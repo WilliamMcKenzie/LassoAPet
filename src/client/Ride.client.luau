@@ -439,8 +439,22 @@ local function findTarget()
 	return best
 end
 
+-- Building an animal is slow, so the pool is filled before anyone rides, and if
+-- it ever runs dry, only a couple are built per frame (the rest show up a frame
+-- or two later, far from the camera).
+local POOL_START = 32
+local BUILD_PER_FRAME = 2
+local builtThisFrame = 0
+
 local function takeFromPool(n, x, z)
-	local entity = table.remove(pool) or newEntity(x, z)
+	local entity = table.remove(pool)
+	if not entity then
+		if builtThisFrame >= BUILD_PER_FRAME then
+			return nil
+		end
+		builtThisFrame += 1
+		entity = newEntity(x, z)
+	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
 	entity.animal.model.Parent = herdFolder
@@ -471,17 +485,19 @@ local function moveAnimal(entity, x, z, speed, dt)
 	animate(entity, dt, speed, lat / 12)
 end
 
--- The stampede runs on the ride's time, so the egg slow-mo holds this player's copy
--- back from the shared server clock. It catches up again: fast during the egg
--- cutscene, while the camera is on the egg, and otherwise at up to 1.5x speed
--- (which also trims any small drift in the clock).
-local function updateHerd(dt, realDt, catchUp)
-	herdClock += dt
-	local lag = workspace:GetServerTimeNow() - herdClock
-	if catchUp == "fast" then
-		herdClock += lag * (1 - math.exp(-3 * realDt))
-	elseif catchUp == "steady" then
-		herdClock += math.clamp(lag, -0.5 * realDt, 0.5 * realDt)
+-- The stampede follows the shared server clock. Only while this player is slowed
+-- down near the egg does their copy run on the ride's slowed time; as soon as the
+-- slowdown ends (or the egg cutscene starts, with the camera on the egg), every
+-- animal snaps straight back to where it is on the shared clock.
+local function updateHerd(dt, slowed)
+	builtThisFrame = 0
+	local snapped = false
+	if slowed then
+		herdClock += dt
+	else
+		local now = workspace:GetServerTimeNow()
+		snapped = math.abs(now - herdClock) > 0.1
+		herdClock = now
 	end
 	local every = Config.HerdSpawnEvery
 	local oldest, newest = math.ceil((herdClock - LIFE) / every), math.floor(herdClock / every)
@@ -508,6 +524,9 @@ local function updateHerd(dt, realDt, catchUp)
 		local x = laneX(p.x, z)
 		if not entity then
 			entity = takeFromPool(n, x, z)
+			if not entity then
+				continue
+			end
 			herd[n] = entity
 			if age < 0.15 then
 				Poof.at(Vector3.new(x, 0, z))
@@ -523,6 +542,9 @@ local function updateHerd(dt, realDt, catchUp)
 		end
 		-- A nudge from a passing rider fades back out; it never changes the schedule.
 		entity.dodge *= math.exp(-1.5 * dt)
+		if snapped then
+			entity.x = x + entity.dodge -- a snap doesn't swing them sideways
+		end
 		moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt)
 	end
 	for n, entity in herd do
@@ -745,7 +767,6 @@ end
 local timeScale = 1
 
 RunService.PreSimulation:Connect(function(dt)
-	local realDt = dt
 	local slow = (phase == "outbound" and actionTarget == "egg") or cutscene ~= nil
 	timeScale += ((slow and Config.EggSlowMo or 1) - timeScale) * (1 - math.exp(-10 * dt))
 	dt *= timeScale
@@ -758,7 +779,7 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		nestEgg:update(dt)
 	end
-	updateHerd(dt, realDt, if cutscene then "fast" elseif slow then "hold" else "steady")
+	updateHerd(dt, slow and not cutscene)
 	Dust.update(dt)
 	if phase == "idle" then
 		if starter then
@@ -844,3 +865,13 @@ player.CharacterAdded:Connect(function()
 end)
 
 spawnStarter()
+
+-- Fill the pool a few animals per frame, so joining doesn't hitch.
+task.spawn(function()
+	for i = 1, POOL_START do
+		putInPool(newEntity(0, 0))
+		if i % 4 == 0 then
+			task.wait()
+		end
+	end
+end)
