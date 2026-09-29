@@ -8,12 +8,13 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local Animal = require(ReplicatedStorage.Shared.Animals.Horse)
+local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local Hud = require(script.Parent.Hud)
 local Lasso = require(script.Parent.Lasso)
 local Poof = require(script.Parent.Poof)
 local Dust = require(script.Parent.Dust)
+local Outline = require(script.Parent.Outline)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -77,12 +78,6 @@ local herdFolder = Instance.new("Folder")
 herdFolder.Name = "Herd"
 herdFolder.Parent = workspace
 
-local highlight = Instance.new("Highlight")
-highlight.FillTransparency = 1
-highlight.OutlineColor = Color3.fromRGB(255, 230, 120)
-highlight.DepthMode = Enum.HighlightDepthMode.Occluded
-highlight.Enabled = false
-highlight.Parent = workspace
 
 -- An entity is an animal plus its position on the course.
 -- yaw 0 faces -z (outbound); yaw pi faces +z (home).
@@ -92,7 +87,7 @@ local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
 local plans = {} -- [n] = { x, speed }, the stampede's schedule
 local taken = {} -- [n] = true once lassoed out of the stampede
 local strays = {} -- former mounts, running on to the far wall with the stampede
-local pool = {} -- spare animals for the stampede
+local pools = {} -- [kind] = spare animals of that kind for the stampede
 local herdClock = workspace:GetServerTimeNow()
 local hold, grace = 0, 0
 local transfer, tumble, carried
@@ -104,9 +99,27 @@ local touchSteer, padSteer = 0, 0
 local coins = 0 -- cash gained this ride; what the Gold icon shows while riding
 local touchStart = {}
 
-local function newEntity(x, z, yaw)
-	local animal = Animal.new()
+-- The kinds of animal in the stampede and how often each turns up (Config.HerdMix).
+local kinds, mixTotal = {}, 0
+for name, weight in Config.HerdMix do
+	table.insert(kinds, { name = name, class = require(Animals[name]), weight = weight })
+	mixTotal += weight
+end
+table.sort(kinds, function(a, b)
+	return a.name < b.name -- the same order on every client, so every client picks the same animals
+end)
+local classes = {}
+for _, kind in kinds do
+	classes[kind.name] = kind.class
+	pools[kind.name] = {}
+end
+classes.Horse = classes.Horse or require(Animals.Horse) -- the starter
+
+local function newEntity(x, z, yaw, kind)
+	kind = kind or "Horse"
+	local animal = classes[kind].new()
 	local entity = {
+		kind = kind,
 		animal = animal,
 		rootY = animal.model.PrimaryPart.Position.Y,
 		x = x,
@@ -167,6 +180,14 @@ local function plan(n)
 	if not p then
 		local r = Random.new(n)
 		p = { x = r:NextNumber(-EDGE, EDGE), speed = r:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax) }
+		local pick = r:NextNumber(0, mixTotal)
+		for _, kind in kinds do
+			p.kind = kind.name
+			pick -= kind.weight
+			if pick < 0 then
+				break
+			end
+		end
 		plans[n] = p
 	end
 	return p
@@ -224,7 +245,7 @@ local function cleanup()
 	end
 	Lasso.stop()
 	cutscene = nil
-	highlight.Adornee = nil
+	Outline.set(nil)
 	setEggInNest(true)
 end
 
@@ -317,7 +338,7 @@ local function fail(reason)
 		carried.part:Destroy()
 		carried = nil
 	end
-	highlight.Adornee = nil
+	Outline.set(nil)
 	-- Thrown off behind the animal, landing flat on their back until they go home.
 	local look = hrp.CFrame.LookVector
 	tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1 }
@@ -444,8 +465,22 @@ local function findTarget()
 	return best
 end
 
-local function takeFromPool(n, x, z)
-	local entity = table.remove(pool) or newEntity(x, z)
+-- Building an animal is slow, so the pool is filled before anyone rides, and if
+-- it ever runs dry, only a couple are built per frame (the rest show up a frame
+-- or two later, far from the camera).
+local POOL_START = 32
+local BUILD_PER_FRAME = 2
+local builtThisFrame = 0
+
+local function takeFromPool(n, x, z, kind)
+	local entity = table.remove(pools[kind])
+	if not entity then
+		if builtThisFrame >= BUILD_PER_FRAME then
+			return nil
+		end
+		builtThisFrame += 1
+		entity = newEntity(x, z, 0, kind)
+	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
 	entity.animal.model.Parent = herdFolder
@@ -456,7 +491,7 @@ local function putInPool(entity)
 	entity.animal.model.Parent = nil
 	entity.animal:setScale(1)
 	entity.hop, entity.popping = 0, nil
-	table.insert(pool, entity)
+	table.insert(pools[entity.kind], entity)
 end
 
 -- Advances an animal's animation, kicking up hoof dust when a leap lands near the camera.
@@ -476,17 +511,19 @@ local function moveAnimal(entity, x, z, speed, dt)
 	animate(entity, dt, speed, lat / 12)
 end
 
--- The stampede runs on the ride's time, so the egg slow-mo holds this player's copy
--- back from the shared server clock. It catches up again: fast during the egg
--- cutscene, while the camera is on the egg, and otherwise at up to 1.5x speed
--- (which also trims any small drift in the clock).
-local function updateHerd(dt, realDt, catchUp)
-	herdClock += dt
-	local lag = workspace:GetServerTimeNow() - herdClock
-	if catchUp == "fast" then
-		herdClock += lag * (1 - math.exp(-3 * realDt))
-	elseif catchUp == "steady" then
-		herdClock += math.clamp(lag, -0.5 * realDt, 0.5 * realDt)
+-- The stampede follows the shared server clock. Only while this player is slowed
+-- down near the egg does their copy run on the ride's slowed time; as soon as the
+-- slowdown ends (or the egg cutscene starts, with the camera on the egg), every
+-- animal snaps straight back to where it is on the shared clock.
+local function updateHerd(dt, slowed)
+	builtThisFrame = 0
+	local snapped = false
+	if slowed then
+		herdClock += dt
+	else
+		local now = workspace:GetServerTimeNow()
+		snapped = math.abs(now - herdClock) > 0.1
+		herdClock = now
 	end
 	local every = Config.HerdSpawnEvery
 	local oldest, newest = math.ceil((herdClock - LIFE) / every), math.floor(herdClock / every)
@@ -512,7 +549,10 @@ local function updateHerd(dt, realDt, catchUp)
 		end
 		local x = laneX(p.x, z)
 		if not entity then
-			entity = takeFromPool(n, x, z)
+			entity = takeFromPool(n, x, z, p.kind)
+			if not entity then
+				continue
+			end
 			herd[n] = entity
 			if age < 0.15 then
 				Poof.at(Vector3.new(x, 0, z))
@@ -528,6 +568,9 @@ local function updateHerd(dt, realDt, catchUp)
 		end
 		-- A nudge from a passing rider fades back out; it never changes the schedule.
 		entity.dodge *= math.exp(-1.5 * dt)
+		if snapped then
+			entity.x = x + entity.dodge -- a snap doesn't swing them sideways
+		end
 		moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt)
 	end
 	for n, entity in herd do
@@ -750,7 +793,6 @@ end
 local timeScale = 1
 
 RunService.PreSimulation:Connect(function(dt)
-	local realDt = dt
 	local slow = (phase == "outbound" and actionTarget == "egg") or cutscene ~= nil
 	timeScale += ((slow and Config.EggSlowMo or 1) - timeScale) * (1 - math.exp(-10 * dt))
 	dt *= timeScale
@@ -763,7 +805,7 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		nestEgg:update(dt)
 	end
-	updateHerd(dt, realDt, if cutscene then "fast" elseif slow then "hold" else "steady")
+	updateHerd(dt, slow and not cutscene)
 	Dust.update(dt)
 	if phase == "idle" then
 		if starter then
@@ -801,8 +843,8 @@ RunService.PreSimulation:Connect(function(dt)
 		checkRide(dt)
 	end
 	actionTarget = findTarget()
-	highlight.Adornee = if actionTarget == "egg" then nestEgg.model elseif actionTarget then actionTarget.animal.model else nil
-	highlight.Enabled = actionTarget ~= nil
+	Outline.set(if actionTarget == "egg" then nestEgg.model elseif actionTarget then actionTarget.animal.model else nil)
+	Outline.update()
 	updateHud()
 end)
 
@@ -849,3 +891,18 @@ player.CharacterAdded:Connect(function()
 end)
 
 spawnStarter()
+
+-- Fill the pools a few animals per frame, so joining doesn't hitch: each kind
+-- gets its share of POOL_START by its HerdMix weight (at least a couple).
+task.spawn(function()
+	local built = 0
+	for _, kind in kinds do
+		for _ = 1, math.max(2, math.round(POOL_START * kind.weight / mixTotal)) do
+			putInPool(newEntity(0, 0, 0, kind.name))
+			built += 1
+			if built % 4 == 0 then
+				task.wait()
+			end
+		end
+	end
+end)

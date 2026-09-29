@@ -4,6 +4,10 @@ return {
 	ShowHud = true,
 	HudScale = 1, -- multiplies the whole HUD's size; 1 matches QM's mockups
 	TakeEggSunburst = true, -- turning sunburst behind the TAKE EGG button (trial)
+	-- Outline on what the lasso would catch. true: thin white line inside a black
+	-- one twice as thick (trial); false: the old thin yellow line.
+	LayeredOutline = true,
+	OutlineWidth = 0.1, -- studs between the stacked lines; about one line's width at riding distance
 
 	-- World (studs). The map is the saved model src/world/World.rbxmx; these sizes
 	-- must match it (the ride reads them). Ground and wall colours are calibrated so
@@ -42,4 +46,7 @@ return {
 	HerdSpawnEvery = 0.9,
 	HerdSpeedMin = 26,
 	HerdSpeedMax = 36,
+	-- Which animals run in the stampede and how often, by weight: 3 to 1 means one
+	-- animal in four is a Pinto. Names are modules in Shared/Animals.
+	HerdMix = { Horse = 3, Pinto = 1 },
 }
