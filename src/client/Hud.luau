@@ -33,9 +33,11 @@ local IMAGES = {
 	gold = { id = "rbxassetid://75090734827129", size = Vector2.new(262, 263) },
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
+	sprint = { id = "", size = Vector2.new(618, 524) }, -- TODO: upload assets/ui/Sprint.png and put its id here
 }
 
 local BUTTON_WIDTH = 256
+local SPRINT_WIDTH = 164 -- about 2/3 of TAKE EGG's width, as in the mockup
 local BAR_WIDTH = 352
 local ICON_HEIGHT = 80 -- Gold
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
@@ -57,6 +59,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
+local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
 
 -- Text outlines, kept at a whole number of screen pixels. The HUD's UIScale scales
@@ -257,6 +260,15 @@ function Hud.init(onAction, onHome, onRide)
 
 	home = button(rideRoot, "home", fit("home", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onHome)
 	home.Visible = false
+	-- Sprint, bottom left: held down, not clicked. Remembers the touch or click that
+	-- pressed it, so sliding a finger off the button doesn't drop the sprint.
+	sprint = button(rideRoot, "sprint", fit("sprint", SPRINT_WIDTH), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
+	sprint.Visible = false
+	sprint.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+			sprintInput = input
+		end
+	end)
 	gained = cashRow(rideRoot, 84, 58, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.57))
 	rideCash = cashRow(rideRoot, 60, 46, Vector2.new(0, 0.5), UDim2.new(0.5, BAR_WIDTH / 2 + 8, 0, holdFrame.Position.Y.Offset))
 
@@ -300,6 +312,22 @@ function Hud.show(visible)
 	Hud.setVignette(0)
 	actionScale.Scale = 1
 	setCash(0)
+end
+
+-- Shows or hides the Sprint button (on the way out only).
+function Hud.setSprint(visible)
+	sprint.Visible = visible
+	if not visible then
+		sprintInput = nil
+	end
+end
+
+-- Whether the Sprint button is being held down right now.
+function Hud.sprintHeld()
+	if sprintInput and (sprintInput.UserInputState == Enum.UserInputState.End or sprintInput.UserInputState == Enum.UserInputState.Cancel) then
+		sprintInput = nil
+	end
+	return sprintInput ~= nil
 end
 
 function Hud.setHold(fraction)
