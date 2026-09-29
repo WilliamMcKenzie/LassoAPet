@@ -41,13 +41,15 @@ local ground = folder("Ground")
 local tile = Config.Tile
 local function groundRect(x0, x1, z0, z1)
 	for x = x0, x1 - tile, tile do
-		for z = z0, z1 - tile, tile do
+		for z = z1 - tile, z0, -tile do
 			local shade = (math.floor(x / tile) + math.floor(z / tile)) % 2 + 1
 			local part = block(ground, Vector3.new(tile, 2, tile), Vector3.new(x + tile / 2, -1, z + tile / 2), Config.GroundColors[shade], "Tile")
 			part.CanQuery = true
 		end
 	end
 end
+-- One wide plain under everything, so the edges of the map never show the void.
+block(ground, Vector3.new(2048, 2, 2048), Vector3.new(0, -1.05, -Config.CourseLength / 2), Color3.fromRGB(88, 150, 64), "Plain")
 groundRect(-Config.CourseHalfWidth, Config.CourseHalfWidth, -Config.CourseLength, 0)
 groundRect(-Config.HomeHalfWidth, Config.HomeHalfWidth, 0, Config.HomeDepth)
 

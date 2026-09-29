@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local Animal = require(ReplicatedStorage.Shared.Animals.Placeholder)
+local Animal = require(ReplicatedStorage.Shared.Animals.Horse)
 local Hud = require(script.Parent.Hud)
 
 local player = Players.LocalPlayer
