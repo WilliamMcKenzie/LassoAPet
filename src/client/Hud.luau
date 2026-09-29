@@ -213,7 +213,7 @@ function Hud.init(onAction, onHome, onRide)
 	distance.ZIndex = 2
 
 	-- Ride back: the bar makes way for the HOME title, with the distance under it.
-	local titleSize = fit("homeTitle", 260)
+	local titleSize = fit("homeTitle", 156)
 	homeTitle = image(rideRoot, "homeTitle", titleSize, UDim2.new(0.5, 0, 0, 16 + titleSize.Y.Offset / 2))
 	homeTitle.Visible = false
 
