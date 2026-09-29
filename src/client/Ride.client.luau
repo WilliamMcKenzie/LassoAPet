@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
@@ -98,6 +99,7 @@ local focus = Vector3.zero
 local touchSteer, padSteer = 0, 0
 local coins = 0 -- cash gained this ride; what the Gold icon shows while riding
 local touchStart = {}
+local sprintKey = false -- Shift or L2 held
 
 -- The kinds of animal in the stampede and how often each turns up (Config.HerdMix).
 local kinds, mixTotal = {}, 0
@@ -421,6 +423,20 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 end)
 
+-- Sprint keys. Bound above the default controls so Shift doesn't also toggle
+-- shift lock while riding; outside a ride it's passed on as usual.
+ContextActionService:BindActionAtPriority("Sprint", function(_, state)
+	sprintKey = state == Enum.UserInputState.Begin
+	if phase == "idle" then
+		return Enum.ContextActionResult.Pass
+	end
+	return Enum.ContextActionResult.Sink
+end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.LeftShift, Enum.KeyCode.RightShift, Enum.KeyCode.ButtonL2)
+
+local function sprinting()
+	return phase == "outbound" and (sprintKey or Hud.sprintHeld())
+end
+
 UserInputService.InputChanged:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.Touch and touchStart[input] then
 		touchSteer = math.clamp((input.Position.X - touchStart[input]) / 70, -1, 1)
@@ -632,7 +648,10 @@ local function updateMount(dt)
 	end
 
 	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed)
-	local rate = phase == "home" and 30 or 40
+	if sprinting() then
+		targetSpeed *= Config.SprintSpeed
+	end
+	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	mount.speed += math.clamp(targetSpeed - mount.speed, -rate * dt, rate * dt)
 	local steer = phase == "home" and 0 or readSteer()
 	local targetLat = steer * Config.SteerSpeed * -dir
@@ -647,7 +666,7 @@ end
 local function checkRide(dt)
 	grace = math.max(grace - dt, 0)
 	if phase == "outbound" and mount.z < 0 and not transfer then
-		hold -= dt
+		hold -= dt * (if sprinting() then Config.SprintDrain else 1)
 		if hold <= 0 then
 			return fail("BUCKED OFF")
 		end
@@ -775,6 +794,7 @@ local function updateRider(dt)
 end
 
 local function updateHud()
+	Hud.setSprint(phase == "outbound")
 	if phase == "outbound" then
 		Hud.setHold(mount and hold / Config.HoldTime or 1)
 		Hud.setDistance(string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))

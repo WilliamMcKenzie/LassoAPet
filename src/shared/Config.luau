@@ -26,6 +26,10 @@ return {
 	SteerSpeed = 28,
 	SteerResponse = 8,
 	HoldTime = 6,
+	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
+	-- Hold bar drains faster too.
+	SprintSpeed = 2, -- x MountSpeed
+	SprintDrain = 1.5, -- x the Hold bar's usual drain
 	LassoRange = 34,
 	EggRange = 51, -- about 1.5x LassoRange
 	EggSlowMo = 0.5, -- time scale while the egg is in grab range
