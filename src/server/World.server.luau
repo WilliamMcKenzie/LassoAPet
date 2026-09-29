@@ -47,6 +47,7 @@ local CHECKER = "rbxassetid://97195484523095"
 local STUDS = "rbxassetid://7447638591" -- classic stud decal from the Creator Store
 local function checker(part, face, color)
 	local texture = Instance.new("Texture")
+	texture.Name = "Checker"
 	texture.Texture = CHECKER
 	texture.Face = face
 	texture.StudsPerTileU = tile * 2
@@ -242,4 +243,5 @@ end
 sky.SkyboxUp = "rbxassetid://73730341040940"
 sky.SkyboxDn = "rbxassetid://98351643334543"
 sky.Parent = Lighting
+require(ReplicatedStorage.Shared.WorldColors).watch(world)
 world:SetAttribute("Ready", true)
