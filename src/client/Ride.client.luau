@@ -319,7 +319,7 @@ local function grabEgg()
 	Hud.setAction(nil)
 	Hud.setHold(nil)
 	Hud.flash("BRING IT HOME!", 2)
-	Hud.showCash(false) -- hidden for the ride back
+	Hud.setReturning(true)
 	-- Clear the herd right in front of the turnaround so the return starts fair.
 	for _, entity in herd do
 		if entity.z > mount.z - 10 and entity.z < mount.z + 110 then
@@ -593,7 +593,7 @@ local function updateHud()
 			Hud.setAction("LASSO", actionTarget ~= nil)
 		end
 	elseif phase == "return" then
-		Hud.setDistance(string.format("HOME  %d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
+		Hud.setDistance(string.format("%dm", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 	end
 end
 

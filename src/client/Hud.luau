@@ -22,6 +22,7 @@ local IMAGES = {
 	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
+	homeTitle = { id = "rbxassetid://101045473290524", size = Vector2.new(550, 160) },
 	buckedOff = { id = "rbxassetid://114839635512682", size = Vector2.new(1015, 300) },
 	crash = { id = "rbxassetid://137889269113133", size = Vector2.new(632, 230) },
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
@@ -54,7 +55,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, homeTitle
 
 local function label(parent, size, position, textSize, thickness)
 	local l = Instance.new("TextLabel")
@@ -211,6 +212,11 @@ function Hud.init(onAction, onHome, onRide)
 	distance.Name = "Distance"
 	distance.ZIndex = 2
 
+	-- Ride back: the bar makes way for the HOME title, with the distance under it.
+	local titleSize = fit("homeTitle", 260)
+	homeTitle = image(rideRoot, "homeTitle", titleSize, UDim2.new(0.5, 0, 0, 16 + titleSize.Y.Offset / 2))
+	homeTitle.Visible = false
+
 	message = label(rideRoot, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
 	banner = image(rideRoot, "buckedOff", fit("buckedOff", IMAGES.buckedOff.size.X * BANNER_SCALE), message.Position)
 	banner.Visible = false
@@ -259,8 +265,8 @@ function Hud.show(visible)
 	gold.Visible = not visible
 	pets.Visible = not visible
 	eggs.Visible = not visible
-	rideCash.row.Visible = true
 	gained.row.Visible = false
+	Hud.setReturning(false)
 	setCash(0)
 end
 
@@ -347,9 +353,13 @@ function Hud.showRide(visible)
 	ride.Visible = visible and not gui.Enabled
 end
 
--- This ride's cash, top right of the bar.
-function Hud.showCash(visible)
-	rideCash.row.Visible = visible
+-- Ride back home: HOME title with the distance under it, no cash.
+function Hud.setReturning(returning)
+	homeTitle.Visible = returning
+	rideCash.row.Visible = not returning
+	distance.Position = if returning
+		then homeTitle.Position + UDim2.fromOffset(0, homeTitle.Size.Y.Offset / 2 + 26)
+		else holdFrame.Position
 end
 
 -- Home button, shown after a failed ride with the cash gained; sends you back home.
