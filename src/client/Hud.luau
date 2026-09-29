@@ -313,6 +313,10 @@ function Hud.showRide(visible)
 	ride.Visible = visible and not gui.Enabled
 end
 
+function Hud.showGold(visible)
+	gold.Visible = visible
+end
+
 -- Home button, shown after a failed ride; sends you back home.
 function Hud.showHome(visible)
 	home.Visible = visible

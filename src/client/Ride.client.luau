@@ -319,6 +319,7 @@ local function grabEgg()
 	Hud.setAction(nil)
 	Hud.setHold(nil)
 	Hud.flash("BRING IT HOME!", 2)
+	Hud.showGold(false) -- hidden for the ride back
 	-- Clear the herd right in front of the turnaround so the return starts fair.
 	for _, entity in herd do
 		if entity.z > mount.z - 10 and entity.z < mount.z + 110 then
