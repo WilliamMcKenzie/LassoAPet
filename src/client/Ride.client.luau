@@ -589,8 +589,6 @@ local function updateHud()
 		else
 			Hud.setAction("LASSO", actionTarget ~= nil)
 		end
-	elseif phase == "return" then
-		Hud.setDistance(string.format("%dm", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 	end
 	if phase == "turning" or phase == "return" or phase == "home" then
 		local metres = math.max(0, -focus.Z / STUDS_PER_METRE)

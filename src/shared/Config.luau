@@ -26,7 +26,10 @@ return {
 	EggSlowMo = 0.5, -- time scale while the egg is in grab range
 	LandingGrace = 0.8,
 	TurnGrace = 2,
-	VignetteFadeMetres = 25, -- the ride back's red vignette fades out over this last stretch
+	-- Ride back's vignette. Its shape (clear middle, soft edge) is baked into the image.
+	VignetteColor = Color3.fromRGB(235, 45, 35),
+	VignetteOpacity = 1, -- 0..1, multiplies the image's own edge opacity (up to 92%)
+	VignetteFadeMetres = 25, -- fades out over this last stretch before home
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
 	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25 },

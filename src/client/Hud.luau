@@ -22,7 +22,6 @@ local IMAGES = {
 	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
-	homeTitle = { id = "rbxassetid://101045473290524", size = Vector2.new(550, 160) },
 	dodge = { id = "rbxassetid://96827860827213", size = Vector2.new(1423, 115) },
 	vignette = { id = "rbxassetid://125111494433205", size = Vector2.new(512, 512) }, -- white, clear middle; tinted red
 	buckedOff = { id = "rbxassetid://114839635512682", size = Vector2.new(1015, 300) },
@@ -57,7 +56,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, homeTitle, dodge, dodgePulse, vignette
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, dodge, dodgePulse, vignette
 
 -- Text outlines, kept at a whole number of screen pixels. The HUD's UIScale scales
 -- them too, and at fractional widths the dot UIStroke leaves in small letter
@@ -225,24 +224,19 @@ function Hud.init(onAction, onHome, onRide)
 	local filled = image(holdClip, "barFilled", barSize, UDim2.fromScale(0, 0))
 	filled.AnchorPoint = Vector2.zero
 
-	-- Distance sits on the bar but outside it, so it still shows once the bar is gone.
+	-- Distance, on the bar.
 	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 4)
 	distance.Name = "Distance"
 	distance.ZIndex = 2
 
-	-- Ride back: the bar makes way for the HOME title, with the distance under it.
-	local titleSize = fit("homeTitle", 156)
-	homeTitle = image(rideRoot, "homeTitle", titleSize, UDim2.new(0.5, 0, 0, 16 + titleSize.Y.Offset / 2))
-	homeTitle.Visible = false
-
-	-- Also on the ride back: DODGE THE STAMPEDE! under the distance, pulsing, and a
-	-- red vignette that fades out over the last stretch home.
-	dodge = image(rideRoot, "dodge", fit("dodge", 440), homeTitle.Position + UDim2.fromOffset(0, titleSize.Y.Offset / 2 + 76))
+	-- Ride back: only DODGE THE STAMPEDE!, pulsing between 90% and 110%, and a red
+	-- vignette that fades out over the last stretch home.
+	dodge = image(rideRoot, "dodge", fit("dodge", 440), UDim2.fromScale(0.5, 0.15))
 	dodge.Visible = false
 	Instance.new("UIScale").Parent = dodge
-	dodgePulse = TweenService:Create(dodge.UIScale, TweenInfo.new(0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.08 })
+	dodgePulse = TweenService:Create(dodge.UIScale, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.1 })
 	vignette = image(rideRoot, "vignette", UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5))
-	vignette.ImageColor3 = Color3.fromRGB(235, 45, 35)
+	vignette.ImageColor3 = Config.VignetteColor
 	vignette.ZIndex = 0
 	vignette.Visible = false
 
@@ -351,10 +345,9 @@ local function slam(target, key, width)
 end
 
 function Hud.flash(text, seconds)
-	-- Fail screens hide the ride's cash and the HOME title; the Home screen shows what was gained instead.
+	-- Fail screens hide the ride's cash and the ride back's look; the Home screen shows what was gained instead.
 	if TONES[text] == RED then
 		rideCash.row.Visible = false
-		homeTitle.Visible = false
 		Hud.setVignette(0)
 	end
 	banner.Visible = false
@@ -385,29 +378,33 @@ function Hud.showRide(visible)
 	ride.Visible = visible and not gui.Enabled
 end
 
--- Ride back home: HOME title with the distance under it, no cash.
+-- Ride back home: DODGE THE STAMPEDE! slams in, then pulses; no cash or distance.
 function Hud.setReturning(returning)
-	homeTitle.Visible = returning
 	dodgePulse:Cancel()
 	dodge.Visible = false
 	if returning then
 		slam(dodge, "dodge", 440)
 		task.delay(1, function()
 			if dodge.Visible then
-				dodgePulse:Play()
+				-- Ease down to 90%, then pulse 90%..110%.
+				local down = TweenService:Create(dodge.UIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine), { Scale = 0.9 })
+				down.Completed:Connect(function(state)
+					if state == Enum.PlaybackState.Completed and dodge.Visible then
+						dodgePulse:Play()
+					end
+				end)
+				down:Play()
 			end
 		end)
 	end
 	rideCash.row.Visible = not returning
-	distance.Position = if returning
-		then homeTitle.Position + UDim2.fromOffset(0, homeTitle.Size.Y.Offset / 2 + 26)
-		else holdFrame.Position
+	distance.Visible = not returning
 end
 
 -- Ride back's red vignette: 1 full, 0 gone. It and DODGE THE STAMPEDE! go once it's 0.
 function Hud.setVignette(strength)
 	vignette.Visible = strength > 0
-	vignette.ImageTransparency = 1 - strength
+	vignette.ImageTransparency = 1 - strength * Config.VignetteOpacity
 	if strength <= 0 and dodge.Visible then
 		dodgePulse:Cancel()
 		dodge.Visible = false
