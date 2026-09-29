@@ -13,6 +13,7 @@ local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local Hud = require(script.Parent.Hud)
 local Lasso = require(script.Parent.Lasso)
 local Poof = require(script.Parent.Poof)
+local Dust = require(script.Parent.Dust)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -60,6 +61,7 @@ local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:G
 local SPAWN_Z = START_LINE_Z + 4
 local END_Z = -Config.CourseLength + 4 -- the far wall
 local VIEW = 320 -- stampede animals further than this from the camera aren't drawn
+local DUST_VIEW = 160 -- landings further than this from the camera kick up no dust
 -- They pop in instead of appearing: a poof, then they spring up out of it,
 -- overshoot and settle (a damped spring on their scale) with a hop, wait a beat
 -- and burst off.
@@ -457,11 +459,21 @@ local function putInPool(entity)
 	table.insert(pool, entity)
 end
 
+-- Advances an animal's animation, kicking up hoof dust when a leap lands near the camera.
+local function animate(entity, dt, speed, turn)
+	if entity.animal:update(dt, speed, turn) then
+		local root = entity.animal.model.PrimaryPart.CFrame
+		if (root.Position - camera.CFrame.Position).Magnitude < DUST_VIEW then
+			Dust.kick(root, entity.animal.scale)
+		end
+	end
+end
+
 local function moveAnimal(entity, x, z, speed, dt)
 	local lat = (x - entity.x) / math.max(dt, 1e-3)
 	entity.x, entity.z, entity.speed = x, z, speed
 	place(entity, -math.atan2(lat, math.max(speed, 1)))
-	entity.animal:update(dt, speed, lat / 12)
+	animate(entity, dt, speed, lat / 12)
 end
 
 local function updateHerd(dt)
@@ -541,7 +553,7 @@ local function updateHerd(dt)
 		local lat = math.clamp(laneX(entity.lane, z) - x, -1, 1) * 12
 		entity.x, entity.z = math.clamp(x + lat * dt, -EDGE, EDGE), z
 		place(entity, -math.atan2(lat, math.max(entity.speed, 1)))
-		entity.animal:update(dt, entity.speed, turn + lat / 12)
+		animate(entity, dt, entity.speed, turn + lat / 12)
 	end
 end
 
@@ -561,7 +573,7 @@ local function updateMount(dt)
 			mount.speed = Config.ReturnSpeed
 		end
 		place(mount, 0)
-		mount.animal:update(dt, mount.speed, eased < 1 and -0.6 or 0)
+		animate(mount, dt, mount.speed, eased < 1 and -0.6 or 0)
 		return
 	end
 
@@ -575,7 +587,7 @@ local function updateMount(dt)
 	mount.x = math.clamp(mount.x + mount.latVel * dt, -edge, edge)
 	mount.z += dir * mount.speed * dt
 	place(mount, math.atan2(mount.latVel * dir, math.max(mount.speed, 1)))
-	mount.animal:update(dt, mount.speed, mount.latVel * -dir / Config.SteerSpeed)
+	animate(mount, dt, mount.speed, mount.latVel * -dir / Config.SteerSpeed)
 end
 
 local function checkRide(dt)
@@ -741,6 +753,7 @@ RunService.PreSimulation:Connect(function(dt)
 		nestEgg:update(dt)
 	end
 	updateHerd(dt)
+	Dust.update(dt)
 	if phase == "idle" then
 		if starter then
 			place(starter, 0)
