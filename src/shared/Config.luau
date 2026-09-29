@@ -4,7 +4,7 @@ return {
 	-- Steal an Egg reference under the Lighting set in default.project.json. Home is z > 0, the course runs toward -z.
 	Tile = 4,
 	GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
-	WallColors = { Color3.fromRGB(170, 119, 86), Color3.fromRGB(195, 134, 94) },
+	WallColors = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
 	PlotColors = { Color3.fromRGB(96, 106, 134), Color3.fromRGB(128, 139, 166) },
 	CourseHalfWidth = 56,
 	CourseLength = 1400,
