@@ -12,6 +12,9 @@
 --   horse:getNeck()               -- { cframe, radius } for a lasso loop around the neck
 --   horse:setScale(s)             -- grow or shrink the whole horse about its feet (pop-ins)
 --
+-- Variants (the Pinto) share all of this and only swap the model data:
+--   Horse.variant("Pinto", PintoModel, "Uncommon")
+--
 -- Idle, walk and gallop are blended by speed. The gallop is a leap: front legs
 -- reach forward and hind legs back while the horse is in the air. The blocks
 -- only ever rotate one way from rest (front legs and neck forward, hind legs
@@ -34,9 +37,9 @@ local GALLOP_SPEED = 36 -- gallop plays at 1x at this speed
 local LEAN = 0.18 -- body roll into turns, radians at full gallop
 
 -- When a gallop leap lands: the front legs are back at rest after reaching out.
-local LAND_AT = (function()
+local function landAt(data)
 	local reached = false
-	for _, key in HorseModel.animations.gallop.tracks.LegFL.rotation.keys do
+	for _, key in data.animations.gallop.tracks.LegFL.rotation.keys do
 		if key[2] ~= 0 then
 			reached = true
 		elseif reached then
@@ -44,35 +47,46 @@ local LAND_AT = (function()
 		end
 	end
 	return 0
-end)()
+end
 
 local function clamp01(x)
 	return math.max(0, math.min(1, x))
 end
 
-local Horse = {}
-Horse.__index = Horse
-Horse.Rarity = "Common" -- sets the coins for lassoing one (Config.RarityCoins)
+local Horse = {} -- the methods every variant shares
 
-function Horse.new()
-	local model, byName, bones, pivots = Rig.fromData(HorseModel, "Horse", STUD_TEXTURE)
+-- A kind of horse: its own model data and rarity, Horse's methods.
+local function variant(name, data, rarity)
+	local class = setmetatable({
+		Name = name,
+		Rarity = rarity, -- sets the coins for lassoing one (Config.RarityCoins)
+		data = data,
+		landAt = landAt(data),
+	}, { __index = Horse })
+	class.__index = class
 
-	local clocks = {}
-	for name in pairs(HorseModel.animations) do
-		clocks[name] = 0
+	function class.new()
+		local model, byName, bones, pivots = Rig.fromData(data, name, STUD_TEXTURE)
+
+		local clocks = {}
+		for anim in pairs(data.animations) do
+			clocks[anim] = 0
+		end
+
+		return setmetatable({
+			model = model,
+			root = byName.rootBone,
+			neck = byName.neckBone,
+			pivots = pivots,
+			bones = bones,
+			clocks = clocks,
+			speed = 0,
+			turn = 0,
+			scale = 1,
+		}, class)
 	end
 
-	return setmetatable({
-		model = model,
-		root = byName.rootBone,
-		neck = byName.neckBone,
-		pivots = pivots,
-		bones = bones,
-		clocks = clocks,
-		speed = 0,
-		turn = 0,
-		scale = 1,
-	}, Horse)
+	return class
 end
 
 function Horse:update(dt, speed, turn)
@@ -96,7 +110,7 @@ function Horse:update(dt, speed, turn)
 
 	local before = self.clocks.gallop
 	local pose = {}
-	for name, anim in pairs(HorseModel.animations) do
+	for name, anim in pairs(self.data.animations) do
 		self.clocks[name] = (self.clocks[name] + dt * (rates[name] or 1)) % anim.length
 		local w = weights[name] or 0
 		if w > 0 then
@@ -135,7 +149,8 @@ function Horse:update(dt, speed, turn)
 	end
 
 	local after = self.clocks.gallop
-	local crossed = if after >= before then before < LAND_AT and after >= LAND_AT else before < LAND_AT or after >= LAND_AT
+	local land = self.landAt
+	local crossed = if after >= before then before < land and after >= land else before < land or after >= land
 	return crossed and weights.gallop > 0.5
 end
 
@@ -161,4 +176,6 @@ function Horse:setScale(s)
 	end
 end
 
-return Horse
+local Common = variant("Horse", HorseModel, "Common")
+Common.variant = variant
+return Common

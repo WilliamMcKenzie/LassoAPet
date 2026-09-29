@@ -46,4 +46,7 @@ return {
 	HerdSpawnEvery = 0.9,
 	HerdSpeedMin = 26,
 	HerdSpeedMax = 36,
+	-- Which animals run in the stampede and how often, by weight: 3 to 1 means one
+	-- animal in four is a Pinto. Names are modules in Shared/Animals.
+	HerdMix = { Horse = 3, Pinto = 1 },
 }

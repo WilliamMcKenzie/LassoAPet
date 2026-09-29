@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local Animal = require(ReplicatedStorage.Shared.Animals.Horse)
+local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local Hud = require(script.Parent.Hud)
 local Lasso = require(script.Parent.Lasso)
@@ -87,7 +87,7 @@ local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
 local plans = {} -- [n] = { x, speed }, the stampede's schedule
 local taken = {} -- [n] = true once lassoed out of the stampede
 local strays = {} -- former mounts, running on to the far wall with the stampede
-local pool = {} -- spare animals for the stampede
+local pools = {} -- [kind] = spare animals of that kind for the stampede
 local herdClock = workspace:GetServerTimeNow()
 local hold, grace = 0, 0
 local transfer, tumble, carried
@@ -99,9 +99,27 @@ local touchSteer, padSteer = 0, 0
 local coins = 0 -- cash gained this ride; what the Gold icon shows while riding
 local touchStart = {}
 
-local function newEntity(x, z, yaw)
-	local animal = Animal.new()
+-- The kinds of animal in the stampede and how often each turns up (Config.HerdMix).
+local kinds, mixTotal = {}, 0
+for name, weight in Config.HerdMix do
+	table.insert(kinds, { name = name, class = require(Animals[name]), weight = weight })
+	mixTotal += weight
+end
+table.sort(kinds, function(a, b)
+	return a.name < b.name -- the same order on every client, so every client picks the same animals
+end)
+local classes = {}
+for _, kind in kinds do
+	classes[kind.name] = kind.class
+	pools[kind.name] = {}
+end
+classes.Horse = classes.Horse or require(Animals.Horse) -- the starter
+
+local function newEntity(x, z, yaw, kind)
+	kind = kind or "Horse"
+	local animal = classes[kind].new()
 	local entity = {
+		kind = kind,
 		animal = animal,
 		rootY = animal.model.PrimaryPart.Position.Y,
 		x = x,
@@ -162,6 +180,14 @@ local function plan(n)
 	if not p then
 		local r = Random.new(n)
 		p = { x = r:NextNumber(-EDGE, EDGE), speed = r:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax) }
+		local pick = r:NextNumber(0, mixTotal)
+		for _, kind in kinds do
+			p.kind = kind.name
+			pick -= kind.weight
+			if pick < 0 then
+				break
+			end
+		end
 		plans[n] = p
 	end
 	return p
@@ -446,14 +472,14 @@ local POOL_START = 32
 local BUILD_PER_FRAME = 2
 local builtThisFrame = 0
 
-local function takeFromPool(n, x, z)
-	local entity = table.remove(pool)
+local function takeFromPool(n, x, z, kind)
+	local entity = table.remove(pools[kind])
 	if not entity then
 		if builtThisFrame >= BUILD_PER_FRAME then
 			return nil
 		end
 		builtThisFrame += 1
-		entity = newEntity(x, z)
+		entity = newEntity(x, z, 0, kind)
 	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
@@ -465,7 +491,7 @@ local function putInPool(entity)
 	entity.animal.model.Parent = nil
 	entity.animal:setScale(1)
 	entity.hop, entity.popping = 0, nil
-	table.insert(pool, entity)
+	table.insert(pools[entity.kind], entity)
 end
 
 -- Advances an animal's animation, kicking up hoof dust when a leap lands near the camera.
@@ -523,7 +549,7 @@ local function updateHerd(dt, slowed)
 		end
 		local x = laneX(p.x, z)
 		if not entity then
-			entity = takeFromPool(n, x, z)
+			entity = takeFromPool(n, x, z, p.kind)
 			if not entity then
 				continue
 			end
@@ -866,12 +892,17 @@ end)
 
 spawnStarter()
 
--- Fill the pool a few animals per frame, so joining doesn't hitch.
+-- Fill the pools a few animals per frame, so joining doesn't hitch: each kind
+-- gets its share of POOL_START by its HerdMix weight (at least a couple).
 task.spawn(function()
-	for i = 1, POOL_START do
-		putInPool(newEntity(0, 0))
-		if i % 4 == 0 then
-			task.wait()
+	local built = 0
+	for _, kind in kinds do
+		for _ = 1, math.max(2, math.round(POOL_START * kind.weight / mixTotal)) do
+			putInPool(newEntity(0, 0, 0, kind.name))
+			built += 1
+			if built % 4 == 0 then
+				task.wait()
+			end
 		end
 	end
 end)
