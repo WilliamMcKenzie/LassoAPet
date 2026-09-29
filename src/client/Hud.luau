@@ -214,6 +214,15 @@ function Hud.init(onAction, onHome, onRide)
 	eggs = button(homeRoot, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
 	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
 	placeGold(false)
+
+	-- Load every image now, so the first BUCKED OFF isn't still downloading while it animates.
+	task.spawn(function()
+		local ids = {}
+		for _, entry in IMAGES do
+			table.insert(ids, entry.id)
+		end
+		game:GetService("ContentProvider"):PreloadAsync(ids)
+	end)
 end
 
 function Hud.show(visible)
@@ -262,17 +271,17 @@ local function slam(key)
 	banner.ImageTransparency = 1
 	banner.Rotation = -4
 	local scale = banner.UIScale
-	scale.Scale = 2.6
+	scale.Scale = 3
 	local rest = banner.Position
-	TweenService:Create(banner, TweenInfo.new(0.1), { ImageTransparency = 0 }):Play()
-	local drop = TweenService:Create(scale, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = 0.9 })
+	TweenService:Create(banner, TweenInfo.new(0.12), { ImageTransparency = 0 }):Play()
+	local drop = TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = 0.85 })
 	drop.Completed:Connect(function()
-		TweenService:Create(scale, TweenInfo.new(0.35, Enum.EasingStyle.Elastic), { Scale = 1 }):Play()
-		TweenService:Create(banner, TweenInfo.new(0.35, Enum.EasingStyle.Elastic), { Rotation = 0 }):Play()
+		TweenService:Create(scale, TweenInfo.new(0.7, Enum.EasingStyle.Elastic), { Scale = 1 }):Play()
+		TweenService:Create(banner, TweenInfo.new(0.7, Enum.EasingStyle.Elastic), { Rotation = 0 }):Play()
 		task.spawn(function()
-			for i = 8, 1, -1 do
-				banner.Position = rest + UDim2.fromOffset(math.random(-i, i) * 1.5, math.random(-i, i) * 1.5)
-				task.wait(0.025)
+			for i = 14, 1, -1 do
+				banner.Position = rest + UDim2.fromOffset(math.random(-i, i) * 2, math.random(-i, i) * 2)
+				task.wait(0.03)
 			end
 			banner.Position = rest
 		end)
