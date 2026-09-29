@@ -69,6 +69,7 @@ local starter, mount, loose
 local herd = {}
 local hold, grace = 0, 0
 local transfer, tumble, carried
+local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local actionTarget
 local turnT, camYaw = 0, 0
 local focus = Vector3.zero
@@ -154,6 +155,7 @@ local function cleanup()
 		carried = nil
 	end
 	Lasso.stop()
+	cutscene = nil
 	highlight.Adornee = nil
 	setEggInNest(true)
 end
@@ -239,6 +241,8 @@ local function fail(reason)
 	end
 	local hrp = character()
 	phase = "ended"
+	cutscene = nil
+	Hud.setCutscene(false)
 	loose, mount = mount, nil
 	if loose then
 		loose.animal:setSaddled(false)
@@ -290,7 +294,9 @@ local function grabEgg()
 	phase, turnT = "turning", 0
 	Hud.setAction(nil)
 	Hud.setHold(nil)
-	Hud.setReturning(true)
+	-- Cutscene: the camera snaps in on the egg and the UI hides until it's reeled in.
+	cutscene = { shake = 0 }
+	Hud.setCutscene(true)
 	-- Clear the herd right in front of the turnaround so the return starts fair.
 	for _, entity in herd do
 		if entity.z > mount.z - 10 and entity.z < mount.z + 110 then
@@ -564,6 +570,9 @@ local function updateRider(dt)
 			carried.t = math.min(carried.t + dt / THROW_TIME, 1)
 			if carried.t >= 1 then
 				carried.stage, carried.t, carried.from = "pull", 0, carried.part:GetPivot().Position
+				if cutscene then
+					cutscene.shake = 0.25 -- the loop cinches: a jolt
+				end
 			end
 		elseif carried.stage == "pull" then
 			-- Reeled in on an arc, hanging off the rope: it tips toward the rider
@@ -580,6 +589,10 @@ local function updateRider(dt)
 			carried.part:PivotTo(hang:Lerp(CFrame.new(pos) * held.Rotation, t * t) * wobble)
 			if t >= 1 then
 				carried.stage = "held" -- swung round overhead from here (Lasso.twirl)
+				-- Zoom back out into DODGE THE STAMPEDE mode.
+				cutscene = nil
+				Hud.setCutscene(false)
+				Hud.setReturning(true)
 			end
 		end
 	end
@@ -605,7 +618,7 @@ end
 local timeScale = 1
 
 RunService.PreSimulation:Connect(function(dt)
-	local slow = phase == "outbound" and actionTarget == "egg"
+	local slow = (phase == "outbound" and actionTarget == "egg") or cutscene ~= nil
 	timeScale += ((slow and Config.EggSlowMo or 1) - timeScale) * (1 - math.exp(-10 * dt))
 	dt *= timeScale
 	-- The waiting egg twitches now and then: something's alive in there.
@@ -677,9 +690,26 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	camera.CameraType = Enum.CameraType.Scriptable
 	local targetYaw = mount and mount.yaw or camYaw
 	camYaw += (targetYaw - camYaw) * (1 - math.exp(-5 * dt))
+	local hrp = character()
+	if cutscene and carried and hrp then
+		-- Close-up on the egg from the rider's side, slightly off to one side,
+		-- snapping in fast and punching the field of view in.
+		local egg = carried.part:GetPivot().Position
+		local back = (hrp.Position - egg) * Vector3.new(1, 0, 1)
+		back = if back.Magnitude > 0.1 then back.Unit else Vector3.zAxis
+		local side = back:Cross(Vector3.yAxis)
+		local desired = CFrame.lookAt(egg + back * 11 + side * 4 + Vector3.new(0, 5, 0), egg + Vector3.new(0, 1, 0))
+		cutscene.shake = math.max(cutscene.shake - dt, 0)
+		local jolt = cutscene.shake * 2
+		desired *= CFrame.new(rng:NextNumber(-jolt, jolt), rng:NextNumber(-jolt, jolt), 0)
+		camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-14 * dt))
+		camera.FieldOfView += (50 - camera.FieldOfView) * (1 - math.exp(-14 * dt))
+		return
+	end
 	local basis = CFrame.new(focus) * CFrame.Angles(0, camYaw, 0)
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38, 18)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
+	camera.FieldOfView += (70 - camera.FieldOfView) * (1 - math.exp(-8 * dt))
 end)
 
 Hud.init(onAction, goHome, rideFromHome)

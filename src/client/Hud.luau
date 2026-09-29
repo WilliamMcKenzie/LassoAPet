@@ -373,6 +373,11 @@ function Hud.flash(text, seconds)
 	end
 end
 
+-- Cutscenes hide the whole ride HUD.
+function Hud.setCutscene(on)
+	gui.Enabled = not on
+end
+
 -- RIDE shows only while you're close enough to your animal (replaces the [E] prompt).
 function Hud.showRide(visible)
 	ride.Visible = visible and not gui.Enabled
