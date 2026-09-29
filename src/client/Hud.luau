@@ -157,14 +157,15 @@ local function cashRow(parent, coinSize, textSize, anchor, position)
 	local layout = Instance.new("UIListLayout")
 	layout.FillDirection = Enum.FillDirection.Horizontal
 	layout.VerticalAlignment = Enum.VerticalAlignment.Center
-	layout.Padding = UDim.new(0, -coinSize * 0.1)
+	layout.Padding = UDim.new(0, -coinSize * 0.2)
 	layout.Parent = row
 	local coin = image(row, "coin", UDim2.fromOffset(coinSize, coinSize), UDim2.new())
+	coin.ZIndex = 1
 	local text = label(row, UDim2.fromOffset(0, coinSize), UDim2.new(), textSize)
 	text.AutomaticSize = Enum.AutomaticSize.X
 	text.UIStroke.Thickness = 4
 	text.LayoutOrder = 1
-	text.ZIndex = 2 -- the text overlaps the coin's edge, drawn on top
+	text.ZIndex = 3 -- the text overlaps the coin's edge, drawn on top
 	local scale = Instance.new("UIScale")
 	scale.Parent = row
 	row.Parent = parent
