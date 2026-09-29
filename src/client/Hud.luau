@@ -12,6 +12,8 @@ local INK = Color3.fromRGB(20, 20, 28)
 local WHITE = Color3.new(1, 1, 1)
 local DEPTH = 6 -- how far a button's face sits above its shadow, in pixels
 local STUD = 14 -- stud grid spacing on buttons, in pixels
+local ROPE = 7 -- lasso rope thickness in the icon, in pixels
+local ROPE_COLOR = Color3.fromRGB(226, 170, 96)
 
 local GREEN = Color3.fromRGB(88, 214, 72)
 local YELLOW = Color3.fromRGB(255, 198, 36)
@@ -93,23 +95,19 @@ local function studs(parent, width, height)
 	return layer
 end
 
--- Chunky brick button: a dark shadow slab under a studded face, both with the shared outline.
--- The face drops onto the shadow while pressed.
-local function button(name, size, color, textSize, onActivated)
-	local w, h = size.X.Offset, size.Y.Offset
-	local root = Instance.new("TextButton")
-	root.Name = name
-	root.Size = UDim2.fromOffset(w, h + DEPTH)
+-- A brick: a dark shadow slab under a top-lit face with an inner rim, both with the shared outline.
+-- Returns the holder, the face (clips its children) and a recolor function.
+local function brick(w, h, color, radius, depth)
+	local root = Instance.new("Frame")
+	root.Size = UDim2.fromOffset(w, h + depth)
 	root.BackgroundTransparency = 1
-	root.Text = ""
-	root.AutoButtonColor = false
 
 	local shadow = Instance.new("Frame")
 	shadow.Name = "Shadow"
-	shadow.Position = UDim2.fromOffset(0, DEPTH)
+	shadow.Position = UDim2.fromOffset(0, depth)
 	shadow.Size = UDim2.fromOffset(w, h)
 	shadow.BorderSizePixel = 0
-	corner(shadow, UDim.new(0, 12))
+	corner(shadow, radius)
 	outline(shadow, Enum.ApplyStrokeMode.Border)
 	shadow.Parent = root
 
@@ -118,23 +116,21 @@ local function button(name, size, color, textSize, onActivated)
 	face.Size = UDim2.fromOffset(w, h)
 	face.BorderSizePixel = 0
 	face.ClipsDescendants = true
-	corner(face, UDim.new(0, 12))
+	corner(face, radius)
 	outline(face, Enum.ApplyStrokeMode.Border)
 	face.Parent = root
 
-	-- Top-lit: brighter at the top, base color at the bottom.
 	local shade = Instance.new("UIGradient")
 	shade.Rotation = 90
 	shade.Parent = face
 
-	studs(face, w, h)
-
-	-- Inner rim highlight so the face reads as a raised block.
 	local rim = Instance.new("Frame")
+	rim.Name = "Rim"
 	rim.BackgroundTransparency = 1
 	rim.Position = UDim2.fromOffset(3, 3)
 	rim.Size = UDim2.new(1, -6, 1, -6)
-	corner(rim, UDim.new(0, 9))
+	rim.ZIndex = 3
+	corner(rim, UDim.new(radius.Scale, math.max(radius.Offset - 3, 0)))
 	local rimStroke = Instance.new("UIStroke")
 	rimStroke.Thickness = 2
 	rimStroke.Color = WHITE
@@ -143,17 +139,83 @@ local function button(name, size, color, textSize, onActivated)
 	rimStroke.Parent = rim
 	rim.Parent = face
 
-	local text = label(face, UDim2.new(1, -16, 1, -8), UDim2.fromScale(0.5, 0.5), textSize)
-	text.Name = "Label"
-	text.TextWrapped = true
-	text.ZIndex = 2
-
 	local function setColor(c)
 		face.BackgroundColor3 = c
 		shade.Color = ColorSequence.new(lighter(c, 0.25), c)
 		shadow.BackgroundColor3 = darker(c, 0.6)
 	end
 	setColor(color)
+	return root, face, setColor
+end
+
+-- Lasso icon: a tilted loop with a short tail, drawn as rope with the shared outline.
+-- All outlines go down first, then all rope on top, so the pieces join into one rope.
+local LASSO = {
+	{ ring = true, x = 40, y = 20, w = 46, h = 24, r = -8 },
+	{ x = 18, y = 40, w = ROPE, h = 20, r = 28 },
+	{ x = 14, y = 55, w = ROPE, h = 16, r = -18 },
+	{ x = 21, y = 32, w = 11, h = 11, r = 0 }, -- knot
+}
+
+local function lassoIcon(parent, position)
+	local icon = Instance.new("Frame")
+	icon.AnchorPoint = Vector2.new(0.5, 0.5)
+	icon.Position = position
+	icon.Size = UDim2.fromOffset(64, 68)
+	icon.BackgroundTransparency = 1
+	icon.ZIndex = 2
+	local function piece(p, grow, color, strokeWidth, z)
+		local f = Instance.new("Frame")
+		f.AnchorPoint = Vector2.new(0.5, 0.5)
+		f.Position = UDim2.fromOffset(p.x, p.y)
+		f.Size = UDim2.fromOffset(p.w + grow, p.h + grow)
+		f.Rotation = p.r
+		f.BorderSizePixel = 0
+		f.ZIndex = z
+		corner(f, UDim.new(1, 0))
+		if strokeWidth then
+			f.BackgroundTransparency = 1
+			local st = Instance.new("UIStroke")
+			st.Thickness = strokeWidth
+			st.Color = color
+			st.Parent = f
+		else
+			f.BackgroundColor3 = color
+		end
+		f.Parent = icon
+	end
+	for _, p in LASSO do
+		if p.ring then
+			piece(p, 0, INK, ROPE + STROKE, 1)
+			piece(p, 0, ROPE_COLOR, ROPE, 2)
+			piece(p, -STROKE * 2, INK, STROKE, 3)
+		else
+			piece(p, STROKE * 2, INK, nil, 1)
+			piece(p, 0, ROPE_COLOR, nil, 2)
+		end
+	end
+	icon.Parent = parent
+	return icon
+end
+
+-- Chunky studded brick button; the face drops onto its shadow while pressed.
+local function button(name, size, color, textSize, onActivated)
+	local w, h = size.X.Offset, size.Y.Offset
+	local body, face, setColor = brick(w, h, color, UDim.new(0, 12), DEPTH)
+	local root = Instance.new("TextButton")
+	root.Name = name
+	root.Size = body.Size
+	root.BackgroundTransparency = 1
+	root.Text = ""
+	root.AutoButtonColor = false
+	body.Parent = root
+
+	studs(face, w, h)
+
+	local text = label(face, UDim2.new(1, -16, 1, -8), UDim2.fromScale(0.5, 0.5), textSize)
+	text.Name = "Label"
+	text.TextWrapped = true
+	text.ZIndex = 2
 
 	local function press(down)
 		face.Position = UDim2.fromOffset(0, down and DEPTH - 2 or 0)
@@ -169,7 +231,7 @@ local function button(name, size, color, textSize, onActivated)
 	end)
 	root.Activated:Connect(onActivated)
 
-	return { root = root, label = text, setColor = setColor }
+	return { root = root, face = face, label = text, setColor = setColor }
 end
 
 function Hud.init(onAction, onRideAgain)
@@ -180,30 +242,44 @@ function Hud.init(onAction, onRideAgain)
 	gui.Enabled = false
 	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
-	holdFrame = Instance.new("Frame")
+	-- Hold bar: a dark brick track with a studded, glossy fill inset inside it.
+	local track, trackFace
+	track, trackFace = brick(300, 30, Color3.fromRGB(52, 54, 70), UDim.new(1, 0), 4)
+	holdFrame = track
+	holdFrame.Name = "Hold"
 	holdFrame.AnchorPoint = Vector2.new(0.5, 0)
-	holdFrame.Position = UDim2.new(0.5, 0, 0, 56)
-	holdFrame.Size = UDim2.fromOffset(260, 20)
-	holdFrame.BackgroundColor3 = Color3.fromRGB(46, 48, 60)
-	holdFrame.BorderSizePixel = 0
-	holdFrame.ClipsDescendants = true
-	corner(holdFrame, UDim.new(1, 0))
-	outline(holdFrame, Enum.ApplyStrokeMode.Border)
+	holdFrame.Position = UDim2.new(0.5, 0, 0, 52)
 	holdFrame.Parent = gui
+	local well = Instance.new("Frame")
+	well.BackgroundTransparency = 1
+	well.Position = UDim2.fromOffset(5, 5)
+	well.Size = UDim2.new(1, -10, 1, -10)
+	well.ClipsDescendants = true
+	well.ZIndex = 2
+	well.Parent = trackFace
 	holdFill = Instance.new("Frame")
 	holdFill.Size = UDim2.fromScale(1, 1)
 	holdFill.BorderSizePixel = 0
+	holdFill.ClipsDescendants = true
 	corner(holdFill, UDim.new(1, 0))
-	local gloss = Instance.new("UIGradient")
-	gloss.Rotation = 90
-	gloss.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 200, 200))
+	holdFill.Parent = well
+	studs(holdFill, 290, 20)
+	local gloss = Instance.new("Frame")
+	gloss.BorderSizePixel = 0
+	gloss.BackgroundColor3 = WHITE
+	gloss.BackgroundTransparency = 0.6
+	gloss.Position = UDim2.new(0.03, 0, 0, 3)
+	gloss.Size = UDim2.new(0.94, 0, 0, 5)
+	corner(gloss, UDim.new(1, 0))
 	gloss.Parent = holdFill
-	holdFill.Parent = holdFrame
 
 	distance = label(gui, UDim2.fromOffset(260, 34), UDim2.new(0.5, 0, 0, 100), 28)
 	message = label(gui, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
 
-	action = button("Action", UDim2.fromOffset(150, 110), YELLOW, 28, onAction)
+	action = button("Action", UDim2.fromOffset(150, 140), YELLOW, 28, onAction)
+	lassoIcon(action.face, UDim2.new(0.5, 0, 0, 50))
+	action.label.Position = UDim2.new(0.5, 0, 1, -34)
+	action.label.Size = UDim2.new(1, -16, 0, 40)
 	action.root.AnchorPoint = Vector2.new(1, 1)
 	action.root.Position = UDim2.new(1, -40, 1, -40)
 	action.root.Parent = gui
