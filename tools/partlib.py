@@ -214,8 +214,10 @@ def look_at(eye, target):
     return eye, r, u, f
 
 
-def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0), ground=True):
-    """Render parts with a z-buffer; returns a PIL image."""
+def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0), ground=True, transparent=False):
+    """Render parts with a z-buffer; returns a PIL image (RGBA with a clear
+    background when transparent, which also drops the ground)."""
+    ground = ground and not transparent
     eye, r, u, f = look_at(eye, target)
     focal = (H / 2) / math.tan(math.radians(fov) / 2)
     off = np.array(offset, float)
@@ -347,7 +349,11 @@ def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0
         edge[: H - dy, : W - dx] |= e & oa
         edge[dy:, dx:] |= e & ob
     img[edge] *= 0.35
-    return Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
+    rgb = np.clip(img, 0, 255).astype(np.uint8)
+    if transparent:
+        alpha = ((obj | edge) * 255).astype(np.uint8)
+        return Image.fromarray(np.dstack([rgb, alpha]), "RGBA")
+    return Image.fromarray(rgb)
 
 
 # ---------------------------------------------------------------- Blockbench
