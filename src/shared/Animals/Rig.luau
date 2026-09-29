@@ -1,4 +1,5 @@
 -- Builds a rigged, studded Model from a declarative part list.
+-- Parts with `plain = true` (eyes, pupils) skip the stud texture.
 --
 -- Every part hangs off a joint in its parent's space:
 --   joint  = CFrame of the joint relative to the parent part's center (C0)
@@ -40,14 +41,25 @@ function Rig.build(spec)
 		part.Name = def.name
 		part.Size = def.size
 		part.Color = def.color
-		part.Material = Enum.Material.Plastic
+		part.Material = Enum.Material.SmoothPlastic
 		part.Anchored = false
 		part.CanCollide = false
 		part.CanQuery = false
 		part.CanTouch = false
 		part.Massless = true
 		for _, face in ipairs(FACES) do
-			part[face .. "Surface"] = spec.studFaces[face]
+			part[face .. "Surface"] = Enum.SurfaceType.Smooth
+		end
+		-- Fine studs from a tiled texture; surface studs are fixed at 1 stud, too coarse here.
+		if spec.studTexture and not def.plain then
+			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+				local texture = Instance.new("Texture")
+				texture.Texture = spec.studTexture.image
+				texture.StudsPerTileU = spec.studTexture.tile
+				texture.StudsPerTileV = spec.studTexture.tile
+				texture.Face = face
+				texture.Parent = part
+			end
 		end
 
 		local c0 = def.joint or CFrame.new()

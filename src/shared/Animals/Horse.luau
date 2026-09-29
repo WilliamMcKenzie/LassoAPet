@@ -11,24 +11,17 @@
 local Rig = require(script.Parent.Rig)
 local Quadruped = require(script.Parent.Quadruped)
 
-local COAT = Color3.fromRGB(205, 134, 80)
-local MUZZLE = Color3.fromRGB(240, 214, 176)
-local HAIR = Color3.fromRGB(70, 46, 34)
+local COAT = Color3.fromRGB(226, 140, 70)
+local MUZZLE = Color3.fromRGB(252, 226, 184)
+local HAIR = Color3.fromRGB(96, 56, 34)
 local HOOF = Color3.fromRGB(60, 50, 45)
 local EYE_WHITE = Color3.fromRGB(250, 250, 250)
 local PUPIL = Color3.fromRGB(35, 35, 50)
-local BLANKET = Color3.fromRGB(200, 70, 60)
+local BLANKET = Color3.fromRGB(235, 70, 70)
 local LEATHER = Color3.fromRGB(110, 70, 44)
 
-local STUDS = Enum.SurfaceType.Studs
-local STUD_FACES = {
-	Top = STUDS,
-	Front = STUDS,
-	Back = STUDS,
-	Left = STUDS,
-	Right = STUDS,
-	Bottom = Enum.SurfaceType.Inlet,
-}
+-- Classic stud decal from the Creator Store (asset 7447638611), tiled at half-stud size.
+local STUD_TEXTURE = { image = "rbxassetid://7447638591", tile = 0.5 }
 
 local BODY_HEIGHT = 5 -- body center above the ground
 local SEAT = CFrame.new(0, 2.4, 0.2) -- rider hips, relative to the body center
@@ -93,10 +86,10 @@ local function parts()
 		-- The head sits level so the eyes look straight ahead.
 		{ name = "Head", parent = "Neck", joint = at(0, 1.2, -0.2, 0.35), offset = v(0, 0.5, -0.8), size = v(2.4, 2.3, 2.6), color = COAT, animated = true },
 		{ name = "Muzzle", parent = "Head", joint = at(0, -0.55, -1.5), size = v(2, 1.2, 0.8), color = MUZZLE },
-		{ name = "EyeL", parent = "Head", joint = at(-0.6, 0.45, -1.33), size = v(0.9, 1, 0.12), color = EYE_WHITE },
-		{ name = "EyeR", parent = "Head", joint = at(0.6, 0.45, -1.33), size = v(0.9, 1, 0.12), color = EYE_WHITE },
-		{ name = "PupilL", parent = "Head", joint = at(-0.48, 0.28, -1.4), size = v(0.45, 0.55, 0.1), color = PUPIL },
-		{ name = "PupilR", parent = "Head", joint = at(0.48, 0.28, -1.4), size = v(0.45, 0.55, 0.1), color = PUPIL },
+		{ name = "EyeL", parent = "Head", joint = at(-0.6, 0.45, -1.33), size = v(0.9, 1, 0.12), color = EYE_WHITE, plain = true },
+		{ name = "EyeR", parent = "Head", joint = at(0.6, 0.45, -1.33), size = v(0.9, 1, 0.12), color = EYE_WHITE, plain = true },
+		{ name = "PupilL", parent = "Head", joint = at(-0.48, 0.28, -1.4), size = v(0.45, 0.55, 0.1), color = PUPIL, plain = true },
+		{ name = "PupilR", parent = "Head", joint = at(0.48, 0.28, -1.4), size = v(0.45, 0.55, 0.1), color = PUPIL, plain = true },
 		{ name = "Forelock", parent = "Head", joint = at(0, 1.25, -0.5), size = v(0.9, 0.3, 1), color = HAIR },
 		{ name = "EarL", parent = "Head", joint = at(-0.75, 1.15, 0.6), offset = v(0, 0.45, 0), size = v(0.5, 0.9, 0.4), color = COAT, animated = true },
 		{ name = "EarR", parent = "Head", joint = at(0.75, 1.15, 0.6), offset = v(0, 0.45, 0), size = v(0.5, 0.9, 0.4), color = COAT, animated = true },
@@ -121,7 +114,7 @@ Horse.Gaits = GAITS
 
 function Horse.new()
 	local spec = parts()
-	local model, byName, motors = Rig.build({ name = "Horse", studFaces = STUD_FACES, parts = spec })
+	local model, byName, motors = Rig.build({ name = "Horse", studTexture = STUD_TEXTURE, parts = spec })
 
 	local saddle = {}
 	for _, def in ipairs(spec) do
