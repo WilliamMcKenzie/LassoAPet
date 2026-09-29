@@ -57,6 +57,15 @@ local TONES = {
 
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, homeTitle
 
+-- Text outlines, kept at a whole number of screen pixels. The HUD's UIScale scales
+-- them too, and at fractional widths the dot UIStroke leaves in small letter
+-- holes (the 6 in "63 m") comes out oversized.
+local strokes = {}
+local function roundStroke(stroke)
+	local scale = rootScale or 1
+	stroke.Thickness = math.max(1, math.round(strokes[stroke] * scale)) / scale
+end
+
 local function label(parent, size, position, textSize, thickness)
 	local l = Instance.new("TextLabel")
 	l.BackgroundTransparency = 1
@@ -68,7 +77,11 @@ local function label(parent, size, position, textSize, thickness)
 	l.TextColor3 = WHITE
 	l.Text = ""
 	local s = Instance.new("UIStroke")
-	s.Thickness = thickness or STROKE
+	strokes[s] = thickness or STROKE
+	roundStroke(s)
+	s.Destroying:Connect(function()
+		strokes[s] = nil
+	end)
 	s.Color = Color3.new(0, 0, 0)
 	s.LineJoinMode = Enum.LineJoinMode.Round
 	s.Parent = l
@@ -110,6 +123,9 @@ local function root(screenGui)
 		scale.Scale = screen.X / REFERENCE_WIDTH * Config.HudScale
 		frame.Size = UDim2.fromOffset(screen.X / scale.Scale, screen.Y / scale.Scale)
 		rootScale = scale.Scale
+		for stroke in strokes do
+			roundStroke(stroke)
+		end
 	end
 	camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
 	resize()
