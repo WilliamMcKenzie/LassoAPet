@@ -98,7 +98,8 @@ def leap(L=0.8, height=25, spread=55, pitch=8):
     # hind legs leave a touch later and land a touch earlier than the front
     return (L, {
         "root": [
-            pos_y(at(L, [(0, -3), (0.15, 0), (0.3, 0.67 * h), (0.5, h), (0.7, 0.67 * h), (0.85, 0), (1, -3)])),
+            # lifted a little at takeoff and touchdown so the pitched body keeps its hooves out of the ground
+            pos_y(at(L, [(0, 0), (0.15, 5), (0.3, 0.67 * h + 2), (0.5, h), (0.7, 0.67 * h + 2), (0.85, 5), (1, 0)])),
             {"channel": "rotation", "interp": "catmullrom",
              "keys": [(t, (v, 0, 0)) for t, v in at(L, [(0, 0), (0.15, pitch), (0.5, 0), (0.85, -pitch), (1, 0)])]},
         ],

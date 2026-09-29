@@ -1,6 +1,6 @@
 """Convert a rigged Blockbench model into a Luau data module for Rig.luau.
 
-Run: python3 tools/bbmodel_to_luau.py designs/horses/Horse7_ToyRig.bbmodel src/shared/Animals/HorseModel.luau
+Run: python3 tools/bbmodel_to_luau.py designs/horses/Horse9_Leap.bbmodel src/shared/Animals/HorseModel.luau
 
 1 Blockbench unit = 0.1 stud. Blockbench and Roblox share axes (Y up, front
 = -Z) and both rotate right-handed, so rotation keyframes carry over as-is.
