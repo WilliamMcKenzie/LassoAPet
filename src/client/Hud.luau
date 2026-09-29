@@ -7,6 +7,8 @@
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
+local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
 local Hud = {}
 
@@ -163,7 +165,11 @@ local function button(name, size, color, textSize, onActivated)
 end
 
 function Hud.init(onAction, onRideAgain)
-	local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+	-- With ShowHud off the HUD is built but never parented, so nothing shows.
+	local playerGui = Config.ShowHud and Players.LocalPlayer:WaitForChild("PlayerGui") or nil
+	if not Config.ShowHud then
+		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+	end
 	gui = Instance.new("ScreenGui")
 	gui.Name = "RideHud"
 	gui.ResetOnSpawn = false

@@ -193,6 +193,7 @@ local function spawnStarter()
 	prompt.ActionText = "Ride"
 	prompt.RequiresLineOfSight = false
 	prompt.MaxActivationDistance = 12
+	prompt.Style = Config.ShowHud and Enum.ProximityPromptStyle.Default or Enum.ProximityPromptStyle.Custom -- Custom draws nothing; E still works
 	prompt.Parent = starter.animal.model.PrimaryPart
 	prompt.Triggered:Connect(function()
 		prompt:Destroy()
