@@ -337,9 +337,10 @@ local function slam(key)
 end
 
 function Hud.flash(text, seconds)
-	-- Fail screens hide the ride's cash; the Home screen shows what was gained instead.
+	-- Fail screens hide the ride's cash and the HOME title; the Home screen shows what was gained instead.
 	if TONES[text] == RED then
 		rideCash.row.Visible = false
+		homeTitle.Visible = false
 	end
 	banner.Visible = false
 	if BANNERS[text] then
