@@ -22,7 +22,8 @@ local IMAGES = {
 	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
-	buckedOff = { id = "rbxassetid://123571061022694", size = Vector2.new(1015, 300) },
+	buckedOff = { id = "rbxassetid://114839635512682", size = Vector2.new(1015, 300) },
+	crash = { id = "rbxassetid://137889269113133", size = Vector2.new(632, 230) },
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
 	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
@@ -42,7 +43,8 @@ local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
 
 -- Banners drawn as images instead of text.
-local BANNERS = { ["BUCKED OFF"] = "buckedOff" }
+local BANNERS = { ["BUCKED OFF"] = "buckedOff", ["CRASH!"] = "crash" }
+local BANNER_SCALE = 0.55 -- banner images show at this share of their pixel size
 
 -- Banner colors: bad news red, good news yellow, anything else white.
 local TONES = {
@@ -190,7 +192,7 @@ function Hud.init(onAction, onHome, onRide)
 	distance.ZIndex = 2
 
 	message = label(rideRoot, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
-	banner = image(rideRoot, "buckedOff", fit("buckedOff", 560), message.Position)
+	banner = image(rideRoot, "buckedOff", fit("buckedOff", IMAGES.buckedOff.size.X * BANNER_SCALE), message.Position)
 	banner.Visible = false
 	Instance.new("UIScale").Parent = banner
 
@@ -266,7 +268,7 @@ end
 -- Slams a banner image in: drops from big to size fast, squashes, and shakes.
 local function slam(key)
 	banner.Image = IMAGES[key].id
-	banner.Size = fit(key, 560)
+	banner.Size = fit(key, IMAGES[key].size.X * BANNER_SCALE)
 	banner.Visible = true
 	banner.ImageTransparency = 1
 	banner.Rotation = -4
