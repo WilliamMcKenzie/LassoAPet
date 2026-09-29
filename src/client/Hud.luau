@@ -33,7 +33,7 @@ local IMAGES = {
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
 }
 
-local BUTTON_WIDTH = 320
+local BUTTON_WIDTH = 256
 local BAR_WIDTH = 440
 local ICON_HEIGHT = 80 -- Gold
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
