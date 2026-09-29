@@ -44,7 +44,7 @@ local ground = folder("Ground")
 local tile = Config.Tile
 -- Checkerboards are one part each: the part is the first shade and a white/clear
 -- checker mask texture tinted with the second shade paints the other squares.
-local CHECKER = "rbxassetid://97195484523095"
+local CHECKER = "rbxassetid://84747779882944" -- white checker mask; transparent pixels are white too, so no dark seams
 local STUDS = "rbxassetid://7447638591" -- classic stud decal from the Creator Store
 local function checker(part, face, color)
 	local texture = Instance.new("Texture")
