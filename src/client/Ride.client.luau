@@ -24,10 +24,8 @@ end
 -- EggSpot marks the centre of the waiting egg. The egg is a rigged model so
 -- it can twitch in the nest; it turns its face toward the approaching rider.
 local eggSpot = world.Nest.EggSpot
-local nestLight = eggSpot.PointLight
 local nestEgg = Egg.new("Horse")
 nestEgg.model:PivotTo(eggSpot.CFrame * CFrame.Angles(0, math.pi, 0))
-nestLight.Parent = nestEgg.model.PrimaryPart
 nestEgg.model.Parent = world.Nest
 local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this range
 local nextTwitch = 1
@@ -286,7 +284,6 @@ local function grabEgg()
 	local egg = Egg.new(nestEgg.kind)
 	local part = egg.model
 	part:PivotTo(nestEgg.model:GetPivot())
-	nestLight:Clone().Parent = part.PrimaryPart
 	part.Parent = workspace
 	setEggInNest(false)
 	carried = { part = part, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }

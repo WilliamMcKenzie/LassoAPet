@@ -5382,13 +5382,6 @@
 <Color3uint8 name="Color3uint8">4294964438</Color3uint8>
 <CoordinateFrame name="CFrame"><X>0</X><Y>2</Y><Z>-760</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
-<Item class="PointLight" referent="RBX00000111"><Properties>
-<string name="Name">PointLight</string>
-<Color3 name="Color"><R>1</R><G>0.886275</G><B>0.588235</B></Color3>
-<float name="Range">14</float>
-<float name="Brightness">2</float>
-</Properties>
-</Item>
 </Item>
 </Item>
 </Item>
