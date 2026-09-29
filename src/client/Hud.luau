@@ -12,7 +12,6 @@ local Hud = {}
 local FONT = Enum.Font.FredokaOne
 local STROKE = 6
 local WHITE = Color3.new(1, 1, 1)
-local GREY = Color3.fromRGB(150, 150, 150)
 local RED = Color3.fromRGB(255, 72, 72)
 local YELLOW = Color3.fromRGB(255, 190, 30)
 
@@ -20,6 +19,7 @@ local YELLOW = Color3.fromRGB(255, 190, 30)
 local IMAGES = {
 	takeEgg = { id = "rbxassetid://104292931687556", size = Vector2.new(960, 434) },
 	lasso = { id = "rbxassetid://94121512214531", size = Vector2.new(960, 358) },
+	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
 	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
@@ -230,15 +230,17 @@ function Hud.setDistance(text)
 	distance.Text = text
 end
 
--- text = nil hides the button; ready = false greys it out.
+-- text = nil hides the button; ready = false shows LASSO's disabled image.
 function Hud.setAction(text, ready)
 	action.Visible = text ~= nil
 	if text then
 		local key = ACTIONS[text]
+		if key == "lasso" and not ready then
+			key = "lassoDisabled"
+		end
 		action.Image = IMAGES[key].id
 		action.Size = fit(key, BUTTON_WIDTH)
 	end
-	action.ImageColor3 = ready and WHITE or GREY
 end
 
 function Hud.flash(text, seconds)
