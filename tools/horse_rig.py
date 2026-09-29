@@ -311,7 +311,7 @@ def pose(model, anim, t):
             e = emap[node]
             polys = [(M[:3, :3] @ p.T).T + M[:3, 3] for p in element_polys(e)]
             color = element_color(e, pal)
-            plain = e["name"].startswith(("Eye", "Pupil", "Nostril")) or "In" in e["name"]
+            plain = e["name"].startswith(("Eye", "Pupil", "Nostril", "Plain")) or "In" in e["name"]
             p = Part(e["name"], (1, 1, 1), np.eye(4), color, "Poly", plain)
             p.polys = [q / SCALE for q in polys]
             parts.append(p)
@@ -319,7 +319,7 @@ def pose(model, anim, t):
         g = gmap[node["uuid"]]
         o = np.array(g["origin"], float)
         tr = tracks.get(g["name"], {})
-        R = rotm(tr.get("rotation", (0, 0, 0)))
+        R = rotm(tr.get("rotation", (0, 0, 0))) @ np.diag(tr.get("scale", (1, 1, 1)))
         L = np.eye(4)
         L[:3, :3] = R
         L[:3, 3] = o - R @ o + np.array(tr.get("position", (0, 0, 0)))

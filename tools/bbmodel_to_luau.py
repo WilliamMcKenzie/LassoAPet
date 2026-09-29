@@ -17,7 +17,7 @@ import numpy as np
 from PIL import Image
 
 SCALE = 0.1
-PLAIN = ("Eye", "Pupil", "Nostril")
+PLAIN = ("Eye", "Pupil", "Nostril", "Plain")  # name prefixes that skip the stud texture
 
 
 def v3(v):

@@ -352,10 +352,12 @@ def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0
 
 # ---------------------------------------------------------------- Blockbench
 
-def write_bbmodel(parts, name, path, scale=10):
+def write_bbmodel(parts, name, path, scale=10, bones=None):
     """Blockbench 'Generic Model' project. Axis-aligned blocks become cubes,
     wedges and rotated blocks become meshes. Colours come from a small palette
-    texture, one 2x2 cell per colour. `scale` = Blockbench units per stud."""
+    texture, one 2x2 cell per colour. `scale` = Blockbench units per stud.
+    bones: optional list of (name, parent or None, pivot in studs); each part's
+    `bone` attribute picks its group. Returns (model dict, groups by name)."""
     import base64
     import io
     import json
@@ -403,7 +405,14 @@ def write_bbmodel(parts, name, path, scale=10):
             verts, faces = {}, {}
             keys = {}
             u, v = cell[p.color]
-            for fi, (poly, _) in enumerate(part_faces(p)):
+            polys = []
+            for poly, _ in part_faces(p):
+                # Blockbench mesh faces hold at most 4 vertices: fan the rest
+                if len(poly) <= 4:
+                    polys.append(poly)
+                else:
+                    polys += [np.array([poly[0], poly[i], poly[i + 1]]) for i in range(1, len(poly) - 1)]
+            for fi, poly in enumerate(polys):
                 vk = []
                 for pt in poly:
                     k = tuple(np.round(pt * scale, 4))
@@ -417,6 +426,21 @@ def write_bbmodel(parts, name, path, scale=10):
                 "rotation": [0, 0, 0], "color": 0, "vertices": verts, "faces": faces,
             })
 
+    groups, outliner = {}, [e["uuid"] for e in elements]
+    if bones:
+        nodes = {}
+        outliner = []
+        for bname, parent, pivot in bones:
+            g = {"name": bname, "uuid": str(uuid.uuid4()), "export": True, "locked": False, "scope": 0,
+                 "visibility": True, "origin": [round(float(x) * scale, 4) for x in pivot],
+                 "rotation": [0, 0, 0], "color": 0, "children": [], "reset": False, "shade": True,
+                 "mirror_uv": False, "autouv": 0, "isOpen": True}
+            groups[bname] = g
+            nodes[bname] = {"uuid": g["uuid"], "isOpen": True, "children": []}
+            (nodes[parent]["children"] if parent else outliner).append(nodes[bname])
+        for p, e in zip(parts, elements):
+            nodes[getattr(p, "bone", bones[0][0])]["children"].append(e["uuid"])
+
     model = {
         "meta": {"format_version": "4.10", "model_format": "free", "box_uv": False},
         "name": name,
@@ -424,7 +448,8 @@ def write_bbmodel(parts, name, path, scale=10):
         "visible_box": [1, 1, 0],
         "resolution": {"width": res, "height": res},
         "elements": elements,
-        "outliner": [e["uuid"] for e in elements],
+        "groups": list(groups.values()),
+        "outliner": outliner,
         "textures": [{
             "name": "palette.png", "id": "0", "uuid": tex_uuid, "width": res, "height": res,
             "uv_width": res, "uv_height": res, "particle": False, "render_mode": "default",
@@ -432,5 +457,7 @@ def write_bbmodel(parts, name, path, scale=10):
             "source": "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode(),
         }],
     }
-    with open(path, "w") as f:
-        json.dump(model, f, indent=1)
+    if path:
+        with open(path, "w") as f:
+            json.dump(model, f, indent=1)
+    return model, groups
