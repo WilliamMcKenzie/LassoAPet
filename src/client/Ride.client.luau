@@ -1,6 +1,6 @@
 -- The stampede ride, simulated locally: auto-run and steering, lasso transfers,
--- the Hold bar, the egg pickup and turnaround, the oncoming herd, failure and
--- the home boundary.
+-- the Hold bar, the egg pickup and turnaround, the stampede, failure and the
+-- home boundary.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -50,15 +50,24 @@ local TRANSFER_TIME = 0.4 -- rider pulled across on the rope
 local EGG_PULL_TIME = 0.55 -- egg reeled in on the rope
 local TURN_TIME = 1
 local EDGE = Config.CourseHalfWidth - 4
--- Herd animals pop into the world instead of appearing: a poof, then they spring
--- up out of it, overshoot and settle (a damped spring on their scale) with a hop.
+-- The stampede runs all the time, whether anyone is riding or not: animal n pops
+-- in just behind the start line at n * HerdSpawnEvery seconds on the server clock,
+-- with its lane and speed drawn from a generator seeded by n, and runs to the far
+-- wall. So everyone sees the same stream, and riding never changes it: an animal
+-- you lasso just leaves it.
+local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:GetBoundingBox().Position.Z else -2
+local SPAWN_Z = START_LINE_Z + 4
+local END_Z = -Config.CourseLength + 4 -- the far wall
+local VIEW = 320 -- stampede animals further than this from the camera aren't drawn
+-- They pop in instead of appearing: a poof, then they spring up out of it,
+-- overshoot and settle (a damped spring on their scale) with a hop, wait a beat
+-- and burst off.
 local POP_TIME = 0.45
 local POP_HOP = 1.6 -- studs
 local POP_HOP_TIME = 0.32
--- The ride's start: the herd lines up at the start line and bursts off together.
-local START_LINE_Z = world:FindFirstChild("StartLine") and world.StartLine.Position.Z or -2
-local LINEUP_STAGGER = 0.05 -- seconds between pop-ins, from the middle outward
-local LINEUP_WAIT = 0.35 -- after the last pop-in, before the herd runs
+local START_AFTER = POP_TIME + 0.1 -- seconds after popping in
+local START_EASE = 0.3 -- seconds: how quickly they get up to speed
+local LIFE = START_AFTER + START_EASE + (SPAWN_Z - END_Z) / Config.HerdSpeedMin
 
 local rng = Random.new()
 local herdFolder = Instance.new("Folder")
@@ -76,7 +85,12 @@ highlight.Parent = workspace
 -- yaw 0 faces -z (outbound); yaw pi faces +z (home).
 local phase = "idle" -- idle | outbound | turning | return | home | ended
 local starter, mount, loose
-local herd = {}
+local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
+local plans = {} -- [n] = { x, speed }, the stampede's schedule
+local taken = {} -- [n] = true once lassoed out of the stampede
+local strays = {} -- former mounts, running on to the far wall
+local pool = {} -- spare animals for the stampede
+local herdClock = workspace:GetServerTimeNow()
 local hold, grace = 0, 0
 local transfer, tumble, carried
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
@@ -97,7 +111,6 @@ local function newEntity(x, z, yaw)
 		yaw = yaw or 0,
 		speed = 0,
 		latVel = 0,
-		targetX = x,
 		turn = 0,
 	}
 	animal:setSaddled(false)
@@ -105,37 +118,27 @@ local function newEntity(x, z, yaw)
 	return entity
 end
 
+-- Every animal running loose on the course: the stampede's and former mounts.
+local function allAnimals()
+	local list = table.clone(strays)
+	for _, entity in herd do
+		table.insert(list, entity)
+	end
+	return list
+end
+
 local function place(entity, yawOffset)
 	entity.animal.model.PrimaryPart.CFrame = CFrame.new(entity.x, entity.rootY + (entity.hop or 0), entity.z)
 		* CFrame.Angles(0, entity.yaw + yawOffset, 0)
 end
 
--- Starts an entity's pop-in, after `delay` seconds. It stays out of the world until then.
-local function popIn(entity, delay)
-	entity.pop = -(delay or 0)
-	entity.hop = 0
-	entity.animal:setScale(0)
-	entity.animal.model.Parent = nil
+-- Scale and hop of an animal `t` seconds into its pop-in: 0 -> overshoot ~1.2 -> 1.
+local function popScale(t)
+	return 1 - math.exp(-12.6 * t) * math.cos(26 * t)
 end
 
--- Advances a pop-in: scale 0 -> overshoot ~1.2 -> settle at 1, hopping as it grows.
-local function updatePop(entity, dt)
-	local t = entity.pop + dt
-	if entity.pop < 0 and t >= 0 then
-		entity.animal.model.Parent = herdFolder
-		Poof.at(Vector3.new(entity.x, 0, entity.z))
-	end
-	if t >= POP_TIME then
-		entity.pop, entity.hop = nil, 0
-		entity.animal:setScale(1)
-		return
-	end
-	entity.pop = t
-	if t < 0 then
-		return
-	end
-	entity.animal:setScale(1 - math.exp(-12.6 * t) * math.cos(26 * t))
-	entity.hop = if t < POP_HOP_TIME then POP_HOP * math.sin(math.pi * t / POP_HOP_TIME) else 0
+local function popHop(t)
+	return if t < POP_HOP_TIME then POP_HOP * math.sin(math.pi * t / POP_HOP_TIME) else 0
 end
 
 local function blockedAt(x, z, padX, padZ)
@@ -147,23 +150,44 @@ local function blockedAt(x, z, padX, padZ)
 	return false
 end
 
-local function pickX(z)
-	local x = 0
-	for _ = 1, 8 do
-		x = rng:NextNumber(-EDGE, EDGE)
-		if not blockedAt(x, z, 5, 12) then
-			break
-		end
+local function plan(n)
+	local p = plans[n]
+	if not p then
+		local r = Random.new(n)
+		p = { x = r:NextNumber(-EDGE, EDGE), speed = r:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax) }
+		plans[n] = p
 	end
-	return x
+	return p
 end
 
-local function respawn(entity, zNear, zFar)
-	entity.z = rng:NextNumber(math.min(zNear, zFar), math.max(zNear, zFar))
-	entity.x = pickX(entity.z)
-	entity.targetX = entity.x
-	entity.speed = rng:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax)
-	popIn(entity)
+local function smoothstep(a, b, v)
+	local t = math.clamp((v - a) / (b - a), 0, 1)
+	return t * t * (3 - 2 * t)
+end
+
+-- A stampede animal's x at z: its lane, swerving round any obstacle in the way.
+local function laneX(x0, z)
+	local x = x0
+	for _, o in obstacles do
+		local reach = o.hx + 6
+		local d = x0 - o.x
+		if math.abs(d) < reach then
+			local side = if d >= 0 then 1 else -1
+			if math.abs(o.x + side * reach) > EDGE then
+				side = -side
+			end
+			-- Eases out over the 36 studs before the obstacle and back over the 24 after.
+			local w = smoothstep(o.z + o.hz + 40, o.z + o.hz + 4, z) * smoothstep(o.z - o.hz - 28, o.z - o.hz - 4, z)
+			x += (o.x + side * reach - x0) * w
+		end
+	end
+	return math.clamp(x, -EDGE, EDGE)
+end
+
+-- Distance run and current speed `a` seconds after setting off, easing up to `speed`.
+local function run(speed, a)
+	local e = math.exp(-a / START_EASE)
+	return speed * (a - START_EASE * (1 - e)), speed * (1 - e)
 end
 
 local function character()
@@ -178,10 +202,6 @@ local function setEggInNest(visible)
 end
 
 local function cleanup()
-	for _, entity in herd do
-		entity.animal.model:Destroy()
-	end
-	table.clear(herd)
 	if mount then
 		mount.animal.model:Destroy()
 	end
@@ -241,17 +261,6 @@ startRide = function()
 	mount, starter = starter, nil
 	mount.animal:setSaddled(true)
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = Config.StarterSpot.X, Config.StarterSpot.Z, 0, 0, 0
-	-- The herd pops in along the start line, from the middle outward, then runs.
-	local count = Config.HerdCount
-	for i = 1, count do
-		local x = -EDGE + (i - 1) * (2 * EDGE) / math.max(count - 1, 1)
-		local entity = newEntity(x, START_LINE_Z + 4)
-		entity.speed = rng:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax)
-		local rank = math.abs(i - (count + 1) / 2)
-		popIn(entity, rank * 2 * LINEUP_STAGGER)
-		entity.startIn = count * LINEUP_STAGGER + POP_TIME + LINEUP_WAIT
-		table.insert(herd, entity)
-	end
 	phase, hold, grace, camYaw = "outbound", Config.HoldTime, 0, 0
 	coins = 0
 	hrp.Anchored = true
@@ -322,9 +331,8 @@ local function startTransfer(target)
 	local hrp = character()
 	local old = mount
 	old.animal:setSaddled(false)
-	old.targetX = old.x
 	old.speed = rng:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax)
-	table.insert(herd, old)
+	table.insert(strays, old)
 	mount = nil
 	transfer = { target = target, old = old, t = 0, stage = "throw", from = hrp.Position }
 end
@@ -342,12 +350,6 @@ local function grabEgg()
 	-- Cutscene: the camera snaps in on the egg and the UI hides until it's reeled in.
 	cutscene = { shake = 0 }
 	Hud.setCutscene(true)
-	-- Clear the herd right in front of the turnaround so the return starts fair.
-	for _, entity in herd do
-		if entity.z > mount.z - 10 and entity.z < mount.z + 110 then
-			respawn(entity, mount.z + 160, math.min(mount.z + Config.HerdAhead, -30))
-		end
-	end
 end
 
 local function onAction()
@@ -412,9 +414,9 @@ local function findTarget()
 		return "egg"
 	end
 	local best, bestScore = nil, math.huge
-	for _, entity in herd do
-		if entity.pop then
-			continue -- still popping in
+	for _, entity in allAnimals() do
+		if entity.popping then
+			continue
 		end
 		local ahead = mount.z - entity.z
 		local dx = entity.x - mount.x
@@ -429,70 +431,93 @@ local function findTarget()
 	return best
 end
 
--- Keeps a reachable mount ahead of the player on the way out: if nothing will
--- come into lasso range soon, the nearest animal ahead drifts into the player's lane.
-local function ensureReachable()
-	local nearest, nearestAhead = nil, math.huge
-	for _, entity in herd do
-		local ahead = mount.z - entity.z
-		if ahead > 8 and ahead < 90 and math.abs(entity.x - mount.x) < 30 then
-			return
-		end
-		if ahead > 8 and ahead < nearestAhead then
-			nearest, nearestAhead = entity, ahead
-		end
-	end
-	if not nearest or nearestAhead > 160 then
-		-- Nothing close enough to steer over: bring the animal furthest behind up ahead.
-		nearest = herd[1]
-		for _, entity in herd do
-			if entity.z > nearest.z then
-				nearest = entity
-			end
-		end
-		nearest.z = mount.z - rng:NextNumber(110, 140)
-		nearest.x = math.clamp(mount.x + rng:NextNumber(-20, 20), -EDGE, EDGE)
-		popIn(nearest)
-	end
-	nearest.targetX = math.clamp(mount.x + rng:NextNumber(-12, 12), -EDGE, EDGE)
-	nearest.speed = Config.HerdSpeedMin - 6
+local function takeFromPool(n, x, z)
+	local entity = table.remove(pool) or newEntity(x, z)
+	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
+	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
+	entity.animal.model.Parent = herdFolder
+	return entity
+end
+
+local function putInPool(entity)
+	entity.animal.model.Parent = nil
+	entity.animal:setScale(1)
+	entity.hop, entity.popping = 0, nil
+	table.insert(pool, entity)
+end
+
+local function moveAnimal(entity, x, z, speed, dt)
+	local lat = (x - entity.x) / math.max(dt, 1e-3)
+	entity.x, entity.z, entity.speed = x, z, speed
+	place(entity, -math.atan2(lat, math.max(speed, 1)))
+	entity.animal:update(dt, speed, lat / 12)
 end
 
 local function updateHerd(dt)
-	local returning = phase == "return" or phase == "home"
-	for _, entity in herd do
-		if entity.pop then
-			updatePop(entity, dt)
+	herdClock += dt
+	local every = Config.HerdSpawnEvery
+	local oldest, newest = math.ceil((herdClock - LIFE) / every), math.floor(herdClock / every)
+	local camZ = camera.CFrame.Position.Z
+	for n = oldest, newest do
+		if taken[n] then
+			continue
 		end
-		local speed = entity.speed
-		if entity.startIn then
-			entity.startIn -= dt
-			speed = 0
-			if entity.startIn <= 0 then
-				entity.startIn = nil
-			end
-		end
-		entity.z -= speed * dt
-		for _, o in obstacles do
-			local ahead = entity.z - o.z
-			if ahead > 0 and ahead < 40 and math.abs(o.x - entity.x) < o.hx + 4 then
-				entity.targetX = o.x + (entity.x >= o.x and 1 or -1) * (o.hx + 6)
-			end
-		end
-		entity.targetX = math.clamp(entity.targetX, -EDGE, EDGE)
-		local lat = if entity.startIn then 0 else math.clamp(entity.targetX - entity.x, -1, 1) * 12
-		entity.x += lat * dt
-		if returning then
-			if entity.z < focus.Z - Config.HerdBehind then
-				if focus.Z + Config.HerdAhead * 0.6 < -30 then
-					respawn(entity, focus.Z + Config.HerdAhead * 0.6, math.min(focus.Z + Config.HerdAhead, -30))
+		local p = plan(n)
+		local age = herdClock - n * every
+		local dist, speed = run(p.speed, math.max(age - START_AFTER, 0))
+		local z = SPAWN_Z - dist
+		local entity = herd[n]
+		if z <= END_Z or math.abs(z - camZ) > VIEW then
+			if entity then
+				if z <= END_Z then
+					Poof.at(Vector3.new(entity.x, 0, entity.z))
 				end
+				herd[n] = nil
+				putInPool(entity)
 			end
-		elseif entity.z > focus.Z + Config.HerdBehind then
-			respawn(entity, focus.Z - Config.HerdAhead * 0.5, math.max(focus.Z - Config.HerdAhead, -Config.CourseLength + 40))
+			continue
 		end
-		place(entity, -math.atan2(lat, math.max(speed, 1)))
-		entity.animal:update(dt, speed, lat / 12)
+		local x = laneX(p.x, z)
+		if not entity then
+			entity = takeFromPool(n, x, z)
+			herd[n] = entity
+			if age < 0.15 then
+				Poof.at(Vector3.new(x, 0, z))
+			end
+		end
+		if age < POP_TIME then
+			entity.popping = true
+			entity.hop = popHop(age)
+			entity.animal:setScale(popScale(age))
+		elseif entity.popping then
+			entity.popping, entity.hop = nil, 0
+			entity.animal:setScale(1)
+		end
+		-- A nudge from a passing rider fades back out; it never changes the schedule.
+		entity.dodge *= math.exp(-1.5 * dt)
+		moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt)
+	end
+	for n, entity in herd do
+		if n < oldest then
+			herd[n] = nil
+			putInPool(entity)
+		end
+	end
+	for n in plans do
+		if n < oldest then
+			plans[n], taken[n] = nil, nil
+		end
+	end
+	for i = #strays, 1, -1 do
+		local entity = strays[i]
+		local z = entity.z - entity.speed * dt
+		if z <= END_Z then
+			Poof.at(Vector3.new(entity.x, 0, entity.z))
+			entity.animal.model:Destroy()
+			table.remove(strays, i)
+		else
+			moveAnimal(entity, entity.x, z, entity.speed, dt)
+		end
 	end
 end
 
@@ -543,13 +568,13 @@ local function checkRide(dt)
 	if grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4) then
 		return fail("CRASH!")
 	end
-	for _, entity in herd do
+	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
-		if not entity.pop and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
+		if not entity.popping and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
 			if phase == "return" and grace <= 0 then
 				return fail("CRASH!")
-			elseif phase == "outbound" then
-				entity.targetX = mount.x + (dx >= 0 and 5 or -5)
+			elseif phase == "outbound" and entity.n then
+				entity.dodge = math.clamp(entity.dodge + (if dx >= 0 then 1 else -1) * 12 * dt, -6, 6)
 			end
 		end
 	end
@@ -604,7 +629,11 @@ local function updateRider(dt)
 		focus = Vector3.new(pos.X, 0, pos.Z)
 		if t >= 1 then
 			local target = transfer.target
-			table.remove(herd, table.find(herd, target))
+			if target.n then
+				herd[target.n], taken[target.n], target.n = nil, true, nil
+			else
+				table.remove(strays, table.find(strays, target))
+			end
 			mount, transfer = target, nil
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
@@ -690,6 +719,7 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		nestEgg:update(dt)
 	end
+	updateHerd(dt)
 	if phase == "idle" then
 		if starter then
 			place(starter, 0)
@@ -708,7 +738,6 @@ RunService.PreSimulation:Connect(function(dt)
 		place(loose, 0)
 		loose.animal:update(dt, loose.speed, 0)
 	end
-	updateHerd(dt)
 	updateRider(dt)
 	if carried and carried.stage == "held" then
 		Lasso.twirl(dt, carried.part)
@@ -733,9 +762,6 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	if mount and phase ~= "ended" then
 		checkRide(dt)
-	end
-	if phase == "outbound" and mount then
-		ensureReachable()
 	end
 	actionTarget = findTarget()
 	highlight.Adornee = if actionTarget == "egg" then nestEgg.model elseif actionTarget then actionTarget.animal.model else nil
