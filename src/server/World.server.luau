@@ -1,5 +1,5 @@
 -- Builds the greybox world at server start: the home base, the stampede
--- corridor with its faint checkerboard, studded hills, obstacles and the egg nest.
+-- corridor with its faint checkerboard, checkered canyon walls, obstacles and the egg nest.
 
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -13,7 +13,6 @@ world.Parent = workspace
 
 local STONE = Color3.fromRGB(150, 150, 146)
 local WOOD = Color3.fromRGB(124, 84, 54)
-local LEAF = Color3.fromRGB(76, 150, 62)
 local WHITE = Color3.fromRGB(245, 245, 240)
 
 local function block(parent, size, position, color, name)
@@ -54,33 +53,45 @@ local function groundRect(x0, x1, z0, z1)
 	end
 end
 -- One wide plain under everything, so the edges of the map never show the void.
-block(ground, Vector3.new(2048, 2, 2048), Vector3.new(0, -1.2, -Config.CourseLength / 2), Color3.fromRGB(88, 150, 64), "Plain")
+block(ground, Vector3.new(2048, 2, 2048), Vector3.new(0, -1.2, -Config.CourseLength / 2), Config.GroundColors[1], "Plain")
 groundRect(-Config.CourseHalfWidth, Config.CourseHalfWidth, -Config.CourseLength, 0)
 groundRect(-Config.HomeHalfWidth, Config.HomeHalfWidth, 0, Config.HomeDepth)
 
--- Hills: stepped studded blocks along both sides of the corridor.
-local hills = folder("Hills")
-local HILL_SHADES = { Color3.fromRGB(92, 158, 66), Color3.fromRGB(84, 146, 60), Color3.fromRGB(76, 134, 56) }
-local SEGMENT = 32
-for side = -1, 1, 2 do
-	for z = -Config.CourseLength, -SEGMENT, SEGMENT do
-		local x = Config.CourseHalfWidth
-		for step = 1, 3 do
-			local width = 16 + step * 4
-			local height = step * 4 + math.floor(math.noise(z / 90, step, side) * 6 + 0.5) * 2
-			height = math.max(height, step * 3)
-			block(hills, Vector3.new(width, height, SEGMENT), Vector3.new(side * (x + width / 2), height / 2, z + SEGMENT / 2), HILL_SHADES[step])
-			x += width
+-- Walls: tall dirt walls with a faint brown checkerboard and a grass cap, so the
+-- run reads as one long canyon and nothing outside it is visible.
+local walls = folder("Walls")
+local WALL_HEIGHT, WALL_THICK = 48, 8
+local function checkerWall(center, length, alongX, facing)
+	-- facing: the direction the inner face points (+1/-1 on the cross axis).
+	local size = alongX and Vector3.new(length, WALL_HEIGHT, WALL_THICK) or Vector3.new(WALL_THICK, WALL_HEIGHT, length)
+	block(walls, size, center + Vector3.new(0, WALL_HEIGHT / 2, 0), Config.WallColors[1], "Wall")
+	local capSize = alongX and Vector3.new(length, 2, WALL_THICK + 2) or Vector3.new(WALL_THICK + 2, 2, length)
+	local capShift = alongX and Vector3.new(0, 0, facing) or Vector3.new(facing, 0, 0)
+	block(walls, capSize, center + capShift + Vector3.new(0, WALL_HEIGHT + 1, 0), Config.GroundColors[1], "Cap")
+	local face = center + (alongX and Vector3.new(0, 0, facing * (WALL_THICK / 2 + 0.2)) or Vector3.new(facing * (WALL_THICK / 2 + 0.2), 0, 0))
+	for u = -length / 2, length / 2 - tile, tile do
+		for y = 0, WALL_HEIGHT - tile, tile do
+			if (math.floor(u / tile) + math.floor(y / tile)) % 2 == 1 then
+				local tileSize = alongX and Vector3.new(tile, tile, 0.4) or Vector3.new(0.4, tile, tile)
+				local offset = alongX and Vector3.new(u + tile / 2, y + tile / 2, 0) or Vector3.new(0, y + tile / 2, u + tile / 2)
+				block(walls, tileSize, face + offset, Config.WallColors[2], "WallTile")
+			end
 		end
 	end
 end
+local halfW = Config.CourseHalfWidth + WALL_THICK / 2
+checkerWall(Vector3.new(-halfW, 0, -Config.CourseLength / 2), Config.CourseLength, false, 1)
+checkerWall(Vector3.new(halfW, 0, -Config.CourseLength / 2), Config.CourseLength, false, -1)
+checkerWall(Vector3.new(0, 0, -Config.CourseLength - WALL_THICK / 2), Config.CourseHalfWidth * 2 + WALL_THICK * 2, true, 1)
 
-local function tree(parent, position, scale)
+local BUSH = Color3.fromRGB(88, 158, 52)
+local STONE_LIGHT = Color3.fromRGB(205, 205, 200)
+
+local function bush(parent, position)
 	local model = Instance.new("Model")
-	model.Name = "Tree"
-	block(model, Vector3.new(2, 6, 2) * scale, position + Vector3.new(0, 3 * scale, 0), WOOD)
-	block(model, Vector3.new(8, 4, 8) * scale, position + Vector3.new(0, 7 * scale, 0), LEAF)
-	block(model, Vector3.new(5, 3, 5) * scale, position + Vector3.new(0, 10.5 * scale, 0), LEAF)
+	model.Name = "Bush"
+	block(model, Vector3.new(8, 3, 6), position + Vector3.new(0, 1.5, 0), BUSH)
+	block(model, Vector3.new(5, 2, 4), position + Vector3.new(-0.5, 4, 0.5), BUSH)
 	model.Parent = parent
 	return model
 end
@@ -88,21 +99,28 @@ end
 local function rock(parent, position)
 	local model = Instance.new("Model")
 	model.Name = "Rock"
-	local w = rng:NextInteger(3, 5) * 2
-	block(model, Vector3.new(w, 4, w - 2), position + Vector3.new(0, 2, 0), STONE)
-	block(model, Vector3.new(w - 3, 3, w - 4), position + Vector3.new(0.5, 5.5, 0), STONE)
+	local w = rng:NextInteger(3, 4) * 2
+	block(model, Vector3.new(w, 3, w - 2), position + Vector3.new(0, 1.5, 0), STONE)
+	block(model, Vector3.new(w - 3, 2, w - 4), position + Vector3.new(0.5, 4, 0), STONE)
 	model.Parent = parent
 	return model
 end
 
--- Scenery on the hills.
-local scenery = folder("Scenery")
-for z = -Config.CourseLength + 20, -40, 60 do
-	for side = -1, 1, 2 do
-		if rng:NextNumber() < 0.7 then
-			local x = side * (Config.CourseHalfWidth + rng:NextNumber(24, 46))
-			local ray = workspace:Raycast(Vector3.new(x, 100, z), Vector3.new(0, -200, 0))
-			tree(scenery, Vector3.new(x, ray and ray.Position.Y or 12, z), rng:NextNumber(1, 1.4))
+-- Small non-blocking decor along the wall feet: reeds and pebbles.
+local decor = folder("Decor")
+for z = -30, -Config.CourseLength + 20, -36 do
+	local side = rng:NextNumber() < 0.5 and -1 or 1
+	local x = side * (Config.CourseHalfWidth - rng:NextNumber(3, 10))
+	if rng:NextNumber() < 0.5 then
+		for i = 1, 3 do
+			local h = rng:NextNumber(3, 6)
+			local reed = block(decor, Vector3.new(0.4, h, 0.4), Vector3.new(x + i * 0.9 - 1.8, h / 2, z + rng:NextNumber(-1, 1)), BUSH, "Reed")
+			reed.CanCollide = false
+		end
+	else
+		for _ = 1, 3 do
+			local pebble = block(decor, Vector3.new(1, 0.6, 1), Vector3.new(x + rng:NextNumber(-3, 3), 0.3, z + rng:NextNumber(-3, 3)), STONE_LIGHT, "Pebble")
+			pebble.CanCollide = false
 		end
 	end
 end
@@ -113,10 +131,10 @@ for z = -120, -Config.CourseLength + 40, -44 do
 	if math.abs(z - Config.NestZ) > 50 and rng:NextNumber() < 0.75 then
 		local x = rng:NextNumber(-Config.CourseHalfWidth + 8, Config.CourseHalfWidth - 8)
 		local position = Vector3.new(x, 0, z + rng:NextNumber(-10, 10))
-		if rng:NextNumber() < 0.6 then
+		if rng:NextNumber() < 0.5 then
 			rock(obstacles, position)
 		else
-			tree(obstacles, position, 1)
+			bush(obstacles, position)
 		end
 	end
 end
@@ -191,4 +209,6 @@ egg.Parent = nest
 nest.Parent = world
 
 Lighting.ClockTime = 14
+Lighting.ExposureCompensation = 0.1
+Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
 world:SetAttribute("Ready", true)

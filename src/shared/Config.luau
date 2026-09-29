@@ -1,8 +1,9 @@
 -- Tuning values shared by the world builder and the ride.
 return {
 	-- World (studs). Home is z > 0, the course runs toward -z.
-	Tile = 4,
-	GroundColors = { Color3.fromRGB(104, 174, 74), Color3.fromRGB(99, 167, 70) },
+	Tile = 8,
+	GroundColors = { Color3.fromRGB(152, 207, 76), Color3.fromRGB(162, 215, 78) },
+	WallColors = { Color3.fromRGB(177, 129, 85), Color3.fromRGB(190, 141, 92) },
 	CourseHalfWidth = 56,
 	CourseLength = 1400,
 	HomeHalfWidth = 80,
