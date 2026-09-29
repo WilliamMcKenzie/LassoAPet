@@ -29,7 +29,7 @@ local IMAGES = {
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
 	gold = { id = "rbxassetid://75090734827129", size = Vector2.new(262, 263) },
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
-	coin = { id = "rbxassetid://104555508261055", size = Vector2.new(1, 1) }, -- +1 popup, Naro Free Icon Pack
+	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
 }
 
 local BUTTON_WIDTH = 320
@@ -54,7 +54,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, goldScale
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained
 
 local function label(parent, size, position, textSize)
 	local l = Instance.new("TextLabel")
@@ -146,15 +146,33 @@ end
 local BOTTOM_CENTER = Vector2.new(0.5, 1)
 local BUTTON_SPOT = UDim2.new(0.5, 0, 1, -MARGIN)
 
--- Gold sits bottom left at home and just right of the Hold bar while riding.
-local function placeGold(riding)
-	if riding then
-		gold.AnchorPoint = Vector2.new(0, 0.5)
-		gold.Position = UDim2.new(0.5, BAR_WIDTH / 2 + 8, 0, holdFrame.Position.Y.Offset)
-	else
-		gold.AnchorPoint = Vector2.new(0, 1)
-		gold.Position = UDim2.new(0, MARGIN, 1, -MARGIN)
-	end
+-- Coin with "+N$" beside it, the text overlapping the coin's edge
+-- (QM's MoreGold look). Used for this ride's cash and for the fail screen's total.
+local function cashRow(parent, coinSize, textSize, anchor, position)
+	local row = Instance.new("Frame")
+	row.BackgroundTransparency = 1
+	row.AutomaticSize = Enum.AutomaticSize.XY
+	row.AnchorPoint = anchor
+	row.Position = position
+	local layout = Instance.new("UIListLayout")
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.VerticalAlignment = Enum.VerticalAlignment.Center
+	layout.Padding = UDim.new(0, -coinSize * 0.1)
+	layout.Parent = row
+	local coin = image(row, "coin", UDim2.fromOffset(coinSize, coinSize), UDim2.new())
+	local text = label(row, UDim2.fromOffset(0, coinSize), UDim2.new(), textSize)
+	text.AutomaticSize = Enum.AutomaticSize.X
+	text.UIStroke.Thickness = 4
+	text.LayoutOrder = 1
+	text.ZIndex = 2 -- the text overlaps the coin's edge, drawn on top
+	local scale = Instance.new("UIScale")
+	scale.Parent = row
+	row.Parent = parent
+	return { row = row, text = text, scale = scale }
+end
+
+local function setCash(cash, amount)
+	cash.text.Text = "+" .. amount .. "$"
 end
 
 function Hud.init(onAction, onHome, onRide)
@@ -201,6 +219,8 @@ function Hud.init(onAction, onHome, onRide)
 
 	home = button(rideRoot, "home", fit("home", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onHome)
 	home.Visible = false
+	gained = cashRow(rideRoot, 84, 58, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.57))
+	rideCash = cashRow(rideRoot, 60, 46, Vector2.new(0, 0.5), UDim2.new(0.5, BAR_WIDTH / 2 + 8, 0, holdFrame.Position.Y.Offset))
 
 	-- Home buttons, always on screen outside a ride; Gold stays during rides too.
 	homeGui = Instance.new("ScreenGui")
@@ -211,11 +231,10 @@ function Hud.init(onAction, onHome, onRide)
 	homeRoot = root(homeGui)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	ride.Visible = false
-	gold, goldScale = button(homeRoot, "gold", fit("gold", nil, ICON_HEIGHT), Vector2.zero, UDim2.new())
+	gold = button(homeRoot, "gold", fit("gold", nil, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
 	local eggsSize = fit("eggs", nil, SIDE_ICON_HEIGHT)
 	eggs = button(homeRoot, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
 	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
-	placeGold(false)
 
 	-- Load every image now, so the first BUCKED OFF isn't still downloading while it animates.
 	task.spawn(function()
@@ -234,11 +253,13 @@ function Hud.show(visible)
 		banner.Visible = false
 		home.Visible = false
 	end
-	gold.Visible = true
 	ride.Visible = false -- comes back when the ride prompt shows again
+	gold.Visible = not visible
 	pets.Visible = not visible
 	eggs.Visible = not visible
-	placeGold(visible)
+	rideCash.row.Visible = true
+	gained.row.Visible = false
+	setCash(rideCash, 0)
 end
 
 function Hud.setHold(fraction)
@@ -292,9 +313,9 @@ local function slam(key)
 end
 
 function Hud.flash(text, seconds)
-	-- Fail screens hide the ride's cash.
+	-- Fail screens hide the ride's cash; the Home screen shows what was gained instead.
 	if TONES[text] == RED then
-		gold.Visible = false
+		rideCash.row.Visible = false
 	end
 	banner.Visible = false
 	if BANNERS[text] then
@@ -324,19 +345,27 @@ function Hud.showRide(visible)
 	ride.Visible = visible and not gui.Enabled
 end
 
-function Hud.showGold(visible)
-	gold.Visible = visible
+-- This ride's cash, top right of the bar.
+function Hud.showCash(visible)
+	rideCash.row.Visible = visible
 end
 
--- Home button, shown after a failed ride; sends you back home.
+-- Home button, shown after a failed ride with the cash gained; sends you back home.
 function Hud.showHome(visible)
 	home.Visible = visible
+	gained.row.Visible = visible
+	if visible then
+		gained.text.Text = rideCash.text.Text
+		gained.scale.Scale = 0
+		TweenService:Create(gained.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	end
 end
 
--- The amount is baked into the Gold image for now, so this only pops the icon.
-function Hud.setCoins(_amount)
-	goldScale.Scale = 1.25
-	TweenService:Create(goldScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+-- Cash gained this ride.
+function Hud.setCoins(amount)
+	setCash(rideCash, amount)
+	rideCash.scale.Scale = 1.25
+	TweenService:Create(rideCash.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 end
 
 -- "+1" with a coin that pops in at a screen point, floats up and fades.
