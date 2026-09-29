@@ -302,7 +302,7 @@ local function fail(reason)
 		return
 	end
 	local hrp, humanoid = character()
-	local dir = travelDir()
+	local dir = (phase == "return" or phase == "home") and 1 or -1 -- travelDir() is defined further down
 	phase = "ended"
 	cutscene = nil
 	Hud.setCutscene(false)
