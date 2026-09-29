@@ -34,7 +34,7 @@ local IMAGES = {
 }
 
 local BUTTON_WIDTH = 256
-local BAR_WIDTH = 440
+local BAR_WIDTH = 352
 local ICON_HEIGHT = 80 -- Gold
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
