@@ -14,6 +14,7 @@ local Hud = require(script.Parent.Hud)
 local Lasso = require(script.Parent.Lasso)
 local Poof = require(script.Parent.Poof)
 local Dust = require(script.Parent.Dust)
+local Outline = require(script.Parent.Outline)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -77,12 +78,6 @@ local herdFolder = Instance.new("Folder")
 herdFolder.Name = "Herd"
 herdFolder.Parent = workspace
 
-local highlight = Instance.new("Highlight")
-highlight.FillTransparency = 1
-highlight.OutlineColor = Color3.fromRGB(255, 230, 120)
-highlight.DepthMode = Enum.HighlightDepthMode.Occluded
-highlight.Enabled = false
-highlight.Parent = workspace
 
 -- An entity is an animal plus its position on the course.
 -- yaw 0 faces -z (outbound); yaw pi faces +z (home).
@@ -224,7 +219,7 @@ local function cleanup()
 	end
 	Lasso.stop()
 	cutscene = nil
-	highlight.Adornee = nil
+	Outline.set(nil)
 	setEggInNest(true)
 end
 
@@ -317,7 +312,7 @@ local function fail(reason)
 		carried.part:Destroy()
 		carried = nil
 	end
-	highlight.Adornee = nil
+	Outline.set(nil)
 	-- Thrown off behind the animal, landing flat on their back until they go home.
 	local look = hrp.CFrame.LookVector
 	tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1 }
@@ -801,8 +796,8 @@ RunService.PreSimulation:Connect(function(dt)
 		checkRide(dt)
 	end
 	actionTarget = findTarget()
-	highlight.Adornee = if actionTarget == "egg" then nestEgg.model elseif actionTarget then actionTarget.animal.model else nil
-	highlight.Enabled = actionTarget ~= nil
+	Outline.set(if actionTarget == "egg" then nestEgg.model elseif actionTarget then actionTarget.animal.model else nil)
+	Outline.update()
 	updateHud()
 end)
 
