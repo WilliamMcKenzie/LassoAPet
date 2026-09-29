@@ -389,8 +389,11 @@ function Hud.flash(text, seconds)
 end
 
 -- Cutscenes hide the whole ride HUD.
+-- The ride HUD slides off screen for the egg close-up. It isn't disabled:
+-- re-enabling a ScreenGui rebuilds all its text and images in one frame, which
+-- hitched as the cutscene ended.
 function Hud.setCutscene(on)
-	gui.Enabled = not on
+	rideRoot.Position = if on then UDim2.fromScale(0.5, 3) else UDim2.fromScale(0.5, 0.5)
 end
 
 -- RIDE shows only while you're close enough to your animal (replaces the [E] prompt).
