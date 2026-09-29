@@ -8,7 +8,7 @@ and preview PNGs. Horses face -Z with hooves on Y = 0.
 import os
 import sys
 
-from partlib import Builder, T, Rx, Ry, Rz, render, write_rbxmx
+from partlib import Builder, T, Rx, Ry, Rz, render, write_bbmodel, write_rbxmx
 
 COAT = (226, 130, 50)
 MANE = (92, 54, 34)
@@ -301,6 +301,7 @@ def main(out, only=None):
             continue
         parts = fn()
         write_rbxmx(parts, f"Horse{i}_{name}", os.path.join(out, f"Horse{i}_{name}.rbxmx"))
+        write_bbmodel(parts, f"Horse{i}_{name}", os.path.join(out, f"Horse{i}_{name}.bbmodel"))
         a = framed(parts, (-1, 0.45, -0.95))
         s = framed(parts, (-1, 0.12, 0.0))
         f = framed(parts, (-0.18, 0.25, -1))

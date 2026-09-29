@@ -134,6 +134,7 @@ def part_faces(p):
         n = n / ln
         if np.dot(n, world.mean(0) - p.cf[:3, 3]) < 0:
             n = -n
+            world = world[::-1]  # keep vertices counter-clockwise seen from outside
         out.append((world, n))
     return out
 
@@ -342,3 +343,89 @@ def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0
         edge[dy:, dx:] |= e & ob
     img[edge] *= 0.35
     return Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
+
+
+# ---------------------------------------------------------------- Blockbench
+
+def write_bbmodel(parts, name, path, scale=10):
+    """Blockbench 'Generic Model' project. Axis-aligned blocks become cubes,
+    wedges and rotated blocks become meshes. Colours come from a small palette
+    texture, one 2x2 cell per colour. `scale` = Blockbench units per stud."""
+    import base64
+    import io
+    import json
+    import uuid
+
+    colors = []
+    for p in parts:
+        if p.color not in colors:
+            colors.append(p.color)
+    res = 16
+    img = Image.new("RGBA", (res, res), (0, 0, 0, 0))
+    cell = {}
+    for i, c in enumerate(colors):
+        cx, cy = (i % 8) * 2, (i // 8) * 2
+        for dx in range(2):
+            for dy in range(2):
+                img.putpixel((cx + dx, cy + dy), tuple(c) + (255,))
+        cell[c] = (cx + 0.5, cy + 0.5)
+    buf = io.BytesIO()
+    img.save(buf, "PNG")
+    tex_uuid = str(uuid.uuid4())
+
+    def uv_box(c):
+        u, v = cell[c]
+        return [u, v, u + 1, v + 1]
+
+    elements = []
+    for p in parts:
+        R = p.cf[:3, :3]
+        axis_aligned = p.shape == "Block" and np.allclose(np.abs(R), np.eye(3), atol=1e-6)
+        eid = str(uuid.uuid4())
+        if axis_aligned:
+            half = np.abs(R) @ (p.size / 2)
+            lo = (p.cf[:3, 3] - half) * scale
+            hi = (p.cf[:3, 3] + half) * scale
+            faces = {f: {"uv": uv_box(p.color), "texture": 0}
+                     for f in ("north", "east", "south", "west", "up", "down")}
+            elements.append({
+                "name": p.name, "type": "cube", "uuid": eid, "box_uv": False,
+                "from": [round(x, 4) for x in lo], "to": [round(x, 4) for x in hi],
+                "origin": [round(x, 4) for x in p.cf[:3, 3] * scale], "rotation": [0, 0, 0],
+                "autouv": 0, "color": 0, "faces": faces,
+            })
+        else:
+            verts, faces = {}, {}
+            keys = {}
+            u, v = cell[p.color]
+            for fi, (poly, _) in enumerate(part_faces(p)):
+                vk = []
+                for pt in poly:
+                    k = tuple(np.round(pt * scale, 4))
+                    if k not in keys:
+                        keys[k] = f"v{len(keys)}"
+                        verts[keys[k]] = [float(x) for x in k]
+                    vk.append(keys[k])
+                faces[f"f{fi}"] = {"uv": {k: [u + 0.5, v + 0.5] for k in vk}, "vertices": vk, "texture": 0}
+            elements.append({
+                "name": p.name, "type": "mesh", "uuid": eid, "origin": [0, 0, 0],
+                "rotation": [0, 0, 0], "color": 0, "vertices": verts, "faces": faces,
+            })
+
+    model = {
+        "meta": {"format_version": "4.10", "model_format": "free", "box_uv": False},
+        "name": name,
+        "model_identifier": "",
+        "visible_box": [1, 1, 0],
+        "resolution": {"width": res, "height": res},
+        "elements": elements,
+        "outliner": [e["uuid"] for e in elements],
+        "textures": [{
+            "name": "palette.png", "id": "0", "uuid": tex_uuid, "width": res, "height": res,
+            "uv_width": res, "uv_height": res, "particle": False, "render_mode": "default",
+            "render_sides": "auto", "frame_time": 1, "saved": False, "mode": "bitmap",
+            "source": "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode(),
+        }],
+    }
+    with open(path, "w") as f:
+        json.dump(model, f, indent=1)
