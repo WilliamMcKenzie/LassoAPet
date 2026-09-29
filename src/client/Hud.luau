@@ -33,7 +33,7 @@ local IMAGES = {
 	gold = { id = "rbxassetid://75090734827129", size = Vector2.new(262, 263) },
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
-	sprint = { id = "", size = Vector2.new(618, 524) }, -- TODO: upload assets/ui/Sprint.png and put its id here
+	sprint = { id = "rbxassetid://104509002348710", size = Vector2.new(618, 524) },
 }
 
 local BUTTON_WIDTH = 256
