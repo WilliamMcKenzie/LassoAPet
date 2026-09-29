@@ -1,5 +1,9 @@
--- Minimal riding HUD: Hold bar, distance, one action button, a center message.
--- Every outline (text, buttons, bar) uses the same black STROKE so the HUD reads as one set.
+-- Minimal riding HUD: Hold bar with the distance on it, one action button, a
+-- center message, and a coin counter with a +1 popup.
+-- Button style follows the free "Studded UI" kit by RBLX Essentials
+-- (https://rblx-essentials.itch.io/studded-ui): rounded face, top-lit gradient,
+-- a darker bottom band, a fine stud pattern and a dark tinted outline, no drop shadow.
+-- Coin icon: Naro Free Icon Pack. Lasso icon: drawn for this game in the same style.
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -7,17 +11,20 @@ local TweenService = game:GetService("TweenService")
 local Hud = {}
 
 local FONT = Enum.Font.GothamBlack
-local STROKE = 3
+local STROKE = 2.5 -- every outline (text, buttons, bar) uses this width
 local INK = Color3.fromRGB(20, 20, 28)
 local WHITE = Color3.new(1, 1, 1)
-local DEPTH = 6 -- how far a button's face sits above its shadow, in pixels
-local STUD = 14 -- stud grid spacing on buttons, in pixels
-local ROPE = 7 -- lasso rope thickness in the icon, in pixels
-local ROPE_COLOR = Color3.fromRGB(226, 170, 96)
+local STUD_TILE = 12 -- pixels per stud on buttons and the bar
 
-local GREEN = Color3.fromRGB(88, 214, 72)
-local YELLOW = Color3.fromRGB(255, 198, 36)
-local GREY = Color3.fromRGB(150, 156, 168)
+local IMAGES = {
+	coin = "rbxassetid://104555508261055",
+	lasso = "rbxassetid://89797380977705",
+	stud = "rbxassetid://125672549302143",
+}
+
+local GREEN = Color3.fromRGB(80, 206, 64)
+local YELLOW = Color3.fromRGB(255, 190, 30)
+local GREY = Color3.fromRGB(140, 146, 160)
 local RED = Color3.fromRGB(255, 72, 72)
 
 -- Banner colors: bad news red, good news yellow, anything else white.
@@ -28,7 +35,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
-local gui, holdFrame, holdFill, distance, action, message, rideAgain
+local gui, coinGui, holdFrame, holdFill, distance, action, message, rideAgain, coinCount, coinScale
 
 local function darker(c, k)
 	return Color3.new(c.R * k, c.G * k, c.B * k)
@@ -38,10 +45,10 @@ local function lighter(c, k)
 	return c:Lerp(WHITE, k)
 end
 
-local function outline(parent, mode)
+local function outline(parent, color, mode)
 	local s = Instance.new("UIStroke")
 	s.Thickness = STROKE
-	s.Color = INK
+	s.Color = color or INK
 	s.LineJoinMode = Enum.LineJoinMode.Round
 	s.ApplyStrokeMode = mode or Enum.ApplyStrokeMode.Contextual
 	s.Parent = parent
@@ -69,227 +76,167 @@ local function label(parent, size, position, textSize)
 	return l
 end
 
--- A grid of tiny round studs, each a lighter dot over a darker drop, like a brick seen from above.
-local function studs(parent, width, height)
-	local layer = Instance.new("Frame")
-	layer.Name = "Studs"
-	layer.BackgroundTransparency = 1
-	layer.Size = UDim2.fromScale(1, 1)
-	layer.Parent = parent
-	local d = STUD * 0.5
-	for x = STUD * 0.5, width, STUD do
-		for y = STUD * 0.5, height, STUD do
-			for _, dot in { { 1.5, 0 }, { 0, 1 } } do
-				local f = Instance.new("Frame")
-				f.AnchorPoint = Vector2.new(0.5, 0.5)
-				f.Position = UDim2.fromOffset(x, y + dot[1])
-				f.Size = UDim2.fromOffset(d, d)
-				f.BorderSizePixel = 0
-				f.BackgroundColor3 = dot[2] == 1 and WHITE or Color3.new(0, 0, 0)
-				f.BackgroundTransparency = dot[2] == 1 and 0.82 or 0.86
-				corner(f, UDim.new(1, 0))
-				f.Parent = layer
-			end
-		end
-	end
-	return layer
+local function image(parent, id, size, position)
+	local i = Instance.new("ImageLabel")
+	i.BackgroundTransparency = 1
+	i.AnchorPoint = Vector2.new(0.5, 0.5)
+	i.Size = size
+	i.Position = position
+	i.Image = id
+	i.Parent = parent
+	return i
 end
 
--- A brick: a dark shadow slab under a top-lit face with an inner rim, both with the shared outline.
--- Returns the holder, the face (clips its children) and a recolor function.
-local function brick(w, h, color, radius, depth)
-	local root = Instance.new("Frame")
-	root.Size = UDim2.fromOffset(w, h + depth)
-	root.BackgroundTransparency = 1
-
-	local shadow = Instance.new("Frame")
-	shadow.Name = "Shadow"
-	shadow.Position = UDim2.fromOffset(0, depth)
-	shadow.Size = UDim2.fromOffset(w, h)
-	shadow.BorderSizePixel = 0
-	corner(shadow, radius)
-	outline(shadow, Enum.ApplyStrokeMode.Border)
-	shadow.Parent = root
-
-	local face = Instance.new("Frame")
-	face.Name = "Face"
-	face.Size = UDim2.fromOffset(w, h)
-	face.BorderSizePixel = 0
-	face.ClipsDescendants = true
-	corner(face, radius)
-	outline(face, Enum.ApplyStrokeMode.Border)
-	face.Parent = root
-
-	local shade = Instance.new("UIGradient")
-	shade.Rotation = 90
-	shade.Parent = face
-
-	local rim = Instance.new("Frame")
-	rim.Name = "Rim"
-	rim.BackgroundTransparency = 1
-	rim.Position = UDim2.fromOffset(3, 3)
-	rim.Size = UDim2.new(1, -6, 1, -6)
-	rim.ZIndex = 3
-	corner(rim, UDim.new(radius.Scale, math.max(radius.Offset - 3, 0)))
-	local rimStroke = Instance.new("UIStroke")
-	rimStroke.Thickness = 2
-	rimStroke.Color = WHITE
-	rimStroke.Transparency = 0.55
-	rimStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	rimStroke.Parent = rim
-	rim.Parent = face
-
-	local function setColor(c)
-		face.BackgroundColor3 = c
-		shade.Color = ColorSequence.new(lighter(c, 0.25), c)
-		shadow.BackgroundColor3 = darker(c, 0.6)
-	end
-	setColor(color)
-	return root, face, setColor
+-- Fine stud pattern, clipped to the same rounded corners as its parent.
+local function studs(parent, radius)
+	local s = Instance.new("ImageLabel")
+	s.Name = "Studs"
+	s.BackgroundTransparency = 1
+	s.Size = UDim2.fromScale(1, 1)
+	s.Image = IMAGES.stud
+	s.ScaleType = Enum.ScaleType.Tile
+	s.TileSize = UDim2.fromOffset(STUD_TILE, STUD_TILE)
+	s.ImageTransparency = 0.45
+	s.ZIndex = parent.ZIndex + 1
+	corner(s, radius)
+	s.Parent = parent
+	return s
 end
 
--- Lasso icon: a tilted loop with a short tail, drawn as rope with the shared outline.
--- All outlines go down first, then all rope on top, so the pieces join into one rope.
-local LASSO = {
-	{ ring = true, x = 40, y = 20, w = 46, h = 24, r = -8 },
-	{ x = 18, y = 40, w = ROPE, h = 20, r = 28 },
-	{ x = 14, y = 55, w = ROPE, h = 16, r = -18 },
-	{ x = 21, y = 32, w = 11, h = 11, r = 0 }, -- knot
-}
-
-local function lassoIcon(parent, position)
-	local icon = Instance.new("Frame")
-	icon.AnchorPoint = Vector2.new(0.5, 0.5)
-	icon.Position = position
-	icon.Size = UDim2.fromOffset(64, 68)
-	icon.BackgroundTransparency = 1
-	icon.ZIndex = 2
-	local function piece(p, grow, color, strokeWidth, z)
-		local f = Instance.new("Frame")
-		f.AnchorPoint = Vector2.new(0.5, 0.5)
-		f.Position = UDim2.fromOffset(p.x, p.y)
-		f.Size = UDim2.fromOffset(p.w + grow, p.h + grow)
-		f.Rotation = p.r
-		f.BorderSizePixel = 0
-		f.ZIndex = z
-		corner(f, UDim.new(1, 0))
-		if strokeWidth then
-			f.BackgroundTransparency = 1
-			local st = Instance.new("UIStroke")
-			st.Thickness = strokeWidth
-			st.Color = color
-			st.Parent = f
-		else
-			f.BackgroundColor3 = color
-		end
-		f.Parent = icon
-	end
-	for _, p in LASSO do
-		if p.ring then
-			piece(p, 0, INK, ROPE + STROKE, 1)
-			piece(p, 0, ROPE_COLOR, ROPE, 2)
-			piece(p, -STROKE * 2, INK, STROKE, 3)
-		else
-			piece(p, STROKE * 2, INK, nil, 1)
-			piece(p, 0, ROPE_COLOR, nil, 2)
-		end
-	end
-	icon.Parent = parent
-	return icon
+-- Top-lit face with a darker band along the bottom edge.
+local function shade(face, color)
+	local g = face:FindFirstChildOfClass("UIGradient") or Instance.new("UIGradient")
+	g.Rotation = 90
+	g.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, lighter(color, 0.22)),
+		ColorSequenceKeypoint.new(0.8, color),
+		ColorSequenceKeypoint.new(0.81, darker(color, 0.8)),
+		ColorSequenceKeypoint.new(1, darker(color, 0.8)),
+	})
+	g.Parent = face
+	face.BackgroundColor3 = WHITE
+	face.UIStroke.Color = darker(color, 0.35)
 end
 
--- Chunky studded brick button; the face drops onto its shadow while pressed.
 local function button(name, size, color, textSize, onActivated)
-	local w, h = size.X.Offset, size.Y.Offset
-	local body, face, setColor = brick(w, h, color, UDim.new(0, 12), DEPTH)
+	local radius = UDim.new(0, 14)
 	local root = Instance.new("TextButton")
 	root.Name = name
-	root.Size = body.Size
+	root.Size = size
 	root.BackgroundTransparency = 1
 	root.Text = ""
 	root.AutoButtonColor = false
-	body.Parent = root
 
-	studs(face, w, h)
+	local face = Instance.new("Frame")
+	face.Name = "Face"
+	face.AnchorPoint = Vector2.new(0.5, 0.5)
+	face.Position = UDim2.fromScale(0.5, 0.5)
+	face.Size = UDim2.fromScale(1, 1)
+	face.BorderSizePixel = 0
+	corner(face, radius)
+	outline(face, nil, Enum.ApplyStrokeMode.Border)
+	studs(face, radius)
+	face.Parent = root
+	local scale = Instance.new("UIScale")
+	scale.Parent = face
 
-	local text = label(face, UDim2.new(1, -16, 1, -8), UDim2.fromScale(0.5, 0.5), textSize)
+	local text = label(face, UDim2.new(1, -12, 0, textSize + 8), UDim2.fromScale(0.5, 0.5), textSize)
 	text.Name = "Label"
-	text.TextWrapped = true
-	text.ZIndex = 2
+	text.ZIndex = 4
 
-	local function press(down)
-		face.Position = UDim2.fromOffset(0, down and DEPTH - 2 or 0)
-	end
+	local press = TweenInfo.new(0.08)
 	root.MouseButton1Down:Connect(function()
-		press(true)
+		TweenService:Create(scale, press, { Scale = 0.93 }):Play()
 	end)
-	root.MouseButton1Up:Connect(function()
-		press(false)
-	end)
-	root.MouseLeave:Connect(function()
-		press(false)
-	end)
+	for _, event in { root.MouseButton1Up, root.MouseLeave } do
+		event:Connect(function()
+			TweenService:Create(scale, press, { Scale = 1 }):Play()
+		end)
+	end
 	root.Activated:Connect(onActivated)
 
+	local function setColor(c)
+		shade(face, c)
+	end
+	setColor(color)
 	return { root = root, face = face, label = text, setColor = setColor }
 end
 
 function Hud.init(onAction, onRideAgain)
+	local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 	gui = Instance.new("ScreenGui")
 	gui.Name = "RideHud"
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	gui.Enabled = false
-	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+	gui.Parent = playerGui
 
-	-- Hold bar: a dark brick track with a studded, glossy fill inset inside it.
-	local track, trackFace
-	track, trackFace = brick(300, 30, Color3.fromRGB(52, 54, 70), UDim.new(1, 0), 4)
-	holdFrame = track
+	-- Hold bar: dark rounded track, studded green fill, distance written on top.
+	local barRadius = UDim.new(1, 0)
+	holdFrame = Instance.new("Frame")
 	holdFrame.Name = "Hold"
 	holdFrame.AnchorPoint = Vector2.new(0.5, 0)
 	holdFrame.Position = UDim2.new(0.5, 0, 0, 52)
+	holdFrame.Size = UDim2.fromOffset(320, 34)
+	holdFrame.BackgroundColor3 = Color3.fromRGB(40, 42, 56)
+	holdFrame.BorderSizePixel = 0
+	corner(holdFrame, barRadius)
+	outline(holdFrame, nil, Enum.ApplyStrokeMode.Border)
 	holdFrame.Parent = gui
 	local well = Instance.new("Frame")
 	well.BackgroundTransparency = 1
-	well.Position = UDim2.fromOffset(5, 5)
-	well.Size = UDim2.new(1, -10, 1, -10)
-	well.ClipsDescendants = true
-	well.ZIndex = 2
-	well.Parent = trackFace
+	well.Position = UDim2.fromOffset(4, 4)
+	well.Size = UDim2.new(1, -8, 1, -8)
+	well.Parent = holdFrame
 	holdFill = Instance.new("Frame")
+	holdFill.Name = "Fill"
 	holdFill.Size = UDim2.fromScale(1, 1)
 	holdFill.BorderSizePixel = 0
-	holdFill.ClipsDescendants = true
-	corner(holdFill, UDim.new(1, 0))
+	corner(holdFill, barRadius)
+	local fillStroke = outline(holdFill, nil, Enum.ApplyStrokeMode.Border)
+	fillStroke.Transparency = 1
+	studs(holdFill, barRadius)
 	holdFill.Parent = well
-	studs(holdFill, 290, 20)
-	local gloss = Instance.new("Frame")
-	gloss.BorderSizePixel = 0
-	gloss.BackgroundColor3 = WHITE
-	gloss.BackgroundTransparency = 0.6
-	gloss.Position = UDim2.new(0.03, 0, 0, 3)
-	gloss.Size = UDim2.new(0.94, 0, 0, 5)
-	corner(gloss, UDim.new(1, 0))
-	gloss.Parent = holdFill
+	shade(holdFill, GREEN)
 
-	distance = label(gui, UDim2.fromOffset(260, 34), UDim2.new(0.5, 0, 0, 100), 28)
+	distance = label(holdFrame, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 20)
+	distance.ZIndex = 5
+
 	message = label(gui, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
 
-	action = button("Action", UDim2.fromOffset(150, 140), YELLOW, 28, onAction)
-	lassoIcon(action.face, UDim2.new(0.5, 0, 0, 50))
-	action.label.Position = UDim2.new(0.5, 0, 1, -34)
-	action.label.Size = UDim2.new(1, -16, 0, 40)
+	action = button("Action", UDim2.fromOffset(140, 140), YELLOW, 24, onAction)
+	image(action.face, IMAGES.lasso, UDim2.fromOffset(84, 84), UDim2.new(0.5, 0, 0, 54)).ZIndex = 3
+	action.label.Position = UDim2.new(0.5, 0, 1, -24)
 	action.root.AnchorPoint = Vector2.new(1, 1)
 	action.root.Position = UDim2.new(1, -40, 1, -40)
 	action.root.Parent = gui
 
-	rideAgain = button("RideAgain", UDim2.fromOffset(280, 76), GREEN, 34, onRideAgain)
+	rideAgain = button("RideAgain", UDim2.fromOffset(260, 72), GREEN, 30, onRideAgain)
 	rideAgain.root.AnchorPoint = Vector2.new(0.5, 0.5)
 	rideAgain.root.Position = UDim2.fromScale(0.5, 0.48)
 	rideAgain.label.Text = "RIDE AGAIN"
 	rideAgain.root.Visible = false
 	rideAgain.root.Parent = gui
+
+	-- Coin counter, always visible, bottom left.
+	coinGui = Instance.new("ScreenGui")
+	coinGui.Name = "CoinHud"
+	coinGui.ResetOnSpawn = false
+	coinGui.IgnoreGuiInset = true
+	coinGui.Parent = playerGui
+	local counter = Instance.new("Frame")
+	counter.Name = "Coins"
+	counter.BackgroundTransparency = 1
+	counter.AnchorPoint = Vector2.new(0, 1)
+	counter.Position = UDim2.new(0, 28, 1, -28)
+	counter.Size = UDim2.fromOffset(220, 64)
+	counter.Parent = coinGui
+	coinScale = Instance.new("UIScale")
+	coinScale.Parent = counter
+	image(counter, IMAGES.coin, UDim2.fromOffset(64, 64), UDim2.fromOffset(32, 32))
+	coinCount = label(counter, UDim2.fromOffset(150, 64), UDim2.fromOffset(72 + 75, 32), 38)
+	coinCount.TextXAlignment = Enum.TextXAlignment.Left
+	coinCount.Text = "0"
 end
 
 function Hud.show(visible)
@@ -304,7 +251,7 @@ function Hud.setHold(fraction)
 	holdFrame.Visible = fraction ~= nil
 	if fraction then
 		holdFill.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)
-		holdFill.BackgroundColor3 = fraction < 0.3 and RED or GREEN
+		shade(holdFill, fraction < 0.3 and RED or GREEN)
 	end
 end
 
@@ -339,6 +286,47 @@ end
 
 function Hud.showRideAgain(visible)
 	rideAgain.root.Visible = visible
+end
+
+function Hud.setCoins(amount)
+	coinCount.Text = tostring(amount)
+	coinScale.Scale = 1.25
+	TweenService:Create(coinScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+end
+
+-- "+1" with a coin that pops in at a screen point, floats up and fades.
+-- Same pattern as the common DevForum coin-popup recipe: pop with Back easing, rise with Quad, fade out.
+function Hud.coinPopup(screenPoint, amount)
+	local popup = Instance.new("Frame")
+	popup.BackgroundTransparency = 1
+	popup.AnchorPoint = Vector2.new(0.5, 0.5)
+	popup.Position = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
+	popup.Size = UDim2.fromOffset(130, 56)
+	popup.Parent = coinGui
+	local scale = Instance.new("UIScale")
+	scale.Scale = 0
+	scale.Parent = popup
+	local text = label(popup, UDim2.fromOffset(70, 56), UDim2.fromOffset(35, 28), 40)
+	text.Text = "+" .. tostring(amount or 1)
+	text.TextColor3 = Color3.fromRGB(255, 226, 70)
+	text.TextXAlignment = Enum.TextXAlignment.Right
+	local icon = image(popup, IMAGES.coin, UDim2.fromOffset(50, 50), UDim2.fromOffset(100, 28))
+	icon.Rotation = -12
+
+	TweenService:Create(scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	TweenService:Create(icon, TweenInfo.new(0.5, Enum.EasingStyle.Back), { Rotation = 8 }):Play()
+	TweenService:Create(popup, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = UDim2.fromOffset(screenPoint.X, screenPoint.Y - 80),
+	}):Play()
+	task.delay(0.65, function()
+		local fade = TweenInfo.new(0.35)
+		TweenService:Create(text, fade, { TextTransparency = 1 }):Play()
+		TweenService:Create(text.UIStroke, fade, { Transparency = 1 }):Play()
+		TweenService:Create(icon, fade, { ImageTransparency = 1 }):Play()
+	end)
+	task.delay(1.05, function()
+		popup:Destroy()
+	end)
 end
 
 return Hud

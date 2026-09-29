@@ -62,6 +62,7 @@ local actionTarget
 local turnT, camYaw = 0, 0
 local focus = Vector3.zero
 local touchSteer, padSteer = 0, 0
+local coins = 0 -- session only for now; saving comes with the pen
 local touchStart = {}
 
 local function newEntity(x, z, yaw)
@@ -545,6 +546,10 @@ local function updateRider(dt)
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
 			hold, grace = Config.HoldTime, Config.LandingGrace
+			coins += 1
+			Hud.setCoins(coins)
+			local point = camera:WorldToViewportPoint(hrp.Position + Vector3.new(0, 4, 0))
+			Hud.coinPopup(Vector2.new(point.X, point.Y), 1)
 		end
 		return
 	end
