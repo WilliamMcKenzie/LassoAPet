@@ -41,16 +41,32 @@ end
 -- Ground: two close greens in a checkerboard, so it reads as flat grass with a faint grid.
 local ground = folder("Ground")
 local tile = Config.Tile
+-- Checkerboards are one part each: the part is the first shade and a white/clear
+-- checker mask texture tinted with the second shade paints the other squares.
+local CHECKER = "rbxassetid://97195484523095"
+local STUDS = "rbxassetid://7447638591" -- classic stud decal from the Creator Store
+local function checker(part, face, color)
+	local texture = Instance.new("Texture")
+	texture.Texture = CHECKER
+	texture.Face = face
+	texture.StudsPerTileU = tile * 2
+	texture.StudsPerTileV = tile * 2
+	texture.Color3 = color
+	texture.Parent = part
+	-- Studs as a texture layer above the checker, so every square is studded.
+	part[face.Name .. "Surface"] = Enum.SurfaceType.Smooth
+	local studs = Instance.new("Texture")
+	studs.Texture = STUDS
+	studs.Face = face
+	studs.StudsPerTileU = 1
+	studs.StudsPerTileV = 1
+	studs.ZIndex = 2
+	studs.Parent = part
+end
+
 local function groundRect(x0, x1, z0, z1)
-	-- One slab in the first shade, then only the second-shade squares on top: half the parts.
-	block(ground, Vector3.new(x1 - x0, 2, z1 - z0), Vector3.new((x0 + x1) / 2, -1.02, (z0 + z1) / 2), Config.GroundColors[1], "Slab")
-	for x = x0, x1 - tile, tile do
-		for z = z1 - tile, z0, -tile do
-			if (math.floor(x / tile) + math.floor(z / tile)) % 2 == 1 then
-				block(ground, Vector3.new(tile, 1, tile), Vector3.new(x + tile / 2, -0.5, z + tile / 2), Config.GroundColors[2], "Tile")
-			end
-		end
-	end
+	local slab = block(ground, Vector3.new(x1 - x0, 2, z1 - z0), Vector3.new((x0 + x1) / 2, -1, (z0 + z1) / 2), Config.GroundColors[1], "Ground")
+	checker(slab, Enum.NormalId.Top, Config.GroundColors[2])
 end
 -- One wide plain under everything, so the edges of the map never show the void.
 block(ground, Vector3.new(2048, 2, 2048), Vector3.new(0, -1.2, -Config.CourseLength / 2), Config.GroundColors[1], "Plain")
@@ -64,20 +80,17 @@ local WALL_HEIGHT, WALL_THICK = 48, 8
 local function checkerWall(center, length, alongX, facing)
 	-- facing: the direction the inner face points (+1/-1 on the cross axis).
 	local size = alongX and Vector3.new(length, WALL_HEIGHT, WALL_THICK) or Vector3.new(WALL_THICK, WALL_HEIGHT, length)
-	block(walls, size, center + Vector3.new(0, WALL_HEIGHT / 2, 0), Config.WallColors[1], "Wall")
+	local wall = block(walls, size, center + Vector3.new(0, WALL_HEIGHT / 2, 0), Config.WallColors[1], "Wall")
+	local face
+	if alongX then
+		face = facing > 0 and Enum.NormalId.Back or Enum.NormalId.Front
+	else
+		face = facing > 0 and Enum.NormalId.Right or Enum.NormalId.Left
+	end
+	checker(wall, face, Config.WallColors[2])
 	local capSize = alongX and Vector3.new(length, 2, WALL_THICK + 2) or Vector3.new(WALL_THICK + 2, 2, length)
 	local capShift = alongX and Vector3.new(0, 0, facing) or Vector3.new(facing, 0, 0)
-	block(walls, capSize, center + capShift + Vector3.new(0, WALL_HEIGHT + 1, 0), Config.GroundColors[1], "Cap")
-	local face = center + (alongX and Vector3.new(0, 0, facing * (WALL_THICK / 2 + 0.2)) or Vector3.new(facing * (WALL_THICK / 2 + 0.2), 0, 0))
-	for u = -length / 2, length / 2 - tile, tile do
-		for y = 0, WALL_HEIGHT - tile, tile do
-			if (math.floor(u / tile) + math.floor(y / tile)) % 2 == 1 then
-				local tileSize = alongX and Vector3.new(tile, tile, 0.4) or Vector3.new(0.4, tile, tile)
-				local offset = alongX and Vector3.new(u + tile / 2, y + tile / 2, 0) or Vector3.new(0, y + tile / 2, u + tile / 2)
-				block(walls, tileSize, face + offset, Config.WallColors[2], "WallTile")
-			end
-		end
-	end
+	block(walls, capSize, center + capShift + Vector3.new(0, WALL_HEIGHT + 1, 0), Config.GroundColors[2], "Cap")
 end
 local halfW = Config.CourseHalfWidth + WALL_THICK / 2
 checkerWall(Vector3.new(-halfW, 0, -Config.CourseLength / 2), Config.CourseLength, false, 1)
