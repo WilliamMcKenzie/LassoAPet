@@ -592,6 +592,10 @@ local function updateHud()
 	elseif phase == "return" then
 		Hud.setDistance(string.format("%dm", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 	end
+	if phase == "turning" or phase == "return" or phase == "home" then
+		local metres = math.max(0, -focus.Z / STUDS_PER_METRE)
+		Hud.setVignette(math.clamp(metres / Config.VignetteFadeMetres, 0, 1))
+	end
 end
 
 -- Slow motion while the egg is in grab range, so there's time to decide.

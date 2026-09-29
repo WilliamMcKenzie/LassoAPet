@@ -23,6 +23,8 @@ local IMAGES = {
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
 	homeTitle = { id = "rbxassetid://101045473290524", size = Vector2.new(550, 160) },
+	dodge = { id = "rbxassetid://96827860827213", size = Vector2.new(1423, 115) },
+	vignette = { id = "rbxassetid://125111494433205", size = Vector2.new(512, 512) }, -- white, clear middle; tinted red
 	buckedOff = { id = "rbxassetid://114839635512682", size = Vector2.new(1015, 300) },
 	crash = { id = "rbxassetid://137889269113133", size = Vector2.new(632, 230) },
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
@@ -55,7 +57,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, homeTitle
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, homeTitle, dodge, dodgePulse, vignette
 
 -- Text outlines, kept at a whole number of screen pixels. The HUD's UIScale scales
 -- them too, and at fractional widths the dot UIStroke leaves in small letter
@@ -233,6 +235,17 @@ function Hud.init(onAction, onHome, onRide)
 	homeTitle = image(rideRoot, "homeTitle", titleSize, UDim2.new(0.5, 0, 0, 16 + titleSize.Y.Offset / 2))
 	homeTitle.Visible = false
 
+	-- Also on the ride back: DODGE THE STAMPEDE! under the distance, pulsing, and a
+	-- red vignette that fades out over the last stretch home.
+	dodge = image(rideRoot, "dodge", fit("dodge", 440), homeTitle.Position + UDim2.fromOffset(0, titleSize.Y.Offset / 2 + 76))
+	dodge.Visible = false
+	Instance.new("UIScale").Parent = dodge
+	dodgePulse = TweenService:Create(dodge.UIScale, TweenInfo.new(0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.08 })
+	vignette = image(rideRoot, "vignette", UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5))
+	vignette.ImageColor3 = Color3.fromRGB(235, 45, 35)
+	vignette.ZIndex = 0
+	vignette.Visible = false
+
 	message = label(rideRoot, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
 	banner = image(rideRoot, "buckedOff", fit("buckedOff", IMAGES.buckedOff.size.X * BANNER_SCALE), message.Position)
 	banner.Visible = false
@@ -283,6 +296,7 @@ function Hud.show(visible)
 	eggs.Visible = not visible
 	gained.row.Visible = false
 	Hud.setReturning(false)
+	Hud.setVignette(0)
 	setCash(0)
 end
 
@@ -311,26 +325,26 @@ function Hud.setAction(text, ready)
 end
 
 -- Slams a banner image in: drops from big to size fast, squashes, and shakes.
-local function slam(key)
-	banner.Image = IMAGES[key].id
-	banner.Size = fit(key, IMAGES[key].size.X * BANNER_SCALE)
-	banner.Visible = true
-	banner.ImageTransparency = 1
-	banner.Rotation = -4
-	local scale = banner.UIScale
+local function slam(target, key, width)
+	target.Image = IMAGES[key].id
+	target.Size = fit(key, width or IMAGES[key].size.X * BANNER_SCALE)
+	target.Visible = true
+	target.ImageTransparency = 1
+	target.Rotation = -4
+	local scale = target.UIScale
 	scale.Scale = 3
-	local rest = banner.Position
-	TweenService:Create(banner, TweenInfo.new(0.12), { ImageTransparency = 0 }):Play()
+	local rest = target.Position
+	TweenService:Create(target, TweenInfo.new(0.12), { ImageTransparency = 0 }):Play()
 	local drop = TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = 0.85 })
 	drop.Completed:Connect(function()
 		TweenService:Create(scale, TweenInfo.new(0.7, Enum.EasingStyle.Elastic), { Scale = 1 }):Play()
-		TweenService:Create(banner, TweenInfo.new(0.7, Enum.EasingStyle.Elastic), { Rotation = 0 }):Play()
+		TweenService:Create(target, TweenInfo.new(0.7, Enum.EasingStyle.Elastic), { Rotation = 0 }):Play()
 		task.spawn(function()
 			for i = 14, 1, -1 do
-				banner.Position = rest + UDim2.fromOffset(math.random(-i, i) * 2, math.random(-i, i) * 2)
+				target.Position = rest + UDim2.fromOffset(math.random(-i, i) * 2, math.random(-i, i) * 2)
 				task.wait(0.03)
 			end
-			banner.Position = rest
+			target.Position = rest
 		end)
 	end)
 	drop:Play()
@@ -341,11 +355,12 @@ function Hud.flash(text, seconds)
 	if TONES[text] == RED then
 		rideCash.row.Visible = false
 		homeTitle.Visible = false
+		Hud.setVignette(0)
 	end
 	banner.Visible = false
 	if BANNERS[text] then
 		message.Text = ""
-		slam(BANNERS[text])
+		slam(banner, BANNERS[text])
 		return
 	end
 	message.Text = text
@@ -373,10 +388,30 @@ end
 -- Ride back home: HOME title with the distance under it, no cash.
 function Hud.setReturning(returning)
 	homeTitle.Visible = returning
+	dodgePulse:Cancel()
+	dodge.Visible = false
+	if returning then
+		slam(dodge, "dodge", 440)
+		task.delay(1, function()
+			if dodge.Visible then
+				dodgePulse:Play()
+			end
+		end)
+	end
 	rideCash.row.Visible = not returning
 	distance.Position = if returning
 		then homeTitle.Position + UDim2.fromOffset(0, homeTitle.Size.Y.Offset / 2 + 26)
 		else holdFrame.Position
+end
+
+-- Ride back's red vignette: 1 full, 0 gone. It and DODGE THE STAMPEDE! go once it's 0.
+function Hud.setVignette(strength)
+	vignette.Visible = strength > 0
+	vignette.ImageTransparency = 1 - strength
+	if strength <= 0 and dodge.Visible then
+		dodgePulse:Cancel()
+		dodge.Visible = false
+	end
 end
 
 -- Home button, shown after a failed ride with the cash gained; sends you back home.
