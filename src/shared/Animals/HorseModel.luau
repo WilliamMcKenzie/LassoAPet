@@ -48,7 +48,7 @@ return {
 		{ name = "LegHR", bone = "LegHR", class = "Part", size = Vector3.new(1.1, 2.7, 1.1), cframe = CFrame.new(1.05, 2.15, 2.749, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 130, 50) },
 		{ name = "HoofHR", bone = "LegHR", class = "Part", size = Vector3.new(1.1, 0.8, 1.1), cframe = CFrame.new(1.05, 0.4, 2.749, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(74, 78, 102) },
 	},
-	-- keys: { time, x, y, z }; rotation in radians, position in studs
+	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
 	animations = {
 		idle = {
 			length = 2.4,

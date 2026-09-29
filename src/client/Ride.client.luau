@@ -9,6 +9,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animal = require(ReplicatedStorage.Shared.Animals.Horse)
+local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local Hud = require(script.Parent.Hud)
 local Lasso = require(script.Parent.Lasso)
 
@@ -20,7 +21,16 @@ local world = workspace:WaitForChild("World")
 while not world:GetAttribute("Ready") do
 	world:GetAttributeChangedSignal("Ready"):Wait()
 end
-local nestEgg = world.Nest.Egg
+-- EggSpot marks the centre of the waiting egg. The egg is a rigged model so
+-- it can twitch in the nest; it turns its face toward the approaching rider.
+local eggSpot = world.Nest.EggSpot
+local nestLight = eggSpot.PointLight
+local nestEgg = Egg.new("Horse")
+nestEgg.model:PivotTo(eggSpot.CFrame * CFrame.Angles(0, math.pi, 0))
+nestLight.Parent = nestEgg.model.PrimaryPart
+nestEgg.model.Parent = world.Nest
+local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this range
+local nextTwitch = 1
 
 -- Obstacle footprints from each obstacle's lowest part (a tree's trunk, a rock's base).
 local obstacles = {}
@@ -126,8 +136,7 @@ local function character()
 end
 
 local function setEggInNest(visible)
-	nestEgg.Transparency = visible and 0 or 1
-	nestEgg.PointLight.Enabled = visible
+	nestEgg.model.Parent = if visible then world.Nest else nil
 end
 
 local function cleanup()
@@ -274,12 +283,12 @@ local function startTransfer(target)
 end
 
 local function grabEgg()
-	local part = nestEgg:Clone()
-	part.Transparency = 0
-	part.PointLight.Enabled = true
+	local egg = Egg.new(nestEgg.kind)
+	local part = egg.model
+	part:PivotTo(nestEgg.model:GetPivot())
+	nestLight:Clone().Parent = part.PrimaryPart
 	part.Parent = workspace
 	setEggInNest(false)
-	part.CFrame = nestEgg.CFrame
 	carried = { part = part, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	phase, turnT = "turning", 0
 	Hud.setAction(nil)
@@ -350,7 +359,7 @@ local function findTarget()
 	if phase ~= "outbound" or transfer or not mount then
 		return nil
 	end
-	local eggPos = nestEgg.Position
+	local eggPos = eggSpot.Position
 	if Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < Config.EggRange then
 		return "egg"
 	end
@@ -602,6 +611,15 @@ RunService.PreSimulation:Connect(function(dt)
 	local slow = phase == "outbound" and actionTarget == "egg"
 	timeScale += ((slow and Config.EggSlowMo or 1) - timeScale) * (1 - math.exp(-10 * dt))
 	dt *= timeScale
+	-- The waiting egg twitches now and then: something's alive in there.
+	if nestEgg.model.Parent then
+		nextTwitch -= dt
+		if nextTwitch <= 0 then
+			nestEgg:play("twitch")
+			nextTwitch = rng:NextNumber(EGG_TWITCH_EVERY[1], EGG_TWITCH_EVERY[2])
+		end
+		nestEgg:update(dt)
+	end
 	if phase == "idle" then
 		if starter then
 			place(starter, 0)
@@ -650,7 +668,7 @@ RunService.PreSimulation:Connect(function(dt)
 		ensureReachable()
 	end
 	actionTarget = findTarget()
-	highlight.Adornee = if actionTarget == "egg" then nestEgg elseif actionTarget then actionTarget.animal.model else nil
+	highlight.Adornee = if actionTarget == "egg" then nestEgg.model elseif actionTarget then actionTarget.animal.model else nil
 	highlight.Enabled = actionTarget ~= nil
 	updateHud()
 end)
