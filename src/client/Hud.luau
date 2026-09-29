@@ -200,6 +200,7 @@ function Hud.init(onAction, onRideAgain, onRide)
 	homeGui.Parent = playerGui
 	homeRoot = root(homeGui)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
+	ride.Visible = false
 	gold, goldScale = button(homeRoot, "gold", fit("gold", nil, ICON_HEIGHT), Vector2.zero, UDim2.new())
 	local eggsSize = fit("eggs", nil, SIDE_ICON_HEIGHT)
 	eggs = button(homeRoot, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
@@ -213,7 +214,7 @@ function Hud.show(visible)
 		message.Text = ""
 		rideAgain.Visible = false
 	end
-	ride.Visible = not visible
+	ride.Visible = false -- comes back when the ride prompt shows again
 	pets.Visible = not visible
 	eggs.Visible = not visible
 	placeGold(visible)
@@ -259,6 +260,11 @@ function Hud.flash(text, seconds)
 			end
 		end)
 	end
+end
+
+-- RIDE shows only while you're close enough to your animal (replaces the [E] prompt).
+function Hud.showRide(visible)
+	ride.Visible = visible and not gui.Enabled
 end
 
 function Hud.showRideAgain(visible)

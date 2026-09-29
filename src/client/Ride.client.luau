@@ -193,11 +193,17 @@ local function spawnStarter()
 	prompt.ActionText = "Ride"
 	prompt.RequiresLineOfSight = false
 	prompt.MaxActivationDistance = 12
-	prompt.Style = Enum.ProximityPromptStyle.Custom -- draws nothing; E still works, the RIDE button is the visible way in
+	prompt.Style = Enum.ProximityPromptStyle.Custom -- draws nothing; E still works, and the RIDE button shows while it's in range
 	prompt.Parent = starter.animal.model.PrimaryPart
 	prompt.Triggered:Connect(function()
 		prompt:Destroy()
 		startRide()
+	end)
+	prompt.PromptShown:Connect(function()
+		Hud.showRide(true)
+	end)
+	prompt.PromptHidden:Connect(function()
+		Hud.showRide(false)
 	end)
 	ridePrompt = prompt
 end
