@@ -1,43 +1,157 @@
-"""Five more animals in the Toy horse's style, each rarer and fancier than the
-last, plus a matching egg for each. Exported as rigged Blockbench models that
-reuse the horse's bones and idle / walk / gallop animations, with previews.
+"""Zone 1 animals and their eggs, on QM's reworked horse rig.
 
-Run: python3 tools/animal_designs.py [out_dir] [egg_out_dir]
+Run: python3 tools/animal_designs.py [out_dir]
 
-  Horse    Common     (existing, Horse7_ToyRig.bbmodel)
-  Cow      Uncommon   farm: black patches, pink muzzle, horns, floppy side ears
-  Zebra    Rare       wild: horse build cut into black and white stripes
-  Rhino    Epic       wild: bulky and low, head out front, two horns, armour bands
-  Giraffe  Epic       wild: long legs and neck, patches, ossicones
-  Unicorn  Legendary  exotic: white horse, rainbow mane and tail, gold horn and hooves
+  Horse    Common     QM's Horse8 edit (hind legs kick back, back stripe) + leap gallop
+  Pinto    Uncommon   the horse variant: white with brown patches
+  Pig      Uncommon   round and pink, head on the body's front, curly tail
+  Fish     Rare       big blue fish, no legs: flops along
+  Rhino    Epic       bulky and low, head out front, two horns
+  Unicorn  Legendary  white horse, rainbow mane and tail, gold horn and hooves
 
-Same rules as the horse: every block axis-aligned and flush, slopes only from
-wedges, eyes and patches are thin plates. Bones match the horse so the same
-animations fit: legs and neck bend forward only, tail lifts back, ears fold back.
+Rig rules (QM's): every block flush and axis-aligned, and every joint only
+bends one way from rest so hidden faces never show:
+  front legs  swing forward  (pivot top-back edge,  +X)
+  hind legs   kick backward  (pivot top-front edge, -X)
+  neck        bends forward  (pivot at the body's front-top edge, -X)
+  tail        lifts back     (pivot at its top-front edge, -X)
+  ears        fold back      (pivot at their front-bottom edge, +X)
+The fish has its own bones: head and tail curl up from the body (a flop).
+
+Animations: idle and walk are QM's (read from Horse8); gallop is a leap:
+front legs reach forward and hind legs back while the animal is in the air.
 """
 
+import copy
 import json
 import os
 import sys
+import uuid
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(__file__))
-from partlib import Part, T, Rx, Ry, render, write_bbmodel  # noqa: E402
-from horse_rig import animations as horse_animations, pose, write_animations  # noqa: E402
+from partlib import Part, T, Rx, Ry, Rz, render, write_bbmodel  # noqa: E402
+from horse_rig import pose, write_animations, num  # noqa: E402
 import egg_designs as E  # noqa: E402
+
+ROOT = os.path.join(os.path.dirname(__file__), "..")
+QM_HORSE = os.path.join(ROOT, "designs", "horses", "Horse8_QM.bbmodel")
+HORSE_EGG = os.path.join(ROOT, "designs", "eggs", "Egg6_PonyOcto.bbmodel")
 
 WHITE = (248, 248, 244)
 EYE_WHITE = (255, 255, 255)
 PUPIL = (30, 30, 45)
 PINK = (242, 150, 192)
 HOOF = (74, 78, 102)
+ORANGE = (226, 130, 50)
+MANE = (92, 54, 34)
+RAINBOW = [(236, 72, 72), (248, 150, 50), (250, 214, 60), (96, 200, 90), (70, 150, 236), (160, 100, 220)]
 
 PLATE = 0.05  # how far patches and eyes stand off a face
-
 LEGS = ("FL", "FR", "HL", "HR")
 
+
+# ---------------------------------------------------------------- animations
+
+def read_tracks(model, name):
+    """An animation from a .bbmodel as (length, {bone: [track]}) for write_animations."""
+    anim = next(a for a in model["animations"] if a["name"] == name)
+    tracks = {}
+    for a in anim["animators"].values():
+        chans = {}
+        for k in sorted(a.get("keyframes", []), key=lambda k: k["time"]):
+            chans.setdefault(k["channel"], []).append(k)
+        for ch, kfs in chans.items():
+            tracks.setdefault(a["name"], []).append({
+                "channel": ch, "interp": kfs[0]["interpolation"],
+                "keys": [(k["time"], tuple(num(k["data_points"][0][c]) for c in "xyz")) for k in kfs]})
+    return anim["length"], tracks
+
+
+def rot_x(keys, interp="linear"):
+    return {"channel": "rotation", "interp": interp, "keys": [(t, (v, 0, 0)) for t, v in keys]}
+
+
+def rot_z(keys, interp="linear"):
+    return {"channel": "rotation", "interp": interp, "keys": [(t, (0, 0, v)) for t, v in keys]}
+
+
+def pos_y(keys, interp="catmullrom"):
+    return {"channel": "position", "interp": interp, "keys": [(t, (0, v, 0)) for t, v in keys]}
+
+
+def at(L, keys):
+    """Keys given as (fraction of the loop, value) -> (seconds, value)."""
+    return [(round(u * L, 4), v) for u, v in keys]
+
+
+def leap(L=0.8, height=25, spread=55, pitch=8):
+    """One leap per loop. u = 0 is mid-stride on the ground (squashed); takeoff
+    at 0.15, top of the arc at 0.5, touchdown at 0.85. In the air the front legs
+    reach forward and the hind legs back; on the ground they're straight.
+    height is in Blockbench units (10 = 1 stud), angles in degrees."""
+    h = height
+    legs_front = at(L, [(0, 0), (0.15, 0), (0.27, spread), (0.73, spread), (0.85, 0), (1, 0)])
+    legs_hind = [(t, -v) for t, v in legs_front]
+    # hind legs leave a touch later and land a touch earlier than the front
+    return (L, {
+        "root": [
+            pos_y(at(L, [(0, -3), (0.15, 0), (0.3, 0.67 * h), (0.5, h), (0.7, 0.67 * h), (0.85, 0), (1, -3)])),
+            {"channel": "rotation", "interp": "catmullrom",
+             "keys": [(t, (v, 0, 0)) for t, v in at(L, [(0, 0), (0.15, pitch), (0.5, 0), (0.85, -pitch), (1, 0)])]},
+        ],
+        "LegFL": [rot_x(legs_front)],
+        "LegFR": [rot_x(at(L, [(0, 0), (0.17, 0), (0.29, spread), (0.75, spread), (0.87, 0), (1, 0)]))],
+        "LegHL": [rot_x(legs_hind)],
+        "LegHR": [rot_x([(t, -v) for t, v in at(L, [(0, 0), (0.13, 0), (0.25, spread), (0.71, spread), (0.83, 0), (1, 0)])])],
+        "neck": [rot_x(at(L, [(0, -12), (0.2, -3), (0.5, -2), (0.8, -6), (1, -12)]), "catmullrom")],
+        "Tail": [rot_x(at(L, [(0, -20), (0.3, -55), (0.6, -60), (0.9, -30), (1, -20)]), "catmullrom")],
+        "EarL": [rot_x([(0, 35), (L, 35)])],
+        "EarR": [rot_x([(0, 35), (L, 35)])],
+    })
+
+
+GALLOPS = {"A": dict(L=0.8, height=25, spread=55), "B": dict(L=0.55, height=12, spread=40)}
+
+
+def quad_animations():
+    qm = json.load(open(QM_HORSE))
+    return {"idle": read_tracks(qm, "idle"), "walk": read_tracks(qm, "walk"), "gallop": leap(**GALLOPS["A"])}
+
+
+def flop(L, height, curl, air_curl, pitch, fin):
+    """Fish travel: curled up on the ground (head and tail lifted), snaps
+    straight to launch, flies, lands and curls again. Head lifts with +X,
+    tail with -X; pectoral fins flap up (L with -Z, R with +Z)."""
+    head = at(L, [(0, curl), (0.12, curl), (0.18, 2), (0.5, air_curl), (0.82, 2), (0.88, curl * 0.6), (1, curl)])
+    fin_keys = at(L, [(0, 0), (0.15, fin), (0.3, 0), (0.45, fin), (0.6, 0), (1, 0)])
+    return (L, {
+        "root": [
+            pos_y(at(L, [(0, 0), (0.15, 0), (0.3, 0.67 * height), (0.5, height), (0.7, 0.67 * height), (0.85, 0), (1, 0)])),
+            {"channel": "rotation", "interp": "catmullrom",
+             "keys": [(t, (v, 0, 0)) for t, v in at(L, [(0, 0), (0.15, pitch), (0.5, 0), (0.85, -pitch), (1, 0)])]},
+        ],
+        "neck": [rot_x(head)],
+        "Tail": [rot_x([(t, -v) for t, v in head])],
+        "FinL": [rot_z([(t, -v) for t, v in fin_keys])],
+        "FinR": [rot_z(fin_keys)],
+    })
+
+
+def fish_animations():
+    L = 2.4
+    idle = (L, {
+        "neck": [rot_x([(0, 2), (1.2, 6), (L, 2)], "catmullrom")],
+        "Tail": [rot_x([(0, -2), (0.9, -10), (1.1, -4), (1.3, -10), (L, -2)], "catmullrom")],
+        "FinL": [rot_z([(0, 0), (0.6, -25), (1.2, 0), (1.8, -25), (L, 0)], "catmullrom")],
+        "FinR": [rot_z([(0, 0), (0.6, 25), (1.2, 0), (1.8, 25), (L, 0)], "catmullrom")],
+    })
+    return {"idle": idle, "walk": flop(0.9, 10, 16, 4, 5, 30), "gallop": flop(0.8, 30, 28, 8, 10, 45)}
+
+
+# ---------------------------------------------------------------- building blocks
 
 class Animal:
     def __init__(self, name, rarity):
@@ -45,10 +159,13 @@ class Animal:
         self.parts = []
         self.pivots = {}
         self.meta = {}
+        self.bone_order = [("root", None), ("neck", "root"), ("EarL", "neck"), ("EarR", "neck"), ("Tail", "root")]
+        self.bone_order += [("Leg" + leg, "root") for leg in LEGS]
+        self.animations = quad_animations
 
     def box(self, name, lo, hi, color, bone):
         lo, hi = np.array(lo, float), np.array(hi, float)
-        plain = name.startswith(("Eye", "Pupil", "Nostril", "Plain"))
+        plain = name.startswith(("Eye", "Pupil", "Nostril", "Plain", "Mouth"))
         p = Part(name, hi - lo, T(*((lo + hi) / 2)), color, plain=plain)
         p.bone = bone
         self.parts.append(p)
@@ -56,9 +173,10 @@ class Animal:
 
     def wedge(self, name, lo, hi, color, bone, orient="up_front"):
         """up_front: tall at the back, slope faces forward (a plain WedgePart).
-        up_back: tall at the front. down_back: flat top and front, slope faces down and back."""
+        up_back: tall at the front. down_back: flat top and front, slope faces
+        down and back. down_front: flat top and back, slope faces down and forward."""
         lo, hi = np.array(lo, float), np.array(hi, float)
-        R = {"up_front": np.eye(4), "up_back": Ry(180), "down_back": Rx(180)}[orient]
+        R = {"up_front": np.eye(4), "up_back": Ry(180), "down_back": Rx(180), "down_front": Rz(180)}[orient]
         p = Part(name, hi - lo, T(*((lo + hi) / 2)) @ R, color, "Wedge")
         p.bone = bone
         self.parts.append(p)
@@ -77,21 +195,19 @@ class Animal:
         self.parts.append(p)
         return p
 
-    # ------------------------------------------------ shared body parts
-
     def body(self, x, y0, y1, z0, z1, color, bands=None):
         """Body block; bands = [(z0, z1, color)] cut it into flush slices."""
         self.dims = dict(x=x, y0=y0, y1=y1, z0=z0, z1=z1)
         self.pivots["root"] = (0, (y0 + y1) / 2, (z0 + z1) / 2)
         if not bands:
-            self.box("Body", (-x, y0, z0), (x, y1, z1), color, "root")
-            return
+            return self.box("Body", (-x, y0, z0), (x, y1, z1), color, "root")
         for i, (a, b, c) in enumerate(bands):
             self.box(f"Body{i + 1}", (-x, y0, a), (x, y1, b), c, "root")
 
-    def legs(self, xin, xout, depth, hoof_h, color, hoof, segments=None):
+    def legs(self, xin, xout, depth, hoof_h, color, hoof):
         """Four legs under the body, flush with its front, back and sides.
-        segments = [(y0, y1, color)] replaces the single leg block (stripes)."""
+        Front legs pivot on their top-back edge (swing forward), hind legs on
+        their top-front edge (kick back)."""
         d = self.dims
         y0 = d["y0"]
         for leg in LEGS:
@@ -101,14 +217,9 @@ class Animal:
             z1 = z0 + depth
             xa, xb = sorted((sx * xin, sx * xout))
             name = "Leg" + leg
-            if segments:
-                for i, (a, b, c) in enumerate(segments):
-                    self.box(f"{name}{i + 1}" if i else name, (xa, a, z0), (xb, b, z1), c, name)
-            else:
-                self.box(name, (xa, hoof_h, z0), (xb, y0, z1), color, name)
+            self.box(name, (xa, hoof_h, z0), (xb, y0, z1), color, name)
             self.box("Hoof" + leg, (xa, 0, z0), (xb, hoof_h, z1), hoof, name)
-            # pivot on the top-back edge, so the leg only swings forward
-            self.pivots[name] = ((xa + xb) / 2, y0 - 0.025, z1 - 0.05)
+            self.pivots[name] = ((xa + xb) / 2, y0 - 0.025, z1 - 0.05 if front else z0 + 0.05)
 
     def tail(self, w, y_top, y_bot, depth, color, tip_color=None, tip_h=0.8, bands=None):
         d = self.dims
@@ -133,7 +244,7 @@ class Animal:
             self.box("Pupil" + side, (pa, y0 + (y1 - y0) * 0.1, z0), (pb, py1, pz1), PUPIL, bone)
 
     def upright_ears(self, cx, base, z0, z1, half, h, color, inner=PINK):
-        """Horse ears: two right-triangle halves each, pink inner plate on the front."""
+        """Horse ears: two right-triangle halves each, inner plate on the front."""
         for side, sx in (("L", -1), ("R", 1)):
             c = sx * cx
             bone = "Ear" + side
@@ -143,19 +254,8 @@ class Animal:
                          z0 - 0.06, z0, inner, bone)
             self.pivots[bone] = (c, base, z0)
 
-    def side_ears(self, x, x_out, y0, y1, z0, z1, color, inner=PINK):
-        """Floppy ears sticking out sideways, inner colour on the front."""
-        for side, sx in (("L", -1), ("R", 1)):
-            bone = "Ear" + side
-            xa, xb = sorted((sx * x, sx * x_out))
-            self.box("Ear" + side, (xa, y0, z0), (xb, y1, z1), color, bone)
-            ia, ib = sorted((sx * (x + 0.1), sx * (x_out - 0.1)))
-            self.box(f"Ear{side}In", (ia, y0 + 0.08, z0 - PLATE), (ib, y1 - 0.08, z0), inner, bone)
-            self.pivots[bone] = (sx * x, y0, z0)
-
     def patch(self, name, face, a0, a1, b0, b1, color, bone="root", box=None):
-        """Thin plate on a block face. face in L, R (x sides: a = z, b = y),
-        T (top: a = x, b = z), F (front: a = x, b = y). box = (lo, hi) of the block."""
+        """Thin plate on a block face. face in L, R (a = z, b = y), T (a = x, b = z)."""
         (x0, y0, z0), (x1, y1, z1) = box
         if face == "L":
             return self.box(name, (x0 - PLATE, b0, a0), (x0, b1, a1), color, bone)
@@ -163,123 +263,180 @@ class Animal:
             return self.box(name, (x1, b0, a0), (x1 + PLATE, b1, a1), color, bone)
         if face == "T":
             return self.box(name, (a0, y1, b0), (a1, y1 + PLATE, b1), color, bone)
-        if face == "F":
-            return self.box(name, (a0, b0, z0 - PLATE), (a1, b1, z0), color, bone)
         raise ValueError(face)
 
     def bones(self):
-        order = [("root", None), ("neck", "root"), ("EarL", "neck"), ("EarR", "neck"), ("Tail", "root")]
-        order += [("Leg" + leg, "root") for leg in LEGS]
-        return [(n, p, self.pivots[n]) for n, p in order]
+        return [(n, p, self.pivots[n]) for n, p in self.bone_order]
+
+    def scale(self, k):
+        """Grow the whole animal about the ground origin."""
+        for p in self.parts:
+            if p.shape == "Poly":
+                p.polys = [q * k for q in p.polys]
+            else:
+                p.size = p.size * k
+                p.cf[:3, 3] *= k
+        self.pivots = {n: tuple(np.array(v) * k) for n, v in self.pivots.items()}
+        self.meta = {"seat": tuple(np.array(self.meta["seat"]) * k),
+                     "neck_loop": {"center": tuple(np.array(self.meta["neck_loop"]["center"]) * k),
+                                   "radius": self.meta["neck_loop"]["radius"] * k}}
+
+    def remove(self, name):
+        self.parts = [p for p in self.parts if p.name != name]
 
 
-def horse_like(a, coat, mane, hoof=HOOF, body_bands=None, leg_segments=None, neck_bands=None, tail_bands=None,
-               tail_tip=None, ear=None, ear_inner=PINK, muzzle=None, cap=True):
-    """The Toy horse's layout (same numbers as Horse7_ToyRig), with hooks for recolouring."""
-    ear = ear or coat
-    a.body(1.6, 3.5, 6.5, -2.7, 3.3, coat, body_bands)
-    a.legs(0.5, 1.6, 1.1, 0.8, coat, hoof, leg_segments)
-    if neck_bands:
-        for i, (y0, y1, c) in enumerate(neck_bands):
-            a.box(f"Neck{i + 1}" if i else "Neck", (-0.9, y0, -2.699), (0.9, y1, -1.099), c, "neck")
-    else:
-        a.box("Neck", (-0.9, 5.1, -2.699), (0.9, 8.3, -1.099), coat, "neck")
+def horse_body(a, coat=ORANGE, mane=MANE, hoof=HOOF, ear_inner=PINK, cap=True, stripe=True, tail=True):
+    """QM's Horse8 layout: the same numbers, rebuilt as parts so it can be recoloured.
+    The mane is a strip down the back of the head (Cap) and a narrow wedge behind
+    the neck; a stripe runs along the back into the tail."""
+    a.body(1.6, 3.5, 6.5, -2.7, 3.3, coat)
+    a.legs(0.5, 1.6, 1.1, 0.8, coat, hoof)
+    a.box("Neck", (-0.9, 5.1, -2.699), (0.9, 8.3, -1.099), coat, "neck")
     a.box("Head", (-1.1, 8.3, -3.9), (1.1, 10.5, -1.1), coat, "neck")
-    a.box("Snout", (-1.1, 8.3, -5.1), (1.1, 9.7, -3.9), muzzle or coat, "neck")
-    a.wedge("Bridge", (-1.1, 9.7, -5.1), (1.1, 10.5, -3.9), muzzle or coat, "neck")
+    a.box("Snout", (-1.1, 8.3, -5.1), (1.1, 9.7, -3.9), coat, "neck")
+    a.wedge("Bridge", (-1.1, 9.7, -5.1), (1.1, 10.5, -3.9), coat, "neck")
     for side, sx in (("L", -1), ("R", 1)):
         xa, xb = sorted((sx * 0.3, sx * 0.8))
         a.box("Nostril" + side, (xa, 8.9, -5.15), (xb, 9.2, -5.1), (70, 44, 36), "neck")
     a.eyes(1.1, 9.1, 10.1, -3.5, -2.5)
-    a.upright_ears(0.75, 10.5, -1.5, -1.1, 0.35, 1.2, ear, ear_inner)
+    a.upright_ears(0.75, 10.5, -1.5, -1.1, 0.35, 1.2, coat, ear_inner)
     a.pivots["neck"] = (0, 6.444, -2.7835)
-    if mane is not None:
-        a.box("NeckFill", (-0.9, 4.1, -1.099), (0.9, 6.5, 0.101), mane, "neck")
-        a.wedge("Mane", (-0.9, 6.5, -1.1), (0.9, 8.3, 0.1), mane, "neck", "up_back")
-        if cap:
-            a.box("Cap", (-0.4, 10.5, -2.3), (0.4, 11.1, -1.1), mane, "neck")
-    a.tail(0.4, 6.5, 3.5, 0.8, mane, tail_tip, bands=tail_bands)
+    if cap:
+        a.wedge("Mane", (-0.4, 5.3, -1.1), (0.4, 9.5, 0.1), mane, "neck", "up_back")
+        a.box("Cap", (-0.4, 7.1, -2.3), (0.4, 11.1, -0.6), mane, "neck")
+    if stripe:
+        a.box("Stripe", (-0.4, 6.5, -1.8), (0.4, 7.2, 3.3), mane, "root")
+    if tail:
+        a.box("Tail", (-0.4, 4.3, 3.3), (0.4, 7.2, 4.1), mane, "Tail")
+        a.wedge("TailTip", (-0.4, 3.5, 3.3), (0.4, 4.3, 4.1), mane, "Tail", "down_back")
+    a.pivots["Tail"] = (0, 7.2, 3.3)
     a.meta = {"seat": (0, 7.3, 1), "neck_loop": {"center": (0, 7.4, -1.9), "radius": 1.35}}
 
 
-# ---------------------------------------------------------------- the five
+# ---------------------------------------------------------------- the horse (QM's file)
 
-def cow():
-    a = Animal("Cow", "Uncommon")
-    black, muzzle, horn, hoof = (40, 40, 46), (240, 166, 176), (236, 222, 184), (62, 62, 72)
-    # wider and lower than the horse, short sturdy legs
-    a.body(1.8, 3.0, 6.4, -2.9, 3.5, WHITE)
-    body = ((-1.8, 3.0, -2.9), (1.8, 6.4, 3.5))
-    a.legs(0.6, 1.8, 1.2, 0.6, WHITE, hoof)
-    # black patches, not mirrored so they look natural
-    a.patch("SpotL1", "L", -2.4, -0.4, 4.0, 6.4, black, box=body)
-    a.patch("SpotL2", "L", 1.1, 2.6, 3.5, 5.5, black, box=body)
-    a.patch("SpotR1", "R", -1.4, 0.6, 4.5, 6.4, black, box=body)
-    a.patch("SpotR2", "R", 1.6, 3.1, 3.0, 4.5, black, box=body)
-    a.patch("SpotT1", "T", -1.8, -0.3, -0.4, 0.6, black, box=body)
-    a.patch("SpotT2", "T", 0.2, 1.8, 1.6, 3.1, black, box=body)
-    a.patch("SpotT3", "T", -1.8, -0.8, 2.6, 3.5, black, box=body)
-    # short thick neck, square head with a big pink muzzle
-    a.box("Neck", (-1.0, 4.6, -2.899), (1.0, 7.6, -1.199), WHITE, "neck")
-    a.box("Head", (-1.2, 7.6, -3.9), (1.2, 9.6, -1.0), WHITE, "neck")
-    a.box("Snout", (-1.2, 7.6, -5.0), (1.2, 8.9, -3.9), muzzle, "neck")
-    a.wedge("Bridge", (-1.2, 8.9, -5.0), (1.2, 9.6, -3.9), WHITE, "neck")
-    for side, sx in (("L", -1), ("R", 1)):
-        xa, xb = sorted((sx * 0.35, sx * 0.85))
-        a.box("Nostril" + side, (xa, 8.2, -5.05), (xb, 8.5, -5.0), (170, 90, 104), "neck")
-    head = ((-1.2, 7.6, -3.9), (1.2, 9.6, -1.0))
-    a.patch("SpotHead", "L", -3.9, -2.2, 8.9, 9.6, black, "neck", box=head)
-    a.patch("SpotNeck", "R", -2.4, -1.2, 6.4, 7.6, black, "neck", box=((-1.0, 4.6, -2.9), (1.0, 7.6, -1.2)))
-    a.eyes(1.2, 8.4, 9.3, -3.5, -2.6)
-    # horns: out, then up
-    for side, sx in (("L", -1), ("R", 1)):
-        xa, xb = sorted((sx * 0.5, sx * 1.5))
-        a.box("Horn" + side, (xa, 9.6, -2.0), (xb, 10.0, -1.6), horn, "neck")
-        xa, xb = sorted((sx * 1.1, sx * 1.5))
-        a.box("HornTip" + side, (xa, 10.0, -2.0), (xb, 10.6, -1.6), horn, "neck")
-    a.side_ears(1.2, 2.0, 8.9, 9.3, -1.5, -1.1, WHITE, muzzle)
-    a.pivots["neck"] = (0, 6.35, -2.98)
-    a.box("Cap", (-0.5, 9.6, -2.8), (0.5, 9.9, -2.0), black, "neck")
-    # thin tail with a black tuft
-    a.tail(0.3, 6.4, 3.0, 0.6, WHITE, black, tip_h=1.2)
-    a.box("Tuft", (-0.3, 4.2, 3.5), (0.3, 4.8, 4.1), black, "Tail")
-    a.meta = {"seat": (0, 7.2, 1.2), "neck_loop": {"center": (0, 7.0, -2.0), "radius": 1.5}}
+def qm_horse(gallop="A"):
+    """QM's Horse8 with two fixes and the leap gallop:
+      - the tail block ran along the back into the tail; the part on the back is
+        now its own Stripe on the root, so lifting the tail doesn't sink it into the body
+      - the tail pivots on its top-front edge; LegHL's pivot matches LegHR's"""
+    m = json.load(open(QM_HORSE))
+    groups = {g["name"]: g for g in m["groups"]}
+    tail = next(e for e in m["elements"] if e["name"] == "Tail")
+    stripe = copy.deepcopy(tail)
+    stripe.update(name="Stripe", uuid=str(uuid.uuid4()), to=[4, 72, 33])
+    stripe["from"] = [-4, 65, -18]
+    stripe["origin"] = [0, 68.5, 7.5]
+    tail["from"] = [-4, 43, 33]
+    tail["origin"] = [0, 57.5, 37]
+    m["elements"].append(stripe)
+    root = m["outliner"][0]
+    body = next(e for e in m["elements"] if e["name"] == "Body")
+    i = root["children"].index(body["uuid"])
+    root["children"].insert(i + 1, stripe["uuid"])
+    groups["Tail"]["origin"] = [0, 72, 33]
+    groups["LegHL"]["origin"][2] = groups["LegHR"]["origin"][2]
+    anims = {"idle": read_tracks(m, "idle"), "walk": read_tracks(m, "walk"), "gallop": leap(**GALLOPS[gallop])}
+    write_animations(m, groups, anims)
+    m["name"] = "Horse"
+    return m
+
+
+# ---------------------------------------------------------------- the others
+
+def pinto():
+    """The horse variant: white coat with big brown patches, dark mane."""
+    a = Animal("Pinto", "Uncommon")
+    brown, dark = (150, 84, 46), (70, 42, 30)
+    horse_body(a, WHITE, dark, (60, 60, 72))
+    body = ((-1.6, 3.5, -2.7), (1.6, 6.5, 3.3))
+    for name, face, a0, a1, b0, b1 in (
+            ("SpotL1", "L", -2.7, -0.7, 4.5, 6.5), ("SpotL2", "L", 0.8, 3.3, 3.5, 5.5),
+            ("SpotR1", "R", -1.7, 0.8, 4.0, 6.5), ("SpotR2", "R", 2.0, 3.3, 5.0, 6.5),
+            ("SpotT1", "T", -1.6, -0.4, 1.3, 3.3), ("SpotT2", "T", 0.4, 1.6, -2.7, -0.2)):
+        a.patch(name, face, a0, a1, b0, b1, brown, box=body)
+    # brown head and neck, white muzzle with a blaze running up the forehead
+    for p in a.parts:
+        if p.name in ("Head", "Neck"):
+            p.color = brown
+    a.box("Blaze", (-0.35, 10.5, -3.9), (0.35, 10.55, -2.3), WHITE, "neck")
+    for p in a.parts:
+        if p.name.startswith("Ear") and "In" not in p.name:
+            p.color = brown
     return a
 
 
-def zebra():
-    a = Animal("Zebra", "Rare")
-    black = (36, 36, 42)
-    # stripes are flush slices of the body, legs and neck: no plates to z-fight
-    z, bands = -2.7, []
-    for i, w in enumerate((1.0, 0.5, 1.0, 0.5, 1.0, 0.5, 1.0, 0.5)):
-        bands.append((z, z + w, WHITE if i % 2 == 0 else black))
-        z += w
-    legs = [(0.8, 1.6, WHITE), (1.6, 2.1, black), (2.1, 3.5, WHITE)]
-    neck = [(5.1, 7.0, WHITE), (7.0, 7.5, black), (7.5, 8.3, WHITE)]
-    tail = [(4.3, 5.4, WHITE), (5.4, 5.9, black), (5.9, 6.5, WHITE)]
-    horse_like(a, WHITE, black, (40, 40, 48), bands, legs, neck, tail, tail_tip=black,
-               ear_inner=black, muzzle=(58, 58, 66))
-    # black stripe over the forehead and a taller mohawk
-    for p in a.parts:
-        if p.name == "Cap":
-            a.parts.remove(p)
-            break
-    a.box("Mohawk", (-0.3, 10.5, -2.5), (0.3, 11.4, -1.1), black, "neck")
-    head = ((-1.1, 8.3, -3.9), (1.1, 10.5, -1.1))
-    a.patch("StripeHeadL", "L", -2.3, -1.8, 8.3, 10.5, black, "neck", box=head)
-    a.patch("StripeHeadR", "R", -2.3, -1.8, 8.3, 10.5, black, "neck", box=head)
+def pig():
+    a = Animal("Pig", "Uncommon")
+    pink, snout, hoof, dark = (246, 164, 184), (250, 196, 208), (176, 96, 116), (196, 96, 126)
+    a.body(1.8, 2.2, 5.6, -2.8, 3.0, pink)
+    a.legs(0.8, 1.8, 1.0, 0.5, pink, hoof)
+    # the head sits on the body's front, top flush, a big snout on its face
+    a.box("Head", (-1.5, 2.8, -5.0), (1.5, 5.6, -2.799), pink, "neck")
+    a.box("Snout", (-0.8, 3.2, -5.6), (0.8, 4.4, -5.0), snout, "neck")
+    for side, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * 0.2, sx * 0.55))
+        a.box("Nostril" + side, (xa, 3.55, -5.65), (xb, 4.05, -5.6), dark, "neck")
+        # eyes on the face, above the snout
+        xa, xb = sorted((sx * 0.55, sx * 1.15))
+        a.box("Eye" + side, (xa, 4.5, -5.05), (xb, 5.3, -5.0), EYE_WHITE, "neck")
+        pa, pb = sorted((sx * 0.55, sx * 0.9))
+        a.box("Pupil" + side, (pa, 4.55, -5.08), (pb, 5.0, -5.05), PUPIL, "neck")
+    a.upright_ears(0.95, 5.6, -4.0, -3.6, 0.45, 0.9, pink, dark)
+    a.pivots["neck"] = (0, 5.55, -2.85)
+    # curly tail: out, up, over
+    a.box("Tail", (-0.2, 4.6, 3.0), (0.2, 5.0, 3.6), pink, "Tail")
+    a.box("Tail2", (-0.2, 5.0, 3.2), (0.2, 5.6, 3.6), pink, "Tail")
+    a.box("Tail3", (-0.2, 5.6, 3.0), (0.2, 6.0, 3.6), pink, "Tail")
+    a.pivots["Tail"] = (0, 6.0, 3.0)
+    a.meta = {"seat": (0, 6.4, 0.4), "neck_loop": {"center": (0, 4.2, -3.9), "radius": 1.9}}
+    return a
+
+
+def fish():
+    """Big blue fish. No legs: the body is on the root, the head and the tail
+    section curl up off the ground from the body's bottom edges."""
+    a = Animal("Fish", "Rare")
+    blue, dark, belly, mouth = (60, 132, 232), (36, 88, 184), (222, 240, 255), (28, 40, 84)
+    a.bone_order = [("root", None), ("neck", "root"), ("Tail", "root"), ("FinL", "root"), ("FinR", "root")]
+    a.animations = fish_animations
+    y0 = 0.1
+    # body: blue back, pale belly band
+    a.box("Belly", (-1.4, y0, -2.0), (1.4, 1.3, 2.0), belly, "root")
+    a.box("Body", (-1.4, 1.3, -2.0), (1.4, 4.0, 2.0), blue, "root")
+    a.dims = dict(x=1.4, y0=y0, y1=4.0, z0=-2.0, z1=2.0)
+    a.pivots["root"] = (0, 2.0, 0)
+    # head (bone "neck" so the lasso and the rig code find it)
+    a.box("HeadBelly", (-1.2, y0, -4.4), (1.2, 1.3, -2.0), belly, "neck")
+    a.box("Head", (-1.2, 1.3, -4.4), (1.2, 3.6, -2.0), blue, "neck")
+    a.box("Snout", (-0.9, 0.5, -5.2), (0.9, 2.9, -4.4), blue, "neck")
+    a.box("Mouth", (-0.7, 1.2, -5.25), (0.7, 1.45, -5.2), mouth, "neck")
+    a.eyes(1.2, 2.0, 3.1, -4.1, -3.0)
+    a.pivots["neck"] = (0, y0, -2.0)
+    # tail section with a fan tail fin and the dorsal fin on top
+    a.box("TailBelly", (-1.0, 0.5, 2.0), (1.0, 1.3, 4.4), belly, "Tail")
+    a.box("Tail", (-1.0, 1.3, 2.0), (1.0, 3.4, 4.4), blue, "Tail")
+    a.box("FinRoot", (-0.25, 1.4, 4.4), (0.25, 2.3, 4.9), dark, "Tail")
+    a.wedge("FinTop", (-0.25, 2.3, 4.4), (0.25, 4.3, 6.0), dark, "Tail")
+    a.wedge("FinBottom", (-0.25, 0.4, 4.4), (0.25, 1.4, 5.6), dark, "Tail", "down_front")
+    a.wedge("Dorsal", (-0.25, 3.4, 2.0), (0.25, 4.8, 3.9), dark, "Tail", "up_back")
+    a.pivots["Tail"] = (0, y0, 2.0)
+    # pectoral fins flap up from their inner bottom edge
+    for side, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * 1.4, sx * 2.3))
+        a.box("Fin" + side, (xa, 1.0, -1.7), (xb, 1.3, -0.5), dark, "Fin" + side)
+        a.pivots["Fin" + side] = (sx * 1.4, 1.0, -1.1)
+    a.meta = {"seat": (0, 4.8, -0.4), "neck_loop": {"center": (0, 2.2, -2.6), "radius": 1.9}}
+    a.scale(1.35)  # a big fish: about as long as the horse
     return a
 
 
 def rhino():
     a = Animal("Rhino", "Epic")
     grey, dark, horn, hoof = (150, 156, 170), (112, 118, 134), (240, 232, 208), (84, 88, 102)
-    # bulky and low; darker skin folds cut into the body
     bands = [(-3.2, -1.2, grey), (-1.2, -0.7, dark), (-0.7, 1.8, grey), (1.8, 2.3, dark), (2.3, 3.6, grey)]
     a.body(2.0, 2.8, 6.6, -3.2, 3.6, grey, bands)
     a.legs(0.6, 2.0, 1.4, 0.6, grey, hoof)
-    # no neck to speak of: a thick block on the body's front, the head hung low in front of it
     a.box("Neck", (-1.5, 3.6, -4.2), (1.5, 6.2, -3.199), grey, "neck")
     a.box("Head", (-1.2, 3.4, -6.6), (1.2, 5.6, -4.2), grey, "neck")
     a.box("Snout", (-1.2, 3.4, -7.4), (1.2, 4.8, -6.6), grey, "neck")
@@ -287,87 +444,38 @@ def rhino():
     for side, sx in (("L", -1), ("R", 1)):
         xa, xb = sorted((sx * 0.4, sx * 0.9))
         a.box("Nostril" + side, (xa, 3.9, -7.45), (xb, 4.2, -7.4), (60, 62, 74), "neck")
-    # big horn on the nose, small one behind it
     a.box("HornBase", (-0.4, 5.6, -6.6), (0.4, 6.0, -5.6), horn, "neck")
     a.wedge("Horn", (-0.4, 6.0, -6.6), (0.4, 7.8, -5.6), horn, "neck")
     a.wedge("Horn2", (-0.3, 5.6, -5.2), (0.3, 6.6, -4.6), horn, "neck")
     a.eyes(1.2, 4.4, 5.2, -5.6, -4.8)
     a.upright_ears(0.95, 6.2, -3.9, -3.5, 0.35, 1.0, grey, (206, 150, 170))
     a.pivots["neck"] = (0, 6.2, -3.2)
-    # short tail with a dark tuft
     a.tail(0.3, 6.4, 4.0, 0.6, grey, dark, tip_h=0.8)
     a.meta = {"seat": (0, 7.4, 2.2), "neck_loop": {"center": (0, 5.2, -3.7), "radius": 1.9}}
     return a
 
 
-def giraffe():
-    a = Animal("Giraffe", "Epic")
-    yellow, brown, muzzle, hoof, knob = (240, 190, 80), (164, 94, 42), (248, 222, 160), (82, 58, 42), (92, 54, 34)
-    a.body(1.5, 5.0, 7.6, -2.6, 2.6, yellow)
-    body = ((-1.5, 5.0, -2.6), (1.5, 7.6, 2.6))
-    a.legs(0.5, 1.5, 1.0, 0.7, yellow, hoof)
-    for i, (face, a0, a1, b0, b1) in enumerate((
-            ("L", -2.1, -1.1, 6.1, 7.1), ("L", -0.6, 0.6, 5.6, 6.8), ("L", 1.1, 2.1, 6.3, 7.3),
-            ("R", -2.1, -0.9, 5.7, 6.9), ("R", -0.4, 0.6, 6.4, 7.4), ("R", 1.0, 2.2, 5.5, 6.6),
-            ("T", -1.2, -0.2, -1.8, -0.8), ("T", 0.3, 1.3, -0.3, 0.9), ("T", -1.1, 0.1, 1.2, 2.2))):
-        a.patch(f"Spot{i + 1}", face, a0, a1, b0, b1, brown, box=body)
-    # one patch per leg, above the knee
-    for leg in LEGS:
-        sx = -1 if leg[1] == "L" else 1
-        z0 = -2.599 if leg[0] == "F" else 1.599
-        lb = ((min(sx * 0.5, sx * 1.5), 0.7, z0), (max(sx * 0.5, sx * 1.5), 5.0, z0 + 1.0))
-        a.patch("SpotLeg" + leg, "L" if sx < 0 else "R", z0 + 0.2, z0 + 0.8, 3.2, 4.0, brown, "Leg" + leg, box=lb)
-    # the long neck, with patches up both sides and a short mane
-    a.box("Neck", (-0.7, 6.2, -2.599), (0.7, 13.0, -1.199), yellow, "neck")
-    neck = ((-0.7, 6.2, -2.6), (0.7, 13.0, -1.2))
-    for i, (face, y0) in enumerate((("L", 8.0), ("L", 10.6), ("R", 9.2), ("R", 11.6))):
-        a.patch(f"SpotNeck{i + 1}", face, -2.4, -1.4, y0, y0 + 0.9, brown, "neck", box=neck)
-    a.box("Mane", (-0.2, 7.6, -1.199), (0.2, 13.0, -1.0), brown, "neck")
-    a.box("Head", (-0.9, 13.0, -3.4), (0.9, 14.8, -1.0), yellow, "neck")
-    a.box("Snout", (-0.9, 13.0, -4.6), (0.9, 14.2, -3.4), muzzle, "neck")
-    a.wedge("Bridge", (-0.9, 14.2, -4.6), (0.9, 14.8, -3.4), yellow, "neck")
-    for side, sx in (("L", -1), ("R", 1)):
-        xa, xb = sorted((sx * 0.25, sx * 0.65))
-        a.box("Nostril" + side, (xa, 13.5, -4.65), (xb, 13.8, -4.6), (120, 80, 50), "neck")
-        # ossicones with dark knobs
-        xa, xb = sorted((sx * 0.25, sx * 0.65))
-        a.box("Ossicone" + side, (xa, 14.8, -1.8), (xb, 15.6, -1.4), yellow, "neck")
-        a.box("Knob" + side, (xa, 15.6, -1.8), (xb, 15.9, -1.4), knob, "neck")
-    a.eyes(0.9, 13.7, 14.5, -3.0, -2.2)
-    a.side_ears(0.9, 1.6, 14.2, 14.5, -1.4, -1.0, yellow, muzzle)
-    a.pivots["neck"] = (0, 7.55, -2.68)
-    a.tail(0.25, 7.6, 4.6, 0.5, yellow, knob, tip_h=0.9)
-    a.meta = {"seat": (0, 8.4, 0.8), "neck_loop": {"center": (0, 8.6, -1.9), "radius": 1.1}}
-    return a
-
-
-RAINBOW = [(236, 72, 72), (248, 150, 50), (250, 214, 60), (96, 200, 90), (70, 150, 236), (160, 100, 220)]
-
-
 def unicorn():
     a = Animal("Unicorn", "Legendary")
-    white, gold, lilac = (252, 250, 255), (255, 200, 60), (206, 170, 240)
-    tail = [(6.5 - 0.5 * (i + 1), 6.5 - 0.5 * i, c) for i, c in enumerate(RAINBOW[:5])][::-1]
-    horse_like(a, white, None, gold, tail_bands=tail, tail_tip=RAINBOW[5], ear_inner=PINK)
-    # the tail's banded blocks run 4.0..6.5; its tip wedge sits under them
-    for p in a.parts:
-        if p.name == "TailTip":
-            a.parts.remove(p)
-            break
-    a.wedge("TailTip", (-0.4, 3.2, 3.3), (0.4, 4.0, 4.1), RAINBOW[5], "Tail", "down_back")
-    # rainbow mane: locks stepping further back as they go down the neck
+    white, gold = (252, 250, 255), (255, 200, 60)
+    horse_body(a, white, RAINBOW[5], gold, PINK, cap=False, stripe=False, tail=False)
+    # mane strip down the back of the head in rainbow bands, top to bottom
     for i, c in enumerate(RAINBOW):
-        y1 = 8.3 - 0.3 * i
-        a.box(f"Mane{i + 1}" if i else "Mane", (-0.9, y1 - 0.3, -1.1), (0.9, y1, -0.9 + 0.2 * i), c, "neck")
-    a.box("NeckFill", (-0.9, 4.1, -1.099), (0.9, 6.5, 0.101), RAINBOW[5], "neck")
-    a.box("Cap", (-0.4, 10.5, -2.3), (0.4, 11.1, -1.1), lilac, "neck")
-    # stepped gold horn on the forehead
+        y1 = 11.1 - (4.0 / 6) * i
+        a.box(f"Cap{i + 1}" if i else "Cap", (-0.4, y1 - 4.0 / 6, -2.3), (0.4, y1, -0.6), c, "neck")
+    a.wedge("Mane", (-0.4, 5.3, -1.1), (0.4, 9.5, 0.1), RAINBOW[5], "neck", "up_back")
+    # the back stripe and tail carry the rainbow on
+    a.box("Stripe", (-0.4, 6.5, -1.8), (0.4, 7.2, 3.3), RAINBOW[5], "root")
+    for i, c in enumerate(RAINBOW[:5]):
+        y1 = 7.2 - 0.58 * i
+        a.box(f"Tail{i + 1}" if i else "Tail", (-0.4, y1 - 0.58, 3.3), (0.4, y1, 4.1), c, "Tail")
+    a.wedge("TailTip", (-0.4, 3.5, 3.3), (0.4, 4.3, 4.1), RAINBOW[5], "Tail", "down_back")
     for i, (w, y0, y1) in enumerate(((0.3, 10.5, 11.0), (0.2, 11.0, 11.6), (0.1, 11.6, 12.3))):
         a.box(f"Horn{i + 1}" if i else "Horn", (-w, y0, -3.3 - w), (w, y1, -3.3 + w), gold, "neck")
     return a
 
 
-ANIMALS = [cow, zebra, rhino, giraffe, unicorn]
+ANIMALS = [pinto, pig, fish, rhino, unicorn]
 
 
 # ---------------------------------------------------------------- eggs
@@ -394,50 +502,57 @@ def octo_egg(colors, pieces=None, crack_layer=4):
     return egg
 
 
-def top_block(egg, name, lo, hi, color):
-    egg.block(name, lo, hi, color).bone = "top"
+def egg_block(egg, name, lo, hi, color, bone="top"):
+    egg.block(name, lo, hi, color).bone = bone
 
 
-def pony_ears(egg, color, inner, x0=0.35, h=0.7):
+def pony_ears(egg, color, inner, x0=0.35, h=0.7, dz=0.0):
     b = E.H - 0.05
     for side, sx in (("L", -1), ("R", 1)):
         c = sx * x0
         for half, d in (("A", -1), ("B", 1)):
-            E.ear_half(egg, f"Ear{side}{half}", [(c, b), (c + d * 0.25, b), (c, b + h)], -0.15, 0.15, color)
-            E.ear_half(egg, f"EarIn{side}{half}", [(c, b + 0.08), (c + d * 0.13, b + 0.08), (c, b + h * 0.64)], -0.19, -0.15, inner)
+            E.ear_half(egg, f"Ear{side}{half}", [(c, b), (c + d * 0.25, b), (c, b + h)], -0.15 + dz, 0.15 + dz, color)
+            E.ear_half(egg, f"EarIn{side}{half}", [(c, b + 0.08), (c + d * 0.13, b + 0.08), (c, b + h * 0.64)],
+                       -0.19 + dz, -0.15 + dz, inner)
 
 
-def side_ears(egg, color, inner):
-    """Ears lying on the shelf of layer 5, poking out of the top layer's sides."""
-    y0 = 6 * egg.h
-    top = egg.widths[6] / 2
-    for side, sx in (("L", -1), ("R", 1)):
-        xa, xb = sorted((sx * top, sx * (top + 0.4)))
-        top_block(egg, "Ear" + side, (xa, y0, -0.15), (xb, y0 + 0.2, 0.15), color)
-        ia, ib = sorted((sx * (top + 0.08), sx * (top + 0.32)))
-        top_block(egg, f"EarIn{side}", (ia, y0 + 0.04, -0.19), (ib, y0 + 0.16, -0.15), inner)
-
-
-def cow_egg():
-    white, black, muzzle, horn = WHITE, (40, 40, 46), (240, 166, 176), (236, 222, 184)
-    egg = octo_egg([muzzle] * 2 + [white] * 5, {
-        (2, "CornerLB"): black, (2, "Back"): black, (3, "Front"): black, (3, "CornerRF"): black,
-        (4, "CornerRF"): black, (5, "CornerLF"): black, (4, "CornerLF"): black, (6, "Back"): black})
-    t = E.H - 0.05
-    for side, sx in (("L", -1), ("R", 1)):
-        xa, xb = sorted((sx * 0.15, sx * 0.55))
-        top_block(egg, "Horn" + side, (xa, t, -0.15), (xb, t + 0.25, 0.15), horn)
-        xa, xb = sorted((sx * 0.35, sx * 0.55))
-        top_block(egg, "HornTip" + side, (xa, t + 0.25, -0.15), (xb, t + 0.55, 0.15), horn)
-    side_ears(egg, white, muzzle)
+def pinto_egg():
+    brown, dark = (150, 84, 46), (70, 42, 30)
+    egg = octo_egg([WHITE] * 7, {
+        (1, "CornerLF"): brown, (2, "CornerLF"): brown, (2, "Front"): brown, (3, "CornerRB"): brown,
+        (3, "Back"): brown, (4, "CornerRF"): brown, (5, "CornerRF"): brown, (5, "Mid"): brown, (6, "Back"): brown})
+    pony_ears(egg, brown, PINK)
+    egg_block(egg, "Tuft", (-0.15, E.H - 0.05, -0.05), (0.15, E.H + 0.3, 0.45), dark)
     return egg
 
 
-def zebra_egg():
-    white, black = WHITE, (36, 36, 42)
-    egg = octo_egg([white if i % 2 == 0 else black for i in range(7)])
-    pony_ears(egg, white, black)
-    top_block(egg, "Mohawk", (-0.1, E.H - 0.05, -0.1), (0.1, E.H + 0.45, 0.5), black)
+def pig_egg():
+    pink, snout, dark = (246, 164, 184), (250, 196, 208), (196, 96, 126)
+    egg = octo_egg([snout, snout] + [pink] * 5)
+    pony_ears(egg, pink, dark, x0=0.32, h=0.5)
+    # snout on the front of the top shell
+    front = -egg.widths[4] / 2
+    y0, y1 = 4 * egg.h + 0.05, 5 * egg.h - 0.05
+    egg_block(egg, "Snout", (-0.45, y0 - 0.05, front - 0.28), (0.45, y1 + 0.05, front), snout)
+    for side, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * 0.1, sx * 0.28))
+        egg_block(egg, "Nostril" + side, (xa, y0 + 0.08, front - 0.31), (xb, y1 - 0.08, front - 0.28), dark)
+    return egg
+
+
+def fish_egg():
+    blue, dark, belly = (60, 132, 232), (36, 88, 184), (222, 240, 255)
+    egg = octo_egg([belly, belly] + [blue] * 5, {(3, "Mid"): dark, (5, "Front"): dark, (5, "Back"): dark})
+    t = E.H - 0.05
+    p = Part("Dorsal", (0.2, 0.7, 0.8), T(0, t + 0.35, 0.05) @ Ry(180), dark, "Wedge")
+    p.bone = "top"
+    egg.parts.append(p)
+    # little side fins on the bottom shell
+    y = 2 * egg.h
+    w = egg.widths[2] / 2
+    for side, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * w, sx * (w + 0.35)))
+        egg_block(egg, "Fin" + side, (xa, y, -0.3), (xb, y + 0.14, 0.2), dark, "bottom")
     return egg
 
 
@@ -449,25 +564,7 @@ def rhino_egg():
     p = Part("Horn", (0.4, 0.75, 0.5), T(0, t + 0.375, -w + 0.25), horn, "Wedge")
     p.bone = "top"
     egg.parts.append(p)
-    pony_ears(egg, grey, (206, 150, 170), x0=0.3, h=0.45)
-    for p in egg.parts:
-        if p.name.startswith("Ear"):
-            p.polys = [q + np.array([0, 0, 0.3]) for q in p.polys]
-    return egg
-
-
-def giraffe_egg():
-    yellow, brown, muzzle, knob = (240, 190, 80), (164, 94, 42), (248, 222, 160), (92, 54, 34)
-    egg = octo_egg([muzzle] * 2 + [yellow] * 5, {
-        (2, "CornerLF"): brown, (2, "CornerRB"): brown, (3, "Back"): brown, (3, "Mid"): brown,
-        (4, "Front"): brown, (4, "CornerRB"): brown, (5, "CornerLB"): brown, (5, "CornerRF"): brown,
-        (6, "Mid"): brown})
-    t = E.H - 0.05
-    for side, sx in (("L", -1), ("R", 1)):
-        xa, xb = sorted((sx * 0.15, sx * 0.4))
-        top_block(egg, "Ossicone" + side, (xa, t, -0.1), (xb, t + 0.5, 0.15), yellow)
-        top_block(egg, "Knob" + side, (xa, t + 0.5, -0.1), (xb, t + 0.7, 0.15), knob)
-    side_ears(egg, yellow, muzzle)
+    pony_ears(egg, grey, (206, 150, 170), x0=0.3, h=0.45, dz=0.3)
     return egg
 
 
@@ -477,22 +574,21 @@ def unicorn_egg():
     pony_ears(egg, white, PINK, x0=0.42, h=0.55)
     t = E.H - 0.05
     for i, (w, y0, y1) in enumerate(((0.18, 0, 0.35), (0.12, 0.35, 0.7), (0.06, 0.7, 1.1))):
-        top_block(egg, f"Horn{i + 1}" if i else "Horn", (-w, t + y0, -0.3 - w), (w, t + y1, -0.3 + w), gold)
-    # rainbow tuft behind the horn, stepping down toward the back
+        egg_block(egg, f"Horn{i + 1}" if i else "Horn", (-w, t + y0, -0.3 - w), (w, t + y1, -0.3 + w), gold)
     for i, c in enumerate(RAINBOW):
         z0 = -0.05 + 0.1 * i
-        top_block(egg, f"Tuft{i + 1}" if i else "Tuft", (-0.12, t, z0), (0.12, t + 0.55 - 0.06 * i, z0 + 0.1), c)
+        egg_block(egg, f"Tuft{i + 1}" if i else "Tuft", (-0.12, t, z0), (0.12, t + 0.55 - 0.06 * i, z0 + 0.1), c)
     return egg
 
 
-EGGS = {"Cow": cow_egg, "Zebra": zebra_egg, "Rhino": rhino_egg, "Giraffe": giraffe_egg, "Unicorn": unicorn_egg}
+EGGS = {"Pinto": pinto_egg, "Pig": pig_egg, "Fish": fish_egg, "Rhino": rhino_egg, "Unicorn": unicorn_egg}
 
 
 # ---------------------------------------------------------------- export + previews
 
 def build_animal(a, out):
     model, groups = write_bbmodel(a.parts, a.name, None, bones=a.bones())
-    write_animations(model, groups, horse_animations())
+    write_animations(model, groups, a.animations())
     with open(os.path.join(out, a.name + ".bbmodel"), "w") as f:
         json.dump(model, f, separators=(",", ":"))
     return model
@@ -505,72 +601,89 @@ def font(size):
         return ImageFont.load_default()
 
 
-TILE_W, TILE_H = 300, 440
-Q34 = dict(eye=(-22, 15, -24), target=(0, 7.2, -0.5), W=TILE_W, H=TILE_H, fov=36)
-SIDE = dict(eye=(-34, 7.5, -1), target=(0, 7.2, -1), W=TILE_W, H=TILE_H, fov=34)
+TILE_W, TILE_H = 300, 400
+Q34 = dict(eye=(-19, 12, -21), target=(0, 5.2, -0.5), W=TILE_W, H=TILE_H, fov=36)
+SIDE = dict(eye=(-30, 6, -1), target=(0, 5.2, -1), W=TILE_W, H=TILE_H, fov=34)
 
 
-def lineup(models, anim_name=None, t=0.0, cam=Q34):
-    """One tile per animal, same camera and scale, so sizes compare."""
+def anim_named(m, name):
+    return next((x for x in m["animations"] if x["name"] == name), None) if name else None
+
+
+def strip(models, anim_name=None, t=0.0, cam=Q34):
+    """One tile per model, same camera and scale, so sizes compare.
+    t is a fraction of each model's loop so different lengths stay in step."""
     tiles = []
     for m in models:
-        anim = next((x for x in m["animations"] if x["name"] == anim_name), None) if anim_name else None
-        tiles.append(render(pose(m, anim, t), **cam))
-    im = Image.new("RGB", (TILE_W * len(tiles), tiles[0].height))
+        anim = anim_named(m, anim_name)
+        tiles.append(render(pose(m, anim, t * anim["length"] if anim else 0), **cam))
+    im = Image.new("RGB", (cam["W"] * len(tiles), tiles[0].height))
     for i, tile in enumerate(tiles):
-        im.paste(tile, (TILE_W * i, 0))
+        im.paste(tile, (cam["W"] * i, 0))
     return im
 
 
-def label(im, names, top=True, size=22):
-    band = 40
+def label(im, names, size=20):
+    band = 36
     out = Image.new("RGB", (im.width, im.height + band), (255, 255, 255))
-    out.paste(im, (0, band if top else 0))
+    out.paste(im, (0, band))
     d = ImageDraw.Draw(out)
     w = im.width / len(names)
     for i, text in enumerate(names):
         tw = d.textlength(text, font=font(size))
-        d.text((w * i + (w - tw) / 2, 8 if top else im.height + 8), text, fill=(20, 20, 20), font=font(size))
+        d.text((w * i + (w - tw) / 2, 7), text, fill=(20, 20, 20), font=font(size))
     return out
 
 
-def main(out="designs/animals", egg_out="designs/animals/eggs"):
-    os.makedirs(out, exist_ok=True)
-    os.makedirs(egg_out, exist_ok=True)
-    horse = json.load(open(os.path.join(os.path.dirname(__file__), "..", "designs", "horses", "Horse7_ToyRig.bbmodel")))
-    horse_egg = json.load(open(os.path.join(os.path.dirname(__file__), "..", "designs", "eggs", "Egg6_PonyOcto.bbmodel")))
-    models, eggs, names, meta = [horse], [horse_egg], ["Horse · Common"], {}
+def gif(path, frames, fps=20, hold=0):
+    frames = frames + [frames[-1]] * hold
+    frames[0].save(path, save_all=True, append_images=frames[1:], duration=int(1000 / fps), loop=0)
+
+
+def main(out="designs/animals"):
+    eggs_out = os.path.join(out, "eggs")
+    os.makedirs(eggs_out, exist_ok=True)
+    horse = qm_horse("A")
+    with open(os.path.join(out, "Horse.bbmodel"), "w") as f:
+        json.dump(horse, f, separators=(",", ":"))
+    models, eggs, names, meta = [horse], [json.load(open(HORSE_EGG))], ["Horse · Common"], {}
     for fn in ANIMALS:
         a = fn()
         models.append(build_animal(a, out))
         names.append(f"{a.name} · {a.rarity}")
         meta[a.name] = dict(rarity=a.rarity, **a.meta)
         egg = EGGS[a.name]()
-        eggs.append(E.build(egg, a.name + "Egg", egg_out))
+        eggs.append(E.build(egg, a.name + "Egg", eggs_out))
         print(f"{a.name}: {len(a.parts)} parts, egg {len(egg.parts)} parts")
     with open(os.path.join(out, "meta.json"), "w") as f:
         json.dump(meta, f, indent=1)
 
-    label(lineup(models), names).save(os.path.join(out, "lineup.png"))
-    label(lineup(models, cam=SIDE), names).save(os.path.join(out, "lineup_side.png"))
+    label(strip(models), names).save(os.path.join(out, "lineup.png"))
+    label(strip(models, cam=SIDE), names).save(os.path.join(out, "lineup_side.png"))
+    small = (TILE_W * len(models) * 2 // 3, TILE_H * 2 // 3)
+    for name, n in (("walk", 20), ("gallop", 16)):
+        gif(os.path.join(out, name + ".gif"), [strip(models, name, i / n, SIDE).resize(small) for i in range(n)], fps=n / 0.9)
+        print(name, "gif")
 
-    # gallop lineup
-    fps, L = 20, 0.6
-    frames = [lineup(models, "gallop", i / fps).resize((TILE_W * len(models) * 2 // 3, TILE_H * 2 // 3)) for i in range(int(L * fps))]
-    frames[0].save(os.path.join(out, "gallop.gif"), save_all=True, append_images=frames[1:], duration=int(1000 / fps), loop=0)
+    # the two leap ideas side by side on the horse, from the side
+    variants = [qm_horse(k) for k in GALLOPS]
+    cam = dict(SIDE, W=420, H=380)
+    frames = []
+    for i in range(40):
+        t = i / 20
+        tiles = [render(pose(m, anim_named(m, "gallop"), t % anim_named(m, "gallop")["length"]), **cam) for m in variants]
+        im = Image.new("RGB", (840, 380))
+        for j, tl in enumerate(tiles):
+            im.paste(tl, (420 * j, 0))
+        frames.append(label(im, ["A: big leap", "B: quick bounds"]))
+    gif(os.path.join(out, "gallop_variants.gif"), frames)
 
-    # eggs: still, twitch and hatch, one tile each like the animals
-    cam = dict(eye=(-6.5, 5.2, -7.5), target=(0, 1.9, 0), W=TILE_W, H=300, fov=34)
-
-    def egg_frame(anim_name, t):
-        return lineup(eggs, anim_name, t, cam)
-
-    label(egg_frame(None, 0), [n.split(" ·")[0] + " Egg" for n in names]).save(os.path.join(egg_out, "eggs.png"))
-    for anim_name, length in (("twitch", 1.2), ("hatch", 2.0)):
-        frames = [egg_frame(anim_name, i / fps).resize((TILE_W * 4, 200)) for i in range(int(length * fps))]
-        frames += [frames[-1]] * 8
-        frames[0].save(os.path.join(egg_out, f"{anim_name}.gif"), save_all=True, append_images=frames[1:],
-                       duration=int(1000 / fps), loop=0)
+    ecam = dict(eye=(-6.5, 5.2, -7.5), target=(0, 1.9, 0), W=TILE_W, H=300, fov=34)
+    label(strip(eggs, cam=ecam), [n.split(" ·")[0] + " Egg" for n in names]).save(os.path.join(eggs_out, "eggs.png"))
+    esmall = (TILE_W * 4, 200)
+    for name, length in (("twitch", 1.2), ("hatch", 2.0)):
+        n = int(length * 20)
+        gif(os.path.join(eggs_out, name + ".gif"), [strip(eggs, name, i / n, ecam).resize(esmall) for i in range(n)], hold=8)
     print("previews written")
 
 

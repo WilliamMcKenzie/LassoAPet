@@ -266,17 +266,35 @@ def palette(model):
     return Image.open(io.BytesIO(base64.b64decode(src))).convert("RGB")
 
 
+def num(v):
+    """Keyframe value: Blockbench stores numbers, or strings like "-\\n19.6"."""
+    v = "".join(str(v).split())
+    return float(v) if v else 0.0
+
+
+def element_frame(e):
+    """Blockbench element transform: rotate by `rotation` (degrees, XYZ) about `origin`."""
+    R = rotm(e.get("rotation") or (0, 0, 0))
+    return R, np.array(e.get("origin") or (0, 0, 0), float)
+
+
 def element_polys(e):
+    """Faces in model units. Mesh vertices are relative to the element's origin."""
+    R, o = element_frame(e)
     if e["type"] == "cube":
-        (x0, y0, z0), (x1, y1, z1) = e["from"], e["to"]
-        c = lambda i, j, k: ((x0, x1)[i], (y0, y1)[j], (z0, z1)[k])  # noqa: E731
-        quads = [
-            [c(1, 0, 0), c(1, 1, 0), c(1, 1, 1), c(1, 0, 1)], [c(0, 0, 1), c(0, 1, 1), c(0, 1, 0), c(0, 0, 0)],
-            [c(0, 1, 0), c(0, 1, 1), c(1, 1, 1), c(1, 1, 0)], [c(0, 0, 1), c(0, 0, 0), c(1, 0, 0), c(1, 0, 1)],
-            [c(1, 0, 1), c(1, 1, 1), c(0, 1, 1), c(0, 0, 1)], [c(0, 0, 0), c(0, 1, 0), c(1, 1, 0), c(1, 0, 0)],
-        ]
-        return [np.array(q, float) for q in quads]
-    return [np.array([e["vertices"][k] for k in f["vertices"]], float) for f in e["faces"].values()]
+        return [(R @ (q - o).T).T + o for q in _cube_polys(e)]
+    return [(R @ np.array([e["vertices"][k] for k in f["vertices"]], float).T).T + o for f in e["faces"].values()]
+
+
+def _cube_polys(e):
+    (x0, y0, z0), (x1, y1, z1) = e["from"], e["to"]
+    c = lambda i, j, k: ((x0, x1)[i], (y0, y1)[j], (z0, z1)[k])  # noqa: E731
+    quads = [
+        [c(1, 0, 0), c(1, 1, 0), c(1, 1, 1), c(1, 0, 1)], [c(0, 0, 1), c(0, 1, 1), c(0, 1, 0), c(0, 0, 0)],
+        [c(0, 1, 0), c(0, 1, 1), c(1, 1, 1), c(1, 1, 0)], [c(0, 0, 1), c(0, 0, 0), c(1, 0, 0), c(1, 0, 1)],
+        [c(1, 0, 1), c(1, 1, 1), c(0, 1, 1), c(0, 0, 1)], [c(0, 0, 0), c(0, 1, 0), c(1, 1, 0), c(1, 0, 0)],
+    ]
+    return [np.array(q, float) for q in quads]
 
 
 def element_color(e, pal):
@@ -296,12 +314,12 @@ def pose(model, anim, t):
         for a in anim["animators"].values():
             tracks[a["name"]] = {}
             by_ch = {}
-            for k in a["keyframes"]:
+            for k in a.get("keyframes", []):
                 by_ch.setdefault(k["channel"], []).append(k)
             for chn, kfs in by_ch.items():
                 kfs.sort(key=lambda k: k["time"])
                 ch = {"interp": kfs[0]["interpolation"],
-                      "keys": [(k["time"], tuple(float(k["data_points"][0][c]) for c in "xyz")) for k in kfs]}
+                      "keys": [(k["time"], tuple(num(k["data_points"][0][c]) for c in "xyz")) for k in kfs]}
                 tracks[a["name"]][chn] = sample(ch, t)
     emap = {e["uuid"]: e for e in model["elements"]}
     parts = []

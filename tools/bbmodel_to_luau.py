@@ -29,9 +29,24 @@ def cf(pos, R):
     return "CFrame.new({})".format(", ".join("{:g}".format(round(float(x), 6) + 0.0) for x in vals))
 
 
+def element_rotation(e):
+    x, y, z = (math.radians(a) for a in (e.get("rotation") or (0, 0, 0)))
+    cx, sx, cy, sy, cz, sz = math.cos(x), math.sin(x), math.cos(y), math.sin(y), math.cos(z), math.sin(z)
+    return (np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]]) @ np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
+            @ np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]]))
+
+
+def num(v):
+    """Keyframe value: Blockbench stores numbers, or strings like "-\\n19.6"."""
+    v = "".join(str(v).split())
+    return float(v) if v else 0.0
+
+
 def wedge_frame(e):
-    """Center, rotation and size of a WedgePart matching a 6-vertex wedge mesh."""
-    verts = {k: np.array(v, float) * SCALE for k, v in e["vertices"].items()}
+    """Center, rotation and size of a WedgePart matching a 6-vertex wedge mesh.
+    Mesh vertices are relative to the element's origin (and rotation)."""
+    R0, o = element_rotation(e), np.array(e.get("origin") or (0, 0, 0), float)
+    verts = {k: (R0 @ np.array(v, float) + o) * SCALE for k, v in e["vertices"].items()}
     tris = [f["vertices"] for f in e["faces"].values() if len(f["vertices"]) == 3]
     assert len(tris) == 2 and len(verts) == 6, e["name"] + " is not a wedge"
     t0 = [verts[k] for k in tris[0]]
@@ -68,7 +83,9 @@ def main(src, dst):
             e = elements[node]
             if e["type"] == "cube":
                 lo, hi = np.array(e["from"]) * SCALE, np.array(e["to"]) * SCALE
-                center, R, size = (lo + hi) / 2, np.eye(3), hi - lo
+                R = element_rotation(e)
+                o = np.array(e.get("origin") or (0, 0, 0), float) * SCALE
+                center, size = R @ ((lo + hi) / 2 - o) + o, hi - lo
                 u, v = e["faces"]["north"]["uv"][:2]
                 cls = "Part"
             else:
@@ -110,6 +127,8 @@ def main(src, dst):
         out.append(f'\t\t\tlength = {anim["length"]:g},')
         out.append("\t\t\ttracks = {")
         for a in anim["animators"].values():
+            if not a.get("keyframes"):
+                continue
             chans = {}
             for k in sorted(a["keyframes"], key=lambda k: k["time"]):
                 chans.setdefault(k["channel"], []).append(k)
@@ -119,7 +138,7 @@ def main(src, dst):
                      "position": lambda x: float(x) * SCALE}.get(ch, float)  # scale stays a factor
                 interp = kfs[0]["interpolation"]
                 keys = ", ".join("{{ {:g}, {:g}, {:g}, {:g} }}".format(
-                    k["time"], *(round(f(k["data_points"][0][c]), 5) + 0.0 for c in "xyz")) for k in kfs)
+                    k["time"], *(round(f(num(k["data_points"][0][c])), 5) + 0.0 for c in "xyz")) for k in kfs)
                 out.append(f'\t\t\t\t\t{ch} = {{ smooth = {"true" if interp == "catmullrom" else "false"}, keys = {{ {keys} }} }},')
             out.append("\t\t\t\t},")
         out.append("\t\t\t},")
