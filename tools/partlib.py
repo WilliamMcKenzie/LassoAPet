@@ -1,0 +1,344 @@
+"""Tiny part-model toolkit for designing studded Roblox models outside Studio.
+
+Build a list of parts (Block or Wedge) with 4x4 transforms, then:
+  - write_rbxmx(parts, name, path)  -> a Model file you can Insert into Studio
+  - render(parts, ...)              -> a PIL image preview (flat shading + studs)
+
+Coordinates follow Roblox: Y up, models face -Z.
+Roblox WedgePart geometry: full faces on Bottom (-Y) and Back (+Z); the slope
+runs from the top-back edge down to the bottom-front edge, so it faces up and
+forward (-Z, +Y). Left/Right faces are triangles.
+"""
+
+import math
+import numpy as np
+from PIL import Image
+
+# Classic stud decal, tiled at half-stud size (same as Rig.luau).
+STUD_IMAGE = "rbxassetid://7447638591"
+STUD_TILE = 0.5
+
+
+# ---------------------------------------------------------------- transforms
+
+def T(x=0, y=0, z=0):
+    m = np.eye(4)
+    m[:3, 3] = (x, y, z)
+    return m
+
+
+def Rx(deg):
+    a = math.radians(deg)
+    c, s = math.cos(a), math.sin(a)
+    m = np.eye(4)
+    m[1, 1], m[1, 2], m[2, 1], m[2, 2] = c, -s, s, c
+    return m
+
+
+def Ry(deg):
+    a = math.radians(deg)
+    c, s = math.cos(a), math.sin(a)
+    m = np.eye(4)
+    m[0, 0], m[0, 2], m[2, 0], m[2, 2] = c, s, -s, c
+    return m
+
+
+def Rz(deg):
+    a = math.radians(deg)
+    c, s = math.cos(a), math.sin(a)
+    m = np.eye(4)
+    m[0, 0], m[0, 1], m[1, 0], m[1, 1] = c, -s, s, c
+    return m
+
+
+def mirror_x(cf):
+    """Mirror a transform across the X=0 plane, keeping it a proper rotation."""
+    s = np.diag([-1.0, 1, 1, 1])
+    m = s @ cf @ s
+    return m
+
+
+# ---------------------------------------------------------------- parts
+
+class Part:
+    def __init__(self, name, size, cf, color, shape="Block", plain=False):
+        self.name = name
+        self.size = np.array(size, float)
+        self.cf = np.array(cf, float)
+        self.color = color
+        self.shape = shape
+        self.plain = plain
+
+    def mirrored(self, name):
+        cf = mirror_x(self.cf)
+        if self.shape == "Wedge":
+            # A wedge's triangle sides are on +/-X, so mirroring in X keeps its shape.
+            pass
+        return Part(name, self.size, cf, self.color, self.shape, self.plain)
+
+
+class Builder:
+    def __init__(self):
+        self.parts = []
+
+    def add(self, name, size, cf, color, shape="Block", plain=False, mirror=False):
+        p = Part(name, size, cf, color, shape, plain)
+        if mirror:
+            # name given for the left (-X) side; right is mirrored
+            p.name = name + "L"
+            self.parts.append(p)
+            self.parts.append(p.mirrored(name + "R"))
+        else:
+            self.parts.append(p)
+        return p
+
+    def box(self, name, size, cf, color, **kw):
+        return self.add(name, size, cf, color, "Block", **kw)
+
+    def wedge(self, name, size, cf, color, **kw):
+        return self.add(name, size, cf, color, "Wedge", **kw)
+
+
+# Local-space geometry: list of faces, each face = list of vertex coords (in +-1 units)
+# plus the Roblox NormalId it corresponds to.
+_BOX_FACES = [
+    ("Right", [(1, -1, -1), (1, 1, -1), (1, 1, 1), (1, -1, 1)]),
+    ("Left", [(-1, -1, 1), (-1, 1, 1), (-1, 1, -1), (-1, -1, -1)]),
+    ("Top", [(-1, 1, -1), (-1, 1, 1), (1, 1, 1), (1, 1, -1)]),
+    ("Bottom", [(-1, -1, 1), (-1, -1, -1), (1, -1, -1), (1, -1, 1)]),
+    ("Back", [(1, -1, 1), (1, 1, 1), (-1, 1, 1), (-1, -1, 1)]),
+    ("Front", [(-1, -1, -1), (-1, 1, -1), (1, 1, -1), (1, -1, -1)]),
+]
+_WEDGE_FACES = [
+    ("Bottom", [(-1, -1, 1), (-1, -1, -1), (1, -1, -1), (1, -1, 1)]),
+    ("Back", [(1, -1, 1), (1, 1, 1), (-1, 1, 1), (-1, -1, 1)]),
+    ("Front", [(-1, -1, -1), (-1, 1, 1), (1, 1, 1), (1, -1, -1)]),  # slope
+    ("Right", [(1, -1, -1), (1, 1, 1), (1, -1, 1)]),
+    ("Left", [(-1, -1, 1), (-1, 1, 1), (-1, -1, -1)]),
+]
+
+
+def part_faces(p):
+    """World-space polygons for a part: list of (verts Nx3, normal)."""
+    faces = _WEDGE_FACES if p.shape == "Wedge" else _BOX_FACES
+    half = p.size / 2
+    out = []
+    for _, verts in faces:
+        local = np.array(verts, float) * half
+        world = (p.cf[:3, :3] @ local.T).T + p.cf[:3, 3]
+        n = np.cross(world[1] - world[0], world[2] - world[0])
+        ln = np.linalg.norm(n)
+        if ln < 1e-9:
+            continue
+        # make normals point outward (away from part center)
+        n = n / ln
+        if np.dot(n, world.mean(0) - p.cf[:3, 3]) < 0:
+            n = -n
+        out.append((world, n))
+    return out
+
+
+# ---------------------------------------------------------------- rbxmx
+
+def _xml_color(c):
+    r, g, b = c
+    return (255 << 24) | (r << 16) | (g << 8) | b
+
+
+def write_rbxmx(parts, name, path, pivot_y=0.0):
+    ref = [0]
+
+    def nref():
+        ref[0] += 1
+        return f"RBX{ref[0]:08X}"
+
+    lines = ['<roblox version="4">', f'<Item class="Model" referent="{nref()}">', "<Properties>",
+             f'<string name="Name">{name}</string>', "</Properties>"]
+    for p in parts:
+        cls = "WedgePart" if p.shape == "Wedge" else "Part"
+        R = p.cf[:3, :3]
+        x, y, z = p.cf[:3, 3]
+        cf = "".join(f"<{k}>{v:.5f}</{k}>" for k, v in [("X", x), ("Y", y), ("Z", z)])
+        for i in range(3):
+            for j in range(3):
+                cf += f"<R{i}{j}>{R[i, j]:.6f}</R{i}{j}>"
+        lines += [f'<Item class="{cls}" referent="{nref()}">', "<Properties>",
+                  f'<string name="Name">{p.name}</string>',
+                  f'<CoordinateFrame name="CFrame">{cf}</CoordinateFrame>',
+                  f'<Vector3 name="size"><X>{p.size[0]:.4f}</X><Y>{p.size[1]:.4f}</Y><Z>{p.size[2]:.4f}</Z></Vector3>',
+                  f'<Color3uint8 name="Color3uint8">{_xml_color(p.color)}</Color3uint8>',
+                  '<token name="Material">272</token>',  # SmoothPlastic
+                  '<bool name="Anchored">true</bool>',
+                  '<bool name="CanCollide">false</bool>']
+        for face in ("Top", "Bottom", "Front", "Back", "Left", "Right"):
+            lines.append(f'<token name="{face}Surface">0</token>')
+        lines.append("</Properties>")
+        if not p.plain:
+            for fid in range(6):
+                lines += [f'<Item class="Texture" referent="{nref()}">', "<Properties>",
+                          '<string name="Name">Studs</string>',
+                          f'<Content name="Texture"><url>{STUD_IMAGE}</url></Content>',
+                          f'<float name="StudsPerTileU">{STUD_TILE}</float>',
+                          f'<float name="StudsPerTileV">{STUD_TILE}</float>',
+                          f'<token name="Face">{fid}</token>',
+                          "</Properties>", "</Item>"]
+        lines.append("</Item>")
+    lines += ["</Item>", "</roblox>"]
+    with open(path, "w") as f:
+        f.write("\n".join(lines))
+
+
+# ---------------------------------------------------------------- render
+
+SKY_TOP = np.array([70, 150, 245.0])
+SKY_BOT = np.array([175, 215, 255.0])
+GROUND = np.array([96, 196, 70.0])
+GROUND2 = np.array([88, 184, 64.0])
+LIGHT = np.array([-0.45, 0.8, -0.35])
+LIGHT = LIGHT / np.linalg.norm(LIGHT)
+
+
+def look_at(eye, target):
+    eye = np.array(eye, float)
+    f = np.array(target, float) - eye
+    f /= np.linalg.norm(f)
+    r = np.cross(f, [0, 1, 0])
+    r /= np.linalg.norm(r)
+    u = np.cross(r, f)
+    return eye, r, u, f
+
+
+def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0), ground=True):
+    """Render parts with a z-buffer; returns a PIL image."""
+    eye, r, u, f = look_at(eye, target)
+    focal = (H / 2) / math.tan(math.radians(fov) / 2)
+    off = np.array(offset, float)
+
+    def proj(P):
+        d = P - eye
+        x, y, z = d @ r, d @ u, d @ f
+        return np.stack([W / 2 + focal * x / z, H / 2 - focal * y / z, z], -1)
+
+    img = np.zeros((H, W, 3))
+    ys = np.linspace(0, 1, H)[:, None]
+    img[:] = (SKY_TOP * (1 - ys) + SKY_BOT * ys)[:, None, :]
+    zbuf = np.full((H, W), np.inf)
+    shadow = np.zeros((H, W), bool)
+
+    # ground plane: per-pixel ray cast
+    if ground:
+        px, py = np.meshgrid(np.arange(W) + 0.5, np.arange(H) + 0.5)
+        dirs = (r[None, None] * ((px - W / 2) / focal)[..., None]
+                - u[None, None] * ((py - H / 2) / focal)[..., None] + f[None, None])
+        t = -eye[1] / np.where(dirs[..., 1] < -1e-6, dirs[..., 1], np.nan)
+        hit = np.isfinite(t) & (t > 0)
+        gx = eye[0] + t * dirs[..., 0]
+        gz = eye[2] + t * dirs[..., 2]
+        chk = ((np.floor(gx / 4) + np.floor(gz / 4)) % 2 == 0)
+        col = np.where(chk[..., None], GROUND, GROUND2)
+        fog = np.clip((t - 30) / 120, 0, 1)[..., None]
+        col = col * (1 - fog) + SKY_BOT * fog
+        img[hit] = col[hit]
+        zdepth = t * np.einsum("ijk,k->ij", dirs, f)
+        zbuf[hit] = zdepth[hit] + 1e-3  # ground depth
+
+    tris = []  # (screen 3x3, world 3x3, normal, color, face axes, plain)
+    shadow_tris = []
+    for p in parts:
+        for poly, n in part_faces(p):
+            poly = poly + off
+            # face tangent axes for stud pattern
+            e1 = poly[1] - poly[0]
+            e1 /= np.linalg.norm(e1)
+            e2 = np.cross(n, e1)
+            for i in range(1, len(poly) - 1):
+                w3 = np.array([poly[0], poly[i], poly[i + 1]])
+                tris.append((proj(w3), w3, n, np.array(p.color, float), (poly[0], e1, e2), p.plain))
+                # shadow: project onto y=0 along light
+                s = w3 - LIGHT[None] * (w3[:, 1:2] / LIGHT[1])
+                s[:, 1] = 0.01
+                shadow_tris.append(proj(s))
+
+    def raster(s):
+        x0, x1 = int(max(0, np.floor(s[:, 0].min()))), int(min(W - 1, np.ceil(s[:, 0].max())))
+        y0, y1 = int(max(0, np.floor(s[:, 1].min()))), int(min(H - 1, np.ceil(s[:, 1].max())))
+        if x0 > x1 or y0 > y1 or (s[:, 2] <= 0.1).any():
+            return None
+        X, Y = np.meshgrid(np.arange(x0, x1 + 1) + 0.5, np.arange(y0, y1 + 1) + 0.5)
+        (ax, ay), (bx, by), (cx, cy) = s[0, :2], s[1, :2], s[2, :2]
+        den = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy)
+        if abs(den) < 1e-9:
+            return None
+        l0 = ((by - cy) * (X - cx) + (cx - bx) * (Y - cy)) / den
+        l1 = ((cy - ay) * (X - cx) + (ax - cx) * (Y - cy)) / den
+        l2 = 1 - l0 - l1
+        m = (l0 >= -1e-4) & (l1 >= -1e-4) & (l2 >= -1e-4)
+        return x0, y0, X, Y, l0, l1, l2, m
+
+    if ground:
+        for s in shadow_tris:
+            rr = raster(s)
+            if rr is None:
+                continue
+            x0, y0, X, Y, l0, l1, l2, m = rr
+            sub = shadow[y0:y0 + m.shape[0], x0:x0 + m.shape[1]]
+            sub |= m
+        img[shadow & np.isfinite(zbuf)] *= 0.72
+
+    pos = np.zeros((H, W, 3))
+    info = np.full((H, W), -1, int)
+    for ti, (s, w3, n, color, axes, plain) in enumerate(tris):
+        if np.dot(n, w3[0] - eye) >= 0:  # backface
+            continue
+        rr = raster(s)
+        if rr is None:
+            continue
+        x0, y0, X, Y, l0, l1, l2, m = rr
+        # perspective-correct depth
+        iz = l0 / s[0, 2] + l1 / s[1, 2] + l2 / s[2, 2]
+        z = 1 / iz
+        zb = zbuf[y0:y0 + m.shape[0], x0:x0 + m.shape[1]]
+        mm = m & (z < zb)
+        if not mm.any():
+            continue
+        zb[mm] = z[mm]
+        wp = (l0[..., None] * w3[0] / s[0, 2] + l1[..., None] * w3[1] / s[1, 2] + l2[..., None] * w3[2] / s[2, 2]) * z[..., None]
+        pos[y0:y0 + m.shape[0], x0:x0 + m.shape[1]][mm] = wp[mm]
+        info[y0:y0 + m.shape[0], x0:x0 + m.shape[1]][mm] = ti
+
+    # shade
+    for ti in np.unique(info[info >= 0]):
+        s, w3, n, color, (o, e1, e2), plain = tris[ti]
+        m = info == ti
+        lam = max(0.0, float(np.dot(n, LIGHT)))
+        shade = 0.62 + 0.45 * lam
+        c = np.tile(color * shade, (m.sum(), 1))
+        if studs and not plain:
+            d = pos[m] - o
+            uu, vv = d @ e1, d @ e2
+            fu = (uu / STUD_TILE) % 1 - 0.5
+            fv = (vv / STUD_TILE) % 1 - 0.5
+            rad = np.sqrt(fu ** 2 + fv ** 2)
+            ring = (rad < 0.3) & (rad > 0.2)
+            inner = rad <= 0.2
+            # light rim on one side, dark on the other, like the stud decal
+            side = (fu - fv)
+            c[ring & (side < 0)] *= 1.12
+            c[ring & (side >= 0)] *= 0.86
+            c[inner] *= 1.03
+        img[m] = c
+
+    # outline: depth / face discontinuities
+    edge = np.zeros((H, W), bool)
+    obj = info >= 0
+    for dy, dx in ((0, 1), (1, 0)):
+        a = info[: H - dy, : W - dx]
+        b = info[dy:, dx:]
+        za = zbuf[: H - dy, : W - dx]
+        zb2 = zbuf[dy:, dx:]
+        oa, ob = obj[: H - dy, : W - dx], obj[dy:, dx:]
+        e = (oa != ob) | ((oa & ob) & (np.abs(za - zb2) > 0.35))
+        edge[: H - dy, : W - dx] |= e & oa
+        edge[dy:, dx:] |= e & ob
+    img[edge] *= 0.35
+    return Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
