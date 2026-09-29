@@ -224,7 +224,7 @@ function Hud.init(onAction, onHome, onRide)
 	filled.AnchorPoint = Vector2.zero
 
 	-- Distance sits on the bar but outside it, so it still shows once the bar is gone.
-	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 50, 4)
+	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 4)
 	distance.Name = "Distance"
 	distance.ZIndex = 2
 
