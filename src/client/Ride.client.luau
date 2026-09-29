@@ -10,6 +10,7 @@ local UserInputService = game:GetService("UserInputService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animal = require(ReplicatedStorage.Shared.Animals.Horse)
 local Hud = require(script.Parent.Hud)
+local Lasso = require(script.Parent.Lasso)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -35,7 +36,8 @@ end
 
 local SEAT_OFFSET = CFrame.new(0, 1.6, 0)
 local STUDS_PER_METRE = 4
-local TRANSFER_TIME = 0.4
+local THROW_TIME = 0.22 -- lasso flying out to the target's neck
+local TRANSFER_TIME = 0.4 -- rider pulled across on the rope
 local TURN_TIME = 1
 local EDGE = Config.CourseHalfWidth - 4
 
@@ -180,6 +182,7 @@ local function cleanup()
 		carried = nil
 	end
 	clearRope()
+	Lasso.stop()
 	highlight.Adornee = nil
 	setEggInNest(true)
 end
@@ -240,6 +243,7 @@ startRide = function()
 	focus = Vector3.new(mount.x, 0, mount.z)
 	Hud.show(true)
 	Hud.setDistance("")
+	Lasso.start(player.Character)
 end
 
 -- Back on foot at home, standing at x, z.
@@ -303,8 +307,7 @@ local function startTransfer(target)
 	old.speed = rng:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax)
 	table.insert(herd, old)
 	mount = nil
-	transfer = { target = target, t = 0, from = hrp.Position }
-	throwRope(target.animal.model.PrimaryPart, Vector3.new(0, 5, 0))
+	transfer = { target = target, old = old, t = 0, stage = "throw", from = hrp.Position }
 end
 
 local function grabEgg()
@@ -547,6 +550,16 @@ local function updateRider(dt)
 		focus = focus:Lerp(Vector3.new(pos.X, 0, pos.Z), 1 - math.exp(-4 * dt))
 		return
 	end
+	if transfer and transfer.stage == "throw" then
+		-- Still on the old horse while the loop flies out.
+		transfer.t = math.min(transfer.t + dt / THROW_TIME, 1)
+		hrp.CFrame = transfer.old.animal:getSeatCFrame() * SEAT_OFFSET
+		focus = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
+		if transfer.t >= 1 then
+			transfer.stage, transfer.t, transfer.from = "pull", 0, hrp.Position
+		end
+		return
+	end
 	if transfer then
 		transfer.t = math.min(transfer.t + dt / TRANSFER_TIME, 1)
 		local t = transfer.t
@@ -624,6 +637,18 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	updateHerd(dt)
 	updateRider(dt)
+	if transfer then
+		local neck = transfer.target.animal:getNeck()
+		if transfer.stage == "throw" then
+			Lasso.throw(transfer.t, neck)
+		else
+			Lasso.pull(transfer.t, neck)
+		end
+	elseif mount and (phase == "outbound" or phase == "return") then
+		Lasso.swing(dt)
+	else
+		Lasso.hide()
+	end
 	if mount and phase ~= "ended" then
 		checkRide(dt)
 	end

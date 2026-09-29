@@ -7,6 +7,7 @@
 --   horse:update(dt, speed, turn) -- every frame; speed in studs/s, turn -1..1 (+ = right)
 --   horse:getSeatCFrame()         -- where the rider's hips go
 --   horse:setSaddled(true)
+--   horse:getNeck()               -- { cframe, radius } for a lasso loop around the neck
 
 local Rig = require(script.Parent.Rig)
 local Quadruped = require(script.Parent.Quadruped)
@@ -126,6 +127,7 @@ function Horse.new()
 	local self = setmetatable({
 		model = model,
 		body = byName.Body,
+		neck = byName.Neck,
 		saddleParts = saddle,
 		animator = Quadruped.new(motors, GAITS),
 	}, Horse)
@@ -139,6 +141,10 @@ end
 
 function Horse:getSeatCFrame()
 	return self.body.CFrame * SEAT
+end
+
+function Horse:getNeck()
+	return { cframe = self.neck.CFrame, radius = 1.45 }
 end
 
 function Horse:setSaddled(saddled)
