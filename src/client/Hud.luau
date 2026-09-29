@@ -31,7 +31,7 @@ local IMAGES = {
 
 local BUTTON_WIDTH = 320
 local BAR_WIDTH = 440
-local ICON_HEIGHT = 100 -- Gold
+local ICON_HEIGHT = 80 -- Gold
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
@@ -181,6 +181,7 @@ function Hud.init(onAction, onRideAgain, onRide)
 	-- Distance sits on the bar but outside it, so it still shows once the bar is gone.
 	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 50)
 	distance.Name = "Distance"
+	distance.UIStroke.Thickness = 4
 	distance.ZIndex = 2
 
 	message = label(rideRoot, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
