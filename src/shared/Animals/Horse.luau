@@ -5,7 +5,8 @@
 --
 --   local horse = Horse.new()
 --   horse.model.Parent = workspace
---   horse:update(dt, speed, turn) -- every frame; speed in studs/s, turn -1..1 (+ = right)
+--   horse:update(dt, speed, turn) -- every frame; speed in studs/s, turn -1..1 (+ = right);
+--                                 -- returns true on the frame a gallop leap lands
 --   horse:getSeatCFrame()         -- where the rider's hips go
 --   horse:setSaddled(true)        -- no saddle on this design; kept for callers
 --   horse:getNeck()               -- { cframe, radius } for a lasso loop around the neck
@@ -31,6 +32,19 @@ local GALLOP_FROM, GALLOP_IN = 12, 24 -- walk -> gallop
 local WALK_SPEED = 8 -- walk plays at 1x at this speed
 local GALLOP_SPEED = 36 -- gallop plays at 1x at this speed
 local LEAN = 0.18 -- body roll into turns, radians at full gallop
+
+-- When a gallop leap lands: the front legs are back at rest after reaching out.
+local LAND_AT = (function()
+	local reached = false
+	for _, key in HorseModel.animations.gallop.tracks.LegFL.rotation.keys do
+		if key[2] ~= 0 then
+			reached = true
+		elseif reached then
+			return key[1]
+		end
+	end
+	return 0
+end)()
 
 local function clamp01(x)
 	return math.max(0, math.min(1, x))
@@ -80,6 +94,7 @@ function Horse:update(dt, speed, turn)
 		gallop = math.clamp(s / GALLOP_SPEED, 0.8, 1.4),
 	}
 
+	local before = self.clocks.gallop
 	local pose = {}
 	for name, anim in pairs(HorseModel.animations) do
 		self.clocks[name] = (self.clocks[name] + dt * (rates[name] or 1)) % anim.length
@@ -118,6 +133,10 @@ function Horse:update(dt, speed, turn)
 		local p = pose[bone]
 		motor.Transform = if p then CFrame.new(p[1] * sc, p[2] * sc, p[3] * sc) * CFrame.Angles(p[4], p[5], p[6]) else CFrame.identity
 	end
+
+	local after = self.clocks.gallop
+	local crossed = if after >= before then before < LAND_AT and after >= LAND_AT else before < LAND_AT or after >= LAND_AT
+	return crossed and weights.gallop > 0.5
 end
 
 function Horse:getSeatCFrame()
