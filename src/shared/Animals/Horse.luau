@@ -9,6 +9,7 @@
 --   horse:getSeatCFrame()         -- where the rider's hips go
 --   horse:setSaddled(true)        -- no saddle on this design; kept for callers
 --   horse:getNeck()               -- { cframe, radius } for a lasso loop around the neck
+--   horse:setScale(s)             -- grow or shrink the whole horse about its feet (pop-ins)
 --
 -- Idle, walk and gallop are blended by speed. The gallop is a leap: front legs
 -- reach forward and hind legs back while the horse is in the air. The blocks
@@ -56,6 +57,7 @@ function Horse.new()
 		clocks = clocks,
 		speed = 0,
 		turn = 0,
+		scale = 1,
 	}, Horse)
 end
 
@@ -111,9 +113,10 @@ function Horse:update(dt, speed, turn)
 	pose.root = rootPose
 	rootPose[6] -= LEAN * self.turn * (0.4 + 0.6 * galloping)
 
+	local sc = self.scale -- animation offsets are in studs at full size
 	for bone, motor in pairs(self.bones) do
 		local p = pose[bone]
-		motor.Transform = if p then CFrame.new(p[1], p[2], p[3]) * CFrame.Angles(p[4], p[5], p[6]) else CFrame.identity
+		motor.Transform = if p then CFrame.new(p[1] * sc, p[2] * sc, p[3] * sc) * CFrame.Angles(p[4], p[5], p[6]) else CFrame.identity
 	end
 end
 
@@ -126,5 +129,17 @@ function Horse:getNeck()
 end
 
 function Horse:setSaddled(_saddled) end
+
+-- Model:ScaleTo scales relative to the current size, so keep it well above the
+-- smallest part size (0.001): the thinnest plates are 0.05 studs.
+local MIN_SCALE = 0.05
+
+function Horse:setScale(s)
+	s = math.max(s, MIN_SCALE)
+	if s ~= self.scale then
+		self.model:ScaleTo(s)
+		self.scale = s
+	end
+end
 
 return Horse

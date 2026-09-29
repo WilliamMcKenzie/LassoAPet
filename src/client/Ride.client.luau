@@ -12,6 +12,7 @@ local Animal = require(ReplicatedStorage.Shared.Animals.Horse)
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local Hud = require(script.Parent.Hud)
 local Lasso = require(script.Parent.Lasso)
+local Poof = require(script.Parent.Poof)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -49,6 +50,15 @@ local TRANSFER_TIME = 0.4 -- rider pulled across on the rope
 local EGG_PULL_TIME = 0.55 -- egg reeled in on the rope
 local TURN_TIME = 1
 local EDGE = Config.CourseHalfWidth - 4
+-- Herd animals pop into the world instead of appearing: a poof, then they spring
+-- up out of it, overshoot and settle (a damped spring on their scale) with a hop.
+local POP_TIME = 0.45
+local POP_HOP = 1.6 -- studs
+local POP_HOP_TIME = 0.32
+-- The ride's start: the herd lines up at the start line and bursts off together.
+local START_LINE_Z = world:FindFirstChild("StartLine") and world.StartLine.Position.Z or -2
+local LINEUP_STAGGER = 0.05 -- seconds between pop-ins, from the middle outward
+local LINEUP_WAIT = 0.35 -- after the last pop-in, before the herd runs
 
 local rng = Random.new()
 local herdFolder = Instance.new("Folder")
@@ -96,8 +106,36 @@ local function newEntity(x, z, yaw)
 end
 
 local function place(entity, yawOffset)
-	entity.animal.model.PrimaryPart.CFrame = CFrame.new(entity.x, entity.rootY, entity.z)
+	entity.animal.model.PrimaryPart.CFrame = CFrame.new(entity.x, entity.rootY + (entity.hop or 0), entity.z)
 		* CFrame.Angles(0, entity.yaw + yawOffset, 0)
+end
+
+-- Starts an entity's pop-in, after `delay` seconds. It stays out of the world until then.
+local function popIn(entity, delay)
+	entity.pop = -(delay or 0)
+	entity.hop = 0
+	entity.animal:setScale(0)
+	entity.animal.model.Parent = nil
+end
+
+-- Advances a pop-in: scale 0 -> overshoot ~1.2 -> settle at 1, hopping as it grows.
+local function updatePop(entity, dt)
+	local t = entity.pop + dt
+	if entity.pop < 0 and t >= 0 then
+		entity.animal.model.Parent = herdFolder
+		Poof.at(Vector3.new(entity.x, 0, entity.z))
+	end
+	if t >= POP_TIME then
+		entity.pop, entity.hop = nil, 0
+		entity.animal:setScale(1)
+		return
+	end
+	entity.pop = t
+	if t < 0 then
+		return
+	end
+	entity.animal:setScale(1 - math.exp(-12.6 * t) * math.cos(26 * t))
+	entity.hop = if t < POP_HOP_TIME then POP_HOP * math.sin(math.pi * t / POP_HOP_TIME) else 0
 end
 
 local function blockedAt(x, z, padX, padZ)
@@ -125,6 +163,7 @@ local function respawn(entity, zNear, zFar)
 	entity.x = pickX(entity.z)
 	entity.targetX = entity.x
 	entity.speed = rng:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax)
+	popIn(entity)
 end
 
 local function character()
@@ -202,9 +241,15 @@ startRide = function()
 	mount, starter = starter, nil
 	mount.animal:setSaddled(true)
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = Config.StarterSpot.X, Config.StarterSpot.Z, 0, 0, 0
-	for _ = 1, Config.HerdCount do
-		local entity = newEntity(0, 0)
-		respawn(entity, -30, -Config.HerdAhead)
+	-- The herd pops in along the start line, from the middle outward, then runs.
+	local count = Config.HerdCount
+	for i = 1, count do
+		local x = -EDGE + (i - 1) * (2 * EDGE) / math.max(count - 1, 1)
+		local entity = newEntity(x, START_LINE_Z + 4)
+		entity.speed = rng:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax)
+		local rank = math.abs(i - (count + 1) / 2)
+		popIn(entity, rank * 2 * LINEUP_STAGGER)
+		entity.startIn = count * LINEUP_STAGGER + POP_TIME + LINEUP_WAIT
 		table.insert(herd, entity)
 	end
 	phase, hold, grace, camYaw = "outbound", Config.HoldTime, 0, 0
@@ -368,6 +413,9 @@ local function findTarget()
 	end
 	local best, bestScore = nil, math.huge
 	for _, entity in herd do
+		if entity.pop then
+			continue -- still popping in
+		end
 		local ahead = mount.z - entity.z
 		local dx = entity.x - mount.x
 		local dist = math.sqrt(ahead * ahead + dx * dx)
@@ -404,6 +452,7 @@ local function ensureReachable()
 		end
 		nearest.z = mount.z - rng:NextNumber(110, 140)
 		nearest.x = math.clamp(mount.x + rng:NextNumber(-20, 20), -EDGE, EDGE)
+		popIn(nearest)
 	end
 	nearest.targetX = math.clamp(mount.x + rng:NextNumber(-12, 12), -EDGE, EDGE)
 	nearest.speed = Config.HerdSpeedMin - 6
@@ -412,7 +461,18 @@ end
 local function updateHerd(dt)
 	local returning = phase == "return" or phase == "home"
 	for _, entity in herd do
-		entity.z -= entity.speed * dt
+		if entity.pop then
+			updatePop(entity, dt)
+		end
+		local speed = entity.speed
+		if entity.startIn then
+			entity.startIn -= dt
+			speed = 0
+			if entity.startIn <= 0 then
+				entity.startIn = nil
+			end
+		end
+		entity.z -= speed * dt
 		for _, o in obstacles do
 			local ahead = entity.z - o.z
 			if ahead > 0 and ahead < 40 and math.abs(o.x - entity.x) < o.hx + 4 then
@@ -420,7 +480,7 @@ local function updateHerd(dt)
 			end
 		end
 		entity.targetX = math.clamp(entity.targetX, -EDGE, EDGE)
-		local lat = math.clamp(entity.targetX - entity.x, -1, 1) * 12
+		local lat = if entity.startIn then 0 else math.clamp(entity.targetX - entity.x, -1, 1) * 12
 		entity.x += lat * dt
 		if returning then
 			if entity.z < focus.Z - Config.HerdBehind then
@@ -431,8 +491,8 @@ local function updateHerd(dt)
 		elseif entity.z > focus.Z + Config.HerdBehind then
 			respawn(entity, focus.Z - Config.HerdAhead * 0.5, math.max(focus.Z - Config.HerdAhead, -Config.CourseLength + 40))
 		end
-		place(entity, -math.atan2(lat, entity.speed))
-		entity.animal:update(dt, entity.speed, lat / 12)
+		place(entity, -math.atan2(lat, math.max(speed, 1)))
+		entity.animal:update(dt, speed, lat / 12)
 	end
 end
 
@@ -485,7 +545,7 @@ local function checkRide(dt)
 	end
 	for _, entity in herd do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
-		if math.abs(dx) < 2.6 and math.abs(dz) < 5 then
+		if not entity.pop and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
 			if phase == "return" and grace <= 0 then
 				return fail("CRASH!")
 			elseif phase == "outbound" then

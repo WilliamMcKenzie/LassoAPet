@@ -3168,6 +3168,29 @@
 </Item>
 </Item>
 </Item>
+<Item class="Part" referent="STARTLINE"><Properties>
+<string name="Name">StartLine</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>112</X><Y>0.1</Y><Z>4</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>0</X><Y>0.025</Y><Z>-2</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+<Item class="Texture" referent="STARTLINETEX"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">1</token>
+<float name="StudsPerTileU">4</float>
+<float name="StudsPerTileV">4</float>
+<Color3 name="Color3"><R>0.137255</R><G>0.137255</G><B>0.156863</B></Color3>
+</Properties>
+</Item>
+</Item>
 <Item class="SpawnLocation" referent="RBX00000104"><Properties>
 <string name="Name">SpawnLocation</string>
 <bool name="Anchored">true</bool>
