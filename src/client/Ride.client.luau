@@ -245,6 +245,7 @@ local function cleanup()
 	end
 	Lasso.stop()
 	cutscene = nil
+	Hud.setCutscene(false)
 	Outline.set(nil)
 	setEggInNest(true)
 end

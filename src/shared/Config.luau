@@ -5,11 +5,9 @@ return {
 	HudScale = 1, -- multiplies the whole HUD's size; 1 matches QM's mockups
 	TakeEggSunburst = true, -- turning sunburst behind the TAKE EGG button (trial)
 	-- Outline on what the lasso would catch. true: thin white line inside a black
-	-- one twice as thick (trial); false: the old thin yellow line.
-	-- Off for now: Roblox Highlights skip see-through parts, so the black layer's
-	-- invisible shells never get an outline and only the white line shows.
-	LayeredOutline = false,
-	OutlineWidth = 0.1, -- studs between the stacked lines; about one line's width at riding distance
+	-- one about twice as thick (trial); false: the old thin yellow line.
+	LayeredOutline = true,
+	OutlineWidth = 0.1, -- studs; the black rim reaches 2x this past the target's edges
 
 	-- World (studs). The map is the saved model src/world/World.rbxmx; these sizes
 	-- must match it (the ride reads them). Ground and wall colours are calibrated so
