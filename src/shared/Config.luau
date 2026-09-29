@@ -22,7 +22,7 @@ return {
 	SteerResponse = 8,
 	HoldTime = 6,
 	LassoRange = 34,
-	EggRange = 16,
+	EggRange = 51, -- about 1.5x LassoRange
 	EggSlowMo = 0.5, -- time scale while the egg is in grab range
 	LandingGrace = 0.8,
 	TurnGrace = 2,

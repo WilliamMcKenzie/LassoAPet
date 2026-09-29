@@ -38,6 +38,8 @@ local SEAT_OFFSET = CFrame.new(0, 1.6, 0)
 local STUDS_PER_METRE = 4
 local THROW_TIME = 0.22 -- lasso flying out to the target's neck
 local TRANSFER_TIME = 0.4 -- rider pulled across on the rope
+local EGG_PULL_TIME = 0.55 -- egg reeled in on the rope
+local EGG_LOOP_RADIUS = 1.45 -- loop cinched round the egg's middle
 local TURN_TIME = 1
 local EDGE = Config.CourseHalfWidth - 4
 
@@ -59,7 +61,7 @@ local phase = "idle" -- idle | outbound | turning | return | home | ended
 local starter, mount, loose
 local herd = {}
 local hold, grace = 0, 0
-local transfer, tumble, carried, rope
+local transfer, tumble, carried
 local actionTarget
 local turnT, camYaw = 0, 0
 local focus = Vector3.zero
@@ -124,42 +126,6 @@ local function character()
 	return hrp, humanoid
 end
 
-local function clearRope()
-	if rope then
-		for _, instance in rope do
-			instance:Destroy()
-		end
-		rope = nil
-	end
-end
-
-local function throwRope(part, offset)
-	clearRope()
-	local hrp = character()
-	local a0 = Instance.new("Attachment")
-	a0.Position = Vector3.new(1, 1, 0)
-	a0.Parent = hrp
-	local a1 = Instance.new("Attachment")
-	a1.Position = offset
-	a1.Parent = part
-	local beam = Instance.new("Beam")
-	beam.Attachment0, beam.Attachment1 = a0, a1
-	beam.Width0, beam.Width1 = 0.3, 0.3
-	beam.Color = ColorSequence.new(Color3.fromRGB(222, 184, 120))
-	beam.Transparency = NumberSequence.new(0)
-	beam.FaceCamera = true
-	beam.Segments = 12
-	beam.CurveSize0 = 4
-	beam.Parent = hrp
-	rope = { a0, a1, beam }
-	local current = rope
-	task.delay(TRANSFER_TIME + 0.1, function()
-		if rope == current then
-			clearRope()
-		end
-	end)
-end
-
 local function setEggInNest(visible)
 	nestEgg.Transparency = visible and 0 or 1
 	nestEgg.PointLight.Enabled = visible
@@ -181,7 +147,6 @@ local function cleanup()
 		carried.part:Destroy()
 		carried = nil
 	end
-	clearRope()
 	Lasso.stop()
 	highlight.Adornee = nil
 	setEggInNest(true)
@@ -273,7 +238,6 @@ local function fail(reason)
 		loose.animal:setSaddled(false)
 	end
 	transfer = nil
-	clearRope()
 	if carried then
 		carried.part:Destroy()
 		carried = nil
@@ -316,8 +280,8 @@ local function grabEgg()
 	part.PointLight.Enabled = true
 	part.Parent = workspace
 	setEggInNest(false)
-	carried = { part = part, t = 0, from = nestEgg.Position }
-	throwRope(part, Vector3.zero)
+	part.CFrame = nestEgg.CFrame
+	carried = { part = part, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	phase, turnT = "turning", 0
 	Hud.setAction(nil)
 	Hud.setHold(nil)
@@ -590,9 +554,31 @@ local function updateRider(dt)
 		focus = Vector3.new(mount.x, 0, mount.z)
 	end
 	if carried then
-		carried.t = math.min(carried.t + dt / 0.35, 1)
 		local slot = hrp.CFrame * CFrame.new(0, -0.6, 2.4)
-		carried.part.CFrame = CFrame.new(carried.from:Lerp(slot.Position, carried.t)) * slot.Rotation
+		if carried.stage == "throw" then
+			-- Sits in the nest while the loop flies out.
+			carried.t = math.min(carried.t + dt / THROW_TIME, 1)
+			if carried.t >= 1 then
+				carried.stage, carried.t, carried.from = "pull", 0, carried.part.Position
+			end
+		elseif carried.stage == "pull" then
+			-- Reeled in on an arc, hanging off the rope: it tips toward the rider
+			-- and swings and spins, settling as it lands in the rider's lap.
+			carried.t = math.min(carried.t + dt / EGG_PULL_TIME, 1)
+			local t = carried.t
+			local eased = 1 - (1 - t) ^ 2
+			local pos = carried.from:Lerp(slot.Position, eased) + Vector3.new(0, math.sin(t * math.pi) * 7, 0)
+			local towardRider = (hrp.Position - pos).Unit
+			local hang = CFrame.lookAt(pos, pos + towardRider) * CFrame.Angles(-math.pi / 2, 0, 0) -- egg's top toward the rope
+			local settle = 1 - t
+			local wobble = CFrame.Angles(math.sin(t * math.pi * 5) * 0.7 * settle, t * math.pi * 3 * carried.spin, math.cos(t * math.pi * 4) * 0.5 * settle)
+			carried.part.CFrame = hang:Lerp(CFrame.new(pos) * slot.Rotation, t * t) * wobble
+			if t >= 1 then
+				carried.stage = "held"
+			end
+		else
+			carried.part.CFrame = slot
+		end
 	end
 end
 
@@ -637,7 +623,14 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	updateHerd(dt)
 	updateRider(dt)
-	if transfer then
+	if carried and carried.stage ~= "held" then
+		local egg = { cframe = carried.part.CFrame, radius = EGG_LOOP_RADIUS }
+		if carried.stage == "throw" then
+			Lasso.throw(carried.t, egg)
+		else
+			Lasso.pull(carried.t, egg)
+		end
+	elseif transfer then
 		local neck = transfer.target.animal:getNeck()
 		if transfer.stage == "throw" then
 			Lasso.throw(transfer.t, neck)
