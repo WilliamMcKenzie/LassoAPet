@@ -49,6 +49,7 @@ local THROW_TIME = 0.22 -- lasso flying out to the target's neck
 local TRANSFER_TIME = 0.4 -- rider pulled across on the rope
 local EGG_PULL_TIME = 0.55 -- egg reeled in on the rope
 local TURN_TIME = 1
+local LIE_HEIGHT = 0.7 -- root part's height when lying on the ground
 local EDGE = Config.CourseHalfWidth - 4
 -- The stampede runs all the time, whether anyone is riding or not: animal n pops
 -- in just behind the start line at n * HerdSpawnEvery seconds on the server clock,
@@ -84,11 +85,11 @@ highlight.Parent = workspace
 -- An entity is an animal plus its position on the course.
 -- yaw 0 faces -z (outbound); yaw pi faces +z (home).
 local phase = "idle" -- idle | outbound | turning | return | home | ended
-local starter, mount, loose
+local starter, mount
 local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
 local plans = {} -- [n] = { x, speed }, the stampede's schedule
 local taken = {} -- [n] = true once lassoed out of the stampede
-local strays = {} -- former mounts, running on to the far wall
+local strays = {} -- former mounts, running on to the far wall with the stampede
 local pool = {} -- spare animals for the stampede
 local herdClock = workspace:GetServerTimeNow()
 local hold, grace = 0, 0
@@ -116,6 +117,15 @@ local function newEntity(x, z, yaw)
 	animal:setSaddled(false)
 	animal.model.Parent = herdFolder
 	return entity
+end
+
+-- Lets a mount go: it runs on with the stampede (turning back downfield if it
+-- was heading home) and settles into its own pace.
+local function release(entity)
+	entity.animal:setSaddled(false)
+	entity.lane = entity.x
+	entity.cruise = rng:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax)
+	table.insert(strays, entity)
 end
 
 -- Every animal running loose on the course: the stampede's and former mounts.
@@ -205,10 +215,7 @@ local function cleanup()
 	if mount then
 		mount.animal.model:Destroy()
 	end
-	if loose then
-		loose.animal.model:Destroy()
-	end
-	mount, loose, transfer, tumble = nil, nil, nil, nil
+	mount, transfer, tumble = nil, nil, nil
 	if carried then
 		carried.part:Destroy()
 		carried = nil
@@ -279,6 +286,7 @@ local function finishRide(x, z)
 	if hrp then
 		hrp.Anchored = false
 		humanoid.Sit = false
+		humanoid.PlatformStand = false
 		hrp.CFrame = CFrame.new(x + 6, 4, z)
 	end
 	cleanup()
@@ -293,13 +301,14 @@ local function fail(reason)
 	if phase == "ended" then
 		return
 	end
-	local hrp = character()
+	local hrp, humanoid = character()
+	local dir = travelDir()
 	phase = "ended"
 	cutscene = nil
 	Hud.setCutscene(false)
-	loose, mount = mount, nil
-	if loose then
-		loose.animal:setSaddled(false)
+	if mount then
+		release(mount)
+		mount = nil
 	end
 	transfer = nil
 	if carried then
@@ -307,7 +316,11 @@ local function fail(reason)
 		carried = nil
 	end
 	highlight.Adornee = nil
-	tumble = { t = 0, from = hrp.CFrame, side = rng:NextNumber() < 0.5 and -1 or 1 }
+	-- Thrown off behind the animal, landing flat on their back until they go home.
+	local look = hrp.CFrame.LookVector
+	tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1 }
+	humanoid.Sit = false
+	humanoid.PlatformStand = true -- no animations: lies stiff
 	Hud.setAction(nil)
 	Hud.setHold(nil)
 	Hud.setDistance("")
@@ -330,9 +343,7 @@ end
 local function startTransfer(target)
 	local hrp = character()
 	local old = mount
-	old.animal:setSaddled(false)
-	old.speed = rng:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax)
-	table.insert(strays, old)
+	release(old)
 	mount = nil
 	transfer = { target = target, old = old, t = 0, stage = "throw", from = hrp.Position }
 end
@@ -510,14 +521,27 @@ local function updateHerd(dt)
 	end
 	for i = #strays, 1, -1 do
 		local entity = strays[i]
-		local z = entity.z - entity.speed * dt
+		local yaw = entity.yaw * math.exp(-3 * dt) -- swings round to face downfield
+		local turn = math.clamp((entity.yaw - yaw) / math.max(dt, 1e-3) / 3, -1, 1)
+		entity.yaw = yaw
+		entity.speed += (entity.cruise - entity.speed) * (1 - math.exp(-2 * dt))
+		local look = CFrame.Angles(0, yaw, 0).LookVector
+		local z = entity.z + look.Z * entity.speed * dt
 		if z <= END_Z then
 			Poof.at(Vector3.new(entity.x, 0, entity.z))
 			entity.animal.model:Destroy()
 			table.remove(strays, i)
-		else
-			moveAnimal(entity, entity.x, z, entity.speed, dt)
+			continue
 		end
+		local x = entity.x + look.X * entity.speed * dt
+		if math.abs(yaw) > 0.05 then
+			entity.lane = x
+		end
+		-- Swerves round obstacles like the rest of the stampede.
+		local lat = math.clamp(laneX(entity.lane, z) - x, -1, 1) * 12
+		entity.x, entity.z = math.clamp(x + lat * dt, -EDGE, EDGE), z
+		place(entity, -math.atan2(lat, math.max(entity.speed, 1)))
+		entity.animal:update(dt, entity.speed, turn + lat / 12)
 	end
 end
 
@@ -597,15 +621,12 @@ local function updateRider(dt)
 	if tumble then
 		tumble.t = math.min(tumble.t + dt / 0.7, 1)
 		local t = tumble.t
-		local from = tumble.from.Position
-		local ground = Vector3.new(from.X + tumble.side * 9, 3, from.Z + 6 * travelDir() * -1)
+		local from = tumble.from
+		local ground = Vector3.new(from.X + tumble.side * 9, LIE_HEIGHT, from.Z - 6 * tumble.dir)
 		local pos = from:Lerp(ground, t) + Vector3.new(0, math.sin(t * math.pi) * 6, 0)
-		hrp.CFrame = CFrame.new(pos) * tumble.from.Rotation * CFrame.Angles(t * math.pi * 2, 0, tumble.side * t * 1.2)
-		if t >= 1 then
-			tumble = nil
-			hrp.Anchored = false
-			humanoid.Sit = false
-		end
+		-- A flip and a quarter backwards, ending face up.
+		hrp.CFrame = CFrame.new(pos) * CFrame.Angles(0, tumble.yaw, 0)
+			* CFrame.Angles(t * math.pi * 2.5, 0, tumble.side * math.sin(t * math.pi) * 0.8)
 		focus = focus:Lerp(Vector3.new(pos.X, 0, pos.Z), 1 - math.exp(-4 * dt))
 		return
 	end
@@ -729,14 +750,6 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	if mount then
 		updateMount(dt)
-	end
-	if loose then
-		loose.speed = math.max(loose.speed - 30 * dt, 0)
-		local look = CFrame.Angles(0, loose.yaw, 0).LookVector
-		loose.x += look.X * loose.speed * dt
-		loose.z += look.Z * loose.speed * dt
-		place(loose, 0)
-		loose.animal:update(dt, loose.speed, 0)
 	end
 	updateRider(dt)
 	if carried and carried.stage == "held" then
