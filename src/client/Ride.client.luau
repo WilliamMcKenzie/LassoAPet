@@ -491,7 +491,7 @@ local function checkRide(dt)
 	end
 	for _, entity in herd do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
-		if math.abs(dx) < 3 and math.abs(dz) < 5.5 then
+		if math.abs(dx) < 2.6 and math.abs(dz) < 5 then
 			if phase == "return" and grace <= 0 then
 				return fail("CRASH!")
 			elseif phase == "outbound" then
@@ -617,7 +617,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	local targetYaw = mount and mount.yaw or camYaw
 	camYaw += (targetYaw - camYaw) * (1 - math.exp(-5 * dt))
 	local basis = CFrame.new(focus) * CFrame.Angles(0, camYaw, 0)
-	local desired = CFrame.lookAt((basis * CFrame.new(0, 15, 26)).Position, (basis * CFrame.new(0, 2, -24)).Position)
+	local desired = CFrame.lookAt((basis * CFrame.new(0, 38, 18)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
 end)
 

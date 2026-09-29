@@ -22,7 +22,7 @@ return {
 	TurnGrace = 2,
 
 	-- Herd
-	HerdCount = 22,
+	HerdCount = 12,
 	HerdSpeedMin = 26,
 	HerdSpeedMax = 36,
 	HerdAhead = 260,

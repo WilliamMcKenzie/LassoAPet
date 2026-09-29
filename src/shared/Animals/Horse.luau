@@ -11,13 +11,14 @@
 local Rig = require(script.Parent.Rig)
 local Quadruped = require(script.Parent.Quadruped)
 
-local COAT = Color3.fromRGB(163, 104, 63)
-local MUZZLE = Color3.fromRGB(122, 77, 48)
-local HAIR = Color3.fromRGB(56, 40, 32)
-local HOOF = Color3.fromRGB(44, 36, 32)
-local EYE = Color3.fromRGB(20, 20, 20)
-local BLANKET = Color3.fromRGB(151, 60, 52)
-local LEATHER = Color3.fromRGB(92, 58, 38)
+local COAT = Color3.fromRGB(205, 134, 80)
+local MUZZLE = Color3.fromRGB(240, 214, 176)
+local HAIR = Color3.fromRGB(70, 46, 34)
+local HOOF = Color3.fromRGB(60, 50, 45)
+local EYE_WHITE = Color3.fromRGB(250, 250, 250)
+local PUPIL = Color3.fromRGB(35, 35, 50)
+local BLANKET = Color3.fromRGB(200, 70, 60)
+local LEATHER = Color3.fromRGB(110, 70, 44)
 
 local STUDS = Enum.SurfaceType.Studs
 local STUD_FACES = {
@@ -29,8 +30,8 @@ local STUD_FACES = {
 	Bottom = Enum.SurfaceType.Inlet,
 }
 
-local BODY_HEIGHT = 6 -- body center above the ground
-local SEAT = CFrame.new(0, 2.2, 0.2) -- rider hips, relative to the body center
+local BODY_HEIGHT = 5 -- body center above the ground
+local SEAT = CFrame.new(0, 2.4, 0.2) -- rider hips, relative to the body center
 
 local GAITS = {
 	trot = {
@@ -75,37 +76,42 @@ local function at(x, y, z, pitch)
 	return CFrame.new(x, y, z) * CFrame.Angles(pitch or 0, 0, 0)
 end
 
+-- Chunky, toy-like proportions: big square head, short thick legs.
 local function addLeg(parts, leg, x, z)
-	table.insert(parts, { name = "Upper" .. leg, parent = "Body", joint = at(x, -1.2, z), offset = v(0, -0.9, 0), size = v(1, 2.4, 1.2), color = COAT, animated = true })
-	table.insert(parts, { name = "Lower" .. leg, parent = "Upper" .. leg, joint = at(0, -1.2, 0), offset = v(0, -1, 0), size = v(0.8, 2.3, 0.8), color = COAT, animated = true })
-	table.insert(parts, { name = "Hoof" .. leg, parent = "Lower" .. leg, joint = at(0, -1.4, 0), size = v(1, 0.6, 1), color = HOOF })
+	table.insert(parts, { name = "Upper" .. leg, parent = "Body", joint = at(x, -1.2, z), offset = v(0, -0.8, 0), size = v(1.2, 2, 1.3), color = COAT, animated = true })
+	table.insert(parts, { name = "Lower" .. leg, parent = "Upper" .. leg, joint = at(0, -0.6, 0), offset = v(0, -0.9, 0), size = v(1, 1.8, 1), color = COAT, animated = true })
+	table.insert(parts, { name = "Hoof" .. leg, parent = "Lower" .. leg, joint = at(0, -1.1, 0), size = v(1.15, 0.8, 1.15), color = HOOF })
 end
 
 local function parts()
 	local list = {
-		{ name = "Body", parent = "Root", joint = at(0, BODY_HEIGHT, 0), size = v(3, 3, 6.4), color = COAT, animated = true },
+		{ name = "Body", parent = "Root", joint = at(0, BODY_HEIGHT, 0), size = v(3.4, 3.2, 5.4), color = COAT, animated = true },
 
-		{ name = "Neck", parent = "Body", joint = at(0, 1, -2.6, -0.55), offset = v(0, 1.5, 0), size = v(1.6, 3.4, 1.8), color = COAT, animated = true },
-		{ name = "Mane", parent = "Neck", joint = at(0, 0.3, 0.95), size = v(0.5, 3.4, 0.6), color = HAIR },
+		{ name = "Neck", parent = "Body", joint = at(0, 1, -2.2, -0.35), offset = v(0, 1, 0), size = v(1.8, 2.4, 1.9), color = COAT, animated = true },
+		{ name = "Mane", parent = "Neck", joint = at(0, 0.4, 1), size = v(0.7, 2.6, 0.7), color = HAIR },
 
-		{ name = "Head", parent = "Neck", joint = at(0, 1.5, -0.1, 0.2), offset = v(0, 0.35, -0.9), size = v(1.6, 1.7, 3), color = COAT, animated = true },
-		{ name = "Muzzle", parent = "Head", joint = at(0, -0.25, -1.75), size = v(1.5, 1.3, 1.1), color = MUZZLE },
-		{ name = "EyeL", parent = "Head", joint = at(-0.81, 0.35, -0.3), size = v(0.2, 0.45, 0.45), color = EYE },
-		{ name = "EyeR", parent = "Head", joint = at(0.81, 0.35, -0.3), size = v(0.2, 0.45, 0.45), color = EYE },
-		{ name = "EarL", parent = "Head", joint = at(-0.5, 0.85, 0.7), offset = v(0, 0.4, 0), size = v(0.45, 0.8, 0.35), color = COAT, animated = true },
-		{ name = "EarR", parent = "Head", joint = at(0.5, 0.85, 0.7), offset = v(0, 0.4, 0), size = v(0.45, 0.8, 0.35), color = COAT, animated = true },
+		-- The head sits level so the eyes look straight ahead.
+		{ name = "Head", parent = "Neck", joint = at(0, 1.2, -0.2, 0.35), offset = v(0, 0.5, -0.8), size = v(2.4, 2.3, 2.6), color = COAT, animated = true },
+		{ name = "Muzzle", parent = "Head", joint = at(0, -0.55, -1.5), size = v(2, 1.2, 0.8), color = MUZZLE },
+		{ name = "EyeL", parent = "Head", joint = at(-0.6, 0.45, -1.33), size = v(0.9, 1, 0.12), color = EYE_WHITE },
+		{ name = "EyeR", parent = "Head", joint = at(0.6, 0.45, -1.33), size = v(0.9, 1, 0.12), color = EYE_WHITE },
+		{ name = "PupilL", parent = "Head", joint = at(-0.48, 0.28, -1.4), size = v(0.45, 0.55, 0.1), color = PUPIL },
+		{ name = "PupilR", parent = "Head", joint = at(0.48, 0.28, -1.4), size = v(0.45, 0.55, 0.1), color = PUPIL },
+		{ name = "Forelock", parent = "Head", joint = at(0, 1.25, -0.5), size = v(0.9, 0.3, 1), color = HAIR },
+		{ name = "EarL", parent = "Head", joint = at(-0.75, 1.15, 0.6), offset = v(0, 0.45, 0), size = v(0.5, 0.9, 0.4), color = COAT, animated = true },
+		{ name = "EarR", parent = "Head", joint = at(0.75, 1.15, 0.6), offset = v(0, 0.45, 0), size = v(0.5, 0.9, 0.4), color = COAT, animated = true },
 
-		{ name = "Tail1", parent = "Body", joint = at(0, 1.1, 3.2, -0.6), offset = v(0, -0.8, 0), size = v(0.8, 1.8, 0.8), color = HAIR, animated = true },
-		{ name = "Tail2", parent = "Tail1", joint = at(0, -0.8, 0, 0.35), offset = v(0, -0.9, 0), size = v(1, 2, 1), color = HAIR, animated = true },
+		{ name = "Tail1", parent = "Body", joint = at(0, 1.2, 2.7, -0.6), offset = v(0, -0.8, 0), size = v(0.9, 1.6, 0.9), color = HAIR, animated = true },
+		{ name = "Tail2", parent = "Tail1", joint = at(0, -0.8, 0, 0.35), offset = v(0, -0.9, 0), size = v(1.1, 1.8, 1.1), color = HAIR, animated = true },
 
-		{ name = "Blanket", parent = "Body", joint = at(0, 1.6, 0.2), size = v(3.2, 0.3, 2.8), color = BLANKET, saddle = true },
-		{ name = "Saddle", parent = "Body", joint = at(0, 1.95, 0.2), size = v(2.2, 0.5, 2), color = LEATHER, saddle = true },
-		{ name = "Horn", parent = "Body", joint = at(0, 2.3, -0.6), size = v(0.6, 0.6, 0.4), color = LEATHER, saddle = true },
+		{ name = "Blanket", parent = "Body", joint = at(0, 1.75, 0.2), size = v(3.6, 0.3, 2.8), color = BLANKET, saddle = true },
+		{ name = "Saddle", parent = "Body", joint = at(0, 2.05, 0.2), size = v(2.4, 0.5, 2), color = LEATHER, saddle = true },
+		{ name = "Horn", parent = "Body", joint = at(0, 2.4, -0.6), size = v(0.6, 0.6, 0.4), color = LEATHER, saddle = true },
 	}
-	addLeg(list, "FL", -0.95, -2.4)
-	addLeg(list, "FR", 0.95, -2.4)
-	addLeg(list, "HL", -0.95, 2.4)
-	addLeg(list, "HR", 0.95, 2.4)
+	addLeg(list, "FL", -1.05, -1.8)
+	addLeg(list, "FR", 1.05, -1.8)
+	addLeg(list, "HL", -1.05, 1.8)
+	addLeg(list, "HR", 1.05, 1.8)
 	return list
 end
 
