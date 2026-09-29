@@ -19,5 +19,6 @@ In Studio, open the Rojo plugin and press Connect.
 ## Layout
 
 - `src/shared` → `ReplicatedStorage.Shared` (config, animal models)
-- `src/server` → `ServerScriptService.Server` (world builder)
+- `src/server` → `ServerScriptService.Server` (sky, live colours)
+- `src/world` → `Workspace` (the map as a saved model; edit it in Studio, then right-click `Workspace.World` → Save to File over `src/world/World.rbxmx`)
 - `src/client` → `StarterPlayerScripts.Client` (ride controller, HUD)
