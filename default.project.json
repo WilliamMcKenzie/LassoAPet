@@ -22,9 +22,6 @@
     "Workspace": {
       "$properties": {
         "StreamingEnabled": false
-      },
-      "Hills": {
-        "$path": "src/world/Hills.rbxmx"
       }
     },
     "Lighting": {
