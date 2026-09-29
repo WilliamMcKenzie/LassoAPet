@@ -23,6 +23,7 @@ local IMAGES = {
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
 	dodge = { id = "rbxassetid://96827860827213", size = Vector2.new(1423, 115) },
+	sunburst = { id = "rbxassetid://130261551778736", size = Vector2.new(1995, 1996) }, -- white rays, behind TAKE EGG
 	vignette = { id = "rbxassetid://102545209742676", size = Vector2.new(512, 512) }, -- white; clear to 60% out, full only in the corners
 	buckedOff = { id = "rbxassetid://114839635512682", size = Vector2.new(1015, 300) },
 	crash = { id = "rbxassetid://137889269113133", size = Vector2.new(632, 230) },
@@ -56,7 +57,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, dodge, dodgePulse, vignette
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
 
 -- Text outlines, kept at a whole number of screen pixels. The HUD's UIScale scales
 -- them too, and at fractional widths the dot UIStroke leaves in small letter
@@ -245,8 +246,14 @@ function Hud.init(onAction, onHome, onRide)
 	banner.Visible = false
 	Instance.new("UIScale").Parent = banner
 
-	action = button(rideRoot, "lasso", fit("lasso", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onAction)
+	action, actionScale = button(rideRoot, "lasso", fit("lasso", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onAction)
 	action.Name = "Action"
+	action.ZIndex = 2
+	-- Slowly turning sunburst behind TAKE EGG (Config.TakeEggSunburst).
+	local eggHeight = fit("takeEgg", BUTTON_WIDTH).Y.Offset
+	sunburst = image(rideRoot, "sunburst", UDim2.fromOffset(BUTTON_WIDTH * 1.5, BUTTON_WIDTH * 1.5), UDim2.new(0.5, 0, 1, -MARGIN - eggHeight / 2))
+	sunburst.ImageTransparency = 0.25
+	sunburst.Visible = false
 
 	home = button(rideRoot, "home", fit("home", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onHome)
 	home.Visible = false
@@ -291,6 +298,7 @@ function Hud.show(visible)
 	gained.row.Visible = false
 	Hud.setReturning(false)
 	Hud.setVignette(0)
+	actionScale.Scale = 1
 	setCash(0)
 end
 
@@ -315,6 +323,13 @@ function Hud.setAction(text, ready)
 		end
 		action.Image = IMAGES[key].id
 		action.Size = fit(key, BUTTON_WIDTH)
+	end
+	-- TAKE EGG pulses so it can't be missed.
+	local egg = text ~= nil and ACTIONS[text] == "takeEgg"
+	sunburst.Visible = egg and Config.TakeEggSunburst
+	if egg then
+		actionScale.Scale = 1 + 0.07 * math.sin(os.clock() * math.pi * 3)
+		sunburst.Rotation = os.clock() * 25
 	end
 end
 
