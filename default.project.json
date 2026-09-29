@@ -23,6 +23,34 @@
       "$properties": {
         "StreamingEnabled": false
       }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "ShadowMap",
+        "Brightness": 2.5,
+        "GlobalShadows": true,
+        "ShadowSoftness": 0.2,
+        "Ambient": [
+          0.2745,
+          0.2745,
+          0.3137
+        ],
+        "OutdoorAmbient": [
+          0.502,
+          0.502,
+          0.502
+        ],
+        "EnvironmentDiffuseScale": 0.25,
+        "EnvironmentSpecularScale": 1,
+        "ExposureCompensation": 0.2,
+        "ClockTime": 14
+      },
+      "ColorCorrection": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Contrast": 0.05
+        }
+      }
     }
   }
 }

@@ -1,9 +1,10 @@
 -- Tuning values shared by the world builder and the ride.
 return {
-	-- World (studs). Home is z > 0, the course runs toward -z.
+	-- World (studs). Ground and wall colours are calibrated so they render like the
+	-- Steal an Egg reference under the Lighting set in default.project.json. Home is z > 0, the course runs toward -z.
 	Tile = 4,
-	GroundColors = { Color3.fromRGB(109, 186, 64), Color3.fromRGB(120, 200, 67) },
-	WallColors = { Color3.fromRGB(192, 140, 91), Color3.fromRGB(209, 157, 102) },
+	GroundColors = { Color3.fromRGB(133, 246, 85), Color3.fromRGB(144, 255, 86) },
+	WallColors = { Color3.fromRGB(231, 153, 105), Color3.fromRGB(255, 172, 114) },
 	CourseHalfWidth = 56,
 	CourseLength = 1400,
 	HomeHalfWidth = 80,

@@ -222,7 +222,6 @@ egg.Parent = nest
 nest.Parent = world
 
 -- Bright, cloudless kid-friendly sky.
-Lighting.ClockTime = 14
 for _, child in Lighting:GetChildren() do
 	if child:IsA("Sky") or child:IsA("Atmosphere") or child:IsA("Clouds") then
 		child:Destroy()
@@ -243,6 +242,4 @@ end
 sky.SkyboxUp = "rbxassetid://73730341040940"
 sky.SkyboxDn = "rbxassetid://98351643334543"
 sky.Parent = Lighting
-Lighting.ExposureCompensation = 0.1
-Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
 world:SetAttribute("Ready", true)
