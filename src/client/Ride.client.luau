@@ -62,7 +62,7 @@ local actionTarget
 local turnT, camYaw = 0, 0
 local focus = Vector3.zero
 local touchSteer, padSteer = 0, 0
-local coins = 0 -- session only for now; saving comes with the pen
+local coins = 0 -- cash gained this ride; what the Gold icon shows while riding
 local touchStart = {}
 
 local function newEntity(x, z, yaw)
@@ -232,6 +232,7 @@ startRide = function()
 		table.insert(herd, entity)
 	end
 	phase, hold, grace, camYaw = "outbound", Config.HoldTime, 0, 0
+	coins = 0
 	hrp.Anchored = true
 	humanoid.Sit = true
 	controls:Disable()

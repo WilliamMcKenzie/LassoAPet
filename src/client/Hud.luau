@@ -22,6 +22,7 @@ local IMAGES = {
 	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
+	buckedOff = { id = "rbxassetid://123571061022694", size = Vector2.new(1015, 300) },
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
 	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
@@ -40,6 +41,9 @@ local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
 -- Action text from the ride -> which image the action button shows.
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
 
+-- Banners drawn as images instead of text.
+local BANNERS = { ["BUCKED OFF"] = "buckedOff" }
+
 -- Banner colors: bad news red, good news yellow, anything else white.
 local TONES = {
 	["CRASH!"] = RED,
@@ -48,7 +52,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, ride, gold, pets, eggs, goldScale
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, goldScale
 
 local function label(parent, size, position, textSize)
 	local l = Instance.new("TextLabel")
@@ -186,6 +190,9 @@ function Hud.init(onAction, onHome, onRide)
 	distance.ZIndex = 2
 
 	message = label(rideRoot, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
+	banner = image(rideRoot, "buckedOff", fit("buckedOff", 560), message.Position)
+	banner.Visible = false
+	Instance.new("UIScale").Parent = banner
 
 	action = button(rideRoot, "lasso", fit("lasso", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onAction)
 	action.Name = "Action"
@@ -213,8 +220,10 @@ function Hud.show(visible)
 	gui.Enabled = visible
 	if not visible then
 		message.Text = ""
+		banner.Visible = false
 		home.Visible = false
 	end
+	gold.Visible = true
 	ride.Visible = false -- comes back when the ride prompt shows again
 	pets.Visible = not visible
 	eggs.Visible = not visible
@@ -245,7 +254,43 @@ function Hud.setAction(text, ready)
 	end
 end
 
+-- Slams a banner image in: drops from big to size fast, squashes, and shakes.
+local function slam(key)
+	banner.Image = IMAGES[key].id
+	banner.Size = fit(key, 560)
+	banner.Visible = true
+	banner.ImageTransparency = 1
+	banner.Rotation = -4
+	local scale = banner.UIScale
+	scale.Scale = 2.6
+	local rest = banner.Position
+	TweenService:Create(banner, TweenInfo.new(0.1), { ImageTransparency = 0 }):Play()
+	local drop = TweenService:Create(scale, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = 0.9 })
+	drop.Completed:Connect(function()
+		TweenService:Create(scale, TweenInfo.new(0.35, Enum.EasingStyle.Elastic), { Scale = 1 }):Play()
+		TweenService:Create(banner, TweenInfo.new(0.35, Enum.EasingStyle.Elastic), { Rotation = 0 }):Play()
+		task.spawn(function()
+			for i = 8, 1, -1 do
+				banner.Position = rest + UDim2.fromOffset(math.random(-i, i) * 1.5, math.random(-i, i) * 1.5)
+				task.wait(0.025)
+			end
+			banner.Position = rest
+		end)
+	end)
+	drop:Play()
+end
+
 function Hud.flash(text, seconds)
+	-- Fail screens hide the ride's cash.
+	if TONES[text] == RED then
+		gold.Visible = false
+	end
+	banner.Visible = false
+	if BANNERS[text] then
+		message.Text = ""
+		slam(BANNERS[text])
+		return
+	end
 	message.Text = text
 	message.TextColor3 = TONES[text] or WHITE
 	message.TextTransparency = 0
