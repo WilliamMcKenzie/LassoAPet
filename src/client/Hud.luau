@@ -31,7 +31,8 @@ local IMAGES = {
 
 local BUTTON_WIDTH = 320
 local BAR_WIDTH = 440
-local ICON_HEIGHT = 100
+local ICON_HEIGHT = 100 -- Gold
+local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
 
@@ -200,9 +201,9 @@ function Hud.init(onAction, onRideAgain, onRide)
 	homeRoot = root(homeGui)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	gold, goldScale = button(homeRoot, "gold", fit("gold", nil, ICON_HEIGHT), Vector2.zero, UDim2.new())
-	local eggsSize = fit("eggs", nil, ICON_HEIGHT)
+	local eggsSize = fit("eggs", nil, SIDE_ICON_HEIGHT)
 	eggs = button(homeRoot, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
-	pets = button(homeRoot, "pets", fit("pets", nil, ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
+	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
 	placeGold(false)
 end
 
