@@ -476,8 +476,18 @@ local function moveAnimal(entity, x, z, speed, dt)
 	animate(entity, dt, speed, lat / 12)
 end
 
-local function updateHerd(dt)
+-- The stampede runs on the ride's time, so the egg slow-mo holds this player's copy
+-- back from the shared server clock. It catches up again: fast during the egg
+-- cutscene, while the camera is on the egg, and otherwise at up to 1.5x speed
+-- (which also trims any small drift in the clock).
+local function updateHerd(dt, realDt, catchUp)
 	herdClock += dt
+	local lag = workspace:GetServerTimeNow() - herdClock
+	if catchUp == "fast" then
+		herdClock += lag * (1 - math.exp(-3 * realDt))
+	elseif catchUp == "steady" then
+		herdClock += math.clamp(lag, -0.5 * realDt, 0.5 * realDt)
+	end
 	local every = Config.HerdSpawnEvery
 	local oldest, newest = math.ceil((herdClock - LIFE) / every), math.floor(herdClock / every)
 	local camZ = camera.CFrame.Position.Z
@@ -740,6 +750,7 @@ end
 local timeScale = 1
 
 RunService.PreSimulation:Connect(function(dt)
+	local realDt = dt
 	local slow = (phase == "outbound" and actionTarget == "egg") or cutscene ~= nil
 	timeScale += ((slow and Config.EggSlowMo or 1) - timeScale) * (1 - math.exp(-10 * dt))
 	dt *= timeScale
@@ -752,7 +763,7 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		nestEgg:update(dt)
 	end
-	updateHerd(dt)
+	updateHerd(dt, realDt, if cutscene then "fast" elseif slow then "hold" else "steady")
 	Dust.update(dt)
 	if phase == "idle" then
 		if starter then
