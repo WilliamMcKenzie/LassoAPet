@@ -23,7 +23,10 @@ local function block(parent, size, position, color, name)
 	part.Size = size
 	part.Position = position
 	part.Color = color
-	part.TopSurface = Enum.SurfaceType.Studs
+	-- Studs on every visible face, like classic Roblox bricks.
+	for _, face in { "TopSurface", "FrontSurface", "BackSurface", "LeftSurface", "RightSurface" } do
+		part[face] = Enum.SurfaceType.Studs
+	end
 	part.BottomSurface = Enum.SurfaceType.Inlet
 	part.Parent = parent
 	return part
@@ -40,16 +43,18 @@ end
 local ground = folder("Ground")
 local tile = Config.Tile
 local function groundRect(x0, x1, z0, z1)
+	-- One slab in the first shade, then only the second-shade squares on top: half the parts.
+	block(ground, Vector3.new(x1 - x0, 2, z1 - z0), Vector3.new((x0 + x1) / 2, -1.02, (z0 + z1) / 2), Config.GroundColors[1], "Slab")
 	for x = x0, x1 - tile, tile do
 		for z = z1 - tile, z0, -tile do
-			local shade = (math.floor(x / tile) + math.floor(z / tile)) % 2 + 1
-			local part = block(ground, Vector3.new(tile, 2, tile), Vector3.new(x + tile / 2, -1, z + tile / 2), Config.GroundColors[shade], "Tile")
-			part.CanQuery = true
+			if (math.floor(x / tile) + math.floor(z / tile)) % 2 == 1 then
+				block(ground, Vector3.new(tile, 1, tile), Vector3.new(x + tile / 2, -0.5, z + tile / 2), Config.GroundColors[2], "Tile")
+			end
 		end
 	end
 end
 -- One wide plain under everything, so the edges of the map never show the void.
-block(ground, Vector3.new(2048, 2, 2048), Vector3.new(0, -1.05, -Config.CourseLength / 2), Color3.fromRGB(88, 150, 64), "Plain")
+block(ground, Vector3.new(2048, 2, 2048), Vector3.new(0, -1.2, -Config.CourseLength / 2), Color3.fromRGB(88, 150, 64), "Plain")
 groundRect(-Config.CourseHalfWidth, Config.CourseHalfWidth, -Config.CourseLength, 0)
 groundRect(-Config.HomeHalfWidth, Config.HomeHalfWidth, 0, Config.HomeDepth)
 
