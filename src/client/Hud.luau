@@ -21,6 +21,7 @@ local IMAGES = {
 	lasso = { id = "rbxassetid://94121512214531", size = Vector2.new(960, 358) },
 	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
+	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
 	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
@@ -47,7 +48,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, rideAgain, ride, gold, pets, eggs, goldScale
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, ride, gold, pets, eggs, goldScale
 
 local function label(parent, size, position, textSize)
 	local l = Instance.new("TextLabel")
@@ -150,7 +151,7 @@ local function placeGold(riding)
 	end
 end
 
-function Hud.init(onAction, onRideAgain, onRide)
+function Hud.init(onAction, onHome, onRide)
 	-- With ShowHud off the HUD is built but never parented, so nothing shows.
 	local playerGui = Config.ShowHud and Players.LocalPlayer:WaitForChild("PlayerGui") or nil
 	if not Config.ShowHud then
@@ -189,9 +190,8 @@ function Hud.init(onAction, onRideAgain, onRide)
 	action = button(rideRoot, "lasso", fit("lasso", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onAction)
 	action.Name = "Action"
 
-	rideAgain = button(rideRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRideAgain)
-	rideAgain.Name = "RideAgain"
-	rideAgain.Visible = false
+	home = button(rideRoot, "home", fit("home", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onHome)
+	home.Visible = false
 
 	-- Home buttons, always on screen outside a ride; Gold stays during rides too.
 	homeGui = Instance.new("ScreenGui")
@@ -213,7 +213,7 @@ function Hud.show(visible)
 	gui.Enabled = visible
 	if not visible then
 		message.Text = ""
-		rideAgain.Visible = false
+		home.Visible = false
 	end
 	ride.Visible = false -- comes back when the ride prompt shows again
 	pets.Visible = not visible
@@ -268,8 +268,9 @@ function Hud.showRide(visible)
 	ride.Visible = visible and not gui.Enabled
 end
 
-function Hud.showRideAgain(visible)
-	rideAgain.Visible = visible
+-- Home button, shown after a failed ride; sends you back home.
+function Hud.showHome(visible)
+	home.Visible = visible
 end
 
 -- The amount is baked into the Gold image for now, so this only pops the icon.

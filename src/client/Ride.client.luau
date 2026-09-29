@@ -241,12 +241,13 @@ startRide = function()
 	Hud.setDistance("")
 end
 
-local function finishRide()
+-- Back on foot at home, standing at x, z.
+local function finishRide(x, z)
 	local hrp, humanoid = character()
 	if hrp then
 		hrp.Anchored = false
 		humanoid.Sit = false
-		hrp.CFrame = CFrame.new(mount.x + 6, 4, mount.z)
+		hrp.CFrame = CFrame.new(x + 6, 4, z)
 	end
 	cleanup()
 	phase = "idle"
@@ -280,19 +281,17 @@ local function fail(reason)
 	Hud.flash(reason)
 	task.delay(0.8, function()
 		if phase == "ended" then
-			Hud.showRideAgain(true)
+			Hud.showHome(true)
 		end
 	end)
 end
 
-local function rideAgain()
+local function goHome()
 	if phase ~= "ended" then
 		return
 	end
-	Hud.showRideAgain(false)
-	cleanup()
-	spawnStarter()
-	startRide()
+	Hud.showHome(false)
+	finishRide(Config.StarterSpot.X, Config.StarterSpot.Z)
 end
 
 local function startTransfer(target)
@@ -520,7 +519,7 @@ local function checkRide(dt)
 		Hud.flash("EGG SAVED!", 2)
 		task.delay(2.5, function()
 			if phase == "home" then
-				finishRide()
+				finishRide(mount.x, mount.z)
 			end
 		end)
 	end
@@ -647,7 +646,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
 end)
 
-Hud.init(onAction, rideAgain, rideFromHome)
+Hud.init(onAction, goHome, rideFromHome)
 
 player.CharacterAdded:Connect(function()
 	if phase ~= "idle" then
