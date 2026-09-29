@@ -27,15 +27,6 @@ function WorldColors.apply(world)
 	for _, part in world.Ground:GetChildren() do
 		paint(part, groundA, groundB)
 	end
-	-- The saved terraces in Workspace.Hills follow the ground colours too.
-	local hills = workspace:FindFirstChild("Hills")
-	if hills then
-		for _, part in hills:GetChildren() do
-			if part.Name == "Terrace" then
-				paint(part, groundA, groundB)
-			end
-		end
-	end
 	for _, part in world.Walls:GetChildren() do
 		if part.Name == "Cap" then
 			part.Color = groundB
