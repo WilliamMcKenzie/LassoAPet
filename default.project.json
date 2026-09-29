@@ -22,6 +22,9 @@
     "Workspace": {
       "$properties": {
         "StreamingEnabled": false
+      },
+      "World": {
+        "$path": "src/world/World.rbxmx"
       }
     },
     "Lighting": {
