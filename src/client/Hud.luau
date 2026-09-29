@@ -175,7 +175,7 @@ end
 local BOTTOM_CENTER = Vector2.new(0.5, 1)
 local BUTTON_SPOT = UDim2.new(0.5, 0, 1, -MARGIN)
 
--- Coin with "+N$" beside it, the text overlapping the coin's edge
+-- Coin with the amount beside it, the text overlapping the coin's edge
 -- (QM's MoreGold look). Used for this ride's cash and for the fail screen's total.
 local function cashRow(parent, coinSize, textSize, anchor, position)
 	local row = Instance.new("Frame")
@@ -200,8 +200,11 @@ local function cashRow(parent, coinSize, textSize, anchor, position)
 	return { row = row, text = text, scale = scale }
 end
 
-local function setCash(cash, amount)
-	cash.text.Text = "+" .. amount .. "$"
+-- The ride's cash reads "N$"; the fail screen's reads "+N$".
+local rideAmount = 0
+local function setCash(amount)
+	rideAmount = amount
+	rideCash.text.Text = amount .. "$"
 end
 
 function Hud.init(onAction, onHome, onRide)
@@ -287,7 +290,7 @@ function Hud.show(visible)
 	eggs.Visible = not visible
 	rideCash.row.Visible = true
 	gained.row.Visible = false
-	setCash(rideCash, 0)
+	setCash(0)
 end
 
 function Hud.setHold(fraction)
@@ -381,7 +384,7 @@ function Hud.showHome(visible)
 	home.Visible = visible
 	gained.row.Visible = visible
 	if visible then
-		gained.text.Text = rideCash.text.Text
+		gained.text.Text = "+" .. rideAmount .. "$"
 		gained.scale.Scale = 0
 		TweenService:Create(gained.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	end
@@ -389,7 +392,7 @@ end
 
 -- Cash gained this ride.
 function Hud.setCoins(amount)
-	setCash(rideCash, amount)
+	setCash(amount)
 	rideCash.scale.Scale = 1.25
 	TweenService:Create(rideCash.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 end
