@@ -1,7 +1,7 @@
 -- Tuning values shared by the map, the live colours and the ride.
 return {
 	-- false hides every UI element (HUD, coins, Roblox menus, the ride prompt), e.g. for mockup screenshots.
-	ShowHud = false,
+	ShowHud = true,
 
 	-- World (studs). The map is the saved model src/world/World.rbxmx; these sizes
 	-- must match it (the ride reads them). Ground and wall colours are calibrated so

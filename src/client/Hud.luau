@@ -1,9 +1,6 @@
--- Minimal riding HUD: Hold bar with the distance on it, one action button, a
--- center message, and a coin counter with a +1 popup.
--- Button style follows the free "Studded UI" kit by RBLX Essentials
--- (https://rblx-essentials.itch.io/studded-ui): rounded face, top-lit gradient,
--- a darker bottom band, a fine stud pattern and a dark tinted outline, no drop shadow.
--- Coin icon: Naro Free Icon Pack. Lasso icon: drawn for this game in the same style.
+-- Riding HUD built from QM's images: the Hold bar with the distance on it, one
+-- action button (TAKE EGG or LASSO), a center message, and the home buttons
+-- (RIDE, Gold, Pets, Eggs). Layout follows QM's mockups.
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -12,22 +9,33 @@ local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
 local Hud = {}
 
-local FONT = Enum.Font.GothamBlack
-local STROKE = 2.5 -- every outline (text, buttons, bar) uses this width
-local INK = Color3.fromRGB(20, 20, 28)
+local FONT = Enum.Font.FredokaOne
+local STROKE = 6
 local WHITE = Color3.new(1, 1, 1)
-local STUD_TILE = 12 -- pixels per stud on buttons and the bar
+local GREY = Color3.fromRGB(150, 150, 150)
+local RED = Color3.fromRGB(255, 72, 72)
+local YELLOW = Color3.fromRGB(255, 190, 30)
 
+-- Uploaded from QM's ui_assets; size is each image's native pixel size.
 local IMAGES = {
-	coin = "rbxassetid://104555508261055",
-	lasso = "rbxassetid://89797380977705",
-	stud = "rbxassetid://125672549302143",
+	takeEgg = { id = "rbxassetid://104292931687556", size = Vector2.new(960, 434) },
+	lasso = { id = "rbxassetid://94121512214531", size = Vector2.new(960, 358) },
+	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
+	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
+	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
+	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
+	gold = { id = "rbxassetid://75090734827129", size = Vector2.new(262, 263) },
+	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
+	coin = { id = "rbxassetid://104555508261055", size = Vector2.new(1, 1) }, -- +1 popup, Naro Free Icon Pack
 }
 
-local GREEN = Color3.fromRGB(80, 206, 64)
-local YELLOW = Color3.fromRGB(255, 190, 30)
-local GREY = Color3.fromRGB(140, 146, 160)
-local RED = Color3.fromRGB(255, 72, 72)
+local BUTTON_WIDTH = 320
+local BAR_WIDTH = 440
+local ICON_HEIGHT = 100
+local MARGIN = 24
+
+-- Action text from the ride -> which image the action button shows.
+local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
 
 -- Banner colors: bad news red, good news yellow, anything else white.
 local TONES = {
@@ -37,31 +45,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
-local gui, coinGui, holdFrame, holdFill, distance, action, message, rideAgain, coinCount, coinScale
-
-local function darker(c, k)
-	return Color3.new(c.R * k, c.G * k, c.B * k)
-end
-
-local function lighter(c, k)
-	return c:Lerp(WHITE, k)
-end
-
-local function outline(parent, color, mode)
-	local s = Instance.new("UIStroke")
-	s.Thickness = STROKE
-	s.Color = color or INK
-	s.LineJoinMode = Enum.LineJoinMode.Round
-	s.ApplyStrokeMode = mode or Enum.ApplyStrokeMode.Contextual
-	s.Parent = parent
-	return s
-end
-
-local function corner(parent, radius)
-	local c = Instance.new("UICorner")
-	c.CornerRadius = radius
-	c.Parent = parent
-end
+local gui, homeGui, holdFrame, holdClip, distance, action, message, rideAgain, ride, gold, pets, eggs, goldScale
 
 local function label(parent, size, position, textSize)
 	local l = Instance.new("TextLabel")
@@ -73,79 +57,43 @@ local function label(parent, size, position, textSize)
 	l.TextSize = textSize
 	l.TextColor3 = WHITE
 	l.Text = ""
-	outline(l)
+	local s = Instance.new("UIStroke")
+	s.Thickness = STROKE
+	s.Color = Color3.new(0, 0, 0)
+	s.LineJoinMode = Enum.LineJoinMode.Round
+	s.Parent = l
 	l.Parent = parent
 	return l
 end
 
-local function image(parent, id, size, position)
+-- Image at its native aspect ratio: pass a width or a height and the other follows.
+local function fit(key, width, height)
+	local native = IMAGES[key].size
+	return UDim2.fromOffset(width or height * native.X / native.Y, height or width * native.Y / native.X)
+end
+
+local function image(parent, key, size, position)
 	local i = Instance.new("ImageLabel")
 	i.BackgroundTransparency = 1
 	i.AnchorPoint = Vector2.new(0.5, 0.5)
 	i.Size = size
 	i.Position = position
-	i.Image = id
+	i.Image = IMAGES[key].id
 	i.Parent = parent
 	return i
 end
 
--- Fine stud pattern, clipped to the same rounded corners as its parent.
-local function studs(parent, radius)
-	local s = Instance.new("ImageLabel")
-	s.Name = "Studs"
-	s.BackgroundTransparency = 1
-	s.Size = UDim2.fromScale(1, 1)
-	s.Image = IMAGES.stud
-	s.ScaleType = Enum.ScaleType.Tile
-	s.TileSize = UDim2.fromOffset(STUD_TILE, STUD_TILE)
-	s.ImageTransparency = 0.45
-	s.ZIndex = parent.ZIndex + 1
-	corner(s, radius)
-	s.Parent = parent
-	return s
-end
-
--- Top-lit face with a darker band along the bottom edge.
-local function shade(face, color)
-	local g = face:FindFirstChildOfClass("UIGradient") or Instance.new("UIGradient")
-	g.Rotation = 90
-	g.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, lighter(color, 0.22)),
-		ColorSequenceKeypoint.new(0.8, color),
-		ColorSequenceKeypoint.new(0.81, darker(color, 0.8)),
-		ColorSequenceKeypoint.new(1, darker(color, 0.8)),
-	})
-	g.Parent = face
-	face.BackgroundColor3 = WHITE
-	face.UIStroke.Color = darker(color, 0.35)
-end
-
-local function button(name, size, color, textSize, onActivated)
-	local radius = UDim.new(0, 14)
-	local root = Instance.new("TextButton")
-	root.Name = name
-	root.Size = size
+-- Image button that shrinks a little while pressed.
+local function button(parent, key, size, anchor, position, onActivated)
+	local root = Instance.new("ImageButton")
+	root.Name = key
 	root.BackgroundTransparency = 1
-	root.Text = ""
-	root.AutoButtonColor = false
-
-	local face = Instance.new("Frame")
-	face.Name = "Face"
-	face.AnchorPoint = Vector2.new(0.5, 0.5)
-	face.Position = UDim2.fromScale(0.5, 0.5)
-	face.Size = UDim2.fromScale(1, 1)
-	face.BorderSizePixel = 0
-	corner(face, radius)
-	outline(face, nil, Enum.ApplyStrokeMode.Border)
-	studs(face, radius)
-	face.Parent = root
+	root.AnchorPoint = anchor
+	root.Size = size
+	root.Position = position
+	root.Image = IMAGES[key].id
 	local scale = Instance.new("UIScale")
-	scale.Parent = face
-
-	local text = label(face, UDim2.new(1, -12, 0, textSize + 8), UDim2.fromScale(0.5, 0.5), textSize)
-	text.Name = "Label"
-	text.ZIndex = 4
-
+	scale.Parent = root
 	local press = TweenInfo.new(0.08)
 	root.MouseButton1Down:Connect(function()
 		TweenService:Create(scale, press, { Scale = 0.93 }):Play()
@@ -155,16 +103,28 @@ local function button(name, size, color, textSize, onActivated)
 			TweenService:Create(scale, press, { Scale = 1 }):Play()
 		end)
 	end
-	root.Activated:Connect(onActivated)
-
-	local function setColor(c)
-		shade(face, c)
+	if onActivated then
+		root.Activated:Connect(onActivated)
 	end
-	setColor(color)
-	return { root = root, face = face, label = text, setColor = setColor }
+	root.Parent = parent
+	return root, scale
 end
 
-function Hud.init(onAction, onRideAgain)
+local BOTTOM_CENTER = Vector2.new(0.5, 1)
+local BUTTON_SPOT = UDim2.new(0.5, 0, 1, -MARGIN)
+
+-- Gold sits bottom left at home and just right of the Hold bar while riding.
+local function placeGold(riding)
+	if riding then
+		gold.AnchorPoint = Vector2.new(0, 0.5)
+		gold.Position = UDim2.new(0.5, BAR_WIDTH / 2 + 8, 0, holdFrame.Position.Y.Offset)
+	else
+		gold.AnchorPoint = Vector2.new(0, 1)
+		gold.Position = UDim2.new(0, MARGIN, 1, -MARGIN)
+	end
+end
+
+function Hud.init(onAction, onRideAgain, onRide)
 	-- With ShowHud off the HUD is built but never parented, so nothing shows.
 	local playerGui = Config.ShowHud and Players.LocalPlayer:WaitForChild("PlayerGui") or nil
 	if not Config.ShowHud then
@@ -177,87 +137,64 @@ function Hud.init(onAction, onRideAgain)
 	gui.Enabled = false
 	gui.Parent = playerGui
 
-	-- Hold bar: dark rounded track, studded green fill, distance written on top.
-	local barRadius = UDim.new(1, 0)
-	holdFrame = Instance.new("Frame")
+	-- Hold bar: the empty bar, with the full bar cropped to the Hold fraction on top.
+	-- The full image keeps the bar's size inside the clip, so the crop lines up 1:1.
+	local barSize = fit("barEmpty", BAR_WIDTH)
+	holdFrame = image(gui, "barEmpty", barSize, UDim2.new(0.5, 0, 0, 16 + barSize.Y.Offset / 2))
 	holdFrame.Name = "Hold"
-	holdFrame.AnchorPoint = Vector2.new(0.5, 0)
-	holdFrame.Position = UDim2.new(0.5, 0, 0, 52)
-	holdFrame.Size = UDim2.fromOffset(320, 34)
-	holdFrame.BackgroundColor3 = Color3.fromRGB(40, 42, 56)
-	holdFrame.BorderSizePixel = 0
-	corner(holdFrame, barRadius)
-	outline(holdFrame, nil, Enum.ApplyStrokeMode.Border)
-	holdFrame.Parent = gui
-	local well = Instance.new("Frame")
-	well.BackgroundTransparency = 1
-	well.Position = UDim2.fromOffset(4, 4)
-	well.Size = UDim2.new(1, -8, 1, -8)
-	well.Parent = holdFrame
-	holdFill = Instance.new("Frame")
-	holdFill.Name = "Fill"
-	holdFill.Size = UDim2.fromScale(1, 1)
-	holdFill.BorderSizePixel = 0
-	corner(holdFill, barRadius)
-	local fillStroke = outline(holdFill, nil, Enum.ApplyStrokeMode.Border)
-	fillStroke.Transparency = 1
-	studs(holdFill, barRadius)
-	holdFill.Parent = well
-	shade(holdFill, GREEN)
+	holdClip = Instance.new("Frame")
+	holdClip.Name = "Fill"
+	holdClip.BackgroundTransparency = 1
+	holdClip.ClipsDescendants = true
+	holdClip.Size = UDim2.fromScale(1, 1)
+	holdClip.Parent = holdFrame
+	local filled = image(holdClip, "barFilled", barSize, UDim2.fromScale(0, 0))
+	filled.AnchorPoint = Vector2.zero
 
-	distance = label(holdFrame, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 20)
-	distance.ZIndex = 5
+	-- Distance sits on the bar but outside it, so it still shows once the bar is gone.
+	distance = label(gui, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 50)
+	distance.Name = "Distance"
+	distance.ZIndex = 2
 
 	message = label(gui, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
 
-	action = button("Action", UDim2.fromOffset(140, 140), YELLOW, 24, onAction)
-	image(action.face, IMAGES.lasso, UDim2.fromOffset(84, 84), UDim2.new(0.5, 0, 0, 54)).ZIndex = 3
-	action.label.Position = UDim2.new(0.5, 0, 1, -24)
-	action.root.AnchorPoint = Vector2.new(1, 1)
-	action.root.Position = UDim2.new(1, -40, 1, -40)
-	action.root.Parent = gui
+	action = button(gui, "lasso", fit("lasso", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onAction)
+	action.Name = "Action"
 
-	rideAgain = button("RideAgain", UDim2.fromOffset(260, 72), GREEN, 30, onRideAgain)
-	rideAgain.root.AnchorPoint = Vector2.new(0.5, 0.5)
-	rideAgain.root.Position = UDim2.fromScale(0.5, 0.48)
-	rideAgain.label.Text = "RIDE AGAIN"
-	rideAgain.root.Visible = false
-	rideAgain.root.Parent = gui
+	rideAgain = button(gui, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRideAgain)
+	rideAgain.Name = "RideAgain"
+	rideAgain.Visible = false
 
-	-- Coin counter, always visible, bottom left.
-	coinGui = Instance.new("ScreenGui")
-	coinGui.Name = "CoinHud"
-	coinGui.ResetOnSpawn = false
-	coinGui.IgnoreGuiInset = true
-	coinGui.Parent = playerGui
-	local counter = Instance.new("Frame")
-	counter.Name = "Coins"
-	counter.BackgroundTransparency = 1
-	counter.AnchorPoint = Vector2.new(0, 1)
-	counter.Position = UDim2.new(0, 28, 1, -28)
-	counter.Size = UDim2.fromOffset(220, 64)
-	counter.Parent = coinGui
-	coinScale = Instance.new("UIScale")
-	coinScale.Parent = counter
-	image(counter, IMAGES.coin, UDim2.fromOffset(64, 64), UDim2.fromOffset(32, 32))
-	coinCount = label(counter, UDim2.fromOffset(150, 64), UDim2.fromOffset(72 + 75, 32), 38)
-	coinCount.TextXAlignment = Enum.TextXAlignment.Left
-	coinCount.Text = "0"
+	-- Home buttons, always on screen outside a ride; Gold stays during rides too.
+	homeGui = Instance.new("ScreenGui")
+	homeGui.Name = "HomeHud"
+	homeGui.ResetOnSpawn = false
+	homeGui.IgnoreGuiInset = true
+	homeGui.Parent = playerGui
+	ride = button(homeGui, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
+	gold, goldScale = button(homeGui, "gold", fit("gold", nil, ICON_HEIGHT), Vector2.zero, UDim2.new())
+	local eggsSize = fit("eggs", nil, ICON_HEIGHT)
+	eggs = button(homeGui, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
+	pets = button(homeGui, "pets", fit("pets", nil, ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
+	placeGold(false)
 end
 
 function Hud.show(visible)
 	gui.Enabled = visible
 	if not visible then
 		message.Text = ""
-		rideAgain.root.Visible = false
+		rideAgain.Visible = false
 	end
+	ride.Visible = not visible
+	pets.Visible = not visible
+	eggs.Visible = not visible
+	placeGold(visible)
 end
 
 function Hud.setHold(fraction)
 	holdFrame.Visible = fraction ~= nil
 	if fraction then
-		holdFill.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)
-		shade(holdFill, fraction < 0.3 and RED or GREEN)
+		holdClip.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)
 	end
 end
 
@@ -267,9 +204,13 @@ end
 
 -- text = nil hides the button; ready = false greys it out.
 function Hud.setAction(text, ready)
-	action.root.Visible = text ~= nil
-	action.label.Text = text or ""
-	action.setColor(ready and YELLOW or GREY)
+	action.Visible = text ~= nil
+	if text then
+		local key = ACTIONS[text]
+		action.Image = IMAGES[key].id
+		action.Size = fit(key, BUTTON_WIDTH)
+	end
+	action.ImageColor3 = ready and WHITE or GREY
 end
 
 function Hud.flash(text, seconds)
@@ -291,13 +232,13 @@ function Hud.flash(text, seconds)
 end
 
 function Hud.showRideAgain(visible)
-	rideAgain.root.Visible = visible
+	rideAgain.Visible = visible
 end
 
-function Hud.setCoins(amount)
-	coinCount.Text = tostring(amount)
-	coinScale.Scale = 1.25
-	TweenService:Create(coinScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+-- The amount is baked into the Gold image for now, so this only pops the icon.
+function Hud.setCoins(_amount)
+	goldScale.Scale = 1.25
+	TweenService:Create(goldScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 end
 
 -- "+1" with a coin that pops in at a screen point, floats up and fades.
@@ -308,7 +249,7 @@ function Hud.coinPopup(screenPoint, amount)
 	popup.AnchorPoint = Vector2.new(0.5, 0.5)
 	popup.Position = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
 	popup.Size = UDim2.fromOffset(130, 56)
-	popup.Parent = coinGui
+	popup.Parent = homeGui
 	local scale = Instance.new("UIScale")
 	scale.Scale = 0
 	scale.Parent = popup
@@ -316,7 +257,7 @@ function Hud.coinPopup(screenPoint, amount)
 	text.Text = "+" .. tostring(amount or 1)
 	text.TextColor3 = Color3.fromRGB(255, 226, 70)
 	text.TextXAlignment = Enum.TextXAlignment.Right
-	local icon = image(popup, IMAGES.coin, UDim2.fromOffset(50, 50), UDim2.fromOffset(100, 28))
+	local icon = image(popup, "coin", UDim2.fromOffset(50, 50), UDim2.fromOffset(100, 28))
 	icon.Rotation = -12
 
 	TweenService:Create(scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()

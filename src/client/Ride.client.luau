@@ -184,7 +184,7 @@ local function cleanup()
 	setEggInNest(true)
 end
 
-local startRide
+local startRide, ridePrompt
 
 local function spawnStarter()
 	starter = newEntity(Config.StarterSpot.X, Config.StarterSpot.Z, 0)
@@ -193,12 +193,20 @@ local function spawnStarter()
 	prompt.ActionText = "Ride"
 	prompt.RequiresLineOfSight = false
 	prompt.MaxActivationDistance = 12
-	prompt.Style = Config.ShowHud and Enum.ProximityPromptStyle.Default or Enum.ProximityPromptStyle.Custom -- Custom draws nothing; E still works
+	prompt.Style = Enum.ProximityPromptStyle.Custom -- draws nothing; E still works, the RIDE button is the visible way in
 	prompt.Parent = starter.animal.model.PrimaryPart
 	prompt.Triggered:Connect(function()
 		prompt:Destroy()
 		startRide()
 	end)
+	ridePrompt = prompt
+end
+
+local function rideFromHome()
+	if phase == "idle" and ridePrompt and ridePrompt.Parent then
+		ridePrompt:Destroy()
+		startRide()
+	end
 end
 
 startRide = function()
@@ -633,7 +641,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
 end)
 
-Hud.init(onAction, rideAgain)
+Hud.init(onAction, rideAgain, rideFromHome)
 
 player.CharacterAdded:Connect(function()
 	if phase ~= "idle" then
