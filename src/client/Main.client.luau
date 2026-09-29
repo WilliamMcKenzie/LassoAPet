@@ -1,1 +1,0 @@
-print("[LassoForEggs] client up")
