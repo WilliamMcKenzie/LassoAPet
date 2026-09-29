@@ -27,6 +27,7 @@ ORANGE = (226, 130, 50)
 BROWN = (92, 54, 34)
 HOOF = (74, 78, 102)
 PINK = (242, 150, 192)
+BLACK = (0, 0, 0)
 
 H = 3.2  # egg height
 R = 1.2  # widest radius
@@ -103,7 +104,9 @@ def voxel_pinto():
     return egg
 
 
-def octo_layer(egg, i, y0, y1, w, color):
+def octo_layer(egg, i, y0, y1, w, color, bone=None):
+    """Octagonal slab from 3 blocks and 4 wedge corners. Names start with L<i>."""
+    first = len(egg.parts)
     c = round(w / (2 + math.sqrt(2)) / 0.1) * 0.1
     a = w / 2
     egg.block(f"L{i}Mid", (-a, y0, -(a - c)), (a, y1, a - c), color)
@@ -116,6 +119,9 @@ def octo_layer(egg, i, y0, y1, w, color):
             if sx * sz < 0:
                 tri = tri[::-1]
             egg.prism(f"L{i}Corner{'L' if sx < 0 else 'R'}{'F' if sz < 0 else 'B'}", tri, y0, y1, color)
+    if bone:
+        for p in egg.parts[first:]:
+            p.bone = bone
 
 
 def octo_stack():
@@ -158,6 +164,41 @@ def pony_egg():
             faces.append([(itri[a][0], itri[a][1], zi0), (itri[a][0], itri[a][1], zi1), (itri[b][0], itri[b][1], zi1), (itri[b][0], itri[b][1], zi0)])
         egg.poly("EarIn" + side, faces, PINK, "top")
     egg.block("Tuft", (-0.2, top - 0.05, -0.1), (0.2, top + 0.35, 0.5), BROWN).bone = "top"
+    return egg
+
+
+def ear_half(egg, name, tri, z0, z1, color):
+    """Right-triangle prism: tri is 3 (x, y) points with the right angle first,
+    extruded along z. Converts to a WedgePart."""
+    faces = [[(x, y, z0) for x, y in tri], [(x, y, z1) for x, y in tri[::-1]]]
+    for a, b in ((0, 1), (1, 2), (2, 0)):
+        faces.append([(tri[a][0], tri[a][1], z0), (tri[a][0], tri[a][1], z1), (tri[b][0], tri[b][1], z1), (tri[b][0], tri[b][1], z0)])
+    return egg.poly(name, faces, color, "top")
+
+
+def octo_pony():
+    """6. Octo Stack styled like Pony Egg: cream base, orange body, the horse's
+    ears and a mane tuft. Black plates on the crack faces read as a hollow
+    shell once the top pops off (hidden inside the egg until then)."""
+    egg = Egg()
+    n, crack_layer = 7, 4
+    h = H / n
+    crack = crack_layer * h
+    widths = [snap(2 * radius((i + 0.5) * h)) for i in range(n)]
+    for i in range(n):
+        octo_layer(egg, i, i * h, (i + 1) * h, widths[i], CREAM if i < 2 else ORANGE,
+                   "top" if i >= crack_layer else "bottom")
+    inner = min(widths[crack_layer - 1], widths[crack_layer]) - 0.16
+    octo_layer(egg, "InsideBottom", crack, crack + 0.02, inner, BLACK, "bottom")
+    octo_layer(egg, "InsideTop", crack - 0.02, crack, inner, BLACK, "top")
+
+    b = H - 0.05  # ears sink a touch into the top layer
+    for side, sx in (("L", -1), ("R", 1)):
+        x0 = sx * 0.35
+        for half, d in (("A", -1), ("B", 1)):
+            ear_half(egg, f"Ear{side}{half}", [(x0, b), (x0 + d * 0.25, b), (x0, b + 0.7)], -0.15, 0.15, ORANGE)
+            ear_half(egg, f"EarIn{side}{half}", [(x0, b + 0.08), (x0 + d * 0.13, b + 0.08), (x0, b + 0.45)], -0.19, -0.15, PINK)
+    egg.block("Tuft", (-0.15, b, -0.05), (0.15, H + 0.3, 0.45), BROWN).bone = "top"
     return egg
 
 
@@ -223,6 +264,7 @@ DESIGNS = [
     ("LowPolySmooth", lowpoly_smooth),
     ("LowPolyGem", lowpoly_gem),
     ("PonyEgg", pony_egg),
+    ("PonyOcto", octo_pony),
 ]
 
 BONES = [("egg", None, (0, 0, 0)), ("bottom", "egg", (0, 0, 0)), ("top", "egg", (0, SPLIT, 0))]

@@ -89,4 +89,76 @@ function Rig.build(spec)
 	return model, parts, motors
 end
 
+-- Keyframe track from a generated model module (tools/bbmodel_to_luau.py):
+-- { smooth = bool, keys = { { time, x, y, z }, ... } } -> x, y, z at time t.
+-- Smooth tracks are Catmull-Rom through the neighbouring keys, like Blockbench.
+function Rig.sample(track, t)
+	local keys = track.keys
+	local n = #keys
+	if t <= keys[1][1] then
+		return keys[1][2], keys[1][3], keys[1][4]
+	end
+	if t >= keys[n][1] then
+		return keys[n][2], keys[n][3], keys[n][4]
+	end
+	local i = 1
+	while keys[i + 1][1] < t do
+		i += 1
+	end
+	local a, b = keys[i], keys[i + 1]
+	local u = (t - a[1]) / (b[1] - a[1])
+	local out = {}
+	for c = 2, 4 do
+		if track.smooth then
+			local p0 = keys[math.max(i - 1, 1)][c]
+			local p1, p2 = a[c], b[c]
+			local p3 = keys[math.min(i + 2, n)][c]
+			out[c - 1] = 0.5
+				* (2 * p1 + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u * u * u)
+		else
+			out[c - 1] = a[c] + (b[c] - a[c]) * u
+		end
+	end
+	return out[1], out[2], out[3]
+end
+
+-- Builds a model from a generated data module ({ bones, parts, animations }).
+-- Each bone becomes a hidden part at its pivot, driven by a Motor6D named
+-- <bone>Bone; visible parts are welded to their bone.
+-- Returns model, parts by name, motors by bone name, pivots by bone name.
+function Rig.fromData(data, name, studTexture)
+	local list = {}
+	local pivots = {}
+	for _, bone in ipairs(data.bones) do
+		local parentPivot = bone.parent and pivots[bone.parent] or Vector3.zero
+		pivots[bone.name] = bone.pivot
+		table.insert(list, {
+			name = bone.name .. "Bone",
+			parent = bone.parent and bone.parent .. "Bone" or "Root",
+			joint = CFrame.new(bone.pivot - parentPivot),
+			size = Vector3.new(0.2, 0.2, 0.2),
+			color = Color3.new(1, 1, 1),
+			hidden = true,
+			animated = true,
+		})
+	end
+	for _, part in ipairs(data.parts) do
+		table.insert(list, {
+			name = part.name,
+			parent = part.bone .. "Bone",
+			joint = CFrame.new(-pivots[part.bone]) * part.cframe,
+			size = part.size,
+			color = part.color,
+			class = part.class,
+			plain = part.plain,
+		})
+	end
+	local model, byName, motors = Rig.build({ name = name, studTexture = studTexture, parts = list })
+	local bones = {}
+	for _, bone in ipairs(data.bones) do
+		bones[bone.name] = motors[bone.name .. "Bone"]
+	end
+	return model, byName, bones, pivots
+end
+
 return Rig

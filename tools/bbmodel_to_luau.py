@@ -103,7 +103,7 @@ def main(src, dst):
         out.append(f'\t\t{{ name = "{name}", bone = "{bone}", class = "{cls}", size = {v3(size)}, '
                    f"cframe = {cf(center, R)}, color = Color3.fromRGB({r}, {g}, {b}){extra} }},")
     out.append("\t},")
-    out.append("\t-- keys: { time, x, y, z }; rotation in radians, position in studs")
+    out.append("\t-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor")
     out.append("\tanimations = {")
     for anim in model.get("animations", []):
         out.append(f'\t\t{anim["name"]} = {{')
@@ -115,7 +115,8 @@ def main(src, dst):
                 chans.setdefault(k["channel"], []).append(k)
             out.append(f'\t\t\t\t{a["name"]} = {{')
             for ch, kfs in chans.items():
-                f = (lambda x: math.radians(float(x))) if ch == "rotation" else (lambda x: float(x) * SCALE)
+                f = {"rotation": lambda x: math.radians(float(x)),
+                     "position": lambda x: float(x) * SCALE}.get(ch, float)  # scale stays a factor
                 interp = kfs[0]["interpolation"]
                 keys = ", ".join("{{ {:g}, {:g}, {:g}, {:g} }}".format(
                     k["time"], *(round(f(k["data_points"][0][c]), 5) + 0.0 for c in "xyz")) for k in kfs)
