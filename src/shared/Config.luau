@@ -2,6 +2,7 @@
 return {
 	-- false hides every UI element (HUD, coins, Roblox menus, the ride prompt), e.g. for mockup screenshots.
 	ShowHud = true,
+	HudScale = 1, -- multiplies the whole HUD's size; 1 matches QM's mockups
 
 	-- World (studs). The map is the saved model src/world/World.rbxmx; these sizes
 	-- must match it (the ride reads them). Ground and wall colours are calibrated so

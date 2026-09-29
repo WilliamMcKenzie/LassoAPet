@@ -33,6 +33,7 @@ local BUTTON_WIDTH = 320
 local BAR_WIDTH = 440
 local ICON_HEIGHT = 100
 local MARGIN = 24
+local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
 
 -- Action text from the ride -> which image the action button shows.
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
@@ -45,7 +46,7 @@ local TONES = {
 	["EGG SAVED!"] = YELLOW,
 }
 
-local gui, homeGui, holdFrame, holdClip, distance, action, message, rideAgain, ride, gold, pets, eggs, goldScale
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, rideAgain, ride, gold, pets, eggs, goldScale
 
 local function label(parent, size, position, textSize)
 	local l = Instance.new("TextLabel")
@@ -81,6 +82,30 @@ local function image(parent, key, size, position)
 	i.Image = IMAGES[key].id
 	i.Parent = parent
 	return i
+end
+
+-- Full-screen frame that everything is laid out in, in pixels of a REFERENCE_WIDTH
+-- wide screen. It's scaled to the real screen width, so the HUD keeps the mockup's
+-- proportions (Hold bar a third of the screen, action button a quarter).
+local function root(screenGui)
+	local frame = Instance.new("Frame")
+	frame.Name = "Root"
+	frame.BackgroundTransparency = 1
+	frame.AnchorPoint = Vector2.new(0.5, 0.5)
+	frame.Position = UDim2.fromScale(0.5, 0.5)
+	local scale = Instance.new("UIScale")
+	scale.Parent = frame
+	local camera = workspace.CurrentCamera
+	local function resize()
+		local screen = camera.ViewportSize
+		scale.Scale = screen.X / REFERENCE_WIDTH * Config.HudScale
+		frame.Size = UDim2.fromOffset(screen.X / scale.Scale, screen.Y / scale.Scale)
+		rootScale = scale.Scale
+	end
+	camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
+	resize()
+	frame.Parent = screenGui
+	return frame
 end
 
 -- Image button that shrinks a little while pressed.
@@ -136,11 +161,12 @@ function Hud.init(onAction, onRideAgain, onRide)
 	gui.IgnoreGuiInset = true
 	gui.Enabled = false
 	gui.Parent = playerGui
+	rideRoot = root(gui)
 
 	-- Hold bar: the empty bar, with the full bar cropped to the Hold fraction on top.
 	-- The full image keeps the bar's size inside the clip, so the crop lines up 1:1.
 	local barSize = fit("barEmpty", BAR_WIDTH)
-	holdFrame = image(gui, "barEmpty", barSize, UDim2.new(0.5, 0, 0, 16 + barSize.Y.Offset / 2))
+	holdFrame = image(rideRoot, "barEmpty", barSize, UDim2.new(0.5, 0, 0, 16 + barSize.Y.Offset / 2))
 	holdFrame.Name = "Hold"
 	holdClip = Instance.new("Frame")
 	holdClip.Name = "Fill"
@@ -152,16 +178,16 @@ function Hud.init(onAction, onRideAgain, onRide)
 	filled.AnchorPoint = Vector2.zero
 
 	-- Distance sits on the bar but outside it, so it still shows once the bar is gone.
-	distance = label(gui, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 50)
+	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 50)
 	distance.Name = "Distance"
 	distance.ZIndex = 2
 
-	message = label(gui, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
+	message = label(rideRoot, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
 
-	action = button(gui, "lasso", fit("lasso", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onAction)
+	action = button(rideRoot, "lasso", fit("lasso", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onAction)
 	action.Name = "Action"
 
-	rideAgain = button(gui, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRideAgain)
+	rideAgain = button(rideRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRideAgain)
 	rideAgain.Name = "RideAgain"
 	rideAgain.Visible = false
 
@@ -171,11 +197,12 @@ function Hud.init(onAction, onRideAgain, onRide)
 	homeGui.ResetOnSpawn = false
 	homeGui.IgnoreGuiInset = true
 	homeGui.Parent = playerGui
-	ride = button(homeGui, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
-	gold, goldScale = button(homeGui, "gold", fit("gold", nil, ICON_HEIGHT), Vector2.zero, UDim2.new())
+	homeRoot = root(homeGui)
+	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
+	gold, goldScale = button(homeRoot, "gold", fit("gold", nil, ICON_HEIGHT), Vector2.zero, UDim2.new())
 	local eggsSize = fit("eggs", nil, ICON_HEIGHT)
-	eggs = button(homeGui, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
-	pets = button(homeGui, "pets", fit("pets", nil, ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
+	eggs = button(homeRoot, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
+	pets = button(homeRoot, "pets", fit("pets", nil, ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
 	placeGold(false)
 end
 
@@ -244,12 +271,13 @@ end
 -- "+1" with a coin that pops in at a screen point, floats up and fades.
 -- Same pattern as the common DevForum coin-popup recipe: pop with Back easing, rise with Quad, fade out.
 function Hud.coinPopup(screenPoint, amount)
+	screenPoint /= rootScale -- screen pixels -> HUD root pixels
 	local popup = Instance.new("Frame")
 	popup.BackgroundTransparency = 1
 	popup.AnchorPoint = Vector2.new(0.5, 0.5)
 	popup.Position = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
 	popup.Size = UDim2.fromOffset(130, 56)
-	popup.Parent = homeGui
+	popup.Parent = homeRoot
 	local scale = Instance.new("UIScale")
 	scale.Scale = 0
 	scale.Parent = popup
