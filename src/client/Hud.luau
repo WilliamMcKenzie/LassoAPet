@@ -33,6 +33,10 @@ local IMAGES = {
 	gold = { id = "rbxassetid://75090734827129", size = Vector2.new(262, 263) },
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
+	-- TAKE EGG for rarer eggs (takeEgg itself is the Uncommon one). TODO: upload assets/ui/TakeEgg*.png and put their ids here.
+	takeEggRare = { id = "", size = Vector2.new(960, 434) },
+	takeEggEpic = { id = "", size = Vector2.new(960, 434) },
+	takeEggLegendary = { id = "", size = Vector2.new(960, 434) },
 	sprint = { id = "", size = Vector2.new(618, 524) }, -- TODO: upload assets/ui/Sprint.png and put its id here
 }
 
@@ -46,6 +50,8 @@ local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
 
 -- Action text from the ride -> which image the action button shows.
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
+-- The TAKE EGG image by the egg's rarity; anything else uses takeEgg (Uncommon).
+local EGG_BUTTONS = { Rare = "takeEggRare", Epic = "takeEggEpic", Legendary = "takeEggLegendary" }
 
 -- Banners drawn as images instead of text.
 local BANNERS = { ["BUCKED OFF"] = "buckedOff", ["CRASH!"] = "crash" }
@@ -290,7 +296,9 @@ function Hud.init(onAction, onHome, onRide)
 	task.spawn(function()
 		local ids = {}
 		for _, entry in IMAGES do
-			table.insert(ids, entry.id)
+			if entry.id ~= "" then -- not uploaded yet
+				table.insert(ids, entry.id)
+			end
 		end
 		game:GetService("ContentProvider"):PreloadAsync(ids)
 	end)
@@ -341,13 +349,16 @@ function Hud.setDistance(text)
 	distance.Text = text
 end
 
--- text = nil hides the button; ready = false shows LASSO's disabled image.
-function Hud.setAction(text, ready)
+-- text = nil hides the button; ready = false shows LASSO's disabled image;
+-- rarity picks TAKE EGG's colours.
+function Hud.setAction(text, ready, rarity)
 	action.Visible = text ~= nil
 	if text then
 		local key = ACTIONS[text]
 		if key == "lasso" and not ready then
 			key = "lassoDisabled"
+		elseif key == "takeEgg" then
+			key = EGG_BUTTONS[rarity] or key
 		end
 		action.Image = IMAGES[key].id
 		action.Size = fit(key, BUTTON_WIDTH)

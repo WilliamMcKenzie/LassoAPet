@@ -17,6 +17,7 @@ local STUD_TEXTURE = { image = "rbxassetid://7447638591", tile = 0.5 }
 
 local KINDS = {
 	Horse = { data = require(script.Parent.HorseEggModel), center = 1.6 },
+	Pinto = { data = require(script.Parent.PintoEggModel), center = 1.6 },
 }
 
 local Egg = {}

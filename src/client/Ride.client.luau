@@ -28,7 +28,8 @@ end
 -- EggSpot marks the centre of the waiting egg. The egg is a rigged model so
 -- it can twitch in the nest; it turns its face toward the approaching rider.
 local eggSpot = world.Nest.EggSpot
-local nestEgg = Egg.new("Horse")
+local nestEgg = Egg.new(Config.NestEgg)
+local nestRarity = require(ReplicatedStorage.Shared.Animals[Config.NestEgg]).Rarity
 nestEgg.model:PivotTo(eggSpot.CFrame * CFrame.Angles(0, math.pi, 0))
 nestEgg.model.Parent = world.Nest
 local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this range
@@ -799,7 +800,7 @@ local function updateHud()
 		Hud.setHold(mount and hold / Config.HoldTime or 1)
 		Hud.setDistance(string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		if actionTarget == "egg" then
-			Hud.setAction("GRAB EGG", true)
+			Hud.setAction("GRAB EGG", true, nestRarity)
 		else
 			Hud.setAction("LASSO", actionTarget ~= nil)
 		end
