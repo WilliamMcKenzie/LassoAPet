@@ -1,5 +1,7 @@
 -- Builds a rigged, studded Model from a declarative part list.
 -- Parts with `plain = true` (eyes, pupils) skip the stud texture.
+-- `class` picks the part class (default "Part", e.g. "WedgePart").
+-- `hidden = true` makes an invisible, untextured part (used for bones).
 --
 -- Every part hangs off a joint in its parent's space:
 --   joint  = CFrame of the joint relative to the parent part's center (C0)
@@ -37,7 +39,7 @@ function Rig.build(spec)
 		local parent = parts[def.parent]
 		assert(parent, spec.name .. ": " .. def.name .. " has unknown parent " .. tostring(def.parent))
 
-		local part = Instance.new("Part")
+		local part = Instance.new(def.class or "Part")
 		part.Name = def.name
 		part.Size = def.size
 		part.Color = def.color
@@ -47,11 +49,14 @@ function Rig.build(spec)
 		part.CanQuery = false
 		part.CanTouch = false
 		part.Massless = true
+		if def.hidden then
+			part.Transparency = 1
+		end
 		for _, face in ipairs(FACES) do
 			part[face .. "Surface"] = Enum.SurfaceType.Smooth
 		end
 		-- Fine studs from a tiled texture; surface studs are fixed at 1 stud, too coarse here.
-		if spec.studTexture and not def.plain then
+		if spec.studTexture and not def.plain and not def.hidden then
 			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
 				local texture = Instance.new("Texture")
 				texture.Texture = spec.studTexture.image
