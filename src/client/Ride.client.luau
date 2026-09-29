@@ -39,7 +39,6 @@ local STUDS_PER_METRE = 4
 local THROW_TIME = 0.22 -- lasso flying out to the target's neck
 local TRANSFER_TIME = 0.4 -- rider pulled across on the rope
 local EGG_PULL_TIME = 0.55 -- egg reeled in on the rope
-local EGG_LOOP_RADIUS = 1.45 -- loop cinched round the egg's middle
 local TURN_TIME = 1
 local EDGE = Config.CourseHalfWidth - 4
 
@@ -555,30 +554,28 @@ local function updateRider(dt)
 		focus = Vector3.new(mount.x, 0, mount.z)
 	end
 	if carried then
-		local slot = hrp.CFrame * CFrame.new(0, -0.6, 2.4)
 		if carried.stage == "throw" then
 			-- Sits in the nest while the loop flies out.
 			carried.t = math.min(carried.t + dt / THROW_TIME, 1)
 			if carried.t >= 1 then
-				carried.stage, carried.t, carried.from = "pull", 0, carried.part.Position
+				carried.stage, carried.t, carried.from = "pull", 0, carried.part:GetPivot().Position
 			end
 		elseif carried.stage == "pull" then
 			-- Reeled in on an arc, hanging off the rope: it tips toward the rider
-			-- and swings and spins, settling as it lands in the rider's lap.
+			-- and swings and spins, settling into the overhead twirl.
 			carried.t = math.min(carried.t + dt / EGG_PULL_TIME, 1)
 			local t = carried.t
 			local eased = 1 - (1 - t) ^ 2
-			local pos = carried.from:Lerp(slot.Position, eased) + Vector3.new(0, math.sin(t * math.pi) * 7, 0)
+			local held = Lasso.heldCFrame()
+			local pos = carried.from:Lerp(held.Position, eased) + Vector3.new(0, math.sin(t * math.pi) * 7, 0)
 			local towardRider = (hrp.Position - pos).Unit
 			local hang = CFrame.lookAt(pos, pos + towardRider) * CFrame.Angles(-math.pi / 2, 0, 0) -- egg's top toward the rope
 			local settle = 1 - t
 			local wobble = CFrame.Angles(math.sin(t * math.pi * 5) * 0.7 * settle, t * math.pi * 3 * carried.spin, math.cos(t * math.pi * 4) * 0.5 * settle)
-			carried.part.CFrame = hang:Lerp(CFrame.new(pos) * slot.Rotation, t * t) * wobble
+			carried.part:PivotTo(hang:Lerp(CFrame.new(pos) * held.Rotation, t * t) * wobble)
 			if t >= 1 then
-				carried.stage = "held"
+				carried.stage = "held" -- swung round overhead from here (Lasso.twirl)
 			end
-		else
-			carried.part.CFrame = slot
 		end
 	end
 end
@@ -624,8 +621,10 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	updateHerd(dt)
 	updateRider(dt)
-	if carried and carried.stage ~= "held" then
-		local egg = { cframe = carried.part.CFrame, radius = EGG_LOOP_RADIUS }
+	if carried and carried.stage == "held" then
+		Lasso.twirl(dt, carried.part)
+	elseif carried then
+		local egg = { cframe = carried.part:GetPivot(), radius = Lasso.fitRadius(carried.part) }
 		if carried.stage == "throw" then
 			Lasso.throw(carried.t, egg)
 		else
