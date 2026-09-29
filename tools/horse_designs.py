@@ -210,12 +210,70 @@ def toy():
     return b.parts
 
 
+# ---------------------------------------------------------------- 6. Toy, clean grid
+# Every part is axis-aligned and shares faces with its neighbours: no rotated
+# blocks, so nothing overhangs. Slopes come only from wedges.
+
+def span(x0, x1, y0, y1, z0, z1):
+    """Size and centre transform for a box spanning the given ranges."""
+    return (x1 - x0, y1 - y0, z1 - z0), T((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)
+
+
+def toy_clean():
+    b = Builder()
+
+    def box(name, rng, color, rot=None, shape="Block", **kw):
+        size, cf = span(*rng)
+        if rot is not None:
+            # wedges rotated 180 keep the same bounding box
+            cf = cf @ rot
+        return b.add(name, size, cf, color, shape, **kw)
+
+    # body
+    box("Body", (-1.6, 1.6, 3.5, 6.5, -2.7, 3.3), COAT)
+
+    # neck: a column flush with the chest; the mane is a wedge sloping down its back
+    box("Neck", (-0.9, 0.9, 6.5, 8.3, -2.7, -1.1), COAT)
+    box("Mane", (-0.9, 0.9, 6.5, 8.3, -1.1, 0.1), MANE, Ry(180), "Wedge")
+
+    # head: long block, snout stepped down with a wedge nose bridge
+    box("Head", (-1.1, 1.1, 8.3, 10.5, -3.9, -1.1), COAT)
+    box("Snout", (-1.1, 1.1, 8.3, 9.7, -5.1, -3.9), COAT)
+    box("Bridge", (-1.1, 1.1, 9.7, 10.5, -5.1, -3.9), COAT, None, "Wedge")
+    box("NostrilL", (-0.8, -0.3, 8.9, 9.2, -5.15, -5.1), NOSE, plain=True)
+    box("NostrilR", (0.3, 0.8, 8.9, 9.2, -5.15, -5.1), NOSE, plain=True)
+    box("Cap", (-0.4, 0.4, 10.5, 11.1, -2.3, -1.1), MANE)
+
+    # eyes: flat decals on the head sides, pupils toward the front
+    for side, x0, x1 in (("L", -1.15, -1.1), ("R", 1.1, 1.15)):
+        box("Eye" + side, (x0, x1, 9.1, 10.1, -3.5, -2.5), EYE, plain=True)
+        px0, px1 = (x0 - 0.03, x1) if side == "L" else (x0, x1 + 0.03)
+        box("Pupil" + side, (px0, px1, 9.2, 9.8, -3.5, -3.0), PUPIL, plain=True)
+
+    # ears: upright two-wedge points, flush with the back of the head
+    for side, x0, x1 in (("L", -1.1, -0.4), ("R", 0.4, 1.1)):
+        f = T((x0 + x1) / 2, 10.5, -1.3)
+        ear(b, "Ear" + side, f, 1.2, x1 - x0, 0.4, COAT, EAR_IN)
+
+    # tail: hangs flush against the rump, top level with the back
+    box("Tail", (-0.4, 0.4, 4.3, 6.5, 3.3, 4.1), MANE)
+    box("TailTip", (-0.4, 0.4, 3.5, 4.3, 3.3, 4.1), MANE, Rx(180), "Wedge")
+
+    # legs flush with the body's sides and ends; hooves share the footprint
+    for tag, z0, z1 in (("F", -2.7, -1.6), ("H", 2.2, 3.3)):
+        for side, x0, x1 in (("L", -1.6, -0.5), ("R", 0.5, 1.6)):
+            box(f"Leg{tag}{side}", (x0, x1, 0.8, 3.5, z0, z1), COAT)
+            box(f"Hoof{tag}{side}", (x0, x1, 0, 0.8, z0, z1), HOOF)
+    return b.parts
+
+
 DESIGNS = [
     ("Sculpted", sculpted),
     ("Minimal", minimal),
     ("Chibi", chibi),
     ("Arched", arched),
     ("Toy", toy),
+    ("ToyClean", toy_clean),
 ]
 
 
@@ -230,15 +288,17 @@ def framed(parts, direction, fov=30, size=520):
     radius = np.linalg.norm(hi - lo) / 2
     d = np.array(direction, float)
     d /= np.linalg.norm(d)
-    dist = radius / np.sin(np.radians(fov / 2)) * 0.72
+    dist = radius / np.sin(np.radians(fov / 2)) * 0.85
     return render(parts, center + d * dist, center, W=size, H=size, fov=fov)
 
 
-def main(out):
+def main(out, only=None):
     os.makedirs(out, exist_ok=True)
     from PIL import Image, ImageDraw, ImageFont
     tiles = []
     for i, (name, fn) in enumerate(DESIGNS, 1):
+        if only and name not in only:
+            continue
         parts = fn()
         write_rbxmx(parts, f"Horse{i}_{name}", os.path.join(out, f"Horse{i}_{name}.rbxmx"))
         a = framed(parts, (-1, 0.45, -0.95))
@@ -260,8 +320,8 @@ def main(out):
         d.text((14, y + 8), label, fill=(20, 20, 20), font=font)
         for c, im in enumerate(ims):
             sheet.paste(im, (c * tw, y + lh))
-    sheet.save(os.path.join(out, "sheet.png"))
+    sheet.save(os.path.join(out, "sheet.png" if not only else "sheet_" + "_".join(only) + ".png"))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "designs/horses")
+    main(sys.argv[1] if len(sys.argv) > 1 else "designs/horses", sys.argv[2:] or None)
