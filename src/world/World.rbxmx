@@ -80,7 +80,7 @@
 <Color3uint8 name="Color3uint8">4292974184</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">3</token>
-<token name="BackSurface">3</token>
+<token name="BackSurface">0</token>
 <token name="LeftSurface">3</token>
 <token name="RightSurface">0</token>
 <token name="BottomSurface">4</token>
@@ -104,8 +104,26 @@
 <int name="ZIndex">2</int>
 </Properties>
 </Item>
+<Item class="Texture" referent="RBX0000000D"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">2</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
 </Item>
-<Item class="Part" referent="RBX0000000D"><Properties>
+<Item class="Texture" referent="RBX0000000E"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">2</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+</Item>
+<Item class="Part" referent="RBX0000000F"><Properties>
 <string name="Name">Cap</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>10</X><Y>2</Y><Z>1400</Z></Vector3>
@@ -119,20 +137,20 @@
 <CoordinateFrame name="CFrame"><X>-59</X><Y>49</Y><Z>-700</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000000E"><Properties>
+<Item class="Part" referent="RBX00000010"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>48</Y><Z>1400</Z></Vector3>
 <Color3uint8 name="Color3uint8">4292974184</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">3</token>
-<token name="BackSurface">3</token>
+<token name="BackSurface">0</token>
 <token name="LeftSurface">0</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
 <CoordinateFrame name="CFrame"><X>60</X><Y>24</Y><Z>-700</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="RBX0000000F"><Properties>
+<Item class="Texture" referent="RBX00000011"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
 <token name="Face">3</token>
@@ -141,7 +159,7 @@
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
 </Properties>
 </Item>
-<Item class="Texture" referent="RBX00000010"><Properties>
+<Item class="Texture" referent="RBX00000012"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">3</token>
@@ -150,34 +168,6 @@
 <int name="ZIndex">2</int>
 </Properties>
 </Item>
-</Item>
-<Item class="Part" referent="RBX00000011"><Properties>
-<string name="Name">Cap</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>10</X><Y>2</Y><Z>1400</Z></Vector3>
-<Color3uint8 name="Color3uint8">4285136714</Color3uint8>
-<token name="TopSurface">3</token>
-<token name="FrontSurface">3</token>
-<token name="BackSurface">3</token>
-<token name="LeftSurface">3</token>
-<token name="RightSurface">3</token>
-<token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>59</X><Y>49</Y><Z>-700</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties>
-</Item>
-<Item class="Part" referent="RBX00000012"><Properties>
-<string name="Name">Wall</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>128</X><Y>48</Y><Z>8</Z></Vector3>
-<Color3uint8 name="Color3uint8">4292974184</Color3uint8>
-<token name="TopSurface">3</token>
-<token name="FrontSurface">3</token>
-<token name="BackSurface">0</token>
-<token name="LeftSurface">3</token>
-<token name="RightSurface">3</token>
-<token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>0</X><Y>24</Y><Z>-1404</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties>
 <Item class="Texture" referent="RBX00000013"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
@@ -200,6 +190,52 @@
 <Item class="Part" referent="RBX00000015"><Properties>
 <string name="Name">Cap</string>
 <bool name="Anchored">true</bool>
+<Vector3 name="size"><X>10</X><Y>2</Y><Z>1400</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285136714</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="FrontSurface">3</token>
+<token name="BackSurface">3</token>
+<token name="LeftSurface">3</token>
+<token name="RightSurface">3</token>
+<token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>59</X><Y>49</Y><Z>-700</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="RBX00000016"><Properties>
+<string name="Name">Wall</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>128</X><Y>48</Y><Z>8</Z></Vector3>
+<Color3uint8 name="Color3uint8">4292974184</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="FrontSurface">3</token>
+<token name="BackSurface">0</token>
+<token name="LeftSurface">3</token>
+<token name="RightSurface">3</token>
+<token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>0</X><Y>24</Y><Z>-1404</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+<Item class="Texture" referent="RBX00000017"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">2</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX00000018"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">2</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+</Item>
+<Item class="Part" referent="RBX00000019"><Properties>
+<string name="Name">Cap</string>
+<bool name="Anchored">true</bool>
 <Vector3 name="size"><X>128</X><Y>2</Y><Z>10</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285136714</Color3uint8>
 <token name="TopSurface">3</token>
@@ -211,7 +247,7 @@
 <CoordinateFrame name="CFrame"><X>0</X><Y>49</Y><Z>-1403</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000016"><Properties>
+<Item class="Part" referent="RBX0000001A"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>48</Y><Z>168</Z></Vector3>
@@ -224,56 +260,10 @@
 <token name="BottomSurface">4</token>
 <CoordinateFrame name="CFrame"><X>-84</X><Y>24</Y><Z>76</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="RBX00000017"><Properties>
-<string name="Name">Checker</string>
-<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
-<token name="Face">0</token>
-<float name="StudsPerTileU">8</float>
-<float name="StudsPerTileV">8</float>
-<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
-</Properties>
-</Item>
-<Item class="Texture" referent="RBX00000018"><Properties>
-<string name="Name">Texture</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<token name="Face">0</token>
-<float name="StudsPerTileU">1</float>
-<float name="StudsPerTileV">1</float>
-<int name="ZIndex">2</int>
-</Properties>
-</Item>
-</Item>
-<Item class="Part" referent="RBX00000019"><Properties>
-<string name="Name">Cap</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>10</X><Y>2</Y><Z>168</Z></Vector3>
-<Color3uint8 name="Color3uint8">4285136714</Color3uint8>
-<token name="TopSurface">3</token>
-<token name="FrontSurface">3</token>
-<token name="BackSurface">3</token>
-<token name="LeftSurface">3</token>
-<token name="RightSurface">3</token>
-<token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>-83</X><Y>49</Y><Z>76</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties>
-</Item>
-<Item class="Part" referent="RBX0000001A"><Properties>
-<string name="Name">Wall</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>48</Y><Z>168</Z></Vector3>
-<Color3uint8 name="Color3uint8">4292974184</Color3uint8>
-<token name="TopSurface">3</token>
-<token name="FrontSurface">3</token>
-<token name="BackSurface">3</token>
-<token name="LeftSurface">0</token>
-<token name="RightSurface">3</token>
-<token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>84</X><Y>24</Y><Z>76</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties>
 <Item class="Texture" referent="RBX0000001B"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
-<token name="Face">3</token>
+<token name="Face">0</token>
 <float name="StudsPerTileU">8</float>
 <float name="StudsPerTileV">8</float>
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
@@ -282,7 +272,7 @@
 <Item class="Texture" referent="RBX0000001C"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<token name="Face">3</token>
+<token name="Face">0</token>
 <float name="StudsPerTileU">1</float>
 <float name="StudsPerTileV">1</float>
 <int name="ZIndex">2</int>
@@ -300,10 +290,56 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>83</X><Y>49</Y><Z>76</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-83</X><Y>49</Y><Z>76</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
 <Item class="Part" referent="RBX0000001E"><Properties>
+<string name="Name">Wall</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>8</X><Y>48</Y><Z>168</Z></Vector3>
+<Color3uint8 name="Color3uint8">4292974184</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="FrontSurface">3</token>
+<token name="BackSurface">3</token>
+<token name="LeftSurface">0</token>
+<token name="RightSurface">3</token>
+<token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>84</X><Y>24</Y><Z>76</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+<Item class="Texture" referent="RBX0000001F"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">3</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX00000020"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">3</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+</Item>
+<Item class="Part" referent="RBX00000021"><Properties>
+<string name="Name">Cap</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>10</X><Y>2</Y><Z>168</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285136714</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="FrontSurface">3</token>
+<token name="BackSurface">3</token>
+<token name="LeftSurface">3</token>
+<token name="RightSurface">3</token>
+<token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>83</X><Y>49</Y><Z>76</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="RBX00000022"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>176</X><Y>48</Y><Z>8</Z></Vector3>
@@ -316,7 +352,7 @@
 <token name="BottomSurface">4</token>
 <CoordinateFrame name="CFrame"><X>0</X><Y>24</Y><Z>164</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="RBX0000001F"><Properties>
+<Item class="Texture" referent="RBX00000023"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
 <token name="Face">5</token>
@@ -325,7 +361,7 @@
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
 </Properties>
 </Item>
-<Item class="Texture" referent="RBX00000020"><Properties>
+<Item class="Texture" referent="RBX00000024"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">5</token>
@@ -335,7 +371,7 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Part" referent="RBX00000021"><Properties>
+<Item class="Part" referent="RBX00000025"><Properties>
 <string name="Name">Cap</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>176</X><Y>2</Y><Z>10</Z></Vector3>
@@ -349,52 +385,6 @@
 <CoordinateFrame name="CFrame"><X>0</X><Y>49</Y><Z>163</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000022"><Properties>
-<string name="Name">Wall</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>16</X><Y>48</Y><Z>8</Z></Vector3>
-<Color3uint8 name="Color3uint8">4292974184</Color3uint8>
-<token name="TopSurface">3</token>
-<token name="FrontSurface">3</token>
-<token name="BackSurface">0</token>
-<token name="LeftSurface">3</token>
-<token name="RightSurface">3</token>
-<token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>-72</X><Y>24</Y><Z>-4</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties>
-<Item class="Texture" referent="RBX00000023"><Properties>
-<string name="Name">Checker</string>
-<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
-<token name="Face">2</token>
-<float name="StudsPerTileU">8</float>
-<float name="StudsPerTileV">8</float>
-<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
-</Properties>
-</Item>
-<Item class="Texture" referent="RBX00000024"><Properties>
-<string name="Name">Texture</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<token name="Face">2</token>
-<float name="StudsPerTileU">1</float>
-<float name="StudsPerTileV">1</float>
-<int name="ZIndex">2</int>
-</Properties>
-</Item>
-</Item>
-<Item class="Part" referent="RBX00000025"><Properties>
-<string name="Name">Cap</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>16</X><Y>2</Y><Z>10</Z></Vector3>
-<Color3uint8 name="Color3uint8">4285136714</Color3uint8>
-<token name="TopSurface">3</token>
-<token name="FrontSurface">3</token>
-<token name="BackSurface">3</token>
-<token name="LeftSurface">3</token>
-<token name="RightSurface">3</token>
-<token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>-72</X><Y>49</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties>
-</Item>
 <Item class="Part" referent="RBX00000026"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
@@ -406,7 +396,7 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>72</X><Y>24</Y><Z>-4</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-72</X><Y>24</Y><Z>-4</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 <Item class="Texture" referent="RBX00000027"><Properties>
 <string name="Name">Checker</string>
@@ -438,14 +428,60 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>-72</X><Y>49</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="RBX0000002A"><Properties>
+<string name="Name">Wall</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>16</X><Y>48</Y><Z>8</Z></Vector3>
+<Color3uint8 name="Color3uint8">4292974184</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="FrontSurface">3</token>
+<token name="BackSurface">0</token>
+<token name="LeftSurface">3</token>
+<token name="RightSurface">3</token>
+<token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>72</X><Y>24</Y><Z>-4</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+<Item class="Texture" referent="RBX0000002B"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">2</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX0000002C"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">2</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+</Item>
+<Item class="Part" referent="RBX0000002D"><Properties>
+<string name="Name">Cap</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>16</X><Y>2</Y><Z>10</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285136714</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="FrontSurface">3</token>
+<token name="BackSurface">3</token>
+<token name="LeftSurface">3</token>
+<token name="RightSurface">3</token>
+<token name="BottomSurface">4</token>
 <CoordinateFrame name="CFrame"><X>72</X><Y>49</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
 </Item>
-<Item class="Folder" referent="RBX0000002A"><Properties>
+<Item class="Folder" referent="RBX0000002E"><Properties>
 <string name="Name">Decor</string>
 </Properties>
-<Item class="Part" referent="RBX0000002B"><Properties>
+<Item class="Part" referent="RBX0000002F"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -460,7 +496,7 @@
 <CoordinateFrame name="CFrame"><X>53.827698</X><Y>0.3</Y><Z>-28.966887</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000002C"><Properties>
+<Item class="Part" referent="RBX00000030"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -475,7 +511,7 @@
 <CoordinateFrame name="CFrame"><X>51.080364</X><Y>0.3</Y><Z>-27.780639</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000002D"><Properties>
+<Item class="Part" referent="RBX00000031"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -490,7 +526,7 @@
 <CoordinateFrame name="CFrame"><X>53.397106</X><Y>0.3</Y><Z>-32.552642</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000002E"><Properties>
+<Item class="Part" referent="RBX00000032"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.97828</Y><Z>0.4</Z></Vector3>
@@ -505,7 +541,7 @@
 <CoordinateFrame name="CFrame"><X>50.632563</X><Y>2.98914</Y><Z>-66.881932</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000002F"><Properties>
+<Item class="Part" referent="RBX00000033"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.152193</Y><Z>0.4</Z></Vector3>
@@ -520,7 +556,7 @@
 <CoordinateFrame name="CFrame"><X>51.532563</X><Y>2.076097</Y><Z>-66.939493</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000030"><Properties>
+<Item class="Part" referent="RBX00000034"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.21598</Y><Z>0.4</Z></Vector3>
@@ -535,7 +571,7 @@
 <CoordinateFrame name="CFrame"><X>52.432563</X><Y>1.60799</Y><Z>-65.652631</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000031"><Properties>
+<Item class="Part" referent="RBX00000035"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -550,7 +586,7 @@
 <CoordinateFrame name="CFrame"><X>44.715226</X><Y>0.3</Y><Z>-101.291288</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000032"><Properties>
+<Item class="Part" referent="RBX00000036"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -565,7 +601,7 @@
 <CoordinateFrame name="CFrame"><X>47.3087</X><Y>0.3</Y><Z>-103.776608</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000033"><Properties>
+<Item class="Part" referent="RBX00000037"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -580,7 +616,7 @@
 <CoordinateFrame name="CFrame"><X>49.686863</X><Y>0.3</Y><Z>-104.586521</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000034"><Properties>
+<Item class="Part" referent="RBX00000038"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.149465</Y><Z>0.4</Z></Vector3>
@@ -595,7 +631,7 @@
 <CoordinateFrame name="CFrame"><X>51.075591</X><Y>2.574732</Y><Z>-137.522424</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000035"><Properties>
+<Item class="Part" referent="RBX00000039"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.589638</Y><Z>0.4</Z></Vector3>
@@ -610,7 +646,7 @@
 <CoordinateFrame name="CFrame"><X>51.975591</X><Y>2.794819</Y><Z>-137.364759</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000036"><Properties>
+<Item class="Part" referent="RBX0000003A"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.507556</Y><Z>0.4</Z></Vector3>
@@ -625,7 +661,7 @@
 <CoordinateFrame name="CFrame"><X>52.875591</X><Y>2.753778</Y><Z>-137.514986</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000037"><Properties>
+<Item class="Part" referent="RBX0000003B"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.976564</Y><Z>0.4</Z></Vector3>
@@ -640,7 +676,7 @@
 <CoordinateFrame name="CFrame"><X>-51.526933</X><Y>2.488282</Y><Z>-174.233845</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000038"><Properties>
+<Item class="Part" referent="RBX0000003C"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.898235</Y><Z>0.4</Z></Vector3>
@@ -655,7 +691,7 @@
 <CoordinateFrame name="CFrame"><X>-50.626933</X><Y>1.949118</Y><Z>-173.419628</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000039"><Properties>
+<Item class="Part" referent="RBX0000003D"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.938667</Y><Z>0.4</Z></Vector3>
@@ -670,7 +706,7 @@
 <CoordinateFrame name="CFrame"><X>-49.726933</X><Y>1.969334</Y><Z>-173.251102</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000003A"><Properties>
+<Item class="Part" referent="RBX0000003E"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.72218</Y><Z>0.4</Z></Vector3>
@@ -685,7 +721,7 @@
 <CoordinateFrame name="CFrame"><X>50.696056</X><Y>2.36109</Y><Z>-210.169762</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000003B"><Properties>
+<Item class="Part" referent="RBX0000003F"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.895009</Y><Z>0.4</Z></Vector3>
@@ -700,7 +736,7 @@
 <CoordinateFrame name="CFrame"><X>51.596056</X><Y>1.947505</Y><Z>-209.319468</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000003C"><Properties>
+<Item class="Part" referent="RBX00000040"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.802374</Y><Z>0.4</Z></Vector3>
@@ -715,7 +751,7 @@
 <CoordinateFrame name="CFrame"><X>52.496056</X><Y>2.401187</Y><Z>-210.293469</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000003D"><Properties>
+<Item class="Part" referent="RBX00000041"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.721191</Y><Z>0.4</Z></Vector3>
@@ -730,7 +766,7 @@
 <CoordinateFrame name="CFrame"><X>47.991916</X><Y>2.360596</Y><Z>-246.525283</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000003E"><Properties>
+<Item class="Part" referent="RBX00000042"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.258748</Y><Z>0.4</Z></Vector3>
@@ -745,7 +781,7 @@
 <CoordinateFrame name="CFrame"><X>48.891916</X><Y>1.629374</Y><Z>-245.817431</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000003F"><Properties>
+<Item class="Part" referent="RBX00000043"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.575201</Y><Z>0.4</Z></Vector3>
@@ -760,7 +796,7 @@
 <CoordinateFrame name="CFrame"><X>49.791916</X><Y>2.2876</Y><Z>-246.09059</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000040"><Properties>
+<Item class="Part" referent="RBX00000044"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.313562</Y><Z>0.4</Z></Vector3>
@@ -775,7 +811,7 @@
 <CoordinateFrame name="CFrame"><X>-50.736667</X><Y>2.656781</Y><Z>-282.595291</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000041"><Properties>
+<Item class="Part" referent="RBX00000045"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.361955</Y><Z>0.4</Z></Vector3>
@@ -790,7 +826,7 @@
 <CoordinateFrame name="CFrame"><X>-49.836667</X><Y>1.680977</Y><Z>-281.299648</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000042"><Properties>
+<Item class="Part" referent="RBX00000046"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.811605</Y><Z>0.4</Z></Vector3>
@@ -805,7 +841,7 @@
 <CoordinateFrame name="CFrame"><X>-48.936667</X><Y>2.405803</Y><Z>-281.764862</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000043"><Properties>
+<Item class="Part" referent="RBX00000047"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.18055</Y><Z>0.4</Z></Vector3>
@@ -820,7 +856,7 @@
 <CoordinateFrame name="CFrame"><X>50.359159</X><Y>2.090275</Y><Z>-317.73682</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000044"><Properties>
+<Item class="Part" referent="RBX00000048"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.040653</Y><Z>0.4</Z></Vector3>
@@ -835,7 +871,7 @@
 <CoordinateFrame name="CFrame"><X>51.259159</X><Y>2.520327</Y><Z>-318.536739</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000045"><Properties>
+<Item class="Part" referent="RBX00000049"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.576141</Y><Z>0.4</Z></Vector3>
@@ -850,7 +886,7 @@
 <CoordinateFrame name="CFrame"><X>52.159159</X><Y>1.788071</Y><Z>-317.765332</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000046"><Properties>
+<Item class="Part" referent="RBX0000004A"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -865,7 +901,7 @@
 <CoordinateFrame name="CFrame"><X>-49.419966</X><Y>0.3</Y><Z>-354.407437</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000047"><Properties>
+<Item class="Part" referent="RBX0000004B"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -880,7 +916,7 @@
 <CoordinateFrame name="CFrame"><X>-51.814997</X><Y>0.3</Y><Z>-353.944329</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000048"><Properties>
+<Item class="Part" referent="RBX0000004C"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -895,7 +931,7 @@
 <CoordinateFrame name="CFrame"><X>-52.494421</X><Y>0.3</Y><Z>-355.245717</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000049"><Properties>
+<Item class="Part" referent="RBX0000004D"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -910,7 +946,7 @@
 <CoordinateFrame name="CFrame"><X>48.373938</X><Y>0.3</Y><Z>-387.746016</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000004A"><Properties>
+<Item class="Part" referent="RBX0000004E"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -925,7 +961,7 @@
 <CoordinateFrame name="CFrame"><X>52.143493</X><Y>0.3</Y><Z>-390.309047</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000004B"><Properties>
+<Item class="Part" referent="RBX0000004F"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -940,7 +976,7 @@
 <CoordinateFrame name="CFrame"><X>49.065793</X><Y>0.3</Y><Z>-388.035146</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000004C"><Properties>
+<Item class="Part" referent="RBX00000050"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.324316</Y><Z>0.4</Z></Vector3>
@@ -955,7 +991,7 @@
 <CoordinateFrame name="CFrame"><X>-52.350058</X><Y>2.662158</Y><Z>-426.271923</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000004D"><Properties>
+<Item class="Part" referent="RBX00000051"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.003142</Y><Z>0.4</Z></Vector3>
@@ -970,7 +1006,7 @@
 <CoordinateFrame name="CFrame"><X>-51.450058</X><Y>1.501571</Y><Z>-426.157744</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000004E"><Properties>
+<Item class="Part" referent="RBX00000052"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.325024</Y><Z>0.4</Z></Vector3>
@@ -985,7 +1021,7 @@
 <CoordinateFrame name="CFrame"><X>-50.550058</X><Y>1.662512</Y><Z>-425.018954</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000004F"><Properties>
+<Item class="Part" referent="RBX00000053"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1000,7 +1036,7 @@
 <CoordinateFrame name="CFrame"><X>-46.575305</X><Y>0.3</Y><Z>-460.673452</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000050"><Properties>
+<Item class="Part" referent="RBX00000054"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1015,7 +1051,7 @@
 <CoordinateFrame name="CFrame"><X>-46.121043</X><Y>0.3</Y><Z>-463.4597</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000051"><Properties>
+<Item class="Part" referent="RBX00000055"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1030,7 +1066,7 @@
 <CoordinateFrame name="CFrame"><X>-50.60715</X><Y>0.3</Y><Z>-462.02738</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000052"><Properties>
+<Item class="Part" referent="RBX00000056"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1045,7 +1081,7 @@
 <CoordinateFrame name="CFrame"><X>-44.832497</X><Y>0.3</Y><Z>-496.327455</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000053"><Properties>
+<Item class="Part" referent="RBX00000057"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1060,7 +1096,7 @@
 <CoordinateFrame name="CFrame"><X>-47.47238</X><Y>0.3</Y><Z>-495.509277</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000054"><Properties>
+<Item class="Part" referent="RBX00000058"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1075,7 +1111,7 @@
 <CoordinateFrame name="CFrame"><X>-48.159123</X><Y>0.3</Y><Z>-497.494123</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000055"><Properties>
+<Item class="Part" referent="RBX00000059"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.232257</Y><Z>0.4</Z></Vector3>
@@ -1090,7 +1126,7 @@
 <CoordinateFrame name="CFrame"><X>48.863909</X><Y>2.616129</Y><Z>-533.202765</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000056"><Properties>
+<Item class="Part" referent="RBX0000005A"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.622578</Y><Z>0.4</Z></Vector3>
@@ -1105,7 +1141,7 @@
 <CoordinateFrame name="CFrame"><X>49.763909</X><Y>2.811289</Y><Z>-534.63926</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000057"><Properties>
+<Item class="Part" referent="RBX0000005B"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.737607</Y><Z>0.4</Z></Vector3>
@@ -1120,7 +1156,7 @@
 <CoordinateFrame name="CFrame"><X>50.663909</X><Y>1.868804</Y><Z>-534.318653</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000058"><Properties>
+<Item class="Part" referent="RBX0000005C"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1135,7 +1171,7 @@
 <CoordinateFrame name="CFrame"><X>-50.153637</X><Y>0.3</Y><Z>-571.586912</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000059"><Properties>
+<Item class="Part" referent="RBX0000005D"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1150,7 +1186,7 @@
 <CoordinateFrame name="CFrame"><X>-51.731663</X><Y>0.3</Y><Z>-571.287355</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000005A"><Properties>
+<Item class="Part" referent="RBX0000005E"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1165,7 +1201,7 @@
 <CoordinateFrame name="CFrame"><X>-53.932614</X><Y>0.3</Y><Z>-569.392517</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000005B"><Properties>
+<Item class="Part" referent="RBX0000005F"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1180,7 +1216,7 @@
 <CoordinateFrame name="CFrame"><X>45.049923</X><Y>0.3</Y><Z>-604.912816</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000005C"><Properties>
+<Item class="Part" referent="RBX00000060"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1195,7 +1231,7 @@
 <CoordinateFrame name="CFrame"><X>44.293503</X><Y>0.3</Y><Z>-604.059876</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000005D"><Properties>
+<Item class="Part" referent="RBX00000061"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1210,7 +1246,7 @@
 <CoordinateFrame name="CFrame"><X>45.585869</X><Y>0.3</Y><Z>-607.128598</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000005E"><Properties>
+<Item class="Part" referent="RBX00000062"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1225,7 +1261,7 @@
 <CoordinateFrame name="CFrame"><X>51.355429</X><Y>0.3</Y><Z>-643.345891</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000005F"><Properties>
+<Item class="Part" referent="RBX00000063"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1240,7 +1276,7 @@
 <CoordinateFrame name="CFrame"><X>52.895758</X><Y>0.3</Y><Z>-642.16097</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000060"><Properties>
+<Item class="Part" referent="RBX00000064"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1255,7 +1291,7 @@
 <CoordinateFrame name="CFrame"><X>52.559988</X><Y>0.3</Y><Z>-639.408299</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000061"><Properties>
+<Item class="Part" referent="RBX00000065"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.75366</Y><Z>0.4</Z></Vector3>
@@ -1270,7 +1306,7 @@
 <CoordinateFrame name="CFrame"><X>-47.021895</X><Y>2.37683</Y><Z>-677.699486</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000062"><Properties>
+<Item class="Part" referent="RBX00000066"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.48824</Y><Z>0.4</Z></Vector3>
@@ -1285,7 +1321,7 @@
 <CoordinateFrame name="CFrame"><X>-46.121895</X><Y>1.74412</Y><Z>-677.78425</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000063"><Properties>
+<Item class="Part" referent="RBX00000067"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.300476</Y><Z>0.4</Z></Vector3>
@@ -1300,7 +1336,7 @@
 <CoordinateFrame name="CFrame"><X>-45.221895</X><Y>2.650238</Y><Z>-677.828869</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000064"><Properties>
+<Item class="Part" referent="RBX00000068"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.300774</Y><Z>0.4</Z></Vector3>
@@ -1315,7 +1351,7 @@
 <CoordinateFrame name="CFrame"><X>-47.63142</X><Y>2.150387</Y><Z>-713.348749</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000065"><Properties>
+<Item class="Part" referent="RBX00000069"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.267471</Y><Z>0.4</Z></Vector3>
@@ -1330,7 +1366,7 @@
 <CoordinateFrame name="CFrame"><X>-46.73142</X><Y>2.633736</Y><Z>-714.685127</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000066"><Properties>
+<Item class="Part" referent="RBX0000006A"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.697875</Y><Z>0.4</Z></Vector3>
@@ -1345,7 +1381,7 @@
 <CoordinateFrame name="CFrame"><X>-45.83142</X><Y>2.848937</Y><Z>-714.35031</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000067"><Properties>
+<Item class="Part" referent="RBX0000006B"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.287832</Y><Z>0.4</Z></Vector3>
@@ -1360,7 +1396,7 @@
 <CoordinateFrame name="CFrame"><X>-52.367304</X><Y>2.643916</Y><Z>-749.468123</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000068"><Properties>
+<Item class="Part" referent="RBX0000006C"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.734596</Y><Z>0.4</Z></Vector3>
@@ -1375,7 +1411,7 @@
 <CoordinateFrame name="CFrame"><X>-51.467304</X><Y>2.367298</Y><Z>-750.974503</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000069"><Properties>
+<Item class="Part" referent="RBX0000006D"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.220262</Y><Z>0.4</Z></Vector3>
@@ -1390,7 +1426,7 @@
 <CoordinateFrame name="CFrame"><X>-50.567304</X><Y>2.110131</Y><Z>-749.369927</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000006A"><Properties>
+<Item class="Part" referent="RBX0000006E"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.480827</Y><Z>0.4</Z></Vector3>
@@ -1405,7 +1441,7 @@
 <CoordinateFrame name="CFrame"><X>-52.617762</X><Y>1.740414</Y><Z>-785.802854</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000006B"><Properties>
+<Item class="Part" referent="RBX0000006F"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.745033</Y><Z>0.4</Z></Vector3>
@@ -1420,7 +1456,7 @@
 <CoordinateFrame name="CFrame"><X>-51.717762</X><Y>2.372517</Y><Z>-786.377117</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000006C"><Properties>
+<Item class="Part" referent="RBX00000070"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.973886</Y><Z>0.4</Z></Vector3>
@@ -1435,7 +1471,7 @@
 <CoordinateFrame name="CFrame"><X>-50.817762</X><Y>2.486943</Y><Z>-786.752975</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000006D"><Properties>
+<Item class="Part" referent="RBX00000071"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1450,7 +1486,7 @@
 <CoordinateFrame name="CFrame"><X>50.074059</X><Y>0.3</Y><Z>-823.449508</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000006E"><Properties>
+<Item class="Part" referent="RBX00000072"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1465,7 +1501,7 @@
 <CoordinateFrame name="CFrame"><X>49.773167</X><Y>0.3</Y><Z>-820.857171</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000006F"><Properties>
+<Item class="Part" referent="RBX00000073"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1480,7 +1516,7 @@
 <CoordinateFrame name="CFrame"><X>51.858867</X><Y>0.3</Y><Z>-820.928176</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000070"><Properties>
+<Item class="Part" referent="RBX00000074"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.360848</Y><Z>0.4</Z></Vector3>
@@ -1495,7 +1531,7 @@
 <CoordinateFrame name="CFrame"><X>-53.472081</X><Y>1.680424</Y><Z>-858.014195</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000071"><Properties>
+<Item class="Part" referent="RBX00000075"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.184678</Y><Z>0.4</Z></Vector3>
@@ -1510,7 +1546,7 @@
 <CoordinateFrame name="CFrame"><X>-52.572081</X><Y>1.592339</Y><Z>-857.02686</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000072"><Properties>
+<Item class="Part" referent="RBX00000076"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.939998</Y><Z>0.4</Z></Vector3>
@@ -1525,7 +1561,7 @@
 <CoordinateFrame name="CFrame"><X>-51.672081</X><Y>1.969999</Y><Z>-858.694468</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000073"><Properties>
+<Item class="Part" referent="RBX00000077"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.53986</Y><Z>0.4</Z></Vector3>
@@ -1540,7 +1576,7 @@
 <CoordinateFrame name="CFrame"><X>-51.63606</X><Y>2.26993</Y><Z>-893.039499</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000074"><Properties>
+<Item class="Part" referent="RBX00000078"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.129975</Y><Z>0.4</Z></Vector3>
@@ -1555,7 +1591,7 @@
 <CoordinateFrame name="CFrame"><X>-50.73606</X><Y>2.564988</Y><Z>-893.806028</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000075"><Properties>
+<Item class="Part" referent="RBX00000079"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.473368</Y><Z>0.4</Z></Vector3>
@@ -1570,7 +1606,7 @@
 <CoordinateFrame name="CFrame"><X>-49.83606</X><Y>1.736684</Y><Z>-894.43416</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000076"><Properties>
+<Item class="Part" referent="RBX0000007A"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.261034</Y><Z>0.4</Z></Vector3>
@@ -1585,7 +1621,7 @@
 <CoordinateFrame name="CFrame"><X>46.843611</X><Y>1.630517</Y><Z>-929.548215</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000077"><Properties>
+<Item class="Part" referent="RBX0000007B"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.231079</Y><Z>0.4</Z></Vector3>
@@ -1600,7 +1636,7 @@
 <CoordinateFrame name="CFrame"><X>47.743611</X><Y>2.615539</Y><Z>-930.881289</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000078"><Properties>
+<Item class="Part" referent="RBX0000007C"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.339119</Y><Z>0.4</Z></Vector3>
@@ -1615,7 +1651,7 @@
 <CoordinateFrame name="CFrame"><X>48.643611</X><Y>1.669559</Y><Z>-930.36253</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000079"><Properties>
+<Item class="Part" referent="RBX0000007D"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1630,7 +1666,7 @@
 <CoordinateFrame name="CFrame"><X>-50.836332</X><Y>0.3</Y><Z>-963.867524</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000007A"><Properties>
+<Item class="Part" referent="RBX0000007E"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1645,7 +1681,7 @@
 <CoordinateFrame name="CFrame"><X>-50.933121</X><Y>0.3</Y><Z>-963.838359</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000007B"><Properties>
+<Item class="Part" referent="RBX0000007F"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1660,7 +1696,7 @@
 <CoordinateFrame name="CFrame"><X>-51.132036</X><Y>0.3</Y><Z>-968.214483</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000007C"><Properties>
+<Item class="Part" referent="RBX00000080"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1675,7 +1711,7 @@
 <CoordinateFrame name="CFrame"><X>51.062336</X><Y>0.3</Y><Z>-999.079402</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000007D"><Properties>
+<Item class="Part" referent="RBX00000081"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1690,7 +1726,7 @@
 <CoordinateFrame name="CFrame"><X>50.132527</X><Y>0.3</Y><Z>-1000.866145</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000007E"><Properties>
+<Item class="Part" referent="RBX00000082"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1705,7 +1741,7 @@
 <CoordinateFrame name="CFrame"><X>51.690022</X><Y>0.3</Y><Z>-1003.036677</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000007F"><Properties>
+<Item class="Part" referent="RBX00000083"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1720,7 +1756,7 @@
 <CoordinateFrame name="CFrame"><X>52.258046</X><Y>0.3</Y><Z>-1035.390132</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000080"><Properties>
+<Item class="Part" referent="RBX00000084"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1735,7 +1771,7 @@
 <CoordinateFrame name="CFrame"><X>51.701771</X><Y>0.3</Y><Z>-1037.711543</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000081"><Properties>
+<Item class="Part" referent="RBX00000085"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1750,7 +1786,7 @@
 <CoordinateFrame name="CFrame"><X>46.730458</X><Y>0.3</Y><Z>-1036.772212</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000082"><Properties>
+<Item class="Part" referent="RBX00000086"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.864589</Y><Z>0.4</Z></Vector3>
@@ -1765,7 +1801,7 @@
 <CoordinateFrame name="CFrame"><X>-49.668906</X><Y>2.932294</Y><Z>-1074.975657</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000083"><Properties>
+<Item class="Part" referent="RBX00000087"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.547993</Y><Z>0.4</Z></Vector3>
@@ -1780,7 +1816,7 @@
 <CoordinateFrame name="CFrame"><X>-48.768906</X><Y>2.773997</Y><Z>-1073.315604</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000084"><Properties>
+<Item class="Part" referent="RBX00000088"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.131739</Y><Z>0.4</Z></Vector3>
@@ -1795,7 +1831,7 @@
 <CoordinateFrame name="CFrame"><X>-47.868906</X><Y>1.56587</Y><Z>-1074.123364</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000085"><Properties>
+<Item class="Part" referent="RBX00000089"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.026164</Y><Z>0.4</Z></Vector3>
@@ -1810,7 +1846,7 @@
 <CoordinateFrame name="CFrame"><X>-50.285561</X><Y>2.013082</Y><Z>-1110.578689</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000086"><Properties>
+<Item class="Part" referent="RBX0000008A"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.269726</Y><Z>0.4</Z></Vector3>
@@ -1825,7 +1861,7 @@
 <CoordinateFrame name="CFrame"><X>-49.385561</X><Y>2.134863</Y><Z>-1109.43446</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000087"><Properties>
+<Item class="Part" referent="RBX0000008B"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.33592</Y><Z>0.4</Z></Vector3>
@@ -1840,7 +1876,7 @@
 <CoordinateFrame name="CFrame"><X>-48.485561</X><Y>2.66796</Y><Z>-1109.149188</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000088"><Properties>
+<Item class="Part" referent="RBX0000008C"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1855,7 +1891,7 @@
 <CoordinateFrame name="CFrame"><X>-47.184184</X><Y>0.3</Y><Z>-1148.233966</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000089"><Properties>
+<Item class="Part" referent="RBX0000008D"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1870,7 +1906,7 @@
 <CoordinateFrame name="CFrame"><X>-46.811627</X><Y>0.3</Y><Z>-1145.839471</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000008A"><Properties>
+<Item class="Part" referent="RBX0000008E"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1885,7 +1921,7 @@
 <CoordinateFrame name="CFrame"><X>-49.686767</X><Y>0.3</Y><Z>-1147.379433</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000008B"><Properties>
+<Item class="Part" referent="RBX0000008F"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.915397</Y><Z>0.4</Z></Vector3>
@@ -1900,7 +1936,7 @@
 <CoordinateFrame name="CFrame"><X>-52.717126</X><Y>1.957698</Y><Z>-1181.937575</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000008C"><Properties>
+<Item class="Part" referent="RBX00000090"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.955773</Y><Z>0.4</Z></Vector3>
@@ -1915,7 +1951,7 @@
 <CoordinateFrame name="CFrame"><X>-51.817126</X><Y>2.977886</Y><Z>-1181.938828</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000008D"><Properties>
+<Item class="Part" referent="RBX00000091"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.74</Y><Z>0.4</Z></Vector3>
@@ -1930,7 +1966,7 @@
 <CoordinateFrame name="CFrame"><X>-50.917126</X><Y>2.37</Y><Z>-1181.183052</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000008E"><Properties>
+<Item class="Part" referent="RBX00000092"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1945,7 +1981,7 @@
 <CoordinateFrame name="CFrame"><X>47.926613</X><Y>0.3</Y><Z>-1220.473606</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000008F"><Properties>
+<Item class="Part" referent="RBX00000093"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1960,7 +1996,7 @@
 <CoordinateFrame name="CFrame"><X>44.383454</X><Y>0.3</Y><Z>-1218.162681</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000090"><Properties>
+<Item class="Part" referent="RBX00000094"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1975,7 +2011,7 @@
 <CoordinateFrame name="CFrame"><X>49.061585</X><Y>0.3</Y><Z>-1217.09915</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000091"><Properties>
+<Item class="Part" referent="RBX00000095"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -1990,7 +2026,7 @@
 <CoordinateFrame name="CFrame"><X>-49.948508</X><Y>0.3</Y><Z>-1252.648441</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000092"><Properties>
+<Item class="Part" referent="RBX00000096"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -2005,7 +2041,7 @@
 <CoordinateFrame name="CFrame"><X>-49.913787</X><Y>0.3</Y><Z>-1254.547405</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000093"><Properties>
+<Item class="Part" referent="RBX00000097"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -2020,7 +2056,7 @@
 <CoordinateFrame name="CFrame"><X>-54.412574</X><Y>0.3</Y><Z>-1255.692524</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000094"><Properties>
+<Item class="Part" referent="RBX00000098"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>4.851925</Y><Z>0.4</Z></Vector3>
@@ -2035,7 +2071,7 @@
 <CoordinateFrame name="CFrame"><X>47.270859</X><Y>2.425963</Y><Z>-1290.53687</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000095"><Properties>
+<Item class="Part" referent="RBX00000099"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.87456</Y><Z>0.4</Z></Vector3>
@@ -2050,7 +2086,7 @@
 <CoordinateFrame name="CFrame"><X>48.170859</X><Y>1.93728</Y><Z>-1290.973581</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000096"><Properties>
+<Item class="Part" referent="RBX0000009A"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.634758</Y><Z>0.4</Z></Vector3>
@@ -2065,7 +2101,7 @@
 <CoordinateFrame name="CFrame"><X>49.070859</X><Y>2.817379</Y><Z>-1289.122511</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000097"><Properties>
+<Item class="Part" referent="RBX0000009B"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>5.309472</Y><Z>0.4</Z></Vector3>
@@ -2080,7 +2116,7 @@
 <CoordinateFrame name="CFrame"><X>-51.146598</X><Y>2.654736</Y><Z>-1325.235968</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000098"><Properties>
+<Item class="Part" referent="RBX0000009C"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.341672</Y><Z>0.4</Z></Vector3>
@@ -2095,7 +2131,7 @@
 <CoordinateFrame name="CFrame"><X>-50.246598</X><Y>1.670836</Y><Z>-1326.584913</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX00000099"><Properties>
+<Item class="Part" referent="RBX0000009D"><Properties>
 <string name="Name">Reed</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.4</X><Y>3.331874</Y><Z>0.4</Z></Vector3>
@@ -2110,7 +2146,7 @@
 <CoordinateFrame name="CFrame"><X>-49.346598</X><Y>1.665937</Y><Z>-1325.646432</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000009A"><Properties>
+<Item class="Part" referent="RBX0000009E"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -2125,7 +2161,7 @@
 <CoordinateFrame name="CFrame"><X>-50.952294</X><Y>0.3</Y><Z>-1360.910437</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000009B"><Properties>
+<Item class="Part" referent="RBX0000009F"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -2140,7 +2176,7 @@
 <CoordinateFrame name="CFrame"><X>-46.522813</X><Y>0.3</Y><Z>-1359.210234</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX0000009C"><Properties>
+<Item class="Part" referent="RBX000000A0"><Properties>
 <string name="Name">Pebble</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>1</X><Y>0.6</Y><Z>1</Z></Vector3>
@@ -2156,13 +2192,13 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Folder" referent="RBX0000009D"><Properties>
+<Item class="Folder" referent="RBX000000A1"><Properties>
 <string name="Name">Obstacles</string>
 </Properties>
-<Item class="Model" referent="RBX0000009E"><Properties>
+<Item class="Model" referent="RBX000000A2"><Properties>
 <string name="Name">Bush</string>
 </Properties>
-<Item class="Part" referent="RBX0000009F"><Properties>
+<Item class="Part" referent="RBX000000A3"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>3</Y><Z>6</Z></Vector3>
@@ -2176,7 +2212,7 @@
 <CoordinateFrame name="CFrame"><X>32.213654</X><Y>1.5</Y><Z>-117.182674</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000A0"><Properties>
+<Item class="Part" referent="RBX000000A4"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>5</X><Y>2</Y><Z>4</Z></Vector3>
@@ -2191,10 +2227,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000A1"><Properties>
+<Item class="Model" referent="RBX000000A5"><Properties>
 <string name="Name">Bush</string>
 </Properties>
-<Item class="Part" referent="RBX000000A2"><Properties>
+<Item class="Part" referent="RBX000000A6"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>3</Y><Z>6</Z></Vector3>
@@ -2208,7 +2244,7 @@
 <CoordinateFrame name="CFrame"><X>-37.75589</X><Y>1.5</Y><Z>-212.375171</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000A3"><Properties>
+<Item class="Part" referent="RBX000000A7"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>5</X><Y>2</Y><Z>4</Z></Vector3>
@@ -2223,10 +2259,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000A4"><Properties>
+<Item class="Model" referent="RBX000000A8"><Properties>
 <string name="Name">Rock</string>
 </Properties>
-<Item class="Part" referent="RBX000000A5"><Properties>
+<Item class="Part" referent="RBX000000A9"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>3</Y><Z>6</Z></Vector3>
@@ -2240,7 +2276,7 @@
 <CoordinateFrame name="CFrame"><X>-33.763824</X><Y>1.5</Y><Z>-336.729831</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000A6"><Properties>
+<Item class="Part" referent="RBX000000AA"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>5</X><Y>2</Y><Z>4</Z></Vector3>
@@ -2255,10 +2291,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000A7"><Properties>
+<Item class="Model" referent="RBX000000AB"><Properties>
 <string name="Name">Bush</string>
 </Properties>
-<Item class="Part" referent="RBX000000A8"><Properties>
+<Item class="Part" referent="RBX000000AC"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>3</Y><Z>6</Z></Vector3>
@@ -2272,7 +2308,7 @@
 <CoordinateFrame name="CFrame"><X>-28.884933</X><Y>1.5</Y><Z>-375.001825</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000A9"><Properties>
+<Item class="Part" referent="RBX000000AD"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>5</X><Y>2</Y><Z>4</Z></Vector3>
@@ -2287,10 +2323,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000AA"><Properties>
+<Item class="Model" referent="RBX000000AE"><Properties>
 <string name="Name">Rock</string>
 </Properties>
-<Item class="Part" referent="RBX000000AB"><Properties>
+<Item class="Part" referent="RBX000000AF"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>6</X><Y>3</Y><Z>4</Z></Vector3>
@@ -2304,7 +2340,7 @@
 <CoordinateFrame name="CFrame"><X>24.366752</X><Y>1.5</Y><Z>-437.187741</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000AC"><Properties>
+<Item class="Part" referent="RBX000000B0"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>3</X><Y>2</Y><Z>2</Z></Vector3>
@@ -2319,10 +2355,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000AD"><Properties>
+<Item class="Model" referent="RBX000000B1"><Properties>
 <string name="Name">Bush</string>
 </Properties>
-<Item class="Part" referent="RBX000000AE"><Properties>
+<Item class="Part" referent="RBX000000B2"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>3</Y><Z>6</Z></Vector3>
@@ -2336,7 +2372,7 @@
 <CoordinateFrame name="CFrame"><X>29.770638</X><Y>1.5</Y><Z>-479.481275</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000AF"><Properties>
+<Item class="Part" referent="RBX000000B3"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>5</X><Y>2</Y><Z>4</Z></Vector3>
@@ -2351,10 +2387,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000B0"><Properties>
+<Item class="Model" referent="RBX000000B4"><Properties>
 <string name="Name">Rock</string>
 </Properties>
-<Item class="Part" referent="RBX000000B1"><Properties>
+<Item class="Part" referent="RBX000000B5"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>6</X><Y>3</Y><Z>4</Z></Vector3>
@@ -2368,7 +2404,7 @@
 <CoordinateFrame name="CFrame"><X>4.653316</X><Y>1.5</Y><Z>-522.846693</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000B2"><Properties>
+<Item class="Part" referent="RBX000000B6"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>3</X><Y>2</Y><Z>2</Z></Vector3>
@@ -2383,10 +2419,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000B3"><Properties>
+<Item class="Model" referent="RBX000000B7"><Properties>
 <string name="Name">Rock</string>
 </Properties>
-<Item class="Part" referent="RBX000000B4"><Properties>
+<Item class="Part" referent="RBX000000B8"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>6</X><Y>3</Y><Z>4</Z></Vector3>
@@ -2400,7 +2436,7 @@
 <CoordinateFrame name="CFrame"><X>15.768359</X><Y>1.5</Y><Z>-564.068148</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000B5"><Properties>
+<Item class="Part" referent="RBX000000B9"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>3</X><Y>2</Y><Z>2</Z></Vector3>
@@ -2415,10 +2451,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000B6"><Properties>
+<Item class="Model" referent="RBX000000BA"><Properties>
 <string name="Name">Bush</string>
 </Properties>
-<Item class="Part" referent="RBX000000B7"><Properties>
+<Item class="Part" referent="RBX000000BB"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>3</Y><Z>6</Z></Vector3>
@@ -2432,7 +2468,7 @@
 <CoordinateFrame name="CFrame"><X>33.232956</X><Y>1.5</Y><Z>-640.488165</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000B8"><Properties>
+<Item class="Part" referent="RBX000000BC"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>5</X><Y>2</Y><Z>4</Z></Vector3>
@@ -2447,10 +2483,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000B9"><Properties>
+<Item class="Model" referent="RBX000000BD"><Properties>
 <string name="Name">Rock</string>
 </Properties>
-<Item class="Part" referent="RBX000000BA"><Properties>
+<Item class="Part" referent="RBX000000BE"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>6</X><Y>3</Y><Z>4</Z></Vector3>
@@ -2464,7 +2500,7 @@
 <CoordinateFrame name="CFrame"><X>44.103564</X><Y>1.5</Y><Z>-698.169741</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000BB"><Properties>
+<Item class="Part" referent="RBX000000BF"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>3</X><Y>2</Y><Z>2</Z></Vector3>
@@ -2479,10 +2515,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000BC"><Properties>
+<Item class="Model" referent="RBX000000C0"><Properties>
 <string name="Name">Rock</string>
 </Properties>
-<Item class="Part" referent="RBX000000BD"><Properties>
+<Item class="Part" referent="RBX000000C1"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>6</X><Y>3</Y><Z>4</Z></Vector3>
@@ -2496,7 +2532,7 @@
 <CoordinateFrame name="CFrame"><X>-38.580299</X><Y>1.5</Y><Z>-832.264593</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000BE"><Properties>
+<Item class="Part" referent="RBX000000C2"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>3</X><Y>2</Y><Z>2</Z></Vector3>
@@ -2511,10 +2547,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000BF"><Properties>
+<Item class="Model" referent="RBX000000C3"><Properties>
 <string name="Name">Bush</string>
 </Properties>
-<Item class="Part" referent="RBX000000C0"><Properties>
+<Item class="Part" referent="RBX000000C4"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>3</Y><Z>6</Z></Vector3>
@@ -2528,7 +2564,7 @@
 <CoordinateFrame name="CFrame"><X>17.513981</X><Y>1.5</Y><Z>-920.81367</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000C1"><Properties>
+<Item class="Part" referent="RBX000000C5"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>5</X><Y>2</Y><Z>4</Z></Vector3>
@@ -2543,10 +2579,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000C2"><Properties>
+<Item class="Model" referent="RBX000000C6"><Properties>
 <string name="Name">Bush</string>
 </Properties>
-<Item class="Part" referent="RBX000000C3"><Properties>
+<Item class="Part" referent="RBX000000C7"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>3</Y><Z>6</Z></Vector3>
@@ -2560,7 +2596,7 @@
 <CoordinateFrame name="CFrame"><X>-29.630745</X><Y>1.5</Y><Z>-963.388644</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000C4"><Properties>
+<Item class="Part" referent="RBX000000C8"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>5</X><Y>2</Y><Z>4</Z></Vector3>
@@ -2575,10 +2611,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000C5"><Properties>
+<Item class="Model" referent="RBX000000C9"><Properties>
 <string name="Name">Bush</string>
 </Properties>
-<Item class="Part" referent="RBX000000C6"><Properties>
+<Item class="Part" referent="RBX000000CA"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>3</Y><Z>6</Z></Vector3>
@@ -2592,7 +2628,7 @@
 <CoordinateFrame name="CFrame"><X>10.206759</X><Y>1.5</Y><Z>-992.867692</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000C7"><Properties>
+<Item class="Part" referent="RBX000000CB"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>5</X><Y>2</Y><Z>4</Z></Vector3>
@@ -2607,10 +2643,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000C8"><Properties>
+<Item class="Model" referent="RBX000000CC"><Properties>
 <string name="Name">Rock</string>
 </Properties>
-<Item class="Part" referent="RBX000000C9"><Properties>
+<Item class="Part" referent="RBX000000CD"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>6</X><Y>3</Y><Z>4</Z></Vector3>
@@ -2624,7 +2660,7 @@
 <CoordinateFrame name="CFrame"><X>-35.492443</X><Y>1.5</Y><Z>-1049.474846</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000CA"><Properties>
+<Item class="Part" referent="RBX000000CE"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>3</X><Y>2</Y><Z>2</Z></Vector3>
@@ -2639,10 +2675,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000CB"><Properties>
+<Item class="Model" referent="RBX000000CF"><Properties>
 <string name="Name">Rock</string>
 </Properties>
-<Item class="Part" referent="RBX000000CC"><Properties>
+<Item class="Part" referent="RBX000000D0"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>6</X><Y>3</Y><Z>4</Z></Vector3>
@@ -2656,7 +2692,7 @@
 <CoordinateFrame name="CFrame"><X>-44.886907</X><Y>1.5</Y><Z>-1086.669909</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000CD"><Properties>
+<Item class="Part" referent="RBX000000D1"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>3</X><Y>2</Y><Z>2</Z></Vector3>
@@ -2671,10 +2707,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000CE"><Properties>
+<Item class="Model" referent="RBX000000D2"><Properties>
 <string name="Name">Rock</string>
 </Properties>
-<Item class="Part" referent="RBX000000CF"><Properties>
+<Item class="Part" referent="RBX000000D3"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>6</X><Y>3</Y><Z>4</Z></Vector3>
@@ -2688,7 +2724,7 @@
 <CoordinateFrame name="CFrame"><X>38.991637</X><Y>1.5</Y><Z>-1138.932039</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000D0"><Properties>
+<Item class="Part" referent="RBX000000D4"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>3</X><Y>2</Y><Z>2</Z></Vector3>
@@ -2703,10 +2739,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000D1"><Properties>
+<Item class="Model" referent="RBX000000D5"><Properties>
 <string name="Name">Rock</string>
 </Properties>
-<Item class="Part" referent="RBX000000D2"><Properties>
+<Item class="Part" referent="RBX000000D6"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>6</X><Y>3</Y><Z>4</Z></Vector3>
@@ -2720,7 +2756,7 @@
 <CoordinateFrame name="CFrame"><X>-5.572515</X><Y>1.5</Y><Z>-1257.311782</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000D3"><Properties>
+<Item class="Part" referent="RBX000000D7"><Properties>
 <string name="Name">Block</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>3</X><Y>2</Y><Z>2</Z></Vector3>
@@ -2736,7 +2772,7 @@
 </Item>
 </Item>
 </Item>
-<Item class="SpawnLocation" referent="RBX000000D4"><Properties>
+<Item class="SpawnLocation" referent="RBX000000D8"><Properties>
 <string name="Name">SpawnLocation</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1</Y><Z>8</Z></Vector3>
@@ -2745,10 +2781,10 @@
 <bool name="CanCollide">false</bool>
 </Properties>
 </Item>
-<Item class="Model" referent="RBX000000D5"><Properties>
+<Item class="Model" referent="RBX000000D9"><Properties>
 <string name="Name">Nest</string>
 </Properties>
-<Item class="Part" referent="RBX000000D6"><Properties>
+<Item class="Part" referent="RBX000000DA"><Properties>
 <string name="Name">Twig</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>1.2</Y><Z>3</Z></Vector3>
@@ -2762,7 +2798,7 @@
 <CoordinateFrame name="CFrame"><X>0</X><Y>0.6</Y><Z>-757</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000D7"><Properties>
+<Item class="Part" referent="RBX000000DB"><Properties>
 <string name="Name">Twig</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>1.2</Y><Z>3</Z></Vector3>
@@ -2776,7 +2812,7 @@
 <CoordinateFrame name="CFrame"><X>2.12132</X><Y>0.6</Y><Z>-757.87868</Z><R00>0.707107</R00><R01>0</R01><R02>0.707107</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-0.707107</R20><R21>0</R21><R22>0.707107</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000D8"><Properties>
+<Item class="Part" referent="RBX000000DC"><Properties>
 <string name="Name">Twig</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>1.2</Y><Z>3</Z></Vector3>
@@ -2790,7 +2826,7 @@
 <CoordinateFrame name="CFrame"><X>3</X><Y>0.6</Y><Z>-760</Z><R00>0</R00><R01>0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>0</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000D9"><Properties>
+<Item class="Part" referent="RBX000000DD"><Properties>
 <string name="Name">Twig</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>1.2</Y><Z>3</Z></Vector3>
@@ -2804,7 +2840,7 @@
 <CoordinateFrame name="CFrame"><X>2.12132</X><Y>0.6</Y><Z>-762.12132</Z><R00>-0.707107</R00><R01>0</R01><R02>0.707107</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-0.707107</R20><R21>0</R21><R22>-0.707107</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000DA"><Properties>
+<Item class="Part" referent="RBX000000DE"><Properties>
 <string name="Name">Twig</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>1.2</Y><Z>3</Z></Vector3>
@@ -2818,7 +2854,7 @@
 <CoordinateFrame name="CFrame"><X>0</X><Y>0.6</Y><Z>-763</Z><R00>-1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-0</R20><R21>0</R21><R22>-1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000DB"><Properties>
+<Item class="Part" referent="RBX000000DF"><Properties>
 <string name="Name">Twig</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>1.2</Y><Z>3</Z></Vector3>
@@ -2832,7 +2868,7 @@
 <CoordinateFrame name="CFrame"><X>-2.12132</X><Y>0.6</Y><Z>-762.12132</Z><R00>-0.707107</R00><R01>0</R01><R02>-0.707107</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0.707107</R20><R21>0</R21><R22>-0.707107</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000DC"><Properties>
+<Item class="Part" referent="RBX000000E0"><Properties>
 <string name="Name">Twig</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>1.2</Y><Z>3</Z></Vector3>
@@ -2846,7 +2882,7 @@
 <CoordinateFrame name="CFrame"><X>-3</X><Y>0.6</Y><Z>-760</Z><R00>-0</R00><R01>0</R01><R02>-1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>1</R20><R21>0</R21><R22>-0</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000DD"><Properties>
+<Item class="Part" referent="RBX000000E1"><Properties>
 <string name="Name">Twig</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>1.2</Y><Z>3</Z></Vector3>
@@ -2860,7 +2896,7 @@
 <CoordinateFrame name="CFrame"><X>-2.12132</X><Y>0.6</Y><Z>-757.87868</Z><R00>0.707107</R00><R01>0</R01><R02>-0.707107</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0.707107</R20><R21>0</R21><R22>0.707107</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000DE"><Properties>
+<Item class="Part" referent="RBX000000E2"><Properties>
 <string name="Name">Straw</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>6</X><Y>0.4</Y><Z>6</Z></Vector3>
@@ -2874,7 +2910,7 @@
 <CoordinateFrame name="CFrame"><X>0</X><Y>0.2</Y><Z>-760</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="RBX000000DF"><Properties>
+<Item class="Part" referent="RBX000000E3"><Properties>
 <string name="Name">Egg</string>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
@@ -2882,12 +2918,12 @@
 <Color3uint8 name="Color3uint8">4294964438</Color3uint8>
 <CoordinateFrame name="CFrame"><X>0</X><Y>2</Y><Z>-760</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
-<Item class="SpecialMesh" referent="RBX000000E0"><Properties>
+<Item class="SpecialMesh" referent="RBX000000E4"><Properties>
 <string name="Name">SpecialMesh</string>
 <token name="MeshType">3</token>
 </Properties>
 </Item>
-<Item class="PointLight" referent="RBX000000E1"><Properties>
+<Item class="PointLight" referent="RBX000000E5"><Properties>
 <string name="Name">PointLight</string>
 <Color3 name="Color"><R>1</R><G>0.886275</G><B>0.588235</B></Color3>
 <float name="Range">14</float>

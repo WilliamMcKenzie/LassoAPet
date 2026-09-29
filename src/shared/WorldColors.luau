@@ -15,9 +15,10 @@ local DEFAULTS = {
 
 local function paint(part, base, checker)
 	part.Color = base
-	local texture = part:FindFirstChild("Checker")
-	if texture then
-		texture.Color3 = checker
+	for _, texture in part:GetChildren() do
+		if texture.Name == "Checker" then
+			texture.Color3 = checker
+		end
 	end
 end
 
