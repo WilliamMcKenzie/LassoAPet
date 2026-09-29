@@ -3168,26 +3168,1687 @@
 </Item>
 </Item>
 </Item>
-<Item class="Part" referent="STARTLINE"><Properties>
+<Item class="Model" referent="STARTLINE"><Properties>
 <string name="Name">StartLine</string>
+</Properties>
+<Item class="Part" referent="STARTLINE1"><Properties>
+<string name="Name">Square</string>
 <bool name="Anchored">true</bool>
 <bool name="CanCollide">false</bool>
 <bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
 <token name="Material">272</token>
-<Vector3 name="size"><X>112</X><Y>0.1</Y><Z>4</Z></Vector3>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
 <Color3uint8 name="Color3uint8">4294967295</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>0</X><Y>0.025</Y><Z>-2</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-55</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="STARTLINETEX"><Properties>
-<string name="Name">Checker</string>
-<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
-<token name="Face">1</token>
-<float name="StudsPerTileU">4</float>
-<float name="StudsPerTileV">4</float>
-<Color3 name="Color3"><R>0.137255</R><G>0.137255</G><B>0.156863</B></Color3>
+</Item>
+<Item class="Part" referent="STARTLINE2"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-53</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE3"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-51</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE4"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-49</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE5"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-47</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE6"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-45</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE7"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-43</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE8"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-41</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE9"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-39</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE10"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-37</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE11"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-35</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE12"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-33</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE13"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-31</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE14"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-29</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE15"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-27</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE16"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-25</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE17"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-23</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE18"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-21</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE19"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-19</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE20"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-17</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE21"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-15</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE22"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-13</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE23"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-11</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE24"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-9</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE25"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-7</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE26"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-5</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE27"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-3</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE28"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-1</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE29"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>1</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE30"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>3</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE31"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>5</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE32"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>7</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE33"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>9</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE34"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>11</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE35"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>13</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE36"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>15</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE37"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>17</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE38"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>19</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE39"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>21</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE40"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>23</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE41"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>25</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE42"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>27</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE43"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>29</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE44"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>31</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE45"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>33</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE46"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>35</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE47"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>37</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE48"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>39</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE49"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>41</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE50"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>43</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE51"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>45</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE52"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>47</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE53"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>49</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE54"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>51</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE55"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>53</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE56"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>55</X><Y>0.025</Y><Z>-1</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE57"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-55</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE58"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-53</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE59"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-51</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE60"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-49</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE61"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-47</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE62"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-45</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE63"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-43</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE64"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-41</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE65"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-39</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE66"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-37</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE67"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-35</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE68"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-33</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE69"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-31</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE70"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-29</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE71"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-27</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE72"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-25</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE73"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-23</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE74"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-21</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE75"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-19</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE76"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-17</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE77"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-15</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE78"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-13</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE79"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-11</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE80"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-9</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE81"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-7</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE82"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-5</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE83"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-3</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE84"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-1</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE85"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>1</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE86"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>3</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE87"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>5</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE88"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>7</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE89"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>9</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE90"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>11</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE91"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>13</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE92"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>15</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE93"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>17</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE94"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>19</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE95"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>21</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE96"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>23</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE97"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>25</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE98"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>27</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE99"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>29</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE100"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>31</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE101"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>33</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE102"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>35</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE103"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>37</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE104"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>39</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE105"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>41</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE106"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>43</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE107"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>45</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE108"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>47</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE109"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>49</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE110"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>51</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE111"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4280492840</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>53</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="STARTLINE112"><Properties>
+<string name="Name">Square</string>
+<bool name="Anchored">true</bool>
+<bool name="CanCollide">false</bool>
+<bool name="CanQuery">false</bool>
+<bool name="CanTouch">false</bool>
+<bool name="CastShadow">false</bool>
+<token name="Material">272</token>
+<Vector3 name="size"><X>2</X><Y>0.1</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4294967295</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>55</X><Y>0.025</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
 </Item>
