@@ -56,7 +56,13 @@ local TONES = {
 
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained
 
-local function label(parent, size, position, textSize)
+-- Outlined text. UIStroke can't be used: on Fredoka One it leaves marks inside
+-- small letter holes (the 6 in "63 m") at some thicknesses, a known Roblox bug.
+-- Instead black copies of the text are drawn in a ring behind a white copy,
+-- which keeps the outline clean at any size. The label itself draws nothing
+-- (MaxVisibleGraphemes 0) but still holds Text, TextColor3, TextTransparency etc.
+local OUTLINE_STEPS = 16
+local function label(parent, size, position, textSize, thickness)
 	local l = Instance.new("TextLabel")
 	l.BackgroundTransparency = 1
 	l.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -66,11 +72,34 @@ local function label(parent, size, position, textSize)
 	l.TextSize = textSize
 	l.TextColor3 = WHITE
 	l.Text = ""
-	local s = Instance.new("UIStroke")
-	s.Thickness = STROKE
-	s.Color = Color3.new(0, 0, 0)
-	s.LineJoinMode = Enum.LineJoinMode.Round
-	s.Parent = l
+	l.MaxVisibleGraphemes = 0
+	thickness = thickness or STROKE
+	local function copy(offset, color, zIndex)
+		local c = Instance.new("TextLabel")
+		c.BackgroundTransparency = 1
+		c.Size = UDim2.fromScale(1, 1)
+		c.Position = UDim2.fromOffset(offset.X, offset.Y)
+		c.Font = FONT
+		c.TextColor3 = color or WHITE
+		c.ZIndex = zIndex
+		local synced = { "Text", "TextSize", "TextTransparency", "TextXAlignment", "TextYAlignment" }
+		if not color then
+			table.insert(synced, "TextColor3")
+		end
+		for _, property in synced do
+			local function sync()
+				c[property] = l[property]
+			end
+			l:GetPropertyChangedSignal(property):Connect(sync)
+			sync()
+		end
+		c.Parent = l
+	end
+	for i = 1, OUTLINE_STEPS do
+		local angle = i / OUTLINE_STEPS * math.pi * 2
+		copy(Vector2.new(math.cos(angle), math.sin(angle)) * thickness, Color3.new(0, 0, 0), 1)
+	end
+	copy(Vector2.zero, nil, 2)
 	l.Parent = parent
 	return l
 end
@@ -161,9 +190,8 @@ local function cashRow(parent, coinSize, textSize, anchor, position)
 	layout.Parent = row
 	local coin = image(row, "coin", UDim2.fromOffset(coinSize, coinSize), UDim2.new())
 	coin.ZIndex = 1
-	local text = label(row, UDim2.fromOffset(0, coinSize), UDim2.new(), textSize)
+	local text = label(row, UDim2.fromOffset(0, coinSize), UDim2.new(), textSize, 4)
 	text.AutomaticSize = Enum.AutomaticSize.X
-	text.UIStroke.Thickness = 4
 	text.LayoutOrder = 1
 	text.ZIndex = 3 -- the text overlaps the coin's edge, drawn on top
 	local scale = Instance.new("UIScale")
@@ -205,9 +233,8 @@ function Hud.init(onAction, onHome, onRide)
 	filled.AnchorPoint = Vector2.zero
 
 	-- Distance sits on the bar but outside it, so it still shows once the bar is gone.
-	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 50)
+	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 50, 4)
 	distance.Name = "Distance"
-	distance.UIStroke.Thickness = 4
 	distance.ZIndex = 2
 
 	message = label(rideRoot, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0.3), 56)
@@ -327,7 +354,6 @@ function Hud.flash(text, seconds)
 	message.Text = text
 	message.TextColor3 = TONES[text] or WHITE
 	message.TextTransparency = 0
-	message.UIStroke.Transparency = 0
 	message.Size = UDim2.fromOffset(500, 70)
 	TweenService:Create(message, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Size = UDim2.fromOffset(600, 80) }):Play()
 	if seconds then
@@ -335,7 +361,6 @@ function Hud.flash(text, seconds)
 			if message.Text == text then
 				local fade = TweenInfo.new(0.3)
 				TweenService:Create(message, fade, { TextTransparency = 1 }):Play()
-				TweenService:Create(message.UIStroke, fade, { Transparency = 1 }):Play()
 			end
 		end)
 	end
@@ -397,7 +422,6 @@ function Hud.coinPopup(screenPoint, amount)
 	task.delay(0.65, function()
 		local fade = TweenInfo.new(0.35)
 		TweenService:Create(text, fade, { TextTransparency = 1 }):Play()
-		TweenService:Create(text.UIStroke, fade, { Transparency = 1 }):Play()
 		TweenService:Create(icon, fade, { ImageTransparency = 1 }):Play()
 	end)
 	task.delay(1.05, function()
