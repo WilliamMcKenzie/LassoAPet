@@ -8,7 +8,7 @@ return {
 		{ name = "neck", parent = "root", pivot = Vector3.new(0, 6.4439, -2.7835) },
 		{ name = "EarL", parent = "neck", pivot = Vector3.new(-0.75, 10.5, -1.5) },
 		{ name = "EarR", parent = "neck", pivot = Vector3.new(0.75, 10.5, -1.5) },
-		{ name = "Tail", parent = "root", pivot = Vector3.new(0, 7.2, 3.3) },
+		{ name = "Tail", parent = "root", pivot = Vector3.new(0, 6.5, 3.3) },
 		{ name = "LegFL", parent = "root", pivot = Vector3.new(-1.05, 3.475, -1.649) },
 		{ name = "LegFR", parent = "root", pivot = Vector3.new(1.05, 3.475, -1.649) },
 		{ name = "LegHL", parent = "root", pivot = Vector3.new(-1.05, 3.475, 2.249) },
@@ -36,8 +36,8 @@ return {
 		{ name = "EarRInA", bone = "EarR", class = "WedgePart", size = Vector3.new(0.06, 0.1925, 0.744), cframe = CFrame.new(0.65375, 10.952, -1.53, 0, -1, 0, 0, 0, -1, 1, 0, 0), color = Color3.fromRGB(242, 150, 192), plain = true },
 		{ name = "EarRInB", bone = "EarR", class = "WedgePart", size = Vector3.new(0.06, 0.1925, 0.744), cframe = CFrame.new(0.84625, 10.952, -1.53, 0, 1, 0, 0, 0, -1, -1, 0, 0), color = Color3.fromRGB(242, 150, 192), plain = true },
 		{ name = "Body", bone = "root", class = "Part", size = Vector3.new(3.2, 3, 6), cframe = CFrame.new(0, 5, 0.3, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 130, 50) },
-		{ name = "Stripe", bone = "root", class = "Part", size = Vector3.new(0.8, 0.7, 5.1), cframe = CFrame.new(0, 6.85, 0.75, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(92, 54, 34) },
-		{ name = "Tail", bone = "Tail", class = "Part", size = Vector3.new(0.8, 2.9, 0.8), cframe = CFrame.new(0, 5.75, 3.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(92, 54, 34) },
+		{ name = "Stripe", bone = "root", class = "Part", size = Vector3.new(0.8, 0.7, 5.9), cframe = CFrame.new(0, 6.85, 1.15, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(92, 54, 34) },
+		{ name = "Tail", bone = "Tail", class = "Part", size = Vector3.new(0.8, 2.2, 0.8), cframe = CFrame.new(0, 5.4, 3.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(92, 54, 34) },
 		{ name = "TailTip", bone = "Tail", class = "WedgePart", size = Vector3.new(0.8, 0.8, 0.8), cframe = CFrame.new(0, 3.9, 3.7, -1, 0, 0, 0, -1, 0, 0, 0, 1), color = Color3.fromRGB(92, 54, 34) },
 		{ name = "LegFL", bone = "LegFL", class = "Part", size = Vector3.new(1.1, 2.7, 1.1), cframe = CFrame.new(-1.05, 2.15, -2.149, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 130, 50) },
 		{ name = "HoofFL", bone = "LegFL", class = "Part", size = Vector3.new(1.1, 0.8, 1.1), cframe = CFrame.new(-1.05, 0.4, -2.149, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(74, 78, 102) },
@@ -94,35 +94,35 @@ return {
 			},
 		},
 		gallop = {
-			length = 0.8,
+			length = 0.70833,
 			tracks = {
 				root = {
-					position = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.12, 0, 0.5, 0 }, { 0.24, 0, 1.875, 0 }, { 0.4, 0, 2.5, 0 }, { 0.56, 0, 1.875, 0 }, { 0.68, 0, 0.5, 0 }, { 0.8, 0, 0, 0 } } },
-					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.12, 0.13963, 0, 0 }, { 0.4, 0, 0, 0 }, { 0.68, -0.13963, 0, 0 }, { 0.8, 0, 0, 0 } } },
+					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.04167, 0.13963, 0, 0 }, { 0.33333, 0, 0, 0 }, { 0.625, -0.13963, 0, 0 }, { 0.70833, 0, 0, 0 } } },
+					position = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.04167, 0, 0.5, 0 }, { 0.16667, 0, 1.875, 0 }, { 0.33333, 0, 2.5, 0 }, { 0.5, 0, 1.875, 0 }, { 0.625, 0, 0.5, 0 }, { 0.70833, 0, 0, 0 } } },
 				},
 				LegFL = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.12, 0, 0, 0 }, { 0.216, 0.95993, 0, 0 }, { 0.584, 0.95993, 0, 0 }, { 0.68, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.04167, 0, 0, 0 }, { 0.125, 0.95993, 0, 0 }, { 0.5, 0.95993, 0, 0 }, { 0.625, 0, 0, 0 }, { 0.70833, 0, 0, 0 } } },
 				},
 				LegFR = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.136, 0, 0, 0 }, { 0.232, 0.95993, 0, 0 }, { 0.6, 0.95993, 0, 0 }, { 0.696, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.04167, 0, 0, 0 }, { 0.16667, 0.95993, 0, 0 }, { 0.54167, 0.95993, 0, 0 }, { 0.625, 0, 0, 0 }, { 0.70833, 0, 0, 0 } } },
 				},
 				LegHL = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.12, 0, 0, 0 }, { 0.216, -0.95993, 0, 0 }, { 0.584, -0.95993, 0, 0 }, { 0.68, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.04167, 0, 0, 0 }, { 0.125, -0.95993, 0, 0 }, { 0.5, -0.95993, 0, 0 }, { 0.625, 0, 0, 0 }, { 0.70833, 0, 0, 0 } } },
 				},
 				LegHR = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.104, 0, 0, 0 }, { 0.2, -0.95993, 0, 0 }, { 0.568, -0.95993, 0, 0 }, { 0.664, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.04167, 0, 0, 0 }, { 0.125, -0.95993, 0, 0 }, { 0.5, -0.95993, 0, 0 }, { 0.58333, 0, 0, 0 }, { 0.70833, 0, 0, 0 } } },
 				},
 				neck = {
-					rotation = { smooth = true, keys = { { 0, -0.20944, 0, 0 }, { 0.16, -0.05236, 0, 0 }, { 0.4, -0.03491, 0, 0 }, { 0.64, -0.10472, 0, 0 }, { 0.8, -0.20944, 0, 0 } } },
+					rotation = { smooth = true, keys = { { 0, -0.20944, 0, 0 }, { 0.08333, -0.05236, 0, 0 }, { 0.33333, -0.03491, 0, 0 }, { 0.58333, -0.10472, 0, 0 }, { 0.70833, -0.20944, 0, 0 } } },
 				},
 				Tail = {
-					rotation = { smooth = true, keys = { { 0, -0.34907, 0, 0 }, { 0.24, -0.95993, 0, 0 }, { 0.48, -1.0472, 0, 0 }, { 0.72, -0.5236, 0, 0 }, { 0.8, -0.34907, 0, 0 } } },
+					rotation = { smooth = true, keys = { { 0, -0.34907, 0, 0 }, { 0.16667, -0.95993, 0, 0 }, { 0.41667, -1.0472, 0, 0 }, { 0.625, -0.5236, 0, 0 }, { 0.70833, -0.34907, 0, 0 } } },
 				},
 				EarL = {
-					rotation = { smooth = false, keys = { { 0, 0.61087, 0, 0 }, { 0.8, 0.61087, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0.61087, 0, 0 }, { 0.70833, 0.61087, 0, 0 } } },
 				},
 				EarR = {
-					rotation = { smooth = false, keys = { { 0, 0.61087, 0, 0 }, { 0.8, 0.61087, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0.61087, 0, 0 }, { 0.70833, 0.61087, 0, 0 } } },
 				},
 			},
 		},
