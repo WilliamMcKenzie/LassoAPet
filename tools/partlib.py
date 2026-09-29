@@ -119,12 +119,17 @@ _WEDGE_FACES = [
 
 
 def part_faces(p):
-    """World-space polygons for a part: list of (verts Nx3, normal)."""
-    faces = _WEDGE_FACES if p.shape == "Wedge" else _BOX_FACES
-    half = p.size / 2
+    """World-space polygons for a part: list of (verts Nx3, normal).
+    A "Poly" part carries its own polygons in p.polys (part-local coordinates)."""
+    if p.shape == "Poly":
+        polys = [np.array(v, float) for v in p.polys]
+        center = p.cf[:3, :3] @ np.concatenate(polys).mean(0) + p.cf[:3, 3]
+    else:
+        half = p.size / 2
+        polys = [np.array(v, float) * half for _, v in (_WEDGE_FACES if p.shape == "Wedge" else _BOX_FACES)]
+        center = p.cf[:3, 3]
     out = []
-    for _, verts in faces:
-        local = np.array(verts, float) * half
+    for local in polys:
         world = (p.cf[:3, :3] @ local.T).T + p.cf[:3, 3]
         n = np.cross(world[1] - world[0], world[2] - world[0])
         ln = np.linalg.norm(n)
@@ -132,7 +137,7 @@ def part_faces(p):
             continue
         # make normals point outward (away from part center)
         n = n / ln
-        if np.dot(n, world.mean(0) - p.cf[:3, 3]) < 0:
+        if np.dot(n, world.mean(0) - center) < 0:
             n = -n
             world = world[::-1]  # keep vertices counter-clockwise seen from outside
         out.append((world, n))
