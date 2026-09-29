@@ -11,8 +11,8 @@
 local Rig = require(script.Parent.Rig)
 local Quadruped = require(script.Parent.Quadruped)
 
-local COAT = Color3.fromRGB(226, 140, 70)
-local MUZZLE = Color3.fromRGB(252, 226, 184)
+local COAT = Color3.fromRGB(205, 112, 48)
+local MUZZLE = Color3.fromRGB(245, 212, 168)
 local HAIR = Color3.fromRGB(96, 56, 34)
 local HOOF = Color3.fromRGB(60, 50, 45)
 local EYE_WHITE = Color3.fromRGB(250, 250, 250)

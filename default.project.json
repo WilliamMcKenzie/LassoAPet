@@ -27,7 +27,7 @@
     "Lighting": {
       "$properties": {
         "Technology": "ShadowMap",
-        "Brightness": 2.5,
+        "Brightness": 4,
         "GlobalShadows": true,
         "ShadowSoftness": 0.2,
         "Ambient": [
@@ -42,8 +42,10 @@
         ],
         "EnvironmentDiffuseScale": 0.25,
         "EnvironmentSpecularScale": 1,
-        "ExposureCompensation": 0.2,
-        "ClockTime": 14
+        "ExposureCompensation": 0.35,
+        "ClockTime": 14,
+        "FogStart": 100000,
+        "FogEnd": 100000
       },
       "ColorCorrection": {
         "$className": "ColorCorrectionEffect",

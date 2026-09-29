@@ -3,8 +3,9 @@ return {
 	-- World (studs). Ground and wall colours are calibrated so they render like the
 	-- Steal an Egg reference under the Lighting set in default.project.json. Home is z > 0, the course runs toward -z.
 	Tile = 4,
-	GroundColors = { Color3.fromRGB(133, 246, 85), Color3.fromRGB(144, 255, 86) },
-	WallColors = { Color3.fromRGB(231, 153, 105), Color3.fromRGB(255, 172, 114) },
+	GroundColors = { Color3.fromRGB(79, 240, 61), Color3.fromRGB(113, 255, 77) },
+	WallColors = { Color3.fromRGB(203, 132, 89), Color3.fromRGB(231, 150, 97) },
+	PlotColors = { Color3.fromRGB(96, 106, 134), Color3.fromRGB(128, 139, 166) },
 	CourseHalfWidth = 56,
 	CourseLength = 1400,
 	HomeHalfWidth = 80,

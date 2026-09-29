@@ -14,6 +14,7 @@ world.Parent = workspace
 local STONE = Color3.fromRGB(150, 150, 146)
 local WOOD = Color3.fromRGB(124, 84, 54)
 local WHITE = Color3.fromRGB(245, 245, 240)
+local FENCE = Color3.fromRGB(150, 70, 44)
 
 local function block(parent, size, position, color, name)
 	local part = Instance.new("Part")
@@ -162,12 +163,12 @@ local function fenceRun(from, to)
 	local length = (to - from).Magnitude
 	local cf = CFrame.lookAt((from + to) / 2, to)
 	for _, y in { 1.6, 3 } do
-		local rail = block(home, Vector3.new(0.6, 0.6, length), Vector3.zero, WHITE, "Rail")
+		local rail = block(home, Vector3.new(0.6, 0.6, length), Vector3.zero, FENCE, "Rail")
 		rail.CFrame = cf + Vector3.new(0, y, 0)
 	end
 	for i = 0, math.floor(length / 8) do
 		local p = from + (to - from).Unit * math.min(i * 8, length)
-		block(home, Vector3.new(1, 4, 1), p + Vector3.new(0, 2, 0), WHITE, "Post")
+		block(home, Vector3.new(1, 4, 1), p + Vector3.new(0, 2, 0), FENCE, "Post")
 	end
 end
 local hw, hd, cw = Config.HomeHalfWidth, Config.HomeDepth, Config.CourseHalfWidth
@@ -182,7 +183,8 @@ local pen = folder("Pen", home)
 for i = 0, 5 do
 	local x = -50 + (i % 3) * 20
 	local z = 100 + math.floor(i / 3) * 24
-	block(pen, Vector3.new(14, 0.6, 14), Vector3.new(x, 0.3, z), Color3.fromRGB(196, 170, 120), "PetSlot")
+	local slot = block(pen, Vector3.new(16, 0.6, 16), Vector3.new(x, 0.3, z), Config.PlotColors[1], "PetSlot")
+	checker(slot, Enum.NormalId.Top, Config.PlotColors[2])
 end
 block(pen, Vector3.new(8, 3, 8), Vector3.new(40, 1.5, 100), Color3.fromRGB(170, 170, 170), "CashCollector")
 block(pen, Vector3.new(8, 3, 8), Vector3.new(40, 1.5, 124), Color3.fromRGB(170, 170, 170), "LassoUpgrade")
