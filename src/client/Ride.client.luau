@@ -539,10 +539,11 @@ local function updateRider(dt)
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
 			hold, grace = Config.HoldTime, Config.LandingGrace
-			coins += 1
+			local earned = Config.RarityCoins[mount.animal.Rarity]
+			coins += earned
 			Hud.setCoins(coins)
 			local point = camera:WorldToViewportPoint(hrp.Position + Vector3.new(0, 4, 0))
-			Hud.coinPopup(Vector2.new(point.X, point.Y), 1)
+			Hud.coinPopup(Vector2.new(point.X, point.Y), earned)
 		end
 		return
 	end

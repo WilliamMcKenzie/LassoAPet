@@ -185,7 +185,7 @@ local function cashRow(parent, coinSize, textSize, anchor, position)
 	local scale = Instance.new("UIScale")
 	scale.Parent = row
 	row.Parent = parent
-	return { row = row, text = text, scale = scale }
+	return { row = row, coin = coin, text = text, scale = scale }
 end
 
 -- The ride's cash reads "N$"; the fail screen's reads "+N$".
@@ -400,35 +400,23 @@ end
 -- Same pattern as the common DevForum coin-popup recipe: pop with Back easing, rise with Quad, fade out.
 function Hud.coinPopup(screenPoint, amount)
 	screenPoint /= rootScale -- screen pixels -> HUD root pixels
-	local popup = Instance.new("Frame")
-	popup.BackgroundTransparency = 1
-	popup.AnchorPoint = Vector2.new(0.5, 0.5)
-	popup.Position = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
-	popup.Size = UDim2.fromOffset(130, 56)
-	popup.Parent = homeRoot
-	local scale = Instance.new("UIScale")
-	scale.Scale = 0
-	scale.Parent = popup
-	local text = label(popup, UDim2.fromOffset(70, 56), UDim2.fromOffset(35, 28), 40)
-	text.Text = "+" .. tostring(amount or 1)
-	text.TextColor3 = Color3.fromRGB(255, 226, 70)
-	text.TextXAlignment = Enum.TextXAlignment.Right
-	local icon = image(popup, "coin", UDim2.fromOffset(50, 50), UDim2.fromOffset(100, 28))
-	icon.Rotation = -12
+	-- Same coin and "+N$" as the fail screen, a bit smaller.
+	local popup = cashRow(homeRoot, 64, 44, Vector2.new(0.5, 0.5), UDim2.fromOffset(screenPoint.X, screenPoint.Y))
+	popup.text.Text = "+" .. amount .. "$"
+	popup.scale.Scale = 0
 
-	TweenService:Create(scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-	TweenService:Create(icon, TweenInfo.new(0.5, Enum.EasingStyle.Back), { Rotation = 8 }):Play()
-	TweenService:Create(popup, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+	TweenService:Create(popup.scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	TweenService:Create(popup.row, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 		Position = UDim2.fromOffset(screenPoint.X, screenPoint.Y - 80),
 	}):Play()
 	task.delay(0.65, function()
 		local fade = TweenInfo.new(0.35)
-		TweenService:Create(text, fade, { TextTransparency = 1 }):Play()
-		TweenService:Create(text.UIStroke, fade, { Transparency = 1 }):Play()
-		TweenService:Create(icon, fade, { ImageTransparency = 1 }):Play()
+		TweenService:Create(popup.text, fade, { TextTransparency = 1 }):Play()
+		TweenService:Create(popup.text.UIStroke, fade, { Transparency = 1 }):Play()
+		TweenService:Create(popup.coin, fade, { ImageTransparency = 1 }):Play()
 	end)
 	task.delay(1.05, function()
-		popup:Destroy()
+		popup.row:Destroy()
 	end)
 end
 

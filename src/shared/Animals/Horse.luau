@@ -112,6 +112,7 @@ end
 local Horse = {}
 Horse.__index = Horse
 Horse.Gaits = GAITS
+Horse.Rarity = "Common" -- sets the coins for lassoing one (Config.RarityCoins)
 
 function Horse.new()
 	local spec = parts()

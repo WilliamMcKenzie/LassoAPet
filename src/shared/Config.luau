@@ -27,6 +27,9 @@ return {
 	LandingGrace = 0.8,
 	TurnGrace = 2,
 
+	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
+	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25 },
+
 	-- Herd
 	HerdCount = 12,
 	HerdSpeedMin = 26,
