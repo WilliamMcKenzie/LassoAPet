@@ -581,7 +581,13 @@ local function updateHud()
 	end
 end
 
+-- Slow motion while the egg is in grab range, so there's time to decide.
+local timeScale = 1
+
 RunService.PreSimulation:Connect(function(dt)
+	local slow = phase == "outbound" and actionTarget == "egg"
+	timeScale += ((slow and Config.EggSlowMo or 1) - timeScale) * (1 - math.exp(-10 * dt))
+	dt *= timeScale
 	if phase == "idle" then
 		if starter then
 			place(starter, 0)
