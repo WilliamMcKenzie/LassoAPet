@@ -26,9 +26,11 @@ return {
 	EggSlowMo = 0.5, -- time scale while the egg is in grab range
 	LandingGrace = 0.8,
 	TurnGrace = 2,
-	-- Ride back's vignette. Its shape (clear middle, soft edge) is baked into the image.
-	VignetteColor = Color3.fromRGB(235, 45, 35),
-	VignetteOpacity = 1, -- 0..1, multiplies the image's own edge opacity (up to 92%)
+	-- Ride back's vignette: edges only, soft, breathing slowly, to add tension without
+	-- covering the lane. Its shape (clear middle 60%) is baked into the image.
+	VignetteColor = Color3.fromRGB(210, 30, 30),
+	VignetteOpacity = 0.5, -- 0..1: about 30% red at the screen's edges, 50% in the corners
+	VignettePulse = 0.3, -- how much it fades on each breath (0 = steady)
 	VignetteFadeMetres = 25, -- fades out over this last stretch before home
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).

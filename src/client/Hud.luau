@@ -23,7 +23,7 @@ local IMAGES = {
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
 	dodge = { id = "rbxassetid://96827860827213", size = Vector2.new(1423, 115) },
-	vignette = { id = "rbxassetid://125111494433205", size = Vector2.new(512, 512) }, -- white, clear middle; tinted red
+	vignette = { id = "rbxassetid://102545209742676", size = Vector2.new(512, 512) }, -- white; clear to 60% out, full only in the corners
 	buckedOff = { id = "rbxassetid://114839635512682", size = Vector2.new(1015, 300) },
 	crash = { id = "rbxassetid://137889269113133", size = Vector2.new(632, 230) },
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
@@ -402,9 +402,11 @@ function Hud.setReturning(returning)
 end
 
 -- Ride back's red vignette: 1 full, 0 gone. It and DODGE THE STAMPEDE! go once it's 0.
+-- It breathes slowly, in time with the text's pulse.
 function Hud.setVignette(strength)
+	local breath = 1 - Config.VignettePulse * (0.5 + 0.5 * math.sin(os.clock() * math.pi / 0.6))
 	vignette.Visible = strength > 0
-	vignette.ImageTransparency = 1 - strength * Config.VignetteOpacity
+	vignette.ImageTransparency = 1 - strength * Config.VignetteOpacity * breath
 	if strength <= 0 and dodge.Visible then
 		dodgePulse:Cancel()
 		dodge.Visible = false

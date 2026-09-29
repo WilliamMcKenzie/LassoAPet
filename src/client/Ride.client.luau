@@ -284,7 +284,6 @@ local function grabEgg()
 	phase, turnT = "turning", 0
 	Hud.setAction(nil)
 	Hud.setHold(nil)
-	Hud.flash("BRING IT HOME!", 2)
 	Hud.setReturning(true)
 	-- Clear the herd right in front of the turnaround so the return starts fair.
 	for _, entity in herd do
