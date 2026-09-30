@@ -187,6 +187,7 @@ local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start l
 local LEAP_FROM = 8 -- studs before the start line where the leap starts
 local RUN_OUT_SPEED = 20 -- studs/s the pet lands at, braking over Config.HomeRunOut
 local actionTarget
+local picked -- an egg or animal the player clicked to target instead of the default
 local turnT, camYaw = 0, 0
 local focus = Vector3.zero
 local touchSteer, padSteer = 0, 0
@@ -506,6 +507,96 @@ local function grabEgg()
 	Hud.setCutscene(true)
 end
 
+local function eggInRange(waiting)
+	local eggPos = waiting.nest.EggSpot.Position
+	return waitingEggs[waiting.nest] == waiting and waiting.egg.model.Parent ~= nil
+		and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < Config.LassoRange
+end
+
+local function animalInRange(entity)
+	if entity == mount or entity.popping then
+		return nil
+	end
+	local ahead = mount.z - entity.z
+	local dx = entity.x - mount.x
+	local dist = math.sqrt(ahead * ahead + dx * dx)
+	if ahead > -3 and dist < Config.LassoRange then
+		return dist + math.abs(dx) * 0.5 -- lower is a better default pick
+	end
+	return nil
+end
+
+-- Everything that can be lassoed right now: waiting eggs, then animals.
+local function candidates()
+	local list = {}
+	if phase ~= "outbound" or transfer or not mount then
+		return list
+	end
+	for _, waiting in waitingEggs do
+		if eggInRange(waiting) then
+			table.insert(list, waiting)
+		end
+	end
+	for _, entity in allAnimals() do
+		if animalInRange(entity) then
+			table.insert(list, entity)
+		end
+	end
+	return list
+end
+
+local function findTarget()
+	if phase ~= "outbound" or transfer or not mount then
+		picked = nil
+		return nil
+	end
+	-- A target the player clicked stays chosen while it's still in range.
+	if picked then
+		if picked.nest and eggInRange(picked) then
+			nearEgg = picked
+			return "egg"
+		elseif not picked.nest and table.find(allAnimals(), picked) and animalInRange(picked) then
+			return picked
+		end
+		picked = nil
+	end
+	for _, waiting in waitingEggs do
+		if eggInRange(waiting) then
+			nearEgg = waiting
+			return "egg"
+		end
+	end
+	local best, bestScore = nil, math.huge
+	for _, entity in allAnimals() do
+		local score = animalInRange(entity)
+		if score and score < bestScore then
+			best, bestScore = entity, score
+		end
+	end
+	return best
+end
+
+-- The in-range egg or animal drawn nearest a click or tap, if it's close
+-- enough on screen to count as clicking it.
+local PICK_RADIUS = 70 -- pixels
+local function candidateAt(screenPos)
+	local best, bestScore = nil, math.huge
+	for _, c in candidates() do
+		local model = if c.nest then c.egg.model else c.animal.model
+		local cf, size = model:GetBoundingBox()
+		local point, onScreen = camera:WorldToScreenPoint(cf.Position)
+		if onScreen then
+			-- Nearer the camera looks bigger, so allow a wider miss.
+			local slack = PICK_RADIUS * math.clamp(size.Magnitude * 3 / point.Z, 1, 3)
+			local d = (Vector2.new(point.X, point.Y) - screenPos).Magnitude
+			if d < slack and d / slack < bestScore then
+				best, bestScore = c, d / slack
+			end
+		end
+	end
+	return best
+end
+
 local function onAction()
 	if phase ~= "outbound" or transfer or not mount or not actionTarget then
 		return
@@ -531,6 +622,15 @@ end
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
 		return
+	end
+	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+		-- Clicking or tapping another egg or animal in range targets it instead.
+		local hit = candidateAt(Vector2.new(input.Position.X, input.Position.Y))
+		local current = if actionTarget == "egg" then nearEgg else actionTarget
+		if hit and hit ~= current then
+			picked = hit
+			return
+		end
 	end
 	if input.UserInputType == Enum.UserInputType.Touch then
 		touchStart[input] = input.Position.X
@@ -574,35 +674,6 @@ end)
 
 local function travelDir()
 	return (phase == "return" or phase == "home") and 1 or -1
-end
-
-local function findTarget()
-	if phase ~= "outbound" or transfer or not mount then
-		return nil
-	end
-	for _, waiting in waitingEggs do
-		local eggPos = waiting.nest.EggSpot.Position
-		if waiting.egg.model.Parent and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < Config.LassoRange then
-			nearEgg = waiting
-			return "egg"
-		end
-	end
-	local best, bestScore = nil, math.huge
-	for _, entity in allAnimals() do
-		if entity.popping then
-			continue
-		end
-		local ahead = mount.z - entity.z
-		local dx = entity.x - mount.x
-		local dist = math.sqrt(ahead * ahead + dx * dx)
-		if ahead > -3 and dist < Config.LassoRange then
-			local score = dist + math.abs(dx) * 0.5
-			if score < bestScore then
-				best, bestScore = entity, score
-			end
-		end
-	end
-	return best
 end
 
 -- Building an animal is slow, so the pool is filled before anyone rides, and if
