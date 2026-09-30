@@ -104,6 +104,28 @@ local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
 
+-- Money as "950$", "1.2k$", "104k$", "3.5M$", "2B$": from 1000 up, a suffix
+-- with at most one decimal (and none from 100 of a unit up).
+local SUFFIXES = { "k", "M", "B", "T", "Qa", "Qi" }
+local function money(amount)
+	amount = math.floor(amount)
+	local sign = if amount < 0 then "-" else ""
+	local n, suffix = math.abs(amount), ""
+	for _, s in SUFFIXES do
+		if n < 1000 then
+			break
+		end
+		n /= 1000
+		suffix = s
+	end
+	if suffix == "" then
+		return sign .. n .. "$"
+	end
+	-- Round down, so 999,999 reads 999k rather than 1000k.
+	local text = if n >= 100 then tostring(math.floor(n)) else (string.format("%.1f", math.floor(n * 10) / 10):gsub("%.0$", ""))
+	return sign .. text .. suffix .. "$"
+end
+
 -- Text outlines, kept at a whole number of screen pixels. The HUD's UIScale scales
 -- them too, and at fractional widths the dot UIStroke leaves in small letter
 -- holes (the 6 in "63 m") comes out oversized.
@@ -239,7 +261,7 @@ end
 local rideAmount = 0
 local function setCash(amount)
 	rideAmount = amount
-	rideCash.text.Text = amount .. "$"
+	rideCash.text.Text = money(amount)
 end
 
 function Hud.init(onAction, onHome, onRide)
@@ -376,7 +398,7 @@ function Hud.init(onAction, onHome, onRide)
 	total.ZIndex = 2
 	local player = Players.LocalPlayer
 	local function showGold()
-		total.Text = (player:GetAttribute("Gold") or 0) .. "$"
+		total.Text = money(player:GetAttribute("Gold") or 0)
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(showGold)
 	showGold()
@@ -399,7 +421,7 @@ function Hud.init(onAction, onHome, onRide)
 		upgradeShown = cost ~= nil
 		upgrade.Visible = upgradeShown and gold.Visible
 		if cost then
-			price.Text = cost .. "$"
+			price.Text = money(cost)
 			upgrade.Image = IMAGES[if (player:GetAttribute("Gold") or 0) >= cost then "upgradePen" else "upgradePenDisabled"].id
 		end
 	end
@@ -839,7 +861,7 @@ function Hud.showHome(visible)
 	home.Visible = visible
 	gained.row.Visible = visible
 	if visible then
-		gained.text.Text = "+" .. rideAmount .. "$"
+		gained.text.Text = "+" .. money(rideAmount)
 		gained.scale.Scale = 0
 		TweenService:Create(gained.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	end
@@ -858,7 +880,7 @@ function Hud.coinPopup(screenPoint, amount)
 	screenPoint /= rootScale -- screen pixels -> HUD root pixels
 	-- Same coin and "+N$" as the fail screen, a bit smaller.
 	local popup = cashRow(homeRoot, 64, 44, Vector2.new(0.5, 0.5), UDim2.fromOffset(screenPoint.X, screenPoint.Y))
-	popup.text.Text = "+" .. amount .. "$"
+	popup.text.Text = "+" .. money(amount)
 	popup.scale.Scale = 0
 
 	TweenService:Create(popup.scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
@@ -888,7 +910,7 @@ function Hud.coinPopupAt(part, height, amount)
 	board.MaxDistance = 150
 	board.ResetOnSpawn = false
 	local popup = cashRow(board, 48, 34, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5))
-	popup.text.Text = "+" .. amount .. "$"
+	popup.text.Text = "+" .. money(amount)
 	popup.scale.Scale = 0
 	board.Parent = homeGui.Parent
 
