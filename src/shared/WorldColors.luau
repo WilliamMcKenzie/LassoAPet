@@ -20,9 +20,25 @@ function WorldColors.biomeAt(z)
 	return #Config.Biomes
 end
 
+-- The z of biome i's near edge (the line you cross into it).
+function WorldColors.biomeStart(i)
+	local edge = 0
+	for j = 1, i - 1 do
+		edge -= Config.Biomes[j].Length
+	end
+	return edge
+end
+
+-- The z of the first gate a player with this pen level can't pass (-inf if none).
+function WorldColors.gateZ(level)
+	local next = Config.Biomes[(level or 1) + 1]
+	return if next then WorldColors.biomeStart((level or 1) + 1) else -math.huge
+end
+
 local function prefix(i)
 	return if i == 1 then "" else Config.Biomes[i].Name
 end
+WorldColors.prefix = prefix
 
 local function paint(part, base, checker)
 	part.Color = base

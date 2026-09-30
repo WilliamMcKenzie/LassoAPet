@@ -646,15 +646,20 @@ local function grabEgg()
 	Hud.setCutscene(true)
 end
 
+-- The z of the first gate you can't pass yet (your pen's level decides; see Gate.client).
+local function gateZ()
+	return WorldColors.gateZ(player:GetAttribute("PenLevel"))
+end
+
 local function eggInRange(waiting)
 	local eggPos = waiting.nest.EggSpot.Position
-	return waitingEggs[waiting.nest] == waiting and waiting.egg.model.Parent ~= nil
+	return waitingEggs[waiting.nest] == waiting and waiting.egg.model.Parent ~= nil and eggPos.Z > gateZ()
 		and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < Config.LassoRange
 end
 
 local function animalInRange(entity)
-	if entity == mount or entity.popping then
-		return nil
+	if entity == mount or entity.popping or entity.z < gateZ() then
+		return nil -- no lassoing through a locked gate
 	end
 	local ahead = mount.z - entity.z
 	local dx = entity.x - mount.x
@@ -1127,6 +1132,9 @@ local function checkRide(dt)
 	end
 	if grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4) then
 		return fail("CRASH!")
+	end
+	if phase == "outbound" and mount.z < gateZ() + 2.4 then
+		return fail("CRASH!") -- a locked gate
 	end
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
