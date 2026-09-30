@@ -376,15 +376,31 @@ function Hud.init(onAction, onHome, onRide)
 	eggs = button(homeRoot, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
 	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
 
-	-- Load every image now, so the first BUCKED OFF isn't still downloading while it animates.
-	task.spawn(function()
-		local ids = {}
-		for _, entry in IMAGES do
-			if entry.id ~= "" then -- not uploaded yet
-				table.insert(ids, entry.id)
-			end
+	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
+	-- downloading while it animates. Downloading alone isn't enough: Roblox only
+	-- readies an image for drawing the first time it's on screen, which stalls
+	-- that frame. So each image also stays drawn in the corner at 1 pixel and
+	-- nearly invisible, keeping it ready for the moment it's needed.
+	local warm = Instance.new("Frame")
+	warm.Name = "Preload"
+	warm.BackgroundTransparency = 1
+	warm.Size = UDim2.fromOffset(1, 1)
+	warm.Parent = homeGui
+	local labels = {}
+	for key, entry in IMAGES do
+		if entry.id ~= "" then -- not uploaded yet
+			local l = Instance.new("ImageLabel")
+			l.Name = key
+			l.BackgroundTransparency = 1
+			l.Size = UDim2.fromOffset(1, 1)
+			l.Image = entry.id
+			l.ImageTransparency = 0.99
+			l.Parent = warm
+			table.insert(labels, l)
 		end
-		game:GetService("ContentProvider"):PreloadAsync(ids)
+	end
+	task.spawn(function()
+		game:GetService("ContentProvider"):PreloadAsync(labels)
 	end)
 end
 
