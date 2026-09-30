@@ -185,6 +185,7 @@ local transfer, tumble, carried
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
 local LEAP_FROM = 8 -- studs before the start line where the leap starts
+local RUN_OUT_SPEED = 20 -- studs/s the pet lands at, braking over Config.HomeRunOut
 local actionTarget
 local turnT, camYaw = 0, 0
 local focus = Vector3.zero
@@ -821,14 +822,19 @@ local function updateMount(dt)
 		-- time (heroLeap.t) so it lasts HomeHeroTime whatever the slow motion does.
 		local t = heroLeap.t
 		mount.z = heroLeap.fromZ + (heroLeap.toZ - heroLeap.fromZ) * t
-		mount.hop = math.sin(math.pi * t) * Config.HomeLeapHeight
+		-- A floaty arc: up fast, hanging near the top, down fast.
+		mount.hop = math.sin(math.pi * t) ^ 0.6 * Config.HomeLeapHeight
 		mount.latVel = 0
 		place(mount, 0)
 		animate(mount, dt, if t < 1 then mount.speed else 0, 0)
 		return
 	elseif phase == "home" then
+		-- Landed: runs on HomeRunOut studs, easing to a stop.
+		local brake = RUN_OUT_SPEED * RUN_OUT_SPEED / (2 * Config.HomeRunOut)
+		mount.speed = math.max(mount.speed - brake * dt, 0)
+		mount.z += mount.speed * dt
 		place(mount, 0)
-		animate(mount, dt, 0, 0)
+		animate(mount, dt, mount.speed, 0)
 		return
 	end
 	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed) * statsOf(mount.kind).Speed
@@ -1063,6 +1069,7 @@ RunService.PreSimulation:Connect(function(dt)
 		-- Landed: dust, then the egg reveal, then off the pet.
 		heroLeap = nil
 		mount.hop = 0
+		mount.speed = RUN_OUT_SPEED
 		place(mount, 0)
 		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
 		Hud.setCutscene(false)
