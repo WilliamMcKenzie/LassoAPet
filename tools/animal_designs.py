@@ -50,6 +50,7 @@ MANE = (92, 54, 34)
 RAINBOW = [(236, 72, 72), (248, 150, 50), (250, 214, 60), (96, 200, 90), (70, 150, 236), (160, 100, 220)]
 
 PLATE = 0.05  # how far patches and eyes stand off a face
+PUPIL_BACK = 0.025  # pupils sit this far back from the eye plate's front edge (no z-fighting)
 LEGS = ("FL", "FR", "HL", "HR")
 
 
@@ -242,7 +243,8 @@ class Animal:
             xa, xb = sorted((sx * x, sx * (x + PLATE)))
             self.box("Eye" + side, (xa, y0, z0), (xb, y1, z1), EYE_WHITE, bone)
             pa, pb = sorted((sx * x, sx * (x + PLATE + 0.03)))
-            self.box("Pupil" + side, (pa, y0 + (y1 - y0) * 0.1, z0), (pb, py1, pz1), PUPIL, bone)
+            # set back from the eye's front edge so the two faces don't z-fight (QM)
+            self.box("Pupil" + side, (pa, y0 + (y1 - y0) * 0.1, z0 + PUPIL_BACK), (pb, py1, pz1 + PUPIL_BACK), PUPIL, bone)
 
     def upright_ears(self, cx, base, z0, z1, half, h, color, inner=PINK):
         """Horse ears: two right-triangle halves each, inner plate on the front."""
@@ -381,7 +383,7 @@ def pig():
         # eyes on the face, above the snout
         xa, xb = sorted((sx * 0.55, sx * 1.15))
         a.box("Eye" + side, (xa, 4.5, -5.05), (xb, 5.3, -5.0), EYE_WHITE, "neck")
-        pa, pb = sorted((sx * 0.55, sx * 0.9))
+        pa, pb = sorted((sx * (0.55 + PUPIL_BACK), sx * (0.9 + PUPIL_BACK)))
         a.box("Pupil" + side, (pa, 4.55, -5.08), (pb, 5.0, -5.05), PUPIL, "neck")
     a.upright_ears(0.95, 5.6, -4.0, -3.6, 0.45, 0.9, pink, dark)
     a.pivots["neck"] = (0, 5.55, -2.85)
