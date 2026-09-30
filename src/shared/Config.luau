@@ -61,7 +61,7 @@ return {
 	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)
 	LassoRange = 34,
 	EggRange = 51, -- about 1.5x LassoRange
-	EggSlowMo = 0.5, -- time scale while the egg is in grab range
+	EggSlowMo = 0.5, -- time scale during the egg-grab close-up
 	-- Coming home with an egg: the pet leaps over the start line in slow motion while
 	-- the camera swings round to a hero angle in front and back again, landing
 	-- HomeLandPast studs past the line, where you dismount and the egg reveal pops up.
