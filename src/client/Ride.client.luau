@@ -1128,7 +1128,9 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	end
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38, 18)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
-	camera.FieldOfView += (70 - camera.FieldOfView) * (1 - math.exp(-8 * dt))
+	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
+	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
+	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
 end)
 
 Hud.init(onAction, goHome, rideFromHome)

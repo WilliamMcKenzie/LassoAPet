@@ -59,6 +59,7 @@ return {
 	SprintSpeed = 2, -- x MountSpeed
 	SprintDrain = 1.5, -- x the Hold bar's usual drain
 	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)
+	ReturnFovKick = 20, -- degrees added to the field of view on the ride home, to feel faster (0 = off)
 	LassoRange = 34,
 	EggRange = 51, -- about 1.5x LassoRange
 	EggSlowMo = 0.5, -- time scale during the egg-grab close-up
