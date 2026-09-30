@@ -23,18 +23,18 @@ local PetsPanel = {}
 -- Headshots rendered from each pet's model (assets/ui/Pet<Kind>.png); "" until
 -- uploaded, when the card shows the pet's name instead.
 local HEADSHOTS = {
-	Horse = "",
-	Pinto = "",
-	Pig = "",
-	Fish = "",
-	Rhino = "",
-	Unicorn = "",
-	Cactus = "",
-	Scorpion = "",
-	Sandworm = "",
-	Snake = "",
+	Horse = "rbxassetid://119389756908548", -- PetHorse.png
+	Pinto = "rbxassetid://140221490595819", -- PetPinto.png
+	Pig = "rbxassetid://127300311363752", -- PetPig.png
+	Fish = "rbxassetid://127767442274755", -- PetFish.png
+	Rhino = "rbxassetid://136593454528783", -- PetRhino.png
+	Unicorn = "rbxassetid://92220873666400", -- PetUnicorn.png
+	Cactus = "rbxassetid://82844219656223", -- PetCactus.png
+	Scorpion = "rbxassetid://97432378312477", -- PetScorpion.png
+	Sandworm = "rbxassetid://98334444188731", -- PetSandworm.png
+	Snake = "rbxassetid://134072754506430", -- PetSnake.png
 }
-local TRASH = "" -- assets/ui/Trash.png (QM's trash can)
+local TRASH = "rbxassetid://74308771924477" -- assets/ui/Trash.png (QM's trash can)
 local COIN = "rbxassetid://99312860837685"
 -- QM's slot pictures by rarity (as the inventory bar); Common has none, so a plain colour.
 local SLOTS = {
