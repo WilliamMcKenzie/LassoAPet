@@ -36,8 +36,9 @@ local HEADSHOTS = {
 }
 local TRASH = "rbxassetid://74308771924477" -- assets/ui/Trash.png (QM's trash can)
 local COIN = "rbxassetid://99312860837685"
--- QM's slot pictures by rarity (as the inventory bar); Common has none, so a plain colour.
+-- QM's slot pictures by rarity (as the inventory bar); a plain colour until one is uploaded.
 local SLOTS = {
+	Common = "", -- assets/ui/SlotCommon.png
 	Uncommon = "rbxassetid://120075276423928",
 	Rare = "rbxassetid://92909054184182",
 	Epic = "rbxassetid://75096704585668",
@@ -112,7 +113,7 @@ local function card(pet, order)
 	Instance.new("UICorner", face).CornerRadius = UDim.new(52 / 256, 0) -- the slot pictures' corners
 	stroked(face, 5).ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	local slot = SLOTS[rarityOf(pet.kind)]
-	if slot then
+	if slot and slot ~= "" then
 		face.BackgroundTransparency = 1
 		local bg = Instance.new("ImageLabel")
 		bg.BackgroundTransparency = 1
