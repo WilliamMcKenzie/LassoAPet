@@ -26,7 +26,7 @@ local FONT = Enum.Font.FredokaOne
 -- Square backgrounds by the item's rarity (placeholder colours until QM's
 -- slot images: set Image to use one, drawn square over the whole slot).
 local RARITY = {
-	Uncommon = { color = Color3.fromRGB(70, 170, 60), image = "" },
+	Uncommon = { color = Color3.fromRGB(70, 170, 60), image = "rbxassetid://120075276423928" }, -- assets/ui/SlotUncommon.png
 	Rare = { color = Color3.fromRGB(50, 120, 220), image = "" },
 	Epic = { color = Color3.fromRGB(150, 60, 200), image = "" },
 	Legendary = { color = Color3.fromRGB(230, 170, 30), image = "" },
@@ -203,6 +203,17 @@ function Inventory.init(parent)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = bar
 	bar.Parent = parent
+	-- Keep the slot pictures drawn (1 pixel, nearly invisible) so a square never shows up blank.
+	for _, rarity in RARITY do
+		if rarity.image ~= "" then
+			local warm = Instance.new("ImageLabel")
+			warm.BackgroundTransparency = 1
+			warm.Size = UDim2.fromOffset(1, 1)
+			warm.Image = rarity.image
+			warm.ImageTransparency = 0.99
+			warm.Parent = parent
+		end
+	end
 
 	watch(player:FindFirstChildOfClass("Backpack"))
 	player.ChildAdded:Connect(function(child)
