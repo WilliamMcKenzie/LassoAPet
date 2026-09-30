@@ -1,6 +1,6 @@
 -- Riding HUD built from QM's images: the Hold bar with the distance on it, one
 -- action button (TAKE EGG or LASSO), a center message, and the home buttons
--- (RIDE, Gold, Pets). Layout follows QM's mockups.
+-- (RIDE, Gold, Pets, Upgrade Pen). Layout follows QM's mockups.
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -33,6 +33,8 @@ local IMAGES = {
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
+	upgradePen = { id = "rbxassetid://120690804030353", size = Vector2.new(1152, 284) }, -- UpgradePenActive.png
+	upgradePenDisabled = { id = "rbxassetid://134427342737800", size = Vector2.new(1158, 285) }, -- UpgradePenDisabled.png
 	-- TAKE EGG for rarer eggs (takeEgg itself is the Uncommon one).
 	takeEggRare = { id = "rbxassetid://137561422342054", size = Vector2.new(960, 434) },
 	takeEggEpic = { id = "rbxassetid://114155984376753", size = Vector2.new(960, 434) },
@@ -64,6 +66,7 @@ local BUTTON_WIDTH = 256
 local SPRINT_WIDTH = 164 -- about 2/3 of TAKE EGG's width, as in the mockup
 local BAR_WIDTH = 352
 local ICON_HEIGHT = 80 -- Gold
+local UPGRADE_WIDTH = 300 -- Upgrade Pen, top right
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
@@ -99,7 +102,7 @@ local card, cardEgg, cardScale, cardFlash, cardBurst -- egg reveal card, the egg
 local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
 
 -- Text outlines, kept at a whole number of screen pixels. The HUD's UIScale scales
 -- them too, and at fractional widths the dot UIStroke leaves in small letter
@@ -382,6 +385,37 @@ function Hud.init(onAction, onHome, onRide)
 		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8))
 	Inventory.init(homeRoot)
 
+	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). Green when
+	-- you have the gold, grey when you don't; the price sits under the coin drawn
+	-- on its right end. Hidden once there's no next level.
+	local upgradePen = game:GetService("ReplicatedStorage"):WaitForChild("UpgradePen")
+	upgrade = button(homeRoot, "upgradePen", fit("upgradePen", UPGRADE_WIDTH), Vector2.new(1, 0), UDim2.new(1, -MARGIN, 0, MARGIN))
+	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.78), 28, 4)
+	price.AutomaticSize = Enum.AutomaticSize.X
+	local cost -- gold for the next level, nil at the top level
+	local function refreshUpgrade()
+		local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
+		cost = nextBiome and nextBiome.UnlockCost
+		upgradeShown = cost ~= nil
+		upgrade.Visible = upgradeShown and gold.Visible
+		if cost then
+			price.Text = cost .. "$"
+			upgrade.Image = IMAGES[if (player:GetAttribute("Gold") or 0) >= cost then "upgradePen" else "upgradePenDisabled"].id
+		end
+	end
+	local buying = false
+	upgrade.Activated:Connect(function()
+		if buying or not cost or (player:GetAttribute("Gold") or 0) < cost then
+			return
+		end
+		buying = true
+		pcall(upgradePen.InvokeServer, upgradePen)
+		buying = false
+	end)
+	player:GetAttributeChangedSignal("Gold"):Connect(refreshUpgrade)
+	player:GetAttributeChangedSignal("PenLevel"):Connect(refreshUpgrade)
+	refreshUpgrade()
+
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only
 	-- readies an image for drawing the first time it's on screen, which stalls
@@ -424,6 +458,7 @@ function Hud.show(visible)
 	ride.Visible = false -- comes back when the ride prompt shows again
 	gold.Visible = not visible
 	pets.Visible = not visible
+	upgrade.Visible = upgradeShown and not visible
 	Inventory.setVisible(not visible) -- your eggs, hidden while riding
 	gained.row.Visible = false
 	Hud.setReturning(false)
