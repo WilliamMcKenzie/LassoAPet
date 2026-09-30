@@ -112,14 +112,20 @@ do
 			total = 0,
 		}
 		s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / Config.HerdSpeedMin
-		for name, weight in biome.Herd or { [Config.DefaultPet] = 1 } do
+		assert(biome.Herd, "Config.Biomes[" .. b .. "] (" .. tostring(biome.Name) .. ") has no Herd")
+		local names = {}
+		for name, weight in biome.Herd do
 			table.insert(s.kinds, { name = name, weight = weight })
+			table.insert(names, name .. " " .. weight)
 			s.total += weight
 		end
 		table.sort(s.kinds, function(a, c)
 			return a.name < c.name
 		end)
+		table.sort(names)
 		streams[b] = s
+		-- One line per biome in the Output, to check the stampede matches Config.
+		print(string.format("[Herd] %s: spawns at z %.0f, ends at z %.0f: %s", biome.Name, s.spawnZ, s.endZ, table.concat(names, ", ")))
 	end
 end
 
