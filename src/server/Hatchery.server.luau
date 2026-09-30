@@ -3,34 +3,36 @@
 -- A grabbed egg (Nests sets the player's "CarriedEgg") becomes yours when the
 -- ride gets it home (DeliverEgg). It goes in your Roblox inventory: one Tool
 -- per kind of egg ("Pinto Egg"), its "Count" attribute how many you have.
--- Equip it and click a free spot in your pen to place one there (PlaceEgg),
--- where it hatches after Config.HatchTime seconds and the pet stays on that spot.
+-- Equip it and click anywhere in your pen to place one there (PlaceEgg), where
+-- it hatches after Config.HatchTime seconds and the pet stays on that spot.
+--
+-- What's in a pen goes on the pen as its "Contents" attribute for every
+-- client to draw: JSON of { [id] = { x, z, egg, hatchAt } or { x, z, pet } },
+-- x and z in studs from the centre of the pen's Area.
 --
 -- Any pet can be ridden: the one you ride waits on Slot1 (the player's
 -- "RidePet" attribute, Config.DefaultPet to start). Clicking a pet in your pen
--- makes it the one you ride, and the old one takes its spot (RidePet remote).
+-- makes it the one you ride, and the old one takes its place (RidePet remote).
 --
--- Pen spots are the pen's Slots; Slot1 is where the pet you ride waits, so eggs
--- go on Slot2 and up. Each slot part carries what's on it for every client to
--- draw: "Egg" (kind) with "HatchAt" (os.time), or "Pet" (kind).
---
--- Saving needs API access in Studio, like Gold.
+-- Saving needs a published place with API access, like Gold.
 
 local DataStoreService = game:GetService("DataStoreService")
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
 
-local FIRST_SLOT = 2
+local SPACING = 4.5 -- studs kept between eggs and pets placed in a pen
+local EDGE = 2 -- studs kept from the pen's fences
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "Pen")
 if not ok then
 	store = nil
 end
 
--- [player] = { eggs = { [kind] = n }, slots = { [index] = { egg, hatchAt } or { pet } }, ride = kind }
+-- [player] = { eggs = { [kind] = n }, items = { [id] = { x, z, egg, hatchAt } or { x, z, pet } }, ride = kind }
 local profiles = {}
 local loaded = {}
 
@@ -50,10 +52,6 @@ local function penOf(player)
 		return pen
 	end
 	return nil
-end
-
-local function slotPart(pen, index)
-	return pen and pen:FindFirstChild("Slots") and pen.Slots:FindFirstChild("Slot" .. index)
 end
 
 -- The egg Tools in the player's inventory match their egg counts.
@@ -91,7 +89,7 @@ local function syncTools(player, eggs)
 	end
 end
 
--- Copies the profile onto the player (inventory, ride pet) and their pen's slots (what's on each).
+-- Copies the profile onto the player (inventory, ride pet) and their pen (what's in it).
 local function publish(player)
 	local profile = profiles[player]
 	if not profile then
@@ -100,28 +98,31 @@ local function publish(player)
 	syncTools(player, profile.eggs)
 	player:SetAttribute("RidePet", profile.ride)
 	local pen = penOf(player)
-	if not pen then
-		return
-	end
-	for _, slot in pen.Slots:GetChildren() do
-		local index = tonumber(slot.Name:match("^Slot(%d+)$"))
-		local entry = index and profile.slots[index]
-		slot:SetAttribute("Pet", entry and entry.pet or nil)
-		slot:SetAttribute("HatchAt", entry and entry.hatchAt or nil)
-		slot:SetAttribute("Egg", entry and entry.egg or nil)
+	if pen then
+		pen:SetAttribute("Contents", HttpService:JSONEncode(profile.items))
 	end
 end
 
-local function clearPen(pen)
-	for _, slot in pen.Slots:GetChildren() do
-		slot:SetAttribute("Egg", nil)
-		slot:SetAttribute("HatchAt", nil)
-		slot:SetAttribute("Pet", nil)
+-- Whether (x, z) in the pen's Area is a free place for an egg.
+local function canPlace(pen, profile, x, z)
+	local area = pen:FindFirstChild("Area")
+	if not area or math.abs(x) > area.Size.X / 2 - EDGE or math.abs(z) > area.Size.Z / 2 - EDGE then
+		return false
 	end
+	local ride = pen.Slots.Slot1.Position - area.Position
+	if Vector2.new(x - ride.X, z - ride.Z).Magnitude < SPACING * 1.5 then
+		return false -- the pet you ride waits there
+	end
+	for _, item in profile.items do
+		if Vector2.new(x - item.x, z - item.z).Magnitude < SPACING then
+			return false
+		end
+	end
+	return true
 end
 
 local function load(player)
-	local profile = { eggs = {}, slots = {}, ride = Config.DefaultPet }
+	local profile = { eggs = {}, items = {}, ride = Config.DefaultPet }
 	if store then
 		for attempt = 1, 3 do
 			local success, data = pcall(store.GetAsync, store, "u" .. player.UserId)
@@ -135,10 +136,10 @@ local function load(player)
 					if isAnimal(data.ride) then
 						profile.ride = data.ride
 					end
-					for key, entry in data.slots or {} do
-						local index = tonumber(key) -- saved tables have string keys
-						if index and typeof(entry) == "table" and (isAnimal(entry.egg) or isAnimal(entry.pet)) then
-							profile.slots[index] = entry
+					for id, item in data.items or {} do
+						if typeof(item) == "table" and tonumber(item.x) and tonumber(item.z)
+							and (isAnimal(item.egg) or isAnimal(item.pet)) then
+							profile.items[id] = item
 						end
 					end
 				end
@@ -160,12 +161,8 @@ local function save(player)
 	if not store or not profile or not loaded[player] then
 		return
 	end
-	local slots = {}
-	for index, entry in profile.slots do
-		slots[tostring(index)] = entry
-	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, slots = slots, ride = profile.ride }) then
+		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride }) then
 			return
 		end
 		task.wait(attempt)
@@ -173,7 +170,7 @@ local function save(player)
 end
 
 Players.PlayerAdded:Connect(function(player)
-	-- The pen is claimed on join too (Pens); wait for it so the slots get filled in.
+	-- The pen is claimed on join too (Pens); wait for it so its contents show.
 	for _ = 1, 20 do -- no pen at all when the five are taken
 		if player:GetAttribute("Pen") then
 			break
@@ -227,33 +224,32 @@ remote("DeliverEgg", function(player, kind)
 	publish(player)
 end)
 
--- Put an egg from the inventory on a free spot in your pen.
-remote("PlaceEgg", function(player, kind, index)
+-- Put an egg from the inventory down in your pen, at (x, z) from the Area's centre.
+remote("PlaceEgg", function(player, kind, x, z)
 	local profile = profiles[player]
 	local pen = penOf(player)
 	if not profile or not pen or not isAnimal(kind) or (profile.eggs[kind] or 0) < 1 then
 		return
 	end
-	if typeof(index) ~= "number" or index < FIRST_SLOT or profile.slots[index] or not slotPart(pen, index) then
+	if typeof(x) ~= "number" or typeof(z) ~= "number" or not canPlace(pen, profile, x, z) then
 		return
 	end
 	profile.eggs[kind] -= 1
 	if profile.eggs[kind] == 0 then
 		profile.eggs[kind] = nil
 	end
-	profile.slots[index] = { egg = kind, hatchAt = os.time() + hatchTime(kind) }
+	profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + hatchTime(kind) }
 	publish(player)
 end)
 
--- Ride the pet on spot `index` from now on; the pet you rode takes its spot.
-remote("RidePet", function(player, index)
+-- Ride the pet `id` from now on; the pet you rode takes its place in the pen.
+remote("RidePet", function(player, id)
 	local profile = profiles[player]
-	local entry = profile and typeof(index) == "number" and profile.slots[index]
-	if not entry or not entry.pet then
+	local item = profile and typeof(id) == "string" and profile.items[id]
+	if not item or not item.pet then
 		return
 	end
-	profile.slots[index] = { pet = profile.ride }
-	profile.ride = entry.pet
+	item.pet, profile.ride = profile.ride, item.pet
 	publish(player)
 end)
 
@@ -263,9 +259,9 @@ while true do
 	local now = os.time()
 	for player, profile in profiles do
 		local changed = false
-		for index, entry in profile.slots do
-			if entry.egg and now >= entry.hatchAt then
-				profile.slots[index] = { pet = entry.egg }
+		for _, item in profile.items do
+			if item.egg and now >= item.hatchAt then
+				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
 			end
 		end
