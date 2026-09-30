@@ -67,6 +67,12 @@ return {
 	-- Seconds an egg placed in your pen takes to hatch, by the rarity of the
 	-- animal inside (first-biome eggs; later biomes can take longer).
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
+	-- Gold per second each pet in your pen earns you (the one you ride too), paid
+	-- every second while you're in the game.
+	PetIncome = {
+		Horse = 1, Pinto = 3, Pig = 3, Fish = 8, Rhino = 40, Unicorn = 150,
+		Cactus = 6, Scorpion = 14, Sandworm = 60, Snake = 1000,
+	},
 	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
 	EggIcons = {
