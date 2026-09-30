@@ -11,6 +11,7 @@ Built with the same blocks as tools/animal_designs.py (flush, axis-aligned,
 slopes only from wedges). Bones and animations come after QM vets the shapes.
 """
 
+import json
 import os
 import sys
 
@@ -18,7 +19,7 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from partlib import render  # noqa: E402
+from partlib import render, write_bbmodel  # noqa: E402
 import animal_designs as A  # noqa: E402
 from animal_designs import Animal, EYE_WHITE, PUPIL, PLATE  # noqa: E402
 
@@ -73,14 +74,16 @@ def scorpion():
     for i, (z0, z1, c) in enumerate(bands):
         a.box(f"Body{i + 1}", (-1.8, 1.6, z0), (1.8, 3.4, z1), c, "root")
     a.box("Head", (-1.4, 1.6, -3.6), (1.4, 3.0, -2.399), shell, "neck")
+    a.eyes(1.4, 2.2, 2.9, -3.5, -2.8)
+    a.bone_order = [("root", None), ("neck", "root"), ("Tail", "root"), ("ClawL", "root"), ("ClawR", "root")]
+    a.pivots = {"root": (0, 2.5, 0.1), "neck": (0, 2.3, -2.4), "Tail": (0, 2.0, 2.6)}
     for side, sx in (("L", -1), ("R", 1)):
+        a.pivots["Claw" + side] = (sx * 1.4, 2.3, -2.9)
+        for k, z in enumerate((-1.6, 0.1, 1.8)):
+            a.bone_order.append((f"Leg{side}{k}", "root"))
+            a.pivots[f"Leg{side}{k}"] = (sx * 1.8, 2.45, z)
         def X(a0, a1):
             return sorted((sx * a0, sx * a1))
-        # eyes: white blocks on top of the head, dark pupil blocks poking out their fronts
-        x0, x1 = X(0.3, 0.9)
-        a.box("Eye" + side, (x0, 3.0, -3.4), (x1, 3.5, -2.8), EYE_WHITE, "neck")
-        x0, x1 = X(0.4, 0.75)
-        a.box("Pupil" + side, (x0, 3.05, -3.5), (x1, 3.35, -3.2), PUPIL, "neck")
         # pincer arm: out from the head's side, then forward
         x0, x1 = X(1.4, 2.6)
         a.box("Shoulder" + side, (x0, 1.9, -3.3), (x1, 2.7, -2.5), joint, "Claw" + side)
@@ -193,7 +196,6 @@ CREATURES = [cactus, scorpion, sandworm, snake]
 def scaled(a):
     k = getattr(a, "meta_scale", 1)
     if k != 1:
-        a.pivots = {}
         a.scale(k)
     return a
 
@@ -228,6 +230,11 @@ def one(name, out):
     sheet = Image.new("RGB", (W * len(cams), H))
     for i, cam in enumerate(cams):
         sheet.paste(render(a.parts, W=W, H=H, fov=40, **cam), (i * W, 0))
+    if a.pivots.keys() >= {n for n, _ in a.bone_order}:
+        model, _ = write_bbmodel(a.parts, a.name, None, bones=a.bones())
+        with open(os.path.join(out, a.name + ".bbmodel"), "w") as f:
+            json.dump(model, f, separators=(",", ":"))
+        print("wrote", a.name + ".bbmodel")
     path = os.path.join(out, f"{a.name}.png")
     sheet.save(path)
     print("wrote", path)
