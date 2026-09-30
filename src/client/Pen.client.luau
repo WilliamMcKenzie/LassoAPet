@@ -4,17 +4,18 @@
 -- attribute: JSON of { [id] = { x, z, egg, hatchAt } or { x, z, pet } }, x and z
 -- from the centre of the pen's Area. This draws it: eggs with a countdown that
 -- twitch now and then, the hatch (the egg shakes, its top pops off, the pet
--- jumps out onto the spot), and pets idling where they hatched.
+-- jumps out onto the spot), and pets ambling around inside their pen.
 --
 -- It also runs placing: while an egg from your inventory is equipped, a
 -- see-through egg follows the mouse over your pen; click or tap to put it down.
--- Clicking a pet in your own pen makes it the one you ride.
+-- Clicking or tapping a pet in your own pen makes it the one you ride.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
@@ -31,6 +32,7 @@ local TWITCH_EVERY = { 3, 6 }
 -- Same limits as the server's (Hatchery), so the ghost only shows where it can go.
 local SPACING = 4.5
 local EDGE = 2
+local WANDER_SPEED = 6 -- studs/s, a walk (same as the pet you ride, in Ride.client)
 local rng = Random.new()
 
 local folder = Instance.new("Folder")
@@ -69,17 +71,57 @@ local function placePet(pet, at, yaw)
 	pet.animal.model.PrimaryPart.CFrame = CFrame.new(at.X, at.Y + pet.rootY * pet.scale + pet.hop, at.Z) * CFrame.Angles(0, yaw, 0)
 end
 
--- Your own pets can be clicked to ride them next.
+-- Your own pets can be clicked to ride them next. Animal parts aren't queryable
+-- (so they never block the lasso or the mouse), so these ones are made so.
+local mine = {} -- [model] = id
 local function makeRideable(pen, id, pet)
 	if pen ~= myPen() then
 		return
 	end
-	local click = Instance.new("ClickDetector")
-	click.MaxActivationDistance = 60
-	click.MouseClick:Connect(function()
-		ridePet:FireServer(id)
+	for _, part in pet.animal.model:GetDescendants() do
+		if part:IsA("BasePart") and part ~= pet.animal.model.PrimaryPart then
+			part.CanQuery = true
+		end
+	end
+	mine[pet.animal.model] = id
+	pet.animal.model.Destroying:Connect(function()
+		mine[pet.animal.model] = nil
 	end)
-	click.Parent = pet.animal.model
+end
+
+-- Pets amble between random spots inside their pen's fence, resting a while at
+-- each. `margin` keeps big pets' bodies off the fence.
+local function wander(pen, s, dt)
+	local pet, w = s.pet, s.wander
+	local speed, turn = 0, 0
+	if w.rest > 0 then
+		w.rest -= dt
+		if w.rest <= 0 then
+			local area = pen.Area
+			local hx = math.max(0, area.Size.X / 2 - w.margin)
+			local hz = math.max(0, area.Size.Z / 2 - w.margin)
+			w.tx = area.Position.X + rng:NextNumber(-hx, hx)
+			w.tz = area.Position.Z + rng:NextNumber(-hz, hz)
+		end
+	else
+		local dx, dz = w.tx - s.at.X, w.tz - s.at.Z
+		if dx * dx + dz * dz < 1 then
+			w.rest = rng:NextNumber(2, 5)
+		else
+			-- yaw 0 faces -z, so the heading toward (dx, dz) is atan2(-dx, -dz)
+			local diff = (math.atan2(-dx, -dz) - s.yaw + math.pi) % (2 * math.pi) - math.pi
+			s.yaw += math.clamp(diff, -3 * dt, 3 * dt)
+			turn = -math.clamp(diff, -1, 1) -- turn is + to the right, which is -yaw
+			speed = WANDER_SPEED * math.max(0, math.cos(diff)) -- turn on the spot first
+			s.at -= Vector3.new(math.sin(s.yaw), 0, math.cos(s.yaw)) * speed * dt
+		end
+	end
+	pet.animal:update(dt, speed, turn)
+end
+
+local function startWander(s)
+	local _, size = s.pet.animal.model:GetBoundingBox()
+	s.wander = { rest = rng:NextNumber(1, 4), margin = EDGE + math.min(size.X, size.Z) / 2 }
 end
 
 local function newTimer(parent)
@@ -127,6 +169,7 @@ local function showPet(pen, id, item)
 	makeRideable(pen, id, s.pet)
 	s.pet.animal.model.Parent = folder
 	placePet(s.pet, s.at, s.yaw)
+	startWander(s)
 	shown[pen][id] = s
 end
 
@@ -236,7 +279,7 @@ end
 
 RunService.RenderStepped:Connect(function(dt)
 	local now = workspace:GetServerTimeNow()
-	for _, list in shown do
+	for pen, list in shown do
 		for _, s in list do
 			if s.egg then
 				if not s.hatching then
@@ -260,9 +303,14 @@ RunService.RenderStepped:Connect(function(dt)
 					pet.hop = EGG_CENTER * (1 - t) + JUMP_HEIGHT * 4 * t * (1 - t)
 					if t >= 1 then
 						s.jump, s.hatching = nil, nil
+						startWander(s)
 					end
 				end
-				pet.animal:update(dt, 0, 0)
+				if s.wander then
+					wander(pen, s, dt)
+				else
+					pet.animal:update(dt, 0, 0)
+				end
 				placePet(pet, s.at, s.yaw)
 			end
 		end
@@ -335,3 +383,32 @@ player.CharacterAdded:Connect(watchCharacter)
 if player.Character then
 	watchCharacter(player.Character)
 end
+
+-- Clicking or tapping one of your pets (with no egg in hand) rides it next.
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed or holding then
+		return
+	end
+	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+		return
+	end
+	local models = {}
+	for model in mine do
+		table.insert(models, model)
+	end
+	if #models == 0 then
+		return
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = models
+	local ray = workspace.CurrentCamera:ScreenPointToRay(input.Position.X, input.Position.Y)
+	local hit = workspace:Raycast(ray.Origin, ray.Direction * 300, params)
+	local model = hit and hit.Instance:FindFirstAncestorOfClass("Model")
+	while model and not mine[model] do
+		model = model.Parent and model.Parent:FindFirstAncestorOfClass("Model")
+	end
+	if model then
+		ridePet:FireServer(mine[model])
+	end
+end)
