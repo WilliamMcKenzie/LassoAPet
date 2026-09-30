@@ -104,7 +104,7 @@ local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
 
--- Money as "950$", "1.2k$", "104k$", "3.5M$", "2B$": from 1000 up, a suffix
+-- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
 -- with at most one decimal (and none from 100 of a unit up).
 local SUFFIXES = { "k", "M", "B", "T", "Qa", "Qi" }
 local function money(amount)
@@ -119,11 +119,11 @@ local function money(amount)
 		suffix = s
 	end
 	if suffix == "" then
-		return sign .. n .. "$"
+		return sign .. "$" .. n
 	end
-	-- Round down, so 999,999 reads 999k rather than 1000k.
+	-- Round down, so 999,999 reads $999k rather than $1000k.
 	local text = if n >= 100 then tostring(math.floor(n)) else (string.format("%.1f", math.floor(n * 10) / 10):gsub("%.0$", ""))
-	return sign .. text .. suffix .. "$"
+	return sign .. "$" .. text .. suffix
 end
 
 -- Text outlines, kept at a whole number of screen pixels. The HUD's UIScale scales
