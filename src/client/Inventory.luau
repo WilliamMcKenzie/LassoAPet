@@ -23,6 +23,22 @@ local BOTTOM = 24
 local MAX_SLOTS = 9
 local FONT = Enum.Font.FredokaOne
 
+-- Square backgrounds by the item's rarity (placeholder colours until QM's
+-- slot images: set Image to use one, drawn square over the whole slot).
+local RARITY = {
+	Uncommon = { color = Color3.fromRGB(70, 170, 60), image = "" },
+	Rare = { color = Color3.fromRGB(50, 120, 220), image = "" },
+	Epic = { color = Color3.fromRGB(150, 60, 200), image = "" },
+	Legendary = { color = Color3.fromRGB(230, 170, 30), image = "" },
+}
+local Animals = game:GetService("ReplicatedStorage").Shared.Animals
+
+local function rarityOf(tool)
+	local kind = tool:GetAttribute("EggKind")
+	local module = kind and Animals:FindFirstChild(kind)
+	return module and RARITY[require(module).Rarity]
+end
+
 local player = Players.LocalPlayer
 local bar
 local order = {} -- tool names in the order they first showed up, so squares don't jump around
@@ -104,6 +120,18 @@ local function redraw()
 		slot.BackgroundTransparency = 0.45
 		slot.LayoutOrder = i
 		Instance.new("UICorner", slot).CornerRadius = UDim.new(0, 12)
+		local rarity = rarityOf(tool)
+		if rarity and rarity.image ~= "" then
+			slot.BackgroundTransparency = 1
+			local bg = Instance.new("ImageLabel")
+			bg.BackgroundTransparency = 1
+			bg.Size = UDim2.fromScale(1, 1)
+			bg.Image = rarity.image
+			bg.Parent = slot
+		elseif rarity then
+			slot.BackgroundColor3 = rarity.color
+			slot.BackgroundTransparency = 0.25
+		end
 		if tool.Parent == player.Character then
 			local ring = Instance.new("UIStroke")
 			ring.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
