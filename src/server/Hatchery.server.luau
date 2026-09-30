@@ -191,6 +191,11 @@ for _, player in Players:GetPlayers() do
 	task.spawn(load, player)
 end
 
+-- Empties a pen for the next owner (its pets leave with the player).
+local function clearPen(pen)
+	pen:SetAttribute("Contents", "{}")
+end
+
 Players.PlayerRemoving:Connect(function(player)
 	local pen = penOf(player)
 	if pen then
@@ -301,6 +306,29 @@ command.Triggered:Connect(function(source, text)
 	end
 end)
 command.Parent = game:GetService("TextChatService")
+
+-- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
+local function income(profile)
+	local total = Config.PetIncome[profile.ride] or 0
+	for _, item in profile.items do
+		if item.pet then
+			total += Config.PetIncome[item.pet] or 0
+		end
+	end
+	return total
+end
+
+task.spawn(function()
+	while true do
+		task.wait(1)
+		for player, profile in profiles do
+			local earned = income(profile)
+			if earned > 0 and player.Parent then
+				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
+			end
+		end
+	end
+end)
 
 -- Hatch eggs whose time is up: the pet takes the egg's spot.
 while true do
