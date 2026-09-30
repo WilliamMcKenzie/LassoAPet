@@ -102,88 +102,78 @@ def group(name, origin):
 
 
 # ---------------------------------------------------------------- body
+#
+# Rest pose (every bone at 0): the snake lies straight and flat on its belly,
+# every cube axis-aligned, head in front facing -z. Bones chain from the root
+# (the front body segment, where you sit) back to the tail and forward to the
+# head, so bending is all bone rotation: the reared-up S is the "pose" animation.
 
 # (length, half width, height) for each body segment, front to back from z = 0
 SEGMENTS = [(3.0, 1.5, 2.8), (3.0, 1.45, 2.7), (3.0, 1.35, 2.5), (3.0, 1.25, 2.3),
             (3.0, 1.1, 2.0), (3.0, 0.95, 1.7), (2.5, 0.8, 1.4), (2.0, 0.6, 1.1)]
-OVERLAP = 0.3  # each segment reaches this far into the one in front, so waving opens no gaps
-BELLY = 0.32  # fraction of the height that's orange underneath
+# neck segments from z = 0 forward: (length, half width, height)
+NECK = [("NeckBase", "Neck1", 2.8, 1.45, 2.6), ("neck", "Neck2", 2.8, 1.4, 2.5), ("NeckTop", "Neck3", 2.4, 1.35, 2.4)]
+OVERLAP = 0.5  # each block reaches this far back past its joint, so bending opens no gaps
+BELLY = 0.32  # fraction of the height that's cream underneath
 
-# the neck: (from (y, z), to (y, z), half width, thickness) centre lines, rising from the body's front
-NECK = [((1.4, 0.8), (3.8, -1.3), 1.45, 2.6),
-        ((3.8, -1.3), (6.6, -2.0), 1.4, 2.5),
-        ((6.6, -2.0), (8.6, -1.5), 1.35, 2.4)]
-HEAD_AT = (0, 9.1, -0.9)  # where the head group's origin lands (studs)
-
-
-WAVE = 14.0  # studs per side-to-side wave of the resting body
-WAVE_AMP = 2.4  # studs of sideways swing at the tail; none where the neck rises
-
-
-def spine_x(z, total):
-    """Sideways offset of the resting body at z: an S that grows toward the tail."""
-    amp = WAVE_AMP * min(1.0, max(0.0, z / total)) ** 0.8
-    return amp * math.sin(2 * math.pi * z / WAVE)
+# The reared-up pose, as bone rotations (degrees): neck bones lift (+X raises the
+# front), the head levels out again, and the body swings side to side (Y).
+NECK_LIFT = {"NeckBase": 44, "neck": 32, "NeckTop": 28, "Head": -104}
+WAVE = 14.0  # studs per side-to-side wave of the posed body
+WAVE_AMP = 2.4  # studs of sideways swing at the tail
 
 
 def spine_yaw(z, total, dz=0.01):
-    return math.degrees(math.atan2(spine_x(z + dz, total) - spine_x(z - dz, total), 2 * dz))
+    def x(z):
+        return WAVE_AMP * min(1.0, max(0.0, z / total)) ** 0.8 * math.sin(2 * math.pi * z / WAVE)
+    return math.degrees(math.atan2(x(z + dz) - x(z - dz), 2 * dz))
 
 
-def segment_parts(name, z0, z1, hw, h, total, back_spike=True):
-    """One body segment centred on the resting S, turned (about Y) along it."""
+def slab(name, z_front, z_back, hw, h, spike_on=True, band=True):
+    """A straight block lying on the ground from z_front to z_back (z_front < z_back):
+    cream belly, maroon band across the front, gold top, turquoise spike."""
     parts = []
     belly = h * BELLY
-    zc = (z0 + z1) / 2
-    xc, yaw = spine_x(zc, total), spine_yaw(zc, total)
-    L = (z1 - z0) / math.cos(math.radians(yaw))
-    parts.append(cube(name + "Belly", (xc, belly / 2, zc), (2 * hw, belly, L), ORANGE, ry=yaw))
-    # a maroon band across the front third of the top, gold behind it (rattlesnake bands)
-    fwd = np.array([math.sin(math.radians(yaw)), 0, math.cos(math.radians(yaw))])
-    band = L * 0.3
-    top_y = belly + (h - belly) / 2
-    c0 = np.array([xc, top_y, zc]) - fwd * (L / 2 - band / 2)
-    c1 = np.array([xc, top_y, zc]) + fwd * (band / 2)
-    parts.append(cube(name + "Band", c0, (2 * hw + 0.02, h - belly + 0.02, band), TEX["maroon"], ry=yaw))
-    parts.append(cube(name, c1, (2 * hw, h - belly, L - band), RED, ry=yaw))
-    if back_spike:
-        parts.append(spike(name + "Spike", (xc, h, zc + 0.2), min(1.2, (z1 - z0) * 0.45), 0.55 + 0.25 * hw, 0.36, TEX["teal"], ry=yaw))
+    L = z_back - z_front
+    zc = (z_front + z_back) / 2
+    parts.append(cube(name + "Belly", (0, belly / 2, zc), (2 * hw, belly, L), TEX["cream"]))
+    top = (0, belly + (h - belly) / 2)
+    if band:
+        bl = L * 0.3
+        parts.append(cube(name + "Band", (0, top[1], z_front + bl / 2), (2 * hw + 0.02, h - belly + 0.02, bl), TEX["maroon"]))
+        parts.append(cube(name, (0, top[1], z_front + bl + (L - bl) / 2), (2 * hw, h - belly, L - bl), TEX["gold"]))
+    else:
+        parts.append(cube(name, (0, top[1], zc), (2 * hw, h - belly, L), TEX["gold"]))
+    if spike_on:
+        parts.append(spike(name + "Spike", (0, h, zc + 0.2), min(1.2, L * 0.4), 0.55 + 0.25 * hw, 0.36, TEX["teal"]))
     return parts
 
 
-def tilted_segment(name, p0, p1, hw, t, extra=0.35):
-    """A neck block along p0 -> p1 in the (y, z) plane, belly on its front/under side."""
-    (y0, z0), (y1, z1) = p0, p1
-    dy, dz = y1 - y0, z1 - z0
-    L = math.hypot(dy, dz) + extra
-    # the block's local +z runs from p1 back to p0 (tail-ward); tilt about X
-    ang = math.degrees(math.atan2(dy, -dz))  # 0 = lying flat facing -z, 90 = standing up
-    cy, cz = (y0 + y1) / 2, (z0 + z1) / 2
-    # local up (+y) after tilting by ang about X is (0, cos, sin): belly goes the other way
-    up = np.array([0, math.cos(math.radians(ang)), math.sin(math.radians(ang))])
-    belly = t * BELLY
-    c_red = np.array([0, cy, cz]) + up * (belly / 2)
-    c_bel = np.array([0, cy, cz]) - up * ((t - belly) / 2)
-    return [cube(name + "Belly", c_bel, (2 * hw, belly, L), ORANGE, ang),
-            cube(name, c_red, (2 * hw, t - belly, L), RED, ang)]
-
-
-def head_parts():
-    """QM's head, scaled up and moved onto the neck. Returns (elements, outliner node, groups)."""
+def head_parts(z_back):
+    """QM's head, scaled, its back at z_back and its lowest point (the open jaw) on the ground."""
     m = json.load(open(HEAD))
     k = HEAD_SCALE
     src_origin = np.array(next(g for g in m["groups"] if g["name"] == "Head")["origin"], float)
-    offset = np.array(HEAD_AT, float) * BB * SIZE - src_origin * k
+
+    def move(offset):
+        for e in m["elements"]:
+            for key in ("from", "to", "origin"):
+                if key in e:
+                    e[key] = [round(c + o, 4) for c, o in zip(e[key], offset)]
+        for g in m["groups"]:
+            g["origin"] = [round(c + o, 4) for c, o in zip(g["origin"], offset)]
+
     for e in m["elements"]:
-        for key in ("from", "to"):
+        for key in ("from", "to", "origin"):
             if key in e:
-                e[key] = [round(c * k + o, 4) for c, o in zip(e[key], offset)]
-        if "origin" in e:
-            e["origin"] = [round(c * k + o, 4) for c, o in zip(e["origin"], offset)]
+                e[key] = [c * k for c in e[key]]
         if "vertices" in e:
             e["vertices"] = {n: [round(c * k, 4) for c in v] for n, v in e["vertices"].items()}
     for g in m["groups"]:
-        g["origin"] = [round(c * k + o, 4) for c, o in zip(g["origin"], offset)]
+        g["origin"] = [c * k for c in g["origin"]]
+    move(np.array([0, 0, z_back * BB * SIZE]) - src_origin * k)
+    low = min(q[:, 1].min() for p in posed(m) for q in p.polys)
+    move(np.array([0, -low * BB, 0]))
     for e in m["elements"]:
         for prefixes, color in HEAD_COLORS:
             if e["name"].startswith(prefixes):
@@ -193,72 +183,77 @@ def head_parts():
 
 
 def build():
-    head = head_parts()
     elements, groups = [], []
-    root = group("root", (0, 1.4, 3))
-    groups.append(root)
-    outliner = {"uuid": root["uuid"], "isOpen": True, "children": []}
 
-    def add_group(g, parent_node):
+    def add_group(name, pivot, parent):
+        g = group(name, pivot)
         groups.append(g)
         node = {"uuid": g["uuid"], "isOpen": True, "children": []}
-        parent_node["children"].append(node)
+        if parent is not None:
+            parent["children"].append(node)
         return node
 
-    # body segments, each its own bone (pivot at its front, on the centre line)
-    total = sum(L for L, _, _ in SEGMENTS)
-    z = 0.0
-    for i, (L, hw, h) in enumerate(SEGMENTS):
-        name = f"Seg{i + 1}"
-        node = add_group(group(name, (spine_x(z, total), h / 2, z)), outliner)
-        z0 = z - (OVERLAP if i else 0.6)
-        for e in segment_parts(name, z0, z + L, hw, h, total, back_spike=i >= 2):
+    def put(node, parts):
+        for e in parts:
             elements.append(e)
             node["children"].append(e["uuid"])
-        z += L
-        last = node
-    # the rattle on the tail tip: stacked orange beads
-    for j, (d, hw, h, tex) in enumerate(((0.8, 0.55, 1.0, TEX["cream"]), (0.7, 0.48, 0.9, TEX["tan"]), (0.6, 0.4, 0.75, TEX["cream"]))):
-        zc = z + d / 2
-        e = cube(f"Rattle{j + 1}", (spine_x(zc, total), 0.05 + h / 2, zc), (2 * hw, h, d / math.cos(math.radians(spine_yaw(zc, total)))), tex,
-                 ry=spine_yaw(zc, total))
-        elements.append(e)
-        last["children"].append(e["uuid"])
+
+    # body: root is the front segment; each one after hangs off the one before
+    L, hw, h = SEGMENTS[0]
+    root = add_group("root", (0, h / 2, L / 2), None)
+    put(root, slab("Seg1", -OVERLAP, L, hw, h, spike_on=False))
+    parent, z = root, L
+    for i, (L, hw, h) in enumerate(SEGMENTS[1:], start=2):
+        node = add_group(f"Seg{i}", (0, h / 2, z), parent)
+        put(node, slab(f"Seg{i}", z - OVERLAP, z + L, hw, h, spike_on=i >= 3))
+        parent, z = node, z + L
+    for j, (d, rw, rh, tex) in enumerate(((0.8, 0.55, 1.0, "cream"), (0.7, 0.48, 0.9, "tan"), (0.6, 0.4, 0.75, "cream"))):
+        put(parent, [cube(f"Rattle{j + 1}", (0, 0.05 + rh / 2, z + d / 2), (2 * rw, rh, d), TEX[tex])])
         z += d
 
-    # neck: the base rise, then "neck" (which the lasso loops round) carrying the head
-    base = add_group(group("NeckBase", (0, 1.4, 0.8)), outliner)
-    for e in tilted_segment("Neck1", *NECK[0][:2], NECK[0][2], NECK[0][3]):
-        elements.append(e)
-        base["children"].append(e["uuid"])
-    neck = add_group(group("neck", (0, 3.8, -1.3)), base)
-    for n, (p0, p1, hw, t) in enumerate(NECK[1:], start=2):
-        for e in tilted_segment(f"Neck{n}", p0, p1, hw, t):
-            elements.append(e)
-            neck["children"].append(e["uuid"])
-    # spikes down the back of the neck
-    for n, (y, zz) in enumerate(((2.9, 0.2), (5.0, -0.6), (7.2, -0.6))):
-        e = spike(f"NeckSpike{n + 1}", (0, y, zz), 0.9, 0.8, 0.36, TEX["teal"])
-        e["rotation"] = [-60 + 10 * n, 0, 0]
-        elements.append(e)
-        neck["children"].append(e["uuid"])
+    # neck: forward from the front segment, each bone's pivot at its back joint
+    parent, z = root, 0.0
+    for bone, name, L, hw, h in NECK:
+        node = add_group(bone, (0, h / 2, z), parent)
+        put(node, slab(name, z - L, z + OVERLAP, hw, h, band=False))
+        parent, z = node, z - L
 
-    # QM's head goes in as it is, under neck
+    # QM's head, its back against the neck's front
+    head = head_parts(z + 0.3)
+    head_group = next(g for g in head["groups"] if g["name"] == "Head")
+    head_group["origin"] = [0, round(NECK[-1][4] / 2 * BB * SIZE, 4), round(z * BB * SIZE, 4)]
     elements += head["elements"]
     groups += head["groups"]
-    neck["children"] += head["outliner"]
+    parent["children"] += head["outliner"]
 
     model = copy.deepcopy(head)
     model["name"] = "Snake"
     model["elements"] = elements
     model["groups"] = groups
-    model["outliner"] = [outliner]
-    model["animations"] = []
+    model["outliner"] = [root]
     model["resolution"] = {"width": 16, "height": 16}
+    model["animations"] = []
+    pose_anim(model)
     return model
 
 
-META = {"seat": (0, 3.0 * SIZE, 3.2 * SIZE), "neck_loop": {"center": (0, 5.2 * SIZE, -1.7 * SIZE), "radius": 1.8 * SIZE}}
+def pose_anim(model):
+    """The reared-up S as a one-frame "pose" animation (idle, walk and run come later)."""
+    from horse_rig import write_animations
+    groups = {g["name"]: g for g in model["groups"]}
+    total = sum(L for L, _, _ in SEGMENTS)
+    tracks = {name: [{"channel": "rotation", "interp": "linear", "keys": [(0, (a, 0, 0)), (1, (a, 0, 0))]}]
+              for name, a in NECK_LIFT.items()}
+    z, prev = SEGMENTS[0][0], 0.0
+    for i, (L, _, _) in enumerate(SEGMENTS[1:], start=2):
+        yaw = spine_yaw(z + L / 2, total)
+        tracks[f"Seg{i}"] = [{"channel": "rotation", "interp": "linear", "keys": [(0, (0, yaw - prev, 0)), (1, (0, yaw - prev, 0))]}]
+        prev, z = yaw, z + L
+    write_animations(model, groups, {"pose": (1.0, tracks)})
+
+
+META = {"seat": (0, 2.8 * SIZE, 1.6 * SIZE),
+        "neck_loop": {"center": (0, 1.25 * SIZE, -(NECK[0][2] + NECK[1][2] / 2) * SIZE), "radius": 1.8 * SIZE}}
 
 
 # ---------------------------------------------------------------- preview
@@ -332,20 +327,21 @@ def main(out="/mnt/project-files/animals/desert"):
         json.dump(model, f, separators=(",", ":"))
     with open(os.path.join(out, "Snake.bbmodel"), "w") as f:
         json.dump(model, f, separators=(",", ":"))
-    parts = posed(model)
-    horse = A.qm_horse("A")
-    from horse_rig import pose
-    hparts = pose(horse, None, 0)
-    for p in hparts:
-        p.polys = [q + np.array([12, 0, 8]) for q in p.polys]
+    rest = posed(model)
+    reared = posed(model, model["animations"][0], 0)
     W, H = 640, 460
-    cams = [dict(eye=(-36, 24, -30), target=(0, 4, 8)), dict(eye=(-54, 9, 10), target=(0, 6, 10)),
-            dict(eye=(30, 22, 50), target=(0, 4, 10)), dict(eye=(0, 70, 9.5), target=(0, 0, 10))]
-    sheet = Image.new("RGB", (W * 2, H * 2))
-    for i, cam in enumerate(cams):
-        ps = parts + (hparts if i == 1 else [])
-        sheet.paste(render(ps, W=W, H=H, fov=40, **cam), ((i % 2) * W, (i // 2) * H))
-    sheet.save(os.path.join(out, "Snake.png"))
+    q34 = dict(eye=(-36, 24, -30), target=(0, 4, 8))
+    side = dict(eye=(-58, 10, 6), target=(0, 3, 6))
+    top = dict(eye=(0, 75, 6.5), target=(0, 0, 7))
+    sheet = Image.new("RGB", (W * 3, H * 2))
+    for r, parts in enumerate((rest, reared)):
+        for c, cam in enumerate((q34, side, top)):
+            sheet.paste(render(parts, W=W, H=H, fov=40, **cam), (c * W, r * H))
+    A.label(sheet, ["top: rest, all bones at 0", "bottom: the pose animation", ""], 22).save(os.path.join(out, "Snake_rest.png"))
+    im = Image.new("RGB", (W * 2, H))
+    im.paste(render(reared, W=W, H=H, fov=40, **q34), (0, 0))
+    im.paste(render(reared, W=W, H=H, fov=40, **side), (W, 0))
+    im.save(os.path.join(out, "Snake.png"))
     print("wrote", len(model["elements"]), "elements")
 
 
