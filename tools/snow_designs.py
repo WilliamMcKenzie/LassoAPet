@@ -214,7 +214,9 @@ def polar_bear(armor=False):
     """Hunched brute after QM's figure: a chest pitched up into a big shoulder
     hump, the head thrust forward below it, heavy splayed forelegs with blue
     claws, small hind legs. Every block is axis-aligned inside its bone; the
-    pose comes from the bones' rest rotations (a.rest)."""
+    pose comes from the bones' rest rotations (a.rest).
+    QM edited the result (dark eyes with a white glint): designs/snow/PolarBear.bbmodel
+    is now QM's file and the source of truth, so don't overwrite it from here."""
     a = Animal("PolarBear", "Epic")
     fur, shade, belly = (250, 251, 248), (224, 232, 240), (236, 242, 248)
     nose, claw, pad = (34, 36, 48), (46, 150, 196), (96, 104, 124)
@@ -523,9 +525,155 @@ def dragon_model(a):
     return model
 
 
+# ---------------------------------------------------------------- ice wyvern
+
+WYV = dict(cyan=(56, 206, 238), plate=(30, 164, 214), fur=(252, 253, 255), belly=(196, 240, 252),
+           wing=(170, 228, 248), spar=(236, 246, 255), horn=(206, 236, 252), eye=(236, 44, 64), slit=(40, 12, 24))
+
+
+def ice_wyvern():
+    """QM's wyvern (designs/snow/refs/ivory_wyvern_1.bbmodel) translated into our
+    blocks: a small torso pitched up, an S-curved two-piece neck, a long three-piece
+    tail curling up at an ice spike, crouched digitigrade legs, and wing-arms half
+    spread. Scale panels are cyan with white fur rings at every joint; the
+    reference's flat fins and horns become block spikes and pyramids. Every block
+    is axis-aligned inside its bone; the pose is all bone rest rotations."""
+    c = WYV
+    a = Animal("IceWyvern", "Legendary")
+    a.rest = {}
+    order = [("root", None)]
+
+    def bone(name, parent, pivot, rest=(0, 0, 0)):
+        order.append((name, parent))
+        a.pivots[name] = pivot
+        if any(rest):
+            a.rest[name] = rest
+
+    def ring(name, z0, z1, hw, y0, y1, b, out=0.3):
+        a.box(name, (-hw - out, y0 - out, z0), (hw + out, y1 + out, z1), c["fur"], b)
+
+    def spikes(name, zs, y, b, h=1.0, w=0.8):
+        for i, z in enumerate(zs):
+            pyramid(a, f"Spike{name}{i}", (-w / 2, y, z - w / 2), (w / 2, y, z + w / 2), "+y", h, c["horn"], b)
+
+    # torso: the root, pitched up at the chest
+    a.pivots["root"] = (0, 8.0, 0)
+    a.rest["root"] = (10, 0, 0)
+    a.box("Torso", (-2.6, 6.0, -4.5), (2.6, 10.6, 4.0), c["cyan"], "root")
+    a.box("Belly", (-2.0, 5.5, -4.0), (2.0, 6.0, 3.4), c["belly"], "root")
+    a.box("BackPlate", (-1.8, 10.6, -3.6), (1.8, 11.2, 3.2), c["plate"], "root")
+    spikes("Back", (-2.2, 0.0, 2.2), 11.2, "root", 1.2)
+    # neck: two pieces bending up then forward
+    bone("neck", "root", (0, 8.8, -4.5), (38, 0, 0))
+    ring("NeckRing0", -5.0, -4.2, 1.9, 7.2, 10.4, "neck", 0.25)
+    a.box("Neck1", (-1.6, 7.4, -10.0), (1.6, 10.2, -4.2), c["cyan"], "neck")
+    a.box("Neck1Belly", (-1.1, 6.9, -9.6), (1.1, 7.4, -4.6), c["belly"], "neck")
+    spikes("Neck1", (-8.0, -6.0), 10.2, "neck", 0.9, 0.7)
+    bone("Neck2", "neck", (0, 8.8, -10.0), (-22, 0, 0))
+    ring("NeckRing1", -10.6, -9.8, 1.5, 7.5, 10.1, "Neck2", 0.25)
+    a.box("Neck2", (-1.3, 7.6, -15.0), (1.3, 10.0, -10.0), c["cyan"], "Neck2")
+    a.box("Neck2Belly", (-0.9, 7.1, -14.6), (0.9, 7.6, -10.4), c["belly"], "Neck2")
+    spikes("Neck2", (-13.4, -11.6), 10.0, "Neck2", 0.8, 0.6)
+    # head: long skull and snout, swept-back horns, jaw a little open
+    bone("Head", "Neck2", (0, 8.8, -15.0), (-26, 0, 0))
+    a.box("Skull", (-1.9, 7.8, -18.6), (1.9, 11.0, -14.6), c["cyan"], "Head")
+    a.box("Brow", (-2.1, 10.2, -19.0), (2.1, 11.0, -17.4), c["plate"], "Head")
+    a.box("Snout", (-1.3, 8.2, -22.6), (1.3, 10.2, -18.6), c["cyan"], "Head")
+    a.box("SnoutTop", (-0.8, 10.2, -21.8), (0.8, 10.6, -18.6), c["plate"], "Head")
+    for side, sx in SIDES:
+        x0, x1 = X(sx, 0.4, 0.9)
+        a.box("Nostril" + side, (x0, 9.6, -22.7), (x1, 10.0, -22.6), c["slit"], "Head")
+        # red eyes with a dark slit, on the skull's sides
+        x0, x1 = X(sx, 1.9, 1.9 + PLATE)
+        a.box("Eye" + side, (x0, 9.2, -18.2), (x1, 10.3, -16.8), c["eye"], "Head")
+        x0, x1 = X(sx, 1.9, 1.9 + PLATE + 0.03)
+        a.box("Slit" + side, (x0, 9.3, -17.75 + PUPIL_BACK), (x1, 10.2, -17.35 + PUPIL_BACK), c["slit"], "Head")
+        # teeth: a row of small white pyramids under the snout's edge
+        for i, z in enumerate((-22.0, -20.8, -19.6)):
+            x0, x1 = X(sx, 0.75, 1.25)
+            pyramid(a, f"Upper_tooth{side}{i}", (x0, 8.2, z - 0.25), (x1, 8.2, z + 0.25), "-y", 0.6, c["spar"], "Head")
+        # horns: swept back off the brow, stepped to a point
+        hb = "Horn" + side
+        bone(hb, "Head", (sx * 1.3, 10.8, -16.0), (-40, sx * -18, 0))
+        x0, x1 = X(sx, 0.7, 1.9)
+        a.box(hb + "Base", (x0, 10.4, -16.6), (x1, 11.6, -14.4), c["horn"], hb)
+        x0, x1 = X(sx, 0.9, 1.7)
+        a.box(hb + "Mid", (x0, 10.6, -14.4), (x1, 11.4, -12.4), c["horn"], hb)
+        pyramid(a, f"Spike{hb}", (x0, 10.6, -12.4), (x1, 11.4, -12.4), "+z", 1.8, c["spar"], hb)
+    bone("Jaw", "Head", (0, 8.2, -15.4), (-12, 0, 0))
+    a.box("Jaw", (-1.2, 7.3, -22.0), (1.2, 8.2, -15.4), c["belly"], "Jaw")
+    a.box("Mouth", (-0.8, 7.9, -21.6), (0.8, 8.25, -16.0), (238, 104, 146), "Jaw")
+    # tail: three pieces, dipping then curling up to an ice spike
+    bone("Tail", "root", (0, 8.4, 4.0), (-14, 0, 0))
+    ring("TailRing0", 3.8, 4.6, 1.8, 7.2, 9.8, "Tail", 0.25)
+    a.box("Tail1", (-1.6, 7.2, 4.6), (1.6, 9.8, 10.6), c["cyan"], "Tail")
+    spikes("Tail1", (6.4, 8.8), 9.8, "Tail", 0.9, 0.7)
+    bone("Tail2", "Tail", (0, 8.5, 10.6), (22, 0, 0))
+    ring("TailRing1", 10.4, 11.2, 1.3, 7.5, 9.5, "Tail2", 0.25)
+    a.box("Tail2", (-1.2, 7.6, 11.2), (1.2, 9.4, 17.0), c["cyan"], "Tail2")
+    spikes("Tail2", (13.0, 15.2), 9.4, "Tail2", 0.8, 0.6)
+    bone("Tail3", "Tail2", (0, 8.5, 17.0), (-28, 0, 0))
+    ring("TailRing2", 16.8, 17.5, 0.9, 7.8, 9.2, "Tail3", 0.2)
+    a.box("Tail3", (-0.8, 7.9, 17.5), (0.8, 9.1, 22.5), c["cyan"], "Tail3")
+    a.box("TailFin", (-0.3, 9.1, 18.5), (0.3, 10.3, 22.0), c["horn"], "Tail3")
+    pyramid(a, "SpikeTailTip", (-0.8, 7.9, 22.5), (0.8, 9.1, 22.5), "+z", 2.4, c["spar"], "Tail3")
+    # legs: crouched and digitigrade, thigh forward, shin back, long foot, three white claws
+    for side, sx in SIDES:
+        th = "LegH" + side
+        bone(th, "root", (sx * 2.3, 7.4, 2.0), (34, 0, sx * 4))
+        x0, x1 = X(sx, 1.4, 3.8)
+        a.box("Thigh" + side, (x0, 2.8, 0.4), (x1, 8.4, 3.8), c["cyan"], th)
+        sh = "Shin" + side
+        bone(sh, th, (sx * 2.6, 3.4, 2.0), (-70, 0, 0))
+        x0, x1 = X(sx, 1.9, 3.3)
+        a.box("Shin" + side, (x0, -1.4, 1.3), (x1, 3.4, 2.7), c["cyan"], sh)
+        ring("Ankle" + side, 1.4, 2.6, 0, -1.4, -0.8, sh, 0.25)
+        a.parts[-1].cf[0, 3] = sx * 2.6
+        a.parts[-1].size[0] = 1.9
+        ft = "Foot" + side
+        bone(ft, sh, (sx * 2.6, -1.2, 2.0), (36, 0, 0))
+        x0, x1 = X(sx, 1.8, 3.4)
+        a.box("Foot" + side, (x0, -1.9, -1.6), (x1, -0.7, 2.6), c["cyan"], ft)
+        for i, xc in enumerate((2.0, 2.6, 3.2)):
+            x0, x1 = X(sx, xc - 0.22, xc + 0.22)
+            pyramid(a, f"Claw{side}{i}", (x0, -1.9, -1.6), (x1, -1.1, -1.6), "-z", 1.0, c["spar"], ft)
+    # wings: arms raised and swept back, three spars fanning back from the wrist,
+    # membrane panels (half a stud thick, stepped trailing edge) between them
+    for side, sx in SIDES:
+        w = "Wing" + side
+        bone(w, "root", (sx * 2.4, 10.0, -2.4), (0, sx * 28, sx * 32))
+        x0, x1 = X(sx, 2.2, 9.0)
+        a.box("WingArm" + side, (x0, 9.3, -3.2), (x1, 10.7, -1.6), c["cyan"], w)
+        for i, (xa, xb, z1) in enumerate(((2.4, 5.0, 2.4), (5.0, 9.0, 4.2))):
+            x0, x1 = X(sx, xa, xb)
+            a.box(f"WingSkin{side}{i}", (x0, 9.75, -1.6), (x1, 10.25, z1), c["wing"], w)
+        wt = "WingTip" + side
+        bone(wt, w, (sx * 9.0, 10.0, -2.4), (0, sx * -38, 0))
+        x0, x1 = X(sx, 8.6, 14.6)
+        a.box("WingHand" + side, (x0, 9.4, -3.0), (x1, 10.6, -1.8), c["cyan"], wt)
+        pyramid(a, f"WingThumb{side}", (*X(sx, 14.6, 14.6)[:1], 9.5, -2.9), (X(sx, 14.6, 14.6)[1], 10.5, -1.9),
+                "-x" if sx < 0 else "+x", 1.2, c["spar"], wt)
+        # three spars running back from the hand, longest at the tip
+        for i, (xs, z1) in enumerate(((14.2, 8.0), (11.8, 7.0), (9.4, 5.2))):
+            x0, x1 = X(sx, xs - 0.35, xs + 0.35)
+            a.box(f"WingSpar{side}{i}", (x0, 9.6, -1.8), (x1, 10.4, z1), c["spar"], wt)
+        # membrane: strips between the spars, each ending short of the longer spar
+        for i, (xa, xb, z1) in enumerate(((9.0, 9.05, 4.2), (9.75, 11.45, 5.8), (12.15, 13.85, 7.2))):
+            x0, x1 = X(sx, xa, xb)
+            a.box(f"WingSkinTip{side}{i}", (x0, 9.75, -1.8), (x1, 10.25, z1), c["wing"], wt)
+        x0, x1 = X(sx, 9.0, 9.75)
+        a.box(f"WingSkinTip{side}J", (x0, 9.75, -1.8), (x1, 10.25, 4.6), c["wing"], wt)
+    a.remove("WingSkinTipL0")
+    a.remove("WingSkinTipR0")
+    a.bone_order = order
+    a.meta = {"seat": (0, 11.2, 0.4), "neck_loop": {"center": (0, 8.8, -8.0), "radius": 2.2}}
+    a.meta_scale = 0.9  # XL: about 20 studs tall and 40 long, the biggest pet
+    return a
+
+
 # ---------------------------------------------------------------- build + render
 
-CREATURES = [snowman, penguin, white_wolf, polar_bear, troll, ice_dragon]
+CREATURES = [snowman, penguin, white_wolf, polar_bear, troll, ice_dragon, ice_wyvern]
 PLAIN = ("Eye", "Pupil", "Nostril", "Plain", "Mouth", "Amber", "Slit", "Upper_tooth", "Lower_tooth", "Scar",
          "Coal", "Button", "Claw", "Spike", "Tusk", "Carrot", "Nose", "Tie")
 
@@ -546,10 +694,11 @@ def build(fn):
         model = dragon_model(a)
         parts = posed(model)
     elif getattr(a, "rest", None):
-        model, groups = write_bbmodel(a.parts, a.name, None, bones=a.bones())
-        for bone, r in a.rest.items():
-            groups[bone]["rotation"] = list(r)
-        parts = posed(model)
+        model, parts = rest_model(a)
+        drop = min(q[:, 1].min() for p in parts for q in p.polys)
+        if abs(drop) > 0.01:  # stand the posed model on the ground
+            lift(a, -drop)
+            model, parts = rest_model(a)
     else:
         model, _ = write_bbmodel(a.parts, a.name, None, bones=a.bones())
         parts = a.parts
@@ -557,6 +706,25 @@ def build(fn):
         if p.name.startswith(PLAIN):
             p.plain = True
     return a, model, parts
+
+
+def rest_model(a):
+    """The .bbmodel with the bones' rest rotations, and its posed parts."""
+    model, groups = write_bbmodel(a.parts, a.name, None, bones=a.bones())
+    for bone, r in a.rest.items():
+        groups[bone]["rotation"] = list(r)
+    return model, posed(model)
+
+
+def lift(a, dy):
+    for p in a.parts:
+        if p.shape == "Poly":
+            p.polys = [q + np.array([0, dy, 0]) for q in p.polys]
+        else:
+            p.cf[1, 3] += dy
+    a.pivots = {n: (v[0], v[1] + dy, v[2]) for n, v in a.pivots.items()}
+    if a.meta:
+        a.meta["seat"] = (a.meta["seat"][0], a.meta["seat"][1] + dy, a.meta["seat"][2])
 
 
 def save_model(a, model):
@@ -576,7 +744,8 @@ def bounds(parts):
     return pts.min(0), pts.max(0)
 
 
-NAMES = {"WhiteWolf": "White Wolf", "PolarBear": "Polar Bear", "IceDragon": "Ice Dragon"}
+QM_FILES = {"PolarBear"}
+NAMES = {"WhiteWolf": "White Wolf", "PolarBear": "Polar Bear", "IceDragon": "Ice Dragon", "IceWyvern": "Ice Wyvern"}
 Q34_DIR = np.array([-19, 12, -21], float) / np.linalg.norm([-19, 12, -21])
 
 
@@ -637,6 +806,12 @@ def one(name, out):
     """Close look at one animal: 3/4 front, side, 3/4 back, front."""
     fn = next(f for f in CREATURES if f.__name__.replace("_", "") == name.lower().replace("_", ""))
     a, model, parts = build(fn)
+    if a.name in QM_FILES:  # QM's own edit is the source of truth: render it, don't overwrite it
+        model = json.load(open(os.path.join(MODELS, a.name + ".bbmodel")))
+        parts = posed(model)
+        for p in parts:
+            if p.name.startswith(PLAIN):
+                p.plain = True
     path = save_model(a, model)
     shutil.copy(path, os.path.join(out, a.name + ".bbmodel"))  # next to the renders for QM
     print("wrote", path)
