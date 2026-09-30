@@ -61,6 +61,11 @@
           "Saturation": 0.25
         }
       }
+    },
+    "TextChatService": {
+      "$properties": {
+        "ChatVersion": "TextChatService"
+      }
     }
   }
 }

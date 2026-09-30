@@ -20,6 +20,7 @@ local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
@@ -252,6 +253,54 @@ remote("RidePet", function(player, id)
 	item.pet, profile.ride = profile.ride, item.pet
 	publish(player)
 end)
+
+-- Testing: "/give <pet> [count]" in chat puts pets straight into your pen, at
+-- random free places. Only in Studio or for the game's owner.
+local function allowed(player)
+	return RunService:IsStudio() or player.UserId == game.CreatorId
+end
+
+local function give(player, text)
+	local profile = profiles[player]
+	local pen = penOf(player)
+	local name, count = text:match("^/give%s+(%S+)%s*(%d*)")
+	if not name or not profile or not pen or not allowed(player) then
+		return
+	end
+	local kind
+	for _, module in Animals:GetChildren() do
+		if module:IsA("ModuleScript") and module.Name:lower() == name:lower() and not module.Name:match("Model$") and module.Name ~= "Rig" then
+			kind = module.Name
+		end
+	end
+	if not kind then
+		return
+	end
+	local area = pen.Area
+	for _ = 1, math.clamp(tonumber(count) or 1, 1, 20) do
+		for _ = 1, 50 do -- try random places until one is free
+			local x = (math.random() - 0.5) * (area.Size.X - 2 * EDGE)
+			local z = (math.random() - 0.5) * (area.Size.Z - 2 * EDGE)
+			if canPlace(pen, profile, x, z) then
+				profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, pet = kind }
+				break
+			end
+		end
+	end
+	publish(player)
+end
+
+-- A chat command, so the "/give ..." line itself doesn't show in chat.
+local command = Instance.new("TextChatCommand")
+command.Name = "Give"
+command.PrimaryAlias = "/give"
+command.Triggered:Connect(function(source, text)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	if player then
+		give(player, text)
+	end
+end)
+command.Parent = game:GetService("TextChatService")
 
 -- Hatch eggs whose time is up: the pet takes the egg's spot.
 while true do
