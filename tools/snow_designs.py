@@ -531,6 +531,10 @@ WYV = dict(cyan=(56, 206, 238), plate=(30, 164, 214), fur=(252, 253, 255), belly
            wing=(170, 228, 248), spar=(236, 246, 255), horn=(206, 236, 252), eye=(236, 44, 64), slit=(40, 12, 24))
 
 
+WYVERN_HEAD_SCALE = 4.4  # QM's snake head at about the old wyvern head's size
+HEAD_DROP = ("Swept_horn",)  # the snake's own horns: the wyvern gets antlers instead
+
+
 def ice_wyvern():
     """QM's wyvern (designs/snow/refs/ivory_wyvern_1.bbmodel) translated into our
     blocks: a small torso pitched up, an S-curved two-piece neck, a long three-piece
@@ -574,35 +578,29 @@ def ice_wyvern():
     a.box("Neck2", (-1.3, 7.6, -15.0), (1.3, 10.0, -10.0), c["cyan"], "Neck2")
     a.box("Neck2Belly", (-0.9, 7.1, -14.6), (0.9, 7.6, -10.4), c["belly"], "Neck2")
     spikes("Neck2", (-13.4, -11.6), 10.0, "Neck2", 0.8, 0.6)
-    # head: long skull and snout, swept-back horns, jaw a little open
+    # head: QM's sand-snake head (grafted in rest_model), with reindeer antlers
+    # and tusks coming forward from the sides of the mouth instead of its horns
     bone("Head", "Neck2", (0, 8.8, -15.0), (-26, 0, 0))
-    a.box("Skull", (-1.9, 7.8, -18.6), (1.9, 11.0, -14.6), c["cyan"], "Head")
-    a.box("Brow", (-2.1, 10.2, -19.0), (2.1, 11.0, -17.4), c["plate"], "Head")
-    a.box("Snout", (-1.3, 8.2, -22.6), (1.3, 10.2, -18.6), c["cyan"], "Head")
-    a.box("SnoutTop", (-0.8, 10.2, -21.8), (0.8, 10.6, -18.6), c["plate"], "Head")
+    a.head_graft = ((0, 8.8, -15.0), WYVERN_HEAD_SCALE)
     for side, sx in SIDES:
-        x0, x1 = X(sx, 0.4, 0.9)
-        a.box("Nostril" + side, (x0, 9.6, -22.7), (x1, 10.0, -22.6), c["slit"], "Head")
-        # red eyes with a dark slit, on the skull's sides
-        x0, x1 = X(sx, 1.9, 1.9 + PLATE)
-        a.box("Eye" + side, (x0, 9.2, -18.2), (x1, 10.3, -16.8), c["eye"], "Head")
-        x0, x1 = X(sx, 1.9, 1.9 + PLATE + 0.03)
-        a.box("Slit" + side, (x0, 9.3, -17.75 + PUPIL_BACK), (x1, 10.2, -17.35 + PUPIL_BACK), c["slit"], "Head")
-        # teeth: a row of small white pyramids under the snout's edge
-        for i, z in enumerate((-22.0, -20.8, -19.6)):
-            x0, x1 = X(sx, 0.75, 1.25)
-            pyramid(a, f"Upper_tooth{side}{i}", (x0, 8.2, z - 0.25), (x1, 8.2, z + 0.25), "-y", 0.6, c["spar"], "Head")
-        # horns: swept back off the brow, stepped to a point
-        hb = "Horn" + side
-        bone(hb, "Head", (sx * 1.3, 10.8, -16.0), (-40, sx * -18, 0))
-        x0, x1 = X(sx, 0.7, 1.9)
-        a.box(hb + "Base", (x0, 10.4, -16.6), (x1, 11.6, -14.4), c["horn"], hb)
-        x0, x1 = X(sx, 0.9, 1.7)
-        a.box(hb + "Mid", (x0, 10.6, -14.4), (x1, 11.4, -12.4), c["horn"], hb)
-        pyramid(a, f"Spike{hb}", (x0, 10.6, -12.4), (x1, 11.4, -12.4), "+z", 1.8, c["spar"], hb)
-    bone("Jaw", "Head", (0, 8.2, -15.4), (-12, 0, 0))
-    a.box("Jaw", (-1.2, 7.3, -22.0), (1.2, 8.2, -15.4), c["belly"], "Jaw")
-    a.box("Mouth", (-0.8, 7.9, -21.6), (0.8, 8.25, -16.0), (238, 104, 146), "Jaw")
+        an = "Antler" + side
+        bone(an, "Head", (sx * 1.3, 10.6, -16.6), (-18, 0, sx * -22))
+        x0, x1 = X(sx, 1.0, 1.6)
+        a.box(an + "Base", (x0, 10.4, -16.9), (x1, 12.4, -16.3), c["horn"], an)
+        a.box(an + "Beam", (x0, 11.8, -16.3), (x1, 12.4, -14.4), c["horn"], an)  # the main beam sweeps back
+        a.box(an + "Up", (x0, 12.4, -15.0), (x1, 14.6, -14.4), c["horn"], an)  # and up
+        a.box(an + "Top", (x0, 14.0, -16.2), (x1, 14.6, -15.0), c["horn"], an)
+        pyramid(a, f"Spike{an}Top", (x0, 14.0, -16.2), (x1, 14.6, -16.2), "-z", 0.8, c["spar"], an)
+        # tines pointing forward off the beam
+        for k, (y, z) in enumerate(((11.8, -16.3), (13.0, -15.0))):
+            a.box(f"{an}Tine{k}", (x0, y, z - 1.0), (x1, y + 0.6, z), c["horn"], an)
+            pyramid(a, f"Spike{an}Tine{k}", (x0, y, z - 1.0), (x1, y + 0.6, z - 1.0), "-z", 0.7, c["spar"], an)
+        # tusk: out of the mouth's side, pointing forward and a little up
+        tk = "Tusk" + side
+        bone(tk, "Head", (sx * 2.0, 7.9, -19.4), (14, sx * -8, 0))
+        x0, x1 = X(sx, 1.7, 2.35)
+        a.box(tk + "Base", (x0, 7.6, -20.4), (x1, 8.25, -18.8), c["spar"], tk)
+        pyramid(a, f"{tk}Tip", (x0, 7.6, -20.4), (x1, 8.25, -20.4), "-z", 1.6, c["spar"], tk)
     # tail: three pieces, dipping then curling up to an ice spike
     bone("Tail", "root", (0, 8.4, 4.0), (-14, 0, 0))
     ring("TailRing0", 3.8, 4.6, 1.8, 7.2, 9.8, "Tail", 0.25)
@@ -684,6 +682,9 @@ def scaled(a):
         a.scale(k)
         if hasattr(a, "neck_front"):
             a.neck_front = tuple(np.array(a.neck_front) * k)
+        if getattr(a, "head_graft", None):
+            back, hk = a.head_graft
+            a.head_graft = (tuple(np.array(back) * k), hk * k)
     return a
 
 
@@ -713,7 +714,35 @@ def rest_model(a):
     model, groups = write_bbmodel(a.parts, a.name, None, bones=a.bones())
     for bone, r in a.rest.items():
         groups[bone]["rotation"] = list(r)
+    if getattr(a, "head_graft", None):
+        graft_head(model, groups["Head"], *a.head_graft)
     return model, posed(model)
+
+
+def graft_head(model, parent, back, k):
+    """QM's snake head, minus HEAD_DROP parts, into group `parent`, the back of its skull at `back`."""
+    elements, hgroups, node, textures = dragon_head(back, k)
+    drop = {e["uuid"] for e in elements if e["name"].startswith(HEAD_DROP)}
+
+    def prune(n):
+        n["children"] = [prune(c) if isinstance(c, dict) else c for c in n["children"]
+                         if isinstance(c, dict) or c not in drop]
+        return n
+
+    model["elements"] += [e for e in elements if e["uuid"] not in drop]
+    model["groups"] += hgroups
+    model["textures"] += textures
+
+    def find(nodes, uid):
+        for n in nodes:
+            if isinstance(n, dict):
+                if n["uuid"] == uid:
+                    return n
+                hit = find(n["children"], uid)
+                if hit:
+                    return hit
+
+    find(model["outliner"], parent["uuid"])["children"].append(prune(node))
 
 
 def lift(a, dy):
@@ -723,6 +752,9 @@ def lift(a, dy):
         else:
             p.cf[1, 3] += dy
     a.pivots = {n: (v[0], v[1] + dy, v[2]) for n, v in a.pivots.items()}
+    if getattr(a, "head_graft", None):
+        (x, y, z), k = a.head_graft
+        a.head_graft = ((x, y + dy, z), k)
     if a.meta:
         a.meta["seat"] = (a.meta["seat"][0], a.meta["seat"][1] + dy, a.meta["seat"][2])
 
