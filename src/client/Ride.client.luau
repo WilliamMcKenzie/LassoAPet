@@ -1119,7 +1119,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 		local behind = -basis.LookVector
 		local around = CFrame.Angles(0, math.rad(150) * a, 0):VectorToWorldSpace(behind)
 		local distance = 18 + (15 - 18) * a
-		local height = 38 + (2 - 38) * a
+		local height = 38 + (Config.HomeHeroCamHeight - 38) * a
 		local from = Vector3.new(rider.X, focus.Y, rider.Z) + around * distance + Vector3.new(0, height, 0)
 		local lookAt = (basis * CFrame.new(0, 0, -24)).Position:Lerp(rider + Vector3.new(0, 1, 0), math.min(a * 2, 1))
 		camera.CFrame = camera.CFrame:Lerp(CFrame.lookAt(from, lookAt), 1 - math.exp(-12 * dt))
