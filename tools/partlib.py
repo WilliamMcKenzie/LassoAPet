@@ -117,6 +117,15 @@ _WEDGE_FACES = [
     ("Left", [(-1, -1, 1), (-1, 1, 1), (-1, -1, -1)]),
 ]
 
+# CornerWedgePart: peak over the (+X, -Z) corner of the base
+_CORNER_FACES = [
+    ("Bottom", [(-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1)]),
+    ("Front", [(-1, -1, -1), (1, -1, -1), (1, 1, -1)]),
+    ("Right", [(1, -1, -1), (1, -1, 1), (1, 1, -1)]),
+    ("SlopeBack", [(1, -1, 1), (-1, -1, 1), (1, 1, -1)]),
+    ("SlopeLeft", [(-1, -1, 1), (-1, -1, -1), (1, 1, -1)]),
+]
+
 
 def part_faces(p):
     """World-space polygons for a part: list of (verts Nx3, normal).
@@ -126,7 +135,7 @@ def part_faces(p):
         center = p.cf[:3, :3] @ np.concatenate(polys).mean(0) + p.cf[:3, 3]
     else:
         half = p.size / 2
-        polys = [np.array(v, float) * half for _, v in (_WEDGE_FACES if p.shape == "Wedge" else _BOX_FACES)]
+        polys = [np.array(v, float) * half for _, v in {"Wedge": _WEDGE_FACES, "CornerWedge": _CORNER_FACES}.get(p.shape, _BOX_FACES)]
         center = p.cf[:3, 3]
     out = []
     for local in polys:

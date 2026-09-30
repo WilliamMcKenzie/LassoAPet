@@ -2,6 +2,7 @@
 -- Parts with `plain = true` (eyes, pupils) skip the stud texture.
 -- `class` picks the part class (default "Part", e.g. "WedgePart").
 -- `hidden = true` makes an invisible, untextured part (used for bones).
+-- `neon = true` makes a glowing, untextured part (the snake's slit pupils).
 --
 -- Every part hangs off a joint in its parent's space:
 --   joint  = CFrame of the joint relative to the parent part's center (C0)
@@ -43,7 +44,7 @@ function Rig.build(spec)
 		part.Name = def.name
 		part.Size = def.size
 		part.Color = def.color
-		part.Material = Enum.Material.SmoothPlastic
+		part.Material = if def.neon then Enum.Material.Neon else Enum.Material.SmoothPlastic
 		part.Anchored = false
 		part.CanCollide = false
 		part.CanQuery = false
@@ -56,7 +57,7 @@ function Rig.build(spec)
 			part[face .. "Surface"] = Enum.SurfaceType.Smooth
 		end
 		-- Fine studs from a tiled texture; surface studs are fixed at 1 stud, too coarse here.
-		if spec.studTexture and not def.plain and not def.hidden then
+		if spec.studTexture and not def.plain and not def.hidden and not def.neon then
 			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
 				local texture = Instance.new("Texture")
 				texture.Texture = spec.studTexture.image
@@ -124,7 +125,8 @@ end
 
 -- Builds a model from a generated data module ({ bones, parts, animations }).
 -- Each bone becomes a hidden part at its pivot, driven by a Motor6D named
--- <bone>Bone; visible parts are welded to their bone.
+-- <bone>Bone; visible parts are welded to their bone. A bone's optional `rest`
+-- rotation (a Blockbench group rotation) turns it and everything on it at rest.
 -- Returns model, parts by name, motors by bone name, pivots by bone name.
 function Rig.fromData(data, name, studTexture)
 	local list = {}
@@ -135,7 +137,7 @@ function Rig.fromData(data, name, studTexture)
 		table.insert(list, {
 			name = bone.name .. "Bone",
 			parent = bone.parent and bone.parent .. "Bone" or "Root",
-			joint = CFrame.new(bone.pivot - parentPivot),
+			joint = CFrame.new(bone.pivot - parentPivot) * (bone.rest or CFrame.identity),
 			size = Vector3.new(0.2, 0.2, 0.2),
 			color = Color3.new(1, 1, 1),
 			hidden = true,
@@ -151,6 +153,7 @@ function Rig.fromData(data, name, studTexture)
 			color = part.color,
 			class = part.class,
 			plain = part.plain,
+			neon = part.neon,
 		})
 	end
 	local model, byName, motors = Rig.build({ name = name, studTexture = studTexture, parts = list })
