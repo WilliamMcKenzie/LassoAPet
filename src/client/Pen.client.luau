@@ -6,22 +6,22 @@
 -- (the egg shakes, its top pops off, the pet jumps out onto the spot), and pets
 -- idling on their spots.
 --
--- It also runs placing: pick an egg in the Eggs panel and every free spot in
--- your pen shows a see-through egg; click or tap one to put the egg there.
+-- It also runs placing: equip an egg from your inventory and every free spot in
+-- your pen shows a see-through egg; click or tap near one to put the egg there.
+-- Clicking a pet in your own pen makes it the one you ride.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
-local Hud = require(script.Parent:WaitForChild("Hud"))
 
 local player = Players.LocalPlayer
 local placeEgg = ReplicatedStorage:WaitForChild("PlaceEgg")
+local ridePet = ReplicatedStorage:WaitForChild("RidePet")
 
 local FIRST_SLOT = 2 -- Slot1 is where the pet you ride waits
 local EGG_CENTER = 1.6 -- egg pivot height above the ground (Egg.luau)
@@ -111,9 +111,24 @@ local function showEgg(slot, kind)
 	shown[slot] = { egg = egg, kind = kind, timer = newTimer(egg.model.PrimaryPart), nextTwitch = rng:NextNumber(unpack(TWITCH_EVERY)) }
 end
 
+-- Your own pets can be clicked to ride them next.
+local function makeRideable(slot, pet)
+	local pen = slot:FindFirstAncestorOfClass("Model")
+	if not pen or pen.Name ~= "Pen" .. tostring(player:GetAttribute("Pen")) then
+		return
+	end
+	local click = Instance.new("ClickDetector")
+	click.MaxActivationDistance = 60
+	click.MouseClick:Connect(function()
+		ridePet:FireServer(slotIndex(slot))
+	end)
+	click.Parent = pet.animal.model
+end
+
 local function showPet(slot, kind)
 	clear(slot)
 	local pet = newPet(kind)
+	makeRideable(slot, pet)
 	pet.animal.model.Parent = folder
 	placePet(pet, ground(slot), facing(slot))
 	shown[slot] = { pet = pet, kind = kind }
@@ -134,6 +149,7 @@ local function hatch(slot, kind)
 			return
 		end
 		local pet = newPet(kind)
+		makeRideable(slot, pet)
 		pet.scale = 0.2
 		pet.animal:setScale(pet.scale)
 		pet.animal.model.Parent = folder
@@ -242,60 +258,111 @@ RunService.RenderStepped:Connect(function(dt)
 	end
 end)
 
--- Placing an egg: ghosts on your free spots until one is clicked.
+-- Placing an egg: while an egg is equipped, ghosts show on your free spots,
+-- and clicking places it on the free spot nearest where you clicked.
 local ghosts = {}
-
-local function stopPlacing()
-	for _, ghost in ghosts do
-		ghost:Destroy()
-	end
-	table.clear(ghosts)
-end
+local holding -- the equipped egg Tool
 
 local function myPen()
 	local index = player:GetAttribute("Pen")
 	return index and workspace.Pens:FindFirstChild("Pen" .. index)
 end
 
-Hud.onPickEgg = function(kind)
-	stopPlacing()
+local function freeSlots()
 	local pen = myPen()
-	if not pen then
-		return
-	end
-	for _, slot in pen.Slots:GetChildren() do
+	local list = {}
+	for _, slot in pen and pen.Slots:GetChildren() or {} do
 		local index = slotIndex(slot)
 		if index and index >= FIRST_SLOT and not slot:GetAttribute("Egg") and not slot:GetAttribute("Pet") then
-			local ghost = Egg.new(kind).model
-			ghost:PivotTo(CFrame.new(ground(slot) + Vector3.new(0, EGG_CENTER, 0)) * CFrame.Angles(0, facing(slot), 0))
-			for _, part in ghost:GetDescendants() do
-				if part:IsA("BasePart") then
-					part.Transparency = 0.6
-					part.CanCollide = false
-				end
-			end
-			local click = Instance.new("ClickDetector")
-			click.MaxActivationDistance = 200
-			click.MouseClick:Connect(function()
-				stopPlacing()
-				placeEgg:FireServer(kind, index)
-			end)
-			click.Parent = ghost
-			ghost.Parent = folder
-			table.insert(ghosts, ghost)
+			table.insert(list, slot)
 		end
 	end
+	return list
 end
 
-Hud.onEggsToggled = function(open)
-	if open then
-		stopPlacing()
+local function showGhosts()
+	for _, ghost in ghosts do
+		ghost:Destroy()
+	end
+	table.clear(ghosts)
+	if not holding then
+		return
+	end
+	for _, slot in freeSlots() do
+		local ghost = Egg.new(holding:GetAttribute("EggKind")).model
+		ghost:PivotTo(CFrame.new(ground(slot) + Vector3.new(0, EGG_CENTER, 0)) * CFrame.Angles(0, facing(slot), 0))
+		for _, part in ghost:GetDescendants() do
+			if part:IsA("BasePart") then
+				part.Transparency = 0.6
+				part.CanCollide = false
+				part.CanQuery = false
+			end
+		end
+		ghost.Parent = folder
+		table.insert(ghosts, ghost)
 	end
 end
 
-local function showInventory()
-	local ok, inventory = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Eggs") or "{}")
-	Hud.setEggInventory(ok and inventory or {})
+local mouse = player:GetMouse()
+local PLACE_REACH = 5 -- studs from a free spot's centre that still counts as clicking it
+
+local hooked = {} -- tools already wired up (each equip adds the tool to the character again)
+
+local function hold(tool)
+	holding = tool
+	showGhosts()
+	if hooked[tool] then
+		return
+	end
+	hooked[tool] = true
+	tool.Destroying:Connect(function()
+		hooked[tool] = nil
+		if holding == tool then
+			holding = nil
+			showGhosts()
+		end
+	end)
+	tool.Activated:Connect(function()
+		local best, bestDist = nil, PLACE_REACH
+		for _, slot in freeSlots() do
+			local d = (ground(slot) - mouse.Hit.Position) * Vector3.new(1, 0, 1)
+			if d.Magnitude < bestDist then
+				best, bestDist = slot, d.Magnitude
+			end
+		end
+		if best then
+			placeEgg:FireServer(tool:GetAttribute("EggKind"), slotIndex(best))
+		end
+	end)
+	tool.Unequipped:Connect(function()
+		if holding == tool then
+			holding = nil
+			showGhosts()
+		end
+	end)
 end
-player:GetAttributeChangedSignal("Eggs"):Connect(showInventory)
-showInventory()
+
+local function watchCharacter(character)
+	character.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") and child:GetAttribute("EggKind") then
+			hold(child)
+		end
+	end)
+end
+player.CharacterAdded:Connect(watchCharacter)
+if player.Character then
+	watchCharacter(player.Character)
+end
+
+-- Spots fill and empty as eggs are placed and hatch: keep the ghosts up to date.
+task.spawn(function()
+	for _, pen in workspace:WaitForChild("Pens"):GetChildren() do
+		for _, slot in pen:WaitForChild("Slots"):GetChildren() do
+			slot:GetAttributeChangedSignal("Egg"):Connect(function()
+				if holding then
+					task.defer(showGhosts)
+				end
+			end)
+		end
+	end
+end)

@@ -404,6 +404,7 @@ startRide = function()
 	if not starter then
 		spawnStarter()
 	end
+	humanoid:UnequipTools() -- put any egg away
 	mount, starter = starter, nil
 	mount.animal:setSaddled(true)
 	local spot = homeSpot()
@@ -1228,15 +1229,19 @@ end)
 
 spawnStarter()
 
--- The server hands out pens just after joining: move the waiting horse to yours.
-player:GetAttributeChangedSignal("Pen"):Connect(function()
-	if phase == "idle" and starter then
-		starter.animal.model:Destroy()
-		starter = nil
-		Hud.showRide(false)
-		spawnStarter()
-	end
-end)
+-- The server hands out pens just after joining: move the waiting pet to yours.
+-- Picking another pet to ride (in the pen) swaps the waiting one; it's used from
+-- the next ride if you're out on one.
+for _, name in { "Pen", "RidePet" } do
+	player:GetAttributeChangedSignal(name):Connect(function()
+		if phase == "idle" and starter then
+			starter.animal.model:Destroy()
+			starter = nil
+			Hud.showRide(false)
+			spawnStarter()
+		end
+	end)
+end
 
 -- Fill the pools a few animals per frame, so joining doesn't hitch: each kind
 -- gets its share of POOL_START by its weight in the biomes' herds (at least a couple).

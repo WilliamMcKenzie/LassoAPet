@@ -57,6 +57,14 @@ return {
 	-- Seconds an egg placed in your pen takes to hatch, by the rarity of the
 	-- animal inside (first-biome eggs; later biomes can take longer).
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
+	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
+	EggIcons = {
+		Pinto = "rbxassetid://79525419811481",
+		Pig = "rbxassetid://139970505549400",
+		Fish = "rbxassetid://105098230793344",
+		Rhino = "rbxassetid://139482781062355",
+		Unicorn = "rbxassetid://85066893166855",
+	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
 	SprintSpeed = 2, -- x MountSpeed

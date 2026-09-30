@@ -60,7 +60,6 @@ local SPRINT_WIDTH = 164 -- about 2/3 of TAKE EGG's width, as in the mockup
 local BAR_WIDTH = 352
 local ICON_HEIGHT = 80 -- Gold
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
-local EGG_SLOT_HEIGHT = 90 -- each egg in the Eggs panel
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
 
@@ -95,8 +94,6 @@ local card, cardEgg, cardScale, cardFlash, cardBurst -- egg reveal card, the egg
 local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
-local eggPanel
-local eggInventory = {}
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
 
 -- Text outlines, kept at a whole number of screen pixels. The HUD's UIScale scales
@@ -379,31 +376,6 @@ function Hud.init(onAction, onHome, onRide)
 	eggs = button(homeRoot, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
 	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
 
-	-- Egg inventory: a row of your eggs left of the Eggs button, opened by it.
-	eggPanel = Instance.new("Frame")
-	eggPanel.Name = "EggPanel"
-	eggPanel.BackgroundTransparency = 1
-	eggPanel.AutomaticSize = Enum.AutomaticSize.X
-	eggPanel.AnchorPoint = Vector2.new(1, 1)
-	eggPanel.Position = UDim2.new(1, -MARGIN - eggsSize.X.Offset - 16, 1, -MARGIN)
-	eggPanel.Size = UDim2.fromOffset(0, EGG_SLOT_HEIGHT)
-	eggPanel.Visible = false
-	local layout = Instance.new("UIListLayout")
-	layout.FillDirection = Enum.FillDirection.Horizontal
-	layout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-	layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-	layout.Padding = UDim.new(0, 12)
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Parent = eggPanel
-	eggPanel.Parent = homeRoot
-	eggs.Activated:Connect(function()
-		eggPanel.Visible = not eggPanel.Visible
-		if Hud.onEggsToggled then
-			Hud.onEggsToggled(eggPanel.Visible)
-		end
-	end)
-	Hud.setEggInventory(eggInventory)
-
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only
 	-- readies an image for drawing the first time it's on screen, which stalls
@@ -432,57 +404,6 @@ function Hud.init(onAction, onHome, onRide)
 	end)
 end
 
--- The eggs you own, { [kind] = count }, shown in the Eggs panel. Picking one
--- calls Hud.onPickEgg(kind) and closes the panel.
-local RARITY_ORDER = { Uncommon = 1, Rare = 2, Epic = 3, Legendary = 4 }
-function Hud.setEggInventory(inventory)
-	eggInventory = inventory
-	if not eggPanel then
-		return -- before init; drawn then
-	end
-	for _, child in eggPanel:GetChildren() do
-		if child:IsA("GuiObject") then
-			child:Destroy()
-		end
-	end
-	local kinds = {}
-	for kind in inventory do
-		table.insert(kinds, kind)
-	end
-	if #kinds == 0 then
-		local empty = label(eggPanel, UDim2.fromOffset(0, EGG_SLOT_HEIGHT * 0.5), UDim2.new(), 30, 4)
-		empty.AutomaticSize = Enum.AutomaticSize.X
-		empty.Text = "No eggs yet"
-		return
-	end
-	local function rank(kind)
-		local ok, class = pcall(require, game:GetService("ReplicatedStorage").Shared.Animals[kind])
-		return ok and RARITY_ORDER[class.Rarity] or 0
-	end
-	table.sort(kinds, function(a, b)
-		return rank(a) > rank(b)
-	end)
-	for i, kind in kinds do
-		local key = IMAGES["egg" .. kind] and "egg" .. kind or "eggPinto"
-		local b = button(eggPanel, key, fit(key, nil, EGG_SLOT_HEIGHT), Vector2.new(0, 0), UDim2.new(), function()
-			eggPanel.Visible = false
-			if Hud.onEggsToggled then
-				Hud.onEggsToggled(false)
-			end
-			if Hud.onPickEgg then
-				Hud.onPickEgg(kind)
-			end
-		end)
-		b.LayoutOrder = i
-		local count = label(b, UDim2.fromOffset(0, 40), UDim2.new(1, 4, 1, 4), 36, 4)
-		count.AnchorPoint = Vector2.new(1, 1)
-		count.AutomaticSize = Enum.AutomaticSize.X
-		count.TextXAlignment = Enum.TextXAlignment.Right
-		count.Text = "x" .. inventory[kind]
-		count.ZIndex = 2
-	end
-end
-
 function Hud.show(visible)
 	gui.Enabled = visible
 	reveal += 1
@@ -498,9 +419,8 @@ function Hud.show(visible)
 	gold.Visible = not visible
 	pets.Visible = not visible
 	eggs.Visible = not visible
-	if visible and eggPanel then
-		eggPanel.Visible = false
-	end
+	-- The Roblox inventory (your eggs) is hidden while riding.
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, not visible and Config.ShowHud)
 	gained.row.Visible = false
 	Hud.setReturning(false)
 	Hud.setVignette(0)

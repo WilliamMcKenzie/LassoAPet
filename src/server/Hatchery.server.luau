@@ -1,10 +1,14 @@
 -- Eggs you bring home and the pets they hatch into, saved between visits.
 --
 -- A grabbed egg (Nests sets the player's "CarriedEgg") becomes yours when the
--- ride gets it home (DeliverEgg). It goes in your inventory, the player's
--- "Eggs" attribute: JSON of { [kind] = count }. From there you place it on a
--- free spot in your pen (PlaceEgg), where it hatches after Config.HatchTime
--- seconds and the pet stays on that spot.
+-- ride gets it home (DeliverEgg). It goes in your Roblox inventory: one Tool
+-- per kind of egg ("Pinto Egg"), its "Count" attribute how many you have.
+-- Equip it and click a free spot in your pen to place one there (PlaceEgg),
+-- where it hatches after Config.HatchTime seconds and the pet stays on that spot.
+--
+-- Any pet can be ridden: the one you ride waits on Slot1 (the player's
+-- "RidePet" attribute, Config.DefaultPet to start). Clicking a pet in your pen
+-- makes it the one you ride, and the old one takes its spot (RidePet remote).
 --
 -- Pen spots are the pen's Slots; Slot1 is where the pet you ride waits, so eggs
 -- go on Slot2 and up. Each slot part carries what's on it for every client to
@@ -13,7 +17,6 @@
 -- Saving needs API access in Studio, like Gold.
 
 local DataStoreService = game:GetService("DataStoreService")
-local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -27,7 +30,7 @@ if not ok then
 	store = nil
 end
 
--- [player] = { eggs = { [kind] = n }, slots = { [index] = { egg, hatchAt } or { pet } } }
+-- [player] = { eggs = { [kind] = n }, slots = { [index] = { egg, hatchAt } or { pet } }, ride = kind }
 local profiles = {}
 local loaded = {}
 
@@ -53,13 +56,49 @@ local function slotPart(pen, index)
 	return pen and pen:FindFirstChild("Slots") and pen.Slots:FindFirstChild("Slot" .. index)
 end
 
--- Copies the profile onto the player (inventory) and their pen's slots (what's on each).
+-- The egg Tools in the player's inventory match their egg counts.
+local function syncTools(player, eggs)
+	local backpack = player:FindFirstChildOfClass("Backpack")
+	if not backpack then
+		return
+	end
+	local have = {}
+	for _, holder in { backpack, player.Character } do
+		for _, tool in holder and holder:GetChildren() or {} do
+			local kind = tool:IsA("Tool") and tool:GetAttribute("EggKind")
+			if kind then
+				if (eggs[kind] or 0) < 1 or have[kind] then
+					tool:Destroy()
+				else
+					have[kind] = tool
+				end
+			end
+		end
+	end
+	for kind, n in eggs do
+		local tool = have[kind]
+		if not tool then
+			tool = Instance.new("Tool")
+			tool.Name = kind .. " Egg"
+			tool.RequiresHandle = false
+			tool.CanBeDropped = false
+			tool.TextureId = Config.EggIcons[kind] or ""
+			tool:SetAttribute("EggKind", kind)
+			tool.Parent = backpack
+		end
+		tool:SetAttribute("Count", n)
+		tool.ToolTip = kind .. " Egg x" .. n
+	end
+end
+
+-- Copies the profile onto the player (inventory, ride pet) and their pen's slots (what's on each).
 local function publish(player)
 	local profile = profiles[player]
 	if not profile then
 		return
 	end
-	player:SetAttribute("Eggs", HttpService:JSONEncode(profile.eggs))
+	syncTools(player, profile.eggs)
+	player:SetAttribute("RidePet", profile.ride)
 	local pen = penOf(player)
 	if not pen then
 		return
@@ -82,7 +121,7 @@ local function clearPen(pen)
 end
 
 local function load(player)
-	local profile = { eggs = {}, slots = {} }
+	local profile = { eggs = {}, slots = {}, ride = Config.DefaultPet }
 	if store then
 		for attempt = 1, 3 do
 			local success, data = pcall(store.GetAsync, store, "u" .. player.UserId)
@@ -92,6 +131,9 @@ local function load(player)
 						if isAnimal(kind) and tonumber(n) and n > 0 then
 							profile.eggs[kind] = math.floor(n)
 						end
+					end
+					if isAnimal(data.ride) then
+						profile.ride = data.ride
 					end
 					for key, entry in data.slots or {} do
 						local index = tonumber(key) -- saved tables have string keys
@@ -123,7 +165,7 @@ local function save(player)
 		slots[tostring(index)] = entry
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, slots = slots }) then
+		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, slots = slots, ride = profile.ride }) then
 			return
 		end
 		task.wait(attempt)
@@ -138,6 +180,13 @@ Players.PlayerAdded:Connect(function(player)
 		end
 		task.wait(0.25)
 	end
+	player.CharacterAdded:Connect(function()
+		task.wait() -- a fresh Backpack comes with each character
+		local profile = profiles[player]
+		if profile then
+			syncTools(player, profile.eggs)
+		end
+	end)
 	load(player)
 end)
 for _, player in Players:GetPlayers() do
@@ -193,6 +242,18 @@ remote("PlaceEgg", function(player, kind, index)
 		profile.eggs[kind] = nil
 	end
 	profile.slots[index] = { egg = kind, hatchAt = os.time() + hatchTime(kind) }
+	publish(player)
+end)
+
+-- Ride the pet on spot `index` from now on; the pet you rode takes its spot.
+remote("RidePet", function(player, index)
+	local profile = profiles[player]
+	local entry = profile and typeof(index) == "number" and profile.slots[index]
+	if not entry or not entry.pet then
+		return
+	end
+	profile.slots[index] = { pet = profile.ride }
+	profile.ride = entry.pet
 	publish(player)
 end)
 
