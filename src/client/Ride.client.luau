@@ -363,12 +363,41 @@ end
 
 -- Rides from an outer pen are steered into the corridor once past this z (the pen's open side).
 local leadFromZ = 0
+-- A ride from a corner pen (open side facing in) first runs out sideways to this x,
+-- curving round toward the start line; nil once it's out.
+local exitX = nil
+local EXIT_TURN = 10 -- studs from exitX where the curve toward the start line begins
+
+-- The x a ride from a sideways-facing pen runs out to, a little past its open side.
+local function penExitX()
+	local pen = myPen()
+	local spawn, area = pen and pen:FindFirstChild("Spawn"), pen and pen:FindFirstChild("Area")
+	if not (spawn and area) then
+		return nil
+	end
+	local d = spawn.Position - area.Position
+	if math.abs(d.X) <= math.abs(d.Z) then
+		return nil -- faces the start line
+	end
+	return spawn.Position.X
+end
+
+-- Which way your pen's open side faces, as a yaw (0 = toward the start line).
+local function penYaw()
+	local pen = myPen()
+	local spawn, area = pen and pen:FindFirstChild("Spawn"), pen and pen:FindFirstChild("Area")
+	if not (spawn and area) then
+		return 0
+	end
+	local d = spawn.Position - area.Position
+	return math.atan2(-d.X, -d.Z)
+end
 
 local function spawnStarter()
 	local spot = homeSpot()
 	-- The pet you'll ride. Nothing is special about the horse: it's just the default
 	-- pet until pets can be picked in the pen (the "RidePet" attribute).
-	starter = newEntity(spot.X, spot.Z, 0, player:GetAttribute("RidePet") or Config.DefaultPet)
+	starter = newEntity(spot.X, spot.Z, penYaw(), player:GetAttribute("RidePet") or Config.DefaultPet)
 	starter.animal:setSaddled(true)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Ride"
@@ -409,6 +438,7 @@ startRide = function()
 	mount.animal:setSaddled(true)
 	local spot = homeSpot()
 	leadFromZ = spot.Z - 8
+	exitX = penExitX()
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, 0, 0
 	phase, hold, grace, camYaw = "outbound", holdTime(mount), 0, 0
 	coins = 0
@@ -483,8 +513,10 @@ local function goHome()
 		return
 	end
 	Hud.showHome(false)
-	local spot = homeSpot()
-	finishRide(spot.X, spot.Z)
+	local pen = myPen()
+	local spawn = pen and pen:FindFirstChild("Spawn")
+	local spot = if spawn then spawn.Position else homeSpot()
+	finishRide(spot.X - 6, spot.Z) -- just outside your pen's open side
 end
 
 local function startTransfer(target)
@@ -921,6 +953,23 @@ local function updateMount(dt)
 	end
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	mount.speed += math.clamp(targetSpeed - mount.speed, -rate * dt, rate * dt)
+	if phase == "outbound" and exitX then
+		-- Out of a corner pen: sideways through its open side, curving toward the start line.
+		local d = exitX - mount.x
+		local side = math.clamp(math.abs(d) / EXIT_TURN, 0, 1)
+		local lat, fwd = math.sign(d) * side, 1 - side
+		local len = math.sqrt(lat * lat + fwd * fwd)
+		mount.latVel = mount.speed * lat / len
+		local step = mount.latVel * dt
+		mount.x = if math.abs(step) >= math.abs(d) then exitX else mount.x + step
+		mount.z += dir * mount.speed * fwd / len * dt
+		if math.abs(exitX - mount.x) < 0.2 then
+			exitX = nil
+		end
+		place(mount, math.atan2(lat * dir, fwd))
+		animate(mount, dt, mount.speed, 0)
+		return
+	end
 	local steer = phase == "home" and 0 or readSteer()
 	local targetLat = steer * Config.SteerSpeed * -dir
 	-- Leaving the base from an outer pen: lean in so the animal reaches the
