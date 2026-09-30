@@ -50,10 +50,10 @@ local IMAGES = {
 	cardLegendary = { id = "rbxassetid://124659626997084", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- LegendaryEggRNG.png
 	-- Egg renders for the card, cropped to the egg (assets/ui/<Kind>EggRender.png).
 	eggPinto = { id = "rbxassetid://79525419811481", size = Vector2.new(496, 788) }, -- PintoEggRender.png
-	eggPig = { id = "", size = Vector2.new(496, 730) }, -- PigEggRender.png (upload and fill in the id)
-	eggFish = { id = "", size = Vector2.new(586, 810) }, -- FishEggRender.png (upload and fill in the id)
-	eggRhino = { id = "", size = Vector2.new(496, 735) }, -- RhinoEggRender.png (upload and fill in the id)
-	eggUnicorn = { id = "", size = Vector2.new(496, 859) }, -- UnicornEggRender.png (upload and fill in the id)
+	eggPig = { id = "rbxassetid://139970505549400", size = Vector2.new(496, 730) }, -- PigEggRender.png
+	eggFish = { id = "rbxassetid://105098230793344", size = Vector2.new(586, 810) }, -- FishEggRender.png
+	eggRhino = { id = "rbxassetid://139482781062355", size = Vector2.new(496, 735) }, -- RhinoEggRender.png
+	eggUnicorn = { id = "rbxassetid://85066893166855", size = Vector2.new(496, 859) }, -- UnicornEggRender.png
 }
 
 local BUTTON_WIDTH = 256
