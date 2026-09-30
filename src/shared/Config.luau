@@ -39,8 +39,6 @@ return {
 			UnlockCost = 150,
 			PostColor = Color3.fromRGB(206, 118, 72),
 			GateImage = "rbxassetid://88918626302524", -- assets/ui/GateLv2.png
-			-- The board on your pen's front fence that buys this level (its price is drawn on it).
-			UpgradeImage = "rbxassetid://72573135257402", -- assets/ui/UpgradePenDesert.png
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: yellow at the floor
