@@ -8,21 +8,20 @@
 --
 -- It also runs placing: while an egg from your inventory is equipped, a
 -- see-through egg follows the mouse over your pen; click or tap to put it down.
--- Clicking or tapping a pet in your own pen makes it the one you ride.
+-- Your own pets go on PenPets' list, so RIDE (Ride.client) can ride any of them.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
+local PenPets = require(script.Parent.PenPets)
 
 local player = Players.LocalPlayer
 local placeEgg = ReplicatedStorage:WaitForChild("PlaceEgg")
-local ridePet = ReplicatedStorage:WaitForChild("RidePet")
 
 local EGG_CENTER = 1.6 -- egg pivot height above the ground (Egg.luau)
 local TOP_POPS = 1.58 -- seconds into the hatch animation when the top flies off
@@ -71,10 +70,10 @@ local function placePet(pet, at, yaw)
 	pet.animal.model.PrimaryPart.CFrame = CFrame.new(at.X, at.Y + pet.rootY * pet.scale + pet.hop, at.Z) * CFrame.Angles(0, yaw, 0)
 end
 
--- Your own pets can be clicked to ride them next. Animal parts aren't queryable
--- (so they never block the lasso or the mouse), so these ones are made so.
-local mine = {} -- [model] = id
-local function makeRideable(pen, id, pet)
+-- Your own pets can be ridden, and clicked to pick which. Animal parts aren't
+-- queryable (so they never block the lasso or the mouse), so these ones are made so.
+local mine = PenPets.pets -- [model] = { id, kind }
+local function makeRideable(pen, id, pet, kind)
 	if pen ~= myPen() then
 		return
 	end
@@ -83,7 +82,7 @@ local function makeRideable(pen, id, pet)
 			part.CanQuery = true
 		end
 	end
-	mine[pet.animal.model] = id
+	mine[pet.animal.model] = { id = id, kind = kind }
 	pet.animal.model.Destroying:Connect(function()
 		mine[pet.animal.model] = nil
 	end)
@@ -166,7 +165,7 @@ end
 local function showPet(pen, id, item)
 	local s = { kind = item.pet, at = groundAt(pen, item.x, item.z), yaw = facing(pen) }
 	s.pet = newPet(item.pet)
-	makeRideable(pen, id, s.pet)
+	makeRideable(pen, id, s.pet, item.pet)
 	s.pet.animal.model.Parent = folder
 	placePet(s.pet, s.at, s.yaw)
 	startWander(s)
@@ -183,7 +182,7 @@ local function hatch(pen, id, s)
 			return
 		end
 		local pet = newPet(s.kind)
-		makeRideable(pen, id, pet)
+		makeRideable(pen, id, pet, s.kind)
 		pet.scale = 0.2
 		pet.animal:setScale(pet.scale)
 		pet.animal.model.Parent = folder
@@ -384,31 +383,3 @@ if player.Character then
 	watchCharacter(player.Character)
 end
 
--- Clicking or tapping one of your pets (with no egg in hand) rides it next.
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed or holding then
-		return
-	end
-	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
-		return
-	end
-	local models = {}
-	for model in mine do
-		table.insert(models, model)
-	end
-	if #models == 0 then
-		return
-	end
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Include
-	params.FilterDescendantsInstances = models
-	local ray = workspace.CurrentCamera:ScreenPointToRay(input.Position.X, input.Position.Y)
-	local hit = workspace:Raycast(ray.Origin, ray.Direction * 300, params)
-	local model = hit and hit.Instance:FindFirstAncestorOfClass("Model")
-	while model and not mine[model] do
-		model = model.Parent and model.Parent:FindFirstAncestorOfClass("Model")
-	end
-	if model then
-		ridePet:FireServer(mine[model])
-	end
-end)
