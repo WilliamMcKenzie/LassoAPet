@@ -22,6 +22,10 @@ local KINDS = {
 	Fish = { data = require(script.Parent.FishEggModel), center = 1.6 },
 	Rhino = { data = require(script.Parent.RhinoEggModel), center = 1.6 },
 	Unicorn = { data = require(script.Parent.UnicornEggModel), center = 1.6 },
+	Cactus = { data = require(script.Parent.CactusEggModel), center = 1.6 },
+	Scorpion = { data = require(script.Parent.ScorpionEggModel), center = 1.6 },
+	Sandworm = { data = require(script.Parent.SandwormEggModel), center = 1.6 },
+	Snake = { data = require(script.Parent.SnakeEggModel), center = 1.6 },
 }
 
 local Egg = {}

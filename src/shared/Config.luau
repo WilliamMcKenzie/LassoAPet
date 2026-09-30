@@ -32,7 +32,7 @@ return {
 			Length = 760,
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
-			Herd = { Rhino = 1 },
+			Herd = { Cactus = 30, Scorpion = 16, Sandworm = 8, Snake = 3 },
 		},
 	},
 	CourseHalfWidth = 56,
@@ -64,6 +64,11 @@ return {
 		Fish = "rbxassetid://105098230793344",
 		Rhino = "rbxassetid://139482781062355",
 		Unicorn = "rbxassetid://85066893166855",
+		-- desert eggs: fill in once assets/ui/<Kind>EggRender.png is uploaded
+		Cactus = "",
+		Scorpion = "",
+		Sandworm = "",
+		Snake = "",
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
@@ -109,6 +114,10 @@ return {
 		Fish = { Speed = 0.6, Stamina = 3 },
 		Rhino = { Speed = 1.5, Stamina = 1.8 },
 		Unicorn = { Speed = 2, Stamina = 2 },
+		Cactus = { Speed = 1.2, Stamina = 1.5 },
+		Scorpion = { Speed = 1.5, Stamina = 1.5 },
+		Sandworm = { Speed = 1.6, Stamina = 2 },
+		Snake = { Speed = 2, Stamina = 2 },
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
