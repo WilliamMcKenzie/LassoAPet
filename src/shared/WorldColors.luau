@@ -1,7 +1,8 @@
 -- Live colour tuning for the ground and walls. In Studio, press Play, select
 -- Workspace > World and edit its GroundA / GroundB / WallA / WallB attributes
 -- (the first biome and the home base) or DesertGroundA and so on for the other
--- biomes: the map recolours instantly. Copy the values you like into Config.
+-- biomes (DesertGrassA, DesertStoneA... for their Patches): the map recolours
+-- instantly. Copy the values you like into Config.
 
 local Config = require(script.Parent.Config)
 
@@ -54,7 +55,8 @@ function WorldColors.apply(world)
 		return world:GetAttribute(prefix(WorldColors.biomeAt(part.Position.Z)) .. key)
 	end
 	for _, part in world.Ground:GetChildren() do
-		paint(part, get(part, "GroundA"), get(part, "GroundB"))
+		-- "Ground" is the biome's base floor; other names are its Patches (Grass, Stone)
+		paint(part, get(part, part.Name .. "A"), get(part, part.Name .. "B"))
 	end
 	for _, part in world.Walls:GetChildren() do
 		if part.Name == "Cap" then
@@ -74,6 +76,9 @@ function WorldColors.watch(world)
 			WallA = biome.WallColors[1],
 			WallB = biome.WallColors[2],
 		}
+		for name, colors in biome.Patches or {} do
+			defaults[name .. "A"], defaults[name .. "B"] = colors[1], colors[2]
+		end
 		for key, default in defaults do
 			key = prefix(i) .. key
 			if world:GetAttribute(key) == nil then

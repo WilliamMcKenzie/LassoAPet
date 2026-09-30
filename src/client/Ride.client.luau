@@ -13,6 +13,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
+local Ground = require(ReplicatedStorage.Shared.Ground)
 local Hud = require(script.Parent.Hud)
 local Lasso = require(script.Parent.Lasso)
 local Poof = require(script.Parent.Poof)
@@ -294,8 +295,17 @@ local function allAnimals()
 	return list
 end
 
+-- Animals step up onto raised ground (the desert's sandstone) and back down
+-- over this long, rather than popping.
+local STEP_RATE = 25
+
 local function place(entity, yawOffset)
-	entity.animal.model.PrimaryPart.CFrame = CFrame.new(entity.x, entity.rootY + (entity.hop or 0), entity.z)
+	local now = os.clock()
+	local floor = Ground.heightAt(entity.x, entity.z)
+	local lift = entity.lift or floor
+	lift += (floor - lift) * (1 - math.exp(-STEP_RATE * (now - (entity.liftAt or now))))
+	entity.lift, entity.liftAt = lift, now
+	entity.animal.model.PrimaryPart.CFrame = CFrame.new(entity.x, entity.rootY + lift + (entity.hop or 0), entity.z)
 		* CFrame.Angles(0, entity.yaw + yawOffset, 0)
 end
 
@@ -938,7 +948,7 @@ end
 local function putInPool(entity)
 	entity.animal.model.Parent = nil
 	entity.animal:setScale(1)
-	entity.hop, entity.popping = 0, nil
+	entity.hop, entity.popping, entity.lift = 0, nil, nil
 	table.insert(pools[entity.kind], entity)
 end
 
@@ -1498,7 +1508,8 @@ local function updateRider(dt)
 		tumble.t = math.min(tumble.t + dt / 0.7, 1)
 		local t = tumble.t
 		local from = tumble.from
-		local ground = Vector3.new(from.X + tumble.side * 9, LIE_HEIGHT, from.Z - 6 * tumble.dir)
+		local gx, gz = from.X + tumble.side * 9, from.Z - 6 * tumble.dir
+		local ground = Vector3.new(gx, LIE_HEIGHT + Ground.heightAt(gx, gz), gz)
 		local pos = from:Lerp(ground, t) + Vector3.new(0, math.sin(t * math.pi) * 6, 0)
 		-- A flip and a quarter backwards, ending face up.
 		hrp.CFrame = CFrame.new(pos) * CFrame.Angles(0, tumble.yaw, 0)
