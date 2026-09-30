@@ -29,7 +29,7 @@ return {
 		},
 		{
 			Name = "Desert",
-			Length = 760,
+			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
 			Herd = { Cactus = 30, Scorpion = 16, Sandworm = 8, Snake = 3 },
@@ -53,7 +53,7 @@ return {
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	CourseHalfWidth = 56,
-	CourseLength = 1520, -- all the biomes' lengths added up
+	CourseLength = 3040, -- all the biomes' lengths added up
 	HomeHalfWidth = 112,
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
