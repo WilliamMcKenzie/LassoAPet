@@ -19,18 +19,16 @@ PUPIL_BACK back from its front edge). Models go to designs/snow/<Name>.bbmodel.
 Bones and animations come after QM vets the shapes.
 """
 
-import copy
 import json
 import os
 import shutil
 import sys
-import uuid
 
 import numpy as np
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from partlib import Part, render, write_bbmodel, T, Rx, Ry, Rz  # noqa: E402
+from partlib import Part, look_at, part_faces, render, write_bbmodel  # noqa: E402
 import animal_designs as A  # noqa: E402
 from animal_designs import Animal, EYE_WHITE, PUPIL, PLATE, PUPIL_BACK  # noqa: E402
 from horse_rig import pose  # noqa: E402
@@ -82,10 +80,9 @@ def pyramid(a, name, base_lo, base_hi, axis, length, color, bone):
 
 
 def front_eye(a, name_side, x0, x1, y0, y1, z, bone, pupil=PUPIL, pupil_frac=0.62, look=0.0):
-    """A standard eye on a front (-z) face: white plate, pupil plate on it,
-    the pupil's front face PUPIL_BACK behind the plate's front edge... here the
-    plate faces forward, so 'back' means the pupil stands in from the plate's
-    outer (lower) edge by PUPIL_BACK (as on the pig)."""
+    """A standard eye on a front (-z) face, as on the pig: white plate, pupil plate
+    on it, the pupil set PUPIL_BACK in from the plate's bottom edge.
+    pupil=None leaves a plain white eye."""
     a.box("Eye" + name_side, (x0, y0, z - PLATE), (x1, y1, z), EYE_WHITE, bone)
     if pupil is None:
         return
@@ -427,7 +424,6 @@ def dragon_head(back, k=DRAGON_HEAD_SCALE):
         return [round(float(c), 4) for c in np.array(v, float) * k + off]
 
     for e in m["elements"]:
-        e["uuid"] = e["uuid"]  # keep ids: they are unique to this head
         for key in ("from", "to", "origin"):
             if key in e:
                 e[key] = mv(e[key])
@@ -506,14 +502,13 @@ def save_model(a, model):
     return path
 
 
+def points(parts):
+    return np.concatenate([np.concatenate([w for w, _ in part_faces(p)]) for p in parts])
+
+
 def bounds(parts):
-    pts = np.concatenate([np.concatenate([w for w, _ in A_faces(p)]) for p in parts])
+    pts = points(parts)
     return pts.min(0), pts.max(0)
-
-
-def A_faces(p):
-    from partlib import part_faces
-    return part_faces(p)
 
 
 NAMES = {"WhiteWolf": "White Wolf", "PolarBear": "Polar Bear", "IceDragon": "Ice Dragon"}
@@ -536,10 +531,9 @@ def lineup(out):
         target = np.array([cx, ty, cz])
         eye = target + Q34_DIR * dist
         # width: the projected x extent of the bounding box, plus a margin
-        from partlib import look_at
         e, r, u, f = look_at(eye, target)
         focal = (H / 2) / np.tan(np.radians(fov) / 2)
-        d = np.concatenate([np.concatenate([w for w, _ in A_faces(p)]) for p in parts]) - e
+        d = points(parts) - e
         xs = focal * (d @ r) / (d @ f)
         W = int(max(150, 2 * max(abs(xs.min()), abs(xs.max())) + 24))
         ims.append((name, render(parts, eye=eye, target=target, W=W, H=H, fov=fov)))
@@ -578,7 +572,9 @@ def one(name, out):
     """Close look at one animal: 3/4 front, side, 3/4 back, front."""
     fn = next(f for f in CREATURES if f.__name__.replace("_", "") == name.lower().replace("_", ""))
     a, model, parts = build(fn)
-    print("wrote", save_model(a, model))
+    path = save_model(a, model)
+    shutil.copy(path, os.path.join(out, a.name + ".bbmodel"))  # next to the renders for QM
+    print("wrote", path)
     lo, hi = bounds(parts)
     c = (lo + hi) / 2
     radius = np.linalg.norm(hi - lo) / 2
