@@ -522,7 +522,8 @@ end
 local CARD_REST = UDim2.fromScale(0.5, 0.53)
 local ENTER_TIME = 0.5 -- drop in, land, bounce
 local ANTICIPATION = 0.14 -- squash down before the pop
-local EXIT_TIME = 0.32
+local EXIT_SWELL = 0.12 -- swell and squash before popping out
+local EXIT_TIME = 0.42
 
 -- Back home with an egg: a gacha-style card drops in, rolls through the unknown
 -- eggs (slow, then faster and faster), squashes down and pops onto the egg's
@@ -686,12 +687,24 @@ function Hud.eggReveal(rarity, kind)
 		end
 		cardFlash.Visible = false
 
-		-- 5. Exit: a small swell, then snap away.
+		-- 5. Exit, the entrance in reverse: the card swells and squashes down, then
+		-- pops out, stretching tall as it shrinks away. The egg goes first, just
+		-- ahead of the card, and the sunburst fades with them.
 		play(EXIT_TIME, function(t)
-			local u = t / EXIT_TIME
-			cardScale.Scale = if u < 0.3 then 1 + 0.1 * math.sin(u / 0.3 * math.pi / 2) else 1.1 * (1 - ((u - 0.3) / 0.7) ^ 2)
-			cardBurst.UIScale.Scale = 1 - u
+			cardBurst.UIScale.Scale = 1 - math.min(t / (EXIT_TIME * 0.7), 1)
 			cardBurst.Rotation += 1
+			if t < EXIT_SWELL then
+				local a = math.sin(t / EXIT_SWELL * math.pi / 2)
+				cardScale.Scale = 1 + 0.08 * a
+				pose(1 + 0.15 * a, 1 - 0.18 * a, 0, 0)
+				poseEgg(1, 1 + 0.2 * a, 1 - 0.2 * a, 0)
+				return
+			end
+			local v = (t - EXIT_SWELL) / (EXIT_TIME - EXIT_SWELL)
+			cardScale.Scale = (1.08 + 0.2 * v) * (1 - v * v)
+			pose(1 - 0.15 * v, 1 + 0.22 * v, 40 * v, 0)
+			local e = math.min(v / 0.6, 1) -- the egg is gone by 60% of the way
+			poseEgg(1 - e * e, 1 - 0.2 * e, 1 + 0.3 * e, 0)
 		end)
 		if reveal == token then
 			card.Visible = false

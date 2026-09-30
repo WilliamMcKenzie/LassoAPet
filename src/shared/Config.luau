@@ -69,6 +69,7 @@ return {
 	HomeHeroTime = 2.4, -- real seconds for the whole leap
 	HomeSlowMo = 0.3, -- time scale for the world during the leap
 	HomeLeapHeight = 8, -- studs at the top of the arc
+	HomeHeroCamHeight = 9, -- studs above the ground for the camera at the hero angle
 	HomeLandPast = 4, -- studs past the start line (1 m)
 	HomeRunOut = 6, -- studs the pet runs on after landing, easing to a stop
 	-- Egg reveal back home (gacha): the card rolls through the three unknown eggs,
