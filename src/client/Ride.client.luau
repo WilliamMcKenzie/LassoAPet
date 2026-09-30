@@ -32,6 +32,7 @@ end
 -- twitch in the nest; it turns its face toward the approaching rider.
 local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this range
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
+local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
 local waitingEggs = {} -- [nest] = { egg, kind, nest, nextTwitch }
 local nearEgg -- the waiting egg in grab range, while actionTarget is "egg"
 
@@ -429,6 +430,10 @@ local function finishRide(x, z)
 		hrp.CFrame = CFrame.new(x + 6, 4, z)
 	end
 	cleanup()
+	if coins > 0 then
+		bankCoins:FireServer(coins) -- this ride's cash goes into the account's gold
+		coins = 0
+	end
 	phase = "idle"
 	controls:Enable()
 	camera.CameraType = Enum.CameraType.Custom

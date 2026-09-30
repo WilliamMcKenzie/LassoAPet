@@ -30,7 +30,6 @@ local IMAGES = {
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
 	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
-	gold = { id = "rbxassetid://75090734827129", size = Vector2.new(262, 263) },
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
 	-- TAKE EGG for rarer eggs (takeEgg itself is the Uncommon one).
@@ -361,7 +360,18 @@ function Hud.init(onAction, onHome, onRide)
 	homeRoot = root(homeGui)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	ride.Visible = false
-	gold = button(homeRoot, "gold", fit("gold", nil, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
+	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold mockup.
+	gold = button(homeRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
+	local total = label(gold, UDim2.fromOffset(0, ICON_HEIGHT * 0.4), UDim2.new(0.5, 0, 1, 2), 44, 5)
+	total.AnchorPoint = Vector2.new(0.5, 1)
+	total.AutomaticSize = Enum.AutomaticSize.X
+	total.ZIndex = 2
+	local player = Players.LocalPlayer
+	local function showGold()
+		total.Text = (player:GetAttribute("Gold") or 0) .. "$"
+	end
+	player:GetAttributeChangedSignal("Gold"):Connect(showGold)
+	showGold()
 	local eggsSize = fit("eggs", nil, SIDE_ICON_HEIGHT)
 	eggs = button(homeRoot, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
 	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
