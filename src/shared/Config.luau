@@ -5,7 +5,7 @@ return {
 	HudScale = 1, -- multiplies the whole HUD's size; 1 matches QM's mockups
 	TakeEggSunburst = true, -- turning sunburst behind the TAKE EGG button (trial)
 	-- Outline on what the lasso would catch. true: thin white line inside a black
-	-- one about twice as thick (trial); false: the old thin yellow line.
+	-- one about twice as thick (trial); false: just the thin white line.
 	LayeredOutline = false, -- the mirrored hull draws as a solid black horse in Studio, so off for now
 	OutlineWidth = 0.1, -- studs; the black rim reaches 2x this past the target's edges
 

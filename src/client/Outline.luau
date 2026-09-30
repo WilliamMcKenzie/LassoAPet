@@ -22,7 +22,7 @@ local THIN = 0.2 -- plates thinner than this (eyes, patches) get no hull: its ri
 
 local inner = Instance.new("Highlight")
 inner.FillTransparency = 1
-inner.OutlineColor = if layered then Color3.new(1, 1, 1) else Color3.fromRGB(255, 230, 120)
+inner.OutlineColor = Color3.new(1, 1, 1)
 inner.OutlineTransparency = 0
 inner.DepthMode = Enum.HighlightDepthMode.Occluded
 inner.Enabled = false
