@@ -86,7 +86,8 @@ local TONES = {
 	["TOO FAR!"] = RED,
 }
 
-local card, cardFace, cardEgg, cardScale -- egg reveal card, its image, the egg on it, and its UIScale
+local card, cardEgg, cardScale -- egg reveal card, the egg on it, and its UIScale
+local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
@@ -310,9 +311,17 @@ function Hud.init(onAction, onHome, onRide)
 	card.Visible = false
 	cardScale = Instance.new("UIScale")
 	cardScale.Parent = card
-	cardFace = image(card, "unknownEgg", UDim2.new(), UDim2.new())
-	cardFace.AnchorPoint = Vector2.zero
-	cardFace.ZIndex = 3
+	-- Every card is its own image, stacked and already loaded; a flick only swaps
+	-- which one is opaque, in the same frame, so there's no blank frame or size jump.
+	for _, key in { "unknownEgg", "unknownEgg1", "unknownEgg2", "cardUncommon", "cardRare", "cardEpic", "cardLegendary" } do
+		local entry = IMAGES[key]
+		local face = image(card, key, UDim2.fromOffset(entry.size.X * CARD_SCALE, entry.size.Y * CARD_SCALE), UDim2.fromOffset(-entry.cardLeft * CARD_SCALE, -CARD_TOP * CARD_SCALE))
+		face.Name = key
+		face.AnchorPoint = Vector2.zero
+		face.ZIndex = 3
+		face.ImageTransparency = 1
+		cardFaces[key] = face
+	end
 	cardEgg = image(card, "eggPinto", UDim2.new(), UDim2.fromScale(0.5, 0.5))
 	cardEgg.ZIndex = 4
 	Instance.new("UIScale").Parent = cardEgg
@@ -473,10 +482,11 @@ function Hud.flash(text, seconds)
 end
 
 local function setCardFace(key)
-	local entry = IMAGES[key]
-	cardFace.Image = entry.id
-	cardFace.Size = UDim2.fromOffset(entry.size.X * CARD_SCALE, entry.size.Y * CARD_SCALE)
-	cardFace.Position = UDim2.fromOffset(-entry.cardLeft * CARD_SCALE, -CARD_TOP * CARD_SCALE)
+	if cardShown then
+		cardFaces[cardShown].ImageTransparency = 1
+	end
+	cardFaces[key].ImageTransparency = 0
+	cardShown = key
 end
 
 -- Back home with an egg: a gacha-style card pops up, flicks through the unknown
@@ -514,9 +524,6 @@ function Hud.eggReveal(rarity, kind)
 			end
 			if i < flicks then
 				setCardFace(UNKNOWN_CARDS[i % #UNKNOWN_CARDS + 1])
-				-- A little tick on every flick.
-				cardScale.Scale = 1.06
-				TweenService:Create(cardScale, TweenInfo.new(0.1), { Scale = 1 }):Play()
 			end
 		end
 		-- The real card lands: punch, wobble and shake, then the egg pops in.
