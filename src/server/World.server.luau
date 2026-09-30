@@ -41,5 +41,25 @@ if startLine then
 	finish:PivotTo(CFrame.new(0, 0, -Config.CourseLength + Config.FinishFromEnd - z) * startLine:GetPivot())
 	finish.Parent = world
 end
+
+-- Nothing past the finish line: the floor and walls stop at it, so the leap over
+-- it goes out into open sky. Parts that cross the line are cut back to it.
+local finishZ = -Config.CourseLength + Config.FinishFromEnd
+for _, folderName in { "Ground", "Walls", "Obstacles", "Decor" } do
+	local folder = world:FindFirstChild(folderName)
+	for _, part in folder and folder:GetDescendants() or {} do
+		if part:IsA("BasePart") then
+			local near = part.Position.Z + part.Size.Z / 2
+			local far = part.Position.Z - part.Size.Z / 2
+			if near <= finishZ then
+				part:Destroy()
+			elseif far < finishZ and part.CFrame.Rotation == CFrame.identity then
+				local keep = near - finishZ
+				part.Size = Vector3.new(part.Size.X, part.Size.Y, keep)
+				part.CFrame = CFrame.new(part.Position.X, part.Position.Y, finishZ + keep / 2)
+			end
+		end
+	end
+end
 require(ReplicatedStorage.Shared.WorldColors).watch(world)
 world:SetAttribute("Ready", true)

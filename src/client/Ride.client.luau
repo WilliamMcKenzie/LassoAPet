@@ -143,6 +143,7 @@ local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:G
 local SPAWN_Z = START_LINE_Z + 4
 local END_Z = -Config.CourseLength + 4 -- the far wall
 local FINISH_Z = -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
+local FINISH_DROP = 40 -- studs the leap off the end drops below the floor by the time it lands
 local VIEW = 320 -- stampede animals further than this from the camera aren't drawn
 local DUST_VIEW = 160 -- landings further than this from the camera kick up no dust
 -- They pop in instead of appearing: a poof, then they spring up out of it,
@@ -182,7 +183,7 @@ do
 		edge = endZ
 		local s = {
 			spawnZ = if b == 1 then SPAWN_Z else startZ - 2,
-			endZ = if b == #Config.Biomes then END_Z else endZ + 2,
+			endZ = if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
 			kinds = {},
 			total = 0,
 		}
@@ -1435,16 +1436,24 @@ local function updateMount(dt)
 		local t = heroLeap.t
 		mount.z = heroLeap.fromZ + (heroLeap.toZ - heroLeap.fromZ) * t
 		-- A floaty arc: up fast, hanging near the top, down fast.
-		mount.hop = math.sin(math.pi * t) ^ 0.6 * Config.HomeLeapHeight
+		mount.hop = math.sin(math.pi * t) ^ 0.6 * Config.HomeLeapHeight - (heroLeap.drop or 0) * t * t * t
 		mount.latVel = 0
 		place(mount, 0)
 		animate(mount, dt, if t < 1 then mount.speed else 0, 0)
 		return
-	elseif phase == "home" or phase == "finish" then
+	elseif phase == "finish" then
+		-- Over the edge: falling away into the sky (under the egg reveal).
+		mount.fall = (mount.fall or 20) + 60 * dt
+		mount.hop -= mount.fall * dt
+		mount.z -= mount.speed * 0.5 * dt
+		place(mount, 0)
+		animate(mount, dt, mount.speed, 0)
+		return
+	elseif phase == "home" then
 		-- Landed: runs on HomeRunOut studs, easing to a stop.
 		local brake = RUN_OUT_SPEED * RUN_OUT_SPEED / (2 * Config.HomeRunOut)
 		mount.speed = math.max(mount.speed - brake * dt, 0)
-		mount.z += (if phase == "finish" then -1 else 1) * mount.speed * dt
+		mount.z += mount.speed * dt
 		place(mount, 0)
 		animate(mount, dt, mount.speed, 0)
 		return
@@ -1514,7 +1523,8 @@ end
 local function reachFinish()
 	if phase == "outbound" and mount.z <= FINISH_Z + LEAP_FROM and not transfer then
 		phase = "finish"
-		heroLeap = { t = 0, fromZ = mount.z, toZ = FINISH_Z - Config.HomeLandPast }
+		-- Off the end of the course: up over the line and down into the open sky.
+		heroLeap = { t = 0, fromZ = mount.z, toZ = FINISH_Z - 26, drop = FINISH_DROP }
 		Hud.setCutscene(true)
 		Hud.setAction(nil)
 		Hud.setHold(nil)
@@ -1535,7 +1545,7 @@ local function checkRide(dt)
 			return fail("BUCKED OFF")
 		end
 	end
-	if mount.z < END_Z + 8 then
+	if mount.z < FINISH_Z - 8 then
 		return fail("TOO FAR!") -- only if something skipped the finish line
 	end
 	if ability and ability.cfg.Kind == "Charge" then
@@ -1653,7 +1663,9 @@ local function updateRider(dt)
 			humanoid.Sit = true
 		end
 		hrp.CFrame = mount.animal:getSeatCFrame() * SEAT_OFFSET
-		focus = Vector3.new(mount.x, (mount.hop or 0) * 0.6, mount.z) -- the camera rises a little with a leap
+		if phase ~= "finish" or heroLeap then -- falling off the end: the camera stays at the edge
+			focus = Vector3.new(mount.x, math.max(mount.hop or 0, 0) * 0.6, mount.z) -- the camera rises a little with a leap
+		end
 	end
 	if carried then
 		if carried.stage == "throw" then
@@ -1772,10 +1784,12 @@ RunService.PreSimulation:Connect(function(dt)
 	if heroLeap and heroLeap.t >= 1 then
 		-- Landed: dust, then the egg reveal, then off the pet.
 		heroLeap = nil
-		mount.hop = 0
 		mount.speed = RUN_OUT_SPEED
-		place(mount, 0)
-		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
+		if phase ~= "finish" then
+			mount.hop = 0
+			place(mount, 0)
+			Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
+		end
 		Hud.setCutscene(false)
 		if phase == "finish" then
 			-- Crossed the finish line: a random egg (the server draws it), its

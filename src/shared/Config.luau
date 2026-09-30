@@ -147,9 +147,10 @@ return {
 	HomeHeroCamHeight = 9, -- studs above the ground for the camera at the hero angle
 	HomeLandPast = 4, -- studs past the start line (1 m)
 	HomeRunOut = 6, -- studs the pet runs on after landing, easing to a stop
-	-- The finish line, this many studs before the far wall at the end of the last
-	-- biome (it moves with the course as biomes are added). Riding over it plays the
-	-- same slow-motion leap as coming home, then a random egg (FinishEggs) and home.
+	-- The finish line, this many studs before the end of the last biome (it moves
+	-- with the course as biomes are added). The course stops at it: no floor or walls
+	-- past it, just sky. Riding over it plays the slow-motion leap off the edge, then
+	-- a random egg (drawn like the stampede) and you're back home.
 	FinishFromEnd = 50,
 	-- Egg reveal back home (gacha): the card rolls through the three unknown eggs,
 	-- slow at first and faster and faster, then pops onto the egg's rarity card.
