@@ -111,9 +111,10 @@ local function card(pet, order)
 	face.Position = UDim2.fromOffset(0, OVERHANG)
 	face.BackgroundColor3 = COMMON_COLOR
 	Instance.new("UICorner", face).CornerRadius = UDim.new(52 / 256, 0) -- the slot pictures' corners
-	stroked(face, 5).ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	local slot = SLOTS[rarityOf(pet.kind)]
-	if slot and slot ~= "" then
+	if not slot or slot == "" then
+		stroked(face, 5).ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- the slot pictures have their own
+	else
 		face.BackgroundTransparency = 1
 		local bg = Instance.new("ImageLabel")
 		bg.BackgroundTransparency = 1
