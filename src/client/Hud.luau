@@ -649,12 +649,14 @@ function Hud.eggReveal(rarity, kind)
 
 	-- The HUD preloads every image at game start; ask again for this reveal's in
 	-- case the ride was quicker than the download (a no-op once they're cached).
+	local ready = false
 	task.spawn(function()
 		local ids = { IMAGES[final].id, egg.id }
 		for _, key in UNKNOWN_CARDS do
 			table.insert(ids, IMAGES[key].id)
 		end
 		game:GetService("ContentProvider"):PreloadAsync(ids)
+		ready = true
 	end)
 	setCardFace(UNKNOWN_CARDS[1])
 	-- The egg stays visible at scale 0 so its image loads during the roll.
@@ -699,10 +701,12 @@ function Hud.eggReveal(rarity, kind)
 			return
 		end
 
-		-- Never pop onto a card or egg that hasn't loaded (it would flash blank):
-		-- keep rolling fast until both have, for at most a second.
+		-- Never pop onto a card or egg that hasn't downloaded (it would flash blank):
+		-- keep rolling fast until both have, for at most a second. (Not IsLoaded:
+		-- the rarity card is hidden until the pop, and a hidden image never reports
+		-- loaded, so that always sat out the full second.)
 		local waited = 0
-		while waited < 1 and not (cardFaces[final].IsLoaded and cardEgg.IsLoaded) do
+		while waited < 1 and not ready do
 			setCardFace(UNKNOWN_CARDS[flick % #UNKNOWN_CARDS + 1])
 			flick += 1
 			waited += RunService.Heartbeat:Wait() + RunService.Heartbeat:Wait()
