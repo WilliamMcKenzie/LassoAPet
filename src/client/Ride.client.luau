@@ -11,6 +11,7 @@ local ContextActionService = game:GetService("ContextActionService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
+local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Hud = require(script.Parent.Hud)
 local Lasso = require(script.Parent.Lasso)
 local Poof = require(script.Parent.Poof)
@@ -25,15 +26,33 @@ local world = workspace:WaitForChild("World")
 while not world:GetAttribute("Ready") do
 	world:GetAttributeChangedSignal("Ready"):Wait()
 end
--- EggSpot marks the centre of the waiting egg. The egg is a rigged model so
--- it can twitch in the nest; it turns its face toward the approaching rider.
-local eggSpot = world.Nest.EggSpot
-local nestEgg = Egg.new(Config.NestEgg)
+-- Egg spawns: every Nest in World.Nests belongs to the biome it stands in, and
+-- each ride one nest per biome holds an egg. EggSpot marks the egg's centre. The
+-- egg is a rigged model so it can twitch in the nest; it turns its face toward
+-- the approaching rider.
 local nestRarity = require(ReplicatedStorage.Shared.Animals[Config.NestEgg]).Rarity
-nestEgg.model:PivotTo(eggSpot.CFrame * CFrame.Angles(0, math.pi, 0))
-nestEgg.model.Parent = world.Nest
 local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this range
-local nextTwitch = 1
+local nestsByBiome = {}
+for _, nest in world.Nests:GetChildren() do
+	local biome = WorldColors.biomeAt(nest.EggSpot.Position.Z)
+	nestsByBiome[biome] = nestsByBiome[biome] or {}
+	table.insert(nestsByBiome[biome], nest)
+end
+local waitingEggs = {} -- per biome: { egg, nest, nextTwitch }
+local nearEgg -- the waiting egg in grab range, while actionTarget is "egg"
+local function placeEggs()
+	for biome, nests in nestsByBiome do
+		local waiting = waitingEggs[biome]
+		if not waiting then
+			waiting = { egg = Egg.new(Config.NestEgg), nextTwitch = 1 }
+			waitingEggs[biome] = waiting
+		end
+		waiting.nest = nests[math.random(#nests)]
+		waiting.egg.model:PivotTo(waiting.nest.EggSpot.CFrame * CFrame.Angles(0, math.pi, 0))
+		waiting.egg.model.Parent = waiting.nest
+	end
+end
+placeEggs()
 
 -- Obstacle footprints from each obstacle's lowest part (a tree's trunk, a rock's base).
 local obstacles = {}
@@ -233,10 +252,6 @@ local function character()
 	return hrp, humanoid
 end
 
-local function setEggInNest(visible)
-	nestEgg.model.Parent = if visible then world.Nest else nil
-end
-
 local function cleanup()
 	if mount then
 		mount.animal.model:Destroy()
@@ -250,7 +265,7 @@ local function cleanup()
 	cutscene = nil
 	Hud.setCutscene(false)
 	Outline.set(nil)
-	setEggInNest(true)
+	placeEggs()
 end
 
 local startRide, ridePrompt
@@ -389,11 +404,11 @@ local function startTransfer(target)
 end
 
 local function grabEgg()
-	local egg = Egg.new(nestEgg.kind)
+	local egg = Egg.new(nearEgg.egg.kind)
 	local part = egg.model
-	part:PivotTo(nestEgg.model:GetPivot())
+	part:PivotTo(nearEgg.egg.model:GetPivot())
 	part.Parent = workspace
-	setEggInNest(false)
+	nearEgg.egg.model.Parent = nil
 	carried = { part = part, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	phase, turnT = "turning", 0
 	Hud.setAction(nil)
@@ -474,9 +489,12 @@ local function findTarget()
 	if phase ~= "outbound" or transfer or not mount then
 		return nil
 	end
-	local eggPos = eggSpot.Position
-	if Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < Config.EggRange then
-		return "egg"
+	for _, waiting in waitingEggs do
+		local eggPos = waiting.nest.EggSpot.Position
+		if waiting.egg.model.Parent and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < Config.EggRange then
+			nearEgg = waiting
+			return "egg"
+		end
 	end
 	local best, bestScore = nil, math.huge
 	for _, entity in allAnimals() do
@@ -833,14 +851,16 @@ RunService.PreSimulation:Connect(function(dt)
 	local slow = (phase == "outbound" and actionTarget == "egg") or cutscene ~= nil
 	timeScale += ((slow and Config.EggSlowMo or 1) - timeScale) * (1 - math.exp(-10 * dt))
 	dt *= timeScale
-	-- The waiting egg twitches now and then: something's alive in there.
-	if nestEgg.model.Parent then
-		nextTwitch -= dt
-		if nextTwitch <= 0 then
-			nestEgg:play("twitch")
-			nextTwitch = rng:NextNumber(EGG_TWITCH_EVERY[1], EGG_TWITCH_EVERY[2])
+	-- The waiting eggs twitch now and then: something's alive in there.
+	for _, waiting in waitingEggs do
+		if waiting.egg.model.Parent then
+			waiting.nextTwitch -= dt
+			if waiting.nextTwitch <= 0 then
+				waiting.egg:play("twitch")
+				waiting.nextTwitch = rng:NextNumber(EGG_TWITCH_EVERY[1], EGG_TWITCH_EVERY[2])
+			end
+			waiting.egg:update(dt)
 		end
-		nestEgg:update(dt)
 	end
 	updateHerd(dt, slow and not cutscene)
 	Dust.update(dt)
@@ -880,7 +900,7 @@ RunService.PreSimulation:Connect(function(dt)
 		checkRide(dt)
 	end
 	actionTarget = findTarget()
-	Outline.set(if actionTarget == "egg" then nestEgg.model elseif actionTarget then actionTarget.animal.model else nil)
+	Outline.set(if actionTarget == "egg" then nearEgg.egg.model elseif actionTarget then actionTarget.animal.model else nil)
 	Outline.update()
 	updateHud()
 end)

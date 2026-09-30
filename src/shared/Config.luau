@@ -13,10 +13,26 @@ return {
 	-- must match it (the ride reads them). Ground and wall colours are calibrated so
 	-- they render like the Steal an Egg reference under the Lighting set in
 	-- default.project.json. Home is z > 0, the course runs toward -z.
-	GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
-	WallColors = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
+	-- The course is biomes end to end from the start line, each Length studs long,
+	-- with its own tile colours. The home base uses the first biome's. Any Nest
+	-- model in World.Nests is an egg spawn of the biome it stands in; each ride,
+	-- one nest per biome holds an egg.
+	Biomes = {
+		{
+			Name = "Meadow",
+			Length = 760,
+			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
+			WallColors = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
+		},
+		{
+			Name = "Desert",
+			Length = 760,
+			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
+			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
+		},
+	},
 	CourseHalfWidth = 56,
-	CourseLength = 1400,
+	CourseLength = 1520, -- all the biomes' lengths added up
 	HomeHalfWidth = 80,
 	StarterSpot = Vector3.new(0, 0, 56),
 
