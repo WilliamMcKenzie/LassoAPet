@@ -52,6 +52,13 @@ local CARD = 170 -- the square card
 local OVERHANG = 22 -- how far the gold and trash stick out over the card's top
 local GAP = 34
 local CELL = Vector2.new(CARD + GAP, CARD + OVERHANG + GAP)
+-- Headshot transparency across the card: clear at the edges, solid in the middle.
+local FADE = NumberSequence.new({
+	NumberSequenceKeypoint.new(0, 1),
+	NumberSequenceKeypoint.new(0.2, 0),
+	NumberSequenceKeypoint.new(0.8, 0),
+	NumberSequenceKeypoint.new(1, 1),
+})
 local ARM_TIME = 2 -- seconds a tapped trash can stays armed
 
 local player = Players.LocalPlayer
@@ -124,14 +131,28 @@ local function card(pet, order)
 	end
 	local shot = HEADSHOTS[pet.kind]
 	if shot and shot ~= "" then
+		-- The headshot fades out toward every edge so it melts into the slot
+		-- picture instead of being cut off hard: one gradient fades it left and
+		-- right, the CanvasGroup around it fades the result top and bottom.
+		local fade = Instance.new("CanvasGroup")
+		fade.BackgroundTransparency = 1
+		fade.AnchorPoint = Vector2.new(0.5, 0.5)
+		fade.Position = UDim2.fromScale(0.5, 0.5)
+		fade.Size = UDim2.fromScale(0.92, 0.92) -- inside the slot picture's own border
+		fade.ZIndex = 2
 		local picture = Instance.new("ImageLabel")
 		picture.BackgroundTransparency = 1
-		picture.AnchorPoint = Vector2.new(0.5, 1)
-		picture.Position = UDim2.fromScale(0.5, 1)
-		picture.Size = UDim2.fromScale(0.96, 0.96)
+		picture.Size = UDim2.fromScale(1, 1)
 		picture.Image = shot
-		picture.ZIndex = 2
-		picture.Parent = face
+		picture.Parent = fade
+		local sides = Instance.new("UIGradient")
+		sides.Transparency = FADE
+		sides.Parent = picture
+		local ends = Instance.new("UIGradient")
+		ends.Rotation = 90
+		ends.Transparency = FADE
+		ends.Parent = fade
+		fade.Parent = face
 	else
 		local name = Instance.new("TextLabel")
 		name.BackgroundTransparency = 1
