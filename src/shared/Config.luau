@@ -45,6 +45,9 @@ return {
 	-- The egg waiting in the nest. Common animals are the ones you get by default,
 	-- so their eggs never show up here.
 	NestEgg = "Pinto",
+	-- Any pet can be ridden. Until pets can be picked in the pen, you ride this one
+	-- (it waits on the first pet spot in your pen).
+	DefaultPet = "Horse",
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
 	SprintSpeed = 2, -- x MountSpeed

@@ -10,8 +10,8 @@ Each PenN model holds a wooden post-and-rail fence and plank floor with a
 gate facing the course (-Z), a name board on the arch over the gate (the server writes the owner's name on it) and
 invisible markers the scripts read:
   Spawn  where the owner appears
-  Mount  where the owner's horse waits, facing the course
-  Slots  one invisible part per pet spot (all of the owner's pets live here)
+  Slots  one invisible part per pet spot (all of the owner's pets live here;
+         Slot1 is the one the owner rides out from)
 """
 
 import sys
@@ -29,9 +29,10 @@ SPACING = 28  # pen centres along X
 WIDTH, DEPTH = 24, 32
 FRONT_Z = 126  # the gate side; the back sits 2 studs off the base's back wall (z = 160)
 GATE = 8
-MOUNT_Z = 112
 SPAWN_Z = 121
-SLOTS = [(x, FRONT_Z + dz) for dz in (8, 16, 24) for x in (-6, 6)]
+# Pet spots, two rows of three. Slot1 faces the gate, so the pet standing there
+# (the pet you ride, the default horse for now) rides straight out through it.
+SLOTS = [(x, FRONT_Z + dz) for dz in (9, 21) for x in (0, -7, 7)]
 
 # Post-and-rail wooden pens like the horse pens and farm plots in Roblox horse
 # and pet games: dark posts, lighter plank rails, a plank floor and a gate arch
@@ -43,7 +44,10 @@ SIGN_WOOD = (226, 176, 108)
 POST, RAIL = 2, 0.6
 FENCE_H = 5
 FLOOR_H = 0.4
-ARCH_H = 12
+ARCH_H = 11
+BEAM_H = 1.5
+SIGN_W, SIGN_H = 16, 4  # the name board, inside its frame
+FRAME = 0.6
 
 
 def pen_parts(cx):
@@ -72,12 +76,20 @@ def pen_parts(cx):
     for x, z in sorted(posts):
         box("Post", (x - p, 0, z - p), (x + p, FENCE_H, z + p), POST_WOOD)
 
-    # Gate arch: two tall posts, a beam across the top and the name board under it.
+    # Ranch-style entrance: two tall posts and a beam, with the owner's name board
+    # standing on the beam in a dark frame, wide and above the fence so it reads
+    # from the riding camera (like ranch gates in Roblox horse games and the name
+    # signs on Grow a Garden plots).
     for x in (g0 - p, g1 + p):
         box("GatePost", (x - p, 0, z0 - p), (x + p, ARCH_H, z0 + p), POST_WOOD)
-    box("Beam", (g0 - 4, ARCH_H, z0 - 1.5), (g1 + 4, ARCH_H + 1.5, z0 + 1.5), POST_WOOD)
-    # Between the gate posts, not flush with their outer faces (that z-fought).
-    box("Sign", (g0, ARCH_H - 3.5, z0 - 0.5), (g1, ARCH_H - 0.5, z0), SIGN_WOOD)
+    top = ARCH_H + BEAM_H
+    box("Beam", (g0 - 4, ARCH_H, z0 - 1.5), (g1 + 4, top, z0 + 1.5), POST_WOOD)
+    s0, s1 = cx - SIGN_W / 2, cx + SIGN_W / 2
+    box("Sign", (s0, top, z0 - 0.25), (s1, top + SIGN_H, z0 + 0.25), SIGN_WOOD)
+    f = FRAME
+    box("Frame", (s0 - f, top, z0 - 0.45), (s0, top + SIGN_H + f, z0 + 0.45), POST_WOOD)
+    box("Frame", (s1, top, z0 - 0.45), (s1 + f, top + SIGN_H + f, z0 + 0.45), POST_WOOD)
+    box("Frame", (s0, top + SIGN_H, z0 - 0.45), (s1, top + SIGN_H + f, z0 + 0.45), POST_WOOD)
 
     # Two plank rails on every run of fence, on the outside of the posts.
     runs = [
@@ -99,7 +111,6 @@ def pen_parts(cx):
             box("Rail", lo, hi)
 
     box("Spawn", (cx - 2, 0, SPAWN_Z - 2), (cx + 2, 1, SPAWN_Z + 2), visible=False)
-    box("Mount", (cx - 2, 0, MOUNT_Z - 2), (cx + 2, 1, MOUNT_Z + 2), visible=False)
     for i, (sx, sz) in enumerate(SLOTS, 1):
         box(f"Slot{i}", (cx + sx - 2, FLOOR_H, sz - 2), (cx + sx + 2, FLOOR_H + 1, sz + 2), visible=False)
     return parts
@@ -163,7 +174,7 @@ def preview(path):
             if visible:
                 parts.append(partlib.Part(name, size, partlib.T(*centre), color))
         # stand-in for the owner's horse at the Mount spot
-        parts.append(partlib.Part("Horse", (3, 5, 8), partlib.T(cx, 2.5, MOUNT_Z), (160, 100, 60), plain=True))
+        parts.append(partlib.Part("Horse", (3, 5, 8), partlib.T(cx, FLOOR_H + 2.5, SLOTS[0][1]), (160, 100, 60), plain=True))
     wall = (240, 160, 108)
     for lo, hi in [((-84, 0, -4), (-80, 20, 164)), ((80, 0, -4), (84, 20, 164)), ((-84, 0, 160), (84, 20, 164))]:
         lo, hi = np.array(lo, float), np.array(hi, float)

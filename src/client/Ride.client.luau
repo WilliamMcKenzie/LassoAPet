@@ -135,10 +135,10 @@ for _, kind in kinds do
 	classes[kind.name] = kind.class
 	pools[kind.name] = {}
 end
-classes.Horse = classes.Horse or require(Animals.Horse) -- the starter
 
 local function newEntity(x, z, yaw, kind)
-	kind = kind or "Horse"
+	kind = kind or Config.DefaultPet
+	classes[kind] = classes[kind] or require(Animals[kind]) -- a pet that isn't in the stampede
 	local animal = classes[kind].new()
 	local entity = {
 		kind = kind,
@@ -270,19 +270,26 @@ end
 
 local startRide, ridePrompt
 
--- Where your horse waits and where you come home to: in front of your pen
--- (the "Pen" attribute the server sets), or the middle of the base without one.
+-- Where the pet you ride waits and where you come home to: the first pet spot in your
+-- pen (the "Pen" attribute the server sets), or the middle of the base without
+-- one. Y is the floor there (the pen's plank floor sits a little above the grass).
 local function homeSpot()
 	local index = player:GetAttribute("Pen")
 	local pens = workspace:FindFirstChild("Pens")
 	local pen = index and pens and pens:FindFirstChild("Pen" .. index)
-	local spot = pen and pen:FindFirstChild("Mount")
-	return if spot then spot.Position else Config.StarterSpot
+	local slot = pen and pen:FindFirstChild("Slots") and pen.Slots:FindFirstChild("Slot1")
+	if not slot then
+		return Config.StarterSpot
+	end
+	return Vector3.new(slot.Position.X, slot.Position.Y - slot.Size.Y / 2, slot.Position.Z)
 end
 
 local function spawnStarter()
 	local spot = homeSpot()
-	starter = newEntity(spot.X, spot.Z, 0)
+	-- The pet you'll ride. Nothing is special about the horse: it's just the default
+	-- pet until pets can be picked in the pen (the "RidePet" attribute).
+	starter = newEntity(spot.X, spot.Z, 0, player:GetAttribute("RidePet") or Config.DefaultPet)
+	starter.rootY += spot.Y -- stands on the pen floor
 	starter.animal:setSaddled(true)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Ride"
@@ -321,6 +328,7 @@ startRide = function()
 	mount, starter = starter, nil
 	mount.animal:setSaddled(true)
 	local spot = homeSpot()
+	mount.rootY -= spot.Y -- back down to the grass for the ride
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, 0, 0
 	phase, hold, grace, camYaw = "outbound", Config.HoldTime, 0, 0
 	coins = 0

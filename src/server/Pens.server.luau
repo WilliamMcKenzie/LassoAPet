@@ -12,37 +12,41 @@ for i = 1, 5 do
 	pens[i] = folder:WaitForChild("Pen" .. i)
 end
 
+-- The owner's name on both faces of the pen's name board.
 local function setSign(pen, text)
 	local sign = pen:FindFirstChild("Sign")
 	if not sign then
 		return
 	end
-	local gui = sign:FindFirstChild("OwnerName")
-	if not gui then
-		gui = Instance.new("SurfaceGui")
-		gui.Name = "OwnerName"
-		gui.Face = Enum.NormalId.Front
-		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-		gui.PixelsPerStud = 50
-		local label = Instance.new("TextLabel")
-		label.Size = UDim2.fromScale(1, 1)
-		label.BackgroundTransparency = 1
-		label.Font = Enum.Font.FredokaOne
-		label.TextScaled = true
-		label.TextColor3 = Color3.new(1, 1, 1)
-		local stroke = Instance.new("UIStroke")
-		stroke.Thickness = 4
-		stroke.Parent = label
-		local pad = Instance.new("UIPadding")
-		pad.PaddingTop = UDim.new(0.15, 0)
-		pad.PaddingBottom = UDim.new(0.15, 0)
-		pad.PaddingLeft = UDim.new(0.05, 0)
-		pad.PaddingRight = UDim.new(0.05, 0)
-		pad.Parent = label
-		label.Parent = gui
-		gui.Parent = sign
+	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
+		local name = "OwnerName" .. face.Name
+		local gui = sign:FindFirstChild(name)
+		if not gui then
+			gui = Instance.new("SurfaceGui")
+			gui.Name = name
+			gui.Face = face
+			gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+			gui.PixelsPerStud = 50
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.fromScale(1, 1)
+			label.BackgroundTransparency = 1
+			label.Font = Enum.Font.FredokaOne
+			label.TextScaled = true
+			label.TextColor3 = Color3.new(1, 1, 1)
+			local stroke = Instance.new("UIStroke")
+			stroke.Thickness = 6
+			stroke.Parent = label
+			local pad = Instance.new("UIPadding") -- room for the outline, so long names aren't clipped
+			pad.PaddingTop = UDim.new(0.18, 0)
+			pad.PaddingBottom = UDim.new(0.18, 0)
+			pad.PaddingLeft = UDim.new(0.08, 0)
+			pad.PaddingRight = UDim.new(0.08, 0)
+			pad.Parent = label
+			label.Parent = gui
+			gui.Parent = sign
+		end
+		gui.TextLabel.Text = text
 	end
-	gui.TextLabel.Text = text
 end
 
 local function penOf(player)

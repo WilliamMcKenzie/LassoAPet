@@ -170,20 +170,20 @@
 <Item class="Part" referent="RBX00000015"><Properties>
 <string name="Name">GatePost</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>2</X><Y>12</Y><Z>2</Z></Vector3>
+<Vector3 name="size"><X>2</X><Y>11</Y><Z>2</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-61</X><Y>6</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-61</X><Y>5.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 <Item class="Part" referent="RBX00000016"><Properties>
 <string name="Name">GatePost</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>2</X><Y>12</Y><Z>2</Z></Vector3>
+<Vector3 name="size"><X>2</X><Y>11</Y><Z>2</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-51</X><Y>6</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-51</X><Y>5.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 <Item class="Part" referent="RBX00000017"><Properties>
 <string name="Name">Beam</string>
@@ -192,43 +192,43 @@
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-56</X><Y>12.75</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-56</X><Y>11.75</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 <Item class="Part" referent="RBX00000018"><Properties>
 <string name="Name">Sign</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>3</Y><Z>0.5</Z></Vector3>
+<Vector3 name="size"><X>16</X><Y>4</Y><Z>0.5</Z></Vector3>
 <Color3uint8 name="Color3uint8">4293046380</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-56</X><Y>10</Y><Z>125.75</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-56</X><Y>14.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 <Item class="Part" referent="RBX00000019"><Properties>
-<string name="Name">Rail</string>
+<string name="Name">Frame</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
-<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
+<Vector3 name="size"><X>0.6</X><Y>4.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-69.3</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-64.3</X><Y>14.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 <Item class="Part" referent="RBX0000001A"><Properties>
-<string name="Name">Rail</string>
+<string name="Name">Frame</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
-<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
+<Vector3 name="size"><X>0.6</X><Y>4.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-69.3</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-47.7</X><Y>14.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 <Item class="Part" referent="RBX0000001B"><Properties>
-<string name="Name">Rail</string>
+<string name="Name">Frame</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
-<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
+<Vector3 name="size"><X>16</X><Y>0.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-42.7</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-56</X><Y>16.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 <Item class="Part" referent="RBX0000001C"><Properties>
 <string name="Name">Rail</string>
@@ -237,9 +237,36 @@
 <Color3uint8 name="Color3uint8">4290083142</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-42.7</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-69.3</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 <Item class="Part" referent="RBX0000001D"><Properties>
+<string name="Name">Rail</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
+<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-69.3</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX0000001E"><Properties>
+<string name="Name">Rail</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
+<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-42.7</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX0000001F"><Properties>
+<string name="Name">Rail</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
+<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-42.7</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX00000020"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>26</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -248,7 +275,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-56</X><Y>1.5</Y><Z>159.3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000001E"><Properties>
+<Item class="Part" referent="RBX00000021"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>26</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -257,7 +284,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-56</X><Y>3.5</Y><Z>159.3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000001F"><Properties>
+<Item class="Part" referent="RBX00000022"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -266,7 +293,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-65</X><Y>1.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000020"><Properties>
+<Item class="Part" referent="RBX00000023"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -275,7 +302,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-65</X><Y>3.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000021"><Properties>
+<Item class="Part" referent="RBX00000024"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -284,7 +311,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-47</X><Y>1.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000022"><Properties>
+<Item class="Part" referent="RBX00000025"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -293,7 +320,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-47</X><Y>3.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000023"><Properties>
+<Item class="Part" referent="RBX00000026"><Properties>
 <string name="Name">Spawn</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -307,24 +334,10 @@
 <bool name="CastShadow">false</bool>
 <CoordinateFrame name="CFrame"><X>-56</X><Y>0.5</Y><Z>121</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000024"><Properties>
-<string name="Name">Mount</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
-<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
-<token name="TopSurface">0</token>
-<token name="BottomSurface">0</token>
-<float name="Transparency">1</float>
-<bool name="CanCollide">false</bool>
-<bool name="CanQuery">false</bool>
-<bool name="CanTouch">false</bool>
-<bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-56</X><Y>0.5</Y><Z>112</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties></Item>
-<Item class="Folder" referent="RBX00000025"><Properties>
+<Item class="Folder" referent="RBX00000027"><Properties>
 <string name="Name">Slots</string>
 </Properties>
-<Item class="Part" referent="RBX00000026"><Properties>
+<Item class="Part" referent="RBX00000028"><Properties>
 <string name="Name">Slot1</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -336,9 +349,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-62</X><Y>0.9</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-56</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000027"><Properties>
+<Item class="Part" referent="RBX00000029"><Properties>
 <string name="Name">Slot2</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -350,9 +363,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-50</X><Y>0.9</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-63</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000028"><Properties>
+<Item class="Part" referent="RBX0000002A"><Properties>
 <string name="Name">Slot3</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -364,9 +377,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-62</X><Y>0.9</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-49</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000029"><Properties>
+<Item class="Part" referent="RBX0000002B"><Properties>
 <string name="Name">Slot4</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -378,9 +391,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-50</X><Y>0.9</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-56</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000002A"><Properties>
+<Item class="Part" referent="RBX0000002C"><Properties>
 <string name="Name">Slot5</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -392,9 +405,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-62</X><Y>0.9</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-63</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000002B"><Properties>
+<Item class="Part" referent="RBX0000002D"><Properties>
 <string name="Name">Slot6</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -406,14 +419,14 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-50</X><Y>0.9</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-49</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 </Item>
 </Item>
-<Item class="Model" referent="RBX0000002C"><Properties>
+<Item class="Model" referent="RBX0000002E"><Properties>
 <string name="Name">Pen2</string>
 </Properties>
-<Item class="Part" referent="RBX0000002D"><Properties>
+<Item class="Part" referent="RBX0000002F"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -422,7 +435,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-38</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000002E"><Properties>
+<Item class="Part" referent="RBX00000030"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -431,7 +444,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-34</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000002F"><Properties>
+<Item class="Part" referent="RBX00000031"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -440,7 +453,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-30</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000030"><Properties>
+<Item class="Part" referent="RBX00000032"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -449,7 +462,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-26</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000031"><Properties>
+<Item class="Part" referent="RBX00000033"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -458,7 +471,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-22</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000032"><Properties>
+<Item class="Part" referent="RBX00000034"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -467,7 +480,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-18</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000033"><Properties>
+<Item class="Part" referent="RBX00000035"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -476,7 +489,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-40</X><Y>2.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000034"><Properties>
+<Item class="Part" referent="RBX00000036"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -485,7 +498,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-40</X><Y>2.5</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000035"><Properties>
+<Item class="Part" referent="RBX00000037"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -494,7 +507,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-40</X><Y>2.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000036"><Properties>
+<Item class="Part" referent="RBX00000038"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -503,7 +516,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-40</X><Y>2.5</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000037"><Properties>
+<Item class="Part" referent="RBX00000039"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -512,7 +525,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-40</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000038"><Properties>
+<Item class="Part" referent="RBX0000003A"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -521,7 +534,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-32</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000039"><Properties>
+<Item class="Part" referent="RBX0000003B"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -530,7 +543,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-24</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000003A"><Properties>
+<Item class="Part" referent="RBX0000003C"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -539,7 +552,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-16</X><Y>2.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000003B"><Properties>
+<Item class="Part" referent="RBX0000003D"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -548,7 +561,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-16</X><Y>2.5</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000003C"><Properties>
+<Item class="Part" referent="RBX0000003E"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -557,7 +570,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-16</X><Y>2.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000003D"><Properties>
+<Item class="Part" referent="RBX0000003F"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -566,7 +579,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-16</X><Y>2.5</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000003E"><Properties>
+<Item class="Part" referent="RBX00000040"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -575,43 +588,70 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-16</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000003F"><Properties>
-<string name="Name">GatePost</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>2</X><Y>12</Y><Z>2</Z></Vector3>
-<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
-<token name="TopSurface">3</token>
-<token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-33</X><Y>6</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties></Item>
-<Item class="Part" referent="RBX00000040"><Properties>
-<string name="Name">GatePost</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>2</X><Y>12</Y><Z>2</Z></Vector3>
-<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
-<token name="TopSurface">3</token>
-<token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-23</X><Y>6</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties></Item>
 <Item class="Part" referent="RBX00000041"><Properties>
+<string name="Name">GatePost</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>2</X><Y>11</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-33</X><Y>5.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX00000042"><Properties>
+<string name="Name">GatePost</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>2</X><Y>11</Y><Z>2</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-23</X><Y>5.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX00000043"><Properties>
 <string name="Name">Beam</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>16</X><Y>1.5</Y><Z>3</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-28</X><Y>12.75</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-28</X><Y>11.75</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000042"><Properties>
+<Item class="Part" referent="RBX00000044"><Properties>
 <string name="Name">Sign</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>3</Y><Z>0.5</Z></Vector3>
+<Vector3 name="size"><X>16</X><Y>4</Y><Z>0.5</Z></Vector3>
 <Color3uint8 name="Color3uint8">4293046380</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-28</X><Y>10</Y><Z>125.75</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-28</X><Y>14.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000043"><Properties>
+<Item class="Part" referent="RBX00000045"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>4.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-36.3</X><Y>14.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX00000046"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>4.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-19.7</X><Y>14.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX00000047"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>16</X><Y>0.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-28</X><Y>16.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX00000048"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -620,7 +660,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-41.3</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000044"><Properties>
+<Item class="Part" referent="RBX00000049"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -629,7 +669,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-41.3</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000045"><Properties>
+<Item class="Part" referent="RBX0000004A"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -638,7 +678,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-14.7</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000046"><Properties>
+<Item class="Part" referent="RBX0000004B"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -647,7 +687,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-14.7</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000047"><Properties>
+<Item class="Part" referent="RBX0000004C"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>26</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -656,7 +696,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-28</X><Y>1.5</Y><Z>159.3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000048"><Properties>
+<Item class="Part" referent="RBX0000004D"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>26</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -665,7 +705,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-28</X><Y>3.5</Y><Z>159.3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000049"><Properties>
+<Item class="Part" referent="RBX0000004E"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -674,7 +714,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-37</X><Y>1.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000004A"><Properties>
+<Item class="Part" referent="RBX0000004F"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -683,7 +723,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-37</X><Y>3.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000004B"><Properties>
+<Item class="Part" referent="RBX00000050"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -692,7 +732,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-19</X><Y>1.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000004C"><Properties>
+<Item class="Part" referent="RBX00000051"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -701,7 +741,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-19</X><Y>3.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000004D"><Properties>
+<Item class="Part" referent="RBX00000052"><Properties>
 <string name="Name">Spawn</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -715,24 +755,10 @@
 <bool name="CastShadow">false</bool>
 <CoordinateFrame name="CFrame"><X>-28</X><Y>0.5</Y><Z>121</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000004E"><Properties>
-<string name="Name">Mount</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
-<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
-<token name="TopSurface">0</token>
-<token name="BottomSurface">0</token>
-<float name="Transparency">1</float>
-<bool name="CanCollide">false</bool>
-<bool name="CanQuery">false</bool>
-<bool name="CanTouch">false</bool>
-<bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-28</X><Y>0.5</Y><Z>112</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties></Item>
-<Item class="Folder" referent="RBX0000004F"><Properties>
+<Item class="Folder" referent="RBX00000053"><Properties>
 <string name="Name">Slots</string>
 </Properties>
-<Item class="Part" referent="RBX00000050"><Properties>
+<Item class="Part" referent="RBX00000054"><Properties>
 <string name="Name">Slot1</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -744,9 +770,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-34</X><Y>0.9</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-28</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000051"><Properties>
+<Item class="Part" referent="RBX00000055"><Properties>
 <string name="Name">Slot2</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -758,9 +784,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-22</X><Y>0.9</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-35</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000052"><Properties>
+<Item class="Part" referent="RBX00000056"><Properties>
 <string name="Name">Slot3</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -772,9 +798,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-34</X><Y>0.9</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-21</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000053"><Properties>
+<Item class="Part" referent="RBX00000057"><Properties>
 <string name="Name">Slot4</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -786,9 +812,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-22</X><Y>0.9</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-28</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000054"><Properties>
+<Item class="Part" referent="RBX00000058"><Properties>
 <string name="Name">Slot5</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -800,9 +826,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-34</X><Y>0.9</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-35</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000055"><Properties>
+<Item class="Part" referent="RBX00000059"><Properties>
 <string name="Name">Slot6</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -814,14 +840,14 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-22</X><Y>0.9</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-21</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 </Item>
 </Item>
-<Item class="Model" referent="RBX00000056"><Properties>
+<Item class="Model" referent="RBX0000005A"><Properties>
 <string name="Name">Pen3</string>
 </Properties>
-<Item class="Part" referent="RBX00000057"><Properties>
+<Item class="Part" referent="RBX0000005B"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -830,7 +856,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-10</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000058"><Properties>
+<Item class="Part" referent="RBX0000005C"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -839,7 +865,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-6</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000059"><Properties>
+<Item class="Part" referent="RBX0000005D"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -848,7 +874,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-2</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000005A"><Properties>
+<Item class="Part" referent="RBX0000005E"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -857,7 +883,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>2</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000005B"><Properties>
+<Item class="Part" referent="RBX0000005F"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -866,7 +892,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>6</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000005C"><Properties>
+<Item class="Part" referent="RBX00000060"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -875,7 +901,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>10</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000005D"><Properties>
+<Item class="Part" referent="RBX00000061"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -884,7 +910,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-12</X><Y>2.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000005E"><Properties>
+<Item class="Part" referent="RBX00000062"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -893,7 +919,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-12</X><Y>2.5</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000005F"><Properties>
+<Item class="Part" referent="RBX00000063"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -902,7 +928,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-12</X><Y>2.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000060"><Properties>
+<Item class="Part" referent="RBX00000064"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -911,7 +937,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-12</X><Y>2.5</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000061"><Properties>
+<Item class="Part" referent="RBX00000065"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -920,7 +946,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-12</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000062"><Properties>
+<Item class="Part" referent="RBX00000066"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -929,7 +955,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-4</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000063"><Properties>
+<Item class="Part" referent="RBX00000067"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -938,7 +964,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>4</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000064"><Properties>
+<Item class="Part" referent="RBX00000068"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -947,7 +973,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>12</X><Y>2.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000065"><Properties>
+<Item class="Part" referent="RBX00000069"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -956,7 +982,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>12</X><Y>2.5</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000066"><Properties>
+<Item class="Part" referent="RBX0000006A"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -965,7 +991,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>12</X><Y>2.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000067"><Properties>
+<Item class="Part" referent="RBX0000006B"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -974,7 +1000,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>12</X><Y>2.5</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000068"><Properties>
+<Item class="Part" referent="RBX0000006C"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -983,43 +1009,70 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>12</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000069"><Properties>
+<Item class="Part" referent="RBX0000006D"><Properties>
 <string name="Name">GatePost</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>2</X><Y>12</Y><Z>2</Z></Vector3>
+<Vector3 name="size"><X>2</X><Y>11</Y><Z>2</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>-5</X><Y>6</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-5</X><Y>5.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000006A"><Properties>
+<Item class="Part" referent="RBX0000006E"><Properties>
 <string name="Name">GatePost</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>2</X><Y>12</Y><Z>2</Z></Vector3>
+<Vector3 name="size"><X>2</X><Y>11</Y><Z>2</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>5</X><Y>6</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>5</X><Y>5.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000006B"><Properties>
+<Item class="Part" referent="RBX0000006F"><Properties>
 <string name="Name">Beam</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>16</X><Y>1.5</Y><Z>3</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>0</X><Y>12.75</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>0</X><Y>11.75</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000006C"><Properties>
+<Item class="Part" referent="RBX00000070"><Properties>
 <string name="Name">Sign</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>3</Y><Z>0.5</Z></Vector3>
+<Vector3 name="size"><X>16</X><Y>4</Y><Z>0.5</Z></Vector3>
 <Color3uint8 name="Color3uint8">4293046380</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>0</X><Y>10</Y><Z>125.75</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>0</X><Y>14.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000006D"><Properties>
+<Item class="Part" referent="RBX00000071"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>4.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>-8.3</X><Y>14.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX00000072"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>4.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>8.3</X><Y>14.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX00000073"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>16</X><Y>0.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>0</X><Y>16.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX00000074"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1028,7 +1081,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-13.3</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000006E"><Properties>
+<Item class="Part" referent="RBX00000075"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1037,7 +1090,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-13.3</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000006F"><Properties>
+<Item class="Part" referent="RBX00000076"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1046,7 +1099,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>13.3</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000070"><Properties>
+<Item class="Part" referent="RBX00000077"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1055,7 +1108,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>13.3</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000071"><Properties>
+<Item class="Part" referent="RBX00000078"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>26</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1064,7 +1117,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>0</X><Y>1.5</Y><Z>159.3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000072"><Properties>
+<Item class="Part" referent="RBX00000079"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>26</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1073,7 +1126,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>0</X><Y>3.5</Y><Z>159.3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000073"><Properties>
+<Item class="Part" referent="RBX0000007A"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1082,7 +1135,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-9</X><Y>1.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000074"><Properties>
+<Item class="Part" referent="RBX0000007B"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1091,7 +1144,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-9</X><Y>3.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000075"><Properties>
+<Item class="Part" referent="RBX0000007C"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1100,7 +1153,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>9</X><Y>1.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000076"><Properties>
+<Item class="Part" referent="RBX0000007D"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1109,7 +1162,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>9</X><Y>3.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000077"><Properties>
+<Item class="Part" referent="RBX0000007E"><Properties>
 <string name="Name">Spawn</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1123,24 +1176,10 @@
 <bool name="CastShadow">false</bool>
 <CoordinateFrame name="CFrame"><X>0</X><Y>0.5</Y><Z>121</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000078"><Properties>
-<string name="Name">Mount</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
-<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
-<token name="TopSurface">0</token>
-<token name="BottomSurface">0</token>
-<float name="Transparency">1</float>
-<bool name="CanCollide">false</bool>
-<bool name="CanQuery">false</bool>
-<bool name="CanTouch">false</bool>
-<bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>0</X><Y>0.5</Y><Z>112</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties></Item>
-<Item class="Folder" referent="RBX00000079"><Properties>
+<Item class="Folder" referent="RBX0000007F"><Properties>
 <string name="Name">Slots</string>
 </Properties>
-<Item class="Part" referent="RBX0000007A"><Properties>
+<Item class="Part" referent="RBX00000080"><Properties>
 <string name="Name">Slot1</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1152,9 +1191,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-6</X><Y>0.9</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>0</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000007B"><Properties>
+<Item class="Part" referent="RBX00000081"><Properties>
 <string name="Name">Slot2</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1166,9 +1205,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>6</X><Y>0.9</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-7</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000007C"><Properties>
+<Item class="Part" referent="RBX00000082"><Properties>
 <string name="Name">Slot3</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1180,9 +1219,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-6</X><Y>0.9</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>7</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000007D"><Properties>
+<Item class="Part" referent="RBX00000083"><Properties>
 <string name="Name">Slot4</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1194,9 +1233,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>6</X><Y>0.9</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>0</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000007E"><Properties>
+<Item class="Part" referent="RBX00000084"><Properties>
 <string name="Name">Slot5</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1208,9 +1247,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>-6</X><Y>0.9</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-7</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000007F"><Properties>
+<Item class="Part" referent="RBX00000085"><Properties>
 <string name="Name">Slot6</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1222,14 +1261,14 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>6</X><Y>0.9</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>7</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 </Item>
 </Item>
-<Item class="Model" referent="RBX00000080"><Properties>
+<Item class="Model" referent="RBX00000086"><Properties>
 <string name="Name">Pen4</string>
 </Properties>
-<Item class="Part" referent="RBX00000081"><Properties>
+<Item class="Part" referent="RBX00000087"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1238,7 +1277,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>18</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000082"><Properties>
+<Item class="Part" referent="RBX00000088"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1247,7 +1286,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>22</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000083"><Properties>
+<Item class="Part" referent="RBX00000089"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1256,7 +1295,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>26</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000084"><Properties>
+<Item class="Part" referent="RBX0000008A"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1265,7 +1304,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>30</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000085"><Properties>
+<Item class="Part" referent="RBX0000008B"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1274,7 +1313,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>34</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000086"><Properties>
+<Item class="Part" referent="RBX0000008C"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1283,7 +1322,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>38</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000087"><Properties>
+<Item class="Part" referent="RBX0000008D"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1292,7 +1331,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>16</X><Y>2.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000088"><Properties>
+<Item class="Part" referent="RBX0000008E"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1301,7 +1340,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>16</X><Y>2.5</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000089"><Properties>
+<Item class="Part" referent="RBX0000008F"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1310,7 +1349,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>16</X><Y>2.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000008A"><Properties>
+<Item class="Part" referent="RBX00000090"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1319,7 +1358,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>16</X><Y>2.5</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000008B"><Properties>
+<Item class="Part" referent="RBX00000091"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1328,7 +1367,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>16</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000008C"><Properties>
+<Item class="Part" referent="RBX00000092"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1337,7 +1376,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>24</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000008D"><Properties>
+<Item class="Part" referent="RBX00000093"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1346,7 +1385,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>32</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000008E"><Properties>
+<Item class="Part" referent="RBX00000094"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1355,7 +1394,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>40</X><Y>2.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000008F"><Properties>
+<Item class="Part" referent="RBX00000095"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1364,7 +1403,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>40</X><Y>2.5</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000090"><Properties>
+<Item class="Part" referent="RBX00000096"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1373,7 +1412,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>40</X><Y>2.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000091"><Properties>
+<Item class="Part" referent="RBX00000097"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1382,7 +1421,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>40</X><Y>2.5</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000092"><Properties>
+<Item class="Part" referent="RBX00000098"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1391,43 +1430,70 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>40</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000093"><Properties>
+<Item class="Part" referent="RBX00000099"><Properties>
 <string name="Name">GatePost</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>2</X><Y>12</Y><Z>2</Z></Vector3>
+<Vector3 name="size"><X>2</X><Y>11</Y><Z>2</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>23</X><Y>6</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>23</X><Y>5.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000094"><Properties>
+<Item class="Part" referent="RBX0000009A"><Properties>
 <string name="Name">GatePost</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>2</X><Y>12</Y><Z>2</Z></Vector3>
+<Vector3 name="size"><X>2</X><Y>11</Y><Z>2</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>33</X><Y>6</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>33</X><Y>5.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000095"><Properties>
+<Item class="Part" referent="RBX0000009B"><Properties>
 <string name="Name">Beam</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>16</X><Y>1.5</Y><Z>3</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>28</X><Y>12.75</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>28</X><Y>11.75</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000096"><Properties>
+<Item class="Part" referent="RBX0000009C"><Properties>
 <string name="Name">Sign</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>3</Y><Z>0.5</Z></Vector3>
+<Vector3 name="size"><X>16</X><Y>4</Y><Z>0.5</Z></Vector3>
 <Color3uint8 name="Color3uint8">4293046380</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>28</X><Y>10</Y><Z>125.75</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>28</X><Y>14.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000097"><Properties>
+<Item class="Part" referent="RBX0000009D"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>4.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>19.7</X><Y>14.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX0000009E"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>4.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>36.3</X><Y>14.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX0000009F"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>16</X><Y>0.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>28</X><Y>16.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX000000A0"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1436,7 +1502,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>14.7</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000098"><Properties>
+<Item class="Part" referent="RBX000000A1"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1445,7 +1511,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>14.7</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX00000099"><Properties>
+<Item class="Part" referent="RBX000000A2"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1454,7 +1520,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>41.3</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000009A"><Properties>
+<Item class="Part" referent="RBX000000A3"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1463,7 +1529,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>41.3</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000009B"><Properties>
+<Item class="Part" referent="RBX000000A4"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>26</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1472,7 +1538,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>28</X><Y>1.5</Y><Z>159.3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000009C"><Properties>
+<Item class="Part" referent="RBX000000A5"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>26</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1481,7 +1547,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>28</X><Y>3.5</Y><Z>159.3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000009D"><Properties>
+<Item class="Part" referent="RBX000000A6"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1490,7 +1556,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>19</X><Y>1.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000009E"><Properties>
+<Item class="Part" referent="RBX000000A7"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1499,7 +1565,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>19</X><Y>3.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX0000009F"><Properties>
+<Item class="Part" referent="RBX000000A8"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1508,7 +1574,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>37</X><Y>1.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000A0"><Properties>
+<Item class="Part" referent="RBX000000A9"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1517,7 +1583,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>37</X><Y>3.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000A1"><Properties>
+<Item class="Part" referent="RBX000000AA"><Properties>
 <string name="Name">Spawn</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1531,24 +1597,10 @@
 <bool name="CastShadow">false</bool>
 <CoordinateFrame name="CFrame"><X>28</X><Y>0.5</Y><Z>121</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000A2"><Properties>
-<string name="Name">Mount</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
-<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
-<token name="TopSurface">0</token>
-<token name="BottomSurface">0</token>
-<float name="Transparency">1</float>
-<bool name="CanCollide">false</bool>
-<bool name="CanQuery">false</bool>
-<bool name="CanTouch">false</bool>
-<bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>28</X><Y>0.5</Y><Z>112</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties></Item>
-<Item class="Folder" referent="RBX000000A3"><Properties>
+<Item class="Folder" referent="RBX000000AB"><Properties>
 <string name="Name">Slots</string>
 </Properties>
-<Item class="Part" referent="RBX000000A4"><Properties>
+<Item class="Part" referent="RBX000000AC"><Properties>
 <string name="Name">Slot1</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1560,9 +1612,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>22</X><Y>0.9</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>28</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000A5"><Properties>
+<Item class="Part" referent="RBX000000AD"><Properties>
 <string name="Name">Slot2</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1574,9 +1626,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>34</X><Y>0.9</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>21</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000A6"><Properties>
+<Item class="Part" referent="RBX000000AE"><Properties>
 <string name="Name">Slot3</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1588,9 +1640,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>22</X><Y>0.9</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>35</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000A7"><Properties>
+<Item class="Part" referent="RBX000000AF"><Properties>
 <string name="Name">Slot4</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1602,9 +1654,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>34</X><Y>0.9</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>28</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000A8"><Properties>
+<Item class="Part" referent="RBX000000B0"><Properties>
 <string name="Name">Slot5</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1616,9 +1668,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>22</X><Y>0.9</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>21</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000A9"><Properties>
+<Item class="Part" referent="RBX000000B1"><Properties>
 <string name="Name">Slot6</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1630,14 +1682,14 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>34</X><Y>0.9</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>35</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 </Item>
 </Item>
-<Item class="Model" referent="RBX000000AA"><Properties>
+<Item class="Model" referent="RBX000000B2"><Properties>
 <string name="Name">Pen5</string>
 </Properties>
-<Item class="Part" referent="RBX000000AB"><Properties>
+<Item class="Part" referent="RBX000000B3"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1646,7 +1698,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>46</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000AC"><Properties>
+<Item class="Part" referent="RBX000000B4"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1655,7 +1707,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000AD"><Properties>
+<Item class="Part" referent="RBX000000B5"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1664,7 +1716,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>54</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000AE"><Properties>
+<Item class="Part" referent="RBX000000B6"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1673,7 +1725,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>58</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000AF"><Properties>
+<Item class="Part" referent="RBX000000B7"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1682,7 +1734,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>62</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000B0"><Properties>
+<Item class="Part" referent="RBX000000B8"><Properties>
 <string name="Name">Floor</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>32</Z></Vector3>
@@ -1691,7 +1743,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>66</X><Y>0.2</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000B1"><Properties>
+<Item class="Part" referent="RBX000000B9"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1700,7 +1752,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>44</X><Y>2.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000B2"><Properties>
+<Item class="Part" referent="RBX000000BA"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1709,7 +1761,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>44</X><Y>2.5</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000B3"><Properties>
+<Item class="Part" referent="RBX000000BB"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1718,7 +1770,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>44</X><Y>2.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000B4"><Properties>
+<Item class="Part" referent="RBX000000BC"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1727,7 +1779,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>44</X><Y>2.5</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000B5"><Properties>
+<Item class="Part" referent="RBX000000BD"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1736,7 +1788,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>44</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000B6"><Properties>
+<Item class="Part" referent="RBX000000BE"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1745,7 +1797,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>52</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000B7"><Properties>
+<Item class="Part" referent="RBX000000BF"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1754,7 +1806,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>60</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000B8"><Properties>
+<Item class="Part" referent="RBX000000C0"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1763,7 +1815,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>68</X><Y>2.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000B9"><Properties>
+<Item class="Part" referent="RBX000000C1"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1772,7 +1824,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>68</X><Y>2.5</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000BA"><Properties>
+<Item class="Part" referent="RBX000000C2"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1781,7 +1833,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>68</X><Y>2.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000BB"><Properties>
+<Item class="Part" referent="RBX000000C3"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1790,7 +1842,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>68</X><Y>2.5</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000BC"><Properties>
+<Item class="Part" referent="RBX000000C4"><Properties>
 <string name="Name">Post</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>2</X><Y>5</Y><Z>2</Z></Vector3>
@@ -1799,43 +1851,70 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>68</X><Y>2.5</Y><Z>158</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000BD"><Properties>
+<Item class="Part" referent="RBX000000C5"><Properties>
 <string name="Name">GatePost</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>2</X><Y>12</Y><Z>2</Z></Vector3>
+<Vector3 name="size"><X>2</X><Y>11</Y><Z>2</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>51</X><Y>6</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>51</X><Y>5.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000BE"><Properties>
+<Item class="Part" referent="RBX000000C6"><Properties>
 <string name="Name">GatePost</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>2</X><Y>12</Y><Z>2</Z></Vector3>
+<Vector3 name="size"><X>2</X><Y>11</Y><Z>2</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>61</X><Y>6</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>61</X><Y>5.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000BF"><Properties>
+<Item class="Part" referent="RBX000000C7"><Properties>
 <string name="Name">Beam</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>16</X><Y>1.5</Y><Z>3</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285876266</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>56</X><Y>12.75</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>56</X><Y>11.75</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000C0"><Properties>
+<Item class="Part" referent="RBX000000C8"><Properties>
 <string name="Name">Sign</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>3</Y><Z>0.5</Z></Vector3>
+<Vector3 name="size"><X>16</X><Y>4</Y><Z>0.5</Z></Vector3>
 <Color3uint8 name="Color3uint8">4293046380</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
-<CoordinateFrame name="CFrame"><X>56</X><Y>10</Y><Z>125.75</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>56</X><Y>14.5</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000C1"><Properties>
+<Item class="Part" referent="RBX000000C9"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>4.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>47.7</X><Y>14.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX000000CA"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>0.6</X><Y>4.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>64.3</X><Y>14.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX000000CB"><Properties>
+<string name="Name">Frame</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>16</X><Y>0.6</Y><Z>0.9</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285876266</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="BottomSurface">0</token>
+<CoordinateFrame name="CFrame"><X>56</X><Y>16.8</Y><Z>126</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties></Item>
+<Item class="Part" referent="RBX000000CC"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1844,7 +1923,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>42.7</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000C2"><Properties>
+<Item class="Part" referent="RBX000000CD"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1853,7 +1932,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>42.7</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000C3"><Properties>
+<Item class="Part" referent="RBX000000CE"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1862,7 +1941,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>69.3</X><Y>1.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000C4"><Properties>
+<Item class="Part" referent="RBX000000CF"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>0.6</X><Y>1.2</Y><Z>34</Z></Vector3>
@@ -1871,7 +1950,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>69.3</X><Y>3.5</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000C5"><Properties>
+<Item class="Part" referent="RBX000000D0"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>26</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1880,7 +1959,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>56</X><Y>1.5</Y><Z>159.3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000C6"><Properties>
+<Item class="Part" referent="RBX000000D1"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>26</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1889,7 +1968,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>56</X><Y>3.5</Y><Z>159.3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000C7"><Properties>
+<Item class="Part" referent="RBX000000D2"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1898,7 +1977,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>47</X><Y>1.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000C8"><Properties>
+<Item class="Part" referent="RBX000000D3"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1907,7 +1986,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>47</X><Y>3.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000C9"><Properties>
+<Item class="Part" referent="RBX000000D4"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1916,7 +1995,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>65</X><Y>1.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000CA"><Properties>
+<Item class="Part" referent="RBX000000D5"><Properties>
 <string name="Name">Rail</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>8</X><Y>1.2</Y><Z>0.6</Z></Vector3>
@@ -1925,7 +2004,7 @@
 <token name="BottomSurface">0</token>
 <CoordinateFrame name="CFrame"><X>65</X><Y>3.5</Y><Z>124.7</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000CB"><Properties>
+<Item class="Part" referent="RBX000000D6"><Properties>
 <string name="Name">Spawn</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1939,24 +2018,10 @@
 <bool name="CastShadow">false</bool>
 <CoordinateFrame name="CFrame"><X>56</X><Y>0.5</Y><Z>121</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000CC"><Properties>
-<string name="Name">Mount</string>
-<bool name="Anchored">true</bool>
-<Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
-<Color3uint8 name="Color3uint8">4290083142</Color3uint8>
-<token name="TopSurface">0</token>
-<token name="BottomSurface">0</token>
-<float name="Transparency">1</float>
-<bool name="CanCollide">false</bool>
-<bool name="CanQuery">false</bool>
-<bool name="CanTouch">false</bool>
-<bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>56</X><Y>0.5</Y><Z>112</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
-</Properties></Item>
-<Item class="Folder" referent="RBX000000CD"><Properties>
+<Item class="Folder" referent="RBX000000D7"><Properties>
 <string name="Name">Slots</string>
 </Properties>
-<Item class="Part" referent="RBX000000CE"><Properties>
+<Item class="Part" referent="RBX000000D8"><Properties>
 <string name="Name">Slot1</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1968,9 +2033,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>50</X><Y>0.9</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>56</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000CF"><Properties>
+<Item class="Part" referent="RBX000000D9"><Properties>
 <string name="Name">Slot2</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1982,9 +2047,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>62</X><Y>0.9</Y><Z>134</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>49</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000D0"><Properties>
+<Item class="Part" referent="RBX000000DA"><Properties>
 <string name="Name">Slot3</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -1996,9 +2061,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>50</X><Y>0.9</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>63</X><Y>0.9</Y><Z>135</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000D1"><Properties>
+<Item class="Part" referent="RBX000000DB"><Properties>
 <string name="Name">Slot4</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -2010,9 +2075,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>62</X><Y>0.9</Y><Z>142</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>56</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000D2"><Properties>
+<Item class="Part" referent="RBX000000DC"><Properties>
 <string name="Name">Slot5</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -2024,9 +2089,9 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>50</X><Y>0.9</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>49</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
-<Item class="Part" referent="RBX000000D3"><Properties>
+<Item class="Part" referent="RBX000000DD"><Properties>
 <string name="Name">Slot6</string>
 <bool name="Anchored">true</bool>
 <Vector3 name="size"><X>4</X><Y>1</Y><Z>4</Z></Vector3>
@@ -2038,7 +2103,7 @@
 <bool name="CanQuery">false</bool>
 <bool name="CanTouch">false</bool>
 <bool name="CastShadow">false</bool>
-<CoordinateFrame name="CFrame"><X>62</X><Y>0.9</Y><Z>150</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>63</X><Y>0.9</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties></Item>
 </Item>
 </Item>
