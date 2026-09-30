@@ -18,6 +18,7 @@ local UserInputService = game:GetService("UserInputService")
 local Inventory = {}
 
 local SLOT = 84
+local SCALE = 1.2 -- the whole bar, slots, numbers and outlines alike
 local GAP = 10
 local BOTTOM = 24
 local MAX_SLOTS = 9
@@ -202,6 +203,9 @@ function Inventory.init(parent)
 	layout.Padding = UDim.new(0, GAP)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = bar
+	local scale = Instance.new("UIScale")
+	scale.Scale = SCALE
+	scale.Parent = bar
 	bar.Parent = parent
 	-- Keep the slot pictures drawn (1 pixel, nearly invisible) so a square never shows up blank.
 	for _, rarity in RARITY do
