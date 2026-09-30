@@ -76,7 +76,8 @@ def pen_parts(cx):
     for x in (g0 - p, g1 + p):
         box("GatePost", (x - p, 0, z0 - p), (x + p, ARCH_H, z0 + p), POST_WOOD)
     box("Beam", (g0 - 4, ARCH_H, z0 - 1.5), (g1 + 4, ARCH_H + 1.5, z0 + 1.5), POST_WOOD)
-    box("Sign", (g0 - 2, ARCH_H - 3.5, z0 - 0.5), (g1 + 2, ARCH_H - 0.5, z0), SIGN_WOOD)
+    # Between the gate posts, not flush with their outer faces (that z-fought).
+    box("Sign", (g0, ARCH_H - 3.5, z0 - 0.5), (g1, ARCH_H - 0.5, z0), SIGN_WOOD)
 
     # Two plank rails on every run of fence, on the outside of the posts.
     runs = [

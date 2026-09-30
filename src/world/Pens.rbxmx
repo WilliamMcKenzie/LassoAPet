@@ -197,7 +197,7 @@
 <Item class="Part" referent="RBX00000018"><Properties>
 <string name="Name">Sign</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>12</X><Y>3</Y><Z>0.5</Z></Vector3>
+<Vector3 name="size"><X>8</X><Y>3</Y><Z>0.5</Z></Vector3>
 <Color3uint8 name="Color3uint8">4293046380</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
@@ -605,7 +605,7 @@
 <Item class="Part" referent="RBX00000042"><Properties>
 <string name="Name">Sign</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>12</X><Y>3</Y><Z>0.5</Z></Vector3>
+<Vector3 name="size"><X>8</X><Y>3</Y><Z>0.5</Z></Vector3>
 <Color3uint8 name="Color3uint8">4293046380</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
@@ -1013,7 +1013,7 @@
 <Item class="Part" referent="RBX0000006C"><Properties>
 <string name="Name">Sign</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>12</X><Y>3</Y><Z>0.5</Z></Vector3>
+<Vector3 name="size"><X>8</X><Y>3</Y><Z>0.5</Z></Vector3>
 <Color3uint8 name="Color3uint8">4293046380</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
@@ -1421,7 +1421,7 @@
 <Item class="Part" referent="RBX00000096"><Properties>
 <string name="Name">Sign</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>12</X><Y>3</Y><Z>0.5</Z></Vector3>
+<Vector3 name="size"><X>8</X><Y>3</Y><Z>0.5</Z></Vector3>
 <Color3uint8 name="Color3uint8">4293046380</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
@@ -1829,7 +1829,7 @@
 <Item class="Part" referent="RBX000000C0"><Properties>
 <string name="Name">Sign</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>12</X><Y>3</Y><Z>0.5</Z></Vector3>
+<Vector3 name="size"><X>8</X><Y>3</Y><Z>0.5</Z></Vector3>
 <Color3uint8 name="Color3uint8">4293046380</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="BottomSurface">0</token>
