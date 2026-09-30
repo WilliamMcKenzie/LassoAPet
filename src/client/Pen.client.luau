@@ -18,6 +18,7 @@ local TweenService = game:GetService("TweenService")
 
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
+local Config = require(ReplicatedStorage.Shared.Config)
 local PenPets = require(script.Parent.PenPets)
 
 local player = Players.LocalPlayer
@@ -152,6 +153,22 @@ local function remove(s)
 	end
 end
 
+-- How big an egg is by now: it grows from 1x when placed to Config.EggGrowScale
+-- when it hatches.
+local function eggScale(s, now)
+	classes[s.kind] = classes[s.kind] or require(Animals[s.kind])
+	local total = Config.HatchTime[classes[s.kind].Rarity] or Config.HatchTime.Uncommon
+	local grown = math.clamp(1 - ((s.hatchAt or now) - now) / total, 0, 1)
+	return 1 + (Config.EggGrowScale - 1) * grown
+end
+
+local function sizeEgg(s, scale)
+	s.scale = scale
+	s.egg.model:ScaleTo(scale)
+	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER * scale, 0)) * CFrame.Angles(0, s.yaw, 0))
+	s.timer.Parent.StudsOffsetWorldSpace = Vector3.new(0, 4.6 * scale, 0)
+end
+
 local function showEgg(pen, id, item)
 	local s = { kind = item.egg, at = groundAt(pen, item.x, item.z), yaw = facing(pen), hatchAt = item.hatchAt }
 	s.egg = Egg.new(item.egg)
@@ -159,6 +176,7 @@ local function showEgg(pen, id, item)
 	s.egg.model.Parent = folder
 	s.timer = newTimer(s.egg.model.PrimaryPart)
 	s.nextTwitch = rng:NextNumber(unpack(TWITCH_EVERY))
+	sizeEgg(s, eggScale(s, workspace:GetServerTimeNow()))
 	shown[pen][id] = s
 end
 
@@ -283,6 +301,10 @@ RunService.RenderStepped:Connect(function(dt)
 			if s.egg then
 				if not s.hatching then
 					s.timer.Text = countdown((s.hatchAt or now) - now)
+					local scale = eggScale(s, now)
+					if math.abs(scale - s.scale) > 0.004 then
+						sizeEgg(s, scale)
+					end
 					s.nextTwitch -= dt
 					if s.nextTwitch <= 0 and not s.egg:isPlaying() then
 						s.egg:play("twitch")
@@ -299,7 +321,7 @@ RunService.RenderStepped:Connect(function(dt)
 					local t = s.jump
 					pet.scale = 0.2 + 0.8 * (1 - (1 - t) ^ 3)
 					pet.animal:setScale(pet.scale)
-					pet.hop = EGG_CENTER * (1 - t) + JUMP_HEIGHT * 4 * t * (1 - t)
+					pet.hop = EGG_CENTER * (s.scale or 1) * (1 - t) + JUMP_HEIGHT * 4 * t * (1 - t)
 					if t >= 1 then
 						s.jump, s.hatching = nil, nil
 						startWander(s)

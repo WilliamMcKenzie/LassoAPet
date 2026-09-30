@@ -67,6 +67,7 @@ return {
 	-- Seconds an egg placed in your pen takes to hatch, by the rarity of the
 	-- animal inside (first-biome eggs; later biomes can take longer).
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
+	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
 	EggIcons = {
 		Pinto = "rbxassetid://79525419811481",
