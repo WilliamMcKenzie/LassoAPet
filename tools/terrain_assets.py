@@ -1,6 +1,6 @@
 """Terrain assets for the meadow and desert (drafts for QM to vet).
 
-Run: python3 tools/terrain_assets.py [out_dir]
+Run: python3 tools/terrain_assets.py [out_dir] [--boulders]
 
   Meadow  small   Stone       a chunky grey rock
           small   Bush        a stepped round green bush
@@ -64,12 +64,25 @@ def bush(k):
     k.box("Bush", (2.8, 0.4, -1.4), (3.4, 2.0, 1.4), g)
 
 
+def rot(yaw=0, tilt_x=0, tilt_z=0):
+    return Ry(yaw) @ Rx(tilt_x) @ Rz(tilt_z)
+
+
 def boulder(k):
-    k.box("Boulder", (-4.6, 0, -3.8), (4.6, 1.6, 3.8), GREY_D)
-    k.box("Boulder", (-4.2, 1.6, -3.4), (4.2, 5.4, 3.4), GREY)
-    k.box("Boulder", (-3.2, 5.4, -2.6), (3.4, 7.2, 2.8), GREY)
-    k.box("Boulder", (-2.0, 7.2, -1.6), (2.2, 8.0, 1.8), GREY_L)
-    k.box("Boulder", (-5.4, 0, -2.0), (-4.2, 3.2, 1.8), GREY_D)
+    """Take A, a cluster: one big tilted chunk, a smaller one leaning on it and
+    a pebble at its foot, each lit top / dark sides (stylized rock packs)."""
+    k.at("Boulder", (0.2, 2.6, 0.3), (7.6, 6.4, 6.6), GREY, rot(18, 7, -9))
+    k.at("Boulder", (-0.4, 5.9, 0.0), (5.4, 1.4, 4.8), GREY_L, rot(24, 6, -12))  # the lit cap
+    k.at("Boulder", (-4.0, 1.4, -1.4), (3.6, 4.0, 3.4), GREY_D, rot(-20, -6, 16))
+    k.at("Boulder", (3.8, 0.5, -2.8), (2.0, 1.6, 1.8), GREY, rot(35, 0, 8))
+
+
+def boulder_b(k):
+    """Take B, a split slab: two big halves leaning apart with a crack between."""
+    k.at("Boulder", (-1.9, 2.8, 0), (4.2, 7.0, 6.4), GREY, rot(8, 0, 10))
+    k.at("Boulder", (-2.3, 6.4, 0.2), (3.4, 0.8, 5.4), GREY_L, rot(8, 0, 10))
+    k.at("Boulder", (2.1, 2.2, 0.3), (4.0, 5.6, 6.0), GREY_D, rot(-6, 4, -12))
+    k.at("Boulder", (2.5, 5.1, 0.3), (3.2, 0.8, 5.0), GREY, rot(-6, 4, -12))
 
 
 # ---------------------------------------------------------------- desert
@@ -113,12 +126,25 @@ def cactus(k):
 
 
 def sand_boulder(k):
-    band = (214, 162, 96)
-    k.box("Rock", (-4.2, 0, -3.6), (4.2, 1.4, 3.6), band)
-    k.box("Rock", (-4.0, 1.4, -3.4), (4.0, 3.6, 3.4), (234, 190, 122))
-    k.box("Rock", (-3.8, 3.6, -3.2), (3.8, 4.4, 3.2), band)
-    k.box("Rock", (-3.2, 4.4, -2.6), (3.2, 6.4, 2.6), (234, 190, 122))
-    k.box("Rock", (-2.0, 6.4, -1.6), (2.2, 7.2, 1.8), (246, 208, 144))
+    """Take A, a balanced rock (desert hoodoo): a banded base, a narrow neck and
+    a wide tilted cap that overhangs it."""
+    band, rock, top = (214, 162, 96), (234, 190, 122), (246, 208, 144)
+    k.at("Rock", (0, 1.3, 0), (6.4, 3.0, 5.6), band, rot(12, 0, 0))
+    k.at("Rock", (0.2, 3.4, 0.1), (3.6, 2.0, 3.4), rock, rot(-8, 0, 0))
+    k.at("Rock", (0.6, 5.6, 0.2), (8.0, 2.6, 6.6), rock, rot(20, 5, -8))
+    k.at("Rock", (0.4, 6.95, 0.1), (6.2, 0.7, 5.0), top, rot(20, 5, -8))
+    k.at("Rock", (-3.6, 0.6, -2.2), (1.8, 1.4, 1.6), band, rot(40, 0, 10))
+
+
+def sand_boulder_b(k):
+    """Take B, wind-carved: a long rock leaning into the wind, banded, with a
+    smaller chunk tucked behind."""
+    band, rock, top = (214, 162, 96), (234, 190, 122), (246, 208, 144)
+    k.at("Rock", (0, 2.2, 0), (8.6, 5.2, 5.4), rock, rot(10, 0, -16))
+    k.at("Rock", (0, 1.6, 0), (8.8, 1.0, 5.6), band, rot(10, 0, -16))
+    k.at("Rock", (0, 3.4, 0), (8.8, 1.0, 5.6), band, rot(10, 0, -16))
+    k.at("Rock", (-0.8, 5.0, 0), (6.6, 0.6, 4.6), top, rot(10, 0, -16))
+    k.at("Rock", (3.6, 1.2, 1.8), (3.2, 3.0, 3.0), band, rot(-25, 0, 10))
 
 
 def prickly_pear(k, x, y, z):
@@ -164,6 +190,13 @@ def figure(k, x=0):
     k.box("Arm", (x + 1.0, 2, -0.5), (x + 2.0, 4, 0.5), skin)
     k.box("Head", (x - 0.6, 4, -0.6), (x + 0.6, 5.2, 0.6), skin)
 
+
+BOULDERS = [
+    ("Meadow", [(77, 196, 63), (105, 255, 74)], [
+        ("Boulder A: cluster", boulder, 10), ("Boulder B: split", boulder_b, 10)]),
+    ("Desert", [(232, 188, 102), (250, 214, 130)], [
+        ("Sand boulder A: balanced", sand_boulder, 10), ("Sand boulder B: wind-carved", sand_boulder_b, 11)]),
+]
 
 ROWS = [
     ("Meadow", [(77, 196, 63), (105, 255, 74)], [
@@ -224,15 +257,16 @@ def row_image(name, ground, items):
 
 def main(out):
     os.makedirs(out, exist_ok=True)
-    rows = [row_image(*row) for row in ROWS]
+    rows = [row_image(*row) for row in (BOULDERS if "--boulders" in sys.argv else ROWS)]
     board = Image.new("RGB", (max(r.width for r in rows), sum(r.height for r in rows)), (255, 255, 255))
     y = 0
     for r in rows:
         board.paste(r, (0, y))
         y += r.height
-    board.save(os.path.join(out, "terrain_assets.png"))
+    board.save(os.path.join(out, "boulders.png" if "--boulders" in sys.argv else "terrain_assets.png"))
     print("wrote", out)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "/mnt/project-files/biomes/terrain_assets")
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    main(args[0] if args else "/mnt/project-files/biomes/terrain_assets")
