@@ -119,7 +119,7 @@ local function redraw()
 		slot.BackgroundColor3 = Color3.fromRGB(20, 30, 20)
 		slot.BackgroundTransparency = 0.45
 		slot.LayoutOrder = i
-		Instance.new("UICorner", slot).CornerRadius = UDim.new(0, 12)
+		Instance.new("UICorner", slot).CornerRadius = UDim.new(52 / 256, 0) -- the corners of QM's slot pictures (52px on 256)
 		local rarity = rarityOf(tool)
 		if rarity and rarity.image ~= "" then
 			slot.BackgroundTransparency = 1
