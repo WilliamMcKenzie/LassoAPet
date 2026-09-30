@@ -8,4 +8,5 @@ local SnakeModel = require(script.Parent.SnakeModel)
 return Horse.variant("Snake", SnakeModel, "Legendary", {
 	seat = Vector3.new(0, 3.5, 1.6),
 	neck = { center = Vector3.new(0, 2.2, -5), radius = 2.3 },
+	size = 1.5,
 })

@@ -64,7 +64,8 @@ end
 local Horse = {} -- the methods every variant shares
 
 -- A kind of animal: its own model data and rarity, Horse's methods.
--- points (optional): { seat = Vector3, neck = { center = Vector3, radius = number } }
+-- points (optional): { seat = Vector3, neck = { center = Vector3, radius = number },
+-- size = number (the whole animal scaled up from its model, 1 by default) }
 local function variant(name, data, rarity, points)
 	points = points or {}
 	local class = setmetatable({
@@ -74,11 +75,15 @@ local function variant(name, data, rarity, points)
 		landAt = landAt(data),
 		seat = points.seat or SEAT,
 		neckLoop = points.neck or NECK_LOOP,
+		size = points.size or 1,
 	}, { __index = Horse })
 	class.__index = class
 
 	function class.new()
 		local model, byName, bones, pivots = Rig.fromData(data, name, STUD_TEXTURE)
+		if class.size ~= 1 then
+			model:ScaleTo(class.size)
+		end
 
 		local clocks = {}
 		for anim in pairs(data.animations) do
@@ -154,7 +159,7 @@ function Horse:update(dt, speed, turn)
 	pose.root = rootPose
 	rootPose[6] -= LEAN * self.turn * (0.4 + 0.6 * galloping)
 
-	local sc = self.scale -- animation offsets are in studs at full size
+	local sc = self.scale * self.size -- animation offsets are in studs at the model's own size
 	for bone, motor in pairs(self.bones) do
 		local p = pose[bone]
 		motor.Transform = if p then CFrame.new(p[1] * sc, p[2] * sc, p[3] * sc) * CFrame.Angles(p[4], p[5], p[6]) else CFrame.identity
@@ -170,12 +175,12 @@ function Horse:update(dt, speed, turn)
 end
 
 function Horse:getSeatCFrame()
-	return self.root.CFrame * CFrame.new(self.seat - self.pivots.root)
+	return self.root.CFrame * CFrame.new((self.seat - self.pivots.root) * self.size)
 end
 
 function Horse:getNeck()
 	local loop = self.neckLoop
-	return { cframe = self.neck.CFrame * CFrame.new(loop.center - self.pivots.neck), radius = loop.radius }
+	return { cframe = self.neck.CFrame * CFrame.new((loop.center - self.pivots.neck) * self.size), radius = loop.radius * self.size }
 end
 
 function Horse:setSaddled(_saddled) end
@@ -184,10 +189,11 @@ function Horse:setSaddled(_saddled) end
 -- smallest part size (0.001): the thinnest plates are 0.05 studs.
 local MIN_SCALE = 0.05
 
+-- s is relative to the animal's own size (its `size` point).
 function Horse:setScale(s)
 	s = math.max(s, MIN_SCALE)
 	if s ~= self.scale then
-		self.model:ScaleTo(s)
+		self.model:ScaleTo(s * self.size)
 		self.scale = s
 	end
 end
