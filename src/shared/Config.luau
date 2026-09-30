@@ -67,6 +67,20 @@ return {
 	-- Seconds an egg placed in your pen takes to hatch, by the rarity of the
 	-- animal inside (first-biome eggs; later biomes can take longer).
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
+	-- Pet abilities: the Ability button (bottom right while riding), Q or R1.
+	-- A pet without an entry has no button. Seconds throughout.
+	--   Charge (Rhino): while held, up to Duration: a battering ram. No Hold drain,
+	--     and every obstacle and animal in the way is knocked flying, whatever its size.
+	--   Leap (Unicorn): one tap: a gallop up into the air and down again in an arc
+	--     LeapHeight studs high, over everything, at SpeedBoost x speed with no Hold drain.
+	--   Rattle (Snake): one tap: it stops, coils up and rattles for Duration (its
+	--     coiled idle), smashing every obstacle within Radius studs and scattering
+	--     the animals there away from it. No Hold drain while it rattles.
+	Abilities = {
+		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 15 },
+		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 20, SpeedBoost = 1.4, LeapHeight = 14 },
+		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 10, Radius = 45 },
+	},
 	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
 	-- obstacles and stampede animals of a lower tier, knocking them up and away;
 	-- one of its own tier or higher still crashes it. Obstacles take their tier
