@@ -106,7 +106,7 @@ local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one 
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityInput, abilityFill, abilityTime -- the Ability button, its holder, the ready part and the countdown
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
 -- with at most one decimal (and none from 100 of a unit up).
@@ -309,6 +309,10 @@ function Hud.init(onAction, onHome, onRide)
 	dodgePulse = TweenService:Create(dodge.UIScale, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.1 })
 	vignette = image(rideRoot, "vignette", UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5))
 	vignette.ImageColor3 = Config.VignetteColor
+	-- A second vignette an ability tints the screen with (the Snake's blue haze).
+	abilityTint = image(rideRoot, "vignette", UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5))
+	abilityTint.ImageTransparency = 1
+	abilityTint.Visible = false
 	vignette.ZIndex = 0
 	vignette.Visible = false
 
@@ -912,6 +916,15 @@ function Hud.setVignette(strength)
 	if strength <= 0 and dodge.Visible then
 		dodgePulse:Cancel()
 		dodge.Visible = false
+	end
+end
+
+-- The ability's screen tint: 0 = none, 1 = full, in `color`.
+function Hud.setAbilityTint(strength, color)
+	abilityTint.Visible = strength > 0.01
+	abilityTint.ImageTransparency = 1 - strength
+	if color then
+		abilityTint.ImageColor3 = color
 	end
 end
 
