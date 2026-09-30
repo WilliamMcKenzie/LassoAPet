@@ -37351,10 +37351,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Part" referent="DSRT0004"><Properties>
+<Item class="Part" referent="RBXD86D2024CE624C54A839341A912CBAF4"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>48</Y><Z>2280</Z></Vector3>
+<Vector3 name="size"><X>8</X><Y>48</Y><Z>1140.0</Z></Vector3>
 <Color3uint8 name="Color3uint8">4292974184</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">0</token>
@@ -37362,9 +37362,9 @@
 <token name="LeftSurface">0</token>
 <token name="RightSurface">0</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>-60</X><Y>24</Y><Z>-1900</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-60</X><Y>24</Y><Z>-2470.0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="DSRT0005"><Properties>
+<Item class="Texture" referent="RBXAF9A909E185648E48E8D77264919E171"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
 <token name="Face">0</token>
@@ -37373,7 +37373,7 @@
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0006"><Properties>
+<Item class="Texture" referent="RBX740ED86F167A4557BF1038E352F04400"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">0</token>
@@ -37382,7 +37382,7 @@
 <int name="ZIndex">2</int>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0007"><Properties>
+<Item class="Texture" referent="RBX681B3863679B44DFB549B9215796DC91"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
 <token name="Face">3</token>
@@ -37391,7 +37391,7 @@
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0008"><Properties>
+<Item class="Texture" referent="RBX960FD120E7704FD49B972C0007890A34"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">3</token>
@@ -37400,7 +37400,7 @@
 <int name="ZIndex">2</int>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0009"><Properties>
+<Item class="Texture" referent="RBXCD41F84F498042C7ADD7046A2A456375"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
 <token name="Face">2</token>
@@ -37409,7 +37409,7 @@
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0010"><Properties>
+<Item class="Texture" referent="RBX51834AECD8A74C7BBB96D81033652511"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">2</token>
@@ -37418,7 +37418,7 @@
 <int name="ZIndex">2</int>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0011"><Properties>
+<Item class="Texture" referent="RBX5938C8F150D04AAF8B8A817CCCF42E18"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
 <token name="Face">5</token>
@@ -37427,7 +37427,93 @@
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0012"><Properties>
+<Item class="Texture" referent="RBXCBCE039A83CB405D92C10C5625C997DB"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">5</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+</Item>
+<Item class="Part" referent="RBXBE54E92CBD3E4BD196DC9AB08F0CC2DD"><Properties>
+<string name="Name">Wall</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>8</X><Y>48</Y><Z>1140.0</Z></Vector3>
+<Color3uint8 name="Color3uint8">4292974184</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="FrontSurface">0</token>
+<token name="BackSurface">0</token>
+<token name="LeftSurface">0</token>
+<token name="RightSurface">0</token>
+<token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>-60</X><Y>24</Y><Z>-1330.0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+<Item class="Texture" referent="RBX291F7E5C2F8543379C24F97C95104BD7"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">0</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBXBF2A949C396C4C36AB0BB2D92EB06A07"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">0</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX100B058316804B7590E7FCF913716D8B"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">3</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX12DE6436CCDA40FEBAF2F6F41E349562"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">3</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX51C62A5A639F41AE9DA51C797614D784"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">2</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX507A783DC2ED42F68EEA5498BE2DBE5E"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">2</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBXEA34708B0775419291E85457F7194C4B"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">5</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX688BF29D8EFE4AECA97D6CBE8670E667"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">5</token>
@@ -37451,10 +37537,10 @@
 <CoordinateFrame name="CFrame"><X>-59</X><Y>49</Y><Z>-384</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="DSRT0013"><Properties>
+<Item class="Part" referent="RBX055398A22F8846D291BC67B3CDF3F12F"><Properties>
 <string name="Name">Cap</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>10</X><Y>2</Y><Z>2278</Z></Vector3>
+<Vector3 name="size"><X>10</X><Y>2</Y><Z>1139.0</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285136714</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">3</token>
@@ -37462,7 +37548,21 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>-59</X><Y>49</Y><Z>-1899</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-59</X><Y>49</Y><Z>-2468.5</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="RBXA22A9292C91540C69F44C614A494A013"><Properties>
+<string name="Name">Cap</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>10</X><Y>2</Y><Z>1139.0</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285136714</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="FrontSurface">3</token>
+<token name="BackSurface">3</token>
+<token name="LeftSurface">3</token>
+<token name="RightSurface">3</token>
+<token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>-59</X><Y>49</Y><Z>-1329.5</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
 <Item class="Part" referent="RBX00000028"><Properties>
@@ -37751,10 +37851,10 @@
 </Properties>
 </Item>
 </Item>
-<Item class="Part" referent="DSRT0014"><Properties>
+<Item class="Part" referent="RBX4834AEC1E5A1412D9DEF9C9BF7AAC73C"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>48</Y><Z>2280</Z></Vector3>
+<Vector3 name="size"><X>8</X><Y>48</Y><Z>1140.0</Z></Vector3>
 <Color3uint8 name="Color3uint8">4292974184</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">0</token>
@@ -37762,9 +37862,9 @@
 <token name="LeftSurface">0</token>
 <token name="RightSurface">0</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>60</X><Y>24</Y><Z>-1900</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>60</X><Y>24</Y><Z>-2470.0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="DSRT0015"><Properties>
+<Item class="Texture" referent="RBXFFFF434386BD4AA49CE7825BC3D6C374"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
 <token name="Face">0</token>
@@ -37773,7 +37873,7 @@
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0016"><Properties>
+<Item class="Texture" referent="RBX03C11798588441348523FFDF84CCFCD2"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">0</token>
@@ -37782,7 +37882,7 @@
 <int name="ZIndex">2</int>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0017"><Properties>
+<Item class="Texture" referent="RBXABEA4E57B1E74391824B0FEF855BF923"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
 <token name="Face">3</token>
@@ -37791,7 +37891,7 @@
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0018"><Properties>
+<Item class="Texture" referent="RBXFB61A607501240C495B19C24FF3FE956"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">3</token>
@@ -37800,7 +37900,7 @@
 <int name="ZIndex">2</int>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0019"><Properties>
+<Item class="Texture" referent="RBXF3B0379780CA4CCCB1C84B840510A5E9"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
 <token name="Face">2</token>
@@ -37809,7 +37909,7 @@
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0020"><Properties>
+<Item class="Texture" referent="RBX221C77ACAC88493D90F23C81F8EEA0C3"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">2</token>
@@ -37818,7 +37918,7 @@
 <int name="ZIndex">2</int>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0021"><Properties>
+<Item class="Texture" referent="RBX826FE5D37E0446E49CE1A1FFCE660EC4"><Properties>
 <string name="Name">Checker</string>
 <Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
 <token name="Face">5</token>
@@ -37827,7 +37927,93 @@
 <Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
 </Properties>
 </Item>
-<Item class="Texture" referent="DSRT0022"><Properties>
+<Item class="Texture" referent="RBX5737A3EB704D4FA896DBDA36BBB50D67"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">5</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+</Item>
+<Item class="Part" referent="RBXE1086DECA9C74EE89782BE065E1E65B0"><Properties>
+<string name="Name">Wall</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>8</X><Y>48</Y><Z>1140.0</Z></Vector3>
+<Color3uint8 name="Color3uint8">4292974184</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="FrontSurface">0</token>
+<token name="BackSurface">0</token>
+<token name="LeftSurface">0</token>
+<token name="RightSurface">0</token>
+<token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>60</X><Y>24</Y><Z>-1330.0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+<Item class="Texture" referent="RBXDC4FE1EC0EEE4ED0997121EF39E93BC8"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">0</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX0560706DB78D404A83C59C4A70A366CB"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">0</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX7CDF08455B20487C9D99FCD207661A43"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">3</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBXB04FFA1B36D5429BA22E12B81FA811B0"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">3</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX5C955499743B4F56A29AA62301929CF7"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">2</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBXD60584701FD94418992F12DEFCDC4A8A"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">2</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX176A245FB85844028448C78E2323CF92"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">5</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.972549</R><G>0.666667</G><B>0.447059</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="RBX9D7A1ABC32864CA7877B08EE1D50C3EB"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">5</token>
@@ -37851,10 +38037,10 @@
 <CoordinateFrame name="CFrame"><X>59</X><Y>49</Y><Z>-384</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
-<Item class="Part" referent="DSRT0023"><Properties>
+<Item class="Part" referent="RBX070AB57E0A1F47C99DEE17B9BF361584"><Properties>
 <string name="Name">Cap</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>10</X><Y>2</Y><Z>2278</Z></Vector3>
+<Vector3 name="size"><X>10</X><Y>2</Y><Z>1139.0</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285136714</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">3</token>
@@ -37862,7 +38048,21 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>59</X><Y>49</Y><Z>-1899</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>59</X><Y>49</Y><Z>-2468.5</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+</Item>
+<Item class="Part" referent="RBX6F0B8EBA40944A9F983E07C478D3F442"><Properties>
+<string name="Name">Cap</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>10</X><Y>2</Y><Z>1139.0</Z></Vector3>
+<Color3uint8 name="Color3uint8">4285136714</Color3uint8>
+<token name="TopSurface">3</token>
+<token name="FrontSurface">3</token>
+<token name="BackSurface">3</token>
+<token name="LeftSurface">3</token>
+<token name="RightSurface">3</token>
+<token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>59</X><Y>49</Y><Z>-1329.5</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
 <Item class="Part" referent="RBX00000046"><Properties>

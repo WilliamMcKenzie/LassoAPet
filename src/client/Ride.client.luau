@@ -1813,13 +1813,13 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	rattleHaze += ((if kind == "Rattle" then 1 else 0) - rattleHaze) * (1 - math.exp(-6 * dt))
 	Hud.setAbilityTint(rattleHaze * 0.85, RATTLE_HAZE)
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38, 18)).Position, (basis * CFrame.new(0, 0, -24)).Position)
-	-- Charge and Rattle: the camera swings round to a low shot from ahead and off
-	-- to the side, looking back at the pet (slowly circling while the snake rattles).
-	cineCam += ((if kind == "Charge" or kind == "Rattle" then 1 else 0) - cineCam) * (1 - math.exp(-4 * dt))
+	-- Charge: the camera swings round to a low shot from ahead and off to the
+	-- side, looking back at the pet.
+	cineCam += ((if kind == "Charge" then 1 else 0) - cineCam) * (1 - math.exp(-4 * dt))
 	if cineCam > 0.001 and mount then
 		local a = cineCam * cineCam * (3 - 2 * cineCam)
 		local pet = Vector3.new(mount.x, (mount.hop or 0) + 3, mount.z)
-		local swing = if kind == "Rattle" then math.rad(35) + (ability and ability.t or 0) * 0.35 else math.rad(28)
+		local swing = math.rad(28)
 		local from = pet + (basis * CFrame.Angles(0, swing, 0)).LookVector * 28 + Vector3.new(0, 9, 0)
 		local cine = CFrame.lookAt(from, pet + basis.LookVector * 4)
 		desired = desired:Lerp(cine, a)
