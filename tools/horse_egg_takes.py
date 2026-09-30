@@ -186,3 +186,107 @@ def main(out):
 
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv) > 1 else "designs/eggs/horse_v3")
+
+
+# ---------------------------------------------------------------- round 2: take C's style
+# QM liked the Player pens thread's take C (/mnt/project-files/eggs/horse_v2/HorseEgg_C):
+# big ears on the shoulders, a chunky forelock, a white blaze down the front, a
+# mane down the back and a dark hoof-coloured base. These riff on it.
+
+BLAZE = (205, 205, 200)
+
+
+def take_c(ear_h=1.2, blaze_w=0.5, forelock_front=-0.62):
+    egg = Egg()
+    crack = CRACK_LAYER * LH
+    for i in range(N):
+        col = HOOF if i == 0 else CREAM if i == 1 else ORANGE
+        octo_layer(egg, i, i * LH, (i + 1) * LH, WIDTHS[i], col, "top" if i >= CRACK_LAYER else "bottom")
+    inner = min(WIDTHS[CRACK_LAYER - 1], WIDTHS[CRACK_LAYER]) - 0.16
+    octo_layer(egg, "InsideBottom", crack, crack + 0.02, inner, BLACK, "bottom")
+    octo_layer(egg, "InsideTop", crack - 0.02, crack, inner, BLACK, "top")
+    b = 2.6929
+    for side, sx in (("L", -1), ("R", 1)):
+        x0 = sx * 0.6
+        for half, d in (("A", -1), ("B", 1)):
+            ear_half(egg, f"Ear{side}{half}", [(x0, b), (x0 + d * 0.38, b), (x0, b + ear_h)], -0.2, 0.2, ORANGE)
+            ear_half(egg, f"EarIn{side}{half}", [(x0, b + 0.15), (x0 + d * 0.21, b + 0.15), (x0, b + ear_h * 0.58)], -0.25, -0.2, PINK)
+    egg.block("Forelock", (-0.36, 2.7, forelock_front), (0.36, 3.4, 0.2), BROWN).bone = "top"
+    egg.block("Crest", (-0.26, 3.2, 0.2), (0.26, 3.5, 0.7), BROWN).bone = "top"
+    for i in range(CRACK_LAYER, N):
+        z = WIDTHS[i] / 2
+        egg.block(f"Mane{i}", (-0.26, i * LH, z - 0.05), (0.26, (i + 1) * LH, z + 0.25), BROWN)
+    hw = blaze_w / 2
+    for i in range(2, N):
+        w = min(hw, 0.2) if i == N - 1 else hw
+        front_plate(egg, f"Blaze{i}", -w, w, i * LH, (i + 1) * LH, BLAZE, depth=0.05, plain=False)
+    return egg
+
+
+def c_face():
+    """C + the horse's eyes either side of the blaze and nostrils at its foot."""
+    egg = take_c()
+    y = 5 * LH
+    for side, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * 0.3, sx * 0.62))
+        front_plate(egg, "Eye" + side, xa, xb, y + 0.04, y + 0.4, WHITE, depth=0.05)
+        xa, xb = sorted((sx * 0.3, sx * 0.48))
+        front_plate(egg, "Pupil" + side, xa, xb, y + 0.08, y + 0.3, PUPIL, depth=0.08)
+    y = 2 * LH
+    for side, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * 0.08, sx * 0.2))
+        front_plate(egg, "Nostril" + side, xa, xb, y + 0.12, y + 0.26, NOSTRIL, depth=0.08)
+    return egg
+
+
+def c_muzzle():
+    """C + the blaze opening into a white muzzle band low on the front."""
+    egg = take_c()
+    front_plate(egg, "Muzzle", -0.5, 0.5, 2 * LH, 3 * LH, BLAZE, depth=0.06, plain=False)
+    for side, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * 0.18, sx * 0.36))
+        front_plate(egg, "Nostril" + side, xa, xb, 2 * LH + 0.14, 2 * LH + 0.32, NOSTRIL, depth=0.09)
+    return egg
+
+
+def c_tail():
+    """C + the mane running all the way down the back into a tail."""
+    egg = take_c()
+    for i in range(1, CRACK_LAYER):
+        z = WIDTHS[i] / 2
+        egg.block(f"Stripe{i}", (-0.26, i * LH, z - 0.05), (0.26, (i + 1) * LH, z + 0.25), BROWN)
+    z = WIDTHS[1] / 2
+    egg.block("Tail", (-0.22, -0.1, z + 0.2), (0.22, 2 * LH, z + 0.6), BROWN)
+    return egg
+
+
+def c_bold():
+    """C pushed further: taller ears, a wider blaze, the forelock tipping over the front."""
+    return take_c(ear_h=1.55, blaze_w=0.75, forelock_front=-0.8)
+
+
+TAKES_C = [
+    ("C", "C (pens thread)", take_c),
+    ("C1", "C + face", c_face),
+    ("C2", "C + white muzzle", c_muzzle),
+    ("C3", "C + mane to tail", c_tail),
+    ("C4", "C bolder", c_bold),
+]
+
+
+def main_c(out):
+    os.makedirs(out, exist_ok=True)
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 26)
+    tile = 380
+    sheet = Image.new("RGB", (tile * len(TAKES_C), tile * 2 + 50), (236, 236, 236))
+    d = ImageDraw.Draw(sheet)
+    for c, (key, title, fn) in enumerate(TAKES_C):
+        egg = fn()
+        if key != "C":
+            build(egg, f"HorseEgg_{key}", E.SPLIT, out)
+        for r, view in enumerate(VIEWS):
+            sheet.paste(render(egg.parts, W=tile, H=tile, fov=26, **view), (c * tile, 50 + r * tile))
+        w = d.textlength(title, font=font)
+        d.text((c * tile + (tile - w) / 2, 10), title, fill=(30, 30, 30), font=font)
+    sheet.save(os.path.join(out, "compare.png"))
+    print("wrote", out)
