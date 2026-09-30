@@ -146,21 +146,23 @@ def item_span(s, start):
             return start + m.end()
 
 
-def write_map(kind):
+def write_patches(old_refs, ref_prefix, boxes):
+    """Replace a biome's floor parts in World.rbxmx. old_refs: regex of the
+    referents to replace (the biome's one Ground part, or the patches a previous
+    run wrote); the first one is the template (its textures come along).
+    boxes: (name, centre, size) per new part. Returns how many were written."""
     s = open(WORLD).read()
-    # the old desert floor: the one Ground part, or the patches a previous run wrote
-    old = [m.start() for m in re.finditer(r'<Item class="Part" referent="(DSRT0001|DGND\d+)"', s)]
-    assert old, "desert Ground part not found"
+    old = [m.start() for m in re.finditer(r'<Item class="Part" referent="(%s)"' % old_refs, s)]
+    assert old, "floor part not found: " + old_refs
     template_start = old[0]
     template = s[template_start:item_span(s, template_start)]
     for st in reversed(old):
         s = s[:st] + s[item_span(s, st):].lstrip("\n")
     items = []
-    for n, (k, i0, j0, i1, j1) in enumerate(rects(kind)):
-        (cx, cy, cz), (sx, sy, sz) = box(k, i0, j0, i1, j1)
+    for n, (name, (cx, cy, cz), (sx, sy, sz)) in enumerate(boxes):
         refs = iter(range(3))
-        t = re.sub(r'referent="[A-Z0-9]+"', lambda m: f'referent="DGND{n * 3 + next(refs):05d}"', template)
-        t = t.replace('<string name="Name">Ground</string>', f'<string name="Name">{KINDS[k]}</string>', 1)
+        t = re.sub(r'referent="[A-Z0-9]+"', lambda m: f'referent="{ref_prefix}{n * 3 + next(refs):05d}"', template)
+        t = re.sub(r'<string name="Name">[^<]*</string>', f'<string name="Name">{name}</string>', t, count=1)
         t = re.sub(r'<Vector3 name="size">.*?</Vector3>',
                    f'<Vector3 name="size"><X>{sx:g}</X><Y>{sy:g}</Y><Z>{sz:g}</Z></Vector3>', t, count=1)
         t = re.sub(r'(<CoordinateFrame name="CFrame">)<X>[^<]*</X><Y>[^<]*</Y><Z>[^<]*</Z>',
@@ -169,6 +171,11 @@ def write_map(kind):
     s = s[:template_start] + "\n".join(items) + "\n" + s[template_start:]
     open(WORLD, "w").write(s)
     return len(items)
+
+
+def write_map(kind):
+    boxes = [(KINDS[k],) + box(k, i0, j0, i1, j1) for k, i0, j0, i1, j1 in rects(kind)]
+    return write_patches(r"DSRT0001|DGND\d+", "DGND", boxes)
 
 
 def main():
