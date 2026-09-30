@@ -33,6 +33,13 @@ return {
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
 			Herd = { Cactus = 30, Scorpion = 16, Sandworm = 8, Snake = 3 },
+			-- Patches of other ground in the floor (parts named after them in
+			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
+			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
+			Patches = {
+				Grass = { Color3.fromRGB(184, 172, 70), Color3.fromRGB(200, 188, 86) },
+				Stone = { Color3.fromRGB(206, 146, 84), Color3.fromRGB(222, 164, 100) },
+			},
 			-- Locked behind a gate until your pen is this biome's level (its place
 			-- in this list). Upgrading your pen to it costs UnlockCost gold; your pen's
 			-- floor tiles take this biome's ground colours and its posts PostColor.
