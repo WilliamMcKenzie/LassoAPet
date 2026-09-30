@@ -4,6 +4,7 @@
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
@@ -86,7 +87,7 @@ local TONES = {
 	["TOO FAR!"] = RED,
 }
 
-local card, cardEgg, cardScale -- egg reveal card, the egg on it, and its UIScale
+local card, cardEgg, cardScale, cardFlash, cardBurst -- egg reveal card, the egg on it, its UIScale, the white flash and sunburst behind it
 local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
@@ -315,7 +316,8 @@ function Hud.init(onAction, onHome, onRide)
 	-- which one is opaque, in the same frame, so there's no blank frame or size jump.
 	for _, key in { "unknownEgg", "unknownEgg1", "unknownEgg2", "cardUncommon", "cardRare", "cardEpic", "cardLegendary" } do
 		local entry = IMAGES[key]
-		local face = image(card, key, UDim2.fromOffset(entry.size.X * CARD_SCALE, entry.size.Y * CARD_SCALE), UDim2.fromOffset(-entry.cardLeft * CARD_SCALE, -CARD_TOP * CARD_SCALE))
+		-- Sized as a share of the card's body, so squashing the card squashes its images.
+		local face = image(card, key, UDim2.fromScale(entry.size.X / CARD_BODY.X, entry.size.Y / CARD_BODY.Y), UDim2.fromScale(-entry.cardLeft / CARD_BODY.X, -CARD_TOP / CARD_BODY.Y))
 		face.Name = key
 		face.AnchorPoint = Vector2.zero
 		face.ZIndex = 3
@@ -326,6 +328,22 @@ function Hud.init(onAction, onHome, onRide)
 	cardEgg.ZIndex = 4
 	Instance.new("UIScale").Parent = cardEgg
 	card.Parent = rideRoot
+	-- Behind the card: a white flash over the screen and the sunburst, for the pop.
+	cardFlash = Instance.new("Frame")
+	cardFlash.Name = "EggFlash"
+	cardFlash.BackgroundColor3 = WHITE
+	cardFlash.BorderSizePixel = 0
+	cardFlash.AnchorPoint = Vector2.new(0.5, 0.5)
+	cardFlash.Position = UDim2.fromScale(0.5, 0.5)
+	cardFlash.Size = UDim2.fromScale(1.2, 1.2)
+	cardFlash.ZIndex = 2
+	cardFlash.Visible = false
+	cardFlash.Parent = rideRoot
+	cardBurst = image(rideRoot, "sunburst", UDim2.fromOffset(CARD_WIDTH * 2.6, CARD_WIDTH * 2.6), card.Position)
+	cardBurst.Name = "EggBurst"
+	cardBurst.ZIndex = 2
+	cardBurst.Visible = false
+	Instance.new("UIScale").Parent = cardBurst
 
 	gained = cashRow(rideRoot, 84, 58, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.57))
 	rideCash = cashRow(rideRoot, 60, 46, Vector2.new(0, 0.5), UDim2.new(0.5, BAR_WIDTH / 2 + 8, 0, holdFrame.Position.Y.Offset))
@@ -360,6 +378,8 @@ function Hud.show(visible)
 	gui.Enabled = visible
 	reveal += 1
 	card.Visible = false
+	cardFlash.Visible = false
+	cardBurst.Visible = false
 	if not visible then
 		message.Text = ""
 		banner.Visible = false
@@ -489,10 +509,21 @@ local function setCardFace(key)
 	cardShown = key
 end
 
--- Back home with an egg: a gacha-style card pops up, flicks through the unknown
--- eggs, slowing down, then lands on the egg's rarity card and the egg pops in.
--- Returns how long it takes until the card is gone (nil if there's no card for
--- that rarity, e.g. Common).
+-- Damped spring from 1 toward 0: starts at 1, overshoots past 0 and settles.
+-- Drives every bounce below (squash and stretch, overshoot, wobble).
+local function spring(t, frequency, decay)
+	return math.exp(-decay * t) * math.cos(t * frequency * math.pi * 2)
+end
+
+local CARD_REST = UDim2.fromScale(0.5, 0.53)
+local ENTER_TIME = 0.5 -- drop in, land, bounce
+local ANTICIPATION = 0.14 -- squash down before the pop
+local EXIT_TIME = 0.32
+
+-- Back home with an egg: a gacha-style card drops in, rolls through the unknown
+-- eggs (slow, then faster and faster), squashes down and pops onto the egg's
+-- rarity card, and the egg springs out onto it. Returns how long it takes until
+-- the card is gone (nil if there's no card for that rarity, e.g. Common).
 function Hud.eggReveal(rarity, kind)
 	local final = RARITY_CARDS[rarity]
 	if not final then
@@ -502,56 +533,165 @@ function Hud.eggReveal(rarity, kind)
 	local token = reveal
 	local flicks = Config.EggRevealFlicks
 	local first, last = Config.EggRevealFirstGap, Config.EggRevealLastGap
-	local gaps, spin = {}, 0
+	local gaps, roll = {}, 0
 	for i = 1, flicks do
-		-- Each gap a constant factor longer than the one before: fast, then slowing.
+		-- Each gap a constant factor shorter than the one before: slow, then a blur.
 		gaps[i] = first * (last / first) ^ ((i - 1) / math.max(flicks - 1, 1))
-		spin += gaps[i]
+		roll += gaps[i]
+	end
+	local hold = Config.EggRevealHold
+
+	local baseW, baseH = CARD_BODY.X * CARD_SCALE, CARD_BODY.Y * CARD_SCALE
+	local egg = IMAGES["egg" .. tostring(kind)] or IMAGES.eggPinto
+	local eggH = CARD_EGG_HEIGHT
+	local eggW = eggH * baseH * egg.size.X / egg.size.Y / baseW
+
+	-- Pose the card: stretch sx, sy (1 = rest), keeping its bottom edge planted
+	-- when it squashes, plus a lift in pixels and a tilt.
+	local function pose(sx, sy, lift, rotation)
+		card.Size = UDim2.fromOffset(baseW * sx, baseH * sy)
+		card.Position = CARD_REST + UDim2.fromOffset(0, baseH * (1 - sy) / 2 - lift)
+		card.Rotation = rotation
+	end
+	local function poseEgg(scale, sx, sy, lift)
+		cardEgg.UIScale.Scale = scale
+		cardEgg.Size = UDim2.fromScale(eggW * sx, eggH * sy)
+		cardEgg.Position = UDim2.new(0.5, 0, 0.5, -lift)
+	end
+	-- Runs step(t) every frame for a duration; false if the reveal was cancelled.
+	local function play(duration, step)
+		local t = 0
+		while t < duration do
+			step(t)
+			t += RunService.Heartbeat:Wait()
+			if reveal ~= token then
+				return false
+			end
+		end
+		step(duration)
+		return true
 	end
 
+	-- The HUD preloads every image at game start; ask again for this reveal's in
+	-- case the ride was quicker than the download (a no-op once they're cached).
+	task.spawn(function()
+		local ids = { IMAGES[final].id, egg.id }
+		for _, key in UNKNOWN_CARDS do
+			table.insert(ids, IMAGES[key].id)
+		end
+		game:GetService("ContentProvider"):PreloadAsync(ids)
+	end)
 	setCardFace(UNKNOWN_CARDS[1])
-	cardEgg.Visible = false
-	card.Rotation = 0
+	-- The egg stays visible at scale 0 so its image loads during the roll.
+	cardEgg.Image = egg.id
+	cardEgg.Visible = true
+	poseEgg(0, 1, 1, 0)
+	cardFlash.Visible = false
+	cardBurst.Visible = false
+	cardScale.Scale = 1
+	pose(1, 1, 600, 0)
 	card.Visible = true
-	cardScale.Scale = 0
-	TweenService:Create(cardScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 
 	task.spawn(function()
-		for i = 1, flicks do
-			task.wait(gaps[i])
+		-- 1. Drop in from above, stretched by the fall, squash on landing, bounce.
+		local fall = 0.2
+		if not play(ENTER_TIME, function(t)
+			if t < fall then
+				local u = t / fall
+				pose(0.88, 1.18, 600 * (1 - u * u), 0)
+			else
+				local d = spring(t - fall, 3.2, 7)
+				pose(1 + 0.22 * d, 1 - 0.22 * d, 0, 0)
+			end
+		end) then
+			return
+		end
+
+		-- 2. Roll: the faces flick faster and faster while the card shakes and
+		-- swells with the tension. The flicks themselves are clean swaps.
+		local nextFlick, flick = gaps[1], 1
+		if not play(roll, function(t)
+			while flick < flicks and t >= nextFlick do
+				setCardFace(UNKNOWN_CARDS[flick % #UNKNOWN_CARDS + 1])
+				flick += 1
+				nextFlick += gaps[flick]
+			end
+			local u = t / roll
+			local tension = u * u
+			cardScale.Scale = 1 + 0.08 * tension
+			pose(1, 1, 0, math.sin(t * 55) * 4 * tension)
+		end) then
+			return
+		end
+
+		-- Never pop onto a card or egg that hasn't loaded (it would flash blank):
+		-- keep rolling fast until both have, for at most a second.
+		local waited = 0
+		while waited < 1 and not (cardFaces[final].IsLoaded and cardEgg.IsLoaded) do
+			setCardFace(UNKNOWN_CARDS[flick % #UNKNOWN_CARDS + 1])
+			flick += 1
+			waited += RunService.Heartbeat:Wait() + RunService.Heartbeat:Wait()
 			if reveal ~= token then
 				return
 			end
-			if i < flicks then
-				setCardFace(UNKNOWN_CARDS[i % #UNKNOWN_CARDS + 1])
-			end
 		end
-		-- The real card lands: punch, wobble and shake, then the egg pops in.
+
+		-- 3. Anticipation: squash down hard for a beat.
+		if not play(ANTICIPATION, function(t)
+			local u = math.sin(t / ANTICIPATION * math.pi / 2)
+			cardScale.Scale = 1.08 - 0.08 * u
+			pose(1 + 0.2 * u, 1 - 0.25 * u, 0, 0)
+		end) then
+			return
+		end
+
+		-- 4. Pop: the real card, stretched tall and big, springs back with a
+		-- wobble, behind a white flash and the sunburst; the screen shakes.
 		setCardFace(final)
-		cardScale.Scale = 1.3
-		card.Rotation = -5
-		TweenService:Create(cardScale, TweenInfo.new(0.6, Enum.EasingStyle.Elastic), { Scale = 1 }):Play()
-		TweenService:Create(card, TweenInfo.new(0.6, Enum.EasingStyle.Elastic), { Rotation = 0 }):Play()
-		local egg = IMAGES["egg" .. tostring(kind)] or IMAGES.eggPinto
-		local eggHeight = CARD_BODY.Y * CARD_SCALE * CARD_EGG_HEIGHT
-		cardEgg.Image = egg.id
-		cardEgg.Size = UDim2.fromOffset(eggHeight * egg.size.X / egg.size.Y, eggHeight)
+		cardFlash.Visible = true
+		cardBurst.Visible = Config.EggRevealBurst
 		cardEgg.Visible = true
-		cardEgg.UIScale.Scale = 0
-		TweenService:Create(cardEgg.UIScale, TweenInfo.new(0.4, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-		local rest = UDim2.fromScale(0.5, 0.53)
-		for i = 10, 1, -1 do
-			card.Position = rest + UDim2.fromOffset(math.random(-i, i), math.random(-i, i))
-			task.wait(0.03)
-		end
-		card.Position = rest
-		task.wait(Config.EggRevealHold - 0.3)
+		poseEgg(0, 1, 1, 0)
+		local eggDelay = 0.12 -- the egg follows through just after the card
+		play(hold, function(t)
+			local d = spring(t, 2.4, 6)
+			cardScale.Scale = 1 + 0.35 * d
+			local shake = math.max(0, 1 - t / 0.35) * 8
+			local squash = spring(t, 3.5, 7)
+			pose(1 - 0.18 * squash, 1 + 0.22 * squash, math.random(-1, 1) * shake, -8 * spring(t, 1.8, 5))
+			card.Position += UDim2.fromOffset(math.random(-1, 1) * shake, 0)
+			cardFlash.BackgroundTransparency = 0.25 + 0.75 * math.min(t / 0.35, 1)
+			cardBurst.UIScale.Scale = math.min(t / 0.25, 1) * (1 + 0.1 * spring(t, 2, 5))
+			cardBurst.Rotation = t * 30
+			-- Egg: springs out of the card stretched, squashes, then breathes.
+			local e = t - eggDelay
+			if e < 0 then
+				poseEgg(0, 1, 1, 0)
+			else
+				local grow = 1 - spring(e, 2.2, 6)
+				local es = spring(e, 3.8, 6)
+				local breath = math.sin(e * 4) * 0.03 * math.min(e, 1)
+				poseEgg(grow, 1 - 0.25 * es - breath, 1 + 0.3 * es + breath, 0)
+			end
+		end)
 		if reveal ~= token then
 			return
 		end
-		TweenService:Create(cardScale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0 }):Play()
+		cardFlash.Visible = false
+
+		-- 5. Exit: a small swell, then snap away.
+		play(EXIT_TIME, function(t)
+			local u = t / EXIT_TIME
+			cardScale.Scale = if u < 0.3 then 1 + 0.1 * math.sin(u / 0.3 * math.pi / 2) else 1.1 * (1 - ((u - 0.3) / 0.7) ^ 2)
+			cardBurst.UIScale.Scale = 1 - u
+			cardBurst.Rotation += 1
+		end)
+		if reveal == token then
+			card.Visible = false
+			cardBurst.Visible = false
+		end
 	end)
-	return spin + Config.EggRevealHold + 0.3
+	return ENTER_TIME + roll + ANTICIPATION + hold + EXIT_TIME
 end
 
 -- Cutscenes hide the whole ride HUD.
