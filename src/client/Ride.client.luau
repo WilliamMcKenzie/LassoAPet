@@ -369,7 +369,7 @@ local leadFromZ = 0
 local exitX = nil
 local EXIT_TURN = 10 -- studs from exitX where the curve toward the start line begins
 
--- The x a ride from a sideways-facing pen runs out to, a little past its open side.
+-- The x a ride from a sideways-facing pen runs out to, past its open side and inside the corridor.
 local function penExitX()
 	local pen = myPen()
 	local spawn, area = pen and pen:FindFirstChild("Spawn"), pen and pen:FindFirstChild("Area")
@@ -380,7 +380,8 @@ local function penExitX()
 	if math.abs(d.X) <= math.abs(d.Z) then
 		return nil -- faces the start line
 	end
-	return spawn.Position.X
+	-- Straight into the corridor: the corner pens' open sides sit just outside it.
+	return math.clamp(spawn.Position.X, -(EDGE - 4), EDGE - 4)
 end
 
 -- Which way your pen's open side faces, as a yaw (0 = toward the start line).
