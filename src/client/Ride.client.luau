@@ -17,6 +17,7 @@ local Lasso = require(script.Parent.Lasso)
 local Poof = require(script.Parent.Poof)
 local Dust = require(script.Parent.Dust)
 local Outline = require(script.Parent.Outline)
+local PenPets = require(script.Parent.PenPets)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -34,6 +35,7 @@ local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this ra
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
 local deliverEgg = ReplicatedStorage:WaitForChild("DeliverEgg")
+local ridePet = ReplicatedStorage:WaitForChild("RidePet")
 local waitingEggs = {} -- [nest] = { egg, kind, nest, nextTwitch }
 local nearEgg -- the waiting egg in grab range, while actionTarget is "egg"
 
@@ -344,8 +346,11 @@ local function cleanup()
 	Outline.set(nil)
 end
 
-local startRide, ridePrompt
-local rideShown = false -- the RIDE button is up: the waiting pet gets the outline
+local startRide
+local rideShown = false -- the RIDE button is up: the pet it rides gets the outline
+local rideModel -- the pet RIDE rides: the nearest of yours, or the one you clicked
+local pickedPet -- a pet you clicked, which RIDE rides while you stay near it
+local PICK_KEEP = 40 -- studs: walk further than this from a clicked pet and RIDE goes back to the nearest
 
 -- The pen the server handed you (your "Pen" attribute), if any.
 local function myPen()
@@ -395,50 +400,118 @@ local function penYaw()
 	return math.atan2(-d.X, -d.Z)
 end
 
-local function spawnStarter()
-	local spot = homeSpot()
-	rideShown = false
-	-- The pet you'll ride. Nothing is special about the horse: it's just the default
-	-- pet until pets can be picked in the pen (the "RidePet" attribute).
-	starter = newEntity(spot.X, spot.Z, penYaw(), player:GetAttribute("RidePet") or Config.DefaultPet)
-	starter.animal:setSaddled(true)
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.ActionText = "Ride"
-	prompt.RequiresLineOfSight = false
-	prompt.Style = Enum.ProximityPromptStyle.Custom -- draws nothing; E still works, and the RIDE button shows while it's in range
-	-- Measured from the middle of the pet, with more reach for big ones (the
-	-- Snake's root is at its tail end, 18 studs from its head).
-	local root = starter.animal.model.PrimaryPart
-	local middle, size = starter.animal.model:GetBoundingBox()
-	local at = Instance.new("Attachment")
-	at.Name = "RideSpot"
-	at.CFrame = root.CFrame:ToObjectSpace(middle)
-	at.Parent = root
-	prompt.MaxActivationDistance = 8 + math.max(size.X, size.Z) / 2
-	prompt.Parent = at
-	prompt.Triggered:Connect(function()
-		prompt:Destroy()
-		startRide()
-	end)
-	prompt.PromptShown:Connect(function()
-		rideShown = true
-		Hud.showRide(true)
-	end)
-	prompt.PromptHidden:Connect(function()
-		rideShown = false
-		Hud.showRide(false)
-	end)
-	ridePrompt = prompt
-end
-
-local function rideFromHome()
-	if phase == "idle" and ridePrompt and ridePrompt.Parent then
-		ridePrompt:Destroy()
-		startRide()
+-- Animal parts can't be hit by raycasts (so they never block the lasso or the
+-- mouse); your pets at home are made clickable so you can pick one to ride.
+local function setClickable(model, on)
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") and part ~= model.PrimaryPart then
+			part.CanQuery = on
+		end
 	end
 end
 
-startRide = function()
+local function spawnStarter()
+	local spot = homeSpot()
+	-- The pet waiting on your pen's first spot (the "RidePet" attribute). Nothing is
+	-- special about the horse: it's just the default pet. Every other pet in your
+	-- pen can be ridden too (PenPets).
+	starter = newEntity(spot.X, spot.Z, penYaw(), player:GetAttribute("RidePet") or Config.DefaultPet)
+	setClickable(starter.animal.model, true)
+end
+
+-- One prompt, moved onto whichever pet RIDE rides. It draws nothing; E still
+-- works, and the RIDE button shows while it's in range.
+local rideSpot = Instance.new("Attachment")
+rideSpot.Name = "RideSpot"
+local ridePrompt = Instance.new("ProximityPrompt")
+ridePrompt.ActionText = "Ride"
+ridePrompt.RequiresLineOfSight = false
+ridePrompt.Style = Enum.ProximityPromptStyle.Custom
+ridePrompt.Parent = rideSpot
+ridePrompt.PromptShown:Connect(function()
+	rideShown = true
+	Hud.showRide(true)
+end)
+ridePrompt.PromptHidden:Connect(function()
+	rideShown = false
+	Hud.showRide(false)
+end)
+
+-- Your pets at home: the starter's model and every pet in your pen.
+local function homePets()
+	local list = {}
+	if starter then
+		table.insert(list, starter.animal.model)
+	end
+	for model in PenPets.pets do
+		if model.Parent then
+			table.insert(list, model)
+		end
+	end
+	return list
+end
+
+-- Flat distance from `at` to the edge of the pet (roughly), so big pets count as near.
+local function petDistance(model, at)
+	local middle, size = model:GetBoundingBox()
+	local d = Vector2.new(middle.X - at.X, middle.Z - at.Z).Magnitude
+	return d - math.max(size.X, size.Z) / 2, d
+end
+
+-- Every frame at home: bind RIDE to the pet you clicked, else the nearest.
+local function updateRideTarget()
+	local hrp = character()
+	local target
+	if hrp then
+		local pets = homePets()
+		if pickedPet and not table.find(pets, pickedPet) then
+			pickedPet = nil
+		end
+		if pickedPet and select(2, petDistance(pickedPet, hrp.Position)) > PICK_KEEP then
+			pickedPet = nil
+		end
+		target = pickedPet
+		if not target then
+			local best = math.huge
+			for _, model in pets do
+				local d = petDistance(model, hrp.Position)
+				if d < best then
+					target, best = model, d
+				end
+			end
+		end
+	end
+	if target ~= rideModel then
+		rideModel = target
+		if target then
+			-- Measured from the middle of the pet, with more reach for big ones (the
+			-- Snake's root is at its tail end, 18 studs from its head).
+			local root = target.PrimaryPart
+			local middle, size = target:GetBoundingBox()
+			rideSpot.CFrame = root.CFrame:ToObjectSpace(middle)
+			ridePrompt.MaxActivationDistance = 8 + math.max(size.X, size.Z) / 2
+			rideSpot.Parent = root
+		else
+			rideSpot.Parent = nil
+		end
+	end
+end
+
+local function clearRideTarget()
+	rideModel, pickedPet = nil, nil
+	rideSpot.Parent = nil
+end
+
+local function rideFromHome()
+	if phase == "idle" and rideModel and rideShown then
+		startRide(rideModel)
+	end
+end
+ridePrompt.Triggered:Connect(rideFromHome)
+
+-- Rides `model`: the starter, or a pet from your pen, which swaps places with the
+-- starter (the server makes it the one you ride, and the starter joins the pen).
+startRide = function(model)
 	local hrp, humanoid = character()
 	if not hrp then
 		return
@@ -447,9 +520,19 @@ startRide = function()
 		spawnStarter()
 	end
 	humanoid:UnequipTools() -- put any egg away
-	mount, starter = starter, nil
-	mount.animal:setSaddled(true)
 	local spot = homeSpot()
+	local fromPen = model and PenPets.pets[model]
+	clearRideTarget()
+	if fromPen then
+		ridePet:FireServer(fromPen.id)
+		starter.animal.model:Destroy()
+		starter = nil
+		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
+	else
+		mount, starter = starter, nil
+		setClickable(mount.animal.model, false)
+	end
+	mount.animal:setSaddled(true)
 	leadFromZ = spot.Z - 8
 	exitX = penExitX()
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, 0, 0
@@ -660,6 +743,26 @@ local function onAction()
 	end
 end
 
+-- At home, clicking or tapping one of your pets makes RIDE ride it (not while
+-- holding an egg: then a click places the egg).
+local function pickPetAt(screenPos)
+	if not character() or player.Character:FindFirstChildOfClass("Tool") then
+		return
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = homePets()
+	local ray = camera:ScreenPointToRay(screenPos.X, screenPos.Y)
+	local hit = workspace:Raycast(ray.Origin, ray.Direction * 300, params)
+	if hit then
+		for _, model in homePets() do
+			if hit.Instance:IsDescendantOf(model) then
+				pickedPet = model
+			end
+		end
+	end
+end
+
 local function readSteer()
 	local keys = 0
 	if UserInputService:IsKeyDown(Enum.KeyCode.A) or UserInputService:IsKeyDown(Enum.KeyCode.Left) then
@@ -673,6 +776,12 @@ end
 
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
+		return
+	end
+	if phase == "idle" then
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+			pickPetAt(input.Position)
+		end
 		return
 	end
 	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -1175,7 +1284,8 @@ RunService.PreSimulation:Connect(function(dt)
 		if starter then
 			wander(starter, dt)
 		end
-		Outline.set(if rideShown and starter then starter.animal.model else nil) -- the pet RIDE will ride
+		updateRideTarget()
+		Outline.set(if rideShown or pickedPet then rideModel else nil) -- the pet RIDE will ride
 		Outline.update()
 		return
 	end
@@ -1301,7 +1411,6 @@ for _, name in { "Pen", "RidePet" } do
 		if phase == "idle" and starter then
 			starter.animal.model:Destroy()
 			starter = nil
-			Hud.showRide(false)
 			spawnStarter()
 		end
 	end)
