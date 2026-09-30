@@ -1163,7 +1163,7 @@ end
 -- Pet abilities (Config.Abilities): the Ability button, Q or R1. Each mount keeps
 -- its own cooldown (entity.ability); a mount with no entry shows no button.
 local abilityKey = false -- Q or R1 held
-local chargeCam, rattleHaze = 0, 0 -- 0..1, eased in and out: the charge's pulled-back camera, the rattle's haze
+local chargeCam, rattleHaze, cineCam = 0, 0, 0 -- 0..1, eased in and out: the charge's wider view, the rattle's haze, the cinematic angle
 local RATTLE_HAZE = Color3.fromRGB(70, 150, 255)
 local abilityClock = 0 -- ride time, slowed with the slow motion like everything else
 local ABILITY_RING_TIME = 0.6
@@ -1346,6 +1346,7 @@ local function startAbility(cfg)
 		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
 	elseif cfg.Kind == "Rattle" then
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius)
+		hold = math.min(hold + holdTime(mount) * (cfg.Restore or 0), holdTime(mount)) -- a breather: the Hold bar refills
 	end
 end
 
@@ -1808,7 +1809,18 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	chargeCam += ((if kind == "Charge" then 1 else 0) - chargeCam) * (1 - math.exp(-5 * dt))
 	rattleHaze += ((if kind == "Rattle" then 1 else 0) - rattleHaze) * (1 - math.exp(-6 * dt))
 	Hud.setAbilityTint(rattleHaze * 0.85, RATTLE_HAZE)
-	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 + 10 * chargeCam, 18 + 14 * chargeCam)).Position, (basis * CFrame.new(0, 0, -24)).Position)
+	local desired = CFrame.lookAt((basis * CFrame.new(0, 38, 18)).Position, (basis * CFrame.new(0, 0, -24)).Position)
+	-- Charge and Rattle: the camera swings round to a low shot from ahead and off
+	-- to the side, looking back at the pet (slowly circling while the snake rattles).
+	cineCam += ((if kind == "Charge" or kind == "Rattle" then 1 else 0) - cineCam) * (1 - math.exp(-4 * dt))
+	if cineCam > 0.001 and mount then
+		local a = cineCam * cineCam * (3 - 2 * cineCam)
+		local pet = Vector3.new(mount.x, (mount.hop or 0) + 3, mount.z)
+		local swing = if kind == "Rattle" then math.rad(35) + (ability and ability.t or 0) * 0.35 else math.rad(28)
+		local from = pet + (basis * CFrame.Angles(0, swing, 0)).LookVector * 28 + Vector3.new(0, 9, 0)
+		local cine = CFrame.lookAt(from, pet + basis.LookVector * 4)
+		desired = desired:Lerp(cine, a)
+	end
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
