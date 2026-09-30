@@ -7,6 +7,7 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local Inventory = require(script.Parent.Inventory)
+local PetsPanel = require(script.Parent.PetsPanel)
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
 local Hud = {}
@@ -404,8 +405,12 @@ function Hud.init(onAction, onHome, onRide)
 	showGold()
 	-- Pets sits just over the coin, centred on it.
 	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
-		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8))
+		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8), PetsPanel.open)
 	Inventory.init(homeRoot)
+	-- The Pets panel hides the rest of the home UI while it's open.
+	PetsPanel.init({ money = money, hideHud = function(hidden)
+		homeRoot.Visible = not hidden
+	end })
 
 	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). Green when
 	-- you have the gold, grey when you don't; the price sits under the coin drawn
