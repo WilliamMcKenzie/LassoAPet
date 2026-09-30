@@ -505,6 +505,9 @@ ContextActionService:BindActionAtPriority("Sprint", function(_, state)
 end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.LeftShift, Enum.KeyCode.RightShift, Enum.KeyCode.ButtonL2)
 
 local function sprinting()
+	if phase == "return" then
+		return Config.ReturnSprint -- racing home with the egg
+	end
 	return phase == "outbound" and (sprintKey or Hud.sprintHeld())
 end
 
