@@ -485,10 +485,13 @@ end
 -- follows the pet each frame, so it isn't destroyed along with a pet's model.
 local rideSpot = Instance.new("Attachment")
 local rideOffset = CFrame.identity -- rideSpot relative to the pet's root
+local rideSize = Vector3.one -- the pet's bounding box
+local RIDE_REACH = 5 -- studs from the pet's outline where RIDE shows
 rideSpot.Name = "RideSpot"
 local ridePrompt = Instance.new("ProximityPrompt")
 ridePrompt.ActionText = "Ride"
 ridePrompt.RequiresLineOfSight = false
+ridePrompt.MaxActivationDistance = RIDE_REACH
 ridePrompt.Style = Enum.ProximityPromptStyle.Custom
 ridePrompt.Parent = rideSpot
 ridePrompt.PromptShown:Connect(function()
@@ -566,18 +569,23 @@ local function updateRideTarget()
 	if target ~= rideModel then
 		rideModel = target
 		if target then
-			-- Measured from the middle of the pet, with more reach for big ones (the
-			-- Snake's root is at its tail end, 18 studs from its head).
 			local middle, size = target:GetBoundingBox()
 			rideOffset = target.PrimaryPart.CFrame:ToObjectSpace(middle)
-			ridePrompt.MaxActivationDistance = 8 + math.max(size.X, size.Z) / 2
+			rideSize = size
 			rideSpot.Parent = workspace.Terrain
 		else
 			rideSpot.Parent = nil
 		end
 	end
 	if rideModel and rideModel.PrimaryPart then
-		rideSpot.WorldCFrame = rideModel.PrimaryPart.CFrame * rideOffset
+		-- The prompt sits on the point of the pet's outline nearest you, at your
+		-- height, so RIDE shows only when you're right up against the pet (from
+		-- any side, and whatever its size: the Snake is 50 studs long).
+		local box = rideModel.PrimaryPart.CFrame * rideOffset
+		local at = if hrp then box:PointToObjectSpace(hrp.Position) else Vector3.zero
+		local half = rideSize / 2
+		local edge = box:PointToWorldSpace(Vector3.new(math.clamp(at.X, -half.X, half.X), 0, math.clamp(at.Z, -half.Z, half.Z)))
+		rideSpot.WorldCFrame = CFrame.new(Vector3.new(edge.X, if hrp then hrp.Position.Y else edge.Y, edge.Z))
 	end
 end
 
