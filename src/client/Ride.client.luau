@@ -1163,6 +1163,8 @@ end
 -- Pet abilities (Config.Abilities): the Ability button, Q or R1. Each mount keeps
 -- its own cooldown (entity.ability); a mount with no entry shows no button.
 local abilityKey = false -- Q or R1 held
+local chargeCam, rattleHaze = 0, 0 -- 0..1, eased in and out: the charge's pulled-back camera, the rattle's haze
+local RATTLE_HAZE = Color3.fromRGB(70, 150, 255)
 local abilityClock = 0 -- ride time, slowed with the slow motion like everything else
 local ABILITY_RING_TIME = 0.6
 
@@ -1184,30 +1186,87 @@ local function activeAbility()
 	return a and a.active
 end
 
--- Wind streaks tearing back off a charging animal's front.
+-- Charge VFX, from free Creator Store packs: the "Anime/Sharp Wind" beam texture
+-- (Wind VFX Pack, asset 88348191251190) and the speed-line shard (Speed Effect/Vfx,
+-- asset 16703877340). Only the texture ids are used; the effects are built here.
+local WIND_TEXTURE = "rbxassetid://17520182385"
+local SHARD_TEXTURE = "rbxassetid://7216979807"
+local WIND_SHEETS = 6 -- beams in the cone of air parting round the head
+
+-- Wind breaking round a charging animal's head: a cone of sharp wind sheets
+-- sweeping back from its nose, and speed lines streaming past its body.
 local function chargeFx(entity)
 	local root = entity.animal.model.PrimaryPart
 	local middle, size = entity.animal.model:GetBoundingBox()
-	local at = Instance.new("Attachment")
-	at.Name = "ChargeWind"
-	at.Position = root.CFrame:PointToObjectSpace(middle.Position + middle.LookVector * size.Z / 2)
-	local wind = Instance.new("ParticleEmitter")
-	wind.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	wind.Color = ColorSequence.new(Color3.new(1, 1, 1))
-	wind.LightEmission = 0.6
-	wind.Orientation = Enum.ParticleOrientation.VelocityParallel
-	wind.EmissionDirection = Enum.NormalId.Back -- the model faces -Z: streaks fly backwards
-	wind.Speed = NumberRange.new(55, 75)
-	wind.Lifetime = NumberRange.new(0.25, 0.4)
-	wind.Rate = 90
-	wind.SpreadAngle = Vector2.new(25, 25)
-	wind.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(1, 0.1) })
-	wind.Squash = NumberSequence.new(-3)
-	wind.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.3), NumberSequenceKeypoint.new(1, 1) })
-	wind.LockedToPart = false
-	wind.Parent = at
-	at.Parent = root
-	return { at }
+	local local0 = root.CFrame:ToObjectSpace(middle)
+	-- The nose: the front of the box (the model faces -Z), a little above the middle.
+	local nose = local0.Position + Vector3.new(0, size.Y * 0.1, -size.Z / 2 - 0.5)
+	local radius = math.max(size.X, size.Y) * 0.95
+	local length = size.Z * 0.9
+	local fx = {}
+	for k = 1, WIND_SHEETS do
+		-- Round the cone, missing the underside (the ground).
+		local angle = math.rad(-110 + 220 * (k - 1) / (WIND_SHEETS - 1))
+		local out = Vector3.new(math.sin(angle), math.cos(angle), 0) -- radial, 0 = straight up
+		local around = Vector3.new(0, 0, -1):Cross(out)
+		local a0 = Instance.new("Attachment")
+		a0.CFrame = CFrame.fromMatrix(nose, out, around)
+		a0.Parent = root
+		local a1 = Instance.new("Attachment")
+		a1.CFrame = CFrame.fromMatrix(nose + out * radius + Vector3.new(0, 0, length), out, around)
+		a1.Parent = root
+		local beam = Instance.new("Beam")
+		beam.Texture = WIND_TEXTURE
+		beam.TextureMode = Enum.TextureMode.Stretch
+		beam.TextureLength = 1
+		beam.TextureSpeed = 2.2 + 0.3 * (k % 2)
+		beam.Width0, beam.Width1 = 0.8, radius * 1.5
+		beam.CurveSize0, beam.CurveSize1 = radius * 0.7, 0
+		beam.Segments = 16
+		beam.LightInfluence = 0
+		beam.LightEmission = 0.8
+		beam.FaceCamera = false
+		beam.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.2, 0),
+			NumberSequenceKeypoint.new(0.75, 0.35),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		beam.Attachment0, beam.Attachment1 = a0, a1
+		beam.Parent = a0
+		table.insert(fx, a0)
+		table.insert(fx, a1)
+	end
+	-- Speed lines streaming back past the whole body.
+	local shards = Instance.new("ParticleEmitter")
+	shards.Texture = SHARD_TEXTURE
+	shards.Orientation = Enum.ParticleOrientation.VelocityParallel
+	shards.EmissionDirection = Enum.NormalId.Back -- the model faces -Z: lines fly backwards
+	shards.Shape = Enum.ParticleEmitterShape.Box
+	shards.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+	shards.ShapeInOut = Enum.ParticleEmitterShapeInOut.Outward
+	shards.Speed = NumberRange.new(90, 120)
+	shards.Lifetime = NumberRange.new(0.12, 0.2)
+	shards.Rate = 70
+	shards.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.3, 4), NumberSequenceKeypoint.new(1, 0) })
+	shards.Squash = NumberSequence.new({ NumberSequenceKeypoint.new(0, -4), NumberSequenceKeypoint.new(1, -2.2) })
+	shards.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1) })
+	shards.LightEmission = 0.5
+	shards.LockedToPart = false
+	-- The box: the animal's size, a bit wider, so lines pass all round it.
+	local box = Instance.new("Part")
+	box.Size = Vector3.new(size.X + 4, size.Y + 2, size.Z)
+	box.Transparency = 1
+	box.CanCollide, box.CanQuery, box.CanTouch, box.Massless = false, false, false, true
+	box.CFrame = middle
+	box.Anchored = false
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0, weld.Part1 = box, root
+	weld.Parent = box
+	box.Parent = entity.animal.model
+	shards.Parent = box
+	table.insert(fx, box)
+	return fx
 end
 
 -- A ring of sand bursting out from the rattling snake to the ability's radius.
@@ -1382,7 +1441,9 @@ local function updateMount(dt)
 	end
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
-	if ability and ability.cfg.Kind == "Leap" then
+	if ability and ability.cfg.Kind == "Charge" then
+		targetSpeed *= ability.cfg.SpeedBoost
+	elseif ability and ability.cfg.Kind == "Leap" then
 		-- Up into the air and down again in an arc, faster.
 		targetSpeed *= ability.cfg.SpeedBoost
 		mount.hop = math.sin(math.pi * math.clamp(ability.t / ability.cfg.Duration, 0, 1)) * ability.cfg.LeapHeight
@@ -1741,14 +1802,17 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 		camera.FieldOfView += ((70 - 20 * a) - camera.FieldOfView) * (1 - math.exp(-12 * dt))
 		return
 	end
-	local desired = CFrame.lookAt((basis * CFrame.new(0, 38, 18)).Position, (basis * CFrame.new(0, 0, -24)).Position)
+	-- Abilities: the camera pulls back for a charge; a blue haze for the rattle.
+	local ability = activeAbility()
+	local kind = ability and ability.cfg.Kind
+	chargeCam += ((if kind == "Charge" then 1 else 0) - chargeCam) * (1 - math.exp(-5 * dt))
+	rattleHaze += ((if kind == "Rattle" then 1 else 0) - rattleHaze) * (1 - math.exp(-6 * dt))
+	Hud.setAbilityTint(rattleHaze * 0.85, RATTLE_HAZE)
+	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 + 10 * chargeCam, 18 + 14 * chargeCam)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
-	local ability = activeAbility()
-	if ability and ability.cfg.Kind == "Charge" then
-		fov += 12 -- the charge: rushing forward
-	end
+	fov += 12 * chargeCam -- the charge: rushing forward
 	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
 end)
 

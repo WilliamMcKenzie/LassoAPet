@@ -76,15 +76,17 @@ return {
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
 	-- Pet abilities: the Ability button (bottom right while riding), Q or R1.
 	-- A pet without an entry has no button. Seconds throughout.
-	--   Charge (Rhino): while held, up to Duration: a battering ram. No Hold drain,
-	--     and every obstacle and animal in the way is knocked flying, whatever its size.
+	--   Charge (Rhino): while held, up to Duration: a battering ram at SpeedBoost x speed.
+	--     No Hold drain, and every obstacle and animal in the way is knocked flying,
+	--     whatever its size. Wind breaks round its head and the camera pulls back.
 	--   Leap (Unicorn): one tap: a gallop up into the air and down again in an arc
 	--     LeapHeight studs high, over everything, at SpeedBoost x speed with no Hold drain.
 	--   Rattle (Snake): one tap: it stops, coils up and rattles for Duration (its
 	--     coiled idle), smashing every obstacle within Radius studs and scattering
-	--     the animals there away from it. No Hold drain while it rattles.
+	--     the animals there away from it. No Hold drain while it rattles; a blue haze
+	--     closes in round the screen.
 	Abilities = {
-		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 15 },
+		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 15, SpeedBoost = 1.2 },
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 20, SpeedBoost = 1.4, LeapHeight = 14 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 10, Radius = 45 },
 	},
