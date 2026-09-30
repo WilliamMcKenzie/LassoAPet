@@ -65,6 +65,7 @@ ENTRY = 48
 BEAT = 80
 NEST_CLEAR = 18
 GAP = 3  # studs between any two footprints
+FINISH_CLEAR = 80  # studs kept clear before the far wall: the finish line is 50 in
 
 
 class Course:
@@ -99,6 +100,8 @@ class Course:
             return False
         if z - r < biome["z1"] + 4:
             return False
+        if biome is BIOMES[-1] and z - r < biome["z1"] + FINISH_CLEAR:
+            return False  # the finish line and the leap over it (Config.FinishFromEnd)
         for nx, nz in biome["nests"]:
             if math.hypot(x - nx, z - nz) < NEST_CLEAR + r:
                 return False
@@ -230,6 +233,62 @@ class Course:
             side = -side
         self.rng = main
 
+    def cluster(self, biome, rng, cx, cz, smalls, mediums=1):
+        """A tight knot of obstacles: the mediums side by side, smalls packed round."""
+        centres = []
+        for m in range(mediums):
+            x = cx + (m - (mediums - 1) / 2) * 12.5
+            if self.put(self.pick_medium(biome, x, cz), x, cz, biome, jitter=3):
+                centres.append((self.items[-1]["x"], self.items[-1]["z"]))
+        if not centres:
+            centres = [(cx, cz)]
+        start = rng.uniform(0, 2 * math.pi)
+        for k in range(smalls):
+            ox, oz = centres[k % len(centres)]
+            a = start + k * 2 * math.pi / smalls
+            x, z = ox + math.cos(a) * 11.5, oz + math.sin(a) * 11.5
+            asset = "Cactus" if rng.random() < 0.3 else self.pick_small(biome, x, z)
+            self.put(asset, x, z, biome, jitter=1.5)
+
+    def desert_clusters(self, biome, rng):
+        """The desert, gathered up (QM, Sep 30): the same kinds of obstacles, about
+        two thirds as many, packed into clusters with clear lanes between them.
+        Each beat is one cluster swinging from side to side; deeper in, some
+        beats get a second cluster on the other side (a lane down the middle),
+        and every fourth beat is a sand mound island with a few things tucked
+        against it. A few smalls still hug the walls, and each nest keeps one."""
+        main = self.rng
+        self.rng = rng
+        for nx, nz in biome["nests"]:
+            side = int(rng.choice([-1, 1]))
+            self.put(self.pick_small(biome, nx, nz), nx + side * (NEST_CLEAR + 4), nz + rng.normal(0, 3), biome, jitter=1.5)
+        n = int((biome["z0"] - biome["z1"] - ENTRY) // BEAT)
+        side = int(rng.choice([-1, 1]))
+        for b in range(n):
+            mid = biome["z0"] - ENTRY - b * BEAT - BEAT / 2
+            busy = b / max(1, n - 1)
+            if b % 4 == 3:
+                x = rng.uniform(-8, 8)
+                if self.put("SandMound", x, mid, biome, jitter=4):
+                    mx, mz = self.items[-1]["x"], self.items[-1]["z"]
+                    for k in range(2):
+                        a = rng.uniform(0, 2 * math.pi)
+                        self.put(self.pick_small(biome, mx, mz), mx + math.cos(a) * 18, mz + math.sin(a) * 18, biome, jitter=2)
+                continue
+            self.cluster(biome, rng, side * rng.uniform(10, 30), mid, 3 + (1 if busy > 0.5 else 0),
+                         mediums=2 if rng.random() < 0.35 else 1)
+            if busy > 0.4 and rng.random() < 0.5:
+                self.cluster(biome, rng, -side * rng.uniform(30, 40), mid + rng.normal(0, 8), 2)
+            side = -side
+        z = biome["z0"] - ENTRY
+        while z > biome["z1"] + 16:
+            for s in (-1, 1):
+                if rng.random() < 0.08:
+                    x = s * (HALF_W - ASSETS["Sandstone"][0] - 1.5)
+                    self.put("Sandstone", x, z + rng.normal(0, 4), biome)
+            z -= 24
+        self.rng = main
+
     def build(self):
         for b in BIOMES:
             if b["name"] == "Meadow":
@@ -240,7 +299,7 @@ class Course:
                 del self.items[before:]
                 self.meadow_clusters(b, np.random.default_rng(11))
             else:
-                self.biome(b)
+                self.desert_clusters(b, np.random.default_rng(23))
         return self.items
 
 

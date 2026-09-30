@@ -15,6 +15,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
@@ -268,17 +269,30 @@ local function countdown(seconds)
 end
 
 -- Placing: the equipped egg Tool, and the see-through egg that shows where it'll go.
-local holding, ghost, ghostSpot
+local holding, ghost
 local mouse = player:GetMouse()
 
--- Where in your pen the mouse points, as (x, z) from the Area's centre, if an egg can go there.
-local function spotUnderMouse()
+-- Where in your pen the screen point (x, y) (GUI pixels, as the mouse reports
+-- them) looks at, as (x, z) from the Area's centre, if an egg can go there.
+local function spotAt(screenX, screenY)
 	local pen = myPen()
 	if not pen then
 		return nil
 	end
+	-- Where the mouse ray meets the pen floor's plane. (Not mouse.Hit: that stops
+	-- on whatever's in the way first, a fence rail, your character, the pet
+	-- waiting to be ridden, and then the spot was off or missing.)
 	local area = pen.Area
-	local hit = mouse.Hit.Position - area.Position
+	local ray = workspace.CurrentCamera:ScreenPointToRay(screenX, screenY)
+	local floorY = area.Position.Y + area.Size.Y / 2
+	if math.abs(ray.Direction.Y) < 1e-3 then
+		return nil
+	end
+	local t = (floorY - ray.Origin.Y) / ray.Direction.Y
+	if t <= 0 then
+		return nil
+	end
+	local hit = ray.Origin + ray.Direction * t - area.Position
 	if math.abs(hit.X) > area.Size.X / 2 - EDGE or math.abs(hit.Z) > area.Size.Z / 2 - EDGE then
 		return nil
 	end
@@ -337,8 +351,7 @@ RunService.RenderStepped:Connect(function(dt)
 		end
 	end
 	if ghost then
-		local x, z = spotUnderMouse()
-		ghostSpot = x and { x, z } or nil
+		local x, z = spotAt(mouse.X, mouse.Y)
 		ghost.Parent = if x then folder else nil
 		if x then
 			local pen = myPen()
@@ -350,7 +363,7 @@ end)
 local function setGhost(kind)
 	if ghost then
 		ghost:Destroy()
-		ghost, ghostSpot = nil, nil
+		ghost = nil
 	end
 	if not kind then
 		return
@@ -363,7 +376,6 @@ local function setGhost(kind)
 			part.CanQuery = false -- so the mouse sees the ground under it
 		end
 	end
-	mouse.TargetFilter = folder -- nor any egg or pet already down
 end
 
 local hooked = {} -- tools already wired up (each equip puts the tool in the character again)
@@ -386,12 +398,22 @@ local function hold(tool)
 		drop()
 	end)
 	tool.Unequipped:Connect(drop)
-	tool.Activated:Connect(function()
-		if holding == tool and ghostSpot then
-			placeEgg:FireServer(tool:GetAttribute("EggKind"), ghostSpot[1], ghostSpot[2])
-		end
-	end)
 end
+
+-- A click or tap on your pen while holding an egg puts it down there. (Read
+-- straight from the input, not the Tool's Activated, which some clicks never fire.)
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed or not holding or holding.Parent ~= player.Character then
+		return
+	end
+	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+		return
+	end
+	local x, z = spotAt(input.Position.X, input.Position.Y)
+	if x then
+		placeEgg:FireServer(holding:GetAttribute("EggKind"), x, z)
+	end
+end)
 
 local function watchCharacter(character)
 	character.ChildAdded:Connect(function(child)
