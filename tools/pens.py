@@ -31,7 +31,7 @@ FRONT_Z = 126  # the gate side; the back sits 2 studs off the base's back wall (
 GATE = 8
 SPAWN_Z = 121
 # Pet spots, two rows of three. Slot1 faces the gate, so the pet standing there
-# (the default horse for now) rides straight out through it.
+# (the pet you ride, the default horse for now) rides straight out through it.
 SLOTS = [(x, FRONT_Z + dz) for dz in (9, 21) for x in (0, -7, 7)]
 
 # Post-and-rail wooden pens like the horse pens and farm plots in Roblox horse
