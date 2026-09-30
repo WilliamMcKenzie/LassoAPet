@@ -159,7 +159,7 @@ class Course:
                     self.put(self.pick_medium(biome, x2, mid), x2, mid + rng.normal(0, 3), biome)
             self.clump(biome, cx + rng.choice([-1, 1]) * 20, mid - 26, 1 + int(busy * 2))
         elif pattern == "slalom":
-            side = rng.choice([-1, 1])
+            side = int(rng.choice([-1, 1]))
             for k in range(3):
                 z = z0 - 14 - k * (z0 - z1 - 28) / 2
                 x = side * rng.uniform(14, 26)
@@ -203,9 +203,44 @@ class Course:
             self.beat(biome, patterns[b % len(patterns)], z0, z0 - BEAT, busy)
         self.edges(biome)
 
+    def meadow_clusters(self, biome, rng):
+        """The meadow, thinned out (QM, Sep 30): about half as many obstacles as the
+        beats would place, gathered into one tight cluster per beat (a boulder with
+        two or three smalls packed round it) so there's always a wide open lane to
+        take. Clusters swing from side to side down the course; a nest keeps one
+        small beside it."""
+        main = self.rng
+        self.rng = rng
+        for nx, nz in biome["nests"]:
+            side = int(rng.choice([-1, 1]))
+            self.put(self.pick_small(biome, nx, nz), nx + side * (NEST_CLEAR + 4), nz + rng.normal(0, 3), biome, jitter=1.5)
+        n = int((biome["z0"] - biome["z1"] - ENTRY) // BEAT)
+        side = int(rng.choice([-1, 1]))
+        for b in range(n):
+            mid = biome["z0"] - ENTRY - b * BEAT - BEAT / 2
+            cx = side * rng.uniform(12, 34)
+            if self.put(self.pick_medium(biome, cx, mid), cx, mid, biome, jitter=4):
+                cx, mid = self.items[-1]["x"], self.items[-1]["z"]
+            smalls = 2 + (1 if b >= n // 2 else 0)
+            start = rng.uniform(0, 2 * math.pi)
+            for k in range(smalls):
+                a = start + k * 2 * math.pi / smalls
+                x, z = cx + math.cos(a) * 11.5, mid + math.sin(a) * 11.5
+                self.put(self.pick_small(biome, x, z), x, z, biome, jitter=1.5)
+            side = -side
+        self.rng = main
+
     def build(self):
         for b in BIOMES:
-            self.biome(b)
+            if b["name"] == "Meadow":
+                # Lay the old meadow out and throw it away, so the random draws the
+                # desert gets (and so its layout) stay exactly as QM approved them.
+                before = len(self.items)
+                self.biome(b)
+                del self.items[before:]
+                self.meadow_clusters(b, np.random.default_rng(11))
+            else:
+                self.biome(b)
         return self.items
 
 

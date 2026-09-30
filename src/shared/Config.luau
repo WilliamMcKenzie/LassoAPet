@@ -90,7 +90,7 @@ return {
 	--     coiled idle), smashing every obstacle within Radius studs and scattering
 	--     the animals there away from it, and refilling Restore of the Hold bar. No
 	--     Hold drain while it rattles; a blue haze closes in round the screen.
-	-- Charge and Rattle swing the camera round to a cinematic front-side angle.
+	-- Charge swings the camera round to a cinematic front-side angle.
 	Abilities = {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 14 },
