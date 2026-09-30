@@ -5,9 +5,10 @@ Run: python3 tools/snow_ground.py [out_dir]     render a preview
 After QM's reference (their other game): big teal grass fields and pale blue
 ice ponds, with light snow running between them like paths. Same approach as
 tools/desert_ground.py: noise patches on an 8-stud grid so the 4-stud checker
-lines up. Snow is the base at 0, cold grass sits flush, and ice is sunk a stud
-like a frozen pond. The columns along the walls, the start and the nests stay
-snow, so sunken ice never opens a gap under a wall or drops a nest.
+lines up. Snow is the base at 0, cold grass stands a stud higher (QM: grass
+> snow), and ice is sunk a stud like a frozen pond. The columns along the
+walls, the start and the nests stay snow, so sunken ice never opens a gap
+under a wall or drops a nest.
 """
 
 import os
@@ -25,6 +26,7 @@ GRASS = [(80, 160, 166), (96, 176, 180)]  # cold grass, the reference's teal
 ICE = [(160, 188, 244), (178, 202, 250)]
 WALL = [(126, 164, 214), (146, 182, 228)]
 ICE_DOWN = 1
+GRASS_UP = 1  # QM: grass > snow
 LENGTH = 200  # studs shown in the preview
 SNOW_LENGTH = 6840  # 3x the desert (QM)
 NESTS = []  # placed later with the course
@@ -59,7 +61,7 @@ def take(kind):
     for i in range(nx):
         for j in range(nz):
             k = kind[i, j]
-            top = -ICE_DOWN if k == 2 else 0
+            top = (0, GRASS_UP, -ICE_DOWN)[k]
             for di in (0, 1):
                 for dj in (0, 1):
                     x = -HALF_W + i * CELL + di * 4 + 2
