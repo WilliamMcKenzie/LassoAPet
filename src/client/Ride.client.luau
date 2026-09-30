@@ -37,6 +37,7 @@ local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this ra
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
 local deliverEgg = ReplicatedStorage:WaitForChild("DeliverEgg")
+local finishCourse = ReplicatedStorage:WaitForChild("FinishCourse")
 local ridePet = ReplicatedStorage:WaitForChild("RidePet")
 local waitingEggs = {} -- [nest] = { egg, kind, nest, nextTwitch }
 local nearEgg -- the waiting egg in grab range, while actionTarget is "egg"
@@ -141,6 +142,7 @@ local EDGE = Config.CourseHalfWidth - 4
 local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:GetBoundingBox().Position.Z else -2
 local SPAWN_Z = START_LINE_Z + 4
 local END_Z = -Config.CourseLength + 4 -- the far wall
+local FINISH_Z = -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
 local VIEW = 320 -- stampede animals further than this from the camera aren't drawn
 local DUST_VIEW = 160 -- landings further than this from the camera kick up no dust
 -- They pop in instead of appearing: a poof, then they spring up out of it,
@@ -226,7 +228,7 @@ herdFolder.Parent = workspace
 
 -- An entity is an animal plus its position on the course.
 -- yaw 0 faces -z (outbound); yaw pi faces +z (home).
-local phase = "idle" -- idle | outbound | turning | return | home | ended
+local phase = "idle" -- idle | outbound | turning | return | home | finish | ended
 local starter, mount
 local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
 local plans = {} -- [n] = { x, speed }, the stampede's schedule
@@ -1438,11 +1440,11 @@ local function updateMount(dt)
 		place(mount, 0)
 		animate(mount, dt, if t < 1 then mount.speed else 0, 0)
 		return
-	elseif phase == "home" then
+	elseif phase == "home" or phase == "finish" then
 		-- Landed: runs on HomeRunOut studs, easing to a stop.
 		local brake = RUN_OUT_SPEED * RUN_OUT_SPEED / (2 * Config.HomeRunOut)
 		mount.speed = math.max(mount.speed - brake * dt, 0)
-		mount.z += mount.speed * dt
+		mount.z += (if phase == "finish" then -1 else 1) * mount.speed * dt
 		place(mount, 0)
 		animate(mount, dt, mount.speed, 0)
 		return
@@ -1507,7 +1509,24 @@ local function reachHome()
 	end
 end
 
+-- Over the finish line at the end of the course: the same slow-motion leap as
+-- coming home, over the line; then a random egg and home (see the landing below).
+local function reachFinish()
+	if phase == "outbound" and mount.z <= FINISH_Z + LEAP_FROM and not transfer then
+		phase = "finish"
+		heroLeap = { t = 0, fromZ = mount.z, toZ = FINISH_Z - Config.HomeLandPast }
+		Hud.setCutscene(true)
+		Hud.setAction(nil)
+		Hud.setHold(nil)
+		return true
+	end
+	return false
+end
+
 local function checkRide(dt)
+	if phase == "finish" or reachFinish() then
+		return -- the leap over the finish line: nothing can go wrong now
+	end
 	grace = math.max(grace - dt, 0)
 	local ability = activeAbility()
 	if phase == "outbound" and mount.z < 0 and not transfer and not ability then -- abilities use no Hold
@@ -1516,8 +1535,8 @@ local function checkRide(dt)
 			return fail("BUCKED OFF")
 		end
 	end
-	if mount.z < -Config.CourseLength + 40 then
-		return fail("TOO FAR!")
+	if mount.z < END_Z + 8 then
+		return fail("TOO FAR!") -- only if something skipped the finish line
 	end
 	if ability and ability.cfg.Kind == "Charge" then
 		-- A battering ram: everything in the way goes flying, whatever its size.
@@ -1758,15 +1777,31 @@ RunService.PreSimulation:Connect(function(dt)
 		place(mount, 0)
 		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
 		Hud.setCutscene(false)
-		local kind = carried and carried.kind
-		if kind then
-			deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
-		end
-		task.delay(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function()
-			if phase == "home" then
-				finishRide(mount.x, mount.z)
+		if phase == "finish" then
+			-- Crossed the finish line: a random egg (the server draws it), its
+			-- reveal, then back home to your pen.
+			task.spawn(function()
+				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse)
+				kind = ok and kind or nil
+				task.wait(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5)
+				if phase == "finish" then
+					local pen = myPen()
+					local spawn = pen and pen:FindFirstChild("Spawn")
+					local spot = if spawn then spawn.Position else homeSpot()
+					finishRide(spot.X - 6, spot.Z) -- just outside your pen's open side
+				end
+			end)
+		else
+			local kind = carried and carried.kind
+			if kind then
+				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
 			end
-		end)
+			task.delay(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function()
+				if phase == "home" then
+					finishRide(mount.x, mount.z)
+				end
+			end)
+		end
 	end
 	actionTarget = findTarget()
 	Outline.set(if actionTarget == "egg" then nearEgg.egg.model elseif actionTarget then actionTarget.animal.model else nil)

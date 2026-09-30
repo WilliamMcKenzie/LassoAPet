@@ -1,7 +1,8 @@
 -- The map itself (ground, corridor walls, obstacles, home base, pen and egg
 -- nest) is a saved model: src/world/World.rbxmx, synced by Rojo into
 -- Workspace.World, so it can be edited by hand in Studio. This script only sets
--- the sky, turns on the live colour attributes and marks the world ready.
+-- the sky, puts the finish line at the end of the course, turns on the live
+-- colour attributes and marks the world ready.
 
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -29,5 +30,16 @@ end
 sky.SkyboxUp = "rbxassetid://73730341040940"
 sky.SkyboxDn = "rbxassetid://98351643334543"
 sky.Parent = Lighting
+-- The finish line: a copy of the start line at the end of the last biome
+-- (Config.FinishFromEnd before the far wall), so it moves as biomes are added.
+local Config = require(ReplicatedStorage.Shared.Config)
+local startLine = world:FindFirstChild("StartLine")
+if startLine then
+	local finish = startLine:Clone()
+	finish.Name = "FinishLine"
+	local z = startLine:GetBoundingBox().Position.Z
+	finish:PivotTo(CFrame.new(0, 0, -Config.CourseLength + Config.FinishFromEnd - z) * startLine:GetPivot())
+	finish.Parent = world
+end
 require(ReplicatedStorage.Shared.WorldColors).watch(world)
 world:SetAttribute("Ready", true)

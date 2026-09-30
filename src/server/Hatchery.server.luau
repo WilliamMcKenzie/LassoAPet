@@ -230,6 +230,47 @@ remote("DeliverEgg", function(player, kind)
 	publish(player)
 end)
 
+-- The ride crossed the finish line at the end of the course: a random egg, drawn
+-- like the stampede itself (each biome's Herd counts as weights, so a Unicorn egg
+-- is as rare as Unicorns are). Returns the kind, for the egg reveal.
+local finished = {} -- [player] = os.clock() of their last finish
+local finishCourse = Instance.new("RemoteFunction")
+finishCourse.Name = "FinishCourse"
+finishCourse.OnServerInvoke = function(player)
+	local profile = profiles[player]
+	if not profile or (finished[player] and os.clock() - finished[player] < 10) then
+		return nil
+	end
+	finished[player] = os.clock()
+	local pool, total = {}, 0
+	for _, biome in Config.Biomes do
+		for kind, weight in biome.Herd or {} do
+			if isAnimal(kind) then
+				total += weight
+				table.insert(pool, { kind = kind, upTo = total })
+			end
+		end
+	end
+	local roll = Random.new():NextNumber(0, total)
+	local kind
+	for _, entry in pool do
+		kind = entry.kind
+		if roll <= entry.upTo then
+			break
+		end
+	end
+	if not kind then
+		return nil
+	end
+	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	publish(player)
+	return kind
+end
+finishCourse.Parent = ReplicatedStorage
+Players.PlayerRemoving:Connect(function(player)
+	finished[player] = nil
+end)
+
 -- Put an egg from the inventory down in your pen, at (x, z) from the Area's centre.
 remote("PlaceEgg", function(player, kind, x, z)
 	local profile = profiles[player]

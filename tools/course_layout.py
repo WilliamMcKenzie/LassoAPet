@@ -65,6 +65,7 @@ ENTRY = 48
 BEAT = 80
 NEST_CLEAR = 18
 GAP = 3  # studs between any two footprints
+FINISH_CLEAR = 80  # studs kept clear before the far wall: the finish line is 50 in
 
 
 class Course:
@@ -99,6 +100,8 @@ class Course:
             return False
         if z - r < biome["z1"] + 4:
             return False
+        if biome is BIOMES[-1] and z - r < biome["z1"] + FINISH_CLEAR:
+            return False  # the finish line and the leap over it (Config.FinishFromEnd)
         for nx, nz in biome["nests"]:
             if math.hypot(x - nx, z - nz) < NEST_CLEAR + r:
                 return False
