@@ -270,8 +270,19 @@ end
 
 local startRide, ridePrompt
 
+-- Where your horse waits and where you come home to: in front of your pen
+-- (the "Pen" attribute the server sets), or the middle of the base without one.
+local function homeSpot()
+	local index = player:GetAttribute("Pen")
+	local pens = workspace:FindFirstChild("Pens")
+	local pen = index and pens and pens:FindFirstChild("Pen" .. index)
+	local spot = pen and pen:FindFirstChild("Mount")
+	return if spot then spot.Position else Config.StarterSpot
+end
+
 local function spawnStarter()
-	starter = newEntity(Config.StarterSpot.X, Config.StarterSpot.Z, 0)
+	local spot = homeSpot()
+	starter = newEntity(spot.X, spot.Z, 0)
 	starter.animal:setSaddled(true)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Ride"
@@ -309,7 +320,8 @@ startRide = function()
 	end
 	mount, starter = starter, nil
 	mount.animal:setSaddled(true)
-	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = Config.StarterSpot.X, Config.StarterSpot.Z, 0, 0, 0
+	local spot = homeSpot()
+	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, 0, 0
 	phase, hold, grace, camYaw = "outbound", Config.HoldTime, 0, 0
 	coins = 0
 	hrp.Anchored = true
@@ -379,7 +391,8 @@ local function goHome()
 		return
 	end
 	Hud.showHome(false)
-	finishRide(Config.StarterSpot.X, Config.StarterSpot.Z)
+	local spot = homeSpot()
+	finishRide(spot.X, spot.Z)
 end
 
 local function startTransfer(target)
@@ -675,7 +688,9 @@ local function updateMount(dt)
 	local steer = phase == "home" and 0 or readSteer()
 	local targetLat = steer * Config.SteerSpeed * -dir
 	mount.latVel += (targetLat - mount.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
-	local edge = mount.z > 0 and Config.HomeHalfWidth - 4 or EDGE
+	-- At home the side limit widens from the corridor's to the base's over 40 studs,
+	-- so a ride from an outer pen is eased into the corridor.
+	local edge = EDGE + (Config.HomeHalfWidth - 4 - EDGE) * math.clamp(mount.z / 40, 0, 1)
 	mount.x = math.clamp(mount.x + mount.latVel * dt, -edge, edge)
 	mount.z += dir * mount.speed * dt
 	place(mount, math.atan2(mount.latVel * dir, math.max(mount.speed, 1)))
@@ -933,6 +948,16 @@ player.CharacterAdded:Connect(function()
 end)
 
 spawnStarter()
+
+-- The server hands out pens just after joining: move the waiting horse to yours.
+player:GetAttributeChangedSignal("Pen"):Connect(function()
+	if phase == "idle" and starter then
+		starter.animal.model:Destroy()
+		starter = nil
+		Hud.showRide(false)
+		spawnStarter()
+	end
+end)
 
 -- Fill the pools a few animals per frame, so joining doesn't hitch: each kind
 -- gets its share of POOL_START by its HerdMix weight (at least a couple).

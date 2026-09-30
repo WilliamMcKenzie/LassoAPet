@@ -25,6 +25,9 @@
       },
       "World": {
         "$path": "src/world/World.rbxmx"
+      },
+      "Pens": {
+        "$path": "src/world/Pens.rbxmx"
       }
     },
     "Lighting": {
