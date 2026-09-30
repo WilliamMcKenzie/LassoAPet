@@ -64,11 +64,10 @@ return {
 		Fish = "rbxassetid://105098230793344",
 		Rhino = "rbxassetid://139482781062355",
 		Unicorn = "rbxassetid://85066893166855",
-		-- desert eggs: fill in once assets/ui/<Kind>EggRender.png is uploaded
-		Cactus = "",
-		Scorpion = "",
-		Sandworm = "",
-		Snake = "",
+		Cactus = "rbxassetid://95599437590618",
+		Scorpion = "rbxassetid://138046936786400",
+		Sandworm = "rbxassetid://96884572036784",
+		Snake = "rbxassetid://71071272639782",
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
