@@ -223,7 +223,7 @@ def look_at(eye, target):
     return eye, r, u, f
 
 
-def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0), ground=True, transparent=False):
+def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0), ground=True, transparent=False, fog=True):
     """Render parts with a z-buffer; returns a PIL image (RGBA with a clear
     background when transparent, which also drops the ground)."""
     ground = ground and not transparent
@@ -253,8 +253,9 @@ def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0
         gz = eye[2] + t * dirs[..., 2]
         chk = ((np.floor(gx / 4) + np.floor(gz / 4)) % 2 == 0)
         col = np.where(chk[..., None], GROUND, GROUND2)
-        fog = np.clip((t - 30) / 120, 0, 1)[..., None]
-        col = col * (1 - fog) + SKY_BOT * fog
+        if fog:
+            haze = np.clip((t - 30) / 120, 0, 1)[..., None]
+            col = col * (1 - haze) + SKY_BOT * haze
         img[hit] = col[hit]
         zdepth = t * np.einsum("ijk,k->ij", dirs, f)
         zbuf[hit] = zdepth[hit] + 1e-3  # ground depth
@@ -354,7 +355,10 @@ def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0
         za = zbuf[: H - dy, : W - dx]
         zb2 = zbuf[dy:, dx:]
         oa, ob = obj[: H - dy, : W - dx], obj[dy:, dx:]
-        e = (oa != ob) | ((oa & ob) & (np.abs(za - zb2) > 0.35))
+        # the gap that counts as an edge grows with distance, so far-off floors at a
+        # grazing angle don't outline every pixel
+        gap = np.maximum(0.35, 0.02 * np.minimum(za, zb2))
+        e = (oa != ob) | ((oa & ob) & (np.abs(za - zb2) > gap))
         edge[: H - dy, : W - dx] |= e & oa
         edge[dy:, dx:] |= e & ob
     img[edge] *= 0.35
