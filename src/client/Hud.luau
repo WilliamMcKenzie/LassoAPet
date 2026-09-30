@@ -758,6 +758,7 @@ end
 -- RIDE shows only while you're close enough to your animal (replaces the [E] prompt).
 function Hud.showRide(visible)
 	ride.Visible = visible and not gui.Enabled
+	Inventory.setVisible(not ride.Visible and not gui.Enabled) -- the RIDE button takes its place
 end
 
 -- Ride back home: DODGE THE STAMPEDE! slams in, then pulses; no cash or distance.

@@ -345,6 +345,7 @@ local function cleanup()
 end
 
 local startRide, ridePrompt
+local rideShown = false -- the RIDE button is up: the waiting pet gets the outline
 
 -- The pen the server handed you (your "Pen" attribute), if any.
 local function myPen()
@@ -366,6 +367,7 @@ local leadFromZ = 0
 
 local function spawnStarter()
 	local spot = homeSpot()
+	rideShown = false
 	-- The pet you'll ride. Nothing is special about the horse: it's just the default
 	-- pet until pets can be picked in the pen (the "RidePet" attribute).
 	starter = newEntity(spot.X, spot.Z, 0, player:GetAttribute("RidePet") or Config.DefaultPet)
@@ -373,17 +375,27 @@ local function spawnStarter()
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Ride"
 	prompt.RequiresLineOfSight = false
-	prompt.MaxActivationDistance = 12
 	prompt.Style = Enum.ProximityPromptStyle.Custom -- draws nothing; E still works, and the RIDE button shows while it's in range
-	prompt.Parent = starter.animal.model.PrimaryPart
+	-- Measured from the middle of the pet, with more reach for big ones (the
+	-- Snake's root is at its tail end, 18 studs from its head).
+	local root = starter.animal.model.PrimaryPart
+	local middle, size = starter.animal.model:GetBoundingBox()
+	local at = Instance.new("Attachment")
+	at.Name = "RideSpot"
+	at.CFrame = root.CFrame:ToObjectSpace(middle)
+	at.Parent = root
+	prompt.MaxActivationDistance = 8 + math.max(size.X, size.Z) / 2
+	prompt.Parent = at
 	prompt.Triggered:Connect(function()
 		prompt:Destroy()
 		startRide()
 	end)
 	prompt.PromptShown:Connect(function()
+		rideShown = true
 		Hud.showRide(true)
 	end)
 	prompt.PromptHidden:Connect(function()
+		rideShown = false
 		Hud.showRide(false)
 	end)
 	ridePrompt = prompt
@@ -1113,6 +1125,8 @@ RunService.PreSimulation:Connect(function(dt)
 		if starter then
 			wander(starter, dt)
 		end
+		Outline.set(if rideShown and starter then starter.animal.model else nil) -- the pet RIDE will ride
+		Outline.update()
 		return
 	end
 	if mount then
