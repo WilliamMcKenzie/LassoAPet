@@ -67,6 +67,16 @@ return {
 	-- Seconds an egg placed in your pen takes to hatch, by the rarity of the
 	-- animal inside (first-biome eggs; later biomes can take longer).
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
+	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
+	-- obstacles and stampede animals of a lower tier, knocking them up and away;
+	-- one of its own tier or higher still crashes it. Obstacles take their tier
+	-- from their model's "Tier" attribute, else from ObstacleTiers by name.
+	PetTiers = {
+		Horse = 1, Pinto = 1, Pig = 1, Fish = 1, Cactus = 1, Scorpion = 1,
+		Rhino = 2, Unicorn = 2, Sandworm = 2,
+		Snake = 3,
+	},
+	ObstacleTiers = { Bush = 1, Rock = 2 },
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.
 	PetIncome = {
