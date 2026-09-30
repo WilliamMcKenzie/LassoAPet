@@ -419,9 +419,11 @@ local function spawnStarter()
 	setClickable(starter.animal.model, true)
 end
 
--- One prompt, moved onto whichever pet RIDE rides. It draws nothing; E still
--- works, and the RIDE button shows while it's in range.
+-- One prompt, kept on whichever pet RIDE rides. It draws nothing; E still
+-- works, and the RIDE button shows while it's in range. It lives in Terrain and
+-- follows the pet each frame, so it isn't destroyed along with a pet's model.
 local rideSpot = Instance.new("Attachment")
+local rideOffset = CFrame.identity -- rideSpot relative to the pet's root
 rideSpot.Name = "RideSpot"
 local ridePrompt = Instance.new("ProximityPrompt")
 ridePrompt.ActionText = "Ride"
@@ -486,14 +488,16 @@ local function updateRideTarget()
 		if target then
 			-- Measured from the middle of the pet, with more reach for big ones (the
 			-- Snake's root is at its tail end, 18 studs from its head).
-			local root = target.PrimaryPart
 			local middle, size = target:GetBoundingBox()
-			rideSpot.CFrame = root.CFrame:ToObjectSpace(middle)
+			rideOffset = target.PrimaryPart.CFrame:ToObjectSpace(middle)
 			ridePrompt.MaxActivationDistance = 8 + math.max(size.X, size.Z) / 2
-			rideSpot.Parent = root
+			rideSpot.Parent = workspace.Terrain
 		else
 			rideSpot.Parent = nil
 		end
+	end
+	if rideModel and rideModel.PrimaryPart then
+		rideSpot.WorldCFrame = rideModel.PrimaryPart.CFrame * rideOffset
 	end
 end
 
