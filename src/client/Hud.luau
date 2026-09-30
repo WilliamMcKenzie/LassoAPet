@@ -872,4 +872,35 @@ function Hud.coinPopup(screenPoint, amount)
 	end)
 end
 
+-- The same popup in the world: "+N$" over `part`, `height` studs above its
+-- centre, following it as it moves and rising a few studs as it fades.
+function Hud.coinPopupAt(part, height, amount)
+	local board = Instance.new("BillboardGui")
+	board.Size = UDim2.fromOffset(200, 80)
+	board.Adornee = part
+	board.StudsOffsetWorldSpace = Vector3.new(0, height, 0)
+	board.LightInfluence = 0
+	board.AlwaysOnTop = true
+	board.MaxDistance = 150
+	board.ResetOnSpawn = false
+	local popup = cashRow(board, 48, 34, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5))
+	popup.text.Text = "+" .. amount .. "$"
+	popup.scale.Scale = 0
+	board.Parent = homeGui.Parent
+
+	TweenService:Create(popup.scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	TweenService:Create(board, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		StudsOffsetWorldSpace = Vector3.new(0, height + 3, 0),
+	}):Play()
+	task.delay(0.65, function()
+		local fade = TweenInfo.new(0.35)
+		TweenService:Create(popup.text, fade, { TextTransparency = 1 }):Play()
+		TweenService:Create(popup.text.UIStroke, fade, { Transparency = 1 }):Play()
+		TweenService:Create(popup.coin, fade, { ImageTransparency = 1 }):Play()
+	end)
+	task.delay(1.05, function()
+		board:Destroy()
+	end)
+end
+
 return Hud

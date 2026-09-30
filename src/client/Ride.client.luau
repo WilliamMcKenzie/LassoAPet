@@ -466,10 +466,8 @@ ReplicatedStorage:WaitForChild("PetIncome").OnClientEvent:Connect(function()
 		local earned = kind and Config.PetIncome[kind]
 		if earned and earned > 0 then
 			local middle, size = model:GetBoundingBox()
-			local point, onScreen = camera:WorldToViewportPoint(middle.Position + Vector3.new(0, size.Y / 2 + 1, 0))
-			if onScreen then
-				Hud.coinPopup(Vector2.new(point.X, point.Y), earned)
-			end
+			local root = model.PrimaryPart
+			Hud.coinPopupAt(root, middle.Position.Y - root.Position.Y + size.Y / 2 + 1, earned)
 		end
 	end
 end)
