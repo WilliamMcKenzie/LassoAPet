@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
+local Inventory = require(script.Parent.Inventory)
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
 local Hud = {}
@@ -375,6 +376,7 @@ function Hud.init(onAction, onHome, onRide)
 	local eggsSize = fit("eggs", nil, SIDE_ICON_HEIGHT)
 	eggs = button(homeRoot, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
 	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
+	Inventory.init(homeRoot)
 
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only
@@ -419,8 +421,7 @@ function Hud.show(visible)
 	gold.Visible = not visible
 	pets.Visible = not visible
 	eggs.Visible = not visible
-	-- The Roblox inventory (your eggs) is hidden while riding.
-	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, not visible and Config.ShowHud)
+	Inventory.setVisible(not visible) -- your eggs, hidden while riding
 	gained.row.Visible = false
 	Hud.setReturning(false)
 	Hud.setVignette(0)

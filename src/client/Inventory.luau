@@ -1,0 +1,206 @@
+-- The inventory bar: our own version of the Roblox hotbar (which is turned off),
+-- styled after QM's reference. A row of dark see-through squares at the bottom
+-- centre, each with its number in the corner, the item's picture fitted inside
+-- (never stretched) and "xN" when you have more than one. The equipped one gets
+-- a white outline. Click a square or press its number to equip it; again to put
+-- it away.
+--
+-- The items are the Tools the server puts in your Backpack (eggs, for now: see
+-- Hatchery). An item's picture is its TextureId and its count its "Count" attribute.
+--
+--   Inventory.init(parent) -- builds the bar in a HUD frame (sizes in HUD pixels)
+--   Inventory.setVisible(v) -- hidden while riding
+
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local UserInputService = game:GetService("UserInputService")
+
+local Inventory = {}
+
+local SLOT = 84
+local GAP = 10
+local BOTTOM = 24
+local MAX_SLOTS = 9
+local FONT = Enum.Font.FredokaOne
+
+local player = Players.LocalPlayer
+local bar
+local order = {} -- tool names in the order they first showed up, so squares don't jump around
+local tools = {} -- what's in each square, left to right
+
+local function stroked(label, thickness)
+	local s = Instance.new("UIStroke")
+	s.Thickness = thickness
+	s.Color = Color3.new(0, 0, 0)
+	s.LineJoinMode = Enum.LineJoinMode.Round
+	s.Parent = label
+end
+
+local function text(parent, size, textSize, strokeThickness)
+	local l = Instance.new("TextLabel")
+	l.BackgroundTransparency = 1
+	l.Size = size
+	l.Font = FONT
+	l.TextSize = textSize
+	l.TextColor3 = Color3.new(1, 1, 1)
+	stroked(l, strokeThickness)
+	l.Parent = parent
+	return l
+end
+
+local function humanoid()
+	return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+end
+
+local function toggle(tool)
+	local h = humanoid()
+	if not h or not tool then
+		return
+	end
+	if tool.Parent == player.Character then
+		h:UnequipTools()
+	else
+		h:EquipTool(tool)
+	end
+end
+
+local function allTools()
+	local found = {}
+	for _, holder in { player:FindFirstChildOfClass("Backpack"), player.Character } do
+		for _, child in holder and holder:GetChildren() or {} do
+			if child:IsA("Tool") then
+				found[child.Name] = child
+				if not table.find(order, child.Name) then
+					table.insert(order, child.Name)
+				end
+			end
+		end
+	end
+	return found
+end
+
+local function redraw()
+	if not bar then
+		return
+	end
+	for _, child in bar:GetChildren() do
+		if child:IsA("GuiObject") then
+			child:Destroy()
+		end
+	end
+	local found = allTools()
+	table.clear(tools)
+	for _, name in order do
+		if found[name] and #tools < MAX_SLOTS then
+			table.insert(tools, found[name])
+		end
+	end
+	for i, tool in tools do
+		local slot = Instance.new("TextButton")
+		slot.Text = ""
+		slot.AutoButtonColor = false
+		slot.Size = UDim2.fromOffset(SLOT, SLOT)
+		slot.BackgroundColor3 = Color3.fromRGB(20, 30, 20)
+		slot.BackgroundTransparency = 0.45
+		slot.LayoutOrder = i
+		Instance.new("UICorner", slot).CornerRadius = UDim.new(0, 12)
+		if tool.Parent == player.Character then
+			local ring = Instance.new("UIStroke")
+			ring.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			ring.Color = Color3.new(1, 1, 1)
+			ring.Thickness = 4
+			ring.Parent = slot
+		end
+		local picture = Instance.new("ImageLabel")
+		picture.BackgroundTransparency = 1
+		picture.AnchorPoint = Vector2.new(0.5, 0.5)
+		picture.Position = UDim2.fromScale(0.5, 0.54)
+		picture.Size = UDim2.fromScale(0.72, 0.72)
+		picture.Image = tool.TextureId
+		picture.ScaleType = Enum.ScaleType.Fit -- keep the picture's own shape
+		picture.Parent = slot
+		local number = text(slot, UDim2.fromOffset(24, 24), 20, 2)
+		number.Position = UDim2.fromOffset(4, 2)
+		number.Text = tostring(i)
+		local count = tool:GetAttribute("Count") or 1
+		if count > 1 then
+			local label = text(slot, UDim2.fromScale(1, 1), 34, 3)
+			label.Text = "x" .. count
+			label.ZIndex = 2
+		end
+		slot.Activated:Connect(function()
+			toggle(tool)
+		end)
+		slot.Parent = bar
+	end
+end
+
+local watched = {}
+local function watch(holder)
+	if not holder or watched[holder] then
+		return
+	end
+	watched[holder] = true
+	holder.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") then
+			child:GetAttributeChangedSignal("Count"):Connect(redraw)
+			task.defer(redraw)
+		end
+	end)
+	holder.ChildRemoved:Connect(function(child)
+		if child:IsA("Tool") then
+			task.defer(redraw)
+		end
+	end)
+	for _, child in holder:GetChildren() do
+		if child:IsA("Tool") then
+			child:GetAttributeChangedSignal("Count"):Connect(redraw)
+		end
+	end
+	redraw()
+end
+
+function Inventory.init(parent)
+	pcall(StarterGui.SetCoreGuiEnabled, StarterGui, Enum.CoreGuiType.Backpack, false)
+	bar = Instance.new("Frame")
+	bar.Name = "Inventory"
+	bar.BackgroundTransparency = 1
+	bar.AnchorPoint = Vector2.new(0.5, 1)
+	bar.Position = UDim2.new(0.5, 0, 1, -BOTTOM)
+	bar.Size = UDim2.fromOffset(0, SLOT)
+	bar.AutomaticSize = Enum.AutomaticSize.X
+	local layout = Instance.new("UIListLayout")
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.Padding = UDim.new(0, GAP)
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Parent = bar
+	bar.Parent = parent
+
+	watch(player:FindFirstChildOfClass("Backpack"))
+	player.ChildAdded:Connect(function(child)
+		if child:IsA("Backpack") then
+			watch(child)
+		end
+	end)
+	watch(player.Character)
+	player.CharacterAdded:Connect(watch)
+
+	local KEYS = {
+		Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three, Enum.KeyCode.Four, Enum.KeyCode.Five,
+		Enum.KeyCode.Six, Enum.KeyCode.Seven, Enum.KeyCode.Eight, Enum.KeyCode.Nine,
+	}
+	UserInputService.InputBegan:Connect(function(input, processed)
+		local i = table.find(KEYS, input.KeyCode)
+		if i and not processed and bar.Visible then
+			toggle(tools[i])
+		end
+	end)
+end
+
+function Inventory.setVisible(visible)
+	if bar then
+		bar.Visible = visible
+	end
+end
+
+return Inventory
