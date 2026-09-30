@@ -1,6 +1,6 @@
 """Terrain assets for the meadow and desert (drafts for QM to vet).
 
-Run: python3 tools/terrain_assets.py [out_dir] [--boulders]
+Run: python3 tools/terrain_assets.py [out_dir] [--boulders | --redo]
 
   Meadow  small   Stone       a chunky grey rock
           small   Bush        a stepped round green bush
@@ -49,10 +49,15 @@ class Kit:
 GREY, GREY_D, GREY_L = (150, 156, 170), (118, 124, 140), (176, 182, 194)
 
 
+def rot(yaw=0, tilt_x=0, tilt_z=0):
+    return Ry(yaw) @ Rx(tilt_x) @ Rz(tilt_z)
+
+
 def stone(k):
-    k.box("Stone", (-2.2, 0, -1.8), (2.0, 2.0, 1.8), GREY)
-    k.box("Stone", (-1.6, 2.0, -1.2), (1.2, 3.0, 1.4), GREY_L)
-    k.box("Stone", (1.2, 0, -1.2), (2.8, 1.2, 1.0), GREY_D)
+    """A tilted chunk with a lit cap and a chip at its foot (boulder style, small)."""
+    k.at("Stone", (0, 1.1, 0), (3.8, 2.6, 3.2), GREY, rot(20, 6, -10))
+    k.at("Stone", (-0.2, 2.45, 0.1), (2.8, 0.6, 2.4), GREY_L, rot(26, 5, -13))
+    k.at("Stone", (2.3, 0.4, -1.3), (1.4, 1.2, 1.2), GREY_D, rot(-30, 0, 12))
 
 
 def bush(k):
@@ -62,10 +67,6 @@ def bush(k):
     k.box("Bush", (-1.2, 3.8, -1.0), (1.2, 4.6, 1.0), gl)
     k.box("Bush", (-3.4, 0.4, -1.4), (-2.8, 2.0, 1.4), g)
     k.box("Bush", (2.8, 0.4, -1.4), (3.4, 2.0, 1.4), g)
-
-
-def rot(yaw=0, tilt_x=0, tilt_z=0):
-    return Ry(yaw) @ Rx(tilt_x) @ Rz(tilt_z)
 
 
 def boulder(k):
@@ -93,21 +94,26 @@ C_GREEN, C_RIB, C_SPINE = (118, 204, 64), (72, 150, 44), (214, 176, 96)  # the C
 
 
 def sandstone(k):
-    k.box("Slab", (-2.6, 0, -2.0), (2.6, 1.2, 2.0), STONE_D)
-    k.box("Slab", (-2.2, 1.2, -1.7), (2.4, 2.4, 1.8), STONE)
-    k.box("Slab", (-1.6, 2.4, -1.2), (1.6, 3.4, 1.3), STONE_L)
+    """Broken sandstone ledge: layered slabs tipped at different angles, the top
+    one lit, with a chip beside (boulder style, small)."""
+    k.at("Slab", (0, 0.6, 0), (5.0, 1.6, 4.0), STONE_D, rot(15, 0, 6))
+    k.at("Slab", (-0.4, 1.8, 0.2), (4.0, 1.2, 3.2), STONE, rot(-10, 5, -9))
+    k.at("Slab", (-0.2, 2.7, 0.1), (3.0, 0.8, 2.4), STONE_L, rot(-4, 7, -12))
+    k.at("Slab", (2.8, 0.45, -1.6), (1.4, 1.0, 1.2), STONE, rot(40, 0, 14))
 
 
 def ribbed(k, name, lo, hi, color=C_GREEN, rib=C_RIB):
-    """A cactus block with a dark rib down the middle of each side."""
+    """A cactus block with a dark rib down the middle of each side: real ridges
+    that stand D proud of the face (no flat plates)."""
     k.box(name, lo, hi, color)
     (x0, y0, z0), (x1, y1, z1) = lo, hi
     cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
-    for a, b in (((cx - 0.08, y0 + 0.2, z0 - 0.05), (cx + 0.08, y1 - 0.2, z0)),
-                 ((cx - 0.08, y0 + 0.2, z1), (cx + 0.08, y1 - 0.2, z1 + 0.05)),
-                 ((x0 - 0.05, y0 + 0.2, cz - 0.08), (x0, y1 - 0.2, cz + 0.08)),
-                 ((x1, y0 + 0.2, cz - 0.08), (x1 + 0.05, y1 - 0.2, cz + 0.08))):
-        k.box("Rib", a, b, rib, plain=True)
+    D, W = 0.15, 0.1
+    for a, b in (((cx - W, y0 + 0.2, z0 - D), (cx + W, y1 - 0.2, z0)),
+                 ((cx - W, y0 + 0.2, z1), (cx + W, y1 - 0.2, z1 + D)),
+                 ((x0 - D, y0 + 0.2, cz - W), (x0, y1 - 0.2, cz + W)),
+                 ((x1, y0 + 0.2, cz - W), (x1 + D, y1 - 0.2, cz + W))):
+        k.box("Rib", a, b, rib, plain=True)  # a thin ridge: no stud decal
 
 
 def cactus(k):
@@ -171,13 +177,17 @@ def dead_bush(k, x, y, z):
 
 
 def sand_mound(k):
-    layers = [(12, 1.2), (10, 1.2), (8, 1.2), (5.5, 1.0)]  # half widths and heights, stepped up
-    y = 0
-    for i, (hw, h) in enumerate(layers):
-        k.box("Mound", (-hw, y, -hw * 0.8), (hw, y + h, hw * 0.8), ((224, 174, 90), (240, 198, 116))[i % 2])
-        y += h
-    prickly_pear(k, -1.4, y, 0.4)
-    dead_bush(k, 3.0, y, -1.0)
+    """A dune: wide sand slabs piled at gentle, clashing tilts (boulder style,
+    large), a lit crest on top with the prickly pear and dead bush."""
+    sand, sand_l, crest = (224, 174, 90), (240, 198, 116), (250, 214, 140)
+    k.at("Mound", (0, 0.6, 0), (24, 3.0, 18), sand, rot(8, 2, -4))
+    k.at("Mound", (-1.5, 2.4, 0.5), (17, 2.6, 13), sand_l, rot(-12, -3, 5))
+    k.at("Mound", (1.0, 4.0, -0.2), (11, 2.0, 9), sand, rot(14, 3, -6))
+    k.at("Mound", (0.6, 5.1, -0.1), (8, 0.8, 6.4), crest, rot(18, 3, -7))
+    k.at("Mound", (9.5, 0.3, -6.0), (4.0, 1.6, 3.4), sand_l, rot(35, 0, 10))
+    top = 5.4
+    prickly_pear(k, -1.2, top, 0.4)
+    dead_bush(k, 2.6, top, -1.0)
 
 
 def figure(k, x=0):
@@ -190,6 +200,12 @@ def figure(k, x=0):
     k.box("Arm", (x + 1.0, 2, -0.5), (x + 2.0, 4, 0.5), skin)
     k.box("Head", (x - 0.6, 4, -0.6), (x + 0.6, 5.2, 0.6), skin)
 
+
+REDO = [
+    ("Meadow", [(77, 196, 63), (105, 255, 74)], [("Stone (small)", stone, 6)]),
+    ("Desert", [(232, 188, 102), (250, 214, 130)], [
+        ("Sandstone (small)", sandstone, 7), ("Sand mound (large)", sand_mound, 26)]),
+]
 
 BOULDERS = [
     ("Meadow", [(77, 196, 63), (105, 255, 74)], [
@@ -257,13 +273,14 @@ def row_image(name, ground, items):
 
 def main(out):
     os.makedirs(out, exist_ok=True)
-    rows = [row_image(*row) for row in (BOULDERS if "--boulders" in sys.argv else ROWS)]
+    which = "boulders" if "--boulders" in sys.argv else "redo" if "--redo" in sys.argv else "terrain_assets"
+    rows = [row_image(*row) for row in {"boulders": BOULDERS, "redo": REDO, "terrain_assets": ROWS}[which]]
     board = Image.new("RGB", (max(r.width for r in rows), sum(r.height for r in rows)), (255, 255, 255))
     y = 0
     for r in rows:
         board.paste(r, (0, y))
         y += r.height
-    board.save(os.path.join(out, "boulders.png" if "--boulders" in sys.argv else "terrain_assets.png"))
+    board.save(os.path.join(out, which + ".png"))
     print("wrote", out)
 
 

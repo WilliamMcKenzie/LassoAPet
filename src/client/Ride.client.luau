@@ -64,13 +64,16 @@ local function showNestEgg(nest)
 	end
 end
 
--- Obstacle footprints from each obstacle's lowest part (a tree's trunk, a rock's base).
+-- Obstacle footprints from each obstacle's "Base" part (an invisible footprint),
+-- or else its lowest part (a tree's trunk, a rock's base).
 local obstacles = {}
 for _, model in world.Obstacles:GetChildren() do
-	local base
-	for _, part in model:GetChildren() do
-		if part:IsA("BasePart") and (not base or part.Position.Y < base.Position.Y) then
-			base = part
+	local base = model:FindFirstChild("Base")
+	if not base then
+		for _, part in model:GetChildren() do
+			if part:IsA("BasePart") and (not base or part.Position.Y < base.Position.Y) then
+				base = part
+			end
 		end
 	end
 	local parts = {}

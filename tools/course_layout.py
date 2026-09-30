@@ -1,9 +1,12 @@
 """Where the terrain assets go along the course (a draft for QM to vet).
 
-Run: python3 tools/course_layout.py [out_dir]
+Run: python3 tools/course_layout.py [out_dir]         pictures only
+     python3 tools/course_layout.py --map               also write World.Obstacles
 
 Writes layout.json (every placement: asset, x, z, yaw, y), a top-down map of
-both biomes (plan.png) and two ride-view renders.
+both biomes (plan.png) and two ride-view renders. With --map, every placement
+becomes a Model named after its asset in World.Obstacles (src/world/World.rbxmx);
+Config.ObstacleTiers gives each name its size tier.
 
 How a biome is laid out, from its line toward its far end:
   - Entry: the first 48 studs are clear, so a new biome reads before it bites.
@@ -35,13 +38,14 @@ import partlib  # noqa: E402
 from partlib import Part, T, Ry, render  # noqa: E402
 import terrain_assets as TA  # noqa: E402
 import desert_ground as DG  # noqa: E402
+import meadow_ground as MG  # noqa: E402
 from animal_designs import font  # noqa: E402
 
 HALF_W = 56
 BIOMES = [
     dict(name="Meadow", z0=0, z1=-760, nests=[(-20, -470), (22, -600), (0, -736)],
          small=["Stone", "Bush"], medium=["Boulder", "BoulderSplit"], large=[]),
-    dict(name="Desert", z0=-760, z1=-1520, nests=[(16, -980), (-14, -1180), (18, -1400)],
+    dict(name="Desert", z0=-760, z1=-3040, nests=DG.NESTS,
          small=["Sandstone"], medium=["Cactus", "SandBoulder", "SandBoulderCarved"], large=["SandMound"]),
 ]
 # footprint radius (studs), size class and builder for each asset
@@ -68,22 +72,30 @@ class Course:
         self.rng = np.random.default_rng(seed)
         self.items = []
         self.kind = DG.layout()  # desert patches, per 8-stud cell
+        self.dirt = MG.layout(MG.MEADOW_LENGTH // MG.CELL)  # meadow dirt, per 8-stud cell
 
     def patch(self, x, z):
-        """0 sand, 1 dry grass, 2 sandstone (desert only)."""
-        if z > DG.Z_START:
-            return 0
+        """Desert: 0 sand, 1 dry grass, 2 sandstone. Meadow: 0 grass, 3 dirt."""
         i = int((x + DG.HALF_W) // DG.CELL)
+        if z > DG.Z_START:
+            j = int(-z // MG.CELL)
+            if 0 <= i < self.dirt.shape[0] and 0 <= j < self.dirt.shape[1] and self.dirt[i, j]:
+                return 3
+            return 0
         j = int((DG.Z_START - z) // DG.CELL)
         if 0 <= i < self.kind.shape[0] and 0 <= j < self.kind.shape[1]:
             return int(self.kind[i, j])
         return 0
 
+    def floor(self, x, z):
+        """Floor height, as Shared/Ground reports it: sandstone +1, dirt -1."""
+        return {2: 1.0, 3: -1.0}.get(self.patch(x, z), 0.0)
+
     def fits(self, asset, x, z, biome):
         r = ASSETS[asset][0]
         if abs(x) + r > HALF_W - 1:
             return False
-        if z + r > biome["z0"] - ENTRY + (ENTRY if biome["z0"] == 0 else 0) and z > biome["z0"] - ENTRY:
+        if z + r > biome["z0"] - ENTRY:
             return False
         if z - r < biome["z1"] + 4:
             return False
@@ -100,7 +112,7 @@ class Course:
             px = x + (self.rng.normal(0, jitter) if t else 0)
             pz = z + (self.rng.normal(0, jitter) if t else 0)
             if self.fits(asset, px, pz, biome):
-                y = 1.0 if self.patch(px, pz) == 2 else 0.0
+                y = self.floor(px, pz)
                 self.items.append(dict(asset=asset, x=round(px, 2), z=round(pz, 2),
                                        yaw=round(float(self.rng.uniform(0, 360)), 1), y=y,
                                        tier=TIERS[ASSETS[asset][1]], biome=biome["name"]))
@@ -120,13 +132,18 @@ class Course:
 
     def clump(self, biome, x, z, n):
         for _ in range(n):
-            self.put(self.pick_small(biome, x, z), x + self.rng.normal(0, 5), z + self.rng.normal(0, 5), biome)
+            px, pz = x + self.rng.normal(0, 5), z + self.rng.normal(0, 5)
+            # desert clumps mix in a cactus now and then, so it isn't all rubble
+            if biome["name"] == "Desert" and self.rng.random() < 0.3:
+                self.put("Cactus", px, pz, biome)
+            else:
+                self.put(self.pick_small(biome, px, pz), px, pz, biome)
 
     def beat(self, biome, pattern, z0, z1, busy):
         mid = (z0 + z1) / 2
         rng = self.rng
         if pattern == "scatter":
-            for _ in range(2 + int(busy * 3)):
+            for _ in range(2 + int(busy * 2)):
                 self.clump(biome, rng.uniform(-44, 44), rng.uniform(z1, z0), rng.integers(1, 4))
         elif pattern == "gate":
             gap = 34 - busy * 12  # the opening narrows deeper in
@@ -159,8 +176,12 @@ class Course:
         z = biome["z0"] - ENTRY
         while z > biome["z1"] + 16:
             for side in (-1, 1):
-                if self.rng.random() < 0.45:
-                    self.put(self.pick_small(biome, side * 50, z), side * 51, z + self.rng.normal(0, 4), biome)
+                if self.rng.random() < 0.3:
+                    asset = self.pick_small(biome, side * 50, z)
+                    if biome["name"] == "Desert" and self.rng.random() < 0.4:
+                        asset = self.rng.choice(["Cactus", "SandBoulder"])
+                    x = side * (HALF_W - ASSETS[asset][0] - 1.5)
+                    self.put(asset, x, z + self.rng.normal(0, 4), biome)
             z -= 24
 
     def nests(self, biome):
@@ -174,8 +195,8 @@ class Course:
         length = biome["z0"] - biome["z1"]
         n = int((length - ENTRY) // BEAT)
         desert = biome["name"] == "Desert"
-        patterns = ["scatter", "gate", "scatter", "slalom"] if not desert else \
-            ["scatter", "gate", "island", "slalom", "scatter", "island"]
+        patterns = ["gate", "scatter", "slalom", "gate", "scatter"] if not desert else \
+            ["gate", "scatter", "island", "slalom", "gate", "scatter", "island", "slalom"]
         for b in range(n):
             z0 = biome["z0"] - ENTRY - b * BEAT
             busy = b / max(1, n - 1)
@@ -201,46 +222,54 @@ ICON = {
 
 
 def plan(course, items, path, s=2.0):
-    """Top-down map: distance runs left to right, one strip per biome."""
+    """Top-down map: distance runs left to right, 760 studs per strip (the
+    meadow is one strip, the desert three)."""
     pad, band = 20, 34
-    W = int(760 * s) + 2 * pad
+    SEG = 760
+    W = int(SEG * s) + 2 * pad
     strip = int(2 * HALF_W * s)
-    im = Image.new("RGB", (W, (strip + band) * 2 + 80), (255, 255, 255))
+    segs = []
+    for b in BIOMES:
+        for z0 in range(b["z0"], b["z1"], -SEG):
+            segs.append((b, z0, max(z0 - SEG, b["z1"])))
+    im = Image.new("RGB", (W, (strip + band) * len(segs) + 80), (255, 255, 255))
     d = ImageDraw.Draw(im)
-    for bi, b in enumerate(BIOMES):
-        oy = bi * (strip + band) + band
+    for si, (b, z0, z1) in enumerate(segs):
+        oy = si * (strip + band) + band
 
         def to_px(x, z):
-            return pad + (b["z0"] - z) * s, oy + (x + HALF_W) * s
+            return pad + (z0 - z) * s, oy + (x + HALF_W) * s
 
-        d.text((pad, oy - band + 8), f"{b['name']}  (start line on the left, 760 studs)", fill=(30, 30, 30),
-               font=font(18))
-        for zi in range(190):
+        d.text((pad, oy - band + 8), f"{b['name']}: studs {b['z0'] - z0} to {b['z0'] - z1} into the biome",
+               fill=(30, 30, 30), font=font(18))
+        for zi in range(int((z0 - z1) // 4)):
             for xi in range(28):
-                z = b["z0"] - zi * 4 - 2
+                z = z0 - zi * 4 - 2
                 x = -HALF_W + xi * 4 + 2
                 chk = (xi + zi) % 2
+                k = course.patch(x, z)
                 if b["name"] == "Desert":
-                    k = course.patch(x, z)
                     c = (DG.SAND, DG.GRASS, DG.STONE)[k][chk]
                 else:
-                    c = MEADOW[chk]
+                    c = MG.DIRT[chk] if k == 3 else MEADOW[chk]
                 x0, y0 = to_px(x - 2, z + 2)
                 d.rectangle([x0, y0, x0 + 4 * s - 1, y0 + 4 * s - 1], fill=c)
         # beat lines
-        for k in range(10):
+        for k in range(40):
             z = b["z0"] - ENTRY - k * BEAT
-            if z > b["z1"]:
+            if z1 < z <= z0:
                 x0, y0 = to_px(-HALF_W, z)
                 d.line([x0, y0, x0, y0 + strip], fill=(255, 255, 255), width=1)
         for nx, nz in b["nests"]:
+            if not (z1 < nz <= z0):
+                continue
             cx, cy = to_px(nx, nz)
             r = NEST_CLEAR * s
             d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=(255, 255, 255), width=2)
             d.ellipse([cx - 6, cy - 6, cx + 6, cy + 6], fill=(140, 90, 50), outline=(40, 30, 20))
             d.ellipse([cx - 3, cy - 4, cx + 3, cy + 3], fill=(255, 250, 235))
         for it in items:
-            if it["biome"] != b["name"]:
+            if it["biome"] != b["name"] or not (z1 < it["z"] <= z0):
                 continue
             color, shape = ICON[it["asset"]]
             cx, cy = to_px(it["x"], it["z"])
@@ -258,7 +287,7 @@ def plan(course, items, path, s=2.0):
                 d.rectangle([cx - w, cy - r, cx + w, cy + r], fill=color, outline=o)
                 d.rectangle([cx - r, cy - w, cx + r, cy + w], fill=color, outline=o)
     # legend
-    y = 2 * (strip + band) + 14
+    y = len(segs) * (strip + band) + 14
     x = pad
     names = {"Stone": "stone", "Bush": "bush", "Boulder": "boulder A", "BoulderSplit": "boulder B",
              "Sandstone": "sandstone", "Cactus": "cactus", "SandBoulder": "sand boulder A",
@@ -300,27 +329,100 @@ def placed_parts(items, z_lo, z_hi):
 def ride_view(course, items, z_hi, desert, path):
     z_lo = z_hi - 170
     parts = placed_parts(items, z_lo, z_hi)
-    if desert:
-        for zi in range(int((z_hi - z_lo) // 4)):
-            for xi in range(28):
-                x, z = -HALF_W + xi * 4 + 2, z_hi - zi * 4 - 2
-                k = course.patch(x, z)
-                top = 1 if k == 2 else 0
-                c = (DG.SAND, DG.GRASS, DG.STONE)[k][(xi + zi) % 2]
-                parts.append(Part("Floor", (4, top + 1, 4), T(x, (top - 1) / 2, z), c))
-        partlib.GROUND = np.array(DG.SAND[1], float)
-        partlib.GROUND2 = np.array(DG.SAND[0], float)
-    else:
-        partlib.GROUND = np.array(MEADOW[1], float)
-        partlib.GROUND2 = np.array(MEADOW[0], float)
+    for zi in range(int((z_hi - z_lo) // 4)):
+        for xi in range(28):
+            x, z = -HALF_W + xi * 4 + 2, z_hi - zi * 4 - 2
+            k = course.patch(x, z)
+            top = course.floor(x, z)
+            c = (DG.SAND, DG.GRASS, DG.STONE, MG.DIRT)[k] if desert or k == 3 else MEADOW
+            parts.append(Part("Floor", (4, top + 2, 4), T(x, (top - 2) / 2, z), c[(xi + zi) % 2]))
     for side in (-1, 1):
         wall = DG.WALL if desert else [(225, 150, 104), (248, 170, 114)]
         for zi in range(int((z_hi - z_lo) // 4)):
             for yi in range(4):
                 parts.append(Part("Wall", (4, 4, 4), T(side * (HALF_W + 2), yi * 4 + 2, z_hi - zi * 4 - 2),
                                   wall[(zi + yi) % 2], plain=True))
-    img = render(parts, eye=(0, 72, z_hi + 26), target=(0, 0, z_hi - 70), W=1000, H=640, fov=52, fog=False)
+    img = render(parts, eye=(0, 72, z_hi + 26), target=(0, 0, z_hi - 70), W=1000, H=640, fov=52, fog=False,
+                 ground=False)
     img.save(path)
+
+
+# ---------------------------------------------------------------- map
+
+WORLD = DG.WORLD
+STUD_FACES = (0, 1, 2, 3, 5)  # every face but the bottom gets the stud decal
+
+
+def part_xml(ref, p):
+    R, (x, y, z) = p.cf[:3, :3], p.cf[:3, 3]
+    cf = f"<X>{x:.4f}</X><Y>{y:.4f}</Y><Z>{z:.4f}</Z>" + "".join(
+        f"<R{i}{j}>{R[i, j]:.6f}</R{i}{j}>" for i in range(3) for j in range(3))
+    out = [f'<Item class="Part" referent="{ref()}"><Properties>',
+           f'<string name="Name">{p.name}</string>',
+           '<bool name="Anchored">true</bool>',
+           '<bool name="CanCollide">false</bool>',
+           '<bool name="CanTouch">false</bool>',
+           '<token name="Material">272</token>',
+           f'<Vector3 name="size"><X>{p.size[0]:.4f}</X><Y>{p.size[1]:.4f}</Y><Z>{p.size[2]:.4f}</Z></Vector3>',
+           f'<Color3uint8 name="Color3uint8">{partlib._xml_color(p.color)}</Color3uint8>']
+    out += [f'<token name="{f}Surface">0</token>' for f in ("Top", "Bottom", "Front", "Back", "Left", "Right")]
+    out += [f'<CoordinateFrame name="CFrame">{cf}</CoordinateFrame>', "</Properties>"]
+    if not p.plain:
+        for face in STUD_FACES:
+            out += [f'<Item class="Texture" referent="{ref()}"><Properties>',
+                    '<string name="Name">Studs</string>',
+                    f'<Content name="Texture"><url>{partlib.STUD_IMAGE}</url></Content>',
+                    f'<float name="StudsPerTileU">{partlib.STUD_TILE}</float>',
+                    f'<float name="StudsPerTileV">{partlib.STUD_TILE}</float>',
+                    f'<token name="Face">{face}</token>',
+                    "</Properties></Item>"]
+    out.append("</Item>")
+    return "\n".join(out)
+
+
+def write_obstacles(items):
+    """Replace everything in World.Obstacles with one Model per placement."""
+    n = [0]
+
+    def ref():
+        n[0] += 1
+        return f"OBS{n[0]:06d}"
+
+    models = []
+    parts_total = 0
+    for it in items:
+        k = TA.Kit()
+        ASSETS[it["asset"]][2](k)
+        M = T(it["x"], it["y"], it["z"]) @ Ry(it["yaw"])
+        body = [part_xml(ref, Part(p.name, p.size, M @ p.cf, p.color, p.shape, p.plain)) for p in k.parts]
+        # Ride takes an obstacle's footprint from its lowest part, so each model gets
+        # an invisible Base just under the floor, the size of what you'd hit.
+        side = ASSETS[it["asset"]][0] * 1.6
+        body.insert(0, "\n".join([
+            f'<Item class="Part" referent="{ref()}"><Properties>',
+            '<string name="Name">Base</string>',
+            '<bool name="Anchored">true</bool>',
+            '<bool name="CanCollide">false</bool>',
+            '<bool name="CanTouch">false</bool>',
+            '<bool name="CanQuery">false</bool>',
+            '<bool name="CastShadow">false</bool>',
+            '<float name="Transparency">1</float>',
+            f'<Vector3 name="size"><X>{side:.3f}</X><Y>1</Y><Z>{side:.3f}</Z></Vector3>',
+            f'<CoordinateFrame name="CFrame"><X>{it["x"]:.3f}</X><Y>{it["y"] - 0.5:.3f}</Y><Z>{it["z"]:.3f}</Z>'
+            "<R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22>"
+            "</CoordinateFrame>",
+            "</Properties>", "</Item>"]))
+        parts_total += len(body)
+        models.append(f'<Item class="Model" referent="{ref()}"><Properties>\n'
+                      f'<string name="Name">{it["asset"]}</string>\n</Properties>\n' + "\n".join(body) + "\n</Item>")
+    s = open(WORLD).read()
+    i = s.index('<string name="Name">Obstacles</string>')
+    st = s.rindex("<Item", 0, i)
+    en = DG.item_span(s, st)
+    head = s[st:s.index("</Properties>", st) + len("</Properties>")]
+    s = s[:st] + head + "\n" + "\n".join(models) + "\n</Item>" + s[en:]
+    open(WORLD, "w").write(s)
+    return len(models), parts_total
 
 
 def main(out):
@@ -336,7 +438,10 @@ def main(out):
     for it in items:
         counts[it["asset"]] = counts.get(it["asset"], 0) + 1
     print(len(items), "placements", counts)
+    if "--map" in sys.argv:
+        print("wrote %d obstacles (%d parts) into World.Obstacles" % write_obstacles(items))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "/mnt/project-files/biomes/layout")
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    main(args[0] if args else "/mnt/project-files/biomes/layout")

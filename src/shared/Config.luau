@@ -104,7 +104,11 @@ return {
 		Rhino = 2, Unicorn = 2, Sandworm = 2,
 		Snake = 3,
 	},
-	ObstacleTiers = { Bush = 1, Rock = 2 },
+	ObstacleTiers = {
+		Bush = 1, Rock = 2, Stone = 1, Sandstone = 1, -- small
+		Boulder = 2, BoulderSplit = 2, Cactus = 2, SandBoulder = 2, SandBoulderCarved = 2, -- medium
+		SandMound = 3, -- large
+	},
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.
 	PetIncome = {
