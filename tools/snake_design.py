@@ -31,8 +31,40 @@ HEAD = os.path.join(ROOT, "designs", "desert", "SnakeHead_QM.bbmodel")
 BB = 10  # Blockbench units per stud
 SIZE = 1.25  # the whole snake is built at this scale: it's the Legendary, bigger than the rest
 HEAD_SCALE = 3.2 * SIZE
-RED, ORANGE = 1, 2  # QM's texture slots
 NO_TEXTURE = (236, 234, 224)
+
+# Colours (QM's head came in placeholder red/orange): a golden desert snake with
+# maroon rattlesnake bands, a cream belly, turquoise horns and spikes, pink mouth.
+# Each colour is its own solid texture; slot 0 stays the head's palette (eye iris).
+COLORS = {"gold": (240, 186, 72), "cream": (252, 234, 186), "maroon": (168, 48, 78),
+          "teal": (48, 196, 214), "pink": (238, 104, 146), "amber": (255, 214, 64),
+          "ivory": (250, 248, 238), "tan": (212, 150, 70)}
+TEX = {name: i + 1 for i, name in enumerate(COLORS)}
+RED, ORANGE = TEX["gold"], TEX["cream"]  # body top, belly
+HEAD_COLORS = [  # QM's head parts by name prefix
+    (("Cranium", "Long_box_muzzle", "Cheek_", "Chin", "Jaw_rim"), "gold"),
+    (("Jaw_floor",), "cream"),
+    (("Lower_mouth", "Mouth_roof"), "pink"),
+    (("Nostril",), "maroon"),
+    (("Eye_white",), "amber"),
+    (("Upper_tooth", "Lower_tooth"), "ivory"),
+    (("Forehead_crest", "Cheek_spike", "Swept_horn", "Heavy_brow"), "teal"),
+]
+
+
+def solid_texture(name, rgb):
+    im = Image.new("RGBA", (16, 16), tuple(rgb) + (255,))
+    buf = io.BytesIO()
+    im.save(buf, "PNG")
+    return {"name": name, "path": "", "folder": "", "namespace": "", "id": "0", "width": 16, "height": 16,
+            "uv_width": 16, "uv_height": 16, "particle": False, "render_mode": "default", "render_sides": "auto",
+            "visible": True, "internal": True, "saved": False, "uuid": uid(),
+            "source": "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()}
+
+
+def retexture(e, tex):
+    for f in e["faces"].values():
+        f["texture"] = tex
 
 
 def uid():
@@ -106,9 +138,16 @@ def segment_parts(name, z0, z1, hw, h, total, back_spike=True):
     xc, yaw = spine_x(zc, total), spine_yaw(zc, total)
     L = (z1 - z0) / math.cos(math.radians(yaw))
     parts.append(cube(name + "Belly", (xc, belly / 2, zc), (2 * hw, belly, L), ORANGE, ry=yaw))
-    parts.append(cube(name, (xc, belly + (h - belly) / 2, zc), (2 * hw, h - belly, L), RED, ry=yaw))
+    # a maroon band across the front third of the top, gold behind it (rattlesnake bands)
+    fwd = np.array([math.sin(math.radians(yaw)), 0, math.cos(math.radians(yaw))])
+    band = L * 0.3
+    top_y = belly + (h - belly) / 2
+    c0 = np.array([xc, top_y, zc]) - fwd * (L / 2 - band / 2)
+    c1 = np.array([xc, top_y, zc]) + fwd * (band / 2)
+    parts.append(cube(name + "Band", c0, (2 * hw + 0.02, h - belly + 0.02, band), TEX["maroon"], ry=yaw))
+    parts.append(cube(name, c1, (2 * hw, h - belly, L - band), RED, ry=yaw))
     if back_spike:
-        parts.append(spike(name + "Spike", (xc, h, zc + 0.2), min(1.2, (z1 - z0) * 0.45), 0.55 + 0.25 * hw, 0.36, ORANGE, ry=yaw))
+        parts.append(spike(name + "Spike", (xc, h, zc + 0.2), min(1.2, (z1 - z0) * 0.45), 0.55 + 0.25 * hw, 0.36, TEX["teal"], ry=yaw))
     return parts
 
 
@@ -145,6 +184,11 @@ def head_parts():
             e["vertices"] = {n: [round(c * k, 4) for c in v] for n, v in e["vertices"].items()}
     for g in m["groups"]:
         g["origin"] = [round(c * k + o, 4) for c, o in zip(g["origin"], offset)]
+    for e in m["elements"]:
+        for prefixes, color in HEAD_COLORS:
+            if e["name"].startswith(prefixes):
+                retexture(e, TEX[color])
+    m["textures"] = m["textures"][:1] + [solid_texture(n, c) for n, c in COLORS.items()]
     return m
 
 
@@ -174,7 +218,7 @@ def build():
         z += L
         last = node
     # the rattle on the tail tip: stacked orange beads
-    for j, (d, hw, h, tex) in enumerate(((0.8, 0.55, 1.0, ORANGE), (0.7, 0.48, 0.9, RED), (0.6, 0.4, 0.75, ORANGE))):
+    for j, (d, hw, h, tex) in enumerate(((0.8, 0.55, 1.0, TEX["cream"]), (0.7, 0.48, 0.9, TEX["tan"]), (0.6, 0.4, 0.75, TEX["cream"]))):
         zc = z + d / 2
         e = cube(f"Rattle{j + 1}", (spine_x(zc, total), 0.05 + h / 2, zc), (2 * hw, h, d / math.cos(math.radians(spine_yaw(zc, total)))), tex,
                  ry=spine_yaw(zc, total))
@@ -194,7 +238,7 @@ def build():
             neck["children"].append(e["uuid"])
     # spikes down the back of the neck
     for n, (y, zz) in enumerate(((2.9, 0.2), (5.0, -0.6), (7.2, -0.6))):
-        e = spike(f"NeckSpike{n + 1}", (0, y, zz), 0.9, 0.8, 0.36, ORANGE)
+        e = spike(f"NeckSpike{n + 1}", (0, y, zz), 0.9, 0.8, 0.36, TEX["teal"])
         e["rotation"] = [-60 + 10 * n, 0, 0]
         elements.append(e)
         neck["children"].append(e["uuid"])
