@@ -103,6 +103,21 @@ local SHRINK = 12 -- studs before its biome's end over which an animal shrinks i
 -- its kinds of animal by weight (Config.Biomes[b].Herd), sorted by name so every
 -- client picks the same animals. A stream's animals are keyed n * BIOME_KEYS + b - 1.
 local BIOME_KEYS = 8
+
+-- An animal's stats (Config.AnimalStats), 1x for any animal not listed.
+local function statsOf(kind)
+	return Config.AnimalStats[kind] or { Speed = 1, Stamina = 1 }
+end
+
+-- How fast a kind runs in the stampede: always exactly this, no variance.
+local function herdSpeed(kind)
+	return Config.HerdSpeed * statsOf(kind).Speed
+end
+
+-- How long the Hold bar lasts on this mount (its Stamina x Config.HoldTime).
+local function holdTime(entity)
+	return Config.HoldTime * statsOf(entity.kind).Stamina
+end
 local streams = {}
 do
 	local edge = 0
@@ -115,7 +130,11 @@ do
 			kinds = {},
 			total = 0,
 		}
-		s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / Config.HerdSpeedMin
+		local slowest = math.huge
+		for name in biome.Herd do
+			slowest = math.min(slowest, herdSpeed(name))
+		end
+		s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / slowest
 		assert(biome.Herd, "Config.Biomes[" .. b .. "] (" .. tostring(biome.Name) .. ") has no Herd")
 		local names = {}
 		for name, weight in biome.Herd do
@@ -208,7 +227,7 @@ end
 local function release(entity)
 	entity.animal:setSaddled(false)
 	entity.lane = entity.x
-	entity.cruise = rng:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax)
+	entity.cruise = herdSpeed(entity.kind)
 	table.insert(strays, entity)
 end
 
@@ -252,7 +271,7 @@ local function plan(key)
 		local n, b = key // BIOME_KEYS, key % BIOME_KEYS + 1
 		local stream = streams[b]
 		local r = Random.new(if b == 1 then n else key)
-		p = { x = r:NextNumber(-EDGE, EDGE), speed = r:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax) }
+		p = { x = r:NextNumber(-EDGE, EDGE) }
 		local pick = r:NextNumber(0, stream.total)
 		for _, kind in stream.kinds do
 			p.kind = kind.name
@@ -383,7 +402,7 @@ startRide = function()
 	local spot = homeSpot()
 	leadFromZ = spot.Z - 8
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, 0, 0
-	phase, hold, grace, camYaw = "outbound", Config.HoldTime, 0, 0
+	phase, hold, grace, camYaw = "outbound", holdTime(mount), 0, 0
 	coins = 0
 	hrp.Anchored = true
 	humanoid.Sit = true
@@ -696,7 +715,7 @@ local function updateHerd(dt, slowed)
 			end
 			local p = plan(key)
 			local age = herdClock - n * every
-			local dist, speed = run(p.speed, math.max(age - START_AFTER, 0))
+			local dist, speed = run(herdSpeed(p.kind), math.max(age - START_AFTER, 0))
 			local z = stream.spawnZ - dist
 			local entity = herd[key]
 			-- The animal being lassoed runs on past the end until it's caught.
@@ -781,21 +800,21 @@ local function updateMount(dt)
 		turnT = math.min(turnT + dt / TURN_TIME, 1)
 		local eased = 0.5 - math.cos(turnT * math.pi) / 2
 		mount.yaw = math.pi * eased
-		mount.speed = Config.MountSpeed * (1 - math.sin(turnT * math.pi) * 0.7)
+		mount.speed = Config.MountSpeed * statsOf(mount.kind).Speed * (1 - math.sin(turnT * math.pi) * 0.7)
 		mount.latVel *= math.exp(-6 * dt)
 		local look = CFrame.Angles(0, mount.yaw, 0).LookVector
 		mount.x = math.clamp(mount.x + look.X * mount.speed * dt, -EDGE, EDGE)
 		mount.z += look.Z * mount.speed * dt
 		if turnT >= 1 then
 			phase, grace = "return", Config.TurnGrace
-			mount.speed = Config.ReturnSpeed
+			mount.speed = Config.ReturnSpeed * statsOf(mount.kind).Speed
 		end
 		place(mount, 0)
 		animate(mount, dt, mount.speed, eased < 1 and -0.6 or 0)
 		return
 	end
 
-	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed)
+	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed) * statsOf(mount.kind).Speed
 	if sprinting() then
 		targetSpeed *= Config.SprintSpeed
 	end
@@ -901,7 +920,7 @@ local function updateRider(dt)
 			mount.animal:setScale(1)
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
-			hold, grace = Config.HoldTime, Config.LandingGrace
+			hold, grace = holdTime(mount), Config.LandingGrace
 			local earned = Config.RarityCoins[mount.animal.Rarity]
 			coins += earned
 			Hud.setCoins(coins)
@@ -954,7 +973,7 @@ end
 local function updateHud()
 	Hud.setSprint(phase == "outbound")
 	if phase == "outbound" then
-		Hud.setHold(mount and hold / Config.HoldTime or 1)
+		Hud.setHold(mount and hold / holdTime(mount) or 1)
 		Hud.setDistance(string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		if actionTarget == "egg" then
 			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
