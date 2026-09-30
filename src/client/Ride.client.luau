@@ -691,10 +691,9 @@ local function moveAnimal(entity, x, z, speed, dt)
 	animate(entity, dt, speed, lat / 12)
 end
 
--- The stampede follows the shared server clock. Only while this player is slowed
--- down near the egg does their copy run on the ride's slowed time; as soon as the
--- slowdown ends (or the egg cutscene starts, with the camera on the egg), every
--- animal snaps straight back to where it is on the shared clock.
+-- The stampede follows the shared server clock. Only during this player's slow-mo
+-- hero leap home does their copy run on the ride's slowed time; as soon as it ends,
+-- every animal snaps straight back to where it is on the shared clock.
 local function updateHerd(dt, slowed)
 	builtThisFrame = 0
 	local snapped = false
@@ -1002,11 +1001,11 @@ local function updateHud()
 	end
 end
 
--- Slow motion while the egg is in grab range, so there's time to decide.
+-- Slow motion during the egg-grab close-up and the hero leap home.
 local timeScale = 1
 
 RunService.PreSimulation:Connect(function(dt)
-	local slow = (phase == "outbound" and actionTarget == "egg") or cutscene ~= nil or heroLeap ~= nil
+	local slow = cutscene ~= nil or heroLeap ~= nil
 	local slowTo = if heroLeap then Config.HomeSlowMo else Config.EggSlowMo
 	timeScale += ((slow and slowTo or 1) - timeScale) * (1 - math.exp(-10 * dt))
 	if heroLeap then
