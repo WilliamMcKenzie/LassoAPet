@@ -23,13 +23,13 @@ local BOTTOM = 24
 local MAX_SLOTS = 9
 local FONT = Enum.Font.FredokaOne
 
--- Square backgrounds by the item's rarity (placeholder colours until QM's
--- slot images: set Image to use one, drawn square over the whole slot).
+-- Square backgrounds by the item's rarity: QM's slot pictures (the colour is a
+-- fallback for a rarity without one).
 local RARITY = {
 	Uncommon = { color = Color3.fromRGB(70, 170, 60), image = "rbxassetid://120075276423928" }, -- assets/ui/SlotUncommon.png
-	Rare = { color = Color3.fromRGB(50, 120, 220), image = "" },
-	Epic = { color = Color3.fromRGB(150, 60, 200), image = "" },
-	Legendary = { color = Color3.fromRGB(230, 170, 30), image = "" },
+	Rare = { color = Color3.fromRGB(50, 120, 220), image = "rbxassetid://92909054184182" }, -- assets/ui/SlotRare.png
+	Epic = { color = Color3.fromRGB(150, 60, 200), image = "rbxassetid://75096704585668" }, -- assets/ui/SlotEpic.png
+	Legendary = { color = Color3.fromRGB(230, 170, 30), image = "rbxassetid://100279863676585" }, -- assets/ui/SlotLegendary.png
 }
 local Animals = game:GetService("ReplicatedStorage").Shared.Animals
 
