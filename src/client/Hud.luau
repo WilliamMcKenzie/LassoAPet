@@ -1,6 +1,6 @@
 -- Riding HUD built from QM's images: the Hold bar with the distance on it, one
 -- action button (TAKE EGG or LASSO), a center message, and the home buttons
--- (RIDE, Gold, Pets, Eggs). Layout follows QM's mockups.
+-- (RIDE, Gold, Pets). Layout follows QM's mockups.
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -99,7 +99,7 @@ local card, cardEgg, cardScale, cardFlash, cardBurst -- egg reveal card, the egg
 local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
 
 -- Text outlines, kept at a whole number of screen pixels. The HUD's UIScale scales
 -- them too, and at fractional widths the dot UIStroke leaves in small letter
@@ -377,9 +377,7 @@ function Hud.init(onAction, onHome, onRide)
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(showGold)
 	showGold()
-	local eggsSize = fit("eggs", nil, SIDE_ICON_HEIGHT)
-	eggs = button(homeRoot, "eggs", eggsSize, Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
-	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN - eggsSize.Y.Offset - 8))
+	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
 	Inventory.init(homeRoot)
 
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
@@ -424,7 +422,6 @@ function Hud.show(visible)
 	ride.Visible = false -- comes back when the ride prompt shows again
 	gold.Visible = not visible
 	pets.Visible = not visible
-	eggs.Visible = not visible
 	Inventory.setVisible(not visible) -- your eggs, hidden while riding
 	gained.row.Visible = false
 	Hud.setReturning(false)
