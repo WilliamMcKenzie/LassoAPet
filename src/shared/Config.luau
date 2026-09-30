@@ -23,12 +23,16 @@ return {
 			Length = 760,
 			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
 			WallColors = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
+			-- Which animals run in this biome's stampede and how often, by weight
+			-- (names are modules in Shared/Animals).
+			Herd = { Horse = 30, Pinto = 20, Pig = 20, Fish = 12, Rhino = 8, Unicorn = 3 },
 		},
 		{
 			Name = "Desert",
 			Length = 760,
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
+			Herd = { Rhino = 1 },
 		},
 	},
 	CourseHalfWidth = 56,
@@ -74,12 +78,11 @@ return {
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
 	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25 },
 
-	-- Stampede: a steady stream of animals popping in at the start line, one every
-	-- HerdSpawnEvery seconds, whether anyone is riding or not.
+	-- Stampede: each biome has its own steady stream of animals (its Herd above),
+	-- one every HerdSpawnEvery seconds, whether anyone is riding or not. They pop in
+	-- at the biome's start (the start line, or the line from the biome before) and
+	-- shrink away at its end.
 	HerdSpawnEvery = 0.9,
 	HerdSpeedMin = 26,
 	HerdSpeedMax = 36,
-	-- Which animals run in the stampede and how often, by weight: 3 to 1 means one
-	-- animal in four is a Pinto. Names are modules in Shared/Animals.
-	HerdMix = { Horse = 3, Pinto = 1 },
 }

@@ -74,11 +74,12 @@ local EGG_PULL_TIME = 0.55 -- egg reeled in on the rope
 local TURN_TIME = 1
 local LIE_HEIGHT = 0.7 -- root part's height when lying on the ground
 local EDGE = Config.CourseHalfWidth - 4
--- The stampede runs all the time, whether anyone is riding or not: animal n pops
--- in just behind the start line at n * HerdSpawnEvery seconds on the server clock,
--- with its lane and speed drawn from a generator seeded by n, and runs to the far
--- wall. So everyone sees the same stream, and riding never changes it: an animal
--- you lasso just leaves it.
+-- The stampede runs all the time, whether anyone is riding or not. Each biome has
+-- its own stream: its animal n pops in at the biome's start (just behind the start
+-- line, or on the line from the biome before) at n * HerdSpawnEvery seconds on the
+-- server clock, with its lane, speed and kind drawn from a generator seeded by n,
+-- and runs to the biome's end, where it shrinks away. So everyone sees the same
+-- stream, and riding never changes it: an animal you lasso just leaves it.
 local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:GetBoundingBox().Position.Z else -2
 local SPAWN_Z = START_LINE_Z + 4
 local END_Z = -Config.CourseLength + 4 -- the far wall
@@ -92,7 +93,40 @@ local POP_HOP = 1.6 -- studs
 local POP_HOP_TIME = 0.32
 local START_AFTER = POP_TIME + 0.1 -- seconds after popping in
 local START_EASE = 0.3 -- seconds: how quickly they get up to speed
-local LIFE = START_AFTER + START_EASE + (SPAWN_Z - END_Z) / Config.HerdSpeedMin
+local SHRINK = 12 -- studs before its biome's end over which an animal shrinks into nothing
+
+-- Each biome's stream: where it spawns and ends, how long an animal lives in it and
+-- its kinds of animal by weight (Config.Biomes[b].Herd), sorted by name so every
+-- client picks the same animals. A stream's animals are keyed n * BIOME_KEYS + b - 1.
+local BIOME_KEYS = 8
+local streams = {}
+do
+	local edge = 0
+	for b, biome in Config.Biomes do
+		local startZ, endZ = edge, edge - biome.Length
+		edge = endZ
+		local s = {
+			spawnZ = if b == 1 then SPAWN_Z else startZ - 2,
+			endZ = if b == #Config.Biomes then END_Z else endZ + 2,
+			kinds = {},
+			total = 0,
+		}
+		s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / Config.HerdSpeedMin
+		for name, weight in biome.Herd or { [Config.DefaultPet] = 1 } do
+			table.insert(s.kinds, { name = name, weight = weight })
+			s.total += weight
+		end
+		table.sort(s.kinds, function(a, c)
+			return a.name < c.name
+		end)
+		streams[b] = s
+	end
+end
+
+-- Where an animal in biome b (at z) stops: its stream's end.
+local function streamAt(z)
+	return streams[WorldColors.biomeAt(z)]
+end
 
 local rng = Random.new()
 local herdFolder = Instance.new("Folder")
@@ -121,19 +155,15 @@ local coins = 0 -- cash gained this ride; what the Gold icon shows while riding
 local touchStart = {}
 local sprintKey = false -- Shift or L2 held
 
--- The kinds of animal in the stampede and how often each turns up (Config.HerdMix).
-local kinds, mixTotal = {}, 0
-for name, weight in Config.HerdMix do
-	table.insert(kinds, { name = name, class = require(Animals[name]), weight = weight })
-	mixTotal += weight
-end
-table.sort(kinds, function(a, b)
-	return a.name < b.name -- the same order on every client, so every client picks the same animals
-end)
-local classes = {}
-for _, kind in kinds do
-	classes[kind.name] = kind.class
-	pools[kind.name] = {}
+-- Every kind of animal in any biome's stampede, with its share of the whole herd
+-- (for filling the pools).
+local classes, shares = {}, {}
+for _, stream in streams do
+	for _, kind in stream.kinds do
+		classes[kind.name] = classes[kind.name] or require(Animals[kind.name])
+		pools[kind.name] = pools[kind.name] or {}
+		shares[kind.name] = (shares[kind.name] or 0) + kind.weight / stream.total / #streams
+	end
 end
 
 local function newEntity(x, z, yaw, kind)
@@ -197,20 +227,24 @@ local function blockedAt(x, z, padX, padZ)
 	return false
 end
 
-local function plan(n)
-	local p = plans[n]
+-- key = n * BIOME_KEYS + b - 1. The first biome keeps seeding by n alone, so its
+-- lanes and speeds are the same as before biomes had their own streams.
+local function plan(key)
+	local p = plans[key]
 	if not p then
-		local r = Random.new(n)
+		local n, b = key // BIOME_KEYS, key % BIOME_KEYS + 1
+		local stream = streams[b]
+		local r = Random.new(if b == 1 then n else key)
 		p = { x = r:NextNumber(-EDGE, EDGE), speed = r:NextNumber(Config.HerdSpeedMin, Config.HerdSpeedMax) }
-		local pick = r:NextNumber(0, mixTotal)
-		for _, kind in kinds do
+		local pick = r:NextNumber(0, stream.total)
+		for _, kind in stream.kinds do
 			p.kind = kind.name
 			pick -= kind.weight
 			if pick < 0 then
 				break
 			end
 		end
-		plans[n] = p
+		plans[key] = p
 	end
 	return p
 end
@@ -583,62 +617,65 @@ local function updateHerd(dt, slowed)
 		herdClock = now
 	end
 	local every = Config.HerdSpawnEvery
-	local oldest, newest = math.ceil((herdClock - LIFE) / every), math.floor(herdClock / every)
+	local newest = math.floor(herdClock / every)
 	local camZ = camera.CFrame.Position.Z
-	for n = oldest, newest do
-		if taken[n] then
-			continue
-		end
-		local p = plan(n)
-		local age = herdClock - n * every
-		local dist, speed = run(p.speed, math.max(age - START_AFTER, 0))
-		local z = SPAWN_Z - dist
-		local entity = herd[n]
-		if z <= END_Z or math.abs(z - camZ) > VIEW then
-			if entity then
-				if z <= END_Z then
-					Poof.at(Vector3.new(entity.x, 0, entity.z))
-				end
-				herd[n] = nil
-				putInPool(entity)
-			end
-			continue
-		end
-		local x = laneX(p.x, z)
-		if not entity then
-			entity = takeFromPool(n, x, z, p.kind)
-			if not entity then
+	local seen = {}
+	for b, stream in streams do
+		stream.oldest = math.ceil((herdClock - stream.life) / every)
+		for n = stream.oldest, newest do
+			local key = n * BIOME_KEYS + b - 1
+			if taken[key] then
 				continue
 			end
-			herd[n] = entity
-			if age < 0.15 then
-				Poof.at(Vector3.new(x, 0, z))
+			local p = plan(key)
+			local age = herdClock - n * every
+			local dist, speed = run(p.speed, math.max(age - START_AFTER, 0))
+			local z = stream.spawnZ - dist
+			local entity = herd[key]
+			-- The animal being lassoed runs on past the end until it's caught.
+			local lassoed = entity and transfer and transfer.target == entity
+			if (z <= stream.endZ and not lassoed) or math.abs(z - camZ) > VIEW then
+				continue
 			end
+			local x = laneX(p.x, z)
+			if not entity then
+				entity = takeFromPool(key, x, z, p.kind)
+				if not entity then
+					continue
+				end
+				herd[key] = entity
+				if age < 0.15 then
+					Poof.at(Vector3.new(x, 0, z))
+				end
+			end
+			seen[key] = true
+			-- Pops in at the start, shrinks into nothing over the last SHRINK studs.
+			local shrink = if lassoed then 1 else math.clamp((z - stream.endZ) / SHRINK, 0, 1)
+			if age < POP_TIME or shrink < 1 then
+				entity.popping = true
+				entity.hop = if age < POP_TIME then popHop(age) else 0
+				entity.animal:setScale((if age < POP_TIME then popScale(age) else 1) * shrink)
+			elseif entity.popping then
+				entity.popping, entity.hop = nil, 0
+				entity.animal:setScale(1)
+			end
+			-- A nudge from a passing rider fades back out; it never changes the schedule.
+			entity.dodge *= math.exp(-1.5 * dt)
+			if snapped then
+				entity.x = x + entity.dodge -- a snap doesn't swing them sideways
+			end
+			moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt)
 		end
-		if age < POP_TIME then
-			entity.popping = true
-			entity.hop = popHop(age)
-			entity.animal:setScale(popScale(age))
-		elseif entity.popping then
-			entity.popping, entity.hop = nil, 0
-			entity.animal:setScale(1)
-		end
-		-- A nudge from a passing rider fades back out; it never changes the schedule.
-		entity.dodge *= math.exp(-1.5 * dt)
-		if snapped then
-			entity.x = x + entity.dodge -- a snap doesn't swing them sideways
-		end
-		moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt)
 	end
-	for n, entity in herd do
-		if n < oldest then
-			herd[n] = nil
+	for key, entity in herd do
+		if not seen[key] then
+			herd[key] = nil
 			putInPool(entity)
 		end
 	end
-	for n in plans do
-		if n < oldest then
-			plans[n], taken[n] = nil, nil
+	for key in plans do
+		if key // BIOME_KEYS < streams[key % BIOME_KEYS + 1].oldest then
+			plans[key], taken[key] = nil, nil
 		end
 	end
 	for i = #strays, 1, -1 do
@@ -649,12 +686,16 @@ local function updateHerd(dt, slowed)
 		entity.speed += (entity.cruise - entity.speed) * (1 - math.exp(-2 * dt))
 		local look = CFrame.Angles(0, yaw, 0).LookVector
 		local z = entity.z + look.Z * entity.speed * dt
-		if z <= END_Z then
-			Poof.at(Vector3.new(entity.x, 0, entity.z))
+		-- Shrinks away at the end of the biome it's in, like the stampede.
+		local endZ = streamAt(entity.z).endZ
+		if z <= endZ then
 			entity.animal.model:Destroy()
 			table.remove(strays, i)
 			continue
 		end
+		local shrink = math.clamp((z - endZ) / SHRINK, 0, 1)
+		entity.popping = if shrink < 1 then true else nil
+		entity.animal:setScale(shrink)
 		local x = entity.x + look.X * entity.speed * dt
 		if math.abs(yaw) > 0.05 then
 			entity.lane = x
@@ -784,6 +825,8 @@ local function updateRider(dt)
 				table.remove(strays, table.find(strays, target))
 			end
 			mount, transfer = target, nil
+			mount.popping, mount.hop = nil, 0
+			mount.animal:setScale(1)
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
 			hold, grace = Config.HoldTime, Config.LandingGrace
@@ -969,12 +1012,17 @@ player:GetAttributeChangedSignal("Pen"):Connect(function()
 end)
 
 -- Fill the pools a few animals per frame, so joining doesn't hitch: each kind
--- gets its share of POOL_START by its HerdMix weight (at least a couple).
+-- gets its share of POOL_START by its weight in the biomes' herds (at least a couple).
 task.spawn(function()
 	local built = 0
-	for _, kind in kinds do
-		for _ = 1, math.max(2, math.round(POOL_START * kind.weight / mixTotal)) do
-			putInPool(newEntity(0, 0, 0, kind.name))
+	local names = {}
+	for name in shares do
+		table.insert(names, name)
+	end
+	table.sort(names)
+	for _, name in names do
+		for _ = 1, math.max(2, math.round(POOL_START * shares[name])) do
+			putInPool(newEntity(0, 0, 0, name))
 			built += 1
 			if built % 4 == 0 then
 				task.wait()
