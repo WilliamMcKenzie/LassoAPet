@@ -12,8 +12,11 @@
 --   horse:getNeck()               -- { cframe, radius } for a lasso loop around the neck
 --   horse:setScale(s)             -- grow or shrink the whole horse about its feet (pop-ins)
 --
--- Variants (the Pinto) share all of this and only swap the model data:
+-- Every other animal (Pinto, Pig, Fish, Rhino, Unicorn) shares all of this and
+-- only swaps the model data, plus its seat and neck-loop points if they differ
+-- from the horse's (designs/animals/meta.json):
 --   Horse.variant("Pinto", PintoModel, "Uncommon")
+--   Horse.variant("Pig", PigModel, "Uncommon", { seat = ..., neck = { center = ..., radius = ... } })
 --
 -- Idle, walk and gallop are blended by speed. The gallop is a leap: front legs
 -- reach forward and hind legs back while the horse is in the air. The blocks
@@ -37,9 +40,14 @@ local GALLOP_SPEED = 36 -- gallop plays at 1x at this speed
 local LEAN = 0.18 -- body roll into turns, radians at full gallop
 
 -- When a gallop leap lands: the front legs are back at rest after reaching out.
+-- nil for animals without legs (the Fish), which never kick up dust.
 local function landAt(data)
+	local legs = data.animations.gallop.tracks.LegFL
+	if not (legs and legs.rotation) then
+		return nil
+	end
 	local reached = false
-	for _, key in data.animations.gallop.tracks.LegFL.rotation.keys do
+	for _, key in legs.rotation.keys do
 		if key[2] ~= 0 then
 			reached = true
 		elseif reached then
@@ -55,13 +63,17 @@ end
 
 local Horse = {} -- the methods every variant shares
 
--- A kind of horse: its own model data and rarity, Horse's methods.
-local function variant(name, data, rarity)
+-- A kind of animal: its own model data and rarity, Horse's methods.
+-- points (optional): { seat = Vector3, neck = { center = Vector3, radius = number } }
+local function variant(name, data, rarity, points)
+	points = points or {}
 	local class = setmetatable({
 		Name = name,
 		Rarity = rarity, -- sets the coins for lassoing one (Config.RarityCoins)
 		data = data,
 		landAt = landAt(data),
+		seat = points.seat or SEAT,
+		neckLoop = points.neck or NECK_LOOP,
 	}, { __index = Horse })
 	class.__index = class
 
@@ -150,16 +162,20 @@ function Horse:update(dt, speed, turn)
 
 	local after = self.clocks.gallop
 	local land = self.landAt
+	if not land then
+		return false
+	end
 	local crossed = if after >= before then before < land and after >= land else before < land or after >= land
 	return crossed and weights.gallop > 0.5
 end
 
 function Horse:getSeatCFrame()
-	return self.root.CFrame * CFrame.new(SEAT - self.pivots.root)
+	return self.root.CFrame * CFrame.new(self.seat - self.pivots.root)
 end
 
 function Horse:getNeck()
-	return { cframe = self.neck.CFrame * CFrame.new(NECK_LOOP.center - self.pivots.neck), radius = NECK_LOOP.radius }
+	local loop = self.neckLoop
+	return { cframe = self.neck.CFrame * CFrame.new(loop.center - self.pivots.neck), radius = loop.radius }
 end
 
 function Horse:setSaddled(_saddled) end
