@@ -1,0 +1,607 @@
+"""Snow biome animals (first drafts, static models for QM to vet).
+
+Run: python3 tools/snow_designs.py [out_dir]        the lineup + every model
+     python3 tools/snow_designs.py one <name>        one close render + its model
+
+  Snowman    Rare       three stacked snow blocks, coal eyes, carrot nose, stick arms
+  Penguin    Uncommon   black back, white belly and face, orange beak and feet
+  WhiteWolf  Rare       white wolf, grey saddle and tail tip, icy-blue eyes
+  PolarBear  Epic       chunky white bear, black nose, dark claws
+  Troll      Epic       blue, bulky, red eye + scarred white eye, tusks, white ponytail,
+                        spiked wooden club (its own Bat bone)
+  IceDragon  Legendary  cyan scale panels with white fur rings between, spread wings,
+                        QM's sand-snake head recoloured cyan with red eyes
+
+Same blocks as tools/animal_designs.py: flush, axis-aligned, every bone at 0 in
+the rest pose; slopes only from wedges and pyramids. Every detail is a block
+with depth: the only thin plates are the standard eyes (white plate, pupil set
+PUPIL_BACK back from its front edge). Models go to designs/snow/<Name>.bbmodel.
+Bones and animations come after QM vets the shapes.
+"""
+
+import copy
+import json
+import os
+import shutil
+import sys
+import uuid
+
+import numpy as np
+from PIL import Image
+
+sys.path.insert(0, os.path.dirname(__file__))
+from partlib import Part, render, write_bbmodel, T, Rx, Ry, Rz  # noqa: E402
+import animal_designs as A  # noqa: E402
+from animal_designs import Animal, EYE_WHITE, PUPIL, PLATE, PUPIL_BACK  # noqa: E402
+from horse_rig import pose  # noqa: E402
+from snake_design import posed, solid_texture  # noqa: E402
+
+ROOT = os.path.join(os.path.dirname(__file__), "..")
+MODELS = os.path.join(ROOT, "designs", "snow")
+SNAKE_HEAD = os.path.join(ROOT, "designs", "desert", "SnakeHead_QM.bbmodel")
+OUT = "/mnt/project-files/animals/snow"
+BB = 10  # Blockbench units per stud
+
+SNOW = (246, 249, 255)
+COAL = (40, 42, 52)
+CARROT = (250, 132, 40)
+STICK = (124, 82, 48)
+
+
+def X(sx, a0, a1):
+    """x extent mirrored to one side (sx = -1 left, +1 right), low to high."""
+    return tuple(sorted((sx * a0, sx * a1)))
+
+
+SIDES = (("L", -1), ("R", 1))
+
+
+def pyramid(a, name, base_lo, base_hi, axis, length, color, bone):
+    """Square pyramid standing on one face of a box footprint.
+    base_lo/base_hi: the base rectangle (a box with zero size along `axis`);
+    axis: '+x', '-x', '+y', '-y', '+z', '-z', the way the point sticks out."""
+    lo, hi = np.array(base_lo, float), np.array(base_hi, float)
+    k = "xyz".index(axis[1])
+    s = 1 if axis[0] == "+" else -1
+    c = (lo + hi) / 2
+    apex = c.copy()
+    apex[k] = lo[k] + s * length
+    u, v = [i for i in range(3) if i != k]
+    corners = []
+    for du, dv in ((0, 0), (1, 0), (1, 1), (0, 1)):
+        p = lo.copy()
+        p[u] = hi[u] if du else lo[u]
+        p[v] = hi[v] if dv else lo[v]
+        corners.append(p)
+    polys = [np.array(corners)] + [np.array([corners[i], corners[(i + 1) % 4], apex]) for i in range(4)]
+    p = Part(name, (1, 1, 1), np.eye(4), color, "Poly")
+    p.polys = polys
+    p.bone = bone
+    a.parts.append(p)
+    return p
+
+
+def front_eye(a, name_side, x0, x1, y0, y1, z, bone, pupil=PUPIL, pupil_frac=0.62, look=0.0):
+    """A standard eye on a front (-z) face: white plate, pupil plate on it,
+    the pupil's front face PUPIL_BACK behind the plate's front edge... here the
+    plate faces forward, so 'back' means the pupil stands in from the plate's
+    outer (lower) edge by PUPIL_BACK (as on the pig)."""
+    a.box("Eye" + name_side, (x0, y0, z - PLATE), (x1, y1, z), EYE_WHITE, bone)
+    if pupil is None:
+        return
+    w = (x1 - x0) * pupil_frac
+    cx = (x0 + x1) / 2 + look
+    a.box("Pupil" + name_side, (cx - w / 2, y0 + PUPIL_BACK, z - PLATE - 0.03), (cx + w / 2, y1 - (y1 - y0) * 0.22, z - PLATE),
+          pupil, bone)
+
+
+def side_eyes(a, x, y0, y1, z0, z1, pupil=PUPIL, bone="neck"):
+    """animal_designs' eyes (side plates, pupils looking forward) with a pupil colour."""
+    a.eyes(x, y0, y1, z0, z1, bone)
+    for p in a.parts[-4:]:
+        if p.name.startswith("Pupil"):
+            p.color = pupil
+
+
+def pointed_ears(a, cx, base, z0, z1, half, h, color, inner, bone_prefix="Ear"):
+    """Pointed ears: two right-triangle prisms each, an inner prism 0.15 deep on the front."""
+    for side, sx in SIDES:
+        c = sx * cx
+        bone = bone_prefix + side
+        for half_name, dx in (("A", -1), ("B", 1)):
+            a.tri(f"Ear{side}{half_name}", [(c, base), (c + dx * half, base), (c, base + h)], z0, z1, color, bone)
+            a.tri(f"Ear{side}In{half_name}", [(c, base + 0.1), (c + dx * half * 0.55, base + 0.1), (c, base + h * 0.66)],
+                  z0 - 0.15, z0, inner, bone)
+        a.pivots[bone] = (c, base, z0)
+
+
+# ---------------------------------------------------------------- snowman
+
+def snowman():
+    a = Animal("Snowman", "Rare")
+    a.bone_order = [("root", None), ("Mid", "root"), ("neck", "Mid"), ("ArmL", "Mid"), ("ArmR", "Mid")]
+    shade = (228, 238, 252)  # the middle block a touch bluer so the stack reads
+    a.box("Bottom", (-2.5, 0, -2.3), (2.5, 4.2, 2.3), SNOW, "root")
+    a.box("Middle", (-1.9, 4.2, -1.75), (1.9, 7.3, 1.75), shade, "Mid")
+    a.box("Head", (-1.5, 7.3, -1.4), (1.5, 10.1, 1.4), SNOW, "neck")
+    # coal eyes: lumps 0.3 deep, half sunk into the snow
+    for side, sx in SIDES:
+        x0, x1 = X(sx, 0.4, 0.95)
+        a.box("Coal" + side, (x0, 8.75, -1.6), (x1, 9.3, -1.3), COAL, "neck")
+    # carrot nose: a block and a pyramid tip, pointing forward
+    a.box("Carrot", (-0.3, 7.95, -2.3), (0.3, 8.55, -1.35), CARROT, "neck")
+    pyramid(a, "CarrotTip", (-0.3, 7.95, -2.3), (0.3, 8.55, -2.3), "-z", 0.9, CARROT, "neck")
+    # two coal buttons on the middle
+    for i, y in enumerate((5.0, 6.2)):
+        a.box(f"Button{i + 1}", (-0.28, y, -1.95), (0.28, y + 0.55, -1.6), COAL, "Mid")
+    # stick arms: out from the sides, a twig up at the end, a short twig on top
+    for side, sx in SIDES:
+        bone = "Arm" + side
+        x0, x1 = X(sx, 1.9, 4.5)
+        a.box("Stick" + side, (x0, 6.1, -0.2), (x1, 6.5, 0.2), STICK, bone)
+        x0, x1 = X(sx, 4.1, 4.5)
+        a.box("Twig" + side, (x0, 6.5, -0.2), (x1, 7.7, 0.2), STICK, bone)
+        x0, x1 = X(sx, 3.0, 3.35)
+        a.box("Twig2" + side, (x0, 6.5, -0.2), (x1, 7.1, 0.2), STICK, bone)
+        a.pivots[bone] = (sx * 1.9, 6.3, 0)
+    a.pivots.update(root=(0, 2.1, 0), Mid=(0, 4.2, 0), neck=(0, 7.3, 0))
+    a.meta = {"seat": (0, 10.1, 0), "neck_loop": {"center": (0, 8.7, 0), "radius": 1.9}}
+    return a
+
+
+# ---------------------------------------------------------------- penguin
+
+def penguin():
+    a = Animal("Penguin", "Uncommon")
+    black, white, orange = (44, 50, 66), (250, 250, 250), (255, 150, 30)
+    a.bone_order = [("root", None), ("neck", "root"), ("WingL", "root"), ("WingR", "root"),
+                    ("LegL", "root"), ("LegR", "root"), ("Tail", "root")]
+    # feet: flat orange blocks poking out in front
+    for side, sx in SIDES:
+        x0, x1 = X(sx, 0.3, 1.5)
+        a.box("Foot" + side, (x0, 0, -2.5), (x1, 0.6, 0.4), orange, "Leg" + side)
+        a.pivots["Leg" + side] = (sx * 0.9, 0.6, -0.5)
+    # body: black, a white belly block standing proud of the front
+    a.box("Body", (-2.0, 0.6, -1.4), (2.0, 6.4, 1.8), black, "root")
+    a.box("Belly", (-1.5, 0.9, -2.0), (1.5, 5.9, -1.4), white, "root")
+    # head: black, white face block, orange beak
+    a.box("Head", (-1.6, 6.4, -1.6), (1.6, 9.2, 1.3), black, "neck")
+    a.box("Face", (-1.15, 6.6, -1.9), (1.15, 8.7, -1.6), white, "neck")
+    a.box("Beak", (-0.45, 6.95, -2.8), (0.45, 7.45, -1.9), orange, "neck")
+    for side, sx in SIDES:
+        x0, x1 = X(sx, 0.3, 0.9)
+        front_eye(a, side, x0, x1, 7.6, 8.35, -1.9, "neck")
+    # flippers hang at the sides
+    for side, sx in SIDES:
+        x0, x1 = X(sx, 2.0, 2.4)
+        a.box("Flipper" + side, (x0, 2.4, -0.7), (x1, 5.8, 0.9), black, "Wing" + side)
+        a.pivots["Wing" + side] = (sx * 2.0, 5.8, 0.1)
+    a.wedge("Tail", (-0.7, 0.6, 1.8), (0.7, 1.4, 2.7), black, "Tail", "down_back")
+    a.pivots.update(root=(0, 3.5, 0.2), neck=(0, 6.4, -0.1), Tail=(0, 1.4, 1.8))
+    a.meta = {"seat": (0, 9.2, -0.15), "neck_loop": {"center": (0, 7.6, -0.15), "radius": 1.9}}
+    return a
+
+
+# ---------------------------------------------------------------- white wolf
+
+def white_wolf():
+    a = Animal("WhiteWolf", "Rare")
+    white, grey, paw, nose, ice = (242, 245, 250), (180, 192, 212), (204, 214, 228), (46, 52, 70), (40, 170, 240)
+    a.bone_order = [("root", None), ("neck", "root"), ("EarL", "neck"), ("EarR", "neck"), ("Jaw", "neck"),
+                    ("Tail", "root")] + [("Leg" + leg, "root") for leg in A.LEGS]
+    a.body(1.8, 3.3, 6.8, -3.8, 3.6, white)
+    a.legs(0.45, 1.8, 1.3, 0.7, white, paw)
+    # grey saddle down the back, standing proud of it
+    a.box("Saddle", (-1.1, 6.8, -2.4), (1.1, 7.2, 3.6), grey, "root")
+    # thick neck out of the chest, head forward, long snout, black nose
+    a.box("Neck", (-1.4, 4.9, -4.9), (1.4, 8.2, -3.799), white, "neck")
+    a.box("Head", (-1.55, 7.2, -6.7), (1.55, 9.8, -4.1), white, "neck")
+    a.box("Snout", (-0.9, 7.2, -8.7), (0.9, 8.5, -6.7), white, "neck")
+    a.box("Jaw", (-0.8, 6.7, -8.3), (0.8, 7.2, -5.2), paw, "Jaw")
+    a.box("Nose", (-0.45, 7.9, -8.95), (0.45, 8.65, -8.5), nose, "neck")
+    side_eyes(a, 1.55, 8.3, 9.2, -6.5, -5.6, ice)
+    pointed_ears(a, 0.85, 9.8, -5.1, -4.6, 0.5, 1.3, white, grey)
+    # bushy tail: back and down in two steps, grey tip
+    a.box("Tail", (-0.65, 5.4, 3.6), (0.65, 6.7, 5.1), white, "Tail")
+    a.box("Tail2", (-0.7, 4.1, 4.9), (0.7, 6.1, 6.3), white, "Tail")
+    a.wedge("TailTip", (-0.7, 3.1, 4.9), (0.7, 4.1, 6.3), grey, "Tail", "down_back")
+    a.pivots.update(neck=(0, 6.8, -3.85), Jaw=(0, 6.95, -5.2), Tail=(0, 6.7, 3.6))
+    a.meta = {"seat": (0, 7.2, 0.4), "neck_loop": {"center": (0, 7.0, -4.3), "radius": 1.7}}
+    a.meta_scale = 1.1
+    return a
+
+
+# ---------------------------------------------------------------- polar bear
+
+def polar_bear():
+    a = Animal("PolarBear", "Epic")
+    fur, nose, claw = (250, 250, 246), (36, 38, 50), (96, 100, 118)
+    a.bone_order = [("root", None), ("neck", "root"), ("Tail", "root")] + [("Leg" + leg, "root") for leg in A.LEGS]
+    a.body(2.4, 3.3, 7.8, -4.2, 4.2, fur)
+    a.legs(0.55, 2.4, 1.9, 0.7, fur, fur)
+    # claws: three dark pyramids poking forward out of each paw
+    for leg in A.LEGS:
+        sx = -1 if leg[1] == "L" else 1
+        front = leg[0] == "F"
+        z = -4.2 if front else 4.2 - 1.9
+        for i, xc in enumerate((0.85, 1.475, 2.1)):
+            x0, x1 = X(sx, xc - 0.2, xc + 0.2)
+            pyramid(a, f"Claw{leg}{i}", (x0, 0, z), (x1, 0.4, z), "-z", 0.45, claw, "Leg" + leg)
+    # head low out front, square muzzle, black nose
+    a.box("Head", (-1.7, 4.6, -7.0), (1.7, 7.6, -4.199), fur, "neck")
+    a.box("Snout", (-1.0, 4.6, -8.5), (1.0, 6.3, -7.0), fur, "neck")
+    a.box("Nose", (-0.55, 5.7, -8.8), (0.55, 6.45, -8.3), nose, "neck")
+    side_eyes(a, 1.7, 6.3, 7.1, -6.6, -5.8)
+    # round ears: little blocks on the head's top corners
+    for side, sx in SIDES:
+        x0, x1 = X(sx, 0.8, 1.6)
+        a.box("Ear" + side, (x0, 7.6, -5.4), (x1, 8.4, -4.8), fur, "neck")
+    a.box("Tail", (-0.55, 6.4, 4.2), (0.55, 7.3, 4.8), fur, "Tail")
+    a.pivots.update(neck=(0, 7.6, -4.2), Tail=(0, 7.3, 4.2))
+    a.meta = {"seat": (0, 7.8, 0.6), "neck_loop": {"center": (0, 6.1, -5.6), "radius": 2.2}}
+    a.meta_scale = 1.15
+    return a
+
+
+# ---------------------------------------------------------------- troll
+
+def troll():
+    a = Animal("Troll", "Epic")
+    skin, dark, hair, eye_red = (72, 148, 232), (48, 108, 196), (250, 250, 252), (232, 36, 44)
+    shorts, belt, tusk, scar = (132, 86, 50), (92, 58, 36), (252, 246, 226), (246, 132, 178)
+    wood, wood_dark, spike = (156, 100, 52), (116, 72, 38), (206, 212, 222)
+    a.bone_order = [("root", None), ("neck", "root"), ("Jaw", "neck"), ("Ponytail", "neck"),
+                    ("ArmL", "root"), ("ArmR", "root"), ("Bat", "ArmR"), ("LegL", "root"), ("LegR", "root")]
+    # short thick legs with big dark feet
+    for side, sx in SIDES:
+        bone = "Leg" + side
+        x0, x1 = X(sx, 0.45, 2.15)
+        a.box("Leg" + side, (x0, 0.9, -0.9), (x1, 4.4, 0.9), skin, bone)
+        a.box("Foot" + side, (x0, 0, -1.7), (x1, 0.9, 0.9), dark, bone)
+        a.pivots[bone] = (sx * 1.3, 4.4, 0)
+    # shorts with a belt, a round belly, a huge chest
+    a.box("Shorts", (-2.5, 3.9, -1.3), (2.5, 5.6, 1.3), shorts, "root")
+    a.box("Belt", (-2.6, 5.6, -1.4), (2.6, 6.1, 1.4), belt, "root")
+    a.box("Belly", (-2.8, 6.1, -1.8), (2.8, 8.4, 1.5), skin, "root")
+    a.box("Chest", (-3.5, 8.4, -2.0), (3.5, 11.5, 1.8), skin, "root")
+    # head sits forward on the chest (a hunch, but straight)
+    a.box("Head", (-2.0, 11.5, -2.4), (2.0, 15.2, 0.8), skin, "neck")
+    a.box("Nose", (-0.45, 13.0, -2.9), (0.45, 13.8, -2.4), dark, "neck")
+    # underbite: the lower jaw juts out past the face; two tusks stand up off it
+    a.box("Jaw", (-2.1, 11.5, -2.85), (2.1, 12.6, 0.4), skin, "Jaw")
+    for side, sx in SIDES:
+        x0, x1 = X(sx, 1.15, 1.55)
+        a.box("Tusk" + side, (x0, 12.6, -2.85), (x1, 12.95, -2.45), tusk, "Jaw")
+        pyramid(a, "TuskTip" + side, (x0, 12.95, -2.85), (x1, 12.95, -2.45), "+y", 0.5, tusk, "Jaw")
+    # eyes: his left is a white scarred eye, his right is red
+    x0, x1 = X(-1, 0.55, 1.5)
+    front_eye(a, "L", x0, x1, 13.75, 14.6, -2.4, "neck", pupil=None)
+    x0, x1 = X(1, 0.55, 1.5)
+    front_eye(a, "R", x0, x1, 13.75, 14.6, -2.4, "neck", pupil=eye_red, pupil_frac=0.6)
+    # the scar: a pink block line running up and down through the skin over and
+    # under the white eye, standing 0.12 off the face
+    xs = -1.025
+    a.box("Scar", (xs - 0.14, 14.6, -2.52), (xs + 0.14, 15.2, -2.4), scar, "neck")
+    a.box("Scar2", (xs - 0.14, 13.0, -2.52), (xs + 0.14, 13.75, -2.4), scar, "neck")
+    # white hair on top, tied back into a ponytail
+    a.box("Hair", (-2.1, 15.2, -1.9), (2.1, 15.8, 1.0), hair, "neck")
+    a.box("HairBack", (-2.1, 13.6, 0.8), (2.1, 15.8, 1.25), hair, "neck")
+    a.box("Tie", (-0.5, 14.2, 1.25), (0.5, 15.0, 1.65), belt, "Ponytail")
+    a.box("Ponytail", (-0.55, 11.6, 1.65), (0.55, 15.1, 2.35), hair, "Ponytail")
+    # arms: huge shoulders, arms down; the right forearm comes forward to hold the club up
+    for side, sx in SIDES:
+        bone = "Arm" + side
+        x0, x1 = X(sx, 3.5, 5.6)
+        a.box("Shoulder" + side, (x0, 9.4, -1.3), (x1, 11.9, 1.3), skin, bone)
+        x0, x1 = X(sx, 3.7, 5.4)
+        a.box("UpperArm" + side, (x0, 7.2, -1.0), (x1, 9.4, 1.0), skin, bone)
+        a.pivots[bone] = (sx * 4.5, 10.9, 0)
+    x0, x1 = X(-1, 3.6, 5.5)
+    a.box("FistL", (x0, 5.0, -1.1), (x1, 7.2, 1.1), skin, "ArmL")
+    a.box("ForearmR", (3.7, 7.2, -3.0), (5.4, 8.8, -1.0), skin, "ArmR")
+    a.box("FistR", (3.6, 7.0, -4.8), (5.5, 9.0, -2.9), skin, "ArmR")
+    # the club: a handle through the fist, a thick head on top with grey spikes
+    cx, cz = 4.55, -3.85
+    a.box("BatHandle", (cx - 0.4, 5.9, cz - 0.4), (cx + 0.4, 11.4, cz + 0.4), wood_dark, "Bat")
+    a.box("BatHead", (cx - 0.95, 11.4, cz - 0.95), (cx + 0.95, 15.6, cz + 0.95), wood, "Bat")
+    a.box("BatCap", (cx - 0.7, 15.6, cz - 0.7), (cx + 0.7, 16.0, cz + 0.7), wood, "Bat")
+    n = 0
+    for y in (12.4, 14.4):
+        for axis in ("-x", "+x", "-z", "+z"):
+            s = -0.95 if axis[0] == "-" else 0.95
+            off = 0.35 if y > 13 else -0.35  # stagger the two rings a little
+            if axis[1] == "x":
+                lo, hi = (cx + s, y - 0.3, cz + off - 0.3), (cx + s, y + 0.3, cz + off + 0.3)
+            else:
+                lo, hi = (cx + off - 0.3, y - 0.3, cz + s), (cx + off + 0.3, y + 0.3, cz + s)
+            pyramid(a, f"Spike{n}", lo, hi, axis, 0.7, spike, "Bat")
+            n += 1
+    a.pivots.update(root=(0, 7.0, 0), neck=(0, 11.5, -0.6), Jaw=(0, 12.05, 0.4), Ponytail=(0, 14.6, 1.25),
+                    Bat=(cx, 8.0, cz))
+    a.meta = {"seat": (0, 11.5, 0.6), "neck_loop": {"center": (0, 13.3, -0.8), "radius": 2.6}}
+    a.meta_scale = 1.05
+    return a
+
+
+# ---------------------------------------------------------------- ice dragon
+
+DRAGON = dict(cyan=(56, 206, 238), fur=(252, 253, 255), wing=(186, 236, 250), claw=(236, 246, 255))
+HEAD_TEX = {"cyan": (56, 206, 238), "white": (252, 253, 255), "mouth": (238, 104, 146), "nostril": (26, 70, 110),
+            "eye": (255, 255, 255), "red": (236, 30, 40), "pupil": (30, 30, 45), "ivory": (250, 248, 238),
+            "ice": (206, 244, 255)}
+HEAD_PARTS = [  # QM's snake head parts by name prefix -> colour
+    (("Cranium", "Long_box_muzzle", "Cheek_L", "Cheek_R", "Chin", "Jaw_rim"), "cyan"),
+    (("Jaw_floor",), "white"),
+    (("Lower_mouth", "Mouth_roof"), "mouth"),
+    (("Nostril",), "nostril"),
+    (("Eye_white",), "eye"),
+    (("Amber_iris",), "red"),
+    (("Slit_pupil",), "pupil"),
+    (("Upper_tooth", "Lower_tooth"), "ivory"),
+    (("Forehead_crest", "Cheek_spike", "Swept_horn", "Heavy_brow"), "ice"),
+]
+DRAGON_HEAD_SCALE = 4.2  # QM's head is modelled small: this makes it ~7 studs long
+
+
+def ice_dragon():
+    """Body, legs, tail and wings as blocks. The head is grafted on from QM's
+    snake head in dragon_model()."""
+    a = Animal("IceDragon", "Legendary")
+    c = DRAGON
+    a.bone_order = [("root", None), ("NeckBase", "root"), ("neck", "NeckBase"), ("Tail", "root"), ("Tail2", "Tail"),
+                    ("Tail3", "Tail2"), ("WingL", "root"), ("WingR", "root")] + [("Leg" + leg, "root") for leg in A.LEGS]
+
+    def ring(name, z0, z1, hw, y0, y1, bone, out=0.25):
+        """White fur block between two scale panels, standing out of them all round."""
+        a.box(name, (-hw - out, y0 - out, z0), (hw + out, y1 + out, z1), c["fur"], bone)
+
+    # torso: cyan scale panels with thick fur rings between
+    hw, y0, y1 = 3.3, 4.6, 9.9
+    ym = (y0 + y1) / 2
+    a.dims = dict(x=hw, y0=y0, y1=y1, z0=-5.4, z1=5.4)
+    for i, (z0, z1) in enumerate(((-5.4, -2.7), (-1.8, 0.9), (1.8, 5.4))):
+        a.box(f"Body{i + 1}", (-hw, y0, z0), (hw, y1, z1), c["cyan"], "root")
+    ring("Fur1", -2.7, -1.8, hw, y0, y1, "root", 0.3)
+    ring("Fur2", 0.9, 1.8, hw, y0, y1, "root", 0.3)
+    a.pivots["root"] = (0, ym, 0)
+    # four thick legs, white claws
+    a.legs(0.8, 3.3, 2.6, 0.9, c["cyan"], c["cyan"])
+    for leg in A.LEGS:
+        sx = -1 if leg[1] == "L" else 1
+        z = -5.4 if leg[0] == "F" else 5.4 - 2.6
+        for i, xc in enumerate((1.3, 2.05, 2.8)):
+            x0, x1 = X(sx, xc - 0.25, xc + 0.25)
+            pyramid(a, f"Claw{leg}{i}", (x0, 0, z), (x1, 0.55, z), "-z", 0.7, c["claw"], "Leg" + leg)
+    # neck: two panels straight out front, a fur ring at the joint
+    nh, ny0, ny1 = 2.1, ym - 1.9, ym + 1.9
+    a.box("Neck1", (-nh, ny0, -8.4), (nh, ny1, -5.4), c["cyan"], "NeckBase")
+    ring("NeckFur1", -9.2, -8.4, nh, ny0, ny1, "neck", 0.25)
+    a.box("Neck2", (-nh, ny0, -12.0), (nh, ny1, -9.2), c["cyan"], "neck")
+    a.pivots.update(NeckBase=(0, ym, -5.4), neck=(0, ym, -8.4))
+    a.neck_front = (0, ym, -12.0)
+    # tail: straight back, stepping down, fur rings, an ice spike at the end
+    segs = [("Tail", 5.4, 9.0, 2.4, ym - 1.6, ym + 1.6), ("Tail2", 9.8, 13.2, 1.7, ym - 1.1, ym + 1.1),
+            ("Tail3", 13.9, 16.8, 1.1, ym - 0.75, ym + 0.75)]
+    for i, (name, z0, z1, thw, ty0, ty1) in enumerate(segs):
+        a.box(name, (-thw, ty0, z0), (thw, ty1, z1), c["cyan"], name)
+        if i < 2:
+            nxt = segs[i + 1]
+            ring(f"TailFur{i + 1}", z1, nxt[1], nxt[3], nxt[4], nxt[5], nxt[0], 0.25)
+    pyramid(a, "TailSpike", (-1.1, ym - 0.75, 16.8), (1.1, ym + 0.75, 16.8), "+z", 2.2, c["fur"], "Tail3")
+    a.pivots.update(Tail=(0, ym, 5.4), Tail2=(0, ym, 9.0), Tail3=(0, ym, 13.2))
+    # back spikes along the spine: small white pyramids on the fur rings
+    for i, (z0, z1) in enumerate(((-2.6, -1.9), (1.0, 1.7))):
+        pyramid(a, f"BackSpike{i + 1}", (-0.35, y1 + 0.3, z0), (0.35, y1 + 0.3, z1), "+y", 1.2, c["fur"], "root")
+    # wings spread flat: a leading arm, three fingers running back, stepped ice panels between
+    for side, sx in SIDES:
+        bone = "Wing" + side
+        wy0, wy1 = y1 - 0.9, y1 - 0.1
+        x0, x1 = X(sx, hw, 11.2)
+        a.box("WingArm" + side, (x0, wy0, -4.6), (x1, wy1, -3.6), c["cyan"], bone)
+        prev = hw
+        for i, (fx, back) in enumerate(((5.6, 4.4), (8.0, 2.8), (10.4, 1.0))):
+            x0, x1 = X(sx, fx - 0.3, fx + 0.3)
+            a.box(f"Finger{i + 1}" + side, (x0, wy0 + 0.1, -3.6), (x1, wy1 - 0.1, back), c["cyan"], bone)
+            x0, x1 = X(sx, prev, fx - 0.3)
+            a.box(f"Web{i + 1}" + side, (x0, wy0 + 0.25, -3.6), (x1, wy1 - 0.25, back - 0.6), c["wing"], bone)
+            prev = fx + 0.3
+        x0, x1 = X(sx, prev, 11.2)
+        a.box("Web4" + side, (x0, wy0 + 0.25, -3.6), (x1, wy1 - 0.25, -1.4), c["wing"], bone)
+        x0, x1 = X(sx, 10.6, 11.2)
+        pyramid(a, "WingClaw" + side, (x0, wy1, -4.4), (x1, wy1, -3.8), "+y", 0.8, c["claw"], bone)
+        a.pivots[bone] = (sx * hw, wy0 + 0.4, -4.1)
+    a.meta = {"seat": (0, y1, 0.2), "neck_loop": {"center": (0, ym, -7.0), "radius": 2.7}}
+    a.meta_scale = 1.1
+    return a
+
+
+def dragon_head(back, k=DRAGON_HEAD_SCALE):
+    """QM's snake head (designs/desert/SnakeHead_QM.bbmodel), scaled k and
+    recoloured, its Head group origin (the back of the skull) at `back` (studs).
+    Returns (elements, groups, outliner node) with textures numbered from 1."""
+    m = json.load(open(SNAKE_HEAD))
+    src = np.array(next(g for g in m["groups"] if g["name"] == "Head")["origin"], float)
+    off = np.array(back, float) * BB - src * k
+
+    def mv(v):
+        return [round(float(c), 4) for c in np.array(v, float) * k + off]
+
+    for e in m["elements"]:
+        e["uuid"] = e["uuid"]  # keep ids: they are unique to this head
+        for key in ("from", "to", "origin"):
+            if key in e:
+                e[key] = mv(e[key])
+        if "vertices" in e:
+            e["vertices"] = {n: [round(c * k, 4) for c in v] for n, v in e["vertices"].items()}
+        for prefixes, color in HEAD_PARTS:
+            if e["name"].startswith(prefixes):
+                for f in e["faces"].values():
+                    f["texture"] = 1 + list(HEAD_TEX).index(color)
+                break
+        else:
+            raise ValueError("no colour for head part " + e["name"])
+    for g in m["groups"]:
+        g["origin"] = mv(g["origin"])
+    textures = [solid_texture(n, rgb) for n, rgb in HEAD_TEX.items()]
+    return m["elements"], m["groups"], m["outliner"][0], textures
+
+
+def dragon_model(a):
+    """The dragon's .bbmodel: body blocks from write_bbmodel, QM's head grafted onto the neck."""
+    model, groups = write_bbmodel(a.parts, a.name, None, bones=a.bones())
+    elements, hgroups, node, textures = dragon_head(a.neck_front, DRAGON_HEAD_SCALE * getattr(a, "meta_scale", 1))
+    model["elements"] += elements
+    model["groups"] += hgroups
+    model["textures"] += textures
+
+    def find(nodes, uid):
+        for n in nodes:
+            if isinstance(n, dict):
+                if n["uuid"] == uid:
+                    return n
+                hit = find(n["children"], uid)
+                if hit:
+                    return hit
+
+    find(model["outliner"], groups["neck"]["uuid"])["children"].append(node)
+    return model
+
+
+# ---------------------------------------------------------------- build + render
+
+CREATURES = [snowman, penguin, white_wolf, polar_bear, troll, ice_dragon]
+PLAIN = ("Eye", "Pupil", "Nostril", "Plain", "Mouth", "Amber", "Slit", "Upper_tooth", "Lower_tooth", "Scar",
+         "Coal", "Button", "Claw", "Spike", "Tusk", "Carrot", "Nose", "Tie")
+
+
+def scaled(a):
+    k = getattr(a, "meta_scale", 1)
+    if k != 1:
+        a.scale(k)
+        if hasattr(a, "neck_front"):
+            a.neck_front = tuple(np.array(a.neck_front) * k)
+    return a
+
+
+def build(fn):
+    """(animal, model dict, parts to render) for one builder."""
+    a = scaled(fn())
+    if fn is ice_dragon:
+        model = dragon_model(a)
+        parts = posed(model)
+    else:
+        model, _ = write_bbmodel(a.parts, a.name, None, bones=a.bones())
+        parts = a.parts
+    for p in parts:
+        if p.name.startswith(PLAIN):
+            p.plain = True
+    return a, model, parts
+
+
+def save_model(a, model):
+    os.makedirs(MODELS, exist_ok=True)
+    path = os.path.join(MODELS, a.name + ".bbmodel")
+    with open(path, "w") as f:
+        json.dump(model, f, separators=(",", ":"))
+    return path
+
+
+def bounds(parts):
+    pts = np.concatenate([np.concatenate([w for w, _ in A_faces(p)]) for p in parts])
+    return pts.min(0), pts.max(0)
+
+
+def A_faces(p):
+    from partlib import part_faces
+    return part_faces(p)
+
+
+NAMES = {"WhiteWolf": "White Wolf", "PolarBear": "Polar Bear", "IceDragon": "Ice Dragon"}
+Q34_DIR = np.array([-19, 12, -21], float) / np.linalg.norm([-19, 12, -21])
+
+
+def lineup(out):
+    horse = A.qm_horse("A")
+    tiles = [("Horse · for size", pose(horse, None, 0))]
+    for fn in CREATURES:
+        a, model, parts = build(fn)
+        save_model(a, model)
+        tiles.append((f"{NAMES.get(a.name, a.name)} · {a.rarity}", parts))
+        print(a.name, len(a.parts), "parts")
+    H, fov, dist, ty = 460, 30, 62, 7.0
+    ims = []
+    for name, parts in tiles:
+        lo, hi = bounds(parts)
+        cx, cz = (lo[0] + hi[0]) / 2, (lo[2] + hi[2]) / 2
+        target = np.array([cx, ty, cz])
+        eye = target + Q34_DIR * dist
+        # width: the projected x extent of the bounding box, plus a margin
+        from partlib import look_at
+        e, r, u, f = look_at(eye, target)
+        focal = (H / 2) / np.tan(np.radians(fov) / 2)
+        d = np.concatenate([np.concatenate([w for w, _ in A_faces(p)]) for p in parts]) - e
+        xs = focal * (d @ r) / (d @ f)
+        W = int(max(150, 2 * max(abs(xs.min()), abs(xs.max())) + 24))
+        ims.append((name, render(parts, eye=eye, target=target, W=W, H=H, fov=fov)))
+    sheet = Image.new("RGB", (sum(im.width for _, im in ims), H))
+    x = 0
+    for _, im in ims:
+        sheet.paste(im, (x, 0))
+        x += im.width
+    if sheet.width > 1600:  # keep it modest: shrink the whole strip, sizes still compare
+        k = 1600 / sheet.width
+        sheet = sheet.resize((1600, round(H * k)), Image.LANCZOS)
+        ims = [(n, im.resize((round(im.width * k), sheet.height))) for n, im in ims]
+    labelled = label_tiles(sheet, ims)
+    path = os.path.join(out, "snow_lineup.png")
+    labelled.save(path)
+    print("wrote", path, labelled.size)
+
+
+def label_tiles(sheet, ims, size=16):
+    """Two-line labels (name, then rarity) over tiles of different widths."""
+    from PIL import ImageDraw
+    band = 48
+    out = Image.new("RGB", (sheet.width, sheet.height + band), (255, 255, 255))
+    out.paste(sheet, (0, band))
+    d = ImageDraw.Draw(out)
+    x = 0
+    for name, im in ims:
+        for row, text in enumerate(name.split(" · ")):
+            tw = d.textlength(text, font=A.font(size))
+            d.text((x + (im.width - tw) / 2, 5 + row * 21), text, fill=(20, 20, 20), font=A.font(size))
+        x += im.width
+    return out
+
+
+def one(name, out):
+    """Close look at one animal: 3/4 front, side, 3/4 back, front."""
+    fn = next(f for f in CREATURES if f.__name__.replace("_", "") == name.lower().replace("_", ""))
+    a, model, parts = build(fn)
+    print("wrote", save_model(a, model))
+    lo, hi = bounds(parts)
+    c = (lo + hi) / 2
+    radius = np.linalg.norm(hi - lo) / 2
+    W, H, fov = 420, 420, 34
+    dist = radius / np.tan(np.radians(fov) / 2) * 0.97
+    views = [(-19, 12, -21), (-1, 0.15, -0.02), (17, 11, 20), (-0.12, 0.2, -1)]
+    sheet = Image.new("RGB", (W * len(views), H))
+    for i, v in enumerate(views):
+        v = np.array(v, float) / np.linalg.norm(v)
+        sheet.paste(render(parts, eye=c + v * dist, target=c, W=W, H=H, fov=fov), (i * W, 0))
+    path = os.path.join(out, f"{a.name}.png")
+    A.label(sheet, [f"{NAMES.get(a.name, a.name)} · {a.rarity}", "side", "back", "front"], 18).save(path)
+    print("wrote", path)
+
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    os.makedirs(OUT, exist_ok=True)
+    if args and args[0] == "one":
+        one(args[1], args[2] if len(args) > 2 else OUT)
+    else:
+        target = args[0] if args else OUT
+        os.makedirs(target, exist_ok=True)
+        lineup(target)
+        for fn in CREATURES:
+            one(fn.__name__, target)
