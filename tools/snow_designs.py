@@ -210,34 +210,94 @@ def white_wolf():
 
 # ---------------------------------------------------------------- polar bear
 
-def polar_bear():
+def polar_bear(armor=False):
+    """Hunched brute after QM's figure: a chest pitched up into a big shoulder
+    hump, the head thrust forward below it, heavy splayed forelegs with blue
+    claws, small hind legs. Every block is axis-aligned inside its bone; the
+    pose comes from the bones' rest rotations (a.rest)."""
     a = Animal("PolarBear", "Epic")
-    fur, nose, claw = (250, 250, 246), (36, 38, 50), (96, 100, 118)
-    a.bone_order = [("root", None), ("neck", "root"), ("Tail", "root")] + [("Leg" + leg, "root") for leg in A.LEGS]
-    a.body(2.4, 3.3, 7.8, -4.2, 4.2, fur)
-    a.legs(0.55, 2.4, 1.9, 0.7, fur, fur)
-    # claws: three dark pyramids poking forward out of each paw
-    for leg in A.LEGS:
-        sx = -1 if leg[1] == "L" else 1
-        front = leg[0] == "F"
-        z = -4.2 if front else 4.2 - 1.9
-        for i, xc in enumerate((0.85, 1.475, 2.1)):
-            x0, x1 = X(sx, xc - 0.2, xc + 0.2)
-            pyramid(a, f"Claw{leg}{i}", (x0, 0, z), (x1, 0.4, z), "-z", 0.45, claw, "Leg" + leg)
-    # head low out front, square muzzle, black nose
-    a.box("Head", (-1.7, 4.6, -7.0), (1.7, 7.6, -4.199), fur, "neck")
-    a.box("Snout", (-1.0, 4.6, -8.5), (1.0, 6.3, -7.0), fur, "neck")
-    a.box("Nose", (-0.55, 5.7, -8.8), (0.55, 6.45, -8.3), nose, "neck")
-    side_eyes(a, 1.7, 6.3, 7.1, -6.6, -5.8)
-    # round ears: little blocks on the head's top corners
+    fur, shade, belly = (250, 251, 248), (224, 232, 240), (236, 242, 248)
+    nose, claw, pad = (34, 36, 48), (46, 150, 196), (96, 104, 124)
+    a.bone_order = [("root", None), ("Chest", "root"), ("Hump", "Chest"), ("neck", "Chest"),
+                    ("Tail", "root")] + [("Leg" + leg, "root") for leg in A.LEGS]
+    a.rest = {}
+    # hips (root): the low back end
+    a.box("Hips", (-2.9, 5.4, 1.0), (2.9, 10.2, 8.4), fur, "root")
+    a.box("HipsUnder", (-2.5, 4.8, 1.6), (2.5, 5.4, 7.6), shade, "root")
+    a.pivots["root"] = (0, 7.8, 4.7)
+    # chest: much bigger than the hips, pitched up so the back climbs to the hump
+    a.box("Chest", (-3.7, 5.2, -6.2), (3.7, 12.6, 1.8), fur, "Chest")
+    a.box("Belly", (-3.1, 4.6, -5.4), (3.1, 5.2, 1.0), belly, "Chest")
+    a.box("Ruff", (-3.0, 5.4, -7.4), (3.0, 10.0, -6.2), belly, "Chest")  # the fur bib under the head
+    a.pivots["Chest"] = (0, 8.0, 1.4)
+    a.rest["Chest"] = (12, 0, 0)
+    # hump: a slab over the shoulders, tipped back against the chest's pitch
+    a.box("Hump", (-3.2, 12.6, -4.6), (3.2, 14.2, 1.0), fur, "Hump")
+    a.box("HumpTop", (-2.4, 14.2, -3.6), (2.4, 14.8, 0.2), shade, "Hump")
+    a.pivots["Hump"] = (0, 12.6, 1.0)
+    a.rest["Hump"] = (-6, 0, 0)
+    # head: low and thrust forward from the chest's front, nose dipped
+    a.box("Head", (-2.3, 7.4, -10.4), (2.3, 11.4, -6.2), fur, "neck")
+    a.box("Brow", (-2.3, 10.6, -10.8), (2.3, 11.4, -10.4), shade, "neck")
+    a.box("Snout", (-1.4, 7.4, -12.8), (1.4, 9.8, -10.4), fur, "neck")
+    a.box("Jaw", (-1.2, 6.8, -12.2), (1.2, 7.4, -8.0), shade, "neck")
+    a.box("Nose", (-0.7, 9.0, -13.1), (0.7, 10.0, -12.6), nose, "neck")
+    side_eyes(a, 2.3, 9.3, 10.4, -10.0, -9.0)
     for side, sx in SIDES:
-        x0, x1 = X(sx, 0.8, 1.6)
-        a.box("Ear" + side, (x0, 7.6, -5.4), (x1, 8.4, -4.8), fur, "neck")
-    a.box("Tail", (-0.55, 6.4, 4.2), (0.55, 7.3, 4.8), fur, "Tail")
-    a.pivots.update(neck=(0, 7.6, -4.2), Tail=(0, 7.3, 4.2))
-    a.meta = {"seat": (0, 7.8, 0.6), "neck_loop": {"center": (0, 6.1, -5.6), "radius": 2.2}}
-    a.meta_scale = 1.15
+        x0, x1 = X(sx, 1.0, 2.2)
+        a.box("Ear" + side, (x0, 11.4, -7.8), (x1, 12.4, -6.8), fur, "neck")
+        x0, x1 = X(sx, 2.3, 2.9)
+        a.box("Cheek" + side, (x0, 7.4, -9.6), (x1, 9.6, -6.6), fur, "neck")  # jowl fur sticking out
+    a.pivots["neck"] = (0, 8.6, -6.2)
+    a.rest["neck"] = (-16, 0, 0)
+    # forelegs: a big shoulder, a thick arm reaching forward, huge paws with blue claws
+    for side, sx in SIDES:
+        leg = "LegF" + side
+        x0, x1 = X(sx, 2.4, 5.4)
+        a.box("Shoulder" + side, (x0, 8.0, -5.8), (x1, 11.6, -1.2), fur, leg)
+        x0, x1 = X(sx, 2.8, 5.0)
+        a.box("Arm" + side, (x0, 3.4, -5.0), (x1, 8.0, -2.0), fur, leg)
+        x0, x1 = X(sx, 2.5, 5.3)
+        a.box("Wrist" + side, (x0, 1.3, -5.4), (x1, 3.4, -1.7), shade, leg)
+        x0, x1 = X(sx, 2.1, 5.7)
+        a.box("Paw" + side, (x0, 0, -6.6), (x1, 1.3, -1.5), fur, leg)
+        for i, xc in enumerate((2.7, 3.9, 5.1)):
+            x0, x1 = X(sx, xc - 0.35, xc + 0.35)
+            pyramid(a, f"ClawF{side}{i}", (x0, 0.1, -6.6), (x1, 0.9, -6.6), "-z", 0.9, claw, leg)
+        a.pivots[leg] = (sx * 3.9, 10.8, -1.6)
+        a.rest[leg] = (8, 0, sx * 5)
+        # hind legs: a round haunch over a short shin, set wide, feet turned out
+        leg = "LegH" + side
+        x0, x1 = X(sx, 1.0, 3.5)
+        a.box("Haunch" + side, (x0, 4.0, 3.6), (x1, 8.6, 8.4), fur, leg)
+        x0, x1 = X(sx, 1.3, 3.2)
+        a.box("Shin" + side, (x0, 1.1, 4.6), (x1, 4.0, 7.6), shade, leg)
+        x0, x1 = X(sx, 1.0, 3.5)
+        a.box("Foot" + side, (x0, 0, 3.4), (x1, 1.1, 7.8), fur, leg)
+        for i, xc in enumerate((1.5, 2.25, 3.0)):
+            x0, x1 = X(sx, xc - 0.25, xc + 0.25)
+            pyramid(a, f"ClawH{side}{i}", (x0, 0.1, 3.4), (x1, 0.7, 3.4), "-z", 0.6, claw, leg)
+        a.pivots[leg] = (sx * 2.25, 8.0, 4.0)
+        a.rest[leg] = (-6, sx * -8, 0)
+    a.box("Tail", (-0.7, 8.4, 8.4), (0.7, 9.8, 9.2), fur, "Tail")
+    a.pivots["Tail"] = (0, 9.8, 8.4)
+    a.rest["Tail"] = (20, 0, 0)
+    if armor:
+        gold, steel, gem = (232, 180, 64), (150, 160, 176), (40, 150, 196)
+        # one pauldron on the left shoulder, a strap across the chest
+        a.box("PauldronL", (-5.8, 11.6, -6.2), (-2.2, 12.4, -0.8), gold, "LegFL")
+        a.box("PauldronLSide", (-5.8, 9.0, -6.2), (-5.4, 11.6, -0.8), gold, "LegFL")
+        a.box("PauldronLSteel", (-5.9, 9.6, -5.4), (-5.8, 11.2, -1.6), steel, "LegFL")
+        a.box("GemL", (-6.3, 9.9, -4.2), (-5.9, 10.9, -2.8), gem, "LegFL")
+        a.box("Strap", (-3.8, 6.0, -6.4), (3.8, 7.2, -5.2), steel, "Chest")
+        a.box("StrapGem", (-0.7, 5.8, -6.8), (0.7, 7.4, -6.4), gem, "Chest")
+    a.meta = {"seat": (0, 13.4, -1.0), "neck_loop": {"center": (0, 9.0, -8.4), "radius": 2.8}}
+    a.meta_scale = 0.85  # about 1.2x the first draft (QM: large)
     return a
+
+
+def polar_bear_armor():
+    return polar_bear(armor=True)
 
 
 # ---------------------------------------------------------------- troll
@@ -484,6 +544,11 @@ def build(fn):
     a = scaled(fn())
     if fn is ice_dragon:
         model = dragon_model(a)
+        parts = posed(model)
+    elif getattr(a, "rest", None):
+        model, groups = write_bbmodel(a.parts, a.name, None, bones=a.bones())
+        for bone, r in a.rest.items():
+            groups[bone]["rotation"] = list(r)
         parts = posed(model)
     else:
         model, _ = write_bbmodel(a.parts, a.name, None, bones=a.bones())
