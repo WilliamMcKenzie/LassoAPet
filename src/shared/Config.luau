@@ -33,8 +33,8 @@ return {
 	},
 	CourseHalfWidth = 56,
 	CourseLength = 1520, -- all the biomes' lengths added up
-	HomeHalfWidth = 80,
-	StarterSpot = Vector3.new(0, 0, 56),
+	HomeHalfWidth = 112,
+	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
 	-- Ride
 	MountSpeed = 44,

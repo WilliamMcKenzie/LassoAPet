@@ -6,14 +6,20 @@ Writes src/world/Pens.rbxmx (synced by Rojo to Workspace.Pens). Once it is in
 Studio, QM can edit it by hand and Save to File over that path; rerunning this
 script would overwrite those edits.
 
-Each PenN model holds a wooden post-and-rail fence and plank floor with a
-gate facing the course (-Z), a name board on the arch over the gate (the server writes the owner's name on it) and
-invisible markers the scripts read:
-  Spawn  where the owner appears
-  Slots  one invisible part per pet spot (all of the owner's pets live here;
-         Slot1 is the one the owner rides out from)
+The pens copy the open farm pens of Roblox pet games (QM's references): low
+fences on the grass, dark posts, orange wooden rails top and bottom with an X
+brace in every span, and a gap at the front facing the start line. They sit in
+a row just behind the start line so the walk home after a ride is short.
+
+Each PenN model also holds invisible markers the scripts read:
+  Spawn  where the owner appears, outside the gap
+  Sign   above the gap; the server hangs the owner's picture and name on it
+  Area   the ground the pets wander over
+  Slots  one invisible part per pet spot (all of the owner's pets live here);
+         Slot1 is just inside the gap, where the pet you ride sets off from
 """
 
+import math
 import sys
 from pathlib import Path
 
@@ -25,94 +31,80 @@ import partlib  # noqa: E402
 OUT = Path(__file__).resolve().parent.parent / "src" / "world" / "Pens.rbxmx"
 
 PENS = 5
-SPACING = 28  # pen centres along X
-WIDTH, DEPTH = 24, 32
-FRONT_Z = 126  # the gate side; the back sits 2 studs off the base's back wall (z = 160)
-GATE = 8
-SPAWN_Z = 121
-# Pet spots, two rows of three. Slot1 faces the gate, so the pet standing there
-# (the pet you ride, the default horse for now) rides straight out through it.
-SLOTS = [(x, FRONT_Z + dz) for dz in (9, 21) for x in (0, -7, 7)]
+SPACING = 42  # pen centres along X; the base is 224 wide (Config.HomeHalfWidth 112)
+WIDTH, DEPTH = 34, 36
+FRONT_Z = 40  # the open side, facing the start line at z = 0
+GATE = 10
+SPAWN_Z = FRONT_Z - 6
+SLOTS = [(0, FRONT_Z + 6)] + [(x, FRONT_Z + dz) for dz, xs in ((16, (-10, 10)), (27, (-10, 0, 10))) for x in xs]
 
-# Post-and-rail wooden pens like the horse pens and farm plots in Roblox horse
-# and pet games: dark posts, lighter plank rails, a plank floor and a gate arch
-# with a hanging name board.
-POST_WOOD = (117, 72, 42)
-RAIL_WOOD = (181, 121, 70)
-FLOOR_WOOD = [(214, 152, 92), (198, 138, 82)]
-SIGN_WOOD = (226, 176, 108)
-POST, RAIL = 2, 0.6
-FENCE_H = 5
-FLOOR_H = 0.4
-ARCH_H = 11
-BEAM_H = 1.5
-SIGN_W, SIGN_H = 16, 4  # the name board, inside its frame
-FRAME = 0.6
+POST_COLOR = (62, 62, 72)
+RAIL_COLOR = (204, 108, 52)
+POST, POST_H = 1.2, 4
+SPAN = 6  # longest gap between posts
+RAIL_H, RAIL_T = 0.5, 0.5  # rail height and thickness
+RAILS_Y = (0.9, 3.3)  # rail centres
+BRACE_W = 0.4
+
+
+def rot_y(deg):
+    return partlib.Ry(deg)[:3, :3]
 
 
 def pen_parts(cx):
-    parts = []  # (name, size, centre, colour, visible)
+    parts = []  # (name, size, centre, rotation 3x3, colour, visible)
 
-    def box(name, lo, hi, color=RAIL_WOOD, visible=True):
+    def box(name, lo, hi, color=RAIL_COLOR, visible=True):
         lo, hi = np.array(lo, float), np.array(hi, float)
-        parts.append((name, hi - lo, (lo + hi) / 2, color, visible))
+        parts.append((name, hi - lo, (lo + hi) / 2, np.eye(3), color, visible))
 
     x0, x1 = cx - WIDTH / 2, cx + WIDTH / 2
     z0, z1 = FRONT_Z, FRONT_Z + DEPTH
     g0, g1 = cx - GATE / 2, cx + GATE / 2
-    p = POST / 2
 
-    # Plank floor, boards running from the gate to the back, 4 studs wide.
-    for i, x in enumerate(np.arange(x0, x1, 4)):
-        box("Floor", (x, 0, z0), (x + 4, FLOOR_H, z1), FLOOR_WOOD[i % 2])
-
-    # Posts: corners, every 6-8 studs along the sides and back, and either side of the gate.
-    posts = set()
-    for x in np.linspace(x0, x1, 4):
-        posts.add((x, z1))
-    for z in np.linspace(z0, z1, 5):
-        posts.add((x0, z))
-        posts.add((x1, z))
-    for x, z in sorted(posts):
-        box("Post", (x - p, 0, z - p), (x + p, FENCE_H, z + p), POST_WOOD)
-
-    # Ranch-style entrance: two tall posts and a beam, with the owner's name board
-    # standing on the beam in a dark frame, wide and above the fence so it reads
-    # from the riding camera (like ranch gates in Roblox horse games and the name
-    # signs on Grow a Garden plots).
-    for x in (g0 - p, g1 + p):
-        box("GatePost", (x - p, 0, z0 - p), (x + p, ARCH_H, z0 + p), POST_WOOD)
-    top = ARCH_H + BEAM_H
-    box("Beam", (g0 - 4, ARCH_H, z0 - 1.5), (g1 + 4, top, z0 + 1.5), POST_WOOD)
-    s0, s1 = cx - SIGN_W / 2, cx + SIGN_W / 2
-    box("Sign", (s0, top, z0 - 0.25), (s1, top + SIGN_H, z0 + 0.25), SIGN_WOOD)
-    f = FRAME
-    box("Frame", (s0 - f, top, z0 - 0.45), (s0, top + SIGN_H + f, z0 + 0.45), POST_WOOD)
-    box("Frame", (s1, top, z0 - 0.45), (s1 + f, top + SIGN_H + f, z0 + 0.45), POST_WOOD)
-    box("Frame", (s0, top + SIGN_H, z0 - 0.45), (s1, top + SIGN_H + f, z0 + 0.45), POST_WOOD)
-
-    # Two plank rails on every run of fence, on the outside of the posts.
-    runs = [
-        ((x0, z0), (x0, z1), (-1, 0)),
-        ((x1, z0), (x1, z1), (1, 0)),
-        ((x0, z1), (x1, z1), (0, 1)),
-        ((x0, z0), (g0 - POST, z0), (0, -1)),
-        ((g1 + POST, z0), (x1, z0), (0, -1)),
+    runs = [  # fence runs, start -> end on the ground
+        ((x0, z0), (g0, z0)),
+        ((g1, z0), (x1, z0)),
+        ((x0, z0), (x0, z1)),
+        ((x1, z0), (x1, z1)),
+        ((x0, z1), (x1, z1)),
     ]
-    for (ax, az), (bx, bz), (nx, nz) in runs:
-        ox, oz = nx * (p + RAIL / 2), nz * (p + RAIL / 2)
-        wx = RAIL / 2 if nx else 0
-        wz = RAIL / 2 if nz else 0
-        ex = p if nz else 0  # rails run past the end posts' faces
-        ez = p if nx else 0
-        for y in (1.5, 3.5):
-            lo = (min(ax, bx) + ox - wx - ex, y - 0.6, min(az, bz) + oz - wz - ez)
-            hi = (max(ax, bx) + ox + wx + ex, y + 0.6, max(az, bz) + oz + wz + ez)
-            box("Rail", lo, hi)
+    posts = set()
+    p = POST / 2
+    lo_y, hi_y = RAILS_Y[0] + RAIL_H / 2, RAILS_Y[1] - RAIL_H / 2
+    for (ax, az), (bx, bz) in runs:
+        a, b = np.array([ax, az]), np.array([bx, bz])
+        length = float(np.linalg.norm(b - a))
+        along = (b - a) / length
+        n = max(1, math.ceil(length / SPAN - 1e-9))
+        stops = [a + along * length * k / n for k in range(n + 1)]
+        for s in stops:
+            posts.add((round(s[0], 4), round(s[1], 4)))
+        yaw = 0 if abs(along[0]) > 0.5 else 90  # rails run along local X
+        R = rot_y(yaw)
+        mid = (a + b) / 2
+        for y in RAILS_Y:
+            parts.append(("Rail", np.array([length, RAIL_H, RAIL_T]), np.array([mid[0], y, mid[1]]), R, RAIL_COLOR, True))
+        # an X in every span, between the posts and the rails
+        for k in range(n):
+            s0 = stops[k] + along * p
+            s1 = stops[k + 1] - along * p
+            w = float(np.linalg.norm(s1 - s0))
+            h = hi_y - lo_y
+            angle = math.degrees(math.atan2(h, w))
+            c = (s0 + s1) / 2
+            for sign, depth in ((1, 0.34), (-1, 0.3)):  # different depths so the crossing faces never z-fight
+                Rb = R @ partlib.Rz(sign * angle)[:3, :3]
+                size = np.array([math.hypot(w, h) - BRACE_W * 0.5, BRACE_W, depth])
+                parts.append(("Brace", size, np.array([c[0], (lo_y + hi_y) / 2, c[1]]), Rb, RAIL_COLOR, True))
+    for x, z in sorted(posts):
+        box("Post", (x - p, 0, z - p), (x + p, POST_H, z + p), POST_COLOR)
 
     box("Spawn", (cx - 2, 0, SPAWN_Z - 2), (cx + 2, 1, SPAWN_Z + 2), visible=False)
+    box("Sign", (cx - 1, 8, z0 - 1), (cx + 1, 10, z0 + 1), visible=False)
+    box("Area", (x0 + 4, 0, z0 + 4), (x1 - 4, 1, z1 - 4), visible=False)
     for i, (sx, sz) in enumerate(SLOTS, 1):
-        box(f"Slot{i}", (cx + sx - 2, FLOOR_H, sz - 2), (cx + sx + 2, FLOOR_H + 1, sz + 2), visible=False)
+        box(f"Slot{i}", (cx + sx - 2, 0, sz - 2), (cx + sx + 2, 1, sz + 2), visible=False)
     return parts
 
 
@@ -120,7 +112,7 @@ def pen_centres():
     return [(i - (PENS - 1) / 2) * SPACING for i in range(PENS)]
 
 
-def xml_part(ref, name, size, centre, color, visible):
+def xml_part(ref, name, size, centre, R, color, visible):
     r, g, b = color
     rgb = (255 << 24) | (r << 16) | (g << 8) | b
     extra = "" if visible else (
@@ -128,17 +120,17 @@ def xml_part(ref, name, size, centre, color, visible):
         '<bool name="CanQuery">false</bool>\n<bool name="CanTouch">false</bool>\n'
         '<bool name="CastShadow">false</bool>\n')
     top = 3 if visible else 0
+    rot = "".join(f"<R{i}{j}>{R[i, j]:.6g}</R{i}{j}>" for i in range(3) for j in range(3))
     return (
         f'<Item class="Part" referent="{ref()}"><Properties>\n'
         f'<string name="Name">{name}</string>\n'
         '<bool name="Anchored">true</bool>\n'
-        f'<Vector3 name="size"><X>{size[0]:g}</X><Y>{size[1]:g}</Y><Z>{size[2]:g}</Z></Vector3>\n'
+        f'<Vector3 name="size"><X>{size[0]:.4g}</X><Y>{size[1]:.4g}</Y><Z>{size[2]:.4g}</Z></Vector3>\n'
         f'<Color3uint8 name="Color3uint8">{rgb}</Color3uint8>\n'
         f'<token name="TopSurface">{top}</token>\n'
         '<token name="BottomSurface">0</token>\n'
         f'{extra}'
-        f'<CoordinateFrame name="CFrame"><X>{centre[0]:g}</X><Y>{centre[1]:g}</Y><Z>{centre[2]:g}</Z>'
-        '<R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22>'
+        f'<CoordinateFrame name="CFrame"><X>{centre[0]:.6g}</X><Y>{centre[1]:.6g}</Y><Z>{centre[2]:.6g}</Z>{rot}'
         '</CoordinateFrame>\n'
         '</Properties></Item>\n'
     )
@@ -167,19 +159,32 @@ def write():
     OUT.write_text("".join(out))
 
 
+def visible_parts(cx):
+    out = []
+    for name, size, centre, R, color, visible in pen_parts(cx):
+        if visible:
+            cf = np.eye(4)
+            cf[:3, :3] = R
+            cf[:3, 3] = centre
+            out.append(partlib.Part(name, size, cf, color))
+    return out
+
+
 def preview(path):
     parts = []
     for cx in pen_centres():
-        for name, size, centre, color, visible in pen_parts(cx):
-            if visible:
-                parts.append(partlib.Part(name, size, partlib.T(*centre), color))
-        # stand-in for the owner's horse at the Mount spot
-        parts.append(partlib.Part("Horse", (3, 5, 8), partlib.T(cx, FLOOR_H + 2.5, SLOTS[0][1]), (160, 100, 60), plain=True))
+        parts += visible_parts(cx)
+        # stand-ins for pets wandering about
+        for dx, dz, yaw in ((0, 8, 0), (-9, 20, 40), (8, 24, -70)):
+            cf = partlib.T(cx + dx, 2.5, FRONT_Z + dz) @ partlib.Ry(yaw)
+            parts.append(partlib.Part("Pet", (3, 5, 8), cf, (226, 130, 50), plain=True))
     wall = (240, 160, 108)
-    for lo, hi in [((-84, 0, -4), (-80, 20, 164)), ((80, 0, -4), (84, 20, 164)), ((-84, 0, 160), (84, 20, 164))]:
+    for lo, hi in [((-120, 0, -8), (-112, 20, 120)), ((112, 0, -8), (120, 20, 120)), ((-120, 0, 112), (120, 20, 120)),
+                   ((-112, 0, -8), (-56, 20, 0)), ((56, 0, -8), (112, 20, 0))]:
         lo, hi = np.array(lo, float), np.array(hi, float)
         parts.append(partlib.Part("Wall", hi - lo, partlib.T(*((lo + hi) / 2)), wall, plain=True))
-    img = partlib.render(parts, eye=(0, 60, 30), target=(0, 0, 120), W=1100, H=800, fov=50)
+    parts.append(partlib.Part("StartLine", (112, 0.2, 4), partlib.T(0, 0.1, -2), (30, 30, 30), plain=True))
+    img = partlib.render(parts, eye=(0, 95, -45), target=(0, 0, 60), W=1400, H=900, fov=62)
     img.save(path)
 
 
