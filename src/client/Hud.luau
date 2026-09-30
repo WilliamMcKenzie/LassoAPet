@@ -41,6 +41,8 @@ local IMAGES = {
 	takeEggEpic = { id = "rbxassetid://114155984376753", size = Vector2.new(960, 434) },
 	takeEggLegendary = { id = "rbxassetid://93889609154413", size = Vector2.new(960, 434) },
 	sprint = { id = "rbxassetid://104509002348710", size = Vector2.new(618, 524) },
+	ability = { id = "rbxassetid://95632395593874", size = Vector2.new(618, 524) }, -- Ability.png
+	abilityCooldown = { id = "rbxassetid://86071723052223", size = Vector2.new(618, 524) }, -- AbilityCooldown.png
 	-- Egg reveal cards (assets/ui).
 	-- cardLeft is where the card's rounded body starts in the image (the rarity
 	-- cards' banners stick out past it); the body is 975 x 1175 from y = 12 in all.
@@ -103,6 +105,7 @@ local card, cardEgg, cardScale, cardFlash, cardBurst -- egg reveal card, the egg
 local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
+local ability, abilityInput, abilityFill, abilityTime -- the Ability button, its holder, the ready part and the countdown
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -334,6 +337,37 @@ function Hud.init(onAction, onHome, onRide)
 			sprintInput = input
 		end
 	end)
+	-- Ability, bottom right (only for a pet that has one): held down like Sprint.
+	-- Grey while it cools down, the ready (red) picture filling in from the top
+	-- with the seconds left on it.
+	local abilitySize = fit("ability", SPRINT_WIDTH)
+	ability = image(rideRoot, "abilityCooldown", abilitySize, UDim2.new(1, -MARGIN, 1, -MARGIN))
+	ability.Name = "ability"
+	ability.AnchorPoint = Vector2.new(1, 1)
+	ability.Active = true
+	ability.Visible = false
+	abilityFill = Instance.new("Frame")
+	abilityFill.BackgroundTransparency = 1
+	abilityFill.ClipsDescendants = true
+	abilityFill.Size = UDim2.fromScale(1, 1)
+	abilityFill.Parent = ability
+	local ready = image(abilityFill, "ability", abilitySize, UDim2.new())
+	ready.AnchorPoint = Vector2.zero
+	abilityTime = label(ability, UDim2.fromScale(1, 0.4), UDim2.fromScale(0.58, 0.55), 40, 5)
+	abilityTime.ZIndex = 2
+	local abilityScale = Instance.new("UIScale")
+	abilityScale.Parent = ability
+	ability.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+			abilityInput = input
+			TweenService:Create(abilityScale, TweenInfo.new(0.08), { Scale = 0.93 }):Play()
+		end
+	end)
+	ability.InputEnded:Connect(function(input)
+		if input == abilityInput then
+			TweenService:Create(abilityScale, TweenInfo.new(0.08), { Scale = 1 }):Play()
+		end
+	end)
 	-- Egg reveal card: a frame the size of the card's body, with the card image
 	-- placed so its body fills the frame and the egg render on top.
 	card = Instance.new("Frame")
@@ -500,6 +534,26 @@ function Hud.setSprint(visible)
 	if not visible then
 		sprintInput = nil
 	end
+end
+
+-- The Ability button: nil hides it (the pet has no ability); otherwise ready is
+-- 0..1 of the cooldown done (1 = ready) and seconds is the time left on it.
+function Hud.setAbility(ready, seconds)
+	ability.Visible = ready ~= nil
+	if not ready then
+		abilityInput = nil
+		return
+	end
+	abilityFill.Size = UDim2.fromScale(1, ready)
+	abilityTime.Text = if ready < 1 and seconds then math.ceil(seconds) .. "s" else ""
+end
+
+-- Whether the Ability button is being held down right now.
+function Hud.abilityHeld()
+	if abilityInput and (abilityInput.UserInputState == Enum.UserInputState.End or abilityInput.UserInputState == Enum.UserInputState.Cancel) then
+		abilityInput = nil
+	end
+	return abilityInput ~= nil
 end
 
 -- Whether the Sprint button is being held down right now.

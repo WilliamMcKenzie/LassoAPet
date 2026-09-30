@@ -1150,6 +1150,182 @@ local function updateHerd(dt, slowed)
 	end
 end
 
+-- Pet abilities (Config.Abilities): the Ability button, Q or R1. Each mount keeps
+-- its own cooldown (entity.ability); a mount with no entry shows no button.
+local abilityKey = false -- Q or R1 held
+local abilityClock = 0 -- ride time, slowed with the slow motion like everything else
+local ABILITY_RING_TIME = 0.6
+
+ContextActionService:BindActionAtPriority("Ability", function(_, state)
+	abilityKey = state == Enum.UserInputState.Begin
+	if phase == "idle" then
+		return Enum.ContextActionResult.Pass
+	end
+	return Enum.ContextActionResult.Sink
+end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.Q, Enum.KeyCode.ButtonR1)
+
+local function abilityHeld()
+	return abilityKey or Hud.abilityHeld()
+end
+
+-- The running ability on the mount, if any: { kind, cfg, t, fx }.
+local function activeAbility()
+	local a = mount and mount.ability
+	return a and a.active
+end
+
+-- Wind streaks tearing back off a charging animal's front.
+local function chargeFx(entity)
+	local root = entity.animal.model.PrimaryPart
+	local middle, size = entity.animal.model:GetBoundingBox()
+	local at = Instance.new("Attachment")
+	at.Name = "ChargeWind"
+	at.Position = root.CFrame:PointToObjectSpace(middle.Position + middle.LookVector * size.Z / 2)
+	local wind = Instance.new("ParticleEmitter")
+	wind.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	wind.Color = ColorSequence.new(Color3.new(1, 1, 1))
+	wind.LightEmission = 0.6
+	wind.Orientation = Enum.ParticleOrientation.VelocityParallel
+	wind.EmissionDirection = Enum.NormalId.Back -- the model faces -Z: streaks fly backwards
+	wind.Speed = NumberRange.new(55, 75)
+	wind.Lifetime = NumberRange.new(0.25, 0.4)
+	wind.Rate = 90
+	wind.SpreadAngle = Vector2.new(25, 25)
+	wind.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(1, 0.1) })
+	wind.Squash = NumberSequence.new(-3)
+	wind.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.3), NumberSequenceKeypoint.new(1, 1) })
+	wind.LockedToPart = false
+	wind.Parent = at
+	at.Parent = root
+	return { at }
+end
+
+-- A ring of sand bursting out from the rattling snake to the ability's radius.
+local function rattleRing(center, radius)
+	local ring = Instance.new("Part")
+	ring.Shape = Enum.PartType.Cylinder
+	ring.Anchored = true
+	ring.CanCollide = false
+	ring.CanQuery = false
+	ring.CanTouch = false
+	ring.CastShadow = false
+	ring.Material = Enum.Material.Neon
+	ring.Color = Color3.fromRGB(255, 226, 150)
+	ring.Transparency = 0.3
+	ring.Size = Vector3.new(0.4, 2, 2)
+	ring.CFrame = CFrame.new(center.X, 0.3, center.Z) * CFrame.Angles(0, 0, math.pi / 2)
+	ring.Parent = workspace
+	local info = TweenInfo.new(ABILITY_RING_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(ring, info, { Size = Vector3.new(0.4, radius * 2, radius * 2), Transparency = 1 }):Play()
+	task.delay(ABILITY_RING_TIME, function()
+		ring:Destroy()
+	end)
+end
+
+-- Rattle: everything standing within the radius is smashed, and the animals
+-- there scatter sideways, away from the snake.
+local function rattleBlast(dt, cfg)
+	for _, o in obstacles do
+		if not o.smashed and Vector2.new(o.x - mount.x, o.z - mount.z).Magnitude < cfg.Radius then
+			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
+		end
+	end
+	for _, entity in allAnimals() do
+		local dx, dz = entity.x - mount.x, entity.z - mount.z
+		if dx * dx + dz * dz < cfg.Radius * cfg.Radius then
+			local away = if dx >= 0 then 1 else -1
+			if entity.n then
+				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -cfg.Radius, cfg.Radius)
+			else
+				entity.lane = math.clamp(entity.lane + away * 60 * dt, -EDGE, EDGE)
+			end
+		end
+	end
+end
+
+local function endAbility(entity)
+	local a = entity and entity.ability
+	local active = a and a.active
+	if not active then
+		return
+	end
+	for _, fx in active.fx do
+		fx:Destroy()
+	end
+	local root = entity.animal.model.PrimaryPart
+	if active.cfg.Kind == "Leap" then
+		entity.hop = 0
+		if root then
+			Dust.kick(root.CFrame, entity.animal.scale)
+		end
+	end
+	a.active = nil
+	a.readyAt = abilityClock + active.cfg.Cooldown
+	if entity == mount then
+		grace = math.max(grace, 0.4) -- a moment to clear whatever it was going through
+	end
+end
+
+local function startAbility(cfg)
+	local a = mount.ability
+	a.active = { kind = cfg.Kind, cfg = cfg, t = 0, fx = {} }
+	a.needRelease = true
+	if cfg.Kind == "Charge" then
+		a.active.fx = chargeFx(mount)
+		Poof.at(Vector3.new(mount.x, 0, mount.z))
+	elseif cfg.Kind == "Leap" then
+		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
+	elseif cfg.Kind == "Rattle" then
+		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius)
+	end
+end
+
+-- Every frame while riding: start, run and end the mount's ability, and draw the button.
+local abilityMount -- the mount last frame: when it changes (lassoed a new one, thrown off), the old one's ability stops
+local function updateAbility(dt)
+	abilityClock += dt
+	if abilityMount and abilityMount ~= mount then
+		endAbility(abilityMount)
+	end
+	abilityMount = mount
+	local cfg = mount and Config.Abilities[mount.kind]
+	if not cfg or (phase ~= "outbound" and phase ~= "turning" and phase ~= "return") then
+		if mount then
+			endAbility(mount)
+		end
+		Hud.setAbility(nil)
+		return
+	end
+	local a = mount.ability
+	if not a then
+		a = { readyAt = 0 }
+		mount.ability = a
+	end
+	local held = abilityHeld()
+	if not held then
+		a.needRelease = nil
+	end
+	local active = a.active
+	if active then
+		active.t += dt
+		if active.cfg.Kind == "Rattle" then
+			rattleBlast(dt, active.cfg)
+		end
+		if active.t >= active.cfg.Duration or (active.cfg.Kind == "Charge" and not held) then
+			endAbility(mount)
+		end
+	elseif held and not a.needRelease and abilityClock >= a.readyAt and (phase == "outbound" or phase == "return") and not transfer then
+		startAbility(cfg)
+	end
+	active = a.active
+	if active then
+		Hud.setAbility(1 - active.t / active.cfg.Duration, nil)
+	else
+		local left = math.max(a.readyAt - abilityClock, 0)
+		Hud.setAbility(1 - left / cfg.Cooldown, left)
+	end
+end
+
 local function updateMount(dt)
 	local dir = travelDir()
 	if phase == "turning" then
@@ -1195,6 +1371,14 @@ local function updateMount(dt)
 		targetSpeed *= Config.SprintSpeed
 	end
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
+	local ability = activeAbility()
+	if ability and ability.cfg.Kind == "Leap" then
+		-- Up into the air and down again in an arc, faster.
+		targetSpeed *= ability.cfg.SpeedBoost
+		mount.hop = math.sin(math.pi * math.clamp(ability.t / ability.cfg.Duration, 0, 1)) * ability.cfg.LeapHeight
+	elseif ability and ability.cfg.Kind == "Rattle" then
+		targetSpeed, rate = 0, 120 -- stops dead to coil up
+	end
 	mount.speed += math.clamp(targetSpeed - mount.speed, -rate * dt, rate * dt)
 	if phase == "outbound" and exitX then
 		-- Out of a corner pen: sideways through its open side, curving toward the start line.
@@ -1231,9 +1415,19 @@ local function updateMount(dt)
 	animate(mount, dt, mount.speed, mount.latVel * -dir / Config.SteerSpeed)
 end
 
+local function reachHome()
+	if phase == "return" and mount.z >= START_LINE_Z - LEAP_FROM then
+		-- Home with the egg: the hero leap over the line (updateMount), then the reveal.
+		phase = "home"
+		heroLeap = { t = 0, fromZ = mount.z, toZ = START_LINE_Z + Config.HomeLandPast }
+		Hud.setCutscene(true)
+	end
+end
+
 local function checkRide(dt)
 	grace = math.max(grace - dt, 0)
-	if phase == "outbound" and mount.z < 0 and not transfer then
+	local ability = activeAbility()
+	if phase == "outbound" and mount.z < 0 and not transfer and not ability then -- abilities use no Hold
 		hold -= dt * (if sprinting() then Config.SprintDrain else 1)
 		if hold <= 0 then
 			return fail("BUCKED OFF")
@@ -1241,6 +1435,29 @@ local function checkRide(dt)
 	end
 	if mount.z < -Config.CourseLength + 40 then
 		return fail("TOO FAR!")
+	end
+	if ability and ability.cfg.Kind == "Charge" then
+		-- A battering ram: everything in the way goes flying, whatever its size.
+		while true do
+			local o = blockedAt(mount.x, mount.z, 2.5, 4, 1)
+			if not o then
+				break
+			end
+			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
+		end
+		for _, entity in allAnimals() do
+			local dx, dz = entity.x - mount.x, entity.z - mount.z
+			if not entity.popping and math.abs(dx) < 4 and math.abs(dz) < 6 then
+				knock(entity, dx)
+			end
+		end
+	end
+	if ability then
+		-- Charging, leaping over everything or coiled up rattling: nothing crashes it.
+		if phase == "outbound" and mount.z < gateZ() + 2.4 then
+			return fail("CRASH!") -- except a locked gate
+		end
+		return reachHome()
 	end
 	-- A bigger pet plows through smaller obstacles; its own size or bigger stops it.
 	local tier = tierOf(mount.kind)
@@ -1269,12 +1486,7 @@ local function checkRide(dt)
 			end
 		end
 	end
-	if phase == "return" and mount.z >= START_LINE_Z - LEAP_FROM then
-		-- Home with the egg: the hero leap over the line (updateMount), then the reveal.
-		phase = "home"
-		heroLeap = { t = 0, fromZ = mount.z, toZ = START_LINE_Z + Config.HomeLandPast }
-		Hud.setCutscene(true)
-	end
+	reachHome()
 end
 
 local function updateRider(dt)
@@ -1338,7 +1550,7 @@ local function updateRider(dt)
 			humanoid.Sit = true
 		end
 		hrp.CFrame = mount.animal:getSeatCFrame() * SEAT_OFFSET
-		focus = Vector3.new(mount.x, 0, mount.z)
+		focus = Vector3.new(mount.x, (mount.hop or 0) * 0.6, mount.z) -- the camera rises a little with a leap
 	end
 	if carried then
 		if carried.stage == "throw" then
@@ -1425,6 +1637,7 @@ RunService.PreSimulation:Connect(function(dt)
 		Outline.update()
 		return
 	end
+	updateAbility(dt)
 	if mount then
 		updateMount(dt)
 	end
@@ -1521,6 +1734,10 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
+	local ability = activeAbility()
+	if ability and ability.cfg.Kind == "Charge" then
+		fov += 12 -- the charge: rushing forward
+	end
 	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
 end)
 
