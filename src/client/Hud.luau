@@ -40,15 +40,15 @@ local IMAGES = {
 	-- Egg reveal cards (assets/ui). TODO(Mac session): upload and fill in the ids.
 	-- cardLeft is where the card's rounded body starts in the image (the rarity
 	-- cards' banners stick out past it); the body is 975 x 1175 from y = 12 in all.
-	unknownEgg = { id = "", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg.png, 1/10
-	unknownEgg1 = { id = "", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg1.png, 1/100
-	unknownEgg2 = { id = "", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg2.png, 1/1000
-	cardUncommon = { id = "", size = Vector2.new(1229, 1223), cardLeft = 127 }, -- UncommonEggRNG.png
-	cardRare = { id = "", size = Vector2.new(1134, 1217), cardLeft = 82 }, -- RareEggRNG.png
-	cardEpic = { id = "", size = Vector2.new(1244, 1227), cardLeft = 154 }, -- EpicEggRNG.png
-	cardLegendary = { id = "", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- LegendaryEggRNG.png
+	unknownEgg = { id = "rbxassetid://77096507947185", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg.png, 1/10
+	unknownEgg1 = { id = "rbxassetid://113381581343322", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg1.png, 1/100
+	unknownEgg2 = { id = "rbxassetid://111066508903972", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg2.png, 1/1000
+	cardUncommon = { id = "rbxassetid://73673910929091", size = Vector2.new(1229, 1223), cardLeft = 127 }, -- UncommonEggRNG.png
+	cardRare = { id = "rbxassetid://112042125080788", size = Vector2.new(1134, 1217), cardLeft = 82 }, -- RareEggRNG.png
+	cardEpic = { id = "rbxassetid://94491197892789", size = Vector2.new(1244, 1227), cardLeft = 154 }, -- EpicEggRNG.png
+	cardLegendary = { id = "rbxassetid://124659626997084", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- LegendaryEggRNG.png
 	-- Egg renders for the card, cropped to the egg (assets/ui/<Kind>EggRender.png).
-	eggPinto = { id = "", size = Vector2.new(496, 788) }, -- PintoEggRender.png
+	eggPinto = { id = "rbxassetid://79525419811481", size = Vector2.new(496, 788) }, -- PintoEggRender.png
 }
 
 local BUTTON_WIDTH = 256
