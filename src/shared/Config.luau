@@ -38,7 +38,7 @@ return {
 			-- floor tiles take this biome's ground colours and its posts PostColor.
 			UnlockCost = 150,
 			PostColor = Color3.fromRGB(206, 118, 72),
-			GateImage = "", -- rbxassetid of assets/ui/GateLv2.png once uploaded (text is shown until then)
+			GateImage = "rbxassetid://88918626302524", -- assets/ui/GateLv2.png
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: yellow at the floor
