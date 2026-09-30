@@ -10,8 +10,8 @@ Each PenN model holds a wooden post-and-rail fence and plank floor with a
 gate facing the course (-Z), a name board on the arch over the gate (the server writes the owner's name on it) and
 invisible markers the scripts read:
   Spawn  where the owner appears
-  Mount  where the owner's horse waits, facing the course
-  Slots  one invisible part per pet spot (all of the owner's pets live here)
+  Slots  one invisible part per pet spot (all of the owner's pets live here;
+         Slot1 is the one the owner rides out from)
 """
 
 import sys
@@ -29,9 +29,10 @@ SPACING = 28  # pen centres along X
 WIDTH, DEPTH = 24, 32
 FRONT_Z = 126  # the gate side; the back sits 2 studs off the base's back wall (z = 160)
 GATE = 8
-MOUNT_Z = 112
 SPAWN_Z = 121
-SLOTS = [(x, FRONT_Z + dz) for dz in (8, 16, 24) for x in (-6, 6)]
+# Pet spots, two rows of three. Slot1 faces the gate, so the pet standing there
+# (the default horse for now) rides straight out through it.
+SLOTS = [(x, FRONT_Z + dz) for dz in (9, 21) for x in (0, -7, 7)]
 
 # Post-and-rail wooden pens like the horse pens and farm plots in Roblox horse
 # and pet games: dark posts, lighter plank rails, a plank floor and a gate arch
@@ -110,7 +111,6 @@ def pen_parts(cx):
             box("Rail", lo, hi)
 
     box("Spawn", (cx - 2, 0, SPAWN_Z - 2), (cx + 2, 1, SPAWN_Z + 2), visible=False)
-    box("Mount", (cx - 2, 0, MOUNT_Z - 2), (cx + 2, 1, MOUNT_Z + 2), visible=False)
     for i, (sx, sz) in enumerate(SLOTS, 1):
         box(f"Slot{i}", (cx + sx - 2, FLOOR_H, sz - 2), (cx + sx + 2, FLOOR_H + 1, sz + 2), visible=False)
     return parts
@@ -174,7 +174,7 @@ def preview(path):
             if visible:
                 parts.append(partlib.Part(name, size, partlib.T(*centre), color))
         # stand-in for the owner's horse at the Mount spot
-        parts.append(partlib.Part("Horse", (3, 5, 8), partlib.T(cx, 2.5, MOUNT_Z), (160, 100, 60), plain=True))
+        parts.append(partlib.Part("Horse", (3, 5, 8), partlib.T(cx, FLOOR_H + 2.5, SLOTS[0][1]), (160, 100, 60), plain=True))
     wall = (240, 160, 108)
     for lo, hi in [((-84, 0, -4), (-80, 20, 164)), ((80, 0, -4), (84, 20, 164)), ((-84, 0, 160), (84, 20, 164))]:
         lo, hi = np.array(lo, float), np.array(hi, float)
