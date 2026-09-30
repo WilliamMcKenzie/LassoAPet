@@ -27,7 +27,7 @@ local FONT = Enum.Font.FredokaOne
 -- Square backgrounds by the item's rarity: QM's slot pictures (the colour is a
 -- fallback for a rarity without one).
 local RARITY = {
-	Common = { color = Color3.fromRGB(150, 160, 175), image = "" }, -- assets/ui/SlotCommon.png, not uploaded yet
+	Common = { color = Color3.fromRGB(150, 160, 175), image = "rbxassetid://137596967858841" }, -- SlotCommon.png
 	Uncommon = { color = Color3.fromRGB(70, 170, 60), image = "rbxassetid://120075276423928" }, -- assets/ui/SlotUncommon.png
 	Rare = { color = Color3.fromRGB(50, 120, 220), image = "rbxassetid://92909054184182" }, -- assets/ui/SlotRare.png
 	Epic = { color = Color3.fromRGB(150, 60, 200), image = "rbxassetid://75096704585668" }, -- assets/ui/SlotEpic.png

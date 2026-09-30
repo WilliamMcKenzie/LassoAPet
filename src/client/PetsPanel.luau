@@ -38,7 +38,7 @@ local TRASH = "rbxassetid://74308771924477" -- assets/ui/Trash.png (QM's trash c
 local COIN = "rbxassetid://99312860837685"
 -- QM's slot pictures by rarity (as the inventory bar); a plain colour until one is uploaded.
 local SLOTS = {
-	Common = "", -- assets/ui/SlotCommon.png
+	Common = "rbxassetid://137596967858841", -- assets/ui/SlotCommon.png
 	Uncommon = "rbxassetid://120075276423928",
 	Rare = "rbxassetid://92909054184182",
 	Epic = "rbxassetid://75096704585668",
