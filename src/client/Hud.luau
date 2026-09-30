@@ -37,7 +37,7 @@ local IMAGES = {
 	takeEggEpic = { id = "rbxassetid://114155984376753", size = Vector2.new(960, 434) },
 	takeEggLegendary = { id = "rbxassetid://93889609154413", size = Vector2.new(960, 434) },
 	sprint = { id = "rbxassetid://104509002348710", size = Vector2.new(618, 524) },
-	-- Egg reveal cards (assets/ui). TODO(Mac session): upload and fill in the ids.
+	-- Egg reveal cards (assets/ui).
 	-- cardLeft is where the card's rounded body starts in the image (the rarity
 	-- cards' banners stick out past it); the body is 975 x 1175 from y = 12 in all.
 	unknownEgg = { id = "rbxassetid://77096507947185", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg.png, 1/10
