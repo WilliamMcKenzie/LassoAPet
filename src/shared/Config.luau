@@ -26,6 +26,11 @@ return {
 			-- Which animals run in this biome's stampede and how often, by weight
 			-- (names are modules in Shared/Animals).
 			Herd = { Horse = 30, Pinto = 20, Pig = 20, Fish = 12, Rhino = 8, Unicorn = 3 },
+			-- Dirt patches in the walls' colours, a stud below the grass
+			-- (tools/meadow_ground.py); see the Desert's Patches.
+			Patches = {
+				Dirt = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
+			},
 		},
 		{
 			Name = "Desert",
