@@ -50,6 +50,10 @@ local IMAGES = {
 	cardLegendary = { id = "rbxassetid://124659626997084", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- LegendaryEggRNG.png
 	-- Egg renders for the card, cropped to the egg (assets/ui/<Kind>EggRender.png).
 	eggPinto = { id = "rbxassetid://79525419811481", size = Vector2.new(496, 788) }, -- PintoEggRender.png
+	eggPig = { id = "", size = Vector2.new(496, 730) }, -- PigEggRender.png (upload and fill in the id)
+	eggFish = { id = "", size = Vector2.new(586, 810) }, -- FishEggRender.png (upload and fill in the id)
+	eggRhino = { id = "", size = Vector2.new(496, 735) }, -- RhinoEggRender.png (upload and fill in the id)
+	eggUnicorn = { id = "", size = Vector2.new(496, 859) }, -- UnicornEggRender.png (upload and fill in the id)
 }
 
 local BUTTON_WIDTH = 256
@@ -542,7 +546,10 @@ function Hud.eggReveal(rarity, kind)
 	local hold = Config.EggRevealHold
 
 	local baseW, baseH = CARD_BODY.X * CARD_SCALE, CARD_BODY.Y * CARD_SCALE
-	local egg = IMAGES["egg" .. tostring(kind)] or IMAGES.eggPinto
+	local egg = IMAGES["egg" .. tostring(kind)]
+	if not egg or egg.id == "" then
+		egg = IMAGES.eggPinto -- until that egg's render is uploaded
+	end
 	local eggH = CARD_EGG_HEIGHT
 	local eggW = eggH * baseH * egg.size.X / egg.size.Y / baseW
 
