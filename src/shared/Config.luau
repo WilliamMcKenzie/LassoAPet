@@ -46,9 +46,11 @@ return {
 	SteerSpeed = 28,
 	SteerResponse = 8,
 	HoldTime = 6,
-	-- The egg waiting in the nest. Common animals are the ones you get by default,
-	-- so their eggs never show up here.
-	NestEgg = "Pinto",
+	-- Egg nests are shared stock: they all start full, a grabbed egg empties its nest
+	-- for everyone, and it restocks this many seconds later. Eggs are rolled with the
+	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
+	-- their eggs never show up.
+	NestRestock = 30,
 	-- Any pet can be ridden. Until pets can be picked in the pen, you ride this one
 	-- (it waits on the first pet spot in your pen).
 	DefaultPet = "Horse",
