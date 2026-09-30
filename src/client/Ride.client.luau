@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local ContextActionService = game:GetService("ContextActionService")
+local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
@@ -71,7 +72,52 @@ for _, model in world.Obstacles:GetChildren() do
 			base = part
 		end
 	end
-	table.insert(obstacles, { x = base.Position.X, z = base.Position.Z, hx = base.Size.X / 2, hz = base.Size.Z / 2 })
+	local parts = {}
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") then
+			table.insert(parts, { part = part, cframe = part.CFrame, transparency = part.Transparency })
+		end
+	end
+	table.insert(obstacles, {
+		x = base.Position.X,
+		z = base.Position.Z,
+		hx = base.Size.X / 2,
+		hz = base.Size.Z / 2,
+		tier = model:GetAttribute("Tier") or Config.ObstacleTiers[model.Name] or 1,
+		center = model:GetPivot().Position,
+		parts = parts,
+	})
+end
+
+local function tierOf(kind)
+	return Config.PetTiers[kind] or 1
+end
+
+-- An obstacle a bigger pet plowed into flies up and away and fades; it's back
+-- for the next ride (cleanup). Only on this player's screen.
+local SMASH_TIME = 0.7
+local function smash(o, dir, side)
+	o.smashed = true
+	local rng = Random.new()
+	local offset = Vector3.new(side * 10, 16, dir * 14)
+	local spin = CFrame.Angles(rng:NextNumber(-2, 2), rng:NextNumber(-2, 2), rng:NextNumber(-2, 2))
+	local info = TweenInfo.new(SMASH_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	for _, p in o.parts do
+		local rel = CFrame.new(o.center):Inverse() * p.cframe
+		TweenService:Create(p.part, info, { CFrame = CFrame.new(o.center + offset) * spin * rel, Transparency = 1 }):Play()
+	end
+	Poof.at(Vector3.new(o.x, 0, o.z))
+end
+
+local function unsmashAll()
+	for _, o in obstacles do
+		if o.smashed then
+			o.smashed = nil
+			for _, p in o.parts do
+				p.part.CFrame, p.part.Transparency = p.cframe, p.transparency
+			end
+		end
+	end
 end
 
 local SEAT_OFFSET = CFrame.new(0, 1.6, 0)
@@ -262,13 +308,14 @@ local function popHop(t)
 	return if t < POP_HOP_TIME then POP_HOP * math.sin(math.pi * t / POP_HOP_TIME) else 0
 end
 
-local function blockedAt(x, z, padX, padZ)
+-- The first obstacle overlapping (x, z) that's still standing, of at least this tier (1 if nil).
+local function blockedAt(x, z, padX, padZ, tier)
 	for _, o in obstacles do
-		if math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
-			return true
+		if not o.smashed and o.tier >= (tier or 1) and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
+			return o
 		end
 	end
-	return false
+	return nil
 end
 
 -- key = n * BIOME_KEYS + b - 1. The first biome keeps seeding by n alone, so its
@@ -344,6 +391,7 @@ local function cleanup()
 	heroLeap = nil
 	Hud.setCutscene(false)
 	Outline.set(nil)
+	unsmashAll()
 end
 
 local startRide
@@ -952,6 +1000,51 @@ local function moveAnimal(entity, x, z, speed, dt)
 	animate(entity, dt, speed, lat / 12)
 end
 
+-- A stampede animal (or stray) a bigger pet ran into: it's thrown up and away,
+-- tumbling, then vanishes in a poof. It leaves the stampede for good.
+local flung = {}
+local FLING_TIME = 0.9
+local function knock(entity, dx)
+	if entity.n then
+		taken[entity.n] = true
+		herd[entity.n] = nil
+	else
+		table.remove(strays, table.find(strays, entity))
+	end
+	local side = if dx >= 0 then 1 else -1
+	table.insert(flung, {
+		entity = entity,
+		t = 0,
+		vx = side * rng:NextNumber(10, 16),
+		vy = rng:NextNumber(22, 28),
+		vz = travelDir() * rng:NextNumber(14, 20),
+		spin = side * rng:NextNumber(8, 12),
+	})
+end
+
+local function updateFlung(dt)
+	for i = #flung, 1, -1 do
+		local f = flung[i]
+		local e = f.entity
+		f.t += dt
+		f.vy -= 60 * dt
+		e.x += f.vx * dt
+		e.z += f.vz * dt
+		e.hop = (e.hop or 0) + f.vy * dt
+		e.yaw += f.spin * dt
+		place(e, 0)
+		if f.t >= FLING_TIME then
+			Poof.at(Vector3.new(e.x, math.max(e.hop, 0), e.z))
+			table.remove(flung, i)
+			if e.n then
+				putInPool(e)
+			else
+				e.animal.model:Destroy()
+			end
+		end
+	end
+end
+
 -- The stampede follows the shared server clock. Only during this player's slow-mo
 -- hero leap home does their copy run on the ride's slowed time; as soon as it ends,
 -- every animal snaps straight back to where it is on the shared clock.
@@ -1149,7 +1242,16 @@ local function checkRide(dt)
 	if mount.z < -Config.CourseLength + 40 then
 		return fail("TOO FAR!")
 	end
-	if grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4) then
+	-- A bigger pet plows through smaller obstacles; its own size or bigger stops it.
+	local tier = tierOf(mount.kind)
+	while true do
+		local o = blockedAt(mount.x, mount.z, 1.3, 2.4)
+		if not o or o.tier >= tier then
+			break
+		end
+		smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
+	end
+	if grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4, tier) then
 		return fail("CRASH!")
 	end
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
@@ -1158,7 +1260,9 @@ local function checkRide(dt)
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
 		if not entity.popping and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
-			if phase == "return" and grace <= 0 then
+			if phase == "return" and tierOf(entity.kind) < tierOf(mount.kind) then
+				knock(entity, dx)
+			elseif phase == "return" and grace <= 0 then
 				return fail("CRASH!")
 			elseif phase == "outbound" and entity.n then
 				entity.dodge = math.clamp(entity.dodge + (if dx >= 0 then 1 else -1) * 12 * dt, -6, 6)
@@ -1310,6 +1414,7 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 	end
 	updateHerd(dt, slow and not cutscene)
+	updateFlung(dt)
 	Dust.update(dt)
 	if phase == "idle" then
 		if starter then

@@ -8,4 +8,5 @@ local UnicornModel = require(script.Parent.UnicornModel)
 return Horse.variant("Unicorn", UnicornModel, "Legendary", {
 	seat = Vector3.new(0, 7.3, 1),
 	neck = { center = Vector3.new(0, 7.4, -1.9), radius = 1.35 },
+	size = 1.2, -- tier 2: a touch bigger than the tier 1 pets
 })
