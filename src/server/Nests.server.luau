@@ -56,13 +56,14 @@ takeEgg.Name = "TakeEgg"
 takeEgg.Parent = ReplicatedStorage
 
 -- A rider grabbed the egg in `nest`: the first grab wins, later ones find it empty.
-takeEgg.OnServerEvent:Connect(function(_player, nest)
+takeEgg.OnServerEvent:Connect(function(player, nest)
 	if typeof(nest) ~= "Instance" or nest.Parent ~= world.Nests then
 		return
 	end
 	if (nest:GetAttribute("Egg") or "") == "" then
 		return
 	end
+	player:SetAttribute("CarriedEgg", nest:GetAttribute("Egg")) -- theirs once they ride it home (Hatchery)
 	nest:SetAttribute("Egg", "")
 	task.delay(Config.NestRestock, function()
 		if nest.Parent and nest:GetAttribute("Egg") == "" then

@@ -33,6 +33,7 @@ end
 local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this range
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
+local deliverEgg = ReplicatedStorage:WaitForChild("DeliverEgg")
 local waitingEggs = {} -- [nest] = { egg, kind, nest, nextTwitch }
 local nearEgg -- the waiting egg in grab range, while actionTarget is "egg"
 
@@ -1150,6 +1151,9 @@ RunService.PreSimulation:Connect(function(dt)
 		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
 		Hud.setCutscene(false)
 		local kind = carried and carried.kind
+		if kind then
+			deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
+		end
 		task.delay(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function()
 			if phase == "home" then
 				finishRide(mount.x, mount.z)

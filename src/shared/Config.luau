@@ -54,6 +54,9 @@ return {
 	-- Any pet can be ridden. Until pets can be picked in the pen, you ride this one
 	-- (it waits on the first pet spot in your pen).
 	DefaultPet = "Horse",
+	-- Seconds an egg placed in your pen takes to hatch, by the rarity of the
+	-- animal inside (first-biome eggs; later biomes can take longer).
+	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
 	SprintSpeed = 2, -- x MountSpeed
