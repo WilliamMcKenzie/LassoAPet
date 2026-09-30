@@ -55,6 +55,12 @@ return {
 	LassoRange = 34,
 	EggRange = 51, -- about 1.5x LassoRange
 	EggSlowMo = 0.5, -- time scale while the egg is in grab range
+	-- Egg reveal back home (gacha): the card flicks through the three unknown eggs,
+	-- each flick a bit slower, then lands on the egg's rarity card and the egg pops in.
+	EggRevealFlicks = 14, -- unknown cards shown before the real one
+	EggRevealFirstGap = 0.05, -- seconds between the first flicks
+	EggRevealLastGap = 0.35, -- seconds before the real card lands
+	EggRevealHold = 2, -- seconds the real card stays up before the ride ends
 	LandingGrace = 0.8,
 	TurnGrace = 2,
 	-- Ride back's vignette: edges only, soft, breathing slowly, to add tension without

@@ -13,7 +13,6 @@ local FONT = Enum.Font.FredokaOne
 local STROKE = 6
 local WHITE = Color3.new(1, 1, 1)
 local RED = Color3.fromRGB(255, 72, 72)
-local YELLOW = Color3.fromRGB(255, 190, 30)
 
 -- Uploaded from QM's ui_assets; size is each image's native pixel size.
 local IMAGES = {
@@ -38,6 +37,18 @@ local IMAGES = {
 	takeEggEpic = { id = "rbxassetid://114155984376753", size = Vector2.new(960, 434) },
 	takeEggLegendary = { id = "rbxassetid://93889609154413", size = Vector2.new(960, 434) },
 	sprint = { id = "rbxassetid://104509002348710", size = Vector2.new(618, 524) },
+	-- Egg reveal cards (assets/ui). TODO(Mac session): upload and fill in the ids.
+	-- cardLeft is where the card's rounded body starts in the image (the rarity
+	-- cards' banners stick out past it); the body is 975 x 1175 from y = 12 in all.
+	unknownEgg = { id = "", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg.png, 1/10
+	unknownEgg1 = { id = "", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg1.png, 1/100
+	unknownEgg2 = { id = "", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg2.png, 1/1000
+	cardUncommon = { id = "", size = Vector2.new(1229, 1223), cardLeft = 127 }, -- UncommonEggRNG.png
+	cardRare = { id = "", size = Vector2.new(1134, 1217), cardLeft = 82 }, -- RareEggRNG.png
+	cardEpic = { id = "", size = Vector2.new(1244, 1227), cardLeft = 154 }, -- EpicEggRNG.png
+	cardLegendary = { id = "", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- LegendaryEggRNG.png
+	-- Egg renders for the card, cropped to the egg (assets/ui/<Kind>EggRender.png).
+	eggPinto = { id = "", size = Vector2.new(496, 788) }, -- PintoEggRender.png
 }
 
 local BUTTON_WIDTH = 256
@@ -57,14 +68,26 @@ local EGG_BUTTONS = { Rare = "takeEggRare", Epic = "takeEggEpic", Legendary = "t
 local BANNERS = { ["BUCKED OFF"] = "buckedOff", ["CRASH!"] = "crash" }
 local BANNER_SCALE = 0.55 -- banner images show at this share of their pixel size
 
+-- Egg reveal card, sized and placed as in QM's reference screenshot: the card's
+-- body is 22% of the screen's width, centred a little below the middle, and the
+-- egg sits in the card's centre at 37% of its height.
+local CARD_BODY = Vector2.new(975, 1175) -- the rounded body, in image pixels
+local CARD_TOP = 12 -- body's top edge in every card image
+local CARD_WIDTH = 296
+local CARD_SCALE = CARD_WIDTH / CARD_BODY.X
+local CARD_EGG_HEIGHT = 0.37
+local UNKNOWN_CARDS = { "unknownEgg", "unknownEgg1", "unknownEgg2" }
+local RARITY_CARDS = { Uncommon = "cardUncommon", Rare = "cardRare", Epic = "cardEpic", Legendary = "cardLegendary" }
+
 -- Banner colors: bad news red, good news yellow, anything else white.
 local TONES = {
 	["CRASH!"] = RED,
 	["BUCKED OFF"] = RED,
 	["TOO FAR!"] = RED,
-	["EGG SAVED!"] = YELLOW,
 }
 
+local card, cardFace, cardEgg, cardScale -- egg reveal card, its image, the egg on it, and its UIScale
+local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, eggs, rideCash, gained, dodge, dodgePulse, vignette, sunburst, actionScale
 
@@ -275,6 +298,26 @@ function Hud.init(onAction, onHome, onRide)
 			sprintInput = input
 		end
 	end)
+	-- Egg reveal card: a frame the size of the card's body, with the card image
+	-- placed so its body fills the frame and the egg render on top.
+	card = Instance.new("Frame")
+	card.Name = "EggCard"
+	card.BackgroundTransparency = 1
+	card.AnchorPoint = Vector2.new(0.5, 0.5)
+	card.Size = UDim2.fromOffset(CARD_BODY.X * CARD_SCALE, CARD_BODY.Y * CARD_SCALE)
+	card.Position = UDim2.fromScale(0.5, 0.53)
+	card.ZIndex = 3
+	card.Visible = false
+	cardScale = Instance.new("UIScale")
+	cardScale.Parent = card
+	cardFace = image(card, "unknownEgg", UDim2.new(), UDim2.new())
+	cardFace.AnchorPoint = Vector2.zero
+	cardFace.ZIndex = 3
+	cardEgg = image(card, "eggPinto", UDim2.new(), UDim2.fromScale(0.5, 0.5))
+	cardEgg.ZIndex = 4
+	Instance.new("UIScale").Parent = cardEgg
+	card.Parent = rideRoot
+
 	gained = cashRow(rideRoot, 84, 58, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.57))
 	rideCash = cashRow(rideRoot, 60, 46, Vector2.new(0, 0.5), UDim2.new(0.5, BAR_WIDTH / 2 + 8, 0, holdFrame.Position.Y.Offset))
 
@@ -306,6 +349,8 @@ end
 
 function Hud.show(visible)
 	gui.Enabled = visible
+	reveal += 1
+	card.Visible = false
 	if not visible then
 		message.Text = ""
 		banner.Visible = false
@@ -425,6 +470,81 @@ function Hud.flash(text, seconds)
 			end
 		end)
 	end
+end
+
+local function setCardFace(key)
+	local entry = IMAGES[key]
+	cardFace.Image = entry.id
+	cardFace.Size = UDim2.fromOffset(entry.size.X * CARD_SCALE, entry.size.Y * CARD_SCALE)
+	cardFace.Position = UDim2.fromOffset(-entry.cardLeft * CARD_SCALE, -CARD_TOP * CARD_SCALE)
+end
+
+-- Back home with an egg: a gacha-style card pops up, flicks through the unknown
+-- eggs, slowing down, then lands on the egg's rarity card and the egg pops in.
+-- Returns how long it takes until the card is gone (nil if there's no card for
+-- that rarity, e.g. Common).
+function Hud.eggReveal(rarity, kind)
+	local final = RARITY_CARDS[rarity]
+	if not final then
+		return nil
+	end
+	reveal += 1
+	local token = reveal
+	local flicks = Config.EggRevealFlicks
+	local first, last = Config.EggRevealFirstGap, Config.EggRevealLastGap
+	local gaps, spin = {}, 0
+	for i = 1, flicks do
+		-- Each gap a constant factor longer than the one before: fast, then slowing.
+		gaps[i] = first * (last / first) ^ ((i - 1) / math.max(flicks - 1, 1))
+		spin += gaps[i]
+	end
+
+	setCardFace(UNKNOWN_CARDS[1])
+	cardEgg.Visible = false
+	card.Rotation = 0
+	card.Visible = true
+	cardScale.Scale = 0
+	TweenService:Create(cardScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+
+	task.spawn(function()
+		for i = 1, flicks do
+			task.wait(gaps[i])
+			if reveal ~= token then
+				return
+			end
+			if i < flicks then
+				setCardFace(UNKNOWN_CARDS[i % #UNKNOWN_CARDS + 1])
+				-- A little tick on every flick.
+				cardScale.Scale = 1.06
+				TweenService:Create(cardScale, TweenInfo.new(0.1), { Scale = 1 }):Play()
+			end
+		end
+		-- The real card lands: punch, wobble and shake, then the egg pops in.
+		setCardFace(final)
+		cardScale.Scale = 1.3
+		card.Rotation = -5
+		TweenService:Create(cardScale, TweenInfo.new(0.6, Enum.EasingStyle.Elastic), { Scale = 1 }):Play()
+		TweenService:Create(card, TweenInfo.new(0.6, Enum.EasingStyle.Elastic), { Rotation = 0 }):Play()
+		local egg = IMAGES["egg" .. tostring(kind)] or IMAGES.eggPinto
+		local eggHeight = CARD_BODY.Y * CARD_SCALE * CARD_EGG_HEIGHT
+		cardEgg.Image = egg.id
+		cardEgg.Size = UDim2.fromOffset(eggHeight * egg.size.X / egg.size.Y, eggHeight)
+		cardEgg.Visible = true
+		cardEgg.UIScale.Scale = 0
+		TweenService:Create(cardEgg.UIScale, TweenInfo.new(0.4, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		local rest = UDim2.fromScale(0.5, 0.53)
+		for i = 10, 1, -1 do
+			card.Position = rest + UDim2.fromOffset(math.random(-i, i), math.random(-i, i))
+			task.wait(0.03)
+		end
+		card.Position = rest
+		task.wait(Config.EggRevealHold - 0.3)
+		if reveal ~= token then
+			return
+		end
+		TweenService:Create(cardScale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0 }):Play()
+	end)
+	return spin + Config.EggRevealHold + 0.3
 end
 
 -- Cutscenes hide the whole ride HUD.
