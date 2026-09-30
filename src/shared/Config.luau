@@ -88,12 +88,13 @@ return {
 	--     LeapHeight studs high, over everything, at SpeedBoost x speed with no Hold drain.
 	--   Rattle (Snake): one tap: it stops, coils up and rattles for Duration (its
 	--     coiled idle), smashing every obstacle within Radius studs and scattering
-	--     the animals there away from it. No Hold drain while it rattles; a blue haze
-	--     closes in round the screen.
+	--     the animals there away from it, and refilling Restore of the Hold bar. No
+	--     Hold drain while it rattles; a blue haze closes in round the screen.
+	-- Charge and Rattle swing the camera round to a cinematic front-side angle.
 	Abilities = {
-		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 15, SpeedBoost = 1.2 },
-		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 20, SpeedBoost = 1.4, LeapHeight = 14 },
-		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 10, Radius = 45 },
+		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
+		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 14 },
+		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 6, Radius = 45, Restore = 0.5 },
 	},
 	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
 	-- obstacles and stampede animals of a lower tier, knocking them up and away;
