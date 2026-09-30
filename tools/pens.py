@@ -43,7 +43,10 @@ SIGN_WOOD = (226, 176, 108)
 POST, RAIL = 2, 0.6
 FENCE_H = 5
 FLOOR_H = 0.4
-ARCH_H = 12
+ARCH_H = 11
+BEAM_H = 1.5
+SIGN_W, SIGN_H = 16, 4  # the name board, inside its frame
+FRAME = 0.6
 
 
 def pen_parts(cx):
@@ -72,12 +75,20 @@ def pen_parts(cx):
     for x, z in sorted(posts):
         box("Post", (x - p, 0, z - p), (x + p, FENCE_H, z + p), POST_WOOD)
 
-    # Gate arch: two tall posts, a beam across the top and the name board under it.
+    # Ranch-style entrance: two tall posts and a beam, with the owner's name board
+    # standing on the beam in a dark frame, wide and above the fence so it reads
+    # from the riding camera (like ranch gates in Roblox horse games and the name
+    # signs on Grow a Garden plots).
     for x in (g0 - p, g1 + p):
         box("GatePost", (x - p, 0, z0 - p), (x + p, ARCH_H, z0 + p), POST_WOOD)
-    box("Beam", (g0 - 4, ARCH_H, z0 - 1.5), (g1 + 4, ARCH_H + 1.5, z0 + 1.5), POST_WOOD)
-    # Between the gate posts, not flush with their outer faces (that z-fought).
-    box("Sign", (g0, ARCH_H - 3.5, z0 - 0.5), (g1, ARCH_H - 0.5, z0), SIGN_WOOD)
+    top = ARCH_H + BEAM_H
+    box("Beam", (g0 - 4, ARCH_H, z0 - 1.5), (g1 + 4, top, z0 + 1.5), POST_WOOD)
+    s0, s1 = cx - SIGN_W / 2, cx + SIGN_W / 2
+    box("Sign", (s0, top, z0 - 0.25), (s1, top + SIGN_H, z0 + 0.25), SIGN_WOOD)
+    f = FRAME
+    box("Frame", (s0 - f, top, z0 - 0.45), (s0, top + SIGN_H + f, z0 + 0.45), POST_WOOD)
+    box("Frame", (s1, top, z0 - 0.45), (s1 + f, top + SIGN_H + f, z0 + 0.45), POST_WOOD)
+    box("Frame", (s0, top + SIGN_H, z0 - 0.45), (s1, top + SIGN_H + f, z0 + 0.45), POST_WOOD)
 
     # Two plank rails on every run of fence, on the outside of the posts.
     runs = [
