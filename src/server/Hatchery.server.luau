@@ -259,6 +259,35 @@ remote("RidePet", function(player, id)
 	publish(player)
 end)
 
+-- Let a pet go (the Pets panel's trash can). "ride" is the pet you ride: a pet
+-- from your pen takes its place, or the default pet if the pen has none.
+remote("RemovePet", function(player, id)
+	local profile = profiles[player]
+	if not profile or typeof(id) ~= "string" then
+		return
+	end
+	if id == "ride" then
+		local nextId
+		for itemId, item in profile.items do
+			if item.pet then
+				nextId = itemId
+				break
+			end
+		end
+		if nextId then
+			profile.ride = profile.items[nextId].pet
+			profile.items[nextId] = nil
+		else
+			profile.ride = Config.DefaultPet
+		end
+	elseif profile.items[id] and profile.items[id].pet then
+		profile.items[id] = nil
+	else
+		return
+	end
+	publish(player)
+end)
+
 -- Testing: "/give <pet> [count]" in chat puts pets straight into your pen, at
 -- random free places. Only in Studio or for the game's owner.
 local function allowed(player)
