@@ -73,20 +73,30 @@ def scorpion():
     for i, (z0, z1, c) in enumerate(bands):
         a.box(f"Body{i + 1}", (-1.8, 1.6, z0), (1.8, 3.4, z1), c, "root")
     a.box("Head", (-1.4, 1.6, -3.6), (1.4, 3.0, -2.399), shell, "neck")
-    a.eyes(1.4, 2.2, 2.9, -3.5, -2.8)
-    # pincers: an arm forward from each front corner, a big claw with two fingers
     for side, sx in (("L", -1), ("R", 1)):
         def X(a0, a1):
             return sorted((sx * a0, sx * a1))
-        x0, x1 = X(1.9, 2.7)
-        a.box("Arm" + side, (x0, 1.9, -4.2), (x1, 2.6, -2.2), joint, "Claw" + side)
-        x0, x1 = X(1.4, 3.2)
-        a.box("Claw" + side, (x0, 1.4, -6.0), (x1, 3.1, -4.2), shell, "Claw" + side)
-        x0, x1 = X(2.5, 3.2)
-        a.box("FingerOut" + side, (x0, 1.5, -7.2), (x1, 3.0, -6.0), shell, "Claw" + side)
-        a.wedge("FingerOutTip" + side, (x0, 1.5, -7.8), (x1, 3.0, -7.2), dark, "Claw" + side, "up_front")
-        x0, x1 = X(1.4, 1.9)
-        a.box("FingerIn" + side, (x0, 1.7, -6.8), (x1, 2.8, -6.0), dark, "Claw" + side)
+        # eyes: white blocks on top of the head, dark pupil blocks poking out their fronts
+        x0, x1 = X(0.3, 0.9)
+        a.box("Eye" + side, (x0, 3.0, -3.4), (x1, 3.5, -2.8), EYE_WHITE, "neck")
+        x0, x1 = X(0.4, 0.75)
+        a.box("Pupil" + side, (x0, 3.05, -3.5), (x1, 3.35, -3.2), PUPIL, "neck")
+        # pincer arm: out from the head's side, then forward
+        x0, x1 = X(1.4, 2.6)
+        a.box("Shoulder" + side, (x0, 1.9, -3.3), (x1, 2.7, -2.5), joint, "Claw" + side)
+        x0, x1 = X(2.0, 2.8)
+        a.box("Arm" + side, (x0, 1.9, -4.5), (x1, 2.7, -3.3), joint, "Claw" + side)
+        # the claw: a chunky hand, a long outer finger hooking in over a short inner
+        # one, with a gap between them
+        x0, x1 = X(1.6, 3.2)
+        a.box("Hand" + side, (x0, 1.4, -5.8), (x1, 3.0, -4.5), shell, "Claw" + side)
+        x0, x1 = X(2.6, 3.2)
+        a.box("FingerOut" + side, (x0, 1.7, -7.8), (x1, 2.7, -5.8), dark, "Claw" + side)
+        x0, x1 = X(2.0, 2.6)
+        a.box("FingerOutTip" + side, (x0, 1.8, -7.8), (x1, 2.6, -7.3), sting, "Claw" + side)
+        x0, x1 = X(1.6, 2.1)
+        a.box("FingerIn" + side, (x0, 1.8, -6.7), (x1, 2.6, -5.8), dark, "Claw" + side)
+        a.box("FingerInTip" + side, (x0, 1.85, -7.0), (x1, 2.55, -6.7), sting, "Claw" + side)
         # three legs a side: out, then down
         for k, z in enumerate((-1.6, 0.1, 1.8)):
             x0, x1 = X(1.8, 3.0)
@@ -104,7 +114,6 @@ def scorpion():
     a.box("Bulb", (-0.6, 7.4, 0.3), (0.6, 8.6, 1.5), joint, "Tail")
     a.wedge("Stinger", (-0.3, 6.4, 0.3), (0.3, 7.4, 1.0), sting, "Tail", "down_back")
     a.meta = {"seat": (0, 3.4, -0.4), "neck_loop": {"center": (0, 2.3, -3.0), "radius": 1.7}}
-    a.pivots = {}
     a.meta_scale = 1.3
     return a
 
@@ -209,5 +218,25 @@ def main(out):
     print("wrote", out)
 
 
+def one(name, out):
+    """Close look at one creature: three angles plus the front."""
+    fn = next(f for f in CREATURES if f.__name__ == name.lower())
+    a = scaled(fn())
+    W, H = 480, 480
+    cams = [dict(eye=(-17, 11, -19), target=(0, 3.5, -2)), dict(eye=(-26, 5, -2), target=(0, 3.5, -2)),
+            dict(eye=(15, 10, 20), target=(0, 3.5, 0)), dict(eye=(-4, 6, -24), target=(0, 3, -2)), dict(eye=(0, 30, -8), target=(0, 0, -2))]
+    sheet = Image.new("RGB", (W * len(cams), H))
+    for i, cam in enumerate(cams):
+        sheet.paste(render(a.parts, W=W, H=H, fov=40, **cam), (i * W, 0))
+    path = os.path.join(out, f"{a.name}.png")
+    sheet.save(path)
+    print("wrote", path)
+
+
 if __name__ == "__main__":
-    main(*(sys.argv[1:] or ["/mnt/project-files/animals/desert"]))
+    args = sys.argv[1:]
+    out = "/mnt/project-files/animals/desert"
+    if args and args[0] == "one":
+        one(args[1], out)
+    else:
+        main(*(args or [out]))
