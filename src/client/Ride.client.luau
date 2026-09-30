@@ -417,7 +417,7 @@ local function grabEgg()
 	part:PivotTo(nearEgg.egg.model:GetPivot())
 	part.Parent = workspace
 	nearEgg.egg.model.Parent = nil
-	carried = { part = part, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
+	carried = { part = part, kind = nearEgg.egg.kind, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	phase, turnT = "turning", 0
 	Hud.setAction(nil)
 	Hud.setHold(nil)
@@ -731,8 +731,9 @@ local function checkRide(dt)
 	end
 	if phase == "return" and mount.z >= 0 then
 		phase = "home"
-		Hud.flash("EGG SAVED!", 2)
-		task.delay(2.5, function()
+		local kind = carried and carried.kind or Config.NestEgg
+		local rarity = require(ReplicatedStorage.Shared.Animals[kind]).Rarity
+		task.delay(Hud.eggReveal(rarity, kind) or 0.5, function()
 			if phase == "home" then
 				finishRide(mount.x, mount.z)
 			end
