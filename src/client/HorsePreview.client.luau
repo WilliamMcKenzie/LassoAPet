@@ -3,7 +3,7 @@
 -- Local-only parts, so nothing here replicates. Set ENABLED to false once the
 -- horse style is settled.
 
-local ENABLED = true
+local ENABLED = false
 local PREVIEW_AT = Vector3.new(-200, 0, 0)
 local HERD = 6
 local LAP_RADIUS = 40
