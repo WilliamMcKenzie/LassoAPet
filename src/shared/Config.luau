@@ -78,6 +78,18 @@ return {
 	VignettePulse = 0.3, -- how much it fades on each breath (0 = steady)
 	VignetteFadeMetres = 25, -- fades out over this last stretch before home
 
+	-- Each animal's stats, relative to the horse (1x). Speed scales how fast it runs,
+	-- ridden (MountSpeed, ReturnSpeed) and in the stampede (HerdSpeed). Stamina scales
+	-- how long the Hold bar lasts while you ride it: 2x lasts twice as long.
+	AnimalStats = {
+		Horse = { Speed = 1, Stamina = 1 },
+		Pinto = { Speed = 1.1, Stamina = 0.9 },
+		Pig = { Speed = 0.8, Stamina = 0.8 },
+		Fish = { Speed = 0.6, Stamina = 3 },
+		Rhino = { Speed = 1.5, Stamina = 1.8 },
+		Unicorn = { Speed = 2, Stamina = 2 },
+	},
+
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
 	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25 },
 
@@ -86,6 +98,5 @@ return {
 	-- at the biome's start (the start line, or the line from the biome before) and
 	-- shrink away at its end.
 	HerdSpawnEvery = 0.9,
-	HerdSpeedMin = 26,
-	HerdSpeedMax = 36,
+	HerdSpeed = 31, -- studs/s for a 1x animal; each kind runs at exactly this x its Speed
 }
