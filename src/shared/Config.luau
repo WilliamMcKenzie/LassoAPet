@@ -62,6 +62,13 @@ return {
 	LassoRange = 34,
 	EggRange = 51, -- about 1.5x LassoRange
 	EggSlowMo = 0.5, -- time scale while the egg is in grab range
+	-- Coming home with an egg: the pet leaps over the start line in slow motion while
+	-- the camera swings round to a hero angle in front and back again, landing
+	-- HomeLandPast studs past the line, where you dismount and the egg reveal pops up.
+	HomeHeroTime = 2.4, -- real seconds for the whole leap
+	HomeSlowMo = 0.3, -- time scale for the world during the leap
+	HomeLeapHeight = 5, -- studs
+	HomeLandPast = 4, -- studs past the start line (1 m)
 	-- Egg reveal back home (gacha): the card rolls through the three unknown eggs,
 	-- slow at first and faster and faster, then pops onto the egg's rarity card.
 	EggRevealFlicks = 24, -- unknown cards shown before the real one

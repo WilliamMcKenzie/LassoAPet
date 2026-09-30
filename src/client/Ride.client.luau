@@ -183,6 +183,8 @@ local herdClock = workspace:GetServerTimeNow()
 local hold, grace = 0, 0
 local transfer, tumble, carried
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
+local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
+local LEAP_FROM = 8 -- studs before the start line where the leap starts
 local actionTarget
 local turnT, camYaw = 0, 0
 local focus = Vector3.zero
@@ -333,6 +335,7 @@ local function cleanup()
 	end
 	Lasso.stop()
 	cutscene = nil
+	heroLeap = nil
 	Hud.setCutscene(false)
 	Outline.set(nil)
 end
@@ -814,6 +817,21 @@ local function updateMount(dt)
 		return
 	end
 
+	if heroLeap then
+		-- Slow-motion leap over the start line, landing just past it. Driven by real
+		-- time (heroLeap.t) so it lasts HomeHeroTime whatever the slow motion does.
+		local t = heroLeap.t
+		mount.z = heroLeap.fromZ + (heroLeap.toZ - heroLeap.fromZ) * t
+		mount.hop = math.sin(math.pi * t) * Config.HomeLeapHeight
+		mount.latVel = 0
+		place(mount, 0)
+		animate(mount, dt, if t < 1 then mount.speed else 0, 0)
+		return
+	elseif phase == "home" then
+		place(mount, 0)
+		animate(mount, dt, 0, 0)
+		return
+	end
 	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed) * statsOf(mount.kind).Speed
 	if sprinting() then
 		targetSpeed *= Config.SprintSpeed
@@ -862,14 +880,11 @@ local function checkRide(dt)
 			end
 		end
 	end
-	if phase == "return" and mount.z >= 0 then
+	if phase == "return" and mount.z >= START_LINE_Z - LEAP_FROM then
+		-- Home with the egg: the hero leap over the line (updateMount), then the reveal.
 		phase = "home"
-		local kind = carried and carried.kind
-		task.delay(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function()
-			if phase == "home" then
-				finishRide(mount.x, mount.z)
-			end
-		end)
+		heroLeap = { t = 0, fromZ = mount.z, toZ = START_LINE_Z + Config.HomeLandPast }
+		Hud.setCutscene(true)
 	end
 end
 
@@ -991,8 +1006,12 @@ end
 local timeScale = 1
 
 RunService.PreSimulation:Connect(function(dt)
-	local slow = (phase == "outbound" and actionTarget == "egg") or cutscene ~= nil
-	timeScale += ((slow and Config.EggSlowMo or 1) - timeScale) * (1 - math.exp(-10 * dt))
+	local slow = (phase == "outbound" and actionTarget == "egg") or cutscene ~= nil or heroLeap ~= nil
+	local slowTo = if heroLeap then Config.HomeSlowMo else Config.EggSlowMo
+	timeScale += ((slow and slowTo or 1) - timeScale) * (1 - math.exp(-10 * dt))
+	if heroLeap then
+		heroLeap.t = math.min(heroLeap.t + dt / Config.HomeHeroTime, 1)
+	end
 	dt *= timeScale
 	-- The waiting eggs twitch now and then: something's alive in there.
 	for _, waiting in waitingEggs do
@@ -1041,6 +1060,20 @@ RunService.PreSimulation:Connect(function(dt)
 	if mount and phase ~= "ended" then
 		checkRide(dt)
 	end
+	if heroLeap and heroLeap.t >= 1 then
+		-- Landed: dust, then the egg reveal, then off the pet.
+		heroLeap = nil
+		mount.hop = 0
+		place(mount, 0)
+		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
+		Hud.setCutscene(false)
+		local kind = carried and carried.kind
+		task.delay(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function()
+			if phase == "home" then
+				finishRide(mount.x, mount.z)
+			end
+		end)
+	end
 	actionTarget = findTarget()
 	Outline.set(if actionTarget == "egg" then nearEgg.egg.model elseif actionTarget then actionTarget.animal.model else nil)
 	Outline.update()
@@ -1071,6 +1104,22 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 		return
 	end
 	local basis = CFrame.new(focus) * CFrame.Angles(0, camYaw, 0)
+	if heroLeap and hrp then
+		-- Hero shot: the camera swings round from its usual spot behind and above to
+		-- low in front and off to the side of the leaping rider, and back as they land.
+		local a = math.sin(math.pi * heroLeap.t) -- 0 -> 1 -> 0
+		a = a * a * (3 - 2 * a)
+		local rider = hrp.Position
+		local behind = -basis.LookVector
+		local around = CFrame.Angles(0, math.rad(150) * a, 0):VectorToWorldSpace(behind)
+		local distance = 18 + (15 - 18) * a
+		local height = 38 + (2 - 38) * a
+		local from = Vector3.new(rider.X, focus.Y, rider.Z) + around * distance + Vector3.new(0, height, 0)
+		local lookAt = (basis * CFrame.new(0, 0, -24)).Position:Lerp(rider + Vector3.new(0, 1, 0), math.min(a * 2, 1))
+		camera.CFrame = camera.CFrame:Lerp(CFrame.lookAt(from, lookAt), 1 - math.exp(-12 * dt))
+		camera.FieldOfView += ((70 - 20 * a) - camera.FieldOfView) * (1 - math.exp(-12 * dt))
+		return
+	end
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38, 18)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
 	camera.FieldOfView += (70 - camera.FieldOfView) * (1 - math.exp(-8 * dt))
