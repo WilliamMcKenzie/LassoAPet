@@ -582,7 +582,7 @@ local function findTarget()
 	end
 	for _, waiting in waitingEggs do
 		local eggPos = waiting.nest.EggSpot.Position
-		if waiting.egg.model.Parent and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < Config.EggRange then
+		if waiting.egg.model.Parent and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < Config.LassoRange then
 			nearEgg = waiting
 			return "egg"
 		end

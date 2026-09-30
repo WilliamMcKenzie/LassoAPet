@@ -61,7 +61,6 @@ return {
 	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)
 	ReturnFovKick = 20, -- degrees added to the field of view on the ride home, to feel faster (0 = off)
 	LassoRange = 34,
-	EggRange = 51, -- about 1.5x LassoRange
 	EggSlowMo = 0.5, -- time scale during the egg-grab close-up
 	-- Coming home with an egg: the pet leaps over the start line in slow motion while
 	-- the camera swings round to a hero angle in front and back again, landing
