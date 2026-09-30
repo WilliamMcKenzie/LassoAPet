@@ -234,7 +234,9 @@ local function redraw()
 	local rows = math.ceil(#pets / columns)
 	local fitRows = math.max(1, math.floor(screen.Y * 0.8 / CELL.Y))
 	grid.FillDirectionMaxCells = columns
-	scroll.Size = UDim2.fromOffset(columns * CELL.X, math.min(rows, fitRows) * CELL.Y)
+	-- A GAP wider than the cells so the trash cans on the last column, which
+	-- stick out past their cards, aren't clipped.
+	scroll.Size = UDim2.fromOffset(columns * CELL.X + GAP, math.min(rows, fitRows) * CELL.Y)
 	scroll.CanvasSize = UDim2.fromOffset(0, rows * CELL.Y)
 	scroll.ScrollingEnabled = rows > fitRows
 	for i, pet in pets do
@@ -304,6 +306,7 @@ function PetsPanel.init(options)
 	scroll.Parent = root
 	local pad = Instance.new("UIPadding")
 	pad.PaddingLeft = UDim.new(0, GAP / 2)
+	pad.PaddingRight = UDim.new(0, GAP / 2)
 	pad.PaddingTop = UDim.new(0, GAP / 2)
 	pad.Parent = scroll
 	grid = Instance.new("UIGridLayout")
