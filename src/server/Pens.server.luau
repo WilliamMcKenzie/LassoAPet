@@ -12,40 +12,57 @@ for i = 1, 5 do
 	pens[i] = folder:WaitForChild("Pen" .. i)
 end
 
--- The owner's name on both faces of the pen's name board.
-local function setSign(pen, text)
+-- The owner's picture and name floating over the pen's open side, like the
+-- base owners in Roblox pet games. Hidden while the pen is free.
+local function setSign(pen, player)
 	local sign = pen:FindFirstChild("Sign")
 	if not sign then
 		return
 	end
-	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
-		local name = "OwnerName" .. face.Name
-		local gui = sign:FindFirstChild(name)
-		if not gui then
-			gui = Instance.new("SurfaceGui")
-			gui.Name = name
-			gui.Face = face
-			gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-			gui.PixelsPerStud = 50
-			local label = Instance.new("TextLabel")
-			label.Size = UDim2.fromScale(1, 1)
-			label.BackgroundTransparency = 1
-			label.Font = Enum.Font.FredokaOne
-			label.TextScaled = true
-			label.TextColor3 = Color3.new(1, 1, 1)
-			local stroke = Instance.new("UIStroke")
-			stroke.Thickness = 6
-			stroke.Parent = label
-			local pad = Instance.new("UIPadding") -- room for the outline, so long names aren't clipped
-			pad.PaddingTop = UDim.new(0.18, 0)
-			pad.PaddingBottom = UDim.new(0.18, 0)
-			pad.PaddingLeft = UDim.new(0.08, 0)
-			pad.PaddingRight = UDim.new(0.08, 0)
-			pad.Parent = label
-			label.Parent = gui
-			gui.Parent = sign
-		end
-		gui.TextLabel.Text = text
+	local gui = sign:FindFirstChild("Owner")
+	if not gui then
+		gui = Instance.new("BillboardGui")
+		gui.Name = "Owner"
+		gui.Size = UDim2.fromScale(12, 6)
+		gui.MaxDistance = 250
+		gui.LightInfluence = 0
+		local picture = Instance.new("ImageLabel")
+		picture.Name = "Picture"
+		picture.AnchorPoint = Vector2.new(0.5, 0)
+		picture.Position = UDim2.fromScale(0.5, 0)
+		picture.Size = UDim2.fromScale(0.6, 0.6)
+		picture.SizeConstraint = Enum.SizeConstraint.RelativeYY
+		picture.BackgroundColor3 = Color3.new(1, 1, 1)
+		Instance.new("UICorner", picture).CornerRadius = UDim.new(0.5, 0)
+		local ring = Instance.new("UIStroke")
+		ring.Thickness = 3
+		ring.Parent = picture
+		picture.Parent = gui
+		local label = Instance.new("TextLabel")
+		label.Name = "OwnerName"
+		label.Position = UDim2.fromScale(0, 0.64)
+		label.Size = UDim2.fromScale(1, 0.36)
+		label.BackgroundTransparency = 1
+		label.Font = Enum.Font.FredokaOne
+		label.TextScaled = true
+		label.TextColor3 = Color3.new(1, 1, 1)
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 3
+		stroke.Parent = label
+		label.Parent = gui
+		gui.Parent = sign
+	end
+	gui.Enabled = player ~= nil
+	if player then
+		gui.OwnerName.Text = player.DisplayName
+		gui.Picture.Image = ""
+		task.spawn(function()
+			local ok, image = pcall(Players.GetUserThumbnailAsync, Players, player.UserId,
+				Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+			if ok and pen:GetAttribute("Owner") == player.UserId then
+				gui.Picture.Image = image
+			end
+		end)
 	end
 end
 
@@ -69,7 +86,7 @@ local function claim(player)
 		if pen:GetAttribute("Owner") == nil then
 			pen:SetAttribute("Owner", player.UserId)
 			player:SetAttribute("Pen", i)
-			setSign(pen, player.DisplayName)
+			setSign(pen, player)
 			return
 		end
 	end
@@ -79,7 +96,7 @@ local function release(player)
 	local pen = penOf(player)
 	if pen and pen:GetAttribute("Owner") == player.UserId then
 		pen:SetAttribute("Owner", nil)
-		setSign(pen, "")
+		setSign(pen, nil)
 	end
 end
 
@@ -94,7 +111,7 @@ local function onJoin(player)
 end
 
 for _, pen in pens do
-	setSign(pen, "")
+	setSign(pen, nil)
 end
 Players.PlayerAdded:Connect(onJoin)
 Players.PlayerRemoving:Connect(release)

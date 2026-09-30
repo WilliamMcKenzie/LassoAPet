@@ -304,26 +304,29 @@ end
 
 local startRide, ridePrompt
 
--- Where the pet you ride waits and where you come home to: the first pet spot in your
--- pen (the "Pen" attribute the server sets), or the middle of the base without
--- one. Y is the floor there (the pen's plank floor sits a little above the grass).
-local function homeSpot()
+-- The pen the server handed you (your "Pen" attribute), if any.
+local function myPen()
 	local index = player:GetAttribute("Pen")
 	local pens = workspace:FindFirstChild("Pens")
-	local pen = index and pens and pens:FindFirstChild("Pen" .. index)
-	local slot = pen and pen:FindFirstChild("Slots") and pen.Slots:FindFirstChild("Slot1")
-	if not slot then
-		return Config.StarterSpot
-	end
-	return Vector3.new(slot.Position.X, slot.Position.Y - slot.Size.Y / 2, slot.Position.Z)
+	return index and pens and pens:FindFirstChild("Pen" .. index)
 end
+
+-- Where the pet you ride sets off from and where you come home to: the first pet
+-- spot in your pen, just inside its open side, or the middle of the base without one.
+local function homeSpot()
+	local pen = myPen()
+	local slot = pen and pen:FindFirstChild("Slots") and pen.Slots:FindFirstChild("Slot1")
+	return if slot then Vector3.new(slot.Position.X, 0, slot.Position.Z) else Config.StarterSpot
+end
+
+-- Rides from an outer pen are steered into the corridor once past this z (the pen's open side).
+local leadFromZ = 0
 
 local function spawnStarter()
 	local spot = homeSpot()
 	-- The pet you'll ride. Nothing is special about the horse: it's just the default
 	-- pet until pets can be picked in the pen (the "RidePet" attribute).
 	starter = newEntity(spot.X, spot.Z, 0, player:GetAttribute("RidePet") or Config.DefaultPet)
-	starter.rootY += spot.Y -- stands on the pen floor
 	starter.animal:setSaddled(true)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Ride"
@@ -362,7 +365,7 @@ startRide = function()
 	mount, starter = starter, nil
 	mount.animal:setSaddled(true)
 	local spot = homeSpot()
-	mount.rootY -= spot.Y -- back down to the grass for the ride
+	leadFromZ = spot.Z - 8
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, 0, 0
 	phase, hold, grace, camYaw = "outbound", Config.HoldTime, 0, 0
 	coins = 0
@@ -598,6 +601,47 @@ local function animate(entity, dt, speed, turn)
 	end
 end
 
+-- Pets in your pen amble between random spots inside its fence, resting a
+-- while at each. Works for any pet.
+local WANDER_SPEED = 6 -- studs/s, a walk
+local function wander(entity, dt)
+	local pen = myPen()
+	local area = pen and pen:FindFirstChild("Area")
+	local w = entity.wander
+	if not w then
+		w = { rest = rng:NextNumber(1, 3) }
+		entity.wander = w
+	end
+	local speed, turn = 0, 0
+	if area then
+		if w.rest > 0 then
+			w.rest -= dt
+			if w.rest <= 0 then
+				local half = area.Size / 2
+				w.tx = area.Position.X + rng:NextNumber(-half.X, half.X)
+				w.tz = area.Position.Z + rng:NextNumber(-half.Z, half.Z)
+			end
+		elseif w.tx then
+			local dx, dz = w.tx - entity.x, w.tz - entity.z
+			if dx * dx + dz * dz < 1 then
+				w.tx, w.rest = nil, rng:NextNumber(2, 5)
+			else
+				-- yaw 0 faces -z, so the heading toward (dx, dz) is atan2(-dx, -dz)
+				local diff = (math.atan2(-dx, -dz) - entity.yaw + math.pi) % (2 * math.pi) - math.pi
+				entity.yaw += math.clamp(diff, -3 * dt, 3 * dt)
+				turn = -math.clamp(diff, -1, 1) -- turn is + to the right, which is -yaw
+				speed = WANDER_SPEED * math.max(0, math.cos(diff)) -- turn on the spot first
+				entity.x -= math.sin(entity.yaw) * speed * dt
+				entity.z -= math.cos(entity.yaw) * speed * dt
+			end
+		else
+			w.rest = 1
+		end
+	end
+	place(entity, 0)
+	animate(entity, dt, speed, turn)
+end
+
 local function moveAnimal(entity, x, z, speed, dt)
 	local lat = (x - entity.x) / math.max(dt, 1e-3)
 	entity.x, entity.z, entity.speed = x, z, speed
@@ -739,6 +783,12 @@ local function updateMount(dt)
 	mount.speed += math.clamp(targetSpeed - mount.speed, -rate * dt, rate * dt)
 	local steer = phase == "home" and 0 or readSteer()
 	local targetLat = steer * Config.SteerSpeed * -dir
+	-- Leaving the base from an outer pen: lean in so the animal reaches the
+	-- corridor by the start line.
+	if phase == "outbound" and mount.z > 0 and mount.z < leadFromZ and math.abs(mount.x) > EDGE - 4 then
+		local over = math.abs(mount.x) - (EDGE - 4)
+		targetLat -= math.sign(mount.x) * over / math.max(mount.z, 4) * math.max(mount.speed, 10)
+	end
 	mount.latVel += (targetLat - mount.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
 	-- At home the side limit widens from the corridor's to the base's over 40 studs,
 	-- so a ride from an outer pen is eased into the corridor.
@@ -921,8 +971,7 @@ RunService.PreSimulation:Connect(function(dt)
 	Dust.update(dt)
 	if phase == "idle" then
 		if starter then
-			place(starter, 0)
-			starter.animal:update(dt, 0, 0)
+			wander(starter, dt)
 		end
 		return
 	end
