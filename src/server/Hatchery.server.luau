@@ -318,6 +318,12 @@ local function income(profile)
 	return total
 end
 
+-- Fired to a player each time their pets pay out, so the client can pop "+N$"
+-- over each pet's head.
+local paid = Instance.new("RemoteEvent")
+paid.Name = "PetIncome"
+paid.Parent = ReplicatedStorage
+
 task.spawn(function()
 	while true do
 		task.wait(1)
@@ -325,6 +331,7 @@ task.spawn(function()
 			local earned = income(profile)
 			if earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
+				paid:FireClient(player)
 			end
 		end
 	end

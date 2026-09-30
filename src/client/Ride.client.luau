@@ -453,6 +453,27 @@ local function homePets()
 	return list
 end
 
+-- Each time your pets pay out (PetIncome), every one of them at home pops its
+-- Config.PetIncome as "+N$" over its head, like the coins for switching rides.
+ReplicatedStorage:WaitForChild("PetIncome").OnClientEvent:Connect(function()
+	if phase ~= "idle" then
+		return
+	end
+	for _, model in homePets() do
+		local kind = if starter and model == starter.animal.model
+			then player:GetAttribute("RidePet") or Config.DefaultPet
+			else PenPets.pets[model] and PenPets.pets[model].kind
+		local earned = kind and Config.PetIncome[kind]
+		if earned and earned > 0 then
+			local middle, size = model:GetBoundingBox()
+			local point, onScreen = camera:WorldToViewportPoint(middle.Position + Vector3.new(0, size.Y / 2 + 1, 0))
+			if onScreen then
+				Hud.coinPopup(Vector2.new(point.X, point.Y), earned)
+			end
+		end
+	end
+end)
+
 -- Flat distance from `at` to the edge of the pet (roughly), so big pets count as near.
 local function petDistance(model, at)
 	local middle, size = model:GetBoundingBox()
