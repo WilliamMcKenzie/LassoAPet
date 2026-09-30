@@ -635,34 +635,29 @@ def ice_wyvern():
         for i, xc in enumerate((2.0, 2.6, 3.2)):
             x0, x1 = X(sx, xc - 0.22, xc + 0.22)
             pyramid(a, f"Claw{side}{i}", (x0, -1.9, -1.6), (x1, -1.1, -1.6), "-z", 1.0, c["spar"], ft)
-    # wings: arms raised and swept back, three spars fanning back from the wrist,
-    # membrane panels (half a stud thick, stepped trailing edge) between them
+    # wings (QM 23:52): wide and built to fold, six pieces each. The arm carries the
+    # inner membrane; the hand carries the thumb; the spar along the outer edge
+    # carries the outer membrane, so the hand folds against the arm and the spar
+    # folds against the hand.
     for side, sx in SIDES:
         w = "Wing" + side
-        bone(w, "root", (sx * 2.4, 10.0, -2.4), (0, sx * 28, sx * 32))
-        x0, x1 = X(sx, 2.2, 9.0)
+        bone(w, "root", (sx * 2.4, 10.0, -2.4), (0, sx * -12, sx * 20))
+        x0, x1 = X(sx, 2.2, 11.5)
         a.box("WingArm" + side, (x0, 9.3, -3.2), (x1, 10.7, -1.6), c["cyan"], w)
-        for i, (xa, xb, z1) in enumerate(((2.4, 5.0, 2.4), (5.0, 9.0, 4.2))):
-            x0, x1 = X(sx, xa, xb)
-            a.box(f"WingSkin{side}{i}", (x0, 9.75, -1.6), (x1, 10.25, z1), c["wing"], w)
-        wt = "WingTip" + side
-        bone(wt, w, (sx * 9.0, 10.0, -2.4), (0, sx * -38, 0))
-        x0, x1 = X(sx, 8.6, 14.6)
-        a.box("WingHand" + side, (x0, 9.4, -3.0), (x1, 10.6, -1.8), c["cyan"], wt)
-        pyramid(a, f"WingThumb{side}", (*X(sx, 14.6, 14.6)[:1], 9.5, -2.9), (X(sx, 14.6, 14.6)[1], 10.5, -1.9),
-                "-x" if sx < 0 else "+x", 1.2, c["spar"], wt)
-        # three spars running back from the hand, longest at the tip
-        for i, (xs, z1) in enumerate(((14.2, 8.0), (11.8, 7.0), (9.4, 5.2))):
-            x0, x1 = X(sx, xs - 0.35, xs + 0.35)
-            a.box(f"WingSpar{side}{i}", (x0, 9.6, -1.8), (x1, 10.4, z1), c["spar"], wt)
-        # membrane: strips between the spars, each ending short of the longer spar
-        for i, (xa, xb, z1) in enumerate(((9.0, 9.05, 4.2), (9.75, 11.45, 5.8), (12.15, 13.85, 7.2))):
-            x0, x1 = X(sx, xa, xb)
-            a.box(f"WingSkinTip{side}{i}", (x0, 9.75, -1.8), (x1, 10.25, z1), c["wing"], wt)
-        x0, x1 = X(sx, 9.0, 9.75)
-        a.box(f"WingSkinTip{side}J", (x0, 9.75, -1.8), (x1, 10.25, 4.6), c["wing"], wt)
-    a.remove("WingSkinTipL0")
-    a.remove("WingSkinTipR0")
+        x0, x1 = X(sx, 2.4, 11.5)
+        a.box("WingSkinIn" + side, (x0, 9.75, -1.6), (x1, 10.25, 7.5), c["wing"], w)
+        wh = "WingHand" + side
+        bone(wh, w, (sx * 11.5, 10.0, -2.4), (0, sx * -10, sx * -6))
+        x0, x1 = X(sx, 11.2, 21.5)
+        a.box("WingHand" + side, (x0, 9.4, -3.0), (x1, 10.6, -1.8), c["cyan"], wh)
+        x0, x1 = X(sx, 20.6, 21.4)
+        pyramid(a, f"WingThumb{side}", (x0, 9.5, -3.0), (x1, 10.5, -3.0), "-z", 1.8, c["spar"], wh)
+        ws = "WingSpar" + side
+        bone(ws, wh, (sx * 21.2, 10.0, -2.4))
+        x0, x1 = X(sx, 20.8, 21.6)
+        a.box("WingSpar" + side, (x0, 9.6, -1.8), (x1, 10.4, 13.0), c["spar"], ws)
+        x0, x1 = X(sx, 11.5, 20.8)
+        a.box("WingSkinOut" + side, (x0, 9.75, -1.8), (x1, 10.25, 11.0), c["wing"], ws)
     a.bone_order = order
     a.meta = {"seat": (0, 11.2, 0.4), "neck_loop": {"center": (0, 8.8, -8.0), "radius": 2.2}}
     a.meta_scale = 0.9  # XL: about 20 studs tall and 40 long, the biggest pet
@@ -707,6 +702,50 @@ def build(fn):
         if p.name.startswith(PLAIN):
             p.plain = True
     return a, model, parts
+
+
+def qm_wyvern_wings():
+    """QM's IceWyvern.bbmodel (their antlers, tusks and teeth) with its wing
+    groups swapped for the ones ice_wyvern() builds. Same frame: QM kept the body."""
+    path = os.path.join(MODELS, "IceWyvern.bbmodel")
+    qm = json.load(open(path))
+    a, model, _ = build(ice_wyvern)
+    wings = [g for g in model["groups"] if g["name"].startswith("Wing")]
+    gm = {g["uuid"]: g for g in model["groups"]}
+    old = {g["uuid"] for g in qm["groups"] if g["name"].startswith("Wing")}
+
+    def members(node):
+        out = []
+        for c in node["children"]:
+            out += members(c) if isinstance(c, dict) else [c]
+        return out
+
+    qroot = qm["outliner"][0]
+    drop = set()
+    for n in qroot["children"]:
+        if isinstance(n, dict) and n["uuid"] in old:
+            drop |= set(members(n))
+    qroot["children"] = [n for n in qroot["children"] if not (isinstance(n, dict) and n["uuid"] in old)]
+    qm["elements"] = [e for e in qm["elements"] if e["uuid"] not in drop]
+    qm["groups"] = [g for g in qm["groups"] if g["uuid"] not in old]
+    # the new wing elements use the builder's palette texture: add it as one more texture
+    tex = len(qm["textures"])
+    palette = dict(model["textures"][0], uuid=str(__import__("uuid").uuid4()), name="wings.png", id=str(tex))
+    qm["textures"].append(palette)
+    new = set()
+    for n in model["outliner"][0]["children"]:
+        if isinstance(n, dict) and gm[n["uuid"]]["name"] in ("WingL", "WingR"):
+            qroot["children"].append(n)
+            new |= set(members(n))
+    for e in model["elements"]:
+        if e["uuid"] in new:
+            for f in e["faces"].values():
+                f["texture"] = tex
+            qm["elements"].append(e)
+    qm["groups"] += wings
+    with open(path, "w") as f:
+        json.dump(qm, f, separators=(",", ":"))
+    return qm
 
 
 def rest_model(a):
@@ -776,7 +815,7 @@ def bounds(parts):
     return pts.min(0), pts.max(0)
 
 
-QM_FILES = {"PolarBear"}
+QM_FILES = {"PolarBear", "IceWyvern"}  # IceWyvern is QM's file too, but its wings come from here (qm_wyvern_wings)
 NAMES = {"WhiteWolf": "White Wolf", "PolarBear": "Polar Bear", "IceDragon": "Ice Dragon", "IceWyvern": "Ice Wyvern"}
 Q34_DIR = np.array([-19, 12, -21], float) / np.linalg.norm([-19, 12, -21])
 
