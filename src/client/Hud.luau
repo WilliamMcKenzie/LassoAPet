@@ -377,7 +377,9 @@ function Hud.init(onAction, onHome, onRide)
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(showGold)
 	showGold()
-	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(1, 1), UDim2.new(1, -MARGIN, 1, -MARGIN))
+	-- Pets sits just over the coin, centred on it.
+	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
+		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8))
 	Inventory.init(homeRoot)
 
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
