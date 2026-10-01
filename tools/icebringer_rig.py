@@ -253,6 +253,19 @@ def add_neck(m):
     walk(m["outliner"])
 
 
+GLOW_COLORS = ((236, 246, 255), (252, 253, 255))  # the white armour
+
+
+def glow_armour(m):
+    """QM 03:54: the white armour glows like the Snake's pupils. bbmodel_to_luau makes parts
+    named Glow* Neon, so the armour's elements get that prefix (teeth and eyes are other whites)."""
+    from snow_rig import posed
+    white = {p.name for p in posed(m) if tuple(p.color) in GLOW_COLORS}
+    for e in m["elements"]:
+        if e["name"] in white and not e["name"].startswith("Glow"):
+            e["name"] = "Glow_" + e["name"]
+
+
 def main(path=MODEL):
     m = json.load(open(path))
     kept = hand_keys(m)
@@ -261,6 +274,7 @@ def main(path=MODEL):
     edit_model(m)
     name_front_teeth(m)
     add_neck(m)
+    glow_armour(m)
     feet = contacts(m)
     anims = {"idle": idle(m, feet), "walk": walk(m, feet, L=round(1.3 / 0.7, 3)), "gallop": walk(m, feet)}  # QM 03:23: the knuckle-walk is the gallop, the walk is it at 0.7x
     for name, (L, tr) in anims.items():

@@ -26,7 +26,7 @@ from PIL import Image
 
 SCALE = 0.1
 PLAIN = ("Eye", "Pupil", "Nostril", "Plain")  # name prefixes that skip the stud texture
-NEON = ("Slit_pupil",)  # name prefixes that glow
+NEON = ("Slit_pupil", "Glow")  # name prefixes that glow
 PLATE = 0.04  # studs: thickness of a converted one-face plane
 
 
