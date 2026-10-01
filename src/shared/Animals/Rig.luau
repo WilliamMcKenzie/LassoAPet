@@ -3,7 +3,7 @@
 -- `class` picks the part class (default "Part", e.g. "WedgePart").
 -- `hidden = true` makes an invisible, untextured part (used for bones).
 -- `neon = true` makes a glowing, untextured part (the snake's slit pupils).
--- `metal = true` makes a Diamond Plate part with no studs (the Icebringer's armour).
+-- `metal = true` swaps the studs for the classic Glue surface (the Icebringer's armour).
 --
 -- Every part hangs off a joint in its parent's space:
 --   joint  = CFrame of the joint relative to the parent part's center (C0)
@@ -17,6 +17,8 @@
 local Rig = {}
 
 local FACES = { "Top", "Bottom", "Front", "Back", "Left", "Right" }
+-- The classic Glue surface's colour map, from the Resurface plugin (QM 17:21).
+local GLUE_TEXTURE = "rbxassetid://10509635556"
 
 function Rig.build(spec)
 	local model = Instance.new("Model")
@@ -45,10 +47,7 @@ function Rig.build(spec)
 		part.Name = def.name
 		part.Size = def.size
 		part.Color = def.color
-		part.Material = if def.neon
-			then Enum.Material.Neon
-			elseif def.metal then Enum.Material.DiamondPlate
-			else Enum.Material.SmoothPlastic
+		part.Material = if def.neon then Enum.Material.Neon else Enum.Material.SmoothPlastic
 		part.Anchored = false
 		part.CanCollide = false
 		part.CanQuery = false
@@ -61,10 +60,10 @@ function Rig.build(spec)
 			part[face .. "Surface"] = Enum.SurfaceType.Smooth
 		end
 		-- Fine studs from a tiled texture; surface studs are fixed at 1 stud, too coarse here.
-		if spec.studTexture and not def.plain and not def.hidden and not def.neon and not def.metal then
+		if spec.studTexture and not def.plain and not def.hidden and not def.neon then
 			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
 				local texture = Instance.new("Texture")
-				texture.Texture = spec.studTexture.image
+				texture.Texture = if def.metal then GLUE_TEXTURE else spec.studTexture.image
 				texture.StudsPerTileU = spec.studTexture.tile
 				texture.StudsPerTileV = spec.studTexture.tile
 				texture.Face = face
