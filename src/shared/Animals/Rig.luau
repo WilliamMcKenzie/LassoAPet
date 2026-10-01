@@ -130,7 +130,44 @@ end
 -- <bone>Bone; visible parts are welded to their bone. A bone's optional `rest`
 -- rotation (a Blockbench group rotation) turns it and everything on it at rest.
 -- Returns model, parts by name, motors by bone name, pivots by bone name.
-function Rig.fromData(data, name, studTexture)
+--
+-- Each kind is built block by block only once, as a template that's never shown;
+-- every model after that is a copy of it (Clone), which is far quicker than making
+-- hundreds of parts and textures one at a time, so a stampede animal, nest egg or
+-- hatched pet doesn't stall the frame it's made in. `size` (optional) scales the
+-- whole model up from its data (Model:ScaleTo), also once, on the template.
+local templates = {} -- [data][name .. size] = { model, pivots }
+
+function Rig.fromData(data, name, studTexture, size)
+	size = size or 1
+	local key = name .. " " .. size
+	templates[data] = templates[data] or {}
+	local template = templates[data][key]
+	if not template then
+		local model, _, _, pivots = Rig.buildFromData(data, name, studTexture)
+		if size ~= 1 then
+			model:ScaleTo(size)
+		end
+		template = { model = model, pivots = pivots }
+		templates[data][key] = template
+	end
+	local model = template.model:Clone()
+	local byName = {}
+	for _, part in model:GetChildren() do
+		if part:IsA("BasePart") then
+			byName[part.Name] = part
+		end
+	end
+	local bones = {}
+	for _, bone in ipairs(data.bones) do
+		local part = byName[bone.name .. "Bone"]
+		bones[bone.name] = part and part:FindFirstChildOfClass("Motor6D")
+	end
+	return model, byName, bones, template.pivots
+end
+
+-- The block-by-block build behind Rig.fromData's templates.
+function Rig.buildFromData(data, name, studTexture)
 	local list = {}
 	local pivots = {}
 	for _, bone in ipairs(data.bones) do
