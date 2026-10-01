@@ -463,18 +463,14 @@ function Hud.init(onAction, onHome, onRide)
 
 	gained = cashRow(rideRoot, 84, 58, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.57))
 	-- A tooltip that takes the gained cash's place on a fail screen (Hud.setTip):
-	-- white text on a dark rounded box.
+	-- just the outlined white text, no box (QM, Oct 1).
 	tip = Instance.new("Frame")
 	tip.Name = "Tip"
 	tip.AnchorPoint = Vector2.new(0.5, 0.5)
 	tip.Position = gained.row.Position
 	tip.AutomaticSize = Enum.AutomaticSize.XY
-	tip.BackgroundColor3 = Color3.new(0, 0, 0)
-	tip.BackgroundTransparency = 0.35
+	tip.BackgroundTransparency = 1
 	tip.Visible = false
-	local tipCorner = Instance.new("UICorner")
-	tipCorner.CornerRadius = UDim.new(0, 18)
-	tipCorner.Parent = tip
 	local tipPad = Instance.new("UIPadding")
 	tipPad.PaddingLeft, tipPad.PaddingRight = UDim.new(0, 28), UDim.new(0, 28)
 	tipPad.PaddingTop, tipPad.PaddingBottom = UDim.new(0, 12), UDim.new(0, 12)
