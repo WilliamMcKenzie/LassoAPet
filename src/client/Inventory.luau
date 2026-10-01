@@ -10,7 +10,6 @@
 --
 --   Inventory.init(parent) -- builds the bar in a HUD frame (sizes in HUD pixels)
 --   Inventory.setVisible(v) -- hidden while riding
---   Inventory.slotOf(tool) -- the square showing tool
 
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
@@ -240,18 +239,6 @@ function Inventory.init(parent)
 			toggle(tools[i])
 		end
 	end)
-end
-
--- The square of the item `tool` while the bar's showing (the tutorial's cursor
--- points at it), else nil.
-function Inventory.slotOf(tool)
-	local i = bar and bar.Visible and table.find(tools, tool)
-	for _, child in if i then bar:GetChildren() else {} do
-		if child:IsA("GuiObject") and child.LayoutOrder == i then
-			return child
-		end
-	end
-	return nil
 end
 
 function Inventory.setVisible(visible)

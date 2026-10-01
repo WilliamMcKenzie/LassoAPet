@@ -1,14 +1,13 @@
 -- The first-time tutorial, for a player whose "Tutorial" attribute is set (the
 -- server sets it for a new player, Hatchery). One hint at a time at the top of the
 -- screen, a trail of glowing arrows on the ground to whatever the hint is about,
--- QM's golden cursor pulsing on whatever to click, and only the buttons each step
--- needs (Hud.setTutorial; Ride leaves out Sprint, Ability and the Hold bar):
+-- and only the buttons each step needs (Hud.setTutorial; Ride leaves out Sprint,
+-- Ability and the Hold bar):
 --
 --   1. place "Place your egg in your pen!"  only the inventory, holding your first
---                                            egg; the cursor pulses on it, then once
---                                            it's picked shows the drag into the pen.
---                                            It hatches at once (Config.TutorialHatchTime)
---   2. ride  "Ride your Horse!"              arrows to it; the cursor on RIDE
+--                                            egg; arrows to the pen. It hatches at
+--                                            once (Config.TutorialHatchTime)
+--   2. ride  "Ride your Horse!"              arrows to it
 --   3. lasso "Press E to LASSO a new ride!"  time slows while an animal is in reach
 --   4. egg   "Follow the arrows..."          the egg guide; the first Meadow nest
 --                                            always holds a Config.TutorialEgg
@@ -36,7 +35,6 @@ local UserInputService = game:GetService("UserInputService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Hud = require(script.Parent.Hud)
-local Inventory = require(script.Parent.Inventory)
 local PenPets = require(script.Parent.PenPets)
 
 local player = Players.LocalPlayer
@@ -50,10 +48,6 @@ Tutorial.slowMo = nil -- a time scale while LASSO or TAKE EGG waits for its pres
 Tutorial.nest = nil -- the first Meadow nest: while it's empty, this player sees a TutorialEgg in it
 Tutorial.busy = false -- the ending's close-ups are on: no riding off
 
-local CURSOR = "rbxassetid://89545604097968" -- assets/ui/GoldenCursor.png
-local CURSOR_SIZE = 72 -- on a REFERENCE_WIDTH-wide screen, like the HUD
-local REFERENCE_WIDTH = 1320
-local DRAG_TIME = 2 -- seconds per go of the drag from the inventory to the pen
 local MONEY_WAIT = 2 -- seconds of Gold ticking up before the close-up on Upgrade Pen
 local FOCUS_HOLD = 2 -- seconds the close-up on Upgrade Pen holds
 local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
@@ -68,7 +62,6 @@ local hudStage = nil -- what the HUD was last told (Hud.setTutorial)
 local done = false -- TutorialDone sent
 local known = {} -- the pen's items when place2 began: a new one is the egg placed
 local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
-local pointUpgrade = false -- the cursor's on Upgrade Pen
 
 -- The first Meadow nest: the one nearest the start line.
 do
@@ -120,64 +113,6 @@ end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
 resize()
 gui.Parent = player:WaitForChild("PlayerGui")
-
--- QM's golden cursor: its tip on the spot to click, pulsing like a click.
-local cursor = Instance.new("ImageLabel")
-cursor.Name = "Cursor"
-cursor.BackgroundTransparency = 1
-cursor.Image = CURSOR
-cursor.AnchorPoint = Vector2.new(0.16, 0.06) -- the tip, in the picture
-cursor.ZIndex = 10
-cursor.Visible = false
-local cursorScale = Instance.new("UIScale")
-cursorScale.Parent = cursor
-cursor.Parent = gui
-local function resizeCursor()
-	local size = math.round(CURSOR_SIZE * camera.ViewportSize.X / REFERENCE_WIDTH)
-	cursor.Size = UDim2.fromOffset(size, size)
-end
-camera:GetPropertyChangedSignal("ViewportSize"):Connect(resizeCursor)
-resizeCursor()
-
--- A point a little below and right of a button's middle, so the button still shows.
-local function onButton(button)
-	return button.AbsolutePosition + button.AbsoluteSize * 0.6
-end
-
--- Where `world` is on screen, kept inside it.
-local function onScreen(world)
-	local at, ahead = camera:WorldToViewportPoint(world)
-	local size = camera.ViewportSize
-	if not ahead then
-		at = Vector3.new(size.X - at.X, size.Y, 0) -- behind you: from the bottom edge
-	end
-	return Vector2.new(math.clamp(at.X, 40, size.X - 40), math.clamp(at.Y, 40, size.Y - 40))
-end
-
--- Each frame: `at` (screen pixels) pulsing, or nil to hide it. pressed scales it
--- down, as if held.
-local function showCursor(at, pressed)
-	cursor.Visible = at ~= nil
-	if at then
-		cursor.Position = UDim2.fromOffset(at.X, at.Y)
-		cursorScale.Scale = if pressed then 0.85 else 1 - 0.12 * (0.5 + 0.5 * math.sin(os.clock() * math.pi * 3))
-	end
-end
-
--- The drag from the inventory to the pen, over and over: press on the slot, carry
--- it across held down, then click in the pen.
-local function showDrag(from, to)
-	local t = (os.clock() % DRAG_TIME) / DRAG_TIME
-	if t < 0.15 then
-		showCursor(from, t > 0.08)
-	elseif t < 0.7 then
-		local k = (t - 0.15) / 0.55
-		k = k * k * (3 - 2 * k) -- ease in and out
-		showCursor(from:Lerp(to, k), true)
-	else
-		showCursor(to, t > 0.8 and t < 0.88)
-	end
-end
 
 local shown = "" -- the hint's text when it's showing
 local pulse = TweenService:Create(hintScale, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.06 })
@@ -269,17 +204,6 @@ local function contents()
 	return if ok and typeof(items) == "table" then items else {}
 end
 
-local function eggTool()
-	for _, holder in { player:FindFirstChildOfClass("Backpack"), player.Character } do
-		for _, tool in holder and holder:GetChildren() or {} do
-			if tool:IsA("Tool") and tool:GetAttribute("EggKind") then
-				return tool
-			end
-		end
-	end
-	return nil
-end
-
 -- Your pet to ride: the one waiting in the pen (Ride's starter), else the first
 -- egg's pet where it hatched.
 local function myPet(state)
@@ -326,9 +250,7 @@ local function showGoal()
 	local upNext = Config.Biomes[level + 1]
 	if upNext then
 		goalText = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
-		pointUpgrade = true
 		Hud.focusUpgrade(FOCUS_HOLD)
-		pointUpgrade = false
 		local gateZ = WorldColors.gateZ(level)
 		local start = camera.CFrame
 		camera.CameraType = Enum.CameraType.Scriptable
@@ -382,7 +304,6 @@ function Tutorial.update(state)
 	if not Tutorial.active then
 		Tutorial.slowMo = nil
 		setHint(nil)
-		showCursor(nil)
 		beam.Enabled = false
 		lastPhase = phase
 		return
@@ -428,28 +349,6 @@ function Tutorial.update(state)
 
 	setHint(if state.cutscene then nil else hintFor(state))
 
-	-- The cursor: on the button to press, or the egg's drag into the pen.
-	local button = if phase == "ended" then Hud.button("home")
-		elseif step == "ride" and phase == "idle" then Hud.button("ride")
-		elseif Tutorial.slowMo then Hud.button("action")
-		elseif pointUpgrade then Hud.button("upgrade")
-		else nil
-	if button then
-		showCursor(onButton(button))
-	elseif PLACE_STEPS[step] and phase == "idle" then
-		local tool = eggTool()
-		local slot = tool and Inventory.slotOf(tool)
-		local pen = myPen()
-		local area = pen and pen:FindFirstChild("Area")
-		if slot and area and tool.Parent == player.Character then
-			showDrag(onButton(slot), onScreen(area.Position))
-		else
-			showCursor(if slot then onButton(slot) else nil)
-		end
-	else
-		showCursor(nil)
-	end
-
 	local target
 	if phase == "idle" then
 		if step == "ride" then
@@ -477,7 +376,7 @@ function Tutorial.init(changed)
 		local on = Config.Tutorial and player:GetAttribute("Tutorial") == true
 		if on ~= Tutorial.active then
 			Tutorial.active = on
-			step, failed, done, goalText, pointUpgrade = "place", false, false, nil, false
+			step, failed, done, goalText = "place", false, false, nil
 			changed()
 		end
 	end
