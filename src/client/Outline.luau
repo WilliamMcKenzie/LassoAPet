@@ -33,7 +33,8 @@ hullModel.Name = "OutlineHull"
 hullModel.Parent = workspace
 
 local target
-local blocks = {} -- { part = the target's block, copy = its hull block }
+local blocks = {} -- { part = the target's block, copy = its hull block, size = the copy's size }
+local copies, cframes = {}, {} -- for moving every copy in one call
 
 local function hullBlock(part)
 	local copy = Instance.new("Part")
@@ -67,6 +68,8 @@ function Outline.set(model)
 	inner.Adornee = model
 	inner.Enabled = model ~= nil
 	table.clear(blocks)
+	table.clear(copies)
+	table.clear(cframes)
 	hullModel:ClearAllChildren()
 	if not model or not layered then
 		return
@@ -89,10 +92,16 @@ function Outline.update()
 		return
 	end
 	local puff = Vector3.one * (4 * Config.OutlineWidth)
-	for _, b in blocks do
-		b.copy.Size = b.part.Size + puff
-		b.copy.CFrame = b.part.CFrame
+	for i, b in blocks do
+		-- Resizing a part is slow, so only when the target's block changed size (a pop-in).
+		local size = b.part.Size + puff
+		if size ~= b.size then
+			b.copy.Size = size
+			b.size = size
+		end
+		copies[i], cframes[i] = b.copy, b.part.CFrame
 	end
+	workspace:BulkMoveTo(copies, cframes, Enum.BulkMoveMode.FireCFrameChanged)
 end
 
 return Outline
