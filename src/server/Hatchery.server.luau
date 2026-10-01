@@ -304,7 +304,7 @@ rollGacha.OnServerInvoke = function(player)
 	local profile = profiles[player]
 	local gacha = Config.Gacha
 	local gold = player:GetAttribute("Gold") or 0
-	if not profile or gold < gacha.Price or (rolled[player] and os.clock() - rolled[player] < 1) then
+	if not profile or not gacha.Enabled or gold < gacha.Price or (rolled[player] and os.clock() - rolled[player] < 1) then
 		return nil
 	end
 	local odds = {}

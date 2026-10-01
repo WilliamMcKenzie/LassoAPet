@@ -18,6 +18,9 @@ local PURPLE = Color3.fromRGB(150, 92, 230)
 local DARK = Color3.fromRGB(46, 40, 60)
 
 local gacha = Config.Gacha
+if not gacha.Enabled then
+	return
+end
 local origin = CFrame.new(gacha.Position) * CFrame.Angles(0, math.pi, 0) -- front faces the start line (-z)
 
 local machine = Instance.new("Model")

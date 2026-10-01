@@ -621,6 +621,9 @@ function Hud.init(onAction, onHome, onRide)
 		Inventory.setVisible(not shown and not ride.Visible and not gui.Enabled)
 	end
 	task.spawn(function()
+		if not Config.Gacha.Enabled then
+			return
+		end
 		local machine = workspace:WaitForChild("EggMachine")
 		local prompt = machine:WaitForChild("Body"):WaitForChild("RollPrompt", 30)
 		if not prompt then
