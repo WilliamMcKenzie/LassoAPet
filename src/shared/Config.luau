@@ -162,6 +162,7 @@ return {
 	-- weighted too. Exclusive animals are only ever in this machine (keep them
 	-- out of every biome's Herd), and get their own card in the reveal.
 	Gacha = {
+		Enabled = false, -- off for now: QM will revisit the gacha later (no machine, no ROLL)
 		Price = 25000,
 		Position = Vector3.new(-28, 0, 30), -- on the grass between Pen1 and Pen2's ride lanes
 		Odds = { Rare = 50, Epic = 32, Legendary = 15, Exclusive = 3 },
