@@ -1188,14 +1188,6 @@ function Hud.focusUpgrade(hold)
 	focusing = false
 end
 
--- The tutorial's cursor points at these: "ride" (RIDE), "action" (LASSO / TAKE
--- EGG), "home" (HOME) or "upgrade" (Upgrade Pen), each only while it's on screen.
-function Hud.button(name)
-	local riding = gui.Enabled and rideRoot.Position.Y.Scale < 1 -- not moved off for a cutscene
-	local target = if name == "ride" then ride elseif name == "action" and riding then action elseif name == "home" and riding then home elseif name == "upgrade" then upgrade else nil
-	return if target and target.Visible then target else nil
-end
-
 -- Money as the HUD writes it: "$950", "$1.2k".
 Hud.money = money
 
