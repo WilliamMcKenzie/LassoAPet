@@ -4,29 +4,44 @@
 
 return {
 	bones = {
-		{ name = "root", parent = nil, pivot = Vector3.new(0, 3.5, 0.2) },
-		{ name = "neck", parent = "root", pivot = Vector3.new(0, 6.4, -0.1) },
-		{ name = "WingL", parent = "root", pivot = Vector3.new(-2, 5.8, 0.1) },
-		{ name = "WingR", parent = "root", pivot = Vector3.new(2, 5.8, 0.1) },
-		{ name = "LegL", parent = "root", pivot = Vector3.new(-0.9, 0.6, -0.5) },
-		{ name = "LegR", parent = "root", pivot = Vector3.new(0.9, 0.6, -0.5) },
-		{ name = "Tail", parent = "root", pivot = Vector3.new(0, 1.4, 1.8) },
+		{ name = "root", parent = nil, pivot = Vector3.new(0, 3.6, 0.2) },
+		{ name = "LegL", parent = "root", pivot = Vector3.new(-1, 0.7, -0.4) },
+		{ name = "LegR", parent = "root", pivot = Vector3.new(1, 0.7, -0.4) },
+		{ name = "Tail", parent = "root", pivot = Vector3.new(0, 1.6, 2), rest = CFrame.Angles(-0.349066, 0, 0) },
+		{ name = "WingL", parent = "root", pivot = Vector3.new(-1.9, 6.4, 0.1), rest = CFrame.Angles(0, 0, -0.20944) },
+		{ name = "WingR", parent = "root", pivot = Vector3.new(1.9, 6.4, 0.1), rest = CFrame.Angles(0, 0, 0.20944) },
+		{ name = "neck", parent = "root", pivot = Vector3.new(0, 6.9, 0), rest = CFrame.Angles(0.139626, 0, 0) },
 	},
 	parts = {
-		{ name = "Head", bone = "neck", class = "Part", size = Vector3.new(3.2, 2.8, 2.9), cframe = CFrame.new(0, 7.8, -0.15, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(44, 50, 66) },
-		{ name = "Face", bone = "neck", class = "Part", size = Vector3.new(2.3, 2.1, 0.3), cframe = CFrame.new(0, 7.65, -1.75, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 250, 250) },
-		{ name = "Beak", bone = "neck", class = "Part", size = Vector3.new(0.9, 0.5, 0.9), cframe = CFrame.new(0, 7.2, -2.35, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
-		{ name = "EyeL", bone = "neck", class = "Part", size = Vector3.new(0.6, 0.75, 0.05), cframe = CFrame.new(-0.6, 7.975, -1.925, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilL", bone = "neck", class = "Part", size = Vector3.new(0.372, 0.56, 0.03), cframe = CFrame.new(-0.6, 7.905, -1.965, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
-		{ name = "EyeR", bone = "neck", class = "Part", size = Vector3.new(0.6, 0.75, 0.05), cframe = CFrame.new(0.6, 7.975, -1.925, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilR", bone = "neck", class = "Part", size = Vector3.new(0.372, 0.56, 0.03), cframe = CFrame.new(0.6, 7.905, -1.965, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
-		{ name = "FlipperL", bone = "WingL", class = "Part", size = Vector3.new(0.4, 3.4, 1.6), cframe = CFrame.new(-2.2, 4.1, 0.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(44, 50, 66) },
-		{ name = "FlipperR", bone = "WingR", class = "Part", size = Vector3.new(0.4, 3.4, 1.6), cframe = CFrame.new(2.2, 4.1, 0.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(44, 50, 66) },
-		{ name = "FootL", bone = "LegL", class = "Part", size = Vector3.new(1.2, 0.6, 2.9), cframe = CFrame.new(-0.9, 0.3, -1.05, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
-		{ name = "FootR", bone = "LegR", class = "Part", size = Vector3.new(1.2, 0.6, 2.9), cframe = CFrame.new(0.9, 0.3, -1.05, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
-		{ name = "Tail", bone = "Tail", class = "WedgePart", size = Vector3.new(1.4, 0.9, 0.8), cframe = CFrame.new(0, 1, 2.25, -1, 0, 0, 0, 0, 1, 0, 1, 0), color = Color3.fromRGB(44, 50, 66) },
-		{ name = "Body", bone = "root", class = "Part", size = Vector3.new(4, 5.8, 3.2), cframe = CFrame.new(0, 3.5, 0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(44, 50, 66) },
-		{ name = "Belly", bone = "root", class = "Part", size = Vector3.new(3, 5, 0.6), cframe = CFrame.new(0, 3.4, -1.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 250, 250) },
+		{ name = "FootL", bone = "LegL", class = "Part", size = Vector3.new(1.6, 0.7, 2.3), cframe = CFrame.new(-1.05, 0.35, -0.75, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
+		{ name = "ToeL0", bone = "LegL", class = "Part", size = Vector3.new(0.4, 0.45, 0.6), cframe = CFrame.new(-0.45, 0.225, -2.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
+		{ name = "ToeL1", bone = "LegL", class = "Part", size = Vector3.new(0.4, 0.45, 0.6), cframe = CFrame.new(-1.05, 0.225, -2.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
+		{ name = "ToeL2", bone = "LegL", class = "Part", size = Vector3.new(0.4, 0.45, 0.6), cframe = CFrame.new(-1.65, 0.225, -2.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
+		{ name = "FootR", bone = "LegR", class = "Part", size = Vector3.new(1.6, 0.7, 2.3), cframe = CFrame.new(1.05, 0.35, -0.75, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
+		{ name = "ToeR0", bone = "LegR", class = "Part", size = Vector3.new(0.4, 0.45, 0.6), cframe = CFrame.new(0.45, 0.225, -2.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
+		{ name = "ToeR1", bone = "LegR", class = "Part", size = Vector3.new(0.4, 0.45, 0.6), cframe = CFrame.new(1.05, 0.225, -2.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
+		{ name = "ToeR2", bone = "LegR", class = "Part", size = Vector3.new(0.4, 0.45, 0.6), cframe = CFrame.new(1.65, 0.225, -2.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 30) },
+		{ name = "Tail", bone = "Tail", class = "WedgePart", size = Vector3.new(1.6, 1.1, 1), cframe = CFrame.new(0, 1.4, 2.55, 1, 0, 0, 0, 0, -1, 0, 1, 0), color = Color3.fromRGB(40, 46, 64) },
+		{ name = "FlipperL", bone = "WingL", class = "Part", size = Vector3.new(0.6, 2.6, 2), cframe = CFrame.new(-2.2, 5.2, 0.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(40, 46, 64) },
+		{ name = "FlipperTipL", bone = "WingL", class = "Part", size = Vector3.new(0.6, 1.7, 1.4), cframe = CFrame.new(-2.2, 3.05, 0.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(40, 46, 64) },
+		{ name = "FlipperR", bone = "WingR", class = "Part", size = Vector3.new(0.6, 2.6, 2), cframe = CFrame.new(2.2, 5.2, 0.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(40, 46, 64) },
+		{ name = "FlipperTipR", bone = "WingR", class = "Part", size = Vector3.new(0.6, 1.7, 1.4), cframe = CFrame.new(2.2, 3.05, 0.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(40, 46, 64) },
+		{ name = "Head", bone = "neck", class = "Part", size = Vector3.new(3.4, 2.6, 3.2), cframe = CFrame.new(0, 8, -0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(40, 46, 64) },
+		{ name = "Crown", bone = "neck", class = "Part", size = Vector3.new(2.7, 0.6, 2.6), cframe = CFrame.new(0, 9.6, -0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(40, 46, 64) },
+		{ name = "CheekL", bone = "neck", class = "Part", size = Vector3.new(0.25, 1.2, 1.4), cframe = CFrame.new(-1.825, 7.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 170, 40) },
+		{ name = "EyeL", bone = "neck", class = "Part", size = Vector3.new(1.1, 1.25, 0.05), cframe = CFrame.new(-0.85, 8.525, -1.825, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
+		{ name = "PupilL", bone = "neck", class = "Part", size = Vector3.new(0.5, 0.7, 0.03), cframe = CFrame.new(-0.7, 8.4, -1.865, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
+		{ name = "CheekR", bone = "neck", class = "Part", size = Vector3.new(0.25, 1.2, 1.4), cframe = CFrame.new(1.825, 7.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 170, 40) },
+		{ name = "EyeR", bone = "neck", class = "Part", size = Vector3.new(1.1, 1.25, 0.05), cframe = CFrame.new(0.85, 8.525, -1.825, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
+		{ name = "PupilR", bone = "neck", class = "Part", size = Vector3.new(0.5, 0.7, 0.03), cframe = CFrame.new(0.7, 8.4, -1.865, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
+		{ name = "Beak", bone = "neck", class = "WedgePart", size = Vector3.new(1.1, 0.6, 1.7), cframe = CFrame.new(0, 7.65, -2.65, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
+		{ name = "BeakLow", bone = "neck", class = "WedgePart", size = Vector3.new(0.9, 1.1, 0.4), cframe = CFrame.new(0, 7.15, -2.35, 1, 0, 0, 0, 0, 1, 0, -1, 0), color = Color3.fromRGB(230, 100, 30) },
+		{ name = "Body", bone = "root", class = "Part", size = Vector3.new(4.6, 3.8, 3.6), cframe = CFrame.new(0, 2.6, 0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(40, 46, 64) },
+		{ name = "Chest", bone = "root", class = "Part", size = Vector3.new(3.8, 2.4, 3.1), cframe = CFrame.new(0, 5.7, 0.15, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(40, 46, 64) },
+		{ name = "Belly", bone = "root", class = "Part", size = Vector3.new(3.6, 3.5, 0.6), cframe = CFrame.new(0, 2.75, -1.9, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 250, 250) },
+		{ name = "Tummy", bone = "root", class = "Part", size = Vector3.new(2.8, 2.4, 0.4), cframe = CFrame.new(0, 2.6, -2.4, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 250, 250) },
+		{ name = "Bib", bone = "root", class = "Part", size = Vector3.new(3, 1.3, 0.6), cframe = CFrame.new(0, 5.15, -1.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 250, 250) },
+		{ name = "BibGold", bone = "root", class = "Part", size = Vector3.new(3, 0.8, 0.6), cframe = CFrame.new(0, 6.2, -1.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 60) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
 	animations = {
@@ -35,7 +50,7 @@ return {
 			tracks = {
 				root = {
 					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.2167, 0, 0, 0.02182 }, { 0.4333, 0, 0, 0.03779 }, { 0.65, 0, 0, 0.04363 }, { 0.8667, 0, 0, 0.03779 }, { 1.0833, 0, 0, 0.02182 }, { 1.3, 0, 0, 0 }, { 1.5167, 0, 0, -0.02182 }, { 1.7333, 0, 0, -0.03779 }, { 1.95, 0, 0, -0.04363 }, { 2.1667, 0, 0, -0.03779 }, { 2.3833, 0, 0, -0.02182 }, { 2.6, 0, 0, 0 } } },
-					position = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.2167, 0, 0.0189, 0 }, { 0.4333, 0, 0.0319, 0 }, { 0.65, 0, 0.0365, 0 }, { 0.8667, 0, 0.0319, 0 }, { 1.0833, 0, 0.0189, 0 }, { 1.3, 0, 0, 0 }, { 1.5167, 0, 0.0189, 0 }, { 1.7333, 0, 0.0319, 0 }, { 1.95, 0, 0.0365, 0 }, { 2.1667, 0, 0.0319, 0 }, { 2.3833, 0, 0.0189, 0 }, { 2.6, 0, 0, 0 } } },
+					position = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.2167, 0, 0.0211, 0 }, { 0.4333, 0, 0.0357, 0 }, { 0.65, 0, 0.0409, 0 }, { 0.8667, 0, 0.0357, 0 }, { 1.0833, 0, 0.0211, 0 }, { 1.3, 0, 0, 0 }, { 1.5167, 0, 0.0211, 0 }, { 1.7333, 0, 0.0357, 0 }, { 1.95, 0, 0.0409, 0 }, { 2.1667, 0, 0.0357, 0 }, { 2.3833, 0, 0.0211, 0 }, { 2.6, 0, 0, 0 } } },
 				},
 				LegL = {
 					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.2167, 0, 0, -0.02182 }, { 0.4333, 0, 0, -0.03779 }, { 0.65, 0, 0, -0.04363 }, { 0.8667, 0, 0, -0.03779 }, { 1.0833, 0, 0, -0.02182 }, { 1.3, 0, 0, 0 }, { 1.5167, 0, 0, 0.02182 }, { 1.7333, 0, 0, 0.03779 }, { 1.95, 0, 0, 0.04363 }, { 2.1667, 0, 0, 0.03779 }, { 2.3833, 0, 0, 0.02182 }, { 2.6, 0, 0, 0 } } },
@@ -62,7 +77,7 @@ return {
 			tracks = {
 				root = {
 					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.05, 0, 0.04676, 0.06679 }, { 0.1, 0, 0.08639, 0.12341 }, { 0.15, 0, 0.11287, 0.16125 }, { 0.2, 0, 0.12217, 0.17453 }, { 0.25, 0, 0.11287, 0.16125 }, { 0.3, 0, 0.08639, 0.12341 }, { 0.35, 0, 0.04676, 0.06679 }, { 0.4, 0, 0, 0 }, { 0.45, 0, -0.04676, -0.06679 }, { 0.5, 0, -0.08639, -0.12341 }, { 0.55, 0, -0.11287, -0.16125 }, { 0.6, 0, -0.12217, -0.17453 }, { 0.65, 0, -0.11287, -0.16125 }, { 0.7, 0, -0.08639, -0.12341 }, { 0.75, 0, -0.04676, -0.06679 }, { 0.8, 0, 0, 0 } } },
-					position = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.05, 0, 0.055, 0 }, { 0.1, 0, 0.0936, 0 }, { 0.15, 0, 0.1152, 0 }, { 0.2, 0, 0.1219, 0 }, { 0.25, 0, 0.1152, 0 }, { 0.3, 0, 0.0936, 0 }, { 0.35, 0, 0.055, 0 }, { 0.4, 0, 0, 0 }, { 0.45, 0, 0.055, 0 }, { 0.5, 0, 0.0936, 0 }, { 0.55, 0, 0.1152, 0 }, { 0.6, 0, 0.1219, 0 }, { 0.65, 0, 0.1152, 0 }, { 0.7, 0, 0.0936, 0 }, { 0.75, 0, 0.055, 0 }, { 0.8, 0, 0, 0 } } },
+					position = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.05, 0, 0.0615, 0 }, { 0.1, 0, 0.1054, 0 }, { 0.15, 0, 0.1303, 0 }, { 0.2, 0, 0.1383, 0 }, { 0.25, 0, 0.1303, 0 }, { 0.3, 0, 0.1054, 0 }, { 0.35, 0, 0.0615, 0 }, { 0.4, 0, 0, 0 }, { 0.45, 0, 0.0615, 0 }, { 0.5, 0, 0.1054, 0 }, { 0.55, 0, 0.1303, 0 }, { 0.6, 0, 0.1383, 0 }, { 0.65, 0, 0.1303, 0 }, { 0.7, 0, 0.1054, 0 }, { 0.75, 0, 0.0615, 0 }, { 0.8, 0, 0, 0 } } },
 				},
 				LegL = {
 					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.05, 0, -0.02337, -0.06679 }, { 0.1, 0, -0.0432, -0.12341 }, { 0.15, 0, -0.05644, -0.16125 }, { 0.2, 0, -0.06109, -0.17453 }, { 0.25, 0, -0.05644, -0.16125 }, { 0.3, 0, -0.0432, -0.12341 }, { 0.35, 0, -0.02337, -0.06679 }, { 0.4, 0, 0, 0 }, { 0.45, 0, 0.02337, 0.06679 }, { 0.5, 0, 0.0432, 0.12341 }, { 0.55, 0, 0.05644, 0.16125 }, { 0.6, 0, 0.06109, 0.17453 }, { 0.65, 0, 0.05644, 0.16125 }, { 0.7, 0, 0.0432, 0.12341 }, { 0.75, 0, 0.02337, 0.06679 }, { 0.8, 0, 0, 0 } } },
@@ -91,7 +106,7 @@ return {
 			tracks = {
 				root = {
 					rotation = { smooth = true, keys = { { 0, -0.27925, 0, 0 }, { 0.0281, -0.27925, 0.05342, 0.08015 }, { 0.0563, -0.27925, 0.09873, 0.14809 }, { 0.0844, -0.27925, 0.129, 0.1935 }, { 0.1125, -0.27925, 0.13963, 0.20944 }, { 0.1406, -0.27925, 0.129, 0.1935 }, { 0.1688, -0.27925, 0.09873, 0.14809 }, { 0.1969, -0.27925, 0.05342, 0.08015 }, { 0.225, -0.27925, 0, 0 }, { 0.2531, -0.27925, -0.05342, -0.08015 }, { 0.2812, -0.27925, -0.09873, -0.14809 }, { 0.3094, -0.27925, -0.129, -0.1935 }, { 0.3375, -0.27925, -0.13963, -0.20944 }, { 0.3656, -0.27925, -0.129, -0.1935 }, { 0.3937, -0.27925, -0.09873, -0.14809 }, { 0.4219, -0.27925, -0.05342, -0.08015 }, { 0.45, -0.27925, 0, 0 } } },
-					position = { smooth = true, keys = { { 0, 0, 0.2736, 0 }, { 0.0281, 0, 0.4739, 0 }, { 0.0563, 0, 0.607, 0 }, { 0.0844, 0, 0.6578, 0 }, { 0.1125, 0, 0.6236, 0 }, { 0.1406, 0, 0.5113, 0 }, { 0.1688, 0, 0.3356, 0 }, { 0.1969, 0, 0.2698, 0 }, { 0.225, 0, 0.2736, 0 }, { 0.2531, 0, 0.4739, 0 }, { 0.2812, 0, 0.6069, 0 }, { 0.3094, 0, 0.6578, 0 }, { 0.3375, 0, 0.6236, 0 }, { 0.3656, 0, 0.5113, 0 }, { 0.3937, 0, 0.3353, 0 }, { 0.4219, 0, 0.2698, 0 }, { 0.45, 0, 0.2736, 0 } } },
+					position = { smooth = true, keys = { { 0, 0, 0.246, 0 }, { 0.0281, 0, 0.4551, 0 }, { 0.0563, 0, 0.5954, 0 }, { 0.0844, 0, 0.651, 0 }, { 0.1125, 0, 0.6184, 0 }, { 0.1406, 0, 0.5044, 0 }, { 0.1688, 0, 0.324, 0 }, { 0.1969, 0, 0.2404, 0 }, { 0.225, 0, 0.246, 0 }, { 0.2531, 0, 0.4551, 0 }, { 0.2812, 0, 0.5954, 0 }, { 0.3094, 0, 0.651, 0 }, { 0.3375, 0, 0.6184, 0 }, { 0.3656, 0, 0.5044, 0 }, { 0.3937, 0, 0.3237, 0 }, { 0.4219, 0, 0.2404, 0 }, { 0.45, 0, 0.246, 0 } } },
 				},
 				LegL = {
 					rotation = { smooth = true, keys = { { 0, 0.27925, 0, 0 }, { 0.0281, 0.27925, -0.02672, -0.08015 }, { 0.0563, 0.27925, -0.04936, -0.14809 }, { 0.0844, 0.27925, -0.06451, -0.1935 }, { 0.1125, 0.27925, -0.06981, -0.20944 }, { 0.1406, 0.27925, -0.06451, -0.1935 }, { 0.1688, 0.27925, -0.04936, -0.14809 }, { 0.1969, 0.27925, -0.02672, -0.08015 }, { 0.225, 0.27925, 0, 0 }, { 0.2531, 0.27925, 0.02672, 0.08015 }, { 0.2812, 0.27925, 0.04936, 0.14809 }, { 0.3094, 0.27925, 0.06451, 0.1935 }, { 0.3375, 0.27925, 0.06981, 0.20944 }, { 0.3656, 0.27925, 0.06451, 0.1935 }, { 0.3937, 0.27925, 0.04936, 0.14809 }, { 0.4219, 0.27925, 0.02672, 0.08015 }, { 0.45, 0.27925, 0, 0 } } },
