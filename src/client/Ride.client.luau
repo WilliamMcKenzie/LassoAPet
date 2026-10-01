@@ -37,6 +37,7 @@ local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this ra
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
 local deliverEgg = ReplicatedStorage:WaitForChild("DeliverEgg")
+local finishCourse = ReplicatedStorage:WaitForChild("FinishCourse")
 local ridePet = ReplicatedStorage:WaitForChild("RidePet")
 local waitingEggs = {} -- [nest] = { egg, kind, nest, nextTwitch }
 local nearEgg -- the waiting egg in grab range, while actionTarget is "egg"
@@ -141,6 +142,8 @@ local EDGE = Config.CourseHalfWidth - 4
 local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:GetBoundingBox().Position.Z else -2
 local SPAWN_Z = START_LINE_Z + 4
 local END_Z = -Config.CourseLength + 4 -- the far wall
+local FINISH_Z = -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
+local FINISH_DROP = 40 -- studs the leap off the end drops below the floor by the time it lands
 local VIEW = 320 -- stampede animals further than this from the camera aren't drawn
 local DUST_VIEW = 160 -- landings further than this from the camera kick up no dust
 -- They pop in instead of appearing: a poof, then they spring up out of it,
@@ -180,7 +183,7 @@ do
 		edge = endZ
 		local s = {
 			spawnZ = if b == 1 then SPAWN_Z else startZ - 2,
-			endZ = if b == #Config.Biomes then END_Z else endZ + 2,
+			endZ = if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
 			kinds = {},
 			total = 0,
 		}
@@ -226,7 +229,7 @@ herdFolder.Parent = workspace
 
 -- An entity is an animal plus its position on the course.
 -- yaw 0 faces -z (outbound); yaw pi faces +z (home).
-local phase = "idle" -- idle | outbound | turning | return | home | ended
+local phase = "idle" -- idle | outbound | turning | return | home | finish | ended
 local starter, mount
 local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
 local plans = {} -- [n] = { x, speed }, the stampede's schedule
@@ -1172,23 +1175,30 @@ local function updateHerd(dt, slowed)
 end
 
 -- Pet abilities (Config.Abilities): the Ability button, Q or R1. Each mount keeps
--- its own cooldown (entity.ability); a mount with no entry shows no button.
-local abilityKey = false -- Q or R1 held
+-- its own cooldown (entity.ability); a mount with no entry shows no button. Every
+-- ability is one tap: it runs its full Duration.
+local abilityKey = false -- Q or R1 pressed since the last frame
 local chargeCam, rattleHaze, cineCam = 0, 0, 0 -- 0..1, eased in and out: the charge's wider view, the rattle's haze, the cinematic angle
 local RATTLE_HAZE = Color3.fromRGB(70, 150, 255)
 local abilityClock = 0 -- ride time, slowed with the slow motion like everything else
 local ABILITY_RING_TIME = 0.6
 
 ContextActionService:BindActionAtPriority("Ability", function(_, state)
-	abilityKey = state == Enum.UserInputState.Begin
+	if state == Enum.UserInputState.Begin and phase ~= "idle" then
+		abilityKey = true
+	end
 	if phase == "idle" then
 		return Enum.ContextActionResult.Pass
 	end
 	return Enum.ContextActionResult.Sink
 end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.Q, Enum.KeyCode.ButtonR1)
 
-local function abilityHeld()
-	return abilityKey or Hud.abilityHeld()
+-- Whether the ability was asked for since the last frame (a press while it's
+-- cooling down is dropped, not saved up).
+local function abilityPressed()
+	local pressed = Hud.abilityPressed() or abilityKey
+	abilityKey = false
+	return pressed
 end
 
 -- The running ability on the mount, if any: { kind, cfg, t, fx }.
@@ -1349,7 +1359,6 @@ end
 local function startAbility(cfg)
 	local a = mount.ability
 	a.active = { kind = cfg.Kind, cfg = cfg, t = 0, fx = {} }
-	a.needRelease = true
 	if cfg.Kind == "Charge" then
 		a.active.fx = chargeFx(mount)
 		Poof.at(Vector3.new(mount.x, 0, mount.z))
@@ -1374,6 +1383,7 @@ local function updateAbility(dt)
 		if mount then
 			endAbility(mount)
 		end
+		abilityKey = false
 		Hud.setAbility(nil)
 		return
 	end
@@ -1382,20 +1392,17 @@ local function updateAbility(dt)
 		a = { readyAt = 0 }
 		mount.ability = a
 	end
-	local held = abilityHeld()
-	if not held then
-		a.needRelease = nil
-	end
+	local pressed = abilityPressed()
 	local active = a.active
 	if active then
 		active.t += dt
 		if active.cfg.Kind == "Rattle" then
 			rattleBlast(dt, active.cfg)
 		end
-		if active.t >= active.cfg.Duration or (active.cfg.Kind == "Charge" and not held) then
+		if active.t >= active.cfg.Duration then
 			endAbility(mount)
 		end
-	elseif held and not a.needRelease and abilityClock >= a.readyAt and (phase == "outbound" or phase == "return") and not transfer then
+	elseif pressed and abilityClock >= a.readyAt and (phase == "outbound" or phase == "return") and not transfer then
 		startAbility(cfg)
 	end
 	active = a.active
@@ -1433,10 +1440,18 @@ local function updateMount(dt)
 		local t = heroLeap.t
 		mount.z = heroLeap.fromZ + (heroLeap.toZ - heroLeap.fromZ) * t
 		-- A floaty arc: up fast, hanging near the top, down fast.
-		mount.hop = math.sin(math.pi * t) ^ 0.6 * Config.HomeLeapHeight
+		mount.hop = math.sin(math.pi * t) ^ 0.6 * Config.HomeLeapHeight - (heroLeap.drop or 0) * t * t * t
 		mount.latVel = 0
 		place(mount, 0)
 		animate(mount, dt, if t < 1 then mount.speed else 0, 0)
+		return
+	elseif phase == "finish" then
+		-- Over the edge: falling away into the sky (under the egg reveal).
+		mount.fall = (mount.fall or 20) + 60 * dt
+		mount.hop -= mount.fall * dt
+		mount.z -= mount.speed * 0.5 * dt
+		place(mount, 0)
+		animate(mount, dt, mount.speed, 0)
 		return
 	elseif phase == "home" then
 		-- Landed: runs on HomeRunOut studs, easing to a stop.
@@ -1507,7 +1522,25 @@ local function reachHome()
 	end
 end
 
+-- Over the finish line at the end of the course: the same slow-motion leap as
+-- coming home, over the line; then a random egg and home (see the landing below).
+local function reachFinish()
+	if phase == "outbound" and mount.z <= FINISH_Z + LEAP_FROM and not transfer then
+		phase = "finish"
+		-- Off the end of the course: up over the line and down into the open sky.
+		heroLeap = { t = 0, fromZ = mount.z, toZ = FINISH_Z - 26, drop = FINISH_DROP }
+		Hud.setCutscene(true)
+		Hud.setAction(nil)
+		Hud.setHold(nil)
+		return true
+	end
+	return false
+end
+
 local function checkRide(dt)
+	if phase == "finish" or reachFinish() then
+		return -- the leap over the finish line: nothing can go wrong now
+	end
 	grace = math.max(grace - dt, 0)
 	local ability = activeAbility()
 	if phase == "outbound" and mount.z < 0 and not transfer and not ability then -- abilities use no Hold
@@ -1516,8 +1549,8 @@ local function checkRide(dt)
 			return fail("BUCKED OFF")
 		end
 	end
-	if mount.z < -Config.CourseLength + 40 then
-		return fail("TOO FAR!")
+	if mount.z < FINISH_Z - 8 then
+		return fail("TOO FAR!") -- only if something skipped the finish line
 	end
 	if ability and ability.cfg.Kind == "Charge" then
 		-- A battering ram: everything in the way goes flying, whatever its size.
@@ -1634,7 +1667,9 @@ local function updateRider(dt)
 			humanoid.Sit = true
 		end
 		hrp.CFrame = mount.animal:getSeatCFrame() * SEAT_OFFSET
-		focus = Vector3.new(mount.x, (mount.hop or 0) * 0.6, mount.z) -- the camera rises a little with a leap
+		if phase ~= "finish" or heroLeap then -- falling off the end: the camera stays at the edge
+			focus = Vector3.new(mount.x, math.max(mount.hop or 0, 0) * 0.6, mount.z) -- the camera rises a little with a leap
+		end
 	end
 	if carried then
 		if carried.stage == "throw" then
@@ -1753,20 +1788,38 @@ RunService.PreSimulation:Connect(function(dt)
 	if heroLeap and heroLeap.t >= 1 then
 		-- Landed: dust, then the egg reveal, then off the pet.
 		heroLeap = nil
-		mount.hop = 0
 		mount.speed = RUN_OUT_SPEED
-		place(mount, 0)
-		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
-		Hud.setCutscene(false)
-		local kind = carried and carried.kind
-		if kind then
-			deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
+		if phase ~= "finish" then
+			mount.hop = 0
+			place(mount, 0)
+			Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
 		end
-		task.delay(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function()
-			if phase == "home" then
-				finishRide(mount.x, mount.z)
+		Hud.setCutscene(false)
+		if phase == "finish" then
+			-- Crossed the finish line: a random egg (the server draws it), its
+			-- reveal, then back home to your pen.
+			task.spawn(function()
+				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse)
+				kind = ok and kind or nil
+				task.wait(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5)
+				if phase == "finish" then
+					local pen = myPen()
+					local spawn = pen and pen:FindFirstChild("Spawn")
+					local spot = if spawn then spawn.Position else homeSpot()
+					finishRide(spot.X - 6, spot.Z) -- just outside your pen's open side
+				end
+			end)
+		else
+			local kind = carried and carried.kind
+			if kind then
+				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
 			end
-		end)
+			task.delay(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function()
+				if phase == "home" then
+					finishRide(mount.x, mount.z)
+				end
+			end)
+		end
 	end
 	actionTarget = findTarget()
 	Outline.set(if actionTarget == "egg" then nearEgg.egg.model elseif actionTarget then actionTarget.animal.model else nil)

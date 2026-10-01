@@ -146,16 +146,23 @@ def item_span(s, start):
             return start + m.end()
 
 
-def write_patches(old_refs, ref_prefix, boxes):
+def write_patches(old_refs, ref_prefix, boxes, template=None):
     """Replace a biome's floor parts in World.rbxmx. old_refs: regex of the
     referents to replace (the biome's one Ground part, or the patches a previous
     run wrote); the first one is the template (its textures come along).
-    boxes: (name, centre, size) per new part. Returns how many were written."""
+    boxes: (name, centre, size) per new part. template: when no old_refs part
+    exists yet (a new biome), the referent regex of a part to copy (kept).
+    Returns how many were written."""
     s = open(WORLD).read()
     old = [m.start() for m in re.finditer(r'<Item class="Part" referent="(%s)"' % old_refs, s)]
-    assert old, "floor part not found: " + old_refs
-    template_start = old[0]
-    template = s[template_start:item_span(s, template_start)]
+    if not old and template:
+        st = re.search(r'<Item class="Part" referent="(%s)"' % template, s).start()
+        template = s[st:item_span(s, st)]
+        template_start = item_span(s, st) + 1
+    else:
+        assert old, "floor part not found: " + old_refs
+        template_start = old[0]
+        template = s[template_start:item_span(s, template_start)]
     for st in reversed(old):
         s = s[:st] + s[item_span(s, st):].lstrip("\n")
     items = []

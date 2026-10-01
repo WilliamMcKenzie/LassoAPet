@@ -4,7 +4,7 @@ Run: python3 tools/course_layout.py [out_dir]         pictures only
      python3 tools/course_layout.py --map               also write World.Obstacles
 
 Writes layout.json (every placement: asset, x, z, yaw, y), a top-down map of
-both biomes (plan.png) and two ride-view renders. With --map, every placement
+every biome (plan.png) and a ride-view render of each. With --map, every placement
 becomes a Model named after its asset in World.Obstacles (src/world/World.rbxmx);
 Config.ObstacleTiers gives each name its size tier.
 
@@ -21,7 +21,8 @@ How a biome is laid out, from its line toward its far end:
   - Nests: a clear ring around each nest, with a pair of smalls framing it.
   - Every placement keeps its footprint clear of the others, so there's always
     a way through on the ride back.
-Desert extras: cacti prefer dry grass, sandstone chunks prefer the raised
+Snow is laid out like the desert, with pines on the cold grass and ice boulder
+islands. Desert extras: cacti prefer dry grass, sandstone chunks prefer the raised
 sandstone edges, and anything on sandstone sits a stud up.
 """
 
@@ -39,6 +40,7 @@ from partlib import Part, T, Ry, render  # noqa: E402
 import terrain_assets as TA  # noqa: E402
 import desert_ground as DG  # noqa: E402
 import meadow_ground as MG  # noqa: E402
+import snow_ground as SG  # noqa: E402
 from animal_designs import font  # noqa: E402
 
 HALF_W = 56
@@ -47,6 +49,8 @@ BIOMES = [
          small=["Stone", "Bush"], medium=["Boulder", "BoulderSplit"], large=[]),
     dict(name="Desert", z0=-760, z1=-3040, nests=DG.NESTS,
          small=["Sandstone"], medium=["Cactus", "SandBoulder", "SandBoulderCarved"], large=["SandMound"]),
+    dict(name="Snow", z0=-3040, z1=-9880, nests=SG.NESTS,
+         small=["Icicle"], medium=["Pine", "IcicleLarge"], large=["IceBoulder"]),
 ]
 # footprint radius (studs), size class and builder for each asset
 ASSETS = {
@@ -59,12 +63,19 @@ ASSETS = {
     "SandBoulder": (5.0, "medium", TA.sand_boulder),
     "SandBoulderCarved": (5.4, "medium", TA.sand_boulder_b),
     "SandMound": (12.5, "large", TA.sand_mound),
+    "Icicle": (2.6, "small", TA.icicle),
+    "Pine": (4.6, "medium", TA.pine_tree),
+    "IcicleLarge": (4.3, "medium", TA.large_icicle),
+    "IceBoulder": (9.0, "large", TA.ice_boulder),
 }
+# the medium a cluster mixes in now and then, so it isn't all rubble
+ACCENT = {"Desert": "Cactus", "Snow": "Pine"}
 TIERS = {"small": 1, "medium": 2, "large": 3}
 ENTRY = 48
 BEAT = 80
 NEST_CLEAR = 18
 GAP = 3  # studs between any two footprints
+FINISH_CLEAR = 80  # studs kept clear before the far wall: the finish line is 50 in
 
 
 class Course:
@@ -73,10 +84,17 @@ class Course:
         self.items = []
         self.kind = DG.layout()  # desert patches, per 8-stud cell
         self.dirt = MG.layout(MG.MEADOW_LENGTH // MG.CELL)  # meadow dirt, per 8-stud cell
+        self.snow = SG.full_layout()  # snow patches, per 8-stud cell
 
     def patch(self, x, z):
-        """Desert: 0 sand, 1 dry grass, 2 sandstone. Meadow: 0 grass, 3 dirt."""
+        """Desert: 0 sand, 1 dry grass, 2 sandstone. Meadow: 0 grass, 3 dirt.
+        Snow: 4 snow, 5 cold grass, 6 ice."""
         i = int((x + DG.HALF_W) // DG.CELL)
+        if z <= SG.Z_START:
+            j = int((SG.Z_START - z) // SG.CELL)
+            if 0 <= i < self.snow.shape[0] and 0 <= j < self.snow.shape[1]:
+                return 4 + int(self.snow[i, j])
+            return 4
         if z > DG.Z_START:
             j = int(-z // MG.CELL)
             if 0 <= i < self.dirt.shape[0] and 0 <= j < self.dirt.shape[1] and self.dirt[i, j]:
@@ -88,8 +106,8 @@ class Course:
         return 0
 
     def floor(self, x, z):
-        """Floor height, as Shared/Ground reports it: sandstone +1, dirt -1."""
-        return {2: 1.0, 3: -1.0}.get(self.patch(x, z), 0.0)
+        """Floor height, as Shared/Ground reports it: sandstone and cold grass +1, dirt and ice -1."""
+        return {2: 1.0, 3: -1.0, 5: 1.0, 6: -1.0}.get(self.patch(x, z), 0.0)
 
     def fits(self, asset, x, z, biome):
         r = ASSETS[asset][0]
@@ -99,6 +117,8 @@ class Course:
             return False
         if z - r < biome["z1"] + 4:
             return False
+        if biome["name"] in ("Desert", BIOMES[-1]["name"]) and z - r < biome["z1"] + FINISH_CLEAR:
+            return False  # the finish line and the leap over it (Config.FinishFromEnd)
         for nx, nz in biome["nests"]:
             if math.hypot(x - nx, z - nz) < NEST_CLEAR + r:
                 return False
@@ -128,6 +148,11 @@ class Course:
             if self.patch(x, z) == 1:
                 return "Cactus"
             return self.rng.choice(["Cactus", "SandBoulder", "SandBoulderCarved"], p=[0.3, 0.35, 0.35])
+        if biome["name"] == "Snow":
+            # pines grow on the cold grass, big icicles stand on snow and ice
+            if self.patch(x, z) == 5:
+                return "Pine"
+            return self.rng.choice(["Pine", "IcicleLarge"], p=[0.4, 0.6])
         return self.rng.choice(biome["medium"])
 
     def clump(self, biome, x, z, n):
@@ -230,6 +255,63 @@ class Course:
             side = -side
         self.rng = main
 
+    def cluster(self, biome, rng, cx, cz, smalls, mediums=1):
+        """A tight knot of obstacles: the mediums side by side, smalls packed round."""
+        centres = []
+        for m in range(mediums):
+            x = cx + (m - (mediums - 1) / 2) * 12.5
+            if self.put(self.pick_medium(biome, x, cz), x, cz, biome, jitter=3):
+                centres.append((self.items[-1]["x"], self.items[-1]["z"]))
+        if not centres:
+            centres = [(cx, cz)]
+        start = rng.uniform(0, 2 * math.pi)
+        for k in range(smalls):
+            ox, oz = centres[k % len(centres)]
+            a = start + k * 2 * math.pi / smalls
+            x, z = ox + math.cos(a) * 11.5, oz + math.sin(a) * 11.5
+            asset = ACCENT[biome["name"]] if rng.random() < 0.3 else self.pick_small(biome, x, z)
+            self.put(asset, x, z, biome, jitter=1.5)
+
+    def desert_clusters(self, biome, rng):
+        """The desert, gathered up (QM, Sep 30): the same kinds of obstacles, about
+        two thirds as many, packed into clusters with clear lanes between them.
+        Each beat is one cluster swinging from side to side; deeper in, some
+        beats get a second cluster on the other side (a lane down the middle),
+        and every fourth beat is a sand mound island with a few things tucked
+        against it. A few smalls still hug the walls, and each nest keeps one."""
+        main = self.rng
+        self.rng = rng
+        for nx, nz in biome["nests"]:
+            side = int(rng.choice([-1, 1]))
+            self.put(self.pick_small(biome, nx, nz), nx + side * (NEST_CLEAR + 4), nz + rng.normal(0, 3), biome, jitter=1.5)
+        n = int((biome["z0"] - biome["z1"] - ENTRY) // BEAT)
+        side = int(rng.choice([-1, 1]))
+        for b in range(n):
+            mid = biome["z0"] - ENTRY - b * BEAT - BEAT / 2
+            busy = b / max(1, n - 1)
+            if b % 4 == 3:
+                x = rng.uniform(-8, 8)
+                if self.put(biome["large"][0], x, mid, biome, jitter=4):
+                    mx, mz = self.items[-1]["x"], self.items[-1]["z"]
+                    for k in range(2):
+                        a = rng.uniform(0, 2 * math.pi)
+                        self.put(self.pick_small(biome, mx, mz), mx + math.cos(a) * 18, mz + math.sin(a) * 18, biome, jitter=2)
+                continue
+            self.cluster(biome, rng, side * rng.uniform(10, 30), mid, 3 + (1 if busy > 0.5 else 0),
+                         mediums=2 if rng.random() < 0.35 else 1)
+            if busy > 0.4 and rng.random() < 0.5:
+                self.cluster(biome, rng, -side * rng.uniform(30, 40), mid + rng.normal(0, 8), 2)
+            side = -side
+        z = biome["z0"] - ENTRY
+        while z > biome["z1"] + 16:
+            for s in (-1, 1):
+                if rng.random() < 0.08:
+                    small = biome["small"][0]
+                    x = s * (HALF_W - ASSETS[small][0] - 1.5)
+                    self.put(small, x, z + rng.normal(0, 4), biome)
+            z -= 24
+        self.rng = main
+
     def build(self):
         for b in BIOMES:
             if b["name"] == "Meadow":
@@ -239,8 +321,11 @@ class Course:
                 self.biome(b)
                 del self.items[before:]
                 self.meadow_clusters(b, np.random.default_rng(11))
+            elif b["name"] == "Desert":
+                self.desert_clusters(b, np.random.default_rng(23))
             else:
-                self.biome(b)
+                # the snow is laid out like the desert: clusters with lanes between
+                self.desert_clusters(b, np.random.default_rng(31))
         return self.items
 
 
@@ -253,6 +338,8 @@ ICON = {
     "Sandstone": ((176, 116, 64), "square"), "Cactus": ((60, 150, 40), "plus"),
     "SandBoulder": ((200, 150, 90), "circle"), "SandBoulderCarved": ((200, 150, 90), "diamond"),
     "SandMound": ((226, 176, 92), "circle"),
+    "Icicle": ((150, 206, 244), "square"), "Pine": ((40, 110, 70), "plus"),
+    "IcicleLarge": ((120, 180, 236), "diamond"), "IceBoulder": ((170, 220, 250), "circle"),
 }
 
 
@@ -285,6 +372,8 @@ def plan(course, items, path, s=2.0):
                 k = course.patch(x, z)
                 if b["name"] == "Desert":
                     c = (DG.SAND, DG.GRASS, DG.STONE)[k][chk]
+                elif b["name"] == "Snow":
+                    c = (SG.SNOW, SG.GRASS, SG.ICE)[k - 4][chk]
                 else:
                     c = MG.DIRT[chk] if k == 3 else MEADOW[chk]
                 x0, y0 = to_px(x - 2, z + 2)
@@ -326,7 +415,8 @@ def plan(course, items, path, s=2.0):
     x = pad
     names = {"Stone": "stone", "Bush": "bush", "Boulder": "boulder A", "BoulderSplit": "boulder B",
              "Sandstone": "sandstone", "Cactus": "cactus", "SandBoulder": "sand boulder A",
-             "SandBoulderCarved": "sand boulder B", "SandMound": "sand mound"}
+             "SandBoulderCarved": "sand boulder B", "SandMound": "sand mound",
+             "Icicle": "icicle", "Pine": "pine", "IcicleLarge": "large icicle", "IceBoulder": "ice boulder"}
     for a, label in names.items():
         color, shape = ICON[a]
         r = 8
@@ -369,10 +459,10 @@ def ride_view(course, items, z_hi, desert, path):
             x, z = -HALF_W + xi * 4 + 2, z_hi - zi * 4 - 2
             k = course.patch(x, z)
             top = course.floor(x, z)
-            c = (DG.SAND, DG.GRASS, DG.STONE, MG.DIRT)[k] if desert or k == 3 else MEADOW
+            c = (DG.SAND, DG.GRASS, DG.STONE, MG.DIRT, SG.SNOW, SG.GRASS, SG.ICE)[k] if desert or k else MEADOW
             parts.append(Part("Floor", (4, top + 2, 4), T(x, (top - 2) / 2, z), c[(xi + zi) % 2]))
     for side in (-1, 1):
-        wall = DG.WALL if desert else [(225, 150, 104), (248, 170, 114)]
+        wall = SG.WALL if z_hi <= SG.Z_START else DG.WALL if desert else [(225, 150, 104), (248, 170, 114)]
         for zi in range(int((z_hi - z_lo) // 4)):
             for yi in range(4):
                 parts.append(Part("Wall", (4, 4, 4), T(side * (HALF_W + 2), yi * 4 + 2, z_hi - zi * 4 - 2),
@@ -386,6 +476,8 @@ def ride_view(course, items, z_hi, desert, path):
 
 WORLD = DG.WORLD
 STUD_FACES = (0, 1, 2, 3, 5)  # every face but the bottom gets the stud decal
+FACE_AXES = {0: (1, 2), 1: (0, 2), 2: (0, 1), 3: (1, 2), 5: (0, 1)}  # the size axes each face spans
+MIN_STUD_FACE = 0.75  # thinner faces show no studs anyway, so they get no decal (keeps the map light)
 
 
 def part_xml(ref, p):
@@ -404,6 +496,8 @@ def part_xml(ref, p):
     out += [f'<CoordinateFrame name="CFrame">{cf}</CoordinateFrame>', "</Properties>"]
     if not p.plain:
         for face in STUD_FACES:
+            if min(p.size[i] for i in FACE_AXES[face]) < MIN_STUD_FACE:
+                continue
             out += [f'<Item class="Texture" referent="{ref()}"><Properties>',
                     '<string name="Name">Studs</string>',
                     f'<Content name="Texture"><url>{partlib.STUD_IMAGE}</url></Content>',
@@ -469,6 +563,7 @@ def main(out):
     plan(course, items, os.path.join(out, "plan.png"))
     ride_view(course, items, -330, False, os.path.join(out, "ride_meadow.png"))
     ride_view(course, items, -1100, True, os.path.join(out, "ride_desert.png"))
+    ride_view(course, items, -4000, True, os.path.join(out, "ride_snow.png"))
     counts = {}
     for it in items:
         counts[it["asset"]] = counts.get(it["asset"], 0) + 1

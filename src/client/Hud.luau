@@ -63,6 +63,10 @@ local IMAGES = {
 	eggScorpion = { id = "rbxassetid://138046936786400", size = Vector2.new(599, 770) }, -- ScorpionEggRender.png
 	eggSandworm = { id = "rbxassetid://96884572036784", size = Vector2.new(502, 765) }, -- SandwormEggRender.png
 	eggSnake = { id = "rbxassetid://71071272639782", size = Vector2.new(502, 807) }, -- SnakeEggRender.png
+	eggPenguin = { id = "", size = Vector2.new(582, 709) }, -- PenguinEggRender.png
+	eggSnowman = { id = "", size = Vector2.new(675, 772) }, -- SnowmanEggRender.png
+	eggPolarBear = { id = "", size = Vector2.new(603, 728) }, -- PolarBearEggRender.png
+	eggIceWyvern = { id = "", size = Vector2.new(650, 855) }, -- IceWyvernEggRender.png
 }
 
 local BUTTON_WIDTH = 256
@@ -105,7 +109,7 @@ local card, cardEgg, cardScale, cardFlash, cardBurst -- egg reveal card, the egg
 local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
-local ability, abilityInput, abilityFill, abilityTime -- the Ability button, its holder, the ready part and the countdown
+local ability, abilityPressed, abilityFill, abilityTime -- the Ability button, a press not yet used, the ready part and the countdown
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -363,12 +367,12 @@ function Hud.init(onAction, onHome, onRide)
 	abilityScale.Parent = ability
 	ability.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-			abilityInput = input
+			abilityPressed = true
 			TweenService:Create(abilityScale, TweenInfo.new(0.08), { Scale = 0.93 }):Play()
 		end
 	end)
 	ability.InputEnded:Connect(function(input)
-		if input == abilityInput then
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 			TweenService:Create(abilityScale, TweenInfo.new(0.08), { Scale = 1 }):Play()
 		end
 	end)
@@ -450,12 +454,16 @@ function Hud.init(onAction, onHome, onRide)
 		homeRoot.Visible = not hidden
 	end })
 
-	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). Green when
-	-- you have the gold, grey when you don't; the price sits under the coin drawn
-	-- on its right end. Hidden once there's no next level.
+	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). Green and
+	-- throbbing when you have the gold, grey when you don't; the price overlaps the
+	-- bottom of the coin drawn on its right end. Hidden once there's no next level.
 	local upgradePen = game:GetService("ReplicatedStorage"):WaitForChild("UpgradePen")
-	upgrade = button(homeRoot, "upgradePen", fit("upgradePen", UPGRADE_WIDTH), Vector2.new(1, 0), UDim2.new(1, -MARGIN, 0, MARGIN))
-	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.78), 28, 4)
+	local upgradeSize = fit("upgradePen", UPGRADE_WIDTH)
+	local upgradeScale
+	-- Anchored at its middle so the throb grows it evenly.
+	upgrade, upgradeScale = button(homeRoot, "upgradePen", upgradeSize, Vector2.new(0.5, 0.5),
+		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
+	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.66), 30, 4)
 	price.AutomaticSize = Enum.AutomaticSize.X
 	local cost -- gold for the next level, nil at the top level
 	local function refreshUpgrade()
@@ -480,6 +488,27 @@ function Hud.init(onAction, onHome, onRide)
 	player:GetAttributeChangedSignal("Gold"):Connect(refreshUpgrade)
 	player:GetAttributeChangedSignal("PenLevel"):Connect(refreshUpgrade)
 	refreshUpgrade()
+	-- The throb, while it's affordable (and not while it's held down).
+	local pressed = false
+	upgrade.MouseButton1Down:Connect(function()
+		pressed = true
+	end)
+	for _, event in { upgrade.MouseButton1Up, upgrade.MouseLeave } do
+		event:Connect(function()
+			pressed = false
+		end)
+	end
+	local throbbing = false
+	RunService.RenderStepped:Connect(function()
+		local affordable = cost ~= nil and (player:GetAttribute("Gold") or 0) >= cost
+		if affordable and not pressed and upgrade.Visible then
+			throbbing = true
+			upgradeScale.Scale = 1 + 0.06 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 / 0.9))
+		elseif throbbing and not pressed then
+			throbbing = false
+			upgradeScale.Scale = 1
+		end
+	end)
 
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only
@@ -545,19 +574,19 @@ end
 function Hud.setAbility(ready, seconds)
 	ability.Visible = ready ~= nil
 	if not ready then
-		abilityInput = nil
+		abilityPressed = nil
 		return
 	end
 	abilityFill.Size = UDim2.fromScale(1, ready)
 	abilityTime.Text = if ready < 1 and seconds then math.ceil(seconds) .. "s" else ""
 end
 
--- Whether the Ability button is being held down right now.
-function Hud.abilityHeld()
-	if abilityInput and (abilityInput.UserInputState == Enum.UserInputState.End or abilityInput.UserInputState == Enum.UserInputState.Cancel) then
-		abilityInput = nil
-	end
-	return abilityInput ~= nil
+-- Whether the Ability button was pressed since the last call (each press counts
+-- once, however quick the tap).
+function Hud.abilityPressed()
+	local pressed = abilityPressed
+	abilityPressed = nil
+	return pressed == true
 end
 
 -- Whether the Sprint button is being held down right now.
