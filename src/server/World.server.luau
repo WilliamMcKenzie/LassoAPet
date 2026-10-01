@@ -42,7 +42,7 @@ if startLine then
 	finish.Parent = world
 end
 
--- Grow the medium and large obstacles to their tier's size (Config.ObstacleScale),
+-- Resize the medium and large obstacles to their tier's size (Config.ObstacleScale),
 -- about the middle of their footprint on the floor, so they stay put and grounded.
 for _, model in world.Obstacles:GetChildren() do
 	local scale = model:IsA("Model") and Config.ObstacleScale[model.Name]
