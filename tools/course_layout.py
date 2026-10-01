@@ -41,6 +41,7 @@ import terrain_assets as TA  # noqa: E402
 import desert_ground as DG  # noqa: E402
 import meadow_ground as MG  # noqa: E402
 import snow_ground as SG  # noqa: E402
+import ocean_ground as OG  # noqa: E402
 from animal_designs import font  # noqa: E402
 
 HALF_W = 56
@@ -51,6 +52,8 @@ BIOMES = [
          small=["Sandstone"], medium=["Cactus", "SandBoulder", "SandBoulderCarved"], large=["SandMound"]),
     dict(name="Snow", z0=-3040, z1=-9880, nests=SG.NESTS,
          small=["Icicle"], medium=["Pine", "IcicleLarge"], large=["IceBoulder"]),
+    dict(name="Ocean", z0=OG.Z_START, z1=OG.Z_START - OG.OCEAN_LENGTH, nests=OG.NESTS,
+         small=["TubeCoral", "BrainCoral"], medium=["BranchCoral", "FanCoral"], large=["ReefRock"]),
 ]
 # footprint radius (studs), size class and builder for each asset
 ASSETS = {
@@ -67,9 +70,14 @@ ASSETS = {
     "Pine": (4.6, "medium", TA.pine_tree),
     "IcicleLarge": (4.3, "medium", TA.large_icicle),
     "IceBoulder": (9.0, "large", TA.ice_boulder),
+    "TubeCoral": (2.6, "small", TA.tube_coral),
+    "BrainCoral": (3.0, "small", TA.brain_coral),
+    "BranchCoral": (4.0, "medium", TA.branch_coral),
+    "FanCoral": (3.8, "medium", TA.fan_coral),
+    "ReefRock": (9.0, "large", TA.reef_rock),
 }
 # the medium a cluster mixes in now and then, so it isn't all rubble
-ACCENT = {"Desert": "Cactus", "Snow": "Pine"}
+ACCENT = {"Desert": "Cactus", "Snow": "Pine", "Ocean": "FanCoral"}
 TIERS = {"small": 1, "medium": 2, "large": 3}
 ENTRY = 48
 BEAT = 80
@@ -85,11 +93,17 @@ class Course:
         self.kind = DG.layout()  # desert patches, per 8-stud cell
         self.dirt = MG.layout(MG.MEADOW_LENGTH // MG.CELL)  # meadow dirt, per 8-stud cell
         self.snow = SG.full_layout()  # snow patches, per 8-stud cell
+        self.ocean = OG.full_layout()  # ocean patches, per 8-stud cell
 
     def patch(self, x, z):
         """Desert: 0 sand, 1 dry grass, 2 sandstone. Meadow: 0 grass, 3 dirt.
-        Snow: 4 snow, 5 cold grass, 6 ice."""
+        Snow: 4 snow, 5 cold grass, 6 ice. Ocean: 7 sand, 8 seagrass, 9 trench."""
         i = int((x + DG.HALF_W) // DG.CELL)
+        if z <= OG.Z_START:
+            j = int((OG.Z_START - z) // OG.CELL)
+            if 0 <= i < self.ocean.shape[0] and 0 <= j < self.ocean.shape[1]:
+                return 7 + int(self.ocean[i, j])
+            return 7
         if z <= SG.Z_START:
             j = int((SG.Z_START - z) // SG.CELL)
             if 0 <= i < self.snow.shape[0] and 0 <= j < self.snow.shape[1]:
@@ -107,7 +121,7 @@ class Course:
 
     def floor(self, x, z):
         """Floor height, as Shared/Ground reports it: sandstone and cold grass +1, dirt and ice -1."""
-        return {2: 1.0, 3: -1.0, 5: 1.0, 6: -1.0}.get(self.patch(x, z), 0.0)
+        return {2: 1.0, 3: -1.0, 5: 1.0, 6: -1.0, 8: 1.0, 9: -1.0}.get(self.patch(x, z), 0.0)
 
     def fits(self, asset, x, z, biome):
         r = ASSETS[asset][0]
@@ -304,6 +318,7 @@ class Course:
             z -= 24
         self.rng = main
 
+
     def build(self):
         for b in BIOMES:
             if b["name"] == "Meadow":
@@ -316,8 +331,8 @@ class Course:
             elif b["name"] == "Desert":
                 self.desert_clusters(b, np.random.default_rng(23))
             else:
-                # the snow is laid out like the desert: clusters with lanes between
-                self.desert_clusters(b, np.random.default_rng(31))
+                # the snow and ocean are laid out like the desert: clusters with lanes between
+                self.desert_clusters(b, np.random.default_rng(31 if b["name"] == "Snow" else 41))
         return self.items
 
 
@@ -332,10 +347,13 @@ ICON = {
     "SandMound": ((226, 176, 92), "circle"),
     "Icicle": ((150, 206, 244), "square"), "Pine": ((40, 110, 70), "plus"),
     "IcicleLarge": ((120, 180, 236), "diamond"), "IceBoulder": ((170, 220, 250), "circle"),
+    "TubeCoral": ((156, 86, 230), "square"), "BrainCoral": ((255, 140, 48), "circle"),
+    "BranchCoral": ((255, 92, 150), "plus"), "FanCoral": ((255, 214, 60), "diamond"),
+    "ReefRock": ((236, 140, 124), "circle"),
 }
 
 
-def plan(course, items, path, s=2.0):
+def plan(course, items, path, s=2.0, only=None):
     """Top-down map: distance runs left to right, 760 studs per strip (the
     meadow is one strip, the desert three)."""
     pad, band = 20, 34
@@ -344,6 +362,8 @@ def plan(course, items, path, s=2.0):
     strip = int(2 * HALF_W * s)
     segs = []
     for b in BIOMES:
+        if only and b["name"] not in only:
+            continue
         for z0 in range(b["z0"], b["z1"], -SEG):
             segs.append((b, z0, max(z0 - SEG, b["z1"])))
     im = Image.new("RGB", (W, (strip + band) * len(segs) + 80), (255, 255, 255))
@@ -366,12 +386,14 @@ def plan(course, items, path, s=2.0):
                     c = (DG.SAND, DG.GRASS, DG.STONE)[k][chk]
                 elif b["name"] == "Snow":
                     c = (SG.SNOW, SG.GRASS, SG.ICE)[k - 4][chk]
+                elif b["name"] == "Ocean":
+                    c = (OG.SAND, OG.GRASS, OG.TRENCH)[k - 7][chk]
                 else:
                     c = MG.DIRT[chk] if k == 3 else MEADOW[chk]
                 x0, y0 = to_px(x - 2, z + 2)
                 d.rectangle([x0, y0, x0 + 4 * s - 1, y0 + 4 * s - 1], fill=c)
         # beat lines
-        for k in range(40):
+        for k in range(40 if b["name"] != "Ocean" else 0):  # the ocean's 13680 studs would need more
             z = b["z0"] - ENTRY - k * BEAT
             if z1 < z <= z0:
                 x0, y0 = to_px(-HALF_W, z)
@@ -408,7 +430,12 @@ def plan(course, items, path, s=2.0):
     names = {"Stone": "stone", "Bush": "bush", "Boulder": "boulder A", "BoulderSplit": "boulder B",
              "Sandstone": "sandstone", "Cactus": "cactus", "SandBoulder": "sand boulder A",
              "SandBoulderCarved": "sand boulder B", "SandMound": "sand mound",
-             "Icicle": "icicle", "Pine": "pine", "IcicleLarge": "large icicle", "IceBoulder": "ice boulder"}
+             "Icicle": "icicle", "Pine": "pine", "IcicleLarge": "large icicle", "IceBoulder": "ice boulder",
+             "TubeCoral": "tube coral (1)", "BrainCoral": "brain coral (1)", "BranchCoral": "staghorn (2)",
+             "FanCoral": "sea fan (2)", "ReefRock": "reef rock (3)"}
+    if only:
+        keep = {a for b in BIOMES if b["name"] in only for a in b["small"] + b["medium"] + b["large"]}
+        names = {a: l for a, l in names.items() if a in keep}
     for a, label in names.items():
         color, shape = ICON[a]
         r = 8
@@ -423,7 +450,8 @@ def plan(course, items, path, s=2.0):
             d.rectangle([x, y, x + 2 * r, y + 2 * r], fill=color, outline=(30, 30, 30), width=2)
         d.text((x + 22, y), label, fill=(30, 30, 30), font=font(15))
         x += 32 + d.textlength(label, font=font(15)) + 14
-    d.text((x, y), "white ring = nest (kept clear)   white lines = beats", fill=(90, 90, 90), font=font(15))
+    d.text((x, y), "white ring = nest (kept clear)" + ("" if only else "   white lines = beats"),
+           fill=(90, 90, 90), font=font(15))
     im.save(path)
 
 
@@ -451,16 +479,19 @@ def ride_view(course, items, z_hi, desert, path):
             x, z = -HALF_W + xi * 4 + 2, z_hi - zi * 4 - 2
             k = course.patch(x, z)
             top = course.floor(x, z)
-            c = (DG.SAND, DG.GRASS, DG.STONE, MG.DIRT, SG.SNOW, SG.GRASS, SG.ICE)[k] if desert or k else MEADOW
+            c = (DG.SAND, DG.GRASS, DG.STONE, MG.DIRT, SG.SNOW, SG.GRASS, SG.ICE,
+                 OG.SAND, OG.GRASS, OG.TRENCH)[k] if desert or k else MEADOW
             parts.append(Part("Floor", (4, top + 2, 4), T(x, (top - 2) / 2, z), c[(xi + zi) % 2]))
     for side in (-1, 1):
-        wall = SG.WALL if z_hi <= SG.Z_START else DG.WALL if desert else [(225, 150, 104), (248, 170, 114)]
+        wall = OG.WALL if z_hi <= OG.Z_START else SG.WALL if z_hi <= SG.Z_START else DG.WALL if desert else [(225, 150, 104), (248, 170, 114)]
         for zi in range(int((z_hi - z_lo) // 4)):
             for yi in range(4):
                 parts.append(Part("Wall", (4, 4, 4), T(side * (HALF_W + 2), yi * 4 + 2, z_hi - zi * 4 - 2),
                                   wall[(zi + yi) % 2], plain=True))
     img = render(parts, eye=(0, 72, z_hi + 26), target=(0, 0, z_hi - 70), W=1000, H=640, fov=52, fog=False,
                  ground=False)
+    if z_hi <= OG.Z_START:
+        img = OG.underwater(img)
     img.save(path)
 
 
@@ -546,6 +577,17 @@ def write_obstacles(items):
     return len(models), parts_total
 
 
+def ocean_main(out):
+    """The ocean's plan and a few ride views only, into its own folder."""
+    os.makedirs(out, exist_ok=True)
+    course = Course()
+    items = course.build()
+    plan(course, items, os.path.join(out, "ocean_plan.png"), only=("Ocean",))
+    for k, z in enumerate((-10400, -16000, -22000)):
+        ride_view(course, items, z, True, os.path.join(out, f"ocean_ride{k + 1}.png"))
+    print(sum(it["biome"] == "Ocean" for it in items), "ocean placements")
+
+
 def main(out):
     os.makedirs(out, exist_ok=True)
     course = Course()
@@ -556,6 +598,7 @@ def main(out):
     ride_view(course, items, -330, False, os.path.join(out, "ride_meadow.png"))
     ride_view(course, items, -1100, True, os.path.join(out, "ride_desert.png"))
     ride_view(course, items, -4000, True, os.path.join(out, "ride_snow.png"))
+    ride_view(course, items, -10400, True, os.path.join(out, "ride_ocean.png"))
     counts = {}
     for it in items:
         counts[it["asset"]] = counts.get(it["asset"], 0) + 1
@@ -566,4 +609,7 @@ def main(out):
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    main(args[0] if args else "/mnt/project-files/biomes/layout")
+    if "--ocean" in sys.argv:
+        ocean_main(args[0] if args else "/mnt/project-files/biomes/ocean")
+    else:
+        main(args[0] if args else "/mnt/project-files/biomes/layout")
