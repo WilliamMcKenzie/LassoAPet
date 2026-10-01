@@ -450,12 +450,16 @@ function Hud.init(onAction, onHome, onRide)
 		homeRoot.Visible = not hidden
 	end })
 
-	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). Green when
-	-- you have the gold, grey when you don't; the price sits under the coin drawn
-	-- on its right end. Hidden once there's no next level.
+	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). Green and
+	-- throbbing when you have the gold, grey when you don't; the price overlaps the
+	-- bottom of the coin drawn on its right end. Hidden once there's no next level.
 	local upgradePen = game:GetService("ReplicatedStorage"):WaitForChild("UpgradePen")
-	upgrade = button(homeRoot, "upgradePen", fit("upgradePen", UPGRADE_WIDTH), Vector2.new(1, 0), UDim2.new(1, -MARGIN, 0, MARGIN))
-	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.78), 28, 4)
+	local upgradeSize = fit("upgradePen", UPGRADE_WIDTH)
+	local upgradeScale
+	-- Anchored at its middle so the throb grows it evenly.
+	upgrade, upgradeScale = button(homeRoot, "upgradePen", upgradeSize, Vector2.new(0.5, 0.5),
+		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
+	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.66), 30, 4)
 	price.AutomaticSize = Enum.AutomaticSize.X
 	local cost -- gold for the next level, nil at the top level
 	local function refreshUpgrade()
@@ -480,6 +484,27 @@ function Hud.init(onAction, onHome, onRide)
 	player:GetAttributeChangedSignal("Gold"):Connect(refreshUpgrade)
 	player:GetAttributeChangedSignal("PenLevel"):Connect(refreshUpgrade)
 	refreshUpgrade()
+	-- The throb, while it's affordable (and not while it's held down).
+	local pressed = false
+	upgrade.MouseButton1Down:Connect(function()
+		pressed = true
+	end)
+	for _, event in { upgrade.MouseButton1Up, upgrade.MouseLeave } do
+		event:Connect(function()
+			pressed = false
+		end)
+	end
+	local throbbing = false
+	RunService.RenderStepped:Connect(function()
+		local affordable = cost ~= nil and (player:GetAttribute("Gold") or 0) >= cost
+		if affordable and not pressed and upgrade.Visible then
+			throbbing = true
+			upgradeScale.Scale = 1 + 0.06 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 / 0.9))
+		elseif throbbing and not pressed then
+			throbbing = false
+			upgradeScale.Scale = 1
+		end
+	end)
 
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only
