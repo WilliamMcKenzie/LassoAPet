@@ -1579,6 +1579,40 @@ end
 
 -- Frost: a blizzard bursting out round the Icebringer, then snow swirling round it
 -- while it lasts (the returned fx are cleared when it ends).
+-- Puffs of cloud under a leaping animal's feet: it walks on them through the air.
+function vfx.cloudFx(entity)
+	local root = entity.animal.model.PrimaryPart
+	local middle, size = entity.animal.model:GetBoundingBox()
+	local box = Instance.new("Part")
+	box.Name = "CloudFeet"
+	box.Size = Vector3.new(size.X + 1, 0.2, size.Z * 0.8)
+	box.Transparency = 1
+	box.CanCollide, box.CanQuery, box.CanTouch, box.Massless = false, false, false, true
+	box.CFrame = middle * CFrame.new(0, -size.Y / 2, 0)
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0, weld.Part1 = box, root
+	weld.Parent = box
+	local puffs = Instance.new("ParticleEmitter")
+	puffs.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	puffs.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(225, 240, 255))
+	puffs.LightEmission = 0.3
+	puffs.LightInfluence = 0.2
+	puffs.EmissionDirection = Enum.NormalId.Bottom
+	puffs.Shape = Enum.ParticleEmitterShape.Box
+	puffs.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+	puffs.Speed = NumberRange.new(1, 3)
+	puffs.Lifetime = NumberRange.new(0.6, 1)
+	puffs.Rate = 45
+	puffs.RotSpeed = NumberRange.new(-40, 40)
+	puffs.Rotation = NumberRange.new(0, 360)
+	puffs.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2.5), NumberSequenceKeypoint.new(0.5, 4), NumberSequenceKeypoint.new(1, 3) })
+	puffs.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(0.7, 0.35), NumberSequenceKeypoint.new(1, 1) })
+	puffs.LockedToPart = false
+	puffs.Parent = box
+	box.Parent = entity.animal.model
+	return { box }
+end
+
 function vfx.frostFx(entity)
 	local root = entity.animal.model.PrimaryPart
 	local middle, size = entity.animal.model:GetBoundingBox()
@@ -1679,6 +1713,7 @@ local function startAbility(cfg)
 		Poof.at(Vector3.new(mount.x, 0, mount.z))
 	elseif cfg.Kind == "Leap" then
 		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
+		a.active.fx = vfx.cloudFx(mount)
 	elseif cfg.Kind == "Rattle" then
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius)
 		hold = math.min(hold + holdTime(mount) * (cfg.Restore or 0), holdTime(mount)) -- a breather: the Hold bar refills
