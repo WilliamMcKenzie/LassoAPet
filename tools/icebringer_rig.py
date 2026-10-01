@@ -288,7 +288,7 @@ GREY = {(157, 157, 157), (103, 103, 103)}
 
 
 def metal_armour(m):
-    """QM 17:15/17:21: the grey armour gets the classic Glue texture, not studs.
+    """QM 17:15/17:31: the grey armour gets the classic Weld texture, not studs.
     bbmodel_to_luau and Rig draw Metal_ parts that way."""
     _, parts = bbmodel_to_luau.convert(m)
     grey = {p[0] for p in parts if tuple(p[6]) in GREY}

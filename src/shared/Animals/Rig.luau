@@ -3,7 +3,7 @@
 -- `class` picks the part class (default "Part", e.g. "WedgePart").
 -- `hidden = true` makes an invisible, untextured part (used for bones).
 -- `neon = true` makes a glowing, untextured part (the snake's slit pupils).
--- `metal = true` swaps the studs for the classic Glue surface (the Icebringer's armour).
+-- `metal = true` swaps the studs for the classic Weld surface (the Icebringer's armour).
 --
 -- Every part hangs off a joint in its parent's space:
 --   joint  = CFrame of the joint relative to the parent part's center (C0)
@@ -17,8 +17,10 @@
 local Rig = {}
 
 local FACES = { "Top", "Bottom", "Front", "Back", "Left", "Right" }
--- The classic Glue surface's colour map, from the Resurface plugin (QM 17:21).
-local GLUE_TEXTURE = "rbxassetid://10509635556"
+-- The classic Weld surface's colour map, from the Resurface plugin (QM 17:31). It's an
+-- opaque image meant for a MaterialVariant, so it's tinted with the part's colour and
+-- tiled twice as wide as the studs, as Resurface tiles it (2 studs to the studs' 1).
+local WELD = { image = "rbxassetid://10509843977", tile = 2 }
 
 function Rig.build(spec)
 	local model = Instance.new("Model")
@@ -63,9 +65,16 @@ function Rig.build(spec)
 		if spec.studTexture and not def.plain and not def.hidden and not def.neon then
 			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
 				local texture = Instance.new("Texture")
-				texture.Texture = if def.metal then GLUE_TEXTURE else spec.studTexture.image
-				texture.StudsPerTileU = spec.studTexture.tile
-				texture.StudsPerTileV = spec.studTexture.tile
+				if def.metal then
+					texture.Texture = WELD.image
+					texture.Color3 = def.color
+					texture.StudsPerTileU = spec.studTexture.tile * WELD.tile
+					texture.StudsPerTileV = spec.studTexture.tile * WELD.tile
+				else
+					texture.Texture = spec.studTexture.image
+					texture.StudsPerTileU = spec.studTexture.tile
+					texture.StudsPerTileV = spec.studTexture.tile
+				end
 				texture.Face = face
 				texture.Parent = part
 			end
