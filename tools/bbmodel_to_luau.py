@@ -11,7 +11,7 @@ are approximated with blocks and wedges:
   ringed spikes (4n + 1 verts)  a block per ring-to-ring segment, then a pyramid tip
 Each face picks its colour from its own texture. Group rotations become the
 bone's rest rotation. Parts named in NEON glow (Enum.Material.Neon), and parts named in
-METAL are Diamond Plate instead of studs. A group whose name repeats an earlier one (QM's
+METAL get the classic Glue texture instead of studs. A group whose name repeats an earlier one (QM's
 wyvern has a "Head" inside its "Head") becomes its own bone, <name>_2, so bones and their
 animation tracks stay one to one.
 """
@@ -28,7 +28,7 @@ from PIL import Image
 SCALE = 0.1
 PLAIN = ("Eye", "Pupil", "Nostril", "Plain")  # name prefixes that skip the stud texture
 NEON = ("Slit_pupil", "Glow")  # name prefixes that glow
-METAL = ("Metal",)  # name prefixes drawn in Diamond Plate instead of studs
+METAL = ("Metal",)  # name prefixes drawn with the classic Glue texture instead of studs
 PLATE = 0.04  # studs: thickness of a converted one-face plane
 
 
