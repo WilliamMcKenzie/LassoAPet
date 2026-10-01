@@ -57,9 +57,10 @@ return {
 			Length = 6840, -- 3x the desert (QM)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
+			-- White Wolf, Polar Bear, Troll, Ice Wyvern and Ice Drake are out of the herd
+			-- for now (QM, Oct 1): their modules and stats stay, so pets already owned still work.
 			Herd = {
-				Penguin = 30, Boar = 30, Snowman = 16, WhiteWolf = 16,
-				PolarBear = 8, Troll = 8, IceGolem = 8, IceWyvern = 3, IceDrake = 3, Icebringer = 3,
+				Penguin = 30, Boar = 30, Snowman = 16, IceGolem = 8, Icebringer = 3,
 			},
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
