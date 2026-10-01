@@ -70,7 +70,8 @@ block("Handle", Vector3.new(0.6, 2.2, 0.6), CFrame.new(2, 6.2, 5.4), PINK)
 block("Chute", Vector3.new(3.6, 2.4, 0.4), CFrame.new(0, 2.8, 4.6), DARK)
 block("ChuteLip", Vector3.new(4.4, 0.6, 1.4), CFrame.new(0, 1.8, 5), YELLOW)
 
--- The exclusive eggs piled in the dome, so it's clear what you're rolling for.
+-- The exclusive eggs piled in the dome, so it's clear what you're rolling for
+-- (the Legendary ones until there are exclusives).
 local spots = {
 	CFrame.new(-1.9, 8.9, 0.9) * CFrame.Angles(0, 0.4, 0.25),
 	CFrame.new(1.9, 8.9, 1.1) * CFrame.Angles(0, -0.6, -0.2),
@@ -79,7 +80,7 @@ local spots = {
 	CFrame.new(-1.6, 10.9, -1.5) * CFrame.Angles(-0.2, 1.2, 0.3),
 }
 local exclusives = {}
-for kind in gacha.Pool.Exclusive or {} do
+for kind in if next(gacha.Pool.Exclusive or {}) then gacha.Pool.Exclusive else gacha.Pool.Legendary do
 	table.insert(exclusives, kind)
 end
 table.sort(exclusives)
