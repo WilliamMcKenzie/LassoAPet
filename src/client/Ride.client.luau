@@ -94,6 +94,9 @@ for _, model in world.Obstacles:GetChildren() do
 	})
 end
 
+-- Size tiers a pet gains on the way home with the egg.
+local RETURN_TIER_BONUS = 1
+
 local function tierOf(kind)
 	return Config.PetTiers[kind] or 1
 end
@@ -1576,7 +1579,8 @@ local function checkRide(dt)
 		return reachHome()
 	end
 	-- A bigger pet plows through smaller obstacles; its own size or bigger stops it.
-	local tier = tierOf(mount.kind)
+	-- Racing home with the egg, every pet counts as a size bigger (RETURN_TIER_BONUS).
+	local tier = tierOf(mount.kind) + (if phase == "return" or phase == "turning" then RETURN_TIER_BONUS else 0)
 	while true do
 		local o = blockedAt(mount.x, mount.z, 1.3, 2.4)
 		if not o or o.tier >= tier then
@@ -1593,7 +1597,7 @@ local function checkRide(dt)
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
 		if not entity.popping and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
-			if phase == "return" and tierOf(entity.kind) < tierOf(mount.kind) then
+			if phase == "return" and tierOf(entity.kind) < tier then
 				knock(entity, dx)
 			elseif phase == "return" and grace <= 0 then
 				return fail("CRASH!")
