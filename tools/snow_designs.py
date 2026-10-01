@@ -820,7 +820,7 @@ def bounds(parts):
     return pts.min(0), pts.max(0)
 
 
-QM_FILES = {"PolarBear", "IceWyvern"}  # IceWyvern is QM's file too, but its wings come from here (qm_wyvern_wings)
+QM_FILES = {"PolarBear", "IceWyvern", "Penguin"}  # Penguin comes from tools/refine_designs.py; IceWyvern is QM's file too, but its wings come from here (qm_wyvern_wings)
 NAMES = {"WhiteWolf": "White Wolf", "PolarBear": "Polar Bear", "IceDragon": "Ice Dragon", "IceWyvern": "Ice Wyvern"}
 Q34_DIR = np.array([-19, 12, -21], float) / np.linalg.norm([-19, 12, -21])
 
