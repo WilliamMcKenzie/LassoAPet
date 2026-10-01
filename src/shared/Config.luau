@@ -168,6 +168,7 @@ return {
 		Troll = "rbxassetid://111845214220812",
 		IceGolem = "rbxassetid://102264545247873",
 		IceDrake = "rbxassetid://97792373754275",
+		Icebringer = "rbxassetid://108999142038756",
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
