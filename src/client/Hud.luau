@@ -273,6 +273,7 @@ end
 
 -- The ride's cash reads "N$"; the fail screen's reads "+N$".
 local rideAmount = 0
+local noCash = false -- Hud.setCash(nil): this fail screen shows no cash
 local function setCash(amount)
 	rideAmount = amount
 	rideCash.text.Text = money(amount)
@@ -561,6 +562,8 @@ function Hud.show(visible)
 	upgrade.Visible = upgradeShown and not visible
 	Inventory.setVisible(not visible) -- your eggs, hidden while riding
 	gained.row.Visible = false
+	noCash = false
+	rideCash.row.Visible = true
 	Hud.setReturning(false)
 	Hud.setVignette(0)
 	actionScale.Scale = 1
@@ -966,12 +969,19 @@ end
 -- Home button, shown after a failed ride with the cash gained; sends you back home.
 function Hud.showHome(visible)
 	home.Visible = visible
-	gained.row.Visible = visible
-	if visible then
+	gained.row.Visible = visible and not noCash
+	if visible and not noCash then
 		gained.text.Text = "+" .. money(rideAmount)
 		gained.scale.Scale = 0
 		TweenService:Create(gained.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	end
+end
+
+-- nil: no cash at all this time (run over on foot): the ride's cash and the
+-- fail screen's "+$N" stay hidden until the next ride.
+function Hud.setCash(amount)
+	noCash = amount == nil
+	rideCash.row.Visible = not noCash
 end
 
 -- Cash gained this ride.

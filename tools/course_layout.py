@@ -229,29 +229,21 @@ class Course:
         self.edges(biome)
 
     def meadow_clusters(self, biome, rng):
-        """The meadow, thinned out (QM, Sep 30): about half as many obstacles as the
-        beats would place, gathered into one tight cluster per beat (a boulder with
-        two or three smalls packed round it) so there's always a wide open lane to
-        take. Clusters swing from side to side down the course; a nest keeps one
-        small beside it."""
+        """The meadow, the easy first biome (QM, Oct 1): obstacles only in clusters
+        against the walls, so the middle of the course is open and they never
+        really get in the way. One cluster per beat, alternating walls: a boulder
+        with smalls strung along the wall either side of it."""
         main = self.rng
         self.rng = rng
-        for nx, nz in biome["nests"]:
-            side = int(rng.choice([-1, 1]))
-            self.put(self.pick_small(biome, nx, nz), nx + side * (NEST_CLEAR + 4), nz + rng.normal(0, 3), biome, jitter=1.5)
         n = int((biome["z0"] - biome["z1"] - ENTRY) // BEAT)
         side = int(rng.choice([-1, 1]))
         for b in range(n):
-            mid = biome["z0"] - ENTRY - b * BEAT - BEAT / 2
-            cx = side * rng.uniform(12, 34)
-            if self.put(self.pick_medium(biome, cx, mid), cx, mid, biome, jitter=4):
-                cx, mid = self.items[-1]["x"], self.items[-1]["z"]
-            smalls = 2 + (1 if b >= n // 2 else 0)
-            start = rng.uniform(0, 2 * math.pi)
-            for k in range(smalls):
-                a = start + k * 2 * math.pi / smalls
-                x, z = cx + math.cos(a) * 11.5, mid + math.sin(a) * 11.5
-                self.put(self.pick_small(biome, x, z), x, z, biome, jitter=1.5)
+            mid = biome["z0"] - ENTRY - b * BEAT - BEAT / 2 + rng.uniform(-12, 12)
+            m = self.pick_medium(biome, side * 48, mid)
+            self.put(m, side * (HALF_W - 1.5 - ASSETS[m][0]), mid, biome, jitter=2)
+            for dz in (-11.5, 11.5, 22) if b >= n // 2 else (-11.5, 11.5):
+                s_ = self.pick_small(biome, side * 50, mid + dz)
+                self.put(s_, side * (HALF_W - 1.5 - ASSETS[s_][0]), mid + dz, biome, jitter=1.5)
             side = -side
         self.rng = main
 

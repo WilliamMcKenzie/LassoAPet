@@ -692,7 +692,9 @@ local function finishRide(x, z)
 	controls:Enable()
 	camera.CameraType = Enum.CameraType.Custom
 	Hud.show(false)
-	spawnStarter()
+	if not starter then
+		spawnStarter()
+	end
 end
 
 local function fail(reason)
@@ -778,6 +780,7 @@ end
 local guide = { -- the egg guide: the beam and its two ends
 	ARROW = "rbxassetid://101032148634562", -- assets/ui/GuideArrow.png (chevrons pointing along the trail)
 	AHEAD = 6, -- studs in front of the pet where the trail starts
+	HEIGHT = 1.4, -- studs up: over the raised ground patches
 	from = Instance.new("Attachment"),
 	to = Instance.new("Attachment"),
 	beam = Instance.new("Beam"),
@@ -792,6 +795,7 @@ guide.beam.Width0, guide.beam.Width1 = 4, 4
 guide.beam.FaceCamera = false
 guide.beam.LightEmission = 1
 guide.beam.LightInfluence = 0
+guide.beam.ZOffset = 6
 guide.beam.Color = ColorSequence.new(Color3.fromRGB(255, 236, 120))
 guide.beam.Transparency = NumberSequence.new({
 	NumberSequenceKeypoint.new(0, 1),
@@ -809,12 +813,14 @@ end)
 
 local function updateGuide()
 	local target
-	if phase == "outbound" and mount and not transfer and not cutscene then
+	-- From the pet, or the rider while they're pulled across to a lassoed one.
+	local at = if mount then Vector3.new(mount.x, 0, mount.z) else focus
+	if phase == "outbound" and not cutscene then
 		local best = math.huge
 		for nest, waiting in waitingEggs do
 			local spot = nest:FindFirstChild("EggSpot")
-			if spot and waiting.egg.model.Parent and spot.Position.Z < mount.z - guide.AHEAD and spot.Position.Z > gateZ() then
-				local d = (Vector2.new(spot.Position.X, spot.Position.Z) - Vector2.new(mount.x, mount.z)).Magnitude
+			if spot and waiting.egg.model.Parent and spot.Position.Z < at.Z - guide.AHEAD and spot.Position.Z > gateZ() then
+				local d = (Vector2.new(spot.Position.X, spot.Position.Z) - Vector2.new(at.X, at.Z)).Magnitude
 				if d < best then
 					target, best = spot.Position, d
 				end
@@ -823,14 +829,15 @@ local function updateGuide()
 	end
 	guide.beam.Enabled = target ~= nil
 	if target then
-		local from = Vector3.new(mount.x, 0, mount.z - guide.AHEAD)
+		local from = Vector3.new(at.X, 0, at.Z - guide.AHEAD)
 		local flat = Vector3.new(target.X, 0, target.Z)
 		local along = (flat - from).Unit
-		-- Lying flat on the ground: the attachments' up is the beam's width direction.
+		-- Lying flat just above the highest ground (raised patches are a stud up):
+		-- the attachments' up is the beam's width direction. ZOffset draws it
+		-- toward the camera, over the floor and the obstacles it passes.
 		local side = along:Cross(Vector3.yAxis)
-		local y = Ground.heightAt(from.X, from.Z) + 0.3
-		guide.from.WorldCFrame = CFrame.fromMatrix(Vector3.new(from.X, y, from.Z), along, side)
-		guide.to.WorldCFrame = CFrame.fromMatrix(Vector3.new(flat.X, Ground.heightAt(flat.X, flat.Z) + 0.3, flat.Z), along, side)
+		guide.from.WorldCFrame = CFrame.fromMatrix(Vector3.new(from.X, guide.HEIGHT, from.Z), along, side)
+		guide.to.WorldCFrame = CFrame.fromMatrix(Vector3.new(flat.X, guide.HEIGHT, flat.Z), along, side)
 	end
 end
 
@@ -1668,7 +1675,8 @@ local function checkRide(dt)
 		return reachHome()
 	end
 	-- A bigger pet plows through smaller obstacles; its own size or bigger stops it.
-	-- Racing home with the egg, every pet counts as a size bigger (RETURN_TIER_BONUS).
+	-- Racing home with the egg, every pet counts as a size bigger against obstacles
+	-- (RETURN_TIER_BONUS); against stampede animals it's its own size.
 	local tier = tierOf(mount.kind) + (if phase == "return" or phase == "turning" then RETURN_TIER_BONUS else 0)
 	while true do
 		local o = blockedAt(mount.x, mount.z, 1.3, 2.4)
@@ -1686,7 +1694,7 @@ local function checkRide(dt)
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
 		if not entity.popping and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
-			if phase == "return" and tierOf(entity.kind) < tier then
+			if phase == "return" and tierOf(entity.kind) < tierOf(mount.kind) then -- (the +1 is for obstacles only)
 				knock(entity, dx)
 			elseif phase == "return" and grace <= 0 then
 				return fail("CRASH!")
@@ -1842,6 +1850,24 @@ RunService.PreSimulation:Connect(function(dt)
 	Dust.update(dt)
 	if phase == "idle" then
 		updateGuide() -- (hides it)
+		-- On foot on the course, a stampede animal running you down throws you
+		-- like being bucked off (no cash on the fail screen: there was no ride).
+		local hrp, humanoid = character()
+		if hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z + 2 then
+			for _, entity in allAnimals() do
+				if not entity.popping and math.abs(entity.x - hrp.Position.X) < 2.6 and math.abs(entity.z - hrp.Position.Z) < 4 then
+					clearRideTarget()
+					humanoid:UnequipTools()
+					phase, camYaw, focus = "outbound", 0, Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
+					hrp.Anchored = true
+					controls:Disable()
+					Hud.show(true)
+					Hud.setCash(nil)
+					fail("BUCKED OFF")
+					return
+				end
+			end
+		end
 		if starter then
 			wander(starter, dt)
 		end
