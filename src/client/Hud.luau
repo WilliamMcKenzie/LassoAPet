@@ -59,6 +59,7 @@ local IMAGES = {
 	-- The Egg Machine's ROLL button (QM's art to come; a green text button until then).
 	roll = { id = "", size = Vector2.new(960, 308) }, -- Roll.png
 	-- Egg renders for the card, cropped to the egg (assets/ui/<Kind>EggRender.png).
+	eggHorse = { id = "rbxassetid://96698232796495", size = Vector2.new(502, 799) }, -- HorseEggRender.png
 	eggPinto = { id = "rbxassetid://79525419811481", size = Vector2.new(496, 788) }, -- PintoEggRender.png
 	eggPig = { id = "rbxassetid://139970505549400", size = Vector2.new(496, 730) }, -- PigEggRender.png
 	eggFish = { id = "rbxassetid://105098230793344", size = Vector2.new(586, 810) }, -- FishEggRender.png

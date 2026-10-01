@@ -43,7 +43,7 @@ Tutorial.active = false -- the tutorial is running: the "Tutorial" attribute is 
 Tutorial.slowMo = nil -- a time scale while LASSO or TAKE EGG waits for its press
 Tutorial.nest = nil -- the first Meadow nest: while it's empty, this player sees a TutorialEgg in it
 
-local CURSOR = "" -- assets/ui/GoldenCursor.png
+local CURSOR = "rbxassetid://89545604097968" -- assets/ui/GoldenCursor.png
 local CURSOR_SIZE = 72 -- on a REFERENCE_WIDTH-wide screen, like the HUD
 local REFERENCE_WIDTH = 1320
 local DRAG_TIME = 2 -- seconds per go of the drag from the inventory to the pen

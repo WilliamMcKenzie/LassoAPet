@@ -220,7 +220,7 @@ return {
 	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
 	EggIcons = {
-		Horse = "", -- assets/ui/HorseEggRender.png (the tutorial's first egg)
+		Horse = "rbxassetid://96698232796495", -- assets/ui/HorseEggRender.png (the tutorial's first egg)
 		Pinto = "rbxassetid://79525419811481",
 		Pig = "rbxassetid://139970505549400",
 		Fish = "rbxassetid://105098230793344",
