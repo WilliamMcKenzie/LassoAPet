@@ -1,5 +1,6 @@
-"""Animations for the Mixcoatl (QM's edit of the converted model, designs/converted/Mixcoatl.bbmodel):
-a gorilla knuckle-walker (QM 03:16: "full gorilla knuckledragger").
+"""Animations for the Icebringer (QM's ice-themed edit of their old Mixcoatl model,
+designs/converted/Icebringer.bbmodel): a gorilla knuckle-walker (QM 03:16: "full gorilla
+knuckledragger"). Snow Legendary; its Frost ability is in Ride.client.luau.
 
   idle    knuckle stance, slow breathing, a subtle look round
   gallop  knuckle-walk: lateral sequence (left hand, right foot, right hand, left foot),
@@ -9,10 +10,13 @@ a gorilla knuckle-walker (QM 03:16: "full gorilla knuckledragger").
   (charge() is an unused bounding gallop: fists together, then feet)
 
 Keyframes are offsets from QM's rest pose. Signs (from probing the rig): torso -X leans
-forward, arm +X swings forward, leg -X swings back, head +X looks up. The root's height
+forward, arm +X swings forward, leg -X swings back, head +X looks up. Only the arm bones
+move the arms (QM 03:38: the bicep bones aren't meant to be animated). QM's own finger
+keys in the walk are kept when the animations are rewritten. The root's height
 comes from snow_rig.grounded(): each frame the lowest knuckle or foot touches the ground.
 
-Run: python3 tools/mixcoatl_rig.py   (writes the model's animations and preview frames)
+Run: python3 tools/icebringer_rig.py   (rewrites the model's animations), then
+     python3 tools/bbmodel_to_luau.py designs/converted/Icebringer.bbmodel src/shared/Animals/IcebringerModel.luau
 """
 
 import json
@@ -26,11 +30,11 @@ from snake_rig import track  # noqa: E402
 from snow_rig import bump, grounded, group_ids  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
-MODEL = os.path.join(ROOT, "designs", "converted", "Mixcoatl.bbmodel")
+MODEL = os.path.join(ROOT, "designs", "converted", "Icebringer.bbmodel")
 TAU = 2 * math.pi
 
 # the knuckle stance every animation starts from
-LEAN, HEAD_UP, ARM, ARM_Y, BICEP, LEG, TAIL = -20, 16, 40, 30, -25, -22, -14  # ARM_Y * side
+LEAN, HEAD_UP, ARM, ARM_Y, ARM_Z, LEG, TAIL = -20, 16, 16, 29, 10, -22, -14  # ARM_Y, ARM_Z * side
 
 
 def s(x):
@@ -67,15 +71,14 @@ def idle(m, feet):
     tr = stance(L, n, torso=lambda u: (1.5 * s(TAU * u), 0, 0),
                 head=lambda u: (2 * s(2 * TAU * u), 10 * s(TAU * u), 2 * s(TAU * u + 0.8)))
     for side, sx in (("left", -1), ("right", 1)):
-        tr[side + "_arm"] = [track(L, lambda u, sx=sx: (ARM + 1.5 * s(TAU * u), sx * ARM_Y, 0), n)]
-        tr[side + "_bicep"] = [track(L, lambda u: (BICEP, 0, 0), 4)]
+        tr[side + "_arm"] = [track(L, lambda u, sx=sx: (ARM + 1.5 * s(TAU * u), sx * ARM_Y, sx * ARM_Z), n)]
         tr[side + "_leg"] = [track(L, lambda u: (LEG, 0, 0), 4)]
     tr["jaw"] = [track(L, lambda u: (-12 * bump(u, 0.6, 0.2), 0, 0), n)]  # a slow open and close
     tr["root"] = grounded(m, L, tr, feet, n)
     return L, tr
 
 
-def walk(m, feet, L=1.3, n=32, stride_arm=24, stride_leg=20, sway=7):
+def walk(m, feet, L=1.3, n=32, stride_arm=24, stride_leg=20, sway=7, lift=8):
     # lateral sequence: left hand 0, right foot 0.25, right hand 0.5, left foot 0.75
     phase = {"left_arm": 0.0, "right_leg": 0.25, "right_arm": 0.5, "left_leg": 0.75}
     tr = stance(L, n, torso=lambda u: (2 * s(2 * TAU * u), sway * s(TAU * u), -4 * s(TAU * u)),
@@ -83,10 +86,9 @@ def walk(m, feet, L=1.3, n=32, stride_arm=24, stride_leg=20, sway=7):
     for bone, ph in phase.items():
         if bone.endswith("arm"):
             sx = -1 if bone.startswith("left") else 1
-            tr[bone] = [track(L, lambda u, ph=ph, sx=sx: (ARM + stride_arm * s(TAU * (u - ph)), sx * ARM_Y, 0), n)]
-            side = bone.split("_")[0]
-            # the swinging arm bends a little to clear the ground
-            tr[side + "_bicep"] = [track(L, lambda u, ph=ph: (BICEP - 14 * max(0.0, math.cos(TAU * (u - ph))), 0, 0), n)]
+            # the swinging arm lifts out to the side a little to clear the ground
+            tr[bone] = [track(L, lambda u, ph=ph, sx=sx: (ARM + stride_arm * s(TAU * (u - ph)), sx * ARM_Y,
+                                                          sx * (ARM_Z + lift * max(0.0, math.cos(TAU * (u - ph))))), n)]
         else:
             tr[bone] = [track(L, lambda u, ph=ph: (LEG + stride_leg * s(TAU * (u - ph)), 0, 0), n)]
     tr["tail"] = [track(L, lambda u: (TAIL, 10 * s(TAU * u + 1.2), 0), n)]
@@ -101,8 +103,7 @@ def charge(m, feet, L=0.6, n=24):
     tr = stance(L, n, torso=lambda u: (9 * s(TAU * u + 0.6), 0, 0),
                 head=lambda u: (-7 * s(TAU * u + 0.6), 0, 0))
     for side, sx in (("left", -1), ("right", 1)):
-        tr[side + "_arm"] = [track(L, lambda u, sx=sx: (ARM + 4 + 34 * s(TAU * u + 1.4), sx * ARM_Y, 0), n)]
-        tr[side + "_bicep"] = [track(L, lambda u: (BICEP - 18 * max(0.0, math.cos(TAU * u + 1.4)), 0, 0), n)]
+        tr[side + "_arm"] = [track(L, lambda u, sx=sx: (ARM + 4 + 34 * s(TAU * u + 1.4), sx * ARM_Y, sx * ARM_Z), n)]
         tr[side + "_leg"] = [track(L, lambda u: (LEG + 30 * s(TAU * u - 1.7), 0, 0), n)]
     tr["tail"] = [track(L, lambda u: (TAIL - 10 * s(TAU * u), 0, 0), n)]
     tr["root"] = grounded(m, L, tr, feet, n, extra=lambda u: 6 * max(0.0, s(TAU * u + 0.3)))
@@ -195,13 +196,75 @@ def edit_model(m):
         nodes[mirror]["children"].append(r["uuid"])
 
 
+HAND = ("_hand", "_finger1", "_finger2", "_thumb")
+
+
+def hand_keys(m):
+    """QM's hand and finger keyframes, {anim: {bone: [track]}}, in the 4.x sign convention
+    (a Blockbench 5 save stores rotation x and y negated)."""
+    flip = str(m["meta"].get("format_version", "4")).startswith("5")
+    out = {}
+    for a in m.get("animations", []):
+        for x in a["animators"].values():
+            ks = x.get("keyframes", [])
+            if not ks or not x["name"].endswith(HAND):
+                continue
+            by = {}
+            for k in ks:
+                v = [float(k["data_points"][0][c]) for c in "xyz"]
+                if flip and k["channel"] == "rotation":
+                    v[0], v[1] = -v[0], -v[1]
+                by.setdefault((k["channel"], k["interpolation"]), []).append((k["time"], tuple(v)))
+            out.setdefault(a["name"], {})[x["name"]] = [
+                {"channel": ch, "interp": ip, "keys": sorted(keys)} for (ch, ip), keys in by.items()]
+    return out
+
+
+def name_front_teeth(m):
+    """QM added two front teeth by copying Upper_tooth_*_0 and moving its origin; give the
+    copies their own names."""
+    for e in m["elements"]:
+        if e["name"].startswith("Upper_tooth_") and e["name"].endswith("_0") and e.get("origin", [0, 0, 0]) != [0, 0, 0]:
+            e["name"] = e["name"][:-1] + "front"
+
+
+def add_neck(m):
+    """The game lassoes and finds the head by a bone called "neck": a plain one at the head's
+    pivot, holding QM's head bone."""
+    import copy
+    import uuid
+    if any(g["name"] == "neck" for g in m["groups"]):
+        return
+    head = next(g for g in m["groups"] if g["name"] == "head")
+    neck = copy.deepcopy(head)
+    neck.update(name="neck", uuid=str(uuid.uuid4()), rotation=[0, 0, 0])
+    m["groups"].append(neck)
+
+    def walk(o):
+        for i, c in enumerate(o):
+            if isinstance(c, dict):
+                if c["uuid"] == head["uuid"]:
+                    o[i] = {"uuid": neck["uuid"], "isOpen": True, "children": [c]}
+                    return True
+                if walk(c["children"]):
+                    return True
+        return False
+
+    walk(m["outliner"])
+
+
 def main(path=MODEL):
     m = json.load(open(path))
+    kept = hand_keys(m)
     m["meta"]["format_version"] = "4.10"  # keyframes in the 4.x sign convention
     m["animations"] = []
     edit_model(m)
+    name_front_teeth(m)
+    add_neck(m)
     feet = contacts(m)
     anims = {"idle": idle(m, feet), "walk": walk(m, feet, L=round(1.3 / 0.7, 3)), "gallop": walk(m, feet)}  # QM 03:23: the knuckle-walk is the gallop, the walk is it at 0.7x
+    for name, (L, tr) in anims.items():
+        tr.update(kept.get(name, {}))
     write_animations(m, group_ids(m), anims)
     with open(path, "w") as f:
         json.dump(m, f, separators=(",", ":"))

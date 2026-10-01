@@ -1064,7 +1064,54 @@ local function takeFromPool(n, x, z, kind)
 	return entity
 end
 
+-- Frost (the Icebringer's ability, Config.Abilities): the stampede animals it has
+-- slowed, by key, with the seconds left, and how many studs each has fallen behind
+-- its place in the shared stampede (kept: a slowed animal never sprints to catch up).
+-- Strays carry their own entity.frostLeft. Only this player's copy slows, like slow-mo.
+local frostLeft = {}
+local frostLag = {}
+local frostSlow = 0 -- the share of its speed a slowed animal loses (the running Frost's Slow)
+local FROST_TINT = Color3.fromRGB(150, 220, 255)
+local FLAKE_TEXTURE = "rbxasset://textures/particles/sparkles_main.dds"
+
+-- Frosted over while slowed: an icy tint and snowflakes drifting off it.
+local function setFrosted(entity, on)
+	if on == (entity.frostFx ~= nil) then
+		return
+	end
+	if not on then
+		for _, fx in entity.frostFx do
+			fx:Destroy()
+		end
+		entity.frostFx = nil
+		return
+	end
+	local model = entity.animal.model
+	local glow = Instance.new("Highlight")
+	glow.FillColor = FROST_TINT
+	glow.FillTransparency = 0.45
+	glow.OutlineColor = Color3.new(1, 1, 1)
+	glow.OutlineTransparency = 0.2
+	glow.DepthMode = Enum.HighlightDepthMode.Occluded
+	glow.Adornee = model
+	glow.Parent = model
+	local flakes = Instance.new("ParticleEmitter")
+	flakes.Texture = FLAKE_TEXTURE
+	flakes.Color = ColorSequence.new(Color3.new(1, 1, 1), FROST_TINT)
+	flakes.LightEmission = 0.6
+	flakes.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.5), NumberSequenceKeypoint.new(1, 0) })
+	flakes.Transparency = NumberSequence.new(0.1)
+	flakes.Lifetime = NumberRange.new(0.6, 1.1)
+	flakes.Speed = NumberRange.new(2, 5)
+	flakes.SpreadAngle = Vector2.new(180, 180)
+	flakes.Acceleration = Vector3.new(0, -6, 0)
+	flakes.Rate = 18
+	flakes.Parent = model.PrimaryPart
+	entity.frostFx = { glow, flakes }
+end
+
 local function putInPool(entity)
+	setFrosted(entity, false)
 	entity.animal.model.Parent = nil
 	entity.animal:setScale(1)
 	entity.hop, entity.popping, entity.lift = 0, nil, nil
@@ -1191,6 +1238,9 @@ local function updateHerd(dt, slowed)
 	local newest = math.floor(herdClock / every)
 	local camZ = camera.CFrame.Position.Z
 	local seen = {}
+	for key, left in frostLeft do
+		frostLeft[key] = if left > dt then left - dt else nil
+	end
 	for b, stream in streams do
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
 		for n = stream.oldest, newest do
@@ -1201,7 +1251,11 @@ local function updateHerd(dt, slowed)
 			local p = plan(key)
 			local age = herdClock - n * every
 			local dist, speed = run(herdSpeed(p.kind), math.max(age - START_AFTER, 0))
-			local z = stream.spawnZ - dist
+			if frostLeft[key] then
+				frostLag[key] = (frostLag[key] or 0) + speed * frostSlow * dt
+				speed *= 1 - frostSlow
+			end
+			local z = stream.spawnZ - dist + (frostLag[key] or 0)
 			local entity = herd[key]
 			-- The animal being lassoed runs on past the end until it's caught.
 			local lassoed = entity and transfer and transfer.target == entity
@@ -1236,6 +1290,7 @@ local function updateHerd(dt, slowed)
 				entity.x = x + entity.dodge -- a snap doesn't swing them sideways
 			end
 			moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt)
+			setFrosted(entity, frostLeft[key] ~= nil)
 		end
 	end
 	for key, entity in herd do
@@ -1247,6 +1302,7 @@ local function updateHerd(dt, slowed)
 	for key in plans do
 		if key // BIOME_KEYS < streams[key % BIOME_KEYS + 1].oldest then
 			plans[key], taken[key] = nil, nil
+			frostLag[key], frostLeft[key] = nil, nil
 		end
 	end
 	for i = #strays, 1, -1 do
@@ -1255,8 +1311,13 @@ local function updateHerd(dt, slowed)
 		local turn = math.clamp((entity.yaw - yaw) / math.max(dt, 1e-3) / 3, -1, 1)
 		entity.yaw = yaw
 		entity.speed += (entity.cruise - entity.speed) * (1 - math.exp(-2 * dt))
+		if entity.frostLeft then
+			entity.frostLeft = if entity.frostLeft > dt then entity.frostLeft - dt else nil
+		end
+		setFrosted(entity, entity.frostLeft ~= nil)
+		local pace = entity.speed * (if entity.frostLeft then 1 - frostSlow else 1)
 		local look = CFrame.Angles(0, yaw, 0).LookVector
-		local z = entity.z + look.Z * entity.speed * dt
+		local z = entity.z + look.Z * pace * dt
 		-- Shrinks away at the end of the biome it's in, like the stampede.
 		local endZ = streamAt(entity.z).endZ
 		if z <= endZ then
@@ -1267,15 +1328,18 @@ local function updateHerd(dt, slowed)
 		local shrink = math.clamp((z - endZ) / SHRINK, 0, 1)
 		entity.popping = if shrink < 1 then true else nil
 		entity.animal:setScale(shrink)
-		local x = entity.x + look.X * entity.speed * dt
+		local x = entity.x + look.X * pace * dt
 		if math.abs(yaw) > 0.05 then
 			entity.lane = x
 		end
 		-- Swerves round obstacles like the rest of the stampede.
 		local lat = math.clamp(laneX(entity.lane, z) - x, -1, 1) * 12
 		entity.x, entity.z = math.clamp(x + lat * dt, -EDGE, EDGE), z
-		place(entity, -math.atan2(lat, math.max(entity.speed, 1)))
-		animate(entity, dt, entity.speed, turn + lat / 12)
+		place(entity, -math.atan2(lat, math.max(pace, 1)))
+		animate(entity, dt, pace, turn + lat / 12)
+	end
+	if mount then
+		setFrosted(mount, false) -- lassoed while slowed: your new mount thaws out
 	end
 end
 
@@ -1285,6 +1349,8 @@ end
 local abilityKey = false -- Q or R1 pressed since the last frame
 local chargeCam, rattleHaze, cineCam = 0, 0, 0 -- 0..1, eased in and out: the charge's wider view, the rattle's haze, the cinematic angle
 local RATTLE_HAZE = Color3.fromRGB(70, 150, 255)
+local FROST_HAZE = Color3.fromRGB(190, 236, 255)
+local hazeColor = RATTLE_HAZE
 local abilityClock = 0 -- ride time, slowed with the slow motion like everything else
 local ABILITY_RING_TIME = 0.6
 
@@ -1395,8 +1461,8 @@ local function chargeFx(entity)
 	return fx
 end
 
--- A ring of sand bursting out from the rattling snake to the ability's radius.
-local function rattleRing(center, radius)
+-- A ring bursting out from the pet to the ability's radius: sand for the rattle.
+local function rattleRing(center, radius, color)
 	local ring = Instance.new("Part")
 	ring.Shape = Enum.PartType.Cylinder
 	ring.Anchored = true
@@ -1405,7 +1471,7 @@ local function rattleRing(center, radius)
 	ring.CanTouch = false
 	ring.CastShadow = false
 	ring.Material = Enum.Material.Neon
-	ring.Color = Color3.fromRGB(255, 226, 150)
+	ring.Color = color or Color3.fromRGB(255, 226, 150)
 	ring.Transparency = 0.3
 	ring.Size = Vector3.new(0.4, 2, 2)
 	ring.CFrame = CFrame.new(center.X, 0.3, center.Z) * CFrame.Angles(0, 0, math.pi / 2)
@@ -1433,6 +1499,77 @@ local function rattleBlast(dt, cfg)
 				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -cfg.Radius, cfg.Radius)
 			else
 				entity.lane = math.clamp(entity.lane + away * 60 * dt, -EDGE, EDGE)
+			end
+		end
+	end
+end
+
+-- Frost: a blizzard bursting out round the Icebringer, then snow swirling round it
+-- while it lasts (the returned fx are cleared when it ends).
+local function frostFx(entity)
+	local root = entity.animal.model.PrimaryPart
+	local middle, size = entity.animal.model:GetBoundingBox()
+	local function flakes(rate, speed, life, sizeMax)
+		local e = Instance.new("ParticleEmitter")
+		e.Texture = FLAKE_TEXTURE
+		e.Color = ColorSequence.new(Color3.new(1, 1, 1), FROST_TINT)
+		e.LightEmission = 0.7
+		e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, sizeMax), NumberSequenceKeypoint.new(1, 0) })
+		e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 0.6) })
+		e.Lifetime = life
+		e.Speed = speed
+		e.Rotation = NumberRange.new(0, 360)
+		e.RotSpeed = NumberRange.new(-180, 180)
+		e.Rate = rate
+		return e
+	end
+	-- The burst: thrown out all round, low over the ground.
+	local burst = Instance.new("Part")
+	burst.Anchored, burst.CanCollide, burst.CanQuery, burst.CanTouch = true, false, false, false
+	burst.Transparency = 1
+	burst.Size = Vector3.new(1, 1, 1)
+	burst.CFrame = CFrame.new(middle.Position.X, 2, middle.Position.Z)
+	burst.Parent = workspace
+	local blast = flakes(0, NumberRange.new(40, 70), NumberRange.new(0.6, 1.1), 2.4)
+	blast.SpreadAngle = Vector2.new(180, 15)
+	blast.EmissionDirection = Enum.NormalId.Top
+	blast.Drag = 3
+	blast.Parent = burst
+	blast:Emit(140)
+	task.delay(1.5, function()
+		burst:Destroy()
+	end)
+	-- The swirl: snow falling and blowing round the pet for the whole Duration.
+	local box = Instance.new("Part")
+	box.Size = Vector3.new(size.X + 16, 1, size.Z + 16)
+	box.Transparency = 1
+	box.CanCollide, box.CanQuery, box.CanTouch, box.Massless = false, false, false, true
+	box.CFrame = middle * CFrame.new(0, size.Y / 2 + 4, 0)
+	box.Anchored = false
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0, weld.Part1 = box, root
+	weld.Parent = box
+	box.Parent = entity.animal.model
+	local swirl = flakes(90, NumberRange.new(4, 9), NumberRange.new(1, 1.6), 1.2)
+	swirl.Shape = Enum.ParticleEmitterShape.Box
+	swirl.EmissionDirection = Enum.NormalId.Bottom
+	swirl.SpreadAngle = Vector2.new(35, 35)
+	swirl.Acceleration = Vector3.new(0, -4, 0)
+	swirl.Parent = box
+	return { box }
+end
+
+-- Frost: every animal within the radius (but the pet itself) is slowed until the
+-- ability ends; ones that come into range later only for what's left of it.
+local function frostBlast(cfg, left)
+	frostSlow = cfg.Slow
+	for _, entity in allAnimals() do
+		local dx, dz = entity.x - mount.x, entity.z - mount.z
+		if entity ~= mount and dx * dx + dz * dz < cfg.Radius * cfg.Radius then
+			if entity.n and herd[entity.n] == entity then
+				frostLeft[entity.n] = math.max(frostLeft[entity.n] or 0, left)
+			else
+				entity.frostLeft = math.max(entity.frostLeft or 0, left)
 			end
 		end
 	end
@@ -1472,6 +1609,10 @@ local function startAbility(cfg)
 	elseif cfg.Kind == "Rattle" then
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius)
 		hold = math.min(hold + holdTime(mount) * (cfg.Restore or 0), holdTime(mount)) -- a breather: the Hold bar refills
+	elseif cfg.Kind == "Frost" then
+		a.active.fx = frostFx(mount)
+		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, FROST_TINT)
+		frostBlast(cfg, cfg.Duration)
 	end
 end
 
@@ -1503,6 +1644,8 @@ local function updateAbility(dt)
 		active.t += dt
 		if active.cfg.Kind == "Rattle" then
 			rattleBlast(dt, active.cfg)
+		elseif active.cfg.Kind == "Frost" then
+			frostBlast(active.cfg, active.cfg.Duration - active.t)
 		end
 		if active.t >= active.cfg.Duration then
 			endAbility(mount)
@@ -1648,6 +1791,9 @@ local function checkRide(dt)
 	end
 	grace = math.max(grace - dt, 0)
 	local ability = activeAbility()
+	if ability and ability.cfg.Kind == "Frost" then
+		ability = nil -- slowing the herd is all it does: it still uses Hold and can still crash
+	end
 	if phase == "outbound" and mount.z < 0 and not transfer and not ability then -- abilities use no Hold
 		hold -= dt * (if sprinting() then Config.SprintDrain else 1)
 		if hold <= 0 then
@@ -1998,8 +2144,11 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	local ability = activeAbility()
 	local kind = ability and ability.cfg.Kind
 	chargeCam += ((if kind == "Charge" then 1 else 0) - chargeCam) * (1 - math.exp(-5 * dt))
-	rattleHaze += ((if kind == "Rattle" then 1 else 0) - rattleHaze) * (1 - math.exp(-6 * dt))
-	Hud.setAbilityTint(rattleHaze * 0.85, RATTLE_HAZE)
+	if kind == "Rattle" or kind == "Frost" then
+		hazeColor = if kind == "Frost" then FROST_HAZE else RATTLE_HAZE
+	end
+	rattleHaze += ((if kind == "Rattle" or kind == "Frost" then 1 else 0) - rattleHaze) * (1 - math.exp(-6 * dt))
+	Hud.setAbilityTint(rattleHaze * (if hazeColor == FROST_HAZE then 0.6 else 0.85), hazeColor)
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38, 18)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	-- Charge: the camera swings round to a low shot from ahead and off to the
 	-- side, looking back at the pet.

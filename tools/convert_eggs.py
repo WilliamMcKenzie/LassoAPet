@@ -9,6 +9,7 @@ animations (egg_designs.animations).
   SpineLizard  sand bands, an orange and maroon sail over the top with cream spine tips, fins down the back
   IceGolem     deep blue base, ice middle, snowy top with ice crystals bursting out
   IceDrake     cyan with white fur rings, swept-back pale horns, white spikes down the back
+  Icebringer   ice blue with a white armour band, fangs hanging off it, a fanned white crest on top
 
 Run: python3 tools/convert_eggs.py
 Writes designs/eggs/c_style/<Kind>Egg.bbmodel, src/shared/Eggs/<Kind>EggModel.luau,
@@ -151,8 +152,41 @@ def ice_drake_egg():
     return egg
 
 
+def icebringer_egg():
+    deep, cyan, armour, crest, fang = (30, 164, 214), (56, 206, 238), (236, 246, 255), (206, 222, 236), (250, 248, 238)
+    egg = shell([deep, cyan, armour, cyan, cyan, cyan, cyan])
+    # fangs hanging off the front of the armour band
+    a = WIDTHS[2] / 2
+    for k, x in enumerate((-0.3, 0.0, 0.3)):
+        spike(egg, f"Fang{k}", (x - 0.1, 2 * LH, -a - 0.06), (x + 0.1, 2 * LH, -a + 0.14), "-y", 0.34 if k != 1 else 0.24, fang, "bottom")
+    # the crest: a fan of plates across the top, tallest in the middle
+    b = H - 0.05
+    for k, (x, h) in enumerate(((-0.36, 0.18), (-0.18, 0.32), (0.0, 0.44), (0.18, 0.32), (0.36, 0.18))):
+        col = armour if k % 2 == 0 else crest
+        egg.block(f"Crest{k}", (x - 0.08, b, -0.05), (x + 0.08, b + h, 0.3), col).bone = "top"
+        spike(egg, f"CrestTip{k}", (x - 0.08, b + h, -0.05), (x + 0.08, b + h, 0.3), "+y", 0.2, col, "top")
+    return egg
+
+
+def one(kind, fn, preview=OUT):
+    """Build one egg (its .bbmodel, Luau module and reveal render) without touching the others."""
+    egg = fn()
+    name = kind + "Egg"
+    bb_dir = os.path.join(ROOT, "designs", "eggs", "c_style")
+    C.build(egg, name, E.SPLIT, bb_dir)
+    bbmodel_to_luau.main(os.path.join("designs", "eggs", "c_style", name + ".bbmodel"),
+                         os.path.join(ROOT, "src", "shared", "Eggs", name + "Model.luau"))
+    im = render(egg.parts, W=700, H=1100, fov=28, transparent=True, **C.VIEWS[0])
+    im = im.crop(im.getbbox())
+    im.save(os.path.join(ROOT, "assets", "ui", kind + "EggRender.png"))
+    os.makedirs(os.path.join(preview, "renders"), exist_ok=True)
+    im.save(os.path.join(preview, "renders", name + ".png"))
+    return egg
+
+
 EGGS = [("Boar", boar_egg), ("WhiteWolf", white_wolf_egg), ("Troll", troll_egg),
-        ("SpineLizard", spine_lizard_egg), ("IceGolem", ice_golem_egg), ("IceDrake", ice_drake_egg)]
+        ("SpineLizard", spine_lizard_egg), ("IceGolem", ice_golem_egg), ("IceDrake", ice_drake_egg),
+        ("Icebringer", icebringer_egg)]
 TITLES = {"WhiteWolf": "White Wolf", "SpineLizard": "Spine Lizard", "IceGolem": "Ice Golem", "IceDrake": "Ice Drake"}
 
 

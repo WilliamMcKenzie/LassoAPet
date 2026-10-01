@@ -59,7 +59,7 @@ return {
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
 			Herd = {
 				Penguin = 30, Boar = 30, Snowman = 16, WhiteWolf = 16,
-				PolarBear = 8, Troll = 8, IceGolem = 8, IceWyvern = 3, IceDrake = 3,
+				PolarBear = 8, Troll = 8, IceGolem = 8, IceWyvern = 3, IceDrake = 3, Icebringer = 3,
 			},
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
@@ -108,11 +108,15 @@ return {
 	--     coiled idle), smashing every obstacle within Radius studs and scattering
 	--     the animals there away from it, and refilling Restore of the Hold bar. No
 	--     Hold drain while it rattles; a blue haze closes in round the screen.
+	--   Frost (Icebringer): one tap: a blizzard bursts out round it and every animal
+	--     within Radius studs (but itself) runs Slow slower (0.7 = 70%) until Duration
+	--     is up, frosted over. Unlike the others it doesn't stop the Hold bar or crashes.
 	-- Charge swings the camera round to a cinematic front-side angle.
 	Abilities = {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 14 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 6, Radius = 45, Restore = 0.5 },
+		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7 },
 	},
 	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
 	-- obstacles and stampede animals of a lower tier, knocking them up and away;
@@ -124,6 +128,7 @@ return {
 		Snake = 3,
 		Penguin = 1, Snowman = 1, PolarBear = 2, IceWyvern = 3,
 		SpineLizard = 2, Boar = 1, WhiteWolf = 1, Troll = 2, IceGolem = 2, IceDrake = 3,
+		Icebringer = 3,
 	},
 	ObstacleTiers = {
 		Bush = 1, Rock = 2, Stone = 1, Sandstone = 1, -- small
@@ -138,6 +143,7 @@ return {
 		Cactus = 6, Scorpion = 14, Sandworm = 60, Snake = 1000,
 		Penguin = 25, Snowman = 60, PolarBear = 250, IceWyvern = 5000,
 		SpineLizard = 80, Boar = 30, WhiteWolf = 70, Troll = 280, IceGolem = 260, IceDrake = 4500,
+		Icebringer = 4800,
 	},
 	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
@@ -225,6 +231,7 @@ return {
 		Troll = { Speed = 2.5, Stamina = 2 },
 		IceGolem = { Speed = 1.6, Stamina = 2.6 },
 		IceDrake = { Speed = 2.8, Stamina = 3 },
+		Icebringer = { Speed = 2.7, Stamina = 3 },
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
