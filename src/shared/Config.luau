@@ -123,15 +123,16 @@ return {
 	-- Seconds an egg placed in your pen takes to hatch, by the rarity of the
 	-- animal inside (first-biome eggs; later biomes can take longer).
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
-	-- The first-time tutorial (Tutorial.luau): a new player's first ride, egg and
-	-- hatch, one hint at a time. false turns it off. On that first ride the first
-	-- Meadow nest always holds a TutorialEgg (only that player sees it), the stampede
-	-- runs on the player's own clock so it can slow down to TutorialSlowMo x speed
-	-- while LASSO or TAKE EGG is waiting to be pressed, and the egg hatches in
-	-- TutorialHatchTime seconds.
+	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
+	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
+	-- brings home an egg, one hint at a time and only the buttons each step needs.
+	-- false turns it off. On that first ride the first Meadow nest always holds a
+	-- TutorialEgg (only that player sees it), the stampede runs on the player's own
+	-- clock so it can slow down to TutorialSlowMo x speed while LASSO or TAKE EGG is
+	-- waiting to be pressed, and the Hold bar never runs out.
 	Tutorial = true,
 	TutorialEgg = "Pinto",
-	TutorialHatchTime = 5,
+	TutorialHatchTime = 0,
 	TutorialSlowMo = 0.2,
 	-- Pet abilities: the Ability button (bottom right while riding), Q or R1.
 	-- A pet without an entry has no button. Seconds throughout.
@@ -219,6 +220,7 @@ return {
 	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
 	EggIcons = {
+		Horse = "", -- assets/ui/HorseEggRender.png (the tutorial's first egg)
 		Pinto = "rbxassetid://79525419811481",
 		Pig = "rbxassetid://139970505549400",
 		Fish = "rbxassetid://105098230793344",

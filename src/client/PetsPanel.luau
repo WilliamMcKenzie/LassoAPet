@@ -86,7 +86,8 @@ end
 
 -- Everything you own: the pet you ride ("ride") and the pets in your pen, best earners first.
 local function ownedPets()
-	local list = { { id = "ride", kind = player:GetAttribute("RidePet") or Config.DefaultPet } }
+	local riding = player:GetAttribute("RidePet") or Config.DefaultPet
+	local list = if riding ~= "" then { { id = "ride", kind = riding } } else {} -- "": no pet yet (the tutorial)
 	local index = player:GetAttribute("Pen")
 	local pen = index and workspace:FindFirstChild("Pens") and workspace.Pens:FindFirstChild("Pen" .. index)
 	if pen then
