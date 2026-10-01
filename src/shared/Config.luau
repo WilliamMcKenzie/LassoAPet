@@ -37,7 +37,7 @@ return {
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
-			Herd = { Cactus = 30, Scorpion = 16, Sandworm = 8, Snake = 3 },
+			Herd = { Cactus = 30, Scorpion = 16, Sandworm = 8, SpineLizard = 8, Snake = 3 },
 			-- Patches of other ground in the floor (parts named after them in
 			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
 			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
@@ -57,7 +57,10 @@ return {
 			Length = 6840, -- 3x the desert (QM)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
-			Herd = { Penguin = 30, Snowman = 16, PolarBear = 8, IceWyvern = 3 },
+			Herd = {
+				Penguin = 30, Boar = 30, Snowman = 16, WhiteWolf = 16,
+				PolarBear = 8, Troll = 8, IceGolem = 8, IceWyvern = 3, IceDrake = 3,
+			},
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
@@ -120,6 +123,7 @@ return {
 		Rhino = 2, Unicorn = 2, Sandworm = 2,
 		Snake = 3,
 		Penguin = 1, Snowman = 1, PolarBear = 2, IceWyvern = 3,
+		SpineLizard = 2, Boar = 1, WhiteWolf = 1, Troll = 2, IceGolem = 2, IceDrake = 3,
 	},
 	ObstacleTiers = {
 		Bush = 1, Rock = 2, Stone = 1, Sandstone = 1, -- small
@@ -133,6 +137,7 @@ return {
 		Horse = 1, Pinto = 3, Pig = 3, Fish = 8, Rhino = 40, Unicorn = 150,
 		Cactus = 6, Scorpion = 14, Sandworm = 60, Snake = 1000,
 		Penguin = 25, Snowman = 60, PolarBear = 250, IceWyvern = 5000,
+		SpineLizard = 80, Boar = 30, WhiteWolf = 70, Troll = 280, IceGolem = 260, IceDrake = 4500,
 	},
 	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
@@ -204,6 +209,12 @@ return {
 		Snowman = { Speed = 1.9, Stamina = 1.3 },
 		PolarBear = { Speed = 1.5, Stamina = 3 },
 		IceWyvern = { Speed = 3, Stamina = 3 },
+		SpineLizard = { Speed = 1.7, Stamina = 2 },
+		Boar = { Speed = 1.6, Stamina = 1.6 },
+		WhiteWolf = { Speed = 2.3, Stamina = 1.8 },
+		Troll = { Speed = 2.5, Stamina = 2 },
+		IceGolem = { Speed = 1.6, Stamina = 2.6 },
+		IceDrake = { Speed = 2.8, Stamina = 3 },
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).

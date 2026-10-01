@@ -67,6 +67,12 @@ local IMAGES = {
 	eggSnowman = { id = "", size = Vector2.new(675, 772) }, -- SnowmanEggRender.png
 	eggPolarBear = { id = "", size = Vector2.new(603, 728) }, -- PolarBearEggRender.png
 	eggIceWyvern = { id = "", size = Vector2.new(650, 855) }, -- IceWyvernEggRender.png
+	eggSpineLizard = { id = "", size = Vector2.new(502, 934) }, -- SpineLizardEggRender.png
+	eggBoar = { id = "", size = Vector2.new(502, 751) }, -- BoarEggRender.png
+	eggWhiteWolf = { id = "", size = Vector2.new(502, 749) }, -- WhiteWolfEggRender.png
+	eggTroll = { id = "", size = Vector2.new(522, 714) }, -- TrollEggRender.png
+	eggIceGolem = { id = "", size = Vector2.new(502, 866) }, -- IceGolemEggRender.png
+	eggIceDrake = { id = "", size = Vector2.new(502, 807) }, -- IceDrakeEggRender.png
 }
 
 local BUTTON_WIDTH = 256

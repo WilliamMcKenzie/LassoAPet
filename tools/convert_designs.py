@@ -142,7 +142,7 @@ def boar():
     tufts flaring off the cheeks and a mane down the back."""
     c = dict(coat=(176, 108, 68), dark=(112, 66, 46), tan=(236, 190, 136), nose=(248, 150, 158),
              nostril=(130, 50, 70), tusk=(254, 246, 222), hoof=(86, 60, 52))
-    a = Conv("Boar", "New", 0.38)
+    a = Conv("Boar", "Uncommon", 0.38)
     a.pivots["root"] = np.array((0, 12, 2)) * a.k
     # legs: short and thick, dark trotters
     for side, sx in SIDES:
@@ -156,7 +156,7 @@ def boar():
     a.b("Shoulders", (-8, 6.2, -9), (8, 19, -2), c["coat"], "root")
     # mane: a dark ridge down the spine with spikes standing up out of it
     a.b("Mane", (-1.6, 19, -8.5), (1.6, 20, -2.5), c["dark"], "root")
-    for i, (z, y, h) in enumerate(((-7.5, 20, 3.2), (-5.5, 20, 3.8), (-3.5, 20, 3.0), (-1, 16.5, 2.2), (2, 16.5, 2.4), (5, 16.5, 2.0))):
+    for i, (z, y, h) in enumerate(((-7.5, 20, 3.2), (-5.5, 20, 3.8), (-3.5, 20, 3.0), (-0.8, 16.5, 2.2))):
         a.pyr(f"Tuft{i}", (-1.3, y, z - 1.3), (1.3, y, z + 1.3), "+y", h, c["dark"], "root")
     # head: pitched down off the shoulders' front
     head = a.bone("neck", "root", (0, 13, -9), (-14, 0, 0))
@@ -201,7 +201,7 @@ def boar():
     tail = a.bone("Tail", "root", (0, 15, 10.5), (-24, 0, 0))
     a.b("Tail", (-0.7, 10, 10.5), (0.7, 15, 11.9), c["coat"], tail)
     a.pyr("TailTuft", (-1.2, 10, 10.2), (1.2, 10, 12.2), "-y", 2.6, c["dark"], tail)
-    a.meta = {"seat": (0, 19 * a.k, -3 * a.k), "neck_loop": {"center": (0, 13 * a.k, -12 * a.k), "radius": 7 * a.k}}
+    a.meta = {"seat": (0, 16.5 * a.k, 4 * a.k), "neck_loop": {"center": (0, 13 * a.k, -12 * a.k), "radius": 7 * a.k}}
     return a
 
 
@@ -357,7 +357,7 @@ def troll():
                              ("+y", (13.25 + off - 0.9, 11, z - 0.9), (13.25 + off + 0.9, 11, z + 0.9))):
             a.pyr(f"Spike{n}", lo, hi, axis, 1.8, c["spike"], bat)
             n += 1
-    a.meta = {"seat": (0, 31 * a.k, 9.5 * a.k), "neck_loop": {"center": (0, 25 * a.k, 0), "radius": 6 * a.k}}
+    a.meta = {"seat": (0, 32.4 * a.k, 9.5 * a.k), "neck_loop": {"center": (0, 25 * a.k, 0), "radius": 6 * a.k}}
     return a
 
 
@@ -423,7 +423,7 @@ def spine_lizard():
     a.b("Tail2Tip", (-1.8, L(1.4), 47), (1.8, L(5), 53), c["back"], t2)
     for i, (z, h) in enumerate(((35, 2.4), (39.5, 3.2), (44, 2.6))):
         a.pyr(f"Crest{i}", (-1, L(5.6), z - 1.4), (1, L(5.6), z + 1.4), "+y", h, c["ray"], t2)
-    a.meta = {"seat": (0, L(10) * a.k, 8 * a.k), "neck_loop": {"center": (0, L(5) * a.k, -13 * a.k), "radius": 6 * a.k}}
+    a.meta = {"seat": (0, L(9) * a.k, -12 * a.k), "neck_loop": {"center": (0, L(5) * a.k, -13 * a.k), "radius": 6 * a.k}}
     return a
 
 
@@ -435,7 +435,7 @@ def ice_golem():
     crystals growing out of its back where the rocks were."""
     c = dict(ice=(160, 218, 250), deep=(82, 150, 226), frost=(214, 240, 255), snow=(252, 253, 255),
              crystal=(96, 222, 255), crystal2=(236, 250, 255), pupil=(30, 60, 140))
-    a = Conv("IceGolem", "New", 0.4)
+    a = Conv("IceGolem", "Epic", 0.4)
     a.pivots["root"] = np.array((0, 16, 8)) * a.k
     for side, sx in SIDES:
         leg = a.bone("Leg" + side, "root", (sx * 6.5, 10, 9))
@@ -481,7 +481,7 @@ def ice_golem():
         for i, zc in enumerate((1, 4.3, 7.6)):
             xa, xb = X(sx, 13, 18)
             a.b(f"Finger{side}{i}", (xa, 0, zc - 1.4 - 1.5), (xb, 2.6, zc + 1.4 - 1.5), c["frost"], fore)
-    a.meta = {"seat": (0, 34 * a.k, 9 * a.k), "neck_loop": {"center": (0, 23 * a.k, -4 * a.k), "radius": 7 * a.k}}
+    a.meta = {"seat": (0, 33.4 * a.k, 1 * a.k), "neck_loop": {"center": (0, 23 * a.k, -4 * a.k), "radius": 7 * a.k}}
     return a
 
 
@@ -581,7 +581,7 @@ def ice_drake():
     a.b("Tail3", (-1.8, 15.6, 52), (1.8, 20.4, 60), c["cyan"], t2)
     a.b("Blade", (-0.9, 14.6, 56), (0.9, 23, 66), c["spike"], t2)
     a.pyr("SpikeBlade", (-0.9, 14.6, 66), (0.9, 23, 66), "+z", 5, c["spike"], t2)
-    a.meta = {"seat": (0, 26 * a.k, 0), "neck_loop": {"center": (0, 18 * a.k, -21 * a.k), "radius": 5.5 * a.k}}
+    a.meta = {"seat": (0, 22.5 * a.k, -1.75 * a.k), "neck_loop": {"center": (0, 18 * a.k, -21 * a.k), "radius": 5.5 * a.k}}
     return a
 
 
