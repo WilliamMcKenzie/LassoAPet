@@ -679,7 +679,7 @@ local function clearRideTarget()
 end
 
 local function rideFromHome()
-	if phase == "idle" and rideModel and rideShown then
+	if phase == "idle" and rideModel and rideShown and not Tutorial.busy then
 		startRide(rideModel)
 	end
 end
@@ -2040,11 +2040,13 @@ local function updateRider(dt)
 			mount.latVel = 0
 			hold, grace = holdTime(mount), Config.LandingGrace
 			Tutorial.lassoed()
-			local earned = Config.RarityCoins[mount.animal.Rarity]
-			coins += earned
-			Hud.setCoins(coins)
-			local point = camera:WorldToViewportPoint(hrp.Position + Vector3.new(0, 4, 0))
-			Hud.coinPopup(Vector2.new(point.X, point.Y), earned)
+			if not Tutorial.active then -- no money at all in the tutorial until your pets start earning
+				local earned = Config.RarityCoins[mount.animal.Rarity]
+				coins += earned
+				Hud.setCoins(coins)
+				local point = camera:WorldToViewportPoint(hrp.Position + Vector3.new(0, 4, 0))
+				Hud.coinPopup(Vector2.new(point.X, point.Y), earned)
+			end
 		end
 		return
 	end

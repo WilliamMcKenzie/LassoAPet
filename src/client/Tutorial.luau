@@ -13,16 +13,21 @@
 --   4. egg   "Follow the arrows..."          the egg guide; the first Meadow nest
 --                                            always holds a Config.TutorialEgg
 --   5. take  "Press E to take the egg!"      time slows while it's in reach
---   6. home  (DODGE THE STAMPEDE!)           home with the egg, and that's it: the
---                                            egg's in the inventory, as before
+--   6. home  (DODGE THE STAMPEDE!)           home with the egg
+--   7. place2 "Place your egg in your pen!"  as step 1. Placing it starts the money:
+--                                            until now pets earn nothing (Hatchery)
+--   8. goal  Gold and Upgrade Pen pop in, then a close-up on Upgrade Pen and the
+--            camera flies to the next biome's gate: "Save $1k to unlock the Desert!".
+--            Then it's over and the rest of the HUD (Pets) comes back.
 --
 -- A failed ride goes back to step 2. Until it's done the stampede runs on your
 -- own clock (Ride), so slowing it down never snaps it back.
 --
 -- Ride drives it: Tutorial.update(state) every frame, Tutorial.lassoed() on
 -- landing on a lassoed animal, and reads Tutorial.active / Tutorial.slowMo /
--- Tutorial.nest.
+-- Tutorial.nest / Tutorial.busy.
 
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -36,24 +41,34 @@ local PenPets = require(script.Parent.PenPets)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
+local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
 local world = workspace:WaitForChild("World")
 
 local Tutorial = {}
 Tutorial.active = false -- the tutorial is running: the "Tutorial" attribute is set
 Tutorial.slowMo = nil -- a time scale while LASSO or TAKE EGG waits for its press
 Tutorial.nest = nil -- the first Meadow nest: while it's empty, this player sees a TutorialEgg in it
+Tutorial.busy = false -- the ending's close-ups are on: no riding off
 
 local CURSOR = "rbxassetid://89545604097968" -- assets/ui/GoldenCursor.png
 local CURSOR_SIZE = 72 -- on a REFERENCE_WIDTH-wide screen, like the HUD
 local REFERENCE_WIDTH = 1320
 local DRAG_TIME = 2 -- seconds per go of the drag from the inventory to the pen
+local MONEY_WAIT = 2 -- seconds of Gold ticking up before the close-up on Upgrade Pen
+local FOCUS_HOLD = 2 -- seconds the close-up on Upgrade Pen holds
+local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
+local RIDE_STEPS = { lasso = true, egg = true, take = true, home = true }
+local PLACE_STEPS = { place = true, place2 = true }
 
 local step = "place"
 local failed = false -- the ride ended in a crash or buck-off
 local lastPhase = "idle"
 local onChange -- Ride's: shows or hides the nest's tutorial egg
-local hudTutorial = false -- what the HUD was last told (Hud.setTutorial)
+local hudStage = nil -- what the HUD was last told (Hud.setTutorial)
 local done = false -- TutorialDone sent
+local known = {} -- the pen's items when place2 began: a new one is the egg placed
+local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
+local pointUpgrade = false -- the cursor's on Upgrade Pen
 
 -- The first Meadow nest: the one nearest the start line.
 do
@@ -248,6 +263,12 @@ local function myPen()
 	return index and pens and pens:FindFirstChild("Pen" .. index)
 end
 
+local function contents()
+	local pen = myPen()
+	local ok, items = pcall(HttpService.JSONDecode, HttpService, pen and pen:GetAttribute("Contents") or "{}")
+	return if ok and typeof(items) == "table" then items else {}
+end
+
 local function eggTool()
 	for _, holder in { player:FindFirstChildOfClass("Backpack"), player.Character } do
 		for _, tool in holder and holder:GetChildren() or {} do
@@ -280,15 +301,60 @@ local function setStep(name)
 	step = name
 	if name == "ride" and onChange then
 		onChange() -- the nest's egg is back for another go
+	elseif name == "place2" then
+		table.clear(known)
+		for id in contents() do
+			known[id] = true
+		end
 	end
+end
+
+local function finish()
+	if not done then
+		done = true
+		ReplicatedStorage:WaitForChild("TutorialDone"):FireServer() -- clears the attribute: Tutorial.init's refresh ends it
+	end
+end
+
+-- The ending: Gold ticks up for a moment, then a close-up on Upgrade Pen and the
+-- camera flies over to the next biome's gate and back, and it's over.
+local function showGoal()
+	Tutorial.busy = true
+	controls:Disable()
+	task.wait(MONEY_WAIT)
+	local level = player:GetAttribute("PenLevel") or 1
+	local upNext = Config.Biomes[level + 1]
+	if upNext then
+		goalText = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
+		pointUpgrade = true
+		Hud.focusUpgrade(FOCUS_HOLD)
+		pointUpgrade = false
+		local gateZ = WorldColors.gateZ(level)
+		local start = camera.CFrame
+		camera.CameraType = Enum.CameraType.Scriptable
+		local view = CFrame.lookAt(Vector3.new(0, 40, gateZ + 70), Vector3.new(0, 8, gateZ))
+		local out = TweenService:Create(camera, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { CFrame = view })
+		out:Play()
+		out.Completed:Wait()
+		task.wait(GATE_HOLD)
+		local back = TweenService:Create(camera, TweenInfo.new(1.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { CFrame = start })
+		back:Play()
+		back.Completed:Wait()
+		camera.CameraType = Enum.CameraType.Custom
+	end
+	controls:Enable()
+	Tutorial.busy = false
+	finish()
 end
 
 local function hintFor(state)
 	local phase = state.phase
 	if phase == "ended" then
 		return "Oops! Press HOME to try again."
-	elseif step == "place" then
-		return "Place your egg in your pen!"
+	elseif PLACE_STEPS[step] then
+		return if phase == "idle" then "Place your egg in your pen!" else nil
+	elseif step == "goal" then
+		return goalText
 	elseif step == "ride" then
 		local _, kind = myPet(state)
 		return if kind and kind ~= "" then "Ride your " .. kind .. "!" else nil
@@ -308,9 +374,10 @@ end
 -- hero leap is on) }.
 function Tutorial.update(state)
 	local phase = state.phase
-	if Tutorial.active ~= hudTutorial then
-		hudTutorial = Tutorial.active
-		Hud.setTutorial(hudTutorial)
+	local stage = if not Tutorial.active then nil elseif step == "goal" then "money" else "bare"
+	if stage ~= hudStage then
+		hudStage = stage
+		Hud.setTutorial(stage)
 	end
 	if not Tutorial.active then
 		Tutorial.slowMo = nil
@@ -325,20 +392,19 @@ function Tutorial.update(state)
 		if step == "place" or step == "ride" then
 			setStep("lasso")
 		end
-		if phase == "outbound" then
-			if (step == "lasso" or step == "egg") and state.target == "egg" then
-				setStep("take")
+		if RIDE_STEPS[step] then
+			if phase == "outbound" then
+				if (step == "lasso" or step == "egg") and state.target == "egg" then
+					setStep("take")
+				end
+			elseif phase == "turning" or phase == "return" then
+				setStep("home")
 			end
-		elseif phase == "turning" or phase == "return" then
-			setStep("home")
 		end
 	elseif lastPhase ~= "idle" then
-		-- Back home: with the egg, that's the tutorial done; otherwise another go.
-		if not failed and step == "home" and not done then
-			done = true
-			ReplicatedStorage:WaitForChild("TutorialDone"):FireServer() -- clears the attribute: Tutorial.init's refresh ends it
-		elseif step ~= "place" then
-			setStep("ride")
+		-- Back home: with the egg, on to placing it; otherwise another go.
+		if RIDE_STEPS[step] then
+			setStep(if not failed and step == "home" then "place2" else "ride")
 		end
 		failed = false
 	end
@@ -346,6 +412,14 @@ function Tutorial.update(state)
 
 	if step == "place" and ((player:GetAttribute("RidePet") or "") ~= "" or next(PenPets.pets) ~= nil) then
 		setStep("ride") -- it's hatched (or there was a pet already)
+	elseif step == "place2" then
+		for id in contents() do
+			if not known[id] then
+				setStep("goal") -- placed: the money starts
+				task.spawn(showGoal)
+				break
+			end
+		end
 	end
 
 	local slow = (step == "lasso" and typeof(state.target) == "table" and not state.transfer)
@@ -358,10 +432,11 @@ function Tutorial.update(state)
 	local button = if phase == "ended" then Hud.button("home")
 		elseif step == "ride" and phase == "idle" then Hud.button("ride")
 		elseif Tutorial.slowMo then Hud.button("action")
+		elseif pointUpgrade then Hud.button("upgrade")
 		else nil
 	if button then
 		showCursor(onButton(button))
-	elseif step == "place" and phase == "idle" then
+	elseif PLACE_STEPS[step] and phase == "idle" then
 		local tool = eggTool()
 		local slot = tool and Inventory.slotOf(tool)
 		local pen = myPen()
@@ -380,7 +455,7 @@ function Tutorial.update(state)
 		if step == "ride" then
 			local pet = myPet(state)
 			target = pet and pet.PrimaryPart and pet.PrimaryPart.Position
-		elseif step == "place" then
+		elseif PLACE_STEPS[step] then
 			local pen = myPen()
 			target = pen and pen:FindFirstChild("Area") and pen.Area.Position
 		end
@@ -402,7 +477,7 @@ function Tutorial.init(changed)
 		local on = Config.Tutorial and player:GetAttribute("Tutorial") == true
 		if on ~= Tutorial.active then
 			Tutorial.active = on
-			step, failed, done = "place", false, false
+			step, failed, done, goalText, pointUpgrade = "place", false, false, nil, false
 			changed()
 		end
 	end

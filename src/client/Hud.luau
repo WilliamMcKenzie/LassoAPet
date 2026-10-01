@@ -137,7 +137,11 @@ local sprint, sprintInput -- the Sprint button, and the touch or click holding i
 local ability, abilityPressed, abilityFill, abilityTime -- the Ability button, a press not yet used, the ready part and the countdown
 local tip, tipText -- the fail screen's tooltip in place of "+$N" (Hud.setTip), and its text
 local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at the machine
-local tutorial = false -- the first-time tutorial is on: only the buttons it asks for (Hud.setTutorial)
+-- The first-time tutorial's stage (Hud.setTutorial): nil when it's off, "bare"
+-- (no Gold, Pets or Upgrade Pen) or "money" (Gold and Upgrade Pen, not Pets).
+local tutorial = nil
+local goldScale, upgradeScale -- Gold's and Upgrade Pen's UIScales
+local focusing = false -- the tutorial's close-up on Upgrade Pen is on (Hud.focusUpgrade)
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -494,7 +498,7 @@ function Hud.init(onAction, onHome, onRide)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	ride.Visible = false
 	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold mockup.
-	gold = button(homeRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
+	gold, goldScale = button(homeRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
 	local total = label(gold, UDim2.fromOffset(0, ICON_HEIGHT * 0.4), UDim2.new(0.5, 0, 1, 2), 44, 5)
 	total.AnchorPoint = Vector2.new(0.5, 1)
 	total.AutomaticSize = Enum.AutomaticSize.X
@@ -519,7 +523,6 @@ function Hud.init(onAction, onHome, onRide)
 	-- bottom of the coin drawn on its right end. Hidden once there's no next level.
 	local upgradePen = game:GetService("ReplicatedStorage"):WaitForChild("UpgradePen")
 	local upgradeSize = fit("upgradePen", UPGRADE_WIDTH)
-	local upgradeScale
 	-- Anchored at its middle so the throb grows it evenly.
 	upgrade, upgradeScale = button(homeRoot, "upgradePen", upgradeSize, Vector2.new(0.5, 0.5),
 		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
@@ -530,7 +533,7 @@ function Hud.init(onAction, onHome, onRide)
 		local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
 		cost = nextBiome and nextBiome.UnlockCost
 		upgradeShown = cost ~= nil
-		upgrade.Visible = upgradeShown and gold.Visible and not tutorial
+		upgrade.Visible = upgradeShown and gold.Visible
 		if cost then
 			price.Text = money(cost)
 			upgrade.Image = IMAGES[if (player:GetAttribute("Gold") or 0) >= cost then "upgradePen" else "upgradePenDisabled"].id
@@ -561,7 +564,9 @@ function Hud.init(onAction, onHome, onRide)
 	local throbbing = false
 	RunService.RenderStepped:Connect(function()
 		local affordable = cost ~= nil and (player:GetAttribute("Gold") or 0) >= cost
-		if affordable and not pressed and upgrade.Visible then
+		if focusing then
+			return -- the tutorial's close-up is scaling it
+		elseif affordable and not pressed and upgrade.Visible then
 			throbbing = true
 			upgradeScale.Scale = 1 + 0.06 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 / 0.9))
 		elseif throbbing and not pressed then
@@ -681,14 +686,14 @@ function Hud.show(visible)
 		home.Visible = false
 	end
 	ride.Visible = false -- comes back when the ride prompt shows again
-	gold.Visible = not visible and not tutorial
-	pets.Visible = not visible and not tutorial
-	upgrade.Visible = upgradeShown and not visible and not tutorial
+	gold.Visible = not visible and tutorial ~= "bare"
+	pets.Visible = not visible and tutorial == nil
+	upgrade.Visible = upgradeShown and not visible and tutorial ~= "bare"
 	Inventory.setVisible(not visible) -- your eggs, hidden while riding
 	gained.row.Visible = false
 	noCash = false
 	Hud.setTip(nil)
-	rideCash.row.Visible = not tutorial
+	rideCash.row.Visible = tutorial == nil
 	Hud.setReturning(false)
 	Hud.setVignette(0)
 	actionScale.Scale = 1
@@ -1075,7 +1080,7 @@ function Hud.setReturning(returning)
 			end
 		end)
 	end
-	rideCash.row.Visible = not returning and not tutorial
+	rideCash.row.Visible = not returning and tutorial == nil
 	distance.Visible = not returning
 end
 
@@ -1126,23 +1131,68 @@ function Hud.setTip(text)
 	end
 end
 
--- The first-time tutorial (Tutorial.luau) shows only what each step needs: no
--- Gold, Pets or Upgrade Pen at home and no ride cash (Ride leaves out Sprint,
--- Ability and the Hold bar). Off again, everything's back.
-function Hud.setTutorial(on)
-	tutorial = on
+-- The first-time tutorial (Tutorial.luau) shows only what each step needs.
+-- stage "bare": no Gold, Pets or Upgrade Pen at home and no ride cash (Ride leaves
+-- out Sprint, Ability and the Hold bar). "money": Gold and Upgrade Pen pop in.
+-- nil: it's over, everything's back.
+function Hud.setTutorial(stage)
+	local was = tutorial
+	tutorial = stage
 	local riding = gui.Enabled
-	gold.Visible = not riding and not on
-	pets.Visible = not riding and not on
-	upgrade.Visible = upgradeShown and not riding and not on
-	rideCash.row.Visible = not on and not noCash
+	gold.Visible = not riding and stage ~= "bare"
+	pets.Visible = not riding and stage == nil
+	upgrade.Visible = upgradeShown and not riding and stage ~= "bare"
+	rideCash.row.Visible = stage == nil and not noCash
+	if was == "bare" and stage == "money" then
+		for _, scale in { goldScale, upgradeScale } do
+			scale.Scale = 0
+			TweenService:Create(scale, TweenInfo.new(0.45, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		end
+	end
+end
+
+-- The tutorial's close-up on Upgrade Pen: the screen dims and the button comes
+-- out to the middle, big, for `hold` seconds, then goes back. Yields until done.
+function Hud.focusUpgrade(hold)
+	if not upgrade.Visible then
+		return
+	end
+	focusing = true
+	local corner = upgrade.Position
+	local dim = Instance.new("Frame")
+	dim.Name = "TutorialDim"
+	dim.BackgroundColor3 = Color3.new(0, 0, 0)
+	dim.BackgroundTransparency = 1
+	dim.BorderSizePixel = 0
+	dim.AnchorPoint = Vector2.new(0.5, 0.5)
+	dim.Position = UDim2.fromScale(0.5, 0.5)
+	dim.Size = UDim2.fromScale(1.2, 1.2)
+	dim.ZIndex = 5
+	dim.Parent = homeRoot
+	upgrade.ZIndex = 6
+	local out = TweenInfo.new(0.6, Enum.EasingStyle.Back)
+	TweenService:Create(dim, TweenInfo.new(0.4), { BackgroundTransparency = 0.45 }):Play()
+	TweenService:Create(upgradeScale, out, { Scale = 1.8 }):Play()
+	local move = TweenService:Create(upgrade, out, { Position = UDim2.fromScale(0.5, 0.45) })
+	move:Play()
+	move.Completed:Wait()
+	task.wait(hold)
+	local back = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+	TweenService:Create(dim, back, { BackgroundTransparency = 1 }):Play()
+	TweenService:Create(upgradeScale, back, { Scale = 1 }):Play()
+	move = TweenService:Create(upgrade, back, { Position = corner })
+	move:Play()
+	move.Completed:Wait()
+	dim:Destroy()
+	upgrade.ZIndex = 1
+	focusing = false
 end
 
 -- The tutorial's cursor points at these: "ride" (RIDE), "action" (LASSO / TAKE
--- EGG) or "home" (HOME), each only while it's on screen.
+-- EGG), "home" (HOME) or "upgrade" (Upgrade Pen), each only while it's on screen.
 function Hud.button(name)
 	local riding = gui.Enabled and rideRoot.Position.Y.Scale < 1 -- not moved off for a cutscene
-	local target = if name == "ride" then ride elseif name == "action" and riding then action elseif name == "home" and riding then home else nil
+	local target = if name == "ride" then ride elseif name == "action" and riding then action elseif name == "home" and riding then home elseif name == "upgrade" then upgrade else nil
 	return if target and target.Visible then target else nil
 end
 
@@ -1153,7 +1203,7 @@ Hud.money = money
 -- fail screen's "+$N" stay hidden until the next ride.
 function Hud.setCash(amount)
 	noCash = amount == nil
-	rideCash.row.Visible = not noCash and not tutorial
+	rideCash.row.Visible = not noCash and tutorial == nil
 end
 
 -- Cash gained this ride.
