@@ -67,6 +67,12 @@ local IMAGES = {
 	eggSnowman = { id = "rbxassetid://105231134861157", size = Vector2.new(675, 772) }, -- SnowmanEggRender.png
 	eggPolarBear = { id = "rbxassetid://123542177444935", size = Vector2.new(603, 728) }, -- PolarBearEggRender.png
 	eggIceWyvern = { id = "rbxassetid://89731193669575", size = Vector2.new(650, 855) }, -- IceWyvernEggRender.png
+	eggSpineLizard = { id = "rbxassetid://98567631088826", size = Vector2.new(502, 934) }, -- SpineLizardEggRender.png
+	eggBoar = { id = "rbxassetid://121234341393694", size = Vector2.new(502, 751) }, -- BoarEggRender.png
+	eggWhiteWolf = { id = "rbxassetid://134686819748938", size = Vector2.new(502, 749) }, -- WhiteWolfEggRender.png
+	eggTroll = { id = "rbxassetid://111845214220812", size = Vector2.new(522, 714) }, -- TrollEggRender.png
+	eggIceGolem = { id = "rbxassetid://102264545247873", size = Vector2.new(502, 866) }, -- IceGolemEggRender.png
+	eggIceDrake = { id = "rbxassetid://97792373754275", size = Vector2.new(502, 807) }, -- IceDrakeEggRender.png
 }
 
 local BUTTON_WIDTH = 256

@@ -34,9 +34,15 @@ local HEADSHOTS = {
 	Sandworm = "rbxassetid://98334444188731", -- PetSandworm.png
 	Snake = "rbxassetid://134072754506430", -- PetSnake.png
 	Penguin = "rbxassetid://90291860492773", -- PetPenguin.png
-	Snowman = "rbxassetid://134217060309588", -- PetSnowman.png
+	Snowman = "rbxassetid://85805226105184", -- PetSnowman.png
 	PolarBear = "rbxassetid://100016963704658", -- PetPolarBear.png
-	IceWyvern = "rbxassetid://93077776104646", -- PetIceWyvern.png
+	IceWyvern = "rbxassetid://103993655895431", -- PetIceWyvern.png
+	SpineLizard = "rbxassetid://79153083419077", -- PetSpineLizard.png
+	Boar = "rbxassetid://71880208640997", -- PetBoar.png
+	WhiteWolf = "rbxassetid://82302197856420", -- PetWhiteWolf.png
+	Troll = "rbxassetid://119212344502752", -- PetTroll.png
+	IceGolem = "rbxassetid://111385178023948", -- PetIceGolem.png
+	IceDrake = "rbxassetid://72747878519742", -- PetIceDrake.png
 }
 local TRASH = "rbxassetid://74308771924477" -- assets/ui/Trash.png (QM's trash can)
 local COIN = "rbxassetid://99312860837685"
