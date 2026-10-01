@@ -10,7 +10,6 @@ higher, and trenches are sunk a stud. The columns along the walls, the start
 and the nests stay sand.
 """
 
-import math
 import os
 import sys
 
@@ -25,7 +24,7 @@ import terrain_assets as TA  # noqa: E402
 SAND = [(236, 214, 164), (246, 228, 184)]
 GRASS = [(64, 178, 122), (80, 196, 138)]  # seagrass
 TRENCH = [(70, 150, 214), (86, 166, 228)]
-WALL = [(36, 108, 196), (52, 128, 214)]
+WALL = [(236, 140, 124), (250, 160, 142)]  # salmon coral (QM)
 HAZE = np.array([60, 150, 235.0])  # the blue the distance fades into
 TRENCH_DOWN = 1
 GRASS_UP = 1
@@ -44,11 +43,12 @@ KINDS = ("Ground", "Grass", "Trench")
 def layout(nz, seed=41, z_start=0):
     """Kind per 8-stud cell: 0 sand, 1 seagrass, 2 trench."""
     nx = 2 * HALF_W // CELL
-    a = noise(nx, nz, 3.0, seed) * 0.7 + noise(nx, nz, 1.4, seed + 1) * 0.3
-    b = noise(nx, nz, 4.0, seed + 2) * 0.75 + noise(nx, nz, 1.6, seed + 3) * 0.25
+    # broad blobs: fewer, bigger patches keep the 13680-stud floor down to fewer parts
+    a = noise(nx, nz, 5.0, seed) * 0.7 + noise(nx, nz, 2.2, seed + 1) * 0.3
+    b = noise(nx, nz, 6.0, seed + 2) * 0.75 + noise(nx, nz, 2.4, seed + 3) * 0.25
     kind = np.zeros((nx, nz), int)
     kind[a > 0.7] = 1
-    kind[(b > 0.68) & (kind == 0)] = 2
+    kind[(b > 0.72) & (kind == 0)] = 2
     # a sand margin between seagrass and trench
     for i in range(nx):
         for j in range(nz):
@@ -70,9 +70,19 @@ def full_layout():
     return layout(OCEAN_LENGTH // CELL, z_start=Z_START)
 
 
+MAX_CELLS = 2040 // CELL  # Roblox caps a part at 2048 studs
+
+
+def split(rs):
+    """rects, cut so none runs longer than MAX_CELLS along the course."""
+    for k, i0, j0, i1, j1 in rs:
+        for j in range(j0, j1, MAX_CELLS):
+            yield k, i0, j, i1, min(j1, j + MAX_CELLS)
+
+
 def map_boxes(kind):
     out = []
-    for k, i0, j0, i1, j1 in rects(kind):
+    for k, i0, j0, i1, j1 in split(rects(kind)):
         top = (0, GRASS_UP, -TRENCH_DOWN)[k]
         x0, x1 = -HALF_W + i0 * CELL, -HALF_W + i1 * CELL
         z0, z1 = Z_START - j0 * CELL, Z_START - j1 * CELL

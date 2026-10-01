@@ -71,13 +71,38 @@ return {
 			PostColor = Color3.fromRGB(126, 164, 214),
 			GateImage = nil, -- no LV. 3 art yet: the gate shows "LV. 3 REQUIRED" in text
 		},
+		{
+			Name = "Ocean",
+			Length = 13680, -- 2x the snow (QM)
+			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
+			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
+			-- Placeholder until the ocean animals are designed: the Fish swims here.
+			Herd = { Fish = 30 },
+			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
+			Patches = {
+				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
+				Trench = { Color3.fromRGB(70, 150, 214), Color3.fromRGB(86, 166, 228) },
+			},
+			UnlockCost = 1000000,
+			PostColor = Color3.fromRGB(236, 140, 124),
+			GateImage = nil, -- no LV. 4 art yet: the gate shows "LV. 4 REQUIRED" in text
+			-- Under the sea (Ocean.client): while you're in this biome the distance
+			-- fades into Haze.Color and bubbles drift up round the camera.
+			Haze = {
+				Color = Color3.fromRGB(60, 150, 235),
+				Density = 0.45, -- Atmosphere.Density
+				Tint = Color3.fromRGB(200, 228, 255), -- ColorCorrection.TintColor
+				FadeTime = 1.5, -- seconds to sink into it or come out of it
+				Bubbles = 24, -- per second
+			},
+		},
 	},
 	-- The gate across the corridor at a locked biome's line: yellow at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	CourseHalfWidth = 56,
-	CourseLength = 9880, -- all the biomes' lengths added up
+	CourseLength = 23560, -- all the biomes' lengths added up
 	HomeHalfWidth = 112,
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 

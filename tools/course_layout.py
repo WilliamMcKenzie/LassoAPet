@@ -53,8 +53,7 @@ BIOMES = [
     dict(name="Snow", z0=-3040, z1=-9880, nests=SG.NESTS,
          small=["Icicle"], medium=["Pine", "IcicleLarge"], large=["IceBoulder"]),
     dict(name="Ocean", z0=OG.Z_START, z1=OG.Z_START - OG.OCEAN_LENGTH, nests=OG.NESTS,
-         small=["TubeCoral", "BrainCoral"], medium=["BranchCoral", "FanCoral"], large=["ReefRock"],
-         walls=["CoralBar", "FanBar"]),
+         small=["TubeCoral", "BrainCoral"], medium=["BranchCoral", "FanCoral"], large=["ReefRock"]),
 ]
 # footprint radius (studs), size class and builder for each asset
 ASSETS = {
@@ -76,8 +75,6 @@ ASSETS = {
     "BranchCoral": (4.0, "medium", TA.branch_coral),
     "FanCoral": (3.8, "medium", TA.fan_coral),
     "ReefRock": (9.0, "large", TA.reef_rock),
-    "CoralBar": (2.6, "small", TA.coral_bar),  # barrier pieces: their Base comes from the row
-    "FanBar": (3.0, "medium", TA.fan_bar),
 }
 # the medium a cluster mixes in now and then, so it isn't all rubble
 ACCENT = {"Desert": "Cactus", "Snow": "Pine", "Ocean": "FanCoral"}
@@ -97,7 +94,6 @@ class Course:
         self.dirt = MG.layout(MG.MEADOW_LENGTH // MG.CELL)  # meadow dirt, per 8-stud cell
         self.snow = SG.full_layout()  # snow patches, per 8-stud cell
         self.ocean = OG.full_layout()  # ocean patches, per 8-stud cell
-        self.barriers = []  # (z, kind, tier you need to get through) per ocean barrier
 
     def patch(self, x, z):
         """Desert: 0 sand, 1 dry grass, 2 sandstone. Meadow: 0 grass, 3 dirt.
@@ -323,102 +319,6 @@ class Course:
         self.rng = main
 
 
-    # ------------------------------------------------------------ ocean
-
-    def solid(self, asset, x, z, biome, base, yaw=None):
-        """A barrier piece: placed exactly, no spacing check against its row, with a
-        Base footprint (bx, bz) that meets its neighbours', so nothing slips between."""
-        self.items.append(dict(asset=asset, x=round(x, 2), z=round(z, 2),
-                               yaw=round(float(self.rng.uniform(0, 360) if yaw is None else yaw), 1),
-                               y=self.floor(x, z), tier=TIERS[ASSETS[asset][1]], biome=biome["name"],
-                               base=[round(base[0], 2), round(base[1], 2)]))
-
-    def row(self, biome, z, asset, x0=-HALF_W, x1=HALF_W, gaps=(), depth=5):
-        """A reef wall across [x0, x1] at z, one barrier piece (TA.BAR_W wide) per
-        slot, the slots in `gaps` left open. Pieces face across, flipped at random."""
-        slots = max(1, round((x1 - x0) / TA.BAR_W))
-        w = (x1 - x0) / slots
-        for k in range(slots):
-            if k in gaps:
-                continue
-            yaw = float(self.rng.choice([0, 180])) + self.rng.uniform(-3, 3)
-            self.solid(asset, x0 + (k + 0.5) * w, z + self.rng.normal(0, 0.3), biome, (w + 0.2, depth), yaw)
-
-    def barrier(self, biome, kind, z, p):
-        rng = self.rng
-        small, medium = "CoralBar", "FanBar"
-        if kind == "line_gap":
-            # small coral wall to the walls, one opening near a wall to steer through
-            g = int(rng.choice([1, 9]))
-            self.row(biome, z, small, gaps=(g, g + 1))
-            self.barriers.append((z, "Coral line with a gap", 1))
-        elif kind == "line":
-            self.row(biome, z, small)
-            self.barriers.append((z, "Coral line", 2))
-        elif kind == "double":
-            self.row(biome, z + 16, small)
-            self.row(biome, z - 16, small)
-            self.barriers.append((z, "Double coral line", 2))
-        elif kind == "fan_wall":
-            # medium coral wall: only a tier 3 animal gets through
-            self.row(biome, z, medium)
-            self.barriers.append((z, "Sea fan wall", 3))
-        elif kind == "keyhole":
-            # reef rocks wall to wall (nothing smashes them) with one plugged opening
-            n = 6
-            w = 2 * HALF_W / n
-            hole = int(rng.integers(1, n - 1))
-            for k in range(n):
-                x = -HALF_W + (k + 0.5) * w
-                if k != hole:
-                    self.solid("ReefRock", x, z, biome, (w + 0.2, 14))
-            hard = p > 0.6
-            self.row(biome, z, medium if hard else small, x0=-HALF_W + hole * w, x1=-HALF_W + (hole + 1) * w)
-            self.barriers.append((z, "Reef keyhole", 3 if hard else 2))
-        elif kind == "fork":
-            # a reef ridge splits the corridor: one lane is short but barred by coral,
-            # the other is open but winds between coral clumps
-            xd = rng.uniform(-10, 10)
-            for k in range(5):
-                self.solid("ReefRock", xd, z + 36 - k * 18, biome, (14, 18.2))
-            barred = int(rng.choice([-1, 1]))
-            lo, hi = sorted((xd + barred * 7, barred * HALF_W))
-            self.row(biome, z, small, x0=lo, x1=hi)
-            open_mid = (xd - barred * 7 + -barred * HALF_W) / 2
-            for k, dz in enumerate((24, -24)):
-                xo = open_mid + (8 if k % 2 else -8) * barred
-                self.put(self.pick_medium(biome, xo, z + dz), xo, z + dz, biome, jitter=1.0)
-            self.barriers.append((z, "Fork: barred lane / open lane", 2))
-
-    def ocean_layout(self, biome, rng):
-        """The ocean (QM, Oct 1): a barrier course. Every ~320 studs a barrier of coral
-        runs wall to wall, so getting by means riding (or lassoing) an animal big enough
-        to smash through it; open stretches with coral clumps between. Each nest sits
-        just past a barrier, so getting through pays off. Barriers toughen with distance."""
-        main = self.rng
-        self.rng = rng
-        z0, z1 = biome["z0"], biome["z1"]
-        nest_bars = [nz + 70 for _, nz in sorted(biome["nests"], key=lambda n: -n[1])]
-        anchors = [z0 - ENTRY - 140] + nest_bars
-        zs = []
-        for a, b in zip(anchors, anchors[1:] + [z1 + FINISH_CLEAR + 120]):
-            n = max(1, round((a - b) / 320))
-            zs += [a - k * (a - b) / n for k in range(n)]
-        early = ["line_gap", "fork"]
-        mid = ["line", "fork", "keyhole", "line_gap"]
-        late = ["line", "keyhole", "fan_wall", "fork", "double"]
-        end = ["fan_wall", "keyhole", "double", "line", "fork"]
-        for i, z in enumerate(zs):
-            p = (z0 - z) / (z0 - z1)
-            seq = early if p < 0.15 else mid if p < 0.45 else late if p < 0.75 else end
-            self.barrier(biome, seq[i % len(seq)], z, p)
-        # open stretches: a couple of desert-style clumps between barriers
-        for a, b in zip(zs, zs[1:] + [z1 + FINISH_CLEAR]):
-            for t in (0.35, 0.65):
-                cz = a - (a - b) * t
-                self.cluster(biome, rng, rng.choice([-1, 1]) * rng.uniform(12, 32), cz, 3)
-        self.rng = main
-
     def build(self):
         for b in BIOMES:
             if b["name"] == "Meadow":
@@ -430,11 +330,9 @@ class Course:
                 self.meadow_clusters(b, np.random.default_rng(11))
             elif b["name"] == "Desert":
                 self.desert_clusters(b, np.random.default_rng(23))
-            elif b["name"] == "Ocean":
-                self.ocean_layout(b, np.random.default_rng(41))
             else:
-                # the snow is laid out like the desert: clusters with lanes between
-                self.desert_clusters(b, np.random.default_rng(31))
+                # the snow and ocean are laid out like the desert: clusters with lanes between
+                self.desert_clusters(b, np.random.default_rng(31 if b["name"] == "Snow" else 41))
         return self.items
 
 
@@ -452,7 +350,6 @@ ICON = {
     "TubeCoral": ((156, 86, 230), "square"), "BrainCoral": ((255, 140, 48), "circle"),
     "BranchCoral": ((255, 92, 150), "plus"), "FanCoral": ((255, 214, 60), "diamond"),
     "ReefRock": ((236, 140, 124), "circle"),
-    "CoralBar": ((236, 140, 124), "square"), "FanBar": ((204, 112, 104), "diamond"),
 }
 
 
@@ -495,15 +392,8 @@ def plan(course, items, path, s=2.0, only=None):
                     c = MG.DIRT[chk] if k == 3 else MEADOW[chk]
                 x0, y0 = to_px(x - 2, z + 2)
                 d.rectangle([x0, y0, x0 + 4 * s - 1, y0 + 4 * s - 1], fill=c)
-        if b["name"] == "Ocean":
-            for bz, label, need in course.barriers:
-                if z1 < bz <= z0:
-                    x0, y0 = to_px(HALF_W, bz)
-                    col = BARRIER_COLOR[need]
-                    d.rectangle([x0 - 3, y0 - 30, x0 + 3, y0 + strip + 2], fill=col)
-                    d.text((x0 + 6, oy - band + 8 + 18), f"{label} ({NEED[need]})", fill=col, font=font(13))
         # beat lines
-        for k in range(40 if b["name"] != "Ocean" else 0):
+        for k in range(40 if b["name"] != "Ocean" else 0):  # the ocean's 13680 studs would need more
             z = b["z0"] - ENTRY - k * BEAT
             if z1 < z <= z0:
                 x0, y0 = to_px(-HALF_W, z)
@@ -521,11 +411,6 @@ def plan(course, items, path, s=2.0, only=None):
                 continue
             color, shape = ICON[it["asset"]]
             cx, cy = to_px(it["x"], it["z"])
-            if it["asset"] in ("CoralBar", "FanBar"):
-                bx, bz = it["base"]
-                d.rectangle([cx - bz / 2 * s, cy - bx / 2 * s, cx + bz / 2 * s, cy + bx / 2 * s], fill=color,
-                            outline=(30, 30, 30), width=1)
-                continue
             r = ASSETS[it["asset"]][0] * s
             box = [cx - r, cy - r, cx + r, cy + r]
             o = (30, 30, 30)
@@ -547,10 +432,9 @@ def plan(course, items, path, s=2.0, only=None):
              "SandBoulderCarved": "sand boulder B", "SandMound": "sand mound",
              "Icicle": "icicle", "Pine": "pine", "IcicleLarge": "large icicle", "IceBoulder": "ice boulder",
              "TubeCoral": "tube coral (1)", "BrainCoral": "brain coral (1)", "BranchCoral": "staghorn (2)",
-             "FanCoral": "sea fan (2)", "ReefRock": "reef rock (3)",
-             "CoralBar": "coral wall piece (1)", "FanBar": "fan wall piece (2)"}
+             "FanCoral": "sea fan (2)", "ReefRock": "reef rock (3)"}
     if only:
-        keep = {a for b in BIOMES if b["name"] in only for a in b["small"] + b["medium"] + b["large"] + b.get("walls", [])}
+        keep = {a for b in BIOMES if b["name"] in only for a in b["small"] + b["medium"] + b["large"]}
         names = {a: l for a, l in names.items() if a in keep}
     for a, label in names.items():
         color, shape = ICON[a]
@@ -566,22 +450,9 @@ def plan(course, items, path, s=2.0, only=None):
             d.rectangle([x, y, x + 2 * r, y + 2 * r], fill=color, outline=(30, 30, 30), width=2)
         d.text((x + 22, y), label, fill=(30, 30, 30), font=font(15))
         x += 32 + d.textlength(label, font=font(15)) + 14
-    if only and "Ocean" in only:
-        d.text((x, y), "white ring = nest (kept clear)   (n) = obstacle tier", fill=(90, 90, 90), font=font(15))
-        y += 26
-        x = pad
-        for need in (1, 2, 3):
-            d.rectangle([x, y, x + 6, y + 16], fill=BARRIER_COLOR[need])
-            t = "barrier: " + NEED[need]
-            d.text((x + 12, y), t, fill=BARRIER_COLOR[need], font=font(15))
-            x += 40 + d.textlength(t, font=font(15))
-    else:
-        d.text((x, y), "white ring = nest (kept clear)   white lines = beats", fill=(90, 90, 90), font=font(15))
+    d.text((x, y), "white ring = nest (kept clear)" + ("" if only else "   white lines = beats"),
+           fill=(90, 90, 90), font=font(15))
     im.save(path)
-
-
-BARRIER_COLOR = {1: (40, 160, 60), 2: (240, 130, 0), 3: (220, 30, 40)}
-NEED = {1: "any animal, through the gap", 2: "tier 2+", 3: "tier 3+"}
 
 
 def placed_parts(items, z_lo, z_hi):
@@ -679,7 +550,6 @@ def write_obstacles(items):
         # Ride takes an obstacle's footprint from its lowest part, so each model gets
         # an invisible Base just under the floor, the size of what you'd hit.
         side = ASSETS[it["asset"]][0] * 1.6
-        bx, bz = it.get("base", (side, side))  # barrier pieces' footprints meet their neighbours'
         body.insert(0, "\n".join([
             f'<Item class="Part" referent="{ref()}"><Properties>',
             '<string name="Name">Base</string>',
@@ -689,7 +559,7 @@ def write_obstacles(items):
             '<bool name="CanQuery">false</bool>',
             '<bool name="CastShadow">false</bool>',
             '<float name="Transparency">1</float>',
-            f'<Vector3 name="size"><X>{bx:.3f}</X><Y>1</Y><Z>{bz:.3f}</Z></Vector3>',
+            f'<Vector3 name="size"><X>{side:.3f}</X><Y>1</Y><Z>{side:.3f}</Z></Vector3>',
             f'<CoordinateFrame name="CFrame"><X>{it["x"]:.3f}</X><Y>{it["y"] - 0.5:.3f}</Y><Z>{it["z"]:.3f}</Z>'
             "<R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22>"
             "</CoordinateFrame>",
@@ -708,20 +578,14 @@ def write_obstacles(items):
 
 
 def ocean_main(out):
-    """The ocean's plan and ride views only, into its own folder."""
+    """The ocean's plan and a few ride views only, into its own folder."""
     os.makedirs(out, exist_ok=True)
     course = Course()
     items = course.build()
     plan(course, items, os.path.join(out, "ocean_plan.png"), only=("Ocean",))
-    for kind in ("Coral line with a gap", "Reef keyhole", "Fork: barred lane / open lane", "Sea fan wall"):
-        z = next(z for z, k, _ in course.barriers if k == kind)
-        ride_view(course, items, z + 90, True, os.path.join(out, "ocean_" + kind.split(":")[0].lower().replace(" ", "_") + ".png"))
-    ocean = [it for it in items if it["biome"] == "Ocean"]
-    counts = {}
-    for it in ocean:
-        counts[it["asset"]] = counts.get(it["asset"], 0) + 1
-    parts = sum(len((lambda k: (ASSETS[it["asset"]][2](k), k.parts)[1])(TA.Kit())) for it in ocean)
-    print(len(ocean), "ocean placements,", parts, "parts", counts, len(course.barriers), "barriers")
+    for k, z in enumerate((-10400, -16000, -22000)):
+        ride_view(course, items, z, True, os.path.join(out, f"ocean_ride{k + 1}.png"))
+    print(sum(it["biome"] == "Ocean" for it in items), "ocean placements")
 
 
 def main(out):
@@ -734,6 +598,7 @@ def main(out):
     ride_view(course, items, -330, False, os.path.join(out, "ride_meadow.png"))
     ride_view(course, items, -1100, True, os.path.join(out, "ride_desert.png"))
     ride_view(course, items, -4000, True, os.path.join(out, "ride_snow.png"))
+    ride_view(course, items, -10400, True, os.path.join(out, "ride_ocean.png"))
     counts = {}
     for it in items:
         counts[it["asset"]] = counts.get(it["asset"], 0) + 1
