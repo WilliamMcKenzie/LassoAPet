@@ -1,10 +1,11 @@
 """Animations for the Mixcoatl (QM's edit of the converted model, designs/converted/Mixcoatl.bbmodel):
 a gorilla knuckle-walker (QM 03:16: "full gorilla knuckledragger").
 
-  idle    knuckle stance, slow breathing, looks round, then rears up and beats its chest
-  walk    knuckle-walk: lateral sequence (left hand, right foot, right hand, left foot),
+  idle    knuckle stance, slow breathing, a subtle look round
+  gallop  knuckle-walk: lateral sequence (left hand, right foot, right hand, left foot),
           the shoulders rolling over the planted arm
-  gallop  a gorilla charge: both fists land together, then both feet, the back bounding
+  walk    the same knuckle-walk at 0.7x speed
+  (charge() is an unused bounding gallop: fists together, then feet)
 
 Keyframes are offsets from QM's rest pose. Signs (from probing the rig): torso -X leans
 forward, arm +X swings forward, leg -X swings back, head +X looks up. The root's height
@@ -60,34 +61,14 @@ def stance(L, n, torso=lambda u: (0, 0, 0), head=lambda u: (0, 0, 0)):
 
 
 def idle(m, feet):
-    L, n = 4.0, 64
-
-    def rear(u):  # 0 on all fours, 1 reared up (u 0.45..0.9)
-        if u < 0.4 or u > 0.92:
-            return 0.0
-        v = (u - 0.4) / 0.52
-        return min(1.0, v / 0.2, (1 - v) / 0.2)
-
-    def beat(u, side):  # fists drumming while reared: alternate, 4 beats a side
-        if rear(u) < 0.99:
-            return 0.0
-        return max(0.0, s(TAU * 8 * u + (0 if side < 0 else math.pi)))
-
-    tr = stance(L, n, torso=lambda u: (2 * s(TAU * u) + 38 * rear(u), 0, 0),
-                head=lambda u: (2 * s(2 * TAU * u) - 18 * rear(u) + 10 * beat(u, -1) * 0.3,
-                                24 * s(TAU * u * 2) * (1 - rear(u)), 0))
-    tr["jaw"] = [track(L, lambda u: (-18 * rear(u), 0, 0), n)]
+    """Knuckle stance, slow breathing and a subtle look round (QM 03:23: no drumming)."""
+    L, n = 4.0, 32
+    tr = stance(L, n, torso=lambda u: (1.5 * s(TAU * u), 0, 0),
+                head=lambda u: (2 * s(2 * TAU * u), 10 * s(TAU * u), 2 * s(TAU * u + 0.8)))
     for side, sx in (("left", -1), ("right", 1)):
-        def arm(u, sx=sx):
-            r = rear(u)
-            x = ARM + 2 * s(TAU * u) + (60 - ARM) * r
-            z = -sx * (30 - 14 * beat(u, sx)) * r
-            return (x, sx * ARM_Y * (1 - r), z)
-
-        tr[side + "_arm"] = [track(L, arm, n)]
-        tr[side + "_bicep"] = [track(L, lambda u: (BICEP * (1 - rear(u)) - 30 * rear(u), 0, 0), n)]
-        tr[side + "_forearm"] = [track(L, lambda u: (-45 * rear(u), 0, 0), n)]
-        tr[side + "_leg"] = [track(L, lambda u: (LEG * (1 - rear(u)) + 4 * rear(u), 0, 0), n)]
+        tr[side + "_arm"] = [track(L, lambda u, sx=sx: (ARM + 1.5 * s(TAU * u), sx * ARM_Y, 0), n)]
+        tr[side + "_bicep"] = [track(L, lambda u: (BICEP, 0, 0), 4)]
+        tr[side + "_leg"] = [track(L, lambda u: (LEG, 0, 0), 4)]
     tr["root"] = grounded(m, L, tr, feet, n)
     return L, tr
 
@@ -111,7 +92,7 @@ def walk(m, feet, L=1.3, n=32, stride_arm=24, stride_leg=20, sway=7):
     return L, tr
 
 
-def gallop(m, feet, L=0.6, n=24):
+def charge(m, feet, L=0.6, n=24):
     # fists together at 0, feet together at 0.5; the back pitches between them
     tr = stance(L, n, torso=lambda u: (9 * s(TAU * u + 0.6), 0, 0),
                 head=lambda u: (-7 * s(TAU * u + 0.6), 0, 0))
@@ -129,7 +110,7 @@ def main(path=MODEL):
     m["meta"]["format_version"] = "4.10"  # keyframes in the 4.x sign convention
     m["animations"] = []
     feet = contacts(m)
-    anims = {"idle": idle(m, feet), "walk": walk(m, feet), "gallop": gallop(m, feet)}
+    anims = {"idle": idle(m, feet), "walk": walk(m, feet, L=round(1.3 / 0.7, 3)), "gallop": walk(m, feet)}  # QM 03:23: the knuckle-walk is the gallop, the walk is it at 0.7x
     write_animations(m, group_ids(m), anims)
     with open(path, "w") as f:
         json.dump(m, f, separators=(",", ":"))
