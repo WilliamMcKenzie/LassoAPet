@@ -267,3 +267,107 @@ def horse_side_eyes(a, bone, x, yc, zc, k):
         a.box("Eye" + side, (x0, y0, z0), (x1, y0 + 1, z0 + 1), A.EYE_WHITE, bone)
         x0, x1 = sorted((xs, xs + sx * (A.PLATE + 0.03)))
         a.box("Pupil" + side, (x0, y0 + 0.1, z0 + A.PUPIL_BACK), (x1, y0 + 0.7, z0 + 0.5 + A.PUPIL_BACK), A.PUPIL, bone)
+
+
+# ---------------------------------------------------------------- Mixcoatl edits (QM 03:01)
+
+def straight_legs(model, legs=(("left_leg", -1), ("right_leg", 1))):
+    """QM: legs like the Horse's, just straight. Each leg bone loses its rest rotation and
+    everything under it; in their place go a thigh, a shin and a foot block, copied from the
+    old thigh, shin and foot (so they keep those colours), standing straight down to y = 0.
+    Animation tracks below the leg bone are dropped; the leg bone keeps a plain swing."""
+    import copy
+    G = {g["uuid"]: g for g in model["groups"]}
+    E = {e["uuid"]: e for e in model["elements"]}
+    for leg, sx in legs:
+        node = None
+
+        def find(o):
+            nonlocal node
+            for c in o:
+                if isinstance(c, dict):
+                    if G[c["uuid"]]["name"] == leg:
+                        node = c
+                    find(c["children"])
+
+        find(model["outliner"])
+        g = G[node["uuid"]]
+        g["rotation"] = [0, 0, 0]
+        sub_g, sub_e = set(), []
+
+        def collect(o):
+            for c in o:
+                if isinstance(c, dict):
+                    sub_g.add(c["uuid"])
+                    collect(c["children"])
+                else:
+                    sub_e.append(E[c])
+
+        collect(node["children"])
+        by = {e["name"]: e for e in sub_e}
+        thigh, shin, foot = by[f"P{62 if sx < 0 else 70}"], by[f"P{63 if sx < 0 else 71}"], by[f"P{65 if sx < 0 else 73}"]
+        hip = g["origin"][1]
+        X = lambda a, b: sorted((sx * a, sx * b))  # noqa: E731
+        new = []
+        for src, (x0, x1), (y0, y1), (z0, z1) in (
+                (thigh, X(4.5, 22.5), (hip - 16, hip + 12), (9, 26)),
+                (shin, X(7.5, 19.5), (7, hip - 16), (11.5, 23.5)),
+                (foot, X(6.5, 20.5), (0, 7), (9.5, 25.5))):
+            e = copy.deepcopy(src)
+            e["uuid"] = str(uuid.uuid4())
+            e["from"], e["to"] = [x0, y0, z0], [x1, y1, z1]
+            e["origin"] = [(x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2]
+            new.append(e)
+        drop = {e["uuid"] for e in sub_e}
+        model["elements"] = [e for e in model["elements"] if e["uuid"] not in drop] + new
+        model["groups"] = [x for x in model["groups"] if x["uuid"] not in sub_g]
+        node["children"] = [e["uuid"] for e in new]
+        for an in model["animations"]:
+            for uid in list(an["animators"]):
+                if uid in sub_g:
+                    del an["animators"][uid]
+
+
+def leg_swing(model, amp=None):
+    """A plain fore-and-aft swing on the straight legs, opposite legs in turn."""
+    amp = amp or {"idle": 0, "walk": 22, "gallop": 38}
+    G = {g["name"]: g["uuid"] for g in model["groups"]}
+    import math
+    for an in model["animations"]:
+        L = an["length"]
+        for leg, ph in (("left_leg", 0.0), ("right_leg", 0.5)):
+            kfs = []
+            for i in range(13):
+                t = L * i / 12
+                v = amp[an["name"]] * math.sin(2 * math.pi * (i / 12 + ph))
+                kfs.append({"channel": "rotation", "data_points": [{"x": round(v, 3), "y": 0, "z": 0}],
+                            "uuid": str(uuid.uuid4()), "time": round(t, 4), "color": -1,
+                            "interpolation": "catmullrom"})
+            an["animators"][G[leg]] = {"name": leg, "type": "bone", "keyframes": kfs}
+
+
+# old palette colour -> legendary ice: sapphire-to-glacier scales, rich gold armour with
+# frost-white highlights, and an aurora-violet accent where the old model had orange
+LEGEND_ICE = {
+    (12, 116, 145): (22, 40, 120), (20, 133, 156): (30, 60, 160), (36, 133, 164): (36, 78, 190),
+    (36, 151, 145): (40, 96, 205), (36, 151, 156): (44, 108, 215), (36, 151, 174): (50, 122, 225),
+    (48, 133, 141): (34, 70, 175), (48, 164, 189): (70, 150, 240), (59, 172, 156): (90, 175, 245),
+    (59, 185, 211): (120, 205, 255), (71, 201, 228): (165, 230, 255),
+    (211, 113, 63): (120, 60, 230), (230, 131, 80): (160, 90, 255),
+    (255, 172, 108): (240, 160, 30), (255, 199, 127): (255, 190, 45), (255, 219, 137): (255, 212, 70),
+    (255, 241, 174): (220, 245, 255), (255, 255, 210): (240, 252, 255),
+}
+
+
+def recolor(model, table):
+    src = model["textures"][0]["source"]
+    im = Image.open(io.BytesIO(base64.b64decode(src.split(",", 1)[1]))).convert("RGBA")
+    px = im.load()
+    for x in range(im.width):
+        for y in range(im.height):
+            r, g, b, a = px[x, y]
+            if a and (r, g, b) in table:
+                px[x, y] = tuple(table[(r, g, b)]) + (a,)
+    buf = io.BytesIO()
+    im.save(buf, "PNG")
+    model["textures"][0]["source"] = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
