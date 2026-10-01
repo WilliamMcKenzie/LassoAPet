@@ -84,6 +84,20 @@ BEAT = 80
 NEST_CLEAR = 18
 GAP = 3  # studs between any two footprints
 FINISH_CLEAR = 80  # studs kept clear before the far wall: the finish line is 50 in
+# How far from its wall a cluster may reach, per biome (QM, Oct 1): everything past the
+# meadow hugs the walls like the meadow does, each later biome a bit further out, and
+# the middle of the path is always open.
+REACH = {"Desert": 18, "Snow": 22, "Ocean": 26}
+# Config.ObstacleScale: World.server rescales these at runtime, so wall-flush spots use
+# the size they end up as
+SCALE = {"Boulder": 0.83, "BoulderSplit": 0.96, "Cactus": 0.97, "SandBoulder": 0.88, "SandBoulderCarved": 0.93,
+         "SandMound": 0.58, "Pine": 0.78, "IcicleLarge": 0.83, "IceBoulder": 0.85,
+         "BranchCoral": 1.27, "FanCoral": 1.1, "ReefRock": 0.83}
+
+
+def eff(asset):
+    """Footprint radius once World.server has scaled it."""
+    return ASSETS[asset][0] * SCALE.get(asset, 1.0)
 
 
 class Course:
@@ -125,8 +139,10 @@ class Course:
 
     def fits(self, asset, x, z, biome):
         r = ASSETS[asset][0]
-        if abs(x) + r > HALF_W - 1:
+        if abs(x) + (eff(asset) if biome["name"] in REACH else r) > HALF_W - 1:
             return False
+        if biome["name"] in REACH and abs(x) - eff(asset) < HALF_W - REACH[biome["name"]]:
+            return False  # keep the middle of the path open
         if z + r > biome["z0"] - ENTRY:
             return False
         if z - r < biome["z1"] + 4:
@@ -319,6 +335,45 @@ class Course:
         self.rng = main
 
 
+    def wall_clusters(self, biome, rng):
+        """Desert, snow and ocean, made easy to dodge (QM, Oct 1): like the meadow,
+        every obstacle sits in a cluster against a wall and the middle of the path
+        stays open. Each beat is one cluster on alternating walls: a medium flush
+        to the wall (every fourth beat the big one) with smalls packed along the
+        wall and inward, never further from the wall than REACH. Deeper in, some
+        beats get a smaller cluster on the other wall half a beat on, so the open
+        lane weaves a little but never closes."""
+        main = self.rng
+        self.rng = rng
+        reach = REACH[biome["name"]]
+        n = int((biome["z0"] - biome["z1"] - ENTRY) // BEAT)
+        side = int(rng.choice([-1, 1]))
+
+        def flush(asset, s_, z):
+            return s_ * (HALF_W - 1.5 - eff(asset)), z
+
+        def knot(s_, cz, anchor, smalls):
+            x, z = flush(anchor, s_, cz)
+            self.put(anchor, x, z, biome, jitter=2)
+            for k in range(smalls):
+                z = cz + rng.choice([-1, 1]) * rng.uniform(9, 22)
+                asset = ACCENT[biome["name"]] if rng.random() < 0.25 else self.pick_small(biome, s_ * 50, z)
+                # along the wall first, then inward, up to the cluster's reach
+                depth = rng.uniform(0, max(0.0, reach - 2 * eff(asset) - 1.5))
+                x = s_ * (HALF_W - 1.5 - eff(asset) - depth)
+                self.put(asset, x, z, biome, tries=8, jitter=2)
+
+        for b in range(n):
+            mid = biome["z0"] - ENTRY - b * BEAT - BEAT / 2 + rng.uniform(-10, 10)
+            busy = b / max(1, n - 1)
+            anchor = biome["large"][0] if b % 4 == 3 else self.pick_medium(biome, side * 48, mid)
+            knot(side, mid, anchor, 3 + (1 if busy > 0.5 else 0))
+            if busy > 0.4 and rng.random() < 0.5:
+                z = mid - BEAT / 2
+                knot(-side, z, self.pick_medium(biome, -side * 48, z), 2)
+            side = -side
+        self.rng = main
+
     def build(self):
         for b in BIOMES:
             if b["name"] == "Meadow":
@@ -328,11 +383,9 @@ class Course:
                 self.biome(b)
                 del self.items[before:]
                 self.meadow_clusters(b, np.random.default_rng(11))
-            elif b["name"] == "Desert":
-                self.desert_clusters(b, np.random.default_rng(23))
             else:
-                # the snow and ocean are laid out like the desert: clusters with lanes between
-                self.desert_clusters(b, np.random.default_rng(31 if b["name"] == "Snow" else 41))
+                # every later biome hugs the walls like the meadow (QM, Oct 1)
+                self.wall_clusters(b, np.random.default_rng({"Desert": 23, "Snow": 31, "Ocean": 41}[b["name"]]))
         return self.items
 
 
