@@ -52,13 +52,28 @@ return {
 			PostColor = Color3.fromRGB(206, 118, 72),
 			GateImage = "rbxassetid://88918626302524", -- assets/ui/GateLv2.png
 		},
+		{
+			Name = "Snow",
+			Length = 6840, -- 3x the desert (QM)
+			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
+			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
+			Herd = { Penguin = 30, Snowman = 16, PolarBear = 8, IceWyvern = 3 },
+			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
+			Patches = {
+				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
+				Ice = { Color3.fromRGB(160, 188, 244), Color3.fromRGB(178, 202, 250) },
+			},
+			UnlockCost = 5000,
+			PostColor = Color3.fromRGB(126, 164, 214),
+			GateImage = nil, -- no LV. 3 art yet: the gate shows "LV. 3 REQUIRED" in text
+		},
 	},
 	-- The gate across the corridor at a locked biome's line: yellow at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	CourseHalfWidth = 56,
-	CourseLength = 3040, -- all the biomes' lengths added up
+	CourseLength = 9880, -- all the biomes' lengths added up
 	HomeHalfWidth = 112,
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
@@ -104,17 +119,20 @@ return {
 		Horse = 1, Pinto = 1, Pig = 1, Fish = 1, Cactus = 1, Scorpion = 1,
 		Rhino = 2, Unicorn = 2, Sandworm = 2,
 		Snake = 3,
+		Penguin = 1, Snowman = 1, PolarBear = 2, IceWyvern = 3,
 	},
 	ObstacleTiers = {
 		Bush = 1, Rock = 2, Stone = 1, Sandstone = 1, -- small
 		Boulder = 2, BoulderSplit = 2, Cactus = 2, SandBoulder = 2, SandBoulderCarved = 2, -- medium
 		SandMound = 3, -- large
+		Icicle = 1, Pine = 2, IcicleLarge = 2, IceBoulder = 3, -- snow: small, medium, medium, large
 	},
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.
 	PetIncome = {
 		Horse = 1, Pinto = 3, Pig = 3, Fish = 8, Rhino = 40, Unicorn = 150,
 		Cactus = 6, Scorpion = 14, Sandworm = 60, Snake = 1000,
+		Penguin = 25, Snowman = 60, PolarBear = 250, IceWyvern = 5000,
 	},
 	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
@@ -182,6 +200,10 @@ return {
 		Scorpion = { Speed = 1.5, Stamina = 1.5 },
 		Sandworm = { Speed = 1.6, Stamina = 2 },
 		Snake = { Speed = 2, Stamina = 2 },
+		Penguin = { Speed = 1.5, Stamina = 1.5 },
+		Snowman = { Speed = 1.9, Stamina = 1.3 },
+		PolarBear = { Speed = 1.5, Stamina = 3 },
+		IceWyvern = { Speed = 3, Stamina = 3 },
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).

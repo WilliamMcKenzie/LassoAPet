@@ -1,6 +1,6 @@
 """Terrain assets for the meadow and desert (drafts for QM to vet).
 
-Run: python3 tools/terrain_assets.py [out_dir] [--boulders | --redo]
+Run: python3 tools/terrain_assets.py [out_dir] [--boulders | --redo | --snow]
 
   Meadow  small   Stone       a chunky grey rock
           small   Bush        a stepped round green bush
@@ -9,6 +9,10 @@ Run: python3 tools/terrain_assets.py [out_dir] [--boulders | --redo]
           medium  Cactus      a saguaro in the Cactus pet's greens, ribs and spines
           medium  SandBoulder a rounded tan rock with darker bands
           large   SandMound   a stepped sand hill with a prickly pear and a dead bush on top
+  Snow    small   Icicle      ice spikes breaking out of a snow drift
+          medium  Pine        a snow-capped pine in three stepped tiers
+          medium  IcicleLarge a tall ice crystal with leaning shards
+          large   IceBoulder  tilted ice chunks under a snow drift
 
 Everything is studded blocks (no 2D planes). A 5-stud blocky figure stands in
 each row for scale. Sizes are in studs.
@@ -190,6 +194,66 @@ def sand_mound(k):
     dead_bush(k, 2.6, top, -1.0)
 
 
+# ---------------------------------------------------------------- snow
+
+ICE, ICE_L, ICE_D = (150, 206, 244), (206, 236, 252), (112, 170, 228)
+SNOW_W, SNOW_S = (246, 249, 252), (218, 228, 240)
+PINE, PINE_L, BARK = (34, 122, 86), (48, 150, 104), (122, 80, 50)
+
+
+def spike(k, name, x, z, h, w, color, cap, tilt=(0, 0, 0)):
+    """A stepped ice spike: blocks narrowing to a point, tilted as one piece."""
+    R = rot(*tilt)
+    steps = [(w, 0.45), (w * 0.72, 0.3), (w * 0.46, 0.17), (w * 0.24, 0.08)]
+    y = 0.0
+    for i, (sw, frac) in enumerate(steps):
+        sh = h * frac
+        c = R[:3, :3] @ np.array([0, y + sh / 2, 0])
+        k.at(name, (x + c[0], c[1], z + c[2]), (sw, sh, sw), cap if i == len(steps) - 1 else color, R)
+        y += sh
+
+
+def icicle(k):
+    """Three ice spikes breaking out of a snow drift."""
+    k.at("Icicle", (0, 0.4, 0), (4.4, 1.0, 3.8), SNOW_W, rot(12, 0, 0))
+    spike(k, "Icicle", 0.2, 0, 5.2, 1.6, ICE, ICE_L, (10, 4, -8))
+    spike(k, "Icicle", -1.3, 0.8, 3.2, 1.1, ICE_D, ICE_L, (-20, -6, 16))
+    spike(k, "Icicle", 1.4, -0.9, 2.6, 0.9, ICE, ICE_L, (30, 8, -18))
+
+
+def large_icicle(k):
+    """A tall ice crystal with smaller shards leaning off it, on a snow drift."""
+    k.at("IcicleLarge", (0, 0.5, 0), (8.0, 1.4, 6.8), SNOW_W, rot(-10, 0, 0))
+    k.at("IcicleLarge", (-2.6, 0.9, 1.6), (3.0, 1.0, 2.6), SNOW_S, rot(20, 0, 0))
+    spike(k, "IcicleLarge", 0, 0, 11.5, 3.0, ICE, ICE_L, (8, 3, -5))
+    spike(k, "IcicleLarge", -2.2, 0.8, 6.5, 2.0, ICE_D, ICE_L, (-25, -5, 20))
+    spike(k, "IcicleLarge", 2.3, -0.6, 5.0, 1.7, ICE, ICE_L, (35, 6, -22))
+    spike(k, "IcicleLarge", 0.8, 2.0, 3.4, 1.2, ICE_D, ICE_L, (60, 18, 6))
+
+
+def pine_tree(k):
+    """A trunk and three stepped tiers of dark green, each dusted with snow."""
+    k.box("Pine", (-0.8, 0, -0.8), (0.8, 3.0, 0.8), BARK)
+    y = 2.6
+    for w, h in ((9.0, 2.6), (6.8, 2.4), (4.6, 2.2)):
+        k.box("Pine", (-w / 2, y, -w / 2), (w / 2, y + h, w / 2), PINE)
+        k.box("Pine", (-w / 2 + 0.5, y + h, -w / 2 + 0.5), (w / 2 - 0.5, y + h + 0.5, w / 2 - 0.5), SNOW_W)
+        y += h + 0.5
+    k.box("Pine", (-1.2, y, -1.2), (1.2, y + 1.8, 1.2), PINE_L)
+    k.box("Pine", (-0.9, y + 1.8, -0.9), (0.9, y + 2.3, 0.9), SNOW_W)
+
+
+def ice_boulder(k):
+    """Boulder style, large: two big tilted ice chunks leaning together, a lit
+    cap under a snow drift, a shard at the foot."""
+    k.at("IceBoulder", (-1.2, 3.8, 0.4), (11.0, 8.4, 9.6), ICE, rot(18, 8, -10))
+    k.at("IceBoulder", (-1.8, 8.2, 0.2), (8.0, 1.4, 6.8), ICE_L, rot(24, 7, -13))
+    k.at("IceBoulder", (-2.2, 9.1, 0.3), (5.4, 1.0, 4.4), SNOW_W, rot(30, 6, -12))
+    k.at("IceBoulder", (5.0, 2.8, 1.4), (7.0, 6.0, 6.6), ICE_D, rot(-28, -7, 15))
+    k.at("IceBoulder", (5.6, 5.8, 1.2), (4.6, 0.9, 4.2), SNOW_W, rot(-24, -6, 15))
+    k.at("IceBoulder", (-7.2, 0.9, -3.4), (3.2, 2.4, 2.8), ICE_L, rot(40, 0, -10))
+    k.at("IceBoulder", (2.0, 0.4, -4.6), (6.0, 1.0, 3.0), SNOW_W, rot(10, 0, 0))
+
 def figure(k, x=0):
     """A 5-stud blocky figure for scale."""
     skin, shirt, pants = (245, 205, 48), (13, 105, 172), (40, 127, 71)
@@ -205,6 +269,12 @@ REDO = [
     ("Meadow", [(77, 196, 63), (105, 255, 74)], [("Stone (small)", stone, 6)]),
     ("Desert", [(232, 188, 102), (250, 214, 130)], [
         ("Sandstone (small)", sandstone, 7), ("Sand mound (large)", sand_mound, 26)]),
+]
+
+SNOW = [
+    ("Snow", [(228, 234, 242), (244, 247, 251)], [
+        ("Icicle (small)", icicle, 5), ("Pine tree (medium)", pine_tree, 9),
+        ("Large icicle (medium)", large_icicle, 9), ("Ice boulder (large)", ice_boulder, 19)]),
 ]
 
 BOULDERS = [
@@ -273,8 +343,8 @@ def row_image(name, ground, items):
 
 def main(out):
     os.makedirs(out, exist_ok=True)
-    which = "boulders" if "--boulders" in sys.argv else "redo" if "--redo" in sys.argv else "terrain_assets"
-    rows = [row_image(*row) for row in {"boulders": BOULDERS, "redo": REDO, "terrain_assets": ROWS}[which]]
+    which = "boulders" if "--boulders" in sys.argv else "redo" if "--redo" in sys.argv else "snow" if "--snow" in sys.argv else "terrain_assets"
+    rows = [row_image(*row) for row in {"boulders": BOULDERS, "redo": REDO, "snow": SNOW, "terrain_assets": ROWS}[which]]
     board = Image.new("RGB", (max(r.width for r in rows), sum(r.height for r in rows)), (255, 255, 255))
     y = 0
     for r in rows:
