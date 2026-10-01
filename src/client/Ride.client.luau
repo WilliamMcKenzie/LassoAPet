@@ -20,6 +20,7 @@ local Poof = require(script.Parent.Poof)
 local Dust = require(script.Parent.Dust)
 local Outline = require(script.Parent.Outline)
 local PenPets = require(script.Parent.PenPets)
+local Tutorial = require(script.Parent.Tutorial)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -49,6 +50,9 @@ end
 -- Shows the egg the server says is in `nest`, if any.
 local function showNestEgg(nest)
 	local kind = nest:GetAttribute("Egg") or ""
+	if kind == "" and Tutorial.active and nest == Tutorial.nest then
+		kind = Config.TutorialEgg -- the tutorial's egg, only for you (Tutorial)
+	end
 	local waiting = waitingEggs[nest]
 	if waiting and waiting.kind == kind then
 		return
@@ -253,6 +257,11 @@ for _, nest in world.Nests:GetChildren() do
 		showNestEgg(nest)
 	end)
 end
+Tutorial.init(function()
+	if Tutorial.nest then
+		showNestEgg(Tutorial.nest)
+	end
+end)
 local herdFolder = Instance.new("Folder")
 herdFolder.Name = "Herd"
 herdFolder.Parent = workspace
@@ -744,10 +753,11 @@ local function finishRide(x, z)
 	end
 end
 
-local function fail(reason)
+local function fail(reason, tip)
 	if phase == "ended" then
 		return
 	end
+	Hud.setTip(tip) -- in place of the "+$N" the fail screen shows
 	local hrp, humanoid = character()
 	local dir = (phase == "return" or phase == "home") and 1 or -1 -- travelDir() is defined further down
 	phase = "ended"
@@ -1938,7 +1948,7 @@ local function checkRide(dt)
 	if ability then
 		-- Charging, leaping over everything or coiled up rattling: nothing crashes it.
 		if phase == "outbound" and mount.z < gateZ() + 2.4 then
-			return fail("CRASH!") -- except a locked gate
+			return fail("CRASH!", "Upgrade your pen to go further") -- except a locked gate
 		end
 		return reachHome()
 	end
@@ -1957,7 +1967,7 @@ local function checkRide(dt)
 		return fail("CRASH!")
 	end
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
-		return fail("CRASH!") -- a locked gate
+		return fail("CRASH!", "Upgrade your pen to go further") -- a locked gate
 	end
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
@@ -2023,6 +2033,7 @@ local function updateRider(dt)
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
 			hold, grace = holdTime(mount), Config.LandingGrace
+			Tutorial.lassoed()
 			local earned = Config.RarityCoins[mount.animal.Rarity]
 			coins += earned
 			Hud.setCoins(coins)
@@ -2095,8 +2106,16 @@ end
 local timeScale = 1
 
 RunService.PreSimulation:Connect(function(dt)
-	local slow = cutscene ~= nil or heroLeap ~= nil
-	local slowTo = if heroLeap then Config.HomeSlowMo else Config.EggSlowMo
+	Tutorial.update({
+		phase = phase,
+		target = actionTarget,
+		pet = starter and starter.animal.model,
+		transfer = transfer ~= nil,
+		cutscene = cutscene ~= nil or heroLeap ~= nil,
+	})
+	-- The tutorial slows time while LASSO or TAKE EGG waits for its first press.
+	local slow = cutscene ~= nil or heroLeap ~= nil or Tutorial.slowMo ~= nil
+	local slowTo = if heroLeap then Config.HomeSlowMo elseif cutscene then Config.EggSlowMo else Tutorial.slowMo
 	timeScale += ((slow and slowTo or 1) - timeScale) * (1 - math.exp(-10 * dt))
 	if heroLeap then
 		heroLeap.t = math.min(heroLeap.t + dt / Config.HomeHeroTime, 1)
@@ -2113,7 +2132,9 @@ RunService.PreSimulation:Connect(function(dt)
 			waiting.egg:update(dt)
 		end
 	end
-	updateHerd(dt, slow and not cutscene)
+	-- In the tutorial the stampede runs on your own clock, so it's never snapped
+	-- back to everyone else's after slowing down.
+	updateHerd(dt, (slow and not cutscene) or Tutorial.active)
 	updateFlung(dt)
 	Dust.update(dt)
 	if phase == "idle" then
