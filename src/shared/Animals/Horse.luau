@@ -80,10 +80,7 @@ local function variant(name, data, rarity, points)
 	class.__index = class
 
 	function class.new()
-		local model, byName, bones, pivots = Rig.fromData(data, name, STUD_TEXTURE)
-		if class.size ~= 1 then
-			model:ScaleTo(class.size)
-		end
+		local model, byName, bones, pivots = Rig.fromData(data, name, STUD_TEXTURE, class.size)
 
 		local clocks = {}
 		for anim in pairs(data.animations) do
@@ -105,6 +102,9 @@ local function variant(name, data, rarity, points)
 			bones = bones,
 			clocks = clocks,
 			pose = pose,
+			-- What ScaleTo calls this model's own size (class.size, if the copy kept
+			-- its template's scale factor), so setScale works either way.
+			baseScale = model:GetScale(),
 			speed = 0,
 			turn = 0,
 			scale = 1,
@@ -204,7 +204,7 @@ local MIN_SCALE = 0.05
 function Horse:setScale(s)
 	s = math.max(s, MIN_SCALE)
 	if s ~= self.scale then
-		self.model:ScaleTo(s * self.size)
+		self.model:ScaleTo(s * self.baseScale)
 		self.scale = s
 	end
 end

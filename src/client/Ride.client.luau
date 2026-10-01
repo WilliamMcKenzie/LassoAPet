@@ -283,14 +283,19 @@ local coins = 0 -- cash gained this ride; what the Gold icon shows while riding
 local touchStart = {}
 local sprintKey = false -- Shift or L2 held
 
--- Every kind of animal in any biome's stampede, with its share of the whole herd
--- (for filling the pools).
-local classes, shares = {}, {}
+-- Every kind of animal in any biome's stampede, with how many of it the pool
+-- starts with: about the most of that kind ever near the camera at once. In view
+-- (VIEW either side of the camera, or the whole stream if it's shorter) a kind
+-- averages its share of the stream divided by the gap it runs between spawns,
+-- plus a margin for runs of it.
+local classes, poolSizes = {}, {}
 for _, stream in streams do
+	local window = math.min(2 * VIEW, stream.spawnZ - stream.endZ)
 	for _, kind in stream.kinds do
 		classes[kind.name] = classes[kind.name] or require(Animals[kind.name])
 		pools[kind.name] = pools[kind.name] or {}
-		shares[kind.name] = (shares[kind.name] or 0) + kind.weight / stream.total / #streams
+		local average = window * kind.weight / stream.total / (Config.HerdSpawnEvery * herdSpeed(kind.name))
+		poolSizes[kind.name] = (poolSizes[kind.name] or 0) + average + math.sqrt(average)
 	end
 end
 
@@ -1084,7 +1089,6 @@ end
 -- Building an animal is slow, so the pool is filled before anyone rides, and if
 -- it ever runs dry, only a couple are built per frame (the rest show up a frame
 -- or two later, far from the camera).
-local POOL_START = 32
 local BUILD_PER_FRAME = 2
 local builtThisFrame = 0
 
@@ -2308,17 +2312,17 @@ for _, name in { "Pen", "RidePet" } do
 	end)
 end
 
--- Fill the pools a few animals per frame, so joining doesn't hitch: each kind
--- gets its share of POOL_START by its weight in the biomes' herds (at least a couple).
+-- Fill the pools a few animals per frame, so joining doesn't hitch: each kind up
+-- to its poolSizes (at least a couple).
 task.spawn(function()
 	local built = 0
 	local names = {}
-	for name in shares do
+	for name in poolSizes do
 		table.insert(names, name)
 	end
 	table.sort(names)
 	for _, name in names do
-		for _ = 1, math.max(2, math.round(POOL_START * shares[name])) do
+		for _ = #pools[name] + 1, math.max(2, math.ceil(poolSizes[name]) + 1) do
 			putInPool(newEntity(0, 0, 0, name))
 			built += 1
 			if built % 4 == 0 then
@@ -2326,4 +2330,5 @@ task.spawn(function()
 			end
 		end
 	end
+	print(string.format("[Herd] pool filled: %d animals built", built))
 end)
