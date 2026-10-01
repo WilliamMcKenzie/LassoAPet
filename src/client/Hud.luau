@@ -63,6 +63,10 @@ local IMAGES = {
 	eggScorpion = { id = "rbxassetid://138046936786400", size = Vector2.new(599, 770) }, -- ScorpionEggRender.png
 	eggSandworm = { id = "rbxassetid://96884572036784", size = Vector2.new(502, 765) }, -- SandwormEggRender.png
 	eggSnake = { id = "rbxassetid://71071272639782", size = Vector2.new(502, 807) }, -- SnakeEggRender.png
+	eggPenguin = { id = "", size = Vector2.new(582, 709) }, -- PenguinEggRender.png
+	eggSnowman = { id = "", size = Vector2.new(675, 772) }, -- SnowmanEggRender.png
+	eggPolarBear = { id = "", size = Vector2.new(603, 728) }, -- PolarBearEggRender.png
+	eggIceWyvern = { id = "", size = Vector2.new(650, 855) }, -- IceWyvernEggRender.png
 }
 
 local BUTTON_WIDTH = 256

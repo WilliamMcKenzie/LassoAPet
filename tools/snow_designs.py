@@ -798,9 +798,14 @@ def lift(a, dy):
         a.meta["seat"] = (a.meta["seat"][0], a.meta["seat"][1] + dy, a.meta["seat"][2])
 
 
+ANIMATED = {"Penguin", "Snowman", "PolarBear", "IceWyvern"}  # in game, animated by tools/snow_rig.py
+
+
 def save_model(a, model):
     os.makedirs(MODELS, exist_ok=True)
     path = os.path.join(MODELS, a.name + ".bbmodel")
+    if a.name in ANIMATED and "--force" not in sys.argv:
+        return path  # keep the animated file (rerun with --force, then snow_rig.py and the converter)
     with open(path, "w") as f:
         json.dump(model, f, separators=(",", ":"))
     return path

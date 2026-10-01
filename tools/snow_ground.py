@@ -1,6 +1,7 @@
 """Snow biome ground concept: snow paths winding between cold grass and frozen ponds.
 
 Run: python3 tools/snow_ground.py [out_dir]     render a preview
+     python3 tools/snow_ground.py --map           also write it into src/world/World.rbxmx
 
 After QM's reference (their other game): big teal grass fields and pale blue
 ice ponds, with light snow running between them like paths. Same approach as
@@ -19,7 +20,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 from partlib import Part, T, render  # noqa: E402
-from desert_ground import noise, CELL, HALF_W  # noqa: E402
+from desert_ground import noise, rects, write_patches, CELL, HALF_W  # noqa: E402
 
 SNOW = [(228, 234, 242), (244, 247, 251)]
 GRASS = [(80, 160, 166), (96, 176, 180)]  # cold grass, the reference's teal
@@ -29,13 +30,16 @@ ICE_DOWN = 1
 GRASS_UP = 1  # QM: grass > snow
 LENGTH = 200  # studs shown in the preview
 SNOW_LENGTH = 6840  # 3x the desert (QM)
-NESTS = []  # placed later with the course
+Z_START = -3040  # the snow's near edge (the desert's far one)
+NESTS = [(16, -3400), (-14, -4100), (18, -4900), (-16, -5800), (14, -6800), (-18, -7900), (16, -9000)]
+NEST_CLEAR = 14
 START_CLEAR = 16
 KINDS = ("Ground", "Grass", "Ice")
 
 
-def layout(nz, seed=21):
-    """Kind per 8-stud cell: 0 snow, 1 cold grass, 2 ice."""
+def layout(nz, seed=21, z_start=0):
+    """Kind per 8-stud cell: 0 snow, 1 cold grass, 2 ice. Cells round the nests
+    (placed from z_start) stay snow."""
     nx = 2 * HALF_W // CELL
     a = noise(nx, nz, 3.5, seed) * 0.75 + noise(nx, nz, 1.6, seed + 1) * 0.25
     b = noise(nx, nz, 3.5, seed + 2) * 0.75 + noise(nx, nz, 1.6, seed + 3) * 0.25
@@ -52,7 +56,27 @@ def layout(nz, seed=21):
     ice[0, :] = ice[-1, :] = False
     kind[(kind == 2) & ~ice] = 0
     kind[:, : START_CLEAR // CELL] = 0
+    for i in range(nx):
+        for j in range(nz):
+            x, z = -HALF_W + i * CELL + CELL / 2, z_start - j * CELL - CELL / 2
+            if any(abs(x - a) < NEST_CLEAR + CELL / 2 and abs(z - b) < NEST_CLEAR + CELL / 2 for a, b in NESTS):
+                kind[i, j] = 0
     return kind
+
+
+def full_layout():
+    return layout(SNOW_LENGTH // CELL, z_start=Z_START)
+
+
+def map_boxes(kind):
+    """(name, centre, size) per rectangle: snow tops at 0, grass GRASS_UP, ice -ICE_DOWN, bottoms at -2."""
+    out = []
+    for k, i0, j0, i1, j1 in rects(kind):
+        top = (0, GRASS_UP, -ICE_DOWN)[k]
+        x0, x1 = -HALF_W + i0 * CELL, -HALF_W + i1 * CELL
+        z0, z1 = Z_START - j0 * CELL, Z_START - j1 * CELL
+        out.append((KINDS[k], ((x0 + x1) / 2, (top - 2) / 2, (z0 + z1) / 2), (x1 - x0, top + 2, z0 - z1)))
+    return out
 
 
 def take(kind):
@@ -88,6 +112,10 @@ def main(out):
     board.paste(close, (0, 520))
     board.save(os.path.join(out, "snow_ground.png"))
     print("wrote", out, {KINDS[k]: int((kind == k).sum()) for k in range(3)})
+    if "--map" in sys.argv:
+        # the first run copies a desert floor part as the template and keeps it
+        print("wrote", write_patches(r"SGND\d+", "SGND", map_boxes(full_layout()), template=r"DGND00000"),
+              "snow floor parts")
 
 
 if __name__ == "__main__":
