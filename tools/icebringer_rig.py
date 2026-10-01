@@ -195,30 +195,6 @@ def edit_model(m):
         nodes[mirror]["children"].append(r["uuid"])
 
 
-HAND = ("_hand", "_finger1", "_finger2", "_thumb")
-
-
-def hand_keys(m):
-    """QM's hand and finger keyframes, {anim: {bone: [track]}}, in the 4.x sign convention
-    (a Blockbench 5 save stores rotation x and y negated)."""
-    flip = str(m["meta"].get("format_version", "4")).startswith("5")
-    out = {}
-    for a in m.get("animations", []):
-        for x in a["animators"].values():
-            ks = x.get("keyframes", [])
-            if not ks or not x["name"].endswith(HAND):
-                continue
-            by = {}
-            for k in ks:
-                v = [float(k["data_points"][0][c]) for c in "xyz"]
-                if flip and k["channel"] == "rotation":
-                    v[0], v[1] = -v[0], -v[1]
-                by.setdefault((k["channel"], k["interpolation"]), []).append((k["time"], tuple(v)))
-            out.setdefault(a["name"], {})[x["name"]] = [
-                {"channel": ch, "interp": ip, "keys": sorted(keys)} for (ch, ip), keys in by.items()]
-    return out
-
-
 def name_front_teeth(m):
     """QM added two front teeth by copying Upper_tooth_*_0 and moving its origin; give the
     copies their own names."""
@@ -300,26 +276,19 @@ def gallop(m, feet, L=1.0, n=40, duty=0.6, arm=-20, stride_arm=11, leg=-10, stri
     return L, tr
 
 
-def to_4x(m):
-    """A Blockbench 5 save stores keyframe rotations with x and y negated: turn them back into
-    the 4.x convention every tool here (and bbmodel_to_luau) reads."""
-    if str(m["meta"].get("format_version", "4")).startswith("5"):
-        for a in m.get("animations", []):
-            for x in a["animators"].values():
-                for k in x.get("keyframes", []):
-                    if k["channel"] == "rotation":
-                        for c in "xy":
-                            v = -float(k["data_points"][0][c])
-                            k["data_points"][0][c] = v if v != 0 else 0.0
-    m["meta"]["format_version"] = "4.10"
+def as_blockbench5(m):
+    """Blockbench 5 keyframes are already in the convention our renderer and the game use
+    (QM's 17:08 recording matched the raw keys, not negated ones). Blockbench 5 negates x and
+    y rotations when it opens a 4.x file, so anything this writes is marked 5.0."""
+    m["meta"]["format_version"] = "5.0"
 
 
 def main(path=MODEL, *flags):
     """QM's file is the source of truth for every animation since 17:04 (their own idle, walk
-    and gallop): this only converts it to the 4.x keyframe convention and makes the model
-    edits the game needs. Pass "gallop" to replace the gallop with gallop() again."""
+    and gallop): this keeps its keyframes as they are and only makes the model edits the
+    game needs. Pass "gallop" to replace the gallop with gallop() again."""
     m = json.load(open(path))
-    to_4x(m)
+    as_blockbench5(m)
     edit_model(m)
     name_front_teeth(m)
     add_neck(m)
