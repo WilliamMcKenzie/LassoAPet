@@ -159,7 +159,9 @@ return {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1 },
-			Exclusive = { WhiteWolf = 1, Troll = 0.8, PolarBear = 0.7, IceDrake = 0.3, IceWyvern = 0.2 },
+			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
+			-- with an empty pool is never rolled.
+			Exclusive = {},
 		},
 		Reach = 10, -- studs from the machine where ROLL shows
 	},
