@@ -2265,7 +2265,15 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	end
 	rattleHaze += ((if kind == "Rattle" or kind == "Frost" then 1 else 0) - rattleHaze) * (1 - math.exp(-6 * dt))
 	Hud.setAbilityTint(rattleHaze * (if vfx.hazeColor == vfx.FROST_HAZE then 0.6 else 0.85), vfx.hazeColor)
-	local desired = CFrame.lookAt((basis * CFrame.new(0, 38, 18)).Position, (basis * CFrame.new(0, 0, -24)).Position)
+	-- Big pets (the Icebringer, the Snake) fill the view: pull the camera back in
+	-- proportion to the pet's height, from 1x for a horse-sized one up to 2.2x.
+	if mount and not mount.camZoom then
+		local _, size = mount.animal.model:GetBoundingBox()
+		mount.camZoom = math.clamp(size.Y / 13, 1, 2.2)
+	end
+	vfx.camZoom = (vfx.camZoom or 1) + (((mount and mount.camZoom) or 1) - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
+	local z = vfx.camZoom
+	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	-- Charge: the camera swings round to a low shot from ahead and off to the
 	-- side, looking back at the pet.
 	cineCam += ((if kind == "Charge" then 1 else 0) - cineCam) * (1 - math.exp(-4 * dt))
