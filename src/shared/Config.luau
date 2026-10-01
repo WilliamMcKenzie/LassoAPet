@@ -172,6 +172,20 @@ return {
 		Boulder = 2, BoulderSplit = 2, Cactus = 2, SandBoulder = 2, SandBoulderCarved = 2, -- medium
 		SandMound = 3, -- large
 		Icicle = 1, Pine = 2, IcicleLarge = 2, IceBoulder = 3, -- snow: small, medium, medium, large
+		TubeCoral = 1, BrainCoral = 1, BranchCoral = 2, FanCoral = 2, ReefRock = 3, -- ocean
+	},
+	-- How big each tier looks: each one is TierGrowth x the one below, so a medium is
+	-- 2x a small and a large 4x. "Size" is the square root of the two biggest sides of
+	-- the thing's box multiplied (so a long snake and a tall cactus compare fairly).
+	-- Animals are sized from their model to PetSmallSize x TierGrowth^(tier - 1) studs
+	-- (the horse is the tier 1 anchor), unless their file gives an explicit size.
+	-- Obstacles grow about their spot on the floor by ObstacleScale (worked out the same
+	-- way from tools/terrain_assets.py, against smalls of ~5.4 studs; the rest already fit).
+	TierGrowth = 2,
+	PetSmallSize = 10.4,
+	ObstacleScale = {
+		BoulderSplit = 1.19, Cactus = 1.21, SandBoulder = 1.11, SandBoulderCarved = 1.17,
+		IceBoulder = 1.32, BranchCoral = 1.58, FanCoral = 1.37, ReefRock = 1.3,
 	},
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.

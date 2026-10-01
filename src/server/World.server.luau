@@ -42,6 +42,17 @@ if startLine then
 	finish.Parent = world
 end
 
+-- Grow the medium and large obstacles to their tier's size (Config.ObstacleScale),
+-- about the middle of their footprint on the floor, so they stay put and grounded.
+for _, model in world.Obstacles:GetChildren() do
+	local scale = model:IsA("Model") and Config.ObstacleScale[model.Name]
+	local base = scale and model:FindFirstChild("Base")
+	if base then
+		model.WorldPivot = CFrame.new(base.Position + Vector3.new(0, base.Size.Y / 2, 0))
+		model:ScaleTo(scale)
+	end
+end
+
 -- Nothing past the finish line: the floor and walls stop at it, so the leap over
 -- it goes out into open sky. Parts that cross the line are cut back to it.
 local finishZ = -Config.CourseLength + Config.FinishFromEnd
