@@ -3,10 +3,8 @@ designs/converted/Icebringer.bbmodel): a gorilla knuckle-walker (QM 03:16: "full
 knuckledragger"). Snow Legendary; its Frost ability is in Ride.client.luau.
 
   idle    knuckle stance, slow breathing, a subtle look round
-  gallop  knuckle-walk (gallop()): lateral sequence, each fist planted while the body
-          vaults over it (QM 16:19)
-  idle, walk  QM's own since 16:19 (kept from the file); idle() and walk() here made the
-          earlier versions
+  idle, walk, gallop  QM's own (kept from the file since 17:04); idle(), walk() and
+          gallop() here made the earlier versions
   jaw     its own bone, hinged at the back of the mouth (-X opens); Snake-style teeth
   (charge() is an unused bounding gallop: fists together, then feet)
 
@@ -254,17 +252,12 @@ def add_neck(m):
     walk(m["outliner"])
 
 
-GLOW_COLORS = ((236, 246, 255), (252, 253, 255))  # the white armour
-
-
-def glow_armour(m):
-    """QM 03:54: the white armour glows like the Snake's pupils. bbmodel_to_luau makes parts
-    named Glow* Neon, so the armour's elements get that prefix (teeth and eyes are other whites)."""
-    from snow_rig import posed
-    white = {p.name for p in posed(m) if tuple(p.color) in GLOW_COLORS}
+def no_glow(m):
+    """QM 17:05: no glowing armour after all. Undo the Glow_ prefix (PR #65) that
+    bbmodel_to_luau turns into Neon."""
     for e in m["elements"]:
-        if e["name"] in white and not e["name"].startswith("Glow"):
-            e["name"] = "Glow_" + e["name"]
+        if e["name"].startswith("Glow_"):
+            e["name"] = e["name"][len("Glow_"):]
 
 
 def gait(p, duty):
@@ -321,18 +314,21 @@ def to_4x(m):
     m["meta"]["format_version"] = "4.10"
 
 
-def main(path=MODEL):
-    """QM's file keeps its own idle and walk (QM 16:19); only the gallop is generated here."""
+def main(path=MODEL, *flags):
+    """QM's file is the source of truth for every animation since 17:04 (their own idle, walk
+    and gallop): this only converts it to the 4.x keyframe convention and makes the model
+    edits the game needs. Pass "gallop" to replace the gallop with gallop() again."""
     m = json.load(open(path))
     to_4x(m)
     edit_model(m)
     name_front_teeth(m)
     add_neck(m)
-    glow_armour(m)
-    feet = contacts(m)
-    kept = [a for a in m["animations"] if a["name"] != "gallop"]
-    write_animations(m, group_ids(m), {"gallop": gallop(m, feet)})
-    m["animations"] = kept + m["animations"]
+    no_glow(m)
+    if "gallop" in flags:
+        feet = contacts(m)
+        kept = [a for a in m["animations"] if a["name"] != "gallop"]
+        write_animations(m, group_ids(m), {"gallop": gallop(m, feet)})
+        m["animations"] = kept + m["animations"]
     with open(path, "w") as f:
         json.dump(m, f, separators=(",", ":"))
     return m
