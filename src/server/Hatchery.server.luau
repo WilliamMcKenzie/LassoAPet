@@ -277,6 +277,52 @@ Players.PlayerRemoving:Connect(function(player)
 	finished[player] = nil
 end)
 
+-- The Egg Machine (Config.Gacha): pay its price for a random egg, a tier picked
+-- by Odds and then an egg from that tier's Pool. Returns the kind and whether
+-- it's an Exclusive (gacha-only), for the egg reveal; nil if you can't pay.
+local function pick(weights)
+	local total = 0
+	for _, weight in weights do
+		total += weight
+	end
+	local roll = Random.new():NextNumber(0, total)
+	local last
+	for kind, weight in weights do
+		last = kind
+		roll -= weight
+		if roll <= 0 then
+			return kind
+		end
+	end
+	return last
+end
+
+local rolled = {} -- [player] = os.clock() of their last roll
+local rollGacha = Instance.new("RemoteFunction")
+rollGacha.Name = "RollGacha"
+rollGacha.OnServerInvoke = function(player)
+	local profile = profiles[player]
+	local gacha = Config.Gacha
+	local gold = player:GetAttribute("Gold") or 0
+	if not profile or gold < gacha.Price or (rolled[player] and os.clock() - rolled[player] < 1) then
+		return nil
+	end
+	local tier = pick(gacha.Odds)
+	local kind = tier and pick(gacha.Pool[tier] or {})
+	if not isAnimal(kind) then
+		return nil
+	end
+	rolled[player] = os.clock()
+	player:SetAttribute("Gold", gold - gacha.Price)
+	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	publish(player)
+	return kind, tier == "Exclusive"
+end
+rollGacha.Parent = ReplicatedStorage
+Players.PlayerRemoving:Connect(function(player)
+	rolled[player] = nil
+end)
+
 -- Put an egg from the inventory down in your pen, at (x, z) from the Area's centre.
 remote("PlaceEgg", function(player, kind, x, z)
 	local profile = profiles[player]
