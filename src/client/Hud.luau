@@ -73,6 +73,7 @@ local IMAGES = {
 	eggTroll = { id = "rbxassetid://111845214220812", size = Vector2.new(522, 714) }, -- TrollEggRender.png
 	eggIceGolem = { id = "rbxassetid://102264545247873", size = Vector2.new(502, 866) }, -- IceGolemEggRender.png
 	eggIceDrake = { id = "rbxassetid://97792373754275", size = Vector2.new(502, 807) }, -- IceDrakeEggRender.png
+	eggIcebringer = { id = "", size = Vector2.new(502, 774) }, -- IcebringerEggRender.png (not uploaded yet)
 }
 
 local BUTTON_WIDTH = 256
