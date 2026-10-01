@@ -608,7 +608,13 @@ local function updateRideTarget()
 		local box = rideModel.PrimaryPart.CFrame * rideOffset
 		local at = if hrp then box:PointToObjectSpace(hrp.Position) else Vector3.zero
 		local half = rideSize / 2
-		local edge = box:PointToWorldSpace(Vector3.new(math.clamp(at.X, -half.X, half.X), 0, math.clamp(at.Z, -half.Z, half.Z)))
+		local inside = math.abs(at.X) < half.X and math.abs(at.Z) < half.Z
+		-- Standing inside a big pet's box (a Polar Bear's is 11 x 19), the nearest
+		-- point would be your own position, where the prompt never fires on E: put
+		-- it a stud in toward the pet's middle instead.
+		local edge = if inside
+			then box:PointToWorldSpace(at * Vector3.new(1, 0, 1) - Vector3.new(at.X, 0, at.Z).Unit)
+			else box:PointToWorldSpace(Vector3.new(math.clamp(at.X, -half.X, half.X), 0, math.clamp(at.Z, -half.Z, half.Z)))
 		rideSpot.WorldCFrame = CFrame.new(Vector3.new(edge.X, if hrp then hrp.Position.Y else edge.Y, edge.Z))
 	end
 end
