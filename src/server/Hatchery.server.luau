@@ -307,7 +307,13 @@ rollGacha.OnServerInvoke = function(player)
 	if not profile or gold < gacha.Price or (rolled[player] and os.clock() - rolled[player] < 1) then
 		return nil
 	end
-	local tier = pick(gacha.Odds)
+	local odds = {}
+	for tier, weight in gacha.Odds do
+		if next(gacha.Pool[tier] or {}) then
+			odds[tier] = weight
+		end
+	end
+	local tier = pick(odds)
 	local kind = tier and pick(gacha.Pool[tier] or {})
 	if not isAnimal(kind) then
 		return nil
