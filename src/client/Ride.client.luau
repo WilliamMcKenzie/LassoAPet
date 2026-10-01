@@ -1440,7 +1440,7 @@ end
 -- its own cooldown (entity.ability); a mount with no entry shows no button. Every
 -- ability is one tap: it runs its full Duration.
 local abilityKey = false -- Q or R1 pressed since the last frame
-local chargeCam, rattleHaze, cineCam = 0, 0, 0 -- 0..1, eased in and out: the charge's wider view, the rattle's haze, the cinematic angle
+local rattleHaze = 0 -- 0..1, eased in and out: the rattle's haze
 vfx.RATTLE_HAZE = Color3.fromRGB(255, 170, 40) -- yellow-orange
 vfx.FROST_HAZE = Color3.fromRGB(190, 236, 255)
 vfx.hazeColor = vfx.RATTLE_HAZE
@@ -2286,10 +2286,9 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 		camera.FieldOfView += ((70 - 20 * a) - camera.FieldOfView) * (1 - math.exp(-12 * dt))
 		return
 	end
-	-- Abilities: the camera pulls back for a charge; a yellow-orange haze for the rattle.
+	-- Abilities: a yellow-orange haze for the rattle (blue for frost).
 	local ability = activeAbility()
 	local kind = ability and ability.cfg.Kind
-	chargeCam += ((if kind == "Charge" then 1 else 0) - chargeCam) * (1 - math.exp(-5 * dt))
 	if kind == "Rattle" or kind == "Frost" then
 		vfx.hazeColor = if kind == "Frost" then vfx.FROST_HAZE else vfx.RATTLE_HAZE
 	end
@@ -2304,21 +2303,9 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	vfx.camZoom = (vfx.camZoom or 1) + (((mount and mount.camZoom) or 1) - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local z = vfx.camZoom
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
-	-- Charge: the camera swings round to a low shot from ahead and off to the
-	-- side, looking back at the pet.
-	cineCam += ((if kind == "Charge" then 1 else 0) - cineCam) * (1 - math.exp(-4 * dt))
-	if cineCam > 0.001 and mount then
-		local a = cineCam * cineCam * (3 - 2 * cineCam)
-		local pet = Vector3.new(mount.x, (mount.hop or 0) + 3, mount.z)
-		local swing = math.rad(28)
-		local from = pet + (basis * CFrame.Angles(0, swing, 0)).LookVector * 28 + Vector3.new(0, 9, 0)
-		local cine = CFrame.lookAt(from, pet + basis.LookVector * 4)
-		desired = desired:Lerp(cine, a)
-	end
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
-	fov += 12 * chargeCam -- the charge: rushing forward
 	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
 end)
 
