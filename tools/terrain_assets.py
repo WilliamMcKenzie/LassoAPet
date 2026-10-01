@@ -254,6 +254,110 @@ def ice_boulder(k):
     k.at("IceBoulder", (-7.2, 0.9, -3.4), (3.2, 2.4, 2.8), ICE_L, rot(40, 0, -10))
     k.at("IceBoulder", (2.0, 0.4, -4.6), (6.0, 1.0, 3.0), SNOW_W, rot(10, 0, 0))
 
+
+# ---------------------------------------------------------------- ocean
+
+C_PINK, C_PINK_L = (255, 92, 150), (255, 140, 186)
+C_ORANGE, C_ORANGE_L = (255, 140, 48), (255, 182, 84)
+C_PURPLE, C_PURPLE_L = (156, 86, 230), (190, 130, 250)
+C_YELLOW = (255, 214, 60)
+C_TEAL, C_TEAL_L = (40, 200, 190), (100, 236, 220)
+REEF, REEF_L, REEF_D = (236, 140, 124), (250, 168, 148), (204, 112, 104)  # salmon coralline rock
+
+
+def tube(k, name, x, z, h, w, color, rim, tilt=(0, 0, 0), y=0.0):
+    """One tube coral: a block with a lighter rim on top and a dark mouth."""
+    R = rot(*tilt)
+    for frac, sw, c in ((0.0, w, color), (h - 0.5, w, rim)):
+        hh = h - 0.5 if frac == 0 else 0.5
+        cc = R[:3, :3] @ np.array([0, frac + hh / 2, 0])
+        k.at(name, (x + cc[0], y + cc[1], z + cc[2]), (sw, hh, sw), c, R)
+    cc = R[:3, :3] @ np.array([0, h + 0.02, 0])
+    k.at(name, (x + cc[0], y + cc[1], z + cc[2]), (w * 0.5, 0.1, w * 0.5), tuple(int(v * 0.45) for v in color), R)
+
+
+def tube_coral(k):
+    """Small: a clump of purple tubes of different heights, leaning out."""
+    k.at("TubeCoral", (0, 0.3, 0), (4.0, 0.6, 3.6), C_PURPLE, rot(10, 0, 0))
+    for x, z, h, w, t in ((0, 0, 4.2, 1.3, (0, 3, -4)), (-1.3, 0.6, 3.0, 1.1, (20, -6, 14)),
+                          (1.2, -0.5, 2.6, 1.1, (-30, 8, -16)), (0.3, 1.3, 2.0, 0.9, (50, 18, 6)),
+                          (-0.6, -1.2, 1.6, 0.8, (-10, -16, 8))):
+        tube(k, "TubeCoral", x, z, h, w, C_PURPLE, C_PURPLE_L, t, 0.4)
+
+
+def brain_coral(k):
+    """Small: a squat orange dome with lit grooves running over the top."""
+    k.at("BrainCoral", (0, 1.0, 0), (4.6, 2.0, 4.2), C_ORANGE, rot(12, 0, 0))
+    k.at("BrainCoral", (0, 2.3, 0), (3.6, 0.8, 3.2), C_ORANGE, rot(12, 0, 0))
+    for dz in (-1.0, 0.0, 1.0):
+        k.at("BrainCoral", (dz * 0.2, 2.75, dz), (3.0, 0.25, 0.35), C_ORANGE_L, rot(12 + dz * 14, 0, 0))
+    k.at("BrainCoral", (2.6, 0.4, -1.4), (1.4, 0.8, 1.2), C_ORANGE_L, rot(30, 0, 0))
+
+
+def branch(k, name, x, y, z, segs, color, tip):
+    """A staghorn branch: blocks stepping up and out, a lit tip at the end."""
+    for dx, dy, dz, w in segs:
+        # each step spans from where the last one ended to where this one leans to
+        x1, z1 = x + dx, z + dz
+        k.box(name, (min(x, x1) - w / 2, y, min(z, z1) - w / 2), (max(x, x1) + w / 2, y + dy, max(z, z1) + w / 2), color)
+        x, y, z = x1, y + dy, z1
+    k.box(name, (x - 0.45, y, z - 0.45), (x + 0.45, y + 0.7, z + 0.45), tip)
+
+
+def branch_coral(k):
+    """Medium: pink staghorn coral, a trunk forking into five branches."""
+    k.box("BranchCoral", (-1.0, 0, -1.0), (1.0, 2.4, 1.0), C_PINK)
+    for segs in (
+            [(0, 2.6, 0, 1.3), (0.4, 2.2, -0.2, 1.0)],
+            [(-1.4, 1.6, 0, 1.2), (-0.8, 2.0, 0.4, 1.0), (0, 1.6, 0, 0.9)],
+            [(1.6, 1.4, 0.2, 1.2), (0.8, 2.2, -0.2, 1.0), (0, 1.2, 0, 0.9)],
+            [(0.2, 1.2, 1.6, 1.1), (0, 2.0, 0.6, 0.9)],
+            [(-0.4, 1.0, -1.6, 1.1), (0, 1.8, -0.6, 0.9)]):
+        branch(k, "BranchCoral", 0, 2.4, 0, segs, C_PINK, C_PINK_L)
+
+
+def fan_coral(k):
+    """Medium: a sea fan, a lattice of thin yellow bars (real blocks, no plane)
+    on a short stalk, facing across the corridor."""
+    k.box("FanCoral", (-0.6, 0, -0.6), (0.6, 1.6, 0.6), C_ORANGE)
+    for i, (h, half) in enumerate(((2.4, 1.2), (4.0, 2.6), (5.6, 3.4), (7.0, 3.6), (8.2, 3.0), (9.2, 2.0))):
+        y = 1.6 + i * 1.3
+        k.box("FanCoral", (-half, y, -0.3), (half, y + 0.5, 0.3), C_YELLOW)
+    for x in (-3.0, -1.8, -0.6, 0.6, 1.8, 3.0):
+        top = 1.6 + 5 * 1.3 + 0.5 - abs(x) * 1.3
+        k.box("FanCoral", (x - 0.25, 1.6, -0.3), (x + 0.25, max(top, 3.0), 0.3), C_YELLOW)
+
+
+def reef_rock(k):
+    """Large: a salmon coralline rock (boulder style), two tilted slabs, crowned
+    and ringed with coral: tubes, a brain dome, staghorn and a teal anemone."""
+    k.at("Reef", (0, 1.6, 0), (15, 3.6, 12), REEF, rot(10, 3, -4))
+    k.at("Reef", (-0.8, 3.9, 0.3), (10, 1.8, 8), REEF_L, rot(-8, -3, 4))
+    k.at("Reef", (7.0, 0.8, -4.6), (4.0, 2.0, 3.4), REEF_D, rot(30, 0, 8))
+    top = 4.7
+    for x, z, h, w, t in ((-3.0, 1.2, 4.4, 1.4, (0, 4, -6)), (-4.4, 2.2, 3.0, 1.1, (20, -8, 12)),
+                          (-2.0, 2.6, 2.4, 1.0, (-30, 10, -10))):
+        tube(k, "Reef", x, z, h, w, C_PURPLE, C_PURPLE_L, t, top)
+    k.at("Reef", (2.6, top + 0.7, -1.2), (3.6, 1.6, 3.2), C_ORANGE, rot(8, 0, 0))
+    k.at("Reef", (2.6, top + 1.7, -1.2), (2.6, 0.6, 2.2), C_ORANGE_L, rot(8, 0, 0))
+    for segs in ([(0, 1.6, 0, 1.0), (0.8, 1.6, 0.4, 0.8)], [(0, 1.6, 0, 1.0), (-1.0, 1.4, -0.2, 0.8)],
+                 [(0.2, 1.2, 0.9, 0.9), (0, 1.2, 0.3, 0.8)]):
+        branch(k, "Reef", 1.4, top, 2.4, segs, C_PINK, C_PINK_L)
+    anemone(k, -1.2, top, -2.6)
+    # coral at the foot, so the rock reads as reef from the top-down camera
+    tube(k, "Reef", 7.6, 3.6, 2.6, 1.1, C_PURPLE, C_PURPLE_L, (10, 6, -8))
+    tube(k, "Reef", 8.6, 2.8, 1.8, 0.9, C_PURPLE, C_PURPLE_L, (-20, -10, 10))
+    k.at("Reef", (-7.4, 0.7, -3.6), (3.0, 1.4, 2.8), C_ORANGE, rot(20, 0, 0))
+    k.at("Reef", (-7.4, 1.5, -3.6), (2.2, 0.4, 2.0), C_ORANGE_L, rot(20, 0, 0))
+    anemone(k, -5.6, 0, 5.4)
+
+
+def anemone(k, x, y, z):
+    k.at("Reef", (x, y + 0.4, z), (2.4, 0.8, 2.4), C_TEAL)
+    for dx, dz in ((-0.7, -0.7), (0.7, -0.7), (-0.7, 0.7), (0.7, 0.7), (0, 0)):
+        k.at("Reef", (x + dx, y + 1.4, z + dz), (0.45, 1.4, 0.45), C_TEAL_L, rot(0, dz * 18, -dx * 18))
+
+
 def figure(k, x=0):
     """A 5-stud blocky figure for scale."""
     skin, shirt, pants = (245, 205, 48), (13, 105, 172), (40, 127, 71)
@@ -275,6 +379,13 @@ SNOW = [
     ("Snow", [(228, 234, 242), (244, 247, 251)], [
         ("Icicle (small)", icicle, 5), ("Pine tree (medium)", pine_tree, 9),
         ("Large icicle (medium)", large_icicle, 9), ("Ice boulder (large)", ice_boulder, 19)]),
+]
+
+OCEAN = [
+    ("Ocean", [(236, 214, 164), (246, 228, 184)], [
+        ("Tube coral (small)", tube_coral, 5), ("Brain coral (small)", brain_coral, 6),
+        ("Staghorn (medium)", branch_coral, 8), ("Sea fan (medium)", fan_coral, 8),
+        ("Reef rock (large)", reef_rock, 19)]),
 ]
 
 BOULDERS = [
@@ -343,8 +454,8 @@ def row_image(name, ground, items):
 
 def main(out):
     os.makedirs(out, exist_ok=True)
-    which = "boulders" if "--boulders" in sys.argv else "redo" if "--redo" in sys.argv else "snow" if "--snow" in sys.argv else "terrain_assets"
-    rows = [row_image(*row) for row in {"boulders": BOULDERS, "redo": REDO, "snow": SNOW, "terrain_assets": ROWS}[which]]
+    which = "boulders" if "--boulders" in sys.argv else "redo" if "--redo" in sys.argv else "snow" if "--snow" in sys.argv else "ocean" if "--ocean" in sys.argv else "terrain_assets"
+    rows = [row_image(*row) for row in {"boulders": BOULDERS, "redo": REDO, "snow": SNOW, "ocean": OCEAN, "terrain_assets": ROWS}[which]]
     board = Image.new("RGB", (max(r.width for r in rows), sum(r.height for r in rows)), (255, 255, 255))
     y = 0
     for r in rows:
