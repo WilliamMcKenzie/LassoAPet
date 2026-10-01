@@ -10,9 +10,10 @@ are approximated with blocks and wedges:
   pyramids (a quad and a tip)   four CornerWedgeParts (see spike())
   ringed spikes (4n + 1 verts)  a block per ring-to-ring segment, then a pyramid tip
 Each face picks its colour from its own texture. Group rotations become the
-bone's rest rotation. Parts named in NEON glow (Enum.Material.Neon). A group whose
-name repeats an earlier one (QM's wyvern has a "Head" inside its "Head") becomes its own
-bone, <name>_2, so bones and their animation tracks stay one to one.
+bone's rest rotation. Parts named in NEON glow (Enum.Material.Neon), and parts named in
+METAL are Diamond Plate instead of studs. A group whose name repeats an earlier one (QM's
+wyvern has a "Head" inside its "Head") becomes its own bone, <name>_2, so bones and their
+animation tracks stay one to one.
 """
 
 import base64
@@ -27,6 +28,7 @@ from PIL import Image
 SCALE = 0.1
 PLAIN = ("Eye", "Pupil", "Nostril", "Plain")  # name prefixes that skip the stud texture
 NEON = ("Slit_pupil", "Glow")  # name prefixes that glow
+METAL = ("Metal",)  # name prefixes drawn in Diamond Plate instead of studs
 PLATE = 0.04  # studs: thickness of a converted one-face plane
 
 
@@ -229,7 +231,7 @@ def bone_names(model):
 def convert(model):
     """(bones, parts) of a loaded .bbmodel: bones are (name, parent, pivot, rest
     rotation in degrees), parts (name, bone, class, size, center, rotation, rgb,
-    plain, neon) in model space at rest (before bone rest rotations)."""
+    plain, neon, metal) in model space at rest (before bone rest rotations)."""
     names = bone_names(model)
     res = model.get("resolution") or {"width": 16, "height": 16}
     texs = []
@@ -269,12 +271,13 @@ def convert(model):
                 pieces = mesh_parts(e, model_center)
             rgb = color(e)
             neon = e["name"].startswith(NEON)
+            metal = e["name"].startswith(METAL)
             # plates, and the sloped faces of spikes, skip the studs
             flat = e["type"] == "mesh" and len(e["vertices"]) in (4, 5)
             plain = e["name"].startswith(PLAIN) or "In" in e["name"] or neon or flat
             for i, (cls, center, R, size) in enumerate(pieces):
                 name = e["name"] if i == 0 else f"{e['name']}_{i + 1}"
-                parts.append((name, parent, cls, size, center, R, rgb, plain, neon))
+                parts.append((name, parent, cls, size, center, R, rgb, plain, neon, metal))
             return
         g = groups[node["uuid"]]
         name = names[g["uuid"]]
@@ -306,8 +309,8 @@ def main(src, dst):
         out.append(f'\t\t{{ name = "{name}", parent = {p}, pivot = {v3(pivot)}{rest} }},')
     out.append("\t},")
     out.append("\tparts = {")
-    for name, bone, cls, size, center, R, (r, g, b), plain, neon in parts:
-        extra = (", plain = true" if plain else "") + (", neon = true" if neon else "")
+    for name, bone, cls, size, center, R, (r, g, b), plain, neon, metal in parts:
+        extra = (", plain = true" if plain else "") + (", neon = true" if neon else "") + (", metal = true" if metal else "")
         out.append(f'\t\t{{ name = "{name}", bone = "{bone}", class = "{cls}", size = {v3(size)}, '
                    f"cframe = {cf(center, R)}, color = Color3.fromRGB({r}, {g}, {b}){extra} }},")
     out.append("\t},")

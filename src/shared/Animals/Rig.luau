@@ -3,6 +3,7 @@
 -- `class` picks the part class (default "Part", e.g. "WedgePart").
 -- `hidden = true` makes an invisible, untextured part (used for bones).
 -- `neon = true` makes a glowing, untextured part (the snake's slit pupils).
+-- `metal = true` makes a Diamond Plate part with no studs (the Icebringer's armour).
 --
 -- Every part hangs off a joint in its parent's space:
 --   joint  = CFrame of the joint relative to the parent part's center (C0)
@@ -44,7 +45,10 @@ function Rig.build(spec)
 		part.Name = def.name
 		part.Size = def.size
 		part.Color = def.color
-		part.Material = if def.neon then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		part.Material = if def.neon
+			then Enum.Material.Neon
+			elseif def.metal then Enum.Material.DiamondPlate
+			else Enum.Material.SmoothPlastic
 		part.Anchored = false
 		part.CanCollide = false
 		part.CanQuery = false
@@ -57,7 +61,7 @@ function Rig.build(spec)
 			part[face .. "Surface"] = Enum.SurfaceType.Smooth
 		end
 		-- Fine studs from a tiled texture; surface studs are fixed at 1 stud, too coarse here.
-		if spec.studTexture and not def.plain and not def.hidden and not def.neon then
+		if spec.studTexture and not def.plain and not def.hidden and not def.neon and not def.metal then
 			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
 				local texture = Instance.new("Texture")
 				texture.Texture = spec.studTexture.image
@@ -154,6 +158,7 @@ function Rig.fromData(data, name, studTexture)
 			class = part.class,
 			plain = part.plain,
 			neon = part.neon,
+			metal = part.metal,
 		})
 	end
 	local model, byName, motors = Rig.build({ name = name, studTexture = studTexture, parts = list })

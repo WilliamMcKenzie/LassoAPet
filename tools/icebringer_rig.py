@@ -24,6 +24,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
+import bbmodel_to_luau  # noqa: E402
 from horse_rig import write_animations  # noqa: E402
 from snake_rig import track  # noqa: E402
 from snow_rig import bump, grounded, group_ids  # noqa: E402
@@ -283,6 +284,19 @@ def as_blockbench5(m):
     m["meta"]["format_version"] = "5.0"
 
 
+GREY = {(157, 157, 157), (103, 103, 103)}
+
+
+def metal_armour(m):
+    """QM 17:15: the grey armour is Diamond Plate, not studs. bbmodel_to_luau draws
+    Metal_ parts that way."""
+    _, parts = bbmodel_to_luau.convert(m)
+    grey = {p[0] for p in parts if tuple(p[6]) in GREY}
+    for e in m["elements"]:
+        if e["name"] in grey:
+            e["name"] = "Metal_" + e["name"]
+
+
 def main(path=MODEL, *flags):
     """QM's file is the source of truth for every animation since 17:04 (their own idle, walk
     and gallop): this keeps its keyframes as they are and only makes the model edits the
@@ -293,6 +307,7 @@ def main(path=MODEL, *flags):
     name_front_teeth(m)
     add_neck(m)
     no_glow(m)
+    metal_armour(m)
     if "gallop" in flags:
         feet = contacts(m)
         kept = [a for a in m["animations"] if a["name"] != "gallop"]
