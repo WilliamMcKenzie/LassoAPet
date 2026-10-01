@@ -3,9 +3,10 @@ designs/converted/Icebringer.bbmodel): a gorilla knuckle-walker (QM 03:16: "full
 knuckledragger"). Snow Legendary; its Frost ability is in Ride.client.luau.
 
   idle    knuckle stance, slow breathing, a subtle look round
-  gallop  knuckle-walk: lateral sequence (left hand, right foot, right hand, left foot),
-          the shoulders rolling over the planted arm
-  walk    the same knuckle-walk at 0.7x speed
+  gallop  knuckle-walk (gallop()): lateral sequence, each fist planted while the body
+          vaults over it (QM 16:19)
+  idle, walk  QM's own since 16:19 (kept from the file); idle() and walk() here made the
+          earlier versions
   jaw     its own bone, hinged at the back of the mouth (-X opens); Snake-style teeth
   (charge() is an unused bounding gallop: fists together, then feet)
 
@@ -266,20 +267,72 @@ def glow_armour(m):
             e["name"] = "Glow_" + e["name"]
 
 
+def gait(p, duty):
+    """One limb's knuckle-walk cycle at phase p (0..1): planted for `duty` of it, sliding from
+    +1 to -1 as the body vaults over it, then a quick swing back to +1. Returns (swing, lift):
+    swing in -1..1, lift 0..1 (off the ground mid-swing)."""
+    p %= 1.0
+    if p < duty:
+        return 1 - 2 * p / duty, 0.0
+    v = (p - duty) / (1 - duty)
+    return -1 + 2 * v * v * (3 - 2 * v), math.sin(math.pi * v)
+
+
+def gallop(m, feet, L=1.0, n=40, duty=0.6, arm=-20, stride_arm=11, leg=-10, stride_leg=20,
+           lift=12, raise_=30, sway=-8, lean=10):
+    """QM 16:19: the gallop is a gorilla knuckle-walk. Each fist plants beside the shoulder
+    and the body vaults over it (the limb slides back while planted, then swings forward
+    fast, lifted up and out to the side); lateral sequence: left hand, right foot, right
+    hand, left foot. The back is `lean` degrees more upright than the stance so the fists
+    and feet both reach the ground (probed: arm X -9..-31 keeps the fist within 0.1 studs of
+    the feet's height). The back pitches onto each hand, the shoulders roll and the body
+    swings toward the planted arm while the head stays level. Arms move only by the arm bones."""
+    phase = {"left_arm": 0.0, "right_leg": 0.25, "right_arm": 0.5, "left_leg": 0.75}
+    bob = lambda u: math.cos(2 * TAU * u)  # noqa: E731  # +1 as each hand lands
+    tr = stance(L, n, torso=lambda u: (lean - 3 * bob(u), sway * s(TAU * u + 0.6), -1.5 * s(TAU * u + 0.6)),
+                head=lambda u: (-lean + 4 * bob(u), -sway * 0.8 * s(TAU * u + 0.6), 4 * s(TAU * u + 0.6)))
+    for bone, ph in phase.items():
+        if bone.endswith("arm"):
+            sx = -1 if bone.startswith("left") else 1
+
+            def key(u, ph=ph, sx=sx):
+                swing, up = gait(u - ph, duty)
+                return (arm + stride_arm * swing + raise_ * up, sx * ARM_Y, sx * (ARM_Z + lift * up))
+            tr[bone] = [track(L, key, n)]
+        else:
+            tr[bone] = [track(L, lambda u, ph=ph: (leg + stride_leg * gait(u - ph, duty)[0], 0, 0), n)]
+    tr["tail"] = [track(L, lambda u: (TAIL - 4 * bob(u), 12 * s(TAU * u + 1.2), 0), n)]
+    tr["jaw"] = [track(L, lambda u: (-6 - 10 * bump(u, 0.4, 0.12) - 10 * bump(u, 0.9, 0.12), 0, 0), n)]
+    tr["root"] = grounded(m, L, tr, feet, n)
+    return L, tr
+
+
+def to_4x(m):
+    """A Blockbench 5 save stores keyframe rotations with x and y negated: turn them back into
+    the 4.x convention every tool here (and bbmodel_to_luau) reads."""
+    if str(m["meta"].get("format_version", "4")).startswith("5"):
+        for a in m.get("animations", []):
+            for x in a["animators"].values():
+                for k in x.get("keyframes", []):
+                    if k["channel"] == "rotation":
+                        for c in "xy":
+                            v = -float(k["data_points"][0][c])
+                            k["data_points"][0][c] = v if v != 0 else 0.0
+    m["meta"]["format_version"] = "4.10"
+
+
 def main(path=MODEL):
+    """QM's file keeps its own idle and walk (QM 16:19); only the gallop is generated here."""
     m = json.load(open(path))
-    kept = hand_keys(m)
-    m["meta"]["format_version"] = "4.10"  # keyframes in the 4.x sign convention
-    m["animations"] = []
+    to_4x(m)
     edit_model(m)
     name_front_teeth(m)
     add_neck(m)
     glow_armour(m)
     feet = contacts(m)
-    anims = {"idle": idle(m, feet), "walk": walk(m, feet, L=round(1.3 / 0.7, 3)), "gallop": walk(m, feet)}  # QM 03:23: the knuckle-walk is the gallop, the walk is it at 0.7x
-    for name, (L, tr) in anims.items():
-        tr.update(kept.get(name, {}))
-    write_animations(m, group_ids(m), anims)
+    kept = [a for a in m["animations"] if a["name"] != "gallop"]
+    write_animations(m, group_ids(m), {"gallop": gallop(m, feet)})
+    m["animations"] = kept + m["animations"]
     with open(path, "w") as f:
         json.dump(m, f, separators=(",", ":"))
     return m
