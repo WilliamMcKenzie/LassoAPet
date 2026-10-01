@@ -90,6 +90,10 @@ function Rig.build(spec)
 	return model, parts, motors
 end
 
+local function catmullRom(p0, p1, p2, p3, u)
+	return 0.5 * (2 * p1 + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u * u * u)
+end
+
 -- Keyframe track from a generated model module (tools/bbmodel_to_luau.py):
 -- { smooth = bool, keys = { { time, x, y, z }, ... } } -> x, y, z at time t.
 -- Smooth tracks are Catmull-Rom through the neighbouring keys, like Blockbench.
@@ -108,19 +112,13 @@ function Rig.sample(track, t)
 	end
 	local a, b = keys[i], keys[i + 1]
 	local u = (t - a[1]) / (b[1] - a[1])
-	local out = {}
-	for c = 2, 4 do
-		if track.smooth then
-			local p0 = keys[math.max(i - 1, 1)][c]
-			local p1, p2 = a[c], b[c]
-			local p3 = keys[math.min(i + 2, n)][c]
-			out[c - 1] = 0.5
-				* (2 * p1 + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u * u * u)
-		else
-			out[c - 1] = a[c] + (b[c] - a[c]) * u
-		end
+	-- Returned as three values, not a table: this runs for every bone of every
+	-- animal every frame, and a table each time is garbage the collector stalls on.
+	if track.smooth then
+		local k0, k3 = keys[math.max(i - 1, 1)], keys[math.min(i + 2, n)]
+		return catmullRom(k0[2], a[2], b[2], k3[2], u), catmullRom(k0[3], a[3], b[3], k3[3], u), catmullRom(k0[4], a[4], b[4], k3[4], u)
 	end
-	return out[1], out[2], out[3]
+	return a[2] + (b[2] - a[2]) * u, a[3] + (b[3] - a[3]) * u, a[4] + (b[4] - a[4]) * u
 end
 
 -- Builds a model from a generated data module ({ bones, parts, animations }).

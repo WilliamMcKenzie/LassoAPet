@@ -94,6 +94,34 @@ for _, model in world.Obstacles:GetChildren() do
 	})
 end
 
+-- The obstacles again, by 32-stud slice of the course: each slice lists the ones
+-- that could matter to something in it, in their order above. A stampede animal
+-- swerving (laneX) or a crash check (blockedAt) looks through a few nearby
+-- instead of all ~600 every frame.
+-- (One table, not separate locals: this chunk is at Luau's 200-local limit.)
+local slices = {
+	SIZE = 32,
+	SWERVE_BEFORE = 40, -- studs: laneX's reach in front of an obstacle
+	SWERVE_AFTER = 28, -- and past it
+	BLOCK_PAD = 8, -- studs: the most padZ blockedAt is asked for and still uses the slices
+	swerve = {},
+	block = {},
+	NONE = {},
+}
+function slices.add(list, o, zMin, zMax)
+	for slice = math.floor(zMin / slices.SIZE), math.floor(zMax / slices.SIZE) do
+		list[slice] = list[slice] or {}
+		table.insert(list[slice], o)
+	end
+end
+function slices.at(list, z)
+	return list[math.floor(z / slices.SIZE)] or slices.NONE
+end
+for _, o in obstacles do
+	slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
+	slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
+end
+
 -- Size tiers a pet gains on the way home with the egg.
 local RETURN_TIER_BONUS = 1
 
@@ -329,7 +357,8 @@ end
 
 -- The first obstacle overlapping (x, z) that's still standing, of at least this tier (1 if nil).
 local function blockedAt(x, z, padX, padZ, tier)
-	for _, o in obstacles do
+	local list = if padZ <= slices.BLOCK_PAD then slices.at(slices.block, z) else obstacles
+	for _, o in list do
 		if not o.smashed and o.tier >= (tier or 1) and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
 			return o
 		end
@@ -367,7 +396,7 @@ end
 -- A stampede animal's x at z: its lane, swerving round any obstacle in the way.
 local function laneX(x0, z)
 	local x = x0
-	for _, o in obstacles do
+	for _, o in slices.at(slices.swerve, z) do
 		local reach = o.hx + 6
 		local d = x0 - o.x
 		if math.abs(d) < reach then
@@ -376,7 +405,7 @@ local function laneX(x0, z)
 				side = -side
 			end
 			-- Eases out over the 36 studs before the obstacle and back over the 24 after.
-			local w = smoothstep(o.z + o.hz + 40, o.z + o.hz + 4, z) * smoothstep(o.z - o.hz - 28, o.z - o.hz - 4, z)
+			local w = smoothstep(o.z + o.hz + slices.SWERVE_BEFORE, o.z + o.hz + 4, z) * smoothstep(o.z - o.hz - slices.SWERVE_AFTER, o.z - o.hz - 4, z)
 			x += (o.x + side * reach - x0) * w
 		end
 	end
@@ -558,6 +587,13 @@ end
 
 -- Flat distance from `at` to the edge of the pet (roughly), so big pets count as near.
 local function petDistance(model, at)
+	-- A pet's box is slow to measure (every block), and this runs for every pet every
+	-- frame at home: one well out of reach is measured from its root instead.
+	local root = model.PrimaryPart
+	local far = root and Vector2.new(root.Position.X - at.X, root.Position.Z - at.Z).Magnitude
+	if far and far > 100 then
+		return far - 50, far
+	end
 	local middle, size = model:GetBoundingBox()
 	local d = Vector2.new(middle.X - at.X, middle.Z - at.Z).Magnitude
 	return d - math.max(size.X, size.Z) / 2, d
@@ -761,11 +797,14 @@ local function grabEgg()
 	if waitingEggs[nearEgg.nest] ~= nearEgg then
 		return -- someone else took it a moment ago
 	end
-	local egg = Egg.new(nearEgg.egg.kind)
+	-- The nest's own egg goes on the lasso (building a new one here stalled the
+	-- grab). Out of waitingEggs first, so emptying the nest leaves it alone.
+	local egg = nearEgg.egg
+	waitingEggs[nearEgg.nest] = nil
+	egg.t = math.huge
+	egg:update(0) -- stop any twitch, back to rest
 	local part = egg.model
-	part:PivotTo(nearEgg.egg.model:GetPivot())
 	part.Parent = workspace
-	nearEgg.egg.model.Parent = nil
 	takeEgg:FireServer(nearEgg.nest) -- empties the nest for everyone
 	carried = { part = part, kind = nearEgg.kind, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	phase, turnT = "turning", 0
@@ -1113,10 +1152,25 @@ end
 
 local function putInPool(entity)
 	vfx.setFrosted(entity, false)
+	local active = entity.ability and entity.ability.active
+	for _, fx in if active then active.fx else {} do
+		fx:Destroy()
+	end
 	entity.animal.model.Parent = nil
 	entity.animal:setScale(1)
 	entity.hop, entity.popping, entity.lift = 0, nil, nil
+	entity.ability, entity.frostLeft, entity.fall = nil, nil, nil
 	table.insert(pools[entity.kind], entity)
+end
+
+-- Done with an animal: back in its kind's pool if the stampede has one (building
+-- a new one later is what stalls a frame), else gone.
+local function retire(entity)
+	if pools[entity.kind] then
+		putInPool(entity)
+	else
+		entity.animal.model:Destroy()
+	end
 end
 
 -- Advances an animal's animation, kicking up hoof dust when a leap lands near the camera.
@@ -1170,11 +1224,15 @@ local function wander(entity, dt)
 	animate(entity, dt, speed, turn)
 end
 
-local function moveAnimal(entity, x, z, speed, dt)
+-- shown: false while it's out of view (see updateHerd), when it only keeps its
+-- place on the course and its model waits where it was.
+local function moveAnimal(entity, x, z, speed, dt, shown)
 	local lat = (x - entity.x) / math.max(dt, 1e-3)
 	entity.x, entity.z, entity.speed = x, z, speed
-	place(entity, -math.atan2(lat, math.max(speed, 1)))
-	animate(entity, dt, speed, lat / 12)
+	if shown then
+		place(entity, -math.atan2(lat, math.max(speed, 1)))
+		animate(entity, dt, speed, lat / 12)
+	end
 end
 
 -- A stampede animal (or stray) a bigger pet ran into: it's thrown up and away,
@@ -1213,11 +1271,7 @@ local function updateFlung(dt)
 		if f.t >= FLING_TIME then
 			Poof.at(Vector3.new(e.x, math.max(e.hop, 0), e.z))
 			table.remove(flung, i)
-			if e.n then
-				putInPool(e)
-			else
-				e.animal.model:Destroy()
-			end
+			retire(e)
 		end
 	end
 end
@@ -1238,6 +1292,14 @@ local function updateHerd(dt, slowed)
 	local every = Config.HerdSpawnEvery
 	local newest = math.floor(herdClock / every)
 	local camZ = camera.CFrame.Position.Z
+	-- Animals behind the camera aren't moved on screen or animated, which is most
+	-- of the cost of an animal (a stampede animal is 20 to 200 blocks). Ones near
+	-- the camera always are (at home the camera can swing round any time).
+	local camPos, camLook = camera.CFrame.Position, camera.CFrame.LookVector
+	local function inView(x, z)
+		local dx, dz = x - camPos.X, z - camPos.Z
+		return dx * camLook.X - camPos.Y * camLook.Y + dz * camLook.Z > -40 or dx * dx + dz * dz < 80 * 80
+	end
 	local seen = {}
 	for key, left in vfx.frostLeft do
 		vfx.frostLeft[key] = if left > dt then left - dt else nil
@@ -1264,33 +1326,38 @@ local function updateHerd(dt, slowed)
 				continue
 			end
 			local x = laneX(p.x, z)
+			local shown = lassoed or inView(x, z)
 			if not entity then
 				entity = takeFromPool(key, x, z, p.kind)
 				if not entity then
 					continue
 				end
 				herd[key] = entity
-				if age < 0.15 then
+				if age < 0.15 and shown then
 					Poof.at(Vector3.new(x, 0, z))
 				end
 			end
 			seen[key] = true
 			-- Pops in at the start, shrinks into nothing over the last SHRINK studs.
+			-- (Rescaling a model is slow: only while it's in view.)
 			local shrink = if lassoed then 1 else math.clamp((z - stream.endZ) / SHRINK, 0, 1)
+			local scale = 1
 			if age < POP_TIME or shrink < 1 then
 				entity.popping = true
 				entity.hop = if age < POP_TIME then popHop(age) else 0
-				entity.animal:setScale((if age < POP_TIME then popScale(age) else 1) * shrink)
+				scale = (if age < POP_TIME then popScale(age) else 1) * shrink
 			elseif entity.popping then
 				entity.popping, entity.hop = nil, 0
-				entity.animal:setScale(1)
+			end
+			if shown then
+				entity.animal:setScale(scale)
 			end
 			-- A nudge from a passing rider fades back out; it never changes the schedule.
 			entity.dodge *= math.exp(-1.5 * dt)
 			if snapped then
 				entity.x = x + entity.dodge -- a snap doesn't swing them sideways
 			end
-			moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt)
+			moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt, shown)
 			vfx.setFrosted(entity, vfx.frostLeft[key] ~= nil)
 		end
 	end
@@ -1322,13 +1389,16 @@ local function updateHerd(dt, slowed)
 		-- Shrinks away at the end of the biome it's in, like the stampede.
 		local endZ = streamAt(entity.z).endZ
 		if z <= endZ then
-			entity.animal.model:Destroy()
 			table.remove(strays, i)
+			retire(entity)
 			continue
 		end
+		local shown = inView(entity.x, z)
 		local shrink = math.clamp((z - endZ) / SHRINK, 0, 1)
 		entity.popping = if shrink < 1 then true else nil
-		entity.animal:setScale(shrink)
+		if shown then
+			entity.animal:setScale(shrink)
+		end
 		local x = entity.x + look.X * pace * dt
 		if math.abs(yaw) > 0.05 then
 			entity.lane = x
@@ -1336,8 +1406,10 @@ local function updateHerd(dt, slowed)
 		-- Swerves round obstacles like the rest of the stampede.
 		local lat = math.clamp(laneX(entity.lane, z) - x, -1, 1) * 12
 		entity.x, entity.z = math.clamp(x + lat * dt, -EDGE, EDGE), z
-		place(entity, -math.atan2(lat, math.max(pace, 1)))
-		animate(entity, dt, pace, turn + lat / 12)
+		if shown then
+			place(entity, -math.atan2(lat, math.max(pace, 1)))
+			animate(entity, dt, pace, turn + lat / 12)
+		end
 	end
 	if mount then
 		vfx.setFrosted(mount, false) -- lassoed while slowed: your new mount thaws out

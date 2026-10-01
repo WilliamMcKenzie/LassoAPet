@@ -90,6 +90,13 @@ local function variant(name, data, rarity, points)
 			clocks[anim] = 0
 		end
 
+		-- Reused every frame (see update): one { x, y, z, rx, ry, rz } per bone.
+		local pose = {}
+		for bone in pairs(bones) do
+			pose[bone] = { 0, 0, 0, 0, 0, 0 }
+		end
+		pose.root = pose.root or { 0, 0, 0, 0, 0, 0 }
+
 		return setmetatable({
 			model = model,
 			root = byName.rootBone,
@@ -97,6 +104,7 @@ local function variant(name, data, rarity, points)
 			pivots = pivots,
 			bones = bones,
 			clocks = clocks,
+			pose = pose,
 			speed = 0,
 			turn = 0,
 			scale = 1,
@@ -114,22 +122,26 @@ function Horse:update(dt, speed, turn)
 
 	local moving = clamp01(s / WALK_IN)
 	local galloping = clamp01((s - GALLOP_FROM) / (GALLOP_IN - GALLOP_FROM))
-	local weights = {
-		idle = 1 - moving,
-		walk = moving * (1 - galloping),
-		gallop = moving * galloping,
-	}
-	local rates = {
-		idle = 1,
-		walk = math.clamp(s / WALK_SPEED, 0.6, 1.8),
-		gallop = math.clamp(s / GALLOP_SPEED, 0.8, 1.4),
-	}
+	-- No tables made here: this runs for every animal every frame, and fresh
+	-- tables each time pile up garbage that the collector stops the game to clear.
+	local wIdle, wWalk, wGallop = 1 - moving, moving * (1 - galloping), moving * galloping
+	local rWalk, rGallop = math.clamp(s / WALK_SPEED, 0.6, 1.8), math.clamp(s / GALLOP_SPEED, 0.8, 1.4)
 
 	local before = self.clocks.gallop
-	local pose = {}
+	local pose = self.pose
+	for _, p in pairs(pose) do
+		p[1], p[2], p[3], p[4], p[5], p[6] = 0, 0, 0, 0, 0, 0
+	end
 	for name, anim in pairs(self.data.animations) do
-		self.clocks[name] = (self.clocks[name] + dt * (rates[name] or 1)) % anim.length
-		local w = weights[name] or 0
+		local w, rate = 0, 1
+		if name == "idle" then
+			w = wIdle
+		elseif name == "walk" then
+			w, rate = wWalk, rWalk
+		elseif name == "gallop" then
+			w, rate = wGallop, rGallop
+		end
+		self.clocks[name] = (self.clocks[name] + dt * rate) % anim.length
 		if w > 0 then
 			local t = self.clocks[name]
 			for bone, track in pairs(anim.tracks) do
@@ -155,14 +167,13 @@ function Horse:update(dt, speed, turn)
 	end
 
 	-- roll into turns (+turn = right)
-	local rootPose = pose.root or { 0, 0, 0, 0, 0, 0 }
-	pose.root = rootPose
+	local rootPose = pose.root
 	rootPose[6] -= LEAN * self.turn * (0.4 + 0.6 * galloping)
 
 	local sc = self.scale * self.size -- animation offsets are in studs at the model's own size
 	for bone, motor in pairs(self.bones) do
 		local p = pose[bone]
-		motor.Transform = if p then CFrame.new(p[1] * sc, p[2] * sc, p[3] * sc) * CFrame.Angles(p[4], p[5], p[6]) else CFrame.identity
+		motor.Transform = CFrame.new(p[1] * sc, p[2] * sc, p[3] * sc) * CFrame.Angles(p[4], p[5], p[6])
 	end
 
 	local after = self.clocks.gallop
@@ -171,7 +182,7 @@ function Horse:update(dt, speed, turn)
 		return false
 	end
 	local crossed = if after >= before then before < land and after >= land else before < land or after >= land
-	return crossed and weights.gallop > 0.5
+	return crossed and wGallop > 0.5
 end
 
 function Horse:getSeatCFrame()
