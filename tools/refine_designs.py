@@ -105,7 +105,7 @@ def snowball(a, name, x, z, y0, y1, color, bone, r=0.3, inset=0.25):
 
 
 def snowman():
-    """Three rounded snowballs, googly eyes, a coal smile, a carrot nose, a red striped
+    """Three rounded snowballs, the Horse's eyes, a coal smile, a carrot nose, a red striped
     scarf with a hanging end, a matching beanie with a pom-pom, and stick arms
     raised in a cheer."""
     c = dict(snow=(246, 249, 255), shade=(226, 236, 252), coal=(40, 42, 52), carrot=(250, 132, 40),
@@ -125,16 +125,13 @@ def snowman():
     a.b("ScarfFringe", (-1.45, 4.6, -2.3), (-0.65, 4.9, -2.05), c["stripe"], mid)
     head = a.bone("neck", "Mid", (0, 7.3, 0))
     snowball(a, "Head", 1.5, 1.4, 7.3, 10.6, c["snow"], head, r=0.25, inset=0.15)
-    # googly eyes on the face's front band, set in coal rims so they read on the snow
+    # the Horse's eyes, facing front: a 1x1 stud white plate, a 0.5 x 0.6 pupil
+    z = -1.65
     for side, sx in SIDES:
-        x0, x1 = X(sx, 0.0, 1.34)
-        a.box("EyeSocket" + side, (x0, 8.78, -1.65 - A.PLATE), (x1, 10.22, -1.65), c["coal"], head)
-    z = -1.65 - A.PLATE
-    for side, sx in SIDES:
-        x0, x1 = X(sx, 0.12, 1.22)
-        a.box("Eye" + side, (x0, 8.9, z - A.PLATE), (x1, 10.1, z), A.EYE_WHITE, head)
-        x0, x1 = X(sx, 0.3, 0.85)
-        a.box("Pupil" + side, (x0, 9.05, z - A.PLATE - 0.03), (x1, 9.7, z - A.PLATE), A.PUPIL, head)
+        x0, x1 = X(sx, 0.25, 1.25)
+        a.box("Eye" + side, (x0, 9.0, z - A.PLATE), (x1, 10.0, z), A.EYE_WHITE, head)
+        x0, x1 = X(sx, 0.5, 1.0)
+        a.box("Pupil" + side, (x0, 9.1, z - A.PLATE - 0.03), (x1, 9.7, z - A.PLATE), A.PUPIL, head)
     # carrot nose, pointing forward and a touch down
     nose = a.bone("Nose", head, (0, 8.55, -1.65), (-8, 0, 0))
     a.b("Carrot", (-0.3, 8.25, -2.35), (0.3, 8.85, -1.6), c["carrot"], nose)
@@ -203,60 +200,53 @@ if __name__ == "__main__":
             old=sys.argv[3] if len(sys.argv) > 3 else None)
 
 
-# ---------------------------------------------------------------- eye sockets
+# ---------------------------------------------------------------- horse eyes
 
-def eye_sockets(path, margin, dark=None):
-    """Dark sockets for eyes on white fur (QM: white eyes don't show on white animals).
-    Each Eye<side> plate gets a darker block of the same depth around it, margin BB units
-    wider on every side, and the eye and pupil move out by the plate's depth to sit on it.
-    The socket copies the darkest element's faces (its palette colour) unless `dark`
-    names an element to copy."""
-    import copy
-    import uuid
-    from snake_design import element_color, textures
-
+def horse_eyes(path):
+    """Give a .bbmodel the Horse's eyes (QM: the default style, no rims): a 1x1 stud white
+    plate, a pupil 0.5 wide and 0.6 tall, 0.1 stud up from the plate's bottom, standing
+    0.03 proud. On a side eye the pupil sits 0.025 back from the plate's front edge (as on
+    the Horse); on a front eye it is centred. Removes any EyeSocket parts."""
     m = json.load(open(path))
+    socks = {e["uuid"] for e in m["elements"] if e["name"].startswith("EyeSocket")}
     els = {e["name"]: e for e in m["elements"]}
-    if any(n.startswith("EyeSocket") for n in els):
-        print(path, "already has sockets")
-        return
-    texs = textures(m)
-    src = els[dark] if dark else min(m["elements"], key=lambda e: sum(element_color(e, texs)))
     for side in ("L", "R"):
-        eye, pupil = els["Eye" + side], els.get("Pupil" + side) or els.get("Slit" + side)
+        eye, pupil = els["Eye" + side], els.get("Pupil" + side)
         lo, hi = np.array(eye["from"], float), np.array(eye["to"], float)
-        axis = int(np.argmin(hi - lo))  # the plate's thin axis
-        depth = hi[axis] - lo[axis]
-        # outward: away from the head, i.e. the side the pupil sits on
+        axis = int(np.argmin(hi - lo))
         out = -1 if pupil["from"][axis] < lo[axis] else 1
-        sock = copy.deepcopy(src)
-        sock["name"], sock["uuid"] = "EyeSocket" + side, str(uuid.uuid4())
-        slo, shi = lo - margin, hi + margin
-        slo[axis], shi[axis] = lo[axis], hi[axis]
-        sock["from"], sock["to"] = [round(v, 4) for v in slo], [round(v, 4) for v in shi]
-        sock["origin"] = [round(v, 4) for v in (slo + shi) / 2]
-        sock["rotation"] = [0, 0, 0]
-        for e in (eye, pupil):
-            for k in ("from", "to", "origin"):
-                if k in e:
-                    e[k][axis] = round(e[k][axis] + out * depth, 4)
-        m["elements"].append(sock)
+        if socks:  # the eye was moved out onto its socket: put it back on the face
+            d = out * (hi[axis] - lo[axis])
+            lo[axis] -= d
+            hi[axis] -= d
+        c = (lo + hi) / 2
+        elo, ehi = c - 5, c + 5
+        elo[axis], ehi[axis] = lo[axis], hi[axis]
+        plo, phi = elo.copy(), ehi.copy()
+        face = hi[axis] if out > 0 else lo[axis]
+        plo[axis], phi[axis] = sorted((face - out * (hi[axis] - lo[axis]), face + out * 0.3))
+        plo[1], phi[1] = elo[1] + 1, elo[1] + 7
+        h = 2 if axis == 0 else 0  # the pupil's across axis
+        if axis == 0:  # side eye: pupil at the front (-z) edge
+            plo[h], phi[h] = elo[h] + 0.25, elo[h] + 5.25
+        else:
+            plo[h], phi[h] = c[h] - 2.5, c[h] + 2.5
+        for e, l, u in ((eye, elo, ehi), (pupil, plo, phi)):
+            e["from"], e["to"] = [round(v, 4) for v in l], [round(v, 4) for v in u]
+            e["origin"] = [round(v, 4) for v in (l + u) / 2]
+    m["elements"] = [e for e in m["elements"] if e["uuid"] not in socks]
 
-        def put(node):
-            for c in node:
-                if isinstance(c, dict):
-                    if eye["uuid"] in c["children"]:
-                        c["children"].insert(c["children"].index(eye["uuid"]), sock["uuid"])
-                        return True
-                    if put(c["children"]):
-                        return True
-            return False
+    def drop(node):
+        for c in node:
+            if isinstance(c, dict):
+                c["children"] = [x for x in c["children"] if not (isinstance(x, str) and x in socks)]
+                drop(c["children"])
 
-        assert put(m["outliner"]), side
+    drop(m["outliner"])
+    m["outliner"] = [x for x in m["outliner"] if not (isinstance(x, str) and x in socks)]
     with open(path, "w") as f:
         json.dump(m, f, separators=(",", ":"))
-    print(path, "sockets from", src["name"])
-
+    print(path, "horse eyes")
 
 HEAD_KEYS = ("head", "eye", "snout", "muzzle", "face", "nose", "beak", "jaw", "forehead", "hat")
 
