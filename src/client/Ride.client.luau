@@ -1602,12 +1602,12 @@ function vfx.cloudFx(entity)
 	puffs.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
 	puffs.Speed = NumberRange.new(1, 3)
 	puffs.Lifetime = NumberRange.new(0.6, 1)
-	puffs.Rate = 45
+	puffs.Rate = 80
 	puffs.RotSpeed = NumberRange.new(-40, 40)
 	puffs.Rotation = NumberRange.new(0, 360)
-	puffs.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2.5), NumberSequenceKeypoint.new(0.5, 4), NumberSequenceKeypoint.new(1, 3) })
-	puffs.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(0.7, 0.35), NumberSequenceKeypoint.new(1, 1) })
-	puffs.LockedToPart = false
+	puffs.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 3.5), NumberSequenceKeypoint.new(0.5, 6), NumberSequenceKeypoint.new(1, 4.5) })
+	puffs.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.7, 0.15), NumberSequenceKeypoint.new(1, 1) })
+	puffs.LockedToPart = true -- the cloud rides along under its feet
 	puffs.Parent = box
 	box.Parent = entity.animal.model
 	return { box }
