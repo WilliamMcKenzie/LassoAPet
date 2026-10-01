@@ -1044,7 +1044,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 	if input.UserInputType == Enum.UserInputType.Touch then
 		touchStart[input] = input.Position.X
-	elseif input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA
+	elseif input.KeyCode == Enum.KeyCode.E or input.KeyCode == Enum.KeyCode.ButtonA -- (Space is the ability)
 		or input.KeyCode == Enum.KeyCode.ButtonR2 or input.UserInputType == Enum.UserInputType.MouseButton1 then
 		onAction()
 	end
@@ -1420,7 +1420,7 @@ local function updateHerd(dt, slowed)
 	end
 end
 
--- Pet abilities (Config.Abilities): the Ability button, Q or R1. Each mount keeps
+-- Pet abilities (Config.Abilities): the Ability button, Space (or Q), R1. Each mount keeps
 -- its own cooldown (entity.ability); a mount with no entry shows no button. Every
 -- ability is one tap: it runs its full Duration.
 local abilityKey = false -- Q or R1 pressed since the last frame
@@ -1439,7 +1439,7 @@ ContextActionService:BindActionAtPriority("Ability", function(_, state)
 		return Enum.ContextActionResult.Pass
 	end
 	return Enum.ContextActionResult.Sink
-end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.Q, Enum.KeyCode.ButtonR1)
+end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.Space, Enum.KeyCode.Q, Enum.KeyCode.ButtonR1)
 
 -- Whether the ability was asked for since the last frame (a press while it's
 -- cooling down is dropped, not saved up).

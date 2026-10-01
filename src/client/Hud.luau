@@ -76,6 +76,17 @@ local IMAGES = {
 	eggIcebringer = { id = "rbxassetid://108999142038756", size = Vector2.new(502, 774) }, -- IcebringerEggRender.png
 }
 
+-- On a computer (keyboard, no touch screen) the ride buttons show their key:
+-- LASSO [E], RIDE [E], Sprint [SHIFT] and Ability [SPACE] (QM's PC art, same sizes).
+-- The Ability button's cooldown picture stays the same.
+if game:GetService("UserInputService").KeyboardEnabled and not game:GetService("UserInputService").TouchEnabled then
+	IMAGES.lasso.id = "rbxassetid://101879608972078" -- LassoE.png
+	IMAGES.lassoDisabled.id = "rbxassetid://118282623101402" -- LassoDisabledE.png
+	IMAGES.ride.id = "rbxassetid://120239297848540" -- RideE.png
+	IMAGES.sprint.id = "rbxassetid://99201367360467" -- SprintSHIFT.png
+	IMAGES.ability.id = "rbxassetid://85357705922490" -- AbilitySPACE.png
+end
+
 local BUTTON_WIDTH = 256
 local SPRINT_WIDTH = 164 -- about 2/3 of TAKE EGG's width, as in the mockup
 local BAR_WIDTH = 352
