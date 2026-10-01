@@ -69,7 +69,10 @@ local function touch()
 	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 end
 
--- The hint: white text with a black outline, top centre, breathing gently.
+-- The hint: white text with a black outline, top centre. It pops in and then
+-- pulses like DODGE THE STAMPEDE! (a UIScale tween). The text size is fixed per
+-- screen width: TextScaled re-fits the font to whole sizes every frame the scale
+-- changes, which made the pulse step.
 local gui = Instance.new("ScreenGui")
 gui.Name = "TutorialHud"
 gui.ResetOnSpawn = false
@@ -82,7 +85,7 @@ hint.AnchorPoint = Vector2.new(0.5, 0.5)
 hint.Position = UDim2.fromScale(0.5, 0.25)
 hint.Size = UDim2.fromScale(0.8, 0.07)
 hint.Font = Enum.Font.FredokaOne
-hint.TextScaled = true
+hint.TextWrapped = true
 hint.TextColor3 = Color3.new(1, 1, 1)
 hint.Text = ""
 local stroke = Instance.new("UIStroke")
@@ -93,14 +96,17 @@ local hintScale = Instance.new("UIScale")
 hintScale.Parent = hint
 hint.Parent = gui
 local function resize()
-	stroke.Thickness = math.max(2, math.round(camera.ViewportSize.X / 320))
+	local width = camera.ViewportSize.X
+	hint.TextSize = math.round(width / 26)
+	stroke.Thickness = math.max(2, math.round(width / 320))
 end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
 resize()
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local shown = "" -- the hint's text when it's showing
-local popAt = 0
+local pulse = TweenService:Create(hintScale, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.06 })
+local pop -- the pop-in tween, which starts the pulse when it's done
 local function setHint(text)
 	text = text or ""
 	if text == shown then
@@ -109,7 +115,20 @@ local function setHint(text)
 	shown = text
 	hint.Text = text
 	hint.Visible = text ~= ""
-	popAt = os.clock()
+	pulse:Cancel()
+	if pop then
+		pop:Cancel()
+	end
+	if text ~= "" then
+		hintScale.Scale = 0
+		pop = TweenService:Create(hintScale, TweenInfo.new(0.3, Enum.EasingStyle.Back), { Scale = 1 })
+		pop.Completed:Connect(function(state)
+			if state == Enum.PlaybackState.Completed and shown == text then
+				pulse:Play()
+			end
+		end)
+		pop:Play()
+	end
 end
 
 -- The arrows: a beam lying flat on the ground, from just ahead of you to the target.
@@ -347,7 +366,6 @@ function Tutorial.update(state)
 	Tutorial.slowMo = if slow and phase == "outbound" then Config.TutorialSlowMo else nil
 
 	setHint(if state.cutscene then nil else hintFor(state))
-	hintScale.Scale = math.min((os.clock() - popAt) / 0.15, 1) * (1 + 0.04 * math.sin(os.clock() * math.pi * 2))
 	local target
 	if phase == "idle" then
 		if step == "ride" then
