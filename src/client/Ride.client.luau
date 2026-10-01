@@ -745,6 +745,64 @@ local function gateZ()
 	return WorldColors.gateZ(player:GetAttribute("PenLevel"))
 end
 
+-- On the way out, a trail of arrows on the ground from your pet to the nearest
+-- egg still waiting ahead of you (not behind a locked gate).
+local GUIDE_ARROW = "rbxassetid://101032148634562" -- assets/ui/GuideArrow.png (chevrons pointing along the trail)
+local GUIDE_AHEAD = 6 -- studs in front of the pet where the trail starts
+local guideFrom, guideTo = Instance.new("Attachment"), Instance.new("Attachment")
+guideFrom.Name, guideTo.Name = "GuideFrom", "GuideTo"
+local guide = Instance.new("Beam")
+guide.Name = "EggGuide"
+guide.Texture = GUIDE_ARROW
+guide.TextureMode = Enum.TextureMode.Static
+guide.TextureLength = 5
+guide.TextureSpeed = 1.2
+guide.Width0, guide.Width1 = 4, 4
+guide.FaceCamera = false
+guide.LightEmission = 1
+guide.LightInfluence = 0
+guide.Color = ColorSequence.new(Color3.fromRGB(255, 236, 120))
+guide.Transparency = NumberSequence.new({
+	NumberSequenceKeypoint.new(0, 1),
+	NumberSequenceKeypoint.new(0.08, 0.15),
+	NumberSequenceKeypoint.new(0.9, 0.15),
+	NumberSequenceKeypoint.new(1, 1),
+})
+guide.Attachment0, guide.Attachment1 = guideFrom, guideTo
+guide.Enabled = false
+guide.Parent = guideFrom
+guideFrom.Parent, guideTo.Parent = workspace.Terrain, workspace.Terrain
+task.spawn(function()
+	game:GetService("ContentProvider"):PreloadAsync({ guide })
+end)
+
+local function updateGuide()
+	local target
+	if phase == "outbound" and mount and not transfer and not cutscene then
+		local best = math.huge
+		for nest, waiting in waitingEggs do
+			local spot = nest:FindFirstChild("EggSpot")
+			if spot and waiting.egg.model.Parent and spot.Position.Z < mount.z - GUIDE_AHEAD and spot.Position.Z > gateZ() then
+				local d = (Vector2.new(spot.Position.X, spot.Position.Z) - Vector2.new(mount.x, mount.z)).Magnitude
+				if d < best then
+					target, best = spot.Position, d
+				end
+			end
+		end
+	end
+	guide.Enabled = target ~= nil
+	if target then
+		local from = Vector3.new(mount.x, 0, mount.z - GUIDE_AHEAD)
+		local flat = Vector3.new(target.X, 0, target.Z)
+		local along = (flat - from).Unit
+		-- Lying flat on the ground: the attachments' up is the beam's width direction.
+		local side = along:Cross(Vector3.yAxis)
+		local y = Ground.heightAt(from.X, from.Z) + 0.3
+		guideFrom.WorldCFrame = CFrame.fromMatrix(Vector3.new(from.X, y, from.Z), along, side)
+		guideTo.WorldCFrame = CFrame.fromMatrix(Vector3.new(flat.X, Ground.heightAt(flat.X, flat.Z) + 0.3, flat.Z), along, side)
+	end
+end
+
 local function eggInRange(waiting)
 	local eggPos = waiting.nest.EggSpot.Position
 	return waitingEggs[waiting.nest] == waiting and waiting.egg.model.Parent ~= nil and eggPos.Z > gateZ()
@@ -1752,6 +1810,7 @@ RunService.PreSimulation:Connect(function(dt)
 	updateFlung(dt)
 	Dust.update(dt)
 	if phase == "idle" then
+		updateGuide() -- (hides it)
 		if starter then
 			wander(starter, dt)
 		end
@@ -1761,6 +1820,7 @@ RunService.PreSimulation:Connect(function(dt)
 		return
 	end
 	updateAbility(dt)
+	updateGuide()
 	if mount then
 		updateMount(dt)
 	end
