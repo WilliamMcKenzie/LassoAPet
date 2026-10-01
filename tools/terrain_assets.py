@@ -266,14 +266,12 @@ REEF, REEF_L, REEF_D = (236, 140, 124), (250, 168, 148), (204, 112, 104)  # salm
 
 
 def tube(k, name, x, z, h, w, color, rim, tilt=(0, 0, 0), y=0.0):
-    """One tube coral: a block with a lighter rim on top and a dark mouth."""
+    """One tube coral: a block with a lighter rim on top."""
     R = rot(*tilt)
     for frac, sw, c in ((0.0, w, color), (h - 0.5, w, rim)):
         hh = h - 0.5 if frac == 0 else 0.5
         cc = R[:3, :3] @ np.array([0, frac + hh / 2, 0])
         k.at(name, (x + cc[0], y + cc[1], z + cc[2]), (sw, hh, sw), c, R)
-    cc = R[:3, :3] @ np.array([0, h + 0.02, 0])
-    k.at(name, (x + cc[0], y + cc[1], z + cc[2]), (w * 0.5, 0.1, w * 0.5), tuple(int(v * 0.45) for v in color), R)
 
 
 def tube_coral(k):
@@ -344,18 +342,46 @@ def reef_rock(k):
                  [(0.2, 1.2, 0.9, 0.9), (0, 1.2, 0.3, 0.8)]):
         branch(k, "Reef", 1.4, top, 2.4, segs, C_PINK, C_PINK_L)
     anemone(k, -1.2, top, -2.6)
-    # coral at the foot, so the rock reads as reef from the top-down camera
-    tube(k, "Reef", 7.6, 3.6, 2.6, 1.1, C_PURPLE, C_PURPLE_L, (10, 6, -8))
-    tube(k, "Reef", 8.6, 2.8, 1.8, 0.9, C_PURPLE, C_PURPLE_L, (-20, -10, 10))
+    # a brain dome at the foot, so the rock reads as reef from the top-down camera
     k.at("Reef", (-7.4, 0.7, -3.6), (3.0, 1.4, 2.8), C_ORANGE, rot(20, 0, 0))
     k.at("Reef", (-7.4, 1.5, -3.6), (2.2, 0.4, 2.0), C_ORANGE_L, rot(20, 0, 0))
-    anemone(k, -5.6, 0, 5.4)
 
 
 def anemone(k, x, y, z):
     k.at("Reef", (x, y + 0.4, z), (2.4, 0.8, 2.4), C_TEAL)
     for dx, dz in ((-0.7, -0.7), (0.7, -0.7), (-0.7, 0.7), (0.7, 0.7), (0, 0)):
         k.at("Reef", (x + dx, y + 1.4, z + dz), (0.45, 1.4, 0.45), C_TEAL_L, rot(0, dz * 18, -dx * 18))
+
+
+BAR_W = 9.4  # a barrier piece's width: 12 of them span the corridor wall to wall
+
+
+def coral_bar(k):
+    """Small (tier 1) barrier piece: a low rubble ridge packed with coral, made to
+    sit side by side with the next one so a row reads as one reef wall."""
+    w = BAR_W
+    k.at("CoralBar", (0, 0.7, 0), (w, 1.6, 4.2), REEF, rot(0, 0, 0))
+    k.at("CoralBar", (0.6, 1.8, 0.2), (w * 0.6, 0.8, 3.0), REEF_L, rot(6, 0, 3))
+    for x, z, h, wd, t in ((-2.8, 0.4, 3.4, 1.2, (0, 4, -6)), (-1.6, -0.9, 2.4, 1.0, (20, -8, 12))):
+        tube(k, "CoralBar", x, z, h, wd, C_PURPLE, C_PURPLE_L, t, 1.4)
+    k.at("CoralBar", (2.4, 2.4, -0.2), (2.8, 1.4, 2.6), C_ORANGE, rot(10, 0, 0))
+    k.at("CoralBar", (2.4, 3.3, -0.2), (2.0, 0.5, 1.8), C_ORANGE_L, rot(10, 0, 0))
+    anemone(k, 0.2, 1.3, 1.0)
+
+
+def fan_bar(k):
+    """Medium (tier 2) barrier piece: a taller rubble ridge with a sea fan and
+    staghorn growing out of it, so a row reads as a tall coral wall."""
+    w = BAR_W
+    k.at("FanBar", (0, 1.0, 0), (w, 2.2, 4.6), REEF_D)
+    k.at("FanBar", (-0.4, 2.4, 0.1), (w * 0.7, 0.8, 3.4), REEF)
+    y = 2.8
+    for i, half in enumerate((1.4, 2.6, 3.2, 3.2, 2.4)):
+        k.box("FanBar", (-1.6 - half, y + i * 1.3, -0.3), (-1.6 + half, y + i * 1.3 + 0.5, 0.3), C_YELLOW)
+    for x in (-4.0, -2.6, -1.2, 0.2):
+        k.box("FanBar", (x - 0.25, y, -0.3), (x + 0.25, y + 5.6 - abs(x + 1.6) * 0.8, 0.3), C_YELLOW)
+    for segs in ([(0, 1.8, 0, 1.1), (0.6, 1.6, 0.2, 0.9)], [(0.9, 1.4, 0, 1.0), (0.4, 1.4, 0, 0.8)]):
+        branch(k, "FanBar", 3.0, y, 0.6, segs, C_PINK, C_PINK_L)
 
 
 def figure(k, x=0):
@@ -386,6 +412,9 @@ OCEAN = [
         ("Tube coral (small)", tube_coral, 5), ("Brain coral (small)", brain_coral, 6),
         ("Staghorn (medium)", branch_coral, 8), ("Sea fan (medium)", fan_coral, 8),
         ("Reef rock (large)", reef_rock, 19)]),
+    ("Ocean barriers (pieces sit side by side)", [(236, 214, 164), (246, 228, 184)], [
+        ("Coral wall x3 (small)", lambda k: [coral_bar(Shifted(k, dx)) for dx in (-BAR_W, 0, BAR_W)], 28),
+        ("Fan wall x3 (medium)", lambda k: [fan_bar(Shifted(k, dx)) for dx in (-BAR_W, 0, BAR_W)], 28)]),
 ]
 
 BOULDERS = [

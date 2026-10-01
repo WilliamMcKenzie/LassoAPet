@@ -30,9 +30,12 @@ HAZE = np.array([60, 150, 235.0])  # the blue the distance fades into
 TRENCH_DOWN = 1
 GRASS_UP = 1
 LENGTH = 200  # studs shown in the preview
-OCEAN_LENGTH = 6840  # same as the snow (a default; QM can stretch it)
+OCEAN_LENGTH = 13680  # 2x the snow (QM)
 Z_START = -9880  # the ocean's near edge (the snow's far one)
-NESTS = [(16, -10240), (-14, -10940), (18, -11740), (-16, -12640), (14, -13640), (-18, -14740), (16, -15840)]
+# a nest about every 1100 studs, each one just past a barrier (course_layout puts
+# the barriers), so getting past one pays off
+NESTS = [(16, -10300), (-14, -11400), (18, -12500), (-16, -13600), (14, -14700), (-18, -15800),
+         (16, -16900), (-14, -18000), (18, -19100), (-16, -20200), (14, -21300), (-18, -22400)]
 NEST_CLEAR = 14
 START_CLEAR = 16
 KINDS = ("Ground", "Grass", "Trench")
@@ -45,7 +48,7 @@ def layout(nz, seed=41, z_start=0):
     b = noise(nx, nz, 4.0, seed + 2) * 0.75 + noise(nx, nz, 1.6, seed + 3) * 0.25
     kind = np.zeros((nx, nz), int)
     kind[a > 0.7] = 1
-    kind[(b > 0.62) & (kind == 0)] = 2
+    kind[(b > 0.68) & (kind == 0)] = 2
     # a sand margin between seagrass and trench
     for i in range(nx):
         for j in range(nz):
