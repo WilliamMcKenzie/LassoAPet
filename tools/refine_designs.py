@@ -94,8 +94,75 @@ def penguin():
     return a
 
 
-BIOME = {"Penguin": "snow"}
-BUILDERS = {"Penguin": penguin}
+# ---------------------------------------------------------------- snowman
+
+def snowball(a, name, x, z, y0, y1, color, bone, r=0.3, inset=0.25):
+    """A rounded block: a core x by z, plus two bands r wider in x and in z (inset
+    from the top and bottom), so it reads round from every side."""
+    a.b(name, (-x, y0, -z), (x, y1, z), color, bone)
+    a.b(name + "BandX", (-x - r, y0 + inset + r, -z + r), (x + r, y1 - inset - r, z - r), color, bone)
+    a.b(name + "BandZ", (-x + r, y0 + inset + r, -z - r), (x - r, y1 - inset - r, z + r), color, bone)
+
+
+def snowman():
+    """Three rounded snowballs, googly eyes, a coal smile, a carrot nose, a red striped
+    scarf with a hanging end, a matching beanie with a pom-pom, and stick arms
+    raised in a cheer."""
+    c = dict(snow=(246, 249, 255), shade=(226, 236, 252), coal=(40, 42, 52), carrot=(250, 132, 40),
+             stick=(124, 82, 48), red=(230, 50, 60), stripe=(255, 255, 255))
+    a = Conv("Snowman", "Rare", 1.0)
+    a.pivots["root"] = (0, 2.1, 0)
+    snowball(a, "Bottom", 2.5, 2.3, 0, 4.2, c["snow"], "root", r=0.35)
+    mid = a.bone("Mid", "root", (0, 4.2, 0))
+    snowball(a, "Middle", 1.9, 1.75, 4.2, 7.3, c["shade"], mid)
+    # coal buttons standing out of the middle's front band
+    for i, y in enumerate((4.6, 5.7)):
+        a.b(f"Button{i}", (-0.3, y, -2.35), (0.3, y + 0.6, -2.05), c["coal"], mid)
+    # scarf: a ring round the neck and an end hanging down the front left
+    a.b("Scarf", (-2.0, 6.9, -1.9), (2.0, 7.8, 1.9), c["red"], mid)
+    a.b("ScarfEnd", (-1.45, 4.9, -2.3), (-0.65, 6.9, -2.05), c["red"], mid)
+    a.b("ScarfStripe", (-1.45, 5.5, -2.35), (-0.65, 5.8, -2.05), c["stripe"], mid)
+    a.b("ScarfFringe", (-1.45, 4.6, -2.3), (-0.65, 4.9, -2.05), c["stripe"], mid)
+    head = a.bone("neck", "Mid", (0, 7.3, 0))
+    snowball(a, "Head", 1.5, 1.4, 7.3, 10.6, c["snow"], head, r=0.25, inset=0.15)
+    # googly eyes on the face's front band, set in coal rims so they read on the snow
+    for side, sx in SIDES:
+        x0, x1 = X(sx, 0.0, 1.34)
+        a.box("EyeSocket" + side, (x0, 8.78, -1.65 - A.PLATE), (x1, 10.22, -1.65), c["coal"], head)
+    z = -1.65 - A.PLATE
+    for side, sx in SIDES:
+        x0, x1 = X(sx, 0.12, 1.22)
+        a.box("Eye" + side, (x0, 8.9, z - A.PLATE), (x1, 10.1, z), A.EYE_WHITE, head)
+        x0, x1 = X(sx, 0.3, 0.85)
+        a.box("Pupil" + side, (x0, 9.05, z - A.PLATE - 0.03), (x1, 9.7, z - A.PLATE), A.PUPIL, head)
+    # carrot nose, pointing forward and a touch down
+    nose = a.bone("Nose", head, (0, 8.55, -1.65), (-8, 0, 0))
+    a.b("Carrot", (-0.3, 8.25, -2.35), (0.3, 8.85, -1.6), c["carrot"], nose)
+    a.pyr("CarrotTip", (-0.3, 8.25, -2.35), (0.3, 8.85, -2.35), "-z", 1.4, c["carrot"], nose)
+    # coal smile: five lumps in an arc
+    for i, (x, y) in enumerate(((-0.8, 8.05), (-0.4, 7.85), (0, 7.8), (0.4, 7.85), (0.8, 8.05))):
+        a.b(f"Mouth{i}", (x - 0.15, y, -1.9), (x + 0.15, y + 0.25, -1.6), c["coal"], head)
+    # beanie: a red cap with a white cuff and a pom-pom
+    a.b("Beanie", (-1.35, 10.6, -1.25), (1.35, 11.4, 1.25), c["red"], head)
+    a.b("BeanieCuff", (-1.6, 10.3, -1.5), (1.6, 10.8, 1.5), c["stripe"], head)
+    a.b("PomPom", (-0.4, 11.4, -0.4), (0.4, 12.1, 0.4), c["stripe"], head)
+    # stick arms out of the middle, raised, with twig fingers
+    for side, sx in SIDES:
+        arm = a.bone("Arm" + side, mid, (sx * 1.9, 6.3, 0), (0, 0, sx * 22))
+        x0, x1 = X(sx, 1.9, 4.6)
+        a.b("Stick" + side, (x0, 6.1, -0.2), (x1, 6.5, 0.2), c["stick"], arm)
+        x0, x1 = X(sx, 4.2, 4.6)
+        a.b("Twig" + side, (x0, 6.5, -0.2), (x1, 7.6, 0.2), c["stick"], arm)
+        x0, x1 = X(sx, 4.6, 5.3)
+        a.b("Finger" + side, (x0, 6.1, -0.2), (x1, 6.5, 0.2), c["stick"], arm)
+        x0, x1 = X(sx, 3.0, 3.35)
+        a.b("Twig2" + side, (x0, 6.5, -0.2), (x1, 7.1, 0.2), c["stick"], arm)
+    a.meta = {"seat": (0, 12.1, 0), "neck_loop": {"center": (0, 8.9, 0), "radius": 2.1}}
+    return a
+
+
+BIOME = {"Penguin": "snow", "Snowman": "snow"}
+BUILDERS = {"Penguin": penguin, "Snowman": snowman}
 
 
 def preview(name, out, old=None):
