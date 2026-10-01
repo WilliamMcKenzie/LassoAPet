@@ -81,7 +81,7 @@ return {
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
 	-- Pet abilities: the Ability button (bottom right while riding), Q or R1.
 	-- A pet without an entry has no button. Seconds throughout.
-	--   Charge (Rhino): while held, up to Duration: a battering ram at SpeedBoost x speed.
+	--   Charge (Rhino): one tap, for Duration: a battering ram at SpeedBoost x speed.
 	--     No Hold drain, and every obstacle and animal in the way is knocked flying,
 	--     whatever its size. Wind breaks round its head and the camera pulls back.
 	--   Leap (Unicorn): one tap: a gallop up into the air and down again in an arc

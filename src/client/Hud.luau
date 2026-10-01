@@ -105,7 +105,7 @@ local card, cardEgg, cardScale, cardFlash, cardBurst -- egg reveal card, the egg
 local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
-local ability, abilityInput, abilityFill, abilityTime -- the Ability button, its holder, the ready part and the countdown
+local ability, abilityPressed, abilityFill, abilityTime -- the Ability button, a press not yet used, the ready part and the countdown
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -363,12 +363,12 @@ function Hud.init(onAction, onHome, onRide)
 	abilityScale.Parent = ability
 	ability.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-			abilityInput = input
+			abilityPressed = true
 			TweenService:Create(abilityScale, TweenInfo.new(0.08), { Scale = 0.93 }):Play()
 		end
 	end)
 	ability.InputEnded:Connect(function(input)
-		if input == abilityInput then
+		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 			TweenService:Create(abilityScale, TweenInfo.new(0.08), { Scale = 1 }):Play()
 		end
 	end)
@@ -545,19 +545,19 @@ end
 function Hud.setAbility(ready, seconds)
 	ability.Visible = ready ~= nil
 	if not ready then
-		abilityInput = nil
+		abilityPressed = nil
 		return
 	end
 	abilityFill.Size = UDim2.fromScale(1, ready)
 	abilityTime.Text = if ready < 1 and seconds then math.ceil(seconds) .. "s" else ""
 end
 
--- Whether the Ability button is being held down right now.
-function Hud.abilityHeld()
-	if abilityInput and (abilityInput.UserInputState == Enum.UserInputState.End or abilityInput.UserInputState == Enum.UserInputState.Cancel) then
-		abilityInput = nil
-	end
-	return abilityInput ~= nil
+-- Whether the Ability button was pressed since the last call (each press counts
+-- once, however quick the tap).
+function Hud.abilityPressed()
+	local pressed = abilityPressed
+	abilityPressed = nil
+	return pressed == true
 end
 
 -- Whether the Sprint button is being held down right now.
