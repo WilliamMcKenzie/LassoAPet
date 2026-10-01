@@ -108,7 +108,7 @@ return {
 	--   Rattle (Snake): one tap: it stops, coils up and rattles for Duration (its
 	--     coiled idle), smashing every obstacle within Radius studs and scattering
 	--     the animals there away from it, and refilling Restore of the Hold bar. No
-	--     Hold drain while it rattles; a blue haze closes in round the screen.
+	--     Hold drain while it rattles; a yellow-orange haze closes in round the screen.
 	--   Frost (Icebringer): one tap: a blizzard bursts out round it and every animal
 	--     within Radius studs (but itself) runs Slow slower (0.7 = 70%) until Duration
 	--     is up, frosted over. Unlike the others it doesn't stop the Hold bar or crashes.

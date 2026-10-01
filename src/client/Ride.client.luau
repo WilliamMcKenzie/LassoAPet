@@ -1349,7 +1349,7 @@ end
 -- ability is one tap: it runs its full Duration.
 local abilityKey = false -- Q or R1 pressed since the last frame
 local chargeCam, rattleHaze, cineCam = 0, 0, 0 -- 0..1, eased in and out: the charge's wider view, the rattle's haze, the cinematic angle
-vfx.RATTLE_HAZE = Color3.fromRGB(70, 150, 255)
+vfx.RATTLE_HAZE = Color3.fromRGB(255, 170, 40) -- yellow-orange
 vfx.FROST_HAZE = Color3.fromRGB(190, 236, 255)
 vfx.hazeColor = vfx.RATTLE_HAZE
 local abilityClock = 0 -- ride time, slowed with the slow motion like everything else
@@ -2141,7 +2141,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 		camera.FieldOfView += ((70 - 20 * a) - camera.FieldOfView) * (1 - math.exp(-12 * dt))
 		return
 	end
-	-- Abilities: the camera pulls back for a charge; a blue haze for the rattle.
+	-- Abilities: the camera pulls back for a charge; a yellow-orange haze for the rattle.
 	local ability = activeAbility()
 	local kind = ability and ability.cfg.Kind
 	chargeCam += ((if kind == "Charge" then 1 else 0) - chargeCam) * (1 - math.exp(-5 * dt))
