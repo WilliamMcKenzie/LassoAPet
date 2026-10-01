@@ -115,8 +115,7 @@ resize()
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local shown = "" -- the hint's text when it's showing
-local pulse = TweenService:Create(hintScale, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.06 })
-local pop -- the pop-in tween, which starts the pulse when it's done
+local pop -- the pop-in tween
 local function setHint(text)
 	text = text or ""
 	if text == shown then
@@ -125,18 +124,12 @@ local function setHint(text)
 	shown = text
 	hint.Text = text
 	hint.Visible = text ~= ""
-	pulse:Cancel()
 	if pop then
 		pop:Cancel()
 	end
 	if text ~= "" then
 		hintScale.Scale = 0
 		pop = TweenService:Create(hintScale, TweenInfo.new(0.3, Enum.EasingStyle.Back), { Scale = 1 })
-		pop.Completed:Connect(function(state)
-			if state == Enum.PlaybackState.Completed and shown == text then
-				pulse:Play()
-			end
-		end)
 		pop:Play()
 	end
 end
