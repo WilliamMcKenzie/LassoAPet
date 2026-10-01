@@ -1175,23 +1175,30 @@ local function updateHerd(dt, slowed)
 end
 
 -- Pet abilities (Config.Abilities): the Ability button, Q or R1. Each mount keeps
--- its own cooldown (entity.ability); a mount with no entry shows no button.
-local abilityKey = false -- Q or R1 held
+-- its own cooldown (entity.ability); a mount with no entry shows no button. Every
+-- ability is one tap: it runs its full Duration.
+local abilityKey = false -- Q or R1 pressed since the last frame
 local chargeCam, rattleHaze, cineCam = 0, 0, 0 -- 0..1, eased in and out: the charge's wider view, the rattle's haze, the cinematic angle
 local RATTLE_HAZE = Color3.fromRGB(70, 150, 255)
 local abilityClock = 0 -- ride time, slowed with the slow motion like everything else
 local ABILITY_RING_TIME = 0.6
 
 ContextActionService:BindActionAtPriority("Ability", function(_, state)
-	abilityKey = state == Enum.UserInputState.Begin
+	if state == Enum.UserInputState.Begin and phase ~= "idle" then
+		abilityKey = true
+	end
 	if phase == "idle" then
 		return Enum.ContextActionResult.Pass
 	end
 	return Enum.ContextActionResult.Sink
 end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.Q, Enum.KeyCode.ButtonR1)
 
-local function abilityHeld()
-	return abilityKey or Hud.abilityHeld()
+-- Whether the ability was asked for since the last frame (a press while it's
+-- cooling down is dropped, not saved up).
+local function abilityPressed()
+	local pressed = Hud.abilityPressed() or abilityKey
+	abilityKey = false
+	return pressed
 end
 
 -- The running ability on the mount, if any: { kind, cfg, t, fx }.
@@ -1352,7 +1359,6 @@ end
 local function startAbility(cfg)
 	local a = mount.ability
 	a.active = { kind = cfg.Kind, cfg = cfg, t = 0, fx = {} }
-	a.needRelease = true
 	if cfg.Kind == "Charge" then
 		a.active.fx = chargeFx(mount)
 		Poof.at(Vector3.new(mount.x, 0, mount.z))
@@ -1377,6 +1383,7 @@ local function updateAbility(dt)
 		if mount then
 			endAbility(mount)
 		end
+		abilityKey = false
 		Hud.setAbility(nil)
 		return
 	end
@@ -1385,20 +1392,17 @@ local function updateAbility(dt)
 		a = { readyAt = 0 }
 		mount.ability = a
 	end
-	local held = abilityHeld()
-	if not held then
-		a.needRelease = nil
-	end
+	local pressed = abilityPressed()
 	local active = a.active
 	if active then
 		active.t += dt
 		if active.cfg.Kind == "Rattle" then
 			rattleBlast(dt, active.cfg)
 		end
-		if active.t >= active.cfg.Duration or (active.cfg.Kind == "Charge" and not held) then
+		if active.t >= active.cfg.Duration then
 			endAbility(mount)
 		end
-	elseif held and not a.needRelease and abilityClock >= a.readyAt and (phase == "outbound" or phase == "return") and not transfer then
+	elseif pressed and abilityClock >= a.readyAt and (phase == "outbound" or phase == "return") and not transfer then
 		startAbility(cfg)
 	end
 	active = a.active
