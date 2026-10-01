@@ -542,6 +542,20 @@ ReplicatedStorage:WaitForChild("PetIncome").OnClientEvent:Connect(function()
 	end
 end)
 
+-- Stampede animals near home can be ridden too: the ones that have just popped
+-- in at the start line (within 40 studs of it). [model] = entity, rebuilt every
+-- frame at home.
+local herdRideable = {}
+local function rideableHerd()
+	table.clear(herdRideable)
+	for _, entity in herd do
+		if not entity.popping and entity.n and entity.z > START_LINE_Z - 40 and entity.animal.model.Parent then
+			herdRideable[entity.animal.model] = entity
+		end
+	end
+	return herdRideable
+end
+
 -- Flat distance from `at` to the edge of the pet (roughly), so big pets count as near.
 local function petDistance(model, at)
 	local middle, size = model:GetBoundingBox()
@@ -549,12 +563,16 @@ local function petDistance(model, at)
 	return d - math.max(size.X, size.Z) / 2, d
 end
 
--- Every frame at home: bind RIDE to the pet you clicked, else the nearest.
+-- Every frame at home: bind RIDE to the pet you clicked, else the nearest (your
+-- pets, or a stampede animal just in at the start line).
 local function updateRideTarget()
 	local hrp = character()
 	local target
 	if hrp then
 		local pets = homePets()
+		for model in rideableHerd() do
+			table.insert(pets, model)
+		end
 		if pickedPet and not table.find(pets, pickedPet) then
 			pickedPet = nil
 		end
@@ -620,8 +638,17 @@ startRide = function(model)
 	humanoid:UnequipTools() -- put any egg away
 	local spot = homeSpot()
 	local fromPen = model and PenPets.pets[model]
+	local fromHerd = model and herdRideable[model]
 	clearRideTarget()
-	if fromPen then
+	if fromHerd then
+		-- Jumped onto a stampede animal: it leaves the stampede and runs on with
+		-- you from where it is. Your own pet stays home.
+		herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
+		mount = fromHerd
+		mount.popping, mount.hop, mount.dodge = nil, 0, 0
+		mount.animal:setScale(1)
+		spot = Vector3.new(mount.x, 0, mount.z)
+	elseif fromPen then
 		ridePet:FireServer(fromPen.id)
 		starter.animal.model:Destroy()
 		starter = nil
@@ -632,8 +659,9 @@ startRide = function(model)
 	end
 	mount.animal:setSaddled(true)
 	leadFromZ = spot.Z - 8
-	exitX = penExitX()
-	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, 0, 0
+	exitX = if fromHerd then nil else penExitX()
+	local runningAt = if fromHerd then fromHerd.speed or 0 else 0 -- a stampede animal keeps its pace
+	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, runningAt, 0
 	phase, hold, grace, camYaw = "outbound", holdTime(mount), 0, 0
 	coins = 0
 	hrp.Anchored = true
@@ -747,33 +775,36 @@ end
 
 -- On the way out, a trail of arrows on the ground from your pet to the nearest
 -- egg still waiting ahead of you (not behind a locked gate).
-local GUIDE_ARROW = "rbxassetid://101032148634562" -- assets/ui/GuideArrow.png (chevrons pointing along the trail)
-local GUIDE_AHEAD = 6 -- studs in front of the pet where the trail starts
-local guideFrom, guideTo = Instance.new("Attachment"), Instance.new("Attachment")
-guideFrom.Name, guideTo.Name = "GuideFrom", "GuideTo"
-local guide = Instance.new("Beam")
-guide.Name = "EggGuide"
-guide.Texture = GUIDE_ARROW
-guide.TextureMode = Enum.TextureMode.Static
-guide.TextureLength = 5
-guide.TextureSpeed = 1.2
-guide.Width0, guide.Width1 = 4, 4
-guide.FaceCamera = false
-guide.LightEmission = 1
-guide.LightInfluence = 0
-guide.Color = ColorSequence.new(Color3.fromRGB(255, 236, 120))
-guide.Transparency = NumberSequence.new({
+local guide = { -- the egg guide: the beam and its two ends
+	ARROW = "rbxassetid://101032148634562", -- assets/ui/GuideArrow.png (chevrons pointing along the trail)
+	AHEAD = 6, -- studs in front of the pet where the trail starts
+	from = Instance.new("Attachment"),
+	to = Instance.new("Attachment"),
+	beam = Instance.new("Beam"),
+}
+guide.from.Name, guide.to.Name = "GuideFrom", "GuideTo"
+guide.beam.Name = "EggGuide"
+guide.beam.Texture = guide.ARROW
+guide.beam.TextureMode = Enum.TextureMode.Static
+guide.beam.TextureLength = 5
+guide.beam.TextureSpeed = 1.2
+guide.beam.Width0, guide.beam.Width1 = 4, 4
+guide.beam.FaceCamera = false
+guide.beam.LightEmission = 1
+guide.beam.LightInfluence = 0
+guide.beam.Color = ColorSequence.new(Color3.fromRGB(255, 236, 120))
+guide.beam.Transparency = NumberSequence.new({
 	NumberSequenceKeypoint.new(0, 1),
 	NumberSequenceKeypoint.new(0.08, 0.15),
 	NumberSequenceKeypoint.new(0.9, 0.15),
 	NumberSequenceKeypoint.new(1, 1),
 })
-guide.Attachment0, guide.Attachment1 = guideFrom, guideTo
-guide.Enabled = false
-guide.Parent = guideFrom
-guideFrom.Parent, guideTo.Parent = workspace.Terrain, workspace.Terrain
+guide.beam.Attachment0, guide.beam.Attachment1 = guide.from, guide.to
+guide.beam.Enabled = false
+guide.beam.Parent = guide.from
+guide.from.Parent, guide.to.Parent = workspace.Terrain, workspace.Terrain
 task.spawn(function()
-	game:GetService("ContentProvider"):PreloadAsync({ guide })
+	game:GetService("ContentProvider"):PreloadAsync({ guide.beam })
 end)
 
 local function updateGuide()
@@ -782,7 +813,7 @@ local function updateGuide()
 		local best = math.huge
 		for nest, waiting in waitingEggs do
 			local spot = nest:FindFirstChild("EggSpot")
-			if spot and waiting.egg.model.Parent and spot.Position.Z < mount.z - GUIDE_AHEAD and spot.Position.Z > gateZ() then
+			if spot and waiting.egg.model.Parent and spot.Position.Z < mount.z - guide.AHEAD and spot.Position.Z > gateZ() then
 				local d = (Vector2.new(spot.Position.X, spot.Position.Z) - Vector2.new(mount.x, mount.z)).Magnitude
 				if d < best then
 					target, best = spot.Position, d
@@ -790,16 +821,16 @@ local function updateGuide()
 			end
 		end
 	end
-	guide.Enabled = target ~= nil
+	guide.beam.Enabled = target ~= nil
 	if target then
-		local from = Vector3.new(mount.x, 0, mount.z - GUIDE_AHEAD)
+		local from = Vector3.new(mount.x, 0, mount.z - guide.AHEAD)
 		local flat = Vector3.new(target.X, 0, target.Z)
 		local along = (flat - from).Unit
 		-- Lying flat on the ground: the attachments' up is the beam's width direction.
 		local side = along:Cross(Vector3.yAxis)
 		local y = Ground.heightAt(from.X, from.Z) + 0.3
-		guideFrom.WorldCFrame = CFrame.fromMatrix(Vector3.new(from.X, y, from.Z), along, side)
-		guideTo.WorldCFrame = CFrame.fromMatrix(Vector3.new(flat.X, Ground.heightAt(flat.X, flat.Z) + 0.3, flat.Z), along, side)
+		guide.from.WorldCFrame = CFrame.fromMatrix(Vector3.new(from.X, y, from.Z), along, side)
+		guide.to.WorldCFrame = CFrame.fromMatrix(Vector3.new(flat.X, Ground.heightAt(flat.X, flat.Z) + 0.3, flat.Z), along, side)
 	end
 end
 
