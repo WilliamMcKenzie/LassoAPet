@@ -14,6 +14,10 @@
 -- "RidePet" attribute, Config.DefaultPet to start). Clicking a pet in your pen
 -- makes it the one you ride, and the old one takes its place (RidePet remote).
 --
+-- A new player gets the tutorial (Tutorial.luau): the player's "Tutorial"
+-- attribute is true until the client says it's done (TutorialDone), which is
+-- saved with the pen. Anyone with eggs or pets saved from before has done it.
+--
 -- Saving needs a published place with API access, like Gold.
 
 local DataStoreService = game:GetService("DataStoreService")
@@ -33,7 +37,7 @@ if not ok then
 	store = nil
 end
 
--- [player] = { eggs = { [kind] = n }, items = { [id] = { x, z, egg, hatchAt } or { x, z, pet } }, ride = kind }
+-- [player] = { eggs = { [kind] = n }, items = { [id] = { x, z, egg, hatchAt } or { x, z, pet } }, ride = kind, tutorial = done }
 local profiles = {}
 local loaded = {}
 
@@ -137,6 +141,7 @@ local function load(player)
 					if isAnimal(data.ride) then
 						profile.ride = data.ride
 					end
+					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
 					for id, item in data.items or {} do
 						if typeof(item) == "table" and tonumber(item.x) and tonumber(item.z)
 							and (isAnimal(item.egg) or isAnimal(item.pet)) then
@@ -154,6 +159,7 @@ local function load(player)
 		return
 	end
 	profiles[player] = profile
+	player:SetAttribute("Tutorial", if Config.Tutorial and not profile.tutorial then true else nil)
 	publish(player)
 end
 
@@ -163,7 +169,7 @@ local function save(player)
 		return
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride }) then
+		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride, tutorial = profile.tutorial }) then
 			return
 		end
 		task.wait(attempt)
@@ -285,8 +291,17 @@ remote("PlaceEgg", function(player, kind, x, z)
 	if profile.eggs[kind] == 0 then
 		profile.eggs[kind] = nil
 	end
-	profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + hatchTime(kind) }
+	profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else hatchTime(kind)) }
 	publish(player)
+end)
+
+-- The client finished the tutorial: it never shows again.
+remote("TutorialDone", function(player)
+	local profile = profiles[player]
+	if profile then
+		profile.tutorial = true
+	end
+	player:SetAttribute("Tutorial", nil)
 end)
 
 -- Ride the pet `id` from now on; the pet you rode takes its place in the pen.

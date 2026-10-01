@@ -98,6 +98,16 @@ return {
 	-- Seconds an egg placed in your pen takes to hatch, by the rarity of the
 	-- animal inside (first-biome eggs; later biomes can take longer).
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
+	-- The first-time tutorial (Tutorial.luau): a new player's first ride, egg and
+	-- hatch, one hint at a time. false turns it off. On that first ride the first
+	-- Meadow nest always holds a TutorialEgg (only that player sees it), the stampede
+	-- runs on the player's own clock so it can slow down to TutorialSlowMo x speed
+	-- while LASSO or TAKE EGG is waiting to be pressed, and the egg hatches in
+	-- TutorialHatchTime seconds.
+	Tutorial = true,
+	TutorialEgg = "Pinto",
+	TutorialHatchTime = 5,
+	TutorialSlowMo = 0.2,
 	-- Pet abilities: the Ability button (bottom right while riding), Q or R1.
 	-- A pet without an entry has no button. Seconds throughout.
 	--   Charge (Rhino): one tap, for Duration: a battering ram at SpeedBoost x speed.

@@ -128,6 +128,7 @@ local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one 
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityTime -- the Ability button, a press not yet used, the ready part and the countdown
+local tip, tipText -- the fail screen's tooltip in place of "+$N" (Hud.setTip), and its text
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -441,6 +442,28 @@ function Hud.init(onAction, onHome, onRide)
 	Instance.new("UIScale").Parent = cardBurst
 
 	gained = cashRow(rideRoot, 84, 58, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.57))
+	-- A tooltip that takes the gained cash's place on a fail screen (Hud.setTip):
+	-- white text on a dark rounded box.
+	tip = Instance.new("Frame")
+	tip.Name = "Tip"
+	tip.AnchorPoint = Vector2.new(0.5, 0.5)
+	tip.Position = gained.row.Position
+	tip.AutomaticSize = Enum.AutomaticSize.XY
+	tip.BackgroundColor3 = Color3.new(0, 0, 0)
+	tip.BackgroundTransparency = 0.35
+	tip.Visible = false
+	local tipCorner = Instance.new("UICorner")
+	tipCorner.CornerRadius = UDim.new(0, 18)
+	tipCorner.Parent = tip
+	local tipPad = Instance.new("UIPadding")
+	tipPad.PaddingLeft, tipPad.PaddingRight = UDim.new(0, 28), UDim.new(0, 28)
+	tipPad.PaddingTop, tipPad.PaddingBottom = UDim.new(0, 12), UDim.new(0, 12)
+	tipPad.Parent = tip
+	tipText = label(tip, UDim2.fromOffset(0, 56), UDim2.new(), 44, 4)
+	tipText.AnchorPoint = Vector2.zero
+	tipText.AutomaticSize = Enum.AutomaticSize.X
+	Instance.new("UIScale").Parent = tip
+	tip.Parent = rideRoot
 	rideCash = cashRow(rideRoot, 60, 46, Vector2.new(0, 0.5), UDim2.new(0.5, BAR_WIDTH / 2 + 8, 0, holdFrame.Position.Y.Offset))
 
 	-- Home buttons, always on screen outside a ride; Gold stays during rides too.
@@ -575,6 +598,7 @@ function Hud.show(visible)
 	Inventory.setVisible(not visible) -- your eggs, hidden while riding
 	gained.row.Visible = false
 	noCash = false
+	Hud.setTip(nil)
 	rideCash.row.Visible = true
 	Hud.setReturning(false)
 	Hud.setVignette(0)
@@ -981,13 +1005,31 @@ end
 -- Home button, shown after a failed ride with the cash gained; sends you back home.
 function Hud.showHome(visible)
 	home.Visible = visible
-	gained.row.Visible = visible and not noCash
-	if visible and not noCash then
+	local tipping = tipText.Text ~= ""
+	tip.Visible = visible and tipping
+	if tip.Visible then
+		tip.UIScale.Scale = 0
+		TweenService:Create(tip.UIScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	end
+	gained.row.Visible = visible and not noCash and not tipping
+	if gained.row.Visible then
 		gained.text.Text = "+" .. money(rideAmount)
 		gained.scale.Scale = 0
 		TweenService:Create(gained.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	end
 end
+
+-- A tooltip in place of the fail screen's "+$N" (riding into a locked gate:
+-- "Upgrade your pen to go further"); nil clears it. Shows with the Home button.
+function Hud.setTip(text)
+	tipText.Text = text or ""
+	if not text then
+		tip.Visible = false
+	end
+end
+
+-- Money as the HUD writes it: "$950", "$1.2k".
+Hud.money = money
 
 -- nil: no cash at all this time (run over on foot): the ride's cash and the
 -- fail screen's "+$N" stay hidden until the next ride.

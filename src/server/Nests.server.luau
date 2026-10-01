@@ -61,6 +61,12 @@ takeEgg.OnServerEvent:Connect(function(player, nest)
 		return
 	end
 	if (nest:GetAttribute("Egg") or "") == "" then
+		-- On the tutorial's first ride the empty first Meadow nest shows that player
+		-- a Config.TutorialEgg of their own (Tutorial.luau): grabbing it leaves the
+		-- nest as it is for everyone else.
+		if player:GetAttribute("Tutorial") and Config.Tutorial and WorldColors.biomeAt(nest.EggSpot.Position.Z) == 1 then
+			player:SetAttribute("CarriedEgg", Config.TutorialEgg)
+		end
 		return
 	end
 	player:SetAttribute("CarriedEgg", nest:GetAttribute("Egg")) -- theirs once they ride it home (Hatchery)
