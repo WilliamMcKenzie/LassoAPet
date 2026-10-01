@@ -48,7 +48,7 @@ return {
 			-- Locked behind a gate until your pen is this biome's level (its place
 			-- in this list). Upgrading your pen to it costs UnlockCost gold; your pen's
 			-- floor tiles take this biome's ground colours and its posts PostColor.
-			UnlockCost = 4000,
+			UnlockCost = 1000,
 			PostColor = Color3.fromRGB(206, 118, 72),
 			GateImage = "rbxassetid://88918626302524", -- assets/ui/GateLv2.png
 		},
