@@ -48,6 +48,8 @@ Tutorial.slowMo = nil -- a time scale while LASSO or TAKE EGG waits for its pres
 Tutorial.nest = nil -- the first Meadow nest: while it's empty, this player sees a TutorialEgg in it
 Tutorial.busy = false -- the ending's close-ups are on: no riding off
 
+local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
+local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banner (Hud, at 0.3)
 local MONEY_WAIT = 2 -- seconds of Gold ticking up before the close-up on Upgrade Pen
 local FOCUS_HOLD = 2 -- seconds the close-up on Upgrade Pen holds
 local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
@@ -92,7 +94,7 @@ local hint = Instance.new("TextLabel")
 hint.Name = "Hint"
 hint.BackgroundTransparency = 1
 hint.AnchorPoint = Vector2.new(0.5, 0.5)
-hint.Position = UDim2.fromScale(0.5, 0.25)
+hint.Position = UDim2.fromScale(0.5, HINT_Y)
 hint.Size = UDim2.fromScale(0.8, 0.07)
 hint.Font = Enum.Font.FredokaOne
 hint.TextWrapped = true
@@ -341,6 +343,7 @@ function Tutorial.update(state)
 	Tutorial.slowMo = if slow and phase == "outbound" then Config.TutorialSlowMo else nil
 
 	setHint(if state.cutscene then nil else hintFor(state))
+	hint.Position = UDim2.fromScale(0.5, if phase == "ended" then FAIL_HINT_Y else HINT_Y) -- over CRASH! / BUCKED OFF
 
 	local target
 	if phase == "idle" then
