@@ -101,6 +101,8 @@ local UPGRADE_WIDTH = 300 -- Upgrade Pen, top right
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
+local ZOOM = 2.4 -- the tutorial's zoom into Upgrade Pen (Hud.focusUpgrade)
+local ZOOM_IN_TIME, ZOOM_OUT_TIME = 1.1, 0.8
 
 -- Action text from the ride -> which image the action button shows.
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
@@ -1151,40 +1153,60 @@ function Hud.setTutorial(stage)
 	end
 end
 
--- The tutorial's close-up on Upgrade Pen: the screen dims and the button comes
--- out to the middle, big, for `hold` seconds, then goes back. Yields until done.
+-- The tutorial's zoom into Upgrade Pen: the whole screen (the world and the HUD
+-- together, everything but Roblox's own buttons) zooms in, panning so Upgrade Pen
+-- ends up big in the middle, holds `hold` seconds and zooms back out. Yields until
+-- done. The world zooms by narrowing the camera's field of view while turning it
+-- toward the button; the HUD by scaling its root about the same point.
 function Hud.focusUpgrade(hold)
 	if not upgrade.Visible then
 		return
 	end
 	focusing = true
-	local corner = upgrade.Position
-	local dim = Instance.new("Frame")
-	dim.Name = "TutorialDim"
-	dim.BackgroundColor3 = Color3.new(0, 0, 0)
-	dim.BackgroundTransparency = 1
-	dim.BorderSizePixel = 0
-	dim.AnchorPoint = Vector2.new(0.5, 0.5)
-	dim.Position = UDim2.fromScale(0.5, 0.5)
-	dim.Size = UDim2.fromScale(1.2, 1.2)
-	dim.ZIndex = 5
-	dim.Parent = homeRoot
-	upgrade.ZIndex = 6
-	local out = TweenInfo.new(0.6, Enum.EasingStyle.Back)
-	TweenService:Create(dim, TweenInfo.new(0.4), { BackgroundTransparency = 0.45 }):Play()
-	TweenService:Create(upgradeScale, out, { Scale = 1.8 }):Play()
-	local move = TweenService:Create(upgrade, out, { Position = UDim2.fromScale(0.5, 0.45) })
-	move:Play()
-	move.Completed:Wait()
+	local camera = workspace.CurrentCamera
+	local screen = camera.ViewportSize
+	local middle = screen / 2
+	local button = upgrade.AbsolutePosition + upgrade.AbsoluteSize / 2 -- where it is now
+	local zoom = math.min(ZOOM, screen.X * 0.6 / upgrade.AbsoluteSize.X) -- it ends up 60% of the screen wide at most
+	local hudScale = homeRoot:FindFirstChildOfClass("UIScale")
+	local baseScale = hudScale.Scale
+	local startType, start, startFov = camera.CameraType, camera.CFrame, camera.FieldOfView
+	local tanHalf = math.tan(math.rad(startFov) / 2)
+	camera.CameraType = Enum.CameraType.Scriptable
+
+	-- u = 0: as it was; 1: zoomed all the way in with the button in the middle.
+	local function apply(u)
+		local k = 1 + (zoom - 1) * u
+		-- The HUD: the button's spot slides to the middle while everything scales k
+		-- times about it.
+		local at = button:Lerp(middle, u)
+		local shift = at - middle - (button - middle) * k
+		hudScale.Scale = baseScale * k
+		homeRoot.Position = UDim2.new(0.5, shift.X, 0.5, shift.Y)
+		-- The world: k times narrower, looking at the point of the old view that
+		-- keeps the world under the button lined up with the HUD.
+		local look = middle + (button - middle) * (1 - (1 - u) / k)
+		local x = (look.X - middle.X) / middle.Y * tanHalf
+		local y = -(look.Y - middle.Y) / middle.Y * tanHalf
+		local direction = start:VectorToWorldSpace(Vector3.new(x, y, -1))
+		camera.CFrame = CFrame.lookAt(start.Position, start.Position + direction)
+		camera.FieldOfView = math.deg(2 * math.atan(tanHalf / k))
+	end
+	local function run(seconds, from, to)
+		local t = 0
+		while t < seconds do
+			t += RunService.RenderStepped:Wait()
+			local a = math.min(t / seconds, 1)
+			a = a * a * (3 - 2 * a) -- ease in and out
+			apply(from + (to - from) * a)
+		end
+	end
+	run(ZOOM_IN_TIME, 0, 1)
 	task.wait(hold)
-	local back = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
-	TweenService:Create(dim, back, { BackgroundTransparency = 1 }):Play()
-	TweenService:Create(upgradeScale, back, { Scale = 1 }):Play()
-	move = TweenService:Create(upgrade, back, { Position = corner })
-	move:Play()
-	move.Completed:Wait()
-	dim:Destroy()
-	upgrade.ZIndex = 1
+	run(ZOOM_OUT_TIME, 1, 0)
+	hudScale.Scale = baseScale
+	homeRoot.Position = UDim2.fromScale(0.5, 0.5)
+	camera.CFrame, camera.FieldOfView, camera.CameraType = start, startFov, startType
 	focusing = false
 end
 
