@@ -53,6 +53,11 @@ local IMAGES = {
 	cardRare = { id = "rbxassetid://112042125080788", size = Vector2.new(1134, 1217), cardLeft = 82 }, -- RareEggRNG.png
 	cardEpic = { id = "rbxassetid://94491197892789", size = Vector2.new(1244, 1227), cardLeft = 154 }, -- EpicEggRNG.png
 	cardLegendary = { id = "rbxassetid://124659626997084", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- LegendaryEggRNG.png
+	-- Gacha-only animals (Config.Gacha.Pool.Exclusive). Until QM's card is uploaded
+	-- the Legendary card stands in, tinted, with EXCLUSIVE! written over it.
+	cardExclusive = { id = "", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- ExclusiveEggRNG.png
+	-- The Egg Machine's ROLL button (QM's art to come; a green text button until then).
+	roll = { id = "", size = Vector2.new(960, 308) }, -- Roll.png
 	-- Egg renders for the card, cropped to the egg (assets/ui/<Kind>EggRender.png).
 	eggPinto = { id = "rbxassetid://79525419811481", size = Vector2.new(496, 788) }, -- PintoEggRender.png
 	eggPig = { id = "rbxassetid://139970505549400", size = Vector2.new(496, 730) }, -- PigEggRender.png
@@ -114,7 +119,8 @@ local CARD_WIDTH = 296
 local CARD_SCALE = CARD_WIDTH / CARD_BODY.X
 local CARD_EGG_HEIGHT = 0.37
 local UNKNOWN_CARDS = { "unknownEgg", "unknownEgg1", "unknownEgg2" }
-local RARITY_CARDS = { Uncommon = "cardUncommon", Rare = "cardRare", Epic = "cardEpic", Legendary = "cardLegendary" }
+local RARITY_CARDS = { Uncommon = "cardUncommon", Rare = "cardRare", Epic = "cardEpic", Legendary = "cardLegendary", Exclusive = "cardExclusive" }
+local EXCLUSIVE_TINT = Color3.fromRGB(215, 150, 255) -- the stand-in Exclusive card's tint
 
 -- Banner colors: bad news red, good news yellow, anything else white.
 local TONES = {
@@ -123,11 +129,12 @@ local TONES = {
 	["TOO FAR!"] = RED,
 }
 
-local card, cardEgg, cardScale, cardFlash, cardBurst -- egg reveal card, the egg on it, its UIScale, the white flash and sunburst behind it
+local card, cardEgg, cardScale, cardFlash, cardBurst, cardExclusive -- egg reveal card, the egg on it, its UIScale, the white flash and sunburst behind it, the stand-in EXCLUSIVE! text
 local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityTime -- the Ability button, a press not yet used, the ready part and the countdown
+local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at the machine
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -395,6 +402,14 @@ function Hud.init(onAction, onHome, onRide)
 			TweenService:Create(abilityScale, TweenInfo.new(0.08), { Scale = 1 }):Play()
 		end
 	end)
+	-- The egg reveal has its own screen, so the Egg Machine can show it at home too.
+	local revealGui = Instance.new("ScreenGui")
+	revealGui.Name = "EggReveal"
+	revealGui.ResetOnSpawn = false
+	revealGui.IgnoreGuiInset = true
+	revealGui.DisplayOrder = 5
+	revealGui.Parent = playerGui
+	local revealRoot = root(revealGui)
 	-- Egg reveal card: a frame the size of the card's body, with the card image
 	-- placed so its body fills the frame and the egg render on top.
 	card = Instance.new("Frame")
@@ -409,7 +424,7 @@ function Hud.init(onAction, onHome, onRide)
 	cardScale.Parent = card
 	-- Every card is its own image, stacked and already loaded; a flick only swaps
 	-- which one is opaque, in the same frame, so there's no blank frame or size jump.
-	for _, key in { "unknownEgg", "unknownEgg1", "unknownEgg2", "cardUncommon", "cardRare", "cardEpic", "cardLegendary" } do
+	for _, key in { "unknownEgg", "unknownEgg1", "unknownEgg2", "cardUncommon", "cardRare", "cardEpic", "cardLegendary", "cardExclusive" } do
 		local entry = IMAGES[key]
 		-- Sized as a share of the card's body, so squashing the card squashes its images.
 		local face = image(card, key, UDim2.fromScale(entry.size.X / CARD_BODY.X, entry.size.Y / CARD_BODY.Y), UDim2.fromScale(-entry.cardLeft / CARD_BODY.X, -CARD_TOP / CARD_BODY.Y))
@@ -422,7 +437,12 @@ function Hud.init(onAction, onHome, onRide)
 	cardEgg = image(card, "eggPinto", UDim2.new(), UDim2.fromScale(0.5, 0.5))
 	cardEgg.ZIndex = 4
 	Instance.new("UIScale").Parent = cardEgg
-	card.Parent = rideRoot
+	cardExclusive = label(card, UDim2.fromScale(1, 0.14), UDim2.fromScale(0.5, 0.07), 48, 5)
+	cardExclusive.Text = "EXCLUSIVE!"
+	cardExclusive.ZIndex = 5
+	cardExclusive.TextScaled = true
+	cardExclusive.Visible = false
+	card.Parent = revealRoot
 	-- Behind the card: a white flash over the screen and the sunburst, for the pop.
 	cardFlash = Instance.new("Frame")
 	cardFlash.Name = "EggFlash"
@@ -433,8 +453,8 @@ function Hud.init(onAction, onHome, onRide)
 	cardFlash.Size = UDim2.fromScale(1.2, 1.2)
 	cardFlash.ZIndex = 2
 	cardFlash.Visible = false
-	cardFlash.Parent = rideRoot
-	cardBurst = image(rideRoot, "sunburst", UDim2.fromOffset(CARD_WIDTH * 2.6, CARD_WIDTH * 2.6), card.Position)
+	cardFlash.Parent = revealRoot
+	cardBurst = image(revealRoot, "sunburst", UDim2.fromOffset(CARD_WIDTH * 2.6, CARD_WIDTH * 2.6), card.Position)
 	cardBurst.Name = "EggBurst"
 	cardBurst.ZIndex = 2
 	cardBurst.Visible = false
@@ -529,6 +549,69 @@ function Hud.init(onAction, onHome, onRide)
 		end
 	end)
 
+	-- Egg Machine (Config.Gacha): walking up to it shows ROLL where RIDE goes; it
+	-- (or E) pays the price for a random egg, revealed on the egg card. The prompt
+	-- draws nothing, like RIDE's. Green when you have the gold, grey when you don't.
+	local rollGacha = game:GetService("ReplicatedStorage"):WaitForChild("RollGacha")
+	local rollSize = fit("roll", BUTTON_WIDTH)
+	roll = button(homeRoot, "roll", rollSize, BOTTOM_CENTER, BUTTON_SPOT)
+	roll.Visible = false
+	local rollText
+	if IMAGES.roll.id == "" then
+		roll.BackgroundTransparency = 0
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0.3, 0)
+		corner.Parent = roll
+		local edge = Instance.new("UIStroke")
+		edge.Thickness = 5
+		edge.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		edge.Parent = roll
+		rollText = label(roll, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 46, 5)
+	end
+	local rolling = false
+	local function canRoll()
+		return (player:GetAttribute("Gold") or 0) >= Config.Gacha.Price
+	end
+	local function refreshRoll()
+		if rollText then
+			rollText.Text = "ROLL " .. money(Config.Gacha.Price)
+			roll.BackgroundColor3 = if canRoll() then Color3.fromRGB(92, 214, 72) else Color3.fromRGB(150, 150, 150)
+		end
+	end
+	player:GetAttributeChangedSignal("Gold"):Connect(refreshRoll)
+	refreshRoll()
+	local function doRoll()
+		if rolling or not rollShown or gui.Enabled or not canRoll() then
+			return
+		end
+		rolling = true
+		local ok, kind, exclusive = pcall(rollGacha.InvokeServer, rollGacha)
+		local rarity = ok and kind and (if exclusive then "Exclusive" else require(game:GetService("ReplicatedStorage").Shared.Animals[kind]).Rarity)
+		local seconds = rarity and Hud.eggReveal(rarity, kind)
+		task.wait(seconds or 0.3)
+		rolling = false
+	end
+	roll.Activated:Connect(doRoll)
+	local function setRollShown(shown)
+		rollShown = shown
+		roll.Visible = shown and not gui.Enabled
+		Inventory.setVisible(not shown and not ride.Visible and not gui.Enabled)
+	end
+	task.spawn(function()
+		local machine = workspace:WaitForChild("EggMachine")
+		local prompt = machine:WaitForChild("Body"):WaitForChild("RollPrompt", 30)
+		if not prompt then
+			return
+		end
+		prompt.PromptShown:Connect(function()
+			setRollShown(true)
+		end)
+		prompt.PromptHidden:Connect(function()
+			setRollShown(false)
+		end)
+		prompt.Triggered:Connect(doRoll)
+	end)
+
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only
 	-- readies an image for drawing the first time it's on screen, which stalls
@@ -563,6 +646,11 @@ function Hud.show(visible)
 	card.Visible = false
 	cardFlash.Visible = false
 	cardBurst.Visible = false
+	cardExclusive.Visible = false
+	if visible then
+		rollShown = false
+		roll.Visible = false
+	end
 	if not visible then
 		message.Text = ""
 		banner.Visible = false
@@ -736,6 +824,13 @@ function Hud.eggReveal(rarity, kind)
 	if not final then
 		return nil
 	end
+	-- No Exclusive card yet: the Legendary one, tinted, with EXCLUSIVE! on it.
+	local standIn = final == "cardExclusive" and IMAGES.cardExclusive.id == ""
+	if standIn then
+		final = "cardLegendary"
+	end
+	cardFaces.cardLegendary.ImageColor3 = if standIn then EXCLUSIVE_TINT else WHITE
+	cardExclusive.Visible = false
 	reveal += 1
 	local token = reveal
 	local flicks = Config.EggRevealFlicks
@@ -862,6 +957,7 @@ function Hud.eggReveal(rarity, kind)
 		-- 4. Pop: the real card, stretched tall and big, springs back with a
 		-- wobble, behind a white flash and the sunburst; the screen shakes.
 		setCardFace(final)
+		cardExclusive.Visible = standIn
 		cardFlash.Visible = true
 		cardBurst.Visible = Config.EggRevealBurst
 		cardEgg.Visible = true
@@ -915,6 +1011,7 @@ function Hud.eggReveal(rarity, kind)
 		if reveal == token then
 			card.Visible = false
 			cardBurst.Visible = false
+			cardExclusive.Visible = false
 		end
 	end)
 	return ENTER_TIME + roll + ANTICIPATION + hold + EXIT_TIME
@@ -931,7 +1028,7 @@ end
 -- RIDE shows only while you're close enough to your animal (replaces the [E] prompt).
 function Hud.showRide(visible)
 	ride.Visible = visible and not gui.Enabled
-	Inventory.setVisible(not ride.Visible and not gui.Enabled) -- the RIDE button takes its place
+	Inventory.setVisible(not ride.Visible and not rollShown and not gui.Enabled) -- the RIDE button takes its place
 end
 
 -- Ride back home: DODGE THE STAMPEDE! slams in, then pulses; no cash or distance.

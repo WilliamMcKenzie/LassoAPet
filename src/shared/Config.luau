@@ -147,6 +147,22 @@ return {
 		SpineLizard = 80, Boar = 30, WhiteWolf = 70, Troll = 280, IceGolem = 260, IceDrake = 4500,
 		Icebringer = 4800,
 	},
+	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
+	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
+	-- weighted too. Exclusive animals are only ever in this machine (keep them
+	-- out of every biome's Herd), and get their own card in the reveal.
+	Gacha = {
+		Price = 25000,
+		Position = Vector3.new(-28, 0, 30), -- on the grass between Pen1 and Pen2's ride lanes
+		Odds = { Rare = 50, Epic = 32, Legendary = 15, Exclusive = 3 },
+		Pool = {
+			Rare = { Fish = 1, Scorpion = 1, Snowman = 1 },
+			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1 },
+			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1 },
+			Exclusive = { WhiteWolf = 1, Troll = 0.8, PolarBear = 0.7, IceDrake = 0.3, IceWyvern = 0.2 },
+		},
+		Reach = 10, -- studs from the machine where ROLL shows
+	},
 	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
 	EggIcons = {
