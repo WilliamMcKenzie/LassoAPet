@@ -146,6 +146,10 @@ return {
 		Scorpion = "rbxassetid://138046936786400",
 		Sandworm = "rbxassetid://96884572036784",
 		Snake = "rbxassetid://71071272639782",
+		Penguin = "rbxassetid://135143840112034",
+		Snowman = "rbxassetid://105231134861157",
+		PolarBear = "rbxassetid://123542177444935",
+		IceWyvern = "rbxassetid://89731193669575",
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.

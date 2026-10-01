@@ -33,6 +33,10 @@ local HEADSHOTS = {
 	Scorpion = "rbxassetid://97432378312477", -- PetScorpion.png
 	Sandworm = "rbxassetid://98334444188731", -- PetSandworm.png
 	Snake = "rbxassetid://134072754506430", -- PetSnake.png
+	Penguin = "rbxassetid://90291860492773", -- PetPenguin.png
+	Snowman = "rbxassetid://134217060309588", -- PetSnowman.png
+	PolarBear = "rbxassetid://100016963704658", -- PetPolarBear.png
+	IceWyvern = "rbxassetid://93077776104646", -- PetIceWyvern.png
 }
 local TRASH = "rbxassetid://74308771924477" -- assets/ui/Trash.png (QM's trash can)
 local COIN = "rbxassetid://99312860837685"
