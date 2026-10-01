@@ -134,3 +134,82 @@ def preview(name, out, old=None):
 if __name__ == "__main__":
     preview(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else OUT,
             old=sys.argv[3] if len(sys.argv) > 3 else None)
+
+
+# ---------------------------------------------------------------- eye sockets
+
+def eye_sockets(path, margin, dark=None):
+    """Dark sockets for eyes on white fur (QM: white eyes don't show on white animals).
+    Each Eye<side> plate gets a darker block of the same depth around it, margin BB units
+    wider on every side, and the eye and pupil move out by the plate's depth to sit on it.
+    The socket copies the darkest element's faces (its palette colour) unless `dark`
+    names an element to copy."""
+    import copy
+    import uuid
+    from snake_design import element_color, textures
+
+    m = json.load(open(path))
+    els = {e["name"]: e for e in m["elements"]}
+    if any(n.startswith("EyeSocket") for n in els):
+        print(path, "already has sockets")
+        return
+    texs = textures(m)
+    src = els[dark] if dark else min(m["elements"], key=lambda e: sum(element_color(e, texs)))
+    for side in ("L", "R"):
+        eye, pupil = els["Eye" + side], els.get("Pupil" + side) or els.get("Slit" + side)
+        lo, hi = np.array(eye["from"], float), np.array(eye["to"], float)
+        axis = int(np.argmin(hi - lo))  # the plate's thin axis
+        depth = hi[axis] - lo[axis]
+        # outward: away from the head, i.e. the side the pupil sits on
+        out = -1 if pupil["from"][axis] < lo[axis] else 1
+        sock = copy.deepcopy(src)
+        sock["name"], sock["uuid"] = "EyeSocket" + side, str(uuid.uuid4())
+        slo, shi = lo - margin, hi + margin
+        slo[axis], shi[axis] = lo[axis], hi[axis]
+        sock["from"], sock["to"] = [round(v, 4) for v in slo], [round(v, 4) for v in shi]
+        sock["origin"] = [round(v, 4) for v in (slo + shi) / 2]
+        sock["rotation"] = [0, 0, 0]
+        for e in (eye, pupil):
+            for k in ("from", "to", "origin"):
+                if k in e:
+                    e[k][axis] = round(e[k][axis] + out * depth, 4)
+        m["elements"].append(sock)
+
+        def put(node):
+            for c in node:
+                if isinstance(c, dict):
+                    if eye["uuid"] in c["children"]:
+                        c["children"].insert(c["children"].index(eye["uuid"]), sock["uuid"])
+                        return True
+                    if put(c["children"]):
+                        return True
+            return False
+
+        assert put(m["outliner"]), side
+    with open(path, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    print(path, "sockets from", src["name"])
+
+
+HEAD_KEYS = ("head", "eye", "snout", "muzzle", "face", "nose", "beak", "jaw", "forehead", "hat")
+
+
+def headshot(name, path, out=os.path.join(ROOT, "assets", "ui")):
+    """Pets-panel headshot (assets/ui/Pet<Name>.png) from a .bbmodel file, framed like
+    tools/snow_headshots.py, for models whose file (not a builder) is the source of truth."""
+    import snow_designs as SD
+    from snow_rig import posed
+    parts = posed(json.load(open(path)))
+    for p in parts:
+        if p.name.startswith(C.PLAIN) or p.name.startswith(SD.PLAIN):
+            p.plain = True
+    head = [p for p in parts if any(k in p.name.lower() for k in HEAD_KEYS)]
+    lo, hi = SD.bounds(head)
+    c = (lo + hi) / 2
+    size = np.linalg.norm(hi - lo)
+    target = c - np.array([0, size * 0.18, 0])
+    blo, bhi = SD.bounds(parts)
+    eye = target + SD.Q34_DIR * max(size * 3.1, (bhi[1] - blo[1]) * 1.6)
+    im = render(parts, eye=eye, target=target, W=512, H=512, fov=30, transparent=True)
+    im.save(os.path.join(out, f"Pet{name}.png"))
+    print("wrote", f"Pet{name}.png")
