@@ -105,7 +105,7 @@ return {
 	--     whatever its size. Wind breaks round its head and the camera pulls back.
 	--   Leap (Unicorn): one tap: a gallop up into the air and down again in an arc
 	--     LeapHeight studs high, over everything, at SpeedBoost x speed with no Hold drain,
-	--     walking on puffs of cloud.
+	--     leaving a rainbow trail.
 	--   Rattle (Snake): one tap: it stops, coils up and rattles for Duration (its
 	--     coiled idle), smashing every obstacle within Radius studs and scattering
 	--     the animals there away from it, and refilling Restore of the Hold bar. No
@@ -116,7 +116,7 @@ return {
 	-- Charge swings the camera round to a cinematic front-side angle.
 	Abilities = {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
-		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 28 },
+		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 56 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 6, Radius = 45, Restore = 0.5 },
 		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7 },
 	},
