@@ -8,5 +8,4 @@ local RhinoModel = require(script.Parent.RhinoModel)
 return Horse.variant("Rhino", RhinoModel, "Epic", {
 	seat = Vector3.new(0, 7.4, 2.2),
 	neck = { center = Vector3.new(0, 5.2, -3.7), radius = 1.9 },
-	size = 1.2, -- tier 2: a touch bigger than the tier 1 pets
 })

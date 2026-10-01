@@ -23,6 +23,7 @@
 -- only ever rotate one way from rest (front legs and neck forward, hind legs
 -- back), so blending never shows hidden faces.
 
+local Config = require(script.Parent.Parent.Config)
 local Rig = require(script.Parent.Rig)
 local HorseModel = require(script.Parent.HorseModel)
 
@@ -61,11 +62,42 @@ local function clamp01(x)
 	return math.max(0, math.min(1, x))
 end
 
+-- How big a model reads, in studs: the square root of its box's two biggest sides
+-- multiplied (Config.PetSmallSize).
+local function silhouette(data)
+	local lo, hi = Vector3.one * math.huge, -Vector3.one * math.huge
+	for _, part in data.parts do
+		if not part.hidden then
+			local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = part.cframe:GetComponents()
+			local h = part.size / 2
+			local e = Vector3.new(
+				math.abs(r00) * h.X + math.abs(r01) * h.Y + math.abs(r02) * h.Z,
+				math.abs(r10) * h.X + math.abs(r11) * h.Y + math.abs(r12) * h.Z,
+				math.abs(r20) * h.X + math.abs(r21) * h.Y + math.abs(r22) * h.Z
+			)
+			local c = Vector3.new(x, y, z)
+			lo, hi = lo:Min(c - e), hi:Max(c + e)
+		end
+	end
+	local d = hi - lo
+	local sides = { d.X, d.Y, d.Z }
+	table.sort(sides)
+	return math.sqrt(sides[2] * sides[3])
+end
+
+-- The size that makes an animal of this tier read TierGrowth x the tier below.
+local function tierSize(name, data)
+	local tier = Config.PetTiers[name] or 1
+	local size = Config.PetSmallSize * Config.TierGrowth ^ (tier - 1) / silhouette(data)
+	return math.round(size * 100) / 100 -- one template per animal (Rig caches by size)
+end
+
 local Horse = {} -- the methods every variant shares
 
 -- A kind of animal: its own model data and rarity, Horse's methods.
 -- points (optional): { seat = Vector3, neck = { center = Vector3, radius = number },
--- size = number (the whole animal scaled up from its model, 1 by default) }
+-- size = number (the whole animal scaled up from its model; by default sized to its
+-- tier, Config.PetTiers) }
 local function variant(name, data, rarity, points)
 	points = points or {}
 	local class = setmetatable({
@@ -75,7 +107,7 @@ local function variant(name, data, rarity, points)
 		landAt = landAt(data),
 		seat = points.seat or SEAT,
 		neckLoop = points.neck or NECK_LOOP,
-		size = points.size or 1,
+		size = points.size or tierSize(name, data),
 	}, { __index = Horse })
 	class.__index = class
 
