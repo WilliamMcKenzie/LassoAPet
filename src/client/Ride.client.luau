@@ -524,7 +524,11 @@ local function spawnStarter()
 	local spot = homeSpot()
 	-- The pet waiting on your pen's first spot (the "RidePet" attribute). Nothing is
 	-- special about the horse: it's just the default pet. Every other pet in your
-	-- pen can be ridden too (PenPets).
+	-- pen can be ridden too (PenPets). "" is no pet at all yet: the tutorial's
+	-- first pet hatches in the pen and is ridden from there.
+	if player:GetAttribute("RidePet") == "" then
+		return
+	end
 	starter = newEntity(spot.X, spot.Z, penYaw(), player:GetAttribute("RidePet") or Config.DefaultPet)
 	setClickable(starter.animal.model, true)
 end
@@ -706,8 +710,10 @@ startRide = function(model)
 		spot = Vector3.new(mount.x, 0, mount.z)
 	elseif fromPen then
 		ridePet:FireServer(fromPen.id)
-		starter.animal.model:Destroy()
-		starter = nil
+		if starter then
+			starter.animal.model:Destroy()
+			starter = nil
+		end
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
 	else
 		mount, starter = starter, nil
@@ -1074,7 +1080,7 @@ local function sprinting()
 	if phase == "return" then
 		return Config.ReturnSprint -- racing home with the egg
 	end
-	return phase == "outbound" and (sprintKey or Hud.sprintHeld())
+	return phase == "outbound" and not Tutorial.active and (sprintKey or Hud.sprintHeld())
 end
 
 UserInputService.InputChanged:Connect(function(input)
@@ -1750,7 +1756,7 @@ local function updateAbility(dt)
 		endAbility(abilityMount)
 	end
 	abilityMount = mount
-	local cfg = mount and Config.Abilities[mount.kind]
+	local cfg = mount and not Tutorial.active and Config.Abilities[mount.kind] -- no abilities in the tutorial
 	if not cfg or (phase ~= "outbound" and phase ~= "turning" and phase ~= "return") then
 		if mount then
 			endAbility(mount)
@@ -1920,7 +1926,7 @@ local function checkRide(dt)
 	if ability and ability.cfg.Kind == "Frost" then
 		ability = nil -- slowing the herd is all it does: it still uses Hold and can still crash
 	end
-	if phase == "outbound" and mount.z < 0 and not transfer and not ability then -- abilities use no Hold
+	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not Tutorial.active then -- abilities and the tutorial use no Hold
 		hold -= dt * (if sprinting() then Config.SprintDrain else 1)
 		if hold <= 0 then
 			return fail("BUCKED OFF")
@@ -2086,10 +2092,11 @@ local function updateRider(dt)
 end
 
 local function updateHud()
-	Hud.setSprint(phase == "outbound")
+	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out).
+	Hud.setSprint(phase == "outbound" and not Tutorial.active)
 	if phase == "outbound" then
-		Hud.setHold(mount and hold / holdTime(mount) or 1)
-		Hud.setDistance(string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
+		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1)
+		Hud.setDistance(if Tutorial.active then "" else string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		if actionTarget == "egg" then
 			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
 		else

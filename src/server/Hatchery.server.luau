@@ -17,6 +17,9 @@
 -- A new player gets the tutorial (Tutorial.luau): the player's "Tutorial"
 -- attribute is true until the client says it's done (TutorialDone), which is
 -- saved with the pen. Anyone with eggs or pets saved from before has done it.
+-- A new player starts with no pet at all, only a Config.DefaultPet egg (it
+-- hatches at once): that pet becomes the one you ride the first time you ride
+-- it. Nothing is saved until the tutorial's done, so leaving starts it over.
 --
 -- Saving needs a published place with API access, like Gold.
 
@@ -101,7 +104,7 @@ local function publish(player)
 		return
 	end
 	syncTools(player, profile.eggs)
-	player:SetAttribute("RidePet", profile.ride)
+	player:SetAttribute("RidePet", profile.ride or "")
 	local pen = penOf(player)
 	if pen then
 		pen:SetAttribute("Contents", HttpService:JSONEncode(profile.items))
@@ -159,13 +162,18 @@ local function load(player)
 		return
 	end
 	profiles[player] = profile
-	player:SetAttribute("Tutorial", if Config.Tutorial and not profile.tutorial then true else nil)
+	local tutorial = Config.Tutorial and not profile.tutorial
+	if tutorial then
+		profile.ride = nil -- RidePet "": no pet waits in the pen yet
+		profile.eggs = { [Config.DefaultPet] = 1 }
+	end
+	player:SetAttribute("Tutorial", if tutorial then true else nil)
 	publish(player)
 end
 
 local function save(player)
 	local profile = profiles[player]
-	if not store or not profile or not loaded[player] then
+	if not store or not profile or not loaded[player] or player:GetAttribute("Tutorial") then
 		return
 	end
 	for attempt = 1, 3 do
@@ -363,7 +371,11 @@ remote("RidePet", function(player, id)
 	if not item or not item.pet then
 		return
 	end
-	item.pet, profile.ride = profile.ride, item.pet
+	if profile.ride then
+		item.pet, profile.ride = profile.ride, item.pet
+	else
+		profile.ride, profile.items[id] = item.pet, nil -- your first pet: nothing to swap with
+	end
 	publish(player)
 end)
 

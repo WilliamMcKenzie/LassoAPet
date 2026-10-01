@@ -136,6 +136,7 @@ local sprint, sprintInput -- the Sprint button, and the touch or click holding i
 local ability, abilityPressed, abilityFill, abilityTime -- the Ability button, a press not yet used, the ready part and the countdown
 local tip, tipText -- the fail screen's tooltip in place of "+$N" (Hud.setTip), and its text
 local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at the machine
+local tutorial = false -- the first-time tutorial is on: only the buttons it asks for (Hud.setTutorial)
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -528,7 +529,7 @@ function Hud.init(onAction, onHome, onRide)
 		local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
 		cost = nextBiome and nextBiome.UnlockCost
 		upgradeShown = cost ~= nil
-		upgrade.Visible = upgradeShown and gold.Visible
+		upgrade.Visible = upgradeShown and gold.Visible and not tutorial
 		if cost then
 			price.Text = money(cost)
 			upgrade.Image = IMAGES[if (player:GetAttribute("Gold") or 0) >= cost then "upgradePen" else "upgradePenDisabled"].id
@@ -679,14 +680,14 @@ function Hud.show(visible)
 		home.Visible = false
 	end
 	ride.Visible = false -- comes back when the ride prompt shows again
-	gold.Visible = not visible
-	pets.Visible = not visible
-	upgrade.Visible = upgradeShown and not visible
+	gold.Visible = not visible and not tutorial
+	pets.Visible = not visible and not tutorial
+	upgrade.Visible = upgradeShown and not visible and not tutorial
 	Inventory.setVisible(not visible) -- your eggs, hidden while riding
 	gained.row.Visible = false
 	noCash = false
 	Hud.setTip(nil)
-	rideCash.row.Visible = true
+	rideCash.row.Visible = not tutorial
 	Hud.setReturning(false)
 	Hud.setVignette(0)
 	actionScale.Scale = 1
@@ -1073,7 +1074,7 @@ function Hud.setReturning(returning)
 			end
 		end)
 	end
-	rideCash.row.Visible = not returning
+	rideCash.row.Visible = not returning and not tutorial
 	distance.Visible = not returning
 end
 
@@ -1124,6 +1125,26 @@ function Hud.setTip(text)
 	end
 end
 
+-- The first-time tutorial (Tutorial.luau) shows only what each step needs: no
+-- Gold, Pets or Upgrade Pen at home and no ride cash (Ride leaves out Sprint,
+-- Ability and the Hold bar). Off again, everything's back.
+function Hud.setTutorial(on)
+	tutorial = on
+	local riding = gui.Enabled
+	gold.Visible = not riding and not on
+	pets.Visible = not riding and not on
+	upgrade.Visible = upgradeShown and not riding and not on
+	rideCash.row.Visible = not on and not noCash
+end
+
+-- The tutorial's cursor points at these: "ride" (RIDE), "action" (LASSO / TAKE
+-- EGG) or "home" (HOME), each only while it's on screen.
+function Hud.button(name)
+	local riding = gui.Enabled and rideRoot.Position.Y.Scale < 1 -- not moved off for a cutscene
+	local target = if name == "ride" then ride elseif name == "action" and riding then action elseif name == "home" and riding then home else nil
+	return if target and target.Visible then target else nil
+end
+
 -- Money as the HUD writes it: "$950", "$1.2k".
 Hud.money = money
 
@@ -1131,7 +1152,7 @@ Hud.money = money
 -- fail screen's "+$N" stay hidden until the next ride.
 function Hud.setCash(amount)
 	noCash = amount == nil
-	rideCash.row.Visible = not noCash
+	rideCash.row.Visible = not noCash and not tutorial
 end
 
 -- Cash gained this ride.
