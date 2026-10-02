@@ -1180,7 +1180,8 @@ vfx.frostSlow = 0 -- the share of its speed a slowed animal loses (the running F
 vfx.FROST_TINT = Color3.fromRGB(150, 220, 255)
 vfx.FLAKE_TEXTURE = "rbxasset://textures/particles/sparkles_main.dds"
 
--- Frosted over while slowed: an icy tint and snowflakes drifting off it.
+-- Frosted over while slowed: an icy ring round it and snowflakes drifting off it.
+-- (A ring, not a Highlight: a Highlight on each animal it reached hitched on phones.)
 function vfx.setFrosted(entity, on)
 	if on == (entity.frostFx ~= nil) then
 		return
@@ -1193,14 +1194,7 @@ function vfx.setFrosted(entity, on)
 		return
 	end
 	local model = entity.animal.model
-	local glow = Instance.new("Highlight")
-	glow.FillColor = vfx.FROST_TINT
-	glow.FillTransparency = 0.45
-	glow.OutlineColor = Color3.new(1, 1, 1)
-	glow.OutlineTransparency = 0.2
-	glow.DepthMode = Enum.HighlightDepthMode.Occluded
-	glow.Adornee = model
-	glow.Parent = model
+	local glow = Outline.ring(model, vfx.FROST_TINT)
 	local flakes = Instance.new("ParticleEmitter")
 	flakes.Texture = vfx.FLAKE_TEXTURE
 	flakes.Color = ColorSequence.new(Color3.new(1, 1, 1), vfx.FROST_TINT)
