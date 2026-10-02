@@ -127,11 +127,13 @@ resize()
 -- QM's hint pictures, in place of the text hint: step 1's "Click on the egg"
 -- (with a cursor over the egg's square in the inventory: its tip, CURSOR_TIP on
 -- the 256px picture, on the square at CURSOR_AT, CURSOR_SIZE times the square's
--- size) and "Place the egg in your pen" once it's in hand (steps 1 and 7). All
+-- size), "Place the egg in your pen" once it's in hand (steps 1 and 7) and
+-- "Ride your horse!" (step 2, when it's a Horse; another pet gets the text). All
 -- have letters the height of "Click on the egg" at PICTURE_WIDTH.
 local PICTURES = {
 	click = { image = "rbxassetid://93909017403661", width = 935, height = 145 }, -- assets/ui/HintClickEgg.png
 	place = { image = "rbxassetid://110142835452075", width = 1473, height = 146 }, -- assets/ui/HintPlaceEgg.png
+	rideHorse = { image = "rbxassetid://87420526826729", width = 951, height = 146 }, -- assets/ui/HintRideHorse.png
 }
 local picture = Instance.new("ImageLabel")
 picture.Name = "HintPicture"
@@ -438,6 +440,7 @@ function Tutorial.update(state)
 	local pictureName = if state.cutscene or phase ~= "idle" then nil
 		elseif clickTool then "click"
 		elseif PLACE_STEPS[step] then "place"
+		elseif step == "ride" and select(2, myPet(state)) == "Horse" then "rideHorse"
 		else nil
 	showPicture(pictureName, clickTool)
 	setHint(if state.cutscene or pictureName then nil else hintFor(state))
