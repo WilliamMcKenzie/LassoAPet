@@ -38,6 +38,7 @@ local KINDS = {
 	IceDrake = { data = require(script.Parent.IceDrakeEggModel), center = 1.6 },
 	Icebringer = { data = require(script.Parent.IcebringerEggModel), center = 1.6 },
 	Kraken = { data = require(script.Parent.KrakenEggModel), center = 1.6 },
+	Squid = { data = require(script.Parent.SquidEggModel), center = 1.6 },
 }
 
 local Egg = {}
