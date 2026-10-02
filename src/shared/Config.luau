@@ -19,9 +19,11 @@ return {
 			Length = 760,
 			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
 			WallColors = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
-			-- Which animals run in this biome's stampede and how often, by weight
-			-- (names are modules in Shared/Animals).
-			Herd = { Horse = 30, Pinto = 20, Pig = 20, Fish = 12, Rhino = 8, Unicorn = 3 },
+			-- Which animals run in this biome's stampede and how often (names are modules
+			-- in Shared/Animals). QM's spawn table (Oct 2): chances out of 1. They're
+			-- weights, so a biome that doesn't add up to exactly 1 still works. Nest eggs
+			-- use the same odds (Nests.server).
+			Herd = { Horse = 0.22, Pinto = 0.22, Pig = 0.24, Fish = 0.2, Rhino = 0.1, Unicorn = 0.02 },
 			-- Dirt patches in the walls' colours, a stud below the grass
 			-- (tools/meadow_ground.py); see the Desert's Patches.
 			Patches = {
@@ -33,7 +35,7 @@ return {
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
-			Herd = { Cactus = 30, Scorpion = 16, Sandworm = 8, SpineLizard = 8, Snake = 3 },
+			Herd = { Cactus = 0.4, Scorpion = 0.3, Sandworm = 0.15, SpineLizard = 0.13, Snake = 0.02 },
 			-- Patches of other ground in the floor (parts named after them in
 			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
 			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
@@ -58,9 +60,7 @@ return {
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
 			-- White Wolf, Polar Bear, Troll, Ice Wyvern and Ice Drake are out of the herd
 			-- for now (QM, Oct 1): their modules and stats stay, so pets already owned still work.
-			Herd = {
-				Penguin = 30, Boar = 30, Snowman = 16, IceGolem = 8, Icebringer = 3,
-			},
+			Herd = { Penguin = 0.3, Boar = 0.28, Snowman = 0.22, IceGolem = 0.15, Icebringer = 0.05 },
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
@@ -78,7 +78,7 @@ return {
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			Herd = { Starfish = 30, Fish = 30, Whale = 16, Squid = 8, KingCrab = 8, Kraken = 3 },
+			Herd = { Fish = 0.3, Starfish = 0.35, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, Kraken = 0.05 }, -- adds to 1.1
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
