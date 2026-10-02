@@ -223,7 +223,7 @@ return {
 		Penguin = 1, Snowman = 1, PolarBear = 2, IceWyvern = 3,
 		SpineLizard = 2, Boar = 1, WhiteWolf = 1, Troll = 2, IceGolem = 2, IceDrake = 3,
 		Icebringer = 3,
-		Kraken = 3,
+		Kraken = 4, -- XL (QM, Oct 2)
 		Squid = 2,
 		Whale = 4, -- XL (QM, Oct 2): the first tier past large
 		KingCrab = 2,

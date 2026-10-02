@@ -1,5 +1,5 @@
 -- Kraken: a squid with a tall tilted mantle, one big eye and eight tentacles splayed on
--- the sea floor. Legendary, Ocean. QM's model designs/ocean/Kraken.bbmodel, animated by
+-- the sea floor. Legendary, Ocean, XL (tier 4). QM's model designs/ocean/Kraken.bbmodel, animated by
 -- tools/kraken_rig.py and converted into KrakenModel.luau by tools/bbmodel_to_luau.py.
 -- You ride on the top of its mantle.
 
