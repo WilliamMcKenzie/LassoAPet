@@ -13,8 +13,9 @@ from above (toward the back for the left arms, Arm1..4).
           letting it down; the body breathes and rocks gently
   walk    a crawl: tentacles reach forward in turn round the ring and pull back
           along the floor; the body bobs and rolls with the steps
-  gallop  the run, a squid's jet: every tentacle sweeps back and trails behind
-          as the body surges up and leans in, then they all fan out again
+  gallop  the run, a real squid's swim (QM, Oct 2): it lifts off and glides, the
+          tentacles bundled and streaming behind, flaring out and snapping shut
+          to jet it forward (glide)
 """
 
 import json
@@ -59,11 +60,6 @@ def back(yaw):
     return 1 if (yaw % 360) < 180 else -1
 
 
-def forwardness(yaw):
-    """1 for an arm reaching straight ahead, -1 straight back."""
-    return math.cos(math.radians(yaw))
-
-
 def animations(model):
     # position keys are in Blockbench units (0.1 stud)
     L = 4.0
@@ -95,21 +91,45 @@ def animations(model):
                      track(Lw, lambda u: (0, 4 * abs(math.sin(TAU * u)), 0), 16, "position")],
             "neck": [track(Lw, lambda u: (0, 0, -2 * math.sin(TAU * u)), 16)]}
 
-    Lg = 0.7
+    return {"idle": (L, idle), "walk": (Lw, walk), "gallop": glide(model)}
 
-    def gallop_arm(i, yaw, j, u):
-        # 1: swept back and trailing, 0: fanned out on the floor
-        s = 0.5 - 0.5 * math.cos(TAU * u)
-        if j < 0:
-            reach = 10 + 22 * max(0.0, forwardness(yaw))  # the front arms swing furthest
-            return (0, back(yaw) * reach * s, 0)
-        return ((22, -10, -12, 16)[j] * s, 0, 0)
 
-    gallop = {**arms(model, Lg, gallop_arm, 16),
-              "root": [track(Lg, lambda u: (-8 * (0.5 - 0.5 * math.cos(TAU * u)), 0, 0), 16),
-                       track(Lg, lambda u: (0, 12 * max(0.0, math.sin(TAU * u - 0.6)), 0), 16, "position")],
-              "neck": [track(Lg, lambda u: (4 * (0.5 - 0.5 * math.cos(TAU * u)), 0, 0), 16)]}
-    return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lg, gallop)}
+def glide(m):
+    """The run (QM, Oct 2): a squid's jet-propelled glide. It lifts off the floor and leans
+    in, the tentacles hang together in a bundle streaming back behind it, and every
+    1.2 s they flare out and snap shut to kick it forward. Positions in Blockbench units."""
+    L = 1.2
+    rest = {g["name"]: (g.get("rotation") or (0, 0, 0))[0] for g in m["groups"]}
+
+    def stroke(u):
+        """0 bundled and streaming, 1 flared out: opens slowly, snaps shut fast."""
+        if u < 0.35:
+            return math.sin(math.pi / 2 * u / 0.35) ** 2
+        if u < 0.5:
+            return math.cos(math.pi / 2 * (u - 0.35) / 0.15) ** 2
+        return 0.0
+
+    def surge(u):
+        """The jet's kick, peaking just after the tentacles snap shut, easing off in the glide."""
+        d = (u - 0.45) % 1.0
+        return math.exp(-d * 5) * min(1.0, d / 0.06)
+
+    def arm(i, yaw, j, u):
+        f = stroke(u)
+        if j < 0:  # the arms keep their turn; only the segments move
+            return (0, 0, 0)
+        name = f"T{i + 1}{'abcd'[j]}"
+        r = rest[name]
+        straight = (-90 - r) if j == 0 else -r  # each tentacle hanging straight down from the funnel
+        ripple = (0, 3, 6, 9)[j] * math.sin(TAU * u * 2 - 1.1 * j) * (1 - f)
+        flare = ((-90 - r) * 0.25, -r * 0.6, -r * 0.4, 6.0)[j]  # flared: well out from the bundle, tips curling
+        return (straight * (1 - f) + flare * f + ripple, 0, 0)
+
+    anim = {**arms(m, L, arm, 24),
+            "root": [track(L, lambda u: (-16 - 6 * surge(u) + 4 * stroke(u), 0, 0), 24),
+                     track(L, lambda u: (0, 95 + 14 * surge(u) - 10 * stroke(u), -12 * surge(u)), 24, "position")],
+            "neck": [track(L, lambda u: (-34 + 16 * stroke(u), 0, 0), 24)]}
+    return L, anim
 
 
 def main(out="/mnt/project-files/animals/ocean"):
