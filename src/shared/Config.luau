@@ -58,8 +58,6 @@ return {
 			Length = 6840, -- 3x the desert (QM)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
-			-- White Wolf, Polar Bear, Troll, Ice Wyvern and Ice Drake are out of the herd
-			-- for now (QM, Oct 1): their modules and stats stay, so pets already owned still work.
 			Herd = { Penguin = 0.3, Boar = 0.28, Snowman = 0.22, IceGolem = 0.15, Icebringer = 0.05 },
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
@@ -217,17 +215,10 @@ return {
 	-- one of its own tier or higher still crashes it. Obstacles take their tier
 	-- from their model's "Tier" attribute, else from ObstacleTiers by name.
 	PetTiers = {
-		Horse = 1, Pinto = 1, Pig = 1, Fish = 1, Cactus = 1, Scorpion = 1,
-		Rhino = 2, Unicorn = 2, Sandworm = 2,
-		Snake = 3,
-		Penguin = 1, Snowman = 1, PolarBear = 2, IceWyvern = 3,
-		SpineLizard = 2, Boar = 1, WhiteWolf = 1, Troll = 2, IceGolem = 2, IceDrake = 3,
-		Icebringer = 3,
-		Kraken = 4, -- XL (QM, Oct 2)
-		Squid = 2,
-		Whale = 4, -- XL (QM, Oct 2): the first tier past large
-		KingCrab = 2,
-		Starfish = 1,
+		Horse = 1, Pig = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
+		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
+		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, Icebringer = 3, -- Tundra
+		Starfish = 1, Squid = 2, KingCrab = 2, Whale = 4, Kraken = 4, -- Ocean
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.2x medium, 1.44x large, 1.73x XL (QM, Oct 2; Eggs/Egg.luau).
@@ -260,16 +251,10 @@ return {
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.
 	PetIncome = {
-		Horse = 1, Pinto = 3, Pig = 3, Fish = 8, Rhino = 40, Unicorn = 150,
-		Cactus = 6, Scorpion = 14, Sandworm = 60, Snake = 1000,
-		Penguin = 25, Snowman = 60, PolarBear = 250, IceWyvern = 5000,
-		SpineLizard = 80, Boar = 30, WhiteWolf = 70, Troll = 280, IceGolem = 260, IceDrake = 4500,
-		Icebringer = 4800,
-		Kraken = 24000,
-		Squid = 1200,
-		Whale = 300,
-		KingCrab = 1300,
-		Starfish = 100,
+		Horse = 1, Pig = 3, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
+		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
+		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, Icebringer = 1111, -- Tundra
+		Starfish = 100, Squid = 700, KingCrab = 950, Whale = 5000, Kraken = 8200, -- Ocean
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -305,14 +290,9 @@ return {
 		Snake = "rbxassetid://71071272639782",
 		Penguin = "rbxassetid://135143840112034",
 		Snowman = "rbxassetid://105231134861157",
-		PolarBear = "rbxassetid://123542177444935",
-		IceWyvern = "rbxassetid://89731193669575",
 		SpineLizard = "rbxassetid://98567631088826",
 		Boar = "rbxassetid://121234341393694",
-		WhiteWolf = "rbxassetid://134686819748938",
-		Troll = "rbxassetid://111845214220812",
 		IceGolem = "rbxassetid://102264545247873",
-		IceDrake = "rbxassetid://97792373754275",
 		Icebringer = "rbxassetid://108999142038756",
 		Kraken = "rbxassetid://104654341782924", -- assets/ui/KrakenEggRender.png
 		Squid = "rbxassetid://128883182267763", -- assets/ui/SquidEggRender.png
@@ -363,32 +343,31 @@ return {
 	-- ridden (MountSpeed, ReturnSpeed) and in the stampede (HerdSpeed). Stamina scales
 	-- how long the Hold bar lasts while you ride it: 2x lasts twice as long.
 	AnimalStats = {
+		-- Meadow
 		Horse = { Speed = 1, Stamina = 1 },
-		Pinto = { Speed = 1.1, Stamina = 0.9 },
 		Pig = { Speed = 0.8, Stamina = 0.8 },
+		Pinto = { Speed = 1.1, Stamina = 0.9 },
 		Fish = { Speed = 0.6, Stamina = 3 },
 		Rhino = { Speed = 1.5, Stamina = 1.8 },
 		Unicorn = { Speed = 2, Stamina = 2 },
+		-- Desert
 		Cactus = { Speed = 1.2, Stamina = 1.5 },
 		Scorpion = { Speed = 1.5, Stamina = 1.5 },
-		Sandworm = { Speed = 1.6, Stamina = 2 },
-		Snake = { Speed = 2, Stamina = 2 },
+		Sandworm = { Speed = 1.6, Stamina = 3 },
+		SpineLizard = { Speed = 1.8, Stamina = 2 },
+		Snake = { Speed = 2, Stamina = 3 },
+		-- Tundra
 		Penguin = { Speed = 1.5, Stamina = 1.5 },
-		Snowman = { Speed = 1.9, Stamina = 1.3 },
-		PolarBear = { Speed = 1.5, Stamina = 3 },
-		IceWyvern = { Speed = 3, Stamina = 3 },
-		SpineLizard = { Speed = 1.7, Stamina = 2 },
 		Boar = { Speed = 1.6, Stamina = 1.6 },
-		WhiteWolf = { Speed = 2.3, Stamina = 1.8 },
-		Troll = { Speed = 2.5, Stamina = 2 },
-		IceGolem = { Speed = 1.6, Stamina = 2.6 },
-		IceDrake = { Speed = 2.8, Stamina = 3 },
-		Icebringer = { Speed = 2.7, Stamina = 3 },
-		Kraken = { Speed = 4, Stamina = 3.5 }, -- 4x (QM, Oct 2)
-		Squid = { Speed = 2.6, Stamina = 2.6 },
-		Whale = { Speed = 1.2, Stamina = 5 }, -- QM, Oct 2
-		KingCrab = { Speed = 2.4, Stamina = 3 },
-		Starfish = { Speed = 1.8, Stamina = 2 },
+		Snowman = { Speed = 1.9, Stamina = 1.3 },
+		IceGolem = { Speed = 1.6, Stamina = 3 },
+		Icebringer = { Speed = 2.7, Stamina = 4 },
+		-- Ocean
+		Starfish = { Speed = 2.5, Stamina = 2 },
+		Squid = { Speed = 3, Stamina = 2.6 },
+		KingCrab = { Speed = 3.1, Stamina = 3 },
+		Whale = { Speed = 1.2, Stamina = 10 },
+		Kraken = { Speed = 4.5, Stamina = 3 },
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
