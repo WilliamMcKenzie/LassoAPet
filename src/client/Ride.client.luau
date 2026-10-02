@@ -1883,9 +1883,18 @@ end
 
 vfx.MOUND_EVERY = 3 -- studs between the Sandworm's mounds
 vfx.MOUND_LIFE = 1.8 -- seconds a mound takes to sink away
+-- Three mound shapes, one picked at random each time (QM): blocks of sand as
+-- { x, z, height, width } from the worm.
+vfx.MOUNDS = {
+	{ { 0, 0, 2.2, 6 }, { -2.2, 0.8, 1.4, 4 }, { 2.2, -0.8, 1.4, 4 } },
+	{ { 0, 0.5, 2.6, 5 }, { -1.6, -1.6, 1.6, 4.5 }, { 2.4, 0.6, 1, 3.5 }, { -2.6, 1.4, 0.8, 3 } },
+	{ { 0.4, 0, 1.8, 7 }, { -1.8, -1.2, 1.2, 3.5 }, { 1.4, 1.8, 1.5, 3 } },
+}
 function vfx.mound(x, z, floor)
 	local ground = Config.Biomes[WorldColors.biomeAt(z)].GroundColors
-	for k, s in { { 0, 0, 2.2, 6 }, { -2.2, 0.8, 1.4, 4 }, { 2.2, -0.8, 1.4, 4 } } do
+	local size = rng:NextNumber(0.8, 1.2) -- a little bigger or smaller each time
+	for k, shape in vfx.MOUNDS[rng:NextInteger(1, #vfx.MOUNDS)] do
+		local s = { shape[1] * size, shape[2] * size, shape[3] * size, shape[4] * size }
 		local p = Instance.new("Part")
 		p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
 		p.Color = ground[(k % 2) + 1]
