@@ -4,14 +4,14 @@
 -- later. Each nest's egg is its "Egg" attribute (an animal name, or "" when
 -- empty), which every client reads to show the eggs.
 --
--- Eggs are rolled with the odds of the nest's biome's stampede
--- (Config.Biomes[b].Herd), leaving out Common animals: you get those by default.
+-- Eggs are rolled with exactly the odds of the nest's biome's stampede
+-- (Config.Biomes[b].Herd): an animal that's 1 in 100 of the stampede is 1 in 100
+-- of the eggs (QM, Oct 2).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
-local Animals = ReplicatedStorage.Shared.Animals
 
 local world = workspace:WaitForChild("World")
 local rng = Random.new()
@@ -21,9 +21,7 @@ local eggOdds = {}
 for b, biome in Config.Biomes do
 	local odds = {}
 	for name, weight in biome.Herd do
-		if require(Animals[name]).Rarity ~= "Common" then
-			table.insert(odds, { name = name, weight = weight })
-		end
+		table.insert(odds, { name = name, weight = weight })
 	end
 	table.sort(odds, function(a, c)
 		return a.name < c.name
