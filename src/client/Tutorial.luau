@@ -18,7 +18,7 @@
 --   6. home  (DODGE THE STAMPEDE!)           home with the egg
 --   7. place2 "Place your egg in your pen!"  as step 1. Placing it starts the money:
 --                                            until now pets earn nothing (Hatchery)
---   8. goal  the camera flies to the next biome's gate: "Save $1k to unlock the
+--   8. goal  once that egg's hatched, the camera flies to the next biome's gate: "Save $1k to unlock the
 --            Desert!". Then it's over and the rest of the HUD (Gold, Upgrade Pen,
 --            Pets) comes back: none of it shows in the tutorial (QM).
 --
@@ -54,7 +54,7 @@ Tutorial.busy = false -- the ending's close-ups are on: no riding off
 
 local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
 local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banner (Hud, at 0.3)
-local GOAL_WAIT = 1 -- seconds after the egg's placed before the camera flies to the gate
+local GOAL_WAIT = 3.2 -- seconds after the egg hatches (Pen.client's hatch takes about 2.2) before the camera flies to the gate
 local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
 local PICTURE_Y = 0.09 -- a hint picture's middle, a share of the screen height (QM's layout)
 local PICTURE_WIDTH = 0.25 -- "Click on the egg"'s width, a share of the screen width (0.8x the reference: QM)
@@ -334,12 +334,15 @@ local function finish()
 	end
 end
 
--- The ending: a beat, then the camera flies over to the next biome's gate and
--- back, and it's over.
-local function showGoal()
+-- The ending: once the egg placed (`id` in the pen) has hatched and its pet
+-- jumped out, the camera flies over to the next biome's gate and back, and it's over.
+local function showGoal(id)
 	Tutorial.busy = true
-	controls:Disable()
+	while contents()[id] and contents()[id].egg do
+		task.wait(0.2)
+	end
 	task.wait(GOAL_WAIT)
+	controls:Disable()
 	local level = player:GetAttribute("PenLevel") or 1
 	local upNext = Config.Biomes[level + 1]
 	if upNext then
@@ -432,7 +435,7 @@ function Tutorial.update(state)
 		for id in contents() do
 			if not known[id] then
 				setStep("goal") -- placed: the money starts
-				task.spawn(showGoal)
+				task.spawn(showGoal, id)
 				break
 			end
 		end
