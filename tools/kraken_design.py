@@ -4,6 +4,9 @@ sea floor with their tips curling up. You ride on top of its cap.
 
 Run: python3 tools/kraken_design.py [out_dir]
 
+Superseded (Oct 2): designs/ocean/Kraken.bbmodel is now QM's own model, animated by
+tools/kraken_rig.py. Don't rerun this script: it would overwrite QM's file.
+
 Bones: root (head and cap, where you sit) -> neck (the funnel; the lasso loops
 round it) -> Arm1..Arm8 (each turned about Y to its direction at rest) ->
 T<i>a..T<i>d (the tentacle's segments, each pitched about X at rest so the
