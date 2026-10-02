@@ -313,7 +313,7 @@ return {
 		Icebringer = "rbxassetid://108999142038756",
 		Kraken = "rbxassetid://104654341782924", -- assets/ui/KrakenEggRender.png
 		Squid = "rbxassetid://128883182267763", -- assets/ui/SquidEggRender.png
-		KingCrab = "", -- assets/ui/KingCrabEggRender.png: upload pending
+		KingCrab = "rbxassetid://136150514529079", -- assets/ui/KingCrabEggRender.png
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
