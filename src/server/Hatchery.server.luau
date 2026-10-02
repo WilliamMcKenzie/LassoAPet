@@ -34,7 +34,6 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
 
-local SPACING = 4.5 -- studs kept between eggs and pets placed in a pen
 local EDGE = 2 -- studs kept from the pen's fences
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "Pen")
@@ -113,22 +112,11 @@ local function publish(player)
 	end
 end
 
--- Whether (x, z) in the pen's Area is a free place for an egg.
-local function canPlace(pen, profile, x, z)
+-- Whether (x, z) in the pen's Area is inside it. Eggs can go anywhere in the
+-- pen, even on top of each other (QM).
+local function canPlace(pen, x, z)
 	local area = pen:FindFirstChild("Area")
-	if not area or math.abs(x) > area.Size.X / 2 - EDGE or math.abs(z) > area.Size.Z / 2 - EDGE then
-		return false
-	end
-	local ride = pen.Slots.Slot1.Position - area.Position
-	if Vector2.new(x - ride.X, z - ride.Z).Magnitude < SPACING * 1.5 then
-		return false -- the pet you ride waits there
-	end
-	for _, item in profile.items do
-		if Vector2.new(x - item.x, z - item.z).Magnitude < SPACING then
-			return false
-		end
-	end
-	return true
+	return area ~= nil and math.abs(x) <= area.Size.X / 2 - EDGE and math.abs(z) <= area.Size.Z / 2 - EDGE
 end
 
 local function load(player)
@@ -346,7 +334,7 @@ remote("PlaceEgg", function(player, kind, x, z)
 	if not profile or not pen or not isAnimal(kind) or (profile.eggs[kind] or 0) < 1 then
 		return
 	end
-	if typeof(x) ~= "number" or typeof(z) ~= "number" or not canPlace(pen, profile, x, z) then
+	if typeof(x) ~= "number" or typeof(z) ~= "number" or not canPlace(pen, x, z) then
 		return
 	end
 	profile.eggs[kind] -= 1
@@ -414,7 +402,7 @@ remote("RemovePet", function(player, id)
 end)
 
 -- Testing: "/give <pet> [count]" in chat puts pets straight into your pen, at
--- random free places. Only in Studio or for the game's owner.
+-- random places. Only in Studio or for the game's owner.
 local function allowed(player)
 	return RunService:IsStudio() or player.UserId == game.CreatorId
 end
@@ -437,14 +425,9 @@ local function give(player, text)
 	end
 	local area = pen.Area
 	for _ = 1, math.clamp(tonumber(count) or 1, 1, 20) do
-		for _ = 1, 50 do -- try random places until one is free
-			local x = (math.random() - 0.5) * (area.Size.X - 2 * EDGE)
-			local z = (math.random() - 0.5) * (area.Size.Z - 2 * EDGE)
-			if canPlace(pen, profile, x, z) then
-				profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, pet = kind }
-				break
-			end
-		end
+		local x = (math.random() - 0.5) * (area.Size.X - 2 * EDGE)
+		local z = (math.random() - 0.5) * (area.Size.Z - 2 * EDGE)
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, pet = kind }
 	end
 	publish(player)
 end

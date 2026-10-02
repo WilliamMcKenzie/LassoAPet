@@ -31,7 +31,6 @@ local JUMP_TIME = 0.6
 local JUMP_HEIGHT = 5
 local TWITCH_EVERY = { 3, 6 }
 -- Same limits as the server's (Hatchery), so the ghost only shows where it can go.
-local SPACING = 4.5
 local EDGE = 2
 local WANDER_SPEED = 6 -- studs/s, a walk (same as the pet you ride, in Ride.client)
 -- Pens further than this from the camera aren't animated (out on a ride, say):
@@ -302,37 +301,10 @@ local function spotAt(screenX, screenY)
 		return nil
 	end
 	local hit = ray.Origin + ray.Direction * t - area.Position
-	local halfX, halfZ = area.Size.X / 2 - EDGE, area.Size.Z / 2 - EDGE
-	if math.abs(hit.X) > halfX or math.abs(hit.Z) > halfZ then
+	if math.abs(hit.X) > area.Size.X / 2 - EDGE or math.abs(hit.Z) > area.Size.Z / 2 - EDGE then
 		return nil
 	end
-	local ride = pen.Slots.Slot1.Position - area.Position
-	local function free(x, z)
-		if math.abs(x) > halfX or math.abs(z) > halfZ or Vector2.new(x - ride.X, z - ride.Z).Magnitude < SPACING * 1.5 then
-			return false
-		end
-		for _, item in contents[pen] or {} do
-			if Vector2.new(x - item.x, z - item.z).Magnitude < SPACING then
-				return false
-			end
-		end
-		return true
-	end
-	if free(hit.X, hit.Z) then
-		return hit.X, hit.Z
-	end
-	-- Taken (an egg, or the spot a pet hatched on: the pet may have wandered off,
-	-- so it can look free): the nearest free spot instead, so the egg still shows.
-	for r = 1, SPACING * 2, 0.75 do
-		for k = 0, 15 do
-			local a = k * math.pi / 8
-			local x, z = hit.X + r * math.cos(a), hit.Z + r * math.sin(a)
-			if free(x, z) then
-				return x, z
-			end
-		end
-	end
-	return nil
+	return hit.X, hit.Z
 end
 
 RunService.RenderStepped:Connect(function(dt)
