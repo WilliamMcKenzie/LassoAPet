@@ -87,7 +87,7 @@ return {
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
 				Trench = { Color3.fromRGB(70, 150, 214), Color3.fromRGB(86, 166, 228) },
-				Lava = { Color3.fromRGB(255, 110, 20), Color3.fromRGB(255, 160, 40) }, -- Neon
+				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon (WorldColors keeps the textures off its glow)
 			},
 			-- It gets darker the further you ride (QM, Oct 2): coral reef, sand flats,
 			-- dark rock with the first lava, volcanic abyss. At is the fraction of the

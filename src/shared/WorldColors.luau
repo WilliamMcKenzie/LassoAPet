@@ -70,11 +70,18 @@ local function depthColor(i, z, name, which)
 	return nil
 end
 
+local GLOW_CHECKER = 0.55 -- on glowing (Neon) ground the checker is this see-through
 local function paint(part, base, checker)
 	part.Color = base
+	-- Lava glows: the stud texture's white and an opaque checker over it washed
+	-- the glow out (QM), so on Neon only a faint checker shows.
+	local glow = part.Material == Enum.Material.Neon
 	for _, texture in part:GetChildren() do
 		if texture.Name == "Checker" then
 			texture.Color3 = checker
+			texture.Transparency = if glow then GLOW_CHECKER else 0
+		elseif glow and texture:IsA("Texture") then
+			texture.Transparency = 1
 		end
 	end
 end
