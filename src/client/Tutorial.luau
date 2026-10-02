@@ -18,9 +18,9 @@
 --   6. home  (DODGE THE STAMPEDE!)           home with the egg
 --   7. place2 "Place your egg in your pen!"  as step 1. Placing it starts the money:
 --                                            until now pets earn nothing (Hatchery)
---   8. goal  Gold and Upgrade Pen pop in, then a close-up on Upgrade Pen and the
---            camera flies to the next biome's gate: "Save $1k to unlock the Desert!".
---            Then it's over and the rest of the HUD (Pets) comes back.
+--   8. goal  the camera flies to the next biome's gate: "Save $1k to unlock the
+--            Desert!". Then it's over and the rest of the HUD (Gold, Upgrade Pen,
+--            Pets) comes back: none of it shows in the tutorial (QM).
 --
 -- A failed ride goes back to step 2. Until it's done the stampede runs on your
 -- own clock (Ride), so slowing it down never snaps it back.
@@ -54,8 +54,7 @@ Tutorial.busy = false -- the ending's close-ups are on: no riding off
 
 local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
 local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banner (Hud, at 0.3)
-local MONEY_WAIT = 2 -- seconds of Gold ticking up before the close-up on Upgrade Pen
-local FOCUS_HOLD = 2 -- seconds the close-up on Upgrade Pen holds
+local GOAL_WAIT = 1 -- seconds after the egg's placed before the camera flies to the gate
 local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
 local PICTURE_Y = 0.09 -- a hint picture's middle, a share of the screen height (QM's layout)
 local PICTURE_WIDTH = 0.25 -- "Click on the egg"'s width, a share of the screen width (0.8x the reference: QM)
@@ -335,18 +334,17 @@ local function finish()
 	end
 end
 
--- The ending: Gold ticks up for a moment, then a close-up on Upgrade Pen and the
--- camera flies over to the next biome's gate and back, and it's over.
+-- The ending: a beat, then the camera flies over to the next biome's gate and
+-- back, and it's over.
 local function showGoal()
 	Tutorial.busy = true
 	controls:Disable()
-	task.wait(MONEY_WAIT)
+	task.wait(GOAL_WAIT)
 	local level = player:GetAttribute("PenLevel") or 1
 	local upNext = Config.Biomes[level + 1]
 	if upNext then
 		goalText = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
 		goalDesert = upNext.Name == "Desert" and upNext.UnlockCost == 1000
-		Hud.focusUpgrade(FOCUS_HOLD)
 		local gateZ = WorldColors.gateZ(level)
 		local start = camera.CFrame
 		camera.CameraType = Enum.CameraType.Scriptable
@@ -392,7 +390,7 @@ end
 -- hero leap is on) }.
 function Tutorial.update(state)
 	local phase = state.phase
-	local stage = if not Tutorial.active then nil elseif step == "goal" then "money" else "bare"
+	local stage = if Tutorial.active then "bare" else nil
 	if stage ~= hudStage then
 		hudStage = stage
 		Hud.setTutorial(stage)
