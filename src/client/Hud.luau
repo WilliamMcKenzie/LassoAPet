@@ -45,6 +45,9 @@ local IMAGES = {
 	sprint = { id = "rbxassetid://104509002348710", size = Vector2.new(618, 524) },
 	ability = { id = "rbxassetid://95632395593874", size = Vector2.new(618, 524) }, -- Ability.png
 	abilityCooldown = { id = "rbxassetid://86071723052223", size = Vector2.new(618, 524) }, -- AbilityCooldown.png
+	-- The ready half while it's still filling up: always the one without [SPACE],
+	-- even on a computer, where [SPACE] shows only once it's fully ready (QM).
+	abilityFilling = { id = "rbxassetid://95632395593874", size = Vector2.new(618, 524) }, -- Ability.png
 	-- Egg reveal cards (assets/ui).
 	-- cardLeft is where the card's rounded body starts in the image (the rarity
 	-- cards' banners stick out past it); the body is 975 x 1175 from y = 12 in all.
@@ -141,7 +144,7 @@ local card, cardEgg, cardScale, cardFlash, cardBurst, cardExclusive -- egg revea
 local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
-local ability, abilityPressed, abilityFill, abilityTime -- the Ability button, a press not yet used, the ready part and the countdown
+local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
 local tip, tipText -- the fail screen's tooltip in place of "+$N" (Hud.setTip), and its text
 local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at the machine
 -- The first-time tutorial's stage (Hud.setTutorial): nil when it's off, "bare"
@@ -398,8 +401,8 @@ function Hud.init(onAction, onHome, onRide)
 	abilityFill.ClipsDescendants = true
 	abilityFill.Size = UDim2.fromScale(1, 1)
 	abilityFill.Parent = ability
-	local ready = image(abilityFill, "ability", abilitySize, UDim2.new())
-	ready.AnchorPoint = Vector2.zero
+	abilityReady = image(abilityFill, "ability", abilitySize, UDim2.new())
+	abilityReady.AnchorPoint = Vector2.zero
 	abilityTime = label(ability, UDim2.fromScale(1, 0.4), UDim2.fromScale(0.58, 0.55), 40, 5)
 	abilityTime.ZIndex = 2
 	local abilityScale = Instance.new("UIScale")
@@ -729,6 +732,7 @@ function Hud.setAbility(ready, seconds)
 		return
 	end
 	abilityFill.Size = UDim2.fromScale(1, ready)
+	abilityReady.Image = IMAGES[if ready >= 1 then "ability" else "abilityFilling"].id
 	abilityTime.Text = if ready < 1 and seconds then math.ceil(seconds) .. "s" else ""
 end
 
