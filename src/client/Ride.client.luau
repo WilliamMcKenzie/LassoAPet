@@ -177,7 +177,6 @@ local EDGE = Config.CourseHalfWidth - 4
 -- stream, and riding never changes it: an animal you lasso just leaves it.
 local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:GetBoundingBox().Position.Z else -2
 local SPAWN_Z = START_LINE_Z + 4
-local END_Z = -Config.CourseLength + 4 -- the far wall
 local FINISH_Z = -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
 local FINISH_DROP = 40 -- studs the leap off the end drops below the floor by the time it lands
 local VIEW = 320 -- stampede animals further than this from the camera aren't drawn
@@ -2216,7 +2215,6 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		updateRideTarget()
 		Outline.set(if rideShown or pickedPet then rideModel else nil) -- the pet RIDE will ride
-		Outline.update()
 		return
 	end
 	updateAbility(dt)
@@ -2287,7 +2285,6 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	actionTarget = findTarget()
 	Outline.set(if actionTarget == "egg" then nearEgg.egg.model elseif actionTarget then actionTarget.animal.model else nil)
-	Outline.update()
 	updateHud()
 end)
 
