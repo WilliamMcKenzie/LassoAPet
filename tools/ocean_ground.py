@@ -11,6 +11,7 @@ and the nests stay sand.
 """
 
 import os
+import re
 import sys
 
 import numpy as np
@@ -25,9 +26,11 @@ SAND = [(236, 214, 164), (246, 228, 184)]
 GRASS = [(64, 178, 122), (80, 196, 138)]  # seagrass
 TRENCH = [(70, 150, 214), (86, 166, 228)]
 WALL = [(236, 140, 124), (250, 160, 142)]  # salmon coral (QM)
+LAVA = [(255, 110, 20), (255, 160, 40)]
 HAZE = np.array([60, 150, 235.0])  # the blue the distance fades into
 TRENCH_DOWN = 1
 GRASS_UP = 1
+LAVA_DOWN = 1
 LENGTH = 200  # studs shown in the preview
 OCEAN_LENGTH = 13680  # 2x the snow (QM)
 Z_START = -9880  # the ocean's near edge (the snow's far one)
@@ -37,26 +40,80 @@ NESTS = [(16, -10300), (-14, -11400), (18, -12500), (-16, -13600), (14, -14700),
          (16, -16900), (-14, -18000), (18, -19100), (-16, -20200), (14, -21300), (-18, -22400)]
 NEST_CLEAR = 14
 START_CLEAR = 16
-KINDS = ("Ground", "Grass", "Trench")
+KINDS = ("Ground", "Grass", "Trench", "Lava")
+
+# The ocean gets darker the further you ride (QM, Oct 2): coral reef, sand flats,
+# dark rock with the first lava, volcanic abyss. At = fraction of the way along;
+# everything blends between stops. Grass is seagrass at the reef and turns into
+# raised dark rock. Cut: how rare the raised patches are (higher = fewer); TrenchCut
+# the same for trenches; Lava: how wide the lava streaks are (0 = none).
+# Config.Biomes Ocean.Depths carries the same colours for WorldColors and Ocean.client.
+DEPTHS = [
+    dict(At=0.00, Ground=SAND, Grass=GRASS, Trench=TRENCH, Wall=WALL,
+         Cut=0.70, TrenchCut=0.72, Lava=0.00),
+    dict(At=0.33, Ground=[(222, 196, 150), (234, 210, 166)], Grass=[(76, 150, 112), (90, 164, 124)],
+         Trench=[(60, 120, 190), (74, 134, 204)], Wall=[(196, 150, 140), (212, 166, 154)],
+         Cut=0.86, TrenchCut=1.01, Lava=0.00),
+    dict(At=0.55, Ground=[(150, 146, 150), (164, 160, 164)], Grass=[(84, 86, 102), (96, 98, 114)],
+         Trench=[(50, 80, 140), (60, 92, 152)], Wall=[(120, 116, 132), (136, 132, 148)],
+         Cut=0.80, TrenchCut=1.01, Lava=0.00),
+    dict(At=0.75, Ground=[(104, 104, 120), (118, 118, 134)], Grass=[(66, 68, 86), (78, 80, 98)],
+         Trench=[(40, 50, 90), (50, 60, 100)], Wall=[(78, 82, 106), (92, 96, 120)],
+         Cut=0.75, TrenchCut=1.01, Lava=0.03),
+    dict(At=1.00, Ground=[(54, 50, 62), (66, 62, 74)], Grass=[(36, 34, 44), (46, 44, 54)],
+         Trench=[(30, 30, 50), (40, 40, 60)], Wall=[(40, 38, 50), (52, 50, 62)],
+         Cut=0.68, TrenchCut=1.01, Lava=0.08),
+]
+BAND = 240  # studs: the floor and walls are cut into bands this long, each painted its depth's colour
 
 
-def layout(nz, seed=41, z_start=0):
-    """Kind per 8-stud cell: 0 sand, 1 seagrass, 2 trench."""
+def depth(t):
+    """The DEPTHS stops blended at fraction t."""
+    t = min(max(t, 0.0), 1.0)
+    for s0, s1 in zip(DEPTHS, DEPTHS[1:]):
+        if t <= s1["At"]:
+            f = (t - s0["At"]) / (s1["At"] - s0["At"])
+            out = {}
+            for key, v in s0.items():
+                w = s1[key]
+                if isinstance(v, list):
+                    out[key] = [tuple(round(a + (b - a) * f) for a, b in zip(ca, cb)) for ca, cb in zip(v, w)]
+                else:
+                    out[key] = v + (w - v) * f
+            return out
+    return dict(DEPTHS[-1])
+
+
+def colors_at(k, z):
+    """The checker pair kind k is painted at z in game (its band's depth)."""
+    band = (Z_START - z) // BAND
+    d = depth((band + 0.5) * BAND / OCEAN_LENGTH)
+    return (d["Ground"], d["Grass"], d["Trench"], LAVA, d["Wall"])[k]
+
+
+def layout(nz, seed=41, z_start=0, length=None):
+    """Kind per 8-stud cell: 0 sand, 1 seagrass / rock, 2 trench, 3 lava. length:
+    the studs the depths stretch over (the whole ocean); a short preview stays reef."""
     nx = 2 * HALF_W // CELL
     # broad blobs: fewer, bigger patches keep the 13680-stud floor down to fewer parts
     a = noise(nx, nz, 5.0, seed) * 0.7 + noise(nx, nz, 2.2, seed + 1) * 0.3
     b = noise(nx, nz, 6.0, seed + 2) * 0.75 + noise(nx, nz, 2.4, seed + 3) * 0.25
+    streak = np.abs(noise(nx, nz, 4.0, seed + 5) - 0.5)  # ridged noise: thin wandering lines
     kind = np.zeros((nx, nz), int)
-    kind[a > 0.7] = 1
-    kind[(b > 0.72) & (kind == 0)] = 2
+    for j in range(nz):
+        d = depth(j * CELL / length if length else 0.0)
+        kind[a[:, j] > d["Cut"], j] = 1
+        kind[(b[:, j] > d["TrenchCut"]) & (kind[:, j] == 0), j] = 2
+        if d["Lava"] > 0:
+            kind[streak[:, j] < d["Lava"], j] = 3
     # a sand margin between seagrass and trench
     for i in range(nx):
         for j in range(nz):
             if kind[i, j] == 2 and any(0 <= i + di < nx and 0 <= j + dj < nz and kind[i + di, j + dj] == 1
                                        for di in (-1, 0, 1) for dj in (-1, 0, 1)):
                 kind[i, j] = 0
-    kind[0, :][kind[0, :] == 2] = 0
-    kind[-1, :][kind[-1, :] == 2] = 0
+    for col in (0, -1):  # the wall columns stay flat
+        kind[col, :][kind[col, :] >= 2] = 0
     kind[:, : START_CLEAR // CELL] = 0
     for i in range(nx):
         for j in range(nz):
@@ -67,23 +124,26 @@ def layout(nz, seed=41, z_start=0):
 
 
 def full_layout():
-    return layout(OCEAN_LENGTH // CELL, z_start=Z_START)
+    return layout(OCEAN_LENGTH // CELL, z_start=Z_START, length=OCEAN_LENGTH)
 
 
-MAX_CELLS = 2040 // CELL  # Roblox caps a part at 2048 studs
+MAX_CELLS = BAND // CELL  # also well under Roblox's 2048-stud part cap
 
 
 def split(rs):
-    """rects, cut so none runs longer than MAX_CELLS along the course."""
+    """rects, cut at every band edge so each part sits in one band."""
     for k, i0, j0, i1, j1 in rs:
-        for j in range(j0, j1, MAX_CELLS):
-            yield k, i0, j, i1, min(j1, j + MAX_CELLS)
+        j = j0
+        while j < j1:
+            end = min(j1, (j // MAX_CELLS + 1) * MAX_CELLS)
+            yield k, i0, j, i1, end
+            j = end
 
 
 def map_boxes(kind):
     out = []
     for k, i0, j0, i1, j1 in split(rects(kind)):
-        top = (0, GRASS_UP, -TRENCH_DOWN)[k]
+        top = (0, GRASS_UP, -TRENCH_DOWN, -LAVA_DOWN)[k]
         x0, x1 = -HALF_W + i0 * CELL, -HALF_W + i1 * CELL
         z0, z1 = Z_START - j0 * CELL, Z_START - j1 * CELL
         out.append((KINDS[k], ((x0 + x1) / 2, (top - 2) / 2, (z0 + z1) / 2), (x1 - x0, top + 2, z0 - z1)))
@@ -161,10 +221,21 @@ def main(out):
     for x, y, t in ((10, 10, "ground + coral"), (810, 10, "with blue haze + bubbles")):
         d.text((x, y), t, fill=(255, 255, 255), font=TA.font(20), stroke_width=2, stroke_fill=(0, 0, 0))
     board.save(os.path.join(out, "ocean_ground.png"))
-    print("wrote", out, {KINDS[k]: int((kind == k).sum()) for k in range(3)})
+    print("wrote", out, {KINDS[k]: int((kind == k).sum()) for k in range(4)})
     if "--map" in sys.argv:
         print("wrote", write_patches(r"OGND\d+", "OGND", map_boxes(full_layout()), template=r"DGND00000"),
               "ocean floor parts")
+        glow_lava()
+
+
+def glow_lava():
+    """Lava patches are Neon, so they glow through the abyss haze."""
+    from desert_ground import WORLD
+    s = open(WORLD).read()
+    s = re.sub(r'(<Item class="Part" referent="OGND\d+"><Properties>\n<string name="Name">Lava</string>\n'
+               r'<bool name="Anchored">true</bool>\n)(?!<token name="Material">)',
+               r'\g<1><token name="Material">288</token>\n', s)
+    open(WORLD, "w").write(s)
 
 
 if __name__ == "__main__":

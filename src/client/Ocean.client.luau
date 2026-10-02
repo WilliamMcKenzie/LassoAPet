@@ -1,5 +1,6 @@
 -- Under the sea: while the camera is in a biome with a Haze entry (the Ocean),
--- the distance fades into blue fog, the picture takes a blue tint and bubbles
+-- the distance fades into blue fog (darker the deeper you ride, Config Depths),
+-- the picture takes a blue tint and bubbles
 -- drift up from the sea floor round what you're looking at. Out of it (the
 -- other biomes, home) everything fades back. Client-only, like the rest of
 -- the ride's effects.
@@ -7,7 +8,6 @@
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
@@ -53,26 +53,31 @@ local function newBubble()
 	return part
 end
 
-local current -- the Haze entry we're in, or nil
-local tweens = {}
+local current -- the Haze entry we're in (or last were), or nil
+local settling = 0 -- seconds left easing back to dry land
+local fog = { Color = dry.FogColor, Start = dry.FogStart, End = dry.FogEnd, Tint = dry.Tint }
 
-local function fade(haze)
-	for _, t in tweens do
-		t:Cancel()
+-- Ease the fog and tint toward the haze at z (deeper is darker, Config Depths), or
+-- back to dry land; FadeTime is roughly how long the change takes.
+local function settle(haze, i, z, dt, fadeTime)
+	local color, tint = dry.FogColor, dry.Tint
+	if haze then
+		color, tint = haze.Color, haze.Tint
+		local a, b, f = WorldColors.depthAt(i, z)
+		if a then
+			color, tint = a.Haze:Lerp(b.Haze, f), a.Tint:Lerp(b.Tint, f)
+		end
 	end
-	local info = TweenInfo.new((haze or current).FadeTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	tweens = {
-		TweenService:Create(Lighting, info, {
-			FogColor = if haze then haze.Color else dry.FogColor,
-			FogStart = if haze then FOG_START else dry.FogStart,
-			FogEnd = if haze then FOG_END else dry.FogEnd,
-		}),
-	}
+	local k = 1 - math.exp(-3 * dt / fadeTime)
+	fog.Color = fog.Color:Lerp(color, k)
+	fog.Tint = fog.Tint:Lerp(tint, k)
+	fog.Start += ((if haze then FOG_START else dry.FogStart) - fog.Start) * k
+	fog.End += ((if haze then FOG_END else dry.FogEnd) - fog.End) * k
+	Lighting.FogColor = fog.Color
+	Lighting.FogStart = fog.Start
+	Lighting.FogEnd = fog.End
 	if correction then
-		table.insert(tweens, TweenService:Create(correction, info, { TintColor = if haze then haze.Tint else dry.Tint }))
-	end
-	for _, t in tweens do
-		t:Play()
+		correction.TintColor = fog.Tint
 	end
 end
 
@@ -92,17 +97,23 @@ end
 local owed = 0
 RunService.RenderStepped:Connect(function(dt)
 	local at = lookPoint()
-	local haze = Config.Biomes[WorldColors.biomeAt(at.Z)].Haze
+	local biome = WorldColors.biomeAt(at.Z)
+	local haze = Config.Biomes[biome].Haze
 	if at.Z > 0 then
 		haze = nil -- the home base counts as the first biome; never under the sea
 	end
-	if haze ~= current then
-		fade(haze)
+	if haze then
 		current = haze
+		settling = haze.FadeTime * 3
+		settle(haze, biome, at.Z, dt, haze.FadeTime)
+	elseif settling > 0 then
+		-- just out of the sea: keep easing back, then leave Lighting alone
+		settling -= dt
+		settle(nil, biome, at.Z, dt, current.FadeTime)
 	end
 
-	if current then
-		owed += current.Bubbles * dt
+	if haze then
+		owed += haze.Bubbles * dt
 		while owed >= 1 do
 			owed -= 1
 			local part = newBubble()

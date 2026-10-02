@@ -347,6 +347,27 @@ def reef_rock(k):
     k.at("Reef", (-7.4, 1.5, -3.6), (2.2, 0.4, 2.0), C_ORANGE_L, rot(20, 0, 0))
 
 
+# deep ocean (QM, Oct 2): past the reef the coral gives way to dark basalt and lava
+BASALT, BASALT_L, BASALT_D = (58, 56, 70), (76, 74, 90), (42, 40, 52)
+LAVA, LAVA_L = (255, 110, 20), (255, 160, 40)
+
+
+def basalt_rock(k):
+    """Medium: tilted dark slabs with a lava crack across the top."""
+    k.at("Rock", (0, 1.4, 0), (9, 3.0, 7), BASALT, rot(12, 3, -4))
+    k.at("Rock", (0.6, 3.3, -0.4), (6, 1.6, 5), BASALT_L, rot(-10, -3, 5))
+    k.at("Lava", (0.6, 4.15, -0.4), (5.2, 0.2, 0.8), LAVA_L, rot(30, 0, 0))
+
+
+def vent(k):
+    """Large: a stack of basalt columns with glowing lava tops (a black smoker)."""
+    for x, z, h, w in ((0, 0, 9, 4), (-3.2, 1.4, 6, 3), (2.8, -1.6, 5, 3), (1.4, 2.6, 3.5, 2.6)):
+        k.box("Vent", (x - w / 2, 0, z - w / 2), (x + w / 2, h, z + w / 2), BASALT if h > 4 else BASALT_D)
+        k.box("Lava", (x - w / 2 + 0.5, h, z - w / 2 + 0.5), (x + w / 2 - 0.5, h + 0.3, z + w / 2 - 0.5), LAVA,
+              plain=True)
+    k.box("Rock", (-6, 0, -4), (6, 1.2, 4.5), BASALT_D)
+
+
 def anemone(k, x, y, z):
     k.at("Reef", (x, y + 0.4, z), (2.4, 0.8, 2.4), C_TEAL)
     for dx, dz in ((-0.7, -0.7), (0.7, -0.7), (-0.7, 0.7), (0.7, 0.7), (0, 0)):

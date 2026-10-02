@@ -87,6 +87,59 @@ return {
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
 				Trench = { Color3.fromRGB(70, 150, 214), Color3.fromRGB(86, 166, 228) },
+				Lava = { Color3.fromRGB(255, 110, 20), Color3.fromRGB(255, 160, 40) }, -- Neon
+			},
+			-- It gets darker the further you ride (QM, Oct 2): coral reef, sand flats,
+			-- dark rock with the first lava, volcanic abyss. At is the fraction of the
+			-- way along; the floor, walls and haze blend between these stops (the floor
+			-- and walls step every 240 studs, tools/ocean_ground.py BAND). Where a stop
+			-- has a colour, it wins over the GroundA/WallA... attributes above.
+			Depths = {
+				{
+					At = 0,
+					Ground = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
+					Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
+					Trench = { Color3.fromRGB(70, 150, 214), Color3.fromRGB(86, 166, 228) },
+					Wall = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) },
+					Haze = Color3.fromRGB(60, 150, 235),
+					Tint = Color3.fromRGB(200, 228, 255),
+				},
+				{
+					At = 0.33,
+					Ground = { Color3.fromRGB(222, 196, 150), Color3.fromRGB(234, 210, 166) },
+					Grass = { Color3.fromRGB(76, 150, 112), Color3.fromRGB(90, 164, 124) },
+					Trench = { Color3.fromRGB(60, 120, 190), Color3.fromRGB(74, 134, 204) },
+					Wall = { Color3.fromRGB(196, 150, 140), Color3.fromRGB(212, 166, 154) },
+					Haze = Color3.fromRGB(44, 112, 200),
+					Tint = Color3.fromRGB(192, 214, 245),
+				},
+				{
+					At = 0.55,
+					Ground = { Color3.fromRGB(150, 146, 150), Color3.fromRGB(164, 160, 164) },
+					Grass = { Color3.fromRGB(84, 86, 102), Color3.fromRGB(96, 98, 114) },
+					Trench = { Color3.fromRGB(50, 80, 140), Color3.fromRGB(60, 92, 152) },
+					Wall = { Color3.fromRGB(120, 116, 132), Color3.fromRGB(136, 132, 148) },
+					Haze = Color3.fromRGB(34, 76, 160),
+					Tint = Color3.fromRGB(180, 192, 228),
+				},
+				{
+					At = 0.75,
+					Ground = { Color3.fromRGB(104, 104, 120), Color3.fromRGB(118, 118, 134) },
+					Grass = { Color3.fromRGB(66, 68, 86), Color3.fromRGB(78, 80, 98) },
+					Trench = { Color3.fromRGB(40, 50, 90), Color3.fromRGB(50, 60, 100) },
+					Wall = { Color3.fromRGB(78, 82, 106), Color3.fromRGB(92, 96, 120) },
+					Haze = Color3.fromRGB(26, 50, 120),
+					Tint = Color3.fromRGB(168, 170, 210),
+				},
+				{
+					At = 1,
+					Ground = { Color3.fromRGB(54, 50, 62), Color3.fromRGB(66, 62, 74) },
+					Grass = { Color3.fromRGB(36, 34, 44), Color3.fromRGB(46, 44, 54) },
+					Trench = { Color3.fromRGB(30, 30, 50), Color3.fromRGB(40, 40, 60) },
+					Wall = { Color3.fromRGB(40, 38, 50), Color3.fromRGB(52, 50, 62) },
+					Haze = Color3.fromRGB(18, 16, 52),
+					Tint = Color3.fromRGB(150, 140, 185),
+				},
 			},
 			UnlockCost = 1000000,
 			PostColor = Color3.fromRGB(236, 140, 124),
@@ -185,6 +238,7 @@ return {
 		SandMound = 3, -- large
 		Icicle = 1, Pine = 2, IcicleLarge = 2, IceBoulder = 3, -- snow: small, medium, medium, large
 		TubeCoral = 1, BrainCoral = 1, BranchCoral = 2, FanCoral = 2, ReefRock = 3, -- ocean
+		BasaltRock = 2, Vent = 3, -- the deep ocean
 	},
 	-- How big each tier looks: each one is TierGrowth x the one below, so a medium is
 	-- 1.6x a small and a large 2.56x. "Size" is the square root of the two biggest sides of
@@ -198,7 +252,7 @@ return {
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
-		BranchCoral = 1.27, FanCoral = 1.1, ReefRock = 0.83,
+		BranchCoral = 1.27, FanCoral = 1.1, ReefRock = 0.83, BasaltRock = 0.89, Vent = 1.31,
 	},
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.
