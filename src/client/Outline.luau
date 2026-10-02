@@ -1,5 +1,5 @@
 -- The marker on whatever the lasso would catch (an animal or the egg) or RIDE
--- would ride: a dashed yellow ring on the ground round it, slowly turning (QM's
+-- would ride: a dashed white ring on the ground round it, slowly turning (QM's
 -- reference, Oct 2).
 --
 -- (It used to be a Highlight outline. Moving a Highlight onto another model makes
@@ -14,7 +14,7 @@
 
 local RunService = game:GetService("RunService")
 
-local COLOR = Color3.fromRGB(255, 214, 64)
+local COLOR = Color3.new(1, 1, 1) -- white (QM)
 local TRANSPARENCY = 0.2 -- 80% opaque
 local DASHES = 10
 local DASH_SHARE = 0.6 -- of each dash's slot round the ring; the rest is the gap
