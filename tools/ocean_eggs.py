@@ -5,6 +5,8 @@ a coloured base, bold markings and each animal's own feature.
                      spots, eight banded tentacles splayed round the base, pink tips
                      curling up
   Squid   Epic       the Kraken's egg in the Squid's pink and orange
+  Whale   Rare       blue over a pale ridged base, a cyan spiral glyph on the front,
+                     cyan dashes down the top, little flukes at the back
   KingCrab Epic      red over a pale underside, gold spikes, a big claw and a small one, little legs
 
 Run from the repo root: python3 tools/ocean_eggs.py [Kind ...]
@@ -107,7 +109,43 @@ def build(egg, name, out):
         json.dump(m, f, separators=(",", ":"))
 
 
-EGGS = [("Kraken", kraken_egg), ("Squid", lambda: kraken_egg(SQUID)), ("KingCrab", king_crab_egg)]
+def whale_egg():
+    blue, deep, cyan, belly, groove = (40, 116, 206), (26, 78, 158), (96, 226, 246), (214, 244, 250), (150, 210, 232)
+    egg = shell([belly, belly, blue, blue, blue, blue, deep])  # tools/whale_design.py colours
+    # grooves up the pale base, all the way round
+    for k in range(4):
+        for i, (layer, x) in enumerate((l, x) for l in (0, 1) for x in (-0.45, 0.0, 0.45)):
+            z = WIDTHS[layer] / 2
+            lo, hi = (x - 0.08, layer * LH + 0.08, -z - 0.06), (x + 0.08, (layer + 1) * LH - 0.08, -z + 0.04)
+            p = Part(f"Groove{k}{i}", [b - a for a, b in zip(lo, hi)], Ry(90 * k) @ T(*[(a + b) / 2 for a, b in zip(lo, hi)]), groove)
+            p.bone = "bottom"
+            p.yaw = 90 * k
+            egg.parts.append(p)
+    # the spiral glyph on the front, a square spiral in raised cyan blocks
+    z = WIDTHS[3] / 2
+    y0 = 2 * LH + 0.15
+    px = 0.14
+    for r, row in enumerate(("11111", "10001", "10101", "10111")):
+        for c, on in enumerate(row):
+            if on == "1":
+                x = (c - 2) * px
+                y = y0 + (3 - r) * px
+                egg.block(f"Glyph{r}{c}", (x - px / 2, y, -z - 0.06), (x + px / 2, y + px, -z + 0.04), cyan)
+    # cyan dashes down the top, front to back
+    top = 7 * LH
+    for i, zz in enumerate((-0.32, 0.0, 0.32)):
+        egg.block(f"Dash{i}", (-0.12, top - 0.02, zz - 0.08), (0.12, top + 0.1, zz + 0.08), cyan)
+    # little flukes sticking out of the back, low down
+    zb = WIDTHS[2] / 2
+    egg.block("FlukeRoot", (-0.18, 2 * LH + 0.1, zb - 0.05), (0.18, 2 * LH + 0.4, zb + 0.3), blue)
+    for sx in (-1, 1):
+        egg.block(f"Fluke{'LR'[sx > 0]}", (min(sx * 0.15, sx * 0.62), 2 * LH + 0.18, zb + 0.18),
+                  (max(sx * 0.15, sx * 0.62), 2 * LH + 0.34, zb + 0.46), deep)
+    return egg
+
+
+EGGS = [("Kraken", kraken_egg), ("Squid", lambda: kraken_egg(SQUID)), ("Whale", whale_egg),
+        ("KingCrab", king_crab_egg)]
 
 
 def main(*kinds, preview="/mnt/project-files/eggs/c_style/ocean"):
