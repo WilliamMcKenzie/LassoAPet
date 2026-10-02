@@ -63,7 +63,8 @@ local function showNestEgg(nest)
 	end
 	if kind ~= "" then
 		waiting = { egg = Egg.new(kind), kind = kind, nest = nest, nextTwitch = 0.5 + math.random() * 1.5 }
-		waiting.egg.model:PivotTo(nest.EggSpot.CFrame * CFrame.Angles(0, math.pi, 0))
+		-- (EggSpot is a 1x egg's centre: a bigger egg sits higher so it stays on the nest)
+		waiting.egg.model:PivotTo(nest.EggSpot.CFrame * CFrame.new(0, 1.6 * (waiting.egg.size - 1), 0) * CFrame.Angles(0, math.pi, 0))
 		waiting.egg.model.Parent = nest
 		waitingEggs[nest] = waiting
 	end

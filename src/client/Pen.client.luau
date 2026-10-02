@@ -164,6 +164,7 @@ local function eggScale(s, now)
 end
 
 local function sizeEgg(s, scale)
+	scale *= s.egg.size -- bigger animals' eggs are bigger (Egg.sizeOf)
 	s.scale = scale
 	s.egg.model:ScaleTo(scale)
 	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER * scale, 0)) * CFrame.Angles(0, s.yaw, 0))
@@ -355,7 +356,7 @@ RunService.RenderStepped:Connect(function(dt)
 		ghost.Parent = if x then folder else nil
 		if x then
 			local pen = myPen()
-			ghost:PivotTo(CFrame.new(groundAt(pen, x, z) + Vector3.new(0, EGG_CENTER, 0)) * CFrame.Angles(0, facing(pen), 0))
+			ghost:PivotTo(CFrame.new(groundAt(pen, x, z) + Vector3.new(0, EGG_CENTER * ghost:GetScale(), 0)) * CFrame.Angles(0, facing(pen), 0))
 		end
 	end
 end)

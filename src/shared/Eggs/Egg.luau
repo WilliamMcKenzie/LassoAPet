@@ -4,6 +4,10 @@
 --
 --   local egg = Egg.new("Horse")
 --   egg.model:PivotTo(cframe)  -- pivot is the centre of the egg's body
+--
+-- An egg is as big as its animal: Config.EggSizePerTier times bigger per size
+-- tier above small (egg.size; Egg.sizeOf(kind)). Its centre is 1.6 * egg.size
+-- studs up. Scaling it further: model:ScaleTo(scale * egg.size).
 --   egg:play("twitch")         -- a quick wobble; hatch comes later
 --   egg:update(dt)             -- every frame while it can be playing
 --
@@ -11,6 +15,7 @@
 -- top shell pops off.
 
 local Rig = require(script.Parent.Parent.Animals.Rig)
+local Config = require(script.Parent.Parent.Config)
 
 -- Classic stud decal, the same one the animals use.
 local STUD_TEXTURE = { image = "rbxassetid://7447638591", tile = 0.5 }
@@ -46,14 +51,23 @@ local KINDS = {
 local Egg = {}
 Egg.__index = Egg
 
+function Egg.sizeOf(kind)
+	return Config.EggSizePerTier ^ ((Config.PetTiers[kind] or 1) - 1)
+end
+
 function Egg.new(kind)
 	kind = kind or "Horse"
 	local def = KINDS[kind]
 	local model, _, bones = Rig.fromData(def.data, kind .. "Egg", STUD_TEXTURE)
 	model.PrimaryPart.PivotOffset = CFrame.new(0, def.center, 0)
+	local size = Egg.sizeOf(kind)
+	if size ~= 1 then
+		model:ScaleTo(size)
+	end
 	return setmetatable({
 		model = model,
 		kind = kind,
+		size = size,
 		animations = def.data.animations,
 		bones = bones,
 		playing = nil,
@@ -77,6 +91,7 @@ function Egg:update(dt)
 	end
 	self.t += dt
 	local done = self.t >= anim.length
+	local s = self.model:GetScale() -- the animations are in studs at 1x
 	for bone, motor in pairs(self.bones) do
 		local track = anim.tracks[bone]
 		if done or not track then
@@ -90,7 +105,7 @@ function Egg:update(dt)
 			if track.rotation then
 				rx, ry, rz = Rig.sample(track.rotation, self.t)
 			end
-			motor.Transform = CFrame.new(px, py, pz) * CFrame.Angles(rx, ry, rz)
+			motor.Transform = CFrame.new(px * s, py * s, pz * s) * CFrame.Angles(rx, ry, rz)
 		end
 	end
 	if done then
