@@ -302,19 +302,37 @@ local function spotAt(screenX, screenY)
 		return nil
 	end
 	local hit = ray.Origin + ray.Direction * t - area.Position
-	if math.abs(hit.X) > area.Size.X / 2 - EDGE or math.abs(hit.Z) > area.Size.Z / 2 - EDGE then
+	local halfX, halfZ = area.Size.X / 2 - EDGE, area.Size.Z / 2 - EDGE
+	if math.abs(hit.X) > halfX or math.abs(hit.Z) > halfZ then
 		return nil
 	end
 	local ride = pen.Slots.Slot1.Position - area.Position
-	if Vector2.new(hit.X - ride.X, hit.Z - ride.Z).Magnitude < SPACING * 1.5 then
-		return nil
+	local function free(x, z)
+		if math.abs(x) > halfX or math.abs(z) > halfZ or Vector2.new(x - ride.X, z - ride.Z).Magnitude < SPACING * 1.5 then
+			return false
+		end
+		for _, item in contents[pen] or {} do
+			if Vector2.new(x - item.x, z - item.z).Magnitude < SPACING then
+				return false
+			end
+		end
+		return true
 	end
-	for _, item in contents[pen] or {} do
-		if Vector2.new(hit.X - item.x, hit.Z - item.z).Magnitude < SPACING then
-			return nil
+	if free(hit.X, hit.Z) then
+		return hit.X, hit.Z
+	end
+	-- Taken (an egg, or the spot a pet hatched on: the pet may have wandered off,
+	-- so it can look free): the nearest free spot instead, so the egg still shows.
+	for r = 1, SPACING * 2, 0.75 do
+		for k = 0, 15 do
+			local a = k * math.pi / 8
+			local x, z = hit.X + r * math.cos(a), hit.Z + r * math.sin(a)
+			if free(x, z) then
+				return x, z
+			end
 		end
 	end
-	return hit.X, hit.Z
+	return nil
 end
 
 RunService.RenderStepped:Connect(function(dt)

@@ -627,7 +627,9 @@ end
 local function updateRideTarget()
 	local hrp = character()
 	local target
-	if hrp then
+	-- Holding an egg, the egg comes first: no RIDE (a click places it).
+	local holdingEgg = player.Character and player.Character:FindFirstChildOfClass("Tool")
+	if hrp and not holdingEgg then
 		local pets = homePets()
 		for model in rideableHerd() do
 			table.insert(pets, model)
