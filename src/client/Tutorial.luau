@@ -471,6 +471,20 @@ function Tutorial.lassoed()
 	end
 end
 
+-- What Ride's guide arrows point at on the way out: the nearest animal ahead
+-- while "Lasso an animal" is up, the nearest egg while "Take an egg!" is, and
+-- nothing in the other steps. Outside the tutorial, always the egg.
+function Tutorial.guideTo()
+	if not Tutorial.active then
+		return "egg"
+	elseif step == "lasso" then
+		return "animal"
+	elseif step == "egg" or step == "take" then
+		return "egg"
+	end
+	return nil
+end
+
 -- changed() is called whenever the nest's tutorial egg should show or go.
 function Tutorial.init(changed)
 	onChange = changed

@@ -874,7 +874,8 @@ local function gateZ()
 end
 
 -- On the way out, a trail of arrows on the ground from your pet to the nearest
--- egg still waiting ahead of you (not behind a locked gate).
+-- egg still waiting ahead of you (not behind a locked gate). In the tutorial's
+-- lasso step it leads to the nearest animal ahead instead (Tutorial.guideTo).
 local guide = { -- the egg guide: the beam and its two ends
 	ARROW = "rbxassetid://101032148634562", -- assets/ui/GuideArrow.png (chevrons pointing along the trail)
 	AHEAD = 6, -- studs in front of the pet where the trail starts
@@ -913,7 +914,18 @@ local function updateGuide()
 	local target
 	-- From the pet, or the rider while they're pulled across to a lassoed one.
 	local at = if mount then Vector3.new(mount.x, 0, mount.z) else focus
-	if phase == "outbound" and not cutscene then
+	local want = Tutorial.guideTo()
+	if phase == "outbound" and not cutscene and want == "animal" then
+		local best = math.huge
+		for _, entity in allAnimals() do
+			if entity ~= mount and not entity.popping and entity.z < at.Z - guide.AHEAD and entity.z > gateZ() then
+				local d = (Vector2.new(entity.x, entity.z) - Vector2.new(at.X, at.Z)).Magnitude
+				if d < best then
+					target, best = Vector3.new(entity.x, 0, entity.z), d
+				end
+			end
+		end
+	elseif phase == "outbound" and not cutscene and want == "egg" then
 		local best = math.huge
 		for nest, waiting in waitingEggs do
 			local spot = nest:FindFirstChild("EggSpot")
