@@ -89,7 +89,6 @@ end
 local function paintPen(pen)
 	local owner = Players:GetPlayerByUserId(pen:GetAttribute("Owner") or 0)
 	local n = if owner then level(owner) else 1
-	pen:SetAttribute("Level", n)
 	local floor = floorOf(pen)
 	if floor then
 		local show = n > 1

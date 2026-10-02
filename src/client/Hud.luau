@@ -107,8 +107,6 @@ local UPGRADE_WIDTH = 300 -- Upgrade Pen, top right
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
-local ZOOM = 2.4 -- the tutorial's zoom into Upgrade Pen (Hud.focusUpgrade)
-local ZOOM_IN_TIME, ZOOM_OUT_TIME = 1.1, 0.8
 
 -- Action text from the ride -> which image the action button shows.
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
@@ -146,10 +144,9 @@ local ability, abilityPressed, abilityFill, abilityTime -- the Ability button, a
 local tip, tipText -- the fail screen's tooltip in place of "+$N" (Hud.setTip), and its text
 local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at the machine
 -- The first-time tutorial's stage (Hud.setTutorial): nil when it's off, "bare"
--- (no Gold, Pets or Upgrade Pen) or "money" (Gold and Upgrade Pen, not Pets).
+-- (no Gold, Pets or Upgrade Pen) while it runs.
 local tutorial = nil
-local goldScale, upgradeScale -- Gold's and Upgrade Pen's UIScales
-local focusing = false -- the tutorial's close-up on Upgrade Pen is on (Hud.focusUpgrade)
+local upgradeScale -- Upgrade Pen's UIScale
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -506,7 +503,7 @@ function Hud.init(onAction, onHome, onRide)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	ride.Visible = false
 	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold mockup.
-	gold, goldScale = button(homeRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
+	gold = button(homeRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
 	local total = label(gold, UDim2.fromOffset(0, ICON_HEIGHT * 0.4), UDim2.new(0.5, 0, 1, 2), 44, 5)
 	total.AnchorPoint = Vector2.new(0.5, 1)
 	total.AutomaticSize = Enum.AutomaticSize.X
@@ -580,9 +577,7 @@ function Hud.init(onAction, onHome, onRide)
 	local throbbing = false
 	RunService.RenderStepped:Connect(function()
 		local affordable = cost ~= nil and (player:GetAttribute("Gold") or 0) >= cost
-		if focusing then
-			return -- the tutorial's close-up is scaling it
-		elseif affordable and not pressed and upgrade.Visible then
+		if affordable and not pressed and upgrade.Visible then
 			throbbing = true
 			upgradeScale.Scale = 1 + 0.06 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 / 0.9))
 		elseif throbbing and not pressed then
@@ -1149,79 +1144,14 @@ end
 
 -- The first-time tutorial (Tutorial.luau) shows only what each step needs.
 -- stage "bare": no Gold, Pets or Upgrade Pen at home and no ride cash (Ride leaves
--- out Sprint, Ability and the Hold bar). "money": Gold and Upgrade Pen pop in.
--- nil: it's over, everything's back.
+-- out Sprint, Ability and the Hold bar). nil: it's over, everything's back.
 function Hud.setTutorial(stage)
-	local was = tutorial
 	tutorial = stage
 	local riding = gui.Enabled
 	gold.Visible = not riding and stage ~= "bare"
 	pets.Visible = not riding and stage == nil
 	upgrade.Visible = upgradeShown and not riding and stage ~= "bare"
 	rideCash.row.Visible = stage == nil and not noCash
-	if was == "bare" and stage == "money" then
-		for _, scale in { goldScale, upgradeScale } do
-			scale.Scale = 0
-			TweenService:Create(scale, TweenInfo.new(0.45, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-		end
-	end
-end
-
--- The tutorial's zoom into Upgrade Pen: the whole screen (the world and the HUD
--- together, everything but Roblox's own buttons) zooms in, panning so Upgrade Pen
--- ends up big in the middle, holds `hold` seconds and zooms back out. Yields until
--- done. The world zooms by narrowing the camera's field of view while turning it
--- toward the button; the HUD by scaling its root about the same point.
-function Hud.focusUpgrade(hold)
-	if not upgrade.Visible then
-		return
-	end
-	focusing = true
-	local camera = workspace.CurrentCamera
-	local screen = camera.ViewportSize
-	local middle = screen / 2
-	local button = upgrade.AbsolutePosition + upgrade.AbsoluteSize / 2 -- where it is now
-	local zoom = math.min(ZOOM, screen.X * 0.6 / upgrade.AbsoluteSize.X) -- it ends up 60% of the screen wide at most
-	local hudScale = homeRoot:FindFirstChildOfClass("UIScale")
-	local baseScale = hudScale.Scale
-	local startType, start, startFov = camera.CameraType, camera.CFrame, camera.FieldOfView
-	local tanHalf = math.tan(math.rad(startFov) / 2)
-	camera.CameraType = Enum.CameraType.Scriptable
-
-	-- u = 0: as it was; 1: zoomed all the way in with the button in the middle.
-	local function apply(u)
-		local k = 1 + (zoom - 1) * u
-		-- The HUD: the button's spot slides to the middle while everything scales k
-		-- times about it.
-		local at = button:Lerp(middle, u)
-		local shift = at - middle - (button - middle) * k
-		hudScale.Scale = baseScale * k
-		homeRoot.Position = UDim2.new(0.5, shift.X, 0.5, shift.Y)
-		-- The world: k times narrower, looking at the point of the old view that
-		-- keeps the world under the button lined up with the HUD.
-		local look = middle + (button - middle) * (1 - (1 - u) / k)
-		local x = (look.X - middle.X) / middle.Y * tanHalf
-		local y = -(look.Y - middle.Y) / middle.Y * tanHalf
-		local direction = start:VectorToWorldSpace(Vector3.new(x, y, -1))
-		camera.CFrame = CFrame.lookAt(start.Position, start.Position + direction)
-		camera.FieldOfView = math.deg(2 * math.atan(tanHalf / k))
-	end
-	local function run(seconds, from, to)
-		local t = 0
-		while t < seconds do
-			t += RunService.RenderStepped:Wait()
-			local a = math.min(t / seconds, 1)
-			a = a * a * (3 - 2 * a) -- ease in and out
-			apply(from + (to - from) * a)
-		end
-	end
-	run(ZOOM_IN_TIME, 0, 1)
-	task.wait(hold)
-	run(ZOOM_OUT_TIME, 1, 0)
-	hudScale.Scale = baseScale
-	homeRoot.Position = UDim2.fromScale(0.5, 0.5)
-	camera.CFrame, camera.FieldOfView, camera.CameraType = start, startFov, startType
-	focusing = false
 end
 
 -- Money as the HUD writes it: "$950", "$1.2k".
