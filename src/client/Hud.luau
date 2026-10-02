@@ -524,7 +524,8 @@ function Hud.init(onAction, onHome, onRide)
 
 	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). It's the
 	-- next biome's own button (its UpgradeImage, with the price drawn in),
-	-- throbbing when you have the gold and greyed when you don't. A biome without
+	-- throbbing when you have the gold, its UpgradeImageDisabled when you don't
+	-- (greyed if it has none). A biome without
 	-- one gets the plain button, green or grey, with the price written over the
 	-- bottom of its coin. Hidden once there's no next level.
 	local upgradePen = game:GetService("ReplicatedStorage"):WaitForChild("UpgradePen")
@@ -545,8 +546,9 @@ function Hud.init(onAction, onHome, onRide)
 			local own = nextBiome.UpgradeImage
 			price.Text = money(cost)
 			price.Visible = not own
-			upgrade.Image = own or IMAGES[if affordable then "upgradePen" else "upgradePenDisabled"].id
-			upgrade.ImageColor3 = if own and not affordable then Color3.fromRGB(150, 150, 150) else Color3.new(1, 1, 1)
+			local ownDisabled = own and not affordable and nextBiome.UpgradeImageDisabled
+			upgrade.Image = ownDisabled or own or IMAGES[if affordable then "upgradePen" else "upgradePenDisabled"].id
+			upgrade.ImageColor3 = if own and not affordable and not ownDisabled then Color3.fromRGB(150, 150, 150) else Color3.new(1, 1, 1)
 		end
 	end
 	local buying = false

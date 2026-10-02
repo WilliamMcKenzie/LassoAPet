@@ -53,6 +53,7 @@ return {
 			GateImage = "rbxassetid://113778810800288", -- assets/ui/GateDesert.png ("Zone Locked")
 			-- Upgrade Pen while this is the next biome to unlock (its price is drawn in).
 			UpgradeImage = "rbxassetid://78830244894115", -- assets/ui/UpgradePenDesert.png
+			UpgradeImageDisabled = "rbxassetid://81637358609980", -- assets/ui/UpgradePenDesertDisabled.png: while you can't afford it
 		},
 		{
 			Name = "Snow",
@@ -73,6 +74,7 @@ return {
 			PostColor = Color3.fromRGB(126, 164, 214),
 			GateImage = "rbxassetid://93384010922515", -- assets/ui/GateTundra.png
 			UpgradeImage = "rbxassetid://88059029653274", -- assets/ui/UpgradePenTundra.png
+			UpgradeImageDisabled = "rbxassetid://110114947102534", -- assets/ui/UpgradePenTundraDisabled.png
 		},
 		{
 			Name = "Ocean",
@@ -90,6 +92,7 @@ return {
 			PostColor = Color3.fromRGB(236, 140, 124),
 			GateImage = "rbxassetid://129714355476447", -- assets/ui/GateOcean.png
 			UpgradeImage = "rbxassetid://86653048989907", -- assets/ui/UpgradePenOcean.png
+			UpgradeImageDisabled = "rbxassetid://134800932476227", -- assets/ui/UpgradePenOceanDisabled.png
 			-- Under the sea (Ocean.client): while you're in this biome the distance
 			-- fades into Haze.Color and bubbles drift up round the camera.
 			Haze = {
