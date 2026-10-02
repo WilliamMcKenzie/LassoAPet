@@ -59,7 +59,8 @@ local FOCUS_HOLD = 2 -- seconds the close-up on Upgrade Pen holds
 local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
 local CLICK_EGG_Y = 0.09 -- "Click on the egg": its middle, a share of the screen height (QM's layout)
 local CLICK_EGG_WIDTH = 0.31 -- its width, a share of the screen width
-local THROB = 0.1 -- the picture and cursor throb between 1 - THROB and 1 + THROB times their size
+local THROB = 0.02 -- the picture throbs between 1 - THROB and 1 + THROB times its size (QM)
+local CURSOR_THROB = 0.1 -- and the cursor between 1 -/+ this
 local THROB_TIME = 1 -- seconds per throb
 local RIDE_STEPS = { lasso = true, egg = true, take = true, home = true }
 local PLACE_STEPS = { place = true, place2 = true }
@@ -179,9 +180,9 @@ local function showClickEgg(tool)
 	if not tool then
 		return
 	end
-	local throb = 1 + THROB * math.sin(os.clock() * 2 * math.pi / THROB_TIME)
-	clickScale.Scale = throb
-	cursorScale.Scale = throb
+	local wave = math.sin(os.clock() * 2 * math.pi / THROB_TIME)
+	clickScale.Scale = 1 + THROB * wave
+	cursorScale.Scale = 1 + CURSOR_THROB * wave
 	if slot then
 		local at, size = slot.AbsolutePosition - gui.AbsolutePosition, slot.AbsoluteSize -- (gui's is above 0 by the top bar)
 		cursor.Position = UDim2.fromOffset(at.X + CURSOR_AT.X * size.X, at.Y + CURSOR_AT.Y * size.Y)
