@@ -1881,7 +1881,7 @@ function vfx.updateSprint(dt)
 	end
 end
 
-vfx.MOUND_EVERY = 3 -- studs between the Sandworm's mounds
+vfx.MOUND_EVERY = 4.5 -- studs between the Sandworm's mounds (QM: a bit more spread out than 3)
 vfx.MOUND_LIFE = 1.8 -- seconds a mound takes to sink away
 -- Three mound shapes, one picked at random each time (QM): blocks of sand as
 -- { x, z, height, width } from the worm.
