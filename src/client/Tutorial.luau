@@ -73,6 +73,7 @@ local hudStage = nil -- what the HUD was last told (Hud.setTutorial)
 local done = false -- TutorialDone sent
 local known = {} -- the pen's items when place2 began: a new one is the egg placed
 local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
+local goalDesert = false -- and it's that one, which QM drew (PICTURES.saveDesert)
 
 -- The first Meadow nest: the one nearest the start line.
 do
@@ -129,7 +130,8 @@ resize()
 -- the 256px picture, on the square at CURSOR_AT, CURSOR_SIZE times the square's
 -- size), "Place the egg in your pen" once it's in hand (steps 1 and 7) and
 -- "Ride your horse!" (step 2, when it's a Horse; another pet gets the text),
--- "Lasso an animal" (step 3) and "Take an egg!" (steps 4 and 5). QM draws them
+-- "Lasso an animal" (step 3), "Take an egg!" (steps 4 and 5) and "Save $1k to
+-- unlock the desert!" (step 8, when the Desert's next at $1k). QM draws them
 -- all at one letter size, so they're all shown at the scale that makes "Click on
 -- the egg" PICTURE_WIDTH wide.
 local PICTURES = {
@@ -138,6 +140,7 @@ local PICTURES = {
 	rideHorse = { image = "rbxassetid://87420526826729", width = 951, height = 146 }, -- assets/ui/HintRideHorse.png
 	lasso = { image = "rbxassetid://91804135266195", width = 942, height = 119 }, -- assets/ui/HintLasso.png
 	takeEgg = { image = "rbxassetid://140505417870582", width = 738, height = 145 }, -- assets/ui/HintTakeEgg.png
+	saveDesert = { image = "rbxassetid://116651352653628", width = 1733, height = 127 }, -- assets/ui/HintSaveDesert.png
 }
 local picture = Instance.new("ImageLabel")
 picture.Name = "HintPicture"
@@ -342,6 +345,7 @@ local function showGoal()
 	local upNext = Config.Biomes[level + 1]
 	if upNext then
 		goalText = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
+		goalDesert = upNext.Name == "Desert" and upNext.UnlockCost == 1000
 		Hud.focusUpgrade(FOCUS_HOLD)
 		local gateZ = WorldColors.gateZ(level)
 		local start = camera.CFrame
@@ -446,6 +450,7 @@ function Tutorial.update(state)
 		elseif clickTool then "click"
 		elseif PLACE_STEPS[step] then "place"
 		elseif step == "ride" and select(2, myPet(state)) == "Horse" then "rideHorse"
+		elseif step == "goal" and goalText and goalDesert then "saveDesert"
 		else nil
 	showPicture(pictureName, clickTool)
 	setHint(if state.cutscene or pictureName then nil else hintFor(state))
