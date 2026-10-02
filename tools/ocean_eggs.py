@@ -1,0 +1,104 @@
+"""Eggs for the ocean pets, in take C's style (tools/snow_eggs.py): the octo shell,
+a coloured base, bold markings and each animal's own feature.
+
+  Kraken  Legendary  navy with a dark band, the maroon cap over the top with darker
+                     spots, eight banded tentacles splayed round the base, pink tips
+                     curling up
+
+Run from the repo root: python3 tools/ocean_eggs.py
+Writes designs/eggs/c_style/<Kind>Egg.bbmodel, src/shared/Eggs/<Kind>EggModel.luau,
+assets/ui/<Kind>EggRender.png (cropped, for the reveal card) and previews in
+/mnt/project-files/eggs/c_style/ocean/.
+"""
+
+import os
+import sys
+
+from PIL import Image
+
+sys.path.insert(0, os.path.dirname(__file__))
+import egg_designs as E  # noqa: E402
+import horse_egg_takes as C  # noqa: E402
+from horse_egg_takes import LH, WIDTHS, shell  # noqa: E402
+from partlib import Part, T, Ry, render  # noqa: E402
+import bbmodel_to_luau  # noqa: E402
+
+ROOT = os.path.join(os.path.dirname(__file__), "..")
+
+
+def kraken_egg():
+    navy, band, cap, capdark, pink = (58, 76, 128), (40, 52, 94), (146, 46, 60), (104, 30, 46), (238, 122, 152)
+    egg = shell([navy, band, navy, band, cap, cap, cap])
+    # darker spots standing out of the cap, front, sides and back
+    for i, (layer, x, w) in enumerate(((4, -0.45, 0.5), (5, 0.3, 0.4), (4, 0.55, 0.36))):
+        z = WIDTHS[layer] / 2
+        y = layer * LH + 0.08
+        egg.block(f"SpotF{i}", (x - w / 2, y, -z - 0.06), (x + w / 2, y + LH - 0.16, -z + 0.05), capdark)
+        egg.block(f"SpotB{i}", (-x - w / 2, y, z - 0.05), (-x + w / 2, y + LH - 0.16, z + 0.06), capdark)
+        egg.block(f"SpotS{i}", (z - 0.05 if i % 2 else -z - 0.06, y, x - w / 2), (z + 0.06 if i % 2 else -z + 0.05, y + LH - 0.16, x + w / 2), capdark)
+    egg.block("CapTop", (-0.3, 7 * LH - 0.02, -0.3), (0.3, 7 * LH + 0.12, 0.3), cap)
+    # eight tentacles round the base: out along the floor, then curling up to a pink tip
+    for k in range(8):
+        frame = Ry(22.5 + 45 * k)
+        r0, r1, w = WIDTHS[0] / 2 - 0.15, WIDTHS[1] / 2 + 0.45, 0.34
+        for name, lo, hi, col in ((f"Tentacle{k}", (-w / 2, 0, -r1), (w / 2, 0.3, -r0), navy if k % 2 else band),
+                                  (f"Curl{k}", (-w / 2 + 0.03, 0, -r1 - 0.28), (w / 2 - 0.03, 0.5, -r1 + 0.02), band if k % 2 else navy),
+                                  (f"Tip{k}", (-w / 2 + 0.06, 0.5, -r1 - 0.25), (w / 2 - 0.06, 0.64, -r1 - 0.01), pink)):
+            mid = [(a + b) / 2 for a, b in zip(lo, hi)]
+            p = Part(name, [b - a for a, b in zip(lo, hi)], frame @ T(*mid), col)
+            p.bone = "bottom"
+            p.yaw = 22.5 + 45 * k
+            egg.parts.append(p)
+    return egg
+
+
+def build(egg, name, out):
+    """C.build, but blocks turned about Y (p.yaw) go in as cubes with a Blockbench
+    rotation: the converter only takes axis-aligned boxes or wedge meshes."""
+    import json
+    turned = [p for p in egg.parts if getattr(p, "yaw", None) is not None]
+    keep = {id(p): p.cf for p in turned}
+    for p in turned:
+        p.cf = T(*p.cf[:3, 3])
+    C.build(egg, name, E.SPLIT, out)
+    for p in turned:
+        p.cf = keep[id(p)]
+    path = os.path.join(out, name + ".bbmodel")
+    m = json.load(open(path))
+    yaw = {p.name: p.yaw for p in turned}
+    for e in m["elements"]:
+        if e["name"] in yaw:
+            e["rotation"] = [0, yaw[e["name"]], 0]
+    with open(path, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+
+
+EGGS = [("Kraken", kraken_egg)]
+
+
+def main(preview="/mnt/project-files/eggs/c_style/ocean"):
+    os.makedirs(os.path.join(preview, "renders"), exist_ok=True)
+    bb_dir = os.path.join(ROOT, "designs", "eggs", "c_style")
+    for kind, fn in EGGS:
+        egg = fn()
+        name = kind + "Egg"
+        build(egg, name, bb_dir)
+        build(egg, name, preview)
+        bbmodel_to_luau.main(os.path.join("designs", "eggs", "c_style", name + ".bbmodel"),
+                             os.path.join(ROOT, "src", "shared", "Eggs", name + "Model.luau"))
+        tile = 420
+        sheet = Image.new("RGB", (tile * 2, tile))
+        for r, view in enumerate(C.VIEWS):
+            sheet.paste(render(egg.parts, W=tile, H=tile, fov=28, **view), (r * tile, 0))
+        sheet.save(os.path.join(preview, name + ".png"))
+        im = render(egg.parts, W=700, H=1100, fov=28, transparent=True, **C.VIEWS[0])
+        im = im.crop(im.getbbox())
+        im.save(os.path.join(ROOT, "assets", "ui", kind + "EggRender.png"))
+        padded = Image.new("RGBA", (im.width + 16, im.height + 16))
+        padded.paste(im, (8, 8))
+        padded.save(os.path.join(preview, "renders", name + ".png"))
+        print(kind, len(egg.parts), "parts, render", im.size)
+
+
+if __name__ == "__main__":
+    main(*sys.argv[1:])
