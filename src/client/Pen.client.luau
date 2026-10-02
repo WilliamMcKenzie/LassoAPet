@@ -163,12 +163,17 @@ local function eggScale(s, now)
 	return 1 + (Config.EggGrowScale - 1) * grown
 end
 
+-- scale: how far it's grown (eggScale). s.scale is that times the egg's own size
+-- (bigger animals' eggs are bigger, Egg.sizeOf): how big it really is.
 local function sizeEgg(s, scale)
-	scale *= s.egg.size -- bigger animals' eggs are bigger (Egg.sizeOf)
+	s.grown = scale
+	scale *= s.egg.size
 	s.scale = scale
 	s.egg.model:ScaleTo(scale)
 	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER * scale, 0)) * CFrame.Angles(0, s.yaw, 0))
-	s.timer.Parent.StudsOffsetWorldSpace = Vector3.new(0, 4.6 * scale, 0)
+	if s.timer.Parent then
+		s.timer.Parent.StudsOffsetWorldSpace = Vector3.new(0, 4.6 * scale, 0)
+	end
 end
 
 local function showEgg(pen, id, item)
@@ -317,7 +322,7 @@ RunService.RenderStepped:Connect(function(dt)
 				if not s.hatching then
 					s.timer.Text = countdown((s.hatchAt or now) - now)
 					local scale = eggScale(s, now)
-					if math.abs(scale - s.scale) > 0.004 then
+					if math.abs(scale - s.grown) > 0.004 then
 						sizeEgg(s, scale)
 					end
 					s.nextTwitch -= dt

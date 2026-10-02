@@ -180,9 +180,16 @@ local function breakOpen(i)
 	controls:Enable()
 end
 
-local bought = {} -- [biome index] = true: break it on camera when PenLevel gets there
+-- [biome index] = true: break it on camera when PenLevel gets there. The event
+-- is sent first, but in case PenLevel arrives first, refresh waits a moment
+-- before quietly fading a gate.
+local bought = {}
 ReplicatedStorage:WaitForChild("ZoneUnlocked").OnClientEvent:Connect(function(i)
-	bought[i] = true
+	if gates[i] and i <= (player:GetAttribute("PenLevel") or 1) then
+		task.spawn(breakOpen, i)
+	else
+		bought[i] = true
+	end
 end)
 
 local function refresh()
@@ -195,7 +202,11 @@ local function refresh()
 				bought[i] = nil
 				task.spawn(breakOpen, i)
 			else
-				unlock(i)
+				task.delay(0.5, function()
+					if gates[i] then
+						unlock(i)
+					end
+				end)
 			end
 		end
 	end
