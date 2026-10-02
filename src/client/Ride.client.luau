@@ -751,6 +751,7 @@ ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, ki
 	if phase ~= "idle" then
 		cleanup()
 		Hud.showHome(false)
+		Hud.show(false) -- clears a fail screen's banner
 	end
 	humanoid:UnequipTools()
 	clearRideTarget()
@@ -1748,6 +1749,187 @@ function vfx.frostBlast(cfg, left)
 	end
 end
 
+-- Abilities that don't make the pet untouchable: it still uses Hold and can crash.
+vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true, Devour = true }
+
+-- The mount's size tier right now: Grow and Crabwalk make it bigger while they run.
+function vfx.mountTier()
+	local a = activeAbility()
+	local tier = tierOf(mount.kind)
+	if a and a.cfg.Tier then
+		tier = math.max(tier, a.cfg.Tier)
+	end
+	return tier
+end
+
+-- The mount's special sprint (Config.SprintSpecials) while Sprint is held on the
+-- way out, else nil.
+function vfx.sprintSpecial()
+	local cfg = mount and Config.SprintSpecials[mount.kind]
+	return if cfg and phase == "outbound" and not transfer and sprinting() then cfg else nil
+end
+
+-- Takes an animal out of the stampede (or the strays) for good, as knock does.
+function vfx.takeOut(entity)
+	if entity.n then
+		taken[entity.n] = true
+		herd[entity.n] = nil
+	else
+		local i = table.find(strays, entity)
+		if i then
+			table.remove(strays, i)
+		end
+	end
+end
+
+-- Ink: a dark cloud bursting out round the squid.
+function vfx.inkFx(entity)
+	local middle = entity.animal.model:GetBoundingBox()
+	local burst = Instance.new("Part")
+	burst.Anchored, burst.CanCollide, burst.CanQuery, burst.CanTouch = true, false, false, false
+	burst.Transparency = 1
+	burst.Size = Vector3.new(1, 1, 1)
+	burst.CFrame = CFrame.new(middle.Position)
+	burst.Parent = workspace
+	local ink = Instance.new("ParticleEmitter")
+	ink.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	ink.Color = ColorSequence.new(Color3.fromRGB(30, 20, 50), Color3.fromRGB(10, 8, 20))
+	ink.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 4), NumberSequenceKeypoint.new(1, 12) })
+	ink.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.1), NumberSequenceKeypoint.new(1, 1) })
+	ink.Lifetime = NumberRange.new(1, 1.8)
+	ink.Speed = NumberRange.new(25, 45)
+	ink.Drag = 2.5
+	ink.SpreadAngle = Vector2.new(180, 30)
+	ink.EmissionDirection = Enum.NormalId.Top
+	ink.Rate = 0
+	ink.Parent = burst
+	ink:Emit(80)
+	task.delay(2, function()
+		burst:Destroy()
+	end)
+end
+
+-- Ink: the animals within the radius scatter sideways away from the squid.
+function vfx.inkBlast(dt, cfg)
+	for _, entity in allAnimals() do
+		local dx, dz = entity.x - mount.x, entity.z - mount.z
+		if entity ~= mount and dx * dx + dz * dz < cfg.Radius * cfg.Radius then
+			local away = if dx >= 0 then 1 else -1
+			if entity.n then
+				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -cfg.Radius, cfg.Radius)
+			else
+				entity.lane = math.clamp(entity.lane + away * 60 * dt, -EDGE, EDGE)
+			end
+		end
+	end
+end
+
+-- Devour: the nearest Max animals within Radius are caught and pulled in.
+function vfx.devourStart(cfg)
+	local near = {}
+	for _, entity in allAnimals() do
+		local dx, dz = entity.x - mount.x, entity.z - mount.z
+		local d = dx * dx + dz * dz
+		if entity ~= mount and not entity.popping and d < cfg.Radius * cfg.Radius then
+			table.insert(near, { entity = entity, d = d })
+		end
+	end
+	table.sort(near, function(a, b)
+		return a.d < b.d
+	end)
+	local caught = {}
+	for k = 1, math.min(cfg.Max, #near) do
+		local entity = near[k].entity
+		vfx.takeOut(entity)
+		table.insert(caught, { entity = entity, x = entity.x, z = entity.z, hop = entity.hop or 0, eaten = false })
+	end
+	rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(150, 60, 200))
+	return caught
+end
+
+-- Pulls the caught animals up and in over the ability's Duration, shrinking, and
+-- eats each one as it arrives, each refilling some Hold.
+function vfx.devourStep(active)
+	local u = math.clamp(active.t / active.cfg.Duration, 0, 1)
+	local eased = u * u
+	for _, c in active.caught do
+		if not c.eaten then
+			local e = c.entity
+			e.x = c.x + (mount.x - c.x) * eased
+			e.z = c.z + (mount.z - c.z) * eased
+			e.hop = c.hop + math.sin(u * math.pi) * 10
+			e.yaw += 0.2
+			e.animal:setScale(math.max(1 - u * 0.8, 0.2))
+			place(e, 0)
+			if u >= 1 then
+				c.eaten = true
+				Poof.at(Vector3.new(e.x, 2, e.z))
+				retire(e)
+				hold = math.min(hold + holdTime(mount) * active.cfg.Restore, holdTime(mount))
+			end
+		end
+	end
+end
+
+-- Special sprints: their effects come and go with Sprint (and stop with the mount).
+function vfx.updateSprint(dt)
+	local cfg = vfx.sprintSpecial()
+	local kind = cfg and cfg.Kind
+	if mount ~= vfx.sprintMount or kind ~= vfx.sprintKind then
+		for _, fx in vfx.sprintFx or {} do
+			fx:Destroy()
+		end
+		local old = vfx.sprintMount
+		if old and old ~= mount and (vfx.sprintKind == "Fly" or vfx.sprintKind == "Burrow") then
+			old.hop = 0 -- let go of mid-air or underground: back on the ground
+		end
+		vfx.sprintFx, vfx.burrowSpray = {}, nil
+		if old ~= mount then
+			vfx.burrowDepth = nil
+		end
+		if kind == "Ram" then
+			vfx.sprintFx = chargeFx(mount)
+		elseif kind == "Burrow" then
+			local spray = Instance.new("Part")
+			spray.Anchored, spray.CanCollide, spray.CanQuery, spray.CanTouch = true, false, false, false
+			spray.Transparency = 1
+			spray.Size = Vector3.new(4, 1, 4)
+			spray.Parent = workspace
+			local dirt = Instance.new("ParticleEmitter")
+			dirt.Texture = "rbxasset://textures/particles/smoke_main.dds"
+			local ground = Config.Biomes[WorldColors.biomeAt(mount.z)].GroundColors
+			dirt.Color = ColorSequence.new(ground[1], ground[2])
+			dirt.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2), NumberSequenceKeypoint.new(1, 4) })
+			dirt.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1) })
+			dirt.Lifetime = NumberRange.new(0.4, 0.8)
+			dirt.Speed = NumberRange.new(10, 18)
+			dirt.SpreadAngle = Vector2.new(35, 35)
+			dirt.Acceleration = Vector3.new(0, -40, 0)
+			dirt.Rate = 70
+			dirt.Parent = spray
+			vfx.sprintFx = { spray }
+			vfx.burrowSpray = spray
+		end
+		vfx.sprintMount, vfx.sprintKind = mount, kind
+	end
+	local special = mount and Config.SprintSpecials[mount.kind]
+	if not special or activeAbility() then
+		return
+	end
+	-- Fly rises into the air and Burrow sinks under the floor, easing in and out.
+	if special.Kind == "Fly" or special.Kind == "Burrow" then
+		if special.Kind == "Burrow" and not vfx.burrowDepth then
+			local _, size = Outline.box(mount.animal.model)
+			vfx.burrowDepth = size.Y + 1
+		end
+		local target = if kind == "Fly" then special.Height elseif kind == "Burrow" then -vfx.burrowDepth else 0
+		mount.hop = (mount.hop or 0) + (target - (mount.hop or 0)) * (1 - math.exp(-4 * dt))
+	end
+	if vfx.burrowSpray then
+		vfx.burrowSpray.CFrame = CFrame.new(mount.x, Ground.heightAt(mount.x, mount.z) + 0.5, mount.z)
+	end
+end
+
 local function endAbility(entity)
 	local a = entity and entity.ability
 	local active = a and a.active
@@ -1758,6 +1940,15 @@ local function endAbility(entity)
 		fx:Destroy()
 	end
 	local root = entity.animal.model.PrimaryPart
+	if active.cfg.Tier then
+		entity.animal:setScale(1) -- back to its own size
+	end
+	for _, c in active.caught or {} do
+		if not c.eaten then
+			c.eaten = true
+			retire(c.entity)
+		end
+	end
 	if active.cfg.Kind == "Leap" then
 		entity.hop = 0
 		if root then
@@ -1787,6 +1978,16 @@ local function startAbility(cfg)
 		a.active.fx = vfx.frostFx(mount)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, vfx.FROST_TINT)
 		vfx.frostBlast(cfg, cfg.Duration)
+	elseif cfg.Kind == "Boost" then
+		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
+	elseif cfg.Kind == "Grow" or cfg.Kind == "Crabwalk" then
+		Poof.at(Vector3.new(mount.x, 0, mount.z))
+		mount.animal:setScale(Config.TierGrowth ^ math.max(cfg.Tier - tierOf(mount.kind), 0))
+	elseif cfg.Kind == "Ink" then
+		vfx.inkFx(mount)
+		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(40, 30, 70))
+	elseif cfg.Kind == "Devour" then
+		a.active.caught = vfx.devourStart(cfg)
 	end
 end
 
@@ -1818,6 +2019,10 @@ local function updateAbility(dt)
 		active.t += dt
 		if active.cfg.Kind == "Rattle" then
 			rattleBlast(dt, active.cfg)
+		elseif active.cfg.Kind == "Ink" then
+			vfx.inkBlast(dt, active.cfg)
+		elseif active.cfg.Kind == "Devour" then
+			vfx.devourStep(active)
 		elseif active.cfg.Kind == "Frost" then
 			vfx.frostBlast(active.cfg, active.cfg.Duration - active.t)
 		end
@@ -1890,7 +2095,7 @@ local function updateMount(dt)
 	end
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
-	if ability and ability.cfg.Kind == "Charge" then
+	if ability and (ability.cfg.Kind == "Charge" or ability.cfg.Kind == "Boost" or ability.cfg.Kind == "Grow" or ability.cfg.Kind == "Crabwalk") then
 		targetSpeed *= ability.cfg.SpeedBoost
 	elseif ability and ability.cfg.Kind == "Leap" then
 		-- Up into the air and down again in an arc, faster.
@@ -1931,7 +2136,8 @@ local function updateMount(dt)
 	local edge = EDGE + (Config.HomeHalfWidth - 4 - EDGE) * math.clamp(mount.z / 40, 0, 1)
 	mount.x = math.clamp(mount.x + mount.latVel * dt, -edge, edge)
 	mount.z += dir * mount.speed * dt
-	place(mount, math.atan2(mount.latVel * dir, math.max(mount.speed, 1)))
+	local sideways = if ability and ability.cfg.Kind == "Crabwalk" then math.pi / 2 else 0 -- a crab scuttles sideways
+	place(mount, math.atan2(mount.latVel * dir, math.max(mount.speed, 1)) + sideways)
 	animate(mount, dt, mount.speed, mount.latVel * -dir / Config.SteerSpeed)
 end
 
@@ -1965,8 +2171,8 @@ local function checkRide(dt)
 	end
 	grace = math.max(grace - dt, 0)
 	local ability = activeAbility()
-	if ability and ability.cfg.Kind == "Frost" then
-		ability = nil -- slowing the herd is all it does: it still uses Hold and can still crash
+	if ability and vfx.PLAIN[ability.cfg.Kind] then
+		ability = nil -- these still use Hold and can still crash (Config.Abilities)
 	end
 	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not Tutorial.active then -- abilities and the tutorial use no Hold
 		hold -= dt * (if sprinting() then Config.SprintDrain else 1)
@@ -2000,10 +2206,35 @@ local function checkRide(dt)
 		end
 		return reachHome()
 	end
+	-- Special sprints (Config.SprintSpecials).
+	local special = vfx.sprintSpecial()
+	local kind = special and special.Kind
+	if (kind == "Fly" and (mount.hop or 0) > 8) or (kind == "Burrow" and (mount.hop or 0) < -2) then
+		-- Over or under everything: nothing to hit but a locked gate.
+		if phase == "outbound" and mount.z < gateZ() + 2.4 then
+			return fail("CRASH!")
+		end
+		return reachHome()
+	elseif kind == "Smash" then
+		for _, o in obstacles do
+			if not o.smashed and Vector2.new(o.x - mount.x, o.z - mount.z).Magnitude < special.Radius then
+				smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
+			end
+		end
+	elseif kind == "Ram" then
+		while true do
+			local o = blockedAt(mount.x, mount.z, 2.5, 4, 1)
+			if not o then
+				break
+			end
+			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
+		end
+	end
 	-- A bigger pet plows through smaller obstacles; its own size or bigger stops it.
 	-- Racing home with the egg, every pet counts as a size bigger against obstacles
 	-- (RETURN_TIER_BONUS); against stampede animals it's its own size.
-	local tier = tierOf(mount.kind) + (if phase == "return" or phase == "turning" then RETURN_TIER_BONUS else 0)
+	local myTier = vfx.mountTier()
+	local tier = myTier + (if phase == "return" or phase == "turning" then RETURN_TIER_BONUS else 0)
 	while true do
 		local o = blockedAt(mount.x, mount.z, 1.3, 2.4)
 		if not o or o.tier >= tier then
@@ -2020,7 +2251,8 @@ local function checkRide(dt)
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
 		if not entity.popping and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
-			if phase == "return" and tierOf(entity.kind) < tierOf(mount.kind) then -- (the +1 is for obstacles only)
+			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
+			if (phase == "return" or trample) and tierOf(entity.kind) < myTier then -- (the +1 is for obstacles only)
 				knock(entity, dx)
 			elseif phase == "return" and grace <= 0 then
 				return fail("CRASH!")
@@ -2220,6 +2452,7 @@ RunService.PreSimulation:Connect(function(dt)
 		return
 	end
 	updateAbility(dt)
+	vfx.updateSprint(dt)
 	updateGuide()
 	if mount then
 		updateMount(dt)
@@ -2344,10 +2577,8 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	Hud.setAbilityTint(rattleHaze * (if vfx.hazeColor == vfx.FROST_HAZE then 0.6 else 0.85), vfx.hazeColor)
 	-- Bigger pets fill more of the view: the camera pulls back RideZoomPerTier
 	-- times further for each size tier above small (Config.PetTiers).
-	if mount and not mount.camZoom then
-		mount.camZoom = Config.RideZoomPerTier ^ (tierOf(mount.kind) - 1)
-	end
-	vfx.camZoom = (vfx.camZoom or 1) + (((mount and mount.camZoom) or 1) - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
+	local zoomTo = if mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
+	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local z = vfx.camZoom
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))

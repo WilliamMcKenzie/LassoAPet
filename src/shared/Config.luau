@@ -203,12 +203,44 @@ return {
 	--   Frost (Icebringer): one tap: a blizzard bursts out round it and every animal
 	--     within Radius studs (but itself) runs Slow slower (0.7 = 70%) until Duration
 	--     is up, frosted over. Unlike the others it doesn't stop the Hold bar or crashes.
+	--   Boost (Spine Lizard): SpeedBoost x speed for Duration.
+	--   Grow (Ice Golem): it swells to size tier Tier (XL) for Duration at SpeedBoost x
+	--     speed, plowing through whatever's smaller.
+	--   Ink (Squid): a cloud of ink bursts out and every animal within Radius scatters
+	--     away from it while it lasts.
+	--   Crabwalk (King Crab): it grows to size tier Tier (large) and scuttles sideways
+	--     at SpeedBoost x speed for Duration.
+	--   Devour (Kraken): grabs up to Max animals within Radius, pulls them in and eats
+	--     them, each refilling Restore of the Hold bar.
+	-- Boost, Grow, Ink, Crabwalk and Devour, like Frost, still use Hold and can crash.
 	-- Charge swings the camera round to a cinematic front-side angle.
+	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
 	Abilities = {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 56 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 6, Radius = 45, Restore = 0.5 },
 		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7 },
+		SpineLizard = { Kind = "Boost", Duration = 5, Cooldown = 8, SpeedBoost = 2 },
+		IceGolem = { Kind = "Grow", Duration = 5, Cooldown = 10, SpeedBoost = 1.2, Tier = 4 },
+		Squid = { Kind = "Ink", Duration = 2.5, Cooldown = 8, Radius = 45 },
+		KingCrab = { Kind = "Crabwalk", Duration = 4, Cooldown = 8, SpeedBoost = 2, Tier = 3 },
+		Kraken = { Kind = "Devour", Duration = 1.2, Cooldown = 10, Radius = 45, Max = 8, Restore = 0.1 },
+	},
+	-- Special sprints: what holding Sprint does for these pets on the way out (not the
+	-- automatic sprint home with the egg). Like any sprint they drain Hold faster.
+	--   Smash (Unicorn): every obstacle within Radius studs is smashed, whatever its size.
+	--   Burrow (Sandworm): it dives underground and passes under everything; dirt sprays
+	--     up where it is.
+	--   Ram (Icebringer): the Rhino's charge wind, and it breaks every obstacle it hits.
+	--   Fly (Whale): it rises Height studs into the air, over everything.
+	--   Trample (Kraken): animals smaller than tier BelowTier it runs into are thrown
+	--     up and away, as when a bigger pet runs into them racing home.
+	SprintSpecials = {
+		Unicorn = { Kind = "Smash", Radius = 14 },
+		Sandworm = { Kind = "Burrow" },
+		Icebringer = { Kind = "Ram" },
+		Whale = { Kind = "Fly", Height = 56 },
+		Kraken = { Kind = "Trample", BelowTier = 3 },
 	},
 	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
 	-- obstacles and stampede animals of a lower tier, knocking them up and away;
