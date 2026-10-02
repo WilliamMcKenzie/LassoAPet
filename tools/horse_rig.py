@@ -251,14 +251,17 @@ def sample(ch, t):
     return vs[i] + (vs[i + 1] - vs[i]) * u
 
 
+EULER = "XYZ"  # set to "ZYX" to preview a model built by hand in Blockbench (see bbmodel_to_luau.py)
+
+
 def rotm(deg):
-    # three.js Euler XYZ: R = Rx * Ry * Rz
+    # three.js Euler XYZ: R = Rx * Ry * Rz (or Blockbench's ZYX: R = Rz * Ry * Rx)
     x, y, z = (math.radians(a) for a in deg)
     cx, sx, cy, sy, cz, sz = math.cos(x), math.sin(x), math.cos(y), math.sin(y), math.cos(z), math.sin(z)
     Rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
     Ry = np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
     Rz = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
-    return Rx @ Ry @ Rz
+    return Rz @ Ry @ Rx if EULER == "ZYX" else Rx @ Ry @ Rz
 
 
 def palette(model):
