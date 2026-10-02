@@ -128,12 +128,16 @@ resize()
 -- (with a cursor over the egg's square in the inventory: its tip, CURSOR_TIP on
 -- the 256px picture, on the square at CURSOR_AT, CURSOR_SIZE times the square's
 -- size), "Place the egg in your pen" once it's in hand (steps 1 and 7) and
--- "Ride your horse!" (step 2, when it's a Horse; another pet gets the text). All
--- have letters the height of "Click on the egg" at PICTURE_WIDTH.
+-- "Ride your horse!" (step 2, when it's a Horse; another pet gets the text),
+-- "Lasso an animal" (step 3) and "Take an egg!" (steps 4 and 5). QM draws them
+-- all at one letter size, so they're all shown at the scale that makes "Click on
+-- the egg" PICTURE_WIDTH wide.
 local PICTURES = {
 	click = { image = "rbxassetid://93909017403661", width = 935, height = 145 }, -- assets/ui/HintClickEgg.png
 	place = { image = "rbxassetid://110142835452075", width = 1473, height = 146 }, -- assets/ui/HintPlaceEgg.png
 	rideHorse = { image = "rbxassetid://87420526826729", width = 951, height = 146 }, -- assets/ui/HintRideHorse.png
+	lasso = { image = "rbxassetid://91804135266195", width = 942, height = 119 }, -- assets/ui/HintLasso.png
+	takeEgg = { image = "rbxassetid://140505417870582", width = 738, height = 145 }, -- assets/ui/HintTakeEgg.png
 }
 local picture = Instance.new("ImageLabel")
 picture.Name = "HintPicture"
@@ -147,8 +151,8 @@ picture.Parent = gui
 local pictureShown -- the PICTURES entry showing
 local function sizePicture()
 	local entry = pictureShown or PICTURES.click
-	local height = camera.ViewportSize.X * PICTURE_WIDTH * PICTURES.click.height / PICTURES.click.width
-	picture.Size = UDim2.fromOffset(height * entry.width / entry.height, height)
+	local scale = camera.ViewportSize.X * PICTURE_WIDTH / PICTURES.click.width -- per pixel of the picture
+	picture.Size = UDim2.fromOffset(entry.width * scale, entry.height * scale)
 end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(sizePicture)
 task.spawn(function() -- loaded ahead, so swapping pictures never shows a blank
@@ -437,7 +441,8 @@ function Tutorial.update(state)
 	Tutorial.slowMo = if slow and phase == "outbound" then Config.TutorialSlowMo else nil
 
 	local clickTool = if step == "place" and phase == "idle" and not state.cutscene then eggToClick() else nil
-	local pictureName = if state.cutscene or phase ~= "idle" then nil
+	local pictureName = if state.cutscene or phase == "ended" then nil
+		elseif phase ~= "idle" then (if step == "lasso" then "lasso" elseif step == "egg" or step == "take" then "takeEgg" else nil)
 		elseif clickTool then "click"
 		elseif PLACE_STEPS[step] then "place"
 		elseif step == "ride" and select(2, myPet(state)) == "Horse" then "rideHorse"
