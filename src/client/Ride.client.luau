@@ -2350,6 +2350,7 @@ player.CharacterAdded:Connect(function()
 		controls:Enable()
 		camera.CameraType = Enum.CameraType.Custom
 		Hud.show(false)
+		Hud.showHome(false)
 		spawnStarter()
 	end
 end)

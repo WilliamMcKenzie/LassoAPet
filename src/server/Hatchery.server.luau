@@ -491,6 +491,31 @@ biomeCommand.Triggered:Connect(function(source, text)
 end)
 biomeCommand.Parent = game:GetService("TextChatService")
 
+-- Testing: "/tutorial" wipes your progress (eggs, pen, pets, gold, pen level),
+-- saved as well, and starts the tutorial again from a fresh character.
+local tutorialCommand = Instance.new("TextChatCommand")
+tutorialCommand.Name = "Tutorial"
+tutorialCommand.PrimaryAlias = "/tutorial"
+tutorialCommand.Triggered:Connect(function(source)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	if not player or not profiles[player] or not allowed(player) then
+		return
+	end
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil }
+	if store and loaded[player] then
+		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false })
+	end
+	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
+	player:SetAttribute("PenLevel", 1)
+	player:SetAttribute("CarriedEgg", nil)
+	player:SetAttribute("Tutorial", nil) -- off then on, so a tutorial already running starts over
+	task.wait()
+	player:SetAttribute("Tutorial", if Config.Tutorial then true else nil)
+	publish(player)
+	player:LoadCharacter() -- off any ride, back at your pen
+end)
+tutorialCommand.Parent = game:GetService("TextChatService")
+
 -- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
 local function income(profile)
 	local total = Config.PetIncome[profile.ride] or 0
