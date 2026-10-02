@@ -1998,7 +1998,7 @@ local function checkRide(dt)
 	if ability then
 		-- Charging, leaping over everything or coiled up rattling: nothing crashes it.
 		if phase == "outbound" and mount.z < gateZ() + 2.4 then
-			return fail("CRASH!", "Upgrade your pen to go further") -- except a locked gate
+			return fail("CRASH!") -- except a locked gate
 		end
 		return reachHome()
 	end
@@ -2017,7 +2017,7 @@ local function checkRide(dt)
 		return fail("CRASH!")
 	end
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
-		return fail("CRASH!", "Upgrade your pen to go further") -- a locked gate
+		return fail("CRASH!") -- a locked gate
 	end
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
