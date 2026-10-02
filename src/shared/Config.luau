@@ -175,6 +175,9 @@ return {
 		SpineLizard = 2, Boar = 1, WhiteWolf = 1, Troll = 2, IceGolem = 2, IceDrake = 3,
 		Icebringer = 3,
 	},
+	-- The riding camera pulls back this much further per tier above small: 1x on a
+	-- small pet, 1.2x on a medium, 1.44x on a large (QM, Oct 2).
+	RideZoomPerTier = 1.2,
 	ObstacleTiers = {
 		Bush = 1, Rock = 2, Stone = 1, Sandstone = 1, -- small
 		Boulder = 2, BoulderSplit = 2, Cactus = 2, SandBoulder = 2, SandBoulderCarved = 2, -- medium

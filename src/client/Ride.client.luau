@@ -2338,11 +2338,10 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	end
 	rattleHaze += ((if kind == "Rattle" or kind == "Frost" then 1 else 0) - rattleHaze) * (1 - math.exp(-6 * dt))
 	Hud.setAbilityTint(rattleHaze * (if vfx.hazeColor == vfx.FROST_HAZE then 0.6 else 0.85), vfx.hazeColor)
-	-- Big pets (the Icebringer, the Snake) fill the view: pull the camera back in
-	-- proportion to the pet's height, from 1x for a horse-sized one up to 2.2x.
+	-- Bigger pets fill more of the view: the camera pulls back RideZoomPerTier
+	-- times further for each size tier above small (Config.PetTiers).
 	if mount and not mount.camZoom then
-		local _, size = mount.animal.model:GetBoundingBox()
-		mount.camZoom = math.clamp(size.Y / 13, 1, 2.2)
+		mount.camZoom = Config.RideZoomPerTier ^ (tierOf(mount.kind) - 1)
 	end
 	vfx.camZoom = (vfx.camZoom or 1) + (((mount and mount.camZoom) or 1) - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local z = vfx.camZoom
