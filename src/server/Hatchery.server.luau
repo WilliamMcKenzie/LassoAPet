@@ -461,6 +461,36 @@ command.Triggered:Connect(function(source, text)
 end)
 command.Parent = game:GetService("TextChatService")
 
+-- Testing: "/biome <meadow|desert|tundra|ocean>" puts you at the start of that
+-- biome riding a random animal from its herd, past any gate (Ride.client does
+-- the ride). Same rule as /give for who can use it.
+local BIOME_ALIASES = { tundra = "snow" }
+local biomeWarp = Instance.new("RemoteEvent")
+biomeWarp.Name = "BiomeWarp"
+biomeWarp.Parent = ReplicatedStorage
+local biomeCommand = Instance.new("TextChatCommand")
+biomeCommand.Name = "Biome"
+biomeCommand.PrimaryAlias = "/biome"
+biomeCommand.Triggered:Connect(function(source, text)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	local name = text:match("^/biome%s+(%S+)")
+	if not player or not name or not allowed(player) then
+		return
+	end
+	name = BIOME_ALIASES[name:lower()] or name:lower()
+	for index, biome in Config.Biomes do
+		if biome.Name:lower() == name then
+			local kinds = {}
+			for kind in biome.Herd do
+				table.insert(kinds, kind)
+			end
+			biomeWarp:FireClient(player, index, kinds[math.random(#kinds)])
+			return
+		end
+	end
+end)
+biomeCommand.Parent = game:GetService("TextChatService")
+
 -- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
 local function income(profile)
 	local total = Config.PetIncome[profile.ride] or 0

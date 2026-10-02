@@ -278,6 +278,7 @@ local strays = {} -- former mounts, running on to the far wall with the stampede
 local pools = {} -- [kind] = spare animals of that kind for the stampede
 local herdClock = workspace:GetServerTimeNow()
 local hold, grace = 0, 0
+local warpLevel -- /biome: the biome you were put in, so its gate (and those before) let you through
 local transfer, tumble, carried
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
@@ -443,7 +444,7 @@ local function cleanup()
 	if mount then
 		mount.animal.model:Destroy()
 	end
-	mount, transfer, tumble = nil, nil, nil
+	mount, transfer, tumble, warpLevel = nil, nil, nil, nil
 	if carried then
 		carried.part:Destroy()
 		carried = nil
@@ -736,6 +737,37 @@ startRide = function(model)
 	Lasso.start(player.Character)
 end
 
+-- Testing (/biome, see Hatchery.server): drops you just inside biome b's start
+-- line riding a new `kind`, whatever you were doing. Your own pet stays home.
+ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, kind)
+	local hrp, humanoid = character()
+	if not hrp or Tutorial.busy then
+		return
+	end
+	if phase ~= "idle" then
+		cleanup()
+		Hud.showHome(false)
+	end
+	humanoid:UnequipTools()
+	clearRideTarget()
+	local z = if b == 1 then SPAWN_Z - 6 else WorldColors.biomeStart(b) - 10 -- the meadow's starts at the start line
+	mount = newEntity(0, z, 0, kind)
+	mount.animal:setSaddled(true)
+	warpLevel = b
+	leadFromZ, exitX = z - 8, nil
+	phase, hold, grace, camYaw = "outbound", holdTime(mount), 1, 0
+	coins = 0
+	hrp.Anchored = true
+	humanoid.Sit = true
+	humanoid.PlatformStand = false
+	controls:Disable()
+	camera.CameraType = Enum.CameraType.Scriptable
+	focus = Vector3.new(mount.x, 0, mount.z)
+	Hud.show(true)
+	Hud.setDistance("")
+	Lasso.start(player.Character)
+end)
+
 -- Back on foot at home, standing at x, z.
 local function finishRide(x, z)
 	local hrp, humanoid = character()
@@ -838,7 +870,7 @@ end
 
 -- The z of the first gate you can't pass yet (your pen's level decides; see Gate.client).
 local function gateZ()
-	return WorldColors.gateZ(player:GetAttribute("PenLevel"))
+	return WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1))
 end
 
 -- On the way out, a trail of arrows on the ground from your pet to the nearest
