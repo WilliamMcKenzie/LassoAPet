@@ -36,6 +36,8 @@ local IMAGES = {
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
 	upgradePen = { id = "rbxassetid://120690804030353", size = Vector2.new(1152, 284) }, -- UpgradePenActive.png
 	upgradePenDisabled = { id = "rbxassetid://134427342737800", size = Vector2.new(1158, 285) }, -- UpgradePenDisabled.png
+	-- Each biome's own Upgrade Pen (Config.Biomes[i].UpgradeImage), all this size.
+	upgradePenBiome = { id = "", size = Vector2.new(1390, 352) }, -- UpgradePenDesert.png etc.
 	-- TAKE EGG for rarer eggs (takeEgg itself is the Uncommon one).
 	takeEggRare = { id = "rbxassetid://137561422342054", size = Vector2.new(960, 434) },
 	takeEggEpic = { id = "rbxassetid://114155984376753", size = Vector2.new(960, 434) },
@@ -520,11 +522,13 @@ function Hud.init(onAction, onHome, onRide)
 		homeRoot.Visible = not hidden
 	end })
 
-	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). Green and
-	-- throbbing when you have the gold, grey when you don't; the price overlaps the
-	-- bottom of the coin drawn on its right end. Hidden once there's no next level.
+	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). It's the
+	-- next biome's own button (its UpgradeImage, with the price drawn in),
+	-- throbbing when you have the gold and greyed when you don't. A biome without
+	-- one gets the plain button, green or grey, with the price written over the
+	-- bottom of its coin. Hidden once there's no next level.
 	local upgradePen = game:GetService("ReplicatedStorage"):WaitForChild("UpgradePen")
-	local upgradeSize = fit("upgradePen", UPGRADE_WIDTH)
+	local upgradeSize = fit("upgradePenBiome", UPGRADE_WIDTH)
 	-- Anchored at its middle so the throb grows it evenly.
 	upgrade, upgradeScale = button(homeRoot, "upgradePen", upgradeSize, Vector2.new(0.5, 0.5),
 		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
@@ -537,8 +541,12 @@ function Hud.init(onAction, onHome, onRide)
 		upgradeShown = cost ~= nil
 		upgrade.Visible = upgradeShown and gold.Visible
 		if cost then
+			local affordable = (player:GetAttribute("Gold") or 0) >= cost
+			local own = nextBiome.UpgradeImage
 			price.Text = money(cost)
-			upgrade.Image = IMAGES[if (player:GetAttribute("Gold") or 0) >= cost then "upgradePen" else "upgradePenDisabled"].id
+			price.Visible = not own
+			upgrade.Image = own or IMAGES[if affordable then "upgradePen" else "upgradePenDisabled"].id
+			upgrade.ImageColor3 = if own and not affordable then Color3.fromRGB(150, 150, 150) else Color3.new(1, 1, 1)
 		end
 	end
 	local buying = false

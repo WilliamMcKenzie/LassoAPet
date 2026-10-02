@@ -50,7 +50,9 @@ return {
 			-- floor tiles take this biome's ground colours and its posts PostColor.
 			UnlockCost = 1000,
 			PostColor = Color3.fromRGB(206, 118, 72),
-			GateImage = "rbxassetid://88918626302524", -- assets/ui/GateLv2.png
+			GateImage = "rbxassetid://113778810800288", -- assets/ui/GateDesert.png ("Zone Locked")
+			-- Upgrade Pen while this is the next biome to unlock (its price is drawn in).
+			UpgradeImage = "rbxassetid://90911107520568", -- assets/ui/UpgradePenDesert.png
 		},
 		{
 			Name = "Snow",
@@ -69,7 +71,8 @@ return {
 			},
 			UnlockCost = 100000,
 			PostColor = Color3.fromRGB(126, 164, 214),
-			GateImage = nil, -- no LV. 3 art yet: the gate shows "LV. 3 REQUIRED" in text
+			GateImage = "rbxassetid://93384010922515", -- assets/ui/GateTundra.png
+			UpgradeImage = "rbxassetid://77476974113796", -- assets/ui/UpgradePenTundra.png
 		},
 		{
 			Name = "Ocean",
@@ -85,7 +88,8 @@ return {
 			},
 			UnlockCost = 1000000,
 			PostColor = Color3.fromRGB(236, 140, 124),
-			GateImage = nil, -- no LV. 4 art yet: the gate shows "LV. 4 REQUIRED" in text
+			GateImage = "rbxassetid://129714355476447", -- assets/ui/GateOcean.png
+			UpgradeImage = "rbxassetid://92243594848667", -- assets/ui/UpgradePenOcean.png
 			-- Under the sea (Ocean.client): while you're in this biome the distance
 			-- fades into Haze.Color and bubbles drift up round the camera.
 			Haze = {

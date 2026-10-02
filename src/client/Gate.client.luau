@@ -1,6 +1,6 @@
 -- The gates at the biome lines you haven't unlocked: a sheet across the
 -- corridor, yellow at the floor fading to clear GateHeight studs up, with QM's
--- "LV. N REQUIRED" card on it. Only you see your gates; each one fades away
+-- "Zone Locked" card on it (each biome's GateImage). Only you see your gates; each one fades away
 -- when your pen reaches its level (PenLevel). The ride stops you at them.
 
 local Players = game:GetService("Players")
@@ -13,7 +13,7 @@ local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local player = Players.LocalPlayer
 local PIXELS_PER_STUD = 20
 local CARD_HEIGHT = 0.55 -- of the gate's height
-local CARD_ASPECT = 1068 / 662 -- GateLv2.png
+local CARD_ASPECT = 1068 / 662 -- GateDesert.png etc.
 
 local gates = {} -- [biome index] = { part, fades }
 
