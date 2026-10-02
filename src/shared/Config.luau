@@ -55,7 +55,7 @@ return {
 		},
 		{
 			Name = "Snow",
-			Length = 6840, -- 3x the desert (QM)
+			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
 			Herd = { Penguin = 0.3, Boar = 0.28, Snowman = 0.22, IceGolem = 0.15, Icebringer = 0.05 },
@@ -72,7 +72,7 @@ return {
 		},
 		{
 			Name = "Ocean",
-			Length = 13680, -- 2x the snow (QM)
+			Length = 7680, -- 1.4x the snow (QM, Oct 2), a whole number of 240-stud depth bands
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
@@ -156,7 +156,7 @@ return {
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	CourseHalfWidth = 56,
-	CourseLength = 23560, -- all the biomes' lengths added up
+	CourseLength = 16192, -- all the biomes' lengths added up
 	HomeHalfWidth = 112,
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 

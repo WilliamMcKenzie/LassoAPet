@@ -50,7 +50,7 @@ BIOMES = [
          small=["Stone", "Bush"], medium=["Boulder", "BoulderSplit"], large=[]),
     dict(name="Desert", z0=-760, z1=-3040, nests=DG.NESTS,
          small=["Sandstone"], medium=["Cactus", "SandBoulder", "SandBoulderCarved"], large=["SandMound"]),
-    dict(name="Snow", z0=-3040, z1=-9880, nests=SG.NESTS,
+    dict(name="Snow", z0=SG.Z_START, z1=SG.Z_START - SG.SNOW_LENGTH, nests=SG.NESTS,
          small=["Icicle"], medium=["Pine", "IcicleLarge"], large=["IceBoulder"]),
     dict(name="Ocean", z0=OG.Z_START, z1=OG.Z_START - OG.OCEAN_LENGTH, nests=OG.NESTS,
          small=["TubeCoral", "BrainCoral"], medium=["BranchCoral", "FanCoral"], large=["ReefRock"]),
@@ -461,7 +461,7 @@ def plan(course, items, path, s=2.0, only=None):
                 x0, y0 = to_px(x - 2, z + 2)
                 d.rectangle([x0, y0, x0 + 4 * s - 1, y0 + 4 * s - 1], fill=c)
         # beat lines
-        for k in range(40 if b["name"] != "Ocean" else 0):  # the ocean's 13680 studs would need more
+        for k in range(40 if b["name"] != "Ocean" else 0):  # the ocean's 7680 studs would need more
             z = b["z0"] - ENTRY - k * BEAT
             if z1 < z <= z0:
                 x0, y0 = to_px(-HALF_W, z)
