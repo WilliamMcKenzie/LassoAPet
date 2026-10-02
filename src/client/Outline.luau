@@ -8,6 +8,7 @@
 --
 --   Outline.set(model, fit) -- mark this model; nil clears it. fit (optional):
 --                           -- { lift, radius } overrides, e.g. Outline.NEST
+--   Outline.ring(model, color) -- a ring of its own round this model (Destroy it when done)
 --   Outline.box(model) -- its bounding box as (CFrame from its root, size), measured once
 
 local COLOR = Color3.new(1, 1, 1)
@@ -46,6 +47,17 @@ function Outline.box(model)
 	return cached.box, cached.size
 end
 
+-- Sizes ring `r` to go round `model` (whose root is `root`) and puts it there.
+local function fitRing(r, model, root, fit)
+	local box, size = Outline.box(model)
+	local radius = math.max(0.5 * math.max(size.X, size.Z) * 0.75 + 1, fit and fit.radius or 0)
+	r.Radius = radius
+	r.InnerRadius = radius - math.clamp(radius * 0.12, 0.5, 2)
+	-- (A cylinder adornment runs along its Z axis: turned to lie flat.)
+	r.CFrame = CFrame.new(box.X, fit and fit.lift or LIFT, box.Z) * CFrame.Angles(math.pi / 2, 0, 0)
+	r.Adornee = root
+end
+
 function Outline.set(model, fit)
 	if model == target then
 		return
@@ -57,14 +69,20 @@ function Outline.set(model, fit)
 		ring.Adornee = nil
 		return
 	end
-	local box, size = Outline.box(model)
-	local radius = math.max(0.5 * math.max(size.X, size.Z) * 0.75 + 1, fit and fit.radius or 0)
-	ring.Radius = radius
-	ring.InnerRadius = radius - math.clamp(radius * 0.12, 0.5, 2)
-	-- (A cylinder adornment runs along its Z axis: turned to lie flat.)
-	ring.CFrame = CFrame.new(box.X, fit and fit.lift or LIFT, box.Z) * CFrame.Angles(math.pi / 2, 0, 0)
-	ring.Adornee = root
+	fitRing(ring, model, root, fit)
 	ring.Visible = true
+end
+
+function Outline.ring(model, color)
+	local r = ring:Clone()
+	r.Name = "Ring"
+	r.Color3 = color or COLOR
+	if model.PrimaryPart then
+		fitRing(r, model, model.PrimaryPart)
+		r.Visible = true
+	end
+	r.Parent = workspace
+	return r
 end
 
 return Outline
