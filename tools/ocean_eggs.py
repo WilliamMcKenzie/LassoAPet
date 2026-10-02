@@ -5,6 +5,7 @@ a coloured base, bold markings and each animal's own feature.
                      spots, eight banded tentacles splayed round the base, pink tips
                      curling up
   Squid   Epic       the Kraken's egg in the Squid's pink and orange
+  KingCrab Epic      red over a pale underside, gold spikes, a big claw and a small one, little legs
 
 Run from the repo root: python3 tools/ocean_eggs.py [Kind ...]
 Writes designs/eggs/c_style/<Kind>Egg.bbmodel, src/shared/Eggs/<Kind>EggModel.luau,
@@ -57,6 +58,34 @@ def kraken_egg(colors=KRAKEN):
     return egg
 
 
+def king_crab_egg():
+    """Red over a pale underside, gold spikes down the back, a big claw on the right and a
+    small one on the left (as on QM's crab), two little legs each side at the base."""
+    from desert_eggs import fin
+    shell_red, under, gold, dark, leg = (226, 58, 48), (252, 196, 150), (255, 196, 64), (160, 32, 40), (232, 70, 52)
+    egg = shell([under, under, shell_red, shell_red, shell_red, shell_red, shell_red])
+    for i in (2, 3, 4, 5):
+        fin(egg, f"Spike{i}", i * LH + 0.05, (i + 1) * LH + 0.05, 0.36 if i % 2 else 0.24, 0.12, gold)
+    for side, sx, big in (("L", -1, 0.8), ("R", 1, 1.0)):
+        a = WIDTHS[2] / 2
+        y = 2 * LH
+        X = lambda a0, a1, sx=sx: sorted((sx * a0, sx * a1))
+        x0, x1 = X(a - 0.05, a + 0.25)
+        egg.block("Arm" + side, (x0, y + 0.05, -0.35), (x1, y + 0.35, -0.05), leg)
+        h = 0.55 * big
+        x0, x1 = X(a + 0.1, a + 0.1 + 0.5 * big)
+        egg.block("Claw" + side, (x0, y - 0.05, -0.35 - 0.6 * big), (x1, y - 0.05 + h, -0.35), shell_red)
+        x0, x1 = X(a + 0.14, a + 0.1 + 0.5 * big - 0.04)
+        egg.block("PincerTop" + side, (x0, y + h * 0.5, -0.35 - 0.6 * big - 0.35 * big), (x1, y - 0.05 + h, -0.35 - 0.6 * big), dark)
+        egg.block("PincerBottom" + side, (x0, y - 0.05, -0.35 - 0.6 * big - 0.25 * big), (x1, y + h * 0.3, -0.35 - 0.6 * big), dark)
+        for k, z in enumerate((-0.05, 0.4)):
+            x0, x1 = X(WIDTHS[1] / 2 - 0.1, WIDTHS[1] / 2 + 0.25)
+            egg.block(f"Leg{side}{k}", (x0, 0.3, z - 0.12), (x1, 0.52, z + 0.12), leg)
+            x0, x1 = X(WIDTHS[1] / 2 + 0.1, WIDTHS[1] / 2 + 0.3)
+            egg.block(f"Foot{side}{k}", (x0, 0, z - 0.1), (x1, 0.3, z + 0.1), dark)
+    return egg
+
+
 def build(egg, name, out):
     """C.build, but blocks turned about Y (p.yaw) go in as cubes with a Blockbench
     rotation: the converter only takes axis-aligned boxes or wedge meshes."""
@@ -78,7 +107,7 @@ def build(egg, name, out):
         json.dump(m, f, separators=(",", ":"))
 
 
-EGGS = [("Kraken", kraken_egg), ("Squid", lambda: kraken_egg(SQUID))]
+EGGS = [("Kraken", kraken_egg), ("Squid", lambda: kraken_egg(SQUID)), ("KingCrab", king_crab_egg)]
 
 
 def main(*kinds, preview="/mnt/project-files/eggs/c_style/ocean"):
