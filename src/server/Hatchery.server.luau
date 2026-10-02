@@ -499,6 +499,26 @@ tutorialCommand.Triggered:Connect(function(source)
 end)
 tutorialCommand.Parent = game:GetService("TextChatService")
 
+-- Testing: "/skip" ends the tutorial on the spot, as finishing it would, with a
+-- Config.DefaultPet waiting to ride if you don't have a pet yet.
+local skipCommand = Instance.new("TextChatCommand")
+skipCommand.Name = "Skip"
+skipCommand.PrimaryAlias = "/skip"
+skipCommand.Triggered:Connect(function(source)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	local profile = player and profiles[player]
+	if not profile or not allowed(player) or not player:GetAttribute("Tutorial") then
+		return
+	end
+	profile.tutorial = true
+	if not profile.ride and not next(profile.items) then
+		profile.ride = Config.DefaultPet
+	end
+	player:SetAttribute("Tutorial", nil)
+	publish(player)
+end)
+skipCommand.Parent = game:GetService("TextChatService")
+
 -- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
 local function income(profile)
 	local total = Config.PetIncome[profile.ride] or 0
