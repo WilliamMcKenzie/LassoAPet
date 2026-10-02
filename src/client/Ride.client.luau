@@ -1750,7 +1750,7 @@ function vfx.frostBlast(cfg, left)
 end
 
 -- Abilities that don't make the pet untouchable: it still uses Hold and can crash.
-vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true, Devour = true }
+vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true }
 
 -- The mount's size tier right now: Grow and Crabwalk make it bigger while they run.
 function vfx.mountTier()
@@ -1767,19 +1767,6 @@ end
 function vfx.sprintSpecial()
 	local cfg = mount and Config.SprintSpecials[mount.kind]
 	return if cfg and phase == "outbound" and not transfer and sprinting() then cfg else nil
-end
-
--- Takes an animal out of the stampede (or the strays) for good, as knock does.
-function vfx.takeOut(entity)
-	if entity.n then
-		taken[entity.n] = true
-		herd[entity.n] = nil
-	else
-		local i = table.find(strays, entity)
-		if i then
-			table.remove(strays, i)
-		end
-	end
 end
 
 -- Ink: a dark cloud bursting out round the squid.
@@ -1819,53 +1806,6 @@ function vfx.inkBlast(dt, cfg)
 				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -cfg.Radius, cfg.Radius)
 			else
 				entity.lane = math.clamp(entity.lane + away * 60 * dt, -EDGE, EDGE)
-			end
-		end
-	end
-end
-
--- Devour: the nearest Max animals within Radius are caught and pulled in.
-function vfx.devourStart(cfg)
-	local near = {}
-	for _, entity in allAnimals() do
-		local dx, dz = entity.x - mount.x, entity.z - mount.z
-		local d = dx * dx + dz * dz
-		if entity ~= mount and not entity.popping and d < cfg.Radius * cfg.Radius then
-			table.insert(near, { entity = entity, d = d })
-		end
-	end
-	table.sort(near, function(a, b)
-		return a.d < b.d
-	end)
-	local caught = {}
-	for k = 1, math.min(cfg.Max, #near) do
-		local entity = near[k].entity
-		vfx.takeOut(entity)
-		table.insert(caught, { entity = entity, x = entity.x, z = entity.z, hop = entity.hop or 0, eaten = false })
-	end
-	rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(150, 60, 200))
-	return caught
-end
-
--- Pulls the caught animals up and in over the ability's Duration, shrinking, and
--- eats each one as it arrives, each refilling some Hold.
-function vfx.devourStep(active)
-	local u = math.clamp(active.t / active.cfg.Duration, 0, 1)
-	local eased = u * u
-	for _, c in active.caught do
-		if not c.eaten then
-			local e = c.entity
-			e.x = c.x + (mount.x - c.x) * eased
-			e.z = c.z + (mount.z - c.z) * eased
-			e.hop = c.hop + math.sin(u * math.pi) * 10
-			e.yaw += 0.2
-			e.animal:setScale(math.max(1 - u * 0.8, 0.2))
-			place(e, 0)
-			if u >= 1 then
-				c.eaten = true
-				Poof.at(Vector3.new(e.x, 2, e.z))
-				retire(e)
-				hold = math.min(hold + holdTime(mount) * active.cfg.Restore, holdTime(mount))
 			end
 		end
 	end
@@ -1943,12 +1883,6 @@ local function endAbility(entity)
 	if active.cfg.Tier then
 		entity.animal:setScale(1) -- back to its own size
 	end
-	for _, c in active.caught or {} do
-		if not c.eaten then
-			c.eaten = true
-			retire(c.entity)
-		end
-	end
 	if active.cfg.Kind == "Leap" then
 		entity.hop = 0
 		if root then
@@ -1986,8 +1920,6 @@ local function startAbility(cfg)
 	elseif cfg.Kind == "Ink" then
 		vfx.inkFx(mount)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(40, 30, 70))
-	elseif cfg.Kind == "Devour" then
-		a.active.caught = vfx.devourStart(cfg)
 	end
 end
 
@@ -2021,8 +1953,6 @@ local function updateAbility(dt)
 			rattleBlast(dt, active.cfg)
 		elseif active.cfg.Kind == "Ink" then
 			vfx.inkBlast(dt, active.cfg)
-		elseif active.cfg.Kind == "Devour" then
-			vfx.devourStep(active)
 		elseif active.cfg.Kind == "Frost" then
 			vfx.frostBlast(active.cfg, active.cfg.Duration - active.t)
 		end

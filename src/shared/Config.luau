@@ -210,9 +210,8 @@ return {
 	--     away from it while it lasts.
 	--   Crabwalk (King Crab): it grows to size tier Tier (large) and scuttles sideways
 	--     at SpeedBoost x speed for Duration.
-	--   Devour (Kraken): grabs up to Max animals within Radius, pulls them in and eats
-	--     them, each refilling Restore of the Hold bar.
-	-- Boost, Grow, Ink, Crabwalk and Devour, like Frost, still use Hold and can crash.
+	-- Boost, Grow, Ink and Crabwalk, like Frost, still use Hold and can crash.
+	-- (The Kraken's ability is on hold until QM and Claude settle how it looks.)
 	-- Charge swings the camera round to a cinematic front-side angle.
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
 	Abilities = {
@@ -224,7 +223,6 @@ return {
 		IceGolem = { Kind = "Grow", Duration = 5, Cooldown = 10, SpeedBoost = 1.2, Tier = 4 },
 		Squid = { Kind = "Ink", Duration = 2.5, Cooldown = 8, Radius = 45 },
 		KingCrab = { Kind = "Crabwalk", Duration = 4, Cooldown = 8, SpeedBoost = 2, Tier = 3 },
-		Kraken = { Kind = "Devour", Duration = 1.2, Cooldown = 10, Radius = 45, Max = 8, Restore = 0.1 },
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
 	-- automatic sprint home with the egg). Like any sprint they drain Hold faster.
