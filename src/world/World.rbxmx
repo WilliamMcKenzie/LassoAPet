@@ -550397,7 +550397,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -550466,7 +550466,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -550535,7 +550535,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -550604,7 +550604,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -553712,7 +553712,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -553721,13 +553721,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.2682</X><Y>4.1500</Y><Z>-17409.5027</Z><R00>-0.363251</R00><R01>0.000000</R01><R02>-0.931691</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.931691</R20><R21>0.000000</R21><R22>-0.363251</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS035230"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS035255"><Properties>
@@ -558019,7 +558012,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -558028,13 +558021,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.5808</X><Y>4.1500</Y><Z>-17602.6976</Z><R00>-0.600420</R00><R01>0.000000</R01><R02>0.799685</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.799685</R20><R21>0.000000</R21><R22>-0.600420</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS035665"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS035690"><Properties>
@@ -560953,7 +560939,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -560962,13 +560948,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.3715</X><Y>4.1500</Y><Z>-17732.5341</Z><R00>0.960779</R00><R01>0.000000</R01><R02>0.277315</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.277315</R20><R21>0.000000</R21><R22>0.960779</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS035969"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS035994"><Properties>
@@ -570248,7 +570227,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -570257,13 +570236,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.3397</X><Y>4.1500</Y><Z>-18128.4097</Z><R00>0.342020</R00><R01>0.000000</R01><R02>-0.939693</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.939693</R20><R21>0.000000</R21><R22>0.342020</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS036884"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS036906"><Properties>
@@ -571159,7 +571131,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -571168,13 +571140,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.8913</X><Y>4.1500</Y><Z>-18169.7734</Z><R00>0.282341</R00><R01>0.000000</R01><R02>0.959314</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.959314</R20><R21>0.000000</R21><R22>0.282341</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS036963"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS037009"><Properties>
@@ -574232,7 +574197,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -574241,13 +574206,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.4357</X><Y>4.1500</Y><Z>-18293.3323</Z><R00>-0.883766</R00><R01>0.000000</R01><R02>-0.467930</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.467930</R20><R21>0.000000</R21><R22>-0.883766</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS037268"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS037293"><Properties>
@@ -576894,7 +576852,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -576903,13 +576861,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.4959</X><Y>5.1500</Y><Z>-18441.5085</Z><R00>-0.807990</R00><R01>0.000000</R01><R02>-0.589196</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.589196</R20><R21>0.000000</R21><R22>-0.807990</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS037552"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS037574"><Properties>
@@ -577950,7 +577901,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -578019,7 +577970,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -578088,7 +578039,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -578157,7 +578108,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -579261,7 +579212,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -579270,13 +579221,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.7666</X><Y>4.1500</Y><Z>-18572.7895</Z><R00>0.984503</R00><R01>0.000000</R01><R02>-0.175367</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.175367</R20><R21>0.000000</R21><R22>0.984503</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS037775"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS037821"><Properties>
@@ -581503,7 +581447,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -581512,13 +581456,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.0373</X><Y>4.1500</Y><Z>-18680.6310</Z><R00>0.081939</R00><R01>0.000000</R01><R02>0.996637</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.996637</R20><R21>0.000000</R21><R22>0.081939</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS038015"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS038061"><Properties>
@@ -582907,7 +582844,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -582916,13 +582853,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.1390</X><Y>4.1500</Y><Z>-18765.8744</Z><R00>0.059306</R00><R01>0.000000</R01><R02>-0.998240</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.998240</R20><R21>0.000000</R21><R22>0.059306</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS038163"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS038185"><Properties>
@@ -583940,7 +583870,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -584009,7 +583939,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -584078,7 +584008,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -584147,7 +584077,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -585300,7 +585230,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -585309,13 +585239,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.4786</X><Y>4.1500</Y><Z>-18927.8801</Z><R00>-0.830012</R00><R01>0.000000</R01><R02>-0.557745</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.557745</R20><R21>0.000000</R21><R22>-0.830012</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS038388"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS038434"><Properties>
@@ -586359,7 +586282,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -586368,13 +586291,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.7383</X><Y>4.1500</Y><Z>-19009.8303</Z><R00>0.489382</R00><R01>0.000000</R01><R02>0.872069</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.872069</R20><R21>0.000000</R21><R22>0.489382</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS038491"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS038537"><Properties>
@@ -587566,7 +587482,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -587575,13 +587491,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.8572</X><Y>5.1500</Y><Z>-19048.4851</Z><R00>-0.328867</R00><R01>0.000000</R01><R02>-0.944376</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.944376</R20><R21>0.000000</R21><R22>-0.328867</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS038618"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS038643"><Properties>
@@ -588205,7 +588114,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -588214,13 +588123,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.3289</X><Y>4.1500</Y><Z>-19090.0889</Z><R00>-0.998027</R00><R01>0.000000</R01><R02>0.062791</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.062791</R20><R21>0.000000</R21><R22>-0.998027</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS038677"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS038723"><Properties>
@@ -589215,7 +589117,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -589224,13 +589126,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.7340</X><Y>4.1500</Y><Z>-19129.4418</Z><R00>0.379456</R00><R01>0.000000</R01><R02>-0.925210</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.925210</R20><R21>0.000000</R21><R22>0.379456</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS038783"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS038829"><Properties>
@@ -589950,7 +589845,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -590019,7 +589914,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -590088,7 +589983,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -590157,7 +590052,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -590989,7 +590884,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -590998,13 +590893,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.4247</X><Y>4.1500</Y><Z>-19245.0461</Z><R00>0.573576</R00><R01>0.000000</R01><R02>0.819152</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.819152</R20><R21>0.000000</R21><R22>0.573576</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS038969"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS038991"><Properties>
@@ -592517,7 +592405,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -592526,13 +592414,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.7003</X><Y>4.1500</Y><Z>-19285.0606</Z><R00>0.540240</R00><R01>0.000000</R01><R02>0.841511</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.841511</R20><R21>0.000000</R21><R22>0.540240</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS039113"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS039138"><Properties>
@@ -595500,7 +595381,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -595509,13 +595390,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.5456</X><Y>4.1500</Y><Z>-19413.1353</Z><R00>-0.652098</R00><R01>0.000000</R01><R02>0.758134</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.758134</R20><R21>0.000000</R21><R22>-0.652098</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS039414"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS039436"><Properties>
@@ -596779,7 +596653,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -596848,7 +596722,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -596917,7 +596791,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -596986,7 +596860,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -598238,7 +598112,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -598247,13 +598121,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.2111</X><Y>4.1500</Y><Z>-19567.3629</Z><R00>0.285688</R00><R01>0.000000</R01><R02>0.958323</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.958323</R20><R21>0.000000</R21><R22>0.285688</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS039684"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS039730"><Properties>
@@ -599222,7 +599089,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -599231,13 +599098,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.3398</X><Y>4.1500</Y><Z>-19606.7851</Z><R00>0.993961</R00><R01>0.000000</R01><R02>0.109734</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.109734</R20><R21>0.000000</R21><R22>0.993961</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS039788"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS039834"><Properties>
@@ -600009,7 +599869,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -600018,13 +599878,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.2751</X><Y>4.1500</Y><Z>-19653.9051</Z><R00>-0.250380</R00><R01>0.000000</R01><R02>0.968148</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.968148</R20><R21>0.000000</R21><R22>-0.250380</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS039871"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS039893"><Properties>
@@ -600871,7 +600724,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -600880,13 +600733,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.6260</X><Y>4.1500</Y><Z>-19728.0567</Z><R00>-0.638768</R00><R01>0.000000</R01><R02>-0.769400</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.769400</R20><R21>0.000000</R21><R22>-0.638768</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS039953"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS039999"><Properties>
@@ -602026,7 +601872,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -602095,7 +601941,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -602164,7 +602010,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -602233,7 +602079,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -603065,7 +602911,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -603074,13 +602920,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.3223</X><Y>4.1500</Y><Z>-19856.7423</Z><R00>0.317305</R00><R01>0.000000</R01><R02>-0.948324</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.948324</R20><R21>0.000000</R21><R22>0.317305</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS040183"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS040205"><Properties>
@@ -604619,7 +604458,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -604628,13 +604467,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.6394</X><Y>4.1500</Y><Z>-19962.9028</Z><R00>0.621148</R00><R01>0.000000</R01><R02>0.783693</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.783693</R20><R21>0.000000</R21><R22>0.621148</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS040329"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS040351"><Properties>
@@ -605678,7 +605510,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -605687,13 +605519,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.5157</X><Y>4.1500</Y><Z>-20056.7557</Z><R00>-0.782608</R00><R01>0.000000</R01><R02>-0.622515</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.622515</R20><R21>0.000000</R21><R22>-0.782608</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS040432"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS040457"><Properties>
@@ -606317,7 +606142,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -606326,13 +606151,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.7697</X><Y>4.1500</Y><Z>-20097.2854</Z><R00>-0.991894</R00><R01>0.000000</R01><R02>0.127065</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.127065</R20><R21>0.000000</R21><R22>-0.991894</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS040491"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS040513"><Properties>
@@ -606904,7 +606722,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -606973,7 +606791,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -607042,7 +606860,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -607111,7 +606929,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -607746,7 +607564,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -607755,13 +607573,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.3922</X><Y>4.1500</Y><Z>-20208.6545</Z><R00>-0.936672</R00><R01>0.000000</R01><R02>-0.350207</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.350207</R20><R21>0.000000</R21><R22>-0.936672</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS040632"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS040657"><Properties>
@@ -608953,7 +608764,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -608962,13 +608773,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.7938</X><Y>4.1500</Y><Z>-20295.2141</Z><R00>0.414693</R00><R01>0.000000</R01><R02>0.909961</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.909961</R20><R21>0.000000</R21><R22>0.414693</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS040759"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS040805"><Properties>
@@ -610629,7 +610433,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -610638,13 +610442,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.6533</X><Y>4.1500</Y><Z>-20367.1250</Z><R00>0.799685</R00><R01>0.000000</R01><R02>-0.600420</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.600420</R20><R21>0.000000</R21><R22>0.799685</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS040927"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS040952"><Properties>
@@ -611688,7 +611485,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -611697,13 +611494,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.5115</X><Y>4.1500</Y><Z>-20408.0741</Z><R00>-0.589196</R00><R01>0.000000</R01><R02>0.807990</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.807990</R20><R21>0.000000</R21><R22>-0.589196</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS041030"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS041052"><Properties>
@@ -612275,7 +612065,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -612344,7 +612134,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -612413,7 +612203,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -612482,7 +612272,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -613931,7 +613721,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -613940,13 +613730,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.3342</X><Y>4.1500</Y><Z>-20535.4427</Z><R00>0.452435</R00><R01>0.000000</R01><R02>0.891798</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.891798</R20><R21>0.000000</R21><R22>0.452435</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS041257"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS041279"><Properties>
@@ -614990,7 +614773,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -614999,13 +614782,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.9138</X><Y>4.1500</Y><Z>-20574.0719</Z><R00>0.125333</R00><R01>0.000000</R01><R02>-0.992115</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.992115</R20><R21>0.000000</R21><R22>0.125333</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS041360"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS041382"><Properties>
@@ -615826,7 +615602,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -615835,13 +615611,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.5544</X><Y>4.1500</Y><Z>-20609.2453</Z><R00>-0.652098</R00><R01>0.000000</R01><R02>0.758134</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.758134</R20><R21>0.000000</R21><R22>-0.652098</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS041440"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS041486"><Properties>
@@ -617033,7 +616802,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -617042,13 +616811,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.2811</X><Y>4.1500</Y><Z>-20687.0969</Z><R00>0.258819</R00><R01>0.000000</R01><R02>-0.965926</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.965926</R20><R21>0.000000</R21><R22>0.258819</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS041567"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS041592"><Properties>
@@ -618188,7 +617950,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -618257,7 +618019,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -618326,7 +618088,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -618395,7 +618157,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -619276,7 +619038,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -619285,13 +619047,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.7572</X><Y>4.1500</Y><Z>-20806.7312</Z><R00>0.991216</R00><R01>0.000000</R01><R02>0.132256</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.132256</R20><R21>0.000000</R21><R22>0.991216</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS041794"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS041840"><Properties>
@@ -619840,7 +619595,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -619849,13 +619604,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.1180</X><Y>4.1500</Y><Z>-20858.2779</Z><R00>0.158158</R00><R01>0.000000</R01><R02>0.987414</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.987414</R20><R21>0.000000</R21><R22>0.158158</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS041854"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS041876"><Properties>
@@ -620899,7 +620647,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -620908,13 +620656,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.2486</X><Y>4.1500</Y><Z>-20898.2532</Z><R00>-0.213030</R00><R01>0.000000</R01><R02>0.977046</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.977046</R20><R21>0.000000</R21><R22>-0.213030</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS041957"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS042003"><Properties>
@@ -621686,7 +621427,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -621695,13 +621436,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.8044</X><Y>4.1500</Y><Z>-20936.8580</Z><R00>0.400349</R00><R01>0.000000</R01><R02>0.916363</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.916363</R20><R21>0.000000</R21><R22>0.400349</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS042040"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS042062"><Properties>
@@ -622374,7 +622108,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -622383,13 +622117,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.2789</X><Y>4.1500</Y><Z>-21013.8938</Z><R00>0.377841</R00><R01>0.000000</R01><R02>0.925871</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.925871</R20><R21>0.000000</R21><R22>0.377841</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS042096"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS042118"><Properties>
@@ -623630,7 +623357,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -623639,13 +623366,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.7315</X><Y>4.1500</Y><Z>-21053.8570</Z><R00>0.498488</R00><R01>0.000000</R01><R02>0.866897</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.866897</R20><R21>0.000000</R21><R22>0.498488</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS042220"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS042245"><Properties>
@@ -623945,7 +623665,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -624014,7 +623734,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -624083,7 +623803,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -624152,7 +623872,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -624836,7 +624556,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -624845,13 +624565,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.4024</X><Y>4.1500</Y><Z>-21119.1629</Z><R00>-0.924546</R00><R01>0.000000</R01><R02>-0.381070</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.381070</R20><R21>0.000000</R21><R22>-0.924546</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS042338"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS042384"><Properties>
@@ -625623,7 +625336,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -625632,13 +625345,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.9333</X><Y>4.1500</Y><Z>-21170.2684</Z><R00>-0.224951</R00><R01>0.000000</R01><R02>-0.974370</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.974370</R20><R21>0.000000</R21><R22>-0.224951</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS042421"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS042446"><Properties>
@@ -626485,7 +626191,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -626494,13 +626200,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.6429</X><Y>4.1500</Y><Z>-21210.5696</Z><R00>-0.857167</R00><R01>0.000000</R01><R02>-0.515038</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.515038</R20><R21>0.000000</R21><R22>-0.857167</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS042503"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS042528"><Properties>
@@ -626852,7 +626551,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -626861,13 +626560,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.5941</X><Y>4.1500</Y><Z>-21249.5732</Z><R00>-0.710799</R00><R01>0.000000</R01><R02>0.703395</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.703395</R20><R21>0.000000</R21><R22>-0.710799</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS042542"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS042588"><Properties>
@@ -628108,7 +627800,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -628117,13 +627809,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.6699</X><Y>4.1500</Y><Z>-21288.4872</Z><R00>-0.580703</R00><R01>0.000000</R01><R02>-0.814116</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.814116</R20><R21>0.000000</R21><R22>-0.580703</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS042666"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS042691"><Properties>
@@ -628895,7 +628580,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -628904,13 +628589,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.3551</X><Y>4.1500</Y><Z>-21325.8574</Z><R00>-0.978867</R00><R01>0.000000</R01><R02>-0.204496</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.204496</R20><R21>0.000000</R21><R22>-0.978867</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS042749"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS042795"><Properties>
@@ -629630,7 +629308,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -629699,7 +629377,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -629768,7 +629446,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -629837,7 +629515,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -630941,7 +630619,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -630950,13 +630628,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.8990</X><Y>4.1500</Y><Z>-21446.4951</Z><R00>-0.146083</R00><R01>0.000000</R01><R02>0.989272</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.989272</R20><R21>0.000000</R21><R22>-0.146083</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS042955"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS043001"><Properties>
@@ -631728,7 +631399,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -631737,13 +631408,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.1815</X><Y>4.1500</Y><Z>-21497.2990</Z><R00>0.245307</R00><R01>0.000000</R01><R02>0.969445</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.969445</R20><R21>0.000000</R21><R22>0.245307</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS043038"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS043060"><Properties>
@@ -632787,7 +632451,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -632796,13 +632460,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.3202</X><Y>4.1500</Y><Z>-21557.9114</Z><R00>-0.433659</R00><R01>0.000000</R01><R02>-0.901077</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.901077</R20><R21>0.000000</R21><R22>-0.433659</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS043141"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS043187"><Properties>
@@ -634191,7 +633848,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -634200,13 +633857,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.4859</X><Y>4.1500</Y><Z>-21653.0755</Z><R00>0.551937</R00><R01>0.000000</R01><R02>-0.833886</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.833886</R20><R21>0.000000</R21><R22>0.551937</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS043289"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS043335"><Properties>
@@ -636015,7 +635665,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -636024,13 +635674,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.7429</X><Y>5.1500</Y><Z>-21693.4501</Z><R00>-0.976672</R00><R01>0.000000</R01><R02>-0.214735</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.214735</R20><R21>0.000000</R21><R22>-0.976672</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS043481"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS043503"><Properties>
@@ -636379,7 +636022,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -636448,7 +636091,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -636517,7 +636160,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -636586,7 +636229,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -637542,7 +637185,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -637551,13 +637194,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.2727</X><Y>4.1500</Y><Z>-21762.9941</Z><R00>0.246999</R00><R01>0.000000</R01><R02>-0.969016</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.969016</R20><R21>0.000000</R21><R22>0.246999</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS043616"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS043641"><Properties>
@@ -638132,7 +637768,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -638141,13 +637777,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.1739</X><Y>4.1500</Y><Z>-21798.1096</Z><R00>0.107999</R00><R01>0.000000</R01><R02>-0.994151</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.994151</R20><R21>0.000000</R21><R22>0.107999</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS043678"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS043700"><Properties>
@@ -638548,7 +638177,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -638557,13 +638186,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.2622</X><Y>4.1500</Y><Z>-21880.9408</Z><R00>-0.355107</R00><R01>0.000000</R01><R02>-0.934826</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.934826</R20><R21>0.000000</R21><R22>-0.355107</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS043714"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS043736"><Properties>
@@ -639459,7 +639081,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -639468,13 +639090,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.0511</X><Y>4.1500</Y><Z>-21974.7289</Z><R00>-0.062791</R00><R01>0.000000</R01><R02>-0.998027</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.998027</R20><R21>0.000000</R21><R22>-0.062791</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS043793"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS043815"><Properties>
@@ -640518,7 +640133,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -640527,13 +640142,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.3506</X><Y>4.1500</Y><Z>-22015.2742</Z><R00>0.952129</R00><R01>0.000000</R01><R02>-0.305695</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.305695</R20><R21>0.000000</R21><R22>0.952129</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS043896"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS043918"><Properties>
@@ -641105,7 +640713,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -641174,7 +640782,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -641243,7 +640851,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -641312,7 +640920,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -642564,7 +642172,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -642573,13 +642181,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.7608</X><Y>4.1500</Y><Z>-22091.1514</Z><R00>0.994522</R00><R01>0.000000</R01><R02>0.104528</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.104528</R20><R21>0.000000</R21><R22>0.994522</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS044102"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS044124"><Properties>
@@ -642980,7 +642581,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -642989,13 +642590,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.3558</X><Y>4.1500</Y><Z>-22134.8053</Z><R00>-0.943223</R00><R01>0.000000</R01><R02>0.332161</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.332161</R20><R21>0.000000</R21><R22>-0.943223</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS044138"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS044184"><Properties>
@@ -643964,7 +643558,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -643973,13 +643567,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.5501</X><Y>4.1500</Y><Z>-22213.9405</Z><R00>-0.738455</R00><R01>0.000000</R01><R02>-0.674302</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.674302</R20><R21>0.000000</R21><R22>-0.738455</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS044242"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS044264"><Properties>
@@ -644826,7 +644413,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -644835,13 +644422,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.7347</X><Y>4.1500</Y><Z>-22254.6863</Z><R00>0.967709</R00><R01>0.000000</R01><R02>0.252069</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.252069</R20><R21>0.000000</R21><R22>0.967709</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS044324"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS044370"><Properties>
@@ -645810,7 +645390,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -645819,13 +645399,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.0476</X><Y>4.1500</Y><Z>-22298.2311</Z><R00>0.061049</R00><R01>0.000000</R01><R02>0.998135</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.998135</R20><R21>0.000000</R21><R22>0.061049</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS044428"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS044450"><Properties>
@@ -647014,7 +646587,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -647083,7 +646656,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -647152,7 +646725,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -647221,7 +646794,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -648473,7 +648046,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -648482,13 +648055,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.8547</X><Y>4.1500</Y><Z>-22409.1258</Z><R00>-0.332161</R00><R01>0.000000</R01><R02>-0.943223</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.943223</R20><R21>0.000000</R21><R22>-0.332161</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS044699"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS044745"><Properties>
@@ -649457,7 +649023,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -649466,13 +649032,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.6428</X><Y>4.1500</Y><Z>-22446.3994</Z><R00>0.783693</R00><R01>0.000000</R01><R02>-0.621148</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.621148</R20><R21>0.000000</R21><R22>0.783693</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS044803"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS044825"><Properties>
@@ -650713,7 +650272,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -650722,13 +650281,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.3306</X><Y>4.1500</Y><Z>-22526.5602</Z><R00>0.999986</R00><R01>0.000000</R01><R02>0.005236</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.005236</R20><R21>0.000000</R21><R22>0.999986</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS044927"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS044973"><Properties>
@@ -651969,7 +651521,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -651978,13 +651530,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.6428</X><Y>4.1500</Y><Z>-22608.5294</Z><R00>0.783693</R00><R01>0.000000</R01><R02>-0.621148</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.621148</R20><R21>0.000000</R21><R22>0.783693</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS045051"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS045076"><Properties>
@@ -652880,7 +652425,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -652889,13 +652434,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.9113</X><Y>4.1500</Y><Z>-22648.2324</Z><R00>0.128796</R00><R01>0.000000</R01><R02>-0.991671</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.991671</R20><R21>0.000000</R21><R22>0.128796</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS045130"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS045176"><Properties>
@@ -653392,7 +652930,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -653461,7 +652999,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -653530,7 +653068,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -653599,7 +653137,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -654851,7 +654389,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -654860,13 +654398,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.4652</X><Y>4.1500</Y><Z>-22759.8319</Z><R00>-0.771625</R00><R01>0.000000</R01><R02>0.636078</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.636078</R20><R21>0.000000</R21><R22>-0.771625</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS045337"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS045383"><Properties>
@@ -655638,7 +655169,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -655647,13 +655178,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.7506</X><Y>4.1500</Y><Z>-22849.9909</Z><R00>-0.954240</R00><R01>0.000000</R01><R02>0.299041</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.299041</R20><R21>0.000000</R21><R22>-0.954240</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS045420"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS045445"><Properties>
@@ -656845,7 +656369,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -656854,13 +656378,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.6820</X><Y>4.1500</Y><Z>-22890.1673</Z><R00>0.905569</R00><R01>0.000000</R01><R02>0.424199</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.424199</R20><R21>0.000000</R21><R22>0.905569</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS045547"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS045593"><Properties>
@@ -657829,7 +657346,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -657838,13 +657355,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.3301</X><Y>4.1500</Y><Z>-22920.0186</Z><R00>-0.999976</R00><R01>0.000000</R01><R02>0.006981</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.006981</R20><R21>0.000000</R21><R22>-0.999976</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS045651"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS045673"><Properties>
@@ -658639,7 +658149,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -658708,7 +658218,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -658777,7 +658287,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -658846,7 +658356,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -659901,7 +659411,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -659910,13 +659420,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.6669</X><Y>4.1500</Y><Z>-23086.6434</Z><R00>0.887011</R00><R01>0.000000</R01><R02>0.461749</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.461749</R20><R21>0.000000</R21><R22>0.887011</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS045859"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS045905"><Properties>
@@ -660737,7 +660240,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -660746,13 +660249,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-49.5008</X><Y>5.1500</Y><Z>-23126.7373</Z><R00>0.801776</R00><R01>0.000000</R01><R02>0.597625</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.597625</R20><R21>0.000000</R21><R22>0.801776</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS045939"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS045985"><Properties>
@@ -661721,7 +661217,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -661730,13 +661226,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.7242</X><Y>4.1500</Y><Z>-23159.7640</Z><R00>-0.955793</R00><R01>0.000000</R01><R02>-0.294040</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.294040</R20><R21>0.000000</R21><R22>-0.955793</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS046043"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS046065"><Properties>
@@ -662360,7 +661849,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -662369,13 +661858,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>49.8175</X><Y>4.1500</Y><Z>-23244.9674</Z><R00>-0.382683</R00><R01>0.000000</R01><R02>-0.923880</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.923880</R20><R21>0.000000</R21><R22>-0.382683</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS046102"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS046127"><Properties>
@@ -663318,7 +662800,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>3.0000</X><Y>0.3000</Y><Z>3.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -663387,7 +662869,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -663456,7 +662938,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>2.0000</X><Y>0.3000</Y><Z>2.0000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -663525,7 +663007,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>1.6000</X><Y>0.3000</Y><Z>1.6000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294929940</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -664580,7 +664062,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -664589,13 +664071,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>50.1602</X><Y>4.1500</Y><Z>-23406.2074</Z><R00>0.088894</R00><R01>0.000000</R01><R02>-0.996041</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>0.996041</R20><R21>0.000000</R21><R22>0.088894</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS046334"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS046359"><Properties>
@@ -665590,7 +665065,7 @@
 <bool name="CanTouch">false</bool>
 <token name="Material">288</token>
 <Vector3 name="size"><X>5.2000</X><Y>0.2000</Y><Z>0.8000</Z></Vector3>
-<Color3uint8 name="Color3uint8">4294942760</Color3uint8>
+<Color3uint8 name="Color3uint8">4294920192</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="BottomSurface">0</token>
 <token name="FrontSurface">0</token>
@@ -665599,13 +665074,6 @@
 <token name="RightSurface">0</token>
 <CoordinateFrame name="CFrame"><X>-50.7030</X><Y>4.1500</Y><Z>-23447.2260</Z><R00>-0.876307</R00><R01>0.000000</R01><R02>0.481754</R02><R10>0.000000</R10><R11>1.000000</R11><R12>0.000000</R12><R20>-0.481754</R20><R21>0.000000</R21><R22>-0.876307</R22></CoordinateFrame>
 </Properties>
-<Item class="Texture" referent="OBS046440"><Properties>
-<string name="Name">Studs</string>
-<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
-<float name="StudsPerTileU">0.5</float>
-<float name="StudsPerTileV">0.5</float>
-<token name="Face">1</token>
-</Properties></Item>
 </Item>
 </Item>
 <Item class="Model" referent="OBS046465"><Properties>

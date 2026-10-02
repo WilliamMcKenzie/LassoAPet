@@ -41,11 +41,11 @@ class Kit:
             cf = cf @ rot
         self.parts.append(Part(name, hi - lo, cf, color, plain=plain))
 
-    def at(self, name, centre, size, color, rot=None):
+    def at(self, name, centre, size, color, rot=None, plain=False):
         cf = T(*centre)
         if rot is not None:
             cf = cf @ rot
-        self.parts.append(Part(name, size, cf, color))
+        self.parts.append(Part(name, size, cf, color, plain=plain))
 
 
 # ---------------------------------------------------------------- meadow
@@ -349,14 +349,14 @@ def reef_rock(k):
 
 # deep ocean (QM, Oct 2): past the reef the coral gives way to dark basalt and lava
 BASALT, BASALT_L, BASALT_D = (58, 56, 70), (76, 74, 90), (42, 40, 52)
-LAVA, LAVA_L = (255, 110, 20), (255, 160, 40)
+LAVA, LAVA_L = (255, 72, 0), (255, 120, 10)  # as the ground's Lava (Config); no studs so it glows
 
 
 def basalt_rock(k):
     """Medium: tilted dark slabs with a lava crack across the top."""
     k.at("Rock", (0, 1.4, 0), (9, 3.0, 7), BASALT, rot(12, 3, -4))
     k.at("Rock", (0.6, 3.3, -0.4), (6, 1.6, 5), BASALT_L, rot(-10, -3, 5))
-    k.at("Lava", (0.6, 4.15, -0.4), (5.2, 0.2, 0.8), LAVA_L, rot(30, 0, 0))
+    k.at("Lava", (0.6, 4.15, -0.4), (5.2, 0.2, 0.8), LAVA, rot(30, 0, 0), plain=True)
 
 
 def vent(k):
@@ -432,8 +432,8 @@ class Shifted:
     def box(self, name, lo, hi, color, rot=None, plain=False):
         self.kit.box(name, (lo[0] + self.dx, lo[1], lo[2]), (hi[0] + self.dx, hi[1], hi[2]), color, rot, plain)
 
-    def at(self, name, centre, size, color, rot=None):
-        self.kit.at(name, (centre[0] + self.dx, centre[1], centre[2]), size, color, rot)
+    def at(self, name, centre, size, color, rot=None, plain=False):
+        self.kit.at(name, (centre[0] + self.dx, centre[1], centre[2]), size, color, rot, plain)
 
 
 def row_image(name, ground, items):
