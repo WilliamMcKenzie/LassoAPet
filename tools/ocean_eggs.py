@@ -8,6 +8,8 @@ a coloured base, bold markings and each animal's own feature.
   Whale   Rare       blue over a pale ridged base, a cyan spiral glyph on the front,
                      cyan dashes down the top, little flukes at the back
   KingCrab Epic      red over a pale underside, gold spikes, a big claw and a small one, little legs
+  Starfish Common    orange over a pale base, yellow bumps all round, five stubby arms
+                     splayed out round the bottom with darker tips
 
 Run from the repo root: python3 tools/ocean_eggs.py [Kind ...]
 Writes designs/eggs/c_style/<Kind>Egg.bbmodel, src/shared/Eggs/<Kind>EggModel.luau,
@@ -88,6 +90,34 @@ def king_crab_egg():
     return egg
 
 
+def starfish_egg():
+    orange, deep, bump, belly = (255, 128, 64), (232, 88, 52), (255, 214, 96), (255, 200, 156)  # tools/starfish_design.py
+    egg = shell([belly, orange, orange, orange, orange, orange, orange])
+    # yellow bumps standing out of the shell, staggered up and round it
+    for k in range(4):
+        for i, (layer, x) in enumerate(((2, -0.35), (3, 0.3), (4, -0.2), (5, 0.25))):
+            z = WIDTHS[layer] / 2
+            lo, hi = (x - 0.24, layer * LH + 0.08, -z - 0.08), (x + 0.24, (layer + 1) * LH - 0.1, -z + 0.04)
+            p = Part(f"Bump{k}{i}", [b - a for a, b in zip(lo, hi)], Ry(90 * k + 45 * (i % 2)) @ T(*[(a + b) / 2 for a, b in zip(lo, hi)]), bump)
+            p.bone = "bottom"
+            p.yaw = 90 * k + 45 * (i % 2)
+            egg.parts.append(p)
+    egg.block("TopBump", (-0.25, 7 * LH - 0.02, -0.25), (0.25, 7 * LH + 0.12, 0.25), bump)
+    # five stubby arms out along the floor, a darker tip on each
+    for k in range(5):
+        yaw = 36 + 72 * k
+        r0, r1, w = WIDTHS[0] / 2 - 0.15, WIDTHS[1] / 2 + 0.5, 0.5
+        for name, lo, hi, col in ((f"Arm{k}", (-w / 2, 0, -r1), (w / 2, 0.36, -r0), orange),
+                                  (f"ArmBump{k}", (-w / 4, 0.36, -r1 + 0.1), (w / 4, 0.46, -r0 - 0.1), bump),
+                                  (f"ArmTip{k}", (-w / 2 + 0.06, 0, -r1 - 0.26), (w / 2 - 0.06, 0.3, -r1 + 0.02), deep)):
+            mid = [(a + b) / 2 for a, b in zip(lo, hi)]
+            p = Part(name, [b - a for a, b in zip(lo, hi)], Ry(yaw) @ T(*mid), col)
+            p.bone = "bottom"
+            p.yaw = yaw
+            egg.parts.append(p)
+    return egg
+
+
 def build(egg, name, out):
     """C.build, but blocks turned about Y (p.yaw) go in as cubes with a Blockbench
     rotation: the converter only takes axis-aligned boxes or wedge meshes."""
@@ -145,7 +175,7 @@ def whale_egg():
 
 
 EGGS = [("Kraken", kraken_egg), ("Squid", lambda: kraken_egg(SQUID)), ("Whale", whale_egg),
-        ("KingCrab", king_crab_egg)]
+        ("KingCrab", king_crab_egg), ("Starfish", starfish_egg)]
 
 
 def main(*kinds, preview="/mnt/project-files/eggs/c_style/ocean"):

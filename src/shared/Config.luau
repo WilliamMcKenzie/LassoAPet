@@ -78,7 +78,7 @@ return {
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			Herd = { Fish = 30, Whale = 16, Squid = 8, KingCrab = 8, Kraken = 3 },
+			Herd = { Starfish = 30, Fish = 30, Whale = 16, Squid = 8, KingCrab = 8, Kraken = 3 },
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -227,6 +227,7 @@ return {
 		Squid = 2,
 		Whale = 4, -- XL (QM, Oct 2): the first tier past large
 		KingCrab = 2,
+		Starfish = 1,
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.2x medium, 1.44x large, 1.73x XL (QM, Oct 2; Eggs/Egg.luau).
@@ -268,6 +269,7 @@ return {
 		Squid = 1200,
 		Whale = 300,
 		KingCrab = 1300,
+		Starfish = 100,
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -316,6 +318,7 @@ return {
 		Squid = "rbxassetid://128883182267763", -- assets/ui/SquidEggRender.png
 		Whale = "rbxassetid://97101351248514", -- assets/ui/WhaleEggRender.png
 		KingCrab = "rbxassetid://136150514529079", -- assets/ui/KingCrabEggRender.png
+		Starfish = "", -- assets/ui/StarfishEggRender.png (awaiting upload)
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
@@ -385,6 +388,7 @@ return {
 		Squid = { Speed = 2.6, Stamina = 2.6 },
 		Whale = { Speed = 1.2, Stamina = 5 }, -- QM, Oct 2
 		KingCrab = { Speed = 2.4, Stamina = 3 },
+		Starfish = { Speed = 1.8, Stamina = 2 },
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
