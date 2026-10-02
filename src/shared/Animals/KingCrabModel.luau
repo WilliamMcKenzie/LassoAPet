@@ -30,7 +30,7 @@ return {
 		{ name = "top_pincer2", parent = "claws", pivot = Vector3.new(-1.2, 0.6002, -1.7) },
 	},
 	parts = {
-		{ name = "body", bone = "body", class = "Part", size = Vector3.new(3.1, 1, 3.4), cframe = CFrame.new(0.05, 1.90021, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 58, 48) },
+		{ name = "body", bone = "body", class = "Part", size = Vector3.new(3.1, 1.2, 3.4), cframe = CFrame.new(0.05, 2.00021, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 58, 48) },
 		{ name = "body", bone = "body", class = "Part", size = Vector3.new(2.6, 0.8, 2.7), cframe = CFrame.new(0, 1.00021, 0.15, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(252, 196, 150) },
 		{ name = "body", bone = "body", class = "Part", size = Vector3.new(1.2, 0.2, 2.7), cframe = CFrame.new(-2.1, 2.30021, 0.05, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 58, 48) },
 		{ name = "body", bone = "body", class = "Part", size = Vector3.new(1.1, 0.2, 2.7), cframe = CFrame.new(2.15, 2.30021, 0.05, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 58, 48) },
