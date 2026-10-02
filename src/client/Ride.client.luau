@@ -1842,14 +1842,14 @@ function vfx.updateSprint(dt)
 			dirt.Texture = "rbxasset://textures/particles/smoke_main.dds"
 			local ground = Config.Biomes[WorldColors.biomeAt(mount.z)].GroundColors
 			dirt.Color = ColorSequence.new(ground[1], ground[2])
-			dirt.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2), NumberSequenceKeypoint.new(1, 4) })
-			dirt.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1) })
-			dirt.Lifetime = NumberRange.new(0.4, 0.8)
-			dirt.Speed = NumberRange.new(10, 18)
-			dirt.SpreadAngle = Vector2.new(35, 35)
-			dirt.Acceleration = Vector3.new(0, -40, 0)
-			dirt.Rate = 70
+			dirt.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2), NumberSequenceKeypoint.new(1, 5) })
+			dirt.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.3), NumberSequenceKeypoint.new(1, 1) })
+			dirt.Lifetime = NumberRange.new(0.6, 1)
+			dirt.Speed = NumberRange.new(2, 5)
+			dirt.SpreadAngle = Vector2.new(80, 80)
+			dirt.Rate = 25
 			dirt.Parent = spray
+			vfx.moundAt = nil -- where the last mound went up
 			vfx.sprintFx = { spray }
 			vfx.burrowSpray = spray
 		end
@@ -1869,7 +1869,38 @@ function vfx.updateSprint(dt)
 		mount.hop = (mount.hop or 0) + (target - (mount.hop or 0)) * (1 - math.exp(-4 * dt))
 	end
 	if vfx.burrowSpray then
-		vfx.burrowSpray.CFrame = CFrame.new(mount.x, Ground.heightAt(mount.x, mount.z) + 0.5, mount.z)
+		local floor = Ground.heightAt(mount.x, mount.z)
+		vfx.burrowSpray.CFrame = CFrame.new(mount.x, floor + 0.5, mount.z)
+		-- A sand mound pushes up over the worm every few studs; the ones behind
+		-- slowly sink back into the floor (QM's pick).
+		local here = Vector2.new(mount.x, mount.z)
+		if not vfx.moundAt or (here - vfx.moundAt).Magnitude > vfx.MOUND_EVERY then
+			vfx.moundAt = here
+			vfx.mound(mount.x, mount.z, floor)
+		end
+	end
+end
+
+vfx.MOUND_EVERY = 3 -- studs between the Sandworm's mounds
+vfx.MOUND_LIFE = 1.8 -- seconds a mound takes to sink away
+function vfx.mound(x, z, floor)
+	local ground = Config.Biomes[WorldColors.biomeAt(z)].GroundColors
+	for k, s in { { 0, 0, 2.2, 6 }, { -2.2, 0.8, 1.4, 4 }, { 2.2, -0.8, 1.4, 4 } } do
+		local p = Instance.new("Part")
+		p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+		p.Color = ground[(k % 2) + 1]
+		p.Material = Enum.Material.SmoothPlastic
+		p.Size = Vector3.new(s[4], s[3], s[4] * 0.8)
+		p.CFrame = CFrame.new(x + s[1], floor + s[3] / 2, z + s[2]) * CFrame.Angles(0, rng:NextNumber(0, math.pi), 0)
+		p.Parent = workspace
+		local sunk = Vector3.new(p.Size.X * 0.6, 0.05, p.Size.Z * 0.6)
+		TweenService:Create(p, TweenInfo.new(vfx.MOUND_LIFE, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Size = sunk,
+			CFrame = p.CFrame - Vector3.new(0, s[3] / 2, 0),
+		}):Play()
+		task.delay(vfx.MOUND_LIFE, function()
+			p:Destroy()
+		end)
 	end
 end
 
