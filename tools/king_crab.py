@@ -1,6 +1,13 @@
 """The King Crab (Epic, Ocean, medium) from QM's model (designs/ocean/KingCrab_QM.bbmodel).
 
-Run: python3 tools/king_crab.py [out_dir]
+Run: python3 tools/king_crab.py [out_dir]            previews, GIF and headshot of designs/ocean/KingCrab.bbmodel
+     python3 tools/king_crab.py --rebuild [out_dir]  rebuild that file from KingCrab_QM.bbmodel (overwrites it)
+
+Since Oct 2 20:25 designs/ocean/KingCrab.bbmodel is QM's own save of this script's output
+(QM moved the eyes), so it is the source: don't --rebuild unless QM asks. It was made in
+Blockbench, whose rotations turn Z, then Y, then X, so it previews with EULER = "ZYX" and
+converts with: python3 tools/bbmodel_to_luau.py --zyx designs/ocean/KingCrab.bbmodel
+src/shared/Animals/KingCrabModel.luau
 
 QM's file has the shape and the bone tree but no colours or animations. This
 script keeps every block where QM put it and:
@@ -27,6 +34,7 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
+import horse_rig as HR  # noqa: E402
 import snake_design as S  # noqa: E402
 from horse_rig import element_polys, write_animations  # noqa: E402
 from partlib import render  # noqa: E402
@@ -211,12 +219,16 @@ def animations():
 
 
 def main(out="/mnt/project-files/animals/ocean"):
-    m = build()
-    groups = {g["name"]: g for g in m["groups"]}
-    write_animations(m, groups, animations())
-    for path in (MODEL, os.path.join(out, "KingCrab.bbmodel")):
-        with open(path, "w") as f:
+    HR.EULER = "ZYX"  # QM's parts turn about several axes, the Blockbench way
+    if "--rebuild" in sys.argv:
+        m = build()
+        groups = {g["name"]: g for g in m["groups"]}
+        write_animations(m, groups, animations())
+        with open(MODEL, "w") as f:
             json.dump(m, f, separators=(",", ":"))
+    m = json.load(open(MODEL))
+    with open(os.path.join(out, "KingCrab.bbmodel"), "w") as f:
+        json.dump(m, f, separators=(",", ":"))
     rest = S.posed(m, next(a for a in m["animations"] if a["name"] == "idle"), 0)
     lo = np.min([q.min(0) for p in rest for q in p.polys], 0)
     hi = np.max([q.max(0) for p in rest for q in p.polys], 0)

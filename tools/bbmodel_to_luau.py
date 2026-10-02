@@ -14,6 +14,12 @@ bone's rest rotation. Parts named in NEON glow (Enum.Material.Neon), and parts n
 METAL get the classic Weld texture instead of studs. A group whose name repeats an earlier one (QM's
 wyvern has a "Head" inside its "Head") becomes its own bone, <name>_2, so bones and their
 animation tracks stay one to one.
+
+Euler order: our own tools write rotations meaning R = Rx * Ry * Rz (Roblox's
+CFrame.Angles), the default here. Blockbench itself means R = Rz * Ry * Rx, which only
+differs when a rotation turns about two or more axes. For a model built by hand in
+Blockbench (QM's King Crab), pass --zyx so those parts come out as Blockbench shows them:
+  python3 tools/bbmodel_to_luau.py --zyx designs/ocean/KingCrab.bbmodel src/shared/Animals/KingCrabModel.luau
 """
 
 import base64
@@ -41,11 +47,20 @@ def cf(pos, R):
     return "CFrame.new({})".format(", ".join("{:g}".format(round(float(x), 6) + 0.0) for x in vals))
 
 
-def element_rotation(e):
-    x, y, z = (math.radians(a) for a in (e.get("rotation") or (0, 0, 0)))
+ORDER = "XYZ"  # see the module docstring; main() sets "ZYX" for --zyx
+
+
+def euler(deg):
+    x, y, z = (math.radians(a) for a in deg)
     cx, sx, cy, sy, cz, sz = math.cos(x), math.sin(x), math.cos(y), math.sin(y), math.cos(z), math.sin(z)
-    return (np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]]) @ np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
-            @ np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]]))
+    Rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
+    Ry = np.array([[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]])
+    Rz = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
+    return Rz @ Ry @ Rx if ORDER == "ZYX" else Rx @ Ry @ Rz
+
+
+def element_rotation(e):
+    return euler(e.get("rotation") or (0, 0, 0))
 
 
 def num(v):
@@ -304,7 +319,9 @@ def main(src, dst):
     for name, parent, pivot, rot in bones:
         p = f'"{parent}"' if parent else "nil"
         rest = ""
-        if any(rot):
+        if any(rot) and ORDER == "ZYX" and sum(1 for a in rot if a) > 1:
+            rest = ", rest = " + cf((0, 0, 0), euler(rot))
+        elif any(rot):
             rest = ", rest = CFrame.Angles({:g}, {:g}, {:g})".format(*(round(math.radians(a), 6) + 0.0 for a in rot))
         out.append(f'\t\t{{ name = "{name}", parent = {p}, pivot = {v3(pivot)}{rest} }},')
     out.append("\t},")
@@ -344,4 +361,8 @@ def main(src, dst):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    args = sys.argv[1:]
+    if "--zyx" in args:
+        args.remove("--zyx")
+        ORDER = "ZYX"
+    main(*args)
