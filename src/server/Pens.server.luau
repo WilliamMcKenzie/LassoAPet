@@ -71,13 +71,21 @@ local function penOf(player)
 	return index and pens[index]
 end
 
+local SPAWN_BACK = 10 -- QM's spawn view
+
 local function toPen(player, character)
 	local pen = penOf(player)
 	local spawn = pen and pen:FindFirstChild("Spawn")
 	if spawn then
 		character:WaitForChild("HumanoidRootPart")
 		task.wait() -- let the default spawn finish placing the character first
-		character:PivotTo(CFrame.new(spawn.Position + Vector3.new(0, 3, 0)))
+		-- Facing into the pen (Pen.client puts the camera behind you).
+		-- SPAWN_BACK studs further out than the Spawn part, so the pen's in view.
+		local at = spawn.Position + Vector3.new(0, 3, 0)
+		local area = pen:FindFirstChild("Area")
+		local ahead = if area then Vector3.new(area.Position.X, at.Y, area.Position.Z) else at + Vector3.zAxis
+		at -= (ahead - at).Unit * SPAWN_BACK
+		character:PivotTo(CFrame.lookAt(at, ahead))
 	end
 end
 

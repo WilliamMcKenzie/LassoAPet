@@ -427,3 +427,62 @@ if player.Character then
 	watchCharacter(player.Character)
 end
 
+-- The camera on spawning ---------------------------------------------------------
+-- On spawning at your pen (Pens.server stands you at its Spawn facing in), the
+-- camera starts behind you looking down into the pen, SPAWN_PITCH degrees down and
+-- SPAWN_DISTANCE studs back (QM's pick), instead of Roblox's default low angle.
+
+local SPAWN_PITCH = 34
+local SPAWN_DISTANCE = 24
+local SPAWN_WAIT = 3 -- seconds to wait for the server to move you to your pen
+
+local camera = workspace.CurrentCamera
+
+local function atSpawn(hrp)
+	local pens = workspace:FindFirstChild("Pens")
+	local pen = pens and pens:FindFirstChild("Pen" .. tostring(player:GetAttribute("Pen")))
+	local spawn = pen and pen:FindFirstChild("Spawn")
+	return spawn and (Vector3.new(hrp.Position.X, 0, hrp.Position.Z) - Vector3.new(spawn.Position.X, 0, spawn.Position.Z)).Magnitude < 12 -- (Pens.server stands you 10 out)
+end
+
+local function onSpawn(character)
+	local hrp = character:WaitForChild("HumanoidRootPart", 5)
+	if not hrp then
+		return
+	end
+	local started = os.clock()
+	while not atSpawn(hrp) do
+		if os.clock() - started > SPAWN_WAIT or not hrp.Parent then
+			return -- no pen: leave the default camera
+		end
+		RunService.Heartbeat:Wait()
+	end
+	-- The camera puts itself behind a new character at its own angle a moment after
+	-- it spawns: wait for that, then hold ours for a few frames so it sticks.
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	while camera.CameraSubject ~= humanoid and os.clock() - started < SPAWN_WAIT do
+		RunService.Heartbeat:Wait()
+	end
+	task.wait(0.1)
+	local look = hrp.CFrame.LookVector * Vector3.new(1, 0, 1)
+	if look.Magnitude < 0.01 or not hrp.Parent then
+		return
+	end
+	look = look.Unit
+	local pitch = math.rad(SPAWN_PITCH)
+	-- The camera keeps its own zoom: raising the minimum pushes it out to SPAWN_DISTANCE,
+	-- and it stays there once the minimum's back.
+	local minZoom = player.CameraMinZoomDistance
+	player.CameraMinZoomDistance = SPAWN_DISTANCE
+	for _ = 1, 5 do
+		local focus = hrp.Position + Vector3.new(0, 1.5, 0)
+		camera.CFrame = CFrame.lookAt(focus - look * SPAWN_DISTANCE * math.cos(pitch) + Vector3.yAxis * SPAWN_DISTANCE * math.sin(pitch), focus)
+		RunService.RenderStepped:Wait()
+	end
+	player.CameraMinZoomDistance = minZoom
+end
+
+player.CharacterAdded:Connect(onSpawn)
+if player.Character then
+	task.spawn(onSpawn, player.Character)
+end
