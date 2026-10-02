@@ -4,8 +4,9 @@ a coloured base, bold markings and each animal's own feature.
   Kraken  Legendary  navy with a dark band, the maroon cap over the top with darker
                      spots, eight banded tentacles splayed round the base, pink tips
                      curling up
+  Squid   Epic       the Kraken's egg in the Squid's pink and orange
 
-Run from the repo root: python3 tools/ocean_eggs.py
+Run from the repo root: python3 tools/ocean_eggs.py [Kind ...]
 Writes designs/eggs/c_style/<Kind>Egg.bbmodel, src/shared/Eggs/<Kind>EggModel.luau,
 assets/ui/<Kind>EggRender.png (cropped, for the reveal card) and previews in
 /mnt/project-files/eggs/c_style/ocean/.
@@ -26,8 +27,12 @@ import bbmodel_to_luau  # noqa: E402
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
 
-def kraken_egg():
-    navy, band, cap, capdark, pink = (58, 76, 128), (40, 52, 94), (146, 46, 60), (104, 30, 46), (238, 122, 152)
+KRAKEN = ((58, 76, 128), (40, 52, 94), (146, 46, 60), (104, 30, 46), (238, 122, 152))
+SQUID = ((255, 150, 160), (236, 112, 132), (255, 138, 72), (226, 100, 50), (255, 214, 120))  # tools/squid_design.py
+
+
+def kraken_egg(colors=KRAKEN):
+    navy, band, cap, capdark, pink = colors
     egg = shell([navy, band, navy, band, cap, cap, cap])
     # darker spots standing out of the cap, front, sides and back
     for i, (layer, x, w) in enumerate(((4, -0.45, 0.5), (5, 0.3, 0.4), (4, 0.55, 0.36))):
@@ -73,13 +78,15 @@ def build(egg, name, out):
         json.dump(m, f, separators=(",", ":"))
 
 
-EGGS = [("Kraken", kraken_egg)]
+EGGS = [("Kraken", kraken_egg), ("Squid", lambda: kraken_egg(SQUID))]
 
 
-def main(preview="/mnt/project-files/eggs/c_style/ocean"):
+def main(*kinds, preview="/mnt/project-files/eggs/c_style/ocean"):
     os.makedirs(os.path.join(preview, "renders"), exist_ok=True)
     bb_dir = os.path.join(ROOT, "designs", "eggs", "c_style")
     for kind, fn in EGGS:
+        if kinds and kind not in kinds:
+            continue
         egg = fn()
         name = kind + "Egg"
         build(egg, name, bb_dir)
