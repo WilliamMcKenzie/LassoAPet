@@ -2,15 +2,23 @@
 -- corridor, yellow at the floor fading to clear GateHeight studs up, with QM's
 -- "Zone Locked" card on it (each biome's GateImage). Only you see your gates; each one fades away
 -- when your pen reaches its level (PenLevel). The ride stops you at them.
+-- Buying the level (ZoneUnlocked, from PenLevel.server) plays it on camera
+-- instead: the camera flies over to the gate, it shatters, and flies back.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 
 local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
+local SHARDS_X, SHARDS_Y = 14, 7 -- the gate breaks into this many pieces
+local SHARD_TIME = 1.6 -- seconds the pieces fly before they're gone
+local FLY_TIME = 1.6 -- seconds for the camera to get to the gate (and 1.2 back)
 local PIXELS_PER_STUD = 20
 local CARD_HEIGHT = 0.55 -- of the gate's height
 local CARD_ASPECT = 1068 / 662 -- GateDesert.png etc.
@@ -97,13 +105,98 @@ local function unlock(i)
 	end)
 end
 
+-- The gate bursts into pieces flung on into the biome, tumbling and fading.
+local function shatter(i)
+	local width, height = Config.CourseHalfWidth * 2, Config.GateHeight
+	local z = WorldColors.biomeStart(i)
+	local w, h = width / SHARDS_X, height / SHARDS_Y
+	local rng = Random.new()
+	local shards = {}
+	for gx = 1, SHARDS_X do
+		for gy = 1, SHARDS_Y do
+			local part = Instance.new("Part")
+			part.Anchored = true
+			part.CanCollide = false
+			part.CanQuery = false
+			part.CanTouch = false
+			part.CastShadow = false
+			part.Material = Enum.Material.Neon
+			part.Color = if rng:NextNumber() < 0.3 then Color3.new(1, 1, 1) else Config.GateColor
+			part.Transparency = 0.15 + 0.5 * (gy - 1) / SHARDS_Y -- clearer higher up, like the sheet
+			part.Size = Vector3.new(w * rng:NextNumber(0.6, 1), h * rng:NextNumber(0.6, 1), 0.3)
+			local at = Vector3.new(-width / 2 + (gx - 0.5) * w, (gy - 0.5) * h, z)
+			part.CFrame = CFrame.new(at)
+			part.Parent = workspace
+			table.insert(shards, {
+				part = part,
+				start = part.Transparency,
+				velocity = Vector3.new((at.X / width) * rng:NextNumber(20, 40), rng:NextNumber(8, 30), -rng:NextNumber(25, 60)),
+				spin = Vector3.new(rng:NextNumber(-8, 8), rng:NextNumber(-8, 8), rng:NextNumber(-8, 8)),
+			})
+		end
+	end
+	local t = 0
+	local connection
+	connection = RunService.RenderStepped:Connect(function(dt)
+		t += dt
+		for _, s in shards do
+			s.velocity -= Vector3.new(0, 60 * dt, 0)
+			s.part.CFrame = (s.part.CFrame + s.velocity * dt) * CFrame.Angles(s.spin.X * dt, s.spin.Y * dt, s.spin.Z * dt)
+			s.part.Transparency = s.start + (1 - s.start) * math.clamp(t / SHARD_TIME, 0, 1) ^ 2
+		end
+		if t >= SHARD_TIME then
+			connection:Disconnect()
+			for _, s in shards do
+				s.part:Destroy()
+			end
+		end
+	end)
+end
+
+-- Just bought biome i: fly over to its gate, break it, fly back.
+local function breakOpen(i)
+	local gate = gates[i]
+	gates[i] = nil
+	local z = WorldColors.biomeStart(i)
+	controls:Disable()
+	local start = camera.CFrame
+	camera.CameraType = Enum.CameraType.Scriptable
+	local view = CFrame.lookAt(Vector3.new(0, 30, z + 70), Vector3.new(0, 9, z))
+	local out = TweenService:Create(camera, TweenInfo.new(FLY_TIME, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { CFrame = view })
+	out:Play()
+	out.Completed:Wait()
+	task.wait(0.5)
+	gate.gui:Destroy()
+	gate.part:Destroy()
+	shatter(i)
+	-- a jolt as it goes
+	local shake = TweenService:Create(camera, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 3, true), { CFrame = view * CFrame.new(0, 0.6, 0) })
+	shake:Play()
+	task.wait(SHARD_TIME + 0.3)
+	local back = TweenService:Create(camera, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { CFrame = start })
+	back:Play()
+	back.Completed:Wait()
+	camera.CameraType = Enum.CameraType.Custom
+	controls:Enable()
+end
+
+local bought = {} -- [biome index] = true: break it on camera when PenLevel gets there
+ReplicatedStorage:WaitForChild("ZoneUnlocked").OnClientEvent:Connect(function(i)
+	bought[i] = true
+end)
+
 local function refresh()
 	local level = player:GetAttribute("PenLevel") or 1
 	for i = 2, #Config.Biomes do
 		if i > level and not gates[i] then
 			build(i)
 		elseif i <= level and gates[i] then
-			unlock(i)
+			if bought[i] then
+				bought[i] = nil
+				task.spawn(breakOpen, i)
+			else
+				unlock(i)
+			end
 		end
 	end
 end

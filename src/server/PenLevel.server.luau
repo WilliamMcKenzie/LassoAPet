@@ -161,6 +161,12 @@ end)
 local upgrade = Instance.new("RemoteFunction")
 upgrade.Name = "UpgradePen"
 upgrade.Parent = ReplicatedStorage
+-- Tells the buyer which biome they just opened, ahead of PenLevel changing, so
+-- its gate breaks open on camera (Gate.client) instead of quietly fading as it
+-- does when your saved level loads.
+local zoneUnlocked = Instance.new("RemoteEvent")
+zoneUnlocked.Name = "ZoneUnlocked"
+zoneUnlocked.Parent = ReplicatedStorage
 
 -- Returns true if the upgrade went through.
 upgrade.OnServerInvoke = function(player)
@@ -171,6 +177,7 @@ upgrade.OnServerInvoke = function(player)
 		return false
 	end
 	player:SetAttribute("Gold", gold - cost)
+	zoneUnlocked:FireClient(player, level(player) + 1)
 	player:SetAttribute("PenLevel", level(player) + 1)
 	return true
 end
