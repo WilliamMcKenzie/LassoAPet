@@ -582,10 +582,9 @@ ReplicatedStorage:WaitForChild("PetIncome").OnClientEvent:Connect(function()
 			then player:GetAttribute("RidePet") or Config.DefaultPet
 			else PenPets.pets[model] and PenPets.pets[model].kind
 		local earned = kind and Config.PetIncome[kind]
-		if earned and earned > 0 then
-			local middle, size = model:GetBoundingBox()
-			local root = model.PrimaryPart
-			Hud.coinPopupAt(root, middle.Position.Y - root.Position.Y + size.Y / 2 + 1, earned)
+		if earned and earned > 0 and model.PrimaryPart then
+			local box, size = Outline.box(model)
+			Hud.coinPopupAt(model.PrimaryPart, box.Y + size.Y / 2 + 1, earned)
 		end
 	end
 end)
@@ -607,13 +606,18 @@ end
 -- Flat distance from `at` to the edge of the pet (roughly), so big pets count as near.
 local function petDistance(model, at)
 	-- A pet's box is slow to measure (every block), and this runs for every pet every
-	-- frame at home: one well out of reach is measured from its root instead.
+	-- frame at home: one well out of reach is measured from its root instead, and
+	-- the rest use the box measured once (Outline.box).
 	local root = model.PrimaryPart
-	local far = root and Vector2.new(root.Position.X - at.X, root.Position.Z - at.Z).Magnitude
-	if far and far > 100 then
+	if not root then
+		return math.huge, math.huge
+	end
+	local far = Vector2.new(root.Position.X - at.X, root.Position.Z - at.Z).Magnitude
+	if far > 100 then
 		return far - 50, far
 	end
-	local middle, size = model:GetBoundingBox()
+	local box, size = Outline.box(model)
+	local middle = root.CFrame:PointToWorldSpace(box.Position)
 	local d = Vector2.new(middle.X - at.X, middle.Z - at.Z).Magnitude
 	return d - math.max(size.X, size.Z) / 2, d
 end
@@ -648,9 +652,7 @@ local function updateRideTarget()
 	if target ~= rideModel then
 		rideModel = target
 		if target then
-			local middle, size = target:GetBoundingBox()
-			rideOffset = target.PrimaryPart.CFrame:ToObjectSpace(middle)
-			rideSize = size
+			rideOffset, rideSize = Outline.box(target)
 			rideSpot.Parent = workspace.Terrain
 		else
 			rideSpot.Parent = nil
@@ -2174,11 +2176,15 @@ RunService.PreSimulation:Connect(function(dt)
 		heroLeap.t = math.min(heroLeap.t + dt / Config.HomeHeroTime, 1)
 	end
 	dt *= timeScale
-	-- The waiting eggs twitch now and then: something's alive in there.
-	for _, waiting in waitingEggs do
+	-- The waiting eggs twitch now and then: something's alive in there (only
+	-- the ones near enough to see).
+	local camPos = camera.CFrame.Position
+	for nest, waiting in waitingEggs do
 		if waiting.egg.model.Parent then
 			waiting.nextTwitch -= dt
-			if waiting.nextTwitch <= 0 then
+			if waiting.nextTwitch <= 0 and (nest.EggSpot.Position - camPos).Magnitude > VIEW then
+				waiting.nextTwitch = rng:NextNumber(EGG_TWITCH_EVERY[1], EGG_TWITCH_EVERY[2])
+			elseif waiting.nextTwitch <= 0 then
 				waiting.egg:play("twitch")
 				waiting.nextTwitch = rng:NextNumber(EGG_TWITCH_EVERY[1], EGG_TWITCH_EVERY[2])
 			end
@@ -2284,7 +2290,11 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 	end
 	actionTarget = findTarget()
-	Outline.set(if actionTarget == "egg" then nearEgg.egg.model elseif actionTarget then actionTarget.animal.model else nil)
+	if actionTarget == "egg" then
+		Outline.set(nearEgg.egg.model, Outline.NEST)
+	else
+		Outline.set(if actionTarget then actionTarget.animal.model else nil)
+	end
 	updateHud()
 end)
 
