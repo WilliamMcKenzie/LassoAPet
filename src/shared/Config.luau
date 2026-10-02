@@ -82,7 +82,7 @@ return {
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			Herd = { Fish = 30, Squid = 8, Kraken = 3 },
+			Herd = { Fish = 30, Whale = 16, Squid = 8, Kraken = 3 },
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -229,6 +229,7 @@ return {
 		Icebringer = 3,
 		Kraken = 3,
 		Squid = 2,
+		Whale = 4, -- XL (QM, Oct 2): the first tier past large
 	},
 	-- The riding camera pulls back this much further per tier above small: 1x on a
 	-- small pet, 1.2x on a medium, 1.44x on a large (QM, Oct 2).
@@ -265,6 +266,7 @@ return {
 		Icebringer = 4800,
 		Kraken = 24000,
 		Squid = 1200,
+		Whale = 300,
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -276,7 +278,7 @@ return {
 		Position = Vector3.new(-28, 0, 30), -- on the grass between Pen1 and Pen2's ride lanes
 		Odds = { Rare = 50, Epic = 32, Legendary = 15, Exclusive = 3 },
 		Pool = {
-			Rare = { Fish = 1, Scorpion = 1, Snowman = 1 },
+			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
@@ -311,6 +313,7 @@ return {
 		Icebringer = "rbxassetid://108999142038756",
 		Kraken = "rbxassetid://104654341782924", -- assets/ui/KrakenEggRender.png
 		Squid = "rbxassetid://128883182267763", -- assets/ui/SquidEggRender.png
+		Whale = "", -- assets/ui/WhaleEggRender.png: upload pending
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
@@ -378,6 +381,7 @@ return {
 		Icebringer = { Speed = 2.7, Stamina = 3 },
 		Kraken = { Speed = 4, Stamina = 3.5 }, -- 4x (QM, Oct 2)
 		Squid = { Speed = 2.6, Stamina = 2.6 },
+		Whale = { Speed = 1.2, Stamina = 5 }, -- QM, Oct 2
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).

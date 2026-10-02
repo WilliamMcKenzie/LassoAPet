@@ -4,6 +4,10 @@ tapering tail. QM: blue/cyan instead of the reference's purple and gold.
 
 Run: python3 tools/whale_design.py [out_dir]
 
+Superseded (Oct 2): designs/ocean/Whale.bbmodel is now QM's own edit of this draft
+(no jaw, fewer glyphs; QM's animations). Don't rerun this script: it would overwrite
+QM's file.
+
 Rest pose (every bone at 0): level, belly down, facing -z, every cube
 axis-aligned. Bones: root (the body, where you sit) -> neck (the head; the
 lasso loops round it) -> Jaw; root -> FinL / FinR; root -> Tail1 -> Tail2 ->
