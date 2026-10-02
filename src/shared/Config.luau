@@ -376,7 +376,7 @@ return {
 		IceGolem = { Speed = 1.6, Stamina = 2.6 },
 		IceDrake = { Speed = 2.8, Stamina = 3 },
 		Icebringer = { Speed = 2.7, Stamina = 3 },
-		Kraken = { Speed = 3, Stamina = 3.5 },
+		Kraken = { Speed = 4, Stamina = 3.5 }, -- 4x (QM, Oct 2)
 		Squid = { Speed = 2.6, Stamina = 2.6 },
 	},
 
