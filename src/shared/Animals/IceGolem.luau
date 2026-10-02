@@ -1,7 +1,8 @@
 -- IceGolem: a knuckle-walking ice golem with ice crystals growing out of its back. Epic.
--- Converted from QM's old Blockbench model by tools/convert_designs.py (the pose is in its bones'
--- rest rotations), animated by tools/convert_rig.py and converted into IceGolemModel.luau by
--- tools/bbmodel_to_luau.py from designs/converted/IceGolem.bbmodel. You ride on its snowy shoulders, in front of the crystals.
+-- First converted from QM's old Blockbench model by tools/convert_designs.py and animated by
+-- tools/convert_rig.py; since Oct 2 designs/converted/IceGolem.bbmodel is QM's own edit (three
+-- eyes, no fingers, QM's animations), converted into IceGolemModel.luau with
+-- `tools/bbmodel_to_luau.py --zyx`. Don't rerun convert_designs/convert_rig on it. You ride on its snowy shoulders, in front of the crystals.
 
 local Horse = require(script.Parent.Horse)
 local IceGolemModel = require(script.Parent.IceGolemModel)
