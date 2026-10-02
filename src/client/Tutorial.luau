@@ -6,7 +6,10 @@
 --
 --   1. place "Place your egg in your pen!"  only the inventory, holding your first
 --                                            egg; arrows to the pen. It hatches at
---                                            once (Config.TutorialHatchTime)
+--                                            once (Config.TutorialHatchTime). Until
+--                                            the egg's in hand the hint is QM's
+--                                            "Click on the egg" picture, with a
+--                                            cursor on its square (both throb)
 --   2. ride  "Ride your Horse!"              arrows to it
 --   3. lasso "Press E to LASSO a new ride!"  time slows while an animal is in reach
 --   4. egg   "Follow the arrows..."          the egg guide; the first Meadow nest
@@ -36,6 +39,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
+local Inventory = require(script.Parent.Inventory)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -53,6 +57,10 @@ local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banne
 local MONEY_WAIT = 2 -- seconds of Gold ticking up before the close-up on Upgrade Pen
 local FOCUS_HOLD = 2 -- seconds the close-up on Upgrade Pen holds
 local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
+local CLICK_EGG_Y = 0.09 -- "Click on the egg": its middle, a share of the screen height (QM's layout)
+local CLICK_EGG_WIDTH = 0.31 -- its width, a share of the screen width
+local THROB = 0.1 -- the picture and cursor throb between 1 - THROB and 1 + THROB times their size
+local THROB_TIME = 1 -- seconds per throb
 local RIDE_STEPS = { lasso = true, egg = true, take = true, home = true }
 local PLACE_STEPS = { place = true, place2 = true }
 
@@ -114,7 +122,72 @@ local function resize()
 end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
 resize()
+
+-- Step 1's hint, a picture instead of text, and a cursor over the egg's square
+-- in the inventory: its tip (CURSOR_TIP, on the 256px picture) on the square at CURSOR_AT,
+-- CURSOR_SIZE times the square's size.
+local clickEgg = Instance.new("ImageLabel")
+clickEgg.Name = "ClickEgg"
+clickEgg.BackgroundTransparency = 1
+clickEgg.Image = "rbxassetid://93909017403661" -- assets/ui/HintClickEgg.png
+clickEgg.AnchorPoint = Vector2.new(0.5, 0.5)
+clickEgg.Position = UDim2.fromScale(0.5, CLICK_EGG_Y)
+clickEgg.Visible = false
+local function sizeClickEgg()
+	local width = camera.ViewportSize.X * CLICK_EGG_WIDTH
+	clickEgg.Size = UDim2.fromOffset(width, width * 145 / 935) -- the picture is 935 x 145
+end
+camera:GetPropertyChangedSignal("ViewportSize"):Connect(sizeClickEgg)
+sizeClickEgg()
+local clickScale = Instance.new("UIScale")
+clickScale.Parent = clickEgg
+clickEgg.Parent = gui
+local CURSOR_TIP = Vector2.new(29 / 256, 6 / 256)
+local CURSOR_AT = Vector2.new(0.64, 0.55)
+local CURSOR_SIZE = 0.63
+local cursor = Instance.new("ImageLabel")
+cursor.Name = "Cursor"
+cursor.BackgroundTransparency = 1
+cursor.Image = "rbxassetid://93240211999923" -- assets/ui/TutorialCursor.png
+cursor.AnchorPoint = CURSOR_TIP -- so it throbs about its tip
+cursor.Visible = false
+local cursorScale = Instance.new("UIScale")
+cursorScale.Parent = cursor
+cursor.Parent = gui
 gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Your first egg's tool, while it's in the backpack and not in your hand.
+local function eggToClick()
+	local char = player.Character
+	if not char or char:FindFirstChildOfClass("Tool") then
+		return nil
+	end
+	local backpack = player:FindFirstChildOfClass("Backpack")
+	for _, tool in backpack and backpack:GetChildren() or {} do
+		if tool:IsA("Tool") and tool:GetAttribute("EggKind") then
+			return tool
+		end
+	end
+	return nil
+end
+
+-- Shows "Click on the egg" and the cursor over `tool`'s square, or hides them (nil).
+local function showClickEgg(tool)
+	local slot = tool and Inventory.slot(tool.Name)
+	clickEgg.Visible = tool ~= nil
+	cursor.Visible = slot ~= nil
+	if not tool then
+		return
+	end
+	local throb = 1 + THROB * math.sin(os.clock() * 2 * math.pi / THROB_TIME)
+	clickScale.Scale = throb
+	cursorScale.Scale = throb
+	if slot then
+		local at, size = slot.AbsolutePosition - gui.AbsolutePosition, slot.AbsoluteSize -- (gui's is above 0 by the top bar)
+		cursor.Position = UDim2.fromOffset(at.X + CURSOR_AT.X * size.X, at.Y + CURSOR_AT.Y * size.Y)
+		cursor.Size = UDim2.fromOffset(CURSOR_SIZE * size.X, CURSOR_SIZE * size.X)
+	end
+end
 
 local shown = "" -- the hint's text when it's showing
 local pop -- the pop-in tween
@@ -299,6 +372,7 @@ function Tutorial.update(state)
 	if not Tutorial.active then
 		Tutorial.slowMo = nil
 		setHint(nil)
+		showClickEgg(nil)
 		beam.Enabled = false
 		lastPhase = phase
 		return
@@ -342,7 +416,9 @@ function Tutorial.update(state)
 		or (step == "take" and state.target == "egg")
 	Tutorial.slowMo = if slow and phase == "outbound" then Config.TutorialSlowMo else nil
 
-	setHint(if state.cutscene then nil else hintFor(state))
+	local clickTool = if step == "place" and phase == "idle" and not state.cutscene then eggToClick() else nil
+	showClickEgg(clickTool)
+	setHint(if state.cutscene or clickTool then nil else hintFor(state))
 	hint.Position = UDim2.fromScale(0.5, if phase == "ended" then FAIL_HINT_Y else HINT_Y) -- over CRASH! / BUCKED OFF
 
 	local target

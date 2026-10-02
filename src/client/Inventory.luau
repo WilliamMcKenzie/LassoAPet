@@ -121,6 +121,7 @@ local function redraw()
 		slot.BackgroundColor3 = Color3.fromRGB(20, 30, 20)
 		slot.BackgroundTransparency = 0.45
 		slot.LayoutOrder = i
+		slot.Name = tool.Name
 		Instance.new("UICorner", slot).CornerRadius = UDim.new(52 / 256, 0) -- the corners of QM's slot pictures (52px on 256)
 		local rarity = rarityOf(tool)
 		if rarity and rarity.image ~= "" then
@@ -239,6 +240,12 @@ function Inventory.init(parent)
 			toggle(tools[i])
 		end
 	end)
+end
+
+-- The square showing the tool called `name`, while the bar is up (the tutorial
+-- points at it).
+function Inventory.slot(name)
+	return bar and bar.Visible and bar:FindFirstChild(name) or nil
 end
 
 function Inventory.setVisible(visible)
