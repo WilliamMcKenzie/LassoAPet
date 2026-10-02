@@ -81,8 +81,8 @@ return {
 			Length = 13680, -- 2x the snow (QM)
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
-			-- Placeholder until the ocean animals are designed: the Fish swims here.
-			Herd = { Fish = 30 },
+			-- The Fish is a placeholder until the rest of the ocean animals are designed.
+			Herd = { Fish = 30, Kraken = 3 },
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -174,6 +174,7 @@ return {
 		Penguin = 1, Snowman = 1, PolarBear = 2, IceWyvern = 3,
 		SpineLizard = 2, Boar = 1, WhiteWolf = 1, Troll = 2, IceGolem = 2, IceDrake = 3,
 		Icebringer = 3,
+		Kraken = 3,
 	},
 	-- The riding camera pulls back this much further per tier above small: 1x on a
 	-- small pet, 1.2x on a medium, 1.44x on a large (QM, Oct 2).
@@ -207,6 +208,7 @@ return {
 		Penguin = 25, Snowman = 60, PolarBear = 250, IceWyvern = 5000,
 		SpineLizard = 80, Boar = 30, WhiteWolf = 70, Troll = 280, IceGolem = 260, IceDrake = 4500,
 		Icebringer = 4800,
+		Kraken = 24000,
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -220,7 +222,7 @@ return {
 		Pool = {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1 },
-			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1 },
+			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
 			-- with an empty pool is never rolled.
 			Exclusive = {},
@@ -316,6 +318,7 @@ return {
 		IceGolem = { Speed = 1.6, Stamina = 2.6 },
 		IceDrake = { Speed = 2.8, Stamina = 3 },
 		Icebringer = { Speed = 2.7, Stamina = 3 },
+		Kraken = { Speed = 3, Stamina = 3.5 },
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).

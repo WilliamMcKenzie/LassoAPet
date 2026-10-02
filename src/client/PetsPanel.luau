@@ -44,6 +44,7 @@ local HEADSHOTS = {
 	IceGolem = "rbxassetid://111385178023948", -- PetIceGolem.png
 	IceDrake = "rbxassetid://72747878519742", -- PetIceDrake.png
 	Icebringer = "rbxassetid://84670113231117", -- PetIcebringer.png
+	Kraken = "", -- PetKraken.png: upload pending
 }
 local TRASH = "rbxassetid://74308771924477" -- assets/ui/Trash.png (QM's trash can)
 local COIN = "rbxassetid://99312860837685"
