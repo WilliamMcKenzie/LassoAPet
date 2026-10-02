@@ -1,27 +1,70 @@
--- The outline on whatever the lasso would catch (an animal or the egg): a thin
--- white line hugging the target, drawn by a Highlight.
+-- The marker on whatever the lasso would catch (an animal or the egg) or RIDE
+-- would ride: a thin white ring on the ground round it.
 --
---   Outline.set(model) -- outline this model; nil clears it
+-- (It used to be a Highlight outline. Moving a Highlight onto another model makes
+-- the engine redraw that whole model, studs and all, which hitched hard on phones:
+-- sprinting past the herd moved it several times a second. The ring is a handle
+-- adornment, drawn on its own, so moving it costs nothing.)
+--
+--   Outline.set(model, fit) -- mark this model; nil clears it. fit (optional):
+--                           -- { lift, radius } overrides, e.g. Outline.NEST
+--   Outline.box(model) -- its bounding box as (CFrame from its root, size), measured once
 
-local highlight = Instance.new("Highlight")
-highlight.FillTransparency = 1
-highlight.OutlineColor = Color3.new(1, 1, 1)
-highlight.OutlineTransparency = 0
-highlight.DepthMode = Enum.HighlightDepthMode.Occluded
-highlight.Enabled = false
-highlight.Parent = workspace
+local COLOR = Color3.new(1, 1, 1)
+local LIFT = 0.15 -- studs above the model's root (animals' and eggs' roots are at their feet)
+
+local ring = Instance.new("CylinderHandleAdornment")
+ring.Name = "TargetRing"
+ring.Color3 = COLOR
+ring.Transparency = 0.1
+ring.Height = 0.1
+ring.AlwaysOnTop = false
+ring.Visible = false
+ring.Parent = workspace
+
+-- [model] = { scale, box, size }: a model's bounding box from its root, measured
+-- once (measuring walks every block, too slow to do every frame for every pet)
+-- and again only if the model is rescaled. Animation moves the real box a little.
+local boxes = setmetatable({}, { __mode = "k" })
 
 local target
 
 local Outline = {}
 
-function Outline.set(model)
+-- A nest egg's ring sits on the nest's rim (its top is ~1 stud above the egg's
+-- base) and round the whole nest (~7 studs across), or it'd be hidden in the bowl.
+Outline.NEST = { lift = 1.1, radius = 4.2 }
+
+function Outline.box(model)
+	local scale = model:GetScale()
+	local cached = boxes[model]
+	if not cached or cached.scale ~= scale then
+		local box, size = model:GetBoundingBox()
+		cached = { scale = scale, box = model.PrimaryPart.CFrame:ToObjectSpace(box), size = size }
+		boxes[model] = cached
+	end
+	return cached.box, cached.size
+end
+
+function Outline.set(model, fit)
 	if model == target then
 		return
 	end
 	target = model
-	highlight.Adornee = model
-	highlight.Enabled = model ~= nil
+	local root = model and model.PrimaryPart
+	if not root then
+		ring.Visible = false
+		ring.Adornee = nil
+		return
+	end
+	local box, size = Outline.box(model)
+	local radius = math.max(0.5 * math.max(size.X, size.Z) * 0.75 + 1, fit and fit.radius or 0)
+	ring.Radius = radius
+	ring.InnerRadius = radius - math.clamp(radius * 0.12, 0.5, 2)
+	-- (A cylinder adornment runs along its Z axis: turned to lie flat.)
+	ring.CFrame = CFrame.new(box.X, fit and fit.lift or LIFT, box.Z) * CFrame.Angles(math.pi / 2, 0, 0)
+	ring.Adornee = root
+	ring.Visible = true
 end
 
 return Outline

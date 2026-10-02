@@ -34,6 +34,9 @@ local TWITCH_EVERY = { 3, 6 }
 local SPACING = 4.5
 local EDGE = 2
 local WANDER_SPEED = 6 -- studs/s, a walk (same as the pet you ride, in Ride.client)
+-- Pens further than this from the camera aren't animated (out on a ride, say):
+-- their pets and eggs stand still until you're back, then carry on.
+local FAR = 300
 local rng = Random.new()
 
 local folder = Instance.new("Folder")
@@ -316,7 +319,11 @@ end
 
 RunService.RenderStepped:Connect(function(dt)
 	local now = workspace:GetServerTimeNow()
+	local camPos = workspace.CurrentCamera.CFrame.Position
 	for pen, list in shown do
+		if (pen.Area.Position - camPos).Magnitude > FAR then
+			continue
+		end
 		for _, s in list do
 			if s.egg then
 				if not s.hatching then
@@ -408,16 +415,28 @@ end
 
 -- A click or tap on your pen while holding an egg puts it down there. (Read
 -- straight from the input, not the Tool's Activated, which some clicks never fire.)
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed or not holding or holding.Parent ~= player.Character then
+local function placeAt(screenX, screenY)
+	if not holding or holding.Parent ~= player.Character then
 		return
 	end
-	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
-		return
-	end
-	local x, z = spotAt(input.Position.X, input.Position.Y)
+	local x, z = spotAt(screenX, screenY)
 	if x then
 		placeEgg:FireServer(holding:GetAttribute("EggKind"), x, z)
+	end
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+	if not processed and input.UserInputType == Enum.UserInputType.MouseButton1 then
+		placeAt(input.Position.X, input.Position.Y)
+	end
+end)
+
+-- Taps on phones and tablets. With a tool out, a tap on the world can reach
+-- InputBegan already marked processed (the engine uses it to activate the tool),
+-- and placing never worked on mobile. TouchTapInWorld only flags taps on the UI.
+UserInputService.TouchTapInWorld:Connect(function(position, processedByUI)
+	if not processedByUI then
+		placeAt(position.X, position.Y)
 	end
 end)
 
