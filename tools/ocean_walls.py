@@ -2,10 +2,11 @@
 
 Run once: python3 tools/ocean_walls.py
 Copies the desert's wall and cap parts (World.Walls) for each ocean segment.
-Segments are under Roblox's 2048-stud part limit (8 per side, about 1710 each),
-with their ends on the 8-stud grid so the checker lines up (tools/check_walls.py).
-The far wall goes to the new course end. Run again, it moves the ocean segments
-already in the map onto the current bounds.
+Segments are one depth band long (ocean_ground.BAND, 240 studs, 57 per side) so
+WorldColors can paint each one darker the further along it is (QM, Oct 2), with
+their ends on the 8-stud grid so the checker lines up (tools/check_walls.py).
+The far wall goes to the new course end. Run again, it replaces the ocean
+segments already in the map.
 """
 
 import os
@@ -15,7 +16,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from desert_ground import WORLD, item_span  # noqa: E402
 
-Z0, LENGTH, SEGMENTS = -9880, 13680, 8
+Z0, LENGTH, SEGMENTS = -9880, 13680, 13680 // 240
 END = Z0 - LENGTH
 WALL = {-1: "RBXD86D2024CE624C54A839341A912CBAF4", 1: "RBX4834AEC1E5A1412D9DEF9C9BF7AAC73C"}
 CAP = {-1: "RBX055398A22F8846D291BC67B3CDF3F12F", 1: "RBX070AB57E0A1F47C99DEE17B9BF361584"}
@@ -51,22 +52,19 @@ def layout():
     return out
 
 
-def fix(s):
-    """Move the ocean parts already in the map onto layout()."""
-    refs = re.findall(r'<Item class="Part" referent="(OWAL\d+)"', s)
-    assert len(refs) == 4 * SEGMENTS, refs
-    for ref, (size, pos) in zip(refs, layout()):
-        a, b = item(s, ref)
-        s = s[:a] + resize(s[a:b], size, pos) + s[b:]
-    return s
+def strip(s):
+    """Take out the ocean wall parts already in the map."""
+    while True:
+        m = re.search(r'\n?<Item class="Part" referent="OWAL\d+"', s)
+        if not m:
+            return s
+        st = m.start() + (1 if s[m.start()] == "\n" else 0)
+        s = s[:m.start()] + s[item_span(s, st):]
 
 
 def main():
     s = open(WORLD).read()
-    if "OWAL" in s:
-        open(WORLD, "w").write(fix(s))
-        print("moved the ocean walls onto", bounds())
-        return
+    s = strip(s)
     new = []
     n = 0
     shapes = iter(layout())

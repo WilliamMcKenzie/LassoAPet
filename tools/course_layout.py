@@ -75,6 +75,8 @@ ASSETS = {
     "BranchCoral": (4.0, "medium", TA.branch_coral),
     "FanCoral": (3.8, "medium", TA.fan_coral),
     "ReefRock": (9.0, "large", TA.reef_rock),
+    "BasaltRock": (5.0, "medium", TA.basalt_rock),
+    "Vent": (6.0, "large", TA.vent),
 }
 # the medium a cluster mixes in now and then, so it isn't all rubble
 ACCENT = {"Desert": "Cactus", "Snow": "Pine", "Ocean": "FanCoral"}
@@ -92,7 +94,7 @@ REACH = {"Desert": 18, "Snow": 22, "Ocean": 26}
 # the size they end up as
 SCALE = {"Boulder": 0.83, "BoulderSplit": 0.96, "Cactus": 0.97, "SandBoulder": 0.88, "SandBoulderCarved": 0.93,
          "SandMound": 0.58, "Pine": 0.78, "IcicleLarge": 0.83, "IceBoulder": 0.85,
-         "BranchCoral": 1.27, "FanCoral": 1.1, "ReefRock": 0.83}
+         "BranchCoral": 1.27, "FanCoral": 1.1, "ReefRock": 0.83, "BasaltRock": 0.89, "Vent": 1.31}
 
 
 def eff(asset):
@@ -111,7 +113,7 @@ class Course:
 
     def patch(self, x, z):
         """Desert: 0 sand, 1 dry grass, 2 sandstone. Meadow: 0 grass, 3 dirt.
-        Snow: 4 snow, 5 cold grass, 6 ice. Ocean: 7 sand, 8 seagrass, 9 trench."""
+        Snow: 4 snow, 5 cold grass, 6 ice. Ocean: 7 sand, 8 seagrass, 9 trench, 10 lava."""
         i = int((x + DG.HALF_W) // DG.CELL)
         if z <= OG.Z_START:
             j = int((OG.Z_START - z) // OG.CELL)
@@ -135,7 +137,7 @@ class Course:
 
     def floor(self, x, z):
         """Floor height, as Shared/Ground reports it: sandstone and cold grass +1, dirt and ice -1."""
-        return {2: 1.0, 3: -1.0, 5: 1.0, 6: -1.0, 8: 1.0, 9: -1.0}.get(self.patch(x, z), 0.0)
+        return {2: 1.0, 3: -1.0, 5: 1.0, 6: -1.0, 8: 1.0, 9: -1.0, 10: -1.0}.get(self.patch(x, z), 0.0)
 
     def fits(self, asset, x, z, biome):
         r = ASSETS[asset][0]
@@ -169,6 +171,16 @@ class Course:
                 return True
         return False
 
+    def deep(self, z):
+        """How far into the volcanic deep z is (QM, Oct 2): 0 until halfway along
+        the ocean, 1 from 70% on. Basalt rocks and vents take over from coral."""
+        return min(max(((OG.Z_START - z) / OG.OCEAN_LENGTH - 0.5) / 0.2, 0.0), 1.0)
+
+    def pick_large(self, biome, z):
+        if biome["name"] == "Ocean" and self.deep(z) > 0 and self.rng.random() < self.deep(z):
+            return "Vent"
+        return biome["large"][0]
+
     def pick_small(self, biome, x, z):
         return self.rng.choice(biome["small"])
 
@@ -183,6 +195,8 @@ class Course:
             if self.patch(x, z) == 5:
                 return "Pine"
             return self.rng.choice(["Pine", "IcicleLarge"], p=[0.4, 0.6])
+        if biome["name"] == "Ocean" and self.deep(z) > 0 and self.rng.random() < self.deep(z):
+            return "BasaltRock"
         return self.rng.choice(biome["medium"])
 
     def clump(self, biome, x, z, n):
@@ -366,7 +380,7 @@ class Course:
         for b in range(n):
             mid = biome["z0"] - ENTRY - b * BEAT - BEAT / 2 + rng.uniform(-10, 10)
             busy = b / max(1, n - 1)
-            anchor = biome["large"][0] if b % 4 == 3 else self.pick_medium(biome, side * 48, mid)
+            anchor = self.pick_large(biome, mid) if b % 4 == 3 else self.pick_medium(biome, side * 48, mid)
             knot(side, mid, anchor, 3 + (1 if busy > 0.5 else 0))
             if busy > 0.4 and rng.random() < 0.5:
                 z = mid - BEAT / 2
@@ -403,6 +417,7 @@ ICON = {
     "TubeCoral": ((156, 86, 230), "square"), "BrainCoral": ((255, 140, 48), "circle"),
     "BranchCoral": ((255, 92, 150), "plus"), "FanCoral": ((255, 214, 60), "diamond"),
     "ReefRock": ((236, 140, 124), "circle"),
+    "BasaltRock": ((76, 74, 90), "square"), "Vent": ((255, 110, 20), "circle"),
 }
 
 
@@ -440,7 +455,7 @@ def plan(course, items, path, s=2.0, only=None):
                 elif b["name"] == "Snow":
                     c = (SG.SNOW, SG.GRASS, SG.ICE)[k - 4][chk]
                 elif b["name"] == "Ocean":
-                    c = (OG.SAND, OG.GRASS, OG.TRENCH)[k - 7][chk]
+                    c = OG.colors_at(k - 7, z)[chk]
                 else:
                     c = MG.DIRT[chk] if k == 3 else MEADOW[chk]
                 x0, y0 = to_px(x - 2, z + 2)
@@ -508,6 +523,15 @@ def plan(course, items, path, s=2.0, only=None):
     im.save(path)
 
 
+def tint(it, p):
+    """A part's colour where it's placed: ocean coral loses its colour the deeper it
+    is, toward the basalt (QM, Oct 2). Lava (Neon) keeps its glow."""
+    if it["biome"] != "Ocean" or p.name == "Lava":
+        return p.color
+    fade = min(max(((OG.Z_START - it["z"]) / OG.OCEAN_LENGTH - 0.3) / 0.5, 0.0), 1.0)
+    return tuple(round(c + (b - c) * fade) for c, b in zip(p.color, TA.BASALT_L))
+
+
 def placed_parts(items, z_lo, z_hi):
     parts = []
     for it in items:
@@ -517,7 +541,7 @@ def placed_parts(items, z_lo, z_hi):
         ASSETS[it["asset"]][2](k)
         M = T(it["x"], it["y"], it["z"]) @ Ry(it["yaw"])
         for p in k.parts:
-            q = Part(p.name, p.size, M @ p.cf, p.color, p.shape, p.plain)
+            q = Part(p.name, p.size, M @ p.cf, tint(it, p), p.shape, p.plain)
             if hasattr(p, "polys"):
                 q.polys = [(M @ np.c_[poly, np.ones(len(poly))].T).T[:, :3] for poly in p.polys]
             parts.append(q)
@@ -532,11 +556,11 @@ def ride_view(course, items, z_hi, desert, path):
             x, z = -HALF_W + xi * 4 + 2, z_hi - zi * 4 - 2
             k = course.patch(x, z)
             top = course.floor(x, z)
-            c = (DG.SAND, DG.GRASS, DG.STONE, MG.DIRT, SG.SNOW, SG.GRASS, SG.ICE,
-                 OG.SAND, OG.GRASS, OG.TRENCH)[k] if desert or k else MEADOW
+            c = OG.colors_at(k - 7, z) if k >= 7 else (DG.SAND, DG.GRASS, DG.STONE, MG.DIRT, SG.SNOW, SG.GRASS,
+                                                       SG.ICE)[k] if desert or k else MEADOW
             parts.append(Part("Floor", (4, top + 2, 4), T(x, (top - 2) / 2, z), c[(xi + zi) % 2]))
     for side in (-1, 1):
-        wall = OG.WALL if z_hi <= OG.Z_START else SG.WALL if z_hi <= SG.Z_START else DG.WALL if desert else [(225, 150, 104), (248, 170, 114)]
+        wall = OG.colors_at(4, z_hi) if z_hi <= OG.Z_START else SG.WALL if z_hi <= SG.Z_START else DG.WALL if desert else [(225, 150, 104), (248, 170, 114)]
         for zi in range(int((z_hi - z_lo) // 4)):
             for yi in range(4):
                 parts.append(Part("Wall", (4, 4, 4), T(side * (HALF_W + 2), yi * 4 + 2, z_hi - zi * 4 - 2),
@@ -556,7 +580,7 @@ FACE_AXES = {0: (1, 2), 1: (0, 2), 2: (0, 1), 3: (1, 2), 5: (0, 1)}  # the size 
 MIN_STUD_FACE = 0.75  # thinner faces show no studs anyway, so they get no decal (keeps the map light)
 
 
-def part_xml(ref, p):
+def part_xml(ref, p, material=272):
     R, (x, y, z) = p.cf[:3, :3], p.cf[:3, 3]
     cf = f"<X>{x:.4f}</X><Y>{y:.4f}</Y><Z>{z:.4f}</Z>" + "".join(
         f"<R{i}{j}>{R[i, j]:.6f}</R{i}{j}>" for i in range(3) for j in range(3))
@@ -565,7 +589,7 @@ def part_xml(ref, p):
            '<bool name="Anchored">true</bool>',
            '<bool name="CanCollide">false</bool>',
            '<bool name="CanTouch">false</bool>',
-           '<token name="Material">272</token>',
+           f'<token name="Material">{material}</token>',
            f'<Vector3 name="size"><X>{p.size[0]:.4f}</X><Y>{p.size[1]:.4f}</Y><Z>{p.size[2]:.4f}</Z></Vector3>',
            f'<Color3uint8 name="Color3uint8">{partlib._xml_color(p.color)}</Color3uint8>']
     out += [f'<token name="{f}Surface">0</token>' for f in ("Top", "Bottom", "Front", "Back", "Left", "Right")]
@@ -599,7 +623,8 @@ def write_obstacles(items):
         k = TA.Kit()
         ASSETS[it["asset"]][2](k)
         M = T(it["x"], it["y"], it["z"]) @ Ry(it["yaw"])
-        body = [part_xml(ref, Part(p.name, p.size, M @ p.cf, p.color, p.shape, p.plain)) for p in k.parts]
+        body = [part_xml(ref, Part(p.name, p.size, M @ p.cf, tint(it, p), p.shape, p.plain),
+                         288 if p.name == "Lava" else 272) for p in k.parts]
         # Ride takes an obstacle's footprint from its lowest part, so each model gets
         # an invisible Base just under the floor, the size of what you'd hit.
         side = ASSETS[it["asset"]][0] * 1.6
