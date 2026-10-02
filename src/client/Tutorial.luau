@@ -298,14 +298,15 @@ local function contents()
 	return if ok and typeof(items) == "table" then items else {}
 end
 
--- Your pet to ride: the one waiting in the pen (Ride's starter), else the first
--- egg's pet where it hatched.
+-- Your pet to ride: the one waiting in the pen (Ride's starter), else where the
+-- tutorial egg's pet (a Config.DefaultPet) hatched. Other pets in the pen (from
+-- /give) don't count, so they don't skip step 1 or take over "Ride your horse!".
 local function myPet(state)
 	if state.pet then
 		return state.pet, player:GetAttribute("RidePet")
 	end
 	for model, info in PenPets.pets do
-		if model.Parent then
+		if model.Parent and info.kind == Config.DefaultPet then
 			return model, info.kind
 		end
 	end
@@ -429,7 +430,7 @@ function Tutorial.update(state)
 	end
 	lastPhase = phase
 
-	if step == "place" and ((player:GetAttribute("RidePet") or "") ~= "" or next(PenPets.pets) ~= nil) then
+	if step == "place" and ((player:GetAttribute("RidePet") or "") ~= "" or myPet({}) ~= nil) then
 		setStep("ride") -- it's hatched (or there was a pet already)
 	elseif step == "place2" then
 		for id in contents() do
