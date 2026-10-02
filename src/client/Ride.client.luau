@@ -1522,13 +1522,16 @@ vfx.SHARD_TEXTURE = "rbxassetid://7216979807"
 vfx.WIND_SHEETS = 6 -- beams in the cone of air parting round the head
 
 -- Wind breaking round a charging animal's head: a cone of sharp wind sheets
--- sweeping back from its nose, and speed lines streaming past its body.
-local function chargeFx(entity)
+-- sweeping back from its nose, and speed lines streaming past its body. scale
+-- shrinks it all (the Icebringer's sprint uses half: QM).
+local function chargeFx(entity, scale)
+	scale = scale or 1
 	local root = entity.animal.model.PrimaryPart
-	local middle, size = entity.animal.model:GetBoundingBox()
+	local middle, full = entity.animal.model:GetBoundingBox()
+	local size = full * scale
 	local local0 = root.CFrame:ToObjectSpace(middle)
 	-- The nose: the front of the box (the model faces -Z), a little above the middle.
-	local nose = local0.Position + Vector3.new(0, size.Y * 0.1, -size.Z / 2 - 0.5)
+	local nose = local0.Position + Vector3.new(0, full.Y * 0.1, -full.Z / 2 - 0.5)
 	local radius = math.max(size.X, size.Y) * 0.95
 	local length = size.Z * 0.9
 	local fx = {}
@@ -1828,7 +1831,7 @@ function vfx.updateSprint(dt)
 			vfx.burrowDepth = nil
 		end
 		if kind == "Ram" then
-			vfx.sprintFx = chargeFx(mount)
+			vfx.sprintFx = chargeFx(mount, 0.5)
 		elseif kind == "Burrow" then
 			local spray = Instance.new("Part")
 			spray.Anchored, spray.CanCollide, spray.CanQuery, spray.CanTouch = true, false, false, false
