@@ -85,6 +85,7 @@ local IMAGES = {
 	eggKraken = { id = "rbxassetid://104654341782924", size = Vector2.new(696, 785) }, -- KrakenEggRender.png
 	eggSquid = { id = "rbxassetid://128883182267763", size = Vector2.new(696, 785) }, -- SquidEggRender.png
 	eggWhale = { id = "", size = Vector2.new(502, 684) }, -- WhaleEggRender.png: upload pending
+	eggKingCrab = { id = "rbxassetid://136150514529079", size = Vector2.new(660, 668) }, -- KingCrabEggRender.png
 }
 
 -- On a computer (keyboard, no touch screen) the ride buttons show their key:
