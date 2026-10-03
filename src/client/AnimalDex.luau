@@ -20,6 +20,7 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
@@ -129,6 +130,48 @@ local function image(parent, id, size, position, anchor)
 	return i
 end
 
+-- Buttons spring: they swell a little under the mouse, squash when pressed and
+-- bounce back when let go (QM: bouncier buttons).
+local HOVER, PRESS = 1.12, 0.86
+local SPRING = TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+local SQUASH = TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local function bouncy(button)
+	local scale = Instance.new("UIScale")
+	scale.Parent = button
+	local hovered = false
+	local function to(size, info)
+		TweenService:Create(scale, info, { Scale = size }):Play()
+	end
+	button.MouseEnter:Connect(function()
+		hovered = true
+		to(HOVER, SPRING)
+	end)
+	button.MouseLeave:Connect(function()
+		hovered = false
+		to(1, SPRING)
+	end)
+	button.MouseButton1Down:Connect(function()
+		to(PRESS, SQUASH)
+	end)
+	button.MouseButton1Up:Connect(function()
+		to(if hovered then HOVER else 1, SPRING)
+	end)
+	return scale
+end
+
+-- Pops something in: from small, springing up past its size and settling.
+local POP = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+local function popIn(object, delay)
+	local scale = object:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
+	scale.Scale = 0.2
+	scale.Parent = object
+	task.delay(delay or 0, function()
+		if scale.Parent then
+			TweenService:Create(scale, POP, { Scale = 1 }):Play()
+		end
+	end)
+end
+
 local function clear()
 	if animate then
 		animate:Disconnect()
@@ -167,6 +210,8 @@ function showGrid(biome)
 		card.Activated:Connect(function()
 			showAnimal(kind)
 		end)
+		bouncy(card)
+		popIn(card, (i - 1) * 0.04) -- the cards pop in one after another
 		card.Parent = page
 	end
 end
@@ -181,6 +226,8 @@ local function arrow(position, turn, onClick)
 	a.Size = UDim2.fromOffset(140, 140)
 	a.Position = position
 	a.Activated:Connect(onClick)
+	bouncy(a)
+	popIn(a, 0.08)
 	a.Parent = page
 	return a
 end
@@ -201,6 +248,7 @@ function showAnimal(kind)
 	local run = image(page, "", UDim2.fromOffset(400, 400), UDim2.fromOffset(PAGE.X / 2, 375), Vector2.new(0.5, 0.5)) -- its feet over the divider, as in the mockup
 	run.ImageRectSize = Vector2.new(FRAME, FRAME)
 	run.ImageColor3 = if seen then Color3.new(1, 1, 1) else Color3.new(0, 0, 0)
+	popIn(run) -- bounces in rather than just appearing (QM)
 	local sheets = SHEETS[kind]
 	if sheets then
 		local t = 0
