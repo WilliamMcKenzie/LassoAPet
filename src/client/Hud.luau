@@ -476,7 +476,7 @@ function Hud.init(onAction, onHome, onRide)
 	cardBurst.Visible = false
 	Instance.new("UIScale").Parent = cardBurst
 
-	gained = cashRow(rideRoot, 84, 58, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.57))
+	gained = cashRow(rideRoot, 84, 58, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.57), 4) -- 4px outline (QM)
 	-- A tooltip that takes the gained cash's place on a fail screen (Hud.setTip):
 	-- just the outlined white text, no box (QM, Oct 1).
 	tip = Instance.new("Frame")
