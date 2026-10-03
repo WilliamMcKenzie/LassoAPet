@@ -1077,6 +1077,33 @@ local function pickPetAt(screenPos)
 	end
 end
 
+-- The phone joystick while riding: the player controls stay on (the rider is
+-- anchored, so it only steers, see readSteer) with jumping off, so no jump button.
+local rideStick = { on = false }
+function rideStick.set(on)
+	on = on and UserInputService.TouchEnabled
+	local _, humanoid = character()
+	if on == rideStick.on then
+		return
+	end
+	rideStick.on = on
+	if on then
+		controls:Enable()
+		if humanoid then
+			rideStick.jump = { humanoid.JumpPower, humanoid.JumpHeight }
+			humanoid.JumpPower, humanoid.JumpHeight = 0, 0
+		end
+	else
+		if phase ~= "idle" then
+			controls:Disable() -- still on the ride (thrown off, cutscene): no walking
+		end
+		if humanoid and rideStick.jump then
+			humanoid.JumpPower, humanoid.JumpHeight = rideStick.jump[1], rideStick.jump[2]
+		end
+		rideStick.jump = nil
+	end
+end
+
 local function readSteer()
 	local keys = 0
 	if UserInputService:IsKeyDown(Enum.KeyCode.A) or UserInputService:IsKeyDown(Enum.KeyCode.Left) then
@@ -1085,7 +1112,10 @@ local function readSteer()
 	if UserInputService:IsKeyDown(Enum.KeyCode.D) or UserInputService:IsKeyDown(Enum.KeyCode.Right) then
 		keys += 1
 	end
-	return math.clamp(keys + touchSteer + padSteer, -1, 1)
+	-- On a phone the usual movement joystick stays up while riding (rideStick) and
+	-- steers like the arrow keys.
+	local stick = if rideStick.on then controls:GetMoveVector().X else 0
+	return math.clamp(keys + touchSteer + padSteer + stick, -1, 1)
 end
 
 UserInputService.InputBegan:Connect(function(input, processed)
@@ -2457,6 +2487,7 @@ RunService.PreSimulation:Connect(function(dt)
 	updateHerd(dt, (slow and not cutscene) or Tutorial.active)
 	updateFlung(dt)
 	Dust.update(dt)
+	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)
 	if phase == "idle" then
 		updateGuide() -- (hides it)
 		-- On foot on the course, a stampede animal running you down throws you
