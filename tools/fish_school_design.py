@@ -2,7 +2,7 @@
 rough ball, all facing forward. You ride on top of the swarm. The lead fish at
 the front, a little bigger than the rest, is the face (the lasso loops round it).
 
-Run: python3 tools/fish_school_design.py [palette] [--gif]
+Run: python3 tools/fish_school_design.py [palette, default B] [--gif]
      python3 tools/fish_school_design.py options    colour options sheet
 
 Bones: root (the middle of the swarm) -> F0 (the lead fish, named neck) and
@@ -283,7 +283,7 @@ def gif(m, k, path):
     A.gif(path, frames, fps=20)
 
 
-def main(palette="A"):
+def main(palette="B"):  # QM picked B, yellow tangs (Oct 3)
     os.makedirs(OUT, exist_ok=True)
     m = build(palette)
     groups = {g["name"]: g for g in m["groups"]}

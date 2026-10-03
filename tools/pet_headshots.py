@@ -38,7 +38,7 @@ MODELS = {
     "Penguin": "snow/Penguin", "Boar": "converted/Boar", "Snowman": "snow/Snowman",
     "IceGolem": "converted/IceGolem", "Icebringer": "converted/Icebringer",
     "Starfish": "ocean/Starfish", "Whale": "ocean/Whale", "Squid": "ocean/Squid",
-    "KingCrab": "ocean/KingCrab", "Kraken": "ocean/Kraken",
+    "KingCrab": "ocean/KingCrab", "Kraken": "ocean/Kraken", "FishSchool": "ocean/FishSchool",
 }
 ZYX = {"KingCrab", "IceGolem"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}

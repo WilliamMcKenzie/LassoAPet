@@ -10,6 +10,8 @@ a coloured base, bold markings and each animal's own feature.
   KingCrab Epic      red over a pale underside, gold spikes, a big claw and a small one, little legs
   Starfish Common    orange over a pale base, yellow bumps all round, five stubby arms
                      splayed out round the bottom with darker tips
+  FishSchool Epic    yellow over a pale base, an orange back, a ring of little orange
+                     fish swimming round it (each with a tail and an eye), a fin on top
 
 Run from the repo root: python3 tools/ocean_eggs.py [Kind ...]
 Writes designs/eggs/c_style/<Kind>Egg.bbmodel, src/shared/Eggs/<Kind>EggModel.luau,
@@ -118,6 +120,34 @@ def starfish_egg():
     return egg
 
 
+def fish_school_egg():
+    yellow, back, fin, belly = (255, 214, 40), (255, 186, 20), (255, 150, 20), (255, 240, 150)  # tools/fish_school_design.py B
+    black, white = (20, 20, 24), (255, 255, 255)
+    egg = shell([belly, belly, yellow, yellow, yellow, back, back])
+    # little fish swimming round the shell, two rings going opposite ways
+    for k in range(4):
+        for layer, x, way in ((2, -0.05, 1), (4, 0.1, -1)):
+            yaw = 90 * k + (45 if layer == 4 else 0)
+            z = WIDTHS[layer] / 2
+            y0, y1 = layer * LH + 0.1, (layer + 1) * LH - 0.1
+            blocks = (("Body", (x - 0.3, y0, -z - 0.12), (x + 0.3, y1, -z + 0.04), fin),
+                      ("Tail", (x + way * 0.3 - 0.07, y0 - 0.14, -z - 0.14), (x + way * 0.3 + 0.07, y1 + 0.14, -z + 0.02), (226, 104, 10)),
+                      ("EyeW", (x - way * 0.16 - 0.08, (y0 + y1) / 2, -z - 0.15), (x - way * 0.16 + 0.08, (y0 + y1) / 2 + 0.16, -z - 0.1), white),
+                      ("Pupil", (x - way * 0.18 - 0.04, (y0 + y1) / 2 + 0.03, -z - 0.17), (x - way * 0.18 + 0.04, (y0 + y1) / 2 + 0.11, -z - 0.13), black))
+            for name, lo, hi, col in blocks:
+                if name == "Tail":  # the tail sits behind the body, which way the fish swims
+                    lo = (lo[0] + way * 0.1, lo[1], lo[2])
+                    hi = (hi[0] + way * 0.1, hi[1], hi[2])
+                part = Part(f"{name}{k}{layer}", [b - a for a, b in zip(lo, hi)], Ry(yaw) @ T(*[(a + b) / 2 for a, b in zip(lo, hi)]), col)
+                part.bone = "bottom"
+                part.yaw = yaw
+                egg.parts.append(part)
+    # a fin standing up along the top, front to back
+    top = 7 * LH
+    egg.block("TopFin", (-0.08, top - 0.02, -0.35), (0.08, top + 0.3, 0.3), fin)
+    return egg
+
+
 def build(egg, name, out):
     """C.build, but blocks turned about Y (p.yaw) go in as cubes with a Blockbench
     rotation: the converter only takes axis-aligned boxes or wedge meshes."""
@@ -175,7 +205,7 @@ def whale_egg():
 
 
 EGGS = [("Kraken", kraken_egg), ("Squid", lambda: kraken_egg(SQUID)), ("Whale", whale_egg),
-        ("KingCrab", king_crab_egg), ("Starfish", starfish_egg)]
+        ("KingCrab", king_crab_egg), ("Starfish", starfish_egg), ("FishSchool", fish_school_egg)]
 
 
 def main(*kinds, preview="/mnt/project-files/eggs/c_style/ocean"):
