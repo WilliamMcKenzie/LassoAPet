@@ -280,7 +280,7 @@ local BUTTON_SPOT = UDim2.new(0.5, 0, 1, -MARGIN)
 
 -- Coin with the amount beside it, the text overlapping the coin's edge
 -- (QM's MoreGold look). Used for this ride's cash and for the fail screen's total.
-local function cashRow(parent, coinSize, textSize, anchor, position)
+local function cashRow(parent, coinSize, textSize, anchor, position, strokeThickness)
 	local row = Instance.new("Frame")
 	row.BackgroundTransparency = 1
 	row.AutomaticSize = Enum.AutomaticSize.XY
@@ -293,7 +293,7 @@ local function cashRow(parent, coinSize, textSize, anchor, position)
 	layout.Parent = row
 	local coin = image(row, "coin", UDim2.fromOffset(coinSize, coinSize), UDim2.new())
 	coin.ZIndex = 1
-	local text = label(row, UDim2.fromOffset(0, coinSize), UDim2.new(), textSize, 4)
+	local text = label(row, UDim2.fromOffset(0, coinSize), UDim2.new(), textSize, strokeThickness or 4)
 	text.AutomaticSize = Enum.AutomaticSize.X
 	text.LayoutOrder = 1
 	text.ZIndex = 3 -- the text overlaps the coin's edge, drawn on top
@@ -340,7 +340,7 @@ function Hud.init(onAction, onHome, onRide)
 	filled.AnchorPoint = Vector2.zero
 
 	-- Distance, on the bar.
-	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 4)
+	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 3) -- 3px outline (QM)
 	distance.Name = "Distance"
 	distance.ZIndex = 2
 
@@ -492,7 +492,7 @@ function Hud.init(onAction, onHome, onRide)
 	tipText.AutomaticSize = Enum.AutomaticSize.X
 	Instance.new("UIScale").Parent = tip
 	tip.Parent = rideRoot
-	rideCash = cashRow(rideRoot, 60, 46, Vector2.new(0, 0.5), UDim2.new(0.5, BAR_WIDTH / 2 + 8, 0, holdFrame.Position.Y.Offset))
+	rideCash = cashRow(rideRoot, 60, 46, Vector2.new(0, 0.5), UDim2.new(0.5, BAR_WIDTH / 2 + 8, 0, holdFrame.Position.Y.Offset), 3) -- 3px outline (QM)
 
 	-- Home buttons, always on screen outside a ride; Gold stays during rides too.
 	homeGui = Instance.new("ScreenGui")
