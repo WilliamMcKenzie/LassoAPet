@@ -48,7 +48,8 @@ local function build(i)
 	local sheet = Instance.new("Frame")
 	sheet.Size = UDim2.fromScale(1, 1)
 	sheet.BorderSizePixel = 0
-	sheet.BackgroundColor3 = Config.GateColor
+	local color = Config.Biomes[i].GateColor or Config.GateColor -- each biome's own (QM)
+	sheet.BackgroundColor3 = color
 	local gradient = Instance.new("UIGradient")
 	gradient.Rotation = 90 -- top (0) to bottom (1)
 	gradient.Transparency = NumberSequence.new({
@@ -73,7 +74,7 @@ local function build(i)
 		card.Font = Enum.Font.FredokaOne
 		card.TextScaled = true
 		card.TextColor3 = Color3.new(1, 1, 1)
-		card.BackgroundColor3 = Config.GateColor
+		card.BackgroundColor3 = color
 		local stroke = Instance.new("UIStroke")
 		stroke.Thickness = 6
 		stroke.Parent = card
@@ -121,7 +122,7 @@ local function shatter(i)
 			part.CanTouch = false
 			part.CastShadow = false
 			part.Material = Enum.Material.Neon
-			part.Color = if rng:NextNumber() < 0.3 then Color3.new(1, 1, 1) else Config.GateColor
+			part.Color = if rng:NextNumber() < 0.3 then Color3.new(1, 1, 1) else Config.Biomes[i].GateColor or Config.GateColor
 			part.Transparency = 0.15 + 0.5 * (gy - 1) / SHARDS_Y -- clearer higher up, like the sheet
 			part.Size = Vector3.new(w * rng:NextNumber(0.6, 1), h * rng:NextNumber(0.6, 1), 0.3)
 			local at = Vector3.new(-width / 2 + (gx - 0.5) * w, (gy - 0.5) * h, z)

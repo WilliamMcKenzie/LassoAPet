@@ -49,6 +49,7 @@ return {
 			UnlockCost = 1000,
 			PostColor = Color3.fromRGB(206, 118, 72),
 			GateImage = "rbxassetid://113778810800288", -- assets/ui/GateDesert.png ("Zone Locked")
+			GateColor = Color3.fromRGB(255, 204, 40), -- the gate's glow at this biome's line: desert yellow
 			-- Upgrade Pen while this is the next biome to unlock (its price is drawn in).
 			UpgradeImage = "rbxassetid://78830244894115", -- assets/ui/UpgradePenDesert.png
 			UpgradeImageDisabled = "rbxassetid://81637358609980", -- assets/ui/UpgradePenDesertDisabled.png: while you can't afford it
@@ -67,6 +68,7 @@ return {
 			UnlockCost = 100000,
 			PostColor = Color3.fromRGB(126, 164, 214),
 			GateImage = "rbxassetid://93384010922515", -- assets/ui/GateTundra.png
+			GateColor = Color3.fromRGB(70, 220, 255), -- cyan (QM)
 			UpgradeImage = "rbxassetid://88059029653274", -- assets/ui/UpgradePenTundra.png
 			UpgradeImageDisabled = "rbxassetid://110114947102534", -- assets/ui/UpgradePenTundraDisabled.png
 		},
@@ -138,6 +140,7 @@ return {
 			UnlockCost = 1000000,
 			PostColor = Color3.fromRGB(236, 140, 124),
 			GateImage = "rbxassetid://129714355476447", -- assets/ui/GateOcean.png
+			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
 			UpgradeImage = "rbxassetid://86653048989907", -- assets/ui/UpgradePenOcean.png
 			UpgradeImageDisabled = "rbxassetid://134800932476227", -- assets/ui/UpgradePenOceanDisabled.png
 			-- Under the sea (Ocean.client): while you're in this biome the distance
@@ -151,7 +154,7 @@ return {
 			},
 		},
 	},
-	-- The gate across the corridor at a locked biome's line: yellow at the floor
+	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
