@@ -1,6 +1,6 @@
 -- The marker on whatever the lasso would catch (an animal or the egg) or RIDE
--- would ride: a dashed yellow ring on the ground round it, slowly turning (QM's
--- reference, Oct 2; solid FFFF00, Oct 3).
+-- would ride: a dashed white ring on the ground round it, slowly turning (QM's
+-- reference, Oct 2; pure white at 80% opacity, Oct 3).
 --
 -- (It used to be a Highlight outline. Moving a Highlight onto another model makes
 -- the engine redraw that whole model, studs and all, which hitched hard on phones:
@@ -14,8 +14,8 @@
 
 local RunService = game:GetService("RunService")
 
-local COLOR = Color3.fromRGB(255, 255, 0) -- FFFF00 (QM)
-local TRANSPARENCY = 0 -- fully opaque (QM)
+local COLOR = Color3.new(1, 1, 1) -- pure white (QM)
+local TRANSPARENCY = 0.2 -- 80% opacity (QM)
 local DASHES = 10
 local DASH_SHARE = 0.6 -- of each dash's slot round the ring; the rest is the gap
 local SPIN = 0.8 -- radians a second
