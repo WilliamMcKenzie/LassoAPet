@@ -78,10 +78,30 @@ local SHEETS = {
 }
 local FRAME, PER_SHEET, SHEET_COLUMNS = 192, 25, 5
 
--- Each animal's bio; one without its own gets PLACEHOLDER_BIO until QM writes them.
+-- Each animal's bio; one without its own (a new animal) gets PLACEHOLDER_BIO.
 local PLACEHOLDER_BIO = "Description feijwufjewuejfw lorem ipsum" -- QM's placeholder
-local BIOS = {
-	Horse = "Very thoughtful, horse sends gifts to his friends each year.", -- QM's
+local BIOS = { -- QM's (Oct 3)
+	Horse = "Very thoughtful, horse sends gifts to his friends each year.",
+	Pig = "Pig isn't actually pink, just always blushing! Recently losing weight, down 2 pounds.",
+	Pinto = "Cousin of horse, recently started playing water polo.",
+	Fish = "Fish never learned to swim, and thinks it's too late now. Scared of water.",
+	Rhino = "Rhino ran away to join the mafia at a young age. Still pays horses tuition.",
+	Unicorn = "Unicorn is just a horse who can jump very high. The horn is glued on.",
+	Cactus = "Cactus was once a plant, but it decided it had better places to be! Now it searches for cool trinkets.",
+	Scorpion = "Scorpion was once the worlds #3 ranked badminton player. After he broke his ankle, he now takes revenge on the world.",
+	Sandworm = "Sandworm started out collecting old books, but they all got sandy. Now it just burrows.",
+	SpineLizard = "Spine Lizard runs as fast as it can, to try and make each day last forever.",
+	Snake = "Snake wants to write a love letter, but has no arms! These days he is searching for some.",
+	Penguin = "Penguin was told sardines would be in the Tundra, now hes hungry.",
+	Boar = "Boar watched a sad TV show, now he is charging to hide his tears.",
+	Snowman = "Snowman came to life when a child gave him a silk hat. He is making the most of it!",
+	IceGolem = "Ice golem was originally just a pile of ice rocks, brought to life by the magic of Christmas. Friends with Snowman.",
+	Icebringer = "Icebringer went to Antarctica and found troubling stuff. Now it gets brain freezes to try and forget.",
+	Starfish = "Starfish was the star of her class. Little did she know they said that to all the starfish.",
+	Squid = "Squid started out painting, but his art has gotten more abstract. Now it just squirts ink blotches.",
+	KingCrab = "Crab was almost boiled, but escaped with his fast speed. He is still running to this day.",
+	Whale = "Whale is a talented singer, but his concerts are usually underwater. Distant cousin of horse.",
+	Kraken = "Kraken was once a squid, but started drinking raw milk and bonesmashing. Now his jaw hurts.",
 }
 
 local AnimalDex = {}
