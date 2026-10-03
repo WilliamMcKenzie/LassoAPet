@@ -43,9 +43,11 @@ def texture(kind, n=128):
         # assets/ui/GuideArrow.png, turned to point along +x
         src = Image.open(os.path.join(ROOT, "assets", "ui", "GuideArrow.png")).convert("RGBA").resize((n, n))
         return src.rotate(90, expand=False)
-    if kind == "solid":  # a fat chevron, no edge, more space round it
+    if kind == "solid":  # a fat chevron, no edge, more space round it (drawn big and shrunk: smooth edges)
+        big = Image.new("RGBA", (n * 4, n * 4))
         pts = [(0.2, 0.08), (0.62, 0.5), (0.2, 0.92), (0.02, 0.92), (0.44, 0.5), (0.02, 0.08)]
-        d.polygon([(x * n + 0.2 * n, y * n) for x, y in pts], fill=(255, 255, 255, 255))
+        ImageDraw.Draw(big).polygon([((x + 0.2) * n * 4, y * n * 4) for x, y in pts], fill=(255, 255, 255, 255))
+        return big.resize((n, n), Image.LANCZOS)
     elif kind == "triangle":  # a solid arrowhead
         d.polygon([(0.3 * n, 0.12 * n), (0.8 * n, 0.5 * n), (0.3 * n, 0.88 * n)], fill=(255, 255, 255, 255))
     elif kind == "dash":  # like the ring's dashes: a run of short bars
