@@ -57,6 +57,10 @@ local PAGES = {
 		grid = "rbxassetid://94266934416109", -- assets/ui/dex/DexDesert.png
 		examine = "rbxassetid://84664609464522", -- assets/ui/dex/DexDesertExamine.png
 	},
+	Snow = { -- the Tundra
+		grid = "rbxassetid://80820120308003", -- assets/ui/dex/DexSnow.png
+		examine = "rbxassetid://93155919439780", -- assets/ui/dex/DexSnowExamine.png
+	},
 }
 
 -- Each animal running: its sprite sheets (tools/dex_sheets.py), 25 frames of
@@ -74,6 +78,11 @@ local SHEETS = {
 	Scorpion = { frames = 15, time = 0.03, "rbxassetid://113606148401403" },
 	Sandworm = { frames = 20, time = 0.03, "rbxassetid://79124427569630" },
 	SpineLizard = { frames = 18, time = 0.03, "rbxassetid://116109970242443" },
+	Penguin = { frames = 15, time = 0.03, "rbxassetid://131302675159660" },
+	Boar = { frames = 20, time = 0.03, "rbxassetid://94170840211405" },
+	Snowman = { frames = 18, time = 0.03, "rbxassetid://139839156164981" },
+	IceGolem = { frames = 24, time = 0.03, "rbxassetid://94192117186470" },
+	Icebringer = { frames = 24, time = 0.04, "rbxassetid://125520132317720" },
 	Snake = { frames = 48, time = 0.05, "rbxassetid://74812837390041", "rbxassetid://104986890781116" },
 }
 local FRAME, PER_SHEET, SHEET_COLUMNS = 192, 25, 5
