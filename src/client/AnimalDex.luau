@@ -53,19 +53,33 @@ local PAGES = {
 		grid = "rbxassetid://133205113798142", -- assets/ui/dex/DexMeadow.png
 		examine = "rbxassetid://114285728618249", -- assets/ui/dex/DexMeadowExamine.png
 	},
+	Desert = {
+		grid = "rbxassetid://138809048394907", -- assets/ui/dex/DexDesert.png
+		examine = "rbxassetid://132721267846238", -- assets/ui/dex/DexDesertExamine.png
+	},
 }
 
 -- Each animal running: its sprite sheets (tools/dex_sheets.py), 12 frames of
--- 256 px each, 4 across and 3 down, 30 ms a frame.
+-- 256 px a sheet, 4 across and 3 down, with how many frames it has in all and
+-- the seconds a frame shows (as its GIF).
 local SHEETS = {
-	Horse = { "rbxassetid://117214923442803", "rbxassetid://92016581002992" },
-	Pinto = { "rbxassetid://90941968473030", "rbxassetid://122380495096996" },
-	Pig = { "rbxassetid://72090209789482", "rbxassetid://126968575360177" },
-	Fish = { "rbxassetid://125040909461882", "rbxassetid://134214794380576" },
-	Rhino = { "rbxassetid://117539225187822", "rbxassetid://82166405562428" },
-	Unicorn = { "rbxassetid://108504409647134", "rbxassetid://93485365774832" },
+	Horse = { frames = 24, time = 0.03, "rbxassetid://117214923442803", "rbxassetid://92016581002992" },
+	Pinto = { frames = 24, time = 0.03, "rbxassetid://90941968473030", "rbxassetid://122380495096996" },
+	Pig = { frames = 24, time = 0.03, "rbxassetid://72090209789482", "rbxassetid://126968575360177" },
+	Fish = { frames = 24, time = 0.03, "rbxassetid://125040909461882", "rbxassetid://134214794380576" },
+	Rhino = { frames = 24, time = 0.03, "rbxassetid://117539225187822", "rbxassetid://82166405562428" },
+	Unicorn = { frames = 24, time = 0.03, "rbxassetid://108504409647134", "rbxassetid://93485365774832" },
+	Cactus = { frames = 20, time = 0.03, "rbxassetid://82051306178813", "rbxassetid://94793179997595" },
+	Scorpion = { frames = 15, time = 0.03, "rbxassetid://73657171295559", "rbxassetid://120466565792248" },
+	Sandworm = { frames = 20, time = 0.03, "rbxassetid://80049980661652", "rbxassetid://130219763355091" },
+	SpineLizard = { frames = 18, time = 0.03, "rbxassetid://114781703701436", "rbxassetid://87428707694342" },
+	Snake = {
+		frames = 48, time = 0.05,
+		"rbxassetid://123045726352659", "rbxassetid://101226423450679",
+		"rbxassetid://122324825847876", "rbxassetid://132873469174940",
+	},
 }
-local FRAME, PER_SHEET, FRAME_TIME = 256, 12, 0.03
+local FRAME, PER_SHEET = 256, 12
 
 -- Each animal's bio; one without its own gets PLACEHOLDER_BIO until QM writes them.
 local PLACEHOLDER_BIO = "Description feijwufjewuejfw lorem ipsum" -- QM's placeholder
@@ -184,13 +198,27 @@ local function clear()
 	end
 end
 
-local showGrid, showAnimal
+local showGrid, showAnimal, arrow
+local gridAt = 1 -- the biome whose grid shows (kept between openings)
 
--- A biome's grid of cards.
-function showGrid(biome)
+-- A biome's grid of cards, with arrows either side of the page to the biome
+-- before and after (QM's mockup).
+function showGrid(index)
 	clear()
 	shown = nil
+	gridAt = index
+	local biome = biomes[index]
 	page.Image = PAGES[biome.name].grid
+	if biomes[index - 1] then
+		arrow(UDim2.fromOffset(-100, 422), -90, function()
+			showGrid(index - 1)
+		end)
+	end
+	if biomes[index + 1] then
+		arrow(UDim2.fromOffset(PAGE.X + 100, 422), 90, function()
+			showGrid(index + 1)
+		end)
+	end
 	local seen = ridden()
 	local width = COLUMNS * CARD + (COLUMNS - 1) * GAP
 	for i, kind in biome.kinds do
@@ -216,7 +244,7 @@ function showGrid(biome)
 	end
 end
 
-local function arrow(position, turn, onClick)
+function arrow(position, turn, onClick)
 	local a = Instance.new("ImageButton")
 	a.BackgroundTransparency = 1
 	a.AutoButtonColor = false
@@ -243,6 +271,11 @@ function showAnimal(kind)
 		end
 	end
 	page.Image = PAGES[order[at].biome].examine
+	for i, biome in biomes do
+		if biome.name == order[at].biome then
+			gridAt = i -- reopening shows this animal's biome
+		end
+	end
 	local seen = ridden()[kind]
 
 	local run = image(page, "", UDim2.fromOffset(400, 400), UDim2.fromOffset(PAGE.X / 2, 375), Vector2.new(0.5, 0.5)) -- its feet over the divider, as in the mockup
@@ -252,10 +285,9 @@ function showAnimal(kind)
 	local sheets = SHEETS[kind]
 	if sheets then
 		local t = 0
-		local frames = #sheets * PER_SHEET
 		local function step(dt)
 			t += dt
-			local f = math.floor(t / FRAME_TIME) % frames
+			local f = math.floor(t / sheets.time) % sheets.frames
 			local k = f % PER_SHEET
 			run.Image = sheets[f // PER_SHEET + 1]
 			run.ImageRectOffset = Vector2.new((k % 4) * FRAME, (k // 4) * FRAME)
@@ -308,8 +340,8 @@ end
 function AnimalDex.toggle()
 	open = not open
 	gui.Enabled = open
-	if open and biomes[1] then
-		showGrid(biomes[1])
+	if open and biomes[gridAt] then
+		showGrid(gridAt)
 	elseif not open then
 		clear()
 	end
@@ -356,8 +388,8 @@ player:GetAttributeChangedSignal("Ridden"):Connect(function()
 	end
 	if shown then
 		showAnimal(shown)
-	elseif biomes[1] then
-		showGrid(biomes[1])
+	elseif biomes[gridAt] then
+		showGrid(gridAt)
 	end
 end)
 
@@ -372,8 +404,11 @@ task.spawn(function()
 		table.insert(ids, id)
 	end
 	for _, s in SHEETS do
-		table.insert(ids, s[1])
-		table.insert(ids, s[2])
+		for _, id in s do
+			if typeof(id) == "string" then
+				table.insert(ids, id)
+			end
+		end
 	end
 	game:GetService("ContentProvider"):PreloadAsync(ids)
 end)
