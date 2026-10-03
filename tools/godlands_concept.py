@@ -3,6 +3,8 @@ spawn. Terrain after Realm of the Mad God's godlands: grey snow broken up by dar
 stone, dead bushes and trees, and pools of lava ringed with black rock.
 
 Run: python3 tools/godlands_concept.py [out_dir]
+     python3 tools/godlands_concept.py --map    also write the game's Godlands: its
+         track grids (src/server/GodlandsTracks.luau), walls and terrain pieces
 Writes godlands_map.png (480 tiles of ground from above), godlands_ground.png (a
 stretch of it from the riding camera and up close) and godlands_assets.png (each
 terrain piece beside a 5-stud figure) to /mnt/project-files/biomes/godlands/.
@@ -298,6 +300,125 @@ def scene(kind):
     return parts
 
 
+# ---------------------------------------------------------------- the game's map
+# The Godlands floor in the game is four tracks, each TRACK tiles (960 studs) of
+# the map above: its two halves with ice, and the same two with the ice as lava
+# (QM, Oct 3: "use all 4 tracks and randomly choose"). They're built when the
+# server starts (Server/GodlandsGround), in a random order, from the grids this
+# writes into Server/GodlandsTracks.luau. The walls and the terrain pieces are
+# saved in World.rbxmx as usual.
+Z_START = -16192  # the Ocean's far edge
+TRACK = 240  # tiles per track
+SLOTS = 4  # tracks end to end: Config.Biomes Godlands.Length = SLOTS x 960
+END = Z_START - TRACK * TILE * SLOTS
+TRACKS_LUAU = os.path.join(os.path.dirname(__file__), "..", "src", "server", "GodlandsTracks.luau")
+GLYPH = {SNOW_V: ".", FLOOR_V: "#", ICE_V: "~"}
+
+
+def tracks(seed=7):
+    """The map cut into its tracks, each [x tile, z tile] along the course. The
+    columns by the walls stay snow, and so do each track's first and last rows, so
+    any two tracks meet along a snow line."""
+    nx = 2 * HALF_W // TILE
+    kind = glaciers(nx, MAP_LEN, seed)
+    out = []
+    for t in range(MAP_LEN // TRACK):
+        g = kind[:, t * TRACK:(t + 1) * TRACK].copy()
+        g[0, :] = g[-1, :] = g[:, 0] = g[:, -1] = SNOW_V
+        out.append(g)
+    return out
+
+
+def write_tracks():
+    grids = tracks()
+    out = ["-- The Godlands floor: written by tools/godlands_concept.py --map (don't edit by hand).",
+           "-- Server/GodlandsGround lays Tracks end to end in a random order when the server",
+           "-- starts. Each grid row is one 4-stud row of tiles across the course (x = -56 to 56),",
+           "-- the first row at the track's near end: \".\" snow (the floor), \"#\" dark stone a stud",
+           "-- up, \"~\" the track's Liquid (ice, or glowing lava), flush with the snow.",
+           "return {",
+           f"\tTile = {TILE},",
+           f"\tLength = {TRACK * TILE}, -- studs per track",
+           "\tTracks = {"]
+    for liquid in ("Ice", "Lava"):
+        for g in range(len(grids)):
+            out.append(f'\t\t{{ Grid = {g + 1}, Liquid = "{liquid}" }},')
+    out += ["\t},", "\tGrids = {"]
+    for g in grids:
+        out.append("\t\t{")
+        for j in range(g.shape[1]):
+            out.append('\t\t\t"' + "".join(GLYPH[int(v)] for v in g[:, j]) + '",')
+        out.append("\t\t},")
+    out += ["\t},", "}", ""]
+    with open(TRACKS_LUAU, "w") as f:
+        f.write("\n".join(out))
+    return len(grids)
+
+
+def write_walls():
+    """Side walls and caps for the Godlands (copies of the desert's, one per track
+    per side; WorldColors paints them), and the far wall moved to the new end."""
+    import re
+    from desert_ground import WORLD, item_span
+    import ocean_walls as OW
+    s = open(WORLD).read()
+    while True:  # take out the ones a previous run wrote
+        m = re.search(r'\n?<Item class="Part" referent="GWAL\d+"', s)
+        if not m:
+            break
+        st = m.start() + (1 if s[m.start()] == "\n" else 0)
+        s = s[:m.start()] + s[item_span(s, st):]
+    new, n = [], 0
+    seg = TRACK * TILE
+    for sx in (-1, 1):
+        wall = s[slice(*OW.item(s, OW.WALL[sx]))]
+        cap = s[slice(*OW.item(s, OW.CAP[sx]))]
+        for k in range(SLOTS):
+            zc = Z_START - seg * k - seg / 2
+            for tmpl, size, pos in ((wall, (8, 48, seg), (sx * 60, 24, zc)),
+                                    (cap, (10, 2, seg - 1), (sx * 59, 49, zc + 0.5))):
+                def ref(m):
+                    nonlocal n
+                    n += 1
+                    return f'referent="GWAL{n:05d}"'
+                new.append(OW.resize(re.sub(r'referent="[A-Za-z0-9]+"', ref, tmpl), size, pos))
+    for ref_, y, dz in ((OW.FAR_WALL, 24, -4), (OW.FAR_CAP, 49, -3)):
+        a, b = OW.item(s, ref_)
+        xml = s[a:b]
+        size = re.search(r'<Vector3 name="size"><X>([^<]*)</X><Y>([^<]*)</Y><Z>([^<]*)</Z>', xml).groups()
+        s = s[:a] + OW.resize(xml, tuple(float(v) for v in size), (0, y, END + dz)) + s[b:]
+    a, b = OW.item(s, OW.WALL[1])
+    s = s[:b] + "\n" + "\n".join(new) + s[b:]
+    open(WORLD, "w").write(s)
+    return len(new)
+
+
+def write_obstacles():
+    """The Godlands' terrain pieces (tools/course_layout.py lays them out like the
+    other biomes', in clusters against the walls) into World.Obstacles, replacing any
+    a previous run wrote. They're saved on flat floor: GodlandsGround lifts the ones
+    that land on a stone tile once it has laid the tracks."""
+    import re
+    import course_layout as CL
+    from desert_ground import WORLD, item_span
+    items = [it for it in CL.Course().build() if it["biome"] == "Godlands"]
+    models, parts = CL.obstacle_models(items, prefix="GOBS")
+    s = open(WORLD).read()
+    while True:
+        m = re.search(r'\n?<Item class="Model" referent="GOBS\d+"', s)
+        if not m:
+            break
+        st = m.start() + (1 if s[m.start()] == "\n" else 0)
+        s = s[:m.start()] + s[item_span(s, st):]
+    i = s.index('<string name="Name">Obstacles</string>')
+    st = s.rindex("<Item", 0, i)
+    en = item_span(s, st)  # just past the folder's </Item>
+    close = en - len("</Item>")
+    s = s[:close].rstrip("\n") + "\n" + "\n".join(models) + "\n" + s[close:]
+    open(WORLD, "w").write(s)
+    return len(models), parts
+
+
 WINDOW = 120  # where along the map the 3D views sit (tiles)
 
 
@@ -350,6 +471,10 @@ def main(out):
     rows = [TA.row_image(*row) for row in ASSETS]
     rows[0].save(os.path.join(out, "godlands_assets.png"))
     print("wrote", out)
+    if "--map" in sys.argv:
+        print("wrote", write_tracks(), "track grids into", TRACKS_LUAU)
+        print("wrote", write_walls(), "wall parts")
+        print("wrote %d terrain pieces (%d parts) into World.Obstacles" % write_obstacles())
 
 
 if __name__ == "__main__":

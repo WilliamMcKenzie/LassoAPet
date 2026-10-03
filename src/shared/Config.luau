@@ -153,13 +153,37 @@ return {
 				Bubbles = 24, -- per second
 			},
 		},
+		{
+			-- The endgame (QM, Oct 3), after Realm of the Mad God's godlands: dark stone
+			-- plates split by snow, with ice or lava cracks. Its floor is four 960-stud
+			-- tracks (tools/godlands_concept.py), laid in a random order each time the
+			-- server starts (Server/GodlandsGround): two with ice, two with lava.
+			Name = "Godlands",
+			Length = 3840, -- the four tracks end to end
+			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
+			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)
+			-- Placeholder until the Godlands has animals (and bosses) of its own: the Ocean's.
+			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
+			Herd = { Fish = 0.3, Starfish = 0.35, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, Kraken = 0.05 },
+			PlaceholderHerd = true,
+			Patches = {
+				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
+				Ice = { Color3.fromRGB(170, 196, 250), Color3.fromRGB(184, 208, 252) },
+				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon
+			},
+			UnlockCost = 10000000, -- guessed: 10x the Ocean
+			PostColor = Color3.fromRGB(62, 60, 72),
+			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
+			-- No GateImage / UpgradeImage yet: the gate shows plain text and Upgrade Pen
+			-- the default button with the price, until QM's art is in.
+		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	CourseHalfWidth = 56,
-	CourseLength = 16192, -- all the biomes' lengths added up
+	CourseLength = 20032, -- all the biomes' lengths added up
 	HomeHalfWidth = 144, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3)
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
@@ -271,6 +295,7 @@ return {
 		Icicle = 1, Pine = 2, IcicleLarge = 2, IceBoulder = 3, -- snow: small, medium, medium, large
 		TubeCoral = 1, BrainCoral = 1, BranchCoral = 2, FanCoral = 2, ReefRock = 3, -- ocean
 		BasaltRock = 2, Vent = 3, -- the deep ocean
+		DeadBush = 1, DarkStone = 1, DeadTree = 2, Crag = 2, LavaRock = 3, -- Godlands
 	},
 	-- How big each tier looks: each one is TierGrowth x the one below, so a medium is
 	-- 1.6x a small and a large 2.56x. "Size" is the square root of the two biggest sides of
@@ -285,6 +310,7 @@ return {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
 		BranchCoral = 1.27, FanCoral = 1.1, ReefRock = 0.83, BasaltRock = 0.89, Vent = 1.31,
+		DeadTree = 1.07, Crag = 0.87, LavaRock = 0.86,
 	},
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.

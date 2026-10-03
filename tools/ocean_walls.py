@@ -5,7 +5,8 @@ Copies the desert's wall and cap parts (World.Walls) for each ocean segment.
 Segments are one depth band long (ocean_ground.BAND, 240 studs, 57 per side) so
 WorldColors can paint each one darker the further along it is (QM, Oct 2), with
 their ends on the 8-stud grid so the checker lines up (tools/check_walls.py).
-The far wall goes to the new course end. Run again, it replaces the ocean
+The far wall was moved to its end here once; the Godlands moved it on
+(tools/godlands_concept.py --map). Run again, it replaces the ocean
 segments already in the map.
 """
 
@@ -80,16 +81,11 @@ def main():
                     n += 1
                     return f'referent="OWAL{n:05d}"'
                 new.append(resize(re.sub(r'referent="[A-Za-z0-9]+"', ref, tmpl), size, pos))
-    # the far wall and its cap at the new end
-    for ref, y, dz in ((FAR_WALL, 24, -4), (FAR_CAP, 49, -3)):
-        a, b = item(s, ref)
-        xml = s[a:b]
-        size = re.search(r'<Vector3 name="size"><X>([^<]*)</X><Y>([^<]*)</Y><Z>([^<]*)</Z>', xml).groups()
-        s = s[:a] + resize(xml, tuple(float(v) for v in size), (0, y, END + dz)) + s[b:]
+    # (the far wall stays at the course end: tools/godlands_concept.py --map puts it there)
     a, b = item(s, WALL[1])
     s = s[:b] + "\n" + "\n".join(new) + s[b:]
     open(WORLD, "w").write(s)
-    print("wrote", len(new), "ocean wall parts; far wall at", END - 4)
+    print("wrote", len(new), "ocean wall parts")
 
 
 if __name__ == "__main__":
