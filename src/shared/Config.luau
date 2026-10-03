@@ -372,11 +372,18 @@ return {
 	LandingGrace = 0.8,
 	TurnGrace = 2,
 	-- Continue (QM, Oct 3): after a crash or a buck-off, pay Robux to keep riding
-	-- from where it happened (Shop.server, Ride.client). The developer product is
-	-- made on the Creator Dashboard; until its id is here the button only shows in
-	-- Studio, where it's free.
-	ContinueProductId = 0,
-	ContinuePrice = 100, -- Robux, as set on the product
+	-- from where it happened (Shop.server, Ride.client). It costs more the further
+	-- from home you are: Roblox prices are fixed per developer product, so each
+	-- band is its own product (made on the Creator Dashboard at that price), and
+	-- the furthest band you've passed (From, metres from the start line) is the
+	-- one offered. Until a band's id is here, it only shows in Studio, for free.
+	ContinueTiers = {
+		{ From = 0, Price = 25, ProductId = 0 },
+		{ From = 200, Price = 50, ProductId = 0 },
+		{ From = 500, Price = 100, ProductId = 0 },
+		{ From = 1000, Price = 200, ProductId = 0 },
+		{ From = 2000, Price = 400, ProductId = 0 },
+	},
 	ContinueGrace = 1.5, -- seconds nothing can crash you once you're back on
 	ContinueClear = 14, -- studs: obstacles this close to where you crashed are knocked away
 	-- Ride back's vignette: edges only, soft, breathing slowly, to add tension without

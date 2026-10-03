@@ -801,6 +801,17 @@ local function finishRide(x, z)
 	end
 end
 
+-- Continue's price band for `metres` from home (Config.ContinueTiers): the furthest passed.
+function vfx.continueTier(metres)
+	local tier = Config.ContinueTiers[1]
+	for _, t in Config.ContinueTiers do
+		if metres >= t.From then
+			tier = t
+		end
+	end
+	return tier
+end
+
 local function fail(reason, tip)
 	if phase == "ended" then
 		return
@@ -808,14 +819,14 @@ local function fail(reason, tip)
 	Hud.setTip(tip) -- in place of the "+$N" the fail screen shows
 	local hrp, humanoid = character()
 	local dir = (phase == "return" or phase == "home") and 1 or -1 -- travelDir() is defined further down
-	-- Continue (Config.ContinueProductId): a crash or buck-off on the way out or
+	-- Continue (Config.ContinueTiers): a crash or buck-off on the way out or
 	-- back can be bought off, picking up right here on the same kind of animal,
 	-- with the egg. Not into a locked gate, and not in the tutorial.
 	local gate = WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1))
 	vfx.revive = nil
 	if mount and (reason == "CRASH!" or reason == "BUCKED OFF") and (phase == "outbound" or phase == "return")
 		and not (phase == "outbound" and mount.z < gate + 2.4) and not Tutorial.active
-		and (Config.ContinueProductId ~= 0 or RunService:IsStudio()) then
+		and (RunService:IsStudio() or vfx.continueTier(-mount.z / STUDS_PER_METRE).ProductId ~= 0) then
 		vfx.revive = { kind = mount.kind, x = mount.x, z = mount.z, yaw = mount.yaw, speed = mount.speed, phase = phase, dir = dir }
 	end
 	phase = "ended"
@@ -2715,7 +2726,7 @@ function vfx.askContinue()
 	if phase == "ended" and revive and not revive.asked then
 		revive.asked = true
 		Hud.showContinue("waiting")
-		ReplicatedStorage:WaitForChild("ContinueRide"):FireServer()
+		ReplicatedStorage:WaitForChild("ContinueRide"):FireServer(-revive.z / STUDS_PER_METRE)
 	end
 end
 
