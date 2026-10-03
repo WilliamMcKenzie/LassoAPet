@@ -314,6 +314,11 @@ return {
 		BranchCoral = 1.27, FanCoral = 1.1, ReefRock = 0.83, BasaltRock = 0.89, Vent = 1.31,
 		DeadTree = 1.07, Crag = 0.87, LavaRock = 0.86,
 	},
+	-- While you were away (QM, Oct 3): coming back, your pets have earned this share of
+	-- their usual gold a second for the time you were gone, up to AwayCap seconds of it
+	-- (10 hours at 0.1x: an hour's worth at most). Claimed from a popup (Away.client).
+	AwayRate = 0.1,
+	AwayCap = 10 * 3600,
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.
 	PetIncome = {

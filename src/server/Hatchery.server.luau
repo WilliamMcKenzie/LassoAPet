@@ -130,6 +130,27 @@ local function canPlace(pen, x, z)
 	return area ~= nil and math.abs(x) <= area.Size.X / 2 - EDGE and math.abs(z) <= area.Size.Z / 2 - EDGE
 end
 
+-- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
+local function income(profile)
+	local total = Config.PetIncome[profile.ride] or 0
+	for _, item in profile.items do
+		if item.pet then
+			total += Config.PetIncome[item.pet] or 0
+		end
+	end
+	return total
+end
+
+-- While you were away (QM, Oct 3): back after time away, your pets have earned
+-- Config.AwayRate of their usual gold a second for up to Config.AwayCap seconds of
+-- it. It waits in the "AwayGold" attribute (the client's popup) until ClaimAway;
+-- unclaimed, it's saved and added to the next visit's.
+local function awayGold(profile, data)
+	local seen = tonumber(data.seen)
+	local away = if seen then math.clamp(os.time() - seen, 0, Config.AwayCap) else 0
+	return (tonumber(data.awayGold) or 0) + math.floor(income(profile) * Config.AwayRate * away)
+end
+
 local function load(player)
 	local profile = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {} }
 	if store then
@@ -157,6 +178,9 @@ local function load(player)
 							profile.items[id] = item
 						end
 					end
+					if profile.tutorial then
+						profile.awayGold = awayGold(profile, data)
+					end
 				end
 				loaded[player] = true
 				break
@@ -174,6 +198,7 @@ local function load(player)
 		profile.eggs = { [Config.DefaultPet] = 1 }
 	end
 	player:SetAttribute("Tutorial", if tutorial then true else nil)
+	player:SetAttribute("AwayGold", if (profile.awayGold or 0) > 0 then profile.awayGold else nil)
 	publish(player)
 end
 
@@ -183,7 +208,8 @@ local function save(player)
 		return
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride, tutorial = profile.tutorial, ridden = riddenList(profile) }) then
+		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride, tutorial = profile.tutorial, ridden = riddenList(profile),
+			seen = os.time(), awayGold = profile.awayGold }) then
 			return
 		end
 		task.wait(attempt)
@@ -517,16 +543,34 @@ skipCommand.Triggered:Connect(function(source)
 end)
 skipCommand.Parent = game:GetService("TextChatService")
 
--- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
-local function income(profile)
-	local total = Config.PetIncome[profile.ride] or 0
-	for _, item in profile.items do
-		if item.pet then
-			total += Config.PetIncome[item.pet] or 0
-		end
+-- The "While you were away" popup's Claim button: the gold earned while away goes
+-- into your total.
+remote("ClaimAway", function(player)
+	local profile = profiles[player]
+	if not profile or (profile.awayGold or 0) <= 0 then
+		return
 	end
-	return total
-end
+	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + profile.awayGold)
+	profile.awayGold = nil
+	player:SetAttribute("AwayGold", nil)
+end)
+
+-- Testing: "/away" shows the popup as if you'd been gone the whole Config.AwayCap.
+local awayCommand = Instance.new("TextChatCommand")
+awayCommand.Name = "Away"
+awayCommand.PrimaryAlias = "/away"
+awayCommand.Triggered:Connect(function(source)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	local profile = player and profiles[player]
+	if not profile or not allowed(player) then
+		return
+	end
+	profile.awayGold = (profile.awayGold or 0) + math.max(1, math.floor(income(profile) * Config.AwayRate * Config.AwayCap))
+	player:SetAttribute("AwayGold", nil)
+	task.wait()
+	player:SetAttribute("AwayGold", profile.awayGold)
+end)
+awayCommand.Parent = game:GetService("TextChatService")
 
 -- Fired to a player each time their pets pay out, so the client can pop "+N$"
 -- over each pet's head.
