@@ -885,7 +885,7 @@ local guide = { -- the egg guide: the beam and its two ends
 	-- assets/ui/GuideArrowSolid.png: a fat solid chevron pointing along the trail, flat FFFF00
 	-- like the rings (QM, Oct 3: option C, a little closer together). Until it's uploaded,
 	-- the old outlined chevron (assets/ui/GuideArrow.png).
-	ARROW = "", -- GuideArrowSolid.png (awaiting upload)
+	ARROW = "rbxassetid://88361816101102", -- GuideArrowSolid.png
 	OLD_ARROW = "rbxassetid://101032148634562",
 	AHEAD = 6, -- studs in front of the pet where the trail starts
 	HEIGHT = 1.4, -- studs up: over the raised ground patches
