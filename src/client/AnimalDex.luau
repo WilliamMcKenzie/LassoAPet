@@ -144,8 +144,9 @@ local function image(parent, id, size, position, anchor)
 	return i
 end
 
--- Buttons spring: they swell a little under the mouse, squash when pressed and
--- bounce back when let go (QM: bouncier buttons).
+-- The arrows spring: they swell a little under the mouse, squash when pressed and
+-- bounce back when let go (QM). Nothing else on the page animates but the
+-- examined animal popping in.
 local HOVER, PRESS = 1.12, 0.86
 local SPRING = TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local SQUASH = TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -238,8 +239,6 @@ function showGrid(index)
 		card.Activated:Connect(function()
 			showAnimal(kind)
 		end)
-		bouncy(card)
-		popIn(card, (i - 1) * 0.04) -- the cards pop in one after another
 		card.Parent = page
 	end
 end
@@ -255,7 +254,6 @@ function arrow(position, turn, onClick)
 	a.Position = position
 	a.Activated:Connect(onClick)
 	bouncy(a)
-	popIn(a, 0.08)
 	a.Parent = page
 	return a
 end
