@@ -293,7 +293,10 @@ function showAnimal(kind)
 	end
 	local seen = ridden()[kind]
 
-	local run = image(page, "", UDim2.fromOffset(400, 400), UDim2.fromOffset(PAGE.X / 2, 375), Vector2.new(0.5, 0.5)) -- its feet over the divider, as in the mockup
+	-- Its feet a little over the divider, as in the mockup, and drawn over
+	-- everything on the page, the bottom panel included (QM).
+	local run = image(page, "", UDim2.fromOffset(400, 400), UDim2.fromOffset(PAGE.X / 2, 395), Vector2.new(0.5, 0.5))
+	run.ZIndex = 5
 	run.ImageRectSize = Vector2.new(FRAME, FRAME)
 	run.ImageColor3 = if seen then Color3.new(1, 1, 1) else Color3.new(0, 0, 0)
 	popIn(run) -- bounces in rather than just appearing (QM)
