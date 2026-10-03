@@ -96,6 +96,8 @@ local Horse = {} -- the methods every variant shares
 
 -- A kind of animal: its own model data and rarity, Horse's methods.
 -- points (optional): { seat = Vector3, neck = { center = Vector3, radius = number },
+-- seatOnNeck = true (the seat rides on the neck bone, e.g. a squid's mantle, which
+-- its run swings about: the rider moves with it but stays upright),
 -- size = number (the whole animal scaled up from its model; by default sized to its
 -- tier, Config.PetTiers) }
 local function variant(name, data, rarity, points)
@@ -106,6 +108,7 @@ local function variant(name, data, rarity, points)
 		data = data,
 		landAt = landAt(data),
 		seat = points.seat or SEAT,
+		seatOnNeck = points.seatOnNeck,
 		neckLoop = points.neck or NECK_LOOP,
 		size = points.size or tierSize(name, data),
 	}, { __index = Horse })
@@ -218,6 +221,10 @@ function Horse:update(dt, speed, turn)
 end
 
 function Horse:getSeatCFrame()
+	if self.seatOnNeck then
+		local at = self.neck.CFrame * CFrame.new((self.seat - self.pivots.neck) * self.size)
+		return CFrame.new(at.Position) * self.root.CFrame.Rotation
+	end
 	return self.root.CFrame * CFrame.new((self.seat - self.pivots.root) * self.size)
 end
 

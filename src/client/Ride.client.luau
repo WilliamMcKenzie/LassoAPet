@@ -2352,6 +2352,16 @@ local function updateRider(dt)
 		hrp.CFrame = mount.animal:getSeatCFrame() * SEAT_OFFSET
 		if phase ~= "finish" or heroLeap then -- falling off the end: the camera stays at the edge
 			focus = Vector3.new(mount.x, math.max(mount.hop or 0, 0) * 0.85, mount.z) -- the camera rises with a leap, keeping the pet in view
+			if mount.animal.seatOnNeck then
+				-- A squid's rider sits far out on its leaning mantle: the camera follows the
+				-- rider instead (QM), eased so the glide's surges don't shake it.
+				-- (at the rider's height, so they stay in the middle of the view)
+				local want = hrp.Position - Vector3.new(0, 4, 0)
+				vfx.riderFocus = if vfx.riderFocus then vfx.riderFocus:Lerp(want, 1 - math.exp(-10 * dt)) else want
+				focus = vfx.riderFocus
+			else
+				vfx.riderFocus = nil
+			end
 		end
 	end
 	if carried then
