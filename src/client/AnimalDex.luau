@@ -54,8 +54,8 @@ local PAGES = {
 		examine = "rbxassetid://114285728618249", -- assets/ui/dex/DexMeadowExamine.png
 	},
 	Desert = {
-		grid = "rbxassetid://138809048394907", -- assets/ui/dex/DexDesert.png
-		examine = "rbxassetid://132721267846238", -- assets/ui/dex/DexDesertExamine.png
+		grid = "rbxassetid://94266934416109", -- assets/ui/dex/DexDesert.png
+		examine = "rbxassetid://84664609464522", -- assets/ui/dex/DexDesertExamine.png
 	},
 }
 
