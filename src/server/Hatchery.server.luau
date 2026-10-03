@@ -264,7 +264,8 @@ finishCourse.OnServerInvoke = function(player)
 	finished[player] = os.clock()
 	local pool, total = {}, 0
 	for _, biome in Config.Biomes do
-		for kind, weight in biome.Herd or {} do
+		-- (a borrowed placeholder herd would count its animals twice)
+		for kind, weight in (if biome.PlaceholderHerd then {} else biome.Herd or {}) do
 			if isAnimal(kind) then
 				total += weight
 				table.insert(pool, { kind = kind, upTo = total })

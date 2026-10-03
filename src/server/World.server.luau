@@ -1,8 +1,8 @@
 -- The map itself (ground, corridor walls, obstacles, home base, pen and egg
 -- nest) is a saved model: src/world/World.rbxmx, synced by Rojo into
 -- Workspace.World, so it can be edited by hand in Studio. This script only sets
--- the sky, puts the finish line at the end of the course, turns on the live
--- colour attributes and marks the world ready.
+-- the sky, lays the Godlands floor, puts the finish line at the end of the
+-- course, turns on the live colour attributes and marks the world ready.
 
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -42,6 +42,14 @@ if startLine then
 	finish.Parent = world
 end
 
+-- The Godlands floor: its tracks in a random order (Server/GodlandsGround).
+local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
+for i, biome in Config.Biomes do
+	if biome.Name == "Godlands" then
+		require(script.Parent.GodlandsGround).build(world, WorldColors.biomeStart(i), biome.Length)
+	end
+end
+
 -- Resize the medium and large obstacles to their tier's size (Config.ObstacleScale),
 -- about the middle of their footprint on the floor, so they stay put and grounded.
 for _, model in world.Obstacles:GetChildren() do
@@ -72,5 +80,5 @@ for _, folderName in { "Ground", "Walls", "Obstacles", "Decor" } do
 		end
 	end
 end
-require(ReplicatedStorage.Shared.WorldColors).watch(world)
+WorldColors.watch(world)
 world:SetAttribute("Ready", true)

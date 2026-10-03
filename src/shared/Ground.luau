@@ -1,16 +1,17 @@
 -- Floor height under a point. Most of the floor's top is at y = 0; patches
 -- in World.Ground can stand higher (the desert's sandstone) or sit lower (the
--- meadow's dirt). They're laid out on an 8-stud grid (tools/desert_ground.py,
--- tools/meadow_ground.py), so the height is looked up per 8-stud cell.
+-- meadow's dirt). They're laid out on the 4-stud checker (8-stud cells in most
+-- biomes, tools/desert_ground.py; single tiles in the Godlands, Server/GodlandsGround),
+-- so the height is looked up per 4-stud cell.
 
-local CELL = 8
+local CELL = 4
 
 local Ground = {}
 
 local heights -- [cell key] = top y, only for cells off y = 0
 
 local function key(i, j)
-	return (i + 4096) * 8192 + (j + 4096)
+	return (i + 16384) * 32768 + (j + 16384)
 end
 
 local function load()
