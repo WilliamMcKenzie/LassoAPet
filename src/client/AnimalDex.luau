@@ -59,27 +59,24 @@ local PAGES = {
 	},
 }
 
--- Each animal running: its sprite sheets (tools/dex_sheets.py), 12 frames of
--- 256 px a sheet, 4 across and 3 down, with how many frames it has in all and
--- the seconds a frame shows (as its GIF).
+-- Each animal running: its sprite sheets (tools/dex_sheets.py), 25 frames of
+-- 192 px a sheet, 5 across and 5 down, with how many frames it has in all and
+-- the seconds a frame shows (as its GIF). They're all kept loaded (see the end)
+-- so an animal plays smoothly the first time it's shown.
 local SHEETS = {
-	Horse = { frames = 24, time = 0.03, "rbxassetid://117214923442803", "rbxassetid://92016581002992" },
-	Pinto = { frames = 24, time = 0.03, "rbxassetid://90941968473030", "rbxassetid://122380495096996" },
-	Pig = { frames = 24, time = 0.03, "rbxassetid://72090209789482", "rbxassetid://126968575360177" },
-	Fish = { frames = 24, time = 0.03, "rbxassetid://125040909461882", "rbxassetid://134214794380576" },
-	Rhino = { frames = 24, time = 0.03, "rbxassetid://117539225187822", "rbxassetid://82166405562428" },
-	Unicorn = { frames = 24, time = 0.03, "rbxassetid://108504409647134", "rbxassetid://93485365774832" },
-	Cactus = { frames = 20, time = 0.03, "rbxassetid://82051306178813", "rbxassetid://94793179997595" },
-	Scorpion = { frames = 15, time = 0.03, "rbxassetid://73657171295559", "rbxassetid://120466565792248" },
-	Sandworm = { frames = 20, time = 0.03, "rbxassetid://80049980661652", "rbxassetid://130219763355091" },
-	SpineLizard = { frames = 18, time = 0.03, "rbxassetid://114781703701436", "rbxassetid://87428707694342" },
-	Snake = {
-		frames = 48, time = 0.05,
-		"rbxassetid://123045726352659", "rbxassetid://101226423450679",
-		"rbxassetid://122324825847876", "rbxassetid://132873469174940",
-	},
+	Horse = { frames = 24, time = 0.03, "rbxassetid://120149236853502" },
+	Pinto = { frames = 24, time = 0.03, "rbxassetid://126037490360673" },
+	Pig = { frames = 24, time = 0.03, "rbxassetid://114358725443293" },
+	Fish = { frames = 24, time = 0.03, "rbxassetid://105026411084404" },
+	Rhino = { frames = 24, time = 0.03, "rbxassetid://108540506579286" },
+	Unicorn = { frames = 24, time = 0.03, "rbxassetid://96425037730261" },
+	Cactus = { frames = 20, time = 0.03, "rbxassetid://109623848986836" },
+	Scorpion = { frames = 15, time = 0.03, "rbxassetid://113606148401403" },
+	Sandworm = { frames = 20, time = 0.03, "rbxassetid://79124427569630" },
+	SpineLizard = { frames = 18, time = 0.03, "rbxassetid://116109970242443" },
+	Snake = { frames = 48, time = 0.05, "rbxassetid://74812837390041", "rbxassetid://104986890781116" },
 }
-local FRAME, PER_SHEET = 256, 12
+local FRAME, PER_SHEET, SHEET_COLUMNS = 192, 25, 5
 
 -- Each animal's bio; one without its own gets PLACEHOLDER_BIO until QM writes them.
 local PLACEHOLDER_BIO = "Description feijwufjewuejfw lorem ipsum" -- QM's placeholder
@@ -288,7 +285,7 @@ function showAnimal(kind)
 			local f = math.floor(t / sheets.time) % sheets.frames
 			local k = f % PER_SHEET
 			run.Image = sheets[f // PER_SHEET + 1]
-			run.ImageRectOffset = Vector2.new((k % 4) * FRAME, (k // 4) * FRAME)
+			run.ImageRectOffset = Vector2.new((k % SHEET_COLUMNS) * FRAME, (k // SHEET_COLUMNS) * FRAME)
 		end
 		step(0)
 		animate = RunService.RenderStepped:Connect(step)
@@ -391,8 +388,11 @@ player:GetAttributeChangedSignal("Ridden"):Connect(function()
 	end
 end)
 
--- Load the art ahead so the page doesn't pop in blank.
-task.spawn(function()
+-- Load the art ahead and keep it loaded: every page, card and sprite sheet is
+-- drawn all the time (1 px, nearly see-through, on a screen of its own that's
+-- always on), so nothing pops in blank or plays choppy the first time it's seen.
+-- PreloadAsync alone left the sheets to load as they first played.
+do
 	local ids = { ARROW }
 	for _, p in PAGES do
 		table.insert(ids, p.grid)
@@ -408,7 +408,24 @@ task.spawn(function()
 			end
 		end
 	end
-	game:GetService("ContentProvider"):PreloadAsync(ids)
-end)
+	for _, entry in order do
+		table.insert(ids, PetFaces.HEADSHOTS[entry.kind] or "")
+	end
+	local warm = Instance.new("ScreenGui")
+	warm.Name = "AnimalDexWarm"
+	warm.ResetOnSpawn = false
+	for _, id in ids do
+		local keep = Instance.new("ImageLabel")
+		keep.BackgroundTransparency = 1
+		keep.Size = UDim2.fromOffset(1, 1)
+		keep.Image = id
+		keep.ImageTransparency = 0.99
+		keep.Parent = warm
+	end
+	warm.Parent = player:WaitForChild("PlayerGui")
+	task.spawn(function()
+		game:GetService("ContentProvider"):PreloadAsync(warm:GetChildren())
+	end)
+end
 
 return AnimalDex

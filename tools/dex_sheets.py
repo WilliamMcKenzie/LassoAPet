@@ -1,8 +1,10 @@
 """Animal dictionary art (QM, Oct 3): each pet's run GIF (tools/pet_headshots.py, the
 transparent PetX.gif) cut into sprite sheets Roblox can play, since an ImageLabel
-can't play a GIF. 24 frames of 512 px become two 4 x 3 sheets of 256 px frames
-(1024 x 768 each, under Roblox's 1024 px limit): DexX_1.png holds frames 1-12,
-DexX_2.png frames 13-24. AnimalDex.luau steps through them.
+can't play a GIF. The 512 px frames shrink to 192 px and go 5 x 5 to a sheet
+(960 x 960, under Roblox's 1024 px limit): DexX_1.png holds frames 1-25, DexX_2.png
+the next 25, and so on. AnimalDex.luau steps through them. (192 px rather than
+256: every sheet stays loaded so the animals play smoothly the first time, and
+this keeps that to about a third of the memory.)
 
 Run: python3 tools/dex_sheets.py <gif_dir> <Kind> [<Kind> ...]
 """
@@ -12,7 +14,7 @@ import sys
 
 from PIL import Image
 
-FRAME, COLS, ROWS = 256, 4, 3
+FRAME, COLS, ROWS = 192, 5, 5
 OUT = os.path.join(os.path.dirname(__file__), "..", "assets", "ui", "dex")
 
 
