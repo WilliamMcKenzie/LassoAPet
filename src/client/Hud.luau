@@ -25,6 +25,7 @@ local IMAGES = {
 	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
+	continue = { id = "rbxassetid://124255755969598", size = Vector2.new(960, 308) }, -- Continue.png
 	dodge = { id = "rbxassetid://96827860827213", size = Vector2.new(1423, 115) },
 	sunburst = { id = "rbxassetid://130261551778736", size = Vector2.new(1995, 1996) }, -- white rays, behind TAKE EGG
 	vignette = { id = "rbxassetid://102545209742676", size = Vector2.new(512, 512) }, -- white; clear to 60% out, full only in the corners
@@ -145,6 +146,8 @@ local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one 
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
+local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
+local CONTINUE_GAP = 12 -- between Continue and the Home button under it
 local tip, tipText -- the fail screen's tooltip in place of "+$N" (Hud.setTip), and its text
 local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at the machine
 -- The first-time tutorial's stage (Hud.setTutorial): nil when it's off, "bare"
@@ -314,7 +317,7 @@ local function setCash(amount)
 	rideCash.text.Text = money(amount)
 end
 
-function Hud.init(onAction, onHome, onRide)
+function Hud.init(onAction, onHome, onRide, onContinue)
 	-- With ShowHud off the HUD is built but never parented, so nothing shows.
 	local playerGui = Config.ShowHud and Players.LocalPlayer:WaitForChild("PlayerGui") or nil
 	if not Config.ShowHud then
@@ -378,6 +381,9 @@ function Hud.init(onAction, onHome, onRide)
 
 	home = button(rideRoot, "home", fit("home", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onHome)
 	home.Visible = false
+	local overHome = UDim2.new(0.5, 0, 1, -MARGIN - fit("home", BUTTON_WIDTH).Y.Offset - CONTINUE_GAP)
+	continueButton = button(rideRoot, "continue", fit("continue", BUTTON_WIDTH), BOTTOM_CENTER, overHome, onContinue)
+	continueButton.Visible = false
 	-- Sprint, bottom left: held down, not clicked. Remembers the touch or click that
 	-- pressed it, so sliding a finger off the button doesn't drop the sprint.
 	sprint = button(rideRoot, "sprint", fit("sprint", SPRINT_WIDTH), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
@@ -721,6 +727,7 @@ function Hud.show(visible)
 		message.Text = ""
 		banner.Visible = false
 		home.Visible = false
+		Hud.showContinue(nil)
 	end
 	ride.Visible = false -- comes back when the ride prompt shows again
 	gold.Visible = not visible and tutorial ~= "bare"
@@ -1158,6 +1165,35 @@ function Hud.showHome(visible)
 		gained.scale.Scale = 0
 		TweenService:Create(gained.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	end
+end
+
+-- The fail screen's Continue, above Home (QM's mockup): nil hides it, "ready"
+-- shows it and "waiting" (the Robux prompt is up) dims it and Home (Ride ignores
+-- Home until the prompt closes).
+function Hud.showContinue(state)
+	continueButton.Visible = state ~= nil
+	local dim = if state == "waiting" then 0.5 else 0
+	continueButton.ImageTransparency = dim
+	home.ImageTransparency = dim
+	if state == "ready" and not continueButton:GetAttribute("Shown") then
+		continueButton:SetAttribute("Shown", true)
+		continueButton.UIScale.Scale = 0
+		TweenService:Create(continueButton.UIScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	elseif state == nil then
+		continueButton:SetAttribute("Shown", nil)
+	end
+end
+
+-- Continued after a fail (Ride.client): the fail screen goes and the ride's HUD
+-- comes back as it was, the way out or the ride back.
+function Hud.resume(returning)
+	message.Text = ""
+	banner.Visible = false
+	home.Visible = false
+	Hud.showContinue(nil)
+	gained.row.Visible = false
+	Hud.setTip(nil)
+	Hud.setReturning(returning)
 end
 
 -- A tooltip in place of the fail screen's "+$N" (riding into a locked gate:

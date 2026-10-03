@@ -371,6 +371,14 @@ return {
 	EggRevealBurst = true, -- spinning sunburst behind the real card
 	LandingGrace = 0.8,
 	TurnGrace = 2,
+	-- Continue (QM, Oct 3): after a crash or a buck-off, pay Robux to keep riding
+	-- from where it happened (Shop.server, Ride.client). The developer product is
+	-- made on the Creator Dashboard; until its id is here the button only shows in
+	-- Studio, where it's free.
+	ContinueProductId = 0,
+	ContinuePrice = 100, -- Robux, as set on the product
+	ContinueGrace = 1.5, -- seconds nothing can crash you once you're back on
+	ContinueClear = 14, -- studs: obstacles this close to where you crashed are knocked away
 	-- Ride back's vignette: edges only, soft, breathing slowly, to add tension without
 	-- covering the lane. Its shape (clear middle 60%) is baked into the image.
 	VignetteColor = Color3.fromRGB(210, 30, 30),

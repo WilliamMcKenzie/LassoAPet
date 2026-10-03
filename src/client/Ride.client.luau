@@ -280,6 +280,7 @@ local herdClock = workspace:GetServerTimeNow()
 local hold, grace = 0, 0
 local warpLevel -- /biome: the biome you were put in, so its gate (and those before) let you through
 local transfer, tumble, carried
+local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
 local LEAP_FROM = 8 -- studs before the start line where the leap starts
@@ -449,6 +450,10 @@ local function cleanup()
 		carried.part:Destroy()
 		carried = nil
 	end
+	if vfx.revive and vfx.revive.carried then
+		vfx.revive.carried.part:Destroy() -- the egg kept for a Continue that wasn't bought
+	end
+	vfx.revive = nil
 	Lasso.stop()
 	cutscene = nil
 	heroLeap = nil
@@ -803,6 +808,16 @@ local function fail(reason, tip)
 	Hud.setTip(tip) -- in place of the "+$N" the fail screen shows
 	local hrp, humanoid = character()
 	local dir = (phase == "return" or phase == "home") and 1 or -1 -- travelDir() is defined further down
+	-- Continue (Config.ContinueProductId): a crash or buck-off on the way out or
+	-- back can be bought off, picking up right here on the same kind of animal,
+	-- with the egg. Not into a locked gate, and not in the tutorial.
+	local gate = WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1))
+	vfx.revive = nil
+	if mount and (reason == "CRASH!" or reason == "BUCKED OFF") and (phase == "outbound" or phase == "return")
+		and not (phase == "outbound" and mount.z < gate + 2.4) and not Tutorial.active
+		and (Config.ContinueProductId ~= 0 or RunService:IsStudio()) then
+		vfx.revive = { kind = mount.kind, x = mount.x, z = mount.z, yaw = mount.yaw, speed = mount.speed, phase = phase, dir = dir }
+	end
 	phase = "ended"
 	cutscene = nil
 	Hud.setCutscene(false)
@@ -812,7 +827,12 @@ local function fail(reason, tip)
 	end
 	transfer = nil
 	if carried then
-		carried.part:Destroy()
+		if vfx.revive then
+			vfx.revive.carried = carried -- put away until Continue or Home
+			carried.part.Parent = nil
+		else
+			carried.part:Destroy()
+		end
 		carried = nil
 	end
 	Outline.set(nil)
@@ -828,13 +848,14 @@ local function fail(reason, tip)
 	task.delay(0.8, function()
 		if phase == "ended" then
 			Hud.showHome(true)
+			Hud.showContinue(if vfx.revive then "ready" else nil)
 		end
 	end)
 end
 
 local function goHome()
-	if phase ~= "ended" then
-		return
+	if phase ~= "ended" or (vfx.revive and vfx.revive.asked) then
+		return -- (not while the Continue prompt is up)
 	end
 	Hud.showHome(false)
 	local pen = myPen()
@@ -1206,7 +1227,6 @@ end
 -- slowed, by key, with the seconds left, and how many studs each has fallen behind
 -- its place in the shared stampede (kept: a slowed animal never sprints to catch up).
 -- Strays carry their own entity.frostLeft. Only this player's copy slows, like slow-mo.
-local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.frostLeft = {}
 vfx.frostLag = {}
 vfx.frostSlow = 0 -- the share of its speed a slowed animal loses (the running Frost's Slow)
@@ -2686,7 +2706,57 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
 end)
 
-Hud.init(onAction, goHome, rideFromHome)
+-- Continue on the fail screen: the server asks for the Robux (Shop.server) and
+-- answers true once it's paid, false if it was cancelled. Paid: back on the same
+-- kind of animal where you crashed, with your egg and this ride's cash, the
+-- obstacles and animals right there knocked away and a moment of grace.
+function vfx.askContinue()
+	local revive = vfx.revive
+	if phase == "ended" and revive and not revive.asked then
+		revive.asked = true
+		Hud.showContinue("waiting")
+		ReplicatedStorage:WaitForChild("ContinueRide"):FireServer()
+	end
+end
+
+ReplicatedStorage:WaitForChild("ContinueRide").OnClientEvent:Connect(function(paid)
+	local revive = vfx.revive
+	local hrp, humanoid = character()
+	if phase ~= "ended" or not revive or not hrp then
+		return
+	end
+	if not paid then
+		revive.asked = false
+		Hud.showContinue("ready")
+		return
+	end
+	vfx.revive = nil
+	for _, o in obstacles do
+		if not o.smashed and Vector2.new(o.x - revive.x, o.z - revive.z).Magnitude < Config.ContinueClear then
+			smash(o, revive.dir, if o.x >= revive.x then 1 else -1)
+		end
+	end
+	for _, entity in allAnimals() do
+		local dx = entity.x - revive.x
+		if not entity.popping and math.abs(dx) < Config.ContinueClear and math.abs(entity.z - revive.z) < Config.ContinueClear then
+			knock(entity, dx)
+		end
+	end
+	tumble = nil
+	mount = newEntity(revive.x, revive.z, revive.yaw, revive.kind)
+	mount.animal:setSaddled(true)
+	mount.speed = revive.speed
+	carried = revive.carried
+	if carried then
+		carried.part.Parent = workspace
+	end
+	phase, hold, grace = revive.phase, holdTime(mount), Config.ContinueGrace
+	humanoid.PlatformStand = false
+	humanoid.Sit = true
+	Hud.resume(phase == "return")
+end)
+
+Hud.init(onAction, goHome, rideFromHome, vfx.askContinue)
 
 player.CharacterAdded:Connect(function()
 	if phase ~= "idle" then
