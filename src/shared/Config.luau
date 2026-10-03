@@ -20,10 +20,11 @@ return {
 			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
 			WallColors = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
 			-- Which animals run in this biome's stampede and how often (names are modules
-			-- in Shared/Animals). QM's spawn table (Oct 2): chances out of 1. They're
+			-- in Shared/Animals). QM's spawn table (Oct 3): chances out of 1. They're
 			-- weights, so a biome that doesn't add up to exactly 1 still works. Nest eggs
-			-- use the same odds (Nests.server).
-			Herd = { Horse = 0.22, Pinto = 0.22, Pig = 0.24, Fish = 0.2, Rhino = 0.1, Unicorn = 0.02 },
+			-- use the same odds (Nests.server). A 0 never spawns but keeps the animal on
+			-- the biome's page in the animal dictionary.
+			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Fish = 0.22, Rhino = 0.13, Unicorn = 0.05 },
 			-- Dirt patches in the walls' colours, a stud below the grass
 			-- (tools/meadow_ground.py); see the Desert's Patches.
 			Patches = {
@@ -35,7 +36,7 @@ return {
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
-			Herd = { Cactus = 0.4, Scorpion = 0.3, Sandworm = 0.15, SpineLizard = 0.13, Snake = 0.02 },
+			Herd = { Cactus = 0.3, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05 },
 			-- Patches of other ground in the floor (parts named after them in
 			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
 			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
@@ -59,7 +60,7 @@ return {
 			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
-			Herd = { Penguin = 0.3, Boar = 0.28, Snowman = 0.22, IceGolem = 0.15, Icebringer = 0.05 },
+			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, Icebringer = 0.06 },
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
@@ -78,7 +79,7 @@ return {
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			Herd = { Fish = 0.3, Starfish = 0.35, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, Kraken = 0.05 }, -- adds to 1.25 (School of Fish guessed like the King Crab)
+			Herd = { Fish = 0, Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, Kraken = 0.05 }, -- adds to 1.0
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -163,9 +164,9 @@ return {
 			Length = math.huge, -- endless
 			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
 			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)
-			-- Placeholder until the Godlands has animals (and bosses) of its own: the Ocean's.
+			-- Placeholder until the Godlands has animals (and bosses) of its own: just Fish (QM).
 			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
-			Herd = { Fish = 0.3, Starfish = 0.35, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, Kraken = 0.05 },
+			Herd = { Fish = 1 },
 			PlaceholderHerd = true,
 			Patches = {
 				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
