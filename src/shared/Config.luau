@@ -160,7 +160,7 @@ return {
 	GateColor = Color3.fromRGB(255, 204, 40),
 	CourseHalfWidth = 56,
 	CourseLength = 16192, -- all the biomes' lengths added up
-	HomeHalfWidth = 112,
+	HomeHalfWidth = 144, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3)
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
 	-- Ride

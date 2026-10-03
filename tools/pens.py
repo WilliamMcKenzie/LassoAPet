@@ -12,7 +12,15 @@ brace in every span, and a gap in one side. Three stand along the back wall
 with their gaps facing the start line, and one sits in each front corner of the
 base with its gap facing in. Each covers exactly N x N floor tiles.
 
-Each PenN model also holds invisible markers the scripts read:
+Pens grow as you unlock zones (QM, Oct 3): SIZES[level - 1] tiles a side, from
+12 at the start to 17 (about 2x the area) once the Ocean is open. A pen grows
+away from the wall it backs onto, so its back edge stays put. Each PenN holds
+a Sizes folder with one SizeK model per level: its fence, plus copies of the
+markers below laid out for that size. PenLevel.server shows the owner's size
+and moves the live markers onto that size's copies.
+
+Each PenN model also holds invisible markers the scripts read (laid out for
+size 1 here):
   Spawn  where the owner appears, outside the gap
   Sign   above the gap; the server hangs the owner's picture and name on it
   Area   the ground the pets wander over
@@ -33,18 +41,19 @@ import partlib  # noqa: E402
 OUT = Path(__file__).resolve().parent.parent / "src" / "world" / "Pens.rbxmx"
 
 TILE = 4  # the floor's checker squares
-N = 12  # each pen covers exactly N x N floor tiles (so the pen's tiles can be recoloured)
-SIZE = N * TILE
+SIZES = [12, 14, 16, 17]  # tiles a side at pen level 1..4 (Meadow, Desert, Tundra, Ocean)
 GATE = 10
-# Pens in claim order: (centre x, centre z, the way the open side faces).
-# Three along the back wall facing the start line, and one in each front corner
-# of the base facing in. Edges sit on tile lines; the base is x -112..112, z 0..104.
+HALF_W, DEPTH = 144, 144  # the home base: x -144..144, z 0..144 inside its walls
+# Pens in claim order: (back edge centre x, z, the way the open side faces, which
+# way an odd size's extra tile goes along the pen's local x). Three along the
+# back wall facing the start line, and one in each front corner of the base
+# facing in. Edges sit on tile lines at every size.
 PENS = [
-    (0, 80, "front"),
-    (-56, 80, "front"),
-    (56, 80, "front"),
-    (-88, 24, "right"),
-    (88, 24, "left"),
+    (0, DEPTH, "front", 1),
+    (-76, DEPTH, "front", 1),
+    (76, DEPTH, "front", 1),
+    (-HALF_W, 32, "right", 1),
+    (HALF_W, 32, "left", -1),
 ]
 # Local pen frame: centred on the pen, open side at z = -SIZE / 2 facing -z.
 # These map it onto the world for each facing.
@@ -53,9 +62,7 @@ FACING = {
     "right": ((0, 0, -1), (0, 1, 0), (1, 0, 0)),  # open side faces +x
     "left": ((0, 0, 1), (0, 1, 0), (-1, 0, 0)),  # open side faces -x
 }
-FRONT = -SIZE / 2
-SPAWN_Z = FRONT - 6
-SLOTS = [(0, FRONT + 6)] + [(x, FRONT + dz) for dz, xs in ((20, (-12, 12)), (34, (-14, 0, 14))) for x in xs]
+SLOTS = [(0, 6)] + [(x, dz) for dz, xs in ((20, (-12, 12)), (34, (-14, 0, 14))) for x in xs]  # from the gap
 
 POST_COLOR = (62, 62, 72)
 RAIL_COLOR = (204, 108, 52)
@@ -70,7 +77,16 @@ def rot_y(deg):
     return partlib.Ry(deg)[:3, :3]
 
 
-def pen_parts(cx, cz, facing):
+def pen_parts(bx, bz, facing, odd, n=SIZES[0]):
+    """The pen at n tiles a side; (bx, bz) is the middle of its back edge."""
+    SIZE = n * TILE
+    FRONT = -SIZE / 2
+    SPAWN_Z = FRONT - 6
+    M = np.array(FACING[facing], float)
+    # centre: half a size in from the back edge; an odd size sits half a tile off
+    # centre along the pen so its edges stay on tile lines
+    shift = odd * TILE / 2 if n % 2 else 0
+    cx, _, cz = M @ np.array([shift, 0, -SIZE / 2]) + np.array([bx, 0, bz])
     parts = []  # (name, size, centre, rotation 3x3, colour, visible), local frame first
 
     def box(name, lo, hi, color=RAIL_COLOR, visible=True):
@@ -124,9 +140,8 @@ def pen_parts(cx, cz, facing):
     box("Area", (x0 + 4, 0, z0 + 4), (x1 - 4, 1, z1 - 4), visible=False)
     box("Tiles", (x0, 0, z0), (x1, 0.2, z1), visible=False)  # the N x N floor tiles under the pen
     for i, (sx, sz) in enumerate(SLOTS, 1):
-        box(f"Slot{i}", (sx - 2, 0, sz - 2), (sx + 2, 1, sz + 2), visible=False)
+        box(f"Slot{i}", (sx - 2, 0, FRONT + sz - 2), (sx + 2, 1, FRONT + sz + 2), visible=False)
 
-    M = np.array(FACING[facing], float)
     out = []
     for name, size, centre, R, color, visible in parts:
         world = M @ centre + np.array([cx, 0, cz])
@@ -161,6 +176,9 @@ def xml_part(ref, name, size, centre, R, color, visible):
     )
 
 
+MARKERS = ("Spawn", "Sign", "Area", "Tiles")
+
+
 def write():
     n = [0]
 
@@ -168,25 +186,38 @@ def write():
         n[0] += 1
         return f"RBX{n[0]:08X}"
 
-    out = ['<roblox version="4">\n', f'<Item class="Folder" referent="{ref()}"><Properties>\n<string name="Name">Pens</string>\n</Properties>\n']
+    def folder(name):
+        return f'<Item class="Folder" referent="{ref()}"><Properties>\n<string name="Name">{name}</string>\n</Properties>\n'
+
+    def model(name):
+        return f'<Item class="Model" referent="{ref()}"><Properties>\n<string name="Name">{name}</string>\n</Properties>\n'
+
+    def markers(parts):
+        out = [xml_part(ref, *p) for p in parts if p[0] in MARKERS]
+        out.append(folder("Slots"))
+        out += [xml_part(ref, *p) for p in parts if p[0].startswith("Slot")]
+        out.append("</Item>\n")
+        return out
+
+    out = ['<roblox version="4">\n', folder("Pens")]
     for i, pen in enumerate(PENS, 1):
-        out.append(f'<Item class="Model" referent="{ref()}"><Properties>\n<string name="Name">Pen{i}</string>\n</Properties>\n')
-        slots = []
-        for part in pen_parts(*pen):
-            if part[0].startswith("Slot"):
-                slots.append(part)
-            else:
-                out.append(xml_part(ref, *part))
-        out.append(f'<Item class="Folder" referent="{ref()}"><Properties>\n<string name="Name">Slots</string>\n</Properties>\n')
-        out += [xml_part(ref, *s) for s in slots]
+        out.append(model(f"Pen{i}"))
+        out += markers(pen_parts(*pen))  # the live markers, at size 1
+        out.append(folder("Sizes"))
+        for k, size in enumerate(SIZES, 1):
+            parts = pen_parts(*pen, size)
+            out.append(model(f"Size{k}"))
+            out += [xml_part(ref, *p) for p in parts if p[5]]  # the fence
+            out += markers(parts)
+            out.append("</Item>\n")
         out.append("</Item>\n</Item>\n")
     out.append("</Item>\n</roblox>\n")
     OUT.write_text("".join(out))
 
 
-def visible_parts(pen):
+def visible_parts(pen, n=SIZES[0]):
     out = []
-    for name, size, centre, R, color, visible in pen_parts(*pen):
+    for name, size, centre, R, color, visible in pen_parts(*pen, n):
         if visible:
             cf = np.eye(4)
             cf[:3, :3] = R
@@ -195,27 +226,24 @@ def visible_parts(pen):
     return out
 
 
-def preview(path):
+def preview(path, n=SIZES[0]):
     parts = []
     for pen in PENS:
-        parts += visible_parts(pen)
-        # stand-ins for pets wandering about
-        M = np.array(FACING[pen[2]], float)
-        for dx, dz, yaw in ((0, 8, 0), (-12, 22, 40), (10, 30, -70)):
-            p = M @ np.array([dx, 0, FRONT + dz]) + np.array([pen[0], 0, pen[1]])
-            cf = partlib.T(p[0], 2.5, p[2]) @ partlib.Ry(yaw)
-            parts.append(partlib.Part("Pet", (3, 5, 8), cf, (226, 130, 50), plain=True))
+        parts += visible_parts(pen, n)
+    W, D = HALF_W, DEPTH
     wall = (240, 160, 108)
-    for lo, hi in [((-120, 0, -8), (-112, 20, 104)), ((112, 0, -8), (120, 20, 104)), ((-120, 0, 104), (120, 20, 112)),
-                   ((-112, 0, -8), (-56, 20, 0)), ((56, 0, -8), (112, 20, 0))]:
+    for lo, hi in [((-W - 8, 0, -8), (-W, 20, D)), ((W, 0, -8), (W + 8, 20, D)), ((-W - 8, 0, D), (W + 8, 20, D + 8)),
+                   ((-W, 0, -8), (-56, 20, 0)), ((56, 0, -8), (W, 20, 0))]:
         lo, hi = np.array(lo, float), np.array(hi, float)
         parts.append(partlib.Part("Wall", hi - lo, partlib.T(*((lo + hi) / 2)), wall, plain=True))
     parts.append(partlib.Part("StartLine", (112, 0.2, 4), partlib.T(0, 0.1, -2), (30, 30, 30), plain=True))
-    img = partlib.render(parts, eye=(0, 130, -60), target=(0, 0, 50), W=1400, H=900, fov=62)
+    parts.append(partlib.Part("EggMachine", (12, 14, 12), partlib.T(-28, 7, 30), (255, 120, 190), plain=True))
+    img = partlib.render(parts, eye=(0, 170, -80), target=(0, 0, 66), W=1400, H=900, fov=62)
     img.save(path)
 
 
 if __name__ == "__main__":
     write()
     if len(sys.argv) > 1:
-        preview(sys.argv[1])
+        for k, n in enumerate(SIZES, 1):
+            preview(sys.argv[1].replace(".png", f"{k}.png"), n)
