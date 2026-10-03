@@ -109,7 +109,8 @@ local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
 -- The selected animal, top left (Hud.setSelected): an inventory slot a touch bigger.
-local SELECTED = { size = 160, top = 80, nameSize = 42, gui = nil, root = nil, kind = nil, face = nil }
+-- Turned off for the time being (QM, Oct 3): enabled = true brings it back.
+local SELECTED = { enabled = false, size = 160, top = 80, nameSize = 42, gui = nil, root = nil, kind = nil, face = nil }
 
 -- Action text from the ride -> which image the action button shows.
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
@@ -1254,6 +1255,9 @@ end
 
 -- Shows `kind` as the selected animal (top left), or nothing (nil).
 function Hud.setSelected(kind)
+	if not SELECTED.enabled then
+		return -- off for now (QM, Oct 3)
+	end
 	if kind == SELECTED.kind or not SELECTED.root then
 		return
 	end
