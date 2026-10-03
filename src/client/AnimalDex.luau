@@ -63,13 +63,10 @@ local SHEETS = {
 }
 local FRAME, PER_SHEET, FRAME_TIME = 256, 12, 0.03
 
+-- Each animal's bio; one without its own gets PLACEHOLDER_BIO until QM writes them.
+local PLACEHOLDER_BIO = "Description lorem ipsum dolor sit amet, consectetur adipiscing elit."
 local BIOS = {
 	Horse = "Very thoughtful, horse sends gifts to his friends each year.", -- QM's
-	Pinto = "Never sits still. Pinto has galloped every inch of the meadow twice.",
-	Pig = "Always first to dinner and last to leave. Surprisingly quick for a pig.",
-	Fish = "Nobody knows how Fish ended up in the meadow, least of all Fish.",
-	Rhino = "Rhino doesn't go around things. Rhino goes through them.",
-	Unicorn = "Shy and rarely seen. Wherever it lands, a rainbow follows.",
 }
 
 local AnimalDex = {}
@@ -253,7 +250,7 @@ function showAnimal(kind)
 	bio.TextYAlignment = Enum.TextYAlignment.Top
 	bio.Position = UDim2.fromOffset(36, DIVIDER + 45)
 	bio.Size = UDim2.fromOffset(PAGE.X - 72, 829 - DIVIDER - 70)
-	bio.Text = if seen then BIOS[kind] or "" else "Ride one to find out more."
+	bio.Text = if seen then BIOS[kind] or PLACEHOLDER_BIO else "Ride one to find out more."
 	bio.Parent = page
 end
 
