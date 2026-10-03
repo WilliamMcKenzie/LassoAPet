@@ -517,7 +517,7 @@ function Hud.init(onAction, onHome, onRide)
 	ride.Visible = false
 	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold mockup.
 	gold = button(homeRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
-	local total = label(gold, UDim2.fromOffset(0, ICON_HEIGHT * 0.4), UDim2.new(0.5, 0, 1, 2), 44, 5)
+	local total = label(gold, UDim2.fromOffset(0, ICON_HEIGHT * 0.4), UDim2.new(0.5, 0, 1, 2), 44, 3) -- 3px outline (QM)
 	total.AnchorPoint = Vector2.new(0.5, 1)
 	total.AutomaticSize = Enum.AutomaticSize.X
 	total.ZIndex = 2
