@@ -135,10 +135,14 @@ local function tierOf(kind)
 end
 
 -- An obstacle a bigger pet plowed into flies up and away and fades; it's back
--- for the next ride (cleanup). Only on this player's screen.
+-- for the next ride (cleanup). Everyone else sees it too (Riders.server), and
+-- on their screens it's back a few seconds later (remote).
 local SMASH_TIME = 0.7
-local function smash(o, dir, side)
+local function smash(o, dir, side, remote)
 	o.smashed = true
+	if not remote then
+		ReplicatedStorage.RideCue:FireServer("smash", o.x, o.z, dir, side)
+	end
 	local rng = Random.new()
 	local offset = Vector3.new(side * 10, 16, dir * 14)
 	local spin = CFrame.Angles(rng:NextNumber(-2, 2), rng:NextNumber(-2, 2), rng:NextNumber(-2, 2))
@@ -153,7 +157,7 @@ end
 local function unsmashAll()
 	for _, o in obstacles do
 		if o.smashed then
-			o.smashed = nil
+			o.smashed, o.remoteSmash = nil, nil
 			for _, p in o.parts do
 				p.part.CFrame, p.part.Transparency = p.cframe, p.transparency
 			end
@@ -281,6 +285,8 @@ local hold, grace = 0, 0
 local warpLevel -- /biome: the biome you were put in, so its gate (and those before) let you through
 local transfer, tumble, carried
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
+vfx.rideSync = ReplicatedStorage:WaitForChild("RideSync") -- multiplayer rides (Riders.server)
+vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
 local LEAP_FROM = 8 -- studs before the start line where the leap starts
@@ -713,6 +719,7 @@ startRide = function(model)
 	if fromHerd then
 		-- Jumped onto a stampede animal: it leaves the stampede and runs on with
 		-- you from where it is. Your own pet stays home.
+		vfx.rideCue:FireServer("take", fromHerd.n)
 		herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
 		mount = fromHerd
 		mount.popping, mount.hop, mount.dodge = nil, 0, 0
@@ -881,6 +888,7 @@ local function startTransfer(target)
 	release(old)
 	mount = nil
 	transfer = { target = target, old = old, t = 0, stage = "throw", from = hrp.Position }
+	vfx.rideCue:FireServer("lasso", target.n or false)
 end
 
 local function grabEgg()
@@ -1363,7 +1371,10 @@ end
 -- tumbling, then vanishes in a poof. It leaves the stampede for good.
 local flung = {}
 local FLING_TIME = 0.9
-local function knock(entity, dx)
+local function knock(entity, dx, remote)
+	if entity.n and not remote then
+		vfx.rideCue:FireServer("knock", entity.n, dx)
+	end
 	if entity.n then
 		taken[entity.n] = true
 		herd[entity.n] = nil
@@ -2074,6 +2085,7 @@ end
 
 local function startAbility(cfg)
 	local a = mount.ability
+	vfx.rideCue:FireServer("ability", cfg.Kind)
 	a.active = { kind = cfg.Kind, cfg = cfg, t = 0, fx = {} }
 	if cfg.Kind == "Charge" then
 		a.active.fx = chargeFx(mount)
@@ -2413,6 +2425,7 @@ local function updateRider(dt)
 		if t >= 1 then
 			local target = transfer.target
 			if target.n then
+				vfx.rideCue:FireServer("take", target.n)
 				herd[target.n], taken[target.n], target.n = nil, true, nil
 			else
 				table.remove(strays, table.find(strays, target))
@@ -2507,6 +2520,283 @@ local function updateHud()
 	end
 end
 
+-- Multiplayer rides (Riders.server): your ride goes out ~10 times a second, and
+-- everyone else's comes in. Each other rider gets their own copy of their mount
+-- here, moved smoothly between updates, with their character sat on it. What
+-- they do to the stampede (jumping on, lassoing, knocking animals flying,
+-- smashing obstacles, abilities) shows here too, for looks only: their
+-- abilities don't slow or scatter your copy of the stampede.
+vfx.SYNC_EVERY = 0.1 -- seconds between your ride's updates
+vfx.RIDER_STALE = 2 -- seconds without an update before a rider is taken off
+vfx.REMOTE_SMASH_BACK = 4 -- seconds before an obstacle someone else smashed is back
+vfx.riders = {} -- [player] = { entity, kind, mountCF, riderCF, vel, speed, scale, at, char, fx, fxEnd, rope }
+vfx.syncAt = 0
+vfx.syncing = false
+
+function vfx.sendRide()
+	local hrp = character()
+	if phase == "idle" or not hrp then
+		if vfx.syncing then
+			vfx.syncing = false
+			vfx.rideCue:FireServer("end")
+		end
+		return
+	end
+	local now = os.clock()
+	if now < vfx.syncAt then
+		return
+	end
+	vfx.syncAt = now + vfx.SYNC_EVERY
+	vfx.syncing = true
+	local root = mount and mount.animal.model.PrimaryPart
+	vfx.rideSync:FireServer(
+		if root then mount.kind else "",
+		if root then root.CFrame else hrp.CFrame,
+		hrp.CFrame,
+		if mount then mount.speed else 0,
+		if mount then mount.animal.scale else 1
+	)
+end
+
+function vfx.riderFx(rider)
+	for _, fx in rider.fx do
+		fx:Destroy()
+	end
+	table.clear(rider.fx)
+	rider.fxEnd = nil
+end
+
+-- Lets go of a rider's mount: it runs on with the stampede, like yours does.
+function vfx.dropMount(rider)
+	local entity = rider.entity
+	if not entity then
+		return
+	end
+	vfx.riderFx(rider)
+	rider.entity, rider.kind = nil, nil
+	entity.animal:setScale(1)
+	entity.hop = 0
+	release(entity)
+end
+
+function vfx.endRider(player)
+	local rider = vfx.riders[player]
+	if not rider then
+		return
+	end
+	vfx.riders[player] = nil
+	vfx.dropMount(rider)
+	if rider.rope then
+		rider.rope:Destroy()
+	end
+	local hrp = rider.char and rider.char:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		hrp.Anchored = false -- back to where the server has it
+	end
+end
+
+vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, speed, scale)
+	if player == Players.LocalPlayer then
+		return
+	end
+	local rider = vfx.riders[player]
+	local now = os.clock()
+	if not rider then
+		rider = { fx = {}, mountCF = mountCF, riderCF = riderCF, vel = Vector3.zero, at = now }
+		vfx.riders[player] = rider
+	end
+	local dt = now - rider.at
+	rider.vel = if dt > 0.02 and dt < 0.5 then (mountCF.Position - rider.mountCF.Position) / dt else Vector3.zero
+	if rider.vel.Magnitude > 400 then
+		rider.vel = Vector3.zero -- a jump (warped, continued): no gliding there
+		rider.shown = nil
+	end
+	rider.mountCF, rider.riderCF, rider.at = mountCF, riderCF, now
+	rider.speed, rider.scale = speed, scale
+	if rider.kind ~= kind then
+		vfx.dropMount(rider)
+	end
+	if kind ~= "" and not rider.entity and Animals:FindFirstChild(kind) then
+		local p = mountCF.Position
+		rider.entity = newEntity(p.X, p.Z, 0, kind)
+		rider.entity.animal:setSaddled(true)
+		rider.entity.dodge = 0
+		rider.kind = kind
+		rider.shown = nil
+	end
+end)
+
+-- A rider's lasso: a rope from their hand to the animal's neck while it flies out
+-- and they're pulled across.
+function vfx.remoteRope(rider, entity)
+	if rider.rope then
+		rider.rope:Destroy()
+	end
+	local hand = rider.char and rider.char:FindFirstChild("RightGripAttachment", true)
+	local root = entity.animal.model.PrimaryPart
+	if not hand or not root then
+		return
+	end
+	local knot = Instance.new("Attachment")
+	knot.Parent = root
+	local rope = Instance.new("Beam")
+	rope.Attachment0, rope.Attachment1 = hand, knot
+	rope.Width0, rope.Width1 = 0.28, 0.28
+	rope.Color = ColorSequence.new(Color3.fromRGB(222, 184, 120))
+	rope.FaceCamera = true
+	rope.Parent = knot
+	rider.rope = knot
+	task.delay(THROW_TIME + TRANSFER_TIME, function()
+		if rider.rope == knot then
+			rider.rope = nil
+		end
+		knot:Destroy()
+	end)
+end
+
+vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
+	if player == Players.LocalPlayer then
+		return
+	end
+	if what == "end" then
+		vfx.endRider(player)
+		return
+	end
+	local rider = vfx.riders[player]
+	if what == "take" or what == "lasso" or what == "knock" then
+		local key = tonumber(a)
+		local entity = key and herd[key]
+		if entity and transfer and transfer.target == entity then
+			return -- you're lassoing it too: it stays yours
+		end
+		if what == "lasso" then
+			if rider then
+				vfx.dropMount(rider) -- their old mount runs on, as yours does
+				if entity then
+					vfx.remoteRope(rider, entity)
+				end
+			end
+			return -- (it stays in the stampede till it's reeled in: "take")
+		end
+		if key then
+			taken[key] = true
+		end
+		if what == "knock" then
+			if entity then
+				knock(entity, tonumber(b) or 0, true)
+			end
+		elseif entity and rider then
+			-- Now their mount: the stampede's copy carries on as it.
+			herd[key], entity.n = nil, nil
+			if rider.entity then
+				retire(rider.entity)
+				vfx.riderFx(rider)
+			end
+			entity.popping, entity.hop = nil, 0
+			entity.animal:setScale(1)
+			entity.animal:setSaddled(true)
+			rider.entity, rider.kind = entity, entity.kind
+		end
+	elseif what == "smash" then
+		local x, z = tonumber(a), tonumber(b)
+		if not x or not z then
+			return
+		end
+		for _, o in slices.at(slices.block, z) do
+			if not o.smashed and math.abs(o.x - x) < 0.5 and math.abs(o.z - z) < 0.5 then
+				smash(o, tonumber(c) or -1, tonumber(d) or 1, true)
+				o.remoteSmash = true
+				task.delay(vfx.REMOTE_SMASH_BACK, function()
+					if o.remoteSmash then
+						o.smashed, o.remoteSmash = nil, nil
+						for _, p in o.parts do
+							p.part.CFrame, p.part.Transparency = p.cframe, p.transparency
+						end
+						Poof.at(Vector3.new(o.x, 0, o.z))
+					end
+				end)
+				break
+			end
+		end
+	elseif what == "ability" and rider and rider.entity then
+		local entity = rider.entity
+		local cfg = Config.Abilities[entity.kind]
+		if not cfg or cfg.Kind ~= a then
+			return
+		end
+		vfx.riderFx(rider)
+		local p = entity.animal.model.PrimaryPart.Position
+		if a == "Charge" then
+			rider.fx = chargeFx(entity)
+			Poof.at(Vector3.new(p.X, 0, p.Z))
+		elseif a == "Leap" then
+			Dust.kick(entity.animal.model.PrimaryPart.CFrame, entity.animal.scale)
+			rider.fx = vfx.rainbowFx(entity)
+		elseif a == "Rattle" then
+			rattleRing(p, cfg.Radius)
+		elseif a == "Frost" then
+			rider.fx = vfx.frostFx(entity)
+			rattleRing(p, cfg.Radius, vfx.FROST_TINT)
+		elseif a == "Ink" then
+			vfx.inkFx(entity)
+			rattleRing(p, cfg.Radius, Color3.fromRGB(40, 30, 70))
+		elseif a == "Boost" then
+			Dust.kick(entity.animal.model.PrimaryPart.CFrame, entity.animal.scale)
+		else
+			Poof.at(Vector3.new(p.X, 0, p.Z))
+		end
+		rider.fxEnd = os.clock() + cfg.Duration
+	end
+end)
+
+-- Every frame: each other rider's mount glides toward where it was last heard
+-- of (carried on at the speed it was going), with them sat on it.
+function vfx.updateRiders(dt)
+	local now = os.clock()
+	local camPos = camera.CFrame.Position
+	local ease = 1 - math.exp(-12 * dt)
+	for player, rider in vfx.riders do
+		if now - rider.at > vfx.RIDER_STALE or not player.Parent then
+			vfx.endRider(player)
+			continue
+		end
+		if rider.fxEnd and now >= rider.fxEnd then
+			vfx.riderFx(rider)
+		end
+		local ahead = rider.vel * math.min(now - rider.at, 0.25)
+		local entity = rider.entity
+		local char = player.Character
+		if char ~= rider.char then
+			rider.char = char
+		end
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		if entity then
+			local root = entity.animal.model.PrimaryPart
+			local want = rider.mountCF + ahead
+			local cf = if rider.shown then root.CFrame:Lerp(want, ease) else want
+			rider.shown = true
+			local yaw = select(2, cf:ToEulerAnglesYXZ())
+			entity.x, entity.z, entity.yaw, entity.speed = cf.X, cf.Z, yaw, rider.speed
+			local near = (cf.Position - camPos).Magnitude < VIEW
+			if math.abs(entity.animal.scale - rider.scale) > 0.02 then
+				entity.animal:setScale(rider.scale)
+			end
+			root.CFrame = cf
+			if near then
+				animate(entity, dt, rider.speed, 0)
+			end
+			if hrp then
+				hrp.Anchored = true
+				hrp.CFrame = entity.animal:getSeatCFrame() * SEAT_OFFSET
+			end
+		elseif hrp then
+			local want = rider.riderCF + ahead
+			hrp.Anchored = true
+			hrp.CFrame = if (hrp.Position - want.Position).Magnitude < 30 then hrp.CFrame:Lerp(want, ease) else want
+		end
+	end
+end
+
 -- Slow motion during the egg-grab close-up and the hero leap home.
 local timeScale = 1
 
@@ -2545,6 +2835,8 @@ RunService.PreSimulation:Connect(function(dt)
 	-- back to everyone else's after slowing down.
 	updateHerd(dt, (slow and not cutscene) or Tutorial.active)
 	updateFlung(dt)
+	vfx.sendRide()
+	vfx.updateRiders(dt)
 	Dust.update(dt)
 	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)
 	if phase == "idle" then
