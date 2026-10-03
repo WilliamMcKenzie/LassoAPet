@@ -155,11 +155,12 @@ return {
 		},
 		{
 			-- The endgame (QM, Oct 3), after Realm of the Mad God's godlands: dark stone
-			-- plates split by snow, with ice or lava cracks. Its floor is four 960-stud
-			-- tracks (tools/godlands_concept.py), laid in a random order each time the
-			-- server starts (Server/GodlandsGround): two with ice, two with lava.
+			-- plates split by snow, with ice or lava cracks. It never ends: one 960-stud
+			-- track after another, each picked at random from four (two with ice, two
+			-- with lava; Shared/Godlands, Shared/GodlandsTracks), built round each rider
+			-- as they go (Client/GodlandsStream). It has no finish line.
 			Name = "Godlands",
-			Length = 3840, -- the four tracks end to end
+			Length = math.huge, -- endless
 			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
 			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)
 			-- Placeholder until the Godlands has animals (and bosses) of its own: the Ocean's.
@@ -183,7 +184,7 @@ return {
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	CourseHalfWidth = 56,
-	CourseLength = 20032, -- all the biomes' lengths added up
+	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
 	HomeHalfWidth = 144, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3)
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 

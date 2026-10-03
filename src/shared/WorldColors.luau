@@ -86,23 +86,32 @@ local function paint(part, base, checker)
 	end
 end
 
-function WorldColors.apply(world)
-	local function get(part, name, which)
-		local z = part.Position.Z
-		local i = WorldColors.biomeAt(z)
-		return depthColor(i, z, name, if which == "A" then 1 else 2)
-			or world:GetAttribute(prefix(i) .. name .. which)
+local function get(world, part, name, which)
+	local z = part.Position.Z
+	local i = WorldColors.biomeAt(z)
+	return depthColor(i, z, name, if which == "A" then 1 else 2) or world:GetAttribute(prefix(i) .. name .. which)
+end
+
+-- One floor part: "Ground" is the biome's base floor; other names are its Patches (Grass, Stone).
+function WorldColors.paintGround(world, part)
+	paint(part, get(world, part, part.Name, "A"), get(world, part, part.Name, "B"))
+end
+
+-- One wall part, or the cap along its top.
+function WorldColors.paintWall(world, part)
+	if part.Name == "Cap" then
+		part.Color = get(world, part, "Ground", "B")
+	else
+		paint(part, get(world, part, "Wall", "A"), get(world, part, "Wall", "B"))
 	end
+end
+
+function WorldColors.apply(world)
 	for _, part in world.Ground:GetChildren() do
-		-- "Ground" is the biome's base floor; other names are its Patches (Grass, Stone)
-		paint(part, get(part, part.Name, "A"), get(part, part.Name, "B"))
+		WorldColors.paintGround(world, part)
 	end
 	for _, part in world.Walls:GetChildren() do
-		if part.Name == "Cap" then
-			part.Color = get(part, "Ground", "B")
-		else
-			paint(part, get(part, "Wall", "A"), get(part, "Wall", "B"))
-		end
+		WorldColors.paintWall(world, part)
 	end
 end
 
