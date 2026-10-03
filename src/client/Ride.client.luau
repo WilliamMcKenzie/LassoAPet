@@ -882,11 +882,7 @@ end
 -- egg still waiting ahead of you (not behind a locked gate). In the tutorial's
 -- lasso step it leads to the nearest animal ahead instead (Tutorial.guideTo).
 local guide = { -- the egg guide: the beam and its two ends
-	-- assets/ui/GuideArrowSolid.png: a fat solid chevron pointing along the trail, flat FFFF00
-	-- like the rings (QM, Oct 3: option C, a little closer together). Until it's uploaded,
-	-- the old outlined chevron (assets/ui/GuideArrow.png).
-	ARROW = "rbxassetid://88361816101102", -- GuideArrowSolid.png
-	OLD_ARROW = "rbxassetid://101032148634562",
+	ARROW = "rbxassetid://101032148634562", -- assets/ui/GuideArrow.png (chevrons pointing along the trail)
 	AHEAD = 6, -- studs in front of the pet where the trail starts
 	HEIGHT = 1.4, -- studs up: over the raised ground patches
 	from = Instance.new("Attachment"),
@@ -895,20 +891,20 @@ local guide = { -- the egg guide: the beam and its two ends
 }
 guide.from.Name, guide.to.Name = "GuideFrom", "GuideTo"
 guide.beam.Name = "EggGuide"
-guide.beam.Texture = if guide.ARROW ~= "" then guide.ARROW else guide.OLD_ARROW
+guide.beam.Texture = guide.ARROW
 guide.beam.TextureMode = Enum.TextureMode.Static
-guide.beam.TextureLength = 5.5
+guide.beam.TextureLength = 5
 guide.beam.TextureSpeed = 1.2
-guide.beam.Width0, guide.beam.Width1 = 4.5, 4.5
+guide.beam.Width0, guide.beam.Width1 = 4, 4
 guide.beam.FaceCamera = false
-guide.beam.LightEmission = 0 -- flat, no glow (QM, Oct 3)
+guide.beam.LightEmission = 1
 guide.beam.LightInfluence = 0
 guide.beam.ZOffset = 6
-guide.beam.Color = ColorSequence.new(Color3.fromRGB(255, 255, 0)) -- FFFF00, the rings' yellow (Outline.luau)
+guide.beam.Color = ColorSequence.new(Color3.fromRGB(255, 236, 120))
 guide.beam.Transparency = NumberSequence.new({
 	NumberSequenceKeypoint.new(0, 1),
-	NumberSequenceKeypoint.new(0.08, 0),
-	NumberSequenceKeypoint.new(0.9, 0),
+	NumberSequenceKeypoint.new(0.08, 0.15),
+	NumberSequenceKeypoint.new(0.9, 0.15),
 	NumberSequenceKeypoint.new(1, 1),
 })
 guide.beam.Attachment0, guide.beam.Attachment1 = guide.from, guide.to
