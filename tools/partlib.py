@@ -223,9 +223,12 @@ def look_at(eye, target):
     return eye, r, u, f
 
 
-def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0), ground=True, transparent=False, fog=True):
+def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0), ground=True, transparent=False, fog=True,
+           outline=True):
     """Render parts with a z-buffer; returns a PIL image (RGBA with a clear
-    background when transparent, which also drops the ground)."""
+    background when transparent, which also drops the ground). outline=False skips
+    the dark edge lines (Roblox draws none). Parts with .neon set are lit flat and
+    bright, like Neon."""
     ground = ground and not transparent
     eye, r, u, f = look_at(eye, target)
     focal = (H / 2) / math.tan(math.radians(fov) / 2)
@@ -271,7 +274,7 @@ def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0
             e2 = np.cross(n, e1)
             for i in range(1, len(poly) - 1):
                 w3 = np.array([poly[0], poly[i], poly[i + 1]])
-                tris.append((proj(w3), w3, n, np.array(p.color, float), (poly[0], e1, e2), p.plain))
+                tris.append((proj(w3), w3, n, np.array(p.color, float), (poly[0], e1, e2), 2 if getattr(p, "neon", False) else p.plain))
                 # shadow: project onto y=0 along light
                 s = w3 - LIGHT[None] * (w3[:, 1:2] / LIGHT[1])
                 s[:, 1] = 0.01
@@ -329,7 +332,7 @@ def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0
         s, w3, n, color, (o, e1, e2), plain = tris[ti]
         m = info == ti
         lam = max(0.0, float(np.dot(n, LIGHT)))
-        shade = 0.62 + 0.45 * lam
+        shade = 1.2 if plain == 2 else 0.62 + 0.45 * lam
         c = np.tile(color * shade, (m.sum(), 1))
         if studs and not plain:
             d = pos[m] - o
@@ -361,7 +364,10 @@ def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0
         e = (oa != ob) | ((oa & ob) & (np.abs(za - zb2) > gap))
         edge[: H - dy, : W - dx] |= e & oa
         edge[dy:, dx:] |= e & ob
-    img[edge] *= 0.35
+    if outline:
+        img[edge] *= 0.35
+    else:
+        edge[:] = False
     rgb = np.clip(img, 0, 255).astype(np.uint8)
     if transparent:
         alpha = ((obj | edge) * 255).astype(np.uint8)
