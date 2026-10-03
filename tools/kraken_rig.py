@@ -1,5 +1,7 @@
 """Kraken animations on QM's model (designs/ocean/Kraken.bbmodel, Oct 2: a tall
-tilted mantle with fins, one big eye under two brows, eight tentacles).
+tilted mantle with fins, one big eye under two brows, eight tentacles). On Oct 3
+(QM) the head (root's own blocks) was turned round 180 degrees in the file so the
+eye faces the rider; the tentacle ring is symmetric and stays as it was.
 
 Run: python3 tools/kraken_rig.py [preview_dir]
 

@@ -3,6 +3,8 @@ with its animations (the run is a squid's glide, kraken_rig.glide), recoloured p
 and orange. Only the colour textures change.
 
 Run: python3 tools/squid_design.py [out_dir]
+Rerunning copies the Kraken as it is now: since Oct 3 its head faces back toward the
+rider, which the Squid (built before) doesn't.
 Writes designs/ocean/Squid.bbmodel, a preview and the Pets headshot assets/ui/PetSquid.png.
 """
 
