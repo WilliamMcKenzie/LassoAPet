@@ -2516,6 +2516,11 @@ RunService.PreSimulation:Connect(function(dt)
 		Hud.setSelected(if rideShown and rideModel then vfx.kindOf(rideModel) else nil) -- and its card, top left
 		return
 	end
+	if mount and mount ~= vfx.riddenMount then
+		-- On a new animal: it goes in your animal dictionary (Hatchery.server, AnimalDex).
+		vfx.riddenMount = mount
+		ReplicatedStorage:WaitForChild("Ridden"):FireServer(mount.kind)
+	end
 	updateAbility(dt)
 	vfx.updateSprint(dt)
 	vfx.updateScale(dt)

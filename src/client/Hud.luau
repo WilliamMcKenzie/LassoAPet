@@ -7,7 +7,8 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local Inventory = require(script.Parent.Inventory)
-local PetsPanel = require(script.Parent.PetsPanel)
+local PetFaces = require(script.Parent.PetFaces)
+local AnimalDex = require(script.Parent.AnimalDex)
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
 local Hud = {}
@@ -524,14 +525,11 @@ function Hud.init(onAction, onHome, onRide)
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(showGold)
 	showGold()
-	-- Pets sits just over the coin, centred on it.
+	-- Pets sits just over the coin, centred on it: it opens and closes the animal
+	-- dictionary (AnimalDex).
 	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
-		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8), PetsPanel.open)
+		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8), AnimalDex.toggle)
 	Inventory.init(homeRoot)
-	-- The Pets panel hides the rest of the home UI while it's open.
-	PetsPanel.init({ money = money, hideHud = function(hidden)
-		homeRoot.Visible = not hidden
-	end })
 
 	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). It's the
 	-- next biome's own button (its UpgradeImage, with the price drawn in),
@@ -1250,7 +1248,7 @@ function Hud.setSelected(kind)
 	if not kind then
 		return
 	end
-	local face = PetsPanel.face(kind, SELECTED.size, true)
+	local face = PetFaces.face(kind, SELECTED.size, true)
 	face.Position = UDim2.fromOffset(MARGIN, SELECTED.top)
 	local name = label(face, UDim2.new(1, 40, 0, SELECTED.nameSize), UDim2.fromScale(0.5, 0.93), SELECTED.nameSize, 3) -- 3px outline (QM)
 	name.Text = kind:gsub("(%l)(%u)", "%1 %2") -- "SpineLizard" reads "Spine Lizard"

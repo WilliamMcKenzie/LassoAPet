@@ -98,6 +98,16 @@ local function syncTools(player, eggs)
 	end
 end
 
+-- The kinds of animal this profile has ridden, sorted.
+local function riddenList(profile)
+	local list = {}
+	for kind in profile.ridden do
+		table.insert(list, kind)
+	end
+	table.sort(list)
+	return list
+end
+
 -- Copies the profile onto the player (inventory, ride pet) and their pen (what's in it).
 local function publish(player)
 	local profile = profiles[player]
@@ -106,6 +116,7 @@ local function publish(player)
 	end
 	syncTools(player, profile.eggs)
 	player:SetAttribute("RidePet", profile.ride or "")
+	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
 	local pen = penOf(player)
 	if pen then
 		pen:SetAttribute("Contents", HttpService:JSONEncode(profile.items))
@@ -120,7 +131,7 @@ local function canPlace(pen, x, z)
 end
 
 local function load(player)
-	local profile = { eggs = {}, items = {}, ride = Config.DefaultPet }
+	local profile = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {} }
 	if store then
 		for attempt = 1, 3 do
 			local success, data = pcall(store.GetAsync, store, "u" .. player.UserId)
@@ -135,6 +146,11 @@ local function load(player)
 						profile.ride = data.ride
 					end
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
+					for _, kind in typeof(data.ridden) == "table" and data.ridden or {} do
+						if isAnimal(kind) then
+							profile.ridden[kind] = true
+						end
+					end
 					for id, item in data.items or {} do
 						if typeof(item) == "table" and tonumber(item.x) and tonumber(item.z)
 							and (isAnimal(item.egg) or isAnimal(item.pet)) then
@@ -167,7 +183,7 @@ local function save(player)
 		return
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride, tutorial = profile.tutorial }) then
+		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride, tutorial = profile.tutorial, ridden = riddenList(profile) }) then
 			return
 		end
 		task.wait(attempt)
@@ -349,6 +365,16 @@ remote("PlaceEgg", function(player, kind, x, z)
 end)
 
 -- The client finished the tutorial: it never shows again.
+-- The rider got on an animal of this kind (Ride.client): it's in their animal
+-- dictionary from now on.
+remote("Ridden", function(player, kind)
+	local profile = profiles[player]
+	if profile and isAnimal(kind) and not profile.ridden[kind] then
+		profile.ridden[kind] = true
+		publish(player)
+	end
+end)
+
 remote("TutorialDone", function(player)
 	local profile = profiles[player]
 	if profile then
@@ -368,35 +394,6 @@ remote("RidePet", function(player, id)
 		item.pet, profile.ride = profile.ride, item.pet
 	else
 		profile.ride, profile.items[id] = item.pet, nil -- your first pet: nothing to swap with
-	end
-	publish(player)
-end)
-
--- Let a pet go (the Pets panel's trash can). "ride" is the pet you ride: a pet
--- from your pen takes its place, or the default pet if the pen has none.
-remote("RemovePet", function(player, id)
-	local profile = profiles[player]
-	if not profile or typeof(id) ~= "string" then
-		return
-	end
-	if id == "ride" then
-		local nextId
-		for itemId, item in profile.items do
-			if item.pet then
-				nextId = itemId
-				break
-			end
-		end
-		if nextId then
-			profile.ride = profile.items[nextId].pet
-			profile.items[nextId] = nil
-		else
-			profile.ride = Config.DefaultPet
-		end
-	elseif profile.items[id] and profile.items[id].pet then
-		profile.items[id] = nil
-	else
-		return
 	end
 	publish(player)
 end)
@@ -484,7 +481,7 @@ tutorialCommand.Triggered:Connect(function(source)
 	if not player or not profiles[player] or not allowed(player) then
 		return
 	end
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil }
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {} }
 	if store and loaded[player] then
 		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false })
 	end
