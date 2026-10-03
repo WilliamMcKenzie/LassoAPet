@@ -521,8 +521,17 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	SELECTED.root = root(SELECTED.gui)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	ride.Visible = false
+	-- Gold and Pets have a screen of their own so they stay up while the animal
+	-- dictionary hides the rest of the home HUD (QM: only the dictionary, Pets and
+	-- the gold show then).
+	local sideGui = Instance.new("ScreenGui")
+	sideGui.Name = "GoldPets"
+	sideGui.ResetOnSpawn = false
+	sideGui.IgnoreGuiInset = true
+	sideGui.Parent = playerGui
+	local sideRoot = root(sideGui)
 	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold mockup.
-	gold = button(homeRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
+	gold = button(sideRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
 	local total = label(gold, UDim2.fromOffset(0, ICON_HEIGHT * 0.4), UDim2.new(0.5, 0, 1, 2), 44, 4) -- 4px outline (QM)
 	total.AnchorPoint = Vector2.new(0.5, 1)
 	total.AutomaticSize = Enum.AutomaticSize.X
@@ -535,14 +544,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	showGold()
 	-- Pets sits just over the coin, centred on it: it opens and closes the animal
 	-- dictionary (AnimalDex).
-	-- It has a screen of its own so it can stay up while the dictionary hides the
-	-- rest of the home HUD (QM: only the dictionary and this button show then).
-	local petsGui = Instance.new("ScreenGui")
-	petsGui.Name = "PetsButton"
-	petsGui.ResetOnSpawn = false
-	petsGui.IgnoreGuiInset = true
-	petsGui.Parent = playerGui
-	pets = button(root(petsGui), "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
+	pets = button(sideRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
 		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8), AnimalDex.toggle)
 	AnimalDex.onToggle = function(open)
 		homeGui.Enabled = not open
