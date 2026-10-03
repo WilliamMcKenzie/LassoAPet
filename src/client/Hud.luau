@@ -106,6 +106,8 @@ local UPGRADE_WIDTH = 300 -- Upgrade Pen, top right
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
+-- The selected animal, top left (Hud.setSelected): an inventory slot a touch bigger.
+local SELECTED = { size = 160, top = 80, nameSize = 42, gui = nil, root = nil, kind = nil, face = nil }
 
 -- Action text from the ride -> which image the action button shows.
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
@@ -499,6 +501,15 @@ function Hud.init(onAction, onHome, onRide)
 	homeGui.IgnoreGuiInset = true
 	homeGui.Parent = playerGui
 	homeRoot = root(homeGui)
+	-- The animal RIDE would ride (at home) or LASSO would catch (out on the course),
+	-- top left: its slot with its headshot, mirrored, and its name over the bottom
+	-- edge (QM's mockup). Its own screen, so it shows at home and while riding.
+	SELECTED.gui = Instance.new("ScreenGui")
+	SELECTED.gui.Name = "SelectedHud"
+	SELECTED.gui.ResetOnSpawn = false
+	SELECTED.gui.IgnoreGuiInset = true
+	SELECTED.gui.Parent = playerGui
+	SELECTED.root = root(SELECTED.gui)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	ride.Visible = false
 	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold mockup.
@@ -1224,6 +1235,28 @@ function Hud.coinPopupAt(part, height, amount)
 	task.delay(1.05, function()
 		board:Destroy()
 	end)
+end
+
+-- Shows `kind` as the selected animal (top left), or nothing (nil).
+function Hud.setSelected(kind)
+	if kind == SELECTED.kind or not SELECTED.root then
+		return
+	end
+	SELECTED.kind = kind
+	if SELECTED.face then
+		SELECTED.face:Destroy()
+		SELECTED.face = nil
+	end
+	if not kind then
+		return
+	end
+	local face = PetsPanel.face(kind, SELECTED.size, true)
+	face.Position = UDim2.fromOffset(MARGIN, SELECTED.top)
+	local name = label(face, UDim2.new(1, 40, 0, SELECTED.nameSize), UDim2.fromScale(0.5, 0.93), SELECTED.nameSize, 5)
+	name.Text = kind:gsub("(%l)(%u)", "%1 %2") -- "SpineLizard" reads "Spine Lizard"
+	name.ZIndex = 3
+	face.Parent = SELECTED.root
+	SELECTED.face = face
 end
 
 return Hud

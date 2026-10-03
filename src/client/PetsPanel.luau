@@ -117,20 +117,14 @@ local function stroked(object, thickness)
 	return s
 end
 
-local function card(pet, order)
-	local cell = Instance.new("TextButton") -- sinks clicks, so tapping a card doesn't close the panel
-	cell.Name = pet.kind
-	cell.Text = ""
-	cell.AutoButtonColor = false
-	cell.BackgroundTransparency = 1
-	cell.LayoutOrder = order
-
+-- A pet's picture: its rarity's slot with its headshot faded into it (or its
+-- name, without one), size px square. flip mirrors the headshot.
+local function petFace(kind, size, flip)
 	local face = Instance.new("Frame")
-	face.Size = UDim2.fromOffset(CARD, CARD)
-	face.Position = UDim2.fromOffset(0, OVERHANG)
+	face.Size = UDim2.fromOffset(size, size)
 	face.BackgroundColor3 = COMMON_COLOR
 	Instance.new("UICorner", face).CornerRadius = UDim.new(52 / 256, 0) -- the slot pictures' corners
-	local slot = SLOTS[rarityOf(pet.kind)]
+	local slot = SLOTS[rarityOf(kind)]
 	if not slot or slot == "" then
 		stroked(face, 5).ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- the slot pictures have their own
 	else
@@ -141,7 +135,7 @@ local function card(pet, order)
 		bg.Image = slot
 		bg.Parent = face
 	end
-	local shot = HEADSHOTS[pet.kind]
+	local shot = HEADSHOTS[kind]
 	if shot and shot ~= "" then
 		-- The headshot fades out toward every edge so it melts into the slot
 		-- picture instead of being cut off hard: one gradient fades it left and
@@ -156,6 +150,9 @@ local function card(pet, order)
 		picture.BackgroundTransparency = 1
 		picture.Size = UDim2.fromScale(1, 1)
 		picture.Image = shot
+		if flip then -- mirrored: the 512px headshot read right to left
+			picture.ImageRectOffset, picture.ImageRectSize = Vector2.new(512, 0), Vector2.new(-512, 512)
+		end
 		picture.Parent = fade
 		local sides = Instance.new("UIGradient")
 		sides.Transparency = FADE
@@ -172,11 +169,24 @@ local function card(pet, order)
 		name.Font = FONT
 		name.TextSize = 30
 		name.TextColor3 = Color3.new(1, 1, 1)
-		name.Text = pet.kind
+		name.Text = kind
 		name.ZIndex = 2
 		stroked(name, 3)
 		name.Parent = face
 	end
+	return face
+end
+
+local function card(pet, order)
+	local cell = Instance.new("TextButton") -- sinks clicks, so tapping a card doesn't close the panel
+	cell.Name = pet.kind
+	cell.Text = ""
+	cell.AutoButtonColor = false
+	cell.BackgroundTransparency = 1
+	cell.LayoutOrder = order
+
+	local face = petFace(pet.kind, CARD)
+	face.Position = UDim2.fromOffset(0, OVERHANG)
 	face.Parent = cell
 
 	-- Gold a second, over the top left corner: the coin with the amount beside it.
@@ -365,5 +375,7 @@ function PetsPanel.init(options)
 	player:GetAttributeChangedSignal("Pen"):Connect(watchPen)
 	watchPen()
 end
+
+PetsPanel.face = petFace
 
 return PetsPanel

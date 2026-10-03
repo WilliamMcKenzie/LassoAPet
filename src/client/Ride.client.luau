@@ -1814,6 +1814,50 @@ function vfx.inkBlast(dt, cfg)
 	end
 end
 
+-- The kind of animal a model at home is: the waiting starter, a pen pet or a
+-- stampede animal RIDE can jump on.
+function vfx.kindOf(model)
+	if starter and starter.animal.model == model then
+		return starter.kind
+	end
+	local pet = PenPets.pets[model] or herdRideable[model]
+	return pet and pet.kind
+end
+
+-- Grow and Crabwalk change size with a springy pop (QM: animation principles,
+-- not a sudden jump). Growing: a quick squash down first (anticipation), then it
+-- springs up past its new size and settles (overshoot). Shrinking: a little puff
+-- first, then it drops back past its own size and settles.
+vfx.POP_WIND = 0.12 -- seconds of the squash or puff before the pop
+vfx.POP_TIME = 0.9 -- seconds the whole pop takes
+function vfx.updateScale(dt)
+	local old = vfx.scaleMount
+	if old and old ~= mount and old.scaleAnim then
+		old.animal:setScale(if old.scaleAnim.shrink then 1 else old.scaleAnim.size) -- let go mid-pop: finish it
+		old.scaleAnim = nil
+	end
+	vfx.scaleMount = mount
+	local e = mount
+	local anim = e and e.scaleAnim
+	if not anim then
+		return
+	end
+	anim.t += dt
+	local t, s = anim.t, nil
+	local from, to = if anim.shrink then anim.size else 1, if anim.shrink then 1 else anim.size
+	if t < vfx.POP_WIND then
+		local u = math.sin(math.pi * t / vfx.POP_WIND)
+		s = from * (if anim.shrink then 1 + 0.06 * u else 1 - 0.1 * u)
+	else
+		local k = t - vfx.POP_WIND
+		s = to + (from - to) * math.exp(-7 * k) * math.cos(14 * k)
+	end
+	if t >= vfx.POP_TIME then
+		s, e.scaleAnim = to, nil
+	end
+	e.animal:setScale(s)
+end
+
 -- Special sprints: their effects come and go with Sprint (and stop with the mount).
 function vfx.updateSprint(dt)
 	local cfg = vfx.sprintSpecial()
@@ -1924,7 +1968,11 @@ local function endAbility(entity)
 	end
 	local root = entity.animal.model.PrimaryPart
 	if active.cfg.Tier then
-		entity.animal:setScale(1) -- back to its own size
+		-- Back to its own size: a springy pop down if it's still the mount.
+		entity.scaleAnim = if entity == mount then { shrink = true, t = 0, size = entity.animal.scale } else nil
+		if entity ~= mount then
+			entity.animal:setScale(1)
+		end
 	end
 	if active.cfg.Kind == "Leap" then
 		entity.hop = 0
@@ -1959,7 +2007,7 @@ local function startAbility(cfg)
 		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
 	elseif cfg.Kind == "Grow" or cfg.Kind == "Crabwalk" then
 		Poof.at(Vector3.new(mount.x, 0, mount.z))
-		mount.animal:setScale(Config.TierGrowth ^ math.max(cfg.Tier - tierOf(mount.kind), 0))
+		mount.scaleAnim = { t = 0, size = Config.TierGrowth ^ math.max(cfg.Tier - tierOf(mount.kind), 0) }
 	elseif cfg.Kind == "Ink" then
 		vfx.inkFx(mount)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(40, 30, 70))
@@ -2341,6 +2389,8 @@ local function updateRider(dt)
 end
 
 local function updateHud()
+	-- The animal LASSO would catch, top left (Hud.setSelected).
+	Hud.setSelected(if phase == "outbound" and typeof(actionTarget) == "table" and not cutscene then actionTarget.kind else nil)
 	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out).
 	Hud.setSprint(phase == "outbound" and not Tutorial.active)
 	if phase == "outbound" then
@@ -2422,10 +2472,12 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		updateRideTarget()
 		Outline.set(if rideShown or pickedPet then rideModel else nil) -- the pet RIDE will ride
+		Hud.setSelected(if rideShown and rideModel then vfx.kindOf(rideModel) else nil) -- and its card, top left
 		return
 	end
 	updateAbility(dt)
 	vfx.updateSprint(dt)
+	vfx.updateScale(dt)
 	updateGuide()
 	if mount then
 		updateMount(dt)
