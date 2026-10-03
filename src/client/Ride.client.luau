@@ -1515,6 +1515,7 @@ end
 local abilityKey = false -- Q or R1 pressed since the last frame
 local rattleHaze = 0 -- 0..1, eased in and out: the rattle's haze
 vfx.RATTLE_HAZE = Color3.fromRGB(255, 170, 40) -- yellow-orange
+vfx.FishWave = require(script.Parent.FishWave) -- the School of Fish's wave
 vfx.FROST_HAZE = Color3.fromRGB(190, 236, 255)
 vfx.hazeColor = vfx.RATTLE_HAZE
 local abilityClock = 0 -- ride time, slowed with the slow motion like everything else
@@ -1987,6 +1988,26 @@ function vfx.mound(x, z, floor)
 	end
 end
 
+-- The School of Fish's wave: every obstacle and stampede animal between where its
+-- front was and where it is now, anywhere across the course, goes flying.
+function vfx.waveSweep(from, to)
+	if from == to then
+		return
+	end
+	local lo, hi = math.min(from, to) - 3, math.max(from, to) + 3
+	local dir = travelDir()
+	for _, o in obstacles do
+		if not o.smashed and o.z >= lo and o.z <= hi then
+			smash(o, dir, if o.x >= 0 then 1 else -1)
+		end
+	end
+	for _, entity in allAnimals() do
+		if entity ~= mount and not entity.popping and entity.z >= lo and entity.z <= hi then
+			knock(entity, entity.x - mount.x)
+		end
+	end
+end
+
 local function endAbility(entity)
 	local a = entity and entity.ability
 	local active = a and a.active
@@ -1995,6 +2016,9 @@ local function endAbility(entity)
 	end
 	for _, fx in active.fx do
 		fx:Destroy()
+	end
+	if active.wave then
+		active.wave:destroy()
 	end
 	local root = entity.animal.model.PrimaryPart
 	if active.cfg.Tier then
@@ -2041,6 +2065,8 @@ local function startAbility(cfg)
 	elseif cfg.Kind == "Ink" then
 		vfx.inkFx(mount)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(40, 30, 70))
+	elseif cfg.Kind == "Wave" then
+		a.active.wave = vfx.FishWave.new(mount.z, travelDir(), EDGE)
 	end
 end
 
@@ -2076,6 +2102,8 @@ local function updateAbility(dt)
 			vfx.inkBlast(dt, active.cfg)
 		elseif active.cfg.Kind == "Frost" then
 			vfx.frostBlast(active.cfg, active.cfg.Duration - active.t)
+		elseif active.wave then
+			vfx.waveSweep(active.wave:update(dt, mount.speed, active.t, active.cfg.Duration))
 		end
 		if active.t >= active.cfg.Duration then
 			endAbility(mount)

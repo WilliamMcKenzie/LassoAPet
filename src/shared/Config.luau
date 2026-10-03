@@ -76,7 +76,7 @@ return {
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			Herd = { Fish = 0.3, Starfish = 0.35, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, Kraken = 0.05 }, -- adds to 1.1
+			Herd = { Fish = 0.3, Starfish = 0.35, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, Kraken = 0.05 }, -- adds to 1.25 (School of Fish guessed like the King Crab)
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -210,6 +210,10 @@ return {
 	--     away from it while it lasts.
 	--   Crabwalk (King Crab): it grows to size tier Tier (large) and scuttles sideways
 	--     at SpeedBoost x speed for Duration.
+	--   Wave (School of Fish): a wall of fish rushes up from behind across the whole
+	--     course, overtakes it and races on ahead for Duration, and every obstacle and
+	--     animal it passes goes flying, whatever its size; then the fish dive away
+	--     (client/FishWave.luau). Nothing crashes the school while it runs.
 	-- Boost, Grow, Ink and Crabwalk, like Frost, still use Hold and can crash.
 	-- (The Kraken's ability is on hold until QM and Claude settle how it looks.)
 	-- Charge swings the camera round to a cinematic front-side angle.
@@ -223,6 +227,7 @@ return {
 		IceGolem = { Kind = "Grow", Duration = 5, Cooldown = 10, SpeedBoost = 1.2, Tier = 4 },
 		Squid = { Kind = "Ink", Duration = 2.5, Cooldown = 8, Radius = 45 },
 		KingCrab = { Kind = "Crabwalk", Duration = 4, Cooldown = 8, SpeedBoost = 2, Tier = 3 },
+		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
 	-- automatic sprint home with the egg). Like any sprint they drain Hold faster.
@@ -248,7 +253,7 @@ return {
 		Horse = 1, Pig = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
 		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, Icebringer = 3, -- Tundra
-		Starfish = 1, Squid = 2, KingCrab = 2, Whale = 4, Kraken = 4, -- Ocean
+		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, Whale = 4, Kraken = 4, -- Ocean
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.2x medium, 1.44x large, 1.73x XL (QM, Oct 2; Eggs/Egg.luau).
@@ -284,7 +289,7 @@ return {
 		Horse = 1, Pig = 3, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
 		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
 		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, Icebringer = 1111, -- Tundra
-		Starfish = 100, Squid = 700, KingCrab = 950, Whale = 5000, Kraken = 8200, -- Ocean
+		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, Whale = 5000, Kraken = 8200, -- Ocean
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -297,7 +302,7 @@ return {
 		Odds = { Rare = 50, Epic = 32, Legendary = 15, Exclusive = 3 },
 		Pool = {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1 },
-			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1 },
+			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
 			-- with an empty pool is never rolled.
@@ -329,6 +334,7 @@ return {
 		Whale = "rbxassetid://97101351248514", -- assets/ui/WhaleEggRender.png
 		KingCrab = "rbxassetid://136150514529079", -- assets/ui/KingCrabEggRender.png
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
+		FishSchool = "", -- assets/ui/FishSchoolEggRender.png (awaiting upload)
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
@@ -396,6 +402,7 @@ return {
 		Starfish = { Speed = 2.5, Stamina = 2 },
 		Squid = { Speed = 3, Stamina = 2.6 },
 		KingCrab = { Speed = 3.1, Stamina = 3 },
+		FishSchool = { Speed = 3, Stamina = 2.8 }, -- a guess between the Squid and King Crab
 		Whale = { Speed = 1.2, Stamina = 10 },
 		Kraken = { Speed = 4.5, Stamina = 3 },
 	},
