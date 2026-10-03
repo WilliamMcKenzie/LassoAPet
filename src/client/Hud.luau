@@ -1252,7 +1252,7 @@ function Hud.setSelected(kind)
 	end
 	local face = PetsPanel.face(kind, SELECTED.size, true)
 	face.Position = UDim2.fromOffset(MARGIN, SELECTED.top)
-	local name = label(face, UDim2.new(1, 40, 0, SELECTED.nameSize), UDim2.fromScale(0.5, 0.93), SELECTED.nameSize, 5)
+	local name = label(face, UDim2.new(1, 40, 0, SELECTED.nameSize), UDim2.fromScale(0.5, 0.93), SELECTED.nameSize, 3) -- 3px outline (QM)
 	name.Text = kind:gsub("(%l)(%u)", "%1 %2") -- "SpineLizard" reads "Spine Lizard"
 	name.ZIndex = 3
 	face.Parent = SELECTED.root
