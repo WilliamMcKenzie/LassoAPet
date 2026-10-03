@@ -11,7 +11,10 @@
 -- Everything is laid out in pixels of QM's 1102 x 829 page (half the size of
 -- the page pictures) and scaled to fit the screen.
 --
---   AnimalDex.toggle()
+--   AnimalDex.toggle()     -- the Pets button
+--   AnimalDex.close()
+--   AnimalDex.onToggle = fn(open) -- set by the HUD: while it's open the only other
+--                                 -- UI is the Pets button (QM)
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -64,7 +67,7 @@ local SHEETS = {
 local FRAME, PER_SHEET, FRAME_TIME = 256, 12, 0.03
 
 -- Each animal's bio; one without its own gets PLACEHOLDER_BIO until QM writes them.
-local PLACEHOLDER_BIO = "Description lorem ipsum dolor sit amet, consectetur adipiscing elit."
+local PLACEHOLDER_BIO = "Description feijwufjewuejfw lorem ipsum" -- QM's placeholder
 local BIOS = {
 	Horse = "Very thoughtful, horse sends gifts to his friends each year.", -- QM's
 }
@@ -250,7 +253,7 @@ function showAnimal(kind)
 	bio.TextYAlignment = Enum.TextYAlignment.Top
 	bio.Position = UDim2.fromOffset(36, DIVIDER + 45)
 	bio.Size = UDim2.fromOffset(PAGE.X - 72, 829 - DIVIDER - 70)
-	bio.Text = if seen then BIOS[kind] or PLACEHOLDER_BIO else "Ride one to find out more."
+	bio.Text = if seen then BIOS[kind] or PLACEHOLDER_BIO else "Ride creature to unlock!" -- QM
 	bio.Parent = page
 end
 
@@ -261,6 +264,15 @@ function AnimalDex.toggle()
 		showGrid(biomes[1])
 	elseif not open then
 		clear()
+	end
+	if AnimalDex.onToggle then
+		AnimalDex.onToggle(open)
+	end
+end
+
+function AnimalDex.close()
+	if open then
+		AnimalDex.toggle()
 	end
 end
 

@@ -527,8 +527,21 @@ function Hud.init(onAction, onHome, onRide)
 	showGold()
 	-- Pets sits just over the coin, centred on it: it opens and closes the animal
 	-- dictionary (AnimalDex).
-	pets = button(homeRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
+	-- It has a screen of its own so it can stay up while the dictionary hides the
+	-- rest of the home HUD (QM: only the dictionary and this button show then).
+	local petsGui = Instance.new("ScreenGui")
+	petsGui.Name = "PetsButton"
+	petsGui.ResetOnSpawn = false
+	petsGui.IgnoreGuiInset = true
+	petsGui.Parent = playerGui
+	pets = button(root(petsGui), "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
 		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8), AnimalDex.toggle)
+	AnimalDex.onToggle = function(open)
+		homeGui.Enabled = not open
+		if SELECTED.gui then
+			SELECTED.gui.Enabled = not open
+		end
+	end
 	Inventory.init(homeRoot)
 
 	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). It's the
@@ -689,6 +702,9 @@ function Hud.init(onAction, onHome, onRide)
 end
 
 function Hud.show(visible)
+	if visible then
+		AnimalDex.close() -- off on a ride: no dictionary
+	end
 	gui.Enabled = visible
 	reveal += 1
 	card.Visible = false
