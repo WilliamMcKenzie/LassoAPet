@@ -6,6 +6,8 @@ parts without studs, Glow parts lit flat like Neon.
 Run from the repo root:
   python3 tools/pet_headshots.py options [Kind ...]   style sheet to pick from
   python3 tools/pet_headshots.py [--style NAME] [Kind ...]   write the headshots
+  python3 tools/pet_headshots.py gif [Kind ...]   one looping GIF of each pet's run, from the
+                                                  action headshot's camera
 
 The selected-animal card shows the image mirrored, so either facing works.
 """
@@ -75,13 +77,8 @@ def parts_of(kind, model, pose=None):
     return parts
 
 
-def shot(kind, style, size=512, pad=0.04):
-    st = STYLES[style]
-    model = load(kind)
-    pose = st["pose"]
-    if style == "action" and kind in ACTION_IDLE:
-        pose = ("idle", 0.0)
-    parts = parts_of(kind, model, pose)
+def camera(kind, st, parts):
+    """Eye and target framing these parts whole from the style's angle."""
     pts = np.concatenate([q for p in parts for q in p.polys])
     lo, hi = pts.min(0), pts.max(0)
     c = (lo + hi) / 2
@@ -90,13 +87,81 @@ def shot(kind, style, size=512, pad=0.04):
     # the front is -z; yaw turns the camera round toward the animal's left (-x)
     d = np.array([-math.sin(yaw) * math.cos(pitch), math.sin(pitch), -math.cos(yaw) * math.cos(pitch)])
     dist = radius / math.sin(math.radians(st["fov"]) / 2) * 1.05
+    return c + d * dist, c
+
+
+def shot(kind, style, size=512, pad=0.04):
+    st = STYLES[style]
+    model = load(kind)
+    pose = st["pose"]
+    if style == "action" and kind in ACTION_IDLE:
+        pose = ("idle", 0.0)
+    parts = parts_of(kind, model, pose)
+    eye, target = camera(kind, st, parts)
     R = 1024
-    im = render(parts, eye=c + d * dist, target=c, W=R, H=R, fov=st["fov"], transparent=True, outline=False)
+    im = render(parts, eye=eye, target=target, W=R, H=R, fov=st["fov"], transparent=True, outline=False)
     im = im.crop(im.getbbox())
     side = int(max(im.size) * (1 + 2 * pad))
     sq = Image.new("RGBA", (side, side))
     sq.paste(im, ((side - im.width) // 2, (side - im.height) // 2))
     return sq.resize((size, size), Image.LANCZOS)
+
+
+def loop(kind, frames=24, size=512, pad=0.04, style="action"):
+    """One loop of the animation the action headshot is taken from (the run, or the
+    idle for ACTION_IDLE pets), from the headshot's exact camera: the eye and target
+    are the headshot's, and every frame shares one crop so the animal moves within it
+    rather than the picture jumping. Returns RGBA frames and the frame time in ms."""
+    st = STYLES[style]
+    model = load(kind)
+    name = "idle" if kind in ACTION_IDLE else st["pose"][0]
+    anim = next(a for a in model["animations"] if a["name"] == name)
+    start = 0.0 if kind in ACTION_IDLE else st["pose"][1]  # the first frame is the headshot
+    eye, target = camera(kind, st, parts_of(kind, model, (name, start)))
+    R = 1024
+    ims = []
+    for i in range(frames):
+        parts = parts_of(kind, model, (name, (start + i / frames) % 1))
+        ims.append(render(parts, eye=eye, target=target, W=R, H=R, fov=st["fov"], transparent=True, outline=False))
+    boxes = np.array([im.getbbox() for im in ims])
+    box = (*boxes[:, :2].min(0), *boxes[:, 2:].max(0))
+    w, h = box[2] - box[0], box[3] - box[1]
+    side = int(max(w, h) * (1 + 2 * pad))
+    out = []
+    for im in ims:
+        sq = Image.new("RGBA", (side, side))
+        sq.paste(im.crop(box), ((side - w) // 2, (side - h) // 2))
+        out.append(sq.resize((size, size), Image.LANCZOS))
+    return out, round(anim["length"] * 1000 / frames)
+
+
+def save_gif(path, frames, ms, bg=None):
+    """A looping GIF. With bg (an RGB colour) the frames sit on it; without, the GIF is
+    transparent, with alpha cut at half (GIF has no soft edges)."""
+    pal = []
+    for im in frames:
+        if bg:
+            flat = Image.new("RGBA", im.size, bg + (255,))
+            flat.alpha_composite(im)
+            pal.append(flat.convert("RGB").convert("P", palette=Image.ADAPTIVE, colors=255))
+        else:
+            a = im.getchannel("A").point(lambda v: 255 if v >= 128 else 0)
+            p = im.convert("RGB").convert("P", palette=Image.ADAPTIVE, colors=255)
+            p.paste(255, mask=Image.eval(a, lambda v: 255 - v))
+            p.info["transparency"] = 255
+            pal.append(p)
+    extra = {} if bg else dict(transparency=255, disposal=2)
+    pal[0].save(path, save_all=True, append_images=pal[1:], duration=ms, loop=0, optimize=False, **extra)
+
+
+def gifs(kinds):
+    out = os.path.join(PREVIEW, "gifs")
+    os.makedirs(out, exist_ok=True)
+    for kind in kinds:
+        frames, ms = loop(kind)
+        save_gif(os.path.join(out, f"Pet{kind}.gif"), frames, ms)
+        save_gif(os.path.join(out, f"Pet{kind}_card.gif"), frames, ms, bg=(255, 214, 10))
+        print("wrote", f"Pet{kind}.gif", len(frames), "frames,", ms, "ms each")
 
 
 def options(kinds):
@@ -144,7 +209,9 @@ def main(args):
 
 if __name__ == "__main__":
     a = sys.argv[1:]
-    if a and a[0] == "options":
+    if a and a[0] == "gif":
+        gifs(a[1:] or list(MODELS))
+    elif a and a[0] == "options":
         options(a[1:] or ["Horse", "Kraken"])
     else:
         main(a)
