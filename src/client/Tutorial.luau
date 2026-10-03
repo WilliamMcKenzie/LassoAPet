@@ -1,6 +1,6 @@
 -- The first-time tutorial, for a player whose "Tutorial" attribute is set (the
 -- server sets it for a new player, Hatchery). One hint at a time at the top of the
--- screen, a trail of yellow arrows on the ground to whatever the hint is about,
+-- screen, a trail of glowing arrows on the ground to whatever the hint is about,
 -- and only the buttons each step needs (Hud.setTutorial; Ride leaves out Sprint,
 -- Ability and the Hold bar):
 --
@@ -240,20 +240,20 @@ local beam = Instance.new("Beam")
 local from, to = Instance.new("Attachment"), Instance.new("Attachment")
 from.Name, to.Name = "TutorialFrom", "TutorialTo"
 beam.Name = "TutorialGuide"
-beam.Texture = "rbxassetid://88361816101102" -- assets/ui/GuideArrowSolid.png, as the egg guide (Ride.client's guide.ARROW)
+beam.Texture = "rbxassetid://101032148634562" -- assets/ui/GuideArrow.png, as the egg guide
 beam.TextureMode = Enum.TextureMode.Static
-beam.TextureLength = 5.5
+beam.TextureLength = 5
 beam.TextureSpeed = 1.2
-beam.Width0, beam.Width1 = 4.5, 4.5
+beam.Width0, beam.Width1 = 4, 4
 beam.FaceCamera = false
-beam.LightEmission = 0 -- flat, no glow (QM, Oct 3)
+beam.LightEmission = 1
 beam.LightInfluence = 0
 beam.ZOffset = 6
-beam.Color = ColorSequence.new(Color3.fromRGB(255, 255, 0)) -- FFFF00, the rings' yellow (Outline.luau)
+beam.Color = ColorSequence.new(Color3.fromRGB(255, 236, 120))
 beam.Transparency = NumberSequence.new({
 	NumberSequenceKeypoint.new(0, 1),
-	NumberSequenceKeypoint.new(0.08, 0),
-	NumberSequenceKeypoint.new(0.9, 0),
+	NumberSequenceKeypoint.new(0.08, 0.15),
+	NumberSequenceKeypoint.new(0.9, 0.15),
 	NumberSequenceKeypoint.new(1, 1),
 })
 beam.Attachment0, beam.Attachment1 = from, to
