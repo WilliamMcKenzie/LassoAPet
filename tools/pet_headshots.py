@@ -107,7 +107,18 @@ def shot(kind, style, size=512, pad=0.04):
     return sq.resize((size, size), Image.LANCZOS)
 
 
-def loop(kind, frames=24, size=512, pad=0.04, style="action"):
+def frame_count(length):
+    """24 frames, or more/fewer so each lasts 30-60 ms: GIF times are whole hundredths
+    and browsers slow anything under 20 ms right down."""
+    ms = length * 1000 / 24
+    if ms < 30:
+        return max(12, round(length * 1000 / 30))
+    if ms > 60:
+        return min(48, round(length * 1000 / 50))
+    return 24
+
+
+def loop(kind, frames=None, size=512, pad=0.04, style="action"):
     """One loop of the animation the action headshot is taken from (the run, or the
     idle for ACTION_IDLE pets), from the headshot's exact camera: the eye and target
     are the headshot's, and every frame shares one crop so the animal moves within it
@@ -116,6 +127,7 @@ def loop(kind, frames=24, size=512, pad=0.04, style="action"):
     model = load(kind)
     name = "idle" if kind in ACTION_IDLE else st["pose"][0]
     anim = next(a for a in model["animations"] if a["name"] == name)
+    frames = frames or frame_count(anim["length"])
     start = 0.0 if kind in ACTION_IDLE else st["pose"][1]  # the first frame is the headshot
     eye, target = camera(kind, st, parts_of(kind, model, (name, start)))
     R = 1024
@@ -132,7 +144,7 @@ def loop(kind, frames=24, size=512, pad=0.04, style="action"):
         sq = Image.new("RGBA", (side, side))
         sq.paste(im.crop(box), ((side - w) // 2, (side - h) // 2))
         out.append(sq.resize((size, size), Image.LANCZOS))
-    return out, round(anim["length"] * 1000 / frames)
+    return out, max(20, round(anim["length"] * 100 / frames) * 10)
 
 
 def save_gif(path, frames, ms, bg=None):
