@@ -61,6 +61,10 @@ local PAGES = {
 		grid = "rbxassetid://80820120308003", -- assets/ui/dex/DexSnow.png
 		examine = "rbxassetid://93155919439780", -- assets/ui/dex/DexSnowExamine.png
 	},
+	Ocean = {
+		grid = "rbxassetid://114042809798313", -- assets/ui/dex/DexOcean.png
+		examine = "rbxassetid://95075172887838", -- assets/ui/dex/DexOceanExamine.png
+	},
 }
 
 -- Each animal running: its sprite sheets (tools/dex_sheets.py), 25 frames of
@@ -83,6 +87,12 @@ local SHEETS = {
 	Snowman = { frames = 18, time = 0.03, "rbxassetid://139839156164981" },
 	IceGolem = { frames = 24, time = 0.03, "rbxassetid://94192117186470" },
 	Icebringer = { frames = 24, time = 0.04, "rbxassetid://125520132317720" },
+	Starfish = { frames = 48, time = 0.06, "rbxassetid://79068936169772", "rbxassetid://103163746025717" },
+	Squid = { frames = 24, time = 0.05, "rbxassetid://103797474563946" },
+	KingCrab = { frames = 17, time = 0.03, "rbxassetid://88553226475116" },
+	Whale = { frames = 24, time = 0.03, "rbxassetid://115620712947682" },
+	Kraken = { frames = 24, time = 0.05, "rbxassetid://77455009647862" },
+	FishSchool = { frames = 20, time = 0.03, "rbxassetid://104966778015588" },
 	Snake = { frames = 48, time = 0.05, "rbxassetid://74812837390041", "rbxassetid://104986890781116" },
 }
 local FRAME, PER_SHEET, SHEET_COLUMNS = 192, 25, 5
@@ -116,7 +126,7 @@ local BIOS = { -- QM's (Oct 3)
 local AnimalDex = {}
 
 local gui, page, scale, grid, examine
-local open, shown -- the page is up; the animal being examined (nil: the grid)
+local open, shown -- the page is up; the animal being examined, its place in `order` (nil: the grid)
 local animate -- the running animal's frame clock
 
 local function rarityOf(kind)
@@ -263,7 +273,11 @@ function showGrid(index)
 		local art = image(card, PetFaces.HEADSHOTS[kind] or "", UDim2.fromOffset(ART, ART), UDim2.fromScale(0.5, 0.5), Vector2.new(0.5, 0.5))
 		art.ImageColor3 = if seen[kind] then Color3.new(1, 1, 1) else Color3.new(0, 0, 0) -- not ridden yet: a silhouette
 		card.Activated:Connect(function()
-			showAnimal(kind)
+			for at, entry in order do
+				if entry.kind == kind and entry.biome == biome.name then
+					showAnimal(at)
+				end
+			end
 		end)
 		card.Parent = page
 	end
@@ -285,15 +299,11 @@ function arrow(position, turn, onClick)
 end
 
 -- One animal close up: running, with its name and bio, and arrows to the next.
-function showAnimal(kind)
+-- (at: its place in `order`, since the Fish is in two biomes.)
+function showAnimal(at)
 	clear()
-	shown = kind
-	local at = 1
-	for i, entry in order do
-		if entry.kind == kind then
-			at = i
-		end
-	end
+	shown = at
+	local kind = order[at].kind
 	page.Image = PAGES[order[at].biome].examine
 	for i, biome in biomes do
 		if biome.name == order[at].biome then
@@ -327,10 +337,10 @@ function showAnimal(kind)
 	end
 
 	arrow(UDim2.fromOffset(256, 340), -90, function()
-		showAnimal(order[(at - 2) % #order + 1].kind)
+		showAnimal((at - 2) % #order + 1)
 	end)
 	arrow(UDim2.fromOffset(PAGE.X - 256, 340), 90, function()
-		showAnimal(order[at % #order + 1].kind)
+		showAnimal(at % #order + 1)
 	end)
 
 	local name = Instance.new("TextLabel")
