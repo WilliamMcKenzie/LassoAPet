@@ -1,17 +1,20 @@
 -- Floor height under a point. Most of the floor's top is at y = 0; patches
 -- in World.Ground can stand higher (the desert's sandstone) or sit lower (the
--- meadow's dirt). They're laid out on the 4-stud checker (8-stud cells in most
--- biomes, tools/desert_ground.py; single tiles in the Godlands, Server/GodlandsGround),
--- so the height is looked up per 4-stud cell.
+-- meadow's dirt). They're laid out on an 8-stud grid (tools/desert_ground.py,
+-- tools/meadow_ground.py), so the height is looked up per 8-stud cell.
 
-local CELL = 4
+local CELL = 8
+
+-- Past its line the Godlands is laid out on 4-stud tiles, built by each client
+-- as it goes (Shared/Godlands), so its heights come from its track grids instead.
+local Godlands = require(script.Parent.Godlands)
 
 local Ground = {}
 
 local heights -- [cell key] = top y, only for cells off y = 0
 
 local function key(i, j)
-	return (i + 16384) * 32768 + (j + 16384)
+	return (i + 4096) * 8192 + (j + 4096)
 end
 
 local function load()
@@ -30,6 +33,9 @@ local function load()
 end
 
 function Ground.heightAt(x, z)
+	if Godlands.start and z < Godlands.start then
+		return Godlands.heightAt(x, z)
+	end
 	if not heights then
 		load()
 	end

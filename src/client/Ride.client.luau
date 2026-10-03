@@ -126,6 +126,32 @@ for _, o in obstacles do
 	slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
 	slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
 end
+-- The Godlands' terrain pieces come and go with the tracks built round you
+-- (Client/GodlandsStream): in and out of the list and the slices.
+function slices.remove(list, o, zMin, zMax)
+	for slice = math.floor(zMin / slices.SIZE), math.floor(zMax / slices.SIZE) do
+		local i = list[slice] and table.find(list[slice], o)
+		if i then
+			table.remove(list[slice], i)
+		end
+	end
+end
+function slices.pieces(list, added)
+	for _, o in list do
+		if added then
+			table.insert(obstacles, o)
+			slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
+			slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
+		else
+			local i = table.find(obstacles, o)
+			if i then
+				table.remove(obstacles, i)
+			end
+			slices.remove(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
+			slices.remove(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
+		end
+	end
+end
 
 -- Size tiers a pet gains on the way home with the egg.
 local RETURN_TIER_BONUS = 1
@@ -198,7 +224,9 @@ local SHRINK = 12 -- studs before its biome's end over which an animal shrinks i
 -- Each biome's stream: where it spawns and ends, how long an animal lives in it and
 -- its kinds of animal by weight (Config.Biomes[b].Herd), sorted by name so every
 -- client picks the same animals. A stream's animals are keyed n * BIOME_KEYS + b - 1.
-local BIOME_KEYS = 8
+-- The endless Godlands has a stream per track instead (endless below), at b past the
+-- other biomes', wrapping round well within BIOME_KEYS.
+local BIOME_KEYS = 1024
 
 -- An animal's stats (Config.AnimalStats), 1x for any animal not listed.
 local function statsOf(kind)
@@ -215,41 +243,96 @@ local function holdTime(entity)
 	return Config.HoldTime * statsOf(entity.kind).Stamina
 end
 local streams = {}
+-- The endless Godlands (Shared/Godlands): a stream per track, each running from
+-- its track's line to the next, made as the camera nears it (endless.stream(k)).
+local endless = { Godlands = require(ReplicatedStorage.Shared.Godlands) }
+-- A stream from spawnZ to endZ of the herd's kinds; name labels its line in the Output.
+function endless.newStream(spawnZ, endZ, herd, name)
+	local s = {
+		spawnZ = spawnZ,
+		endZ = endZ,
+		kinds = {},
+		total = 0,
+	}
+	local slowest = math.huge
+	for kind in herd do
+		slowest = math.min(slowest, herdSpeed(kind))
+	end
+	s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / slowest
+	local names = {}
+	for kind, weight in herd do
+		table.insert(s.kinds, { name = kind, weight = weight })
+		table.insert(names, kind .. " " .. weight)
+		s.total += weight
+	end
+	table.sort(s.kinds, function(a, c)
+		return a.name < c.name
+	end)
+	table.sort(names)
+	if name then
+		-- One line per biome in the Output, to check the stampede matches Config.
+		print(string.format("[Herd] %s: spawns at z %.0f, ends at z %.0f: %s", name, s.spawnZ, s.endZ, table.concat(names, ", ")))
+	end
+	return s
+end
 do
 	local edge = 0
 	for b, biome in Config.Biomes do
 		local startZ, endZ = edge, edge - biome.Length
 		edge = endZ
-		local s = {
-			spawnZ = if b == 1 then SPAWN_Z else startZ - 2,
-			endZ = if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
-			kinds = {},
-			total = 0,
-		}
-		local slowest = math.huge
-		for name in biome.Herd do
-			slowest = math.min(slowest, herdSpeed(name))
-		end
-		s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / slowest
 		assert(biome.Herd, "Config.Biomes[" .. b .. "] (" .. tostring(biome.Name) .. ") has no Herd")
-		local names = {}
-		for name, weight in biome.Herd do
-			table.insert(s.kinds, { name = name, weight = weight })
-			table.insert(names, name .. " " .. weight)
-			s.total += weight
+		if b == endless.Godlands.biome then
+			endless.b, endless.herd = b, biome.Herd
+			print(string.format("[Herd] %s: a stream per %d-stud track from z %.0f on", biome.Name, endless.Godlands.length, startZ))
+			continue
 		end
-		table.sort(s.kinds, function(a, c)
-			return a.name < c.name
-		end)
-		table.sort(names)
-		streams[b] = s
-		-- One line per biome in the Output, to check the stampede matches Config.
-		print(string.format("[Herd] %s: spawns at z %.0f, ends at z %.0f: %s", biome.Name, s.spawnZ, s.endZ, table.concat(names, ", ")))
+		streams[b] = endless.newStream(
+			if b == 1 then SPAWN_Z else startZ - 2,
+			if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
+			biome.Herd,
+			biome.Name
+		)
 	end
+end
+-- Track k's stream, at streams[endless.b + k % 900] (made now if it isn't there).
+-- Its animals pop in at the track's line and shrink away at the next one.
+function endless.stream(k)
+	local b = endless.b + k % 900
+	local s = streams[b]
+	if not s or s.k ~= k then
+		local z0 = endless.Godlands.segmentStart(k)
+		s = endless.newStream(z0 - 2, z0 - endless.Godlands.length + 2, endless.herd)
+		s.k = k
+		streams[b] = s
+	end
+	return s
+end
+-- Keeps streams for the tracks within reach of the camera at z, and only those.
+function endless.near(z)
+	if not endless.b then
+		return
+	end
+	local hi = endless.Godlands.segmentAt(z - VIEW)
+	local lo = endless.Godlands.segmentAt(z + VIEW) or 0
+	for b, s in streams do
+		if s.k and (not hi or s.k < lo or s.k > hi) then
+			streams[b] = nil
+		end
+	end
+	for k = lo, hi or -1 do
+		endless.stream(k)
+	end
+end
+if endless.b then
+	endless.stream(0) -- so the pools below count its animals
 end
 
 -- Where an animal in biome b (at z) stops: its stream's end.
 local function streamAt(z)
+	local k = endless.Godlands.segmentAt(z)
+	if k and endless.b then
+		return endless.stream(k)
+	end
 	return streams[WorldColors.biomeAt(z)]
 end
 
@@ -287,6 +370,8 @@ local transfer, tumble, carried
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.rideSync = ReplicatedStorage:WaitForChild("RideSync") -- multiplayer rides (Riders.server)
 vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
+vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
+vfx.godlands.onPieces = slices.pieces
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
 local LEAP_FROM = 8 -- studs before the start line where the leap starts
@@ -1439,6 +1524,8 @@ local function updateHerd(dt, slowed)
 	for key, left in vfx.frostLeft do
 		vfx.frostLeft[key] = if left > dt then left - dt else nil
 	end
+	endless.near(camZ)
+	vfx.godlands.update(camZ)
 	for b, stream in streams do
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
 		for n = stream.oldest, newest do
@@ -1503,7 +1590,8 @@ local function updateHerd(dt, slowed)
 		end
 	end
 	for key in plans do
-		if key // BIOME_KEYS < streams[key % BIOME_KEYS + 1].oldest then
+		local stream = streams[key % BIOME_KEYS + 1] -- (gone if it was a Godlands track's left behind)
+		if not stream or key // BIOME_KEYS < stream.oldest then
 			plans[key], taken[key] = nil, nil
 			vfx.frostLag[key], vfx.frostLeft[key] = nil, nil
 		end

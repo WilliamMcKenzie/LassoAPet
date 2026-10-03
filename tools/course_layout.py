@@ -55,8 +55,6 @@ BIOMES = [
          small=["Icicle"], medium=["Pine", "IcicleLarge"], large=["IceBoulder"]),
     dict(name="Ocean", z0=OG.Z_START, z1=OG.Z_START - OG.OCEAN_LENGTH, nests=OG.NESTS,
          small=["TubeCoral", "BrainCoral"], medium=["BranchCoral", "FanCoral"], large=["ReefRock"]),
-    dict(name="Godlands", z0=GC.Z_START, z1=GC.END, nests=[],
-         small=["DeadBush", "DarkStone"], medium=["DeadTree", "Crag"], large=["LavaRock"]),
 ]
 # footprint radius (studs), size class and builder for each asset
 ASSETS = {
@@ -158,9 +156,8 @@ class Course:
             return False
         if z - r < biome["z1"] + 4:
             return False
-        if biome["name"] in ("Desert", "Ocean", BIOMES[-1]["name"]) and z - r < biome["z1"] + FINISH_CLEAR:
-            return False  # the finish line and the leap over it (Config.FinishFromEnd); the
-            # desert and ocean were the last biome once, and keep the layout they had then
+        if biome["name"] in ("Desert", BIOMES[-1]["name"]) and z - r < biome["z1"] + FINISH_CLEAR:
+            return False  # the finish line and the leap over it (Config.FinishFromEnd)
         for nx, nz in biome["nests"]:
             if math.hypot(x - nx, z - nz) < NEST_CLEAR + r:
                 return False
@@ -409,7 +406,7 @@ class Course:
                 self.meadow_clusters(b, np.random.default_rng(11))
             else:
                 # every later biome hugs the walls like the meadow (QM, Oct 1)
-                self.wall_clusters(b, np.random.default_rng({"Desert": 23, "Snow": 31, "Ocean": 41, "Godlands": 53}[b["name"]]))
+                self.wall_clusters(b, np.random.default_rng({"Desert": 23, "Snow": 31, "Ocean": 41}[b["name"]]))
         return self.items
 
 
