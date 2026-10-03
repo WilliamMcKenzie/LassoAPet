@@ -208,7 +208,7 @@ local function card(pet, order)
 	rate.TextXAlignment = Enum.TextXAlignment.Left
 	rate.Text = money(Config.PetIncome[pet.kind] or 0) .. "/s"
 	rate.ZIndex = 4
-	stroked(rate, 4)
+	stroked(rate, 3)
 	rate.Parent = cell
 
 	-- The trash can over the top right corner.
@@ -225,7 +225,7 @@ local function card(pet, order)
 		trash.Font = FONT
 		trash.TextSize = 36
 		trash.TextColor3 = Color3.new(1, 1, 1)
-		stroked(trash, 4)
+		stroked(trash, 3)
 	end
 	local wiggle = Instance.new("UIScale")
 	wiggle.Parent = trash

@@ -293,7 +293,7 @@ local function cashRow(parent, coinSize, textSize, anchor, position, strokeThick
 	layout.Parent = row
 	local coin = image(row, "coin", UDim2.fromOffset(coinSize, coinSize), UDim2.new())
 	coin.ZIndex = 1
-	local text = label(row, UDim2.fromOffset(0, coinSize), UDim2.new(), textSize, strokeThickness or 4)
+	local text = label(row, UDim2.fromOffset(0, coinSize), UDim2.new(), textSize, strokeThickness or 3)
 	text.AutomaticSize = Enum.AutomaticSize.X
 	text.LayoutOrder = 1
 	text.ZIndex = 3 -- the text overlaps the coin's edge, drawn on top
@@ -487,7 +487,7 @@ function Hud.init(onAction, onHome, onRide)
 	tipPad.PaddingLeft, tipPad.PaddingRight = UDim.new(0, 28), UDim.new(0, 28)
 	tipPad.PaddingTop, tipPad.PaddingBottom = UDim.new(0, 12), UDim.new(0, 12)
 	tipPad.Parent = tip
-	tipText = label(tip, UDim2.fromOffset(0, 56), UDim2.new(), 44, 4)
+	tipText = label(tip, UDim2.fromOffset(0, 56), UDim2.new(), 44, 3)
 	tipText.AnchorPoint = Vector2.zero
 	tipText.AutomaticSize = Enum.AutomaticSize.X
 	Instance.new("UIScale").Parent = tip
@@ -544,7 +544,7 @@ function Hud.init(onAction, onHome, onRide)
 	-- Anchored at its middle so the throb grows it evenly.
 	upgrade, upgradeScale = button(homeRoot, "upgradePen", upgradeSize, Vector2.new(0.5, 0.5),
 		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
-	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.66), 30, 4)
+	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.66), 30, 3)
 	price.AutomaticSize = Enum.AutomaticSize.X
 	local cost -- gold for the next level, nil at the top level
 	local function refreshUpgrade()
