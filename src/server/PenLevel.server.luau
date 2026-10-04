@@ -51,12 +51,20 @@ local function load(player)
 	end
 end
 
-local function save(player)
+local savedAs = {} -- [player] = the level last saved (autosave skips it if unchanged)
+
+-- onlyIfChanged: the autosave's, which skips it when nothing changed.
+local function save(player, onlyIfChanged)
 	if not store or not loaded[player] then
 		return
 	end
+	local value = level(player)
+	if onlyIfChanged and savedAs[player] == value then
+		return
+	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, "u" .. player.UserId, level(player)) then
+		if pcall(store.SetAsync, store, "u" .. player.UserId, value) then
+			savedAs[player] = value
 			return
 		end
 		task.wait(attempt)
@@ -213,14 +221,42 @@ end
 
 Players.PlayerRemoving:Connect(function(player)
 	save(player)
-	loaded[player] = nil
+	loaded[player], savedAs[player] = nil, nil
+end)
+
+-- Autosave (QM, Oct 4): every Config.AutosaveEvery seconds each player's pen level is saved
+-- if it changed since it was last saved (so a server crash loses that much at most),
+-- spread out over the interval to stay inside the DataStore budget. Shutting down
+-- saves everyone and waits for the saves to finish (Roblox allows up to 30 s).
+task.spawn(function()
+	while true do
+		local list = Players:GetPlayers()
+		if #list == 0 then
+			task.wait(Config.AutosaveEvery)
+			continue
+		end
+		for _, player in list do
+			task.wait(Config.AutosaveEvery / #list)
+			if player.Parent then
+				task.spawn(save, player, true)
+			end
+		end
+	end
 end)
 
 game:BindToClose(function()
+	local left = 0
 	for _, player in Players:GetPlayers() do
-		task.spawn(save, player)
+		left += 1
+		task.spawn(function()
+			save(player)
+			left -= 1
+		end)
 	end
-	task.wait(2)
+	local deadline = os.clock() + 25
+	while left > 0 and os.clock() < deadline do
+		task.wait(0.1)
+	end
 end)
 
 -- Buying the next level --------------------------------------------------------

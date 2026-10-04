@@ -169,6 +169,16 @@ return {
 			-- an event and roll exclusive, so it doesn't run here.) PlaceholderHerd keeps it
 			-- out of the finish line's egg odds (Hatchery).
 			Herd = { Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5, Leviathan = 0.1 }, -- its own animals, no Fish (QM, Oct 4; weights are guesses)
+			-- Its nests' eggs (Nests.server: one nest a track, near the riders) get rarer the
+			-- deeper in you are (QM, Oct 4), each tier's pool split evenly: at its line only
+			-- Rares; the Epic chance grows from 0 to Epic.Max over the first Epic.Over
+			-- studs; past Legendary.From studs the Legendary chance grows to Legendary.Max
+			-- over Legendary.Over studs, then holds. The rest is Rares.
+			NestDepth = {
+				Rare = { "Beholder", "Sludge", "WarElephant" },
+				Epic = { Pool = { "Leviathan", "SoulHorse" }, Max = 0.4, Over = 5000 },
+				Legendary = { Pool = { "Unicorn", "Snake", "Icebringer", "Kraken", "BlueCrab" }, From = 5000, Max = 0.1, Over = 5000 },
+			},
 			PlaceholderHerd = true,
 			HerdThin = 2, -- only every 2nd of the stampede's spawns runs here: half as many animals (QM, Oct 4)
 			Patches = {
@@ -418,6 +428,7 @@ return {
 	-- their usual gold a second for the time you were gone, up to AwayCap seconds of it
 	-- (10 hours at 0.1x: an hour's worth at most). Claimed from a popup (Away.client).
 	AwayRate = 0.1,
+	AutosaveEvery = 90, -- seconds between autosaves of each player's gold, pets and pen (Gold, Hatchery, PenLevel)
 	AwayCap = 10 * 3600,
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.

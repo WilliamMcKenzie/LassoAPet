@@ -8,6 +8,12 @@
 -- (Config.Biomes[b].Herd): an animal that's 1 in 100 of the stampede is 1 in 100
 -- of the eggs (QM, Oct 2).
 --
+-- The Godlands' nests have their own odds, by how deep in they are (its NestDepth).
+--
+-- The Godlands never end, so its nests aren't on the map: one goes in each of its
+-- tracks (Shared/Godlands) near any player, at a clear spot picked from the server's
+-- seed, and goes again once no one is near (see the end).
+--
 -- The EventNest is Events.server's: its egg is the event's, never rolled or restocked here.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -31,8 +37,25 @@ for b, biome in Config.Biomes do
 	eggOdds[b] = odds
 end
 
+local godlandsStart -- z of the Godlands' line (Shared/Godlands, below)
+
+-- A Godlands nest's egg, `depth` studs past its line (Config: the Godlands' NestDepth).
+local function rollDeep(depth, nd)
+	local epic = math.clamp(depth / nd.Epic.Over, 0, 1) * nd.Epic.Max
+	local legendary = math.clamp((depth - nd.Legendary.From) / nd.Legendary.Over, 0, 1) * nd.Legendary.Max
+	local r = rng:NextNumber()
+	local pool = if r < legendary then nd.Legendary.Pool elseif r < legendary + epic then nd.Epic.Pool else nd.Rare
+	return pool[rng:NextInteger(1, #pool)]
+end
+
 local function roll(nest)
-	local odds = eggOdds[WorldColors.biomeAt(nest.EggSpot.Position.Z)]
+	local z = nest.EggSpot.Position.Z
+	local b = WorldColors.biomeAt(z)
+	local nd = Config.Biomes[b] and Config.Biomes[b].NestDepth
+	if nd and godlandsStart then
+		return rollDeep(math.max(godlandsStart - z, 0), nd)
+	end
+	local odds = eggOdds[b]
 	local total = 0
 	for _, o in odds do
 		total += o.weight
@@ -81,4 +104,121 @@ takeEgg.OnServerEvent:Connect(function(player, nest)
 			nest:SetAttribute("Egg", roll(nest))
 		end
 	end)
+end)
+
+-- The Godlands' nests ---------------------------------------------------------
+
+local Players = game:GetService("Players")
+local Godlands = require(ReplicatedStorage.Shared.Godlands)
+local Tracks = require(ReplicatedStorage.Shared.GodlandsTracks)
+godlandsStart = Godlands.start
+
+local NEAR = { 1, 3 } -- tracks behind and ahead of a player that have their nest
+local WALL_MARGIN = 14 -- studs in from the walls
+local PIECE_MARGIN = 16 -- studs clear of a mountain's footprint
+local CLEAR = 6 -- studs of plain snow all round the spot
+
+local template = world.Nests:FindFirstChildWhichIsA("Model")
+local godlandsNests = {} -- [k] = its nest
+
+-- Where each rider is: their RideSync (the server can't see a ride's anchored
+-- character move), kept a few seconds; else their character.
+local rideZ, rideAt = {}, {}
+ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, _, _, riderCFrame)
+	if typeof(riderCFrame) == "CFrame" and riderCFrame.Position.Z == riderCFrame.Position.Z then
+		rideZ[player], rideAt[player] = riderCFrame.Position.Z, os.clock()
+	end
+end)
+Players.PlayerRemoving:Connect(function(player)
+	rideZ[player], rideAt[player] = nil, nil
+end)
+local function zOf(player)
+	if rideZ[player] and os.clock() - rideAt[player] < 3 then
+		return rideZ[player]
+	end
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	return root and root.Position.Z
+end
+
+-- A clear spot in track k: level ground round it (all snow, or all stone; no ice or
+-- lava), away from the walls and mountains,
+-- picked from the server's seed so it's the same spot every time it comes back.
+local function spotIn(k)
+	local seed = world:GetAttribute("GodlandsSeed") or 1
+	local r = Random.new(seed * 7919 + k)
+	local track = Godlands.track(k)
+	local near = Godlands.segmentStart(k)
+	local half = Godlands.halfWidth - WALL_MARGIN
+	for _ = 1, 60 do
+		local x, along = r:NextNumber(-half, half), r:NextNumber(120, Godlands.length - 120)
+		local z = near - along
+		local ok, ground = true, Godlands.glyphAt(x, z)
+		for dx = -CLEAR, CLEAR, CLEAR do
+			for dz = -CLEAR, CLEAR, CLEAR do
+				if Godlands.glyphAt(x + dx, z + dz) ~= ground or ground == "~" then
+					ok = false
+				end
+			end
+		end
+		for _, piece in if ok then Tracks.Pieces[track.Grid] else {} do
+			local kit = Tracks.Kit[piece[1]]
+			local hx, hz = kit.HalfX or kit.Radius, kit.HalfZ or kit.Radius
+			if math.abs(x - piece[2]) < hx + PIECE_MARGIN and math.abs(along + piece[3]) < hz + PIECE_MARGIN then
+				ok = false
+			end
+		end
+		if ok then
+			return Vector3.new(x, Godlands.heightAt(x, z), z)
+		end
+	end
+	return nil
+end
+
+local function addNest(k)
+	local spot = spotIn(k)
+	if not template or not spot then
+		godlandsNests[k] = false -- (no room in this one)
+		return
+	end
+	local nest = template:Clone()
+	nest.Name = "GodlandsNest" .. k
+	nest:SetAttribute("Egg", "")
+	local egg = nest:FindFirstChild("EggSpot")
+	local fromSpot = CFrame.new(-egg.Position) * nest:GetPivot()
+	nest:PivotTo(CFrame.new(spot.X, egg.Position.Y + spot.Y, spot.Z) * fromSpot) -- (the EggSpot as high over the ground as over the map's floor)
+	nest:SetAttribute("Egg", roll(nest))
+	nest.Parent = world.Nests
+	godlandsNests[k] = nest
+end
+
+task.spawn(function()
+	while not world:GetAttribute("Ready") do
+		world:GetAttributeChangedSignal("Ready"):Wait()
+	end
+	while true do
+		task.wait(1)
+		local wanted = {}
+		for _, player in Players:GetPlayers() do
+			local z = zOf(player)
+			local k = z and Godlands.segmentAt(z - Godlands.length * NEAR[2])
+			if k then
+				for j = math.max(k - NEAR[1] - NEAR[2], 0), k do
+					wanted[j] = true
+				end
+			end
+		end
+		for k in wanted do
+			if godlandsNests[k] == nil then
+				addNest(k)
+			end
+		end
+		for k, nest in godlandsNests do
+			if not wanted[k] then
+				if nest then
+					nest:Destroy()
+				end
+				godlandsNests[k] = nil
+			end
+		end
+	end
 end)

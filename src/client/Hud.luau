@@ -382,7 +382,15 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 
 	-- Ride back: only DODGE THE STAMPEDE!, pulsing between 90% and 110%, and a red
 	-- vignette that fades out over the last stretch home.
-	dodge = image(rideRoot, "dodge", fit("dodge", 440), UDim2.fromScale(0.5, 0.15))
+	-- (in a holder over the whole ride screen, so an event's countdown can hide it
+	-- without upsetting its own show and pulse: Hud.setEventCountdown)
+	local dodgeHolder = Instance.new("Frame")
+	dodgeHolder.Name = "DodgeHolder"
+	dodgeHolder.BackgroundTransparency = 1
+	dodgeHolder.Size = UDim2.fromScale(1, 1)
+	dodgeHolder.Parent = rideRoot
+	EVENT.dodgeHolder = dodgeHolder
+	dodge = image(dodgeHolder, "dodge", fit("dodge", 440), UDim2.fromScale(0.5, 0.15))
 	dodge.Visible = false
 	Instance.new("UIScale").Parent = dodge
 	dodgePulse = TweenService:Create(dodge.UIScale, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.1 })
@@ -1402,6 +1410,9 @@ function Hud.setEventCountdown(kind, seconds)
 	end
 	local shown = kind ~= nil and tutorial == nil
 	EVENT.row.Visible = shown
+	if EVENT.dodgeHolder then
+		EVENT.dodgeHolder.Visible = not shown -- DODGE THE STAMPEDE! steps aside for it (QM)
+	end
 	if not shown then
 		EVENT.kind, EVENT.seconds = nil, nil
 		return

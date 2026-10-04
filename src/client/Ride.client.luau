@@ -347,6 +347,9 @@ local rng = Random.new()
 do
 	local function watchNest(nest)
 		showNestEgg(nest)
+		nest.Destroying:Connect(function() -- (a Godlands nest no one's near any more: Nests.server)
+			waitingEggs[nest] = nil
+		end)
 		nest:GetAttributeChangedSignal("Egg"):Connect(function()
 			showNestEgg(nest)
 		end)
