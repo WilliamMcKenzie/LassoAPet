@@ -65,6 +65,14 @@ local PAGES = {
 		grid = "rbxassetid://114042809798313", -- assets/ui/dex/DexOcean.png
 		examine = "rbxassetid://95075172887838", -- assets/ui/dex/DexOceanExamine.png
 	},
+	Godlands = {
+		grid = "rbxassetid://81880377884398", -- assets/ui/dex/DexGodlands.png
+		examine = "rbxassetid://103373591995713", -- assets/ui/dex/DexGodlandsExamine.png
+		-- Its Fish are a stand-in until it has animals enough (Config), not its own;
+		-- the Loong is its exclusive, which never runs in its stampede.
+		skip = { Fish = true },
+		extra = { "Loong" },
+	},
 }
 
 -- Each animal running: its sprite sheets (tools/dex_sheets.py), 25 frames of
@@ -143,9 +151,17 @@ end
 local biomes, order = {}, {}
 for _, biome in Config.Biomes do
 	if PAGES[biome.Name] then
+		local page = PAGES[biome.Name]
 		local kinds = {}
 		for kind in biome.Herd do
-			table.insert(kinds, kind)
+			if not (page.skip and page.skip[kind]) then
+				table.insert(kinds, kind)
+			end
+		end
+		for _, kind in page.extra or {} do
+			if not table.find(kinds, kind) then
+				table.insert(kinds, kind)
+			end
 		end
 		table.sort(kinds, function(a, b)
 			local ra, rb = table.find(RARITIES, rarityOf(a)), table.find(RARITIES, rarityOf(b))
