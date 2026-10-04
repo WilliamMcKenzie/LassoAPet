@@ -252,9 +252,10 @@ return {
 	--     LeapHeight studs high, over everything, at SpeedBoost x speed with no Hold drain,
 	--     leaving a rainbow trail.
 	--   Rattle (Snake): one tap: it stops, coils up and rattles for Duration (its
-	--     coiled idle), smashing every obstacle within Radius studs and scattering
-	--     the animals there away from it, and refilling Restore of the Hold bar. No
-	--     Hold drain while it rattles; a yellow-orange haze closes in round the screen.
+	--     coiled idle). Once the rattle's over (QM, Oct 4) every obstacle within
+	--     Radius studs is smashed and every animal there is scared for ScareTime
+	--     seconds, keeping away from it, each one refilling RestorePer of the Hold
+	--     bar. No Hold drain while it rattles; a yellow-orange haze closes in round the screen.
 	--   Frost (Icebringer): one tap: a blizzard bursts out round it and every animal
 	--     within Radius studs (but itself) runs Slow slower (0.7 = 70%) until Duration
 	--     is up, frosted over. Unlike the others it doesn't stop the Hold bar or crashes.
@@ -289,7 +290,7 @@ return {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
 		SnackYak = { Kind = "Charge", UntilFull = true, Cooldown = 5, SpeedBoost = 2 }, -- QM, Oct 4
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 56 },
-		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 6, Radius = 45, Restore = 0.5 },
+		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 10, Radius = 45, ScareTime = 10, RestorePer = 0.1 }, -- QM, Oct 4
 		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7 },
 		SpineLizard = { Kind = "Boost", Duration = 5, Cooldown = 8, SpeedBoost = 2 },
 		IceGolem = { Kind = "Grow", Duration = 5, Cooldown = 10, SpeedBoost = 1.2, Tier = 4 },

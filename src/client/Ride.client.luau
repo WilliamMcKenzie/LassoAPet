@@ -1456,7 +1456,7 @@ local function putInPool(entity)
 	entity.animal.model.Parent = nil
 	entity.animal:setScale(1)
 	entity.hop, entity.popping, entity.lift = 0, nil, nil
-	entity.ability, entity.frostLeft, entity.fall = nil, nil, nil
+	entity.ability, entity.frostLeft, entity.fall, entity.scared = nil, nil, nil, nil
 	table.insert(pools[entity.kind], entity)
 end
 
@@ -1962,22 +1962,46 @@ local function rattleRing(center, radius, color)
 	end)
 end
 
--- Rattle: everything standing within the radius is smashed, and the animals
--- there scatter sideways, away from the snake.
-local function rattleBlast(dt, cfg)
+-- Rattle, once the rattling's done (QM, Oct 4): everything standing within the
+-- radius is smashed, and every animal there is scared for cfg.ScareTime, each one
+-- refilling cfg.RestorePer of the Hold bar.
+local function rattleBlast(cfg)
+	rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius)
 	for _, o in obstacles do
 		if not o.smashed and Vector2.new(o.x - mount.x, o.z - mount.z).Magnitude < cfg.Radius then
 			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
 		end
 	end
+	local scared = 0
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
-		if dx * dx + dz * dz < cfg.Radius * cfg.Radius then
-			local away = if dx >= 0 then 1 else -1
-			if entity.n then
-				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -cfg.Radius, cfg.Radius)
+		if not entity.popping and dx * dx + dz * dz < cfg.Radius * cfg.Radius then
+			entity.scared = { left = cfg.ScareTime, radius = cfg.Radius }
+			scared += 1
+		end
+	end
+	hold = math.min(hold + holdTime(mount) * cfg.RestorePer * scared, holdTime(mount))
+end
+
+-- Scared animals keep away from the snake while it lasts: they scatter sideways,
+-- away from it, whenever it comes within the rattle's radius.
+function vfx.updateScared(dt)
+	for _, entity in allAnimals() do
+		local scared = entity.scared
+		if scared then
+			scared.left -= dt
+			if scared.left <= 0 or not mount then
+				entity.scared = nil
 			else
-				entity.lane = math.clamp(entity.lane + away * 60 * dt, -EDGE, EDGE)
+				local dx, dz = entity.x - mount.x, entity.z - mount.z
+				if dx * dx + dz * dz < scared.radius * scared.radius then
+					local away = if dx >= 0 then 1 else -1
+					if entity.n then
+						entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -scared.radius, scared.radius)
+					else
+						entity.lane = math.clamp((entity.lane or entity.x) + away * 60 * dt, -EDGE, EDGE)
+					end
+				end
 			end
 		end
 	end
@@ -2495,8 +2519,7 @@ local function startAbility(cfg)
 		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
 		a.active.fx = vfx.rainbowFx(mount)
 	elseif cfg.Kind == "Rattle" then
-		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius)
-		hold = math.min(hold + holdTime(mount) * (cfg.Restore or 0), holdTime(mount)) -- a breather: the Hold bar refills
+		-- (it scares only once the rattling's done: rattleBlast, from updateAbility)
 	elseif cfg.Kind == "Frost" then
 		a.active.fx = vfx.frostFx(mount)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, vfx.FROST_TINT)
@@ -2559,9 +2582,7 @@ local function updateAbility(dt)
 	local active = a.active
 	if active then
 		active.t += dt
-		if active.cfg.Kind == "Rattle" then
-			rattleBlast(dt, active.cfg)
-		elseif active.cfg.Kind == "Ink" then
+		if active.cfg.Kind == "Ink" then
 			vfx.inkBlast(dt, active.cfg)
 		elseif active.cfg.Kind == "Frost" then
 			vfx.frostBlast(active.cfg, active.cfg.Duration - active.t)
@@ -2573,6 +2594,9 @@ local function updateAbility(dt)
 			vfx.missileSweep(active.missiles:update(dt, mount.speed, active.t), active.cfg)
 		end
 		if active.cfg.Duration and active.t >= active.cfg.Duration then
+			if active.cfg.Kind == "Rattle" then
+				rattleBlast(active.cfg) -- the rattle's over: now they're scared
+			end
 			endAbility(mount) -- (an UntilFull charge ends in checkRide, when Hold is full again)
 		end
 	elseif pressed and abilityClock >= a.readyAt and (phase == "outbound" or phase == "return") and not transfer
@@ -3322,6 +3346,7 @@ RunService.PreSimulation:Connect(function(dt)
 		ReplicatedStorage:WaitForChild("Ridden"):FireServer(mount.kind)
 	end
 	updateAbility(dt)
+	vfx.updateScared(dt)
 	vfx.updateSprint(dt)
 	vfx.updateScale(dt)
 	updateGuide()
