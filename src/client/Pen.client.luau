@@ -170,7 +170,7 @@ end
 -- (bigger animals' eggs are bigger, Egg.sizeOf): how big it really is.
 local function sizeEgg(s, scale)
 	s.grown = scale
-	scale *= s.egg.size
+	scale *= s.egg.size * (s.eggScale or 1)
 	s.scale = scale
 	s.egg.model:ScaleTo(scale)
 	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER * scale, 0)) * CFrame.Angles(0, s.yaw, 0))
@@ -180,7 +180,7 @@ local function sizeEgg(s, scale)
 end
 
 local function showEgg(pen, id, item)
-	local s = { kind = item.egg, merged = item.merged or 1, at = groundAt(pen, item.x, item.z), yaw = facing(pen), hatchAt = item.hatchAt }
+	local s = { kind = item.egg, merged = item.merged or 1, eggScale = item.eggScale, at = groundAt(pen, item.x, item.z), yaw = facing(pen), hatchAt = item.hatchAt }
 	s.egg = Egg.new(item.egg)
 	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER, 0)) * CFrame.Angles(0, s.yaw, 0))
 	s.egg.model.Parent = folder
@@ -400,6 +400,9 @@ local function setGhost(kind)
 	end
 	local special = Config.SpecialEggs[kind]
 	ghost = Egg.new(if special then special.Pet else kind).model
+	if special and special.EggScale then
+		ghost:ScaleTo(special.EggScale) -- (the Giant Horse's egg is 3x)
+	end
 	for _, part in ghost:GetDescendants() do
 		if part:IsA("BasePart") then
 			part.Transparency = 0.6

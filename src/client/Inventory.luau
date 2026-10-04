@@ -40,7 +40,7 @@ local function rarityOf(tool)
 	local kind = tool:GetAttribute("EggKind")
 	local special = kind and Config.SpecialEggs[kind]
 	if special then
-		return RARITY[special.Rarity]
+		kind = special.Pet -- (looks like its pet's egg: the Giant Horse's is a horse egg)
 	end
 	local module = kind and Animals:FindFirstChild(kind)
 	return module and RARITY[require(module).Rarity]

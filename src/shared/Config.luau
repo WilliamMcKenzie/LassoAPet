@@ -471,9 +471,9 @@ return {
 	},
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
-	-- (Shared/Merge). Rarity is the inventory square's colour.
+	-- (Shared/Merge). They look like Pet's egg, EggScale x as big (QM).
 	SpecialEggs = {
-		GiantHorse = { Name = "Giant Horse", Pet = "Horse", Merged = 10, HatchTime = 0, Rarity = "Legendary" }, -- the shop's Giant Horse
+		GiantHorse = { Name = "Giant Horse", Pet = "Horse", Merged = 10, HatchTime = 0, EggScale = 3 }, -- the shop's Giant Horse
 	},
 	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
