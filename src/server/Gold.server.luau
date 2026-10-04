@@ -12,6 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local MAX_PER_RIDE = 100000 -- ignore anything bigger than a ride could earn
+local Config = require(ReplicatedStorage.Shared.Config)
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "Gold")
 if not ok then
@@ -21,6 +22,7 @@ end
 local loaded = {} -- players whose saved gold has loaded, so a failed load never overwrites it
 local ready = {} -- players whose load is over (loaded or not)
 local bought = {} -- [player] = how much bought gold is already in their gold
+local savedAs = {} -- [player] = the gold and bought last saved (autosave skips it if they haven't changed)
 
 local function key(player)
 	return "u" .. player.UserId
@@ -50,13 +52,19 @@ local function load(player)
 	end
 end
 
-local function save(player)
+-- onlyIfChanged: the autosave's, which skips it when nothing changed.
+local function save(player, onlyIfChanged)
 	if not store or not loaded[player] then
 		return
 	end
 	local gold = player:GetAttribute("Gold") or 0
+	local as = gold .. "/" .. (bought[player] or 0)
+	if onlyIfChanged and savedAs[player] == as then
+		return
+	end
 	for attempt = 1, 3 do
 		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0 }) then
+			savedAs[player] = as
 			return
 		end
 		task.wait(attempt)
@@ -89,14 +97,42 @@ end
 
 Players.PlayerRemoving:Connect(function(player)
 	save(player)
-	loaded[player], ready[player], bought[player] = nil, nil, nil
+	loaded[player], ready[player], bought[player], savedAs[player] = nil, nil, nil, nil
+end)
+
+-- Autosave (QM, Oct 4): every Config.AutosaveEvery seconds each player's gold is saved
+-- if it changed since it was last saved (so a server crash loses that much at most),
+-- spread out over the interval to stay inside the DataStore budget. Shutting down
+-- saves everyone and waits for the saves to finish (Roblox allows up to 30 s).
+task.spawn(function()
+	while true do
+		local list = Players:GetPlayers()
+		if #list == 0 then
+			task.wait(Config.AutosaveEvery)
+			continue
+		end
+		for _, player in list do
+			task.wait(Config.AutosaveEvery / #list)
+			if player.Parent then
+				task.spawn(save, player, true)
+			end
+		end
+	end
 end)
 
 game:BindToClose(function()
+	local left = 0
 	for _, player in Players:GetPlayers() do
-		task.spawn(save, player)
+		left += 1
+		task.spawn(function()
+			save(player)
+			left -= 1
+		end)
 	end
-	task.wait(2)
+	local deadline = os.clock() + 25
+	while left > 0 and os.clock() < deadline do
+		task.wait(0.1)
+	end
 end)
 
 local bankCoins = Instance.new("RemoteEvent")

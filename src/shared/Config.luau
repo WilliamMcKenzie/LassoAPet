@@ -418,6 +418,7 @@ return {
 	-- their usual gold a second for the time you were gone, up to AwayCap seconds of it
 	-- (10 hours at 0.1x: an hour's worth at most). Claimed from a popup (Away.client).
 	AwayRate = 0.1,
+	AutosaveEvery = 90, -- seconds between autosaves of each player's gold, pets and pen (Gold, Hatchery, PenLevel)
 	AwayCap = 10 * 3600,
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.
