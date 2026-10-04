@@ -36,7 +36,7 @@ CELL = 4  # the height field's grid: the floor's checker
 STEP = 4  # studs per ledge
 LENGTH = 80  # studs along the course
 PEAK = 44  # studs: a little under the walls
-OPEN_LANE = 48  # studs the side mountains leave open on the far side; the centre one leaves LANE_C a side
+OPEN_LANE = 60  # studs the side mountains leave open on the far side (QM: was 48, a touch less in the way); the centre one leaves LANE_C a side
 LANE_C = 30
 
 ROCK = [(58, 56, 68), (72, 70, 84), (46, 44, 56)]  # dark stone, one shade a ledge
