@@ -1,12 +1,11 @@
 -- The animal dictionary (QM's mockup, Oct 3): the Pets button opens it and closes
--- it again (the button stays up while it's open). A biome's page is a 4 x 3 grid
--- of its animals, each on its rarity's card, in colour once you've ridden one and
--- a black silhouette until then (the server keeps the list: the "Ridden"
--- attribute, Hatchery.server). Tapping an animal examines it: the page turns to
--- the biome's examine background with the animal running (its sprite sheets) and
--- its name and bio, and arrows step to the animal before or after, on into the
--- next biome's. Only the Meadow has its art so far: biomes without a page are
--- left out.
+-- it again (the button stays up while it's open). It opens straight onto the Horse
+-- (QM, Oct 4: no grid of animals to pick from any more): the animal running (its
+-- sprite sheets) on its biome's examine page, with its name and bio, in colour
+-- once you've ridden one and a black silhouette until then (the server keeps the
+-- list: the "Ridden" attribute, Hatchery.server). Arrows step to the animal before
+-- or after, on into the next biome's (its page turns with it). Biomes without a
+-- page are left out.
 --
 -- Everything is laid out in pixels of QM's 1102 x 829 page (half the size of
 -- the page pictures) and scaled to fit the screen.
@@ -31,43 +30,28 @@ local player = Players.LocalPlayer
 
 local PAGE = Vector2.new(1102, 829)
 local SCREEN_SHARE = 0.54 -- the page is this share of the screen's width (QM's mockup), or less to fit its height
-local CARD, ART, GAP = 200, 180, 43 -- QM: 200 px cards, the animal 180 px in the middle
-local COLUMNS, ROWS = 4, 3
-local GRID_TOP = 90 -- the grid sits in the middle of the page's frame (37 to 829)
 local DIVIDER = 560 -- the examine page's line between the picture and the bio
 local FONT = Enum.Font.FredokaOne
 
 local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary" }
-local CARDS = {
-	Common = "rbxassetid://79697917998703", -- assets/ui/dex/DexCommon.png
-	Uncommon = "rbxassetid://129147449223279",
-	Rare = "rbxassetid://72145821537095",
-	Epic = "rbxassetid://137693950544184",
-	Legendary = "rbxassetid://80504921595928",
-}
 local ARROW = "rbxassetid://130844925944438" -- assets/ui/dex/DexArrow.png (points up)
 
 -- Each biome's page and examine page (Config.Biomes names). Biomes without
 -- them aren't in the dictionary yet.
 local PAGES = {
 	Meadow = {
-		grid = "rbxassetid://106554381754752", -- assets/ui/dex/DexMeadow.png
 		examine = "rbxassetid://78091503897812", -- assets/ui/dex/DexMeadowExamine.png
 	},
 	Desert = {
-		grid = "rbxassetid://73927041783018", -- assets/ui/dex/DexDesert.png
 		examine = "rbxassetid://77735968469215", -- assets/ui/dex/DexDesertExamine.png
 	},
 	Snow = { -- the Tundra
-		grid = "rbxassetid://112472035586790", -- assets/ui/dex/DexSnow.png
 		examine = "rbxassetid://112429560665609", -- assets/ui/dex/DexSnowExamine.png
 	},
 	Ocean = {
-		grid = "rbxassetid://136447630725420", -- assets/ui/dex/DexOcean.png
 		examine = "rbxassetid://93558185988056", -- assets/ui/dex/DexOceanExamine.png
 	},
 	Godlands = {
-		grid = "rbxassetid://100657168276916", -- assets/ui/dex/DexGodlands.png
 		examine = "rbxassetid://80615979394374", -- assets/ui/dex/DexGodlandsExamine.png
 		-- The exclusives (the Loong, Snack Yak and Robo Shark) are on this page (QM),
 		-- though none runs in its stampede; they're left off their own biomes' pages.
@@ -155,9 +139,9 @@ local function rarityOf(kind)
 	return require(Animals[kind]).Rarity
 end
 
--- The biomes with a page, each with its animals in rarity order (cheapest first
--- within one), and every animal in that order across biomes for the arrows.
-local biomes, order = {}, {}
+-- Every animal for the arrows: biome by biome (those with a page), each biome's in
+-- rarity order (cheapest first within one).
+local order = {}
 -- Animals put on another biome's page (a page's extra) aren't on their own one.
 local elsewhere = {}
 for name, page in PAGES do
@@ -186,7 +170,6 @@ for _, biome in Config.Biomes do
 			end
 			return (Config.PetIncome[a] or 0) < (Config.PetIncome[b] or 0)
 		end)
-		table.insert(biomes, { name = biome.Name, kinds = kinds })
 		for _, kind in kinds do
 			table.insert(order, { kind = kind, biome = biome.Name })
 		end
@@ -272,54 +255,10 @@ local function clear()
 	end
 end
 
-local showGrid, showAnimal, arrow
-local gridAt = 1 -- the biome whose grid shows (kept between openings)
+local showAnimal, arrow
 
 -- A biome's grid of cards, with arrows either side of the page to the biome
 -- before and after (QM's mockup).
-function showGrid(index)
-	clear()
-	shown = nil
-	gridAt = index
-	local biome = biomes[index]
-	page.Image = PAGES[biome.name].grid
-	if biomes[index - 1] then
-		arrow(UDim2.fromOffset(-100, 422), -90, function()
-			showGrid(index - 1)
-		end)
-	end
-	if biomes[index + 1] then
-		arrow(UDim2.fromOffset(PAGE.X + 100, 422), 90, function()
-			showGrid(index + 1)
-		end)
-	end
-	local seen = ridden()
-	local width = COLUMNS * CARD + (COLUMNS - 1) * GAP
-	for i, kind in biome.kinds do
-		if i > COLUMNS * ROWS then
-			break
-		end
-		local col, row = (i - 1) % COLUMNS, (i - 1) // COLUMNS
-		local card = Instance.new("ImageButton")
-		card.Name = kind
-		card.BackgroundTransparency = 1
-		card.AutoButtonColor = false
-		card.Image = CARDS[rarityOf(kind)]
-		card.Size = UDim2.fromOffset(CARD, CARD)
-		card.Position = UDim2.fromOffset((PAGE.X - width) / 2 + col * (CARD + GAP), GRID_TOP + row * (CARD + GAP))
-		local art = image(card, PetFaces.HEADSHOTS[kind] or "", UDim2.fromOffset(ART, ART), UDim2.fromScale(0.5, 0.5), Vector2.new(0.5, 0.5))
-		art.ImageColor3 = if seen[kind] then Color3.new(1, 1, 1) else Color3.new(0, 0, 0) -- not ridden yet: a silhouette
-		card.Activated:Connect(function()
-			for at, entry in order do
-				if entry.kind == kind and entry.biome == biome.name then
-					showAnimal(at)
-				end
-			end
-		end)
-		card.Parent = page
-	end
-end
-
 function arrow(position, turn, onClick)
 	local a = Instance.new("ImageButton")
 	a.BackgroundTransparency = 1
@@ -342,11 +281,6 @@ function showAnimal(at)
 	shown = at
 	local kind = order[at].kind
 	page.Image = PAGES[order[at].biome].examine
-	for i, biome in biomes do
-		if biome.name == order[at].biome then
-			gridAt = i -- reopening shows this animal's biome
-		end
-	end
 	local seen = ridden()[kind]
 
 	-- Its feet a little over the divider, as in the mockup, and drawn over
@@ -421,8 +355,15 @@ function AnimalDex.toggle()
 	open = not open
 	if open then
 		gui.Enabled = true
-		if biomes[gridAt] then
-			showGrid(gridAt)
+		local horse = 1 -- the Horse first, every time (QM)
+		for at, entry in order do
+			if entry.kind == "Horse" then
+				horse = at
+				break
+			end
+		end
+		if order[horse] then
+			showAnimal(horse)
 		end
 		ModalPop.open(setPop)
 	else
@@ -501,23 +442,17 @@ player:GetAttributeChangedSignal("Ridden"):Connect(function()
 	end
 	if shown then
 		showAnimal(shown)
-	elseif biomes[gridAt] then
-		showGrid(gridAt)
 	end
 end)
 
--- Load the art ahead and keep it loaded: every page, card and sprite sheet is
+-- Load the art ahead and keep it loaded: every page and sprite sheet is
 -- drawn all the time (1 px, nearly see-through, on a screen of its own that's
 -- always on), so nothing pops in blank or plays choppy the first time it's seen.
 -- PreloadAsync alone left the sheets to load as they first played.
 do
 	local ids = { ARROW }
 	for _, p in PAGES do
-		table.insert(ids, p.grid)
 		table.insert(ids, p.examine)
-	end
-	for _, id in CARDS do
-		table.insert(ids, id)
 	end
 	for _, s in SHEETS do
 		for _, id in s do
