@@ -700,10 +700,13 @@ ReplicatedStorage:WaitForChild("PetIncome").OnClientEvent:Connect(function()
 		return
 	end
 	for _, model in homePets() do
-		local kind = if starter and model == starter.animal.model
+		local isStarter = starter and model == starter.animal.model
+		local kind = if isStarter
 			then player:GetAttribute("RidePet") or Config.DefaultPet
 			else PenPets.pets[model] and PenPets.pets[model].kind
-		local earned = kind and Config.PetIncome[kind]
+		-- (a merged pet earns for every pet it's made of: Shared/Merge)
+		local merged = if isStarter then starter.merged or 1 else PenPets.pets[model] and PenPets.pets[model].merged or 1
+		local earned = kind and Config.PetIncome[kind] and Config.PetIncome[kind] * merged
 		if earned and earned > 0 and model.PrimaryPart then
 			local box, size = Outline.box(model)
 			Hud.coinPopupAt(model.PrimaryPart, box.Y + size.Y / 2 + 1, earned)

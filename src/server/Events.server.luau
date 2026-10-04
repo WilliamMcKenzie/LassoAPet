@@ -30,15 +30,21 @@ local PARKED = CFrame.new(0, -500, 0)
 local template = world.Nests:FindFirstChildWhichIsA("Model")
 local nest = template:Clone()
 nest.Name = "EventNest"
-for _, child in nest:GetChildren() do
+-- No nest to see (QM): the event's egg just lies on the ground. The copy's parts stay
+-- (EggSpot is where the egg goes), all of them invisible and out of the way.
+for _, child in nest:GetDescendants() do
 	if child:IsA("BasePart") then
 		child.Anchored = true
+		child.Transparency = 1
+		child.CanCollide, child.CanQuery, child.CanTouch = false, false, false
+	elseif child:IsA("Decal") or child:IsA("Texture") then
+		child.Transparency = 1
 	end
 end
 local spot = nest:WaitForChild("EggSpot")
--- How far the egg's centre sits above the floor, and the nest's pivot from the egg.
-local SPOT_LIFT = template.EggSpot.Position.Y
-	- Ground.heightAt(template.EggSpot.Position.X, template.EggSpot.Position.Z)
+-- How far the egg's centre sits above the floor: on the ground itself (a 1x egg's
+-- centre is 1.6 studs up; Ride.client lifts a bigger one to match).
+local SPOT_LIFT = 1.6
 local FROM_SPOT = CFrame.new(-spot.Position) * nest:GetPivot()
 nest:SetAttribute("Egg", "")
 nest:PivotTo(PARKED)
@@ -124,8 +130,14 @@ while true do
 	nest:PivotTo(CFrame.new(randomSpot()) * FROM_SPOT)
 	task.wait()
 	nest:SetAttribute("Egg", kind)
+	-- The egg stays out until it's grabbed, the next event is due, or (QM) the event's
+	-- animal is gone: run off the far end of the course at its stampede speed, as every
+	-- client draws it (Ride.client). Once someone's riding it, it's theirs to chase.
 	local nextCycle = cycleStart + EVENTS.Cycle
-	while nest:GetAttribute("Egg") ~= "" and os.clock() < nextCycle - 1.5 do
+	local speed = Config.HerdSpeed * ((Config.AnimalStats[kind] or {}).Speed or 1)
+	local runsOff = os.clock() + (START_Z + 44 - (-Config.CourseLength + Config.FinishFromEnd)) / speed + 1
+	while nest:GetAttribute("Egg") ~= "" and os.clock() < nextCycle - 1.5
+		and (world:GetAttribute("EventTaken") or os.clock() < runsOff) do
 		task.wait(0.5)
 	end
 
