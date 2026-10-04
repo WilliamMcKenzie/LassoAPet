@@ -163,12 +163,16 @@ local function piece(name, x, y, z, yaw, parent)
 		table.insert(parts, { part = p, cframe = cf, transparency = 0 })
 	end
 	model.Parent = parent
-	local half = kit.Radius * 0.8 -- the footprint the other biomes' pieces have (their "Base")
+	local hx = kit.HalfX or kit.Radius * 0.8 -- the footprint the other biomes' pieces have (their "Base")
+	local hz = kit.HalfZ or kit.Radius * 0.8
+	if kit.HalfX and math.abs(math.sin(math.rad(yaw))) > 0.7 then
+		hx, hz = hz, hx -- a wall piece turned side on
+	end
 	return {
 		x = x,
 		z = z,
-		hx = half,
-		hz = half,
+		hx = hx,
+		hz = hz,
 		tier = kit.Tier,
 		center = Vector3.new(x, y + 2, z),
 		parts = parts,

@@ -404,6 +404,7 @@ vfx.rideSync = ReplicatedStorage:WaitForChild("RideSync") -- multiplayer rides (
 vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
 vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
 vfx.godlands.onPieces = slices.pieces
+vfx.hazards = require(script.Parent.GodlandsHazards) -- the Godlands' wild animals: spikes, sludge, confusion, charges, hunts
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
 local LEAP_FROM = 8 -- studs before the start line where the leap starts
@@ -536,6 +537,30 @@ end
 -- A stampede animal's x at z: its lane, swerving round any obstacle in the way.
 local function laneX(x0, z)
 	local x = x0
+	if endless.Godlands.segmentAt(z) then
+		-- The Godlands' walls (Shared/GodlandsTracks) run right across: rather than
+		-- swerving round each piece on its own, the lane is shoved out of one piece
+		-- after another until it's clear of them all (through the wall's gap).
+		local target, w = x0, 0
+		for _ = 1, 4 do
+			local moved = false
+			for _, o in slices.at(slices.swerve, z) do
+				local reach = o.hx + 6
+				local ow = smoothstep(o.z + o.hz + slices.SWERVE_BEFORE, o.z + o.hz + 4, z) * smoothstep(o.z - o.hz - slices.SWERVE_AFTER, o.z - o.hz - 4, z)
+				if ow > 0 and math.abs(target - o.x) < reach then
+					local side = if target >= o.x then 1 else -1
+					if math.abs(o.x + side * reach) > EDGE then
+						side = -side
+					end
+					target, w, moved = o.x + side * reach, math.max(w, ow), true
+				end
+			end
+			if not moved then
+				break
+			end
+		end
+		return math.clamp(x0 + (target - x0) * w, -EDGE, EDGE)
+	end
 	for _, o in slices.at(slices.swerve, z) do
 		local reach = o.hx + 6
 		local d = x0 - o.x
@@ -585,6 +610,7 @@ local function cleanup()
 	end
 	vfx.hunting, vfx.huntTarget = nil, nil -- (a hunt cut short by the ride ending)
 	vfx.endEventRun() -- (the barriers are back for the next ride)
+	vfx.hazards.clear()
 	cutscene = nil
 	heroLeap = nil
 	Hud.setCutscene(false)
@@ -1287,7 +1313,7 @@ local function readSteer()
 	-- On a phone the usual movement joystick stays up while riding (rideStick) and
 	-- steers like the arrow keys.
 	local stick = if rideStick.on then controls:GetMoveVector().X else 0
-	return math.clamp(keys + touchSteer + padSteer + stick, -1, 1)
+	return math.clamp(keys + touchSteer + padSteer + stick, -1, 1) * vfx.hazards.steerSign() -- (flipped while a Beholder has you confused)
 end
 
 UserInputService.InputBegan:Connect(function(input, processed)
@@ -1369,6 +1395,7 @@ local function takeFromPool(n, x, z, kind)
 		entity = newEntity(x, z, 0, kind)
 	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
+	entity.face, entity.rush = nil, nil
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
 	entity.animal.model.Parent = herdFolder
 	return entity
@@ -1556,8 +1583,9 @@ local function moveAnimal(entity, x, z, speed, dt, shown)
 	local lat = (x - entity.x) / math.max(dt, 1e-3)
 	entity.x, entity.z, entity.speed = x, z, speed
 	if shown then
-		place(entity, -math.atan2(lat, math.max(speed, 1)))
-		animate(entity, dt, speed, lat / 12)
+		-- (face and rush: a Godlands animal charging or hunting you, GodlandsHazards)
+		place(entity, entity.face or -math.atan2(lat, math.max(speed, 1)))
+		animate(entity, dt, entity.rush or speed, if entity.face then 0 else lat / 12)
 	end
 end
 
@@ -1778,7 +1806,8 @@ local function updateHerd(dt, slowed)
 			if snapped then
 				entity.x = x + entity.dodge -- a snap doesn't swing them sideways
 			end
-			moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt, shown)
+			local ox, oz = vfx.hazards.offset(key) -- (charging or hunting you: off its place for a bit)
+			moveAnimal(entity, math.clamp(x + entity.dodge + ox, -EDGE, EDGE), z + oz, speed, dt, shown)
 			vfx.setFrosted(entity, vfx.frostLeft[key] ~= nil)
 		end
 	end
@@ -1969,6 +1998,7 @@ local function chargeFx(entity, scale, turn)
 	table.insert(fx, box)
 	return fx
 end
+vfx.hazards.chargeFx = chargeFx -- (a War Elephant charging you: the Rhino's charge)
 
 -- A ring bursting out from the pet to the ability's radius: sand for the rattle.
 local function rattleRing(center, radius, color)
@@ -3175,6 +3205,7 @@ local function updateMount(dt)
 		targetSpeed *= Config.SprintSpeed * ((vfx.sprintSpecial() or {}).SpeedBoost or 1) -- the Blue Crab's crab walk: faster still
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
+	targetSpeed *= vfx.hazards.slow() -- stuck in a Sludge's sludge
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
 	if ability and ability.cfg.MaxBoost then
@@ -3250,6 +3281,7 @@ local function updateMount(dt)
 		local prey = vfx.huntTarget
 		targetLat = if prey then math.clamp((prey.x - mount.x) * 4, -Config.SteerSpeed * 1.5, Config.SteerSpeed * 1.5) else 0
 	end
+	targetLat *= math.sqrt(vfx.hazards.slow())
 	mount.latVel += (targetLat - mount.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
 	-- At home the side limit widens from the corridor's to the base's over 40 studs,
 	-- so a ride from an outer pen is eased into the corridor.
@@ -3386,6 +3418,11 @@ local function checkRide(dt)
 	end
 	if grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4, tier) then
 		return fail("CRASH!")
+	end
+	-- The Godlands' wild animals (GodlandsHazards): spikes, charges, hunts.
+	local hazard = vfx.hazards.hit(mount, grace > 0)
+	if hazard then
+		return fail("CRASH!", hazard)
 	end
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
 		return fail("CRASH!") -- a locked gate
@@ -3871,6 +3908,7 @@ RunService.PreSimulation:Connect(function(dt)
 	-- back to everyone else's after slowing down.
 	updateHerd(dt, (slow and not cutscene) or Tutorial.active)
 	updateFlung(dt)
+	vfx.hazards.update(dt, herd, mount, phase == "outbound" or phase == "turning" or phase == "return")
 	vfx.sendRide()
 	vfx.updateRiders(dt)
 	Dust.update(dt)

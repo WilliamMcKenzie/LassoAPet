@@ -311,7 +311,7 @@ def scene(kind):
 TRACK = 240  # tiles per track
 TRACKS_LUAU = os.path.join(os.path.dirname(__file__), "..", "src", "shared", "GodlandsTracks.luau")
 GLYPH = {SNOW_V: ".", FLOOR_V: "#", ICE_V: "~"}
-PIECES = ["DeadBush", "DarkStone", "DeadTree", "Crag", "LavaRock"]
+PIECES = ["Ridge", "Spire"]  # what the formations are built from (FORMATION_KIT, below)
 
 
 def tracks(seed=7):
@@ -328,19 +328,112 @@ def tracks(seed=7):
     return out
 
 
-def pieces(grid, seed):
-    """Terrain pieces for one track, z from 0 (its near end) to -960: (asset, x, z, yaw, y)."""
-    import course_layout as CL
-    course = CL.Course()
-    course.items = []
-    biome = dict(name="Godlands", z0=0, z1=-TRACK * TILE, nests=[],
-                 small=["DeadBush", "DarkStone"], medium=["DeadTree", "Crag"], large=["LavaRock"])
-    course.wall_clusters(biome, np.random.default_rng(seed))
+# The obstacles (QM, Oct 4): the Godlands is the get-as-far-as-you-can challenge, so
+# its obstacles aren't scattered against the walls like the other biomes'. Each track
+# is a run of set pieces ("formations") across the whole path, some right in the
+# middle, each one a little puzzle to read and steer through: a wall with one gap, two
+# gaps on opposite sides, half walls to weave round, an island to pick a side of, a
+# funnel to a throat with a pillar past it, a field of staggered pillars. They're built
+# from two plain pieces: Ridge, a 12-stud obsidian slab with a lava seam on top (walls),
+# and Spire, an obsidian pillar. Both are large (tier 3): only an XL pet smashes through.
+# Gaps are GAP studs wide; the rider needs about 2.6 of it (Ride's crash check).
+GAP = 16
+RIDGE_LEN = 12
+FIRST, LAST = 60, 900  # studs into the track where the first formation may start and the last must end
+REST = (56, 80)  # studs of open ground between formations
+
+
+OBSIDIAN = (28, 26, 36)  # darker than the stone plates, so the walls stand out on them
+
+
+def ridge(k):
+    """A 12-stud slab of obsidian with a glowing lava seam along its top: a piece of wall."""
+    k.at("Rock", (0, 2.5, 0), (RIDGE_LEN, 5.0, 4.0), OBSIDIAN)
+    k.at("Lava", (0, 5.2, 0), (RIDGE_LEN - 0.8, 0.4, 1.6), GLOW, plain=True)
+
+
+def spire(k):
+    """An obsidian pillar with a glowing lava top."""
+    k.at("Rock", (0, 4.0, 0), (3.6, 8.0, 3.6), OBSIDIAN)
+    k.at("Lava", (0, 8.2, 0), (2.0, 0.4, 2.0), GLOW, plain=True)
+
+
+# name: (builder, tier, footprint half x, half z)
+FORMATION_KIT = {"Ridge": (ridge, 3, RIDGE_LEN / 2, 2.0), "Spire": (spire, 3, 1.8, 1.8)}
+
+
+def wall(out, z, x0, x1):
+    """Ridges side by side covering x0..x1 (studs) at z."""
+    if x1 - x0 < 2:
+        return
+    n = max(1, int(np.ceil((x1 - x0) / RIDGE_LEN)))
+    for i in range(n):
+        x = x0 + RIDGE_LEN / 2 + (x1 - x0 - RIDGE_LEN) * (i / (n - 1) if n > 1 else 0.5)
+        out.append(("Ridge", x, z))
+
+
+def gate(out, z, gx, width=GAP):
+    """A wall right across with one gap centred on gx."""
+    wall(out, z, -HALF_W, gx - width / 2)
+    wall(out, z, gx + width / 2, HALF_W)
+
+
+def formation(kind, z, rng):
+    """One set piece starting at z (going -z): its pieces and the z it ends at."""
     out = []
-    for it in course.items:
-        i, j = int((it["x"] + HALF_W) // TILE), int(-it["z"] // TILE)
-        y = STONE_UP if grid[i, min(j, TRACK - 1)] == FLOOR_V else 0
-        out.append((str(it["asset"]), it["x"], it["z"], it["yaw"], y))
+    s = int(rng.choice([-1, 1]))
+    if kind == "gate":  # one gap, anywhere
+        gate(out, z, float(rng.uniform(-34, 34)))
+        return out, z - 4
+    if kind == "chicane":  # a gap on one side, then one on the other
+        gate(out, z, s * float(rng.uniform(12, 18)))
+        gate(out, z - 72, -s * float(rng.uniform(12, 18)))
+        return out, z - 76
+    if kind == "slalom":  # half walls from alternate sides, each reaching past the middle
+        for i in range(3):
+            side = s if i % 2 == 0 else -s
+            if side < 0:
+                wall(out, z - i * 64, -HALF_W, 6)
+            else:
+                wall(out, z - i * 64, -6, HALF_W)
+        return out, z - 132
+    if kind == "split":  # an island in the middle, then a gap in the middle
+        wall(out, z, -18, 18)
+        gate(out, z - 64, 0)
+        return out, z - 68
+    if kind == "funnel":  # walls stepping in from both sides to a throat, a pillar past it
+        steps = 4
+        for i in range(steps):
+            reach = HALF_W - (HALF_W - GAP / 2) * (i + 1) / steps
+            wall(out, z - i * 12, -HALF_W, -reach)
+            wall(out, z - i * 12, reach, HALF_W)
+        out.append(("Spire", 0.0, z - (steps - 1) * 12 - 36))
+        return out, z - (steps - 1) * 12 - 40
+    if kind == "pillars":  # rows of pillars, every other row shifted half a gap
+        for r in range(4):
+            xs = range(-40, 41, 20) if r % 2 == 0 else range(-50, 51, 20)
+            for x in xs:
+                out.append(("Spire", float(x), z - r * 22))
+        return out, z - 70
+    raise ValueError(kind)
+
+
+FORMATIONS = ["gate", "chicane", "slalom", "split", "funnel", "pillars"]
+
+
+def pieces(grid, seed):
+    """Terrain pieces for one track, z from 0 (its near end) to -960: (asset, x, z, yaw, y).
+    Formation after formation (above), never the same one twice running."""
+    rng = np.random.default_rng(seed)
+    out, z, last = [], -FIRST, None
+    while True:
+        kind = str(rng.choice([f for f in FORMATIONS if f != last]))
+        placed, end = formation(kind, z, rng)
+        if end < -LAST:
+            break
+        out += [(name, x, zz, 0.0, 0) for name, x, zz in placed]
+        last = kind
+        z = end - float(rng.uniform(*REST))
     return out
 
 
@@ -348,8 +441,12 @@ def kit_luau(name):
     """One terrain piece's parts as Luau rows, scaled to its tier's size (Config.ObstacleScale)."""
     import course_layout as CL
     k = TA.Kit()
-    CL.ASSETS[name][2](k)
-    s = CL.SCALE.get(name, 1.0)
+    if name in FORMATION_KIT:
+        FORMATION_KIT[name][0](k)
+        s = 1.0
+    else:
+        CL.ASSETS[name][2](k)
+        s = CL.SCALE.get(name, 1.0)
     rows = []
     for p in k.parts:
         assert getattr(p, "shape", "block") in (None, "block", "Block"), p.shape
@@ -361,6 +458,9 @@ def kit_luau(name):
         rows.append('\t\t\t\t{ "%s", %s, %s, %d, %d, %d%s },' % (
             p.name, ", ".join("%.3f" % v for v in size), ", ".join("%.4f" % v for v in nums),
             *p.color, ", true" if p.plain else ""))
+    if name in FORMATION_KIT:
+        _, _, hx, hz = FORMATION_KIT[name]
+        return max(hx, hz) / 0.8, rows
     radius = CL.ASSETS[name][0] * s
     return radius, rows
 
@@ -391,13 +491,17 @@ def write_tracks():
             total += 1
         out.append("\t\t},")
     out += ["\t},",
-            "\t-- Each piece's footprint radius (studs), size tier and parts, sized already:",
+            "\t-- Each piece's footprint radius (studs) (or HalfX by HalfZ), size tier and parts, sized already:",
             "\t-- { name, size x, y, z, position x, y, z, rotation (9), r, g, b, plain }. Plain parts have no studs.",
             "\tKit = {"]
     for name in PIECES:
         radius, rows = kit_luau(name)
-        out += [f"\t\t{name} = {{", f"\t\t\tRadius = {radius:.2f},",
-                f"\t\t\tTier = {CL.TIERS[CL.ASSETS[name][1]]},", "\t\t\tParts = {"] + rows + ["\t\t\t},", "\t\t},"]
+        if name in FORMATION_KIT:
+            _, tier, hx, hz = FORMATION_KIT[name]
+            head = [f"\t\t\tRadius = {radius:.2f},", f"\t\t\tTier = {tier},", f"\t\t\tHalfX = {hx:.2f},", f"\t\t\tHalfZ = {hz:.2f},"]
+        else:
+            head = [f"\t\t\tRadius = {radius:.2f},", f"\t\t\tTier = {CL.TIERS[CL.ASSETS[name][1]]},"]
+        out += [f"\t\t{name} = {{"] + head + ["\t\t\tParts = {"] + rows + ["\t\t\t},", "\t\t},"]
     out += ["\t},", "\tGrids = {"]
     for g in grids:
         out.append("\t\t{")
