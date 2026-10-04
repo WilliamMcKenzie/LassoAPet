@@ -1057,7 +1057,9 @@ local function updateGuide()
 	-- From the pet, or the rider while they're pulled across to a lassoed one.
 	local at = if mount then Vector3.new(mount.x, 0, mount.z) else focus
 	local want = Tutorial.guideTo()
-	if phase == "outbound" and not cutscene and want == "animal" then
+	if vfx.huntTarget then
+		target = Vector3.new(vfx.huntTarget.x, 0, vfx.huntTarget.z) -- the Robo Shark's prey while it hunts
+	elseif phase == "outbound" and not cutscene and want == "animal" then
 		local best = math.huge
 		for _, entity in allAnimals() do
 			if entity ~= mount and not entity.popping and entity.z < at.Z - guide.AHEAD and entity.z > gateZ() then
@@ -2156,7 +2158,7 @@ vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = tr
 -- how much bigger and faster it has grown this ride. nil for every other pet.
 function vfx.feastOf(entity)
 	local cfg = entity and Config.Abilities[entity.kind]
-	if not cfg or cfg.Kind ~= "Feast" then
+	if not cfg or (cfg.Kind ~= "Feast" and cfg.Kind ~= "Hunt") then -- (the Robo Shark grows the same way)
 		return nil
 	end
 	entity.feast = entity.feast or { count = 0, size = 1, speed = 1 }
@@ -2237,6 +2239,59 @@ function vfx.scareOff(dt, special)
 				entity.scaredOffBy = mount
 				hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount))
 			end
+		end
+	end
+end
+
+-- The Robo Shark's Hunt (Config.Abilities): it goes after the nearest animal (not
+-- one far behind it) and eats it on contact, growing cfg.Grow x and getting
+-- cfg.SpeedUp x faster each time up to size tier cfg.MaxTier, and refilling
+-- cfg.RestorePer of Hold. vfx.huntTarget is its prey (steering and arrows follow it).
+function vfx.huntStep(cfg)
+	local prey = vfx.huntTarget
+	local dir = travelDir()
+	local function alive(entity)
+		return (entity.n and herd[entity.n] == entity) or (not entity.n and table.find(strays, entity) ~= nil)
+	end
+	if prey and (not alive(prey) or (prey.z - mount.z) * dir < -6) then
+		prey = nil -- gone, or it got past us
+	end
+	if not prey then
+		local best = math.huge
+		for _, entity in allAnimals() do
+			local dx, dz = entity.x - mount.x, entity.z - mount.z
+			if entity ~= mount and not entity.popping and not entity.event and dz * dir > -4 then
+				local d = dx * dx + dz * dz
+				if d < best then
+					prey, best = entity, d
+				end
+			end
+		end
+	end
+	vfx.huntTarget = prey
+	if not prey then
+		return
+	end
+	local s = mount.animal.scale
+	if math.abs(prey.x - mount.x) < 3 * s and math.abs(prey.z - mount.z) < 5 * s then
+		-- Caught: eaten on the spot.
+		if prey.n then
+			herd[prey.n], taken[prey.n] = nil, true
+			vfx.rideCue:FireServer("take", prey.n) -- gone for everyone else too
+		else
+			table.remove(strays, table.find(strays, prey))
+		end
+		Poof.at(Vector3.new(prey.x, 0, prey.z))
+		retire(prey)
+		vfx.huntTarget = nil
+		hold = math.min(hold + holdTime(mount) * cfg.RestorePer, holdTime(mount))
+		local feast = vfx.feastOf(mount)
+		local max = Config.TierGrowth ^ math.max(cfg.MaxTier - tierOf(mount.kind), 0)
+		if feast.size < max then
+			local size = math.min(feast.size * cfg.Grow, max)
+			mount.scaleAnim = { t = 0, from = mount.animal.scale, size = size }
+			feast.size = size
+			feast.speed = feast.speed * cfg.SpeedUp
 		end
 	end
 end
@@ -2674,6 +2729,10 @@ local function endAbility(entity)
 	if active.prey then
 		vfx.devourStep(active, math.huge) -- cut short: whatever it had hold of is eaten now
 	end
+	if active.cfg.Kind == "Hunt" then
+		vfx.huntTarget = nil -- (the arrows go back to the eggs)
+	end
+	local after = if active.cfg.Kind == "Hunt" then 1.5 else 0.4 -- (you get the steering back mid-stampede after a hunt)
 	local root = entity.animal.model.PrimaryPart
 	if active.cfg.Tier then
 		-- Back to its own size: a springy pop down if it's still the mount.
@@ -2691,7 +2750,7 @@ local function endAbility(entity)
 	a.active = nil
 	a.readyAt = abilityClock + active.cfg.Cooldown
 	if entity == mount then
-		grace = math.max(grace, 0.4) -- a moment to clear whatever it was going through
+		grace = math.max(grace, after) -- a moment to clear whatever it was going through
 	end
 end
 
@@ -2727,6 +2786,8 @@ local function startAbility(cfg)
 		a.active.missiles = vfx.launchMissiles(mount, cfg, travelDir())
 	elseif cfg.Kind == "Shield" then
 		vfx.summonShield(cfg)
+	elseif cfg.Kind == "Hunt" then
+		vfx.huntTarget = nil
 	elseif cfg.Kind == "Devour" then
 		mount.speed = 0 -- stops dead on the spot to feed (QM)
 		vfx.devour(a.active, cfg)
@@ -2775,7 +2836,9 @@ local function updateAbility(dt)
 	local active = a.active
 	if active then
 		active.t += dt
-		if active.cfg.Kind == "Devour" then
+		if active.cfg.Kind == "Hunt" then
+			vfx.huntStep(active.cfg)
+		elseif active.cfg.Kind == "Devour" then
 			vfx.devourStep(active, active.t)
 		elseif active.cfg.Kind == "Ink" then
 			vfx.inkBlast(dt, active.cfg)
@@ -2863,7 +2926,7 @@ local function updateMount(dt)
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
-	if ability and (ability.cfg.Kind == "Charge" or ability.cfg.Kind == "Boost" or ability.cfg.Kind == "Grow" or ability.cfg.Kind == "Crabwalk") then
+	if ability and (ability.cfg.Kind == "Charge" or ability.cfg.Kind == "Boost" or ability.cfg.Kind == "Grow" or ability.cfg.Kind == "Crabwalk" or ability.cfg.Kind == "Hunt") then
 		targetSpeed *= ability.cfg.SpeedBoost
 	elseif ability and ability.cfg.Kind == "Leap" then
 		-- Up into the air and down again in an arc, faster.
@@ -2904,6 +2967,11 @@ local function updateMount(dt)
 	if phase == "outbound" and mount.z > 0 and mount.z < leadFromZ and math.abs(mount.x) > EDGE - 4 then
 		local over = math.abs(mount.x) - (EDGE - 4)
 		targetLat -= math.sign(mount.x) * over / math.max(mount.z, 4) * math.max(mount.speed, 10)
+	end
+	if ability and ability.cfg.Kind == "Hunt" then
+		-- Hunting on its own (the Robo Shark): it swerves after its prey, not your steering.
+		local prey = vfx.huntTarget
+		targetLat = if prey then math.clamp((prey.x - mount.x) * 4, -Config.SteerSpeed * 1.5, Config.SteerSpeed * 1.5) else 0
 	end
 	mount.latVel += (targetLat - mount.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
 	-- At home the side limit widens from the corridor's to the base's over 40 studs,
@@ -2982,6 +3050,16 @@ local function checkRide(dt)
 			if not entity.popping and math.abs(dx) < 4 and math.abs(dz) < 6 then
 				knock(entity, dx)
 			end
+		end
+	elseif ability and ability.cfg.Kind == "Hunt" then
+		-- The hunting Robo Shark crashes through whatever's in its way (its prey it eats: vfx.huntStep).
+		local s = mount.animal.scale
+		while true do
+			local o = blockedAt(mount.x, mount.z, 2.5 * s, 4 * s, 1)
+			if not o then
+				break
+			end
+			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
 		end
 	end
 	if ability then

@@ -282,7 +282,13 @@ return {
 	--     seconds in, everything in a Width-stud lane Range studs ahead is burnt away:
 	--     obstacles smashed, animals flung, whatever their size. It refills Restore of
 	--     the Hold bar when it starts (QM: 20%).
-	--   Missiles (Robo Shark): two missiles fly out from its sides straight ahead for
+	--   Hunt (Robo Shark, QM Oct 4): for Duration seconds it hunts on its own (you lose
+	--     the steering): it charges at SpeedBoost x speed at the nearest animal and eats
+	--     it, then the next. Each one eaten makes it Grow x bigger and SpeedUp x faster for
+	--     the rest of the ride and refills RestorePer of the Hold bar. It starts small and
+	--     grows a size tier every TierGrowth x, stopping at MaxTier (XL). While it hunts
+	--     the guide arrows lead to its prey, and nothing can crash it.
+	--   Missiles (unused now; was the Robo Shark's): two missiles fly out from its sides straight ahead for
 	--     Duration, smashing every obstacle and knocking away every animal within Radius
 	--     of their lanes, whatever its size (client/Missiles.luau; Spread and Size are in
 	--     its model studs). Every launch refills Restore of the Hold bar (QM: 10%).
@@ -307,7 +313,7 @@ return {
 		BlueCrab = { Kind = "Shield", Duration = 0.6, Cooldown = 15, Crabs = 3, Ahead = 22, Spread = 11, Life = 15, Radius = 5 }, -- QM, Oct 4 (cooldown and life are guesses)
 		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
 		-- the animation's length and fire window; the range, width and cooldown are guesses
-		RoboShark = { Kind = "Missiles", Duration = 1.2, Cooldown = 3, Restore = 0.1, Radius = 7, Spread = 0.9, Size = 0.18 }, -- QM, Oct 4 (Duration, Radius a guess)
+		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 1.5, Grow = 1.1, SpeedUp = 1.1, RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
 		Loong = { Kind = "Breath", Duration = 2.6, FireFrom = 0.95, FireTo = 2.1, Cooldown = 8, Range = 70, Width = 22, Restore = 0.2 },
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
@@ -341,7 +347,7 @@ return {
 		Horse = 1, Pig = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
 		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
-		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 3, Whale = 4, Kraken = 4, -- Ocean
+		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		Loong = 3, -- Godlands
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
