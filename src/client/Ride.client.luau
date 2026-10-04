@@ -579,9 +579,7 @@ end
 
 local startRide
 local rideShown = false -- the RIDE button is up: the pet it rides gets the outline
-local rideModel -- the pet RIDE rides: the nearest of yours, or the one you clicked
-local pickedPet -- a pet you clicked, which RIDE rides while you stay near it
-local PICK_KEEP = 40 -- studs: walk further than this from a clicked pet and RIDE goes back to the nearest
+local rideModel -- the pet RIDE rides: always the nearest of yours
 
 -- The pen the server handed you (your "Pen" attribute), if any.
 local function myPen()
@@ -759,20 +757,12 @@ local function updateRideTarget()
 		for model in rideableHerd() do
 			table.insert(pets, model)
 		end
-		if pickedPet and not table.find(pets, pickedPet) then
-			pickedPet = nil
-		end
-		if pickedPet and select(2, petDistance(pickedPet, hrp.Position)) > PICK_KEEP then
-			pickedPet = nil
-		end
-		target = pickedPet
-		if not target then
-			local best = math.huge
-			for _, model in pets do
-				local d = petDistance(model, hrp.Position)
-				if d < best then
-					target, best = model, d
-				end
+		-- Always the nearest one (QM: no clicking a pet to pick it any more).
+		local best = math.huge
+		for _, model in pets do
+			local d = petDistance(model, hrp.Position)
+			if d < best then
+				target, best = model, d
 			end
 		end
 	end
@@ -804,7 +794,7 @@ local function updateRideTarget()
 end
 
 local function clearRideTarget()
-	rideModel, pickedPet = nil, nil
+	rideModel = nil
 	rideSpot.Parent = nil
 end
 
@@ -1231,26 +1221,6 @@ local function onAction()
 	end
 end
 
--- At home, clicking or tapping one of your pets makes RIDE ride it (not while
--- holding an egg: then a click places the egg).
-local function pickPetAt(screenPos)
-	if not character() or player.Character:FindFirstChildOfClass("Tool") then
-		return
-	end
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Include
-	params.FilterDescendantsInstances = homePets()
-	local ray = camera:ScreenPointToRay(screenPos.X, screenPos.Y)
-	local hit = workspace:Raycast(ray.Origin, ray.Direction * 300, params)
-	if hit then
-		for _, model in homePets() do
-			if hit.Instance:IsDescendantOf(model) then
-				pickedPet = model
-			end
-		end
-	end
-end
-
 -- The phone joystick while riding: the player controls stay on (the rider is
 -- anchored, so it only steers, see readSteer) with jumping off, so no jump button.
 local rideStick = { on = false }
@@ -1297,10 +1267,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		return
 	end
 	if phase == "idle" then
-		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-			pickPetAt(input.Position)
-		end
-		return
+		return -- (RIDE always rides the nearest pet: clicking one doesn't pick it)
 	end
 	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 		-- Clicking or tapping another egg or animal in range targets it instead.
@@ -3749,7 +3716,7 @@ RunService.PreSimulation:Connect(function(dt)
 			wander(starter, dt)
 		end
 		updateRideTarget()
-		Outline.set(if rideShown or pickedPet then rideModel else nil) -- the pet RIDE will ride
+		Outline.set(if rideShown then rideModel else nil) -- the pet RIDE will ride
 		Hud.setSelected(if rideShown and rideModel then vfx.kindOf(rideModel) else nil) -- and its card, top left
 		vfx.updateMerge()
 		return
