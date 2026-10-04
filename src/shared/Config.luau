@@ -208,8 +208,8 @@ return {
 	NestRestock = 30,
 	-- Exclusive animal events (Events.server, QM Oct 4): there's always one on. A
 	-- banner counts down the last Countdown seconds, then the animal pops in at the
-	-- start line and waits there to be ridden, and its egg drops somewhere random on
-	-- the course. Riding that kind of animal while its egg is out, the guide arrows
+	-- start line and runs off with the stampede to the finish line, and its egg drops
+	-- somewhere random on the course. Riding that kind of animal while its egg is out, the guide arrows
 	-- lead to that egg. The event ends when someone takes the egg or after Duration
 	-- seconds; the next countdown starts Gap seconds later. One kind at a time,
 	-- picked at random (never the same twice running).

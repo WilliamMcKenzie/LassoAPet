@@ -1518,12 +1518,13 @@ local function updateFlung(dt)
 end
 
 -- Exclusive animal events (Events.server): when the countdown ends, the event's
--- animal pops in just past the start line and waits there, idling, until someone
--- rides it (from home, like any stampede animal just in at the line) or the event
--- ends. It's in the herd under key -EventId, so riding it works as for the rest;
--- it can't be knocked away or crashed into. Built during the countdown, since a
--- big animal is slow to build.
-vfx.EVENT_SPOT = Vector2.new(0, START_LINE_Z - 12)
+-- animal pops in at the start line like any stampede animal and runs off with
+-- the stampede, on the server clock so everyone sees it in the same place, all
+-- the way to the finish line (it doesn't stop at its biome's end). It's in the
+-- herd under key -EventId, so riding or lassoing it works as for the rest; it
+-- can't be knocked away or crashed into. Built during the countdown, since a big
+-- animal is slow to build.
+vfx.EVENT_LANE = 0
 function vfx.updateEvent(dt, seen, inView)
 	local id = world:GetAttribute("EventId") or 0
 	local key, kind = -id, world:GetAttribute("EventKind") or ""
@@ -1532,48 +1533,71 @@ function vfx.updateEvent(dt, seen, inView)
 	if old and (old.key ~= key or kind == "" or taken[key] or world:GetAttribute("EventTaken")) then
 		-- Over, or someone has it: gone (unless it's someone's mount now).
 		vfx.event = nil
-		old.entity.event = nil -- (as someone's mount, or back in a pool, it's an animal like any other)
-		if herd[old.key] == old.entity then
-			herd[old.key] = nil
-			Poof.at(Vector3.new(old.entity.x, 0, old.entity.z))
-			retire(old.entity)
-		elseif not old.entity.animal.model.Parent then
-			retire(old.entity) -- built for the countdown, never shown
+		local entity = old.entity
+		if entity then
+			entity.event = nil -- (as someone's mount, or back in a pool, it's an animal like any other)
+			if herd[old.key] == entity then
+				herd[old.key] = nil
+				Poof.at(Vector3.new(entity.x, 0, entity.z))
+				retire(entity)
+			elseif not old.shown then
+				retire(entity) -- built for the countdown, never shown
+			end
 		end
 	end
 	if kind == "" or age < -3 or taken[key] or world:GetAttribute("EventTaken") or not Animals:FindFirstChild(kind) then
 		return
 	end
 	if not vfx.event then
-		local entity = newEntity(vfx.EVENT_SPOT.X, vfx.EVENT_SPOT.Y, 0, kind)
+		local entity = newEntity(vfx.EVENT_LANE, SPAWN_Z, 0, kind)
 		entity.animal.model.Parent = nil
 		entity.n, entity.dodge, entity.event = key, 0, true
 		vfx.event = { key = key, entity = entity }
 	end
-	local entity = vfx.event.entity
-	if age < 0 then
-		return -- still counting down
+	local event = vfx.event
+	local entity = event.entity
+	if age < 0 or not entity then
+		return -- still counting down, or it already ran off the end
 	end
-	if not herd[key] then
-		herd[key] = entity
-		entity.animal.model.Parent = herdFolder
-		Poof.at(Vector3.new(entity.x, 0, entity.z))
-	end
-	seen[key] = true
-	entity.dodge *= math.exp(-1.5 * dt)
-	entity.x = math.clamp(vfx.EVENT_SPOT.X + entity.dodge, -EDGE, EDGE)
-	if not inView(entity.x, entity.z) then
+	local dist, speed = run(herdSpeed(kind), math.max(age - START_AFTER, 0))
+	local z = SPAWN_Z - dist
+	local lassoed = transfer and transfer.target == entity
+	if z <= FINISH_Z + 2 and not lassoed then
+		-- Ran the whole course: shrinks away at the finish line, for good.
+		event.entity = nil
+		if herd[key] == entity then
+			herd[key] = nil
+		end
+		entity.event = nil
+		retire(entity)
 		return
 	end
-	if age < POP_TIME then
-		entity.popping, entity.hop = true, popHop(age)
-		entity.animal:setScale(popScale(age))
+	if not herd[key] then
+		herd[key], event.shown = entity, true
+		entity.x, entity.z = laneX(vfx.EVENT_LANE, z), z
+		if age < 0.15 then
+			Poof.at(Vector3.new(entity.x, 0, z))
+		end
+	end
+	seen[key] = true
+	local near = math.abs(z - camera.CFrame.Position.Z) <= VIEW or lassoed
+	entity.animal.model.Parent = if near then herdFolder else nil
+	local x = laneX(vfx.EVENT_LANE, z)
+	local shown = near and (lassoed or inView(x, z))
+	local shrink = if lassoed then 1 else math.clamp((z - FINISH_Z - 2) / SHRINK, 0, 1)
+	local scale = 1
+	if age < POP_TIME or shrink < 1 then
+		entity.popping = true
+		entity.hop = if age < POP_TIME then popHop(age) else 0
+		scale = (if age < POP_TIME then popScale(age) else 1) * shrink
 	elseif entity.popping then
 		entity.popping, entity.hop = nil, 0
-		entity.animal:setScale(1)
 	end
-	place(entity, 0)
-	animate(entity, dt, 0, 0)
+	if shown then
+		entity.animal:setScale(scale)
+	end
+	entity.dodge *= math.exp(-1.5 * dt)
+	moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt, shown)
 end
 
 -- The stampede follows the shared server clock. Only during this player's slow-mo

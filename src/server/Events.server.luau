@@ -1,6 +1,7 @@
 -- Exclusive animal events (Config.Events, QM Oct 4): one is always on. Each event
 -- picks one of the exclusive animals (the Loong, Snack Yak, Robo Shark), counts
--- down, then that animal pops in at the start line (every client draws it, Ride
+-- down, then that animal pops in at the start line and runs off with the
+-- stampede to the finish line (every client draws it, Ride
 -- .client) and its egg drops in the EventNest somewhere random on the course.
 -- Riding that kind of animal while the egg is out, the guide arrows lead to it.
 -- The first player to grab the egg gets it (Nests.server, like any nest's); that,
