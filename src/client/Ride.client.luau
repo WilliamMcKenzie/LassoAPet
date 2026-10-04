@@ -2236,15 +2236,15 @@ local function updateAbility(dt)
 		elseif active.wave then
 			vfx.waveSweep(active.wave:update(dt, mount.speed, active.t, active.cfg.Duration))
 		end
-		if active.t >= active.cfg.Duration then
-			endAbility(mount)
+		if active.cfg.Duration and active.t >= active.cfg.Duration then
+			endAbility(mount) -- (an UntilEmpty charge ends in checkRide, when Hold runs out)
 		end
 	elseif pressed and abilityClock >= a.readyAt and (phase == "outbound" or phase == "return") and not transfer then
 		startAbility(cfg)
 	end
 	active = a.active
 	if active then
-		Hud.setAbility(1 - active.t / active.cfg.Duration, nil)
+		Hud.setAbility(if active.cfg.Duration then 1 - active.t / active.cfg.Duration else hold / holdTime(mount), nil)
 	else
 		local left = math.max(a.readyAt - abilityClock, 0)
 		Hud.setAbility(1 - left / cfg.Cooldown, left)
@@ -2383,6 +2383,15 @@ local function checkRide(dt)
 	local ability = activeAbility()
 	if ability and vfx.PLAIN[ability.cfg.Kind] then
 		ability = nil -- these still use Hold and can still crash (Config.Abilities)
+	end
+	if ability and ability.cfg.UntilEmpty and not Tutorial.active then
+		-- The Snack Yak's charge runs on Hold, out or home, until the bar is empty.
+		hold -= dt
+		if hold <= 0 then
+			hold = 0
+			endAbility(mount)
+			ability = nil
+		end
 	end
 	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not Tutorial.active then -- abilities and the tutorial use no Hold
 		hold -= dt * (if sprinting() then Config.SprintDrain else 1)
@@ -2833,7 +2842,7 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 		else
 			Poof.at(Vector3.new(p.X, 0, p.Z))
 		end
-		rider.fxEnd = os.clock() + cfg.Duration
+		rider.fxEnd = os.clock() + (cfg.Duration or holdTime(entity)) -- an UntilEmpty charge: at most a full bar
 	end
 end)
 

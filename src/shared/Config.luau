@@ -60,7 +60,7 @@ return {
 			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
-			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0.12, Icebringer = 0.06 }, -- Snack Yak guessed like the Ice Golem
+			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.06 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
@@ -222,6 +222,8 @@ return {
 	--   Charge (Rhino): one tap, for Duration: a battering ram at SpeedBoost x speed.
 	--     No Hold drain, and every obstacle and animal in the way is knocked flying,
 	--     whatever its size. Wind breaks round its head and the camera pulls back.
+	--     With UntilEmpty (Snack Yak) it has no Duration: it charges until the Hold bar
+	--     runs out, draining it as usual, and on the way out an empty bar bucks you off.
 	--   Leap (Unicorn): one tap: a gallop up into the air and down again in an arc
 	--     LeapHeight studs high, over everything, at SpeedBoost x speed with no Hold drain,
 	--     leaving a rainbow trail.
@@ -249,6 +251,7 @@ return {
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
 	Abilities = {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
+		SnackYak = { Kind = "Charge", UntilEmpty = true, Cooldown = 30, SpeedBoost = 2 }, -- QM, Oct 4
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 56 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 6, Radius = 45, Restore = 0.5 },
 		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7 },
@@ -324,7 +327,7 @@ return {
 	PetIncome = {
 		Horse = 1, Pig = 3, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
 		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
-		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 480, Icebringer = 1111, -- Tundra
+		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 4000, Icebringer = 1111, -- Tundra
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, Whale = 5000, Kraken = 8200, -- Ocean
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
@@ -338,7 +341,7 @@ return {
 		Odds = { Rare = 50, Epic = 32, Legendary = 15, Exclusive = 3 },
 		Pool = {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1 },
-			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, SnackYak = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
+			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
 			-- with an empty pool is never rolled.
@@ -449,7 +452,7 @@ return {
 		Boar = { Speed = 1.6, Stamina = 1.6 },
 		Snowman = { Speed = 1.9, Stamina = 1.3 },
 		IceGolem = { Speed = 1.6, Stamina = 3 },
-		SnackYak = { Speed = 1.8, Stamina = 2.6 }, -- a guess, just past the Ice Golem's speed
+		SnackYak = { Speed = 3, Stamina = 10 }, -- QM, Oct 4
 		Icebringer = { Speed = 2.7, Stamina = 4 },
 		-- Ocean
 		Starfish = { Speed = 2.5, Stamina = 2 },
