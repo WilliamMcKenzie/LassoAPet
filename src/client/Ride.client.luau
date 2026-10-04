@@ -585,6 +585,7 @@ local function cleanup()
 	end
 	vfx.hunting, vfx.huntTarget = nil, nil -- (a hunt cut short by the ride ending)
 	vfx.endEventRun() -- (the barriers are back for the next ride)
+	vfx.nuke = nil
 	cutscene = nil
 	heroLeap = nil
 	Hud.setCutscene(false)
@@ -865,6 +866,7 @@ startRide = function(model)
 	mount.feast = nil -- (the Blue Crab starts every ride at its own size)
 	vfx.applyMerge(mount)
 	phase, hold, grace, camYaw = "outbound", holdTime(mount), 0, 0
+	vfx.startNuke()
 	coins = 0
 	hrp.Anchored = true
 	humanoid.Sit = true
@@ -3304,7 +3306,7 @@ local function checkRide(dt)
 			ability = nil
 		end
 	end
-	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not Tutorial.active then -- abilities and the tutorial use no Hold
+	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not Tutorial.active and not mount.giant then -- abilities, the tutorial and the Giant Horse use no Hold
 		hold -= dt * (if sprinting() then Config.SprintDrain else 1)
 		if hold <= 0 then
 			return fail("BUCKED OFF")
@@ -3871,6 +3873,7 @@ RunService.PreSimulation:Connect(function(dt)
 	-- back to everyone else's after slowing down.
 	updateHerd(dt, (slow and not cutscene) or Tutorial.active)
 	updateFlung(dt)
+	vfx.updateNuke()
 	vfx.sendRide()
 	vfx.updateRiders(dt)
 	Dust.update(dt)
@@ -4046,7 +4049,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	Hud.setAbilityTint(rattleHaze * (if vfx.hazeColor == vfx.FROST_HAZE then 0.6 elseif vfx.hazeColor == vfx.HUNT_HAZE then 1 else 0.85), vfx.hazeColor)
 	-- Bigger pets fill more of the view: the camera pulls back RideZoomPerTier
 	-- times further for each size tier above small (Config.PetTiers).
-	local zoomTo = if mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
+	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local z = vfx.camZoom
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
@@ -4149,6 +4152,72 @@ Hud.onMerge = function()
 		end
 	end
 end
+
+-- Nuke All from the shop (Shop.server's "Nukes"): spent on the next ride as it
+-- starts. Every animal in sight is knocked flying, and for the whole ride every
+-- obstacle within Config.Shop.NukeRange of you is blown away (back next ride).
+function vfx.startNuke()
+	if (player:GetAttribute("Nukes") or 0) < 1 or Tutorial.active or not mount then
+		return
+	end
+	ReplicatedStorage:WaitForChild("UseNuke"):FireServer()
+	vfx.nuke = true
+	Hud.flash("NUKE!", 1.5)
+	for _, entity in allAnimals() do
+		if entity ~= mount and not entity.popping and math.abs(entity.z - mount.z) < VIEW then
+			knock(entity, entity.x - mount.x)
+		end
+	end
+	vfx.updateNuke()
+end
+
+function vfx.updateNuke()
+	if not vfx.nuke or not mount then
+		return
+	end
+	local range = Config.Shop.NukeRange
+	for _, o in obstacles do
+		if not o.smashed and math.abs(o.z - mount.z) < range then
+			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
+		end
+	end
+end
+
+-- The Giant Horse from the shop (Config.Shop.GiantHorse): as if you'd pressed RIDE,
+-- but on a huge Horse at the start line, with no Hold drain, for one ride. Bought
+-- while out on a ride, it waits for you to be back on foot.
+ReplicatedStorage:WaitForChild("ShopGrant").OnClientEvent:Connect(function(key)
+	if key ~= "GiantHorse" then
+		return
+	end
+	while phase ~= "idle" or Tutorial.busy do
+		task.wait(0.5)
+	end
+	local hrp, humanoid = character()
+	if not hrp then
+		return
+	end
+	local giant = Config.Shop.GiantHorse
+	humanoid:UnequipTools()
+	clearRideTarget()
+	mount = newEntity(0, SPAWN_Z - 6, 0, "Horse")
+	mount.giant = true
+	mount.feast = { count = 0, size = giant.Scale, speed = giant.Speed / statsOf("Horse").Speed }
+	mount.animal:setScale(giant.Scale)
+	mount.animal:setSaddled(true)
+	leadFromZ, exitX = mount.z - 8, nil
+	phase, hold, grace, camYaw = "outbound", holdTime(mount), 1, 0
+	coins = 0
+	hrp.Anchored = true
+	humanoid.Sit = true
+	controls:Disable()
+	camera.CameraType = Enum.CameraType.Scriptable
+	focus = Vector3.new(mount.x, 0, mount.z)
+	Hud.show(true)
+	Hud.setDistance("")
+	Lasso.start(player.Character)
+	vfx.startNuke()
+end)
 
 Hud.init(onAction, goHome, rideFromHome, vfx.askContinue)
 

@@ -493,6 +493,26 @@ local function give(player, text)
 	publish(player)
 end
 
+-- The shop's Legendary Pet (Shop.server): a random Legendary straight into your
+-- pen, hatched. Returns its kind, or nil if you have no pen yet.
+local grantPet = Instance.new("BindableFunction")
+grantPet.Name = "GrantPet"
+grantPet.OnInvoke = function(player)
+	local profile = profiles[player]
+	local pen = penOf(player)
+	local kind = profile and pen and pick(Config.Gacha.Pool.Legendary)
+	if not isAnimal(kind) then
+		return nil
+	end
+	local area = pen.Area
+	local x = (math.random() - 0.5) * (area.Size.X - 2 * EDGE)
+	local z = (math.random() - 0.5) * (area.Size.Z - 2 * EDGE)
+	profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, pet = kind }
+	publish(player)
+	return kind
+end
+grantPet.Parent = game:GetService("ServerStorage")
+
 -- A chat command, so the "/give ..." line itself doesn't show in chat.
 local command = Instance.new("TextChatCommand")
 command.Name = "Give"

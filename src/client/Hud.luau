@@ -1,6 +1,7 @@
 -- Riding HUD built from QM's images: the Hold bar with the distance on it, one
 -- action button (TAKE EGG or LASSO), a center message, and the home buttons
--- (RIDE, Gold, Pets, Upgrade Pen). Layout follows QM's mockups.
+-- (RIDE, Gold, Pets, Upgrade Pen). Layout follows QM's mockups. Gold opens the
+-- Robux shop (Shop).
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -10,6 +11,7 @@ local Inventory = require(script.Parent.Inventory)
 local PetFaces = require(script.Parent.PetFaces)
 local AnimalDex = require(script.Parent.AnimalDex)
 local RollMenu = require(script.Parent.RollMenu)
+local Shop = require(script.Parent.Shop)
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
 local Hud = {}
@@ -574,7 +576,11 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	sideGui.Parent = playerGui
 	local sideRoot = root(sideGui)
 	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold mockup.
-	gold = button(sideRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
+	gold = button(sideRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN), function()
+		if Shop.hasOffers() then
+			Shop.toggle()
+		end
+	end)
 	local total = label(gold, UDim2.fromOffset(0, ICON_HEIGHT * 0.4), UDim2.new(0.5, 0, 1, 2), 44, 4) -- 4px outline (QM)
 	total.AnchorPoint = Vector2.new(0.5, 1)
 	total.AutomaticSize = Enum.AutomaticSize.X
@@ -598,6 +604,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	AnimalDex.onToggle = function(open)
 		if open then
 			RollMenu.close()
+			Shop.close()
 		end
 		homeGui.Enabled = not open
 		if SELECTED.gui then
@@ -608,11 +615,34 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		if open then
 			AnimalDex.close()
 		end
+		Shop.close() -- (a top-up goes with its roll menu; the full shop makes way for it)
 		homeGui.Enabled = not open
 		if SELECTED.gui then
 			SELECTED.gui.Enabled = not open
 		end
 	end
+	-- The full shop hides the rest of the home HUD like the other menus; a top-up
+	-- sits over the roll menu, which already has.
+	Shop.onToggle = function(open, topUp)
+		if topUp then
+			return
+		end
+		if open then
+			AnimalDex.close()
+			RollMenu.close()
+		end
+		homeGui.Enabled = not open
+		if SELECTED.gui then
+			SELECTED.gui.Enabled = not open
+		end
+	end
+	-- A Legendary Pet bought in the shop is in your pen: its card shows which.
+	game:GetService("ReplicatedStorage"):WaitForChild("ShopGrant").OnClientEvent:Connect(function(key, kind)
+		Shop.close()
+		if key == "Legendary" and kind then
+			Hud.eggReveal("Legendary", kind)
+		end
+	end)
 	Inventory.init(homeRoot)
 
 	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). It's the
@@ -710,8 +740,20 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(refreshRoll)
 	refreshRoll()
+	-- Under Config.Shop.TopUpBelow gold, ROLL offers a Robux top-up first (QM): once
+	-- per opening of the roll menu, and every time you can't pay.
+	local toppedUp = false
 	local function doRoll()
-		if rolling or not (rollShown or RollMenu.isOpen()) or gui.Enabled or not canRoll() then
+		if rolling or not (rollShown or RollMenu.isOpen()) or gui.Enabled then
+			return
+		end
+		local gold = player:GetAttribute("Gold") or 0
+		if gold < Config.Shop.TopUpBelow and (not toppedUp or not canRoll()) and Shop.hasGold() then
+			toppedUp = true
+			Shop.open(true)
+			return
+		end
+		if not canRoll() then
 			return
 		end
 		rolling = true
@@ -729,6 +771,12 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end
 	roll.Activated:Connect(doRoll)
 	RollMenu.onRoll = doRoll
+	Shop.onRoll = doRoll
+	local rollToggled = RollMenu.onToggle
+	RollMenu.onToggle = function(open)
+		toppedUp = false
+		rollToggled(open)
+	end
 	local function setRollShown(shown)
 		rollShown = shown
 		roll.Visible = shown and not gui.Enabled
@@ -814,6 +862,7 @@ function Hud.show(visible)
 	if visible then
 		AnimalDex.close() -- off on a ride: no dictionary
 		RollMenu.close()
+		Shop.close()
 		mergeWanted = false -- (MERGE is for home: it'd sit behind the fail screen's Home)
 		mergeButton.Visible = false
 	end
