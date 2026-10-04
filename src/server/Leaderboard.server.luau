@@ -5,8 +5,11 @@
 -- Distance is the HUD's: metres past the start line (4 studs a metre), read off
 -- each rider's RideSync (Riders.server passes those on; this only listens).
 -- Everyone's best is kept all time in the OrderedDataStore "BestDistance"
--- ("u" .. UserId = metres), only ever raised. A ride that jumps hundreds of studs
--- in one sync (the /biome warp) doesn't count until that player is home again.
+-- ("u" .. UserId = metres), only ever raised. The server checks each ride (QM, Oct 4):
+-- it only counts if it set out from home (the first sync near the start line) and
+-- never went faster than MAX_SPEED between syncs (no pet gets near it, whatever it's
+-- merged or boosted to); a ride that breaks either (a teleport, the /biome warp, a
+-- speed hack) doesn't count until that player is home again.
 -- The podium re-reads the top 3 every Refresh seconds, mixed with this server's
 -- own bests so far, so it works in Studio without API access too.
 
@@ -17,7 +20,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 
 local STUDS_PER_METRE = 4 -- Ride.client's
-local MAX_JUMP = 300 -- studs between two syncs: more than any ride covers, so a teleport
+local MAX_SPEED = 1500 -- studs a second: 44 x 8 (MergeMaxSpeed) x 2 (sprint) x 2 (a boost), and some
+local SLACK = 60 -- studs of leeway on top, for sync jitter
+local START_NEAR = -200 -- a ride's first sync must be closer to home than this (z)
 local FLUSH = 30 -- seconds between saving raised bests
 local STUDS = "rbxassetid://7447638591" -- the classic stud decal the animals use
 local STUD_TILE = 0.5
@@ -32,6 +37,7 @@ local best = {} -- [userId] = metres, this server's riders
 local names = {} -- [userId] = name
 local dirty = {} -- [userId] = true: best raised since the last save
 local lastZ = {} -- [player] = rider z at their last sync
+local lastAt = {} -- [player] = os.clock() of their last sync
 local warped = {} -- [player] = true: teleported this ride, not counted till home
 
 ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, kind, _mountCFrame, riderCFrame)
@@ -42,10 +48,15 @@ ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player
 	if z ~= z or math.abs(z) > 1e7 then
 		return
 	end
-	if lastZ[player] and math.abs(z - lastZ[player]) > MAX_JUMP then
+	local now = os.clock()
+	if not lastZ[player] then
+		if z < START_NEAR then
+			warped[player] = true -- didn't set out from home
+		end
+	elseif math.abs(z - lastZ[player]) > MAX_SPEED * (now - lastAt[player]) + SLACK then
 		warped[player] = true
 	end
-	lastZ[player] = z
+	lastZ[player], lastAt[player] = z, now
 	if z > 0 then
 		warped[player] = nil -- home again
 		return
@@ -59,6 +70,13 @@ ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player
 		best[id] = metres
 		names[id] = player.DisplayName
 		dirty[id] = true
+	end
+end)
+
+-- A ride's over: the next one has to set out from home again.
+ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
+	if what == "end" then
+		lastZ[player], lastAt[player] = nil, nil
 	end
 end)
 
@@ -85,7 +103,7 @@ task.spawn(function()
 	end
 end)
 Players.PlayerRemoving:Connect(function(player)
-	lastZ[player], warped[player] = nil, nil
+	lastZ[player], lastAt[player], warped[player] = nil, nil, nil
 	save(player.UserId)
 end)
 game:BindToClose(function()

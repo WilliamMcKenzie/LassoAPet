@@ -1,6 +1,7 @@
 -- Each player's gold: the account total, saved between visits. It lives in
 -- the player's "Gold" attribute, which the HUD shows. A ride's cash is added
--- when the rider gets home (BankCoins). Saving needs API access in Studio;
+-- when the rider gets home (BankCoins), counted here, not by the client (QM, Oct 4:
+-- server authoritative): see "Ride cash" below. Saving needs API access in Studio;
 -- without it everyone starts at 0 and nothing is kept.
 -- Gold bought with Robux (the "BoughtGold" attribute, Shop.server's running
 -- total) is added once: the save keeps how much of it is in (bought), and only
@@ -139,9 +140,65 @@ local bankCoins = Instance.new("RemoteEvent")
 bankCoins.Name = "BankCoins"
 bankCoins.Parent = ReplicatedStorage
 
+-- Ride cash ------------------------------------------------------------------
+-- A ride earns coins for every animal you lasso across onto (Config.LassoCoins, else
+-- Config.RarityCoins by its rarity), as Ride.client counts them. The server keeps its
+-- own count from the ride's cues (Riders.server's remotes): a "take" (you landed on
+-- a stampede animal) while you were already riding, then the next sync's animal is
+-- what you landed on. At most one every MIN_TAKE_GAP seconds, none in the tutorial.
+-- BankCoins only says the ride's over: what's banked is the server's count (never
+-- more than the client's, which can only be lower if it dropped coins). "end" (the
+-- ride's over, after any banking) clears the count.
+local Animals = ReplicatedStorage.Shared.Animals
+local MIN_TAKE_GAP = 0.5
+local rideCash = {} -- [player] = coins counted this ride
+local riding = {} -- [player] = true once they've synced on an animal this ride
+local pendingTake = {} -- [player] = os.clock() of a take not yet credited
+local lastTake = {} -- [player] = os.clock() of the last credited take
+
+local function coinsFor(kind)
+	if Config.LassoCoins[kind] then
+		return Config.LassoCoins[kind]
+	end
+	local module = Animals:FindFirstChild(kind)
+	local ok, class = pcall(require, module)
+	return ok and class and Config.RarityCoins[class.Rarity] or 0
+end
+
+ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
+	if what == "take" then
+		local now = os.clock()
+		if riding[player] and now - (lastTake[player] or 0) >= MIN_TAKE_GAP then
+			pendingTake[player] = now
+		end
+	elseif what == "end" then
+		rideCash[player], riding[player], pendingTake[player] = nil, nil, nil
+	end
+end)
+
+ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, kind)
+	if type(kind) ~= "string" or kind == "" or not Animals:FindFirstChild(kind) then
+		return -- ("": between animals, lassoed across)
+	end
+	local taken = pendingTake[player]
+	if taken and os.clock() - taken < 5 and not player:GetAttribute("Tutorial") then
+		pendingTake[player], lastTake[player] = nil, os.clock()
+		rideCash[player] = (rideCash[player] or 0) + coinsFor(kind)
+	end
+	riding[player] = true
+end)
+
 bankCoins.OnServerEvent:Connect(function(player, amount)
-	if typeof(amount) ~= "number" or amount ~= amount or amount <= 0 or amount > MAX_PER_RIDE then
+	if typeof(amount) ~= "number" or amount ~= amount or amount <= 0 then
 		return
 	end
-	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + math.floor(amount))
+	local cash = math.min(rideCash[player] or 0, math.floor(amount), MAX_PER_RIDE)
+	rideCash[player] = nil
+	if cash > 0 then
+		player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + cash)
+	end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	rideCash[player], riding[player], pendingTake[player], lastTake[player] = nil, nil, nil, nil
 end)
