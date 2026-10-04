@@ -4,6 +4,7 @@
 -- whose id is "" isn't uploaded yet and stays silent.
 --
 --   Sounds.play(name, volume?, speed?)  -- a one-shot (IDS below)
+--   Sounds.animal(kind)                  -- that animal's call (Config.AnimalSound)
 --   Sounds.setGallop(on, pace?)          -- the gallop loop while riding a galloping animal;
 --                                        -- pace 0..1+ (its speed over MountSpeed) sets its volume and rate
 --   Sounds.setMusic("base" | "ride")     -- crossfades between the two themes
@@ -36,6 +37,17 @@ local IDS = {
 	purchase = "rbxassetid://84676553460536", -- a Robux purchase goes through
 	countdown = "rbxassetid://138395707986004", -- 3, 2, 1 before an event's animal spawns
 	countdown_go = "rbxassetid://114056716396759", -- it spawns
+	-- The animals' calls (Config.AnimalSound says which animal makes which): assets/sounds/animals
+	animal_horse = "",
+	animal_unicorn = "",
+	animal_pig = "",
+	animal_boar = "",
+	animal_rhino = "",
+	animal_elephant = "",
+	animal_snake = "",
+	animal_penguin = "",
+	animal_dragon = "",
+	animal_bear = "",
 }
 local MUSIC = {
 	base = "rbxassetid://1840347412", -- Way Out West (APM): at home
@@ -93,6 +105,14 @@ function Sounds.play(name, volume, speed)
 			s:Destroy()
 		end
 	end)
+end
+
+-- An animal's call (Config.AnimalSound), as you lasso onto it or set off on it.
+function Sounds.animal(kind)
+	local call = require(game:GetService("ReplicatedStorage").Shared.Config).AnimalSound[kind]
+	if call then
+		Sounds.play("animal_" .. call, 0.6)
+	end
 end
 
 local gallop

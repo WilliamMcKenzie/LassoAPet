@@ -915,6 +915,7 @@ startRide = function(model)
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, runningAt, 0
 	mount.feast = nil -- (the Blue Crab starts every ride at its own size)
 	vfx.applyMerge(mount)
+	vfx.sounds.animal(mount.kind) -- (its call as you set off)
 	phase, hold, grace, camYaw = "outbound", holdTime(mount), 0, 0
 	vfx.startNuke()
 	coins = 0
@@ -3558,6 +3559,7 @@ local function updateRider(dt)
 			end
 			mount, transfer = target, nil
 			vfx.sounds.play("lasso_land")
+			vfx.sounds.animal(mount.kind)
 			mount.popping, mount.hop = nil, 0
 			mount.animal:setScale(vfx.ownSize(mount)) -- (back on a pet you let go: merged or grown, it still is)
 			mount.animal:setSaddled(true)
