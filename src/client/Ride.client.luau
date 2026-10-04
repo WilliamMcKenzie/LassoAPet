@@ -2007,6 +2007,71 @@ local function rattleBlast(cfg)
 	vfx.snakeGlow(mount, true)
 end
 
+-- Spikes (the Soul Horse, QM Oct 4): steel spikes burst up out of the ground all round
+-- it, rippling out to cfg.Radius, then sink back after cfg.Duration. Every animal within
+-- the radius (whatever its size; never an event's) is killed, flung away, each one
+-- refilling cfg.RestorePer of Hold. remote: another rider's, just the look.
+vfx.SPIKE_FIELD_COLOR = Color3.fromRGB(132, 144, 162)
+local SPIKE_PEAK = Vector3.new(1, 0, -1) -- a CornerWedgePart's peak, seen from above
+function vfx.spikeField(center, cfg, remote)
+	local rng = Random.new()
+	local holder = Instance.new("Model")
+	holder.Name = "SpikeField"
+	holder.Parent = workspace
+	local rise = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+	local sink = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	for i = 1, cfg.Count do
+		-- spread evenly over the disc (sqrt), none right under the horse
+		local r = math.sqrt(rng:NextNumber((6 / cfg.Radius) ^ 2, 1)) * cfg.Radius
+		local a = rng:NextNumber(0, 2 * math.pi)
+		local x, z = center.X + math.cos(a) * r, center.Z + math.sin(a) * r
+		local w, h = rng:NextNumber(2.4, 3.6), rng:NextNumber(4, 7)
+		local floor = Ground.heightAt(x, z)
+		-- four corner wedges, each with its peak over the middle: a pyramid
+		for sx = -1, 1, 2 do
+			for sz = -1, 1, 2 do
+				local turn = 0
+				for k = 0, 3 do
+					local v = CFrame.Angles(0, k * math.pi / 2, 0) * SPIKE_PEAK
+					if math.sign(v.X) == -sx and math.sign(v.Z) == -sz then
+						turn = k * math.pi / 2
+					end
+				end
+				local part = Instance.new("CornerWedgePart")
+				part.Anchored, part.CanCollide, part.CanQuery, part.CanTouch = true, false, false, false
+				part.Material = Enum.Material.SmoothPlastic
+				part.Color = vfx.SPIKE_FIELD_COLOR
+				part.Size = Vector3.new(w / 2, h, w / 2)
+				local up = CFrame.new(x + sx * w / 4, floor + h / 2, z + sz * w / 4) * CFrame.Angles(0, turn, 0)
+				part.CFrame = up - Vector3.new(0, h + 0.5, 0)
+				part.Parent = holder
+				task.delay(r / cfg.Radius * 0.35, function() -- rippling out from the horse
+					TweenService:Create(part, rise, { CFrame = up }):Play()
+				end)
+				task.delay(cfg.Duration, function()
+					TweenService:Create(part, sink, { CFrame = up - Vector3.new(0, h + 0.5, 0) }):Play()
+				end)
+			end
+		end
+	end
+	task.delay(cfg.Duration + 0.5, function()
+		holder:Destroy()
+	end)
+	rattleRing(Vector3.new(center.X, 0, center.Z), cfg.Radius, vfx.SPIKE_FIELD_COLOR)
+	if remote then
+		return
+	end
+	local killed = 0
+	for _, entity in allAnimals() do
+		local dx, dz = entity.x - mount.x, entity.z - mount.z
+		if entity ~= mount and not entity.popping and not entity.event and dx * dx + dz * dz < cfg.Radius * cfg.Radius then
+			knock(entity, dx)
+			killed += 1
+		end
+	end
+	hold = math.min(hold + holdTime(mount) * cfg.RestorePer * killed, holdTime(mount)) -- QM: 10% each
+end
+
 -- While the snake's scare lasts, its horns and blue spikes glow (QM): the parts in
 -- its spike colour turn Neon, their studs hidden so the glow shows.
 vfx.SPIKE_COLOR = Color3.fromRGB(48, 196, 214)
@@ -2890,6 +2955,8 @@ local function startAbility(cfg)
 		a.active.missiles = vfx.launchMissiles(mount, cfg, travelDir())
 	elseif cfg.Kind == "Shield" then
 		vfx.summonShield(cfg)
+	elseif cfg.Kind == "Spikes" then
+		vfx.spikeField(Vector3.new(mount.x, 0, mount.z), cfg)
 	elseif cfg.Kind == "Hunt" then
 		vfx.huntTarget, vfx.hunting = nil, true
 	elseif cfg.Kind == "Devour" then
@@ -3610,6 +3677,8 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 			rider.fx = vfx.rainbowFx(entity)
 		elseif a == "Rattle" then
 			rattleRing(p, cfg.Radius)
+		elseif a == "Spikes" then
+			vfx.spikeField(p, cfg, true)
 		elseif a == "Frost" then
 			rider.fx = vfx.frostFx(entity)
 			rattleRing(p, cfg.Radius, vfx.FROST_TINT)

@@ -6,6 +6,7 @@ pyramids) under the belly. Idle and walk are QM's horse's, the gallop the leap.
 
 Run: python3 tools/soul_horse.py [out_dir]   writes SoulHorse.bbmodel and previews
 then: python3 tools/bbmodel_to_luau.py designs/godlands/SoulHorse.bbmodel src/shared/Animals/SoulHorseModel.luau
+      python3 tools/bbmodel_to_luau.py designs/eggs/c_style/SoulHorseEgg.bbmodel src/shared/Eggs/SoulHorseEggModel.luau
 """
 
 import os
@@ -15,6 +16,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
+import horse_egg_takes as HE  # noqa: E402
 from horse_rig import pose  # noqa: E402
 from partlib import render  # noqa: E402
 from snow_designs import pyramid  # noqa: E402
@@ -26,7 +28,7 @@ STEEL = (132, 144, 162)
 TRIM = (84, 88, 112)
 CLOTH = (70, 74, 46)
 TATTER = (112, 96, 156)
-SOUL = (90, 240, 230)
+SOUL = (80, 220, 255)
 
 
 def soul_horse():
@@ -34,6 +36,9 @@ def soul_horse():
     A.horse_body(a, COAT, MANE, HOOF, ear_inner=TRIM, stripe=False)
     for n in ("EyeL", "EyeR", "PupilL", "PupilR"):
         a.remove(n)
+    for p in a.parts:
+        if p.name.startswith("Nostril"):
+            p.color = (14, 26, 22)  # (the horse's brown ones read as red eyes on the dark snout)
     for side, sx in (("L", -1), ("R", 1)):
         xa, xb = sorted((sx * 1.1, sx * 1.16))
         a.box("GlowEye" + side, (xa, 9.4, -3.6), (xb, 9.9, -2.6), SOUL, "neck")
@@ -67,6 +72,23 @@ def soul_horse():
     return a
 
 
+def soul_horse_egg():
+    """The Pinto egg's horse shape (ears, forelock, mane down the back) in the Soul
+    Horse's colours: ghost green over pale hooves, a steel band at the crack and steel
+    spikes on the crest and back (no face: eggs have none, QM)."""
+    egg = HE.shell([HOOF, COAT, COAT, TRIM, COAT, COAT, COAT])
+    HE.ears(egg, COAT, TRIM)
+    egg.block("Forelock", (-0.36, 2.7, -0.62), (0.36, 3.4, 0.2), MANE).bone = "top"
+    HE.back_ridge(egg, MANE, range(HE.CRACK_LAYER, HE.N))
+    for k, (z0, z1, h) in enumerate(((-0.5, -0.1, 0.6), (-0.05, 0.35, 0.45))):
+        pyramid(egg, f"CrestSpike{k}", (-0.2, 3.4, z0), (0.2, 3.4, z1), "+y", h, STEEL, "top")
+    for i in (2, 3):
+        z = HE.WIDTHS[i] / 2 + 0.2
+        y = (i + 0.5) * HE.LH
+        pyramid(egg, f"BackSpike{i}", (-0.18, y - 0.18, z), (0.18, y + 0.18, z), "+z", 0.35, STEEL, "bottom")
+    return egg
+
+
 def main(out="designs/godlands"):
     os.makedirs(out, exist_ok=True)
     a = soul_horse()
@@ -81,7 +103,17 @@ def main(out="designs/godlands"):
     gallop = A.anim_named(m, "gallop")
     frames = [render(pose(m, gallop, i / 16 * gallop["length"]), **cams[2]).resize((345, 360)) for i in range(16)]
     A.gif(os.path.join(out, "SoulHorse_gallop.gif"), frames, fps=20)
-    print(f"SoulHorse: {len(a.parts)} parts")
+    egg = soul_horse_egg()
+    egg_dir = os.path.join(out, "..", "eggs", "c_style") if out == "designs/godlands" else out
+    HE.build(egg, "SoulHorseEgg", HE.E.SPLIT, egg_dir)
+    im = render(egg.parts, W=700, H=1100, fov=28, transparent=True, **HE.VIEWS[0])
+    im.crop(im.getbbox()).save(os.path.join(out, "SoulHorseEggRender.png"))
+    tiles = [render(egg.parts, W=360, H=360, fov=28, **v) for v in HE.VIEWS]
+    es = Image.new("RGB", (720, 360))
+    for i, t in enumerate(tiles):
+        es.paste(t, (360 * i, 0))
+    es.save(os.path.join(out, "SoulHorseEgg.png"))
+    print(f"SoulHorse: {len(a.parts)} parts, egg {len(egg.parts)} parts")
 
 
 if __name__ == "__main__":
