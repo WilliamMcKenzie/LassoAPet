@@ -276,7 +276,8 @@ def element_color(e, texs):
     if len(set(px)) == 1:
         return px[0][:3]
     uv = face["uv"]
-    u, v = (uv[0], uv[1]) if isinstance(uv, list) else next(iter(uv.values()))
+    # (a mirrored face's UV runs backwards: its painted pixel starts at the smaller corner)
+    u, v = (min(uv[0], uv[2]), min(uv[1], uv[3])) if isinstance(uv, list) else next(iter(uv.values()))
     s = im.size[0] / uvw
     return im.getpixel((min(int((u + 0.5) * s), im.size[0] - 1), min(int((v + 0.5) * s), im.size[1] - 1)))[:3]
 

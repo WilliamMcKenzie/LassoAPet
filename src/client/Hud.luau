@@ -78,20 +78,20 @@ local IMAGES = {
 	eggRhino = { id = "rbxassetid://139482781062355", size = Vector2.new(496, 735) }, -- RhinoEggRender.png
 	eggUnicorn = { id = "rbxassetid://85066893166855", size = Vector2.new(496, 859) }, -- UnicornEggRender.png
 	eggCactus = { id = "rbxassetid://95599437590618", size = Vector2.new(635, 766) }, -- CactusEggRender.png
-	eggScorpion = { id = "rbxassetid://138046936786400", size = Vector2.new(599, 770) }, -- ScorpionEggRender.png
-	eggSandworm = { id = "rbxassetid://96884572036784", size = Vector2.new(502, 765) }, -- SandwormEggRender.png
-	eggSnake = { id = "rbxassetid://71071272639782", size = Vector2.new(502, 807) }, -- SnakeEggRender.png
+	eggScorpion = { id = "rbxassetid://138046936786400", size = Vector2.new(599, 1007) }, -- ScorpionEggRender.png (QM's update: re-upload)
+	eggSandworm = { id = "rbxassetid://96884572036784", size = Vector2.new(502, 767) }, -- SandwormEggRender.png (QM's update: re-upload)
+	eggSnake = { id = "rbxassetid://71071272639782", size = Vector2.new(553, 960) }, -- SnakeEggRender.png (QM's update: re-upload)
 	eggPenguin = { id = "rbxassetid://135143840112034", size = Vector2.new(582, 709) }, -- PenguinEggRender.png
 	eggSnowman = { id = "rbxassetid://105231134861157", size = Vector2.new(675, 772) }, -- SnowmanEggRender.png
-	eggSpineLizard = { id = "rbxassetid://98567631088826", size = Vector2.new(502, 934) }, -- SpineLizardEggRender.png
-	eggBoar = { id = "rbxassetid://121234341393694", size = Vector2.new(502, 751) }, -- BoarEggRender.png
-	eggIceGolem = { id = "rbxassetid://102264545247873", size = Vector2.new(502, 866) }, -- IceGolemEggRender.png
-	eggSnackYak = { id = "rbxassetid://87632604695329", size = Vector2.new(505, 762) }, -- SnackYakEggRender.png
-	eggIcebringer = { id = "rbxassetid://108999142038756", size = Vector2.new(502, 774) }, -- IcebringerEggRender.png
-	eggKraken = { id = "rbxassetid://104654341782924", size = Vector2.new(696, 785) }, -- KrakenEggRender.png
+	eggSpineLizard = { id = "rbxassetid://98567631088826", size = Vector2.new(502, 982) }, -- SpineLizardEggRender.png (QM's update: re-upload)
+	eggBoar = { id = "rbxassetid://121234341393694", size = Vector2.new(589, 849) }, -- BoarEggRender.png (QM's update: re-upload)
+	eggIceGolem = { id = "rbxassetid://102264545247873", size = Vector2.new(502, 973) }, -- IceGolemEggRender.png (QM's update: re-upload)
+	eggSnackYak = { id = "rbxassetid://87632604695329", size = Vector2.new(700, 668) }, -- SnackYakEggRender.png (QM's update: re-upload)
+	eggIcebringer = { id = "rbxassetid://108999142038756", size = Vector2.new(502, 915) }, -- IcebringerEggRender.png (QM's update: re-upload)
+	eggKraken = { id = "rbxassetid://104654341782924", size = Vector2.new(696, 900) }, -- KrakenEggRender.png (QM's update: re-upload)
 	eggSquid = { id = "rbxassetid://128883182267763", size = Vector2.new(696, 785) }, -- SquidEggRender.png
 	eggWhale = { id = "rbxassetid://97101351248514", size = Vector2.new(502, 684) }, -- WhaleEggRender.png
-	eggKingCrab = { id = "rbxassetid://136150514529079", size = Vector2.new(660, 668) }, -- KingCrabEggRender.png
+	eggKingCrab = { id = "rbxassetid://136150514529079", size = Vector2.new(700, 668) }, -- KingCrabEggRender.png (QM's update: re-upload)
 	eggBlueCrab = { id = "rbxassetid://119349539273288", size = Vector2.new(660, 668) }, -- BlueCrabEggRender.png
 	eggRoboShark = { id = "rbxassetid://95626930006876", size = Vector2.new(514, 752) }, -- RoboSharkEggRender.png
 	eggStarfish = { id = "rbxassetid://114368032731288", size = Vector2.new(680, 783) }, -- StarfishEggRender.png
