@@ -10,6 +10,7 @@ a coloured base, bold markings and each animal's own feature.
   KingCrab Epic      red over a pale underside, gold spikes, a big claw and a small one, little legs
   Starfish Common    orange over a pale base, yellow bumps all round, five stubby arms
                      splayed out round the bottom with darker tips
+  BlueCrab Legendary the King Crab's egg in the Blue Crab's blues
   FishSchool Epic    yellow over a pale base, an orange back, a ring of little orange
                      fish swimming round it (each with a tail and an eye), a fin on top
 
@@ -64,11 +65,17 @@ def kraken_egg(colors=KRAKEN):
     return egg
 
 
-def king_crab_egg():
+KING_CRAB = {"shell": (226, 58, 48), "dark": (160, 32, 40), "leg": (232, 70, 52)}
+BLUE_CRAB = {"shell": (0, 144, 255), "dark": (0, 86, 255), "leg": (0, 183, 255)}  # QM's Blue Crab colours
+
+
+def king_crab_egg(colors=KING_CRAB):
     """Red over a pale underside, gold spikes down the back, a big claw on the right and a
-    small one on the left (as on QM's crab), two little legs each side at the base."""
+    small one on the left (as on QM's crab), two little legs each side at the base.
+    The Blue Crab's is the same in its blues (BLUE_CRAB)."""
     from desert_eggs import fin
-    shell_red, under, gold, dark, leg = (226, 58, 48), (252, 196, 150), (255, 196, 64), (160, 32, 40), (232, 70, 52)
+    under, gold = (252, 196, 150), (255, 196, 64)
+    shell_red, dark, leg = colors["shell"], colors["dark"], colors["leg"]
     egg = shell([under, under, shell_red, shell_red, shell_red, shell_red, shell_red])
     for i in (2, 3, 4, 5):
         fin(egg, f"Spike{i}", i * LH + 0.05, (i + 1) * LH + 0.05, 0.36 if i % 2 else 0.24, 0.12, gold)
@@ -205,7 +212,7 @@ def whale_egg():
 
 
 EGGS = [("Kraken", kraken_egg), ("Squid", lambda: kraken_egg(SQUID)), ("Whale", whale_egg),
-        ("KingCrab", king_crab_egg), ("Starfish", starfish_egg), ("FishSchool", fish_school_egg)]
+        ("KingCrab", king_crab_egg), ("BlueCrab", lambda: king_crab_egg(BLUE_CRAB)), ("Starfish", starfish_egg), ("FishSchool", fish_school_egg)]
 
 
 def main(*kinds, preview="/mnt/project-files/eggs/c_style/ocean"):

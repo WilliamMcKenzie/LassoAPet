@@ -79,7 +79,7 @@ return {
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			Herd = { Fish = 0, Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, Kraken = 0.05 }, -- adds to 1.0
+			Herd = { Fish = 0, Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, Kraken = 0.05 }, -- (Blue Crab guessed like the Kraken)
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -243,6 +243,10 @@ return {
 	--     away from it while it lasts.
 	--   Crabwalk (King Crab): it grows to size tier Tier (large) and scuttles sideways
 	--     at SpeedBoost x speed for Duration.
+	--   Feast (Blue Crab): one tap cashes in everything it broke since the last Feast:
+	--     for each, Heal of the Hold bar back, and it grows Grow x bigger and runs
+	--     SpeedUp x faster for the rest of the ride, up to Max x its own size and speed
+	--     (a size TierGrowth x bigger counts as a size tier up).
 	--   Wave (School of Fish): a wall of fish rushes up from behind across the whole
 	--     course, overtakes it and races on ahead for Duration, and every obstacle and
 	--     animal it passes goes flying, whatever its size; then the fish dive away
@@ -265,6 +269,7 @@ return {
 		IceGolem = { Kind = "Grow", Duration = 5, Cooldown = 10, SpeedBoost = 1.2, Tier = 4 },
 		Squid = { Kind = "Ink", Duration = 2.5, Cooldown = 8, Radius = 45 },
 		KingCrab = { Kind = "Crabwalk", Duration = 4, Cooldown = 8, SpeedBoost = 2, Tier = 3 },
+		BlueCrab = { Kind = "Feast", Duration = 0.9, Cooldown = 8, Heal = 0.1, Grow = 1.1, SpeedUp = 1.1, Max = 2 }, -- QM, Oct 4 (cooldown a guess)
 		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
 		-- the animation's length and fire window; the range, width and cooldown are guesses
 		Loong = { Kind = "Breath", Duration = 2.6, FireFrom = 0.95, FireTo = 2.1, Cooldown = 8, Range = 70, Width = 22, Restore = 0.2 },
@@ -278,6 +283,9 @@ return {
 	--   Fly (Whale): it rises Height studs into the air, over everything.
 	--   Trample (Kraken): animals smaller than tier BelowTier it runs into are thrown
 	--     up and away, as when a bigger pet runs into them racing home.
+	--   Crabwalk (Blue Crab): it scuttles sideways at SpeedBoost x its sprint speed with
+	--     the Icebringer's wind, breaking every obstacle and knocking every animal in
+	--     its path, whatever its size.
 	--   Loom (Loong): it swells to Grow x its size (a look only: its tier stays) and the
 	--     animals within Radius studs scatter away from it.
 	SprintSpecials = {
@@ -287,6 +295,7 @@ return {
 		Whale = { Kind = "Fly", Height = 56 },
 		Kraken = { Kind = "Trample", BelowTier = 3 },
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
+		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2 }, -- QM, Oct 4
 	},
 	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
 	-- obstacles and stampede animals of a lower tier, knocking them up and away;
@@ -296,7 +305,7 @@ return {
 		Horse = 1, Pig = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
 		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
-		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, Whale = 4, Kraken = 4, -- Ocean
+		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, Whale = 4, Kraken = 4, -- Ocean
 		Loong = 3, -- Godlands
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
@@ -340,7 +349,7 @@ return {
 		Horse = 1, Pig = 3, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
 		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
 		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 4000, Icebringer = 1111, -- Tundra
-		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, Whale = 5000, Kraken = 8200, -- Ocean
+		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, Whale = 5000, Kraken = 8200, -- Ocean
 		Loong = 20000, -- Godlands (a guess, past the Kraken)
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
@@ -355,7 +364,7 @@ return {
 		Pool = {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
-			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1 },
+			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
 			-- with an empty pool is never rolled.
 			Exclusive = {},
@@ -386,6 +395,7 @@ return {
 		Squid = "rbxassetid://128883182267763", -- assets/ui/SquidEggRender.png
 		Whale = "rbxassetid://97101351248514", -- assets/ui/WhaleEggRender.png
 		KingCrab = "rbxassetid://136150514529079", -- assets/ui/KingCrabEggRender.png
+		BlueCrab = "", -- assets/ui/BlueCrabEggRender.png (awaiting upload)
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://123632636372048", -- assets/ui/LoongEggRender.png
@@ -472,6 +482,7 @@ return {
 		Starfish = { Speed = 2.5, Stamina = 2 },
 		Squid = { Speed = 3, Stamina = 2.6 },
 		KingCrab = { Speed = 3.1, Stamina = 3 },
+		BlueCrab = { Speed = 3.1, Stamina = 3 }, -- the King Crab's; its Feast ability grows it to 2x
 		FishSchool = { Speed = 3, Stamina = 2.8 }, -- a guess between the Squid and King Crab
 		Whale = { Speed = 1.2, Stamina = 10 },
 		Kraken = { Speed = 4.5, Stamina = 3 },

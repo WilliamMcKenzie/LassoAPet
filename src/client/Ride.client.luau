@@ -827,6 +827,7 @@ startRide = function(model)
 	local runningAt = if fromHerd then fromHerd.speed or 0 else 0 -- a stampede animal keeps its pace
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, runningAt, 0
 	phase, hold, grace, camYaw = "outbound", holdTime(mount), 0, 0
+	mount.feast = nil -- (the Blue Crab starts every ride at its own size)
 	coins = 0
 	hrp.Anchored = true
 	humanoid.Sit = true
@@ -1685,14 +1686,21 @@ vfx.WIND_SHEETS = 6 -- beams in the cone of air parting round the head
 -- Wind breaking round a charging animal's head: a cone of sharp wind sheets
 -- sweeping back from its nose, and speed lines streaming past its body. scale
 -- shrinks it all (the Icebringer's sprint uses half: QM).
-local function chargeFx(entity, scale)
+-- turn: radians the model is turned from the way it's going (a crab walking sideways,
+-- pi / 2): the wind then breaks round its side.
+local function chargeFx(entity, scale, turn)
 	scale = scale or 1
 	local root = entity.animal.model.PrimaryPart
 	local middle, full = entity.animal.model:GetBoundingBox()
+	local ahead = CFrame.Angles(0, -(turn or 0), 0) -- from the way it's going to the model's own axes
+	if turn then
+		full = Vector3.new(full.Z, full.Y, full.X) -- going along its width
+		middle *= ahead
+	end
 	local size = full * scale
-	local local0 = root.CFrame:ToObjectSpace(middle)
+	local base = CFrame.new(root.CFrame:ToObjectSpace(middle).Position) * ahead
 	-- The nose: the front of the box (the model faces -Z), a little above the middle.
-	local nose = local0.Position + Vector3.new(0, full.Y * 0.1, -full.Z / 2 - 0.5)
+	local nose = Vector3.new(0, full.Y * 0.1, -full.Z / 2 - 0.5)
 	local radius = math.max(size.X, size.Y) * 0.95
 	local length = size.Z * 0.9
 	local fx = {}
@@ -1702,10 +1710,10 @@ local function chargeFx(entity, scale)
 		local out = Vector3.new(math.sin(angle), math.cos(angle), 0) -- radial, 0 = straight up
 		local around = Vector3.new(0, 0, -1):Cross(out)
 		local a0 = Instance.new("Attachment")
-		a0.CFrame = CFrame.fromMatrix(nose, out, around)
+		a0.CFrame = base * CFrame.fromMatrix(nose, out, around)
 		a0.Parent = root
 		local a1 = Instance.new("Attachment")
-		a1.CFrame = CFrame.fromMatrix(nose + out * radius + Vector3.new(0, 0, length), out, around)
+		a1.CFrame = base * CFrame.fromMatrix(nose + out * radius + Vector3.new(0, 0, length), out, around)
 		a1.Parent = root
 		local beam = Instance.new("Beam")
 		beam.Texture = vfx.WIND_TEXTURE
@@ -1914,7 +1922,26 @@ function vfx.frostBlast(cfg, left)
 end
 
 -- Abilities that don't make the pet untouchable: it still uses Hold and can crash.
-vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true, Breath = true }
+vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true, Breath = true, Feast = true }
+
+-- The Blue Crab's Feast (Config.Abilities): what it has broken since the last one, and
+-- how much bigger and faster it has grown this ride. nil for every other pet.
+function vfx.feastOf(entity)
+	local cfg = entity and Config.Abilities[entity.kind]
+	if not cfg or cfg.Kind ~= "Feast" then
+		return nil
+	end
+	entity.feast = entity.feast or { count = 0, size = 1, speed = 1 }
+	return entity.feast
+end
+
+-- The mount broke something (smashed an obstacle, knocked an animal flying).
+function vfx.broke()
+	local feast = vfx.feastOf(mount)
+	if feast then
+		feast.count += 1
+	end
+end
 
 -- The mount's size tier right now: Grow and Crabwalk make it bigger while they run.
 function vfx.mountTier()
@@ -1922,6 +1949,9 @@ function vfx.mountTier()
 	local tier = tierOf(mount.kind)
 	if a and a.cfg.Tier then
 		tier = math.max(tier, a.cfg.Tier)
+	end
+	if mount.feast and mount.feast.size > 1 then -- grown by its Feasts: TierGrowth x bigger is a tier up
+		tier += math.floor(math.log(mount.feast.size) / math.log(Config.TierGrowth) + 1e-6)
 	end
 	return tier
 end
@@ -2069,7 +2099,7 @@ function vfx.updateScale(dt)
 	end
 	anim.t += dt
 	local t, s = anim.t, nil
-	local from, to = if anim.shrink then anim.size else 1, if anim.shrink then 1 else anim.size
+	local from, to = if anim.shrink then anim.size else anim.from or 1, if anim.shrink then 1 else anim.size
 	if t < vfx.POP_WIND then
 		local u = math.sin(math.pi * t / vfx.POP_WIND)
 		s = from * (if anim.shrink then 1 + 0.06 * u else 1 - 0.1 * u)
@@ -2113,6 +2143,8 @@ function vfx.updateSprint(dt)
 		end
 		if kind == "Ram" then
 			vfx.sprintFx = chargeFx(mount, 0.5)
+		elseif kind == "Crabwalk" then
+			vfx.sprintFx = chargeFx(mount, 0.5, math.pi / 2) -- sideways, like the crab
 		elseif kind == "Burrow" then
 			local spray = Instance.new("Part")
 			spray.Anchored, spray.CanCollide, spray.CanQuery, spray.CanTouch = true, false, false, false
@@ -2277,6 +2309,18 @@ local function startAbility(cfg)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(40, 30, 70))
 	elseif cfg.Kind == "Wave" then
 		a.active.wave = vfx.FishWave.new(mount.z, travelDir(), EDGE)
+	elseif cfg.Kind == "Feast" then
+		-- Everything broken since the last Feast: Hold back, and bigger and faster for good.
+		local feast = vfx.feastOf(mount)
+		local n = feast.count
+		feast.count = 0
+		hold = math.min(hold + holdTime(mount) * cfg.Heal * n, holdTime(mount))
+		feast.speed = math.min(feast.speed * cfg.SpeedUp ^ n, cfg.Max)
+		if n > 0 and feast.size < cfg.Max then
+			mount.scaleAnim = { t = 0, from = mount.animal.scale, size = math.min(feast.size * cfg.Grow ^ n, cfg.Max) }
+		end
+		feast.size = math.min(feast.size * cfg.Grow ^ n, cfg.Max)
+		Poof.at(Vector3.new(mount.x, 0, mount.z))
 	elseif cfg.Kind == "Breath" then
 		hold = math.min(hold + holdTime(mount) * (cfg.Restore or 0), holdTime(mount)) -- QM: refills 20% of the Hold bar
 		mount.animal:playOnce("special")
@@ -2388,8 +2432,9 @@ local function updateMount(dt)
 	end
 	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed) * statsOf(mount.kind).Speed
 	if sprinting() then
-		targetSpeed *= Config.SprintSpeed
+		targetSpeed *= Config.SprintSpeed * ((vfx.sprintSpecial() or {}).SpeedBoost or 1) -- the Blue Crab's crab walk: faster still
 	end
+	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
 	if ability and (ability.cfg.Kind == "Charge" or ability.cfg.Kind == "Boost" or ability.cfg.Kind == "Grow" or ability.cfg.Kind == "Crabwalk") then
@@ -2433,7 +2478,7 @@ local function updateMount(dt)
 	local edge = EDGE + (Config.HomeHalfWidth - 4 - EDGE) * math.clamp(mount.z / 40, 0, 1)
 	mount.x = math.clamp(mount.x + mount.latVel * dt, -edge, edge)
 	mount.z += dir * mount.speed * dt
-	local sideways = if ability and ability.cfg.Kind == "Crabwalk" then math.pi / 2 else 0 -- a crab scuttles sideways
+	local sideways = if (ability and ability.cfg.Kind == "Crabwalk") or (vfx.sprintSpecial() or {}).Kind == "Crabwalk" then math.pi / 2 else 0 -- a crab scuttles sideways
 	place(mount, math.atan2(mount.latVel * dir, math.max(mount.speed, 1)) + sideways)
 	animate(mount, dt, mount.speed, mount.latVel * -dir / Config.SteerSpeed)
 end
@@ -2528,13 +2573,14 @@ local function checkRide(dt)
 				smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
 			end
 		end
-	elseif kind == "Ram" then
+	elseif kind == "Ram" or kind == "Crabwalk" then
 		while true do
 			local o = blockedAt(mount.x, mount.z, 2.5, 4, 1)
 			if not o then
 				break
 			end
 			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
+			vfx.broke()
 		end
 	end
 	-- A bigger pet plows through smaller obstacles; its own size or bigger stops it.
@@ -2548,6 +2594,7 @@ local function checkRide(dt)
 			break
 		end
 		smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
+		vfx.broke()
 	end
 	if grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4, tier) then
 		return fail("CRASH!")
@@ -2559,8 +2606,9 @@ local function checkRide(dt)
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
 		if not entity.popping and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
 			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
-			if (phase == "return" or trample) and tierOf(entity.kind) < myTier then -- (the +1 is for obstacles only)
-				knock(entity, dx)
+			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" then -- (the +1 is for obstacles only)
+				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
+				vfx.broke()
 			elseif phase == "return" and grace <= 0 then
 				return fail("CRASH!")
 			elseif phase == "outbound" and entity.n then
