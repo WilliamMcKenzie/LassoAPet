@@ -9,6 +9,7 @@ local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local Inventory = require(script.Parent.Inventory)
 local PetFaces = require(script.Parent.PetFaces)
+local Sounds = require(script.Parent.Sounds)
 local AnimalDex = require(script.Parent.AnimalDex)
 local RollMenu = require(script.Parent.RollMenu)
 local Shop = require(script.Parent.Shop)
@@ -656,11 +657,14 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end
 	-- A Legendary Pet bought in the shop is in your pen: its card shows which.
 	game:GetService("ReplicatedStorage"):WaitForChild("ShopGrant").OnClientEvent:Connect(function(key, kind)
+		if key ~= "LegendaryPet" then
+			Sounds.play("purchase") -- (the Legend Egg's pet comes as a second grant: one sound)
+		end
 		Shop.close()
 		if key == "LegendaryPet" and kind then
 			-- (its own rarity's card: the Loong and Robo Shark are Exclusive)
 			local animal = game:GetService("ReplicatedStorage").Shared.Animals:FindFirstChild(kind)
-			Hud.eggReveal(if animal then require(animal).Rarity else "Legendary", kind)
+			Hud.eggReveal(if animal then require(animal).Rarity else "Legendary", kind, true)
 		end
 	end)
 	Inventory.init(homeRoot)
@@ -775,7 +779,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		-- The same egg card as coming home with that egg: its own rarity's (QM).
 		local rarity = ok and kind and require(game:GetService("ReplicatedStorage").Shared.Animals[kind]).Rarity
 		RollMenu.setHidden(rarity ~= nil) -- the menu steps aside for the egg card
-		local seconds = rarity and Hud.eggReveal(rarity, kind)
+		local seconds = rarity and Hud.eggReveal(rarity, kind, true)
 		task.wait(seconds or 0.3)
 		if rarity then
 			RollMenu.close() -- one egg per roll: the menu doesn't come back after the card (QM)
@@ -1058,7 +1062,9 @@ local EXIT_TIME = 0.42
 -- eggs (slow, then faster and faster), squashes down and pops onto the egg's
 -- rarity card, and the egg springs out onto it. Returns how long it takes until
 -- the card is gone (nil if there's no card for that rarity, e.g. Common).
-function Hud.eggReveal(rarity, kind)
+-- rolled: a roll's (or the shop's Legend Egg's) card, which lands with roll_reveal
+-- rather than reveal_pop (Sounds).
+function Hud.eggReveal(rarity, kind, rolled)
 	local final = RARITY_CARDS[rarity]
 	if not final then
 		return nil
@@ -1159,6 +1165,7 @@ function Hud.eggReveal(rarity, kind)
 		if not play(roll, function(t)
 			while flick < flicks and t >= nextFlick do
 				setCardFace(UNKNOWN_CARDS[flick % #UNKNOWN_CARDS + 1])
+				Sounds.play("reveal_tick", 0.35)
 				flick += 1
 				nextFlick += gaps[flick]
 			end
@@ -1196,6 +1203,7 @@ function Hud.eggReveal(rarity, kind)
 		-- 4. Pop: the real card, stretched tall and big, springs back with a
 		-- wobble, behind a white flash and the sunburst; the screen shakes.
 		setCardFace(final)
+		Sounds.play(if rolled then "roll_reveal" else "reveal_pop")
 		cardExclusive.Visible = standIn
 		cardFlash.Visible = true
 		cardBurst.Visible = Config.EggRevealBurst
@@ -1409,6 +1417,9 @@ function Hud.setEventCountdown(kind, seconds)
 		return
 	end
 	local shown = kind ~= nil and tutorial == nil
+	if not shown and EVENT.seconds == 1 then
+		Sounds.play("countdown_go") -- the countdown ran out: it spawns
+	end
 	EVENT.row.Visible = shown
 	if EVENT.dodgeHolder then
 		EVENT.dodgeHolder.Visible = not shown -- DODGE THE STAMPEDE! steps aside for it (QM)
@@ -1431,6 +1442,9 @@ function Hud.setEventCountdown(kind, seconds)
 	end
 	if seconds ~= EVENT.seconds then
 		EVENT.seconds = seconds
+		if seconds <= 3 then
+			Sounds.play("countdown")
+		end
 		EVENT.text.Text = "spawns in " .. seconds .. "s..."
 		EVENT.scale.Scale = 1.15
 		TweenService:Create(EVENT.scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()

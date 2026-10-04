@@ -22,6 +22,7 @@ local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local Config = require(ReplicatedStorage.Shared.Config)
 local Merge = require(ReplicatedStorage.Shared.Merge)
 local PenPets = require(script.Parent.PenPets)
+local Sounds = require(script.Parent.Sounds)
 
 local player = Players.LocalPlayer
 local placeEgg = ReplicatedStorage:WaitForChild("PlaceEgg")
@@ -215,6 +216,9 @@ end
 -- The egg hatched: play the hatch, then the pet jumps out onto the spot.
 local function hatch(pen, id, s)
 	s.hatching = true
+	if pen == myPen() then
+		Sounds.play("egg_hatch")
+	end
 	s.timer.Parent:Destroy() -- the countdown
 	s.egg:play("hatch")
 	task.delay(TOP_POPS, function()
@@ -365,6 +369,10 @@ RunService.RenderStepped:Connect(function(dt)
 				if s.drop then
 					local t = os.clock() - s.drop.landAt
 					if t >= 0 then
+						if not s.dropPopped then
+							s.dropPopped = true
+							Sounds.play("merge_pop")
+						end
 						local size, hop, landed = PenPets.drop(t, s.drop.at.Y - s.at.Y)
 						pet.animal.model.Parent = folder
 						pet.scale, pet.hop = s.full * size, hop

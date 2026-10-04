@@ -171,6 +171,7 @@ local function smash(o, dir, side, remote)
 	end
 	o.smashed = true
 	if not remote then
+		vfx.sounds.play("smash", 0.4)
 		ReplicatedStorage.RideCue:FireServer("smash", o.x, o.z, dir, side)
 	end
 	local rng = Random.new()
@@ -408,6 +409,7 @@ function vfx.applyMerge(entity)
 		entity.animal:setScale(size)
 	end
 end
+vfx.sounds = require(script.Parent.Sounds) -- sound effects and music (a field: this chunk is at the local limit)
 vfx.rideSync = ReplicatedStorage:WaitForChild("RideSync") -- multiplayer rides (Riders.server)
 vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
 vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
@@ -996,6 +998,7 @@ local function fail(reason, tip)
 	if phase == "ended" then
 		return
 	end
+	vfx.sounds.play("crash")
 	Hud.setTip(tip) -- in place of the "+$N" the fail screen shows
 	local hrp, humanoid = character()
 	local dir = (phase == "return" or phase == "home") and 1 or -1 -- travelDir() is defined further down
@@ -1062,6 +1065,7 @@ local function startTransfer(target)
 	mount = nil
 	transfer = { target = target, old = old, t = 0, stage = "throw", from = hrp.Position }
 	vfx.rideCue:FireServer("lasso", target.n or false)
+	vfx.sounds.play("lasso_throw")
 end
 
 local function grabEgg()
@@ -1077,6 +1081,8 @@ local function grabEgg()
 	local part = egg.model
 	part.Parent = workspace
 	takeEgg:FireServer(nearEgg.nest) -- empties the nest for everyone
+	vfx.sounds.play("lasso_throw")
+	vfx.sounds.play("egg_grab")
 	carried = { part = part, kind = nearEgg.kind, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	phase, turnT = "turning", 0
 	Hud.setAction(nil)
@@ -3341,6 +3347,7 @@ local function reachHome()
 		-- Home with the egg: the hero leap over the line (updateMount), then the reveal.
 		phase = "home"
 		heroLeap = { t = 0, fromZ = mount.z, toZ = START_LINE_Z + Config.HomeLandPast }
+		vfx.sounds.play("arrive_home")
 		Hud.setCutscene(true)
 	end
 end
@@ -3548,6 +3555,7 @@ local function updateRider(dt)
 				table.remove(strays, table.find(strays, target))
 			end
 			mount, transfer = target, nil
+			vfx.sounds.play("lasso_land")
 			mount.popping, mount.hop = nil, 0
 			mount.animal:setScale(vfx.ownSize(mount)) -- (back on a pet you let go: merged or grown, it still is)
 			mount.animal:setSaddled(true)
@@ -3965,6 +3973,7 @@ RunService.PreSimulation:Connect(function(dt)
 		mount and (vfx.sprintSpecial() or {}).Kind) -- (the Sludge's and Soul Horse's sprints lay trails)
 	vfx.updateNuke()
 	vfx.sendRide()
+	vfx.updateSound()
 	vfx.updateRiders(dt)
 	Dust.update(dt)
 	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)
@@ -4177,6 +4186,7 @@ ReplicatedStorage:WaitForChild("ContinueRide").OnClientEvent:Connect(function(pa
 		Hud.showContinue("ready")
 		return
 	end
+	vfx.sounds.play("purchase")
 	vfx.revive = nil
 	for _, o in obstacles do
 		if not o.smashed and Vector2.new(o.x - revive.x, o.z - revive.z).Magnitude < Config.ContinueClear then
@@ -4232,6 +4242,10 @@ end
 -- The just-merged starter popping out over the pen and dropping (PenPets.drop).
 function vfx.dropStarter(entity, dt)
 	local t = os.clock() - entity.drop.landAt
+	if t >= 0 and not entity.dropPopped then
+		entity.dropPopped = true
+		vfx.sounds.play("merge_pop")
+	end
 	if t >= 0 then
 		local floor = Ground.heightAt(entity.x, entity.z)
 		local size, hop, landed = PenPets.drop(t, entity.drop.at.Y - floor)
@@ -4244,6 +4258,21 @@ function vfx.dropStarter(entity, dt)
 	end
 	place(entity, 0)
 	animate(entity, dt, 0, 0)
+end
+
+-- Music and the gallop loop, every frame: the ride theme out riding, the base theme at
+-- home; the gallop while you ride an animal that gallops (Config.GallopSound), louder
+-- and quicker the faster it goes. Sprint's whoosh as it starts.
+function vfx.updateSound()
+	vfx.sounds.setMusic(if phase == "idle" then "base" else "ride")
+	local riding = mount and (phase == "outbound" or phase == "return" or phase == "turning") and not transfer
+	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] == true and (mount.hop or 0) < 2,
+		mount and mount.speed / Config.MountSpeed or 0)
+	local now = phase == "outbound" and mount ~= nil and sprinting()
+	if now and not vfx.wasSprinting then
+		vfx.sounds.play("sprint_whoosh")
+	end
+	vfx.wasSprinting = now
 end
 
 -- MERGE (QM, Oct 4): every pet going into a merge is pulled up into one spot 2 m
@@ -4286,6 +4315,7 @@ end
 -- first), spinning and shrinking away, then a poof. The pets themselves are hidden
 -- meanwhile (the server's merge removes them; if it never comes, they show again).
 function vfx.mergePull(models, at)
+	vfx.sounds.play("merge_whoosh")
 	local copies = {}
 	for _, model in models do
 		local copy = model:Clone()
@@ -4328,6 +4358,7 @@ function vfx.mergePull(models, at)
 				c.model:Destroy()
 			end
 			Poof.at(at - Vector3.new(0, 1, 0))
+			vfx.sounds.play("merge_poof")
 		end
 	end)
 end

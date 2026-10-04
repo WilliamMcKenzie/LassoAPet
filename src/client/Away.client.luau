@@ -11,6 +11,7 @@ local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Hud = require(script.Parent.Hud)
+local Sounds = require(script.Parent.Sounds)
 
 local player = Players.LocalPlayer
 local claimAway = ReplicatedStorage:WaitForChild("ClaimAway")
@@ -224,6 +225,9 @@ local function show(total)
 			while dropped < t * COINS_PER_SECOND do
 				dropped += 1
 				dropCoin()
+				if dropped % 3 == 1 then
+					Sounds.play("gold_tick", 0.35) -- (every third coin: a steady patter)
+				end
 			end
 			return
 		end
