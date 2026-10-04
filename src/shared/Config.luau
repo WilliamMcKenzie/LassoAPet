@@ -541,7 +541,8 @@ return {
 	ContinueGrace = 1.5, -- seconds nothing can crash you once you're back on
 	ContinueClear = 14, -- studs: obstacles this close to where you crashed are knocked away
 	-- Robux shop (QM, Oct 4; Shop client, Shop.server): the gold icon at home opens it,
-	-- and pressing ROLL with less than TopUpBelow gold opens it as a top-up.
+	-- and pressing ROLL without the gold for it asks you to buy the smallest gold pack
+	-- that covers it.
 	-- Each offer is its own developer product, like Continue's bands (QM's
 	-- dashboard, Oct 4; a ProductId of 0 would only show in Studio, for free).
 	-- QM's new menu (Oct 4) shows Giant Horse, Spawn Loong, Gold1, Gold4 and the
@@ -549,7 +550,6 @@ return {
 	-- a note of it: what's charged is the product's price on the dashboard). Gold2,
 	-- Gold3 and Nuke All aren't on it but can still be bought.
 	Shop = {
-		TopUpBelow = 10000000,
 		Gold = {
 			{ Key = "Gold1", Gold = 100000, Price = 50, ProductId = 3716409553 }, -- $100K (QM's nerf, Oct 4: was $1M)
 			{ Key = "Gold2", Gold = 5000000, Price = 99, ProductId = 3716409568 },

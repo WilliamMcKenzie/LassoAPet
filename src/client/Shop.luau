@@ -7,13 +7,11 @@
 -- exist yet only shows in Studio, where it's free. It behaves like the roll menu
 -- and the animal dictionary: no dark backdrop, the HUD's left buttons stay on top
 -- and clickable, and clicking anywhere off the panel closes it.
--- Pressing ROLL with less than Config.Shop.TopUpBelow gold opens it as a top-up,
--- over the roll menu, with ROLL under it when you can pay.
 --
---   Shop.open(topUp) / Shop.toggle() / Shop.close() / Shop.isOpen()
+--   Shop.open() / Shop.toggle() / Shop.close() / Shop.isOpen()
 --   Shop.hasOffers() / Shop.hasGold()   -- anything to show (live: products made)
---   Shop.onToggle = function(open, topUp)
---   Shop.onRoll = function()            -- ROLL on the top-up was pressed
+--   Shop.buyGoldFor(amount)             -- asks to buy the smallest gold pack giving that much
+--   Shop.onToggle = function(open)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -25,13 +23,10 @@ local ModalPop = require(script.Parent.ModalPop)
 local Shop = {}
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
-local GREY = Color3.fromRGB(150, 150, 150)
-local WHITE = Color3.new(1, 1, 1)
 -- QM's art (assets/ui/Shop*.png). The cards' prices are baked in: keep them in step
 -- with the products' prices on the Creator Dashboard.
 local PANEL = { id = "rbxassetid://105155399825774", size = Vector2.new(2888, 1694) } -- ShopPanel.png ("Shop" on its top edge)
 local ODDS_BUTTON = "rbxassetid://83654143211576" -- ShopOddsButton.png (the green ?)
-local ROLL_BUTTON = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) } -- RollButton.png, as the roll menu's
 local CARDS = {
 	-- [offer Key] = the card's art, and its column and row in the grid (the
 	-- Legend Egg spans both rows)
@@ -49,7 +44,7 @@ local GAP = 30 -- between columns
 local ODDS_SIZE = 58
 
 local player = Players.LocalPlayer
-local open, topUp = false, false
+local open = false
 local buyShop = ReplicatedStorage:WaitForChild("BuyShop")
 
 -- Paid random items (the Legend Egg; egg rolls, as gold can be bought) are left
@@ -115,7 +110,7 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "Shop"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.DisplayOrder = -1 -- under the HUD (its left buttons stay on top), over the roll menu (-2) for the top-up
+gui.DisplayOrder = -1 -- under the HUD (its left buttons stay on top), over the roll menu (-2)
 gui.Enabled = false
 
 local root = Instance.new("Frame")
@@ -209,34 +204,7 @@ if legendCard then
 	end)
 end
 
--- The top-up's way on to the roll you asked for, when you can pay for it: the
--- roll menu's ROLL, over the panel's bottom edge.
-local roll = Instance.new("ImageButton")
-roll.Name = "Roll"
-roll.BackgroundTransparency = 1
-roll.AutoButtonColor = false
-roll.Image = ROLL_BUTTON.id
-roll.AnchorPoint = Vector2.new(0.5, 0.5)
-roll.Position = UDim2.fromScale(0.5, 0.99)
-roll.Size = UDim2.fromOffset(310, 310 * ROLL_BUTTON.size.Y / ROLL_BUTTON.size.X)
-roll.ZIndex = 3
-pressable(roll)
-roll.Activated:Connect(function()
-	if Shop.onRoll then
-		Shop.close()
-		Shop.onRoll()
-	end
-end)
-roll.Parent = panel
-
-local function refresh()
-	local canPay = (player:GetAttribute("Gold") or 0) >= Config.Gacha.Price
-	roll.ImageColor3 = if canPay then WHITE else GREY
-	roll.Visible = topUp and canPay
-end
-player:GetAttributeChangedSignal("Gold"):Connect(refresh)
-
--- Clicking anywhere off the panel (and its ROLL) closes it. No dark backdrop (QM).
+-- Clicking anywhere off the panel closes it. No dark backdrop (QM).
 local function over(object, at)
 	local min, size = object.AbsolutePosition, object.AbsoluteSize
 	return at.X >= min.X and at.Y >= min.Y and at.X <= min.X + size.X and at.Y <= min.Y + size.Y
@@ -250,7 +218,7 @@ backdrop.Size = UDim2.fromScale(1, 1)
 backdrop.ZIndex = 0
 backdrop.Activated:Connect(function(input)
 	local at = Vector2.new(input.Position.X, input.Position.Y)
-	if not over(panel, at) and not (roll.Visible and over(roll, at)) then
+	if not over(panel, at) then
 		Shop.close()
 	end
 end)
@@ -263,21 +231,19 @@ local function setScale(scale)
 	panelScale.Scale = scale
 end
 
--- topUp: opened from ROLL, over the roll menu, with ROLL under it.
-function Shop.open(asTopUp)
+function Shop.open()
 	if open then
 		return
 	end
-	open, topUp = true, asTopUp == true
+	open = true
 	if legendCard and legendOdds then -- the mystery egg first, every time
 		legendOdds = false
 		legendCard.Image = CARDS.Legendary.id
 	end
-	refresh()
 	gui.Enabled = true
 	ModalPop.open(setScale)
 	if Shop.onToggle then
-		Shop.onToggle(true, topUp)
+		Shop.onToggle(true)
 	end
 end
 
@@ -290,7 +256,7 @@ function Shop.close()
 		gui.Enabled = false
 	end)
 	if Shop.onToggle then
-		Shop.onToggle(false, topUp)
+		Shop.onToggle(false)
 	end
 end
 
@@ -298,7 +264,27 @@ function Shop.toggle()
 	if open then
 		Shop.close()
 	else
-		Shop.open(false)
+		Shop.open()
+	end
+end
+
+-- ROLL without the gold for it (Hud, QM): the smallest gold pack that covers
+-- `amount`, else the biggest there is.
+function Shop.buyGoldFor(amount)
+	local packs = {}
+	for _, offer in Config.Shop.Gold do
+		if offered(offer) then
+			table.insert(packs, offer)
+		end
+	end
+	table.sort(packs, function(a, b)
+		return a.Gold < b.Gold
+	end)
+	for i, offer in packs do
+		if offer.Gold >= amount or i == #packs then
+			buyShop:FireServer(offer.Key)
+			return
+		end
 	end
 end
 

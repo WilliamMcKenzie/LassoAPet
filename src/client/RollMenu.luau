@@ -1,12 +1,14 @@
 -- The egg roll menu (QM, Oct 4): the Roll button over Pets opens it. QM's panel
--- (the eggs you can roll, baked into the art) with ROLL $1M on its bottom edge,
--- laid out like QM's mockup. The roll itself is Hud's (RollGacha, then the egg
--- card); clicking anywhere off the panel closes it, like the animal dictionary.
+-- (the title, the exclusives' silhouettes and the eggs you can roll, baked into the
+-- art), the same size and place as the shop's, with ROLL $1M over the eggs and the
+-- shop's green ? on its top-right corner, which flips it to QM's odds art and back
+-- (ROLL steps aside while the odds show). The roll itself is Hud's (RollGacha, then
+-- the egg card; with too little gold it offers a gold pack instead); clicking
+-- anywhere off the panel closes it, like the animal dictionary.
 --
 --   RollMenu.toggle() / RollMenu.close()
 --   RollMenu.onToggle = function(open)     -- Hud hides the rest of the home HUD
 --   RollMenu.onRoll = function()           -- ROLL was pressed
---   RollMenu.setAffordable(yes)            -- greys ROLL when you can't pay
 --   RollMenu.setHidden(yes)                -- out of the way while the egg card shows
 
 local Players = game:GetService("Players")
@@ -17,11 +19,16 @@ local ModalPop = require(script.Parent.ModalPop)
 local RollMenu = {}
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
-local PANEL = { id = "rbxassetid://139179785391159", size = Vector2.new(2204, 1420) } -- RollMenu.png
+-- QM's art. The panel's frame starts FRAME_TOP down its picture (the silhouettes
+-- reach up over it); the odds art is padded to the same size, frame for frame.
+local PANEL = { id = "rbxassetid://104698392936555", size = Vector2.new(2892, 1900) } -- RollPanel.png
+local ODDS = "rbxassetid://110875946388838" -- RollPanelOdds.png
+local FRAME_TOP = 305 / 1900
+local ODDS_BUTTON = "rbxassetid://83654143211576" -- ShopOddsButton.png (the green ?)
 local BUTTON = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) } -- RollButton.png (ROLL $1M)
-local PANEL_WIDTH = 720 -- about half the screen, as in the mockup
-local BUTTON_WIDTH = 310
-local GREY = Color3.fromRGB(150, 150, 150)
+local PANEL_WIDTH = 930 -- the shop's
+local BUTTON_WIDTH = PANEL_WIDTH * 0.23 -- as in QM's mockup
+local ODDS_SIZE = 64
 
 local player = Players.LocalPlayer
 local open, hidden, closing = false, false, false
@@ -49,13 +56,16 @@ end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
 resize()
 
+-- Its frame sits where the shop's panel does (centred a little below the middle).
+local panelHeight = PANEL_WIDTH * PANEL.size.Y / PANEL.size.X
+local frameHeight = panelHeight * (1 - FRAME_TOP)
 local panel = Instance.new("ImageLabel")
 panel.Name = "Panel"
 panel.BackgroundTransparency = 1
 panel.Image = PANEL.id
-panel.AnchorPoint = Vector2.new(0.5, 0.5)
-panel.Position = UDim2.fromScale(0.5, 0.45)
-panel.Size = UDim2.fromOffset(PANEL_WIDTH, PANEL_WIDTH * PANEL.size.Y / PANEL.size.X)
+panel.AnchorPoint = Vector2.new(0.5, 0.5) -- (so it pops about its middle)
+panel.Position = UDim2.new(0.5, 0, 0.52, panelHeight / 2 - (panelHeight * FRAME_TOP + frameHeight / 2))
+panel.Size = UDim2.fromOffset(PANEL_WIDTH, panelHeight)
 local panelScale = Instance.new("UIScale")
 panelScale.Parent = panel
 panel.Parent = root
@@ -66,7 +76,7 @@ roll.BackgroundTransparency = 1
 roll.AutoButtonColor = false
 roll.Image = BUTTON.id
 roll.AnchorPoint = Vector2.new(0.5, 0.5)
-roll.Position = UDim2.fromScale(0.5, 0.97) -- over the panel's bottom edge
+roll.Position = UDim2.fromScale(0.5, 0.85) -- over the eggs
 roll.Size = UDim2.fromOffset(BUTTON_WIDTH, BUTTON_WIDTH * BUTTON.size.Y / BUTTON.size.X)
 roll.ZIndex = 2
 local rollScale = Instance.new("UIScale")
@@ -87,47 +97,37 @@ roll.Activated:Connect(function()
 	end
 end)
 
--- Each animal's chance per roll (a paid random item: the odds are shown), under
--- ROLL: its tier's share of Config.Gacha.Odds split by the weights in that tier's Pool.
-do
-	local gacha, chances, tierTotal = Config.Gacha, {}, 0
-	for tier, weight in gacha.Odds do
-		if next(gacha.Pool[tier] or {}) then
-			tierTotal += weight
-		end
-	end
-	for tier, weight in gacha.Odds do
-		local pool, poolTotal = gacha.Pool[tier] or {}, 0
-		for _, w in pool do
-			poolTotal += w
-		end
-		for kind, w in pool do
-			table.insert(chances, { kind = kind, chance = weight / tierTotal * w / poolTotal * 100 })
-		end
-	end
-	table.sort(chances, function(a, b)
-		return a.chance > b.chance or (a.chance == b.chance and a.kind < b.kind)
-	end)
-	local parts = {}
-	for _, c in chances do
-		table.insert(parts, string.format("%s %s%%", c.kind, (string.format("%.1f", c.chance):gsub("%.0$", ""))))
-	end
-	local odds = Instance.new("TextLabel")
-	odds.Name = "Odds"
-	odds.BackgroundTransparency = 1
-	odds.AnchorPoint = Vector2.new(0.5, 0)
-	odds.Position = UDim2.new(0.5, 0, 1, BUTTON_WIDTH * BUTTON.size.Y / BUTTON.size.X / 2 + 8)
-	odds.Size = UDim2.fromOffset(PANEL_WIDTH, 50)
-	odds.Font = Enum.Font.FredokaOne
-	odds.TextSize = 18
-	odds.TextWrapped = true
-	odds.TextColor3 = Color3.new(1, 1, 1)
-	odds.Text = "Odds: " .. table.concat(parts, "  ")
-	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 2
-	stroke.Parent = odds
-	odds.Parent = panel
+-- The ? flips the panel to the odds (a paid random item: the odds are shown) and
+-- back. QM's odds art matches Config.Gacha's Odds and Pools: keep them in step.
+local showingOdds = false
+local function setOdds(yes)
+	showingOdds = yes
+	panel.Image = if yes then ODDS else PANEL.id
+	roll.Visible = not yes
 end
+local flip = Instance.new("ImageButton")
+flip.Name = "Odds"
+flip.BackgroundTransparency = 1
+flip.AutoButtonColor = false
+flip.Image = ODDS_BUTTON
+flip.AnchorPoint = Vector2.new(0.5, 0.5)
+flip.Position = UDim2.new(1, -ODDS_SIZE * 0.3, FRAME_TOP, ODDS_SIZE * 0.3) -- on the frame's top-right corner
+flip.Size = UDim2.fromOffset(ODDS_SIZE, ODDS_SIZE)
+flip.ZIndex = 3
+local flipScale = Instance.new("UIScale")
+flipScale.Parent = flip
+flip.MouseButton1Down:Connect(function()
+	TweenService:Create(flipScale, press, { Scale = 0.93 }):Play()
+end)
+for _, event in { flip.MouseButton1Up, flip.MouseLeave } do
+	event:Connect(function()
+		TweenService:Create(flipScale, press, { Scale = 1 }):Play()
+	end)
+end
+flip.Activated:Connect(function()
+	setOdds(not showingOdds)
+end)
+flip.Parent = panel
 
 -- Clicking anywhere off the panel and its button closes it.
 local function over(object, at)
@@ -143,7 +143,7 @@ backdrop.Size = UDim2.fromScale(1, 1)
 backdrop.ZIndex = 0
 backdrop.Activated:Connect(function(input)
 	local at = Vector2.new(input.Position.X, input.Position.Y)
-	if not over(panel, at) and not over(roll, at) then
+	if not over(panel, at) and not over(flip, at) then
 		RollMenu.close()
 	end
 end)
@@ -165,6 +165,7 @@ function RollMenu.toggle()
 	closing = not open and not hidden -- (out of the way for the egg card: it just goes)
 	refresh()
 	if open then
+		setOdds(false) -- the eggs first, every time
 		ModalPop.open(setScale)
 	else
 		ModalPop.close(setScale, function()
@@ -185,10 +186,6 @@ end
 
 function RollMenu.isOpen()
 	return open
-end
-
-function RollMenu.setAffordable(yes)
-	roll.ImageColor3 = if yes then Color3.new(1, 1, 1) else GREY
 end
 
 function RollMenu.setHidden(yes)

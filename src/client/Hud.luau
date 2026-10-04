@@ -41,7 +41,8 @@ local IMAGES = {
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
 	rollIcon = { id = "rbxassetid://107116554539032", size = Vector2.new(232, 240) }, -- RollIcon.png: opens the egg roll menu
 	-- The roll menu's own art (RollMenu draws it; listed here so it's preloaded with the rest).
-	rollMenu = { id = "rbxassetid://139179785391159", size = Vector2.new(2204, 1420) }, -- RollMenu.png
+	rollMenu = { id = "rbxassetid://104698392936555", size = Vector2.new(2892, 1900) }, -- RollPanel.png
+	rollMenuOdds = { id = "rbxassetid://110875946388838", size = Vector2.new(2892, 1900) }, -- RollPanelOdds.png
 	rollButton = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) }, -- RollButton.png
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
@@ -625,19 +626,15 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	RollMenu.onToggle = function(open)
 		if open then
 			AnimalDex.close()
+			Shop.close()
 		end
-		Shop.close() -- (a top-up goes with its roll menu; the full shop makes way for it)
 		homeGui.Enabled = not open
 		if SELECTED.gui then
 			SELECTED.gui.Enabled = not open
 		end
 	end
-	-- The full shop hides the rest of the home HUD like the other menus; a top-up
-	-- sits over the roll menu, which already has.
-	Shop.onToggle = function(open, topUp)
-		if topUp then
-			return
-		end
+	-- The shop hides the rest of the home HUD like the other menus.
+	Shop.onToggle = function(open)
 		if open then
 			AnimalDex.close()
 			RollMenu.close()
@@ -745,28 +742,22 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		return (player:GetAttribute("Gold") or 0) >= Config.Gacha.Price
 	end
 	local function refreshRoll()
-		RollMenu.setAffordable(canRoll())
 		if rollText then
 			rollText.Text = "ROLL " .. money(Config.Gacha.Price)
-			roll.BackgroundColor3 = if canRoll() then Color3.fromRGB(92, 214, 72) else Color3.fromRGB(150, 150, 150)
+			roll.BackgroundColor3 = Color3.fromRGB(92, 214, 72) -- always pressable (QM): short of gold, it offers a gold pack
 		end
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(refreshRoll)
 	refreshRoll()
-	-- Under Config.Shop.TopUpBelow gold, ROLL offers a Robux top-up first (QM): once
-	-- per opening of the roll menu, and every time you can't pay.
-	local toppedUp = false
+	-- ROLL is always pressable (QM): without the gold for it, it asks you to buy the
+	-- smallest gold pack that gets you there (Shop.buyGoldFor); press ROLL again once
+	-- it's in.
 	local function doRoll()
 		if rolling or not (rollShown or RollMenu.isOpen()) or gui.Enabled then
 			return
 		end
-		local gold = player:GetAttribute("Gold") or 0
-		if gold < Config.Shop.TopUpBelow and (not toppedUp or not canRoll()) and Shop.hasGold() then
-			toppedUp = true
-			Shop.open(true)
-			return
-		end
 		if not canRoll() then
+			Shop.buyGoldFor(Config.Gacha.Price - (player:GetAttribute("Gold") or 0))
 			return
 		end
 		rolling = true
@@ -784,12 +775,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end
 	roll.Activated:Connect(doRoll)
 	RollMenu.onRoll = doRoll
-	Shop.onRoll = doRoll
-	local rollToggled = RollMenu.onToggle
-	RollMenu.onToggle = function(open)
-		toppedUp = false
-		rollToggled(open)
-	end
 	local function setRollShown(shown)
 		rollShown = shown
 		roll.Visible = shown and not gui.Enabled
