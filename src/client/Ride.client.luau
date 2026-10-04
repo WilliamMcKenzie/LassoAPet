@@ -557,6 +557,7 @@ local function cleanup()
 		vfx.endScare() -- (the snake's glow goes with the ride)
 		vfx.endShield() -- (and the Blue Crab's King Crabs)
 	end
+	vfx.hunting, vfx.huntTarget = nil, nil -- (a hunt cut short by the ride ending)
 	cutscene = nil
 	heroLeap = nil
 	Hud.setCutscene(false)
@@ -1310,6 +1311,9 @@ ContextActionService:BindActionAtPriority("Sprint", function(_, state)
 end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.LeftShift, Enum.KeyCode.RightShift, Enum.KeyCode.ButtonL2)
 
 local function sprinting()
+	if vfx.hunting then
+		return false -- the Robo Shark can't sprint while it hunts (QM)
+	end
 	if phase == "return" then
 		return Config.ReturnSprint -- racing home with the egg
 	end
@@ -2734,7 +2738,7 @@ local function endAbility(entity)
 		vfx.devourStep(active, math.huge) -- cut short: whatever it had hold of is eaten now
 	end
 	if active.cfg.Kind == "Hunt" then
-		vfx.huntTarget = nil -- (the arrows go back to the eggs)
+		vfx.huntTarget, vfx.hunting = nil, nil -- (the arrows go back to the eggs, and Sprint works again)
 		entity.yaw = if phase == "return" or phase == "home" then math.pi else 0 -- facing the right way again
 	end
 	local after = if active.cfg.Kind == "Hunt" then 1.5 else 0.4 -- (you get the steering back mid-stampede after a hunt)
@@ -2792,7 +2796,7 @@ local function startAbility(cfg)
 	elseif cfg.Kind == "Shield" then
 		vfx.summonShield(cfg)
 	elseif cfg.Kind == "Hunt" then
-		vfx.huntTarget = nil
+		vfx.huntTarget, vfx.hunting = nil, true
 	elseif cfg.Kind == "Devour" then
 		mount.speed = 0 -- stops dead on the spot to feed (QM)
 		vfx.devour(a.active, cfg)
