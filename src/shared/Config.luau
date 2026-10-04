@@ -568,7 +568,7 @@ return {
 			{ Key = "Gold4", Gold = 1000000, Price = 150, ProductId = 3716409606 }, -- $1M (QM's nerf, Oct 4: was $100M)
 		},
 		Specials = {
-			{ Key = "GiantHorse", Name = "Giant Horse", Price = 5, ProductId = 3716409132 }, -- one ride (GiantHorse below)
+			{ Key = "GiantHorse", Name = "Giant Horse", Price = 5, ProductId = 3716552368, OldProductIds = { 3716409132 } }, -- one ride (GiantHorse below)
 			{ Key = "SpawnLoong", Name = "Spawn Loong", Price = 25, ProductId = 0 }, -- starts the Loong event now (Events.server); no product yet
 			{ Key = "Nuke", Name = "Nuke All", Price = 200, ProductId = 3716409185 }, -- your next ride (NukeRange)
 			{ Key = "Legendary", Name = "Legend Egg", Price = 150, ProductId = 3716409444 }, -- a pet by LegendaryOdds, into your pen

@@ -62,6 +62,9 @@ for _, list in { Config.Shop.Gold, Config.Shop.Specials } do
 		if offer.ProductId ~= 0 then
 			offerOf[offer.ProductId] = offer
 		end
+		for _, id in offer.OldProductIds or {} do -- (a product it was sold as before: still granted)
+			offerOf[id] = offer
+		end
 	end
 end
 
