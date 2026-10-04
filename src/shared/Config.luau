@@ -526,12 +526,9 @@ return {
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
-	-- The animals the gallop sound plays for while you ride them (Sounds; QM: the ones that
-	-- gallop, not snakes and the like).
-	GallopSound = {
-		Horse = true, Pinto = true, Pig = true, Rhino = true, Unicorn = true, Boar = true,
-		SnackYak = true, Icebringer = true, WarElephant = true, SoulHorse = true,
-	},
+	-- The gallop sound plays while you ride any animal (Sounds; QM, Oct 4: "add the galloping
+	-- sfx to all animals"). List animals here as false to leave them out.
+	GallopSound = {},
 	SprintSpeed = 2, -- x MountSpeed
 	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
 	SprintDrain = 1.5, -- x the Hold bar's usual drain

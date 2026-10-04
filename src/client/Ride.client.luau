@@ -4266,7 +4266,7 @@ end
 function vfx.updateSound()
 	vfx.sounds.setMusic(if phase == "idle" then "base" else "ride")
 	local riding = mount and (phase == "outbound" or phase == "return" or phase == "turning") and not transfer
-	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] == true and (mount.hop or 0) < 2,
+	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] ~= false and (mount.hop or 0) < 2,
 		mount and mount.speed / Config.MountSpeed or 0)
 	local now = phase == "outbound" and mount ~= nil and sprinting()
 	if now and not vfx.wasSprinting then
