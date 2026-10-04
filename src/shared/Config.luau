@@ -165,10 +165,10 @@ return {
 			Length = math.huge, -- endless
 			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
 			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)
-			-- Placeholder until the Godlands has animals (and bosses) of its own: Fish (QM).
-			-- (The Loong is an event and roll exclusive now, so it doesn't run here.)
-			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
-			Herd = { Fish = 1, Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5, Leviathan = 0.1 }, -- the Beholder, War Elephant, Soul Horse, Sludge and Leviathan live here (QM, Oct 4; weights are guesses)
+			-- Its own animals now; the Fish that stood in are gone (QM, Oct 4). (The Loong is
+			-- an event and roll exclusive, so it doesn't run here.) PlaceholderHerd keeps it
+			-- out of the finish line's egg odds (Hatchery).
+			Herd = { Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5, Leviathan = 0.1 }, -- its own animals, no Fish (QM, Oct 4; weights are guesses)
 			PlaceholderHerd = true,
 			Patches = {
 				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up

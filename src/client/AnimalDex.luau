@@ -68,10 +68,9 @@ local PAGES = {
 	Godlands = {
 		grid = "rbxassetid://81880377884398", -- assets/ui/dex/DexGodlands.png
 		examine = "rbxassetid://103373591995713", -- assets/ui/dex/DexGodlandsExamine.png
-		-- Its Fish are a stand-in until it has animals enough (Config), not its own;
-		-- the Loong is its exclusive, which never runs in its stampede.
-		skip = { Fish = true },
-		extra = { "Loong" },
+		-- The exclusives (the Loong, Snack Yak and Robo Shark) are on this page (QM),
+		-- though none runs in its stampede; they're left off their own biomes' pages.
+		extra = { "Loong", "SnackYak", "RoboShark" },
 	},
 }
 
@@ -101,6 +100,11 @@ local SHEETS = {
 	KingCrab = { frames = 17, time = 0.03, "rbxassetid://88553226475116" },
 	BlueCrab = { frames = 17, time = 0.03, "rbxassetid://101217167881986" },
 	RoboShark = { frames = 20, time = 0.03, "rbxassetid://121345968224573" },
+	Loong = { frames = 24, time = 0.04, "rbxassetid://122418900338409" }, -- tools/dex_render.py
+	Beholder = { frames = 20, time = 0.03, "rbxassetid://120731347381935" }, -- tools/dex_render.py
+	WarElephant = { frames = 24, time = 0.03, "rbxassetid://103485896070996" }, -- tools/dex_render.py
+	SoulHorse = { frames = 24, time = 0.03, "rbxassetid://71539574618443" }, -- tools/dex_render.py
+	Sludge = { frames = 24, time = 0.06, "rbxassetid://101851743328298" }, -- tools/dex_render.py
 	Whale = { frames = 24, time = 0.03, "rbxassetid://115620712947682" },
 	Kraken = { frames = 24, time = 0.05, "rbxassetid://77455009647862" },
 	FishSchool = { frames = 20, time = 0.03, "rbxassetid://104966778015588" },
@@ -150,12 +154,19 @@ end
 -- The biomes with a page, each with its animals in rarity order (cheapest first
 -- within one), and every animal in that order across biomes for the arrows.
 local biomes, order = {}, {}
+-- Animals put on another biome's page (a page's extra) aren't on their own one.
+local elsewhere = {}
+for name, page in PAGES do
+	for _, kind in page.extra or {} do
+		elsewhere[kind] = name
+	end
+end
 for _, biome in Config.Biomes do
 	if PAGES[biome.Name] then
 		local page = PAGES[biome.Name]
 		local kinds = {}
 		for kind in biome.Herd do
-			if not (page.skip and page.skip[kind]) then
+			if not (page.skip and page.skip[kind]) and not elsewhere[kind] then
 				table.insert(kinds, kind)
 			end
 		end
