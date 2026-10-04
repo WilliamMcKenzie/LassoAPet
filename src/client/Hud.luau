@@ -81,7 +81,7 @@ local IMAGES = {
 	eggSpineLizard = { id = "rbxassetid://98567631088826", size = Vector2.new(502, 934) }, -- SpineLizardEggRender.png
 	eggBoar = { id = "rbxassetid://121234341393694", size = Vector2.new(502, 751) }, -- BoarEggRender.png
 	eggIceGolem = { id = "rbxassetid://102264545247873", size = Vector2.new(502, 866) }, -- IceGolemEggRender.png
-	eggSnackYak = { id = "", size = Vector2.new(505, 762) }, -- SnackYakEggRender.png (awaiting upload)
+	eggSnackYak = { id = "rbxassetid://87632604695329", size = Vector2.new(505, 762) }, -- SnackYakEggRender.png
 	eggIcebringer = { id = "rbxassetid://108999142038756", size = Vector2.new(502, 774) }, -- IcebringerEggRender.png
 	eggKraken = { id = "rbxassetid://104654341782924", size = Vector2.new(696, 785) }, -- KrakenEggRender.png
 	eggSquid = { id = "rbxassetid://128883182267763", size = Vector2.new(696, 785) }, -- SquidEggRender.png

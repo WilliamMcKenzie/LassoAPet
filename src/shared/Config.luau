@@ -364,7 +364,7 @@ return {
 		SpineLizard = "rbxassetid://98567631088826",
 		Boar = "rbxassetid://121234341393694",
 		IceGolem = "rbxassetid://102264545247873",
-		SnackYak = "", -- assets/ui/SnackYakEggRender.png (awaiting upload)
+		SnackYak = "rbxassetid://87632604695329", -- assets/ui/SnackYakEggRender.png
 		Icebringer = "rbxassetid://108999142038756",
 		Kraken = "rbxassetid://104654341782924", -- assets/ui/KrakenEggRender.png
 		Squid = "rbxassetid://128883182267763", -- assets/ui/SquidEggRender.png

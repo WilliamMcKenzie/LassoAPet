@@ -86,6 +86,7 @@ local SHEETS = {
 	Boar = { frames = 20, time = 0.03, "rbxassetid://94170840211405" },
 	Snowman = { frames = 18, time = 0.03, "rbxassetid://139839156164981" },
 	IceGolem = { frames = 24, time = 0.03, "rbxassetid://94192117186470" },
+	SnackYak = { frames = 18, time = 0.03, "rbxassetid://131389846384914" },
 	Icebringer = { frames = 24, time = 0.04, "rbxassetid://125520132317720" },
 	Starfish = { frames = 48, time = 0.06, "rbxassetid://79068936169772", "rbxassetid://103163746025717" },
 	Squid = { frames = 24, time = 0.05, "rbxassetid://103797474563946" },
