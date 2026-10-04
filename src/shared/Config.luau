@@ -154,10 +154,7 @@ return {
 				Bubbles = 24, -- per second
 			},
 		},
-		-- The Godlands is off for now (QM, Oct 4: "remove godlands for now ... finish line
-		-- after ocean"). Uncomment to bring it back; its code (Shared/Godlands, Client/GodlandsStream)
-		-- does nothing without this entry. CourseLength goes back to math.huge with it.
-		--[==[
+		-- (Off for a while on Oct 4, back the same night as the endless endgame, QM.)
 		{
 			-- The endgame (QM, Oct 3), after Realm of the Mad God's godlands: dark stone
 			-- plates split by snow, with ice or lava cracks. It never ends: one 960-stud
@@ -168,10 +165,10 @@ return {
 			Length = math.huge, -- endless
 			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
 			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)
-			-- Placeholder until the Godlands has animals (and bosses) of its own: Fish (QM), and
-			-- now the Loong, rare (a guess). PlaceholderHerd keeps it out of the finish line's
-			-- egg odds (Hatchery).
-			Herd = { Fish = 1, Loong = 0.05 },
+			-- Placeholder until the Godlands has animals (and bosses) of its own: Fish (QM).
+			-- (The Loong is an event and roll exclusive now, so it doesn't run here.)
+			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
+			Herd = { Fish = 1 },
 			PlaceholderHerd = true,
 			Patches = {
 				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
@@ -184,14 +181,13 @@ return {
 			-- No GateImage / UpgradeImage yet: the gate shows plain text and Upgrade Pen
 			-- the default button with the price, until QM's art is in.
 		},
-		]==]
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	CourseHalfWidth = 56,
-	CourseLength = 16192, -- all the biomes' lengths added up (math.huge with the endless Godlands)
+	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
 	HomeHalfWidth = 144, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3)
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
