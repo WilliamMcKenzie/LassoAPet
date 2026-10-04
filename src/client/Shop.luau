@@ -40,6 +40,19 @@ local player = Players.LocalPlayer
 local open, topUp = false, false
 local buyShop = ReplicatedStorage:WaitForChild("BuyShop")
 
+-- Paid random items (the Legendary Pet; egg rolls, as gold can be bought) are left
+-- out where the player's policy restricts them. Unknown counts as restricted.
+local restricted
+function Shop.randomRestricted()
+	if restricted == nil then
+		local ok, info = pcall(function()
+			return game:GetService("PolicyService"):GetPolicyInfoForPlayerAsync(player)
+		end)
+		restricted = not ok or info.ArePaidRandomItemsRestricted == true
+	end
+	return restricted
+end
+
 local function offered(offer)
 	return offer.ProductId ~= 0 or RunService:IsStudio()
 end
@@ -220,6 +233,7 @@ local function card(parent, order, width, height, icon, emoji, name, offer)
 		buyShop:FireServer(offer.Key)
 	end)
 	c.Parent = parent
+	return c
 end
 
 local goldRow = row(1, 230)
@@ -227,8 +241,27 @@ for i, offer in Config.Shop.Gold do
 	card(goldRow, i, 180, 230, ICONS.gold, nil, money(offer.Gold), offer)
 end
 local specialRow = row(2, 250)
+-- The Legendary Pet is a paid random item: its odds are on its card, and it's
+-- left out where the player's policy restricts paid random items (PolicyService).
 for i, offer in Config.Shop.Specials do
-	card(specialRow, i, 240, 250, ICONS[offer.Key] or "", EMOJI[offer.Key], offer.Name, offer)
+	local c = card(specialRow, i, 240, 250, ICONS[offer.Key] or "", EMOJI[offer.Key], offer.Name, offer)
+	if offer.Key == "Legendary" then
+		local pool, total = {}, 0
+		for _, weight in Config.Gacha.Pool.Legendary do
+			total += weight
+		end
+		for kind, weight in Config.Gacha.Pool.Legendary do
+			table.insert(pool, string.format("%s %d%%", kind, math.round(weight / total * 100)))
+		end
+		table.sort(pool)
+		local odds = label(c, table.concat(pool, "  "), 16, UDim2.fromOffset(224, 40), UDim2.new(0.5, 0, 0, 24))
+		odds.TextWrapped = true
+		odds.ZIndex = 2
+		c.Visible = false -- until the policy check says it may show
+		task.spawn(function()
+			c.Visible = offered(offer) and not Shop.randomRestricted()
+		end)
+	end
 end
 -- The top-up's way on to the roll you asked for, when you can pay for it.
 local rollRow = row(3, 70)

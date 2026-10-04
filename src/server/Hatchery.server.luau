@@ -183,6 +183,7 @@ local function load(player)
 					if profile.tutorial then
 						profile.awayGold = awayGold(profile, data)
 					end
+					profile.boughtPets = tonumber(data.boughtPets) -- Legendary Pets from the shop already in (addBoughtPets)
 				end
 				loaded[player] = true
 				break
@@ -214,7 +215,7 @@ local function save(player)
 	end
 	for attempt = 1, 3 do
 		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, tutorial = profile.tutorial, ridden = riddenList(profile),
-			seen = os.time(), awayGold = profile.awayGold }) then
+			seen = os.time(), awayGold = profile.awayGold, boughtPets = profile.boughtPets }) then
 			return
 		end
 		task.wait(attempt)
@@ -351,6 +352,12 @@ rollGacha.OnServerInvoke = function(player)
 	local gacha = Config.Gacha
 	local gold = player:GetAttribute("Gold") or 0
 	if not profile or not gacha.Enabled or gold < gacha.Price or (rolled[player] and os.clock() - rolled[player] < 1) then
+		return nil
+	end
+	-- Gold can be bought with Robux, so a roll is a paid random item: none where the
+	-- player's policy restricts them (Shop.server checks).
+	local restricted = game:GetService("ServerStorage"):FindFirstChild("RandomRestricted")
+	if not restricted or restricted:Invoke(player) then
 		return nil
 	end
 	local odds = {}
@@ -493,25 +500,47 @@ local function give(player, text)
 	publish(player)
 end
 
--- The shop's Legendary Pet (Shop.server): a random Legendary straight into your
--- pen, hatched. Returns its kind, or nil if you have no pen yet.
-local grantPet = Instance.new("BindableFunction")
-grantPet.Name = "GrantPet"
-grantPet.OnInvoke = function(player)
+-- The shop's Legendary Pet (Shop.server): its "BoughtPets" attribute is the
+-- running total bought; each one not yet in your profile (boughtPets, saved with
+-- it) is a random Legendary straight into your pen, hatched, saved at once, and
+-- its card shows (ShopGrant). Waits for your profile and pen.
+local function addBoughtPets(player)
 	local profile = profiles[player]
 	local pen = penOf(player)
-	local kind = profile and pen and pick(Config.Gacha.Pool.Legendary)
-	if not isAnimal(kind) then
-		return nil
+	local total = player:GetAttribute("BoughtPets")
+	if not profile or not pen or not total or total <= (profile.boughtPets or 0) then
+		return
 	end
 	local area = pen.Area
-	local x = (math.random() - 0.5) * (area.Size.X - 2 * EDGE)
-	local z = (math.random() - 0.5) * (area.Size.Z - 2 * EDGE)
-	profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, pet = kind }
+	local kinds = {}
+	for _ = (profile.boughtPets or 0) + 1, total do
+		local kind = pick(Config.Gacha.Pool.Legendary)
+		if isAnimal(kind) then
+			local x = (math.random() - 0.5) * (area.Size.X - 2 * EDGE)
+			local z = (math.random() - 0.5) * (area.Size.Z - 2 * EDGE)
+			profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, pet = kind }
+			table.insert(kinds, kind)
+		end
+	end
+	profile.boughtPets = total
 	publish(player)
-	return kind
+	save(player)
+	for _, kind in kinds do
+		ReplicatedStorage:WaitForChild("ShopGrant"):FireClient(player, "LegendaryPet", kind)
+	end
 end
-grantPet.Parent = game:GetService("ServerStorage")
+Players.PlayerAdded:Connect(function(player)
+	player:GetAttributeChangedSignal("BoughtPets"):Connect(function()
+		addBoughtPets(player)
+	end)
+	for _ = 1, 120 do -- (bought on an earlier visit: once your pets have loaded)
+		if profiles[player] or not player.Parent then
+			break
+		end
+		task.wait(0.5)
+	end
+	addBoughtPets(player)
+end)
 
 -- A chat command, so the "/give ..." line itself doesn't show in chat.
 local command = Instance.new("TextChatCommand")
@@ -565,7 +594,7 @@ tutorialCommand.Triggered:Connect(function(source)
 	if not player or not profiles[player] or not allowed(player) then
 		return
 	end
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {} }
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = profiles[player].boughtPets }
 	if store and loaded[player] then
 		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false })
 	end

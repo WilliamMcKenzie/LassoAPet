@@ -525,31 +525,30 @@ return {
 	-- the furthest band you've passed (From, metres from the start line) is the
 	-- one offered. Until a band's id is here, it only shows in Studio, for free.
 	ContinueTiers = {
-		{ From = 0, Price = 25, ProductId = 0 },
-		{ From = 200, Price = 50, ProductId = 0 },
-		{ From = 500, Price = 100, ProductId = 0 },
-		{ From = 1000, Price = 200, ProductId = 0 },
-		{ From = 2000, Price = 400, ProductId = 0 },
+		{ From = 0, Price = 25, ProductId = 3716409203 },
+		{ From = 200, Price = 50, ProductId = 3716409211 },
+		{ From = 500, Price = 100, ProductId = 3716409249 },
+		{ From = 1000, Price = 200, ProductId = 3716409258 },
+		{ From = 2000, Price = 400, ProductId = 3716409346 },
 	},
 	ContinueGrace = 1.5, -- seconds nothing can crash you once you're back on
 	ContinueClear = 14, -- studs: obstacles this close to where you crashed are knocked away
 	-- Robux shop (QM, Oct 4; Shop client, Shop.server): the gold icon at home opens it,
 	-- and pressing ROLL with less than TopUpBelow gold opens just its gold offers.
-	-- Each offer is its own developer product, like Continue's bands: until its
-	-- ProductId is filled in it only shows in Studio, for free. Amounts and prices
-	-- are guesses.
+	-- Each offer is its own developer product, like Continue's bands (QM's
+	-- dashboard, Oct 4; a ProductId of 0 would only show in Studio, for free).
 	Shop = {
 		TopUpBelow = 10000000,
 		Gold = {
-			{ Key = "Gold1", Gold = 1000000, Price = 25, ProductId = 0 },
-			{ Key = "Gold2", Gold = 5000000, Price = 99, ProductId = 0 },
-			{ Key = "Gold3", Gold = 25000000, Price = 399, ProductId = 0 },
-			{ Key = "Gold4", Gold = 100000000, Price = 1199, ProductId = 0 },
+			{ Key = "Gold1", Gold = 1000000, Price = 25, ProductId = 3716409553 },
+			{ Key = "Gold2", Gold = 5000000, Price = 99, ProductId = 3716409568 },
+			{ Key = "Gold3", Gold = 25000000, Price = 399, ProductId = 3716409595 },
+			{ Key = "Gold4", Gold = 100000000, Price = 1199, ProductId = 3716409606 },
 		},
 		Specials = {
-			{ Key = "GiantHorse", Name = "Giant Horse", Price = 100, ProductId = 0 }, -- one ride (GiantHorse below)
-			{ Key = "Nuke", Name = "Nuke All", Price = 200, ProductId = 0 }, -- your next ride (NukeRange)
-			{ Key = "Legendary", Name = "Legendary Pet", Price = 50, ProductId = 0 }, -- Gacha.Pool.Legendary, into your pen
+			{ Key = "GiantHorse", Name = "Giant Horse", Price = 100, ProductId = 3716409132 }, -- one ride (GiantHorse below)
+			{ Key = "Nuke", Name = "Nuke All", Price = 200, ProductId = 3716409185 }, -- your next ride (NukeRange)
+			{ Key = "Legendary", Name = "Legendary Pet", Price = 50, ProductId = 3716409444 }, -- Gacha.Pool.Legendary, into your pen
 		},
 		-- The Giant Horse: a Horse this many times its size, Speed x its own, no
 		-- Hold drain, for one ride from the start line. Zoom is the camera's pull-back.

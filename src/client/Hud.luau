@@ -600,6 +600,17 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	if Config.Gacha.Enabled then
 		rollIcon = button(sideRoot, "rollIcon", fit("rollIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
 			UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8 - SIDE_ICON_HEIGHT - 8), RollMenu.toggle)
+		-- Rolls are paid random items (gold can be bought): no Roll where the player's
+		-- policy restricts them (Shop.randomRestricted).
+		rollIcon.Visible = false
+		task.spawn(function()
+			if Shop.randomRestricted() then
+				rollIcon:Destroy()
+				rollIcon = nil
+			else
+				rollIcon.Visible = pets.Visible
+			end
+		end)
 	end
 	AnimalDex.onToggle = function(open)
 		if open then
@@ -639,7 +650,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- A Legendary Pet bought in the shop is in your pen: its card shows which.
 	game:GetService("ReplicatedStorage"):WaitForChild("ShopGrant").OnClientEvent:Connect(function(key, kind)
 		Shop.close()
-		if key == "Legendary" and kind then
+		if key == "LegendaryPet" and kind then
 			Hud.eggReveal("Legendary", kind)
 		end
 	end)
