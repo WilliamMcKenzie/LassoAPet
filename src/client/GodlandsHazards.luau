@@ -6,8 +6,8 @@
 --   Sludge      leaves puddles of sludge: ride into one and you're stuck, crawling, for a moment
 --   Beholder    now and then a purple circle swells round it, then bursts: caught in it, your
 --               steering is flipped for a few seconds (CONFUSED)
---   War Elephant now and then stamps and turns on you (a red lane on the ground shows where),
---               then charges down it (the Rhino's charge VFX): hit and you're knocked out
+--   War Elephant now and then stamps and turns on you (a red "!" over it),
+--               then charges at where you were (the Rhino's charge VFX): hit and you're knocked out
 --   Leviathan   now and then rears up (a red "!") and hunts you for a few seconds, a little
 --               faster than you but slow to turn, so you can swerve out of its way
 --
@@ -60,10 +60,9 @@ local AURA = {
 }
 local CHARGE = {
 	EVERY = { 5, 9 },
-	WARN = 1.3, -- stamping, the red lane tracking you
+	WARN = 1.3, -- stamping, turning to you (QM: no red lane on the ground)
 	SPEED = 95,
 	LENGTH = { 50, 120 },
-	WIDTH = 9,
 	NEAR = 70,
 	COLOR = Color3.fromRGB(255, 50, 40),
 }
@@ -178,7 +177,7 @@ local function footprint(entity)
 end
 
 local function tidy(st)
-	for _, name in { "lane", "flag", "ring" } do
+	for _, name in { "flag", "ring" } do
 		if st[name] then
 			st[name]:Destroy()
 			st[name] = nil
@@ -355,8 +354,6 @@ local function charge(st, entity, dt, mount)
 		st.wait -= dt
 		if st.wait <= 0 and dist < CHARGE.NEAR and not entity.popping then
 			st.stage, st.t = "warn", 0
-			st.lane = part("Part", Vector3.new(CHARGE.WIDTH, 0.2, 1), CHARGE.COLOR)
-			st.lane.Material = Enum.Material.Neon
 			st.flag = warning(entity)
 		end
 		return
@@ -364,17 +361,12 @@ local function charge(st, entity, dt, mount)
 	if st.stage == "warn" then
 		settle(st, dt)
 		st.t += dt
-		-- Stamping and turning toward you, the lane following you, then it locks.
+		-- Stamping and turning toward you, then it locks on where you are.
 		st.dirX, st.dirZ = dx / math.max(dist, 0.1), dz / math.max(dist, 0.1)
 		st.length = math.clamp(dist + 30, CHARGE.LENGTH[1], CHARGE.LENGTH[2])
 		entity.face = math.atan2(-st.dirX, -st.dirZ)
 		entity.hop = math.abs(math.sin(st.t * math.pi * 3)) * 1.2
 		st.hopping = true
-		local from = Vector3.new(entity.x, Ground.heightAt(entity.x, entity.z) + 0.2, entity.z)
-		local dir = Vector3.new(st.dirX, 0, st.dirZ)
-		st.lane.Size = Vector3.new(CHARGE.WIDTH, 0.2, st.length)
-		st.lane.CFrame = CFrame.lookAt(from, from + dir) * CFrame.new(0, 0, -st.length / 2)
-		st.lane.Transparency = 0.5 + 0.25 * math.cos(st.t * 16)
 		if st.t >= CHARGE.WARN then
 			st.stage, st.left = "go", st.length
 			entity.hop, st.hopping = 0, nil
@@ -386,7 +378,7 @@ local function charge(st, entity, dt, mount)
 		end
 		return
 	end
-	-- Charging down the lane.
+	-- Charging at where you were.
 	local step = math.min(CHARGE.SPEED * dt, st.left)
 	st.left -= step
 	st.ox += st.dirX * step
