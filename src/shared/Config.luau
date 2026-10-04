@@ -436,6 +436,21 @@ return {
 		},
 		Reach = 10, -- studs from the machine where ROLL shows
 	},
+	-- Carl's stall (Carl.client, QM Oct 4): a desert stall with a cactus guy in it, in
+	-- the gap between the left corner pen and the start line. Talk to him and he asks
+	-- if you want to spin; Yes opens the roll menu. Faces into the base (+z).
+	Carl = {
+		Position = Vector3.new(-66, 0, 8), -- clear of Pen4 at its biggest (x <= -76) and its ride lane (z ~32)
+		Reach = 12, -- studs from the counter where Talk shows
+	},
+	-- The top-3 podium (Leaderboard.server, QM Oct 4): the avatars of the three players
+	-- who rode furthest from base, all time (OrderedDataStore "BestDistance", metres),
+	-- in the gap between the right corner pen and the start line. Faces into the base.
+	Podium = {
+		Position = Vector3.new(66, 0, 8), -- clear of Pen5 at its biggest (x >= 76)
+		Refresh = 120, -- seconds between re-reading the top 3
+		AvatarScale = 1.5,
+	},
 	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
 	EggIcons = {

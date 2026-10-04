@@ -1,0 +1,349 @@
+-- Carl's stall (Config.Carl, QM Oct 4): a little desert stall in the gap between
+-- the left corner pen and the start line, with a cactus growing out of it and
+-- Carl (a cactus guy) behind the counter. Walk up and Talk: he asks if you want
+-- to spin for a pet, and Yes opens the egg roll menu (RollMenu; the roll is Hud's).
+--
+-- Built here on each client rather than in the map, so Carl can play his idle
+-- animation and tuning the stall needs no map reload. Everyone sees the same stall.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local Config = require(ReplicatedStorage.Shared.Config)
+local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
+local Cactus = require(ReplicatedStorage.Shared.Animals.Cactus)
+local RollMenu = require(script.Parent.RollMenu)
+
+if not Config.Gacha.Enabled then
+	return
+end
+
+local STUDS = "rbxassetid://7447638591" -- the classic stud decal the animals use
+local STUD_TILE = 0.5
+local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
+
+local SAND = Color3.fromRGB(236, 200, 130)
+local SAND_DARK = Color3.fromRGB(200, 150, 90)
+local WOOD = Color3.fromRGB(150, 96, 56)
+local ORANGE = Color3.fromRGB(255, 140, 40)
+local CREAM = Color3.fromRGB(255, 240, 200)
+local GREEN = Color3.fromRGB(118, 204, 64) -- Carl's own green
+local PINK = Color3.fromRGB(255, 110, 170)
+
+local player = Players.LocalPlayer
+local carlConfig = Config.Carl
+-- The stall's frame: front (the counter) toward the base (+z), back to the start line.
+local origin = CFrame.new(carlConfig.Position) * CFrame.Angles(0, math.pi, 0)
+
+local stall = Instance.new("Model")
+stall.Name = "CarlStall"
+
+-- A studded block, `size` big, at `at` in the stall's frame.
+local function block(name, size, at, color)
+	local part = Instance.new("Part")
+	part.Name = name
+	part.Size = size
+	part.CFrame = origin * at
+	part.Color = color
+	part.Material = Enum.Material.SmoothPlastic
+	part.Anchored = true
+	part.TopSurface = Enum.SurfaceType.Smooth
+	part.BottomSurface = Enum.SurfaceType.Smooth
+	for _, face in Enum.NormalId:GetEnumItems() do
+		local texture = Instance.new("Texture")
+		texture.Texture = STUDS
+		texture.StudsPerTileU = STUD_TILE
+		texture.StudsPerTileV = STUD_TILE
+		texture.Face = face
+		texture.Parent = part
+	end
+	part.Parent = stall
+	return part
+end
+
+local function text(parent, size, value, thickness)
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.Size = size
+	label.Font = Enum.Font.FredokaOne
+	label.TextScaled = true
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.Text = value
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = thickness or 3
+	stroke.Parent = label
+	label.Parent = parent
+	return label
+end
+
+local function money(amount)
+	if amount >= 1e6 then
+		return "$" .. string.format("%g", amount / 1e6) .. "M"
+	elseif amount >= 1e3 then
+		return "$" .. string.format("%g", amount / 1e3) .. "k"
+	end
+	return "$" .. amount
+end
+
+-- Carl first: the stall is sized around him.
+local carl = Cactus.new()
+carl:setSaddled(false)
+for _, part in carl.model:GetDescendants() do
+	if part:IsA("BasePart") then
+		part.CanCollide = false
+		part.CanQuery = false
+	end
+end
+local carlRootY = carl.model.PrimaryPart.Position.Y
+local _, carlSize = carl.model:GetBoundingBox()
+local h = carlSize.Y
+
+local W, FRONT, BACK = 14, -4, 4 -- stall width; front and back edges (local z)
+local counterH = math.max(3.5, 0.3 * h) -- hides his legs
+local roofH = h + 2.5 -- the awning's front edge
+
+block("Floor", Vector3.new(W + 1, 0.4, BACK - FRONT + 1), CFrame.new(0, 0.2, 0), SAND_DARK)
+local counter = block("Counter", Vector3.new(W, counterH, 3), CFrame.new(0, 0.4 + counterH / 2, FRONT + 1.5), SAND)
+block("CounterTop", Vector3.new(W + 0.6, 0.6, 3.6), CFrame.new(0, 0.4 + counterH + 0.3, FRONT + 1.5), SAND_DARK)
+for _, x in { -W / 2 + 0.5, W / 2 - 0.5 } do
+	block("Post", Vector3.new(1, roofH, 1), CFrame.new(x, 0.4 + roofH / 2, FRONT + 0.5), WOOD)
+	block("Post", Vector3.new(1, roofH + 2, 1), CFrame.new(x, 0.4 + (roofH + 2) / 2, BACK - 0.5), WOOD)
+end
+
+-- The striped awning, sloping down toward the front.
+local rise, run = 2, BACK - FRONT + 1.5
+local slope = math.atan2(rise, run)
+local length = math.sqrt(rise * rise + run * run)
+local stripes = 7
+for i = 1, stripes do
+	local x = -W / 2 - 0.5 + (i - 0.5) * (W + 1) / stripes
+	block("Awning", Vector3.new((W + 1) / stripes, 0.5, length),
+		CFrame.new(x, 0.4 + roofH + 0.6 + rise / 2, (FRONT - 1.5 + BACK) / 2) * CFrame.Angles(-slope, 0, 0),
+		if i % 2 == 1 then ORANGE else CREAM)
+end
+-- The sign hanging off the awning's front edge.
+local board = block("Sign", Vector3.new(W - 1, 1.8, 0.4), CFrame.new(0, 0.4 + roofH - 0.6, FRONT - 1.3), WOOD)
+local boardGui = Instance.new("SurfaceGui")
+boardGui.Face = Enum.NormalId.Front -- the stall's front: toward the base
+boardGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+boardGui.PixelsPerStud = 40
+boardGui.LightInfluence = 0
+text(boardGui, UDim2.fromScale(1, 1), "CARL'S PET SPIN")
+boardGui.Parent = board
+
+-- The cactus growing up out of the stall's back corner, through the awning.
+local cx, cz = W / 2 - 1.8, BACK - 2.2
+local trunkH = roofH + 6
+block("Cactus", Vector3.new(2.2, trunkH, 2.2), CFrame.new(cx, 0.4 + trunkH / 2, cz), GREEN)
+block("CactusArm", Vector3.new(2.4, 1.4, 1.4), CFrame.new(cx + 2.2, 0.4 + roofH + 2, cz), GREEN)
+block("CactusArm", Vector3.new(1.4, 3.2, 1.4), CFrame.new(cx + 2.7, 0.4 + roofH + 3.3, cz), GREEN)
+block("CactusArm", Vector3.new(2, 1.2, 1.2), CFrame.new(cx - 1.9, 0.4 + roofH + 4, cz), GREEN)
+block("CactusArm", Vector3.new(1.2, 2.4, 1.2), CFrame.new(cx - 2.4, 0.4 + roofH + 4.9, cz), GREEN)
+block("Flower", Vector3.new(1.4, 0.8, 1.4), CFrame.new(cx, 0.4 + trunkH + 0.4, cz), PINK)
+
+-- The eggs you can win, on the counter.
+local exclusives = {}
+for kind in Config.Gacha.Pool.Exclusive or {} do
+	table.insert(exclusives, kind)
+end
+table.sort(exclusives)
+local counterTop = 0.4 + counterH + 0.6
+for i, kind in exclusives do
+	if i > 3 then
+		break
+	end
+	local egg = Egg.new(kind).model
+	for _, part in egg:GetDescendants() do
+		if part:IsA("BasePart") then
+			part.Anchored = true
+			part.CanCollide = false
+			part.CanQuery = false
+		end
+	end
+	local _, size = egg:GetBoundingBox()
+	egg:ScaleTo(egg:GetScale() * 2.4 / size.Y)
+	local box, fitted = egg:GetBoundingBox()
+	local lift = egg:GetPivot().Position.Y - box.Position.Y + fitted.Y / 2
+	egg:PivotTo(origin * CFrame.new((i - 2) * 3.6, counterTop + lift, FRONT + 1.5))
+	egg.Parent = stall
+end
+
+-- Carl behind the counter, facing the base, his name over his head.
+local CARL_AT = CFrame.new(0, 0.4, BACK - 2.2)
+local tag = Instance.new("BillboardGui")
+tag.Name = "Name"
+tag.Size = UDim2.fromOffset(120, 40)
+tag.StudsOffsetWorldSpace = Vector3.new(0, h - carlRootY + 1.5, 0)
+tag.MaxDistance = 150
+tag.Adornee = carl.model.PrimaryPart
+text(tag, UDim2.fromScale(1, 1), "Carl").TextColor3 = Color3.fromRGB(150, 255, 140)
+tag.Parent = stall
+
+local prompt = Instance.new("ProximityPrompt")
+prompt.Name = "TalkPrompt"
+prompt.ActionText = "Talk"
+prompt.ObjectText = "Carl"
+prompt.RequiresLineOfSight = false
+prompt.MaxActivationDistance = carlConfig.Reach
+prompt.Parent = counter
+
+carl.model.Parent = stall
+stall.Parent = workspace
+
+-- The chat: Carl's line at the bottom of the screen, with Yes and No.
+local gui = Instance.new("ScreenGui")
+gui.Name = "CarlChat"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.DisplayOrder = 3
+gui.Enabled = false
+
+local root = Instance.new("Frame")
+root.BackgroundTransparency = 1
+root.AnchorPoint = Vector2.new(0.5, 0.5)
+root.Position = UDim2.fromScale(0.5, 0.5)
+local rootScale = Instance.new("UIScale")
+rootScale.Parent = root
+local camera = workspace.CurrentCamera
+local function resize()
+	local screen = camera.ViewportSize
+	rootScale.Scale = screen.X / REFERENCE_WIDTH * Config.HudScale
+	root.Size = UDim2.fromOffset(screen.X / rootScale.Scale, screen.Y / rootScale.Scale)
+end
+camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
+resize()
+
+local panel = Instance.new("Frame")
+panel.Name = "Panel"
+panel.AnchorPoint = Vector2.new(0.5, 1)
+panel.Position = UDim2.new(0.5, 0, 1, -40)
+panel.Size = UDim2.fromOffset(620, 200)
+panel.BackgroundColor3 = SAND
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 20)
+corner.Parent = panel
+local edge = Instance.new("UIStroke")
+edge.Thickness = 5
+edge.Color = Color3.fromRGB(110, 70, 36)
+edge.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+edge.Parent = panel
+local panelScale = Instance.new("UIScale")
+panelScale.Parent = panel
+panel.Parent = root
+
+local name = text(panel, UDim2.fromOffset(140, 44), "CARL", 4)
+name.TextColor3 = Color3.fromRGB(150, 255, 140)
+name.Position = UDim2.fromOffset(24, -26)
+
+local line = text(panel, UDim2.new(1, -48, 0, 70), "")
+line.Position = UDim2.fromOffset(24, 26)
+line.TextWrapped = true
+
+local function choice(label, color, x)
+	local button = Instance.new("TextButton")
+	button.Name = label
+	button.AutoButtonColor = false
+	button.Text = ""
+	button.BackgroundColor3 = color
+	button.AnchorPoint = Vector2.new(0.5, 1)
+	button.Position = UDim2.new(0.5, x, 1, -20)
+	button.Size = UDim2.fromOffset(190, 64)
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(0, 16)
+	round.Parent = button
+	local outline = Instance.new("UIStroke")
+	outline.Thickness = 5
+	outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	outline.Parent = button
+	local scale = Instance.new("UIScale")
+	scale.Parent = button
+	local caption = text(button, UDim2.fromScale(1, 0.8), label, 4)
+	caption.Position = UDim2.fromScale(0, 0.1)
+	local press = TweenInfo.new(0.08)
+	button.MouseButton1Down:Connect(function()
+		TweenService:Create(scale, press, { Scale = 0.93 }):Play()
+	end)
+	for _, event in { button.MouseButton1Up, button.MouseLeave } do
+		event:Connect(function()
+			TweenService:Create(scale, press, { Scale = 1 }):Play()
+		end)
+	end
+	button.Parent = panel
+	return button
+end
+local yes = choice("YES", Color3.fromRGB(92, 214, 72), -110)
+local no = choice("NO", Color3.fromRGB(235, 72, 72), 110)
+
+root.Parent = gui
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local talking = false
+local hop = 0 -- seconds left of Carl's hop
+
+local function close()
+	talking = false
+	gui.Enabled = false
+	prompt.Enabled = true
+end
+
+prompt.Triggered:Connect(function()
+	if talking then
+		return
+	end
+	talking = true
+	prompt.Enabled = false
+	hop = 0.45
+	line.Text = "Howdy partner! Wanna spin for a pet? Just " .. money(Config.Gacha.Price) .. " a spin!"
+	line.MaxVisibleGraphemes = 0
+	gui.Enabled = true
+	panelScale.Scale = 0.85
+	TweenService:Create(panelScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	task.spawn(function()
+		local length = utf8.len(line.Text) or #line.Text
+		for i = 1, length do
+			if not talking then
+				break
+			end
+			line.MaxVisibleGraphemes = i
+			task.wait(0.02)
+		end
+		line.MaxVisibleGraphemes = -1
+	end)
+end)
+
+yes.Activated:Connect(function()
+	close()
+	if not RollMenu.isOpen() then
+		RollMenu.toggle()
+	end
+end)
+no.Activated:Connect(close)
+
+-- Carl idles, turns to whoever's talking to him and hops when you say hi. The
+-- chat closes once you walk off.
+local yaw = 0
+RunService.Heartbeat:Connect(function(dt)
+	local character = player.Character
+	local hrp = character and character:FindFirstChild("HumanoidRootPart")
+	local here = (origin * CARL_AT).Position
+	local away = if hrp then (hrp.Position - here) * Vector3.new(1, 0, 1) else nil
+	if talking and (not away or away.Magnitude > carlConfig.Reach + 8) then
+		close()
+	end
+	if away and away.Magnitude > 200 then
+		return -- too far to see him move
+	end
+	local target = 0
+	if talking and away and away.Magnitude > 0.1 then
+		local inFrame = origin:VectorToObjectSpace(away)
+		target = math.clamp(math.atan2(-inFrame.X, -inFrame.Z), -1, 1)
+	end
+	yaw += (target - yaw) * math.min(1, dt * 8)
+	hop = math.max(0, hop - dt)
+	local lift = math.sin(hop / 0.45 * math.pi) * 1.2
+	carl:update(dt, 0, 0)
+	-- (a model faces its -z, as the stall's frame does: so no extra turn)
+	carl.model.PrimaryPart.CFrame = origin * CARL_AT * CFrame.new(0, carlRootY + lift, 0) * CFrame.Angles(0, yaw, 0)
+end)
