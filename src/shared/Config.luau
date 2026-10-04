@@ -534,15 +534,13 @@ return {
 	-- its reach sprints, easing it back stops.
 	TouchSprintAt = 0.85,
 	-- Each animal's call (Sounds: animal_<call>, Freesound CC0, QM's picks Oct 4), played
-	-- when you lasso onto it or set off riding it. The ten calls go round the closest match.
+	-- when you lasso onto it or set off riding it. Only where a call fits the animal
+	-- (QM): the rest are silent.
 	AnimalSound = {
 		Horse = "horse", Pinto = "horse", SoulHorse = "horse", Unicorn = "unicorn",
-		Pig = "pig", Boar = "boar", Rhino = "rhino", WarElephant = "elephant", Whale = "elephant",
-		Snake = "snake", Sandworm = "snake", SpineLizard = "snake", Scorpion = "snake",
-		Penguin = "penguin", Snowman = "penguin", Cactus = "penguin", Fish = "penguin", Starfish = "penguin",
-		FishSchool = "penguin", Squid = "penguin", KingCrab = "penguin", BlueCrab = "penguin",
-		Loong = "dragon", Kraken = "dragon", Leviathan = "dragon", RoboShark = "dragon",
-		SnackYak = "bear", IceGolem = "bear", Icebringer = "bear", Beholder = "bear", Sludge = "bear",
+		Pig = "pig", Boar = "boar", Rhino = "rhino", WarElephant = "elephant",
+		Snake = "snake", Penguin = "penguin", Loong = "dragon", Leviathan = "dragon",
+		SnackYak = "bear", IceGolem = "bear", Icebringer = "bear",
 	},
 	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
 	SprintDrain = 1.5, -- x the Hold bar's usual drain
