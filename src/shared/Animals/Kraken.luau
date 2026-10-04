@@ -12,5 +12,6 @@ local KrakenModel = require(script.Parent.KrakenModel)
 return Horse.variant("Kraken", KrakenModel, "Legendary", {
 	seat = Vector3.new(0, 11.6, 3.5), -- on the back of the cap's rim, over the eye (clear of the mantle)
 	seatBone = "root", -- moves with the head as it glides, staying upright
+	gallopOnSprint = true, -- QM: its gallop only while sprinting, else its walk
 	neck = { center = Vector3.new(0, 5.8, 0), radius = 2.4 },
 })

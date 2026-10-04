@@ -696,6 +696,9 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		RollMenu.setHidden(rarity ~= nil) -- the menu steps aside for the egg card
 		local seconds = rarity and Hud.eggReveal(rarity, kind)
 		task.wait(seconds or 0.3)
+		if rarity then
+			RollMenu.close() -- one egg per roll: the menu doesn't come back after the card (QM)
+		end
 		RollMenu.setHidden(false)
 		rolling = false
 	end

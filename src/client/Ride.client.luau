@@ -431,6 +431,7 @@ end
 -- was heading home) and settles into its own pace.
 local function release(entity)
 	entity.animal:setSaddled(false)
+	entity.animal.sprinting = false -- (the Kraken walks again: Horse gallopOnSprint)
 	entity.lane = entity.x
 	entity.cruise = herdSpeed(entity.kind)
 	table.insert(strays, entity)
@@ -2240,6 +2241,77 @@ function vfx.scareOff(dt, special)
 	end
 end
 
+-- The Kraken's Devour (Config.Abilities): its tentacles shoot out to the nearest
+-- animals of cfg.MaxTier or smaller within cfg.Radius (up to cfg.Max), each one is
+-- reeled in over cfg.PullTime, shrinking into it, and eaten, refilling
+-- cfg.RestorePer of Hold. The prey leave the stampede the moment they're grabbed.
+vfx.TENTACLE_COLOR = Color3.fromRGB(44, 64, 150)
+function vfx.devour(active, cfg)
+	local found = {}
+	for _, entity in allAnimals() do
+		local dx, dz = entity.x - mount.x, entity.z - mount.z
+		local d = dx * dx + dz * dz
+		if entity ~= mount and not entity.popping and not entity.event and tierOf(entity.kind) <= cfg.MaxTier
+			and d < cfg.Radius * cfg.Radius then
+			table.insert(found, { entity = entity, d = d })
+		end
+	end
+	table.sort(found, function(a, b)
+		return a.d < b.d
+	end)
+	active.prey, active.fx = {}, active.fx or {}
+	for i = 1, math.min(cfg.Max, #found) do
+		local entity = found[i].entity
+		if entity.n and herd[entity.n] == entity then
+			herd[entity.n], taken[entity.n] = nil, true
+			vfx.rideCue:FireServer("take", entity.n) -- gone for everyone else too
+		else
+			local k = table.find(strays, entity)
+			if k then
+				table.remove(strays, k)
+			end
+		end
+		local tentacle = Instance.new("Part")
+		tentacle.Anchored, tentacle.CanCollide, tentacle.CanQuery, tentacle.CanTouch = true, false, false, false
+		tentacle.Color = vfx.TENTACLE_COLOR
+		tentacle.Material = Enum.Material.SmoothPlastic
+		tentacle.Parent = workspace
+		table.insert(active.fx, tentacle)
+		table.insert(active.prey, { entity = entity, from = Vector3.new(entity.x, 0, entity.z), tentacle = tentacle })
+	end
+end
+
+function vfx.devourStep(active, t)
+	local cfg = active.cfg
+	local mouth = Vector3.new(mount and mount.x or 0, 3, mount and mount.z or 0)
+	for _, prey in active.prey do
+		if not prey.eaten then
+			local entity = prey.entity
+			local reach = math.clamp(t / (cfg.PullTime * 0.35), 0, 1) -- out to it first...
+			local pull = math.clamp((t - cfg.PullTime * 0.35) / (cfg.PullTime * 0.65), 0, 1) -- ...then reeled in
+			local eased = pull * pull
+			if pull >= 1 or not mount then
+				prey.eaten = true
+				prey.tentacle:Destroy()
+				Poof.at(Vector3.new(entity.x, 0, entity.z))
+				retire(entity)
+				if mount then
+					hold = math.min(hold + holdTime(mount) * cfg.RestorePer, holdTime(mount))
+				end
+			else
+				local at = prey.from:Lerp(Vector3.new(mouth.X, 0, mouth.Z), eased)
+				entity.x, entity.z = at.X, at.Z
+				entity.animal:setScale(1 - 0.8 * eased)
+				place(entity, 0)
+				local tip = mouth:Lerp(Vector3.new(at.X, 2, at.Z), reach)
+				local length = (tip - mouth).Magnitude
+				prey.tentacle.Size = Vector3.new(2.6, 2.6, math.max(length, 0.1))
+				prey.tentacle.CFrame = CFrame.lookAt((mouth + tip) / 2, tip + Vector3.new(0, 0, 0.001))
+			end
+		end
+	end
+end
+
 -- The Blue Crab's Shield (Config.Abilities): King Crabs marching in a line in front
 -- of it, each soaking one hit (the animal that runs into it is knocked flying).
 function vfx.summonShield(cfg)
@@ -2599,6 +2671,9 @@ local function endAbility(entity)
 	if active.missiles then
 		active.missiles:destroy()
 	end
+	if active.prey then
+		vfx.devourStep(active, math.huge) -- cut short: whatever it had hold of is eaten now
+	end
 	local root = entity.animal.model.PrimaryPart
 	if active.cfg.Tier then
 		-- Back to its own size: a springy pop down if it's still the mount.
@@ -2652,6 +2727,8 @@ local function startAbility(cfg)
 		a.active.missiles = vfx.launchMissiles(mount, cfg, travelDir())
 	elseif cfg.Kind == "Shield" then
 		vfx.summonShield(cfg)
+	elseif cfg.Kind == "Devour" then
+		vfx.devour(a.active, cfg)
 	elseif cfg.Kind == "Feast" then
 		-- Everything broken since the last Feast: Hold back, and bigger and faster for good.
 		local feast = vfx.feastOf(mount)
@@ -2697,7 +2774,9 @@ local function updateAbility(dt)
 	local active = a.active
 	if active then
 		active.t += dt
-		if active.cfg.Kind == "Ink" then
+		if active.cfg.Kind == "Devour" then
+			vfx.devourStep(active, active.t)
+		elseif active.cfg.Kind == "Ink" then
 			vfx.inkBlast(dt, active.cfg)
 		elseif active.cfg.Kind == "Frost" then
 			vfx.frostBlast(active.cfg, active.cfg.Duration - active.t)
@@ -2789,8 +2868,8 @@ local function updateMount(dt)
 		-- Up into the air and down again in an arc, faster.
 		targetSpeed *= ability.cfg.SpeedBoost
 		mount.hop = math.sin(math.pi * math.clamp(ability.t / ability.cfg.Duration, 0, 1)) * ability.cfg.LeapHeight
-	elseif ability and ability.cfg.Kind == "Rattle" then
-		targetSpeed, rate = 0, 120 -- stops dead to coil up
+	elseif ability and (ability.cfg.Kind == "Rattle" or ability.cfg.Kind == "Devour") then
+		targetSpeed, rate = 0, 120 -- stops dead to coil up (or for the Kraken to feed)
 	end
 	mount.speed += math.clamp(targetSpeed - mount.speed, -rate * dt, rate * dt)
 	if phase == "outbound" and exitX then
@@ -3459,6 +3538,9 @@ RunService.PreSimulation:Connect(function(dt)
 		-- On a new animal: it goes in your animal dictionary (Hatchery.server, AnimalDex).
 		vfx.riddenMount = mount
 		ReplicatedStorage:WaitForChild("Ridden"):FireServer(mount.kind)
+	end
+	if mount then
+		mount.animal.sprinting = sprinting() -- (the Kraken gallops only at a sprint)
 	end
 	updateAbility(dt)
 	vfx.updateScared(dt)

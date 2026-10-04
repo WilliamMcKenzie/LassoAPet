@@ -287,7 +287,10 @@ return {
 	--     of their lanes, whatever its size (client/Missiles.luau; Spread and Size are in
 	--     its model studs). Every launch refills Restore of the Hold bar (QM: 10%).
 	-- Boost, Grow, Ink, Crabwalk, Breath and Missiles, like Frost, still use Hold and can crash.
-	-- (The Kraken's ability is on hold until QM and Claude settle how it looks.)
+	--   Devour (Kraken, QM Oct 4): one tap: it stops dead and its tentacles reach out to
+	--     up to Max animals of size tier MaxTier or smaller within Radius studs, reeling
+	--     each one in over PullTime seconds and eating it, each one refilling RestorePer
+	--     of the Hold bar. Nothing can crash it while it feeds.
 	-- Charge swings the camera round to a cinematic front-side angle.
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
 	Abilities = {
@@ -295,6 +298,7 @@ return {
 		SnackYak = { Kind = "Charge", UntilFull = true, Cooldown = 5, SpeedBoost = 2 }, -- QM, Oct 4
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 56 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 10, Radius = 45, ScareTime = 10, RestorePer = 0.1 }, -- QM, Oct 4
+		Kraken = { Kind = "Devour", Duration = 1.4, Cooldown = 6, Radius = 50, Max = 8, MaxTier = 2, PullTime = 0.7, RestorePer = 0.2 }, -- QM, Oct 4 (radius a guess)
 		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7, RestorePer = 0.03 }, -- 3% Hold per animal frozen (QM, Oct 4)
 		SpineLizard = { Kind = "Boost", Duration = 5, Cooldown = 8, SpeedBoost = 2 },
 		IceGolem = { Kind = "Grow", Duration = 5, Cooldown = 10, SpeedBoost = 1.2, Tier = 4 },
@@ -325,9 +329,7 @@ return {
 	SprintSpecials = {
 		Unicorn = { Kind = "Smash", Radius = 14, ScareRadius = 30, RestorePer = 0.02, OnReturn = true }, -- scares animals within ScareRadius off, 2% Hold each (QM, Oct 4)
 		Sandworm = { Kind = "Burrow", OnReturn = true },
-		Icebringer = { Kind = "Ram" },
 		Whale = { Kind = "Fly", Height = 56 },
-		Kraken = { Kind = "Trample", BelowTier = 3 },
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
 		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true }, -- QM, Oct 4
 	},

@@ -104,7 +104,8 @@ local Horse = {} -- the methods every variant shares
 -- seatBone = bone name (the same, on any bone: the Loong's saddle is on its chest,
 -- which its slither swings about),
 -- size = number (the whole animal scaled up from its model; by default sized to its
--- tier, Config.PetTiers) }
+-- tier, Config.PetTiers), gallopOnSprint = true (its gallop only while it's ridden
+-- at a sprint, its walk otherwise) }
 local function variant(name, data, rarity, points)
 	points = points or {}
 	local class = setmetatable({
@@ -115,6 +116,7 @@ local function variant(name, data, rarity, points)
 		seat = points.seat or SEAT,
 		seatOnNeck = points.seatOnNeck,
 		seatBone = points.seatBone,
+		gallopOnSprint = points.gallopOnSprint, -- gallops only while self.sprinting (Ride sets it)
 		neckLoop = points.neck or NECK_LOOP,
 		size = points.size or tierSize(name, data),
 	}, { __index = Horse })
@@ -164,6 +166,9 @@ function Horse:update(dt, speed, turn)
 
 	local moving = clamp01(s / WALK_IN)
 	local galloping = clamp01((s - GALLOP_FROM) / (GALLOP_IN - GALLOP_FROM))
+	if self.gallopOnSprint and not self.sprinting then
+		galloping = 0 -- (the Kraken: its gallop only while you sprint on it, else its walk; QM)
+	end
 	-- No tables made here: this runs for every animal every frame, and fresh
 	-- tables each time pile up garbage that the collector stops the game to clear.
 	local wIdle, wWalk, wGallop = 1 - moving, moving * (1 - galloping), moving * galloping
