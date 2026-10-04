@@ -34,10 +34,6 @@ PREVIEW = "/mnt/project-files/animals/godlands"
 K = 2  # QM: 2x, about the Large size tier
 FLOAT = 3.0  # studs between the lowest dangling claw and the ground in the previews
 
-# The body, head to tail. torso (chest, neck, arms) and root (hips, tail, legs) are
-# siblings pivoting at the waist, so opposite bends there make the S-curve.
-FRONT = ["hi_head", "neck_joint", "neck", "torso"]
-BACK = ["root", "tail", "tail_joint1", "tail_joint_2"]
 LIMBS = {"left_arm": 0.0, "right_arm": 0.5, "left_leg": 0.25, "right_leg": 0.75}
 
 
@@ -72,25 +68,37 @@ def boxes_to_cubes(m):
         del e["vertices"]
 
 
-def float_anim(L, amp, yaw, bob, lag=0.11, limb=14, head=0.6, jaw=None):
-    """One looping float: a wave head -> tail of `amp` degrees pitch (and `yaw` side
-    to side), the whole body bobbing `bob` units, limbs dangling behind."""
+BODY = ["hi_head", "neck_joint", "neck", "torso", "root", "tail", "tail_joint1", "tail_joint_2"]  # head to tail
+PARENT = {"hi_head": "neck_joint", "neck_joint": "neck", "neck": "torso", "tail": "root",
+          "tail_joint1": "tail", "tail_joint_2": "tail_joint1"}
+BODY_LEN = 420  # Blockbench units, head to tail tip at 2x
+
+
+def float_anim(L, amp, yaw, waves=1.0, limb=14, jaw=None):
+    """One looping float: a sine wave travelling head -> tail along the body.
+
+    Each segment's slope (head to tail) is amp * sin(2 pi (u - waves * i / 8)) degrees,
+    i its place along BODY; a bone's keyframe is its slope minus its parent's (the two
+    top-level bones, torso and root, take it whole). `yaw` does the same side to side.
+    The waist rides the wave's height there, so the whole body bobs with it."""
     T = {}
-    chain = FRONT[::-1] + BACK  # torso outward to the head, root outward to the tail
 
-    def bend(i, front):
-        # each joint's phase lags the one before it along the body, so the wave runs
-        # from the head down to the tail tip
-        ph = -lag * (FRONT.index(chain[i]) if front else len(FRONT) + BACK.index(chain[i]))
-        a = amp * (head if chain[i] == "hi_head" else 1)
-        y = yaw * (head if chain[i] == "hi_head" else 1)
-        sign = -1 if front else 1  # +X lifts a front bone and lowers a back one
-        return lambda u: (sign * sin(u, a, ph), sin(u, y, ph + 0.25), 0)
+    def theta(i, u, a, ph=0.0):
+        return sin(u, a, ph - waves * i / len(BODY))
 
-    for i, name in enumerate(chain):
-        T[name] = [cyc(L, bend(i, name in FRONT), 24)]
-    for name in ("torso", "root"):  # both top-level: bob together so the waist stays joined
-        T[name].append(cyc(L, lambda u: (0, sin(u, bob, -0.15), 0), 24, "position"))
+    for i, name in enumerate(BODY):
+        par = BODY.index(PARENT[name]) if name in PARENT else None
+
+        def f(u, i=i, par=par):
+            x = theta(i, u, amp) - (theta(par, u, amp) if par is not None else 0)
+            y = theta(i, u, yaw) - (theta(par, u, yaw) if par is not None else 0)
+            return (-x, y, 0)  # +X lifts a head-pointing bone and lowers a tail-pointing one: both slope down
+
+        T[name] = [cyc(L, f, 24)]
+    # height of the wave at the waist (between torso and root): the integral of the slope
+    h = BODY_LEN / (2 * math.pi * waves) * math.radians(amp)
+    for name in ("torso", "root"):
+        T[name].append(cyc(L, lambda u: (0, sin(u, h, 0.25 - waves * 3.5 / len(BODY)), 0), 24, "position"))
     for name, ph in LIMBS.items():
         T[name] = [cyc(L, lambda u, ph=ph: (sin(u, limb, ph - 0.3), 0, sin(u, limb * 0.3, ph)), 24)]
     for name in ("left_calve", "right_calve", "left_forearm", "right_forearm"):
@@ -104,11 +112,11 @@ def float_anim(L, amp, yaw, bob, lag=0.11, limb=14, head=0.6, jaw=None):
 def animations():
     return {
         # hovering in place: a slow, lazy ripple, the mouth opening a little to breathe
-        "idle": float_anim(3.2, 4, 2, 16, limb=8, jaw=lambda u: (-max(0, sin(u, 14, 0.1)), 0, 0)),
-        # cruising: a longer wave, more side to side
-        "walk": float_anim(1.8, 7, 5, 22, limb=14),
+        "idle": float_anim(3.2, 10, 3, limb=8, jaw=lambda u: (-max(0, sin(u, 14, 0.1)), 0, 0)),
+        # cruising: a bigger wave
+        "walk": float_anim(1.8, 16, 4, limb=14),
         # chasing: a fast, deep wave, legs streaming, jaws wide
-        "gallop": float_anim(1.0, 10, 7, 28, lag=0.13, limb=22, head=0.4,
+        "gallop": float_anim(1.0, 22, 5, limb=22,
                              jaw=lambda u: (-18 - sin(u, 8, 0.0, 2), 0, 0)),
     }
 
