@@ -150,7 +150,7 @@ local claimed = false
 -- Every other UI goes while it's up, and comes back as it was once it's claimed. A
 -- screen another script turns on meanwhile stays off until then (and comes back on).
 local StarterGui = game:GetService("StarterGui")
-local KEEP = { AnimalDexWarm = true } -- (1 px, nearly see-through: keeps the dictionary's art loaded)
+local KEEP = { AnimalDexWarm = true, PreloadWarm = true } -- (1 px, nearly see-through: keep art loaded)
 local wanted = {} -- [ScreenGui] = whether it should be on once we're done
 local watching = {}
 local coreWas = {}
