@@ -83,7 +83,7 @@ local IMAGES = {
 	eggScorpion = { id = "rbxassetid://84668325203507", size = Vector2.new(599, 1007) }, -- ScorpionEggRender.png (QM's update)
 	eggSandworm = { id = "rbxassetid://102795691143589", size = Vector2.new(502, 767) }, -- SandwormEggRender.png (QM's update)
 	eggSnake = { id = "rbxassetid://90142926499080", size = Vector2.new(553, 960) }, -- SnakeEggRender.png (QM's update)
-	eggBeholder = { id = "rbxassetid://123404719952235", size = Vector2.new(647, 775) }, -- BeholderEggRender.png
+	eggBeholder = { id = "rbxassetid://111649507533762", size = Vector2.new(647, 758) }, -- BeholderEggRender.png
 	eggPenguin = { id = "rbxassetid://135143840112034", size = Vector2.new(582, 709) }, -- PenguinEggRender.png
 	eggSnowman = { id = "rbxassetid://105231134861157", size = Vector2.new(675, 772) }, -- SnowmanEggRender.png
 	eggSpineLizard = { id = "rbxassetid://131132122596946", size = Vector2.new(502, 982) }, -- SpineLizardEggRender.png (QM's update)
@@ -101,6 +101,8 @@ local IMAGES = {
 	eggFishSchool = { id = "rbxassetid://137156704531563", size = Vector2.new(530, 721) }, -- FishSchoolEggRender.png
 	eggLoong = { id = "rbxassetid://70469571709365", size = Vector2.new(560, 863) }, -- LoongEggRender.png (QM's egg)
 	eggWarElephant = { id = "rbxassetid://84356622911486", size = Vector2.new(656, 673) }, -- WarElephantEggRender.png
+	eggSoulHorse = { id = "rbxassetid://136725772402125", size = Vector2.new(502, 812) }, -- SoulHorseEggRender.png
+	eggSludge = { id = "rbxassetid://140005979942732", size = Vector2.new(561, 713) }, -- SludgeEggRender.png
 	-- Exclusive animal events' countdown (Hud.setEventCountdown): QM's gradient names.
 	eventLoong = { id = "rbxassetid://125494868051538", size = Vector2.new(372, 140) }, -- EventLoong.png
 	eventSnackYak = { id = "rbxassetid://136877153343024", size = Vector2.new(593, 119) }, -- EventSnackYak.png

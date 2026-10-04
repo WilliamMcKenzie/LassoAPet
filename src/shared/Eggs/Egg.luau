@@ -40,6 +40,7 @@ local KINDS = {
 	Icebringer = { data = require(script.Parent.IcebringerEggModel), center = 1.6 },
 	Kraken = { data = require(script.Parent.KrakenEggModel), center = 1.6 },
 	WarElephant = { data = require(script.Parent.WarElephantEggModel), center = 1.6 },
+	SoulHorse = { data = require(script.Parent.SoulHorseEggModel), center = 1.6 },
 	Squid = { data = require(script.Parent.SquidEggModel), center = 1.6 },
 	Whale = { data = require(script.Parent.WhaleEggModel), center = 1.6 },
 	KingCrab = { data = require(script.Parent.KingCrabEggModel), center = 1.6 },
@@ -49,6 +50,7 @@ local KINDS = {
 	FishSchool = { data = require(script.Parent.FishSchoolEggModel), center = 1.6 },
 	Loong = { data = require(script.Parent.LoongEggModel), center = 1.6 },
 	Beholder = { data = require(script.Parent.BeholderEggModel), center = 1.6 },
+	Sludge = { data = require(script.Parent.SludgeEggModel), center = 1.6 },
 }
 
 local Egg = {}
