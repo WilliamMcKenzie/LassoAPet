@@ -2,7 +2,7 @@
 that floats with its legs hanging, scaled up 2x with floating animations.
 
 Run: python3 tools/dragon_rig.py [qm.bbmodel] [preview_dir]
-Writes designs/godlands/Dragon.bbmodel (idle, walk, gallop) and preview GIFs.
+Writes designs/godlands/Dragon.bbmodel (idle, walk, gallop, special = fire breath) and preview GIFs.
 
 QM's two block-shaped meshes in the head become plain cubes (bbmodel_to_luau only
 takes wedge and pyramid meshes). Every animation is the body snaking through the air:
@@ -22,7 +22,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
 import horse_rig as HR  # noqa: E402
-from convert_rig import cyc, sin  # noqa: E402
+from convert_rig import cyc, lerp, sin  # noqa: E402
 from horse_rig import write_animations  # noqa: E402
 from partlib import render  # noqa: E402
 from snake_design import posed  # noqa: E402
@@ -109,6 +109,43 @@ def float_anim(L, amp, yaw, waves=1.0, limb=14, jaw=None):
     return L, T
 
 
+def special(L=2.6):
+    """Fire breath, played once (the fire itself is added in Roblox): he draws back,
+    rearing his head and chest up with the jaw shut, then lunges, head thrust forward
+    and down, jaws wide, and holds the breath shaking with effort before settling.
+    The tail keeps a slow wave and whips at the lunge; arms and legs brace forward."""
+    T = {}
+
+    def key(pts, k=1.0):
+        return lambda u: k * lerp(u, pts)
+
+    # (u, degrees) through the move: draw back to 0.3, lunge by 0.38, hold to 0.82, settle
+    rear = [(0, 0), (0.3, 1), (0.38, -0.6), (0.82, -0.6), (1, 0)]
+    shake = lambda u: (sin(u, 1.5, 0, 9) if 0.38 < u < 0.82 else 0)  # noqa: E731
+
+    def front(name, deg):
+        return lambda u: (key(rear, deg)(u) + shake(u), 0, 0)
+
+    T["torso"] = [cyc(L, front("torso", 10), 48),
+                  cyc(L, lambda u: (0, 0, lerp(u, [(0, 0), (0.3, 18), (0.38, -16), (0.82, -14), (1, 0)])), 48, "position")]
+    T["neck"] = [cyc(L, front("neck", 18), 48)]
+    T["neck_joint"] = [cyc(L, front("neck_joint", 14), 48)]
+    T["hi_head"] = [cyc(L, front("hi_head", 16), 48)]
+    T["jaw"] = [cyc(L, lambda u: (-lerp(u, [(0, 0), (0.3, 0), (0.36, 40), (0.82, 38), (0.95, 0), (1, 0)])
+                                   + (sin(u, 2, 0.1, 11) if 0.38 < u < 0.82 else 0), 0, 0), 48)]
+    # hips follow the chest, the tail lags and whips
+    T["root"] = [cyc(L, lambda u: (-0.5 * key(rear, 10)(u), 0, 0), 48),
+                 cyc(L, lambda u: (0, 0, lerp(u, [(0, 0), (0.3, 18), (0.38, -16), (0.82, -14), (1, 0)])), 48, "position")]
+    for i, name in enumerate(("tail", "tail_joint1", "tail_joint_2")):
+        whip = [(0, 0), (0.32 + 0.04 * i, -12), (0.44 + 0.04 * i, 16), (0.6 + 0.04 * i, -6), (0.85, 0), (1, 0)]
+        T[name] = [cyc(L, lambda u, w=whip, i=i: (lerp(u, w) + sin(u, 4, -0.12 * i, 2), sin(u, 3, -0.12 * i), 0), 48)]
+    for name in ("left_arm", "right_arm"):
+        T[name] = [cyc(L, lambda u: (lerp(u, [(0, 0), (0.3, -18), (0.38, 26), (0.82, 24), (1, 0)]), 0, 0), 48)]
+    for name in ("left_leg", "right_leg"):
+        T[name] = [cyc(L, lambda u: (lerp(u, [(0, 0), (0.3, -10), (0.4, 18), (0.82, 16), (1, 0)]), 0, 0), 48)]
+    return L, T
+
+
 def animations():
     return {
         # hovering in place: a slow, lazy ripple, the mouth opening a little to breathe
@@ -118,6 +155,8 @@ def animations():
         # chasing: a fast, deep wave, legs streaming, jaws wide
         "gallop": float_anim(1.0, 22, 5, limb=22,
                              jaw=lambda u: (-18 - sin(u, 8, 0.0, 2), 0, 0)),
+        # fire breath, one shot (QM: "special")
+        "special": special(),
     }
 
 
@@ -141,6 +180,9 @@ def main(src=SRC, out=PREVIEW):
     scale(m, K)
     boxes_to_cubes(m)
     write_animations(m, {g["name"]: g for g in m["groups"]}, animations())
+    for a in m["animations"]:
+        if a["name"] == "special":
+            a["loop"] = "once"
     m["name"] = "Dragon"
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w") as f:
