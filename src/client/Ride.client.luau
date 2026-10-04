@@ -378,6 +378,20 @@ local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's
 vfx.Merge = require(ReplicatedStorage.Shared.Merge)
 -- A merged pet (Shared/Merge) rides bigger and faster: its boost starts it off where
 -- the Robo Shark's and Loong's growing (vfx.feed) carries on from.
+-- Riding an exclusive event's animal (Events.server; its stampede key is negative):
+-- every barrier is gone for the rest of that ride (QM). Gate.client hides them on the
+-- local "EventRun" attribute.
+function vfx.markEventRun(entity)
+	if entity and ((entity.n or 0) < 0 or entity.event) then
+		vfx.eventRun = true
+		player:SetAttribute("EventRun", true)
+	end
+end
+function vfx.endEventRun()
+	vfx.eventRun = nil
+	player:SetAttribute("EventRun", nil)
+end
+
 function vfx.applyMerge(entity)
 	local n = entity.merged or 1
 	if n > 1 then
@@ -570,6 +584,7 @@ local function cleanup()
 		vfx.endShield() -- (and the Blue Crab's King Crabs)
 	end
 	vfx.hunting, vfx.huntTarget = nil, nil -- (a hunt cut short by the ride ending)
+	vfx.endEventRun() -- (the barriers are back for the next ride)
 	cutscene = nil
 	heroLeap = nil
 	Hud.setCutscene(false)
@@ -824,6 +839,7 @@ startRide = function(model)
 		-- Jumped onto a stampede animal: it leaves the stampede and runs on with
 		-- you from where it is. Your own pet stays home.
 		vfx.rideCue:FireServer("take", fromHerd.n)
+		vfx.markEventRun(fromHerd)
 		herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
 		mount = fromHerd
 		mount.popping, mount.hop, mount.dodge, mount.merged = nil, 0, 0, nil
@@ -1022,6 +1038,9 @@ end
 
 -- The z of the first gate you can't pass yet (your pen's level decides; see Gate.client).
 local function gateZ()
+	if vfx.eventRun then
+		return -math.huge -- riding an event's animal: no barriers this ride (QM)
+	end
 	return WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1))
 end
 
@@ -3270,6 +3289,7 @@ local function updateRider(dt)
 		focus = Vector3.new(pos.X, 0, pos.Z)
 		if t >= 1 then
 			local target = transfer.target
+			vfx.markEventRun(target)
 			if target.n then
 				vfx.rideCue:FireServer("take", target.n)
 				herd[target.n], taken[target.n], target.n = nil, true, nil

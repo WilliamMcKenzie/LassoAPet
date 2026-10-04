@@ -90,6 +90,7 @@ local function build(i)
 
 	gui.Parent = player:WaitForChild("PlayerGui")
 	part.Parent = workspace
+	gui.Enabled = not player:GetAttribute("EventRun")
 	gates[i] = { part = part, gui = gui, fades = fades }
 end
 
@@ -215,3 +216,11 @@ end
 
 player:GetAttributeChangedSignal("PenLevel"):Connect(refresh)
 refresh()
+
+-- Riding an exclusive event's animal (Ride.client sets "EventRun" on you, locally):
+-- every barrier is gone for that ride, and back after it (QM).
+player:GetAttributeChangedSignal("EventRun"):Connect(function()
+	for _, gate in gates do
+		gate.gui.Enabled = not player:GetAttribute("EventRun")
+	end
+end)
