@@ -2259,7 +2259,7 @@ function vfx.huntStep(cfg)
 		local best = math.huge
 		for _, entity in allAnimals() do
 			local dx, dz = entity.x - mount.x, entity.z - mount.z
-			if entity ~= mount and not entity.popping and not entity.event then -- (any way: it can turn round for it)
+			if entity ~= mount and not entity.popping and not entity.event and dz * travelDir() > 0 then -- (only ones in front of it, QM)
 				local d = dx * dx + dz * dz
 				if d < best then
 					prey, best = entity, d
