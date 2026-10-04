@@ -140,10 +140,10 @@ return {
 			},
 			UnlockCost = 1000000,
 			PostColor = Color3.fromRGB(236, 140, 124),
-			GateImage = "rbxassetid://129714355476447", -- assets/ui/GateOcean.png
+			GateImage = "rbxassetid://75356296124042", -- assets/ui/GateOcean.png
 			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
 			UpgradeImage = "rbxassetid://86653048989907", -- assets/ui/UpgradePenOcean.png
-			UpgradeImageDisabled = "rbxassetid://134800932476227", -- assets/ui/UpgradePenOceanDisabled.png
+			UpgradeImageDisabled = "rbxassetid://98442121637216", -- assets/ui/UpgradePenOceanDisabled.png
 			-- Under the sea (Ocean.client): while you're in this biome the distance
 			-- fades into Haze.Color and bubbles drift up round the camera.
 			Haze = {
@@ -178,8 +178,9 @@ return {
 			UnlockCost = 10000000, -- guessed: 10x the Ocean
 			PostColor = Color3.fromRGB(62, 60, 72),
 			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
-			-- No GateImage / UpgradeImage yet: the gate shows plain text and Upgrade Pen
-			-- the default button with the price, until QM's art is in.
+			GateImage = "rbxassetid://81079145393331", -- assets/ui/GateGodlands.png
+			UpgradeImage = "rbxassetid://133410257702964", -- assets/ui/UpgradePenGodlands.png
+			UpgradeImageDisabled = "rbxassetid://75177337427277", -- assets/ui/UpgradePenGodlandsDisabled.png
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
