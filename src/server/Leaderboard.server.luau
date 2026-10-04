@@ -121,10 +121,9 @@ model.Parent = workspace
 -- Who's standing there: { id, avatar }.
 local standing
 
--- The leader strikes a victory pose (QM): Roblox's own Cheer emote, both arms flung up,
--- held still at its peak. Swap POSE (and POSE_AT, seconds into it) for another.
-local POSE = { R15 = "rbxassetid://507770677", R6 = "rbxassetid://129423030" } -- Cheer
-local POSE_AT = 0.45
+-- The leader stands with some attitude (QM): Roblox's Superhero animation pack's idle,
+-- hands on hips, looping. Swap POSE for another idle. (R6 avatars: the plain R6 idle.)
+local POSE = { R15 = "rbxassetid://616111295", R6 = "rbxassetid://180435571" } -- SuperHero_Idle
 
 local function idle(avatar)
 	local humanoid = avatar:FindFirstChildOfClass("Humanoid")
@@ -136,19 +135,11 @@ local function idle(avatar)
 	animator.Parent = humanoid
 	local animation = Instance.new("Animation")
 	animation.AnimationId = if humanoid.RigType == Enum.HumanoidRigType.R15 then POSE.R15 else POSE.R6
-	task.spawn(pcall, function()
+	pcall(function()
 		local track = animator:LoadAnimation(animation)
-		track.Looped = false
-		track.Priority = Enum.AnimationPriority.Action
-		for _ = 1, 50 do -- (its length is 0 until it has loaded)
-			if track.Length > 0 then
-				break
-			end
-			task.wait(0.1)
-		end
-		track:Play(0)
-		track:AdjustSpeed(0) -- held at its peak
-		track.TimePosition = math.min(POSE_AT, track.Length)
+		track.Looped = true
+		track.Priority = Enum.AnimationPriority.Idle
+		track:Play()
 	end)
 end
 
