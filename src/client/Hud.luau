@@ -797,6 +797,8 @@ function Hud.show(visible)
 	if visible then
 		AnimalDex.close() -- off on a ride: no dictionary
 		RollMenu.close()
+		mergeWanted = false -- (MERGE is for home: it'd sit behind the fail screen's Home)
+		mergeButton.Visible = false
 	end
 	gui.Enabled = visible
 	reveal += 1

@@ -3945,7 +3945,9 @@ function vfx.mergeKinds()
 end
 
 function vfx.updateMerge()
-	Hud.showMerge(not Tutorial.active and #vfx.mergeKinds() > 0)
+	local hrp = character()
+	local home = phase == "idle" and hrp ~= nil and hrp.Position.Z > START_LINE_Z -- in the base (QM), not out on the course
+	Hud.showMerge(home and not Tutorial.active and #vfx.mergeKinds() > 0)
 end
 
 Hud.onMerge = function()
