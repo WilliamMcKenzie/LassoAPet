@@ -38,6 +38,7 @@ local HEADSHOTS = {
 	KingCrab = "rbxassetid://131403632828209", -- PetKingCrab.png
 	Starfish = "rbxassetid://112526271674778", -- PetStarfish.png
 	FishSchool = "rbxassetid://132126224577278", -- PetFishSchool.png
+	Loong = "", -- PetLoong.png (awaiting upload)
 }
 -- QM's slot pictures by rarity (as the inventory bar); a plain colour until one is uploaded.
 local SLOTS = {

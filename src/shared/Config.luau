@@ -164,9 +164,10 @@ return {
 			Length = math.huge, -- endless
 			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
 			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)
-			-- Placeholder until the Godlands has animals (and bosses) of its own: just Fish (QM).
-			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
-			Herd = { Fish = 1 },
+			-- Placeholder until the Godlands has animals (and bosses) of its own: Fish (QM), and
+			-- now the Loong, rare (a guess). PlaceholderHerd keeps it out of the finish line's
+			-- egg odds (Hatchery).
+			Herd = { Fish = 1, Loong = 0.05 },
 			PlaceholderHerd = true,
 			Patches = {
 				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
@@ -243,7 +244,11 @@ return {
 	--     course, overtakes it and races on ahead for Duration, and every obstacle and
 	--     animal it passes goes flying, whatever its size; then the fish dive away
 	--     (client/FishWave.luau). Nothing crashes the school while it runs.
-	-- Boost, Grow, Ink and Crabwalk, like Frost, still use Hold and can crash.
+	--   Breath (Loong): it plays its fire breath ("special") and, from FireFrom to FireTo
+	--     seconds in, everything in a Width-stud lane Range studs ahead is burnt away:
+	--     obstacles smashed, animals flung, whatever their size. It refills Restore of
+	--     the Hold bar when it starts (QM: 20%).
+	-- Boost, Grow, Ink, Crabwalk and Breath, like Frost, still use Hold and can crash.
 	-- (The Kraken's ability is on hold until QM and Claude settle how it looks.)
 	-- Charge swings the camera round to a cinematic front-side angle.
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
@@ -257,6 +262,8 @@ return {
 		Squid = { Kind = "Ink", Duration = 2.5, Cooldown = 8, Radius = 45 },
 		KingCrab = { Kind = "Crabwalk", Duration = 4, Cooldown = 8, SpeedBoost = 2, Tier = 3 },
 		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
+		-- the animation's length and fire window; the range, width and cooldown are guesses
+		Loong = { Kind = "Breath", Duration = 2.6, FireFrom = 0.95, FireTo = 2.1, Cooldown = 8, Range = 70, Width = 22, Restore = 0.2 },
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
 	-- automatic sprint home with the egg). Like any sprint they drain Hold faster.
@@ -267,12 +274,15 @@ return {
 	--   Fly (Whale): it rises Height studs into the air, over everything.
 	--   Trample (Kraken): animals smaller than tier BelowTier it runs into are thrown
 	--     up and away, as when a bigger pet runs into them racing home.
+	--   Loom (Loong): it swells to Grow x its size (a look only: its tier stays) and the
+	--     animals within Radius studs scatter away from it.
 	SprintSpecials = {
 		Unicorn = { Kind = "Smash", Radius = 14 },
 		Sandworm = { Kind = "Burrow" },
 		Icebringer = { Kind = "Ram" },
 		Whale = { Kind = "Fly", Height = 56 },
 		Kraken = { Kind = "Trample", BelowTier = 3 },
+		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
 	},
 	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
 	-- obstacles and stampede animals of a lower tier, knocking them up and away;
@@ -283,6 +293,7 @@ return {
 		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, Whale = 4, Kraken = 4, -- Ocean
+		Loong = 3, -- Godlands
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.2x medium, 1.44x large, 1.73x XL (QM, Oct 2; Eggs/Egg.luau).
@@ -326,6 +337,7 @@ return {
 		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
 		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 480, Icebringer = 1111, -- Tundra
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, Whale = 5000, Kraken = 8200, -- Ocean
+		Loong = 20000, -- Godlands (a guess, past the Kraken)
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -372,6 +384,7 @@ return {
 		KingCrab = "rbxassetid://136150514529079", -- assets/ui/KingCrabEggRender.png
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
+		Loong = "", -- assets/ui/LoongEggRender.png (awaiting upload)
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
@@ -458,6 +471,8 @@ return {
 		FishSchool = { Speed = 3, Stamina = 2.8 }, -- a guess between the Squid and King Crab
 		Whale = { Speed = 1.2, Stamina = 10 },
 		Kraken = { Speed = 4.5, Stamina = 3 },
+		-- Godlands
+		Loong = { Speed = 4, Stamina = 8 }, -- QM
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).

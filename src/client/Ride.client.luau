@@ -1914,7 +1914,7 @@ function vfx.frostBlast(cfg, left)
 end
 
 -- Abilities that don't make the pet untouchable: it still uses Hold and can crash.
-vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true }
+vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true, Breath = true }
 
 -- The mount's size tier right now: Grow and Crabwalk make it bigger while they run.
 function vfx.mountTier()
@@ -1971,6 +1971,70 @@ function vfx.inkBlast(dt, cfg)
 			else
 				entity.lane = math.clamp(entity.lane + away * 60 * dt, -EDGE, EDGE)
 			end
+		end
+	end
+end
+
+-- Breath (the Loong): fire pours out of its mouth from FireFrom to FireTo seconds into
+-- its "special" animation. A placeholder flame (QM will put the real fire in, in
+-- Studio): a ParticleEmitter named LoongFire on the jaw, blowing straight ahead.
+function vfx.breathFx(entity, cfg)
+	local model = entity.animal.model
+	local jaw = model:FindFirstChild("jawBone") or model.PrimaryPart
+	local at = Instance.new("Attachment")
+	at.Name = "LoongFireAt"
+	at.CFrame = CFrame.new(0, 0, -2 * entity.animal.size) * CFrame.Angles(math.pi / 2, 0, 0) -- out the front, emitting along -Z
+	at.Parent = jaw
+	local fire = Instance.new("ParticleEmitter")
+	fire.Name = "LoongFire"
+	fire.Texture = "rbxasset://textures/particles/fire_main.dds"
+	fire.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 240, 140)),
+		ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 140, 20)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 40, 10)),
+	})
+	fire.LightEmission = 0.8
+	fire.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 3), NumberSequenceKeypoint.new(1, 14) })
+	fire.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.1), NumberSequenceKeypoint.new(1, 1) })
+	fire.Lifetime = NumberRange.new(0.5, 0.8)
+	fire.Speed = NumberRange.new(cfg.Range * 1.2, cfg.Range * 1.5)
+	fire.SpreadAngle = Vector2.new(12, 12)
+	fire.EmissionDirection = Enum.NormalId.Bottom -- the attachment is turned so Bottom is ahead
+	fire.Rate = 220
+	fire.Enabled = false
+	fire.Parent = at
+	task.delay(cfg.FireFrom, function()
+		if fire.Parent then
+			fire.Enabled = true
+		end
+	end)
+	task.delay(cfg.FireTo, function()
+		if fire.Parent then
+			fire.Enabled = false
+		end
+	end)
+	return { at }
+end
+
+-- Breath: while the fire pours, everything in the lane ahead is burnt away, obstacles
+-- and animals whatever their size.
+function vfx.breathBlast(active)
+	local cfg = active.cfg
+	if active.t < cfg.FireFrom or active.t > cfg.FireTo then
+		return
+	end
+	local dir = travelDir()
+	local half = cfg.Width / 2
+	for _, o in obstacles do
+		local ahead = (o.z - mount.z) * dir
+		if not o.smashed and ahead > -4 and ahead < cfg.Range and math.abs(o.x - mount.x) < half + o.hx then
+			smash(o, dir, if o.x >= mount.x then 1 else -1)
+		end
+	end
+	for _, entity in allAnimals() do
+		local ahead = (entity.z - mount.z) * dir
+		if entity ~= mount and not entity.popping and ahead > 0 and ahead < cfg.Range and math.abs(entity.x - mount.x) < half then
+			knock(entity, entity.x - mount.x)
 		end
 	end
 end
@@ -2035,6 +2099,18 @@ function vfx.updateSprint(dt)
 		if old ~= mount then
 			vfx.burrowDepth = nil
 		end
+		-- Loom (the Loong) swells while Sprint is held, and pops back when it's let go.
+		if vfx.sprintKind == "Loom" and old then
+			if old == mount then
+				old.scaleAnim = { shrink = true, t = 0, size = old.animal.scale }
+			else
+				old.scaleAnim = nil
+				old.animal:setScale(1)
+			end
+		end
+		if kind == "Loom" then
+			mount.scaleAnim = { t = 0, size = cfg.Grow }
+		end
 		if kind == "Ram" then
 			vfx.sprintFx = chargeFx(mount, 0.5)
 		elseif kind == "Burrow" then
@@ -2063,6 +2139,9 @@ function vfx.updateSprint(dt)
 	local special = mount and Config.SprintSpecials[mount.kind]
 	if not special or activeAbility() then
 		return
+	end
+	if kind == "Loom" then
+		vfx.inkBlast(dt, special) -- the animals round it scatter
 	end
 	-- Fly rises into the air and Burrow sinks under the floor, easing in and out.
 	if special.Kind == "Fly" or special.Kind == "Burrow" then
@@ -2198,6 +2277,10 @@ local function startAbility(cfg)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(40, 30, 70))
 	elseif cfg.Kind == "Wave" then
 		a.active.wave = vfx.FishWave.new(mount.z, travelDir(), EDGE)
+	elseif cfg.Kind == "Breath" then
+		hold = math.min(hold + holdTime(mount) * (cfg.Restore or 0), holdTime(mount)) -- QM: refills 20% of the Hold bar
+		mount.animal:playOnce("special")
+		a.active.fx = vfx.breathFx(mount, cfg)
 	end
 end
 
@@ -2233,6 +2316,8 @@ local function updateAbility(dt)
 			vfx.inkBlast(dt, active.cfg)
 		elseif active.cfg.Kind == "Frost" then
 			vfx.frostBlast(active.cfg, active.cfg.Duration - active.t)
+		elseif active.cfg.Kind == "Breath" then
+			vfx.breathBlast(active)
 		elseif active.wave then
 			vfx.waveSweep(active.wave:update(dt, mount.speed, active.t, active.cfg.Duration))
 		end
@@ -2830,6 +2915,9 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 			rattleRing(p, cfg.Radius, Color3.fromRGB(40, 30, 70))
 		elseif a == "Boost" then
 			Dust.kick(entity.animal.model.PrimaryPart.CFrame, entity.animal.scale)
+		elseif a == "Breath" then
+			entity.animal:playOnce("special")
+			rider.fx = vfx.breathFx(entity, cfg)
 		else
 			Poof.at(Vector3.new(p.X, 0, p.Z))
 		end

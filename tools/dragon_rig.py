@@ -1,8 +1,8 @@
-"""The Godlands dragon boss: QM's ivory_wyvern_1.bbmodel (Oct 3), an Eastern dragon
+"""The Loong (Legendary, Large; QM, Oct 4), the Godlands dragon: QM's ivory_wyvern_1.bbmodel (Oct 3), an Eastern dragon
 that floats with its legs hanging, scaled up 2x with floating animations.
 
 Run: python3 tools/dragon_rig.py [qm.bbmodel] [preview_dir]
-Writes designs/godlands/Dragon.bbmodel (idle, walk, gallop, special = fire breath) and preview GIFs.
+Writes designs/godlands/Loong.bbmodel (idle, walk, gallop, special = fire breath) and preview GIFs.
 
 QM's two block-shaped meshes in the head become plain cubes (bbmodel_to_luau only
 takes wedge and pyramid meshes). Every animation is the body snaking through the air:
@@ -28,11 +28,13 @@ from partlib import render  # noqa: E402
 from snake_design import posed  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
-SRC = os.path.join(ROOT, "designs", "godlands", "Dragon_QM.bbmodel")  # QM's ivory_wyvern_1, as sent
-OUT = os.path.join(ROOT, "designs", "godlands", "Dragon.bbmodel")
+SRC = os.path.join(ROOT, "designs", "godlands", "Loong_QM.bbmodel")  # QM's ivory_wyvern_1, as sent
+OUT = os.path.join(ROOT, "designs", "godlands", "Loong.bbmodel")
 PREVIEW = "/mnt/project-files/animals/godlands"
 K = 2  # QM: 2x, about the Large size tier
-FLOAT = 3.0  # studs between the lowest dangling claw and the ground in the previews
+HOVER = 30  # Blockbench units every animation lifts the body by: the game stands a model on its
+# lowest point (the dangling claws), so this is how high the Loong floats over the ground
+FLOAT = 0.0  # extra studs of air under it in the previews
 
 LIMBS = {"left_arm": 0.0, "right_arm": 0.5, "left_leg": 0.25, "right_leg": 0.75}
 
@@ -69,7 +71,7 @@ def boxes_to_cubes(m):
 
 
 BODY = ["hi_head", "neck_joint", "neck", "torso", "root", "tail", "tail_joint1", "tail_joint_2"]  # head to tail
-PARENT = {"hi_head": "neck_joint", "neck_joint": "neck", "neck": "torso", "tail": "root",
+PARENT = {"hi_head": "neck_joint", "neck_joint": "neck", "neck": "torso", "torso": "root", "tail": "root",
           "tail_joint1": "tail", "tail_joint_2": "tail_joint1"}
 BODY_LEN = 420  # Blockbench units, head to tail tip at 2x
 
@@ -78,8 +80,8 @@ def float_anim(L, amp, yaw, waves=1.0, limb=14, jaw=None):
     """One looping float: a sine wave travelling head -> tail along the body.
 
     Each segment's slope (head to tail) is amp * sin(2 pi (u - waves * i / 8)) degrees,
-    i its place along BODY; a bone's keyframe is its slope minus its parent's (the two
-    top-level bones, torso and root, take it whole). `yaw` does the same side to side.
+    i its place along BODY; a bone's keyframe is its slope minus its parent's (the
+    top-level root, the hips, takes it whole). `yaw` does the same side to side.
     The waist rides the wave's height there, so the whole body bobs with it."""
     T = {}
 
@@ -97,8 +99,7 @@ def float_anim(L, amp, yaw, waves=1.0, limb=14, jaw=None):
         T[name] = [cyc(L, f, 24)]
     # height of the wave at the waist (between torso and root): the integral of the slope
     h = BODY_LEN / (2 * math.pi * waves) * math.radians(amp)
-    for name in ("torso", "root"):
-        T[name].append(cyc(L, lambda u: (0, sin(u, h, 0.25 - waves * 3.5 / len(BODY)), 0), 24, "position"))
+    T["root"].append(cyc(L, lambda u: (0, HOVER + sin(u, h, 0.25 - waves * 3.5 / len(BODY)), 0), 24, "position"))
     for name, ph in LIMBS.items():
         T[name] = [cyc(L, lambda u, ph=ph: (sin(u, limb, ph - 0.3), 0, sin(u, limb * 0.3, ph)), 24)]
     for name in ("left_calve", "right_calve", "left_forearm", "right_forearm"):
@@ -126,16 +127,15 @@ def special(L=2.6):
     def front(name, deg):
         return lambda u: (key(rear, deg)(u) + shake(u), 0, 0)
 
-    T["torso"] = [cyc(L, front("torso", 10), 48),
-                  cyc(L, lambda u: (0, 0, lerp(u, [(0, 0), (0.3, 18), (0.38, -16), (0.82, -14), (1, 0)])), 48, "position")]
+    T["torso"] = [cyc(L, front("torso", 15), 48)]
     T["neck"] = [cyc(L, front("neck", 18), 48)]
     T["neck_joint"] = [cyc(L, front("neck_joint", 14), 48)]
     T["hi_head"] = [cyc(L, front("hi_head", 16), 48)]
     T["jaw"] = [cyc(L, lambda u: (-lerp(u, [(0, 0), (0.3, 0), (0.36, 40), (0.82, 38), (0.95, 0), (1, 0)])
                                    + (sin(u, 2, 0.1, 11) if 0.38 < u < 0.82 else 0), 0, 0), 48)]
-    # hips follow the chest, the tail lags and whips
+    # the hips (root, which carries everything) draw back and lunge; the tail lags and whips
     T["root"] = [cyc(L, lambda u: (-0.5 * key(rear, 10)(u), 0, 0), 48),
-                 cyc(L, lambda u: (0, 0, lerp(u, [(0, 0), (0.3, 18), (0.38, -16), (0.82, -14), (1, 0)])), 48, "position")]
+                 cyc(L, lambda u: (0, HOVER, lerp(u, [(0, 0), (0.3, 18), (0.38, -16), (0.82, -14), (1, 0)])), 48, "position")]
     for i, name in enumerate(("tail", "tail_joint1", "tail_joint_2")):
         whip = [(0, 0), (0.32 + 0.04 * i, -12), (0.44 + 0.04 * i, 16), (0.6 + 0.04 * i, -6), (0.85, 0), (1, 0)]
         T[name] = [cyc(L, lambda u, w=whip, i=i: (lerp(u, w) + sin(u, 4, -0.12 * i, 2), sin(u, 3, -0.12 * i), 0), 48)]
@@ -183,7 +183,7 @@ def main(src=SRC, out=PREVIEW):
     for a in m["animations"]:
         if a["name"] == "special":
             a["loop"] = "once"
-    m["name"] = "Dragon"
+    m["name"] = "Loong"
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w") as f:
         json.dump(m, f, separators=(",", ":"))
@@ -210,7 +210,7 @@ def main(src=SRC, out=PREVIEW):
     still = Image.new("RGB", (1280, 640))
     for i, v in enumerate(views):
         still.paste(render(rest + hparts, eye=eye(v), target=c, W=640, H=640, fov=fov), (i * 640, 0))
-    still.save(os.path.join(out, "Dragon_2x.png"))
+    still.save(os.path.join(out, "Loong.png"))
     frames = []
     for anim in m["animations"]:
         n = round(anim["length"] * 12)
@@ -221,7 +221,7 @@ def main(src=SRC, out=PREVIEW):
                 for j, v in enumerate(views):
                     f.paste(render(parts, eye=eye(v), target=c, W=400, H=400, fov=fov), (j * 400, 0))
                 frames.append(A.label(f, [anim["name"]], 18))
-    A.gif(os.path.join(out, "Dragon_anims.gif"), frames, fps=12)
+    A.gif(os.path.join(out, "Loong_anims.gif"), frames, fps=12)
     print("wrote", OUT, len(frames), "frames")
 
 

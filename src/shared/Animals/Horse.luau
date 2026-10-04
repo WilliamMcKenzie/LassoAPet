@@ -11,6 +11,8 @@
 --   horse:setSaddled(true)        -- no saddle on this design; kept for callers
 --   horse:getNeck()               -- { cframe, radius } for a lasso loop around the neck
 --   horse:setScale(s)             -- grow or shrink the whole horse about its feet (pop-ins)
+--   horse:playOnce(name)          -- play one of its other animations once over the blend
+--                                 -- (the Loong's "special" fire breath)
 --
 -- Every other animal (Pinto, Pig, Fish, Rhino, Unicorn) shares all of this and
 -- only swaps the model data, plus its seat and neck-loop points if they differ
@@ -39,6 +41,7 @@ local GALLOP_FROM, GALLOP_IN = 12, 24 -- walk -> gallop
 local WALK_SPEED = 8 -- walk plays at 1x at this speed
 local GALLOP_SPEED = 36 -- gallop plays at 1x at this speed
 local LEAN = 0.18 -- body roll into turns, radians at full gallop
+local ONCE_FADE_IN, ONCE_FADE_OUT = 0.15, 0.3 -- seconds a playOnce animation blends in and out
 
 -- When a gallop leap lands: the front legs are back at rest after reaching out.
 -- nil for animals without legs (the Fish), which never kick up dust.
@@ -98,6 +101,8 @@ local Horse = {} -- the methods every variant shares
 -- points (optional): { seat = Vector3, neck = { center = Vector3, radius = number },
 -- seatOnNeck = true (the seat rides on the neck bone, e.g. a squid's mantle, which
 -- its run swings about: the rider moves with it but stays upright),
+-- seatBone = bone name (the same, on any bone: the Loong's saddle is on its chest,
+-- which its slither swings about),
 -- size = number (the whole animal scaled up from its model; by default sized to its
 -- tier, Config.PetTiers) }
 local function variant(name, data, rarity, points)
@@ -109,6 +114,7 @@ local function variant(name, data, rarity, points)
 		landAt = landAt(data),
 		seat = points.seat or SEAT,
 		seatOnNeck = points.seatOnNeck,
+		seatBone = points.seatBone,
 		neckLoop = points.neck or NECK_LOOP,
 		size = points.size or tierSize(name, data),
 	}, { __index = Horse })
@@ -133,6 +139,7 @@ local function variant(name, data, rarity, points)
 			model = model,
 			root = byName.rootBone,
 			neck = byName.neckBone,
+			seatPart = points.seatBone and byName[points.seatBone .. "Bone"],
 			pivots = pivots,
 			bones = bones,
 			clocks = clocks,
@@ -162,6 +169,19 @@ function Horse:update(dt, speed, turn)
 	local wIdle, wWalk, wGallop = 1 - moving, moving * (1 - galloping), moving * galloping
 	local rWalk, rGallop = math.clamp(s / WALK_SPEED, 0.6, 1.8), math.clamp(s / GALLOP_SPEED, 0.8, 1.4)
 
+	-- A one-shot (playOnce) fades in over the blend and back out at its end.
+	local once = self.once
+	local wOnce = 0
+	if once then
+		once.t += dt
+		local length = self.data.animations[once.name].length
+		if once.t >= length then
+			self.once, once = nil, nil
+		else
+			wOnce = math.min(1, once.t / ONCE_FADE_IN, (length - once.t) / ONCE_FADE_OUT)
+		end
+	end
+
 	local before = self.clocks.gallop
 	local pose = self.pose
 	for _, p in pairs(pose) do
@@ -177,8 +197,13 @@ function Horse:update(dt, speed, turn)
 			w, rate = wGallop, rGallop
 		end
 		self.clocks[name] = (self.clocks[name] + dt * rate) % anim.length
+		local t = self.clocks[name]
+		if once and name == once.name then
+			w, t = wOnce, once.t
+		else
+			w *= 1 - wOnce
+		end
 		if w > 0 then
-			local t = self.clocks[name]
 			for bone, track in pairs(anim.tracks) do
 				local p = pose[bone]
 				if not p then
@@ -221,6 +246,10 @@ function Horse:update(dt, speed, turn)
 end
 
 function Horse:getSeatCFrame()
+	if self.seatPart then
+		local at = self.seatPart.CFrame * CFrame.new((self.seat - self.pivots[self.seatBone]) * self.size * self.scale)
+		return CFrame.new(at.Position) * self.model.PrimaryPart.CFrame.Rotation
+	end
 	if self.seatOnNeck then
 		local at = self.neck.CFrame * CFrame.new((self.seat - self.pivots.neck) * self.size)
 		return CFrame.new(at.Position) * self.root.CFrame.Rotation
@@ -234,6 +263,14 @@ function Horse:getNeck()
 end
 
 function Horse:setSaddled(_saddled) end
+
+-- Plays one of this animal's own animations (not idle, walk or gallop) once, over
+-- whatever it's doing; ignored if it has no animation of that name.
+function Horse:playOnce(name)
+	if self.data.animations[name] then
+		self.once = { name = name, t = 0 }
+	end
+end
 
 -- Model:ScaleTo scales relative to the current size, so keep it well above the
 -- smallest part size (0.001): the thinnest plates are 0.05 studs.
