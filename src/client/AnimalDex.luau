@@ -105,6 +105,7 @@ local SHEETS = {
 	WarElephant = { frames = 24, time = 0.03, "rbxassetid://103485896070996" }, -- tools/dex_render.py
 	SoulHorse = { frames = 24, time = 0.03, "rbxassetid://71539574618443" }, -- tools/dex_render.py
 	Sludge = { frames = 24, time = 0.06, "rbxassetid://101851743328298" }, -- tools/dex_render.py
+	Leviathan = { frames = 20, time = 0.03, "rbxassetid://130093266232562" }, -- tools/dex_render.py
 	Whale = { frames = 24, time = 0.03, "rbxassetid://115620712947682" },
 	Kraken = { frames = 24, time = 0.05, "rbxassetid://77455009647862" },
 	FishSchool = { frames = 20, time = 0.03, "rbxassetid://104966778015588" },

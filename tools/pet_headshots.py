@@ -42,6 +42,7 @@ MODELS = {
     "Loong": "godlands/Loong", "WarElephant": "godlands/WarElephant", "SoulHorse": "godlands/SoulHorse",
     "Sludge": "sludge/Sludge",
     "Beholder": "beholder/Beholder",
+    "Leviathan": "leviathan/Leviathan",
 }
 ZYX = {"KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}

@@ -45,6 +45,7 @@ local HEADSHOTS = {
 	WarElephant = "rbxassetid://88035044263993", -- PetWarElephant.png
 	SoulHorse = "rbxassetid://102872657938822", -- PetSoulHorse.png
 	Sludge = "rbxassetid://119834887149656", -- PetSludge.png
+	Leviathan = "rbxassetid://93677343741816", -- PetLeviathan.png
 }
 -- QM's slot pictures by rarity (as the inventory bar); a plain colour until one is uploaded.
 local SLOTS = {

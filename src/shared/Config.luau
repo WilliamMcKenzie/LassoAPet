@@ -469,6 +469,7 @@ return {
 		WarElephant = "rbxassetid://84356622911486", -- assets/ui/WarElephantEggRender.png
 		SoulHorse = "rbxassetid://136725772402125", -- assets/ui/SoulHorseEggRender.png
 		Sludge = "rbxassetid://140005979942732", -- assets/ui/SludgeEggRender.png
+		Leviathan = "rbxassetid://95236739672996", -- assets/ui/LeviathanEggRender.png
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
