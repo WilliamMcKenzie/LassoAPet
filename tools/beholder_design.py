@@ -1,12 +1,12 @@
-"""The Beholder (Rare, medium): a round orange-brown blob floating over the floor
-with one huge eye on its front (cream rim, white, black pupil with a glint) under
-a heavy brow, and six stubby tentacles hanging round its underside, curling out
-at the tips like the pixel-art reference QM sent. You sit on top of the blob.
+"""The Beholder (Rare, medium, Godlands): an orange cube floating over the floor with
+one big square eye plate and a pupil on its front (QM, Oct 4: just those three cubes),
+and six stubby tentacles hanging round its underside, curling out at the tips like
+the pixel-art reference QM sent. You sit on top of the cube.
 
 Run: python3 tools/beholder_design.py [out_dir] [--gif]
 
-Bones: root (the blob, where you sit) -> neck (the eye and brow; the lasso loops
-round the blob) ; root -> Arm1..Arm6 (each turned about Y to its direction at
+Bones: root (the blob, where you sit) -> neck (the eye and pupil; the lasso loops
+round the body) ; root -> Arm1..Arm6 (each turned about Y to its direction at
 rest, 30 + 60 i degrees, so the eye has a clear view between the front two) ->
 T<i>a -> T<i>b -> T<i>c (segments, base to tip). Every tentacle is built along
 -z before its Arm turns it, so +X on a segment lifts it.
@@ -40,21 +40,19 @@ COLORS = {"body": (222, 136, 56), "dark": (160, 92, 34), "light": (246, 186, 112
           "white": (255, 255, 255), "black": (20, 20, 24), "brow": (120, 66, 26)}
 TEX = {n: i for i, n in enumerate(COLORS)}
 
-W = 9.0  # the blob's width
-# the ball's slabs: (height of the slab's centre above or below the middle, width), middle out
-LAYERS = [(0.0, 9.0, 3.2), (2.6, 7.6, 2.2), (4.1, 5.0, 1.0)]
-LAYER_H = LAYERS[-1][2]
+W = 8.0  # the body cube
 HOVER = 6.6  # the blob's centre above its own origin, before floor() drops the tentacle tips to y = 0
 ARMS = 6
 BASE_R = 2.2  # where the tentacles leave the underside
 BASE_Y = HOVER - 3.2
-EYE = 0.8
+EYE = 5.6  # the eye plate
+PUPIL = 2.4
 # (length, thickness) of each tentacle segment, base to tip, and its rest pitch
 SEGS = [(2.6, 1.6), (2.3, 1.25), (2.0, 0.95)]
 PITCH = [-76.0, 28.0, 40.0]
 GAP = 2.4  # the tentacle tips float this far off the floor
 OVERLAP = 0.4
-SEAT_Y = HOVER + LAYERS[-1][0] + LAYER_H / 2
+SEAT_Y = HOVER + W / 2
 
 
 def build():
@@ -77,44 +75,14 @@ def build():
     c = S.cube
     y0 = HOVER
 
-    # the blob: a ball of stacked octagon slabs (a square and the same square turned 45
-    # degrees each), a lighter belly patch underneath, knobbly bumps on the back and sides
+    # QM, Oct 4: just three cubes above the tentacles: the body, the eye (a square plate on
+    # its front) and the pupil
     root = add_group("root", (0, y0, 0), None)
-    parts = []
-    for n, (dy, w, h) in enumerate(LAYERS):
-        for sgn in (-1, 1) if dy else (1,):
-            yy, tag = y0 + sgn * dy, f"Ball{n}{'ab'[sgn > 0]}"
-            parts += [c(tag, (0, yy, 0), (w, h, 0.62 * w), TEX["body"]),
-                      c(tag + "X", (0, yy, 0), (0.62 * w, h, w), TEX["body"]),
-                      c(tag + "C", (0, yy, 0), (0.86 * w, h, 0.86 * w), TEX["body"])]
-    R = LAYERS[0][1] / 2
-    parts += [c("Belly", (0, y0 - LAYERS[-1][0] - LAYER_H / 2 - 0.2, 0), (2.6, 0.4, 2.6), TEX["light"]),
-              c("BumpBack", (0, y0 + 1.2, R + 0.2), (2.0, 2.0, 0.8), TEX["dark"]),
-              c("BumpL", (-R - 0.2, y0 + 1.6, 1.0), (0.8, 1.5, 1.5), TEX["dark"]),
-              c("BumpR", (R + 0.2, y0 + 1.6, 1.0), (0.8, 1.5, 1.5), TEX["dark"]),
-              c("BumpTop", (1.6, y0 + LAYERS[-1][0] + LAYER_H / 2 + 0.3, 1.6), (1.2, 0.6, 1.2), TEX["dark"])]
-    put(root, parts)
-
-    # the eye on the front (-z), tilted up a little so the rider can see it: rim, white, pupil, glint
-    neck = add_group("neck", (0, y0, -W / 2), root, (12, 0, 0))
+    put(root, [c("Body", (0, y0, 0), (W, W, W), TEX["body"])])
+    neck = add_group("neck", (0, y0, -W / 2), root)
     z = -W / 2
-    ey = y0 - 0.2
-    e = EYE  # the eye's size against the first draft's 6.8-stud rim
-
-    def eye(name, dz, w, h, d, tex, x=0.0, y=0.0):
-        return c(name, (x * e, ey + y * e, z + 0.3 - dz), (w * e, h * e, d), tex)
-
-    put(neck, [eye("EyeRim", 0.3, 6.0, 6.0, 0.8, TEX["rim"]),
-               eye("EyeRimY", 0.3, 5.0, 6.8, 0.8, TEX["rim"]),
-               eye("EyeRimX", 0.3, 6.8, 5.0, 0.8, TEX["rim"]),
-               eye("Eye", 0.6, 4.6, 4.6, 0.8, TEX["white"]),
-               eye("EyeY", 0.6, 3.6, 5.4, 0.8, TEX["white"]),
-               eye("EyeX", 0.6, 5.4, 3.6, 0.8, TEX["white"]),
-               eye("Pupil", 0.95, 2.4, 2.4, 0.6, TEX["black"]),
-               eye("PupilY", 0.95, 1.6, 3.0, 0.6, TEX["black"]),
-               eye("Glint", 1.3, 0.7, 0.7, 0.2, TEX["white"], -0.6, 0.6),
-               # the heavy brow over it
-               c("Brow", (0, ey + 3.6 * e + 0.2, z - 0.1), (6.4 * e, 1.1, 1.4), TEX["brow"], -10)])
+    put(neck, [c("Eye", (0, y0, z - 0.1), (EYE, EYE, 0.2), TEX["white"]),
+               c("Pupil", (0, y0, z - 0.3), (PUPIL, PUPIL, 0.2), TEX["black"])])
 
     # the tentacles
     for i in range(ARMS):
