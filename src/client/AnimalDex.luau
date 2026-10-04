@@ -91,6 +91,7 @@ local SHEETS = {
 	Starfish = { frames = 48, time = 0.06, "rbxassetid://79068936169772", "rbxassetid://103163746025717" },
 	Squid = { frames = 24, time = 0.05, "rbxassetid://103797474563946" },
 	KingCrab = { frames = 17, time = 0.03, "rbxassetid://88553226475116" },
+	BlueCrab = { frames = 17, time = 0.03, "rbxassetid://101217167881986" },
 	Whale = { frames = 24, time = 0.03, "rbxassetid://115620712947682" },
 	Kraken = { frames = 24, time = 0.05, "rbxassetid://77455009647862" },
 	FishSchool = { frames = 20, time = 0.03, "rbxassetid://104966778015588" },
