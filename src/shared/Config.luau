@@ -568,16 +568,16 @@ return {
 	-- Gold3 and Nuke All aren't on it but can still be bought.
 	Shop = {
 		Gold = {
-			{ Key = "Gold1", Gold = 100000, Price = 50, ProductId = 3716409553 }, -- $100K (QM's nerf, Oct 4: was $1M)
+			{ Key = "Gold1", Gold = 100000, Price = 50, ProductId = 3716553782, OldProductIds = { 3716409553 } }, -- $100K (QM's nerf, Oct 4: was $1M)
 			{ Key = "Gold2", Gold = 5000000, Price = 99, ProductId = 3716409568 },
 			{ Key = "Gold3", Gold = 25000000, Price = 399, ProductId = 3716409595 },
-			{ Key = "Gold4", Gold = 1000000, Price = 150, ProductId = 3716409606 }, -- $1M (QM's nerf, Oct 4: was $100M)
+			{ Key = "Gold4", Gold = 1000000, Price = 150, ProductId = 3716553841, OldProductIds = { 3716409606 } }, -- $1M (QM's nerf, Oct 4: was $100M)
 		},
 		Specials = {
 			{ Key = "GiantHorse", Name = "Giant Horse", Price = 5, ProductId = 3716552368, OldProductIds = { 3716409132 } }, -- a Giant Horse egg (SpecialEggs); the old product was one giant ride -- one ride (GiantHorse below)
 			{ Key = "SpawnLoong", Name = "Spawn Loong", Price = 25, ProductId = 3716553200 }, -- starts the Loong event now, no countdown, and the 10 minute cycle over (Events.server)
 			{ Key = "Nuke", Name = "Nuke All", Price = 200, ProductId = 3716409185 }, -- your next ride (NukeRange)
-			{ Key = "Legendary", Name = "Legend Egg", Price = 150, ProductId = 3716409444 }, -- a pet by LegendaryOdds, into your pen
+			{ Key = "Legendary", Name = "Legend Egg", Price = 150, ProductId = 3716553941, OldProductIds = { 3716409444 } }, -- a pet by LegendaryOdds, into your pen
 		},
 		-- The Legend Egg's odds (percent, QM's odds card, Oct 4).
 		LegendaryOdds = { Unicorn = 18, Snake = 20, Icebringer = 20, Kraken = 20, BlueCrab = 20, Loong = 1, RoboShark = 1 },
