@@ -417,7 +417,7 @@ return {
 		-- 70% split evenly over the other Legendaries (14% each).
 		Odds = { Legendary = 70, Exclusive = 30 },
 		Pool = {
-			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1, Beholder = 1 },
+			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1, Beholder = 1, Sludge = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
