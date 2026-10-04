@@ -60,7 +60,7 @@ return {
 			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
-			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, Icebringer = 0.06 },
+			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0.12, Icebringer = 0.06 }, -- Snack Yak guessed like the Ice Golem
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
@@ -281,7 +281,7 @@ return {
 	PetTiers = {
 		Horse = 1, Pig = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
 		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
-		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, Icebringer = 3, -- Tundra
+		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, Whale = 4, Kraken = 4, -- Ocean
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
@@ -324,7 +324,7 @@ return {
 	PetIncome = {
 		Horse = 1, Pig = 3, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
 		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
-		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, Icebringer = 1111, -- Tundra
+		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 480, Icebringer = 1111, -- Tundra
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, Whale = 5000, Kraken = 8200, -- Ocean
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
@@ -338,7 +338,7 @@ return {
 		Odds = { Rare = 50, Epic = 32, Legendary = 15, Exclusive = 3 },
 		Pool = {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1 },
-			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
+			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, SnackYak = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
 			-- with an empty pool is never rolled.
@@ -364,6 +364,7 @@ return {
 		SpineLizard = "rbxassetid://98567631088826",
 		Boar = "rbxassetid://121234341393694",
 		IceGolem = "rbxassetid://102264545247873",
+		SnackYak = "", -- assets/ui/SnackYakEggRender.png (awaiting upload)
 		Icebringer = "rbxassetid://108999142038756",
 		Kraken = "rbxassetid://104654341782924", -- assets/ui/KrakenEggRender.png
 		Squid = "rbxassetid://128883182267763", -- assets/ui/SquidEggRender.png
@@ -448,6 +449,7 @@ return {
 		Boar = { Speed = 1.6, Stamina = 1.6 },
 		Snowman = { Speed = 1.9, Stamina = 1.3 },
 		IceGolem = { Speed = 1.6, Stamina = 3 },
+		SnackYak = { Speed = 1.8, Stamina = 2.6 }, -- a guess, just past the Ice Golem's speed
 		Icebringer = { Speed = 2.7, Stamina = 4 },
 		-- Ocean
 		Starfish = { Speed = 2.5, Stamina = 2 },

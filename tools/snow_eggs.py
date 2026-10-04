@@ -10,8 +10,10 @@ or wedge with depth.
                         blue claws, a pale hump down the back
   IceWyvern  Legendary  cyan with white bands, pale-ice antlers with forward tines,
                         folded wings on the sides, ice spikes down the back
+  SnackYak   Epic       brown under a shaggy yellow lid with fur hanging over the crack,
+                        a pink nose, khaki horns out the sides, a fruit basket on top
 
-Run from the repo root: python3 tools/snow_eggs.py
+Run from the repo root: python3 tools/snow_eggs.py [Kind ...]   (default: all of them)
 Writes designs/eggs/c_style/<Kind>Egg.bbmodel, src/shared/Eggs/<Kind>EggModel.luau,
 assets/ui/<Kind>EggRender.png (cropped, for the reveal card) and previews in
 /mnt/project-files/eggs/c_style/snow/.
@@ -34,6 +36,7 @@ from egg_designs import H  # noqa: E402
 from partlib import Part, T, Ry, Rz, look_at, render  # noqa: E402
 from desert_eggs import fin  # noqa: E402
 import bbmodel_to_luau  # noqa: E402
+from ocean_eggs import build as build_turned  # noqa: E402  (C.build, plus blocks turned about Y)
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -202,7 +205,45 @@ def ice_wyvern_egg():
     return egg
 
 
-EGGS = [("Penguin", penguin_egg), ("Snowman", snowman_egg), ("PolarBear", polar_bear_egg), ("IceWyvern", ice_wyvern_egg)]
+def snack_yak_egg():
+    # tools/snack_yak.py's colours from QM's painted yak
+    brown, dark, fur, nose, nostril = (129, 74, 39), (92, 41, 32), (238, 200, 74), (255, 125, 109), (120, 40, 40)
+    horn, tip, basket, inside, carrot = (202, 191, 133), (165, 145, 112), (196, 154, 75), (81, 51, 39), (233, 127, 27)
+    egg = shell([dark, brown, brown, brown, fur, fur, fur])
+    # fur hanging over the crack: strands of yellow down from the lid, all round
+    for k in range(8):
+        yaw = 45 * k + 22.5
+        z = WIDTHS[3] / 2
+        long = k % 2 == 0
+        p = Part(f"Fringe{k}", (0.34, 0.3 if long else 0.18, 0.1),
+                 Ry(yaw) @ T(0, 4 * LH - (0.15 if long else 0.09), -z - 0.03), fur)
+        p.bone = "bottom"
+        p.yaw = yaw
+        egg.parts.append(p)
+    # the pink nose out the front, nostrils in it
+    zf, y = -WIDTHS[3] / 2, 3 * LH
+    egg.block("Nose", (-0.34, y - 0.3, zf - 0.22), (0.34, y + 0.06, zf + 0.05), nose)
+    for side, x in (("L", -0.16), ("R", 0.16)):
+        egg.block("Nostril" + side, (x - 0.06, y - 0.2, zf - 0.25), (x + 0.06, y - 0.06, zf - 0.2), nostril)
+
+    # horns out the sides of the lid, up, then their tips forward
+    def horn_(side, sx, X):
+        a, y0 = WIDTHS[5] / 2, 5 * LH
+        xa, xb = X(a - 0.05, a + 0.34)
+        egg.block("Horn" + side, (xa, y0, -0.14), (xb, y0 + 0.2, 0.14), horn).bone = "top"
+        xa, xb = X(a + 0.16, a + 0.34)
+        egg.block("HornUp" + side, (xa, y0 + 0.2, -0.12), (xb, y0 + 0.62, 0.1), horn).bone = "top"
+        egg.block("HornTip" + side, (xa, y0 + 0.44, -0.36), (xb, y0 + 0.62, -0.12), tip).bone = "top"
+    sides(horn_)
+    # a little fruit basket on top, open, with a carrot in it
+    egg.block("Basket", (-0.32, H - 0.04, -0.12), (0.32, H + 0.3, 0.48), basket).bone = "top"
+    egg.block("BasketIn", (-0.24, H + 0.28, -0.04), (0.24, H + 0.31, 0.4), inside).bone = "top"
+    egg.block("Carrot", (-0.06, H + 0.2, 0.06), (0.06, H + 0.52, 0.18), carrot).bone = "top"
+    return egg
+
+
+EGGS = [("Penguin", penguin_egg), ("Snowman", snowman_egg), ("PolarBear", polar_bear_egg), ("IceWyvern", ice_wyvern_egg),
+        ("SnackYak", snack_yak_egg)]
 RENDER_VIEW = C.VIEWS[0]
 SCALE_EGG = ("Horse", C.take_c)
 
@@ -217,20 +258,21 @@ def moved(parts, dx):
     return out
 
 
-def main(preview="/mnt/project-files/eggs/c_style/snow"):
+def main(*kinds, preview="/mnt/project-files/eggs/c_style/snow"):
+    todo = [(k, fn) for k, fn in EGGS if not kinds or k in kinds]
     os.makedirs(os.path.join(preview, "renders"), exist_ok=True)
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 26)
     tile = 360
-    sheet = Image.new("RGB", (tile * len(EGGS), tile * 2 + 50), (236, 236, 236))
+    sheet = Image.new("RGB", (tile * len(todo), tile * 2 + 50), (236, 236, 236))
     d = ImageDraw.Draw(sheet)
     bb_dir = os.path.join(ROOT, "designs", "eggs", "c_style")
     eggs = []
-    for c, (kind, fn) in enumerate(EGGS):
+    for c, (kind, fn) in enumerate(todo):
         egg = fn()
         eggs.append((kind, egg))
         name = kind + "Egg"
-        C.build(egg, name, E.SPLIT, bb_dir)
-        C.build(egg, name, E.SPLIT, preview)
+        build_turned(egg, name, bb_dir)
+        build_turned(egg, name, preview)
         bbmodel_to_luau.main(os.path.join("designs", "eggs", "c_style", name + ".bbmodel"),
                              os.path.join(ROOT, "src", "shared", "Eggs", name + "Model.luau"))
         for r, view in enumerate(C.VIEWS):

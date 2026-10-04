@@ -36,11 +36,11 @@ MODELS = {
     "Cactus": "desert/Cactus", "Scorpion": "desert/Scorpion", "Sandworm": "desert/Sandworm",
     "SpineLizard": "converted/SpineLizard", "Snake": "desert/Snake",
     "Penguin": "snow/Penguin", "Boar": "converted/Boar", "Snowman": "snow/Snowman",
-    "IceGolem": "converted/IceGolem", "Icebringer": "converted/Icebringer",
+    "IceGolem": "converted/IceGolem", "Icebringer": "converted/Icebringer", "SnackYak": "snow/SnackYak",
     "Starfish": "ocean/Starfish", "Whale": "ocean/Whale", "Squid": "ocean/Squid",
     "KingCrab": "ocean/KingCrab", "Kraken": "ocean/Kraken", "FishSchool": "ocean/FishSchool",
 }
-ZYX = {"KingCrab", "IceGolem"}  # converted with --zyx (QM's hand-made multi-axis rotations)
+ZYX = {"KingCrab", "IceGolem", "SnackYak"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}
 # Animals whose run makes a poor picture (the Snake stretches out thin, the Starfish
 # folds its arms up) keep their idle stance in the action style.
