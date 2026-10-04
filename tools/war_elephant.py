@@ -15,6 +15,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
 import horse_egg_takes as HE  # noqa: E402
+from snow_designs import pyramid  # noqa: E402
 from horse_rig import pose  # noqa: E402
 from partlib import render  # noqa: E402
 from PIL import Image  # noqa: E402
@@ -25,6 +26,7 @@ ARMOUR = (56, 60, 74)
 TRIM = (98, 104, 122)
 TUSK = (246, 238, 214)
 NAIL = (226, 218, 198)
+SPIKE = (150, 156, 174)
 
 
 def war_elephant():
@@ -39,7 +41,11 @@ def war_elephant():
     for side, sx in (("L", -1), ("R", 1)):
         xa, xb = sorted((sx * 0.85, sx * 1.3))
         a.box("Tusk" + side, (xa, 4.3, -7.6), (xb, 4.8, -5.4), TUSK, "neck")
-        a.box("TuskTip" + side, (xa + 0.05 * sx, 4.8, -8.0), (xb - 0.05 * sx, 5.5, -7.4), TUSK, "neck")
+        a.box("TuskTip" + side, (xa + 0.05 * sx, 4.8, -8.0), (xb - 0.05 * sx, 5.3, -7.4), TUSK, "neck")
+        # steel spikes capping the tusks
+        lo, hi = sorted((sx * 0.85, sx * 1.3))
+        pyramid(a, "TuskSpike" + side, (lo, 5.3, -8.0), (hi, 5.3, -7.4), "+y", 0.9, SPIKE, "neck")
+        pyramid(a, "TuskSpikeFront" + side, (lo, 4.3, -7.6), (hi, 4.8, -7.6), "-z", 0.5, SPIKE, "neck")
         # big flat ears on the head's sides, folding back from their front edge
         xa, xb = sorted((sx * 1.6, sx * 2.05))
         bone = "Ear" + side
@@ -59,8 +65,13 @@ def war_elephant():
         for side, sx in (("L", -1), ("R", 1)):
             xa, xb = sorted((sx * 2.2, sx * 2.5))
             a.box(f"Skirt{side}{i + 1}", (xa, 3.7, z0), (xb, 5.6, z1), ARMOUR, "root")
-    for k, z in enumerate((-1.8, 0.2, 2.2)):
-        a.box(f"Spine{k + 1}", (-0.25, 8.0, z), (0.25, 8.4, z + 0.8), TRIM, "root")
+    # pyramid spikes: a row down the back, one on each side plate, one on the head plate
+    for k, z in enumerate((-2.2, -0.4, 1.4, 2.8)):
+        pyramid(a, f"Spine{k + 1}", (-0.4, 8.0, z - 0.4), (0.4, 8.0, z + 0.4), "+y", 1.1, SPIKE, "root")
+    for i, z in enumerate((-1.95, 0.25, 2.45)):
+        for side, sx in (("L", -1), ("R", 1)):
+            pyramid(a, f"SideSpike{side}{i + 1}", (sx * 2.5, 4.3, z - 0.35), (sx * 2.5, 5.0, z + 0.35), ("+x" if sx > 0 else "-x"), 0.7, SPIKE, "root")
+    pyramid(a, "HeadSpike", (-0.3, 8.6, -6.95), (0.3, 8.6, -6.35), "+y", 0.9, SPIKE, "neck")
     a.meta = {"seat": (0, 8.1, 1.2), "neck_loop": {"center": (0, 6.4, -4.6), "radius": 2.3}}
     return a
 
@@ -83,6 +94,10 @@ def war_elephant_egg():
     for i in (3,):
         HE.front_plate(egg, f"Band{i}", -0.6, 0.6, i * HE.LH, (i + 1) * HE.LH, ARMOUR, depth=0.05, plain=False)
     HE.back_ridge(egg, ARMOUR, range(1, HE.N), name="Plate", out=0.15, hw=0.45)
+    for i in (2, 4, 5):
+        z = HE.WIDTHS[i] / 2 + 0.15
+        y = (i + 0.5) * HE.LH
+        pyramid(egg, f"Spike{i}", (-0.2, y - 0.2, z), (0.2, y + 0.2, z), "+z", 0.4, SPIKE, "top" if i >= 4 else "bottom")
     return egg
 
 
