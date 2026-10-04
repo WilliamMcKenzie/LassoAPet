@@ -472,13 +472,16 @@ return {
 		Yaw = 15, -- degrees it turns in toward the course, off square with the wall (QM)
 		Reach = 12, -- studs from the counter where Talk shows
 	},
-	-- The top-3 podium (Leaderboard.server, QM Oct 4): the avatars of the three players
-	-- who rode furthest from base, all time (OrderedDataStore "BestDistance", metres),
-	-- in the gap between the right corner pen and the start line. Faces into the base.
+	-- The podium (Leaderboard.server, QM Oct 4): the avatar of the player who rode
+	-- furthest from base, all time (OrderedDataStore "BestDistance", metres), standing on
+	-- QM's gold column in the middle of a coiled grass snake (Props/GrassSnake,
+	-- PodiumSnake.client), in the base's right front corner. No text for now (QM).
 	Podium = {
-		Position = Vector3.new(66, 0, 8), -- clear of Pen5 at its biggest (x >= 76)
-		Refresh = 120, -- seconds between re-reading the top 3
+		Position = Vector3.new(58, 0, 16), -- the column, on the ground; the snake reaches x ~50..74, z ~2..47 (Pen5 is x >= 76)
+		Refresh = 120, -- seconds between re-reading the leader
 		AvatarScale = 1.5,
+		SnakeScale = 2, -- x the model (the Snake pet is about 1.9)
+		SnakeYaw = 165, -- degrees: its head rears in front of the column, looking into the base
 	},
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged

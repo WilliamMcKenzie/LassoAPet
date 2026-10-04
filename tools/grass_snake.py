@@ -1,15 +1,13 @@
-"""Grass Snake prop: QM's Snake (designs/desert/Snake.bbmodel) recoloured as a
-plain grass snake. Same cubes, bones and idle animation; only the colours change,
-and only the idle animation is kept (it's a prop, not a rideable animal).
+"""Grass Snake prop: QM's Snake recoloured as a plain grass snake, coiled in its idle
+round a gold podium column (QM's edit, Oct 4). Renders a still and the idle GIF.
 
 Run: python3 tools/grass_snake.py [out_dir]
 
-  body     bright grass green, darker green bands, pale cream-yellow belly
-  collar   the neck piece behind the head is the grass snake's yellow collar,
-           the one behind it a near-black band
-  spikes   horns, crest and spikes go dark green so they read as scales
-  rattle   green like the tail
-Eyes, mouth and teeth keep the Snake's colours.
+designs/props/GrassSnake.bbmodel is QM's file (QM added the Podium group, column and cap,
+and turned the coil in the idle). build() made the first recolour from
+designs/desert/Snake.bbmodel; `python3 tools/grass_snake.py rebuild` would overwrite
+QM's file with it, so don't. Convert it for the game with
+  python3 tools/bbmodel_to_luau.py designs/props/GrassSnake.bbmodel src/shared/Props/GrassSnakeModel.luau
 """
 
 import base64
@@ -74,19 +72,21 @@ def build():
 
 
 def main(out="/mnt/project-files/animals/grass_snake"):
-    m = build()
-    os.makedirs(os.path.dirname(OUT), exist_ok=True)
+    if out == "rebuild":
+        with open(OUT, "w") as f:
+            json.dump(build(), f, separators=(",", ":"))
+        return
+    m = json.load(open(OUT))
     os.makedirs(out, exist_ok=True)
-    for path in (OUT, os.path.join(out, "GrassSnake.bbmodel")):
-        with open(path, "w") as f:
-            json.dump(m, f, separators=(",", ":"))
+    with open(os.path.join(out, "GrassSnake.bbmodel"), "w") as f:
+        json.dump(m, f, separators=(",", ":"))
     cams = [dict(eye=(-40, 28, -30), target=(0, 3, 8)), dict(eye=(0, 80, 7), target=(0, 0, 7.5))]
     W, H = 480, 440
     idle = m["animations"][0]
     still = Image.new("RGB", (W * 2, H))
     for c, cam in enumerate(cams):
         still.paste(render(posed(m, idle, idle["length"] * 0.25), W=W, H=H, fov=40, outline=False, **cam), (c * W, 0))
-    A.label(still, ["grass snake (idle)", "from above"]).save(os.path.join(out, "GrassSnake.png"))
+    A.label(still, ["grass snake podium (idle)", "from above"]).save(os.path.join(out, "GrassSnake.png"))
     frames = []
     n = 24
     for _ in range(2):

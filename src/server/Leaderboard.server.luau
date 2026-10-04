@@ -1,6 +1,7 @@
--- The top-3 podium (Config.Podium): the Roblox avatars of the three players who
--- rode furthest from base, standing on gold, silver and bronze steps in the gap
--- between the right corner pen and the start line.
+-- The podium (Config.Podium): the Roblox avatar of the player who rode furthest from
+-- base, standing on the cap of QM's gold column in the middle of the grass snake's
+-- coil (Props/GrassSnake, built by PodiumSnake.client) in the base's right front
+-- corner. First place only, and no text for now (QM, Oct 4).
 --
 -- Distance is the HUD's: metres past the start line (4 studs a metre), read off
 -- each rider's RideSync (Riders.server passes those on; this only listens).
@@ -10,7 +11,7 @@
 -- never went faster than MAX_SPEED between syncs (no pet gets near it, whatever it's
 -- merged or boosted to); a ride that breaks either (a teleport, the /biome warp, a
 -- speed hack) doesn't count until that player is home again.
--- The podium re-reads the top 3 every Refresh seconds, mixed with this server's
+-- The podium re-reads the leader every Refresh seconds, mixed with this server's
 -- own bests so far, so it works in Studio without API access too.
 
 local DataStoreService = game:GetService("DataStoreService")
@@ -18,14 +19,13 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local GrassSnake = require(ReplicatedStorage.Shared.Props.GrassSnake)
 
 local STUDS_PER_METRE = 4 -- Ride.client's
 local MAX_SPEED = 1500 -- studs a second: 44 x 8 (MergeMaxSpeed) x 2 (sprint) x 2 (a boost), and some
 local SLACK = 60 -- studs of leeway on top, for sync jitter
 local START_NEAR = -200 -- a ride's first sync must be closer to home than this (z)
 local FLUSH = 30 -- seconds between saving raised bests
-local STUDS = "rbxassetid://7447638591" -- the classic stud decal the animals use
-local STUD_TILE = 0.5
 
 local podium = Config.Podium
 local ok, store = pcall(DataStoreService.GetOrderedDataStore, DataStoreService, "BestDistance")
@@ -34,7 +34,6 @@ if not ok then
 end
 
 local best = {} -- [userId] = metres, this server's riders
-local names = {} -- [userId] = name
 local dirty = {} -- [userId] = true: best raised since the last save
 local lastZ = {} -- [player] = rider z at their last sync
 local lastAt = {} -- [player] = os.clock() of their last sync
@@ -68,7 +67,6 @@ ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player
 	local id = player.UserId
 	if metres > (best[id] or 0) then
 		best[id] = metres
-		names[id] = player.DisplayName
 		dirty[id] = true
 	end
 end)
@@ -112,98 +110,16 @@ game:BindToClose(function()
 	end
 end)
 
--- The podium: 2nd on the left, 1st in the middle, 3rd on the right (as you look
--- at it from the base), numbers on their fronts.
-local origin = CFrame.new(podium.Position) * CFrame.Angles(0, math.pi, 0) -- front faces into the base (+z)
+-- Where the winner stands: on the column's cap (the snake is the client's), facing
+-- into the base (+z).
+local origin = CFrame.new(podium.Position + Vector3.new(0, GrassSnake.capTop.Y * podium.SnakeScale, 0))
+	* CFrame.Angles(0, math.pi, 0) -- (a character looks along its -z)
 local model = Instance.new("Model")
 model.Name = "Podium"
-
-local function block(name, size, at, color)
-	local part = Instance.new("Part")
-	part.Name = name
-	part.Size = size
-	part.CFrame = origin * at
-	part.Color = color
-	part.Material = Enum.Material.SmoothPlastic
-	part.Anchored = true
-	part.TopSurface = Enum.SurfaceType.Smooth
-	part.BottomSurface = Enum.SurfaceType.Smooth
-	for _, face in Enum.NormalId:GetEnumItems() do
-		local texture = Instance.new("Texture")
-		texture.Texture = STUDS
-		texture.StudsPerTileU = STUD_TILE
-		texture.StudsPerTileV = STUD_TILE
-		texture.Face = face
-		texture.Parent = part
-	end
-	part.Parent = model
-	return part
-end
-
-local function text(parent, size, value)
-	local label = Instance.new("TextLabel")
-	label.BackgroundTransparency = 1
-	label.Size = size
-	label.Font = Enum.Font.FredokaOne
-	label.TextScaled = true
-	label.TextColor3 = Color3.new(1, 1, 1)
-	label.Text = value
-	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 3
-	stroke.Parent = label
-	label.Parent = parent
-	return label
-end
-
-local STEP_W, STEP_D = 5.6, 6
-local STEPS = { -- rank: x (in the podium's frame, + = the viewer's left), height, colour
-	{ x = 0, h = 4.5, color = Color3.fromRGB(255, 204, 40) },
-	{ x = STEP_W, h = 3, color = Color3.fromRGB(200, 208, 222) },
-	{ x = -STEP_W, h = 2, color = Color3.fromRGB(222, 132, 64) },
-}
-block("Base", Vector3.new(STEP_W * 3 + 1, 0.6, STEP_D + 1), CFrame.new(0, 0.3, 0), Color3.fromRGB(62, 62, 72))
-for rank, step in STEPS do
-	local part = block("Step" .. rank, Vector3.new(STEP_W, step.h, STEP_D), CFrame.new(step.x, 0.6 + step.h / 2, 0), step.color)
-	local number = Instance.new("SurfaceGui")
-	number.Face = Enum.NormalId.Front -- the podium's front, toward the base
-	number.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	number.PixelsPerStud = 40
-	number.LightInfluence = 0
-	text(number, UDim2.fromScale(1, 0.9), tostring(rank)).Position = UDim2.fromScale(0, 0.05)
-	number.Parent = part
-	step.top = 0.6 + step.h
-end
-
-local title = Instance.new("BillboardGui")
-title.Name = "Title"
-title.Size = UDim2.fromOffset(320, 44)
--- Over the winner's name: about where a usual avatar's head is, lifted past the name sign.
-title.StudsOffsetWorldSpace = Vector3.new(0, STEPS[1].h / 2 + 5.5 * podium.AvatarScale + 1.5, 0)
-title.SizeOffset = Vector2.new(0, 1.3)
-title.MaxDistance = 200
-title.Adornee = model:FindFirstChild("Step1")
-text(title, UDim2.fromScale(1, 1), "FURTHEST RIDES")
-title.Parent = model
-
 model.Parent = workspace
 
--- Who's standing on each step: { id, metres, avatar, sign }.
-local standing = {}
-
-local function sign(parent, adornee, height)
-	local gui = Instance.new("BillboardGui")
-	gui.Name = "Name"
-	gui.Size = UDim2.fromOffset(180, 56)
-	gui.StudsOffsetWorldSpace = Vector3.new(0, height + 1.5, 0)
-	gui.MaxDistance = 150
-	gui.Adornee = adornee
-	local name = text(gui, UDim2.fromScale(1, 0.55), "")
-	local metres = text(gui, UDim2.fromScale(1, 0.45), "")
-	metres.Position = UDim2.fromScale(0, 0.55)
-	metres.TextColor3 = Color3.fromRGB(150, 255, 140)
-	gui.Parent = parent
-	return gui, name, metres
-end
+-- Who's standing there: { id, avatar }.
+local standing
 
 local function idle(avatar)
 	local humanoid = avatar:FindFirstChildOfClass("Humanoid")
@@ -224,15 +140,13 @@ local function idle(avatar)
 	end)
 end
 
-local function stand(rank, id, metres, name)
-	local spot = standing[rank]
-	if spot and spot.id == id then
-		spot.metresText.Text = string.format("%d m", metres)
+local function stand(id)
+	if standing and standing.id == id then
 		return
 	end
-	if spot then
-		spot.holder:Destroy()
-		standing[rank] = nil
+	if standing then
+		standing.avatar:Destroy()
+		standing = nil
 	end
 	if not id then
 		return
@@ -241,8 +155,7 @@ local function stand(rank, id, metres, name)
 	if not okModel or not avatar then
 		return
 	end
-	local step = STEPS[rank]
-	avatar.Name = "Avatar"
+	avatar.Name = "Leader"
 	for _, part in avatar:GetDescendants() do
 		if part:IsA("BasePart") then
 			part.Anchored = true
@@ -251,34 +164,19 @@ local function stand(rank, id, metres, name)
 		end
 	end
 	avatar:ScaleTo(podium.AvatarScale)
-	-- Feet on the step, facing the base.
+	-- Feet on the cap.
 	local box, size = avatar:GetBoundingBox()
 	local pivot = avatar:GetPivot()
-	local feet = origin * CFrame.new(step.x, step.top, 0) -- (a character looks along its -z, as origin does)
-	avatar:PivotTo(feet * CFrame.new(0, size.Y / 2 + (pivot.Position.Y - box.Position.Y), 0))
-	local holder = Instance.new("Model")
-	holder.Name = "Rank" .. rank
-	avatar.Parent = holder
-	local _, nameText, metresText = sign(holder, model:FindFirstChild("Step" .. rank), step.h / 2 + size.Y)
-	nameText.Text = name
-	metresText.Text = string.format("%d m", metres)
-	holder.Parent = model
+	avatar:PivotTo(origin * CFrame.new(0, size.Y / 2 + (pivot.Position.Y - box.Position.Y), 0))
+	avatar.Parent = model
 	idle(avatar)
-	standing[rank] = { id = id, holder = holder, metresText = metresText }
-end
-
-local function nameOf(id)
-	if not names[id] then
-		local okName, name = pcall(Players.GetNameFromUserIdAsync, Players, id)
-		names[id] = okName and name or "?"
-	end
-	return names[id]
+	standing = { id = id, avatar = avatar }
 end
 
 local function refresh()
 	local scores = {} -- [userId] = metres
 	if store then
-		local okPages, pages = pcall(store.GetSortedAsync, store, false, 3)
+		local okPages, pages = pcall(store.GetSortedAsync, store, false, 1)
 		if okPages then
 			for _, entry in pages:GetCurrentPage() do
 				local id = tonumber(string.match(entry.key, "^u(%d+)$"))
@@ -291,23 +189,13 @@ local function refresh()
 	for id, metres in best do
 		scores[id] = math.max(scores[id] or 0, metres)
 	end
-	local top = {}
+	local leader, most = nil, 0
 	for id, metres in scores do
-		if metres > 0 then
-			table.insert(top, { id = id, metres = metres })
+		if metres > most then
+			leader, most = id, metres
 		end
 	end
-	table.sort(top, function(a, b)
-		return a.metres > b.metres
-	end)
-	for rank = 1, 3 do
-		local entry = top[rank]
-		if entry then
-			stand(rank, entry.id, entry.metres, nameOf(entry.id))
-		else
-			stand(rank, nil)
-		end
-	end
+	stand(leader)
 end
 
 task.spawn(function()
