@@ -2446,7 +2446,7 @@ function vfx.inkBlast(dt, cfg)
 end
 
 -- Breath (the Loong): from FireFrom to FireTo seconds into its "special" animation,
--- waves of QM's spiral (assets/ui/LoongSpiral.png) pour out of its mouth, growing as
+-- a stream of QM's spiral (assets/ui/LoongSpiral.png) pours out of its mouth, growing as
 -- they fly (like QM's reference clip), aimed at the spot on the ground under the
 -- mouse; on a phone, the last place tapped; with neither, straight ahead.
 vfx.SPIRAL = "rbxassetid://73420824782915"
@@ -2490,13 +2490,15 @@ function vfx.breathFx(entity, cfg, remote)
 	local fire = Instance.new("ParticleEmitter")
 	fire.Name = "LoongFire"
 	fire.Texture = vfx.SPIRAL
+	-- Like real fire (QM): white at the mouth, then yellow, orange and red as it flies out.
 	fire.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 200, 90)),
-		ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 90, 40)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(230, 30, 30)),
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.15, Color3.fromRGB(255, 236, 90)),
+		ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 140, 30)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(225, 30, 20)),
 	})
 	fire.LightEmission = 0.4
-	fire.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.6 * s), NumberSequenceKeypoint.new(1, 3.2 * s) })
+	fire.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1.2 * s), NumberSequenceKeypoint.new(1, 6.4 * s) }) -- (QM: 2x)
 	fire.Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0),
 		NumberSequenceKeypoint.new(0.75, 0),
@@ -2508,7 +2510,7 @@ function vfx.breathFx(entity, cfg, remote)
 	fire.Speed = NumberRange.new(cfg.Range / 0.8 * 0.9, cfg.Range / 0.8 * 1.1)
 	fire.SpreadAngle = Vector2.new(8, 8)
 	fire.EmissionDirection = Enum.NormalId.Front -- the attachment's -Z, pointed at the aim
-	fire.Rate = 45
+	fire.Rate = 140 -- a constant stream (QM)
 	fire.Enabled = false
 	fire.Parent = at
 	task.delay(cfg.FireFrom, function()

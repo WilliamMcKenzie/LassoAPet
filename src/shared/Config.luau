@@ -314,7 +314,7 @@ return {
 		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
 		-- the animation's length and fire window; the range, width and cooldown are guesses
 		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 0.8, Grow = 1.1, SpeedUp = 1.05, MaxSpeed = 3, RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
-		Loong = { Kind = "Breath", Duration = 2.6, FireFrom = 0.95, FireTo = 2.1, Cooldown = 8, Range = 70, Width = 22, Restore = 0.2, Crawl = 0.15 },
+		Loong = { Kind = "Breath", Duration = 4.2, FireFrom = 0.95, FireTo = 3.95, Cooldown = 8, Range = 70, Width = 22, Restore = 0.2, Crawl = 0.15 },
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
 	-- automatic sprint home with the egg). Like any sprint they drain Hold faster.
