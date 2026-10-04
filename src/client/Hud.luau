@@ -160,7 +160,7 @@ local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one 
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
-local mergeButton -- MERGE, over RIDE: you have two or more of the pet RIDE would ride (Hud.showMerge)
+local mergeButton, mergeWanted -- MERGE, in RIDE's spot when RIDE isn't up (Hud.showMerge), and whether there's anything to merge
 local rollIcon -- Roll, over Pets: opens the egg roll menu (RollMenu)
 local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
 local CONTINUE_GAP = 12 -- between Continue and the Home button under it
@@ -541,8 +541,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	SELECTED.root = root(SELECTED.gui)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	ride.Visible = false
-	mergeButton = button(homeRoot, "merge", fit("merge", BUTTON_WIDTH), BOTTOM_CENTER,
-		UDim2.new(0.5, 0, 1, -MARGIN - fit("ride", BUTTON_WIDTH).Y.Offset - 12), function()
+	mergeButton = button(homeRoot, "merge", fit("merge", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, function()
 			if Hud.onMerge then
 				Hud.onMerge()
 			end
@@ -716,7 +715,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	local function setRollShown(shown)
 		rollShown = shown
 		roll.Visible = shown and not gui.Enabled
-		Inventory.setVisible(not shown and not ride.Visible and not gui.Enabled)
+		Inventory.setVisible(not shown and not ride.Visible and not mergeButton.Visible and not gui.Enabled)
 	end
 	task.spawn(function()
 		if not Config.Gacha.Enabled or not Config.Gacha.Machine then
@@ -1192,15 +1191,19 @@ end
 -- RIDE shows only while you're close enough to your animal (replaces the [E] prompt).
 function Hud.showRide(visible)
 	ride.Visible = visible and not gui.Enabled
-	if not ride.Visible then
-		mergeButton.Visible = false
-	end
-	Inventory.setVisible(not ride.Visible and not rollShown and not gui.Enabled) -- the RIDE button takes its place
+	Hud.showMerge(mergeWanted) -- RIDE comes first; MERGE takes the spot when it goes
+	Inventory.setVisible(not ride.Visible and not mergeButton.Visible and not rollShown and not gui.Enabled) -- the RIDE button takes its place
 end
 
--- MERGE, over RIDE, while you're at a pet you have two or more of (Ride.client).
+-- MERGE (QM): in RIDE's spot whenever you have pets to merge and RIDE isn't up;
+-- it takes the place of your egg inventory.
 function Hud.showMerge(visible)
-	mergeButton.Visible = visible and ride.Visible
+	mergeWanted = visible
+	local shown = visible and not ride.Visible and not rollShown and not gui.Enabled
+	if shown ~= mergeButton.Visible then
+		mergeButton.Visible = shown
+		Inventory.setVisible(not ride.Visible and not shown and not rollShown and not gui.Enabled)
+	end
 end
 
 -- Ride back home: DODGE THE STAMPEDE! slams in, then pulses; no cash or distance.

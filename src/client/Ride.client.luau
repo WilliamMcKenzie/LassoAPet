@@ -3954,37 +3954,42 @@ ReplicatedStorage:WaitForChild("ContinueRide").OnClientEvent:Connect(function(pa
 	Hud.resume(phase == "return")
 end)
 
--- MERGE (QM, Oct 4; Shared/Merge): over RIDE while it's on one of your own pets and
--- you have two or more of that kind (in the pen, and the one waiting on its spot).
--- It merges them all into one (Hatchery.server's MergePets).
-function vfx.mergeKind()
-	if not rideShown or not rideModel then
-		return nil
+-- MERGE (QM, Oct 4; Shared/Merge): in RIDE's spot whenever you have two or more
+-- of any kind (in the pen, and the one waiting on its spot), near a pet or not. It
+-- merges every kind you have more than one of (Hatchery.server's MergePets).
+function vfx.mergeKinds()
+	local counts = {}
+	if starter then
+		counts[starter.kind] = 1
 	end
-	local own = PenPets.pets[rideModel]
-	local kind = if own then own.kind elseif starter and rideModel == starter.animal.model then starter.kind else nil
-	if not kind then
-		return nil
-	end
-	local count = if starter and starter.kind == kind then 1 else 0
 	for _, pet in PenPets.pets do
-		if pet.kind == kind then
-			count += 1
+		counts[pet.kind] = (counts[pet.kind] or 0) + 1
+	end
+	local kinds = {}
+	for kind, n in counts do
+		if n >= 2 then
+			table.insert(kinds, kind)
 		end
 	end
-	return if count >= 2 then kind else nil
+	return kinds
 end
 
 function vfx.updateMerge()
-	Hud.showMerge(vfx.mergeKind() ~= nil)
+	Hud.showMerge(not Tutorial.active and #vfx.mergeKinds() > 0)
 end
 
 Hud.onMerge = function()
-	local kind = vfx.mergeKind()
-	if kind and phase == "idle" then
+	if phase ~= "idle" then
+		return
+	end
+	local merging = {}
+	for _, kind in vfx.mergeKinds() do
+		merging[kind] = true
 		ReplicatedStorage:WaitForChild("MergePets"):FireServer(kind)
-		local at = rideModel and rideModel:GetPivot().Position
-		if at then
+	end
+	for model, pet in PenPets.pets do
+		if merging[pet.kind] then -- a poof on each pet that goes into a merge
+			local at = model:GetPivot().Position
 			Poof.at(Vector3.new(at.X, 0, at.Z))
 		end
 	end
