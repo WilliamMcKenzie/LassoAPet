@@ -3044,6 +3044,9 @@ local function checkRide(dt)
 			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then -- (the +1 is for obstacles only)
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
 				vfx.broke()
+				if kind == "Crabwalk" and special.RestorePer then
+					hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount)) -- 20% Hold per animal it hits (QM)
+				end
 			elseif phase == "return" and grace <= 0 then
 				return fail("CRASH!")
 			elseif phase == "outbound" and entity.n then

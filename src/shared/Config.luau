@@ -331,7 +331,7 @@ return {
 		Sandworm = { Kind = "Burrow", OnReturn = true },
 		Whale = { Kind = "Fly", Height = 56 },
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
-		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true }, -- QM, Oct 4
+		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true, RestorePer = 0.2 }, -- QM, Oct 4: 20% Hold per animal it hits
 	},
 	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
 	-- obstacles and stampede animals of a lower tier, knocking them up and away;
