@@ -291,7 +291,7 @@ return {
 		SnackYak = { Kind = "Charge", UntilFull = true, Cooldown = 5, SpeedBoost = 2 }, -- QM, Oct 4
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 56 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 10, Radius = 45, ScareTime = 10, RestorePer = 0.1 }, -- QM, Oct 4
-		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7 },
+		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7, RestorePer = 0.03 }, -- 3% Hold per animal frozen (QM, Oct 4)
 		SpineLizard = { Kind = "Boost", Duration = 5, Cooldown = 8, SpeedBoost = 2 },
 		IceGolem = { Kind = "Grow", Duration = 5, Cooldown = 10, SpeedBoost = 1.2, Tier = 4 },
 		Squid = { Kind = "Ink", Duration = 2.5, Cooldown = 8, Radius = 45 },
@@ -317,7 +317,7 @@ return {
 	--   Loom (Loong): it swells to Grow x its size (a look only: its tier stays) and the
 	--     animals within Radius studs scatter away from it.
 	SprintSpecials = {
-		Unicorn = { Kind = "Smash", Radius = 14 },
+		Unicorn = { Kind = "Smash", Radius = 14, RestorePer = 0.02 }, -- 2% Hold per animal it scares out of its way (QM, Oct 4)
 		Sandworm = { Kind = "Burrow" },
 		Icebringer = { Kind = "Ram" },
 		Whale = { Kind = "Fly", Height = 56 },

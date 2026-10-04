@@ -1456,7 +1456,7 @@ local function putInPool(entity)
 	entity.animal.model.Parent = nil
 	entity.animal:setScale(1)
 	entity.hop, entity.popping, entity.lift = 0, nil, nil
-	entity.ability, entity.frostLeft, entity.fall, entity.scared = nil, nil, nil, nil
+	entity.ability, entity.frostLeft, entity.fall, entity.scared, entity.scaredOffBy = nil, nil, nil, nil, nil
 	table.insert(pools[entity.kind], entity)
 end
 
@@ -2107,6 +2107,10 @@ function vfx.frostBlast(cfg, left)
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
 		if entity ~= mount and dx * dx + dz * dz < cfg.Radius * cfg.Radius then
+			if cfg.RestorePer and vfx.frozenByThis and not vfx.frozenByThis[entity] then
+				vfx.frozenByThis[entity] = true
+				hold = math.min(hold + holdTime(mount) * cfg.RestorePer, holdTime(mount))
+			end
 			if entity.n and herd[entity.n] == entity then
 				vfx.frostLeft[entity.n] = math.max(vfx.frostLeft[entity.n] or 0, left)
 			else
@@ -2522,6 +2526,7 @@ local function startAbility(cfg)
 		-- (it scares only once the rattling's done: rattleBlast, from updateAbility)
 	elseif cfg.Kind == "Frost" then
 		a.active.fx = vfx.frostFx(mount)
+		vfx.frozenByThis = {} -- (each animal it freezes refills cfg.RestorePer of Hold once: frostBlast)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, vfx.FROST_TINT)
 		vfx.frostBlast(cfg, cfg.Duration)
 	elseif cfg.Kind == "Boost" then
@@ -2846,6 +2851,11 @@ local function checkRide(dt)
 				return fail("CRASH!")
 			elseif phase == "outbound" and entity.n then
 				entity.dodge = math.clamp(entity.dodge + (if dx >= 0 then 1 else -1) * 12 * dt, -6, 6)
+				if special and special.RestorePer and entity.scaredOffBy ~= mount then
+					-- The Unicorn's sprint: each animal it scares out of its way refills Hold (once).
+					entity.scaredOffBy = mount
+					hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount))
+				end
 			end
 		end
 	end
