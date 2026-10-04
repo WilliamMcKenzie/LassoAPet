@@ -36,7 +36,7 @@ return {
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
-			Herd = { Cactus = 0.3, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05, Beholder = 0.1 }, -- (the Beholder: its biome and weight are guesses, Oct 4)
+			Herd = { Cactus = 0.3, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05 },
 			-- Patches of other ground in the floor (parts named after them in
 			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
 			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
@@ -168,7 +168,7 @@ return {
 			-- Placeholder until the Godlands has animals (and bosses) of its own: Fish (QM).
 			-- (The Loong is an event and roll exclusive now, so it doesn't run here.)
 			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
-			Herd = { Fish = 1 },
+			Herd = { Fish = 1, Beholder = 0.1 }, -- the Beholder lives here (QM, Oct 4; its weight is a guess)
 			PlaceholderHerd = true,
 			Patches = {
 				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
@@ -345,10 +345,10 @@ return {
 	-- from their model's "Tier" attribute, else from ObstacleTiers by name.
 	PetTiers = {
 		Horse = 1, Pig = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
-		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, Beholder = 2, -- Desert
+		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
-		Loong = 1, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
+		Loong = 1, Beholder = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -394,10 +394,10 @@ return {
 	-- every second while you're in the game.
 	PetIncome = {
 		Horse = 1, Pig = 3, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
-		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, Beholder = 40, -- Desert (the Beholder's a guess)
+		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
 		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 4000, Icebringer = 1111, -- Tundra
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 7000, Whale = 5000, Kraken = 8200, -- Ocean
-		Loong = 20000, -- Godlands (a guess, past the Kraken)
+		Loong = 20000, Beholder = 40, -- Godlands (guesses: the Loong past the Kraken)
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -525,7 +525,6 @@ return {
 		Sandworm = { Speed = 1.6, Stamina = 3 },
 		SpineLizard = { Speed = 1.8, Stamina = 2 },
 		Snake = { Speed = 2, Stamina = 3 },
-		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
 		-- Tundra
 		Penguin = { Speed = 1.5, Stamina = 1.5 },
 		Boar = { Speed = 1.6, Stamina = 1.6 },
@@ -544,6 +543,7 @@ return {
 		Kraken = { Speed = 4.5, Stamina = 3 },
 		-- Godlands
 		Loong = { Speed = 1, Stamina = 8 }, -- QM, Oct 4: starts at 1x, its breath's kills take it up to 4x
+		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
