@@ -2249,18 +2249,17 @@ end
 -- cfg.RestorePer of Hold. vfx.huntTarget is its prey (steering and arrows follow it).
 function vfx.huntStep(cfg)
 	local prey = vfx.huntTarget
-	local dir = travelDir()
 	local function alive(entity)
 		return (entity.n and herd[entity.n] == entity) or (not entity.n and table.find(strays, entity) ~= nil)
 	end
-	if prey and (not alive(prey) or (prey.z - mount.z) * dir < -6) then
-		prey = nil -- gone, or it got past us
+	if prey and not alive(prey) then
+		prey = nil -- gone (eaten, lassoed or knocked away)
 	end
 	if not prey then
 		local best = math.huge
 		for _, entity in allAnimals() do
 			local dx, dz = entity.x - mount.x, entity.z - mount.z
-			if entity ~= mount and not entity.popping and not entity.event and dz * dir > -4 then
+			if entity ~= mount and not entity.popping and not entity.event then -- (any way: it can turn round for it)
 				local d = dx * dx + dz * dz
 				if d < best then
 					prey, best = entity, d
@@ -2731,6 +2730,7 @@ local function endAbility(entity)
 	end
 	if active.cfg.Kind == "Hunt" then
 		vfx.huntTarget = nil -- (the arrows go back to the eggs)
+		entity.yaw = if phase == "return" or phase == "home" then math.pi else 0 -- facing the right way again
 	end
 	local after = if active.cfg.Kind == "Hunt" then 1.5 else 0.4 -- (you get the steering back mid-stampede after a hunt)
 	local root = entity.animal.model.PrimaryPart
@@ -2943,6 +2943,26 @@ local function updateMount(dt)
 		end
 	end
 	mount.speed += math.clamp(targetSpeed - mount.speed, -rate * dt, rate * dt)
+	if ability and ability.cfg.Kind == "Hunt" and vfx.huntTarget then
+		-- Hunting (the Robo Shark, QM): no momentum, any direction: it goes straight at
+		-- its prey at full charge speed, turning on the spot, whichever way that is.
+		local prey = vfx.huntTarget
+		local dx, dz = prey.x - mount.x, prey.z - mount.z
+		local len = math.max(math.sqrt(dx * dx + dz * dz), 0.001)
+		mount.speed = targetSpeed
+		local step = math.min(targetSpeed * dt, len)
+		mount.x = math.clamp(mount.x + dx / len * step, -EDGE, EDGE)
+		local z = mount.z + dz / len * step
+		if phase == "outbound" then
+			z = math.clamp(z, gateZ() + 3, SPAWN_Z) -- not back over the start line, nor into a locked gate
+		end
+		mount.z = z
+		mount.latVel = 0
+		mount.yaw = math.atan2(-dx, -dz) -- facing it (yaw 0 faces -z)
+		place(mount, 0)
+		animate(mount, dt, mount.speed, 0)
+		return
+	end
 	if phase == "outbound" and exitX then
 		-- Out of a corner pen: sideways through its open side, curving toward the start line.
 		local d = exitX - mount.x
@@ -3767,7 +3787,8 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local z = vfx.camZoom
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
-	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-8 * dt))
+	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
+	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
 	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
