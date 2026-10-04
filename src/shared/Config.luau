@@ -455,7 +455,7 @@ return {
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://70469571709365", -- assets/ui/LoongEggRender.png
-		WarElephant = "", -- assets/ui/WarElephantEggRender.png (awaiting upload)
+		WarElephant = "rbxassetid://84356622911486", -- assets/ui/WarElephantEggRender.png
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
