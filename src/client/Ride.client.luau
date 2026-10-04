@@ -1830,6 +1830,7 @@ vfx.RATTLE_HAZE = Color3.fromRGB(255, 170, 40) -- yellow-orange
 vfx.FishWave = require(script.Parent.FishWave) -- the School of Fish's wave
 vfx.Missiles = require(script.Parent.Missiles) -- the Robo Shark's missiles
 vfx.FROST_HAZE = Color3.fromRGB(190, 236, 255)
+vfx.HUNT_HAZE = Color3.fromRGB(230, 10, 10) -- the Robo Shark's hunt
 vfx.hazeColor = vfx.RATTLE_HAZE
 local abilityClock = 0 -- ride time, slowed with the slow motion like everything else
 vfx.ABILITY_RING_TIME = 0.6
@@ -3780,11 +3781,13 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	if vfx.scareAura and not kind then
 		kind = "Rattle" -- the snake's scare keeps its haze the whole time (QM)
 	end
-	if kind == "Rattle" or kind == "Frost" then
-		vfx.hazeColor = if kind == "Frost" then vfx.FROST_HAZE else vfx.RATTLE_HAZE
+	local hazed = kind == "Rattle" or kind == "Frost" or kind == "Hunt"
+	if hazed then
+		vfx.hazeColor = if kind == "Frost" then vfx.FROST_HAZE elseif kind == "Hunt" then vfx.HUNT_HAZE else vfx.RATTLE_HAZE
 	end
-	rattleHaze += ((if kind == "Rattle" or kind == "Frost" then 1 else 0) - rattleHaze) * (1 - math.exp(-6 * dt))
-	Hud.setAbilityTint(rattleHaze * (if vfx.hazeColor == vfx.FROST_HAZE then 0.6 else 0.85), vfx.hazeColor)
+	rattleHaze += ((if hazed then 1 else 0) - rattleHaze) * (1 - math.exp(-6 * dt))
+	-- (the Robo Shark's hunt: a strong red, QM)
+	Hud.setAbilityTint(rattleHaze * (if vfx.hazeColor == vfx.FROST_HAZE then 0.6 elseif vfx.hazeColor == vfx.HUNT_HAZE then 1 else 0.85), vfx.hazeColor)
 	-- Bigger pets fill more of the view: the camera pulls back RideZoomPerTier
 	-- times further for each size tier above small (Config.PetTiers).
 	local zoomTo = if mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
