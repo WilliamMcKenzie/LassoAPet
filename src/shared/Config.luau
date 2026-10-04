@@ -530,6 +530,9 @@ return {
 	-- sfx to all animals"). List animals here as false to leave them out.
 	GallopSound = {},
 	SprintSpeed = 2, -- x MountSpeed
+	-- Phones have no Sprint button (QM, Oct 4): pushing the joystick out past this share of
+	-- its reach sprints, easing it back stops.
+	TouchSprintAt = 0.85,
 	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
 	SprintDrain = 1.5, -- x the Hold bar's usual drain
 	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)

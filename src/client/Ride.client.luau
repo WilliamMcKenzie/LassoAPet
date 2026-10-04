@@ -1388,7 +1388,9 @@ local function sprinting()
 	if phase == "return" then
 		return Config.ReturnSprint -- racing home with the egg
 	end
-	return phase == "outbound" and not Tutorial.active and (sprintKey or Hud.sprintHeld())
+	-- (on a phone: the joystick pushed far out, rideStick; QM)
+	local stickOut = rideStick.on and controls:GetMoveVector().Magnitude >= Config.TouchSprintAt
+	return phase == "outbound" and not Tutorial.active and (sprintKey or Hud.sprintHeld() or stickOut)
 end
 
 UserInputService.InputChanged:Connect(function(input)

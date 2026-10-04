@@ -912,9 +912,12 @@ function Hud.show(visible)
 	setCash(0)
 end
 
--- Shows or hides the Sprint button (on the way out only).
+-- Shows or hides the Sprint button (on the way out only). Never on a phone or tablet:
+-- pushing the joystick out sprints there (Ride.client, Config.TouchSprintAt).
+local UIS = game:GetService("UserInputService")
+local touchOnly = UIS.TouchEnabled and not UIS.KeyboardEnabled and not UIS.MouseEnabled
 function Hud.setSprint(visible)
-	sprint.Visible = visible
+	sprint.Visible = visible and not touchOnly
 	if not visible then
 		sprintInput = nil
 	end
