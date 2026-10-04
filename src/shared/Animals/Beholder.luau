@@ -1,5 +1,5 @@
 -- Beholder: a round orange blob floating over six stubby tentacles, one huge eye on its
--- front under a heavy brow. Rare, medium (QM, Oct 4). designs/beholder/Beholder.bbmodel is
+-- front under a heavy brow. Rare, medium, Godlands (QM, Oct 4). designs/beholder/Beholder.bbmodel is
 -- built and animated by tools/beholder_design.py, converted into BeholderModel.luau by
 -- tools/bbmodel_to_luau.py. You sit on top of the blob. Its ability is Devour, like the
 -- Kraken's, but with one tentacle for one animal (Config.Abilities.Beholder).
