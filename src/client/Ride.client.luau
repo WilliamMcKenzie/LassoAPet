@@ -126,6 +126,32 @@ for _, o in obstacles do
 	slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
 	slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
 end
+-- The Godlands' terrain pieces come and go with the tracks built round you
+-- (Client/GodlandsStream): in and out of the list and the slices.
+function slices.remove(list, o, zMin, zMax)
+	for slice = math.floor(zMin / slices.SIZE), math.floor(zMax / slices.SIZE) do
+		local i = list[slice] and table.find(list[slice], o)
+		if i then
+			table.remove(list[slice], i)
+		end
+	end
+end
+function slices.pieces(list, added)
+	for _, o in list do
+		if added then
+			table.insert(obstacles, o)
+			slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
+			slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
+		else
+			local i = table.find(obstacles, o)
+			if i then
+				table.remove(obstacles, i)
+			end
+			slices.remove(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
+			slices.remove(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
+		end
+	end
+end
 
 -- Size tiers a pet gains on the way home with the egg.
 local RETURN_TIER_BONUS = 1
@@ -135,10 +161,14 @@ local function tierOf(kind)
 end
 
 -- An obstacle a bigger pet plowed into flies up and away and fades; it's back
--- for the next ride (cleanup). Only on this player's screen.
+-- for the next ride (cleanup). Everyone else sees it too (Riders.server), and
+-- on their screens it's back a few seconds later (remote).
 local SMASH_TIME = 0.7
-local function smash(o, dir, side)
+local function smash(o, dir, side, remote)
 	o.smashed = true
+	if not remote then
+		ReplicatedStorage.RideCue:FireServer("smash", o.x, o.z, dir, side)
+	end
 	local rng = Random.new()
 	local offset = Vector3.new(side * 10, 16, dir * 14)
 	local spin = CFrame.Angles(rng:NextNumber(-2, 2), rng:NextNumber(-2, 2), rng:NextNumber(-2, 2))
@@ -153,7 +183,7 @@ end
 local function unsmashAll()
 	for _, o in obstacles do
 		if o.smashed then
-			o.smashed = nil
+			o.smashed, o.remoteSmash = nil, nil
 			for _, p in o.parts do
 				p.part.CFrame, p.part.Transparency = p.cframe, p.transparency
 			end
@@ -194,7 +224,9 @@ local SHRINK = 12 -- studs before its biome's end over which an animal shrinks i
 -- Each biome's stream: where it spawns and ends, how long an animal lives in it and
 -- its kinds of animal by weight (Config.Biomes[b].Herd), sorted by name so every
 -- client picks the same animals. A stream's animals are keyed n * BIOME_KEYS + b - 1.
-local BIOME_KEYS = 8
+-- The endless Godlands has a stream per track instead (endless below), at b past the
+-- other biomes', wrapping round well within BIOME_KEYS.
+local BIOME_KEYS = 1024
 
 -- An animal's stats (Config.AnimalStats), 1x for any animal not listed.
 local function statsOf(kind)
@@ -211,41 +243,96 @@ local function holdTime(entity)
 	return Config.HoldTime * statsOf(entity.kind).Stamina
 end
 local streams = {}
+-- The endless Godlands (Shared/Godlands): a stream per track, each running from
+-- its track's line to the next, made as the camera nears it (endless.stream(k)).
+local endless = { Godlands = require(ReplicatedStorage.Shared.Godlands) }
+-- A stream from spawnZ to endZ of the herd's kinds; name labels its line in the Output.
+function endless.newStream(spawnZ, endZ, herd, name)
+	local s = {
+		spawnZ = spawnZ,
+		endZ = endZ,
+		kinds = {},
+		total = 0,
+	}
+	local slowest = math.huge
+	for kind in herd do
+		slowest = math.min(slowest, herdSpeed(kind))
+	end
+	s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / slowest
+	local names = {}
+	for kind, weight in herd do
+		table.insert(s.kinds, { name = kind, weight = weight })
+		table.insert(names, kind .. " " .. weight)
+		s.total += weight
+	end
+	table.sort(s.kinds, function(a, c)
+		return a.name < c.name
+	end)
+	table.sort(names)
+	if name then
+		-- One line per biome in the Output, to check the stampede matches Config.
+		print(string.format("[Herd] %s: spawns at z %.0f, ends at z %.0f: %s", name, s.spawnZ, s.endZ, table.concat(names, ", ")))
+	end
+	return s
+end
 do
 	local edge = 0
 	for b, biome in Config.Biomes do
 		local startZ, endZ = edge, edge - biome.Length
 		edge = endZ
-		local s = {
-			spawnZ = if b == 1 then SPAWN_Z else startZ - 2,
-			endZ = if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
-			kinds = {},
-			total = 0,
-		}
-		local slowest = math.huge
-		for name in biome.Herd do
-			slowest = math.min(slowest, herdSpeed(name))
-		end
-		s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / slowest
 		assert(biome.Herd, "Config.Biomes[" .. b .. "] (" .. tostring(biome.Name) .. ") has no Herd")
-		local names = {}
-		for name, weight in biome.Herd do
-			table.insert(s.kinds, { name = name, weight = weight })
-			table.insert(names, name .. " " .. weight)
-			s.total += weight
+		if b == endless.Godlands.biome then
+			endless.b, endless.herd = b, biome.Herd
+			print(string.format("[Herd] %s: a stream per %d-stud track from z %.0f on", biome.Name, endless.Godlands.length, startZ))
+			continue
 		end
-		table.sort(s.kinds, function(a, c)
-			return a.name < c.name
-		end)
-		table.sort(names)
-		streams[b] = s
-		-- One line per biome in the Output, to check the stampede matches Config.
-		print(string.format("[Herd] %s: spawns at z %.0f, ends at z %.0f: %s", biome.Name, s.spawnZ, s.endZ, table.concat(names, ", ")))
+		streams[b] = endless.newStream(
+			if b == 1 then SPAWN_Z else startZ - 2,
+			if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
+			biome.Herd,
+			biome.Name
+		)
 	end
+end
+-- Track k's stream, at streams[endless.b + k % 900] (made now if it isn't there).
+-- Its animals pop in at the track's line and shrink away at the next one.
+function endless.stream(k)
+	local b = endless.b + k % 900
+	local s = streams[b]
+	if not s or s.k ~= k then
+		local z0 = endless.Godlands.segmentStart(k)
+		s = endless.newStream(z0 - 2, z0 - endless.Godlands.length + 2, endless.herd)
+		s.k = k
+		streams[b] = s
+	end
+	return s
+end
+-- Keeps streams for the tracks within reach of the camera at z, and only those.
+function endless.near(z)
+	if not endless.b then
+		return
+	end
+	local hi = endless.Godlands.segmentAt(z - VIEW)
+	local lo = endless.Godlands.segmentAt(z + VIEW) or 0
+	for b, s in streams do
+		if s.k and (not hi or s.k < lo or s.k > hi) then
+			streams[b] = nil
+		end
+	end
+	for k = lo, hi or -1 do
+		endless.stream(k)
+	end
+end
+if endless.b then
+	endless.stream(0) -- so the pools below count its animals
 end
 
 -- Where an animal in biome b (at z) stops: its stream's end.
 local function streamAt(z)
+	local k = endless.Godlands.segmentAt(z)
+	if k and endless.b then
+		return endless.stream(k)
+	end
 	return streams[WorldColors.biomeAt(z)]
 end
 
@@ -280,6 +367,11 @@ local herdClock = workspace:GetServerTimeNow()
 local hold, grace = 0, 0
 local warpLevel -- /biome: the biome you were put in, so its gate (and those before) let you through
 local transfer, tumble, carried
+local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
+vfx.rideSync = ReplicatedStorage:WaitForChild("RideSync") -- multiplayer rides (Riders.server)
+vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
+vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
+vfx.godlands.onPieces = slices.pieces
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
 local LEAP_FROM = 8 -- studs before the start line where the leap starts
@@ -449,6 +541,10 @@ local function cleanup()
 		carried.part:Destroy()
 		carried = nil
 	end
+	if vfx.revive and vfx.revive.carried then
+		vfx.revive.carried.part:Destroy() -- the egg kept for a Continue that wasn't bought
+	end
+	vfx.revive = nil
 	Lasso.stop()
 	cutscene = nil
 	heroLeap = nil
@@ -708,6 +804,7 @@ startRide = function(model)
 	if fromHerd then
 		-- Jumped onto a stampede animal: it leaves the stampede and runs on with
 		-- you from where it is. Your own pet stays home.
+		vfx.rideCue:FireServer("take", fromHerd.n)
 		herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
 		mount = fromHerd
 		mount.popping, mount.hop, mount.dodge = nil, 0, 0
@@ -796,6 +893,17 @@ local function finishRide(x, z)
 	end
 end
 
+-- Continue's price band for `metres` from home (Config.ContinueTiers): the furthest passed.
+function vfx.continueTier(metres)
+	local tier = Config.ContinueTiers[1]
+	for _, t in Config.ContinueTiers do
+		if metres >= t.From then
+			tier = t
+		end
+	end
+	return tier
+end
+
 local function fail(reason, tip)
 	if phase == "ended" then
 		return
@@ -803,6 +911,16 @@ local function fail(reason, tip)
 	Hud.setTip(tip) -- in place of the "+$N" the fail screen shows
 	local hrp, humanoid = character()
 	local dir = (phase == "return" or phase == "home") and 1 or -1 -- travelDir() is defined further down
+	-- Continue (Config.ContinueTiers): a crash or buck-off on the way out or
+	-- back can be bought off, picking up right here on the same kind of animal,
+	-- with the egg. Not into a locked gate, and not in the tutorial.
+	local gate = WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1))
+	vfx.revive = nil
+	if mount and (reason == "CRASH!" or reason == "BUCKED OFF") and (phase == "outbound" or phase == "return")
+		and not (phase == "outbound" and mount.z < gate + 2.4) and not Tutorial.active
+		and (RunService:IsStudio() or vfx.continueTier(-mount.z / STUDS_PER_METRE).ProductId ~= 0) then
+		vfx.revive = { kind = mount.kind, x = mount.x, z = mount.z, yaw = mount.yaw, speed = mount.speed, phase = phase, dir = dir }
+	end
 	phase = "ended"
 	cutscene = nil
 	Hud.setCutscene(false)
@@ -812,7 +930,12 @@ local function fail(reason, tip)
 	end
 	transfer = nil
 	if carried then
-		carried.part:Destroy()
+		if vfx.revive then
+			vfx.revive.carried = carried -- put away until Continue or Home
+			carried.part.Parent = nil
+		else
+			carried.part:Destroy()
+		end
 		carried = nil
 	end
 	Outline.set(nil)
@@ -828,13 +951,14 @@ local function fail(reason, tip)
 	task.delay(0.8, function()
 		if phase == "ended" then
 			Hud.showHome(true)
+			Hud.showContinue(if vfx.revive then "ready" else nil)
 		end
 	end)
 end
 
 local function goHome()
-	if phase ~= "ended" then
-		return
+	if phase ~= "ended" or (vfx.revive and vfx.revive.asked) then
+		return -- (not while the Continue prompt is up)
 	end
 	Hud.showHome(false)
 	local pen = myPen()
@@ -849,6 +973,7 @@ local function startTransfer(target)
 	release(old)
 	mount = nil
 	transfer = { target = target, old = old, t = 0, stage = "throw", from = hrp.Position }
+	vfx.rideCue:FireServer("lasso", target.n or false)
 end
 
 local function grabEgg()
@@ -1206,7 +1331,6 @@ end
 -- slowed, by key, with the seconds left, and how many studs each has fallen behind
 -- its place in the shared stampede (kept: a slowed animal never sprints to catch up).
 -- Strays carry their own entity.frostLeft. Only this player's copy slows, like slow-mo.
-local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.frostLeft = {}
 vfx.frostLag = {}
 vfx.frostSlow = 0 -- the share of its speed a slowed animal loses (the running Frost's Slow)
@@ -1332,7 +1456,10 @@ end
 -- tumbling, then vanishes in a poof. It leaves the stampede for good.
 local flung = {}
 local FLING_TIME = 0.9
-local function knock(entity, dx)
+local function knock(entity, dx, remote)
+	if entity.n and not remote then
+		vfx.rideCue:FireServer("knock", entity.n, dx)
+	end
 	if entity.n then
 		taken[entity.n] = true
 		herd[entity.n] = nil
@@ -1397,6 +1524,8 @@ local function updateHerd(dt, slowed)
 	for key, left in vfx.frostLeft do
 		vfx.frostLeft[key] = if left > dt then left - dt else nil
 	end
+	endless.near(camZ)
+	vfx.godlands.update(camZ)
 	for b, stream in streams do
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
 		for n = stream.oldest, newest do
@@ -1461,7 +1590,8 @@ local function updateHerd(dt, slowed)
 		end
 	end
 	for key in plans do
-		if key // BIOME_KEYS < streams[key % BIOME_KEYS + 1].oldest then
+		local stream = streams[key % BIOME_KEYS + 1] -- (gone if it was a Godlands track's left behind)
+		if not stream or key // BIOME_KEYS < stream.oldest then
 			plans[key], taken[key] = nil, nil
 			vfx.frostLag[key], vfx.frostLeft[key] = nil, nil
 		end
@@ -2043,6 +2173,7 @@ end
 
 local function startAbility(cfg)
 	local a = mount.ability
+	vfx.rideCue:FireServer("ability", cfg.Kind)
 	a.active = { kind = cfg.Kind, cfg = cfg, t = 0, fx = {} }
 	if cfg.Kind == "Charge" then
 		a.active.fx = chargeFx(mount)
@@ -2382,6 +2513,7 @@ local function updateRider(dt)
 		if t >= 1 then
 			local target = transfer.target
 			if target.n then
+				vfx.rideCue:FireServer("take", target.n)
 				herd[target.n], taken[target.n], target.n = nil, true, nil
 			else
 				table.remove(strays, table.find(strays, target))
@@ -2476,6 +2608,283 @@ local function updateHud()
 	end
 end
 
+-- Multiplayer rides (Riders.server): your ride goes out ~10 times a second, and
+-- everyone else's comes in. Each other rider gets their own copy of their mount
+-- here, moved smoothly between updates, with their character sat on it. What
+-- they do to the stampede (jumping on, lassoing, knocking animals flying,
+-- smashing obstacles, abilities) shows here too, for looks only: their
+-- abilities don't slow or scatter your copy of the stampede.
+vfx.SYNC_EVERY = 0.1 -- seconds between your ride's updates
+vfx.RIDER_STALE = 2 -- seconds without an update before a rider is taken off
+vfx.REMOTE_SMASH_BACK = 4 -- seconds before an obstacle someone else smashed is back
+vfx.riders = {} -- [player] = { entity, kind, mountCF, riderCF, vel, speed, scale, at, char, fx, fxEnd, rope }
+vfx.syncAt = 0
+vfx.syncing = false
+
+function vfx.sendRide()
+	local hrp = character()
+	if phase == "idle" or not hrp then
+		if vfx.syncing then
+			vfx.syncing = false
+			vfx.rideCue:FireServer("end")
+		end
+		return
+	end
+	local now = os.clock()
+	if now < vfx.syncAt then
+		return
+	end
+	vfx.syncAt = now + vfx.SYNC_EVERY
+	vfx.syncing = true
+	local root = mount and mount.animal.model.PrimaryPart
+	vfx.rideSync:FireServer(
+		if root then mount.kind else "",
+		if root then root.CFrame else hrp.CFrame,
+		hrp.CFrame,
+		if mount then mount.speed else 0,
+		if mount then mount.animal.scale else 1
+	)
+end
+
+function vfx.riderFx(rider)
+	for _, fx in rider.fx do
+		fx:Destroy()
+	end
+	table.clear(rider.fx)
+	rider.fxEnd = nil
+end
+
+-- Lets go of a rider's mount: it runs on with the stampede, like yours does.
+function vfx.dropMount(rider)
+	local entity = rider.entity
+	if not entity then
+		return
+	end
+	vfx.riderFx(rider)
+	rider.entity, rider.kind = nil, nil
+	entity.animal:setScale(1)
+	entity.hop = 0
+	release(entity)
+end
+
+function vfx.endRider(player)
+	local rider = vfx.riders[player]
+	if not rider then
+		return
+	end
+	vfx.riders[player] = nil
+	vfx.dropMount(rider)
+	if rider.rope then
+		rider.rope:Destroy()
+	end
+	local hrp = rider.char and rider.char:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		hrp.Anchored = false -- back to where the server has it
+	end
+end
+
+vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, speed, scale)
+	if player == Players.LocalPlayer then
+		return
+	end
+	local rider = vfx.riders[player]
+	local now = os.clock()
+	if not rider then
+		rider = { fx = {}, mountCF = mountCF, riderCF = riderCF, vel = Vector3.zero, at = now }
+		vfx.riders[player] = rider
+	end
+	local dt = now - rider.at
+	rider.vel = if dt > 0.02 and dt < 0.5 then (mountCF.Position - rider.mountCF.Position) / dt else Vector3.zero
+	if rider.vel.Magnitude > 400 then
+		rider.vel = Vector3.zero -- a jump (warped, continued): no gliding there
+		rider.shown = nil
+	end
+	rider.mountCF, rider.riderCF, rider.at = mountCF, riderCF, now
+	rider.speed, rider.scale = speed, scale
+	if rider.kind ~= kind then
+		vfx.dropMount(rider)
+	end
+	if kind ~= "" and not rider.entity and Animals:FindFirstChild(kind) then
+		local p = mountCF.Position
+		rider.entity = newEntity(p.X, p.Z, 0, kind)
+		rider.entity.animal:setSaddled(true)
+		rider.entity.dodge = 0
+		rider.kind = kind
+		rider.shown = nil
+	end
+end)
+
+-- A rider's lasso: a rope from their hand to the animal's neck while it flies out
+-- and they're pulled across.
+function vfx.remoteRope(rider, entity)
+	if rider.rope then
+		rider.rope:Destroy()
+	end
+	local hand = rider.char and rider.char:FindFirstChild("RightGripAttachment", true)
+	local root = entity.animal.model.PrimaryPart
+	if not hand or not root then
+		return
+	end
+	local knot = Instance.new("Attachment")
+	knot.Parent = root
+	local rope = Instance.new("Beam")
+	rope.Attachment0, rope.Attachment1 = hand, knot
+	rope.Width0, rope.Width1 = 0.28, 0.28
+	rope.Color = ColorSequence.new(Color3.fromRGB(222, 184, 120))
+	rope.FaceCamera = true
+	rope.Parent = knot
+	rider.rope = knot
+	task.delay(THROW_TIME + TRANSFER_TIME, function()
+		if rider.rope == knot then
+			rider.rope = nil
+		end
+		knot:Destroy()
+	end)
+end
+
+vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
+	if player == Players.LocalPlayer then
+		return
+	end
+	if what == "end" then
+		vfx.endRider(player)
+		return
+	end
+	local rider = vfx.riders[player]
+	if what == "take" or what == "lasso" or what == "knock" then
+		local key = tonumber(a)
+		local entity = key and herd[key]
+		if entity and transfer and transfer.target == entity then
+			return -- you're lassoing it too: it stays yours
+		end
+		if what == "lasso" then
+			if rider then
+				vfx.dropMount(rider) -- their old mount runs on, as yours does
+				if entity then
+					vfx.remoteRope(rider, entity)
+				end
+			end
+			return -- (it stays in the stampede till it's reeled in: "take")
+		end
+		if key then
+			taken[key] = true
+		end
+		if what == "knock" then
+			if entity then
+				knock(entity, tonumber(b) or 0, true)
+			end
+		elseif entity and rider then
+			-- Now their mount: the stampede's copy carries on as it.
+			herd[key], entity.n = nil, nil
+			if rider.entity then
+				retire(rider.entity)
+				vfx.riderFx(rider)
+			end
+			entity.popping, entity.hop = nil, 0
+			entity.animal:setScale(1)
+			entity.animal:setSaddled(true)
+			rider.entity, rider.kind = entity, entity.kind
+		end
+	elseif what == "smash" then
+		local x, z = tonumber(a), tonumber(b)
+		if not x or not z then
+			return
+		end
+		for _, o in slices.at(slices.block, z) do
+			if not o.smashed and math.abs(o.x - x) < 0.5 and math.abs(o.z - z) < 0.5 then
+				smash(o, tonumber(c) or -1, tonumber(d) or 1, true)
+				o.remoteSmash = true
+				task.delay(vfx.REMOTE_SMASH_BACK, function()
+					if o.remoteSmash then
+						o.smashed, o.remoteSmash = nil, nil
+						for _, p in o.parts do
+							p.part.CFrame, p.part.Transparency = p.cframe, p.transparency
+						end
+						Poof.at(Vector3.new(o.x, 0, o.z))
+					end
+				end)
+				break
+			end
+		end
+	elseif what == "ability" and rider and rider.entity then
+		local entity = rider.entity
+		local cfg = Config.Abilities[entity.kind]
+		if not cfg or cfg.Kind ~= a then
+			return
+		end
+		vfx.riderFx(rider)
+		local p = entity.animal.model.PrimaryPart.Position
+		if a == "Charge" then
+			rider.fx = chargeFx(entity)
+			Poof.at(Vector3.new(p.X, 0, p.Z))
+		elseif a == "Leap" then
+			Dust.kick(entity.animal.model.PrimaryPart.CFrame, entity.animal.scale)
+			rider.fx = vfx.rainbowFx(entity)
+		elseif a == "Rattle" then
+			rattleRing(p, cfg.Radius)
+		elseif a == "Frost" then
+			rider.fx = vfx.frostFx(entity)
+			rattleRing(p, cfg.Radius, vfx.FROST_TINT)
+		elseif a == "Ink" then
+			vfx.inkFx(entity)
+			rattleRing(p, cfg.Radius, Color3.fromRGB(40, 30, 70))
+		elseif a == "Boost" then
+			Dust.kick(entity.animal.model.PrimaryPart.CFrame, entity.animal.scale)
+		else
+			Poof.at(Vector3.new(p.X, 0, p.Z))
+		end
+		rider.fxEnd = os.clock() + cfg.Duration
+	end
+end)
+
+-- Every frame: each other rider's mount glides toward where it was last heard
+-- of (carried on at the speed it was going), with them sat on it.
+function vfx.updateRiders(dt)
+	local now = os.clock()
+	local camPos = camera.CFrame.Position
+	local ease = 1 - math.exp(-12 * dt)
+	for player, rider in vfx.riders do
+		if now - rider.at > vfx.RIDER_STALE or not player.Parent then
+			vfx.endRider(player)
+			continue
+		end
+		if rider.fxEnd and now >= rider.fxEnd then
+			vfx.riderFx(rider)
+		end
+		local ahead = rider.vel * math.min(now - rider.at, 0.25)
+		local entity = rider.entity
+		local char = player.Character
+		if char ~= rider.char then
+			rider.char = char
+		end
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		if entity then
+			local root = entity.animal.model.PrimaryPart
+			local want = rider.mountCF + ahead
+			local cf = if rider.shown then root.CFrame:Lerp(want, ease) else want
+			rider.shown = true
+			local yaw = select(2, cf:ToEulerAnglesYXZ())
+			entity.x, entity.z, entity.yaw, entity.speed = cf.X, cf.Z, yaw, rider.speed
+			local near = (cf.Position - camPos).Magnitude < VIEW
+			if math.abs(entity.animal.scale - rider.scale) > 0.02 then
+				entity.animal:setScale(rider.scale)
+			end
+			root.CFrame = cf
+			if near then
+				animate(entity, dt, rider.speed, 0)
+			end
+			if hrp then
+				hrp.Anchored = true
+				hrp.CFrame = entity.animal:getSeatCFrame() * SEAT_OFFSET
+			end
+		elseif hrp then
+			local want = rider.riderCF + ahead
+			hrp.Anchored = true
+			hrp.CFrame = if (hrp.Position - want.Position).Magnitude < 30 then hrp.CFrame:Lerp(want, ease) else want
+		end
+	end
+end
+
 -- Slow motion during the egg-grab close-up and the hero leap home.
 local timeScale = 1
 
@@ -2514,6 +2923,8 @@ RunService.PreSimulation:Connect(function(dt)
 	-- back to everyone else's after slowing down.
 	updateHerd(dt, (slow and not cutscene) or Tutorial.active)
 	updateFlung(dt)
+	vfx.sendRide()
+	vfx.updateRiders(dt)
 	Dust.update(dt)
 	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)
 	if phase == "idle" then
@@ -2686,7 +3097,57 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
 end)
 
-Hud.init(onAction, goHome, rideFromHome)
+-- Continue on the fail screen: the server asks for the Robux (Shop.server) and
+-- answers true once it's paid, false if it was cancelled. Paid: back on the same
+-- kind of animal where you crashed, with your egg and this ride's cash, the
+-- obstacles and animals right there knocked away and a moment of grace.
+function vfx.askContinue()
+	local revive = vfx.revive
+	if phase == "ended" and revive and not revive.asked then
+		revive.asked = true
+		Hud.showContinue("waiting")
+		ReplicatedStorage:WaitForChild("ContinueRide"):FireServer(-revive.z / STUDS_PER_METRE)
+	end
+end
+
+ReplicatedStorage:WaitForChild("ContinueRide").OnClientEvent:Connect(function(paid)
+	local revive = vfx.revive
+	local hrp, humanoid = character()
+	if phase ~= "ended" or not revive or not hrp then
+		return
+	end
+	if not paid then
+		revive.asked = false
+		Hud.showContinue("ready")
+		return
+	end
+	vfx.revive = nil
+	for _, o in obstacles do
+		if not o.smashed and Vector2.new(o.x - revive.x, o.z - revive.z).Magnitude < Config.ContinueClear then
+			smash(o, revive.dir, if o.x >= revive.x then 1 else -1)
+		end
+	end
+	for _, entity in allAnimals() do
+		local dx = entity.x - revive.x
+		if not entity.popping and math.abs(dx) < Config.ContinueClear and math.abs(entity.z - revive.z) < Config.ContinueClear then
+			knock(entity, dx)
+		end
+	end
+	tumble = nil
+	mount = newEntity(revive.x, revive.z, revive.yaw, revive.kind)
+	mount.animal:setSaddled(true)
+	mount.speed = revive.speed
+	carried = revive.carried
+	if carried then
+		carried.part.Parent = workspace
+	end
+	phase, hold, grace = revive.phase, holdTime(mount), Config.ContinueGrace
+	humanoid.PlatformStand = false
+	humanoid.Sit = true
+	Hud.resume(phase == "return")
+end)
+
+Hud.init(onAction, goHome, rideFromHome, vfx.askContinue)
 
 player.CharacterAdded:Connect(function()
 	if phase ~= "idle" then

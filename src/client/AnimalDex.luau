@@ -86,6 +86,7 @@ local SHEETS = {
 	Boar = { frames = 20, time = 0.03, "rbxassetid://94170840211405" },
 	Snowman = { frames = 18, time = 0.03, "rbxassetid://139839156164981" },
 	IceGolem = { frames = 24, time = 0.03, "rbxassetid://94192117186470" },
+	SnackYak = { frames = 18, time = 0.03, "rbxassetid://131389846384914" },
 	Icebringer = { frames = 24, time = 0.04, "rbxassetid://125520132317720" },
 	Starfish = { frames = 48, time = 0.06, "rbxassetid://79068936169772", "rbxassetid://103163746025717" },
 	Squid = { frames = 24, time = 0.05, "rbxassetid://103797474563946" },
@@ -400,6 +401,33 @@ gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.DisplayOrder = -1 -- under the HUD, so the Pets button that closes it stays on top
 gui.Enabled = false
+-- Clicking anywhere off the page closes it (QM): a clear button over the whole
+-- screen, under the page. The page doesn't stop clicks reaching it, so a click
+-- on the page or on one of its buttons (the arrows stick out past it) is let be.
+local function over(object, at)
+	local min, size = object.AbsolutePosition, object.AbsoluteSize
+	return at.X >= min.X and at.Y >= min.Y and at.X <= min.X + size.X and at.Y <= min.Y + size.Y
+end
+local backdrop = Instance.new("TextButton")
+backdrop.Name = "Backdrop"
+backdrop.BackgroundTransparency = 1
+backdrop.Text = ""
+backdrop.AutoButtonColor = false
+backdrop.Size = UDim2.fromScale(1, 1)
+backdrop.ZIndex = 0
+backdrop.Activated:Connect(function(input)
+	local at = Vector2.new(input.Position.X, input.Position.Y)
+	if over(page, at) then
+		return
+	end
+	for _, d in page:GetDescendants() do
+		if d:IsA("GuiButton") and d.Visible and over(d, at) then
+			return
+		end
+	end
+	AnimalDex.close()
+end)
+backdrop.Parent = gui
 page = Instance.new("ImageLabel")
 page.Name = "Page"
 page.BackgroundTransparency = 1

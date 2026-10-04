@@ -20,10 +20,11 @@ return {
 			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
 			WallColors = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
 			-- Which animals run in this biome's stampede and how often (names are modules
-			-- in Shared/Animals). QM's spawn table (Oct 2): chances out of 1. They're
+			-- in Shared/Animals). QM's spawn table (Oct 3): chances out of 1. They're
 			-- weights, so a biome that doesn't add up to exactly 1 still works. Nest eggs
-			-- use the same odds (Nests.server).
-			Herd = { Horse = 0.22, Pinto = 0.22, Pig = 0.24, Fish = 0.2, Rhino = 0.1, Unicorn = 0.02 },
+			-- use the same odds (Nests.server). A 0 never spawns but keeps the animal on
+			-- the biome's page in the animal dictionary.
+			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Fish = 0.22, Rhino = 0.13, Unicorn = 0.05 },
 			-- Dirt patches in the walls' colours, a stud below the grass
 			-- (tools/meadow_ground.py); see the Desert's Patches.
 			Patches = {
@@ -35,7 +36,7 @@ return {
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
-			Herd = { Cactus = 0.4, Scorpion = 0.3, Sandworm = 0.15, SpineLizard = 0.13, Snake = 0.02 },
+			Herd = { Cactus = 0.3, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05 },
 			-- Patches of other ground in the floor (parts named after them in
 			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
 			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
@@ -59,7 +60,7 @@ return {
 			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
-			Herd = { Penguin = 0.3, Boar = 0.28, Snowman = 0.22, IceGolem = 0.15, Icebringer = 0.05 },
+			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0.12, Icebringer = 0.06 }, -- Snack Yak guessed like the Ice Golem
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
@@ -78,7 +79,7 @@ return {
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			Herd = { Fish = 0.3, Starfish = 0.35, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, Kraken = 0.05 }, -- adds to 1.25 (School of Fish guessed like the King Crab)
+			Herd = { Fish = 0, Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, Kraken = 0.05 }, -- adds to 1.0
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -153,13 +154,38 @@ return {
 				Bubbles = 24, -- per second
 			},
 		},
+		{
+			-- The endgame (QM, Oct 3), after Realm of the Mad God's godlands: dark stone
+			-- plates split by snow, with ice or lava cracks. It never ends: one 960-stud
+			-- track after another, each picked at random from four (two with ice, two
+			-- with lava; Shared/Godlands, Shared/GodlandsTracks), built round each rider
+			-- as they go (Client/GodlandsStream). It has no finish line.
+			Name = "Godlands",
+			Length = math.huge, -- endless
+			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
+			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)
+			-- Placeholder until the Godlands has animals (and bosses) of its own: just Fish (QM).
+			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
+			Herd = { Fish = 1 },
+			PlaceholderHerd = true,
+			Patches = {
+				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
+				Ice = { Color3.fromRGB(170, 196, 250), Color3.fromRGB(184, 208, 252) },
+				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon
+			},
+			UnlockCost = 10000000, -- guessed: 10x the Ocean
+			PostColor = Color3.fromRGB(62, 60, 72),
+			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
+			-- No GateImage / UpgradeImage yet: the gate shows plain text and Upgrade Pen
+			-- the default button with the price, until QM's art is in.
+		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	CourseHalfWidth = 56,
-	CourseLength = 16192, -- all the biomes' lengths added up
+	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
 	HomeHalfWidth = 144, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3)
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
@@ -255,7 +281,7 @@ return {
 	PetTiers = {
 		Horse = 1, Pig = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
 		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
-		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, Icebringer = 3, -- Tundra
+		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, Whale = 4, Kraken = 4, -- Ocean
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
@@ -271,6 +297,7 @@ return {
 		Icicle = 1, Pine = 2, IcicleLarge = 2, IceBoulder = 3, -- snow: small, medium, medium, large
 		TubeCoral = 1, BrainCoral = 1, BranchCoral = 2, FanCoral = 2, ReefRock = 3, -- ocean
 		BasaltRock = 2, Vent = 3, -- the deep ocean
+		DeadBush = 1, DarkStone = 1, DeadTree = 2, Crag = 2, LavaRock = 3, -- Godlands
 	},
 	-- How big each tier looks: each one is TierGrowth x the one below, so a medium is
 	-- 1.6x a small and a large 2.56x. "Size" is the square root of the two biggest sides of
@@ -285,13 +312,19 @@ return {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
 		BranchCoral = 1.27, FanCoral = 1.1, ReefRock = 0.83, BasaltRock = 0.89, Vent = 1.31,
+		DeadTree = 1.07, Crag = 0.87, LavaRock = 0.86,
 	},
+	-- While you were away (QM, Oct 3): coming back, your pets have earned this share of
+	-- their usual gold a second for the time you were gone, up to AwayCap seconds of it
+	-- (10 hours at 0.1x: an hour's worth at most). Claimed from a popup (Away.client).
+	AwayRate = 0.1,
+	AwayCap = 10 * 3600,
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
 	-- every second while you're in the game.
 	PetIncome = {
 		Horse = 1, Pig = 3, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
 		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
-		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, Icebringer = 1111, -- Tundra
+		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 480, Icebringer = 1111, -- Tundra
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, Whale = 5000, Kraken = 8200, -- Ocean
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
@@ -305,7 +338,7 @@ return {
 		Odds = { Rare = 50, Epic = 32, Legendary = 15, Exclusive = 3 },
 		Pool = {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1 },
-			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
+			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, SnackYak = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
 			-- with an empty pool is never rolled.
@@ -331,6 +364,7 @@ return {
 		SpineLizard = "rbxassetid://98567631088826",
 		Boar = "rbxassetid://121234341393694",
 		IceGolem = "rbxassetid://102264545247873",
+		SnackYak = "rbxassetid://87632604695329", -- assets/ui/SnackYakEggRender.png
 		Icebringer = "rbxassetid://108999142038756",
 		Kraken = "rbxassetid://104654341782924", -- assets/ui/KrakenEggRender.png
 		Squid = "rbxassetid://128883182267763", -- assets/ui/SquidEggRender.png
@@ -371,6 +405,21 @@ return {
 	EggRevealBurst = true, -- spinning sunburst behind the real card
 	LandingGrace = 0.8,
 	TurnGrace = 2,
+	-- Continue (QM, Oct 3): after a crash or a buck-off, pay Robux to keep riding
+	-- from where it happened (Shop.server, Ride.client). It costs more the further
+	-- from home you are: Roblox prices are fixed per developer product, so each
+	-- band is its own product (made on the Creator Dashboard at that price), and
+	-- the furthest band you've passed (From, metres from the start line) is the
+	-- one offered. Until a band's id is here, it only shows in Studio, for free.
+	ContinueTiers = {
+		{ From = 0, Price = 25, ProductId = 0 },
+		{ From = 200, Price = 50, ProductId = 0 },
+		{ From = 500, Price = 100, ProductId = 0 },
+		{ From = 1000, Price = 200, ProductId = 0 },
+		{ From = 2000, Price = 400, ProductId = 0 },
+	},
+	ContinueGrace = 1.5, -- seconds nothing can crash you once you're back on
+	ContinueClear = 14, -- studs: obstacles this close to where you crashed are knocked away
 	-- Ride back's vignette: edges only, soft, breathing slowly, to add tension without
 	-- covering the lane. Its shape (clear middle 60%) is baked into the image.
 	VignetteColor = Color3.fromRGB(210, 30, 30),
@@ -400,6 +449,7 @@ return {
 		Boar = { Speed = 1.6, Stamina = 1.6 },
 		Snowman = { Speed = 1.9, Stamina = 1.3 },
 		IceGolem = { Speed = 1.6, Stamina = 3 },
+		SnackYak = { Speed = 1.8, Stamina = 2.6 }, -- a guess, just past the Ice Golem's speed
 		Icebringer = { Speed = 2.7, Stamina = 4 },
 		-- Ocean
 		Starfish = { Speed = 2.5, Stamina = 2 },

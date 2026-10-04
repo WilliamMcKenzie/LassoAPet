@@ -1,8 +1,8 @@
 -- The map itself (ground, corridor walls, obstacles, home base, pen and egg
 -- nest) is a saved model: src/world/World.rbxmx, synced by Rojo into
 -- Workspace.World, so it can be edited by hand in Studio. This script only sets
--- the sky, puts the finish line at the end of the course, turns on the live
--- colour attributes and marks the world ready.
+-- the sky, picks the Godlands' tracks, puts the finish line at the end of the
+-- course, turns on the live colour attributes and marks the world ready.
 
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -32,14 +32,34 @@ sky.SkyboxDn = "rbxassetid://98351643334543"
 sky.Parent = Lighting
 -- The finish line: a copy of the start line at the end of the last biome
 -- (Config.FinishFromEnd before the far wall), so it moves as biomes are added.
+-- The endless Godlands has no end, so no finish line.
 local Config = require(ReplicatedStorage.Shared.Config)
+local endless = Config.CourseLength == math.huge
 local startLine = world:FindFirstChild("StartLine")
-if startLine then
+if startLine and not endless then
 	local finish = startLine:Clone()
 	finish.Name = "FinishLine"
 	local z = startLine:GetBoundingBox().Position.Z
 	finish:PivotTo(CFrame.new(0, 0, -Config.CourseLength + Config.FinishFromEnd - z) * startLine:GetPivot())
 	finish.Parent = world
+end
+
+-- The Godlands: each client builds the tracks near it (Client/GodlandsStream), in
+-- the order this server's seed picks (Shared/Godlands). Anything saved in the map
+-- past its line (walls, pieces, the far wall) is in the way, so it goes.
+local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
+local Godlands = require(ReplicatedStorage.Shared.Godlands)
+if Godlands.start then
+	world:SetAttribute("GodlandsSeed", Random.new():NextInteger(1, 1000000))
+	for _, folderName in { "Ground", "Walls", "Obstacles", "Decor" } do
+		local folder = world:FindFirstChild(folderName)
+		for _, child in folder and folder:GetChildren() or {} do
+			local box = if child:IsA("Model") then child:GetBoundingBox().Position elseif child:IsA("BasePart") then child.Position else nil
+			if box and box.Z < Godlands.start then
+				child:Destroy()
+			end
+		end
+	end
 end
 
 -- Resize the medium and large obstacles to their tier's size (Config.ObstacleScale),
@@ -56,7 +76,7 @@ end
 -- Nothing past the finish line: the floor and walls stop at it, so the leap over
 -- it goes out into open sky. Parts that cross the line are cut back to it.
 local finishZ = -Config.CourseLength + Config.FinishFromEnd
-for _, folderName in { "Ground", "Walls", "Obstacles", "Decor" } do
+for _, folderName in if endless then {} else { "Ground", "Walls", "Obstacles", "Decor" } do
 	local folder = world:FindFirstChild(folderName)
 	for _, part in folder and folder:GetDescendants() or {} do
 		if part:IsA("BasePart") then
@@ -72,5 +92,5 @@ for _, folderName in { "Ground", "Walls", "Obstacles", "Decor" } do
 		end
 	end
 end
-require(ReplicatedStorage.Shared.WorldColors).watch(world)
+WorldColors.watch(world)
 world:SetAttribute("Ready", true)

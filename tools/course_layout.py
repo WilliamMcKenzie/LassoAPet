@@ -42,6 +42,7 @@ import desert_ground as DG  # noqa: E402
 import meadow_ground as MG  # noqa: E402
 import snow_ground as SG  # noqa: E402
 import ocean_ground as OG  # noqa: E402
+import godlands_concept as GC  # noqa: E402
 from animal_designs import font  # noqa: E402
 
 HALF_W = 56
@@ -77,9 +78,14 @@ ASSETS = {
     "ReefRock": (9.0, "large", TA.reef_rock),
     "BasaltRock": (5.0, "medium", TA.basalt_rock),
     "Vent": (6.0, "large", TA.vent),
+    "DeadBush": (2.4, "small", GC.dead_bush),
+    "DarkStone": (3.2, "small", GC.dark_stone),
+    "DeadTree": (3.2, "medium", GC.dead_tree),
+    "Crag": (5.6, "medium", GC.crag),
+    "LavaRock": (9.0, "large", GC.lava_rock),
 }
 # the medium a cluster mixes in now and then, so it isn't all rubble
-ACCENT = {"Desert": "Cactus", "Snow": "Pine", "Ocean": "FanCoral"}
+ACCENT = {"Desert": "Cactus", "Snow": "Pine", "Ocean": "FanCoral", "Godlands": "DeadTree"}
 TIERS = {"small": 1, "medium": 2, "large": 3}
 ENTRY = 48
 BEAT = 80
@@ -89,12 +95,13 @@ FINISH_CLEAR = 80  # studs kept clear before the far wall: the finish line is 50
 # How far from its wall a cluster may reach, per biome (QM, Oct 1): everything past the
 # meadow hugs the walls like the meadow does, each later biome a bit further out, and
 # the middle of the path is always open.
-REACH = {"Desert": 18, "Snow": 22, "Ocean": 26}
+REACH = {"Desert": 18, "Snow": 22, "Ocean": 26, "Godlands": 30}
 # Config.ObstacleScale: World.server rescales these at runtime, so wall-flush spots use
 # the size they end up as
 SCALE = {"Boulder": 0.83, "BoulderSplit": 0.96, "Cactus": 0.97, "SandBoulder": 0.88, "SandBoulderCarved": 0.93,
          "SandMound": 0.58, "Pine": 0.78, "IcicleLarge": 0.83, "IceBoulder": 0.85,
-         "BranchCoral": 1.27, "FanCoral": 1.1, "ReefRock": 0.83, "BasaltRock": 0.89, "Vent": 1.31}
+         "BranchCoral": 1.27, "FanCoral": 1.1, "ReefRock": 0.83, "BasaltRock": 0.89, "Vent": 1.31,
+         "DeadTree": 1.07, "Crag": 0.87, "LavaRock": 0.86}
 
 
 def eff(asset):
@@ -418,6 +425,8 @@ ICON = {
     "BranchCoral": ((255, 92, 150), "plus"), "FanCoral": ((255, 214, 60), "diamond"),
     "ReefRock": ((236, 140, 124), "circle"),
     "BasaltRock": ((76, 74, 90), "square"), "Vent": ((255, 110, 20), "circle"),
+    "DeadBush": ((112, 100, 96), "square"), "DarkStone": ((58, 56, 68), "square"),
+    "DeadTree": ((86, 76, 74), "plus"), "Crag": ((80, 78, 92), "diamond"), "LavaRock": ((255, 72, 0), "circle"),
 }
 
 
@@ -609,13 +618,13 @@ def part_xml(ref, p, material=272):
     return "\n".join(out)
 
 
-def write_obstacles(items):
-    """Replace everything in World.Obstacles with one Model per placement."""
+def obstacle_models(items, prefix="OBS"):
+    """One Model's XML per placement, and how many parts they hold."""
     n = [0]
 
     def ref():
         n[0] += 1
-        return f"OBS{n[0]:06d}"
+        return f"{prefix}{n[0]:06d}"
 
     models = []
     parts_total = 0
@@ -645,6 +654,12 @@ def write_obstacles(items):
         parts_total += len(body)
         models.append(f'<Item class="Model" referent="{ref()}"><Properties>\n'
                       f'<string name="Name">{it["asset"]}</string>\n</Properties>\n' + "\n".join(body) + "\n</Item>")
+    return models, parts_total
+
+
+def write_obstacles(items):
+    """Replace everything in World.Obstacles with one Model per placement."""
+    models, parts_total = obstacle_models(items)
     s = open(WORLD).read()
     i = s.index('<string name="Name">Obstacles</string>')
     st = s.rindex("<Item", 0, i)

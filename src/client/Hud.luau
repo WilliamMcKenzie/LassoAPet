@@ -25,6 +25,7 @@ local IMAGES = {
 	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
+	continue = { id = "rbxassetid://124255755969598", size = Vector2.new(960, 308) }, -- Continue.png
 	dodge = { id = "rbxassetid://96827860827213", size = Vector2.new(1423, 115) },
 	sunburst = { id = "rbxassetid://130261551778736", size = Vector2.new(1995, 1996) }, -- white rays, behind TAKE EGG
 	vignette = { id = "rbxassetid://102545209742676", size = Vector2.new(512, 512) }, -- white; clear to 60% out, full only in the corners
@@ -80,6 +81,7 @@ local IMAGES = {
 	eggSpineLizard = { id = "rbxassetid://98567631088826", size = Vector2.new(502, 934) }, -- SpineLizardEggRender.png
 	eggBoar = { id = "rbxassetid://121234341393694", size = Vector2.new(502, 751) }, -- BoarEggRender.png
 	eggIceGolem = { id = "rbxassetid://102264545247873", size = Vector2.new(502, 866) }, -- IceGolemEggRender.png
+	eggSnackYak = { id = "rbxassetid://87632604695329", size = Vector2.new(505, 762) }, -- SnackYakEggRender.png
 	eggIcebringer = { id = "rbxassetid://108999142038756", size = Vector2.new(502, 774) }, -- IcebringerEggRender.png
 	eggKraken = { id = "rbxassetid://104654341782924", size = Vector2.new(696, 785) }, -- KrakenEggRender.png
 	eggSquid = { id = "rbxassetid://128883182267763", size = Vector2.new(696, 785) }, -- SquidEggRender.png
@@ -145,6 +147,8 @@ local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one 
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
+local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
+local CONTINUE_GAP = 12 -- between Continue and the Home button under it
 local tip, tipText -- the fail screen's tooltip in place of "+$N" (Hud.setTip), and its text
 local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at the machine
 -- The first-time tutorial's stage (Hud.setTutorial): nil when it's off, "bare"
@@ -314,7 +318,7 @@ local function setCash(amount)
 	rideCash.text.Text = money(amount)
 end
 
-function Hud.init(onAction, onHome, onRide)
+function Hud.init(onAction, onHome, onRide, onContinue)
 	-- With ShowHud off the HUD is built but never parented, so nothing shows.
 	local playerGui = Config.ShowHud and Players.LocalPlayer:WaitForChild("PlayerGui") or nil
 	if not Config.ShowHud then
@@ -378,6 +382,9 @@ function Hud.init(onAction, onHome, onRide)
 
 	home = button(rideRoot, "home", fit("home", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onHome)
 	home.Visible = false
+	local overHome = UDim2.new(0.5, 0, 1, -MARGIN - fit("home", BUTTON_WIDTH).Y.Offset - CONTINUE_GAP)
+	continueButton = button(rideRoot, "continue", fit("continue", BUTTON_WIDTH), BOTTOM_CENTER, overHome, onContinue)
+	continueButton.Visible = false
 	-- Sprint, bottom left: held down, not clicked. Remembers the touch or click that
 	-- pressed it, so sliding a finger off the button doesn't drop the sprint.
 	sprint = button(rideRoot, "sprint", fit("sprint", SPRINT_WIDTH), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
@@ -515,8 +522,17 @@ function Hud.init(onAction, onHome, onRide)
 	SELECTED.root = root(SELECTED.gui)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	ride.Visible = false
+	-- Gold and Pets have a screen of their own so they stay up while the animal
+	-- dictionary hides the rest of the home HUD (QM: only the dictionary, Pets and
+	-- the gold show then).
+	local sideGui = Instance.new("ScreenGui")
+	sideGui.Name = "GoldPets"
+	sideGui.ResetOnSpawn = false
+	sideGui.IgnoreGuiInset = true
+	sideGui.Parent = playerGui
+	local sideRoot = root(sideGui)
 	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold mockup.
-	gold = button(homeRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
+	gold = button(sideRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
 	local total = label(gold, UDim2.fromOffset(0, ICON_HEIGHT * 0.4), UDim2.new(0.5, 0, 1, 2), 44, 4) -- 4px outline (QM)
 	total.AnchorPoint = Vector2.new(0.5, 1)
 	total.AutomaticSize = Enum.AutomaticSize.X
@@ -529,14 +545,7 @@ function Hud.init(onAction, onHome, onRide)
 	showGold()
 	-- Pets sits just over the coin, centred on it: it opens and closes the animal
 	-- dictionary (AnimalDex).
-	-- It has a screen of its own so it can stay up while the dictionary hides the
-	-- rest of the home HUD (QM: only the dictionary and this button show then).
-	local petsGui = Instance.new("ScreenGui")
-	petsGui.Name = "PetsButton"
-	petsGui.ResetOnSpawn = false
-	petsGui.IgnoreGuiInset = true
-	petsGui.Parent = playerGui
-	pets = button(root(petsGui), "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
+	pets = button(sideRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
 		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8), AnimalDex.toggle)
 	AnimalDex.onToggle = function(open)
 		homeGui.Enabled = not open
@@ -721,6 +730,7 @@ function Hud.show(visible)
 		message.Text = ""
 		banner.Visible = false
 		home.Visible = false
+		Hud.showContinue(nil)
 	end
 	ride.Visible = false -- comes back when the ride prompt shows again
 	gold.Visible = not visible and tutorial ~= "bare"
@@ -1158,6 +1168,35 @@ function Hud.showHome(visible)
 		gained.scale.Scale = 0
 		TweenService:Create(gained.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	end
+end
+
+-- The fail screen's Continue, above Home (QM's mockup): nil hides it, "ready"
+-- shows it and "waiting" (the Robux prompt is up) dims it and Home (Ride ignores
+-- Home until the prompt closes).
+function Hud.showContinue(state)
+	continueButton.Visible = state ~= nil
+	local dim = if state == "waiting" then 0.5 else 0
+	continueButton.ImageTransparency = dim
+	home.ImageTransparency = dim
+	if state == "ready" and not continueButton:GetAttribute("Shown") then
+		continueButton:SetAttribute("Shown", true)
+		continueButton.UIScale.Scale = 0
+		TweenService:Create(continueButton.UIScale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	elseif state == nil then
+		continueButton:SetAttribute("Shown", nil)
+	end
+end
+
+-- Continued after a fail (Ride.client): the fail screen goes and the ride's HUD
+-- comes back as it was, the way out or the ride back.
+function Hud.resume(returning)
+	message.Text = ""
+	banner.Visible = false
+	home.Visible = false
+	Hud.showContinue(nil)
+	gained.row.Visible = false
+	Hud.setTip(nil)
+	Hud.setReturning(returning)
 end
 
 -- A tooltip in place of the fail screen's "+$N" (riding into a locked gate:

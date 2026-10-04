@@ -5,6 +5,10 @@
 
 local CELL = 8
 
+-- Past its line the Godlands is laid out on 4-stud tiles, built by each client
+-- as it goes (Shared/Godlands), so its heights come from its track grids instead.
+local Godlands = require(script.Parent.Godlands)
+
 local Ground = {}
 
 local heights -- [cell key] = top y, only for cells off y = 0
@@ -29,6 +33,9 @@ local function load()
 end
 
 function Ground.heightAt(x, z)
+	if Godlands.start and z < Godlands.start then
+		return Godlands.heightAt(x, z)
+	end
 	if not heights then
 		load()
 	end
