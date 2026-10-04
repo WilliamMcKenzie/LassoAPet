@@ -795,8 +795,9 @@ local function petDistance(model, at)
 	return d - math.max(size.X, size.Z) / 2, d
 end
 
--- Every frame at home: bind RIDE to the pet you clicked, else the nearest (your
--- pets, or a stampede animal just in at the start line).
+-- Every frame at home: bind RIDE to the nearest pet, measured to the middle of its
+-- body so a small pet you stand on beats a huge one nearby (your pets, or a
+-- stampede animal just in at the start line).
 local function updateRideTarget()
 	local hrp = character()
 	local target
@@ -810,7 +811,7 @@ local function updateRideTarget()
 		-- Always the nearest one (QM: no clicking a pet to pick it any more).
 		local best = math.huge
 		for _, model in pets do
-			local d = petDistance(model, hrp.Position)
+			local _, d = petDistance(model, hrp.Position) -- from the middle of its body, not its outline (QM)
 			if d < best then
 				target, best = model, d
 			end
