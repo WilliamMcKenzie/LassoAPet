@@ -7,7 +7,9 @@ designs/props/GrassSnake.bbmodel is QM's file (QM added the Podium group, column
 and turned the coil in the idle). build() made the first recolour from
 designs/desert/Snake.bbmodel; `python3 tools/grass_snake.py rebuild` would overwrite
 QM's file with it, so don't. Convert it for the game with
-  python3 tools/bbmodel_to_luau.py designs/props/GrassSnake.bbmodel src/shared/Props/GrassSnakeModel.luau
+  python3 tools/bbmodel_to_luau.py --zyx designs/props/GrassSnake.bbmodel src/shared/Props/GrassSnakeModel.luau
+(--zyx: QM turns parts about several axes in Blockbench; the column's striped texture
+becomes fluting strips, see stripes() there)
 """
 
 import base64

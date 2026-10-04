@@ -36,6 +36,7 @@ PLAIN = ("Eye", "Pupil", "Nostril", "Plain")  # name prefixes that skip the stud
 NEON = ("Slit_pupil", "Glow")  # name prefixes that glow
 METAL = ("Metal",)  # name prefixes drawn with the classic Weld texture instead of studs
 PLATE = 0.04  # studs: thickness of a converted one-face plane
+FLUTE = 0.1  # studs: thickness of a stripe on a striped block (see stripes())
 
 
 def v3(v):
@@ -270,6 +271,26 @@ def convert(model):
         u, v = uv[:2] if isinstance(uv, list) else next(iter(uv.values()))
         return im.getpixel((min(int(u * sx), im.width - 1), min(int(v * sy), im.height - 1)))
 
+    def stripes(e):
+        """Vertical stripes on an unrotated cube's front face (QM's fluted podium column):
+        [(from, to, rgb)] across the face as fractions of its width, or None if it's one colour."""
+        face = e["faces"].get("north") or {}
+        if face.get("texture") is None or any(e.get("rotation") or (0, 0, 0)):
+            return None
+        im, sx, sy = texs[face["texture"]]
+        u0, v0, u1, v1 = face["uv"]
+        xs = range(int(min(u0, u1) * sx), int(max(u0, u1) * sx))
+        rows = {int(v * sy) for v in (min(v0, v1) + 0.25, (v0 + v1) / 2, max(v0, v1) - 0.25)}
+        lines = [[im.getpixel((min(x, im.width - 1), min(y, im.height - 1))) for x in xs] for y in rows]
+        if len(xs) < 2 or any(line != lines[0] for line in lines) or len(set(lines[0])) < 2:
+            return None
+        runs, start = [], 0
+        for i in range(1, len(xs) + 1):
+            if i == len(xs) or lines[0][i] != lines[0][start]:
+                runs.append((start / len(xs), i / len(xs), lines[0][start]))
+                start = i
+        return runs
+
     bones, parts = [], []
 
     def walk(node, parent):
@@ -293,6 +314,25 @@ def convert(model):
             for i, (cls, center, R, size) in enumerate(pieces):
                 name = e["name"] if i == 0 else f"{e['name']}_{i + 1}"
                 parts.append((name, parent, cls, size, center, R, rgb, plain, neon, metal))
+            runs = stripes(e) if e["type"] == "cube" else None
+            if runs:
+                # the block in its first stripe's colour, and each other stripe as a strip
+                # FLUTE thick, half sunk into each of its four sides, the full height
+                parts[-1] = parts[-1][:6] + (runs[0][2],) + parts[-1][7:]
+                n = 0
+                for a, b, c in runs:
+                    if c == runs[0][2]:
+                        continue
+                    for axis, other in ((0, 2), (2, 0)):  # along x on the front and back, along z on the sides
+                        for side in (lo[other], hi[other]):
+                            size = np.array(hi - lo, float)
+                            size[axis] *= b - a
+                            size[other] = FLUTE
+                            center = (lo + hi) / 2
+                            center[axis] = lo[axis] + (hi[axis] - lo[axis]) * (a + b) / 2
+                            center[other] = side
+                            n += 1
+                            parts.append((f"{e['name']}_flute{n}", parent, "Part", size, center, np.eye(3), c, plain, neon, metal))
             return
         g = groups[node["uuid"]]
         name = names[g["uuid"]]
