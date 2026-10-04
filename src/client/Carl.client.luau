@@ -95,7 +95,7 @@ local carlRootY = carl.model.PrimaryPart.Position.Y
 local _, carlSize = carl.model:GetBoundingBox()
 local h = carlSize.Y
 
--- QM's market stall in our style (tools/carl_stall.py -> CarlStallModel): posts,
+-- QM's stall (designs/stall/CarlStall.bbmodel -> tools/carl_stall.py -> CarlStallModel): posts,
 -- beams, a counter and a striped cloth roof, with a cactus growing up through it.
 local counter
 for _, spec in StallModel.parts do
@@ -117,17 +117,9 @@ boardGui.LightInfluence = 0
 text(boardGui, UDim2.fromScale(0.9, 0.6), "CARL'S PET SPIN").Position = UDim2.fromScale(0.05, 0.2)
 boardGui.Parent = counter
 
--- The eggs you can win, on the counter.
-local exclusives = {}
-for kind in Config.Gacha.Pool.Exclusive or {} do
-	table.insert(exclusives, kind)
-end
-table.sort(exclusives)
-for i, kind in exclusives do
-	if i > 3 then
-		break
-	end
-	local egg = Egg.new(kind).model
+-- The heap of eggs behind him (QM, Oct 4): every egg the roll gives, at its real size.
+for _, spec in StallModel.pile do
+	local egg = Egg.new(spec.kind).model
 	for _, part in egg:GetDescendants() do
 		if part:IsA("BasePart") then
 			part.Anchored = true
@@ -135,11 +127,7 @@ for i, kind in exclusives do
 			part.CanQuery = false
 		end
 	end
-	local _, size = egg:GetBoundingBox()
-	egg:ScaleTo(egg:GetScale() * 2.4 / size.Y)
-	local box, fitted = egg:GetBoundingBox()
-	local lift = egg:GetPivot().Position.Y - box.Position.Y + fitted.Y / 2
-	egg:PivotTo(origin * CFrame.new(StallModel.eggs + Vector3.new((i - 2) * StallModel.eggSpacing, lift, 0)))
+	egg:PivotTo(origin * spec.cframe)
 	egg.Parent = stall
 end
 

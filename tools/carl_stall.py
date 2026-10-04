@@ -1,145 +1,161 @@
-"""Carl's stall: QM's market stall (market_stall_large.bbmodel, Oct 4) in our style.
+"""Carl's stall from QM's Blockbench model.
 
     python3 tools/carl_stall.py [preview_dir]
 
-Writes src/shared/CarlStallModel.luau (the blocks Carl.client builds) and, with a
-preview_dir, renders of the stall plus a Blockbench copy (CarlStall.bbmodel).
+designs/stall/CarlStall.bbmodel is the master (QM's edit, Oct 4, of our studded
+take on QM's market stall). This writes src/shared/CarlStallModel.luau, the blocks
+Carl.client builds, and with a preview_dir renders the stall with Carl in it.
 
-The conversion keeps QM's layout and drops what isn't needed (QM: as few cubes
-as possible): 4 posts, a beam along each side, the ridge cap, the counter (top
-and body), and the striped cloth roof, now a sheet 1 unit thick instead of two
-zero-thickness planes. Doubled beams are merged, the gable trusses and side
-X-braces (drawn on flat planes) are gone, and the side table is left out (there
-is no room for it beside the biggest pen). The counter is shallower so Carl
-stands behind it, under the ridge, and a cactus grows up through the roof.
-
-Measurements below are QM's Blockbench units; SCALE turns them into studs.
-The stall faces +z in Blockbench (the counter side) and -z in the output, which
-is the way our models face (Carl.client turns it to face into the base).
+1 Blockbench unit = 0.1 stud, same axes, the counter facing -Z. Cubes keep their
+from/to (turned about their origin, Blockbench's Z-then-Y-then-X order); the
+cloth's six-sided meshes become blocks fitted to their corners. Colours come
+from the palette texture under each face's UV.
 """
 
+import base64
+import io
+import json
 import math
 import sys
 from pathlib import Path
 
 import numpy as np
+from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import partlib  # noqa: E402
 
-OUT = Path(__file__).resolve().parent.parent / "src" / "shared" / "CarlStallModel.luau"
+ROOT = Path(__file__).resolve().parent.parent
+SOURCE = ROOT / "designs" / "stall" / "CarlStall.bbmodel"
+OUT = ROOT / "src" / "shared" / "CarlStallModel.luau"
+UNIT = 0.1  # studs per Blockbench unit
+CARL = (0, 0, 2.1)  # Carl's feet: behind the counter, under the ridge
+EGG_GROWTH = 1.5  # Config.EggSizePerTier
+# The heap of eggs behind Carl (QM, Oct 4): every egg the roll can give, at its
+# real size (Config.PetTiers: 1.5x per size tier). kind, tier, (x, bottom y, z), yaw, roll.
+PILE = [
+    # on the ground
+    ("Kraken", 4, (0, 0, 11), 0.2, 0),
+    ("Snake", 3, (-7, 0, 8.5), 0.5, 0.1),
+    ("Icebringer", 3, (7, 0, 8.5), -0.5, -0.1),
+    ("SnackYak", 2, (-8.4, 0, 13.6), 0.8, 0),
+    ("BlueCrab", 2, (8.4, 0, 13.6), -0.7, 0),
+    ("Loong", 1, (8.6, 0, 5.4), -0.3, 0),
+    ("RoboShark", 1, (-8.6, 0, 5.4), 0.4, 0),
+    # leaning on those
+    ("Unicorn", 2, (-4.6, 7.4, 8.6), 0.3, 0.45),
+    ("BlueCrab", 2, (4.6, 7.8, 9), -0.6, -0.4),
+    ("Icebringer", 3, (-4, 8.6, 13.4), 1.2, 0.3),
+    ("Snake", 3, (4.2, 8.8, 13.8), -1.0, -0.3),
+    # and the top of the heap
+    ("Loong", 1, (-1.8, 12.8, 10.2), 0.6, 0.3),
+    ("RoboShark", 1, (2.2, 13, 11), -0.4, -0.25),
+    ("Unicorn", 2, (0.2, 15.2, 12.6), 0.1, 0.05),
+]
 
-SCALE = 0.6  # studs per Blockbench unit: the roof just clears Carl (a Cactus at pet size)
-CENTRE = np.array([8.0, 0, 8.0])  # the middle of the four posts
-STRIPES = 5  # cloth stripes per roof side (odd: red at both ends)
 
-WOOD = (150, 100, 62)
-WOOD_DARK = (112, 74, 46)
-COUNTER = (186, 132, 82)
-RED = (226, 60, 72)
-WHITE = (250, 246, 236)
-GREEN = (118, 204, 64)  # Carl's own green
-PINK = (255, 110, 170)
-
-FLIP = np.diag([-1.0, 1, -1, 1])  # turned half round: the counter faces -z
+def pile_cframe(tier, at, yaw, roll):
+    """The egg's pivot (its body's centre, 1.6 x its size up) for Egg.new's model."""
+    size = EGG_GROWTH ** (tier - 1)
+    return partlib.T(at[0], at[1], at[2]) @ partlib.Ry(math.degrees(yaw)) @ partlib.Rz(math.degrees(roll)) @ partlib.T(0, 1.6 * size, 0)
 
 
-def to_studs(m):
-    """A Blockbench-unit transform to studs, centred on the posts and turned to face -z."""
-    out = m.copy()
-    out[:3, 3] = (out[:3, 3] - CENTRE) * SCALE
-    return FLIP @ out
+def palette(model):
+    src = model["textures"][0]["source"].split(",", 1)[1]
+    return Image.open(io.BytesIO(base64.b64decode(src))).convert("RGB")
+
+
+def rotation(deg):
+    x, y, z = deg
+    return (partlib.Rz(z) @ partlib.Ry(y) @ partlib.Rx(x))[:3, :3]
+
+
+def cube_part(e, color):
+    lo, hi = np.array(e["from"], float), np.array(e["to"], float)
+    centre = (lo + hi) / 2
+    m = np.eye(4)
+    m[:3, 3] = centre
+    if any(e.get("rotation", [0, 0, 0])):
+        o = np.array(e["origin"], float)
+        R = rotation(e["rotation"])
+        m[:3, :3] = R
+        m[:3, 3] = o + R @ (centre - o)
+    m[:3, 3] *= UNIT
+    return partlib.Part(e["name"], (hi - lo) * UNIT, m, color)
+
+
+def mesh_part(e, color):
+    """A six-sided mesh (a turned block): its box from its corners."""
+    pts = np.array(list(e["vertices"].values()), float) * UNIT
+    centre = pts.mean(0)
+    _, _, axes = np.linalg.svd(pts - centre)
+    if np.linalg.det(axes) < 0:
+        axes[2] = -axes[2]
+    # Order the axes nearest X, Y, Z so the block's faces line up like a cube's.
+    order = [int(np.argmax(np.abs(axes[:, i]))) for i in range(3)]
+    R = np.zeros((3, 3))
+    used = set()
+    for world in range(3):
+        k = max((k for k in range(3) if k not in used), key=lambda k: abs(axes[k, world]))
+        used.add(k)
+        v = axes[k] * (1 if axes[k, world] >= 0 else -1)
+        R[:, world] = v
+    if np.linalg.det(R) < 0:
+        R[:, 2] = -R[:, 2]
+    local = (pts - centre) @ R
+    size = local.max(0) - local.min(0)
+    m = np.eye(4)
+    m[:3, :3] = R
+    m[:3, 3] = centre + R @ ((local.max(0) + local.min(0)) / 2)
+    return partlib.Part(e["name"], size, m, color)
 
 
 def build():
-    b = partlib.Builder()
-
-    def box(name, lo, hi, color, about=None, rz=0.0):
-        lo, hi = np.array(lo, float), np.array(hi, float)
-        centre = (lo + hi) / 2
-        m = partlib.T(*centre)
-        if rz:
-            o = np.array(about, float)
-            m = partlib.T(*o) @ partlib.Rz(rz) @ partlib.T(*(centre - o))
-        b.box(name, (hi - lo) * SCALE, to_studs(m), color)
-
-    # Posts at the four corners, and the beam along the top of each side (QM's two
-    # stacked beams per side, as one).
-    for x0 in (-6, 21):
-        for z0 in (0, 14):
-            box("Post", (x0, 0, z0), (x0 + 1, 18, z0 + 2), WOOD_DARK)
-    box("Beam", (-8, 16, -2.5), (-5, 20, 18.5), WOOD)
-    box("Beam", (21, 16, -2.5), (24, 20, 18.5), WOOD)
-
-    # The cloth roof: QM's two planes at +-22.5 degrees from the ridge (x 7.5..8.5,
-    # y 26), now 1 unit thick, in stripes running down the slope.
-    width = 17 / STRIPES
-    for i in range(STRIPES):
-        z0 = -0.5 + i * width
-        color = RED if i % 2 == 0 else WHITE
-        box("Cloth", (7.5, 25.5, z0), (22.5, 26.5, z0 + width), color, about=(7.5, 26, 0), rz=-22.5)
-        box("Cloth", (-6.5, 25.5, z0), (8.5, 26.5, z0 + width), color, about=(8.5, 26, 0), rz=22.5)
-    # The ridge cap, sitting on the cloth (QM's ridge beams, lifted clear of Carl's spines).
-    box("Ridge", (6.5, 25.5, -1.5), (9.5, 27.5, 17.5), WOOD)
-
-    # The counter along the front: the body, and the top overhanging it.
-    box("Counter", (-4, 0, 9.5), (20, 5.5, 13.5), COUNTER)
-    box("CounterTop", (-5, 5.5, 9), (21, 7, 14.5), WOOD)
-
-    # A cactus growing up through the cloth at the back corner, one arm and a flower.
-    cx, cz = -2, 3
-    top = 29
-    box("Cactus", (cx - 1.8, 0, cz - 1.8), (cx + 1.8, top, cz + 1.8), GREEN)
-    box("CactusArm", (cx - 6, 22, cz - 1.2), (cx - 1.8, 24.4, cz + 1.2), GREEN)
-    box("CactusArm", (cx - 6, 24.4, cz - 1.2), (cx - 3.6, 29, cz + 1.2), GREEN)
-    box("Flower", (cx - 1.2, top, cz - 1.2), (cx + 1.2, top + 1.4, cz + 1.2), PINK)
-    return b.parts
-
-
-# Where Carl.client puts things, in studs in the output frame.
-def points():
-    def at(x, y, z):
-        return to_studs(partlib.T(x, y, z))[:3, 3]
-
-    return {
-        "Carl": at(8, 0, 4.5),  # behind the counter, under the ridge
-        "Eggs": at(8, 7, 11.75),  # the middle of the counter top
-        "EggSpacing": 7 * SCALE,
-    }
-
-
-def luau_cframe(m):
-    r = m[:3, :3]
-    nums = list(m[:3, 3]) + [r[0, 0], r[0, 1], r[0, 2], r[1, 0], r[1, 1], r[1, 2], r[2, 0], r[2, 1], r[2, 2]]
-    return "CFrame.new(" + ", ".join(fmt(n) for n in nums) + ")"
+    model = json.loads(SOURCE.read_text())
+    tex = palette(model)
+    parts = []
+    for e in model["elements"]:
+        face = next(iter(e["faces"].values()))
+        uv = face["uv"]
+        u, v = (uv[0], uv[1]) if isinstance(uv, list) else next(iter(uv.values()))
+        color = tex.getpixel((min(int(u), tex.width - 1), min(int(v), tex.height - 1)))
+        parts.append(mesh_part(e, color) if e.get("type") == "mesh" else cube_part(e, color))
+    return parts
 
 
 def fmt(n):
     n = round(float(n), 4)
-    if n == 0:
-        n = 0.0
-    return f"{n:g}"
+    return f"{(0.0 if n == 0 else n):g}"
+
+
+def luau_cframe(m):
+    r = m[:3, :3]
+    nums = list(m[:3, 3]) + list(r.reshape(-1))
+    return "CFrame.new(" + ", ".join(fmt(n) for n in nums) + ")"
 
 
 def write(parts):
-    p = points()
     lines = [
-        "-- GENERATED by tools/carl_stall.py from QM's market_stall_large.bbmodel. Don't edit by hand:",
-        "-- change the script and rerun it.",
+        "-- GENERATED by tools/carl_stall.py from designs/stall/CarlStall.bbmodel (QM's). Don't edit by hand:",
+        "-- change the .bbmodel in Blockbench and rerun the script.",
         "-- Studs, ground at Y = 0, the counter facing -Z (Carl.client turns it into the base).",
         "",
         "return {",
         "\tparts = {",
     ]
-    for part in parts:
-        size = "Vector3.new(" + ", ".join(fmt(v) for v in part.size) + ")"
-        color = "Color3.fromRGB(" + ", ".join(str(c) for c in part.color) + ")"
-        lines.append(f'\t\t{{ name = "{part.name}", size = {size}, cframe = {luau_cframe(part.cf)}, color = {color} }},')
+    for p in parts:
+        size = "Vector3.new(" + ", ".join(fmt(v) for v in p.size) + ")"
+        color = "Color3.fromRGB(" + ", ".join(str(c) for c in p.color) + ")"
+        lines.append(f'\t\t{{ name = "{p.name}", size = {size}, cframe = {luau_cframe(p.cf)}, color = {color} }},')
     lines += [
         "\t},",
-        "\tcarl = Vector3.new(" + ", ".join(fmt(v) for v in p["Carl"]) + "), -- his feet",
-        "\teggs = Vector3.new(" + ", ".join(fmt(v) for v in p["Eggs"]) + "), -- the middle egg's bottom, on the counter",
-        f"\teggSpacing = {fmt(p['EggSpacing'])},",
+        "\tcarl = Vector3.new(" + ", ".join(fmt(v) for v in CARL) + "), -- his feet",
+        "\tpile = { -- the egg heap behind him: each egg's pivot (Egg.new's model, its real size)",
+    ]
+    for kind, tier, at, yaw, roll in PILE:
+        lines.append(f'\t\t{{ kind = "{kind}", cframe = {luau_cframe(pile_cframe(tier, at, yaw, roll))} }},')
+    lines += [
+        "\t},",
         "}",
         "",
     ]
@@ -154,34 +170,49 @@ def carl(feet, scale=1.11):
     pat = re.compile(r'size = Vector3\.new\(([^)]*)\), cframe = CFrame\.new\(([^)]*)\), color = Color3\.fromRGB\(([^)]*)\)')
     out = []
     for size_s, cf_s, col_s in pat.findall(text):
-        size = np.array([float(v) for v in size_s.split(",")]) * scale
         c = [float(v) for v in cf_s.split(",")]
         m = np.eye(4)
-        m[:3, 3] = c[:3]
+        m[:3, 3] = np.array(c[:3]) * scale + feet
         if len(c) == 12:
             m[:3, :3] = np.array(c[3:]).reshape(3, 3)
-        m[:3, 3] = m[:3, 3] * scale + feet
+        size = np.array([float(v) for v in size_s.split(",")]) * scale
         out.append(partlib.Part("Carl", size, m, tuple(int(v) for v in col_s.split(","))))
+    return out
+
+
+def eggs():
+    """The heap in the renders, from the egg models' rest poses."""
+    import re
+
+    pat = re.compile(r'size = Vector3\.new\(([^)]*)\), cframe = CFrame\.new\(([^)]*)\), color = Color3\.fromRGB\(([^)]*)\)')
+    out = []
+    for kind, tier, at, yaw, roll in PILE:
+        size = EGG_GROWTH ** (tier - 1)
+        base = pile_cframe(tier, at, yaw, roll) @ partlib.T(0, -1.6 * size, 0)
+        text = (OUT.parent / "Eggs" / f"{kind}EggModel.luau").read_text()
+        for size_s, cf_s, col_s in pat.findall(text):
+            c = [float(v) for v in cf_s.split(",")]
+            m = np.eye(4)
+            m[:3, 3] = np.array(c[:3]) * size
+            if len(c) == 12:
+                m[:3, :3] = np.array(c[3:]).reshape(3, 3)
+            out.append(partlib.Part(kind, np.array([float(v) for v in size_s.split(",")]) * size, base @ m,
+                                    tuple(int(v) for v in col_s.split(","))))
     return out
 
 
 def preview(parts, folder):
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
-    shown = parts + carl(points()["Carl"])
-    views = {
-        "front": ((14, 16, -30), (0, 6, 0)),
-        "game": ((0, 40, -34), (0, 4, 0)),  # about where the game's camera looks from
-        "back": ((-20, 18, 26), (0, 7, 0)),
-    }
+    shown = parts + carl(np.array(CARL, float)) + eggs()
+    views = {"front": ((16, 18, -34), (0, 7, 3)), "game": ((0, 44, -38), (0, 4, 4)), "back": ((-24, 22, 34), (0, 6, 6))}
     for name, (eye, target) in views.items():
         partlib.render(shown, eye=eye, target=target, W=640, H=560, fov=45, outline=False).save(folder / f"stall_{name}.png")
-    partlib.write_bbmodel(parts, "CarlStall", str(folder / "CarlStall.bbmodel"))
 
 
 if __name__ == "__main__":
     parts = build()
     write(parts)
-    print(len(parts), "cubes")
+    print(len(parts), "blocks")
     if len(sys.argv) > 1:
         preview(parts, sys.argv[1])

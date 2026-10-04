@@ -444,7 +444,7 @@ return {
 	-- the gap between the left corner pen and the start line. Talk to him and he asks
 	-- if you want to spin; Yes opens the roll menu. Faces into the base (+z).
 	Carl = {
-		Position = Vector3.new(-66, 0, 8), -- clear of Pen4 at its biggest (x <= -76) and its ride lane (z ~32)
+		Position = Vector3.new(-66, 0, 17), -- clear of Pen4 at its biggest (x <= -76) and its ride lane (z ~32); the egg heap behind reaches the wall
 		Reach = 12, -- studs from the counter where Talk shows
 	},
 	-- The top-3 podium (Leaderboard.server, QM Oct 4): the avatars of the three players
