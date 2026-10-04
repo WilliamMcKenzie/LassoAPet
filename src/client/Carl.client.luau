@@ -92,8 +92,6 @@ for _, part in carl.model:GetDescendants() do
 	end
 end
 local carlRootY = carl.model.PrimaryPart.Position.Y
-local _, carlSize = carl.model:GetBoundingBox()
-local h = carlSize.Y
 
 -- QM's stall (designs/stall/CarlStall.bbmodel -> tools/carl_stall.py -> CarlStallModel): posts,
 -- beams, a counter and a striped cloth roof, with a cactus growing up through it.
@@ -104,18 +102,6 @@ for _, spec in StallModel.parts do
 		counter = part
 	end
 end
-local roofTop = 0
-for _, spec in StallModel.parts do
-	roofTop = math.max(roofTop, spec.cframe.Position.Y + spec.size.Y / 2)
-end
--- The sign on the counter's front, toward the base.
-local boardGui = Instance.new("SurfaceGui")
-boardGui.Face = Enum.NormalId.Front
-boardGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-boardGui.PixelsPerStud = 40
-boardGui.LightInfluence = 0
-text(boardGui, UDim2.fromScale(0.9, 0.6), "CARL'S PET SPIN").Position = UDim2.fromScale(0.05, 0.2)
-boardGui.Parent = counter
 
 -- The heap of eggs behind him (QM, Oct 4): every egg the roll gives, at its real size.
 for _, spec in StallModel.pile do
@@ -131,16 +117,8 @@ for _, spec in StallModel.pile do
 	egg.Parent = stall
 end
 
--- Carl behind the counter, facing the base, his name over his head.
+-- Carl behind the counter, facing the base (no name tag or sign: QM, Oct 4).
 local CARL_AT = CFrame.new(StallModel.carl)
-local tag = Instance.new("BillboardGui")
-tag.Name = "Name"
-tag.Size = UDim2.fromOffset(120, 40)
-tag.StudsOffsetWorldSpace = Vector3.new(0, math.max(h, roofTop) - carlRootY + 1.5, 0) -- over the roof
-tag.MaxDistance = 150
-tag.Adornee = carl.model.PrimaryPart
-text(tag, UDim2.fromScale(1, 1), "Carl").TextColor3 = Color3.fromRGB(150, 255, 140)
-tag.Parent = stall
 
 local prompt = Instance.new("ProximityPrompt")
 prompt.Name = "TalkPrompt"
