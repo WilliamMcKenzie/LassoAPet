@@ -86,12 +86,6 @@ return {
 				Trench = { Color3.fromRGB(70, 150, 214), Color3.fromRGB(86, 166, 228) },
 				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon (WorldColors keeps the textures off its glow)
 			},
-			-- QM's experiment (Oct 4): the sea floor sinks on a slope down to MaxDepth studs
-			-- by FullAt of the way along (and stays there), so you swim near the surface
-			-- over the deep (Server/OceanDepth). Only the floor, walls and obstacle/nest
-			-- pillars move; you, the animals, eggs and nests stay at the usual height.
-			-- Enabled = false puts it all back as it was.
-			Deep = { Enabled = true, MaxDepth = 80, FullAt = 0.85, Curve = 1.4 },
 			-- It gets darker the further you ride (QM, Oct 2): coral reef, sand flats,
 			-- dark rock with the first lava, volcanic abyss. At is the fraction of the
 			-- way along; the floor, walls and haze blend between these stops (the floor
