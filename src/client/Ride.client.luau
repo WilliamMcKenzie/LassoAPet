@@ -2335,6 +2335,7 @@ end
 -- one far behind it) and eats it on contact, growing cfg.Grow x and getting
 -- cfg.SpeedUp x faster each time up to size tier cfg.MaxTier, and refilling
 -- cfg.RestorePer of Hold. vfx.huntTarget is its prey (steering and arrows follow it).
+-- Returns true on the frame it eats one (the Leviathan's hunt, cfg.Once, stops there).
 function vfx.huntStep(cfg)
 	local prey = vfx.huntTarget
 	local function alive(entity)
@@ -2372,7 +2373,9 @@ function vfx.huntStep(cfg)
 		retire(prey)
 		vfx.huntTarget = nil
 		vfx.feed(cfg, 1)
+		return true
 	end
+	return false
 end
 
 -- The Robo Shark eats / the Loong burns n animals (cfg: its Config.Abilities entry):
@@ -2668,6 +2671,76 @@ function vfx.breathBlast(active)
 	end
 end
 
+-- Flame (the Leviathan's sprint, QM Oct 4): the Loong's fire as a short flamethrower
+-- out of its mouth, straight ahead of its head. flameFx makes the stream; flameBlast
+-- aims it each frame and burns away every obstacle and animal within cfg.Range studs
+-- of the mouth (cfg.Width wide), whatever its size.
+vfx.FLAME_LIFE = 0.3 -- seconds a flame spiral lives
+function vfx.flameMouth(entity)
+	local model = entity.animal.model
+	local head = model:FindFirstChild("neckBone") or model.PrimaryPart
+	local s = entity.animal.size * entity.animal.scale
+	local mouth = (head.CFrame * CFrame.new(0, 0.5 * s, -6.9 * s)).Position -- the tip of its snout (model studs)
+	local look = head.CFrame.LookVector
+	local aim = Vector3.new(look.X, 0, look.Z)
+	return mouth, if aim.Magnitude > 0.1 then aim.Unit else Vector3.new(0, 0, travelDir())
+end
+
+function vfx.flameFx(entity, cfg)
+	local at = Instance.new("Attachment")
+	at.Name = "LeviathanFlameAt"
+	at.Parent = workspace.Terrain
+	local fire = Instance.new("ParticleEmitter")
+	fire.Name = "LeviathanFlame"
+	fire.Texture = vfx.SPIRAL
+	fire.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 236, 90)),
+		ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 140, 30)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(225, 30, 20)),
+	})
+	fire.LightEmission = 0.4
+	local s = entity.animal.scale
+	fire.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1.5 * s), NumberSequenceKeypoint.new(1, 5 * s) })
+	fire.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.7, 0), NumberSequenceKeypoint.new(1, 1) })
+	fire.Rotation = NumberRange.new(0, 360)
+	fire.RotSpeed = NumberRange.new(-180, 180)
+	fire.Lifetime = NumberRange.new(vfx.FLAME_LIFE)
+	local speed = (cfg.Range + 3) / vfx.FLAME_LIFE -- out a little past the reach of the burn
+	fire.Speed = NumberRange.new(speed * 0.9, speed * 1.1)
+	fire.SpreadAngle = Vector2.new(14, 14)
+	fire.EmissionDirection = Enum.NormalId.Front
+	fire.Rate = 120
+	fire.Parent = at
+	vfx.flameBlast(cfg, at) -- placed at the mouth before its first frame
+	return { at }
+end
+
+function vfx.flameBlast(cfg, at)
+	local mouth, aim = vfx.flameMouth(mount)
+	at = at or (vfx.sprintFx and vfx.sprintFx[1])
+	if at then
+		at.WorldCFrame = CFrame.lookAt(mouth, mouth + aim)
+	end
+	local half = cfg.Width / 2
+	local function inPath(x, z, extra)
+		local rx, rz = x - mouth.X, z - mouth.Z
+		local along = rx * aim.X + rz * aim.Z
+		local across = math.abs(rx * aim.Z - rz * aim.X)
+		return along > -2 - (extra or 0) and along < cfg.Range + (extra or 0) and across < half + (extra or 0)
+	end
+	for _, o in obstacles do
+		if not o.smashed and inPath(o.x, o.z, o.hx) then
+			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
+		end
+	end
+	for _, entity in allAnimals() do
+		if entity ~= mount and not entity.popping and not entity.event and inPath(entity.x, entity.z) then
+			knock(entity, entity.x - mount.x)
+		end
+	end
+end
+
 -- Missiles (the Robo Shark): two missiles off its sides, sized to it, heading `dir`.
 -- Spread and Size are in the shark's own model studs.
 function vfx.launchMissiles(entity, cfg, dir)
@@ -2773,6 +2846,8 @@ function vfx.updateSprint(dt)
 			vfx.sprintFx = chargeFx(mount, 0.35) -- QM: 0.7x the half-size wind it had
 		elseif kind == "Crabwalk" then
 			vfx.sprintFx = chargeFx(mount, 0.5, math.pi / 2) -- sideways, like the crab
+		elseif kind == "Flame" then
+			vfx.sprintFx = vfx.flameFx(mount, cfg)
 		elseif kind == "Burrow" then
 			local spray = Instance.new("Part")
 			spray.Anchored, spray.CanCollide, spray.CanQuery, spray.CanTouch = true, false, false, false
@@ -2804,6 +2879,8 @@ function vfx.updateSprint(dt)
 		vfx.inkBlast(dt, special) -- the animals round it scatter
 	elseif kind == "Smash" then
 		vfx.scareOff(dt, special) -- the Unicorn's: the animals round it scatter too, refilling Hold
+	elseif kind == "Flame" then
+		vfx.flameBlast(special) -- the Leviathan's flamethrower
 	end
 	-- Fly rises into the air and Burrow sinks under the floor, easing in and out.
 	if special.Kind == "Fly" or special.Kind == "Burrow" then
@@ -3008,7 +3085,10 @@ local function updateAbility(dt)
 	if active then
 		active.t += dt
 		if active.cfg.Kind == "Hunt" then
-			vfx.huntStep(active.cfg)
+			local ate = vfx.huntStep(active.cfg)
+			if active.cfg.Once and (ate or not vfx.huntTarget) then
+				endAbility(mount) -- the Leviathan: one animal (or nothing ahead to hunt), then done
+			end
 		elseif active.cfg.Kind == "Devour" then
 			vfx.devourStep(active, active.t)
 		elseif active.cfg.Kind == "Ink" then
@@ -3097,7 +3177,11 @@ local function updateMount(dt)
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
-	if ability and (ability.cfg.Kind == "Charge" or ability.cfg.Kind == "Boost" or ability.cfg.Kind == "Grow" or ability.cfg.Kind == "Crabwalk" or ability.cfg.Kind == "Hunt") then
+	if ability and ability.cfg.MaxBoost then
+		-- The Leviathan's hunt: faster and faster, steadily, up to MaxBoost x (QM).
+		local cfg = ability.cfg
+		targetSpeed *= math.min(cfg.SpeedBoost + (cfg.MaxBoost - cfg.SpeedBoost) * ability.t / cfg.RampTime, cfg.MaxBoost)
+	elseif ability and (ability.cfg.Kind == "Charge" or ability.cfg.Kind == "Boost" or ability.cfg.Kind == "Grow" or ability.cfg.Kind == "Crabwalk" or ability.cfg.Kind == "Hunt") then
 		targetSpeed *= ability.cfg.SpeedBoost
 	elseif ability and ability.cfg.Kind == "Leap" then
 		-- Up into the air and down again in an arc, faster.

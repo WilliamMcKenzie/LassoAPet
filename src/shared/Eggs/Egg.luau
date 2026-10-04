@@ -50,6 +50,7 @@ local KINDS = {
 	FishSchool = { data = require(script.Parent.FishSchoolEggModel), center = 1.6 },
 	Loong = { data = require(script.Parent.LoongEggModel), center = 1.6 },
 	Beholder = { data = require(script.Parent.BeholderEggModel), center = 1.6 },
+	Leviathan = { data = require(script.Parent.LeviathanEggModel), center = 1.6 },
 	Sludge = { data = require(script.Parent.SludgeEggModel), center = 1.6 },
 }
 

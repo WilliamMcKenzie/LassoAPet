@@ -168,7 +168,7 @@ return {
 			-- Placeholder until the Godlands has animals (and bosses) of its own: Fish (QM).
 			-- (The Loong is an event and roll exclusive now, so it doesn't run here.)
 			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
-			Herd = { Fish = 1, Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5 }, -- the Beholder, War Elephant, Soul Horse and Sludge live here (QM, Oct 4; weights are guesses)
+			Herd = { Fish = 1, Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5, Leviathan = 0.1 }, -- the Beholder, War Elephant, Soul Horse, Sludge and Leviathan live here (QM, Oct 4; weights are guesses)
 			PlaceholderHerd = true,
 			Patches = {
 				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
@@ -286,6 +286,9 @@ return {
 	--     it, then the next. Each one eaten makes it Grow x bigger and SpeedUp x faster (up to MaxSpeed x) for
 	--     the rest of the ride and refills RestorePer of the Hold bar. It starts small and
 	--     grows a size tier every TierGrowth x, stopping at MaxTier (XL). While it hunts
+	--     (Once, the Leviathan: no Duration; it hunts one animal, however long that takes,
+	--     and stops once it's eaten it. Its speed climbs steadily from SpeedBoost x to
+	--     MaxBoost x over RampTime seconds.)
 	--     the guide arrows lead to its prey, and nothing can crash it.
 	--   Missiles (unused now; was the Robo Shark's): two missiles fly out from its sides straight ahead for
 	--     Duration, smashing every obstacle and knocking away every animal within Radius
@@ -316,6 +319,8 @@ return {
 		SoulHorse = { Kind = "Spikes", Duration = 1.5, Cooldown = 10, Radius = 45, Count = 28, RestorePer = 0.1 }, -- QM, Oct 4: 10% Hold per kill (duration, cooldown, radius guesses)
 		-- the animation's length and fire window; the range, width and cooldown are guesses
 		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 0.8, Grow = 1.1, SpeedUp = 1.05, MaxSpeed = 2.5, RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
+		-- QM, Oct 4: one animal, however long it takes, speeding up from 1x to MaxBoost x over RampTime s
+		Leviathan = { Kind = "Hunt", Once = true, Cooldown = 5, SpeedBoost = 1, MaxBoost = 8, RampTime = 10, RestorePer = 0.2, Grow = 1, SpeedUp = 1, MaxTier = 2 },
 		Loong = { Kind = "Breath", Duration = 4.2, FireFrom = 0.95, FireTo = 3.95, Cooldown = 8, Range = 140, Width = 22, Crawl = 0.15, RestorePer = 0.1, Grow = 1.1, SpeedUp = 1.1, MaxSpeed = 4, MaxTier = 4 },
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
@@ -332,12 +337,16 @@ return {
 	--     its path, whatever its size.
 	--   Loom (Loong): it swells to Grow x its size (a look only: its tier stays) and the
 	--     animals within Radius studs scatter away from it.
+	--   Flame (Leviathan): a flamethrower, the Loong's fire straight ahead: every obstacle
+	--     and animal within Range studs of its mouth (Width wide) is burnt away, whatever
+	--     its size.
 	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, which
 	-- is always a sprint (ReturnSprint).
 	SprintSpecials = {
 		Unicorn = { Kind = "Smash", Radius = 14, ScareRadius = 30, RestorePer = 0.02, OnReturn = true }, -- scares animals within ScareRadius off, 2% Hold each (QM, Oct 4)
 		Sandworm = { Kind = "Burrow", OnReturn = true },
 		Whale = { Kind = "Fly", Height = 56 },
+		Leviathan = { Kind = "Flame", Range = 5, Width = 9, OnReturn = true }, -- QM, Oct 4: "like 1m ahead" (4 studs a metre; the width is a guess)
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
 		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true, RestorePer = 0.2 }, -- QM, Oct 4: 20% Hold per animal it hits
 	},
@@ -351,7 +360,7 @@ return {
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
-		Loong = 1, Beholder = 2, Sludge = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
+		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -400,7 +409,7 @@ return {
 		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
 		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 4000, Icebringer = 1111, -- Tundra
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 7000, Whale = 5000, Kraken = 8200, -- Ocean
-		Loong = 20000, Beholder = 40, -- Godlands (guesses: the Loong past the Kraken)
+		Loong = 20000, Beholder = 40, Leviathan = 400, -- Godlands (guesses: the Loong past the Kraken)
 		WarElephant = 10000, SoulHorse = 15000, Sludge = 40, -- Godlands (guesses)
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
@@ -419,7 +428,7 @@ return {
 		Odds = { Legendary = 70, Exclusive = 30 },
 		Pool = {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1, Beholder = 1, Sludge = 1 },
-			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
+			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1, Leviathan = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
 			-- with an empty pool is never rolled.
@@ -551,6 +560,7 @@ return {
 		-- Godlands
 		Loong = { Speed = 1, Stamina = 8 }, -- QM, Oct 4: starts at 1x, its breath's kills take it up to 4x
 		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
+		Leviathan = { Speed = 2, Stamina = 3 }, -- QM, Oct 4
 		WarElephant = { Speed = 1.1, Stamina = 4 }, -- QM, Oct 4
 		SoulHorse = { Speed = 2, Stamina = 3 }, -- QM, Oct 4
 		Sludge = { Speed = 1, Stamina = 2 }, -- guesses (Oct 4)

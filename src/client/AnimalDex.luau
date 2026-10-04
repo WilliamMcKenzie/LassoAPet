@@ -133,6 +133,7 @@ local BIOS = { -- QM's (Oct 3)
 	Whale = "Whale is a talented singer, but his concerts are usually underwater. Distant cousin of horse.",
 	Beholder = "Beholder has one eye on the prize and no idea where he left his snacks.",
 	Sludge = "Sludge never hurries. Everything he touches comes with him anyway.",
+	Leviathan = "Leviathan was a cute little axolotl, until he took up fire breathing. Now nobody calls him cute to his face.",
 	Kraken = "Kraken was once a squid, but started drinking raw milk and bonesmashing. Now his jaw hurts.",
 }
 
