@@ -285,8 +285,12 @@ for _, pen in workspace:WaitForChild("Pens"):GetChildren() do
 	refresh(pen)
 end
 
+-- An egg's time left: "2h" from an hour up (whole hours, QM), else "m:ss".
 local function countdown(seconds)
 	seconds = math.max(0, math.ceil(seconds))
+	if seconds >= 3600 then
+		return string.format("%dh", seconds // 3600)
+	end
 	return string.format("%d:%02d", seconds // 60, seconds % 60)
 end
 
