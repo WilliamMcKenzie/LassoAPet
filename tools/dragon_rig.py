@@ -111,8 +111,8 @@ def float_anim(L, amp, yaw, waves=1.0, limb=14, jaw=None):
 
 def special(L=2.6):
     """Fire breath, played once (the fire itself is added in Roblox): he draws back,
-    rearing his head and chest up with the jaw shut, then lunges, head thrust forward
-    and down, jaws wide, and holds the breath shaking with effort before settling.
+    rearing his head and chest up with the jaw shut, then lunges, head thrust straight
+    forward (QM: forward, not down), jaws wide, and holds the breath shaking with effort before settling.
     The tail keeps a slow wave and whips at the lunge; arms and legs brace forward."""
     T = {}
 
@@ -120,7 +120,7 @@ def special(L=2.6):
         return lambda u: k * lerp(u, pts)
 
     # (u, degrees) through the move: draw back to 0.3, lunge by 0.38, hold to 0.82, settle
-    rear = [(0, 0), (0.3, 1), (0.38, -0.6), (0.82, -0.6), (1, 0)]
+    rear = [(0, 0), (0.3, 1.4), (0.38, 0.45), (0.82, 0.45), (1, 0)]  # the hold keeps the snout level
     shake = lambda u: (sin(u, 1.5, 0, 9) if 0.38 < u < 0.82 else 0)  # noqa: E731
 
     def front(name, deg):
