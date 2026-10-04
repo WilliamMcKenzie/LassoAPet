@@ -1419,6 +1419,10 @@ local function takeFromPool(n, x, z, kind)
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
 	entity.face, entity.rush = nil, nil
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
+	-- Put where it now is at once: one taken out of view isn't moved until it comes
+	-- into view, and it stood frozen where it was last used meanwhile (QM, Oct 4: full-size
+	-- animals standing at the biome's end, where they'd shrunk away last time).
+	place(entity, 0)
 	entity.animal.model.Parent = herdFolder
 	return entity
 end
@@ -1717,6 +1721,7 @@ function vfx.updateEvent(dt, seen, inView)
 	if not herd[key] then
 		herd[key], event.shown = entity, true
 		entity.x, entity.z = laneX(vfx.EVENT_LANE, z), z
+		place(entity, 0) -- (where it is now, even if it's out of view: see takeFromPool)
 		if age < 0.15 then
 			Poof.at(Vector3.new(entity.x, 0, z))
 		end
