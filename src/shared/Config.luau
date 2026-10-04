@@ -170,6 +170,7 @@ return {
 			-- out of the finish line's egg odds (Hatchery).
 			Herd = { Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5, Leviathan = 0.1 }, -- its own animals, no Fish (QM, Oct 4; weights are guesses)
 			PlaceholderHerd = true,
+			HerdThin = 2, -- only every 2nd of the stampede's spawns runs here: half as many animals (QM, Oct 4)
 			Patches = {
 				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
 				Ice = { Color3.fromRGB(170, 196, 250), Color3.fromRGB(184, 208, 252) },

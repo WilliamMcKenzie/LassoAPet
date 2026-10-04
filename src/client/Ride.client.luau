@@ -308,6 +308,7 @@ function endless.stream(k)
 		local z0 = endless.Godlands.segmentStart(k)
 		s = endless.newStream(z0 - 2, z0 - endless.Godlands.length + 2, endless.herd)
 		s.k = k
+		s.thin = Config.Biomes[endless.b].HerdThin -- (fewer animals in the Godlands)
 		streams[b] = s
 	end
 	return s
@@ -1768,7 +1769,7 @@ local function updateHerd(dt, slowed)
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
 		for n = stream.oldest, newest do
 			local key = n * BIOME_KEYS + b - 1
-			if taken[key] then
+			if taken[key] or (stream.thin and n % stream.thin ~= 0) then
 				continue
 			end
 			local p = plan(key)
