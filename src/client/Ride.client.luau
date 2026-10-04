@@ -2445,32 +2445,70 @@ function vfx.inkBlast(dt, cfg)
 	end
 end
 
--- Breath (the Loong): fire pours out of its mouth from FireFrom to FireTo seconds into
--- its "special" animation. A placeholder flame (QM will put the real fire in, in
--- Studio): a ParticleEmitter named LoongFire on the jaw, blowing straight ahead.
-function vfx.breathFx(entity, cfg)
-	local model = entity.animal.model
-	local jaw = model:FindFirstChild("jawBone") or model.PrimaryPart
-	local at = Instance.new("Attachment")
+-- Breath (the Loong): from FireFrom to FireTo seconds into its "special" animation,
+-- waves of QM's spiral (assets/ui/LoongSpiral.png) pour out of its mouth, growing as
+-- they fly (like QM's reference clip), aimed at the spot on the ground under the
+-- mouse; on a phone, the last place tapped; with neither, straight ahead.
+vfx.SPIRAL = "rbxassetid://73420824782915"
+UserInputService.InputBegan:Connect(function(input, processed)
+	if input.UserInputType == Enum.UserInputType.Touch and not processed then
+		vfx.lastTap = Vector2.new(input.Position.X, input.Position.Y)
+	end
+end)
+
+-- Flat unit vector from the mount toward where the breath is aimed.
+function vfx.breathAim()
+	local ahead = Vector3.new(0, 0, travelDir())
+	local ray
+	if UserInputService.MouseEnabled and not UserInputService.TouchEnabled then
+		local m = UserInputService:GetMouseLocation()
+		ray = camera:ViewportPointToRay(m.X, m.Y)
+	elseif vfx.lastTap then
+		ray = camera:ScreenPointToRay(vfx.lastTap.X, vfx.lastTap.Y)
+	end
+	if not ray or ray.Direction.Y > -1e-3 then
+		return ahead
+	end
+	local floor = Ground.heightAt(mount.x, mount.z)
+	local hit = ray.Origin + ray.Direction * ((floor - ray.Origin.Y) / ray.Direction.Y)
+	local d = Vector3.new(hit.X - mount.x, 0, hit.Z - mount.z)
+	return if d.Magnitude > 1 then d.Unit else ahead
+end
+
+-- remote: another player's Loong (we don't know their aim): straight out of its mouth.
+function vfx.breathFx(entity, cfg, remote)
+	local s = entity.animal.size * entity.animal.scale
+	local at = Instance.new("Attachment") -- yours: in the world, turned toward the aim each frame (breathBlast)
 	at.Name = "LoongFireAt"
-	at.CFrame = CFrame.new(0, 0, -2 * entity.animal.size) * CFrame.Angles(math.pi / 2, 0, 0) -- out the front, emitting along -Z
-	at.Parent = jaw
+	if remote then
+		local jaw = entity.animal.model:FindFirstChild("jawBone") or entity.animal.model.PrimaryPart
+		at.CFrame = CFrame.new(0, 0, -2 * entity.animal.size)
+		at.Parent = jaw
+	else
+		at.Parent = workspace.Terrain
+	end
 	local fire = Instance.new("ParticleEmitter")
 	fire.Name = "LoongFire"
-	fire.Texture = "rbxasset://textures/particles/fire_main.dds"
+	fire.Texture = vfx.SPIRAL
 	fire.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 240, 140)),
-		ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 140, 20)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 40, 10)),
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 200, 90)),
+		ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 90, 40)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(230, 30, 30)),
 	})
-	fire.LightEmission = 0.8
-	fire.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 3), NumberSequenceKeypoint.new(1, 14) })
-	fire.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.1), NumberSequenceKeypoint.new(1, 1) })
-	fire.Lifetime = NumberRange.new(0.5, 0.8)
-	fire.Speed = NumberRange.new(cfg.Range * 1.2, cfg.Range * 1.5)
-	fire.SpreadAngle = Vector2.new(12, 12)
-	fire.EmissionDirection = Enum.NormalId.Bottom -- the attachment is turned so Bottom is ahead
-	fire.Rate = 220
+	fire.LightEmission = 0.4
+	fire.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.6 * s), NumberSequenceKeypoint.new(1, 3.2 * s) })
+	fire.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0),
+		NumberSequenceKeypoint.new(0.75, 0),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	fire.Rotation = NumberRange.new(0, 360)
+	fire.RotSpeed = NumberRange.new(-120, 120)
+	fire.Lifetime = NumberRange.new(0.7, 0.9)
+	fire.Speed = NumberRange.new(cfg.Range / 0.8 * 0.9, cfg.Range / 0.8 * 1.1)
+	fire.SpreadAngle = Vector2.new(8, 8)
+	fire.EmissionDirection = Enum.NormalId.Front -- the attachment's -Z, pointed at the aim
+	fire.Rate = 45
 	fire.Enabled = false
 	fire.Parent = at
 	task.delay(cfg.FireFrom, function()
@@ -2486,24 +2524,35 @@ function vfx.breathFx(entity, cfg)
 	return { at }
 end
 
--- Breath: while the fire pours, everything in the lane ahead is burnt away, obstacles
--- and animals whatever their size.
+-- Breath: the fire follows the aim, and while it pours everything in its path
+-- (Range long, Width wide) is burnt away, obstacles and animals whatever their size.
 function vfx.breathBlast(active)
 	local cfg = active.cfg
+	local aim = vfx.breathAim()
+	local at = active.fx and active.fx[1]
+	if at then
+		local model = mount.animal.model
+		local jaw = model:FindFirstChild("jawBone") or model.PrimaryPart
+		local mouth = (jaw.CFrame * CFrame.new(0, 0, -2 * mount.animal.size * mount.animal.scale)).Position
+		at.WorldCFrame = CFrame.lookAt(mouth, mouth + aim)
+	end
 	if active.t < cfg.FireFrom or active.t > cfg.FireTo then
 		return
 	end
-	local dir = travelDir()
 	local half = cfg.Width / 2
+	local function inPath(x, z, extra)
+		local rx, rz = x - mount.x, z - mount.z
+		local along = rx * aim.X + rz * aim.Z
+		local across = math.abs(rx * aim.Z - rz * aim.X)
+		return along > -4 and along < cfg.Range and across < half + (extra or 0)
+	end
 	for _, o in obstacles do
-		local ahead = (o.z - mount.z) * dir
-		if not o.smashed and ahead > -4 and ahead < cfg.Range and math.abs(o.x - mount.x) < half + o.hx then
-			smash(o, dir, if o.x >= mount.x then 1 else -1)
+		if not o.smashed and inPath(o.x, o.z, o.hx) then
+			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
 		end
 	end
 	for _, entity in allAnimals() do
-		local ahead = (entity.z - mount.z) * dir
-		if entity ~= mount and not entity.popping and ahead > 0 and ahead < cfg.Range and math.abs(entity.x - mount.x) < half then
+		if entity ~= mount and not entity.popping and inPath(entity.x, entity.z) then
 			knock(entity, entity.x - mount.x)
 		end
 	end
@@ -3524,7 +3573,7 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 			Dust.kick(entity.animal.model.PrimaryPart.CFrame, entity.animal.scale)
 		elseif a == "Breath" then
 			entity.animal:playOnce("special")
-			rider.fx = vfx.breathFx(entity, cfg)
+			rider.fx = vfx.breathFx(entity, cfg, true)
 		elseif a == "Missiles" then
 			local s = entity.animal.size * entity.animal.scale
 			local dir = if entity.animal.model.PrimaryPart.CFrame.LookVector.Z < 0 then -1 else 1
