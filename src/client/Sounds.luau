@@ -1,6 +1,7 @@
 -- Sound effects and music (QM, Oct 4: the first wave). The effects are Kenney's (CC0),
 -- kept in assets/sounds; the music is APM's, free in any Roblox game, straight from the
--- Creator Store. A sound whose id is "" isn't uploaded yet and stays silent.
+-- Creator Store. The effects are uploaded to the egg hatcha community (Oct 4). A sound
+-- whose id is "" isn't uploaded yet and stays silent.
 --
 --   Sounds.play(name, volume?, speed?)  -- a one-shot (IDS below)
 --   Sounds.setGallop(on, pace?)          -- the gallop loop while riding a galloping animal;
@@ -15,26 +16,26 @@ local TweenService = game:GetService("TweenService")
 local Sounds = {}
 
 local IDS = {
-	lasso_throw = "", -- the lasso leaves the player's hand
-	lasso_land = "", -- landed on the animal it caught
-	egg_grab = "", -- an egg lassoed mid-ride
-	gallop_loop = "", -- while riding a galloping animal (Config.GallopSound)
-	sprint_whoosh = "", -- Sprint starts
-	smash = "", -- the pet smashes through an obstacle
-	crash = "", -- crashed or bucked off
-	arrive_home = "", -- back over the start line with an egg
-	reveal_tick = "", -- each flick of the egg card (and the roll's)
-	reveal_pop = "", -- the egg card lands on its rarity
-	egg_hatch = "", -- an egg in your pen hatches
-	gold_tick = "", -- gold counting up
-	merge_whoosh = "", -- pets pulled together to merge
-	merge_poof = "", -- the poof as they combine
-	merge_pop = "", -- the merged pet pops out
-	button_click = "", -- every UI button
-	roll_reveal = "", -- a roll (or the shop's Legend Egg) lands on its egg
-	purchase = "", -- a Robux purchase goes through
-	countdown = "", -- 3, 2, 1 before an event's animal spawns
-	countdown_go = "", -- it spawns
+	lasso_throw = "rbxassetid://125583421064165", -- the lasso leaves the player's hand
+	lasso_land = "rbxassetid://132698985263025", -- landed on the animal it caught
+	egg_grab = "rbxassetid://94379425317312", -- an egg lassoed mid-ride
+	gallop_loop = "rbxassetid://129029116650332", -- while riding a galloping animal (Config.GallopSound)
+	sprint_whoosh = "rbxassetid://73983934702758", -- Sprint starts
+	smash = "rbxassetid://90604529915688", -- the pet smashes through an obstacle
+	crash = "rbxassetid://94142874131984", -- crashed or bucked off
+	arrive_home = "rbxassetid://87800549075293", -- back over the start line with an egg
+	reveal_tick = "rbxassetid://73032400412392", -- each flick of the egg card (and the roll's)
+	reveal_pop = "rbxassetid://111639552753199", -- the egg card lands on its rarity
+	egg_hatch = "rbxassetid://112644148635720", -- an egg in your pen hatches
+	gold_tick = "rbxassetid://118802531388267", -- gold counting up
+	merge_whoosh = "rbxassetid://131427370077297", -- pets pulled together to merge
+	merge_poof = "rbxassetid://102947888103382", -- the poof as they combine
+	merge_pop = "rbxassetid://130377429757922", -- the merged pet pops out
+	button_click = "rbxassetid://102399207280537", -- every UI button
+	roll_reveal = "rbxassetid://101552385373858", -- a roll (or the shop's Legend Egg) lands on its egg
+	purchase = "rbxassetid://84676553460536", -- a Robux purchase goes through
+	countdown = "rbxassetid://138395707986004", -- 3, 2, 1 before an event's animal spawns
+	countdown_go = "rbxassetid://114056716396759", -- it spawns
 }
 local MUSIC = {
 	base = "rbxassetid://1840347412", -- Way Out West (APM): at home
