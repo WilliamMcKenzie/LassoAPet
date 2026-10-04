@@ -12,15 +12,18 @@
 --               faster than you but slow to turn, so you can swerve out of its way
 --
 -- Ride.client drives it:
---   Hazards.update(dt, herd, mount, riding, goo)  -- each frame, after the stampede moves
---       (goo: your Sludge's sprint is on (Config.SprintSpecials): it lays the same sludge,
---       which gets stampede animals stuck instead of you)
+--   Hazards.update(dt, herd, mount, riding, trail)  -- each frame, after the stampede moves
+--       (trail: your pet's sprint special's Kind, when it lays a trail (Config.SprintSpecials):
+--       "Goo", your Sludge's: the same sludge, which gets stampede animals stuck instead
+--       of you; "SpikeTrail", your Soul Horse's: the same spikes, which kill the stampede
+--       animals that run into them instead of you (Hazards.spiked))
 --   Hazards.offset(key)       -- x, z a charging or hunting animal is off its place in the stampede
 --   Hazards.hit(mount, grace) -- the tip for a crash this frame, if any (gets you stuck in sludge too)
 --   Hazards.steerSign()       -- -1 while you're confused
 --   Hazards.slow()            -- x your speed while you're stuck
 --   Hazards.clear()           -- the ride's over: everything goes
 --   Hazards.chargeFx          -- set by Ride: chargeFx(entity) -> instances (the Rhino's charge)
+--   Hazards.spiked            -- set by Ride: spiked(entity, dx) kills a stampede animal on your spikes
 --   Hazards.guideBeam         -- set by Ride: the egg guide's beam (the charge arrows copy it)
 
 local Players = game:GetService("Players")
@@ -41,6 +44,7 @@ local SPIKE = {
 	WIDTH = 2.8,
 	HEIGHT = 4.5,
 	COLOR = Color3.fromRGB(96, 150, 255), -- the Soul Horse's ghostly blue
+	BEHIND = 8, -- studs behind your own Soul Horse its trail's spikes go in
 }
 local SLUDGE = {
 	EVERY = 7, -- studs between puddles
@@ -86,7 +90,8 @@ local KINDS = { SoulHorse = "spikes", Sludge = "sludge", Beholder = "aura", WarE
 local player = Players.LocalPlayer
 local rng = Random.new()
 local watched = {} -- [key] = state of a hazardous stampede animal near you
-local spikes = {} -- { parts, up, t, x, z }
+local spikes = {} -- { parts, up, t, x, z, mine }: mine = your Soul Horse's, which never crash you
+local spikedKeys = {} -- [key] = true: stampede animals already killed on your spikes
 local puddles = {} -- { part, t, x, z, r, mine }: mine = your Sludge's, which never gets you stuck
 local gooLeft, gooLag = {}, {} -- [key]: a stampede animal stuck in your sludge (seconds left), and how far behind it fell
 local fading = {} -- one-off effects: { part, t, life, size0, size1, transparency0 }
@@ -221,10 +226,10 @@ end
 -- Spikes and puddles --------------------------------------------------------
 
 local SPIKE_PEAK = Vector3.new(1, 0, -1) -- a CornerWedgePart's peak, seen from above
-local function spike(x, z)
+local function spike(x, z, mine)
 	local w, h = SPIKE.WIDTH, SPIKE.HEIGHT
 	local floor = Ground.heightAt(x, z)
-	local s = { t = 0, x = x, z = z, parts = {}, up = {} }
+	local s = { t = 0, x = x, z = z, parts = {}, up = {}, mine = mine }
 	-- four corner wedges, each with its peak over the middle: a pyramid (as the Soul Horse's Spikes)
 	for sx = -1, 1, 2 do
 		for sz = -1, 1, 2 do
@@ -461,25 +466,50 @@ end
 
 -- The API -------------------------------------------------------------------
 
-function Hazards.update(dt, herd, mount, riding, goo)
+function Hazards.update(dt, herd, mount, riding, trailKind)
 	local seen = {}
 	if not riding or not mount then
 		herd = {} -- crashed (or not riding): the animals calm down, the spikes and sludge play out
-		confused, stuck, goo = 0, 0, false
+		confused, stuck, trailKind = 0, 0, nil
 	end
-	if goo then
-		-- Your Sludge sprinting: its sludge trail, every so many studs (Hazards.mine is its trail state).
+	if trailKind == "Goo" or trailKind == "SpikeTrail" then
+		-- Your Sludge or Soul Horse sprinting: its sludge or spike trail, every so many
+		-- studs (Hazards.mine is its trail state). Spikes go in just behind you.
 		Hazards.mine = Hazards.mine or {}
 		local m = Hazards.mine
 		local dx, dz = mount.x - (m.x or mount.x), mount.z - (m.z or mount.z)
 		m.run = (m.run or 0) + math.sqrt(dx * dx + dz * dz)
 		m.x, m.z = mount.x, mount.z
-		if m.run >= SLUDGE.EVERY then
+		if trailKind == "Goo" and m.run >= SLUDGE.EVERY then
 			m.run = 0
 			puddle(mount.x, mount.z, true)
+		elseif trailKind == "SpikeTrail" and m.run >= SPIKE.EVERY then
+			m.run = 0
+			spike(mount.x, mount.z + SPIKE.BEHIND, true)
 		end
 	else
 		Hazards.mine = nil
+	end
+	-- Stampede animals running into your spikes are killed (whatever their size).
+	for _, sp in spikes do
+		if sp.mine and sp.t > SPIKE.RISE * 0.5 and sp.t < SPIKE.LIFE and Hazards.spiked then
+			for key, entity in herd do
+				local dx, dz = entity.x - sp.x, entity.z - sp.z
+				if key >= 0 and entity ~= mount and not spikedKeys[key] and not entity.popping and not entity.event
+					and math.abs(dx) < 40 and math.abs(dz) < 40 then
+					local hx, hz = footprint(entity)
+					if math.abs(dx) < hx + SPIKE.WIDTH / 2 and math.abs(dz) < hz + SPIKE.WIDTH / 2 then
+						spikedKeys[key] = true
+						Hazards.spiked(entity, dx)
+					end
+				end
+			end
+		end
+	end
+	for key in spikedKeys do
+		if not herd[key] then
+			spikedKeys[key] = nil
+		end
 	end
 	-- Stampede animals running into your sludge get stuck and fall behind.
 	local anyMine = false
@@ -585,7 +615,7 @@ function Hazards.hit(mount, grace)
 	end
 	local reachX, reachZ = SPIKE.WIDTH / 2 + 1.3, SPIKE.WIDTH / 2 + 2.4 -- (the pads Ride's obstacle check uses)
 	for _, s in spikes do
-		if s.t > SPIKE.RISE * 0.5 and s.t < SPIKE.LIFE and math.abs(x - s.x) < reachX and math.abs(z - s.z) < reachZ then
+		if not s.mine and s.t > SPIKE.RISE * 0.5 and s.t < SPIKE.LIFE and math.abs(x - s.x) < reachX and math.abs(z - s.z) < reachZ then
 			return "Spiked by a Soul Horse's trail!"
 		end
 	end
@@ -630,7 +660,7 @@ function Hazards.clear()
 		f.part:Destroy()
 	end
 	spikes, puddles, fading = {}, {}, {}
-	gooLeft, gooLag, Hazards.mine = {}, {}, nil
+	gooLeft, gooLag, Hazards.mine, spikedKeys = {}, {}, nil, {}
 	confused, stuck = 0, 0
 	gui.Enabled = false
 end

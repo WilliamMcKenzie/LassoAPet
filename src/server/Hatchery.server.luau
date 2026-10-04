@@ -4,7 +4,7 @@
 -- ride gets it home (DeliverEgg). It goes in your Roblox inventory: one Tool
 -- per kind of egg ("Pinto Egg"), its "Count" attribute how many you have.
 -- Equip it and click anywhere in your pen to place one there (PlaceEgg), where
--- it hatches after Config.HatchTime seconds and the pet stays on that spot.
+-- it hatches after Config.PetHatchTime (or HatchTime) seconds and the pet stays on that spot.
 --
 -- What's in a pen goes on the pen as its "Contents" attribute for every
 -- client to draw: JSON of { [id] = { x, z, egg, hatchAt } or { x, z, pet } },
@@ -51,7 +51,7 @@ end
 
 local function hatchTime(kind)
 	local rarity = require(Animals[kind]).Rarity
-	return Config.HatchTime[rarity] or Config.HatchTime.Uncommon
+	return Config.PetHatchTime[kind] or Config.HatchTime[rarity] or Config.HatchTime.Uncommon
 end
 
 local function penOf(player)

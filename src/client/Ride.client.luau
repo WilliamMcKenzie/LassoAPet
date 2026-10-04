@@ -2012,6 +2012,9 @@ local function chargeFx(entity, scale, turn)
 	return fx
 end
 vfx.hazards.chargeFx = chargeFx -- (a War Elephant charging you: the Rhino's charge)
+vfx.hazards.spiked = function(entity, dx) -- (a stampede animal ran into your Soul Horse's spike trail)
+	knock(entity, dx)
+end
 
 -- A ring bursting out from the pet to the ability's radius: sand for the rattle.
 local function rattleRing(center, radius, color)
@@ -3528,7 +3531,7 @@ local function updateRider(dt)
 			hold, grace = holdTime(mount), Config.LandingGrace
 			Tutorial.lassoed()
 			if not Tutorial.active then -- no money at all in the tutorial until your pets start earning
-				local earned = Config.RarityCoins[mount.animal.Rarity]
+				local earned = Config.LassoCoins[mount.kind] or Config.RarityCoins[mount.animal.Rarity]
 				coins += earned
 				Hud.setCoins(coins)
 				local point = camera:WorldToViewportPoint(hrp.Position + Vector3.new(0, 4, 0))
@@ -3935,7 +3938,7 @@ RunService.PreSimulation:Connect(function(dt)
 	updateHerd(dt, (slow and not cutscene) or Tutorial.active)
 	updateFlung(dt)
 	vfx.hazards.update(dt, herd, mount, phase == "outbound" or phase == "turning" or phase == "return",
-		mount ~= nil and (vfx.sprintSpecial() or {}).Kind == "Goo") -- (the Sludge's sprint: its sludge trail)
+		mount and (vfx.sprintSpecial() or {}).Kind) -- (the Sludge's and Soul Horse's sprints lay trails)
 	vfx.updateNuke()
 	vfx.sendRide()
 	vfx.updateRiders(dt)

@@ -161,7 +161,7 @@ end
 -- when it hatches.
 local function eggScale(s, now)
 	classes[s.kind] = classes[s.kind] or require(Animals[s.kind])
-	local total = Config.HatchTime[classes[s.kind].Rarity] or Config.HatchTime.Uncommon
+	local total = Config.PetHatchTime[s.kind] or Config.HatchTime[classes[s.kind].Rarity] or Config.HatchTime.Uncommon
 	local grown = math.clamp(1 - ((s.hatchAt or now) - now) / total, 0, 1)
 	return 1 + (Config.EggGrowScale - 1) * grown
 end

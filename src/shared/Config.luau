@@ -224,9 +224,17 @@ return {
 	-- Any pet can be ridden. Until pets can be picked in the pen, you ride this one
 	-- (it waits on the first pet spot in your pen).
 	DefaultPet = "Horse",
-	-- Seconds an egg placed in your pen takes to hatch, by the rarity of the
-	-- animal inside (first-biome eggs; later biomes can take longer).
+	-- Seconds an egg placed in your pen takes to hatch: PetHatchTime by the animal
+	-- inside (QM's pets JSON, Oct 4), else HatchTime by its rarity.
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
+	PetHatchTime = {
+		Horse = 15, Pig = 15, Pinto = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
+		Cactus = 30, Scorpion = 90, Sandworm = 210, SpineLizard = 300, Snake = 600, -- Desert
+		Penguin = 30, Boar = 45, Snowman = 120, IceGolem = 360, Icebringer = 1800, -- Tundra
+		Starfish = 15, Whale = 3600, Squid = 900, FishSchool = 666, KingCrab = 1200, BlueCrab = 3000, Kraken = 3333, -- Ocean
+		Beholder = 666, Sludge = 600, WarElephant = 900, Leviathan = 1800, SoulHorse = 2400, -- Godlands
+		SnackYak = 10, RoboShark = 9000, Loong = 12000, -- exclusives
+	},
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
 	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
 	-- brings home an egg, one hint at a time and only the buttons each step needs.
@@ -342,6 +350,8 @@ return {
 	--     its size.
 	--   Goo (Sludge): it lays the wild Sludge's sludge behind it; stampede animals that
 	--     run into it are stuck, crawling, for a moment (Client/GodlandsHazards).
+	--   SpikeTrail (Soul Horse): it leaves the wild Soul Horse's spikes behind it; stampede
+	--     animals that run into one are killed, whatever their size (they never crash you).
 	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, which
 	-- is always a sprint (ReturnSprint).
 	SprintSpecials = {
@@ -353,6 +363,7 @@ return {
 		Beholder = { Kind = "Fly", Height = 24, ScareRadius = 30, Haze = Color3.fromRGB(255, 110, 210) }, -- height and radius are guesses
 		Leviathan = { Kind = "Flame", Range = 5, Width = 9, OnReturn = true }, -- QM, Oct 4: "like 1m ahead" (4 studs a metre; the width is a guess)
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
+		SoulHorse = { Kind = "SpikeTrail" }, -- QM, Oct 4: the wild Soul Horse's spike trail behind it; stampede animals that run into a spike are killed (Client/GodlandsHazards)
 		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/GodlandsHazards)
 		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true, RestorePer = 0.2 }, -- QM, Oct 4: 20% Hold per animal it hits
 	},
@@ -413,10 +424,10 @@ return {
 	PetIncome = {
 		Horse = 1, Pig = 3, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
 		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
-		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 4000, Icebringer = 1111, -- Tundra
-		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 7000, Whale = 5000, Kraken = 8200, -- Ocean
-		Loong = 20000, Beholder = 40, Leviathan = 400, -- Godlands (guesses: the Loong past the Kraken)
-		WarElephant = 10000, SoulHorse = 15000, Sludge = 40, -- Godlands (guesses)
+		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 18000, Icebringer = 1111, -- Tundra
+		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 19000, Whale = 5000, Kraken = 8200, -- Ocean
+		Loong = 20000, Beholder = 666, Leviathan = 5000, -- Godlands (QM's pets JSON, Oct 4)
+		WarElephant = 1000, SoulHorse = 6666, Sludge = 450, -- Godlands (QM's pets JSON, Oct 4)
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -621,8 +632,10 @@ return {
 		Sludge = { Speed = 1, Stamina = 2 }, -- guesses (Oct 4)
 	},
 
-	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
+	-- Coins for landing on an animal: LassoCoins for that animal, else by its rarity (set
+	-- in its Animals module).
 	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25 },
+	LassoCoins = { Beholder = 50, Sludge = 50, WarElephant = 50, Leviathan = 100 }, -- QM's pets JSON, Oct 4
 
 	-- Stampede: each biome has its own steady stream of animals (its Herd above),
 	-- one every HerdSpawnEvery seconds, whether anyone is riding or not. They pop in
