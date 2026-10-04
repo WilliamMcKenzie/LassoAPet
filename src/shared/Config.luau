@@ -353,8 +353,8 @@ return {
 		Loong = 1, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
-	-- 1.2x medium, 1.44x large, 1.73x XL (QM, Oct 2; Eggs/Egg.luau).
-	EggSizePerTier = 1.5, -- QM, Oct 4: 1.5x per size tier (was 1.2)
+	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
+	EggSizePerTier = 1.5,
 	-- The riding camera pulls back this much further per tier above small: 1x on a
 	-- small pet, 1.2x on a medium, 1.44x on a large (QM, Oct 2).
 	RideZoomPerTier = 1.2,
