@@ -1,5 +1,5 @@
 -- The egg roll menu (QM, Oct 4): the Roll button over Pets opens it. QM's panel
--- (the eggs you can roll, baked into the art) with ROLL $10M on its bottom edge,
+-- (the eggs you can roll, baked into the art) with ROLL $1M on its bottom edge,
 -- laid out like QM's mockup. The roll itself is Hud's (RollGacha, then the egg
 -- card); clicking anywhere off the panel closes it, like the animal dictionary.
 --
@@ -17,7 +17,7 @@ local RollMenu = {}
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
 local PANEL = { id = "rbxassetid://139179785391159", size = Vector2.new(2204, 1420) } -- RollMenu.png
-local BUTTON = { id = "rbxassetid://106021366595884", size = Vector2.new(960, 378) } -- RollButton.png
+local BUTTON = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) } -- RollButton.png (ROLL $1M)
 local PANEL_WIDTH = 720 -- about half the screen, as in the mockup
 local BUTTON_WIDTH = 310
 local GREY = Color3.fromRGB(150, 150, 150)

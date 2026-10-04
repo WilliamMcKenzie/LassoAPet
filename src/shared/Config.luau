@@ -371,17 +371,18 @@ return {
 		-- Egg Machine in the base stays off (Machine).
 		Enabled = true,
 		Machine = false,
-		Price = 10000000, -- QM's ROLL $10M button
+		Price = 1000000, -- QM's ROLL $1M button
 		Position = Vector3.new(-28, 0, 30), -- on the grass between Pen1 and Pen2's ride lanes
-		-- Only the eggs on QM's menu for now: one of the three exclusives, evenly (a guess).
-		Odds = { Exclusive = 100 },
+		-- QM, Oct 4: the Loong, Snack Yak and Robo Shark 10% each (Exclusive), the other
+		-- 70% split evenly over the other Legendaries (14% each).
+		Odds = { Legendary = 70, Exclusive = 30 },
 		Pool = {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
 			-- with an empty pool is never rolled.
-			Exclusive = { SnackYak = 1, Loong = 1, RoboShark = 1 },
+			Exclusive = { Loong = 1, SnackYak = 1, RoboShark = 1 },
 		},
 		Reach = 10, -- studs from the machine where ROLL shows
 	},

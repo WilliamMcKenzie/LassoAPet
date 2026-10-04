@@ -38,7 +38,7 @@ local IMAGES = {
 	rollIcon = { id = "rbxassetid://107116554539032", size = Vector2.new(232, 240) }, -- RollIcon.png: opens the egg roll menu
 	-- The roll menu's own art (RollMenu draws it; listed here so it's preloaded with the rest).
 	rollMenu = { id = "rbxassetid://139179785391159", size = Vector2.new(2204, 1420) }, -- RollMenu.png
-	rollButton = { id = "rbxassetid://106021366595884", size = Vector2.new(960, 378) }, -- RollButton.png
+	rollButton = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) }, -- RollButton.png
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
 	upgradePen = { id = "rbxassetid://120690804030353", size = Vector2.new(1152, 284) }, -- UpgradePenActive.png
@@ -683,7 +683,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		end
 		rolling = true
 		local ok, kind, exclusive = pcall(rollGacha.InvokeServer, rollGacha)
-		local rarity = ok and kind and (if exclusive then "Exclusive" else require(game:GetService("ReplicatedStorage").Shared.Animals[kind]).Rarity)
+		-- The same egg card as coming home with that egg: its own rarity's (QM).
+		local rarity = ok and kind and require(game:GetService("ReplicatedStorage").Shared.Animals[kind]).Rarity
 		RollMenu.setHidden(rarity ~= nil) -- the menu steps aside for the egg card
 		local seconds = rarity and Hud.eggReveal(rarity, kind)
 		task.wait(seconds or 0.3)
