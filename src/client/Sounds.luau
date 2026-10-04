@@ -59,12 +59,30 @@ local function newSound(id, volume, looped)
 	return s
 end
 
+-- Each effect loaded once up front (so the first play of each isn't late or silent);
+-- a play is a copy of it.
+local templates = {}
+for name, id in IDS do
+	if id ~= "" then
+		templates[name] = newSound(id, VOLUME)
+	end
+end
+task.spawn(function()
+	local list = {}
+	for _, t in templates do
+		table.insert(list, t)
+	end
+	pcall(game:GetService("ContentProvider").PreloadAsync, game:GetService("ContentProvider"), list)
+end)
+
 function Sounds.play(name, volume, speed)
-	local id = IDS[name]
-	if not id or id == "" then
+	local template = templates[name]
+	if not template then
 		return
 	end
-	local s = newSound(id, volume or VOLUME)
+	local s = template:Clone()
+	s.Volume = volume or VOLUME
+	s.Parent = folder
 	s.PlaybackSpeed = speed or 1
 	s.Ended:Once(function()
 		s:Destroy()
