@@ -13,6 +13,9 @@ a coloured base, bold markings and each animal's own feature.
   BlueCrab Legendary the King Crab's egg in the Blue Crab's blues
   FishSchool Epic    yellow over a pale base, an orange back, a ring of little orange
                      fish swimming round it (each with a tail and an eye), a fin on top
+  RoboShark Legendary gunmetal over a darker base, glowing cyan eyes under a brow, a dark
+                     mouth slot with metal teeth, gold rivets round it, a dorsal fin on
+                     top and a tail fin at the back
 
 Run from the repo root: python3 tools/ocean_eggs.py [Kind ...]
 Writes designs/eggs/c_style/<Kind>Egg.bbmodel, src/shared/Eggs/<Kind>EggModel.luau,
@@ -211,8 +214,46 @@ def whale_egg():
     return egg
 
 
+def robo_shark_egg():
+    hull, base, dark, tooth = (81, 65, 72), (62, 50, 58), (40, 30, 36), (128, 112, 120)  # RoboShark.bbmodel
+    gold, cyan = (187, 164, 88), (86, 206, 244)
+    egg = shell([base, base, hull, hull, hull, hull, hull])
+    # glowing eyes under a heavy brow, and a mouth slot with teeth hanging into it
+    z = WIDTHS[4] / 2
+    y = 4 * LH + 0.12
+    for sx in (-1, 1):
+        x0, x1 = sorted((sx * 0.18, sx * 0.48))
+        egg.block("GlowEye" + "LR"[sx > 0], (x0, y, -z - 0.06), (x1, y + 0.2, -z + 0.04), cyan)
+        egg.block("Brow" + "LR"[sx > 0], (x0 - 0.04, y + 0.24, -z - 0.1), (x1 + 0.04, y + 0.36, -z + 0.04), dark)
+    z = WIDTHS[3] / 2
+    y0, y1 = 3 * LH + 0.06, 3 * LH + 0.36
+    egg.block("Mouth", (-0.6, y0, -z - 0.04), (0.6, y1, -z + 0.04), dark)
+    for k in range(5):
+        x = -0.48 + k * 0.24
+        egg.block(f"Tooth{k}", (x - 0.06, y1 - 0.16, -z - 0.08), (x + 0.06, y1, -z - 0.02), tooth)
+    # gold rivets round the base, front, sides and back
+    for k in range(4):
+        for i, x in enumerate((-0.4, 0.4)):
+            zr = WIDTHS[2] / 2
+            lo, hi = (x - 0.07, 2 * LH + 0.2, -zr - 0.06), (x + 0.07, 2 * LH + 0.34, -zr + 0.04)
+            p = Part(f"Rivet{k}{i}", [b - a for a, b in zip(lo, hi)], Ry(90 * k) @ T(*[(a + b) / 2 for a, b in zip(lo, hi)]), gold)
+            p.bone = "bottom"
+            p.yaw = 90 * k
+            egg.parts.append(p)
+    # a stepped dorsal fin on top, sweeping back, and a tail fin at the back
+    top = 7 * LH
+    for k, (z0, z1, h) in enumerate(((-0.3, 0.2, 0.18), (-0.15, 0.25, 0.16), (0.0, 0.28, 0.14))):
+        yb = top - 0.02 + sum((0.18, 0.16, 0.14)[:k])
+        egg.block(f"Dorsal{k}", (-0.07, yb, z0), (0.07, yb + h, z1), hull)
+    zb = WIDTHS[3] / 2
+    egg.block("TailFinUp", (-0.07, 3 * LH + 0.1, zb - 0.05), (0.07, 4 * LH + 0.25, zb + 0.22), hull)
+    egg.block("TailFinDown", (-0.07, 2 * LH + 0.25, zb - 0.05), (0.07, 3 * LH + 0.1, zb + 0.16), base)
+    return egg
+
+
 EGGS = [("Kraken", kraken_egg), ("Squid", lambda: kraken_egg(SQUID)), ("Whale", whale_egg),
-        ("KingCrab", king_crab_egg), ("BlueCrab", lambda: king_crab_egg(BLUE_CRAB)), ("Starfish", starfish_egg), ("FishSchool", fish_school_egg)]
+        ("KingCrab", king_crab_egg), ("BlueCrab", lambda: king_crab_egg(BLUE_CRAB)), ("Starfish", starfish_egg), ("FishSchool", fish_school_egg),
+        ("RoboShark", robo_shark_egg)]
 
 
 def main(*kinds, preview="/mnt/project-files/eggs/c_style/ocean"):
