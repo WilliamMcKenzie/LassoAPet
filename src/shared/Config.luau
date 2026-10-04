@@ -308,7 +308,6 @@ return {
 		SnackYak = { Kind = "Charge", UntilFull = true, Cooldown = 5, SpeedBoost = 2 }, -- QM, Oct 4
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 56 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 10, Radius = 45, ScareTime = 10, RestorePer = 0.1 }, -- QM, Oct 4
-		Beholder = { Kind = "Devour", Duration = 1.2, Cooldown = 10, Radius = 50, Max = 1, MaxTier = 2, PullTime = 0.8, RestorePer = 1, Hop = 3, TentacleColor = Color3.fromRGB(222, 136, 56), Mouth = 11 }, -- QM, Oct 4: one tentacle eats the nearest animal and refills all of Hold (radius and size limit guesses)
 		Kraken = { Kind = "Devour", Duration = 1.4, Cooldown = 6, Radius = 50, Max = 8, MaxTier = 2, PullTime = 0.7, RestorePer = 0.2, Hop = 6 }, -- QM, Oct 4 (radius a guess)
 		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7, RestorePer = 0.03 }, -- 3% Hold per animal frozen (QM, Oct 4)
 		SpineLizard = { Kind = "Boost", Duration = 5, Cooldown = 8, SpeedBoost = 2 },
@@ -349,6 +348,9 @@ return {
 		Unicorn = { Kind = "Smash", Radius = 14, ScareRadius = 30, RestorePer = 0.02, OnReturn = true }, -- scares animals within ScareRadius off, 2% Hold each (QM, Oct 4)
 		Sandworm = { Kind = "Burrow", OnReturn = true },
 		Whale = { Kind = "Fly", Height = 56 },
+		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
+		-- Whale, a pink haze round the screen, and scares the animals round it off.
+		Beholder = { Kind = "Fly", Height = 24, ScareRadius = 30, Haze = Color3.fromRGB(255, 110, 210) }, -- height and radius are guesses
 		Leviathan = { Kind = "Flame", Range = 5, Width = 9, OnReturn = true }, -- QM, Oct 4: "like 1m ahead" (4 studs a metre; the width is a guess)
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
 		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/GodlandsHazards)
