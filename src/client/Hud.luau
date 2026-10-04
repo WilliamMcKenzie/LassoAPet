@@ -98,9 +98,9 @@ local IMAGES = {
 	eggFishSchool = { id = "rbxassetid://137156704531563", size = Vector2.new(530, 721) }, -- FishSchoolEggRender.png
 	eggLoong = { id = "rbxassetid://70469571709365", size = Vector2.new(560, 863) }, -- LoongEggRender.png (QM's egg)
 	-- Exclusive animal events' countdown (Hud.setEventCountdown): QM's gradient names.
-	eventLoong = { id = "", size = Vector2.new(372, 140) }, -- EventLoong.png
-	eventSnackYak = { id = "", size = Vector2.new(593, 119) }, -- EventSnackYak.png
-	eventRoboShark = { id = "", size = Vector2.new(628, 119) }, -- EventRoboShark.png
+	eventLoong = { id = "rbxassetid://125494868051538", size = Vector2.new(372, 140) }, -- EventLoong.png
+	eventSnackYak = { id = "rbxassetid://136877153343024", size = Vector2.new(593, 119) }, -- EventSnackYak.png
+	eventRoboShark = { id = "rbxassetid://85550148075389", size = Vector2.new(628, 119) }, -- EventRoboShark.png
 }
 
 -- On a computer (keyboard, no touch screen) the ride buttons show their key:
