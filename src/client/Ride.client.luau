@@ -1739,7 +1739,7 @@ function vfx.updateEvent(dt, seen, inView)
 		entity.popping, entity.hop = nil, 0
 	end
 	if shown then
-		entity.animal:setScale(scale)
+		entity.animal:setScale(scale * vfx.ownSize(entity)) -- (grown while you rode it, it stays grown)
 	end
 	entity.dodge *= math.exp(-1.5 * dt)
 	moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt, shown)
@@ -1871,7 +1871,7 @@ local function updateHerd(dt, slowed)
 		local shrink = math.clamp((z - endZ) / SHRINK, 0, 1)
 		entity.popping = if shrink < 1 then true else nil
 		if shown then
-			entity.animal:setScale(shrink)
+			entity.animal:setScale(shrink * vfx.ownSize(entity)) -- (your merged or grown pet stays that size, let go)
 		end
 		local x = entity.x + look.X * pace * dt
 		if math.abs(yaw) > 0.05 then
@@ -2296,6 +2296,13 @@ end
 
 -- Abilities that don't make the pet untouchable: it still uses Hold and can crash.
 vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true, Breath = true, Feast = true, Missiles = true, Shield = true }
+
+-- An animal's size when nothing's growing it for now: what merging (Shared/Merge) or
+-- its hunts and feasts this ride have made it (entity.feast), else 1. It stays with
+-- the animal when you let it go and get back on it.
+function vfx.ownSize(entity)
+	return entity.feast and entity.feast.size or 1
+end
 
 -- The Blue Crab's Feast (Config.Abilities): what it has broken since the last one, and
 -- how much bigger and faster it has grown this ride. nil for every other pet.
@@ -3040,9 +3047,9 @@ local function endAbility(entity)
 	local root = entity.animal.model.PrimaryPart
 	if active.cfg.Tier then
 		-- Back to its own size: a springy pop down if it's still the mount.
-		entity.scaleAnim = if entity == mount then { shrink = true, t = 0, size = entity.animal.scale } else nil
+		entity.scaleAnim = if entity == mount then { shrink = true, t = 0, size = entity.animal.scale, base = vfx.ownSize(entity) } else nil
 		if entity ~= mount then
-			entity.animal:setScale(1)
+			entity.animal:setScale(vfx.ownSize(entity))
 		end
 	end
 	if active.cfg.Kind == "Leap" or active.cfg.Kind == "Devour" then
@@ -3079,7 +3086,7 @@ local function startAbility(cfg)
 		Dust.kick(mount.animal.model.PrimaryPart.CFrame, mount.animal.scale)
 	elseif cfg.Kind == "Grow" or cfg.Kind == "Crabwalk" then
 		Poof.at(Vector3.new(mount.x, 0, mount.z))
-		mount.scaleAnim = { t = 0, size = Config.TierGrowth ^ math.max(cfg.Tier - tierOf(mount.kind), 0) }
+		mount.scaleAnim = { t = 0, size = math.max(Config.TierGrowth ^ math.max(cfg.Tier - tierOf(mount.kind), 0), vfx.ownSize(mount)) }
 	elseif cfg.Kind == "Ink" then
 		vfx.inkFx(mount)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(40, 30, 70))
@@ -3534,7 +3541,7 @@ local function updateRider(dt)
 			end
 			mount, transfer = target, nil
 			mount.popping, mount.hop = nil, 0
-			mount.animal:setScale(1)
+			mount.animal:setScale(vfx.ownSize(mount)) -- (back on a pet you let go: merged or grown, it still is)
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
 			hold, grace = holdTime(mount), Config.LandingGrace
