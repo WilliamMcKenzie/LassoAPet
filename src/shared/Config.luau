@@ -266,7 +266,11 @@ return {
 	--     away from it while it lasts.
 	--   Crabwalk (King Crab): it grows to size tier Tier (large) and scuttles sideways
 	--     at SpeedBoost x speed for Duration.
-	--   Feast (Blue Crab): one tap cashes in everything it broke since the last Feast:
+	--   Shield (Blue Crab, QM Oct 4): one tap summons Crabs King Crabs Ahead studs in
+	--     front of it, Spread studs apart, marching along with it for Life seconds. Each
+	--     one soaks one hit: the first animal to run into it is knocked flying and that
+	--     crab is gone.
+	--   Feast (unused now; was the Blue Crab's): one tap cashes in everything it broke since the last Feast:
 	--     for each, Heal of the Hold bar back, and it grows Grow x bigger and runs
 	--     SpeedUp x faster for the rest of the ride, up to Max x its own size and speed
 	--     (a size TierGrowth x bigger counts as a size tier up).
@@ -296,7 +300,7 @@ return {
 		IceGolem = { Kind = "Grow", Duration = 5, Cooldown = 10, SpeedBoost = 1.2, Tier = 4 },
 		Squid = { Kind = "Ink", Duration = 2.5, Cooldown = 8, Radius = 45 },
 		KingCrab = { Kind = "Crabwalk", Duration = 4, Cooldown = 8, SpeedBoost = 2, Tier = 3 },
-		BlueCrab = { Kind = "Feast", Duration = 0.9, Cooldown = 8, Heal = 0.1, Grow = 1.1, SpeedUp = 1.1, Max = 2 }, -- QM, Oct 4 (cooldown a guess)
+		BlueCrab = { Kind = "Shield", Duration = 0.6, Cooldown = 15, Crabs = 3, Ahead = 22, Spread = 11, Life = 15, Radius = 5 }, -- QM, Oct 4 (cooldown and life are guesses)
 		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
 		-- the animation's length and fire window; the range, width and cooldown are guesses
 		RoboShark = { Kind = "Missiles", Duration = 1.2, Cooldown = 3, Restore = 0.1, Radius = 7, Spread = 0.9, Size = 0.18 }, -- QM, Oct 4 (Duration, Radius a guess)
@@ -316,14 +320,16 @@ return {
 	--     its path, whatever its size.
 	--   Loom (Loong): it swells to Grow x its size (a look only: its tier stays) and the
 	--     animals within Radius studs scatter away from it.
+	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, which
+	-- is always a sprint (ReturnSprint).
 	SprintSpecials = {
-		Unicorn = { Kind = "Smash", Radius = 14, RestorePer = 0.02 }, -- 2% Hold per animal it scares out of its way (QM, Oct 4)
-		Sandworm = { Kind = "Burrow" },
+		Unicorn = { Kind = "Smash", Radius = 14, ScareRadius = 30, RestorePer = 0.02, OnReturn = true }, -- scares animals within ScareRadius off, 2% Hold each (QM, Oct 4)
+		Sandworm = { Kind = "Burrow", OnReturn = true },
 		Icebringer = { Kind = "Ram" },
 		Whale = { Kind = "Fly", Height = 56 },
 		Kraken = { Kind = "Trample", BelowTier = 3 },
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
-		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2 }, -- QM, Oct 4
+		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true }, -- QM, Oct 4
 	},
 	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
 	-- obstacles and stampede animals of a lower tier, knocking them up and away;
@@ -516,7 +522,7 @@ return {
 		Starfish = { Speed = 2.5, Stamina = 2 },
 		Squid = { Speed = 3, Stamina = 2.6 },
 		KingCrab = { Speed = 3.1, Stamina = 3 },
-		BlueCrab = { Speed = 3.1, Stamina = 3 }, -- the King Crab's; its Feast ability grows it to 2x
+		BlueCrab = { Speed = 3.1, Stamina = 3 }, -- the King Crab's
 		RoboShark = { Speed = 3.3, Stamina = 3 }, -- a guess (Oct 4)
 		FishSchool = { Speed = 3, Stamina = 2.8 }, -- a guess between the Squid and King Crab
 		Whale = { Speed = 1.2, Stamina = 10 },

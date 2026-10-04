@@ -554,6 +554,7 @@ local function cleanup()
 	Lasso.stop()
 	if vfx.endScare then
 		vfx.endScare() -- (the snake's glow goes with the ride)
+		vfx.endShield() -- (and the Blue Crab's King Crabs)
 	end
 	cutscene = nil
 	heroLeap = nil
@@ -2148,7 +2149,7 @@ function vfx.frostBlast(cfg, left)
 end
 
 -- Abilities that don't make the pet untouchable: it still uses Hold and can crash.
-vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true, Breath = true, Feast = true, Missiles = true }
+vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true, Breath = true, Feast = true, Missiles = true, Shield = true }
 
 -- The Blue Crab's Feast (Config.Abilities): what it has broken since the last one, and
 -- how much bigger and faster it has grown this ride. nil for every other pet.
@@ -2186,7 +2187,8 @@ end
 -- way out, else nil.
 function vfx.sprintSpecial()
 	local cfg = mount and Config.SprintSpecials[mount.kind]
-	return if cfg and phase == "outbound" and not transfer and sprinting() then cfg else nil
+	local now = phase == "outbound" or (phase == "return" and cfg and cfg.OnReturn) -- (OnReturn: on the way home too, QM)
+	return if cfg and now and not transfer and sprinting() then cfg else nil
 end
 
 -- Ink: a dark cloud bursting out round the squid.
@@ -2217,6 +2219,83 @@ function vfx.inkFx(entity)
 end
 
 -- Ink: the animals within the radius scatter sideways away from the squid.
+-- The Unicorn's sprint: the animals within special.ScareRadius scatter away from it,
+-- each refilling special.RestorePer of Hold the first time it's scared off.
+function vfx.scareOff(dt, special)
+	local r = special.ScareRadius
+	for _, entity in allAnimals() do
+		local dx, dz = entity.x - mount.x, entity.z - mount.z
+		if entity ~= mount and not entity.popping and dx * dx + dz * dz < r * r then
+			local away = if dx >= 0 then 1 else -1
+			if entity.n then
+				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -r, r)
+			else
+				entity.lane = math.clamp((entity.lane or entity.x) + away * 60 * dt, -EDGE, EDGE)
+			end
+			if special.RestorePer and entity.scaredOffBy ~= mount then
+				entity.scaredOffBy = mount
+				hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount))
+			end
+		end
+	end
+end
+
+-- The Blue Crab's Shield (Config.Abilities): King Crabs marching in a line in front
+-- of it, each soaking one hit (the animal that runs into it is knocked flying).
+function vfx.summonShield(cfg)
+	vfx.endShield()
+	local crabs = {}
+	for i = 1, cfg.Crabs do
+		local offset = (i - (cfg.Crabs + 1) / 2) * cfg.Spread
+		local crab = newEntity(mount.x + offset, mount.z + travelDir() * cfg.Ahead, mount.yaw, "KingCrab")
+		crab.offset = offset
+		Poof.at(Vector3.new(crab.x, 0, crab.z))
+		table.insert(crabs, crab)
+	end
+	vfx.shield = { mount = mount, cfg = cfg, crabs = crabs, left = cfg.Life }
+end
+
+function vfx.endShield()
+	local shield = vfx.shield
+	vfx.shield = nil
+	for _, crab in shield and shield.crabs or {} do
+		Poof.at(Vector3.new(crab.x, 0, crab.z))
+		crab.animal.model:Destroy()
+	end
+end
+
+function vfx.updateShield(dt)
+	local shield = vfx.shield
+	if not shield then
+		return
+	end
+	shield.left -= dt
+	if shield.left <= 0 or mount ~= shield.mount or #shield.crabs == 0 then
+		vfx.endShield()
+		return
+	end
+	local cfg = shield.cfg
+	for i = #shield.crabs, 1, -1 do
+		local crab = shield.crabs[i]
+		crab.x = math.clamp(mount.x + crab.offset, -EDGE, EDGE)
+		crab.z = mount.z + travelDir() * cfg.Ahead
+		crab.yaw = mount.yaw
+		animate(crab, dt, mount.speed, 0)
+		place(crab, 0)
+		for _, entity in allAnimals() do
+			local dx = entity.x - crab.x
+			if entity ~= mount and not entity.popping and not entity.event
+				and math.abs(dx) < cfg.Radius and math.abs(entity.z - crab.z) < cfg.Radius then
+				knock(entity, dx) -- soaked: the attacker goes flying, and this crab is spent
+				Poof.at(Vector3.new(crab.x, 0, crab.z))
+				crab.animal.model:Destroy()
+				table.remove(shield.crabs, i)
+				break
+			end
+		end
+	end
+end
+
 function vfx.inkBlast(dt, cfg)
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
@@ -2428,6 +2507,8 @@ function vfx.updateSprint(dt)
 	end
 	if kind == "Loom" then
 		vfx.inkBlast(dt, special) -- the animals round it scatter
+	elseif kind == "Smash" then
+		vfx.scareOff(dt, special) -- the Unicorn's: the animals round it scatter too, refilling Hold
 	end
 	-- Fly rises into the air and Burrow sinks under the floor, easing in and out.
 	if special.Kind == "Fly" or special.Kind == "Burrow" then
@@ -2569,6 +2650,8 @@ local function startAbility(cfg)
 	elseif cfg.Kind == "Missiles" then
 		hold = math.min(hold + holdTime(mount) * cfg.Restore, holdTime(mount)) -- QM: every launch refills 10% of the Hold bar
 		a.active.missiles = vfx.launchMissiles(mount, cfg, travelDir())
+	elseif cfg.Kind == "Shield" then
+		vfx.summonShield(cfg)
 	elseif cfg.Kind == "Feast" then
 		-- Everything broken since the last Feast: Hold back, and bigger and faster for good.
 		local feast = vfx.feastOf(mount)
@@ -2878,11 +2961,6 @@ local function checkRide(dt)
 				return fail("CRASH!")
 			elseif phase == "outbound" and entity.n then
 				entity.dodge = math.clamp(entity.dodge + (if dx >= 0 then 1 else -1) * 12 * dt, -6, 6)
-				if special and special.RestorePer and entity.scaredOffBy ~= mount then
-					-- The Unicorn's sprint: each animal it scares out of its way refills Hold (once).
-					entity.scaredOffBy = mount
-					hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount))
-				end
 			end
 		end
 	end
@@ -3384,6 +3462,7 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	updateAbility(dt)
 	vfx.updateScared(dt)
+	vfx.updateShield(dt)
 	vfx.updateSprint(dt)
 	vfx.updateScale(dt)
 	updateGuide()
@@ -3503,6 +3582,9 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	-- Abilities: a yellow-orange haze for the rattle (blue for frost).
 	local ability = activeAbility()
 	local kind = ability and ability.cfg.Kind
+	if vfx.scareAura and not kind then
+		kind = "Rattle" -- the snake's scare keeps its haze the whole time (QM)
+	end
 	if kind == "Rattle" or kind == "Frost" then
 		vfx.hazeColor = if kind == "Frost" then vfx.FROST_HAZE else vfx.RATTLE_HAZE
 	end
