@@ -136,13 +136,19 @@ local function idle(avatar)
 	animator.Parent = humanoid
 	local animation = Instance.new("Animation")
 	animation.AnimationId = if humanoid.RigType == Enum.HumanoidRigType.R15 then POSE.R15 else POSE.R6
-	pcall(function()
+	task.spawn(pcall, function()
 		local track = animator:LoadAnimation(animation)
 		track.Looped = false
 		track.Priority = Enum.AnimationPriority.Action
+		for _ = 1, 50 do -- (its length is 0 until it has loaded)
+			if track.Length > 0 then
+				break
+			end
+			task.wait(0.1)
+		end
 		track:Play(0)
-		track.TimePosition = POSE_AT
 		track:AdjustSpeed(0) -- held at its peak
+		track.TimePosition = math.min(POSE_AT, track.Length)
 	end)
 end
 
