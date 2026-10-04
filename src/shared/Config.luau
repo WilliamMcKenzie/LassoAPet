@@ -536,7 +536,7 @@ return {
 		Whale = { Speed = 1.2, Stamina = 10 },
 		Kraken = { Speed = 4.5, Stamina = 3 },
 		-- Godlands
-		Loong = { Speed = 4, Stamina = 8 }, -- QM
+		Loong = { Speed = 2, Stamina = 8 }, -- QM (speed 4 -> 2, Oct 4)
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
