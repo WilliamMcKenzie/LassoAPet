@@ -2463,6 +2463,7 @@ end
 -- they fly (like QM's reference clip), aimed at the spot on the ground under the
 -- mouse; on a phone, the last place tapped; with neither, straight ahead.
 vfx.SPIRAL = "rbxassetid://73420824782915"
+vfx.FIRE_LIFE = 0.9 -- seconds a fire spiral lives (and flies out to the range in)
 UserInputService.InputBegan:Connect(function(input, processed)
 	if input.UserInputType == Enum.UserInputType.Touch and not processed then
 		vfx.lastTap = Vector2.new(input.Position.X, input.Position.Y)
@@ -2520,8 +2521,12 @@ function vfx.breathFx(entity, cfg, remote)
 	})
 	fire.Rotation = NumberRange.new(0, 360)
 	fire.RotSpeed = NumberRange.new(-120, 120)
-	fire.Lifetime = NumberRange.new(0.7, 0.9)
-	fire.Speed = NumberRange.new(cfg.Range / 0.8 * 0.9, cfg.Range / 0.8 * 1.1)
+	-- They brake to a stop right at the end of the range and bunch up there (QM): out
+	-- fast, then braked steadily by an Acceleration against the aim (set each frame in
+	-- breathBlast), so a spiral covers 2 x speed x life / 2 = Range. (Particles can't
+	-- follow a custom speed curve; steady braking is the closest an emitter does.)
+	fire.Lifetime = NumberRange.new(vfx.FIRE_LIFE)
+	fire.Speed = NumberRange.new(2 * cfg.Range / vfx.FIRE_LIFE * 0.95, 2 * cfg.Range / vfx.FIRE_LIFE * 1.05)
 	fire.SpreadAngle = Vector2.new(8, 8)
 	fire.EmissionDirection = Enum.NormalId.Front -- the attachment's -Z, pointed at the aim
 	fire.Rate = 140 -- a constant stream (QM)
@@ -2551,6 +2556,10 @@ function vfx.breathBlast(active)
 		local jaw = model:FindFirstChild("jawBone") or model.PrimaryPart
 		local mouth = (jaw.CFrame * CFrame.new(0, 0, -2 * mount.animal.size * mount.animal.scale)).Position
 		at.WorldCFrame = CFrame.lookAt(mouth, mouth + aim)
+		local fire = at:FindFirstChild("LoongFire")
+		if fire then
+			fire.Acceleration = -aim * (2 * cfg.Range / vfx.FIRE_LIFE / vfx.FIRE_LIFE) -- braking to a stop at the range's end
+		end
 	end
 	if active.t < cfg.FireFrom or active.t > cfg.FireTo then
 		return
