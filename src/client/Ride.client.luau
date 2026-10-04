@@ -1094,8 +1094,12 @@ local function updateGuide()
 	end
 	guide.beam.Enabled = target ~= nil
 	if target then
-		local from = Vector3.new(at.X, 0, at.Z - guide.AHEAD)
+		-- The trail starts a little out from the pet toward the target (guide.AHEAD, or
+		-- half way to a target that close), so it always comes straight off the pet,
+		-- whether it leads to an egg far ahead or the Robo Shark's prey right beside it.
 		local flat = Vector3.new(target.X, 0, target.Z)
+		local toward = Vector3.new(flat.X - at.X, 0, flat.Z - at.Z)
+		local from = Vector3.new(at.X, 0, at.Z) + (if toward.Magnitude > 0.01 then toward.Unit * math.min(guide.AHEAD, toward.Magnitude / 2) else Vector3.zero)
 		local along = (flat - from).Unit
 		-- Lying flat just above the highest ground (raised patches are a stud up):
 		-- the attachments' up is the beam's width direction. ZOffset draws it
