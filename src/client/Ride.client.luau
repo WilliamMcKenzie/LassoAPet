@@ -2941,6 +2941,8 @@ local function updateMount(dt)
 		-- Up into the air and down again in an arc, faster.
 		targetSpeed *= ability.cfg.SpeedBoost
 		mount.hop = math.sin(math.pi * math.clamp(ability.t / ability.cfg.Duration, 0, 1)) * ability.cfg.LeapHeight
+	elseif ability and ability.cfg.Kind == "Breath" then
+		targetSpeed *= ability.cfg.Crawl or 1 -- the Loong slows to a crawl while it breathes fire (QM)
 	elseif ability and (ability.cfg.Kind == "Rattle" or ability.cfg.Kind == "Devour") then
 		targetSpeed, rate = 0, 120 -- stops dead to coil up (or for the Kraken to feed)
 		if ability.cfg.Kind == "Devour" then
