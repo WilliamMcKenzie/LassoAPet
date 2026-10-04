@@ -222,8 +222,9 @@ return {
 	--   Charge (Rhino): one tap, for Duration: a battering ram at SpeedBoost x speed.
 	--     No Hold drain, and every obstacle and animal in the way is knocked flying,
 	--     whatever its size. Wind breaks round its head and the camera pulls back.
-	--     With UntilEmpty (Snack Yak) it has no Duration: it charges until the Hold bar
-	--     runs out, draining it as usual, and on the way out an empty bar bucks you off.
+	--     With UntilFull (Snack Yak) it has no Duration: while it charges the Hold bar
+	--     refills, as fast as it usually drains, and the charge ends once the bar is
+	--     full. It can't start on a full bar.
 	--   Leap (Unicorn): one tap: a gallop up into the air and down again in an arc
 	--     LeapHeight studs high, over everything, at SpeedBoost x speed with no Hold drain,
 	--     leaving a rainbow trail.
@@ -251,7 +252,7 @@ return {
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
 	Abilities = {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
-		SnackYak = { Kind = "Charge", UntilEmpty = true, Cooldown = 30, SpeedBoost = 2 }, -- QM, Oct 4
+		SnackYak = { Kind = "Charge", UntilFull = true, Cooldown = 30, SpeedBoost = 2 }, -- QM, Oct 4
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 56 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 6, Radius = 45, Restore = 0.5 },
 		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7 },
