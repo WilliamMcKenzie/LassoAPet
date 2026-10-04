@@ -280,8 +280,10 @@ return {
 	--     (client/FishWave.luau). Nothing crashes the school while it runs.
 	--   Breath (Loong): it plays its fire breath ("special") and, from FireFrom to FireTo
 	--     seconds in, everything in a Width-stud lane Range studs ahead is burnt away:
-	--     obstacles smashed, animals flung, whatever their size. It refills Restore of
-	--     the Hold bar when it starts (QM: 20%).
+	--     obstacles smashed, animals flung, whatever their size, aimed at the mouse. Each
+	--     animal it burns refills RestorePer of the Hold bar and makes it Grow x bigger and
+	--     SpeedUp x faster for the rest of the ride, up to size tier MaxTier and MaxSpeed x
+	--     its own speed (QM, Oct 4: it starts small and slow, as the Robo Shark does).
 	--   Hunt (Robo Shark, QM Oct 4): for Duration seconds it hunts on its own (you lose
 	--     the steering or Sprint): it goes at SpeedBoost x speed (QM: 0.8x) at the nearest animal and eats
 	--     it, then the next. Each one eaten makes it Grow x bigger and SpeedUp x faster (up to MaxSpeed x) for
@@ -314,7 +316,7 @@ return {
 		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
 		-- the animation's length and fire window; the range, width and cooldown are guesses
 		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 0.8, Grow = 1.1, SpeedUp = 1.05, MaxSpeed = 3, RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
-		Loong = { Kind = "Breath", Duration = 4.2, FireFrom = 0.95, FireTo = 3.95, Cooldown = 8, Range = 140, Width = 22, Restore = 0.2, Crawl = 0.15 },
+		Loong = { Kind = "Breath", Duration = 4.2, FireFrom = 0.95, FireTo = 3.95, Cooldown = 8, Range = 140, Width = 22, Crawl = 0.15, RestorePer = 0.1, Grow = 1.1, SpeedUp = 1.1, MaxSpeed = 4, MaxTier = 4 },
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
 	-- automatic sprint home with the egg). Like any sprint they drain Hold faster.
@@ -348,7 +350,7 @@ return {
 		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
-		Loong = 3, -- Godlands
+		Loong = 1, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.2x medium, 1.44x large, 1.73x XL (QM, Oct 2; Eggs/Egg.luau).
@@ -536,7 +538,7 @@ return {
 		Whale = { Speed = 1.2, Stamina = 10 },
 		Kraken = { Speed = 4.5, Stamina = 3 },
 		-- Godlands
-		Loong = { Speed = 2, Stamina = 8 }, -- QM (speed 4 -> 2, Oct 4)
+		Loong = { Speed = 1, Stamina = 8 }, -- QM, Oct 4: starts at 1x, its breath's kills take it up to 4x
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).

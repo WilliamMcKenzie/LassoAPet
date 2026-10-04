@@ -2167,7 +2167,7 @@ vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = tr
 -- how much bigger and faster it has grown this ride. nil for every other pet.
 function vfx.feastOf(entity)
 	local cfg = entity and Config.Abilities[entity.kind]
-	if not cfg or (cfg.Kind ~= "Feast" and cfg.Kind ~= "Hunt") then -- (the Robo Shark grows the same way)
+	if not cfg or (cfg.Kind ~= "Feast" and cfg.Kind ~= "Hunt" and cfg.Kind ~= "Breath") then -- (the Robo Shark and Loong grow the same way)
 		return nil
 	end
 	entity.feast = entity.feast or { count = 0, size = 1, speed = 1 }
@@ -2292,16 +2292,29 @@ function vfx.huntStep(cfg)
 		Poof.at(Vector3.new(prey.x, 0, prey.z))
 		retire(prey)
 		vfx.huntTarget = nil
-		hold = math.min(hold + holdTime(mount) * cfg.RestorePer, holdTime(mount))
-		local feast = vfx.feastOf(mount)
-		local max = Config.TierGrowth ^ math.max(cfg.MaxTier - tierOf(mount.kind), 0)
-		if feast.size < max then
-			local size = math.min(feast.size * cfg.Grow, max)
-			mount.scaleAnim = { t = 0, from = mount.animal.scale, size = size }
-			feast.size = size
-		end
-		feast.speed = math.min(feast.speed * cfg.SpeedUp, cfg.MaxSpeed or math.huge) -- (QM: 1.05x each, 3x its own speed at most)
+		vfx.feed(cfg, 1)
 	end
+end
+
+-- The Robo Shark eats / the Loong burns n animals (cfg: its Config.Abilities entry):
+-- cfg.RestorePer of Hold back for each, and cfg.Grow x bigger and cfg.SpeedUp x faster
+-- each, up to size tier cfg.MaxTier and cfg.MaxSpeed x its own speed.
+function vfx.feed(cfg, n)
+	if n <= 0 then
+		return
+	end
+	hold = math.min(hold + holdTime(mount) * cfg.RestorePer * n, holdTime(mount))
+	local feast = vfx.feastOf(mount)
+	local max = Config.TierGrowth ^ math.max(cfg.MaxTier - tierOf(mount.kind), 0)
+	if feast.size < max then
+		local size = math.min(feast.size * cfg.Grow ^ n, max)
+		local looming = vfx.sprintMount == mount and vfx.sprintKind == "Loom"
+		local special = Config.SprintSpecials[mount.kind]
+		local show = if looming and special then size * special.Grow else size -- (bigger still while it looms)
+		mount.scaleAnim = { t = 0, from = mount.animal.scale, size = show }
+		feast.size = size
+	end
+	feast.speed = math.min(feast.speed * cfg.SpeedUp ^ n, cfg.MaxSpeed or math.huge)
 end
 
 -- The Kraken's Devour (Config.Abilities): its tentacles shoot out to the nearest
@@ -2553,10 +2566,15 @@ function vfx.breathBlast(active)
 			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
 		end
 	end
+	local burnt = 0
 	for _, entity in allAnimals() do
-		if entity ~= mount and not entity.popping and inPath(entity.x, entity.z) then
+		if entity ~= mount and not entity.popping and not entity.event and inPath(entity.x, entity.z) then
 			knock(entity, entity.x - mount.x)
+			burnt += 1
 		end
+	end
+	if cfg.Grow then
+		vfx.feed(cfg, burnt) -- each one burnt: Hold back, and bigger and faster (QM)
 	end
 end
 
@@ -2607,7 +2625,7 @@ vfx.POP_TIME = 0.9 -- seconds the whole pop takes
 function vfx.updateScale(dt)
 	local old = vfx.scaleMount
 	if old and old ~= mount and old.scaleAnim then
-		old.animal:setScale(if old.scaleAnim.shrink then 1 else old.scaleAnim.size) -- let go mid-pop: finish it
+		old.animal:setScale(if old.scaleAnim.shrink then old.scaleAnim.base or 1 else old.scaleAnim.size) -- let go mid-pop: finish it
 		old.scaleAnim = nil
 	end
 	vfx.scaleMount = mount
@@ -2618,7 +2636,7 @@ function vfx.updateScale(dt)
 	end
 	anim.t += dt
 	local t, s = anim.t, nil
-	local from, to = if anim.shrink then anim.size else anim.from or 1, if anim.shrink then 1 else anim.size
+	local from, to = if anim.shrink then anim.size else anim.from or 1, if anim.shrink then anim.base or 1 else anim.size
 	if t < vfx.POP_WIND then
 		local u = math.sin(math.pi * t / vfx.POP_WIND)
 		s = from * (if anim.shrink then 1 + 0.06 * u else 1 - 0.1 * u)
@@ -2650,15 +2668,16 @@ function vfx.updateSprint(dt)
 		end
 		-- Loom (the Loong) swells while Sprint is held, and pops back when it's let go.
 		if vfx.sprintKind == "Loom" and old then
+			local base = old.feast and old.feast.size or 1 -- (back to what its breath has grown it to)
 			if old == mount then
-				old.scaleAnim = { shrink = true, t = 0, size = old.animal.scale }
+				old.scaleAnim = { shrink = true, t = 0, size = old.animal.scale, base = base }
 			else
 				old.scaleAnim = nil
-				old.animal:setScale(1)
+				old.animal:setScale(base)
 			end
 		end
 		if kind == "Loom" then
-			mount.scaleAnim = { t = 0, size = cfg.Grow }
+			mount.scaleAnim = { t = 0, from = mount.animal.scale, size = cfg.Grow * (mount.feast and mount.feast.size or 1) }
 		end
 		if kind == "Ram" then
 			vfx.sprintFx = chargeFx(mount, 0.35) -- QM: 0.7x the half-size wind it had
@@ -2864,7 +2883,7 @@ local function startAbility(cfg)
 		feast.size = math.min(feast.size * cfg.Grow ^ n, cfg.Max)
 		Poof.at(Vector3.new(mount.x, 0, mount.z))
 	elseif cfg.Kind == "Breath" then
-		hold = math.min(hold + holdTime(mount) * (cfg.Restore or 0), holdTime(mount)) -- QM: refills 20% of the Hold bar
+		-- (no Hold back just for breathing: only for what it burns, vfx.feed; QM)
 		mount.animal:playOnce("special")
 		a.active.fx = vfx.breathFx(mount, cfg)
 	end
