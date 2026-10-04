@@ -2682,7 +2682,7 @@ local function endAbility(entity)
 			entity.animal:setScale(1)
 		end
 	end
-	if active.cfg.Kind == "Leap" then
+	if active.cfg.Kind == "Leap" or active.cfg.Kind == "Devour" then
 		entity.hop = 0
 		if root then
 			Dust.kick(root.CFrame, entity.animal.scale)
@@ -2728,6 +2728,7 @@ local function startAbility(cfg)
 	elseif cfg.Kind == "Shield" then
 		vfx.summonShield(cfg)
 	elseif cfg.Kind == "Devour" then
+		mount.speed = 0 -- stops dead on the spot to feed (QM)
 		vfx.devour(a.active, cfg)
 	elseif cfg.Kind == "Feast" then
 		-- Everything broken since the last Feast: Hold back, and bigger and faster for good.
@@ -2870,6 +2871,13 @@ local function updateMount(dt)
 		mount.hop = math.sin(math.pi * math.clamp(ability.t / ability.cfg.Duration, 0, 1)) * ability.cfg.LeapHeight
 	elseif ability and (ability.cfg.Kind == "Rattle" or ability.cfg.Kind == "Devour") then
 		targetSpeed, rate = 0, 120 -- stops dead to coil up (or for the Kraken to feed)
+		if ability.cfg.Kind == "Devour" then
+			targetSpeed, rate = 0, math.huge
+			-- A little bounce while it feeds, so it doesn't just sit there (QM): up and
+			-- down twice, the first hop the higher.
+			local f = math.clamp(ability.t / ability.cfg.Duration, 0, 1)
+			mount.hop = math.abs(math.sin(f * math.pi * 2)) * (1 - 0.4 * f) * ability.cfg.Hop
+		end
 	end
 	mount.speed += math.clamp(targetSpeed - mount.speed, -rate * dt, rate * dt)
 	if phase == "outbound" and exitX then
