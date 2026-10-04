@@ -526,7 +526,7 @@ return {
 		Boar = { Speed = 1.6, Stamina = 1.6 },
 		Snowman = { Speed = 1.9, Stamina = 1.3 },
 		IceGolem = { Speed = 1.6, Stamina = 3 },
-		SnackYak = { Speed = 3, Stamina = 1 }, -- QM, Oct 4
+		SnackYak = { Speed = 3, Stamina = 2 }, -- QM, Oct 4 (stamina 1 -> 2)
 		Icebringer = { Speed = 2.7, Stamina = 4 },
 		-- Ocean
 		Starfish = { Speed = 2.5, Stamina = 2 },
