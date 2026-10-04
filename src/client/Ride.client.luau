@@ -1115,6 +1115,7 @@ guide.beam.Transparency = NumberSequence.new({
 guide.beam.Attachment0, guide.beam.Attachment1 = guide.from, guide.to
 guide.beam.Enabled = false
 guide.beam.Parent = guide.from
+vfx.hazards.guideBeam = guide.beam -- (a War Elephant's charge arrows are a red copy)
 guide.from.Parent, guide.to.Parent = workspace.Terrain, workspace.Terrain
 task.spawn(function()
 	game:GetService("ContentProvider"):PreloadAsync({ guide.beam })

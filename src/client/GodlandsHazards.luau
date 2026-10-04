@@ -21,6 +21,7 @@
 --   Hazards.slow()            -- x your speed while you're stuck
 --   Hazards.clear()           -- the ride's over: everything goes
 --   Hazards.chargeFx          -- set by Ride: chargeFx(entity) -> instances (the Rhino's charge)
+--   Hazards.guideBeam         -- set by Ride: the egg guide's beam (the charge arrows copy it)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -170,29 +171,16 @@ local function warning(entity)
 	return b
 end
 
--- The egg guide's arrows (Ride's guide), tinted red: where a War Elephant is about to
--- charge (QM). Two attachments lying flat on the ground and the beam between them.
-local ARROW = "rbxassetid://101032148634562" -- assets/ui/GuideArrow.png
+-- The egg guide's arrows, tinted red: where a War Elephant is about to charge (QM).
+-- A copy of Ride's own guide beam (Hazards.guideBeam), so the arrows are exactly the
+-- same, between two attachments lying flat on the ground.
 local function arrows()
 	local from, to = Instance.new("Attachment"), Instance.new("Attachment")
-	local beam = Instance.new("Beam")
-	beam.Texture = ARROW
-	beam.TextureMode = Enum.TextureMode.Static
-	beam.TextureLength = 5
-	beam.TextureSpeed = 1.2
-	beam.Width0, beam.Width1 = 4, 4
-	beam.FaceCamera = false
-	beam.LightEmission = 1
-	beam.LightInfluence = 0
-	beam.ZOffset = 6
+	local beam = Hazards.guideBeam:Clone()
+	beam.Name = "ChargeArrows"
 	beam.Color = ColorSequence.new(CHARGE.COLOR)
-	beam.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(0.08, 0.15),
-		NumberSequenceKeypoint.new(0.9, 0.15),
-		NumberSequenceKeypoint.new(1, 1),
-	})
 	beam.Attachment0, beam.Attachment1 = from, to
+	beam.Enabled = true
 	beam.Parent = from
 	from.Parent, to.Parent = workspace.Terrain, workspace.Terrain
 	return from, to
@@ -396,13 +384,14 @@ local function charge(st, entity, dt, mount)
 		entity.face = math.atan2(-st.dirX, -st.dirZ)
 		entity.hop = math.abs(math.sin(st.t * math.pi * 3)) * 1.2
 		st.hopping = true
-		-- The red arrows, from its feet down the way it'll charge (lying flat: the
-		-- attachments' up is the beam's width).
+		-- The red arrows, from just out in front of it to you and no further, laid like
+		-- the egg guide's (6 studs out, or half way when you're that close; lying flat:
+		-- the attachments' up is the beam's width).
 		local along = Vector3.new(st.dirX, 0, st.dirZ)
 		local side = along:Cross(Vector3.yAxis)
-		local from = Vector3.new(entity.x, 1.4, entity.z) + along * 4
+		local from = Vector3.new(entity.x, 1.4, entity.z) + along * math.min(6, dist / 2)
 		st.arrowFrom.WorldCFrame = CFrame.fromMatrix(from, along, side)
-		st.arrowTo.WorldCFrame = CFrame.fromMatrix(from + along * st.length, along, side)
+		st.arrowTo.WorldCFrame = CFrame.fromMatrix(Vector3.new(mount.x, 1.4, mount.z), along, side)
 		if st.t >= CHARGE.WARN then
 			st.stage, st.left = "go", st.length
 			entity.hop, st.hopping = 0, nil
