@@ -9,6 +9,7 @@ local StarterGui = game:GetService("StarterGui")
 local Inventory = require(script.Parent.Inventory)
 local PetFaces = require(script.Parent.PetFaces)
 local AnimalDex = require(script.Parent.AnimalDex)
+local RollMenu = require(script.Parent.RollMenu)
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
 local Hud = {}
@@ -34,6 +35,10 @@ local IMAGES = {
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
 	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
+	rollIcon = { id = "rbxassetid://107116554539032", size = Vector2.new(232, 240) }, -- RollIcon.png: opens the egg roll menu
+	-- The roll menu's own art (RollMenu draws it; listed here so it's preloaded with the rest).
+	rollMenu = { id = "rbxassetid://139179785391159", size = Vector2.new(2204, 1420) }, -- RollMenu.png
+	rollButton = { id = "rbxassetid://106021366595884", size = Vector2.new(960, 378) }, -- RollButton.png
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
 	upgradePen = { id = "rbxassetid://120690804030353", size = Vector2.new(1152, 284) }, -- UpgradePenActive.png
@@ -150,6 +155,7 @@ local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one 
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
+local rollIcon -- Roll, over Pets: opens the egg roll menu (RollMenu)
 local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
 local CONTINUE_GAP = 12 -- between Continue and the Home button under it
 local tip, tipText -- the fail screen's tooltip in place of "+$N" (Hud.setTip), and its text
@@ -550,7 +556,25 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- dictionary (AnimalDex).
 	pets = button(sideRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
 		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8), AnimalDex.toggle)
+	-- Roll sits over Pets the same way: it opens the egg roll menu (RollMenu). Only
+	-- one of the two menus is open at a time; either hides the rest of the home HUD.
+	if Config.Gacha.Enabled then
+		rollIcon = button(sideRoot, "rollIcon", fit("rollIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
+			UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8 - SIDE_ICON_HEIGHT - 8), RollMenu.toggle)
+	end
 	AnimalDex.onToggle = function(open)
+		if open then
+			RollMenu.close()
+		end
+		homeGui.Enabled = not open
+		if SELECTED.gui then
+			SELECTED.gui.Enabled = not open
+		end
+	end
+	RollMenu.onToggle = function(open)
+		if open then
+			AnimalDex.close()
+		end
 		homeGui.Enabled = not open
 		if SELECTED.gui then
 			SELECTED.gui.Enabled = not open
@@ -645,6 +669,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		return (player:GetAttribute("Gold") or 0) >= Config.Gacha.Price
 	end
 	local function refreshRoll()
+		RollMenu.setAffordable(canRoll())
 		if rollText then
 			rollText.Text = "ROLL " .. money(Config.Gacha.Price)
 			roll.BackgroundColor3 = if canRoll() then Color3.fromRGB(92, 214, 72) else Color3.fromRGB(150, 150, 150)
@@ -653,24 +678,27 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	player:GetAttributeChangedSignal("Gold"):Connect(refreshRoll)
 	refreshRoll()
 	local function doRoll()
-		if rolling or not rollShown or gui.Enabled or not canRoll() then
+		if rolling or not (rollShown or RollMenu.isOpen()) or gui.Enabled or not canRoll() then
 			return
 		end
 		rolling = true
 		local ok, kind, exclusive = pcall(rollGacha.InvokeServer, rollGacha)
 		local rarity = ok and kind and (if exclusive then "Exclusive" else require(game:GetService("ReplicatedStorage").Shared.Animals[kind]).Rarity)
+		RollMenu.setHidden(rarity ~= nil) -- the menu steps aside for the egg card
 		local seconds = rarity and Hud.eggReveal(rarity, kind)
 		task.wait(seconds or 0.3)
+		RollMenu.setHidden(false)
 		rolling = false
 	end
 	roll.Activated:Connect(doRoll)
+	RollMenu.onRoll = doRoll
 	local function setRollShown(shown)
 		rollShown = shown
 		roll.Visible = shown and not gui.Enabled
 		Inventory.setVisible(not shown and not ride.Visible and not gui.Enabled)
 	end
 	task.spawn(function()
-		if not Config.Gacha.Enabled then
+		if not Config.Gacha.Enabled or not Config.Gacha.Machine then
 			return
 		end
 		local machine = workspace:WaitForChild("EggMachine")
@@ -718,6 +746,7 @@ end
 function Hud.show(visible)
 	if visible then
 		AnimalDex.close() -- off on a ride: no dictionary
+		RollMenu.close()
 	end
 	gui.Enabled = visible
 	reveal += 1
@@ -738,6 +767,9 @@ function Hud.show(visible)
 	ride.Visible = false -- comes back when the ride prompt shows again
 	gold.Visible = not visible and tutorial ~= "bare"
 	pets.Visible = not visible and tutorial == nil
+	if rollIcon then
+		rollIcon.Visible = pets.Visible
+	end
 	upgrade.Visible = upgradeShown and not visible and tutorial ~= "bare"
 	Inventory.setVisible(not visible) -- your eggs, hidden while riding
 	gained.row.Visible = false
@@ -1219,6 +1251,9 @@ function Hud.setTutorial(stage)
 	local riding = gui.Enabled
 	gold.Visible = not riding and stage ~= "bare"
 	pets.Visible = not riding and stage == nil
+	if rollIcon then
+		rollIcon.Visible = pets.Visible
+	end
 	upgrade.Visible = upgradeShown and not riding and stage ~= "bare"
 	rideCash.row.Visible = stage == nil and not noCash
 end

@@ -367,17 +367,21 @@ return {
 	-- weighted too. Exclusive animals are only ever in this machine (keep them
 	-- out of every biome's Herd), and get their own card in the reveal.
 	Gacha = {
-		Enabled = false, -- off for now: QM will revisit the gacha later (no machine, no ROLL)
-		Price = 25000,
+		-- The egg roll menu (QM, Oct 4): Roll over Pets opens it (RollMenu, Hud). The old
+		-- Egg Machine in the base stays off (Machine).
+		Enabled = true,
+		Machine = false,
+		Price = 10000000, -- QM's ROLL $10M button
 		Position = Vector3.new(-28, 0, 30), -- on the grass between Pen1 and Pen2's ride lanes
-		Odds = { Rare = 50, Epic = 32, Legendary = 15, Exclusive = 3 },
+		-- Only the eggs on QM's menu for now: one of the three exclusives, evenly (a guess).
+		Odds = { Exclusive = 100 },
 		Pool = {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
 			-- with an empty pool is never rolled.
-			Exclusive = {},
+			Exclusive = { SnackYak = 1, Loong = 1, RoboShark = 1 },
 		},
 		Reach = 10, -- studs from the machine where ROLL shows
 	},
