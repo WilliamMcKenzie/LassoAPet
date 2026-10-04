@@ -37,6 +37,9 @@ for _, t in Config.ContinueTiers do
 	if t.ProductId ~= 0 then
 		isContinue[t.ProductId] = true
 	end
+	for _, id in t.OldProductIds or {} do
+		isContinue[id] = true
+	end
 end
 
 continueRide.OnServerEvent:Connect(function(player, metres)
