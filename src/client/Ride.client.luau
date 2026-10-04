@@ -1456,7 +1456,7 @@ local function putInPool(entity)
 	entity.animal.model.Parent = nil
 	entity.animal:setScale(1)
 	entity.hop, entity.popping, entity.lift = 0, nil, nil
-	entity.ability, entity.frostLeft, entity.fall, entity.scared, entity.scaredOffBy = nil, nil, nil, nil, nil
+	entity.ability, entity.frostLeft, entity.fall, entity.scaredOffBy = nil, nil, nil, nil
 	table.insert(pools[entity.kind], entity)
 end
 
@@ -1963,8 +1963,8 @@ local function rattleRing(center, radius, color)
 end
 
 -- Rattle, once the rattling's done (QM, Oct 4): everything standing within the
--- radius is smashed, and every animal there is scared for cfg.ScareTime, each one
--- refilling cfg.RestorePer of the Hold bar.
+-- radius is smashed, and for cfg.ScareTime the snake scares off every animal that
+-- comes within it (vfx.updateScared), each one refilling cfg.RestorePer of Hold.
 local function rattleBlast(cfg)
 	rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius)
 	for _, o in obstacles do
@@ -1972,36 +1972,33 @@ local function rattleBlast(cfg)
 			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
 		end
 	end
-	local scared = 0
-	for _, entity in allAnimals() do
-		local dx, dz = entity.x - mount.x, entity.z - mount.z
-		if not entity.popping and dx * dx + dz * dz < cfg.Radius * cfg.Radius then
-			entity.scared = { left = cfg.ScareTime, radius = cfg.Radius }
-			scared += 1
-		end
-	end
-	hold = math.min(hold + holdTime(mount) * cfg.RestorePer * scared, holdTime(mount))
+	vfx.scareAura = { mount = mount, left = cfg.ScareTime, radius = cfg.Radius, restorePer = cfg.RestorePer, scared = {} }
 end
 
--- Scared animals keep away from the snake while it lasts: they scatter sideways,
--- away from it, whenever it comes within the rattle's radius.
+-- The snake's scare, while it lasts: every animal within its radius scatters
+-- sideways, away from it (QM: all of them, not only the ones there for the rattle).
 function vfx.updateScared(dt)
+	local aura = vfx.scareAura
+	if not aura then
+		return
+	end
+	aura.left -= dt
+	if aura.left <= 0 or mount ~= aura.mount then
+		vfx.scareAura = nil
+		return
+	end
 	for _, entity in allAnimals() do
-		local scared = entity.scared
-		if scared then
-			scared.left -= dt
-			if scared.left <= 0 or not mount then
-				entity.scared = nil
+		local dx, dz = entity.x - mount.x, entity.z - mount.z
+		if entity ~= mount and not entity.popping and dx * dx + dz * dz < aura.radius * aura.radius then
+			local away = if dx >= 0 then 1 else -1
+			if entity.n then
+				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -aura.radius, aura.radius)
 			else
-				local dx, dz = entity.x - mount.x, entity.z - mount.z
-				if dx * dx + dz * dz < scared.radius * scared.radius then
-					local away = if dx >= 0 then 1 else -1
-					if entity.n then
-						entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -scared.radius, scared.radius)
-					else
-						entity.lane = math.clamp((entity.lane or entity.x) + away * 60 * dt, -EDGE, EDGE)
-					end
-				end
+				entity.lane = math.clamp((entity.lane or entity.x) + away * 60 * dt, -EDGE, EDGE)
+			end
+			if not aura.scared[entity] then
+				aura.scared[entity] = true
+				hold = math.min(hold + holdTime(mount) * aura.restorePer, holdTime(mount))
 			end
 		end
 	end

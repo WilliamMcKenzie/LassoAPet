@@ -253,9 +253,9 @@ return {
 	--     leaving a rainbow trail.
 	--   Rattle (Snake): one tap: it stops, coils up and rattles for Duration (its
 	--     coiled idle). Once the rattle's over (QM, Oct 4) every obstacle within
-	--     Radius studs is smashed and every animal there is scared for ScareTime
-	--     seconds, keeping away from it, each one refilling RestorePer of the Hold
-	--     bar. No Hold drain while it rattles; a yellow-orange haze closes in round the screen.
+	--     Radius studs is smashed, and for ScareTime seconds every animal that comes
+	--     within Radius is scared off, each one refilling RestorePer of the Hold bar
+	--     (once). No Hold drain while it rattles; a yellow-orange haze closes in round the screen.
 	--   Frost (Icebringer): one tap: a blizzard bursts out round it and every animal
 	--     within Radius studs (but itself) runs Slow slower (0.7 = 70%) until Duration
 	--     is up, frosted over. Unlike the others it doesn't stop the Hold bar or crashes.
