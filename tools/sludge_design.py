@@ -12,7 +12,7 @@ off Tier3, each -> Twig (the bit that points up).
 
   idle    breathes: the tiers settle and swell in turn, the twigs wave
   walk    the ooze: each tier slides forward a beat after the one under it
-  gallop  the run: the same, faster and bigger, the whole mound surging
+  gallop  the run: the walk again (QM, Oct 4)
 """
 
 import json
@@ -152,10 +152,8 @@ def animations():
     Lw = 1.4
     walk = ooze(Lw, 6.0, 3.0, 1.1, 18)
     walk["root"].append(track(Lw, lambda u: (0, 3 * math.sin(TAU * u), 0), 16))
-    Lg = 0.7
-    gallop = ooze(Lg, 10.0, 5.0, 1.2, 26)
-    gallop["root"].append(track(Lg, lambda u: (-3 + 3 * math.sin(TAU * u), 0, 0), 16))
-    return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lg, gallop)}
+    # QM, Oct 4: the run is the walk
+    return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lw, walk)}
 
 
 # ---------------------------------------------------------------- preview
@@ -181,7 +179,7 @@ def previews(m, out, gif=True):
         return
     Wd, Ht = 400, 320
     frames = []
-    for name, label, n, loops in (("idle", "idle", 24, 1), ("walk", "walk", 14, 2), ("gallop", "run", 8, 4)):
+    for name, label, n, loops in (("idle", "idle", 24, 1), ("walk", "walk", 14, 2), ("gallop", "run", 14, 2)):
         anim = next(a for a in m["animations"] if a["name"] == name)
         for _ in range(loops):
             for k in range(n):

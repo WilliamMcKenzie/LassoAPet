@@ -168,7 +168,7 @@ return {
 			-- Placeholder until the Godlands has animals (and bosses) of its own: Fish (QM).
 			-- (The Loong is an event and roll exclusive now, so it doesn't run here.)
 			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
-			Herd = { Fish = 1, Beholder = 0.1, WarElephant = 1 }, -- the Beholder and War Elephant live here (QM, Oct 4; weights are guesses)
+			Herd = { Fish = 1, Beholder = 0.1, WarElephant = 1, Sludge = 0.5 }, -- the Beholder and War Elephant live here (QM, Oct 4; weights are guesses)
 			PlaceholderHerd = true,
 			Patches = {
 				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
@@ -349,7 +349,7 @@ return {
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		WarElephant = 3, -- Godlands (QM: large)
-		Loong = 1, Beholder = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
+		Loong = 1, Beholder = 2, Sludge = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -400,6 +400,7 @@ return {
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 7000, Whale = 5000, Kraken = 8200, -- Ocean
 		Loong = 20000, Beholder = 40, -- Godlands (guesses: the Loong past the Kraken)
 		WarElephant = 10000, -- Godlands (a guess)
+		Sludge = 40, -- Godlands (a guess, like the Beholder)
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -416,7 +417,7 @@ return {
 		-- 70% split evenly over the other Legendaries (14% each).
 		Odds = { Legendary = 70, Exclusive = 30 },
 		Pool = {
-			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1, Beholder = 1 },
+			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1, Beholder = 1, Sludge = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
@@ -548,6 +549,7 @@ return {
 		Loong = { Speed = 1, Stamina = 8 }, -- QM, Oct 4: starts at 1x, its breath's kills take it up to 4x
 		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
 		WarElephant = { Speed = 1.1, Stamina = 4 }, -- QM, Oct 4
+		Sludge = { Speed = 1, Stamina = 2 }, -- guesses (Oct 4)
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).
