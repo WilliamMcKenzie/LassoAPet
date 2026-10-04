@@ -284,7 +284,7 @@ return {
 	--     the Hold bar when it starts (QM: 20%).
 	--   Hunt (Robo Shark, QM Oct 4): for Duration seconds it hunts on its own (you lose
 	--     the steering): it charges at SpeedBoost x speed at the nearest animal and eats
-	--     it, then the next. Each one eaten makes it Grow x bigger and SpeedUp x faster for
+	--     it, then the next. Each one eaten makes it Grow x bigger and SpeedUp x faster (up to MaxSpeed x) for
 	--     the rest of the ride and refills RestorePer of the Hold bar. It starts small and
 	--     grows a size tier every TierGrowth x, stopping at MaxTier (XL). While it hunts
 	--     the guide arrows lead to its prey, and nothing can crash it.
@@ -313,7 +313,7 @@ return {
 		BlueCrab = { Kind = "Shield", Duration = 0.6, Cooldown = 15, Crabs = 3, Ahead = 22, Spread = 11, Life = 15, Radius = 5 }, -- QM, Oct 4 (cooldown and life are guesses)
 		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
 		-- the animation's length and fire window; the range, width and cooldown are guesses
-		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 1.5, Grow = 1.1, SpeedUp = 1.1, RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
+		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 1.5, Grow = 1.1, SpeedUp = 1.05, MaxSpeed = 2, RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
 		Loong = { Kind = "Breath", Duration = 2.6, FireFrom = 0.95, FireTo = 2.1, Cooldown = 8, Range = 70, Width = 22, Restore = 0.2 },
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the

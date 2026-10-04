@@ -2290,8 +2290,8 @@ function vfx.huntStep(cfg)
 			local size = math.min(feast.size * cfg.Grow, max)
 			mount.scaleAnim = { t = 0, from = mount.animal.scale, size = size }
 			feast.size = size
-			feast.speed = feast.speed * cfg.SpeedUp
 		end
+		feast.speed = math.min(feast.speed * cfg.SpeedUp, cfg.MaxSpeed or math.huge) -- (QM: 1.05x each, 2x its own speed at most)
 	end
 end
 
