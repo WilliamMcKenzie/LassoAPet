@@ -40,6 +40,19 @@ local player = Players.LocalPlayer
 local open, topUp = false, false
 local buyShop = ReplicatedStorage:WaitForChild("BuyShop")
 
+-- Paid random items (the Legendary Pet; egg rolls, as gold can be bought) are left
+-- out where the player's policy restricts them. Unknown counts as restricted.
+local restricted
+function Shop.randomRestricted()
+	if restricted == nil then
+		local ok, info = pcall(function()
+			return game:GetService("PolicyService"):GetPolicyInfoForPlayerAsync(player)
+		end)
+		restricted = not ok or info.ArePaidRandomItemsRestricted == true
+	end
+	return restricted
+end
+
 local function offered(offer)
 	return offer.ProductId ~= 0 or RunService:IsStudio()
 end
@@ -246,10 +259,7 @@ for i, offer in Config.Shop.Specials do
 		odds.ZIndex = 2
 		c.Visible = false -- until the policy check says it may show
 		task.spawn(function()
-			local ok, info = pcall(function()
-				return game:GetService("PolicyService"):GetPolicyInfoForPlayerAsync(player)
-			end)
-			c.Visible = offered(offer) and ok and not info.ArePaidRandomItemsRestricted
+			c.Visible = offered(offer) and not Shop.randomRestricted()
 		end)
 	end
 end

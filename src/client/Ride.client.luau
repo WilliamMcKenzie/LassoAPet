@@ -4198,7 +4198,17 @@ function vfx.startNuke()
 	if (player:GetAttribute("Nukes") or 0) < 1 or Tutorial.active or not mount then
 		return
 	end
-	ReplicatedStorage:WaitForChild("UseNuke"):FireServer()
+	local ride = mount
+	task.spawn(function()
+		-- Spent on the server first (Shop.server's ledger), so it's used exactly once.
+		local ok, spent = pcall(ReplicatedStorage:WaitForChild("UseNuke").InvokeServer, ReplicatedStorage.UseNuke)
+		if ok and spent and mount == ride then
+			vfx.nukeNow()
+		end
+	end)
+end
+
+function vfx.nukeNow()
 	vfx.nuke = true
 	Hud.flash("NUKE!", 1.5)
 	for _, entity in allAnimals() do
@@ -4223,16 +4233,21 @@ end
 
 -- The Giant Horse from the shop (Config.Shop.GiantHorse): as if you'd pressed RIDE,
 -- but on a huge Horse at the start line, with no Hold drain, for one ride. Bought
--- while out on a ride, it waits for you to be back on foot.
+-- while out on a ride (or on an earlier visit), it waits for you to be back on
+-- foot at home; the ride is spent on the server (UseGiant) as it starts.
+local giantWaiting = false
 ReplicatedStorage:WaitForChild("ShopGrant").OnClientEvent:Connect(function(key)
-	if key ~= "GiantHorse" then
+	if key ~= "GiantHorse" or giantWaiting then
 		return
 	end
-	while phase ~= "idle" or Tutorial.busy do
+	giantWaiting = true
+	while phase ~= "idle" or Tutorial.busy or Tutorial.active or not character() do
 		task.wait(0.5)
 	end
+	local ok, spent = pcall(ReplicatedStorage:WaitForChild("UseGiant").InvokeServer, ReplicatedStorage.UseGiant)
+	giantWaiting = false
 	local hrp, humanoid = character()
-	if not hrp then
+	if not (ok and spent) or not hrp or phase ~= "idle" then
 		return
 	end
 	local giant = Config.Shop.GiantHorse

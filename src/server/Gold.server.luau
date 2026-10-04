@@ -2,6 +2,9 @@
 -- the player's "Gold" attribute, which the HUD shows. A ride's cash is added
 -- when the rider gets home (BankCoins). Saving needs API access in Studio;
 -- without it everyone starts at 0 and nothing is kept.
+-- Gold bought with Robux (the "BoughtGold" attribute, Shop.server's running
+-- total) is added once: the save keeps how much of it is in (bought), and only
+-- the rest is added, saved straight away.
 
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
@@ -16,6 +19,8 @@ if not ok then
 end
 
 local loaded = {} -- players whose saved gold has loaded, so a failed load never overwrites it
+local ready = {} -- players whose load is over (loaded or not)
+local bought = {} -- [player] = how much bought gold is already in their gold
 
 local function key(player)
 	return "u" .. player.UserId
@@ -30,7 +35,10 @@ local function load(player)
 		local success, value = pcall(store.GetAsync, store, key(player))
 		if success then
 			if player.Parent then
-				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + (tonumber(value) or 0))
+				-- (saved as a number before the shop: no bought gold in it)
+				local gold = if typeof(value) == "table" then value.gold else value
+				bought[player] = if typeof(value) == "table" then tonumber(value.bought) or 0 else 0
+				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + (tonumber(gold) or 0))
 				loaded[player] = true
 			end
 			return
@@ -48,21 +56,40 @@ local function save(player)
 	end
 	local gold = player:GetAttribute("Gold") or 0
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, key(player), gold) then
+		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0 }) then
 			return
 		end
 		task.wait(attempt)
 	end
 end
 
-Players.PlayerAdded:Connect(load)
+-- Adds bought gold not yet in, and saves at once.
+local function addBought(player)
+	local total = player:GetAttribute("BoughtGold")
+	if not ready[player] or not total or total <= (bought[player] or 0) then
+		return
+	end
+	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + total - (bought[player] or 0))
+	bought[player] = total
+	save(player)
+end
+
+local function join(player)
+	load(player)
+	ready[player] = true
+	player:GetAttributeChangedSignal("BoughtGold"):Connect(function()
+		addBought(player)
+	end)
+	addBought(player)
+end
+Players.PlayerAdded:Connect(join)
 for _, player in Players:GetPlayers() do
-	task.spawn(load, player)
+	task.spawn(join, player)
 end
 
 Players.PlayerRemoving:Connect(function(player)
 	save(player)
-	loaded[player] = nil
+	loaded[player], ready[player], bought[player] = nil, nil, nil
 end)
 
 game:BindToClose(function()

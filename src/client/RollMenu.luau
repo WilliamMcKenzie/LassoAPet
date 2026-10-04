@@ -86,6 +86,48 @@ roll.Activated:Connect(function()
 	end
 end)
 
+-- Each animal's chance per roll (a paid random item: the odds are shown), under
+-- ROLL: its tier's share of Config.Gacha.Odds split by the weights in that tier's Pool.
+do
+	local gacha, chances, tierTotal = Config.Gacha, {}, 0
+	for tier, weight in gacha.Odds do
+		if next(gacha.Pool[tier] or {}) then
+			tierTotal += weight
+		end
+	end
+	for tier, weight in gacha.Odds do
+		local pool, poolTotal = gacha.Pool[tier] or {}, 0
+		for _, w in pool do
+			poolTotal += w
+		end
+		for kind, w in pool do
+			table.insert(chances, { kind = kind, chance = weight / tierTotal * w / poolTotal * 100 })
+		end
+	end
+	table.sort(chances, function(a, b)
+		return a.chance > b.chance or (a.chance == b.chance and a.kind < b.kind)
+	end)
+	local parts = {}
+	for _, c in chances do
+		table.insert(parts, string.format("%s %s%%", c.kind, (string.format("%.1f", c.chance):gsub("%.0$", ""))))
+	end
+	local odds = Instance.new("TextLabel")
+	odds.Name = "Odds"
+	odds.BackgroundTransparency = 1
+	odds.AnchorPoint = Vector2.new(0.5, 0)
+	odds.Position = UDim2.new(0.5, 0, 1, BUTTON_WIDTH * BUTTON.size.Y / BUTTON.size.X / 2 + 8)
+	odds.Size = UDim2.fromOffset(PANEL_WIDTH, 50)
+	odds.Font = Enum.Font.FredokaOne
+	odds.TextSize = 18
+	odds.TextWrapped = true
+	odds.TextColor3 = Color3.new(1, 1, 1)
+	odds.Text = "Odds: " .. table.concat(parts, "  ")
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 2
+	stroke.Parent = odds
+	odds.Parent = panel
+end
+
 -- Clicking anywhere off the panel and its button closes it.
 local function over(object, at)
 	local min, size = object.AbsolutePosition, object.AbsoluteSize
