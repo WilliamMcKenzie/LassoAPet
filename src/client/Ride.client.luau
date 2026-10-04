@@ -404,6 +404,7 @@ vfx.rideSync = ReplicatedStorage:WaitForChild("RideSync") -- multiplayer rides (
 vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
 vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
 vfx.godlands.onPieces = slices.pieces
+vfx.hazards = require(script.Parent.GodlandsHazards) -- the Godlands' wild animals: spikes, sludge, confusion, charges, hunts
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
 local LEAP_FROM = 8 -- studs before the start line where the leap starts
@@ -536,6 +537,30 @@ end
 -- A stampede animal's x at z: its lane, swerving round any obstacle in the way.
 local function laneX(x0, z)
 	local x = x0
+	if endless.Godlands.segmentAt(z) then
+		-- The Godlands' walls (Shared/GodlandsTracks) run right across: rather than
+		-- swerving round each piece on its own, the lane is shoved out of one piece
+		-- after another until it's clear of them all (through the wall's gap).
+		local target, w = x0, 0
+		for _ = 1, 4 do
+			local moved = false
+			for _, o in slices.at(slices.swerve, z) do
+				local reach = o.hx + 6
+				local ow = smoothstep(o.z + o.hz + slices.SWERVE_BEFORE, o.z + o.hz + 4, z) * smoothstep(o.z - o.hz - slices.SWERVE_AFTER, o.z - o.hz - 4, z)
+				if ow > 0 and math.abs(target - o.x) < reach then
+					local side = if target >= o.x then 1 else -1
+					if math.abs(o.x + side * reach) > EDGE then
+						side = -side
+					end
+					target, w, moved = o.x + side * reach, math.max(w, ow), true
+				end
+			end
+			if not moved then
+				break
+			end
+		end
+		return math.clamp(x0 + (target - x0) * w, -EDGE, EDGE)
+	end
 	for _, o in slices.at(slices.swerve, z) do
 		local reach = o.hx + 6
 		local d = x0 - o.x
@@ -585,6 +610,8 @@ local function cleanup()
 	end
 	vfx.hunting, vfx.huntTarget = nil, nil -- (a hunt cut short by the ride ending)
 	vfx.endEventRun() -- (the barriers are back for the next ride)
+	vfx.hazards.clear()
+	vfx.nuke = nil
 	cutscene = nil
 	heroLeap = nil
 	Hud.setCutscene(false)
@@ -865,6 +892,7 @@ startRide = function(model)
 	mount.feast = nil -- (the Blue Crab starts every ride at its own size)
 	vfx.applyMerge(mount)
 	phase, hold, grace, camYaw = "outbound", holdTime(mount), 0, 0
+	vfx.startNuke()
 	coins = 0
 	hrp.Anchored = true
 	humanoid.Sit = true
@@ -1287,7 +1315,7 @@ local function readSteer()
 	-- On a phone the usual movement joystick stays up while riding (rideStick) and
 	-- steers like the arrow keys.
 	local stick = if rideStick.on then controls:GetMoveVector().X else 0
-	return math.clamp(keys + touchSteer + padSteer + stick, -1, 1)
+	return math.clamp(keys + touchSteer + padSteer + stick, -1, 1) * vfx.hazards.steerSign() -- (flipped while a Beholder has you confused)
 end
 
 UserInputService.InputBegan:Connect(function(input, processed)
@@ -1369,6 +1397,7 @@ local function takeFromPool(n, x, z, kind)
 		entity = newEntity(x, z, 0, kind)
 	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
+	entity.face, entity.rush = nil, nil
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
 	entity.animal.model.Parent = herdFolder
 	return entity
@@ -1556,8 +1585,9 @@ local function moveAnimal(entity, x, z, speed, dt, shown)
 	local lat = (x - entity.x) / math.max(dt, 1e-3)
 	entity.x, entity.z, entity.speed = x, z, speed
 	if shown then
-		place(entity, -math.atan2(lat, math.max(speed, 1)))
-		animate(entity, dt, speed, lat / 12)
+		-- (face and rush: a Godlands animal charging or hunting you, GodlandsHazards)
+		place(entity, entity.face or -math.atan2(lat, math.max(speed, 1)))
+		animate(entity, dt, entity.rush or speed, if entity.face then 0 else lat / 12)
 	end
 end
 
@@ -1778,7 +1808,8 @@ local function updateHerd(dt, slowed)
 			if snapped then
 				entity.x = x + entity.dodge -- a snap doesn't swing them sideways
 			end
-			moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt, shown)
+			local ox, oz = vfx.hazards.offset(key) -- (charging or hunting you: off its place for a bit)
+			moveAnimal(entity, math.clamp(x + entity.dodge + ox, -EDGE, EDGE), z + oz, speed, dt, shown)
 			vfx.setFrosted(entity, vfx.frostLeft[key] ~= nil)
 		end
 	end
@@ -1969,6 +2000,7 @@ local function chargeFx(entity, scale, turn)
 	table.insert(fx, box)
 	return fx
 end
+vfx.hazards.chargeFx = chargeFx -- (a War Elephant charging you: the Rhino's charge)
 
 -- A ring bursting out from the pet to the ability's radius: sand for the rattle.
 local function rattleRing(center, radius, color)
@@ -3175,6 +3207,7 @@ local function updateMount(dt)
 		targetSpeed *= Config.SprintSpeed * ((vfx.sprintSpecial() or {}).SpeedBoost or 1) -- the Blue Crab's crab walk: faster still
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
+	targetSpeed *= vfx.hazards.slow() -- stuck in a Sludge's sludge
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
 	if ability and ability.cfg.MaxBoost then
@@ -3250,6 +3283,7 @@ local function updateMount(dt)
 		local prey = vfx.huntTarget
 		targetLat = if prey then math.clamp((prey.x - mount.x) * 4, -Config.SteerSpeed * 1.5, Config.SteerSpeed * 1.5) else 0
 	end
+	targetLat *= math.sqrt(vfx.hazards.slow())
 	mount.latVel += (targetLat - mount.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
 	-- At home the side limit widens from the corridor's to the base's over 40 studs,
 	-- so a ride from an outer pen is eased into the corridor.
@@ -3304,7 +3338,7 @@ local function checkRide(dt)
 			ability = nil
 		end
 	end
-	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not Tutorial.active then -- abilities and the tutorial use no Hold
+	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not Tutorial.active and not mount.giant then -- abilities, the tutorial and the Giant Horse use no Hold
 		hold -= dt * (if sprinting() then Config.SprintDrain else 1)
 		if hold <= 0 then
 			return fail("BUCKED OFF")
@@ -3386,6 +3420,11 @@ local function checkRide(dt)
 	end
 	if grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4, tier) then
 		return fail("CRASH!")
+	end
+	-- The Godlands' wild animals (GodlandsHazards): spikes, charges, hunts.
+	local hazard = vfx.hazards.hit(mount, grace > 0)
+	if hazard then
+		return fail("CRASH!", hazard)
 	end
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
 		return fail("CRASH!") -- a locked gate
@@ -3871,6 +3910,8 @@ RunService.PreSimulation:Connect(function(dt)
 	-- back to everyone else's after slowing down.
 	updateHerd(dt, (slow and not cutscene) or Tutorial.active)
 	updateFlung(dt)
+	vfx.hazards.update(dt, herd, mount, phase == "outbound" or phase == "turning" or phase == "return")
+	vfx.updateNuke()
 	vfx.sendRide()
 	vfx.updateRiders(dt)
 	Dust.update(dt)
@@ -4046,7 +4087,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	Hud.setAbilityTint(rattleHaze * (if vfx.hazeColor == vfx.FROST_HAZE then 0.6 elseif vfx.hazeColor == vfx.HUNT_HAZE then 1 else 0.85), vfx.hazeColor)
 	-- Bigger pets fill more of the view: the camera pulls back RideZoomPerTier
 	-- times further for each size tier above small (Config.PetTiers).
-	local zoomTo = if mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
+	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local z = vfx.camZoom
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
@@ -4149,6 +4190,72 @@ Hud.onMerge = function()
 		end
 	end
 end
+
+-- Nuke All from the shop (Shop.server's "Nukes"): spent on the next ride as it
+-- starts. Every animal in sight is knocked flying, and for the whole ride every
+-- obstacle within Config.Shop.NukeRange of you is blown away (back next ride).
+function vfx.startNuke()
+	if (player:GetAttribute("Nukes") or 0) < 1 or Tutorial.active or not mount then
+		return
+	end
+	ReplicatedStorage:WaitForChild("UseNuke"):FireServer()
+	vfx.nuke = true
+	Hud.flash("NUKE!", 1.5)
+	for _, entity in allAnimals() do
+		if entity ~= mount and not entity.popping and math.abs(entity.z - mount.z) < VIEW then
+			knock(entity, entity.x - mount.x)
+		end
+	end
+	vfx.updateNuke()
+end
+
+function vfx.updateNuke()
+	if not vfx.nuke or not mount then
+		return
+	end
+	local range = Config.Shop.NukeRange
+	for _, o in obstacles do
+		if not o.smashed and math.abs(o.z - mount.z) < range then
+			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
+		end
+	end
+end
+
+-- The Giant Horse from the shop (Config.Shop.GiantHorse): as if you'd pressed RIDE,
+-- but on a huge Horse at the start line, with no Hold drain, for one ride. Bought
+-- while out on a ride, it waits for you to be back on foot.
+ReplicatedStorage:WaitForChild("ShopGrant").OnClientEvent:Connect(function(key)
+	if key ~= "GiantHorse" then
+		return
+	end
+	while phase ~= "idle" or Tutorial.busy do
+		task.wait(0.5)
+	end
+	local hrp, humanoid = character()
+	if not hrp then
+		return
+	end
+	local giant = Config.Shop.GiantHorse
+	humanoid:UnequipTools()
+	clearRideTarget()
+	mount = newEntity(0, SPAWN_Z - 6, 0, "Horse")
+	mount.giant = true
+	mount.feast = { count = 0, size = giant.Scale, speed = giant.Speed / statsOf("Horse").Speed }
+	mount.animal:setScale(giant.Scale)
+	mount.animal:setSaddled(true)
+	leadFromZ, exitX = mount.z - 8, nil
+	phase, hold, grace, camYaw = "outbound", holdTime(mount), 1, 0
+	coins = 0
+	hrp.Anchored = true
+	humanoid.Sit = true
+	controls:Disable()
+	camera.CameraType = Enum.CameraType.Scriptable
+	focus = Vector3.new(mount.x, 0, mount.z)
+	Hud.show(true)
+	Hud.setDistance("")
+	Lasso.start(player.Character)
+	vfx.startNuke()
+end)
 
 Hud.init(onAction, goHome, rideFromHome, vfx.askContinue)
 
