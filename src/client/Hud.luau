@@ -173,7 +173,7 @@ local upgradeScale -- Upgrade Pen's UIScale
 -- The exclusive animal event's countdown, top centre (Hud.setEventCountdown), in
 -- its own always-on ScreenGui: its row, the animal's name (QM's gradient image, or
 -- plain text until it's uploaded), "spawns in Ns..." and the row's UIScale.
-local EVENT = { NAME_SCALE = 44 / 119, TEXT_SIZE = 40, TOP = 44 }
+local EVENT = { NAME_SCALE = 44 / 119, TEXT_SIZE = 40, TOP = 16 + 352 * 220 / 1292 + 36 } -- TOP: just under the Hold bar (QM; BAR_WIDTH x barEmpty's shape)
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
