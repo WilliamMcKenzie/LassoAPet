@@ -228,28 +228,12 @@ local function close()
 end
 
 prompt.Triggered:Connect(function()
-	if talking then
-		return
-	end
-	talking = true
-	prompt.Enabled = false
+	-- QM: E opens the roll menu straight away (Carl still hops hello); his chat
+	-- panel is never shown now.
 	hop = 0.45
-	line.Text = "Howdy partner! Wanna spin for a pet? Just " .. money(Config.Gacha.Price) .. " a spin!"
-	line.MaxVisibleGraphemes = 0
-	gui.Enabled = true
-	panelScale.Scale = 0.85
-	TweenService:Create(panelScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-	task.spawn(function()
-		local length = utf8.len(line.Text) or #line.Text
-		for i = 1, length do
-			if not talking then
-				break
-			end
-			line.MaxVisibleGraphemes = i
-			task.wait(0.02)
-		end
-		line.MaxVisibleGraphemes = -1
-	end)
+	if not RollMenu.isOpen() then
+		RollMenu.toggle()
+	end
 end)
 
 yes.Activated:Connect(function()
