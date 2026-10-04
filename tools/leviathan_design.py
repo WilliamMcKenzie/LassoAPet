@@ -5,7 +5,7 @@ a little mouth, and three red feathery gill stalks fanning out each side. The bo
 is aqua over a white belly with a pale ridge down the back, tapering to a yellow
 tail tip.
 
-Run: python3 tools/leviathan_design.py [out_dir] [--gif]
+Run: python3 tools/leviathan_design.py [out_dir] [--gif]  (previews QM's file; --rebuild overwrites it)
 
 Rest pose (every bone at 0): straight and flat on its belly, facing -z, every cube
 axis-aligned. Bones: root (the front segment, where you sit) -> Seg2 ... Seg7 (the
@@ -239,7 +239,13 @@ def previews(m, out, gif=True):
 
 def main(out="/mnt/project-files/animals/leviathan"):
     os.makedirs(out, exist_ok=True)
-    os.makedirs(os.path.dirname(MODEL), exist_ok=True)
+    if "--rebuild" not in sys.argv:
+        # QM edited the model in Blockbench (Oct 4: crown and tail tip gone):
+        # designs/leviathan/Leviathan.bbmodel is QM's file now, so only preview it
+        m = json.load(open(MODEL))
+        print("previewing QM's", MODEL, "(--rebuild would overwrite it from build())")
+        previews(m, out, gif="--gif" in sys.argv)
+        return
     m = build()
     groups = {g["name"]: g for g in m["groups"]}
     write_animations(m, groups, animations())
