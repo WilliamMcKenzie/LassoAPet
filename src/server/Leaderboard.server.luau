@@ -121,9 +121,10 @@ model.Parent = workspace
 -- Who's standing there: { id, avatar }.
 local standing
 
--- The leader just stands about like a player (QM): Roblox's default idle, breathing and
--- swaying, looping. Swap POSE for another idle.
-local POSE = { R15 = "rbxassetid://507766666", R6 = "rbxassetid://180435571" } -- the default idles
+-- The leader just stands about like a player, R6 Reimagined style (QM): the idle from the
+-- "R6 Reimagined" animation pack (catalog 113781694262261, by 55Epaa), looping. Swap
+-- POSE for another idle. (R6 avatars: the plain R6 idle.)
+local POSE = { R15 = "rbxassetid://138612360383511", R6 = "rbxassetid://180435571" }
 
 local function idle(avatar)
 	local humanoid = avatar:FindFirstChildOfClass("Humanoid")
