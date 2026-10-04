@@ -41,6 +41,7 @@ MODELS = {
     "KingCrab": "ocean/KingCrab", "BlueCrab": "ocean/BlueCrab", "RoboShark": "ocean/RoboShark", "Kraken": "ocean/Kraken", "FishSchool": "ocean/FishSchool",
     "Loong": "godlands/Loong", "WarElephant": "godlands/WarElephant", "SoulHorse": "godlands/SoulHorse",
     "Sludge": "sludge/Sludge",
+    "Beholder": "beholder/Beholder",
 }
 ZYX = {"KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}
