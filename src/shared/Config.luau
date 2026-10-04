@@ -168,7 +168,7 @@ return {
 			-- Placeholder until the Godlands has animals (and bosses) of its own: Fish (QM).
 			-- (The Loong is an event and roll exclusive now, so it doesn't run here.)
 			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
-			Herd = { Fish = 1 },
+			Herd = { Fish = 1, WarElephant = 1 }, -- War Elephant: the first Godlands animal (QM, Oct 4; weight a guess)
 			PlaceholderHerd = true,
 			Patches = {
 				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
@@ -346,6 +346,7 @@ return {
 		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
+		WarElephant = 3, -- Godlands (QM: large)
 		Loong = 1, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
@@ -396,6 +397,7 @@ return {
 		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 4000, Icebringer = 1111, -- Tundra
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 7000, Whale = 5000, Kraken = 8200, -- Ocean
 		Loong = 20000, -- Godlands (a guess, past the Kraken)
+		WarElephant = 10000, -- Godlands (a guess)
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -450,6 +452,7 @@ return {
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://70469571709365", -- assets/ui/LoongEggRender.png
+		WarElephant = "", -- assets/ui/WarElephantEggRender.png (awaiting upload)
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
@@ -540,6 +543,7 @@ return {
 		Kraken = { Speed = 4.5, Stamina = 3 },
 		-- Godlands
 		Loong = { Speed = 1, Stamina = 8 }, -- QM, Oct 4: starts at 1x, its breath's kills take it up to 4x
+		WarElephant = { Speed = 1.1, Stamina = 4 }, -- QM, Oct 4
 	},
 
 	-- Coins for landing on an animal, by the animal's rarity (set in its Animals module).

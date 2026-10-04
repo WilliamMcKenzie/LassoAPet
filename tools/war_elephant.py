@@ -1,7 +1,11 @@
 """War Elephant (Rare, Large): a Rhino-style elephant in simple dark plate armour.
 
+Superseded (Oct 4): the game uses QM's edit, designs/godlands/WarElephant.bbmodel and
+designs/eggs/c_style/WarElephantEgg.bbmodel. This script writes the first draft into
+designs/war only; never point it at QM's files.
+
 Run: python3 tools/war_elephant.py [out_dir]   writes WarElephant.bbmodel, WarElephantEgg.bbmodel, previews
-then: python3 tools/bbmodel_to_luau.py designs/war/WarElephant.bbmodel src/shared/Animals/WarElephantModel.luau
+QM's file: python3 tools/bbmodel_to_luau.py --zyx designs/godlands/WarElephant.bbmodel src/shared/Animals/WarElephantModel.luau
 
 Built like the Rhino (tools/animal_designs.py): the same Animal blocks and rig, so the
 legs, neck, ears and tail bend the way QM's rules say, with the horse's idle and walk
