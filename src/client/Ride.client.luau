@@ -1050,6 +1050,7 @@ end
 local guide = { -- the egg guide: the beam and its two ends
 	ARROW = "rbxassetid://101032148634562", -- assets/ui/GuideArrow.png (chevrons pointing along the trail)
 	AHEAD = 6, -- studs in front of the pet where the trail starts
+	MAX_LENGTH = 300, -- studs: the longest the trail is drawn, toward a farther target
 	HEIGHT = 1.4, -- studs up: over the raised ground patches
 	from = Instance.new("Attachment"),
 	to = Instance.new("Attachment"),
@@ -1133,6 +1134,11 @@ local function updateGuide()
 		local toward = Vector3.new(flat.X - at.X, 0, flat.Z - at.Z)
 		local from = Vector3.new(at.X, 0, at.Z) + (if toward.Magnitude > 0.01 then toward.Unit * math.min(guide.AHEAD, toward.Magnitude / 2) else Vector3.zero)
 		local along = (flat - from).Unit
+		-- A far target (an event egg thousands of studs off) isn't drawn as one huge beam,
+		-- which doesn't render: the trail runs toward it for at most guide.MAX_LENGTH.
+		if (flat - from).Magnitude > guide.MAX_LENGTH then
+			flat = from + along * guide.MAX_LENGTH
+		end
 		-- Lying flat just above the highest ground (raised patches are a stud up):
 		-- the attachments' up is the beam's width direction. ZOffset draws it
 		-- toward the camera, over the floor and the obstacles it passes.
