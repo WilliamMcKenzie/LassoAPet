@@ -6,7 +6,7 @@
 -- the egg card; with too little gold it offers a gold pack instead); clicking
 -- anywhere off the panel closes it, like the animal dictionary.
 --
---   RollMenu.toggle() / RollMenu.close()
+--   RollMenu.toggle() / RollMenu.close(instant)  -- instant: no closing animation (switching menus)
 --   RollMenu.onToggle = function(open)     -- Hud hides the rest of the home HUD
 --   RollMenu.onRoll = function()           -- ROLL was pressed
 --   RollMenu.setHidden(yes)                -- out of the way while the egg card shows
@@ -160,7 +160,7 @@ local function setScale(scale)
 	panelScale.Scale = scale
 end
 
-function RollMenu.toggle()
+function RollMenu.toggle(instant)
 	open = not open
 	closing = not open and not hidden -- (out of the way for the egg card: it just goes)
 	refresh()
@@ -171,16 +171,16 @@ function RollMenu.toggle()
 		ModalPop.close(setScale, function()
 			closing = false
 			refresh()
-		end)
+		end, instant)
 	end
 	if RollMenu.onToggle then
 		RollMenu.onToggle(open)
 	end
 end
 
-function RollMenu.close()
+function RollMenu.close(instant)
 	if open then
-		RollMenu.toggle()
+		RollMenu.toggle(instant)
 	end
 end
 

@@ -8,7 +8,7 @@
 -- and the animal dictionary: no dark backdrop, the HUD's left buttons stay on top
 -- and clickable, and clicking anywhere off the panel closes it.
 --
---   Shop.open() / Shop.toggle() / Shop.close() / Shop.isOpen()
+--   Shop.open() / Shop.toggle() / Shop.close(instant) / Shop.isOpen()  -- instant: no closing animation
 --   Shop.hasOffers() / Shop.hasGold()   -- anything to show (live: products made)
 --   Shop.buyGoldFor(amount)             -- asks to buy the smallest gold pack giving that much
 --   Shop.onToggle = function(open)
@@ -247,14 +247,14 @@ function Shop.open()
 	end
 end
 
-function Shop.close()
+function Shop.close(instant)
 	if not open then
 		return
 	end
 	open = false
 	ModalPop.close(setScale, function()
 		gui.Enabled = false
-	end)
+	end, instant)
 	if Shop.onToggle then
 		Shop.onToggle(false)
 	end

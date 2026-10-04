@@ -11,7 +11,7 @@
 -- the page pictures) and scaled to fit the screen.
 --
 --   AnimalDex.toggle()     -- the Pets button
---   AnimalDex.close()
+--   AnimalDex.close(instant)  -- instant: no closing animation (switching menus)
 --   AnimalDex.onToggle = fn(open) -- set by the HUD: while it's open the only other
 --                                 -- UI is the Pets button (QM)
 
@@ -351,7 +351,7 @@ local function setPop(scale)
 	resize()
 end
 
-function AnimalDex.toggle()
+function AnimalDex.toggle(instant)
 	open = not open
 	if open then
 		gui.Enabled = true
@@ -370,16 +370,16 @@ function AnimalDex.toggle()
 		ModalPop.close(setPop, function()
 			gui.Enabled = false
 			clear()
-		end)
+		end, instant)
 	end
 	if AnimalDex.onToggle then
 		AnimalDex.onToggle(open)
 	end
 end
 
-function AnimalDex.close()
+function AnimalDex.close(instant)
 	if open then
-		AnimalDex.toggle()
+		AnimalDex.toggle(instant)
 	end
 end
 

@@ -5,7 +5,10 @@
 -- sets its size from the scale given (1 = its normal size).
 --
 --   ModalPop.open(apply)
---   ModalPop.close(apply, done)   -- done() once it's shrunk away (not if reopened first)
+--   ModalPop.close(apply, done, instant)   -- done() once it's shrunk away (not if reopened
+--                                          -- first); instant: no animation, done() now
+-- Switching from one menu to another (QM): the one going just goes (instant), and
+-- the one coming in still bounces in.
 
 local TweenService = game:GetService("TweenService")
 
@@ -39,8 +42,12 @@ function ModalPop.open(apply)
 	TweenService:Create(value, OPEN, { Value = 1 }):Play()
 end
 
-function ModalPop.close(apply, done)
+function ModalPop.close(apply, done, instant)
 	local value, run = valueFor(apply)
+	if instant then
+		done()
+		return
+	end
 	local swell = TweenService:Create(value, SWELL, { Value = PEAK })
 	swell.Completed:Connect(function()
 		if runs[apply] ~= run then

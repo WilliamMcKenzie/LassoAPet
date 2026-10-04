@@ -613,10 +613,12 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			end
 		end)
 	end
+	-- Opening one menu closes the others at once, with no closing animation (QM): only
+	-- the one coming in pops.
 	AnimalDex.onToggle = function(open)
 		if open then
-			RollMenu.close()
-			Shop.close()
+			RollMenu.close(true)
+			Shop.close(true)
 		end
 		homeGui.Enabled = not open
 		if SELECTED.gui then
@@ -625,8 +627,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end
 	RollMenu.onToggle = function(open)
 		if open then
-			AnimalDex.close()
-			Shop.close()
+			AnimalDex.close(true)
+			Shop.close(true)
 		end
 		homeGui.Enabled = not open
 		if SELECTED.gui then
@@ -636,8 +638,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- The shop hides the rest of the home HUD like the other menus.
 	Shop.onToggle = function(open)
 		if open then
-			AnimalDex.close()
-			RollMenu.close()
+			AnimalDex.close(true)
+			RollMenu.close(true)
 		end
 		homeGui.Enabled = not open
 		if SELECTED.gui then
