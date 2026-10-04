@@ -1355,21 +1355,56 @@ vfx.frostSlow = 0 -- the share of its speed a slowed animal loses (the running F
 vfx.FROST_TINT = Color3.fromRGB(150, 220, 255)
 vfx.FLAKE_TEXTURE = "rbxasset://textures/particles/sparkles_main.dds"
 
--- Frosted over while slowed: an icy ring round it and snowflakes drifting off it.
--- (A ring, not a Highlight: a Highlight on each animal it reached hitched on phones.)
-function vfx.setFrosted(entity, on)
+-- Frozen while slowed (QM, Oct 4): a see-through block of ice round the whole
+-- animal, sized from its box with room to spare so it always fits, with snowflakes
+-- drifting off it. It pops on and, when the animal thaws, shrinks down into the
+-- ground. (No Highlight: one on each animal it reached hitched on phones.)
+-- now: drop it at once, no melt (the animal is going back to the pool).
+vfx.ICE_COLOR = Color3.fromRGB(175, 225, 255)
+vfx.ICE_TRANSPARENCY = 0.55
+vfx.ICE_ROOM = 1.25 -- the block is this much bigger than the animal's box, so animation can't poke out
+vfx.ICE_POP = TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+vfx.ICE_MELT = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+function vfx.setFrosted(entity, on, now)
 	if on == (entity.frostFx ~= nil) then
 		return
 	end
 	if not on then
-		for _, fx in entity.frostFx do
-			fx:Destroy()
-		end
+		local fx = entity.frostFx
 		entity.frostFx = nil
+		fx.flakes:Destroy()
+		if now or not fx.ice.Parent then
+			fx.ice:Destroy()
+			return
+		end
+		-- Melts: shrinks down to a puddle at the animal's feet.
+		local size = fx.ice.Size
+		TweenService:Create(fx.ice, vfx.ICE_MELT, { Size = Vector3.new(size.X * 0.6, 0.1, size.Z * 0.6), Transparency = 0.8 }):Play()
+		TweenService:Create(fx.weld, vfx.ICE_MELT, { C0 = fx.weld.C0 * CFrame.new(0, -size.Y / 2, 0) }):Play()
+		task.delay(vfx.ICE_MELT.Time, function()
+			fx.ice:Destroy()
+		end)
 		return
 	end
 	local model = entity.animal.model
-	local glow = Outline.ring(model, vfx.FROST_TINT)
+	local root = model.PrimaryPart
+	local box, size = Outline.box(model)
+	size *= vfx.ICE_ROOM
+	local ice = Instance.new("Part")
+	ice.Name = "Ice"
+	ice.Anchored, ice.CanCollide, ice.CanQuery, ice.CanTouch, ice.Massless = false, false, false, false, true
+	ice.CastShadow = false
+	ice.Material = Enum.Material.Ice
+	ice.Color = vfx.ICE_COLOR
+	ice.Transparency = vfx.ICE_TRANSPARENCY
+	ice.Size = size * 0.6
+	local weld = Instance.new("Weld")
+	weld.Part0, weld.Part1 = root, ice
+	weld.C0 = CFrame.new(box.Position) -- level with the root (its feet), not tipped with the model's box
+	weld.Parent = ice
+	ice.CFrame = root.CFrame * weld.C0
+	ice.Parent = herdFolder -- not in the model: rescaling or measuring the animal leaves it alone
+	TweenService:Create(ice, vfx.ICE_POP, { Size = size }):Play()
 	local flakes = Instance.new("ParticleEmitter")
 	flakes.Texture = vfx.FLAKE_TEXTURE
 	flakes.Color = ColorSequence.new(Color3.new(1, 1, 1), vfx.FROST_TINT)
@@ -1381,12 +1416,39 @@ function vfx.setFrosted(entity, on)
 	flakes.SpreadAngle = Vector2.new(180, 180)
 	flakes.Acceleration = Vector3.new(0, -6, 0)
 	flakes.Rate = 18
-	flakes.Parent = model.PrimaryPart
-	entity.frostFx = { glow, flakes }
+	flakes.Parent = root
+	entity.frostFx = { ice = ice, weld = weld, flakes = flakes }
+end
+
+-- Smashed while frozen: the ice bursts into chunks that fly out and fade.
+function vfx.shatterIce(entity)
+	local fx = entity.frostFx
+	if not fx then
+		return
+	end
+	local at, size = fx.ice.CFrame, fx.ice.Size
+	vfx.setFrosted(entity, false, true)
+	local chunk = math.clamp(math.min(size.X, size.Y, size.Z) * 0.3, 0.6, 4)
+	for _ = 1, 10 do
+		local p = Instance.new("Part")
+		p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch = true, false, false, false
+		p.CastShadow = false
+		p.Material = Enum.Material.Ice
+		p.Color = vfx.ICE_COLOR
+		p.Transparency = vfx.ICE_TRANSPARENCY
+		p.Size = Vector3.one * chunk * rng:NextNumber(0.6, 1.2)
+		local out = Vector3.new(rng:NextNumber(-0.5, 0.5) * size.X, rng:NextNumber(-0.3, 0.5) * size.Y, rng:NextNumber(-0.5, 0.5) * size.Z)
+		p.CFrame = at * CFrame.new(out)
+		p.Parent = herdFolder
+		local spin = CFrame.Angles(rng:NextNumber(-3, 3), rng:NextNumber(-3, 3), rng:NextNumber(-3, 3))
+		TweenService:Create(p, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{ CFrame = (p.CFrame + (out + Vector3.yAxis * 0.1).Unit * size.Magnitude * 0.6 + Vector3.yAxis * size.Y * 0.3) * spin, Transparency = 1, Size = p.Size * 0.4 }):Play()
+		task.delay(0.5, p.Destroy, p)
+	end
 end
 
 local function putInPool(entity)
-	vfx.setFrosted(entity, false)
+	vfx.setFrosted(entity, false, true)
 	local active = entity.ability and entity.ability.active
 	for _, fx in if active then active.fx else {} do
 		fx:Destroy()
@@ -1481,6 +1543,7 @@ local function knock(entity, dx, remote)
 	if entity.n and not remote then
 		vfx.rideCue:FireServer("knock", entity.n, dx)
 	end
+	vfx.shatterIce(entity)
 	if entity.n then
 		taken[entity.n] = true
 		herd[entity.n] = nil
@@ -1582,6 +1645,9 @@ function vfx.updateEvent(dt, seen, inView)
 	seen[key] = true
 	local near = math.abs(z - camera.CFrame.Position.Z) <= VIEW or lassoed
 	entity.animal.model.Parent = if near then herdFolder else nil
+	if entity.frostFx then
+		entity.frostFx.ice.Parent = entity.animal.model.Parent -- its ice comes and goes with it
+	end
 	local x = laneX(vfx.EVENT_LANE, z)
 	local shown = near and (lassoed or inView(x, z))
 	local shrink = if lassoed then 1 else math.clamp((z - FINISH_Z - 2) / SHRINK, 0, 1)
@@ -1790,7 +1856,7 @@ vfx.WIND_SHEETS = 6 -- beams in the cone of air parting round the head
 
 -- Wind breaking round a charging animal's head: a cone of sharp wind sheets
 -- sweeping back from its nose, and speed lines streaming past its body. scale
--- shrinks it all (the Icebringer's sprint uses half: QM).
+-- shrinks it all (the Icebringer's sprint uses 0.35: QM).
 -- turn: radians the model is turned from the way it's going (a crab walking sideways,
 -- pi / 2): the wind then breaks round its side.
 local function chargeFx(entity, scale, turn)
@@ -2275,7 +2341,7 @@ function vfx.updateSprint(dt)
 			mount.scaleAnim = { t = 0, size = cfg.Grow }
 		end
 		if kind == "Ram" then
-			vfx.sprintFx = chargeFx(mount, 0.5)
+			vfx.sprintFx = chargeFx(mount, 0.35) -- QM: 0.7x the half-size wind it had
 		elseif kind == "Crabwalk" then
 			vfx.sprintFx = chargeFx(mount, 0.5, math.pi / 2) -- sideways, like the crab
 		elseif kind == "Burrow" then
@@ -2747,7 +2813,9 @@ local function checkRide(dt)
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
 		if not entity.popping and not entity.event and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
 			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
-			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" then -- (the +1 is for obstacles only)
+			-- Racing home on the Icebringer, an animal frozen in ice smashes whatever its size (QM).
+			local shatter = phase == "return" and entity.frostFx ~= nil and (Config.Abilities[mount.kind] or {}).Kind == "Frost"
+			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then -- (the +1 is for obstacles only)
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
 				vfx.broke()
 			elseif phase == "return" and grace <= 0 then
