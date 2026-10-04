@@ -123,6 +123,7 @@ local BIOS = { -- QM's (Oct 3)
 	Squid = "Squid started out painting, but his art has gotten more abstract. Now it just squirts ink blotches.",
 	KingCrab = "Crab was almost boiled, but escaped with his fast speed. He is still running to this day.",
 	Whale = "Whale is a talented singer, but his concerts are usually underwater. Distant cousin of horse.",
+	Beholder = "Beholder has one eye on the prize and no idea where he left his snacks.",
 	Kraken = "Kraken was once a squid, but started drinking raw milk and bonesmashing. Now his jaw hurts.",
 }
 

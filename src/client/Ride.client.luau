@@ -2335,6 +2335,7 @@ end
 -- animals of cfg.MaxTier or smaller within cfg.Radius (up to cfg.Max), each one is
 -- reeled in over cfg.PullTime, shrinking into it, and eaten, refilling
 -- cfg.RestorePer of Hold. The prey leave the stampede the moment they're grabbed.
+-- The Beholder's is the same with one tentacle (cfg.Max 1) in its own colour.
 vfx.TENTACLE_COLOR = Color3.fromRGB(44, 64, 150)
 function vfx.devour(active, cfg)
 	local found = {}
@@ -2363,7 +2364,7 @@ function vfx.devour(active, cfg)
 		end
 		local tentacle = Instance.new("Part")
 		tentacle.Anchored, tentacle.CanCollide, tentacle.CanQuery, tentacle.CanTouch = true, false, false, false
-		tentacle.Color = vfx.TENTACLE_COLOR
+		tentacle.Color = cfg.TentacleColor or vfx.TENTACLE_COLOR
 		tentacle.Material = Enum.Material.SmoothPlastic
 		tentacle.Parent = workspace
 		table.insert(active.fx, tentacle)
@@ -2373,7 +2374,7 @@ end
 
 function vfx.devourStep(active, t)
 	local cfg = active.cfg
-	local mouth = Vector3.new(mount and mount.x or 0, 3, mount and mount.z or 0)
+	local mouth = Vector3.new(mount and mount.x or 0, cfg.Mouth or 3, mount and mount.z or 0) -- (the Beholder's floats higher)
 	for _, prey in active.prey do
 		if not prey.eaten then
 			local entity = prey.entity

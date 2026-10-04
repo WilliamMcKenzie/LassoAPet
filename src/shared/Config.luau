@@ -36,7 +36,7 @@ return {
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
-			Herd = { Cactus = 0.3, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05 },
+			Herd = { Cactus = 0.3, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05, Beholder = 0.1 }, -- (the Beholder: its biome and weight are guesses, Oct 4)
 			-- Patches of other ground in the floor (parts named after them in
 			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
 			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
@@ -294,7 +294,8 @@ return {
 	--   Devour (Kraken, QM Oct 4): one tap: it stops dead and its tentacles reach out to
 	--     up to Max animals of size tier MaxTier or smaller within Radius studs, reeling
 	--     each one in over PullTime seconds and eating it, each one refilling RestorePer
-	--     of the Hold bar. Nothing can crash it while it feeds.
+	--     of the Hold bar. Nothing can crash it while it feeds. TentacleColor (default navy)
+	--     and Mouth (studs up its tentacles start from, default 3) are optional.
 	-- Charge swings the camera round to a cinematic front-side angle.
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
 	Abilities = {
@@ -302,6 +303,7 @@ return {
 		SnackYak = { Kind = "Charge", UntilFull = true, Cooldown = 5, SpeedBoost = 2 }, -- QM, Oct 4
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 56 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 10, Radius = 45, ScareTime = 10, RestorePer = 0.1 }, -- QM, Oct 4
+		Beholder = { Kind = "Devour", Duration = 1.2, Cooldown = 10, Radius = 50, Max = 1, MaxTier = 2, PullTime = 0.8, RestorePer = 1, Hop = 3, TentacleColor = Color3.fromRGB(222, 136, 56), Mouth = 11 }, -- QM, Oct 4: one tentacle eats the nearest animal and refills all of Hold (radius and size limit guesses)
 		Kraken = { Kind = "Devour", Duration = 1.4, Cooldown = 6, Radius = 50, Max = 8, MaxTier = 2, PullTime = 0.7, RestorePer = 0.2, Hop = 6 }, -- QM, Oct 4 (radius a guess)
 		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7, RestorePer = 0.03 }, -- 3% Hold per animal frozen (QM, Oct 4)
 		SpineLizard = { Kind = "Boost", Duration = 5, Cooldown = 8, SpeedBoost = 2 },
@@ -343,7 +345,7 @@ return {
 	-- from their model's "Tier" attribute, else from ObstacleTiers by name.
 	PetTiers = {
 		Horse = 1, Pig = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
-		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
+		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, Beholder = 2, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		Loong = 1, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
@@ -392,7 +394,7 @@ return {
 	-- every second while you're in the game.
 	PetIncome = {
 		Horse = 1, Pig = 3, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
-		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
+		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, Beholder = 40, -- Desert (the Beholder's a guess)
 		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 4000, Icebringer = 1111, -- Tundra
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 7000, Whale = 5000, Kraken = 8200, -- Ocean
 		Loong = 20000, -- Godlands (a guess, past the Kraken)
@@ -412,7 +414,7 @@ return {
 		-- 70% split evenly over the other Legendaries (14% each).
 		Odds = { Legendary = 70, Exclusive = 30 },
 		Pool = {
-			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1 },
+			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1, Beholder = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
@@ -522,6 +524,7 @@ return {
 		Sandworm = { Speed = 1.6, Stamina = 3 },
 		SpineLizard = { Speed = 1.8, Stamina = 2 },
 		Snake = { Speed = 2, Stamina = 3 },
+		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
 		-- Tundra
 		Penguin = { Speed = 1.5, Stamina = 1.5 },
 		Boar = { Speed = 1.6, Stamina = 1.6 },
