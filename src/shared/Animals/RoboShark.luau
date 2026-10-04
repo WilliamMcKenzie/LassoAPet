@@ -4,7 +4,8 @@
 -- (Config.Abilities), fires two missiles ahead that smash whatever they touch.
 -- QM's file designs/ocean/RoboShark.bbmodel, animated by tools/robo_shark_rig.py and
 -- converted with `tools/bbmodel_to_luau.py --zyx`. You ride on its back behind the
--- dorsal fin; at a run its jaw snaps shut on every tail beat.
+-- dorsal fin; at a run its jaw snaps shut on every tail beat. (Now its ability is Hunt and
+-- it starts small, growing as it eats: Config.Abilities.)
 
 local Horse = require(script.Parent.Horse)
 local RoboSharkModel = require(script.Parent.RoboSharkModel)

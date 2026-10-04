@@ -255,11 +255,12 @@ function Horse:getSeatCFrame()
 		local at = self.seatPart.CFrame * CFrame.new((self.seat - self.pivots[self.seatBone]) * self.size * self.scale)
 		return CFrame.new(at.Position) * self.model.PrimaryPart.CFrame.Rotation
 	end
+	-- (scaled with the animal too: the seat rises as it grows, e.g. the Robo Shark's hunt)
 	if self.seatOnNeck then
-		local at = self.neck.CFrame * CFrame.new((self.seat - self.pivots.neck) * self.size)
+		local at = self.neck.CFrame * CFrame.new((self.seat - self.pivots.neck) * self.size * self.scale)
 		return CFrame.new(at.Position) * self.root.CFrame.Rotation
 	end
-	return self.root.CFrame * CFrame.new((self.seat - self.pivots.root) * self.size)
+	return self.root.CFrame * CFrame.new((self.seat - self.pivots.root) * self.size * self.scale)
 end
 
 function Horse:getNeck()
