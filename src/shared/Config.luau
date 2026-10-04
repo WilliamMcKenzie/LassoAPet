@@ -216,8 +216,7 @@ return {
 	Events = {
 		Animals = { "Loong", "SnackYak", "RoboShark" },
 		Countdown = 10,
-		Duration = 180,
-		Gap = 5,
+		Cycle = 600, -- seconds from one event's countdown to the next (QM: every 10 minutes)
 		-- The egg's spot: this far in from the walls, this far from any obstacle's
 		-- footprint and from a gate's line.
 		WallMargin = 14,

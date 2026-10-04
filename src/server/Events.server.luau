@@ -1,10 +1,10 @@
--- Exclusive animal events (Config.Events, QM Oct 4): one is always on. Each event
+-- Exclusive animal events (Config.Events, QM Oct 4): one every 10 minutes. Each event
 -- picks one of the exclusive animals (the Loong, Snack Yak, Robo Shark), counts
 -- down, then that animal pops in at the start line and runs off with the
 -- stampede to the finish line (every client draws it, Ride.client) and its egg drops in the EventNest somewhere random on the course.
 -- Riding that kind of animal while the egg is out, the guide arrows lead to it.
--- The first player to grab the egg gets it (Nests.server, like any nest's); that,
--- or running out of time, ends the event, and the next countdown starts.
+-- The first player to grab the egg gets it (Nests.server, like any nest's), which
+-- ends the event; a new one starts every Config.Events.Cycle seconds.
 --
 -- What the clients read, on Workspace.World:
 --   EventKind     the animal ("" between events)
@@ -104,17 +104,15 @@ while not world:GetAttribute("Ready") do
 	world:GetAttributeChangedSignal("Ready"):Wait()
 end
 
-local id, last = 0, nil
+-- A new event every Config.Events.Cycle seconds (QM, Oct 4: a 10 minute cycle,
+-- picking at random from the three). Its egg stays out until someone grabs it or
+-- the next one's countdown starts.
+local id = 0
+local cycleStart = os.clock()
 while true do
-	-- Count down to the next one.
-	local kinds = {}
-	for _, kind in EVENTS.Animals do
-		if kind ~= last or #EVENTS.Animals == 1 then
-			table.insert(kinds, kind)
-		end
-	end
-	local kind = kinds[rng:NextInteger(1, #kinds)]
-	last, id = kind, id + 1
+	-- Count down to it.
+	local kind = EVENTS.Animals[rng:NextInteger(1, #EVENTS.Animals)]
+	id += 1
 	world:SetAttribute("EventTaken", false)
 	world:SetAttribute("EventSpawnAt", workspace:GetServerTimeNow() + EVENTS.Countdown)
 	world:SetAttribute("EventId", id)
@@ -126,15 +124,16 @@ while true do
 	nest:PivotTo(CFrame.new(randomSpot()) * FROM_SPOT)
 	task.wait()
 	nest:SetAttribute("Egg", kind)
-	local ends = os.clock() + EVENTS.Duration
-	while nest:GetAttribute("Egg") ~= "" and os.clock() < ends do
+	local nextCycle = cycleStart + EVENTS.Cycle
+	while nest:GetAttribute("Egg") ~= "" and os.clock() < nextCycle - 1.5 do
 		task.wait(0.5)
 	end
 
-	-- Over: grabbed, or out of time.
+	-- Over: grabbed, or the next one is due. Wait out the rest of the cycle.
 	nest:SetAttribute("Egg", "")
 	world:SetAttribute("EventKind", "")
 	task.wait(1)
 	nest:PivotTo(PARKED)
-	task.wait(EVENTS.Gap)
+	task.wait(math.max(nextCycle - os.clock(), 0))
+	cycleStart = nextCycle
 end
