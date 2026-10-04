@@ -2490,7 +2490,8 @@ end
 
 -- remote: another player's Loong (we don't know their aim): straight out of its mouth.
 function vfx.breathFx(entity, cfg, remote)
-	local s = entity.animal.size * entity.animal.scale
+	-- Always the size it'd be on a large Loong, however big this one has grown (QM).
+	local s = entity.animal.size * Config.TierGrowth ^ math.max(3 - (Config.PetTiers[entity.kind] or 1), 0)
 	local at = Instance.new("Attachment") -- yours: in the world, turned toward the aim each frame (breathBlast)
 	at.Name = "LoongFireAt"
 	if remote then
