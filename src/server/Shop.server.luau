@@ -66,6 +66,14 @@ for _, list in { Config.Shop.Gold, Config.Shop.Specials } do
 end
 
 -- Hands a paid offer over. False if it can't be yet (no pen for the pet).
+-- The Legendary Pet is a paid random item: never sold where those are restricted.
+local function randomAllowed(player)
+	local ok, info = pcall(function()
+		return game:GetService("PolicyService"):GetPolicyInfoForPlayerAsync(player)
+	end)
+	return ok and not info.ArePaidRandomItemsRestricted
+end
+
 local function grant(player, offer)
 	if offer.Gold then
 		player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + offer.Gold)
@@ -85,7 +93,7 @@ end
 
 buyShop.OnServerEvent:Connect(function(player, key)
 	local offer = typeof(key) == "string" and offers[key]
-	if not offer then
+	if not offer or (offer.Key == "Legendary" and not randomAllowed(player)) then
 		return
 	end
 	if offer.ProductId ~= 0 then
