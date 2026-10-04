@@ -575,7 +575,7 @@ return {
 		},
 		Specials = {
 			{ Key = "GiantHorse", Name = "Giant Horse", Price = 5, ProductId = 3716552368, OldProductIds = { 3716409132 } }, -- a Giant Horse egg (SpecialEggs); the old product was one giant ride -- one ride (GiantHorse below)
-			{ Key = "SpawnLoong", Name = "Spawn Loong", Price = 25, ProductId = 0 }, -- starts the Loong event now (Events.server); no product yet
+			{ Key = "SpawnLoong", Name = "Spawn Loong", Price = 25, ProductId = 3716553200 }, -- starts the Loong event now, no countdown, and the 10 minute cycle over (Events.server)
 			{ Key = "Nuke", Name = "Nuke All", Price = 200, ProductId = 3716409185 }, -- your next ride (NukeRange)
 			{ Key = "Legendary", Name = "Legend Egg", Price = 150, ProductId = 3716409444 }, -- a pet by LegendaryOdds, into your pen
 		},

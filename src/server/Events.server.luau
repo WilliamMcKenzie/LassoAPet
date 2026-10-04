@@ -128,13 +128,17 @@ eventCommand.Triggered:Connect(function(source, text)
 	end
 end)
 eventCommand.Parent = game:GetService("TextChatService")
--- (The same from the server side, for testing in Studio: World's "ForceEvent" attribute.)
+-- (The same from the server side, for testing in Studio: World's "ForceEvent" attribute.
+-- The shop's Spawn Loong sets it too, with "ForceEventNow" first: no countdown.)
+local forcedNow = false
 world:GetAttributeChangedSignal("ForceEvent"):Connect(function()
 	local kind = world:GetAttribute("ForceEvent")
 	if kind and table.find(EVENTS.Animals, kind) then
 		forced = kind
+		forcedNow = world:GetAttribute("ForceEventNow") == true
 	end
 	world:SetAttribute("ForceEvent", nil)
+	world:SetAttribute("ForceEventNow", nil)
 end)
 
 -- Waits `seconds` (or until it's true that `stop()`), checking every so often.
@@ -153,15 +157,16 @@ local cycleStart = os.clock()
 while true do
 	-- Count down to it.
 	local kind = forced or EVENTS.Animals[rng:NextInteger(1, #EVENTS.Animals)]
+	local countdown = if forced and forcedNow then 0 else EVENTS.Countdown
 	if forced then
-		forced, cycleStart = nil, os.clock()
+		forced, forcedNow, cycleStart = nil, false, os.clock()
 	end
 	id += 1
 	world:SetAttribute("EventTaken", false)
-	world:SetAttribute("EventSpawnAt", workspace:GetServerTimeNow() + EVENTS.Countdown)
+	world:SetAttribute("EventSpawnAt", workspace:GetServerTimeNow() + countdown)
 	world:SetAttribute("EventId", id)
 	world:SetAttribute("EventKind", kind)
-	waitFor(EVENTS.Countdown, isForced)
+	waitFor(countdown, isForced)
 
 	if not forced then
 		-- The animal pops in on every client; the egg drops (nest first, then its egg,

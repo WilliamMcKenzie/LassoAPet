@@ -194,6 +194,7 @@ local function record(userId, purchaseId, offer)
 		return true
 	end)
 	if ledger and fresh and offer.Key == "SpawnLoong" then
+		workspace.World:SetAttribute("ForceEventNow", true) -- (bought: no countdown)
 		workspace.World:SetAttribute("ForceEvent", "Loong")
 	end
 	local player = Players:GetPlayerByUserId(userId)
