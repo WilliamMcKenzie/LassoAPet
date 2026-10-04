@@ -168,7 +168,7 @@ return {
 			-- Placeholder until the Godlands has animals (and bosses) of its own: Fish (QM).
 			-- (The Loong is an event and roll exclusive now, so it doesn't run here.)
 			-- PlaceholderHerd keeps it out of the finish line's egg odds (Hatchery).
-			Herd = { Fish = 1, Beholder = 0.1, WarElephant = 1, Sludge = 0.5 }, -- the Beholder and War Elephant live here (QM, Oct 4; weights are guesses)
+			Herd = { Fish = 1, Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5 }, -- the Beholder, War Elephant, Soul Horse and Sludge live here (QM, Oct 4; weights are guesses)
 			PlaceholderHerd = true,
 			Patches = {
 				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
@@ -312,6 +312,7 @@ return {
 		KingCrab = { Kind = "Crabwalk", Duration = 4, Cooldown = 8, SpeedBoost = 2, Tier = 3 },
 		BlueCrab = { Kind = "Shield", Duration = 0.6, Cooldown = 15, Crabs = 3, Ahead = 22, Spread = 11, Life = 15, Radius = 5 }, -- QM, Oct 4 (cooldown and life are guesses)
 		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
+		SoulHorse = { Kind = "Spikes", Duration = 1.5, Cooldown = 10, Radius = 45, Count = 28, RestorePer = 0.1 }, -- QM, Oct 4: 10% Hold per kill (duration, cooldown, radius guesses)
 		-- the animation's length and fire window; the range, width and cooldown are guesses
 		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 0.8, Grow = 1.1, SpeedUp = 1.05, MaxSpeed = 2.5, RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
 		Loong = { Kind = "Breath", Duration = 4.2, FireFrom = 0.95, FireTo = 3.95, Cooldown = 8, Range = 140, Width = 22, Crawl = 0.15, RestorePer = 0.1, Grow = 1.1, SpeedUp = 1.1, MaxSpeed = 4, MaxTier = 4 },
@@ -348,7 +349,7 @@ return {
 		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
-		WarElephant = 3, -- Godlands (QM: large)
+		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
 		Loong = 1, Beholder = 2, Sludge = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
@@ -399,8 +400,7 @@ return {
 		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 4000, Icebringer = 1111, -- Tundra
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 7000, Whale = 5000, Kraken = 8200, -- Ocean
 		Loong = 20000, Beholder = 40, -- Godlands (guesses: the Loong past the Kraken)
-		WarElephant = 10000, -- Godlands (a guess)
-		Sludge = 40, -- Godlands (a guess, like the Beholder)
+		WarElephant = 10000, SoulHorse = 15000, Sludge = 40, -- Godlands (guesses)
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -417,7 +417,7 @@ return {
 		-- 70% split evenly over the other Legendaries (14% each).
 		Odds = { Legendary = 70, Exclusive = 30 },
 		Pool = {
-			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1, Beholder = 1, Sludge = 1 },
+			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1, Beholder = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
@@ -457,6 +457,7 @@ return {
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://70469571709365", -- assets/ui/LoongEggRender.png
 		WarElephant = "rbxassetid://84356622911486", -- assets/ui/WarElephantEggRender.png
+		SoulHorse = "rbxassetid://136725772402125", -- assets/ui/SoulHorseEggRender.png
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
@@ -549,6 +550,7 @@ return {
 		Loong = { Speed = 1, Stamina = 8 }, -- QM, Oct 4: starts at 1x, its breath's kills take it up to 4x
 		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
 		WarElephant = { Speed = 1.1, Stamina = 4 }, -- QM, Oct 4
+		SoulHorse = { Speed = 2, Stamina = 3 }, -- QM, Oct 4
 		Sludge = { Speed = 1, Stamina = 2 }, -- guesses (Oct 4)
 	},
 

@@ -101,6 +101,7 @@ local IMAGES = {
 	eggFishSchool = { id = "rbxassetid://137156704531563", size = Vector2.new(530, 721) }, -- FishSchoolEggRender.png
 	eggLoong = { id = "rbxassetid://70469571709365", size = Vector2.new(560, 863) }, -- LoongEggRender.png (QM's egg)
 	eggWarElephant = { id = "rbxassetid://84356622911486", size = Vector2.new(656, 673) }, -- WarElephantEggRender.png
+	eggSoulHorse = { id = "rbxassetid://136725772402125", size = Vector2.new(502, 812) }, -- SoulHorseEggRender.png
 	-- Exclusive animal events' countdown (Hud.setEventCountdown): QM's gradient names.
 	eventLoong = { id = "rbxassetid://125494868051538", size = Vector2.new(372, 140) }, -- EventLoong.png
 	eventSnackYak = { id = "rbxassetid://136877153343024", size = Vector2.new(593, 119) }, -- EventSnackYak.png
