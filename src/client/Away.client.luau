@@ -2,6 +2,7 @@
 -- pets earned meanwhile (the "AwayGold" attribute, Hatchery.server). The amount
 -- counts up from $0 over COUNT_TIME with coins dropping behind it, bulges when it
 -- lands and settles, and Claim banks it (ClaimAway). Layout follows QM's mockup.
+-- While it's up, every other UI is hidden (QM): the game's own screens and Roblox's.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -145,9 +146,61 @@ end
 local showing = false
 local claimed = false
 
+-- Every other UI goes while it's up, and comes back as it was once it's claimed. A
+-- screen another script turns on meanwhile stays off until then (and comes back on).
+local StarterGui = game:GetService("StarterGui")
+local KEEP = { AnimalDexWarm = true } -- (1 px, nearly see-through: keeps the dictionary's art loaded)
+local wanted = {} -- [ScreenGui] = whether it should be on once we're done
+local watching = {}
+local coreWas = {}
+local function hold(screen)
+	if screen == gui or not screen:IsA("ScreenGui") or KEEP[screen.Name] or wanted[screen] ~= nil then
+		return
+	end
+	wanted[screen] = screen.Enabled
+	screen.Enabled = false
+	table.insert(watching, screen:GetPropertyChangedSignal("Enabled"):Connect(function()
+		if screen.Enabled and wanted[screen] ~= nil then
+			wanted[screen] = true
+			screen.Enabled = false
+		end
+	end))
+end
+local playerGui = player:WaitForChild("PlayerGui")
+local function hideOthers()
+	for _, screen in playerGui:GetChildren() do
+		hold(screen)
+	end
+	table.insert(watching, playerGui.ChildAdded:Connect(hold))
+	for _, core in Enum.CoreGuiType:GetEnumItems() do
+		if core ~= Enum.CoreGuiType.All then
+			coreWas[core] = StarterGui:GetCoreGuiEnabled(core)
+		end
+	end
+	pcall(StarterGui.SetCoreGuiEnabled, StarterGui, Enum.CoreGuiType.All, false)
+end
+local function showOthers()
+	for _, c in watching do
+		c:Disconnect()
+	end
+	watching = {}
+	local list = wanted
+	wanted = {}
+	for screen, on in list do
+		if screen.Parent then
+			screen.Enabled = on
+		end
+	end
+	for core, on in coreWas do
+		pcall(StarterGui.SetCoreGuiEnabled, StarterGui, core, on)
+	end
+	coreWas = {}
+end
+
 local function show(total)
 	showing, claimed = true, false
 	gui.Enabled = true
+	hideOthers()
 	dim.BackgroundTransparency = 1
 	TweenService:Create(dim, TweenInfo.new(0.3), { BackgroundTransparency = 0.45 }):Play()
 	for _, s in { titleScale, claimScale } do
@@ -199,6 +252,7 @@ local function hide()
 			gui.Enabled = false
 			showing = false
 			coinLayer:ClearAllChildren()
+			showOthers()
 		end
 	end)
 end
