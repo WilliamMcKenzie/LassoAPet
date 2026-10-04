@@ -214,6 +214,10 @@ return {
 	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
 	-- their eggs never show up.
 	NestRestock = 30,
+	-- Stealing eggs mid-ride (Nests.server, QM Oct 4): STEAL EGG lassoes the egg off a rider
+	-- carrying one, from as far as a nest's egg (LassoRange); then it can't change hands
+	-- again for Lock seconds.
+	EggSteal = { Lock = 2 },
 	-- Exclusive animal events (Events.server, QM Oct 4): there's always one on. A
 	-- banner counts down the last Countdown seconds, then the animal pops in at the
 	-- start line and runs off with the stampede to the finish line, and its egg drops

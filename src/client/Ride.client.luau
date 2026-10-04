@@ -1305,6 +1305,10 @@ local function candidateAt(screenPos)
 end
 
 local function onAction()
+	if vfx.stealFrom and not transfer and not carried then
+		ReplicatedStorage:WaitForChild("StealEgg"):FireServer(vfx.stealFrom) -- (the server says if it's yours: EggSteal)
+		return
+	end
 	if phase ~= "outbound" or transfer or not mount or not actionTarget then
 		return
 	end
@@ -3608,7 +3612,12 @@ local function updateRider(dt)
 	end
 	if carried then
 		if carried.stage == "throw" then
-			-- Sits in the nest while the loop flies out.
+			-- Sits in the nest while the loop flies out (or over the head of the rider it's
+			-- being stolen from, as they ride on).
+			local victimRoot = carried.follow and carried.follow.Character and carried.follow.Character:FindFirstChild("HumanoidRootPart")
+			if victimRoot then
+				carried.part:PivotTo(CFrame.new(victimRoot.Position + Vector3.new(0, 7, 0)))
+			end
 			carried.t = math.min(carried.t + dt / THROW_TIME, 1)
 			if carried.t >= 1 then
 				carried.stage, carried.t, carried.from = "pull", 0, carried.part:GetPivot().Position
@@ -3946,6 +3955,123 @@ function vfx.updateRiders(dt)
 	end
 end
 
+-- Stealing eggs (Nests.server, QM Oct 4): with no egg of your own, out riding, a rider
+-- carrying an egg within lasso range (as far as a nest's egg) lights up STEAL EGG (the
+-- egg button); pressing it lassoes their egg onto your animal, no close-up this time.
+-- The server decides (StealEgg); EggSteal plays it out on every client: the thief reels
+-- it in and turns for home with it, the one robbed rides on without it (and can steal it
+-- back), and everyone near sees the swipe. Whoever has it at home keeps it. Every rider
+-- carrying an egg has it over their head (vfx.updateEggHeads).
+function vfx.stealTarget()
+	if carried or transfer or not mount or (phase ~= "outbound" and phase ~= "return") or Tutorial.active then
+		return nil
+	end
+	local best, bestD
+	for other, rider in vfx.riders do
+		local kind = other:GetAttribute("CarriedEgg")
+		if kind and rider.riderCF and Animals:FindFirstChild(kind) then
+			local p = rider.riderCF.Position
+			local d = Vector2.new(p.X - mount.x, p.Z - mount.z).Magnitude
+			if d < Config.LassoRange and (not bestD or d < bestD) then
+				best, bestD = other, d
+			end
+		end
+	end
+	return best
+end
+
+-- Each frame, after the HUD: STEAL EGG instead of whatever the button would be.
+function vfx.updateSteal()
+	local victim = vfx.stealTarget()
+	vfx.stealFrom = victim
+	if victim then
+		Hud.setAction("GRAB EGG", true, rarityOf(victim:GetAttribute("CarriedEgg")))
+		vfx.stealShown = true
+	elseif vfx.stealShown then
+		vfx.stealShown = false
+		if phase ~= "outbound" then
+			Hud.setAction(nil)
+		end
+	end
+end
+
+ReplicatedStorage:WaitForChild("EggSteal").OnClientEvent:Connect(function(thief, victim, kind)
+	local where
+	if thief == player then
+		where = character() and character().Position
+		if carried then
+			carried.part:Destroy()
+		end
+		-- Their egg, on your lasso: thrown out to it over their head, then reeled in.
+		local egg = Egg.new(kind)
+		local head = vfx.eggHeads[victim]
+		local from = if head then head.model:GetPivot() else CFrame.new((where or Vector3.zero) + Vector3.new(0, 7, 0))
+		if head then
+			head.model:Destroy()
+			vfx.eggHeads[victim] = nil
+		end
+		egg.model:PivotTo(from)
+		egg.model.Parent = workspace
+		carried = { part = egg.model, kind = kind, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1, follow = victim }
+		vfx.sounds.play("lasso_throw")
+		if phase == "outbound" then
+			phase, turnT = "turning", 0 -- home with it
+			Hud.setHold(nil)
+		end
+		Hud.setAction(nil)
+		Hud.setReturning(true)
+		Hud.flash("You stole it!", 1.5)
+		vfx.sounds.play("egg_grab")
+	elseif victim == player then
+		where = character() and character().Position
+		if carried then
+			carried.part:Destroy()
+			carried = nil
+		end
+		if cutscene then -- (taken while it was still being reeled in)
+			cutscene = nil
+			Hud.setCutscene(false)
+			Hud.setReturning(true)
+		end
+		Hud.flash("STOLEN!", 1.5)
+		vfx.sounds.play("crash", 0.5)
+	else
+		local rider = vfx.riders[victim]
+		where = rider and rider.riderCF and rider.riderCF.Position
+	end
+	if where and victim ~= player and thief ~= player then
+		Poof.at(Vector3.new(where.X, where.Y + 4, where.Z)) -- (the swipe, for everyone else watching)
+	end
+end)
+
+-- Another rider carrying an egg has it over their head (their "CarriedEgg").
+vfx.eggHeads = {} -- [player] = { kind, model }
+function vfx.updateEggHeads()
+	for other, rider in vfx.riders do
+		local kind = other:GetAttribute("CarriedEgg")
+		local head = vfx.eggHeads[other]
+		if head and head.kind ~= kind then
+			head.model:Destroy()
+			vfx.eggHeads[other], head = nil, nil
+		end
+		local hrp = other.Character and other.Character:FindFirstChild("HumanoidRootPart")
+		if kind and hrp and not head and Animals:FindFirstChild(kind) then
+			head = { kind = kind, model = Egg.new(kind).model }
+			head.model.Parent = workspace
+			vfx.eggHeads[other] = head
+		end
+		if head and hrp then
+			head.model:PivotTo(CFrame.new(hrp.Position + Vector3.new(0, 7, 0)) * CFrame.Angles(0, os.clock() * 3, 0))
+		end
+	end
+	for other, head in vfx.eggHeads do
+		if not vfx.riders[other] then
+			head.model:Destroy()
+			vfx.eggHeads[other] = nil
+		end
+	end
+end
+
 -- Slow motion during the egg-grab close-up and the hero leap home.
 local timeScale = 1
 
@@ -3990,6 +4116,7 @@ RunService.PreSimulation:Connect(function(dt)
 	vfx.sendRide()
 	vfx.updateSound()
 	vfx.updateRiders(dt)
+	vfx.updateEggHeads()
 	Dust.update(dt)
 	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)
 	if phase == "idle" then
@@ -4108,6 +4235,7 @@ RunService.PreSimulation:Connect(function(dt)
 		Outline.set(if actionTarget then actionTarget.animal.model else nil)
 	end
 	updateHud()
+	vfx.updateSteal()
 end)
 
 RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, function(dt)

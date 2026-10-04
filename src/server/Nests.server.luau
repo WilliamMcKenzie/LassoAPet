@@ -222,3 +222,60 @@ task.spawn(function()
 		end
 	end
 end)
+
+-- Stealing eggs (QM, Oct 4) ----------------------------------------------------
+-- Out on the course, a rider without an egg can lasso the egg off another rider who's
+-- carrying one, from as far as they could grab a nest's (Config.LassoRange): their
+-- STEAL EGG asks for it (StealEgg, victim) and it's checked here against both riders'
+-- RideSync positions, never taken on a client's word. Whoever has it when they get home
+-- keeps it (Hatchery's DeliverEgg). After a steal the egg can't change hands again for
+-- Config.EggSteal.Lock seconds. EggSteal tells every client (thief, victim, kind) for the
+-- effects; the thief's client reels it in and turns for home with it.
+
+local SLACK = 12 -- studs of leeway on the range, for the time the positions take to arrive
+local riders = {} -- [player] = { at = Vector3 (rider), t = os.clock(), on = riding an animal }
+local lockedUntil = {} -- [player] = os.clock() before which their egg can't be taken
+ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, kind, _, riderCFrame)
+	if typeof(riderCFrame) == "CFrame" and riderCFrame.Position.Z == riderCFrame.Position.Z then
+		riders[player] = { at = riderCFrame.Position, t = os.clock(), on = type(kind) == "string" and kind ~= "" }
+	end
+end)
+ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
+	if what == "end" then
+		riders[player] = nil
+	end
+end)
+Players.PlayerRemoving:Connect(function(player)
+	riders[player], lockedUntil[player] = nil, nil
+end)
+
+local function riding(player, now)
+	local r = riders[player]
+	return r and r.on and now - r.t < 1 and r.at.Z < 0 and not player:GetAttribute("Tutorial") and r or nil
+end
+
+local eggSteal = Instance.new("RemoteEvent")
+eggSteal.Name = "EggSteal"
+eggSteal.Parent = ReplicatedStorage
+local stealEgg = Instance.new("RemoteEvent")
+stealEgg.Name = "StealEgg"
+stealEgg.Parent = ReplicatedStorage
+
+stealEgg.OnServerEvent:Connect(function(thief, victim)
+	local now = os.clock()
+	if typeof(victim) ~= "Instance" or not victim:IsA("Player") or victim == thief then
+		return
+	end
+	local kind = victim:GetAttribute("CarriedEgg")
+	local t, v = riding(thief, now), riding(victim, now)
+	if not kind or thief:GetAttribute("CarriedEgg") or not t or not v or now < (lockedUntil[victim] or 0) then
+		return
+	end
+	if (Vector3.new(t.at.X, 0, t.at.Z) - Vector3.new(v.at.X, 0, v.at.Z)).Magnitude > Config.LassoRange + SLACK then
+		return
+	end
+	victim:SetAttribute("CarriedEgg", nil)
+	thief:SetAttribute("CarriedEgg", kind)
+	lockedUntil[thief] = now + Config.EggSteal.Lock
+	eggSteal:FireAllClients(thief, victim, kind)
+end)
