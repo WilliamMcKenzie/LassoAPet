@@ -271,7 +271,9 @@ local function root(screenGui)
 	scale.Parent = frame
 	local camera = workspace.CurrentCamera
 	local function resize()
-		local screen = camera.ViewportSize
+		-- (the screen it's on, edge to edge: ScreenEdges.client takes the safe-area insets
+		-- off every screen, so the buttons sit at the real edges on phones too)
+		local screen = if screenGui.AbsoluteSize.X > 0 then screenGui.AbsoluteSize else camera.ViewportSize
 		scale.Scale = screen.X / REFERENCE_WIDTH * Config.HudScale
 		frame.Size = UDim2.fromOffset(screen.X / scale.Scale, screen.Y / scale.Scale)
 		rootScale = scale.Scale
@@ -280,6 +282,7 @@ local function root(screenGui)
 		end
 	end
 	camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
+	screenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
 	resize()
 	frame.Parent = screenGui
 	return frame
