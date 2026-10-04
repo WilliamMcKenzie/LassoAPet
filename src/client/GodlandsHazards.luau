@@ -6,7 +6,7 @@
 --   Sludge      leaves puddles of sludge: ride into one and you're stuck, crawling, for a moment
 --   Beholder    now and then a purple circle swells round it, then bursts: caught in it, your
 --               steering is flipped for a few seconds (CONFUSED)
---   War Elephant now and then stamps and turns on you (a red "!" over it),
+--   War Elephant now and then stamps and turns on you (a red "!" over it, red arrows on the ground),
 --               then charges at where you were (the Rhino's charge VFX): hit and you're knocked out
 --   Leviathan   now and then rears up (a red "!") and hunts you for a few seconds, a little
 --               faster than you but slow to turn, so you can swerve out of its way
@@ -60,7 +60,7 @@ local AURA = {
 }
 local CHARGE = {
 	EVERY = { 5, 9 },
-	WARN = 1.3, -- stamping, turning to you (QM: no red lane on the ground)
+	WARN = 1.3, -- stamping, turning to you, red guide arrows down the way it'll charge (QM)
 	SPEED = 95,
 	LENGTH = { 50, 120 },
 	NEAR = 70,
@@ -170,6 +170,34 @@ local function warning(entity)
 	return b
 end
 
+-- The egg guide's arrows (Ride's guide), tinted red: where a War Elephant is about to
+-- charge (QM). Two attachments lying flat on the ground and the beam between them.
+local ARROW = "rbxassetid://101032148634562" -- assets/ui/GuideArrow.png
+local function arrows()
+	local from, to = Instance.new("Attachment"), Instance.new("Attachment")
+	local beam = Instance.new("Beam")
+	beam.Texture = ARROW
+	beam.TextureMode = Enum.TextureMode.Static
+	beam.TextureLength = 5
+	beam.TextureSpeed = 1.2
+	beam.Width0, beam.Width1 = 4, 4
+	beam.FaceCamera = false
+	beam.LightEmission = 1
+	beam.LightInfluence = 0
+	beam.ZOffset = 6
+	beam.Color = ColorSequence.new(CHARGE.COLOR)
+	beam.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.08, 0.15),
+		NumberSequenceKeypoint.new(0.9, 0.15),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	beam.Attachment0, beam.Attachment1 = from, to
+	beam.Parent = from
+	from.Parent, to.Parent = workspace.Terrain, workspace.Terrain
+	return from, to
+end
+
 -- The animal's footprint, for the hit checks: its half width and half length.
 local function footprint(entity)
 	local _, size = entity.animal.model:GetBoundingBox()
@@ -177,7 +205,7 @@ local function footprint(entity)
 end
 
 local function tidy(st)
-	for _, name in { "flag", "ring" } do
+	for _, name in { "flag", "ring", "arrowFrom", "arrowTo" } do
 		if st[name] then
 			st[name]:Destroy()
 			st[name] = nil
@@ -355,6 +383,7 @@ local function charge(st, entity, dt, mount)
 		if st.wait <= 0 and dist < CHARGE.NEAR and not entity.popping then
 			st.stage, st.t = "warn", 0
 			st.flag = warning(entity)
+			st.arrowFrom, st.arrowTo = arrows()
 		end
 		return
 	end
@@ -367,6 +396,13 @@ local function charge(st, entity, dt, mount)
 		entity.face = math.atan2(-st.dirX, -st.dirZ)
 		entity.hop = math.abs(math.sin(st.t * math.pi * 3)) * 1.2
 		st.hopping = true
+		-- The red arrows, from its feet down the way it'll charge (lying flat: the
+		-- attachments' up is the beam's width).
+		local along = Vector3.new(st.dirX, 0, st.dirZ)
+		local side = along:Cross(Vector3.yAxis)
+		local from = Vector3.new(entity.x, 1.4, entity.z) + along * 4
+		st.arrowFrom.WorldCFrame = CFrame.fromMatrix(from, along, side)
+		st.arrowTo.WorldCFrame = CFrame.fromMatrix(from + along * st.length, along, side)
 		if st.t >= CHARGE.WARN then
 			st.stage, st.left = "go", st.length
 			entity.hop, st.hopping = 0, nil
