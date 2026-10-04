@@ -121,6 +121,11 @@ model.Parent = workspace
 -- Who's standing there: { id, avatar }.
 local standing
 
+-- The leader strikes a victory pose (QM): Roblox's own Cheer emote, both arms flung up,
+-- held still at its peak. Swap POSE (and POSE_AT, seconds into it) for another.
+local POSE = { R15 = "rbxassetid://507770677", R6 = "rbxassetid://129423030" } -- Cheer
+local POSE_AT = 0.45
+
 local function idle(avatar)
 	local humanoid = avatar:FindFirstChildOfClass("Humanoid")
 	if not humanoid then
@@ -130,13 +135,14 @@ local function idle(avatar)
 	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator")
 	animator.Parent = humanoid
 	local animation = Instance.new("Animation")
-	animation.AnimationId = if humanoid.RigType == Enum.HumanoidRigType.R15
-		then "rbxassetid://507766666" -- the default R15 idle
-		else "rbxassetid://180435571" -- the default R6 idle
+	animation.AnimationId = if humanoid.RigType == Enum.HumanoidRigType.R15 then POSE.R15 else POSE.R6
 	pcall(function()
 		local track = animator:LoadAnimation(animation)
-		track.Looped = true
-		track:Play()
+		track.Looped = false
+		track.Priority = Enum.AnimationPriority.Action
+		track:Play(0)
+		track.TimePosition = POSE_AT
+		track:AdjustSpeed(0) -- held at its peak
 	end)
 end
 
@@ -156,9 +162,11 @@ local function stand(id)
 		return
 	end
 	avatar.Name = "Leader"
+	-- Only the root is anchored: limbs held by their joints can be posed (anchored ones
+	-- can't move, which left the avatar stiff).
 	for _, part in avatar:GetDescendants() do
 		if part:IsA("BasePart") then
-			part.Anchored = true
+			part.Anchored = part.Name == "HumanoidRootPart"
 			part.CanCollide = false
 			part.CanQuery = false
 		end
