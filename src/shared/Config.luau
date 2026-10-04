@@ -252,7 +252,7 @@ return {
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
 	Abilities = {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
-		SnackYak = { Kind = "Charge", UntilFull = true, Cooldown = 30, SpeedBoost = 2 }, -- QM, Oct 4
+		SnackYak = { Kind = "Charge", UntilFull = true, Cooldown = 5, SpeedBoost = 2 }, -- QM, Oct 4
 		Unicorn = { Kind = "Leap", Duration = 3, Cooldown = 8, SpeedBoost = 1.4, LeapHeight = 56 },
 		Snake = { Kind = "Rattle", Duration = 2.4, Cooldown = 6, Radius = 45, Restore = 0.5 },
 		Icebringer = { Kind = "Frost", Duration = 4, Cooldown = 8, Radius = 50, Slow = 0.7 },
@@ -453,7 +453,7 @@ return {
 		Boar = { Speed = 1.6, Stamina = 1.6 },
 		Snowman = { Speed = 1.9, Stamina = 1.3 },
 		IceGolem = { Speed = 1.6, Stamina = 3 },
-		SnackYak = { Speed = 3, Stamina = 10 }, -- QM, Oct 4
+		SnackYak = { Speed = 3, Stamina = 1 }, -- QM, Oct 4
 		Icebringer = { Speed = 2.7, Stamina = 4 },
 		-- Ocean
 		Starfish = { Speed = 2.5, Stamina = 2 },
