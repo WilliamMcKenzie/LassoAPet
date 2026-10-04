@@ -1,5 +1,8 @@
 """The Snack Yak (Tundra, medium) from QM's model (designs/snow/SnackYak_QM.bbmodel).
 
+Superseded (Oct 4): QM edits the rigged model by hand now. designs/snow/SnackYak.bbmodel is
+QM's SnackYak_QM2.bbmodel scaled 3.9x (tools/bb_scale.py); running this would overwrite it.
+
 Run: python3 tools/snack_yak.py [out_dir]   rebuild designs/snow/SnackYak.bbmodel, render previews
 then: python3 tools/bbmodel_to_luau.py --zyx designs/snow/SnackYak.bbmodel src/shared/Animals/SnackYakModel.luau
 
