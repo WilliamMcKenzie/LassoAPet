@@ -1,5 +1,5 @@
 -- The podium's grass snake (QM, Oct 4): QM's Snake recoloured as a grass snake, coiled
--- in its idle round a stone column with a cap that first place stands on.
+-- in its idle round a cream marble column with a cap that first place stands on.
 -- designs/props/GrassSnake.bbmodel (QM's file) -> GrassSnakeModel via tools/bbmodel_to_luau.py.
 -- Built and animated by PodiumSnake.client; Leaderboard.server stands the winner on the cap.
 

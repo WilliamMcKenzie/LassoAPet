@@ -226,8 +226,8 @@ return {
 		{ name = "Jaw_rim_-1", bone = "Jaw", class = "Part", size = Vector3.new(0.82, 0.82, 3.36), cframe = CFrame.new(-1.63, 0.63536, -11.685, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(104, 186, 64) },
 		{ name = "Jaw_rim_-2", bone = "Jaw", class = "Part", size = Vector3.new(0.82, 0.82, 3.36), cframe = CFrame.new(1.63, 0.63536, -11.685, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(104, 186, 64) },
 		{ name = "Jaw_rim_2", bone = "Jaw", class = "Part", size = Vector3.new(0.42, 0.82, 5.76), cframe = CFrame.new(1.43, 0.63136, -12.885, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(104, 186, 64) },
-		{ name = "Column", bone = "Podium", class = "Part", size = Vector3.new(3, 5.7, 3.4), cframe = CFrame.new(6, 4.05, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(163, 162, 165) },
-		{ name = "Cap", bone = "Podium", class = "Part", size = Vector3.new(4, 0.6, 3.6), cframe = CFrame.new(6, 7.2, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(163, 162, 165) },
+		{ name = "Column", bone = "Podium", class = "Part", size = Vector3.new(3, 5.7, 3.4), cframe = CFrame.new(6, 4.05, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(242, 232, 210) },
+		{ name = "Cap", bone = "Podium", class = "Part", size = Vector3.new(4, 0.6, 3.6), cframe = CFrame.new(6, 7.2, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(242, 232, 210) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
 	animations = {
