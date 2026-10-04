@@ -338,11 +338,17 @@ end
 
 local rng = Random.new()
 
-for _, nest in world.Nests:GetChildren() do
-	showNestEgg(nest)
-	nest:GetAttributeChangedSignal("Egg"):Connect(function()
+do
+	local function watchNest(nest)
 		showNestEgg(nest)
-	end)
+		nest:GetAttributeChangedSignal("Egg"):Connect(function()
+			showNestEgg(nest)
+		end)
+	end
+	for _, nest in world.Nests:GetChildren() do
+		watchNest(nest)
+	end
+	world.Nests.ChildAdded:Connect(watchNest) -- the EventNest (Events.server) can come in late
 end
 Tutorial.init(function()
 	if Tutorial.nest then
@@ -1057,14 +1063,25 @@ local function updateGuide()
 			end
 		end
 	elseif phase == "outbound" and not cutscene and want == "egg" then
-		local best = math.huge
-		for nest, waiting in waitingEggs do
-			local spot = nest:FindFirstChild("EggSpot")
-			if spot and waiting.egg.model.Parent and spot.Position.Z < at.Z - guide.AHEAD and spot.Position.Z > gateZ() then
-				local d = (Vector2.new(spot.Position.X, spot.Position.Z) - Vector2.new(at.X, at.Z)).Magnitude
-				if d < best then
-					target, best = spot.Position, d
+		-- Riding an event's kind of animal while its egg is out (Events.server), the
+		-- arrows lead to that egg instead; the event's egg is never the nearest egg
+		-- otherwise. (If it's behind you or a locked gate, back to the nearest egg.)
+		local event = world.Nests:FindFirstChild("EventNest")
+		local chasing = event and waitingEggs[event] and mount and mount.kind == world:GetAttribute("EventKind")
+		for _, eventOnly in if chasing then { true, false } else { false } do
+			local best = math.huge
+			for nest, waiting in waitingEggs do
+				local spot = nest:FindFirstChild("EggSpot")
+				if (nest == event) == eventOnly and spot and waiting.egg.model.Parent
+					and spot.Position.Z < at.Z - guide.AHEAD and spot.Position.Z > gateZ() then
+					local d = (Vector2.new(spot.Position.X, spot.Position.Z) - Vector2.new(at.X, at.Z)).Magnitude
+					if d < best then
+						target, best = spot.Position, d
+					end
 				end
+			end
+			if target then
+				break
 			end
 		end
 	end
@@ -1458,6 +1475,9 @@ end
 local flung = {}
 local FLING_TIME = 0.9
 local function knock(entity, dx, remote)
+	if entity.event then
+		return -- an event's animal (vfx.updateEvent) can only be ridden
+	end
 	if entity.n and not remote then
 		vfx.rideCue:FireServer("knock", entity.n, dx)
 	end
@@ -1495,6 +1515,65 @@ local function updateFlung(dt)
 			retire(e)
 		end
 	end
+end
+
+-- Exclusive animal events (Events.server): when the countdown ends, the event's
+-- animal pops in just past the start line and waits there, idling, until someone
+-- rides it (from home, like any stampede animal just in at the line) or the event
+-- ends. It's in the herd under key -EventId, so riding it works as for the rest;
+-- it can't be knocked away or crashed into. Built during the countdown, since a
+-- big animal is slow to build.
+vfx.EVENT_SPOT = Vector2.new(0, START_LINE_Z - 12)
+function vfx.updateEvent(dt, seen, inView)
+	local id = world:GetAttribute("EventId") or 0
+	local key, kind = -id, world:GetAttribute("EventKind") or ""
+	local age = workspace:GetServerTimeNow() - (world:GetAttribute("EventSpawnAt") or math.huge)
+	local old = vfx.event
+	if old and (old.key ~= key or kind == "" or taken[key] or world:GetAttribute("EventTaken")) then
+		-- Over, or someone has it: gone (unless it's someone's mount now).
+		vfx.event = nil
+		old.entity.event = nil -- (as someone's mount, or back in a pool, it's an animal like any other)
+		if herd[old.key] == old.entity then
+			herd[old.key] = nil
+			Poof.at(Vector3.new(old.entity.x, 0, old.entity.z))
+			retire(old.entity)
+		elseif not old.entity.animal.model.Parent then
+			retire(old.entity) -- built for the countdown, never shown
+		end
+	end
+	if kind == "" or age < -3 or taken[key] or world:GetAttribute("EventTaken") or not Animals:FindFirstChild(kind) then
+		return
+	end
+	if not vfx.event then
+		local entity = newEntity(vfx.EVENT_SPOT.X, vfx.EVENT_SPOT.Y, 0, kind)
+		entity.animal.model.Parent = nil
+		entity.n, entity.dodge, entity.event = key, 0, true
+		vfx.event = { key = key, entity = entity }
+	end
+	local entity = vfx.event.entity
+	if age < 0 then
+		return -- still counting down
+	end
+	if not herd[key] then
+		herd[key] = entity
+		entity.animal.model.Parent = herdFolder
+		Poof.at(Vector3.new(entity.x, 0, entity.z))
+	end
+	seen[key] = true
+	entity.dodge *= math.exp(-1.5 * dt)
+	entity.x = math.clamp(vfx.EVENT_SPOT.X + entity.dodge, -EDGE, EDGE)
+	if not inView(entity.x, entity.z) then
+		return
+	end
+	if age < POP_TIME then
+		entity.popping, entity.hop = true, popHop(age)
+		entity.animal:setScale(popScale(age))
+	elseif entity.popping then
+		entity.popping, entity.hop = nil, 0
+		entity.animal:setScale(1)
+	end
+	place(entity, 0)
+	animate(entity, dt, 0, 0)
 end
 
 -- The stampede follows the shared server clock. Only during this player's slow-mo
@@ -1584,6 +1663,7 @@ local function updateHerd(dt, slowed)
 			vfx.setFrosted(entity, vfx.frostLeft[key] ~= nil)
 		end
 	end
+	vfx.updateEvent(dt, seen, inView)
 	for key, entity in herd do
 		if not seen[key] then
 			herd[key] = nil
@@ -2641,7 +2721,7 @@ local function checkRide(dt)
 	end
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
-		if not entity.popping and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
+		if not entity.popping and not entity.event and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
 			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
 			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" then -- (the +1 is for obstacles only)
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)

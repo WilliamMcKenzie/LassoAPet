@@ -7,6 +7,8 @@
 -- Eggs are rolled with exactly the odds of the nest's biome's stampede
 -- (Config.Biomes[b].Herd): an animal that's 1 in 100 of the stampede is 1 in 100
 -- of the eggs (QM, Oct 2).
+--
+-- The EventNest is Events.server's: its egg is the event's, never rolled or restocked here.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -46,7 +48,9 @@ local function roll(nest)
 end
 
 for _, nest in world.Nests:GetChildren() do
-	nest:SetAttribute("Egg", roll(nest))
+	if nest.Name ~= "EventNest" then
+		nest:SetAttribute("Egg", roll(nest))
+	end
 end
 
 local takeEgg = Instance.new("RemoteEvent")
@@ -69,6 +73,9 @@ takeEgg.OnServerEvent:Connect(function(player, nest)
 	end
 	player:SetAttribute("CarriedEgg", nest:GetAttribute("Egg")) -- theirs once they ride it home (Hatchery)
 	nest:SetAttribute("Egg", "")
+	if nest.Name == "EventNest" then
+		return -- the event's over (Events.server)
+	end
 	task.delay(Config.NestRestock, function()
 		if nest.Parent and nest:GetAttribute("Egg") == "" then
 			nest:SetAttribute("Egg", roll(nest))

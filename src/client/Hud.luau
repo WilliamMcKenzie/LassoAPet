@@ -97,6 +97,10 @@ local IMAGES = {
 	eggStarfish = { id = "rbxassetid://114368032731288", size = Vector2.new(680, 783) }, -- StarfishEggRender.png
 	eggFishSchool = { id = "rbxassetid://137156704531563", size = Vector2.new(530, 721) }, -- FishSchoolEggRender.png
 	eggLoong = { id = "rbxassetid://70469571709365", size = Vector2.new(560, 863) }, -- LoongEggRender.png (QM's egg)
+	-- Exclusive animal events' countdown (Hud.setEventCountdown): QM's gradient names.
+	eventLoong = { id = "", size = Vector2.new(372, 140) }, -- EventLoong.png
+	eventSnackYak = { id = "", size = Vector2.new(593, 119) }, -- EventSnackYak.png
+	eventRoboShark = { id = "", size = Vector2.new(628, 119) }, -- EventRoboShark.png
 }
 
 -- On a computer (keyboard, no touch screen) the ride buttons show their key:
@@ -164,6 +168,10 @@ local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at th
 -- (no Gold, Pets or Upgrade Pen) while it runs.
 local tutorial = nil
 local upgradeScale -- Upgrade Pen's UIScale
+-- The exclusive animal event's countdown, top centre (Hud.setEventCountdown), in
+-- its own always-on ScreenGui: its row, the animal's name (QM's gradient image, or
+-- plain text until it's uploaded), "spawns in Ns..." and the row's UIScale.
+local EVENT = { NAME_SCALE = 44 / 119, TEXT_SIZE = 40, TOP = 44 }
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -716,6 +724,36 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		prompt.Triggered:Connect(doRoll)
 	end)
 
+	-- The exclusive animal event's countdown (QM's reference: the name, then "spawns in 9s...").
+	local eventGui = Instance.new("ScreenGui")
+	eventGui.Name = "EventHud"
+	eventGui.ResetOnSpawn = false
+	eventGui.IgnoreGuiInset = true
+	eventGui.DisplayOrder = 5
+	eventGui.Parent = playerGui
+	EVENT.row = Instance.new("Frame")
+	EVENT.row.BackgroundTransparency = 1
+	EVENT.row.AutomaticSize = Enum.AutomaticSize.XY
+	EVENT.row.AnchorPoint = Vector2.new(0.5, 0.5)
+	EVENT.row.Position = UDim2.new(0.5, 0, 0, EVENT.TOP)
+	EVENT.row.Visible = false
+	local eventLayout = Instance.new("UIListLayout")
+	eventLayout.FillDirection = Enum.FillDirection.Horizontal
+	eventLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	eventLayout.Padding = UDim.new(0, 12)
+	eventLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	eventLayout.Parent = EVENT.row
+	EVENT.name = image(EVENT.row, "eventLoong", UDim2.new(), UDim2.new())
+	EVENT.nameText = label(EVENT.row, UDim2.fromOffset(0, EVENT.TEXT_SIZE + 8), UDim2.new(), EVENT.TEXT_SIZE + 6, 3)
+	EVENT.nameText.AutomaticSize = Enum.AutomaticSize.X
+	EVENT.nameText.TextColor3 = Color3.fromRGB(150, 255, 140)
+	EVENT.text = label(EVENT.row, UDim2.fromOffset(0, EVENT.TEXT_SIZE + 8), UDim2.new(), EVENT.TEXT_SIZE, 3) -- 3px outline (QM)
+	EVENT.text.AutomaticSize = Enum.AutomaticSize.X
+	EVENT.text.LayoutOrder = 1
+	EVENT.scale = Instance.new("UIScale")
+	EVENT.scale.Parent = EVENT.row
+	EVENT.row.Parent = root(eventGui)
+
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only
 	-- readies an image for drawing the first time it's on screen, which stalls
@@ -1257,6 +1295,38 @@ function Hud.setTutorial(stage)
 	end
 	upgrade.Visible = upgradeShown and not riding and stage ~= "bare"
 	rideCash.row.Visible = stage == nil and not noCash
+end
+
+-- The exclusive animal event's countdown: `kind` spawns in `seconds`, or nil to
+-- hide it. Each new second pops a little. Not during the tutorial.
+function Hud.setEventCountdown(kind, seconds)
+	if not EVENT.row then
+		return
+	end
+	local shown = kind ~= nil and tutorial == nil
+	EVENT.row.Visible = shown
+	if not shown then
+		EVENT.kind, EVENT.seconds = nil, nil
+		return
+	end
+	if kind ~= EVENT.kind then
+		EVENT.kind = kind
+		local entry = IMAGES["event" .. kind]
+		local uploaded = entry ~= nil and entry.id ~= ""
+		EVENT.name.Visible, EVENT.nameText.Visible = uploaded, not uploaded
+		if uploaded then
+			EVENT.name.Image = entry.id
+			EVENT.name.Size = UDim2.fromOffset(entry.size.X * EVENT.NAME_SCALE, entry.size.Y * EVENT.NAME_SCALE)
+		else
+			EVENT.nameText.Text = kind:gsub("(%l)(%u)", "%1 %2") -- "SnackYak" reads "Snack Yak"
+		end
+	end
+	if seconds ~= EVENT.seconds then
+		EVENT.seconds = seconds
+		EVENT.text.Text = "spawns in " .. seconds .. "s..."
+		EVENT.scale.Scale = 1.15
+		TweenService:Create(EVENT.scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	end
 end
 
 -- Money as the HUD writes it: "$950", "$1.2k".

@@ -206,6 +206,24 @@ return {
 	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
 	-- their eggs never show up.
 	NestRestock = 30,
+	-- Exclusive animal events (Events.server, QM Oct 4): there's always one on. A
+	-- banner counts down the last Countdown seconds, then the animal pops in at the
+	-- start line and waits there to be ridden, and its egg drops somewhere random on
+	-- the course. Riding that kind of animal while its egg is out, the guide arrows
+	-- lead to that egg. The event ends when someone takes the egg or after Duration
+	-- seconds; the next countdown starts Gap seconds later. One kind at a time,
+	-- picked at random (never the same twice running).
+	Events = {
+		Animals = { "Loong", "SnackYak", "RoboShark" },
+		Countdown = 10,
+		Duration = 180,
+		Gap = 5,
+		-- The egg's spot: this far in from the walls, this far from any obstacle's
+		-- footprint and from a gate's line.
+		WallMargin = 14,
+		ObstacleMargin = 10,
+		GateMargin = 30,
+	},
 	-- Any pet can be ridden. Until pets can be picked in the pen, you ride this one
 	-- (it waits on the first pet spot in your pen).
 	DefaultPet = "Horse",
