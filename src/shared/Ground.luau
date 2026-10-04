@@ -20,7 +20,8 @@ end
 local function load()
 	heights = {}
 	for _, part in workspace:WaitForChild("World"):WaitForChild("Ground"):GetChildren() do
-		local top = part.Position.Y + part.Size.Y / 2
+		-- (a part sunk by Server/OceanDepth keeps its riding height in RestTop)
+		local top = part:GetAttribute("RestTop") or part.Position.Y + part.Size.Y / 2
 		if part:IsA("BasePart") and math.abs(top) > 0.01 then
 			local lo = part.Position - part.Size / 2
 			for x = lo.X + CELL / 2, lo.X + part.Size.X, CELL do
