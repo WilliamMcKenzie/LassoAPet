@@ -443,17 +443,27 @@ local function hold(tool)
 		hooked[tool] = nil
 		drop()
 	end)
+	-- On a phone or tablet a tap puts the egg straight down where you tapped (QM: there's no
+	-- pointer to preview it with). The tap reaches the egg as the tool's Activated, and
+	-- the mouse is moved to the tap.
+	tool.Activated:Connect(function()
+		if UserInputService.TouchEnabled and not UserInputService.MouseEnabled then
+			placeAt(mouse.X, mouse.Y)
+		end
+	end)
 	tool.Unequipped:Connect(drop)
 end
 
 -- A click or tap on your pen while holding an egg puts it down there. (Read
 -- straight from the input, not the Tool's Activated, which some clicks never fire.)
+local lastPlaced = 0
 local function placeAt(screenX, screenY)
-	if not holding or holding.Parent ~= player.Character then
-		return
+	if not holding or holding.Parent ~= player.Character or os.clock() - lastPlaced < 0.3 then
+		return -- (one tap can come in two ways on a phone: place it once)
 	end
 	local x, z = spotAt(screenX, screenY)
 	if x then
+		lastPlaced = os.clock()
 		placeEgg:FireServer(holding:GetAttribute("EggKind"), x, z)
 	end
 end
