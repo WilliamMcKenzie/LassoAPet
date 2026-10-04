@@ -9,7 +9,8 @@ Run: python3 tools/leviathan_design.py [out_dir] [--gif]
 
 Rest pose (every bone at 0): straight and flat on its belly, facing -z, every cube
 axis-aligned. Bones: root (the front segment, where you sit) -> Seg2 ... Seg7 (the
-tail); root -> neck (the head) -> GillL, GillR (the gill fans).
+tail); root -> neck (the head) -> GillL, GillR (the gill fans), Jaw (the lower jaw;
+-X opens it).
 
   idle    head raised, looking about, the gills fanning slowly, the tail curling
   walk    a side-to-side wave down the body, the head bobbing, the gills rippling
@@ -30,6 +31,7 @@ from horse_rig import write_animations  # noqa: E402
 from partlib import render  # noqa: E402
 from snake_rig import track  # noqa: E402
 import animal_designs as A  # noqa: E402
+import sandworm_design as W  # noqa: E402  (its tooth(): a square pyramid)
 
 S.SIZE = 1.0
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -38,11 +40,13 @@ TAU = 2 * math.pi
 
 COLORS = {"aqua": (140, 226, 214), "deep": (92, 190, 182), "pale": (198, 246, 238), "belly": (246, 250, 250),
           "gill": (186, 52, 40), "gilldark": (130, 30, 30), "gold": (232, 184, 48), "black": (20, 20, 24),
-          "mark": (120, 24, 30), "tip": (255, 236, 130)}
+          "mark": (120, 24, 30), "tip": (255, 236, 130), "ivory": (252, 250, 240), "mouth": (110, 20, 34)}
 TEX = {n: i for i, n in enumerate(COLORS)}
 
 # (bone, z front, z back, half width, height): the body from the front to the tail
-HEAD = (-5.0, 0.0, 2.7, 4.6)  # z front, z back, half width, height
+HEAD = (-4.0, 0.0, 2.7, 5.6)  # z front, z back, half width, height (the head block, behind the snout)
+SNOUT = 2.6  # how far the jaws reach out in front of it
+GAPE = 0.9  # studs between the jaws at rest: the teeth show, crossing
 SEGMENTS = [("root", 0.0, 3.4, 2.4, 4.2), ("Seg2", 3.4, 6.6, 2.25, 3.9), ("Seg3", 6.6, 9.6, 2.05, 3.5),
             ("Seg4", 9.6, 12.4, 1.8, 3.1), ("Seg5", 12.4, 15.0, 1.5, 2.6), ("Seg6", 15.0, 17.2, 1.2, 2.1),
             ("Seg7", 17.2, 19.0, 0.9, 1.6)]
@@ -100,19 +104,42 @@ def build():
     z0, z1, hw, h = HEAD
     head = add_group("neck", (0, h / 2, z1), root)
     belly = h * 0.36
-    put(head, [c("HeadChin", (0, belly / 2, (z0 + z1) / 2 + 0.25), (2 * hw - 0.3, belly, z1 - z0 + 0.5), TEX["belly"]),
-               c("Head", (0, belly + (h - belly) / 2, (z0 + z1) / 2 + 0.25), (2 * hw, h - belly, z1 - z0 + 0.5), TEX["aqua"]),
-               # a rounded crown and a broad, flat snout
-               c("Crown", (0, h + 0.3, (z0 + z1) / 2 + 0.6), (2 * hw - 1.4, 0.6, z1 - z0 - 1.4), TEX["aqua"]),
-               c("Snout", (0, belly + 0.5, z0 - 0.4), (2 * hw - 1.6, 1.8, 0.8), TEX["aqua"]),
-               c("SnoutChin", (0, belly / 2 + 0.1, z0 - 0.4), (2 * hw - 1.8, belly - 0.2, 0.8), TEX["belly"])])
-    # the face on the front: gold eyes up top, dark red marks under them, a little mouth
+    put(head, [c("Head", (0, belly + (h - belly) / 2, (z0 + z1) / 2 + 0.25), (2 * hw, h - belly, z1 - z0 + 0.5), TEX["aqua"]),
+               c("Crown", (0, h + 0.3, (z0 + z1) / 2 + 0.6), (2 * hw - 1.4, 0.6, z1 - z0 - 1.4), TEX["aqua"])])
+    # the gold eyes on the front, over the snout
     zf = z0 - 0.03
     for side, sx in (("L", -1), ("R", 1)):
-        put(head, [c("Eye" + side, (sx * 1.15, h - 1.1, zf), (1.0, 1.0, 0.06), TEX["gold"]),
-                   c("Pupil" + side, (sx * 1.05, h - 1.2, zf - 0.03), (0.4, 0.55, 0.06), TEX["black"]),
-                   c("Mark" + side, (sx * 1.55, h - 2.2, zf), (0.6, 0.6, 0.06), TEX["mark"])])
-    put(head, [c("Mouth", (0, belly + 0.55, z0 - 0.83), (1.0, 0.4, 0.06), TEX["mark"])])
+        put(head, [c("Eye" + side, (sx * 1.15, h - 0.85, zf), (1.0, 1.0, 0.06), TEX["gold"]),
+                   c("Pupil" + side, (sx * 1.05, h - 0.95, zf - 0.03), (0.4, 0.55, 0.06), TEX["black"])])
+    # the upper jaw: a long snout out front with the reference's dark red marks on top as
+    # nostrils, dark gums under it and a row of razor teeth hanging over the lower jaw
+    sw, sl = 2 * hw - 0.8, SNOUT  # snout width, length
+    y0s, y1s = belly + GAPE, belly + GAPE + 1.6  # the mouth is modelled open by GAPE studs
+    zs = z0 - sl
+    put(head, [c("Snout", (0, (y0s + y1s) / 2 + 0.15, z0 - sl / 2), (sw, y1s - y0s - 0.3, sl), TEX["aqua"]),
+               c("Gums", (0, y0s + 0.08, z0 - sl / 2 + 0.1), (sw - 0.4, 0.16, sl - 0.2), TEX["mouth"]),
+               c("Throat", (0, belly + GAPE / 2, z0 + 0.2), (sw - 0.4, GAPE + 0.1, 0.4), TEX["mouth"])])
+    for side, sx in (("L", -1), ("R", 1)):
+        put(head, [c("Nostril" + side, (sx * 0.8, y1s + 0.03, zs + 0.6), (0.5, 0.06, 0.5), TEX["mark"])])
+    ty = y0s + 0.02
+    teeth = [(x, zs + 0.25) for x in (-1.6, -0.8, 0.0, 0.8, 1.6)]
+    teeth += [(sx * (sw / 2 - 0.25), zs + 0.25 + 0.75 * k) for sx in (-1, 1) for k in range(1, int(sl / 0.75) + 2)]
+    for k, (x, z) in enumerate(teeth):
+        fang = abs(x) > 1.2 and k < 5  # the outer front pair are fangs
+        put(head, [W.tooth(f"ToothTop{k}", (x, ty, z), 0.55 if fang else 0.42, 1.25 if fang else 0.85, (0, -1, 0), TEX["ivory"])])
+
+    # the lower jaw on its own bone, hinged at the back: a pale jaw, a touch longer than
+    # the snout (an underbite), its own teeth jutting up in front of the upper ones
+    jaw = add_group("Jaw", (0, belly / 2, z1 - 1.0), head)
+    jw = sw - 0.5
+    jz0, jz1 = zs - 0.3, z1 + 0.5
+    put(jaw, [c("Jaw", (0, belly / 2, (jz0 + jz1) / 2), (2 * hw - 0.3, belly, jz1 - jz0), TEX["belly"]),
+              c("Tongue", (0, belly + 0.04, (jz0 + z0) / 2 + 0.2), (jw - 0.6, 0.08, z0 - jz0 - 0.6), TEX["mouth"])])
+    jteeth = [(x, jz0 + 0.25) for x in (-1.2, -0.4, 0.4, 1.2)]
+    jteeth += [(sx * (jw / 2 - 0.1), jz0 + 0.65 + 0.75 * k) for sx in (-1, 1) for k in range(int(sl / 0.75))]
+    for k, (x, z) in enumerate(jteeth):
+        put(jaw, [W.tooth(f"ToothBottom{k}", (x, belly - 0.02, z), 0.42, 0.8, (0, 1, 0), TEX["ivory"])])
+
     # the gills: three red stalks fanning out from each side of the back of the head,
     # each with a darker tip and a row of feathery nubs along its top
     for side, sx in (("L", -1), ("R", 1)):
@@ -156,6 +183,7 @@ def animations():
     idle = {"neck": [track(L, lambda u: (14 + 3 * math.sin(TAU * u * 2), 16 * math.sin(TAU * u), 0), 24)],
             "root": [track(L, lambda u: (0, -4 * math.sin(TAU * u), 0), 12)],
             **gills(L, lambda u: (8 * math.sin(TAU * u * 2), 0), 24),
+            "Jaw": [track(L, lambda u: (-34 * max(0.0, math.sin(TAU * u * 2 - 1)) ** 4, 0, 0), 32)],  # a snap now and then
             **{b: [track(L, lambda u, j=j: (0, (5 + 3 * j) + (10 if j == len(BODY) - 1 else 2) * math.sin(TAU * u * (2 if j == len(BODY) - 1 else 1)), 0), 24)]
                for j, b in enumerate(BODY)}}
 
@@ -163,13 +191,15 @@ def animations():
     walk = {**wave(Lw, 11, 0.95, 0.15),
             "neck": [track(Lw, lambda u: (6 + 3 * math.sin(TAU * u * 2), -8 * math.sin(TAU * u + 0.4), 0), 16)],
             "root": [track(Lw, lambda u: (0, 4 * math.sin(TAU * u + 0.4), 0), 12)],
-            **gills(Lw, lambda u: (10 * math.sin(TAU * u * 2), 8))}
+            **gills(Lw, lambda u: (10 * math.sin(TAU * u * 2), 8)),
+            "Jaw": [track(Lw, lambda u: (-10 - 8 * math.sin(TAU * u), 0, 0), 16)]}
 
     Lg = 0.6
     gallop = {**wave(Lg, 17, 0.9, 0.15),
               "neck": [track(Lg, lambda u: (2 + 3 * math.sin(TAU * u * 2), -10 * math.sin(TAU * u + 0.4), 0), 12)],
               "root": [track(Lg, lambda u: (0, 6 * math.sin(TAU * u + 0.4), 0), 12)],
-              **gills(Lg, lambda u: (6 * math.sin(TAU * u * 2), 30))}
+              **gills(Lg, lambda u: (6 * math.sin(TAU * u * 2), 30)),
+              "Jaw": [track(Lg, lambda u: (-18 - 16 * math.sin(TAU * u * 2), 0, 0), 16)]}  # snapping
     return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lg, gallop)}
 
 
