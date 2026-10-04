@@ -12,6 +12,7 @@ local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
+local Sounds = require(script.Parent.Sounds)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -109,6 +110,10 @@ end
 
 -- The gate bursts into pieces flung on into the biome, tumbling and fading.
 local function shatter(i)
+	-- It breaks with a crunch (smash and crash together), then a little jingle (egg_hatch's) (QM).
+	Sounds.play("smash", 0.8)
+	Sounds.play("crash", 0.5)
+	task.delay(0.3, Sounds.play, "egg_hatch", 0.6)
 	local width, height = Config.CourseHalfWidth * 2, Config.GateHeight
 	local z = WorldColors.biomeStart(i)
 	local w, h = width / SHARDS_X, height / SHARDS_Y
