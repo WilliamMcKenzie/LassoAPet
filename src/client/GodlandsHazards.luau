@@ -12,7 +12,9 @@
 --               faster than you but slow to turn, so you can swerve out of its way
 --
 -- Ride.client drives it:
---   Hazards.update(dt, herd, mount, riding)  -- each frame, after the stampede moves
+--   Hazards.update(dt, herd, mount, riding, goo)  -- each frame, after the stampede moves
+--       (goo: your Sludge's sprint is on (Config.SprintSpecials): it lays the same sludge,
+--       which gets stampede animals stuck instead of you)
 --   Hazards.offset(key)       -- x, z a charging or hunting animal is off its place in the stampede
 --   Hazards.hit(mount, grace) -- the tip for a crash this frame, if any (gets you stuck in sludge too)
 --   Hazards.steerSign()       -- -1 while you're confused
@@ -75,13 +77,18 @@ local HUNT = {
 	NEAR = 60,
 }
 local SETTLE = 1.2 -- how quickly a charger or hunter drifts back to its place in the stampede
+local GOO = {
+	STUCK = 1.5, -- seconds a stampede animal that ran into your Sludge's sludge crawls
+	SLOW = 0.2, -- x its speed meanwhile: it falls behind the stampede
+}
 local KINDS = { SoulHorse = "spikes", Sludge = "sludge", Beholder = "aura", WarElephant = "charge", Leviathan = "hunt" }
 
 local player = Players.LocalPlayer
 local rng = Random.new()
 local watched = {} -- [key] = state of a hazardous stampede animal near you
 local spikes = {} -- { parts, up, t, x, z }
-local puddles = {} -- { part, t, x, z, r }
+local puddles = {} -- { part, t, x, z, r, mine }: mine = your Sludge's, which never gets you stuck
+local gooLeft, gooLag = {}, {} -- [key]: a stampede animal stuck in your sludge (seconds left), and how far behind it fell
 local fading = {} -- one-off effects: { part, t, life, size0, size1, transparency0 }
 local confused, stuck = 0, 0
 local holder = Instance.new("Folder")
@@ -248,9 +255,9 @@ local function updateSpikes(dt)
 	end
 end
 
-local function puddle(x, z)
+local function puddle(x, z, mine)
 	local p = disc(x, z, SLUDGE.RADIUS, SLUDGE.COLOR, 0.12)
-	table.insert(puddles, { part = p, t = 0, x = x, z = z, r = SLUDGE.RADIUS })
+	table.insert(puddles, { part = p, t = 0, x = x, z = z, r = SLUDGE.RADIUS, mine = mine })
 end
 
 local function updatePuddles(dt)
@@ -437,11 +444,55 @@ end
 
 -- The API -------------------------------------------------------------------
 
-function Hazards.update(dt, herd, mount, riding)
+function Hazards.update(dt, herd, mount, riding, goo)
 	local seen = {}
 	if not riding or not mount then
 		herd = {} -- crashed (or not riding): the animals calm down, the spikes and sludge play out
-		confused, stuck = 0, 0
+		confused, stuck, goo = 0, 0, false
+	end
+	if goo then
+		-- Your Sludge sprinting: its sludge trail, every so many studs (Hazards.mine is its trail state).
+		Hazards.mine = Hazards.mine or {}
+		local m = Hazards.mine
+		local dx, dz = mount.x - (m.x or mount.x), mount.z - (m.z or mount.z)
+		m.run = (m.run or 0) + math.sqrt(dx * dx + dz * dz)
+		m.x, m.z = mount.x, mount.z
+		if m.run >= SLUDGE.EVERY then
+			m.run = 0
+			puddle(mount.x, mount.z, true)
+		end
+	else
+		Hazards.mine = nil
+	end
+	-- Stampede animals running into your sludge get stuck and fall behind.
+	local anyMine = false
+	for _, d in puddles do
+		anyMine = anyMine or d.mine
+	end
+	for key, left in gooLeft do
+		gooLeft[key] = if left > dt then left - dt else nil
+		local entity = herd[key]
+		if entity then
+			gooLag[key] = (gooLag[key] or 0) + (entity.speed or 0) * (1 - GOO.SLOW) * dt
+		end
+	end
+	if anyMine then
+		for key, entity in herd do
+			if key >= 0 and not entity.popping and not entity.event then
+				for _, d in puddles do
+					local dx, dz = entity.x - d.x, entity.z - d.z
+					if d.mine and dx * dx + dz * dz < (d.r + 1.5) ^ 2 then
+						gooLeft[key] = GOO.STUCK
+						break
+					end
+				end
+			end
+		end
+	end
+	for key in gooLag do
+		if not herd[key] then
+			gooLag[key], gooLeft[key] = nil, nil -- gone (out of view, lassoed or knocked away)
+		end
 	end
 	for key, entity in herd do
 		local kind = KINDS[entity.kind]
@@ -497,17 +548,18 @@ end
 
 function Hazards.offset(key)
 	local st = watched[key]
+	local lag = gooLag[key] or 0 -- (it runs toward -z: falling behind is +z)
 	if st then
-		return st.ox, st.oz
+		return st.ox, st.oz + lag
 	end
-	return 0, 0
+	return 0, lag
 end
 
 function Hazards.hit(mount, grace)
 	local x, z = mount.x, mount.z
 	for _, d in puddles do
 		local dx, dz = x - d.x, z - d.z
-		if dx * dx + dz * dz < d.r * d.r then
+		if not d.mine and dx * dx + dz * dz < d.r * d.r then
 			stuck = SLUDGE.STUCK
 		end
 	end
@@ -561,6 +613,7 @@ function Hazards.clear()
 		f.part:Destroy()
 	end
 	spikes, puddles, fading = {}, {}, {}
+	gooLeft, gooLag, Hazards.mine = {}, {}, nil
 	confused, stuck = 0, 0
 	gui.Enabled = false
 end

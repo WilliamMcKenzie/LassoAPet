@@ -3910,7 +3910,8 @@ RunService.PreSimulation:Connect(function(dt)
 	-- back to everyone else's after slowing down.
 	updateHerd(dt, (slow and not cutscene) or Tutorial.active)
 	updateFlung(dt)
-	vfx.hazards.update(dt, herd, mount, phase == "outbound" or phase == "turning" or phase == "return")
+	vfx.hazards.update(dt, herd, mount, phase == "outbound" or phase == "turning" or phase == "return",
+		mount ~= nil and (vfx.sprintSpecial() or {}).Kind == "Goo") -- (the Sludge's sprint: its sludge trail)
 	vfx.updateNuke()
 	vfx.sendRide()
 	vfx.updateRiders(dt)

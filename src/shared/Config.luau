@@ -340,6 +340,8 @@ return {
 	--   Flame (Leviathan): a flamethrower, the Loong's fire straight ahead: every obstacle
 	--     and animal within Range studs of its mouth (Width wide) is burnt away, whatever
 	--     its size.
+	--   Goo (Sludge): it lays the wild Sludge's sludge behind it; stampede animals that
+	--     run into it are stuck, crawling, for a moment (Client/GodlandsHazards).
 	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, which
 	-- is always a sprint (ReturnSprint).
 	SprintSpecials = {
@@ -348,6 +350,7 @@ return {
 		Whale = { Kind = "Fly", Height = 56 },
 		Leviathan = { Kind = "Flame", Range = 5, Width = 9, OnReturn = true }, -- QM, Oct 4: "like 1m ahead" (4 studs a metre; the width is a guess)
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
+		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/GodlandsHazards)
 		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true, RestorePer = 0.2 }, -- QM, Oct 4: 20% Hold per animal it hits
 	},
 	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
