@@ -32,8 +32,8 @@ return {
 	parts = {
 		{ name = "body", bone = "body", class = "Part", size = Vector3.new(3.1, 1.2, 3.4), cframe = CFrame.new(0.05, 2.00021, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 58, 48) },
 		{ name = "body", bone = "body", class = "Part", size = Vector3.new(2.6, 0.8, 2.7), cframe = CFrame.new(0, 1.00021, 0.15, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(252, 196, 150) },
-		{ name = "body", bone = "body", class = "Part", size = Vector3.new(1.2, 0.2, 2.7), cframe = CFrame.new(-2.1, 2.30021, 0.05, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 58, 48) },
-		{ name = "body", bone = "body", class = "Part", size = Vector3.new(1.1, 0.2, 2.7), cframe = CFrame.new(2.15, 2.30021, 0.05, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 58, 48) },
+		{ name = "body", bone = "body", class = "Part", size = Vector3.new(1.5, 0.5, 2.7), cframe = CFrame.new(-1.82141, 2.63011, 0.05, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 0, 0, 1), color = Color3.fromRGB(226, 58, 48) },
+		{ name = "body", bone = "body", class = "Part", size = Vector3.new(1.5, 0.5, 2.7), cframe = CFrame.new(1.82141, 2.63011, 0.05, 0.866025, -0.5, 0, 0.5, 0.866025, 0, 0, 0, 1), color = Color3.fromRGB(226, 58, 48) },
 		{ name = "face", bone = "neck", class = "Part", size = Vector3.new(0.3, 1.3, 0.3), cframe = CFrame.new(0.781028, 2.66815, -1.90891, 0.819152, 0.573576, 0, -0.387503, 0.553411, 0.737277, 0.422885, -0.603942, 0.67559), color = Color3.fromRGB(160, 32, 40) },
 		{ name = "face", bone = "neck", class = "Part", size = Vector3.new(0.3, 1.3, 0.3), cframe = CFrame.new(-0.781028, 2.66815, -1.90891, 0.819152, -0.573576, 0, 0.387503, 0.553411, 0.737277, -0.422885, -0.603942, 0.67559), color = Color3.fromRGB(160, 32, 40) },
 		{ name = "mandible0", bone = "mandible0", class = "Part", size = Vector3.new(0.6, 0.4, 0.4), cframe = CFrame.new(0.436603, 1.30021, -1.7634, 0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025), color = Color3.fromRGB(250, 226, 190) },
