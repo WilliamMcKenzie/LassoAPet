@@ -2252,8 +2252,8 @@ function vfx.huntStep(cfg)
 	local function alive(entity)
 		return (entity.n and herd[entity.n] == entity) or (not entity.n and table.find(strays, entity) ~= nil)
 	end
-	if prey and not alive(prey) then
-		prey = nil -- gone (eaten, lassoed or knocked away)
+	if prey and (not alive(prey) or (prey.z - mount.z) * travelDir() <= 0) then
+		prey = nil -- gone (eaten, lassoed or knocked away), or no longer ahead of it
 	end
 	if not prey then
 		local best = math.huge
