@@ -1397,8 +1397,10 @@ local function sprinting()
 	if phase == "return" then
 		return Config.ReturnSprint -- racing home with the egg
 	end
-	-- (on a phone: the joystick pushed far out, rideStick; QM)
-	local stickOut = rideStick.on and controls:GetMoveVector().Magnitude >= Config.TouchSprintAt
+	-- (the joystick pushed far out sprints, QM: a phone's, either the fixed or the
+	-- dynamic one (both drive the move vector, rideStick), or a controller's left stick)
+	local stickOut = (rideStick.on and controls:GetMoveVector().Magnitude >= Config.TouchSprintAt)
+		or (vfx.padPush or 0) >= Config.TouchSprintAt
 	return phase == "outbound" and not Tutorial.active and (sprintKey or Hud.sprintHeld() or stickOut)
 end
 
@@ -1407,6 +1409,7 @@ UserInputService.InputChanged:Connect(function(input)
 		touchSteer = math.clamp((input.Position.X - touchStart[input]) / 70, -1, 1)
 	elseif input.KeyCode == Enum.KeyCode.Thumbstick1 then
 		padSteer = math.abs(input.Position.X) > 0.2 and input.Position.X or 0
+		vfx.padPush = Vector2.new(input.Position.X, input.Position.Y).Magnitude -- (pushed far out: sprints, as on a phone)
 	end
 end)
 
