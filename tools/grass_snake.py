@@ -1,5 +1,5 @@
 """Grass Snake prop: QM's Snake recoloured as a plain grass snake, coiled in its idle
-round a gold podium column (QM's edit, Oct 4). Renders a still and the idle GIF.
+round a stone podium column (QM's edit, Oct 4). Renders a still and the idle GIF.
 
 Run: python3 tools/grass_snake.py [out_dir]
 

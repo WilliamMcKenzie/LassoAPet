@@ -1,5 +1,5 @@
 -- The podium (Config.Podium, QM Oct 4): QM's grass snake (Props/GrassSnake), coiled on
--- the ground playing its idle round the gold column that first place stands on
+-- the ground playing its idle round the stone column that first place stands on
 -- (Leaderboard.server puts their avatar on the cap). Only a prop: it isn't an animal
 -- you can ride or own.
 --

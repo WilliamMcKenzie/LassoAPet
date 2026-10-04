@@ -1,5 +1,5 @@
 -- The podium (Config.Podium): the Roblox avatar of the player who rode furthest from
--- base, standing on the cap of QM's gold column in the middle of the grass snake's
+-- base, standing on the cap of QM's stone column in the middle of the grass snake's
 -- coil (Props/GrassSnake, built by PodiumSnake.client) in the base's right front
 -- corner. First place only, and no text for now (QM, Oct 4).
 --
