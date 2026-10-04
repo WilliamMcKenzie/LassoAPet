@@ -13,6 +13,7 @@
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -42,6 +43,9 @@ local function load(player)
 				loaded[player] = true
 			end
 			return
+		end
+		if attempt == 3 or RunService:IsStudio() then
+			break -- no API access in Studio fails every time: don't keep the player waiting
 		end
 		task.wait(attempt * 2)
 	end
