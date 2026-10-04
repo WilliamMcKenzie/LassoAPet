@@ -1,0 +1,18 @@
+{
+ "WarElephant": {
+  "rarity": "Rare",
+  "seat": [
+   0,
+   8.1,
+   1.2
+  ],
+  "neck_loop": {
+   "center": [
+    0,
+    6.4,
+    -4.6
+   ],
+   "radius": 2.3
+  }
+ }
+}
