@@ -552,6 +552,9 @@ local function cleanup()
 	end
 	vfx.revive = nil
 	Lasso.stop()
+	if vfx.endScare then
+		vfx.endScare() -- (the snake's glow goes with the ride)
+	end
 	cutscene = nil
 	heroLeap = nil
 	Hud.setCutscene(false)
@@ -1972,7 +1975,34 @@ local function rattleBlast(cfg)
 			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
 		end
 	end
+	vfx.endScare()
 	vfx.scareAura = { mount = mount, left = cfg.ScareTime, radius = cfg.Radius, restorePer = cfg.RestorePer, scared = {} }
+	vfx.snakeGlow(mount, true)
+end
+
+-- While the snake's scare lasts, its horns and blue spikes glow (QM): the parts in
+-- its spike colour turn Neon, their studs hidden so the glow shows.
+vfx.SPIKE_COLOR = Color3.fromRGB(48, 196, 214)
+function vfx.snakeGlow(entity, on)
+	for _, part in entity.animal.model:GetDescendants() do
+		if part:IsA("BasePart") and part.Color == vfx.SPIKE_COLOR then
+			part.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
+			for _, texture in part:GetChildren() do
+				if texture:IsA("Texture") then
+					texture.Transparency = if on then 1 else 0
+				end
+			end
+		end
+	end
+end
+
+-- The scare's over (its time is up, the ride ended, or the snake's gone).
+function vfx.endScare()
+	local aura = vfx.scareAura
+	if aura then
+		vfx.scareAura = nil
+		vfx.snakeGlow(aura.mount, false)
+	end
 end
 
 -- The snake's scare, while it lasts: every animal within its radius scatters
@@ -1984,7 +2014,7 @@ function vfx.updateScared(dt)
 	end
 	aura.left -= dt
 	if aura.left <= 0 or mount ~= aura.mount then
-		vfx.scareAura = nil
+		vfx.endScare()
 		return
 	end
 	for _, entity in allAnimals() do
