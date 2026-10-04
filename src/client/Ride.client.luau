@@ -1083,6 +1083,7 @@ end)
 
 local function updateGuide()
 	local target
+	vfx.chasingEvent = false
 	-- From the pet, or the rider while they're pulled across to a lassoed one.
 	local at = if mount then Vector3.new(mount.x, 0, mount.z) else focus
 	local want = Tutorial.guideTo()
@@ -1117,10 +1118,12 @@ local function updateGuide()
 				end
 			end
 			if target then
+				vfx.chasingEvent = eventOnly -- (the arrows lead to the event's egg)
 				break
 			end
 		end
 	end
+	Hud.setFollowHint(vfx.chasingEvent and phase == "outbound" and not cutscene) -- QM: on the event animal, following its arrows
 	guide.beam.Enabled = target ~= nil
 	if target then
 		-- The trail starts a little out from the pet toward the target (guide.AHEAD, or

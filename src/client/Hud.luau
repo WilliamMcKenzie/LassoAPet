@@ -26,6 +26,7 @@ local IMAGES = {
 	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	merge = { id = "rbxassetid://134299381559519", size = Vector2.new(960, 308) }, -- MergePet.png
+	followArrows = { id = "rbxassetid://115987106435760", size = Vector2.new(879, 279) }, -- FollowArrows.png
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
 	continue = { id = "rbxassetid://124255755969598", size = Vector2.new(960, 308) }, -- Continue.png
 	dodge = { id = "rbxassetid://96827860827213", size = Vector2.new(1423, 115) },
@@ -160,6 +161,7 @@ local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one 
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
+local followHint -- "Follow the arrows to the egg!", top left while you ride an event's animal (Hud.setFollowHint)
 local mergeButton, mergeWanted -- MERGE, in RIDE's spot when RIDE isn't up (Hud.showMerge), and whether there's anything to merge
 local rollIcon -- Roll, over Pets: opens the egg roll menu (RollMenu)
 local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
@@ -401,6 +403,16 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 
 	home = button(rideRoot, "home", fit("home", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onHome)
 	home.Visible = false
+	-- "Follow the arrows to the egg!", top left (QM's mockup), throbbing very slightly.
+	followHint = image(rideRoot, "followArrows", fit("followArrows", 300), UDim2.fromScale(0.18, 0.19))
+	followHint.Visible = false
+	local followScale = Instance.new("UIScale")
+	followScale.Parent = followHint
+	RunService.RenderStepped:Connect(function()
+		if followHint.Visible then
+			followScale.Scale = 1 + 0.02 * math.sin(os.clock() * math.pi * 2 / 1.2)
+		end
+	end)
 	local overHome = UDim2.new(0.5, 0, 1, -MARGIN - fit("home", BUTTON_WIDTH).Y.Offset - CONTINUE_GAP)
 	continueButton = button(rideRoot, "continue", fit("continue", BUTTON_WIDTH), BOTTOM_CENTER, overHome, onContinue)
 	continueButton.Visible = false
@@ -1206,6 +1218,12 @@ function Hud.showMerge(visible)
 		mergeButton.Visible = shown
 		Inventory.setVisible(not ride.Visible and not shown and not rollShown and not gui.Enabled)
 	end
+end
+
+-- "Follow the arrows to the egg!" while you ride an event's animal and the arrows
+-- lead to its egg (Ride.client).
+function Hud.setFollowHint(on)
+	followHint.Visible = on
 end
 
 -- Ride back home: DODGE THE STAMPEDE! slams in, then pulses; no cash or distance.
