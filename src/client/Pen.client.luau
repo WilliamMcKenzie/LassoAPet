@@ -300,6 +300,7 @@ end
 
 -- Placing: the equipped egg Tool, and the see-through egg that shows where it'll go.
 local holding, ghost
+local placeAt -- (below: puts the held egg down at a screen point)
 local mouse = player:GetMouse()
 
 -- Where in your pen the screen point (x, y) (GUI pixels, as the mouse reports
@@ -457,7 +458,7 @@ end
 -- A click or tap on your pen while holding an egg puts it down there. (Read
 -- straight from the input, not the Tool's Activated, which some clicks never fire.)
 local lastPlaced = 0
-local function placeAt(screenX, screenY)
+function placeAt(screenX, screenY)
 	if not holding or holding.Parent ~= player.Character or os.clock() - lastPlaced < 0.3 then
 		return -- (one tap can come in two ways on a phone: place it once)
 	end
