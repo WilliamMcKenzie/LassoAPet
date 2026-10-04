@@ -27,7 +27,7 @@ local FRAME_TOP = 305 / 1900
 local ODDS_BUTTON = "rbxassetid://83654143211576" -- ShopOddsButton.png (the green ?)
 local BUTTON = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) } -- RollButton.png (ROLL $1M)
 local PANEL_WIDTH = 930 -- the shop's
-local BUTTON_WIDTH = PANEL_WIDTH * 0.23 -- as in QM's mockup
+local BUTTON_WIDTH = PANEL_WIDTH * 0.33 -- as in QM's reference (Oct 4: bigger than the first mockup's 23%)
 local ODDS_SIZE = 64
 
 local player = Players.LocalPlayer
@@ -76,7 +76,7 @@ roll.BackgroundTransparency = 1
 roll.AutoButtonColor = false
 roll.Image = BUTTON.id
 roll.AnchorPoint = Vector2.new(0.5, 0.5)
-roll.Position = UDim2.fromScale(0.5, 0.85) -- over the eggs
+roll.Position = UDim2.fromScale(0.5, 0.84) -- over the eggs
 roll.Size = UDim2.fromOffset(BUTTON_WIDTH, BUTTON_WIDTH * BUTTON.size.Y / BUTTON.size.X)
 roll.ZIndex = 2
 local rollScale = Instance.new("UIScale")
