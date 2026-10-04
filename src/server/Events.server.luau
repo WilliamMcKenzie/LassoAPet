@@ -128,6 +128,14 @@ eventCommand.Triggered:Connect(function(source, text)
 	end
 end)
 eventCommand.Parent = game:GetService("TextChatService")
+-- (The same from the server side, for testing in Studio: World's "ForceEvent" attribute.)
+world:GetAttributeChangedSignal("ForceEvent"):Connect(function()
+	local kind = world:GetAttribute("ForceEvent")
+	if kind and table.find(EVENTS.Animals, kind) then
+		forced = kind
+	end
+	world:SetAttribute("ForceEvent", nil)
+end)
 
 -- Waits `seconds` (or until it's true that `stop()`), checking every so often.
 local function waitFor(seconds, stop)
