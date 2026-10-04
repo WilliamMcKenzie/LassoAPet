@@ -20,6 +20,7 @@ local UserInputService = game:GetService("UserInputService")
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local Config = require(ReplicatedStorage.Shared.Config)
+local Merge = require(ReplicatedStorage.Shared.Merge)
 local PenPets = require(script.Parent.PenPets)
 
 local player = Players.LocalPlayer
@@ -77,7 +78,7 @@ end
 -- Your own pets can be ridden, and clicked to pick which. Animal parts aren't
 -- queryable (so they never block the lasso or the mouse), so these ones are made so.
 local mine = PenPets.pets -- [model] = { id, kind }
-local function makeRideable(pen, id, pet, kind)
+local function makeRideable(pen, id, pet, kind, merged)
 	if pen ~= myPen() then
 		return
 	end
@@ -86,7 +87,7 @@ local function makeRideable(pen, id, pet, kind)
 			part.CanQuery = true
 		end
 	end
-	mine[pet.animal.model] = { id = id, kind = kind }
+	mine[pet.animal.model] = { id = id, kind = kind, merged = merged or 1 }
 	pet.animal.model.Destroying:Connect(function()
 		mine[pet.animal.model] = nil
 	end)
@@ -190,9 +191,11 @@ local function showEgg(pen, id, item)
 end
 
 local function showPet(pen, id, item)
-	local s = { kind = item.pet, at = groundAt(pen, item.x, item.z), yaw = facing(pen) }
+	local s = { kind = item.pet, merged = item.merged or 1, at = groundAt(pen, item.x, item.z), yaw = facing(pen) }
 	s.pet = newPet(item.pet)
-	makeRideable(pen, id, s.pet, item.pet)
+	s.pet.scale = Merge.size(item.pet, item.merged) -- a merged pet is bigger (Shared/Merge)
+	s.pet.animal:setScale(s.pet.scale)
+	makeRideable(pen, id, s.pet, item.pet, item.merged)
 	s.pet.animal.model.Parent = folder
 	placePet(s.pet, s.at, s.yaw)
 	startWander(s)
@@ -246,8 +249,8 @@ local function refresh(pen)
 			list[id] = nil
 		elseif item.pet and s.egg and not s.hatching then
 			hatch(pen, id, s)
-		elseif item.pet and s.pet and not s.jump and item.pet ~= s.kind then
-			remove(s) -- swapped with the pet you ride
+		elseif item.pet and s.pet and not s.jump and (item.pet ~= s.kind or (item.merged or 1) ~= (s.merged or 1)) then
+			remove(s) -- swapped with the pet you ride, or merged (shown again below)
 			list[id] = nil
 		end
 	end

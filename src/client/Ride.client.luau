@@ -240,7 +240,8 @@ end
 
 -- How long the Hold bar lasts on this mount (its Stamina x Config.HoldTime).
 local function holdTime(entity)
-	return Config.HoldTime * statsOf(entity.kind).Stamina
+	-- (a merged pet has more: Shared/Merge)
+	return Config.HoldTime * statsOf(entity.kind).Stamina * require(ReplicatedStorage.Shared.Merge).stamina(entity.merged)
 end
 local streams = {}
 -- The endless Godlands (Shared/Godlands): a stream per track, each running from
@@ -374,6 +375,17 @@ local hold, grace = 0, 0
 local warpLevel -- /biome: the biome you were put in, so its gate (and those before) let you through
 local transfer, tumble, carried
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
+vfx.Merge = require(ReplicatedStorage.Shared.Merge)
+-- A merged pet (Shared/Merge) rides bigger and faster: its boost starts it off where
+-- the Robo Shark's and Loong's growing (vfx.feed) carries on from.
+function vfx.applyMerge(entity)
+	local n = entity.merged or 1
+	if n > 1 then
+		local size = vfx.Merge.size(entity.kind, n)
+		entity.feast = { count = 0, size = size, speed = vfx.Merge.speed(entity.kind, n) }
+		entity.animal:setScale(size)
+	end
+end
 vfx.rideSync = ReplicatedStorage:WaitForChild("RideSync") -- multiplayer rides (Riders.server)
 vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
 vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
@@ -639,6 +651,8 @@ local function spawnStarter()
 		return
 	end
 	starter = newEntity(spot.X, spot.Z, penYaw(), player:GetAttribute("RidePet") or Config.DefaultPet)
+	starter.merged = player:GetAttribute("RideMerged") or 1
+	starter.animal:setScale(vfx.Merge.size(starter.kind, starter.merged)) -- a merged pet is bigger
 	setClickable(starter.animal.model, true)
 end
 
@@ -819,7 +833,7 @@ startRide = function(model)
 		vfx.rideCue:FireServer("take", fromHerd.n)
 		herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
 		mount = fromHerd
-		mount.popping, mount.hop, mount.dodge = nil, 0, 0
+		mount.popping, mount.hop, mount.dodge, mount.merged = nil, 0, 0, nil
 		mount.animal:setScale(1)
 		spot = Vector3.new(mount.x, 0, mount.z)
 	elseif fromPen then
@@ -829,6 +843,7 @@ startRide = function(model)
 			starter = nil
 		end
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
+		mount.merged = fromPen.merged
 	else
 		mount, starter = starter, nil
 		setClickable(mount.animal.model, false)
@@ -838,8 +853,9 @@ startRide = function(model)
 	exitX = if fromHerd then nil else penExitX()
 	local runningAt = if fromHerd then fromHerd.speed or 0 else 0 -- a stampede animal keeps its pace
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, runningAt, 0
-	phase, hold, grace, camYaw = "outbound", holdTime(mount), 0, 0
 	mount.feast = nil -- (the Blue Crab starts every ride at its own size)
+	vfx.applyMerge(mount)
+	phase, hold, grace, camYaw = "outbound", holdTime(mount), 0, 0
 	coins = 0
 	hrp.Anchored = true
 	humanoid.Sit = true
@@ -3732,6 +3748,7 @@ RunService.PreSimulation:Connect(function(dt)
 		updateRideTarget()
 		Outline.set(if rideShown or pickedPet then rideModel else nil) -- the pet RIDE will ride
 		Hud.setSelected(if rideShown and rideModel then vfx.kindOf(rideModel) else nil) -- and its card, top left
+		vfx.updateMerge()
 		return
 	end
 	if mount and mount ~= vfx.riddenMount then
@@ -3937,6 +3954,42 @@ ReplicatedStorage:WaitForChild("ContinueRide").OnClientEvent:Connect(function(pa
 	Hud.resume(phase == "return")
 end)
 
+-- MERGE (QM, Oct 4; Shared/Merge): over RIDE while it's on one of your own pets and
+-- you have two or more of that kind (in the pen, and the one waiting on its spot).
+-- It merges them all into one (Hatchery.server's MergePets).
+function vfx.mergeKind()
+	if not rideShown or not rideModel then
+		return nil
+	end
+	local own = PenPets.pets[rideModel]
+	local kind = if own then own.kind elseif starter and rideModel == starter.animal.model then starter.kind else nil
+	if not kind then
+		return nil
+	end
+	local count = if starter and starter.kind == kind then 1 else 0
+	for _, pet in PenPets.pets do
+		if pet.kind == kind then
+			count += 1
+		end
+	end
+	return if count >= 2 then kind else nil
+end
+
+function vfx.updateMerge()
+	Hud.showMerge(vfx.mergeKind() ~= nil)
+end
+
+Hud.onMerge = function()
+	local kind = vfx.mergeKind()
+	if kind and phase == "idle" then
+		ReplicatedStorage:WaitForChild("MergePets"):FireServer(kind)
+		local at = rideModel and rideModel:GetPivot().Position
+		if at then
+			Poof.at(Vector3.new(at.X, 0, at.Z))
+		end
+	end
+end
+
 Hud.init(onAction, goHome, rideFromHome, vfx.askContinue)
 
 player.CharacterAdded:Connect(function()
@@ -3956,7 +4009,7 @@ spawnStarter()
 -- The server hands out pens just after joining: move the waiting pet to yours.
 -- Picking another pet to ride (in the pen) swaps the waiting one; it's used from
 -- the next ride if you're out on one.
-for _, name in { "Pen", "RidePet" } do
+for _, name in { "Pen", "RidePet", "RideMerged" } do
 	player:GetAttributeChangedSignal(name):Connect(function()
 		if phase == "idle" and starter then
 			starter.animal.model:Destroy()

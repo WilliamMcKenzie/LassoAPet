@@ -116,6 +116,7 @@ local function publish(player)
 	end
 	syncTools(player, profile.eggs)
 	player:SetAttribute("RidePet", profile.ride or "")
+	player:SetAttribute("RideMerged", profile.rideMerged or 1) -- how many pets it's merged from (Shared/Merge)
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
 	local pen = penOf(player)
 	if pen then
@@ -132,10 +133,10 @@ end
 
 -- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
 local function income(profile)
-	local total = Config.PetIncome[profile.ride] or 0
+	local total = (Config.PetIncome[profile.ride] or 0) * (profile.rideMerged or 1)
 	for _, item in profile.items do
 		if item.pet then
-			total += Config.PetIncome[item.pet] or 0
+			total += (Config.PetIncome[item.pet] or 0) * (item.merged or 1) -- (a merged pet earns for all it's made of)
 		end
 	end
 	return total
@@ -165,6 +166,7 @@ local function load(player)
 					end
 					if isAnimal(data.ride) then
 						profile.ride = data.ride
+						profile.rideMerged = tonumber(data.rideMerged) and math.max(1, math.floor(data.rideMerged)) or nil
 					end
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
 					for _, kind in typeof(data.ridden) == "table" and data.ridden or {} do
@@ -211,7 +213,7 @@ local function save(player)
 		return
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride, tutorial = profile.tutorial, ridden = riddenList(profile),
+		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, tutorial = profile.tutorial, ridden = riddenList(profile),
 			seen = os.time(), awayGold = profile.awayGold }) then
 			return
 		end
@@ -422,8 +424,40 @@ remote("RidePet", function(player, id)
 	end
 	if profile.ride then
 		item.pet, profile.ride = profile.ride, item.pet
+		item.merged, profile.rideMerged = profile.rideMerged, item.merged -- (a merged pet stays merged)
 	else
-		profile.ride, profile.items[id] = item.pet, nil -- your first pet: nothing to swap with
+		profile.ride, profile.rideMerged, profile.items[id] = item.pet, item.merged, nil -- your first pet: nothing to swap with
+	end
+	publish(player)
+end)
+
+-- MERGE (QM, Oct 4; Shared/Merge): every pet of `kind` you have, in the pen and the
+-- one you ride, becomes one pet of that kind made of all of them. If the one you
+-- ride is among them, it's the one that stays.
+remote("MergePets", function(player, kind)
+	local profile = profiles[player]
+	if not profile or not isAnimal(kind) then
+		return
+	end
+	local ids, total = {}, if profile.ride == kind then profile.rideMerged or 1 else 0
+	for id, item in profile.items do
+		if item.pet == kind then
+			table.insert(ids, id)
+			total += item.merged or 1
+		end
+	end
+	if #ids + (if profile.ride == kind then 1 else 0) < 2 then
+		return
+	end
+	table.sort(ids)
+	if profile.ride == kind then
+		profile.rideMerged = total
+	else
+		profile.items[ids[1]].merged = total
+		table.remove(ids, 1)
+	end
+	for _, id in ids do
+		profile.items[id] = nil
 	end
 	publish(player)
 end)

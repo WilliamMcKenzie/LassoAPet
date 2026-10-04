@@ -355,6 +355,11 @@ return {
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
 	EggSizePerTier = 1.5,
+	-- Merging pets (QM, Oct 4; Shared/Merge): each pet merged in makes the one it becomes
+	-- MergeGrowth x bigger (up to XL), x more stamina (no cap) and x faster, up to a
+	-- Speed stat of MergeMaxSpeed.
+	MergeGrowth = 1.1,
+	MergeMaxSpeed = 8,
 	-- The riding camera pulls back this much further per tier above small: 1x on a
 	-- small pet, 1.2x on a medium, 1.44x on a large (QM, Oct 2).
 	RideZoomPerTier = 1.2,

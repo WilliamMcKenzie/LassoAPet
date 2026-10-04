@@ -25,6 +25,7 @@ local IMAGES = {
 	lasso = { id = "rbxassetid://94121512214531", size = Vector2.new(960, 358) },
 	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
+	merge = { id = "rbxassetid://134299381559519", size = Vector2.new(960, 308) }, -- MergePet.png
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
 	continue = { id = "rbxassetid://124255755969598", size = Vector2.new(960, 308) }, -- Continue.png
 	dodge = { id = "rbxassetid://96827860827213", size = Vector2.new(1423, 115) },
@@ -159,6 +160,7 @@ local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one 
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
+local mergeButton -- MERGE, over RIDE: you have two or more of the pet RIDE would ride (Hud.showMerge)
 local rollIcon -- Roll, over Pets: opens the egg roll menu (RollMenu)
 local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
 local CONTINUE_GAP = 12 -- between Continue and the Home button under it
@@ -539,6 +541,13 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	SELECTED.root = root(SELECTED.gui)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	ride.Visible = false
+	mergeButton = button(homeRoot, "merge", fit("merge", BUTTON_WIDTH), BOTTOM_CENTER,
+		UDim2.new(0.5, 0, 1, -MARGIN - fit("ride", BUTTON_WIDTH).Y.Offset - 12), function()
+			if Hud.onMerge then
+				Hud.onMerge()
+			end
+		end)
+	mergeButton.Visible = false
 	-- Gold and Pets have a screen of their own so they stay up while the animal
 	-- dictionary hides the rest of the home HUD (QM: only the dictionary, Pets and
 	-- the gold show then).
@@ -1183,7 +1192,15 @@ end
 -- RIDE shows only while you're close enough to your animal (replaces the [E] prompt).
 function Hud.showRide(visible)
 	ride.Visible = visible and not gui.Enabled
+	if not ride.Visible then
+		mergeButton.Visible = false
+	end
 	Inventory.setVisible(not ride.Visible and not rollShown and not gui.Enabled) -- the RIDE button takes its place
+end
+
+-- MERGE, over RIDE, while you're at a pet you have two or more of (Ride.client).
+function Hud.showMerge(visible)
+	mergeButton.Visible = visible and ride.Visible
 end
 
 -- Ride back home: DODGE THE STAMPEDE! slams in, then pulses; no cash or distance.
