@@ -145,17 +145,32 @@ function Sounds.setMusic(which)
 	end
 end
 
--- Every button in the UI clicks when pressed, except the invisible full-screen ones
--- that close a menu when you click off it.
+-- Every button in the UI clicks the moment it's pressed down (not on release, QM), except
+-- the invisible full-screen ones that close a menu when you click off it. The click
+-- is one ready-made Sound, restarted each time, so nothing is built per click.
+local click
+local function playClick()
+	if not templates.button_click then
+		return
+	end
+	if not click then
+		click = templates.button_click:Clone()
+		click.Volume = 0.4
+		click.Parent = folder
+	end
+	click.TimePosition = 0
+	click:Play()
+end
 local hooked = setmetatable({}, { __mode = "k" })
 local function hook(button)
 	if not button:IsA("GuiButton") or hooked[button] then
 		return
 	end
 	hooked[button] = true
-	button.Activated:Connect(function()
-		if button.Size ~= UDim2.fromScale(1, 1) then
-			Sounds.play("button_click", 0.4)
+	button.InputBegan:Connect(function(input)
+		if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch)
+			and button.Size ~= UDim2.fromScale(1, 1) then
+			playClick()
 		end
 	end)
 end
