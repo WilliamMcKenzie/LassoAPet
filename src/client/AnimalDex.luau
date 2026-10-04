@@ -51,24 +51,24 @@ local ARROW = "rbxassetid://130844925944438" -- assets/ui/dex/DexArrow.png (poin
 -- them aren't in the dictionary yet.
 local PAGES = {
 	Meadow = {
-		grid = "rbxassetid://133205113798142", -- assets/ui/dex/DexMeadow.png
-		examine = "rbxassetid://114285728618249", -- assets/ui/dex/DexMeadowExamine.png
+		grid = "rbxassetid://106554381754752", -- assets/ui/dex/DexMeadow.png
+		examine = "rbxassetid://78091503897812", -- assets/ui/dex/DexMeadowExamine.png
 	},
 	Desert = {
-		grid = "rbxassetid://94266934416109", -- assets/ui/dex/DexDesert.png
-		examine = "rbxassetid://84664609464522", -- assets/ui/dex/DexDesertExamine.png
+		grid = "rbxassetid://73927041783018", -- assets/ui/dex/DexDesert.png
+		examine = "rbxassetid://77735968469215", -- assets/ui/dex/DexDesertExamine.png
 	},
 	Snow = { -- the Tundra
-		grid = "rbxassetid://80820120308003", -- assets/ui/dex/DexSnow.png
-		examine = "rbxassetid://93155919439780", -- assets/ui/dex/DexSnowExamine.png
+		grid = "rbxassetid://112472035586790", -- assets/ui/dex/DexSnow.png
+		examine = "rbxassetid://112429560665609", -- assets/ui/dex/DexSnowExamine.png
 	},
 	Ocean = {
-		grid = "rbxassetid://114042809798313", -- assets/ui/dex/DexOcean.png
-		examine = "rbxassetid://95075172887838", -- assets/ui/dex/DexOceanExamine.png
+		grid = "rbxassetid://136447630725420", -- assets/ui/dex/DexOcean.png
+		examine = "rbxassetid://93558185988056", -- assets/ui/dex/DexOceanExamine.png
 	},
 	Godlands = {
-		grid = "rbxassetid://81880377884398", -- assets/ui/dex/DexGodlands.png
-		examine = "rbxassetid://103373591995713", -- assets/ui/dex/DexGodlandsExamine.png
+		grid = "rbxassetid://100657168276916", -- assets/ui/dex/DexGodlands.png
+		examine = "rbxassetid://80615979394374", -- assets/ui/dex/DexGodlandsExamine.png
 		-- The exclusives (the Loong, Snack Yak and Robo Shark) are on this page (QM),
 		-- though none runs in its stampede; they're left off their own biomes' pages.
 		extra = { "Loong", "SnackYak", "RoboShark" },
