@@ -185,6 +185,9 @@ local function load(player)
 				loaded[player] = true
 				break
 			end
+			if attempt == 3 or RunService:IsStudio() then
+				break -- no API access in Studio fails every time: don't keep the player waiting
+			end
 			task.wait(attempt * 2)
 		end
 	end

@@ -6,6 +6,7 @@
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local MAX_PER_RIDE = 100000 -- ignore anything bigger than a ride could earn
 
@@ -33,6 +34,9 @@ local function load(player)
 				loaded[player] = true
 			end
 			return
+		end
+		if attempt == 3 or RunService:IsStudio() then
+			break -- no API access in Studio fails every time: don't keep the player waiting
 		end
 		task.wait(attempt * 2)
 	end
