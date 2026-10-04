@@ -11,6 +11,7 @@
 -- the one coming in still bounces in.
 
 local TweenService = game:GetService("TweenService")
+local Sounds = require(script.Parent.Sounds)
 
 local ModalPop = {}
 
@@ -37,6 +38,7 @@ local function valueFor(apply)
 end
 
 function ModalPop.open(apply)
+	Sounds.play("book_open")
 	local value = valueFor(apply)
 	value.Value = FROM
 	TweenService:Create(value, OPEN, { Value = 1 }):Play()
@@ -45,9 +47,10 @@ end
 function ModalPop.close(apply, done, instant)
 	local value, run = valueFor(apply)
 	if instant then
-		done()
+		done() -- (switching menus: only the one opening makes a sound)
 		return
 	end
+	Sounds.play("book_open")
 	local swell = TweenService:Create(value, SWELL, { Value = PEAK })
 	swell.Completed:Connect(function()
 		if runs[apply] ~= run then

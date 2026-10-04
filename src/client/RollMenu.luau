@@ -15,6 +15,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 local ModalPop = require(script.Parent.ModalPop)
+local Sounds = require(script.Parent.Sounds)
 
 local RollMenu = {}
 
@@ -125,6 +126,7 @@ for _, event in { flip.MouseButton1Up, flip.MouseLeave } do
 	end)
 end
 flip.Activated:Connect(function()
+	Sounds.play("book_flip")
 	setOdds(not showingOdds)
 end)
 flip.Parent = panel

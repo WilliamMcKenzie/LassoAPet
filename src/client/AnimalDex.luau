@@ -25,6 +25,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
 local PetFaces = require(script.Parent.PetFaces)
 local ModalPop = require(script.Parent.ModalPop)
+local Sounds = require(script.Parent.Sounds)
 
 local player = Players.LocalPlayer
 
@@ -315,9 +316,11 @@ function showAnimal(at)
 	end
 
 	arrow(UDim2.fromOffset(256, 340), -90, function()
+		Sounds.play("book_flip")
 		showAnimal((at - 2) % #order + 1)
 	end)
 	arrow(UDim2.fromOffset(PAGE.X - 256, 340), 90, function()
+		Sounds.play("book_flip")
 		showAnimal(at % #order + 1)
 	end)
 

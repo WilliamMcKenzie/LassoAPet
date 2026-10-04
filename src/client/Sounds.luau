@@ -37,6 +37,8 @@ local IDS = {
 	purchase = "rbxassetid://84676553460536", -- a Robux purchase goes through
 	countdown = "rbxassetid://138395707986004", -- 3, 2, 1 before an event's animal spawns
 	countdown_go = "rbxassetid://114056716396759", -- it spawns
+	book_open = "", -- a menu (shop, roll, dictionary) opens or closes
+	book_flip = "", -- a menu turns a page (the dictionary's arrows, a ? flip)
 	-- The animals' calls (Config.AnimalSound says which animal makes which): assets/sounds/animals
 	animal_horse = "",
 	animal_unicorn = "",

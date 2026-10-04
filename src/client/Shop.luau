@@ -19,6 +19,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModalPop = require(script.Parent.ModalPop)
+local Sounds = require(script.Parent.Sounds)
 
 local Shop = {}
 
@@ -195,6 +196,7 @@ if legendCard then
 	flip.ZIndex = 2
 	pressable(flip)
 	flip.Activated:Connect(function()
+		Sounds.play("book_flip")
 		legendOdds = not legendOdds
 		legendCard.Image = if legendOdds then spot.odds else spot.id
 	end)
