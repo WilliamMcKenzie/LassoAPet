@@ -121,6 +121,25 @@ local CLEAR = 6 -- studs of plain snow all round the spot
 local template = world.Nests:FindFirstChildWhichIsA("Model")
 local godlandsNests = {} -- [k] = its nest
 
+-- Where each rider is: their RideSync (the server can't see a ride's anchored
+-- character move), kept a few seconds; else their character.
+local rideZ, rideAt = {}, {}
+ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, _, _, riderCFrame)
+	if typeof(riderCFrame) == "CFrame" and riderCFrame.Position.Z == riderCFrame.Position.Z then
+		rideZ[player], rideAt[player] = riderCFrame.Position.Z, os.clock()
+	end
+end)
+Players.PlayerRemoving:Connect(function(player)
+	rideZ[player], rideAt[player] = nil, nil
+end)
+local function zOf(player)
+	if rideZ[player] and os.clock() - rideAt[player] < 3 then
+		return rideZ[player]
+	end
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	return root and root.Position.Z
+end
+
 -- A clear spot in track k: level ground round it (all snow, or all stone; no ice or
 -- lava), away from the walls and mountains,
 -- picked from the server's seed so it's the same spot every time it comes back.
@@ -180,8 +199,8 @@ task.spawn(function()
 		task.wait(1)
 		local wanted = {}
 		for _, player in Players:GetPlayers() do
-			local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-			local k = root and Godlands.segmentAt(root.Position.Z - Godlands.length * NEAR[2])
+			local z = zOf(player)
+			local k = z and Godlands.segmentAt(z - Godlands.length * NEAR[2])
 			if k then
 				for j = math.max(k - NEAR[1] - NEAR[2], 0), k do
 					wanted[j] = true
