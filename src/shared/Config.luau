@@ -438,7 +438,7 @@ return {
 		Scorpion = "rbxassetid://84668325203507",
 		Sandworm = "rbxassetid://102795691143589",
 		Snake = "rbxassetid://90142926499080",
-		Beholder = "rbxassetid://123404719952235", -- assets/ui/BeholderEggRender.png
+		Beholder = "rbxassetid://111649507533762", -- assets/ui/BeholderEggRender.png
 		Penguin = "rbxassetid://135143840112034",
 		Snowman = "rbxassetid://105231134861157",
 		SpineLizard = "rbxassetid://131132122596946",
@@ -455,7 +455,7 @@ return {
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://70469571709365", -- assets/ui/LoongEggRender.png
-		WarElephant = "", -- assets/ui/WarElephantEggRender.png (awaiting upload)
+		WarElephant = "rbxassetid://84356622911486", -- assets/ui/WarElephantEggRender.png
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.

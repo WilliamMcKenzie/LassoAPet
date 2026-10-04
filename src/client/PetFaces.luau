@@ -25,7 +25,7 @@ local HEADSHOTS = {
 	Scorpion = "rbxassetid://85451012004987", -- PetScorpion.png
 	Sandworm = "rbxassetid://122144649250110", -- PetSandworm.png
 	Snake = "rbxassetid://91376372256857", -- PetSnake.png
-	Beholder = "rbxassetid://97515015824825", -- PetBeholder.png
+	Beholder = "rbxassetid://122284072508208", -- PetBeholder.png
 	Penguin = "rbxassetid://126516601606999", -- PetPenguin.png
 	Snowman = "rbxassetid://131420314948529", -- PetSnowman.png
 	SpineLizard = "rbxassetid://88911086754037", -- PetSpineLizard.png
@@ -42,7 +42,7 @@ local HEADSHOTS = {
 	Starfish = "rbxassetid://112526271674778", -- PetStarfish.png
 	FishSchool = "rbxassetid://132126224577278", -- PetFishSchool.png
 	Loong = "rbxassetid://110728718265049", -- PetLoong.png
-	WarElephant = "", -- PetWarElephant.png (awaiting upload)
+	WarElephant = "rbxassetid://128564579926077", -- PetWarElephant.png
 }
 -- QM's slot pictures by rarity (as the inventory bar); a plain colour until one is uploaded.
 local SLOTS = {
