@@ -154,6 +154,10 @@ return {
 				Bubbles = 24, -- per second
 			},
 		},
+		-- The Godlands is off for now (QM, Oct 4: "remove godlands for now ... finish line
+		-- after ocean"). Uncomment to bring it back; its code (Shared/Godlands, Client/GodlandsStream)
+		-- does nothing without this entry. CourseLength goes back to math.huge with it.
+		--[==[
 		{
 			-- The endgame (QM, Oct 3), after Realm of the Mad God's godlands: dark stone
 			-- plates split by snow, with ice or lava cracks. It never ends: one 960-stud
@@ -180,13 +184,14 @@ return {
 			-- No GateImage / UpgradeImage yet: the gate shows plain text and Upgrade Pen
 			-- the default button with the price, until QM's art is in.
 		},
+		]==]
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	CourseHalfWidth = 56,
-	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
+	CourseLength = 16192, -- all the biomes' lengths added up (math.huge with the endless Godlands)
 	HomeHalfWidth = 144, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3)
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
