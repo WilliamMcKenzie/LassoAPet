@@ -313,7 +313,7 @@ return {
 		BlueCrab = { Kind = "Shield", Duration = 0.6, Cooldown = 15, Crabs = 3, Ahead = 22, Spread = 11, Life = 15, Radius = 5 }, -- QM, Oct 4 (cooldown and life are guesses)
 		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
 		-- the animation's length and fire window; the range, width and cooldown are guesses
-		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 1.5, Grow = 1.1, SpeedUp = 1.05, MaxSpeed = 2, RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
+		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 1.5, Grow = 1.1, SpeedUp = 1.05, MaxSpeed = 3, RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
 		Loong = { Kind = "Breath", Duration = 2.6, FireFrom = 0.95, FireTo = 2.1, Cooldown = 8, Range = 70, Width = 22, Restore = 0.2 },
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
@@ -531,7 +531,7 @@ return {
 		Squid = { Speed = 3, Stamina = 2.6 },
 		KingCrab = { Speed = 3.1, Stamina = 3 },
 		BlueCrab = { Speed = 3.1, Stamina = 3 }, -- the King Crab's
-		RoboShark = { Speed = 3.3, Stamina = 3 }, -- a guess (Oct 4)
+		RoboShark = { Speed = 1, Stamina = 3 }, -- QM, Oct 4: starts at 1x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed)
 		FishSchool = { Speed = 3, Stamina = 2.8 }, -- a guess between the Squid and King Crab
 		Whale = { Speed = 1.2, Stamina = 10 },
 		Kraken = { Speed = 4.5, Stamina = 3 },
