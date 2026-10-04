@@ -34,9 +34,14 @@ local RARITY = {
 	Legendary = { color = Color3.fromRGB(230, 170, 30), image = "rbxassetid://100279863676585" }, -- assets/ui/SlotLegendary.png
 }
 local Animals = game:GetService("ReplicatedStorage").Shared.Animals
+local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
 local function rarityOf(tool)
 	local kind = tool:GetAttribute("EggKind")
+	local special = kind and Config.SpecialEggs[kind]
+	if special then
+		return RARITY[special.Rarity]
+	end
 	local module = kind and Animals:FindFirstChild(kind)
 	return module and RARITY[require(module).Rarity]
 end

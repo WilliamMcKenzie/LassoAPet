@@ -64,6 +64,15 @@ local function penOf(player)
 end
 
 -- The egg Tools in the player's inventory match their egg counts.
+-- The animal an inventory egg of `kind` holds (an animal's own, or Config.SpecialEggs'), if any.
+local function eggPet(kind)
+	local special = typeof(kind) == "string" and Config.SpecialEggs[kind]
+	if special then
+		return special.Pet
+	end
+	return if isAnimal(kind) then kind else nil
+end
+
 local function syncTools(player, eggs)
 	local backpack = player:FindFirstChildOfClass("Backpack")
 	if not backpack then
@@ -86,15 +95,16 @@ local function syncTools(player, eggs)
 		local tool = have[kind]
 		if not tool then
 			tool = Instance.new("Tool")
-			tool.Name = kind .. " Egg"
+			local special = Config.SpecialEggs[kind]
+			tool.Name = (if special then special.Name else kind) .. " Egg"
 			tool.RequiresHandle = false
 			tool.CanBeDropped = false
-			tool.TextureId = Config.EggIcons[kind] or ""
+			tool.TextureId = Config.EggIcons[kind] or Config.EggIcons[eggPet(kind)] or ""
 			tool:SetAttribute("EggKind", kind)
 			tool.Parent = backpack
 		end
 		tool:SetAttribute("Count", n)
-		tool.ToolTip = kind .. " Egg x" .. n
+		tool.ToolTip = tool.Name .. " x" .. n
 	end
 end
 
@@ -160,7 +170,7 @@ local function load(player)
 			if success then
 				if typeof(data) == "table" then
 					for kind, n in data.eggs or {} do
-						if isAnimal(kind) and tonumber(n) and n > 0 then
+						if eggPet(kind) and tonumber(n) and n > 0 then
 							profile.eggs[kind] = math.floor(n)
 						end
 					end
@@ -184,6 +194,7 @@ local function load(player)
 						profile.awayGold = awayGold(profile, data)
 					end
 					profile.boughtPets = tonumber(data.boughtPets) -- Legendary Pets from the shop already in (addBoughtPets)
+					profile.boughtGiantEggs = tonumber(data.boughtGiantEggs) -- Giant Horse eggs from the shop already in (addBoughtGiantEggs)
 				end
 				loaded[player] = true
 				break
@@ -215,7 +226,7 @@ local function save(player)
 	end
 	for attempt = 1, 3 do
 		if pcall(store.SetAsync, store, "u" .. player.UserId, { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, tutorial = profile.tutorial, ridden = riddenList(profile),
-			seen = os.time(), awayGold = profile.awayGold, boughtPets = profile.boughtPets }) then
+			seen = os.time(), awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs }) then
 			return
 		end
 		task.wait(attempt)
@@ -386,7 +397,8 @@ end)
 remote("PlaceEgg", function(player, kind, x, z)
 	local profile = profiles[player]
 	local pen = penOf(player)
-	if not profile or not pen or not isAnimal(kind) or (profile.eggs[kind] or 0) < 1 then
+	local pet = eggPet(kind)
+	if not profile or not pen or not pet or (profile.eggs[kind] or 0) < 1 then
 		return
 	end
 	if typeof(x) ~= "number" or typeof(z) ~= "number" or not canPlace(pen, x, z) then
@@ -399,7 +411,12 @@ remote("PlaceEgg", function(player, kind, x, z)
 	if profile.ride or next(profile.items) then
 		profile.earning = true -- the tutorial's second egg: pets start earning
 	end
-	profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else hatchTime(kind)) }
+	local special = Config.SpecialEggs[kind]
+	if special then -- (hatches into its Pet, merged from Merged: a Giant Horse is 10 horses)
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = pet, merged = special.Merged, hatchAt = os.time() + special.HatchTime }
+	else
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else hatchTime(kind)) }
+	end
 	publish(player)
 end)
 
@@ -529,9 +546,26 @@ local function addBoughtPets(player)
 		ReplicatedStorage:WaitForChild("ShopGrant"):FireClient(player, "LegendaryPet", kind)
 	end
 end
+-- The shop's Giant Horse (Shop.server): its "BoughtGiantEggs" attribute is the running
+-- total bought; each one not yet in your profile (boughtGiantEggs, saved with it) is
+-- a Giant Horse egg in your inventory (Config.SpecialEggs.GiantHorse).
+local function addBoughtGiantEggs(player)
+	local profile = profiles[player]
+	local total = player:GetAttribute("BoughtGiantEggs")
+	if not profile or not total or total <= (profile.boughtGiantEggs or 0) then
+		return
+	end
+	profile.eggs.GiantHorse = (profile.eggs.GiantHorse or 0) + total - (profile.boughtGiantEggs or 0)
+	profile.boughtGiantEggs = total
+	publish(player)
+	save(player)
+end
 Players.PlayerAdded:Connect(function(player)
 	player:GetAttributeChangedSignal("BoughtPets"):Connect(function()
 		addBoughtPets(player)
+	end)
+	player:GetAttributeChangedSignal("BoughtGiantEggs"):Connect(function()
+		addBoughtGiantEggs(player)
 	end)
 	for _ = 1, 120 do -- (bought on an earlier visit: once your pets have loaded)
 		if profiles[player] or not player.Parent then
@@ -540,6 +574,7 @@ Players.PlayerAdded:Connect(function(player)
 		task.wait(0.5)
 	end
 	addBoughtPets(player)
+	addBoughtGiantEggs(player)
 end)
 
 -- A chat command, so the "/give ..." line itself doesn't show in chat.
@@ -594,7 +629,7 @@ tutorialCommand.Triggered:Connect(function(source)
 	if not player or not profiles[player] or not allowed(player) then
 		return
 	end
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = profiles[player].boughtPets }
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = profiles[player].boughtPets, boughtGiantEggs = profiles[player].boughtGiantEggs }
 	if store and loaded[player] then
 		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false })
 	end

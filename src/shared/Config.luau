@@ -469,6 +469,12 @@ return {
 		Refresh = 120, -- seconds between re-reading the top 3
 		AvatarScale = 1.5,
 	},
+	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
+	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
+	-- (Shared/Merge). Rarity is the inventory square's colour.
+	SpecialEggs = {
+		GiantHorse = { Name = "Giant Horse", Pet = "Horse", Merged = 10, HatchTime = 0, Rarity = "Legendary" }, -- the shop's Giant Horse
+	},
 	EggGrowScale = 2, -- a placed egg grows from 1x to this size by the time it hatches
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
 	EggIcons = {
@@ -568,7 +574,7 @@ return {
 			{ Key = "Gold4", Gold = 1000000, Price = 150, ProductId = 3716409606 }, -- $1M (QM's nerf, Oct 4: was $100M)
 		},
 		Specials = {
-			{ Key = "GiantHorse", Name = "Giant Horse", Price = 5, ProductId = 3716552368, OldProductIds = { 3716409132 } }, -- one ride (GiantHorse below)
+			{ Key = "GiantHorse", Name = "Giant Horse", Price = 5, ProductId = 3716552368, OldProductIds = { 3716409132 } }, -- a Giant Horse egg (SpecialEggs); the old product was one giant ride -- one ride (GiantHorse below)
 			{ Key = "SpawnLoong", Name = "Spawn Loong", Price = 25, ProductId = 0 }, -- starts the Loong event now (Events.server); no product yet
 			{ Key = "Nuke", Name = "Nuke All", Price = 200, ProductId = 3716409185 }, -- your next ride (NukeRange)
 			{ Key = "Legendary", Name = "Legend Egg", Price = 150, ProductId = 3716409444 }, -- a pet by LegendaryOdds, into your pen

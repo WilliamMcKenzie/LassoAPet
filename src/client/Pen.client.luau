@@ -180,7 +180,7 @@ local function sizeEgg(s, scale)
 end
 
 local function showEgg(pen, id, item)
-	local s = { kind = item.egg, at = groundAt(pen, item.x, item.z), yaw = facing(pen), hatchAt = item.hatchAt }
+	local s = { kind = item.egg, merged = item.merged or 1, at = groundAt(pen, item.x, item.z), yaw = facing(pen), hatchAt = item.hatchAt }
 	s.egg = Egg.new(item.egg)
 	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER, 0)) * CFrame.Angles(0, s.yaw, 0))
 	s.egg.model.Parent = folder
@@ -222,8 +222,9 @@ local function hatch(pen, id, s)
 			return
 		end
 		local pet = newPet(s.kind)
-		makeRideable(pen, id, pet, s.kind)
-		pet.scale = 0.2
+		makeRideable(pen, id, pet, s.kind, s.merged)
+		s.full = Merge.size(s.kind, s.merged) -- (a special egg's pet can hatch merged: the Giant Horse)
+		pet.scale = 0.2 * s.full
 		pet.animal:setScale(pet.scale)
 		pet.animal.model.Parent = folder
 		s.pet, s.jump = pet, 0
@@ -349,7 +350,7 @@ RunService.RenderStepped:Connect(function(dt)
 					-- Out of the egg in an arc, growing to full size, landing on the spot.
 					s.jump = math.min(s.jump + dt / JUMP_TIME, 1)
 					local t = s.jump
-					pet.scale = 0.2 + 0.8 * (1 - (1 - t) ^ 3)
+					pet.scale = (0.2 + 0.8 * (1 - (1 - t) ^ 3)) * (s.full or 1)
 					pet.animal:setScale(pet.scale)
 					pet.hop = EGG_CENTER * (s.scale or 1) * (1 - t) + JUMP_HEIGHT * 4 * t * (1 - t)
 					if t >= 1 then
@@ -397,7 +398,8 @@ local function setGhost(kind)
 	if not kind then
 		return
 	end
-	ghost = Egg.new(kind).model
+	local special = Config.SpecialEggs[kind]
+	ghost = Egg.new(if special then special.Pet else kind).model
 	for _, part in ghost:GetDescendants() do
 		if part:IsA("BasePart") then
 			part.Transparency = 0.6

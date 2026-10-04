@@ -88,10 +88,11 @@ restrictedCheck.Parent = game:GetService("ServerStorage")
 -- The purchase ledger, one DataStore entry per player, written in one UpdateAsync
 -- per receipt so each purchase is recorded exactly once: the receipt ids seen
 -- (the last 200), and running totals of what was bought: Gold (gold), Legendary
--- pets, Giant Horse rides and Nukes, plus how many rides and Nukes were used.
+-- pets, Giant Horse eggs (giantEggs; giant: rides, as it was sold before) and Nukes,
+-- plus how many rides and Nukes were used.
 -- A receipt is only acknowledged once it's in the ledger. The ledger's totals go
 -- onto the player as attributes, and the rest is handed over from them:
---   BoughtGold, BoughtPets: Gold.server and Hatchery add what they haven't yet
+--   BoughtGold, BoughtPets, BoughtGiantEggs: Gold.server and Hatchery add what they haven't yet
 --     (each saving how much it has, in its own entry, with the gold or pets).
 --   GiantRides, Nukes: what's left to use; UseGiant / UseNuke spend one.
 -- Without DataStores (Studio without API access) the ledger lives in memory.
@@ -105,13 +106,14 @@ local ledgers = {} -- [player] = the ledger as last read or written
 local MAX_RECEIPTS = 200
 
 local function blank()
-	return { receipts = {}, gold = 0, pets = 0, giant = 0, giantUsed = 0, nukes = 0, nukesUsed = 0 }
+	return { receipts = {}, gold = 0, pets = 0, giant = 0, giantUsed = 0, giantEggs = 0, nukes = 0, nukesUsed = 0 }
 end
 
 local function show(player, ledger)
 	ledgers[player] = ledger
 	player:SetAttribute("BoughtGold", ledger.gold)
 	player:SetAttribute("BoughtPets", ledger.pets)
+	player:SetAttribute("BoughtGiantEggs", ledger.giantEggs)
 	local rides, nukes = ledger.giant - ledger.giantUsed, ledger.nukes - ledger.nukesUsed
 	player:SetAttribute("GiantRides", if rides > 0 then rides else nil)
 	player:SetAttribute("Nukes", if nukes > 0 then nukes else nil)
@@ -185,7 +187,7 @@ local function record(userId, purchaseId, offer)
 		elseif offer.Key == "Legendary" then
 			ledger.pets += 1
 		elseif offer.Key == "GiantHorse" then
-			ledger.giant += 1
+			ledger.giantEggs += 1 -- a Giant Horse egg (QM, Oct 4: no longer a ride)
 		elseif offer.Key == "Nuke" then
 			ledger.nukes += 1
 		end
@@ -197,7 +199,7 @@ local function record(userId, purchaseId, offer)
 	local player = Players:GetPlayerByUserId(userId)
 	if ledger and player then
 		show(player, ledger)
-		shopGrant:FireClient(player, offer.Key)
+		shopGrant:FireClient(player, if offer.Key == "GiantHorse" then "GiantEgg" else offer.Key) -- ("GiantHorse" starts a giant ride: old purchases)
 	end
 	return ledger ~= nil
 end
