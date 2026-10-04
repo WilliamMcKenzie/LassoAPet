@@ -109,6 +109,7 @@ local slices = {
 	SWERVE_BEFORE = 40, -- studs: laneX's reach in front of an obstacle
 	SWERVE_AFTER = 28, -- and past it
 	BLOCK_PAD = 8, -- studs: the most padZ blockedAt is asked for and still uses the slices
+	SOLID = 9, -- obstacles of this tier (the Godlands' mountains) are never smashed: they always crash you
 	swerve = {},
 	block = {},
 	NONE = {},
@@ -165,6 +166,9 @@ end
 -- on their screens it's back a few seconds later (remote).
 local SMASH_TIME = 0.7
 local function smash(o, dir, side, remote)
+	if o.tier >= slices.SOLID then
+		return -- a mountain: nothing moves it (checkRide crashes you into it instead)
+	end
 	o.smashed = true
 	if not remote then
 		ReplicatedStorage.RideCue:FireServer("smash", o.x, o.z, dir, side)
@@ -497,10 +501,14 @@ local function popHop(t)
 end
 
 -- The first obstacle overlapping (x, z) that's still standing, of at least this tier (1 if nil).
+-- Solid ones (slices.SOLID: mountains) only when that's the tier asked for, so the loops
+-- that smash whatever's in the way never get stuck on one.
 local function blockedAt(x, z, padX, padZ, tier)
 	local list = if padZ <= slices.BLOCK_PAD then slices.at(slices.block, z) else obstacles
+	tier = tier or 1
 	for _, o in list do
-		if not o.smashed and o.tier >= (tier or 1) and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
+		if not o.smashed and o.tier >= tier and (o.tier < slices.SOLID or tier >= slices.SOLID)
+			and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
 			return o
 		end
 	end
@@ -3324,6 +3332,16 @@ local function checkRide(dt)
 		return -- the leap over the finish line: nothing can go wrong now
 	end
 	grace = math.max(grace - dt, 0)
+	do
+		-- The Godlands' mountains (slices.SOLID) crash you whatever you're riding or doing,
+		-- unless you're flying over or burrowing under them.
+		local special = vfx.sprintSpecial()
+		local hop = mount.hop or 0
+		local clear = special and ((special.Kind == "Fly" and hop > 8) or (special.Kind == "Burrow" and hop < -2))
+		if not clear and grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4, slices.SOLID) then
+			return fail("CRASH!")
+		end
+	end
 	local ability = activeAbility()
 	if ability and vfx.PLAIN[ability.cfg.Kind] then
 		ability = nil -- these still use Hold and can still crash (Config.Abilities)

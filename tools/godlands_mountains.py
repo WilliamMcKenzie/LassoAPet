@@ -7,9 +7,10 @@ so the rider has to funnel past them:
   MountainCenter  stands in the middle: pick a side
 
 Each is a stepped, studded mountain (a height field on the 4-stud checker, every
-step 4 studs up) in the Godlands' dark stone, snow on its highest ledges, a lava
-stream running down its front face from a glowing crater into a lava pool at its
-foot, loose rocks round its base and dead bushes and trees on its ledges.
+step 4 studs up) in the Godlands' dark stone, snow on its highest ledges and on
+some others, loose rocks round its base and dead bushes and trees on its ledges.
+(The draft's lava stream came off, QM.) tools/godlands_concept.py --map lays them
+along the Godlands' tracks (MOUNTAINS there).
 
 Run: python3 tools/godlands_mountains.py [out_dir]
 Writes godlands_mountains.png (each from the riding camera and up close) to
@@ -40,9 +41,6 @@ LANE_C = 30
 
 ROCK = [(58, 56, 68), (72, 70, 84), (46, 44, 56)]  # dark stone, one shade a ledge
 SNOW = (238, 241, 247)
-LAVA = (255, 72, 0)
-LAVA_HOT = (255, 150, 20)
-CRUST = (34, 30, 40)  # the black rock lining the lava
 
 
 def heights(kind, seed):
@@ -80,25 +78,6 @@ def heights(kind, seed):
     return out, x0
 
 
-def lava_path(field, kind):
-    """The cells the lava runs down: from the crater (the highest cell) down the
-    front face (toward z 0, the rider) along the steepest way, to the foot."""
-    top = max(field, key=lambda c: (field[c], -abs(c[1] - LENGTH // CELL // 2)))
-    path = [top]
-    i, j = top
-    while True:
-        best = None
-        for di, dj in ((0, -1), (-1, -1), (1, -1)):  # always toward the rider, maybe sideways
-            c = (i + di, j + dj)
-            if c in field and (best is None or field[c] < field[best]):
-                best = c
-        if best is None:
-            break
-        path.append(best)
-        i, j = best
-    return path
-
-
 def rects(cells):
     """Greedy merge of a set of (i, j) cells into rectangles (i0, j0, i1, j1), ends exclusive."""
     left = set(cells)
@@ -121,11 +100,10 @@ def rects(cells):
 
 
 def mountain(kind, seed=3):
-    """The mountain's parts (Part, with .neon on the lava), its footprint (x, z, half x,
+    """The mountain's parts, its footprint (x, z, half x,
     half z) with z 0 at its near end, and its cell field."""
     field, x0 = heights(kind, seed)
     k = TA.Kit()
-    lava = set(lava_path(field, kind))
     cx = lambda i: x0 + (i + 0.5) * CELL  # noqa: E731
     cz = lambda j: -(j + 0.5) * CELL  # noqa: E731
     # The rock: each ledge (all cells at least that high) as merged columns from the
@@ -134,41 +112,18 @@ def mountain(kind, seed=3):
         cells = {c for c, h in field.items() if h >= level}
         for i0, j0, i1, j1 in rects(cells):
             colour = ROCK[(level // STEP) % 3]
-            if level >= PEAK - STEP and not any((i, j) in lava for i in range(i0, i1) for j in range(j0, j1)):
+            if level >= PEAK - STEP:
                 colour = SNOW if level == max(field[(i, j)] for i in range(i0, i1) for j in range(j0, j1)) else colour
             k.box("Rock", (x0 + i0 * CELL, level - STEP, -j1 * CELL), (x0 + i1 * CELL, level, -j0 * CELL), colour)
-    # The lava: a glowing stream lying on each cell of its path, a black crust either
-    # side, and the crater: a ring of crust round a hot pool on the top cell.
-    path = lava_path(field, kind)
-    for n, (i, j) in enumerate(path):
-        h = field[(i, j)]
-        k.at("Lava", (cx(i), h + 0.2, cz(j)), (CELL * 0.75, 0.4, CELL), LAVA if n % 2 else LAVA_HOT, plain=True)
-        # where it spills off the ledge, a lavafall down the step's face to the next one
-        below = field[path[n + 1]] if n + 1 < len(path) else 0
-        if below < h:
-            fx = (cx(i) + cx(path[n + 1][0])) / 2 if n + 1 < len(path) else cx(i)
-            k.at("Lava", (fx, (h + below) / 2 + 0.2, cz(j) + CELL / 2), (CELL * 0.75, h - below, 0.8), LAVA_HOT, plain=True)
-    top = max(lava, key=lambda c: field[c])
-    h = field[top]
-    for dx, dz in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-        k.at("Rock", (cx(top[0]) + dx * 2.6, h + 1.0, cz(top[1]) + dz * 2.6),
-             (1.4 if dx else 6.6, 2.0, 1.4 if dz else 6.6), CRUST)
-    k.at("Lava", (cx(top[0]), h + 1.6, cz(top[1])), (3.8, 0.3, 3.8), LAVA_HOT, plain=True)
-    # The pool at its foot, where the stream runs out, ringed with crust.
-    foot = min(lava, key=lambda c: c[1])
-    fx, fz = cx(foot[0]), cz(foot[1]) + CELL * 1.5
-    k.at("Lava", (fx, 0.08, fz), (10, 0.16, 6), LAVA, plain=True)
-    for dx, dz, w, d in ((-5.8, 0, 1.6, 7), (5.8, 0, 1.6, 7), (0, 3.6, 12, 1.2)):
-        k.at("Rock", (fx + dx, 0.5, fz + dz), (w, 1.0, d), CRUST)
     # Snow lying on some of the ledges (the Godlands' grey snow lines).
     rng0 = np.random.default_rng(seed + 2)
     for (i, j), h in field.items():
-        if (i, j) not in lava and h < PEAK - STEP and rng0.random() < 0.18 \
+        if h < PEAK - STEP and rng0.random() < 0.18 \
                 and field.get((i, j - 1), 0) < h:  # an exposed front edge
             k.at("Rock", (cx(i), h + 0.3, cz(j)), (CELL, 0.6, CELL), SNOW)
     # Life: dead bushes and trees on ledges, loose rocks round the base.
     rng = np.random.default_rng(seed + 1)
-    ledges = [c for c, h in field.items() if c not in lava and STEP * 2 <= h <= PEAK - STEP * 2
+    ledges = [c for c, h in field.items() if STEP * 2 <= h <= PEAK - STEP * 2
               and all(field.get((c[0] + di, c[1] + dj), 0) <= h for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
     for n, c in enumerate(rng.permutation(len(ledges))[:7]):
         i, j = ledges[c]
@@ -186,8 +141,6 @@ def mountain(kind, seed=3):
         M = T(cx(i) + rng.uniform(-1, 1), 0, cz(j) + rng.uniform(-1, 1)) @ rot(rng.uniform(0, 360))
         for p in sub.parts:
             k.parts.append(Part(p.name, p.size, M @ p.cf, p.color, p.shape, p.plain))
-    for p in k.parts:
-        p.neon = p.name == "Lava"
     # The footprint the ride crashes into: the cells at least two ledges high, so the
     # low skirt at the very edge can be grazed.
     solid = [c for c, h in field.items() if h >= STEP * 2]
