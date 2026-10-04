@@ -651,7 +651,9 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	game:GetService("ReplicatedStorage"):WaitForChild("ShopGrant").OnClientEvent:Connect(function(key, kind)
 		Shop.close()
 		if key == "LegendaryPet" and kind then
-			Hud.eggReveal("Legendary", kind)
+			-- (its own rarity's card: the Loong and Robo Shark are Exclusive)
+			local animal = game:GetService("ReplicatedStorage").Shared.Animals:FindFirstChild(kind)
+			Hud.eggReveal(if animal then require(animal).Rarity else "Legendary", kind)
 		end
 	end)
 	Inventory.init(homeRoot)

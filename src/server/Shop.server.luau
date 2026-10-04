@@ -7,7 +7,8 @@
 -- Studio gives it away for testing and live games don't offer it.
 -- The shop (Config.Shop): the BuyShop remote asks for the purchase of one offer
 -- by its Key, the same way. Paid, it goes into the purchase ledger (below) and
--- ShopGrant tells the client.
+-- ShopGrant tells the client. Spawn Loong starts the Loong's exclusive event at
+-- once (Events.server, as "/event loong" does), for the whole server.
 
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
@@ -165,10 +166,13 @@ end)
 
 -- Records `offer` bought with receipt `purchaseId` (once). True once it's saved.
 local function record(userId, purchaseId, offer)
+	local fresh = false
 	local ledger = update(userId, function(ledger)
+		fresh = false
 		if table.find(ledger.receipts, purchaseId) then
 			return false -- already recorded: it was handed over then
 		end
+		fresh = true
 		table.insert(ledger.receipts, purchaseId)
 		while #ledger.receipts > MAX_RECEIPTS do
 			table.remove(ledger.receipts, 1)
@@ -184,6 +188,9 @@ local function record(userId, purchaseId, offer)
 		end
 		return true
 	end)
+	if ledger and fresh and offer.Key == "SpawnLoong" then
+		workspace.World:SetAttribute("ForceEvent", "Loong")
+	end
 	local player = Players:GetPlayerByUserId(userId)
 	if ledger and player then
 		show(player, ledger)

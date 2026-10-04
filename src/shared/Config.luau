@@ -541,22 +541,29 @@ return {
 	ContinueGrace = 1.5, -- seconds nothing can crash you once you're back on
 	ContinueClear = 14, -- studs: obstacles this close to where you crashed are knocked away
 	-- Robux shop (QM, Oct 4; Shop client, Shop.server): the gold icon at home opens it,
-	-- and pressing ROLL with less than TopUpBelow gold opens just its gold offers.
+	-- and pressing ROLL with less than TopUpBelow gold opens it as a top-up.
 	-- Each offer is its own developer product, like Continue's bands (QM's
 	-- dashboard, Oct 4; a ProductId of 0 would only show in Studio, for free).
+	-- QM's new menu (Oct 4) shows Giant Horse, Spawn Loong, Gold1, Gold4 and the
+	-- Legend Egg, with their prices baked into the cards' art (Price here is just
+	-- a note of it: what's charged is the product's price on the dashboard). Gold2,
+	-- Gold3 and Nuke All aren't on it but can still be bought.
 	Shop = {
 		TopUpBelow = 10000000,
 		Gold = {
-			{ Key = "Gold1", Gold = 1000000, Price = 25, ProductId = 3716409553 },
+			{ Key = "Gold1", Gold = 100000, Price = 50, ProductId = 3716409553 }, -- $100K (QM's nerf, Oct 4: was $1M)
 			{ Key = "Gold2", Gold = 5000000, Price = 99, ProductId = 3716409568 },
 			{ Key = "Gold3", Gold = 25000000, Price = 399, ProductId = 3716409595 },
-			{ Key = "Gold4", Gold = 100000000, Price = 1199, ProductId = 3716409606 },
+			{ Key = "Gold4", Gold = 1000000, Price = 150, ProductId = 3716409606 }, -- $1M (QM's nerf, Oct 4: was $100M)
 		},
 		Specials = {
-			{ Key = "GiantHorse", Name = "Giant Horse", Price = 100, ProductId = 3716409132 }, -- one ride (GiantHorse below)
+			{ Key = "GiantHorse", Name = "Giant Horse", Price = 5, ProductId = 3716409132 }, -- one ride (GiantHorse below)
+			{ Key = "SpawnLoong", Name = "Spawn Loong", Price = 25, ProductId = 0 }, -- starts the Loong event now (Events.server); no product yet
 			{ Key = "Nuke", Name = "Nuke All", Price = 200, ProductId = 3716409185 }, -- your next ride (NukeRange)
-			{ Key = "Legendary", Name = "Legendary Pet", Price = 50, ProductId = 3716409444 }, -- Gacha.Pool.Legendary, into your pen
+			{ Key = "Legendary", Name = "Legend Egg", Price = 150, ProductId = 3716409444 }, -- a pet by LegendaryOdds, into your pen
 		},
+		-- The Legend Egg's odds (percent, QM's odds card, Oct 4).
+		LegendaryOdds = { Unicorn = 18, Snake = 20, Icebringer = 20, Kraken = 20, BlueCrab = 20, Loong = 1, RoboShark = 1 },
 		-- The Giant Horse: a Horse this many times its size, Speed x its own, no
 		-- Hold drain, for one ride from the start line. Zoom is the camera's pull-back.
 		GiantHorse = { Scale = 8, Speed = 16, Zoom = 2.6 },

@@ -25,6 +25,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Animals = ReplicatedStorage.Shared.Animals
 local PetFaces = require(script.Parent.PetFaces)
+local ModalPop = require(script.Parent.ModalPop)
 
 local player = Players.LocalPlayer
 
@@ -145,6 +146,8 @@ local BIOS = { -- QM's (Oct 3)
 local AnimalDex = {}
 
 local gui, page, scale, grid, examine
+local pop = 1 -- the page's pop in or out (ModalPop), times its fit to the screen
+local resize
 local open, shown -- the page is up; the animal being examined, its place in `order` (nil: the grid)
 local animate -- the running animal's frame clock
 
@@ -408,13 +411,25 @@ function showAnimal(at)
 	bio.Parent = page
 end
 
+-- It pops in and out (ModalPop), hiding (and clearing) once it has shrunk away.
+local function setPop(scale)
+	pop = scale
+	resize()
+end
+
 function AnimalDex.toggle()
 	open = not open
-	gui.Enabled = open
-	if open and biomes[gridAt] then
-		showGrid(gridAt)
-	elseif not open then
-		clear()
+	if open then
+		gui.Enabled = true
+		if biomes[gridAt] then
+			showGrid(gridAt)
+		end
+		ModalPop.open(setPop)
+	else
+		ModalPop.close(setPop, function()
+			gui.Enabled = false
+			clear()
+		end)
 	end
 	if AnimalDex.onToggle then
 		AnimalDex.onToggle(open)
@@ -471,9 +486,9 @@ scale = Instance.new("UIScale")
 scale.Parent = page
 page.Parent = gui
 local camera = workspace.CurrentCamera
-local function resize()
+function resize()
 	local screen = camera.ViewportSize
-	scale.Scale = math.min(screen.X * SCREEN_SHARE / PAGE.X, screen.Y * 0.8 / PAGE.Y)
+	scale.Scale = math.min(screen.X * SCREEN_SHARE / PAGE.X, screen.Y * 0.8 / PAGE.Y) * pop
 end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
 resize()

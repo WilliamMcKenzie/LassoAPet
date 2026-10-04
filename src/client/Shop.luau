@@ -1,10 +1,14 @@
--- The Robux shop (QM, Oct 4; Config.Shop): the gold icon at home opens it. Gold
--- offers on top, then the specials (Giant Horse, Nuke All, Legendary Pet). Pressing
--- ROLL with less than Config.Shop.TopUpBelow gold opens just the gold offers as a
--- top-up, with ROLL under them when you can pay. Buying asks the server (BuyShop,
--- Shop.server), which asks Roblox for the Robux; an offer whose product doesn't
--- exist yet only shows in Studio, where it's free. Clicking off the panel closes it.
--- Placeholder art drawn in code until QM's is in.
+-- The Robux shop (QM, Oct 4; Config.Shop): the gold icon at home opens it. QM's
+-- panel with five cards laid out like QM's mockup: Giant Horse, Spawn Loong and the
+-- two gold packs in a 2x2 grid, and the tall Legend Egg card on the right, whose ?
+-- flips it between the mystery egg and its odds. Each card's picture, name and
+-- Robux price are baked into QM's art; clicking a card buys it (BuyShop,
+-- Shop.server), which asks Roblox for the Robux. An offer whose product doesn't
+-- exist yet only shows in Studio, where it's free. It behaves like the roll menu
+-- and the animal dictionary: no dark backdrop, the HUD's left buttons stay on top
+-- and clickable, and clicking anywhere off the panel closes it.
+-- Pressing ROLL with less than Config.Shop.TopUpBelow gold opens it as a top-up,
+-- over the roll menu, with ROLL under it when you can pay.
 --
 --   Shop.open(topUp) / Shop.toggle() / Shop.close() / Shop.isOpen()
 --   Shop.hasOffers() / Shop.hasGold()   -- anything to show (live: products made)
@@ -16,31 +20,39 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
-local PetFaces = require(script.Parent.PetFaces)
+local ModalPop = require(script.Parent.ModalPop)
 
 local Shop = {}
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
-local FONT = Enum.Font.FredokaOne
-local WHITE = Color3.new(1, 1, 1)
-local GREEN = Color3.fromRGB(92, 214, 72)
 local GREY = Color3.fromRGB(150, 150, 150)
-local PANEL_COLOR = Color3.fromRGB(255, 196, 64)
-local CARD_COLOR = Color3.fromRGB(255, 240, 200)
--- Placeholder pictures until QM draws the cards ("" = an emoji in its place).
-local ICONS = {
-	gold = "rbxassetid://99312860837685", -- Hud's coin
-	GiantHorse = PetFaces.HEADSHOTS.Horse or "",
-	Nuke = "", -- 💥
-	Legendary = "rbxassetid://85066893166855", -- Hud's Unicorn egg render
+local WHITE = Color3.new(1, 1, 1)
+-- QM's art (assets/ui/Shop*.png). The cards' prices are baked in: keep them in step
+-- with the products' prices on the Creator Dashboard.
+local PANEL = { id = "rbxassetid://105155399825774", size = Vector2.new(2888, 1694) } -- ShopPanel.png ("Shop" on its top edge)
+local ODDS_BUTTON = "rbxassetid://83654143211576" -- ShopOddsButton.png (the green ?)
+local ROLL_BUTTON = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) } -- RollButton.png, as the roll menu's
+local CARDS = {
+	-- [offer Key] = the card's art, and its column and row in the grid (the
+	-- Legend Egg spans both rows)
+	GiantHorse = { id = "rbxassetid://73979296990982", column = 0, row = 0 }, -- ShopGiantHorse.png
+	SpawnLoong = { id = "rbxassetid://70887174133121", column = 1, row = 0 }, -- ShopSpawnLoong.png
+	Gold1 = { id = "rbxassetid://136220197688301", column = 0, row = 1 }, -- ShopGold100k.png
+	Gold4 = { id = "rbxassetid://103982023506783", column = 1, row = 1 }, -- ShopGold1M.png
+	Legendary = { id = "rbxassetid://125476338322601", odds = "rbxassetid://102515912144773", column = 2, row = 0, tall = true }, -- ShopLegendaryEgg.png / ShopLegendaryEggOdds.png
 }
-local EMOJI = { Nuke = "💥" }
+local PANEL_WIDTH = 930 -- about 70% of the screen, as in QM's mockup
+local CARD_WIDTH = 265
+local SMALL_HEIGHT = CARD_WIDTH * 666 / 848 -- the small cards' art is 848x666
+local TALL_HEIGHT = CARD_WIDTH * 1362 / 848 -- the Legend Egg's is 848x1362
+local GAP = 30 -- between columns
+local ODDS_SIZE = 58
 
 local player = Players.LocalPlayer
 local open, topUp = false, false
 local buyShop = ReplicatedStorage:WaitForChild("BuyShop")
 
--- Paid random items (the Legendary Pet; egg rolls, as gold can be bought) are left
+-- Paid random items (the Legend Egg; egg rolls, as gold can be bought) are left
 -- out where the player's policy restricts them. Unknown counts as restricted.
 local restricted
 function Shop.randomRestricted()
@@ -57,9 +69,18 @@ local function offered(offer)
 	return offer.ProductId ~= 0 or RunService:IsStudio()
 end
 
+local offers = {} -- [Key] = offer
+for _, list in { Config.Shop.Gold, Config.Shop.Specials } do
+	for _, offer in list do
+		offers[offer.Key] = offer
+	end
+end
+
+-- Only the offers with a card count (the other gold packs and Nuke All aren't on
+-- QM's menu, though they can still be bought).
 function Shop.hasGold()
-	for _, offer in Config.Shop.Gold do
-		if offered(offer) then
+	for key, offer in offers do
+		if offer.Gold and CARDS[key] and offered(offer) then
 			return true
 		end
 	end
@@ -67,83 +88,34 @@ function Shop.hasGold()
 end
 
 function Shop.hasOffers()
-	if Shop.hasGold() then
-		return true
-	end
-	for _, offer in Config.Shop.Specials do
-		if offered(offer) then
+	for key, offer in offers do
+		if CARDS[key] and offered(offer) then
 			return true
 		end
 	end
 	return false
 end
 
--- Money as Hud shows it: "$1M", "$25M".
-local function money(amount)
-	for _, s in { { 1e9, "B" }, { 1e6, "M" }, { 1e3, "k" } } do
-		if amount >= s[1] then
-			return "$" .. (string.format("%.1f", amount / s[1]):gsub("%.0$", "")) .. s[2]
-		end
-	end
-	return "$" .. amount
-end
-
-local function corner(parent, radius)
-	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, radius)
-	c.Parent = parent
-end
-
-local function label(parent, text, textSize, size, position)
-	local l = Instance.new("TextLabel")
-	l.BackgroundTransparency = 1
-	l.AnchorPoint = Vector2.new(0.5, 0.5)
-	l.Size = size
-	l.Position = position
-	l.Font = FONT
-	l.TextSize = textSize
-	l.TextColor3 = WHITE
-	l.Text = text
-	local s = Instance.new("UIStroke")
-	s.Thickness = 3
-	s.LineJoinMode = Enum.LineJoinMode.Round
-	s.Parent = l
-	l.Parent = parent
-	return l
-end
-
--- A green text button that shrinks a little while pressed.
-local function pushButton(parent, text, size, position, onActivated)
-	local b = Instance.new("TextButton")
-	b.AutoButtonColor = false
-	b.BackgroundColor3 = GREEN
-	b.AnchorPoint = Vector2.new(0.5, 0.5)
-	b.Size = size
-	b.Position = position
-	b.Text = ""
-	corner(b, 14)
-	label(b, text, 34, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5))
+-- Shrinks a little while pressed.
+local function pressable(button)
 	local scale = Instance.new("UIScale")
-	scale.Parent = b
+	scale.Parent = button
 	local press = TweenInfo.new(0.08)
-	b.MouseButton1Down:Connect(function()
-		TweenService:Create(scale, press, { Scale = 0.93 }):Play()
+	button.MouseButton1Down:Connect(function()
+		TweenService:Create(scale, press, { Scale = 0.95 }):Play()
 	end)
-	for _, event in { b.MouseButton1Up, b.MouseLeave } do
+	for _, event in { button.MouseButton1Up, button.MouseLeave } do
 		event:Connect(function()
 			TweenService:Create(scale, press, { Scale = 1 }):Play()
 		end)
 	end
-	b.Activated:Connect(onActivated)
-	b.Parent = parent
-	return b
 end
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "Shop"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.DisplayOrder = 10 -- over the roll menu, for the top-up
+gui.DisplayOrder = -1 -- under the HUD (its left buttons stay on top), over the roll menu (-2) for the top-up
 gui.Enabled = false
 
 local root = Instance.new("Frame")
@@ -162,140 +134,123 @@ end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
 resize()
 
-local panel = Instance.new("Frame")
+local panel = Instance.new("ImageLabel")
 panel.Name = "Panel"
-panel.BackgroundColor3 = PANEL_COLOR
+panel.BackgroundTransparency = 1
+panel.Image = PANEL.id
 panel.AnchorPoint = Vector2.new(0.5, 0.5)
-panel.Position = UDim2.fromScale(0.5, 0.5)
-panel.Size = UDim2.fromOffset(820, 0)
-panel.AutomaticSize = Enum.AutomaticSize.Y
-corner(panel, 28)
-local padding = Instance.new("UIPadding")
-padding.PaddingTop = UDim.new(0, 56)
-padding.PaddingBottom = UDim.new(0, 28)
-padding.Parent = panel
-local rows = Instance.new("UIListLayout")
-rows.HorizontalAlignment = Enum.HorizontalAlignment.Center
-rows.SortOrder = Enum.SortOrder.LayoutOrder
-rows.Padding = UDim.new(0, 18)
-rows.Parent = panel
+panel.Position = UDim2.fromScale(0.5, 0.52) -- a little below centre, as in the mockup
+panel.Size = UDim2.fromOffset(PANEL_WIDTH, PANEL_WIDTH * PANEL.size.Y / PANEL.size.X)
 local panelScale = Instance.new("UIScale")
 panelScale.Parent = panel
 panel.Parent = root
--- The title over the panel's top edge (outside the list layout's reach).
-local titleHolder = Instance.new("Frame")
-titleHolder.BackgroundTransparency = 1
-titleHolder.AnchorPoint = Vector2.new(0.5, 0.5)
-titleHolder.Position = UDim2.fromScale(0.5, 0.5)
-titleHolder.Size = UDim2.fromOffset(820, 0)
-titleHolder.Parent = root
-local title = label(titleHolder, "SHOP", 72, UDim2.fromOffset(600, 80), UDim2.fromScale(0.5, 0))
 
-local function row(order, height)
-	local r = Instance.new("Frame")
-	r.BackgroundTransparency = 1
-	r.Size = UDim2.fromOffset(780, height)
-	r.LayoutOrder = order
-	local list = Instance.new("UIListLayout")
-	list.FillDirection = Enum.FillDirection.Horizontal
-	list.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	list.SortOrder = Enum.SortOrder.LayoutOrder
-	list.Padding = UDim.new(0, 16)
-	list.Parent = r
-	r.Parent = panel
-	return r
-end
+-- The cards, centred in the panel under its title.
+local grid = Instance.new("Frame")
+grid.Name = "Cards"
+grid.BackgroundTransparency = 1
+grid.AnchorPoint = Vector2.new(0.5, 0.5)
+grid.Position = UDim2.fromScale(0.5, 0.54)
+grid.Size = UDim2.fromOffset(3 * CARD_WIDTH + 2 * GAP, TALL_HEIGHT)
+grid.Parent = panel
 
--- One offer: its picture, its name, and its Robux price as the buy button.
-local function card(parent, order, width, height, icon, emoji, name, offer)
-	local c = Instance.new("Frame")
-	c.BackgroundColor3 = CARD_COLOR
-	c.Size = UDim2.fromOffset(width, height)
-	c.LayoutOrder = order
-	c.Visible = offered(offer)
-	corner(c, 20)
-	local picture = height - 120
-	if icon ~= "" then
-		local i = Instance.new("ImageLabel")
-		i.BackgroundTransparency = 1
-		i.ScaleType = Enum.ScaleType.Fit
-		i.AnchorPoint = Vector2.new(0.5, 0)
-		i.Position = UDim2.new(0.5, 0, 0, 10)
-		i.Size = UDim2.fromOffset(picture, picture)
-		i.Image = icon
-		i.Parent = c
-	else
-		local e = label(c, emoji or "?", picture * 0.8, UDim2.fromOffset(picture, picture), UDim2.new(0.5, 0, 0, 10 + picture / 2))
-		e.UIStroke.Enabled = false
+local legendCard, legendOdds
+for key, spot in CARDS do
+	local offer = offers[key]
+	if not offer then
+		continue
 	end
-	label(c, name, 32, UDim2.fromOffset(width, 36), UDim2.new(0.5, 0, 1, -82))
-	pushButton(c, "R$ " .. offer.Price, UDim2.fromOffset(width - 28, 52), UDim2.new(0.5, 0, 1, -36), function()
-		buyShop:FireServer(offer.Key)
+	local card = Instance.new("ImageButton")
+	card.Name = key
+	card.BackgroundTransparency = 1
+	card.AutoButtonColor = false
+	card.Image = spot.id
+	card.AnchorPoint = Vector2.new(0.5, 0.5)
+	local height = if spot.tall then TALL_HEIGHT else SMALL_HEIGHT
+	local top = if spot.row == 0 then 0 else TALL_HEIGHT - SMALL_HEIGHT
+	card.Position = UDim2.fromOffset(spot.column * (CARD_WIDTH + GAP) + CARD_WIDTH / 2, top + height / 2)
+	card.Size = UDim2.fromOffset(CARD_WIDTH, height)
+	card.Visible = offered(offer)
+	pressable(card)
+	card.Activated:Connect(function()
+		if open then -- (not while it shrinks away)
+			buyShop:FireServer(key)
+		end
 	end)
-	c.Parent = parent
-	return c
-end
-
-local goldRow = row(1, 230)
-for i, offer in Config.Shop.Gold do
-	card(goldRow, i, 180, 230, ICONS.gold, nil, money(offer.Gold), offer)
-end
-local specialRow = row(2, 250)
--- The Legendary Pet is a paid random item: its odds are on its card, and it's
--- left out where the player's policy restricts paid random items (PolicyService).
-for i, offer in Config.Shop.Specials do
-	local c = card(specialRow, i, 240, 250, ICONS[offer.Key] or "", EMOJI[offer.Key], offer.Name, offer)
-	if offer.Key == "Legendary" then
-		local pool, total = {}, 0
-		for _, weight in Config.Gacha.Pool.Legendary do
-			total += weight
-		end
-		for kind, weight in Config.Gacha.Pool.Legendary do
-			table.insert(pool, string.format("%s %d%%", kind, math.round(weight / total * 100)))
-		end
-		table.sort(pool)
-		local odds = label(c, table.concat(pool, "  "), 16, UDim2.fromOffset(224, 40), UDim2.new(0.5, 0, 0, 24))
-		odds.TextWrapped = true
-		odds.ZIndex = 2
-		c.Visible = false -- until the policy check says it may show
-		task.spawn(function()
-			c.Visible = offered(offer) and not Shop.randomRestricted()
-		end)
+	card.Parent = grid
+	if key == "Legendary" then
+		legendCard = card
 	end
 end
--- The top-up's way on to the roll you asked for, when you can pay for it.
-local rollRow = row(3, 70)
-local rollButton = pushButton(rollRow, "ROLL " .. money(Config.Gacha.Price), UDim2.fromOffset(300, 64), UDim2.new(), function()
+
+-- The Legend Egg is a paid random item: its ? flips the card to its odds and back
+-- (QM's odds art, Config.Shop.LegendaryOdds), and it's left out where the player's
+-- policy restricts paid random items (PolicyService).
+if legendCard then
+	local spot = CARDS.Legendary
+	legendCard.Visible = false -- until the policy check says it may show
+	local flip = Instance.new("ImageButton")
+	flip.Name = "Odds"
+	flip.BackgroundTransparency = 1
+	flip.AutoButtonColor = false
+	flip.Image = ODDS_BUTTON
+	flip.AnchorPoint = Vector2.new(0.5, 0.5)
+	flip.Position = UDim2.fromScale(0.88, 0.055) -- on the card's top-right corner, right of its title
+	flip.Size = UDim2.fromOffset(ODDS_SIZE, ODDS_SIZE)
+	flip.ZIndex = 2
+	pressable(flip)
+	flip.Activated:Connect(function()
+		legendOdds = not legendOdds
+		legendCard.Image = if legendOdds then spot.odds else spot.id
+	end)
+	flip.Parent = legendCard
+	task.spawn(function()
+		legendCard.Visible = offered(offers.Legendary) and not Shop.randomRestricted()
+	end)
+end
+
+-- The top-up's way on to the roll you asked for, when you can pay for it: the
+-- roll menu's ROLL, over the panel's bottom edge.
+local roll = Instance.new("ImageButton")
+roll.Name = "Roll"
+roll.BackgroundTransparency = 1
+roll.AutoButtonColor = false
+roll.Image = ROLL_BUTTON.id
+roll.AnchorPoint = Vector2.new(0.5, 0.5)
+roll.Position = UDim2.fromScale(0.5, 0.99)
+roll.Size = UDim2.fromOffset(310, 310 * ROLL_BUTTON.size.Y / ROLL_BUTTON.size.X)
+roll.ZIndex = 3
+pressable(roll)
+roll.Activated:Connect(function()
 	if Shop.onRoll then
 		Shop.close()
 		Shop.onRoll()
 	end
 end)
+roll.Parent = panel
 
 local function refresh()
-	rollButton.BackgroundColor3 = if (player:GetAttribute("Gold") or 0) >= Config.Gacha.Price then GREEN else GREY
-	rollRow.Visible = topUp and (player:GetAttribute("Gold") or 0) >= Config.Gacha.Price
+	local canPay = (player:GetAttribute("Gold") or 0) >= Config.Gacha.Price
+	roll.ImageColor3 = if canPay then WHITE else GREY
+	roll.Visible = topUp and canPay
 end
 player:GetAttributeChangedSignal("Gold"):Connect(refresh)
 
--- The title sits on the panel's top edge, wherever its height ends up.
-panel:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-	titleHolder.Size = UDim2.fromOffset(820, panel.AbsoluteSize.Y / rootScale.Scale)
-end)
-
--- Clicking anywhere off the panel closes it.
+-- Clicking anywhere off the panel (and its ROLL) closes it. No dark backdrop (QM).
+local function over(object, at)
+	local min, size = object.AbsolutePosition, object.AbsoluteSize
+	return at.X >= min.X and at.Y >= min.Y and at.X <= min.X + size.X and at.Y <= min.Y + size.Y
+end
 local backdrop = Instance.new("TextButton")
 backdrop.Name = "Backdrop"
-backdrop.BackgroundColor3 = Color3.new(0, 0, 0)
-backdrop.BackgroundTransparency = 0.6
+backdrop.BackgroundTransparency = 1
 backdrop.Text = ""
 backdrop.AutoButtonColor = false
 backdrop.Size = UDim2.fromScale(1, 1)
 backdrop.ZIndex = 0
 backdrop.Activated:Connect(function(input)
 	local at = Vector2.new(input.Position.X, input.Position.Y)
-	local min, size = panel.AbsolutePosition, panel.AbsoluteSize
-	if at.X < min.X or at.Y < min.Y or at.X > min.X + size.X or at.Y > min.Y + size.Y then
+	if not over(panel, at) and not (roll.Visible and over(roll, at)) then
 		Shop.close()
 	end
 end)
@@ -303,18 +258,24 @@ backdrop.Parent = gui
 root.Parent = gui
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- topUp: just the gold offers, titled as a top-up, with ROLL under them.
+-- It pops in and out like the other menus (ModalPop), hiding once it has shrunk away.
+local function setScale(scale)
+	panelScale.Scale = scale
+end
+
+-- topUp: opened from ROLL, over the roll menu, with ROLL under it.
 function Shop.open(asTopUp)
 	if open then
 		return
 	end
 	open, topUp = true, asTopUp == true
-	title.Text = if topUp then "TOP UP GOLD!" else "SHOP"
-	specialRow.Visible = not topUp
+	if legendCard and legendOdds then -- the mystery egg first, every time
+		legendOdds = false
+		legendCard.Image = CARDS.Legendary.id
+	end
 	refresh()
 	gui.Enabled = true
-	panelScale.Scale = 0.85
-	TweenService:Create(panelScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	ModalPop.open(setScale)
 	if Shop.onToggle then
 		Shop.onToggle(true, topUp)
 	end
@@ -325,7 +286,9 @@ function Shop.close()
 		return
 	end
 	open = false
-	gui.Enabled = false
+	ModalPop.close(setScale, function()
+		gui.Enabled = false
+	end)
 	if Shop.onToggle then
 		Shop.onToggle(false, topUp)
 	end

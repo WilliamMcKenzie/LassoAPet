@@ -12,6 +12,7 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
+local ModalPop = require(script.Parent.ModalPop)
 
 local RollMenu = {}
 
@@ -23,13 +24,13 @@ local BUTTON_WIDTH = 310
 local GREY = Color3.fromRGB(150, 150, 150)
 
 local player = Players.LocalPlayer
-local open, hidden = false, false
+local open, hidden, closing = false, false, false
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "RollMenu"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.DisplayOrder = -1 -- under the HUD, so the Roll button that closes it stays on top
+gui.DisplayOrder = -2 -- under the HUD, so the Roll button that closes it stays on top (and under the shop's top-up)
 gui.Enabled = false
 
 local root = Instance.new("Frame")
@@ -151,15 +152,25 @@ root.Parent = gui
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local function refresh()
-	gui.Enabled = open and not hidden
+	gui.Enabled = (open or closing) and not hidden
+end
+
+-- It pops in and out (ModalPop), hiding once it has shrunk away.
+local function setScale(scale)
+	panelScale.Scale = scale
 end
 
 function RollMenu.toggle()
 	open = not open
+	closing = not open and not hidden -- (out of the way for the egg card: it just goes)
 	refresh()
 	if open then
-		panelScale.Scale = 0.85
-		TweenService:Create(panelScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		ModalPop.open(setScale)
+	else
+		ModalPop.close(setScale, function()
+			closing = false
+			refresh()
+		end)
 	end
 	if RollMenu.onToggle then
 		RollMenu.onToggle(open)

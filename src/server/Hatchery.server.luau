@@ -502,7 +502,7 @@ end
 
 -- The shop's Legendary Pet (Shop.server): its "BoughtPets" attribute is the
 -- running total bought; each one not yet in your profile (boughtPets, saved with
--- it) is a random Legendary straight into your pen, hatched, saved at once, and
+-- it) is a random pet by Config.Shop.LegendaryOdds straight into your pen, hatched, saved at once, and
 -- its card shows (ShopGrant). Waits for your profile and pen.
 local function addBoughtPets(player)
 	local profile = profiles[player]
@@ -514,7 +514,7 @@ local function addBoughtPets(player)
 	local area = pen.Area
 	local kinds = {}
 	for _ = (profile.boughtPets or 0) + 1, total do
-		local kind = pick(Config.Gacha.Pool.Legendary)
+		local kind = pick(Config.Shop.LegendaryOdds)
 		if isAnimal(kind) then
 			local x = (math.random() - 0.5) * (area.Size.X - 2 * EDGE)
 			local z = (math.random() - 0.5) * (area.Size.Z - 2 * EDGE)
