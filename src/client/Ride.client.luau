@@ -1647,6 +1647,7 @@ local abilityKey = false -- Q or R1 pressed since the last frame
 local rattleHaze = 0 -- 0..1, eased in and out: the rattle's haze
 vfx.RATTLE_HAZE = Color3.fromRGB(255, 170, 40) -- yellow-orange
 vfx.FishWave = require(script.Parent.FishWave) -- the School of Fish's wave
+vfx.Missiles = require(script.Parent.Missiles) -- the Robo Shark's missiles
 vfx.FROST_HAZE = Color3.fromRGB(190, 236, 255)
 vfx.hazeColor = vfx.RATTLE_HAZE
 local abilityClock = 0 -- ride time, slowed with the slow motion like everything else
@@ -1922,7 +1923,7 @@ function vfx.frostBlast(cfg, left)
 end
 
 -- Abilities that don't make the pet untouchable: it still uses Hold and can crash.
-vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true, Breath = true, Feast = true }
+vfx.PLAIN = { Frost = true, Boost = true, Grow = true, Ink = true, Crabwalk = true, Breath = true, Feast = true, Missiles = true }
 
 -- The Blue Crab's Feast (Config.Abilities): what it has broken since the last one, and
 -- how much bigger and faster it has grown this ride. nil for every other pet.
@@ -2065,6 +2066,34 @@ function vfx.breathBlast(active)
 		local ahead = (entity.z - mount.z) * dir
 		if entity ~= mount and not entity.popping and ahead > 0 and ahead < cfg.Range and math.abs(entity.x - mount.x) < half then
 			knock(entity, entity.x - mount.x)
+		end
+	end
+end
+
+-- Missiles (the Robo Shark): two missiles off its sides, sized to it, heading `dir`.
+-- Spread and Size are in the shark's own model studs.
+function vfx.launchMissiles(entity, cfg, dir)
+	local s = entity.animal.size * entity.animal.scale
+	local p = entity.animal.model.PrimaryPart.Position
+	return vfx.Missiles.new(p.X, p.Y, p.Z, dir, cfg.Spread * s, cfg.Size * s)
+end
+
+-- Missiles: everything in the stretch of each missile's lane it flew through this
+-- frame is smashed or knocked flying, obstacles and animals whatever their size.
+function vfx.missileSweep(lanes, cfg)
+	local dir = travelDir()
+	for _, lane in lanes do
+		local lo, hi = math.min(lane.from, lane.to) - 2, math.max(lane.from, lane.to) + 2
+		for _, o in obstacles do
+			if not o.smashed and o.z >= lo and o.z <= hi and math.abs(o.x - lane.x) < cfg.Radius + o.hx then
+				smash(o, dir, if o.x >= lane.x then 1 else -1)
+				Poof.at(Vector3.new(o.x, 0, o.z))
+			end
+		end
+		for _, entity in allAnimals() do
+			if entity ~= mount and not entity.popping and entity.z >= lo and entity.z <= hi and math.abs(entity.x - lane.x) < cfg.Radius then
+				knock(entity, entity.x - mount.x)
+			end
 		end
 	end
 end
@@ -2261,6 +2290,9 @@ local function endAbility(entity)
 	if active.wave then
 		active.wave:destroy()
 	end
+	if active.missiles then
+		active.missiles:destroy()
+	end
 	local root = entity.animal.model.PrimaryPart
 	if active.cfg.Tier then
 		-- Back to its own size: a springy pop down if it's still the mount.
@@ -2309,6 +2341,9 @@ local function startAbility(cfg)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(40, 30, 70))
 	elseif cfg.Kind == "Wave" then
 		a.active.wave = vfx.FishWave.new(mount.z, travelDir(), EDGE)
+	elseif cfg.Kind == "Missiles" then
+		hold = math.min(hold + holdTime(mount) * cfg.Restore, holdTime(mount)) -- QM: every launch refills 10% of the Hold bar
+		a.active.missiles = vfx.launchMissiles(mount, cfg, travelDir())
 	elseif cfg.Kind == "Feast" then
 		-- Everything broken since the last Feast: Hold back, and bigger and faster for good.
 		local feast = vfx.feastOf(mount)
@@ -2364,6 +2399,8 @@ local function updateAbility(dt)
 			vfx.breathBlast(active)
 		elseif active.wave then
 			vfx.waveSweep(active.wave:update(dt, mount.speed, active.t, active.cfg.Duration))
+		elseif active.missiles then
+			vfx.missileSweep(active.missiles:update(dt, mount.speed, active.t), active.cfg)
 		end
 		if active.cfg.Duration and active.t >= active.cfg.Duration then
 			endAbility(mount) -- (an UntilFull charge ends in checkRide, when Hold is full again)
@@ -2978,6 +3015,10 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 		elseif a == "Breath" then
 			entity.animal:playOnce("special")
 			rider.fx = vfx.breathFx(entity, cfg)
+		elseif a == "Missiles" then
+			local s = entity.animal.size * entity.animal.scale
+			local dir = if entity.animal.model.PrimaryPart.CFrame.LookVector.Z < 0 then -1 else 1
+			vfx.Missiles.show(p.X, p.Y, p.Z, dir, cfg.Spread * s, cfg.Size * s, cfg.Duration, rider.vel.Magnitude)
 		else
 			Poof.at(Vector3.new(p.X, 0, p.Z))
 		end

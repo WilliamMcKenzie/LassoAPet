@@ -79,7 +79,7 @@ return {
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			Herd = { Fish = 0, Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0.05, Kraken = 0.05 }, -- (Blue Crab and Robo Shark guessed like the Kraken)
+			Herd = { Fish = 0, Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0, Kraken = 0.05 }, -- (Blue Crab guessed like the Kraken; the Robo Shark never spawns: a future Robux pet, QM Oct 4)
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -260,7 +260,11 @@ return {
 	--     seconds in, everything in a Width-stud lane Range studs ahead is burnt away:
 	--     obstacles smashed, animals flung, whatever their size. It refills Restore of
 	--     the Hold bar when it starts (QM: 20%).
-	-- Boost, Grow, Ink, Crabwalk and Breath, like Frost, still use Hold and can crash.
+	--   Missiles (Robo Shark): two missiles fly out from its sides straight ahead for
+	--     Duration, smashing every obstacle and knocking away every animal within Radius
+	--     of their lanes, whatever its size (client/Missiles.luau; Spread and Size are in
+	--     its model studs). Every launch refills Restore of the Hold bar (QM: 10%).
+	-- Boost, Grow, Ink, Crabwalk, Breath and Missiles, like Frost, still use Hold and can crash.
 	-- (The Kraken's ability is on hold until QM and Claude settle how it looks.)
 	-- Charge swings the camera round to a cinematic front-side angle.
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
@@ -277,6 +281,7 @@ return {
 		BlueCrab = { Kind = "Feast", Duration = 0.9, Cooldown = 8, Heal = 0.1, Grow = 1.1, SpeedUp = 1.1, Max = 2 }, -- QM, Oct 4 (cooldown a guess)
 		FishSchool = { Kind = "Wave", Duration = 4, Cooldown = 10 },
 		-- the animation's length and fire window; the range, width and cooldown are guesses
+		RoboShark = { Kind = "Missiles", Duration = 1.2, Cooldown = 3, Restore = 0.1, Radius = 7, Spread = 0.9, Size = 0.18 }, -- QM, Oct 4 (Duration, Radius a guess)
 		Loong = { Kind = "Breath", Duration = 2.6, FireFrom = 0.95, FireTo = 2.1, Cooldown = 8, Range = 70, Width = 22, Restore = 0.2 },
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
@@ -369,7 +374,7 @@ return {
 		Pool = {
 			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1 },
-			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1, RoboShark = 1 },
+			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
 			-- with an empty pool is never rolled.
 			Exclusive = {},
