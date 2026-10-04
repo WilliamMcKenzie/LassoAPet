@@ -1,4 +1,4 @@
--- Carl's stall (Config.Carl, QM Oct 4): a little desert stall in the gap between
+-- Carl's stall (Config.Carl, QM Oct 4): QM's market stall (CarlStallModel) in the gap between
 -- the left corner pen and the start line, with a cactus growing out of it and
 -- Carl (a cactus guy) behind the counter. Walk up and Talk: he asks if you want
 -- to spin for a pet, and Yes opens the egg roll menu (RollMenu; the roll is Hud's).
@@ -14,6 +14,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local Cactus = require(ReplicatedStorage.Shared.Animals.Cactus)
+local StallModel = require(ReplicatedStorage.Shared.CarlStallModel)
 local RollMenu = require(script.Parent.RollMenu)
 
 if not Config.Gacha.Enabled then
@@ -25,12 +26,6 @@ local STUD_TILE = 0.5
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
 
 local SAND = Color3.fromRGB(236, 200, 130)
-local SAND_DARK = Color3.fromRGB(200, 150, 90)
-local WOOD = Color3.fromRGB(150, 96, 56)
-local ORANGE = Color3.fromRGB(255, 140, 40)
-local CREAM = Color3.fromRGB(255, 240, 200)
-local GREEN = Color3.fromRGB(118, 204, 64) -- Carl's own green
-local PINK = Color3.fromRGB(255, 110, 170)
 
 local player = Players.LocalPlayer
 local carlConfig = Config.Carl
@@ -100,48 +95,27 @@ local carlRootY = carl.model.PrimaryPart.Position.Y
 local _, carlSize = carl.model:GetBoundingBox()
 local h = carlSize.Y
 
-local W, FRONT, BACK = 14, -4, 4 -- stall width; front and back edges (local z)
-local counterH = math.max(3.5, 0.3 * h) -- hides his legs
-local roofH = h + 2.5 -- the awning's front edge
-
-block("Floor", Vector3.new(W + 1, 0.4, BACK - FRONT + 1), CFrame.new(0, 0.2, 0), SAND_DARK)
-local counter = block("Counter", Vector3.new(W, counterH, 3), CFrame.new(0, 0.4 + counterH / 2, FRONT + 1.5), SAND)
-block("CounterTop", Vector3.new(W + 0.6, 0.6, 3.6), CFrame.new(0, 0.4 + counterH + 0.3, FRONT + 1.5), SAND_DARK)
-for _, x in { -W / 2 + 0.5, W / 2 - 0.5 } do
-	block("Post", Vector3.new(1, roofH, 1), CFrame.new(x, 0.4 + roofH / 2, FRONT + 0.5), WOOD)
-	block("Post", Vector3.new(1, roofH + 2, 1), CFrame.new(x, 0.4 + (roofH + 2) / 2, BACK - 0.5), WOOD)
+-- QM's market stall in our style (tools/carl_stall.py -> CarlStallModel): posts,
+-- beams, a counter and a striped cloth roof, with a cactus growing up through it.
+local counter
+for _, spec in StallModel.parts do
+	local part = block(spec.name, spec.size, spec.cframe, spec.color)
+	if spec.name == "Counter" then
+		counter = part
+	end
 end
-
--- The striped awning, sloping down toward the front.
-local rise, run = 2, BACK - FRONT + 1.5
-local slope = math.atan2(rise, run)
-local length = math.sqrt(rise * rise + run * run)
-local stripes = 7
-for i = 1, stripes do
-	local x = -W / 2 - 0.5 + (i - 0.5) * (W + 1) / stripes
-	block("Awning", Vector3.new((W + 1) / stripes, 0.5, length),
-		CFrame.new(x, 0.4 + roofH + 0.6 + rise / 2, (FRONT - 1.5 + BACK) / 2) * CFrame.Angles(-slope, 0, 0),
-		if i % 2 == 1 then ORANGE else CREAM)
+local roofTop = 0
+for _, spec in StallModel.parts do
+	roofTop = math.max(roofTop, spec.cframe.Position.Y + spec.size.Y / 2)
 end
--- The sign hanging off the awning's front edge.
-local board = block("Sign", Vector3.new(W - 1, 1.8, 0.4), CFrame.new(0, 0.4 + roofH - 0.6, FRONT - 1.3), WOOD)
+-- The sign on the counter's front, toward the base.
 local boardGui = Instance.new("SurfaceGui")
-boardGui.Face = Enum.NormalId.Front -- the stall's front: toward the base
+boardGui.Face = Enum.NormalId.Front
 boardGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 boardGui.PixelsPerStud = 40
 boardGui.LightInfluence = 0
-text(boardGui, UDim2.fromScale(1, 1), "CARL'S PET SPIN")
-boardGui.Parent = board
-
--- The cactus growing up out of the stall's back corner, through the awning.
-local cx, cz = W / 2 - 1.8, BACK - 2.2
-local trunkH = roofH + 6
-block("Cactus", Vector3.new(2.2, trunkH, 2.2), CFrame.new(cx, 0.4 + trunkH / 2, cz), GREEN)
-block("CactusArm", Vector3.new(2.4, 1.4, 1.4), CFrame.new(cx + 2.2, 0.4 + roofH + 2, cz), GREEN)
-block("CactusArm", Vector3.new(1.4, 3.2, 1.4), CFrame.new(cx + 2.7, 0.4 + roofH + 3.3, cz), GREEN)
-block("CactusArm", Vector3.new(2, 1.2, 1.2), CFrame.new(cx - 1.9, 0.4 + roofH + 4, cz), GREEN)
-block("CactusArm", Vector3.new(1.2, 2.4, 1.2), CFrame.new(cx - 2.4, 0.4 + roofH + 4.9, cz), GREEN)
-block("Flower", Vector3.new(1.4, 0.8, 1.4), CFrame.new(cx, 0.4 + trunkH + 0.4, cz), PINK)
+text(boardGui, UDim2.fromScale(0.9, 0.6), "CARL'S PET SPIN").Position = UDim2.fromScale(0.05, 0.2)
+boardGui.Parent = counter
 
 -- The eggs you can win, on the counter.
 local exclusives = {}
@@ -149,7 +123,6 @@ for kind in Config.Gacha.Pool.Exclusive or {} do
 	table.insert(exclusives, kind)
 end
 table.sort(exclusives)
-local counterTop = 0.4 + counterH + 0.6
 for i, kind in exclusives do
 	if i > 3 then
 		break
@@ -166,16 +139,16 @@ for i, kind in exclusives do
 	egg:ScaleTo(egg:GetScale() * 2.4 / size.Y)
 	local box, fitted = egg:GetBoundingBox()
 	local lift = egg:GetPivot().Position.Y - box.Position.Y + fitted.Y / 2
-	egg:PivotTo(origin * CFrame.new((i - 2) * 3.6, counterTop + lift, FRONT + 1.5))
+	egg:PivotTo(origin * CFrame.new(StallModel.eggs + Vector3.new((i - 2) * StallModel.eggSpacing, lift, 0)))
 	egg.Parent = stall
 end
 
 -- Carl behind the counter, facing the base, his name over his head.
-local CARL_AT = CFrame.new(0, 0.4, BACK - 2.2)
+local CARL_AT = CFrame.new(StallModel.carl)
 local tag = Instance.new("BillboardGui")
 tag.Name = "Name"
 tag.Size = UDim2.fromOffset(120, 40)
-tag.StudsOffsetWorldSpace = Vector3.new(0, h - carlRootY + 1.5, 0)
+tag.StudsOffsetWorldSpace = Vector3.new(0, math.max(h, roofTop) - carlRootY + 1.5, 0) -- over the roof
 tag.MaxDistance = 150
 tag.Adornee = carl.model.PrimaryPart
 text(tag, UDim2.fromScale(1, 1), "Carl").TextColor3 = Color3.fromRGB(150, 255, 140)
@@ -342,7 +315,7 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 	yaw += (target - yaw) * math.min(1, dt * 8)
 	hop = math.max(0, hop - dt)
-	local lift = math.sin(hop / 0.45 * math.pi) * 1.2
+	local lift = math.sin(hop / 0.45 * math.pi) * 0.6 -- (low: the roof is just over his head)
 	carl:update(dt, 0, 0)
 	-- (a model faces its -z, as the stall's frame does: so no extra turn)
 	carl.model.PrimaryPart.CFrame = origin * CARL_AT * CFrame.new(0, carlRootY + lift, 0) * CFrame.Angles(0, yaw, 0)
