@@ -30,7 +30,7 @@ local SAND = Color3.fromRGB(236, 200, 130)
 local player = Players.LocalPlayer
 local carlConfig = Config.Carl
 -- The stall's frame: front (the counter) toward the base (+z), back to the start line.
-local origin = CFrame.new(carlConfig.Position) * CFrame.Angles(0, math.pi, 0)
+local origin = CFrame.new(carlConfig.Position) * CFrame.Angles(0, math.pi + math.rad(carlConfig.Yaw or 0), 0)
 
 local stall = Instance.new("Model")
 stall.Name = "CarlStall"
