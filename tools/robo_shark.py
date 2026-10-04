@@ -14,6 +14,10 @@ block where QM put it (its jaw hangs open and its tail bends, as in the statue) 
     head, one per tooth, as wide as the painted tooth and as long;
   - adds the bones the game needs: root (body) -> neck (head) -> Jaw; root -> FinL /
     FinR; root -> Tail -> TailFin.
+
+Superseded (Oct 4): QM edited the result in Blockbench (bigger eyes, gold marks redrawn)
+and sent it back; designs/ocean/RoboShark.bbmodel is now QM's file, animated by
+tools/robo_shark_rig.py. Don't rerun this script into it: pass an out_dir to preview only.
 """
 
 import json
@@ -212,7 +216,7 @@ def main(out="/mnt/project-files/animals/robo_shark"):
     os.makedirs(out, exist_ok=True)
     m = build()
     shift = floor(m)
-    for path in (MODEL, os.path.join(out, "RoboShark.bbmodel")):
+    for path in (os.path.join(out, "RoboShark_1to1.bbmodel"),):
         with open(path, "w") as f:
             json.dump(m, f, separators=(",", ":"))
     print("elements", len(m["elements"]), "shift", round(shift, 3))

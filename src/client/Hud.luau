@@ -88,6 +88,7 @@ local IMAGES = {
 	eggWhale = { id = "rbxassetid://97101351248514", size = Vector2.new(502, 684) }, -- WhaleEggRender.png
 	eggKingCrab = { id = "rbxassetid://136150514529079", size = Vector2.new(660, 668) }, -- KingCrabEggRender.png
 	eggBlueCrab = { id = "rbxassetid://119349539273288", size = Vector2.new(660, 668) }, -- BlueCrabEggRender.png
+	eggRoboShark = { id = "", size = Vector2.new(514, 752) }, -- RoboSharkEggRender.png (awaiting upload)
 	eggStarfish = { id = "rbxassetid://114368032731288", size = Vector2.new(680, 783) }, -- StarfishEggRender.png
 	eggFishSchool = { id = "rbxassetid://137156704531563", size = Vector2.new(530, 721) }, -- FishSchoolEggRender.png
 	eggLoong = { id = "rbxassetid://70469571709365", size = Vector2.new(560, 863) }, -- LoongEggRender.png (QM's egg)
