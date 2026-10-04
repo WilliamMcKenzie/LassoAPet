@@ -25,6 +25,7 @@ local HEADSHOTS = {
 	Scorpion = "rbxassetid://85451012004987", -- PetScorpion.png
 	Sandworm = "rbxassetid://122144649250110", -- PetSandworm.png
 	Snake = "rbxassetid://91376372256857", -- PetSnake.png
+	Beholder = "rbxassetid://97515015824825", -- PetBeholder.png
 	Penguin = "rbxassetid://126516601606999", -- PetPenguin.png
 	Snowman = "rbxassetid://131420314948529", -- PetSnowman.png
 	SpineLizard = "rbxassetid://88911086754037", -- PetSpineLizard.png

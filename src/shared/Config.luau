@@ -436,6 +436,7 @@ return {
 		Scorpion = "rbxassetid://84668325203507",
 		Sandworm = "rbxassetid://102795691143589",
 		Snake = "rbxassetid://90142926499080",
+		Beholder = "rbxassetid://123404719952235", -- assets/ui/BeholderEggRender.png
 		Penguin = "rbxassetid://135143840112034",
 		Snowman = "rbxassetid://105231134861157",
 		SpineLizard = "rbxassetid://131132122596946",
