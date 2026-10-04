@@ -196,6 +196,16 @@ local function showPet(pen, id, item)
 	s.pet.scale = Merge.size(item.pet, item.merged) -- a merged pet is bigger (Shared/Merge)
 	s.pet.animal:setScale(s.pet.scale)
 	makeRideable(pen, id, s.pet, item.pet, item.merged)
+	-- Just merged (PenPets.merges): it waits unseen while the pets going into it are
+	-- pulled up, then pops out up there and drops down onto the spot under it.
+	local merge = pen == myPen() and (item.merged or 1) > 1 and PenPets.mergeFor(item.pet)
+	if merge then
+		s.drop, s.full = merge, s.pet.scale
+		s.at = Vector3.new(merge.at.X, s.at.Y, merge.at.Z)
+		placePet(s.pet, s.at, s.yaw)
+		shown[pen][id] = s
+		return
+	end
 	s.pet.animal.model.Parent = folder
 	placePet(s.pet, s.at, s.yaw)
 	startWander(s)
@@ -347,7 +357,20 @@ RunService.RenderStepped:Connect(function(dt)
 						startWander(s)
 					end
 				end
-				if s.wander then
+				if s.drop then
+					local t = os.clock() - s.drop.landAt
+					if t >= 0 then
+						local size, hop, landed = PenPets.drop(t, s.drop.at.Y - s.at.Y)
+						pet.animal.model.Parent = folder
+						pet.scale, pet.hop = s.full * size, hop
+						pet.animal:setScale(pet.scale)
+						if landed then
+							s.drop, pet.hop = nil, 0
+							startWander(s)
+						end
+					end
+					pet.animal:update(dt, 0, 0)
+				elseif s.wander then
 					wander(pen, s, dt)
 				else
 					pet.animal:update(dt, 0, 0)

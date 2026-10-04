@@ -703,6 +703,15 @@ local function spawnStarter()
 	starter.merged = player:GetAttribute("RideMerged") or 1
 	starter.animal:setScale(vfx.Merge.size(starter.kind, starter.merged)) -- a merged pet is bigger
 	setClickable(starter.animal.model, true)
+	-- Just merged (PenPets.merges): it pops out up over the pen once the pets going
+	-- into it have been pulled up there, and drops down (vfx.dropStarter).
+	local merge = starter.merged > 1 and PenPets.mergeFor(starter.kind)
+	if merge then
+		starter.drop, starter.full = merge, vfx.Merge.size(starter.kind, starter.merged)
+		starter.x, starter.z = merge.at.X, merge.at.Z
+		starter.dropParent = starter.animal.model.Parent or workspace
+		starter.animal.model.Parent = nil
+	end
 end
 
 -- One prompt, kept on whichever pet RIDE rides. It draws nothing; E still
@@ -3964,7 +3973,9 @@ RunService.PreSimulation:Connect(function(dt)
 				end
 			end
 		end
-		if starter then
+		if starter and starter.drop then
+			vfx.dropStarter(starter, dt)
+		elseif starter then
 			wander(starter, dt)
 		end
 		updateRideTarget()
@@ -4203,21 +4214,107 @@ function vfx.updateMerge()
 	Hud.showMerge(home and not Tutorial.active and #vfx.mergeKinds() > 0)
 end
 
+-- The just-merged starter popping out over the pen and dropping (PenPets.drop).
+function vfx.dropStarter(entity, dt)
+	local t = os.clock() - entity.drop.landAt
+	if t >= 0 then
+		local floor = Ground.heightAt(entity.x, entity.z)
+		local size, hop, landed = PenPets.drop(t, entity.drop.at.Y - floor)
+		entity.animal.model.Parent = entity.dropParent
+		entity.animal:setScale(entity.full * size)
+		entity.hop = hop
+		if landed then
+			entity.drop, entity.hop = nil, 0
+		end
+	end
+	place(entity, 0)
+	animate(entity, dt, 0, 0)
+end
+
+-- MERGE (QM, Oct 4): every pet going into a merge is pulled up into one spot 2 m
+-- over the pen (over the pet that stays: the one you ride, else the server's pick),
+-- shrinking away as it goes, then a poof; the new, bigger pet pops out up there and
+-- drops down (Pen.client, or the starter here: PenPets.merges).
 Hud.onMerge = function()
 	if phase ~= "idle" then
 		return
 	end
-	local merging = {}
+	local pen = myPen()
+	local area = pen and pen:FindFirstChild("Area")
 	for _, kind in vfx.mergeKinds() do
-		merging[kind] = true
+		local models, target, targetId = {}, nil, nil
+		if starter and starter.kind == kind then
+			table.insert(models, starter.animal.model)
+			target = starter.animal.model
+		end
+		for model, pet in PenPets.pets do
+			if pet.kind == kind and model.Parent then
+				table.insert(models, model)
+				-- (the server keeps the pen pet whose id sorts first)
+				if not (starter and starter.kind == kind) and (not targetId or pet.id < targetId) then
+					target, targetId = model, pet.id
+				end
+			end
+		end
 		ReplicatedStorage:WaitForChild("MergePets"):FireServer(kind)
-	end
-	for model, pet in PenPets.pets do
-		if merging[pet.kind] then -- a poof on each pet that goes into a merge
-			local at = model:GetPivot().Position
-			Poof.at(Vector3.new(at.X, 0, at.Z))
+		if target then
+			local base = target:GetPivot().Position
+			local floor = if area then area.Position.Y - area.Size.Y / 2 else Ground.heightAt(base.X, base.Z)
+			local at = Vector3.new(base.X, floor + PenPets.MERGE_UP, base.Z)
+			PenPets.merges[kind] = { at = at, landAt = os.clock() + PenPets.MERGE_PULL }
+			vfx.mergePull(models, at)
 		end
 	end
+end
+
+-- The pets going into a merge: copies of them fly up to `at` (backing off a touch
+-- first), spinning and shrinking away, then a poof. The pets themselves are hidden
+-- meanwhile (the server's merge removes them; if it never comes, they show again).
+function vfx.mergePull(models, at)
+	local copies = {}
+	for _, model in models do
+		local copy = model:Clone()
+		if copy then
+			for _, d in copy:GetDescendants() do
+				if d:IsA("BasePart") then
+					d.Anchored, d.CanCollide, d.CanQuery, d.CanTouch = true, false, false, false
+				end
+			end
+			copy.Parent = workspace
+			table.insert(copies, { model = copy, from = copy:GetPivot(), scale = copy:GetScale() })
+		end
+		local function hide(amount)
+			for _, d in model:GetDescendants() do
+				if d:IsA("BasePart") or d:IsA("Decal") then
+					d.LocalTransparencyModifier = amount
+				end
+			end
+		end
+		hide(1)
+		task.delay(PenPets.MERGE_PULL + 3, function()
+			if model.Parent then
+				hide(0)
+			end
+		end)
+	end
+	local start = os.clock()
+	local step
+	step = RunService.RenderStepped:Connect(function()
+		local a = math.min((os.clock() - start) / PenPets.MERGE_PULL, 1)
+		local ease = a * a * (2.7 * a - 1.7) -- back in: a small pull back, then faster and faster
+		for _, c in copies do
+			local spin = CFrame.Angles(0, a * a * math.pi * 2, 0)
+			c.model:PivotTo(CFrame.new(c.from.Position:Lerp(at, ease)) * spin * c.from.Rotation)
+			c.model:ScaleTo(math.max(c.scale * (1 - 0.95 * a * a), 0.01))
+		end
+		if a >= 1 then
+			step:Disconnect()
+			for _, c in copies do
+				c.model:Destroy()
+			end
+			Poof.at(at - Vector3.new(0, 1, 0))
+		end
+	end)
 end
 
 -- Nuke All from the shop (Shop.server's "Nukes"): spent on the next ride as it
