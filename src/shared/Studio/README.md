@@ -86,3 +86,18 @@ in the open Studio session for photos; it is not added to the saved map and is
 never created automatically in gameplay. `World`, `Pens`, and Lighting are
 untouched. Cleanup/recreation and original-camera restoration were checked in
 Studio; the original World/Pens descendant counts remained 49,875 / 2,910.
+
+## Desert and matching rendered backgrounds
+
+`DesertDiorama.luau` provides the same `create()`, `view()`, and `cleanup()`
+commands at `(30000, 1000, 4000)`. It copies the first 760 studs of the actual
+desert floor and its cactus/sandstone props, including raised stone and dry
+grass patches. Its level camera and 60-degree field of view match the meadow
+set. The native capture is `DesertDiorama.jpg`; cleanup and camera restoration
+were checked, with the original World/Pens counts unchanged.
+
+The `MeadowDiorama-simple-style.png` and `DesertDiorama-simple-style.png`
+backgrounds are built-in image-generation renders of those native captures.
+Each has a `-walls.png` variant retaining its low forward-facing composition,
+ground layout, and props. The wall variants are images only; both Studio photo
+sets remain wall-free. Exact generation/refinement prompts accompany each PNG.
