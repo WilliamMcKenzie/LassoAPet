@@ -64,3 +64,25 @@ modified. Neither the stage nor its poses are saved in the map files.
 The Reference texture was created with built-in image generation, then uploaded
 through Studio MCP. Its PNG and exact prompt are in `FaceAssets/`. Only this
 decal is generated artwork; all rider images are native Studio captures.
+
+## Meadow diorama
+
+`MeadowDiorama.luau` creates a separate, manually invoked photo set at
+`(20000, 1000, 4000)`, outside the stampede course. It clones the actual meadow
+grass/dirt layout and rock/bush models, extends the grass to an open horizon,
+and frames the scene with a level camera, 60-degree field of view, and sky in
+the upper half. There are no walls, animals, spawns, nests, or runtime scripts.
+The native Studio capture is `MeadowDiorama.jpg`.
+
+```lua
+local meadow = require(game.ReplicatedStorage.Shared.Studio.MeadowDiorama)
+meadow.create() -- creates Workspace.MeadowDiorama and frames the shot
+meadow.view() -- return to the photo camera after moving around
+meadow.cleanup() -- remove the set and restore the previous camera/selection
+```
+
+Use the fresh-source loading pattern above when iterating. The set can remain
+in the open Studio session for photos; it is not added to the saved map and is
+never created automatically in gameplay. `World`, `Pens`, and Lighting are
+untouched. Cleanup/recreation and original-camera restoration were checked in
+Studio; the original World/Pens descendant counts remained 49,875 / 2,910.
