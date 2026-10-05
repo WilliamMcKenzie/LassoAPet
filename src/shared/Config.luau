@@ -479,7 +479,8 @@ return {
 	-- The podium (Leaderboard.server, QM Oct 4): the avatar of the player who rode
 	-- furthest from base, all time (OrderedDataStore "BestDistance", metres), standing on
 	-- QM's cream marble column in the middle of a coiled grass snake (Props/GrassSnake,
-	-- PodiumSnake.client), in the base's right front corner. No text for now (QM).
+	-- PodiumSnake.client), in the base's right front corner, their username and best
+	-- distance over their head (QM, Oct 5).
 	Podium = {
 		Position = Vector3.new(58, 0, 16), -- the column, on the ground; the snake reaches x ~50..74, z ~2..47 (Pen5 is x >= 76)
 		Refresh = 120, -- seconds between re-reading the leader
