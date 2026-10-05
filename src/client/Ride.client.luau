@@ -374,6 +374,10 @@ herdFolder.Parent = workspace
 -- yaw 0 faces -z (outbound); yaw pi faces +z (home).
 local phase = "idle" -- idle | outbound | turning | return | home | finish | ended
 local starter, mount
+-- The pet waiting to be ridden, for PetHover.client (nil while you ride).
+function PenPets.starter()
+	return if starter and phase == "idle" then starter.animal.model else nil
+end
 local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
 local plans = {} -- [n] = { x, speed }, the stampede's schedule
 local taken = {} -- [n] = true once lassoed out of the stampede
