@@ -4276,7 +4276,9 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	if vfx.scareAura and not kind then
 		kind = "Rattle" -- the snake's scare keeps its haze the whole time (QM)
 	end
-	local sprintHaze = not kind and (vfx.sprintSpecial() or {}).Haze -- (the Beholder's pink, while it flies)
+	-- (the Beholder's pink, while it flies; nil, never false, while an ability runs: a false
+	-- here counted as a haze and tinted every ability orange, Oct 5)
+	local sprintHaze = if kind then nil else (vfx.sprintSpecial() or {}).Haze
 	local hazed = kind == "Rattle" or kind == "Frost" or kind == "Hunt" or sprintHaze ~= nil
 	if hazed then
 		vfx.hazeColor = if kind == "Frost" then vfx.FROST_HAZE elseif kind == "Hunt" then vfx.HUNT_HAZE elseif sprintHaze then sprintHaze else vfx.RATTLE_HAZE
