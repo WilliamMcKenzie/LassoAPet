@@ -4,7 +4,8 @@
 -- stampede to the finish line (every client draws it, Ride.client) and its egg drops in the EventNest somewhere random on the course.
 -- Riding that kind of animal while the egg is out, the guide arrows lead to it.
 -- The first player to grab the egg gets it (Nests.server, like any nest's), which
--- ends the event; a new one starts every Config.Events.Cycle seconds.
+-- ends the event; a new one starts every Config.Events.Cycle seconds (the first one
+-- a full cycle after the server starts).
 --
 -- What the clients read, on Workspace.World:
 --   EventKind     the animal ("" between events)
@@ -153,6 +154,9 @@ local function isForced()
 end
 
 local id = 0
+-- A new server waits a full cycle before its first event (QM, Oct 5); Spawn Loong
+-- and "/event" still start one straight away.
+waitFor(EVENTS.Cycle, isForced)
 local cycleStart = os.clock()
 while true do
 	-- Count down to it.

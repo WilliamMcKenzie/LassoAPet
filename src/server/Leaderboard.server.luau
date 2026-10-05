@@ -1,7 +1,8 @@
 -- The podium (Config.Podium): the Roblox avatar of the player who rode furthest from
 -- base, standing on the cap of QM's cream marble column in the middle of the grass snake's
 -- coil (Props/GrassSnake, built by PodiumSnake.client) in the base's right front
--- corner. First place only, and no text for now (QM, Oct 4).
+-- corner. First place only, with their username and best distance ("500m") over
+-- their head (QM, Oct 5).
 --
 -- Distance is the HUD's: metres past the start line (4 studs a metre), read off
 -- each rider's RideSync (Riders.server passes those on; this only listens).
@@ -118,8 +119,39 @@ local model = Instance.new("Model")
 model.Name = "Podium"
 model.Parent = workspace
 
--- Who's standing there: { id, avatar }.
+-- Who's standing there: { id, avatar, tag }.
 local standing
+
+-- Their username, and their best under it ("500m"), floating over their head.
+local function nameTag(avatar, id)
+	local gui = Instance.new("BillboardGui")
+	gui.Name = "Tag"
+	gui.Size = UDim2.fromScale(12, 4)
+	gui.StudsOffset = Vector3.new(0, 9, 0) -- clear of the lasso loop swinging overhead (QM)
+	gui.MaxDistance = 250
+	gui.LightInfluence = 0
+	local function line(name, y, height)
+		local label = Instance.new("TextLabel")
+		label.Name = name
+		label.Position = UDim2.fromScale(0, y)
+		label.Size = UDim2.fromScale(1, height)
+		label.BackgroundTransparency = 1
+		label.Font = Enum.Font.FredokaOne
+		label.TextScaled = true
+		label.TextColor3 = Color3.new(1, 1, 1)
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 3
+		stroke.Parent = label
+		label.Parent = gui
+		return label
+	end
+	local okName, name = pcall(Players.GetNameFromUserIdAsync, Players, id)
+	line("PlayerName", 0, 0.55).Text = if okName and name then name else ""
+	line("Distance", 0.58, 0.42)
+	gui.Adornee = avatar:FindFirstChild("Head")
+	gui.Parent = avatar:FindFirstChild("Head") or avatar
+	return gui
+end
 
 -- Roblox's Stylish idle gives the winner bent knees and a shifting stance.
 -- PodiumLasso.client overrides only the lasso arm, leaving the idle free to move.
@@ -140,8 +172,9 @@ local function idle(avatar)
 	end
 end
 
-local function stand(id)
+local function stand(id, metres)
 	if standing and standing.id == id then
+		standing.tag.Distance.Text = math.floor(metres) .. "m"
 		return
 	end
 	if standing then
@@ -172,7 +205,9 @@ local function stand(id)
 	avatar:PivotTo(origin * CFrame.new(0, size.Y / 2 + (pivot.Position.Y - box.Position.Y), 0))
 	avatar.Parent = model
 	idle(avatar)
-	standing = { id = id, avatar = avatar }
+	local tag = nameTag(avatar, id)
+	tag.Distance.Text = math.floor(metres) .. "m"
+	standing = { id = id, avatar = avatar, tag = tag }
 end
 
 local function refresh()
@@ -197,7 +232,7 @@ local function refresh()
 			leader, most = id, metres
 		end
 	end
-	stand(leader)
+	stand(leader, most)
 end
 
 task.spawn(function()
