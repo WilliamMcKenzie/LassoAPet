@@ -13,6 +13,7 @@ local Sounds = require(script.Parent.Sounds)
 local AnimalDex = require(script.Parent.AnimalDex)
 local RollMenu = require(script.Parent.RollMenu)
 local Shop = require(script.Parent.Shop)
+local Gamepad = require(script.Parent.Gamepad)
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
 local Hud = {}
@@ -118,13 +119,20 @@ local IMAGES = {
 
 -- On a computer (keyboard, no touch screen) the ride buttons show their key:
 -- LASSO [E], RIDE [E], Sprint [SHIFT] and Ability [SPACE] (QM's PC art, same sizes).
--- The Ability button's cooldown picture stays the same.
+-- The Ability button's cooldown picture stays the same. While a controller is in
+-- use they go back to the plain art, with the pad's button on them (Gamepad).
+local KEYBOARD_ART = {} -- [image key] = { keys = the PC art, plain = the art without a key }
 if game:GetService("UserInputService").KeyboardEnabled and not game:GetService("UserInputService").TouchEnabled then
-	IMAGES.lasso.id = "rbxassetid://101879608972078" -- LassoE.png
-	IMAGES.lassoDisabled.id = "rbxassetid://118282623101402" -- LassoDisabledE.png
-	IMAGES.ride.id = "rbxassetid://120239297848540" -- RideE.png
-	IMAGES.sprint.id = "rbxassetid://99201367360467" -- SprintSHIFT.png
-	IMAGES.ability.id = "rbxassetid://85357705922490" -- AbilitySPACE.png
+	for key, id in {
+		lasso = "rbxassetid://101879608972078", -- LassoE.png
+		lassoDisabled = "rbxassetid://118282623101402", -- LassoDisabledE.png
+		ride = "rbxassetid://120239297848540", -- RideE.png
+		sprint = "rbxassetid://99201367360467", -- SprintSHIFT.png
+		ability = "rbxassetid://85357705922490", -- AbilitySPACE.png
+	} do
+		KEYBOARD_ART[key] = { keys = id, plain = IMAGES[key].id }
+		IMAGES[key].id = id
+	end
 end
 
 local BUTTON_WIDTH = 256
@@ -723,14 +731,15 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		end
 	end
 	local buying = false
-	upgrade.Activated:Connect(function()
+	local function buyUpgrade()
 		if buying or not cost or (player:GetAttribute("Gold") or 0) < cost then
 			return
 		end
 		buying = true
 		pcall(upgradePen.InvokeServer, upgradePen)
 		buying = false
-	end)
+	end
+	upgrade.Activated:Connect(buyUpgrade)
 	player:GetAttributeChangedSignal("Gold"):Connect(refreshUpgrade)
 	player:GetAttributeChangedSignal("PenLevel"):Connect(refreshUpgrade)
 	refreshUpgrade()
@@ -869,6 +878,81 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	EVENT.notice = label(root(eventGui), UDim2.fromOffset(0, EVENT.TEXT_SIZE + 8), EVENT.row.Position, EVENT.TEXT_SIZE, 3) -- 3px outline (QM)
 	EVENT.notice.AutomaticSize = Enum.AutomaticSize.X
 	EVENT.notice.Visible = false
+
+	-- Controllers (Gamepad): each button's pad button on its corner, shown only
+	-- while a pad is in use, and the presses that work it.
+	local TOP_RIGHT, RIGHT, LEFT = Vector2.new(0.92, 0.12), Vector2.new(1.05, 0.5), Vector2.new(-0.05, 0.5)
+	Gamepad.hint(action, Enum.KeyCode.ButtonA, TOP_RIGHT)
+	Gamepad.hint(sprint, Enum.KeyCode.ButtonL2, TOP_RIGHT)
+	Gamepad.hint(ability, Enum.KeyCode.ButtonR1, Vector2.new(0.08, 0.12))
+	Gamepad.hint(home, Enum.KeyCode.ButtonA, TOP_RIGHT)
+	Gamepad.hint(continueButton, Enum.KeyCode.ButtonY, TOP_RIGHT)
+	Gamepad.hint(ride, Enum.KeyCode.ButtonX, TOP_RIGHT) -- (the ride prompt's own gamepad key)
+	Gamepad.hint(roll, Enum.KeyCode.ButtonX, TOP_RIGHT) -- (the Egg Machine prompt's)
+	Gamepad.hint(mergeButton, Enum.KeyCode.ButtonY, TOP_RIGHT)
+	Gamepad.hint(shopIcon, Enum.KeyCode.DPadUp, RIGHT, 44)
+	if rollIcon then
+		Gamepad.hint(rollIcon, Enum.KeyCode.DPadLeft, RIGHT, 44)
+	end
+	Gamepad.hint(pets, Enum.KeyCode.DPadDown, RIGHT, 44)
+	Gamepad.hint(upgrade, Enum.KeyCode.DPadRight, LEFT, 44)
+	local function onScreen(button)
+		local screen = button and button:FindFirstAncestorOfClass("ScreenGui")
+		return button ~= nil and button.Parent ~= nil and button.Visible and screen ~= nil and screen.Enabled
+	end
+	Gamepad.bind("Home", Enum.KeyCode.ButtonA, onHome, function()
+		return onScreen(home)
+	end)
+	Gamepad.bind("Continue", Enum.KeyCode.ButtonY, onContinue, function()
+		return onScreen(continueButton)
+	end)
+	Gamepad.bind("Merge", Enum.KeyCode.ButtonY, function()
+		if Hud.onMerge then
+			Hud.onMerge()
+		end
+	end, function()
+		return onScreen(mergeButton)
+	end)
+	Gamepad.bind("Shop", Enum.KeyCode.DPadUp, function()
+		if Shop.hasOffers() then
+			Shop.toggle()
+		end
+	end, function()
+		return onScreen(shopIcon)
+	end)
+	Gamepad.bind("Roll", Enum.KeyCode.DPadLeft, RollMenu.toggle, function()
+		return onScreen(rollIcon)
+	end)
+	Gamepad.bind("Pets", Enum.KeyCode.DPadDown, AnimalDex.toggle, function()
+		return onScreen(pets)
+	end)
+	Gamepad.bind("Upgrade", Enum.KeyCode.DPadRight, function()
+		task.spawn(buyUpgrade)
+	end, function()
+		return onScreen(upgrade)
+	end)
+	-- The PC art's keys don't mean anything on a pad: the plain art while one's in use.
+	Gamepad.onChanged(function(active)
+		local swaps = {}
+		for key, art in KEYBOARD_ART do
+			local from, to = art.keys, art.plain
+			if not active then
+				from, to = to, from
+			end
+			IMAGES[key].id = to
+			swaps[from] = to
+		end
+		if next(swaps) == nil then
+			return
+		end
+		for _, screen in { gui, homeGui } do
+			for _, d in screen:GetDescendants() do
+				if (d:IsA("ImageButton") or d:IsA("ImageLabel")) and swaps[d.Image] then
+					d.Image = swaps[d.Image]
+				end
+			end
+		end
+	end)
 
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only

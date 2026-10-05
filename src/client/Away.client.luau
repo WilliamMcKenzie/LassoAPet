@@ -12,6 +12,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Hud = require(script.Parent.Hud)
 local Sounds = require(script.Parent.Sounds)
+local Gamepad = require(script.Parent.Gamepad)
 
 local player = Players.LocalPlayer
 local claimAway = ReplicatedStorage:WaitForChild("ClaimAway")
@@ -198,9 +199,12 @@ local function showOthers()
 	coreWas = {}
 end
 
+local doClaim -- (below: the Claim button)
+
 local function show(total)
 	showing, claimed = true, false
 	gui.Enabled = true
+	Gamepad.openMenu("Away", { close = doClaim, keys = { [Enum.KeyCode.ButtonA] = doClaim } }) -- (A or B claims it)
 	hideOthers()
 	dim.BackgroundTransparency = 1
 	TweenService:Create(dim, TweenInfo.new(0.3), { BackgroundTransparency = 0.45 }):Play()
@@ -261,13 +265,16 @@ local function hide()
 	end)
 end
 
-claim.Activated:Connect(function()
+function doClaim()
 	if showing and not claimed then
 		claimed = true
+		Gamepad.closeMenu("Away")
 		claimAway:FireServer()
 		hide()
 	end
-end)
+end
+claim.Activated:Connect(doClaim)
+Gamepad.hint(claim, Enum.KeyCode.ButtonA, Vector2.new(0.92, 0.12))
 
 local function check()
 	local total = player:GetAttribute("AwayGold")

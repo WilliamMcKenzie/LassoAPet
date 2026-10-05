@@ -16,6 +16,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 local ModalPop = require(script.Parent.ModalPop)
 local Sounds = require(script.Parent.Sounds)
+local Gamepad = require(script.Parent.Gamepad)
 
 local RollMenu = {}
 
@@ -92,11 +93,13 @@ for _, event in { roll.MouseButton1Up, roll.MouseLeave } do
 		TweenService:Create(rollScale, press, { Scale = 1 }):Play()
 	end)
 end
-roll.Activated:Connect(function()
+local function doRoll()
 	if RollMenu.onRoll then
 		RollMenu.onRoll()
 	end
-end)
+end
+roll.Activated:Connect(doRoll)
+Gamepad.hint(roll, Enum.KeyCode.ButtonA, Vector2.new(0.92, 0.12))
 
 -- The ? flips the panel to the odds (a paid random item: the odds are shown) and
 -- back. QM's odds art matches Config.Gacha's Odds and Pools: keep them in step.
@@ -125,10 +128,12 @@ for _, event in { flip.MouseButton1Up, flip.MouseLeave } do
 		TweenService:Create(flipScale, press, { Scale = 1 }):Play()
 	end)
 end
-flip.Activated:Connect(function()
+local function flipOdds()
 	Sounds.play("book_flip")
 	setOdds(not showingOdds)
-end)
+end
+flip.Activated:Connect(flipOdds)
+Gamepad.hint(flip, Enum.KeyCode.ButtonY, Vector2.new(-0.45, 0.5), 44)
 flip.Parent = panel
 
 -- Clicking anywhere off the panel and its button closes it.
@@ -141,6 +146,7 @@ backdrop.Name = "Backdrop"
 backdrop.BackgroundTransparency = 1
 backdrop.Text = ""
 backdrop.AutoButtonColor = false
+backdrop.Selectable = false -- (never a controller's pick)
 backdrop.Size = UDim2.fromScale(1, 1)
 backdrop.ZIndex = 0
 backdrop.Activated:Connect(function(input)
@@ -169,7 +175,20 @@ function RollMenu.toggle(instant)
 	if open then
 		setOdds(false) -- the eggs first, every time
 		ModalPop.open(setScale)
+		-- A controller: A rolls, Y shows the odds and back, B closes.
+		Gamepad.openMenu("Roll", {
+			close = RollMenu.close,
+			keys = {
+				[Enum.KeyCode.ButtonA] = function()
+					if not showingOdds and not hidden then
+						doRoll()
+					end
+				end,
+				[Enum.KeyCode.ButtonY] = flipOdds,
+			},
+		})
 	else
+		Gamepad.closeMenu("Roll")
 		ModalPop.close(setScale, function()
 			closing = false
 			refresh()

@@ -3,7 +3,7 @@
 -- centre, each with its number in the corner, the item's picture fitted inside
 -- (never stretched) and "xN" when you have more than one. The equipped one gets
 -- a white outline. Click a square or press its number to equip it; again to put
--- it away.
+-- it away. On a controller, LB / RB step to the egg before / after (Gamepad).
 --
 -- The items are the Tools the server puts in your Backpack (eggs, for now: see
 -- Hatchery). An item's picture is its TextureId and its count its "Count" attribute.
@@ -35,6 +35,7 @@ local RARITY = {
 }
 local Animals = game:GetService("ReplicatedStorage").Shared.Animals
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
+local Gamepad = require(script.Parent.Gamepad)
 
 local function rarityOf(tool)
 	local kind = tool:GetAttribute("EggKind")
@@ -167,6 +168,16 @@ local function redraw()
 		slot.Activated:Connect(function()
 			toggle(tool)
 		end)
+		-- A controller's buttons: LB and RB either end of the bar, RT on the egg in hand.
+		if i == 1 then
+			Gamepad.hint(slot, Enum.KeyCode.ButtonL1, Vector2.new(-0.38, 0.5), 44)
+		end
+		if i == #tools then
+			Gamepad.hint(slot, Enum.KeyCode.ButtonR1, Vector2.new(1.38, 0.5), 44)
+		end
+		if tool.Parent == player.Character then
+			Gamepad.hint(slot, Enum.KeyCode.ButtonR2, Vector2.new(0.84, 0.16), 36)
+		end
 		slot.Parent = bar
 	end
 end
@@ -245,6 +256,28 @@ function Inventory.init(parent)
 			toggle(tools[i])
 		end
 	end)
+	-- LB / RB: the egg before or after the one in hand (from the first or last
+	-- with none); with only one egg, RB takes it out and puts it away.
+	local function shown()
+		local screen = bar:FindFirstAncestorOfClass("ScreenGui")
+		return bar.Visible and #tools > 0 and screen ~= nil and screen.Enabled
+	end
+	local function step(by)
+		local at
+		for n, tool in tools do
+			if tool.Parent == player.Character then
+				at = n
+			end
+		end
+		local n = if at then (at - 1 + by) % #tools + 1 elseif by > 0 then 1 else #tools
+		toggle(tools[n])
+	end
+	Gamepad.bind("EggBefore", Enum.KeyCode.ButtonL1, function()
+		step(-1)
+	end, shown)
+	Gamepad.bind("EggAfter", Enum.KeyCode.ButtonR1, function()
+		step(1)
+	end, shown)
 end
 
 -- The square showing the tool called `name`, while the bar is up (the tutorial

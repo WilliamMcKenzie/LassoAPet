@@ -24,6 +24,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Merge = require(ReplicatedStorage.Shared.Merge)
 local PenPets = require(script.Parent.PenPets)
 local Sounds = require(script.Parent.Sounds)
+local Gamepad = require(script.Parent.Gamepad)
 
 local player = Players.LocalPlayer
 local placeEgg = ReplicatedStorage:WaitForChild("PlaceEgg")
@@ -368,6 +369,22 @@ local function spotAt(screenX, screenY)
 	return hit.X, hit.Z
 end
 
+-- The screen point an egg goes down at: the mouse's (or the last tap's); with a
+-- controller, the ground a few studs in front of you.
+local PAD_AHEAD = 6
+local function pointer()
+	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	local pen = myPen()
+	if Gamepad.active and hrp and pen then
+		local look = hrp.CFrame.LookVector * Vector3.new(1, 0, 1)
+		local ahead = hrp.Position + (if look.Magnitude > 1e-3 then look.Unit else Vector3.zero) * PAD_AHEAD
+		local floorY = pen.Area.Position.Y + pen.Area.Size.Y / 2
+		local screen = workspace.CurrentCamera:WorldToScreenPoint(Vector3.new(ahead.X, floorY, ahead.Z))
+		return screen.X, screen.Y
+	end
+	return mouse.X, mouse.Y
+end
+
 RunService.RenderStepped:Connect(function(dt)
 	local now = workspace:GetServerTimeNow()
 	local camPos = workspace.CurrentCamera.CFrame.Position
@@ -436,7 +453,7 @@ RunService.RenderStepped:Connect(function(dt)
 		end
 	end
 	if ghost then
-		local x, z = spotAt(mouse.X, mouse.Y)
+		local x, z = spotAt(pointer())
 		ghost.Parent = if x then folder else nil
 		if x then
 			local pen = myPen()
@@ -490,7 +507,9 @@ local function hold(tool)
 	-- pointer to preview it with). The tap reaches the egg as the tool's Activated, and
 	-- the mouse is moved to the tap.
 	tool.Activated:Connect(function()
-		if UserInputService.TouchEnabled and not UserInputService.MouseEnabled then
+		if Gamepad.active then
+			placeAt(pointer()) -- (RT: in front of you)
+		elseif UserInputService.TouchEnabled and not UserInputService.MouseEnabled then
 			placeAt(mouse.X, mouse.Y)
 		end
 	end)
@@ -514,6 +533,8 @@ end
 UserInputService.InputBegan:Connect(function(input, processed)
 	if not processed and input.UserInputType == Enum.UserInputType.MouseButton1 then
 		placeAt(input.Position.X, input.Position.Y)
+	elseif input.KeyCode == Enum.KeyCode.ButtonR2 and holding then
+		placeAt(pointer()) -- a controller's RT (also the tool's Activated: placed once)
 	end
 end)
 

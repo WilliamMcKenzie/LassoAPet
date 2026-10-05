@@ -183,6 +183,7 @@ local function playClick()
 	click.TimePosition = 0
 	click:Play()
 end
+Sounds.click = playClick -- (a controller's press on a HUD button: Gamepad)
 local hooked = setmetatable({}, { __mode = "k" })
 local function hook(button)
 	if not button:IsA("GuiButton") or hooked[button] then

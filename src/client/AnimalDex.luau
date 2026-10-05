@@ -26,6 +26,7 @@ local Animals = ReplicatedStorage.Shared.Animals
 local PetFaces = require(script.Parent.PetFaces)
 local ModalPop = require(script.Parent.ModalPop)
 local Sounds = require(script.Parent.Sounds)
+local Gamepad = require(script.Parent.Gamepad)
 
 local player = Players.LocalPlayer
 
@@ -323,6 +324,9 @@ function showAnimal(at)
 		Sounds.play("book_flip")
 		showAnimal(at % #order + 1)
 	end)
+	-- A controller's LB / RB, under the arrows (on the page: the arrows are turned).
+	Gamepad.hint(page, Enum.KeyCode.ButtonL1, Vector2.new(256 / PAGE.X, 430 / PAGE.Y), 80)
+	Gamepad.hint(page, Enum.KeyCode.ButtonR1, Vector2.new((PAGE.X - 256) / PAGE.X, 430 / PAGE.Y), 80)
 
 	local name = Instance.new("TextLabel")
 	name.BackgroundTransparency = 1
@@ -376,7 +380,25 @@ function AnimalDex.toggle(instant)
 			showAnimal(horse)
 		end
 		ModalPop.open(setPop)
+		Gamepad.openMenu("Pets", {
+			close = AnimalDex.close,
+			keys = {
+				[Enum.KeyCode.ButtonL1] = function()
+					if shown then
+						Sounds.play("book_flip")
+						showAnimal((shown - 2) % #order + 1)
+					end
+				end,
+				[Enum.KeyCode.ButtonR1] = function()
+					if shown then
+						Sounds.play("book_flip")
+						showAnimal(shown % #order + 1)
+					end
+				end,
+			},
+		})
 	else
+		Gamepad.closeMenu("Pets")
 		ModalPop.close(setPop, function()
 			gui.Enabled = false
 			clear()
@@ -412,6 +434,7 @@ backdrop.Name = "Backdrop"
 backdrop.BackgroundTransparency = 1
 backdrop.Text = ""
 backdrop.AutoButtonColor = false
+backdrop.Selectable = false -- (never a controller's pick)
 backdrop.Size = UDim2.fromScale(1, 1)
 backdrop.ZIndex = 0
 backdrop.Activated:Connect(function(input)

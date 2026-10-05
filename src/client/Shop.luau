@@ -20,6 +20,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModalPop = require(script.Parent.ModalPop)
 local Sounds = require(script.Parent.Sounds)
+local Gamepad = require(script.Parent.Gamepad)
 
 local Shop = {}
 
@@ -151,6 +152,7 @@ grid.Size = UDim2.fromOffset(3 * CARD_WIDTH + 2 * GAP, TALL_HEIGHT)
 grid.Parent = panel
 
 local legendCard, legendOdds
+local cards = {} -- every card, for a controller's first pick
 for key, spot in CARDS do
 	local offer = offers[key]
 	if not offer then
@@ -174,6 +176,7 @@ for key, spot in CARDS do
 		end
 	end)
 	card.Parent = grid
+	table.insert(cards, card)
 	if key == "Legendary" then
 		legendCard = card
 	end
@@ -195,12 +198,20 @@ if legendCard then
 	flip.Size = UDim2.fromOffset(ODDS_SIZE, ODDS_SIZE)
 	flip.ZIndex = 2
 	pressable(flip)
-	flip.Activated:Connect(function()
+	local function flipOdds()
 		Sounds.play("book_flip")
 		legendOdds = not legendOdds
 		legendCard.Image = if legendOdds then spot.odds else spot.id
-	end)
+	end
+	flip.Activated:Connect(flipOdds)
+	flip.Selectable = false -- (a controller's Y flips it: Shop.open)
+	Gamepad.hint(flip, Enum.KeyCode.ButtonY, Vector2.new(-0.45, 0.5), 40)
 	flip.Parent = legendCard
+	Shop.flipLegendOdds = function()
+		if legendCard.Visible then
+			flipOdds()
+		end
+	end
 	task.spawn(function()
 		legendCard.Visible = offered(offers.Legendary) and not Shop.randomRestricted()
 	end)
@@ -216,6 +227,7 @@ backdrop.Name = "Backdrop"
 backdrop.BackgroundTransparency = 1
 backdrop.Text = ""
 backdrop.AutoButtonColor = false
+backdrop.Selectable = false -- (never a controller's pick)
 backdrop.Size = UDim2.fromScale(1, 1)
 backdrop.ZIndex = 0
 backdrop.Activated:Connect(function(input)
@@ -244,6 +256,28 @@ function Shop.open()
 	end
 	gui.Enabled = true
 	ModalPop.open(setScale)
+	-- A controller: the D-pad picks a card and A buys it, Y shows the Legend Egg's
+	-- odds and back, B closes.
+	local keys = {}
+	if Shop.flipLegendOdds then
+		keys[Enum.KeyCode.ButtonY] = Shop.flipLegendOdds
+	end
+	Gamepad.openMenu("Shop", {
+		close = Shop.close,
+		keys = keys,
+		group = grid,
+		select = function()
+			table.sort(cards, function(a, b)
+				return a.Position.X.Offset + a.Position.Y.Offset < b.Position.X.Offset + b.Position.Y.Offset
+			end)
+			for _, card in cards do
+				if card.Visible then
+					return card
+				end
+			end
+			return nil
+		end,
+	})
 	if Shop.onToggle then
 		Shop.onToggle(true)
 	end
@@ -254,6 +288,7 @@ function Shop.close(instant)
 		return
 	end
 	open = false
+	Gamepad.closeMenu("Shop")
 	ModalPop.close(setScale, function()
 		gui.Enabled = false
 	end, instant)
