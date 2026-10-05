@@ -125,6 +125,7 @@ local function publish(player)
 		return
 	end
 	syncTools(player, profile.eggs)
+	player:SetAttribute("HatchCredits", math.max(0, (player:GetAttribute("BoughtHatches") or 0) - (profile.usedHatches or 0)))
 	player:SetAttribute("RidePet", profile.ride or "")
 	player:SetAttribute("RideMerged", profile.rideMerged or 1) -- how many pets it's merged from (Shared/Merge)
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
@@ -193,6 +194,8 @@ local function load(player)
 					if profile.tutorial then
 						profile.awayGold = awayGold(profile, data)
 					end
+					profile.usedHatches = tonumber(data.usedHatches) or 0
+					profile.hatchTarget = typeof(data.hatchTarget) == "string" and data.hatchTarget or nil
 					profile.boughtPets = tonumber(data.boughtPets) -- Legendary Pets from the shop already in (addBoughtPets)
 					profile.boughtGiantEggs = tonumber(data.boughtGiantEggs) -- Giant Horse eggs from the shop already in (addBoughtGiantEggs)
 				end
@@ -228,22 +231,79 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, tutorial = profile.tutorial, ridden = riddenList(profile),
-		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs }
+		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
-		return
+		return true
 	end
 	data.seen = os.time() -- (when you were last here: the while-you-were-away gold counts from it)
 	for attempt = 1, 3 do
 		if pcall(store.SetAsync, store, "u" .. player.UserId, data) then
 			savedAs[player] = as
-			return
+			return true
 		end
 		task.wait(attempt)
 	end
 end
 
+-- A paid hatch is a durable credit: the purchase ledger owns the total bought,
+-- and the pen saves the total used together with the resulting pet.
+local applyingHatch = {}
+local function applyHatch(player)
+	local profile = profiles[player]
+	local total = player:GetAttribute("BoughtHatches")
+	if not profile or not loaded[player] or total == nil or applyingHatch[player] then
+		return
+	end
+	local used = profile.usedHatches or 0
+	player:SetAttribute("HatchCredits", math.max(0, total - used))
+	local item = profile.hatchTarget and profile.items[profile.hatchTarget]
+	if total <= used or not item or not item.egg or item.hatchAt <= os.time() then
+		return -- already hatched during checkout: keep the credit for another egg
+	end
+	applyingHatch[player] = true
+	profile.usedHatches, profile.hatchTarget = used + 1, nil
+	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
+	save(player)
+	publish(player)
+	applyingHatch[player] = nil
+end
+
+-- Shop calls this before opening checkout; the client only supplies the item id.
+local prepareHatch = Instance.new("BindableFunction")
+prepareHatch.Name = "PrepareEggSpeedup"
+prepareHatch.OnInvoke = function(player, id)
+	local profile = profiles[player]
+	local pen = penOf(player)
+	local item = profile and typeof(id) == "string" and profile.items[id]
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not loaded[player] or not pen or not root or not item or not item.egg
+		or item.hatchAt <= os.time() or player:GetAttribute("Tutorial") or applyingHatch[player] then
+		return nil
+	end
+	local at = pen.Area.Position + Vector3.new(item.x, 0, item.z)
+	if (root.Position - at).Magnitude > Config.SpeedupEgg.Range + 4 then
+		return nil
+	end
+	profile.hatchTarget = id
+	if (player:GetAttribute("BoughtHatches") or 0) > (profile.usedHatches or 0) then
+		applyHatch(player)
+		return "credit"
+	end
+	-- Save the selected egg before charging, so a reconnect can finish the hatch.
+	if not save(player) then
+		profile.hatchTarget = nil
+		return nil
+	end
+	if not player.Parent or not item.egg or item.hatchAt <= os.time() then
+		return nil
+	end
+	return "purchase"
+end
+prepareHatch.Parent = game:GetService("ServerStorage")
+
 Players.PlayerAdded:Connect(function(player)
+	player:GetAttributeChangedSignal("BoughtHatches"):Connect(function() applyHatch(player) end)
 	-- The pen is claimed on join too (Pens); wait for it so its contents show.
 	for _ = 1, 20 do -- no pen at all when the five are taken
 		if player:GetAttribute("Pen") then
@@ -259,9 +319,11 @@ Players.PlayerAdded:Connect(function(player)
 		end
 	end)
 	load(player)
+	applyHatch(player)
 end)
 for _, player in Players:GetPlayers() do
-	task.spawn(load, player)
+	player:GetAttributeChangedSignal("BoughtHatches"):Connect(function() applyHatch(player) end)
+	task.spawn(function() load(player) applyHatch(player) end)
 end
 
 -- Empties a pen for the next owner (its pets leave with the player).
@@ -275,7 +337,7 @@ Players.PlayerRemoving:Connect(function(player)
 		clearPen(pen)
 	end
 	save(player)
-	profiles[player], loaded[player], savedAs[player] = nil, nil, nil
+	profiles[player], loaded[player], savedAs[player], applyingHatch[player] = nil, nil, nil, nil
 end)
 
 -- Autosave (QM, Oct 4): every Config.AutosaveEvery seconds each player's eggs, pets and pen is saved
@@ -527,7 +589,16 @@ end)
 -- Testing: "/give <pet> [count]" in chat puts pets straight into your pen, at
 -- random places. Only in Studio or for the game's owner.
 local function allowed(player)
-	return RunService:IsStudio() or player.UserId == game.CreatorId
+	if RunService:IsStudio() then
+		return true
+	end
+	if game.CreatorType == Enum.CreatorType.User then
+		return player.UserId == game.CreatorId
+	end
+	local success, group = pcall(function()
+		return game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
+	end)
+	return success and group.Owner ~= nil and player.UserId == group.Owner.Id
 end
 
 local function give(player, text)
@@ -667,9 +738,9 @@ tutorialCommand.Triggered:Connect(function(source)
 	if not player or not profiles[player] or not allowed(player) then
 		return
 	end
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = profiles[player].boughtPets, boughtGiantEggs = profiles[player].boughtGiantEggs }
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = profiles[player].boughtPets, boughtGiantEggs = profiles[player].boughtGiantEggs, usedHatches = profiles[player].usedHatches }
 	if store and loaded[player] then
-		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false })
+		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false, usedHatches = profiles[player].usedHatches })
 	end
 	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
 	player:SetAttribute("PenLevel", 1)

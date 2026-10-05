@@ -130,13 +130,14 @@ local function sizePen(pen, n)
 end
 
 -- A thin copy of the ground over the pen's tiles, with the ground's checker.
+-- Top at 0.3: the underlying ground textures bleed through the old 0.1 gap at shallow angles.
 local function floorOf(pen)
 	local floor = pen:FindFirstChild("Floor")
 	local tiles = pen:FindFirstChild("Tiles")
 	if floor or not tiles then
 		if floor and tiles then -- the pen may have grown
 			floor.Size = Vector3.new(tiles.Size.X, 0.1, tiles.Size.Z)
-			floor.CFrame = CFrame.new(tiles.Position.X, 0.05, tiles.Position.Z)
+			floor.CFrame = CFrame.new(tiles.Position.X, 0.25, tiles.Position.Z)
 		end
 		return floor
 	end
@@ -149,7 +150,7 @@ local function floorOf(pen)
 	floor.CastShadow = false
 	floor.TopSurface = Enum.SurfaceType.Smooth
 	floor.Size = Vector3.new(tiles.Size.X, 0.1, tiles.Size.Z)
-	floor.CFrame = CFrame.new(tiles.Position.X, 0.05, tiles.Position.Z)
+	floor.CFrame = CFrame.new(tiles.Position.X, 0.25, tiles.Position.Z)
 	local ground = world.Ground:GetChildren()[1]
 	for _, texture in ground:GetChildren() do
 		if texture:IsA("Texture") then
@@ -166,7 +167,7 @@ local function paintPen(pen)
 	local fence = sizePen(pen, n) or pen
 	local floor = floorOf(pen)
 	if floor then
-		local show = n > 1
+		local show = n > 1 and not fence:GetAttribute("CustomFloor")
 		floor.Transparency = if show then 0 else 1
 		for _, texture in floor:GetChildren() do
 			if texture:IsA("Texture") then

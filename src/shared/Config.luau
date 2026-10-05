@@ -595,6 +595,7 @@ return {
 	-- Legend Egg, with their prices baked into the cards' art (Price here is just
 	-- a note of it: what's charged is the product's price on the dashboard). Gold2,
 	-- Gold3 and Nuke All aren't on it but can still be bought.
+	SpeedupEgg = { ProductId = 3716598923, Price = 10, Range = 10 }, -- instantly hatch one egg in your pen
 	Shop = {
 		Gold = {
 			{ Key = "Gold1", Gold = 100000, Price = 50, ProductId = 3716553782, OldProductIds = { 3716409553 } }, -- $100K (QM's nerf, Oct 4: was $1M)

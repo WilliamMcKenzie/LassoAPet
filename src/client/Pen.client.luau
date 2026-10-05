@@ -16,6 +16,7 @@ local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
@@ -26,6 +27,13 @@ local Sounds = require(script.Parent.Sounds)
 
 local player = Players.LocalPlayer
 local placeEgg = ReplicatedStorage:WaitForChild("PlaceEgg")
+local speedupEgg = ReplicatedStorage:WaitForChild("SpeedupEgg")
+local hatchPrice = Config.SpeedupEgg.Price
+-- Fetch the price on this client so regional pricing is displayed accurately.
+task.spawn(function()
+	local ok, info = pcall(MarketplaceService.GetProductInfoAsync, MarketplaceService, Config.SpeedupEgg.ProductId, Enum.InfoType.Product)
+	if ok and info.PriceInRobux then hatchPrice = info.PriceInRobux end
+end)
 
 local EGG_CENTER = 1.6 -- egg pivot height above the ground (Egg.luau)
 local TOP_POPS = 1.58 -- seconds into the hatch animation when the top flies off
@@ -150,6 +158,7 @@ local function newTimer(parent)
 end
 
 local function remove(s)
+	if s.speedupAttachment then s.speedupAttachment:Destroy() end
 	if s.egg then
 		s.egg.model:Destroy()
 	end
@@ -186,6 +195,32 @@ local function showEgg(pen, id, item)
 	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER, 0)) * CFrame.Angles(0, s.yaw, 0))
 	s.egg.model.Parent = folder
 	s.timer = newTimer(s.egg.model.PrimaryPart)
+	if pen == myPen() and pen:GetAttribute("Owner") == player.UserId then
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.Name = "SpeedupEgg"
+		prompt.ObjectText = item.egg .. " Egg"
+		prompt.ActionText = "Hatch now"
+		prompt.KeyboardKeyCode = Enum.KeyCode.F
+		prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
+		prompt.HoldDuration = 0.35
+		prompt.MaxActivationDistance = Config.SpeedupEgg.Range
+		prompt.RequiresLineOfSight = false
+		prompt.Enabled = false
+		-- Keep the prompt outside the growing model: ScaleTo also scales its range.
+		local attachment = Instance.new("Attachment")
+		attachment.Name = "EggHatchPrompt"
+		attachment.Position = pen.Area.CFrame:PointToObjectSpace(s.at + Vector3.new(0, 2, 0))
+		attachment.Parent = pen.Area
+		s.speedupAttachment = attachment
+		prompt.Parent = attachment
+		prompt.Triggered:Connect(function()
+			if not s.hatching and pen == myPen() then
+				speedupEgg:FireServer(id)
+			end
+		end)
+		s.speedupPrompt = prompt
+	end
+
 	s.nextTwitch = rng:NextNumber(unpack(TWITCH_EVERY))
 	sizeEgg(s, eggScale(s, workspace:GetServerTimeNow()))
 	shown[pen][id] = s
@@ -216,6 +251,10 @@ end
 -- The egg hatched: play the hatch, then the pet jumps out onto the spot.
 local function hatch(pen, id, s)
 	s.hatching = true
+	if s.speedupAttachment then
+		s.speedupAttachment:Destroy()
+		s.speedupAttachment, s.speedupPrompt = nil, nil
+	end
 	if pen == myPen() then
 		Sounds.play("egg_hatch")
 	end
@@ -340,6 +379,10 @@ RunService.RenderStepped:Connect(function(dt)
 		for _, s in list do
 			if s.egg then
 				if not s.hatching then
+					if s.speedupPrompt then
+						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and not player:GetAttribute("Tutorial") and (s.hatchAt or now) > now
+						s.speedupPrompt.ActionText = if (player:GetAttribute("HatchCredits") or 0) > 0 then "Use paid hatch" else "Hatch now — " .. hatchPrice .. " Robux"
+					end
 					s.timer.Text = countdown((s.hatchAt or now) - now)
 					local scale = eggScale(s, now)
 					if math.abs(scale - s.grown) > 0.004 then

@@ -89,8 +89,11 @@ local function build(i)
 	card.Size = UDim2.fromScale(CARD_HEIGHT * height * CARD_ASPECT / width, CARD_HEIGHT)
 	card.Parent = sheet
 
-	gui.Parent = player:WaitForChild("PlayerGui")
+	-- (the part goes in first and carries its own sheet: a sheet adorned from PlayerGui
+	-- stopped drawing on these parts, Oct 5)
 	part.Parent = workspace
+	gui.Adornee = nil
+	gui.Parent = part
 	gui.Enabled = not player:GetAttribute("EventRun")
 	gates[i] = { part = part, gui = gui, fades = fades }
 end

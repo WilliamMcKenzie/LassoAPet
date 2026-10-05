@@ -32,11 +32,12 @@ local TWIRL_HEIGHT = 1.6 -- above the hand
 local folder, anchor, points, knot, hand, handRope, loopBeams
 local shoulder
 local spin = 0
+local ropeScale = 1
 
 local function beam(a0, a1)
 	local b = Instance.new("Beam")
 	b.Attachment0, b.Attachment1 = a0, a1
-	b.Width0, b.Width1 = ROPE_WIDTH, ROPE_WIDTH
+	b.Width0, b.Width1 = ROPE_WIDTH * ropeScale, ROPE_WIDTH * ropeScale
 	b.Color = ColorSequence.new(ROPE_COLOR)
 	b.Transparency = NumberSequence.new(0)
 	b.FaceCamera = true
@@ -77,8 +78,10 @@ local function poseArm(raise, roll)
 	end
 end
 
-function Lasso.start(character)
+function Lasso.start(character, scale)
 	Lasso.stop()
+	ropeScale = scale or 1
+	spin = 0
 	folder = Instance.new("Folder")
 	folder.Name = "Lasso"
 	anchor = Instance.new("Part")
@@ -112,7 +115,7 @@ function Lasso.start(character)
 	setVisible(false)
 end
 
-function Lasso.swing(dt)
+function Lasso.swing(dt, height)
 	if not folder then
 		return
 	end
@@ -120,7 +123,7 @@ function Lasso.swing(dt)
 	poseArm(math.pi * 0.9 + math.sin(spin) * 0.12, math.cos(spin) * 0.15)
 	local head = hand.WorldPosition
 	local tilt = Vector3.new(math.cos(spin) * 0.12, 1, math.sin(spin) * 0.12).Unit
-	drawLoop(head + Vector3.new(0, 1.2, 0), tilt, SWING_RADIUS, spin)
+	drawLoop(head + Vector3.new(0, height or 1.2 * ropeScale, 0), tilt, SWING_RADIUS * ropeScale, spin)
 	handRope.CurveSize0, handRope.CurveSize1 = 0, 0
 	setVisible(true)
 end

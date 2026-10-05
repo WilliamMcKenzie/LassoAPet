@@ -121,27 +121,23 @@ model.Parent = workspace
 -- Who's standing there: { id, avatar }.
 local standing
 
--- The leader just stands about like a player, R6 Reimagined style (QM): the idle from the
--- "R6 Reimagined" animation pack (catalog 113781694262261, by 55Epaa), looping. Swap
--- POSE for another idle. (R6 avatars: the plain R6 idle.)
-local POSE = { R15 = "rbxassetid://138612360383511", R6 = "rbxassetid://180435571" }
-
+-- Roblox's Stylish idle gives the winner bent knees and a shifting stance.
+-- PodiumLasso.client overrides only the lasso arm, leaving the idle free to move.
 local function idle(avatar)
 	local humanoid = avatar:FindFirstChildOfClass("Humanoid")
-	if not humanoid then
-		return
-	end
 	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator")
 	animator.Parent = humanoid
 	local animation = Instance.new("Animation")
-	animation.AnimationId = if humanoid.RigType == Enum.HumanoidRigType.R15 then POSE.R15 else POSE.R6
-	pcall(function()
-		local track = animator:LoadAnimation(animation)
+	animation.AnimationId = if humanoid.RigType == Enum.HumanoidRigType.R15
+		then "rbxassetid://616138447" else "rbxassetid://180435571"
+	local ok, track = pcall(animator.LoadAnimation, animator, animation)
+	animation:Destroy()
+	if ok then
 		track.Looped = true
 		track.Priority = Enum.AnimationPriority.Idle
-		track:Play()
-	end)
+		track:Play(0.2)
+	end
 end
 
 local function stand(id)

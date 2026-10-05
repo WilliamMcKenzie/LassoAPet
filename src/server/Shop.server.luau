@@ -71,6 +71,8 @@ for _, list in { Config.Shop.Gold, Config.Shop.Specials } do
 	end
 end
 
+offerOf[Config.SpeedupEgg.ProductId] = { Key = "SpeedupEgg" }
+
 -- Paid random items (the Legendary Pet, and egg rolls now gold can be bought) are
 -- never sold where the player's policy restricts them. Unknown counts as restricted.
 local policies = {} -- [player] = restricted
@@ -109,11 +111,12 @@ local ledgers = {} -- [player] = the ledger as last read or written
 local MAX_RECEIPTS = 200
 
 local function blank()
-	return { receipts = {}, gold = 0, pets = 0, giant = 0, giantUsed = 0, giantEggs = 0, nukes = 0, nukesUsed = 0 }
+	return { receipts = {}, gold = 0, pets = 0, giant = 0, giantUsed = 0, giantEggs = 0, nukes = 0, nukesUsed = 0, hatches = 0 }
 end
 
 local function show(player, ledger)
 	ledgers[player] = ledger
+	player:SetAttribute("BoughtHatches", ledger.hatches or 0)
 	player:SetAttribute("BoughtGold", ledger.gold)
 	player:SetAttribute("BoughtPets", ledger.pets)
 	player:SetAttribute("BoughtGiantEggs", ledger.giantEggs)
@@ -191,6 +194,8 @@ local function record(userId, purchaseId, offer)
 			ledger.pets += 1
 		elseif offer.Key == "GiantHorse" then
 			ledger.giantEggs += 1 -- a Giant Horse egg (QM, Oct 4: no longer a ride)
+		elseif offer.Key == "SpeedupEgg" then
+			ledger.hatches = (ledger.hatches or 0) + 1
 		elseif offer.Key == "Nuke" then
 			ledger.nukes += 1
 		end
@@ -203,10 +208,40 @@ local function record(userId, purchaseId, offer)
 	local player = Players:GetPlayerByUserId(userId)
 	if ledger and player then
 		show(player, ledger)
-		shopGrant:FireClient(player, if offer.Key == "GiantHorse" then "GiantEgg" else offer.Key) -- ("GiantHorse" starts a giant ride: old purchases)
+		if offer.Key ~= "SpeedupEgg" then
+			shopGrant:FireClient(player, if offer.Key == "GiantHorse" then "GiantEgg" else offer.Key) -- ("GiantHorse" starts a giant ride: old purchases)
+		end
 	end
 	return ledger ~= nil
 end
+
+-- Only one egg checkout at a time, so its selected target cannot be replaced.
+local hatchPending = {}
+local speedupEgg = Instance.new("RemoteEvent")
+speedupEgg.Name = "SpeedupEgg"
+speedupEgg.OnServerEvent:Connect(function(player, id)
+	if hatchPending[player] or typeof(id) ~= "string" then
+		return
+	end
+	local prepare = game:GetService("ServerStorage"):FindFirstChild("PrepareEggSpeedup")
+	if not prepare then
+		return
+	end
+	hatchPending[player] = true
+	local ok, action = pcall(prepare.Invoke, prepare, player, id)
+	if not ok or action ~= "purchase" then
+		hatchPending[player] = nil
+		return
+	end
+	local prompted = pcall(MarketplaceService.PromptProductPurchase, MarketplaceService, player, Config.SpeedupEgg.ProductId)
+	if not prompted then
+		hatchPending[player] = nil
+	end
+end)
+speedupEgg.Parent = ReplicatedStorage
+Players.PlayerRemoving:Connect(function(player)
+	hatchPending[player] = nil
+end)
 
 buyShop.OnServerEvent:Connect(function(player, key)
 	local offer = typeof(key) == "string" and offers[key]
@@ -247,6 +282,9 @@ spender("UseNuke", "nukes", "nukesUsed")
 
 MarketplaceService.PromptProductPurchaseFinished:Connect(function(userId, productId, purchased)
 	local player = Players:GetPlayerByUserId(userId)
+	if player and productId == Config.SpeedupEgg.ProductId and not purchased then
+		hatchPending[player] = nil
+	end
 	if player and isContinue[productId] and not purchased then
 		continueRide:FireClient(player, false)
 	end
@@ -256,9 +294,12 @@ MarketplaceService.ProcessReceipt = function(receipt)
 	-- Shop offers go into the ledger whether or not the buyer is still here.
 	local offer = offerOf[receipt.ProductId]
 	if offer then
-		return if record(receipt.PlayerId, receipt.PurchaseId, offer)
-			then Enum.ProductPurchaseDecision.PurchaseGranted
-			else Enum.ProductPurchaseDecision.NotProcessedYet
+		local granted = record(receipt.PlayerId, receipt.PurchaseId, offer)
+		if granted and receipt.ProductId == Config.SpeedupEgg.ProductId then
+			local player = Players:GetPlayerByUserId(receipt.PlayerId)
+			if player then hatchPending[player] = nil end
+		end
+		return if granted then Enum.ProductPurchaseDecision.PurchaseGranted else Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	local player = Players:GetPlayerByUserId(receipt.PlayerId)
 	if player and isContinue[receipt.ProductId] then

@@ -96,5 +96,12 @@ warm.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 task.spawn(function()
 	pcall(ContentProvider.PreloadAsync, ContentProvider, warm:GetChildren())
-	pcall(ContentProvider.PreloadAsync, ContentProvider, REST)
+	-- (as image labels, not bare ids: PreloadAsync fails plain image id strings)
+	local labels = {}
+	for _, id in REST do
+		local label = Instance.new("ImageLabel")
+		label.Image = id
+		table.insert(labels, label)
+	end
+	pcall(ContentProvider.PreloadAsync, ContentProvider, labels)
 end)
