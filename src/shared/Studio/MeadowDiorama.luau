@@ -35,7 +35,7 @@ function Diorama.view()
 	camera.FieldOfView = 60
 	-- Level camera puts the open-sky horizon at the middle of the frame.
 	camera.CFrame = CFrame.lookAt(ORIGIN + Vector3.new(0, 8, -100), ORIGIN + Vector3.new(0, 8, -300))
-	camera.Focus = CFrame.new(ORIGIN + Vector3.new(0, 0, -180))
+	camera.Focus = CFrame.new(ORIGIN + Vector3.new(0, 8, -300))
 	Selection:Set({})
 end
 
