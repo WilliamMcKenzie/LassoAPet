@@ -41,9 +41,8 @@ local IMAGES = {
 	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
 	rollIcon = { id = "rbxassetid://107116554539032", size = Vector2.new(232, 240) }, -- RollIcon.png: opens the egg roll menu
-	-- TODO(Studio): upload assets/ui/Shop.png and put its id here. Until then the
-	-- button is a plain outlined "Shop" label in the same spot, and still works.
-	shopIcon = { id = "", size = Vector2.new(272, 277) }, -- Shop.png: opens the Robux shop
+	-- (With no id, the button is a plain outlined "Shop" label in the same spot.)
+	shopIcon = { id = "rbxassetid://113963704996686", size = Vector2.new(272, 277) }, -- Shop.png: opens the Robux shop
 	-- The roll menu's own art (RollMenu draws it; listed here so it's preloaded with the rest).
 	rollMenu = { id = "rbxassetid://104698392936555", size = Vector2.new(2892, 1900) }, -- RollPanel.png
 	rollMenuOdds = { id = "rbxassetid://110875946388838", size = Vector2.new(2892, 1900) }, -- RollPanelOdds.png
