@@ -103,6 +103,10 @@ end
 local function release(player)
 	local pen = penOf(player)
 	if pen and pen:GetAttribute("Owner") == player.UserId then
+		-- Emptied here too, with the owner: Hatchery's own PlayerRemoving can run
+		-- after this one, and then it no longer finds the pen as theirs and left
+		-- their pets in it for the next owner (QM, Oct 5).
+		pen:SetAttribute("Contents", "{}")
 		pen:SetAttribute("Owner", nil)
 		setSign(pen, nil)
 	end
