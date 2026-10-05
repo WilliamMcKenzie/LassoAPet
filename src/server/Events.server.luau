@@ -20,6 +20,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Ground = require(ReplicatedStorage.Shared.Ground)
 local Godlands = require(ReplicatedStorage.Shared.Godlands)
+local Badlands = require(ReplicatedStorage.Shared.Badlands)
 
 local EVENTS = Config.Events
 local world = workspace:WaitForChild("World")
@@ -91,7 +92,13 @@ local function randomSpot()
 	local half = Config.CourseHalfWidth - EVENTS.WallMargin
 	local x, z
 	for _ = 1, 200 do
-		x, z = rng:NextNumber(-half, half), rng:NextNumber(END_Z, START_Z)
+		z = rng:NextNumber(END_Z, START_Z)
+		local lo, hi = Badlands.edgesAt(z) -- (the Badlands' walls angle in and out)
+		if lo then
+			x = rng:NextNumber(lo + EVENTS.WallMargin, hi - EVENTS.WallMargin)
+		else
+			x = rng:NextNumber(-half, half)
+		end
 		if clear(x, z) then
 			break
 		end

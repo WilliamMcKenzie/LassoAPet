@@ -8,6 +8,8 @@ local CELL = 8
 -- Past its line the Godlands is laid out on 4-stud tiles, built by each client
 -- as it goes (Shared/Godlands), so its heights come from its track grids instead.
 local Godlands = require(script.Parent.Godlands)
+-- So is the Badlands (Shared/Badlands): its red stone stands a stud up.
+local Badlands = require(script.Parent.Badlands)
 
 local Ground = {}
 
@@ -35,6 +37,9 @@ end
 function Ground.heightAt(x, z)
 	if Godlands.start and z < Godlands.start then
 		return Godlands.heightAt(x, z)
+	end
+	if Badlands.contains(z) then
+		return Badlands.heightAt(x, z)
 	end
 	if not heights then
 		load()

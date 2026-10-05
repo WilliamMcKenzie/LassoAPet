@@ -26,6 +26,16 @@ end
 
 local loaded = {}
 
+-- Saves are under "b" + UserId since the Badlands went in as zone 5 (before that,
+-- "u" + UserId, where 5 was the Godlands).
+local KEY = "b"
+local BADLANDS = 5
+for i, biome in Config.Biomes do
+	if biome.Name == "Badlands" then
+		BADLANDS = i
+	end
+end
+
 local function level(player)
 	return math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
 end
@@ -36,7 +46,16 @@ local function load(player)
 		return
 	end
 	for attempt = 1, 3 do
-		local success, value = pcall(store.GetAsync, store, "u" .. player.UserId)
+		local success, value = pcall(store.GetAsync, store, KEY .. player.UserId)
+		if success and value == nil then
+			-- Not saved since the Badlands went in as zone 5 (QM, Oct 5): an old save
+			-- of 5 or more had the Godlands, now zone 6, so it moves up one and the
+			-- Badlands come free with it.
+			local old
+			success, old = pcall(store.GetAsync, store, "u" .. player.UserId)
+			old = tonumber(old)
+			value = if old and old >= BADLANDS then old + 1 else old
+		end
 		if success then
 			if player.Parent then
 				player:SetAttribute("PenLevel", math.max(level(player), tonumber(value) or 1))
@@ -63,7 +82,7 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, "u" .. player.UserId, value) then
+		if pcall(store.SetAsync, store, KEY .. player.UserId, value) then
 			savedAs[player] = value
 			return
 		end
@@ -188,6 +207,34 @@ local function paintPen(pen)
 		if part.Name == "Post" then
 			postColors[part] = postColors[part] or part.Color
 			part.Color = if n > 1 and Config.Biomes[n].PostColor then Config.Biomes[n].PostColor else postColors[part]
+		end
+	end
+end
+
+-- The Badlands' pen (Server/ForgePen) is the size of the biggest pen, as its
+-- next size up; past it (the Godlands) the forge stays. A size already there
+-- from before the Badlands (the Godlands') moves up one.
+local ForgePen = require(script.Parent.ForgePen)
+local badlands
+for i, biome in Config.Biomes do
+	if biome.Name == "Badlands" then
+		badlands = i
+	end
+end
+if badlands then
+	for _, pen in pens:GetChildren() do
+		local folder = pen:FindFirstChild("Sizes")
+		local list = sizesOf(pen)
+		local biggest = list[badlands - 1]
+		if folder and biggest and not (list[badlands] and list[badlands]:GetAttribute("Forge")) then
+			for k = #list, badlands, -1 do
+				list[k].Name = "Size" .. (k + 1)
+				list[k + 1] = list[k]
+			end
+			local forge = ForgePen.build(biggest)
+			forge.Name = "Size" .. badlands
+			forge.Parent = spare
+			list[badlands] = forge
 		end
 	end
 end

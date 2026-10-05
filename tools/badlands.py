@@ -1,8 +1,10 @@
-"""Nether biome concept: red sand, red stone and lava ground laid out by QM's
+"""The Badlands (QM's Nether-style biome, Oct 5): red sand, red stone and lava ground laid out by QM's
 MapMaker "Hot" biome, angled walls that funnel and open up, and sideways lava
 geysers on the walls of the open stretches.
 
-Run: python3 tools/nether_ground.py     render the concept into /mnt/project-files/biomes/nether/
+Run: python3 tools/badlands.py              map picture (/mnt/project-files/biomes/nether/badlands_map.png)
+     python3 tools/badlands.py --map        also write src/shared/BadlandsMap.luau (the game reads it)
+     python3 tools/badlands.py --renders    the concept renders
 
 Ground: a port of github.com/WilliamMcKenzie/MapMaker server/mapgen.go's Hot
 biome (studio-imperium/atlas): the floor is split into Voronoi cells, an
@@ -37,6 +39,9 @@ WALL = [(62, 28, 22), (74, 34, 26)]
 STONE_UP, LAVA_DOWN = 1, 1
 WALL_ROWS = 5
 GRAVEL, RUIN, LAVA_T = 0, 1, 2
+HALF = 112  # the floor grid spans x -112..112
+MAX_X = HALF - 6  # walls stay inside it
+LENGTH = 4800  # studs (a guess: between the Snow's and the Ocean's)
 
 
 # ---------------------------------------------------------------- ground (atlas port)
@@ -145,10 +150,10 @@ def wall_profile(length, seed=5):
     funnel, then opens into a wide chamber, and so on. The walls run straight
     between points, so every change of width is an angled wall."""
     rng = np.random.default_rng(seed)
-    pts = [(0.0, -56.0, 56.0)]
-    z = 0.0
+    pts = [(0.0, -56.0, 56.0), (40.0, -56.0, 56.0)]  # it starts and ends as wide as the other biomes
+    z = 40.0
     wide = False
-    while z < length:
+    while z < length - 480:
         z += rng.uniform(90, 140)  # the angled run
         if wide:
             c = rng.uniform(-14, 14)
@@ -157,10 +162,11 @@ def wall_profile(length, seed=5):
             c = rng.uniform(-10, 10)
             hw = rng.uniform(80, 96)  # a 160-190 stud chamber
         l, r = c - hw + rng.uniform(-8, 8), c + hw + rng.uniform(-8, 8)
-        pts.append((z, l, r))
+        pts.append((z, max(l, -MAX_X), min(r, MAX_X)))
         z += rng.uniform(60, 110) if wide else rng.uniform(110, 170)  # hold it
-        pts.append((z, l + rng.uniform(-10, 10), r + rng.uniform(-10, 10)))
+        pts.append((z, max(l + rng.uniform(-10, 10), -MAX_X), min(r + rng.uniform(-10, 10), MAX_X)))
         wide = not wide
+    pts += [(length - 40.0, -56.0, 56.0), (float(length), -56.0, 56.0)]
     return pts
 
 
@@ -320,6 +326,8 @@ def topdown(val, prof, x0, length, px=3):
     d = ImageDraw.Draw(im)
     s = px / TILE
     for z, side, cf in geyser_spots(prof, length):
+        if z > length:
+            continue
         wx, wz = cf[0, 3], -cf[2, 3]
         dx, dz = cf[0, 0], -cf[2, 0]
         X, Y = (wx - x0) * s, (length - wz) * s
@@ -328,20 +336,105 @@ def topdown(val, prof, x0, length, px=3):
     return im
 
 
+def nest_spots(prof, length):
+    """One nest in the middle of each chamber's straight stretch (z along, x)."""
+    out = []
+    for (z0, l0, r0), (z1, l1, r1) in zip(prof, prof[1:]):
+        if r0 - l0 > 140 and r1 - l1 > 140 and z1 - z0 > 60:
+            zc = (z0 + z1) / 2
+            l, r = walls_at(prof, zc)
+            out.append((round(zc), round((l + r) / 2)))
+    return out
+
+
+NEST_CLEAR = 4  # tiles of plain sand round a nest
+
+
+def clear_nests(val, nests):
+    for zc, xc in nests:
+        i0, j0 = int((xc + HALF) // TILE), int(zc // TILE)
+        val[max(i0 - NEST_CLEAR, 0):i0 + NEST_CLEAR + 1, max(j0 - NEST_CLEAR, 0):j0 + NEST_CLEAR + 1] = GRAVEL
+
+
+def rect_count(val, rows):
+    """Floor parts per stretch of `rows` rows once same-kind tiles are merged."""
+    counts = []
+    for j0 in range(0, val.shape[1], rows):
+        sub = val[:, j0:j0 + rows]
+        done = np.zeros_like(sub, bool)
+        n = 0
+        for i in range(sub.shape[0]):
+            for j in range(sub.shape[1]):
+                if done[i, j]:
+                    continue
+                k = sub[i, j]
+                j1 = j
+                while j1 < sub.shape[1] and sub[i, j1] == k and not done[i, j1]:
+                    j1 += 1
+                i1 = i + 1
+                while i1 < sub.shape[0] and all(sub[i1, jj] == k and not done[i1, jj] for jj in range(j, j1)):
+                    i1 += 1
+                done[i:i1, j:j1] = True
+                n += 1
+        counts.append(n)
+    return counts
+
+
+def write_luau(val, prof, spots, nests, length, path):
+    glyph = {GRAVEL: ".", RUIN: "#", LAVA_T: "~"}
+    nx, nz = val.shape
+    rows = ["".join(glyph[val[i, j]] for i in range(nx)) for j in range(nz)]
+    out = ["-- The Badlands: written by tools/badlands.py --map (don't edit by hand).",
+           "-- Shared/Badlands reads it; Client/BadlandsStream builds it round each rider.",
+           "-- Floor (QM's MapMaker Hot biome): one row per 4 studs along, the first at the",
+           "-- biome's line, each row x = -%d to %d in 4-stud tiles: \".\" red sand, \"#\" red" % (HALF, HALF),
+           "-- stone a stud up, \"~\" glowing lava, flush. Walls: { along, left x, right x },",
+           "-- straight between points. Geysers: { along, x, yaw } on a wall, +x local into the",
+           "-- corridor. Nests: { along, x }. (along = studs past the biome's line.)",
+           "return {",
+           "\tTile = %d," % TILE,
+           "\tLength = %d," % length,
+           "\tHalfWidth = %d," % HALF,
+           "\tWalls = {"]
+    out += ["\t\t{ %.1f, %.2f, %.2f }," % (z, l, r) for z, l, r in prof]
+    out.append("\t},")
+    out.append("\tGeysers = {")
+    for z, side, cf in spots:
+        yaw = math.degrees(math.atan2(-cf[0, 2], cf[0, 0]))  # Ry(a): local +x -> (cos a, 0, -sin a)
+        out.append("\t\t{ %g, %.2f, %.1f }," % (z, cf[0, 3], yaw))
+    out.append("\t},")
+    out.append("\tNests = {")
+    out += ["\t\t{ %d, %d }," % n for n in nests]
+    out.append("\t},")
+    out.append("\tGrid = {")
+    out += ['\t\t"%s",' % r for r in rows]
+    out += ["\t},", "}", ""]
+    open(path, "w").write("\n".join(out))
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
-    length = 1600
+    length = LENGTH
     prof = wall_profile(length)
-    half = 112  # the generated floor is wider than the widest chamber
-    x0 = -half
-    nx, nz = 2 * half // TILE, length // TILE
+    x0 = -HALF
+    nx, nz = 2 * HALF // TILE, length // TILE
     val, biome = ground(nx, nz)
+    nests = nest_spots(prof, length)
+    clear_nests(val, nests)
+    for j in range(nz):  # past the walls is plain sand (fewer floor parts)
+        l, r = walls_at(prof, j * TILE + 2)
+        xc = x0 + np.arange(nx) * TILE + 2
+        val[(xc < l - 2) | (xc > r + 2), j] = GRAVEL
+    spots = geyser_spots(prof, length)
     print({k: int((val == v).sum()) for k, v in (("sand", GRAVEL), ("stone", RUIN), ("lava", LAVA_T))},
-          "sub-biomes", np.bincount(biome.ravel(), minlength=3))
-    topdown(val, prof, x0, length, px=8).save(os.path.join(OUT, "nether_map.png"))
-    if "--map-only" in sys.argv:
+          "sub-biomes", np.bincount(biome.ravel(), minlength=3), "nests", len(nests), "geysers", len(spots))
+    topdown(val, prof, x0, length, px=4).save(os.path.join(OUT, "badlands_map.png"))
+    if "--map" in sys.argv:
+        write_luau(val, prof, spots, nests, length,
+                   os.path.join(os.path.dirname(__file__), "..", "src", "shared", "BadlandsMap.luau"))
         return
-
+    if "--renders" not in sys.argv:
+        return
     kw = dict(W=1100, H=680, fog=False, ground=False)
     z_open = geyser_spots(prof, length)[0][0]
     shots = []

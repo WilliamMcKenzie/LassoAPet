@@ -14,7 +14,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.dirname(__file__))
 from partlib import Part, T, render  # noqa: E402
 import terrain_assets as TA  # noqa: E402
-from nether_ground import SAND, STONE, LAVA, WALL  # noqa: E402
+from badlands import SAND, STONE, LAVA, WALL  # noqa: E402
 
 OUT = "/mnt/project-files/biomes/nether"
 N = 17  # tiles a side (the Ocean size; the base has no room for more)

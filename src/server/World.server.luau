@@ -44,18 +44,23 @@ if startLine and not endless then
 	finish.Parent = world
 end
 
--- The Godlands: each client builds the tracks near it (Client/GodlandsStream), in
--- the order this server's seed picks (Shared/Godlands). Anything saved in the map
--- past its line (walls, pieces, the far wall) is in the way, so it goes.
+-- The Badlands and the Godlands: each client builds them near it
+-- (Client/BadlandsStream, Client/GodlandsStream), the Godlands' tracks in the order
+-- this server's seed picks (Shared/Godlands). Anything saved in the map past the
+-- first of their lines (walls, pieces, the Ocean's far wall) is in the way, so it goes.
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Godlands = require(ReplicatedStorage.Shared.Godlands)
+local Badlands = require(ReplicatedStorage.Shared.Badlands)
 if Godlands.start then
 	world:SetAttribute("GodlandsSeed", Random.new():NextInteger(1, 1000000))
+end
+local streamedFrom = Badlands.start or Godlands.start
+if streamedFrom then
 	for _, folderName in { "Ground", "Walls", "Obstacles", "Decor" } do
 		local folder = world:FindFirstChild(folderName)
 		for _, child in folder and folder:GetChildren() or {} do
 			local box = if child:IsA("Model") then child:GetBoundingBox().Position elseif child:IsA("BasePart") then child.Position else nil
-			if box and box.Z < Godlands.start then
+			if box and box.Z < streamedFrom then
 				child:Destroy()
 			end
 		end
