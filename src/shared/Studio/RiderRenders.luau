@@ -57,12 +57,12 @@ local function ropeSegment(parent, a, b)
 	p.Shape = Enum.PartType.Cylinder
 end
 
-local function makeRider(parent, seat, width)
+local function makeRider(parent, seat)
 	local description = Instance.new("HumanoidDescription")
 	description.HairAccessory = "63690008" -- Pal Hair
 	description.Shirt = 144076358 -- Blue and Black Motorcycle Shirt
 	description.Pants = 144076760 -- Dark Green Jeans
-	description.Face = 7074764 -- Chill: half-lidded, knowing smile
+	description.Face = 26424808 -- Know-It-All Grin: raised brows and a smug grin
 	local skin = Color3.fromRGB(245, 205, 148)
 	description.HeadColor, description.LeftArmColor, description.RightArmColor = skin, skin, skin
 	description.TorsoColor, description.LeftLegColor, description.RightLegColor = skin, skin, skin
@@ -71,8 +71,8 @@ local function makeRider(parent, seat, width)
 	rider.Name = "BaconHair"
 	rider.Parent = parent
 	rider.Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-	rider:ScaleTo(1.15)
-	local scale = 1.15
+	local scale = 1.45
+	rider:ScaleTo(scale)
 	local head, torso = rider.Head, rider.Torso
 	local accessories = {}
 	for _, item in rider:GetDescendants() do
@@ -88,12 +88,12 @@ local function makeRider(parent, seat, width)
 	local hips = CFrame.new(seat.Position)
 	torso.CFrame = hips * CFrame.new(0, scale, 0) * CFrame.Angles(0, math.rad(35), 0)
 	head.CFrame = torso.CFrame * CFrame.new(0, 1.5 * scale, 0)
-		* CFrame.Angles(0, math.rad(110), 0) * CFrame.Angles(math.rad(22), 0, 0)
+		* CFrame.Angles(0, math.rad(110), 0) * CFrame.Angles(math.rad(43), 0, 0)
 	rider.HumanoidRootPart.CFrame = torso.CFrame
-	rider["Left Leg"].CFrame = hips * CFrame.new(-width / 2 - 0.35, -0.55, -0.35)
-		* CFrame.Angles(math.rad(32), 0, math.rad(-18))
-	rider["Right Leg"].CFrame = hips * CFrame.new(width / 2 + 0.35, -0.55, -0.35)
-		* CFrame.Angles(math.rad(32), 0, math.rad(18))
+	rider["Left Leg"].CFrame = hips * CFrame.new(-0.55 * scale, 0, 0)
+		* CFrame.Angles(math.rad(30), 0, math.rad(-45)) * CFrame.new(0, -scale, 0)
+	rider["Right Leg"].CFrame = hips * CFrame.new(0.55 * scale, 0, 0)
+		* CFrame.Angles(math.rad(30), 0, math.rad(45)) * CFrame.new(0, -scale, 0)
 	rider["Left Arm"].CFrame = torso.CFrame * CFrame.new(-1.5 * scale, 0.65 * scale, 0)
 		* CFrame.Angles(math.rad(25), 0, math.rad(-20)) * CFrame.new(0, -0.65 * scale, 0)
 	local arm = rider["Right Arm"]
@@ -163,7 +163,7 @@ function Renders.create()
 			animal.speed = 36
 			animal:update(if kind == "Horse" then 0.22 else 0.1, 36, 0)
 			bakeAnimal(animal)
-			makeRider(scene, animal:getSeatCFrame(), 3.2 * animal.size)
+			makeRider(scene, animal:getSeatCFrame())
 		end
 		ContentProvider:PreloadAsync({ stage })
 	end)
@@ -178,9 +178,21 @@ function Renders.view(kind, backdropColor)
 	local scene = stage[kind]
 	local box, size = scene:GetBoundingBox()
 	local target = box.Position
-	local distance = math.max(size.Y, size.X, size.Z) * 2.3
 	local camera = workspace.CurrentCamera
 	camera.FieldOfView = 32
+	local rotation = CFrame.lookAt(target + CAMERA_DIRECTION, target).Rotation
+	local tangent = math.tan(math.rad(camera.FieldOfView / 2)) * 0.84
+	local aspect = camera.ViewportSize.X / camera.ViewportSize.Y
+	local distance = 1
+	for _, item in scene:GetDescendants() do
+		if item:IsA("BasePart") and item.Transparency < 1 then
+			for _, x in { -1, 1 } do for _, y in { -1, 1 } do for _, z in { -1, 1 } do
+				local corner = item.CFrame:PointToWorldSpace(item.Size * Vector3.new(x, y, z) / 2)
+				local p = rotation:VectorToObjectSpace(corner - target)
+				distance = math.max(distance, math.abs(p.Y) / tangent + p.Z, math.abs(p.X) / (tangent * aspect) + p.Z)
+			end end end
+		end
+	end
 	camera.CFrame = CFrame.lookAt(target + CAMERA_DIRECTION * distance, target)
 	camera.Focus = CFrame.new(target)
 	local backdrop = stage:FindFirstChild("Backdrop")
