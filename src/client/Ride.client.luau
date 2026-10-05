@@ -762,14 +762,6 @@ ReplicatedStorage:WaitForChild("PetIncome").OnClientEvent:Connect(function()
 	if phase ~= "idle" then
 		return
 	end
-	-- One coin sound a payout (not one a pet), while you're at your pen (QM).
-	local hrp = character()
-	local pen = myPen()
-	local area = pen and pen:FindFirstChild("Area")
-	if hrp and area and (Vector3.new(hrp.Position.X, 0, hrp.Position.Z) - Vector3.new(area.Position.X, 0, area.Position.Z)).Magnitude
-		< math.max(area.Size.X, area.Size.Z) / 2 + 30 then
-		vfx.sounds.play("gold_tick", 0.25)
-	end
 	for _, model in homePets() do
 		local isStarter = starter and model == starter.animal.model
 		local kind = if isStarter
