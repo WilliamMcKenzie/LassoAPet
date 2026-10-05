@@ -192,6 +192,7 @@ end
 local function showEgg(pen, id, item)
 	local s = { kind = item.egg, merged = item.merged or 1, eggScale = item.eggScale, at = groundAt(pen, item.x, item.z), yaw = facing(pen), hatchAt = item.hatchAt }
 	s.egg = Egg.new(item.egg)
+	shown[pen][id] = s -- tracked at once: if anything below fails, the next refresh still clears it
 	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER, 0)) * CFrame.Angles(0, s.yaw, 0))
 	s.egg.model.Parent = folder
 	s.timer = newTimer(s.egg.model.PrimaryPart)
@@ -223,12 +224,12 @@ local function showEgg(pen, id, item)
 
 	s.nextTwitch = rng:NextNumber(unpack(TWITCH_EVERY))
 	sizeEgg(s, eggScale(s, workspace:GetServerTimeNow()))
-	shown[pen][id] = s
 end
 
 local function showPet(pen, id, item)
 	local s = { kind = item.pet, merged = item.merged or 1, at = groundAt(pen, item.x, item.z), yaw = facing(pen) }
 	s.pet = newPet(item.pet)
+	shown[pen][id] = s -- tracked at once: if anything below fails, the next refresh still clears it
 	s.pet.scale = Merge.size(item.pet, item.merged) -- a merged pet is bigger (Shared/Merge)
 	s.pet.animal:setScale(s.pet.scale)
 	makeRideable(pen, id, s.pet, item.pet, item.merged)
@@ -239,13 +240,11 @@ local function showPet(pen, id, item)
 		s.drop, s.full = merge, s.pet.scale
 		s.at = Vector3.new(merge.at.X, s.at.Y, merge.at.Z)
 		placePet(s.pet, s.at, s.yaw)
-		shown[pen][id] = s
 		return
 	end
 	s.pet.animal.model.Parent = folder
 	placePet(s.pet, s.at, s.yaw)
 	startWander(s)
-	shown[pen][id] = s
 end
 
 -- The egg hatched: play the hatch, then the pet jumps out onto the spot.
