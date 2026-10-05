@@ -3265,6 +3265,9 @@ local function updateMount(dt)
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	targetSpeed *= vfx.hazards.slow() -- stuck in a Sludge's sludge
+	if hold <= 0 then
+		targetSpeed *= Config.TiredSpeed -- out of Hold: tired (checkRide)
+	end
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
 	if ability and ability.cfg.MaxBoost then
@@ -3407,10 +3410,9 @@ local function checkRide(dt)
 		end
 	end
 	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not Tutorial.active and not mount.giant then -- abilities, the tutorial and the Giant Horse use no Hold
-		hold -= dt * (if sprinting() then Config.SprintDrain else 1)
-		if hold <= 0 then
-			return fail("BUCKED OFF")
-		end
+		-- Out of Hold the mount carries on, slower (Config.TiredSpeed; QM, Oct 5: it
+		-- used to buck you off).
+		hold = math.max(hold - dt * (if sprinting() then Config.SprintDrain else 1), 0)
 	end
 	if mount.z < FINISH_Z - 8 then
 		return fail("TOO FAR!") -- only if something skipped the finish line
