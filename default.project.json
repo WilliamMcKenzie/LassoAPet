@@ -14,7 +14,7 @@
     },
     "StarterPlayer": {
       "$properties": {
-        "DevTouchMovementMode": "Thumbstick"
+        "DevTouchMovementMode": "DynamicThumbstick"
       },
       "StarterPlayerScripts": {
         "Client": {
