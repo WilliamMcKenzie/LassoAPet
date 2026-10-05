@@ -12,6 +12,11 @@ local STAGE = "RiderRenderStage"
 local ORIGIN = Vector3.new(20000, 1000, 0)
 local ROPE_COLOR = Color3.fromRGB(222, 184, 120)
 local CAMERA_DIRECTION = Vector3.new(-0.34, 0.79, 0.51).Unit
+Renders.faces = {
+	Smug = "rbxassetid://405706038",
+	Grin = "rbxassetid://26424652",
+	Reference = "rbxassetid://111969738039607",
+}
 
 local function editOnly()
 	assert(RunService:IsStudio() and not RunService:IsRunning(), "Rider renders are only available in Studio edit mode")
@@ -63,7 +68,7 @@ local function makeRider(parent, seat)
 	description.Shirt = 144076358 -- Blue and Black Motorcycle Shirt
 	description.Pants = 144076760 -- Dark Green Jeans
 	description.Face = 406001308 -- Roblox's classic Smug face
-	local skin = Color3.fromRGB(245, 205, 148)
+	local skin = Color3.new(1, 1, 1) -- exact #FFFFFF, including head and hands
 	description.HeadColor, description.LeftArmColor, description.RightArmColor = skin, skin, skin
 	description.TorsoColor, description.LeftLegColor, description.RightLegColor = skin, skin, skin
 	local rider = Players:CreateHumanoidModelFromDescriptionAsync(description, Enum.HumanoidRigType.R6)
@@ -100,7 +105,8 @@ local function makeRider(parent, seat)
 	arm.CFrame = torso.CFrame * CFrame.new(1.5 * scale, 0.65 * scale, 0)
 		* CFrame.Angles(math.rad(15), 0, math.rad(155)) * CFrame.new(0, -0.65 * scale, 0)
 	for _, accessory in accessories do
-		accessory.handle.CFrame = accessory.body.CFrame * accessory.c1 * accessory.c0:Inverse()
+		accessory.handle.CFrame = accessory.body.CFrame * CFrame.new(0, 0.13 * scale, 0)
+			* accessory.c1 * accessory.c0:Inverse()
 	end
 	local hand = (arm.CFrame * CFrame.new(0, -0.95 * scale, 0)).Position
 	local center = hand + Vector3.new(0.6, 1.65, -0.4)
@@ -169,6 +175,18 @@ function Renders.create()
 	end)
 	if not ok then Renders.cleanup(); error(err) end
 	return "Created Horse and Cactus poses in Workspace." .. STAGE
+end
+
+function Renders.face(name)
+	editOnly()
+	local texture = assert(Renders.faces[name], "Choose Smug, Grin or Reference")
+	local stage = assert(workspace:FindFirstChild(STAGE), "Call create() first")
+	for _, kind in { "Horse", "Cactus" } do
+		local face = stage[kind].BaconHair.Head:FindFirstChildOfClass("Decal")
+		face.Texture = texture
+	end
+	ContentProvider:PreloadAsync({ texture })
+	return texture
 end
 
 function Renders.view(kind, backdropColor)
