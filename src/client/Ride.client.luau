@@ -252,6 +252,22 @@ local streams = {}
 -- The endless Godlands (Shared/Godlands): a stream per track, each running from
 -- its track's line to the next, made as the camera nears it (endless.stream(k)).
 local endless = { Godlands = require(ReplicatedStorage.Shared.Godlands) }
+-- The Badlands' walls angle in and out (Shared/Badlands), so there the sides of the
+-- course depend on z: edges(z) is the x range you and the stampede keep to and
+-- clampX keeps an x in it. laneX spreads a stampede lane (drawn from -EDGE..EDGE)
+-- across the width there, so the herd squeezes through the funnels.
+endless.Badlands = require(ReplicatedStorage.Shared.Badlands)
+function endless.edges(z)
+	local lo, hi = endless.Badlands.edgesAt(z)
+	if lo then
+		return lo + 4, hi - 4
+	end
+	return -EDGE, EDGE
+end
+function endless.clampX(x, z)
+	local lo, hi = endless.edges(z)
+	return math.clamp(x, lo, hi)
+end
 -- A stream from spawnZ to endZ of the herd's kinds; name labels its line in the Output.
 function endless.newStream(spawnZ, endZ, herd, name)
 	local s = {
@@ -414,6 +430,7 @@ vfx.rideSync = ReplicatedStorage:WaitForChild("RideSync") -- multiplayer rides (
 vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
 vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
 vfx.godlands.onPieces = slices.pieces
+vfx.badlands = require(script.Parent.BadlandsStream) -- the Badlands' floor, angled walls and lava geysers, built round the camera
 vfx.hazards = require(script.Parent.GodlandsHazards) -- the Godlands' wild animals: spikes, sludge, confusion, charges, hunts
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
@@ -549,7 +566,8 @@ local function smoothstep(a, b, v)
 end
 
 -- A stampede animal's x at z: its lane, swerving round any obstacle in the way.
-local function laneX(x0, z)
+-- real: x0 is already an x on the course (a stray's), not a stampede lane.
+local function laneX(x0, z, real)
 	local x = x0
 	if endless.Godlands.segmentAt(z) then
 		-- The Godlands' walls (Shared/GodlandsTracks) run right across: rather than
@@ -575,6 +593,10 @@ local function laneX(x0, z)
 		end
 		return math.clamp(x0 + (target - x0) * w, -EDGE, EDGE)
 	end
+	if not real and endless.Badlands.contains(z) then
+		local lo, hi = endless.edges(z)
+		return lo + (x0 + EDGE) / (2 * EDGE) * (hi - lo) -- (no obstacles in the Badlands)
+	end
 	for _, o in slices.at(slices.swerve, z) do
 		local reach = o.hx + 6
 		local d = x0 - o.x
@@ -588,7 +610,7 @@ local function laneX(x0, z)
 			x += (o.x + side * reach - x0) * w
 		end
 	end
-	return math.clamp(x, -EDGE, EDGE)
+	return endless.clampX(x, z)
 end
 
 -- Distance run and current speed `a` seconds after setting off, easing up to `speed`.
@@ -1766,7 +1788,7 @@ function vfx.updateEvent(dt, seen, inView)
 		entity.animal:setScale(scale * vfx.ownSize(entity)) -- (grown while you rode it, it stays grown)
 	end
 	entity.dodge *= math.exp(-1.5 * dt)
-	moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt, shown)
+	moveAnimal(entity, endless.clampX(x + entity.dodge, z), z, speed, dt, shown)
 end
 
 -- The stampede follows the shared server clock. Only during this player's slow-mo
@@ -1799,6 +1821,7 @@ local function updateHerd(dt, slowed)
 	end
 	endless.near(camZ)
 	vfx.godlands.update(camZ)
+	vfx.badlands.update(camZ)
 	for b, stream in streams do
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
 		for n = stream.oldest, newest do
@@ -1853,7 +1876,7 @@ local function updateHerd(dt, slowed)
 				entity.x = x + entity.dodge -- a snap doesn't swing them sideways
 			end
 			local ox, oz = vfx.hazards.offset(key) -- (charging or hunting you: off its place for a bit)
-			moveAnimal(entity, math.clamp(x + entity.dodge + ox, -EDGE, EDGE), z + oz, speed, dt, shown)
+			moveAnimal(entity, endless.clampX(x + entity.dodge + ox, z + oz), z + oz, speed, dt, shown)
 			vfx.setFrosted(entity, vfx.frostLeft[key] ~= nil)
 		end
 	end
@@ -1902,8 +1925,8 @@ local function updateHerd(dt, slowed)
 			entity.lane = x
 		end
 		-- Swerves round obstacles like the rest of the stampede.
-		local lat = math.clamp(laneX(entity.lane, z) - x, -1, 1) * 12
-		entity.x, entity.z = math.clamp(x + lat * dt, -EDGE, EDGE), z
+		local lat = math.clamp(laneX(entity.lane, z, true) - x, -1, 1) * 12
+		entity.x, entity.z = endless.clampX(x + lat * dt, z), z
 		if shown then
 			place(entity, -math.atan2(lat, math.max(pace, 1)))
 			animate(entity, dt, pace, turn + lat / 12)
@@ -2195,7 +2218,7 @@ function vfx.updateScared(dt)
 			if entity.n then
 				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -aura.radius, aura.radius)
 			else
-				entity.lane = math.clamp((entity.lane or entity.x) + away * 60 * dt, -EDGE, EDGE)
+				entity.lane = endless.clampX((entity.lane or entity.x) + away * 60 * dt, entity.z)
 			end
 			if not aura.scared[entity] then
 				aura.scared[entity] = true
@@ -2407,7 +2430,7 @@ function vfx.scareOff(dt, special)
 			if entity.n then
 				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -r, r)
 			else
-				entity.lane = math.clamp((entity.lane or entity.x) + away * 60 * dt, -EDGE, EDGE)
+				entity.lane = endless.clampX((entity.lane or entity.x) + away * 60 * dt, entity.z)
 			end
 			if special.RestorePer and entity.scaredOffBy ~= mount then
 				entity.scaredOffBy = mount
@@ -2594,7 +2617,7 @@ function vfx.updateShield(dt)
 	local cfg = shield.cfg
 	for i = #shield.crabs, 1, -1 do
 		local crab = shield.crabs[i]
-		crab.x = math.clamp(mount.x + crab.offset, -EDGE, EDGE)
+		crab.x = endless.clampX(mount.x + crab.offset, mount.z)
 		crab.z = mount.z + travelDir() * cfg.Ahead
 		crab.yaw = mount.yaw
 		animate(crab, dt, mount.speed, 0)
@@ -2621,7 +2644,7 @@ function vfx.inkBlast(dt, cfg)
 			if entity.n then
 				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -cfg.Radius, cfg.Radius)
 			else
-				entity.lane = math.clamp(entity.lane + away * 60 * dt, -EDGE, EDGE)
+				entity.lane = endless.clampX(entity.lane + away * 60 * dt, entity.z)
 			end
 		end
 	end
@@ -3220,7 +3243,7 @@ local function updateMount(dt)
 		mount.speed = Config.MountSpeed * statsOf(mount.kind).Speed * (1 - math.sin(turnT * math.pi) * 0.7)
 		mount.latVel *= math.exp(-6 * dt)
 		local look = CFrame.Angles(0, mount.yaw, 0).LookVector
-		mount.x = math.clamp(mount.x + look.X * mount.speed * dt, -EDGE, EDGE)
+		mount.x = endless.clampX(mount.x + look.X * mount.speed * dt, mount.z)
 		mount.z += look.Z * mount.speed * dt
 		if turnT >= 1 then
 			phase, grace = "return", Config.TurnGrace
@@ -3298,7 +3321,7 @@ local function updateMount(dt)
 		local len = math.max(math.sqrt(dx * dx + dz * dz), 0.001)
 		mount.speed = targetSpeed
 		local step = math.min(targetSpeed * dt, len)
-		mount.x = math.clamp(mount.x + dx / len * step, -EDGE, EDGE)
+		mount.x = endless.clampX(mount.x + dx / len * step, mount.z)
 		local z = mount.z + dz / len * step
 		if phase == "outbound" then
 			z = math.clamp(z, gateZ() + 3, SPAWN_Z) -- not back over the start line, nor into a locked gate
@@ -3345,7 +3368,11 @@ local function updateMount(dt)
 	-- At home the side limit widens from the corridor's to the base's over 40 studs,
 	-- so a ride from an outer pen is eased into the corridor.
 	local edge = EDGE + (Config.HomeHalfWidth - 4 - EDGE) * math.clamp(mount.z / 40, 0, 1)
-	mount.x = math.clamp(mount.x + mount.latVel * dt, -edge, edge)
+	if endless.Badlands.contains(mount.z) then
+		mount.x = endless.clampX(mount.x + mount.latVel * dt, mount.z) -- (its walls angle in and out)
+	else
+		mount.x = math.clamp(mount.x + mount.latVel * dt, -edge, edge)
+	end
 	mount.z += dir * mount.speed * dt
 	local sideways = if (ability and ability.cfg.Kind == "Crabwalk") or (vfx.sprintSpecial() or {}).Kind == "Crabwalk" then math.pi / 2 else 0 -- a crab scuttles sideways
 	place(mount, math.atan2(mount.latVel * dir, math.max(mount.speed, 1)) + sideways)
@@ -3493,6 +3520,9 @@ local function checkRide(dt)
 	local hazard = vfx.hazards.hit(mount, grace > 0)
 	if hazard then
 		return fail("CRASH!", hazard)
+	end
+	if grace <= 0 and vfx.badlands.hit(mount.x, mount.z) then
+		return fail("CRASH!", "Watch out for the lava geysers!") -- (the Badlands' geysers)
 	end
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
 		return fail("CRASH!") -- a locked gate

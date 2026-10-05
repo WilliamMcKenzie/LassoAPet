@@ -154,6 +154,28 @@ return {
 				Bubbles = 24, -- per second
 			},
 		},
+		{
+			-- The Badlands (QM, Oct 5): a Nether-style zone between the Ocean and the
+			-- Godlands. Red sand, red stone a stud up and glowing lava, laid out by QM's
+			-- MapMaker "Hot" biome; its walls angle in and out, pinching the course to
+			-- funnels and opening it into wide chambers where lava geysers on the walls
+			-- spray across (a crash). Built round each rider as they go (Shared/Badlands,
+			-- Shared/BadlandsMap from tools/badlands.py, Client/BadlandsStream).
+			Name = "Badlands",
+			Length = 4800, -- tools/badlands.py LENGTH (a guess, between the Snow's and the Ocean's)
+			GroundColors = { Color3.fromRGB(107, 49, 32), Color3.fromRGB(117, 56, 38) }, -- red sand (QM's reference)
+			WallColors = { Color3.fromRGB(62, 28, 22), Color3.fromRGB(74, 34, 26) },
+			-- No Badlands animals yet: the Ocean's run here and fill its nests until they're designed.
+			Herd = { Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, Kraken = 0.05 },
+			PlaceholderHerd = true,
+			Patches = {
+				Stone = { Color3.fromRGB(78, 38, 29), Color3.fromRGB(88, 43, 32) }, -- red stone, a stud up
+				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon, the Godlands' lava (QM)
+			},
+			UnlockCost = 3000000, -- guessed: between the Ocean's $1M and the Godlands' $10M
+			PostColor = Color3.fromRGB(62, 28, 22),
+			GateColor = Color3.fromRGB(220, 40, 20), -- lava red
+		},
 		-- (Off for a while on Oct 4, back the same night as the endless endgame, QM.)
 		{
 			-- The endgame (QM, Oct 3), after Realm of the Mad God's godlands: dark stone

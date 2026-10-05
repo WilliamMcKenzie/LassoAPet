@@ -70,6 +70,29 @@ local function roll(nest)
 	return if #odds > 0 then odds[#odds].name else ""
 end
 
+-- The Badlands are built by each client (Client/BadlandsStream), so their nests
+-- aren't in the saved map: copies of a map nest go on its spots (Shared/Badlands).
+do
+	local Badlands = require(ReplicatedStorage.Shared.Badlands)
+	local original
+	for _, nest in world.Nests:GetChildren() do
+		if nest:IsA("Model") and nest.Name ~= "EventNest" and nest:FindFirstChild("EggSpot") then
+			original = nest
+			break
+		end
+	end
+	for i, spot in Badlands.nests do
+		if original then
+			local nest = original:Clone()
+			nest.Name = "BadlandsNest" .. i
+			local egg = nest.EggSpot
+			local fromSpot = CFrame.new(-egg.Position) * nest:GetPivot()
+			nest:PivotTo(CFrame.new(spot.X, egg.Position.Y, spot.Z) * fromSpot)
+			nest.Parent = world.Nests
+		end
+	end
+end
+
 for _, nest in world.Nests:GetChildren() do
 	if nest.Name ~= "EventNest" then
 		nest:SetAttribute("Egg", roll(nest))
