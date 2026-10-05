@@ -1,7 +1,7 @@
 -- Riding HUD built from QM's images: the Hold bar with the distance on it, one
 -- action button (TAKE EGG or LASSO), a center message, and the home buttons
--- (RIDE, Gold, Pets, Upgrade Pen). Layout follows QM's mockups. Gold opens the
--- Robux shop (Shop).
+-- (RIDE, Gold, Pets, Upgrade Pen). Layout follows QM's mockups. Shop, over Roll,
+-- opens the Robux shop (Shop); the gold icon itself does nothing (QM, Oct 5).
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -41,6 +41,9 @@ local IMAGES = {
 	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
 	rollIcon = { id = "rbxassetid://107116554539032", size = Vector2.new(232, 240) }, -- RollIcon.png: opens the egg roll menu
+	-- TODO(Studio): upload assets/ui/Shop.png and put its id here. Until then the
+	-- button is a plain outlined "Shop" label in the same spot, and still works.
+	shopIcon = { id = "", size = Vector2.new(272, 277) }, -- Shop.png: opens the Robux shop
 	-- The roll menu's own art (RollMenu draws it; listed here so it's preloaded with the rest).
 	rollMenu = { id = "rbxassetid://104698392936555", size = Vector2.new(2892, 1900) }, -- RollPanel.png
 	rollMenuOdds = { id = "rbxassetid://110875946388838", size = Vector2.new(2892, 1900) }, -- RollPanelOdds.png
@@ -175,6 +178,7 @@ local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Abi
 local followHint -- "Follow the arrows to the egg!", top left while you ride an event's animal (Hud.setFollowHint)
 local mergeButton, mergeWanted -- MERGE, in RIDE's spot when RIDE isn't up (Hud.showMerge), and whether there's anything to merge
 local rollIcon -- Roll, over Pets: opens the egg roll menu (RollMenu)
+local shopIcon -- Shop, over Roll (or over Pets without Roll): opens the Robux shop (Shop)
 local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
 local CONTINUE_GAP = 12 -- between Continue and the Home button under it
 local tip, tipText -- the fail screen's tooltip in place of "+$N" (Hud.setTip), and its text
@@ -590,12 +594,9 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	sideGui.IgnoreGuiInset = true
 	sideGui.Parent = playerGui
 	local sideRoot = root(sideGui)
-	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold mockup.
-	gold = button(sideRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN), function()
-		if Shop.hasOffers() then
-			Shop.toggle()
-		end
-	end)
+	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold
+	-- mockup. Clicking it does nothing: the Shop button opens the shop (QM, Oct 5).
+	gold = button(sideRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
 	local total = label(gold, UDim2.fromOffset(0, ICON_HEIGHT * 0.4), UDim2.new(0.5, 0, 1, 2), 44, 4) -- 4px outline (QM)
 	total.AnchorPoint = Vector2.new(0.5, 1)
 	total.AutomaticSize = Enum.AutomaticSize.X
@@ -627,6 +628,25 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			end
 		end)
 	end
+	-- Shop sits over Roll the same way (over Pets when there's no Roll): it opens the
+	-- Robux shop. It drops down a row if the policy check takes Roll away.
+	local function shopSpot(withRoll)
+		local rows = if withRoll then 2 else 1
+		return UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8 - rows * (SIDE_ICON_HEIGHT + 8))
+	end
+	shopIcon = button(sideRoot, "shopIcon", fit("shopIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), shopSpot(Config.Gacha.Enabled), function()
+		if Shop.hasOffers() then
+			Shop.toggle()
+		end
+	end)
+	shopIcon.Visible = pets.Visible
+	if IMAGES.shopIcon.id == "" then
+		local shopText = label(shopIcon, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 34, 3) -- 3px outline (QM)
+		shopText.Text = "Shop"
+	end
+	task.spawn(function()
+		shopIcon.Position = shopSpot(Config.Gacha.Enabled and not Shop.randomRestricted())
+	end)
 	-- Opening one menu closes the others at once, with no closing animation (QM): only
 	-- the one coming in pops.
 	AnimalDex.onToggle = function(open)
@@ -905,6 +925,7 @@ function Hud.show(visible)
 	if rollIcon then
 		rollIcon.Visible = pets.Visible
 	end
+	shopIcon.Visible = pets.Visible
 	upgrade.Visible = upgradeShown and not visible and tutorial ~= "bare"
 	Inventory.setVisible(not visible) -- your eggs, hidden while riding
 	gained.row.Visible = false
@@ -1414,6 +1435,7 @@ function Hud.setTutorial(stage)
 	if rollIcon then
 		rollIcon.Visible = pets.Visible
 	end
+	shopIcon.Visible = pets.Visible
 	upgrade.Visible = upgradeShown and not riding and stage ~= "bare"
 	rideCash.row.Visible = stage == nil and not noCash
 end
