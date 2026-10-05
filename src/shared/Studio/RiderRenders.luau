@@ -62,7 +62,7 @@ local function makeRider(parent, seat)
 	description.HairAccessory = "63690008" -- Pal Hair
 	description.Shirt = 144076358 -- Blue and Black Motorcycle Shirt
 	description.Pants = 144076760 -- Dark Green Jeans
-	description.Face = 26424808 -- Know-It-All Grin: raised brows and a smug grin
+	description.Face = 406001308 -- Roblox's classic Smug face
 	local skin = Color3.fromRGB(245, 205, 148)
 	description.HeadColor, description.LeftArmColor, description.RightArmColor = skin, skin, skin
 	description.TorsoColor, description.LeftLegColor, description.RightLegColor = skin, skin, skin
