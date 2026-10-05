@@ -20,6 +20,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
+local Funnel = require(script.Parent.Funnel)
 
 local world = workspace:WaitForChild("World")
 local rng = Random.new()
@@ -91,10 +92,12 @@ takeEgg.OnServerEvent:Connect(function(player, nest)
 		-- nest as it is for everyone else.
 		if player:GetAttribute("Tutorial") and Config.Tutorial and WorldColors.biomeAt(nest.EggSpot.Position.Z) == 1 then
 			player:SetAttribute("CarriedEgg", Config.TutorialEgg)
+			Funnel.step(player, "Grabbed Egg")
 		end
 		return
 	end
 	player:SetAttribute("CarriedEgg", nest:GetAttribute("Egg")) -- theirs once they ride it home (Hatchery)
+	Funnel.step(player, "Grabbed Egg")
 	nest:SetAttribute("Egg", "")
 	if nest.Name == "EventNest" then
 		return -- the event's over (Events.server)

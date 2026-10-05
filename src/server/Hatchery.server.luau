@@ -32,6 +32,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Funnel = require(script.Parent.Funnel)
 local Animals = ReplicatedStorage.Shared.Animals
 
 local EDGE = 2 -- studs kept from the pen's fences
@@ -212,6 +213,9 @@ local function load(player)
 		return
 	end
 	profiles[player] = profile
+	if not profile.tutorial then
+		Funnel.track(player) -- a new player
+	end
 	local tutorial = Config.Tutorial and not profile.tutorial
 	if tutorial then
 		profile.ride = nil -- RidePet "": no pet waits in the pen yet
@@ -264,6 +268,7 @@ local function applyHatch(player)
 	applyingHatch[player] = true
 	profile.usedHatches, profile.hatchTarget = used + 1, nil
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
+	Funnel.step(player, "Egg Hatched")
 	save(player)
 	publish(player)
 	applyingHatch[player] = nil
@@ -390,6 +395,7 @@ remote("DeliverEgg", function(player, kind)
 	end
 	player:SetAttribute("CarriedEgg", nil)
 	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	Funnel.step(player, "Brought Egg Home")
 	publish(player)
 end)
 
@@ -517,6 +523,7 @@ remote("PlaceEgg", function(player, kind, x, z)
 	else
 		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else hatchTime(kind)) }
 	end
+	Funnel.step(player, "Placed Egg")
 	publish(player)
 end)
 
@@ -537,6 +544,7 @@ remote("TutorialDone", function(player)
 		profile.tutorial = true
 	end
 	player:SetAttribute("Tutorial", nil)
+	Funnel.step(player, "Tutorial Done")
 end)
 
 -- Ride the pet `id` from now on; the pet you rode takes its place in the pen.
@@ -831,6 +839,7 @@ while true do
 			if item.egg and now >= item.hatchAt then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
+				Funnel.step(player, "Egg Hatched")
 			end
 		end
 		if changed then
