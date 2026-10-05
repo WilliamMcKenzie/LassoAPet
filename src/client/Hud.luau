@@ -865,6 +865,10 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	EVENT.scale = Instance.new("UIScale")
 	EVENT.scale.Parent = EVENT.row
 	EVENT.row.Parent = root(eventGui)
+	-- A notice in the same spot (Hud.setNotice), over the countdown while it's up.
+	EVENT.notice = label(root(eventGui), UDim2.fromOffset(0, EVENT.TEXT_SIZE + 8), EVENT.row.Position, EVENT.TEXT_SIZE, 3) -- 3px outline (QM)
+	EVENT.notice.AutomaticSize = Enum.AutomaticSize.X
+	EVENT.notice.Visible = false
 
 	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only
@@ -1455,7 +1459,7 @@ function Hud.setEventCountdown(kind, seconds)
 	if not shown and EVENT.seconds == 1 then
 		Sounds.play("countdown_go") -- the countdown ran out: it spawns
 	end
-	EVENT.row.Visible = shown
+	EVENT.row.Visible = shown and not EVENT.notice.Visible
 	if EVENT.dodgeHolder then
 		EVENT.dodgeHolder.Visible = not shown -- DODGE THE STAMPEDE! steps aside for it (QM)
 	end
@@ -1484,6 +1488,18 @@ function Hud.setEventCountdown(kind, seconds)
 		EVENT.scale.Scale = 1.15
 		TweenService:Create(EVENT.scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	end
+end
+
+-- A line of text where the event countdown goes (QM, Oct 5: "Return to your base to
+-- ride an animal!" when you walk at the start line, WalkLimit.client), or nil to
+-- hide it. The countdown steps aside while it's up.
+function Hud.setNotice(text)
+	if not EVENT.notice or EVENT.notice.Visible == (text ~= nil) and EVENT.notice.Text == (text or "") then
+		return
+	end
+	EVENT.notice.Visible = text ~= nil
+	EVENT.notice.Text = text or ""
+	EVENT.row.Visible = EVENT.kind ~= nil and tutorial == nil and text == nil
 end
 
 -- Money as the HUD writes it: "$950", "$1.2k".
