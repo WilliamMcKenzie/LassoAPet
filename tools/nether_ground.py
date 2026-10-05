@@ -32,7 +32,7 @@ TILE = 4
 # Colours picked off QM's reference (MapMaker's Hot biome).
 SAND = [(107, 49, 32), (117, 56, 38)]   # gravel
 STONE = [(78, 38, 29), (88, 43, 32)]    # ruin (its dark grid lines read as a darker tone)
-LAVA = [(216, 116, 51), (234, 138, 60)]
+LAVA = [(255, 72, 0), (255, 120, 10)]  # the Godlands lava (Config Godlands Patches.Lava, Neon)
 WALL = [(62, 28, 22), (74, 34, 26)]
 STONE_UP, LAVA_DOWN = 1, 1
 WALL_ROWS = 5
@@ -285,8 +285,10 @@ def scene(val, prof, x0, z_from, z_to, sprays):
             k = val[i, j]
             top = (0, STONE_UP, -LAVA_DOWN)[k]
             pal = (SAND, STONE, LAVA)[k]
-            parts.append(Part(("Ground", "Stone", "Lava")[k], (4, top + 2, 4), T(xc, (top - 2) / 2, -zc),
-                              pal[(i + j) % 2], plain=(k == 2)))
+            p = Part(("Ground", "Stone", "Lava")[k], (4, top + 2, 4), T(xc, (top - 2) / 2, -zc),
+                     pal[(i + j) % 2], plain=(k == 2))
+            p.neon = k == 2
+            parts.append(p)
     parts += wall_parts(prof, z_from - 40, z_to + 40)
     for n, (z, side, cf) in enumerate(geyser_spots(prof, z_to + 20)):
         if z_from - 20 < z < z_to + 20:
