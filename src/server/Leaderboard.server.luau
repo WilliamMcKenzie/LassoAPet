@@ -127,7 +127,7 @@ local function nameTag(avatar, id)
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "Tag"
 	gui.Size = UDim2.fromScale(12, 4)
-	gui.StudsOffset = Vector3.new(0, 3.5, 0)
+	gui.StudsOffset = Vector3.new(0, 9, 0) -- clear of the lasso loop swinging overhead (QM)
 	gui.MaxDistance = 250
 	gui.LightInfluence = 0
 	local function line(name, y, height)
