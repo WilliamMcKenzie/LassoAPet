@@ -102,6 +102,17 @@ local function syncTools(player, eggs)
 			tool.CanBeDropped = false
 			tool.TextureId = Config.EggIcons[kind] or Config.EggIcons[eggPet(kind)] or ""
 			tool:SetAttribute("EggKind", kind)
+			-- An invisible Handle, so the arm comes up to hold the egg (HeldEgg.client
+			-- draws the egg there).
+			local handle = Instance.new("Part")
+			handle.Name = "Handle"
+			handle.Size = Vector3.new(0.2, 0.2, 0.2)
+			handle.Transparency = 1
+			handle.CanCollide = false
+			handle.CanQuery = false
+			handle.CanTouch = false
+			handle.Massless = true
+			handle.Parent = tool
 			tool.Parent = backpack
 		end
 		tool:SetAttribute("Count", n)
