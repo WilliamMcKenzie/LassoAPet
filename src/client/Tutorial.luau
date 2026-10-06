@@ -64,7 +64,9 @@ Tutorial.eggTaken = false -- this ride took the egg from Tutorial.nest (Ride): n
 local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
 local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banner (Hud, at 0.3)
 local FUSE_HINT_Y = 0.05 -- with the Fuse menu open: above its page
-local GOAL_WAIT = 3.2 -- seconds after the egg hatches (Pen.client's hatch takes about 2.2) before the fuse step (or the gate)
+local GOAL_WAIT = 3.2 -- seconds after the egg hatches (Pen.client's hatch takes about 2.2) before the gate, when there's no fuse step
+local FUSE_WAIT = 2.2 -- before the fuse step: just till the pet has landed (Pen.client: 2.18 s; QM, no pause)
+local REVEAL = { Big = 3, Pop = 0.5, Hold = 0.35, Fly = 0.6 } -- the Fuse button's reveal: times its size in the middle, then seconds
 local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
 local PICTURE_Y = 0.09 -- a hint picture's middle, a share of the screen height (QM's layout)
 local PICTURE_WIDTH = 0.25 -- "Click on the egg"'s width, a share of the screen width (0.8x the reference: QM)
@@ -84,6 +86,7 @@ local known = {} -- the pen's items when the ride home began: a new one is the e
 local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
 local goalDesert = false -- and it's that one, which QM drew (PICTURES.saveDesert)
 local fuseFrom = math.huge -- when the fuse step began
+local fuseRevealed = false -- the Fuse button has flown to its spot (revealFuse)
 
 -- The first Meadow nest: the one nearest the start line.
 do
@@ -406,17 +409,56 @@ local function fuseTarget()
 	if Hud.fusedAt and Hud.fusedAt >= fuseFrom then
 		return nil, nil
 	end
+	if not fuseRevealed then
+		return nil, nil
+	end
 	local target, isFuse
 	if Hud.fuseGuide then
 		target, isFuse = Hud.fuseGuide()
 	end
 	local verb = if touch() then "Tap" else "Click"
 	if target == nil then
-		return Hud.fuseButton(), verb .. " Fuse!"
+		return Hud.fuseButton(), nil -- (no hint: the reveal showed where it is, QM)
 	elseif not target then
 		return nil, nil
 	end
 	return target, if isFuse then verb .. " FUSE!" else verb .. " both your pets!"
+end
+
+-- The fuse step's start (QM): the Fuse button pops up big in the middle of the
+-- screen with a bounce, then shrinks as it flies to its spot in the HUD (still
+-- hidden till it lands); then the cursor shows on it.
+local function revealFuse()
+	local icon = Hud.fuseButton()
+	local size = icon.AbsoluteSize -- (laid out while hidden)
+	if size.X >= 1 then
+		local fly = Instance.new("ImageLabel")
+		fly.Name = "FuseReveal"
+		fly.BackgroundTransparency = 1
+		fly.Image = icon.Image
+		fly.AnchorPoint = Vector2.new(0.5, 0.5)
+		fly.Position = UDim2.fromScale(0.5, 0.5)
+		fly.Size = UDim2.fromOffset(size.X * REVEAL.Big, size.Y * REVEAL.Big)
+		local grow = Instance.new("UIScale")
+		grow.Scale = 0
+		grow.Parent = fly
+		fly.Parent = gui
+		local pop = TweenService:Create(grow, TweenInfo.new(REVEAL.Pop, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
+		pop:Play()
+		pop.Completed:Wait()
+		task.wait(REVEAL.Hold)
+		local at = icon.AbsolutePosition + size / 2 - gui.AbsolutePosition
+		local go = TweenService:Create(fly, TweenInfo.new(REVEAL.Fly, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+			Position = UDim2.fromOffset(at.X, at.Y),
+			Size = UDim2.fromOffset(size.X, size.Y),
+		})
+		go:Play()
+		go.Completed:Wait()
+		fuseRevealed = true -- the real one shows (Tutorial.update's stage)
+		task.wait(0.05)
+		fly:Destroy()
+	end
+	fuseRevealed = true
 end
 
 -- A fusion's pets are being pulled up, or its hybrid dropping down (PenPets).
@@ -437,11 +479,13 @@ local function showGoal(id)
 	while contents()[id] and contents()[id].egg do
 		task.wait(0.2)
 	end
-	task.wait(GOAL_WAIT)
-	if Tutorial.active and canFuse() then
+	local fuse = Tutorial.active and canFuse()
+	task.wait(if fuse then FUSE_WAIT else GOAL_WAIT)
+	if fuse then
 		local before = hybrids()
 		fuseFrom = os.clock()
 		step = "fuse" -- (not a funnel step: Funnel's steps are numbered)
+		revealFuse()
 		while Tutorial.active do
 			local at = Hud.fusedAt
 			if at and at >= fuseFrom and not fusing() and (hybrids() > before or os.clock() > at + 5) then
@@ -507,7 +551,7 @@ end
 -- hero leap is on) }.
 function Tutorial.update(state)
 	local phase = state.phase
-	local stage = if not Tutorial.active then nil elseif step == "fuse" then "fuse" else "bare"
+	local stage = if not Tutorial.active then nil elseif step == "fuse" and fuseRevealed then "fuse" else "bare"
 	if stage ~= hudStage then
 		hudStage = stage
 		Hud.setTutorial(stage)
@@ -618,7 +662,7 @@ function Tutorial.init(changed)
 		local on = Config.Tutorial and player:GetAttribute("Tutorial") == true
 		if on ~= Tutorial.active then
 			Tutorial.active = on
-			step, failed, done, goalText, fuseFrom = "place", false, false, nil, math.huge
+			step, failed, done, goalText, fuseFrom, fuseRevealed = "place", false, false, nil, math.huge, false
 			if on then
 				report("place")
 			end
