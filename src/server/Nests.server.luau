@@ -25,12 +25,16 @@ local Funnel = require(script.Parent.Funnel)
 local world = workspace:WaitForChild("World")
 local rng = Random.new()
 
--- Per biome: { { name, weight } }, sorted by name.
+-- Per biome: { { name, weight, rare } }, sorted by name. rare: Rare or better, the
+-- eggs that get likelier deeper into the biome (Config.NestDepthOdds).
+local RARE = { Rare = true, Epic = true, Legendary = true }
 local eggOdds = {}
 for b, biome in Config.Biomes do
 	local odds = {}
 	for name, weight in biome.Herd do
-		table.insert(odds, { name = name, weight = weight })
+		local module = ReplicatedStorage.Shared.Animals:FindFirstChild(name)
+		local ok, class = pcall(require, module)
+		table.insert(odds, { name = name, weight = weight, rare = ok and class and RARE[class.Rarity] or false })
 	end
 	table.sort(odds, function(a, c)
 		return a.name < c.name
@@ -56,14 +60,16 @@ local function roll(nest)
 	if nd and godlandsStart then
 		return rollDeep(math.max(godlandsStart - z, 0), nd)
 	end
-	local odds = eggOdds[b]
+	local odds = eggOdds[b] or {}
+	local depth = Config.NestDepthOdds
+	local boost = if depth and Config.Biomes[b] then depth.Near + (depth.Far - depth.Near) * WorldColors.along(b, z) else 1
 	local total = 0
 	for _, o in odds do
-		total += o.weight
+		total += o.weight * (if o.rare then boost else 1)
 	end
 	local pick = rng:NextNumber(0, total)
 	for _, o in odds do
-		pick -= o.weight
+		pick -= o.weight * (if o.rare then boost else 1)
 		if pick < 0 then
 			return o.name
 		end

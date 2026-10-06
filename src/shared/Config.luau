@@ -217,6 +217,11 @@ return {
 	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
 	-- their eggs never show up.
 	NestRestock = 30,
+	-- Rare, Epic and Legendary eggs get likelier the further into its biome a nest is
+	-- (QM, Oct 6: going further should pay): their odds x Near at the biome's start
+	-- line, rising evenly to x Far at its end, so a biome's average stays about the
+	-- same. Common and Uncommon eggs keep their odds. Not the Godlands (its NestDepth).
+	NestDepthOdds = { Near = 0.5, Far = 1.5 },
 	-- Stealing eggs mid-ride (Nests.server, QM Oct 4): STEAL EGG lassoes the egg off a rider
 	-- carrying one, from as far as a nest's egg (LassoRange); then it can't change hands
 	-- again for Lock seconds.
