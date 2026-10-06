@@ -454,6 +454,9 @@ return {
 	-- Obstacles are rescaled about their spot on the floor by ObstacleScale (worked out the same
 	-- way from tools/terrain_assets.py, against smalls of ~5.4 studs).
 	TierGrowth = 1.6, -- QM, Oct 1: 2x was too much
+	-- MERGE is off for now that there's FUSE (QM, Oct 6 19:16): no MERGE button, and
+	-- the server refuses MergePets. Pets already merged keep their size and gold.
+	MergeEnabled = false,
 	-- FUSE's price (Shared/Fusion.price): each of the two pets adds its rarity's. Free for
 	-- now (QM, Oct 6 18:57); QM's prices were Common 100 (Claude's), Uncommon 1000,
 	-- Rare 10000, Epic 100000, Legendary 1000000, so two Legendaries $2M.

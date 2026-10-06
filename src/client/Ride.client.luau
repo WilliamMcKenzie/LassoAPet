@@ -4616,7 +4616,7 @@ end
 function vfx.updateMerge()
 	local hrp = character()
 	local home = phase == "idle" and hrp ~= nil and hrp.Position.Z > START_LINE_Z -- in the base (QM), not out on the course
-	Hud.showMerge(home and not Tutorial.active and #vfx.mergeKinds() > 0)
+	Hud.showMerge(Config.MergeEnabled and home and not Tutorial.active and #vfx.mergeKinds() > 0)
 end
 
 -- The just-merged starter popping out over the pen and dropping (PenPets.drop).
@@ -4660,7 +4660,7 @@ end
 -- shrinking away as it goes, then a poof; the new, bigger pet pops out up there and
 -- drops down (Pen.client, or the starter here: PenPets.merges).
 Hud.onMerge = function()
-	if phase ~= "idle" then
+	if phase ~= "idle" or not Config.MergeEnabled then
 		return
 	end
 	local pen = myPen()

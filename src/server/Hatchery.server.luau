@@ -680,6 +680,9 @@ end)
 -- one you ride, becomes one pet of that kind made of all of them. If the one you
 -- ride is among them, it's the one that stays.
 remote("MergePets", function(player, key)
+	if not Config.MergeEnabled then -- (off for now: QM)
+		return
+	end
 	local profile = profiles[player]
 	if typeof(key) ~= "string" then
 		return
