@@ -10,7 +10,8 @@
 local ContentProvider = game:GetService("ContentProvider")
 local Players = game:GetService("Players")
 
--- The shop's, the roll menu's and the dictionary's pages.
+-- The shop's, the roll menu's and the dictionary's pages, and the Fuse menu's art
+-- (its panel, FUSE button, rarity cards and the Fuse icon: QM, Oct 6).
 local PANELS = {
 	"rbxassetid://105155399825774", "rbxassetid://83654143211576", "rbxassetid://73979296990982",
 	"rbxassetid://70887174133121", "rbxassetid://136220197688301", "rbxassetid://103982023506783",
@@ -18,6 +19,9 @@ local PANELS = {
 	"rbxassetid://110875946388838", "rbxassetid://119520152431016", "rbxassetid://78091503897812",
 	"rbxassetid://77735968469215", "rbxassetid://112429560665609", "rbxassetid://93558185988056",
 	"rbxassetid://80615979394374",
+	"rbxassetid://132460179762796", "rbxassetid://92820434532680", "rbxassetid://79697917998703",
+	"rbxassetid://129147449223279", "rbxassetid://72145821537095", "rbxassetid://137693950544184",
+	"rbxassetid://80504921595928", "rbxassetid://132069626373718",
 }
 
 -- Everything else: HUD buttons, egg cards, headshots, egg renders, the dictionary's
