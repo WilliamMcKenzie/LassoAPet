@@ -3,8 +3,10 @@
 -- A grabbed egg (Nests sets the player's "CarriedEgg") becomes yours when the
 -- ride gets it home (DeliverEgg). It goes in your Roblox inventory: one Tool
 -- per kind of egg ("Pinto Egg"), its "Count" attribute how many you have.
--- Equip it and click anywhere in your pen to place one there (PlaceEgg), where
--- it hatches after Config.PetHatchTime (or HatchTime) seconds and the pet stays on that spot.
+-- Equip it and click anywhere in your pen to place one there (PlaceEgg). It's
+-- ready after Config.PetHatchTime (or HatchTime) seconds, then waits for you to
+-- hatch it: stand by it and hold E (HatchEgg; Pen.client's prompt). The pet stays
+-- on that spot. Only the tutorial's eggs hatch by themselves (QM, Oct 6).
 --
 -- What's in a pen goes on the pen as its "Contents" attribute for every
 -- client to draw: JSON of { [id] = { x, z, egg, hatchAt } or { x, z, pet } },
@@ -441,6 +443,26 @@ remote("DeliverEgg", function(player, kind)
 		end
 	end
 	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	publish(player)
+end)
+
+-- You held E by an egg in your pen that's ready (Pen.client): it hatches.
+remote("HatchEgg", function(player, id)
+	local profile = profiles[player]
+	local pen = penOf(player)
+	local item = profile and typeof(id) == "string" and profile.items[id]
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not loaded[player] or not pen or not root or not item or not item.egg or item.hatchAt > os.time() or applyingHatch[player] then
+		return
+	end
+	local at = pen.Area.Position + Vector3.new(item.x, 0, item.z)
+	if (root.Position - at).Magnitude > Config.SpeedupEgg.Range + 4 then
+		return
+	end
+	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
+	if profile.earning then
+		Funnel.step(player, "Egg Hatched")
+	end
 	publish(player)
 end)
 
@@ -977,14 +999,15 @@ task.spawn(function()
 	end
 end)
 
--- Hatch eggs whose time is up: the pet takes the egg's spot.
+-- The tutorial's eggs hatch by themselves once their time is up: the pet takes the
+-- egg's spot. Every other egg waits to be hatched by hand (HatchEgg, above).
 while true do
 	task.wait(0.5)
 	local now = os.time()
 	for player, profile in profiles do
 		local changed = false
 		for _, item in profile.items do
-			if item.egg and now >= item.hatchAt then
+			if item.egg and now >= item.hatchAt and player:GetAttribute("Tutorial") then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
 				if profile.earning then

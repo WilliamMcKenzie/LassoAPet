@@ -31,9 +31,13 @@ while not world:GetAttribute("Ready") do
 	world:GetAttributeChangedSignal("Ready"):Wait()
 end
 -- Egg nests: shared stock kept by the server (Nests.server.luau). Each Nest in
--- World.Nests shows the egg its "Egg" attribute names ("" = empty, taken by
--- someone). EggSpot marks the egg's centre. The egg is a rigged model so it can
--- twitch in the nest; it turns its face toward the approaching rider.
+-- World.Nests holds the egg its "Egg" attribute names: "" is empty (taken by
+-- someone), "?" is an egg that's yours to decide, since the egg you take is the
+-- animal you're riding (QM, Oct 6). A "?" nest shows your mount's egg, swapping
+-- with a bounce on every hop, and a grey "?" egg until you've lassoed a wild
+-- animal (your own pet's egg can't be taken; nor an event animal's). The EventNest
+-- names its egg outright. EggSpot marks the egg's centre. The egg is a rigged model
+-- so it can twitch in the nest.
 local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this range
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
@@ -45,37 +49,6 @@ local nearEgg -- the waiting egg in grab range, while actionTarget is "egg"
 
 local function rarityOf(kind)
 	return require(Animals[kind]).Rarity
-end
-
--- Shows the egg the server says is in `nest`, if any.
-local function showNestEgg(nest)
-	local kind = nest:GetAttribute("Egg") or ""
-	if kind == "" and Tutorial.active and nest == Tutorial.nest and not Tutorial.eggTaken then
-		kind = Config.TutorialEgg -- the tutorial's egg, only for you (Tutorial)
-	end
-	local waiting = waitingEggs[nest]
-	if waiting and waiting.kind == kind then
-		return
-	end
-	if waiting then
-		waiting.egg.model:Destroy()
-		waitingEggs[nest] = nil
-	end
-	if kind ~= "" then
-		waiting = { egg = Egg.new(kind), kind = kind, nest = nest, nextTwitch = 0.5 + math.random() * 1.5 }
-		-- A bigger nest (Nests.server: its biome's NestScale) is takeable from that much
-		-- further, and its egg is as much bigger, there and the whole ride home (QM, Oct 6;
-		-- others see it so from your "CarriedEggScale").
-		local scale = nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale())
-		waiting.reach = Config.LassoRange * scale
-		if scale ~= 1 then
-			waiting.egg.model:ScaleTo(waiting.egg.size * scale)
-		end
-		-- (EggSpot is a 1x egg's centre, scaled with the nest: a bigger egg sits higher so it stays on the nest)
-		waiting.egg.model:PivotTo(nest.EggSpot.CFrame * CFrame.new(0, 1.6 * scale * (waiting.egg.size - 1), 0) * CFrame.Angles(0, math.pi, 0))
-		waiting.egg.model.Parent = nest
-		waitingEggs[nest] = waiting
-	end
 end
 
 -- Obstacle footprints from each obstacle's "Base" part (an invisible footprint),
@@ -357,6 +330,70 @@ end
 
 local rng = Random.new()
 
+-- The egg nests hold for you: the wild animal you're riding, else "?" (Nests.server
+-- takes your word for the kind when you grab, so this and what it's sent must agree).
+vfx.nestKind = "?"
+function vfx.setNestKind(kind)
+	vfx.nestKind = kind -- (the nests catch up in the frame loop below: near ones with a bounce, far ones when they're near)
+end
+-- The egg nests hold while you're on `entity`: its kind, or "?" on your own pet or an
+-- exclusive event's animal (Config.Events.Animals never run wild: its egg is the EventNest's).
+function vfx.eggOf(entity)
+	return if entity.own or table.find(Config.Events.Animals, entity.kind) then "?" else entity.kind
+end
+-- The kind of egg `nest` holds for you right now: what the server says, or your mount's for a "?".
+function vfx.nestKindFor(nest)
+	local kind = nest:GetAttribute("Egg") or ""
+	if kind == "" and Tutorial.active and nest == Tutorial.nest and not Tutorial.eggTaken then
+		kind = "?" -- the tutorial's egg, only for you (Tutorial)
+	end
+	return if kind == "?" then vfx.nestKind else kind
+end
+-- A nest's egg popping in when it changes (your hop onto another animal): it starts
+-- small, hops up and lands with a squash at Land seconds, overshoots and settles by
+-- Time, then twitches once. Only nests within Swap studs of the camera swap (each
+-- is a model built; further ones wait till they're near).
+vfx.EGG_POP = { Time = 0.7, Land = 0.35, Swap = 700 }
+-- Its scale (x its rest size) and height (studs over its rest spot) at t.
+function vfx.eggPop(t)
+	local scale = 1 - 0.35 * math.exp(-4 * t) * math.cos(13.8 * t)
+	local height = 1.2 * math.sin(math.pi * math.clamp(t / vfx.EGG_POP.Land, 0, 1))
+	return scale, height
+end
+
+-- Shows the egg `nest` holds for you, if any (vfx.nestKindFor), popping it in when `pop`.
+local function showNestEgg(nest, pop)
+	local kind = vfx.nestKindFor(nest)
+	local waiting = waitingEggs[nest]
+	if waiting and waiting.kind == kind then
+		return
+	end
+	if waiting then
+		waiting.egg.model:Destroy()
+		waitingEggs[nest] = nil
+	end
+	if kind ~= "" then
+		waiting = { egg = Egg.new(kind), kind = kind, nest = nest, nextTwitch = 0.5 + math.random() * 1.5 }
+		-- A bigger nest (Nests.server: its biome's NestScale) is takeable from that much
+		-- further, and its egg is as much bigger, there and the whole ride home (QM, Oct 6;
+		-- others see it so from your "CarriedEggScale").
+		local scale = nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale())
+		waiting.reach = Config.LassoRange * scale
+		waiting.scale = scale
+		if scale ~= 1 then
+			waiting.egg.model:ScaleTo(waiting.egg.size * scale)
+		end
+		-- (EggSpot is a 1x egg's centre, scaled with the nest: a bigger egg sits higher so it stays on the nest)
+		waiting.rest = nest.EggSpot.CFrame * CFrame.new(0, 1.6 * scale * (waiting.egg.size - 1), 0) * CFrame.Angles(0, math.pi, 0)
+		waiting.egg.model:PivotTo(waiting.rest)
+		waiting.egg.model.Parent = nest
+		waitingEggs[nest] = waiting
+		if pop then
+			waiting.pop = 0
+		end
+	end
+end
+
 do
 	local function watchNest(nest)
 		showNestEgg(nest)
@@ -632,6 +669,7 @@ local function cleanup()
 		mount.animal.model:Destroy()
 	end
 	mount, transfer, tumble, warpLevel = nil, nil, nil, nil
+	vfx.setNestKind("?")
 	if Tutorial.eggTaken then -- the ride's over: the tutorial egg's back for the next one
 		Tutorial.eggTaken = false
 		showNestEgg(Tutorial.nest)
@@ -932,10 +970,13 @@ startRide = function(model)
 		end
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
 		mount.merged = fromPen.merged
+		mount.own = true -- your own pet: no egg of it from a nest (it stays yours once let go and lassoed back)
 	else
 		mount, starter = starter, nil
+		mount.own = true
 		setClickable(mount.animal.model, false)
 	end
+	vfx.setNestKind(vfx.eggOf(mount))
 	mount.animal:setSaddled(true)
 	vfx.rideAgain = nil
 	leadFromZ = spot.Z - 8
@@ -1125,7 +1166,7 @@ local function grabEgg()
 	egg:update(0) -- stop any twitch, back to rest
 	local part = egg.model
 	part.Parent = workspace
-	takeEgg:FireServer(nearEgg.nest) -- empties the nest for everyone
+	takeEgg:FireServer(nearEgg.nest, nearEgg.kind) -- empties the nest for everyone
 	vfx.sounds.play("lasso_throw")
 	vfx.sounds.play("egg_grab")
 	carried = { part = part, kind = nearEgg.kind, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
@@ -1296,7 +1337,7 @@ end
 
 local function eggInRange(waiting)
 	local eggPos = waiting.nest.EggSpot.Position
-	return waitingEggs[waiting.nest] == waiting and waiting.egg.model.Parent ~= nil and eggPos.Z > gateZ()
+	return waitingEggs[waiting.nest] == waiting and waiting.kind ~= "?" and waiting.egg.model.Parent ~= nil and eggPos.Z > gateZ()
 		and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < waiting.reach
 end
 
@@ -3775,6 +3816,7 @@ local function updateRider(dt)
 				table.remove(strays, table.find(strays, target))
 			end
 			mount, transfer = target, nil
+			vfx.setNestKind(vfx.eggOf(mount)) -- the nests' eggs are this animal's now
 			vfx.sounds.play("lasso_land")
 			vfx.sounds.animal(mount.kind)
 			mount.popping, mount.hop = nil, 0
@@ -4379,12 +4421,30 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	dt *= timeScale
 	-- The waiting eggs twitch now and then: something's alive in there (only
-	-- the ones near enough to see).
+	-- the ones near enough to see). One showing the wrong animal (you hopped:
+	-- vfx.setNestKind) swaps once it's within vfx.EGG_POP.Swap studs, with a bounce if in view.
 	local camPos = camera.CFrame.Position
+	local stale = nil
 	for nest, waiting in waitingEggs do
 		if waiting.egg.model.Parent then
+			local away = (nest.EggSpot.Position - camPos).Magnitude
+			if waiting.kind ~= vfx.nestKindFor(nest) and away < vfx.EGG_POP.Swap then
+				stale = stale or {}
+				table.insert(stale, { nest = nest, pop = away < VIEW })
+			elseif waiting.pop then
+				waiting.pop += dt
+				local scale, height = vfx.eggPop(waiting.pop)
+				if waiting.pop >= vfx.EGG_POP.Time then
+					waiting.pop, scale, height = nil, 1, 0
+				elseif waiting.pop >= vfx.EGG_POP.Land and not waiting.landed then
+					waiting.landed = true
+					waiting.egg:play("twitch")
+				end
+				waiting.egg.model:ScaleTo(waiting.egg.size * waiting.scale * scale)
+				waiting.egg.model:PivotTo(waiting.rest * CFrame.new(0, height, 0))
+			end
 			waiting.nextTwitch -= dt
-			if waiting.nextTwitch <= 0 and (nest.EggSpot.Position - camPos).Magnitude > VIEW then
+			if waiting.nextTwitch <= 0 and away > VIEW then
 				waiting.nextTwitch = rng:NextNumber(EGG_TWITCH_EVERY[1], EGG_TWITCH_EVERY[2])
 			elseif waiting.nextTwitch <= 0 then
 				waiting.egg:play("twitch")
@@ -4392,6 +4452,9 @@ RunService.PreSimulation:Connect(function(dt)
 			end
 			waiting.egg:update(dt)
 		end
+	end
+	for _, swap in stale or {} do -- (after the loop: showNestEgg re-keys waitingEggs)
+		showNestEgg(swap.nest, swap.pop)
 	end
 	-- In the tutorial the stampede runs on your own clock, so it's never snapped
 	-- back to everyone else's after slowing down.

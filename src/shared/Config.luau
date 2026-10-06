@@ -174,16 +174,6 @@ return {
 			-- an event and roll exclusive, so it doesn't run here.) PlaceholderHerd keeps it
 			-- out of the finish line's egg odds (Hatchery).
 			Herd = { Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5, Leviathan = 0.1 }, -- its own animals, no Fish (QM, Oct 4; weights are guesses)
-			-- Its nests' eggs (Nests.server: one nest a track, near the riders) get rarer the
-			-- deeper in you are (QM, Oct 4), each tier's pool split evenly: at its line only
-			-- Rares; the Epic chance grows from 0 to Epic.Max over the first Epic.Over
-			-- studs; past Legendary.From studs the Legendary chance grows to Legendary.Max
-			-- over Legendary.Over studs, then holds. The rest is Rares.
-			NestDepth = {
-				Rare = { "Beholder", "Sludge", "WarElephant" },
-				Epic = { Pool = { "Leviathan", "SoulHorse" }, Max = 0.4, Over = 5000 },
-				Legendary = { Pool = { "Unicorn", "Snake", "Icebringer", "Kraken", "BlueCrab" }, From = 5000, Max = 0.1, Over = 5000 },
-			},
 			PlaceholderHerd = true,
 			HerdThin = 2, -- only every 2nd of the stampede's spawns runs here: half as many animals (QM, Oct 4)
 			Patches = {
@@ -229,15 +219,12 @@ return {
 	-- animals swerve slower); slow ones start earlier than Warn to make it in time.
 	ReturnAvoid = { On = true, Warn = 1.6, Clear = 17, Turn = 0.6, MaxSpeed = 140, Chance = 0.9 }, -- (QM Oct 6: was 0.4 s / 5 studs / 0.85, too easy to crash; Warn doubled from 0.8; Clear 9 -> 80 -> 20 -> 14 -> 17)
 	-- Egg nests are shared stock: they all start full, a grabbed egg empties its nest
-	-- for everyone, and it restocks this many seconds later. Eggs are rolled with the
-	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
-	-- their eggs never show up.
+	-- for everyone, and it restocks this many seconds later. The egg you take is the
+	-- animal you're riding (QM, Oct 6: lassoing is hunting): a nest shows the egg of
+	-- your mount, swapping on every hop, and a "?" egg until you've lassoed a wild
+	-- animal (your own pet's egg can't be taken, and nor can an event animal's: its
+	-- egg is the event's). Rarity is the stampede's: a 1 in 20 animal is a 1 in 20 egg.
 	NestRestock = 30,
-	-- Rare, Epic and Legendary eggs get likelier the further into its biome a nest is
-	-- (QM, Oct 6: going further should pay): their odds x Near at the biome's start
-	-- line, rising evenly to x Far at its end, so a biome's average stays about the
-	-- same. Common and Uncommon eggs keep their odds. Not the Godlands (its NestDepth).
-	NestDepthOdds = { Near = 0.5, Far = 1.5 },
 	-- Stealing eggs mid-ride (Nests.server, QM Oct 4): STEAL EGG lassoes the egg off a rider
 	-- carrying one, from as far as a nest's egg (LassoRange); then it can't change hands
 	-- again for Lock seconds.
@@ -279,12 +266,13 @@ return {
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
 	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
 	-- brings home an egg, one hint at a time and only the buttons each step needs.
-	-- false turns it off. On that first ride the first Meadow nest always holds a
-	-- TutorialEgg (only that player sees it), the stampede runs on the player's own
-	-- clock so it can slow down to TutorialSlowMo x speed while LASSO or TAKE EGG is
-	-- waiting to be pressed, and the Hold bar never runs out.
+	-- false turns it off. On that first ride the first Meadow nest always holds an egg
+	-- for that player (of the animal they lassoed, as everywhere), the stampede runs
+	-- on the player's own clock so it can slow down to TutorialSlowMo x speed while
+	-- LASSO or TAKE EGG is waiting to be pressed, and the Hold bar never runs out. The
+	-- tutorial's eggs hatch by themselves (TutorialHatchTime); every other egg waits
+	-- for you to hold E by it once it's ready (Hatchery, Pen.client).
 	Tutorial = true,
-	TutorialEgg = "Pinto",
 	TutorialHatchTime = 0,
 	TutorialSlowMo = 0.2,
 	-- Pet abilities: the Ability button (bottom right while riding), Q or R1.
