@@ -1,13 +1,16 @@
--- The egg nests, as this client shows them: shared stock kept by the server
--- (Nests.server.luau). Each Nest in World.Nests holds the egg its "Egg" attribute
--- names ("" = empty, taken by someone), rolled from its biome's odds. But the egg
--- you take is the animal you're riding (QM, Oct 6): once you've lassoed a wild
--- animal, the nests show that animal's egg instead, swapping with a bounce on every
--- hop (setMount); on your own pet you see the rolled egg. EggSpot marks the egg's
--- centre. The egg is a rigged model so it can twitch in the nest. (Ride.client
--- grabs them and draws the guide to the nearest; Nests.server takes the grab.)
+-- The egg nests, as this client shows them. Every nest always holds an egg, and the
+-- eggs are yours alone (QM, Oct 6: no shared stock, nothing to restock): each Nest
+-- in World.Nests holds the egg NestOdds rolls for it from your NestSeed, a number
+-- the server gives you when you join and after every ride (Nests.server), so the
+-- nests are stocked afresh each ride and the server rolls the same egg when you
+-- grab one. But the egg you take is the animal you're riding (QM, Oct 6): once
+-- you've lassoed a wild animal, the nests show that animal's egg instead, swapping
+-- with a bounce on every hop (setMount); on your own pet you see the rolled egg.
+-- EggSpot marks the egg's centre. The egg is a rigged model so it can twitch in the
+-- nest. (Ride.client grabs them and draws the guide to the nearest; Nests.server
+-- takes the grab. A nest you've emptied stays so for you till the ride's over.)
 --
---   NestEggs.start()            -- once the World's ready: every nest's egg, kept up with the server's changes
+--   NestEggs.start()            -- once the World's ready: every nest's egg, kept up with your seed
 --   NestEggs.waiting[nest]      -- { egg, kind, nest, reach, ... } while the nest shows an egg
 --   NestEggs.setMount(kind)     -- the wild animal you're on, or "" (every ride start and hop)
 --   NestEggs.eggOf(entity)      -- what to set for `entity`: its kind, or "" on your own pet
@@ -15,12 +18,14 @@
 --   NestEggs.show(nest, popIn)  -- shows what `nest` holds for you now, popping it in when `popIn`
 --   NestEggs.update(dt, view)   -- every frame: twitches, swaps and pops (view: studs the camera can see)
 
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
-local Tutorial = require(script.Parent.Tutorial)
+local NestOdds = require(ReplicatedStorage.Shared.NestOdds)
 
+local player = Players.LocalPlayer
 local world = workspace:WaitForChild("World")
 local camera = workspace.CurrentCamera
 local rng = Random.new()
@@ -35,6 +40,7 @@ local POP = { Time = 0.7, Land = 0.35, Swap = 700 }
 local NestEggs = {}
 NestEggs.waiting = {} -- [nest] = { egg, kind, nest, nextTwitch, reach, scale, rest, pop, landed }
 NestEggs.mountKind = "" -- the wild animal you're riding, else "" (the nests' own rolled eggs)
+local rolled = {} -- [nest] = the egg NestOdds rolled for it from your seed (cleared with the seed)
 
 function NestEggs.setMount(kind)
 	NestEggs.mountKind = kind -- (the nests catch up in update: near ones with a bounce, far ones when they're near)
@@ -48,11 +54,13 @@ function NestEggs.eggOf(entity)
 end
 
 -- The kind of egg `nest` holds for you right now: your mount's, if the nest holds
--- one at all, else what the server rolled.
+-- one at all, else what your seed rolled for it.
 local function kindFor(nest)
-	local kind = nest:GetAttribute("Egg") or ""
-	if kind == "" and Tutorial.active and nest == Tutorial.nest and not Tutorial.eggTaken then
-		kind = Config.TutorialEgg -- the tutorial's egg, only for you (Tutorial)
+	local kind = rolled[nest]
+	if kind == nil then
+		local seed = player:GetAttribute("NestSeed")
+		kind = if seed then NestOdds.roll(nest, seed) else ""
+		rolled[nest] = kind
 	end
 	return if kind ~= "" and NestEggs.mountKind ~= "" then NestEggs.mountKind else kind
 end
@@ -135,25 +143,24 @@ function NestEggs.update(dt, view)
 	end
 end
 
--- Every nest's egg, kept up with the server's changes, and the tutorial's: its nest
--- shows this player an egg while the tutorial's on (Tutorial).
+-- Every nest's egg, rolled again from each new seed (a ride's over: Nests.server).
 function NestEggs.start()
 	local function watch(nest)
 		NestEggs.show(nest)
 		nest.Destroying:Connect(function() -- (a Godlands nest no one's near any more: Nests.server)
-			NestEggs.waiting[nest] = nil
-		end)
-		nest:GetAttributeChangedSignal("Egg"):Connect(function()
-			NestEggs.show(nest)
+			NestEggs.waiting[nest], rolled[nest] = nil, nil
 		end)
 	end
 	for _, nest in world.Nests:GetChildren() do
 		watch(nest)
 	end
 	world.Nests.ChildAdded:Connect(watch) -- the Godlands' nests come and go (Nests.server)
-	Tutorial.init(function()
-		if Tutorial.nest then
-			NestEggs.show(Tutorial.nest)
+	player:GetAttributeChangedSignal("NestSeed"):Connect(function()
+		table.clear(rolled)
+		for _, nest in world.Nests:GetChildren() do
+			if not NestEggs.waiting[nest] then
+				NestEggs.show(nest) -- one you emptied is full again (the rest swap as you near them: update)
+			end
 		end
 	end)
 end

@@ -14,9 +14,7 @@
 --   3. lasso "Press E to LASSO a new ride!"  time slows while an animal is in reach;
 --                                            no nest egg can be taken yet (Ride's
 --                                            eggInRange), so this step can't be skipped
---   4. egg   "Follow the arrows..."          the egg guide; the first Meadow nest
---                                            always holds an egg for you (your
---                                            lassoed animal's, else a TutorialEgg)
+--   4. egg   "Follow the arrows..."          the egg guide (Ride's, to the nearest nest's)
 --   5. take  "Press E to take the egg!"      time slows while it's in reach
 --   6. home  (DODGE THE STAMPEDE!)           home with the egg
 --   7. place2 the egg goes into the pen by itself (Hatchery's DeliverEgg, balance
@@ -31,9 +29,9 @@
 -- A failed ride goes back to step 2. Until it's done the stampede runs on your
 -- own clock (Ride), so slowing it down never snaps it back.
 --
--- Ride drives it: Tutorial.update(state) every frame, Tutorial.lassoed() on
--- landing on a lassoed animal, and reads Tutorial.active / Tutorial.slowMo /
--- Tutorial.nest / Tutorial.busy.
+-- Ride drives it: Tutorial.init() once, Tutorial.update(state) every frame,
+-- Tutorial.lassoed() on landing on a lassoed animal, and reads Tutorial.active /
+-- Tutorial.slowMo / Tutorial.busy.
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -51,14 +49,11 @@ local Inventory = require(script.Parent.Inventory)
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
-local world = workspace:WaitForChild("World")
 
 local Tutorial = {}
 Tutorial.active = false -- the tutorial is running: the "Tutorial" attribute is set
 Tutorial.slowMo = nil -- a time scale while LASSO or TAKE EGG waits for its press
-Tutorial.nest = nil -- the first Meadow nest: while it's empty, this player still sees an egg in it (their lassoed animal's, else a TutorialEgg)
 Tutorial.busy = false -- the ending's close-ups are on: no riding off
-Tutorial.eggTaken = false -- this ride took the egg from Tutorial.nest (Ride): no tutorial egg there till the ride's over
 
 local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
 local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banner (Hud, at 0.3)
@@ -81,25 +76,12 @@ local PLACE_STEPS = { place = true, place2 = true }
 local step = "place"
 local failed = false -- the ride ended in a crash or buck-off
 local lastPhase = "idle"
-local onChange -- Ride's: shows or hides the nest's tutorial egg
 local hudStage = nil -- what the HUD was last told (Hud.setTutorial)
 local done = false -- TutorialDone sent
 local newPet = nil -- the pen id of the pet the egg brought home hatched into: once it's over, the arrows lead to it till you ride (QM, Oct 6)
 local known = {} -- the pen's items when the ride home began: a new one is the egg brought home
 local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
 local goalDesert = false -- and it's that one, which QM drew (PICTURES.saveDesert)
-
--- The first Meadow nest: the one nearest the start line.
-do
-	local best = -math.huge
-	for _, nest in world:WaitForChild("Nests"):GetChildren() do
-		local spot = nest:FindFirstChild("EggSpot")
-		local z = spot and spot.Position.Z
-		if z and WorldColors.biomeAt(z) == 1 and z > best then
-			Tutorial.nest, best = nest, z
-		end
-	end
-end
 
 local function touch()
 	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
@@ -346,9 +328,7 @@ local function setStep(name)
 	end
 	step = name
 	report(name)
-	if name == "ride" and onChange then
-		onChange() -- the nest's egg is back for another go
-	elseif name == "home" then
+	if name == "home" then
 		table.clear(known)
 		for id in contents() do
 			known[id] = true
@@ -571,9 +551,8 @@ function Tutorial.guideTo()
 	return nil
 end
 
--- changed() is called whenever the nest's tutorial egg should show or go.
-function Tutorial.init(changed)
-	onChange = changed
+-- Once, from Ride: the tutorial runs while the "Tutorial" attribute is set.
+function Tutorial.init()
 	local function refresh()
 		local on = Config.Tutorial and player:GetAttribute("Tutorial") == true
 		if on ~= Tutorial.active then
@@ -583,7 +562,6 @@ function Tutorial.init(changed)
 				newPet = nil
 				report("place")
 			end
-			changed()
 		end
 	end
 	player:GetAttributeChangedSignal("Tutorial"):Connect(refresh)

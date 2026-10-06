@@ -1,12 +1,9 @@
--- Egg nests are shared stock, like Steal an Egg: when the server starts, every
--- Nest in World.Nests holds an egg. The first player to grab one empties that
--- nest for everyone, and it restocks with a fresh egg Config.NestRestock seconds
--- later. Each nest's egg is its "Egg" attribute (an animal name, or "" when
--- empty), which every client reads to show the eggs.
---
--- Eggs are rolled with exactly the odds of the nest's biome's stampede
--- (Config.Biomes[b].Herd): an animal that's 1 in 100 of the stampede is 1 in 100
--- of the eggs (QM, Oct 2), rarer ones likelier deeper in (Config.NestDepthOdds).
+-- Egg nests. Every nest is always stocked, and its eggs are yours alone (QM, Oct 6:
+-- no shared stock, nothing to restock): when you join and after every ride you get
+-- a NestSeed attribute, and what each nest holds for you is NestOdds' roll from it
+-- (your Ride.client shows that; here the same roll says what you grabbed). So the
+-- nests fill up afresh for each ride, and one player's grab leaves everyone else's
+-- eggs alone.
 --
 -- But the egg you take is the animal you're riding (QM, Oct 6): once a rider's got
 -- on a wild animal (a "lasso" or "take" cue this ride: not the pet they rode out
@@ -14,8 +11,6 @@
 -- their grab says which animal (mountEgg), an event's animal included (finding and
 -- riding one is the hard part). The rolled egg is for a rider still on their own pet
 -- (riding your best pet to a nest would copy it every ride).
---
--- The Godlands' nests have their own odds, by how deep in they are (its NestDepth).
 --
 -- The Godlands never end, so its nests aren't on the map: one goes in each of its
 -- tracks (Shared/Godlands) near any player, at a clear spot picked from the server's
@@ -25,62 +20,20 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local NestOdds = require(ReplicatedStorage.Shared.NestOdds)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Funnel = require(script.Parent.Funnel)
 
 local world = workspace:WaitForChild("World")
 local rng = Random.new()
 
--- Per biome: { { name, weight, rare } }, sorted by name. rare: Rare or better, the
--- eggs that get likelier deeper into the biome (Config.NestDepthOdds).
-local RARE = { Rare = true, Epic = true, Legendary = true }
-local eggOdds = {}
-for b, biome in Config.Biomes do
-	local odds = {}
-	for name, weight in biome.Herd do
-		local module = ReplicatedStorage.Shared.Animals:FindFirstChild(name)
-		local ok, class = pcall(require, module)
-		table.insert(odds, { name = name, weight = weight, rare = ok and class and RARE[class.Rarity] or false })
-	end
-	table.sort(odds, function(a, c)
-		return a.name < c.name
-	end)
-	eggOdds[b] = odds
+-- Each player's NestSeed: what NestOdds rolls their nests' eggs from, new for every ride.
+local function reseed(player)
+	player:SetAttribute("NestSeed", rng:NextInteger(1, 1e9))
 end
-
-local godlandsStart -- z of the Godlands' line (Shared/Godlands, below)
-
--- A Godlands nest's egg, `depth` studs past its line (Config: the Godlands' NestDepth).
-local function rollDeep(depth, nd)
-	local epic = math.clamp(depth / nd.Epic.Over, 0, 1) * nd.Epic.Max
-	local legendary = math.clamp((depth - nd.Legendary.From) / nd.Legendary.Over, 0, 1) * nd.Legendary.Max
-	local r = rng:NextNumber()
-	local pool = if r < legendary then nd.Legendary.Pool elseif r < legendary + epic then nd.Epic.Pool else nd.Rare
-	return pool[rng:NextInteger(1, #pool)]
-end
-
-local function roll(nest)
-	local z = nest.EggSpot.Position.Z
-	local b = WorldColors.biomeAt(z)
-	local nd = Config.Biomes[b] and Config.Biomes[b].NestDepth
-	if nd and godlandsStart then
-		return rollDeep(math.max(godlandsStart - z, 0), nd)
-	end
-	local odds = eggOdds[b] or {}
-	local depth = Config.NestDepthOdds
-	local boost = if depth and Config.Biomes[b] then depth.Near + (depth.Far - depth.Near) * WorldColors.along(b, z) else 1
-	local total = 0
-	for _, o in odds do
-		total += o.weight * (if o.rare then boost else 1)
-	end
-	local pick = rng:NextNumber(0, total)
-	for _, o in odds do
-		pick -= o.weight * (if o.rare then boost else 1)
-		if pick < 0 then
-			return o.name
-		end
-	end
-	return if #odds > 0 then odds[#odds].name else ""
+Players.PlayerAdded:Connect(reseed)
+for _, player in Players:GetPlayers() do
+	reseed(player)
 end
 
 -- Where each rider is and what they're on: their RideSync (the server can't see a
@@ -107,6 +60,7 @@ ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player,
 		riderOf(player).wild = true
 	elseif what == "end" then
 		riders[player] = nil
+		reseed(player) -- the next ride's eggs (their Ride.client swaps the nests over as they near them)
 		-- The ride's over: an egg still carried was lost on the way (a crash, bucked
 		-- off, Home from the fail screen). One brought home was handed in first
 		-- (Hatchery's DeliverEgg, sent before this), so this only clears a lost one,
@@ -152,7 +106,6 @@ end
 for _, nest in world.Nests:GetChildren() do
 	local biome = Config.Biomes[WorldColors.biomeAt(nest.EggSpot.Position.Z)]
 	sizeNest(nest, biome and biome.NestScale or 1)
-	nest:SetAttribute("Egg", roll(nest))
 end
 
 local takeEgg = Instance.new("RemoteEvent")
@@ -160,42 +113,28 @@ takeEgg.Name = "TakeEgg"
 takeEgg.Parent = ReplicatedStorage
 
 -- A rider grabbed the egg in `nest` (`mount`: the animal they're on, "" on their own
--- pet; Ride.client): the first grab wins, later ones find it empty.
+-- pet; Ride.client). The nest's as full as ever for everyone else, and for them again
+-- next ride.
 takeEgg.OnServerEvent:Connect(function(player, nest, mount)
 	if typeof(nest) ~= "Instance" or nest.Parent ~= world.Nests then
 		return
 	end
-	local kind = nest:GetAttribute("Egg") or ""
+	-- The wild animal they're riding, if one (see the top), else their roll for the nest.
+	local kind = mountEgg(player, mount) or NestOdds.roll(nest, player:GetAttribute("NestSeed") or 0)
 	if kind == "" then
-		-- On the tutorial's first ride the empty first Meadow nest shows that player an
-		-- egg of their own (Tutorial.luau: their lassoed animal's, else a Config.TutorialEgg):
-		-- grabbing it leaves the nest as it is for everyone else.
-		if player:GetAttribute("Tutorial") and Config.Tutorial and WorldColors.biomeAt(nest.EggSpot.Position.Z) == 1 then
-			player:SetAttribute("CarriedEgg", mountEgg(player, mount) or Config.TutorialEgg)
-			player:SetAttribute("CarriedEggScale", 1)
-			Funnel.step(player, "Grabbed Egg")
-		end
 		return
 	end
-	kind = mountEgg(player, mount) or kind -- the wild animal they're riding, if one (see the top)
 	player:SetAttribute("CarriedEgg", kind) -- theirs once they ride it home (Hatchery)
 	-- A bigger nest's egg stays that much bigger the whole ride (QM, Oct 6): everyone's
 	-- Ride.client shows it at this scale (the hatched pet and your eggs aren't changed).
 	player:SetAttribute("CarriedEggScale", nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale()))
 	Funnel.step(player, "Grabbed Egg")
-	nest:SetAttribute("Egg", "")
-	task.delay(Config.NestRestock, function()
-		if nest.Parent and nest:GetAttribute("Egg") == "" then
-			nest:SetAttribute("Egg", roll(nest))
-		end
-	end)
 end)
 
 -- The Godlands' nests ---------------------------------------------------------
 
 local Godlands = require(ReplicatedStorage.Shared.Godlands)
 local Tracks = require(ReplicatedStorage.Shared.GodlandsTracks)
-godlandsStart = Godlands.start
 
 local NEAR = { 1, 3 } -- tracks behind and ahead of a player that have their nest
 local WALL_MARGIN = 14 -- studs in from the walls
@@ -257,12 +196,10 @@ local function addNest(k)
 	end
 	local nest = template:Clone()
 	nest.Name = "GodlandsNest" .. k
-	nest:SetAttribute("Egg", "")
 	sizeNest(nest, Config.Biomes[#Config.Biomes].NestScale or 1) -- (the Godlands are the last biome)
 	local egg = nest:FindFirstChild("EggSpot")
 	local fromSpot = CFrame.new(-egg.Position) * nest:GetPivot()
 	nest:PivotTo(CFrame.new(spot.X, egg.Position.Y + spot.Y, spot.Z) * fromSpot) -- (the EggSpot as high over the ground as over the map's floor)
-	nest:SetAttribute("Egg", roll(nest))
 	nest.Parent = world.Nests
 	godlandsNests[k] = nest
 end
