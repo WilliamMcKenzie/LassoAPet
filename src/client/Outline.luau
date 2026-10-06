@@ -19,7 +19,7 @@ local TRANSPARENCY = 0.2 -- 80% opacity (QM)
 local DASHES = 10
 local DASH_SHARE = 0.6 -- of each dash's slot round the ring; the rest is the gap
 local SPIN = 0.8 -- radians a second
-local LIFT = 0.15 -- studs above the model's root (animals' and eggs' roots are at their feet)
+local LIFT = 0.45 -- studs above the model's root (animals' and eggs' roots are at their feet; over the pens' floor, whose top is 0.3 up, or the ring hid under it)
 
 -- [model] = { scale, box, size }: a model's bounding box from its root, measured
 -- once (measuring walks every block, too slow to do every frame for every pet)
