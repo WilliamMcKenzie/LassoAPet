@@ -534,7 +534,9 @@ remote("PlaceEgg", function(player, kind, x, z)
 	else
 		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else hatchTime(kind)) }
 	end
-	Funnel.step(player, "Placed Egg")
+	if profile.earning then
+		Funnel.step(player, "Placed Egg") -- the egg brought home, not the starter egg placed before the first ride
+	end
 	publish(player)
 end)
 
@@ -850,7 +852,9 @@ while true do
 			if item.egg and now >= item.hatchAt then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
-				Funnel.step(player, "Egg Hatched")
+				if profile.earning then
+					Funnel.step(player, "Egg Hatched") -- (not the starter egg, which hatches before the first ride)
+				end
 			end
 		end
 		if changed then

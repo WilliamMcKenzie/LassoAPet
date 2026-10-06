@@ -47,7 +47,7 @@ return {
 			-- Locked behind a gate until your pen is this biome's level (its place
 			-- in this list). Upgrading your pen to it costs UnlockCost gold; your pen's
 			-- floor tiles take this biome's ground colours and its posts PostColor.
-			UnlockCost = 1000,
+			UnlockCost = 500, -- balance pass (Oct 6): was $1k; most new players quit before reaching it
 			PostColor = Color3.fromRGB(206, 118, 72),
 			GateImage = "rbxassetid://113778810800288", -- assets/ui/GateDesert.png ("Zone Locked")
 			GateColor = Color3.fromRGB(255, 204, 40), -- the gate's glow at this biome's line: desert yellow
@@ -66,7 +66,7 @@ return {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
 				Ice = { Color3.fromRGB(160, 188, 244), Color3.fromRGB(178, 202, 250) },
 			},
-			UnlockCost = 100000,
+			UnlockCost = 300000, -- balance pass (Oct 6): was $100k
 			PostColor = Color3.fromRGB(126, 164, 214),
 			GateImage = "rbxassetid://93384010922515", -- assets/ui/GateTundra.png
 			GateColor = Color3.fromRGB(70, 220, 255), -- cyan (QM)
@@ -138,7 +138,7 @@ return {
 					Tint = Color3.fromRGB(150, 140, 185),
 				},
 			},
-			UnlockCost = 1000000,
+			UnlockCost = 10000000, -- balance pass (Oct 6): was $1M
 			PostColor = Color3.fromRGB(236, 140, 124),
 			GateImage = "rbxassetid://75356296124042", -- assets/ui/GateOcean.png
 			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
@@ -186,7 +186,7 @@ return {
 				Ice = { Color3.fromRGB(170, 196, 250), Color3.fromRGB(184, 208, 252) },
 				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon
 			},
-			UnlockCost = 10000000, -- guessed: 10x the Ocean
+			UnlockCost = 300000000, -- balance pass (Oct 6): was $10M (a guess). The Badlands (PR #154) would sit at about $50M
 			PostColor = Color3.fromRGB(62, 60, 72),
 			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
 			GateImage = "rbxassetid://81079145393331", -- assets/ui/GateGodlands.png
@@ -243,12 +243,15 @@ return {
 	-- inside (QM's pets JSON, Oct 4), else HatchTime by its rarity.
 	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
 	PetHatchTime = {
+		-- Balance pass (Oct 6): QM's pets JSON times, x1 in the Meadow (the first eggs stay quick),
+		-- x2 Desert, x4 Tundra, x6 Ocean, x8 Godlands; the exclusives 1 h / 16 h / 24 h. Eggs hatch
+		-- while you're offline, so long ones bring players back (Steal an Egg goes up to 12-36 h).
 		Horse = 15, Pig = 15, Pinto = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
-		Cactus = 30, Scorpion = 90, Sandworm = 210, SpineLizard = 300, Snake = 600, -- Desert
-		Penguin = 30, Boar = 45, Snowman = 120, IceGolem = 360, Icebringer = 1800, -- Tundra
-		Starfish = 15, Whale = 3600, Squid = 900, FishSchool = 666, KingCrab = 1200, BlueCrab = 3000, Kraken = 3333, -- Ocean
-		Beholder = 666, Sludge = 600, WarElephant = 900, Leviathan = 1800, SoulHorse = 2400, -- Godlands
-		SnackYak = 10, RoboShark = 9000, Loong = 12000, -- exclusives
+		Cactus = 60, Scorpion = 180, Sandworm = 420, SpineLizard = 600, Snake = 1200, -- Desert
+		Penguin = 120, Boar = 180, Snowman = 480, IceGolem = 1440, Icebringer = 7200, -- Tundra
+		Starfish = 90, Whale = 21600, Squid = 5400, FishSchool = 4000, KingCrab = 7200, BlueCrab = 18000, Kraken = 20000, -- Ocean
+		Beholder = 5400, Sludge = 4800, WarElephant = 7200, Leviathan = 14400, SoulHorse = 19200, -- Godlands
+		SnackYak = 3600, RoboShark = 57600, Loong = 86400, -- exclusives
 	},
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
 	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
