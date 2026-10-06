@@ -1192,9 +1192,17 @@ end
 
 -- Back on foot after a ride (any ride, however it ended), the same arrows lead from
 -- you to the pet waiting in your pen, so you go and ride again (QM). They go once
--- you're up close to it or riding, and never during the tutorial (it has its own).
+-- you step into your pen (for good, till the next ride: QM, Oct 6), are up close
+-- to the pet or riding, and never show during the tutorial (it has its own).
 function vfx.updateHomeGuide()
 	local hrp = character()
+	local area = vfx.rideAgain and hrp and myPen() and myPen():FindFirstChild("Area")
+	if area then
+		local p = area.CFrame:PointToObjectSpace(hrp.Position)
+		if math.abs(p.X) <= area.Size.X / 2 and math.abs(p.Z) <= area.Size.Z / 2 then
+			vfx.rideAgain = nil -- in your pen
+		end
+	end
 	local target
 	if vfx.rideAgain and hrp and not cutscene and not Tutorial.active then
 		local spot = if starter then Vector3.new(starter.x, 0, starter.z) else homeSpot()
