@@ -7,9 +7,10 @@
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Config = require(ReplicatedStorage.Shared.Config)
 local world = workspace:WaitForChild("World")
 
--- Bright, cloudless kid-friendly sky.
+-- The sky (Config.Sky), with no sun, moon, stars or clouds of Roblox's own.
 for _, child in Lighting:GetChildren() do
 	if child:IsA("Sky") or child:IsA("Atmosphere") or child:IsA("Clouds") then
 		child:Destroy()
@@ -27,15 +28,20 @@ sky.StarCount = 0
 -- ExposureCompensation 0.5 brighten and saturate the sky too, so it was picked by
 -- uploading solid colours and sampling Studio's screen until it read #59D9FE (one off
 -- in blue, the nearest it gets). Change those Lighting settings and it needs picking again.
-local SKY = "rbxassetid://81588505365795"
+local FLAT = "rbxassetid://81588505365795"
+-- Or the Creator Store's free "Anime sky" (asset 13107361022, by bomberman_br): soft
+-- cartoon clouds on a pastel blue (QM, Oct 6). Config.Sky picks which.
+local ANIME = {
+	Bk = "rbxassetid://13107325341", Dn = "rbxassetid://13107329809", Ft = "rbxassetid://13107334845",
+	Lf = "rbxassetid://13107337703", Rt = "rbxassetid://13107340396", Up = "rbxassetid://13107344387",
+}
 for _, face in { "Bk", "Dn", "Ft", "Lf", "Rt", "Up" } do
-	sky["Skybox" .. face] = SKY
+	sky["Skybox" .. face] = if Config.Sky == "Flat" then FLAT else ANIME[face]
 end
 sky.Parent = Lighting
 -- The finish line: a copy of the start line at the end of the last biome
 -- (Config.FinishFromEnd before the far wall), so it moves as biomes are added.
 -- The endless Godlands has no end, so no finish line.
-local Config = require(ReplicatedStorage.Shared.Config)
 local endless = Config.CourseLength == math.huge
 local startLine = world:FindFirstChild("StartLine")
 if startLine and not endless then
