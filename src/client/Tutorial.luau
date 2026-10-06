@@ -64,7 +64,6 @@ Tutorial.eggTaken = false -- this ride took the egg from Tutorial.nest (Ride): n
 local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
 local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banner (Hud, at 0.3)
 local GOAL_WAIT = 3.2 -- seconds after the egg hatches (Pen.client's hatch takes about 2.2) before the gate, when there's no fuse step
-local FUSE_WAIT = 2.2 -- before the fuse step: just till the pet has landed (Pen.client: 2.18 s; QM, no pause)
 local REVEAL = { Big = 3, Pop = 0.5, Hold = 0.35, Fly = 0.6 } -- the Fuse button's reveal: times its size in the middle, then seconds
 local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
 local PICTURE_Y = 0.09 -- a hint picture's middle, a share of the screen height (QM's layout)
@@ -361,7 +360,8 @@ local function finish()
 	end
 end
 
--- Your pets: the one you ride and the pen's, as { kind, fuse }.
+-- Your pets: the one you ride and the pen's, as { kind, fuse } (an egg as the
+-- animal it hatches).
 local function yourPets()
 	local list = {}
 	local ride = player:GetAttribute("RidePet")
@@ -370,8 +370,8 @@ local function yourPets()
 		table.insert(list, { ride, if fuse ~= "" then fuse else nil })
 	end
 	for _, item in contents() do
-		if item.pet then
-			table.insert(list, { item.pet, item.fuse })
+		if item.pet or item.egg then
+			table.insert(list, { item.pet or item.egg, item.fuse })
 		end
 	end
 	return list
@@ -416,10 +416,22 @@ local function fuseTarget()
 	return target or nil
 end
 
--- The fuse step's start (QM): the Fuse button pops up big in the middle of the
--- screen with a bounce, then shrinks as it flies to its spot in the HUD (still
--- hidden till it lands); then the cursor shows on it.
-local function revealFuse()
+-- The egg placed (`id` in the pen) has hatched and its pet is out in the pen
+-- (Pen.client puts it in PenPets 1.6 s into the hatch), so the Fuse menu shows it.
+local function petOut(id)
+	for model, pet in PenPets.pets do
+		if pet.id == id and model.Parent then
+			return true
+		end
+	end
+	return false
+end
+
+-- The fuse step's start, the moment the egg's hatching (QM: no pause): the Fuse
+-- button pops up big in the middle of the screen with a bounce, then shrinks as
+-- it flies to its spot in the HUD (still hidden till it lands); once the new pet
+-- is out too, the cursor shows on it.
+local function revealFuse(id)
 	local icon = Hud.fuseButton()
 	local size = icon.AbsoluteSize -- (laid out while hidden)
 	if size.X >= 1 then
@@ -445,6 +457,10 @@ local function revealFuse()
 		})
 		go:Play()
 		go.Completed:Wait()
+		local by = os.clock() + 3
+		while not petOut(id) and os.clock() < by do
+			task.wait()
+		end
 		fuseRevealed = true -- the real one shows (Tutorial.update's stage)
 		task.wait(0.05)
 		fly:Destroy()
@@ -462,21 +478,22 @@ local function fusing()
 	return false
 end
 
--- The ending: once the egg placed (`id` in the pen) has hatched and its pet
--- jumped out, the two pets are fused (step "fuse") and, the moment the hybrid's
--- landed, the camera flies over to the next biome's gate and back, and it's over.
+-- The ending: the moment the egg's placed (`id` in the pen), the two pets are
+-- fused (step "fuse": the Fuse button flies in while it hatches) and, the moment
+-- the hybrid's landed, the camera flies over to the next biome's gate and back, and it's over.
 local function showGoal(id)
 	Tutorial.busy = true
-	while contents()[id] and contents()[id].egg do
-		task.wait(0.2)
-	end
-	local fuse = Tutorial.active and canFuse()
-	task.wait(if fuse then FUSE_WAIT else GOAL_WAIT)
-	if fuse then
+	local fuse = Tutorial.active and canFuse() -- (straight away: the egg's hatching by itself)
+	if not fuse then
+		while contents()[id] and contents()[id].egg do
+			task.wait(0.2)
+		end
+		task.wait(GOAL_WAIT)
+	else
 		local before = hybrids()
 		fuseFrom = os.clock()
 		step = "fuse" -- (not a funnel step: Funnel's steps are numbered)
-		revealFuse()
+		revealFuse(id)
 		while Tutorial.active do
 			local at = Hud.fusedAt
 			if at and at >= fuseFrom and not fusing() and (hybrids() > before or os.clock() > at + 5) then
