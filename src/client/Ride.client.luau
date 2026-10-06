@@ -724,7 +724,10 @@ end)
 -- Your pets at home: the starter's model and every pet in your pen.
 local function homePets()
 	local list = {}
-	if starter then
+	-- (Not while a just-merged or fused starter waits unparented to drop: its joints
+	-- don't hold out of the world, so its parts sit back at the origin and its
+	-- measured box, and RIDE's ring round it, came out giant.)
+	if starter and starter.animal.model.Parent then
 		table.insert(list, starter.animal.model)
 	end
 	for model in PenPets.pets do
