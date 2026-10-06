@@ -3268,8 +3268,8 @@ local function updateMount(dt)
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	targetSpeed *= vfx.hazards.slow() -- stuck in a Sludge's sludge
-	if hold <= 0 then
-		targetSpeed *= Config.TiredSpeed -- out of Hold: tired (checkRide)
+	if hold <= 0 and not player:GetAttribute("CarriedEgg") then
+		targetSpeed *= Config.TiredSpeed -- out of Hold: tired (checkRide), but not with an egg on the way home (QM, Oct 6)
 	end
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
@@ -3652,7 +3652,7 @@ local function updateHud()
 	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out).
 	Hud.setSprint(phase == "outbound" and not Tutorial.active)
 	if phase == "outbound" then
-		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1)
+		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1, player:GetAttribute("CarriedEgg") == nil)
 		Hud.setDistance(if Tutorial.active then "" else string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		if actionTarget == "egg" then
 			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))

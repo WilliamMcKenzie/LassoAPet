@@ -1072,12 +1072,13 @@ end
 
 local TIRED_RED = Color3.fromRGB(255, 90, 90)
 
-function Hud.setHold(fraction)
+-- tired: whether an empty bar slows the mount (not while it carries an egg home).
+function Hud.setHold(fraction, tired)
 	holdFrame.Visible = fraction ~= nil
 	if fraction then
 		holdClip.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)
 		-- Empty (the mount's tired, at half speed): the bar pulses a subtle red (QM, Oct 5).
-		holdFrame.ImageColor3 = if fraction <= 0
+		holdFrame.ImageColor3 = if fraction <= 0 and tired ~= false
 			then Color3.new(1, 1, 1):Lerp(TIRED_RED, 0.5 + 0.5 * math.sin(os.clock() * math.pi * 2))
 			else Color3.new(1, 1, 1)
 	end
