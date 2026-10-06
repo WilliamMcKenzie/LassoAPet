@@ -1037,6 +1037,7 @@ local function fail(reason, tip)
 	-- Thrown off behind the animal, landing flat on their back until they go home.
 	local look = hrp.CFrame.LookVector
 	tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1 }
+	vfx.rideCue:FireServer("crash", tumble.from, tumble.yaw, tumble.dir, tumble.side) -- everyone sees you thrown off
 	humanoid.Sit = false
 	humanoid.PlatformStand = true -- no animations: lies stiff
 	Hud.setAction(nil)
@@ -3572,22 +3573,27 @@ local function checkRide(dt)
 	reachHome()
 end
 
+-- Where a thrown-off rider is t (0..1) through their tumble: a flip and a quarter
+-- backwards, ending face up on the ground (yours, and other riders': RideCue "crash").
+vfx.TUMBLE_TIME = 0.7
+function vfx.tumbleCFrame(tumble, t)
+	local from = tumble.from
+	local gx, gz = from.X + tumble.side * 9, from.Z - 6 * tumble.dir
+	local ground = Vector3.new(gx, LIE_HEIGHT + Ground.heightAt(gx, gz), gz)
+	local pos = from:Lerp(ground, t) + Vector3.new(0, math.sin(t * math.pi) * 6, 0)
+	return CFrame.new(pos) * CFrame.Angles(0, tumble.yaw, 0)
+		* CFrame.Angles(t * math.pi * 2.5, 0, tumble.side * math.sin(t * math.pi) * 0.8)
+end
+
 local function updateRider(dt)
 	local hrp, humanoid = character()
 	if not hrp then
 		return
 	end
 	if tumble then
-		tumble.t = math.min(tumble.t + dt / 0.7, 1)
-		local t = tumble.t
-		local from = tumble.from
-		local gx, gz = from.X + tumble.side * 9, from.Z - 6 * tumble.dir
-		local ground = Vector3.new(gx, LIE_HEIGHT + Ground.heightAt(gx, gz), gz)
-		local pos = from:Lerp(ground, t) + Vector3.new(0, math.sin(t * math.pi) * 6, 0)
-		-- A flip and a quarter backwards, ending face up.
-		hrp.CFrame = CFrame.new(pos) * CFrame.Angles(0, tumble.yaw, 0)
-			* CFrame.Angles(t * math.pi * 2.5, 0, tumble.side * math.sin(t * math.pi) * 0.8)
-		focus = focus:Lerp(Vector3.new(pos.X, 0, pos.Z), 1 - math.exp(-4 * dt))
+		tumble.t = math.min(tumble.t + dt / vfx.TUMBLE_TIME, 1)
+		hrp.CFrame = vfx.tumbleCFrame(tumble, tumble.t)
+		focus = focus:Lerp(Vector3.new(hrp.Position.X, 0, hrp.Position.Z), 1 - math.exp(-4 * dt))
 		return
 	end
 	if transfer and transfer.stage == "throw" then
@@ -3748,7 +3754,8 @@ function vfx.sendRide()
 		if root then root.CFrame else hrp.CFrame,
 		hrp.CFrame,
 		if mount then mount.speed else 0,
-		if mount then mount.animal.scale else 1
+		if mount then mount.animal.scale else 1,
+		vfx.lassoState
 	)
 end
 
@@ -3780,16 +3787,14 @@ function vfx.endRider(player)
 	end
 	vfx.riders[player] = nil
 	vfx.dropMount(rider)
-	if rider.rope then
-		rider.rope:Destroy()
-	end
+	vfx.riderLasso(rider, nil)
 	local hrp = rider.char and rider.char:FindFirstChild("HumanoidRootPart")
 	if hrp then
 		hrp.Anchored = false -- back to where the server has it
 	end
 end
 
-vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, speed, scale)
+vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, speed, scale, lasso)
 	if player == Players.LocalPlayer then
 		return
 	end
@@ -3807,6 +3812,10 @@ vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, spee
 	end
 	rider.mountCF, rider.riderCF, rider.at = mountCF, riderCF, now
 	rider.speed, rider.scale = speed, scale
+	rider.lassoState = if type(lasso) == "string" then lasso else ""
+	if rider.tumble then
+		kind = "" -- thrown off: a late update from before the crash doesn't sit them back on
+	end
 	if rider.kind ~= kind then
 		vfx.dropMount(rider)
 	end
@@ -3820,32 +3829,59 @@ vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, spee
 	end
 end)
 
--- A rider's lasso: a rope from their hand to the animal's neck while it flies out
--- and they're pulled across.
-function vfx.remoteRope(rider, entity)
-	if rider.rope then
-		rider.rope:Destroy()
+-- Each other rider has their own lasso (a copy of the Lasso module: it holds one
+-- character's state, as the podium's does), swung over their head, thrown at the
+-- animal they're lassoing ("lasso" cue) and twirling a caught egg, like yours.
+function vfx.riderLasso(rider, char)
+	if rider.lasso and rider.lassoChar == char then
+		return rider.lasso
 	end
-	local hand = rider.char and rider.char:FindFirstChild("RightGripAttachment", true)
-	local root = entity.animal.model.PrimaryPart
-	if not hand or not root then
+	if rider.lasso then
+		rider.lasso.Lasso.stop()
+		rider.lasso.module:Destroy()
+		rider.lasso = nil
+	end
+	rider.lassoChar = char
+	if char and char:FindFirstChild("RightGripAttachment", true) then
+		local module = script.Parent.Lasso:Clone()
+		module.Name = "RiderLasso"
+		module.Parent = script
+		rider.lasso = { module = module, Lasso = require(module) }
+		rider.lasso.Lasso.start(char)
+	end
+	return rider.lasso
+end
+
+-- Their lasso this frame (after their mount and them are placed).
+function vfx.updateRiderLasso(rider, dt)
+	local own = vfx.riderLasso(rider, rider.char)
+	if not own then
 		return
 	end
-	local knot = Instance.new("Attachment")
-	knot.Parent = root
-	local rope = Instance.new("Beam")
-	rope.Attachment0, rope.Attachment1 = hand, knot
-	rope.Width0, rope.Width1 = 0.28, 0.28
-	rope.Color = ColorSequence.new(Color3.fromRGB(222, 184, 120))
-	rope.FaceCamera = true
-	rope.Parent = knot
-	rider.rope = knot
-	task.delay(THROW_TIME + TRANSFER_TIME, function()
-		if rider.rope == knot then
-			rider.rope = nil
+	local L = own.Lasso
+	local throw = rider.throw
+	local e = throw and os.clock() - throw.at
+	if throw and (e > THROW_TIME + TRANSFER_TIME or not throw.entity.animal.model.PrimaryPart) then
+		rider.throw, throw = nil, nil
+	end
+	if throw then
+		local neck = throw.entity.animal:getNeck()
+		if e < THROW_TIME then
+			L.throw(e / THROW_TIME, neck)
+		else
+			L.pull((e - THROW_TIME) / TRANSFER_TIME, neck)
 		end
-		knot:Destroy()
-	end)
+		own.shown = true
+	elseif rider.lassoState == "twirl" and vfx.eggHeads[rider.player] then
+		L.twirl(dt, vfx.eggHeads[rider.player].model)
+		own.shown = true
+	elseif rider.lassoState == "swing" and rider.entity then
+		L.swing(dt)
+		own.shown = true
+	elseif own.shown then
+		L.hide() -- once: then their own animations have the arm back
+		own.shown = false
+	end
 end
 
 vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
@@ -3857,6 +3893,25 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 		return
 	end
 	local rider = vfx.riders[player]
+	if what == "crash" then
+		-- Thrown off (fail): the crash, and them tumbling to the ground behind the animal.
+		local from, yaw, dir, side = a, tonumber(b), tonumber(c), tonumber(d)
+		if typeof(from) ~= "Vector3" or not yaw or not dir or not side then
+			return
+		end
+		if not rider then
+			rider = { fx = {}, mountCF = CFrame.new(from), riderCF = CFrame.new(from), vel = Vector3.zero, at = os.clock() }
+			vfx.riders[player] = rider
+		end
+		vfx.dropMount(rider)
+		rider.throw = nil
+		rider.tumble = { from = from, yaw = yaw, dir = dir, side = side, at = os.clock() }
+		Poof.at(Vector3.new(from.X, 0, from.Z))
+		if (from - camera.CFrame.Position).Magnitude < VIEW / 2 then
+			vfx.sounds.play("crash", 0.5)
+		end
+		return
+	end
 	if what == "take" or what == "lasso" or what == "knock" then
 		local key = tonumber(a)
 		local entity = key and herd[key]
@@ -3866,9 +3921,7 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 		if what == "lasso" then
 			if rider then
 				vfx.dropMount(rider) -- their old mount runs on, as yours does
-				if entity then
-					vfx.remoteRope(rider, entity)
-				end
+				rider.throw = if entity then { entity = entity, at = os.clock() } else nil
 			end
 			return -- (it stays in the stampede till it's reeled in: "take")
 		end
@@ -3890,6 +3943,7 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 			entity.animal:setScale(1)
 			entity.animal:setSaddled(true)
 			rider.entity, rider.kind = entity, entity.kind
+			rider.tumble = nil
 		end
 	elseif what == "smash" then
 		local x, z = tonumber(a), tonumber(b)
@@ -3972,6 +4026,7 @@ function vfx.updateRiders(dt)
 		if char ~= rider.char then
 			rider.char = char
 		end
+		rider.player = player
 		local hrp = char and char:FindFirstChild("HumanoidRootPart")
 		if entity then
 			local root = entity.animal.model.PrimaryPart
@@ -3992,11 +4047,16 @@ function vfx.updateRiders(dt)
 				hrp.Anchored = true
 				hrp.CFrame = entity.animal:getSeatCFrame() * SEAT_OFFSET
 			end
+		elseif hrp and rider.tumble and now - rider.tumble.at < vfx.TUMBLE_TIME then
+			hrp.Anchored = true
+			hrp.CFrame = vfx.tumbleCFrame(rider.tumble, (now - rider.tumble.at) / vfx.TUMBLE_TIME)
 		elseif hrp then
+			rider.tumble = nil -- landed: on with where they say they are (lying there, till they go home)
 			local want = rider.riderCF + ahead
 			hrp.Anchored = true
 			hrp.CFrame = if (hrp.Position - want.Position).Magnitude < 30 then hrp.CFrame:Lerp(want, ease) else want
 		end
+		vfx.updateRiderLasso(rider, dt)
 	end
 end
 
@@ -4105,7 +4165,7 @@ function vfx.updateEggHeads()
 			head.model.Parent = workspace
 			vfx.eggHeads[other] = head
 		end
-		if head and hrp then
+		if head and hrp and rider.lassoState ~= "twirl" then -- (twirling: on their lasso, vfx.updateRiderLasso)
 			head.model:PivotTo(CFrame.new(hrp.Position + Vector3.new(0, 7, 0)) * CFrame.Angles(0, os.clock() * 3, 0))
 		end
 	end
@@ -4213,6 +4273,10 @@ RunService.PreSimulation:Connect(function(dt)
 		updateMount(dt)
 	end
 	updateRider(dt)
+	-- What others see your lasso doing (sendRide; a throw at an animal is its own cue, "lasso").
+	vfx.lassoState = if carried and carried.stage == "held" then "twirl"
+		elseif not carried and not transfer and mount and (phase == "outbound" or phase == "return") then "swing"
+		else ""
 	if carried and carried.stage == "held" then
 		Lasso.twirl(dt, carried.part)
 	elseif carried then
