@@ -50,7 +50,7 @@ end
 -- Shows the egg the server says is in `nest`, if any.
 local function showNestEgg(nest)
 	local kind = nest:GetAttribute("Egg") or ""
-	if kind == "" and Tutorial.active and nest == Tutorial.nest then
+	if kind == "" and Tutorial.active and nest == Tutorial.nest and not Tutorial.eggTaken then
 		kind = Config.TutorialEgg -- the tutorial's egg, only for you (Tutorial)
 	end
 	local waiting = waitingEggs[nest]
@@ -610,6 +610,10 @@ local function cleanup()
 		mount.animal.model:Destroy()
 	end
 	mount, transfer, tumble, warpLevel = nil, nil, nil, nil
+	if Tutorial.eggTaken then -- the ride's over: the tutorial egg's back for the next one
+		Tutorial.eggTaken = false
+		showNestEgg(Tutorial.nest)
+	end
 	if carried then
 		carried.part:Destroy()
 		carried = nil
@@ -1080,6 +1084,9 @@ local function grabEgg()
 	-- grab). Out of waitingEggs first, so emptying the nest leaves it alone.
 	local egg = nearEgg.egg
 	waitingEggs[nearEgg.nest] = nil
+	-- Taken from the tutorial's nest: once the server empties it, no tutorial egg
+	-- shows up there in its place this ride (it looked like a second egg left behind).
+	Tutorial.eggTaken = Tutorial.eggTaken or nearEgg.nest == Tutorial.nest
 	egg.t = math.huge
 	egg:update(0) -- stop any twitch, back to rest
 	local part = egg.model
