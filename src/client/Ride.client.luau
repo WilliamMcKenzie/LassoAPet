@@ -63,6 +63,8 @@ local function showNestEgg(nest)
 	end
 	if kind ~= "" then
 		waiting = { egg = Egg.new(kind), kind = kind, nest = nest, nextTwitch = 0.5 + math.random() * 1.5 }
+		-- A bigger nest (Nests.server: its biome's NestScale) is takeable from that much further (QM, Oct 6).
+		waiting.reach = Config.LassoRange * nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale())
 		-- (EggSpot is a 1x egg's centre: a bigger egg sits higher so it stays on the nest)
 		waiting.egg.model:PivotTo(nest.EggSpot.CFrame * CFrame.new(0, 1.6 * (waiting.egg.size - 1), 0) * CFrame.Angles(0, math.pi, 0))
 		waiting.egg.model.Parent = nest
@@ -1286,7 +1288,7 @@ end
 local function eggInRange(waiting)
 	local eggPos = waiting.nest.EggSpot.Position
 	return waitingEggs[waiting.nest] == waiting and waiting.egg.model.Parent ~= nil and eggPos.Z > gateZ()
-		and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < Config.LassoRange
+		and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < waiting.reach
 end
 
 local function animalInRange(entity)
