@@ -63,10 +63,16 @@ local function showNestEgg(nest)
 	end
 	if kind ~= "" then
 		waiting = { egg = Egg.new(kind), kind = kind, nest = nest, nextTwitch = 0.5 + math.random() * 1.5 }
-		-- A bigger nest (Nests.server: its biome's NestScale) is takeable from that much further (QM, Oct 6).
-		waiting.reach = Config.LassoRange * nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale())
-		-- (EggSpot is a 1x egg's centre: a bigger egg sits higher so it stays on the nest)
-		waiting.egg.model:PivotTo(nest.EggSpot.CFrame * CFrame.new(0, 1.6 * (waiting.egg.size - 1), 0) * CFrame.Angles(0, math.pi, 0))
+		-- A bigger nest (Nests.server: its biome's NestScale) is takeable from that much
+		-- further, and its egg is as much bigger while it sits there (QM, Oct 6; grabEgg
+		-- puts it back to its own size).
+		local scale = nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale())
+		waiting.reach = Config.LassoRange * scale
+		if scale ~= 1 then
+			waiting.egg.model:ScaleTo(waiting.egg.size * scale)
+		end
+		-- (EggSpot is a 1x egg's centre, scaled with the nest: a bigger egg sits higher so it stays on the nest)
+		waiting.egg.model:PivotTo(nest.EggSpot.CFrame * CFrame.new(0, 1.6 * scale * (waiting.egg.size - 1), 0) * CFrame.Angles(0, math.pi, 0))
 		waiting.egg.model.Parent = nest
 		waitingEggs[nest] = waiting
 	end
@@ -1114,6 +1120,9 @@ local function grabEgg()
 	Tutorial.eggTaken = Tutorial.eggTaken or nearEgg.nest == Tutorial.nest
 	egg.t = math.huge
 	egg:update(0) -- stop any twitch, back to rest
+	if egg.model:GetScale() ~= egg.size then
+		egg.model:ScaleTo(egg.size) -- (a bigger nest's egg: its own size once it's yours)
+	end
 	local part = egg.model
 	part.Parent = workspace
 	takeEgg:FireServer(nearEgg.nest) -- empties the nest for everyone
