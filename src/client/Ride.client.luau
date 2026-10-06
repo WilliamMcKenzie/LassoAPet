@@ -2346,7 +2346,8 @@ end
 -- Frost: a blizzard bursting out round the Icebringer, then snow swirling round it
 -- while it lasts (the returned fx are cleared when it ends).
 -- A rainbow streaming out behind a leaping animal while it's in the air: six
--- trails stacked one above another, a band of colour each.
+-- trails stacked one above another, a band of colour each. lifetime: how long
+-- each band trails (the Leap's 1.4 s by default).
 vfx.RAINBOW = {
 	Color3.fromRGB(255, 70, 70),
 	Color3.fromRGB(255, 160, 50),
@@ -2355,7 +2356,7 @@ vfx.RAINBOW = {
 	Color3.fromRGB(70, 150, 255),
 	Color3.fromRGB(170, 90, 240),
 }
-function vfx.rainbowFx(entity)
+function vfx.rainbowFx(entity, lifetime)
 	local root = entity.animal.model.PrimaryPart
 	local middle, size = entity.animal.model:GetBoundingBox()
 	local back = root.CFrame:ToObjectSpace(middle * CFrame.new(0, 0, size.Z * 0.3)) -- toward its tail (it faces -Z)
@@ -2370,7 +2371,7 @@ function vfx.rainbowFx(entity)
 		local trail = Instance.new("Trail")
 		trail.Attachment0, trail.Attachment1 = a0, a1
 		trail.Color = ColorSequence.new(color)
-		trail.Lifetime = 1.4
+		trail.Lifetime = lifetime or 1.4
 		trail.MinLength = 0.2
 		trail.LightEmission = 0.4
 		trail.LightInfluence = 0
@@ -3865,6 +3866,10 @@ function vfx.dropMount(rider)
 		return
 	end
 	vfx.riderFx(rider)
+	for _, fx in rider.trail or {} do
+		fx:Destroy()
+	end
+	rider.trail = nil
 	rider.entity, rider.kind = nil, nil
 	entity.animal:setScale(1)
 	entity.hop = 0
@@ -3916,6 +3921,9 @@ vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, spee
 		rider.entity.animal:setSaddled(true)
 		rider.entity.dodge = 0
 		rider.kind = kind
+		if player:GetAttribute("RainbowTrail") then -- they bought the Rainbow Trail (Config.RainbowTrail)
+			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime)
+		end
 		rider.shown = nil
 	end
 end)
@@ -4096,6 +4104,21 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 		rider.fxEnd = os.clock() + (cfg.Duration or holdTime(entity)) -- an UntilFull charge: at most a full bar
 	end
 end)
+
+-- Every frame: the Rainbow Trail (Config.RainbowTrail), once bought, on whatever
+-- you're riding, moved over when you swap mounts and gone when the ride ends.
+vfx.trail = { parts = {} }
+function vfx.updateTrail()
+	local want = if mount and Players.LocalPlayer:GetAttribute("RainbowTrail") and mount.animal.model.PrimaryPart then mount else nil
+	if vfx.trail.entity == want then
+		return
+	end
+	for _, fx in vfx.trail.parts do
+		fx:Destroy()
+	end
+	vfx.trail.entity = want
+	vfx.trail.parts = if want then vfx.rainbowFx(want, Config.RainbowTrail.Lifetime) else {}
+end
 
 -- Every frame: each other rider's mount glides toward where it was last heard
 -- of (carried on at the speed it was going), with them sat on it.
@@ -4321,6 +4344,7 @@ RunService.PreSimulation:Connect(function(dt)
 	vfx.sendRide()
 	vfx.updateSound()
 	vfx.updateRiders(dt)
+	vfx.updateTrail()
 	vfx.updateEggHeads()
 	Dust.update(dt)
 	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)

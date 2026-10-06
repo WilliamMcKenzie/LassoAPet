@@ -148,6 +148,7 @@ local function publish(player)
 	player:SetAttribute("HatchCredits", math.max(0, (player:GetAttribute("BoughtHatches") or 0) - (profile.usedHatches or 0)))
 	player:SetAttribute("RidePet", profile.ride or "")
 	player:SetAttribute("RollPrice", rollPrice(profile))
+	player:SetAttribute("RainbowTrail", profile.rainbowTrail or nil) -- bought (Config.RainbowTrail): every ride trails a rainbow
 	player:SetAttribute("RideMerged", profile.rideMerged or 1) -- how many pets it's merged from (Shared/Merge)
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
 	local pen = penOf(player)
@@ -201,6 +202,7 @@ local function load(player)
 						profile.rideMerged = tonumber(data.rideMerged) and math.max(1, math.floor(data.rideMerged)) or nil
 					end
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
+					profile.rainbowTrail = data.rainbowTrail == true or nil
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
 					for _, kind in typeof(data.ridden) == "table" and data.ridden or {} do
 						if isAnimal(kind) then
@@ -256,7 +258,8 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, tutorial = profile.tutorial, ridden = riddenList(profile),
-		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls }
+		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
+		rainbowTrail = profile.rainbowTrail }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -482,6 +485,26 @@ finishCourse.Parent = ReplicatedStorage
 Players.PlayerRemoving:Connect(function(player)
 	finished[player] = nil
 end)
+
+-- The Rainbow Trail (Config.RainbowTrail): Price gold, once, only with the last
+-- biome (the Godlands) open. Saved straight away: the gold's gone either way.
+-- Returns true if it went through.
+local buyTrail = Instance.new("RemoteFunction")
+buyTrail.Name = "BuyRainbowTrail"
+buyTrail.OnServerInvoke = function(player)
+	local profile = profiles[player]
+	local price = Config.RainbowTrail.Price
+	local gold = player:GetAttribute("Gold") or 0
+	if not profile or profile.rainbowTrail or (player:GetAttribute("PenLevel") or 1) < #Config.Biomes or gold < price then
+		return false
+	end
+	player:SetAttribute("Gold", gold - price)
+	profile.rainbowTrail = true
+	publish(player)
+	task.spawn(save, player)
+	return true
+end
+buyTrail.Parent = ReplicatedStorage
 
 -- The Egg Machine (Config.Gacha): pay its price for a random egg, a tier picked
 -- by Odds and then an egg from that tier's Pool. Returns the kind and whether
