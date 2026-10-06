@@ -415,10 +415,11 @@ return {
 		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/GodlandsHazards)
 		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true, RestorePer = 0.2 }, -- QM, Oct 4: 20% Hold per animal it hits
 	},
-	-- Size tiers (any whole number, bigger is bigger). A pet plows straight through
-	-- obstacles and stampede animals of a lower tier, knocking them up and away;
-	-- one of its own tier or higher still crashes it. Obstacles take their tier
-	-- from their model's "Tier" attribute, else from ObstacleTiers by name.
+	-- Size tiers (any whole number, bigger is bigger). Racing home, a pet plows
+	-- through stampede animals of a lower tier; one of its own tier or higher
+	-- crashes it. Obstacles never crash you: every one is smashed on contact (QM,
+	-- Oct 6); their tier (model "Tier" attribute, else ObstacleTiers by name) only
+	-- decides which ones some abilities break.
 	PetTiers = {
 		Horse = 1, Pig = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
 		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert

@@ -83,7 +83,6 @@ local slices = {
 	SWERVE_BEFORE = 40, -- studs: laneX's reach in front of an obstacle
 	SWERVE_AFTER = 28, -- and past it
 	BLOCK_PAD = 8, -- studs: the most padZ blockedAt is asked for and still uses the slices
-	SOLID = 9, -- obstacles of this tier (the Godlands' mountains) are never smashed: they always crash you
 	swerve = {},
 	block = {},
 	NONE = {},
@@ -128,9 +127,6 @@ function slices.pieces(list, added)
 	end
 end
 
--- Size tiers a pet gains on the way home with the egg.
-local RETURN_TIER_BONUS = 1
-
 local function tierOf(kind)
 	return Config.PetTiers[kind] or 1
 end
@@ -138,14 +134,11 @@ end
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 -- (declared up here: smash() below already uses it, and was reading a nil global)
 
--- An obstacle a bigger pet plowed into flies up and away and fades; it's back
+-- An obstacle you ride into flies up and away and fades; it's back
 -- for the next ride (cleanup). Everyone else sees it too (Riders.server), and
 -- on their screens it's back a few seconds later (remote).
 local SMASH_TIME = 0.7
 local function smash(o, dir, side, remote)
-	if o.tier >= slices.SOLID then
-		return -- a mountain: nothing moves it (checkRide crashes you into it instead)
-	end
 	o.smashed = true
 	if not remote then
 		vfx.sounds.play("smash", 0.4)
@@ -482,14 +475,11 @@ local function popHop(t)
 end
 
 -- The first obstacle overlapping (x, z) that's still standing, of at least this tier (1 if nil).
--- Solid ones (slices.SOLID: mountains) only when that's the tier asked for, so the loops
--- that smash whatever's in the way never get stuck on one.
 local function blockedAt(x, z, padX, padZ, tier)
 	local list = if padZ <= slices.BLOCK_PAD then slices.at(slices.block, z) else obstacles
 	tier = tier or 1
 	for _, o in list do
-		if not o.smashed and o.tier >= tier and (o.tier < slices.SOLID or tier >= slices.SOLID)
-			and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
+		if not o.smashed and o.tier >= tier and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
 			return o
 		end
 	end
@@ -3559,16 +3549,6 @@ local function checkRide(dt)
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)
 	end
-	do
-		-- The Godlands' mountains (slices.SOLID) crash you whatever you're riding or doing,
-		-- unless you're flying over or burrowing under them.
-		local special = vfx.sprintSpecial()
-		local hop = mount.hop or 0
-		local clear = special and ((special.Kind == "Fly" and hop > 8) or (special.Kind == "Burrow" and hop < -2))
-		if not clear and grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4, slices.SOLID) then
-			return fail("CRASH!")
-		end
-	end
 	local ability = activeAbility()
 	if ability and vfx.PLAIN[ability.cfg.Kind] then
 		ability = nil -- these still use Hold and can still crash (Config.Abilities)
@@ -3649,22 +3629,17 @@ local function checkRide(dt)
 			vfx.broke()
 		end
 	end
-	-- A bigger pet plows through smaller obstacles; its own size or bigger stops it.
-	-- Racing home with the egg, every pet counts as a size bigger against obstacles
-	-- (RETURN_TIER_BONUS); against stampede animals it's its own size.
-	local myTier = vfx.mountTier()
-	local tier = myTier + (if phase == "return" or phase == "turning" then RETURN_TIER_BONUS else 0)
+	-- Obstacles never crash you: whatever you ride into is smashed (QM, Oct 6: new
+	-- players kept crashing into them). Stampede animals still go by size.
 	while true do
 		local o = blockedAt(mount.x, mount.z, 1.3, 2.4)
-		if not o or o.tier >= tier then
+		if not o then
 			break
 		end
 		smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
 		vfx.broke()
 	end
-	if grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4, tier) then
-		return fail("CRASH!")
-	end
+	local myTier = vfx.mountTier()
 	-- The Godlands' wild animals (GodlandsHazards): spikes, charges, hunts.
 	local hazard = vfx.hazards.hit(mount, grace > 0)
 	if hazard then
@@ -3679,7 +3654,7 @@ local function checkRide(dt)
 			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
 			-- Racing home on the Icebringer, an animal frozen in ice smashes whatever its size (QM).
 			local shatter = phase == "return" and entity.frostFx ~= nil and (vfx.abilityOf(mount) or {}).Kind == "Frost"
-			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then -- (the +1 is for obstacles only)
+			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
 				vfx.broke()
 				if kind == "Crabwalk" and special.RestorePer then
