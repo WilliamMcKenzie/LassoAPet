@@ -575,16 +575,16 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(showGold)
 	showGold()
-	-- The coin keeps the bottom left to itself; Fuse, Pets and Shop stack up the
-	-- bottom right, Fuse at the bottom, all the same height (QM, Oct 6). Row 0 is the
+	-- The coin keeps the bottom left to itself; the bottom right column is Fuse,
+	-- Shop, Pets from the top, all the same height (QM, Oct 6 19:24). Row 0 is the
 	-- bottom one. (The egg roll menu opens from Carl, its NPC.)
 	local function columnSpot(row)
 		return UDim2.new(1, -MARGIN - SIDE_ICON_HEIGHT / 2, 1, -MARGIN - row * (SIDE_ICON_HEIGHT + 8))
 	end
 	-- Pets: it opens and closes the animal dictionary (AnimalDex).
-	pets = button(sideRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), columnSpot(1), AnimalDex.toggle)
-	-- Fuse, under Pets: tap two of your pets to fuse them (FuseMenu).
-	fuseIcon = button(sideRoot, "fuseIcon", fit("fuseIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), columnSpot(0), function()
+	pets = button(sideRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), columnSpot(0), AnimalDex.toggle)
+	-- Fuse, on top of the column: tap two of your pets to fuse them (FuseMenu).
+	fuseIcon = button(sideRoot, "fuseIcon", fit("fuseIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), columnSpot(2), function()
 		if Hud.onFuse then
 			Hud.onFuse()
 		end
@@ -594,8 +594,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		local fuseText = label(fuseIcon, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 34, 3) -- 3px outline (QM)
 		fuseText.Text = "Fuse"
 	end
-	-- Shop, on top of the column: it opens the Robux shop.
-	shopIcon = button(sideRoot, "shopIcon", fit("shopIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), columnSpot(2), function()
+	-- Shop, in the middle: it opens the Robux shop.
+	shopIcon = button(sideRoot, "shopIcon", fit("shopIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), columnSpot(1), function()
 		if Shop.hasOffers() then
 			Shop.toggle()
 		end
