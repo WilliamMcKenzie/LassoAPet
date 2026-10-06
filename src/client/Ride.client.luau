@@ -1112,7 +1112,7 @@ local guide = { -- the egg guide: the beam and its two ends
 	AHEAD = 6, -- studs in front of the pet where the trail starts
 	MAX_LENGTH = 300, -- studs: the longest the trail is drawn, toward a farther target
 	HEIGHT = 1.4, -- studs up: over the raised ground patches
-	HOME_CLOSE = 10, -- studs: back home, the arrows to your pet go once you're this close
+	HOME_CLOSE = 10, -- studs: back home, the arrows to your pen's entrance go once you're this close
 	from = Instance.new("Attachment"),
 	to = Instance.new("Attachment"),
 	beam = Instance.new("Beam"),
@@ -1191,7 +1191,7 @@ local function updateGuide()
 end
 
 -- Back on foot after a ride (any ride, however it ended), the same arrows lead from
--- you to the pet waiting in your pen, so you go and ride again (QM). They go once
+-- you to your pen's entrance, so you go and ride again (QM). They go once
 -- you step into your pen (for good, till the next ride: QM, Oct 6), are up close
 -- to the pet or riding, and never show during the tutorial (it has its own).
 function vfx.updateHomeGuide()
@@ -1205,7 +1205,19 @@ function vfx.updateHomeGuide()
 	end
 	local target
 	if vfx.rideAgain and hrp and not cutscene and not Tutorial.active then
-		local spot = if starter then Vector3.new(starter.x, 0, starter.z) else homeSpot()
+		-- To the gap in your pen's fence (QM, Oct 6): where the line from its Spawn
+		-- (just outside the gap) to its middle crosses the Area's edge.
+		local spot = homeSpot()
+		local spawn = area and myPen():FindFirstChild("Spawn")
+		if spawn then
+			local d = (area.Position - spawn.Position) * Vector3.new(1, 0, 1)
+			if d.Magnitude > 0 then
+				d = d.Unit
+				local half = math.abs(d.X) * area.Size.X / 2 + math.abs(d.Z) * area.Size.Z / 2
+				local gap = area.Position - d * half
+				spot = Vector3.new(gap.X, 0, gap.Z)
+			end
+		end
 		local at = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
 		if (spot - at).Magnitude > guide.HOME_CLOSE and not rideShown then
 			target = spot
@@ -3302,7 +3314,9 @@ local function updateMount(dt)
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	targetSpeed *= vfx.hazards.slow() -- stuck in a Sludge's sludge
-	if hold <= 0 and not player:GetAttribute("CarriedEgg") then
+	-- (carried, not the "CarriedEgg" attribute: the server leaves that set after a crash
+	-- with an egg, and then the next ride was never tired)
+	if hold <= 0 and not carried then
 		targetSpeed *= Config.TiredSpeed -- out of Hold: tired (checkRide), but not with an egg on the way home (QM, Oct 6)
 	end
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
@@ -3686,7 +3700,7 @@ local function updateHud()
 	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out).
 	Hud.setSprint(phase == "outbound" and not Tutorial.active)
 	if phase == "outbound" then
-		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1, player:GetAttribute("CarriedEgg") == nil)
+		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1, carried == nil)
 		Hud.setDistance(if Tutorial.active then "" else string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		if actionTarget == "egg" then
 			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
