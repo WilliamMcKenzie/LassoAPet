@@ -217,6 +217,13 @@ return {
 	Sky = "Anime", -- "Anime" (the Creator Store's Anime sky, QM Oct 6) or "Flat" (one flat #59D9FD): World.server
 	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
 	TiredSpeed = 0.5, -- x speed once the Hold bar's empty: no more bucking off (QM, Oct 5)
+	-- On the ride home with an egg the stampede gets out of your way (QM, Oct 6, to
+	-- test: dodging home lost new players): an animal heading into you swerves aside
+	-- late, Warn seconds before it would hit, so it still looks like a near miss. It
+	-- moves until it's Clear studs to the side of you (a crash is within 2.6), at Speed
+	-- studs/s or faster if it needs to, never over MaxSpeed (too late: it hits). Only
+	-- Chance of them swerve at all, so dodging still counts. On = false turns it off.
+	ReturnAvoid = { On = true, Warn = 0.4, Clear = 5, Speed = 20, MaxSpeed = 70, Chance = 0.85 },
 	-- Egg nests are shared stock: they all start full, a grabbed egg empties its nest
 	-- for everyone, and it restocks this many seconds later. Eggs are rolled with the
 	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
