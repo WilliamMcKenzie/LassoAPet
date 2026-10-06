@@ -28,7 +28,7 @@ local PANEL = { id = "rbxassetid://104698392936555", size = Vector2.new(2892, 19
 local ODDS = "rbxassetid://110875946388838" -- RollPanelOdds.png
 local FRAME_TOP = 305 / 1900
 local ODDS_BUTTON = "rbxassetid://83654143211576" -- ShopOddsButton.png (the green ?)
-local BUTTON = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) } -- RollButton.png (QM, Oct 6: no price drawn in; the price is written on it, below)
+local BUTTON = { id = "rbxassetid://112026122025466", size = Vector2.new(960, 378) } -- RollButton.png (QM, Oct 6: no price drawn in; the price is written on it, below)
 local PANEL_WIDTH = 930 -- the shop's
 local BUTTON_WIDTH = PANEL_WIDTH * 0.33 -- as in QM's reference (Oct 4: bigger than the first mockup's 23%)
 local ODDS_SIZE = 64

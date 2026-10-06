@@ -47,7 +47,7 @@ local IMAGES = {
 	-- The roll menu's own art (RollMenu draws it; listed here so it's preloaded with the rest).
 	rollMenu = { id = "rbxassetid://104698392936555", size = Vector2.new(2892, 1900) }, -- RollPanel.png
 	rollMenuOdds = { id = "rbxassetid://110875946388838", size = Vector2.new(2892, 1900) }, -- RollPanelOdds.png
-	rollButton = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) }, -- RollButton.png
+	rollButton = { id = "rbxassetid://112026122025466", size = Vector2.new(960, 378) }, -- RollButton.png
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
 	upgradePen = { id = "rbxassetid://120690804030353", size = Vector2.new(1152, 284) }, -- UpgradePenActive.png
