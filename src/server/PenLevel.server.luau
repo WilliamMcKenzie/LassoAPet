@@ -177,10 +177,10 @@ local function paintPen(pen)
 		end
 		if show then
 			local prefix = WorldColors.prefix(n)
-			floor.Color = world:GetAttribute(prefix .. "GroundA") or Config.Biomes[n].GroundColors[1]
+			floor.Color = WorldColors.saturate(world:GetAttribute(prefix .. "GroundA") or Config.Biomes[n].GroundColors[1])
 			for _, texture in floor:GetChildren() do
 				if texture.Name == "Checker" then
-					texture.Color3 = world:GetAttribute(prefix .. "GroundB") or Config.Biomes[n].GroundColors[2]
+					texture.Color3 = WorldColors.saturate(world:GetAttribute(prefix .. "GroundB") or Config.Biomes[n].GroundColors[2])
 				end
 			end
 		end

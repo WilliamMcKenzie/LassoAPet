@@ -86,10 +86,22 @@ local function paint(part, base, checker)
 	end
 end
 
+-- The terrain's colours as painted: Config.TerrainSaturation x their saturation
+-- (QM, Oct 6; 1 leaves them as they are). The attributes and Config keep the
+-- unboosted colours, so setting it back to 1 undoes it.
+function WorldColors.saturate(color)
+	local k = Config.TerrainSaturation or 1
+	if not color or k == 1 then
+		return color
+	end
+	local h, s, v = color:ToHSV()
+	return Color3.fromHSV(h, math.min(s * k, 1), v)
+end
+
 local function get(world, part, name, which)
 	local z = part.Position.Z
 	local i = WorldColors.biomeAt(z)
-	return depthColor(i, z, name, if which == "A" then 1 else 2) or world:GetAttribute(prefix(i) .. name .. which)
+	return WorldColors.saturate(depthColor(i, z, name, if which == "A" then 1 else 2) or world:GetAttribute(prefix(i) .. name .. which))
 end
 
 -- One floor part: "Ground" is the biome's base floor; other names are its Patches (Grass, Stone).
