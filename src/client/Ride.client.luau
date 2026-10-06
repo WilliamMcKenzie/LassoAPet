@@ -315,13 +315,13 @@ function endless.stream(k)
 	end
 	return s
 end
--- Keeps streams for the tracks within reach of the camera at z, and only those.
-function endless.near(z)
+-- Keeps streams for the tracks with stampede loaded (z from fromZ to toZ: vfx.viewWindow), and only those.
+function endless.near(fromZ, toZ)
 	if not endless.b then
 		return
 	end
-	local hi = endless.Godlands.segmentAt(z - VIEW)
-	local lo = endless.Godlands.segmentAt(z + VIEW) or 0
+	local hi = endless.Godlands.segmentAt(fromZ)
+	local lo = endless.Godlands.segmentAt(toZ) or 0
 	for b, s in streams do
 		if s.k and (not hi or s.k < lo or s.k > hi) then
 			streams[b] = nil
@@ -386,6 +386,18 @@ local warpLevel -- /biome: the biome you were put in, so its gate (and those bef
 local transfer, tumble, carried
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.Merge = require(ReplicatedStorage.Shared.Merge)
+-- The stretch of course with stampede loaded round the camera at camZ: VIEW either
+-- way. Racing home (+z) the wider field of view (Config.ReturnFovKick) sees to the
+-- horizon, so VIEW ahead had animals popping in about 2 s before you reached them in
+-- the fast zones (QM, Oct 6): then the same-size window sits mostly ahead, VIEW_BACK
+-- behind the camera (nothing behind comes back at you: the stampede runs the other way).
+vfx.VIEW_BACK = 80
+function vfx.viewWindow(camZ)
+	if phase == "return" then
+		return camZ - vfx.VIEW_BACK, camZ + 2 * VIEW - vfx.VIEW_BACK
+	end
+	return camZ - VIEW, camZ + VIEW
+end
 -- A merged pet (Shared/Merge) rides bigger and faster: its boost starts it off where
 -- the Robo Shark's and Loong's growing (vfx.feed) carries on from.
 -- Riding an exclusive event's animal (Events.server; its stampede key is negative):
@@ -1874,7 +1886,8 @@ local function updateHerd(dt, slowed)
 	for key, left in vfx.frostLeft do
 		vfx.frostLeft[key] = if left > dt then left - dt else nil
 	end
-	endless.near(camZ)
+	local fromZ, toZ = vfx.viewWindow(camZ)
+	endless.near(fromZ, toZ)
 	vfx.godlands.update(camZ)
 	for b, stream in streams do
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
@@ -1896,7 +1909,7 @@ local function updateHerd(dt, slowed)
 			local entity = herd[key]
 			-- The animal being lassoed runs on past the end until it's caught.
 			local lassoed = entity and transfer and transfer.target == entity
-			if (z <= stream.endZ and not lassoed) or math.abs(z - camZ) > VIEW then
+			if (z <= stream.endZ and not lassoed) or z < fromZ or z > toZ then
 				continue
 			end
 			local x = laneX(p.x, z)
