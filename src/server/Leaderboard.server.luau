@@ -204,6 +204,34 @@ local function stand(id, metres)
 	local pivot = avatar:GetPivot()
 	avatar:PivotTo(origin * CFrame.new(0, size.Y / 2 + (pivot.Position.Y - box.Position.Y), 0))
 	avatar.Parent = model
+	-- Any accessory not held on by a joint (some hair isn't, once the avatar's limbs
+	-- are unanchored) would drop off onto the ground by the start line (QM, Oct 6):
+	-- weld it to the body part with its attachment, or the head.
+	for _, accessory in avatar:GetChildren() do
+		local handle = accessory:IsA("Accessory") and accessory:FindFirstChild("Handle")
+		if handle and handle:IsA("BasePart") then
+			local held = false
+			for _, part in handle:GetConnectedParts(true) do
+				if part ~= handle and not part:IsDescendantOf(accessory) then
+					held = true
+					break
+				end
+			end
+			if not held then
+				local at = handle:FindFirstChildWhichIsA("Attachment")
+				local match = at and avatar:FindFirstChild(at.Name, true)
+				local body = if match and match:IsA("Attachment") and not match:IsDescendantOf(accessory)
+					then match.Parent else avatar:FindFirstChild("Head")
+				if body then
+					local weld = Instance.new("WeldConstraint")
+					weld.Part0, weld.Part1 = handle, body
+					weld.Parent = handle
+				else
+					handle.Anchored = true
+				end
+			end
+		end
+	end
 	idle(avatar)
 	local tag = nameTag(avatar, id)
 	tag.Distance.Text = math.floor(metres) .. "m"
