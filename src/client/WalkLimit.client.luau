@@ -1,6 +1,8 @@
 -- On foot you can't walk past the start line into the stampede (QM, Oct 5): your
--- character is held at the line, and while you push against it the HUD says
--- "Return to your base to ride an animal!" where the event countdown goes. Riders
+-- character is held at the line. Walking into it puts you on a random Meadow
+-- animal on the spot (QM, Oct 6: StartLine, Ride.client); only when that can't
+-- happen (the tutorial) the HUD says "Return to your base to ride an animal!"
+-- where the event countdown goes. Riders
 -- aren't touched: a rider's root is anchored to the mount (Ride.client), and a
 -- character lying on the course after a fall, or far out past the line, is left
 -- alone. Only your own character is held, on your client: no wall, nothing a
@@ -10,6 +12,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local Hud = require(script.Parent.Hud)
+local StartLine = require(script.Parent.StartLine)
 
 local player = Players.LocalPlayer
 local world = workspace:WaitForChild("World")
@@ -32,7 +35,9 @@ RunService.PreSimulation:Connect(function()
 			root.CFrame += Vector3.new(0, 0, LIMIT - z)
 			local v = root.AssemblyLinearVelocity
 			root.AssemblyLinearVelocity = Vector3.new(v.X, v.Y, math.max(v.Z, 0))
-			lastPush = os.clock()
+			if not (StartLine.ride and StartLine.ride(root.Position.X, LIMIT - 4)) then
+				lastPush = os.clock()
+			end
 		end
 	end
 	Hud.setNotice(if os.clock() - lastPush < LINGER then TEXT else nil)
