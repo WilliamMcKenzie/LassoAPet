@@ -143,7 +143,9 @@ local PICTURES = {
 	rideHorse = { image = "rbxassetid://87420526826729", width = 951, height = 146 }, -- assets/ui/HintRideHorse.png
 	lasso = { image = "rbxassetid://91804135266195", width = 942, height = 119 }, -- assets/ui/HintLasso.png
 	takeEgg = { image = "rbxassetid://140505417870582", width = 738, height = 145 }, -- assets/ui/HintTakeEgg.png
-	saveDesert = { image = "rbxassetid://116651352653628", width = 1733, height = 127 }, -- assets/ui/HintSaveDesert.png
+	-- (cost: the Desert price drawn in it; at any other price the text hint shows instead.
+	-- image "": not uploaded yet, the text hint too)
+	saveDesert = { image = "", width = 1830, height = 127, cost = 500 }, -- assets/ui/HintSaveDesert.png
 }
 local picture = Instance.new("ImageLabel")
 picture.Name = "HintPicture"
@@ -164,7 +166,9 @@ camera:GetPropertyChangedSignal("ViewportSize"):Connect(sizePicture)
 task.spawn(function() -- loaded ahead, so swapping pictures never shows a blank
 	local images = {}
 	for _, entry in PICTURES do
-		table.insert(images, entry.image)
+		if entry.image ~= "" then
+			table.insert(images, entry.image)
+		end
 	end
 	game:GetService("ContentProvider"):PreloadAsync(images)
 end)
@@ -361,7 +365,7 @@ local function showGoal(id)
 	local upNext = Config.Biomes[level + 1]
 	if upNext then
 		goalText = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
-		goalDesert = upNext.Name == "Desert" and upNext.UnlockCost == 1000
+		goalDesert = upNext.Name == "Desert" and upNext.UnlockCost == PICTURES.saveDesert.cost and PICTURES.saveDesert.image ~= ""
 		report("gate")
 		local gateZ = WorldColors.gateZ(level)
 		local start = camera.CFrame
