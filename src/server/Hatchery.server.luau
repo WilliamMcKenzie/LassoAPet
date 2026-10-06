@@ -35,6 +35,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Funnel = require(script.Parent.Funnel)
+local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Animals = ReplicatedStorage.Shared.Animals
 
 local EDGE = 2 -- studs kept from the pen's fences
@@ -152,6 +153,8 @@ local function publish(player)
 	player:SetAttribute("RollPrice", rollPrice(profile))
 	player:SetAttribute("RainbowTrail", profile.rainbowTrail or nil) -- bought (Config.RainbowTrail): every ride trails a rainbow
 	player:SetAttribute("RideMerged", profile.rideMerged or 1) -- how many pets it's merged from (Shared/Merge)
+	player:SetAttribute("RideFuse", profile.rideFuse) -- the donor, if it's a hybrid (Shared/Fusion)
+	player:SetAttribute("RideIncome", profile.rideIncome) -- (a hybrid's: what both its pets earned)
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
 	local pen = penOf(player)
 	if pen then
@@ -168,10 +171,11 @@ end
 
 -- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
 local function income(profile)
-	local total = (Config.PetIncome[profile.ride] or 0) * (profile.rideMerged or 1)
+	-- (a merged pet earns for all it's made of; a hybrid what both its pets earned)
+	local total = profile.rideIncome or (Config.PetIncome[profile.ride] or 0) * (profile.rideMerged or 1)
 	for _, item in profile.items do
 		if item.pet then
-			total += (Config.PetIncome[item.pet] or 0) * (item.merged or 1) -- (a merged pet earns for all it's made of)
+			total += item.income or (Config.PetIncome[item.pet] or 0) * (item.merged or 1)
 		end
 	end
 	return total
@@ -202,6 +206,9 @@ local function load(player)
 					if isAnimal(data.ride) then
 						profile.ride = data.ride
 						profile.rideMerged = tonumber(data.rideMerged) and math.max(1, math.floor(data.rideMerged)) or nil
+						if isAnimal(data.rideFuse) and data.rideFuse ~= data.ride and tonumber(data.rideIncome) then
+							profile.rideFuse, profile.rideIncome = data.rideFuse, math.max(0, tonumber(data.rideIncome))
+						end
 					end
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
 					profile.rainbowTrail = data.rainbowTrail == true or nil
@@ -214,6 +221,9 @@ local function load(player)
 					for id, item in data.items or {} do
 						if typeof(item) == "table" and tonumber(item.x) and tonumber(item.z)
 							and (isAnimal(item.egg) or isAnimal(item.pet)) then
+							if not (item.pet and isAnimal(item.fuse) and item.fuse ~= item.pet and tonumber(item.income)) then
+								item.fuse, item.income = nil, nil -- (a hybrid: Shared/Fusion)
+							end
 							profile.items[id] = item
 						end
 					end
@@ -259,7 +269,7 @@ local function save(player, onlyIfChanged)
 	if not store or not profile or not loaded[player] or player:GetAttribute("Tutorial") then
 		return
 	end
-	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, tutorial = profile.tutorial, ridden = riddenList(profile),
+	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
 		rainbowTrail = profile.rainbowTrail }
 	local as = HttpService:JSONEncode(data)
@@ -657,8 +667,11 @@ remote("RidePet", function(player, id)
 	if profile.ride then
 		item.pet, profile.ride = profile.ride, item.pet
 		item.merged, profile.rideMerged = profile.rideMerged, item.merged -- (a merged pet stays merged)
+		item.fuse, profile.rideFuse = profile.rideFuse, item.fuse -- (and a hybrid a hybrid)
+		item.income, profile.rideIncome = profile.rideIncome, item.income
 	else
 		profile.ride, profile.rideMerged, profile.items[id] = item.pet, item.merged, nil -- your first pet: nothing to swap with
+		profile.rideFuse, profile.rideIncome = item.fuse, item.income
 	end
 	publish(player)
 end)
@@ -666,32 +679,77 @@ end)
 -- MERGE (QM, Oct 4; Shared/Merge): every pet of `kind` you have, in the pen and the
 -- one you ride, becomes one pet of that kind made of all of them. If the one you
 -- ride is among them, it's the one that stays.
-remote("MergePets", function(player, kind)
+remote("MergePets", function(player, key)
 	local profile = profiles[player]
-	if not profile or not isAnimal(kind) then
+	if typeof(key) ~= "string" then
 		return
 	end
-	local ids, total = {}, if profile.ride == kind then profile.rideMerged or 1 else 0
+	local kind, fuse = Fusion.split(key) -- (two of the same hybrid merge too: Shared/Fusion)
+	if not profile or not isAnimal(kind) or (fuse and not isAnimal(fuse)) then
+		return
+	end
+	local rides = profile.ride == kind and profile.rideFuse == fuse
+	local ids, total, earns = {}, if rides then profile.rideMerged or 1 else 0, if rides then profile.rideIncome or 0 else 0
 	for id, item in profile.items do
-		if item.pet == kind then
+		if item.pet == kind and item.fuse == fuse then
 			table.insert(ids, id)
 			total += item.merged or 1
+			earns += item.income or 0
 		end
 	end
-	if #ids + (if profile.ride == kind then 1 else 0) < 2 then
+	if #ids + (if rides then 1 else 0) < 2 then
 		return
 	end
 	table.sort(ids)
-	if profile.ride == kind then
+	if rides then
 		profile.rideMerged = total
+		profile.rideIncome = if fuse then earns else nil
 	else
 		profile.items[ids[1]].merged = total
+		profile.items[ids[1]].income = if fuse then earns else nil
 		table.remove(ids, 1)
 	end
 	for _, id in ids do
 		profile.items[id] = nil
 	end
 	Funnel.event(player, "Merged Pets")
+	publish(player)
+end)
+
+-- FUSE (QM, Oct 6; Shared/Fusion): two pets of different kinds, in the pen or the
+-- one you ride ("ride"), become one hybrid where the base was. The rarer is the
+-- base; the other sets its size and colours. It earns what both earned. Hybrids
+-- don't fuse again.
+remote("FusePets", function(player, idA, idB)
+	local profile = profiles[player]
+	if not profile or typeof(idA) ~= "string" or typeof(idB) ~= "string" or idA == idB then
+		return
+	end
+	local function pet(id)
+		if id == "ride" then
+			return profile.ride and not profile.rideFuse and { pet = profile.ride, merged = profile.rideMerged }
+		end
+		local item = profile.items[id]
+		return item and item.pet and not item.fuse and item
+	end
+	local a, b = pet(idA), pet(idB)
+	if not a or not b or a.pet == b.pet then
+		return
+	end
+	local base = Fusion.order(a.pet, b.pet)
+	local baseId, donorId = idA, idB
+	if base ~= a.pet then
+		a, b, baseId, donorId = b, a, idB, idA
+	end
+	local earns = (Config.PetIncome[a.pet] or 0) * (a.merged or 1) + (Config.PetIncome[b.pet] or 0) * (b.merged or 1)
+	if baseId == "ride" or donorId == "ride" then -- the hybrid is the one you ride
+		profile.ride, profile.rideFuse, profile.rideMerged, profile.rideIncome = a.pet, b.pet, nil, earns
+		profile.items[if baseId == "ride" then donorId else baseId] = nil
+	else
+		profile.items[baseId] = { x = a.x, z = a.z, pet = a.pet, fuse = b.pet, income = earns }
+		profile.items[donorId] = nil
+	end
+	Funnel.event(player, "Fused Pets")
 	publish(player)
 end)
 
