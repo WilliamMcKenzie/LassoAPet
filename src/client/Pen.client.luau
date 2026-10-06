@@ -320,10 +320,33 @@ local function hatch(pen, id, s)
 	end)
 end
 
+-- The pet someone else rides waits in their pen too, but it isn't in Contents
+-- (the server keeps it on the owner as "RidePet"), and only its owner's Ride.client
+-- draws it. So for everyone else it's drawn here, on the pen's first spot, while
+-- it's home: not while it's out on a ride ("PetOut", Riders.server).
+local function ridePetOf(pen)
+	local owner = Players:GetPlayerByUserId(pen:GetAttribute("Owner") or 0)
+	local kind = owner and owner ~= player and owner:GetAttribute("RidePet")
+	local slot = pen:FindFirstChild("Slots") and pen.Slots:FindFirstChild("Slot1")
+	if not (kind and kind ~= "" and Animals:FindFirstChild(kind) and slot) or owner:GetAttribute("PetOut") then
+		return nil
+	end
+	local fuse = owner:GetAttribute("RideFuse")
+	return {
+		pet = kind,
+		merged = owner:GetAttribute("RideMerged"),
+		fuse = if fuse and Animals:FindFirstChild(fuse) then fuse else nil,
+		x = slot.Position.X - pen.Area.Position.X,
+		z = slot.Position.Z - pen.Area.Position.Z,
+	}
+end
+
 local function refresh(pen)
 	local ok, items = pcall(HttpService.JSONDecode, HttpService, pen:GetAttribute("Contents") or "{}")
 	items = ok and typeof(items) == "table" and items or {}
 	contents[pen] = items
+	items = table.clone(items)
+	items.ride = ridePetOf(pen)
 	local list = shown[pen]
 	for id, s in list do
 		local item = items[id]
@@ -356,7 +379,30 @@ for _, pen in workspace:WaitForChild("Pens"):GetChildren() do
 	pen:GetAttributeChangedSignal("Contents"):Connect(function()
 		refresh(pen)
 	end)
+	pen:GetAttributeChangedSignal("Owner"):Connect(function()
+		refresh(pen)
+	end)
 	refresh(pen)
+end
+
+-- Someone else's ride pet changed, set off or came home: redraw their pen.
+local function watchRidePet(other)
+	if other == player then
+		return
+	end
+	for _, name in { "RidePet", "RideMerged", "RideFuse", "PetOut" } do
+		other:GetAttributeChangedSignal(name):Connect(function()
+			for pen in shown do
+				if pen:GetAttribute("Owner") == other.UserId then
+					refresh(pen)
+				end
+			end
+		end)
+	end
+end
+Players.PlayerAdded:Connect(watchRidePet)
+for _, other in Players:GetPlayers() do
+	watchRidePet(other)
 end
 
 -- An egg's time left: "2h" from an hour up (whole hours, QM), else "m:ss".

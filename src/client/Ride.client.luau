@@ -903,6 +903,10 @@ startRide = function(model)
 		setClickable(mount.animal.model, false)
 	end
 	NestEggs.setMount(NestEggs.eggOf(mount))
+	if not fromHerd then
+		vfx.rideCue:FireServer("out") -- your pet's left your pen: others stop drawing it there (Riders.server, Pen.client)
+		vfx.syncing = true -- (so "end" follows, however soon the ride ends)
+	end
 	mount.animal:setSaddled(true)
 	vfx.rideAgain = nil
 	leadFromZ = spot.Z - 8

@@ -12,6 +12,9 @@
 --     server -> others  player, what, ...
 --     what: "take" key (jumped on or reeled in stampede animal key), "lasso" key,
 --     "knock" key dx, "smash" x z dir side, "ability" kind, "crash" from yaw dir side, "end"
+--   "out" (client -> server only): the ride set off on the rider's own pet, so it's
+--     left their pen. It sets the player's "PetOut" attribute until "end", and
+--     Pen.client stops drawing that pet in their pen for everyone else meanwhile.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -51,6 +54,12 @@ rideSync.OnServerEvent:Connect(function(player, kind, mountCFrame, riderCFrame, 
 end)
 
 rideCue.OnServerEvent:Connect(function(player, what, ...)
+	if what == "out" then
+		player:SetAttribute("PetOut", true)
+		return
+	elseif what == "end" then
+		player:SetAttribute("PetOut", nil)
+	end
 	if type(what) == "string" and CUES[what] then
 		toOthers(rideCue, player, what, ...)
 	end
