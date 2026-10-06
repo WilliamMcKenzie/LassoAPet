@@ -9,7 +9,7 @@
 --   Lasso.throw(k, neck)                -- k 0..1: loop flies out and opens over the neck
 --   Lasso.pull(k, neck)                 -- k 0..1: loop cinches on the neck, rope taut
 --   Lasso.twirl(dt, object)             -- a caught egg (any part or model) swung round overhead
---   Lasso.heldCFrame()                  -- where a twirled object sits right now
+--   Lasso.heldCFrame(object)            -- where a twirled object sits right now
 --   Lasso.fitRadius(object)             -- loop radius that fits snugly round a part or model
 --   Lasso.hide()
 --   Lasso.stop()                        -- removes everything, arm back to normal
@@ -28,6 +28,7 @@ local CINCH_TIME = 0.35 -- share of the pull spent tightening
 local TWIRL_RATE = 1.4 -- turns per second with a caught egg
 local TWIRL_RADIUS = 4 -- rope length from the hand to the egg
 local TWIRL_HEIGHT = 1.6 -- above the hand
+local TWIRL_FIT = 2.5 -- loop radius (Lasso.fitRadius) an egg can have before it's swung further out
 
 local folder, anchor, points, knot, hand, handRope, loopBeams
 local shoulder
@@ -162,10 +163,13 @@ function Lasso.fitRadius(object)
 	return math.max(size.X, size.Z) / 2 + 0.15
 end
 
--- Flung out on the rope, slightly upward, with its top facing the hand.
-function Lasso.heldCFrame()
-	local center = hand.WorldPosition + Vector3.new(0, TWIRL_HEIGHT, 0)
-	local pos = center + Vector3.new(math.cos(spin), 0.25, math.sin(spin)).Unit * TWIRL_RADIUS
+-- Flung out on the rope, slightly upward, with its top facing the hand. A big egg
+-- (a big animal's, or one from a bigger nest) goes as much further out and higher,
+-- so it swings clear of the rider.
+function Lasso.heldCFrame(object)
+	local extra = if object then math.max(Lasso.fitRadius(object) - TWIRL_FIT, 0) else 0
+	local center = hand.WorldPosition + Vector3.new(0, TWIRL_HEIGHT + extra, 0)
+	local pos = center + Vector3.new(math.cos(spin), 0.25, math.sin(spin)).Unit * (TWIRL_RADIUS + extra)
 	return CFrame.lookAt(pos, center) * CFrame.Angles(-math.pi / 2, 0, 0)
 end
 
@@ -175,7 +179,7 @@ function Lasso.twirl(dt, object)
 	end
 	spin = (spin + dt * TWIRL_RATE * math.pi * 2) % (math.pi * 2)
 	poseArm(math.pi * 0.9 + math.sin(spin) * 0.12, math.cos(spin) * 0.15)
-	local cframe = Lasso.heldCFrame()
+	local cframe = Lasso.heldCFrame(object)
 	object:PivotTo(cframe)
 	drawLoop(cframe.Position, cframe.UpVector, Lasso.fitRadius(object), 0, hand.WorldPosition - cframe.Position)
 	handRope.CurveSize0, handRope.CurveSize1 = 0, 0

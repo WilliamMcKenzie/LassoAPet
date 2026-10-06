@@ -64,8 +64,8 @@ local function showNestEgg(nest)
 	if kind ~= "" then
 		waiting = { egg = Egg.new(kind), kind = kind, nest = nest, nextTwitch = 0.5 + math.random() * 1.5 }
 		-- A bigger nest (Nests.server: its biome's NestScale) is takeable from that much
-		-- further, and its egg is as much bigger while it sits there (QM, Oct 6; grabEgg
-		-- puts it back to its own size).
+		-- further, and its egg is as much bigger, there and the whole ride home (QM, Oct 6;
+		-- others see it so from your "CarriedEggScale").
 		local scale = nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale())
 		waiting.reach = Config.LassoRange * scale
 		if scale ~= 1 then
@@ -1120,9 +1120,6 @@ local function grabEgg()
 	Tutorial.eggTaken = Tutorial.eggTaken or nearEgg.nest == Tutorial.nest
 	egg.t = math.huge
 	egg:update(0) -- stop any twitch, back to rest
-	if egg.model:GetScale() ~= egg.size then
-		egg.model:ScaleTo(egg.size) -- (a bigger nest's egg: its own size once it's yours)
-	end
 	local part = egg.model
 	part.Parent = workspace
 	takeEgg:FireServer(nearEgg.nest) -- empties the nest for everyone
@@ -3776,7 +3773,7 @@ local function updateRider(dt)
 			carried.t = math.min(carried.t + dt / EGG_PULL_TIME, 1)
 			local t = carried.t
 			local eased = 1 - (1 - t) ^ 2
-			local held = Lasso.heldCFrame()
+			local held = Lasso.heldCFrame(carried.part)
 			local pos = carried.from:Lerp(held.Position, eased) + Vector3.new(0, math.sin(t * math.pi) * 7, 0)
 			local towardRider = (hrp.Position - pos).Unit
 			local hang = CFrame.lookAt(pos, pos + towardRider) * CFrame.Angles(-math.pi / 2, 0, 0) -- egg's top toward the rope
@@ -4194,7 +4191,7 @@ function vfx.updateSteal()
 	end
 end
 
-ReplicatedStorage:WaitForChild("EggSteal").OnClientEvent:Connect(function(thief, victim, kind)
+ReplicatedStorage:WaitForChild("EggSteal").OnClientEvent:Connect(function(thief, victim, kind, scale)
 	local where
 	if thief == player then
 		where = character() and character().Position
@@ -4203,6 +4200,9 @@ ReplicatedStorage:WaitForChild("EggSteal").OnClientEvent:Connect(function(thief,
 		end
 		-- Their egg, on your lasso: thrown out to it over their head, then reeled in.
 		local egg = Egg.new(kind)
+		if scale and scale ~= 1 then
+			egg.model:ScaleTo(egg.size * scale) -- (as big as it was on them)
+		end
 		local head = vfx.eggHeads[victim]
 		local from = if head then head.model:GetPivot() else CFrame.new((where or Vector3.zero) + Vector3.new(0, 7, 0))
 		if head then
@@ -4243,7 +4243,8 @@ ReplicatedStorage:WaitForChild("EggSteal").OnClientEvent:Connect(function(thief,
 	end
 end)
 
--- Another rider carrying an egg has it over their head (their "CarriedEgg").
+-- Another rider carrying an egg has it over their head (their "CarriedEgg"), as big
+-- as it is for them ("CarriedEggScale": from a bigger nest), lifted clear of their head.
 vfx.eggHeads = {} -- [player] = { kind, model }
 function vfx.updateEggHeads()
 	for other, rider in vfx.riders do
@@ -4255,12 +4256,17 @@ function vfx.updateEggHeads()
 		end
 		local hrp = other.Character and other.Character:FindFirstChild("HumanoidRootPart")
 		if kind and hrp and not head and Animals:FindFirstChild(kind) then
-			head = { kind = kind, model = Egg.new(kind).model }
+			local egg = Egg.new(kind)
+			local scale = other:GetAttribute("CarriedEggScale") or 1
+			if scale ~= 1 then
+				egg.model:ScaleTo(egg.size * scale)
+			end
+			head = { kind = kind, model = egg.model, lift = 7 + math.max(Lasso.fitRadius(egg.model) - 2.5, 0) }
 			head.model.Parent = workspace
 			vfx.eggHeads[other] = head
 		end
 		if head and hrp and rider.lassoState ~= "twirl" then -- (twirling: on their lasso, vfx.updateRiderLasso)
-			head.model:PivotTo(CFrame.new(hrp.Position + Vector3.new(0, 7, 0)) * CFrame.Angles(0, os.clock() * 3, 0))
+			head.model:PivotTo(CFrame.new(hrp.Position + Vector3.new(0, head.lift, 0)) * CFrame.Angles(0, os.clock() * 3, 0))
 		end
 	end
 	for other, head in vfx.eggHeads do

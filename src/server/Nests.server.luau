@@ -119,11 +119,15 @@ takeEgg.OnServerEvent:Connect(function(player, nest)
 		-- nest as it is for everyone else.
 		if player:GetAttribute("Tutorial") and Config.Tutorial and WorldColors.biomeAt(nest.EggSpot.Position.Z) == 1 then
 			player:SetAttribute("CarriedEgg", Config.TutorialEgg)
+			player:SetAttribute("CarriedEggScale", 1)
 			Funnel.step(player, "Grabbed Egg")
 		end
 		return
 	end
 	player:SetAttribute("CarriedEgg", nest:GetAttribute("Egg")) -- theirs once they ride it home (Hatchery)
+	-- A bigger nest's egg stays that much bigger the whole ride (QM, Oct 6): everyone's
+	-- Ride.client shows it at this scale (the hatched pet and your eggs aren't changed).
+	player:SetAttribute("CarriedEggScale", nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale()))
 	Funnel.step(player, "Grabbed Egg")
 	nest:SetAttribute("Egg", "")
 	if nest.Name == "EventNest" then
@@ -260,7 +264,7 @@ end)
 -- STEAL EGG asks for it (StealEgg, victim) and it's checked here against both riders'
 -- RideSync positions, never taken on a client's word. Whoever has it when they get home
 -- keeps it (Hatchery's DeliverEgg). After a steal the egg can't change hands again for
--- Config.EggSteal.Lock seconds. EggSteal tells every client (thief, victim, kind) for the
+-- Config.EggSteal.Lock seconds. EggSteal tells every client (thief, victim, kind, scale) for the
 -- effects; the thief's client reels it in and turns for home with it.
 
 local SLACK = 12 -- studs of leeway on the range, for the time the positions take to arrive
@@ -310,8 +314,10 @@ stealEgg.OnServerEvent:Connect(function(thief, victim)
 	if (Vector3.new(t.at.X, 0, t.at.Z) - Vector3.new(v.at.X, 0, v.at.Z)).Magnitude > Config.LassoRange + SLACK then
 		return
 	end
+	local scale = victim:GetAttribute("CarriedEggScale") or 1
 	victim:SetAttribute("CarriedEgg", nil)
 	thief:SetAttribute("CarriedEgg", kind)
+	thief:SetAttribute("CarriedEggScale", scale)
 	lockedUntil[thief] = now + Config.EggSteal.Lock
-	eggSteal:FireAllClients(thief, victim, kind)
+	eggSteal:FireAllClients(thief, victim, kind, scale)
 end)
