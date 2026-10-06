@@ -27,7 +27,8 @@
 --   9. goal  the moment the hybrid's landed, the camera flies to the next biome's gate: "Save $1k to unlock the
 --            Desert!". Then it's over: the money starts (Hatchery: pets earn nothing
 --            till now, QM Oct 6) and the rest of the HUD (Gold, Upgrade Pen, Pets)
---            comes back, none of which shows in the tutorial (QM).
+--            comes back, none of which shows in the tutorial (QM). The arrows then
+--            lead to your new pet, the hybrid, until you ride (QM).
 --
 -- A failed ride goes back to step 2. Until it's done the stampede runs on your
 -- own clock (Ride), so slowing it down never snaps it back.
@@ -87,6 +88,7 @@ local lastPhase = "idle"
 local onChange -- Ride's: shows or hides the nest's tutorial egg
 local hudStage = nil -- what the HUD was last told (Hud.setTutorial)
 local done = false -- TutorialDone sent
+local toNewPet = false -- and it's over: the arrows lead to your new pet (the hybrid) till you ride (QM, Oct 6)
 local known = {} -- the pen's items when the ride home began: a new one is the egg brought home
 local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
 local goalDesert = false -- and it's that one, which QM drew (PICTURES.saveDesert)
@@ -362,7 +364,7 @@ end
 
 local function finish()
 	if not done then
-		done = true
+		done, toNewPet = true, true
 		ReplicatedStorage:WaitForChild("TutorialDone"):FireServer() -- clears the attribute: Tutorial.init's refresh ends it
 	end
 end
@@ -603,7 +605,11 @@ function Tutorial.update(state)
 		Tutorial.slowMo = nil
 		setHint(nil)
 		showPicture(nil)
-		beam.Enabled = false
+		if phase ~= "idle" then
+			toNewPet = false -- riding: the arrows have done their job
+		end
+		local pet = toNewPet and not state.cutscene and myPet(state)
+		pointTo(pet and pet.PrimaryPart and pet.PrimaryPart.Position)
 		lastPhase = phase
 		return
 	end
