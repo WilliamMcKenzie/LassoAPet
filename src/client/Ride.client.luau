@@ -2339,10 +2339,17 @@ function vfx.updateAvoid(dt)
 		if not state.skip[entity] then
 			-- Away from you, unless that's into the wall: then across your other side.
 			local away = if gap > 0 then 1 elseif gap < 0 then -1 elseif entity.x > 0 then -1 else 1
-			if math.abs(px + away * cfg.Clear) > EDGE then
+			-- Clear studs that side of you, or the wall if that's past it (Clear can be wider than
+			-- the track); the far side only when the wall leaves it in your way.
+			local target = math.clamp(px + away * cfg.Clear, -EDGE, EDGE)
+			if math.abs(target - px) < 6 then
 				away = -away
+				target = math.clamp(px + away * cfg.Clear, -EDGE, EDGE)
 			end
-			local shift = px + away * cfg.Clear - entity.x -- (signed: to Clear studs that side of you)
+			if move and math.abs(target - (entity.x + left)) < 1 then
+				continue -- already headed there (say, parked on a wall)
+			end
+			local shift = target - entity.x -- (signed)
 			-- Done a little before it reaches you; a smoothstep's top speed is 1.5x its average.
 			local dur = math.max(math.min(t * 0.8, cfg.Ease), 1.5 * math.abs(shift) / cfg.MaxSpeed)
 			state.moves[entity] = if entity.n
