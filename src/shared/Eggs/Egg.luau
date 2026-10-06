@@ -8,9 +8,6 @@
 -- An egg is as big as its animal: Config.EggSizePerTier times bigger per size
 -- tier above small (egg.size; Egg.sizeOf(kind)). Its centre is 1.6 * egg.size
 -- studs up. Scaling it further: model:ScaleTo(scale * egg.size).
--- Egg.new("?") is the mystery egg a nest shows before you're on a wild animal
--- (Ride.client: the egg you take is the animal you're riding): a plain grey egg
--- with a "?" over it.
 --   egg:play("twitch")         -- a quick wobble; hatch comes later
 --   egg:update(dt)             -- every frame while it can be playing
 --
@@ -55,9 +52,7 @@ local KINDS = {
 	Beholder = { data = require(script.Parent.BeholderEggModel), center = 1.6 },
 	Leviathan = { data = require(script.Parent.LeviathanEggModel), center = 1.6 },
 	Sludge = { data = require(script.Parent.SludgeEggModel), center = 1.6 },
-	["?"] = { data = require(script.Parent.HorseEggModel), center = 1.6, mystery = true },
 }
-local MYSTERY_COLOR = Color3.fromRGB(222, 222, 230)
 
 local Egg = {}
 Egg.__index = Egg
@@ -74,31 +69,6 @@ function Egg.new(kind)
 	local size = Egg.sizeOf(kind)
 	if size ~= 1 then
 		model:ScaleTo(size)
-	end
-	if def.mystery then
-		for _, part in model:GetDescendants() do
-			if part:IsA("BasePart") then
-				part.Color = MYSTERY_COLOR
-			end
-		end
-		local gui = Instance.new("BillboardGui")
-		gui.Name = "Mystery"
-		gui.Size = UDim2.fromOffset(60, 60)
-		gui.StudsOffsetWorldSpace = Vector3.new(0, 4.6, 0)
-		gui.MaxDistance = 200
-		gui.LightInfluence = 0
-		local text = Instance.new("TextLabel")
-		text.BackgroundTransparency = 1
-		text.Size = UDim2.fromScale(1, 1)
-		text.Font = Enum.Font.FredokaOne
-		text.TextSize = 44
-		text.TextColor3 = Color3.new(1, 1, 1)
-		text.Text = "?"
-		local stroke = Instance.new("UIStroke")
-		stroke.Thickness = 3
-		stroke.Parent = text
-		text.Parent = gui
-		gui.Parent = model.PrimaryPart
 	end
 	return setmetatable({
 		model = model,
