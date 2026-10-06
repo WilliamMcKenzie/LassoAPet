@@ -41,7 +41,7 @@ local deliverEgg = ReplicatedStorage:WaitForChild("DeliverEgg")
 local finishCourse = ReplicatedStorage:WaitForChild("FinishCourse")
 local ridePet = ReplicatedStorage:WaitForChild("RidePet")
 local waitingEggs = {} -- [nest] = { egg, kind, nest, nextTwitch }
-local nearEgg -- the waiting egg in grab range (TAKE EGG), or nil; vfx.lassoTarget is LASSO's animal
+local nearEgg -- the waiting egg in grab range, while actionTarget is "egg"
 
 local function rarityOf(kind)
 	return require(Animals[kind]).Rarity
@@ -1323,11 +1323,7 @@ local function candidates()
 	return list
 end
 
--- What TAKE EGG would take (nearEgg) and what LASSO would catch (vfx.lassoTarget),
--- each on its own button (QM, Oct 6). Returns the one the outline and the tutorial
--- follow: "egg" while an egg's in reach, else LASSO's animal (or nil).
 local function findTarget()
-	nearEgg, vfx.lassoTarget = nil, nil
 	if phase ~= "outbound" or transfer or not mount then
 		picked = nil
 		return nil
@@ -1336,31 +1332,26 @@ local function findTarget()
 	if picked then
 		if picked.nest and eggInRange(picked) then
 			nearEgg = picked
+			return "egg"
 		elseif not picked.nest and table.find(allAnimals(), picked) and animalInRange(picked) then
-			vfx.lassoTarget = picked
-		else
-			picked = nil
+			return picked
+		end
+		picked = nil
+	end
+	for _, waiting in waitingEggs do
+		if eggInRange(waiting) then
+			nearEgg = waiting
+			return "egg"
 		end
 	end
-	if not nearEgg then
-		for _, waiting in waitingEggs do
-			if eggInRange(waiting) then
-				nearEgg = waiting
-				break
-			end
+	local best, bestScore = nil, math.huge
+	for _, entity in allAnimals() do
+		local score = animalInRange(entity)
+		if score and score < bestScore then
+			best, bestScore = entity, score
 		end
 	end
-	if not vfx.lassoTarget then
-		local best, bestScore = nil, math.huge
-		for _, entity in allAnimals() do
-			local score = animalInRange(entity)
-			if score and score < bestScore then
-				best, bestScore = entity, score
-			end
-		end
-		vfx.lassoTarget = best
-	end
-	return if nearEgg then "egg" else vfx.lassoTarget
+	return best
 end
 
 -- The in-range egg or animal drawn nearest a click or tap, if it's close
@@ -1384,16 +1375,18 @@ local function candidateAt(screenPos)
 	return best
 end
 
--- which = "egg" (TAKE EGG: F, the pad's X) or "lasso" (LASSO: E, the pad's A or R2).
-local function onAction(which)
-	if which == "egg" then
-		if vfx.stealFrom and not transfer and not carried then
-			ReplicatedStorage:WaitForChild("StealEgg"):FireServer(vfx.stealFrom) -- (the server says if it's yours: EggSteal)
-		elseif phase == "outbound" and not transfer and mount and nearEgg then
-			grabEgg()
-		end
-	elseif phase == "outbound" and not transfer and mount and vfx.lassoTarget then
-		startTransfer(vfx.lassoTarget)
+local function onAction()
+	if vfx.stealFrom and not transfer and not carried then
+		ReplicatedStorage:WaitForChild("StealEgg"):FireServer(vfx.stealFrom) -- (the server says if it's yours: EggSteal)
+		return
+	end
+	if phase ~= "outbound" or transfer or not mount or not actionTarget then
+		return
+	end
+	if actionTarget == "egg" then
+		grabEgg()
+	else
+		startTransfer(actionTarget)
 	end
 end
 
@@ -1446,14 +1439,11 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		return -- (RIDE always rides the nearest pet: clicking one doesn't pick it)
 	end
 	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		-- Clicking or tapping another egg or animal in range targets it instead;
-		-- clicking the egg TAKE EGG would take takes it.
+		-- Clicking or tapping another egg or animal in range targets it instead.
 		local hit = candidateAt(Vector2.new(input.Position.X, input.Position.Y))
-		if hit and hit ~= (if hit.nest then nearEgg else vfx.lassoTarget) then
+		local current = if actionTarget == "egg" then nearEgg else actionTarget
+		if hit and hit ~= current then
 			picked = hit
-			return
-		elseif hit and hit.nest and input.UserInputType == Enum.UserInputType.MouseButton1 then
-			onAction("egg")
 			return
 		end
 	end
@@ -1461,9 +1451,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		touchStart[input] = input.Position.X
 	elseif input.KeyCode == Enum.KeyCode.E or input.KeyCode == Enum.KeyCode.ButtonA -- (Space is the ability)
 		or input.KeyCode == Enum.KeyCode.ButtonR2 or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		onAction("lasso")
-	elseif input.KeyCode == Enum.KeyCode.F or input.KeyCode == Enum.KeyCode.ButtonX then
-		onAction("egg")
+		onAction()
 	end
 end)
 
@@ -3799,13 +3787,17 @@ end
 
 local function updateHud()
 	-- The animal LASSO would catch, top left (Hud.setSelected).
-	Hud.setSelected(if phase == "outbound" and vfx.lassoTarget and not cutscene then vfx.lassoTarget.kind else nil)
+	Hud.setSelected(if phase == "outbound" and typeof(actionTarget) == "table" and not cutscene then actionTarget.kind else nil)
 	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out).
 	Hud.setSprint(phase == "outbound" and not Tutorial.active)
 	if phase == "outbound" then
 		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1, carried == nil)
 		Hud.setDistance(if Tutorial.active then "" else string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
-		Hud.setAction(vfx.lassoTarget ~= nil, nearEgg ~= nil, nearEgg and rarityOf(nearEgg.kind))
+		if actionTarget == "egg" then
+			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
+		else
+			Hud.setAction("LASSO", actionTarget ~= nil)
+		end
 	end
 	if phase == "turning" or phase == "return" or phase == "home" then
 		local metres = math.max(0, -focus.Z / STUDS_PER_METRE)
@@ -4183,7 +4175,7 @@ function vfx.updateSteal()
 	local victim = vfx.stealTarget()
 	vfx.stealFrom = victim
 	if victim then
-		Hud.setTakeEgg(true, rarityOf(victim:GetAttribute("CarriedEgg"))) -- (LASSO stays as it was)
+		Hud.setAction("GRAB EGG", true, rarityOf(victim:GetAttribute("CarriedEgg")))
 		vfx.stealShown = true
 	elseif vfx.stealShown then
 		vfx.stealShown = false

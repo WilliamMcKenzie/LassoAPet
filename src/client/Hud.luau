@@ -1,5 +1,5 @@
--- Riding HUD built from QM's images: the Hold bar with the distance on it, the
--- LASSO and TAKE EGG buttons side by side, a center message, and the home buttons
+-- Riding HUD built from QM's images: the Hold bar with the distance on it, one
+-- action button (TAKE EGG or LASSO), a center message, and the home buttons
 -- (RIDE, Gold, Pets, Upgrade Pen). Layout follows QM's mockups. Shop, over Roll,
 -- opens the Robux shop (Shop); the gold icon itself does nothing (QM, Oct 5).
 
@@ -119,7 +119,6 @@ local IMAGES = {
 
 -- On a computer (keyboard, no touch screen) the ride buttons show their key:
 -- LASSO [E], RIDE [E], Sprint [SHIFT] and Ability [SPACE] (QM's PC art, same sizes).
--- TAKE EGG has no PC art yet: its key, F, is written on its corner (TAKE.key).
 -- The Ability button's cooldown picture stays the same. While a controller is in
 -- use they go back to the plain art, with the pad's button on them (Gamepad).
 local KEYBOARD_ART = {} -- [image key] = { keys = the PC art, plain = the art without a key }
@@ -148,12 +147,8 @@ local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
 -- Turned off for the time being (QM, Oct 3): enabled = true brings it back.
 local SELECTED = { enabled = false, size = 160, top = 80, nameSize = 42, gui = nil, root = nil, kind = nil, face = nil }
 
--- LASSO and TAKE EGG are two buttons side by side under the middle of the screen,
--- each in a spot of its own so neither moves under your thumb (QM, Oct 6: one button
--- that did both kept lassoing when you meant to take the egg, and the other way
--- round). LASSO, left, is there the whole way out (grey with nothing in reach);
--- TAKE EGG, right, only while an egg is in reach (or a rider's egg to steal).
-local TAKE = { GAP = 16, button = nil, scale = nil, key = nil }
+-- Action text from the ride -> which image the action button shows.
+local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
 -- The TAKE EGG image by the egg's rarity; anything else uses takeEgg (Uncommon).
 local EGG_BUTTONS = { Rare = "takeEggRare", Epic = "takeEggEpic", Legendary = "takeEggLegendary" }
 
@@ -203,7 +198,7 @@ local upgradeScale -- Upgrade Pen's UIScale
 -- its own always-on ScreenGui: its row, the animal's name (QM's gradient image, or
 -- plain text until it's uploaded), "spawns in Ns..." and the row's UIScale.
 local EVENT = { NAME_SCALE = 44 / 119, TEXT_SIZE = 40, TOP = 16 + 352 * 220 / 1292 + 36 } -- TOP: just under the Hold bar (QM; BAR_WIDTH x barEmpty's shape)
-local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst
+local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
 -- with at most one decimal (and none from 100 of a unit up).
@@ -430,28 +425,12 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	banner.Visible = false
 	Instance.new("UIScale").Parent = banner
 
-	-- LASSO left of the middle, TAKE EGG right of it (TAKE); onAction("lasso" or "egg").
-	action = button(rideRoot, "lasso", fit("lasso", BUTTON_WIDTH), Vector2.new(1, 1), UDim2.new(0.5, -TAKE.GAP / 2, 1, -MARGIN), function()
-		onAction("lasso")
-	end)
-	action.Name = "Lasso"
+	action, actionScale = button(rideRoot, "lasso", fit("lasso", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onAction)
+	action.Name = "Action"
 	action.ZIndex = 2
-	action.Visible = false
-	TAKE.button, TAKE.scale = button(rideRoot, "takeEgg", fit("takeEgg", BUTTON_WIDTH), Vector2.new(0, 1), UDim2.new(0.5, TAKE.GAP / 2, 1, -MARGIN), function()
-		onAction("egg")
-	end)
-	TAKE.button.Name = "TakeEgg"
-	TAKE.button.ZIndex = 2
-	TAKE.button.Visible = false
-	if next(KEYBOARD_ART) then -- (a computer: its key, until there's PC art for it)
-		TAKE.key = label(TAKE.button, UDim2.fromOffset(40, 40), UDim2.fromScale(0.9, 0.16), 40, 3)
-		TAKE.key.Text = "F"
-		TAKE.key.ZIndex = 3
-		TAKE.key.Visible = not Gamepad.active
-	end
 	-- Slowly turning sunburst behind TAKE EGG (Config.TakeEggSunburst).
 	local eggHeight = fit("takeEgg", BUTTON_WIDTH).Y.Offset
-	sunburst = image(rideRoot, "sunburst", UDim2.fromOffset(BUTTON_WIDTH * 1.5, BUTTON_WIDTH * 1.5), UDim2.new(0.5, TAKE.GAP / 2 + BUTTON_WIDTH / 2, 1, -MARGIN - eggHeight / 2))
+	sunburst = image(rideRoot, "sunburst", UDim2.fromOffset(BUTTON_WIDTH * 1.5, BUTTON_WIDTH * 1.5), UDim2.new(0.5, 0, 1, -MARGIN - eggHeight / 2))
 	sunburst.ImageTransparency = 0.25
 	sunburst.Visible = false
 
@@ -915,7 +894,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- while a pad is in use, and the presses that work it.
 	local TOP_RIGHT, RIGHT, LEFT = Vector2.new(0.92, 0.12), Vector2.new(1.05, 0.5), Vector2.new(-0.05, 0.5)
 	Gamepad.hint(action, Enum.KeyCode.ButtonA, TOP_RIGHT)
-	Gamepad.hint(TAKE.button, Enum.KeyCode.ButtonX, TOP_RIGHT)
 	Gamepad.hint(sprint, Enum.KeyCode.ButtonL2, TOP_RIGHT)
 	Gamepad.hint(ability, Enum.KeyCode.ButtonR1, Vector2.new(0.08, 0.12))
 	Gamepad.hint(home, Enum.KeyCode.ButtonA, TOP_RIGHT)
@@ -966,9 +944,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end)
 	-- The PC art's keys don't mean anything on a pad: the plain art while one's in use.
 	Gamepad.onChanged(function(active)
-		if TAKE.key then
-			TAKE.key.Visible = not active
-		end
 		local swaps = {}
 		for key, art in KEYBOARD_ART do
 			local from, to = art.keys, art.plain
@@ -1057,7 +1032,7 @@ function Hud.show(visible)
 	rideCash.row.Visible = tutorial == nil
 	Hud.setReturning(false)
 	Hud.setVignette(0)
-	TAKE.scale.Scale = 1
+	actionScale.Scale = 1
 	setCash(0)
 end
 
@@ -1119,35 +1094,27 @@ function Hud.setDistance(text)
 	distance.Text = text
 end
 
--- LASSO: nil hides it; false shows its grey (nothing in reach) image.
-function Hud.setLasso(ready)
-	action.Visible = ready ~= nil
-	if ready ~= nil then
-		local key = if ready then "lasso" else "lassoDisabled"
+-- text = nil hides the button; ready = false shows LASSO's disabled image;
+-- rarity picks TAKE EGG's colours.
+function Hud.setAction(text, ready, rarity)
+	action.Visible = text ~= nil
+	if text then
+		local key = ACTIONS[text]
+		if key == "lasso" and not ready then
+			key = "lassoDisabled"
+		elseif key == "takeEgg" then
+			key = EGG_BUTTONS[rarity] or key
+		end
 		action.Image = IMAGES[key].id
 		action.Size = fit(key, BUTTON_WIDTH)
 	end
-end
-
--- TAKE EGG: shown (an egg in reach, or one to steal), in the colours of the egg's rarity.
-function Hud.setTakeEgg(shown, rarity)
-	local take = TAKE.button
-	take.Visible = shown == true
-	sunburst.Visible = shown == true and Config.TakeEggSunburst
-	if shown then
-		local key = EGG_BUTTONS[rarity] or "takeEgg"
-		take.Image = IMAGES[key].id
-		take.Size = fit(key, BUTTON_WIDTH)
-		-- It pulses so it can't be missed.
-		TAKE.scale.Scale = 1 + 0.07 * math.sin(os.clock() * math.pi * 3)
+	-- TAKE EGG pulses so it can't be missed.
+	local egg = text ~= nil and ACTIONS[text] == "takeEgg"
+	sunburst.Visible = egg and Config.TakeEggSunburst
+	if egg then
+		actionScale.Scale = 1 + 0.07 * math.sin(os.clock() * math.pi * 3)
 		sunburst.Rotation = os.clock() * 25
 	end
-end
-
--- Both: Hud.setAction(nil) hides LASSO and TAKE EGG.
-function Hud.setAction(ready, egg, rarity)
-	Hud.setLasso(ready)
-	Hud.setTakeEgg(egg, rarity)
 end
 
 -- Slams a banner image in: drops from big to size fast, squashes, and shakes.
