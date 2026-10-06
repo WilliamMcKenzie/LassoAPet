@@ -6,7 +6,7 @@
 local Horse = require(script.Parent.Horse)
 local StarfishModel = require(script.Parent.StarfishModel)
 
-return Horse.variant("Starfish", StarfishModel, "Common", {
+return Horse.variant("Starfish", StarfishModel, "Uncommon", {
 	seat = Vector3.new(0, 2.92, 0.1),
 	neck = { center = Vector3.new(0, 2.27, 0), radius = 1.7 },
 })

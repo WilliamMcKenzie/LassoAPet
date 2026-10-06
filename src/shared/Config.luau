@@ -24,8 +24,9 @@ return {
 			-- Which animals run in this biome's stampede and how often (names are modules
 			-- in Shared/Animals). QM's spawn table (Oct 3): chances out of 1. They're
 			-- weights, so a biome that doesn't add up to exactly 1 still works. Nest eggs
-			-- use the same odds (Nests.server). A 0 never spawns but keeps the animal on
-			-- the biome's page in the animal dictionary.
+			-- are the animals you ride (Nests.server). A 0 never spawns but keeps the animal
+			-- on the biome's page in the animal dictionary. No Common animal runs wild
+			-- (QM, Oct 6: no Common eggs): the Horse is only ever the pet you start with.
 			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Fish = 0.22, Rhino = 0.13, Unicorn = 0.05 },
 			-- Dirt patches in the walls' colours, a stud below the grass
 			-- (tools/meadow_ground.py); see the Desert's Patches.
