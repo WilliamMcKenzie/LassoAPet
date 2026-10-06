@@ -2259,13 +2259,24 @@ end
 
 -- On the ride home the stampede swerves out of your way, late (Config.ReturnAvoid).
 -- Like the snake's scare, but only the animals about to hit you, and only just enough.
+-- A swerve is one smooth move (eased in and out, so the animal turns into it and
+-- straightens up again: moveAnimal faces it along its sideways speed) to a new line,
+-- held until you're past; then the stampede's usual nudge decay drifts it back.
+-- Pushing it a bit every frame instead made it jitter and snap (QM, Oct 6).
 -- skip: the animals that rolled not to swerve this ride home (one roll each).
-vfx.avoid = { lastZ = nil, vz = 0, skip = setmetatable({}, { __mode = "k" }) }
+-- moves: [entity] = { n, from, to, t, dur }, a stampede animal's swerve (its dodge).
+vfx.avoid = {
+	lastZ = nil,
+	vz = 0,
+	skip = setmetatable({}, { __mode = "k" }),
+	moves = setmetatable({}, { __mode = "k" }),
+}
 function vfx.updateAvoid(dt)
 	local cfg, state = Config.ReturnAvoid, vfx.avoid
 	if not (cfg and cfg.On and phase == "return" and mount) then
 		state.lastZ = nil
 		table.clear(state.skip)
+		table.clear(state.moves)
 		return
 	end
 	if state.lastZ and dt > 0 then
@@ -2279,6 +2290,20 @@ function vfx.updateAvoid(dt)
 		end
 		local dx = entity.x - mount.x
 		local dz = entity.z - mount.z - 5 -- (the crash check reaches 5 studs ahead)
+		local move = state.moves[entity]
+		if move and move.n ~= entity.n then
+			move, state.moves[entity] = nil, nil -- (a pooled animal back as another one)
+		end
+		if move then
+			if dz < -10 then
+				state.moves[entity] = nil -- past you: let it drift back
+			else
+				move.t += dt
+				local k = math.clamp(move.t / move.dur, 0, 1)
+				entity.dodge = move.from + (move.to - move.from) * k * k * (3 - 2 * k)
+			end
+			continue
+		end
 		local need = cfg.Clear - math.abs(dx)
 		if dz <= 0 or need <= 0 then
 			continue
@@ -2295,13 +2320,14 @@ function vfx.updateAvoid(dt)
 			local away = if dx > 0 then 1 elseif dx < 0 then -1 elseif entity.x > 0 then -1 else 1
 			if math.abs(mount.x + away * cfg.Clear) > EDGE then
 				away = -away
-				need = cfg.Clear + math.abs(dx)
 			end
-			local step = math.min(math.max(cfg.Speed, need / t) * dt, cfg.MaxSpeed * dt, need)
+			local shift = mount.x + away * cfg.Clear - entity.x -- (signed: to Clear studs that side of you)
 			if entity.n then
-				entity.dodge = math.clamp(entity.dodge + away * step, -2 * cfg.Clear, 2 * cfg.Clear)
+				-- Done a little before it reaches you; a smoothstep's top speed is 1.5x its average.
+				local dur = math.max(math.min(t * 0.8, cfg.Ease), 1.5 * math.abs(shift) / cfg.MaxSpeed)
+				state.moves[entity] = { n = entity.n, from = entity.dodge, to = entity.dodge + shift, t = 0, dur = dur }
 			else
-				entity.lane = math.clamp((entity.lane or entity.x) + away * step, -EDGE, EDGE)
+				entity.lane = math.clamp((entity.lane or entity.x) + shift, -EDGE, EDGE) -- (a loose former mount steers there itself)
 			end
 		end
 	end

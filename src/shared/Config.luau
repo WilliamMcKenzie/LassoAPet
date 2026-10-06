@@ -220,10 +220,11 @@ return {
 	-- On the ride home with an egg the stampede gets out of your way (QM, Oct 6, to
 	-- test: dodging home lost new players): an animal heading into you swerves aside
 	-- late, Warn seconds before it would hit, so it still looks like a near miss. It
-	-- moves until it's Clear studs to the side of you (a crash is within 2.6), at Speed
-	-- studs/s or faster if it needs to, never over MaxSpeed (too late: it hits). Only
-	-- Chance of them swerve at all, so dodging still counts. On = false turns it off.
-	ReturnAvoid = { On = true, Warn = 0.8, Clear = 9, Speed = 40, MaxSpeed = 140, Chance = 0.9 }, -- (QM, Oct 6: the bigger swerve; was 0.4 / 5 / 20 / 70 / 0.85)
+	-- eases across, turning that way, to Clear studs to the side of you (a crash is
+	-- within 2.6) over up to Ease seconds, never faster than MaxSpeed studs/s, then
+	-- keeps that line till you're past. Only Chance of them swerve at all, so dodging
+	-- still counts. On = false turns it off.
+	ReturnAvoid = { On = true, Warn = 0.8, Clear = 9, Ease = 0.6, MaxSpeed = 140, Chance = 0.9 }, -- (QM Oct 6: was 0.4 s / 5 studs / 0.85, too easy to crash)
 	-- Egg nests are shared stock: they all start full, a grabbed egg empties its nest
 	-- for everyone, and it restocks this many seconds later. Eggs are rolled with the
 	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
