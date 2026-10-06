@@ -34,6 +34,7 @@ return {
 		},
 		{
 			Name = "Desert",
+			NestScale = 2, -- its nests are this many times bigger, so they show from afar at its speed (Nests.server; QM, Oct 6)
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
@@ -58,6 +59,7 @@ return {
 		},
 		{
 			Name = "Snow",
+			NestScale = 2.25,
 			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
@@ -76,6 +78,7 @@ return {
 		},
 		{
 			Name = "Ocean",
+			NestScale = 2.5,
 			Length = 7680, -- 1.4x the snow (QM, Oct 2), a whole number of 240-stud depth bands
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
@@ -163,6 +166,7 @@ return {
 			-- with lava; Shared/Godlands, Shared/GodlandsTracks), built round each rider
 			-- as they go (Client/GodlandsStream). It has no finish line.
 			Name = "Godlands",
+			NestScale = 2.5,
 			Length = math.huge, -- endless
 			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
 			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)

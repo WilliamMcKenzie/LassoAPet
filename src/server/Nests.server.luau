@@ -77,8 +77,29 @@ local function roll(nest)
 	return if #odds > 0 then odds[#odds].name else ""
 end
 
+-- Nests from the Desert on are bigger (Config.Biomes[b].NestScale; QM, Oct 6): you
+-- ride past them fast there, so they have to show from far off. Only the nest grows,
+-- about the bottom of its box so it still sits on the ground; the egg stays its size
+-- (Ride.client puts it on the EggSpot, which goes up with the nest).
+local function sizeNest(nest, scale)
+	local base = nest:GetAttribute("BaseScale") or nest:GetScale() -- (ScaleTo is absolute: never grow one twice)
+	nest:SetAttribute("BaseScale", base)
+	if base * scale == nest:GetScale() then
+		return
+	end
+	local function bottom()
+		local box, size = nest:GetBoundingBox()
+		return box.Position - box.UpVector * size.Y / 2
+	end
+	local was = bottom()
+	nest:ScaleTo(base * scale)
+	nest:PivotTo(nest:GetPivot() + (was - bottom()))
+end
+
 for _, nest in world.Nests:GetChildren() do
 	if nest.Name ~= "EventNest" then
+		local biome = Config.Biomes[WorldColors.biomeAt(nest.EggSpot.Position.Z)]
+		sizeNest(nest, biome and biome.NestScale or 1)
 		nest:SetAttribute("Egg", roll(nest))
 	end
 end
@@ -192,6 +213,7 @@ local function addNest(k)
 	local nest = template:Clone()
 	nest.Name = "GodlandsNest" .. k
 	nest:SetAttribute("Egg", "")
+	sizeNest(nest, Config.Biomes[#Config.Biomes].NestScale or 1) -- (the Godlands are the last biome)
 	local egg = nest:FindFirstChild("EggSpot")
 	local fromSpot = CFrame.new(-egg.Position) * nest:GetPivot()
 	nest:PivotTo(CFrame.new(spot.X, egg.Position.Y + spot.Y, spot.Z) * fromSpot) -- (the EggSpot as high over the ground as over the map's floor)

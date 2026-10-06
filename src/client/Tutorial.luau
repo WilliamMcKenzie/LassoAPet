@@ -14,7 +14,7 @@
 --   3. lasso "Press E to LASSO a new ride!"  time slows while an animal is in reach
 --   4. egg   "Follow the arrows..."          the egg guide; the first Meadow nest
 --                                            always holds a Config.TutorialEgg
---   5. take  "Press E to take the egg!"      time slows while it's in reach
+--   5. take  "Press F to take the egg!"      time slows while it's in reach
 --   6. home  (DODGE THE STAMPEDE!)           home with the egg
 --   7. place2 the egg goes into the pen by itself (Hatchery's DeliverEgg, balance
 --            pass Oct 6: a fifth of new players left here when they had to place it).
@@ -401,7 +401,7 @@ local function hintFor(state)
 	elseif step == "egg" then
 		return "Follow the arrows to the egg!"
 	elseif step == "take" then
-		return if touch() then "Tap TAKE EGG!" else "Press E to take the egg!"
+		return if touch() then "Tap TAKE EGG!" else "Press F to take the egg!"
 	end
 	return nil -- home: DODGE THE STAMPEDE! says it
 end
