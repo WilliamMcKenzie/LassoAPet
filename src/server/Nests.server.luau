@@ -11,17 +11,15 @@
 -- But the egg you take is the animal you're riding (QM, Oct 6): once a rider's got
 -- on a wild animal (a "lasso" or "take" cue this ride: not the pet they rode out
 -- on), their Ride.client shows every nest holding that animal's egg instead, and
--- their grab says which animal (mountEgg). The rolled egg is for a rider still on
--- their own pet (riding your best pet to a nest would copy it every ride) or on an
--- exclusive event's animal (its egg is the EventNest's).
+-- their grab says which animal (mountEgg), an event's animal included (finding and
+-- riding one is the hard part). The rolled egg is for a rider still on their own pet
+-- (riding your best pet to a nest would copy it every ride).
 --
 -- The Godlands' nests have their own odds, by how deep in they are (its NestDepth).
 --
 -- The Godlands never end, so its nests aren't on the map: one goes in each of its
 -- tracks (Shared/Godlands) near any player, at a clear spot picked from the server's
 -- seed, and goes again once no one is near (see the end).
---
--- The EventNest is Events.server's: its egg is the event's, never rolled, swapped or restocked here.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -122,15 +120,11 @@ end)
 
 -- The egg `player` takes instead of a nest's rolled one: `mount`, the animal their
 -- Ride.client says they're on (the stampede is theirs alone, so there's nothing here
--- to check it against), as long as they've got on a wild animal this ride and it's an
--- animal a nest can give (not an exclusive: an event animal's egg is the EventNest's).
--- Else nil: the rolled egg (Ride.client sends "" on your own pet or an event animal).
+-- to check it against), as long as they've got on a wild animal this ride and it's a
+-- real animal. Else nil: the rolled egg (Ride.client sends "" on your own pet).
 local function mountEgg(player, mount)
 	local r = riders[player]
-	if not (r and r.wild) or typeof(mount) ~= "string" or mount == "" then
-		return nil
-	end
-	if not ReplicatedStorage.Shared.Animals:FindFirstChild(mount) or table.find(Config.Events.Animals, mount) then
+	if not (r and r.wild) or typeof(mount) ~= "string" or mount == "" or not ReplicatedStorage.Shared.Animals:FindFirstChild(mount) then
 		return nil
 	end
 	return mount
@@ -156,11 +150,9 @@ local function sizeNest(nest, scale)
 end
 
 for _, nest in world.Nests:GetChildren() do
-	if nest.Name ~= "EventNest" then
-		local biome = Config.Biomes[WorldColors.biomeAt(nest.EggSpot.Position.Z)]
-		sizeNest(nest, biome and biome.NestScale or 1)
-		nest:SetAttribute("Egg", roll(nest))
-	end
+	local biome = Config.Biomes[WorldColors.biomeAt(nest.EggSpot.Position.Z)]
+	sizeNest(nest, biome and biome.NestScale or 1)
+	nest:SetAttribute("Egg", roll(nest))
 end
 
 local takeEgg = Instance.new("RemoteEvent")
@@ -185,18 +177,13 @@ takeEgg.OnServerEvent:Connect(function(player, nest, mount)
 		end
 		return
 	end
-	if nest.Name ~= "EventNest" then
-		kind = mountEgg(player, mount) or kind -- the wild animal they're riding, if one (see the top)
-	end
+	kind = mountEgg(player, mount) or kind -- the wild animal they're riding, if one (see the top)
 	player:SetAttribute("CarriedEgg", kind) -- theirs once they ride it home (Hatchery)
 	-- A bigger nest's egg stays that much bigger the whole ride (QM, Oct 6): everyone's
 	-- Ride.client shows it at this scale (the hatched pet and your eggs aren't changed).
 	player:SetAttribute("CarriedEggScale", nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale()))
 	Funnel.step(player, "Grabbed Egg")
 	nest:SetAttribute("Egg", "")
-	if nest.Name == "EventNest" then
-		return -- the event's over (Events.server)
-	end
 	task.delay(Config.NestRestock, function()
 		if nest.Parent and nest:GetAttribute("Egg") == "" then
 			nest:SetAttribute("Egg", roll(nest))
