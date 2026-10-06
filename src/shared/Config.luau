@@ -496,6 +496,16 @@ return {
 		},
 		Reach = 10, -- studs from the machine where ROLL shows
 	},
+	-- Rainbow Trail (QM, Oct 6): once the Godlands are open, Upgrade Pen's spot (top
+	-- right) sells a rainbow trail for Price gold, one time, saved (Hatchery's
+	-- "RainbowTrail"). After that every pet you ride trails the Unicorn's Leap rainbow,
+	-- for the whole ride, and other players see it too. The price is drawn into the art.
+	RainbowTrail = {
+		Price = 1000000000,
+		Image = "", -- assets/ui/RainbowTrail.png
+		ImageDisabled = "", -- assets/ui/DisabledRainbowTrail.png: while you can't afford it
+		Lifetime = 0.8, -- seconds each band trails behind (the Leap's is 1.4; very long trails don't render)
+	},
 	-- Carl's stall (Carl.client, QM Oct 4): a desert stall with a cactus guy in it, in
 	-- the gap between the left corner pen and the start line. Talk to him and he asks
 	-- if you want to spin; Yes opens the roll menu. Faces into the base (+z).

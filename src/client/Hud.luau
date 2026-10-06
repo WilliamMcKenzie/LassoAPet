@@ -711,26 +711,34 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- throbbing when you have the gold, its UpgradeImageDisabled when you don't
 	-- (greyed if it has none). A biome without
 	-- one gets the plain button, green or grey, with the price written over the
-	-- bottom of its coin. Hidden once there's no next level.
+	-- bottom of its coin. Once there's no next level it sells the Rainbow Trail
+	-- (Config.RainbowTrail, its own art the same way) until that's bought, then hides.
 	local upgradePen = game:GetService("ReplicatedStorage"):WaitForChild("UpgradePen")
+	local buyTrail = game:GetService("ReplicatedStorage"):WaitForChild("BuyRainbowTrail")
 	local upgradeSize = fit("upgradePenBiome", UPGRADE_WIDTH)
 	-- Anchored at its middle so the throb grows it evenly.
 	upgrade, upgradeScale = button(homeRoot, "upgradePen", upgradeSize, Vector2.new(0.5, 0.5),
 		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
 	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.66), 30, 3)
 	price.AutomaticSize = Enum.AutomaticSize.X
-	local cost -- gold for the next level, nil at the top level
+	local cost -- gold for the next level (or the Rainbow Trail), nil when there's nothing to buy
+	local trail = false -- selling the Rainbow Trail
 	local function refreshUpgrade()
 		local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
 		cost = nextBiome and nextBiome.UnlockCost
+		trail = cost == nil and not player:GetAttribute("RainbowTrail")
+		if trail then
+			cost = Config.RainbowTrail.Price
+		end
 		upgradeShown = cost ~= nil
 		upgrade.Visible = upgradeShown and gold.Visible
 		if cost then
 			local affordable = (player:GetAttribute("Gold") or 0) >= cost
-			local own = nextBiome.UpgradeImage
+			local art = if trail then Config.RainbowTrail else { Image = nextBiome.UpgradeImage, ImageDisabled = nextBiome.UpgradeImageDisabled }
+			local own = if art.Image ~= "" then art.Image else nil
 			price.Text = money(cost)
 			price.Visible = not own
-			local ownDisabled = own and not affordable and nextBiome.UpgradeImageDisabled
+			local ownDisabled = own and not affordable and art.ImageDisabled ~= "" and art.ImageDisabled
 			upgrade.Image = ownDisabled or own or IMAGES[if affordable then "upgradePen" else "upgradePenDisabled"].id
 			upgrade.ImageColor3 = if own and not affordable and not ownDisabled then Color3.fromRGB(150, 150, 150) else Color3.new(1, 1, 1)
 		end
@@ -741,12 +749,14 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			return
 		end
 		buying = true
-		pcall(upgradePen.InvokeServer, upgradePen)
+		local remote = if trail then buyTrail else upgradePen
+		pcall(remote.InvokeServer, remote)
 		buying = false
 	end
 	upgrade.Activated:Connect(buyUpgrade)
 	player:GetAttributeChangedSignal("Gold"):Connect(refreshUpgrade)
 	player:GetAttributeChangedSignal("PenLevel"):Connect(refreshUpgrade)
+	player:GetAttributeChangedSignal("RainbowTrail"):Connect(refreshUpgrade)
 	refreshUpgrade()
 	-- The throb, while it's affordable (and not while it's held down).
 	local pressed = false
@@ -775,7 +785,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	local throbbing = false
 	RunService.RenderStepped:Connect(function()
 		local affordable = cost ~= nil and (player:GetAttribute("Gold") or 0) >= cost
-		hand.Visible = affordable and tutorial == nil and not player:GetAttribute("Tutorial")
+		hand.Visible = affordable and not trail and tutorial == nil and not player:GetAttribute("Tutorial")
 		if hand.Visible then
 			handScale.Scale = 1 + 0.1 * math.sin(os.clock() * 2 * math.pi)
 		end
