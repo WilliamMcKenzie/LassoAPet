@@ -1525,7 +1525,7 @@ local function takeFromPool(n, x, z, kind)
 	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
 	entity.face, entity.rush = nil, nil
-	entity.swerve, entity.swerveTo, entity.swerveV, entity.swerveSide = 0, 0, 0, nil -- (vfx.updateAvoid)
+	entity.swerve, entity.swerveTo, entity.swerveV, entity.swerveSide, entity.lat = 0, 0, 0, nil, 0 -- (vfx.updateAvoid; moveAnimal)
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
 	-- Put where it now is at once: one taken out of view isn't moved until it comes
 	-- into view, and it stood frozen where it was last used meanwhile (QM, Oct 4: full-size
@@ -1714,7 +1714,11 @@ end
 -- shown: false while it's out of view (see updateHerd), when it only keeps its
 -- place on the course and its model waits where it was.
 local function moveAnimal(entity, x, z, speed, dt, shown)
+	-- Faces along its sideways speed, smoothed (~0.1 s) so any frame-to-frame wobble in x
+	-- can't twitch its head (QM, Oct 6). Its position isn't smoothed: that's the hitbox.
 	local lat = (x - entity.x) / math.max(dt, 1e-3)
+	lat = (entity.lat or lat) + (lat - (entity.lat or lat)) * (1 - math.exp(-10 * dt))
+	entity.lat = lat
 	entity.x, entity.z, entity.speed = x, z, speed
 	if shown then
 		-- (face and rush: a Godlands animal charging or hunting you, GodlandsHazards)
