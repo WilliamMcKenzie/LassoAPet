@@ -210,6 +210,7 @@ local function load(player)
 					profile.hatchTarget = typeof(data.hatchTarget) == "string" and data.hatchTarget or nil
 					profile.boughtPets = tonumber(data.boughtPets) -- Legendary Pets from the shop already in (addBoughtPets)
 					profile.boughtGiantEggs = tonumber(data.boughtGiantEggs) -- Giant Horse eggs from the shop already in (addBoughtGiantEggs)
+					profile.likeAsked = data.likeAsked == true
 				end
 				loaded[player] = true
 				break
@@ -246,7 +247,7 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, tutorial = profile.tutorial, ridden = riddenList(profile),
-		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget }
+		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, likeAsked = profile.likeAsked }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -259,6 +260,28 @@ local function save(player, onlyIfChanged)
 		end
 		task.wait(attempt)
 	end
+end
+
+-- "Enjoying the game?" (QM, Oct 6): a player's first hatch asks them, once ever, to
+-- like the game. Roblox has no prompt for liking or favoriting an experience, so the
+-- card (LikePopup.client) just points at the like button. Nothing is rewarded: the
+-- game can't tell whether they liked it. In the tutorial the first hatch is its
+-- ending, so it waits for TutorialDone instead of covering the hints.
+local LIKE_DELAY = 4 -- seconds after the hatch, so the pet's out first
+local likeAsk = Instance.new("RemoteEvent")
+likeAsk.Name = "LikeAsk"
+likeAsk.Parent = ReplicatedStorage
+local function askLike(player, delay)
+	local profile = profiles[player]
+	if not profile or profile.likeAsked or not loaded[player] or player:GetAttribute("Tutorial") then
+		return
+	end
+	profile.likeAsked = true
+	task.delay(delay or LIKE_DELAY, function()
+		if player.Parent then
+			likeAsk:FireClient(player)
+		end
+	end)
 end
 
 -- A paid hatch is a durable credit: the purchase ledger owns the total bought,
@@ -280,6 +303,7 @@ local function applyHatch(player)
 	profile.usedHatches, profile.hatchTarget = used + 1, nil
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 	Funnel.step(player, "Egg Hatched")
+	askLike(player)
 	save(player)
 	publish(player)
 	applyingHatch[player] = nil
@@ -556,6 +580,7 @@ remote("TutorialDone", function(player)
 	end
 	player:SetAttribute("Tutorial", nil)
 	Funnel.step(player, "Tutorial Done")
+	askLike(player, 2)
 end)
 
 -- Ride the pet `id` from now on; the pet you rode takes its place in the pen.
@@ -851,6 +876,7 @@ while true do
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
 				Funnel.step(player, "Egg Hatched")
+				askLike(player)
 			end
 		end
 		if changed then
