@@ -43,7 +43,7 @@ local IMAGES = {
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
 	rollIcon = { id = "rbxassetid://107116554539032", size = Vector2.new(232, 240) }, -- RollIcon.png: opens the egg roll menu
 	-- (With no id, the button is a plain outlined "Shop" label in the same spot.)
-	shopIcon = { id = "rbxassetid://113963704996686", size = Vector2.new(272, 277) }, -- Shop.png: opens the Robux shop
+	shopIcon = { id = "rbxassetid://105477086117375", size = Vector2.new(256, 259) }, -- Shop.png: opens the Robux shop
 	-- The roll menu's own art (RollMenu draws it; listed here so it's preloaded with the rest).
 	rollMenu = { id = "rbxassetid://104698392936555", size = Vector2.new(2892, 1900) }, -- RollPanel.png
 	rollMenuOdds = { id = "rbxassetid://110875946388838", size = Vector2.new(2892, 1900) }, -- RollPanelOdds.png
@@ -614,15 +614,20 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(showGold)
 	showGold()
-	-- Pets sits just over the coin, centred on it: it opens and closes the animal
-	-- dictionary (AnimalDex).
+	-- The coin keeps the bottom left to itself; Eggs (Roll), Pets and Shop stack up the
+	-- bottom right, Eggs at the bottom, all the same height (QM, Oct 6). Row 0 is the
+	-- bottom one; without Roll the others drop a row.
+	local function columnSpot(row)
+		return UDim2.new(1, -MARGIN - SIDE_ICON_HEIGHT / 2, 1, -MARGIN - row * (SIDE_ICON_HEIGHT + 8))
+	end
+	-- Pets: it opens and closes the animal dictionary (AnimalDex).
 	pets = button(sideRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
-		UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8), AnimalDex.toggle)
-	-- Roll sits over Pets the same way: it opens the egg roll menu (RollMenu). Only
-	-- one of the two menus is open at a time; either hides the rest of the home HUD.
+		columnSpot(if Config.Gacha.Enabled then 1 else 0), AnimalDex.toggle)
+	-- Roll (Eggs), under Pets: it opens the egg roll menu (RollMenu). Only one of the
+	-- two menus is open at a time; either hides the rest of the home HUD.
 	if Config.Gacha.Enabled then
 		rollIcon = button(sideRoot, "rollIcon", fit("rollIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
-			UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8 - SIDE_ICON_HEIGHT - 8), RollMenu.toggle)
+			columnSpot(0), RollMenu.toggle)
 		-- Rolls are paid random items (gold can be bought): no Roll where the player's
 		-- policy restricts them (Shop.randomRestricted).
 		rollIcon.Visible = false
@@ -630,16 +635,16 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			if Shop.randomRestricted() then
 				rollIcon:Destroy()
 				rollIcon = nil
+				pets.Position = columnSpot(0)
 			else
 				rollIcon.Visible = pets.Visible
 			end
 		end)
 	end
-	-- Shop sits over Roll the same way (over Pets when there's no Roll): it opens the
-	-- Robux shop. It drops down a row if the policy check takes Roll away.
+	-- Shop, on top of the column: it opens the Robux shop. It drops down a row if the
+	-- policy check takes Roll away.
 	local function shopSpot(withRoll)
-		local rows = if withRoll then 2 else 1
-		return UDim2.new(0, MARGIN + ICON_HEIGHT / 2, 1, -MARGIN - ICON_HEIGHT - 8 - rows * (SIDE_ICON_HEIGHT + 8))
+		return columnSpot(if withRoll then 2 else 1)
 	end
 	shopIcon = button(sideRoot, "shopIcon", fit("shopIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), shopSpot(Config.Gacha.Enabled), function()
 		if Shop.hasOffers() then
@@ -890,11 +895,11 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	Gamepad.hint(ride, Enum.KeyCode.ButtonX, TOP_RIGHT) -- (the ride prompt's own gamepad key)
 	Gamepad.hint(roll, Enum.KeyCode.ButtonX, TOP_RIGHT) -- (the Egg Machine prompt's)
 	Gamepad.hint(mergeButton, Enum.KeyCode.ButtonY, TOP_RIGHT)
-	Gamepad.hint(shopIcon, Enum.KeyCode.DPadUp, RIGHT, 44)
+	Gamepad.hint(shopIcon, Enum.KeyCode.DPadUp, LEFT, 44) -- (the column's on the right edge: hints to its left)
 	if rollIcon then
-		Gamepad.hint(rollIcon, Enum.KeyCode.DPadLeft, RIGHT, 44)
+		Gamepad.hint(rollIcon, Enum.KeyCode.DPadLeft, LEFT, 44)
 	end
-	Gamepad.hint(pets, Enum.KeyCode.DPadDown, RIGHT, 44)
+	Gamepad.hint(pets, Enum.KeyCode.DPadDown, LEFT, 44)
 	Gamepad.hint(upgrade, Enum.KeyCode.DPadRight, LEFT, 44)
 	local function onScreen(button)
 		local screen = button and button:FindFirstAncestorOfClass("ScreenGui")
