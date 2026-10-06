@@ -3804,8 +3804,6 @@ local function updateRider(dt)
 end
 
 local function updateHud()
-	-- The animal LASSO would catch, top left (Hud.setSelected).
-	Hud.setSelected(if phase == "outbound" and typeof(actionTarget) == "table" and not cutscene then actionTarget.kind else nil)
 	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out).
 	Hud.setSprint(phase == "outbound" and not Tutorial.active)
 	if phase == "outbound" then
@@ -4374,7 +4372,6 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		updateRideTarget()
 		Outline.set(if rideShown then rideModel else nil) -- the pet RIDE will ride
-		Hud.setSelected(if rideShown and rideModel then vfx.kindOf(rideModel) else nil) -- and its card, top left
 		vfx.updateMerge()
 		return
 	end

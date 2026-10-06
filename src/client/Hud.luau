@@ -8,7 +8,6 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local Inventory = require(script.Parent.Inventory)
-local PetFaces = require(script.Parent.PetFaces)
 local Sounds = require(script.Parent.Sounds)
 local AnimalDex = require(script.Parent.AnimalDex)
 local RollMenu = require(script.Parent.RollMenu)
@@ -40,7 +39,7 @@ local IMAGES = {
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
 	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
-	rollIcon = { id = "rbxassetid://107116554539032", size = Vector2.new(232, 240) }, -- RollIcon.png: opens the egg roll menu
+	fuseIcon = { id = "", size = Vector2.new(308, 284) }, -- Fuse.png: picks two pets to fuse (FuseMenu); "" shows a "Fuse" label
 	-- (With no id, the button is a plain outlined "Shop" label in the same spot.)
 	shopIcon = { id = "rbxassetid://105477086117375", size = Vector2.new(256, 259) }, -- Shop.png: opens the Robux shop
 	-- The roll menu's own art (RollMenu draws it; listed here so it's preloaded with the rest).
@@ -138,9 +137,6 @@ local UPGRADE_WIDTH = 300 -- Upgrade Pen, top right
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
--- The selected animal, top left (Hud.setSelected): an inventory slot a touch bigger.
--- Turned off for the time being (QM, Oct 3): enabled = true brings it back.
-local SELECTED = { enabled = false, size = 160, top = 80, nameSize = 42, gui = nil, root = nil, kind = nil, face = nil }
 
 -- Action text from the ride -> which image the action button shows.
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
@@ -178,7 +174,7 @@ local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
 local mergeButton, mergeWanted -- MERGE, in RIDE's spot when RIDE isn't up (Hud.showMerge), and whether there's anything to merge
-local rollIcon -- Roll, over Pets: opens the egg roll menu (RollMenu)
+local fuseIcon -- Fuse, under Pets: picks two pets to fuse (FuseMenu, through Hud.onFuse)
 local shopIcon -- Shop, over Roll (or over Pets without Roll): opens the Robux shop (Shop)
 local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
 local CONTINUE_GAP = 12 -- between Continue and the Home button under it
@@ -549,15 +545,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	homeGui.IgnoreGuiInset = true
 	homeGui.Parent = playerGui
 	homeRoot = root(homeGui)
-	-- The animal RIDE would ride (at home) or LASSO would catch (out on the course),
-	-- top left: its slot with its headshot, mirrored, and its name over the bottom
-	-- edge (QM's mockup). Its own screen, so it shows at home and while riding.
-	SELECTED.gui = Instance.new("ScreenGui")
-	SELECTED.gui.Name = "SelectedHud"
-	SELECTED.gui.ResetOnSpawn = false
-	SELECTED.gui.IgnoreGuiInset = true
-	SELECTED.gui.Parent = playerGui
-	SELECTED.root = root(SELECTED.gui)
 	ride = button(homeRoot, "ride", fit("ride", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onRide)
 	ride.Visible = false
 	mergeButton = button(homeRoot, "merge", fit("merge", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, function()
@@ -588,39 +575,27 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(showGold)
 	showGold()
-	-- The coin keeps the bottom left to itself; Eggs (Roll), Pets and Shop stack up the
-	-- bottom right, Eggs at the bottom, all the same height (QM, Oct 6). Row 0 is the
-	-- bottom one; without Roll the others drop a row.
+	-- The coin keeps the bottom left to itself; Fuse, Pets and Shop stack up the
+	-- bottom right, Fuse at the bottom, all the same height (QM, Oct 6). Row 0 is the
+	-- bottom one. (The egg roll menu opens from Carl, its NPC.)
 	local function columnSpot(row)
 		return UDim2.new(1, -MARGIN - SIDE_ICON_HEIGHT / 2, 1, -MARGIN - row * (SIDE_ICON_HEIGHT + 8))
 	end
 	-- Pets: it opens and closes the animal dictionary (AnimalDex).
-	pets = button(sideRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
-		columnSpot(if Config.Gacha.Enabled then 1 else 0), AnimalDex.toggle)
-	-- Roll (Eggs), under Pets: it opens the egg roll menu (RollMenu). Only one of the
-	-- two menus is open at a time; either hides the rest of the home HUD.
-	if Config.Gacha.Enabled then
-		rollIcon = button(sideRoot, "rollIcon", fit("rollIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1),
-			columnSpot(0), RollMenu.toggle)
-		-- Rolls are paid random items (gold can be bought): no Roll where the player's
-		-- policy restricts them (Shop.randomRestricted).
-		rollIcon.Visible = false
-		task.spawn(function()
-			if Shop.randomRestricted() then
-				rollIcon:Destroy()
-				rollIcon = nil
-				pets.Position = columnSpot(0)
-			else
-				rollIcon.Visible = pets.Visible
-			end
-		end)
+	pets = button(sideRoot, "pets", fit("pets", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), columnSpot(1), AnimalDex.toggle)
+	-- Fuse, under Pets: tap two of your pets to fuse them (FuseMenu).
+	fuseIcon = button(sideRoot, "fuseIcon", fit("fuseIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), columnSpot(0), function()
+		if Hud.onFuse then
+			Hud.onFuse()
+		end
+	end)
+	fuseIcon.Visible = pets.Visible
+	if IMAGES.fuseIcon.id == "" then
+		local fuseText = label(fuseIcon, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 34, 3) -- 3px outline (QM)
+		fuseText.Text = "Fuse"
 	end
-	-- Shop, on top of the column: it opens the Robux shop. It drops down a row if the
-	-- policy check takes Roll away.
-	local function shopSpot(withRoll)
-		return columnSpot(if withRoll then 2 else 1)
-	end
-	shopIcon = button(sideRoot, "shopIcon", fit("shopIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), shopSpot(Config.Gacha.Enabled), function()
+	-- Shop, on top of the column: it opens the Robux shop.
+	shopIcon = button(sideRoot, "shopIcon", fit("shopIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), columnSpot(2), function()
 		if Shop.hasOffers() then
 			Shop.toggle()
 		end
@@ -630,9 +605,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		local shopText = label(shopIcon, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 34, 3) -- 3px outline (QM)
 		shopText.Text = "Shop"
 	end
-	task.spawn(function()
-		shopIcon.Position = shopSpot(Config.Gacha.Enabled and not Shop.randomRestricted())
-	end)
 	-- Opening one menu closes the others at once, with no closing animation (QM): only
 	-- the one coming in pops.
 	AnimalDex.onToggle = function(open)
@@ -641,9 +613,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			Shop.close(true)
 		end
 		homeGui.Enabled = not open
-		if SELECTED.gui then
-			SELECTED.gui.Enabled = not open
-		end
 	end
 	RollMenu.onToggle = function(open)
 		if open then
@@ -651,9 +620,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			Shop.close(true)
 		end
 		homeGui.Enabled = not open
-		if SELECTED.gui then
-			SELECTED.gui.Enabled = not open
-		end
 	end
 	-- The shop hides the rest of the home HUD like the other menus.
 	Shop.onToggle = function(open)
@@ -662,9 +628,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			RollMenu.close(true)
 		end
 		homeGui.Enabled = not open
-		if SELECTED.gui then
-			SELECTED.gui.Enabled = not open
-		end
 	end
 	-- A Legendary Pet bought in the shop is in your pen: its card shows which.
 	game:GetService("ReplicatedStorage"):WaitForChild("ShopGrant").OnClientEvent:Connect(function(key, kind)
@@ -881,9 +844,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	Gamepad.hint(roll, Enum.KeyCode.ButtonX, TOP_RIGHT) -- (the Egg Machine prompt's)
 	Gamepad.hint(mergeButton, Enum.KeyCode.ButtonY, TOP_RIGHT)
 	Gamepad.hint(shopIcon, Enum.KeyCode.DPadUp, LEFT, 44) -- (the column's on the right edge: hints to its left)
-	if rollIcon then
-		Gamepad.hint(rollIcon, Enum.KeyCode.DPadLeft, LEFT, 44)
-	end
+	Gamepad.hint(fuseIcon, Enum.KeyCode.DPadLeft, LEFT, 44)
 	Gamepad.hint(pets, Enum.KeyCode.DPadDown, LEFT, 44)
 	Gamepad.hint(upgrade, Enum.KeyCode.DPadRight, LEFT, 44)
 	local function onScreen(button)
@@ -910,8 +871,12 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end, function()
 		return onScreen(shopIcon)
 	end)
-	Gamepad.bind("Roll", Enum.KeyCode.DPadLeft, RollMenu.toggle, function()
-		return onScreen(rollIcon)
+	Gamepad.bind("Fuse", Enum.KeyCode.DPadLeft, function()
+		if Hud.onFuse then
+			Hud.onFuse()
+		end
+	end, function()
+		return onScreen(fuseIcon)
 	end)
 	Gamepad.bind("Pets", Enum.KeyCode.DPadDown, AnimalDex.toggle, function()
 		return onScreen(pets)
@@ -999,9 +964,7 @@ function Hud.show(visible)
 	ride.Visible = false -- comes back when the ride prompt shows again
 	gold.Visible = not visible and tutorial ~= "bare"
 	pets.Visible = not visible and tutorial == nil
-	if rollIcon then
-		rollIcon.Visible = pets.Visible
-	end
+	fuseIcon.Visible = pets.Visible
 	shopIcon.Visible = pets.Visible
 	upgrade.Visible = upgradeShown and not visible and tutorial ~= "bare"
 	Inventory.setVisible(not visible) -- your eggs, hidden while riding
@@ -1510,9 +1473,7 @@ function Hud.setTutorial(stage)
 	local riding = gui.Enabled
 	gold.Visible = not riding and stage ~= "bare"
 	pets.Visible = not riding and stage == nil
-	if rollIcon then
-		rollIcon.Visible = pets.Visible
-	end
+	fuseIcon.Visible = pets.Visible
 	shopIcon.Visible = pets.Visible
 	upgrade.Visible = upgradeShown and not riding and stage ~= "bare"
 	rideCash.row.Visible = stage == nil and not noCash
@@ -1598,31 +1559,6 @@ function Hud.coinPopupAt(part, height, amount)
 	task.delay(1.05, function()
 		board:Destroy()
 	end)
-end
-
--- Shows `kind` as the selected animal (top left), or nothing (nil).
-function Hud.setSelected(kind)
-	if not SELECTED.enabled then
-		return -- off for now (QM, Oct 3)
-	end
-	if kind == SELECTED.kind or not SELECTED.root then
-		return
-	end
-	SELECTED.kind = kind
-	if SELECTED.face then
-		SELECTED.face:Destroy()
-		SELECTED.face = nil
-	end
-	if not kind then
-		return
-	end
-	local face = PetFaces.face(kind, SELECTED.size, true)
-	face.Position = UDim2.fromOffset(MARGIN, SELECTED.top)
-	local name = label(face, UDim2.new(1, 40, 0, SELECTED.nameSize), UDim2.fromScale(0.5, 0.93), SELECTED.nameSize, 3) -- 3px outline (QM)
-	name.Text = kind:gsub("(%l)(%u)", "%1 %2") -- "SpineLizard" reads "Spine Lizard"
-	name.ZIndex = 3
-	face.Parent = SELECTED.root
-	SELECTED.face = face
 end
 
 return Hud

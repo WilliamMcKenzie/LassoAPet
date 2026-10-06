@@ -1,12 +1,11 @@
--- FUSE (QM, Oct 6; Shared/Fusion): at home, with two or more kinds of pet, the FUSE
--- button lets you tap two of your pets (in the pen, or the one waiting on its
+-- FUSE (QM, Oct 6; Shared/Fusion): at home, the Fuse button (Hud's, under Pets) lets
+-- you tap two of your pets (in the pen, or the one waiting on its
 -- spot). A preview shows the hybrid they'd make, turning slowly in 3D, what it's
 -- called and what it earns; FUSE! makes it (Hatchery.server's FusePets). The rarer
 -- pet is the base; the other sets its size and paints it in its colours. Hybrids
 -- don't fuse again, and two of the same kind merge instead (MERGE).
 --
--- Its own script, as Ride.client is at its limits. The button is a placeholder in
--- the HUD's font until QM draws one.
+-- Its own script, as Ride.client is at its limits.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -16,6 +15,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
+local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local Sounds = require(script.Parent.Sounds)
 
@@ -111,7 +111,6 @@ gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
 resize()
 
-local fuseButton -- set below
 local tip = text(root, UDim2.fromOffset(600, 50), UDim2.new(0.5, 0, 0, 120), 40)
 tip.Visible = false
 local cancelButton
@@ -319,14 +318,6 @@ local function start()
 	cancelButton.Visible = true
 end
 
-fuseButton = pill(root, "FUSE", PINK, UDim2.fromOffset(170, 64), UDim2.new(0, 24 + 85, 1, -24 - 32), function()
-	if state.active then
-		stop()
-	else
-		start()
-	end
-end)
-fuseButton.Visible = false
 cancelButton = pill(root, "X", Color3.fromRGB(230, 60, 60), UDim2.fromOffset(64, 64), UDim2.new(0.5, 340, 0, 120), stop)
 cancelButton.Visible = false
 
@@ -340,8 +331,8 @@ pill(panel, "FUSE!", PINK, UDim2.fromOffset(200, 70), UDim2.new(0.5, -105, 1, -5
 end)
 pill(panel, "Cancel", Color3.fromRGB(150, 160, 175), UDim2.fromOffset(170, 70), UDim2.new(0.5, 105, 1, -56), stop)
 
--- Whether you're at home (in or by your pen, on foot) with two kinds to fuse.
-local function canFuse()
+-- Whether you're at home: in or by your pen, on foot.
+local function atHome()
 	if player:GetAttribute("Tutorial") then
 		return false
 	end
@@ -355,9 +346,11 @@ local function canFuse()
 		return false
 	end
 	local offset = area.CFrame:PointToObjectSpace(hrp.Position)
-	if math.abs(offset.X) > area.Size.X / 2 + HOME_REACH or math.abs(offset.Z) > area.Size.Z / 2 + HOME_REACH then
-		return false
-	end
+	return math.abs(offset.X) <= area.Size.X / 2 + HOME_REACH and math.abs(offset.Z) <= area.Size.Z / 2 + HOME_REACH
+end
+
+-- How many kinds of pet you have that can fuse (hybrids can't).
+local function kindsToFuse()
 	local kinds, n = {}, 0
 	for _, pet in yours() do
 		if not pet.fuse and not kinds[pet.kind] then
@@ -365,14 +358,35 @@ local function canFuse()
 			n += 1
 		end
 	end
-	return n >= 2
+	return n
 end
 
+Hud.onFuse = function()
+	if state.active then
+		stop()
+	elseif not atHome() then
+		flash("Fuse your pets at your pen")
+		task.delay(1.6, function()
+			if not state.active then
+				tip.Visible = false
+			end
+		end)
+	elseif kindsToFuse() < 2 then
+		flash("You need two kinds of pets to fuse")
+		task.delay(1.6, function()
+			if not state.active then
+				tip.Visible = false
+			end
+		end)
+	else
+		start()
+	end
+end
+
+-- Leaving home (or riding off) puts picking away.
 task.spawn(function()
 	while true do
-		local ok = canFuse()
-		fuseButton.Visible = ok
-		if not ok and state.active then
+		if state.active and not atHome() then
 			stop()
 		end
 		task.wait(0.3)
