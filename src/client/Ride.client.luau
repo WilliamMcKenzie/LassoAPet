@@ -910,6 +910,7 @@ startRide = function(model)
 		setClickable(mount.animal.model, false)
 	end
 	mount.animal:setSaddled(true)
+	vfx.rideAgain = nil
 	leadFromZ = spot.Z - 8
 	exitX = if fromHerd then nil else penExitX()
 	local runningAt = if fromHerd then fromHerd.speed or 0 else 0 -- a stampede animal keeps its pace
@@ -977,6 +978,7 @@ local function finishRide(x, z)
 		coins = 0
 	end
 	phase = "idle"
+	vfx.rideAgain = true -- (arrows to the pet in your pen: vfx.updateHomeGuide)
 	controls:Enable()
 	camera.CameraType = Enum.CameraType.Custom
 	Hud.show(false)
@@ -1110,6 +1112,7 @@ local guide = { -- the egg guide: the beam and its two ends
 	AHEAD = 6, -- studs in front of the pet where the trail starts
 	MAX_LENGTH = 300, -- studs: the longest the trail is drawn, toward a farther target
 	HEIGHT = 1.4, -- studs up: over the raised ground patches
+	HOME_CLOSE = 10, -- studs: back home, the arrows to your pet go once you're this close
 	from = Instance.new("Attachment"),
 	to = Instance.new("Attachment"),
 	beam = Instance.new("Beam"),
@@ -1184,6 +1187,29 @@ local function updateGuide()
 		end
 	end
 	Hud.setFollowHint(vfx.chasingEvent and phase == "outbound" and not cutscene) -- QM: on the event animal, following its arrows
+	vfx.drawGuide(at, target)
+end
+
+-- Back on foot after a ride (any ride, however it ended), the same arrows lead from
+-- you to the pet waiting in your pen, so you go and ride again (QM). They go once
+-- you're up close to it or riding, and never during the tutorial (it has its own).
+function vfx.updateHomeGuide()
+	local hrp = character()
+	local target
+	if vfx.rideAgain and hrp and not cutscene and not Tutorial.active then
+		local spot = if starter then Vector3.new(starter.x, 0, starter.z) else homeSpot()
+		local at = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
+		if (spot - at).Magnitude > guide.HOME_CLOSE and not rideShown then
+			target = spot
+		end
+		vfx.drawGuide(at, target)
+	else
+		vfx.drawGuide(nil, nil)
+	end
+end
+
+-- Draws the trail of arrows from `at` toward `target`, or hides it (no target).
+function vfx.drawGuide(at, target)
 	guide.beam.Enabled = target ~= nil
 	if target then
 		-- The trail starts a little out from the pet toward the target (guide.AHEAD, or
@@ -4117,7 +4143,7 @@ RunService.PreSimulation:Connect(function(dt)
 	Dust.update(dt)
 	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)
 	if phase == "idle" then
-		updateGuide() -- (hides it)
+		vfx.updateHomeGuide() -- (to the pet in your pen after a ride; else hidden)
 		-- On foot on the course, a stampede animal running you down throws you
 		-- like being bucked off (no cash on the fail screen: there was no ride).
 		local hrp, humanoid = character()
@@ -4592,6 +4618,7 @@ player.CharacterAdded:Connect(function()
 	if phase ~= "idle" then
 		cleanup()
 		phase = "idle"
+		vfx.rideAgain = true
 		controls:Enable()
 		camera.CameraType = Enum.CameraType.Custom
 		Hud.show(false)
