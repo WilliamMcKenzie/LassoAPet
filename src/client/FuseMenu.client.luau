@@ -1,41 +1,84 @@
--- FUSE (QM, Oct 6; Shared/Fusion): at home, the Fuse button (Hud's, under Pets) lets
--- you tap two of your pets (in the pen, or the one waiting on its
--- spot). A preview shows the hybrid they'd make, turning slowly in 3D, what it's
--- called and what it earns; FUSE! makes it (Hatchery.server's FusePets). The rarer
--- pet is the base; the other sets its size and paints it in its colours. Hybrids
--- don't fuse again, and two of the same kind merge instead (MERGE).
+-- FUSE (QM, Oct 6; Shared/Fusion): the Fuse button (Hud's, under Pets) opens a page of
+-- your pets, the animal dictionary's old grid page and rarity cards (QM: reuse
+-- them), each pet still in 3D as it is (merged bigger, a hybrid in its colours).
+-- Tap two to pick them (each gets an outline); with two picked, FUSE pops up at the
+-- bottom of the page with the hybrid's name over it. FUSE closes the page and the
+-- two are pulled up over the pen and fuse, as merging does (PenPets.pull), and the
+-- hybrid drops down where the base was (Hatchery.server's FusePets). The rarer pet
+-- is the base; the other sets its size and paints it in its colours. Hybrids don't
+-- fuse again, and two of a kind merge instead (MERGE).
 --
--- Its own script, as Ride.client is at its limits.
+-- Laid out in pixels of the dictionary's 1102 x 829 page and scaled to fit the screen.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
+local ModalPop = require(script.Parent.ModalPop)
 local Sounds = require(script.Parent.Sounds)
+local Gamepad = require(script.Parent.Gamepad)
 
 local Animals = ReplicatedStorage.Shared.Animals
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
+local PAGE = Vector2.new(1102, 829)
+local SCREEN_SHARE = 0.54 -- as the dictionary's
+local CARD, ART, GAP = 200, 180, 43 -- the dictionary's grid: 200 px cards, the pet 180 px in the middle
+local COLUMNS, ROWS = 4, 3
+local GRID_TOP = 70
 local FONT = Enum.Font.FredokaOne
-local REFERENCE_WIDTH = 1320 -- as Hud's
-local HOME_REACH = 30 -- studs outside your pen's fence the button still shows
-local PINK = Color3.fromRGB(236, 72, 160)
+local PAGE_ART = "rbxassetid://106554381754752" -- assets/ui/dex/DexMeadow.png, the dictionary's old grid page
+local CARDS = { -- the dictionary's rarity cards (assets/ui/dex/Dex<Rarity>.png)
+	Common = "rbxassetid://79697917998703",
+	Uncommon = "rbxassetid://129147449223279",
+	Rare = "rbxassetid://72145821537095",
+	Epic = "rbxassetid://137693950544184",
+	Legendary = "rbxassetid://80504921595928",
+}
+local ARROW = "rbxassetid://130844925944438" -- assets/ui/dex/DexArrow.png (points up)
+local PICKED = Color3.fromRGB(255, 214, 64) -- the outline on a picked pet
+local GREEN = Color3.fromRGB(110, 210, 70)
 
-local state = { picks = {}, marks = {} } -- picks: { { id, kind, fuse, model } }
+local gui, page, scale
+local pop = 1
+local open = false
+local pets = {} -- this opening's: { model, id, kind, fuse, merged }
+local picks = {} -- up to two of `pets`
+local at = 1 -- the first pet on the page shown
+local cards = {} -- [pet] = its card
+local fuseButton, fuseName, tip
+
+local function money(n)
+	local s = tostring(math.floor(n))
+	while true do
+		local k
+		s, k = string.gsub(s, "^(-?%d+)(%d%d%d)", "%1,%2")
+		if k == 0 then
+			return "$" .. s
+		end
+	end
+end
+
+-- Gold to fuse the two picked (QM: each pet adds its rarity's price).
+local function priceOf(a, b)
+	return Fusion.price(a.kind, b.kind)
+end
+
+local function rarityOf(kind)
+	local ok, class = pcall(require, Animals:FindFirstChild(kind))
+	return ok and class and class.Rarity or "Common"
+end
 
 local function stroked(object, thickness)
 	local s = Instance.new("UIStroke")
 	s.Thickness = thickness
 	s.Color = Color3.new(0, 0, 0)
 	s.LineJoinMode = Enum.LineJoinMode.Round
-	s.ApplyStrokeMode = if object:IsA("TextLabel") or object:IsA("TextButton") then Enum.ApplyStrokeMode.Contextual else Enum.ApplyStrokeMode.Border
 	s.Parent = object
 	return s
 end
@@ -49,345 +92,405 @@ local function text(parent, size, position, textSize)
 	label.Size = size
 	label.Position = position
 	label.AnchorPoint = Vector2.new(0.5, 0.5)
+	label.ZIndex = 4
 	stroked(label, 3)
 	label.Parent = parent
 	return label
 end
 
-local function pill(parent, caption, color, size, position, onActivated)
-	local b = Instance.new("TextButton")
-	b.AutoButtonColor = false
-	b.BackgroundColor3 = color
-	b.Size = size
-	b.Position = position
-	b.AnchorPoint = Vector2.new(0.5, 0.5)
-	b.Font = FONT
-	b.Text = caption
-	b.TextColor3 = Color3.new(1, 1, 1)
-	b.TextSize = math.floor(size.Y.Offset * 0.5)
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0.5, 0)
-	corner.Parent = b
-	stroked(b, 3).ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	local textStroke = Instance.new("UIStroke")
-	textStroke.Thickness = 3
-	textStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-	textStroke.Parent = b
-	local scale = Instance.new("UIScale")
-	scale.Parent = b
-	b.MouseButton1Down:Connect(function()
-		TweenService:Create(scale, TweenInfo.new(0.08), { Scale = 0.93 }):Play()
+-- The headshot's camera (tools/pet_headshots.py, "action"): 3/4 front from a little
+-- above, mid-gallop (the Snake and Starfish in their idle stance).
+local YAW, PITCH, FOV = math.rad(35), math.rad(12), 26
+local FACING = { Kraken = math.pi }
+local ACTION_IDLE = { Snake = true, Starfish = true }
+
+-- A pet standing still in 3D, as it is: drawn once, never redrawn (QM: unanimated).
+local function still3D(kind, fuse)
+	local module = Animals:FindFirstChild(kind)
+	local ok, animal = pcall(function()
+		return require(module).new()
 	end)
-	for _, event in { b.MouseButton1Up, b.MouseLeave } do
-		event:Connect(function()
-			TweenService:Create(scale, TweenInfo.new(0.08), { Scale = 1 }):Play()
-		end)
+	if not ok or not animal then
+		return nil
 	end
-	b.Activated:Connect(onActivated)
-	b.Parent = parent
-	return b
-end
-
--- The screen: sized like Hud's, so it scales the same on every screen.
-local gui = Instance.new("ScreenGui")
-gui.Name = "FuseHud"
-gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
-gui.DisplayOrder = 5
-gui.Parent = player:WaitForChild("PlayerGui")
-local root = Instance.new("Frame")
-root.BackgroundTransparency = 1
-root.AnchorPoint = Vector2.new(0.5, 0.5)
-root.Position = UDim2.fromScale(0.5, 0.5)
-local rootScale = Instance.new("UIScale")
-rootScale.Parent = root
-root.Parent = gui
-local function resize()
-	local screen = if gui.AbsoluteSize.X > 0 then gui.AbsoluteSize else camera.ViewportSize
-	rootScale.Scale = screen.X / REFERENCE_WIDTH * (Config.HudScale or 1)
-	root.Size = UDim2.fromOffset(screen.X / rootScale.Scale, screen.Y / rootScale.Scale)
-end
-gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
-camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
-resize()
-
-local tip = text(root, UDim2.fromOffset(600, 50), UDim2.new(0.5, 0, 0, 120), 40)
-tip.Visible = false
-local cancelButton
-
--- The preview: the hybrid turning in a little 3D window.
-local panel = Instance.new("Frame")
-panel.AnchorPoint = Vector2.new(0.5, 0.5)
-panel.Position = UDim2.fromScale(0.5, 0.48)
-panel.Size = UDim2.fromOffset(440, 520)
-panel.BackgroundColor3 = Color3.fromRGB(255, 214, 96)
-panel.Visible = false
-local panelCorner = Instance.new("UICorner")
-panelCorner.CornerRadius = UDim.new(0, 28)
-panelCorner.Parent = panel
-stroked(panel, 4)
-panel.Parent = root
-local viewport = Instance.new("ViewportFrame")
-viewport.BackgroundTransparency = 1
-viewport.Size = UDim2.fromOffset(400, 330)
-viewport.Position = UDim2.fromOffset(20, 64)
-viewport.Ambient = Color3.fromRGB(190, 190, 190)
-viewport.LightColor = Color3.new(1, 1, 1)
-viewport.LightDirection = Vector3.new(-1, -2, -1)
-viewport.Parent = panel
-local world = Instance.new("WorldModel")
-world.Parent = viewport
-local viewCamera = Instance.new("Camera")
-viewCamera.FieldOfView = 30
-viewCamera.Parent = viewport
-viewport.CurrentCamera = viewCamera
-local title = text(panel, UDim2.new(1, -20, 0, 50), UDim2.new(0.5, 0, 0, 38), 38)
-local earns = text(panel, UDim2.new(1, -20, 0, 36), UDim2.new(0.5, 0, 0, 404), 30)
-
-local preview -- { animal, center, radius, spin }
-
-local function money(n)
-	local s = tostring(math.floor(n))
-	while true do
-		local k
-		s, k = string.gsub(s, "^(-?%d+)(%d%d%d)", "%1,%2")
-		if k == 0 then
-			return "$" .. s
-		end
-	end
-end
-
-local function clearPreview()
-	if preview then
-		preview.animal.model:Destroy()
-		preview = nil
-	end
-	panel.Visible = false
-end
-
-local function clearMarks()
-	for _, mark in state.marks do
-		mark:Destroy()
-	end
-	table.clear(state.marks)
-end
-
-local function stop()
-	state.active = false
-	table.clear(state.picks)
-	clearMarks()
-	clearPreview()
-	tip.Visible = false
-	cancelButton.Visible = false
-end
-
--- What a pet earns a second: a hybrid what both its pets did; a merged one for all of them.
-local function incomeOf(pick)
-	return pick.income or (Config.PetIncome[pick.kind] or 0) * (pick.merged or 1)
-end
-
-local function showPreview()
-	local a, b = state.picks[1], state.picks[2]
-	local base, donor = Fusion.order(a.kind, b.kind)
-	local ok, class = pcall(require, Animals[base])
-	if not ok then
-		stop()
-		return
-	end
-	local animal = class.new()
 	animal:setSaddled(false)
-	Fusion.paint(animal.model, base, donor)
+	Fusion.paint(animal.model, kind, fuse)
+	local gallop = animal.data and animal.data.animations and animal.data.animations.gallop
+	if gallop and not ACTION_IDLE[kind] then
+		animal.speed, animal.clocks.gallop = 1000, gallop.length * 0.35
+		pcall(animal.update, animal, 0, 1000, 0)
+	else
+		pcall(animal.update, animal, 0, 0, 0)
+	end
+	local view = Instance.new("ViewportFrame")
+	view.BackgroundTransparency = 1
+	view.Ambient = Color3.fromRGB(200, 200, 200)
+	view.LightColor = Color3.new(1, 1, 1)
+	view.LightDirection = Vector3.new(-1, -2, -1)
+	local world = Instance.new("WorldModel") -- (it places the posed parts on their joints)
+	world.Parent = view
 	animal.model:PivotTo(CFrame.new())
 	animal.model.Parent = world
-	local cf, size = animal.model:GetBoundingBox()
-	preview = { animal = animal, center = cf.Position, radius = size.Magnitude / 2, spin = 0 }
-	title.Text = Fusion.name(base, donor)
-	local scale = Fusion.scale(base, donor)
-	local sizeWord = if scale < 0.99 then "tiny " elseif scale > 1.01 then "giant " else ""
-	earns.Text = "A " .. sizeWord .. base:gsub("(%l)(%u)", "%1 %2") .. ", earns " .. money(incomeOf(a) + incomeOf(b)) .. "/s"
-	panel.Visible = true
-	tip.Visible = false
+	local box, extents = animal.model:GetBoundingBox()
+	local yaw = YAW + (FACING[kind] or 0)
+	local dir = Vector3.new(-math.sin(yaw) * math.cos(PITCH), math.sin(PITCH), -math.cos(yaw) * math.cos(PITCH))
+	local radius = extents.Magnitude / 2
+	local cam = Instance.new("Camera")
+	cam.FieldOfView = FOV
+	cam.CFrame = CFrame.lookAt(box.Position + dir * radius / math.sin(math.rad(FOV) / 2) * 0.95, box.Position)
+	cam.Parent = view
+	view.CurrentCamera = cam
+	return view
 end
 
--- Each frame the preview turns slowly, idling, seen from a little above.
-RunService.RenderStepped:Connect(function(dt)
-	if not preview then
-		return
-	end
-	preview.spin += dt * 0.6
-	pcall(preview.animal.update, preview.animal, dt, 0, 0)
-	local dist = preview.radius / math.sin(math.rad(viewCamera.FieldOfView) / 2) * 1.05
-	local dir = Vector3.new(-math.sin(preview.spin) * math.cos(0.25), math.sin(0.25), -math.cos(preview.spin) * math.cos(0.25))
-	viewCamera.CFrame = CFrame.lookAt(preview.center + dir * dist, preview.center)
-end)
-
-local function mark(model, n)
-	local bb = Instance.new("BillboardGui")
-	bb.Size = UDim2.fromOffset(60, 60)
-	bb.AlwaysOnTop = true
-	bb.StudsOffsetWorldSpace = Vector3.new(0, model:GetExtentsSize().Y / 2 + 2, 0)
-	bb.Adornee = model.PrimaryPart
-	local label = text(bb, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 48)
-	label.Text = tostring(n)
-	label.TextColor3 = PINK
-	bb.Parent = gui
-	table.insert(state.marks, bb)
-end
-
--- Your pets you can pick: [model] = { id, kind, fuse, merged, income }
-local function yours()
+-- Your pets: the ones in the pen, and the one waiting on its spot (id "ride").
+local function yourPets()
 	local list = {}
 	for model, pet in PenPets.pets do
 		if model.Parent then
-			list[model] = pet
+			table.insert(list, { model = model, id = pet.id, kind = pet.kind, fuse = pet.fuse, merged = pet.merged })
 		end
 	end
 	local starter = PenPets.starter
 	if starter and starter.animal.model.Parent and starter.kind == player:GetAttribute("RidePet") then
-		list[starter.animal.model] = { id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged,
-			income = player:GetAttribute("RideIncome") }
+		table.insert(list, { model = starter.animal.model, id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged })
 	end
+	local ranks = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5 }
+	table.sort(list, function(a, b) -- rarest first, then by kind, so a kind's pets sit together
+		local ra, rb = ranks[rarityOf(a.kind)] or 0, ranks[rarityOf(b.kind)] or 0
+		if ra ~= rb then
+			return ra > rb
+		end
+		return Fusion.key(a.kind, a.fuse) < Fusion.key(b.kind, b.fuse)
+	end)
 	return list
 end
 
-local function flash(message)
-	tip.Text = message
-	tip.Visible = true
-	task.delay(1.6, function()
-		if state.active and #state.picks < 2 then
-			tip.Text = if #state.picks == 0 then "Tap two pets to fuse" else "Now tap another pet"
-		end
-	end)
-end
-
-local function pick(model, pet)
+-- Whether `pet` can go with what's picked: hybrids don't fuse again, and two of a
+-- kind merge instead.
+local function canPick(pet)
 	if pet.fuse then
-		flash("Hybrids can't fuse again")
-		return
+		return false
 	end
-	for _, p in state.picks do
-		if p.model == model then
-			return
-		end
-		if p.kind == pet.kind then
-			flash("Pick a different animal")
-			return
-		end
+	local other = picks[1]
+	return not other or other == pet or other.kind ~= pet.kind
+end
+
+local showPage
+
+local function refresh()
+	for pet, card in cards do
+		local picked = table.find(picks, pet) ~= nil
+		card.Outline.Enabled = picked
+		card.UIScale.Scale = if picked then 1.06 else 1
+		local dim = not picked and #picks >= 1 and not canPick(pet) or pet.fuse ~= nil
+		card.ImageTransparency = if dim then 0.5 else 0
+		card.Art.GroupTransparency = if dim then 0.5 else 0
 	end
-	table.insert(state.picks, { id = pet.id, kind = pet.kind, merged = pet.merged, income = pet.income, model = model })
-	mark(model, #state.picks)
-	Sounds.play("merge_pop")
-	if #state.picks == 2 then
-		showPreview()
+	local ready = #picks == 2
+	if ready and not fuseButton.Visible then
+		local base, donor = Fusion.order(picks[1].kind, picks[2].kind)
+		local price = priceOf(picks[1], picks[2])
+		fuseName.Text = Fusion.name(base, donor) .. "!"
+		fuseButton.Text = "FUSE " .. money(price)
+		fuseButton.BackgroundColor3 = if (player:GetAttribute("Gold") or 0) >= price then GREEN else Color3.fromRGB(150, 160, 175)
+		fuseButton.Visible, fuseName.Visible = true, true
+		local s = fuseButton:FindFirstChildOfClass("UIScale")
+		s.Scale = 0.2
+		TweenService:Create(s, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	elseif not ready then
+		fuseButton.Visible, fuseName.Visible = false, false
+	end
+end
+
+local function toggle(pet)
+	local i = table.find(picks, pet)
+	if i then
+		table.remove(picks, i)
+	elseif canPick(pet) and #picks < 2 then
+		table.insert(picks, pet)
+		Sounds.play("merge_pop")
 	else
-		tip.Text = "Now tap another pet"
-	end
-end
-
-UserInputService.InputBegan:Connect(function(input, processed)
-	if not state.active or processed or panel.Visible then
+		tip.Text = if pet.fuse then "Hybrids can't fuse again" else "Pick a different animal"
+		tip.Visible = true
+		task.delay(1.6, function()
+			tip.Visible = false
+		end)
 		return
 	end
-	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+	refresh()
+end
+
+local function arrow(position, turn, onClick)
+	local a = Instance.new("ImageButton")
+	a.BackgroundTransparency = 1
+	a.AutoButtonColor = false
+	a.Image = ARROW
+	a.Rotation = turn
+	a.AnchorPoint = Vector2.new(0.5, 0.5)
+	a.Size = UDim2.fromOffset(140, 140)
+	a.Position = position
+	a.ZIndex = 3
+	a.Activated:Connect(onClick)
+	a.Parent = page
+	return a
+end
+
+-- One page of up to 12 cards, with arrows to the pages either side.
+function showPage(first)
+	at = first
+	for _, child in page:GetChildren() do
+		if child:IsA("GuiObject") and child ~= fuseButton and child ~= fuseName and child ~= tip then
+			child:Destroy()
+		end
+	end
+	table.clear(cards)
+	local perPage = COLUMNS * ROWS
+	if first > 1 then
+		arrow(UDim2.fromOffset(-100, 422), -90, function()
+			Sounds.play("book_flip")
+			showPage(first - perPage)
+		end)
+	end
+	if first + perPage <= #pets then
+		arrow(UDim2.fromOffset(PAGE.X + 100, 422), 90, function()
+			Sounds.play("book_flip")
+			showPage(first + perPage)
+		end)
+	end
+	local width = COLUMNS * CARD + (COLUMNS - 1) * GAP
+	for i = first, math.min(first + perPage - 1, #pets) do
+		local pet = pets[i]
+		local slot = i - first
+		local col, row = slot % COLUMNS, slot // COLUMNS
+		local card = Instance.new("ImageButton")
+		card.Name = pet.kind
+		card.BackgroundTransparency = 1
+		card.AutoButtonColor = false
+		card.Image = CARDS[rarityOf(pet.kind)] or CARDS.Common
+		card.Size = UDim2.fromOffset(CARD, CARD)
+		card.AnchorPoint = Vector2.new(0.5, 0.5)
+		card.Position = UDim2.fromOffset((PAGE.X - width) / 2 + col * (CARD + GAP) + CARD / 2, GRID_TOP + row * (CARD + GAP) + CARD / 2)
+		Instance.new("UIScale").Parent = card
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0.16, 0)
+		corner.Parent = card
+		local outline = Instance.new("UIStroke") -- picked (QM: choosing a pet outlines it)
+		outline.Name = "Outline"
+		outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		outline.Thickness = 8
+		outline.Color = PICKED
+		outline.Enabled = false
+		outline.Parent = card
+		local art = Instance.new("CanvasGroup") -- (fades with the card when it can't be picked)
+		art.Name = "Art"
+		art.BackgroundTransparency = 1
+		art.AnchorPoint = Vector2.new(0.5, 0.5)
+		art.Position = UDim2.fromScale(0.5, 0.5)
+		art.Size = UDim2.fromOffset(ART, ART)
+		art.Parent = card
+		local view = still3D(pet.kind, pet.fuse)
+		if view then
+			view.Size = UDim2.fromScale(1, 1)
+			view.Parent = art
+		end
+		if pet.fuse or (pet.merged or 1) > 1 then -- a hybrid's name, or how many it's merged from
+			local tag = text(card, UDim2.new(1, 0, 0, 30), UDim2.new(0.5, 0, 1, -14), 26)
+			tag.Text = if pet.fuse then Fusion.name(pet.kind, pet.fuse) else "x" .. pet.merged
+		end
+		card.Activated:Connect(function()
+			toggle(pet)
+		end)
+		card.Parent = page
+		cards[pet] = card
+	end
+	refresh()
+end
+
+local function setPop(s)
+	pop = s
+	local screen = camera.ViewportSize
+	scale.Scale = math.min(screen.X * SCREEN_SHARE / PAGE.X, screen.Y * 0.8 / PAGE.Y) * pop
+end
+
+local close
+
+local function fuse()
+	local a, b = picks[1], picks[2]
+	if not a or not b then
 		return
 	end
-	local pets = yours()
-	local models = {}
-	for model in pets do
-		table.insert(models, model)
+	if (player:GetAttribute("Gold") or 0) < priceOf(a, b) then
+		tip.Text = "Not enough gold"
+		tip.Visible = true
+		task.delay(1.6, function()
+			tip.Visible = false
+		end)
+		return
 	end
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Include
-	params.FilterDescendantsInstances = models
-	local ray = camera:ViewportPointToRay(input.Position.X, input.Position.Y)
-	local hit = workspace:Raycast(ray.Origin, ray.Direction * 1000, params)
-	local part = hit and hit.Instance
-	while part and not pets[part] do
-		part = part.Parent
+	local base, donor = Fusion.order(a.kind, b.kind)
+	local baseModel = if a.kind == base then a.model else b.model
+	-- The two are pulled up over the base and fuse, as a merge's are; the hybrid
+	-- drops down from there (Pen.client, or Ride.client's starter).
+	if baseModel.Parent then
+		local index = player:GetAttribute("Pen")
+		local pen = index and workspace:FindFirstChild("Pens") and workspace.Pens:FindFirstChild("Pen" .. index)
+		local area = pen and pen:FindFirstChild("Area")
+		local spot = baseModel:GetPivot().Position
+		local floor = if area then area.Position.Y - area.Size.Y / 2 else spot.Y
+		local up = Vector3.new(spot.X, floor + PenPets.MERGE_UP, spot.Z)
+		PenPets.merges[Fusion.key(base, donor)] = { at = up, landAt = os.clock() + PenPets.MERGE_PULL }
+		if PenPets.pull then
+			PenPets.pull({ a.model, b.model }, up)
+		end
 	end
-	if part then
-		pick(part, pets[part])
-	end
-end)
-
-local function start()
-	stop()
-	state.active = true
-	tip.Text = "Tap two pets to fuse"
-	tip.Visible = true
-	cancelButton.Visible = true
+	ReplicatedStorage:WaitForChild("FusePets"):FireServer(a.id, b.id)
+	close()
 end
 
-cancelButton = pill(root, "X", Color3.fromRGB(230, 60, 60), UDim2.fromOffset(64, 64), UDim2.new(0.5, 340, 0, 120), stop)
-cancelButton.Visible = false
-
-pill(panel, "FUSE!", PINK, UDim2.fromOffset(200, 70), UDim2.new(0.5, -105, 1, -56), function()
-	local a, b = state.picks[1], state.picks[2]
-	if a and b then
-		ReplicatedStorage:WaitForChild("FusePets"):FireServer(a.id, b.id)
-		Sounds.play("merge_poof")
-	end
-	stop()
-end)
-pill(panel, "Cancel", Color3.fromRGB(150, 160, 175), UDim2.fromOffset(170, 70), UDim2.new(0.5, 105, 1, -56), stop)
-
--- Whether you're at home: in or by your pen, on foot.
-local function atHome()
-	if player:GetAttribute("Tutorial") then
-		return false
-	end
-	local char = player.Character
-	local hrp = char and char:FindFirstChild("HumanoidRootPart")
-	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-	local index = player:GetAttribute("Pen")
-	local pen = index and workspace:FindFirstChild("Pens") and workspace.Pens:FindFirstChild("Pen" .. index)
-	local area = pen and pen:FindFirstChild("Area")
-	if not hrp or not area or (humanoid and humanoid.Sit) then
-		return false
-	end
-	local offset = area.CFrame:PointToObjectSpace(hrp.Position)
-	return math.abs(offset.X) <= area.Size.X / 2 + HOME_REACH and math.abs(offset.Z) <= area.Size.Z / 2 + HOME_REACH
-end
-
--- How many kinds of pet you have that can fuse (hybrids can't).
-local function kindsToFuse()
+local function openPage()
+	pets = yourPets()
 	local kinds, n = {}, 0
-	for _, pet in yours() do
+	for _, pet in pets do
 		if not pet.fuse and not kinds[pet.kind] then
-			kinds[pet.kind] = true
-			n += 1
+			kinds[pet.kind], n = true, n + 1
 		end
 	end
-	return n
+	if n < 2 then
+		return false
+	end
+	open = true
+	table.clear(picks)
+	gui.Enabled = true
+	showPage(1)
+	ModalPop.open(setPop)
+	Gamepad.openMenu("Fuse", { close = close })
+	Hud.fuseToggled(true)
+	return true
 end
 
+function close(instant)
+	if not open then
+		return
+	end
+	open = false
+	Gamepad.closeMenu("Fuse")
+	ModalPop.close(setPop, function()
+		gui.Enabled = false
+		table.clear(cards)
+		for _, child in page:GetChildren() do
+			if child:IsA("GuiObject") and child ~= fuseButton and child ~= fuseName and child ~= tip then
+				child:Destroy()
+			end
+		end
+	end, instant)
+	Hud.fuseToggled(false)
+end
+
+-- The page in the middle of the screen, as the dictionary's; clicking off it closes it.
+gui = Instance.new("ScreenGui")
+gui.Name = "FuseMenu"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.DisplayOrder = -1 -- under the HUD, so the Fuse button that closes it stays on top
+gui.Enabled = false
+local function over(object, point)
+	local min, size = object.AbsolutePosition, object.AbsoluteSize
+	return point.X >= min.X and point.Y >= min.Y and point.X <= min.X + size.X and point.Y <= min.Y + size.Y
+end
+local backdrop = Instance.new("TextButton")
+backdrop.BackgroundTransparency = 1
+backdrop.Text = ""
+backdrop.AutoButtonColor = false
+backdrop.Selectable = false
+backdrop.Size = UDim2.fromScale(1, 1)
+backdrop.ZIndex = 0
+backdrop.Activated:Connect(function(input)
+	local point = Vector2.new(input.Position.X, input.Position.Y)
+	if over(page, point) then
+		return
+	end
+	for _, d in page:GetDescendants() do
+		if d:IsA("GuiButton") and d.Visible and over(d, point) then
+			return
+		end
+	end
+	close()
+end)
+backdrop.Parent = gui
+page = Instance.new("ImageLabel")
+page.Name = "Page"
+page.BackgroundTransparency = 1
+page.Image = PAGE_ART
+page.AnchorPoint = Vector2.new(0.5, 0.5)
+page.Position = UDim2.fromScale(0.5, 0.5)
+page.Size = UDim2.fromOffset(PAGE.X, PAGE.Y)
+scale = Instance.new("UIScale")
+scale.Parent = page
+page.Parent = gui
+
+-- FUSE, popping up at the bottom of the page once two are picked, the hybrid's name over it.
+fuseButton = Instance.new("TextButton")
+fuseButton.Name = "Fuse"
+fuseButton.AutoButtonColor = false
+fuseButton.BackgroundColor3 = GREEN
+fuseButton.AnchorPoint = Vector2.new(0.5, 0.5)
+fuseButton.Size = UDim2.fromOffset(420, 100)
+fuseButton.Position = UDim2.fromOffset(PAGE.X / 2, PAGE.Y - 20)
+fuseButton.Font = FONT
+fuseButton.Text = "FUSE"
+fuseButton.TextSize = 52
+fuseButton.TextColor3 = Color3.new(1, 1, 1)
+fuseButton.ZIndex = 5
+fuseButton.Visible = false
+Instance.new("UIScale").Parent = fuseButton
+local fuseCorner = Instance.new("UICorner")
+fuseCorner.CornerRadius = UDim.new(0.3, 0)
+fuseCorner.Parent = fuseButton
+stroked(fuseButton, 5).ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+local fuseTextStroke = stroked(fuseButton, 4)
+fuseTextStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+fuseButton.Activated:Connect(fuse)
+fuseButton.Parent = page
+fuseName = text(page, UDim2.fromOffset(600, 50), UDim2.fromOffset(PAGE.X / 2, PAGE.Y - 100), 44)
+fuseName.ZIndex = 5
+fuseName.Visible = false
+tip = text(page, UDim2.fromOffset(700, 50), UDim2.fromOffset(PAGE.X / 2, PAGE.Y - 160), 40)
+tip.ZIndex = 6
+tip.Visible = false
+
+camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+	setPop(pop)
+end)
+setPop(1)
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- The Fuse button: opens the page, or closes it again. With fewer than two kinds
+-- to fuse, it says so instead.
+local notice = text(gui, UDim2.fromOffset(700, 50), UDim2.new(0.5, 0, 0, 120), 40)
+notice.Visible = false
 Hud.onFuse = function()
-	if state.active then
-		stop()
-	elseif not atHome() then
-		flash("Fuse your pets at your pen")
-		task.delay(1.6, function()
-			if not state.active then
-				tip.Visible = false
-			end
+	if open then
+		close()
+	elseif not openPage() then
+		notice.Text = "You need two kinds of pets to fuse"
+		notice.Visible = true
+		task.delay(1.8, function()
+			notice.Visible = false
 		end)
-	elseif kindsToFuse() < 2 then
-		flash("You need two kinds of pets to fuse")
-		task.delay(1.6, function()
-			if not state.active then
-				tip.Visible = false
-			end
-		end)
-	else
-		start()
 	end
 end
+Hud.closeFuse = close
 
--- Leaving home (or riding off) puts picking away.
+-- Riding off closes it.
+player.CharacterAdded:Connect(function()
+	close(true)
+end)
 task.spawn(function()
 	while true do
-		if state.active and not atHome() then
-			stop()
+		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+		if open and humanoid and humanoid.Sit then
+			close(true)
 		end
 		task.wait(0.3)
 	end

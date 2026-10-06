@@ -741,7 +741,16 @@ remote("FusePets", function(player, idA, idB)
 	if base ~= a.pet then
 		a, b, baseId, donorId = b, a, idB, idA
 	end
-	local earns = (Config.PetIncome[a.pet] or 0) * (a.merged or 1) + (Config.PetIncome[b.pet] or 0) * (b.merged or 1)
+	local function earning(item) -- (neither is a hybrid: what it earns is its kind's, times its merges)
+		return (Config.PetIncome[item.pet] or 0) * (item.merged or 1)
+	end
+	local earns = earning(a) + earning(b)
+	local price = Fusion.price(a.pet, b.pet) -- (QM: fusing costs gold, by rarity)
+	local gold = player:GetAttribute("Gold") or 0
+	if gold < price then
+		return
+	end
+	player:SetAttribute("Gold", gold - price)
 	if baseId == "ride" or donorId == "ride" then -- the hybrid is the one you ride
 		profile.ride, profile.rideFuse, profile.rideMerged, profile.rideIncome = a.pet, b.pet, nil, earns
 		profile.items[if baseId == "ride" then donorId else baseId] = nil

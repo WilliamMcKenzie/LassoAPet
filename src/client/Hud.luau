@@ -609,6 +609,9 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- the one coming in pops.
 	AnimalDex.onToggle = function(open)
 		if open then
+			if Hud.closeFuse then
+				Hud.closeFuse(true)
+			end
 			RollMenu.close(true)
 			Shop.close(true)
 		end
@@ -616,14 +619,29 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end
 	RollMenu.onToggle = function(open)
 		if open then
+			if Hud.closeFuse then
+				Hud.closeFuse(true)
+			end
 			AnimalDex.close(true)
 			Shop.close(true)
 		end
 		homeGui.Enabled = not open
 	end
 	-- The shop hides the rest of the home HUD like the other menus.
+	-- The Fuse page (FuseMenu) is a menu like the others.
+	function Hud.fuseToggled(open)
+		if open then
+			AnimalDex.close(true)
+			RollMenu.close(true)
+			Shop.close(true)
+		end
+		homeGui.Enabled = not open
+	end
 	Shop.onToggle = function(open)
 		if open then
+			if Hud.closeFuse then
+				Hud.closeFuse(true)
+			end
 			AnimalDex.close(true)
 			RollMenu.close(true)
 		end

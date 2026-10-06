@@ -265,7 +265,7 @@ local function showPet(pen, id, item)
 	makeRideable(pen, id, s.pet, item.pet, item.merged, item.fuse, item.income)
 	-- Just merged (PenPets.merges): it waits unseen while the pets going into it are
 	-- pulled up, then pops out up there and drops down onto the spot under it.
-	local merge = pen == myPen() and (item.merged or 1) > 1 and PenPets.mergeFor(Fusion.key(item.pet, item.fuse))
+	local merge = pen == myPen() and ((item.merged or 1) > 1 or item.fuse) and PenPets.mergeFor(Fusion.key(item.pet, item.fuse))
 	if merge then
 		s.drop, s.full = merge, s.pet.scale
 		s.at = Vector3.new(merge.at.X, s.at.Y, merge.at.Z)

@@ -11,8 +11,9 @@
 --   Fusion.split(key)             kind, fuse
 --   Fusion.order(a, b)            base, donor: the rarer one is the base
 --   Fusion.scale(kind, fuse)      how much bigger (or smaller) the donor makes it
---   Fusion.name(kind, fuse)       "Loong x Pig"
+--   Fusion.name(kind, fuse)       "Poong": the donor's front and the base's back
 --   Fusion.paint(model, kind, fuse)  repaints a built model in the donor's palette
+--   Fusion.price(kindA, kindB)    gold to fuse two pets: each adds its rarity's price
 
 local Config = require(script.Parent.Config)
 local Palettes = require(script.Parent.Palettes)
@@ -76,12 +77,57 @@ function Fusion.scale(kind, fuse)
 	return Config.TierGrowth ^ (to - from)
 end
 
+-- Hybrid names (QM, Oct 6): the donor's front half and the base's back half, so a
+-- Unicorn donor on a Robo Shark is a "Unishark". Split by hand: compound names at
+-- the join, longer ones by syllable, one-syllable ones before the vowel. Those
+-- have a second front with the vowel ("Sna"), for a back that starts with a
+-- consonant (Snake on a Horse: "Snase", not "Snse"). Where two vowels meet, one
+-- goes ("Kra" + "ale" = "Krale"). Names can repeat: they're only for show.
+local NAMES = {
+	Horse = { "Hor", "se" }, Pinto = { "Pin", "to" }, Pig = { "P", "ig", "Pi" }, Fish = { "F", "ish", "Fi" },
+	Rhino = { "Rhi", "no" }, Unicorn = { "Uni", "corn" }, Cactus = { "Cac", "tus" }, Scorpion = { "Scor", "pion" },
+	Sandworm = { "Sand", "worm" }, SpineLizard = { "Spine", "lizard" }, Snake = { "Sn", "ake", "Sna" },
+	Beholder = { "Be", "holder" }, Penguin = { "Pen", "guin" }, Snowman = { "Snow", "man" }, Boar = { "B", "oar", "Bo" },
+	IceGolem = { "Ice", "golem" }, SnackYak = { "Snack", "yak" }, Icebringer = { "Ice", "bringer" },
+	Starfish = { "Star", "fish" }, Whale = { "Wh", "ale", "Wha" }, Squid = { "Sq", "uid", "Squi" },
+	Kraken = { "Kra", "ken" }, KingCrab = { "King", "crab" }, BlueCrab = { "Blue", "crab" },
+	RoboShark = { "Robo", "shark" }, FishSchool = { "Fish", "school" }, Loong = { "L", "oong", "Loo" },
+	WarElephant = { "War", "elephant" }, SoulHorse = { "Soul", "horse" }, Sludge = { "Slu", "udge" },
+	Leviathan = { "Levi", "athan" },
+}
+local VOWELS = { a = true, e = true, i = true, o = true, u = true }
+
 local function spaced(kind)
 	return (string.gsub(kind, "(%l)(%u)", "%1 %2"))
 end
 
+-- FUSE costs each pet's rarity price added up (Config.FusePrice): a Legendary and
+-- a Rare are $1,010,000.
+function Fusion.price(kindA, kindB)
+	local function one(kind)
+		return Config.FusePrice[RARITIES[rarityRank(kind)] or "Common"] or 0
+	end
+	return one(kindA) + one(kindB)
+end
+
 function Fusion.name(kind, fuse)
-	return if fuse then spaced(kind) .. " x " .. spaced(fuse) else spaced(kind)
+	if not fuse then
+		return spaced(kind)
+	end
+	local front, back = NAMES[fuse], NAMES[kind]
+	if not front or not back then
+		return spaced(kind) .. " x " .. spaced(fuse) -- (a new animal not split yet)
+	end
+	local f, b = front[1], back[2]
+	local first = string.sub(b, 1, 1)
+	if not VOWELS[first] and front[3] then
+		f = front[3]
+	end
+	local last = string.lower(string.sub(f, -1))
+	if (VOWELS[last] and VOWELS[first]) or last == first then
+		b = string.sub(b, 2)
+	end
+	return f .. b -- (the front is capitalised, the back isn't)
 end
 
 -- The donor's colour for a slot it doesn't have, made from the ones it does.

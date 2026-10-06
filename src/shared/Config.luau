@@ -454,6 +454,9 @@ return {
 	-- Obstacles are rescaled about their spot on the floor by ObstacleScale (worked out the same
 	-- way from tools/terrain_assets.py, against smalls of ~5.4 studs).
 	TierGrowth = 1.6, -- QM, Oct 1: 2x was too much
+	-- FUSE costs gold (QM, Oct 6): each of the two pets adds its rarity's price, so two
+	-- Legendaries are $2M (Shared/Fusion.price). Common wasn't named: Claude's 100.
+	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000 },
 	PetSmallSize = 10.4,
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,

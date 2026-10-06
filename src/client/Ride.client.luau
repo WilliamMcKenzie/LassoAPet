@@ -689,7 +689,7 @@ local function spawnStarter()
 	setClickable(starter.animal.model, true)
 	-- Just merged (PenPets.merges): it pops out up over the pen once the pets going
 	-- into it have been pulled up there, and drops down (vfx.dropStarter).
-	local merge = starter.merged > 1 and PenPets.mergeFor(vfx.Fusion.key(starter.kind, starter.fuse))
+	local merge = (starter.merged > 1 or starter.fuse) and PenPets.mergeFor(vfx.Fusion.key(starter.kind, starter.fuse))
 	if merge then
 		starter.drop, starter.full = merge, vfx.Merge.size(starter.kind, starter.merged) * vfx.Fusion.scale(starter.kind, starter.fuse)
 		starter.x, starter.z = merge.at.X, merge.at.Z
@@ -4739,6 +4739,7 @@ function vfx.mergePull(models, at)
 		end
 	end)
 end
+PenPets.pull = vfx.mergePull -- (FuseMenu pulls the two it fuses up the same way)
 
 -- Nuke All from the shop (Shop.server's "Nukes"): spent on the next ride as it
 -- starts. Every animal in sight is knocked flying, and for the whole ride every
