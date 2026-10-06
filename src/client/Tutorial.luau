@@ -145,7 +145,7 @@ local PICTURES = {
 	takeEgg = { image = "rbxassetid://140505417870582", width = 738, height = 145 }, -- assets/ui/HintTakeEgg.png
 	-- (cost: the Desert price drawn in it; at any other price the text hint shows instead.
 	-- image "": not uploaded yet, the text hint too)
-	saveDesert = { image = "", width = 1830, height = 127, cost = 500 }, -- assets/ui/HintSaveDesert.png
+	saveDesert = { image = "rbxassetid://mode", width = 1830, height = 127, cost = 500 }, -- assets/ui/HintSaveDesert.png
 }
 local picture = Instance.new("ImageLabel")
 picture.Name = "HintPicture"
