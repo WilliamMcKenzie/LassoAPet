@@ -719,6 +719,10 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
 	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.66), 30, 3)
 	price.AutomaticSize = Enum.AutomaticSize.X
+	-- How far along you are, under the button while you can't afford it yet ("$230 / $500"):
+	-- the next goal after the tutorial (balance pass, Oct 6).
+	local progress = label(upgrade, UDim2.fromOffset(0, 30), UDim2.new(0.5, 0, 1, 22), 26, 3)
+	progress.AutomaticSize = Enum.AutomaticSize.X
 	local cost -- gold for the next level, nil at the top level
 	local function refreshUpgrade()
 		local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
@@ -730,6 +734,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			local own = nextBiome.UpgradeImage
 			price.Text = money(cost)
 			price.Visible = not own
+			progress.Text = money(player:GetAttribute("Gold") or 0) .. " / " .. money(cost)
+			progress.Visible = not affordable
 			local ownDisabled = own and not affordable and nextBiome.UpgradeImageDisabled
 			upgrade.Image = ownDisabled or own or IMAGES[if affordable then "upgradePen" else "upgradePenDisabled"].id
 			upgrade.ImageColor3 = if own and not affordable and not ownDisabled then Color3.fromRGB(150, 150, 150) else Color3.new(1, 1, 1)
@@ -790,16 +796,22 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		rollText = label(roll, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 46, 5)
 	end
 	local rolling = false
+	-- The next roll's price climbs with each roll (Hatchery's "RollPrice").
+	local function rollPrice()
+		return player:GetAttribute("RollPrice") or Config.Gacha.Price
+	end
 	local function canRoll()
-		return (player:GetAttribute("Gold") or 0) >= Config.Gacha.Price
+		return (player:GetAttribute("Gold") or 0) >= rollPrice()
 	end
 	local function refreshRoll()
+		RollMenu.setPrice(money(rollPrice()))
 		if rollText then
-			rollText.Text = "ROLL " .. money(Config.Gacha.Price)
+			rollText.Text = "ROLL " .. money(rollPrice())
 			roll.BackgroundColor3 = Color3.fromRGB(92, 214, 72) -- always pressable (QM): short of gold, it offers a gold pack
 		end
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(refreshRoll)
+	player:GetAttributeChangedSignal("RollPrice"):Connect(refreshRoll)
 	refreshRoll()
 	-- ROLL is always pressable (QM): without the gold for it, it asks you to buy the
 	-- smallest gold pack that gets you there (Shop.buyGoldFor); press ROLL again once
@@ -809,7 +821,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			return
 		end
 		if not canRoll() then
-			Shop.buyGoldFor(Config.Gacha.Price - (player:GetAttribute("Gold") or 0))
+			Shop.buyGoldFor(rollPrice() - (player:GetAttribute("Gold") or 0))
 			return
 		end
 		rolling = true

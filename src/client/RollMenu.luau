@@ -1,6 +1,6 @@
 -- The egg roll menu (QM, Oct 4): the Roll button over Pets opens it. QM's panel
 -- (the title, the exclusives' silhouettes and the eggs you can roll, baked into the
--- art), the same size and place as the shop's, with ROLL $1M over the eggs and the
+-- art), the same size and place as the shop's, with ROLL and its price over the eggs and the
 -- shop's green ? on its top-right corner, which flips it to QM's odds art and back
 -- (ROLL steps aside while the odds show). The roll itself is Hud's (RollGacha, then
 -- the egg card; with too little gold it offers a gold pack instead); clicking
@@ -10,6 +10,7 @@
 --   RollMenu.onToggle = function(open)     -- Hud hides the rest of the home HUD
 --   RollMenu.onRoll = function()           -- ROLL was pressed
 --   RollMenu.setHidden(yes)                -- out of the way while the egg card shows
+--   RollMenu.setPrice(text)                -- the price written on ROLL ("$1.1M")
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -27,7 +28,7 @@ local PANEL = { id = "rbxassetid://104698392936555", size = Vector2.new(2892, 19
 local ODDS = "rbxassetid://110875946388838" -- RollPanelOdds.png
 local FRAME_TOP = 305 / 1900
 local ODDS_BUTTON = "rbxassetid://83654143211576" -- ShopOddsButton.png (the green ?)
-local BUTTON = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) } -- RollButton.png (ROLL $1M)
+local BUTTON = { id = "rbxassetid://119520152431016", size = Vector2.new(960, 378) } -- RollButton.png (QM, Oct 6: no price drawn in; the price is written on it, below)
 local PANEL_WIDTH = 930 -- the shop's
 local BUTTON_WIDTH = PANEL_WIDTH * 0.33 -- as in QM's reference (Oct 4: bigger than the first mockup's 23%)
 local ODDS_SIZE = 64
@@ -84,6 +85,25 @@ roll.ZIndex = 2
 local rollScale = Instance.new("UIScale")
 rollScale.Parent = roll
 roll.Parent = panel
+-- The next roll's price (it climbs with each roll: Config.Gacha), written right of the
+-- coin like the Upgrade Pen buttons' drawn-in prices. Hud sets it (RollMenu.setPrice).
+local price = Instance.new("TextLabel")
+price.Name = "Price"
+price.BackgroundTransparency = 1
+price.AnchorPoint = Vector2.new(0.5, 0.5)
+price.Position = UDim2.fromScale(0.77, 0.66)
+price.Size = UDim2.fromScale(0.4, 0.4)
+price.Font = Enum.Font.FredokaOne
+price.TextScaled = true
+price.TextColor3 = Color3.new(1, 1, 1)
+price.Text = ""
+price.ZIndex = 3
+local priceStroke = Instance.new("UIStroke")
+priceStroke.Thickness = 5
+priceStroke.Color = Color3.new(0, 0, 0)
+priceStroke.LineJoinMode = Enum.LineJoinMode.Round
+priceStroke.Parent = price
+price.Parent = roll
 local press = TweenInfo.new(0.08)
 roll.MouseButton1Down:Connect(function()
 	TweenService:Create(rollScale, press, { Scale = 0.93 }):Play()
@@ -203,6 +223,10 @@ function RollMenu.close(instant)
 	if open then
 		RollMenu.toggle(instant)
 	end
+end
+
+function RollMenu.setPrice(text)
+	price.Text = text
 end
 
 function RollMenu.isOpen()

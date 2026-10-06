@@ -444,10 +444,10 @@ return {
 	PetIncome = {
 		Horse = 1, Pig = 3, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
 		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
-		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 18000, Icebringer = 1111, -- Tundra
-		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 19000, Whale = 5000, Kraken = 8200, -- Ocean
-		Loong = 20000, Beholder = 666, Leviathan = 5000, -- Godlands (QM's pets JSON, Oct 4)
-		WarElephant = 1000, SoulHorse = 6666, Sludge = 450, -- Godlands (QM's pets JSON, Oct 4)
+		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 3000, Icebringer = 1111, -- Tundra
+		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 19000, Whale = 1500, Kraken = 8200, -- Ocean
+		Loong = 20000, Beholder = 3000, Leviathan = 15000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
+		WarElephant = 4000, SoulHorse = 20000, Sludge = 2500, -- so they pay more than the Ocean's)
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -458,7 +458,12 @@ return {
 		-- Egg Machine in the base stays off (Machine).
 		Enabled = true,
 		Machine = false,
-		Price = 1000000, -- QM's ROLL $1M button
+		-- Each roll costs PriceGrowth x the last, rounded to two figures ($1M, $1.1M, $1.2M,
+		-- $1.3M, $1.5M...), counted per player and saved (balance pass, Oct 6: a flat $1M
+		-- roll paid for itself in ~2 minutes once you had the Ocean). Hatchery sets it on
+		-- the player as "RollPrice".
+		Price = 1000000, -- the first roll
+		PriceGrowth = 1.1,
 		Position = Vector3.new(-28, 0, 30), -- on the grass between Pen1 and Pen2's ride lanes
 		-- QM, Oct 4: the Loong, Snack Yak and Robo Shark 10% each (Exclusive), the other
 		-- 70% split evenly over the other Legendaries (14% each).

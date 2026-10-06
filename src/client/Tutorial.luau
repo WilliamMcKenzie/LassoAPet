@@ -16,8 +16,9 @@
 --                                            always holds a Config.TutorialEgg
 --   5. take  "Press E to take the egg!"      time slows while it's in reach
 --   6. home  (DODGE THE STAMPEDE!)           home with the egg
---   7. place2 "Place your egg in your pen!"  as step 1. Placing it starts the money:
---                                            until now pets earn nothing (Hatchery)
+--   7. place2 the egg goes into the pen by itself (Hatchery's DeliverEgg, balance
+--            pass Oct 6: a fifth of new players left here when they had to place it).
+--            Placing it starts the money: until now pets earn nothing (Hatchery)
 --   8. goal  once that egg's hatched, the camera flies to the next biome's gate: "Save $1k to unlock the
 --            Desert!". Then it's over and the rest of the HUD (Gold, Upgrade Pen,
 --            Pets) comes back: none of it shows in the tutorial (QM).
@@ -70,7 +71,7 @@ local lastPhase = "idle"
 local onChange -- Ride's: shows or hides the nest's tutorial egg
 local hudStage = nil -- what the HUD was last told (Hud.setTutorial)
 local done = false -- TutorialDone sent
-local known = {} -- the pen's items when place2 began: a new one is the egg placed
+local known = {} -- the pen's items when the ride home began: a new one is the egg brought home
 local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
 local goalDesert = false -- and it's that one, which QM drew (PICTURES.saveDesert)
 
@@ -322,7 +323,7 @@ local function setStep(name)
 	step = name
 	if name == "ride" and onChange then
 		onChange() -- the nest's egg is back for another go
-	elseif name == "place2" then
+	elseif name == "home" then
 		table.clear(known)
 		for id in contents() do
 			known[id] = true
