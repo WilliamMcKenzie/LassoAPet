@@ -2481,9 +2481,10 @@ function vfx.ownSize(entity)
 	return entity.feast and entity.feast.size or 1
 end
 
--- A pet's ability (Config.Abilities): a hybrid's is its donor's, the right pick's (QM, Oct 6).
+-- A pet's ability (Config.Abilities): a hybrid's is its donor's, the right pick's, or
+-- if that has none its body's (QM, Oct 6).
 function vfx.abilityOf(entity)
-	return entity and Config.Abilities[entity.fuse or entity.kind]
+	return entity and (entity.fuse and Config.Abilities[entity.fuse] or Config.Abilities[entity.kind])
 end
 
 -- The Blue Crab's Feast (Config.Abilities): what it has broken since the last one, and
@@ -4087,7 +4088,7 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 		end
 	elseif what == "ability" and rider and rider.entity then
 		local entity = rider.entity
-		local cfg = Config.Abilities[select(2, vfx.Fusion.split(rider.kind)) or entity.kind] -- (a hybrid's is its donor's)
+		local cfg = vfx.abilityOf({ kind = entity.kind, fuse = select(2, vfx.Fusion.split(rider.kind)) }) -- (a hybrid's is its donor's)
 		if not cfg or cfg.Kind ~= a then
 			return
 		end
