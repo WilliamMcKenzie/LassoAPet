@@ -17,6 +17,7 @@ return {
 		{
 			Name = "Meadow",
 			Length = 760,
+			HerdKeep = 0.75, -- this share of the stampede's spawns runs here: a quarter fewer animals, new players kept crashing on the way back (QM, Oct 6)
 			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
 			WallColors = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
 			-- Which animals run in this biome's stampede and how often (names are modules

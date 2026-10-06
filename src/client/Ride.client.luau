@@ -298,6 +298,7 @@ do
 			biome.Herd,
 			biome.Name
 		)
+		streams[b].keep = biome.HerdKeep -- (fewer animals in the Meadow)
 	end
 end
 -- Track k's stream, at streams[endless.b + k % 900] (made now if it isn't there).
@@ -1803,7 +1804,9 @@ local function updateHerd(dt, slowed)
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
 		for n = stream.oldest, newest do
 			local key = n * BIOME_KEYS + b - 1
-			if taken[key] or (stream.thin and n % stream.thin ~= 0) then
+			-- (keep: spawn n runs if n x the golden ratio's fraction is under it, the same
+			-- on every client and spread evenly, without a pattern to the gaps)
+			if taken[key] or (stream.thin and n % stream.thin ~= 0) or (stream.keep and (n * 0.6180339887) % 1 >= stream.keep) then
 				continue
 			end
 			local p = plan(key)
