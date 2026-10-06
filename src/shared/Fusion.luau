@@ -1,5 +1,6 @@
--- FUSE (QM, Oct 6): two of your pets of different kinds become one hybrid. The rarer
--- one is the base: its model, animations and ability. The other one, the donor,
+-- FUSE (QM, Oct 6): two of your pets of different kinds become one hybrid. The one
+-- picked first (on the left) is the base: its model, animations and ability (QM,
+-- Oct 6 20:00; it used to be the rarer one). The other one, the donor, on the right,
 -- sets its size (a Pig donor makes a tiny Loong, a Loong donor a giant Pig) and
 -- paints it in its own colours, slot for slot (Shared/Palettes). It earns what both
 -- earned. Two of the same hybrid merge like any other pets (Shared/Merge).
@@ -9,7 +10,6 @@
 --
 --   Fusion.key(kind, fuse)        "Loong:Pig", or just the kind for a plain pet
 --   Fusion.split(key)             kind, fuse
---   Fusion.order(a, b)            base, donor: the rarer one is the base
 --   Fusion.combine(a, aFuse, b, bFuse)  what fusing two pets (hybrids too) makes
 --   Fusion.scale(kind, fuse)      how much bigger (or smaller) the donor makes it
 --   Fusion.name(kind, fuse)       "Poong": the donor's front and the base's back
@@ -58,35 +58,20 @@ local function rarityRank(kind)
 	return ok and class and table.find(RARITIES, class.Rarity) or 0
 end
 
--- The rarer one is the base (QM); between equals, the one that earns more.
-function Fusion.order(a, b)
-	local ra, rb = rarityRank(a), rarityRank(b)
-	if rb > ra or (rb == ra and (Config.PetIncome[b] or 0) > (Config.PetIncome[a] or 0)) then
-		return b, a
-	end
-	return a, b
-end
-
 -- Fusing two pets, either of them a hybrid already (QM, Oct 6: hybrids fuse again):
--- the rarer base animal is the base, and the other pet gives what it looks like, its
--- donor's colours and size if it's a hybrid, else its own. Returns the new base and
--- donor, and whether pet A is the base; nil if they'd merge instead (the same pet)
--- or come out as a plain animal (the donor's look is the base's own).
+-- pet A (the left one) gives the body, its base animal, and pet B (the right one)
+-- what it looks like, its donor's colours and size if it's a hybrid, else its own.
+-- Returns the new base and donor, and true (pet A is the base); nil if they'd merge
+-- instead (the same pet) or come out as a plain animal (B looks like A's animal).
 function Fusion.combine(a, aFuse, b, bFuse)
 	if Fusion.key(a, aFuse) == Fusion.key(b, bFuse) then
 		return nil
 	end
-	local aIsBase = Fusion.order(a, b) == a
-	local base, donor
-	if aIsBase then
-		base, donor = a, bFuse or b
-	else
-		base, donor = b, aFuse or a
-	end
+	local base, donor = a, bFuse or b
 	if donor == base then
 		return nil
 	end
-	return base, donor, aIsBase
+	return base, donor, true
 end
 
 -- The donor's size tier stands in for the base's: each tier is Config.TierGrowth

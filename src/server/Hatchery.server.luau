@@ -720,9 +720,9 @@ remote("MergePets", function(player, key)
 end)
 
 -- FUSE (QM, Oct 6; Shared/Fusion): two pets of different kinds, in the pen or the
--- one you ride ("ride"), become one hybrid where the base was. The rarer is the
--- base; the other sets its size and colours. It earns what both earned. Hybrids
--- don't fuse again.
+-- one you ride ("ride"), become one hybrid where the base was. The first (the left
+-- pick) is the base; the other sets its size and colours. It earns what both
+-- earned. Hybrids fuse again.
 remote("FusePets", function(player, idA, idB)
 	local profile = profiles[player]
 	if not profile or typeof(idA) ~= "string" or typeof(idB) ~= "string" or idA == idB then

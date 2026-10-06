@@ -4,8 +4,9 @@
 -- Tap two to pick them (each gets an outline); their names show in the strip at the
 -- bottom either side of QM's FUSE button ("???" till picked), with the price over
 -- it. FUSE closes the panel and the two are pulled up over the pen and fuse, as merging does (PenPets.pull), and the
--- hybrid drops down where the base was (Hatchery.server's FusePets). The rarer pet
--- is the base; the other sets its size and paints it in its colours. Hybrids fuse
+-- hybrid drops down where the base was (Hatchery.server's FusePets). The left pick
+-- (the first) is the base, its body and ability; the right one sets its size and
+-- paints it in its colours (QM). Hybrids fuse
 -- again (QM; Fusion.combine), and two of the same pet merge instead (MERGE). No
 -- hybrid names anywhere (QM): a hybrid's card has none, the strip says its base.
 --

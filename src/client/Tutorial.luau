@@ -375,14 +375,14 @@ local function yourPets()
 	return list
 end
 
--- Two of your pets fuse, and you can pay for it (free for now).
+-- Two of your pets fuse, either way round, and you can pay for it (free for now).
 local function canFuse()
 	local list = yourPets()
 	local gold = player:GetAttribute("Gold") or 0
 	for i = 1, #list do
-		for j = i + 1, #list do
+		for j = 1, #list do
 			local a, b = list[i], list[j]
-			if Fusion.combine(a[1], a[2], b[1], b[2]) and gold >= Fusion.price(a[1], b[1]) then
+			if i ~= j and Fusion.combine(a[1], a[2], b[1], b[2]) and gold >= Fusion.price(a[1], b[1]) then
 				return true
 			end
 		end
