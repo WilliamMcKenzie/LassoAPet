@@ -222,6 +222,7 @@ return {
 	HoldTime = 6,
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	Sky = "Anime", -- "Anime" (the Creator Store's Anime sky, QM Oct 6) or "Flat" (one flat #59D9FD): World.server
+	WalkSpeed = 32, -- on foot, studs a second (Roblox's default is 16; QM, Oct 6: 2x, walking round took too long)
 	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
 	TiredSpeed = 0.5, -- x speed once the Hold bar's empty: no more bucking off (QM, Oct 5)
 	-- On the ride home with an egg the stampede gets out of your way (QM, Oct 6, to

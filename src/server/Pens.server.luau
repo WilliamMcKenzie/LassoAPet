@@ -5,6 +5,10 @@
 -- Players past the fifth get no pen and spawn at the base's SpawnLocation.
 
 local Players = game:GetService("Players")
+local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
+
+-- Walking speed on foot (Config.WalkSpeed): every character spawns with it.
+game:GetService("StarterPlayer").CharacterWalkSpeed = Config.WalkSpeed
 
 local folder = workspace:WaitForChild("Pens")
 local pens = {}
@@ -115,6 +119,10 @@ end
 local function onJoin(player)
 	claim(player)
 	player.CharacterAdded:Connect(function(character)
+		local humanoid = character:WaitForChild("Humanoid", 5)
+		if humanoid then
+			humanoid.WalkSpeed = Config.WalkSpeed
+		end
 		toPen(player, character)
 	end)
 	if player.Character then
