@@ -665,20 +665,85 @@ local function allowed(player)
 	return success and group.Owner ~= nil and player.UserId == group.Owner.Id
 end
 
-local function give(player, text)
-	local profile = profiles[player]
-	local pen = penOf(player)
-	local name, count = text:match("^/give%s+(%S+)%s*(%d*)")
-	if not name or not profile or not pen or not allowed(player) then
-		return
-	end
-	local kind
+-- The animal (or special egg, e.g. GiantHorse) a /give names, any case, or nil.
+local function animalNamed(name)
 	for _, module in Animals:GetChildren() do
 		if module:IsA("ModuleScript") and module.Name:lower() == name:lower() and not module.Name:match("Model$") and module.Name ~= "Rig" then
-			kind = module.Name
+			return module.Name
 		end
 	end
-	if not kind then
+	for kind in Config.SpecialEggs do
+		if kind:lower() == name:lower() then
+			return kind
+		end
+	end
+	return nil
+end
+
+-- The one player whose username or display name is `name`, or starts with it (any
+-- case); nil and why if none or several do.
+local function playerNamed(name)
+	name = name:lower()
+	local found = {}
+	for _, p in Players:GetPlayers() do
+		if p.Name:lower() == name or p.DisplayName:lower() == name then
+			return p
+		end
+		if p.Name:lower():sub(1, #name) == name or p.DisplayName:lower():sub(1, #name) == name then
+			table.insert(found, p)
+		end
+	end
+	if #found == 1 then
+		return found[1]
+	end
+	return nil, if #found == 0 then "no player called " .. name else #found .. " players start with " .. name
+end
+
+-- Dev chat replies (DevChat.client shows them in the chat window).
+local devChat = Instance.new("RemoteEvent")
+devChat.Name = "DevChat"
+devChat.Parent = ReplicatedStorage
+
+local function give(player, text)
+	if not allowed(player) then
+		return
+	end
+	local first, second, third = text:match("^/give%s+(%S+)%s*(%S*)%s*(%S*)")
+	if not first then
+		return
+	end
+	-- "/give <player> <animal> [n]" (QM, Oct 6): n eggs of that animal into that
+	-- player's inventory. (A second word that's a number is the old form's count.)
+	if second ~= "" and not tonumber(second) then
+		local target, why = playerNamed(first)
+		local kind = animalNamed(second)
+		if not target then
+			devChat:FireClient(player, "/give: " .. why)
+			return
+		elseif not kind then
+			devChat:FireClient(player, "/give: no animal called " .. second)
+			return
+		elseif not profiles[target] then
+			devChat:FireClient(player, "/give: " .. target.Name .. " hasn't loaded yet")
+			return
+		end
+		local n = math.clamp(tonumber(third) or 1, 1, 20)
+		local eggs = profiles[target].eggs
+		eggs[kind] = (eggs[kind] or 0) + n
+		publish(target)
+		devChat:FireClient(player, "/give: " .. n .. " " .. kind .. " egg" .. (if n > 1 then "s" else "") .. " to " .. target.Name)
+		return
+	end
+	-- "/give <animal> [n]": n of that animal, hatched, in your own pen.
+	local profile = profiles[player]
+	local pen = penOf(player)
+	local name, count = first, second
+	if not profile or not pen then
+		return
+	end
+	local kind = animalNamed(name)
+	if not kind or Config.SpecialEggs[kind] then
+		devChat:FireClient(player, "/give: no animal called " .. name)
 		return
 	end
 	local area = pen.Area
