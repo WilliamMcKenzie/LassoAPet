@@ -141,6 +141,19 @@ local function startWander(s)
 	s.wander = { rest = rng:NextNumber(1, 4), margin = EDGE + math.min(size.X, size.Z) / 2 }
 end
 
+-- The countdown's ("Ready"'s) outline: 3 px the way the HUD's are (QM, Oct 6), so
+-- x the HUD's scale (Hud: screen width / 1320 x Config.HudScale), kept up as the
+-- window changes size.
+local timerStrokes = {} -- [UIStroke] = true
+local function timerStroke()
+	return 3 * workspace.CurrentCamera.ViewportSize.X / 1320 * (Config.HudScale or 1)
+end
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+	for stroke in timerStrokes do
+		stroke.Thickness = timerStroke()
+	end
+end)
+
 local function newTimer(parent)
 	local gui = Instance.new("BillboardGui")
 	gui.Size = UDim2.fromOffset(120, 40)
@@ -154,8 +167,12 @@ local function newTimer(parent)
 	text.TextSize = 28
 	text.TextColor3 = Color3.new(1, 1, 1)
 	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 3
+	stroke.Thickness = timerStroke()
 	stroke.Parent = text
+	timerStrokes[stroke] = true
+	stroke.Destroying:Connect(function()
+		timerStrokes[stroke] = nil
+	end)
 	text.Parent = gui
 	gui.Parent = parent
 	return text
