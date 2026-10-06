@@ -18,7 +18,6 @@ return {
 			Name = "Meadow",
 			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
 			Length = 760,
-			HerdKeep = 0.5, -- this share of the stampede's spawns runs here: half as many animals, new players kept crashing on the way back (QM, Oct 6)
 			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
 			WallColors = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
 			-- Which animals run in this biome's stampede and how often (names are modules
