@@ -208,7 +208,14 @@ local function watch(holder)
 end
 
 function Inventory.init(parent)
-	pcall(StarterGui.SetCoreGuiEnabled, StarterGui, Enum.CoreGuiType.Backpack, false)
+	-- The Roblox hotbar stays off (this bar stands in for it). SetCoreGuiEnabled can
+	-- fail or be undone just after joining, so it's set again for the first while.
+	task.spawn(function()
+		for _ = 1, 20 do
+			pcall(StarterGui.SetCoreGuiEnabled, StarterGui, Enum.CoreGuiType.Backpack, false)
+			task.wait(0.5)
+		end
+	end)
 	bar = Instance.new("Frame")
 	bar.Name = "Inventory"
 	bar.BackgroundTransparency = 1

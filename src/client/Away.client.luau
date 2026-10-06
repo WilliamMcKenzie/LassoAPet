@@ -175,7 +175,10 @@ local function hideOthers()
 	end
 	table.insert(watching, playerGui.ChildAdded:Connect(hold))
 	for _, core in Enum.CoreGuiType:GetEnumItems() do
-		if core ~= Enum.CoreGuiType.All then
+		-- (never the Backpack: the game's own inventory bar stands in for it, and
+		-- restoring it here brought the Roblox hotbar back whenever this popup came
+		-- up before Inventory had hidden it)
+		if core ~= Enum.CoreGuiType.All and core ~= Enum.CoreGuiType.Backpack then
 			coreWas[core] = StarterGui:GetCoreGuiEnabled(core)
 		end
 	end
