@@ -401,21 +401,11 @@ end
 
 local function openPage()
 	pets = yourPets()
-	local kinds, n = {}, 0
-	for _, pet in pets do
-		local key = Fusion.key(pet.kind, pet.fuse)
-		if not kinds[key] then
-			kinds[key], n = true, n + 1
-		end
-	end
 	open = true
 	table.clear(picks)
 	gui.Enabled = true
 	showPage(1)
-	-- (It opens all the same: the page says what's missing. It used to say so on the
-	-- screen instead, on this hidden ScreenGui, so Fuse seemed to do nothing.)
-	tip.Text = "You need two kinds of pets to fuse"
-	tip.Visible = n < 2
+	tip.Visible = false -- (no "two kinds" message: QM)
 	ModalPop.open(setPop)
 	Gamepad.openMenu("Fuse", { close = close })
 	Hud.fuseToggled(true)
