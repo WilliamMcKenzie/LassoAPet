@@ -130,6 +130,14 @@ local function riddenList(profile)
 	return list
 end
 
+-- What this profile's next egg roll costs (Config.Gacha: PriceGrowth x per roll so far,
+-- two significant figures).
+local function rollPrice(profile)
+	local price = Config.Gacha.Price * (Config.Gacha.PriceGrowth or 1) ^ (profile.rolls or 0)
+	local step = 10 ^ math.max(math.floor(math.log10(price)) - 1, 0)
+	return math.floor(price / step + 0.5) * step
+end
+
 -- Copies the profile onto the player (inventory, ride pet) and their pen (what's in it).
 local function publish(player)
 	local profile = profiles[player]
@@ -139,6 +147,7 @@ local function publish(player)
 	syncTools(player, profile.eggs)
 	player:SetAttribute("HatchCredits", math.max(0, (player:GetAttribute("BoughtHatches") or 0) - (profile.usedHatches or 0)))
 	player:SetAttribute("RidePet", profile.ride or "")
+	player:SetAttribute("RollPrice", rollPrice(profile))
 	player:SetAttribute("RideMerged", profile.rideMerged or 1) -- how many pets it's merged from (Shared/Merge)
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
 	local pen = penOf(player)
@@ -191,6 +200,7 @@ local function load(player)
 						profile.ride = data.ride
 						profile.rideMerged = tonumber(data.rideMerged) and math.max(1, math.floor(data.rideMerged)) or nil
 					end
+					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
 					for _, kind in typeof(data.ridden) == "table" and data.ridden or {} do
 						if isAnimal(kind) then
@@ -246,7 +256,7 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, tutorial = profile.tutorial, ridden = riddenList(profile),
-		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget }
+		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -398,6 +408,9 @@ local function remote(name, handler)
 	event.Parent = ReplicatedStorage
 end
 
+local place -- (below, after PlaceEgg)
+local TUTORIAL_SPOTS = { Vector2.new(0, 0), Vector2.new(8, 0), Vector2.new(-8, 0), Vector2.new(0, 8), Vector2.new(0, -8), Vector2.new(8, 8) }
+
 -- The ride got its egg home.
 remote("DeliverEgg", function(player, kind)
 	local profile = profiles[player]
@@ -405,8 +418,26 @@ remote("DeliverEgg", function(player, kind)
 		return
 	end
 	player:SetAttribute("CarriedEgg", nil)
-	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
 	Funnel.step(player, "Brought Egg Home")
+	-- The tutorial's egg brought home goes straight into the pen (balance pass, Oct 6: a
+	-- fifth of new players left at "Place your egg" a second time). The first spot clear
+	-- of the starter pet, from the middle out.
+	local pen = penOf(player)
+	if player:GetAttribute("Tutorial") and pen and (profile.ride or next(profile.items)) then
+		for _, spot in TUTORIAL_SPOTS do
+			local clear = canPlace(pen, spot.X, spot.Y)
+			for _, item in profile.items do
+				if clear and math.abs(item.x - spot.X) < 6 and math.abs(item.z - spot.Y) < 6 then
+					clear = false
+				end
+			end
+			if clear then
+				place(player, profile, kind, spot.X, spot.Y)
+				return
+			end
+		end
+	end
+	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
 	publish(player)
 end)
 
@@ -479,7 +510,8 @@ rollGacha.OnServerInvoke = function(player)
 	local profile = profiles[player]
 	local gacha = Config.Gacha
 	local gold = player:GetAttribute("Gold") or 0
-	if not profile or not gacha.Enabled or gold < gacha.Price or (rolled[player] and os.clock() - rolled[player] < 1) then
+	local price = profile and rollPrice(profile)
+	if not profile or not gacha.Enabled or gold < price or (rolled[player] and os.clock() - rolled[player] < 1) then
 		return nil
 	end
 	-- Gold can be bought with Robux, so a roll is a paid random item: none where the
@@ -500,7 +532,8 @@ rollGacha.OnServerInvoke = function(player)
 		return nil
 	end
 	rolled[player] = os.clock()
-	player:SetAttribute("Gold", gold - gacha.Price)
+	player:SetAttribute("Gold", gold - price)
+	profile.rolls = (profile.rolls or 0) + 1
 	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
 	publish(player)
 	return kind, tier == "Exclusive"
@@ -525,9 +558,15 @@ remote("PlaceEgg", function(player, kind, x, z)
 	if profile.eggs[kind] == 0 then
 		profile.eggs[kind] = nil
 	end
+	place(player, profile, kind, x, z)
+end)
+
+-- Puts an egg of `kind` (already out of the inventory) down at (x, z) in the pen.
+place = function(player, profile, kind, x, z)
 	if profile.ride or next(profile.items) then
 		profile.earning = true -- the tutorial's second egg: pets start earning
 	end
+	local pet = eggPet(kind)
 	local special = Config.SpecialEggs[kind]
 	if special then -- (hatches into its Pet, merged from Merged: a Giant Horse is 10 horses)
 		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = pet, merged = special.Merged, eggScale = special.EggScale, hatchAt = os.time() + special.HatchTime }
@@ -538,7 +577,7 @@ remote("PlaceEgg", function(player, kind, x, z)
 		Funnel.step(player, "Placed Egg") -- the egg brought home, not the starter egg placed before the first ride
 	end
 	publish(player)
-end)
+end
 
 -- The client finished the tutorial: it never shows again.
 -- The rider got on an animal of this kind (Ride.client): it's in their animal
