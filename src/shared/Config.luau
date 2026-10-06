@@ -211,6 +211,7 @@ return {
 	CourseHalfWidth = 56,
 	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
 	HomeHalfWidth = 144, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3)
+	HomeDepth = 144, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
 	-- Ride

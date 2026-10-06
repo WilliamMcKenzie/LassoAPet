@@ -39,6 +39,7 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -67,6 +68,12 @@ local GOAL_WAIT = 3.2 -- seconds after the egg hatches (Pen.client's hatch takes
 local FUSE_WAIT = 2.2 -- before the fuse step: just till the pet has landed (Pen.client: 2.18 s; QM, no pause)
 local REVEAL = { Big = 3, Pop = 0.5, Hold = 0.35, Fly = 0.6 } -- the Fuse button's reveal: times its size in the middle, then seconds
 local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
+-- The flight to the gate and back (flightAt): straight up first, to Clear studs
+-- (over the base's and the course's walls, 48 tall with 2-stud caps), leaning Lean
+-- studs in toward the base's middle so it clears a cap it starts under, then an
+-- arc that climbs Arc more and dives in to the view from Dive studs before it. A
+-- straight line from a pen off the corridor's line went through the front wall (QM, Oct 6).
+local SWOOP = { Clear = 60, Lean = 16, Arc = 40, Dive = 120 }
 local PICTURE_Y = 0.09 -- a hint picture's middle, a share of the screen height (QM's layout)
 local PICTURE_WIDTH = 0.25 -- "Click on the egg"'s width, a share of the screen width (0.8x the reference: QM)
 local THROB = 0.02 -- a hint picture throbs between 1 - THROB and 1 + THROB times its size (QM)
@@ -462,6 +469,40 @@ local function fusing()
 	return false
 end
 
+-- Where the camera is `t` (0..1) of the way from `start` to `view` on the flight
+-- (SWOOP): up out of the base, then the arc down the corridor, turning evenly.
+local function flightAt(start, view, t)
+	local from = start.Position
+	local lift = from
+	if from.Y < SWOOP.Clear then
+		local inward = Vector3.new(-from.X, 0, Config.HomeDepth / 2 - from.Z)
+		lift = Vector3.new(from.X, SWOOP.Clear, from.Z) + (if inward.Magnitude > 1 then inward.Unit * SWOOP.Lean else Vector3.zero)
+	end
+	local up = (lift - from).Magnitude
+	local share = up / (up + (view.Position - lift).Magnitude) -- the lift's share of the way
+	local pos
+	if t < share then
+		pos = from:Lerp(lift, t / share)
+	else
+		local s = (t - share) / (1 - share)
+		local u = 1 - s
+		local p1, p2 = lift + Vector3.new(0, SWOOP.Arc, 0), view.Position + Vector3.new(0, SWOOP.Arc, SWOOP.Dive)
+		pos = u * u * u * lift + 3 * u * u * s * p1 + 3 * u * s * s * p2 + s * s * s * view.Position
+	end
+	return CFrame.new(pos) * start:Lerp(view, t).Rotation
+end
+
+-- Flies the camera from `start` to `view` in `seconds`, eased (`back`: the other way).
+local function flight(start, view, seconds, back)
+	local began = os.clock()
+	local t = 0
+	while t < 1 do
+		t = TweenService:GetValue(math.min((os.clock() - began) / seconds, 1), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+		camera.CFrame = flightAt(start, view, if back then 1 - t else t)
+		RunService.RenderStepped:Wait()
+	end
+end
+
 -- The ending: once the egg placed (`id` in the pen) has hatched and its pet
 -- jumped out, the two pets are fused (step "fuse") and, the moment the hybrid's
 -- landed, the camera flies over to the next biome's gate and back, and it's over.
@@ -499,13 +540,9 @@ local function showGoal(id)
 		local start = camera.CFrame
 		camera.CameraType = Enum.CameraType.Scriptable
 		local view = CFrame.lookAt(Vector3.new(0, 40, gateZ + 70), Vector3.new(0, 8, gateZ))
-		local out = TweenService:Create(camera, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { CFrame = view })
-		out:Play()
-		out.Completed:Wait()
+		flight(start, view, 2)
 		task.wait(GATE_HOLD)
-		local back = TweenService:Create(camera, TweenInfo.new(1.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { CFrame = start })
-		back:Play()
-		back.Completed:Wait()
+		flight(start, view, 1.4, true)
 		camera.CameraType = Enum.CameraType.Custom
 	end
 	controls:Enable()
