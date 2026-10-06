@@ -1557,6 +1557,9 @@ end
 -- The same popup in the world: "+N$" over `part`, `height` studs above its
 -- centre, following it as it moves and rising a few studs as it fades.
 function Hud.coinPopupAt(part, height, amount)
+	if not homeGui or not homeGui.Parent then
+		return -- (a payout just after joining, before Hud.init has built the HUD)
+	end
 	local board = Instance.new("BillboardGui")
 	board.Size = UDim2.fromOffset(200, 80)
 	board.Adornee = part
