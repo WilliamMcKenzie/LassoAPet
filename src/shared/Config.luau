@@ -507,6 +507,7 @@ return {
 		Image = "rbxassetid://74500954492785", -- assets/ui/RainbowTrail.png
 		ImageDisabled = "rbxassetid://71726481257884", -- assets/ui/DisabledRainbowTrail.png: while you can't afford it
 		Lifetime = 0.8, -- seconds each band trails behind (the Leap's is 1.4; very long trails don't render)
+		Width = 3, -- x the Unicorn's rainbow's height (QM, Oct 6: 3x bigger)
 	},
 	-- Carl's stall (Carl.client, QM Oct 4): a desert stall with a cactus guy in it, in
 	-- the gap between the left corner pen and the start line. Talk to him and he asks

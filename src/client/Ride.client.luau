@@ -2410,14 +2410,18 @@ vfx.RAINBOW = {
 	Color3.fromRGB(70, 150, 255),
 	Color3.fromRGB(170, 90, 240),
 }
-function vfx.rainbowFx(entity, lifetime)
+-- scale: x the bands' height (the bought Rainbow Trail's Config.RainbowTrail.Width);
+-- a taller rainbow is lifted so its bottom stays at the ground.
+function vfx.rainbowFx(entity, lifetime, scale)
 	local root = entity.animal.model.PrimaryPart
 	local middle, size = entity.animal.model:GetBoundingBox()
 	local back = root.CFrame:ToObjectSpace(middle * CFrame.new(0, 0, size.Z * 0.3)) -- toward its tail (it faces -Z)
-	local band = size.Y * 0.6 / #vfx.RAINBOW
+	scale = scale or 1
+	local band = size.Y * 0.6 * scale / #vfx.RAINBOW
+	local lift = math.max(size.Y * 0.3 * scale - size.Y * 0.5, 0)
 	local parts = {}
 	for k, color in vfx.RAINBOW do
-		local y = size.Y * 0.3 - (k - 1) * band
+		local y = size.Y * 0.3 * scale + lift - (k - 1) * band
 		local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
 		a0.CFrame = back * CFrame.new(0, y, 0)
 		a1.CFrame = back * CFrame.new(0, y - band, 0)
@@ -3976,7 +3980,7 @@ vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, spee
 		rider.entity.dodge = 0
 		rider.kind = kind
 		if player:GetAttribute("RainbowTrail") then -- they bought the Rainbow Trail (Config.RainbowTrail)
-			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime)
+			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width)
 		end
 		rider.shown = nil
 	end
@@ -4171,7 +4175,7 @@ function vfx.updateTrail()
 		fx:Destroy()
 	end
 	vfx.trail.entity = want
-	vfx.trail.parts = if want then vfx.rainbowFx(want, Config.RainbowTrail.Lifetime) else {}
+	vfx.trail.parts = if want then vfx.rainbowFx(want, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width) else {}
 end
 
 -- Every frame: each other rider's mount glides toward where it was last heard
