@@ -2303,8 +2303,11 @@ function vfx.updateAvoid(dt)
 			continue
 		end
 		local dz = if on then entity.z - mount.z - 5 else -math.huge -- (the crash check reaches 5 studs ahead)
+		-- Less in each zone further out, none in the Godlands (Config.Biomes[].Swerve, QM).
+		local zone = if dz > 0 then Config.Biomes[WorldColors.biomeAt(entity.z)].Swerve or 1 else 0
 		-- (not a Godlands animal charging or hunting you: that one means it)
-		if dz > 0 and not (entity.popping or entity.event or entity.face or entity.rush) then
+		if zone > 0 and not (entity.popping or entity.event or entity.face or entity.rush) then
+			local clear = cfg.Clear * zone
 			local t = dz / math.max(state.vz + math.max(entity.speed or 0, 0), 1) -- seconds until it's on you
 			local base = entity.x - (entity.swerve or 0) -- its line without the swerve
 			local px = math.clamp(mount.x + state.vx * math.min(t, 1), -EDGE, EDGE) -- where you'll be by then (a guess past 1 s)
@@ -2315,20 +2318,20 @@ function vfx.updateAvoid(dt)
 			-- you, never later than Warn; if you swerve at it late, it hurries (w t >= 2: over half
 			-- way across by then).
 			local side0 = entity.swerveSide or (if gap > 0 then 1 elseif gap < 0 then -1 elseif entity.x > 0 then -1 else 1)
-			local reach = math.abs(math.clamp(px + side0 * cfg.Clear, -EDGE, EDGE) - entity.x)
+			local reach = math.abs(math.clamp(px + side0 * clear, -EDGE, EDGE) - entity.x)
 			local w = 2.718 * cfg.Turn * math.max(entity.speed or 0, 10) / math.max(reach, 1)
 			w = math.clamp(math.max(w, 2 / math.max(t, 0.1)), 0.8, 12)
-			if t <= math.max(cfg.Warn, 4.74 / w) and math.abs(gap) < cfg.Clear then
+			if t <= math.max(cfg.Warn, 4.74 / w) and math.abs(gap) < clear then
 				if state.skip[entity] == nil then
-					state.skip[entity] = rng:NextNumber() >= cfg.Chance
+					state.skip[entity] = rng:NextNumber() >= cfg.Chance * zone
 				end
 				if not state.skip[entity] then
 					-- Away from you (the side it first picked), unless the wall leaves it in your way.
 					local side = side0
-					local target = math.clamp(px + side * cfg.Clear, -EDGE, EDGE)
-					if math.abs(target - px) < 6 then
+					local target = math.clamp(px + side * clear, -EDGE, EDGE)
+					if math.abs(target - px) < math.min(6, clear) then
 						side = -side
-						target = math.clamp(px + side * cfg.Clear, -EDGE, EDGE)
+						target = math.clamp(px + side * clear, -EDGE, EDGE)
 					end
 					entity.swerveSide, entity.swerveTo = side, target - base
 					entity.swerveW = w

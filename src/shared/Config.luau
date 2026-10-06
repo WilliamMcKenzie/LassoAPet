@@ -16,6 +16,7 @@ return {
 	Biomes = {
 		{
 			Name = "Meadow",
+			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
 			Length = 760,
 			HerdKeep = 0.5, -- this share of the stampede's spawns runs here: half as many animals, new players kept crashing on the way back (QM, Oct 6)
 			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
@@ -34,6 +35,7 @@ return {
 		},
 		{
 			Name = "Desert",
+			Swerve = 0.75,
 			NestScale = 2, -- its nests are this many times bigger, so they show from afar at its speed (Nests.server; QM, Oct 6)
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
@@ -59,6 +61,7 @@ return {
 		},
 		{
 			Name = "Snow",
+			Swerve = 0.5,
 			NestScale = 2.25,
 			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
@@ -78,6 +81,7 @@ return {
 		},
 		{
 			Name = "Ocean",
+			Swerve = 0.25,
 			NestScale = 2.5,
 			Length = 7680, -- 1.4x the snow (QM, Oct 2), a whole number of 240-stud depth bands
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
@@ -166,6 +170,7 @@ return {
 			-- with lava; Shared/Godlands, Shared/GodlandsTracks), built round each rider
 			-- as they go (Client/GodlandsStream). It has no finish line.
 			Name = "Godlands",
+			Swerve = 0,
 			NestScale = 2.5,
 			Length = math.huge, -- endless
 			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
