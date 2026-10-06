@@ -725,37 +725,40 @@ remote("FusePets", function(player, idA, idB)
 	if not profile or typeof(idA) ~= "string" or typeof(idB) ~= "string" or idA == idB then
 		return
 	end
-	local function pet(id)
+	local function pet(id) -- (hybrids fuse again too: QM)
 		if id == "ride" then
-			return profile.ride and not profile.rideFuse and { pet = profile.ride, merged = profile.rideMerged }
+			return profile.ride and { pet = profile.ride, fuse = profile.rideFuse, merged = profile.rideMerged, income = profile.rideIncome }
 		end
 		local item = profile.items[id]
-		return item and item.pet and not item.fuse and item
+		return item and item.pet and item
 	end
 	local a, b = pet(idA), pet(idB)
-	if not a or not b or a.pet == b.pet then
+	if not a or not b then
 		return
 	end
-	local base = Fusion.order(a.pet, b.pet)
+	local base, donor, aIsBase = Fusion.combine(a.pet, a.fuse, b.pet, b.fuse)
+	if not base then
+		return
+	end
 	local baseId, donorId = idA, idB
-	if base ~= a.pet then
+	if not aIsBase then
 		a, b, baseId, donorId = b, a, idB, idA
 	end
-	local function earning(item) -- (neither is a hybrid: what it earns is its kind's, times its merges)
-		return (Config.PetIncome[item.pet] or 0) * (item.merged or 1)
+	local function earning(item) -- (a hybrid's is saved; a plain pet's is its kind's, times its merges)
+		return item.income or (Config.PetIncome[item.pet] or 0) * (item.merged or 1)
 	end
 	local earns = earning(a) + earning(b)
-	local price = Fusion.price(a.pet, b.pet) -- (QM: fusing costs gold, by rarity)
+	local price = Fusion.price(a.pet, b.pet) -- (QM: fusing costs gold, by rarity; free for now)
 	local gold = player:GetAttribute("Gold") or 0
 	if gold < price then
 		return
 	end
 	player:SetAttribute("Gold", gold - price)
 	if baseId == "ride" or donorId == "ride" then -- the hybrid is the one you ride
-		profile.ride, profile.rideFuse, profile.rideMerged, profile.rideIncome = a.pet, b.pet, nil, earns
+		profile.ride, profile.rideFuse, profile.rideMerged, profile.rideIncome = base, donor, nil, earns
 		profile.items[if baseId == "ride" then donorId else baseId] = nil
 	else
-		profile.items[baseId] = { x = a.x, z = a.z, pet = a.pet, fuse = b.pet, income = earns }
+		profile.items[baseId] = { x = a.x, z = a.z, pet = base, fuse = donor, income = earns }
 		profile.items[donorId] = nil
 	end
 	Funnel.event(player, "Fused Pets")

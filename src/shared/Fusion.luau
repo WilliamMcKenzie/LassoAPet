@@ -10,6 +10,7 @@
 --   Fusion.key(kind, fuse)        "Loong:Pig", or just the kind for a plain pet
 --   Fusion.split(key)             kind, fuse
 --   Fusion.order(a, b)            base, donor: the rarer one is the base
+--   Fusion.combine(a, aFuse, b, bFuse)  what fusing two pets (hybrids too) makes
 --   Fusion.scale(kind, fuse)      how much bigger (or smaller) the donor makes it
 --   Fusion.name(kind, fuse)       "Poong": the donor's front and the base's back
 --   Fusion.paint(model, kind, fuse)  repaints a built model in the donor's palette
@@ -64,6 +65,28 @@ function Fusion.order(a, b)
 		return b, a
 	end
 	return a, b
+end
+
+-- Fusing two pets, either of them a hybrid already (QM, Oct 6: hybrids fuse again):
+-- the rarer base animal is the base, and the other pet gives what it looks like, its
+-- donor's colours and size if it's a hybrid, else its own. Returns the new base and
+-- donor, and whether pet A is the base; nil if they'd merge instead (the same pet)
+-- or come out as a plain animal (the donor's look is the base's own).
+function Fusion.combine(a, aFuse, b, bFuse)
+	if Fusion.key(a, aFuse) == Fusion.key(b, bFuse) then
+		return nil
+	end
+	local aIsBase = Fusion.order(a, b) == a
+	local base, donor
+	if aIsBase then
+		base, donor = a, bFuse or b
+	else
+		base, donor = b, aFuse or a
+	end
+	if donor == base then
+		return nil
+	end
+	return base, donor, aIsBase
 end
 
 -- The donor's size tier stands in for the base's: each tier is Config.TierGrowth

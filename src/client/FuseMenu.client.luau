@@ -5,8 +5,9 @@
 -- bottom either side of QM's FUSE button ("???" till picked), with the price over
 -- it. FUSE closes the panel and the two are pulled up over the pen and fuse, as merging does (PenPets.pull), and the
 -- hybrid drops down where the base was (Hatchery.server's FusePets). The rarer pet
--- is the base; the other sets its size and paints it in its colours. Hybrids don't
--- fuse again, and two of a kind merge instead (MERGE).
+-- is the base; the other sets its size and paints it in its colours. Hybrids fuse
+-- again (QM; Fusion.combine), and two of the same pet merge instead (MERGE). No
+-- hybrid names anywhere (QM): a hybrid's card has none, the strip says its base.
 --
 -- Laid out in pixels of QM's 1102 x 829 panel (assets/ui/fuse/FusionPanel.png) and
 -- scaled to fit the screen.
@@ -211,14 +212,11 @@ local function yourPets()
 	return list
 end
 
--- Whether `pet` can go with what's picked: hybrids don't fuse again, and two of a
--- kind merge instead.
+-- Whether `pet` can go with what's picked (Fusion.combine): two of the same pet
+-- merge instead.
 local function canPick(pet)
-	if pet.fuse then
-		return false
-	end
 	local other = picks[1]
-	return not other or other == pet or other.kind ~= pet.kind
+	return not other or other == pet or Fusion.combine(other.kind, other.fuse, pet.kind, pet.fuse) ~= nil
 end
 
 local showPage
@@ -228,7 +226,7 @@ local function refresh()
 		local picked = table.find(picks, pet) ~= nil
 		card.Outline.Enabled = picked
 		card.UIScale.Scale = if picked then 1.06 else 1
-		local dim = not picked and #picks >= 1 and not canPick(pet) or pet.fuse ~= nil
+		local dim = not picked and #picks >= 1 and not canPick(pet)
 		card.ImageTransparency = if dim then 0.5 else 0
 		card.Art.GroupTransparency = if dim then 0.5 else 0
 	end
@@ -257,7 +255,7 @@ local function toggle(pet)
 		table.insert(picks, pet)
 		Sounds.play("merge_pop")
 	else
-		tip.Text = if pet.fuse then "Hybrids can't fuse again" else "Pick a different animal"
+		tip.Text = "Pick a different animal"
 		tip.Visible = true
 		task.delay(1.6, function()
 			tip.Visible = false
@@ -342,9 +340,9 @@ function showPage(first)
 			view.Size = UDim2.fromScale(1, 1)
 			view.Parent = art
 		end
-		if pet.fuse or (pet.merged or 1) > 1 then -- a hybrid's name, or how many it's merged from
+		if not pet.fuse and (pet.merged or 1) > 1 then -- how many it's merged from (no names: QM)
 			local tag = text(card, UDim2.new(1, 0, 0, 30), UDim2.new(0.5, 0, 1, -14), 26)
-			tag.Text = if pet.fuse then Fusion.name(pet.kind, pet.fuse) else "x" .. pet.merged
+			tag.Text = "x" .. pet.merged
 		end
 		card.Activated:Connect(function()
 			toggle(pet)
@@ -381,8 +379,11 @@ local function fuse()
 		end)
 		return
 	end
-	local base, donor = Fusion.order(a.kind, b.kind)
-	local baseModel = if a.kind == base then a.model else b.model
+	local base, donor, aIsBase = Fusion.combine(a.kind, a.fuse, b.kind, b.fuse)
+	if not base then
+		return
+	end
+	local baseModel = if aIsBase then a.model else b.model
 	-- The two are pulled up over the base and fuse, as a merge's are; the hybrid
 	-- drops down from there (Pen.client, or Ride.client's starter).
 	if baseModel.Parent then
@@ -405,8 +406,9 @@ local function openPage()
 	pets = yourPets()
 	local kinds, n = {}, 0
 	for _, pet in pets do
-		if not pet.fuse and not kinds[pet.kind] then
-			kinds[pet.kind], n = true, n + 1
+		local key = Fusion.key(pet.kind, pet.fuse)
+		if not kinds[key] then
+			kinds[key], n = true, n + 1
 		end
 	end
 	open = true
