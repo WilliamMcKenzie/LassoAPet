@@ -502,8 +502,8 @@ return {
 	-- for the whole ride, and other players see it too. The price is drawn into the art.
 	RainbowTrail = {
 		Price = 1000000000,
-		Image = "", -- assets/ui/RainbowTrail.png
-		ImageDisabled = "", -- assets/ui/DisabledRainbowTrail.png: while you can't afford it
+		Image = "rbxassetid://74500954492785", -- assets/ui/RainbowTrail.png
+		ImageDisabled = "rbxassetid://71726481257884", -- assets/ui/DisabledRainbowTrail.png: while you can't afford it
 		Lifetime = 0.8, -- seconds each band trails behind (the Leap's is 1.4; very long trails don't render)
 	},
 	-- Carl's stall (Carl.client, QM Oct 4): a desert stall with a cactus guy in it, in

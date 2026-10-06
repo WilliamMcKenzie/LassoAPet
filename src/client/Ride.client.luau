@@ -169,6 +169,9 @@ local function tierOf(kind)
 	return Config.PetTiers[kind] or 1
 end
 
+local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
+-- (declared up here: smash() below already uses it, and was reading a nil global)
+
 -- An obstacle a bigger pet plowed into flies up and away and fades; it's back
 -- for the next ride (cleanup). Everyone else sees it too (Riders.server), and
 -- on their screens it's back a few seconds later (remote).
@@ -392,7 +395,6 @@ local herdClock = workspace:GetServerTimeNow()
 local hold, grace = 0, 0
 local warpLevel -- /biome: the biome you were put in, so its gate (and those before) let you through
 local transfer, tumble, carried
-local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.Merge = require(ReplicatedStorage.Shared.Merge)
 -- The stretch of course with stampede loaded round the camera at camZ: VIEW either
 -- way. Racing home (+z) the wider field of view (Config.ReturnFovKick) sees to the
