@@ -11,8 +11,7 @@ return {
 	-- default.project.json. Home is z > 0, the course runs toward -z.
 	-- The course is biomes end to end from the start line, each Length studs long,
 	-- with its own tile colours. The home base uses the first biome's. Any Nest
-	-- model in World.Nests is an egg spawn of the biome it stands in; each ride,
-	-- one nest per biome holds an egg.
+	-- model in World.Nests is an egg spawn of the biome it stands in (NestOdds).
 	Biomes = {
 		{
 			Name = "Meadow",
@@ -23,7 +22,7 @@ return {
 			-- Which animals run in this biome's stampede and how often (names are modules
 			-- in Shared/Animals). QM's spawn table (Oct 3): chances out of 1. They're
 			-- weights, so a biome that doesn't add up to exactly 1 still works. Nest eggs
-			-- use the same odds (Nests.server). A 0 never spawns but keeps the animal on
+			-- use the same odds (NestOdds). A 0 never spawns but keeps the animal on
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
 			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Fish = 0.22, Rhino = 0.13, Unicorn = 0.05 },
@@ -235,15 +234,14 @@ return {
 	-- Turn: a swerve's top sideways speed, x the animal's own running speed (QM: slower
 	-- animals swerve slower); slow ones start earlier than Warn to make it in time.
 	ReturnAvoid = { On = true, Warn = 1.6, Clear = 17, Turn = 0.6, MaxSpeed = 140, Chance = 0.9 }, -- (QM Oct 6: was 0.4 s / 5 studs / 0.85, too easy to crash; Warn doubled from 0.8; Clear 9 -> 80 -> 20 -> 14 -> 17)
-	-- Egg nests are shared stock: they all start full, a grabbed egg empties its nest
-	-- for everyone, and it restocks this many seconds later. Eggs are rolled with the
-	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
-	-- their eggs never show up. But the egg you take is the animal you're riding (QM,
-	-- Oct 6: lassoing is hunting): once you've lassoed a wild animal the nests show its
-	-- egg, swapping with a bounce on every hop, an event's animal included (finding and
-	-- riding one is the hard part). The rolled egg is what you get on your own pet (so
-	-- your best pet never copies itself).
-	NestRestock = 30,
+	-- Egg nests are always stocked, and their eggs are yours alone (QM, Oct 6: no
+	-- shared stock, nothing to restock): each ride they're rolled afresh for you from
+	-- the nest's biome's Herd odds (NestOdds); Common animals are the ones you get by
+	-- default, so their eggs never show up. But the egg you take is the animal you're
+	-- riding (QM, Oct 6: lassoing is hunting): once you've lassoed a wild animal the
+	-- nests show its egg, swapping with a bounce on every hop, an event's animal
+	-- included (finding and riding one is the hard part). The rolled egg is what you
+	-- get on your own pet (so your best pet never copies itself).
 	-- Rare, Epic and Legendary eggs get likelier the further into its biome a nest is
 	-- (QM, Oct 6: going further should pay): their odds x Near at the biome's start
 	-- line, rising evenly to x Far at its end, so a biome's average stays about the
@@ -285,14 +283,12 @@ return {
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
 	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
 	-- brings home an egg, one hint at a time and only the buttons each step needs.
-	-- false turns it off. On that first ride the first Meadow nest always holds an egg
-	-- for that player (the animal they lassoed's, as everywhere, else a TutorialEgg),
-	-- the stampede runs on the player's own clock so it can slow down to TutorialSlowMo
-	-- x speed while LASSO or TAKE EGG is waiting to be pressed, and the Hold bar never
-	-- runs out. The tutorial's eggs hatch by themselves (TutorialHatchTime); every
-	-- other egg waits for you to hold F by it once it's ready (Hatchery, Pen.client).
+	-- false turns it off. On that first ride the stampede runs on the player's own
+	-- clock so it can slow down to TutorialSlowMo x speed while LASSO or TAKE EGG is
+	-- waiting to be pressed, and the Hold bar never runs out. The tutorial's eggs hatch
+	-- by themselves (TutorialHatchTime); every other egg waits for you to hold F by it
+	-- once it's ready (Hatchery, Pen.client).
 	Tutorial = true,
-	TutorialEgg = "Pinto",
 	TutorialHatchTime = 0,
 	TutorialSlowMo = 0.2,
 	-- Pet abilities: the Ability button (bottom right while riding), Q or R1.

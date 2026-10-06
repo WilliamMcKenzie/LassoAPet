@@ -31,8 +31,8 @@ local world = workspace:WaitForChild("World")
 while not world:GetAttribute("Ready") do
 	world:GetAttributeChangedSignal("Ready"):Wait()
 end
--- Egg nests: NestEggs.luau shows them (shared stock, Nests.server; the egg you take
--- is the animal you're riding). Here: grabbing one, and the guide to the nearest.
+-- Egg nests: NestEggs.luau shows them (yours alone, rolled each ride: NestOdds; the
+-- egg you take is the animal you're riding). Here: grabbing one, and the guide to the nearest.
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
 local deliverEgg = ReplicatedStorage:WaitForChild("DeliverEgg")
@@ -321,6 +321,7 @@ end
 local rng = Random.new()
 
 NestEggs.start()
+Tutorial.init()
 local herdFolder = Instance.new("Folder")
 herdFolder.Name = "Herd"
 herdFolder.Parent = workspace
@@ -575,10 +576,6 @@ local function cleanup()
 	end
 	mount, transfer, tumble, warpLevel = nil, nil, nil, nil
 	NestEggs.setMount("")
-	if Tutorial.eggTaken then -- the ride's over: the tutorial egg's back for the next one
-		Tutorial.eggTaken = false
-		NestEggs.show(Tutorial.nest)
-	end
 	if carried then
 		carried.part:Destroy()
 		carried = nil
@@ -1098,20 +1095,17 @@ end
 
 local function grabEgg()
 	if NestEggs.waiting[nearEgg.nest] ~= nearEgg then
-		return -- someone else took it a moment ago
+		return -- (a hop just swapped it)
 	end
 	-- The nest's own egg goes on the lasso (building a new one here stalled the
-	-- grab). Out of NestEggs.waiting first, so emptying the nest leaves it alone.
+	-- grab). Out of NestEggs.waiting, so the nest stays empty for you this ride.
 	local egg = nearEgg.egg
 	NestEggs.waiting[nearEgg.nest] = nil
-	-- Taken from the tutorial's nest: once the server empties it, no tutorial egg
-	-- shows up there in its place this ride (it looked like a second egg left behind).
-	Tutorial.eggTaken = Tutorial.eggTaken or nearEgg.nest == Tutorial.nest
 	egg.t = math.huge
 	egg:update(0) -- stop any twitch, back to rest
 	local part = egg.model
 	part.Parent = workspace
-	takeEgg:FireServer(nearEgg.nest, NestEggs.mountKind) -- empties the nest for everyone (and says which animal you're on)
+	takeEgg:FireServer(nearEgg.nest, NestEggs.mountKind) -- (says which animal you're on: the server rolls the rest)
 	vfx.sounds.play("lasso_throw")
 	vfx.sounds.play("egg_grab")
 	carried = { part = part, kind = nearEgg.kind, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
