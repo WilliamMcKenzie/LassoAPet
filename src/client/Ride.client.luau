@@ -2307,23 +2307,31 @@ function vfx.updateAvoid(dt)
 		if dz > 0 and not (entity.popping or entity.event or entity.face or entity.rush) then
 			local t = dz / math.max(state.vz + math.max(entity.speed or 0, 0), 1) -- seconds until it's on you
 			local base = entity.x - (entity.swerve or 0) -- its line without the swerve
-			local px = math.clamp(mount.x + state.vx * t, -EDGE, EDGE) -- where you'll be by then
+			local px = math.clamp(mount.x + state.vx * math.min(t, 1), -EDGE, EDGE) -- where you'll be by then (a guess past 1 s)
 			local gap = base + (entity.swerveTo or 0) - px
-			if t <= cfg.Warn and math.abs(gap) < cfg.Clear then
+			-- How briskly it swerves: its sideways speed peaks at Turn x its own running speed
+			-- (a spring's peak is shift x w / e), so quick animals dart aside and slow ones lumber
+			-- (QM, Oct 6). It starts early enough to be ~95% there (4.74 / w s) when it reaches
+			-- you, never later than Warn; if you swerve at it late, it hurries (w t >= 2: over half
+			-- way across by then).
+			local side0 = entity.swerveSide or (if gap > 0 then 1 elseif gap < 0 then -1 elseif entity.x > 0 then -1 else 1)
+			local reach = math.abs(math.clamp(px + side0 * cfg.Clear, -EDGE, EDGE) - entity.x)
+			local w = 2.718 * cfg.Turn * math.max(entity.speed or 0, 10) / math.max(reach, 1)
+			w = math.clamp(math.max(w, 2 / math.max(t, 0.1)), 0.8, 12)
+			if t <= math.max(cfg.Warn, 4.74 / w) and math.abs(gap) < cfg.Clear then
 				if state.skip[entity] == nil then
 					state.skip[entity] = rng:NextNumber() >= cfg.Chance
 				end
 				if not state.skip[entity] then
 					-- Away from you (the side it first picked), unless the wall leaves it in your way.
-					local side = entity.swerveSide or (if gap > 0 then 1 elseif gap < 0 then -1 elseif entity.x > 0 then -1 else 1)
+					local side = side0
 					local target = math.clamp(px + side * cfg.Clear, -EDGE, EDGE)
 					if math.abs(target - px) < 6 then
 						side = -side
 						target = math.clamp(px + side * cfg.Clear, -EDGE, EDGE)
 					end
 					entity.swerveSide, entity.swerveTo = side, target - base
-					-- Settles (to ~1%) in about 6.6/w s: by the time it reaches you, at most Ease.
-					entity.swerveW = 6.6 / math.clamp(t * 0.8, 0.3, cfg.Ease)
+					entity.swerveW = w
 				end
 			end
 		elseif dz < -10 and entity.swerveSide then
