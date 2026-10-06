@@ -224,7 +224,7 @@ return {
 	-- within 2.6) over up to Ease seconds, never faster than MaxSpeed studs/s, then
 	-- keeps that line till you're past. Only Chance of them swerve at all, so dodging
 	-- still counts. On = false turns it off.
-	ReturnAvoid = { On = true, Warn = 0.8, Clear = 9, Ease = 0.6, MaxSpeed = 140, Chance = 0.9 }, -- (QM Oct 6: was 0.4 s / 5 studs / 0.85, too easy to crash)
+	ReturnAvoid = { On = true, Warn = 1.6, Clear = 9, Ease = 0.6, MaxSpeed = 140, Chance = 0.9 }, -- (QM Oct 6: was 0.4 s / 5 studs / 0.85, too easy to crash; Warn doubled from 0.8)
 	-- Egg nests are shared stock: they all start full, a grabbed egg empties its nest
 	-- for everyone, and it restocks this many seconds later. Eggs are rolled with the
 	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
