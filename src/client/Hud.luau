@@ -758,9 +758,27 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			pressed = false
 		end)
 	end
+	-- The tutorial's clicking hand (Tutorial.luau's cursor) over it too, while it's
+	-- affordable and the tutorial's not on (QM).
+	local hand = Instance.new("ImageLabel")
+	hand.Name = "Hand"
+	hand.BackgroundTransparency = 1
+	hand.Image = "rbxassetid://93240211999923" -- assets/ui/TutorialCursor.png
+	hand.AnchorPoint = Vector2.new(29 / 256, 6 / 256) -- its tip, so it throbs about it
+	hand.Position = UDim2.fromScale(0.5, 0.6)
+	hand.SizeConstraint = Enum.SizeConstraint.RelativeYY
+	hand.Size = UDim2.fromScale(0.9, 0.9)
+	hand.Visible = false
+	local handScale = Instance.new("UIScale")
+	handScale.Parent = hand
+	hand.Parent = upgrade
 	local throbbing = false
 	RunService.RenderStepped:Connect(function()
 		local affordable = cost ~= nil and (player:GetAttribute("Gold") or 0) >= cost
+		hand.Visible = affordable and tutorial == nil and not player:GetAttribute("Tutorial")
+		if hand.Visible then
+			handScale.Scale = 1 + 0.1 * math.sin(os.clock() * 2 * math.pi)
+		end
 		if affordable and not pressed and upgrade.Visible then
 			throbbing = true
 			upgradeScale.Scale = 1 + 0.06 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 / 0.9))
