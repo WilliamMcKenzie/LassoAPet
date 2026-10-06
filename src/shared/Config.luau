@@ -53,8 +53,8 @@ return {
 			GateImage = "rbxassetid://113778810800288", -- assets/ui/GateDesert.png ("Zone Locked")
 			GateColor = Color3.fromRGB(255, 204, 40), -- the gate's glow at this biome's line: desert yellow
 			-- Upgrade Pen while this is the next biome to unlock (its price is drawn in).
-			UpgradeImage = "rbxassetid://78830244894115", -- assets/ui/UpgradePenDesert.png
-			UpgradeImageDisabled = "rbxassetid://81637358609980", -- assets/ui/UpgradePenDesertDisabled.png: while you can't afford it
+			UpgradeImage = "rbxassetid://115511110106388", -- assets/ui/UpgradePenDesert.png
+			UpgradeImageDisabled = "rbxassetid://82534446488604", -- assets/ui/UpgradePenDesertDisabled.png: while you can't afford it
 		},
 		{
 			Name = "Snow",
@@ -71,8 +71,8 @@ return {
 			PostColor = Color3.fromRGB(126, 164, 214),
 			GateImage = "rbxassetid://93384010922515", -- assets/ui/GateTundra.png
 			GateColor = Color3.fromRGB(70, 220, 255), -- cyan (QM)
-			UpgradeImage = "rbxassetid://88059029653274", -- assets/ui/UpgradePenTundra.png
-			UpgradeImageDisabled = "rbxassetid://110114947102534", -- assets/ui/UpgradePenTundraDisabled.png
+			UpgradeImage = "rbxassetid://119577030724753", -- assets/ui/UpgradePenTundra.png
+			UpgradeImageDisabled = "rbxassetid://74372809106323", -- assets/ui/UpgradePenTundraDisabled.png
 		},
 		{
 			Name = "Ocean",
@@ -143,8 +143,8 @@ return {
 			PostColor = Color3.fromRGB(236, 140, 124),
 			GateImage = "rbxassetid://75356296124042", -- assets/ui/GateOcean.png
 			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
-			UpgradeImage = "rbxassetid://98442121637216", -- assets/ui/UpgradePenOcean.png (QM's new one, Oct 4)
-			UpgradeImageDisabled = "rbxassetid://134800932476227", -- assets/ui/UpgradePenOceanDisabled.png
+			UpgradeImage = "rbxassetid://74721639573768", -- assets/ui/UpgradePenOcean.png
+			UpgradeImageDisabled = "rbxassetid://101363896090039", -- assets/ui/UpgradePenOceanDisabled.png
 			-- Under the sea (Ocean.client): while you're in this biome the distance
 			-- fades into Haze.Color and bubbles drift up round the camera.
 			Haze = {
@@ -191,8 +191,8 @@ return {
 			PostColor = Color3.fromRGB(62, 60, 72),
 			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
 			GateImage = "rbxassetid://81079145393331", -- assets/ui/GateGodlands.png
-			UpgradeImage = "rbxassetid://133410257702964", -- assets/ui/UpgradePenGodlands.png
-			UpgradeImageDisabled = "rbxassetid://75177337427277", -- assets/ui/UpgradePenGodlandsDisabled.png
+			UpgradeImage = "rbxassetid://88879130889050", -- assets/ui/UpgradePenGodlands.png
+			UpgradeImageDisabled = "rbxassetid://106219222962689", -- assets/ui/UpgradePenGodlandsDisabled.png
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
