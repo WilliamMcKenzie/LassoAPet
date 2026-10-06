@@ -34,10 +34,9 @@ end
 -- World.Nests holds the egg its "Egg" attribute names ("" = empty, taken by
 -- someone), rolled from its biome's odds. But the egg you take is the animal
 -- you're riding (QM, Oct 6): once you've lassoed a wild animal, the nests show
--- that animal's egg instead, swapping with a bounce on every hop (vfx.nestKindFor).
--- On your own pet or an event animal you see the rolled egg, and the EventNest's
--- egg is always the event's. EggSpot marks the egg's centre. The egg is a rigged
--- model so it can twitch in the nest; it turns its face toward the approaching rider.
+-- that animal's egg instead, swapping with a bounce on every hop (vfx.nestKindFor);
+-- on your own pet you see the rolled egg. EggSpot marks the egg's centre. The egg is
+-- a rigged model so it can twitch in the nest; it turns its face toward the approaching rider.
 local EGG_TWITCH_EVERY = { 2, 4 } -- seconds between twitches, random in this range
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
@@ -337,20 +336,20 @@ vfx.nestKind = ""
 function vfx.setNestKind(kind)
 	vfx.nestKind = kind -- (the nests catch up in the frame loop below: near ones with a bounce, far ones when they're near)
 end
--- The egg the nests hold while you're on `entity`: its kind, or "" (the rolled egg) on
--- your own pet (QM, Oct 6: riding your best pet to a nest would copy it every ride) or
--- an exclusive event's animal (Config.Events.Animals never run wild: its egg is the EventNest's).
+-- The egg the nests hold while you're on `entity`: its kind (an event's animal too:
+-- QM, Oct 6, finding and riding one is the hard part), or "" (the rolled egg) on your
+-- own pet (riding your best pet to a nest would copy it every ride).
 function vfx.eggOf(entity)
-	return if entity.own or table.find(Config.Events.Animals, entity.kind) then "" else entity.kind
+	return if entity.own then "" else entity.kind
 end
 -- The kind of egg `nest` holds for you right now: your mount's (vfx.nestKind), if the
--- nest holds one at all, else what the server rolled. The EventNest's is always the event's.
+-- nest holds one at all, else what the server rolled.
 function vfx.nestKindFor(nest)
 	local kind = nest:GetAttribute("Egg") or ""
 	if kind == "" and Tutorial.active and nest == Tutorial.nest and not Tutorial.eggTaken then
 		kind = Config.TutorialEgg -- the tutorial's egg, only for you (Tutorial)
 	end
-	return if kind ~= "" and vfx.nestKind ~= "" and nest.Name ~= "EventNest" then vfx.nestKind else kind
+	return if kind ~= "" and vfx.nestKind ~= "" then vfx.nestKind else kind
 end
 -- A nest's egg popping in when it changes (your hop onto another animal): it starts
 -- small, hops up and lands with a squash at Land seconds, overshoots and settles by
@@ -410,7 +409,7 @@ do
 	for _, nest in world.Nests:GetChildren() do
 		watchNest(nest)
 	end
-	world.Nests.ChildAdded:Connect(watchNest) -- the EventNest (Events.server) can come in late
+	world.Nests.ChildAdded:Connect(watchNest) -- the Godlands' nests come and go (Nests.server)
 end
 Tutorial.init(function()
 	if Tutorial.nest then
@@ -1238,7 +1237,6 @@ end)
 
 local function updateGuide()
 	local target
-	vfx.chasingEvent = false
 	-- From the pet, or the rider while they're pulled across to a lassoed one.
 	local at = if mount then Vector3.new(mount.x, 0, mount.z) else focus
 	local want = Tutorial.guideTo()
@@ -1255,30 +1253,17 @@ local function updateGuide()
 			end
 		end
 	elseif phase == "outbound" and not cutscene and want == "egg" then
-		-- Riding an event's kind of animal while its egg is out (Events.server), the
-		-- arrows lead to that egg instead; the event's egg is never the nearest egg
-		-- otherwise. (If it's behind you or a locked gate, back to the nearest egg.)
-		local event = world.Nests:FindFirstChild("EventNest")
-		local chasing = event and waitingEggs[event] and mount and mount.kind == world:GetAttribute("EventKind")
-		for _, eventOnly in if chasing then { true, false } else { false } do
-			local best = math.huge
-			for nest, waiting in waitingEggs do
-				local spot = nest:FindFirstChild("EggSpot")
-				if (nest == event) == eventOnly and spot and waiting.egg.model.Parent
-					and spot.Position.Z < at.Z - guide.AHEAD and spot.Position.Z > gateZ() then
-					local d = (Vector2.new(spot.Position.X, spot.Position.Z) - Vector2.new(at.X, at.Z)).Magnitude
-					if d < best then
-						target, best = spot.Position, d
-					end
+		local best = math.huge
+		for nest, waiting in waitingEggs do
+			local spot = nest:FindFirstChild("EggSpot")
+			if spot and waiting.egg.model.Parent and spot.Position.Z < at.Z - guide.AHEAD and spot.Position.Z > gateZ() then
+				local d = (Vector2.new(spot.Position.X, spot.Position.Z) - Vector2.new(at.X, at.Z)).Magnitude
+				if d < best then
+					target, best = spot.Position, d
 				end
-			end
-			if target then
-				vfx.chasingEvent = eventOnly -- (the arrows lead to the event's egg)
-				break
 			end
 		end
 	end
-	Hud.setFollowHint(vfx.chasingEvent and phase == "outbound" and not cutscene) -- QM: on the event animal, following its arrows
 	vfx.drawGuide(at, target)
 end
 

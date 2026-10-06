@@ -238,9 +238,9 @@ return {
 	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
 	-- their eggs never show up. But the egg you take is the animal you're riding (QM,
 	-- Oct 6: lassoing is hunting): once you've lassoed a wild animal the nests show its
-	-- egg, swapping with a bounce on every hop. The rolled egg is what you get on your
-	-- own pet (so your best pet never copies itself) or on an event animal (its egg is
-	-- the event's), and the EventNest's egg is always the event's.
+	-- egg, swapping with a bounce on every hop, an event's animal included (finding and
+	-- riding one is the hard part). The rolled egg is what you get on your own pet (so
+	-- your best pet never copies itself).
 	NestRestock = 30,
 	-- Rare, Epic and Legendary eggs get likelier the further into its biome a nest is
 	-- (QM, Oct 6: going further should pay): their odds x Near at the biome's start
@@ -251,22 +251,17 @@ return {
 	-- carrying one, from as far as a nest's egg (LassoRange); then it can't change hands
 	-- again for Lock seconds.
 	EggSteal = { Lock = 2 },
-	-- Exclusive animal events (Events.server, QM Oct 4): there's always one on. A
-	-- banner counts down the last Countdown seconds, then the animal pops in at the
-	-- start line and runs off with the stampede to the finish line, and its egg drops
-	-- somewhere random on the course. Riding that kind of animal while its egg is out, the guide arrows
-	-- lead to that egg. The event ends when someone takes the egg or after Duration
-	-- seconds; the next countdown starts Gap seconds later. One kind at a time,
-	-- picked at random (never the same twice running).
+	-- Exclusive animal events (Events.server, QM Oct 4): every Cycle seconds one of
+	-- the Animals, picked at random, pops in at the start line Countdown seconds after
+	-- it's picked (the clients build it meanwhile) and runs off with the stampede to
+	-- the finish line. Nothing announces it (QM, Oct 6: no banner, sound or arrows; the
+	-- hard part is finding and riding it in the wild): lasso it and the nests give its
+	-- egg, like any wild animal's. The event's over once someone's riding it, it's run
+	-- off the course, or the next one's due.
 	Events = {
 		Animals = { "Loong", "SnackYak", "RoboShark" },
 		Countdown = 10,
-		Cycle = 600, -- seconds from one event's countdown to the next (QM: every 10 minutes)
-		-- The egg's spot: this far in from the walls, this far from any obstacle's
-		-- footprint and from a gate's line.
-		WallMargin = 14,
-		ObstacleMargin = 10,
-		GateMargin = 30,
+		Cycle = 600, -- seconds from one event to the next (QM: every 10 minutes)
 	},
 	-- Any pet can be ridden. Until pets can be picked in the pen, you ride this one
 	-- (it waits on the first pet spot in your pen).

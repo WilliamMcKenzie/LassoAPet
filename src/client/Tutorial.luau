@@ -77,15 +77,13 @@ local known = {} -- the pen's items when the ride home began: a new one is the e
 local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
 local goalDesert = false -- and it's that one, which QM drew (PICTURES.saveDesert)
 
--- The first Meadow nest: the one nearest the start line. Not the EventNest
--- (Events.server), parked under the start line between events: picked, the
--- tutorial egg sat 500 studs down there and TAKE EGG came up on leaving home.
+-- The first Meadow nest: the one nearest the start line.
 do
 	local best = -math.huge
 	for _, nest in world:WaitForChild("Nests"):GetChildren() do
 		local spot = nest:FindFirstChild("EggSpot")
 		local z = spot and spot.Position.Z
-		if z and nest.Name ~= "EventNest" and WorldColors.biomeAt(z) == 1 and z > best then
+		if z and WorldColors.biomeAt(z) == 1 and z > best then
 			Tutorial.nest, best = nest, z
 		end
 	end

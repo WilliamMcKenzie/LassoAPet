@@ -30,7 +30,6 @@ local IMAGES = {
 	lassoDisabled = { id = "rbxassetid://83416502851504", size = Vector2.new(960, 358) },
 	ride = { id = "rbxassetid://108897443176698", size = Vector2.new(960, 308) },
 	merge = { id = "rbxassetid://134299381559519", size = Vector2.new(960, 308) }, -- MergePet.png
-	followArrows = { id = "rbxassetid://115987106435760", size = Vector2.new(879, 279) }, -- FollowArrows.png
 	home = { id = "rbxassetid://91332218189700", size = Vector2.new(960, 364) },
 	continue = { id = "rbxassetid://124255755969598", size = Vector2.new(960, 308) }, -- Continue.png
 	dodge = { id = "rbxassetid://96827860827213", size = Vector2.new(1423, 115) },
@@ -111,10 +110,6 @@ local IMAGES = {
 	eggSoulHorse = { id = "rbxassetid://136725772402125", size = Vector2.new(502, 812) }, -- SoulHorseEggRender.png
 	eggSludge = { id = "rbxassetid://140005979942732", size = Vector2.new(561, 713) }, -- SludgeEggRender.png
 	eggLeviathan = { id = "rbxassetid://95236739672996", size = Vector2.new(680, 684) }, -- LeviathanEggRender.png
-	-- Exclusive animal events' countdown (Hud.setEventCountdown): QM's gradient names.
-	eventLoong = { id = "rbxassetid://125494868051538", size = Vector2.new(372, 140) }, -- EventLoong.png
-	eventSnackYak = { id = "rbxassetid://136877153343024", size = Vector2.new(593, 119) }, -- EventSnackYak.png
-	eventRoboShark = { id = "rbxassetid://85550148075389", size = Vector2.new(628, 119) }, -- EventRoboShark.png
 }
 
 -- On a computer (keyboard, no touch screen) the ride buttons show their key:
@@ -182,7 +177,6 @@ local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one 
 local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
-local followHint -- "Follow the arrows to the egg!", top left while you ride an event's animal (Hud.setFollowHint)
 local mergeButton, mergeWanted -- MERGE, in RIDE's spot when RIDE isn't up (Hud.showMerge), and whether there's anything to merge
 local rollIcon -- Roll, over Pets: opens the egg roll menu (RollMenu)
 local shopIcon -- Shop, over Roll (or over Pets without Roll): opens the Robux shop (Shop)
@@ -194,10 +188,8 @@ local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at th
 -- (no Gold, Pets or Upgrade Pen) while it runs.
 local tutorial = nil
 local upgradeScale -- Upgrade Pen's UIScale
--- The exclusive animal event's countdown, top centre (Hud.setEventCountdown), in
--- its own always-on ScreenGui: its row, the animal's name (QM's gradient image, or
--- plain text until it's uploaded), "spawns in Ns..." and the row's UIScale.
-local EVENT = { NAME_SCALE = 44 / 119, TEXT_SIZE = 40, TOP = 16 + 352 * 220 / 1292 + 36 } -- TOP: just under the Hold bar (QM; BAR_WIDTH x barEmpty's shape)
+-- A line of text top centre (Hud.setNotice), in its own always-on ScreenGui.
+local NOTICE = { TEXT_SIZE = 40, TOP = 16 + 352 * 220 / 1292 + 36 } -- TOP: just under the Hold bar (QM; BAR_WIDTH x barEmpty's shape)
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -399,15 +391,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 
 	-- Ride back: only DODGE THE STAMPEDE!, pulsing between 90% and 110%, and a red
 	-- vignette that fades out over the last stretch home.
-	-- (in a holder over the whole ride screen, so an event's countdown can hide it
-	-- without upsetting its own show and pulse: Hud.setEventCountdown)
-	local dodgeHolder = Instance.new("Frame")
-	dodgeHolder.Name = "DodgeHolder"
-	dodgeHolder.BackgroundTransparency = 1
-	dodgeHolder.Size = UDim2.fromScale(1, 1)
-	dodgeHolder.Parent = rideRoot
-	EVENT.dodgeHolder = dodgeHolder
-	dodge = image(dodgeHolder, "dodge", fit("dodge", 440), UDim2.fromScale(0.5, 0.15))
+	dodge = image(rideRoot, "dodge", fit("dodge", 440), UDim2.fromScale(0.5, 0.15))
 	dodge.Visible = false
 	Instance.new("UIScale").Parent = dodge
 	dodgePulse = TweenService:Create(dodge.UIScale, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.1 })
@@ -436,16 +420,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 
 	home = button(rideRoot, "home", fit("home", BUTTON_WIDTH), BOTTOM_CENTER, BUTTON_SPOT, onHome)
 	home.Visible = false
-	-- "Follow the arrows to the egg!", top left (QM's mockup), throbbing very slightly.
-	followHint = image(rideRoot, "followArrows", fit("followArrows", 300), UDim2.fromScale(0.18, 0.19))
-	followHint.Visible = false
-	local followScale = Instance.new("UIScale")
-	followScale.Parent = followHint
-	RunService.RenderStepped:Connect(function()
-		if followHint.Visible then
-			followScale.Scale = 1 + 0.02 * math.sin(os.clock() * math.pi * 2 / 1.2)
-		end
-	end)
 	local overHome = UDim2.new(0.5, 0, 1, -MARGIN - fit("home", BUTTON_WIDTH).Y.Offset - CONTINUE_GAP)
 	continueButton = button(rideRoot, "continue", fit("continue", BUTTON_WIDTH), BOTTOM_CENTER, overHome, onContinue)
 	continueButton.Visible = false
@@ -884,39 +858,16 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		prompt.Triggered:Connect(doRoll)
 	end)
 
-	-- The exclusive animal event's countdown (QM's reference: the name, then "spawns in 9s...").
-	local eventGui = Instance.new("ScreenGui")
-	eventGui.Name = "EventHud"
-	eventGui.ResetOnSpawn = false
-	eventGui.IgnoreGuiInset = true
-	eventGui.DisplayOrder = 5
-	eventGui.Parent = playerGui
-	EVENT.row = Instance.new("Frame")
-	EVENT.row.BackgroundTransparency = 1
-	EVENT.row.AutomaticSize = Enum.AutomaticSize.XY
-	EVENT.row.AnchorPoint = Vector2.new(0.5, 0.5)
-	EVENT.row.Position = UDim2.new(0.5, 0, 0, EVENT.TOP)
-	EVENT.row.Visible = false
-	local eventLayout = Instance.new("UIListLayout")
-	eventLayout.FillDirection = Enum.FillDirection.Horizontal
-	eventLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	eventLayout.Padding = UDim.new(0, 12)
-	eventLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	eventLayout.Parent = EVENT.row
-	EVENT.name = image(EVENT.row, "eventLoong", UDim2.new(), UDim2.new())
-	EVENT.nameText = label(EVENT.row, UDim2.fromOffset(0, EVENT.TEXT_SIZE + 8), UDim2.new(), EVENT.TEXT_SIZE + 6, 3)
-	EVENT.nameText.AutomaticSize = Enum.AutomaticSize.X
-	EVENT.nameText.TextColor3 = Color3.fromRGB(150, 255, 140)
-	EVENT.text = label(EVENT.row, UDim2.fromOffset(0, EVENT.TEXT_SIZE + 8), UDim2.new(), EVENT.TEXT_SIZE, 3) -- 3px outline (QM)
-	EVENT.text.AutomaticSize = Enum.AutomaticSize.X
-	EVENT.text.LayoutOrder = 1
-	EVENT.scale = Instance.new("UIScale")
-	EVENT.scale.Parent = EVENT.row
-	EVENT.row.Parent = root(eventGui)
-	-- A notice in the same spot (Hud.setNotice), over the countdown while it's up.
-	EVENT.notice = label(root(eventGui), UDim2.fromOffset(0, EVENT.TEXT_SIZE + 8), EVENT.row.Position, EVENT.TEXT_SIZE, 3) -- 3px outline (QM)
-	EVENT.notice.AutomaticSize = Enum.AutomaticSize.X
-	EVENT.notice.Visible = false
+	-- A line of text top centre (Hud.setNotice), where the event countdown was.
+	local noticeGui = Instance.new("ScreenGui")
+	noticeGui.Name = "NoticeHud"
+	noticeGui.ResetOnSpawn = false
+	noticeGui.IgnoreGuiInset = true
+	noticeGui.DisplayOrder = 5
+	noticeGui.Parent = playerGui
+	NOTICE.label = label(root(noticeGui), UDim2.fromOffset(0, NOTICE.TEXT_SIZE + 8), UDim2.new(0.5, 0, 0, NOTICE.TOP), NOTICE.TEXT_SIZE, 3) -- 3px outline (QM)
+	NOTICE.label.AutomaticSize = Enum.AutomaticSize.X
+	NOTICE.label.Visible = false
 
 	-- Controllers (Gamepad): each button's pad button on its corner, shown only
 	-- while a pad is in use, and the presses that work it.
@@ -1452,12 +1403,6 @@ function Hud.showMerge(visible)
 	end
 end
 
--- "Follow the arrows to the egg!" while you ride an event's animal and the arrows
--- lead to its egg (Ride.client).
-function Hud.setFollowHint(on)
-	followHint.Visible = on
-end
-
 -- Ride back home: DODGE THE STAMPEDE! slams in, then pulses; no cash or distance.
 function Hud.setReturning(returning)
 	dodgePulse:Cancel()
@@ -1573,57 +1518,14 @@ function Hud.setTutorial(stage)
 	rideCash.row.Visible = stage == nil and not noCash
 end
 
--- The exclusive animal event's countdown: `kind` spawns in `seconds`, or nil to
--- hide it. Each new second pops a little. Not during the tutorial.
-function Hud.setEventCountdown(kind, seconds)
-	if not EVENT.row then
-		return
-	end
-	local shown = kind ~= nil and tutorial == nil
-	if not shown and EVENT.seconds == 1 then
-		Sounds.play("countdown_go") -- the countdown ran out: it spawns
-	end
-	EVENT.row.Visible = shown and not EVENT.notice.Visible
-	if EVENT.dodgeHolder then
-		EVENT.dodgeHolder.Visible = not shown -- DODGE THE STAMPEDE! steps aside for it (QM)
-	end
-	if not shown then
-		EVENT.kind, EVENT.seconds = nil, nil
-		return
-	end
-	if kind ~= EVENT.kind then
-		EVENT.kind = kind
-		local entry = IMAGES["event" .. kind]
-		local uploaded = entry ~= nil and entry.id ~= ""
-		EVENT.name.Visible, EVENT.nameText.Visible = uploaded, not uploaded
-		if uploaded then
-			EVENT.name.Image = entry.id
-			EVENT.name.Size = UDim2.fromOffset(entry.size.X * EVENT.NAME_SCALE, entry.size.Y * EVENT.NAME_SCALE)
-		else
-			EVENT.nameText.Text = kind:gsub("(%l)(%u)", "%1 %2") -- "SnackYak" reads "Snack Yak"
-		end
-	end
-	if seconds ~= EVENT.seconds then
-		EVENT.seconds = seconds
-		if seconds <= 3 then
-			Sounds.play("countdown")
-		end
-		EVENT.text.Text = "spawns in " .. seconds .. "s..."
-		EVENT.scale.Scale = 1.15
-		TweenService:Create(EVENT.scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-	end
-end
-
--- A line of text where the event countdown goes (QM, Oct 5: "Return to your base to
--- ride an animal!" when you walk at the start line, WalkLimit.client), or nil to
--- hide it. The countdown steps aside while it's up.
+-- A line of text top centre (QM, Oct 5: "Return to your base to ride an animal!"
+-- when you walk at the start line, WalkLimit.client), or nil to hide it.
 function Hud.setNotice(text)
-	if not EVENT.notice or EVENT.notice.Visible == (text ~= nil) and EVENT.notice.Text == (text or "") then
+	if not NOTICE.label or NOTICE.label.Visible == (text ~= nil) and NOTICE.label.Text == (text or "") then
 		return
 	end
-	EVENT.notice.Visible = text ~= nil
-	EVENT.notice.Text = text or ""
-	EVENT.row.Visible = EVENT.kind ~= nil and tutorial == nil and text == nil
+	NOTICE.label.Visible = text ~= nil
+	NOTICE.label.Text = text or ""
 end
 
 -- Money as the HUD writes it: "$950", "$1.2k".

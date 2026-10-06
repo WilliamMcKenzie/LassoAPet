@@ -35,8 +35,6 @@ local IDS = {
 	button_click = "rbxassetid://102399207280537", -- every UI button
 	roll_reveal = "rbxassetid://101552385373858", -- a roll (or the shop's Legend Egg) lands on its egg
 	purchase = "rbxassetid://127625005664662", -- a Robux purchase goes through
-	countdown = "rbxassetid://82087340390753", -- 3, 2, 1 before an event's animal spawns
-	countdown_go = "rbxassetid://139885049061365", -- it spawns
 	book_open = "rbxassetid://93383284601909", -- a menu (shop, roll, dictionary) opens or closes
 	book_flip = "rbxassetid://121038229911289", -- a menu turns a page (the dictionary's arrows, a ? flip)
 	-- The animals' calls (Config.AnimalSound says which animal makes which): assets/sounds/animals
