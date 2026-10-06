@@ -316,11 +316,20 @@ local function myPet(state)
 	return nil, nil
 end
 
+-- Analytics (Funnel.server): this step was reached. Never waits on the remote.
+local function report(name)
+	local remote = ReplicatedStorage:FindFirstChild("FunnelStep")
+	if remote then
+		remote:FireServer("tutorial", name)
+	end
+end
+
 local function setStep(name)
 	if name == step then
 		return
 	end
 	step = name
+	report(name)
 	if name == "ride" and onChange then
 		onChange() -- the nest's egg is back for another go
 	elseif name == "home" then
@@ -352,6 +361,7 @@ local function showGoal(id)
 	if upNext then
 		goalText = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
 		goalDesert = upNext.Name == "Desert" and upNext.UnlockCost == 1000
+		report("gate")
 		local gateZ = WorldColors.gateZ(level)
 		local start = camera.CFrame
 		camera.CameraType = Enum.CameraType.Scriptable
@@ -503,6 +513,9 @@ function Tutorial.init(changed)
 		if on ~= Tutorial.active then
 			Tutorial.active = on
 			step, failed, done, goalText = "place", false, false, nil
+			if on then
+				report("place")
+			end
 			changed()
 		end
 	end
