@@ -1,14 +1,15 @@
--- FUSE (QM, Oct 6; Shared/Fusion): the Fuse button (Hud's, under Pets) opens a page of
--- your pets, the animal dictionary's old grid page and rarity cards (QM: reuse
--- them), each pet still in 3D as it is (merged bigger, a hybrid in its colours).
--- Tap two to pick them (each gets an outline); with two picked, FUSE pops up at the
--- bottom of the page. FUSE closes the page and the
--- two are pulled up over the pen and fuse, as merging does (PenPets.pull), and the
+-- FUSE (QM, Oct 6; Shared/Fusion): the Fuse button (Hud's, under Pets) opens QM's
+-- FUSION panel: your pets on the dictionary's rarity cards, 8 to a page (arrows
+-- for more), each still in 3D as it is (merged bigger, a hybrid in its colours).
+-- Tap two to pick them (each gets an outline); their names show in the strip at the
+-- bottom either side of QM's FUSE button ("???" till picked), with the price over
+-- it. FUSE closes the panel and the two are pulled up over the pen and fuse, as merging does (PenPets.pull), and the
 -- hybrid drops down where the base was (Hatchery.server's FusePets). The rarer pet
 -- is the base; the other sets its size and paints it in its colours. Hybrids don't
 -- fuse again, and two of a kind merge instead (MERGE).
 --
--- Laid out in pixels of the dictionary's 1102 x 829 page and scaled to fit the screen.
+-- Laid out in pixels of QM's 1102 x 829 panel (assets/ui/fuse/FusionPanel.png) and
+-- scaled to fit the screen.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -29,14 +30,18 @@ local camera = workspace.CurrentCamera
 local PAGE = Vector2.new(1102, 829)
 local SCREEN_SHARE = 0.54 -- as the dictionary's
 local CARD, ART = 200, 180 -- the dictionary's grid: 200 px cards, the pet 180 px in the middle
-local COLUMNS, ROWS = 4, 3
-local INSIDE = Rect.new(6, 43, 1096, 823) -- the page's green inside its black edge
+local COLUMNS, ROWS = 4, 2 -- 8 to a page (QM)
+local INSIDE = Rect.new(6, 43, 1096, 609) -- the panel's blue, down to the top of FUSE
+local STRIP_Y = 756 -- the middle of the strip along the bottom
+local BUTTON = Vector2.new(278, 189) -- QM's FUSE button (assets/ui/fuse/FuseButton.png)
+local BUTTON_Y = 698 -- its middle, over the strip's top edge (QM's mockup)
 -- The same space round every card and between them (QM: even margins), across and down.
 local GAP_X = (INSIDE.Width - COLUMNS * CARD) / (COLUMNS + 1)
 local GAP_Y = (INSIDE.Height - ROWS * CARD) / (ROWS + 1)
 local CARD_CORNER = UDim.new(0.05, 0) -- the rarity cards' own corners (10 px of 200), or the clip cuts their edge
 local FONT = Enum.Font.FredokaOne
-local PAGE_ART = "rbxassetid://106554381754752" -- assets/ui/dex/DexMeadow.png, the dictionary's old grid page
+local PAGE_ART = "" -- assets/ui/fuse/FusionPanel.png (QM)
+local BUTTON_ART = "" -- assets/ui/fuse/FuseButton.png (QM)
 local CARDS = { -- the dictionary's rarity cards (assets/ui/dex/Dex<Rarity>.png)
 	Common = "rbxassetid://79697917998703",
 	Uncommon = "rbxassetid://129147449223279",
@@ -45,8 +50,9 @@ local CARDS = { -- the dictionary's rarity cards (assets/ui/dex/Dex<Rarity>.png)
 	Legendary = "rbxassetid://80504921595928",
 }
 local ARROW = "rbxassetid://130844925944438" -- assets/ui/dex/DexArrow.png (points up)
+local ARROW_Y = 340 -- beside the cards (QM's mockup)
+local kept = {} -- the panel's own parts, kept when a page's cards are cleared
 local PICKED = Color3.new(1, 1, 1) -- the outline on a picked pet (QM: white)
-local GREEN = Color3.fromRGB(110, 210, 70)
 
 local gui, page, scale
 local pop = 1
@@ -55,7 +61,7 @@ local pets = {} -- this opening's: { model, id, kind, fuse, merged }
 local picks = {} -- up to two of `pets`
 local at = 1 -- the first pet on the page shown
 local cards = {} -- [pet] = its card
-local fuseButton, tip
+local fuseButton, tip, nameA, nameB, priceLabel
 
 local function money(n)
 	local s = tostring(math.floor(n))
@@ -226,18 +232,21 @@ local function refresh()
 		card.ImageTransparency = if dim then 0.5 else 0
 		card.Art.GroupTransparency = if dim then 0.5 else 0
 	end
+	-- The strip: the picks' names either side of FUSE, "???" till picked.
+	nameA.Text = if picks[1] then Fusion.name(picks[1].kind) else "???"
+	nameB.Text = if picks[2] then Fusion.name(picks[2].kind) else "???"
 	local ready = #picks == 2
-	if ready and not fuseButton.Visible then
-		local price = priceOf(picks[1], picks[2])
-		fuseButton.Text = "FUSE " .. money(price)
-		fuseButton.BackgroundColor3 = if (player:GetAttribute("Gold") or 0) >= price then GREEN else Color3.fromRGB(150, 160, 175)
-		fuseButton.Visible = true
+	local price = ready and priceOf(picks[1], picks[2])
+	priceLabel.Visible = ready
+	priceLabel.Text = if price then money(price) else ""
+	local can = ready and (player:GetAttribute("Gold") or 0) >= price
+	fuseButton.ImageColor3 = if can then Color3.new(1, 1, 1) else Color3.fromRGB(150, 150, 150)
+	if ready and not fuseButton:GetAttribute("Ready") then -- a pop once it's ready
 		local s = fuseButton:FindFirstChildOfClass("UIScale")
-		s.Scale = 0.2
+		s.Scale = 0.85
 		TweenService:Create(s, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-	elseif not ready then
-		fuseButton.Visible = false
 	end
+	fuseButton:SetAttribute("Ready", ready)
 end
 
 local function toggle(pet)
@@ -277,20 +286,20 @@ end
 function showPage(first)
 	at = first
 	for _, child in page:GetChildren() do
-		if child:IsA("GuiObject") and child ~= fuseButton and child ~= tip then
+		if child:IsA("GuiObject") and not kept[child] then
 			child:Destroy()
 		end
 	end
 	table.clear(cards)
 	local perPage = COLUMNS * ROWS
 	if first > 1 then
-		arrow(UDim2.fromOffset(-100, 422), -90, function()
+		arrow(UDim2.fromOffset(-100, ARROW_Y), -90, function()
 			Sounds.play("book_flip")
 			showPage(first - perPage)
 		end)
 	end
 	if first + perPage <= #pets then
-		arrow(UDim2.fromOffset(PAGE.X + 100, 422), 90, function()
+		arrow(UDim2.fromOffset(PAGE.X + 100, ARROW_Y), 90, function()
 			Sounds.play("book_flip")
 			showPage(first + perPage)
 		end)
@@ -357,6 +366,11 @@ local close
 local function fuse()
 	local a, b = picks[1], picks[2]
 	if not a or not b then
+		tip.Text = "Pick two pets to fuse"
+		tip.Visible = true
+		task.delay(1.6, function()
+			tip.Visible = false
+		end)
 		return
 	end
 	if (player:GetAttribute("Gold") or 0) < priceOf(a, b) then
@@ -419,7 +433,7 @@ function close(instant)
 		gui.Enabled = false
 		table.clear(cards)
 		for _, child in page:GetChildren() do
-			if child:IsA("GuiObject") and child ~= fuseButton and child ~= tip then
+			if child:IsA("GuiObject") and not kept[child] then
 				child:Destroy()
 			end
 		end
@@ -469,32 +483,35 @@ scale = Instance.new("UIScale")
 scale.Parent = page
 page.Parent = gui
 
--- FUSE, popping up at the bottom of the page once two are picked.
-fuseButton = Instance.new("TextButton")
+-- QM's FUSE button over the strip, greyed till two are picked (and you can pay),
+-- the price over it; the picks' names either side.
+fuseButton = Instance.new("ImageButton")
 fuseButton.Name = "Fuse"
+fuseButton.BackgroundTransparency = 1
 fuseButton.AutoButtonColor = false
-fuseButton.BackgroundColor3 = GREEN
+fuseButton.Image = BUTTON_ART
 fuseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-fuseButton.Size = UDim2.fromOffset(420, 100)
-fuseButton.Position = UDim2.fromOffset(PAGE.X / 2, PAGE.Y - 20)
-fuseButton.Font = FONT
-fuseButton.Text = "FUSE"
-fuseButton.TextSize = 52
-fuseButton.TextColor3 = Color3.new(1, 1, 1)
+fuseButton.Size = UDim2.fromOffset(BUTTON.X, BUTTON.Y)
+fuseButton.Position = UDim2.fromOffset(PAGE.X / 2, BUTTON_Y)
 fuseButton.ZIndex = 5
-fuseButton.Visible = false
 Instance.new("UIScale").Parent = fuseButton
-local fuseCorner = Instance.new("UICorner")
-fuseCorner.CornerRadius = UDim.new(0.3, 0)
-fuseCorner.Parent = fuseButton
-stroked(fuseButton, 5).ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-local fuseTextStroke = stroked(fuseButton, 4)
-fuseTextStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
 fuseButton.Activated:Connect(fuse)
 fuseButton.Parent = page
-tip = text(page, UDim2.fromOffset(700, 50), UDim2.fromOffset(PAGE.X / 2, PAGE.Y - 160), 40)
+priceLabel = text(page, UDim2.fromOffset(400, 40), UDim2.fromOffset(PAGE.X / 2, BUTTON_Y - BUTTON.Y / 2 - 22), 36)
+priceLabel.ZIndex = 6
+local side = (PAGE.X - BUTTON.X) / 2 -- the strip either side of FUSE
+nameA = text(page, UDim2.fromOffset(side - 40, 70), UDim2.fromOffset(side / 2, STRIP_Y), 56)
+nameB = text(page, UDim2.fromOffset(side - 40, 70), UDim2.fromOffset(PAGE.X - side / 2, STRIP_Y), 56)
+for _, label in { nameA, nameB } do
+	label.TextScaled = true -- (a long name fits)
+	Instance.new("UITextSizeConstraint", label).MaxTextSize = 56
+end
+tip = text(page, UDim2.fromOffset(700, 50), UDim2.fromOffset(PAGE.X / 2, (INSIDE.Min.Y + INSIDE.Max.Y) / 2), 40)
 tip.ZIndex = 6
 tip.Visible = false
+for _, object in { fuseButton, priceLabel, nameA, nameB, tip } do
+	kept[object] = true
+end
 
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
 	setPop(pop)
