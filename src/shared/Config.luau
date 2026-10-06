@@ -210,6 +210,7 @@ return {
 	SteerSpeed = 28,
 	SteerResponse = 8,
 	HoldTime = 6,
+	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
 	TiredSpeed = 0.5, -- x speed once the Hold bar's empty: no more bucking off (QM, Oct 5)
 	-- Egg nests are shared stock: they all start full, a grabbed egg empties its nest
 	-- for everyone, and it restocks this many seconds later. Eggs are rolled with the

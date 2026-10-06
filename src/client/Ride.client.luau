@@ -3444,6 +3444,9 @@ local function checkRide(dt)
 		return -- the leap over the finish line: nothing can go wrong now
 	end
 	grace = math.max(grace - dt, 0)
+	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
+		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)
+	end
 	do
 		-- The Godlands' mountains (slices.SOLID) crash you whatever you're riding or doing,
 		-- unless you're flying over or burrowing under them.
