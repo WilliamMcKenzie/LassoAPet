@@ -7,8 +7,8 @@
 -- hybrid drops down where the base was (Hatchery.server's FusePets). The left pick
 -- (the first) is the base, its body and ability; the right one sets its size and
 -- paints it in its colours (QM). Hybrids fuse
--- again (QM; Fusion.combine), and two of the same pet merge instead (MERGE). No
--- hybrid names anywhere (QM): a hybrid's card has none, the strip says its base.
+-- again (QM; Fusion.combine), and two of the same pet merge instead (MERGE). A
+-- hybrid's card has no name; picked, the strip shows its hybrid name (QM, Oct 6 20:15).
 --
 -- Laid out in pixels of QM's 1102 x 829 panel (assets/ui/fuse/FusionPanel.png) and
 -- scaled to fit the screen.
@@ -232,8 +232,8 @@ local function refresh()
 		card.Art.GroupTransparency = if dim then 0.5 else 0
 	end
 	-- The strip: the picks' names either side of FUSE, "???" till picked.
-	nameA.Text = if picks[1] then Fusion.name(picks[1].kind) else "???"
-	nameB.Text = if picks[2] then Fusion.name(picks[2].kind) else "???"
+	nameA.Text = if picks[1] then Fusion.name(picks[1].kind, picks[1].fuse) else "???"
+	nameB.Text = if picks[2] then Fusion.name(picks[2].kind, picks[2].fuse) else "???"
 	local ready = #picks == 2
 	local price = ready and priceOf(picks[1], picks[2])
 	priceLabel.Visible = ready and price > 0 -- (no price shown while fusing's free)
