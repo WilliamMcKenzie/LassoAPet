@@ -236,7 +236,11 @@ return {
 	-- Egg nests are shared stock: they all start full, a grabbed egg empties its nest
 	-- for everyone, and it restocks this many seconds later. Eggs are rolled with the
 	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
-	-- their eggs never show up.
+	-- their eggs never show up. But the egg you take is the animal you're riding (QM,
+	-- Oct 6: lassoing is hunting): once you've lassoed a wild animal the nests show its
+	-- egg, swapping with a bounce on every hop. The rolled egg is what you get on your
+	-- own pet (so your best pet never copies itself) or on an event animal (its egg is
+	-- the event's), and the EventNest's egg is always the event's.
 	NestRestock = 30,
 	-- Rare, Epic and Legendary eggs get likelier the further into its biome a nest is
 	-- (QM, Oct 6: going further should pay): their odds x Near at the biome's start
@@ -284,12 +288,12 @@ return {
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
 	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
 	-- brings home an egg, one hint at a time and only the buttons each step needs.
-	-- false turns it off. On that first ride the first Meadow nest always holds a
-	-- TutorialEgg (only that player sees it), the stampede runs on the player's own
-	-- clock so it can slow down to TutorialSlowMo x speed while LASSO or TAKE EGG is
-	-- waiting to be pressed, and the Hold bar never runs out. The tutorial's eggs hatch
-	-- by themselves (TutorialHatchTime); every other egg waits for you to hold E by it
-	-- once it's ready (Hatchery, Pen.client).
+	-- false turns it off. On that first ride the first Meadow nest always holds an egg
+	-- for that player (the animal they lassoed's, as everywhere, else a TutorialEgg),
+	-- the stampede runs on the player's own clock so it can slow down to TutorialSlowMo
+	-- x speed while LASSO or TAKE EGG is waiting to be pressed, and the Hold bar never
+	-- runs out. The tutorial's eggs hatch by themselves (TutorialHatchTime); every
+	-- other egg waits for you to hold E by it once it's ready (Hatchery, Pen.client).
 	Tutorial = true,
 	TutorialEgg = "Pinto",
 	TutorialHatchTime = 0,

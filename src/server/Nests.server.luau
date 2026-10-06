@@ -6,7 +6,14 @@
 --
 -- Eggs are rolled with exactly the odds of the nest's biome's stampede
 -- (Config.Biomes[b].Herd): an animal that's 1 in 100 of the stampede is 1 in 100
--- of the eggs (QM, Oct 2).
+-- of the eggs (QM, Oct 2), rarer ones likelier deeper in (Config.NestDepthOdds).
+--
+-- But the egg you take is the animal you're riding (QM, Oct 6): once a rider's got
+-- on a wild animal (a "lasso" or "take" cue this ride: not the pet they rode out
+-- on), their Ride.client shows every nest holding that animal's egg instead, and
+-- their grab says which animal (mountEgg). The rolled egg is for a rider still on
+-- their own pet (riding your best pet to a nest would copy it every ride) or on an
+-- exclusive event's animal (its egg is the EventNest's).
 --
 -- The Godlands' nests have their own odds, by how deep in they are (its NestDepth).
 --
@@ -14,8 +21,9 @@
 -- tracks (Shared/Godlands) near any player, at a clear spot picked from the server's
 -- seed, and goes again once no one is near (see the end).
 --
--- The EventNest is Events.server's: its egg is the event's, never rolled or restocked here.
+-- The EventNest is Events.server's: its egg is the event's, never rolled, swapped or restocked here.
 
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -77,6 +85,57 @@ local function roll(nest)
 	return if #odds > 0 then odds[#odds].name else ""
 end
 
+-- Where each rider is and what they're on: their RideSync (the server can't see a
+-- ride's anchored character move), kept a few seconds, and whether they've got on
+-- a stampede animal this ride (a "lasso" or "take" cue: they're on a wild animal,
+-- not the pet they rode out on), till the ride's "end".
+local riders = {} -- [player] = { at = Vector3 (rider), t = os.clock(), on = riding an animal, wild }
+local function riderOf(player)
+	local r = riders[player]
+	if not r then
+		r = { at = Vector3.zero, t = 0, on = false }
+		riders[player] = r
+	end
+	return r
+end
+ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, kind, _, riderCFrame)
+	if typeof(riderCFrame) == "CFrame" and riderCFrame.Position.Z == riderCFrame.Position.Z then
+		local r = riderOf(player)
+		r.at, r.t, r.on = riderCFrame.Position, os.clock(), type(kind) == "string" and kind ~= ""
+	end
+end)
+ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
+	if what == "lasso" or what == "take" then
+		riderOf(player).wild = true
+	elseif what == "end" then
+		riders[player] = nil
+		-- The ride's over: an egg still carried was lost on the way (a crash, bucked
+		-- off, Home from the fail screen). One brought home was handed in first
+		-- (Hatchery's DeliverEgg, sent before this), so this only clears a lost one,
+		-- which otherwise stayed set and blocked stealing on the next ride.
+		player:SetAttribute("CarriedEgg", nil)
+	end
+end)
+Players.PlayerRemoving:Connect(function(player)
+	riders[player] = nil
+end)
+
+-- The egg `player` takes instead of a nest's rolled one: `mount`, the animal their
+-- Ride.client says they're on (the stampede is theirs alone, so there's nothing here
+-- to check it against), as long as they've got on a wild animal this ride and it's an
+-- animal a nest can give (not an exclusive: an event animal's egg is the EventNest's).
+-- Else nil: the rolled egg (Ride.client sends "" on your own pet or an event animal).
+local function mountEgg(player, mount)
+	local r = riders[player]
+	if not (r and r.wild) or typeof(mount) ~= "string" or mount == "" then
+		return nil
+	end
+	if not ReplicatedStorage.Shared.Animals:FindFirstChild(mount) or table.find(Config.Events.Animals, mount) then
+		return nil
+	end
+	return mount
+end
+
 -- Nests from the Desert on are bigger (Config.Biomes[b].NestScale; QM, Oct 6): you
 -- ride past them fast there, so they have to show from far off. Only the nest grows,
 -- about the bottom of its box so it still sits on the ground; the egg stays its size
@@ -108,23 +167,28 @@ local takeEgg = Instance.new("RemoteEvent")
 takeEgg.Name = "TakeEgg"
 takeEgg.Parent = ReplicatedStorage
 
--- A rider grabbed the egg in `nest`: the first grab wins, later ones find it empty.
-takeEgg.OnServerEvent:Connect(function(player, nest)
+-- A rider grabbed the egg in `nest` (`mount`: the animal they're on, "" on their own
+-- pet; Ride.client): the first grab wins, later ones find it empty.
+takeEgg.OnServerEvent:Connect(function(player, nest, mount)
 	if typeof(nest) ~= "Instance" or nest.Parent ~= world.Nests then
 		return
 	end
-	if (nest:GetAttribute("Egg") or "") == "" then
-		-- On the tutorial's first ride the empty first Meadow nest shows that player
-		-- a Config.TutorialEgg of their own (Tutorial.luau): grabbing it leaves the
-		-- nest as it is for everyone else.
+	local kind = nest:GetAttribute("Egg") or ""
+	if kind == "" then
+		-- On the tutorial's first ride the empty first Meadow nest shows that player an
+		-- egg of their own (Tutorial.luau: their lassoed animal's, else a Config.TutorialEgg):
+		-- grabbing it leaves the nest as it is for everyone else.
 		if player:GetAttribute("Tutorial") and Config.Tutorial and WorldColors.biomeAt(nest.EggSpot.Position.Z) == 1 then
-			player:SetAttribute("CarriedEgg", Config.TutorialEgg)
+			player:SetAttribute("CarriedEgg", mountEgg(player, mount) or Config.TutorialEgg)
 			player:SetAttribute("CarriedEggScale", 1)
 			Funnel.step(player, "Grabbed Egg")
 		end
 		return
 	end
-	player:SetAttribute("CarriedEgg", nest:GetAttribute("Egg")) -- theirs once they ride it home (Hatchery)
+	if nest.Name ~= "EventNest" then
+		kind = mountEgg(player, mount) or kind -- the wild animal they're riding, if one (see the top)
+	end
+	player:SetAttribute("CarriedEgg", kind) -- theirs once they ride it home (Hatchery)
 	-- A bigger nest's egg stays that much bigger the whole ride (QM, Oct 6): everyone's
 	-- Ride.client shows it at this scale (the hatched pet and your eggs aren't changed).
 	player:SetAttribute("CarriedEggScale", nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale()))
@@ -142,7 +206,6 @@ end)
 
 -- The Godlands' nests ---------------------------------------------------------
 
-local Players = game:GetService("Players")
 local Godlands = require(ReplicatedStorage.Shared.Godlands)
 local Tracks = require(ReplicatedStorage.Shared.GodlandsTracks)
 godlandsStart = Godlands.start
@@ -155,20 +218,11 @@ local CLEAR = 6 -- studs of plain snow all round the spot
 local template = world.Nests:FindFirstChildWhichIsA("Model")
 local godlandsNests = {} -- [k] = its nest
 
--- Where each rider is: their RideSync (the server can't see a ride's anchored
--- character move), kept a few seconds; else their character.
-local rideZ, rideAt = {}, {}
-ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, _, _, riderCFrame)
-	if typeof(riderCFrame) == "CFrame" and riderCFrame.Position.Z == riderCFrame.Position.Z then
-		rideZ[player], rideAt[player] = riderCFrame.Position.Z, os.clock()
-	end
-end)
-Players.PlayerRemoving:Connect(function(player)
-	rideZ[player], rideAt[player] = nil, nil
-end)
+-- Where a rider is: their ride's position (riders, above), else their character's.
 local function zOf(player)
-	if rideZ[player] and os.clock() - rideAt[player] < 3 then
-		return rideZ[player]
+	local r = riders[player]
+	if r and os.clock() - r.t < 3 then
+		return r.at.Z
 	end
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	return root and root.Position.Z
@@ -268,25 +322,9 @@ end)
 -- effects; the thief's client reels it in and turns for home with it.
 
 local SLACK = 12 -- studs of leeway on the range, for the time the positions take to arrive
-local riders = {} -- [player] = { at = Vector3 (rider), t = os.clock(), on = riding an animal }
 local lockedUntil = {} -- [player] = os.clock() before which their egg can't be taken
-ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, kind, _, riderCFrame)
-	if typeof(riderCFrame) == "CFrame" and riderCFrame.Position.Z == riderCFrame.Position.Z then
-		riders[player] = { at = riderCFrame.Position, t = os.clock(), on = type(kind) == "string" and kind ~= "" }
-	end
-end)
-ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
-	if what == "end" then
-		riders[player] = nil
-		-- The ride's over: an egg still carried was lost on the way (a crash, bucked
-		-- off, Home from the fail screen). One brought home was handed in first
-		-- (Hatchery's DeliverEgg, sent before this), so this only clears a lost one,
-		-- which otherwise stayed set and blocked stealing on the next ride.
-		player:SetAttribute("CarriedEgg", nil)
-	end
-end)
 Players.PlayerRemoving:Connect(function(player)
-	riders[player], lockedUntil[player] = nil, nil
+	lockedUntil[player] = nil
 end)
 
 local function riding(player, now)

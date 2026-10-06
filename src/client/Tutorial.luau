@@ -13,7 +13,8 @@
 --   2. ride  "Ride your Horse!"              arrows to it
 --   3. lasso "Press E to LASSO a new ride!"  time slows while an animal is in reach
 --   4. egg   "Follow the arrows..."          the egg guide; the first Meadow nest
---                                            always holds a Config.TutorialEgg
+--                                            always holds an egg for you (your
+--                                            lassoed animal's, else a TutorialEgg)
 --   5. take  "Press E to take the egg!"      time slows while it's in reach
 --   6. home  (DODGE THE STAMPEDE!)           home with the egg
 --   7. place2 the egg goes into the pen by itself (Hatchery's DeliverEgg, balance
@@ -50,7 +51,7 @@ local world = workspace:WaitForChild("World")
 local Tutorial = {}
 Tutorial.active = false -- the tutorial is running: the "Tutorial" attribute is set
 Tutorial.slowMo = nil -- a time scale while LASSO or TAKE EGG waits for its press
-Tutorial.nest = nil -- the first Meadow nest: while it's empty, this player sees a TutorialEgg in it
+Tutorial.nest = nil -- the first Meadow nest: while it's empty, this player still sees an egg in it (their lassoed animal's, else a TutorialEgg)
 Tutorial.busy = false -- the ending's close-ups are on: no riding off
 Tutorial.eggTaken = false -- this ride took the egg from Tutorial.nest (Ride): no tutorial egg there till the ride's over
 
