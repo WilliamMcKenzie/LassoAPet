@@ -63,7 +63,6 @@ Tutorial.eggTaken = false -- this ride took the egg from Tutorial.nest (Ride): n
 
 local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
 local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banner (Hud, at 0.3)
-local FUSE_HINT_Y = 0.05 -- with the Fuse menu open: above its page
 local GOAL_WAIT = 3.2 -- seconds after the egg hatches (Pen.client's hatch takes about 2.2) before the gate, when there's no fuse step
 local FUSE_WAIT = 2.2 -- before the fuse step: just till the pet has landed (Pen.client: 2.18 s; QM, no pause)
 local REVEAL = { Big = 3, Pop = 0.5, Hold = 0.35, Fly = 0.6 } -- the Fuse button's reveal: times its size in the middle, then seconds
@@ -403,26 +402,18 @@ local function hybrids()
 	return n
 end
 
--- The fuse step's next click: what the cursor's on, and the hint. Fuse, then each
--- pet on the page, then FUSE (FuseMenu's Hud.fuseGuide); nothing once it's fused.
+-- The fuse step's next click, where the cursor goes: Fuse, then each pet on the
+-- page, then FUSE (FuseMenu's Hud.fuseGuide); nothing once it's fused. No hint
+-- text: the cursor says it (QM).
 local function fuseTarget()
-	if Hud.fusedAt and Hud.fusedAt >= fuseFrom then
-		return nil, nil
+	if not fuseRevealed or (Hud.fusedAt and Hud.fusedAt >= fuseFrom) then
+		return nil
 	end
-	if not fuseRevealed then
-		return nil, nil
-	end
-	local target, isFuse
-	if Hud.fuseGuide then
-		target, isFuse = Hud.fuseGuide()
-	end
-	local verb = if touch() then "Tap" else "Click"
+	local target = Hud.fuseGuide and Hud.fuseGuide()
 	if target == nil then
-		return Hud.fuseButton(), nil -- (no hint: the reveal showed where it is, QM)
-	elseif not target then
-		return nil, nil
+		return Hud.fuseButton()
 	end
-	return target, if isFuse then verb .. " FUSE!" else verb .. " both your pets!"
+	return target or nil
 end
 
 -- The fuse step's start (QM): the Fuse button pops up big in the middle of the
@@ -530,8 +521,6 @@ local function hintFor(state)
 		return if phase == "idle" then "Place your egg in your pen!" else nil
 	elseif step == "goal" then
 		return goalText
-	elseif step == "fuse" then
-		return select(2, fuseTarget())
 	elseif step == "ride" then
 		local _, kind = myPet(state)
 		return if kind and kind ~= "" then "Ride your " .. kind .. "!" else nil
@@ -616,9 +605,7 @@ function Tutorial.update(state)
 		else nil
 	showPicture(pictureName, cursorOn)
 	setHint(if state.cutscene or pictureName then nil else hintFor(state))
-	hint.Position = UDim2.fromScale(0.5, if phase == "ended" then FAIL_HINT_Y -- over CRASH! / BUCKED OFF
-		elseif step == "fuse" and Hud.fuseGuide and Hud.fuseGuide() then FUSE_HINT_Y
-		else HINT_Y)
+	hint.Position = UDim2.fromScale(0.5, if phase == "ended" then FAIL_HINT_Y else HINT_Y) -- over CRASH! / BUCKED OFF
 
 	local target
 	if phase == "idle" then
