@@ -246,6 +246,11 @@ end)
 ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
 	if what == "end" then
 		riders[player] = nil
+		-- The ride's over: an egg still carried was lost on the way (a crash, bucked
+		-- off, Home from the fail screen). One brought home was handed in first
+		-- (Hatchery's DeliverEgg, sent before this), so this only clears a lost one,
+		-- which otherwise stayed set and blocked stealing on the next ride.
+		player:SetAttribute("CarriedEgg", nil)
 	end
 end)
 Players.PlayerRemoving:Connect(function(player)
