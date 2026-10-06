@@ -871,7 +871,9 @@ startRide = function(model)
 		-- you from where it is. Your own pet stays home.
 		vfx.rideCue:FireServer("take", fromHerd.n)
 		vfx.markEventRun(fromHerd)
-		herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
+		if fromHerd.n then -- (nil: a Meadow animal for walking over the start line, below)
+			herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
+		end
 		mount = fromHerd
 		mount.popping, mount.hop, mount.dodge, mount.merged, mount.fuse = nil, 0, 0, nil, nil
 		mount.swerve, mount.swerveTo, mount.swerveV, mount.swerveSide = 0, 0, 0, nil
@@ -917,6 +919,29 @@ startRide = function(model)
 	Hud.show(true)
 	Hud.setDistance("")
 	Lasso.start(player.Character)
+end
+
+-- Walking over the start line on foot (WalkLimit.client): you're on a random
+-- Meadow animal there and then (QM, Oct 6), ridden like a stampede animal you
+-- jumped on at the start line. Any Meadow herd kind that spawns, all equally likely.
+require(script.Parent.StartLine).ride = function(x, z)
+	if phase ~= "idle" or Tutorial.busy or player:GetAttribute("Tutorial") then
+		return false
+	end
+	local kinds = {}
+	for kind, weight in Config.Biomes[1].Herd do
+		if weight > 0 and Animals:FindFirstChild(kind) then
+			table.insert(kinds, kind)
+		end
+	end
+	if #kinds == 0 then
+		return false
+	end
+	table.sort(kinds) -- (pairs order isn't random)
+	local entity = newEntity(x, z, 0, kinds[math.random(#kinds)])
+	herdRideable[entity.animal.model] = entity
+	startRide(entity.animal.model)
+	return phase == "outbound"
 end
 
 -- Testing (/biome, see Hatchery.server): drops you just inside biome b's start
