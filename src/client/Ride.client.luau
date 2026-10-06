@@ -3679,7 +3679,8 @@ local function checkRide(dt)
 			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
 			-- Racing home on the Icebringer, an animal frozen in ice smashes whatever its size (QM).
 			local shatter = phase == "return" and entity.frostFx ~= nil and (vfx.abilityOf(mount) or {}).Kind == "Frost"
-			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
+			-- In the tutorial you can't crash racing home: you knock everything aside like an XXL pet (QM, Oct 6).
+			if ((phase == "return" or trample) and (tierOf(entity.kind) < myTier or Tutorial.active)) or kind == "Crabwalk" or shatter then
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
 				vfx.broke()
 				if kind == "Crabwalk" and special.RestorePer then
@@ -4370,7 +4371,7 @@ RunService.PreSimulation:Connect(function(dt)
 		-- On foot on the course, a stampede animal running you down throws you
 		-- like being bucked off (no cash on the fail screen: there was no ride).
 		local hrp, humanoid = character()
-		if hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z + 2 then
+		if hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z + 2 and not Tutorial.active then
 			for _, entity in allAnimals() do
 				if not entity.popping and math.abs(entity.x - hrp.Position.X) < 2.6 and math.abs(entity.z - hrp.Position.Z) < 4 then
 					clearRideTarget()
