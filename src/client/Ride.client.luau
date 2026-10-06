@@ -2481,10 +2481,15 @@ function vfx.ownSize(entity)
 	return entity.feast and entity.feast.size or 1
 end
 
+-- A pet's ability (Config.Abilities): a hybrid's is its donor's, the right pick's (QM, Oct 6).
+function vfx.abilityOf(entity)
+	return entity and Config.Abilities[entity.fuse or entity.kind]
+end
+
 -- The Blue Crab's Feast (Config.Abilities): what it has broken since the last one, and
 -- how much bigger and faster it has grown this ride. nil for every other pet.
 function vfx.feastOf(entity)
-	local cfg = entity and Config.Abilities[entity.kind]
+	local cfg = vfx.abilityOf(entity)
 	if not cfg or (cfg.Kind ~= "Feast" and cfg.Kind ~= "Hunt" and cfg.Kind ~= "Breath") then -- (the Robo Shark and Loong grow the same way)
 		return nil
 	end
@@ -3308,7 +3313,7 @@ local function updateAbility(dt)
 		endAbility(abilityMount)
 	end
 	abilityMount = mount
-	local cfg = mount and not Tutorial.active and Config.Abilities[mount.kind] -- no abilities in the tutorial
+	local cfg = mount and not Tutorial.active and vfx.abilityOf(mount) -- no abilities in the tutorial
 	if not cfg or (phase ~= "outbound" and phase ~= "turning" and phase ~= "return") then
 		if mount then
 			endAbility(mount)
@@ -3662,7 +3667,7 @@ local function checkRide(dt)
 		if not entity.popping and not entity.event and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
 			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
 			-- Racing home on the Icebringer, an animal frozen in ice smashes whatever its size (QM).
-			local shatter = phase == "return" and entity.frostFx ~= nil and (Config.Abilities[mount.kind] or {}).Kind == "Frost"
+			local shatter = phase == "return" and entity.frostFx ~= nil and (vfx.abilityOf(mount) or {}).Kind == "Frost"
 			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then -- (the +1 is for obstacles only)
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
 				vfx.broke()
@@ -4082,7 +4087,7 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 		end
 	elseif what == "ability" and rider and rider.entity then
 		local entity = rider.entity
-		local cfg = Config.Abilities[entity.kind]
+		local cfg = Config.Abilities[select(2, vfx.Fusion.split(rider.kind)) or entity.kind] -- (a hybrid's is its donor's)
 		if not cfg or cfg.Kind ~= a then
 			return
 		end

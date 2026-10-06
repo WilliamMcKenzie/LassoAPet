@@ -1,6 +1,7 @@
 -- FUSE (QM, Oct 6): two of your pets of different kinds become one hybrid. The one
--- picked first (on the left) is the base: its model, animations and ability (QM,
--- Oct 6 20:00; it used to be the rarer one). The other one, the donor, on the right,
+-- picked first (on the left) is the base: its model and animations (QM, Oct 6 20:00;
+-- it used to be the rarer one). The other one, the donor, on the right, gives its
+-- ability (QM, 20:13: Ride's vfx.abilityOf), and
 -- sets its size (a Pig donor makes a tiny Loong, a Loong donor a giant Pig) and
 -- paints it in its own colours, slot for slot (Shared/Palettes). It earns what both
 -- earned. Two of the same hybrid merge like any other pets (Shared/Merge).
