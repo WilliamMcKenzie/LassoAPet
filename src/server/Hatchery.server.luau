@@ -850,6 +850,18 @@ awayCommand.Triggered:Connect(function(source)
 end)
 awayCommand.Parent = game:GetService("TextChatService")
 
+-- Testing: "/like" shows the like popup now, without touching likeAsked.
+local likeCommand = Instance.new("TextChatCommand")
+likeCommand.Name = "Like"
+likeCommand.PrimaryAlias = "/like"
+likeCommand.Triggered:Connect(function(source)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	if player and allowed(player) then
+		likeAsk:FireClient(player)
+	end
+end)
+likeCommand.Parent = game:GetService("TextChatService")
+
 -- Fired to a player each time their pets pay out, so the client can pop "+N$"
 -- over each pet's head.
 local paid = Instance.new("RemoteEvent")
