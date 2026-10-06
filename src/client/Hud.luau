@@ -719,10 +719,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
 	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.66), 30, 3)
 	price.AutomaticSize = Enum.AutomaticSize.X
-	-- How far along you are, under the button while you can't afford it yet ("$230 / $500"):
-	-- the next goal after the tutorial (balance pass, Oct 6).
-	local progress = label(upgrade, UDim2.fromOffset(0, 30), UDim2.new(0.5, 0, 1, 22), 26, 3)
-	progress.AutomaticSize = Enum.AutomaticSize.X
 	local cost -- gold for the next level, nil at the top level
 	local function refreshUpgrade()
 		local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
@@ -734,8 +730,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			local own = nextBiome.UpgradeImage
 			price.Text = money(cost)
 			price.Visible = not own
-			progress.Text = money(player:GetAttribute("Gold") or 0) .. " / " .. money(cost)
-			progress.Visible = not affordable
 			local ownDisabled = own and not affordable and nextBiome.UpgradeImageDisabled
 			upgrade.Image = ownDisabled or own or IMAGES[if affordable then "upgradePen" else "upgradePenDisabled"].id
 			upgrade.ImageColor3 = if own and not affordable and not ownDisabled then Color3.fromRGB(150, 150, 150) else Color3.new(1, 1, 1)
