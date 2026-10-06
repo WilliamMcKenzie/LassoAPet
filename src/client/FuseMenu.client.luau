@@ -395,7 +395,6 @@ local function fuse()
 		end
 	end
 	ReplicatedStorage:WaitForChild("FusePets"):FireServer(a.id, b.id)
-	Hud.fusedAt = os.clock() -- (Tutorial waits for it)
 	close()
 end
 
@@ -517,23 +516,6 @@ Hud.onFuse = function()
 	end
 end
 Hud.closeFuse = close
-
--- The tutorial's fuse step (Tutorial): what to click next while the page is open,
--- the next pet to pick or else FUSE (and true); nil while it's shut, false if
--- there's no pet on the page it can pick.
-Hud.fuseGuide = function()
-	if not open then
-		return nil
-	elseif #picks >= 2 then
-		return fuseButton, true
-	end
-	for _, pet in pets do
-		if cards[pet] and not table.find(picks, pet) and canPick(pet) then
-			return cards[pet]
-		end
-	end
-	return if picks[1] then cards[picks[1]] else false -- (clicking it unpicks it)
-end
 
 -- Riding off closes it.
 player.CharacterAdded:Connect(function()
