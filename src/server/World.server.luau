@@ -22,13 +22,15 @@ end
 local sky = Instance.new("Sky")
 sky.CelestialBodiesShown = false
 sky.StarCount = 0
--- Plain gradient skybox generated for this game (deep blue overhead, lighter at the horizon).
-local SKY_SIDE = "rbxassetid://101714504952971"
-for _, face in { "Bk", "Ft", "Lf", "Rt" } do
-	sky["Skybox" .. face] = SKY_SIDE
+-- One flat colour all round, that shows on screen as #59D9FD (QM, Oct 6). The image
+-- itself is #5CB5F1: Lighting's ColorCorrection (Saturation 0.25, Contrast 0.05) and
+-- ExposureCompensation 0.5 brighten and saturate the sky too, so it was picked by
+-- uploading solid colours and sampling Studio's screen until it read #59D9FE (one off
+-- in blue, the nearest it gets). Change those Lighting settings and it needs picking again.
+local SKY = "rbxassetid://81588505365795"
+for _, face in { "Bk", "Dn", "Ft", "Lf", "Rt", "Up" } do
+	sky["Skybox" .. face] = SKY
 end
-sky.SkyboxUp = "rbxassetid://73730341040940"
-sky.SkyboxDn = "rbxassetid://98351643334543"
 sky.Parent = Lighting
 -- The finish line: a copy of the start line at the end of the last biome
 -- (Config.FinishFromEnd before the far wall), so it moves as biomes are added.
