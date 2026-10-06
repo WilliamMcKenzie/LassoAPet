@@ -921,6 +921,7 @@ startRide = function(model)
 		herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
 		mount = fromHerd
 		mount.popping, mount.hop, mount.dodge, mount.merged = nil, 0, 0, nil
+		mount.swerve, mount.swerveTo, mount.swerveV, mount.swerveSide = 0, 0, 0, nil
 		mount.animal:setScale(1)
 		spot = Vector3.new(mount.x, 0, mount.z)
 	elseif fromPen then
@@ -1524,6 +1525,7 @@ local function takeFromPool(n, x, z, kind)
 	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
 	entity.face, entity.rush = nil, nil
+	entity.swerve, entity.swerveTo, entity.swerveV, entity.swerveSide = 0, 0, 0, nil -- (vfx.updateAvoid)
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
 	-- Put where it now is at once: one taken out of view isn't moved until it comes
 	-- into view, and it stood frozen where it was last used meanwhile (QM, Oct 4: full-size
@@ -1940,10 +1942,10 @@ local function updateHerd(dt, slowed)
 			-- A nudge from a passing rider fades back out; it never changes the schedule.
 			entity.dodge *= math.exp(-1.5 * dt)
 			if snapped then
-				entity.x = x + entity.dodge -- a snap doesn't swing them sideways
+				entity.x = x + entity.dodge + (entity.swerve or 0) -- a snap doesn't swing them sideways
 			end
 			local ox, oz = vfx.hazards.offset(key) -- (charging or hunting you: off its place for a bit)
-			moveAnimal(entity, math.clamp(x + entity.dodge + ox, -EDGE, EDGE), z + oz, speed, dt, shown)
+			moveAnimal(entity, math.clamp(x + entity.dodge + (entity.swerve or 0) + ox, -EDGE, EDGE), z + oz, speed, dt, shown)
 			vfx.setFrosted(entity, vfx.frostLeft[key] ~= nil)
 		end
 	end
@@ -2259,102 +2261,89 @@ end
 
 -- On the ride home the stampede swerves out of your way, late (Config.ReturnAvoid).
 -- Like the snake's scare, but only the animals about to hit you, and only just enough.
--- A swerve is one smooth move (eased in and out, so the animal turns into it and
--- straightens up again: moveAnimal faces it along its sideways speed) to a new line,
--- held until you're past; then the stampede's usual nudge decay drifts it back.
--- Pushing it a bit every frame instead made it jitter and snap (QM, Oct 6).
--- It aims Clear studs beside where you'll be when it reaches you (your sideways speed
--- carried on), and if you steer back at it, it swerves again (QM, Oct 6: chased
--- head-on, a horse never moved). Loose former mounts (strays) swerve the same way;
--- their own steering only manages 12 studs/s, too slow to get clear.
+-- Each animal's swerve is its own sideways offset (entity.swerve, added to its lane by
+-- updateHerd), pulled toward a target by a critically damped spring: it eases out,
+-- holds its new line till you're past, then eases back. A spring can be retargeted
+-- any frame without a kink, and it is the only thing that writes the offset, so nothing
+-- fights it. (Before: the swerve rode the shared nudge, which updateHerd decays every
+-- frame before the swerve set it again, so the animal shook by a frame-time-dependent
+-- amount and moveAnimal swung its facing with it; worse live, where frame times vary.
+-- QM, Oct 6.) It aims Clear studs beside where you'll be when it reaches you (your
+-- sideways speed carried on), keeps the side it first picked (no ping-pong as you steer)
+-- and only ever moves further out. Loose former mounts (strays) swerve the same way,
+-- moved bodily with their lane, and keep their new line afterwards.
 -- skip: the animals that rolled not to swerve this ride home (one roll each).
--- moves: [entity] = { n, from, to, t, dur } for a stampede animal (its dodge), or
--- { shift, applied, t, dur } for a stray (moved bodily, its lane with it).
 vfx.avoid = {
 	lastZ = nil,
 	lastX = nil,
 	vz = 0,
 	vx = 0,
 	skip = setmetatable({}, { __mode = "k" }),
-	moves = setmetatable({}, { __mode = "k" }),
 }
 function vfx.updateAvoid(dt)
 	local cfg, state = Config.ReturnAvoid, vfx.avoid
-	if not (cfg and cfg.On and phase == "return" and mount) then
-		state.lastZ, state.lastX, state.vx = nil, nil, 0
-		table.clear(state.skip)
-		table.clear(state.moves)
-		return
-	end
-	if state.lastZ and dt > 0 then
+	local on = cfg and cfg.On and phase == "return" and mount
+	if on and state.lastZ and dt > 0 then
 		state.vz = math.max((mount.z - state.lastZ) / dt, 0) -- (toward home is +z)
 		state.vx += ((mount.x - state.lastX) / dt - state.vx) * (1 - math.exp(-10 * dt))
 	end
-	state.lastZ, state.lastX = mount.z, mount.x
+	if on then
+		state.lastZ, state.lastX = mount.z, mount.x
+	else
+		state.lastZ, state.lastX, state.vx = nil, nil, 0
+		table.clear(state.skip)
+	end
+	local maxSpeed = cfg and cfg.MaxSpeed or 140
 	for _, entity in allAnimals() do
+		if entity == mount then
+			continue
+		end
+		local dz = if on then entity.z - mount.z - 5 else -math.huge -- (the crash check reaches 5 studs ahead)
 		-- (not a Godlands animal charging or hunting you: that one means it)
-		if entity == mount or entity.popping or entity.event or entity.face or entity.rush then
-			continue
+		if dz > 0 and not (entity.popping or entity.event or entity.face or entity.rush) then
+			local t = dz / math.max(state.vz + math.max(entity.speed or 0, 0), 1) -- seconds until it's on you
+			local base = entity.x - (entity.swerve or 0) -- its line without the swerve
+			local px = math.clamp(mount.x + state.vx * t, -EDGE, EDGE) -- where you'll be by then
+			local gap = base + (entity.swerveTo or 0) - px
+			if t <= cfg.Warn and math.abs(gap) < cfg.Clear then
+				if state.skip[entity] == nil then
+					state.skip[entity] = rng:NextNumber() >= cfg.Chance
+				end
+				if not state.skip[entity] then
+					-- Away from you (the side it first picked), unless the wall leaves it in your way.
+					local side = entity.swerveSide or (if gap > 0 then 1 elseif gap < 0 then -1 elseif entity.x > 0 then -1 else 1)
+					local target = math.clamp(px + side * cfg.Clear, -EDGE, EDGE)
+					if math.abs(target - px) < 6 then
+						side = -side
+						target = math.clamp(px + side * cfg.Clear, -EDGE, EDGE)
+					end
+					entity.swerveSide, entity.swerveTo = side, target - base
+					-- Settles (to ~1%) in about 6.6/w s: by the time it reaches you, at most Ease.
+					entity.swerveW = 6.6 / math.clamp(t * 0.8, 0.3, cfg.Ease)
+				end
+			end
+		elseif dz < -10 and entity.swerveSide then
+			-- Past you: a stampede animal drifts back to its line; a stray keeps its new one.
+			entity.swerveSide, entity.swerveW = nil, 2
+			entity.swerveTo = if entity.n then 0 else entity.swerve
 		end
-		local dz = entity.z - mount.z - 5 -- (the crash check reaches 5 studs ahead)
-		local move = state.moves[entity]
-		if move and move.n ~= entity.n then
-			move, state.moves[entity] = nil, nil -- (a pooled animal back as another one)
-		end
-		if dz < -10 then
-			state.moves[entity] = nil -- past you: let it drift back
-			continue
-		end
-		local left = 0 -- how much further its swerve will take it
-		if move then
-			move.t += dt
-			local k = math.clamp(move.t / move.dur, 0, 1)
-			k = k * k * (3 - 2 * k)
-			if move.shift then
-				local step = move.shift * k - move.applied
-				move.applied += step
+		local s, to, v = entity.swerve or 0, entity.swerveTo or 0, entity.swerveV or 0
+		if s ~= to or v ~= 0 then
+			-- Critically damped spring, solved exactly for this dt (the same at any frame rate).
+			local w = entity.swerveW or 2
+			local off = s - to
+			local a = (v + w * off) * dt
+			local decay = math.exp(-w * dt)
+			off, v = (off + a) * decay, math.clamp((v - w * a) * decay, -maxSpeed, maxSpeed)
+			if math.abs(off) < 0.01 and math.abs(v) < 0.05 then
+				off, v = 0, 0
+			end
+			if not entity.n then
+				local step = to + off - s
 				entity.x = math.clamp(entity.x + step, -EDGE, EDGE)
 				entity.lane = math.clamp((entity.lane or entity.x) + step, -EDGE, EDGE)
-				left = move.shift - move.applied
-			else
-				entity.dodge = move.from + (move.to - move.from) * k
-				left = move.to - entity.dodge
 			end
-		end
-		if dz <= 0 then
-			continue
-		end
-		local t = dz / math.max(state.vz + math.max(entity.speed or 0, 0), 1) -- seconds until it's on you
-		if t > cfg.Warn or (move and move.t < 0.15) then
-			continue
-		end
-		local px = math.clamp(mount.x + state.vx * t, -EDGE, EDGE) -- where you'll be by then
-		local gap = entity.x + left - px
-		if math.abs(gap) >= (if move then 0.6 else 1) * cfg.Clear then
-			continue -- clear of you (a swerving one: unless you've steered back at it)
-		end
-		if state.skip[entity] == nil then
-			state.skip[entity] = rng:NextNumber() >= cfg.Chance
-		end
-		if not state.skip[entity] then
-			-- Away from you, unless that's into the wall: then across your other side.
-			local away = if gap > 0 then 1 elseif gap < 0 then -1 elseif entity.x > 0 then -1 else 1
-			-- Clear studs that side of you, or the wall if that's past it (Clear can be wider than
-			-- the track); the far side only when the wall leaves it in your way.
-			local target = math.clamp(px + away * cfg.Clear, -EDGE, EDGE)
-			if math.abs(target - px) < 6 then
-				away = -away
-				target = math.clamp(px + away * cfg.Clear, -EDGE, EDGE)
-			end
-			if move and math.abs(target - (entity.x + left)) < 1 then
-				continue -- already headed there (say, parked on a wall)
-			end
-			local shift = target - entity.x -- (signed)
-			-- Done a little before it reaches you; a smoothstep's top speed is 1.5x its average.
-			local dur = math.max(math.min(t * 0.8, cfg.Ease), 1.5 * math.abs(shift) / cfg.MaxSpeed)
-			state.moves[entity] = if entity.n
-				then { n = entity.n, from = entity.dodge, to = entity.dodge + shift, t = 0, dur = dur }
-				else { shift = shift, applied = 0, t = 0, dur = dur }
+			entity.swerve, entity.swerveV = to + off, v
 		end
 	end
 end
