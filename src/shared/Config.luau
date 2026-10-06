@@ -220,7 +220,7 @@ return {
 	SteerSpeed = 28,
 	SteerResponse = 8,
 	HoldTime = 6,
-	TerrainSaturation = 1.05, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate; QM, Oct 6: 1.15 was too hard on the eyes): 1 undoes it
+	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	Sky = "Anime", -- "Anime" (the Creator Store's Anime sky, QM Oct 6) or "Flat" (one flat #59D9FD): World.server
 	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
 	TiredSpeed = 0.5, -- x speed once the Hold bar's empty: no more bucking off (QM, Oct 5)
