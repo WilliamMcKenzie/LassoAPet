@@ -11,6 +11,7 @@
 --                           -- { lift, radius } overrides, e.g. Outline.NEST
 --   Outline.ring(model, color) -- a ring of its own round this model (:Destroy() it when done)
 --   Outline.box(model) -- its bounding box as (CFrame from its root, size), measured once
+--   Outline.circle(color) -- a free ring: :place(position, radius) puts it flat there, :hide()
 
 local RunService = game:GetService("RunService")
 
@@ -90,6 +91,29 @@ function Ring:fit(model, root, fit)
 	spinning[self] = true
 end
 
+-- Lays the ring flat on the ground at `position` (world), `radius` studs across the middle.
+local worldAnchor
+function Ring:place(position, radius)
+	if not worldAnchor then
+		worldAnchor = Instance.new("Part")
+		worldAnchor.Name = "RingAnchor"
+		worldAnchor.Anchored, worldAnchor.CanCollide, worldAnchor.CanQuery, worldAnchor.CanTouch = true, false, false, false
+		worldAnchor.Transparency = 1
+		worldAnchor.Size = Vector3.one
+		worldAnchor.CFrame = CFrame.identity
+		worldAnchor.Parent = workspace
+	end
+	self.base = CFrame.new(position) * CFrame.Angles(math.pi / 2, 0, 0)
+	for _, dash in self.dashes do
+		dash.Radius = radius
+		dash.InnerRadius = radius - math.clamp(radius * 0.08, 0.5, 1.5)
+		dash.Adornee = worldAnchor
+		dash.Visible = true
+	end
+	self:turn()
+	spinning[self] = true
+end
+
 function Ring:hide()
 	spinning[self] = nil
 	for _, dash in self.dashes do
@@ -134,6 +158,10 @@ function Outline.ring(model, color)
 		r:fit(model, model.PrimaryPart)
 	end
 	return r
+end
+
+function Outline.circle(color)
+	return newRing(color)
 end
 
 return Outline

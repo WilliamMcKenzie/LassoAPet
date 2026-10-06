@@ -1126,6 +1126,36 @@ end
 -- rarity picks TAKE EGG's colours.
 function Hud.setAction(text, ready, rarity)
 	action.Visible = text ~= nil
+	-- Text with no button art (JUMP, Config.Dive's experiment): a plain stand-in button.
+	local label = action:FindFirstChild("Label")
+	if text and not ACTIONS[text] then
+		if not label then
+			label = Instance.new("TextLabel")
+			label.Name = "Label"
+			label.AnchorPoint = Vector2.new(0.5, 0.5)
+			label.Position = UDim2.fromScale(0.5, 0.5)
+			label.Size = UDim2.fromScale(1, 0.8)
+			label.BackgroundColor3 = Color3.fromRGB(255, 170, 30)
+			label.Font = FONT
+			label.TextScaled = true
+			label.TextColor3 = Color3.new(1, 1, 1)
+			label.TextStrokeTransparency = 0
+			Instance.new("UICorner").Parent = label
+			local stroke = Instance.new("UIStroke")
+			stroke.Thickness = 3
+			stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			stroke.Parent = label
+			label.Parent = action
+		end
+		label.Text = text
+		label.Visible = true
+		action.Image = ""
+		sunburst.Visible = false
+		actionScale.Scale = 1
+		return
+	elseif label then
+		label.Visible = false
+	end
 	if text then
 		local key = ACTIONS[text]
 		if key == "lasso" and not ready then

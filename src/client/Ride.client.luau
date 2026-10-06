@@ -632,6 +632,9 @@ local function cleanup()
 		mount.animal.model:Destroy()
 	end
 	mount, transfer, tumble, warpLevel = nil, nil, nil, nil
+	if vfx.diveEnd then
+		vfx.diveEnd()
+	end
 	if Tutorial.eggTaken then -- the ride's over: the tutorial egg's back for the next one
 		Tutorial.eggTaken = false
 		showNestEgg(Tutorial.nest)
@@ -1060,6 +1063,7 @@ local function fail(reason, tip)
 		mount = nil
 	end
 	transfer = nil
+	vfx.diveEnd()
 	if carried then
 		if vfx.revive then
 			vfx.revive.carried = carried -- put away until Continue or Home
@@ -1332,6 +1336,10 @@ local function candidates()
 end
 
 local function findTarget()
+	if vfx.diveMode() then
+		picked = nil
+		return vfx.diveTarget() -- (jump and dive: only what's in the ring under you, in the air)
+	end
 	if phase ~= "outbound" or transfer or not mount then
 		picked = nil
 		return nil
@@ -1384,6 +1392,10 @@ local function candidateAt(screenPos)
 end
 
 local function onAction()
+	if vfx.diveMode() then
+		vfx.diveAction() -- (Config.Dive: the button jumps and dives instead)
+		return
+	end
 	if vfx.stealFrom and not transfer and not carried then
 		ReplicatedStorage:WaitForChild("StealEgg"):FireServer(vfx.stealFrom) -- (the server says if it's yours: EggSteal)
 		return
@@ -3757,11 +3769,12 @@ local function updateRider(dt)
 		return
 	end
 	if transfer then
-		transfer.t = math.min(transfer.t + dt / TRANSFER_TIME, 1)
+		transfer.t = math.min(transfer.t + dt / (transfer.dive or TRANSFER_TIME), 1)
 		local t = transfer.t
 		local seat = transfer.target.animal:getSeatCFrame() * SEAT_OFFSET
 		local eased = 1 - (1 - t) * (1 - t)
-		local pos = transfer.from:Lerp(seat.Position, eased) + Vector3.new(0, math.sin(t * math.pi) * 5, 0)
+		-- (a dive from a jump comes straight down onto it: no hop up first)
+		local pos = transfer.from:Lerp(seat.Position, eased) + Vector3.new(0, if transfer.dive then 0 else math.sin(t * math.pi) * 5, 0)
 		hrp.CFrame = CFrame.new(pos) * seat.Rotation
 		focus = Vector3.new(pos.X, 0, pos.Z)
 		if t >= 1 then
@@ -3858,7 +3871,9 @@ local function updateHud()
 	if phase == "outbound" then
 		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1, carried == nil)
 		Hud.setDistance(if Tutorial.active then "" else string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
-		if actionTarget == "egg" then
+		if vfx.diveMode() and (mount or (vfx.dv and vfx.dv.stage == "foot")) then
+			Hud.setAction(if vfx.canJump() then "JUMP" else nil)
+		elseif actionTarget == "egg" then
 			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
 		else
 			Hud.setAction("LASSO", actionTarget ~= nil)
@@ -3905,7 +3920,8 @@ function vfx.sendRide()
 		hrp.CFrame,
 		if mount then mount.speed else 0,
 		if mount then mount.animal.scale else 1,
-		vfx.lassoState
+		vfx.lassoState,
+		vfx.dv ~= nil -- (off your animal, jumping or on foot: Nests.server still counts you as out riding, for steals)
 	)
 end
 
@@ -4240,8 +4256,8 @@ end
 -- back), and everyone near sees the swipe. Whoever has it at home keeps it. Every rider
 -- carrying an egg has it over their head (vfx.updateEggHeads).
 function vfx.stealTarget()
-	if carried or transfer or not mount or (phase ~= "outbound" and phase ~= "return") or Tutorial.active then
-		return nil
+	if carried or transfer or not mount or (phase ~= "outbound" and phase ~= "return") or Tutorial.active or vfx.diveMode() then
+		return nil -- (jumping and diving, you dive onto a carrier instead: vfx.diveDown)
 	end
 	local best, bestD
 	for other, rider in vfx.riders do
@@ -4294,7 +4310,9 @@ ReplicatedStorage:WaitForChild("EggSteal").OnClientEvent:Connect(function(thief,
 		egg.model.Parent = workspace
 		carried = { part = egg.model, kind = kind, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1, follow = victim }
 		vfx.sounds.play("lasso_throw")
-		if phase == "outbound" then
+		if vfx.dv then
+			vfx.diveCarry() -- (dived onto them: home on foot with it)
+		elseif phase == "outbound" then
 			phase, turnT = "turning", 0 -- home with it
 			Hud.setHold(nil)
 		end
@@ -4312,6 +4330,12 @@ ReplicatedStorage:WaitForChild("EggSteal").OnClientEvent:Connect(function(thief,
 			cutscene = nil
 			Hud.setCutscene(false)
 			Hud.setReturning(true)
+		end
+		if vfx.dv then
+			-- On foot without it now: back out with the stampede, free to jump again.
+			vfx.dv.home = nil
+			phase = "outbound"
+			Hud.setReturning(false)
 		end
 		Hud.flash("STOLEN!", 1.5)
 		vfx.sounds.play("crash", 0.5)
@@ -4359,6 +4383,285 @@ function vfx.updateEggHeads()
 end
 
 -- Slow motion during the egg-grab close-up and the hero leap home.
+-- Jump and dive (Config.Dive; QM's experiment, Oct 6). Off your animal you're in
+-- vfx.dv = { stage, t, x, z, y, speed, latVel, ... }, with no mount:
+--   "air"  up off the animal (or your feet), flying on, a ring on the ground under you
+--   "dive" coming down onto a nest's egg, or onto the ground (onto an animal is a transfer)
+--   "foot" running: on with the stampede, or home (dv.home) with the egg
+--   "stop" home with it: standing while the egg's revealed
+-- The rider's root stays anchored and is placed here every frame, as on a mount.
+function vfx.diveMode()
+	return Config.Dive ~= nil and Config.Dive.On and not Tutorial.active
+end
+
+function vfx.canJump()
+	local dv = vfx.dv
+	if phase ~= "outbound" or transfer or carried or cutscene or heroLeap then
+		return false
+	end
+	if mount then
+		return mount.z < START_LINE_Z and exitX == nil -- (out on the course, not in the base)
+	end
+	return dv ~= nil and dv.stage == "foot" and not dv.home
+end
+
+function vfx.diveAction()
+	if vfx.canJump() then
+		vfx.diveJump()
+	elseif vfx.dv and vfx.dv.stage == "air" then
+		vfx.diveDown()
+	end
+end
+
+-- The root's height standing at (x, z).
+function vfx.footY(x, z)
+	local hrp, humanoid = character()
+	local up = if hrp and humanoid.RigType == Enum.HumanoidRigType.R15 then humanoid.HipHeight + hrp.Size.Y / 2 else 3
+	return Ground.heightAt(x, z) + up
+end
+
+function vfx.diveJump()
+	local hrp, humanoid = character()
+	if not hrp then
+		return
+	end
+	local old = vfx.dv
+	local speed, latVel
+	if mount then
+		speed, latVel = mount.speed * Config.Dive.AirCarry, mount.latVel
+		release(mount) -- runs on riderless with the stampede (you can dive back onto it)
+		mount = nil
+	else
+		speed, latVel = old.speed, old.latVel
+		vfx.diveEnd()
+	end
+	humanoid.Sit = false
+	hrp.Anchored = true
+	local pos = hrp.Position
+	vfx.dv = { stage = "air", t = 0, x = pos.X, z = pos.Z, y = pos.Y, y0 = pos.Y, speed = speed, latVel = latVel }
+	vfx.diveRing = vfx.diveRing or Outline.circle()
+	vfx.sounds.play("sprint_whoosh")
+end
+
+-- What a dive right now would land on: another rider's egg (returns their player, as
+-- the second value), a nest's egg ("egg", nearEgg set), else the nearest animal.
+function vfx.diveTarget()
+	local dv = vfx.dv
+	if not dv or dv.stage ~= "air" or phase ~= "outbound" then
+		return nil
+	end
+	local r = Config.Dive.Radius
+	local at = Vector2.new(dv.x, dv.z)
+	for other, rider in vfx.riders do
+		local p = rider.riderCF and rider.riderCF.Position
+		if p and other:GetAttribute("CarriedEgg") and (Vector2.new(p.X, p.Z) - at).Magnitude < r then
+			return nil, other
+		end
+	end
+	local best, bestD = nil, r
+	for _, waiting in waitingEggs do
+		local p = waiting.nest.EggSpot.Position
+		local d = (Vector2.new(p.X, p.Z) - at).Magnitude
+		if waiting.egg.model.Parent and p.Z > gateZ() and d < bestD then
+			best, bestD = waiting, d
+		end
+	end
+	if best then
+		nearEgg = best
+		return "egg"
+	end
+	for _, entity in allAnimals() do
+		local d = (Vector2.new(entity.x, entity.z) - at).Magnitude
+		if not entity.popping and entity.z > gateZ() and d < bestD then
+			best, bestD = entity, d
+		end
+	end
+	return best
+end
+
+function vfx.diveDown()
+	local dv = vfx.dv
+	local hrp = character()
+	local target, victim = vfx.diveTarget()
+	vfx.diveRing:hide()
+	vfx.sounds.play("lasso_throw")
+	if typeof(target) == "table" then
+		-- Onto an animal: down onto its back (the lasso's pull, straight down), then ridden.
+		vfx.diveEnd()
+		transfer = { target = target, t = 0, stage = "pull", from = hrp.Position, dive = Config.Dive.DiveTime }
+		vfx.rideCue:FireServer("lasso", target.n or false)
+		return
+	end
+	dv.stage, dv.t, dv.from = "dive", 0, hrp.Position
+	if target == "egg" then
+		dv.egg = nearEgg
+		dv.to = nearEgg.nest.EggSpot.Position + Vector3.new(0, 3, 0)
+	else
+		dv.to = Vector3.new(dv.x, vfx.footY(dv.x, dv.z), dv.z)
+		if victim then
+			ReplicatedStorage:WaitForChild("StealEgg"):FireServer(victim) -- (the server says if it's yours: EggSteal, then vfx.diveCarry)
+		end
+	end
+end
+
+-- Landed on a nest's egg: it's yours, swung overhead, and you run home with it.
+function vfx.diveTakeEgg(waiting)
+	if waitingEggs[waiting.nest] ~= waiting then
+		return -- someone else took it a moment ago: you're just on foot
+	end
+	local egg = waiting.egg
+	waitingEggs[waiting.nest] = nil
+	egg.t = math.huge
+	egg:update(0)
+	egg.model.Parent = workspace
+	takeEgg:FireServer(waiting.nest) -- empties the nest for everyone
+	vfx.sounds.play("egg_grab")
+	carried = { part = egg.model, kind = waiting.kind, stage = "held", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
+	vfx.diveCarry()
+end
+
+-- With an egg (taken from a nest, or stolen): on foot, home.
+function vfx.diveCarry()
+	local dv = vfx.dv
+	dv.home = true
+	phase = "return"
+	Hud.setAction(nil)
+	Hud.setHold(nil)
+	Hud.setReturning(true)
+end
+
+function vfx.diveEnd()
+	local dv = vfx.dv
+	if dv and dv.run then
+		dv.run:Stop(0.1)
+		dv.run:Destroy()
+	end
+	vfx.dv = nil
+	if vfx.diveRing then
+		vfx.diveRing:hide()
+	end
+end
+
+-- Blocked on foot at (x, z): obstacles (any size) and the Godlands' mountains.
+function vfx.footBlocked(x, z)
+	return blockedAt(x, z, 1, 1) or blockedAt(x, z, 1, 1, slices.SOLID)
+end
+
+function vfx.updateDive(dt)
+	local dv = vfx.dv
+	local hrp, humanoid = character()
+	if not dv or not hrp or phase == "ended" or phase == "idle" then
+		return
+	end
+	local cfg = Config.Dive
+	dv.t += dt
+	if dv.stage == "air" then
+		-- Up fast to JumpHeight, then hanging there, still flying on and steerable.
+		local steer = readSteer()
+		dv.latVel += (steer * Config.SteerSpeed * cfg.AirSteer - dv.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
+		dv.x = math.clamp(dv.x + dv.latVel * dt, -EDGE, EDGE)
+		dv.z = math.max(dv.z - dv.speed * dt, gateZ() + 3, FINISH_Z + 10)
+		local floor = Ground.heightAt(dv.x, dv.z)
+		local k = math.clamp(dv.t / cfg.Rise, 0, 1)
+		dv.y = dv.y0 + (floor + cfg.JumpHeight - dv.y0) * (1 - (1 - k) ^ 2)
+		local pos = Vector3.new(dv.x, dv.y, dv.z)
+		hrp.CFrame = CFrame.lookAt(pos, pos + Vector3.new(dv.latVel, 0, -math.max(dv.speed, 1)))
+		focus = Vector3.new(dv.x, (dv.y - floor) * 0.5, dv.z)
+		vfx.diveRing:place(Vector3.new(dv.x, floor + 0.45, dv.z), cfg.Radius)
+		if dv.t >= cfg.AirTime then
+			vfx.diveDown() -- (out of air: down you come, onto whatever's under you)
+		end
+	elseif dv.stage == "dive" then
+		-- Head first, straight down onto it.
+		local k = math.clamp(dv.t / cfg.DiveTime, 0, 1)
+		local pos = dv.from:Lerp(dv.to, k * k)
+		local flat = Vector3.new(dv.latVel, 0, -math.max(dv.speed, 1)).Unit
+		hrp.CFrame = CFrame.lookAt(pos, pos + flat) * CFrame.Angles(-math.pi * 0.4 * math.sin(k * math.pi), 0, 0)
+		focus = Vector3.new(pos.X, 0, pos.Z)
+		if k >= 1 then
+			dv.x, dv.z, dv.stage, dv.t, dv.grace = dv.to.X, dv.to.Z, "foot", 0, cfg.LandGrace
+			Dust.kick(CFrame.new(dv.to.X, Ground.heightAt(dv.to.X, dv.to.Z), dv.to.Z), 0.5)
+			local egg = dv.egg
+			dv.egg = nil
+			if egg then
+				vfx.diveTakeEgg(egg)
+			end
+			if not dv.home then
+				dv.speed = math.min(dv.speed, cfg.FootSpeed)
+			end
+		end
+	elseif dv.stage == "foot" then
+		local dir = if dv.home then 1 else -1
+		dv.speed += math.clamp(cfg.FootSpeed - dv.speed, -60 * dt, 60 * dt)
+		local steer = readSteer()
+		dv.latVel += (steer * Config.SteerSpeed * cfg.FootSteer * -dir - dv.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
+		local edge = EDGE + (Config.HomeHalfWidth - 4 - EDGE) * math.clamp(dv.z / 40, 0, 1)
+		local x = math.clamp(dv.x + dv.latVel * dt, -edge, edge)
+		local z = dv.z + dir * dv.speed * dt
+		if dir < 0 then
+			z = math.max(z, gateZ() + 3, FINISH_Z + 10)
+		end
+		if vfx.footBlocked(x, z) then
+			-- Into an obstacle: slide along it, or stop.
+			if not vfx.footBlocked(x, dv.z) then
+				z = dv.z
+			elseif not vfx.footBlocked(dv.x, z) then
+				x = dv.x
+			else
+				x, z = dv.x, dv.z
+			end
+		end
+		dv.x, dv.z = x, z
+		local pos = Vector3.new(x, vfx.footY(x, z), z)
+		hrp.CFrame = CFrame.lookAt(pos, pos + Vector3.new(dv.latVel, 0, dir * math.max(dv.speed, 1)))
+		focus = Vector3.new(x, 0, z)
+		camYaw += ((if dv.home then math.pi else 0) - camYaw) * (1 - math.exp(-5 * dt))
+		-- Running (the character's own run, played here: an anchored root never "runs").
+		if not dv.run then
+			local animate = hrp.Parent:FindFirstChild("Animate")
+			local run = animate and animate:FindFirstChild("run")
+			local anim = run and run:FindFirstChildOfClass("Animation")
+			local animator = humanoid:FindFirstChildOfClass("Animator")
+			if anim and animator then
+				dv.run = animator:LoadAnimation(anim)
+				dv.run.Priority = Enum.AnimationPriority.Action
+				dv.run:Play(0.1)
+			end
+		end
+		if dv.run then
+			dv.run:AdjustSpeed(math.clamp(dv.speed / 30, 0.5, 2))
+		end
+		-- Any animal that reaches you on foot is a crash (not nearly home with the egg: HomeSafeZone).
+		dv.grace = math.max((dv.grace or 0) - dt, 0)
+		if dv.grace <= 0 and not (dv.home and z > START_LINE_Z - Config.HomeSafeZone) then
+			for _, entity in allAnimals() do
+				if not entity.popping and not entity.event and math.abs(entity.x - x) < 2.6 and math.abs(entity.z - z) < 4 then
+					fail("CRASH!")
+					return
+				end
+			end
+		end
+		if dv.home and z >= START_LINE_Z - 2 then
+			-- Home with it: the egg's reveal, then back to your pen.
+			dv.stage = "stop"
+			phase = "home"
+			if dv.run then
+				dv.run:Stop(0.2)
+			end
+			vfx.sounds.play("arrive_home")
+			local kind = carried and carried.kind
+			if kind then
+				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
+			end
+			task.delay(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function()
+				if phase == "home" then
+					finishRide(x, z)
+				end
+			end)
+		end
+	end
+end
+
 local timeScale = 1
 
 RunService.PreSimulation:Connect(function(dt)
@@ -4405,7 +4708,7 @@ RunService.PreSimulation:Connect(function(dt)
 	vfx.updateTrail()
 	vfx.updateEggHeads()
 	Dust.update(dt)
-	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)
+	rideStick.set((phase == "outbound" or phase == "return") and (mount ~= nil or vfx.dv ~= nil) and not cutscene and not heroLeap)
 	if phase == "idle" then
 		vfx.updateHomeGuide() -- (to the pet in your pen after a ride; else hidden)
 		-- On foot on the course, a stampede animal running you down throws you
@@ -4456,6 +4759,7 @@ RunService.PreSimulation:Connect(function(dt)
 		updateMount(dt)
 	end
 	updateRider(dt)
+	vfx.updateDive(dt)
 	-- What others see your lasso doing (sendRide; a throw at an animal is its own cue, "lasso").
 	vfx.lassoState = if carried and carried.stage == "held" then "twirl"
 		elseif not carried and not transfer and mount and (phase == "outbound" or phase == "return") then "swing"

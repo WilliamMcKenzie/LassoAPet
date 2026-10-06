@@ -226,6 +226,27 @@ return {
 	-- keeps that line till you're past. Only Chance of them swerve at all, so dodging
 	-- still counts. On = false turns it off.
 	ReturnAvoid = { On = true, Warn = 1.6, Clear = 14, Ease = 0.8, MaxSpeed = 140, Chance = 0.9 }, -- (QM Oct 6: was 0.4 s / 5 studs / 0.85, too easy to crash; Warn doubled from 0.8; Clear 9 -> 80 -> 20 -> 14)
+	-- Jump and dive (experiment, QM Oct 6; branch claude/jump-dive-experiment-ocyd3y, not for
+	-- live): the action button JUMPs you up off your animal (or off your feet); in the air a
+	-- dashed ring of Radius studs shows on the ground under you, and the button DIVEs onto
+	-- whatever's in it: another rider's egg (a steal), a nest's egg, else the nearest animal
+	-- (lassoed and ridden). With an egg you run home on foot at FootSpeed; on foot any
+	-- animal that touches you is a crash. Diving onto nothing leaves you on foot, running on
+	-- with the stampede, free to jump again. Out of AirTime the dive happens by itself.
+	-- On = false brings back plain LASSO / GRAB EGG. Off in the tutorial.
+	Dive = {
+		On = true,
+		JumpHeight = 14, -- studs above the ground at the top of the jump
+		Rise = 0.35, -- seconds up to that height
+		AirTime = 1.6, -- seconds in the air before the dive happens on its own
+		AirCarry = 0.8, -- x the animal's speed you keep flying forward with
+		AirSteer = 1, -- x SteerSpeed sideways in the air
+		Radius = 12, -- studs, the ring under you: what's inside can be dived onto
+		DiveTime = 0.25, -- seconds from the air down onto the target
+		FootSpeed = 70, -- studs/s on foot (placeholder: no speed stat or treadmill exists yet)
+		FootSteer = 1.2, -- x SteerSpeed sideways on foot
+		LandGrace = 0.4, -- seconds after landing on foot before an animal can hit you
+	},
 	-- Egg nests are shared stock: they all start full, a grabbed egg empties its nest
 	-- for everyone, and it restocks this many seconds later. Eggs are rolled with the
 	-- nest's biome's Herd odds; Common animals are the ones you get by default, so

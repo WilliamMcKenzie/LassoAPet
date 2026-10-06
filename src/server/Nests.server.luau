@@ -270,9 +270,10 @@ end)
 local SLACK = 12 -- studs of leeway on the range, for the time the positions take to arrive
 local riders = {} -- [player] = { at = Vector3 (rider), t = os.clock(), on = riding an animal }
 local lockedUntil = {} -- [player] = os.clock() before which their egg can't be taken
-ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, kind, _, riderCFrame)
+-- (onFoot: off their animal in Config.Dive's jump-and-dive experiment, still out riding)
+ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, kind, _, riderCFrame, _, _, _, onFoot)
 	if typeof(riderCFrame) == "CFrame" and riderCFrame.Position.Z == riderCFrame.Position.Z then
-		riders[player] = { at = riderCFrame.Position, t = os.clock(), on = type(kind) == "string" and kind ~= "" }
+		riders[player] = { at = riderCFrame.Position, t = os.clock(), on = (type(kind) == "string" and kind ~= "") or onFoot == true }
 	end
 end)
 ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
