@@ -11,7 +11,9 @@
 --                                            egg", with a cursor on its square.
 --                                            (Both place hints are QM's pictures.)
 --   2. ride  "Ride your Horse!"              arrows to it
---   3. lasso "Press E to LASSO a new ride!"  time slows while an animal is in reach
+--   3. lasso "Press E to LASSO a new ride!"  time slows while an animal is in reach;
+--                                            no nest egg can be taken yet (Ride's
+--                                            eggInRange), so this step can't be skipped
 --   4. egg   "Follow the arrows..."          the egg guide; the first Meadow nest
 --                                            always holds an egg for you (your
 --                                            lassoed animal's, else a TutorialEgg)
@@ -431,7 +433,7 @@ function Tutorial.update(state)
 		end
 		if RIDE_STEPS[step] then
 			if phase == "outbound" then
-				if (step == "lasso" or step == "egg") and state.target == "egg" then
+				if step == "egg" and state.target == "egg" then
 					setStep("take")
 				end
 			elseif phase == "turning" or phase == "return" then
@@ -496,8 +498,9 @@ function Tutorial.lassoed()
 end
 
 -- What Ride's guide arrows point at on the way out: the nearest animal ahead
--- while "Lasso an animal" is up, the nearest egg while "Take an egg!" is, and
--- nothing in the other steps. Outside the tutorial, always the egg.
+-- while "Lasso an animal" is up (and no egg is takeable then), the nearest egg
+-- while "Take an egg!" is, and nothing in the other steps. Outside the tutorial,
+-- always the egg.
 function Tutorial.guideTo()
 	if not Tutorial.active then
 		return "egg"

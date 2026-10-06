@@ -1242,6 +1242,7 @@ local function eggInRange(waiting)
 	local eggPos = waiting.nest.EggSpot.Position
 	return NestEggs.waiting[waiting.nest] == waiting and waiting.egg.model.Parent ~= nil and eggPos.Z > gateZ()
 		and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < waiting.reach
+		and Tutorial.guideTo() ~= "animal" -- the tutorial's lasso step: no egg till you've lassoed, so TAKE EGG can't skip that lesson
 end
 
 local function animalInRange(entity)
