@@ -782,9 +782,13 @@ tutorialCommand.Triggered:Connect(function(source)
 	if not player or not profiles[player] or not allowed(player) then
 		return
 	end
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = profiles[player].boughtPets, boughtGiantEggs = profiles[player].boughtGiantEggs, usedHatches = profiles[player].usedHatches }
+	local old = profiles[player]
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, likeAsked = old.likeAsked }
 	if store and loaded[player] then
-		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false, usedHatches = profiles[player].usedHatches })
+		-- Keep the shop counts saved too: without them, rejoining hands every Giant Horse
+		-- egg and Legendary Pet ever bought over again (addBoughtGiantEggs / addBoughtPets).
+		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false, usedHatches = old.usedHatches,
+			boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, likeAsked = old.likeAsked })
 	end
 	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
 	player:SetAttribute("PenLevel", 1)
