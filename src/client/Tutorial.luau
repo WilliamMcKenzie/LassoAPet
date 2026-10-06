@@ -20,14 +20,14 @@
 --   5. take  "Press E to take the egg!"      time slows while it's in reach
 --   6. home  (DODGE THE STAMPEDE!)           home with the egg
 --   7. place2 the egg goes into the pen by itself (Hatchery's DeliverEgg, balance
---            pass Oct 6: a fifth of new players left here when they had to place it).
---            Placing it starts the money: until now pets earn nothing (Hatchery)
+--            pass Oct 6: a fifth of new players left here when they had to place it)
 --   8. fuse  once that egg's hatched, the Fuse button shows (nothing else does) and
 --            the cursor clicks through it: Fuse, both pets, FUSE (QM). Skipped
 --            when the two can't fuse (two of the same pet)
 --   9. goal  the moment the hybrid's landed, the camera flies to the next biome's gate: "Save $1k to unlock the
---            Desert!". Then it's over and the rest of the HUD (Gold, Upgrade Pen,
---            Pets) comes back: none of it shows in the tutorial (QM).
+--            Desert!". Then it's over: the money starts (Hatchery: pets earn nothing
+--            till now, QM Oct 6) and the rest of the HUD (Gold, Upgrade Pen, Pets)
+--            comes back, none of which shows in the tutorial (QM).
 --
 -- A failed ride goes back to step 2. Until it's done the stampede runs on your
 -- own clock (Ride), so slowing it down never snaps it back.
@@ -635,7 +635,7 @@ function Tutorial.update(state)
 	elseif step == "place2" then
 		for id in contents() do
 			if not known[id] then
-				setStep("goal") -- placed: the money starts
+				setStep("goal") -- placed
 				task.spawn(showGoal, id)
 				break
 			end

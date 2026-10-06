@@ -22,8 +22,8 @@
 -- A new player starts with no pet at all, only a Config.DefaultPet egg (it
 -- hatches at once): that pet becomes the one you ride the first time you ride
 -- it. Nothing is saved until the tutorial's done, so leaving starts it over.
--- Pets earn nothing in the tutorial until an egg is placed in a pen that already
--- has a pet (the egg brought home): that's when the money starts.
+-- Pets earn nothing until the tutorial's done (QM, Oct 6): the money starts the
+-- moment it ends, finished or skipped.
 --
 -- Saving needs a published place with API access, like Gold.
 
@@ -470,7 +470,7 @@ remote("HatchEgg", function(player, id)
 		return
 	end
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
-	if profile.earning then
+	if profile.pastStarter then
 		Funnel.step(player, "Egg Hatched")
 	end
 	publish(player)
@@ -620,7 +620,7 @@ end)
 -- Puts an egg of `kind` (already out of the inventory) down at (x, z) in the pen.
 place = function(player, profile, kind, x, z)
 	if profile.ride or next(profile.items) then
-		profile.earning = true -- the tutorial's second egg: pets start earning
+		profile.pastStarter = true -- placed with a pet already there: not the starter egg (the funnel tells them apart)
 	end
 	local pet = eggPet(kind)
 	local special = Config.SpecialEggs[kind]
@@ -629,7 +629,7 @@ place = function(player, profile, kind, x, z)
 	else
 		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else hatchTime(kind)) }
 	end
-	if profile.earning then
+	if profile.pastStarter then
 		Funnel.step(player, "Placed Egg") -- the egg brought home, not the starter egg placed before the first ride
 	else
 		Funnel.step(player, "Placed Starter Egg")
@@ -1063,7 +1063,7 @@ task.spawn(function()
 	while true do
 		task.wait(1)
 		for player, profile in profiles do
-			local earned = if profile.earning or not player:GetAttribute("Tutorial") then income(profile) else 0
+			local earned = if player:GetAttribute("Tutorial") then 0 else income(profile) -- (nothing till the tutorial's done)
 			if earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
 				paid:FireClient(player)
@@ -1083,7 +1083,7 @@ while true do
 			if item.egg and now >= item.hatchAt and player:GetAttribute("Tutorial") then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
-				if profile.earning then
+				if profile.pastStarter then
 					Funnel.step(player, "Egg Hatched") -- (not the starter egg, which hatches before the first ride)
 				end
 			end

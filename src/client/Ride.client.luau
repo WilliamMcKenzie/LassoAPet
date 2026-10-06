@@ -3745,7 +3745,7 @@ local function updateRider(dt)
 			mount.latVel = 0
 			hold, grace = holdTime(mount), Config.LandingGrace
 			Tutorial.lassoed()
-			if not Tutorial.active then -- no money at all in the tutorial until your pets start earning
+			if not Tutorial.active then -- no money at all in the tutorial (Hatchery: pets earn nothing till it's done)
 				local earned = Config.LassoCoins[mount.kind] or Config.RarityCoins[mount.animal.Rarity]
 				coins += earned
 				Hud.setCoins(coins)
