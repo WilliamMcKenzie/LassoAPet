@@ -223,7 +223,7 @@ return {
 	-- moves until it's Clear studs to the side of you (a crash is within 2.6), at Speed
 	-- studs/s or faster if it needs to, never over MaxSpeed (too late: it hits). Only
 	-- Chance of them swerve at all, so dodging still counts. On = false turns it off.
-	ReturnAvoid = { On = true, Warn = 0.4, Clear = 5, Speed = 20, MaxSpeed = 70, Chance = 0.85 }, -- (QM, Oct 6: a bigger swerve was tried and dropped; these were fine)
+	ReturnAvoid = { On = true, Warn = 0.8, Clear = 9, Speed = 40, MaxSpeed = 140, Chance = 0.9 }, -- (QM, Oct 6: the bigger swerve; was 0.4 / 5 / 20 / 70 / 0.85)
 	-- Egg nests are shared stock: they all start full, a grabbed egg empties its nest
 	-- for everyone, and it restocks this many seconds later. Eggs are rolled with the
 	-- nest's biome's Herd odds; Common animals are the ones you get by default, so
