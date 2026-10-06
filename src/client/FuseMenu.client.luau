@@ -105,7 +105,7 @@ local function text(parent, size, position, textSize)
 	label.Position = position
 	label.AnchorPoint = Vector2.new(0.5, 0.5)
 	label.ZIndex = 4
-	stroked(label, 3)
+	stroked(label, 6) -- (QM: 6 px on the panel)
 	label.Parent = parent
 	return label
 end
@@ -256,12 +256,7 @@ local function toggle(pet)
 		table.insert(picks, pet)
 		Sounds.play("merge_pop")
 	else
-		tip.Text = "Pick a different animal"
-		tip.Visible = true
-		task.delay(1.6, function()
-			tip.Visible = false
-		end)
-		return
+		return -- (it's dimmed: no tip, QM)
 	end
 	refresh()
 end
