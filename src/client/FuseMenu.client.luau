@@ -2,7 +2,7 @@
 -- your pets, the animal dictionary's old grid page and rarity cards (QM: reuse
 -- them), each pet still in 3D as it is (merged bigger, a hybrid in its colours).
 -- Tap two to pick them (each gets an outline); with two picked, FUSE pops up at the
--- bottom of the page with the hybrid's name over it. FUSE closes the page and the
+-- bottom of the page. FUSE closes the page and the
 -- two are pulled up over the pen and fuse, as merging does (PenPets.pull), and the
 -- hybrid drops down where the base was (Hatchery.server's FusePets). The rarer pet
 -- is the base; the other sets its size and paints it in its colours. Hybrids don't
@@ -13,8 +13,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
-local Config = require(ReplicatedStorage.Shared.Config)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
@@ -28,9 +28,13 @@ local camera = workspace.CurrentCamera
 
 local PAGE = Vector2.new(1102, 829)
 local SCREEN_SHARE = 0.54 -- as the dictionary's
-local CARD, ART, GAP = 200, 180, 43 -- the dictionary's grid: 200 px cards, the pet 180 px in the middle
+local CARD, ART = 200, 180 -- the dictionary's grid: 200 px cards, the pet 180 px in the middle
 local COLUMNS, ROWS = 4, 3
-local GRID_TOP = 70
+local INSIDE = Rect.new(6, 43, 1096, 823) -- the page's green inside its black edge
+-- The same space round every card and between them (QM: even margins), across and down.
+local GAP_X = (INSIDE.Width - COLUMNS * CARD) / (COLUMNS + 1)
+local GAP_Y = (INSIDE.Height - ROWS * CARD) / (ROWS + 1)
+local CARD_CORNER = UDim.new(0.05, 0) -- the rarity cards' own corners (10 px of 200), or the clip cuts their edge
 local FONT = Enum.Font.FredokaOne
 local PAGE_ART = "rbxassetid://106554381754752" -- assets/ui/dex/DexMeadow.png, the dictionary's old grid page
 local CARDS = { -- the dictionary's rarity cards (assets/ui/dex/Dex<Rarity>.png)
@@ -41,7 +45,7 @@ local CARDS = { -- the dictionary's rarity cards (assets/ui/dex/Dex<Rarity>.png)
 	Legendary = "rbxassetid://80504921595928",
 }
 local ARROW = "rbxassetid://130844925944438" -- assets/ui/dex/DexArrow.png (points up)
-local PICKED = Color3.fromRGB(255, 214, 64) -- the outline on a picked pet
+local PICKED = Color3.new(1, 1, 1) -- the outline on a picked pet (QM: white)
 local GREEN = Color3.fromRGB(110, 210, 70)
 
 local gui, page, scale
@@ -51,7 +55,7 @@ local pets = {} -- this opening's: { model, id, kind, fuse, merged }
 local picks = {} -- up to two of `pets`
 local at = 1 -- the first pet on the page shown
 local cards = {} -- [pet] = its card
-local fuseButton, fuseName, tip
+local fuseButton, tip
 
 local function money(n)
 	local s = tostring(math.floor(n))
@@ -140,6 +144,41 @@ local function still3D(kind, fuse)
 	cam.CFrame = CFrame.lookAt(box.Position + dir * radius / math.sin(math.rad(FOV) / 2) * 0.95, box.Position)
 	cam.Parent = view
 	view.CurrentCamera = cam
+	-- Once the WorldModel has put the posed parts on their joints (a frame on), frame
+	-- just what shows, as seen from the camera, so the pet sits in the middle (QM).
+	task.spawn(function()
+		RunService.Heartbeat:Wait()
+		RunService.Heartbeat:Wait()
+		if not view.Parent then
+			return
+		end
+		local look = CFrame.lookAt(dir, Vector3.zero)
+		local right, up, back = look.RightVector, look.UpVector, -look.LookVector
+		local minX, maxX, minY, maxY = math.huge, -math.huge, math.huge, -math.huge
+		local points = {}
+		for _, part in animal.model:GetDescendants() do
+			if part:IsA("BasePart") and part.Transparency < 1 then
+				local half = part.Size / 2
+				for _, corner in { Vector3.new(1, 1, 1), Vector3.new(1, 1, -1), Vector3.new(1, -1, 1), Vector3.new(1, -1, -1), Vector3.new(-1, 1, 1), Vector3.new(-1, 1, -1), Vector3.new(-1, -1, 1), Vector3.new(-1, -1, -1) } do
+					local p = part.CFrame:PointToWorldSpace(half * corner) - box.Position
+					local x, y = p:Dot(right), p:Dot(up)
+					minX, maxX, minY, maxY = math.min(minX, x), math.max(maxX, x), math.min(minY, y), math.max(maxY, y)
+					table.insert(points, Vector3.new(x, y, p:Dot(back)))
+				end
+			end
+		end
+		if #points == 0 then
+			return
+		end
+		local cx, cy = (minX + maxX) / 2, (minY + maxY) / 2
+		local tan = math.tan(math.rad(FOV) / 2)
+		local distance = 0
+		for _, p in points do -- far enough back that every corner is in view
+			distance = math.max(distance, math.max(math.abs(p.X - cx), math.abs(p.Y - cy)) / tan + p.Z)
+		end
+		local middle = box.Position + right * cx + up * cy
+		cam.CFrame = CFrame.lookAt(middle + back * distance * 1.06, middle)
+	end)
 	return view
 end
 
@@ -189,17 +228,15 @@ local function refresh()
 	end
 	local ready = #picks == 2
 	if ready and not fuseButton.Visible then
-		local base, donor = Fusion.order(picks[1].kind, picks[2].kind)
 		local price = priceOf(picks[1], picks[2])
-		fuseName.Text = Fusion.name(base, donor) .. "!"
 		fuseButton.Text = "FUSE " .. money(price)
 		fuseButton.BackgroundColor3 = if (player:GetAttribute("Gold") or 0) >= price then GREEN else Color3.fromRGB(150, 160, 175)
-		fuseButton.Visible, fuseName.Visible = true, true
+		fuseButton.Visible = true
 		local s = fuseButton:FindFirstChildOfClass("UIScale")
 		s.Scale = 0.2
 		TweenService:Create(s, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
 	elseif not ready then
-		fuseButton.Visible, fuseName.Visible = false, false
+		fuseButton.Visible = false
 	end
 end
 
@@ -240,7 +277,7 @@ end
 function showPage(first)
 	at = first
 	for _, child in page:GetChildren() do
-		if child:IsA("GuiObject") and child ~= fuseButton and child ~= fuseName and child ~= tip then
+		if child:IsA("GuiObject") and child ~= fuseButton and child ~= tip then
 			child:Destroy()
 		end
 	end
@@ -258,7 +295,6 @@ function showPage(first)
 			showPage(first + perPage)
 		end)
 	end
-	local width = COLUMNS * CARD + (COLUMNS - 1) * GAP
 	for i = first, math.min(first + perPage - 1, #pets) do
 		local pet = pets[i]
 		local slot = i - first
@@ -270,10 +306,13 @@ function showPage(first)
 		card.Image = CARDS[rarityOf(pet.kind)] or CARDS.Common
 		card.Size = UDim2.fromOffset(CARD, CARD)
 		card.AnchorPoint = Vector2.new(0.5, 0.5)
-		card.Position = UDim2.fromOffset((PAGE.X - width) / 2 + col * (CARD + GAP) + CARD / 2, GRID_TOP + row * (CARD + GAP) + CARD / 2)
+		card.Position = UDim2.fromOffset(
+			INSIDE.Min.X + GAP_X + col * (CARD + GAP_X) + CARD / 2,
+			INSIDE.Min.Y + GAP_Y + row * (CARD + GAP_Y) + CARD / 2
+		)
 		Instance.new("UIScale").Parent = card
 		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0.16, 0)
+		corner.CornerRadius = CARD_CORNER
 		corner.Parent = card
 		local outline = Instance.new("UIStroke") -- picked (QM: choosing a pet outlines it)
 		outline.Name = "Outline"
@@ -356,13 +395,14 @@ local function openPage()
 			kinds[pet.kind], n = true, n + 1
 		end
 	end
-	if n < 2 then
-		return false
-	end
 	open = true
 	table.clear(picks)
 	gui.Enabled = true
 	showPage(1)
+	-- (It opens all the same: the page says what's missing. It used to say so on the
+	-- screen instead, on this hidden ScreenGui, so Fuse seemed to do nothing.)
+	tip.Text = "You need two kinds of pets to fuse"
+	tip.Visible = n < 2
 	ModalPop.open(setPop)
 	Gamepad.openMenu("Fuse", { close = close })
 	Hud.fuseToggled(true)
@@ -379,7 +419,7 @@ function close(instant)
 		gui.Enabled = false
 		table.clear(cards)
 		for _, child in page:GetChildren() do
-			if child:IsA("GuiObject") and child ~= fuseButton and child ~= fuseName and child ~= tip then
+			if child:IsA("GuiObject") and child ~= fuseButton and child ~= tip then
 				child:Destroy()
 			end
 		end
@@ -429,7 +469,7 @@ scale = Instance.new("UIScale")
 scale.Parent = page
 page.Parent = gui
 
--- FUSE, popping up at the bottom of the page once two are picked, the hybrid's name over it.
+-- FUSE, popping up at the bottom of the page once two are picked.
 fuseButton = Instance.new("TextButton")
 fuseButton.Name = "Fuse"
 fuseButton.AutoButtonColor = false
@@ -452,9 +492,6 @@ local fuseTextStroke = stroked(fuseButton, 4)
 fuseTextStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
 fuseButton.Activated:Connect(fuse)
 fuseButton.Parent = page
-fuseName = text(page, UDim2.fromOffset(600, 50), UDim2.fromOffset(PAGE.X / 2, PAGE.Y - 100), 44)
-fuseName.ZIndex = 5
-fuseName.Visible = false
 tip = text(page, UDim2.fromOffset(700, 50), UDim2.fromOffset(PAGE.X / 2, PAGE.Y - 160), 40)
 tip.ZIndex = 6
 tip.Visible = false
@@ -465,19 +502,12 @@ end)
 setPop(1)
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- The Fuse button: opens the page, or closes it again. With fewer than two kinds
--- to fuse, it says so instead.
-local notice = text(gui, UDim2.fromOffset(700, 50), UDim2.new(0.5, 0, 0, 120), 40)
-notice.Visible = false
+-- The Fuse button: opens the page, or closes it again.
 Hud.onFuse = function()
 	if open then
 		close()
-	elseif not openPage() then
-		notice.Text = "You need two kinds of pets to fuse"
-		notice.Visible = true
-		task.delay(1.8, function()
-			notice.Visible = false
-		end)
+	else
+		openPage()
 	end
 end
 Hud.closeFuse = close
