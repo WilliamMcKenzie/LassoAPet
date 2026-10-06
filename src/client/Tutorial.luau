@@ -52,6 +52,7 @@ Tutorial.active = false -- the tutorial is running: the "Tutorial" attribute is 
 Tutorial.slowMo = nil -- a time scale while LASSO or TAKE EGG waits for its press
 Tutorial.nest = nil -- the first Meadow nest: while it's empty, this player sees a TutorialEgg in it
 Tutorial.busy = false -- the ending's close-ups are on: no riding off
+Tutorial.eggTaken = false -- this ride took the egg from Tutorial.nest (Ride): no tutorial egg there till the ride's over
 
 local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
 local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banner (Hud, at 0.3)
