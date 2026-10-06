@@ -3,7 +3,7 @@
 -- The server (Hatchery) puts what's in each pen on the pen's "Contents"
 -- attribute: JSON of { [id] = { x, z, egg, hatchAt } or { x, z, pet } }, x and z
 -- from the centre of the pen's Area. This draws it: eggs with a countdown that
--- twitch now and then ("Ready" once it's up: an egg waits for you to hold E by it,
+-- twitch now and then ("Ready" once it's up: an egg waits for you to hold F by it,
 -- HatchEgg, QM Oct 6; till then the same prompt sells the paid hatch), the hatch
 -- (the egg shakes, its top pops off, the pet jumps out onto the spot), and pets
 -- ambling around inside their pen.
@@ -220,7 +220,7 @@ local function showEgg(pen, id, item)
 	s.timer = newTimer(s.egg.model.PrimaryPart)
 	if pen == myPen() and pen:GetAttribute("Owner") == player.UserId then
 		-- One prompt on the egg: hold F for the paid hatch while it's counting down,
-		-- hold E to hatch it once it's ready (the frame loop below switches it over).
+		-- and F to hatch it once it's ready (QM; the frame loop below switches it over).
 		local prompt = Instance.new("ProximityPrompt")
 		prompt.Name = "SpeedupEgg"
 		prompt.ObjectText = item.egg .. " Egg"
@@ -429,10 +429,8 @@ RunService.RenderStepped:Connect(function(dt)
 						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and not player:GetAttribute("Tutorial")
 						if ready then
 							s.speedupPrompt.ActionText = "Hatch"
-							s.speedupPrompt.KeyboardKeyCode = Enum.KeyCode.E
 						else
 							s.speedupPrompt.ActionText = if (player:GetAttribute("HatchCredits") or 0) > 0 then "Use paid hatch" else "Hatch now — " .. hatchPrice .. " Robux"
-							s.speedupPrompt.KeyboardKeyCode = Enum.KeyCode.F
 						end
 					end
 					s.timer.Text = if ready then "Ready" else countdown((s.hatchAt or now) - now)

@@ -5,7 +5,7 @@
 -- per kind of egg ("Pinto Egg"), its "Count" attribute how many you have.
 -- Equip it and click anywhere in your pen to place one there (PlaceEgg). It's
 -- ready after Config.PetHatchTime (or HatchTime) seconds, then waits for you to
--- hatch it: stand by it and hold E (HatchEgg; Pen.client's prompt). The pet stays
+-- hatch it: stand by it and hold F (HatchEgg; Pen.client's prompt). The pet stays
 -- on that spot. Only the tutorial's eggs hatch by themselves (QM, Oct 6).
 --
 -- What's in a pen goes on the pen as its "Contents" attribute for every

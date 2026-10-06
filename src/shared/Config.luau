@@ -288,7 +288,7 @@ return {
 	-- the stampede runs on the player's own clock so it can slow down to TutorialSlowMo
 	-- x speed while LASSO or TAKE EGG is waiting to be pressed, and the Hold bar never
 	-- runs out. The tutorial's eggs hatch by themselves (TutorialHatchTime); every
-	-- other egg waits for you to hold E by it once it's ready (Hatchery, Pen.client).
+	-- other egg waits for you to hold F by it once it's ready (Hatchery, Pen.client).
 	Tutorial = true,
 	TutorialEgg = "Pinto",
 	TutorialHatchTime = 0,
