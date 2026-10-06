@@ -4,14 +4,18 @@
 -- ability, or the base's if it has none (QM, 20:13/20:19: Ride's vfx.abilityOf), and
 -- sets its size (a Pig donor makes a tiny Loong, a Loong donor a giant Pig) and
 -- paints it in its own colours, slot for slot (Shared/Palettes). It earns what both
--- earned. Two of the same hybrid merge like any other pets (Shared/Merge).
+-- earned, and runs as fast and lasts as long as the better of the two (QM, Oct 6
+-- 20:53). Two of the same hybrid merge like any other pets (Shared/Merge).
 --
 -- A pen item or the ridden pet keeps its base in `pet` (or `ride`) as before, and
--- the donor in `fuse`; what it earns a second is in `income`.
+-- the donor in `fuse`; what it earns a second is in `income`, its Speed and Stamina
+-- in `stats` (`rideStats`).
 --
 --   Fusion.key(kind, fuse)        "Loong:Pig", or just the kind for a plain pet
 --   Fusion.split(key)             kind, fuse
 --   Fusion.combine(a, aFuse, b, bFuse)  what fusing two pets (hybrids too) makes
+--   Fusion.stats(kind, fuse, saved)  its Speed and Stamina (Config.AnimalStats)
+--   Fusion.best(a, b)             the higher Speed and higher Stamina of two stats
 --   Fusion.scale(kind, fuse)      how much bigger (or smaller) the donor makes it
 --   Fusion.name(kind, fuse)       "Poong": the donor's front and the base's back
 --   Fusion.paint(model, kind, fuse)  repaints a built model in the donor's palette
@@ -73,6 +77,27 @@ function Fusion.combine(a, aFuse, b, bFuse)
 		return nil
 	end
 	return base, donor, true
+end
+
+local ONE = { Speed = 1, Stamina = 1 }
+
+-- A pet's Speed and Stamina (Config.AnimalStats, 1x if not listed). A hybrid's are
+-- the best of the two pets fused into it, saved when it was made (`saved`, as a
+-- hybrid of hybrids keeps what its picks had); one fused before that has the
+-- better of its base's and donor's.
+function Fusion.stats(kind, fuse, saved)
+	if not fuse then
+		return Config.AnimalStats[kind] or ONE
+	end
+	if typeof(saved) == "table" and tonumber(saved.Speed) and tonumber(saved.Stamina) then
+		return saved
+	end
+	return Fusion.best(Config.AnimalStats[kind] or ONE, Config.AnimalStats[fuse] or ONE)
+end
+
+-- The best of both worlds (QM): the faster one's Speed and the longer one's Stamina.
+function Fusion.best(a, b)
+	return { Speed = math.max(a.Speed, b.Speed), Stamina = math.max(a.Stamina, b.Stamina) }
 end
 
 -- The donor's size tier stands in for the base's: each tier is Config.TierGrowth

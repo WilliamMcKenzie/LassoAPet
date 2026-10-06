@@ -210,8 +210,12 @@ local SHRINK = 12 -- studs before its biome's end over which an animal shrinks i
 -- other biomes', wrapping round well within BIOME_KEYS.
 local BIOME_KEYS = 1024
 
--- An animal's stats (Config.AnimalStats), 1x for any animal not listed.
-local function statsOf(kind)
+-- An animal's stats (Config.AnimalStats), 1x for any animal not listed; a hybrid
+-- `entity` has the best of its two pets' (Shared/Fusion.stats).
+local function statsOf(kind, entity)
+	if entity and entity.fuse then
+		return vfx.Fusion.stats(kind, entity.fuse, entity.stats)
+	end
 	return Config.AnimalStats[kind] or { Speed = 1, Stamina = 1 }
 end
 
@@ -223,7 +227,7 @@ end
 -- How long the Hold bar lasts on this mount (its Stamina x Config.HoldTime).
 local function holdTime(entity)
 	-- (a merged pet has more: Shared/Merge)
-	return Config.HoldTime * statsOf(entity.kind).Stamina * require(ReplicatedStorage.Shared.Merge).stamina(entity.merged)
+	return Config.HoldTime * statsOf(entity.kind, entity).Stamina * require(ReplicatedStorage.Shared.Merge).stamina(entity.merged)
 end
 local streams = {}
 -- The endless Godlands (Shared/Godlands): a stream per track, each running from
@@ -683,6 +687,8 @@ local function spawnStarter()
 	starter = newEntity(spot.X, spot.Z, penYaw(), player:GetAttribute("RidePet") or Config.DefaultPet)
 	starter.merged = player:GetAttribute("RideMerged") or 1
 	starter.fuse = player:GetAttribute("RideFuse") -- a hybrid (Shared/Fusion): its donor's colours and size
+	local stats = player:GetAttribute("RideStats") -- (and the best of both pets' Speed, Stamina)
+	starter.stats = stats and { Speed = stats.X, Stamina = stats.Y }
 	vfx.Fusion.paint(starter.animal.model, starter.kind, starter.fuse)
 	PenPets.starter = starter -- (FuseMenu: the one you ride can be fused too)
 	starter.animal:setScale(vfx.Merge.size(starter.kind, starter.merged) * vfx.Fusion.scale(starter.kind, starter.fuse)) -- a merged pet is bigger
@@ -888,7 +894,7 @@ startRide = function(model)
 			starter = nil
 		end
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
-		mount.merged, mount.fuse = fromPen.merged, fromPen.fuse
+		mount.merged, mount.fuse, mount.stats = fromPen.merged, fromPen.fuse, fromPen.stats
 		vfx.Fusion.paint(mount.animal.model, mount.kind, mount.fuse)
 		mount.own = true -- your own pet: the nests keep their rolled eggs (it stays yours once let go and lassoed back)
 	else
@@ -1595,7 +1601,7 @@ local function putInPool(entity)
 	entity.animal:setScale(1)
 	if entity.fuse then -- a hybrid you let go: back to its own colours for the stampede
 		vfx.Fusion.paint(entity.animal.model, entity.kind, nil)
-		entity.fuse = nil
+		entity.fuse, entity.stats = nil, nil
 	end
 	entity.hop, entity.popping, entity.lift = 0, nil, nil
 	entity.ability, entity.frostLeft, entity.fall, entity.scaredOffBy = nil, nil, nil, nil
@@ -3376,14 +3382,14 @@ local function updateMount(dt)
 		turnT = math.min(turnT + dt / TURN_TIME, 1)
 		local eased = 0.5 - math.cos(turnT * math.pi) / 2
 		mount.yaw = math.pi * eased
-		mount.speed = Config.MountSpeed * statsOf(mount.kind).Speed * (1 - math.sin(turnT * math.pi) * 0.7)
+		mount.speed = Config.MountSpeed * statsOf(mount.kind, mount).Speed * (1 - math.sin(turnT * math.pi) * 0.7)
 		mount.latVel *= math.exp(-6 * dt)
 		local look = CFrame.Angles(0, mount.yaw, 0).LookVector
 		mount.x = math.clamp(mount.x + look.X * mount.speed * dt, -EDGE, EDGE)
 		mount.z += look.Z * mount.speed * dt
 		if turnT >= 1 then
 			phase, grace = "return", Config.TurnGrace
-			mount.speed = Config.ReturnSpeed * statsOf(mount.kind).Speed
+			mount.speed = Config.ReturnSpeed * statsOf(mount.kind, mount).Speed
 		end
 		place(mount, 0)
 		animate(mount, dt, mount.speed, eased < 1 and -0.6 or 0)
@@ -3418,7 +3424,7 @@ local function updateMount(dt)
 		animate(mount, dt, mount.speed, 0)
 		return
 	end
-	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed) * statsOf(mount.kind).Speed
+	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed) * statsOf(mount.kind, mount).Speed
 	if sprinting() then
 		targetSpeed *= (Config.PetSprintSpeed[mount.kind] or Config.SprintSpeed) * ((vfx.sprintSpecial() or {}).SpeedBoost or 1) -- the Blue Crab's crab walk: faster still
 	end
@@ -4851,7 +4857,7 @@ spawnStarter()
 -- The server hands out pens just after joining: move the waiting pet to yours.
 -- Picking another pet to ride (in the pen) swaps the waiting one; it's used from
 -- the next ride if you're out on one.
-for _, name in { "Pen", "RidePet", "RideMerged", "RideFuse" } do
+for _, name in { "Pen", "RidePet", "RideMerged", "RideFuse", "RideStats" } do
 	player:GetAttributeChangedSignal(name):Connect(function()
 		if phase == "idle" and starter then
 			starter.animal.model:Destroy()

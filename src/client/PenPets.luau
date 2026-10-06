@@ -8,7 +8,7 @@
 -- you ride) then pops out up there and drops down: PenPets.drop says how.
 
 local PenPets = {
-	pets = {}, -- [model] = { id = pen item id, kind = animal name, merged, fuse = donor of a hybrid, income }
+	pets = {}, -- [model] = { id = pen item id, kind = animal name, merged, fuse = donor of a hybrid, income, stats }
 	merges = {}, -- [Fusion.key] = { at = Vector3 up in the air, landAt = os.clock() the new pet pops out }
 	starter = nil, -- Ride.client's pet waiting on its spot (its entity: kind, merged, fuse, animal)
 }

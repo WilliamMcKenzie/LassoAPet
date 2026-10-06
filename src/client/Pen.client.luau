@@ -91,8 +91,8 @@ end
 
 -- Your own pets can be ridden, and clicked to pick which. Animal parts aren't
 -- queryable (so they never block the lasso or the mouse), so these ones are made so.
-local mine = PenPets.pets -- [model] = { id, kind, merged, fuse, income }
-local function makeRideable(pen, id, pet, kind, merged, fuse, income)
+local mine = PenPets.pets -- [model] = { id, kind, merged, fuse, income, stats }
+local function makeRideable(pen, id, pet, kind, merged, fuse, income, stats)
 	if pen ~= myPen() then
 		return
 	end
@@ -101,7 +101,7 @@ local function makeRideable(pen, id, pet, kind, merged, fuse, income)
 			part.CanQuery = true
 		end
 	end
-	mine[pet.animal.model] = { id = id, kind = kind, merged = merged or 1, fuse = fuse, income = income }
+	mine[pet.animal.model] = { id = id, kind = kind, merged = merged or 1, fuse = fuse, income = income, stats = stats }
 	pet.animal.model.Destroying:Connect(function()
 		mine[pet.animal.model] = nil
 	end)
@@ -262,7 +262,7 @@ local function showPet(pen, id, item)
 	Fusion.paint(s.pet.animal.model, item.pet, item.fuse) -- a hybrid wears its donor's colours (Shared/Fusion)
 	s.pet.scale = Merge.size(item.pet, item.merged) * Fusion.scale(item.pet, item.fuse) -- a merged pet is bigger (Shared/Merge)
 	s.pet.animal:setScale(s.pet.scale)
-	makeRideable(pen, id, s.pet, item.pet, item.merged, item.fuse, item.income)
+	makeRideable(pen, id, s.pet, item.pet, item.merged, item.fuse, item.income, item.stats)
 	-- Just merged (PenPets.merges): it waits unseen while the pets going into it are
 	-- pulled up, then pops out up there and drops down onto the spot under it.
 	local merge = pen == myPen() and ((item.merged or 1) > 1 or item.fuse) and PenPets.mergeFor(Fusion.key(item.pet, item.fuse))
@@ -335,6 +335,8 @@ local function refresh(pen)
 		elseif item.pet and s.pet and not s.jump and (item.pet ~= s.kind or item.fuse ~= s.fuse or (item.merged or 1) ~= (s.merged or 1)) then
 			remove(s) -- swapped with the pet you ride, merged or fused (shown again below)
 			list[id] = nil
+		elseif item.pet and s.pet and mine[s.pet.animal.model] then -- (fused into a hybrid that looks the same)
+			mine[s.pet.animal.model].stats, mine[s.pet.animal.model].income = item.stats, item.income
 		end
 	end
 	for id, item in items do
