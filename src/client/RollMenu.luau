@@ -28,6 +28,7 @@ local PANEL = { id = "rbxassetid://104698392936555", size = Vector2.new(2892, 19
 local ODDS = "rbxassetid://110875946388838" -- RollPanelOdds.png
 local FRAME_TOP = 305 / 1900
 local ODDS_BUTTON = "rbxassetid://83654143211576" -- ShopOddsButton.png (the green ?)
+local PRICE_MIDDLE = 262 / 378 -- (the label's middle, down the button: see Price below)
 local BUTTON = { id = "rbxassetid://112026122025466", size = Vector2.new(960, 378) } -- RollButton.png (QM, Oct 6: no price drawn in; the price is written on it, below)
 local PANEL_WIDTH = 930 -- the shop's
 local BUTTON_WIDTH = PANEL_WIDTH * 0.33 -- as in QM's reference (Oct 4: bigger than the first mockup's 23%)
@@ -87,19 +88,26 @@ rollScale.Parent = roll
 roll.Parent = panel
 -- The next roll's price (it climbs with each roll: Config.Gacha), written right of the
 -- coin like the Upgrade Pen buttons' drawn-in prices. Hud sets it (RollMenu.setPrice).
+-- Matched to the drawn-in ROLL (QM, Oct 6): in RollButton.png its capitals stand 89 px
+-- tall about y = 262 (of 378), outlined 12 px, and the coin ends at x = 598 (of 960).
+-- The label runs from just past the coin to the button's inner edge (x = 936); its
+-- height is the text size that gives capitals that tall (Roblox sizes FredokaOne so
+-- its capitals are 0.606 of TextSize, centred in the line), so "$1M" and "$1.1M" match
+-- ROLL exactly and a long price ("$12.5M") only shrinks to fit.
 local price = Instance.new("TextLabel")
 price.Name = "Price"
 price.BackgroundTransparency = 1
-price.AnchorPoint = Vector2.new(0.5, 0.5)
-price.Position = UDim2.fromScale(0.77, 0.66)
-price.Size = UDim2.fromScale(0.4, 0.4)
+price.AnchorPoint = Vector2.new(0, 0.5)
+price.Position = UDim2.fromScale(610 / 960, PRICE_MIDDLE)
+price.Size = UDim2.fromScale(326 / 960, 89 / 0.606 / 378)
 price.Font = Enum.Font.FredokaOne
 price.TextScaled = true
+price.TextXAlignment = Enum.TextXAlignment.Left
 price.TextColor3 = Color3.new(1, 1, 1)
 price.Text = ""
 price.ZIndex = 3
 local priceStroke = Instance.new("UIStroke")
-priceStroke.Thickness = 5
+priceStroke.Thickness = BUTTON_WIDTH * 12 / 960 -- ROLL's outline, at the button's size
 priceStroke.Color = Color3.new(0, 0, 0)
 priceStroke.LineJoinMode = Enum.LineJoinMode.Round
 priceStroke.Parent = price
