@@ -967,14 +967,23 @@ ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, ki
 	Lasso.start(player.Character)
 end)
 
--- Back on foot at home, standing at x, z.
+-- Back on foot at home: however the ride ended (egg home, Home from the fail screen,
+-- the finish line), just outside your pen's open side, facing in (QM, Oct 6: no
+-- walking back). x, z only if you have no pen.
 local function finishRide(x, z)
 	local hrp, humanoid = character()
 	if hrp then
 		hrp.Anchored = false
 		humanoid.Sit = false
 		humanoid.PlatformStand = false
-		hrp.CFrame = CFrame.new(x + 6, 4, z)
+		local pen = myPen()
+		local spawn = pen and pen:FindFirstChild("Spawn")
+		if spawn and pen:FindFirstChild("Area") then
+			local at = Vector3.new(spawn.Position.X, 4, spawn.Position.Z)
+			hrp.CFrame = CFrame.lookAt(at, Vector3.new(pen.Area.Position.X, 4, pen.Area.Position.Z))
+		else
+			hrp.CFrame = CFrame.new(x + 6, 4, z)
+		end
 	end
 	cleanup()
 	if coins > 0 then
@@ -982,7 +991,8 @@ local function finishRide(x, z)
 		coins = 0
 	end
 	phase = "idle"
-	vfx.rideAgain = true -- (arrows to the pet in your pen: vfx.updateHomeGuide)
+	-- (No arrows back to the pen now you're put down at it: vfx.updateHomeGuide stays
+	-- off. Set vfx.rideAgain = true here to bring them back.)
 	controls:Enable()
 	camera.CameraType = Enum.CameraType.Custom
 	Hud.show(false)
@@ -4714,7 +4724,6 @@ player.CharacterAdded:Connect(function()
 	if phase ~= "idle" then
 		cleanup()
 		phase = "idle"
-		vfx.rideAgain = true
 		controls:Enable()
 		camera.CameraType = Enum.CameraType.Custom
 		Hud.show(false)
