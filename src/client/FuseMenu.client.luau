@@ -237,7 +237,7 @@ local function refresh()
 	nameB.Text = if picks[2] then Fusion.name(picks[2].kind) else "???"
 	local ready = #picks == 2
 	local price = ready and priceOf(picks[1], picks[2])
-	priceLabel.Visible = ready
+	priceLabel.Visible = ready and price > 0 -- (no price shown while fusing's free)
 	priceLabel.Text = if price then money(price) else ""
 	local can = ready and (player:GetAttribute("Gold") or 0) >= price
 	fuseButton.ImageColor3 = if can then Color3.new(1, 1, 1) else Color3.fromRGB(150, 150, 150)
