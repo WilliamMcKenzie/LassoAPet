@@ -36,23 +36,23 @@ for _, player in Players:GetPlayers() do
 	reseed(player)
 end
 
--- Where each rider is and what they're on: their RideSync (the server can't see a
--- ride's anchored character move), kept a few seconds, and whether they've got on
--- a stampede animal this ride (a "lasso" or "take" cue: they're on a wild animal,
--- not the pet they rode out on), till the ride's "end".
-local riders = {} -- [player] = { at = Vector3 (rider), t = os.clock(), on = riding an animal, wild }
+-- Where each rider is: their RideSync (the server can't see a ride's anchored
+-- character move), kept a few seconds, and whether they've got on a stampede animal
+-- this ride (a "lasso" or "take" cue: they're on a wild animal, not the pet they
+-- rode out on), till the ride's "end".
+local riders = {} -- [player] = { at = Vector3 (rider), t = os.clock(), wild }
 local function riderOf(player)
 	local r = riders[player]
 	if not r then
-		r = { at = Vector3.zero, t = 0, on = false }
+		r = { at = Vector3.zero, t = 0 }
 		riders[player] = r
 	end
 	return r
 end
-ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, kind, _, riderCFrame)
+ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, _, _, riderCFrame)
 	if typeof(riderCFrame) == "CFrame" and riderCFrame.Position.Z == riderCFrame.Position.Z then
 		local r = riderOf(player)
-		r.at, r.t, r.on = riderCFrame.Position, os.clock(), type(kind) == "string" and kind ~= ""
+		r.at, r.t = riderCFrame.Position, os.clock()
 	end
 end)
 ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
@@ -64,7 +64,7 @@ ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player,
 		-- The ride's over: an egg still carried was lost on the way (a crash, bucked
 		-- off, Home from the fail screen). One brought home was handed in first
 		-- (Hatchery's DeliverEgg, sent before this), so this only clears a lost one,
-		-- which otherwise stayed set and blocked stealing on the next ride.
+		-- which otherwise stayed set: Hatchery would take it as brought home next ride.
 		player:SetAttribute("CarriedEgg", nil)
 	end
 end)
@@ -234,52 +234,4 @@ task.spawn(function()
 			end
 		end
 	end
-end)
-
--- Stealing eggs (QM, Oct 4) ----------------------------------------------------
--- Out on the course, a rider without an egg can lasso the egg off another rider who's
--- carrying one, from as far as they could grab a nest's (Config.LassoRange): their
--- STEAL EGG asks for it (StealEgg, victim) and it's checked here against both riders'
--- RideSync positions, never taken on a client's word. Whoever has it when they get home
--- keeps it (Hatchery's DeliverEgg). After a steal the egg can't change hands again for
--- Config.EggSteal.Lock seconds. EggSteal tells every client (thief, victim, kind, scale) for the
--- effects; the thief's client reels it in and turns for home with it.
-
-local SLACK = 12 -- studs of leeway on the range, for the time the positions take to arrive
-local lockedUntil = {} -- [player] = os.clock() before which their egg can't be taken
-Players.PlayerRemoving:Connect(function(player)
-	lockedUntil[player] = nil
-end)
-
-local function riding(player, now)
-	local r = riders[player]
-	return r and r.on and now - r.t < 1 and r.at.Z < 0 and not player:GetAttribute("Tutorial") and r or nil
-end
-
-local eggSteal = Instance.new("RemoteEvent")
-eggSteal.Name = "EggSteal"
-eggSteal.Parent = ReplicatedStorage
-local stealEgg = Instance.new("RemoteEvent")
-stealEgg.Name = "StealEgg"
-stealEgg.Parent = ReplicatedStorage
-
-stealEgg.OnServerEvent:Connect(function(thief, victim)
-	local now = os.clock()
-	if typeof(victim) ~= "Instance" or not victim:IsA("Player") or victim == thief then
-		return
-	end
-	local kind = victim:GetAttribute("CarriedEgg")
-	local t, v = riding(thief, now), riding(victim, now)
-	if not kind or thief:GetAttribute("CarriedEgg") or not t or not v or now < (lockedUntil[victim] or 0) then
-		return
-	end
-	if (Vector3.new(t.at.X, 0, t.at.Z) - Vector3.new(v.at.X, 0, v.at.Z)).Magnitude > Config.LassoRange + SLACK then
-		return
-	end
-	local scale = victim:GetAttribute("CarriedEggScale") or 1
-	victim:SetAttribute("CarriedEgg", nil)
-	thief:SetAttribute("CarriedEgg", kind)
-	thief:SetAttribute("CarriedEggScale", scale)
-	lockedUntil[thief] = now + Config.EggSteal.Lock
-	eggSteal:FireAllClients(thief, victim, kind, scale)
 end)

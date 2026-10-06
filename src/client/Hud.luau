@@ -164,8 +164,6 @@ local TONES = {
 	["CRASH!"] = RED,
 	["BUCKED OFF"] = RED,
 	["TOO FAR!"] = RED,
-	["STOLEN!"] = RED, -- another rider took your egg (Ride.client, EggSteal)
-	["You stole it!"] = Color3.fromRGB(255, 225, 29),
 }
 
 local card, cardEgg, cardScale, cardFlash, cardBurst, cardExclusive -- egg reveal card, the egg on it, its UIScale, the white flash and sunburst behind it, the stand-in EXCLUSIVE! text

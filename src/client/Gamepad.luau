@@ -6,7 +6,7 @@
 --                 Y      MERGE
 --                 LB/RB  the egg before / after in the inventory; RT puts it down
 --                 D-pad  up Shop, left Roll, down Pets, right Upgrade Pen
---   Riding        A/RT   LASSO, TAKE EGG, STEAL EGG; LT sprint; RB ability;
+--   Riding        A/RT   LASSO, TAKE EGG; LT sprint; RB ability;
 --                        the left stick steers (pushed far out, it sprints)
 --   Fail screen   A      Home; Y Continue
 --   Menus         B      closes; the dictionary turns pages with LB / RB, the

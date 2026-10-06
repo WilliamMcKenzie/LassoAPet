@@ -247,10 +247,6 @@ return {
 	-- line, rising evenly to x Far at its end, so a biome's average stays about the
 	-- same. Common and Uncommon eggs keep their odds. Not the Godlands (its NestDepth).
 	NestDepthOdds = { Near = 0.5, Far = 1.5 },
-	-- Stealing eggs mid-ride (Nests.server, QM Oct 4): STEAL EGG lassoes the egg off a rider
-	-- carrying one, from as far as a nest's egg (LassoRange); then it can't change hands
-	-- again for Lock seconds.
-	EggSteal = { Lock = 2 },
 	-- Exclusive animal events (Events.server, QM Oct 4): every Cycle seconds one of
 	-- the Animals, picked at random, pops in at the start line Countdown seconds after
 	-- it's picked (the clients build it meanwhile) and runs off with the stampede to
