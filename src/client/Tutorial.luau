@@ -22,7 +22,10 @@
 --   7. place2 the egg goes into the pen by itself (Hatchery's DeliverEgg, balance
 --            pass Oct 6: a fifth of new players left here when they had to place it).
 --            Placing it starts the money: until now pets earn nothing (Hatchery)
---   8. goal  once that egg's hatched, the camera flies to the next biome's gate: "Save $1k to unlock the
+--   8. fuse  once that egg's hatched, the Fuse button shows (nothing else does) and
+--            the cursor clicks through it: Fuse, both pets, FUSE (QM). Skipped
+--            when the two can't fuse (two of the same pet)
+--   9. goal  the moment the hybrid's landed, the camera flies to the next biome's gate: "Save $1k to unlock the
 --            Desert!". Then it's over and the rest of the HUD (Gold, Upgrade Pen,
 --            Pets) comes back: none of it shows in the tutorial (QM).
 --
@@ -41,6 +44,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
+local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
@@ -59,7 +63,8 @@ Tutorial.eggTaken = false -- this ride took the egg from Tutorial.nest (Ride): n
 
 local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
 local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banner (Hud, at 0.3)
-local GOAL_WAIT = 3.2 -- seconds after the egg hatches (Pen.client's hatch takes about 2.2) before the camera flies to the gate
+local FUSE_HINT_Y = 0.05 -- with the Fuse menu open: above its page
+local GOAL_WAIT = 3.2 -- seconds after the egg hatches (Pen.client's hatch takes about 2.2) before the fuse step (or the gate)
 local GATE_HOLD = 2.5 -- seconds the camera stays on the gate
 local PICTURE_Y = 0.09 -- a hint picture's middle, a share of the screen height (QM's layout)
 local PICTURE_WIDTH = 0.25 -- "Click on the egg"'s width, a share of the screen width (0.8x the reference: QM)
@@ -78,6 +83,7 @@ local done = false -- TutorialDone sent
 local known = {} -- the pen's items when the ride home began: a new one is the egg brought home
 local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
 local goalDesert = false -- and it's that one, which QM drew (PICTURES.saveDesert)
+local fuseFrom = math.huge -- when the fuse step began
 
 -- The first Meadow nest: the one nearest the start line.
 do
@@ -202,25 +208,25 @@ local function eggToClick()
 	return nil
 end
 
--- Shows the hint picture called `name` (nil: none), and the cursor over `tool`'s
--- square if there's a tool.
-local function showPicture(name, tool)
+-- Shows the hint picture called `name` (nil: none), and the cursor over `target`
+-- (a button or the egg's square) if there's one.
+local function showPicture(name, target)
 	local entry = name and PICTURES[name]
 	if entry ~= pictureShown then
 		pictureShown = entry
 		picture.Image = if entry then entry.image else ""
 		sizePicture()
 	end
-	local slot = tool and Inventory.slot(tool.Name)
 	picture.Visible = entry ~= nil
-	cursor.Visible = slot ~= nil
+	cursor.Visible = target ~= nil
 	local wave = math.sin(os.clock() * 2 * math.pi / THROB_TIME)
 	pictureScale.Scale = 1 + THROB * wave
 	cursorScale.Scale = 1 + CURSOR_THROB * wave
-	if slot then
-		local at, size = slot.AbsolutePosition - gui.AbsolutePosition, slot.AbsoluteSize -- (gui's is above 0 by the top bar)
+	if target then
+		local at, size = target.AbsolutePosition - gui.AbsolutePosition, target.AbsoluteSize -- (gui's is above 0 by the top bar)
 		cursor.Position = UDim2.fromOffset(at.X + CURSOR_AT.X * size.X, at.Y + CURSOR_AT.Y * size.Y)
-		cursor.Size = UDim2.fromOffset(CURSOR_SIZE * size.X, CURSOR_SIZE * size.X)
+		local side = CURSOR_SIZE * math.min(size.X, size.Y)
+		cursor.Size = UDim2.fromOffset(side, side)
 	end
 end
 
@@ -353,14 +359,100 @@ local function finish()
 	end
 end
 
+-- Your pets: the one you ride and the pen's, as { kind, fuse }.
+local function yourPets()
+	local list = {}
+	local ride = player:GetAttribute("RidePet")
+	if ride and ride ~= "" then
+		local fuse = player:GetAttribute("RideFuse")
+		table.insert(list, { ride, if fuse ~= "" then fuse else nil })
+	end
+	for _, item in contents() do
+		if item.pet then
+			table.insert(list, { item.pet, item.fuse })
+		end
+	end
+	return list
+end
+
+-- Two of your pets fuse, and you can pay for it (free for now).
+local function canFuse()
+	local list = yourPets()
+	local gold = player:GetAttribute("Gold") or 0
+	for i = 1, #list do
+		for j = i + 1, #list do
+			local a, b = list[i], list[j]
+			if Fusion.combine(a[1], a[2], b[1], b[2]) and gold >= Fusion.price(a[1], b[1]) then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function hybrids()
+	local n = 0
+	for _, pet in yourPets() do
+		if pet[2] then
+			n += 1
+		end
+	end
+	return n
+end
+
+-- The fuse step's next click: what the cursor's on, and the hint. Fuse, then each
+-- pet on the page, then FUSE (FuseMenu's Hud.fuseGuide); nothing once it's fused.
+local function fuseTarget()
+	if Hud.fusedAt and Hud.fusedAt >= fuseFrom then
+		return nil, nil
+	end
+	local target, isFuse
+	if Hud.fuseGuide then
+		target, isFuse = Hud.fuseGuide()
+	end
+	local verb = if touch() then "Tap" else "Click"
+	if target == nil then
+		return Hud.fuseButton(), verb .. " Fuse!"
+	elseif not target then
+		return nil, nil
+	end
+	return target, if isFuse then verb .. " FUSE!" else verb .. " both your pets!"
+end
+
+-- A fusion's pets are being pulled up, or its hybrid dropping down (PenPets).
+local function fusing()
+	for key in PenPets.merges do
+		if PenPets.mergeFor(key) then
+			return true
+		end
+	end
+	return false
+end
+
 -- The ending: once the egg placed (`id` in the pen) has hatched and its pet
--- jumped out, the camera flies over to the next biome's gate and back, and it's over.
+-- jumped out, the two pets are fused (step "fuse") and, the moment the hybrid's
+-- landed, the camera flies over to the next biome's gate and back, and it's over.
 local function showGoal(id)
 	Tutorial.busy = true
 	while contents()[id] and contents()[id].egg do
 		task.wait(0.2)
 	end
 	task.wait(GOAL_WAIT)
+	if Tutorial.active and canFuse() then
+		local before = hybrids()
+		fuseFrom = os.clock()
+		step = "fuse" -- (not a funnel step: Funnel's steps are numbered)
+		while Tutorial.active do
+			local at = Hud.fusedAt
+			if at and at >= fuseFrom and not fusing() and (hybrids() > before or os.clock() > at + 5) then
+				break
+			elseif Hud.fuseGuide and Hud.fuseGuide() == false then
+				break -- the page has no pets to fuse after all: on to the gate
+			end
+			task.wait()
+		end
+		step = "goal"
+	end
 	controls:Disable()
 	local level = player:GetAttribute("PenLevel") or 1
 	local upNext = Config.Biomes[level + 1]
@@ -394,6 +486,8 @@ local function hintFor(state)
 		return if phase == "idle" then "Place your egg in your pen!" else nil
 	elseif step == "goal" then
 		return goalText
+	elseif step == "fuse" then
+		return select(2, fuseTarget())
 	elseif step == "ride" then
 		local _, kind = myPet(state)
 		return if kind and kind ~= "" then "Ride your " .. kind .. "!" else nil
@@ -413,7 +507,7 @@ end
 -- hero leap is on) }.
 function Tutorial.update(state)
 	local phase = state.phase
-	local stage = if Tutorial.active then "bare" else nil
+	local stage = if not Tutorial.active then nil elseif step == "fuse" then "fuse" else "bare"
 	if stage ~= hudStage then
 		hudStage = stage
 		Hud.setTutorial(stage)
@@ -473,9 +567,14 @@ function Tutorial.update(state)
 		elseif step == "ride" and select(2, myPet(state)) == "Horse" then "rideHorse"
 		elseif step == "goal" and goalText and goalDesert then "saveDesert"
 		else nil
-	showPicture(pictureName, clickTool)
+	local cursorOn = if clickTool then Inventory.slot(clickTool.Name)
+		elseif step == "fuse" and phase == "idle" then (fuseTarget())
+		else nil
+	showPicture(pictureName, cursorOn)
 	setHint(if state.cutscene or pictureName then nil else hintFor(state))
-	hint.Position = UDim2.fromScale(0.5, if phase == "ended" then FAIL_HINT_Y else HINT_Y) -- over CRASH! / BUCKED OFF
+	hint.Position = UDim2.fromScale(0.5, if phase == "ended" then FAIL_HINT_Y -- over CRASH! / BUCKED OFF
+		elseif step == "fuse" and Hud.fuseGuide and Hud.fuseGuide() then FUSE_HINT_Y
+		else HINT_Y)
 
 	local target
 	if phase == "idle" then
@@ -519,7 +618,7 @@ function Tutorial.init(changed)
 		local on = Config.Tutorial and player:GetAttribute("Tutorial") == true
 		if on ~= Tutorial.active then
 			Tutorial.active = on
-			step, failed, done, goalText = "place", false, false, nil
+			step, failed, done, goalText, fuseFrom = "place", false, false, nil, math.huge
 			if on then
 				report("place")
 			end

@@ -181,7 +181,7 @@ local CONTINUE_GAP = 12 -- between Continue and the Home button under it
 local tip, tipText -- the fail screen's tooltip in place of "+$N" (Hud.setTip), and its text
 local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at the machine
 -- The first-time tutorial's stage (Hud.setTutorial): nil when it's off, "bare"
--- (no Gold, Pets or Upgrade Pen) while it runs.
+-- (no Gold, Pets or Upgrade Pen) while it runs, "fuse" (Fuse alone) at its fuse step.
 local tutorial = nil
 local upgradeScale -- Upgrade Pen's UIScale
 -- A line of text top centre (Hud.setNotice), in its own always-on ScreenGui.
@@ -980,11 +980,11 @@ function Hud.show(visible)
 		Hud.showContinue(nil)
 	end
 	ride.Visible = false -- comes back when the ride prompt shows again
-	gold.Visible = not visible and tutorial ~= "bare"
+	gold.Visible = not visible and tutorial == nil
 	pets.Visible = not visible and tutorial == nil
-	fuseIcon.Visible = pets.Visible
+	fuseIcon.Visible = not visible and (tutorial == nil or tutorial == "fuse")
 	shopIcon.Visible = pets.Visible
-	upgrade.Visible = upgradeShown and not visible and tutorial ~= "bare"
+	upgrade.Visible = upgradeShown and not visible and tutorial == nil
 	Inventory.setVisible(not visible) -- your eggs, hidden while riding
 	gained.row.Visible = false
 	noCash = false
@@ -1485,16 +1485,22 @@ end
 
 -- The first-time tutorial (Tutorial.luau) shows only what each step needs.
 -- stage "bare": no Gold, Pets or Upgrade Pen at home and no ride cash (Ride leaves
--- out Sprint, Ability and the Hold bar). nil: it's over, everything's back.
+-- out Sprint, Ability and the Hold bar). "fuse": the same but for Fuse, the one
+-- button showing (QM). nil: it's over, everything's back.
 function Hud.setTutorial(stage)
 	tutorial = stage
 	local riding = gui.Enabled
-	gold.Visible = not riding and stage ~= "bare"
+	gold.Visible = not riding and stage == nil
 	pets.Visible = not riding and stage == nil
-	fuseIcon.Visible = pets.Visible
+	fuseIcon.Visible = not riding and (stage == nil or stage == "fuse")
 	shopIcon.Visible = pets.Visible
-	upgrade.Visible = upgradeShown and not riding and stage ~= "bare"
+	upgrade.Visible = upgradeShown and not riding and stage == nil
 	rideCash.row.Visible = stage == nil and not noCash
+end
+
+-- The Fuse button, for the tutorial's cursor.
+function Hud.fuseButton()
+	return fuseIcon
 end
 
 -- A line of text top centre (QM, Oct 5: "Return to your base to ride an animal!"
