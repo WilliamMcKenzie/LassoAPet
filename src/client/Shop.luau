@@ -250,6 +250,10 @@ function Shop.open()
 		return
 	end
 	open = true
+	local funnelStep = ReplicatedStorage:FindFirstChild("FunnelStep") -- (Funnel.server, analytics)
+	if funnelStep then
+		funnelStep:FireServer("shop")
+	end
 	if legendCard and legendOdds then -- the mystery egg first, every time
 		legendOdds = false
 		legendCard.Image = CARDS.Legendary.id

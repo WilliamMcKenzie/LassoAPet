@@ -285,5 +285,6 @@ upgrade.OnServerInvoke = function(player)
 	zoneUnlocked:FireClient(player, level(player) + 1)
 	player:SetAttribute("PenLevel", level(player) + 1)
 	Funnel.step(player, "Unlocked Zone 2")
+	Funnel.zone(player, level(player))
 	return true
 end

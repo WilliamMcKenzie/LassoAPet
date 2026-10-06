@@ -534,6 +534,7 @@ rollGacha.OnServerInvoke = function(player)
 	rolled[player] = os.clock()
 	player:SetAttribute("Gold", gold - price)
 	profile.rolls = (profile.rolls or 0) + 1
+	Funnel.event(player, "Rolled Egg")
 	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
 	publish(player)
 	return kind, tier == "Exclusive"
@@ -575,6 +576,8 @@ place = function(player, profile, kind, x, z)
 	end
 	if profile.earning then
 		Funnel.step(player, "Placed Egg") -- the egg brought home, not the starter egg placed before the first ride
+	else
+		Funnel.step(player, "Placed Starter Egg")
 	end
 	publish(player)
 end
@@ -643,6 +646,7 @@ remote("MergePets", function(player, kind)
 	for _, id in ids do
 		profile.items[id] = nil
 	end
+	Funnel.event(player, "Merged Pets")
 	publish(player)
 end)
 
