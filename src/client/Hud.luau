@@ -39,7 +39,7 @@ local IMAGES = {
 	barFilled = { id = "rbxassetid://82401653732533", size = Vector2.new(1292, 220) },
 	barEmpty = { id = "rbxassetid://128272625286546", size = Vector2.new(1292, 220) },
 	pets = { id = "rbxassetid://90844952883979", size = Vector2.new(254, 256) },
-	fuseIcon = { id = "rbxassetid://132069626373718", size = Vector2.new(308, 284) }, -- Fuse.png: picks two pets to fuse (FuseMenu); "" shows a "Fuse" label
+	fuseIcon = { id = "", size = Vector2.new(366, 289) }, -- MergeIcon.png (QM, Oct 7: Fuse is "Merge" to players; upload): picks two pets to fuse (FuseMenu); "" shows a "Merge" label
 	-- (With no id, the button is a plain outlined "Shop" label in the same spot.)
 	shopIcon = { id = "rbxassetid://105477086117375", size = Vector2.new(256, 259) }, -- Shop.png: opens the Robux shop
 	-- The roll menu's own art (RollMenu draws it; listed here so it's preloaded with the rest).
@@ -598,7 +598,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end
 	if IMAGES.fuseIcon.id == "" then
 		local fuseText = label(fuseIcon, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 34, 3) -- 3px outline (QM)
-		fuseText.Text = "Fuse"
+		fuseText.Text = "Merge"
 	end
 	-- Shop, in the middle: it opens the Robux shop.
 	shopIcon = button(sideRoot, "shopIcon", fit("shopIcon", nil, SIDE_ICON_HEIGHT), Vector2.new(0.5, 1), columnSpot(1), function()

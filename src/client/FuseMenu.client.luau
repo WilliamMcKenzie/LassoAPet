@@ -42,7 +42,8 @@ local GAP_X = (INSIDE.Width - COLUMNS * CARD) / (COLUMNS + 1)
 local GAP_Y = (INSIDE.Height - ROWS * CARD) / (ROWS + 1)
 local CARD_CORNER = UDim.new(0.05, 0) -- the rarity cards' own corners (10 px of 200), or the clip cuts their edge
 local FONT = Enum.Font.FredokaOne
-local PAGE_ART = "rbxassetid://132460179762796" -- assets/ui/fuse/FusionPanel.png (QM)
+local PAGE_ART = "" -- assets/ui/fuse/MergePanel.png (QM, Oct 7: titled MERGE; upload)
+local OLD_PAGE_ART = "rbxassetid://132460179762796" -- assets/ui/fuse/FusionPanel.png (till then)
 -- QM's FUSE button, the price written under its arm (QM, Oct 7): green when you can
 -- fuse the two picked, grey when you can't (or can't afford it). (The old art, with
 -- FUSE written on it, stands in till the new ones are uploaded.)
@@ -352,7 +353,7 @@ local close
 local function fuse()
 	local a, b = picks[1], picks[2]
 	if not a or not b then
-		tip.Text = "Pick two pets to fuse"
+		tip.Text = "Pick two pets to merge"
 		tip.Visible = true
 		task.delay(1.6, function()
 			tip.Visible = false
@@ -456,7 +457,7 @@ backdrop.Parent = gui
 page = Instance.new("ImageLabel")
 page.Name = "Page"
 page.BackgroundTransparency = 1
-page.Image = PAGE_ART
+page.Image = if PAGE_ART ~= "" then PAGE_ART else OLD_PAGE_ART
 page.AnchorPoint = Vector2.new(0.5, 0.5)
 page.Position = UDim2.fromScale(0.5, 0.5)
 page.Size = UDim2.fromOffset(PAGE.X, PAGE.Y)
