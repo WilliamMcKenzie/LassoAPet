@@ -81,11 +81,6 @@ local function priceOf(a, b)
 	return Fusion.price(a.kind, b.kind)
 end
 
-local function rarityOf(kind)
-	local ok, class = pcall(require, Animals:FindFirstChild(kind))
-	return ok and class and class.Rarity or "Common"
-end
-
 local function stroked(object, thickness)
 	local s = Instance.new("UIStroke")
 	s.Thickness = thickness
@@ -204,7 +199,7 @@ local function yourPets()
 	end
 	local ranks = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5 }
 	table.sort(list, function(a, b) -- rarest first, then by kind, so a kind's pets sit together
-		local ra, rb = ranks[rarityOf(a.kind)] or 0, ranks[rarityOf(b.kind)] or 0
+		local ra, rb = ranks[Fusion.rarity(a.kind, a.fuse)] or 0, ranks[Fusion.rarity(b.kind, b.fuse)] or 0
 		if ra ~= rb then
 			return ra > rb
 		end
@@ -306,7 +301,7 @@ function showPage(first)
 		card.Name = pet.kind
 		card.BackgroundTransparency = 1
 		card.AutoButtonColor = false
-		card.Image = CARDS[rarityOf(pet.kind)] or CARDS.Common
+		card.Image = CARDS[Fusion.rarity(pet.kind, pet.fuse)] or CARDS.Common -- (a hybrid: the rarer of its two)
 		card.Size = UDim2.fromOffset(CARD, CARD)
 		card.AnchorPoint = Vector2.new(0.5, 0.5)
 		card.Position = UDim2.fromOffset(

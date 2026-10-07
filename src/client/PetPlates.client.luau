@@ -1,7 +1,6 @@
--- Nameplates over your own pets when you walk up to them (QM, Oct 7): the pet's
--- name in its rarity's colour, and under it its speed (its Speed
--- stat x 20, "m/s"), both centred.
--- Laid out from QM's reference, measured in pixels: the whole plate is 300 x 125.
+-- Nameplates over your own pets when you walk up to them (QM, Oct 7), centred:
+-- the pet's name in its rarity's colour (a hybrid's fused name), the gold it earns a
+-- second, and its speed (its Speed stat x 20, "m/s").
 --
 -- Only the NEAREST few of your pets within REACH get one, and only while you're on
 -- foot. A pet with its plate up doesn't pop "+N$" (Ride.client skips the ones on
@@ -12,7 +11,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
-local Animals = ReplicatedStorage.Shared.Animals
 local Config = require(ReplicatedStorage.Shared.Config)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local PenPets = require(script.Parent.PenPets)
@@ -23,8 +21,10 @@ local player = Players.LocalPlayer
 local REACH = 16 -- studs from you to a pet's root where its plate shows
 local LEAVE = 19 -- and where it goes again (a bit further, so it doesn't flicker at the edge)
 local MOST = 4 -- plates at once, nearest first (a crowded pen would be a wall of them)
-local HEIGHT = 3 -- studs: the plate's height (125 px in the reference)
+local HEIGHT = 3 -- studs: the name and speed lines' height (125 px in the reference)
 local WIDTH = HEIGHT * 300 / 125
+local TALL = HEIGHT * 1.45 -- studs: the plate's height with the gold line between them (QM, Oct 7)
+local GOLD = Color3.fromRGB(80, 255, 60) -- the gold line's bright green
 local TIER_GROWTH = 1.2 -- the plate's size per size tier up from a small pet (QM, Oct 7)
 local ABOVE = 0.6 -- studs between the pet's top and the plate
 local FONT = Enum.Font.FredokaOne
@@ -38,21 +38,8 @@ local COLORS = {
 	Epic = Color3.fromHex("FF7CC6"),
 	Legendary = Color3.fromHex("5CE6B7"),
 }
-local RANKS = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5 }
-
-local function rarityOf(kind)
-	local module = kind and Animals:FindFirstChild(kind)
-	local ok, class = pcall(require, module)
-	return ok and class and class.Rarity or "Common"
-end
-
--- A hybrid's colour is the rarer of its two pets'.
 local function colorOf(kind, fuse)
-	local rarity = rarityOf(kind)
-	if fuse and (RANKS[rarityOf(fuse)] or 0) > (RANKS[rarity] or 0) then
-		rarity = rarityOf(fuse)
-	end
-	return COLORS[rarity] or COLORS.Common
+	return COLORS[Fusion.rarity(kind, fuse)] or COLORS.Common -- (a hybrid: the rarer of its two)
 end
 
 local function text(parent, size, position, color)
@@ -80,7 +67,7 @@ local function build(model)
 	board.Name = "PetPlate"
 	-- Twice as wide as the plate, which sits in its middle, so a long name can run
 	-- on to the right without being cut off.
-	board.Size = UDim2.fromScale(WIDTH * 2, HEIGHT)
+	board.Size = UDim2.fromScale(WIDTH * 2, TALL)
 	board.LightInfluence = 0
 	board.AlwaysOnTop = true
 	board.ResetOnSpawn = false
@@ -93,10 +80,12 @@ local function build(model)
 	plate.Parent = board
 	local scale = Instance.new("UIScale")
 	scale.Parent = plate
-	-- The name on top and the speed under it, both centred (QM, Oct 7: no arm icon).
-	-- Each may run the board's whole width: a name too long for that shrinks to fit.
-	local name = text(plate, UDim2.fromScale(2, 0.6), UDim2.fromScale(0.5, 28 / 125), Color3.new(1, 1, 1))
-	local speed = text(plate, UDim2.fromScale(2, 0.58), UDim2.fromScale(0.5, 98 / 125), Color3.new(1, 1, 1))
+	-- Centred, top to bottom (QM, Oct 7): the name, the gold it earns a second (a
+	-- little smaller, green) and its speed. Each may run the board's whole width: a
+	-- name too long for that shrinks to fit.
+	local name = text(plate, UDim2.fromScale(2, 0.41), UDim2.fromScale(0.5, 0.2), Color3.new(1, 1, 1))
+	local gold = text(plate, UDim2.fromScale(2, 0.32), UDim2.fromScale(0.5, 0.555), GOLD)
+	local speed = text(plate, UDim2.fromScale(2, 0.37), UDim2.fromScale(0.5, 0.83), Color3.new(1, 1, 1))
 	-- In a folder of its own, adorned to the pet: inside the pet's model, the pet's
 	-- ScaleTo would scale the plate with it (a medium pet's came out huge).
 	local folder = workspace:FindFirstChild("PetPlates")
@@ -106,7 +95,7 @@ local function build(model)
 		folder.Parent = workspace
 	end
 	board.Parent = folder
-	local p = { board = board, scale = scale, name = name, speed = speed }
+	local p = { board = board, scale = scale, name = name, gold = gold, speed = speed }
 	plates[model] = p
 	model.Destroying:Connect(function()
 		board:Destroy()
@@ -116,21 +105,32 @@ local function build(model)
 	return p
 end
 
-local function show(model, kind, fuse, stats)
+-- 15, 1.2k, 3.4m, ... (gold a second, short).
+local function short(n)
+	for _, unit in { { 1e9, "b" }, { 1e6, "m" }, { 1e3, "k" } } do
+		if n >= unit[1] then
+			return (string.format("%.1f", n / unit[1]):gsub("%.0$", "")) .. unit[2]
+		end
+	end
+	return tostring(math.floor(n + 0.5))
+end
+
+local function show(model, kind, fuse, stats, income)
 	local p = plates[model] or build(model)
 	local s = Fusion.stats(kind, fuse, stats)
-	local key = Fusion.key(kind, fuse) .. "/" .. s.Speed
+	local key = Fusion.key(kind, fuse) .. "/" .. s.Speed .. "/" .. income
 	if p.key ~= key then
 		p.key = key
-		p.name.Text = Fusion.name(kind) -- a hybrid goes by its base animal's name: no fused names (QM)
+		p.name.Text = Fusion.name(kind, fuse) -- a hybrid's fused name (QM, Oct 7)
 		p.name.TextColor3 = colorOf(kind, fuse)
+		p.gold.Text = "$" .. short(income) .. "/s"
 		p.speed.Text = math.floor(s.Speed * 20 + 0.5) .. "m/s"
 	end
 	local box, size = Outline.box(model)
 	local grow = TIER_GROWTH ^ ((Config.PetTiers[kind] or 1) - 1)
-	p.board.Size = UDim2.fromScale(WIDTH * 2 * grow, HEIGHT * grow)
+	p.board.Size = UDim2.fromScale(WIDTH * 2 * grow, TALL * grow)
 	p.board.Adornee = model.PrimaryPart
-	p.board.StudsOffsetWorldSpace = Vector3.new(0, box.Y + size.Y / 2 + ABOVE + HEIGHT * grow / 2, 0)
+	p.board.StudsOffsetWorldSpace = Vector3.new(0, box.Y + size.Y / 2 + ABOVE + TALL * grow / 2, 0)
 	if not p.on then
 		p.on = true
 		p.board.Enabled = true
@@ -163,23 +163,25 @@ RunService.Heartbeat:Connect(function(dt)
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	-- (Sitting is riding; PlatformStand is lying flat after a crash.)
 	if root and humanoid and not humanoid.Sit and not humanoid.PlatformStand then
-		local function consider(model, kind, fuse, stats)
+		local function consider(model, kind, fuse, stats, income)
 			local pet = model.PrimaryPart
 			if not kind or not pet or not model.Parent then
 				return
 			end
 			local d = Vector2.new(pet.Position.X - root.Position.X, pet.Position.Z - root.Position.Z).Magnitude
 			if d <= (if plates[model] and plates[model].on then LEAVE else REACH) then
-				table.insert(candidates, { model = model, kind = kind, fuse = fuse, stats = stats, d = d })
+				table.insert(candidates, { model = model, kind = kind, fuse = fuse, stats = stats, income = income, d = d })
 			end
 		end
 		for model, info in PenPets.pets do
-			consider(model, info.kind, info.fuse, info.stats)
+			-- (gold a second: a merged pet's for all it's made of, a hybrid's both pets': Hatchery's income)
+			consider(model, info.kind, info.fuse, info.stats, info.income or (Config.PetIncome[info.kind] or 0) * (info.merged or 1))
 		end
 		-- The pet on your spot (Ride.client's starter), unless it's the one you're out on.
 		local starter = PenPets.starter
 		if starter and starter.kind == player:GetAttribute("RidePet") then
-			consider(starter.animal.model, starter.kind, starter.fuse, starter.stats)
+			consider(starter.animal.model, starter.kind, starter.fuse, starter.stats,
+				player:GetAttribute("RideIncome") or (Config.PetIncome[starter.kind] or 0) * (starter.merged or 1))
 		end
 		table.sort(candidates, function(a, b)
 			return a.d < b.d
@@ -189,7 +191,7 @@ RunService.Heartbeat:Connect(function(dt)
 	for i = 1, math.min(#candidates, MOST) do
 		local c = candidates[i]
 		keep[c.model] = true
-		show(c.model, c.kind, c.fuse, c.stats)
+		show(c.model, c.kind, c.fuse, c.stats, c.income)
 	end
 	for model in plates do
 		if not keep[model] then

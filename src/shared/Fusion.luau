@@ -63,6 +63,25 @@ local function rarityRank(kind)
 	return ok and class and table.find(RARITIES, class.Rarity) or 0
 end
 
+-- A pet's rarity: a hybrid's is the rarer of its two animals' (QM, Oct 7), so
+-- fusing never lowers it. (An Exclusive, past Legendary, outranks the lot.)
+function Fusion.rarity(kind, fuse)
+	local function of(k)
+		local module = k and script.Parent.Animals:FindFirstChild(k)
+		local ok, class = pcall(require, module)
+		local rarity = ok and class and class.Rarity or "Common"
+		return rarity, table.find(RARITIES, rarity) or #RARITIES + 1
+	end
+	local rarity, rank = of(kind)
+	if fuse then
+		local other, otherRank = of(fuse)
+		if otherRank > rank then
+			rarity = other
+		end
+	end
+	return rarity
+end
+
 -- Fusing two pets, either of them a hybrid already (QM, Oct 6: hybrids fuse again):
 -- pet A (the left one) gives the body, its base animal, and pet B (the right one)
 -- what it looks like, its donor's colours and size if it's a hybrid, else its own.
