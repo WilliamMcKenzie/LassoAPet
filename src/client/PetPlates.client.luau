@@ -25,7 +25,7 @@ local MOST = 4 -- plates at once, nearest first (a crowded pen would be a wall o
 local HEIGHT = 3 -- studs: the plate's height (125 px in the reference)
 local WIDTH = HEIGHT * 300 / 125
 local ABOVE = 0.6 -- studs between the pet's top and the plate
-local ARM = "" -- rbxassetid of assets/ui/PowerArm.png, once Studio's uploaded it
+local ARM = "rbxassetid://73860967591442" -- assets/ui/PowerArm.png
 local FONT = Enum.Font.FredokaOne
 local CHECK = 0.1 -- seconds between looks round
 
