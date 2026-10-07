@@ -20,6 +20,7 @@
 --   Fusion.name(kind, fuse)       "Poong": the donor's front and the base's back
 --   Fusion.paint(model, kind, fuse)  repaints a built model in the donor's palette
 --   Fusion.worth(kind, fuse, saved) what a pet adds to FUSE's price (a hybrid: all its pets)
+--   Fusion.price(worth)              the gold FUSE charges for that (Config.FuseCostScale)
 
 local Config = require(script.Parent.Config)
 local Palettes = require(script.Parent.Palettes)
@@ -163,6 +164,11 @@ function Fusion.worth(kind, fuse, saved)
 		return Config.FusePrice[RARITIES[rarityRank(k)] or "Common"] or 0
 	end
 	return one(kind) + (if fuse then one(fuse) else 0)
+end
+
+-- The gold FUSE charges for pets worth `worth` in all (Config.FuseCostScale: QM, Oct 7).
+function Fusion.price(worth)
+	return math.floor(worth * (Config.FuseCostScale or 1) + 0.5)
 end
 
 function Fusion.name(kind, fuse)

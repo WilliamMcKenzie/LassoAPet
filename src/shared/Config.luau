@@ -469,6 +469,9 @@ return {
 	-- Legendaries $2M (QM; Common 100 is Claude's), and a hybrid every pet in it (QM). Back on Oct 7 (QM), after a spell free;
 	-- the fuse lesson's fuse is free (FuseLesson).
 	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000 },
+	-- What FUSE actually charges is that worth times this (QM, Oct 7: "100x cheaper"): Common $1,
+	-- two Legendaries $20k. Hybrids keep their saved worth on the scale above, so it's done here.
+	FuseCostScale = 0.01,
 	PetSmallSize = 10.4,
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,

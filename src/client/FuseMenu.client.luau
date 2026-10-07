@@ -76,7 +76,7 @@ local fuseButton, tip, nameA, nameB, priceLabel
 
 -- Gold to fuse the two picked (QM: each pet adds its rarity's price, a hybrid all its pets').
 local function priceOf(a, b)
-	return Fusion.worth(a.kind, a.fuse, a.worth) + Fusion.worth(b.kind, b.fuse, b.worth)
+	return Fusion.price(Fusion.worth(a.kind, a.fuse, a.worth) + Fusion.worth(b.kind, b.fuse, b.worth))
 end
 
 local function stroked(object, thickness)
@@ -230,7 +230,7 @@ local function refresh()
 	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's fuse is free: QM)
 	local price = if ready and not lesson then priceOf(picks[1], picks[2]) else 0
 	-- (not ready: the least it could cost with what's picked, so it's never blank: QM)
-	local least = if picks[1] then Fusion.worth(picks[1].kind, picks[1].fuse, picks[1].worth) + Config.FusePrice.Common else 2 * Config.FusePrice.Common
+	local least = Fusion.price(if picks[1] then Fusion.worth(picks[1].kind, picks[1].fuse, picks[1].worth) + Config.FusePrice.Common else 2 * Config.FusePrice.Common)
 	priceLabel.Text = if lesson then "FREE" elseif ready then Hud.money(price) else Hud.money(least)
 	local can = ready and (player:GetAttribute("Gold") or 0) >= price
 	local art = if can then BUTTON_ART.on else BUTTON_ART.off
