@@ -21,7 +21,7 @@ GateSmash.smashed = Instance.new("BindableEvent") -- (i): shatter gate i now (Ga
 GateSmash.rejected = Instance.new("BindableEvent") -- the server said no: put the gates back (Gate.client)
 
 local function nextGate()
-	return math.max(player:GetAttribute("PenLevel") or 1, GateSmash.level or 1) + 1
+	return math.max(Rules.level(player), GateSmash.level or 1) + 1
 end
 
 function GateSmash.hit(mount)

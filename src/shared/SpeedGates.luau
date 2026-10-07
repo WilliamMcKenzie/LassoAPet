@@ -5,7 +5,10 @@
 -- abilities). Gold goes on merging instead, priced by how fast the hybrid will be.
 --
 --   SpeedGates.on()                   Config.SpeedGates.On
---   SpeedGates.need(i)                m/s to break biome i's gate (nil: no gate)
+--   SpeedGates.need(i)                m/s to break gate i (nil: no gate). Gates 2 to #Biomes are the
+--                                     biomes' lines; past that, the endless Godlands' (Config.SpeedGates.Endless)
+--   SpeedGates.biome(i)               the biome gate i stands in (its colour and card)
+--   SpeedGates.level(player)          gates opened: PenLevel, plus the Godlands' broken ("GodGates")
 --   SpeedGates.mps(kind, fuse, stats) a pet's m/s (PetPlates shows the same)
 --   SpeedGates.mergePrice(a, b)       gold to merge pets a and b ({ kind, fuse, stats })
 
@@ -19,8 +22,22 @@ function SpeedGates.on()
 end
 
 function SpeedGates.need(i)
+	local n = #Config.Biomes
+	local endless = Config.SpeedGates.Endless
+	if i > n then
+		local last = Config.SpeedGates.Need[Config.Biomes[n].Name]
+		return if endless and last then math.floor(last * endless.Growth ^ (i - n) / 10 + 0.5) * 10 else nil
+	end
 	local biome = Config.Biomes[i]
 	return biome and Config.SpeedGates.Need[biome.Name]
+end
+
+function SpeedGates.biome(i)
+	return Config.Biomes[math.min(i, #Config.Biomes)]
+end
+
+function SpeedGates.level(player)
+	return (player:GetAttribute("PenLevel") or 1) + (player:GetAttribute("GodGates") or 0)
 end
 
 function SpeedGates.mps(kind, fuse, stats)

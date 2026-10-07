@@ -27,6 +27,12 @@ local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "PenLev
 if not ok then
 	store = nil
 end
+-- How many of the endless Godlands' speed gates you've broken (Shared/SpeedGates):
+-- the "GodGates" attribute, saved in its own store so PenLevel's stays a plain number.
+local godOk, godStore = pcall(DataStoreService.GetDataStore, DataStoreService, "GodGates")
+if not godOk then
+	godStore = nil
+end
 
 local loaded = {}
 
@@ -34,8 +40,30 @@ local function level(player)
 	return math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
 end
 
+local godLoaded = {}
+local function loadGodGates(player)
+	for attempt = 1, 3 do
+		local success, value = pcall(godStore.GetAsync, godStore, "u" .. player.UserId)
+		if success then
+			if player.Parent then
+				local n = math.max(player:GetAttribute("GodGates") or 0, math.floor(tonumber(value) or 0))
+				player:SetAttribute("GodGates", if n > 0 then n else nil)
+				godLoaded[player] = true
+			end
+			return
+		end
+		if attempt == 3 or RunService:IsStudio() then
+			break
+		end
+		task.wait(attempt * 2)
+	end
+end
+
 local function load(player)
 	player:SetAttribute("PenLevel", 1)
+	if godStore then
+		task.spawn(loadGodGates, player)
+	end
 	if not store then
 		return
 	end
@@ -56,9 +84,25 @@ local function load(player)
 end
 
 local savedAs = {} -- [player] = the level last saved (autosave skips it if unchanged)
+local savedGod = {} -- [player] = the GodGates last saved
+
+local function saveGodGates(player, onlyIfChanged)
+	local value = player:GetAttribute("GodGates") or 0
+	if not godStore or not godLoaded[player] or (onlyIfChanged and (savedGod[player] or 0) == value) then
+		return
+	end
+	for attempt = 1, 3 do
+		if pcall(godStore.SetAsync, godStore, "u" .. player.UserId, value) then
+			savedGod[player] = value
+			return
+		end
+		task.wait(attempt)
+	end
+end
 
 -- onlyIfChanged: the autosave's, which skips it when nothing changed.
 local function save(player, onlyIfChanged)
+	saveGodGates(player, onlyIfChanged)
 	if not store or not loaded[player] then
 		return
 	end
@@ -316,6 +360,7 @@ end
 Players.PlayerRemoving:Connect(function(player)
 	save(player)
 	loaded[player], savedAs[player] = nil, nil
+	godLoaded[player], savedGod[player] = nil, nil
 end)
 
 -- Autosave (QM, Oct 4): every Config.AutosaveEvery seconds each player's pen level is saved
@@ -412,7 +457,7 @@ local breakGate = Instance.new("RemoteFunction")
 breakGate.Name = "BreakGate"
 breakGate.Parent = ReplicatedStorage
 breakGate.OnServerInvoke = function(player, i)
-	if not SpeedGates.on() or i ~= level(player) + 1 or not onOwnPet[player] then
+	if not SpeedGates.on() or i ~= SpeedGates.level(player) + 1 or not onOwnPet[player] then
 		return false
 	end
 	local need = SpeedGates.need(i)
@@ -421,6 +466,11 @@ breakGate.OnServerInvoke = function(player, i)
 	if not need or type(kind) ~= "string" or kind == ""
 		or SpeedGates.mps(kind, player:GetAttribute("RideFuse"), stats and { Speed = stats.X, Stamina = stats.Y }) < need then
 		return false
+	end
+	if i > #Config.Biomes then -- one of the endless Godlands' (its pen level stays the Godlands')
+		player:SetAttribute("GodGates", i - #Config.Biomes)
+		Funnel.event(player, "Godlands Gate")
+		return true
 	end
 	zoneUnlocked:FireClient(player, i) -- (PassPopups' VIP; Gate.client's already shattered it)
 	player:SetAttribute("PenLevel", i)

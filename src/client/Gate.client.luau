@@ -39,7 +39,7 @@ local function build(i)
 	part.CastShadow = false
 	part.Transparency = 1
 	part.Size = Vector3.new(width, height, 0.2)
-	part.CFrame = CFrame.new(0, height / 2, WorldColors.biomeStart(i))
+	part.CFrame = CFrame.new(0, height / 2, WorldColors.gateLine(i))
 
 	local fades = {}
 	local gui = Instance.new("SurfaceGui")
@@ -51,7 +51,7 @@ local function build(i)
 	local sheet = Instance.new("Frame")
 	sheet.Size = UDim2.fromScale(1, 1)
 	sheet.BorderSizePixel = 0
-	local color = Config.Biomes[i].GateColor or Config.GateColor -- each biome's own (QM)
+	local color = SpeedGates.biome(i).GateColor or Config.GateColor -- each biome's own (QM)
 	sheet.BackgroundColor3 = color
 	local gradient = Instance.new("UIGradient")
 	gradient.Rotation = 90 -- top (0) to bottom (1)
@@ -64,7 +64,7 @@ local function build(i)
 	sheet.Parent = gui
 	table.insert(fades, { sheet, "BackgroundTransparency" })
 
-	local image = Config.Biomes[i].GateImage
+	local image = SpeedGates.biome(i).GateImage
 	local card
 	if image and image ~= "" then
 		card = Instance.new("ImageLabel")
@@ -139,7 +139,7 @@ local function shatter(i)
 	Sounds.play("gate_break", 0.8)
 	task.delay(0.3, Sounds.play, "egg_hatch", 0.6)
 	local width, height = Config.CourseHalfWidth * 2, Config.GateHeight
-	local z = WorldColors.biomeStart(i)
+	local z = WorldColors.gateLine(i)
 	local w, h = width / SHARDS_X, height / SHARDS_Y
 	local rng = Random.new()
 	local shards = {}
@@ -152,7 +152,7 @@ local function shatter(i)
 			part.CanTouch = false
 			part.CastShadow = false
 			part.Material = Enum.Material.Neon
-			part.Color = if rng:NextNumber() < 0.3 then Color3.new(1, 1, 1) else Config.Biomes[i].GateColor or Config.GateColor
+			part.Color = if rng:NextNumber() < 0.3 then Color3.new(1, 1, 1) else SpeedGates.biome(i).GateColor or Config.GateColor
 			part.Transparency = 0.15 + 0.5 * (gy - 1) / SHARDS_Y -- clearer higher up, like the sheet
 			part.Size = Vector3.new(w * rng:NextNumber(0.6, 1), h * rng:NextNumber(0.6, 1), 0.3)
 			local at = Vector3.new(-width / 2 + (gx - 0.5) * w, (gy - 0.5) * h, z)
@@ -188,7 +188,7 @@ end
 local function breakOpen(i)
 	local gate = gates[i]
 	gates[i] = nil
-	local z = WorldColors.biomeStart(i)
+	local z = WorldColors.gateLine(i)
 	controls:Disable()
 	local start = camera.CFrame
 	camera.CameraType = Enum.CameraType.Scriptable
@@ -224,9 +224,12 @@ ReplicatedStorage:WaitForChild("ZoneUnlocked").OnClientEvent:Connect(function(i)
 end)
 
 local function refresh()
-	local level = player:GetAttribute("PenLevel") or 1
-	for i = 2, #Config.Biomes do
-		if i > level and not gates[i] then
+	local level = SpeedGates.level(player) -- (the endless Godlands' broken gates too)
+	-- (and the endless Godlands' next two, with speed gates on: WorldColors.gateLine)
+	for i = 2, math.max(#Config.Biomes, level + 2) do
+		if not WorldColors.gateLine(i) then
+			break
+		elseif i > level and not gates[i] then
 			build(i)
 		elseif i <= level and gates[i] then
 			if bought[i] then
@@ -244,6 +247,7 @@ local function refresh()
 end
 
 player:GetAttributeChangedSignal("PenLevel"):Connect(refresh)
+player:GetAttributeChangedSignal("GodGates"):Connect(refresh)
 refresh()
 
 -- Ridden through fast enough (GateSmash): it shatters right there, mid-ride, no camera

@@ -622,6 +622,10 @@ return {
 	SpeedGates = {
 		On = true,
 		Need = { Desert = 26, Snow = 80, Ocean = 150, Godlands = 300 },
+		-- Past its line the endless Godlands keeps putting up gates (QM, Oct 7): one every
+		-- Every studs (two of its 960-stud tracks), each Growth x the last's m/s (300, 450,
+		-- 680, 1010, ...), to the nearest 10. Broken ones are saved ("GodGates").
+		Endless = { Every = 1920, Growth = 1.5 },
 		MergePrice = { Base = 500, From = 28, Power = 5 },
 	},
 	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)

@@ -1040,7 +1040,7 @@ local function fail(reason, tip)
 	-- Continue (Config.ContinueTiers): a crash or buck-off on the way out or
 	-- back can be bought off, picking up right here on the same kind of animal,
 	-- with the egg. Not into a locked gate, and not in the tutorial.
-	local gate = WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1, vfx.gateSmash.level or 1))
+	local gate = WorldColors.gateZ(math.max((player:GetAttribute("PenLevel") or 1) + (player:GetAttribute("GodGates") or 0), warpLevel or 1, vfx.gateSmash.level or 1))
 	vfx.revive = nil
 	if mount and (reason == "CRASH!" or reason == "BUCKED OFF") and (phase == "outbound" or phase == "return")
 		and not (phase == "outbound" and mount.z < gate + 2.4) and not Tutorial.active
@@ -1133,7 +1133,7 @@ local function gateZ()
 	if vfx.eventRun then
 		return -math.huge -- riding an event's animal: no barriers this ride (QM)
 	end
-	return WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1, vfx.gateSmash.level or 1))
+	return WorldColors.gateZ(math.max((player:GetAttribute("PenLevel") or 1) + (player:GetAttribute("GodGates") or 0), warpLevel or 1, vfx.gateSmash.level or 1))
 end
 
 -- On the way out, a trail of arrows on the ground from your pet to the nearest

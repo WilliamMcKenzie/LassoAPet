@@ -1063,6 +1063,7 @@ tutorialCommand.Triggered:Connect(function(source)
 	end
 	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
 	player:SetAttribute("PenLevel", 1)
+	player:SetAttribute("GodGates", nil) -- (the endless Godlands' speed gates: PenLevel.server saves it)
 	player:SetAttribute("CarriedEgg", nil)
 	player:SetAttribute("FuseLesson", nil)
 	player:SetAttribute("Tutorial", nil) -- off then on, so a tutorial already running starts over

@@ -30,10 +30,23 @@ function WorldColors.biomeStart(i)
 	return edge
 end
 
--- The z of the first gate a player with this pen level can't pass (-inf if none).
+-- The z of gate i: biome i's line, or past the last biome, with speed gates on, one
+-- of the endless Godlands' (Config.SpeedGates.Endless) every Every studs on from its line.
+-- nil if there's no gate i.
+function WorldColors.gateLine(i)
+	local n = #Config.Biomes
+	if i <= n then
+		return if i > 1 then WorldColors.biomeStart(i) else nil
+	end
+	local gates = Config.SpeedGates
+	local endless = gates and gates.On and gates.Endless
+	return if endless then WorldColors.biomeStart(n) - (i - n) * endless.Every else nil
+end
+
+-- The z of the first gate a player with this level (pen level, plus any of the
+-- Godlands' gates broken) can't pass (-inf if none).
 function WorldColors.gateZ(level)
-	local next = Config.Biomes[(level or 1) + 1]
-	return if next then WorldColors.biomeStart((level or 1) + 1) else -math.huge
+	return WorldColors.gateLine((level or 1) + 1) or -math.huge
 end
 
 local function prefix(i)
