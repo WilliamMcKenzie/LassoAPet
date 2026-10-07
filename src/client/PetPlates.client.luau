@@ -13,6 +13,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Animals = ReplicatedStorage.Shared.Animals
+local Config = require(ReplicatedStorage.Shared.Config)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local PenPets = require(script.Parent.PenPets)
 local Outline = require(script.Parent.Outline)
@@ -24,6 +25,7 @@ local LEAVE = 19 -- and where it goes again (a bit further, so it doesn't flicke
 local MOST = 4 -- plates at once, nearest first (a crowded pen would be a wall of them)
 local HEIGHT = 3 -- studs: the plate's height (125 px in the reference)
 local WIDTH = HEIGHT * 300 / 125
+local TIER_GROWTH = 1.2 -- the plate's size per size tier up from a small pet (QM, Oct 7)
 local ABOVE = 0.6 -- studs between the pet's top and the plate
 local ARM = "rbxassetid://73860967591442" -- assets/ui/PowerArm.png
 local FONT = Enum.Font.FredokaOne
@@ -107,9 +109,15 @@ local function build(model)
 	-- Both run to the board's right edge: a name too long for that shrinks to fit.
 	local name = text(plate, UDim2.fromScale(1.5 - 90 / 300, 0.6), UDim2.fromScale(90 / 300, 28 / 125), Color3.new(1, 1, 1))
 	local speed = text(plate, UDim2.fromScale(1.5 - 106 / 300, 0.58), UDim2.fromScale(106 / 300, 98 / 125), Color3.new(1, 1, 1))
-	-- On the pet itself: a BillboardGui adorned from PlayerGui doesn't draw on these
-	-- parts (Gate.client found the same, Oct 5).
-	board.Parent = model.PrimaryPart or model
+	-- In a folder of its own, adorned to the pet: inside the pet's model, the pet's
+	-- ScaleTo would scale the plate with it (a medium pet's came out huge).
+	local folder = workspace:FindFirstChild("PetPlates")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "PetPlates"
+		folder.Parent = workspace
+	end
+	board.Parent = folder
 	local p = { board = board, scale = scale, name = name, speed = speed }
 	plates[model] = p
 	model.Destroying:Connect(function()
@@ -131,8 +139,10 @@ local function show(model, kind, fuse, stats)
 		p.speed.Text = math.floor(s.Speed * 20 + 0.5) .. "m/s"
 	end
 	local box, size = Outline.box(model)
+	local grow = TIER_GROWTH ^ ((Config.PetTiers[kind] or 1) - 1)
+	p.board.Size = UDim2.fromScale(WIDTH * 2 * grow, HEIGHT * grow)
 	p.board.Adornee = model.PrimaryPart
-	p.board.StudsOffsetWorldSpace = Vector3.new(0, box.Y + size.Y / 2 + ABOVE + HEIGHT / 2, 0)
+	p.board.StudsOffsetWorldSpace = Vector3.new(0, box.Y + size.Y / 2 + ABOVE + HEIGHT * grow / 2, 0)
 	if not p.on then
 		p.on = true
 		p.board.Enabled = true
