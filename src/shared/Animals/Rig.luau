@@ -61,25 +61,6 @@ function Rig.build(spec)
 		for _, face in ipairs(FACES) do
 			part[face .. "Surface"] = Enum.SurfaceType.Smooth
 		end
-		-- Fine studs from a tiled texture; surface studs are fixed at 1 stud, too coarse here.
-		if spec.studTexture and not def.plain and not def.hidden and not def.neon then
-			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
-				local texture = Instance.new("Texture")
-				if def.metal then
-					texture.Texture = WELD.image
-					texture.Color3 = def.color
-					texture.StudsPerTileU = spec.studTexture.tile * WELD.tile
-					texture.StudsPerTileV = spec.studTexture.tile * WELD.tile
-				else
-					texture.Texture = spec.studTexture.image
-					texture.StudsPerTileU = spec.studTexture.tile
-					texture.StudsPerTileV = spec.studTexture.tile
-				end
-				texture.Face = face
-				texture.Parent = part
-			end
-		end
-
 		local c0 = def.joint or CFrame.new()
 		local c1 = CFrame.new(-(def.offset or Vector3.new()))
 		part.CFrame = parent.CFrame * c0 * c1:Inverse()
@@ -99,7 +80,75 @@ function Rig.build(spec)
 		parts[def.name] = part
 	end
 
+	-- Fine studs from a tiled texture; surface studs are fixed at 1 stud, too coarse here.
+	-- A face buried in another block on the same bone gets none: that block always
+	-- hides it, whatever the animation does, and every texture is drawn (Rig.covered).
+	if spec.studTexture then
+		local byBone = {}
+		for _, def in ipairs(spec.parts) do
+			local part = parts[def.name]
+			if part.ClassName == "Part" and not def.hidden then
+				byBone[def.parent] = byBone[def.parent] or {}
+				table.insert(byBone[def.parent], part)
+			end
+		end
+		for _, def in ipairs(spec.parts) do
+			if def.plain or def.hidden or def.neon then
+				continue
+			end
+			local part = parts[def.name]
+			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+				if part.ClassName == "Part" and Rig.covered(part, face, byBone[def.parent]) then
+					continue
+				end
+				local texture = Instance.new("Texture")
+				if def.metal then
+					texture.Texture = WELD.image
+					texture.Color3 = def.color
+					texture.StudsPerTileU = spec.studTexture.tile * WELD.tile
+					texture.StudsPerTileV = spec.studTexture.tile * WELD.tile
+				else
+					texture.Texture = spec.studTexture.image
+					texture.StudsPerTileU = spec.studTexture.tile
+					texture.StudsPerTileV = spec.studTexture.tile
+				end
+				texture.Face = face
+				texture.Parent = part
+			end
+		end
+	end
+
 	return model, parts, motors
+end
+
+-- Whether `face` of block `part` is wholly inside the other blocks in `others`
+-- (its 5 x 5 grid of points, just off the face, each inside one of them).
+local GRID = { -0.95, -0.475, 0, 0.475, 0.95 }
+function Rig.covered(part, face, others)
+	local n = Vector3.FromNormalId(face)
+	local half = part.Size / 2
+	local out = n * half + n * 0.02
+	for _, a in GRID do
+		for _, b in GRID do
+			local along = if n.X ~= 0 then Vector3.new(0, a, b) elseif n.Y ~= 0 then Vector3.new(a, 0, b) else Vector3.new(a, b, 0)
+			local at = part.CFrame:PointToWorldSpace(out + along * half)
+			local inside = false
+			for _, other in others do
+				if other ~= part then
+					local l = other.CFrame:PointToObjectSpace(at)
+					local h = other.Size / 2
+					if math.abs(l.X) <= h.X + 1e-3 and math.abs(l.Y) <= h.Y + 1e-3 and math.abs(l.Z) <= h.Z + 1e-3 then
+						inside = true
+						break
+					end
+				end
+			end
+			if not inside then
+				return false
+			end
+		end
+	end
+	return true
 end
 
 local function catmullRom(p0, p1, p2, p3, u)

@@ -134,7 +134,9 @@ local function wander(pen, s, dt)
 			s.at -= Vector3.new(math.sin(s.yaw), 0, math.cos(s.yaw)) * speed * dt
 		end
 	end
-	pet.animal:update(dt, speed, turn)
+	if s.inView then
+		pet.animal:update(dt, speed, turn)
+	end
 end
 
 local function startWander(s)
@@ -462,6 +464,26 @@ local function pointer()
 	return mouse.X, mouse.Y
 end
 
+-- Whether any of a pen (with room for big pets over its fence) can be on screen.
+-- Off screen, its pets and eggs keep their places but aren't animated or moved:
+-- posing a pet's blocks is most of its cost, and at home most pens are out of view.
+local PEN_ROOM = 30 -- studs past the fence's corners
+local function penInView(pen)
+	local camera = workspace.CurrentCamera
+	local area = pen.Area
+	local radius = Vector2.new(area.Size.X, area.Size.Z).Magnitude / 2 + PEN_ROOM
+	local at = camera.CFrame:PointToObjectSpace(area.Position)
+	local depth = -at.Z
+	if depth < -radius then
+		return false
+	end
+	local tanY = math.tan(math.rad(camera.FieldOfView) / 2)
+	local size = camera.ViewportSize
+	local tanX = tanY * size.X / math.max(size.Y, 1)
+	return math.abs(at.X) <= depth * tanX + radius * math.sqrt(1 + tanX * tanX)
+		and math.abs(at.Y) <= depth * tanY + radius * math.sqrt(1 + tanY * tanY)
+end
+
 RunService.RenderStepped:Connect(function(dt)
 	local now = workspace:GetServerTimeNow()
 	local camPos = workspace.CurrentCamera.CFrame.Position
@@ -469,8 +491,10 @@ RunService.RenderStepped:Connect(function(dt)
 		if (pen.Area.Position - camPos).Magnitude > FAR then
 			continue
 		end
+		local inView = penInView(pen)
 		for _, s in list do
-			if s.egg then
+			s.inView = inView
+			if s.egg and (inView or s.hatching) then
 				if not s.hatching then
 					local ready = (s.hatchAt or now) <= now
 					if s.speedupPrompt then
@@ -527,10 +551,12 @@ RunService.RenderStepped:Connect(function(dt)
 					pet.animal:update(dt, 0, 0)
 				elseif s.wander then
 					wander(pen, s, dt)
-				else
+				elseif inView or s.jump then
 					pet.animal:update(dt, 0, 0)
 				end
-				placePet(pet, s.at, s.yaw)
+				if inView or s.jump or s.drop then
+					placePet(pet, s.at, s.yaw)
+				end
 			end
 		end
 	end
