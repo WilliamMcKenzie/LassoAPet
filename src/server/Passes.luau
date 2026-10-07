@@ -85,12 +85,13 @@ local buyPass = Instance.new("RemoteEvent")
 buyPass.Name = "BuyPass"
 buyPass.OnServerEvent:Connect(function(player, key)
 	local pass = typeof(key) == "string" and byKey[key]
-	if not pass or player:GetAttribute("Pass" .. pass.Key) then
+	if not pass then
 		return
 	end
 	if pass.Id ~= 0 then
+		-- (owned too: Roblox's prompt then says you own it, so a tap never does nothing)
 		MarketplaceService:PromptGamePassPurchase(player, pass.Id)
-	elseif RunService:IsStudio() then
+	elseif RunService:IsStudio() and not player:GetAttribute("Pass" .. pass.Key) then
 		grant(player, pass, true)
 	end
 end)
