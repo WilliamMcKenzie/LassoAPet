@@ -145,12 +145,12 @@ return {
 					Tint = Color3.fromRGB(176, 180, 230),
 				},
 			},
-			UnlockCost = 10000000, -- balance pass (Oct 6): was $1M
+			UnlockCost = 5000000, -- QM, Oct 7: halved with the Tundra's ("same with ocean/godlands"); balance pass Oct 6 had it $10M, before that $1M
 			PostColor = Color3.fromRGB(236, 140, 124),
 			GateImage = "rbxassetid://75356296124042", -- assets/ui/GateOcean.png
 			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
-			UpgradeImage = "rbxassetid://131593866577439", -- assets/ui/UpgradePenOcean.png (QM, Oct 7: new art)
-			UpgradeImageDisabled = "rbxassetid://77069230216461", -- assets/ui/UpgradePenOceanDisabled.png
+			UpgradeImage = "", -- assets/ui/UpgradePenOcean.png (QM's Oct 7 art, now $5m; Studio uploads it and fills the id. "" draws the price as text meanwhile)
+			UpgradeImageDisabled = "", -- assets/ui/UpgradePenOceanDisabled.png ($5m, likewise)
 			-- Under the sea (Ocean.client): while you're in this biome the distance
 			-- fades into Haze.Color and bubbles drift up round the camera.
 			Haze = {
@@ -195,12 +195,12 @@ return {
 				Ice = { Color3.fromRGB(170, 196, 250), Color3.fromRGB(184, 208, 252) },
 				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon
 			},
-			UnlockCost = 300000000, -- balance pass (Oct 6): was $10M (a guess). The Badlands (PR #154) would sit at about $50M
+			UnlockCost = 150000000, -- QM, Oct 7: halved with the Tundra's; balance pass Oct 6 had it $300M, before that $10M (a guess). The Badlands (PR #154) would sit at about $50M
 			PostColor = Color3.fromRGB(62, 60, 72),
 			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
 			GateImage = "rbxassetid://81079145393331", -- assets/ui/GateGodlands.png
-			UpgradeImage = "rbxassetid://88879130889050", -- assets/ui/UpgradePenGodlands.png
-			UpgradeImageDisabled = "rbxassetid://106219222962689", -- assets/ui/UpgradePenGodlandsDisabled.png
+			UpgradeImage = "", -- assets/ui/UpgradePenGodlands.png ($150m; Studio uploads it and fills the id)
+			UpgradeImageDisabled = "", -- assets/ui/UpgradePenGodlandsDisabled.png ($150m, likewise)
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
