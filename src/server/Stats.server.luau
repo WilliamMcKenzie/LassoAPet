@@ -11,7 +11,10 @@
 --             and where today's sessions ended: how many, and how long they lasted,
 --             by how far the player had got when they left (still in the tutorial,
 --             or the furthest zone unlocked), and how long players stayed after
---             unlocking the Desert that session (QM, Oct 7: is the Desert a let-down?).
+--             unlocking the Desert that session (QM, Oct 7: is the Desert a let-down?),
+--             and today's frame rate by device and place (FpsProbe.client sends each
+--             player's every 30 s: average fps, share of seconds under 20 fps, time a
+--             frame spends on scripts and physics, and memory).
 --
 -- A first visit is a player the DataStore "StatsSeen" hasn't seen before (it keeps
 -- only "seen" against their UserId, inside Roblox like their save; it starts empty
@@ -160,6 +163,43 @@ local function finish(player)
 end
 Players.PlayerRemoving:Connect(finish)
 
+-- Frame rate reports (FpsProbe.client), into today's totals as
+-- "fps<Device><Place><Frames|Seconds|Logic|Low|Mem>". Clients can send anything, so
+-- only known devices and places, sane numbers, and no more seconds than they've played.
+local DEVICES = { "Touch", "PC", "Console" }
+local PLACES = { "Home" }
+for _, biome in Config.Biomes do
+	table.insert(PLACES, biome.Name)
+end
+local fpsReport = Instance.new("RemoteEvent")
+fpsReport.Name = "FpsReport"
+fpsReport.Parent = ReplicatedStorage
+local function sane(n, most)
+	return type(n) == "number" and n == n and n >= 0 and n <= most
+end
+fpsReport.OnServerEvent:Connect(function(player, kind, at, frames, seconds, logic, low, mem)
+	local session = joined[player]
+	if not session or not table.find(DEVICES, kind) or not table.find(PLACES, at) then
+		return
+	end
+	if not (sane(seconds, 60) and sane(frames, seconds * 300) and sane(logic, seconds)
+		and sane(low, seconds + 1) and sane(mem, (seconds + 1) * 20000)) then
+		return
+	end
+	session.fpsSeconds = (session.fpsSeconds or 0) + seconds
+	if session.fpsSeconds > os.time() - session.at + 60 then
+		return
+	end
+	local key = "fps" .. kind .. at
+	pending[dayKey(os.time())] = addInto(pending[dayKey(os.time())] or blank(), {
+		[key .. "Frames"] = math.floor(frames),
+		[key .. "Seconds"] = seconds,
+		[key .. "Logic"] = logic,
+		[key .. "Low"] = math.floor(low),
+		[key .. "Mem"] = mem,
+	})
+end)
+
 local function flush()
 	if not store then
 		return
@@ -242,6 +282,31 @@ local function byStage(t, lines)
 	end
 end
 
+-- Today's frame rate, by device and place (FpsProbe.client), where there's a minute of it.
+local function byFps(t, lines)
+	local any = false
+	for _, kind in DEVICES do
+		for _, at in PLACES do
+			local key = "fps" .. kind .. at
+			local seconds = t[key .. "Seconds"] or 0
+			if seconds >= 60 then
+				if not any then
+					any = true
+					table.insert(lines, "Frame rate today (fps avg, share of time under 20 fps, scripts+physics per frame, memory):")
+				end
+				local frames = math.max(t[key .. "Frames"] or 0, 1)
+				local whole = math.max(math.floor(seconds), 1)
+				table.insert(lines, string.format("  %s, %s: %.0f fps, %.0f%% under 20, %.1f ms, %.0f MB (%.1f h)",
+					kind, at, frames / seconds, 100 * math.min((t[key .. "Low"] or 0) / whole, 1),
+					1000 * (t[key .. "Logic"] or 0) / frames, (t[key .. "Mem"] or 0) / whole, seconds / 3600))
+			end
+		end
+	end
+	if not any then
+		table.insert(lines, "Frame rate today: not a minute of it reported yet")
+	end
+end
+
 local function report()
 	local now = os.time()
 	local lines = { "Stats (days are UTC, from 8 PM your time):" }
@@ -262,6 +327,7 @@ local function report()
 	table.insert(lines, "First play bounce, last 7 days: " .. bounce(week))
 	table.insert(lines, "Where today's sessions ended (furthest zone when they left):")
 	byStage(today, lines)
+	byFps(today, lines)
 	if not store then
 		table.insert(lines, "(No DataStore here: this server's sessions only)")
 	end
