@@ -207,6 +207,7 @@ local function sizeEgg(s, scale)
 	scale *= s.egg.size * (s.eggScale or 1)
 	s.scale = scale
 	s.egg.model:ScaleTo(scale)
+	Egg.fitStuds(s.egg.model)
 	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER * scale, 0)) * CFrame.Angles(0, s.yaw, 0))
 	if s.timer.Parent then
 		s.timer.Parent.StudsOffsetWorldSpace = Vector3.new(0, 4.6 * scale, 0)
@@ -582,6 +583,7 @@ local function setGhost(kind)
 	ghost = Egg.new(if special then special.Pet else kind).model
 	if special and special.EggScale then
 		ghost:ScaleTo(special.EggScale) -- (the Giant Horse's egg is 3x)
+		Egg.fitStuds(ghost)
 	end
 	for _, part in ghost:GetDescendants() do
 		if part:IsA("BasePart") then

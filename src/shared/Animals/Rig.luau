@@ -209,6 +209,9 @@ function Rig.fromData(data, name, studTexture, size)
 		local model, _, _, pivots = Rig.buildFromData(data, name, studTexture)
 		if size ~= 1 then
 			model:ScaleTo(size)
+			if studTexture then
+				Studs.fit(model, studTexture.tile * size) -- (the material's studs don't scale with it)
+			end
 		end
 		template = { model = model, pivots = pivots }
 		templates[data][key] = template

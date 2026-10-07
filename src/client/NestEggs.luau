@@ -106,6 +106,7 @@ function NestEggs.show(nest, popIn)
 		waiting.scale = scale
 		if scale ~= 1 then
 			waiting.egg.model:ScaleTo(waiting.egg.size * scale)
+			Egg.fitStuds(waiting.egg.model)
 		end
 		-- (EggSpot is a 1x egg's centre, scaled with the nest: a bigger egg sits higher so it stays on the nest)
 		waiting.rest = spot.CFrame * CFrame.new(0, 1.6 * scale * (waiting.egg.size - 1), 0) * CFrame.Angles(0, math.pi, 0)

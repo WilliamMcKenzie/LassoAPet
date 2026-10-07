@@ -41,6 +41,16 @@ local NAMES = {
 	[0.665] = "Studs665",
 	[1] = "Studs",
 }
+-- Bigger studs for scaled-up animals and eggs (a Kraken, a Godlands egg in a big nest):
+-- 0.5 x 1.1^k studs for k = 4..27 (0.73 to 6.6), named "Studs" .. its size x 1000.
+for k = 4, 27 do
+	local size = 0.5 * 1.1 ^ k
+	NAMES[size] = "Studs" .. math.round(size * 1000)
+end
+local isStuds = {}
+for _, name in NAMES do
+	isStuds[name] = true
+end
 local MATCH = 1.06
 -- Glacier is slippery: anything you can stand on keeps plastic's grip.
 local PLASTIC = PhysicalProperties.new(Enum.Material.SmoothPlastic)
@@ -71,6 +81,23 @@ function Studs.apply(part, tile)
 		part.CustomPhysicalProperties = PLASTIC
 	end
 	return true
+end
+
+-- A model scaled up or down (Model:ScaleTo) scales its stud Textures with it, but not
+-- a material: this gives its stud-material parts the variant for studSize, its stud
+-- size now (the stud tile it was built with x its scale). Only when that changes.
+local fitted = setmetatable({}, { __mode = "k" })
+function Studs.fit(model, studSize)
+	local variant = Studs.variant(studSize)
+	if not variant or fitted[model] == variant.Name then
+		return
+	end
+	fitted[model] = variant.Name
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") and isStuds[part.MaterialVariant] then
+			part.MaterialVariant = variant.Name
+		end
+	end
 end
 
 function Studs.convert(part)

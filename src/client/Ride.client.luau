@@ -4232,6 +4232,7 @@ function vfx.updateEggHeads()
 			local scale = other:GetAttribute("CarriedEggScale") or 1
 			if scale ~= 1 then
 				egg.model:ScaleTo(egg.size * scale)
+				Egg.fitStuds(egg.model)
 			end
 			head = { kind = kind, model = egg.model, lift = 7 + math.max(Lasso.fitRadius(egg.model) - 2.5, 0) }
 			head.model.Parent = workspace

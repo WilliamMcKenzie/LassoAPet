@@ -16,6 +16,7 @@
 
 local Rig = require(script.Parent.Parent.Animals.Rig)
 local Config = require(script.Parent.Parent.Config)
+local Studs = require(script.Parent.Parent.Studs)
 
 -- Classic stud decal, the same one the animals use.
 local STUD_TEXTURE = { image = "rbxassetid://7447638591", tile = 0.5 }
@@ -69,6 +70,7 @@ function Egg.new(kind)
 	local size = Egg.sizeOf(kind)
 	if size ~= 1 then
 		model:ScaleTo(size)
+		Egg.fitStuds(model)
 	end
 	return setmetatable({
 		model = model,
@@ -79,6 +81,12 @@ function Egg.new(kind)
 		playing = nil,
 		t = 0,
 	}, Egg)
+end
+
+-- After scaling an egg's model (ScaleTo): its studs as a material (Shared/Studs)
+-- don't scale with it the way stud Textures do, so they're picked for its size.
+function Egg.fitStuds(model)
+	Studs.fit(model, STUD_TEXTURE.tile * model:GetScale())
 end
 
 function Egg:play(name)
