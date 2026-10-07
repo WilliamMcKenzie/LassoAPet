@@ -4,7 +4,8 @@
 -- totals are across all servers. Totals only: no player ids are kept.
 --
 --   "/stats"  (the game's owner, or anyone in Studio) lists them in your chat window:
---             average session today, yesterday and over the last 7 days, and the
+--             average session today, yesterday and over the last 7 days, today's
+--             longest session, and the
 --             first play bounce rate (as Creator Hub's: of players on their very
 --             first visit, the share who left within 60 s, and within 61-180 s).
 --
@@ -30,11 +31,16 @@ local seenOk, seenStore = pcall(DataStoreService.GetDataStore, DataStoreService,
 if not seenOk then
 	seenStore = nil
 end
--- What each day's totals add up (missing ones, as in days saved before they existed, are 0).
+-- What each day's totals add up (missing ones, as in days saved before they existed, are 0),
+-- and what they keep the biggest of (the longest session, in seconds: QM, Oct 7).
 local FIELDS = { "sessions", "seconds", "firsts", "bounce60", "bounce180" }
+local MOST = { "longest" }
 local function blank()
 	local t = {}
 	for _, f in FIELDS do
+		t[f] = 0
+	end
+	for _, f in MOST do
 		t[f] = 0
 	end
 	return t
@@ -42,6 +48,9 @@ end
 local function addInto(into, from)
 	for _, f in FIELDS do
 		into[f] = (into[f] or 0) + (from and tonumber(from[f]) or 0)
+	end
+	for _, f in MOST do
+		into[f] = math.max(into[f] or 0, from and tonumber(from[f]) or 0)
 	end
 	return into
 end
@@ -105,6 +114,7 @@ local function finish(player)
 		pending[key] = addInto(pending[key] or blank(), {
 			sessions = 1,
 			seconds = length,
+			longest = length,
 			firsts = if session.first then 1 else 0,
 			bounce60 = if session.first and length <= 60 then 1 else 0,
 			bounce180 = if session.first and length > 60 and length <= 180 then 1 else 0,
@@ -161,6 +171,13 @@ local function average(t)
 	return string.format("%.1f min avg (%d sessions)", t.seconds / t.sessions / 60, t.sessions)
 end
 
+local function longest(t)
+	if t.longest <= 0 then
+		return "no sessions yet"
+	end
+	return string.format("%.1f min", t.longest / 60)
+end
+
 local function bounce(t)
 	if t.firsts == 0 then
 		return "no first visits yet"
@@ -184,6 +201,7 @@ local function report()
 		end
 	end
 	table.insert(lines, "Avg session, last 7 days: " .. average(week))
+	table.insert(lines, "Longest session today: " .. longest(today))
 	table.insert(lines, "First play bounce today: " .. bounce(today))
 	table.insert(lines, "First play bounce, last 7 days: " .. bounce(week))
 	if not store then
