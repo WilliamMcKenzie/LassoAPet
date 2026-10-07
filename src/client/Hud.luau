@@ -672,6 +672,17 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- Anchored at its middle so the throb grows it evenly.
 	upgrade, upgradeScale = button(homeRoot, "upgradePen", upgradeSize, Vector2.new(0.5, 0.5),
 		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
+	-- It fills up as your gold does (QM, Oct 7), like the Hold bar: the disabled art
+	-- is the button, and the enabled art sits on it, cropped to gold / price from the left.
+	local fill = Instance.new("Frame")
+	fill.Name = "Fill"
+	fill.BackgroundTransparency = 1
+	fill.ClipsDescendants = true
+	fill.ZIndex = 0 -- under the price and the hand
+	fill.Size = UDim2.fromScale(0, 1)
+	fill.Parent = upgrade
+	image(fill, "upgradePen", upgradeSize, UDim2.fromScale(0, 0)).AnchorPoint = Vector2.zero
+	fill.ImageLabel.ZIndex = 0
 	local price = label(upgrade, UDim2.fromOffset(0, 36), UDim2.fromScale(0.855, 0.66), 36, 3.6)
 	price.AutomaticSize = Enum.AutomaticSize.X
 	local cost -- gold for the next level (or the Rainbow Trail), nil when there's nothing to buy
@@ -694,6 +705,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			local ownDisabled = own and not affordable and art.ImageDisabled ~= "" and art.ImageDisabled
 			upgrade.Image = ownDisabled or own or IMAGES[if affordable then "upgradePen" else "upgradePenDisabled"].id
 			upgrade.ImageColor3 = if own and not affordable and not ownDisabled then Color3.fromRGB(150, 150, 150) else Color3.new(1, 1, 1)
+			fill.ImageLabel.Image = own or IMAGES.upgradePen.id
+			fill.Size = UDim2.fromScale(if affordable then 1 else math.clamp((player:GetAttribute("Gold") or 0) / cost, 0, 1), 1)
 		end
 	end
 	local buying = false
