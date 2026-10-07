@@ -15,6 +15,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local Cactus = require(ReplicatedStorage.Shared.Animals.Cactus)
 local StallModel = require(ReplicatedStorage.Shared.CarlStallModel)
+local Studs = require(ReplicatedStorage.Shared.Studs)
 local RollMenu = require(script.Parent.RollMenu)
 
 if not Config.Gacha.Enabled then
@@ -46,7 +47,7 @@ local function block(name, size, at, color)
 	part.Anchored = true
 	part.TopSurface = Enum.SurfaceType.Smooth
 	part.BottomSurface = Enum.SurfaceType.Smooth
-	for _, face in Enum.NormalId:GetEnumItems() do
+	for _, face in if Studs.apply(part, STUD_TILE) then {} else Enum.NormalId:GetEnumItems() do
 		local texture = Instance.new("Texture")
 		texture.Texture = STUDS
 		texture.StudsPerTileU = STUD_TILE

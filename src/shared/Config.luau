@@ -220,6 +220,11 @@ return {
 	SteerResponse = 8,
 	HoldTime = 6,
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
+	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"
+	-- (0.5 stud) MaterialVariant from MaterialService instead of a stud Texture per face,
+	-- which cut tens of thousands of textures. Off (or those variants missing from
+	-- MaterialService): the stud Textures as before. Shared/Studs.
+	StudMaterial = true,
 	Sky = "Anime", -- "Anime" (the Creator Store's Anime sky, QM Oct 6; tried Flat again and kept Anime) or "Flat" (one flat #59D9FD): World.server
 	WalkSpeed = 32, -- on foot, studs a second (Roblox's default is 16; QM, Oct 6: 2x, walking round took too long)
 	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
