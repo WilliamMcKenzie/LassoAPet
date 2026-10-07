@@ -18,7 +18,7 @@ local PANELS = {
 	"rbxassetid://125476338322601", "rbxassetid://102515912144773", "rbxassetid://104698392936555",
 	"rbxassetid://110875946388838", "rbxassetid://119520152431016", "rbxassetid://78091503897812",
 	"rbxassetid://77735968469215", "rbxassetid://112429560665609", "rbxassetid://93558185988056",
-	"rbxassetid://80615979394374",
+	"rbxassetid://80615979394374", "rbxassetid://120348389827821", "rbxassetid://74328700033740", -- (the FUSE button on and off)
 	"rbxassetid://132460179762796", "rbxassetid://92820434532680", "rbxassetid://79697917998703",
 	"rbxassetid://129147449223279", "rbxassetid://72145821537095", "rbxassetid://137693950544184",
 	"rbxassetid://80504921595928", "rbxassetid://132069626373718",

@@ -47,8 +47,8 @@ local PAGE_ART = "rbxassetid://132460179762796" -- assets/ui/fuse/FusionPanel.pn
 -- fuse the two picked, grey when you can't (or can't afford it). (The old art, with
 -- FUSE written on it, stands in till the new ones are uploaded.)
 local BUTTON_ART = {
-	on = "", -- assets/ui/fuse/FuseButtonOn.png (QM; upload)
-	off = "", -- assets/ui/fuse/FuseButtonOff.png (QM; upload)
+	on = "rbxassetid://120348389827821", -- assets/ui/fuse/FuseButtonOn.png (QM)
+	off = "rbxassetid://74328700033740", -- assets/ui/fuse/FuseButtonOff.png (QM)
 	old = "rbxassetid://92820434532680", -- assets/ui/fuse/FuseButton.png
 }
 local CARDS = { -- the dictionary's rarity cards (assets/ui/dex/Dex<Rarity>.png)
