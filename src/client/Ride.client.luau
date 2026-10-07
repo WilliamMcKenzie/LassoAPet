@@ -3791,7 +3791,13 @@ local function updateHud()
 	Hud.setSprint(phase == "outbound" and not Tutorial.active)
 	if phase == "outbound" then
 		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1, carried == nil)
-		Hud.setDistance(if Tutorial.active then "" else string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
+		-- Your speed on the nameplates' and gates' scale (QM, Oct 7: was the distance from home):
+		-- what you're doing now, but never more than the pet's own m/s, which is all a gate
+		-- counts, so a sprint or an ability never makes it look fast enough (speed gates).
+		if mount then -- (nil mid-lasso: it keeps the last)
+			local own = statsOf(mount.kind, mount).Speed * 20
+			Hud.setDistance(if Tutorial.active then "" else math.floor(math.min(mount.speed / Config.MountSpeed * 20, own) + 0.5) .. "m/s")
+		end
 		if actionTarget == "egg" then
 			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
 		else
