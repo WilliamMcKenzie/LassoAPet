@@ -4,7 +4,13 @@
 -- totals are across all servers. Totals only: no player ids are kept.
 --
 --   "/stats"  (the game's owner, or anyone in Studio) lists them in your chat window:
---             average session today, yesterday and over the last 7 days.
+--             average session today, yesterday and over the last 7 days, and the
+--             first play bounce rate (as Creator Hub's: of players on their very
+--             first visit, the share who left within 60 s, and within 61-180 s).
+--
+-- A first visit is a player the DataStore "StatsSeen" hasn't seen before (it keeps
+-- only "seen" against their UserId, inside Roblox like their save; it starts empty
+-- on Oct 7, so for a day or so some returning players count as first visits).
 --
 -- Sessions aren't counted in Studio or for the owner, so testing doesn't skew them.
 -- A session counts on the day it ends.
@@ -19,6 +25,25 @@ local DAY = 24 * 60 * 60
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "Stats")
 if not ok then
 	store = nil
+end
+local seenOk, seenStore = pcall(DataStoreService.GetDataStore, DataStoreService, "StatsSeen")
+if not seenOk then
+	seenStore = nil
+end
+-- What each day's totals add up (missing ones, as in days saved before they existed, are 0).
+local FIELDS = { "sessions", "seconds", "firsts", "bounce60", "bounce180" }
+local function blank()
+	local t = {}
+	for _, f in FIELDS do
+		t[f] = 0
+	end
+	return t
+end
+local function addInto(into, from)
+	for _, f in FIELDS do
+		into[f] = (into[f] or 0) + (from and tonumber(from[f]) or 0)
+	end
+	return into
 end
 
 -- The game's owner (as Hatchery's dev commands), or anyone in Studio.
@@ -39,14 +64,30 @@ local function dayKey(time)
 	return os.date("!day-%Y-%m-%d", time)
 end
 
-local joined = {} -- [player] = os.time() they joined (players whose sessions count)
-local pending = {} -- [dayKey] = { sessions, seconds } not in the store yet
+local joined = {} -- [player] = { at = os.time() they joined, first = their first visit } (players whose sessions count)
+local pending = {} -- [dayKey] = totals (FIELDS) not in the store yet
+
+-- True the first time a player's ever seen here (nil if the store can't say).
+local function firstVisit(player)
+	if not seenStore then
+		return nil
+	end
+	local first = nil
+	local got = pcall(seenStore.UpdateAsync, seenStore, "u" .. player.UserId, function(old)
+		first = old == nil
+		return if first then true else nil -- (nil: leave it as it is)
+	end)
+	return if got then first else nil
+end
 
 local function track(player)
 	local at = os.time()
-	if not RunService:IsStudio() and not allowed(player) and player.Parent then
-		joined[player] = at
+	if RunService:IsStudio() or allowed(player) or not player.Parent then
+		return
 	end
+	local session = { at = at }
+	joined[player] = session
+	session.first = firstVisit(player)
 end
 Players.PlayerAdded:Connect(track)
 for _, player in Players:GetPlayers() do -- (any that joined before this ran)
@@ -55,15 +96,19 @@ end
 
 -- A session's over: into today's totals.
 local function finish(player)
-	local from = joined[player]
+	local session = joined[player]
 	joined[player] = nil
-	if from then
+	if session then
 		local now = os.time()
+		local length = now - session.at
 		local key = dayKey(now)
-		local p = pending[key] or { sessions = 0, seconds = 0 }
-		p.sessions += 1
-		p.seconds += now - from
-		pending[key] = p
+		pending[key] = addInto(pending[key] or blank(), {
+			sessions = 1,
+			seconds = length,
+			firsts = if session.first then 1 else 0,
+			bounce60 = if session.first and length <= 60 then 1 else 0,
+			bounce180 = if session.first and length > 60 and length <= 180 then 1 else 0,
+		})
 	end
 end
 Players.PlayerRemoving:Connect(finish)
@@ -76,14 +121,10 @@ local function flush()
 	pending = {}
 	for key, p in batch do
 		local saved = pcall(store.UpdateAsync, store, key, function(old)
-			old = old or { sessions = 0, seconds = 0 }
-			return { sessions = old.sessions + p.sessions, seconds = old.seconds + p.seconds }
+			return addInto(addInto(blank(), old), p)
 		end)
 		if not saved then -- try again next time
-			local back = pending[key] or { sessions = 0, seconds = 0 }
-			back.sessions += p.sessions
-			back.seconds += p.seconds
-			pending[key] = back
+			pending[key] = addInto(pending[key] or blank(), p)
 		end
 	end
 end
@@ -103,43 +144,48 @@ end)
 
 -- One day's totals: the store's plus this server's not yet added.
 local function totals(key)
-	local sessions, seconds = 0, 0
+	local t = blank()
 	if store then
 		local got, data = pcall(store.GetAsync, store, key)
-		if got and data then
-			sessions, seconds = data.sessions, data.seconds
+		if got and typeof(data) == "table" then
+			addInto(t, data)
 		end
 	end
-	local p = pending[key]
-	if p then
-		sessions += p.sessions
-		seconds += p.seconds
-	end
-	return sessions, seconds
+	return addInto(t, pending[key])
 end
 
-local function average(sessions, seconds)
-	if sessions == 0 then
+local function average(t)
+	if t.sessions == 0 then
 		return "no sessions yet"
 	end
-	return string.format("%.1f min avg (%d sessions)", seconds / sessions / 60, sessions)
+	return string.format("%.1f min avg (%d sessions)", t.seconds / t.sessions / 60, t.sessions)
+end
+
+local function bounce(t)
+	if t.firsts == 0 then
+		return "no first visits yet"
+	end
+	return string.format("%.1f%% left within 60 s, %.1f%% within 61-180 s (%d first visits)",
+		100 * t.bounce60 / t.firsts, 100 * t.bounce180 / t.firsts, t.firsts)
 end
 
 local function report()
 	local now = os.time()
 	local lines = { "Stats (days are UTC, from 8 PM your time):" }
-	local weekSessions, weekSeconds = 0, 0
+	local week, today = blank(), nil
 	for i = 0, 6 do
-		local sessions, seconds = totals(dayKey(now - i * DAY))
-		weekSessions += sessions
-		weekSeconds += seconds
+		local t = totals(dayKey(now - i * DAY))
+		addInto(week, t)
 		if i == 0 then
-			table.insert(lines, "Avg session today: " .. average(sessions, seconds))
+			today = t
+			table.insert(lines, "Avg session today: " .. average(t))
 		elseif i == 1 then
-			table.insert(lines, "Avg session yesterday: " .. average(sessions, seconds))
+			table.insert(lines, "Avg session yesterday: " .. average(t))
 		end
 	end
-	table.insert(lines, "Avg session, last 7 days: " .. average(weekSessions, weekSeconds))
+	table.insert(lines, "Avg session, last 7 days: " .. average(week))
+	table.insert(lines, "First play bounce today: " .. bounce(today))
+	table.insert(lines, "First play bounce, last 7 days: " .. bounce(week))
 	if not store then
 		table.insert(lines, "(No DataStore here: this server's sessions only)")
 	end
