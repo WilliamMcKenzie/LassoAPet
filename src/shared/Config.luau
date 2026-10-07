@@ -71,12 +71,12 @@ return {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
 				Ice = { Color3.fromRGB(160, 188, 244), Color3.fromRGB(178, 202, 250) },
 			},
-			UnlockCost = 300000, -- balance pass (Oct 6): was $100k
+			UnlockCost = 150000, -- QM, Oct 7: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
 			PostColor = Color3.fromRGB(126, 164, 214),
 			GateImage = "rbxassetid://93384010922515", -- assets/ui/GateTundra.png
 			GateColor = Color3.fromRGB(70, 220, 255), -- cyan (QM)
-			UpgradeImage = "rbxassetid://119577030724753", -- assets/ui/UpgradePenTundra.png
-			UpgradeImageDisabled = "rbxassetid://74372809106323", -- assets/ui/UpgradePenTundraDisabled.png
+			UpgradeImage = "", -- assets/ui/UpgradePenTundra.png ($150k; Studio uploads it and fills the id. "" draws the price as text meanwhile)
+			UpgradeImageDisabled = "", -- assets/ui/UpgradePenTundraDisabled.png ($150k, likewise)
 		},
 		{
 			Name = "Ocean",
