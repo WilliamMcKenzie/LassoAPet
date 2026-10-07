@@ -30,13 +30,13 @@ local ABOVE = 0.6 -- studs between the pet's top and the plate
 local FONT = Enum.Font.FredokaOne
 local CHECK = 0.1 -- seconds between looks round
 
--- The rarity colours of the inventory slots (Inventory.luau's RARITY).
+-- The rarity colours (QM, Oct 7); Common keeps the inventory slots' grey.
 local COLORS = {
 	Common = Color3.fromRGB(150, 160, 175),
-	Uncommon = Color3.fromRGB(70, 170, 60),
-	Rare = Color3.fromRGB(50, 120, 220),
-	Epic = Color3.fromRGB(150, 60, 200),
-	Legendary = Color3.fromRGB(230, 170, 30),
+	Uncommon = Color3.fromHex("43FA00"),
+	Rare = Color3.fromHex("40D6FF"),
+	Epic = Color3.fromHex("FF7CC6"),
+	Legendary = Color3.fromHex("5CE6B7"),
 }
 local RANKS = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5 }
 
