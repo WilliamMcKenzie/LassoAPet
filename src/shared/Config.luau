@@ -654,6 +654,29 @@ return {
 	-- a note of it: what's charged is the product's price on the dashboard). Gold2,
 	-- Gold3 and Nuke All aren't on it but can still be bought.
 	SpeedupEgg = { ProductId = 3716598923, Price = 10, Range = 10 }, -- instantly hatch one egg in your pen
+	-- Game passes (QM, Oct 7; Server/Passes): bought once, kept for good. Each is a
+	-- pass on the Creator Hub (Monetization > Passes); put its id in Id. With Id 0
+	-- it isn't offered live, and in Studio buying it is free for the session.
+	-- Owning one sets the player's "Pass<Key>" attribute (PassDoubleGold, ...).
+	--   DoubleGold: x2 on every gold you earn (pets, rides, away gold)
+	--   FastHatch: eggs hatch in half the time
+	--   AutoHatch: ready eggs hatch by themselves, no holding F
+	--   VIP: a gold fence with red banners round your pen (the floor stays the
+	--     biome's), your name over the pen in gold, and a gold trail behind you
+	Passes = {
+		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 0 },
+		{ Key = "FastHatch", Name = "Fast Hatch", Price = 99, Id = 0 },
+		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 40, Id = 0 },
+		{ Key = "VIP", Name = "VIP", Price = 199, Id = 0 },
+	},
+	PassGoldMultiplier = 2, -- DoubleGold's
+	PassHatchSpeed = 2, -- FastHatch's: hatch times / this
+	Vip = {
+		Fence = { Post = Color3.fromRGB(255, 196, 40), Rail = Color3.fromRGB(255, 222, 90), Brace = Color3.fromRGB(232, 160, 20) },
+		Banner = Color3.fromRGB(214, 32, 40), -- the red banners on the pen's corner posts
+		Name = Color3.fromRGB(255, 205, 50), -- the owner's name over the pen
+		Trail = { Color3.fromRGB(255, 236, 140), Color3.fromRGB(255, 180, 20) }, -- head to tail
+	},
 	Shop = {
 		Gold = {
 			{ Key = "Gold1", Gold = 100000, Price = 50, ProductId = 3716553782, OldProductIds = { 3716409553 } }, -- $100K (QM's nerf, Oct 4: was $1M)

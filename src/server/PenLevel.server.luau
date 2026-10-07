@@ -18,7 +18,9 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
+local Studs = require(ReplicatedStorage.Shared.Studs)
 local Funnel = require(script.Parent.Funnel)
+require(script.Parent.Passes) -- (PassVIP: the gold fence, below)
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "PenLevel")
 if not ok then
@@ -77,6 +79,7 @@ end
 local world = workspace:WaitForChild("World")
 local pens = workspace:WaitForChild("Pens")
 local postColors = {} -- [post] = its level 1 colour
+local fenceLooks = {} -- [rail or brace] = { Color, Material } as built, for when VIP goes
 
 -- Pen sizes ------------------------------------------------------------------
 
@@ -162,6 +165,62 @@ local function floorOf(pen)
 	return floor
 end
 
+-- VIP (game pass): a red banner on a gold pole on each corner post of the fence,
+-- facing out. Rebuilt with each repaint (the pen grows), gone without VIP.
+local function bannerPart(parent, size, cframe, color, shape)
+	local p = Instance.new("Part")
+	p.Name = "Banner"
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch = true, false, false, false
+	p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+	p.Material = Enum.Material.SmoothPlastic
+	p.Shape = shape or Enum.PartType.Block
+	p.Size, p.CFrame, p.Color = size, cframe, color
+	Studs.apply(p, 0.5)
+	p.Parent = parent
+end
+
+local function vipBanners(pen, fence, vip)
+	local old = pen:FindFirstChild("VipBanners")
+	if old then
+		old:Destroy()
+	end
+	local tiles = pen:FindFirstChild("Tiles")
+	if not vip or not tiles then
+		return
+	end
+	local posts = {}
+	for _, part in fence:GetDescendants() do
+		if part.Name == "Post" and part:IsA("BasePart") then
+			table.insert(posts, part)
+		end
+	end
+	local folder = Instance.new("Folder")
+	folder.Name = "VipBanners"
+	local centre, half = tiles.Position, tiles.Size / 2
+	local gold, red = Config.Vip.Fence.Post, Config.Vip.Banner
+	for _, corner in { Vector3.new(-1, 0, -1), Vector3.new(1, 0, -1), Vector3.new(-1, 0, 1), Vector3.new(1, 0, 1) } do
+		local want = centre + Vector3.new(corner.X * half.X, 0, corner.Z * half.Z)
+		local best, bestD = nil, math.huge
+		for _, post in posts do
+			local d = (Vector3.new(post.Position.X, 0, post.Position.Z) - Vector3.new(want.X, 0, want.Z)).Magnitude
+			if d < bestD then
+				best, bestD = post, d
+			end
+		end
+		if best then
+			local top = best.Position + Vector3.new(0, best.Size.Y / 2, 0)
+			local out = Vector3.new(top.X - centre.X, 0, top.Z - centre.Z).Unit
+			local face = CFrame.lookAt(top, top + out) -- -Z faces out of the pen
+			bannerPart(folder, Vector3.new(0.5, 6, 0.5), face * CFrame.new(0, 3, 0), gold) -- pole
+			bannerPart(folder, Vector3.new(1.1, 1.1, 1.1), face * CFrame.new(0, 6.4, 0), gold, Enum.PartType.Ball) -- its knob
+			bannerPart(folder, Vector3.new(3.4, 0.4, 0.4), face * CFrame.new(0, 5.5, -0.5), gold) -- cross bar
+			bannerPart(folder, Vector3.new(3, 3.4, 0.3), face * CFrame.new(0, 3.6, -0.5), red) -- the banner
+			bannerPart(folder, Vector3.new(3, 0.5, 0.35), face * CFrame.new(0, 2.1, -0.5), gold) -- its gold hem
+		end
+	end
+	folder.Parent = pen
+end
+
 local function paintPen(pen)
 	local owner = Players:GetPlayerByUserId(pen:GetAttribute("Owner") or 0)
 	local n = if owner then level(owner) else 1
@@ -185,12 +244,21 @@ local function paintPen(pen)
 			end
 		end
 	end
-	for _, part in fence:GetChildren() do
+	local vip = owner ~= nil and owner:GetAttribute("PassVIP") == true
+	for _, part in fence:GetDescendants() do
 		if part.Name == "Post" then
 			postColors[part] = postColors[part] or part.Color
-			part.Color = if n > 1 and Config.Biomes[n].PostColor then Config.Biomes[n].PostColor else postColors[part]
+			part.Color = if vip then Config.Vip.Fence.Post
+				elseif n > 1 and Config.Biomes[n].PostColor then Config.Biomes[n].PostColor
+				else postColors[part]
+		elseif part:IsA("BasePart") and (part.Name == "Rail" or part.Name == "Brace") then
+			fenceLooks[part] = fenceLooks[part] or { part.Color, part.Material }
+			part.Color = if vip then Config.Vip.Fence[part.Name] else fenceLooks[part][1]
+			-- (the Godlands' Neon lava rails go plain gold; the rest keep their studs)
+			part.Material = if vip and fenceLooks[part][2] == Enum.Material.Neon then Enum.Material.SmoothPlastic else fenceLooks[part][2]
 		end
 	end
+	vipBanners(pen, fence, vip)
 end
 
 -- The Godlands' own pen (Server/GodlandsPen), built from each pen's biggest size
@@ -228,12 +296,14 @@ local function penOf(player)
 end
 
 local function watch(player)
-	player:GetAttributeChangedSignal("PenLevel"):Connect(function()
-		local pen = penOf(player)
-		if pen then
-			paintPen(pen)
-		end
-	end)
+	for _, name in { "PenLevel", "PassVIP" } do
+		player:GetAttributeChangedSignal(name):Connect(function()
+			local pen = penOf(player)
+			if pen then
+				paintPen(pen)
+			end
+		end)
+	end
 	load(player)
 end
 

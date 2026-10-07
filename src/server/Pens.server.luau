@@ -57,6 +57,10 @@ local function setSign(pen, player)
 		gui.Parent = sign
 	end
 	gui.Enabled = player ~= nil
+	-- VIP (game pass): the name and the ring round the picture in gold.
+	local vip = player ~= nil and player:GetAttribute("PassVIP") == true
+	gui.OwnerName.TextColor3 = if vip then Config.Vip.Name else Color3.new(1, 1, 1)
+	gui.Picture.UIStroke.Color = if vip then Config.Vip.Name else Color3.new(0, 0, 0)
 	if player then
 		gui.OwnerName.Text = player.DisplayName
 		gui.Picture.Image = ""
@@ -118,6 +122,12 @@ end
 
 local function onJoin(player)
 	claim(player)
+	player:GetAttributeChangedSignal("PassVIP"):Connect(function()
+		local pen = penOf(player)
+		if pen and pen:GetAttribute("Owner") == player.UserId then
+			setSign(pen, player)
+		end
+	end)
 	player.CharacterAdded:Connect(function(character)
 		local humanoid = character:WaitForChild("Humanoid", 5)
 		if humanoid then

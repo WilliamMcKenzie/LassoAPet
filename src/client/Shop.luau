@@ -7,6 +7,9 @@
 -- exist yet only shows in Studio, where it's free. It behaves like the roll menu
 -- and the animal dictionary: no dark backdrop, the HUD's left buttons stay on top
 -- and clickable, and clicking anywhere off the panel closes it.
+-- Under the panel, a row of the game passes (Config.Passes; QM, Oct 7): clicking
+-- one buys it (BuyPass, Server/Passes), and an owned one says OWNED. They're
+-- placeholder gold buttons until QM's art is in PASS_ART.
 --
 --   Shop.open() / Shop.toggle() / Shop.close(instant) / Shop.isOpen()  -- instant: no closing animation
 --   Shop.hasOffers() / Shop.hasGold()   -- anything to show (live: products made)
@@ -38,6 +41,9 @@ local CARDS = {
 	Gold4 = { id = "rbxassetid://103982023506783", column = 1, row = 1 }, -- ShopGold1M.png
 	Legendary = { id = "rbxassetid://125476338322601", odds = "rbxassetid://102515912144773", column = 2, row = 0, tall = true }, -- ShopLegendaryEgg.png / ShopLegendaryEggOdds.png
 }
+-- [pass Key] = QM's card art for it ("" = the placeholder button with its name and price)
+local PASS_ART = { DoubleGold = "", FastHatch = "", AutoHatch = "", VIP = "" }
+local PASS_HEIGHT = 96
 local PANEL_WIDTH = 930 -- about 70% of the screen, as in QM's mockup
 local CARD_WIDTH = 265
 local SMALL_HEIGHT = CARD_WIDTH * 666 / 848 -- the small cards' art is 848x666
@@ -48,6 +54,7 @@ local ODDS_SIZE = 58
 local player = Players.LocalPlayer
 local open = false
 local buyShop = ReplicatedStorage:WaitForChild("BuyShop")
+local buyPass = ReplicatedStorage:WaitForChild("BuyPass")
 
 -- Paid random items (the Legend Egg; egg rolls, as gold can be bought) are left
 -- out where the player's policy restricts them. Unknown counts as restricted.
@@ -84,7 +91,16 @@ function Shop.hasGold()
 	return false
 end
 
+local function passOffered(pass)
+	return pass.Id ~= 0 or RunService:IsStudio()
+end
+
 function Shop.hasOffers()
+	for _, pass in Config.Passes do
+		if passOffered(pass) then
+			return true
+		end
+	end
 	for key, offer in offers do
 		if CARDS[key] and offered(offer) then
 			return true
@@ -217,6 +233,84 @@ if legendCard then
 	end)
 end
 
+-- The game passes, in a row under the panel (inside the cards' group, so a
+-- controller's D-pad reaches them).
+local passRow = Instance.new("Frame")
+passRow.Name = "Passes"
+passRow.BackgroundTransparency = 1
+passRow.AnchorPoint = Vector2.new(0.5, 0)
+passRow.Position = UDim2.new(0.5, 0, 1, 54) -- just under the panel
+passRow.Size = UDim2.fromOffset(PANEL_WIDTH, PASS_HEIGHT)
+local passLayout = Instance.new("UIListLayout")
+passLayout.FillDirection = Enum.FillDirection.Horizontal
+passLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+passLayout.SortOrder = Enum.SortOrder.LayoutOrder
+passLayout.Padding = UDim.new(0, GAP)
+passLayout.Parent = passRow
+passRow.Parent = grid
+
+local function outlined(label)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.FredokaOne
+	label.TextScaled = true
+	label.TextColor3 = Color3.new(1, 1, 1)
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 3
+	stroke.Parent = label
+end
+
+for i, pass in Config.Passes do
+	local card = Instance.new("ImageButton")
+	card.Name = pass.Key
+	card.LayoutOrder = i
+	card.AutoButtonColor = false
+	card.Size = UDim2.fromOffset((PANEL_WIDTH - (#Config.Passes - 1) * GAP) / #Config.Passes, PASS_HEIGHT)
+	card.Visible = passOffered(pass)
+	local art = PASS_ART[pass.Key] or ""
+	card.Image = art
+	card.BackgroundTransparency = if art ~= "" then 1 else 0
+	card.BackgroundColor3 = Color3.fromRGB(255, 196, 40)
+	local price = Instance.new("TextLabel")
+	price.Name = "Price"
+	price.AnchorPoint = Vector2.new(0.5, 1)
+	price.Position = UDim2.fromScale(0.5, 0.92)
+	price.Size = UDim2.fromScale(0.9, 0.38)
+	outlined(price)
+	price.Parent = card
+	if art == "" then
+		Instance.new("UICorner", card).CornerRadius = UDim.new(0, 18)
+		local edge = Instance.new("UIStroke")
+		edge.Thickness = 3
+		edge.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		edge.Parent = card
+		local name = Instance.new("TextLabel")
+		name.Name = "PassName"
+		name.AnchorPoint = Vector2.new(0.5, 0)
+		name.Position = UDim2.fromScale(0.5, 0.08)
+		name.Size = UDim2.fromScale(0.9, 0.46)
+		name.Text = pass.Name
+		outlined(name)
+		name.Parent = card
+	else
+		price.Visible = false -- (the art has its price; OWNED still shows)
+	end
+	local function owned()
+		local has = player:GetAttribute("Pass" .. pass.Key) == true
+		price.Text = if has then "OWNED" else "\u{E002} " .. pass.Price
+		price.Visible = has or art == ""
+		card.ImageTransparency = if has then 0.4 else 0
+	end
+	player:GetAttributeChangedSignal("Pass" .. pass.Key):Connect(owned)
+	owned()
+	pressable(card)
+	card.Activated:Connect(function()
+		if open and not player:GetAttribute("Pass" .. pass.Key) then
+			buyPass:FireServer(pass.Key)
+		end
+	end)
+	card.Parent = passRow -- (not in cards: a controller starts on the panel's cards)
+end
+
 -- Clicking anywhere off the panel closes it. No dark backdrop (QM).
 local function over(object, at)
 	local min, size = object.AbsolutePosition, object.AbsoluteSize
@@ -232,7 +326,7 @@ backdrop.Size = UDim2.fromScale(1, 1)
 backdrop.ZIndex = 0
 backdrop.Activated:Connect(function(input)
 	local at = Vector2.new(input.Position.X, input.Position.Y)
-	if not over(panel, at) then
+	if not over(panel, at) and not over(passRow, at) then
 		Shop.close()
 	end
 end)
