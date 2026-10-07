@@ -25,7 +25,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
-from animal_designs import Animal, EYE_WHITE, PINK, PUPIL, quad_animations  # noqa: E402
+from animal_designs import Animal, PINK, quad_animations  # noqa: E402
 
 TAKES = {
     "A": dict(label="Sand cat", coat=(226, 186, 128), light=(252, 240, 214), dark=(120, 84, 52)),
@@ -96,8 +96,8 @@ WHITE = (255, 250, 242)
 
 
 def ginger(tail_up=True):
-    """QM's reference (Oct 7): a chibi ginger tabby, big head with front-facing
-    eyes (like the Pig's), white muzzle, chest and paws, stripes across the
+    """QM's reference (Oct 7): a chibi ginger tabby, big head with the eyes
+    on its sides, white muzzle, chest and paws, stripes across the
     forehead and back, big pink-lined ears, a striped tail with a white tip."""
     coat, dark = (244, 150, 58), (204, 104, 34)
     a = Animal("Kitten", "Uncommon")
@@ -127,12 +127,8 @@ def ginger(tail_up=True):
         a.box(f"Crown{i + 1}", (edges[i], hy1 - 0.5, hz0), (edges[i + 1], hy1, hz1), dark if i % 2 else coat, "neck")
     a.box("Muzzle", (-1.0, hy0, -5.6), (1.0, 4.3, hz0), WHITE, "neck")
     a.box("Nose", (-0.3, 3.9, -5.75), (0.3, 4.3, -5.6), NOSE, "neck")
-    # Horse googly eyes, on the face like the Pig's, pupils toward the middle
-    for side, sx in (("L", -1), ("R", 1)):
-        xa, xb = sorted((sx * 0.35, sx * 1.35))
-        a.box("Eye" + side, (xa, 4.5, hz0 - 0.05), (xb, 5.5, hz0), EYE_WHITE, "neck")
-        pa, pb = sorted((sx * 0.4, sx * 0.9))
-        a.box("Pupil" + side, (pa, 4.55, hz0 - 0.08), (pb, 5.15, hz0 - 0.05), PUPIL, "neck")
+    # Horse googly eyes on the head's sides (QM: like the first takes)
+    a.eyes(hx, 4.5, 5.5, -4.7, -3.7)
     a.pivots["neck"] = (0, 4.2, -2.05)
     # big pointed ears: two prism halves meeting at the tip, pink pair inside
     for side, sx in (("L", -1), ("R", 1)):
