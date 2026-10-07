@@ -1068,9 +1068,10 @@ tutorialCommand.Triggered:Connect(function(source)
 	player:SetAttribute("CarriedEgg", nil)
 	player:SetAttribute("FuseLesson", nil)
 	player:SetAttribute("Tutorial", nil) -- off then on, so a tutorial already running starts over
+	publish(player) -- before it's back on: the old RidePet still set as it starts skipped the
+	-- client's step 1 ("Place your egg") straight to riding a pet that's gone, with no hint
 	task.wait()
 	player:SetAttribute("Tutorial", if Config.Tutorial then true else nil)
-	publish(player)
 	player:LoadCharacter() -- off any ride, back at your pen
 end)
 tutorialCommand.Parent = game:GetService("TextChatService")
