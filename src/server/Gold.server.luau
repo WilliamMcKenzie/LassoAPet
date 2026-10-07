@@ -14,6 +14,7 @@ local RunService = game:GetService("RunService")
 
 local MAX_PER_RIDE = 100000 -- ignore anything bigger than a ride could earn
 local Config = require(ReplicatedStorage.Shared.Config)
+require(script.Parent.Passes) -- (PassDoubleGold: x2 ride cash, below)
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "Gold")
 if not ok then
@@ -193,6 +194,9 @@ bankCoins.OnServerEvent:Connect(function(player, amount)
 		return
 	end
 	local cash = math.min(rideCash[player] or 0, math.floor(amount), MAX_PER_RIDE)
+	if player:GetAttribute("PassDoubleGold") then
+		cash *= Config.PassGoldMultiplier -- x2 Gold (game pass; the HUD shows it doubled as you ride)
+	end
 	rideCash[player] = nil
 	if cash > 0 then
 		player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + cash)
