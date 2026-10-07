@@ -4,6 +4,7 @@
 -- Pens, Vip). Buying one in game sets it on the spot. The client asks to buy with
 -- BuyPass (Shop): a pass with no Id yet is free in Studio, for the session, and not
 -- offered live.
+-- QM's popups for each pass (PassPopups.client) show at the moments that suit them.
 --
 --   Passes.owns(player, key)   -- true if owned (waits for the join check)
 --   Passes.onBought(fn)        -- fn(player, key) when a pass is bought in game
@@ -101,5 +102,36 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, id, p
 		grant(player, pass, true)
 	end
 end)
+
+-- Testing (QM only): "/popup vip|auto|speed|gold" shows that pass's popup now
+-- (PassPopups.client), whatever its usual moment.
+local function allowed(player)
+	if RunService:IsStudio() then
+		return true
+	end
+	if game.CreatorType == Enum.CreatorType.User then
+		return player.UserId == game.CreatorId
+	end
+	local success, group = pcall(function()
+		return game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
+	end)
+	return success and group.Owner ~= nil and player.UserId == group.Owner.Id
+end
+
+local passPopup = Instance.new("RemoteEvent")
+passPopup.Name = "PassPopup"
+passPopup.Parent = ReplicatedStorage
+local POPUPS = { vip = "VIP", auto = "AutoHatch", speed = "FastHatch", gold = "DoubleGold" }
+local popupCommand = Instance.new("TextChatCommand")
+popupCommand.Name = "Popup"
+popupCommand.PrimaryAlias = "/popup"
+popupCommand.Triggered:Connect(function(source, text)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	local key = POPUPS[string.lower(string.match(text, "^%S+%s+(%S+)") or "")]
+	if player and key and allowed(player) then
+		passPopup:FireClient(player, key)
+	end
+end)
+popupCommand.Parent = game:GetService("TextChatService")
 
 return Passes
