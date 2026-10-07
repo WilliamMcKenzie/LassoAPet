@@ -81,6 +81,7 @@ local IMAGES = {
 	eggHorse = { id = "rbxassetid://96698232796495", size = Vector2.new(502, 799) }, -- HorseEggRender.png
 	eggPinto = { id = "rbxassetid://79525419811481", size = Vector2.new(496, 788) }, -- PintoEggRender.png
 	eggPig = { id = "rbxassetid://139970505549400", size = Vector2.new(496, 730) }, -- PigEggRender.png
+	eggBunny = { id = "", size = Vector2.new(502, 920) }, -- BunnyEggRender.png
 	eggFish = { id = "rbxassetid://105098230793344", size = Vector2.new(586, 810) }, -- FishEggRender.png
 	eggRhino = { id = "rbxassetid://139482781062355", size = Vector2.new(496, 735) }, -- RhinoEggRender.png
 	eggUnicorn = { id = "rbxassetid://85066893166855", size = Vector2.new(496, 859) }, -- UnicornEggRender.png

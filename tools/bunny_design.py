@@ -1,6 +1,7 @@
 """Bunny: an early-game Meadow animal on the same rig as the Pig.
 
-Run: python3 tools/bunny_design.py [out_dir]
+Run: python3 tools/bunny_design.py [out_dir]     the takes and previews
+     python3 tools/bunny_design.py game [take]   the picked take (A) into the game files
 
 Three takes for QM to pick from (same build, different coat and ears):
   A  Cottontail  tan, cream muzzle and paws, tall upright ears
@@ -148,5 +149,27 @@ def main(out="/mnt/project-files/animals/bunny"):
     print("written to", out)
 
 
+def game(take="A"):
+    """QM picked take A (Oct 7): write it as designs/animals/Bunny.bbmodel, its
+    meta.json entry and src/shared/Animals/BunnyModel.luau."""
+    import bbmodel_to_luau
+    a = bunny(take)
+    a.rarity = "Uncommon"  # no Common animal runs wild (Config.Biomes Meadow Herd)
+    out = os.path.join("designs", "animals")
+    m = A.build_animal(a, out)
+    m["meta"]["format_version"] = "5.0"
+    with open(os.path.join(out, "Bunny.bbmodel"), "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    path = os.path.join(out, "meta.json")
+    meta = json.load(open(path))
+    meta["Bunny"] = dict(rarity=a.rarity, **a.meta)
+    with open(path, "w") as f:
+        json.dump(meta, f, indent=1)
+    bbmodel_to_luau.main(os.path.join(out, "Bunny.bbmodel"), os.path.join("src", "shared", "Animals", "BunnyModel.luau"))
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["game"]:
+        game(*sys.argv[2:])
+    else:
+        main(*sys.argv[1:])
