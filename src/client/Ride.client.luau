@@ -341,7 +341,8 @@ local hold, grace = 0, 0
 local warpLevel -- /biome: the biome you were put in, so its gate (and those before) let you through
 local transfer, tumble, carried
 vfx.Merge = require(ReplicatedStorage.Shared.Merge)
-vfx.Fusion = require(ReplicatedStorage.Shared.Fusion) -- hybrids: the donor's size and colours
+vfx.Fusion = require(ReplicatedStorage.Shared.Fusion)
+vfx.Studs = require(ReplicatedStorage.Shared.Studs) -- hybrids: the donor's size and colours
 -- The stretch of course with stampede loaded round the camera at camZ: VIEW either
 -- way. Racing home (+z) the wider field of view (Config.ReturnFovKick) sees to the
 -- horizon, so VIEW ahead had animals popping in about 2 s before you reached them in
@@ -2224,6 +2225,9 @@ function vfx.snakeGlow(entity, on)
 	for _, part in entity.animal.model:GetDescendants() do
 		if part:IsA("BasePart") and part.Color == vfx.SPIKE_COLOR then
 			part.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
+			if not on then
+				vfx.Studs.apply(part, 0.5) -- (studs as a material, if they're on: Shared/Studs)
+			end
 			for _, texture in part:GetChildren() do
 				if texture:IsA("Texture") then
 					texture.Transparency = if on then 1 else 0

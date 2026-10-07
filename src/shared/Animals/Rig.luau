@@ -14,6 +14,8 @@
 -- The model faces -Z. Root is an anchored, invisible part at ground level and
 -- is the PrimaryPart: move the animal by setting Root.CFrame.
 
+local Studs = require(script.Parent.Parent.Studs)
+
 local Rig = {}
 
 local FACES = { "Top", "Bottom", "Front", "Back", "Left", "Right" }
@@ -97,6 +99,9 @@ function Rig.build(spec)
 				continue
 			end
 			local part = parts[def.name]
+			if not def.metal and Studs.apply(part, spec.studTexture.tile) then
+				continue -- studs as a material (Config.StudMaterial): no textures
+			end
 			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
 				if part.ClassName == "Part" and Rig.covered(part, face, byBone[def.parent]) then
 					continue

@@ -13,6 +13,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Godlands = require(ReplicatedStorage.Shared.Godlands)
 local Tracks = require(ReplicatedStorage.Shared.GodlandsTracks)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
+local Studs = require(ReplicatedStorage.Shared.Studs)
 
 local CHECKER = "rbxassetid://84747779882944" -- the floor's 4-stud checker (every Ground part's "Checker")
 local FLOOR_STUDS = "rbxassetid://7447638591"
@@ -153,7 +154,7 @@ local function piece(name, x, y, z, yaw, parent)
 		p.Color = Color3.fromRGB(row[17], row[18], row[19])
 		p.Material = if row[1] == "Lava" then Enum.Material.Neon else Enum.Material.SmoothPlastic
 		p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
-		if not row[20] then
+		if not row[20] and not (row[1] ~= "Lava" and Studs.apply(p, PIECE_STUD_TILE)) then
 			for _, face in STUD_FACES do
 				if math.min(size[face[2]], size[face[3]]) >= MIN_STUD_FACE then
 					texture(p, PIECE_STUDS, PIECE_STUD_TILE, face[1])
