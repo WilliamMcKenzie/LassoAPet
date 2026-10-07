@@ -238,7 +238,7 @@ local function load(player)
 					if isAnimal(data.ride) then
 						profile.ride = data.ride
 						profile.rideMerged = tonumber(data.rideMerged) and math.max(1, math.floor(data.rideMerged)) or nil
-						if isAnimal(data.rideFuse) and data.rideFuse ~= data.ride and tonumber(data.rideIncome) then
+						if isAnimal(data.rideFuse) and tonumber(data.rideIncome) then -- (its donor can be its own kind: Fusion.combine)
 							profile.rideFuse, profile.rideIncome = data.rideFuse, math.max(0, tonumber(data.rideIncome))
 							profile.rideStats = loadedHybridStats(profile.ride, profile.rideFuse, data.rideStats)
 						end
@@ -255,7 +255,7 @@ local function load(player)
 					for id, item in data.items or {} do
 						if typeof(item) == "table" and tonumber(item.x) and tonumber(item.z)
 							and (isAnimal(item.egg) or isAnimal(item.pet)) then
-							if not (item.pet and isAnimal(item.fuse) and item.fuse ~= item.pet and tonumber(item.income)) then
+							if not (item.pet and isAnimal(item.fuse) and tonumber(item.income)) then
 								item.fuse, item.income = nil, nil -- (a hybrid: Shared/Fusion)
 							end
 							item.stats = item.fuse and loadedHybridStats(item.pet, item.fuse, item.stats) or nil

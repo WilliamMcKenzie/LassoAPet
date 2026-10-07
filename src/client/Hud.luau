@@ -183,6 +183,7 @@ local roll, rollShown -- the Egg Machine's ROLL button, and whether you're at th
 -- The first-time tutorial's stage (Hud.setTutorial): nil when it's off, "bare"
 -- (no Gold, Pets or Upgrade Pen) while it runs, "fuse" (Fuse alone) at its fuse step.
 local tutorial = nil
+local lesson = false -- the fuse lesson's on (Hud.setLesson): nothing but Fuse shows
 local upgradeScale -- Upgrade Pen's UIScale
 -- A line of text top centre (Hud.setNotice), in its own always-on ScreenGui.
 local NOTICE = { TEXT_SIZE = 40, TOP = 16 + 352 * 220 / 1292 + 36 } -- TOP: just under the Hold bar (QM; BAR_WIDTH x barEmpty's shape)
@@ -836,8 +837,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	RollMenu.onRoll = doRoll
 	local function setRollShown(shown)
 		rollShown = shown
-		roll.Visible = shown and not gui.Enabled
-		Inventory.setVisible(not shown and not ride.Visible and not mergeButton.Visible and not gui.Enabled)
+		roll.Visible = shown and not gui.Enabled and not lesson
+		Inventory.setVisible(not shown and not ride.Visible and not mergeButton.Visible and not gui.Enabled and not lesson)
 	end
 	task.spawn(function()
 		if not Config.Gacha.Enabled or not Config.Gacha.Machine then
@@ -1003,7 +1004,7 @@ function Hud.show(visible)
 	fuseIcon.Visible = not visible and ((tutorial == nil and Hud.fuseUnlocked()) or tutorial == "fuse")
 	shopIcon.Visible = pets.Visible
 	upgrade.Visible = upgradeShown and not visible and tutorial == nil
-	Inventory.setVisible(not visible) -- your eggs, hidden while riding
+	Inventory.setVisible(not visible and not lesson) -- your eggs, hidden while riding
 	gained.row.Visible = false
 	noCash = false
 	Hud.setTip(nil)
@@ -1386,20 +1387,39 @@ end
 
 -- RIDE shows only while you're close enough to your animal (replaces the [E] prompt).
 function Hud.showRide(visible)
-	ride.Visible = visible and not gui.Enabled
+	ride.Visible = visible and not gui.Enabled and not lesson
 	Hud.showMerge(mergeWanted) -- RIDE comes first; MERGE takes the spot when it goes
-	Inventory.setVisible(not ride.Visible and not mergeButton.Visible and not rollShown and not gui.Enabled) -- the RIDE button takes its place
+	Inventory.setVisible(not ride.Visible and not mergeButton.Visible and not rollShown and not gui.Enabled and not lesson) -- the RIDE button takes its place
 end
 
 -- MERGE (QM): in RIDE's spot whenever you have pets to merge and RIDE isn't up;
 -- it takes the place of your egg inventory.
 function Hud.showMerge(visible)
 	mergeWanted = visible
-	local shown = visible and not ride.Visible and not rollShown and not gui.Enabled
+	local shown = visible and not ride.Visible and not rollShown and not gui.Enabled and not lesson
 	if shown ~= mergeButton.Visible then
 		mergeButton.Visible = shown
-		Inventory.setVisible(not ride.Visible and not shown and not rollShown and not gui.Enabled)
+		Inventory.setVisible(not ride.Visible and not shown and not rollShown and not gui.Enabled and not lesson)
 	end
+end
+
+-- The fuse lesson (FuseLesson, QM Oct 7): while it's on, nothing shows but Fuse and
+-- what it leads you through: no RIDE (Ride.client won't ride either), MERGE, egg
+-- slots, ROLL, nameplates (PetPlates) or the rest (setTutorial's "bare"/"fuse").
+function Hud.setLesson(on)
+	if on == lesson then
+		return
+	end
+	lesson = on
+	if on then
+		ride.Visible, roll.Visible = false, false
+	end
+	Hud.showMerge(mergeWanted)
+	Inventory.setVisible(not ride.Visible and not mergeButton.Visible and not rollShown and not gui.Enabled and not lesson)
+end
+
+function Hud.inLesson()
+	return lesson
 end
 
 -- Ride back home: DODGE THE STAMPEDE! slams in, then pulses; no cash or distance.

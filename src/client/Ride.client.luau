@@ -837,7 +837,7 @@ local function updateRideTarget()
 			else box:PointToWorldSpace(Vector3.new(math.clamp(at.X, -half.X, half.X), 0, math.clamp(at.Z, -half.Z, half.Z)))
 		rideSpot.WorldCFrame = CFrame.new(Vector3.new(edge.X, if hrp then hrp.Position.Y else edge.Y, edge.Z))
 	end
-	local near = rideModel ~= nil and hrp ~= nil and (rideSpot.WorldPosition - hrp.Position).Magnitude <= RIDE_REACH
+	local near = rideModel ~= nil and hrp ~= nil and (rideSpot.WorldPosition - hrp.Position).Magnitude <= RIDE_REACH and not Hud.inLesson() -- (no riding in the fuse lesson)
 	if near ~= rideShown then
 		rideShown = near
 		Hud.showRide(near)

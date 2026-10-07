@@ -7,7 +7,7 @@
 -- hybrid drops down where the base was (Hatchery.server's FusePets). The left pick
 -- (the first) is the base, its body and ability; the right one sets its size and
 -- paints it in its colours (QM). Hybrids fuse
--- again (QM; Fusion.combine), and two of the same pet merge instead (MERGE). A
+-- again (QM; Fusion.combine), and so do two of the same animal (QM, Oct 7). A
 -- hybrid's card has no name; picked, the strip shows its hybrid name (QM, Oct 6 20:15).
 --
 -- Laid out in pixels of QM's 1102 x 829 panel (assets/ui/fuse/FusionPanel.png) and
@@ -208,8 +208,7 @@ local function yourPets()
 	return list
 end
 
--- Whether `pet` can go with what's picked (Fusion.combine): two of the same pet
--- merge instead.
+-- Whether `pet` can go with what's picked (Fusion.combine: anything can, now).
 local function canPick(pet)
 	local other = picks[1]
 	return not other or other == pet or Fusion.combine(other.kind, other.fuse, pet.kind, pet.fuse) ~= nil

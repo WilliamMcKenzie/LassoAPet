@@ -85,17 +85,11 @@ end
 -- Fusing two pets, either of them a hybrid already (QM, Oct 6: hybrids fuse again):
 -- pet A (the left one) gives the body, its base animal, and pet B (the right one)
 -- what it looks like, its donor's colours and size if it's a hybrid, else its own.
--- Returns the new base and donor, and true (pet A is the base); nil if they'd merge
--- instead (the same pet) or come out as a plain animal (B looks like A's animal).
+-- Returns the new base and donor, and true (pet A is the base). Two of the same
+-- animal fuse too (QM, Oct 7: same rules, it's worth it): a Horse with a Horse is a
+-- hybrid whose donor is its own kind.
 function Fusion.combine(a, aFuse, b, bFuse)
-	if Fusion.key(a, aFuse) == Fusion.key(b, bFuse) then
-		return nil
-	end
-	local base, donor = a, bFuse or b
-	if donor == base then
-		return nil
-	end
-	return base, donor, true
+	return a, bFuse or b, true
 end
 
 local ONE = { Speed = 1, Stamina = 1 }
@@ -168,8 +162,8 @@ function Fusion.price(kindA, kindB)
 end
 
 function Fusion.name(kind, fuse)
-	if not fuse then
-		return spaced(kind)
+	if not fuse or fuse == kind then
+		return spaced(kind) -- (two of the same: just its name, "Buny" and "Kiten" read wrong)
 	end
 	local front, back = NAMES[fuse], NAMES[kind]
 	if not front or not back then

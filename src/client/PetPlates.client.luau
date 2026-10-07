@@ -15,6 +15,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local PenPets = require(script.Parent.PenPets)
 local Outline = require(script.Parent.Outline)
+local Hud = require(script.Parent.Hud)
 
 local player = Players.LocalPlayer
 
@@ -164,7 +165,7 @@ RunService.Heartbeat:Connect(function(dt)
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	-- (Sitting is riding; PlatformStand is lying flat after a crash.)
-	if root and humanoid and not humanoid.Sit and not humanoid.PlatformStand then
+	if root and humanoid and not humanoid.Sit and not humanoid.PlatformStand and not Hud.inLesson() then -- (none in the fuse lesson)
 		local function consider(model, kind, fuse, stats, income)
 			local pet = model.PrimaryPart
 			if not kind or not pet or not model.Parent then

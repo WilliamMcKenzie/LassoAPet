@@ -145,7 +145,7 @@ end)
 -- stage to show ("bare" while the button flies in, "fuse" while it leads, nil when
 -- it's not on) and the cursor's target, if any. `phase` is Ride's; `cutscene`, a
 -- close-up's on.
-function FuseLesson.update(phase, cutscene)
+local function step(phase, cutscene)
 	if finished or not player:GetAttribute("FuseLesson") or (player:GetAttribute("PenLevel") or 1) < 2 then
 		running = nil
 		return nil, nil
@@ -175,6 +175,12 @@ function FuseLesson.update(phase, cutscene)
 		return nil, nil
 	end
 	return "fuse", if target == nil then Hud.fuseButton() else (target or nil)
+end
+
+function FuseLesson.update(phase, cutscene)
+	local stage, cursor = step(phase, cutscene)
+	Hud.setLesson(stage ~= nil) -- nothing but Fuse while it's on (QM, Oct 7)
+	return stage, cursor
 end
 
 return FuseLesson
