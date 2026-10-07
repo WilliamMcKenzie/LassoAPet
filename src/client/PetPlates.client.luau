@@ -124,7 +124,7 @@ local function show(model, kind, fuse, stats)
 	local key = Fusion.key(kind, fuse) .. "/" .. s.Speed
 	if p.key ~= key then
 		p.key = key
-		p.name.Text = Fusion.name(kind, fuse)
+		p.name.Text = Fusion.name(kind) -- a hybrid goes by its base animal's name: no fused names (QM)
 		p.name.TextColor3 = colorOf(kind, fuse)
 		p.speed.Text = math.floor(s.Speed * 20 + 0.5) .. "m/s"
 	end
