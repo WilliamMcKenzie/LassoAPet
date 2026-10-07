@@ -131,7 +131,10 @@ local function flush()
 	pending = {}
 	for key, p in batch do
 		local saved = pcall(store.UpdateAsync, store, key, function(old)
-			return addInto(addInto(blank(), old), p)
+			-- (keeps any fields this version doesn't know, so an older server still
+			-- running after a publish doesn't wipe a newer stat like "longest")
+			local into = if typeof(old) == "table" then table.clone(old) else {}
+			return addInto(into, p)
 		end)
 		if not saved then -- try again next time
 			pending[key] = addInto(pending[key] or blank(), p)
