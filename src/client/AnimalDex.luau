@@ -104,6 +104,7 @@ local FRAME, PER_SHEET, SHEET_COLUMNS = 192, 25, 5
 local PLACEHOLDER_BIO = "Description feijwufjewuejfw lorem ipsum" -- QM's placeholder
 local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Horse = "Very thoughtful, horse sends gifts to his friends each year.",
+	Bunny = "Hops everywhere, even to the fridge. Has never once walked.",
 	Pig = "Isn't actually pink, just always blushing. Recently losing weight, down 2 pounds.",
 	Pinto = "Cousin of horse, recently started playing water polo.",
 	Fish = "Never learned to swim, and thinks it's too late now. Scared of water.",

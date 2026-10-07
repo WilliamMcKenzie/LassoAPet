@@ -45,6 +45,11 @@ return {
 		{ "Body", 250, 196, 208 }, -- snout
 		{ "Hoof", 176, 96, 116 },
 	},
+	Bunny = {
+		{ "Body", 206, 150, 98 },
+		{ "Belly", 250, 236, 212 }, -- muzzle
+		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" }, -- (cream paws, like the muzzle)
+	},
 	Rhino = {
 		{ "Body", 150, 156, 170 },
 		{ "Marking", 112, 118, 134 }, -- back plates, tail tip

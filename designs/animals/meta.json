@@ -78,5 +78,21 @@
    ],
    "radius": 1.35
   }
+ },
+ "Bunny": {
+  "rarity": "Uncommon",
+  "seat": [
+   0,
+   5.2,
+   0.6
+  ],
+  "neck_loop": {
+   "center": [
+    0,
+    4.4,
+    -3.4
+   ],
+   "radius": 1.8
+  }
  }
 }
