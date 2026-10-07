@@ -392,6 +392,7 @@ vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, bu
 vfx.godlands.onPieces = slices.pieces
 vfx.hazards = require(script.Parent.GodlandsHazards) -- the Godlands' wild animals: spikes, sludge, confusion, charges, hunts
 vfx.gateSmash = require(script.Parent.GateSmash) -- speed gates: own pets fast enough break locked gates (Shared/SpeedGates)
+vfx.sprintCreep = require(script.Parent.SprintCreep) -- a held sprint builds speed (QM, Oct 7)
 vfx.speedFx = require(script.Parent.SpeedFx) -- the speed cap's curve, speed lines and wider view (QM, Oct 7)
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
@@ -3410,6 +3411,7 @@ local function updateMount(dt)
 	if sprinting() then
 		targetSpeed *= (Config.PetSprintSpeed[mount.kind] or Config.SprintSpeed) * ((vfx.sprintSpecial() or {}).SpeedBoost or 1) -- the Blue Crab's crab walk: faster still
 	end
+	targetSpeed *= vfx.sprintCreep.step(dt, phase == "outbound" and hold > 0 and sprinting()) -- a held sprint keeps building, ever more slowly (QM)
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	targetSpeed *= vfx.hazards.slow() -- stuck in a Sludge's sludge
 	-- (carried, not the "CarriedEgg" attribute: the server leaves that set after a crash

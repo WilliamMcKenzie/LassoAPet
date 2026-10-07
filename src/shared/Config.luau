@@ -606,6 +606,11 @@ return {
 	TouchSprintAt = 0.85,
 	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
 	SprintDrain = 1.5, -- x the Hold bar's usual drain
+	-- Holding a sprint on the way out keeps building speed, ever more slowly (QM, Oct 7;
+	-- Client/SprintCreep): x (1 + Rate * ln(1 + seconds / Over)) on top of the sprint, so
+	-- +13% at 4 s, +24% at 12 s, +36% at 30 s, +46% at a minute. Starts over when you let
+	-- go or run out of Hold. nil turns it off.
+	SprintCreep = { Rate = 0.15, Over = 3 },
 	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)
 	ReturnFovKick = 20, -- degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
