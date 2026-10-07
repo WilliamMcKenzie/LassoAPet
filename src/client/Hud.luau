@@ -383,9 +383,13 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	filled.AnchorPoint = Vector2.zero
 
 	-- Distance, on the bar.
-	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 3) -- 3px outline (QM)
+	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 5) -- a thick black outline (QM's speed reference, Oct 7; was 3px)
 	distance.Name = "Distance"
 	distance.ZIndex = 2
+	local speedFill = Instance.new("UIGradient") -- (Hud.setSpeed: white down to the zone's colour)
+	speedFill.Rotation = 90
+	speedFill.Enabled = false
+	speedFill.Parent = distance
 
 	-- Ride back: only DODGE THE STAMPEDE!, pulsing between 90% and 110%, and a red
 	-- vignette that fades out over the last stretch home.
@@ -1073,6 +1077,25 @@ end
 
 function Hud.setDistance(text)
 	distance.Text = text
+	distance.UIGradient.Enabled = false
+end
+
+-- The ride's speed on the bar, "43m/s" (QM, Oct 7): white at the top fading down to
+-- the colour of the furthest zone that speed's gate opens for (Shared/SpeedGates):
+-- Meadow green, then each gate's own colour (Desert yellow, Tundra cyan, Ocean
+-- blue, Godlands orange).
+local MEADOW_SPEED_COLOR = Color3.fromRGB(110, 235, 70)
+function Hud.setSpeed(ms)
+	local color = MEADOW_SPEED_COLOR
+	for i = 2, #Config.Biomes do
+		local need = SpeedGates.need(i)
+		if need and ms >= need then
+			color = Config.Biomes[i].GateColor or Config.GateColor
+		end
+	end
+	distance.Text = ms .. "m/s"
+	distance.UIGradient.Color = ColorSequence.new(WHITE, color)
+	distance.UIGradient.Enabled = true
 end
 
 -- text = nil hides the button; ready = false shows LASSO's disabled image;

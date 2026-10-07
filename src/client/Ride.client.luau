@@ -3796,7 +3796,11 @@ local function updateHud()
 		-- counts, so a sprint or an ability never makes it look fast enough (speed gates).
 		if mount then -- (nil mid-lasso: it keeps the last)
 			local own = statsOf(mount.kind, mount).Speed * 20
-			Hud.setDistance(if Tutorial.active then "" else math.floor(math.min(mount.speed / Config.MountSpeed * 20, own) + 0.5) .. "m/s")
+			if Tutorial.active then
+				Hud.setDistance("")
+			else
+				Hud.setSpeed(math.floor(math.min(mount.speed / Config.MountSpeed * 20, own) + 0.5))
+			end
 		end
 		if actionTarget == "egg" then
 			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
