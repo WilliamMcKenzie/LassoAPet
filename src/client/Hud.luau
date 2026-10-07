@@ -135,7 +135,7 @@ local BUTTON_WIDTH = 256
 local SPRINT_WIDTH = 164 -- about 2/3 of TAKE EGG's width, as in the mockup
 local BAR_WIDTH = 352
 local ICON_HEIGHT = 80 -- Gold
-local UPGRADE_WIDTH = 360 -- Upgrade Pen, top right (20% up from 300, QM Oct 7: easier to notice)
+local UPGRADE_WIDTH = 360 -- Upgrade Pen, top centre (20% up from 300, QM Oct 7: easier to notice)
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
@@ -667,7 +667,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end)
 	Inventory.init(homeRoot)
 
-	-- Upgrade Pen, top right: buys your pen's next level (UpgradePen). It's the
+	-- Upgrade Pen, top centre: buys your pen's next level (UpgradePen). It's the
 	-- next biome's own button (its UpgradeImage, with the price drawn in),
 	-- throbbing when you have the gold, its UpgradeImageDisabled when you don't
 	-- (greyed if it has none). A biome without
@@ -677,9 +677,10 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	local upgradePen = game:GetService("ReplicatedStorage"):WaitForChild("UpgradePen")
 	local buyTrail = game:GetService("ReplicatedStorage"):WaitForChild("BuyRainbowTrail")
 	local upgradeSize = fit("upgradePenBiome", UPGRADE_WIDTH)
-	-- Anchored at its middle so the throb grows it evenly.
+	-- Anchored at its middle so the throb grows it evenly. Top centre (QM, Oct 7: more
+	-- obvious there than in the corner).
 	upgrade, upgradeScale = button(homeRoot, "upgradePen", upgradeSize, Vector2.new(0.5, 0.5),
-		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
+		UDim2.new(0.5, 0, 0, MARGIN + upgradeSize.Y.Offset / 2))
 	-- It fills up as your gold does (QM, Oct 7), like the Hold bar: the disabled art
 	-- is the button, and the enabled art sits on it, cropped to gold / price from the left.
 	local fill = Instance.new("Frame")
