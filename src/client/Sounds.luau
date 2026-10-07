@@ -55,7 +55,7 @@ local MUSIC = {
 }
 local VOLUME = 0.5
 local GALLOP_VOLUME = 0.35
-local MUSIC_VOLUME = 0.25
+local MUSIC_VOLUME = 0.175 -- 70% of 0.25 (QM, Oct 7: a touch quieter)
 local MUSIC_FADE = 1.2 -- seconds
 
 local folder = Instance.new("Folder")
