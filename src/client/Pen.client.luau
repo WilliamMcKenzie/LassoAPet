@@ -94,6 +94,12 @@ end
 local mine = PenPets.pets -- [model] = { id, kind, merged, fuse, income, stats }
 local function makeRideable(pen, id, pet, kind, merged, fuse, income, stats)
 	if pen ~= myPen() then
+		-- Someone else's: no RIDE, but its nameplate and ring show as yours do (QM, Oct 7).
+		local model = pet.animal.model
+		PenPets.others[model] = { kind = kind, merged = merged or 1, fuse = fuse, income = income, stats = stats }
+		model.Destroying:Connect(function()
+			PenPets.others[model] = nil
+		end)
 		return
 	end
 	for _, part in pet.animal.model:GetDescendants() do
@@ -335,10 +341,13 @@ local function ridePetOf(pen)
 		return nil
 	end
 	local fuse = owner:GetAttribute("RideFuse")
+	local stats = owner:GetAttribute("RideStats") -- (a hybrid's Speed, Stamina)
 	return {
 		pet = kind,
 		merged = owner:GetAttribute("RideMerged"),
 		fuse = if fuse and Animals:FindFirstChild(fuse) then fuse else nil,
+		income = owner:GetAttribute("RideIncome"),
+		stats = if typeof(stats) == "Vector2" then { Speed = stats.X, Stamina = stats.Y } else nil,
 		x = slot.Position.X - pen.Area.Position.X,
 		z = slot.Position.Z - pen.Area.Position.Z,
 	}
@@ -361,8 +370,9 @@ local function refresh(pen)
 		elseif item.pet and s.pet and not s.jump and (item.pet ~= s.kind or item.fuse ~= s.fuse or (item.merged or 1) ~= (s.merged or 1)) then
 			remove(s) -- swapped with the pet you ride, merged or fused (shown again below)
 			list[id] = nil
-		elseif item.pet and s.pet and mine[s.pet.animal.model] then -- (fused into a hybrid that looks the same)
-			mine[s.pet.animal.model].stats, mine[s.pet.animal.model].income = item.stats, item.income
+		elseif item.pet and s.pet and (mine[s.pet.animal.model] or PenPets.others[s.pet.animal.model]) then -- (fused into a hybrid that looks the same)
+			local info = mine[s.pet.animal.model] or PenPets.others[s.pet.animal.model]
+			info.stats, info.income = item.stats, item.income
 		end
 	end
 	for id, item in items do

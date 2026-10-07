@@ -12,6 +12,7 @@ local PenPets = {
 	merges = {}, -- [Fusion.key] = { at = Vector3 up in the air, landAt = os.clock() the new pet pops out }
 	starter = nil, -- Ride.client's pet waiting on its spot (its entity: kind, merged, fuse, animal)
 	plated = {}, -- [model] = true: pets showing their nameplate (PetPlates.client), which don't pop "+N$"
+	others = {}, -- [model] = { kind, merged, fuse, income, stats }: other players' pets in their pens (Pen.client), for their nameplates
 }
 
 PenPets.MERGE_UP = 8 -- studs over the pen (2 m)

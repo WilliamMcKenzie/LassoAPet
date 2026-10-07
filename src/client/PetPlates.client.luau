@@ -29,6 +29,7 @@ local TIER_GROWTH = 1.2 -- the plate's size per size tier up from a small pet (Q
 local ABOVE = 0.6 -- studs between the pet's top and the plate
 local FONT = Enum.Font.FredokaOne
 local CHECK = 0.1 -- seconds between looks round
+local RING_REACH = 5 -- studs from another player's pet's outline where it gets the ring (RIDE's reach on yours)
 
 -- The rarity colours (QM, Oct 7); Common keeps the inventory slots' grey.
 local COLORS = {
@@ -150,6 +151,7 @@ local function hide(model)
 end
 
 local candidates = {}
+local otherRing, ringOn -- the ring round someone else's pet (Outline.ring), and which
 local untilCheck = 0
 RunService.Heartbeat:Connect(function(dt)
 	untilCheck -= dt
@@ -177,6 +179,10 @@ RunService.Heartbeat:Connect(function(dt)
 			-- (gold a second: a merged pet's for all it's made of, a hybrid's both pets': Hatchery's income)
 			consider(model, info.kind, info.fuse, info.stats, info.income or (Config.PetIncome[info.kind] or 0) * (info.merged or 1))
 		end
+		-- Other players' pets show theirs too (QM, Oct 7), as yours do but for RIDE.
+		for model, info in PenPets.others do
+			consider(model, info.kind, info.fuse, info.stats, info.income or (Config.PetIncome[info.kind] or 0) * (info.merged or 1))
+		end
 		-- The pet on your spot (Ride.client's starter), unless it's the one you're out on.
 		local starter = PenPets.starter
 		if starter and starter.kind == player:GetAttribute("RidePet") then
@@ -196,6 +202,27 @@ RunService.Heartbeat:Connect(function(dt)
 	for model in plates do
 		if not keep[model] then
 			hide(model)
+		end
+	end
+	-- The ring round the nearest of someone else's pets once you're right by it, as
+	-- RIDE's is round yours (Ride.client marks your own).
+	local near
+	for _, c in candidates do
+		if PenPets.others[c.model] then
+			local _, size = Outline.box(c.model)
+			if c.d - math.max(size.X, size.Z) / 2 <= RING_REACH then
+				near = c.model
+			end
+			break
+		end
+	end
+	if near ~= ringOn then
+		ringOn = near
+		if near then
+			otherRing = otherRing or Outline.ring(near)
+			otherRing:fit(near, near.PrimaryPart)
+		elseif otherRing then
+			otherRing:hide()
 		end
 	end
 end)
