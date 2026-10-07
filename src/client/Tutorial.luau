@@ -143,7 +143,7 @@ local PICTURES = {
 	-- image "": not uploaded yet, the text hint too)
 	saveDesert = { image = "rbxassetid://94733777866922", width = 1830, height = 127, cost = 500 }, -- assets/ui/HintSaveDesert.png
 	-- Over the Tundra gate, after the merge lesson (QM, Oct 7). image "": not uploaded yet, its text instead
-	mergeFaster = { image = "", width = 1125, height = 145 }, -- assets/ui/HintMergeFaster.png
+	mergeFaster = { image = "rbxassetid://97716311204622", width = 1125, height = 145 }, -- assets/ui/HintMergeFaster.png
 }
 local picture = Instance.new("ImageLabel")
 picture.Name = "HintPicture"
