@@ -483,10 +483,10 @@ fuseButton.ZIndex = 5
 Instance.new("UIScale").Parent = fuseButton
 fuseButton.Activated:Connect(fuse)
 fuseButton.Parent = page
-priceLabel = text(fuseButton, UDim2.new(1, -24, 0, 88), UDim2.fromScale(0.5, 0.71), 76) -- (QM's mockups: big, under the arm)
+priceLabel = text(fuseButton, UDim2.new(1, -24, 0, 70), UDim2.fromScale(0.5, 0.72), 60) -- (QM's mockups: under the arm; QM, Oct 7: a touch smaller than 76)
 priceLabel.ZIndex = 6
 priceLabel.TextScaled = true -- (a long price fits)
-Instance.new("UITextSizeConstraint", priceLabel).MaxTextSize = 76
+Instance.new("UITextSizeConstraint", priceLabel).MaxTextSize = 60
 for _, name in { "Gold", "FuseLesson" } do
 	player:GetAttributeChangedSignal(name):Connect(function()
 		if open then
