@@ -700,7 +700,9 @@ local function spawnStarter()
 end
 
 -- One prompt, kept on whichever pet RIDE rides. It draws nothing; E still
--- works, and the RIDE button shows while it's in range. It lives in Terrain and
+-- works. The RIDE button shows while you're within RIDE_REACH of the pet, measured
+-- here (updateRideTarget), not from the prompt's PromptShown: that didn't come back
+-- after a respawn (QM, Oct 7), and RIDE was gone for good. It lives in Terrain and
 -- follows the pet each frame, so it isn't destroyed along with a pet's model.
 local rideSpot = Instance.new("Attachment")
 local rideOffset = CFrame.identity -- rideSpot relative to the pet's root
@@ -713,14 +715,6 @@ ridePrompt.RequiresLineOfSight = false
 ridePrompt.MaxActivationDistance = RIDE_REACH
 ridePrompt.Style = Enum.ProximityPromptStyle.Custom
 ridePrompt.Parent = rideSpot
-ridePrompt.PromptShown:Connect(function()
-	rideShown = true
-	Hud.showRide(true)
-end)
-ridePrompt.PromptHidden:Connect(function()
-	rideShown = false
-	Hud.showRide(false)
-end)
 
 -- Your pets at home: the starter's model and every pet in your pen.
 local function homePets()
@@ -842,11 +836,17 @@ local function updateRideTarget()
 			else box:PointToWorldSpace(Vector3.new(math.clamp(at.X, -half.X, half.X), 0, math.clamp(at.Z, -half.Z, half.Z)))
 		rideSpot.WorldCFrame = CFrame.new(Vector3.new(edge.X, if hrp then hrp.Position.Y else edge.Y, edge.Z))
 	end
+	local near = rideModel ~= nil and hrp ~= nil and (rideSpot.WorldPosition - hrp.Position).Magnitude <= RIDE_REACH
+	if near ~= rideShown then
+		rideShown = near
+		Hud.showRide(near)
+	end
 end
 
 local function clearRideTarget()
 	rideModel = nil
 	rideSpot.Parent = nil
+	rideShown = false -- (Hud.show hides the button itself)
 end
 
 local function rideFromHome()
@@ -4763,6 +4763,8 @@ end)
 Hud.init(onAction, goHome, rideFromHome, vfx.askContinue)
 
 player.CharacterAdded:Connect(function()
+	clearRideTarget() -- the prompt starts afresh for the new character (E)
+	Hud.showRide(false)
 	if phase ~= "idle" then
 		cleanup()
 		phase = "idle"
