@@ -95,9 +95,13 @@ function Fusion.stats(kind, fuse, saved)
 	return Fusion.best(Config.AnimalStats[kind] or ONE, Config.AnimalStats[fuse] or ONE)
 end
 
--- The best of both worlds (QM): the faster one's Speed and the longer one's Stamina.
+-- The best of both worlds (QM): the faster one's Speed plus half the slower one's
+-- (QM, Oct 7: max + min / 2), and the longer one's Stamina.
 function Fusion.best(a, b)
-	return { Speed = math.max(a.Speed, b.Speed), Stamina = math.max(a.Stamina, b.Stamina) }
+	return {
+		Speed = math.max(a.Speed, b.Speed) + math.min(a.Speed, b.Speed) / 2,
+		Stamina = math.max(a.Stamina, b.Stamina),
+	}
 end
 
 -- The donor's size tier stands in for the base's: each tier is Config.TierGrowth
