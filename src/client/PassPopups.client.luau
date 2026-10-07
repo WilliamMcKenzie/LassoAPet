@@ -25,10 +25,10 @@ local buyPass = ReplicatedStorage:WaitForChild("BuyPass")
 -- QM's cards (assets/ui/PassPopup*.png), their size in pixels as drawn, and how
 -- big they show: SCALE x that, in pixels of Hud's 1320-wide screen.
 local ART = {
-	VIP = { id = "", size = Vector2.new(716, 352) }, -- PassPopupVIP.png
-	FastHatch = { id = "", size = Vector2.new(1388, 402) }, -- PassPopupFastHatch.png
-	AutoHatch = { id = "", size = Vector2.new(1140, 402) }, -- PassPopupAutoHatch.png
-	DoubleGold = { id = "", size = Vector2.new(926, 378) }, -- PassPopupDoubleGold.png
+	VIP = { id = "rbxassetid://132592725982767", size = Vector2.new(716, 352) }, -- PassPopupVIP.png
+	FastHatch = { id = "rbxassetid://85992452177736", size = Vector2.new(1388, 402) }, -- PassPopupFastHatch.png
+	AutoHatch = { id = "rbxassetid://87748999824256", size = Vector2.new(1140, 402) }, -- PassPopupAutoHatch.png
+	DoubleGold = { id = "rbxassetid://102508237570181", size = Vector2.new(926, 378) }, -- PassPopupDoubleGold.png
 }
 local SCALE = 0.23 -- the VIP card about 165 x 80, as in QM's mockup
 local REFERENCE_WIDTH = 1320 -- Hud's
