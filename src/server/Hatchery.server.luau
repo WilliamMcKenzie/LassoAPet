@@ -59,6 +59,18 @@ local function savedStats(stats)
 	return if speed and stamina and speed > 0 and stamina > 0 then { Speed = speed, Stamina = stamina } else nil
 end
 
+-- A saved hybrid's stats as it loads, brought up to the fusion speed formula (QM, Oct 7:
+-- max + min / 2, Fusion.best) for its two animals. Only ever raises Speed, from the
+-- animals themselves, so loading again doesn't add to it.
+local function loadedHybridStats(kind, fuse, stats)
+	local saved = savedStats(stats)
+	if not saved then
+		return nil
+	end
+	local fresh = Fusion.best(Fusion.stats(kind), Fusion.stats(fuse))
+	return { Speed = math.max(saved.Speed, fresh.Speed), Stamina = saved.Stamina }
+end
+
 local function hatchTime(kind)
 	local rarity = require(Animals[kind]).Rarity
 	return Config.PetHatchTime[kind] or Config.HatchTime[rarity] or Config.HatchTime.Uncommon
@@ -216,7 +228,7 @@ local function load(player)
 						profile.rideMerged = tonumber(data.rideMerged) and math.max(1, math.floor(data.rideMerged)) or nil
 						if isAnimal(data.rideFuse) and data.rideFuse ~= data.ride and tonumber(data.rideIncome) then
 							profile.rideFuse, profile.rideIncome = data.rideFuse, math.max(0, tonumber(data.rideIncome))
-							profile.rideStats = savedStats(data.rideStats)
+							profile.rideStats = loadedHybridStats(profile.ride, profile.rideFuse, data.rideStats)
 						end
 					end
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
@@ -234,7 +246,7 @@ local function load(player)
 							if not (item.pet and isAnimal(item.fuse) and item.fuse ~= item.pet and tonumber(item.income)) then
 								item.fuse, item.income = nil, nil -- (a hybrid: Shared/Fusion)
 							end
-							item.stats = item.fuse and savedStats(item.stats) or nil
+							item.stats = item.fuse and loadedHybridStats(item.pet, item.fuse, item.stats) or nil
 							profile.items[id] = item
 						end
 					end
