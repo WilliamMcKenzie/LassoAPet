@@ -42,8 +42,9 @@ function Rig.build(spec)
 
 	local parts = { Root = root }
 	local motors = {}
+	local built = {} -- [i] = the part made for spec.parts[i] (names can repeat: parts[name] is the last)
 
-	for _, def in ipairs(spec.parts) do
+	for i, def in ipairs(spec.parts) do
 		local parent = parts[def.parent]
 		assert(parent, spec.name .. ": " .. def.name .. " has unknown parent " .. tostring(def.parent))
 
@@ -80,6 +81,7 @@ function Rig.build(spec)
 
 		part.Parent = model
 		parts[def.name] = part
+		built[i] = part
 	end
 
 	-- Fine studs from a tiled texture; surface studs are fixed at 1 stud, too coarse here.
@@ -87,18 +89,18 @@ function Rig.build(spec)
 	-- hides it, whatever the animation does, and every texture is drawn (Rig.covered).
 	if spec.studTexture then
 		local byBone = {}
-		for _, def in ipairs(spec.parts) do
-			local part = parts[def.name]
+		for i, def in ipairs(spec.parts) do
+			local part = built[i]
 			if part.ClassName == "Part" and not def.hidden then
 				byBone[def.parent] = byBone[def.parent] or {}
 				table.insert(byBone[def.parent], part)
 			end
 		end
-		for _, def in ipairs(spec.parts) do
+		for i, def in ipairs(spec.parts) do
 			if def.plain or def.hidden or def.neon then
 				continue
 			end
-			local part = parts[def.name]
+			local part = built[i]
 			if not def.metal and Studs.apply(part, spec.studTexture.tile) then
 				continue -- studs as a material (Config.StudMaterial): no textures
 			end
