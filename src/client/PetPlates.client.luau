@@ -107,7 +107,9 @@ local function build(model)
 	-- Both run to the board's right edge: a name too long for that shrinks to fit.
 	local name = text(plate, UDim2.fromScale(1.5 - 90 / 300, 0.6), UDim2.fromScale(90 / 300, 28 / 125), Color3.new(1, 1, 1))
 	local speed = text(plate, UDim2.fromScale(1.5 - 106 / 300, 0.58), UDim2.fromScale(106 / 300, 98 / 125), Color3.new(1, 1, 1))
-	board.Parent = player:WaitForChild("PlayerGui")
+	-- On the pet itself: a BillboardGui adorned from PlayerGui doesn't draw on these
+	-- parts (Gate.client found the same, Oct 5).
+	board.Parent = model.PrimaryPart or model
 	local p = { board = board, scale = scale, name = name, speed = speed }
 	plates[model] = p
 	model.Destroying:Connect(function()
