@@ -391,6 +391,7 @@ vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
 vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
 vfx.godlands.onPieces = slices.pieces
 vfx.hazards = require(script.Parent.GodlandsHazards) -- the Godlands' wild animals: spikes, sludge, confusion, charges, hunts
+vfx.gateSmash = require(script.Parent.GateSmash) -- speed gates: own pets fast enough break locked gates (Shared/SpeedGates)
 vfx.speedFx = require(script.Parent.SpeedFx) -- the speed cap's curve, speed lines and wider view (QM, Oct 7)
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
@@ -1039,7 +1040,7 @@ local function fail(reason, tip)
 	-- Continue (Config.ContinueTiers): a crash or buck-off on the way out or
 	-- back can be bought off, picking up right here on the same kind of animal,
 	-- with the egg. Not into a locked gate, and not in the tutorial.
-	local gate = WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1))
+	local gate = WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1, vfx.gateSmash.level or 1))
 	vfx.revive = nil
 	if mount and (reason == "CRASH!" or reason == "BUCKED OFF") and (phase == "outbound" or phase == "return")
 		and not (phase == "outbound" and mount.z < gate + 2.4) and not Tutorial.active
@@ -1132,7 +1133,7 @@ local function gateZ()
 	if vfx.eventRun then
 		return -math.huge -- riding an event's animal: no barriers this ride (QM)
 	end
-	return WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1))
+	return WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1, vfx.gateSmash.level or 1))
 end
 
 -- On the way out, a trail of arrows on the ground from your pet to the nearest
@@ -3527,6 +3528,9 @@ local function checkRide(dt)
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)
 	end
+	if phase == "outbound" and mount.z < gateZ() + 2.4 then
+		vfx.gateSmash.hit(mount) -- fast enough: it shatters and the next gate's the one (GateSmash)
+	end
 	do
 		-- The Godlands' mountains crash you whatever you're riding or doing, unless
 		-- you're flying over or burrowing under them.
@@ -3588,7 +3592,7 @@ local function checkRide(dt)
 	if ability then
 		-- Charging, leaping over everything or coiled up rattling: nothing crashes it.
 		if phase == "outbound" and mount.z < gateZ() + 2.4 then
-			return fail("CRASH!") -- except a locked gate
+			return fail("CRASH!", vfx.gateSmash.tip()) -- except a locked gate
 		end
 		return reachHome()
 	end
@@ -3598,7 +3602,7 @@ local function checkRide(dt)
 	if (kind == "Fly" and (mount.hop or 0) > 8) or (kind == "Burrow" and (mount.hop or 0) < -2) then
 		-- Over or under everything: nothing to hit but a locked gate.
 		if phase == "outbound" and mount.z < gateZ() + 2.4 then
-			return fail("CRASH!")
+			return fail("CRASH!", vfx.gateSmash.tip())
 		end
 		return reachHome()
 	elseif kind == "Smash" then
@@ -3635,7 +3639,7 @@ local function checkRide(dt)
 		return fail("CRASH!", hazard)
 	end
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
-		return fail("CRASH!") -- a locked gate
+		return fail("CRASH!", vfx.gateSmash.tip()) -- a locked gate
 	end
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z

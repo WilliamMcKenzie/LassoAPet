@@ -13,6 +13,8 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Sounds = require(script.Parent.Sounds)
+local SpeedGates = require(ReplicatedStorage.Shared.SpeedGates)
+local GateSmash = require(script.Parent.GateSmash)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -88,6 +90,26 @@ local function build(i)
 	card.Position = UDim2.fromScale(0.5, 0.5)
 	card.Size = UDim2.fromScale(CARD_HEIGHT * height * CARD_ASPECT / width, CARD_HEIGHT)
 	card.Parent = sheet
+
+	-- Speed gates (Shared/SpeedGates): the m/s it takes, under the card.
+	local need = SpeedGates.on() and SpeedGates.need(i)
+	if need then
+		local speed = Instance.new("TextLabel")
+		speed.Text = need .. " m/s"
+		speed.Font = Enum.Font.FredokaOne
+		speed.TextScaled = true
+		speed.TextColor3 = Color3.new(1, 1, 1)
+		speed.BackgroundTransparency = 1
+		speed.AnchorPoint = Vector2.new(0.5, 0)
+		speed.Position = UDim2.fromScale(0.5, 0.5 + CARD_HEIGHT / 2 + 0.01)
+		speed.Size = UDim2.fromScale(0.6, 0.2)
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 8
+		stroke.Parent = speed
+		speed.Parent = sheet
+		table.insert(fades, { speed, "TextTransparency" })
+		table.insert(fades, { stroke, "Transparency" })
+	end
 
 	-- (the part goes in first and carries its own sheet: a sheet adorned from PlayerGui
 	-- stopped drawing on these parts, Oct 5)
@@ -223,6 +245,19 @@ end
 
 player:GetAttributeChangedSignal("PenLevel"):Connect(refresh)
 refresh()
+
+-- Ridden through fast enough (GateSmash): it shatters right there, mid-ride, no camera
+-- flight. If the server says no after all, it's back.
+GateSmash.smashed.Event:Connect(function(i)
+	local gate = gates[i]
+	if gate then
+		gates[i] = nil
+		gate.gui:Destroy()
+		gate.part:Destroy()
+		shatter(i)
+	end
+end)
+GateSmash.rejected.Event:Connect(refresh)
 
 -- Riding an exclusive event's animal (Ride.client sets "EventRun" on you, locally):
 -- every barrier is gone for that ride, and back after it (QM).

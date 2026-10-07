@@ -19,6 +19,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Studs = require(ReplicatedStorage.Shared.Studs)
+local SpeedGates = require(ReplicatedStorage.Shared.SpeedGates)
 local Funnel = require(script.Parent.Funnel)
 require(script.Parent.Passes) -- (PassVIP: the gold fence, below)
 
@@ -364,22 +365,64 @@ local zoneUnlocked = Instance.new("RemoteEvent")
 zoneUnlocked.Name = "ZoneUnlocked"
 zoneUnlocked.Parent = ReplicatedStorage
 
+-- After the level's gone up one, bought or broken.
+local function opened(player)
+	if level(player) == 2 then
+		if not SpeedGates.on() then
+			player:SetAttribute("FuseLesson", true) -- fusing opens with the Desert: the lesson's due (Hatchery saves it; client FuseLesson)
+		end
+		player:SetAttribute("DesertAt", os.time()) -- (Stats.server: how long they stay after)
+	end
+	Funnel.step(player, "Unlocked Zone 2")
+	Funnel.zone(player, level(player))
+end
+
 -- Returns true if the upgrade went through.
 upgrade.OnServerInvoke = function(player)
 	local nextBiome = Config.Biomes[level(player) + 1]
 	local cost = nextBiome and nextBiome.UnlockCost
 	local gold = player:GetAttribute("Gold") or 0
-	if not cost or gold < cost then
+	if not cost or gold < cost or SpeedGates.on() then -- (speed gates: not for sale)
 		return false
 	end
 	player:SetAttribute("Gold", gold - cost)
 	zoneUnlocked:FireClient(player, level(player) + 1)
 	player:SetAttribute("PenLevel", level(player) + 1)
-	if level(player) == 2 then
-		player:SetAttribute("FuseLesson", true) -- fusing opens with the Desert: the lesson's due (Hatchery saves it; client FuseLesson)
-		player:SetAttribute("DesertAt", os.time()) -- (Stats.server: how long they stay after)
+	opened(player)
+	return true
+end
+
+-- Speed gates (Shared/SpeedGates): the client's ridden into gate i fast enough and
+-- already shattered it (GateSmash); true if that stands. Only on your own pet: "out"
+-- (RideCue) set off on it, and lassoing onto a stampede animal ("take") or the
+-- ride's "end" stops that. Its m/s is the pet you ride's (RidePet, RideFuse, RideStats).
+local onOwnPet = {}
+ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
+	if what == "out" then
+		onOwnPet[player] = true
+	elseif what == "take" or what == "end" then
+		onOwnPet[player] = nil
 	end
-	Funnel.step(player, "Unlocked Zone 2")
-	Funnel.zone(player, level(player))
+end)
+Players.PlayerRemoving:Connect(function(player)
+	onOwnPet[player] = nil
+end)
+
+local breakGate = Instance.new("RemoteFunction")
+breakGate.Name = "BreakGate"
+breakGate.Parent = ReplicatedStorage
+breakGate.OnServerInvoke = function(player, i)
+	if not SpeedGates.on() or i ~= level(player) + 1 or not onOwnPet[player] then
+		return false
+	end
+	local need = SpeedGates.need(i)
+	local stats = player:GetAttribute("RideStats")
+	local kind = player:GetAttribute("RidePet")
+	if not need or type(kind) ~= "string" or kind == ""
+		or SpeedGates.mps(kind, player:GetAttribute("RideFuse"), stats and { Speed = stats.X, Stamina = stats.Y }) < need then
+		return false
+	end
+	player:SetAttribute("PenLevel", i)
+	opened(player)
 	return true
 end

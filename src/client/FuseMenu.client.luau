@@ -20,6 +20,7 @@ local RunService = game:GetService("RunService")
 
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Config = require(ReplicatedStorage.Shared.Config)
+local SpeedGates = require(ReplicatedStorage.Shared.SpeedGates)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local ModalPop = require(script.Parent.ModalPop)
@@ -75,7 +76,11 @@ local cards = {} -- [pet] = its card
 local fuseButton, tip, nameA, nameB, priceLabel
 
 -- Gold to fuse the two picked (QM: each pet adds its rarity's price, a hybrid all its pets').
+-- (Speed gates: by how fast the hybrid will be instead, Shared/SpeedGates.)
 local function priceOf(a, b)
+	if SpeedGates.on() then
+		return SpeedGates.mergePrice(a, b)
+	end
 	return Fusion.worth(a.kind, a.fuse, a.worth) + Fusion.worth(b.kind, b.fuse, b.worth)
 end
 
@@ -188,12 +193,12 @@ local function yourPets()
 	local list = {}
 	for model, pet in PenPets.pets do
 		if model.Parent then
-			table.insert(list, { model = model, id = pet.id, kind = pet.kind, fuse = pet.fuse, merged = pet.merged, worth = pet.worth })
+			table.insert(list, { model = model, id = pet.id, kind = pet.kind, fuse = pet.fuse, merged = pet.merged, worth = pet.worth, stats = pet.stats })
 		end
 	end
 	local starter = PenPets.starter
 	if starter and starter.animal.model.Parent and starter.kind == player:GetAttribute("RidePet") then
-		table.insert(list, { model = starter.animal.model, id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged, worth = player:GetAttribute("RideWorth") })
+		table.insert(list, { model = starter.animal.model, id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged, worth = player:GetAttribute("RideWorth"), stats = starter.stats })
 	end
 	local ranks = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5 }
 	table.sort(list, function(a, b) -- rarest first, then by kind, so a kind's pets sit together
@@ -231,6 +236,18 @@ local function refresh()
 	local price = if ready and not lesson then priceOf(picks[1], picks[2]) else 0
 	-- (not ready: the least it could cost with what's picked, so it's never blank: QM)
 	local least = if picks[1] then Fusion.worth(picks[1].kind, picks[1].fuse, picks[1].worth) + Config.FusePrice.Common else 2 * Config.FusePrice.Common
+	if SpeedGates.on() then
+		-- (speed gates: the cheapest merge of what's picked with any of your pets, or of any two)
+		least = math.huge
+		for i, a in pets do
+			for j, b in pets do
+				if i < j and (not picks[1] or a == picks[1] or b == picks[1]) then
+					least = math.min(least, priceOf(a, b))
+				end
+			end
+		end
+		least = if least < math.huge then least else 0
+	end
 	priceLabel.Text = if lesson then "FREE" elseif ready then Hud.money(price) else Hud.money(least)
 	local can = ready and (player:GetAttribute("Gold") or 0) >= price
 	local art = if can then BUTTON_ART.on else BUTTON_ART.off

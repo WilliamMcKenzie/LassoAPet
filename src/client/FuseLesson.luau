@@ -16,6 +16,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
+local SpeedGates = require(ReplicatedStorage.Shared.SpeedGates)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 
@@ -150,7 +151,8 @@ end)
 -- close-up's on.
 local function step(phase, cutscene)
 	local fused = running and Hud.fusedAt and Hud.fusedAt >= from -- (the server's ended it then: its fuse is the free one)
-	if finished or not (player:GetAttribute("FuseLesson") or fused) or (player:GetAttribute("PenLevel") or 1) < 2 then
+	-- (speed gates: it's due from the tutorial's end, before the Desert)
+	if finished or not (player:GetAttribute("FuseLesson") or fused) or ((player:GetAttribute("PenLevel") or 1) < 2 and not SpeedGates.on()) then
 		running = nil
 		return nil, nil
 	elseif phase ~= "idle" or cutscene or camera.CameraType ~= Enum.CameraType.Custom then

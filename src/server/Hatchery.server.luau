@@ -37,6 +37,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Funnel = require(script.Parent.Funnel)
 local Passes = require(script.Parent.Passes)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
+local SpeedGates = require(ReplicatedStorage.Shared.SpeedGates)
 local Animals = ReplicatedStorage.Shared.Animals
 
 local EDGE = 2 -- studs kept from the pen's fences
@@ -709,6 +710,9 @@ remote("TutorialDone", function(player)
 	end
 	player:SetAttribute("Tutorial", nil)
 	Funnel.step(player, "Tutorial Done")
+	if SpeedGates.on() and (player:GetAttribute("PenLevel") or 1) < 2 then
+		player:SetAttribute("FuseLesson", true) -- speed gates: merging's how you get to the Desert, so its lesson's next (FuseLesson)
+	end
 end)
 
 -- Ride the pet `id` from now on; the pet you rode takes its place in the pen.
@@ -810,7 +814,9 @@ remote("FusePets", function(player, idA, idB)
 	local stats = Fusion.best(Fusion.stats(a.pet, a.fuse, a.stats), Fusion.stats(b.pet, b.fuse, b.stats)) -- the best of both (QM)
 	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's fuse is free, once: QM)
 	local worth = Fusion.worth(a.pet, a.fuse, a.worth) + Fusion.worth(b.pet, b.fuse, b.worth) -- (QM: a hybrid costs all its pets)
-	local price = if lesson then 0 else worth -- (QM: fusing costs gold, by rarity)
+	local price = if lesson then 0
+		elseif SpeedGates.on() then SpeedGates.mergePrice({ kind = a.pet, fuse = a.fuse, stats = a.stats }, { kind = b.pet, fuse = b.fuse, stats = b.stats }) -- (speed gates: by the hybrid's m/s)
+		else worth -- (QM: fusing costs gold, by rarity)
 	local gold = player:GetAttribute("Gold") or 0
 	if gold < price then
 		return

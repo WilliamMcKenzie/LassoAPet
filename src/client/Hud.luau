@@ -14,6 +14,7 @@ local RollMenu = require(script.Parent.RollMenu)
 local Shop = require(script.Parent.Shop)
 local Gamepad = require(script.Parent.Gamepad)
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
+local SpeedGates = require(game:GetService("ReplicatedStorage").Shared.SpeedGates)
 
 local Hud = {}
 
@@ -591,7 +592,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		end
 	end)
 	fuseIcon.Visible = pets.Visible and Hud.fuseUnlocked()
-	for _, name in { "PenLevel", "FuseLesson" } do
+	for _, name in { "PenLevel", "FuseLesson", "Tutorial" } do
 		player:GetAttributeChangedSignal(name):Connect(function()
 			Hud.setTutorial(tutorial) -- (Fuse shows from the Desert on)
 		end)
@@ -697,8 +698,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	local trail = false -- selling the Rainbow Trail
 	local function refreshUpgrade()
 		local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
-		cost = nextBiome and nextBiome.UnlockCost
-		trail = cost == nil and not player:GetAttribute("RainbowTrail")
+		cost = nextBiome and not SpeedGates.on() and nextBiome.UnlockCost or nil -- (speed gates: zones aren't for sale)
+		trail = nextBiome == nil and not player:GetAttribute("RainbowTrail")
 		if trail then
 			cost = Config.RainbowTrail.Price
 		end
@@ -1524,9 +1525,11 @@ end
 
 -- Fusing opens with the Desert: the Fuse button's hidden till then (QM, Oct 7), and
 -- till the fuse lesson (FuseLesson) has shown it to you.
+-- (Speed gates: merging's how you get to the Desert, so it's there from the tutorial's end.)
 function Hud.fuseUnlocked()
 	local player = Players.LocalPlayer
-	return (player:GetAttribute("PenLevel") or 1) >= 2 and not player:GetAttribute("FuseLesson")
+	local open = if SpeedGates.on() then not player:GetAttribute("Tutorial") else (player:GetAttribute("PenLevel") or 1) >= 2
+	return open and not player:GetAttribute("FuseLesson")
 end
 
 -- The first-time tutorial (Tutorial.luau) shows only what each step needs.

@@ -42,6 +42,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
+local SpeedGates = require(ReplicatedStorage.Shared.SpeedGates)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
@@ -420,8 +421,10 @@ local function showGoal(id)
 	local level = player:GetAttribute("PenLevel") or 1
 	local upNext = Config.Biomes[level + 1]
 	if upNext then
-		goalText = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
-		goalDesert = upNext.Name == "Desert" and upNext.UnlockCost == PICTURES.saveDesert.cost and PICTURES.saveDesert.image ~= ""
+		local need = SpeedGates.on() and SpeedGates.need(level + 1)
+		goalText = if need then "Go " .. need .. " m/s to break into the " .. upNext.Name .. "!"
+			else "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
+		goalDesert = not need and upNext.Name == "Desert" and upNext.UnlockCost == PICTURES.saveDesert.cost and PICTURES.saveDesert.image ~= ""
 		report("gate")
 		gateFlight(level)
 	end

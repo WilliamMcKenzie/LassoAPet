@@ -611,6 +611,19 @@ return {
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
 	-- view (up to MaxFov) grow from Start studs/s. Each part off with On = false.
+	-- Speed gates (QM, Oct 7; speed-gates branch, Shared/SpeedGates): a zone's gate shatters when
+	-- you ride into it on your own pet with at least Need[zone] m/s (its nameplate's number:
+	-- Speed x 20, uncapped, no abilities); slower, or on a wild animal, it crashes you as before.
+	-- Zones aren't bought with gold any more (UnlockCost unused); merging costs
+	-- MergePrice.Base x (the hybrid's m/s / From) ^ Power gold instead of FusePrice. The Merge
+	-- lesson comes right after the tutorial. Numbers are guesses: a first Meadow merge (Horse +
+	-- Pig at worst, 28) breaks the Desert; ~3-4 merges per zone after that.
+	-- On = false: gold gates and rarity prices as before.
+	SpeedGates = {
+		On = true,
+		Need = { Desert = 28, Snow = 80, Ocean = 150, Godlands = 300 },
+		MergePrice = { Base = 500, From = 28, Power = 5 },
+	},
 	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)
 	SpeedFeel = { On = true, Start = 44, Scale = 200, Lines = 28, Opacity = 0.6, LineSpeed = 2.2, FovKick = 18, MaxFov = 110 },
 	LassoRange = 34,
