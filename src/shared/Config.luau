@@ -608,6 +608,11 @@ return {
 	SprintDrain = 1.5, -- x the Hold bar's usual drain
 	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)
 	ReturnFovKick = 20, -- degrees added to the field of view on the ride home, to feel faster (0 = off)
+	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
+	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
+	-- view (up to MaxFov) grow from Start studs/s. Each part off with On = false.
+	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)
+	SpeedFeel = { On = true, Start = 44, Scale = 200, Lines = 28, Opacity = 0.6, LineSpeed = 2.2, FovKick = 18, MaxFov = 110 },
 	LassoRange = 34,
 	EggSlowMo = 0.5, -- time scale during the egg-grab close-up
 	-- Coming home with an egg: the pet leaps over the start line in slow motion while

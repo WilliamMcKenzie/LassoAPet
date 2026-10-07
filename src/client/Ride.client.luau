@@ -390,6 +390,7 @@ vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
 vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
 vfx.godlands.onPieces = slices.pieces
 vfx.hazards = require(script.Parent.GodlandsHazards) -- the Godlands' wild animals: spikes, sludge, confusion, charges, hunts
+vfx.speedFx = require(script.Parent.SpeedFx) -- the speed cap's curve, speed lines and wider view (QM, Oct 7)
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
 local LEAP_FROM = 8 -- studs before the start line where the leap starts
@@ -3406,7 +3407,7 @@ local function updateMount(dt)
 		turnT = math.min(turnT + dt / TURN_TIME, 1)
 		local eased = 0.5 - math.cos(turnT * math.pi) / 2
 		mount.yaw = math.pi * eased
-		mount.speed = Config.MountSpeed * statsOf(mount.kind, mount).Speed * (1 - math.sin(turnT * math.pi) * 0.7)
+		mount.speed = vfx.speedFx.curve(Config.MountSpeed * statsOf(mount.kind, mount).Speed * (1 - math.sin(turnT * math.pi) * 0.7))
 		mount.latVel *= math.exp(-6 * dt)
 		local look = CFrame.Angles(0, mount.yaw, 0).LookVector
 		mount.x = math.clamp(mount.x + look.X * mount.speed * dt, -EDGE, EDGE)
@@ -3483,6 +3484,9 @@ local function updateMount(dt)
 			mount.hop = math.abs(math.sin(f * math.pi * 2)) * (1 - 0.4 * f) * ability.cfg.Hop
 		end
 	end
+	local curved = vfx.speedFx.curve(targetSpeed) -- (past the knee it bends off: SpeedFx)
+	vfx.speedGain = if curved > 0 then targetSpeed / curved else 1
+	targetSpeed = curved
 	mount.speed += math.clamp(targetSpeed - mount.speed, -rate * dt, rate * dt)
 	if ability and ability.cfg.Kind == "Hunt" and vfx.huntTarget then
 		-- Hunting (the Robo Shark, QM): no momentum, any direction: it goes straight at
@@ -4408,6 +4412,8 @@ RunService.PreSimulation:Connect(function(dt)
 end)
 
 RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, function(dt)
+	local riding = mount and not cutscene and not heroLeap and (phase == "outbound" or phase == "return")
+	vfx.speedFx.update(dt, if riding then mount.speed * (vfx.speedGain or 1) else 0) -- speed lines, by the uncurved speed
 	if phase == "idle" then
 		return
 	end
@@ -4473,6 +4479,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
+	fov = math.max(fov, math.min(fov + vfx.speedFx.fovKick(), Config.SpeedFeel.MaxFov))
 	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
 end)
 
