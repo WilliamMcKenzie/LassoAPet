@@ -4,8 +4,8 @@
 -- (BreakGate, PenLevel.server). Ride.client counts `GateSmash.level` as unlocked
 -- straight away, so there's no wait for the server.
 --
---   GateSmash.hit(mount)  at a locked gate: true if it broke
---   GateSmash.tip()       the crash screen's tip there ("NEED 28 m/s"), or nil
+--   GateSmash.hit(mount, speed)  at a locked gate, at `speed` studs/s: true if it broke
+--   GateSmash.tip()       the crash screen's tip there ("NEED 15 mph"), or nil
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -24,13 +24,17 @@ local function nextGate()
 	return math.max(Rules.level(player), GateSmash.level or 1) + 1
 end
 
-function GateSmash.hit(mount)
-	if not Rules.on() or not mount or not mount.own then
-		return false -- wild animals never break gates
-	end
+GateSmash.allow = nil -- function(i): false holds gate i shut for now (the tutorial, till its gate step)
+GateSmash.mph = Rules.mph
+
+-- speed: the live studs/s you're running at, uncurved (QM, Oct 7 21:14: sprints count).
+function GateSmash.hit(mount, speed)
 	local i = nextGate()
+	if not Rules.on() or not mount or not (mount.own or Rules.anyAnimal(i)) then
+		return false -- wild animals only break the Desert's
+	end
 	local need = Rules.need(i)
-	if not need or Rules.mps(mount.kind, mount.fuse, mount.stats) < need then
+	if not need or Rules.mph(speed or 0) < need or (GateSmash.allow and not GateSmash.allow(i)) then
 		return false
 	end
 	GateSmash.level = i
@@ -47,7 +51,7 @@ end
 
 function GateSmash.tip()
 	local need = Rules.on() and Rules.need(nextGate())
-	return if need then "NEED " .. need .. " m/s" else nil
+	return if need then "NEED " .. need .. " mph" else nil
 end
 
 return GateSmash

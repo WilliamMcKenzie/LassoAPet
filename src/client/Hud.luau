@@ -1080,20 +1080,20 @@ function Hud.setDistance(text)
 	distance.UIGradient.Enabled = false
 end
 
--- The ride's speed on the bar, "43m/s" (QM, Oct 7): white at the top fading down to
+-- The ride's speed on the bar, "43mph" (QM, Oct 7): white at the top fading down to
 -- the colour of the furthest zone that speed's gate opens for (Shared/SpeedGates):
 -- Meadow green, then each gate's own colour (Desert yellow, Tundra cyan, Ocean
 -- blue, Godlands orange).
 local MEADOW_SPEED_COLOR = Color3.fromRGB(110, 235, 70)
-function Hud.setSpeed(ms)
+function Hud.setSpeed(mph)
 	local color = MEADOW_SPEED_COLOR
 	for i = 2, #Config.Biomes do
 		local need = SpeedGates.need(i)
-		if need and ms >= need then
+		if need and mph >= need then
 			color = Config.Biomes[i].GateColor or Config.GateColor
 		end
 	end
-	distance.Text = ms .. "m/s"
+	distance.Text = mph .. "mph"
 	distance.UIGradient.Color = ColorSequence.new(WHITE, color)
 	distance.UIGradient.Enabled = true
 end

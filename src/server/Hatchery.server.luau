@@ -705,13 +705,14 @@ end)
 
 remote("TutorialDone", function(player)
 	local profile = profiles[player]
+	local first = player:GetAttribute("Tutorial") == true
 	if profile then
 		profile.tutorial = true
 	end
 	player:SetAttribute("Tutorial", nil)
 	Funnel.step(player, "Tutorial Done")
-	if SpeedGates.on() and (player:GetAttribute("PenLevel") or 1) < 2 then
-		player:SetAttribute("FuseLesson", true) -- speed gates: merging's how you get to the Desert, so its lesson's next (FuseLesson)
+	if SpeedGates.on() and first then
+		player:SetAttribute("FuseLesson", true) -- speed gates: the tutorial ends through the Desert gate, and the merge lesson's next (FuseLesson)
 	end
 end)
 

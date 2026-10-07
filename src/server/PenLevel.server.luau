@@ -453,19 +453,28 @@ Players.PlayerRemoving:Connect(function(player)
 	onOwnPet[player] = nil
 end)
 
+local ABILITY_ROOM = 4 -- (the Leviathan's hunt and the like run a few times faster than a sprint)
 local breakGate = Instance.new("RemoteFunction")
 breakGate.Name = "BreakGate"
 breakGate.Parent = ReplicatedStorage
 breakGate.OnServerInvoke = function(player, i)
-	if not SpeedGates.on() or i ~= SpeedGates.level(player) + 1 or not onOwnPet[player] then
+	if not SpeedGates.on() or i ~= SpeedGates.level(player) + 1 then
 		return false
 	end
 	local need = SpeedGates.need(i)
-	local stats = player:GetAttribute("RideStats")
-	local kind = player:GetAttribute("RidePet")
-	if not need or type(kind) ~= "string" or kind == ""
-		or SpeedGates.mps(kind, player:GetAttribute("RideFuse"), stats and { Speed = stats.X, Stamina = stats.Y }) < need then
+	if not need then
 		return false
+	end
+	-- The Desert's breaks for any animal, wild ones too (QM: the tutorial zone). The rest:
+	-- only on your own pet, and only if it can get there at all, flat out (its top sprint,
+	-- with room for abilities' boosts, ABILITY_ROOM): the speed itself is live, on the client.
+	if not SpeedGates.anyAnimal(i) then
+		local stats = player:GetAttribute("RideStats")
+		local kind = player:GetAttribute("RidePet")
+		if not onOwnPet[player] or type(kind) ~= "string" or kind == ""
+			or SpeedGates.topMph(kind, player:GetAttribute("RideFuse"), stats and { Speed = stats.X, Stamina = stats.Y }) * ABILITY_ROOM < need then
+			return false
+		end
 	end
 	if i > #Config.Biomes then -- one of the endless Godlands' (its pen level stays the Godlands')
 		player:SetAttribute("GodGates", i - #Config.Biomes)

@@ -9,7 +9,10 @@
 --                                     biomes' lines; past that, the endless Godlands' (Config.SpeedGates.Endless)
 --   SpeedGates.biome(i)               the biome gate i stands in (its colour and card)
 --   SpeedGates.level(player)          gates opened: PenLevel, plus the Godlands' broken ("GodGates")
---   SpeedGates.mps(kind, fuse, stats) a pet's m/s (PetPlates shows the same)
+--   SpeedGates.mps(kind, fuse, stats) a pet's m/s stat scale (Speed x 20: merge prices)
+--   SpeedGates.mph(studsPerSecond)    a live speed in mph, as the ride bar and gates count it
+--   SpeedGates.topMph(kind, fuse, stats) a pet's flat-out sprint in mph (its nameplate)
+--   SpeedGates.anyAnimal(i)           gate i breaks for wild animals too (the Desert's)
 --   SpeedGates.mergePrice(a, b)       gold to merge pets a and b ({ kind, fuse, stats })
 
 local Config = require(script.Parent.Config)
@@ -38,6 +41,20 @@ end
 
 function SpeedGates.level(player)
 	return (player:GetAttribute("PenLevel") or 1) + (player:GetAttribute("GodGates") or 0)
+end
+
+function SpeedGates.mph(studsPerSecond)
+	return math.floor(studsPerSecond * Config.SpeedGates.MphPerStud + 0.5)
+end
+
+function SpeedGates.topMph(kind, fuse, stats)
+	local sprint = Config.PetSprintSpeed[kind] or Config.SprintSpeed
+	return SpeedGates.mph(Fusion.stats(kind, fuse, stats).Speed * Config.MountSpeed * sprint)
+end
+
+function SpeedGates.anyAnimal(i)
+	local biome = Config.Biomes[i]
+	return i <= #Config.Biomes and biome ~= nil and (Config.SpeedGates.AnyAnimal or {})[biome.Name] == true
 end
 
 function SpeedGates.mps(kind, fuse, stats)

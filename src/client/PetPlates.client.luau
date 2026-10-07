@@ -1,6 +1,6 @@
 -- Nameplates over your own pets when you walk up to them (QM, Oct 7), centred:
 -- the pet's name in its rarity's colour (a hybrid's fused name), the gold it earns a
--- second, and its speed (its Speed stat x 20, "m/s").
+-- second, and its speed (its Speed stat x 20, "m/s"; with speed gates, its top sprint in "mph").
 --
 -- Only the NEAREST few of your pets within REACH get one, and only while you're on
 -- foot. A pet with its plate up doesn't pop "+N$" (Ride.client skips the ones on
@@ -13,6 +13,7 @@ local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
+local SpeedGates = require(ReplicatedStorage.Shared.SpeedGates)
 local PenPets = require(script.Parent.PenPets)
 local Outline = require(script.Parent.Outline)
 local Hud = require(script.Parent.Hud)
@@ -126,7 +127,8 @@ local function show(model, kind, fuse, stats, income)
 		p.name.Text = Fusion.name(kind, fuse) -- a hybrid's fused name (QM, Oct 7)
 		p.name.TextColor3 = colorOf(kind, fuse)
 		p.gold.Text = "$" .. short(income * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)) .. "/s" -- (doubled by the x2 Gold pass)
-		p.speed.Text = math.floor(s.Speed * 20 + 0.5) .. "m/s"
+		-- (speed gates: its flat-out sprint in mph, the most the ride bar shows on it: QM, Oct 7)
+		p.speed.Text = if SpeedGates.on() then SpeedGates.topMph(kind, fuse, stats) .. "mph" else math.floor(s.Speed * 20 + 0.5) .. "m/s"
 	end
 	local box, size = Outline.box(model)
 	local grow = TIER_GROWTH ^ ((Config.PetTiers[kind] or 1) - 1)

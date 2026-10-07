@@ -91,11 +91,11 @@ local function build(i)
 	card.Size = UDim2.fromScale(CARD_HEIGHT * height * CARD_ASPECT / width, CARD_HEIGHT)
 	card.Parent = sheet
 
-	-- Speed gates (Shared/SpeedGates): the m/s it takes, under the card.
+	-- Speed gates (Shared/SpeedGates): the mph it takes, under the card.
 	local need = SpeedGates.on() and SpeedGates.need(i)
 	if need then
 		local speed = Instance.new("TextLabel")
-		speed.Text = need .. " m/s"
+		speed.Text = need .. " mph"
 		speed.Font = Enum.Font.FredokaOne
 		speed.TextScaled = true
 		speed.TextColor3 = Color3.new(1, 1, 1)

@@ -621,10 +621,20 @@ return {
 	-- On = false: gold gates and rarity prices as before.
 	SpeedGates = {
 		On = true,
-		Need = { Desert = 26, Snow = 80, Ocean = 150, Godlands = 300 },
+		-- (QM, Oct 7 21:14) Speeds are mph, and it's the speed you're really running at,
+		-- live: sprints and abilities count, tiredness slows you. mph = studs/s x
+		-- MphPerStud, before the SpeedCurve bend (that only caps how fast you travel, so
+		-- the high gates stay reachable; the ride bar shows that uncurved number too). A
+		-- Horse runs 11 mph and sprints 22; the Desert's
+		-- 15 is a Horse sprint (a Fish's sprint, 13, isn't), and any animal, wild ones
+		-- too, breaks it (AnyAnimal: it's the tutorial zone). The rest want your own pet,
+		-- sprinting at the old stat they asked for (Speed 4, 7.5, 15 x 22 mph).
+		MphPerStud = 0.25,
+		Need = { Desert = 15, Snow = 90, Ocean = 165, Godlands = 330 },
+		AnyAnimal = { Desert = true },
 		-- Past its line the endless Godlands keeps putting up gates (QM, Oct 7): one every
-		-- Every studs (two of its 960-stud tracks), each Growth x the last's m/s (300, 450,
-		-- 680, 1010, ...), to the nearest 10. Broken ones are saved ("GodGates").
+		-- Every studs (two of its 960-stud tracks), each Growth x the last's mph (330, 500,
+		-- 740, 1110, ...), to the nearest 10. Broken ones are saved ("GodGates").
 		Endless = { Every = 1920, Growth = 1.5 },
 		MergePrice = { Base = 500, From = 28, Power = 5 },
 	},

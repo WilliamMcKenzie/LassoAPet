@@ -1083,6 +1083,18 @@ local function fail(reason, tip)
 	end)
 end
 
+-- The tutorial's Desert gate cutscene (GateCutscene): off the ride and home, whatever it was doing.
+Tutorial.endRide = function()
+	if phase == "idle" then
+		return
+	end
+	Hud.showHome(false)
+	local pen = myPen()
+	local spawn = pen and pen:FindFirstChild("Spawn")
+	local spot = if spawn then spawn.Position else homeSpot()
+	finishRide(spot.X - 6, spot.Z)
+end
+
 local function goHome()
 	if phase ~= "ended" or (vfx.revive and vfx.revive.asked) then
 		return -- (not while the Continue prompt is up)
@@ -1463,7 +1475,7 @@ local function sprinting()
 	-- dynamic one (both drive the move vector, rideStick), or a controller's left stick)
 	local stickOut = (rideStick.on and controls:GetMoveVector().Magnitude >= Config.TouchSprintAt)
 		or (vfx.padPush or 0) >= Config.TouchSprintAt
-	return phase == "outbound" and not Tutorial.active and (sprintKey or Hud.sprintHeld() or stickOut)
+	return phase == "outbound" and (not Tutorial.active or Tutorial.showSpeed) and (sprintKey or Hud.sprintHeld() or stickOut)
 end
 
 UserInputService.InputChanged:Connect(function(input)
@@ -3521,15 +3533,15 @@ local function reachFinish()
 end
 
 local function checkRide(dt)
-	if phase == "finish" or reachFinish() then
-		return -- the leap over the finish line: nothing can go wrong now
+	if phase == "finish" or reachFinish() or Tutorial.camera then
+		return -- the leap over the finish line (or the tutorial's gate cutscene): nothing can go wrong now
 	end
 	grace = math.max(grace - dt, 0)
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)
 	end
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
-		vfx.gateSmash.hit(mount) -- fast enough: it shatters and the next gate's the one (GateSmash)
+		vfx.gateSmash.hit(mount, mount.speed * (vfx.speedGain or 1)) -- fast enough, live: it shatters and the next gate's the one (GateSmash)
 	end
 	do
 		-- The Godlands' mountains crash you whatever you're riding or doing, unless
@@ -3787,19 +3799,18 @@ local function updateRider(dt)
 end
 
 local function updateHud()
-	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out).
-	Hud.setSprint(phase == "outbound" and not Tutorial.active)
+	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out),
+	-- but for its charge at the Desert gate (Tutorial.showSpeed): Sprint and your speed.
+	Hud.setSprint(phase == "outbound" and (not Tutorial.active or Tutorial.showSpeed))
 	if phase == "outbound" then
 		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1, carried == nil)
-		-- Your speed on the nameplates' and gates' scale (QM, Oct 7: was the distance from home):
-		-- what you're doing now, but never more than the pet's own m/s, which is all a gate
-		-- counts, so a sprint or an ability never makes it look fast enough (speed gates).
+		-- Your speed in mph, live (QM, Oct 7: was the distance from home): what you're really
+		-- running at before the SpeedCurve bend, sprints and all, as the gates count it.
 		if mount then -- (nil mid-lasso: it keeps the last)
-			local own = statsOf(mount.kind, mount).Speed * 20
-			if Tutorial.active then
+			if Tutorial.active and not Tutorial.showSpeed then
 				Hud.setDistance("")
 			else
-				Hud.setSpeed(math.floor(math.min(mount.speed / Config.MountSpeed * 20, own) + 0.5))
+				Hud.setSpeed(vfx.gateSmash.mph(mount.speed * (vfx.speedGain or 1)))
 			end
 		end
 		if actionTarget == "egg" then
@@ -4375,6 +4386,11 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	local riding = mount and not cutscene and not heroLeap and (phase == "outbound" or phase == "return")
 	vfx.speedFx.update(dt, if riding then mount.speed * (vfx.speedGain or 1) else 0) -- speed lines, by the uncurved speed
 	if phase == "idle" then
+		return
+	end
+	if Tutorial.camera and mount then -- the tutorial's Desert gate cutscene flies its own (GateCutscene)
+		camera.CameraType = Enum.CameraType.Scriptable
+		camera.CFrame = Tutorial.camera(dt, Vector3.new(mount.x, mount.hop or 0, mount.z))
 		return
 	end
 	camera.CameraType = Enum.CameraType.Scriptable

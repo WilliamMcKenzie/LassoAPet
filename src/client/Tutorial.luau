@@ -47,6 +47,8 @@ local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
 local FuseLesson = require(script.Parent.FuseLesson) -- (fusing's own lesson, once the Desert's unlocked)
+local GateCutscene = require(script.Parent.GateCutscene) -- (speed gates: the charge through the Desert gate)
+local GateSmash = require(script.Parent.GateSmash)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -56,6 +58,9 @@ local Tutorial = {}
 Tutorial.active = false -- the tutorial is running: the "Tutorial" attribute is set
 Tutorial.slowMo = nil -- a time scale while LASSO or TAKE EGG waits for its press, lower the longer it waits
 Tutorial.busy = false -- the ending's close-ups are on: no riding off
+Tutorial.showSpeed = false -- the gate charge (speed gates): Sprint and the speed readout are on in the tutorial
+Tutorial.camera = nil -- while the gate cutscene rolls, Ride's camera comes from here
+Tutorial.endRide = nil -- set by Ride: off the ride and home (the cutscene's fade)
 
 local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
 local FAIL_HINT_Y = 0.1 -- on a fail screen: above the CRASH! / BUCKED OFF banner (Hud, at 0.3)
@@ -72,7 +77,7 @@ local PICTURE_WIDTH = 0.25 -- "Click on the egg"'s width, a share of the screen 
 local THROB = 0.02 -- a hint picture throbs between 1 - THROB and 1 + THROB times its size (QM)
 local CURSOR_THROB = 0.1 -- and the cursor between 1 -/+ this
 local THROB_TIME = 1 -- seconds per throb
-local RIDE_STEPS = { lasso = true, egg = true, take = true, home = true }
+local RIDE_STEPS = { lasso = true, egg = true, take = true, home = true, gate = true } -- (gate: the charge at the Desert, speed gates)
 local PLACE_STEPS = { place = true, place2 = true }
 
 local step = "place"
@@ -406,9 +411,50 @@ local function gateFlight(level)
 	camera.CameraType = Enum.CameraType.Custom
 end
 
--- The ending: the egg's placed (`id` in the pen) and hatches by itself; the moment
--- its pet's out and landed, the camera flies over to the next biome's gate and back,
--- and it's over.
+-- Speed gates (QM, Oct 7): once the pet's hatched the tutorial doesn't end. The
+-- camera flies to the Desert gate with "Go 15mph to break the gate!", and the last
+-- step is to ride out on a pet and charge it. Breaking it (Tutorial.smashed) rolls
+-- the cutscene and ends the tutorial, which starts the merge lesson (Hatchery's
+-- TutorialDone). Until then GateSmash holds every gate shut for this player.
+local function gateStep(id)
+	Tutorial.busy = true
+	local by = os.clock() + 6
+	while not petOut(id) and os.clock() < by do
+		task.wait()
+	end
+	task.wait(LAND_WAIT)
+	newPet = id
+	controls:Disable()
+	local level = player:GetAttribute("PenLevel") or 1
+	goalText = "Go " .. (SpeedGates.need(level + 1) or 0) .. "mph to break the gate!"
+	goalDesert = false
+	report("gate")
+	gateFlight(level)
+	controls:Enable()
+	Tutorial.busy = false
+end
+
+-- Through the Desert gate (GateSmash, while the tutorial's last step is on): slow
+-- motion, the camera swings round to watch you charge through, then black, home,
+-- and the tutorial's done (the merge lesson is next).
+function Tutorial.smashed()
+	if not (Tutorial.active and step == "gate") or GateCutscene.running() then
+		return
+	end
+	Tutorial.busy = true
+	GateCutscene.play(function()
+		if Tutorial.endRide then
+			Tutorial.endRide()
+		end
+		newPet, goalText = nil, nil
+		Tutorial.busy, Tutorial.showSpeed = false, false
+		finish() -- (TutorialDone: the server makes the merge lesson due)
+	end)
+end
+
+-- The old ending, without speed gates: the egg's placed (`id` in the pen) and
+-- hatches by itself; the moment its pet's out and landed, the camera flies over to
+-- the next biome's gate and back, and it's over.
 local function showGoal(id)
 	Tutorial.busy = true
 	local by = os.clock() + 6 -- (in case it never shows)
@@ -439,7 +485,7 @@ local function hintFor(state)
 		return "Oops! Press HOME to try again."
 	elseif PLACE_STEPS[step] then
 		return if phase == "idle" then "Place your egg in your pen!" else nil
-	elseif step == "goal" then
+	elseif step == "goal" or step == "gate" then
 		return goalText
 	elseif step == "ride" then
 		local _, kind = myPet(state)
@@ -487,7 +533,10 @@ function Tutorial.update(state)
 		if step == "place" or step == "ride" then
 			setStep("lasso")
 		end
-		if RIDE_STEPS[step] then
+		if step == "gate" then
+			-- The last step with speed gates: out on a pet, charging the Desert gate.
+			-- Nothing else to track; breaking it ends the tutorial (Tutorial.smashed).
+		elseif RIDE_STEPS[step] then
 			if phase == "outbound" then
 				if step == "egg" and state.target == "egg" then
 					setStep("take")
@@ -498,7 +547,9 @@ function Tutorial.update(state)
 		end
 	elseif lastPhase ~= "idle" then
 		-- Back home: with the egg, on to placing it; otherwise another go.
-		if RIDE_STEPS[step] then
+		if step == "gate" then
+			-- (crashed into the gate too slow, or came home: ride out and try again)
+		elseif RIDE_STEPS[step] then
 			setStep(if not failed and step == "home" then "place2" else "ride")
 		end
 		failed = false
@@ -510,13 +561,28 @@ function Tutorial.update(state)
 	elseif step == "place2" then
 		for id in contents() do
 			if not known[id] then
-				setStep("goal") -- placed
-				task.spawn(showGoal, id)
+				if SpeedGates.on() then
+					setStep("gate") -- placed: now go and break the Desert gate (QM)
+					task.spawn(gateStep, id)
+				else
+					setStep("goal")
+					task.spawn(showGoal, id)
+				end
 				break
 			end
 		end
 	end
+	Tutorial.showSpeed = step == "gate"
 
+	if GateCutscene.slowMo then
+		Tutorial.slowMo = GateCutscene.slowMo -- the gate cutscene's slow motion (Ride reads this)
+		Tutorial.camera = GateCutscene.camera
+		pointTo(nil)
+		setHint(nil)
+		lastPhase = phase
+		return
+	end
+	Tutorial.camera = nil
 	local slow = (step == "lasso" and typeof(state.target) == "table" and not state.transfer)
 		or (step == "take" and state.target == "egg")
 	if slow and phase == "outbound" then
@@ -598,6 +664,17 @@ function Tutorial.guideTo()
 	return nil
 end
 
+-- While the tutorial's on, no gate breaks until its last step (and then only the
+-- Desert's): a fast first ride shouldn't skip the zone.
+GateSmash.allow = function(i)
+	return not Tutorial.active or (step == "gate" and i == 2)
+end
+GateSmash.smashed.Event:Connect(function(i)
+	if i == 2 then
+		Tutorial.smashed()
+	end
+end)
+
 -- Once, from Ride: the tutorial runs while the "Tutorial" attribute is set.
 function Tutorial.init()
 	local function refresh()
@@ -605,6 +682,7 @@ function Tutorial.init()
 		if on ~= Tutorial.active then
 			Tutorial.active = on
 			step, failed, done, goalText = "place", false, false, nil
+			Tutorial.showSpeed, Tutorial.camera = false, nil
 			if on then
 				newPet = nil
 				report("place")
