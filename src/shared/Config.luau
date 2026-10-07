@@ -663,13 +663,11 @@ return {
 	--   AutoHatch: ready eggs hatch by themselves, no holding F
 	--   VIP: a gold fence with red banners round your pen (the floor stays the
 	--     biome's), your name over the pen in gold, and a gold trail behind you
-	-- (QM's ids of Oct 7, 3717084644 etc., are developer products, not game passes:
-	-- these need game pass ids, so the passes stay hidden live till then.)
 	Passes = {
-		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 0 },
-		{ Key = "FastHatch", Name = "Fast Hatch", Price = 99, Id = 0 },
-		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 40, Id = 0 },
-		{ Key = "VIP", Name = "VIP", Price = 199, Id = 0 },
+		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },
+		{ Key = "FastHatch", Name = "Fast Hatch", Price = 99, Id = 2014634454 },
+		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 40, Id = 2012972449 },
+		{ Key = "VIP", Name = "VIP", Price = 199, Id = 2013764414 },
 	},
 	PassGoldMultiplier = 2, -- DoubleGold's
 	PassHatchSpeed = 2, -- FastHatch's: hatch times / this
