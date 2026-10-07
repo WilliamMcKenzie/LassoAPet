@@ -72,9 +72,9 @@ local at = 1 -- the first pet on the page shown
 local cards = {} -- [pet] = its card
 local fuseButton, tip, nameA, nameB, priceLabel
 
--- Gold to fuse the two picked (QM: each pet adds its rarity's price).
+-- Gold to fuse the two picked (QM: each pet adds its rarity's price, a hybrid all its pets').
 local function priceOf(a, b)
-	return Fusion.price(a.kind, b.kind)
+	return Fusion.worth(a.kind, a.fuse, a.worth) + Fusion.worth(b.kind, b.fuse, b.worth)
 end
 
 local function stroked(object, thickness)
@@ -186,12 +186,12 @@ local function yourPets()
 	local list = {}
 	for model, pet in PenPets.pets do
 		if model.Parent then
-			table.insert(list, { model = model, id = pet.id, kind = pet.kind, fuse = pet.fuse, merged = pet.merged })
+			table.insert(list, { model = model, id = pet.id, kind = pet.kind, fuse = pet.fuse, merged = pet.merged, worth = pet.worth })
 		end
 	end
 	local starter = PenPets.starter
 	if starter and starter.animal.model.Parent and starter.kind == player:GetAttribute("RidePet") then
-		table.insert(list, { model = starter.animal.model, id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged })
+		table.insert(list, { model = starter.animal.model, id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged, worth = player:GetAttribute("RideWorth") })
 	end
 	local ranks = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5 }
 	table.sort(list, function(a, b) -- rarest first, then by kind, so a kind's pets sit together

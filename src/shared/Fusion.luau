@@ -19,7 +19,7 @@
 --   Fusion.scale(kind, fuse)      how much bigger (or smaller) the donor makes it
 --   Fusion.name(kind, fuse)       "Poong": the donor's front and the base's back
 --   Fusion.paint(model, kind, fuse)  repaints a built model in the donor's palette
---   Fusion.price(kindA, kindB)    gold to fuse two pets: each adds its rarity's price
+--   Fusion.worth(kind, fuse, saved) what a pet adds to FUSE's price (a hybrid: all its pets)
 
 local Config = require(script.Parent.Config)
 local Palettes = require(script.Parent.Palettes)
@@ -152,13 +152,17 @@ local function spaced(kind)
 	return (string.gsub(kind, "(%l)(%u)", "%1 %2"))
 end
 
--- FUSE costs each pet's rarity price added up (Config.FusePrice): a Legendary and
--- a Rare are $1,010,000.
-function Fusion.price(kindA, kindB)
-	local function one(kind)
-		return Config.FusePrice[RARITIES[rarityRank(kind)] or "Common"] or 0
+-- What a pet adds to FUSE's price: its rarity's (Config.FusePrice), so a Legendary
+-- and a Rare are $1,010,000. A hybrid's is every pet that went into it added up
+-- (QM), saved on it as `worth`; one fused before that counts its two kinds.
+function Fusion.worth(kind, fuse, saved)
+	if fuse and tonumber(saved) then
+		return tonumber(saved)
 	end
-	return one(kindA) + one(kindB)
+	local function one(k)
+		return Config.FusePrice[RARITIES[rarityRank(k)] or "Common"] or 0
+	end
+	return one(kind) + (if fuse then one(fuse) else 0)
 end
 
 function Fusion.name(kind, fuse)

@@ -465,8 +465,8 @@ return {
 	-- MERGE is off for now that there's FUSE (QM, Oct 6 19:16): no MERGE button, and
 	-- the server refuses MergePets. Pets already merged keep their size and gold.
 	MergeEnabled = false,
-	-- FUSE's price (Shared/Fusion.price): each of the two pets adds its rarity's, so two
-	-- Legendaries $2M (QM; Common 100 is Claude's). Back on Oct 7 (QM), after a spell free;
+	-- FUSE's price (Shared/Fusion.worth): each of the two pets adds its rarity's, so two
+	-- Legendaries $2M (QM; Common 100 is Claude's), and a hybrid every pet in it (QM). Back on Oct 7 (QM), after a spell free;
 	-- the fuse lesson's fuse is free (FuseLesson).
 	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000 },
 	PetSmallSize = 10.4,
