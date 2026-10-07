@@ -566,7 +566,7 @@ return {
 		Rhino = "rbxassetid://139482781062355",
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
-		Kitten = "", -- assets/ui/KittenEggRender.png, once uploaded
+		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
 		Scorpion = "rbxassetid://84668325203507",
 		Sandworm = "rbxassetid://102795691143589",
 		Snake = "rbxassetid://90142926499080",

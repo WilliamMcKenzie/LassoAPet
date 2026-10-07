@@ -73,6 +73,7 @@ local SHEETS = {
 	Rhino = { frames = 24, time = 0.03, "rbxassetid://108540506579286" },
 	Unicorn = { frames = 24, time = 0.03, "rbxassetid://96425037730261" },
 	Bunny = { frames = 23, time = 0.03, "rbxassetid://109509060486808" },
+	Kitten = { frames = 24, time = 0.03, "rbxassetid://76735200273090" },
 	Cactus = { frames = 20, time = 0.03, "rbxassetid://109623848986836" },
 	Scorpion = { frames = 15, time = 0.03, "rbxassetid://113606148401403" },
 	Sandworm = { frames = 20, time = 0.03, "rbxassetid://79124427569630" },
