@@ -678,12 +678,11 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	fill.Name = "Fill"
 	fill.BackgroundTransparency = 1
 	fill.ClipsDescendants = true
-	fill.ZIndex = 0 -- under the price and the hand
 	fill.Size = UDim2.fromScale(0, 1)
 	fill.Parent = upgrade
 	image(fill, "upgradePen", upgradeSize, UDim2.fromScale(0, 0)).AnchorPoint = Vector2.zero
-	fill.ImageLabel.ZIndex = 0
 	local price = label(upgrade, UDim2.fromOffset(0, 36), UDim2.fromScale(0.855, 0.66), 36, 3.6)
+	price.ZIndex = 2 -- over the fill (this ScreenGui layers by ZIndex across the whole tree)
 	price.AutomaticSize = Enum.AutomaticSize.X
 	local cost -- gold for the next level (or the Rainbow Trail), nil when there's nothing to buy
 	local trail = false -- selling the Rainbow Trail
@@ -745,6 +744,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	hand.SizeConstraint = Enum.SizeConstraint.RelativeYY
 	hand.Size = UDim2.fromScale(0.9, 0.9)
 	hand.Visible = false
+	hand.ZIndex = 2 -- over the fill
 	local handScale = Instance.new("UIScale")
 	handScale.Parent = hand
 	hand.Parent = upgrade
