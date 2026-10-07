@@ -1,7 +1,8 @@
 -- Studs as a material (Config.StudMaterial, QM Oct 7): instead of a stud Texture on
 -- every face (tens of thousands of them, each drawn on its own), a part gets a stud
 -- MaterialVariant from MaterialService: "Studs" for the 1-stud studs (ground), and
--- "StudsHalf" for the 0.5-stud ones (obstacles, animals, eggs, Carl's stall). They're
+-- "StudsHalf" for the 0.5-stud ones (animals, eggs, Carl's stall), and StudsNNN for
+-- the scaled obstacles' sizes in between (NAMES). They're
 -- from the "2008-2024 Studs As PBR Materials" pack (Glacier base material), tinted by
 -- the part's colour like the textures were. Without them in MaterialService, or with
 -- Config.StudMaterial off, everything keeps its textures.
@@ -23,12 +24,38 @@ end
 local Studs = {}
 
 Studs.IMAGE = "rbxassetid://7447638591" -- the classic stud decal every stud Texture uses
-local NAMES = { [0.5] = "StudsHalf", [1] = "Studs" }
+-- One variant per stud size, each the same pack material with its own StudsPerTile.
+-- The map's obstacles were scaled, so their studs run from about 0.29 to 0.65 studs:
+-- a stud Texture takes the variant nearest its size, as long as that's within
+-- MATCH (the sizes below are 10% apart, so a stud is never more than ~5% off).
+local NAMES = {
+	[0.29] = "Studs290",
+	[0.32] = "Studs320",
+	[0.35] = "Studs350",
+	[0.385] = "Studs385",
+	[0.425] = "Studs425",
+	[0.465] = "Studs465",
+	[0.5] = "StudsHalf",
+	[0.55] = "Studs550",
+	[0.605] = "Studs605",
+	[0.665] = "Studs665",
+	[1] = "Studs",
+}
+local MATCH = 1.06
 -- Glacier is slippery: anything you can stand on keeps plastic's grip.
 local PLASTIC = PhysicalProperties.new(Enum.Material.SmoothPlastic)
 
 function Studs.variant(tile)
-	local name = Config.StudMaterial and NAMES[tile]
+	if not Config.StudMaterial or not tile or tile <= 0 then
+		return nil
+	end
+	local name, off = nil, MATCH
+	for size, n in NAMES do
+		local ratio = math.max(size / tile, tile / size)
+		if ratio <= off then
+			name, off = n, ratio
+		end
+	end
 	local variant = name and MaterialService:FindFirstChild(name)
 	return if variant and variant:IsA("MaterialVariant") then variant else nil
 end
