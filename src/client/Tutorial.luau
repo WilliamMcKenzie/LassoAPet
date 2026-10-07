@@ -45,6 +45,7 @@ local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
+local FuseLesson = require(script.Parent.FuseLesson) -- (fusing's own lesson, once the Desert's unlocked)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -448,7 +449,11 @@ end
 -- hero leap is on) }.
 function Tutorial.update(state)
 	local phase = state.phase
-	local stage = if Tutorial.active then "bare" else nil
+	local lessonStage, lessonCursor
+	if not Tutorial.active then
+		lessonStage, lessonCursor = FuseLesson.update(phase, state.cutscene)
+	end
+	local stage = if Tutorial.active then "bare" else lessonStage
 	if stage ~= hudStage then
 		hudStage = stage
 		Hud.setTutorial(stage)
@@ -456,7 +461,7 @@ function Tutorial.update(state)
 	if not Tutorial.active then
 		slowSince, Tutorial.slowMo = nil, nil
 		setHint(nil)
-		showPicture(nil)
+		showPicture(nil, lessonCursor)
 		if phase ~= "idle" then
 			newPet = nil -- riding: the arrows have done their job
 		end
