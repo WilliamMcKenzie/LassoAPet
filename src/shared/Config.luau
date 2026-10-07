@@ -39,7 +39,7 @@ return {
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
-			Herd = { Cactus = 0.3, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05 },
+			Herd = { Cactus = 0.3, Kitten = 0.25, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05 },
 			-- Patches of other ground in the floor (parts named after them in
 			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
 			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
@@ -275,7 +275,7 @@ return {
 		-- x2 Desert, x4 Tundra, x6 Ocean, x8 Godlands; the exclusives 1 h / 16 h / 24 h. Eggs hatch
 		-- while you're offline, so long ones bring players back (Steal an Egg goes up to 12-36 h).
 		Horse = 15, Pig = 15, Bunny = 15, Pinto = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
-		Cactus = 60, Scorpion = 180, Sandworm = 420, SpineLizard = 600, Snake = 1200, -- Desert
+		Cactus = 60, Kitten = 60, Scorpion = 180, Sandworm = 420, SpineLizard = 600, Snake = 1200, -- Desert
 		Penguin = 120, Boar = 180, Snowman = 480, IceGolem = 1440, Icebringer = 7200, -- Tundra
 		Starfish = 90, Whale = 21600, Squid = 5400, FishSchool = 4000, KingCrab = 7200, BlueCrab = 18000, Kraken = 20000, -- Ocean
 		Beholder = 5400, Sludge = 4800, WarElephant = 7200, Leviathan = 14400, SoulHorse = 19200, -- Godlands
@@ -425,7 +425,7 @@ return {
 	-- decides which ones some abilities break.
 	PetTiers = {
 		Horse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
-		Cactus = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
+		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
@@ -483,7 +483,7 @@ return {
 	-- every second while you're in the game.
 	PetIncome = {
 		Horse = 1, Pig = 3, Bunny = 4, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
-		Cactus = 6, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
+		Cactus = 6, Kitten = 8, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
 		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 3000, Icebringer = 1111, -- Tundra
 		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 19000, Whale = 1500, Kraken = 8200, -- Ocean
 		Loong = 20000, Beholder = 3000, Leviathan = 15000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
@@ -566,6 +566,7 @@ return {
 		Rhino = "rbxassetid://139482781062355",
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
+		Kitten = "", -- assets/ui/KittenEggRender.png, once uploaded
 		Scorpion = "rbxassetid://84668325203507",
 		Sandworm = "rbxassetid://102795691143589",
 		Snake = "rbxassetid://90142926499080",
@@ -694,6 +695,7 @@ return {
 		Unicorn = { Speed = 2, Stamina = 2 },
 		-- Desert
 		Cactus = { Speed = 1.2, Stamina = 1.5 },
+		Kitten = { Speed = 1.4, Stamina = 1.2 }, -- quick pounces (guess)
 		Scorpion = { Speed = 1.5, Stamina = 1.5 },
 		Sandworm = { Speed = 1.6, Stamina = 3 },
 		SpineLizard = { Speed = 1.8, Stamina = 2 },

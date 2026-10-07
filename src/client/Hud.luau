@@ -86,6 +86,7 @@ local IMAGES = {
 	eggRhino = { id = "rbxassetid://139482781062355", size = Vector2.new(496, 735) }, -- RhinoEggRender.png
 	eggUnicorn = { id = "rbxassetid://85066893166855", size = Vector2.new(496, 859) }, -- UnicornEggRender.png
 	eggCactus = { id = "rbxassetid://95599437590618", size = Vector2.new(635, 766) }, -- CactusEggRender.png
+	eggKitten = { id = "", size = Vector2.new(502, 749) }, -- KittenEggRender.png
 	eggScorpion = { id = "rbxassetid://84668325203507", size = Vector2.new(599, 1007) }, -- ScorpionEggRender.png (QM's update)
 	eggSandworm = { id = "rbxassetid://102795691143589", size = Vector2.new(502, 767) }, -- SandwormEggRender.png (QM's update)
 	eggSnake = { id = "rbxassetid://90142926499080", size = Vector2.new(553, 960) }, -- SnakeEggRender.png (QM's update)

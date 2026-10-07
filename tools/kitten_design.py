@@ -2,6 +2,7 @@
 
 Run: python3 tools/kitten_design.py [out_dir]          takes A-C
      python3 tools/kitten_design.py ginger [out_dir]   takes D-E, from QM's reference picture
+     python3 tools/kitten_design.py game               D (picked) into the game files
 
 Three takes for QM to pick from (same build, different coat):
   A  Sand cat  sandy tan, cream muzzle and paws, dark ear tips and tail rings
@@ -221,8 +222,27 @@ def main(out="/mnt/project-files/animals/kitten"):
     print("written to", out)
 
 
+
+
+def game(tail_up="1"):
+    """QM approved the ginger (Oct 7 13:43); D, the tail-up take, goes in: writes
+    designs/desert/Kitten.bbmodel and src/shared/Animals/KittenModel.luau."""
+    import bbmodel_to_luau
+    a = ginger(tail_up == "1")
+    out = os.path.join("designs", "desert")
+    m = A.build_animal(a, out)
+    m["meta"]["format_version"] = "5.0"
+    path = os.path.join(out, "Kitten.bbmodel")
+    with open(path, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    bbmodel_to_luau.main(path, os.path.join("src", "shared", "Animals", "KittenModel.luau"))
+    print("meta", a.meta)
+
+
 if __name__ == "__main__":
     if sys.argv[1:2] == ["ginger"]:
         main_ginger(*sys.argv[2:])
+    elif sys.argv[1:2] == ["game"]:
+        game(*sys.argv[2:])
     else:
         main(*sys.argv[1:])

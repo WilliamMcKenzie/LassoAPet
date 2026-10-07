@@ -111,6 +111,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Fish = "Never learned to swim, and thinks it's too late now. Scared of water.",
 	Rhino = "Ran away to join the mafia at a young age. Still pays horses tuition.",
 	Unicorn = "Just a horse who can jump very high. The horn is glued on.",
+	Kitten = "Came to the desert for the world's biggest litter box. Has not left since.",
 	Cactus = "The fastest plant in the west. Deals eggs on the side.",
 	Scorpion = "Got busted dealing spice, now speaks about drug awareness at high school ceremonies.",
 	Sandworm = "Sandworm started out collecting old books, but they all got sandy. Now it just burrows.",

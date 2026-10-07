@@ -66,6 +66,12 @@ return {
 		{ "Marking", 72, 150, 44 }, -- ribs
 		{ "Horn", 214, 176, 96 }, -- spines
 	},
+	Kitten = {
+		{ "Body", 244, 150, 58 },
+		{ "Belly", 255, 250, 242 }, -- muzzle, chest, tail tip
+		{ "Marking", 204, 104, 34 }, -- tabby stripes, tail ring
+		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" }, -- (white paws, like the chest)
+	},
 	Scorpion = {
 		{ "Body", 230, 160, 74 },
 		{ "Body", 184, 110, 50 }, -- every other tail segment, pincer fingers, shins

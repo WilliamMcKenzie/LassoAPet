@@ -33,7 +33,7 @@ PREVIEW = "/mnt/project-files/animals/headshots"
 MODELS = {
     "Horse": "horses/Horse9_Leap", "Pinto": "horses/Pinto", "Pig": "animals/Pig", "Bunny": "animals/Bunny", "Fish": "animals/Fish",
     "Rhino": "animals/Rhino", "Unicorn": "animals/Unicorn",
-    "Cactus": "desert/Cactus", "Scorpion": "desert/Scorpion", "Sandworm": "desert/Sandworm",
+    "Cactus": "desert/Cactus", "Kitten": "desert/Kitten", "Scorpion": "desert/Scorpion", "Sandworm": "desert/Sandworm",
     "SpineLizard": "converted/SpineLizard", "Snake": "desert/Snake",
     "Penguin": "snow/Penguin", "Boar": "converted/Boar", "Snowman": "snow/Snowman",
     "IceGolem": "converted/IceGolem", "Icebringer": "converted/Icebringer", "SnackYak": "snow/SnackYak",
