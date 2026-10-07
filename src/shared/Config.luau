@@ -644,7 +644,7 @@ return {
 		MergePrice = { Base = 500, From = 28, Power = 5 },
 		-- On each gate, instead of the lock card: "15mph" with QM's lightning bolt beside it
 		-- (assets/ui/SpeedBolt.png; Studio uploads it and fills the id).
-		BoltImage = "",
+		BoltImage = "rbxassetid://140004835424151",
 	},
 	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)
 	SpeedFeel = { On = true, Start = 44, Scale = 200, Lines = 28, Opacity = 0.6, LineSpeed = 2.2, FovKick = 18, MaxFov = 110 },
