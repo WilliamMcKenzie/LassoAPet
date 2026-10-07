@@ -83,6 +83,7 @@ local slices = {
 	SWERVE_BEFORE = 40, -- studs: laneX's reach in front of an obstacle
 	SWERVE_AFTER = 28, -- and past it
 	BLOCK_PAD = 8, -- studs: the most padZ blockedAt is asked for and still uses the slices
+	SOLID = math.huge, -- blockedAt's tier for the solid obstacles (the Godlands' mountains) alone
 	swerve = {},
 	block = {},
 	NONE = {},
@@ -113,6 +114,7 @@ end
 function slices.pieces(list, added)
 	for _, o in list do
 		if added then
+			o.solid = true -- mountains to dodge (QM, Oct 7): never smashed, they crash you
 			table.insert(obstacles, o)
 			slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
 			slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
@@ -139,6 +141,9 @@ local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's
 -- on their screens it's back a few seconds later (remote).
 local SMASH_TIME = 0.7
 local function smash(o, dir, side, remote)
+	if o.solid then
+		return -- a mountain: nothing moves it (checkRide crashes you into it instead)
+	end
 	o.smashed = true
 	if not remote then
 		vfx.sounds.play("smash", 0.4)
@@ -476,11 +481,13 @@ local function popHop(t)
 end
 
 -- The first obstacle overlapping (x, z) that's still standing, of at least this tier (1 if nil).
+-- Solid ones (mountains) only when slices.SOLID is asked for, so the loops that smash
+-- whatever's in the way never get stuck on one.
 local function blockedAt(x, z, padX, padZ, tier)
 	local list = if padZ <= slices.BLOCK_PAD then slices.at(slices.block, z) else obstacles
 	tier = tier or 1
 	for _, o in list do
-		if not o.smashed and o.tier >= tier and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
+		if not o.smashed and (if o.solid then tier == slices.SOLID else o.tier >= tier) and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
 			return o
 		end
 	end
@@ -3567,6 +3574,16 @@ local function checkRide(dt)
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)
 	end
+	do
+		-- The Godlands' mountains crash you whatever you're riding or doing, unless
+		-- you're flying over or burrowing under them.
+		local special = vfx.sprintSpecial()
+		local hop = mount.hop or 0
+		local clear = special and ((special.Kind == "Fly" and hop > 8) or (special.Kind == "Burrow" and hop < -2))
+		if not clear and grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4, slices.SOLID) then
+			return fail("CRASH!")
+		end
+	end
 	local ability = activeAbility()
 	if ability and vfx.PLAIN[ability.cfg.Kind] then
 		ability = nil -- these still use Hold and can still crash (Config.Abilities)
@@ -3648,7 +3665,8 @@ local function checkRide(dt)
 		end
 	end
 	-- Obstacles never crash you: whatever you ride into is smashed (QM, Oct 6: new
-	-- players kept crashing into them). Stampede animals still go by size.
+	-- players kept crashing into them), but the Godlands' mountains (above). Stampede
+	-- animals still go by size.
 	while true do
 		local o = blockedAt(mount.x, mount.z, 1.3, 2.4)
 		if not o then
