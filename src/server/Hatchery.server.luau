@@ -35,6 +35,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Funnel = require(script.Parent.Funnel)
+local Passes = require(script.Parent.Passes)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Animals = ReplicatedStorage.Shared.Animals
 
@@ -190,6 +191,16 @@ local function canPlace(pen, x, z)
 end
 
 -- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
+-- x2 Gold (game pass): x this on all the gold pets earn.
+local function goldX(player)
+	return if player:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1
+end
+
+-- Fast Hatch (game pass): hatch times / this.
+local function hatchX(player)
+	return if player:GetAttribute("PassFastHatch") then Config.PassHatchSpeed else 1
+end
+
 local function income(profile)
 	-- (a merged pet earns for all it's made of; a hybrid what both its pets earned)
 	local total = profile.rideIncome or (Config.PetIncome[profile.ride] or 0) * (profile.rideMerged or 1)
@@ -205,10 +216,11 @@ end
 -- Config.AwayRate of their usual gold a second for up to Config.AwayCap seconds of
 -- it. It waits in the "AwayGold" attribute (the client's popup) until ClaimAway;
 -- unclaimed, it's saved and added to the next visit's.
-local function awayGold(profile, data)
+local function awayGold(player, profile, data)
 	local seen = tonumber(data.seen)
 	local away = if seen then math.clamp(os.time() - seen, 0, Config.AwayCap) else 0
-	return (tonumber(data.awayGold) or 0) + math.floor(income(profile) * Config.AwayRate * away)
+	local x = if Passes.owns(player, "DoubleGold") then Config.PassGoldMultiplier else 1 -- (waits for the pass check)
+	return (tonumber(data.awayGold) or 0) + math.floor(income(profile) * x * Config.AwayRate * away)
 end
 
 local function load(player)
@@ -251,7 +263,7 @@ local function load(player)
 						end
 					end
 					if profile.tutorial then
-						profile.awayGold = awayGold(profile, data)
+						profile.awayGold = awayGold(player, profile, data)
 					end
 					profile.usedHatches = tonumber(data.usedHatches) or 0
 					profile.hatchTarget = typeof(data.hatchTarget) == "string" and data.hatchTarget or nil
@@ -365,6 +377,22 @@ prepareHatch.OnInvoke = function(player, id)
 	return "purchase"
 end
 prepareHatch.Parent = game:GetService("ServerStorage")
+
+-- Fast Hatch bought in game: the eggs already waiting in the pen have their time
+-- left cut too (the eggs placed from then on start out with half).
+Passes.onBought(function(player, key)
+	local profile = profiles[player]
+	if key ~= "FastHatch" or not profile or player:GetAttribute("Tutorial") then
+		return
+	end
+	local now = os.time()
+	for _, item in profile.items do
+		if item.egg and item.hatchAt > now then
+			item.hatchAt = now + math.ceil((item.hatchAt - now) / Config.PassHatchSpeed)
+		end
+	end
+	publish(player)
+end)
 
 Players.PlayerAdded:Connect(function(player)
 	player:GetAttributeChangedSignal("BoughtHatches"):Connect(function() applyHatch(player) end)
@@ -648,9 +676,9 @@ place = function(player, profile, kind, x, z)
 	local pet = eggPet(kind)
 	local special = Config.SpecialEggs[kind]
 	if special then -- (hatches into its Pet, merged from Merged: a Giant Horse is 10 horses)
-		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = pet, merged = special.Merged, eggScale = special.EggScale, hatchAt = os.time() + special.HatchTime }
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = pet, merged = special.Merged, eggScale = special.EggScale, hatchAt = os.time() + math.ceil(special.HatchTime / hatchX(player)) }
 	else
-		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else hatchTime(kind)) }
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else math.ceil(hatchTime(kind) / hatchX(player))) }
 	end
 	if profile.pastStarter then
 		Funnel.step(player, "Placed Egg") -- the egg brought home, not the starter egg placed before the first ride
@@ -1090,7 +1118,7 @@ awayCommand.Triggered:Connect(function(source)
 	if not profile or not allowed(player) then
 		return
 	end
-	profile.awayGold = (profile.awayGold or 0) + math.max(1, math.floor(income(profile) * Config.AwayRate * Config.AwayCap))
+	profile.awayGold = (profile.awayGold or 0) + math.max(1, math.floor(income(profile) * goldX(player) * Config.AwayRate * Config.AwayCap))
 	player:SetAttribute("AwayGold", nil)
 	task.wait()
 	player:SetAttribute("AwayGold", profile.awayGold)
@@ -1107,7 +1135,7 @@ task.spawn(function()
 	while true do
 		task.wait(1)
 		for player, profile in profiles do
-			local earned = if player:GetAttribute("Tutorial") then 0 else income(profile) -- (nothing till the tutorial's done)
+			local earned = if player:GetAttribute("Tutorial") then 0 else income(profile) * goldX(player) -- (nothing till the tutorial's done)
 			if earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
 				paid:FireClient(player)
@@ -1117,14 +1145,15 @@ task.spawn(function()
 end)
 
 -- The tutorial's eggs hatch by themselves once their time is up: the pet takes the
--- egg's spot. Every other egg waits to be hatched by hand (HatchEgg, above).
+-- egg's spot, and so do everyone's with Auto Hatch (game pass). Every other egg
+-- waits to be hatched by hand (HatchEgg, above).
 while true do
 	task.wait(0.5)
 	local now = os.time()
 	for player, profile in profiles do
 		local changed = false
 		for _, item in profile.items do
-			if item.egg and now >= item.hatchAt and player:GetAttribute("Tutorial") then
+			if item.egg and now >= item.hatchAt and (player:GetAttribute("Tutorial") or player:GetAttribute("PassAutoHatch")) then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
 				if profile.pastStarter then
