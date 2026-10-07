@@ -84,7 +84,6 @@ local newPet = nil -- the pen id of the pet the egg brought home hatched into: o
 local known = {} -- the pen's items when the ride home began: a new one is the egg brought home
 local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
 local goalDesert = false -- and it's that one, which QM drew (PICTURES.saveDesert)
-local tour = false -- the merge lesson's gate close-up is on (FuseLesson.done)
 
 local function touch()
 	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
@@ -142,8 +141,6 @@ local PICTURES = {
 	-- (cost: the Desert price drawn in it; at any other price the text hint shows instead.
 	-- image "": not uploaded yet, the text hint too)
 	saveDesert = { image = "rbxassetid://94733777866922", width = 1830, height = 127, cost = 500 }, -- assets/ui/HintSaveDesert.png
-	-- Over the Tundra gate, after the merge lesson (QM, Oct 7). image "": not uploaded yet, its text instead
-	mergeFaster = { image = "rbxassetid://97716311204622", width = 1125, height = 145 }, -- assets/ui/HintMergeFaster.png
 }
 local picture = Instance.new("ImageLabel")
 picture.Name = "HintPicture"
@@ -461,16 +458,15 @@ function Tutorial.update(state)
 	if not Tutorial.active then
 		lessonStage, lessonCursor = FuseLesson.update(phase, state.cutscene)
 	end
-	local stage = if Tutorial.active or tour then "bare" else lessonStage
+	local stage = if Tutorial.active then "bare" else lessonStage
 	if stage ~= hudStage then
 		hudStage = stage
 		Hud.setTutorial(stage)
 	end
 	if not Tutorial.active then
 		slowSince, Tutorial.slowMo = nil, nil
-		local tourPicture = tour and PICTURES.mergeFaster.image ~= ""
-		setHint(if tour and not tourPicture then "Merge to go faster!" else nil)
-		showPicture(if tourPicture then "mergeFaster" else nil, lessonCursor)
+		setHint(nil)
+		showPicture(nil, lessonCursor)
 		if phase ~= "idle" then
 			newPet = nil -- riding: the arrows have done their job
 		end
@@ -553,24 +549,6 @@ function Tutorial.update(state)
 		end
 	end
 	pointTo(target)
-end
-
--- The merge lesson's over (its hybrid's landed): like the tutorial's ending, the
--- camera flies over to the next gate, the Tundra's, with "Merge to go faster!"
--- (QM, Oct 7), and back.
-FuseLesson.done = function()
-	local level = player:GetAttribute("PenLevel") or 1
-	if not Config.Biomes[level + 1] or Tutorial.active or Tutorial.busy then
-		return
-	end
-	Tutorial.busy = true
-	task.wait(LAND_WAIT)
-	tour = true
-	controls:Disable()
-	gateFlight(level)
-	controls:Enable()
-	tour = false
-	Tutorial.busy = false
 end
 
 -- Landed on a lassoed animal: on to the egg.
