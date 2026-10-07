@@ -84,6 +84,7 @@ local newPet = nil -- the pen id of the pet the egg brought home hatched into: o
 local known = {} -- the pen's items when the ride home began: a new one is the egg brought home
 local goalText -- "Save $1k to unlock the Desert!", once the close-ups start
 local goalDesert = false -- and it's that one, which QM drew (PICTURES.saveDesert)
+local tour -- the merge lesson's gate close-up is on: { picture, text } (FuseLesson.done)
 
 local function touch()
 	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
@@ -141,6 +142,9 @@ local PICTURES = {
 	-- (cost: the Desert price drawn in it; at any other price the text hint shows instead.
 	-- image "": not uploaded yet, the text hint too)
 	saveDesert = { image = "rbxassetid://94733777866922", width = 1830, height = 127, cost = 500 }, -- assets/ui/HintSaveDesert.png
+	-- After the merge lesson, the Tundra gate (QM, Oct 7). For now it's the Desert's
+	-- picture: swap in QM's own Tundra one here, with its size (and cost, if it's drawn).
+	saveTundra = { image = "rbxassetid://94733777866922", width = 1830, height = 127 },
 }
 local picture = Instance.new("ImageLabel")
 picture.Name = "HintPicture"
@@ -390,6 +394,18 @@ local function flight(start, view, seconds, back)
 	end
 end
 
+-- Over to the gate after biome `level` and back.
+local function gateFlight(level)
+	local gateZ = WorldColors.gateZ(level)
+	local start = camera.CFrame
+	camera.CameraType = Enum.CameraType.Scriptable
+	local view = CFrame.lookAt(Vector3.new(0, 40, gateZ + 70), Vector3.new(0, 8, gateZ))
+	flight(start, view, 2)
+	task.wait(GATE_HOLD)
+	flight(start, view, 1.4, true)
+	camera.CameraType = Enum.CameraType.Custom
+end
+
 -- The ending: the egg's placed (`id` in the pen) and hatches by itself; the moment
 -- its pet's out and landed, the camera flies over to the next biome's gate and back,
 -- and it's over.
@@ -408,14 +424,7 @@ local function showGoal(id)
 		goalText = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
 		goalDesert = upNext.Name == "Desert" and upNext.UnlockCost == PICTURES.saveDesert.cost and PICTURES.saveDesert.image ~= ""
 		report("gate")
-		local gateZ = WorldColors.gateZ(level)
-		local start = camera.CFrame
-		camera.CameraType = Enum.CameraType.Scriptable
-		local view = CFrame.lookAt(Vector3.new(0, 40, gateZ + 70), Vector3.new(0, 8, gateZ))
-		flight(start, view, 2)
-		task.wait(GATE_HOLD)
-		flight(start, view, 1.4, true)
-		camera.CameraType = Enum.CameraType.Custom
+		gateFlight(level)
 	end
 	controls:Enable()
 	Tutorial.busy = false
@@ -453,15 +462,15 @@ function Tutorial.update(state)
 	if not Tutorial.active then
 		lessonStage, lessonCursor = FuseLesson.update(phase, state.cutscene)
 	end
-	local stage = if Tutorial.active then "bare" else lessonStage
+	local stage = if Tutorial.active or tour then "bare" else lessonStage
 	if stage ~= hudStage then
 		hudStage = stage
 		Hud.setTutorial(stage)
 	end
 	if not Tutorial.active then
 		slowSince, Tutorial.slowMo = nil, nil
-		setHint(nil)
-		showPicture(nil, lessonCursor)
+		setHint(if tour and not tour.picture then tour.text else nil)
+		showPicture(tour and tour.picture, lessonCursor)
 		if phase ~= "idle" then
 			newPet = nil -- riding: the arrows have done their job
 		end
@@ -544,6 +553,29 @@ function Tutorial.update(state)
 		end
 	end
 	pointTo(target)
+end
+
+-- The merge lesson's over (its hybrid's landed): like the tutorial's ending, the
+-- camera flies over to the next gate, the Tundra's, with "Save ... to unlock the
+-- Tundra!" (QM, Oct 7), and back.
+FuseLesson.done = function()
+	local level = player:GetAttribute("PenLevel") or 1
+	local upNext = Config.Biomes[level + 1]
+	if not upNext or Tutorial.active or Tutorial.busy then
+		return
+	end
+	Tutorial.busy = true
+	task.wait(LAND_WAIT)
+	local art = PICTURES.saveTundra
+	tour = {
+		picture = if upNext.Name == "Tundra" and art.image ~= "" and (art.cost == nil or art.cost == upNext.UnlockCost) then "saveTundra" else nil,
+		text = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!",
+	}
+	controls:Disable()
+	gateFlight(level)
+	controls:Enable()
+	tour = nil
+	Tutorial.busy = false
 end
 
 -- Landed on a lassoed animal: on to the egg.

@@ -26,6 +26,7 @@ local REVEAL = { Big = 3, Pop = 0.5, Hold = 0.35, Fly = 0.6 } -- the Fuse button
 local GIVE_UP = 5 -- seconds after FUSE with no hybrid showing up before it counts as done anyway
 
 local FuseLesson = {}
+FuseLesson.done = nil -- called once it's over (Tutorial: the camera flies to the next gate)
 
 local running = nil -- nil, "reveal" (the button's flying in) or "guide" (the cursor's leading)
 local from = math.huge -- when it began
@@ -132,6 +133,9 @@ local function finish()
 	running, finished = nil, true
 	player:SetAttribute("FuseLesson", nil) -- (here at once, so Fuse stays on show: Hud.fuseUnlocked)
 	ReplicatedStorage:WaitForChild("FuseLessonDone"):FireServer()
+	if FuseLesson.done then
+		task.spawn(FuseLesson.done)
+	end
 end
 
 player:GetAttributeChangedSignal("FuseLesson"):Connect(function()
