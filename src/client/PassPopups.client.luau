@@ -79,20 +79,33 @@ local function atBase()
 	return hrp ~= nil and hrp.Position.Z > START_LINE_Z - LEFT_BASE
 end
 
-local function hide()
+-- bought: it bounces away (swells, then springs out up and off the screen's
+-- edge, QM); otherwise it just shrinks away.
+local function hide(bought)
 	local shown = current
 	if not shown then
 		return
 	end
 	current = nil
-	local out = TweenService:Create(shown.scale, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0 })
+	local out
+	if bought then
+		local swell = TweenService:Create(shown.scale, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 1.2 })
+		out = TweenService:Create(shown.card, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+			{ Position = shown.card.Position + UDim2.new(0, 120, 0, -260), Rotation = 25 })
+		swell.Completed:Connect(function()
+			out:Play()
+		end)
+		swell:Play()
+	else
+		out = TweenService:Create(shown.scale, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0 })
+		out:Play()
+	end
 	out.Completed:Connect(function()
 		shown.card:Destroy()
 	end)
-	out:Play()
 end
 
-local function show(key, forced)
+local function show(key)
 	local art = ART[key]
 	if not art then
 		return
@@ -130,7 +143,7 @@ local function show(key, forced)
 		buyPass:FireServer(key)
 	end)
 	card.Parent = root
-	current = { key = key, card = card, scale = scale, forced = forced }
+	current = { key = key, card = card, scale = scale, owned = player:GetAttribute("Pass" .. key) == true } -- (owned: only by /popup)
 	-- Pops in with a bounce.
 	TweenService:Create(scale, TweenInfo.new(0.5, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 end
@@ -154,7 +167,9 @@ end
 local wasAtBase = true
 RunService.Heartbeat:Connect(function()
 	local here = atBase()
-	if current and (not here or (player:GetAttribute("Pass" .. current.key) and not current.forced)) then
+	if current and player:GetAttribute("Pass" .. current.key) and not current.owned then
+		hide(true) -- just bought
+	elseif current and not here then
 		hide()
 	end
 	if waiting and here and not current and os.clock() - joinedAt >= MIN_PLAY then
@@ -225,6 +240,6 @@ end)
 -- QM's "/popup ...": shown now.
 ReplicatedStorage:WaitForChild("PassPopup").OnClientEvent:Connect(function(key)
 	if passes[key] then
-		show(key, true) -- (even for a pass you own)
+		show(key) -- (even for a pass you own)
 	end
 end)
