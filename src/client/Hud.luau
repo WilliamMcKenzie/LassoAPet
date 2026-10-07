@@ -1551,7 +1551,7 @@ end
 
 -- Cash gained this ride.
 function Hud.setCoins(amount)
-	setCash(amount)
+	setCash(amount and amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)) -- (the x2 Gold pass doubles what's banked: Passes)
 	rideCash.scale.Scale = 1.25
 	TweenService:Create(rideCash.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 end
@@ -1562,7 +1562,7 @@ function Hud.coinPopup(screenPoint, amount)
 	screenPoint /= rootScale -- screen pixels -> HUD root pixels
 	-- Same coin and "+N$" as the fail screen, a bit smaller.
 	local popup = cashRow(homeRoot, 64, 44, Vector2.new(0.5, 0.5), UDim2.fromOffset(screenPoint.X, screenPoint.Y))
-	popup.text.Text = "+" .. money(amount)
+	popup.text.Text = "+" .. money(amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1))
 	popup.scale.Scale = 0
 
 	TweenService:Create(popup.scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
@@ -1595,7 +1595,7 @@ function Hud.coinPopupAt(part, height, amount)
 	board.MaxDistance = 150
 	board.ResetOnSpawn = false
 	local popup = cashRow(board, 48, 34, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5))
-	popup.text.Text = "+" .. money(amount)
+	popup.text.Text = "+" .. money(amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1))
 	popup.scale.Scale = 0
 	board.Parent = homeGui.Parent
 
