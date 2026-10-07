@@ -59,14 +59,13 @@ local function yourPets()
 	return list
 end
 
--- Two of your pets fuse, either way round, and you can pay for it (free for now).
+-- Two of your pets fuse, either way round (the lesson's fuse is free).
 local function canFuse()
 	local list = yourPets()
-	local gold = player:GetAttribute("Gold") or 0
 	for i = 1, #list do
 		for j = 1, #list do
 			local a, b = list[i], list[j]
-			if i ~= j and Fusion.combine(a[1], a[2], b[1], b[2]) and gold >= Fusion.price(a[1], b[1]) then
+			if i ~= j and Fusion.combine(a[1], a[2], b[1], b[2]) then
 				return true
 			end
 		end
@@ -146,7 +145,8 @@ end)
 -- it's not on) and the cursor's target, if any. `phase` is Ride's; `cutscene`, a
 -- close-up's on.
 local function step(phase, cutscene)
-	if finished or not player:GetAttribute("FuseLesson") or (player:GetAttribute("PenLevel") or 1) < 2 then
+	local fused = running and Hud.fusedAt and Hud.fusedAt >= from -- (the server's ended it then: its fuse is the free one)
+	if finished or not (player:GetAttribute("FuseLesson") or fused) or (player:GetAttribute("PenLevel") or 1) < 2 then
 		running = nil
 		return nil, nil
 	elseif phase ~= "idle" or cutscene or camera.CameraType ~= Enum.CameraType.Custom then

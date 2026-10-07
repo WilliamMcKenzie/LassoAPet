@@ -35,7 +35,7 @@ local CARD, ART = 200, 180 -- the dictionary's grid: 200 px cards, the pet 180 p
 local COLUMNS, ROWS = 4, 2 -- 8 to a page (QM)
 local INSIDE = Rect.new(6, 43, 1096, 609) -- the panel's blue, down to the top of FUSE
 local STRIP_Y = 756 -- the middle of the strip along the bottom
-local BUTTON = Vector2.new(278, 189) -- QM's FUSE button (assets/ui/fuse/FuseButton.png)
+local BUTTON = Vector2.new(278, 189) -- QM's FUSE button (assets/ui/fuse/FuseButtonOn.png)
 local BUTTON_Y = 698 -- its middle, over the strip's top edge (QM's mockup)
 -- The same space round every card and between them (QM: even margins), across and down.
 local GAP_X = (INSIDE.Width - COLUMNS * CARD) / (COLUMNS + 1)
@@ -43,7 +43,14 @@ local GAP_Y = (INSIDE.Height - ROWS * CARD) / (ROWS + 1)
 local CARD_CORNER = UDim.new(0.05, 0) -- the rarity cards' own corners (10 px of 200), or the clip cuts their edge
 local FONT = Enum.Font.FredokaOne
 local PAGE_ART = "rbxassetid://132460179762796" -- assets/ui/fuse/FusionPanel.png (QM)
-local BUTTON_ART = "rbxassetid://92820434532680" -- assets/ui/fuse/FuseButton.png (QM)
+-- QM's FUSE button, the price written under its arm (QM, Oct 7): green when you can
+-- fuse the two picked, grey when you can't (or can't afford it). (The old art, with
+-- FUSE written on it, stands in till the new ones are uploaded.)
+local BUTTON_ART = {
+	on = "", -- assets/ui/fuse/FuseButtonOn.png (QM; upload)
+	off = "", -- assets/ui/fuse/FuseButtonOff.png (QM; upload)
+	old = "rbxassetid://92820434532680", -- assets/ui/fuse/FuseButton.png
+}
 local CARDS = { -- the dictionary's rarity cards (assets/ui/dex/Dex<Rarity>.png)
 	Common = "rbxassetid://79697917998703",
 	Uncommon = "rbxassetid://129147449223279",
@@ -64,17 +71,6 @@ local picks = {} -- up to two of `pets`
 local at = 1 -- the first pet on the page shown
 local cards = {} -- [pet] = its card
 local fuseButton, tip, nameA, nameB, priceLabel
-
-local function money(n)
-	local s = tostring(math.floor(n))
-	while true do
-		local k
-		s, k = string.gsub(s, "^(-?%d+)(%d%d%d)", "%1,%2")
-		if k == 0 then
-			return "$" .. s
-		end
-	end
-end
 
 -- Gold to fuse the two picked (QM: each pet adds its rarity's price).
 local function priceOf(a, b)
@@ -229,11 +225,13 @@ local function refresh()
 	nameA.Text = if picks[1] then Fusion.name(picks[1].kind, picks[1].fuse) else "???"
 	nameB.Text = if picks[2] then Fusion.name(picks[2].kind, picks[2].fuse) else "???"
 	local ready = #picks == 2
-	local price = ready and priceOf(picks[1], picks[2])
-	priceLabel.Visible = ready and price > 0 -- (no price shown while fusing's free)
-	priceLabel.Text = if price then money(price) else ""
+	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's fuse is free: QM)
+	local price = if ready and not lesson then priceOf(picks[1], picks[2]) else 0
+	priceLabel.Text = if lesson then "FREE" elseif ready then Hud.money(price) else ""
 	local can = ready and (player:GetAttribute("Gold") or 0) >= price
-	fuseButton.ImageColor3 = if can then Color3.new(1, 1, 1) else Color3.fromRGB(150, 150, 150)
+	local art = if can then BUTTON_ART.on else BUTTON_ART.off
+	fuseButton.Image = if art ~= "" then art else BUTTON_ART.old
+	fuseButton.ImageColor3 = if can or art ~= "" then Color3.new(1, 1, 1) else Color3.fromRGB(150, 150, 150)
 	if ready and not fuseButton:GetAttribute("Ready") then -- a pop once it's ready
 		local s = fuseButton:FindFirstChildOfClass("UIScale")
 		s.Scale = 0.85
@@ -361,7 +359,7 @@ local function fuse()
 		end)
 		return
 	end
-	if (player:GetAttribute("Gold") or 0) < priceOf(a, b) then
+	if not player:GetAttribute("FuseLesson") and (player:GetAttribute("Gold") or 0) < priceOf(a, b) then
 		tip.Text = "Not enough gold"
 		tip.Visible = true
 		task.delay(1.6, function()
@@ -466,13 +464,14 @@ scale = Instance.new("UIScale")
 scale.Parent = page
 page.Parent = gui
 
--- QM's FUSE button over the strip, greyed till two are picked (and you can pay),
--- the price over it; the picks' names either side.
+-- QM's FUSE button over the strip, grey till two are picked (and you can pay), the
+-- price under its arm ("FREE" in the fuse lesson, as QM's mockups); the picks' names
+-- either side.
 fuseButton = Instance.new("ImageButton")
 fuseButton.Name = "Fuse"
 fuseButton.BackgroundTransparency = 1
 fuseButton.AutoButtonColor = false
-fuseButton.Image = BUTTON_ART
+fuseButton.Image = BUTTON_ART.old
 fuseButton.AnchorPoint = Vector2.new(0.5, 0.5)
 fuseButton.Size = UDim2.fromOffset(BUTTON.X, BUTTON.Y)
 fuseButton.Position = UDim2.fromOffset(PAGE.X / 2, BUTTON_Y)
@@ -480,8 +479,17 @@ fuseButton.ZIndex = 5
 Instance.new("UIScale").Parent = fuseButton
 fuseButton.Activated:Connect(fuse)
 fuseButton.Parent = page
-priceLabel = text(page, UDim2.fromOffset(400, 40), UDim2.fromOffset(PAGE.X / 2, BUTTON_Y - BUTTON.Y / 2 - 22), 36)
+priceLabel = text(fuseButton, UDim2.new(1, -24, 0, 88), UDim2.fromScale(0.5, 0.71), 76) -- (QM's mockups: big, under the arm)
 priceLabel.ZIndex = 6
+priceLabel.TextScaled = true -- (a long price fits)
+Instance.new("UITextSizeConstraint", priceLabel).MaxTextSize = 76
+for _, name in { "Gold", "FuseLesson" } do
+	player:GetAttributeChangedSignal(name):Connect(function()
+		if open then
+			refresh() -- (grey or green as your gold changes)
+		end
+	end)
+end
 local side = (PAGE.X - BUTTON.X) / 2 -- the strip either side of FUSE
 nameA = text(page, UDim2.fromOffset(side - 40, 70), UDim2.fromOffset(side / 2, STRIP_Y), 56)
 nameB = text(page, UDim2.fromOffset(side - 40, 70), UDim2.fromOffset(PAGE.X - side / 2, STRIP_Y), 56)

@@ -804,12 +804,16 @@ remote("FusePets", function(player, idA, idB)
 	end
 	local earns = earning(a) + earning(b)
 	local stats = Fusion.best(Fusion.stats(a.pet, a.fuse, a.stats), Fusion.stats(b.pet, b.fuse, b.stats)) -- the best of both (QM)
-	local price = Fusion.price(a.pet, b.pet) -- (QM: fusing costs gold, by rarity; free for now)
+	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's fuse is free, once: QM)
+	local price = if lesson then 0 else Fusion.price(a.pet, b.pet) -- (QM: fusing costs gold, by rarity)
 	local gold = player:GetAttribute("Gold") or 0
 	if gold < price then
 		return
 	end
 	player:SetAttribute("Gold", gold - price)
+	if lesson then
+		player:SetAttribute("FuseLesson", nil) -- (done: client FuseLesson sees the hybrid land)
+	end
 	if baseId == "ride" or donorId == "ride" then -- the hybrid is the one you ride
 		profile.ride, profile.rideFuse, profile.rideMerged, profile.rideIncome, profile.rideStats = base, donor, nil, earns, stats
 		profile.items[if baseId == "ride" then donorId else baseId] = nil
