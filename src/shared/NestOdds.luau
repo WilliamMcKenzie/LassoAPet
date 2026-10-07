@@ -9,7 +9,14 @@
 -- of the eggs (QM, Oct 2), rarer ones likelier deeper in (Config.NestDepthOdds).
 -- The Godlands' nests have their own odds, by how deep in they are (its NestDepth).
 --
+-- A rider on a wild animal takes that animal's egg instead (Nests.server, NestEggs),
+-- but only from the nests of the biome it runs in (QM, Oct 7: no Snake eggs in the
+-- Tundra, no Kraken eggs in the Meadow on the ride home); elsewhere the nests hold
+-- their rolled eggs. An animal that runs in no biome (the events' exclusives) gives
+-- its egg everywhere: finding and riding one is the hard part.
+--
 --   NestOdds.roll(nest, seed)  -- the animal whose egg `nest` holds for the rider with `seed` ("" if its biome has no odds)
+--   NestOdds.ridden(kind, z)   -- the egg a nest at `z` gives a rider on wild animal `kind` in place of its roll: `kind`, or nil (the roll)
 
 local Config = require(script.Parent.Config)
 local Godlands = require(script.Parent.Godlands)
@@ -31,6 +38,18 @@ for b, biome in Config.Biomes do
 		return a.name < c.name
 	end)
 	eggOdds[b] = odds
+end
+
+-- The biome each animal runs in: the one whose Herd spawns it. One listed only at
+-- weight 0 (the Horse, the Snack Yak, the Robo Shark) or not at all (the Loong)
+-- runs nowhere, so it has none.
+local home = {}
+for b, biome in Config.Biomes do
+	for name, weight in biome.Herd do
+		if weight > 0 then
+			home[name] = b
+		end
+	end
 end
 
 -- A Godlands nest's egg, `depth` studs past its line (Config: the Godlands' NestDepth).
@@ -73,6 +92,11 @@ function NestOdds.roll(nest, seed)
 		end
 	end
 	return if #odds > 0 then odds[#odds].name else ""
+end
+
+function NestOdds.ridden(kind, z)
+	local b = home[kind]
+	return if b == nil or b == WorldColors.biomeAt(z) then kind else nil
 end
 
 return NestOdds

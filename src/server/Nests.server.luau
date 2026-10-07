@@ -7,10 +7,12 @@
 --
 -- But the egg you take is the animal you're riding (QM, Oct 6): once a rider's got
 -- on a wild animal (a "lasso" or "take" cue this ride: not the pet they rode out
--- on), their Ride.client shows every nest holding that animal's egg instead, and
--- their grab says which animal (mountEgg), an event's animal included (finding and
--- riding one is the hard part). The rolled egg is for a rider still on their own pet
--- (riding your best pet to a nest would copy it every ride).
+-- on), their Ride.client shows every nest of that animal's own biome holding its egg
+-- instead, and their grab says which animal (mountEgg); nests anywhere else keep
+-- their rolled eggs (QM, Oct 7: no Snake eggs in the Tundra; NestOdds.ridden), bar
+-- an event's animal, whose egg is everywhere (finding and riding one is the hard
+-- part). The rolled egg is for a rider still on their own pet (riding your best pet
+-- to a nest would copy it every ride).
 --
 -- The Godlands never end, so its nests aren't on the map: one goes in each of its
 -- tracks (Shared/Godlands) near any player, at a clear spot picked from the server's
@@ -124,8 +126,14 @@ takeEgg.OnServerEvent:Connect(function(player, nest, mount)
 	if typeof(nest) ~= "Instance" or nest.Parent ~= world.Nests then
 		return
 	end
-	-- The wild animal they're riding, if one (see the top), else their roll for the nest.
-	local kind = mountEgg(player, mount) or NestOdds.roll(nest, player:GetAttribute("NestSeed") or 0)
+	local spot = nest:FindFirstChild("EggSpot")
+	if not spot then
+		return -- (not a whole nest: no egg)
+	end
+	-- The wild animal they're riding, if one and the nest's in its biome (see the top),
+	-- else their roll for the nest.
+	local wild = mountEgg(player, mount)
+	local kind = (wild and NestOdds.ridden(wild, spot.Position.Z)) or NestOdds.roll(nest, player:GetAttribute("NestSeed") or 0)
 	if kind == "" then
 		return
 	end

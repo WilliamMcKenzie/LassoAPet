@@ -4,8 +4,10 @@
 -- the server gives you when you join and after every ride (Nests.server), so the
 -- nests are stocked afresh each ride and the server rolls the same egg when you
 -- grab one. But the egg you take is the animal you're riding (QM, Oct 6): once
--- you've lassoed a wild animal, the nests show that animal's egg instead, swapping
--- with a bounce on every hop (setMount); on your own pet you see the rolled egg.
+-- you've lassoed a wild animal, the nests of its own biome show that animal's egg
+-- instead, swapping with a bounce on every hop (setMount); nests anywhere else keep
+-- their rolled eggs (QM, Oct 7: no Kraken eggs in the Meadow on the ride home;
+-- NestOdds.ridden), and on your own pet you see the rolled egg everywhere.
 -- EggSpot marks the egg's centre. The egg is a rigged model so it can twitch in the
 -- nest. (Ride.client grabs them and draws the guide to the nearest; Nests.server
 -- takes the grab. A nest you've emptied stays so for you till the ride's over.)
@@ -53,16 +55,20 @@ function NestEggs.eggOf(entity)
 	return if entity.own then "" else entity.kind
 end
 
--- The kind of egg `nest` holds for you right now: your mount's, if the nest holds
--- one at all, else what your seed rolled for it.
-local function kindFor(nest)
+-- The kind of egg `nest` (its EggSpot at `z`) holds for you right now: your mount's,
+-- if the nest holds one at all and it's in your mount's biome, else what your seed
+-- rolled for it.
+local function kindFor(nest, z)
 	local kind = rolled[nest]
 	if kind == nil then
 		local seed = player:GetAttribute("NestSeed")
 		kind = if seed then NestOdds.roll(nest, seed) else ""
 		rolled[nest] = kind
 	end
-	return if kind ~= "" and NestEggs.mountKind ~= "" then NestEggs.mountKind else kind
+	if kind == "" or NestEggs.mountKind == "" then
+		return kind
+	end
+	return NestOdds.ridden(NestEggs.mountKind, z) or kind
 end
 
 -- A popping egg's scale (x its rest size) and height (studs over its rest spot) at t.
@@ -87,7 +93,7 @@ function NestEggs.show(nest, popIn)
 		drop(nest) -- (not a whole nest: it showed up in live error reports)
 		return
 	end
-	local kind = kindFor(nest)
+	local kind = kindFor(nest, spot.Position.Z)
 	local waiting = NestEggs.waiting[nest]
 	if waiting and waiting.kind == kind then
 		return
@@ -132,7 +138,7 @@ function NestEggs.update(dt, view)
 			table.insert(gone, nest)
 		elseif waiting.egg.model.Parent then
 			local away = (spot.Position - camPos).Magnitude
-			if waiting.kind ~= kindFor(nest) and away < POP.Swap then
+			if waiting.kind ~= kindFor(nest, spot.Position.Z) and away < POP.Swap then
 				stale = stale or {}
 				table.insert(stale, { nest = nest, pop = away < view })
 			elseif waiting.pop then

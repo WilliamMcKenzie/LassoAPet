@@ -244,9 +244,12 @@ return {
 	-- the nest's biome's Herd odds (NestOdds); Common animals are the ones you get by
 	-- default, so their eggs never show up. But the egg you take is the animal you're
 	-- riding (QM, Oct 6: lassoing is hunting): once you've lassoed a wild animal the
-	-- nests show its egg, swapping with a bounce on every hop, an event's animal
-	-- included (finding and riding one is the hard part). The rolled egg is what you
-	-- get on your own pet (so your best pet never copies itself).
+	-- nests of its own biome (the one whose Herd runs it) show its egg, swapping with
+	-- a bounce on every hop; nests anywhere else keep their rolled eggs (QM, Oct 7: no
+	-- Snake eggs in the Tundra, no Kraken eggs in the Meadow on the ride home). An
+	-- event's animal runs in no biome, so its egg is everywhere (finding and riding
+	-- one is the hard part). The rolled egg is what you get on your own pet (so your
+	-- best pet never copies itself).
 	-- Rare, Epic and Legendary eggs get likelier the further into its biome a nest is
 	-- (QM, Oct 6: going further should pay): their odds x Near at the biome's start
 	-- line, rising evenly to x Far at its end, so a biome's average stays about the
