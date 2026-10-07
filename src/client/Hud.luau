@@ -133,7 +133,7 @@ local BUTTON_WIDTH = 256
 local SPRINT_WIDTH = 164 -- about 2/3 of TAKE EGG's width, as in the mockup
 local BAR_WIDTH = 352
 local ICON_HEIGHT = 80 -- Gold
-local UPGRADE_WIDTH = 300 -- Upgrade Pen, top right
+local UPGRADE_WIDTH = 360 -- Upgrade Pen, top right (20% up from 300, QM Oct 7: easier to notice)
 local SIDE_ICON_HEIGHT = 80 -- Pets and Eggs, a little smaller in the mockup
 local MARGIN = 24
 local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
@@ -672,7 +672,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- Anchored at its middle so the throb grows it evenly.
 	upgrade, upgradeScale = button(homeRoot, "upgradePen", upgradeSize, Vector2.new(0.5, 0.5),
 		UDim2.new(1, -MARGIN - upgradeSize.X.Offset / 2, 0, MARGIN + upgradeSize.Y.Offset / 2))
-	local price = label(upgrade, UDim2.fromOffset(0, 30), UDim2.fromScale(0.855, 0.66), 30, 3)
+	local price = label(upgrade, UDim2.fromOffset(0, 36), UDim2.fromScale(0.855, 0.66), 36, 3.6)
 	price.AutomaticSize = Enum.AutomaticSize.X
 	local cost -- gold for the next level (or the Rainbow Trail), nil when there's nothing to buy
 	local trail = false -- selling the Rainbow Trail
