@@ -4,7 +4,6 @@
 -- whose id is "" isn't uploaded yet and stays silent.
 --
 --   Sounds.play(name, volume?, speed?)  -- a one-shot (IDS below)
---   Sounds.animal(kind)                  -- that animal's call (Config.AnimalSound)
 --   Sounds.setGallop(on, pace?)          -- the gallop loop while riding a galloping animal;
 --                                        -- pace 0..1+ (its speed over MountSpeed) sets its volume and rate
 --   Sounds.setMusic("base" | "ride")     -- crossfades between the two themes
@@ -37,17 +36,6 @@ local IDS = {
 	purchase = "rbxassetid://127625005664662", -- a Robux purchase goes through
 	book_open = "rbxassetid://93383284601909", -- a menu (shop, roll, dictionary) opens or closes
 	book_flip = "rbxassetid://121038229911289", -- a menu turns a page (the dictionary's arrows, a ? flip)
-	-- The animals' calls (Config.AnimalSound says which animal makes which): assets/sounds/animals
-	animal_horse = "rbxassetid://140093608140412",
-	animal_unicorn = "rbxassetid://116892949180157",
-	animal_pig = "rbxassetid://99667393983594",
-	animal_boar = "rbxassetid://83174854533432",
-	animal_rhino = "rbxassetid://88125274661887",
-	animal_elephant = "rbxassetid://75795045274036",
-	animal_snake = "rbxassetid://80957809750357",
-	animal_penguin = "rbxassetid://110273559241946",
-	animal_dragon = "rbxassetid://106584740062364",
-	animal_bear = "rbxassetid://131225256259874",
 }
 local MUSIC = {
 	base = "rbxassetid://1840347412", -- Way Out West (APM): at home
@@ -105,14 +93,6 @@ function Sounds.play(name, volume, speed)
 			s:Destroy()
 		end
 	end)
-end
-
--- An animal's call (Config.AnimalSound), as you lasso onto it or set off on it.
-function Sounds.animal(kind)
-	local call = require(game:GetService("ReplicatedStorage").Shared.Config).AnimalSound[kind]
-	if call then
-		Sounds.play("animal_" .. call, 0.6)
-	end
 end
 
 local gallop
