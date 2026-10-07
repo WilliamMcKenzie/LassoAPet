@@ -104,8 +104,13 @@ local function sizeNest(nest, scale)
 end
 
 for _, nest in world.Nests:GetChildren() do
-	local biome = Config.Biomes[WorldColors.biomeAt(nest.EggSpot.Position.Z)]
-	sizeNest(nest, biome and biome.NestScale or 1)
+	local spot = nest:FindFirstChild("EggSpot")
+	if spot then
+		local biome = Config.Biomes[WorldColors.biomeAt(spot.Position.Z)]
+		sizeNest(nest, biome and biome.NestScale or 1)
+	else
+		warn("Nest without an EggSpot: " .. nest:GetFullName())
+	end
 end
 
 local takeEgg = Instance.new("RemoteEvent")

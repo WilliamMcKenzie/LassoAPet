@@ -72,7 +72,21 @@ local function pop(t)
 	return scale, height
 end
 
+-- Forgets `nest`'s egg (a nest that's gone, or lost its EggSpot).
+local function drop(nest)
+	local waiting = NestEggs.waiting[nest]
+	if waiting then
+		waiting.egg.model:Destroy()
+	end
+	NestEggs.waiting[nest], rolled[nest] = nil, nil
+end
+
 function NestEggs.show(nest, popIn)
+	local spot = nest:FindFirstChild("EggSpot")
+	if not spot or nest.Parent ~= world.Nests then
+		drop(nest) -- (not a whole nest: it showed up in live error reports)
+		return
+	end
 	local kind = kindFor(nest)
 	local waiting = NestEggs.waiting[nest]
 	if waiting and waiting.kind == kind then
@@ -94,7 +108,7 @@ function NestEggs.show(nest, popIn)
 			waiting.egg.model:ScaleTo(waiting.egg.size * scale)
 		end
 		-- (EggSpot is a 1x egg's centre, scaled with the nest: a bigger egg sits higher so it stays on the nest)
-		waiting.rest = nest.EggSpot.CFrame * CFrame.new(0, 1.6 * scale * (waiting.egg.size - 1), 0) * CFrame.Angles(0, math.pi, 0)
+		waiting.rest = spot.CFrame * CFrame.new(0, 1.6 * scale * (waiting.egg.size - 1), 0) * CFrame.Angles(0, math.pi, 0)
 		waiting.egg.model:PivotTo(waiting.rest)
 		waiting.egg.model.Parent = nest
 		NestEggs.waiting[nest] = waiting
@@ -109,10 +123,14 @@ end
 -- once it's within POP.Swap studs, with a bounce if in view.
 function NestEggs.update(dt, view)
 	local camPos = camera.CFrame.Position
-	local stale = nil
+	local stale, gone = nil, nil
 	for nest, waiting in NestEggs.waiting do
-		if waiting.egg.model.Parent then
-			local away = (nest.EggSpot.Position - camPos).Magnitude
+		local spot = nest:FindFirstChild("EggSpot")
+		if not spot or nest.Parent ~= world.Nests then
+			gone = gone or {}
+			table.insert(gone, nest)
+		elseif waiting.egg.model.Parent then
+			local away = (spot.Position - camPos).Magnitude
 			if waiting.kind ~= kindFor(nest) and away < POP.Swap then
 				stale = stale or {}
 				table.insert(stale, { nest = nest, pop = away < view })
@@ -138,6 +156,9 @@ function NestEggs.update(dt, view)
 			waiting.egg:update(dt)
 		end
 	end
+	for _, nest in gone or {} do -- (after the loop, like the swaps)
+		drop(nest)
+	end
 	for _, swap in stale or {} do -- (after the loop: show re-keys waiting)
 		NestEggs.show(swap.nest, swap.pop)
 	end
@@ -146,9 +167,17 @@ end
 -- Every nest's egg, rolled again from each new seed (a ride's over: Nests.server).
 function NestEggs.start()
 	local function watch(nest)
-		NestEggs.show(nest)
+		if nest:FindFirstChild("EggSpot") then
+			NestEggs.show(nest)
+		else
+			task.spawn(function() -- (a new Godlands nest's parts can land a moment after it)
+				if nest:WaitForChild("EggSpot", 10) then
+					NestEggs.show(nest)
+				end
+			end)
+		end
 		nest.Destroying:Connect(function() -- (a Godlands nest no one's near any more: Nests.server)
-			NestEggs.waiting[nest], rolled[nest] = nil, nil
+			drop(nest)
 		end)
 	end
 	for _, nest in world.Nests:GetChildren() do

@@ -45,7 +45,11 @@ end
 local NestOdds = {}
 
 function NestOdds.roll(nest, seed)
-	local at = nest.EggSpot.Position
+	local spot = nest:FindFirstChild("EggSpot")
+	if not spot then
+		return "" -- (not a whole nest: no egg)
+	end
+	local at = spot.Position
 	-- One stream per nest and seed (a seeded Random repeats itself, so both sides roll
 	-- alike); the nest's spot tells the nests apart (they're all named Nest).
 	local r = Random.new(seed * 65536 + math.round(at.Z) * 64 + math.round(at.X))
