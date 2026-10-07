@@ -734,7 +734,8 @@ local function homePets()
 end
 
 -- Each time your pets pay out (PetIncome), every one of them at home pops its
--- Config.PetIncome as "+N$" over its head, like the coins for switching rides.
+-- Config.PetIncome as "+N$" over its head, like the coins for switching rides,
+-- except the ones near you showing their nameplate (PenPets.plated: PetPlates.client).
 ReplicatedStorage:WaitForChild("PetIncome").OnClientEvent:Connect(function()
 	if phase ~= "idle" then
 		return
@@ -749,7 +750,7 @@ ReplicatedStorage:WaitForChild("PetIncome").OnClientEvent:Connect(function()
 		local earned = kind and Config.PetIncome[kind] and Config.PetIncome[kind] * merged
 		local income = if isStarter then player:GetAttribute("RideIncome") else PenPets.pets[model] and PenPets.pets[model].income
 		earned = income or earned -- (a hybrid earns what both its pets did: Shared/Fusion)
-		if earned and earned > 0 and model.PrimaryPart then
+		if earned and earned > 0 and model.PrimaryPart and not PenPets.plated[model] then
 			local box, size = Outline.box(model)
 			Hud.coinPopupAt(model.PrimaryPart, box.Y + size.Y / 2 + 1, earned)
 		end
