@@ -1,6 +1,6 @@
 -- Nameplates over your own pets when you walk up to them (QM, Oct 7): the pet's
--- name in its rarity's colour, and under it, a little right, its speed (its Speed
--- stat x 20, "m/s"), with QM's arm icon filling the spot to the left of both.
+-- name in its rarity's colour, and under it its speed (its Speed
+-- stat x 20, "m/s"), both centred.
 -- Laid out from QM's reference, measured in pixels: the whole plate is 300 x 125.
 --
 -- Only the NEAREST few of your pets within REACH get one, and only while you're on
@@ -27,7 +27,6 @@ local HEIGHT = 3 -- studs: the plate's height (125 px in the reference)
 local WIDTH = HEIGHT * 300 / 125
 local TIER_GROWTH = 1.2 -- the plate's size per size tier up from a small pet (QM, Oct 7)
 local ABOVE = 0.6 -- studs between the pet's top and the plate
-local ARM = "rbxassetid://73860967591442" -- assets/ui/PowerArm.png
 local FONT = Enum.Font.FredokaOne
 local CHECK = 0.1 -- seconds between looks round
 
@@ -62,8 +61,7 @@ local function text(parent, size, position, color)
 	label.Font = FONT
 	label.TextScaled = true
 	label.TextColor3 = color
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.AnchorPoint = Vector2.new(0, 0.5)
+	label.AnchorPoint = Vector2.new(0.5, 0.5)
 	label.Size = size
 	label.Position = position
 	local stroke = Instance.new("UIStroke")
@@ -95,20 +93,10 @@ local function build(model)
 	plate.Parent = board
 	local scale = Instance.new("UIScale")
 	scale.Parent = plate
-	-- The arm: from the plate's left edge, level with the middle of the name down
-	-- to the bottom of the speed (91 x 91 px at (0, 30)).
-	local arm = Instance.new("ImageLabel")
-	arm.BackgroundTransparency = 1
-	arm.Image = ARM
-	arm.ScaleType = Enum.ScaleType.Fit
-	arm.Position = UDim2.fromScale(0, 30 / 125)
-	arm.Size = UDim2.fromScale(91 / 300, 91 / 125)
-	arm.Parent = plate
-	-- The name's letters span 0-57 px down from x 90; the speed's 71-125 from x 106,
-	-- just right of the name's start. (A label's letters are ~3/4 its height.)
-	-- Both run to the board's right edge: a name too long for that shrinks to fit.
-	local name = text(plate, UDim2.fromScale(1.5 - 90 / 300, 0.6), UDim2.fromScale(90 / 300, 28 / 125), Color3.new(1, 1, 1))
-	local speed = text(plate, UDim2.fromScale(1.5 - 106 / 300, 0.58), UDim2.fromScale(106 / 300, 98 / 125), Color3.new(1, 1, 1))
+	-- The name on top and the speed under it, both centred (QM, Oct 7: no arm icon).
+	-- Each may run the board's whole width: a name too long for that shrinks to fit.
+	local name = text(plate, UDim2.fromScale(2, 0.6), UDim2.fromScale(0.5, 28 / 125), Color3.new(1, 1, 1))
+	local speed = text(plate, UDim2.fromScale(2, 0.58), UDim2.fromScale(0.5, 98 / 125), Color3.new(1, 1, 1))
 	-- In a folder of its own, adorned to the pet: inside the pet's model, the pet's
 	-- ScaleTo would scale the plate with it (a medium pet's came out huge).
 	local folder = workspace:FindFirstChild("PetPlates")
