@@ -577,7 +577,9 @@ local function character()
 	local char = player.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
 	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-	return hrp, humanoid
+	-- Mid-respawn the root part can exist before (or after) the Humanoid: no hrp
+	-- without a humanoid, so every "if hrp" check covers both.
+	return if humanoid then hrp else nil, humanoid
 end
 
 local function cleanup()
@@ -1065,11 +1067,13 @@ local function fail(reason, tip)
 	end
 	Outline.set(nil)
 	-- Thrown off behind the animal, landing flat on their back until they go home.
-	local look = hrp.CFrame.LookVector
-	tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1 }
-	vfx.rideCue:FireServer("crash", tumble.from, tumble.yaw, tumble.dir, tumble.side) -- everyone sees you thrown off
-	humanoid.Sit = false
-	humanoid.PlatformStand = true -- no animations: lies stiff
+	if hrp then -- (no character mid-respawn: nothing to throw)
+		local look = hrp.CFrame.LookVector
+		tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1 }
+		vfx.rideCue:FireServer("crash", tumble.from, tumble.yaw, tumble.dir, tumble.side) -- everyone sees you thrown off
+		humanoid.Sit = false
+		humanoid.PlatformStand = true -- no animations: lies stiff
+	end
 	Hud.setAction(nil)
 	Hud.setHold(nil)
 	Hud.setDistance("")
