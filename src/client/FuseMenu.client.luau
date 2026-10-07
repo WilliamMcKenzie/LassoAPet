@@ -19,6 +19,7 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
+local Config = require(ReplicatedStorage.Shared.Config)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local ModalPop = require(script.Parent.ModalPop)
@@ -42,7 +43,7 @@ local GAP_X = (INSIDE.Width - COLUMNS * CARD) / (COLUMNS + 1)
 local GAP_Y = (INSIDE.Height - ROWS * CARD) / (ROWS + 1)
 local CARD_CORNER = UDim.new(0.05, 0) -- the rarity cards' own corners (10 px of 200), or the clip cuts their edge
 local FONT = Enum.Font.FredokaOne
-local PAGE_ART = "" -- assets/ui/fuse/MergePanel.png (QM, Oct 7: titled MERGE; upload)
+local PAGE_ART = "rbxassetid://92882303663654" -- assets/ui/fuse/MergePanel.png (QM, Oct 7: titled MERGE)
 local OLD_PAGE_ART = "rbxassetid://132460179762796" -- assets/ui/fuse/FusionPanel.png (till then)
 -- QM's FUSE button, the price written under its arm (QM, Oct 7): green when you can
 -- fuse the two picked, grey when you can't (or can't afford it). (The old art, with
@@ -228,7 +229,9 @@ local function refresh()
 	local ready = #picks == 2
 	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's fuse is free: QM)
 	local price = if ready and not lesson then priceOf(picks[1], picks[2]) else 0
-	priceLabel.Text = if lesson then "FREE" elseif ready then Hud.money(price) else ""
+	-- (not ready: the least it could cost with what's picked, so it's never blank: QM)
+	local least = if picks[1] then Fusion.worth(picks[1].kind, picks[1].fuse, picks[1].worth) + Config.FusePrice.Common else 2 * Config.FusePrice.Common
+	priceLabel.Text = if lesson then "FREE" elseif ready then Hud.money(price) else Hud.money(least)
 	local can = ready and (player:GetAttribute("Gold") or 0) >= price
 	local art = if can then BUTTON_ART.on else BUTTON_ART.off
 	fuseButton.Image = if art ~= "" then art else BUTTON_ART.old
