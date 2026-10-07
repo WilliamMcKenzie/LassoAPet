@@ -1088,6 +1088,9 @@ skipCommand.Triggered:Connect(function(source)
 	if not profile.ride and not next(profile.items) then
 		profile.ride = Config.DefaultPet
 	end
+	if SpeedGates.on() and (player:GetAttribute("PenLevel") or 1) < 2 then
+		player:SetAttribute("FuseLesson", true) -- (as finishing it would: TutorialDone)
+	end
 	player:SetAttribute("Tutorial", nil)
 	publish(player)
 end)

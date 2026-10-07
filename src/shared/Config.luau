@@ -617,11 +617,11 @@ return {
 	-- Zones aren't bought with gold any more (UnlockCost unused); merging costs
 	-- MergePrice.Base x (the hybrid's m/s / From) ^ Power gold instead of FusePrice. The Merge
 	-- lesson comes right after the tutorial. Numbers are guesses: a first Meadow merge (Horse +
-	-- Pig at worst, 28) breaks the Desert; ~3-4 merges per zone after that.
+	-- Fish at worst, 26: the tutorial's egg can be a Fish) breaks the Desert; ~3-4 merges per zone after that.
 	-- On = false: gold gates and rarity prices as before.
 	SpeedGates = {
 		On = true,
-		Need = { Desert = 28, Snow = 80, Ocean = 150, Godlands = 300 },
+		Need = { Desert = 26, Snow = 80, Ocean = 150, Godlands = 300 },
 		MergePrice = { Base = 500, From = 28, Power = 5 },
 	},
 	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)

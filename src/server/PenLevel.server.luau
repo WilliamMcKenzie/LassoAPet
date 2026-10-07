@@ -397,11 +397,11 @@ end
 -- (RideCue) set off on it, and lassoing onto a stampede animal ("take") or the
 -- ride's "end" stops that. Its m/s is the pet you ride's (RidePet, RideFuse, RideStats).
 local onOwnPet = {}
-ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
+ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what, n)
 	if what == "out" then
 		onOwnPet[player] = true
-	elseif what == "take" or what == "end" then
-		onOwnPet[player] = nil
+	elseif what == "take" or what == "end" or (what == "lasso" and n) then
+		onOwnPet[player] = nil -- (onto a stampede animal; a stray, n false, may be your own pet again)
 	end
 end)
 Players.PlayerRemoving:Connect(function(player)
@@ -422,6 +422,7 @@ breakGate.OnServerInvoke = function(player, i)
 		or SpeedGates.mps(kind, player:GetAttribute("RideFuse"), stats and { Speed = stats.X, Stamina = stats.Y }) < need then
 		return false
 	end
+	zoneUnlocked:FireClient(player, i) -- (PassPopups' VIP; Gate.client's already shattered it)
 	player:SetAttribute("PenLevel", i)
 	opened(player)
 	return true
