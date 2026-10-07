@@ -113,9 +113,8 @@ end
 
 -- The gate bursts into pieces flung on into the biome, tumbling and fading.
 local function shatter(i)
-	-- It breaks with a crunch (smash and crash together), then a little jingle (egg_hatch's) (QM).
-	Sounds.play("smash", 0.8)
-	Sounds.play("crash", 0.5)
+	-- It shatters like glass (QM, Oct 7: Mirror Break), then a little jingle (egg_hatch's) (QM).
+	Sounds.play("gate_break", 0.8)
 	task.delay(0.3, Sounds.play, "egg_hatch", 0.6)
 	local width, height = Config.CourseHalfWidth * 2, Config.GateHeight
 	local z = WorldColors.biomeStart(i)

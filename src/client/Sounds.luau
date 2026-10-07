@@ -22,6 +22,7 @@ local IDS = {
 	gallop_loop = "rbxassetid://129029116650332", -- while riding a galloping animal (Config.GallopSound)
 	sprint_whoosh = "rbxassetid://73983934702758", -- Sprint starts
 	smash = "rbxassetid://90604529915688", -- the pet smashes through an obstacle
+	gate_break = "rbxassetid://9116938119", -- a zone gate shatters (Mirror Break, Roblox's ProSoundEffects; QM's pick, Oct 7)
 	crash = "rbxassetid://94142874131984", -- crashed or bucked off
 	arrive_home = "rbxassetid://87800549075293", -- back over the start line with an egg
 	reveal_tick = "rbxassetid://91812796089050", -- each flick of the egg card (and the roll's)
