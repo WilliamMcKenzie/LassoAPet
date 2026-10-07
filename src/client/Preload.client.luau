@@ -20,7 +20,7 @@ local PANELS = {
 	"rbxassetid://77735968469215", "rbxassetid://112429560665609", "rbxassetid://93558185988056",
 	"rbxassetid://80615979394374", "rbxassetid://120348389827821", "rbxassetid://74328700033740", -- (the FUSE button on and off)
 	"rbxassetid://126004469719414", "rbxassetid://92882303663654", -- (the MERGE icon and panel)
-	"rbxassetid://132592725982767", "rbxassetid://85992452177736", "rbxassetid://87748999824256", "rbxassetid://102508237570181", -- (the pass popups)
+	"rbxassetid://132592725982767", "rbxassetid://85992452177736", "rbxassetid://87748999824256", "rbxassetid://135226874634598", -- (the pass popups)
 	"rbxassetid://132460179762796", "rbxassetid://92820434532680", "rbxassetid://79697917998703",
 	"rbxassetid://129147449223279", "rbxassetid://72145821537095", "rbxassetid://137693950544184",
 	"rbxassetid://80504921595928", "rbxassetid://132069626373718",
