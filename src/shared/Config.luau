@@ -149,8 +149,8 @@ return {
 			PostColor = Color3.fromRGB(236, 140, 124),
 			GateImage = "rbxassetid://75356296124042", -- assets/ui/GateOcean.png
 			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
-			UpgradeImage = "rbxassetid://74721639573768", -- assets/ui/UpgradePenOcean.png
-			UpgradeImageDisabled = "rbxassetid://101363896090039", -- assets/ui/UpgradePenOceanDisabled.png
+			UpgradeImage = "rbxassetid://131593866577439", -- assets/ui/UpgradePenOcean.png (QM, Oct 7: new art)
+			UpgradeImageDisabled = "rbxassetid://77069230216461", -- assets/ui/UpgradePenOceanDisabled.png
 			-- Under the sea (Ocean.client): while you're in this biome the distance
 			-- fades into Haze.Color and bubbles drift up round the camera.
 			Haze = {
