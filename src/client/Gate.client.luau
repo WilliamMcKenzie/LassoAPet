@@ -15,12 +15,12 @@ local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Sounds = require(script.Parent.Sounds)
 local SpeedGates = require(ReplicatedStorage.Shared.SpeedGates)
 local GateSmash = require(script.Parent.GateSmash)
+local GlassShatter = require(script.Parent.GlassShatter)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
-local SHARDS_X, SHARDS_Y = 14, 7 -- the gate breaks into this many pieces
-local SHARD_TIME = 1.6 -- seconds the pieces fly before they're gone
+local SHARD_TIME = 1.6 -- seconds the camera watches the pieces fly
 local FLY_TIME = 1.6 -- seconds for the camera to get to the gate (and 1.2 back)
 local PIXELS_PER_STUD = 20
 local CARD_HEIGHT = 0.55 -- of the gate's height
@@ -133,55 +133,23 @@ local function unlock(i)
 	end)
 end
 
--- The gate bursts into pieces flung on into the biome, tumbling and fading.
-local function shatter(i)
+-- The gate breaks like glass (GlassShatter, QM Oct 7): Delaunay pieces round where
+-- it was hit (x, along the sheet; the middle if nobody hit it), flung on into the
+-- biome at `push` studs/s (the rider's speed), tumbling, bouncing and fading.
+local function shatter(i, x, push)
 	-- It shatters like glass (QM, Oct 7: Mirror Break), then a little jingle (egg_hatch's) (QM).
 	Sounds.play("gate_break", 0.8)
 	task.delay(0.3, Sounds.play, "egg_hatch", 0.6)
-	local width, height = Config.CourseHalfWidth * 2, Config.GateHeight
-	local z = WorldColors.gateLine(i)
-	local w, h = width / SHARDS_X, height / SHARDS_Y
-	local rng = Random.new()
-	local shards = {}
-	for gx = 1, SHARDS_X do
-		for gy = 1, SHARDS_Y do
-			local part = Instance.new("Part")
-			part.Anchored = true
-			part.CanCollide = false
-			part.CanQuery = false
-			part.CanTouch = false
-			part.CastShadow = false
-			part.Material = Enum.Material.Neon
-			part.Color = if rng:NextNumber() < 0.3 then Color3.new(1, 1, 1) else SpeedGates.biome(i).GateColor or Config.GateColor
-			part.Transparency = 0.15 + 0.5 * (gy - 1) / SHARDS_Y -- clearer higher up, like the sheet
-			part.Size = Vector3.new(w * rng:NextNumber(0.6, 1), h * rng:NextNumber(0.6, 1), 0.3)
-			local at = Vector3.new(-width / 2 + (gx - 0.5) * w, (gy - 0.5) * h, z)
-			part.CFrame = CFrame.new(at)
-			part.Parent = workspace
-			table.insert(shards, {
-				part = part,
-				start = part.Transparency,
-				velocity = Vector3.new((at.X / width) * rng:NextNumber(20, 40), rng:NextNumber(8, 30), -rng:NextNumber(25, 60)),
-				spin = Vector3.new(rng:NextNumber(-8, 8), rng:NextNumber(-8, 8), rng:NextNumber(-8, 8)),
-			})
-		end
-	end
-	local t = 0
-	local connection
-	connection = RunService.RenderStepped:Connect(function(dt)
-		t += dt
-		for _, s in shards do
-			s.velocity -= Vector3.new(0, 60 * dt, 0)
-			s.part.CFrame = (s.part.CFrame + s.velocity * dt) * CFrame.Angles(s.spin.X * dt, s.spin.Y * dt, s.spin.Z * dt)
-			s.part.Transparency = s.start + (1 - s.start) * math.clamp(t / SHARD_TIME, 0, 1) ^ 2
-		end
-		if t >= SHARD_TIME then
-			connection:Disconnect()
-			for _, s in shards do
-				s.part:Destroy()
-			end
-		end
-	end)
+	local width = Config.CourseHalfWidth * 2
+	GlassShatter.burst({
+		z = WorldColors.gateLine(i),
+		width = width,
+		height = Config.GateHeight,
+		color = SpeedGates.biome(i).GateColor or Config.GateColor,
+		impact = Vector2.new(math.clamp(x or 0, -width / 2 + 4, width / 2 - 4), 5),
+		push = push,
+		dir = -1,
+	})
 end
 
 -- Just bought biome i: fly over to its gate, break it, fly back.
@@ -252,13 +220,13 @@ refresh()
 
 -- Ridden through fast enough (GateSmash): it shatters right there, mid-ride, no camera
 -- flight. If the server says no after all, it's back.
-GateSmash.smashed.Event:Connect(function(i)
+GateSmash.smashed.Event:Connect(function(i, x, push)
 	local gate = gates[i]
 	if gate then
 		gates[i] = nil
 		gate.gui:Destroy()
 		gate.part:Destroy()
-		shatter(i)
+		shatter(i, x, push)
 	end
 end)
 GateSmash.rejected.Event:Connect(refresh)

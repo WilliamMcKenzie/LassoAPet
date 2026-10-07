@@ -17,7 +17,7 @@ local remote = ReplicatedStorage:WaitForChild("BreakGate")
 
 local GateSmash = {}
 GateSmash.level = nil -- the level broken this session that the server may not have confirmed yet
-GateSmash.smashed = Instance.new("BindableEvent") -- (i): shatter gate i now (Gate.client)
+GateSmash.smashed = Instance.new("BindableEvent") -- (i, x, speed): shatter gate i now (Gate.client)
 GateSmash.rejected = Instance.new("BindableEvent") -- the server said no: put the gates back (Gate.client)
 
 local function nextGate()
@@ -34,7 +34,7 @@ function GateSmash.hit(mount)
 		return false
 	end
 	GateSmash.level = i
-	GateSmash.smashed:Fire(i)
+	GateSmash.smashed:Fire(i, mount.x, mount.speed) -- (it breaks round where you hit it, flung on at your speed: GlassShatter)
 	task.spawn(function()
 		local ok, yes = pcall(remote.InvokeServer, remote, i)
 		if not (ok and yes) and GateSmash.level and GateSmash.level >= i then
