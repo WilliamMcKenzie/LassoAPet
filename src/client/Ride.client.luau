@@ -3800,10 +3800,10 @@ end
 
 local function updateHud()
 	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out),
-	-- but for its charge at the Desert gate (Tutorial.showSpeed): Sprint and your speed.
+	-- but for its charge at the Desert gate (Tutorial.showSpeed): Sprint, the bar and your speed.
 	Hud.setSprint(phase == "outbound" and (not Tutorial.active or Tutorial.showSpeed))
 	if phase == "outbound" then
-		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1, carried == nil)
+		Hud.setHold(if Tutorial.active and not Tutorial.showSpeed then nil elseif mount then hold / holdTime(mount) else 1, carried == nil)
 		-- Your speed in mph, live (QM, Oct 7: was the distance from home): what you're really
 		-- running at before the SpeedCurve bend, sprints and all, as the gates count it.
 		if mount then -- (nil mid-lasso: it keeps the last)
