@@ -642,6 +642,9 @@ return {
 		-- 740, 1110, ...), to the nearest 10. Broken ones are saved ("GodGates").
 		Endless = { Every = 1920, Growth = 1.5 },
 		MergePrice = { Base = 500, From = 28, Power = 5 },
+		-- On each gate, instead of the lock card: "15mph" with QM's lightning bolt beside it
+		-- (assets/ui/SpeedBolt.png; Studio uploads it and fills the id).
+		BoltImage = "",
 	},
 	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)
 	SpeedFeel = { On = true, Start = 44, Scale = 200, Lines = 28, Opacity = 0.6, LineSpeed = 2.2, FovKick = 18, MaxFov = 110 },

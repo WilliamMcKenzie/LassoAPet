@@ -22,7 +22,7 @@ local camera = workspace.CurrentCamera
 local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
 local SHARD_TIME = 1.6 -- seconds the camera watches the pieces fly
 local FLY_TIME = 1.6 -- seconds for the camera to get to the gate (and 1.2 back)
-local PIXELS_PER_STUD = 20
+local PIXELS_PER_STUD = if SpeedGates.on() then 8 else 20 -- (speed gates: coarser, so the mph text can be big: a TextLabel tops out at 100px)
 local CARD_HEIGHT = 0.55 -- of the gate's height
 local CARD_ASPECT = 1068 / 662 -- GateDesert.png etc.
 
@@ -64,51 +64,76 @@ local function build(i)
 	sheet.Parent = gui
 	table.insert(fades, { sheet, "BackgroundTransparency" })
 
-	local image = SpeedGates.biome(i).GateImage
-	local card
-	if image and image ~= "" then
-		card = Instance.new("ImageLabel")
-		card.Image = image
-		card.BackgroundTransparency = 1
-		table.insert(fades, { card, "ImageTransparency" })
-	else
-		card = Instance.new("TextLabel") -- until the card image is uploaded
-		card.Text = "LV. " .. i .. " REQUIRED"
-		card.Font = Enum.Font.FredokaOne
-		card.TextScaled = true
-		card.TextColor3 = Color3.new(1, 1, 1)
-		card.BackgroundColor3 = color
-		local stroke = Instance.new("UIStroke")
-		stroke.Thickness = 6
-		stroke.Parent = card
-		Instance.new("UICorner", card).CornerRadius = UDim.new(0.15, 0)
-		table.insert(fades, { card, "TextTransparency" })
-		table.insert(fades, { card, "BackgroundTransparency" })
-		table.insert(fades, { stroke, "Transparency" })
-	end
-	card.AnchorPoint = Vector2.new(0.5, 0.5)
-	card.Position = UDim2.fromScale(0.5, 0.5)
-	card.Size = UDim2.fromScale(CARD_HEIGHT * height * CARD_ASPECT / width, CARD_HEIGHT)
-	card.Parent = sheet
-
-	-- Speed gates (Shared/SpeedGates): the mph it takes, under the card.
 	local need = SpeedGates.on() and SpeedGates.need(i)
 	if need then
+		-- Speed gates (QM, Oct 7): no lock card, just what it takes, "15mph" with a
+		-- 2px black outline and QM's lightning bolt beside it, in the middle.
+		local rowHeight = math.floor(height * PIXELS_PER_STUD * 0.45)
+		local row = Instance.new("Frame")
+		row.BackgroundTransparency = 1
+		row.AnchorPoint = Vector2.new(0.5, 0.5)
+		row.Position = UDim2.fromScale(0.5, 0.5)
+		row.Size = UDim2.new(1, 0, 0, rowHeight)
+		local layout = Instance.new("UIListLayout")
+		layout.FillDirection = Enum.FillDirection.Horizontal
+		layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		layout.VerticalAlignment = Enum.VerticalAlignment.Center
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
+		layout.Padding = UDim.new(0, math.floor(rowHeight * 0.1))
+		layout.Parent = row
+		local bolt = Config.SpeedGates.BoltImage
+		if bolt and bolt ~= "" then
+			local icon = Instance.new("ImageLabel")
+			icon.Image = bolt
+			icon.BackgroundTransparency = 1
+			icon.Size = UDim2.fromOffset(rowHeight, rowHeight)
+			icon.LayoutOrder = 1
+			icon.Parent = row
+			table.insert(fades, { icon, "ImageTransparency" })
+		end
 		local speed = Instance.new("TextLabel")
-		speed.Text = need .. " mph"
+		speed.Text = need .. "mph"
 		speed.Font = Enum.Font.FredokaOne
-		speed.TextScaled = true
+		speed.TextSize = math.min(rowHeight, 100)
 		speed.TextColor3 = Color3.new(1, 1, 1)
 		speed.BackgroundTransparency = 1
-		speed.AnchorPoint = Vector2.new(0.5, 0)
-		speed.Position = UDim2.fromScale(0.5, 0.5 + CARD_HEIGHT / 2 + 0.01)
-		speed.Size = UDim2.fromScale(0.6, 0.2)
+		speed.AutomaticSize = Enum.AutomaticSize.X
+		speed.Size = UDim2.fromOffset(0, rowHeight)
+		speed.LayoutOrder = 2
 		local stroke = Instance.new("UIStroke")
-		stroke.Thickness = 8
+		stroke.Thickness = 2
 		stroke.Parent = speed
-		speed.Parent = sheet
+		speed.Parent = row
+		row.Parent = sheet
 		table.insert(fades, { speed, "TextTransparency" })
 		table.insert(fades, { stroke, "Transparency" })
+	else
+		local image = SpeedGates.biome(i).GateImage
+		local card
+		if image and image ~= "" then
+			card = Instance.new("ImageLabel")
+			card.Image = image
+			card.BackgroundTransparency = 1
+			table.insert(fades, { card, "ImageTransparency" })
+		else
+			card = Instance.new("TextLabel") -- until the card image is uploaded
+			card.Text = "LV. " .. i .. " REQUIRED"
+			card.Font = Enum.Font.FredokaOne
+			card.TextScaled = true
+			card.TextColor3 = Color3.new(1, 1, 1)
+			card.BackgroundColor3 = color
+			local stroke = Instance.new("UIStroke")
+			stroke.Thickness = 6
+			stroke.Parent = card
+			Instance.new("UICorner", card).CornerRadius = UDim.new(0.15, 0)
+			table.insert(fades, { card, "TextTransparency" })
+			table.insert(fades, { card, "BackgroundTransparency" })
+			table.insert(fades, { stroke, "Transparency" })
+		end
+		card.AnchorPoint = Vector2.new(0.5, 0.5)
+		card.Position = UDim2.fromScale(0.5, 0.5)
+		card.Size = UDim2.fromScale(CARD_HEIGHT * height * CARD_ASPECT / width, CARD_HEIGHT)
+		card.Parent = sheet
 	end
 
 	-- (the part goes in first and carries its own sheet: a sheet adorned from PlayerGui

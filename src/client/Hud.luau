@@ -383,7 +383,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	filled.AnchorPoint = Vector2.zero
 
 	-- Distance, on the bar.
-	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 5) -- a thick black outline (QM's speed reference, Oct 7; was 3px)
+	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 3) -- 3px outline (QM)
 	distance.Name = "Distance"
 	distance.ZIndex = 2
 
