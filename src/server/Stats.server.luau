@@ -7,7 +7,11 @@
 --             average session today, yesterday and over the last 7 days, today's
 --             longest session, and the
 --             first play bounce rate (as Creator Hub's: of players on their very
---             first visit, the share who left within 60 s, and within 61-180 s).
+--             first visit, the share who left within 60 s, and within 61-180 s),
+--             and where today's sessions ended: how many, and how long they lasted,
+--             by how far the player had got when they left (still in the tutorial,
+--             or the furthest zone unlocked), and how long players stayed after
+--             unlocking the Desert that session (QM, Oct 7: is the Desert a let-down?).
 --
 -- A first visit is a player the DataStore "StatsSeen" hasn't seen before (it keeps
 -- only "seen" against their UserId, inside Roblox like their save; it starts empty
@@ -19,6 +23,8 @@ local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+
+local Config = require(ReplicatedStorage.Shared.Config)
 
 local FLUSH_EVERY = 60 -- seconds between adding this server's sessions into the store
 local DAY = 24 * 60 * 60
@@ -45,6 +51,11 @@ local function blank()
 	end
 	return t
 end
+local most = {}
+for _, f in MOST do
+	most[f] = true
+end
+-- (any other number in `from` is added too: the per-stage counts, "at<Stage>Sessions" and so on)
 local function addInto(into, from)
 	for _, f in FIELDS do
 		into[f] = (into[f] or 0) + (from and tonumber(from[f]) or 0)
@@ -52,7 +63,25 @@ local function addInto(into, from)
 	for _, f in MOST do
 		into[f] = math.max(into[f] or 0, from and tonumber(from[f]) or 0)
 	end
+	for f, v in from or {} do
+		if type(v) == "number" and not most[f] and not table.find(FIELDS, f) then
+			into[f] = (into[f] or 0) + v
+		end
+	end
 	return into
+end
+
+-- How far a player had got: "Tutorial", or their furthest zone (Config.Biomes' names).
+local STAGES = { "Tutorial" }
+for _, biome in Config.Biomes do
+	table.insert(STAGES, biome.Name)
+end
+local function stageOf(player)
+	if player:GetAttribute("Tutorial") then
+		return "Tutorial"
+	end
+	local biome = Config.Biomes[math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)]
+	return biome and biome.Name or "Tutorial"
 end
 
 -- The game's owner (as Hatchery's dev commands), or anyone in Studio.
@@ -111,7 +140,15 @@ local function finish(player)
 		local now = os.time()
 		local length = now - session.at
 		local key = dayKey(now)
+		local stage = stageOf(player)
+		-- PenLevel.server stamps "DesertAt" when a player unlocks the Desert (this session only).
+		local desertAt = player:GetAttribute("DesertAt")
+		local after = if typeof(desertAt) == "number" and desertAt >= session.at then now - desertAt else nil
 		pending[key] = addInto(pending[key] or blank(), {
+			["at" .. stage .. "Sessions"] = 1,
+			["at" .. stage .. "Seconds"] = length,
+			desertUnlocks = if after then 1 else 0,
+			afterDesertSeconds = after or 0,
 			sessions = 1,
 			seconds = length,
 			longest = length,
@@ -189,6 +226,22 @@ local function bounce(t)
 		100 * t.bounce60 / t.firsts, 100 * t.bounce180 / t.firsts, t.firsts)
 end
 
+-- Where `t`'s sessions ended, by stage, and how long they lasted after a Desert unlock.
+local function byStage(t, lines)
+	for _, stage in STAGES do
+		local n = t["at" .. stage .. "Sessions"] or 0
+		if n > 0 then
+			table.insert(lines, string.format("  Left at %s: %d (%.0f%%), %.1f min avg",
+				stage, n, 100 * n / math.max(t.sessions, 1), (t["at" .. stage .. "Seconds"] or 0) / n / 60))
+		end
+	end
+	local unlocks = t.desertUnlocks or 0
+	if unlocks > 0 then
+		table.insert(lines, string.format("  Unlocked the Desert this session: %d, stayed %.1f min avg after",
+			unlocks, (t.afterDesertSeconds or 0) / unlocks / 60))
+	end
+end
+
 local function report()
 	local now = os.time()
 	local lines = { "Stats (days are UTC, from 8 PM your time):" }
@@ -207,6 +260,8 @@ local function report()
 	table.insert(lines, "Longest session today: " .. longest(today))
 	table.insert(lines, "First play bounce today: " .. bounce(today))
 	table.insert(lines, "First play bounce, last 7 days: " .. bounce(week))
+	table.insert(lines, "Where today's sessions ended (furthest zone when they left):")
+	byStage(today, lines)
 	if not store then
 		table.insert(lines, "(No DataStore here: this server's sessions only)")
 	end
