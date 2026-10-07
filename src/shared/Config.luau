@@ -280,13 +280,18 @@ return {
 	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
 	-- brings home an egg, one hint at a time and only the buttons each step needs.
 	-- false turns it off. On that first ride the stampede runs on the player's own
-	-- clock so it can slow down to TutorialSlowMo x speed while LASSO or TAKE EGG is
-	-- waiting to be pressed, and the Hold bar never runs out. The tutorial's eggs hatch
-	-- by themselves (TutorialHatchTime); every other egg waits for you to hold F by it
-	-- once it's ready (Hatchery, Pen.client).
+	-- clock so it can slow down to TutorialSlowMo x speed, and ever slower from there
+	-- (TutorialSlowDeepen), while LASSO or TAKE EGG is waiting to be pressed, and the
+	-- Hold bar never runs out. The tutorial's eggs hatch by themselves
+	-- (TutorialHatchTime); every other egg waits for you to hold F by it once it's
+	-- ready (Hatchery, Pen.client).
 	Tutorial = true,
 	TutorialHatchTime = 0,
 	TutorialSlowMo = 0.2,
+	-- Seconds of waiting for that press before time runs at a quarter of TutorialSlowMo;
+	-- it keeps slowing (x 1 / (1 + waited / this)^2) till the press, so the stampede all
+	-- but stops and the egg can't be outrun (QM, Oct 7: it was, into the Desert gate).
+	TutorialSlowDeepen = 1,
 	-- Pet abilities: the Ability button (bottom right while riding), Q or R1.
 	-- A pet without an entry has no button. Seconds throughout.
 	--   Charge (Rhino): one tap, for Duration: a battering ram at SpeedBoost x speed.

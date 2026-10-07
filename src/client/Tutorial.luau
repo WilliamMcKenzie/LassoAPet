@@ -11,11 +11,11 @@
 --                                            egg", with a cursor on its square.
 --                                            (Both place hints are QM's pictures.)
 --   2. ride  "Ride your Horse!"              arrows to it
---   3. lasso "Press E to LASSO a new ride!"  time slows while an animal is in reach;
---                                            no nest egg can be taken yet (Ride's
---                                            eggInRange), so this step can't be skipped
+--   3. lasso "Press E to LASSO a new ride!"  time slows, ever more, while an animal is
+--                                            in reach; no nest egg can be taken yet
+--                                            (Ride's eggInRange), so it can't be skipped
 --   4. egg   "Follow the arrows..."          the egg guide (Ride's, to the nearest nest's)
---   5. take  "Press E to take the egg!"      time slows while it's in reach
+--   5. take  "Press E to take the egg!"      time slows, ever more, while it's in reach
 --   6. home  (DODGE THE STAMPEDE!)           home with the egg
 --   7. place2 the egg goes into the pen by itself (Hatchery's DeliverEgg, balance
 --            pass Oct 6: a fifth of new players left here when they had to place it)
@@ -52,7 +52,7 @@ local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("Play
 
 local Tutorial = {}
 Tutorial.active = false -- the tutorial is running: the "Tutorial" attribute is set
-Tutorial.slowMo = nil -- a time scale while LASSO or TAKE EGG waits for its press
+Tutorial.slowMo = nil -- a time scale while LASSO or TAKE EGG waits for its press, lower the longer it waits
 Tutorial.busy = false -- the ending's close-ups are on: no riding off
 
 local HINT_Y = 0.25 -- the hint's height on screen (its middle, a share of the screen height)
@@ -76,6 +76,7 @@ local PLACE_STEPS = { place = true, place2 = true }
 local step = "place"
 local failed = false -- the ride ended in a crash or buck-off
 local lastPhase = "idle"
+local slowSince -- os.clock() when LASSO or TAKE EGG began waiting for its press (nil: it isn't)
 local hudStage = nil -- what the HUD was last told (Hud.setTutorial)
 local done = false -- TutorialDone sent
 local newPet = nil -- the pen id of the pet the egg brought home hatched into: once it's over, the arrows lead to it till you ride (QM, Oct 6)
@@ -453,7 +454,7 @@ function Tutorial.update(state)
 		Hud.setTutorial(stage)
 	end
 	if not Tutorial.active then
-		Tutorial.slowMo = nil
+		slowSince, Tutorial.slowMo = nil, nil
 		setHint(nil)
 		showPicture(nil)
 		if phase ~= "idle" then
@@ -501,7 +502,18 @@ function Tutorial.update(state)
 
 	local slow = (step == "lasso" and typeof(state.target) == "table" and not state.transfer)
 		or (step == "take" and state.target == "egg")
-	Tutorial.slowMo = if slow and phase == "outbound" then Config.TutorialSlowMo else nil
+	if slow and phase == "outbound" then
+		-- Time keeps slowing the longer the press takes (QM, Oct 7: at one fixed speed
+		-- players outran the egg and rode on into the Desert gate): TutorialSlowMo at
+		-- first, a quarter of that after TutorialSlowDeepen seconds, a ninth after twice
+		-- that, and so on, till the stampede all but stands still. So the egg (or the
+		-- animal) stays in reach however long the button takes to find.
+		slowSince = slowSince or os.clock()
+		local waited = 1 + (os.clock() - slowSince) / Config.TutorialSlowDeepen
+		Tutorial.slowMo = Config.TutorialSlowMo / (waited * waited)
+	else
+		slowSince, Tutorial.slowMo = nil, nil
+	end
 
 	local clickTool = if step == "place" and phase == "idle" and not state.cutscene then eggToClick() else nil
 	local pictureName = if state.cutscene or phase == "ended" then nil
