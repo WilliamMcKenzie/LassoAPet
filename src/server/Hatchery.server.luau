@@ -221,6 +221,7 @@ local function load(player)
 					end
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
 					profile.rainbowTrail = data.rainbowTrail == true or nil
+					player:SetAttribute("FuseLesson", data.fuseLesson == true or nil) -- the fuse lesson's still to come (FuseLesson)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
 					for _, kind in typeof(data.ridden) == "table" and data.ridden or {} do
 						if isAnimal(kind) then
@@ -281,7 +282,7 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail }
+		rainbowTrail = profile.rainbowTrail, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -1008,6 +1009,7 @@ tutorialCommand.Triggered:Connect(function(source)
 	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
 	player:SetAttribute("PenLevel", 1)
 	player:SetAttribute("CarriedEgg", nil)
+	player:SetAttribute("FuseLesson", nil)
 	player:SetAttribute("Tutorial", nil) -- off then on, so a tutorial already running starts over
 	task.wait()
 	player:SetAttribute("Tutorial", if Config.Tutorial then true else nil)
@@ -1047,6 +1049,24 @@ remote("ClaimAway", function(player)
 	profile.awayGold = nil
 	player:SetAttribute("AwayGold", nil)
 end)
+
+-- The fuse lesson (client FuseLesson): due once you unlock the Desert (PenLevel.server
+-- sets "FuseLesson"), saved till you've fused, then never again.
+remote("FuseLessonDone", function(player)
+	player:SetAttribute("FuseLesson", nil)
+end)
+
+-- Testing: "/fuselesson" runs the fuse lesson again (from the Desert on).
+local fuseLessonCommand = Instance.new("TextChatCommand")
+fuseLessonCommand.Name = "FuseLesson"
+fuseLessonCommand.PrimaryAlias = "/fuselesson"
+fuseLessonCommand.Triggered:Connect(function(source)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	if player and allowed(player) then
+		player:SetAttribute("FuseLesson", true)
+	end
+end)
+fuseLessonCommand.Parent = game:GetService("TextChatService")
 
 -- Testing: "/away" shows the popup as if you'd been gone the whole Config.AwayCap.
 local awayCommand = Instance.new("TextChatCommand")

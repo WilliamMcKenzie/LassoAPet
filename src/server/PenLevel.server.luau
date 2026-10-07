@@ -305,6 +305,9 @@ upgrade.OnServerInvoke = function(player)
 	player:SetAttribute("Gold", gold - cost)
 	zoneUnlocked:FireClient(player, level(player) + 1)
 	player:SetAttribute("PenLevel", level(player) + 1)
+	if level(player) == 2 then
+		player:SetAttribute("FuseLesson", true) -- fusing opens with the Desert: the lesson's due (Hatchery saves it; client FuseLesson)
+	end
 	Funnel.step(player, "Unlocked Zone 2")
 	Funnel.zone(player, level(player))
 	return true
