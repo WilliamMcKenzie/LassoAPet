@@ -347,6 +347,7 @@ local warpLevel -- /biome: the biome you were put in, so its gate (and those bef
 local transfer, tumble, carried
 vfx.Merge = require(ReplicatedStorage.Shared.Merge)
 vfx.Fusion = require(ReplicatedStorage.Shared.Fusion)
+vfx.Burrow = require(script.Parent.Burrow) -- the Sandworm's spray and mounds (yours and other riders')
 vfx.Studs = require(ReplicatedStorage.Shared.Studs) -- hybrids: the donor's size and colours
 -- The stretch of course with stampede loaded round the camera at camZ: VIEW either
 -- way. Racing home (+z) the wider field of view (Config.ReturnFovKick) sees to the
@@ -3101,6 +3102,7 @@ function vfx.updateSprint(dt)
 		if old and old ~= mount and (vfx.sprintKind == "Fly" or vfx.sprintKind == "Burrow") then
 			old.hop = 0 -- let go of mid-air or underground: back on the ground
 		end
+		vfx.Burrow.stop(vfx.burrowSpray)
 		vfx.sprintFx, vfx.burrowSpray = {}, nil
 		if old ~= mount then
 			vfx.burrowDepth = nil
@@ -3125,25 +3127,7 @@ function vfx.updateSprint(dt)
 		elseif kind == "Flame" then
 			vfx.sprintFx = vfx.flameFx(mount, cfg)
 		elseif kind == "Burrow" then
-			local spray = Instance.new("Part")
-			spray.Anchored, spray.CanCollide, spray.CanQuery, spray.CanTouch = true, false, false, false
-			spray.Transparency = 1
-			spray.Size = Vector3.new(4, 1, 4)
-			spray.Parent = workspace
-			local dirt = Instance.new("ParticleEmitter")
-			dirt.Texture = "rbxasset://textures/particles/smoke_main.dds"
-			local ground = Config.Biomes[WorldColors.biomeAt(mount.z)].GroundColors
-			dirt.Color = ColorSequence.new(ground[1], ground[2])
-			dirt.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2), NumberSequenceKeypoint.new(1, 5) })
-			dirt.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.3), NumberSequenceKeypoint.new(1, 1) })
-			dirt.Lifetime = NumberRange.new(0.6, 1)
-			dirt.Speed = NumberRange.new(2, 5)
-			dirt.SpreadAngle = Vector2.new(80, 80)
-			dirt.Rate = 25
-			dirt.Parent = spray
-			vfx.moundAt = nil -- where the last mound went up
-			vfx.sprintFx = { spray }
-			vfx.burrowSpray = spray
+			vfx.burrowSpray = vfx.Burrow.start(mount.z)
 		end
 		vfx.sprintMount, vfx.sprintKind = mount, kind
 	end
@@ -3171,47 +3155,7 @@ function vfx.updateSprint(dt)
 		mount.hop = (mount.hop or 0) + (target - (mount.hop or 0)) * (1 - math.exp(-4 * dt))
 	end
 	if vfx.burrowSpray then
-		local floor = Ground.heightAt(mount.x, mount.z)
-		vfx.burrowSpray.CFrame = CFrame.new(mount.x, floor + 0.5, mount.z)
-		-- A sand mound pushes up over the worm every few studs; the ones behind
-		-- slowly sink back into the floor (QM's pick).
-		local here = Vector2.new(mount.x, mount.z)
-		if not vfx.moundAt or (here - vfx.moundAt).Magnitude > vfx.MOUND_EVERY then
-			vfx.moundAt = here
-			vfx.mound(mount.x, mount.z, floor)
-		end
-	end
-end
-
-vfx.MOUND_EVERY = 4.5 -- studs between the Sandworm's mounds (QM: a bit more spread out than 3)
-vfx.MOUND_LIFE = 1.8 -- seconds a mound takes to sink away
--- Three mound shapes, one picked at random each time (QM): blocks of sand as
--- { x, z, height, width } from the worm.
-vfx.MOUNDS = {
-	{ { 0, 0, 2.2, 6 }, { -2.2, 0.8, 1.4, 4 }, { 2.2, -0.8, 1.4, 4 } },
-	{ { 0, 0.5, 2.6, 5 }, { -1.6, -1.6, 1.6, 4.5 }, { 2.4, 0.6, 1, 3.5 }, { -2.6, 1.4, 0.8, 3 } },
-	{ { 0.4, 0, 1.8, 7 }, { -1.8, -1.2, 1.2, 3.5 }, { 1.4, 1.8, 1.5, 3 } },
-}
-function vfx.mound(x, z, floor)
-	local ground = Config.Biomes[WorldColors.biomeAt(z)].GroundColors
-	local size = rng:NextNumber(0.8, 1.2) -- a little bigger or smaller each time
-	for k, shape in vfx.MOUNDS[rng:NextInteger(1, #vfx.MOUNDS)] do
-		local s = { shape[1] * size, shape[2] * size, shape[3] * size, shape[4] * size }
-		local p = Instance.new("Part")
-		p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
-		p.Color = ground[(k % 2) + 1]
-		p.Material = Enum.Material.SmoothPlastic
-		p.Size = Vector3.new(s[4], s[3], s[4] * 0.8)
-		p.CFrame = CFrame.new(x + s[1], floor + s[3] / 2, z + s[2]) * CFrame.Angles(0, rng:NextNumber(0, math.pi), 0)
-		p.Parent = workspace
-		local sunk = Vector3.new(p.Size.X * 0.6, 0.05, p.Size.Z * 0.6)
-		TweenService:Create(p, TweenInfo.new(vfx.MOUND_LIFE, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			Size = sunk,
-			CFrame = p.CFrame - Vector3.new(0, s[3] / 2, 0),
-		}):Play()
-		task.delay(vfx.MOUND_LIFE, function()
-			p:Destroy()
-		end)
+		vfx.Burrow.follow(vfx.burrowSpray, mount.x, mount.z)
 	end
 end
 
@@ -3914,6 +3858,7 @@ function vfx.dropMount(rider)
 		fx:Destroy()
 	end
 	rider.trail = nil
+	vfx.Burrow.rider(rider, nil)
 	rider.entity, rider.kind = nil, nil
 	entity.animal:setScale(1)
 	entity.hop = 0
@@ -4203,6 +4148,7 @@ function vfx.updateRiders(dt)
 			if near then
 				animate(entity, dt, rider.speed, 0)
 			end
+			vfx.Burrow.rider(rider, entity) -- their Sandworm's burrow
 			if hrp then
 				hrp.Anchored = true
 				hrp.CFrame = entity.animal:getSeatCFrame() * SEAT_OFFSET
