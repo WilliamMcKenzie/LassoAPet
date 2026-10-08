@@ -577,6 +577,10 @@ return {
 		MaxTap = 0.7,
 		Arm = "rbxassetid://81589206383908", -- assets/ui/FlexArm.png: the +1 popup's icon
 		Popup = false, -- a "+1" with the arm on each tap (QM, Oct 8: off)
+		-- QM's "TAP!" while you struggle (Hud.setStruggle): its centre At (of the screen),
+		-- Width (of the screen's width), its art's Aspect, tilted Rotation degrees,
+		-- pulsing Pulse either way.
+		Tap = { Image = "", At = Vector2.new(0.79, 0.36), Width = 0.14, Aspect = 150 / 95, Rotation = 15, Pulse = 0.12 },
 	},
 	-- Lassoing an animal while riding (QM, Oct 8: the new lasso, phase 1): once the loop's
 	-- round its neck you hang off the rope behind it (HOLD ON!, Config.HoldOn, decides

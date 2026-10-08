@@ -1609,7 +1609,7 @@ end
 -- HOLD ON!'s struggle (QM, Oct 8): nothing on screen but the bar. Every ScreenGui and
 -- BillboardGui of yours is switched off (and back as it was after), and the bar moves
 -- onto a screen of its own, at the same spot and size.
-local struggleGui, struggleRoot, struggleWas
+local struggleGui, struggleRoot, struggleWas, tapSign, tapScale, tapPulse
 function Hud.setStruggle(on)
 	if not holdFrame or (on == (struggleWas ~= nil)) then
 		return
@@ -1624,6 +1624,31 @@ function Hud.setStruggle(on)
 			struggleGui.DisplayOrder = 10
 			struggleGui.Parent = playerGui
 			struggleRoot = root(struggleGui)
+			-- QM's "TAP!" on the right, tilted, pulsing in and out (Config.HoldOn.Tap).
+			local tap = Config.HoldOn.Tap
+			tapSign = Instance.new(if tap.Image ~= "" then "ImageLabel" else "TextLabel")
+			tapSign.Name = "Tap"
+			tapSign.BackgroundTransparency = 1
+			tapSign.AnchorPoint = Vector2.new(0.5, 0.5)
+			tapSign.Position = UDim2.fromScale(tap.At.X, tap.At.Y)
+			tapSign.SizeConstraint = Enum.SizeConstraint.RelativeXX
+			tapSign.Size = UDim2.fromScale(tap.Width, tap.Width / tap.Aspect)
+			tapSign.Rotation = tap.Rotation
+			if tap.Image ~= "" then
+				tapSign.Image = tap.Image
+				tapSign.ScaleType = Enum.ScaleType.Fit
+			else -- (until the art's uploaded)
+				tapSign.Text = "TAP!"
+				tapSign.Font = FONT
+				tapSign.TextScaled = true
+				tapSign.TextColor3 = Color3.fromRGB(255, 214, 40)
+				local edge = Instance.new("UIStroke")
+				edge.Thickness = 4
+				edge.Parent = tapSign
+			end
+			tapScale = Instance.new("UIScale")
+			tapScale.Parent = tapSign
+			tapSign.Parent = struggleRoot
 		end
 		struggleWas = {}
 		for _, g in playerGui:GetDescendants() do
@@ -1634,6 +1659,10 @@ function Hud.setStruggle(on)
 		end
 		holdFrame.Parent = struggleRoot
 		struggleGui.Enabled = true
+		local from = os.clock()
+		tapPulse = RunService.RenderStepped:Connect(function()
+			tapScale.Scale = 1 + Config.HoldOn.Tap.Pulse * math.sin((os.clock() - from) * math.pi * 2 * 1.6)
+		end)
 	else
 		for g in struggleWas do
 			if g.Parent then
@@ -1643,6 +1672,10 @@ function Hud.setStruggle(on)
 		struggleWas = nil
 		holdFrame.Parent = rideRoot
 		struggleGui.Enabled = false
+		if tapPulse then
+			tapPulse:Disconnect()
+			tapPulse = nil
+		end
 	end
 end
 
