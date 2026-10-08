@@ -1640,7 +1640,8 @@ function Hud.coinPopupAt(part, height, amount)
 	board.AlwaysOnTop = true
 	board.MaxDistance = 150
 	board.ResetOnSpawn = false
-	local popup = cashRow(board, 48, 34, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5))
+	-- The same size as training's "+1" lasso popup (Training.client: 34 px icon, 30 px text; QM, Oct 8).
+	local popup = cashRow(board, 34, 30, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5))
 	popup.text.Text = "+" .. money(amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1))
 	popup.scale.Scale = 0
 	board.Parent = homeGui.Parent
