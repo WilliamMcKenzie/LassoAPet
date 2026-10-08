@@ -566,7 +566,7 @@ return {
 	-- at a front corner, facing out (TrainingSpot); you train at your own pen's. It's
 	-- meant to upgrade with the pen later (QM).
 	Training = {
-		Out = 8, -- studs in front of the pen's open side
+		Out = 5.5, -- studs from the pen's open side (its fence) to the pole: the base (3.3 behind it) ~2 clear of the fence (QM)
 		In = 6, -- studs in from the pen's corner, along that side
 		Chair = 8, -- studs from the dummy to the chair you lasso it from (Design's TrainingChair), along the pen's front
 		Radius = 14, -- studs from the pole you train from
