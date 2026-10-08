@@ -507,20 +507,28 @@ function Tutorial.update(state)
 		end
 	end
 
-	local slow = (step == "lasso" and ((typeof(state.target) == "table" and not state.transfer) or HoldOn.isOn()))
+	local struggle = step == "lasso" and HoldOn.isOn()
+	local slow = struggle or (step == "lasso" and typeof(state.target) == "table" and not state.transfer)
 		or (step == "take" and state.target == "egg")
 	if slow and phase == "outbound" then
 		-- Time keeps slowing the longer the press takes (QM, Oct 7: at one fixed speed
 		-- players outran the egg and rode on into the Desert gate): TutorialSlowMo at
 		-- first, a quarter of that after TutorialSlowDeepen seconds, a ninth after twice
 		-- that, and so on, till the stampede all but stands still. So the egg (or the
-		-- animal) stays in reach however long the button takes to find. The same while
-		-- the HOLD ON! bar waits for its taps (Oct 8: it can't be lost in the tutorial, so
-		-- at full speed the animal dragged new players on past the Meadow into the Snow).
+		-- animal) stays in reach however long the button takes to find. Time slows too
+		-- while the HOLD ON! bar waits for its taps (Oct 8: it can't be lost in the
+		-- tutorial, so at full speed the animal dragged new players on past the Meadow
+		-- into the Snow), but gentler (QM, Oct 8: that curve froze time by TAP!): from
+		-- HoldOn.TutorialSlow x speed, half that again every TutorialSlowHalf seconds.
 		-- (Not while the loop flies out: the throw runs at full speed, then the slow starts afresh.)
 		slowSince = slowSince or os.clock()
-		local waited = 1 + (os.clock() - slowSince) / Config.TutorialSlowDeepen
-		Tutorial.slowMo = Config.TutorialSlowMo / (waited * waited)
+		if struggle then
+			local cfg = Config.HoldOn
+			Tutorial.slowMo = cfg.TutorialSlow * 0.5 ^ ((os.clock() - slowSince) / cfg.TutorialSlowHalf)
+		else
+			local waited = 1 + (os.clock() - slowSince) / Config.TutorialSlowDeepen
+			Tutorial.slowMo = Config.TutorialSlowMo / (waited * waited)
+		end
 	else
 		slowSince, Tutorial.slowMo = nil, nil
 	end

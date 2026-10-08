@@ -590,6 +590,12 @@ return {
 		-- stuck, and drains at TutorialDrain x the usual rate (QM: not overwhelming).
 		TutorialFloor = 0.15,
 		TutorialDrain = 0.25,
+		-- In the tutorial time slows while the bar's up (Tutorial): to TutorialSlow x speed
+		-- at first, then half as fast again every TutorialSlowHalf seconds, a slide and
+		-- never a freeze (QM, Oct 8). So however long it takes, the animal drags you only
+		-- TutorialSlow x TutorialSlowHalf / ln 2 seconds of its run (~1.4 s).
+		TutorialSlow = 0.5,
+		TutorialSlowHalf = 2,
 		MaxTap = 0.7,
 		Arm = "rbxassetid://81589206383908", -- assets/ui/FlexArm.png: the +1 popup's icon
 		Popup = false, -- a "+1" with the arm on each tap (QM, Oct 8: off)
