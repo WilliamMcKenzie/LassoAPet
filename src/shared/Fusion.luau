@@ -2,7 +2,7 @@
 -- picked first (on the left) is the base: its model and animations (QM, Oct 6 20:00;
 -- it used to be the rarer one). The other one, the donor, on the right, gives its
 -- ability, or the base's if it has none (QM, 20:13/20:19: Ride's vfx.abilityOf), and
--- sets its size (a Pig donor makes a tiny Loong, a Loong donor a giant Pig) and
+-- sets its size if it's the bigger (a Loong donor makes a giant Pig; QM, Oct 8: never smaller) and
 -- paints it in its own colours, slot for slot (Shared/Palettes). It earns what both
 -- earned, and runs as fast and lasts as long as the better of the two (QM, Oct 6
 -- 20:53). Two of the same hybrid merge like any other pets (Shared/Merge).
@@ -16,7 +16,7 @@
 --   Fusion.combine(a, aFuse, b, bFuse)  what fusing two pets (hybrids too) makes
 --   Fusion.stats(kind, fuse, saved)  its Speed and Stamina (Config.AnimalStats)
 --   Fusion.best(a, b)             the higher Speed and higher Stamina of two stats
---   Fusion.scale(kind, fuse)      how much bigger (or smaller) the donor makes it
+--   Fusion.scale(kind, fuse)      how much bigger the donor makes it (never smaller)
 --   Fusion.name(kind, fuse)       "Poong": the donor's front and the base's back
 --   Fusion.paint(model, kind, fuse)  repaints a built model in the donor's palette
 --   Fusion.worth(kind, fuse, saved) what a pet adds to FUSE's price (a hybrid: all its pets)
@@ -118,15 +118,16 @@ function Fusion.best(a, b)
 	}
 end
 
--- The donor's size tier stands in for the base's: each tier is Config.TierGrowth
--- bigger than the one below, so a Loong (tier 4) with a Pig donor (tier 1) is
--- 1.6^3 = 4x smaller.
+-- A hybrid is the size of the bigger of its two (QM, Oct 8: merging only ever makes
+-- a pet bigger; it used to take the donor's size tier, so a Pig donor shrank a Loong
+-- 4x). Each tier is Config.TierGrowth bigger than the one below: a Loong (tier 4)
+-- with a Pig donor stays Loong-sized, a Pig with a Loong donor is 1.6^3 = 4x bigger.
 function Fusion.scale(kind, fuse)
 	if not fuse then
 		return 1
 	end
 	local from, to = Config.PetTiers[kind] or 1, Config.PetTiers[fuse] or 1
-	return Config.TierGrowth ^ (to - from)
+	return Config.TierGrowth ^ math.max(to - from, 0)
 end
 
 -- Hybrid names (QM, Oct 6): the donor's front half and the base's back half, so a
