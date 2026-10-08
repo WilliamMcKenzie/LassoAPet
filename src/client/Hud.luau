@@ -598,10 +598,21 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- Each payout from your pets (Hatchery's PetIncome, every second): "+$N" beside
 	-- the gold in the money yellow, smaller, which then slides up and fades to make
 	-- room for the next (QM, Oct 8).
+	-- (its labels go in a holder of their own, shown only while the gold counter is)
+	local ticker = Instance.new("Frame")
+	ticker.Name = "GoldTicker"
+	ticker.BackgroundTransparency = 1
+	ticker.Size = UDim2.fromScale(1, 1)
+	ticker.Parent = sideRoot
+	local function follow()
+		ticker.Visible = gold.Visible
+	end
+	gold:GetPropertyChangedSignal("Visible"):Connect(follow)
+	follow()
 	task.spawn(function() -- (not holding up the HUD's build for it)
 	game:GetService("ReplicatedStorage"):WaitForChild("PetIncome").OnClientEvent:Connect(function(earned)
-		if type(earned) ~= "number" or earned <= 0 then
-			return
+		if type(earned) ~= "number" or earned <= 0 or not gold.Visible or not sideRoot:FindFirstAncestorOfClass("ScreenGui").Enabled then
+			return -- (nothing while the counter's hidden: riding, the struggle...)
 		end
 		-- (its own label on sideRoot, outside the gold's layout: inside the gold text it
 		-- widened that text's AutomaticSize and pushed the number and coin about, Oct 8)
@@ -609,7 +620,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		local scale = sideRoot.AbsoluteSize.X / math.max(sideRoot.Size.X.Offset, 1)
 		local right = tx.AbsolutePosition.X + (tx.AbsoluteSize.X + tx.TextBounds.X) / 2
 		local at = (Vector2.new(right, tx.AbsolutePosition.Y + tx.AbsoluteSize.Y / 2) - sideRoot.AbsolutePosition) / scale
-		local plus = label(sideRoot, UDim2.fromOffset(0, 34), UDim2.fromOffset(at.X + 8, at.Y), 30, 3)
+		local plus = label(ticker, UDim2.fromOffset(0, 34), UDim2.fromOffset(at.X + 8, at.Y), 30, 3)
 		plus.AnchorPoint = Vector2.new(0, 0.5)
 		plus.AutomaticSize = Enum.AutomaticSize.X
 		plus.TextColor3 = Color3.fromHex("FFC41E")
