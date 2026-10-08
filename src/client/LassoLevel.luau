@@ -5,6 +5,8 @@
 -- moves it with the target ring (Outline.set).
 --
 --   LassoLevel.set(model, kind) -- show it over this animal; nil hides it
+--   LassoLevel.setSelf(character) -- yours over your head while you ride (QM, Oct 8:
+--                                 -- the same tag, your real level, in green); nil hides it
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -23,8 +25,8 @@ local HARD_COLOR = Color3.fromRGB(255, 50, 50)
 local LassoLevel = {}
 
 local tag, number
-local function build()
-	tag = Instance.new("BillboardGui")
+local function newTag()
+	local tag = Instance.new("BillboardGui")
 	tag.Name = "LassoLevel"
 	tag.Size = UDim2.fromOffset(200, ICON)
 	tag.AlwaysOnTop = true
@@ -47,7 +49,7 @@ local function build()
 	icon.Size = UDim2.fromOffset(ICON, ICON)
 	icon.Image = Hud.lassoIcon
 	icon.Parent = row
-	number = Instance.new("TextLabel")
+	local number = Instance.new("TextLabel")
 	number.BackgroundTransparency = 1
 	number.AutomaticSize = Enum.AutomaticSize.X
 	number.Size = UDim2.fromOffset(0, ICON)
@@ -61,6 +63,11 @@ local function build()
 	stroke.Parent = number
 	number.Parent = row
 	tag.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+	return tag, number
+end
+
+local function build()
+	tag, number = newTag()
 end
 
 local shown, shownLevel
@@ -97,6 +104,30 @@ function LassoLevel.set(model, kind)
 	recolor()
 	number.Text = (Hud.money(level):gsub("%$", ""))
 	tag.Enabled = true
+end
+
+-- Your own lasso level over your head while you ride: the same tag, in green (QM).
+local SELF_COLOR = Color3.fromHex("8EFFA1")
+local selfTag, selfNumber, selfOn
+function LassoLevel.setSelf(character)
+	local head = character and character:FindFirstChild("Head")
+	if not head then
+		if selfTag and selfOn then
+			selfTag.Enabled, selfOn = false, false
+		end
+		return
+	end
+	if not selfTag then
+		selfTag, selfNumber = newTag()
+		selfTag.Name = "MyLassoLevel"
+		selfNumber.TextColor3 = SELF_COLOR
+		selfTag.StudsOffset = Vector3.new(0, 2.5, 0)
+	end
+	selfTag.Adornee = head
+	selfNumber.Text = (Hud.money(Players.LocalPlayer:GetAttribute("Lasso") or 0):gsub("%$", ""))
+	if not selfOn then
+		selfTag.Enabled, selfOn = true, true
+	end
 end
 
 return LassoLevel
