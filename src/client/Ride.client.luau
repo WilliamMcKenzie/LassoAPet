@@ -3935,6 +3935,7 @@ local function updateRider(dt)
 end
 
 local function updateHud()
+	NestEggs.homeward = carried ~= nil or phase == "return" or phase == "turning" -- (the ride home's random eggs on a lassoed mount)
 	-- Your lasso level over your head while you ride (not hanging off the rope: then
 	-- the screen's just the bar).
 	vfx.lassoLevel.setSelf(if mount and not transfer and not carried and phase == "outbound" then player.Character else nil) -- (not on the way home with the egg: QM)

@@ -43,6 +43,8 @@ local NestEggs = {}
 NestEggs.waiting = {} -- [nest] = { egg, kind, nest, nextTwitch, reach, scale, rest, pop, landed }
 NestEggs.mountKind = "" -- the wild animal you're riding, else "" (the nests' own rolled eggs)
 local rolled = {} -- [nest] = the egg NestOdds rolled for it from your seed (cleared with the seed)
+local rolledFull = {} -- [nest] = the same from its biome's whole table (the ride home's)
+NestEggs.homeward = false -- on the way home with the egg (Ride): a lassoed mount's nests show random eggs
 
 function NestEggs.setMount(kind)
 	NestEggs.mountKind = kind -- (the nests catch up in update: near ones with a bounce, far ones when they're near)
@@ -66,7 +68,18 @@ local function kindFor(nest, z)
 		rolled[nest] = kind
 	end
 	if kind == "" or NestEggs.mountKind == "" then
-		return kind
+		return kind -- (your own pet: always the rolled egg)
+	end
+	if NestEggs.homeward then
+		-- On the way home on a lassoed animal: random eggs from the biome's whole table
+		-- (QM, Oct 8: just to look at; nothing's taken on the way back).
+		local full = rolledFull[nest]
+		if full == nil then
+			local seed = player:GetAttribute("NestSeed")
+			full = if seed then NestOdds.roll(nest, seed, true) else ""
+			rolledFull[nest] = full
+		end
+		return full
 	end
 	return NestOdds.ridden(NestEggs.mountKind, z) or kind
 end
@@ -84,7 +97,7 @@ local function drop(nest)
 	if waiting then
 		waiting.egg.model:Destroy()
 	end
-	NestEggs.waiting[nest], rolled[nest] = nil, nil
+	NestEggs.waiting[nest], rolled[nest], rolledFull[nest] = nil, nil, nil
 end
 
 function NestEggs.show(nest, popIn)
@@ -193,6 +206,7 @@ function NestEggs.start()
 	world.Nests.ChildAdded:Connect(watch) -- the Godlands' nests come and go (Nests.server)
 	player:GetAttributeChangedSignal("NestSeed"):Connect(function()
 		table.clear(rolled)
+		table.clear(rolledFull)
 		for _, nest in world.Nests:GetChildren() do
 			if not NestEggs.waiting[nest] then
 				NestEggs.show(nest) -- one you emptied is full again (the rest swap as you near them: update)
