@@ -223,7 +223,7 @@ local CATCH_AT = training.Swing + training.Throw + training.Pull * 0.35 -- the l
 local character -- the character the lasso's started on, while training
 local t = 0 -- seconds into this catch
 local counted = false
-local sitWeld -- you, welded into your chair
+local sitWeld -- you in your chair: { Part0 = seat, Part1 = your root, C0 = offset } (held there each frame)
 local sitSeat -- the chair's seat you sat down in
 local lassoLevel -- the pen level whose lasso you're throwing (LassoTiers)
 local stoodUp = false -- jumped out of the chair: no sitting again till you've stepped off it
@@ -265,11 +265,10 @@ local function sitDown(char, dummy, again)
 	sitSeat = dummy.seat
 	local above = hrp.Size.Y / 2 + 0.4 * char:GetScale() -- the root's height over the plank, seated
 	hrp.CFrame = dummy.seat.CFrame * CFrame.new(0, above, 0)
-	local weld = Instance.new("Weld")
-	weld.Part0, weld.Part1 = dummy.seat, hrp
-	weld.C0 = CFrame.new(0, above, 0)
-	weld.Parent = dummy.seat
-	sitWeld = weld
+	-- Held on the seat every frame (below), not welded: welded to the (anchored) chair
+	-- your character stops replicating, and everyone else saw you sat where you'd
+	-- stood when you sat down (QM, Oct 8: "shifted over by a dozen studs").
+	sitWeld = { Part0 = dummy.seat, Part1 = hrp, C0 = CFrame.new(0, above, 0), Destroy = function() end }
 	humanoid.Sit = true
 	-- Sitting here isn't riding: the merge menu and pet plates stay (this client only).
 	player:SetAttribute("TrainingSeat", true)
@@ -318,7 +317,11 @@ RunService.PreSimulation:Connect(function(dt)
 	elseif not sitWeld and not stoodUp then
 		sitDown(char, dummy)
 	end
-	if not sitWeld then
+	if sitWeld then
+		local hrp = sitWeld.Part1
+		hrp.CFrame = sitWeld.Part0.CFrame * sitWeld.C0
+		hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
+	else
 		char = nil -- you lasso from the chair
 	end
 	if char ~= character then
