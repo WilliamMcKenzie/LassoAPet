@@ -3719,14 +3719,15 @@ local function updateRider(dt)
 			if Config.LassoHang.Duration > 0 then
 				-- Yanked off: hang from the rope round its neck first (QM, Oct 8).
 				transfer.stage = "hang"
-				transfer.hang = vfx.ropeHang.start(hrp.Position, transfer.target.animal:getNeck().cframe.Position, hrp.Parent)
+				transfer.hang = vfx.ropeHang.start(hrp.Position, hrp.Parent)
 			end
 		end
 		return
 	end
 	if transfer and transfer.stage == "hang" then
 		transfer.t = math.min(transfer.t + dt / Config.LassoHang.Duration, 1)
-		local at = vfx.ropeHang.update(transfer.hang, dt, transfer.target.animal:getNeck().cframe.Position)
+		local animal = transfer.target.animal
+		local at = vfx.ropeHang.update(transfer.hang, dt, animal:getNeck().cframe.Position, animal.model.PrimaryPart.CFrame.LookVector)
 		hrp.CFrame = at
 		focus = focus:Lerp(Vector3.new(at.X, 0, at.Z), 1 - math.exp(-10 * dt)) -- (smooth through the swings)
 		if transfer.t >= 1 then
@@ -4414,7 +4415,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 		return
 	end
 	camera.CameraType = Enum.CameraType.Scriptable
-	local targetYaw = mount and mount.yaw or camYaw
+	local targetYaw = mount and mount.yaw or (transfer and transfer.target.yaw) or camYaw -- (hanging off the rope: the animal's)
 	camYaw += (targetYaw - camYaw) * (1 - math.exp(-5 * dt))
 	local hrp = character()
 	if cutscene and carried and hrp then
@@ -4473,8 +4474,13 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
+	local hanging = transfer and transfer.stage == "hang" -- off the rope (RopeHang): a rattle and a wider view
+	if hanging then
+		local t = os.clock()
+		camera.CFrame *= CFrame.Angles(math.sin(t * 41) * 0.004, math.sin(t * 33) * 0.004, math.sin(t * 29) * 0.006)
+	end
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
-	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
+	local fov = (if phase == "return" then 70 + Config.ReturnFovKick else 70) + (if hanging then Config.LassoHang.Fov else 0)
 	fov = math.max(fov, math.min(fov + vfx.speedFx.fovKick(), Config.SpeedFeel.MaxFov))
 	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
 end)

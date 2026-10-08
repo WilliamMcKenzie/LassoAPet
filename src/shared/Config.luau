@@ -564,17 +564,20 @@ return {
 	-- PodiumSnake.client), in the base's right front corner, their username and best
 	-- distance over their head (QM, Oct 5).
 	-- Lassoing an animal while riding (QM, Oct 8: the new lasso, phase 1): once the loop's
-	-- round its neck you hang off the rope, dragged through the air behind it, for
-	-- Duration seconds, then hop on as before (RopeHang.luau; 0 skips it). Rope: studs
-	-- of rope between its neck and you. Gravity/Lift/Drag shape the swing (Lift: up per
-	-- stud/s of speed, never quite cancelling Gravity); MinHeight: the lowest you sag.
+	-- round its neck you hang off the rope behind it for Duration seconds, then hop on
+	-- as before (RopeHang.luau; 0 skips it). Locked straight behind it and high (QM: fast
+	-- and high-stakes, not drifting): Rope studs of rope from its neck, rising Height
+	-- studs to you; Follow how stiffly you follow its turns. Shake: studs of quick jolt;
+	-- a Tug (studs) forward every TugEvery seconds or so. Fov: degrees wider meanwhile.
 	LassoHang = {
 		Duration = 1.5,
-		Rope = 9,
-		Gravity = 80,
-		Lift = 2,
-		Drag = 0.6,
-		MinHeight = 3,
+		Rope = 18, -- (QM: a long rope, clearly hanging onto it)
+		Height = 8,
+		Follow = 25,
+		Shake = 0.3,
+		Tug = 1.2,
+		TugEvery = 0.4,
+		Fov = 12,
 	},
 	-- Lasso training (QM, Oct 8: new-loops): a stitched horse dummy on a pole at home.
 	-- Stand within Radius of it (on foot) and you lasso it over and over, each catch

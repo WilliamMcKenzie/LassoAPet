@@ -1,18 +1,18 @@
 -- Holding on for dear life (QM, Oct 8: the new lasso, phase 1): once the loop's round
 -- the lassoed animal's neck, the rider is yanked off their old mount and hangs off
--- the end of the rope, dragged through the air behind the animal as it runs, before
--- hopping on (Ride.client's transfer: throw -> hang -> pull). Config.LassoHang.
+-- the end of the rope, flying behind the animal as it runs, before hopping on
+-- (Ride.client's transfer: throw -> hang -> pull). Config.LassoHang.
 --
--- The rider is a weight on a rope tied to the neck: it swings under gravity (a light
--- one: they're flying, not dragging along the floor), the rope never stretches past
--- its length, the air holds them up behind the animal, and they never touch the
--- ground. So they trail straight out behind at a gallop, swing wide when it turns and
--- slump in when it slows. Both arms reach up the rope, the legs kick.
+-- It has to feel fast and high-stakes, not floaty (QM): the rider is locked directly
+-- behind the animal on its heading, high up with the rope rising to them from the
+-- neck, following its turns near-instantly. The speed comes from the shaking: quick
+-- small jolts, a hard tug on the rope every so often, the body streamed straight back
+-- (head and arms to the animal, belly down) with the legs fluttering.
 --
---   local hang = RopeHang.start(fromPosition, neckPosition, character)
---   RopeHang.update(hang, dt, neckPosition) -> the rider's root CFrame this frame
---   RopeHang.pose(hang)                     -- arms up the rope, legs flailing (after the Animator)
---   RopeHang.stop(hang)                     -- limbs back to normal
+--   local hang = RopeHang.start(fromPosition, character)
+--   RopeHang.update(hang, dt, neckPosition, heading) -> the rider's root CFrame this frame
+--   RopeHang.pose(hang)                              -- arms up the rope, legs fluttering
+--   RopeHang.stop(hang)                              -- limbs back to normal
 
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
@@ -28,67 +28,47 @@ local function joints(character)
 	return found
 end
 
-function RopeHang.start(from, neck, character)
-	local cfg = Config.LassoHang
-	local away = from - neck
+function RopeHang.start(from, character)
 	return {
 		pos = from,
-		vel = Vector3.zero,
-		last = neck,
-		length = math.max(cfg.Rope, math.min(away.Magnitude, cfg.Rope * 1.5)), -- reels in to Rope if thrown from further
 		t = 0,
+		tug = 0, -- seconds since the last hard tug
+		kick = 0, -- the tug's jolt, dying away
 		joints = joints(character),
-		flail = math.random() * 10,
-		cframe = CFrame.lookAt(from, neck),
+		seed = math.random() * 100,
 	}
 end
 
-function RopeHang.update(hang, dt, neck)
+function RopeHang.update(hang, dt, neck, heading)
 	local cfg = Config.LassoHang
-	dt = math.min(dt, 1 / 20)
 	hang.t += dt
-	hang.length += (cfg.Rope - hang.length) * (1 - math.exp(-4 * dt))
-	local anchorVel = (neck - hang.last) / math.max(dt, 1e-3)
-	hang.last = neck
+	heading = Vector3.new(heading.X, 0, heading.Z)
+	heading = if heading.Magnitude > 0.01 then heading.Unit else -Vector3.zAxis
+	local side = heading:Cross(Vector3.yAxis)
 
-	-- Gravity, the air's drag (relative to still air) and its lift: the faster you're
-	-- dragged, the more it holds you up.
-	local speed = hang.vel.Magnitude
-	local accel = Vector3.new(0, -cfg.Gravity + math.min(speed * cfg.Lift, cfg.Gravity * 0.9), 0) - hang.vel * cfg.Drag
-	hang.vel += accel * dt
-	local pos = hang.pos + hang.vel * dt
+	-- Straight behind, high up: the rope rises from the neck to you.
+	local back = math.sqrt(math.max(cfg.Rope * cfg.Rope - cfg.Height * cfg.Height, 1))
+	local want = neck - heading * back + Vector3.new(0, cfg.Height, 0)
+	hang.pos = hang.pos:Lerp(want, 1 - math.exp(-cfg.Follow * dt))
 
-	-- The rope: never longer than its length. Pulled taut, the rider takes the
-	-- rope's direction of the anchor's speed (that's the yank).
-	local rope = pos - neck
-	local d = rope.Magnitude
-	if d > hang.length then
-		local dir = rope / d
-		pos = neck + dir * hang.length
-		local radial = hang.vel:Dot(dir) - anchorVel:Dot(dir)
-		if radial > 0 then
-			hang.vel -= dir * radial
-		end
+	-- A hard tug every TugEvery seconds or so: yanked forward, then streaming back.
+	hang.tug += dt
+	if hang.tug >= cfg.TugEvery * (0.7 + 0.6 * math.abs(math.sin(hang.t * 7.3 + hang.seed))) then
+		hang.tug, hang.kick = 0, 1
 	end
-	-- Never down to the floor: a bounce off the air just above it.
-	if pos.Y < cfg.MinHeight then
-		pos = Vector3.new(pos.X, cfg.MinHeight, pos.Z)
-		if hang.vel.Y < 0 then
-			hang.vel = Vector3.new(hang.vel.X, -hang.vel.Y * 0.3, hang.vel.Z)
-		end
-	end
-	hang.pos = pos
+	hang.kick *= math.exp(-12 * dt)
 
-	-- Stretched out along the rope: head and arms towards the neck, belly down, the
-	-- body twisting a little as it swings.
-	local up = (neck - pos)
-	up = if up.Magnitude > 0.1 then up.Unit else Vector3.yAxis
-	local side = up:Cross(Vector3.yAxis)
-	side = if side.Magnitude > 0.1 then side.Unit else Vector3.xAxis
-	local back = side:Cross(up).Unit
-	local twist = math.sin(hang.t * 3.1 + hang.flail) * 0.25
-	hang.cframe = CFrame.fromMatrix(pos, side, up, back) * CFrame.Angles(0, twist, 0)
-	return hang.cframe
+	-- Quick small jolts (not slow sway).
+	local t, s = hang.t + hang.seed, cfg.Shake
+	local jolt = side * (math.sin(t * 23) * 0.6 + math.sin(t * 37) * 0.4) * s
+		+ Vector3.yAxis * (math.sin(t * 29) * 0.6 + math.sin(t * 17) * 0.4) * s
+		+ heading * hang.kick * cfg.Tug
+	local pos = hang.pos + jolt
+
+	-- Stretched straight back along the heading: head to the animal, belly down, a
+	-- little rattle in the roll and pitch.
+	local cf = CFrame.fromMatrix(pos, side, heading, Vector3.yAxis)
+	return cf * CFrame.Angles(math.sin(t * 19) * 0.06 - hang.kick * 0.25, 0, math.sin(t * 27) * 0.08)
 end
 
 -- In the torso's axes, like PodiumLasso's (R6's joints have other local axes).
@@ -101,20 +81,20 @@ local function pose(hang, name, x, y, z)
 end
 
 function RopeHang.pose(hang)
-	local t = hang.t + hang.flail
-	local grip = math.sin(t * 7) * 0.08
-	-- Both hands up on the rope over the head (the right one holds the lasso's end).
-	pose(hang, "RightShoulder", math.pi * 0.95 + grip, 0, -0.15)
-	pose(hang, "LeftShoulder", math.pi * 0.95 - grip, 0, 0.15)
-	pose(hang, "RightElbow", 0.25, 0, 0)
-	pose(hang, "LeftElbow", 0.25, 0, 0)
-	-- Legs kicking, out of step.
-	local kick = math.sin(t * 11)
-	pose(hang, "RightHip", kick * 0.7, 0, 0.1)
-	pose(hang, "LeftHip", -kick * 0.7, 0, -0.1)
-	pose(hang, "RightKnee", -0.5 - math.max(kick, 0) * 0.6, 0, 0)
-	pose(hang, "LeftKnee", -0.5 - math.max(-kick, 0) * 0.6, 0, 0)
-	pose(hang, "Waist", math.sin(t * 5) * 0.12, 0, 0)
+	local t = hang.t + hang.seed
+	local grip = math.sin(t * 21) * 0.05
+	-- Both hands up on the rope over the head, pulled straight (the right one holds the end).
+	pose(hang, "RightShoulder", math.pi * 0.97 + grip, 0, -0.08)
+	pose(hang, "LeftShoulder", math.pi * 0.97 - grip, 0, 0.08)
+	pose(hang, "RightElbow", 0.1, 0, 0)
+	pose(hang, "LeftElbow", 0.1, 0, 0)
+	-- Legs streaming straight back, fluttering fast in the wind.
+	local flutter = math.sin(t * 24)
+	pose(hang, "RightHip", flutter * 0.18, 0, 0.05)
+	pose(hang, "LeftHip", -flutter * 0.18, 0, -0.05)
+	pose(hang, "RightKnee", -0.1 - math.max(flutter, 0) * 0.2, 0, 0)
+	pose(hang, "LeftKnee", -0.1 - math.max(-flutter, 0) * 0.2, 0, 0)
+	pose(hang, "Waist", 0, 0, 0)
 end
 
 function RopeHang.stop(hang)
