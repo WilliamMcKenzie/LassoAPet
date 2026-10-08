@@ -147,7 +147,7 @@ local function redraw()
 			local ring = Instance.new("UIStroke")
 			ring.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 			ring.Color = Color3.new(1, 1, 1)
-			ring.Thickness = 4
+			ring.Thickness = 2.5 -- (QM, Oct 8: a bit thinner than 4)
 			ring.Parent = slot
 		end
 		local picture = Instance.new("ImageLabel")
