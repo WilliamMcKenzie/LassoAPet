@@ -577,8 +577,9 @@ return {
 		Rest = 0.35, -- and slack before the next
 		-- The stronger your lasso, the faster you lasso (QM, Oct 8): all of the above
 		-- runs SpeedPerDecade quicker per x10 of lasso strength, up to MaxSpeed
-		-- (TrainingSpot.speed): 10 -> x1.3, 1k -> x1.9, 1M -> x2.8, 1B -> x3.7, 10B -> x4.
-		SpeedPerDecade = 0.3,
+		-- (TrainingSpot.speed). It ramps up quick (QM: level 100 is 3x level 1):
+		-- 1 -> x1 (2.4 s a catch), 10 -> x2 (1.2 s), 100 -> x3 (0.8 s), 1k+ -> x4 (0.6 s).
+		SpeedPerDecade = 1,
 		MaxSpeed = 4,
 	},
 	-- Recommended lasso level for each animal, shown over the one you'd lasso as you
