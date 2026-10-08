@@ -36,7 +36,7 @@ return {
 			Name = "Desert",
 			Swerve = 0.75,
 			NestScale = 2, -- its nests are this many times bigger, so they show from afar at its speed (Nests.server; QM, Oct 6)
-			Length = 2280, -- 3x the meadow (QM)
+			Length = 4560, -- 6x the meadow: 2x its old 2280, a test (QM, Oct 8; the map goes with it: tools/desert_2x.luau)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
 			Herd = { Cactus = 0.3, Kitten = 0.25, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05 },
