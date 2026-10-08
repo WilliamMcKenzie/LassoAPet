@@ -19,7 +19,7 @@ local Inventory = {}
 
 local SLOT = 84
 local OUTLINE = 2 -- px of black round each egg picture (QM: about the slot number's stroke)
-local PANEL = "rbxassetid://112353135883922" -- assets/ui/CommonPanel.png (512 px, ~90 px corners)
+local PANEL = "rbxassetid://137842424291809" -- assets/ui/CommonPanel.png (512 px, ~90 px corners, no border: QM, Oct 8)
 local SCALE = 1.2 -- the whole bar, slots, numbers and outlines alike
 local GAP = 10
 local BOTTOM = 24
@@ -139,7 +139,7 @@ local function redraw()
 		bg.Size = UDim2.fromScale(1, 1)
 		bg.Image = PANEL
 		bg.ScaleType = Enum.ScaleType.Slice
-		bg.SliceCenter = Rect.new(112, 112, 400, 400)
+		bg.SliceCenter = Rect.new(96, 96, 416, 416) -- (just past its rounded corners)
 		bg.SliceScale = SLOT / 512 -- (the art's proportions at slot size)
 		bg.ZIndex = 0 -- (under the egg's outline)
 		bg.Parent = slot
