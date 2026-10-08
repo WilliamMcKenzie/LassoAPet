@@ -20,6 +20,18 @@
 
 local MODE = "apply"
 local START, RATE, MAX = 56, 0.005, 137
+-- Each biome's obstacles and nests grow with its beasts (QM, Oct 8): its far edge's z
+-- and Config.Biomes[i].AnimalSize, the obstacles and nests scaled by that ^ GROW.
+local BIOMES = { { -760, 1 }, { -3040, 1.35 }, { -8512, 1.8 }, { -16192, 2.6 } }
+local GROW = 0.8
+local function grownAt(z)
+	for _, b in BIOMES do
+		if z > b[1] then
+			return b[2] ^ GROW
+		end
+	end
+	return BIOMES[#BIOMES][2] ^ GROW
+end
 local CELL = 8
 local STRIP = 40 -- studs of z per piece of World.Funnel's floor
 
@@ -48,6 +60,11 @@ local function restore(inst)
 			inst:SetAttribute("FunnelSize", nil)
 		end
 	elseif inst:IsA("Model") then
+		local scale = inst:GetAttribute("FunnelScale")
+		if scale then
+			inst:ScaleTo(scale)
+			inst:SetAttribute("FunnelScale", nil)
+		end
 		local pivot = inst:GetAttribute("FunnelPivot")
 		if pivot then
 			inst:PivotTo(pivot)
@@ -130,6 +147,13 @@ for _, name in { "Obstacles" } do
 			if inst:IsA("Model") then
 				inst:SetAttribute("FunnelPivot", pivot)
 				inst:PivotTo(pivot + Vector3.new(dx, 0, 0))
+				local grow = grownAt(pivot.Z)
+				if grow ~= 1 then
+					inst:SetAttribute("FunnelScale", inst:GetScale())
+					local at = inst:GetPivot()
+					inst:ScaleTo(inst:GetScale() * grow)
+					inst:PivotTo(at + Vector3.new(0, at.Y * (grow - 1), 0)) -- (grown from the floor under it, not its middle)
+				end
 			else
 				keep(inst)
 				inst.CFrame = pivot + Vector3.new(dx, 0, 0)
@@ -166,6 +190,13 @@ for _, nest in world.Nests:GetChildren() do
 		end
 		nest:SetAttribute("FunnelPivot", pivot)
 		nest:PivotTo(pivot + Vector3.new(x - pivot.X, 0, 0))
+		local grow = grownAt(pivot.Z)
+		if grow ~= 1 then
+			nest:SetAttribute("FunnelScale", nest:GetScale())
+			local at = nest:GetPivot()
+			nest:ScaleTo(nest:GetScale() * grow)
+			nest:PivotTo(at + Vector3.new(0, at.Y * (grow - 1), 0))
+		end
 		counts.moved += 1
 	end
 end

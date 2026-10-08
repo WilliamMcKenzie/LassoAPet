@@ -137,6 +137,26 @@ local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's
 vfx.lassoLevel = require(script.Parent.LassoLevel) -- the recommended lasso level over the target
 vfx.ropeHang = require(script.Parent.RopeHang) -- hanging off the rope before you hop on (Config.LassoHang)
 vfx.holdOn = require(script.Parent.HoldOn) -- HOLD ON!: tap to overpower it while you hang (Config.HoldOn)
+-- Each biome's beasts are bigger (QM, Oct 8): an animal out on the course is its home
+-- biome's AnimalSize (the first biome whose herd it's in), and counts as that many
+-- size tiers up (TierGrowth x is a tier) when it comes to who tramples whom.
+vfx.homeSize = {}
+for _, biome in Config.Biomes do
+	for kind in biome.Herd or {} do
+		vfx.homeSize[kind] = vfx.homeSize[kind] or biome.AnimalSize or 1
+	end
+end
+function vfx.biomeSize(kind)
+	return vfx.homeSize[kind] or 1
+end
+function vfx.tierAt(kind)
+	return tierOf(kind) + math.log(vfx.biomeSize(kind)) / math.log(Config.TierGrowth)
+end
+-- Half its body's width and length on the ground (its real box, at the size it is).
+function vfx.halfBody(entity)
+	local _, size = Outline.box(entity.animal.model)
+	return size.X / 2, size.Z / 2
+end
 -- (declared up here: smash() below already uses it, and was reading a nil global)
 
 -- An obstacle you ride into flies up and away and fades; it's back
@@ -926,6 +946,7 @@ startRide = function(model, at)
 		setClickable(mount.animal.model, false)
 	end
 	NestEggs.setMount(NestEggs.eggOf(mount))
+	mount.animal:setBiome(vfx.biomeSize(mount.kind)) -- (out on the course: its biome's size)
 	if not fromHerd then
 		vfx.rideCue:FireServer("out") -- your pet's left your pen: others stop drawing it there (Riders.server, Pen.client)
 		vfx.syncing = true -- (so "end" follows, however soon the ride ends)
@@ -1537,6 +1558,7 @@ local function takeFromPool(n, x, z, kind)
 		entity = newEntity(x, z, 0, kind)
 	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
+	entity.animal:setBiome(vfx.biomeSize(kind)) -- (its biome's size out here)
 	entity.face, entity.rush = nil, nil
 	entity.swerve, entity.swerveTo, entity.swerveV, entity.swerveSide, entity.lat = 0, 0, 0, nil, 0 -- (vfx.updateAvoid; moveAnimal)
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
@@ -2592,7 +2614,7 @@ end
 -- The mount's size tier right now: Grow and Crabwalk make it bigger while they run.
 function vfx.mountTier()
 	local a = activeAbility()
-	local tier = tierOf(mount.kind)
+	local tier = vfx.tierAt(mount.kind) -- (a native giant counts as its biome's size)
 	if a and a.cfg.Tier then
 		tier = math.max(tier, a.cfg.Tier)
 	end
@@ -3517,7 +3539,11 @@ local function updateMount(dt)
 		return
 	end
 	local steer = phase == "home" and 0 or readSteer()
-	local targetLat = steer * Config.SteerSpeed * -dir
+	-- A bigger body steers quicker, so a giant crosses its own width about as fast as a
+	-- horse does (QM, Oct 8: they took ages to get out of the way).
+	local halfWidth = vfx.halfBody(mount)
+	local wide = math.max(1, halfWidth / 1.6)
+	local targetLat = steer * Config.SteerSpeed * wide * -dir
 	-- Leaving the base from an outer pen: lean in so the animal reaches the
 	-- corridor by the start line.
 	if phase == "outbound" and mount.z > 0 and mount.z < leadFromZ and math.abs(mount.x) > EDGE - 4 then
@@ -3534,11 +3560,12 @@ local function updateMount(dt)
 	-- At home the side limit widens from the corridor's to the base's over 40 studs,
 	-- so a ride from an outer pen is eased into the corridor.
 	local edge = vfx.edge(mount.z) + (Config.HomeHalfWidth - 4 - vfx.edge(mount.z)) * math.clamp(mount.z / 40, 0, 1)
+	edge = math.max(edge - math.max(halfWidth - 2, 0), 4) -- (its whole body stays off the walls)
 	mount.x = math.clamp(mount.x + mount.latVel * dt, -edge, edge)
 	mount.z += dir * mount.speed * dt
 	local sideways = if (ability and ability.cfg.Kind == "Crabwalk") or (vfx.sprintSpecial() or {}).Kind == "Crabwalk" then math.pi / 2 else 0 -- a crab scuttles sideways
 	place(mount, math.atan2(mount.latVel * dir, math.max(mount.speed, 1)) + sideways)
-	animate(mount, dt, mount.speed, mount.latVel * -dir / Config.SteerSpeed)
+	animate(mount, dt, mount.speed, mount.latVel * -dir / (Config.SteerSpeed * wide))
 end
 
 local function reachHome()
@@ -3664,8 +3691,9 @@ local function checkRide(dt)
 	-- Obstacles never crash you: whatever you ride into is smashed (QM, Oct 6: new
 	-- players kept crashing into them), but the Godlands' mountains (above). Stampede
 	-- animals still go by size.
+	local bodyX, bodyZ = vfx.halfBody(mount)
 	while true do
-		local o = blockedAt(mount.x, mount.z, 1.3, 2.4)
+		local o = blockedAt(mount.x, mount.z, math.max(1.3, bodyX * 0.7), math.max(2.4, bodyZ * 0.7))
 		if not o then
 			break
 		end
@@ -3681,14 +3709,21 @@ local function checkRide(dt)
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
 		return fail("CRASH!") -- a locked gate
 	end
+	-- Whole bodies touching (QM, Oct 8): your mount's real box against each animal's,
+	-- a little forgiving at the edges. Smaller ones are trampled, others crash you.
+	local mhx, mhz = vfx.halfBody(mount)
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
-		if not entity.popping and not entity.event and math.abs(dx) < 2.6 and math.abs(dz) < 5 then
+		local ehx, ehz = 0, 0
+		if math.abs(dz) < mhz + 60 and not entity.popping and entity ~= mount then
+			ehx, ehz = vfx.halfBody(entity)
+		end
+		if not entity.popping and not entity.event and entity ~= mount and math.abs(dx) < math.max((mhx + ehx) * 0.8, 2.6) and math.abs(dz) < math.max((mhz + ehz) * 0.8, 5) then
 			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
 			-- Racing home on the Icebringer, an animal frozen in ice smashes whatever its size (QM).
 			local shatter = phase == "return" and entity.frostFx ~= nil and (vfx.abilityOf(mount) or {}).Kind == "Frost"
 			-- In the tutorial you can't crash racing home: you knock everything aside like an XXL pet (QM, Oct 6).
-			if ((phase == "return" or trample) and (tierOf(entity.kind) < myTier or Tutorial.active)) or kind == "Crabwalk" or shatter then
+			if ((phase == "return" or trample) and (vfx.tierAt(entity.kind) < myTier or Tutorial.active)) or kind == "Crabwalk" or shatter then
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
 				vfx.broke()
 				if kind == "Crabwalk" and special.RestorePer then
