@@ -568,7 +568,7 @@ return {
 	-- PerTap/DrawTaps/MaxTap: how much a tap fills and how fast it drains (below). CursorAfter: seconds without a tap before the pulsing
 	-- cursor comes back. Width: the button's share of the screen's width.
 	HoldOn = {
-		Start = 0.3,
+		Start = 0.5, -- (QM, Oct 8: half full)
 		-- Your lasso level against the animal's (QM, Oct 8): each tap fills
 		-- PerTap x yours / its (its: Config.LassoLevels, the label over it; 1:1 if it has
 		-- none), at most MaxTap; it drains PerTap x DrawTaps a second. So matched, DrawTaps

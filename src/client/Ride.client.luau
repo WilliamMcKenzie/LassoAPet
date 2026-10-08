@@ -3733,13 +3733,17 @@ local function updateRider(dt)
 		focus = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
 		if transfer.t >= 1 then
 			transfer.stage, transfer.t, transfer.from = "pull", 0, hrp.Position
-			if Config.LassoHang.Duration > 0 or not Tutorial.active then
+			-- No struggle with an animal at or under your lasso strength (its level, the
+			-- label over it): you hop straight on (QM, Oct 8).
+			local its = Config.LassoLevels[transfer.target.kind]
+			local easy = not Tutorial.active and its ~= nil and its <= (player:GetAttribute("Lasso") or 0)
+			if not easy and (Config.LassoHang.Duration > 0 or not Tutorial.active) then
 				-- Yanked off: hang from the rope round its neck first (QM, Oct 8).
 				transfer.stage = "hang"
 				transfer.hang = vfx.ropeHang.start(hrp.Position, hrp.Parent)
 				if not Tutorial.active then -- (the tutorial just hangs a moment: Duration)
 					transfer.fill = Config.HoldOn.Start
-					vfx.holdOn.start(hrp.Parent, player:GetAttribute("Lasso"), Config.LassoLevels[transfer.target.kind])
+					vfx.holdOn.start(hrp.Parent, player:GetAttribute("Lasso"), its)
 				end
 			end
 		end
