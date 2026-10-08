@@ -146720,7 +146720,7 @@
 <Item class="Part" referent="RBX00000006"><Properties>
 <string name="Name">Ground</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>768</X><Y>2</Y><Z>208</Z></Vector3>
+<Vector3 name="size"><X>288</X><Y>2</Y><Z>152</Z></Vector3>
 <Color3uint8 name="Color3uint8">4283286591</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="FrontSurface">3</token>
@@ -146728,7 +146728,7 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>0</X><Y>-1</Y><Z>104</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>0</X><Y>-1</Y><Z>76</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 <Item class="Texture" referent="RBX00000007"><Properties>
 <string name="Name">Checker</string>
@@ -146856,7 +146856,7 @@
 <Item class="Part" referent="RBX00000014"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>784</X><Y>48</Y><Z>8</Z></Vector3>
+<Vector3 name="size"><X>304</X><Y>48</Y><Z>8</Z></Vector3>
 <Color3uint8 name="Color3uint8">4292974184</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">0</token>
@@ -146864,7 +146864,7 @@
 <token name="LeftSurface">0</token>
 <token name="RightSurface">0</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>0</X><Y>24</Y><Z>204</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>0</X><Y>24</Y><Z>148</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 <Item class="Texture" referent="RBX00000015"><Properties>
 <string name="Name">Checker</string>
@@ -146942,7 +146942,7 @@
 <Item class="Part" referent="RBX0000001D"><Properties>
 <string name="Name">Cap</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>784</X><Y>2</Y><Z>10</Z></Vector3>
+<Vector3 name="size"><X>304</X><Y>2</Y><Z>10</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285136714</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">3</token>
@@ -146950,7 +146950,7 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>0</X><Y>49</Y><Z>203</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>0</X><Y>49</Y><Z>147</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
 <Item class="Part" referent="RBX0000001E"><Properties>
@@ -147256,7 +147256,7 @@
 <Item class="Part" referent="RBX00000028"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>328</X><Y>48</Y><Z>8</Z></Vector3>
+<Vector3 name="size"><X>88</X><Y>48</Y><Z>8</Z></Vector3>
 <Color3uint8 name="Color3uint8">4292974184</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">0</token>
@@ -147264,7 +147264,7 @@
 <token name="LeftSurface">0</token>
 <token name="RightSurface">0</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>-220</X><Y>24</Y><Z>-4</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-100</X><Y>24</Y><Z>-4</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 <Item class="Texture" referent="RBX00000029"><Properties>
 <string name="Name">Checker</string>
@@ -147342,7 +147342,7 @@
 <Item class="Part" referent="RBX00000031"><Properties>
 <string name="Name">Cap</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>338</X><Y>2</Y><Z>10</Z></Vector3>
+<Vector3 name="size"><X>98</X><Y>2</Y><Z>10</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285136714</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">3</token>
@@ -147350,13 +147350,13 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>-223</X><Y>49</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-103</X><Y>49</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
 <Item class="Part" referent="RBX00000032"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>48</Y><Z>208</Z></Vector3>
+<Vector3 name="size"><X>8</X><Y>48</Y><Z>152</Z></Vector3>
 <Color3uint8 name="Color3uint8">4292974184</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">0</token>
@@ -147364,7 +147364,7 @@
 <token name="LeftSurface">0</token>
 <token name="RightSurface">0</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>-388</X><Y>24</Y><Z>96</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-148</X><Y>24</Y><Z>68</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 <Item class="Texture" referent="RBX00000033"><Properties>
 <string name="Name">Checker</string>
@@ -147442,7 +147442,7 @@
 <Item class="Part" referent="RBX0000003B"><Properties>
 <string name="Name">Cap</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>10</X><Y>2</Y><Z>196</Z></Vector3>
+<Vector3 name="size"><X>10</X><Y>2</Y><Z>140</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285136714</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">3</token>
@@ -147450,7 +147450,7 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>-387</X><Y>49</Y><Z>100</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-147</X><Y>49</Y><Z>72</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
 <Item class="Part" referent="RBX0000003C"><Properties>
@@ -154956,7 +154956,7 @@
 <Item class="Part" referent="RBX00000046"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>328</X><Y>48</Y><Z>8</Z></Vector3>
+<Vector3 name="size"><X>88</X><Y>48</Y><Z>8</Z></Vector3>
 <Color3uint8 name="Color3uint8">4292974184</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">0</token>
@@ -154964,7 +154964,7 @@
 <token name="LeftSurface">0</token>
 <token name="RightSurface">0</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>220</X><Y>24</Y><Z>-4</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>100</X><Y>24</Y><Z>-4</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 <Item class="Texture" referent="RBX00000047"><Properties>
 <string name="Name">Checker</string>
@@ -155042,7 +155042,7 @@
 <Item class="Part" referent="RBX0000004F"><Properties>
 <string name="Name">Cap</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>338</X><Y>2</Y><Z>10</Z></Vector3>
+<Vector3 name="size"><X>98</X><Y>2</Y><Z>10</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285136714</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">3</token>
@@ -155050,13 +155050,13 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>223</X><Y>49</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>103</X><Y>49</Y><Z>-3</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
 <Item class="Part" referent="RBX00000050"><Properties>
 <string name="Name">Wall</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>48</Y><Z>208</Z></Vector3>
+<Vector3 name="size"><X>8</X><Y>48</Y><Z>152</Z></Vector3>
 <Color3uint8 name="Color3uint8">4292974184</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">0</token>
@@ -155064,7 +155064,7 @@
 <token name="LeftSurface">0</token>
 <token name="RightSurface">0</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>388</X><Y>24</Y><Z>96</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>148</X><Y>24</Y><Z>68</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 <Item class="Texture" referent="RBX00000051"><Properties>
 <string name="Name">Checker</string>
@@ -155142,7 +155142,7 @@
 <Item class="Part" referent="RBX00000059"><Properties>
 <string name="Name">Cap</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>10</X><Y>2</Y><Z>196</Z></Vector3>
+<Vector3 name="size"><X>10</X><Y>2</Y><Z>140</Z></Vector3>
 <Color3uint8 name="Color3uint8">4285136714</Color3uint8>
 <token name="TopSurface">3</token>
 <token name="FrontSurface">3</token>
@@ -155150,7 +155150,7 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>387</X><Y>49</Y><Z>100</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>147</X><Y>49</Y><Z>72</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 </Item>
 </Item>

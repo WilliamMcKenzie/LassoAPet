@@ -18,12 +18,12 @@ local TrainingSpot = {}
 
 -- Which way each pen opens. The back row (Pen1..3) opens towards the start line (-Z),
 -- the side pens towards the middle of the base; the dummy goes on the corner `side`.
-local OPEN = { -- (all five in a row facing the start line since Oct 8: tools/pens.py)
+local OPEN = {
 	Pen1 = { out = Vector3.new(0, 0, -1), side = Vector3.new(1, 0, 0) },
 	Pen2 = { out = Vector3.new(0, 0, -1), side = Vector3.new(1, 0, 0) },
 	Pen3 = { out = Vector3.new(0, 0, -1), side = Vector3.new(1, 0, 0) },
-	Pen4 = { out = Vector3.new(0, 0, -1), side = Vector3.new(1, 0, 0) },
-	Pen5 = { out = Vector3.new(0, 0, -1), side = Vector3.new(-1, 0, 0) },
+	Pen4 = { out = Vector3.new(1, 0, 0), side = Vector3.new(0, 0, 1) },
+	Pen5 = { out = Vector3.new(-1, 0, 0), side = Vector3.new(0, 0, 1) },
 }
 
 function TrainingSpot.of(pen, out)
