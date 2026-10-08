@@ -1,6 +1,7 @@
 -- The recommended lasso level (Config.LassoLevels) over the animal you'd lasso as you
 -- ride (QM, Oct 8): the lasso icon with the level beside it, like the HUD's lasso
--- counter, the number in the animal's rarity colour (Config.RarityColors). Ride.client
+-- counter, the number coloured by how it compares with your lasso strength (QM, Oct 8):
+-- white at or under yours (safe), orange up to Risky x yours, red past that. Ride.client
 -- moves it with the target ring (Outline.set).
 --
 --   LassoLevel.set(model, kind) -- show it over this animal; nil hides it
@@ -14,6 +15,10 @@ local Outline = require(script.Parent.Outline)
 
 local ICON = 40 -- px
 local ABOVE = 1.5 -- studs over the animal's top
+local RISKY = 1.1 -- up to this many times your strength: risky
+local SAFE_COLOR = Color3.new(1, 1, 1)
+local RISKY_COLOR = Color3.fromRGB(255, 150, 30)
+local HARD_COLOR = Color3.fromRGB(255, 50, 50)
 
 local LassoLevel = {}
 
@@ -58,7 +63,16 @@ local function build()
 	tag.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 end
 
-local shown
+local shown, shownLevel
+local function recolor()
+	if not shownLevel then
+		return
+	end
+	local mine = Players.LocalPlayer:GetAttribute("Lasso") or 0
+	number.TextColor3 = if shownLevel <= mine then SAFE_COLOR elseif shownLevel <= mine * RISKY then RISKY_COLOR else HARD_COLOR
+end
+Players.LocalPlayer:GetAttributeChangedSignal("Lasso"):Connect(recolor)
+
 function LassoLevel.set(model, kind)
 	local level = kind and Config.LassoLevels[kind]
 	if not (model and level and model.PrimaryPart) then
@@ -79,9 +93,8 @@ function LassoLevel.set(model, kind)
 	local box, size = Outline.box(model)
 	tag.Adornee = model.PrimaryPart
 	tag.StudsOffset = Vector3.new(0, box.Y + size.Y / 2 + ABOVE, 0)
-	local Animals = ReplicatedStorage.Shared.Animals
-	local ok, class = pcall(require, Animals:FindFirstChild(kind))
-	number.TextColor3 = Config.RarityColors[ok and class and class.Rarity] or Config.RarityColors.Common
+	shownLevel = level
+	recolor()
 	number.Text = (Hud.money(level):gsub("%$", ""))
 	tag.Enabled = true
 end
