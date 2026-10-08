@@ -130,4 +130,31 @@ function LassoLevel.setSelf(character)
 	end
 end
 
+-- Other riders' lasso levels over their heads, the same green tag, while they ride out
+-- (Ride's vfx.updateRiders: only while their lasso swings, so not hanging on or with an
+-- egg). Their "Lasso" attribute comes from the server, so nothing more is sent.
+local otherTags = {} -- [player] = { tag, number }
+function LassoLevel.setOther(p, character)
+	local head = character and character:FindFirstChild("Head")
+	local o = otherTags[p]
+	if not head then
+		if o then
+			o.tag:Destroy()
+			otherTags[p] = nil
+		end
+		return
+	end
+	if not o then
+		local tag, number = newTag()
+		tag.Name = "LassoLevel" .. p.UserId
+		number.TextColor3 = SELF_COLOR
+		tag.StudsOffset = Vector3.new(0, 2.5, 0)
+		tag.Enabled = true
+		o = { tag = tag, number = number }
+		otherTags[p] = o
+	end
+	o.tag.Adornee = head
+	o.number.Text = (Hud.money(p:GetAttribute("Lasso") or 0):gsub("%$", ""))
+end
+
 return LassoLevel
