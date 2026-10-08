@@ -3537,10 +3537,10 @@ local function updateMount(dt)
 		return
 	end
 	local steer = phase == "home" and 0 or readSteer()
-	-- A bigger body steers quicker, so a giant crosses its own width about as fast as a
-	-- horse does (QM, Oct 8: they took ages to get out of the way).
+	-- A bigger body steers a little quicker (QM, Oct 8: a marginal bump): 1x at a horse's
+	-- width, up to Config.SteerBigBoost at Config.SteerBigHalfWidth and over.
 	local halfWidth = vfx.halfBody(mount)
-	local wide = math.max(1, halfWidth / 1.6)
+	local wide = 1 + (Config.SteerBigBoost - 1) * math.clamp((halfWidth - 1.6) / (Config.SteerBigHalfWidth - 1.6), 0, 1)
 	local targetLat = steer * Config.SteerSpeed * wide * -dir
 	-- Leaving the base from an outer pen: lean in so the animal reaches the
 	-- corridor by the start line.
