@@ -15,7 +15,7 @@ return {
 	Biomes = {
 		{
 			Name = "Meadow",
-			AnimalSize = 1, -- its animals out on the course x this, and its obstacles and nests ^0.8 of it (QM, Oct 8: each biome's beasts bigger; Animals/Horse setBiome, tools/funnel.luau)
+			AnimalSize = 1, -- its animals are this much bigger (everywhere: Animals/Horse), its obstacles and nests ^0.8 of it (QM, Oct 8: each biome's beasts bigger; tools/funnel.luau)
 			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
 			Length = 760,
 			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },

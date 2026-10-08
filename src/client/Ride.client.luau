@@ -137,9 +137,9 @@ local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's
 vfx.lassoLevel = require(script.Parent.LassoLevel) -- the recommended lasso level over the target
 vfx.ropeHang = require(script.Parent.RopeHang) -- hanging off the rope before you hop on (Config.LassoHang)
 vfx.holdOn = require(script.Parent.HoldOn) -- HOLD ON!: tap to overpower it while you hang (Config.HoldOn)
--- Each biome's beasts are bigger (QM, Oct 8): an animal out on the course is its home
--- biome's AnimalSize (the first biome whose herd it's in), and counts as that many
--- size tiers up (TierGrowth x is a tier) when it comes to who tramples whom.
+-- Each biome's beasts are bigger (QM, Oct 8): an animal is its home biome's AnimalSize
+-- (the first biome whose herd it's in; Animals/Horse sizes it so), and counts as that
+-- many size tiers up (TierGrowth x is a tier) when it comes to who tramples whom.
 vfx.homeSize = {}
 for _, biome in Config.Biomes do
 	for kind in biome.Herd or {} do
@@ -946,7 +946,6 @@ startRide = function(model, at)
 		setClickable(mount.animal.model, false)
 	end
 	NestEggs.setMount(NestEggs.eggOf(mount))
-	mount.animal:setBiome(vfx.biomeSize(mount.kind)) -- (out on the course: its biome's size)
 	if not fromHerd then
 		vfx.rideCue:FireServer("out") -- your pet's left your pen: others stop drawing it there (Riders.server, Pen.client)
 		vfx.syncing = true -- (so "end" follows, however soon the ride ends)
@@ -1558,7 +1557,6 @@ local function takeFromPool(n, x, z, kind)
 		entity = newEntity(x, z, 0, kind)
 	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
-	entity.animal:setBiome(vfx.biomeSize(kind)) -- (its biome's size out here)
 	entity.face, entity.rush = nil, nil
 	entity.swerve, entity.swerveTo, entity.swerveV, entity.swerveSide, entity.lat = 0, 0, 0, nil, 0 -- (vfx.updateAvoid; moveAnimal)
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop

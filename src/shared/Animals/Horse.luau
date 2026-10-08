@@ -88,10 +88,21 @@ local function silhouette(data)
 	return math.sqrt(sides[2] * sides[3])
 end
 
+-- Each biome's animals are bigger (QM, Oct 8): x its AnimalSize (Config.Biomes), the
+-- first biome whose herd it's in. One size, everywhere: pen, menus, the course.
+local function biomeSize(name)
+	for _, biome in Config.Biomes do
+		if biome.Herd and biome.Herd[name] then
+			return biome.AnimalSize or 1
+		end
+	end
+	return 1
+end
+
 -- The size that makes an animal of this tier read TierGrowth x the tier below.
 local function tierSize(name, data)
 	local tier = Config.PetTiers[name] or 1
-	local size = Config.PetSmallSize * Config.TierGrowth ^ (tier - 1) / silhouette(data)
+	local size = Config.PetSmallSize * Config.TierGrowth ^ (tier - 1) / silhouette(data) * biomeSize(name)
 	return math.round(size * 100) / 100 -- one template per animal (Rig caches by size)
 end
 
@@ -118,7 +129,7 @@ local function variant(name, data, rarity, points)
 		seatBone = points.seatBone,
 		gallopOnSprint = points.gallopOnSprint, -- gallops only while self.sprinting (Ride sets it)
 		neckLoop = points.neck or NECK_LOOP,
-		size = points.size or tierSize(name, data),
+		size = if points.size then points.size * biomeSize(name) else tierSize(name, data),
 	}, { __index = Horse })
 	class.__index = class
 
@@ -235,7 +246,7 @@ function Horse:update(dt, speed, turn)
 	local rootPose = pose.root
 	rootPose[6] -= LEAN * self.turn * (0.4 + 0.6 * galloping)
 
-	local sc = self.scale * (self.biome or 1) * self.size -- animation offsets are in studs at the model's own size
+	local sc = self.scale * self.size -- animation offsets are in studs at the model's own size
 	for bone, motor in pairs(self.bones) do
 		local p = pose[bone]
 		motor.Transform = CFrame.new(p[1] * sc, p[2] * sc, p[3] * sc) * CFrame.Angles(p[4], p[5], p[6])
@@ -252,20 +263,20 @@ end
 
 function Horse:getSeatCFrame()
 	if self.seatPart then
-		local at = self.seatPart.CFrame * CFrame.new((self.seat - self.pivots[self.seatBone]) * self.size * self.scale * (self.biome or 1))
+		local at = self.seatPart.CFrame * CFrame.new((self.seat - self.pivots[self.seatBone]) * self.size * self.scale)
 		return CFrame.new(at.Position) * self.model.PrimaryPart.CFrame.Rotation
 	end
 	-- (scaled with the animal too: the seat rises as it grows, e.g. the Robo Shark's hunt)
 	if self.seatOnNeck then
-		local at = self.neck.CFrame * CFrame.new((self.seat - self.pivots.neck) * self.size * self.scale * (self.biome or 1))
+		local at = self.neck.CFrame * CFrame.new((self.seat - self.pivots.neck) * self.size * self.scale)
 		return CFrame.new(at.Position) * self.root.CFrame.Rotation
 	end
-	return self.root.CFrame * CFrame.new((self.seat - self.pivots.root) * self.size * self.scale * (self.biome or 1))
+	return self.root.CFrame * CFrame.new((self.seat - self.pivots.root) * self.size * self.scale)
 end
 
 function Horse:getNeck()
 	local loop = self.neckLoop
-	local k = self.size * self.scale * (self.biome or 1) -- (at the size it really is)
+	local k = self.size * self.scale -- (at the size it really is)
 	return { cframe = self.neck.CFrame * CFrame.new((loop.center - self.pivots.neck) * k), radius = loop.radius * k }
 end
 
@@ -286,24 +297,10 @@ local MIN_SCALE = 0.05
 -- s is relative to the animal's own size (its `size` point).
 function Horse:setScale(s)
 	s = math.max(s, MIN_SCALE)
-	if s ~= self.scale or self.shownBiome ~= self.biome then
-		self.model:ScaleTo(s * (self.biome or 1) * self.baseScale)
-		self.scale, self.shownBiome = s, self.biome
+	if s ~= self.scale then
+		self.model:ScaleTo(s * self.baseScale)
+		self.scale = s
 	end
-end
-
--- Out on the course an animal is its biome's size (Config.Biomes[i].AnimalSize: QM,
--- Oct 8, each biome's bigger than the last): x f on top of its `scale` (which stays
--- what setScale asked for). Pets at home stay 1. Horse:realScale() is the size it is.
-function Horse:setBiome(f)
-	if f ~= (self.biome or 1) then
-		self.biome = f
-		self:setScale(self.scale or 1)
-	end
-end
-
-function Horse:realScale()
-	return self.scale * (self.biome or 1)
 end
 
 local Common = variant("Horse", HorseModel, "Common")
