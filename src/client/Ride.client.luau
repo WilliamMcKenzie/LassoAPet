@@ -392,7 +392,7 @@ end
 function vfx.applyMerge(entity)
 	local n = entity.merged or 1
 	if n > 1 or entity.fuse then
-		local size = vfx.Merge.size(entity.kind, n) * vfx.Fusion.scale(entity.kind, entity.fuse)
+		local size = vfx.Merge.size(entity.kind, n) * vfx.Fusion.scale(entity.kind, entity.fuse, entity.tier)
 		entity.feast = { count = 0, size = size, speed = vfx.Merge.speed(entity.kind, n) }
 		entity.animal:setScale(size)
 	end
@@ -705,17 +705,18 @@ local function spawnStarter()
 	starter = newEntity(spot.X, spot.Z, penYaw(), player:GetAttribute("RidePet") or Config.DefaultPet)
 	starter.merged = player:GetAttribute("RideMerged") or 1
 	starter.fuse = player:GetAttribute("RideFuse") -- a hybrid (Shared/Fusion): its donor's colours and size
+	starter.tier = player:GetAttribute("RideTier") -- (its saved size tier: Fusion.tier)
 	local stats = player:GetAttribute("RideStats") -- (and the best of both pets' Speed, Stamina)
 	starter.stats = stats and { Speed = stats.X, Stamina = stats.Y }
 	vfx.Fusion.paint(starter.animal.model, starter.kind, starter.fuse)
 	PenPets.starter = starter -- (FuseMenu: the one you ride can be fused too)
-	starter.animal:setScale(vfx.Merge.size(starter.kind, starter.merged) * vfx.Fusion.scale(starter.kind, starter.fuse)) -- a merged pet is bigger
+	starter.animal:setScale(vfx.Merge.size(starter.kind, starter.merged) * vfx.Fusion.scale(starter.kind, starter.fuse, starter.tier)) -- a merged pet is bigger
 	setClickable(starter.animal.model, true)
 	-- Just merged (PenPets.merges): it pops out up over the pen once the pets going
 	-- into it have been pulled up there, and drops down (vfx.dropStarter).
 	local merge = (starter.merged > 1 or starter.fuse) and PenPets.mergeFor(vfx.Fusion.key(starter.kind, starter.fuse))
 	if merge then
-		starter.drop, starter.full = merge, vfx.Merge.size(starter.kind, starter.merged) * vfx.Fusion.scale(starter.kind, starter.fuse)
+		starter.drop, starter.full = merge, vfx.Merge.size(starter.kind, starter.merged) * vfx.Fusion.scale(starter.kind, starter.fuse, starter.tier)
 		starter.x, starter.z = merge.at.X, merge.at.Z
 		starter.dropParent = starter.animal.model.Parent or workspace
 		starter.animal.model.Parent = nil
@@ -905,7 +906,7 @@ startRide = function(model, at)
 			herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
 		end
 		mount = fromHerd
-		mount.popping, mount.hop, mount.dodge, mount.merged, mount.fuse = nil, 0, 0, nil, nil
+		mount.popping, mount.hop, mount.dodge, mount.merged, mount.fuse, mount.tier = nil, 0, 0, nil, nil, nil
 		mount.swerve, mount.swerveTo, mount.swerveV, mount.swerveSide = 0, 0, 0, nil
 		mount.animal:setScale(1)
 		spot = Vector3.new(mount.x, 0, mount.z)
@@ -916,7 +917,7 @@ startRide = function(model, at)
 			starter = nil
 		end
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
-		mount.merged, mount.fuse, mount.stats = fromPen.merged, fromPen.fuse, fromPen.stats
+		mount.merged, mount.fuse, mount.stats, mount.tier = fromPen.merged, fromPen.fuse, fromPen.stats, fromPen.tier
 		vfx.Fusion.paint(mount.animal.model, mount.kind, mount.fuse)
 		mount.own = true -- your own pet: the nests keep their rolled eggs (it stays yours once let go and lassoed back)
 	else
@@ -4831,7 +4832,7 @@ spawnStarter()
 -- The server hands out pens just after joining: move the waiting pet to yours.
 -- Picking another pet to ride (in the pen) swaps the waiting one; it's used from
 -- the next ride if you're out on one.
-for _, name in { "Pen", "RidePet", "RideMerged", "RideFuse", "RideStats" } do
+for _, name in { "Pen", "RidePet", "RideMerged", "RideFuse", "RideStats", "RideTier" } do
 	player:GetAttributeChangedSignal(name):Connect(function()
 		if phase == "idle" and starter then
 			starter.animal.model:Destroy()

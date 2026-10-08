@@ -173,6 +173,7 @@ local function publish(player)
 	player:SetAttribute("RainbowTrail", profile.rainbowTrail or nil) -- bought (Config.RainbowTrail): every ride trails a rainbow
 	player:SetAttribute("RideMerged", profile.rideMerged or 1) -- how many pets it's merged from (Shared/Merge)
 	player:SetAttribute("RideFuse", profile.rideFuse) -- the donor, if it's a hybrid (Shared/Fusion)
+	player:SetAttribute("RideTier", profile.rideFuse and profile.rideTier or nil) -- its saved size tier (Fusion.tier)
 	player:SetAttribute("RideIncome", profile.rideIncome) -- (a hybrid's: what both its pets earned)
 	player:SetAttribute("RideWorth", profile.rideWorth) -- (a hybrid's FUSE price: Fusion.worth)
 	local stats = profile.rideFuse and profile.rideStats
@@ -243,6 +244,7 @@ local function load(player)
 							profile.rideFuse, profile.rideIncome = data.rideFuse, math.max(0, tonumber(data.rideIncome))
 							profile.rideStats = loadedHybridStats(profile.ride, profile.rideFuse, data.rideStats)
 							profile.rideWorth = tonumber(data.rideWorth) and math.max(0, tonumber(data.rideWorth)) or nil
+							profile.rideTier = tonumber(data.rideTier) -- (none before Oct 8: Fusion.tier works it out)
 						end
 					end
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
@@ -262,6 +264,7 @@ local function load(player)
 							end
 							item.stats = item.fuse and loadedHybridStats(item.pet, item.fuse, item.stats) or nil
 							item.worth = item.fuse and tonumber(item.worth) and math.max(0, tonumber(item.worth)) or nil
+							item.tier = item.fuse and tonumber(item.tier) or nil
 							profile.items[id] = item
 						end
 					end
@@ -307,7 +310,7 @@ local function save(player, onlyIfChanged)
 	if not store or not profile or not loaded[player] or player:GetAttribute("Tutorial") then
 		return
 	end
-	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, tutorial = profile.tutorial, ridden = riddenList(profile),
+	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
 		rainbowTrail = profile.rainbowTrail, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
 	local as = HttpService:JSONEncode(data)
@@ -766,9 +769,11 @@ remote("RidePet", function(player, id)
 		item.income, profile.rideIncome = profile.rideIncome, item.income
 		item.stats, profile.rideStats = profile.rideStats, item.stats
 		item.worth, profile.rideWorth = profile.rideWorth, item.worth
+		item.tier, profile.rideTier = profile.rideTier, item.tier
 	else
 		profile.ride, profile.rideMerged, profile.items[id] = item.pet, item.merged, nil -- your first pet: nothing to swap with
 		profile.rideFuse, profile.rideIncome, profile.rideStats, profile.rideWorth = item.fuse, item.income, item.stats, item.worth
+		profile.rideTier = item.tier
 	end
 	publish(player)
 end)
@@ -790,11 +795,13 @@ remote("MergePets", function(player, key)
 	end
 	local rides = profile.ride == kind and profile.rideFuse == fuse
 	local ids, total, earns = {}, if rides then profile.rideMerged or 1 else 0, if rides then profile.rideIncome or 0 else 0
+	local tier = if rides then Fusion.tier(kind, fuse, profile.rideTier) else 0 -- (the biggest of them: never smaller)
 	for id, item in profile.items do
 		if item.pet == kind and item.fuse == fuse then
 			table.insert(ids, id)
 			total += item.merged or 1
 			earns += item.income or 0
+			tier = math.max(tier, Fusion.tier(kind, fuse, item.tier))
 		end
 	end
 	if #ids + (if rides then 1 else 0) < 2 then
@@ -804,9 +811,11 @@ remote("MergePets", function(player, key)
 	if rides then
 		profile.rideMerged = total
 		profile.rideIncome = if fuse then earns else nil
+		profile.rideTier = if fuse then tier else nil
 	else
 		profile.items[ids[1]].merged = total
 		profile.items[ids[1]].income = if fuse then earns else nil
+		profile.items[ids[1]].tier = if fuse then tier else nil
 		table.remove(ids, 1)
 	end
 	for _, id in ids do
@@ -827,7 +836,7 @@ remote("FusePets", function(player, idA, idB)
 	end
 	local function pet(id) -- (hybrids fuse again too: QM)
 		if id == "ride" then
-			return profile.ride and { pet = profile.ride, fuse = profile.rideFuse, merged = profile.rideMerged, income = profile.rideIncome, stats = profile.rideStats, worth = profile.rideWorth }
+			return profile.ride and { pet = profile.ride, fuse = profile.rideFuse, merged = profile.rideMerged, income = profile.rideIncome, stats = profile.rideStats, worth = profile.rideWorth, tier = profile.rideTier }
 		end
 		local item = profile.items[id]
 		return item and item.pet and item
@@ -849,6 +858,7 @@ remote("FusePets", function(player, idA, idB)
 	end
 	local earns = earning(a) + earning(b)
 	local stats = Fusion.best(Fusion.stats(a.pet, a.fuse, a.stats), Fusion.stats(b.pet, b.fuse, b.stats)) -- the best of both (QM)
+	local tier = math.max(Fusion.tier(a.pet, a.fuse, a.tier), Fusion.tier(b.pet, b.fuse, b.tier)) -- the bigger of the two (QM, Oct 8)
 	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's fuse is free, once: QM)
 	local worth = Fusion.worth(a.pet, a.fuse, a.worth) + Fusion.worth(b.pet, b.fuse, b.worth) -- (QM: a hybrid costs all its pets)
 	local price = if lesson then 0 else Fusion.price(worth) -- (QM: fusing costs gold, by rarity; 100x less from Oct 7)
@@ -862,9 +872,10 @@ remote("FusePets", function(player, idA, idB)
 	end
 	if baseId == "ride" or donorId == "ride" then -- the hybrid is the one you ride
 		profile.ride, profile.rideFuse, profile.rideMerged, profile.rideIncome, profile.rideStats, profile.rideWorth = base, donor, nil, earns, stats, worth
+		profile.rideTier = tier
 		profile.items[if baseId == "ride" then donorId else baseId] = nil
 	else
-		profile.items[baseId] = { x = a.x, z = a.z, pet = base, fuse = donor, income = earns, stats = stats, worth = worth }
+		profile.items[baseId] = { x = a.x, z = a.z, pet = base, fuse = donor, income = earns, stats = stats, worth = worth, tier = tier }
 		profile.items[donorId] = nil
 	end
 	Funnel.event(player, "Fused Pets")

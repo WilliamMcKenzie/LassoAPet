@@ -92,7 +92,7 @@ end
 -- Your own pets can be ridden, and clicked to pick which. Animal parts aren't
 -- queryable (so they never block the lasso or the mouse), so these ones are made so.
 local mine = PenPets.pets -- [model] = { id, kind, merged, fuse, income, stats, worth }
-local function makeRideable(pen, id, pet, kind, merged, fuse, income, stats, worth)
+local function makeRideable(pen, id, pet, kind, merged, fuse, income, stats, worth, tier)
 	if pen ~= myPen() then
 		-- Someone else's: no RIDE, but its nameplate and ring show as yours do (QM, Oct 7).
 		local model = pet.animal.model
@@ -107,7 +107,7 @@ local function makeRideable(pen, id, pet, kind, merged, fuse, income, stats, wor
 			part.CanQuery = true
 		end
 	end
-	mine[pet.animal.model] = { id = id, kind = kind, merged = merged or 1, fuse = fuse, income = income, stats = stats, worth = worth }
+	mine[pet.animal.model] = { id = id, kind = kind, merged = merged or 1, fuse = fuse, income = income, stats = stats, worth = worth, tier = tier }
 	pet.animal.model.Destroying:Connect(function()
 		mine[pet.animal.model] = nil
 	end)
@@ -269,9 +269,9 @@ local function showPet(pen, id, item)
 	s.pet = newPet(item.pet)
 	shown[pen][id] = s -- tracked at once: if anything below fails, the next refresh still clears it
 	Fusion.paint(s.pet.animal.model, item.pet, item.fuse) -- a hybrid wears its donor's colours (Shared/Fusion)
-	s.pet.scale = Merge.size(item.pet, item.merged) * Fusion.scale(item.pet, item.fuse) -- a merged pet is bigger (Shared/Merge)
+	s.pet.scale = Merge.size(item.pet, item.merged) * Fusion.scale(item.pet, item.fuse, item.tier) -- a merged pet is bigger (Shared/Merge)
 	s.pet.animal:setScale(s.pet.scale)
-	makeRideable(pen, id, s.pet, item.pet, item.merged, item.fuse, item.income, item.stats, item.worth)
+	makeRideable(pen, id, s.pet, item.pet, item.merged, item.fuse, item.income, item.stats, item.worth, item.tier)
 	-- Just merged (PenPets.merges): it waits unseen while the pets going into it are
 	-- pulled up, then pops out up there and drops down onto the spot under it.
 	local merge = pen == myPen() and ((item.merged or 1) > 1 or item.fuse) and PenPets.mergeFor(Fusion.key(item.pet, item.fuse))

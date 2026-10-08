@@ -16,7 +16,8 @@
 --   Fusion.combine(a, aFuse, b, bFuse)  what fusing two pets (hybrids too) makes
 --   Fusion.stats(kind, fuse, saved)  its Speed and Stamina (Config.AnimalStats)
 --   Fusion.best(a, b)             the higher Speed and higher Stamina of two stats
---   Fusion.scale(kind, fuse)      how much bigger the donor makes it (never smaller)
+--   Fusion.tier(kind, fuse, saved)  its size tier (a hybrid's saved one, else the bigger of its two)
+--   Fusion.scale(kind, fuse, saved) how much bigger that makes it than its base (never smaller)
 --   Fusion.name(kind, fuse)       "Poong": the donor's front and the base's back
 --   Fusion.paint(model, kind, fuse)  repaints a built model in the donor's palette
 --   Fusion.worth(kind, fuse, saved) what a pet adds to FUSE's price (a hybrid: all its pets)
@@ -122,12 +123,21 @@ end
 -- a pet bigger; it used to take the donor's size tier, so a Pig donor shrank a Loong
 -- 4x). Each tier is Config.TierGrowth bigger than the one below: a Loong (tier 4)
 -- with a Pig donor stays Loong-sized, a Pig with a Loong donor is 1.6^3 = 4x bigger.
-function Fusion.scale(kind, fuse)
+-- A pet's size tier: a hybrid's saved one (`tier`, the bigger of the two fused into it,
+-- so fusing it again can't shrink it either), else the bigger of its base's and donor's.
+function Fusion.tier(kind, fuse, tier)
+	local own = Config.PetTiers[kind] or 1
+	if not fuse then
+		return own
+	end
+	return tonumber(tier) or math.max(own, Config.PetTiers[fuse] or 1)
+end
+
+function Fusion.scale(kind, fuse, tier)
 	if not fuse then
 		return 1
 	end
-	local from, to = Config.PetTiers[kind] or 1, Config.PetTiers[fuse] or 1
-	return Config.TierGrowth ^ math.max(to - from, 0)
+	return Config.TierGrowth ^ math.max(Fusion.tier(kind, fuse, tier) - (Config.PetTiers[kind] or 1), 0)
 end
 
 -- Hybrid names (QM, Oct 6): the donor's front half and the base's back half, so a
