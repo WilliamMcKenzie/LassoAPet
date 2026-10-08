@@ -3868,7 +3868,7 @@ local function updateRider(dt)
 			end
 			mount, transfer = target, nil
 			vfx.rideCue:FireServer("landed") -- (eggs can be taken again: Riders.server)
-			vfx.actionsFrom = os.clock() + 0.6 -- (the struggle's last taps don't grab an egg or lasso again)
+			vfx.actionsFrom = os.clock() + 0.3 -- (the struggle's last taps don't grab an egg or lasso again)
 			picked = nil
 			NestEggs.setMount(NestEggs.eggOf(mount)) -- the nests' eggs are this animal's now
 			vfx.sounds.play("lasso_land")
