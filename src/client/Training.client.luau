@@ -336,7 +336,7 @@ RunService.PreSimulation:Connect(function(dt)
 	-- however many catches it counts for, its pitch a little off each time.
 	if not whooshed and t >= training.Swing then
 		whooshed = true
-		Sounds.play("training_whoosh", 0.35, 1 + (math.random() - 0.5) * 0.16)
+		Sounds.play("training_whoosh", 0.6, 0.94 + math.random() * 0.12)
 	end
 	if t < training.Swing then
 		Lasso.swing(dt)
