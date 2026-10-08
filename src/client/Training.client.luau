@@ -220,6 +220,8 @@ local character -- the character the lasso's started on, while training
 local t = 0 -- seconds into this catch
 local counted = false
 local sitWeld -- you, welded into your chair
+local sitSeat -- the chair's seat you sat down in
+local lassoLevel -- the pen level whose lasso you're throwing (LassoTiers)
 local stoodUp = false -- jumped out of the chair: no sitting again till you've walked off
 
 -- Near your dummy, on foot (not riding: Ride anchors you), alive, not in the tutorial.
@@ -246,12 +248,13 @@ local function standUp()
 end
 
 -- Into the chair, facing the dummy (the seat faces the chair's -Z, at it).
-local function sitDown(char, dummy)
+local function sitDown(char, dummy, again)
 	local hrp = char.HumanoidRootPart
 	local humanoid = char:FindFirstChildOfClass("Humanoid")
-	if humanoid.Sit then
+	if humanoid.Sit and not again then
 		return -- (in some other seat)
 	end
+	sitSeat = dummy.seat
 	local above = hrp.Size.Y / 2 + 0.4 * char:GetScale() -- the root's height over the plank, seated
 	hrp.CFrame = dummy.seat.CFrame * CFrame.new(0, above, 0)
 	local weld = Instance.new("Weld")
@@ -283,8 +286,15 @@ RunService.PreSimulation:Connect(function(dt)
 	local char = near(dummy)
 	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
 	if sitWeld and not (char and humanoid.Sit and sitWeld.Part0 == dummy.seat and sitWeld.Part1 == char.HumanoidRootPart) then
-		standUp() -- jumped off (or respawned, or the pen moved)
-		stoodUp = char ~= nil
+		-- Your pen upgraded under you (a new dummy and chair, QM): straight into the new
+		-- chair, still training. Otherwise you jumped off (or respawned, or the pen moved).
+		local swapped = char and humanoid.Sit and sitSeat ~= dummy.seat
+		standUp()
+		if swapped then
+			sitDown(char, dummy, true)
+		else
+			stoodUp = char ~= nil
+		end
 	end
 	if not char then
 		stoodUp = false
@@ -298,9 +308,14 @@ RunService.PreSimulation:Connect(function(dt)
 		stop()
 		if char then
 			character = char
-			Lasso.start(char, 1, player:GetAttribute("PenLevel") or 1) -- (your pen level's lasso: LassoTiers)
+			lassoLevel = player:GetAttribute("PenLevel") or 1
+			Lasso.start(char, 1, lassoLevel) -- (your pen level's lasso: LassoTiers)
 			t, counted, whooshed = 0, false, false
 		end
+	end
+	if character and (player:GetAttribute("PenLevel") or 1) ~= lassoLevel then
+		lassoLevel = player:GetAttribute("PenLevel") or 1
+		Lasso.start(character, 1, lassoLevel) -- upgraded mid-throw: the new lasso, carrying on (QM)
 	end
 	if not character then
 		return
