@@ -19,7 +19,7 @@ local claimAway = ReplicatedStorage:WaitForChild("ClaimAway")
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
 local FONT = Enum.Font.FredokaOne
-local GOLD = Color3.fromRGB(80, 255, 60) -- the nameplates' income green (QM, Oct 7; was FFE11D)
+local GOLD = Color3.fromHex("FFC41E") -- golden yellow (QM, Oct 8; was the nameplates' income green, before that FFE11D)
 local COIN = "rbxassetid://99312860837685" -- Hud's coin
 local CLAIM = { id = "rbxassetid://135663178618300", size = Vector2.new(960, 378) } -- Claim.png
 local CLAIM_WIDTH = 330
