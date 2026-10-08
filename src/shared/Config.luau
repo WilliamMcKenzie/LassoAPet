@@ -571,8 +571,9 @@ return {
 	-- a Tug (studs) forward every TugEvery seconds or so. Fov: degrees wider meanwhile.
 	LassoHang = {
 		Duration = 1.5,
-		Rope = 18, -- (QM: a long rope, clearly hanging onto it)
-		Height = 8,
+		Rope = 36, -- (QM: a long rope, clearly hanging onto it)
+		Height = 14,
+		Zoom = 1.35, -- the camera pulls back this much meanwhile, centred between you and it, to see you both
 		Follow = 25,
 		Shake = 0.3,
 		Tug = 1.2,

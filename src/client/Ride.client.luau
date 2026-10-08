@@ -3729,7 +3729,8 @@ local function updateRider(dt)
 		local animal = transfer.target.animal
 		local at = vfx.ropeHang.update(transfer.hang, dt, animal:getNeck().cframe.Position, animal.model.PrimaryPart.CFrame.LookVector)
 		hrp.CFrame = at
-		focus = focus:Lerp(Vector3.new(at.X, 0, at.Z), 1 - math.exp(-10 * dt)) -- (smooth through the swings)
+		local look = at.Position:Lerp(animal.model.PrimaryPart.Position, 0.4) -- (between you and it: both in view)
+		focus = focus:Lerp(Vector3.new(look.X, 0, look.Z), 1 - math.exp(-10 * dt)) -- (smooth through the jolts)
 		if transfer.t >= 1 then
 			vfx.ropeHang.stop(transfer.hang)
 			transfer.stage, transfer.t, transfer.from = "pull", 0, hrp.Position -- now hop on
@@ -4468,7 +4469,8 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	Hud.setAbilityTint(rattleHaze * (if vfx.hazeColor == vfx.FROST_HAZE then 0.6 elseif vfx.hazeColor == vfx.HUNT_HAZE then 1 else 0.85), vfx.hazeColor)
 	-- Bigger pets fill more of the view: the camera pulls back RideZoomPerTier
 	-- times further for each size tier above small (Config.PetTiers).
-	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
+	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1)
+		elseif transfer and transfer.stage == "hang" then Config.LassoHang.Zoom else 1
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local z = vfx.camZoom
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
