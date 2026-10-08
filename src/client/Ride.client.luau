@@ -3772,15 +3772,14 @@ local function updateRider(dt)
 			-- No struggle with an animal at or under your lasso strength (its level, the
 			-- label over it): you hop straight on (QM, Oct 8).
 			local its = Config.LassoLevels[transfer.target.kind]
-			local easy = not Tutorial.active and its ~= nil and its <= (player:GetAttribute("Lasso") or 0)
-			if not easy and (Config.LassoHang.Duration > 0 or not Tutorial.active) then
+			local strength = math.max(player:GetAttribute("Lasso") or 0, Config.HoldOn.MinStrength)
+			local easy = not Tutorial.active and its ~= nil and its <= strength
+			if not easy then -- (the tutorial's always a struggle: QM)
 				-- Yanked off: hang from the rope round its neck first (QM, Oct 8).
 				transfer.stage = "hang"
 				transfer.hang = vfx.ropeHang.start(hrp.Position, hrp.Parent, Lasso.tier())
-				if not Tutorial.active then -- (the tutorial just hangs a moment: Duration)
-					transfer.fill = Config.HoldOn.Start
-					vfx.holdOn.start(hrp.Parent, player:GetAttribute("Lasso"), its)
-				end
+				transfer.fill = Config.HoldOn.Start
+				vfx.holdOn.start(hrp.Parent, strength, its, Tutorial.active) -- (the tutorial's can't be lost)
 			end
 		end
 		return

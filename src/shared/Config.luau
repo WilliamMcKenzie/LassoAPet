@@ -579,6 +579,12 @@ return {
 		-- taps a second is a draw; at twice its level half that, at half its level twice.
 		PerTap = 0.08,
 		DrawTaps = 3,
+		-- Your lasso level counts as at least this in every match-up (HOLD ON!'s taps, the
+		-- auto-ride, the level labels' colours), so Meadow's rabbits and horses are an
+		-- easy fight from the start (QM, Oct 8; the counter still shows the real one).
+		MinStrength = 20,
+		-- In the tutorial the bar never runs out: it holds at this, so nobody gets stuck.
+		TutorialFloor = 0.15,
 		MaxTap = 0.7,
 		Arm = "rbxassetid://81589206383908", -- assets/ui/FlexArm.png: the +1 popup's icon
 		Popup = false, -- a "+1" with the arm on each tap (QM, Oct 8: off)

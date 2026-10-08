@@ -68,7 +68,7 @@ local function recolor()
 	if not shownLevel then
 		return
 	end
-	local mine = Players.LocalPlayer:GetAttribute("Lasso") or 0
+	local mine = math.max(Players.LocalPlayer:GetAttribute("Lasso") or 0, Config.HoldOn.MinStrength) -- (at least MinStrength in a match-up)
 	number.TextColor3 = if shownLevel <= mine then SAFE_COLOR elseif shownLevel <= mine * RISKY then RISKY_COLOR else HARD_COLOR
 end
 Players.LocalPlayer:GetAttributeChangedSignal("Lasso"):Connect(recolor)

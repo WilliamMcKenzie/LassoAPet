@@ -24,6 +24,7 @@ local active = false
 local fill = 0
 local who -- the character the +1s pop over
 local perTap, drain = 0, 0 -- this time's (Config.HoldOn: your lasso level against its)
+local floor = 0 -- the bar never drains below this (the tutorial's: can't be lost)
 local goAt = 0 -- os.clock() "Ready... Set..." is over: the bar holds and taps don't count till then
 
 function HoldOn.tap()
@@ -38,13 +39,14 @@ function HoldOn.tap()
 	end
 end
 
-function HoldOn.start(character, yours, its)
+function HoldOn.start(character, yours, its, cantLose)
 	who = character
 	local cfg = Config.HoldOn
 	local ratio = if its and its > 0 then math.max(yours or 0, 1) / its else 1
 	perTap = math.min(cfg.PerTap * ratio, cfg.MaxTap)
 	drain = cfg.PerTap * cfg.DrawTaps
 	active, fill = true, cfg.Start
+	floor = if cantLose then cfg.TutorialFloor else 0
 	goAt = os.clock() + cfg.Ready.Time + cfg.Set.Time
 	Hud.setStruggle(true)
 	-- A tap or click anywhere, Space or A: over everything else's while it's on.
@@ -69,7 +71,7 @@ function HoldOn.update(dt)
 	if os.clock() < goAt then
 		return fill, nil -- (Ready... Set...)
 	end
-	fill -= drain * dt
+	fill = math.max(fill - drain * dt, floor)
 	if fill <= 0 then
 		return 0, "lost"
 	end
