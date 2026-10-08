@@ -206,12 +206,14 @@ end
 -- "+N" with the lasso icon popping out beside your head on each catch (PlusPopup).
 local Hud = require(script.Parent.Hud)
 local PlusPopup = require(script.Parent.PlusPopup)
+local Sounds = require(script.Parent.Sounds)
 local function popCatch(char, amount)
 	PlusPopup.at(char, amount, Hud.lassoIcon)
 end
 
 -- Training ----------------------------------------------------------------------
 local CYCLE = training.Swing + training.Throw + training.Pull + training.Rest
+local whooshed = false -- this throw's whoosh has played
 local perThrow, owed = 1, 0 -- catches each throw counts for (past MinCycle), and the fraction owed
 local CATCH_AT = training.Swing + training.Throw + training.Pull * 0.35 -- the loop's cinched on its neck
 local character -- the character the lasso's started on, while training
@@ -297,7 +299,7 @@ RunService.PreSimulation:Connect(function(dt)
 		if char then
 			character = char
 			Lasso.start(char, 1)
-			t, counted = 0, false
+			t, counted, whooshed = 0, false, false
 		end
 	end
 	if not character then
@@ -328,7 +330,13 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 	end
 	if t >= CYCLE then
-		t, counted = t % CYCLE, false
+		t, counted, whooshed = t % CYCLE, false, false
+	end
+	-- A whoosh as each throw leaves your hand (QM: training's one sound), one a throw
+	-- however many catches it counts for, its pitch a little off each time.
+	if not whooshed and t >= training.Swing then
+		whooshed = true
+		Sounds.play("training_whoosh", 0.35, 1 + (math.random() - 0.5) * 0.16)
 	end
 	if t < training.Swing then
 		Lasso.swing(dt)

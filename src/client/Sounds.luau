@@ -21,6 +21,7 @@ local IDS = {
 	egg_grab = "rbxassetid://94379425317312", -- an egg lassoed mid-ride
 	gallop_loop = "rbxassetid://129029116650332", -- while riding a galloping animal (Config.GallopSound)
 	sprint_whoosh = "rbxassetid://73983934702758", -- Sprint starts
+	training_whoosh = "", -- each lasso throw at your training dummy (Training.client; QM, Oct 8: Design's file coming)
 	smash = "rbxassetid://90604529915688", -- the pet smashes through an obstacle
 	gate_break = "rbxassetid://9116938119", -- a zone gate shatters (Mirror Break, Roblox's ProSoundEffects; QM's pick, Oct 7)
 	crash = "rbxassetid://94142874131984", -- crashed or bucked off
