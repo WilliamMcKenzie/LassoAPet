@@ -9,6 +9,7 @@
 --   Lasso.throw(k, neck)                -- k 0..1: loop flies out and opens over the neck
 --   Lasso.pull(k, neck, noRope)         -- k 0..1: loop cinches on the neck, rope taut (noRope: just the loop)
 --   Lasso.twirl(dt, object)             -- a caught egg (any part or model) swung round overhead
+--   Lasso.gold(on)                      -- the whole rope gold and glowing (training's CRITs), or back
 --   Lasso.heldCFrame(object)            -- where a twirled object sits right now
 --   Lasso.fitRadius(object)             -- loop radius that fits snugly round a part or model
 --   Lasso.hide()
@@ -23,6 +24,7 @@ local LassoTiers = require(game:GetService("Players").LocalPlayer:WaitForChild("
 
 local POINTS = 16
 local ROPE_COLOR = Color3.fromRGB(222, 184, 120)
+local GOLD = Color3.fromHex("FFC41E") -- (the money text's)
 local ROPE_WIDTH = 0.28
 local SPIN_RATE = 2.4 -- turns per second over the head
 local SWING_RADIUS = 2.6
@@ -40,6 +42,7 @@ local burstDone, lastPull = false, math.huge
 local shoulder
 local spin = 0
 local ropeScale = 1
+local golden = false
 
 local function beam(a0, a1)
 	local b = Instance.new("Beam")
@@ -65,7 +68,7 @@ end
 
 -- The tier's rope: colour (a rainbow turns), glow and width.
 local function paintRope()
-	if not tier then
+	if not tier or golden then
 		return
 	end
 	local t = os.clock()
@@ -273,6 +276,25 @@ function Lasso.twirl(dt, object)
 	end
 end
 
+-- A CRIT's rope (Training, QM Oct 8): all gold and glowing, then its tier's again.
+function Lasso.gold(on)
+	if not folder or on == golden then
+		return
+	end
+	golden = on
+	if tier and not on then
+		paintRope()
+		return
+	end
+	local color = ColorSequence.new(if on then GOLD else ROPE_COLOR)
+	for _, b in loopBeams do
+		b.Color = color
+		b.LightEmission = if on then 1 else 0
+	end
+	handRope.Color = color
+	handRope.LightEmission = if on then 1 else 0
+end
+
 -- The current tier (LassoTiers'), for the HOLD ON! rope (RopeHang) to match.
 function Lasso.tier()
 	return tier
@@ -295,7 +317,7 @@ function Lasso.stop()
 	if folder then
 		folder:Destroy()
 	end
-	folder, shoulder = nil, nil
+	folder, shoulder, golden = nil, nil, false
 end
 
 return Lasso

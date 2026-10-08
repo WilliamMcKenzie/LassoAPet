@@ -9,6 +9,7 @@
 -- Training.client sizes it to its biome's dummy).
 --   TrainingSpot.perCatch(penLevel) -- lasso strength one catch gives (Config.Training)
 --   TrainingSpot.speed(lasso) -- how many times quicker this lasso strength throws
+--   TrainingSpot.crit(seed, i) -- whether throw i is a lucky CRIT (Config.Training.Crit)
 
 local Config = require(script.Parent.Config)
 
@@ -49,6 +50,20 @@ end
 function TrainingSpot.speed(lasso)
 	local training = Config.Training
 	return training.SpeedPerDecade ^ math.log10(math.max(lasso or 0, 1))
+end
+
+-- Whether your throw number i (1 = your first since you joined) is a CRIT
+-- (Config.Training.Crit), from your "CritSeed" attribute: the same on your client and
+-- the server, so the client knows ahead (the gold rope) and the server pays it.
+function TrainingSpot.crit(seed, i)
+	local crit = Config.Training.Crit
+	if not crit or not seed then
+		return false
+	end
+	if i == crit.First then
+		return true
+	end
+	return Random.new(seed * 7919 + i):NextNumber() < crit.Chance
 end
 
 return TrainingSpot

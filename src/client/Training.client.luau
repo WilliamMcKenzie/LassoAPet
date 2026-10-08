@@ -9,6 +9,9 @@
 -- attribute), on foot (QM, Oct 8: sitting in a chair wasn't fun): a ring round it on
 -- the floor, and anywhere in the ring you lasso it, turned to face it wherever you
 -- walk. Step out and you stop. Each plays its idle, and yours its hit on each catch.
+-- Now and then a throw's a lucky CRIT (Config.Training.Crit): its rope goes gold, and
+-- the catch swings the dummy round your head and slams it back (TrainingCrit), which
+-- everyone near sees.
 -- Built on each client like the podium snake, so they can animate (Motor6D.Transform
 -- doesn't replicate). The lasso is its own copy of the rider's (Lasso holds one character).
 
@@ -21,6 +24,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Rig = require(ReplicatedStorage.Shared.Animals.Rig)
 local TrainingByBiome = require(ReplicatedStorage.Shared.Props.TrainingByBiome)
 local TrainingSpot = require(ReplicatedStorage.Shared.TrainingSpot)
+local TrainingCrit = require(script.Parent.TrainingCrit)
 
 local lassoModule = script.Parent.Lasso:Clone()
 lassoModule.Name = "TrainingLassoInstance"
@@ -39,7 +43,7 @@ local trainingState = ReplicatedStorage:WaitForChild("TrainingState") -- (others
 -- its own space; its entry's `neck` is where the loop closes (centre in model space,
 -- cinched radius). The bigger ones stand further out so their bases stay ~2 studs
 -- clear of the fence, and have bigger rings.
-local dummies = {} -- [pen] = { entry, level, model, bones, ring, out, radius, place, idleT, hitT }
+local dummies = {} -- [pen] = { entry, level, model, bones, ring, out, radius, place, idleT, hitT, crit (TrainingCrit's), critNeck, critAt }
 local ringShown = 0 -- how much of your ring shows (0..1.6), easing
 
 local function noCollide(model)
@@ -205,6 +209,17 @@ local t = 0 -- seconds into this catch
 local counted = false
 local lassoLevel -- the pen level whose lasso you're throwing (LassoTiers)
 local TURN = 10 -- how quickly you turn to face the dummy (per second, eased)
+-- Your throws since you joined, as the server counts them (one per TrainLasso), and
+-- whether this one's a CRIT (TrainingSpot.crit; nil: not looked up yet).
+local throwIndex = 1
+local lucky = nil
+local critDummy -- your dummy while your CRIT's swinging it round
+local function isLucky()
+	if lucky == nil then
+		lucky = TrainingSpot.crit(player:GetAttribute("CritSeed"), throwIndex)
+	end
+	return lucky
+end
 
 -- In your dummy's ring, on foot (not riding: Ride anchors you), alive, not in the
 -- tutorial. The ring stops at the fence: not from inside your pen.
@@ -225,6 +240,10 @@ end
 -- You stop training: the rope goes, you turn freely again, and everyone else stops
 -- seeing you throw (the server's "Training" attribute).
 local function stop()
+	if critDummy then
+		TrainingCrit.cancel(critDummy) -- (not reported, so this throw's a CRIT again next time)
+		critDummy = nil
+	end
 	if character then
 		Lasso.stop()
 		local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -243,6 +262,9 @@ RunService.PreSimulation:Connect(function(dt)
 		if dummy.place and at0 and (at0.Position - dummy.place.Position).Magnitude < 300 then
 			animate(dummy, dt) -- (not while you're out riding: too far to see them move)
 		end
+		if dummy.crit then
+			dummy.critNeck, dummy.critAt = TrainingCrit.update(dummy, dt)
+		end
 	end
 	local dummy = mine()
 	local char = near(dummy)
@@ -252,7 +274,7 @@ RunService.PreSimulation:Connect(function(dt)
 			character = char
 			lassoLevel = player:GetAttribute("PenLevel") or 1
 			Lasso.start(char, 1, lassoLevel) -- (your pen level's lasso: LassoTiers)
-			t, counted, whooshed = 0, false, false
+			t, counted, whooshed, lucky = 0, false, false, nil
 			char:FindFirstChildOfClass("Humanoid").AutoRotate = false -- (turned to the dummy below)
 			trainingState:FireServer(true)
 		end
@@ -285,9 +307,18 @@ RunService.PreSimulation:Connect(function(dt)
 	-- steer, turned to it the whole time.
 	local hrp = character.HumanoidRootPart
 	local at = hrp.Position
-	local look = Vector3.new(dummy.place.Position.X, at.Y, dummy.place.Position.Z)
+	local focus = if dummy.crit and dummy.critAt then dummy.critAt else dummy.place.Position
+	local look = Vector3.new(focus.X, at.Y, focus.Z)
 	if (look - at).Magnitude > 0.5 then
-		hrp.CFrame = hrp.CFrame:Lerp(CFrame.lookAt(at, look), math.min(dt * TURN, 1))
+		hrp.CFrame = hrp.CFrame:Lerp(CFrame.lookAt(at, look), math.min(dt * (if dummy.crit then 30 else TURN), 1))
+	end
+	if dummy.crit then
+		-- Your CRIT: the rope taut on its neck as you swing it round; the throws wait
+		-- till it's back on its pole.
+		if dummy.critNeck then
+			Lasso.pull(1, dummy.critNeck)
+		end
+		return
 	end
 	local neck = dummy.entry.neck
 	local target = { cframe = dummy.place * CFrame.new(neck.center), radius = neck.radius }
@@ -309,12 +340,30 @@ RunService.PreSimulation:Connect(function(dt)
 		local n = math.floor(owed)
 		owed -= n
 		if n >= 1 then
-			trainLasso:FireServer(n)
-			popCatch(character, n * TrainingSpot.perCatch(player:GetAttribute("PenLevel")))
+			local amount = n * TrainingSpot.perCatch(player:GetAttribute("PenLevel"))
+			if isLucky() then
+				-- A CRIT: reported, popped and slammed as it lands (TrainingCrit).
+				local thrower = character
+				critDummy = dummy
+				TrainingCrit.start(dummy, thrower, function()
+					critDummy = nil
+					trainLasso:FireServer(n)
+					throwIndex += 1
+					lucky = false
+					PlusPopup.at(thrower, amount * training.Crit.Mult, Hud.lassoIcon, PlusPopup.CRIT)
+					TrainingCrit.slam(dummy, true)
+					Lasso.gold(false)
+					t = training.Swing + training.Throw + training.Pull -- (on to the slack before the next)
+				end)
+			else
+				trainLasso:FireServer(n)
+				throwIndex += 1
+				popCatch(character, amount)
+			end
 		end
 	end
 	if t >= CYCLE then
-		t, counted, whooshed = t % CYCLE, false, false
+		t, counted, whooshed, lucky = t % CYCLE, false, false, nil
 	end
 	-- A whoosh as each throw leaves your hand (QM: training's one sound), one a throw
 	-- however many catches it counts for, its pitch a little off each time.
@@ -322,6 +371,8 @@ RunService.PreSimulation:Connect(function(dt)
 		whooshed = true
 		Sounds.play("training_whoosh", 0.6, 0.94 + math.random() * 0.12)
 	end
+	-- A CRIT's rope turns gold halfway through its swing (QM: you see it coming).
+	Lasso.gold(isLucky() and t >= training.Swing * 0.5 and t < training.Swing + training.Throw + training.Pull)
 	if t < training.Swing then
 		Lasso.swing(dt)
 	elseif t < training.Swing + training.Throw then
@@ -335,10 +386,11 @@ RunService.PreSimulation:Connect(function(dt)
 end)
 
 -- Everyone else training (their "Training" attribute, from the server): their throws at
--- their own pen's dummy played here, as they'd see them (no +N popups: those are theirs).
+-- their own pen's dummy played here, as they'd see them (no +N popups: those are theirs),
+-- and each CRIT the server pays them (their "TrainingCrits" going up) swung and slammed.
 -- Each has a copy of the Lasso module (it holds one character). Only near ones.
 local OTHERS_NEAR = 300
-local others = {} -- [player] = { module, Lasso, t, counted, level }
+local others = {} -- [player] = { module, Lasso, t, counted, level, char, crits }
 local function dropOther(p)
 	local o = others[p]
 	if o then
@@ -368,7 +420,7 @@ RunService.PreSimulation:Connect(function(dt)
 			local module = script.Parent.Lasso:Clone()
 			module.Name = "TrainingLasso" .. p.UserId
 			module.Parent = script
-			o = { module = module, Lasso = require(module), t = 0, counted = false, char = char }
+			o = { module = module, Lasso = require(module), t = 0, counted = false, char = char, crits = p:GetAttribute("TrainingCrits") }
 			others[p] = o
 			o.level = level
 			o.Lasso.start(char, 1, level)
@@ -376,6 +428,23 @@ RunService.PreSimulation:Connect(function(dt)
 			o.level = level
 			o.Lasso.start(char, 1, level)
 		end
+		local crits = p:GetAttribute("TrainingCrits")
+		if crits ~= o.crits then
+			o.crits = crits
+			if not dummy.crit then
+				TrainingCrit.start(dummy, char, function()
+					TrainingCrit.slam(dummy, false)
+				end)
+			end
+		end
+		if dummy.crit then
+			o.Lasso.gold(true)
+			if dummy.critNeck then
+				o.Lasso.pull(1, dummy.critNeck)
+			end
+			continue
+		end
+		o.Lasso.gold(false)
 		local speed = TrainingSpot.speed(p:GetAttribute("Lasso"))
 		local step = dt * math.min(speed, CYCLE / training.MinCycle)
 		o.t += step

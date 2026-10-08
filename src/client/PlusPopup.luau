@@ -3,8 +3,10 @@
 -- lasso catches (Training.client) and HOLD ON!'s taps (HoldOn) look exactly the same.
 --
 --   PlusPopup.at(character, amount, icon, how) -- amount: a number ("+1", "+1k") or text
---   how (optional): { spread = studs, tilt = degrees, size = { min, max }, burst = true }, e.g.
+--   how (optional): { spread = studs, tilt = degrees, size = { min, max }, burst = true,
+--     big = x, color = Color3, prefix = text, time = seconds }, e.g.
 --   PlusPopup.SCATTER: wider, tilted and sized at random so quick ones don't cluster
+--   PlusPopup.CRIT: training's lucky catch, "CRIT! +N" big and gold over your head
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -28,6 +30,8 @@ PlusPopup.SCATTER = { spread = 4, tilt = 14, size = { 0.85, 1.15 } }
 -- (not just up), a little tilted and sized at random (QM, Oct 8: training's, so they
 -- don't stack in a column).
 PlusPopup.BURST = { burst = true, tilt = 10, size = { 0.85, 1.15 } }
+-- Training's CRITs (QM, Oct 8): twice the size, money gold, straight up over your head.
+PlusPopup.CRIT = { spread = 0, big = 2, color = Color3.fromHex("FFC41E"), prefix = "CRIT! ", time = 1.4 }
 
 function PlusPopup.at(char, amount, icon, how)
 	local head = char and char:FindFirstChild("Head")
@@ -46,8 +50,10 @@ function PlusPopup.at(char, amount, icon, how)
 		rise = dir * rng:NextNumber(2.2, 3.4)
 	end
 	local size = if how and how.size then rng:NextNumber(how.size[1], how.size[2]) else 1
+	local big = if how and how.big then how.big else 1
+	local popTime = if how and how.time then how.time else POP_TIME
 	local tag = Instance.new("BillboardGui")
-	tag.Size = UDim2.fromOffset(110, 40)
+	tag.Size = UDim2.fromOffset(110 * big * (if how and how.prefix then 2 else 1), 40 * big)
 	tag.AlwaysOnTop = true
 	tag.LightInfluence = 0
 	tag.Adornee = head
@@ -70,13 +76,13 @@ function PlusPopup.at(char, amount, icon, how)
 	local text = Instance.new("TextLabel")
 	text.BackgroundTransparency = 1
 	text.AutomaticSize = Enum.AutomaticSize.X
-	text.Size = UDim2.fromOffset(0, 40)
+	text.Size = UDim2.fromOffset(0, 40 * big)
 	text.Font = Enum.Font.FredokaOne
-	text.TextSize = 30
-	text.TextColor3 = Color3.new(1, 1, 1)
-	text.Text = "+" .. (if type(amount) == "number" then (Hud.money(amount):gsub("%$", "")) else tostring(amount))
+	text.TextSize = 30 * big
+	text.TextColor3 = if how and how.color then how.color else Color3.new(1, 1, 1)
+	text.Text = (if how and how.prefix then how.prefix else "") .. "+" .. (if type(amount) == "number" then (Hud.money(amount):gsub("%$", "")) else tostring(amount))
 	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 3
+	stroke.Thickness = 3 * big
 	stroke.LineJoinMode = Enum.LineJoinMode.Round
 	stroke.Parent = text
 	text.Parent = row
@@ -84,7 +90,7 @@ function PlusPopup.at(char, amount, icon, how)
 	if icon and icon ~= "" then
 		image = Instance.new("ImageLabel")
 		image.BackgroundTransparency = 1
-		image.Size = UDim2.fromOffset(34, 34)
+		image.Size = UDim2.fromOffset(34 * big, 34 * big)
 		image.Image = icon
 		image.LayoutOrder = 1
 		image.Parent = row
@@ -94,15 +100,15 @@ function PlusPopup.at(char, amount, icon, how)
 		row.Rotation = rng:NextNumber(-how.tilt, how.tilt)
 	end
 	TweenService:Create(scale, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = size }):Play()
-	local riseInfo = TweenInfo.new(POP_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local riseInfo = TweenInfo.new(popTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	TweenService:Create(tag, riseInfo, { StudsOffset = from + rise }):Play()
-	local fade = TweenInfo.new(POP_TIME * 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, POP_TIME * 0.5)
+	local fade = TweenInfo.new(popTime * 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, popTime * 0.5)
 	TweenService:Create(text, fade, { TextTransparency = 1 }):Play()
 	TweenService:Create(stroke, fade, { Transparency = 1 }):Play()
 	if image then
 		TweenService:Create(image, fade, { ImageTransparency = 1 }):Play()
 	end
-	task.delay(POP_TIME + 0.05, tag.Destroy, tag)
+	task.delay(popTime + 0.05, tag.Destroy, tag)
 end
 
 return PlusPopup

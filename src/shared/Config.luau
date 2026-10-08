@@ -668,6 +668,13 @@ return {
 		-- still follows the curve.
 		SpeedPerDecade = 2,
 		MinCycle = 0.25,
+		-- Lucky catches (QM, Oct 8: more spectacle): a throw is a CRIT one time in 1/Chance,
+		-- worth Mult catches. Its rope turns gold halfway through the swing, then the dummy's
+		-- yanked off its pole, swung once round your head and slammed back (Time seconds:
+		-- TrainingCrit). Throw number First each visit always is one (a new player's third:
+		-- they see one straight away). The server rolls them from your CritSeed and its
+		-- own count of your throws (TrainingSpot.crit), so they can't be faked.
+		Crit = { Chance = 0.1, Mult = 10, First = 3, Time = 1.25 },
 	},
 	-- Lasso level for each animal (Game design, Oct 8; sim in project files balance/lasso/): placed
 	-- along a typical player's training (70% of their time at the dummy, today's PerCatch and
