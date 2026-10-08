@@ -566,19 +566,26 @@ return {
 	-- Lassoing an animal while riding (QM, Oct 8: the new lasso, phase 1): once the loop's
 	-- round its neck you hang off the rope behind it for Duration seconds, then hop on
 	-- as before (RopeHang.luau; 0 skips it). Locked straight behind it and high (QM: fast
-	-- and high-stakes, not drifting): Rope studs of rope from its neck, rising Height
-	-- studs to you; Follow how stiffly you follow its turns. Shake: studs of quick jolt;
-	-- a Tug (studs) forward every TugEvery seconds or so. Fov: degrees wider meanwhile.
+	-- and high-stakes, never drifting): Rope studs of rope from its neck, rising Height
+	-- studs to you; Follow how stiffly you follow its turns. The rope waves in the wind
+	-- round that line (QM's canvas sine waves, with noise): Wave studs side to side at
+	-- your end, WaveLength studs per ripple, travelling back at WaveSpeed studs/s; its
+	-- height breathes Breathe times a second; Noise (0..1) how unpredictable it is;
+	-- Segments: pieces the rope's drawn in. Fov: degrees wider; Zoom: the camera pulls
+	-- back this much, centred between you and it, to see you both.
 	LassoHang = {
 		Duration = 1.5,
 		Rope = 36, -- (QM: a long rope, clearly hanging onto it)
 		Height = 14,
-		Zoom = 1.35, -- the camera pulls back this much meanwhile, centred between you and it, to see you both
 		Follow = 25,
-		Shake = 0.3,
-		Tug = 1.2,
-		TugEvery = 0.4,
+		Wave = 4,
+		WaveLength = 30,
+		WaveSpeed = 45,
+		Breathe = 0.6,
+		Noise = 0.4,
+		Segments = 24,
 		Fov = 12,
+		Zoom = 1.35,
 	},
 	-- Lasso training (QM, Oct 8: new-loops): a stitched horse dummy on a pole at home.
 	-- Stand within Radius of it (on foot) and you lasso it over and over, each catch

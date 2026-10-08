@@ -7,7 +7,7 @@
 --   Lasso.start(character)
 --   Lasso.swing(dt)                     -- loop spinning over the head
 --   Lasso.throw(k, neck)                -- k 0..1: loop flies out and opens over the neck
---   Lasso.pull(k, neck)                 -- k 0..1: loop cinches on the neck, rope taut
+--   Lasso.pull(k, neck, noRope)         -- k 0..1: loop cinches on the neck, rope taut (noRope: just the loop)
 --   Lasso.twirl(dt, object)             -- a caught egg (any part or model) swung round overhead
 --   Lasso.heldCFrame(object)            -- where a twirled object sits right now
 --   Lasso.fitRadius(object)             -- loop radius that fits snugly round a part or model
@@ -145,7 +145,7 @@ function Lasso.throw(k, neck)
 	setVisible(true)
 end
 
-function Lasso.pull(k, neck)
+function Lasso.pull(k, neck, noRope)
 	if not folder then
 		return
 	end
@@ -156,6 +156,9 @@ function Lasso.pull(k, neck)
 	drawLoop(center, neck.cframe.UpVector, radius, 0, hand.WorldPosition - center)
 	handRope.CurveSize0, handRope.CurveSize1 = 0, 0
 	setVisible(true)
+	if noRope then
+		handRope.Enabled = false
+	end
 end
 
 function Lasso.fitRadius(object)

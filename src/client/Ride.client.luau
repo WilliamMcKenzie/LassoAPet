@@ -599,6 +599,9 @@ local function cleanup()
 	if mount then
 		mount.animal.model:Destroy()
 	end
+	if transfer and transfer.hang then
+		vfx.ropeHang.stop(transfer.hang) -- (its rope goes too)
+	end
 	mount, transfer, tumble, warpLevel = nil, nil, nil, nil
 	NestEggs.setMount("")
 	if carried then
@@ -1075,6 +1078,9 @@ local function fail(reason, tip)
 	if mount then
 		release(mount)
 		mount = nil
+	end
+	if transfer and transfer.hang then
+		vfx.ropeHang.stop(transfer.hang)
 	end
 	transfer = nil
 	if carried then
@@ -3733,6 +3739,7 @@ local function updateRider(dt)
 		focus = focus:Lerp(Vector3.new(look.X, 0, look.Z), 1 - math.exp(-10 * dt)) -- (smooth through the jolts)
 		if transfer.t >= 1 then
 			vfx.ropeHang.stop(transfer.hang)
+			transfer.hang = nil
 			transfer.stage, transfer.t, transfer.from = "pull", 0, hrp.Position -- now hop on
 		end
 		return
@@ -4349,7 +4356,7 @@ RunService.PreSimulation:Connect(function(dt)
 		if transfer.stage == "throw" then
 			Lasso.throw(transfer.t, neck)
 		elseif transfer.stage == "hang" then
-			Lasso.pull(1, neck) -- cinched, the rope taut to your hands
+			Lasso.pull(1, neck, true) -- cinched (RopeHang draws the waving rope to your hands)
 			vfx.ropeHang.pose(transfer.hang)
 		else
 			Lasso.pull(transfer.t, neck)
@@ -4476,11 +4483,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
-	local hanging = transfer and transfer.stage == "hang" -- off the rope (RopeHang): a rattle and a wider view
-	if hanging then
-		local t = os.clock()
-		camera.CFrame *= CFrame.Angles(math.sin(t * 41) * 0.004, math.sin(t * 33) * 0.004, math.sin(t * 29) * 0.006)
-	end
+	local hanging = transfer and transfer.stage == "hang" -- off the rope (RopeHang): a wider view (no shake: QM)
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = (if phase == "return" then 70 + Config.ReturnFovKick else 70) + (if hanging then Config.LassoHang.Fov else 0)
 	fov = math.max(fov, math.min(fov + vfx.speedFx.fovKick(), Config.SpeedFeel.MaxFov))
