@@ -598,8 +598,10 @@ return {
 		In = 6, -- studs in from the pen's corner, along that side
 		Chair = 8, -- studs from the dummy to the chair you lasso it from (Design's TrainingChair), along the pen's front
 		Radius = 14, -- studs from the pole you train from
-		PerCatch = 1, -- at pen level 1 (the Meadow): x PerLevel for each level up (QM, Oct 8: Desert +10, Tundra +100, Ocean +1k, Godlands +10k)
-		PerLevel = 10,
+		-- Lasso strength per catch at each pen level (Config.Biomes order), tracking the
+		-- biomes' lasso level ranges so each takes some 100-1,000 catches (QM, Oct 8: the
+		-- shape matters, not the numbers): Meadow, Desert, Tundra, Ocean, Godlands.
+		PerCatch = { 1, 10, 1000, 100000, 10000000 },
 		Swing = 1.1, -- seconds of each catch: the loop spun overhead,
 		Throw = 0.45, -- flying out to the dummy's neck,
 		Pull = 0.5, -- cinching on it (the catch counts here),

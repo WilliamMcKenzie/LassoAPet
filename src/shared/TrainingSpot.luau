@@ -55,8 +55,8 @@ function TrainingSpot.chair(pen, out, along)
 end
 
 function TrainingSpot.perCatch(penLevel)
-	local training = Config.Training
-	return training.PerCatch * training.PerLevel ^ (math.max(penLevel or 1, 1) - 1)
+	local list = Config.Training.PerCatch
+	return list[math.clamp(penLevel or 1, 1, #list)]
 end
 
 function TrainingSpot.speed(lasso)
