@@ -107,7 +107,7 @@ function RopeHang.update(hang, dt, neck, heading)
 	-- with the wave's slope there and rolling into it.
 	local slope = (offset(hang, cfg.Rope, hang.t) - offset(hang, cfg.Rope - 1, hang.t))
 	local cf = CFrame.fromMatrix(pos, side, heading, Vector3.yAxis)
-	return CFrame.new(pos) * CFrame.Angles(0, -math.atan(slope), 0) * cf.Rotation * CFrame.Angles(0, swing / math.max(cfg.Wave, 0.1) * 0.25, 0)
+	return CFrame.new(pos) * CFrame.Angles(0, -math.atan(slope), 0) * cf.Rotation * CFrame.Angles(0, swing * 0.0625, 0)
 end
 
 -- In the torso's axes, like PodiumLasso's (R6's joints have other local axes).
@@ -129,7 +129,7 @@ function RopeHang.pose(hang)
 	pose(hang, "LeftElbow", 0.1, 0, 0)
 	-- Legs streaming back, trailing the swing a little and fluttering.
 	local flutter = math.sin(t * 9)
-	local trail = offset(hang, cfg.Rope, hang.t - 0.15) / math.max(cfg.Wave, 0.1) * 0.25
+	local trail = offset(hang, cfg.Rope, hang.t - 0.15) * 0.0625
 	pose(hang, "RightHip", flutter * 0.15, 0, 0.05 + trail)
 	pose(hang, "LeftHip", -flutter * 0.15, 0, -0.05 + trail)
 	pose(hang, "RightKnee", -0.15 - math.max(flutter, 0) * 0.2, 0, 0)

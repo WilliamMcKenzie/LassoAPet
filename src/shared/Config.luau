@@ -578,7 +578,7 @@ return {
 		Rope = 36, -- (QM: a long rope, clearly hanging onto it)
 		Height = 14,
 		Follow = 25,
-		Wave = 4,
+		Wave = 0.8, -- (QM: 80% less than the first 4)
 		WaveLength = 30,
 		WaveSpeed = 45,
 		Breathe = 0.6,
