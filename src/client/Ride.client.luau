@@ -179,7 +179,16 @@ local TRANSFER_TIME = 0.4 -- rider pulled across on the rope
 local EGG_PULL_TIME = 0.55 -- egg reeled in on the rope
 local TURN_TIME = 1
 local LIE_HEIGHT = 0.7 -- root part's height when lying on the ground
-local EDGE = Config.CourseHalfWidth - 4
+local EDGE = Config.CourseHalfWidth - 4 -- at the start line: the course widens on from there (a funnel)
+-- How far either side of the middle you can go at z, and how many times wider than
+-- at the start line the course is there. Herd lanes (plan's x, entity.lane) are in
+-- start-line units, spread out by vfx.widen as the course opens up.
+function vfx.edge(z)
+	return WorldColors.halfWidth(z) - 4
+end
+function vfx.widen(z)
+	return WorldColors.widen(z)
+end
 -- The stampede runs all the time, whether anyone is riding or not. Each biome has
 -- its own stream: its animal n pops in at the biome's start (just behind the start
 -- line, or on the line from the biome before) at n * HerdSpawnEvery seconds on the
@@ -447,7 +456,7 @@ end
 local function release(entity)
 	entity.animal:setSaddled(false)
 	entity.animal.sprinting = false -- (the Kraken walks again: Horse gallopOnSprint)
-	entity.lane = entity.x
+	entity.lane = entity.x / vfx.widen(entity.z)
 	entity.cruise = herdSpeed(entity.kind)
 	table.insert(strays, entity)
 end
@@ -527,6 +536,8 @@ end
 
 -- A stampede animal's x at z: its lane, swerving round any obstacle in the way.
 local function laneX(x0, z)
+	x0 *= vfx.widen(z) -- (lanes are in start-line units)
+	local EDGE = vfx.edge(z)
 	local x = x0
 	if endless.Godlands.segmentAt(z) then
 		-- The Godlands' walls (Shared/GodlandsTracks) run right across: rather than
@@ -1854,7 +1865,7 @@ function vfx.updateEvent(dt, seen, inView)
 		entity.animal:setScale(scale * vfx.ownSize(entity)) -- (grown while you rode it, it stays grown)
 	end
 	entity.dodge *= math.exp(-1.5 * dt)
-	moveAnimal(entity, math.clamp(x + entity.dodge, -EDGE, EDGE), z, speed, dt, shown)
+	moveAnimal(entity, math.clamp(x + entity.dodge, -vfx.edge(z), vfx.edge(z)), z, speed, dt, shown)
 end
 
 -- The stampede follows the shared server clock. Only during this player's slow-mo
@@ -1944,7 +1955,7 @@ local function updateHerd(dt, slowed)
 				entity.x = x + entity.dodge + (entity.swerve or 0) -- a snap doesn't swing them sideways
 			end
 			local ox, oz = vfx.hazards.offset(key) -- (charging or hunting you: off its place for a bit)
-			moveAnimal(entity, math.clamp(x + entity.dodge + (entity.swerve or 0) + ox, -EDGE, EDGE), z + oz, speed, dt, shown)
+			moveAnimal(entity, math.clamp(x + entity.dodge + (entity.swerve or 0) + ox, -vfx.edge(z), vfx.edge(z)), z + oz, speed, dt, shown)
 			vfx.setFrosted(entity, vfx.frostLeft[key] ~= nil)
 		end
 	end
@@ -1990,11 +2001,11 @@ local function updateHerd(dt, slowed)
 		end
 		local x = entity.x + look.X * pace * dt
 		if math.abs(yaw) > 0.05 then
-			entity.lane = x
+			entity.lane = x / vfx.widen(z)
 		end
 		-- Swerves round obstacles like the rest of the stampede.
 		local lat = math.clamp(laneX(entity.lane, z) - x, -1, 1) * 12
-		entity.x, entity.z = math.clamp(x + lat * dt, -EDGE, EDGE), z
+		entity.x, entity.z = math.clamp(x + lat * dt, -vfx.edge(z), vfx.edge(z)), z
 		if shown then
 			place(entity, -math.atan2(lat, math.max(pace, 1)))
 			animate(entity, dt, pace, turn + lat / 12)
@@ -2308,7 +2319,7 @@ function vfx.updateAvoid(dt)
 			local clear = cfg.Clear * zone
 			local t = dz / math.max(state.vz + math.max(entity.speed or 0, 0), 1) -- seconds until it's on you
 			local base = entity.x - (entity.swerve or 0) -- its line without the swerve
-			local px = math.clamp(mount.x + state.vx * math.min(t, 1), -EDGE, EDGE) -- where you'll be by then (a guess past 1 s)
+			local px = math.clamp(mount.x + state.vx * math.min(t, 1), -vfx.edge(entity.z), vfx.edge(entity.z)) -- where you'll be by then (a guess past 1 s)
 			local gap = base + (entity.swerveTo or 0) - px
 			-- How briskly it swerves: its sideways speed peaks at Turn x its own running speed
 			-- (a spring's peak is shift x w / e), so quick animals dart aside and slow ones lumber
@@ -2316,7 +2327,7 @@ function vfx.updateAvoid(dt)
 			-- you, never later than Warn; if you swerve at it late, it hurries (w t >= 2: over half
 			-- way across by then).
 			local side0 = entity.swerveSide or (if gap > 0 then 1 elseif gap < 0 then -1 elseif entity.x > 0 then -1 else 1)
-			local reach = math.abs(math.clamp(px + side0 * clear, -EDGE, EDGE) - entity.x)
+			local reach = math.abs(math.clamp(px + side0 * clear, -vfx.edge(entity.z), vfx.edge(entity.z)) - entity.x)
 			local w = 2.718 * cfg.Turn * math.max(entity.speed or 0, 10) / math.max(reach, 1)
 			w = math.clamp(math.max(w, 2 / math.max(t, 0.1)), 0.8, 12)
 			if t <= math.max(cfg.Warn, 4.74 / w) and math.abs(gap) < clear then
@@ -2326,10 +2337,10 @@ function vfx.updateAvoid(dt)
 				if not state.skip[entity] then
 					-- Away from you (the side it first picked), unless the wall leaves it in your way.
 					local side = side0
-					local target = math.clamp(px + side * clear, -EDGE, EDGE)
+					local target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
 					if math.abs(target - px) < math.min(6, clear) then
 						side = -side
-						target = math.clamp(px + side * clear, -EDGE, EDGE)
+						target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
 					end
 					entity.swerveSide, entity.swerveTo = side, target - base
 					entity.swerveW = w
@@ -2353,8 +2364,8 @@ function vfx.updateAvoid(dt)
 			end
 			if not entity.n then
 				local step = to + off - s
-				entity.x = math.clamp(entity.x + step, -EDGE, EDGE)
-				entity.lane = math.clamp((entity.lane or entity.x) + step, -EDGE, EDGE)
+				entity.x = math.clamp(entity.x + step, -vfx.edge(entity.z), vfx.edge(entity.z))
+				entity.lane = math.clamp((entity.lane or entity.x / vfx.widen(entity.z)) + step / vfx.widen(entity.z), -EDGE, EDGE)
 			end
 			entity.swerve, entity.swerveV = to + off, v
 		end
@@ -2389,7 +2400,7 @@ function vfx.updateScared(dt)
 			if entity.n then
 				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -aura.radius, aura.radius)
 			else
-				entity.lane = math.clamp((entity.lane or entity.x) + away * 60 * dt, -EDGE, EDGE)
+				entity.lane = math.clamp((entity.lane or entity.x / vfx.widen(entity.z)) + away * 60 * dt / vfx.widen(entity.z), -EDGE, EDGE)
 			end
 			if not aura.scared[entity] then
 				aura.scared[entity] = true
@@ -2612,7 +2623,7 @@ function vfx.scareOff(dt, special)
 			if entity.n then
 				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -r, r)
 			else
-				entity.lane = math.clamp((entity.lane or entity.x) + away * 60 * dt, -EDGE, EDGE)
+				entity.lane = math.clamp((entity.lane or entity.x / vfx.widen(entity.z)) + away * 60 * dt / vfx.widen(entity.z), -EDGE, EDGE)
 			end
 			if special.RestorePer and entity.scaredOffBy ~= mount then
 				entity.scaredOffBy = mount
@@ -2799,7 +2810,7 @@ function vfx.updateShield(dt)
 	local cfg = shield.cfg
 	for i = #shield.crabs, 1, -1 do
 		local crab = shield.crabs[i]
-		crab.x = math.clamp(mount.x + crab.offset, -EDGE, EDGE)
+		crab.x = math.clamp(mount.x + crab.offset, -vfx.edge(mount.z), vfx.edge(mount.z))
 		crab.z = mount.z + travelDir() * cfg.Ahead
 		crab.yaw = mount.yaw
 		animate(crab, dt, mount.speed, 0)
@@ -2826,7 +2837,7 @@ function vfx.inkBlast(dt, cfg)
 			if entity.n then
 				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -cfg.Radius, cfg.Radius)
 			else
-				entity.lane = math.clamp(entity.lane + away * 60 * dt, -EDGE, EDGE)
+				entity.lane = math.clamp(entity.lane + away * 60 * dt / vfx.widen(entity.z), -EDGE, EDGE)
 			end
 		end
 	end
@@ -3263,7 +3274,7 @@ local function startAbility(cfg)
 		vfx.inkFx(mount)
 		rattleRing(Vector3.new(mount.x, 0, mount.z), cfg.Radius, Color3.fromRGB(40, 30, 70))
 	elseif cfg.Kind == "Wave" then
-		a.active.wave = vfx.FishWave.new(mount.z, travelDir(), EDGE)
+		a.active.wave = vfx.FishWave.new(mount.z, travelDir(), vfx.edge(mount.z))
 	elseif cfg.Kind == "Missiles" then
 		hold = math.min(hold + holdTime(mount) * cfg.Restore, holdTime(mount)) -- QM: every launch refills 10% of the Hold bar
 		a.active.missiles = vfx.launchMissiles(mount, cfg, travelDir())
@@ -3368,7 +3379,7 @@ local function updateMount(dt)
 		mount.speed = vfx.speedFx.curve(Config.MountSpeed * statsOf(mount.kind, mount).Speed * (1 - math.sin(turnT * math.pi) * 0.7))
 		mount.latVel *= math.exp(-6 * dt)
 		local look = CFrame.Angles(0, mount.yaw, 0).LookVector
-		mount.x = math.clamp(mount.x + look.X * mount.speed * dt, -EDGE, EDGE)
+		mount.x = math.clamp(mount.x + look.X * mount.speed * dt, -vfx.edge(mount.z), vfx.edge(mount.z))
 		mount.z += look.Z * mount.speed * dt
 		if turnT >= 1 then
 			phase, grace = "return", Config.TurnGrace
@@ -3454,7 +3465,7 @@ local function updateMount(dt)
 		local len = math.max(math.sqrt(dx * dx + dz * dz), 0.001)
 		mount.speed = targetSpeed
 		local step = math.min(targetSpeed * dt, len)
-		mount.x = math.clamp(mount.x + dx / len * step, -EDGE, EDGE)
+		mount.x = math.clamp(mount.x + dx / len * step, -vfx.edge(mount.z), vfx.edge(mount.z))
 		local z = mount.z + dz / len * step
 		if phase == "outbound" then
 			z = math.clamp(z, gateZ() + 3, SPAWN_Z) -- not back over the start line, nor into a locked gate
@@ -3500,7 +3511,7 @@ local function updateMount(dt)
 	mount.latVel += (targetLat - mount.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
 	-- At home the side limit widens from the corridor's to the base's over 40 studs,
 	-- so a ride from an outer pen is eased into the corridor.
-	local edge = EDGE + (Config.HomeHalfWidth - 4 - EDGE) * math.clamp(mount.z / 40, 0, 1)
+	local edge = vfx.edge(mount.z) + (Config.HomeHalfWidth - 4 - vfx.edge(mount.z)) * math.clamp(mount.z / 40, 0, 1)
 	mount.x = math.clamp(mount.x + mount.latVel * dt, -edge, edge)
 	mount.z += dir * mount.speed * dt
 	local sideways = if (ability and ability.cfg.Kind == "Crabwalk") or (vfx.sprintSpecial() or {}).Kind == "Crabwalk" then math.pi / 2 else 0 -- a crab scuttles sideways

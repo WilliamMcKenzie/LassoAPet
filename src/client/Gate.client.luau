@@ -27,7 +27,7 @@ local CARD_ASPECT = 1068 / 662 -- GateDesert.png etc.
 local gates = {} -- [biome index] = { part, fades }
 
 local function build(i)
-	local width, height = Config.CourseHalfWidth * 2, Config.GateHeight
+	local width, height = WorldColors.halfWidth(WorldColors.biomeStart(i)) * 2, Config.GateHeight
 	local part = Instance.new("Part")
 	part.Name = "Gate" .. i
 	part.Anchored = true
@@ -116,7 +116,7 @@ local function shatter(i)
 	-- It shatters like glass (QM, Oct 7: Mirror Break), then a little jingle (egg_hatch's) (QM).
 	Sounds.play("gate_break", 0.8)
 	task.delay(0.3, Sounds.play, "egg_hatch", 0.6)
-	local width, height = Config.CourseHalfWidth * 2, Config.GateHeight
+	local width, height = WorldColors.halfWidth(WorldColors.biomeStart(i)) * 2, Config.GateHeight
 	local z = WorldColors.biomeStart(i)
 	local w, h = width / SHARDS_X, height / SHARDS_Y
 	local rng = Random.new()

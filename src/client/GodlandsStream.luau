@@ -186,7 +186,7 @@ local function build(k)
 	local track = Godlands.track(k)
 	local rows = Tracks.Grids[track.Grid]
 	local z0 = Godlands.segmentStart(k)
-	local half, tile = Godlands.halfWidth, Tracks.Tile
+	local half, gh, tile = Godlands.halfWidth, Godlands.gridHalf, Tracks.Tile
 	local count = 0
 	local function tick(n)
 		count += n
@@ -198,15 +198,15 @@ local function build(k)
 	floorPart("Ground", -half, half, z0, z0 - Tracks.Length, 0, -2, entry.folder)
 	for _, kind in { { "#", "Stone", Godlands.STONE_UP, -2 }, { "~", track.Liquid, Godlands.LIQUID_TOP, -Godlands.LIQUID_TOP } } do
 		for _, r in rects(rows, kind[1]) do
-			local x0, x1 = -half + (r[1] - 1) * tile, -half + (r[3] - 1) * tile
+			local x0, x1 = Godlands.worldX(-gh + (r[1] - 1) * tile), Godlands.worldX(-gh + (r[3] - 1) * tile)
 			floorPart(kind[2], x0, x1, z0 - (r[2] - 1) * tile, z0 - (r[4] - 1) * tile, kind[3], kind[4], entry.folder)
 			tick(1)
 		end
 	end
 	local zc = z0 - Tracks.Length / 2
 	for _, side in { -1, 1 } do
-		for _, w in { { "Wall", Vector3.new(8, 48, Tracks.Length), Vector3.new(side * 60, 24, zc) },
-			{ "Cap", Vector3.new(10, 2, Tracks.Length - 1), Vector3.new(side * 59, 49, zc + 0.5) } } do
+		for _, w in { { "Wall", Vector3.new(8, 48, Tracks.Length), Vector3.new(side * (half + 4), 24, zc) },
+			{ "Cap", Vector3.new(10, 2, Tracks.Length - 1), Vector3.new(side * (half + 3), 49, zc + 0.5) } } do
 			local template = templates[w[1] .. side]
 			if template then
 				local p = template:Clone()
@@ -218,7 +218,7 @@ local function build(k)
 	end
 	local pieces = {}
 	for _, row in Tracks.Pieces[track.Grid] do
-		table.insert(pieces, piece(row[1], row[2], row[5], z0 + row[3], row[4], entry.folder))
+		table.insert(pieces, piece(row[1], row[2] * Godlands.widen, row[5], z0 + row[3], row[4], entry.folder))
 		tick(#Tracks.Kit[row[1]].Parts)
 	end
 	entry.pieces = pieces

@@ -15,10 +15,15 @@
 local Config = require(script.Parent.Config)
 local Tracks = require(script.Parent.GodlandsTracks)
 
+-- The tracks' grids are drawn for a 112-stud course; the course is a funnel (Config)
+-- that's CourseMaxHalfWidth wide by here, so they're laid stretched across it:
+-- grid x times `widen`, snapped to the 4-stud tiles (Godlands.worldX).
+local gridHalf = #Tracks.Grids[1][1] * Tracks.Tile / 2
 local Godlands = {
 	length = Tracks.Length,
 	tile = Tracks.Tile,
-	halfWidth = #Tracks.Grids[1][1] * Tracks.Tile / 2,
+	gridHalf = gridHalf,
+	halfWidth = math.floor(Config.CourseMaxHalfWidth / Tracks.Tile + 0.5) * Tracks.Tile,
 	STONE_UP = 1,
 	LIQUID_TOP = 0.05, -- ice and lava sit just over the snow
 }
@@ -63,13 +68,20 @@ function Godlands.track(k)
 	return t
 end
 
+Godlands.widen = Godlands.halfWidth / gridHalf
+
+-- A grid x (-gridHalf..gridHalf) laid across the wider course, on the tile grid.
+function Godlands.worldX(x)
+	return math.floor(x * Godlands.widen / Tracks.Tile + 0.5) * Tracks.Tile
+end
+
 function Godlands.glyphAt(x, z)
 	local k = Godlands.segmentAt(z)
 	if not k then
 		return nil
 	end
 	local row = Tracks.Grids[Godlands.track(k).Grid][math.floor((Godlands.segmentStart(k) - z) / Tracks.Tile) + 1]
-	local i = math.floor((x + Godlands.halfWidth) / Tracks.Tile) + 1
+	local i = math.floor((x / Godlands.widen + gridHalf) / Tracks.Tile) + 1
 	return if row and i >= 1 and i <= #row then string.sub(row, i, i) else "."
 end
 

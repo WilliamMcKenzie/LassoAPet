@@ -210,7 +210,15 @@ return {
 	Gates = false,
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
+	-- The course is a funnel (QM, Oct 8): CourseHalfWidth at the start line, each wall
+	-- angled out CourseWidening studs per stud of course (one straight line), up to
+	-- CourseMaxHalfWidth (reached at the Godlands line, which keeps that width). Full
+	-- widths: Meadow 112-120, Desert 120-142, Snow 142-197, Ocean 197-274, Godlands 274.
+	-- WorldColors.halfWidth(z) is the width at z. The place's walls, ground, obstacles
+	-- and nests are moved to it by tools/funnel.luau (re-run it after a World push).
 	CourseHalfWidth = 56,
+	CourseWidening = 0.005,
+	CourseMaxHalfWidth = 137,
 	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
 	HomeHalfWidth = 144, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3)
 	HomeDepth = 144, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall

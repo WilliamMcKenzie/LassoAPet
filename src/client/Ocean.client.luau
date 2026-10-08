@@ -119,7 +119,7 @@ RunService.RenderStepped:Connect(function(dt)
 			local part = newBubble()
 			local size = rng:NextNumber(BUBBLE_SIZE[1], BUBBLE_SIZE[2])
 			part.Size = Vector3.new(size, size, size)
-			local x = math.clamp(at.X + rng:NextNumber(-SPREAD_X, SPREAD_X), -Config.CourseHalfWidth, Config.CourseHalfWidth)
+			local x = math.clamp(at.X + rng:NextNumber(-SPREAD_X, SPREAD_X), -WorldColors.halfWidth(at.Z), WorldColors.halfWidth(at.Z))
 			table.insert(live, {
 				part = part,
 				x = x,

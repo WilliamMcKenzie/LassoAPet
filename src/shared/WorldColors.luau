@@ -21,6 +21,16 @@ function WorldColors.biomeAt(z)
 	return #Config.Biomes
 end
 
+-- The course's half width at z (Config: a funnel, widening from the start line).
+function WorldColors.halfWidth(z)
+	return math.min(Config.CourseHalfWidth + Config.CourseWidening * math.max(-z, 0), Config.CourseMaxHalfWidth)
+end
+
+-- How many times wider than at the start line the course is at z.
+function WorldColors.widen(z)
+	return WorldColors.halfWidth(z) / Config.CourseHalfWidth
+end
+
 -- The z of biome i's near edge (the line you cross into it).
 function WorldColors.biomeStart(i)
 	local edge = 0
@@ -127,6 +137,12 @@ function WorldColors.apply(world)
 	end
 	for _, part in world.Walls:GetChildren() do
 		WorldColors.paintWall(world, part)
+	end
+	local funnel = world:FindFirstChild("Funnel") -- (the floor under the widened ground: tools/funnel.luau)
+	if funnel then
+		for _, part in funnel:GetChildren() do
+			WorldColors.paintGround(world, part)
+		end
 	end
 end
 
