@@ -22,7 +22,7 @@ local last = {} -- [player] = os.clock() of their last counted catch
 
 trainLasso.OnServerEvent:Connect(function(player)
 	local now = os.clock()
-	if now - (last[player] or 0) < CYCLE * 0.8 then
+	if now - (last[player] or 0) < CYCLE * 0.8 / TrainingSpot.speed(player:GetAttribute("Lasso")) then
 		return
 	end
 	local character = player.Character

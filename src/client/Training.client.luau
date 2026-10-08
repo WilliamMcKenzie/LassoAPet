@@ -171,6 +171,7 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 	end
 	local target = { cframe = dummy.place * CFrame.new(neck.center), radius = neck.radius }
+	dt *= TrainingSpot.speed(player:GetAttribute("Lasso")) -- stronger, quicker (the swing spins faster too)
 	t += dt
 	if t >= CYCLE then
 		t, counted = t - CYCLE, false

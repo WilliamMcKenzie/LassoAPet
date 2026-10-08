@@ -5,6 +5,7 @@
 -- catches against the same spot.
 --
 --   TrainingSpot.of(pen) -- CFrame at the dummy's foot, facing out (-Z), or nil
+--   TrainingSpot.speed(lasso) -- how many times quicker this lasso strength throws
 
 local Config = require(script.Parent.Config)
 
@@ -35,6 +36,11 @@ function TrainingSpot.of(pen)
 		+ open.side * (width / 2 - Config.Training.In)
 	spot = Vector3.new(spot.X, 0, spot.Z)
 	return CFrame.lookAt(spot, spot + open.out)
+end
+
+function TrainingSpot.speed(lasso)
+	local training = Config.Training
+	return math.min(1 + training.SpeedPerDecade * math.log10(math.max(lasso or 0, 1)), training.MaxSpeed)
 end
 
 return TrainingSpot

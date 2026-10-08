@@ -566,6 +566,11 @@ return {
 		Throw = 0.45, -- flying out to the dummy's neck,
 		Pull = 0.5, -- cinching on it (the catch counts here),
 		Rest = 0.35, -- and slack before the next
+		-- The stronger your lasso, the faster you lasso (QM, Oct 8): all of the above
+		-- runs SpeedPerDecade quicker per x10 of lasso strength, up to MaxSpeed
+		-- (TrainingSpot.speed): 10 -> x1.3, 1k -> x1.9, 1M -> x2.8, 1B -> x3.7, 10B -> x4.
+		SpeedPerDecade = 0.3,
+		MaxSpeed = 4,
 	},
 	-- Recommended lasso level for each animal, shown over the one you'd lasso as you
 	-- ride (LassoLevel.luau). PLACEHOLDERS until Game design sets them (QM, Oct 8): each
