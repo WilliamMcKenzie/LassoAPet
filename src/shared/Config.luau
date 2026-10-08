@@ -75,8 +75,8 @@ return {
 			PostColor = Color3.fromRGB(126, 164, 214),
 			GateImage = "rbxassetid://93384010922515", -- assets/ui/GateTundra.png
 			GateColor = Color3.fromRGB(70, 220, 255), -- cyan (QM)
-			UpgradeImage = "", -- assets/ui/UpgradePenTundra.png ($150k; Studio uploads it and fills the id. "" draws the price as text meanwhile)
-			UpgradeImageDisabled = "", -- assets/ui/UpgradePenTundraDisabled.png ($150k, likewise)
+			UpgradeImage = "rbxassetid://100202451134816", -- assets/ui/UpgradePenTundra.png ($150k; Studio uploads it and fills the id. "" draws the price as text meanwhile)
+			UpgradeImageDisabled = "rbxassetid://84089158899976", -- assets/ui/UpgradePenTundraDisabled.png ($150k, likewise)
 		},
 		{
 			Name = "Ocean",
@@ -149,8 +149,8 @@ return {
 			PostColor = Color3.fromRGB(236, 140, 124),
 			GateImage = "rbxassetid://75356296124042", -- assets/ui/GateOcean.png
 			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
-			UpgradeImage = "", -- assets/ui/UpgradePenOcean.png (QM's Oct 7 art, now $5m; Studio uploads it and fills the id. "" draws the price as text meanwhile)
-			UpgradeImageDisabled = "", -- assets/ui/UpgradePenOceanDisabled.png ($5m, likewise)
+			UpgradeImage = "rbxassetid://120593568705149", -- assets/ui/UpgradePenOcean.png (QM's Oct 7 art, now $5m; Studio uploads it and fills the id. "" draws the price as text meanwhile)
+			UpgradeImageDisabled = "rbxassetid://126023633689709", -- assets/ui/UpgradePenOceanDisabled.png ($5m, likewise)
 			-- Under the sea (Ocean.client): while you're in this biome the distance
 			-- fades into Haze.Color and bubbles drift up round the camera.
 			Haze = {
@@ -199,8 +199,8 @@ return {
 			PostColor = Color3.fromRGB(62, 60, 72),
 			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
 			GateImage = "rbxassetid://81079145393331", -- assets/ui/GateGodlands.png
-			UpgradeImage = "", -- assets/ui/UpgradePenGodlands.png ($150m; Studio uploads it and fills the id)
-			UpgradeImageDisabled = "", -- assets/ui/UpgradePenGodlandsDisabled.png ($150m, likewise)
+			UpgradeImage = "rbxassetid://138868721056257", -- assets/ui/UpgradePenGodlands.png ($150m; Studio uploads it and fills the id)
+			UpgradeImageDisabled = "rbxassetid://111144732532154", -- assets/ui/UpgradePenGodlandsDisabled.png ($150m, likewise)
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
