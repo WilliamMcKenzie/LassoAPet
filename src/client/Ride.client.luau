@@ -3868,7 +3868,9 @@ local function updateHud()
 	if phase == "outbound" then
 		Hud.setHold(if transfer and transfer.fill then transfer.fill else nil, false) -- HOLD ON!'s bar, only while it's on
 		Hud.setDistance(if Tutorial.active then "" else string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
-		if actionTarget == "egg" then
+		if transfer and transfer.fill then
+			Hud.setAction(nil) -- HOLD ON!'s button is in its place
+		elseif actionTarget == "egg" then
 			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
 		else
 			Hud.setAction("LASSO", actionTarget ~= nil)

@@ -1601,6 +1601,11 @@ function Hud.setNotice(text)
 	NOTICE.label.Text = text or ""
 end
 
+-- The ride's action button (LASSO / GRAB EGG): HOLD ON!'s takes its exact spot and size.
+function Hud.actionButton()
+	return action
+end
+
 -- Money as the HUD writes it: "$950", "$1.2k".
 Hud.money = money
 Hud.lassoIcon = IMAGES.lassoIcon.id -- (LassoLevel's tag)

@@ -17,6 +17,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local PlusPopup = require(script.Parent.PlusPopup)
+local Hud = require(script.Parent.Hud)
 
 local CURSOR = "rbxassetid://93240211999923" -- assets/ui/TutorialCursor.png (Tutorial's)
 local BUTTON_ASPECT = 960 / 435 -- assets/ui/HoldOn.png
@@ -33,23 +34,35 @@ local who -- the character the +1s pop over
 
 local function build()
 	local cfg = Config.HoldOn
-	gui = Instance.new("ScreenGui")
-	gui.Name = "HoldOn"
-	gui.ResetOnSpawn = false
-	gui.IgnoreGuiInset = true
-	gui.DisplayOrder = 5
-	gui.Enabled = false
+	-- It sits exactly where the ride's action button (GRAB EGG) does, the same size
+	-- (QM: 1:1), on the same screen; its own screen only if that isn't up yet.
+	local action = Hud.actionButton()
+	if not action then
+		gui = Instance.new("ScreenGui")
+		gui.Name = "HoldOn"
+		gui.ResetOnSpawn = false
+		gui.IgnoreGuiInset = true
+		gui.DisplayOrder = 5
+		gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+	end
 	button = Instance.new("ImageButton")
 	button.Name = "HoldOn"
 	button.BackgroundTransparency = 1
 	button.Image = cfg.Image
-	button.AnchorPoint = Vector2.new(0.5, 1)
-	button.Position = UDim2.new(0.5, 0, 1, -24)
-	button.Size = UDim2.fromScale(cfg.Width, cfg.Width / BUTTON_ASPECT)
-	button.SizeConstraint = Enum.SizeConstraint.RelativeXX
+	button.ScaleType = Enum.ScaleType.Fit
+	button.Visible = false
+	if action then
+		button.AnchorPoint, button.Position, button.Size = action.AnchorPoint, action.Position, action.Size
+		button.ZIndex = action.ZIndex + 1
+	else
+		button.AnchorPoint = Vector2.new(0.5, 1)
+		button.Position = UDim2.new(0.5, 0, 1, -24)
+		button.Size = UDim2.fromScale(cfg.Width, cfg.Width / BUTTON_ASPECT)
+		button.SizeConstraint = Enum.SizeConstraint.RelativeXX
+	end
 	buttonScale = Instance.new("UIScale")
 	buttonScale.Parent = button
-	button.Parent = gui
+	button.Parent = if action then action.Parent else gui
 	cursor = Instance.new("ImageLabel")
 	cursor.Name = "Cursor"
 	cursor.BackgroundTransparency = 1
@@ -57,15 +70,14 @@ local function build()
 	cursor.AnchorPoint = Vector2.new(29 / 256, 6 / 256) -- its tip (Tutorial's CURSOR_TIP)
 	cursor.Position = UDim2.fromScale(0.82, 0.55) -- on the button's right end
 	cursor.SizeConstraint = Enum.SizeConstraint.RelativeYY
-	cursor.Size = UDim2.fromScale(1.1, 1.1)
-	cursor.ZIndex = 2
+	cursor.Size = UDim2.fromScale(0.9, 0.9) -- (sized by the button: QM, scaled with it)
+	cursor.ZIndex = button.ZIndex + 1
 	cursorScale = Instance.new("UIScale")
 	cursorScale.Parent = cursor
 	cursor.Parent = button
 	button.Activated:Connect(function()
 		HoldOn.tap()
 	end)
-	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 end
 
 function HoldOn.tap()
@@ -76,16 +88,16 @@ function HoldOn.tap()
 	fill = math.min(fill + cfg.PerTap, 1)
 	lastTap = os.clock()
 	buttonScale.Scale = 0.92 -- a press, springing back in update
-	PlusPopup.at(who, 1, cfg.Arm)
+	PlusPopup.at(who, 1, cfg.Arm, PlusPopup.SCATTER) -- (scattered wide: QM, not clustered)
 end
 
 function HoldOn.start(character)
-	if not gui then
+	if not button or not button.Parent then
 		build()
 	end
 	who = character
 	active, fill, lastTap, started = true, Config.HoldOn.Start, -math.huge, os.clock()
-	gui.Enabled = true
+	button.Visible = true
 	-- Space / A tap it too, over the ability's Space while it's up.
 	ContextActionService:BindActionAtPriority(ACTION, function(_, state)
 		if state == Enum.UserInputState.Begin then
@@ -120,7 +132,7 @@ function HoldOn.stop()
 		return
 	end
 	active = false
-	gui.Enabled = false
+	button.Visible = false
 	ContextActionService:UnbindAction(ACTION)
 end
 

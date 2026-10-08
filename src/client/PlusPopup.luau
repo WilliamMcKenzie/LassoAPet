@@ -2,7 +2,9 @@
 -- a little off from the last one (QM, Oct 8, like a treadmill sim's steps): training's
 -- lasso catches (Training.client) and HOLD ON!'s taps (HoldOn) look exactly the same.
 --
---   PlusPopup.at(character, amount, icon) -- amount: a number ("+1", "+1k") or text
+--   PlusPopup.at(character, amount, icon, how) -- amount: a number ("+1", "+1k") or text
+--   how (optional): { spread = studs, tilt = degrees, size = { min, max } }, e.g.
+--   PlusPopup.SCATTER: wider, tilted and sized at random so quick ones don't cluster
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -13,13 +15,17 @@ local POP_TIME = 0.9
 
 local PlusPopup = {}
 
-function PlusPopup.at(char, amount, icon)
+PlusPopup.SCATTER = { spread = 4, tilt = 14, size = { 0.85, 1.15 } }
+
+function PlusPopup.at(char, amount, icon, how)
 	local head = char and char:FindFirstChild("Head")
 	if not head then
 		return
 	end
 	local rng = Random.new()
-	local from = Vector3.new(rng:NextNumber(-2.2, 2.2), rng:NextNumber(0.6, 1.6), 0)
+	local spread = if how then how.spread else 2.2
+	local from = Vector3.new(rng:NextNumber(-spread, spread), rng:NextNumber(0.6, 0.6 + spread * 0.45), 0)
+	local size = if how and how.size then rng:NextNumber(how.size[1], how.size[2]) else 1
 	local tag = Instance.new("BillboardGui")
 	tag.Size = UDim2.fromOffset(110, 40)
 	tag.AlwaysOnTop = true
@@ -63,7 +69,10 @@ function PlusPopup.at(char, amount, icon)
 		image.Parent = row
 	end
 	tag.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-	TweenService:Create(scale, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	if how and how.tilt then
+		row.Rotation = rng:NextNumber(-how.tilt, how.tilt)
+	end
+	TweenService:Create(scale, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = size }):Play()
 	local rise = TweenInfo.new(POP_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	TweenService:Create(tag, rise, { StudsOffset = from + Vector3.new(0, 2.5, 0) }):Play()
 	local fade = TweenInfo.new(POP_TIME * 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, POP_TIME * 0.5)
