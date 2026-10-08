@@ -4241,10 +4241,13 @@ RunService.PreSimulation:Connect(function(dt)
 	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)
 	if phase == "idle" then
 		vfx.updateHomeGuide() -- (to the pet in your pen after a ride; else hidden)
-		-- On foot on the course, a stampede animal running you down throws you
+		-- On foot out on the course, a stampede animal running you down throws you
 		-- like being bucked off (no cash on the fail screen: there was no ride).
+		-- Never at the start line (QM, Oct 8): walking up to it is how you start a
+		-- ride (WalkLimit holds you there), so only 8+ studs past it, where no
+		-- animal at the line reaches.
 		local hrp, humanoid = character()
-		if hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z + 2 and not Tutorial.active then
+		if hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z - 8 and not Tutorial.active then
 			for _, entity in allAnimals() do
 				if not entity.popping and math.abs(entity.x - hrp.Position.X) < 2.6 and math.abs(entity.z - hrp.Position.Z) < 4 then
 					clearRideTarget()
