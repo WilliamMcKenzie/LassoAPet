@@ -248,6 +248,7 @@ passLayout.SortOrder = Enum.SortOrder.LayoutOrder
 passLayout.Padding = UDim.new(0, GAP)
 passLayout.Parent = passRow
 passRow.Parent = grid
+passRow.Visible = false -- (QM, Oct 8: nothing under the panel; the passes still sell through PassPopups)
 
 local function outlined(label)
 	label.BackgroundTransparency = 1
@@ -326,7 +327,7 @@ backdrop.Size = UDim2.fromScale(1, 1)
 backdrop.ZIndex = 0
 backdrop.Activated:Connect(function(input)
 	local at = Vector2.new(input.Position.X, input.Position.Y)
-	if not over(panel, at) and not over(passRow, at) then
+	if not over(panel, at) and not (passRow.Visible and over(passRow, at)) then
 		Shop.close()
 	end
 end)
