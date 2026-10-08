@@ -1,5 +1,5 @@
 -- Lasso training (Config.Training; the dummy and the throws are Training.client):
--- each catch the client reports (TrainLasso) adds PerCatch to the player's "Lasso"
+-- each catch the client reports (TrainLasso) adds TrainingSpot.perCatch (x10 per pen level) to the player's "Lasso"
 -- attribute, their lasso strength, which Gold.server saves with their gold. Only
 -- counted from near their own pen's dummy (TrainingSpot), and no faster than the
 -- throw itself takes.
@@ -34,7 +34,7 @@ trainLasso.OnServerEvent:Connect(function(player)
 		return
 	end
 	last[player] = now
-	player:SetAttribute("Lasso", (player:GetAttribute("Lasso") or 0) + training.PerCatch)
+	player:SetAttribute("Lasso", (player:GetAttribute("Lasso") or 0) + TrainingSpot.perCatch(player:GetAttribute("PenLevel")))
 end)
 
 Players.PlayerRemoving:Connect(function(player)

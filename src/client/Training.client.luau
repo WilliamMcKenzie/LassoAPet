@@ -205,7 +205,8 @@ end
 
 -- "+1" with the lasso icon popping out beside your head on each catch (QM, Oct 8, like
 -- a treadmill sim's steps): floats up and fades, a little off from the last one.
-local LASSO_ICON = require(script.Parent.Hud).lassoIcon
+local Hud = require(script.Parent.Hud)
+local LASSO_ICON = Hud.lassoIcon
 local POP_TIME = 0.9
 local function popCatch(char, amount)
 	local head = char:FindFirstChild("Head")
@@ -241,7 +242,7 @@ local function popCatch(char, amount)
 	text.Font = Enum.Font.FredokaOne
 	text.TextSize = 30
 	text.TextColor3 = Color3.new(1, 1, 1)
-	text.Text = "+" .. amount
+	text.Text = "+" .. (Hud.money(amount):gsub("%$", ""))
 	local stroke = Instance.new("UIStroke")
 	stroke.Thickness = 3
 	stroke.LineJoinMode = Enum.LineJoinMode.Round
@@ -368,7 +369,7 @@ RunService.PreSimulation:Connect(function(dt)
 			dummy.hitT = 0
 		end
 		trainLasso:FireServer()
-		popCatch(character, training.PerCatch)
+		popCatch(character, TrainingSpot.perCatch(player:GetAttribute("PenLevel")))
 	end
 	if t >= CYCLE then
 		t, counted = t % CYCLE, false

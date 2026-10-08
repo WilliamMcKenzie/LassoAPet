@@ -9,6 +9,7 @@
 -- out: studs from the pen's open side to the dummy's pole (default Config.Training.Out);
 -- along: from the pole to the chair (default Config.Training.Chair). Training.client
 -- sizes both to its biome's dummy.
+--   TrainingSpot.perCatch(penLevel) -- lasso strength one catch gives (Config.Training)
 --   TrainingSpot.speed(lasso) -- how many times quicker this lasso strength throws
 
 local Config = require(script.Parent.Config)
@@ -51,6 +52,11 @@ function TrainingSpot.chair(pen, out, along)
 	end
 	local at = spot.Position - OPEN[pen.Name].side * (along or Config.Training.Chair)
 	return CFrame.lookAt(at, spot.Position)
+end
+
+function TrainingSpot.perCatch(penLevel)
+	local training = Config.Training
+	return training.PerCatch * training.PerLevel ^ (math.max(penLevel or 1, 1) - 1)
 end
 
 function TrainingSpot.speed(lasso)
