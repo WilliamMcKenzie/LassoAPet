@@ -4036,7 +4036,6 @@ function vfx.endRider(player)
 		return
 	end
 	vfx.riders[player] = nil
-	vfx.lassoLevel.setOther(player, nil)
 	vfx.dropMount(rider)
 	vfx.riderLasso(rider, nil)
 	local hrp = rider.char and rider.char:FindFirstChild("HumanoidRootPart")
@@ -4298,7 +4297,6 @@ function vfx.updateRiders(dt)
 			rider.char = char
 		end
 		rider.player = player
-		vfx.lassoLevel.setOther(player, if rider.lassoState == "swing" then char else nil) -- (their level over their head, riding out)
 		local hrp = char and char:FindFirstChild("HumanoidRootPart")
 		if entity then
 			local root = entity.animal.model.PrimaryPart

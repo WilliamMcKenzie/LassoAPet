@@ -130,9 +130,9 @@ function LassoLevel.setSelf(character)
 	end
 end
 
--- Other riders' lasso levels over their heads, the same green tag, while they ride out
--- (Ride's vfx.updateRiders: only while their lasso swings, so not hanging on or with an
--- egg). Their "Lasso" attribute comes from the server, so nothing more is sent.
+-- Other players' lasso levels over their heads, the same green tag, always (QM, Oct 8).
+-- Their "Lasso" attribute comes from the server, so nothing more is sent. (Not touched
+-- during your own HOLD ON! struggle: Hud.setStruggle has every tag off then.)
 local otherTags = {} -- [player] = { tag, number }
 function LassoLevel.setOther(p, character)
 	local head = character and character:FindFirstChild("Head")
@@ -156,5 +156,21 @@ function LassoLevel.setOther(p, character)
 	o.tag.Adornee = head
 	o.number.Text = (Hud.money(p:GetAttribute("Lasso") or 0):gsub("%$", ""))
 end
+
+local nextLook = 0
+game:GetService("RunService").Heartbeat:Connect(function()
+	if os.clock() < nextLook or Hud.struggling then
+		return
+	end
+	nextLook = os.clock() + 0.25
+	for _, p in Players:GetPlayers() do
+		if p ~= Players.LocalPlayer then
+			LassoLevel.setOther(p, p.Character)
+		end
+	end
+end)
+Players.PlayerRemoving:Connect(function(p)
+	LassoLevel.setOther(p, nil)
+end)
 
 return LassoLevel

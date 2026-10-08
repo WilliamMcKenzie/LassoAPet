@@ -1799,11 +1799,13 @@ function Hud.setStruggle(on)
 		end
 		holdFrame.Parent = struggleRoot
 		struggleGui.Enabled = true
+		Hud.struggling = true
 		local run = {}
 		struggleRun = run
 		task.spawn(runStruggle, run)
 	else
 		struggleRun = nil
+		Hud.struggling = nil
 		if struggleCursor then
 			struggleCursor.Visible = false
 		end
