@@ -6,8 +6,8 @@
 --
 -- Every pen has its own dummy (Design's, one per biome: Props/TrainingByBiome) by its
 -- front corner, facing out (TrainingSpot), and a chair beside it; you train at
--- your own pen's (your "Pen" attribute): walk up and you sit in the chair and lasso
--- from it. Jump off and you stand until you've walked away and come back. Each
+-- your own pen's (your "Pen" attribute): step onto the chair and you sit and lasso
+-- from it. Jump off and you can sit again once you've stepped off it. Each
 -- plays its idle, and yours its hit on each catch. Built on each client like the
 -- podium snake, so they can animate (Motor6D.Transform doesn't replicate). The lasso
 -- is its own copy of the rider's (Lasso holds one character).
@@ -226,7 +226,8 @@ local counted = false
 local sitWeld -- you, welded into your chair
 local sitSeat -- the chair's seat you sat down in
 local lassoLevel -- the pen level whose lasso you're throwing (LassoTiers)
-local stoodUp = false -- jumped out of the chair: no sitting again till you've walked off
+local stoodUp = false -- jumped out of the chair: no sitting again till you've stepped off it
+local CHAIR_REACH = 2.5 -- studs from the seat's middle (flat) that count as stepping onto the chair
 
 -- Near your dummy, on foot (not riding: Ride anchors you), alive, not in the tutorial.
 local function near(dummy)
@@ -304,7 +305,15 @@ RunService.PreSimulation:Connect(function(dt)
 			stoodUp = char ~= nil
 		end
 	end
-	if not char then
+	-- The chair is the trigger (QM, Oct 8: it used to be the whole area round the dummy,
+	-- and jumping out left you inside it, so you had to walk off and back): step onto it
+	-- and you sit; jump off and you can sit again as soon as you've stepped off it.
+	local onChair = false
+	if char and dummy.seat then
+		local d = (char.HumanoidRootPart.Position - dummy.seat.Position) * Vector3.new(1, 0, 1)
+		onChair = d.Magnitude <= CHAIR_REACH
+	end
+	if not onChair then
 		stoodUp = false
 	elseif not sitWeld and not stoodUp then
 		sitDown(char, dummy)
