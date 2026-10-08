@@ -580,7 +580,7 @@ return {
 		-- QM's "TAP!" while you struggle (Hud.setStruggle): its centre At (of the screen),
 		-- Width (of the screen's width), its art's Aspect, tilted Rotation degrees,
 		-- pulsing Pulse either way.
-		Tap = { Image = "", At = Vector2.new(0.79, 0.36), Width = 0.14, Aspect = 150 / 95, Rotation = 15, Pulse = 0.12 },
+		Tap = { Image = "rbxassetid://94705725691297", At = Vector2.new(0.79, 0.36), Width = 0.15, Aspect = 188 / 72, Rotation = 20, Pulse = 0.12 }, -- assets/ui/Tap.png
 	},
 	-- Lassoing an animal while riding (QM, Oct 8: the new lasso, phase 1): once the loop's
 	-- round its neck you hang off the rope behind it (HOLD ON!, Config.HoldOn, decides
