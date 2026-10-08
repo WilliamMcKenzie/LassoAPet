@@ -15,6 +15,14 @@ local POP_TIME = 0.9
 
 local PlusPopup = {}
 
+-- Each popup a hair nearer the camera than the one before (its StudsOffset's Z, in the
+-- camera's frame), so two overlapping never z-fight: the newer one draws on top, whole.
+local depth = 0
+local function nextDepth()
+	depth = (depth + 1) % 400
+	return depth * 0.005
+end
+
 PlusPopup.SCATTER = { spread = 4, tilt = 14, size = { 0.85, 1.15 } }
 -- Each from its own spot round the head, flying off outwards in a random direction
 -- (not just up), a little tilted and sized at random (QM, Oct 8: training's, so they
@@ -27,6 +35,7 @@ function PlusPopup.at(char, amount, icon, how)
 		return
 	end
 	local rng = Random.new()
+	local z = nextDepth()
 	local spread = if how and how.spread then how.spread else 2.2
 	local from = Vector3.new(rng:NextNumber(-spread, spread), rng:NextNumber(0.6, 0.6 + spread * 0.45), 0)
 	local rise = Vector3.new(0, 2.5, 0)
@@ -42,6 +51,7 @@ function PlusPopup.at(char, amount, icon, how)
 	tag.AlwaysOnTop = true
 	tag.LightInfluence = 0
 	tag.Adornee = head
+	from += Vector3.new(0, 0, z)
 	tag.StudsOffset = from
 	local scale = Instance.new("UIScale")
 	scale.Scale = 0.4

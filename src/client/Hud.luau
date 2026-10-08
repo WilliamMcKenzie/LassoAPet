@@ -1879,6 +1879,7 @@ end
 
 -- The same popup in the world: "+N$" over `part`, `height` studs above its
 -- centre, following it as it moves and rising a few studs as it fades.
+local coinDepth = 0
 function Hud.coinPopupAt(part, height, amount)
 	if not homeGui or not homeGui.Parent then
 		return -- (a payout just after joining, before Hud.init has built the HUD)
@@ -1887,6 +1888,8 @@ function Hud.coinPopupAt(part, height, amount)
 	board.Size = UDim2.fromOffset(200, 80)
 	board.Adornee = part
 	board.StudsOffsetWorldSpace = Vector3.new(0, height, 0)
+	coinDepth = (coinDepth + 1) % 400
+	board.StudsOffset = Vector3.new(0, 0, coinDepth * 0.005) -- (each a hair nearer the camera: overlapping ones don't z-fight)
 	board.LightInfluence = 0
 	board.AlwaysOnTop = true
 	board.MaxDistance = 150
