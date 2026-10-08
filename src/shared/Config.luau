@@ -757,7 +757,12 @@ return {
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
 	-- view (up to MaxFov) grow from Start studs/s. Each part off with On = false.
 	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)
-	SpeedFeel = { On = true, Start = 44, Scale = 200, Lines = 28, Opacity = 0.6, LineSpeed = 2.2, FovKick = 18, MaxFov = 110 },
+	-- Speed lines and a wider view (SpeedFx), only while sprinting (QM, Oct 8: none
+	-- otherwise, and a lot more of them): at Min strength on the slowest sprint, rising
+	-- with speed as (speed / Ref) ^ Curve (a square root: quick to build, gentle at the
+	-- top) to full at Ref studs/s and over. Lines, their Opacity and LineSpeed, and
+	-- FovKick degrees wider (up to MaxFov), all at full strength.
+	SpeedFeel = { On = true, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
 	LassoRange = 34,
 	EggSlowMo = 0.5, -- time scale during the egg-grab close-up
 	-- Coming home with an egg: the pet leaps over the start line in slow motion while
