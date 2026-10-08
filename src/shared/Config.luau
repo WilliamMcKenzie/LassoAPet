@@ -576,11 +576,11 @@ return {
 		Pull = 0.5, -- cinching on it (the catch counts here),
 		Rest = 0.35, -- and slack before the next
 		-- The stronger your lasso, the faster you lasso (QM, Oct 8): all of the above
-		-- runs SpeedPerDecade quicker per x10 of lasso strength, up to MaxSpeed
+		-- runs SpeedPerDecade quicker per x10 of lasso strength, with no cap (QM)
 		-- (TrainingSpot.speed). It ramps up quick (QM: level 100 is 3x level 1):
-		-- 1 -> x1 (2.4 s a catch), 10 -> x2 (1.2 s), 100 -> x3 (0.8 s), 1k+ -> x4 (0.6 s).
+		-- 1 -> x1 (2.4 s a catch), 10 -> x2 (1.2 s), 100 -> x3 (0.8 s), 1M -> x7
+		-- (0.34 s), 10B -> x11 (0.22 s).
 		SpeedPerDecade = 1,
-		MaxSpeed = 4,
 	},
 	-- Recommended lasso level for each animal, shown over the one you'd lasso as you
 	-- ride (LassoLevel.luau). PLACEHOLDERS until Game design sets them (QM, Oct 8): each

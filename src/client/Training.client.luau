@@ -214,6 +214,7 @@ end
 
 -- Training ----------------------------------------------------------------------
 local CYCLE = training.Swing + training.Throw + training.Pull + training.Rest
+local CATCH_AT = training.Swing + training.Throw + training.Pull * 0.35 -- the loop's cinched on its neck
 local character -- the character the lasso's started on, while training
 local t = 0 -- seconds into this catch
 local counted = false
@@ -302,9 +303,19 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	local target = { cframe = dummy.place * CFrame.new(neck.center), radius = neck.radius }
 	dt *= TrainingSpot.speed(player:GetAttribute("Lasso")) -- stronger, quicker (the swing spins faster too)
+	-- The catch counts once the loop's cinched (CATCH_AT into the cycle), even if a
+	-- long frame at a high speed steps right over the pull.
 	t += dt
+	if not counted and t >= CATCH_AT then
+		counted = true
+		if dummy.hitT > 0.3 then -- (at high speeds the hit isn't restarted every catch: it'd only judder)
+			dummy.hitT = 0
+		end
+		trainLasso:FireServer()
+		popCatch(character, training.PerCatch)
+	end
 	if t >= CYCLE then
-		t, counted = t - CYCLE, false
+		t, counted = t % CYCLE, false
 	end
 	if t < training.Swing then
 		Lasso.swing(dt)
@@ -313,12 +324,6 @@ RunService.PreSimulation:Connect(function(dt)
 	elseif t < training.Swing + training.Throw + training.Pull then
 		local k = (t - training.Swing - training.Throw) / training.Pull
 		Lasso.pull(k, target)
-		if not counted and k > 0.35 then -- cinched: that's a catch
-			counted = true
-			dummy.hitT = 0
-			trainLasso:FireServer()
-			popCatch(character, training.PerCatch)
-		end
 	else
 		Lasso.hide()
 	end

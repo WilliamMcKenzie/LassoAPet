@@ -52,7 +52,7 @@ end
 
 function TrainingSpot.speed(lasso)
 	local training = Config.Training
-	return math.min(1 + training.SpeedPerDecade * math.log10(math.max(lasso or 0, 1)), training.MaxSpeed)
+	return 1 + training.SpeedPerDecade * math.log10(math.max(lasso or 0, 1))
 end
 
 return TrainingSpot
