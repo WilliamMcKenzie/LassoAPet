@@ -1190,7 +1190,7 @@ task.spawn(function()
 			local earned = if player:GetAttribute("Tutorial") then 0 else income(profile) * goldX(player) -- (nothing till the tutorial's done)
 			if earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
-				paid:FireClient(player)
+				paid:FireClient(player, earned) -- (the HUD shows it by the gold counter)
 			end
 		end
 	end
