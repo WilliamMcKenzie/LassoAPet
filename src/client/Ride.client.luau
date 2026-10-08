@@ -948,7 +948,7 @@ startRide = function(model, at)
 	focus = Vector3.new(mount.x, 0, mount.z)
 	Hud.show(true)
 	Hud.setDistance("")
-	Lasso.start(player.Character)
+	Lasso.start(player.Character, nil, player:GetAttribute("PenLevel") or 1) -- (your pen level's lasso: LassoTiers)
 end
 
 -- Walking over the start line on foot (WalkLimit.client): you're on a random
@@ -1009,7 +1009,7 @@ ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, ki
 	focus = Vector3.new(mount.x, 0, mount.z)
 	Hud.show(true)
 	Hud.setDistance("")
-	Lasso.start(player.Character)
+	Lasso.start(player.Character, nil, player:GetAttribute("PenLevel") or 1) -- (your pen level's lasso: LassoTiers)
 end)
 
 -- Back on foot at home: however the ride ended (egg home, Home from the fail screen,
@@ -3741,7 +3741,7 @@ local function updateRider(dt)
 			if not easy and (Config.LassoHang.Duration > 0 or not Tutorial.active) then
 				-- Yanked off: hang from the rope round its neck first (QM, Oct 8).
 				transfer.stage = "hang"
-				transfer.hang = vfx.ropeHang.start(hrp.Position, hrp.Parent)
+				transfer.hang = vfx.ropeHang.start(hrp.Position, hrp.Parent, Lasso.tier())
 				if not Tutorial.active then -- (the tutorial just hangs a moment: Duration)
 					transfer.fill = Config.HoldOn.Start
 					vfx.holdOn.start(hrp.Parent, player:GetAttribute("Lasso"), its)
@@ -4024,7 +4024,7 @@ function vfx.riderLasso(rider, char)
 		module.Name = "RiderLasso"
 		module.Parent = script
 		rider.lasso = { module = module, Lasso = require(module) }
-		rider.lasso.Lasso.start(char)
+		rider.lasso.Lasso.start(char, nil, rider.player and rider.player:GetAttribute("PenLevel") or 1)
 	end
 	return rider.lasso
 end
@@ -4807,7 +4807,7 @@ ReplicatedStorage:WaitForChild("ShopGrant").OnClientEvent:Connect(function(key)
 	focus = Vector3.new(mount.x, 0, mount.z)
 	Hud.show(true)
 	Hud.setDistance("")
-	Lasso.start(player.Character)
+	Lasso.start(player.Character, nil, player:GetAttribute("PenLevel") or 1) -- (your pen level's lasso: LassoTiers)
 	vfx.startNuke()
 end)
 

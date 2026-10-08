@@ -17,6 +17,7 @@
 --   RopeHang.stop(hang)                              -- limbs back, rope gone
 
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
+local LassoTiers = require(script.Parent.LassoTiers)
 
 local ROPE_COLOR = Color3.fromRGB(222, 184, 120) -- Lasso's
 local ROPE_WIDTH = 0.28
@@ -33,7 +34,7 @@ local function joints(character)
 	return found
 end
 
-function RopeHang.start(from, character)
+function RopeHang.start(from, character, tier)
 	local cfg = Config.LassoHang
 	local anchor = Instance.new("Part")
 	anchor.Name = "HangRope"
@@ -50,8 +51,12 @@ function RopeHang.start(from, character)
 		if i > 0 then
 			local b = Instance.new("Beam")
 			b.Attachment0, b.Attachment1 = points[i - 1], a
-			b.Width0, b.Width1 = ROPE_WIDTH, ROPE_WIDTH
-			b.Color = ColorSequence.new(ROPE_COLOR)
+			local width = ROPE_WIDTH * (if tier then tier.rope.width else 1)
+			b.Width0, b.Width1 = width, width
+			b.Color = if tier then LassoTiers.ropeColor(tier, i, cfg.Segments, 0) else ColorSequence.new(ROPE_COLOR)
+			if tier then
+				b.LightEmission, b.LightInfluence = tier.rope.glow, 1 - tier.rope.glow
+			end
 			b.Transparency = NumberSequence.new(0)
 			b.FaceCamera = true
 			b.Segments = 1
@@ -68,6 +73,8 @@ function RopeHang.start(from, character)
 		seed = math.random() * 100,
 		anchor = anchor,
 		points = points,
+		tier = tier, -- (the lasso's: LassoTiers; a rainbow one keeps turning)
+		beams = beams,
 	}
 end
 
@@ -147,6 +154,11 @@ function RopeHang.pose(hang)
 		local u = i / cfg.Segments
 		-- (your hand's already swung out: the wave on top of the straight line to it)
 		a.WorldPosition = from:Lerp(to, u) + hang.side * (offset(hang, u * length, hang.t) - u * endSwing)
+	end
+	if hang.tier and hang.tier.rope.rainbow then
+		for i, b in hang.beams do
+			b.Color = LassoTiers.ropeColor(hang.tier, i, cfg.Segments, os.clock())
+		end
 	end
 end
 

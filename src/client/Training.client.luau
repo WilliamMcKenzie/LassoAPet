@@ -298,7 +298,7 @@ RunService.PreSimulation:Connect(function(dt)
 		stop()
 		if char then
 			character = char
-			Lasso.start(char, 1)
+			Lasso.start(char, 1, player:GetAttribute("PenLevel") or 1) -- (your pen level's lasso: LassoTiers)
 			t, counted, whooshed = 0, false, false
 		end
 	end

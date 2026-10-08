@@ -4,7 +4,7 @@
 -- from PreSimulation, which runs after the Animator), and the rope is a ring of
 -- beams plus one beam from the hand to the loop's knot.
 --
---   Lasso.start(character)
+--   Lasso.start(character, scale, tier) -- tier: LassoTiers' (your pen level's: QM, Oct 8), plain if nil
 --   Lasso.swing(dt)                     -- loop spinning over the head
 --   Lasso.throw(k, neck)                -- k 0..1: loop flies out and opens over the neck
 --   Lasso.pull(k, neck, noRope)         -- k 0..1: loop cinches on the neck, rope taut (noRope: just the loop)
@@ -17,6 +17,9 @@
 -- neck = { cframe = neck part CFrame (Y along the neck), radius = cinched loop radius }
 
 local Lasso = {}
+
+-- (from the Client folder by name: Training and the podium run copies of this module)
+local LassoTiers = require(game:GetService("Players").LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("Client"):WaitForChild("LassoTiers"))
 
 local POINTS = 16
 local ROPE_COLOR = Color3.fromRGB(222, 184, 120)
@@ -31,6 +34,9 @@ local TWIRL_HEIGHT = 1.6 -- above the hand
 local TWIRL_FIT = 2.5 -- loop radius (Lasso.fitRadius) an egg can have before it's swung further out
 
 local folder, anchor, points, knot, hand, handRope, loopBeams
+local tier -- LassoTiers' (the rope's look, sparkles, trail and burst)
+local sparkles, trail, burst = {}, nil, nil
+local burstDone, lastPull = false, math.huge
 local shoulder
 local spin = 0
 local ropeScale = 1
@@ -52,6 +58,52 @@ local function setVisible(visible)
 		b.Enabled = visible
 	end
 	handRope.Enabled = visible
+	for _, e in sparkles do
+		e.Enabled = visible
+	end
+end
+
+-- The tier's rope: colour (a rainbow turns), glow and width.
+local function paintRope()
+	if not tier then
+		return
+	end
+	local t = os.clock()
+	local width = ROPE_WIDTH * ropeScale * tier.rope.width
+	for i, b in loopBeams do
+		if tier.rope.rainbow or i == 1 then
+			b.Color = LassoTiers.ropeColor(tier, i, POINTS, t)
+		else
+			b.Color = loopBeams[1].Color
+		end
+		b.LightEmission, b.LightInfluence = tier.rope.glow, 1 - tier.rope.glow
+		b.Width0, b.Width1 = width, width
+	end
+	handRope.Color = LassoTiers.ropeColor(tier, 0, POINTS, t)
+	handRope.LightEmission, handRope.LightInfluence = tier.rope.glow, 1 - tier.rope.glow
+	handRope.Width0, handRope.Width1 = width, width
+end
+
+-- Sparkles on four points round the loop, the trail and the burst on its knot.
+local function dressUp()
+	sparkles, trail, burst = {}, nil, nil
+	if not tier then
+		return
+	end
+	if tier.sparkle then
+		for i = 1, POINTS, POINTS // 4 do
+			table.insert(sparkles, LassoTiers.emitter(tier.sparkle, points[i]))
+		end
+	end
+	if tier.trail then
+		trail = LassoTiers.emitter(tier.trail, knot)
+		trail.Enabled = false
+	end
+	if tier.burst then
+		burst = LassoTiers.emitter(tier.burst, knot)
+		burst.Rate = 0
+	end
+	paintRope()
 end
 
 -- Loop of the given radius around center, in the plane with the given normal.
@@ -79,8 +131,9 @@ local function poseArm(raise, roll)
 	end
 end
 
-function Lasso.start(character, scale)
+function Lasso.start(character, scale, level)
 	Lasso.stop()
+	tier = if level then LassoTiers.get(level) else nil
 	ropeScale = scale or 1
 	spin = 0
 	folder = Instance.new("Folder")
@@ -111,6 +164,7 @@ function Lasso.start(character, scale)
 	handRope.Segments = 10
 	folder.Parent = workspace
 
+	dressUp()
 	local arm = character:FindFirstChild("RightUpperArm") or character:FindFirstChild("Torso")
 	shoulder = arm and (arm:FindFirstChild("RightShoulder") or arm:FindFirstChild("Right Shoulder"))
 	setVisible(false)
@@ -127,6 +181,12 @@ function Lasso.swing(dt, height)
 	drawLoop(head + Vector3.new(0, height or 1.2 * ropeScale, 0), tilt, SWING_RADIUS * ropeScale, spin)
 	handRope.CurveSize0, handRope.CurveSize1 = 0, 0
 	setVisible(true)
+	if trail then
+		trail.Enabled = false
+	end
+	if tier and tier.rope.rainbow then
+		paintRope()
+	end
 end
 
 function Lasso.throw(k, neck)
@@ -143,6 +203,12 @@ function Lasso.throw(k, neck)
 	drawLoop(center, normal, SWING_RADIUS + (OPEN_RADIUS - SWING_RADIUS) * eased, 0, hand.WorldPosition - center)
 	handRope.CurveSize0 = 2 * (1 - k)
 	setVisible(true)
+	if trail then
+		trail.Enabled = k < 0.98 -- (a trail behind the flying loop)
+	end
+	if tier and tier.rope.rainbow then
+		paintRope()
+	end
 end
 
 function Lasso.pull(k, neck, noRope)
@@ -158,6 +224,21 @@ function Lasso.pull(k, neck, noRope)
 	setVisible(true)
 	if noRope then
 		handRope.Enabled = false
+	end
+	if trail then
+		trail.Enabled = false
+	end
+	-- The burst where it lands: once a pull, as it cinches.
+	if k < lastPull then
+		burstDone = false
+	end
+	lastPull = k
+	if burst and not burstDone and k >= CINCH_TIME then
+		burstDone = true
+		burst:Emit(tier.burst.count)
+	end
+	if tier and tier.rope.rainbow then
+		paintRope()
 	end
 end
 
@@ -187,11 +268,22 @@ function Lasso.twirl(dt, object)
 	drawLoop(cframe.Position, cframe.UpVector, Lasso.fitRadius(object), 0, hand.WorldPosition - cframe.Position)
 	handRope.CurveSize0, handRope.CurveSize1 = 0, 0
 	setVisible(true)
+	if trail then
+		trail.Enabled = false
+	end
+end
+
+-- The current tier (LassoTiers'), for the HOLD ON! rope (RopeHang) to match.
+function Lasso.tier()
+	return tier
 end
 
 function Lasso.hide()
 	if folder then
 		setVisible(false)
+		if trail then
+			trail.Enabled = false
+		end
 		poseArm(0)
 	end
 end
