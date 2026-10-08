@@ -63,7 +63,10 @@ function HoldOn.start(character, yours, its, cantLose)
 		end
 		return Enum.ContextActionResult.Sink
 	end, false, Enum.ContextActionPriority.High.Value + 10, Enum.UserInputType.MouseButton1, Enum.UserInputType.Touch,
-		Enum.KeyCode.Space, Enum.KeyCode.E, Enum.KeyCode.ButtonA) -- (E too, QM; over the lasso's E while it's on)
+		Enum.KeyCode.Space, Enum.KeyCode.E, -- (E too, QM; over the lasso's E while it's on)
+		-- and every controller button mashes (QM, Oct 8), none doing its usual job meanwhile
+		Enum.KeyCode.ButtonA, Enum.KeyCode.ButtonB, Enum.KeyCode.ButtonX, Enum.KeyCode.ButtonY,
+		Enum.KeyCode.ButtonL1, Enum.KeyCode.ButtonR1, Enum.KeyCode.ButtonL2, Enum.KeyCode.ButtonR2)
 end
 
 function HoldOn.update(dt)
