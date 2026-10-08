@@ -15,7 +15,11 @@
 -- their rolled eggs. An animal that runs in no biome (the events' exclusives) gives
 -- its egg everywhere: finding and riding one is the hard part.
 --
---   NestOdds.roll(nest, seed)  -- the animal whose egg `nest` holds for the rider with `seed` ("" if its biome has no odds)
+-- The rolled eggs are only ever Common or Uncommon (QM, Oct 8): Rare, Epic and Legendary
+-- eggs come only from riding the animal itself in its own biome (NestOdds.ridden). A
+-- biome with no low ones (the Godlands) rolls the nearest earlier biome's.
+--
+--   NestOdds.roll(nest, seed)  -- the animal whose egg `nest` holds for the rider with `seed` ("" if there are no odds)
 --   NestOdds.ridden(kind, z)   -- the egg a nest at `z` gives a rider on wild animal `kind` in place of its roll: `kind`, or nil (the roll)
 
 local Config = require(script.Parent.Config)
@@ -63,6 +67,24 @@ end
 
 local NestOdds = {}
 
+-- Per biome: its Common and Uncommon eggs (weight > 0), else the nearest earlier biome's.
+local lowOdds = {}
+for b in Config.Biomes do
+	for from = b, 1, -1 do
+		local low = {}
+		for _, o in eggOdds[from] or {} do
+			if not o.rare and o.weight > 0 then
+				table.insert(low, o)
+			end
+		end
+		if #low > 0 then
+			lowOdds[b] = low
+			break
+		end
+	end
+end
+local _ = rollDeep -- (the Godlands' deep odds: unused while rolls are low only)
+
 function NestOdds.roll(nest, seed)
 	local spot = nest:FindFirstChild("EggSpot")
 	if not spot then
@@ -73,11 +95,7 @@ function NestOdds.roll(nest, seed)
 	-- alike); the nest's spot tells the nests apart (they're all named Nest).
 	local r = Random.new(seed * 65536 + math.round(at.Z) * 64 + math.round(at.X))
 	local b = WorldColors.biomeAt(at.Z)
-	local nd = Config.Biomes[b] and Config.Biomes[b].NestDepth
-	if nd and Godlands.start then
-		return rollDeep(r, math.max(Godlands.start - at.Z, 0), nd)
-	end
-	local odds = eggOdds[b] or {}
+	local odds = lowOdds[b] or {} -- (Common and Uncommon only: QM, Oct 8)
 	local depth = Config.NestDepthOdds
 	local boost = if depth and Config.Biomes[b] then depth.Near + (depth.Far - depth.Near) * WorldColors.along(b, at.Z) else 1
 	local total = 0
