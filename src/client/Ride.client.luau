@@ -1381,7 +1381,7 @@ local function findTarget()
 		if picked.nest and eggInRange(picked) then
 			nearEgg = picked
 			return "egg"
-		elseif not picked.nest and table.find(allAnimals(), picked) and animalInRange(picked) then
+		elseif not picked.nest and not Tutorial.noLasso() and table.find(allAnimals(), picked) and animalInRange(picked) then
 			return picked
 		end
 		picked = nil
@@ -1391,6 +1391,9 @@ local function findTarget()
 			nearEgg = waiting
 			return "egg"
 		end
+	end
+	if Tutorial.noLasso() then
+		return nil -- (the tutorial's ride, lassoed once: just the egg now)
 	end
 	local best, bestScore = nil, math.huge
 	for _, entity in allAnimals() do
@@ -3929,8 +3932,8 @@ local function updateHud()
 	if phase == "outbound" then
 		Hud.setHold(if transfer and transfer.fill then transfer.fill else nil, false) -- HOLD ON!'s bar, only while it's on
 		Hud.setDistance(if Tutorial.active then "" else string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
-		if transfer and transfer.fill then
-			Hud.setAction(nil) -- HOLD ON!'s button is in its place
+		if (transfer and transfer.fill) or (Tutorial.noLasso() and actionTarget ~= "egg") then
+			Hud.setAction(nil) -- (HOLD ON!'s on; or the tutorial's after its lasso, when only TAKE EGG shows)
 		elseif actionTarget == "egg" then
 			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
 		else

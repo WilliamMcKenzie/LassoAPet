@@ -550,6 +550,12 @@ function Tutorial.update(state)
 	pointTo(target)
 end
 
+-- After the first lasso, the tutorial's ride is just the egg (QM, Oct 8: LASSO kept
+-- covering TAKE EGG): no animal to lasso, no LASSO button, till the next ride after it.
+function Tutorial.noLasso()
+	return Tutorial.active and (step == "egg" or step == "take" or step == "home")
+end
+
 -- The lasso's struggle has begun (Ride), for the analytics funnel.
 function Tutorial.struggled()
 	if Tutorial.active then
