@@ -563,10 +563,9 @@ return {
 	-- PodiumSnake.client), in the base's right front corner, their username and best
 	-- distance over their head (QM, Oct 5).
 	-- HOLD ON! (QM, Oct 8: the new core loop; HoldOn.luau): hanging off the rope after
-	-- lassoing, tap the button (or Space / A) to fill the top bar, which drains all the
-	-- while. Full: you hop on. Empty: BUCKED OFF!. Start: the bar's fill to begin with;
-	-- PerTap/DrawTaps/MaxTap: how much a tap fills and how fast it drains (below). CursorAfter: seconds without a tap before the pulsing
-	-- cursor comes back. Width: the button's share of the screen's width.
+	-- lassoing, tap anywhere (or Space / A) to fill the top bar, the only thing on screen, which drains all the
+	-- while. Full: you hop on. Empty: you crash. Start: the bar's fill to begin with;
+	-- PerTap/DrawTaps/MaxTap: how much a tap fills and how fast it drains (below).
 	HoldOn = {
 		Start = 0.5, -- (QM, Oct 8: half full)
 		-- Your lasso level against the animal's (QM, Oct 8): each tap fills
@@ -576,9 +575,6 @@ return {
 		PerTap = 0.08,
 		DrawTaps = 3,
 		MaxTap = 0.7,
-		CursorAfter = 1,
-		Width = 0.33,
-		Image = "rbxassetid://71069860798170", -- assets/ui/HoldOn.png
 		Arm = "rbxassetid://81589206383908", -- assets/ui/FlexArm.png: the +1 popup's icon
 		Popup = false, -- a "+1" with the arm on each tap (QM, Oct 8: off)
 	},

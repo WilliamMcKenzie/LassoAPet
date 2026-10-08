@@ -1606,6 +1606,46 @@ function Hud.setNotice(text)
 	NOTICE.label.Text = text or ""
 end
 
+-- HOLD ON!'s struggle (QM, Oct 8): nothing on screen but the bar. Every ScreenGui and
+-- BillboardGui of yours is switched off (and back as it was after), and the bar moves
+-- onto a screen of its own, at the same spot and size.
+local struggleGui, struggleRoot, struggleWas
+function Hud.setStruggle(on)
+	if not holdFrame or (on == (struggleWas ~= nil)) then
+		return
+	end
+	local playerGui = Players.LocalPlayer:FindFirstChild("PlayerGui")
+	if on then
+		if not struggleGui then
+			struggleGui = Instance.new("ScreenGui")
+			struggleGui.Name = "Struggle"
+			struggleGui.ResetOnSpawn = false
+			struggleGui.IgnoreGuiInset = true
+			struggleGui.DisplayOrder = 10
+			struggleGui.Parent = playerGui
+			struggleRoot = root(struggleGui)
+		end
+		struggleWas = {}
+		for _, g in playerGui:GetDescendants() do
+			if (g:IsA("ScreenGui") or g:IsA("BillboardGui")) and g ~= struggleGui and g.Enabled then
+				struggleWas[g] = true
+				g.Enabled = false
+			end
+		end
+		holdFrame.Parent = struggleRoot
+		struggleGui.Enabled = true
+	else
+		for g in struggleWas do
+			if g.Parent then
+				g.Enabled = true
+			end
+		end
+		struggleWas = nil
+		holdFrame.Parent = rideRoot
+		struggleGui.Enabled = false
+	end
+end
+
 -- The ride's action button (LASSO / GRAB EGG): HOLD ON!'s takes its exact spot and size.
 function Hud.actionButton()
 	return action
