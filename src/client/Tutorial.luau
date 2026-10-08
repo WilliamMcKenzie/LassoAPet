@@ -47,7 +47,7 @@ local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
-local TrainArrow = require(script.Parent.TrainArrow) -- (the last step's arrow over your chair, on the screen)
+local TrainArrow = require(script.Parent.TrainArrow) -- (the last step's arrow into your training ring, on the screen)
 local HoldOn = require(script.Parent.HoldOn)
 
 local player = Players.LocalPlayer
@@ -408,7 +408,7 @@ local function gateFlight(level)
 end
 
 -- The egg's placed (`id` in the pen) and hatches by itself; the moment its pet's out
--- and landed: off to your training chair (step "train"), and sitting in it ends it.
+-- and landed: off to your training dummy (step "train"), and stepping into its ring ends it.
 local function showGoal(id)
 	Tutorial.busy = true
 	local by = os.clock() + 6 -- (in case it never shows)
@@ -562,8 +562,8 @@ function Tutorial.update(state)
 		end
 	end
 	pointTo(target)
-	-- And QM's arrow on the screen over the chair till you sit (Oct 8: a third stopped here).
-	TrainArrow.update(if step == "train" and phase == "idle" and not player:GetAttribute("TrainingSeat") then player:GetAttribute("TrainingChairAt") else nil)
+	-- And QM's arrow on the screen over the ring till you're in it (Oct 8: a third stopped here).
+	TrainArrow.update(if step == "train" and phase == "idle" and not player:GetAttribute("Training") then player:GetAttribute("TrainingAt") else nil)
 end
 
 -- After the first lasso, the tutorial's ride is just the egg (QM, Oct 8: LASSO kept

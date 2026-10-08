@@ -1,17 +1,17 @@
 -- The tutorial's last step, "Train your lasso for big pets" (QM, Oct 8: a third of new
--- players never sat down): QM's white arrow on the screen, pointing down at your
--- training chair and bobbing over it. Off screen, it sits at the nearest edge, turned
--- to point the way to the chair. Tutorial.update drives it every frame.
+-- players never sat down): QM's white arrow on the screen, pointing down into your
+-- training ring and bobbing over it. Off screen, it sits at the nearest edge, turned
+-- to point the way there. Tutorial.update drives it every frame.
 --
---   TrainArrow.update(at) -- at: the chair's position (world), or nil to hide it
+--   TrainArrow.update(at) -- at: just inside the ring's front (world: Training.client's "TrainingAt"), or nil to hide it
 
 local Players = game:GetService("Players")
 
 local IMAGE = "rbxassetid://89957123476396" -- assets/ui/TrainArrow.png (256 px, pointing down)
 local SIZE = require(game:GetService("ReplicatedStorage").Shared.Config).TrainArrowSize -- px
-local ABOVE = 4 -- studs over the chair the arrow's tip points at
+local ABOVE = 4 -- studs over that spot the arrow's tip points at
 local BOB = SIZE / 10 -- px up and down
-local EDGE = 70 -- px in from the screen's edge when the chair's off screen
+local EDGE = 70 -- px in from the screen's edge when the spot's off screen
 
 local TrainArrow = {}
 

@@ -141,7 +141,9 @@ local function place(dummy, pen)
 		dummy.model.Parent = workspace
 		dummy.ring.Parent = if yours then workspace else nil
 		if yours then
-			player:SetAttribute("TrainingAt", spot.Position) -- (the tutorial's arrows lead here; this client only)
+			-- Just inside the ring's front, where you'd step in (the tutorial's arrows lead
+			-- here; this client only).
+			player:SetAttribute("TrainingAt", (spot * CFrame.new(0, 0, 3 - dummy.radius)).Position)
 		end
 	else
 		dummy.place = nil

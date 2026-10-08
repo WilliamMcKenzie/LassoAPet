@@ -215,7 +215,7 @@ return {
 	Gates = false,
 	-- The Upgrade Pen button (Hud): buys the next pen level at the next biome's
 	-- UnlockCost. With the gates off it only grows and repaints your pen and swaps in
-	-- that biome's training dummy and chair (QM, Oct 8); past the last, the Rainbow Trail.
+	-- that biome's training dummy (QM, Oct 8); past the last, the Rainbow Trail.
 	PenUpgrades = true,
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
@@ -756,7 +756,7 @@ return {
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
 	-- view (up to MaxFov) grow from Start studs/s. Each part off with On = false.
 	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)
-	-- The tutorial's arrow on the screen over your training chair (TrainArrow): px a side
+	-- The tutorial's arrow on the screen into your training ring (TrainArrow): px a side
 	-- (QM, Oct 8: 20% over the first 80).
 	TrainArrowSize = 96,
 	-- Speed lines and a wider view (SpeedFx), only while sprinting (QM, Oct 8: none
