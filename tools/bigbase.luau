@@ -11,7 +11,7 @@
 -- Every resized part keeps its old CFrame/Size in "BaseCF"/"BaseSize".
 
 local MODE = "apply"
-local W, D, CORRIDOR = 240, 304, 56
+local W, D, CORRIDOR = 384, 200, 56
 
 local world = workspace.World
 local parts = {}

@@ -8,13 +8,13 @@ script would overwrite those edits.
 
 The pens copy the open farm pens of Roblox pet games (QM's references): low
 fences on the grass, dark posts, orange wooden rails top and bottom with an X
-brace in every span, and a gap in one side. Three stand along the back wall
-with their gaps facing the start line, and one sits in each front corner of the
-base with its gap facing in. Each covers exactly N x N floor tiles.
+brace in every span, and a gap in one side. All five stand in a row by the start
+line, their gaps facing it (QM, Oct 8: they used to back onto the walls, three at the
+back and one in each front corner, so a new pen sat far from the action).
 
-Pens grow as you unlock zones (QM, Oct 3): SIZES[level - 1] tiles a side, from
-12 at the start to 17 (about 2x the area) once the Ocean is open. A pen grows
-away from the wall it backs onto, so its back edge stays put. Each PenN holds
+Pens grow as you unlock zones: SIZES[level - 1] tiles a side, faster and faster up to
+the Godlands'. A pen grows away from the start line, so its open front edge stays
+put (and the training dummy in front of it barely moves). Each PenN holds
 a Sizes folder with one SizeK model per level: its fence, plus copies of the
 markers below laid out for that size. PenLevel.server shows the owner's size
 and moves the live markers onto that size's copies.
@@ -46,19 +46,22 @@ TILE = 4  # the floor's checker squares
 # Kraken (~110 studs) and the Godlands' is 144 studs a side
 SIZES = [12, 16, 21, 29, 36]
 GATE = 10
-HALF_W, DEPTH = 240, 304  # the home base: x -240..240, z 0..304 inside its walls (QM, Oct 8: was 144 x 144)
+HALF_W, DEPTH = 384, 200  # the home base: x -384..384, z 0..200 inside its walls (QM, Oct 8: was 144 x 144)
 # Pens in claim order: (back edge centre x, z, the way the open side faces, which
 # way an odd size's extra tile goes along the pen's local x). Three along the
 # back wall facing the start line, and one in each front corner of the base
 # facing in. Edges sit on tile lines at every size.
-# (Spread so the biggest size never overlaps: back pens 160 apart, the corner ones
-# far enough up the side walls to clear the start line and the back row.)
+# (QM, Oct 8: the small pens close to the start line, growing back from it.) All five
+# in a row facing the start line, 152 apart (the biggest is 144 a side); FRONT_Z is
+# where each one's open side stays at every size, so (x, FRONT_Z) is the middle of its
+# front edge and it grows away from the line, back and to both sides.
+FRONT_Z = 48  # (clear of the podium's snake, which reaches z 47)
 PENS = [
-    (0, DEPTH, "front", 1),
-    (-160, DEPTH, "front", 1),
-    (160, DEPTH, "front", 1),
-    (-HALF_W, 80, "right", 1),
-    (HALF_W, 80, "left", -1),
+    (0, FRONT_Z, "front", 1),
+    (-152, FRONT_Z, "front", 1),
+    (152, FRONT_Z, "front", 1),
+    (-304, FRONT_Z, "front", 1),
+    (304, FRONT_Z, "front", 1),
 ]
 # Local pen frame: centred on the pen, open side at z = -SIZE / 2 facing -z.
 # These map it onto the world for each facing.
@@ -83,15 +86,15 @@ def rot_y(deg):
 
 
 def pen_parts(bx, bz, facing, odd, n=SIZES[0]):
-    """The pen at n tiles a side; (bx, bz) is the middle of its back edge."""
+    """The pen at n tiles a side; (bx, bz) is the middle of its open (front) edge."""
     SIZE = n * TILE
     FRONT = -SIZE / 2
     SPAWN_Z = FRONT - 6
     M = np.array(FACING[facing], float)
-    # centre: half a size in from the back edge; an odd size sits half a tile off
+    # centre: half a size back from the front edge; an odd size sits half a tile off
     # centre along the pen so its edges stay on tile lines
     shift = odd * TILE / 2 if n % 2 else 0
-    cx, _, cz = M @ np.array([shift, 0, -SIZE / 2]) + np.array([bx, 0, bz])
+    cx, _, cz = M @ np.array([shift, 0, SIZE / 2]) + np.array([bx, 0, bz])
     parts = []  # (name, size, centre, rotation 3x3, colour, visible), local frame first
 
     def box(name, lo, hi, color=RAIL_COLOR, visible=True):
