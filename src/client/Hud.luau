@@ -697,8 +697,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	local trail = false -- selling the Rainbow Trail
 	local function refreshUpgrade()
 		local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
-		cost = nextBiome and nextBiome.UnlockCost
-		trail = cost == nil and not player:GetAttribute("RainbowTrail")
+		cost = Config.Gates and nextBiome and nextBiome.UnlockCost or nil
+		trail = Config.Gates and cost == nil and not player:GetAttribute("RainbowTrail")
 		if trail then
 			cost = Config.RainbowTrail.Price
 		end

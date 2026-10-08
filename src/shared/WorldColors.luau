@@ -32,6 +32,9 @@ end
 
 -- The z of the first gate a player with this pen level can't pass (-inf if none).
 function WorldColors.gateZ(level)
+	if not Config.Gates then
+		return -math.huge
+	end
 	local next = Config.Biomes[(level or 1) + 1]
 	return if next then WorldColors.biomeStart((level or 1) + 1) else -math.huge
 end

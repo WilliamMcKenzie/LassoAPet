@@ -418,7 +418,7 @@ local function showGoal(id)
 	controls:Disable()
 	local level = player:GetAttribute("PenLevel") or 1
 	local upNext = Config.Biomes[level + 1]
-	if upNext then
+	if upNext and Config.Gates then
 		goalText = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
 		goalDesert = upNext.Name == "Desert" and upNext.UnlockCost == PICTURES.saveDesert.cost and PICTURES.saveDesert.image ~= ""
 		report("gate")

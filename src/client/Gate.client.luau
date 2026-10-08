@@ -202,6 +202,9 @@ ReplicatedStorage:WaitForChild("ZoneUnlocked").OnClientEvent:Connect(function(i)
 end)
 
 local function refresh()
+	if not Config.Gates then
+		return
+	end
 	local level = player:GetAttribute("PenLevel") or 1
 	for i = 2, #Config.Biomes do
 		if i > level and not gates[i] then
