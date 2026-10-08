@@ -18,6 +18,7 @@ local UserInputService = game:GetService("UserInputService")
 local Inventory = {}
 
 local SLOT = 84
+local PANEL = "rbxassetid://112353135883922" -- assets/ui/CommonPanel.png (512 px, ~90 px corners)
 local SCALE = 1.2 -- the whole bar, slots, numbers and outlines alike
 local GAP = 10
 local BOTTOM = 24
@@ -129,18 +130,17 @@ local function redraw()
 		slot.LayoutOrder = i
 		slot.Name = tool.Name
 		Instance.new("UICorner", slot).CornerRadius = UDim.new(52 / 256, 0) -- the corners of QM's slot pictures (52px on 256)
-		local rarity = rarityOf(tool)
-		if rarity and rarity.image ~= "" then
-			slot.BackgroundTransparency = 1
-			local bg = Instance.new("ImageLabel")
-			bg.BackgroundTransparency = 1
-			bg.Size = UDim2.fromScale(1, 1)
-			bg.Image = rarity.image
-			bg.Parent = slot
-		elseif rarity then
-			slot.BackgroundColor3 = rarity.color
-			slot.BackgroundTransparency = 0.25
-		end
+		-- Every slot on QM's CommonPanel (Oct 8, trying it out in place of the rarity
+		-- panels): a 9-slice, so its outline and round corners stay crisp at slot size.
+		slot.BackgroundTransparency = 1
+		local bg = Instance.new("ImageLabel")
+		bg.BackgroundTransparency = 1
+		bg.Size = UDim2.fromScale(1, 1)
+		bg.Image = PANEL
+		bg.ScaleType = Enum.ScaleType.Slice
+		bg.SliceCenter = Rect.new(112, 112, 400, 400)
+		bg.SliceScale = SLOT / 512 -- (the art's proportions at slot size)
+		bg.Parent = slot
 		if tool.Parent == player.Character then
 			local ring = Instance.new("UIStroke")
 			ring.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
