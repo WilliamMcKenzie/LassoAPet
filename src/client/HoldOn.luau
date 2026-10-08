@@ -114,6 +114,11 @@ function HoldOn.update(dt)
 		return fill, nil
 	end
 	local cfg = Config.HoldOn
+	-- (full is checked before this frame's drain: a tap caps it at exactly 1, and
+	-- draining first took it straight back under, so it could never be won)
+	if fill >= 1 then
+		return 1, "won"
+	end
 	fill -= cfg.Drain * dt
 	-- The cursor: up at the start and whenever you've stopped tapping a while.
 	local now = os.clock()
@@ -121,9 +126,7 @@ function HoldOn.update(dt)
 	local pulse = 0.5 + 0.5 * math.sin((now - started) * math.pi * 2 * 1.6)
 	cursorScale.Scale = 1 + 0.15 * pulse
 	buttonScale.Scale += ((1 + (if cursor.Visible then 0.05 * pulse else 0)) - buttonScale.Scale) * (1 - math.exp(-18 * dt))
-	if fill >= 1 then
-		return 1, "won"
-	elseif fill <= 0 then
+	if fill <= 0 then
 		return 0, "lost"
 	end
 	return fill, nil
