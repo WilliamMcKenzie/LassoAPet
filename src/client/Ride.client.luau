@@ -3757,7 +3757,7 @@ local function updateRider(dt)
 			transfer.fill, result = vfx.holdOn.update(dt)
 			if result == "lost" then
 				vfx.holdOn.stop()
-				return fail("BUCKED OFF!")
+				return fail("CRASH!") -- (the CRASH graphic: QM)
 			end
 			won = result == "won"
 		else

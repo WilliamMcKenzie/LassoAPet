@@ -121,8 +121,8 @@ for _, part in world.Walls:GetChildren() do
 	end
 end
 
--- Obstacles and nests: moved out with the width, the same size.
-for _, name in { "Obstacles", "Nests" } do
+-- Obstacles: moved out with the width, the same size.
+for _, name in { "Obstacles" } do
 	for _, inst in world[name]:GetChildren() do
 		local pivot = if inst:IsA("Model") then inst:GetPivot() elseif inst:IsA("BasePart") then inst.CFrame else nil
 		if pivot and pivot.Z < 0 then
@@ -136,6 +136,37 @@ for _, name in { "Obstacles", "Nests" } do
 			end
 			counts.moved += 1
 		end
+	end
+end
+
+-- Nests: out by the walls (QM, Oct 8: too near the middle), NEST_IN studs in from
+-- the wall on the side they were on (alternating for those dead centre). Anything
+-- in the way there swaps over to where the nest would have been.
+local NEST_IN, NEST_CLEAR = 12, 9
+local alternate = 1
+for _, nest in world.Nests:GetChildren() do
+	local pivot = if nest:IsA("Model") then nest:GetPivot() else nil
+	if pivot and pivot.Z < 0 then
+		local side = math.sign(pivot.X)
+		if math.abs(pivot.X) < 1 then
+			side, alternate = alternate, -alternate
+		end
+		local x = side * (halfWidth(pivot.Z) - NEST_IN)
+		local was = mapX(pivot.X, pivot.Z)
+		for _, inst in world.Obstacles:GetChildren() do
+			local at = if inst:IsA("Model") then inst:GetPivot() elseif inst:IsA("BasePart") then inst.CFrame else nil
+			if at and math.abs(at.Z - pivot.Z) < NEST_CLEAR and math.abs(at.X - x) < NEST_CLEAR then
+				local dx = was - x
+				if inst:IsA("Model") then
+					inst:PivotTo(at + Vector3.new(dx, 0, 0)) -- (its FunnelPivot still holds where it began)
+				else
+					inst.CFrame = at + Vector3.new(dx, 0, 0)
+				end
+			end
+		end
+		nest:SetAttribute("FunnelPivot", pivot)
+		nest:PivotTo(pivot + Vector3.new(x - pivot.X, 0, 0))
+		counts.moved += 1
 	end
 end
 
