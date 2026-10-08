@@ -158,7 +158,7 @@ RunService.Heartbeat:Connect(function(dt)
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	-- (Sitting is riding; PlatformStand is lying flat after a crash.)
-	if root and humanoid and not humanoid.Sit and not humanoid.PlatformStand and not Hud.inLesson() then -- (none in the fuse lesson)
+	if root and humanoid and (not humanoid.Sit or player:GetAttribute("TrainingSeat")) and not humanoid.PlatformStand and not Hud.inLesson() then -- (none in the fuse lesson)
 		local function consider(model, kind, fuse, stats, income)
 			local pet = model.PrimaryPart
 			if not kind or not pet or not model.Parent then

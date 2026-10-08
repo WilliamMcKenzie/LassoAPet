@@ -52,7 +52,7 @@ local IMAGES = {
 	upgradePen = { id = "rbxassetid://120690804030353", size = Vector2.new(1152, 284) }, -- UpgradePenActive.png
 	upgradePenDisabled = { id = "rbxassetid://134427342737800", size = Vector2.new(1158, 285) }, -- UpgradePenDisabled.png
 	-- Each biome's own Upgrade Pen (Config.Biomes[i].UpgradeImage), all this size.
-	upgradePenBiome = { id = "", size = Vector2.new(1390, 352) }, -- UpgradePenDesert.png etc.
+	upgradePenBiome = { id = "", size = Vector2.new(1024, 256) }, -- UpgradePenDesertEnabled.png etc. (QM, Oct 8)
 	-- TAKE EGG for rarer eggs (takeEgg itself is the Uncommon one).
 	takeEggRare = { id = "rbxassetid://137561422342054", size = Vector2.new(960, 434) },
 	takeEggEpic = { id = "rbxassetid://114155984376753", size = Vector2.new(960, 434) },

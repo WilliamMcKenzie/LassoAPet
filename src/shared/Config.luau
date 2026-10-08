@@ -55,8 +55,8 @@ return {
 			GateImage = "rbxassetid://113778810800288", -- assets/ui/GateDesert.png ("Zone Locked")
 			GateColor = Color3.fromRGB(255, 204, 40), -- the gate's glow at this biome's line: desert yellow
 			-- Upgrade Pen while this is the next biome to unlock (its price is drawn in).
-			UpgradeImage = "rbxassetid://115511110106388", -- assets/ui/UpgradePenDesert.png
-			UpgradeImageDisabled = "rbxassetid://82534446488604", -- assets/ui/UpgradePenDesertDisabled.png: while you can't afford it
+			UpgradeImage = "rbxassetid://134340111977085", -- assets/ui/UpgradePenDesertEnabled.png (QM, Oct 8: price drawn in)
+			UpgradeImageDisabled = "rbxassetid://97537967185164", -- assets/ui/UpgradePenDesertDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 		},
 		{
 			Name = "Snow",
@@ -71,12 +71,12 @@ return {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
 				Ice = { Color3.fromRGB(160, 188, 244), Color3.fromRGB(178, 202, 250) },
 			},
-			UnlockCost = 150000, -- QM, Oct 7: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
+			UnlockCost = 300000, -- QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
 			PostColor = Color3.fromRGB(126, 164, 214),
 			GateImage = "rbxassetid://93384010922515", -- assets/ui/GateTundra.png
 			GateColor = Color3.fromRGB(70, 220, 255), -- cyan (QM)
-			UpgradeImage = "rbxassetid://100202451134816", -- assets/ui/UpgradePenTundra.png ($150k)
-			UpgradeImageDisabled = "rbxassetid://84089158899976", -- assets/ui/UpgradePenTundraDisabled.png ($150k)
+			UpgradeImage = "rbxassetid://105968538824751", -- assets/ui/UpgradePenTundraEnabled.png (QM, Oct 8: price drawn in)
+			UpgradeImageDisabled = "rbxassetid://133303061216721", -- assets/ui/UpgradePenTundraDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 		},
 		{
 			Name = "Ocean",
@@ -145,12 +145,12 @@ return {
 					Tint = Color3.fromRGB(176, 180, 230),
 				},
 			},
-			UnlockCost = 5000000, -- QM, Oct 7: halved with the Tundra's ("same with ocean/godlands"); balance pass Oct 6 had it $10M, before that $1M
+			UnlockCost = 10000000, -- QM, Oct 8: matches the new button art (Oct 7 had $5M: halved with the Tundra's ("same with ocean/godlands"); balance pass Oct 6 had it $10M, before that $1M
 			PostColor = Color3.fromRGB(236, 140, 124),
 			GateImage = "rbxassetid://75356296124042", -- assets/ui/GateOcean.png
 			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
-			UpgradeImage = "rbxassetid://120593568705149", -- assets/ui/UpgradePenOcean.png (QM's Oct 7 art, now $5m)
-			UpgradeImageDisabled = "rbxassetid://126023633689709", -- assets/ui/UpgradePenOceanDisabled.png ($5m)
+			UpgradeImage = "rbxassetid://86611519789045", -- assets/ui/UpgradePenOceanEnabled.png (QM, Oct 8: price drawn in)
+			UpgradeImageDisabled = "rbxassetid://98686807740770", -- assets/ui/UpgradePenOceanDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 			-- Under the sea (Ocean.client): while you're in this biome the distance
 			-- fades into Haze.Color and bubbles drift up round the camera.
 			Haze = {
@@ -195,12 +195,12 @@ return {
 				Ice = { Color3.fromRGB(170, 196, 250), Color3.fromRGB(184, 208, 252) },
 				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon
 			},
-			UnlockCost = 150000000, -- QM, Oct 7: halved with the Tundra's; balance pass Oct 6 had it $300M, before that $10M (a guess). The Badlands (PR #154) would sit at about $50M
+			UnlockCost = 300000000, -- QM, Oct 8: matches the new button art (Oct 7 had $150M: halved with the Tundra's; balance pass Oct 6 had it $300M, before that $10M (a guess). The Badlands (PR #154) would sit at about $50M
 			PostColor = Color3.fromRGB(62, 60, 72),
 			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
 			GateImage = "rbxassetid://81079145393331", -- assets/ui/GateGodlands.png
-			UpgradeImage = "rbxassetid://138868721056257", -- assets/ui/UpgradePenGodlands.png ($150m)
-			UpgradeImageDisabled = "rbxassetid://111144732532154", -- assets/ui/UpgradePenGodlandsDisabled.png ($150m)
+			UpgradeImage = "rbxassetid://122300024756957", -- assets/ui/UpgradePenGodlandsEnabled.png (QM, Oct 8: price drawn in)
+			UpgradeImageDisabled = "rbxassetid://73528380270412", -- assets/ui/UpgradePenGodlandsDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor

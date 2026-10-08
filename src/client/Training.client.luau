@@ -293,6 +293,7 @@ local function standUp()
 		sitWeld:Destroy()
 		sitWeld = nil
 	end
+	player:SetAttribute("TrainingSeat", nil)
 end
 
 -- Into the chair, facing the dummy (the seat faces the chair's -Z, at it).
@@ -310,6 +311,8 @@ local function sitDown(char, dummy)
 	weld.Parent = dummy.seat
 	sitWeld = weld
 	humanoid.Sit = true
+	-- Sitting here isn't riding: the merge menu and pet plates stay (this client only).
+	player:SetAttribute("TrainingSeat", true)
 end
 
 local function stop()
