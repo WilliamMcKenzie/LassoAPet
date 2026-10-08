@@ -52,6 +52,20 @@ def rot_bone(a, bone, R):
             pivot(p, a.pivots[bone], R)
 
 
+def pixel_x_eye(a, x, yc, zc, size=1.0, bone="neck"):
+    """X eyes from axis-aligned squares (5x5 grid, both diagonals), for the game model:
+    the converter only takes rotated blocks as cubes, and plain squares read the same."""
+    h, c = size / 2, size / 5
+    for s, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * x, sx * (x + A.PLATE)))
+        a.box("Eye" + s, (xa, yc - h, zc - h), (xb, yc + h, zc + h), EYE_WHITE, bone)
+        pa, pb = sorted((sx * x, sx * (x + A.PLATE + 0.03)))
+        for i in range(5):
+            for j in {i, 4 - i}:
+                y0, z0 = yc + h - (i + 1) * c, zc - h + j * c
+                a.box(f"Pupil{s}{i}{j}", (pa, y0, z0), (pb, y0 + c, z0 + c), BLACK, bone)
+
+
 def x_eye(a, x, yc, zc, size=1.0, bone="neck", side="both", back=None):
     """White eye plate with a black X stitched over it; on the head's sides (x) or front (back=z)."""
     h = size / 2
@@ -117,12 +131,19 @@ def stand(a, y_top, x=0, z=0.3):
 
 # ---------------------------------------------------------------- A: stitched horse
 
-def stitched_horse():
+# the leap pose: bone rest rotations (degrees about X) and how high the pole holds the horse
+LEAP = {"LegFL": 55, "LegFR": 55, "LegHL": -55, "LegHR": -55, "Tail": -60, "EarL": -35, "EarR": -35}
+LIFT, PITCH = 4.5, 12
+
+
+def stitched_horse(posed=True):
+    """posed=False keeps the horse at rest (only lifted onto the pole) for the game model,
+    where the leap is the bones' rest rotations (see game())."""
     a = Animal("DummyHorse", "Common")
     horse_body(a, coat=SACK, mane=ROPE, hoof=SACK_DARK, ear_inner=PATCH_RED)
     for n in ("EyeL", "EyeR", "PupilL", "PupilR"):
         a.remove(n)
-    x_eye(a, 1.1, 9.6, -3.0)
+    (x_eye if posed else pixel_x_eye)(a, 1.1, 9.6, -3.0)
     for side in (-1, 1):
         # seam where the neck is sewn on, a patch on each flank, a seam down the snout
         stitches_y(a, f"Neck{side}", side * 0.9, -1.9, 5.3, 8.2, 5, "neck")
@@ -131,19 +152,57 @@ def stitched_horse():
                    PATCH_BLUE if side < 0 else PATCH_RED)
         stitches_z(a, f"Belly{side}", side * 1.6, 3.8, -2.4, 3.0, 9)
     # mid-leap: legs out, nose up, tail streaming; the whole horse up on the pole
-    for leg in ("LegFL", "LegFR"):
-        rot_bone(a, leg, Rx(55))
-    for leg in ("LegHL", "LegHR"):
-        rot_bone(a, leg, Rx(-55))
-    rot_bone(a, "Tail", Rx(-60))
-    rot_bone(a, "EarL", Rx(-35))
-    rot_bone(a, "EarR", Rx(-35))
-    lift = 4.5
+    if posed:
+        for bone, deg in LEAP.items():
+            rot_bone(a, bone, Rx(deg))
     for p in a.parts:
-        pivot(p, (0, 5, 0.3), Rx(12))
-        p.cf = T(0, lift, 0) @ p.cf
-    stand(a, 3.5 + lift + 0.2, z=0.3)
+        if posed:
+            pivot(p, (0, 3.5, 0.3), Rx(PITCH))
+        p.cf = T(0, LIFT, 0) @ p.cf
+    a.pivots = {n: (v[0], v[1] + LIFT, v[2]) for n, v in a.pivots.items()}
+    n0 = len(a.parts)
+    stand(a, 3.5 + LIFT + 0.2, z=0.3)
+    for p in a.parts[n0:]:
+        p.bone = "Pole"
     return a
+
+
+def game():
+    """QM picked A (Oct 8): the stitched horse on a pole as the lasso training target.
+    Writes designs/props/TrainingDummy.bbmodel and src/shared/Props/TrainingDummyModel.luau.
+    Bones: Pole (static) > root (pivots on the pole's tip) > neck, ears, tail, legs, with the
+    leap as rest rotations. Animations: idle (a slow sway) and hit (a wobble when a lasso lands)."""
+    import json
+    import bbmodel_to_luau
+    from horse_rig import write_animations
+    a = stitched_horse(posed=False)
+    a.name = "TrainingDummy"
+    tip = (0, 3.5 + LIFT, 0.3)
+    a.pivots["root"] = tip
+    a.pivots["Pole"] = (0, 0, 0.3)
+    a.bone_order = [("Pole", None)] + [(n, p or "Pole") for n, p in a.bone_order]
+    model, groups = A.write_bbmodel(a.parts, a.name, None, bones=a.bones())
+    groups["root"]["rotation"] = [PITCH, 0, 0]
+    for bone, deg in LEAP.items():
+        groups[bone]["rotation"] = [deg, 0, 0]
+    rz = lambda keys: {"channel": "rotation", "interp": "catmullrom", "keys": [(t, (x, 0, z)) for t, x, z in keys]}
+    write_animations(model, groups, {
+        "idle": (2.4, {"root": [rz([(0, 0, 0), (0.6, 1.5, 2), (1.2, 0, 0), (1.8, -1.5, -2), (2.4, 0, 0)])]}),
+        "hit": (0.9, {"root": [rz([(0, 0, 0), (0.1, -10, 6), (0.25, 7, -5), (0.4, -4, 3), (0.55, 2, -1.5), (0.7, -1, 0.5), (0.9, 0, 0)])],
+                      "neck": [rz([(0, 0, 0), (0.12, 12, 0), (0.3, -6, 0), (0.5, 3, 0), (0.9, 0, 0)])]}),
+    })
+    os.makedirs(os.path.join("designs", "props"), exist_ok=True)
+    path = os.path.join("designs", "props", "TrainingDummy.bbmodel")
+    model["meta"]["format_version"] = "5.0"
+    with open(path, "w") as f:
+        json.dump(model, f, separators=(",", ":"))
+    bbmodel_to_luau.main(path, os.path.join("src", "shared", "Props", "TrainingDummyModel.luau"))
+    # where the lasso should land: the horse's neck loop, carried through the root's pitch
+    c = np.array(a.meta["neck_loop"]["center"], float) + (0, LIFT, 0)
+    R = Rx(PITCH)[:3, :3]
+    c = R @ (c - tip) + tip
+    print("neck loop center", np.round(c, 2), "radius", a.meta["neck_loop"]["radius"])
+    return model
 
 
 # ---------------------------------------------------------------- B: target dummy
@@ -290,4 +349,7 @@ def main(out="/mnt/project-files/design/dummies"):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["game"]:
+        game()
+    else:
+        main(*sys.argv[1:])
