@@ -134,6 +134,7 @@ local function tierOf(kind)
 end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
+vfx.lassoLevel = require(script.Parent.LassoLevel) -- the recommended lasso level over the target
 -- (declared up here: smash() below already uses it, and was reading a nil global)
 
 -- An obstacle you ride into flies up and away and fades; it's back
@@ -609,6 +610,7 @@ local function cleanup()
 	heroLeap = nil
 	Hud.setCutscene(false)
 	Outline.set(nil)
+	vfx.lassoLevel.set(nil)
 	unsmashAll()
 end
 
@@ -1073,6 +1075,7 @@ local function fail(reason, tip)
 		carried = nil
 	end
 	Outline.set(nil)
+	vfx.lassoLevel.set(nil)
 	-- Thrown off behind the animal, landing flat on their back until they go home.
 	if hrp then -- (no character mid-respawn: nothing to throw)
 		local look = hrp.CFrame.LookVector
@@ -4365,8 +4368,10 @@ RunService.PreSimulation:Connect(function(dt)
 	actionTarget = findTarget()
 	if actionTarget == "egg" then
 		Outline.set(nearEgg.egg.model, Outline.NEST)
+		vfx.lassoLevel.set(nil)
 	else
 		Outline.set(if actionTarget then actionTarget.animal.model else nil)
+		vfx.lassoLevel.set(actionTarget and actionTarget.animal.model, actionTarget and actionTarget.kind)
 	end
 	updateHud()
 end)

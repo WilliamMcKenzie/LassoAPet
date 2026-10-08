@@ -1586,6 +1586,7 @@ end
 
 -- Money as the HUD writes it: "$950", "$1.2k".
 Hud.money = money
+Hud.lassoIcon = IMAGES.lassoIcon.id -- (LassoLevel's tag)
 
 -- nil: no cash at all this time (run over on foot): the ride's cash and the
 -- fail screen's "+$N" stay hidden until the next ride.

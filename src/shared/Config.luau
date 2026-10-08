@@ -566,6 +566,26 @@ return {
 		Pull = 0.5, -- cinching on it (the catch counts here),
 		Rest = 0.35, -- and slack before the next
 	},
+	-- Recommended lasso level for each animal, shown over the one you'd lasso as you
+	-- ride (LassoLevel.luau). PLACEHOLDERS (Oct 8) until Game design sets them: the
+	-- biome it first runs in (Meadow 10, Desert 100, Snow 1k, Ocean 10k, Godlands
+	-- 100k) x its rarity (Common 1, Uncommon 2, Rare 4, Epic 8, Legendary 16).
+	-- An animal not listed shows nothing.
+	LassoLevels = {
+		Horse = 10, Pinto = 20, Pig = 20, Bunny = 20, Fish = 40, Rhino = 80, Unicorn = 160, -- Meadow
+		Cactus = 200, Kitten = 200, Scorpion = 400, Sandworm = 800, SpineLizard = 800, Snake = 1600, -- Desert
+		Penguin = 2000, Boar = 2000, Snowman = 4000, IceGolem = 8000, SnackYak = 8000, Icebringer = 16000, -- Snow
+		Starfish = 20000, Whale = 40000, Squid = 80000, KingCrab = 80000, FishSchool = 80000, BlueCrab = 160000, RoboShark = 160000, Kraken = 160000, -- Ocean
+		Beholder = 400000, WarElephant = 400000, Sludge = 400000, SoulHorse = 800000, Leviathan = 800000, Loong = 1600000, -- Godlands
+	},
+	-- Rarity text colours (QM, Oct 7): pet nameplates, lasso levels. Common keeps the inventory slots' grey.
+	RarityColors = {
+		Common = Color3.fromRGB(150, 160, 175),
+		Uncommon = Color3.fromHex("43FA00"),
+		Rare = Color3.fromHex("40D6FF"),
+		Epic = Color3.fromHex("FF7CC6"),
+		Legendary = Color3.fromHex("5CE6B7"),
+	},
 	Podium = {
 		Position = Vector3.new(58, 0, 16), -- the column, on the ground; the snake reaches x ~50..74, z ~2..47 (Pen5 is x >= 76)
 		Refresh = 120, -- seconds between re-reading the leader

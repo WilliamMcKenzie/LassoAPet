@@ -32,14 +32,7 @@ local FONT = Enum.Font.FredokaOne
 local CHECK = 0.1 -- seconds between looks round
 local RING_REACH = 5 -- studs from another player's pet's outline where it gets the ring (RIDE's reach on yours)
 
--- The rarity colours (QM, Oct 7); Common keeps the inventory slots' grey.
-local COLORS = {
-	Common = Color3.fromRGB(150, 160, 175),
-	Uncommon = Color3.fromHex("43FA00"),
-	Rare = Color3.fromHex("40D6FF"),
-	Epic = Color3.fromHex("FF7CC6"),
-	Legendary = Color3.fromHex("5CE6B7"),
-}
+local COLORS = Config.RarityColors -- (QM, Oct 7)
 local function colorOf(kind, fuse)
 	return COLORS[Fusion.rarity(kind, fuse)] or COLORS.Common -- (a hybrid: the rarer of its two)
 end
