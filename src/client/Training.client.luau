@@ -77,7 +77,7 @@ end
 model.Name = "TrainingDummy"
 for _, part in model:GetDescendants() do
 	if part:IsA("BasePart") then
-		part.CanCollide = part.Name == "Pole" or part.Name == "Foot" or part.Name == "RootBone" or part.Name == "Root"
+		part.CanCollide = not designed and (part.Name == "Pole" or part.Name == "Foot") -- (Design's: none, like the animals)
 		part.CanQuery = false
 		part.CanTouch = false
 	end
