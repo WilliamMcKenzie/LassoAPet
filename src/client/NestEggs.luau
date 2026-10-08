@@ -11,6 +11,8 @@
 -- EggSpot marks the egg's centre. The egg is a rigged model so it can twitch in the
 -- nest. (Ride.client grabs them and draws the guide to the nearest; Nests.server
 -- takes the grab. A nest you've emptied stays so for you till the ride's over.)
+-- The tutorial's last nest, at the end of the Meadow (Nests.server), shows only while
+-- you're in the tutorial, and its egg is in reach from wall to wall (its Reach).
 --
 --   NestEggs.start()            -- once the World's ready: every nest's egg, kept up with your seed
 --   NestEggs.waiting[nest]      -- { egg, kind, nest, reach, ... } while the nest shows an egg
@@ -106,6 +108,20 @@ function NestEggs.show(nest, popIn)
 		drop(nest) -- (not a whole nest: it showed up in live error reports)
 		return
 	end
+	if nest:GetAttribute("Tutorial") then
+		local mine = player:GetAttribute("Tutorial") == true
+		if not mine then
+			drop(nest)
+		end
+		for _, part in nest:GetDescendants() do
+			if part:IsA("BasePart") or part:IsA("Decal") then
+				part.LocalTransparencyModifier = if mine then 0 else 1
+			end
+		end
+		if not mine then
+			return
+		end
+	end
 	local kind = kindFor(nest, spot.Position.Z)
 	local waiting = NestEggs.waiting[nest]
 	if waiting and waiting.kind == kind then
@@ -119,9 +135,9 @@ function NestEggs.show(nest, popIn)
 		waiting = { egg = Egg.new(kind), kind = kind, nest = nest, nextTwitch = 0.5 + math.random() * 1.5 }
 		-- A bigger nest (Nests.server: its biome's NestScale) is takeable from that much
 		-- further, and its egg is as much bigger, there and the whole ride home (QM, Oct 6;
-		-- others see it so from your "CarriedEggScale").
+		-- others see it so from your "CarriedEggScale"). The tutorial's last nest sets its own.
 		local scale = nest:GetScale() / (nest:GetAttribute("BaseScale") or nest:GetScale())
-		waiting.reach = Config.LassoRange * scale
+		waiting.reach = nest:GetAttribute("Reach") or Config.LassoRange * scale
 		waiting.scale = scale
 		if scale ~= 1 then
 			waiting.egg.model:ScaleTo(waiting.egg.size * scale)
@@ -210,6 +226,13 @@ function NestEggs.start()
 		for _, nest in world.Nests:GetChildren() do
 			if not NestEggs.waiting[nest] then
 				NestEggs.show(nest) -- one you emptied is full again (the rest swap as you near them: update)
+			end
+		end
+	end)
+	player:GetAttributeChangedSignal("Tutorial"):Connect(function()
+		for _, nest in world.Nests:GetChildren() do
+			if nest:GetAttribute("Tutorial") then
+				NestEggs.show(nest) -- the tutorial's last nest: there for the tutorial, gone after it
 			end
 		end
 	end)

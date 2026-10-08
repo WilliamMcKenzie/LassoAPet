@@ -16,12 +16,15 @@
 --
 -- The Godlands never end, so its nests aren't on the map: one goes in each of its
 -- tracks (Shared/Godlands) near any player, at a clear spot picked from the server's
--- seed, and goes again once no one is near (see the end).
+-- seed, and goes again once no one is near (see below).
+--
+-- One more nest, at the very end of the Meadow, is the tutorial's alone (see the end).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Ground = require(ReplicatedStorage.Shared.Ground)
 local NestOdds = require(ReplicatedStorage.Shared.NestOdds)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Funnel = require(script.Parent.Funnel)
@@ -129,6 +132,9 @@ takeEgg.OnServerEvent:Connect(function(player, nest, mount)
 	local spot = nest:FindFirstChild("EggSpot")
 	if not spot or player:GetAttribute("Lassoing") then
 		return -- (not a whole nest: no egg; or mid-lasso, hanging on: Riders.server)
+	end
+	if nest:GetAttribute("Tutorial") and not player:GetAttribute("Tutorial") then
+		return -- (the tutorial's last nest: only its players see it; see the end)
 	end
 	-- The wild animal they're riding, if one and the nest's in its biome (see the top),
 	-- else their roll for the nest.
@@ -249,3 +255,26 @@ task.spawn(function()
 		end
 	end
 end)
+
+-- The tutorial's last nest ------------------------------------------------------
+
+-- One more nest at the very end of the Meadow, for players in the tutorial only (QM,
+-- Oct 8: new players rode on past the Meadow into the Desert and the Snow). Its egg
+-- is in reach from wall to wall (its Reach, for NestEggs), so a tutorial ride can't
+-- get past it: the tutorial's slow-mo while TAKE EGG waits (Tutorial) deepens till
+-- they take it. NestEggs shows it to players in the tutorial and hides it from the
+-- rest; only they can take it (above).
+local TUTORIAL_NEST = { Before = 30, Margin = 20 } -- studs before the Desert's line; reach past the walls
+if template then
+	local nest = template:Clone()
+	nest.Name = "TutorialNest"
+	nest:SetAttribute("Tutorial", true)
+	sizeNest(nest, Config.Biomes[1].NestScale or 1)
+	local egg = nest:FindFirstChild("EggSpot")
+	local z = WorldColors.biomeStart(2) + TUTORIAL_NEST.Before
+	local fromSpot = CFrame.new(-egg.Position) * nest:GetPivot()
+	local y = egg.Position.Y - Ground.heightAt(egg.Position.X, egg.Position.Z) + Ground.heightAt(0, z) -- (as high over the floor as the nest it's cloned from)
+	nest:PivotTo(CFrame.new(0, y, z) * fromSpot)
+	nest:SetAttribute("Reach", WorldColors.halfWidth(z) + TUTORIAL_NEST.Margin)
+	nest.Parent = world.Nests
+end
