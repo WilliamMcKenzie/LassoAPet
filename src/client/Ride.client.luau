@@ -135,6 +135,7 @@ end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.lassoLevel = require(script.Parent.LassoLevel) -- the recommended lasso level over the target
+vfx.ropeHang = require(script.Parent.RopeHang) -- hanging off the rope before you hop on (Config.LassoHang)
 -- (declared up here: smash() below already uses it, and was reading a nil global)
 
 -- An obstacle you ride into flies up and away and fades; it's back
@@ -3715,6 +3716,22 @@ local function updateRider(dt)
 		focus = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
 		if transfer.t >= 1 then
 			transfer.stage, transfer.t, transfer.from = "pull", 0, hrp.Position
+			if Config.LassoHang.Duration > 0 then
+				-- Yanked off: hang from the rope round its neck first (QM, Oct 8).
+				transfer.stage = "hang"
+				transfer.hang = vfx.ropeHang.start(hrp.Position, transfer.target.animal:getNeck().cframe.Position, hrp.Parent)
+			end
+		end
+		return
+	end
+	if transfer and transfer.stage == "hang" then
+		transfer.t = math.min(transfer.t + dt / Config.LassoHang.Duration, 1)
+		local at = vfx.ropeHang.update(transfer.hang, dt, transfer.target.animal:getNeck().cframe.Position)
+		hrp.CFrame = at
+		focus = focus:Lerp(Vector3.new(at.X, 0, at.Z), 1 - math.exp(-10 * dt)) -- (smooth through the swings)
+		if transfer.t >= 1 then
+			vfx.ropeHang.stop(transfer.hang)
+			transfer.stage, transfer.t, transfer.from = "pull", 0, hrp.Position -- now hop on
 		end
 		return
 	end
@@ -4329,6 +4346,9 @@ RunService.PreSimulation:Connect(function(dt)
 		local neck = transfer.target.animal:getNeck()
 		if transfer.stage == "throw" then
 			Lasso.throw(transfer.t, neck)
+		elseif transfer.stage == "hang" then
+			Lasso.pull(1, neck) -- cinched, the rope taut to your hands
+			vfx.ropeHang.pose(transfer.hang)
 		else
 			Lasso.pull(transfer.t, neck)
 		end

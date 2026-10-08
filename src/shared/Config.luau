@@ -563,6 +563,19 @@ return {
 	-- QM's cream marble column in the middle of a coiled grass snake (Props/GrassSnake,
 	-- PodiumSnake.client), in the base's right front corner, their username and best
 	-- distance over their head (QM, Oct 5).
+	-- Lassoing an animal while riding (QM, Oct 8: the new lasso, phase 1): once the loop's
+	-- round its neck you hang off the rope, dragged through the air behind it, for
+	-- Duration seconds, then hop on as before (RopeHang.luau; 0 skips it). Rope: studs
+	-- of rope between its neck and you. Gravity/Lift/Drag shape the swing (Lift: up per
+	-- stud/s of speed, never quite cancelling Gravity); MinHeight: the lowest you sag.
+	LassoHang = {
+		Duration = 1.5,
+		Rope = 9,
+		Gravity = 80,
+		Lift = 2,
+		Drag = 0.6,
+		MinHeight = 3,
+	},
 	-- Lasso training (QM, Oct 8: new-loops): a stitched horse dummy on a pole at home.
 	-- Stand within Radius of it (on foot) and you lasso it over and over, each catch
 	-- PerCatch lasso strength (the saved "Lasso" attribute, Training.server). It
