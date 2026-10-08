@@ -7,7 +7,7 @@
 -- up, goes once you're tapping, and comes back if you stop for CursorAfter seconds.
 -- Config.HoldOn.
 --
---   HoldOn.start(character)   -- the phase begins: bar at Start, button up
+--   HoldOn.start(character, yourLevel, itsLevel) -- the phase begins: bar at Start, button up
 --   HoldOn.update(dt) -> fill (0..1), "won" | "lost" | nil
 --   HoldOn.stop()             -- button and cursor away
 
@@ -31,6 +31,7 @@ local fill = 0
 local lastTap = -math.huge
 local started = 0
 local who -- the character the +1s pop over
+local perTap, drain = 0, 0 -- this time's (Config.HoldOn: your lasso level against its)
 
 local function build()
 	local cfg = Config.HoldOn
@@ -85,7 +86,7 @@ function HoldOn.tap()
 		return
 	end
 	local cfg = Config.HoldOn
-	fill = math.min(fill + cfg.PerTap, 1)
+	fill = math.min(fill + perTap, 1)
 	lastTap = os.clock()
 	buttonScale.Scale = 0.92 -- a press, springing back in update
 	if cfg.Popup then
@@ -93,11 +94,15 @@ function HoldOn.tap()
 	end
 end
 
-function HoldOn.start(character)
+function HoldOn.start(character, yours, its)
 	if not button or not button.Parent then
 		build()
 	end
 	who = character
+	local cfg = Config.HoldOn
+	local ratio = if its and its > 0 then math.max(yours or 0, 1) / its else 1
+	perTap = math.min(cfg.PerTap * ratio, cfg.MaxTap)
+	drain = cfg.PerTap * cfg.DrawTaps
 	active, fill, lastTap, started = true, Config.HoldOn.Start, -math.huge, os.clock()
 	button.Visible = true
 	-- Space / A tap it too, over the ability's Space while it's up.
@@ -119,7 +124,7 @@ function HoldOn.update(dt)
 	if fill >= 1 then
 		return 1, "won"
 	end
-	fill -= cfg.Drain * dt
+	fill -= drain * dt
 	-- The cursor: up at the start and whenever you've stopped tapping a while.
 	local now = os.clock()
 	cursor.Visible = now - lastTap >= cfg.CursorAfter

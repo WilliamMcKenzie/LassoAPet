@@ -3739,7 +3739,7 @@ local function updateRider(dt)
 				transfer.hang = vfx.ropeHang.start(hrp.Position, hrp.Parent)
 				if not Tutorial.active then -- (the tutorial just hangs a moment: Duration)
 					transfer.fill = Config.HoldOn.Start
-					vfx.holdOn.start(hrp.Parent)
+					vfx.holdOn.start(hrp.Parent, player:GetAttribute("Lasso"), Config.LassoLevels[transfer.target.kind])
 				end
 			end
 		end

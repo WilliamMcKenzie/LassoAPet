@@ -565,13 +565,17 @@ return {
 	-- HOLD ON! (QM, Oct 8: the new core loop; HoldOn.luau): hanging off the rope after
 	-- lassoing, tap the button (or Space / A) to fill the top bar, which drains all the
 	-- while. Full: you hop on. Empty: BUCKED OFF!. Start: the bar's fill to begin with;
-	-- PerTap: each tap's fill; Drain: fill lost a second (so it takes Drain / PerTap taps
-	-- a second to hold your own). CursorAfter: seconds without a tap before the pulsing
+	-- PerTap/DrawTaps/MaxTap: how much a tap fills and how fast it drains (below). CursorAfter: seconds without a tap before the pulsing
 	-- cursor comes back. Width: the button's share of the screen's width.
 	HoldOn = {
 		Start = 0.3,
+		-- Your lasso level against the animal's (QM, Oct 8): each tap fills
+		-- PerTap x yours / its (its: Config.LassoLevels, the label over it; 1:1 if it has
+		-- none), at most MaxTap; it drains PerTap x DrawTaps a second. So matched, DrawTaps
+		-- taps a second is a draw; at twice its level half that, at half its level twice.
 		PerTap = 0.08,
-		Drain = 0.25,
+		DrawTaps = 3,
+		MaxTap = 0.7,
 		CursorAfter = 1,
 		Width = 0.33,
 		Image = "rbxassetid://71069860798170", -- assets/ui/HoldOn.png
