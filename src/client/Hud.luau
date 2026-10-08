@@ -1636,6 +1636,7 @@ function Hud.coinPopup(screenPoint, amount)
 	-- Same coin and "+N$" as the fail screen, a bit smaller.
 	local popup = cashRow(homeRoot, 64, 44, Vector2.new(0.5, 0.5), UDim2.fromOffset(screenPoint.X, screenPoint.Y))
 	popup.text.Text = "+" .. money(amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1))
+	popup.text.TextColor3 = Color3.fromHex("FFC41E") -- golden yellow, like the login money (QM, Oct 8)
 	popup.scale.Scale = 0
 
 	TweenService:Create(popup.scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
