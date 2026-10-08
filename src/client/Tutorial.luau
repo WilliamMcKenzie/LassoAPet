@@ -428,7 +428,7 @@ local function hintFor(state)
 	elseif step == "goal" then
 		return goalText
 	elseif step == "train" then
-		return "Train your lasso for big pets
+		return "Train your lasso for big pets"
 	elseif step == "ride" then
 		local _, kind = myPet(state)
 		return if kind and kind ~= "" then "Ride your " .. kind .. "!" else nil
