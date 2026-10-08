@@ -1,7 +1,7 @@
 -- The recommended lasso level (Config.LassoLevels) over the animal you'd lasso as you
 -- ride (QM, Oct 8): the lasso icon with the level beside it, like the HUD's lasso
 -- counter, the number coloured by how it compares with your lasso strength (QM, Oct 8):
--- white at or under yours (safe), orange up to Risky x yours, red past that. Ride.client
+-- white at or under yours (safe), orange up to 9x yours (risky), red past that. Ride.client
 -- moves it with the target ring (Outline.set).
 --
 --   LassoLevel.set(model, kind) -- show it over this animal; nil hides it
@@ -15,7 +15,7 @@ local Outline = require(script.Parent.Outline)
 
 local ICON = 40 -- px
 local ABOVE = 1.5 -- studs over the animal's top
-local RISKY = 1.1 -- up to this many times your strength: risky
+local RISKY = 9 -- up to this many times your strength: risky (QM: a rough sense of scale)
 local SAFE_COLOR = Color3.new(1, 1, 1)
 local RISKY_COLOR = Color3.fromRGB(255, 150, 30)
 local HARD_COLOR = Color3.fromRGB(255, 50, 50)
