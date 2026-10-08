@@ -143,13 +143,14 @@ end
 -- One terrain piece (Tracks.Kit) standing at (x, y, z), turned yaw degrees.
 local function piece(name, x, y, z, yaw, parent)
 	local kit = Tracks.Kit[name]
+	local g = Godlands.pieceScale -- (grown with the Godlands' beasts, from the floor up)
 	local model = Instance.new("Model")
 	model.Name = name
 	local at = CFrame.new(x, y, z) * CFrame.Angles(0, math.rad(yaw), 0)
 	local parts = {}
 	for _, row in kit.Parts do
-		local size = Vector3.new(row[2], row[3], row[4])
-		local cf = at * CFrame.new(row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16])
+		local size = Vector3.new(row[2], row[3], row[4]) * g
+		local cf = at * CFrame.new(row[5] * g, row[6] * g, row[7] * g, row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15], row[16])
 		local p = block(row[1], size, cf, model)
 		p.Color = Color3.fromRGB(row[17], row[18], row[19])
 		p.Material = if row[1] == "Lava" then Enum.Material.Neon else Enum.Material.SmoothPlastic
@@ -164,8 +165,8 @@ local function piece(name, x, y, z, yaw, parent)
 		table.insert(parts, { part = p, cframe = cf, transparency = 0 })
 	end
 	model.Parent = parent
-	local hx = kit.HalfX or kit.Radius * 0.8 -- the footprint the other biomes' pieces have (their "Base")
-	local hz = kit.HalfZ or kit.Radius * 0.8
+	local hx = (kit.HalfX or kit.Radius * 0.8) * g -- the footprint the other biomes' pieces have (their "Base")
+	local hz = (kit.HalfZ or kit.Radius * 0.8) * g
 	if kit.HalfX and math.abs(math.sin(math.rad(yaw))) > 0.7 then
 		hx, hz = hz, hx -- a wall piece turned side on
 	end
@@ -175,7 +176,7 @@ local function piece(name, x, y, z, yaw, parent)
 		hx = hx,
 		hz = hz,
 		tier = kit.Tier,
-		center = Vector3.new(x, y + 2, z),
+		center = Vector3.new(x, y + 2 * g, z),
 		parts = parts,
 	}
 end

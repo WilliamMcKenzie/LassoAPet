@@ -189,8 +189,9 @@ local function spotIn(k)
 		end
 		for _, piece in if ok then Tracks.Pieces[track.Grid] else {} do
 			local kit = Tracks.Kit[piece[1]]
-			local hx, hz = kit.HalfX or kit.Radius, kit.HalfZ or kit.Radius
-			if math.abs(x - piece[2]) < hx + PIECE_MARGIN and math.abs(along + piece[3]) < hz + PIECE_MARGIN then
+			local g = Godlands.pieceScale -- (laid wider and grown: GodlandsStream)
+			local hx, hz = (kit.HalfX or kit.Radius) * g, (kit.HalfZ or kit.Radius) * g
+			if math.abs(x - piece[2] * Godlands.widen) < hx + PIECE_MARGIN and math.abs(along + piece[3]) < hz + PIECE_MARGIN then
 				ok = false
 			end
 		end
@@ -209,7 +210,7 @@ local function addNest(k)
 	end
 	local nest = template:Clone()
 	nest.Name = "GodlandsNest" .. k
-	sizeNest(nest, Config.Biomes[#Config.Biomes].NestScale or 1) -- (the Godlands are the last biome)
+	sizeNest(nest, (Config.Biomes[#Config.Biomes].NestScale or 1) * Godlands.pieceScale) -- (the Godlands are the last biome; grown with its beasts)
 	local egg = nest:FindFirstChild("EggSpot")
 	local fromSpot = CFrame.new(-egg.Position) * nest:GetPivot()
 	nest:PivotTo(CFrame.new(spot.X, egg.Position.Y + spot.Y, spot.Z) * fromSpot) -- (the EggSpot as high over the ground as over the map's floor)

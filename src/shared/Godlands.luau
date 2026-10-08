@@ -69,6 +69,9 @@ function Godlands.track(k)
 end
 
 Godlands.widen = Godlands.halfWidth / gridHalf
+-- Its terrain pieces and nests grow with its beasts (QM, Oct 8): AnimalSize ^ 0.8, as
+-- tools/funnel.luau grows the other biomes' obstacles and nests.
+Godlands.pieceScale = (Godlands.biome and Config.Biomes[Godlands.biome].AnimalSize or 1) ^ 0.8
 
 -- A grid x (-gridHalf..gridHalf) laid across the wider course, on the tile grid.
 function Godlands.worldX(x)
