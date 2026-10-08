@@ -47,6 +47,9 @@ function HoldOn.start(character, yours, its, cantLose)
 	drain = cfg.PerTap * cfg.DrawTaps
 	active, fill = true, cfg.Start
 	floor = if cantLose then cfg.TutorialFloor else 0
+	if cantLose then
+		drain *= cfg.TutorialDrain -- (the tutorial's: slow, QM)
+	end
 	goAt = os.clock() + cfg.Ready.Time + cfg.Set.Time
 	Hud.setStruggle(true)
 	-- A tap or click anywhere, Space or A: over everything else's while it's on.

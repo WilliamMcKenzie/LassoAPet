@@ -41,19 +41,24 @@ import partlib  # noqa: E402
 OUT = Path(__file__).resolve().parent.parent / "src" / "world" / "Pens.rbxmx"
 
 TILE = 4  # the floor's checker squares
-SIZES = [12, 14, 16, 17]  # tiles a side at pen level 1..4 (Meadow, Desert, Tundra, Ocean)
+# tiles a side at pen level 1..5 (Meadow, Desert, Tundra, Ocean, Godlands): growing
+# faster and faster (QM, Oct 8: was 12, 14, 16, 17), so the Ocean's holds a Whale or a
+# Kraken (~110 studs) and the Godlands' is 144 studs a side
+SIZES = [12, 16, 21, 29, 36]
 GATE = 10
-HALF_W, DEPTH = 144, 144  # the home base: x -144..144, z 0..144 inside its walls
+HALF_W, DEPTH = 240, 304  # the home base: x -240..240, z 0..304 inside its walls (QM, Oct 8: was 144 x 144)
 # Pens in claim order: (back edge centre x, z, the way the open side faces, which
 # way an odd size's extra tile goes along the pen's local x). Three along the
 # back wall facing the start line, and one in each front corner of the base
 # facing in. Edges sit on tile lines at every size.
+# (Spread so the biggest size never overlaps: back pens 160 apart, the corner ones
+# far enough up the side walls to clear the start line and the back row.)
 PENS = [
     (0, DEPTH, "front", 1),
-    (-76, DEPTH, "front", 1),
-    (76, DEPTH, "front", 1),
-    (-HALF_W, 32, "right", 1),
-    (HALF_W, 32, "left", -1),
+    (-160, DEPTH, "front", 1),
+    (160, DEPTH, "front", 1),
+    (-HALF_W, 80, "right", 1),
+    (HALF_W, 80, "left", -1),
 ]
 # Local pen frame: centred on the pen, open side at z = -SIZE / 2 facing -z.
 # These map it onto the world for each facing.

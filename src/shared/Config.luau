@@ -229,8 +229,8 @@ return {
 	CourseWidening = 0.005,
 	CourseMaxHalfWidth = 137,
 	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
-	HomeHalfWidth = 144, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3)
-	HomeDepth = 144, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
+	HomeHalfWidth = 240, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3; again Oct 8, for 144-stud Godlands pens)
+	HomeDepth = 304, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
 	-- Ride
@@ -583,8 +583,10 @@ return {
 		-- auto-ride, the level labels' colours), so Meadow's rabbits and horses are an
 		-- easy fight from the start (QM, Oct 8; the counter still shows the real one).
 		MinStrength = 20,
-		-- In the tutorial the bar never runs out: it holds at this, so nobody gets stuck.
+		-- In the tutorial the bar never runs out: it holds at TutorialFloor, so nobody gets
+		-- stuck, and drains at TutorialDrain x the usual rate (QM: not overwhelming).
 		TutorialFloor = 0.15,
+		TutorialDrain = 0.25,
 		MaxTap = 0.7,
 		Arm = "rbxassetid://81589206383908", -- assets/ui/FlexArm.png: the +1 popup's icon
 		Popup = false, -- a "+1" with the arm on each tap (QM, Oct 8: off)
