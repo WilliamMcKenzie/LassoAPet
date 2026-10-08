@@ -1653,7 +1653,35 @@ end
 -- HOLD ON!'s struggle (QM, Oct 8): nothing on screen but the bar. Every ScreenGui and
 -- BillboardGui of yours is switched off (and back as it was after), and the bar moves
 -- onto a screen of its own, at the same spot and size.
-local struggleGui, struggleRoot, struggleWas, struggleRun, holdBounce
+local struggleGui, struggleRoot, struggleWas, struggleRun, holdBounce, struggleCursor
+
+-- The tutorial's pulsing click cursor in the middle of the screen during its struggle,
+-- while you're not tapping (HoldOn; QM, Oct 8). A tap anywhere counts.
+function Hud.setStruggleCursor(on)
+	if not struggleRoot then
+		return
+	end
+	if not struggleCursor then
+		struggleCursor = Instance.new("ImageLabel")
+		struggleCursor.Name = "TapCursor"
+		struggleCursor.BackgroundTransparency = 1
+		struggleCursor.Image = "rbxassetid://93240211999923" -- assets/ui/TutorialCursor.png
+		struggleCursor.AnchorPoint = Vector2.new(29 / 256, 6 / 256) -- its tip
+		struggleCursor.Position = UDim2.fromScale(0.5, 0.5)
+		struggleCursor.SizeConstraint = Enum.SizeConstraint.RelativeYY
+		struggleCursor.Size = UDim2.fromScale(0.16, 0.16)
+		struggleCursor.ZIndex = 5
+		local scale = Instance.new("UIScale")
+		scale.Parent = struggleCursor
+		RunService.RenderStepped:Connect(function()
+			if struggleCursor.Visible then
+				scale.Scale = 1 + 0.15 * math.sin(os.clock() * math.pi * 2 * 1.6)
+			end
+		end)
+	end
+	struggleCursor.Visible = on
+	struggleCursor.Parent = struggleRoot
+end
 
 -- The bar bounces on each HOLD ON! tap (QM, Oct 8): a subtle 1.04x punch easing back,
 -- started afresh each tap (no stacking).
@@ -1776,6 +1804,9 @@ function Hud.setStruggle(on)
 		task.spawn(runStruggle, run)
 	else
 		struggleRun = nil
+		if struggleCursor then
+			struggleCursor.Visible = false
+		end
 		for g in struggleWas do
 			if g.Parent then
 				g.Enabled = true
@@ -1785,7 +1816,7 @@ function Hud.setStruggle(on)
 		holdFrame.Parent = rideRoot
 		struggleGui.Enabled = false
 		for _, child in struggleRoot:GetChildren() do
-			if child ~= holdFrame and child:IsA("GuiObject") then
+			if child ~= holdFrame and child ~= struggleCursor and child:IsA("GuiObject") then
 				child:Destroy()
 			end
 		end

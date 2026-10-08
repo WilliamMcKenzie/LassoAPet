@@ -25,6 +25,8 @@ local fill = 0
 local who -- the character the +1s pop over
 local perTap, drain = 0, 0 -- this time's (Config.HoldOn: your lasso level against its)
 local floor = 0 -- the bar never drains below this (the tutorial's: can't be lost)
+local tutorial = false -- the tutorial's struggle: the click cursor nudges you to tap
+local lastTap = 0
 local goAt = 0 -- os.clock() "Ready... Set..." is over: the bar holds and taps don't count till then
 
 function HoldOn.tap()
@@ -33,6 +35,7 @@ function HoldOn.tap()
 	end
 	local cfg = Config.HoldOn
 	fill = math.min(fill + perTap, 1)
+	lastTap = os.clock()
 	Hud.bounceHold() -- the bar bounces with each tap (QM)
 	if cfg.Popup then
 		PlusPopup.at(who, 1, cfg.Arm, PlusPopup.SCATTER)
@@ -47,6 +50,7 @@ function HoldOn.start(character, yours, its, cantLose)
 	drain = cfg.PerTap * cfg.DrawTaps
 	active, fill = true, cfg.Start
 	floor = if cantLose then cfg.TutorialFloor else 0
+	tutorial = cantLose == true
 	if cantLose then
 		drain *= cfg.TutorialDrain -- (the tutorial's: slow, QM)
 	end
@@ -74,6 +78,8 @@ function HoldOn.update(dt)
 	if os.clock() < goAt then
 		return fill, nil -- (Ready... Set...)
 	end
+	-- In the tutorial, the pulsing click cursor while you've not tapped for a second (QM).
+	Hud.setStruggleCursor(tutorial and os.clock() - math.max(lastTap, goAt) >= 1)
 	fill = math.max(fill - drain * dt, floor)
 	if fill <= 0 then
 		return 0, "lost"
@@ -86,6 +92,7 @@ function HoldOn.stop()
 		return
 	end
 	active = false
+	Hud.setStruggleCursor(false)
 	ContextActionService:UnbindAction(ACTION)
 	Hud.setStruggle(false)
 end
