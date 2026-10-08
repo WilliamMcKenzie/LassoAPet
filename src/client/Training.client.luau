@@ -40,6 +40,7 @@ local trainingState = ReplicatedStorage:WaitForChild("TrainingState") -- (others
 -- cinched radius). The bigger ones stand further out so their bases stay ~2 studs
 -- clear of the fence, and have bigger rings.
 local dummies = {} -- [pen] = { entry, level, model, bones, ring, out, radius, place, idleT, hitT }
+local ringShown = 0 -- how much of your ring shows (0..1.6), easing
 
 local function noCollide(model)
 	for _, part in model:GetDescendants() do
@@ -71,30 +72,10 @@ local function reach(model)
 	return back, side
 end
 
--- The ring you train in (QM, Oct 8): white blocks on the floor round the pole, only
--- in front of the fence (`out` studs behind the pole, +Z in its space: the pen's
--- behind it). Built round the origin, placed with the dummy. Only yours is shown.
-local RING = { Segments = 72, Width = 1, Height = 0.2, Idle = 0.35 } -- Idle: its transparency till you're in it
-local function buildRing(radius, out)
-	local ring = Instance.new("Model")
-	ring.Name = "TrainingRing"
-	for i = 0, RING.Segments - 1 do
-		local a = (i + 0.5) / RING.Segments * 2 * math.pi
-		local x, z = radius * math.cos(a), radius * math.sin(a)
-		if z < out - 1 then
-			local part = Instance.new("Part")
-			part.Anchored, part.CanCollide, part.CanQuery, part.CanTouch, part.CastShadow = true, false, false, false, false
-			part.Size = Vector3.new(RING.Width, RING.Height, 2 * math.pi * radius / RING.Segments + 0.05)
-			part.Color = Color3.new(1, 1, 1)
-			part.Material = Enum.Material.SmoothPlastic
-			part.Transparency = RING.Idle
-			part.CFrame = CFrame.new(x, RING.Height / 2 + 0.02, z) * CFrame.Angles(0, -a, 0) -- (its length along the ring)
-			part.Parent = ring
-		end
-	end
-	ring.WorldPivot = CFrame.identity
-	return ring
-end
+-- The ring you train in (QM, Oct 8): the same dotted ring the animals get (Outline),
+-- round the pole on the floor, only yours, fading in as you come near it
+-- (Config.Training.RingShowDist) and brighter while you're in it.
+local Outline = require(script.Parent.Outline)
 
 local function levelOf(pen)
 	local owner = pen:GetAttribute("Owner") and Players:GetPlayerByUserId(pen:GetAttribute("Owner"))
@@ -107,6 +88,7 @@ local function build(pen, level)
 	if old then
 		old.model:Destroy()
 		old.ring:Destroy()
+		ringShown = 0
 	end
 	local entry = TrainingByBiome[level]
 	local model, _, bones = Rig.fromData(entry.dummy, "TrainingDummy" .. entry.name, STUD_TEXTURE)
@@ -121,7 +103,7 @@ local function build(pen, level)
 		bones = bones,
 		out = back + 2, -- (QM: right up against the fence, ~2 studs clear)
 		radius = radius,
-		ring = buildRing(radius, back + 2),
+		ring = Outline.circle(),
 		idleT = math.random() * entry.dummy.animations.idle.length,
 		hitT = math.huge,
 	}
@@ -136,10 +118,8 @@ local function place(dummy, pen)
 		if dummy.place ~= spot then
 			dummy.place = spot
 			dummy.model.PrimaryPart.CFrame = spot -- (Root is at the model's origin, its foot)
-			dummy.ring:PivotTo(spot)
 		end
 		dummy.model.Parent = workspace
-		dummy.ring.Parent = if yours then workspace else nil
 		if yours then
 			-- Just inside the ring's front, where you'd step in (the tutorial's arrows lead
 			-- here; this client only).
@@ -148,7 +128,8 @@ local function place(dummy, pen)
 	else
 		dummy.place = nil
 		dummy.model.Parent = nil
-		dummy.ring.Parent = nil
+		dummy.ring:hide()
+		dummy.ringOn = false
 	end
 end
 
@@ -276,12 +257,21 @@ RunService.PreSimulation:Connect(function(dt)
 			trainingState:FireServer(true)
 		end
 	end
-	-- Your ring lights up while you're in it.
-	local lit = character ~= nil
-	if dummy and dummy.lit ~= lit then
-		dummy.lit = lit
-		for _, part in dummy.ring:GetChildren() do
-			part.Transparency = if lit then 0 else RING.Idle
+	-- Your ring: shown as you come near (fading in and out), more solid while you're in it.
+	if dummy and dummy.place then
+		local me = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		local away = if me then ((me.Position - dummy.place.Position) * Vector3.new(1, 0, 1)).Magnitude else math.huge
+		local want = if character then 1.6 elseif away <= training.RingShowDist * dummy.radius / training.Radius then 1 else 0
+		ringShown += (want - ringShown) * (1 - math.exp(-8 * dt))
+		if ringShown > 0.02 then
+			if not dummy.ringOn then
+				dummy.ring:place(dummy.model.PrimaryPart, dummy.radius)
+				dummy.ringOn = true
+			end
+			dummy.ring:fade(ringShown)
+		elseif dummy.ringOn then
+			dummy.ring:hide()
+			dummy.ringOn = false
 		end
 	end
 	if character and (player:GetAttribute("PenLevel") or 1) ~= lassoLevel then

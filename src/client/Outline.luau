@@ -11,6 +11,7 @@
 --                           -- { lift, radius } overrides, e.g. Outline.NEST
 --   Outline.ring(model, color) -- a ring of its own round this model (:Destroy() it when done)
 --   Outline.box(model) -- its bounding box as (CFrame from its root, size), measured once
+--   Outline.circle() -- a ring of its own, placed by hand: ring:place(part, radius), ring:fade(0..1), ring:hide()
 
 local RunService = game:GetService("RunService")
 
@@ -90,6 +91,26 @@ function Ring:fit(model, root, fit)
 	spinning[self] = true
 end
 
+-- Shows the ring round `part` (flat on its floor, at its middle) at `radius` studs.
+function Ring:place(part, radius, lift)
+	self.base = CFrame.new(0, lift or LIFT, 0) * CFrame.Angles(math.pi / 2, 0, 0)
+	for _, dash in self.dashes do
+		dash.Radius = radius
+		dash.InnerRadius = radius - math.clamp(radius * 0.12, 0.5, 2)
+		dash.Adornee = part
+		dash.Visible = true
+	end
+	self:turn()
+	spinning[self] = true
+end
+
+-- How much of it shows: 1 the usual (TRANSPARENCY), 0 none, over 1 more solid.
+function Ring:fade(alpha)
+	for _, dash in self.dashes do
+		dash.Transparency = math.clamp(1 - (1 - TRANSPARENCY) * alpha, 0, 1)
+	end
+end
+
 function Ring:hide()
 	spinning[self] = nil
 	for _, dash in self.dashes do
@@ -126,6 +147,10 @@ function Outline.set(model, fit)
 	else
 		ring:hide()
 	end
+end
+
+function Outline.circle(color)
+	return newRing(color)
 end
 
 function Outline.ring(model, color)

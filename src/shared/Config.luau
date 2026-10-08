@@ -651,6 +651,7 @@ return {
 		Out = 5.5, -- studs from the pen's open side (its fence) to the pole: the base (3.3 behind it) ~2 clear of the fence (QM)
 		In = 6, -- studs in from the pen's corner, along that side
 		Radius = 14, -- studs from the pole: the ring you train in, on foot (QM, Oct 8; bigger round the bigger dummies)
+		RingShowDist = 28, -- studs from your dummy your ring shows within (2x Radius, more for the bigger dummies), fading in and out (QM, Oct 8)
 		-- Lasso strength per catch at each pen level (Config.Biomes order), tracking the
 		-- biomes' lasso level ranges so each takes some 100-1,000 catches (QM, Oct 8: the
 		-- shape matters, not the numbers): Meadow, Desert, Tundra, Ocean, Godlands.
