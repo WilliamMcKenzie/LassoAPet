@@ -1653,7 +1653,83 @@ end
 -- HOLD ON!'s struggle (QM, Oct 8): nothing on screen but the bar. Every ScreenGui and
 -- BillboardGui of yours is switched off (and back as it was after), and the bar moves
 -- onto a screen of its own, at the same spot and size.
-local struggleGui, struggleRoot, struggleWas, tapSign, tapScale, tapPulse
+local struggleGui, struggleRoot, struggleWas, struggleRun
+
+-- One of QM's struggle signs (Config.HoldOn: Ready, Set, Tap): its art, or the word in
+-- yellow with a black outline until that's uploaded.
+local function struggleSign(sign, word)
+	local label = Instance.new(if sign.Image ~= "" then "ImageLabel" else "TextLabel")
+	label.Name = word
+	label.BackgroundTransparency = 1
+	label.AnchorPoint = Vector2.new(0.5, 0.5)
+	label.SizeConstraint = Enum.SizeConstraint.RelativeXX
+	label.Size = UDim2.fromScale(sign.Width, sign.Width / sign.Aspect)
+	if sign.Image ~= "" then
+		label.Image = sign.Image
+		label.ScaleType = Enum.ScaleType.Fit
+	else
+		label.Text = word
+		label.Font = FONT
+		label.TextScaled = true
+		label.TextColor3 = Color3.fromRGB(255, 214, 40)
+		local edge = Instance.new("UIStroke")
+		edge.Thickness = 4
+		edge.Parent = label
+	end
+	local scale = Instance.new("UIScale")
+	scale.Parent = label
+	label.Parent = struggleRoot
+	return label, scale
+end
+
+local function fadeOut(label, info, goal)
+	goal = goal or {}
+	goal[if label:IsA("ImageLabel") then "ImageTransparency" else "TextTransparency"] = 1
+	TweenService:Create(label, info, goal):Play()
+	local edge = label:FindFirstChildOfClass("UIStroke")
+	if edge then
+		TweenService:Create(edge, info, { Transparency = 1 }):Play()
+	end
+end
+
+-- "Ready..." then "Set..." in the middle, each popping in then shrinking away, then
+-- TAP!s rising and fading on either side by turns, a reminder to keep tapping (not
+-- one per tap), till it's over (QM, Oct 8).
+local function runStruggle(run)
+	local cfg = Config.HoldOn
+	for _, step in { { cfg.Ready, "READY" }, { cfg.Set, "SET" } } do
+		local sign = step[1]
+		local label, scale = struggleSign(sign, step[2])
+		label.Position = UDim2.fromScale(sign.At.X, sign.At.Y)
+		scale.Scale = 1.25
+		TweenService:Create(scale, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+		task.wait(sign.Time * 0.45)
+		local away = TweenInfo.new(sign.Time * 0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+		TweenService:Create(scale, away, { Scale = 0.4 }):Play()
+		fadeOut(label, away)
+		task.wait(sign.Time * 0.55)
+		label:Destroy()
+		if struggleRun ~= run then
+			return
+		end
+	end
+	local tap, side = cfg.Tap, 1
+	while struggleRun == run do
+		local spot = tap.Spots[side]
+		local label, scale = struggleSign(tap, "TAP!")
+		label.Rotation = spot.Rotation
+		label.Position = UDim2.fromScale(spot.At.X, spot.At.Y + tap.Rise / 2)
+		scale.Scale = 0.8
+		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+		local life = TweenInfo.new(tap.Life, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		TweenService:Create(label, life, { Position = UDim2.fromScale(spot.At.X, spot.At.Y - tap.Rise / 2) }):Play()
+		fadeOut(label, TweenInfo.new(tap.Life, Enum.EasingStyle.Quad, Enum.EasingDirection.In))
+		task.delay(tap.Life + 0.05, label.Destroy, label)
+		side = side % #tap.Spots + 1
+		task.wait(tap.Every)
+	end
+end
+
 function Hud.setStruggle(on)
 	if not holdFrame or (on == (struggleWas ~= nil)) then
 		return
@@ -1668,31 +1744,6 @@ function Hud.setStruggle(on)
 			struggleGui.DisplayOrder = 10
 			struggleGui.Parent = playerGui
 			struggleRoot = root(struggleGui)
-			-- QM's "TAP!" on the right, tilted, pulsing in and out (Config.HoldOn.Tap).
-			local tap = Config.HoldOn.Tap
-			tapSign = Instance.new(if tap.Image ~= "" then "ImageLabel" else "TextLabel")
-			tapSign.Name = "Tap"
-			tapSign.BackgroundTransparency = 1
-			tapSign.AnchorPoint = Vector2.new(0.5, 0.5)
-			tapSign.Position = UDim2.fromScale(tap.At.X, tap.At.Y)
-			tapSign.SizeConstraint = Enum.SizeConstraint.RelativeXX
-			tapSign.Size = UDim2.fromScale(tap.Width, tap.Width / tap.Aspect)
-			tapSign.Rotation = tap.Rotation
-			if tap.Image ~= "" then
-				tapSign.Image = tap.Image
-				tapSign.ScaleType = Enum.ScaleType.Fit
-			else -- (until the art's uploaded)
-				tapSign.Text = "TAP!"
-				tapSign.Font = FONT
-				tapSign.TextScaled = true
-				tapSign.TextColor3 = Color3.fromRGB(255, 214, 40)
-				local edge = Instance.new("UIStroke")
-				edge.Thickness = 4
-				edge.Parent = tapSign
-			end
-			tapScale = Instance.new("UIScale")
-			tapScale.Parent = tapSign
-			tapSign.Parent = struggleRoot
 		end
 		struggleWas = {}
 		for _, g in playerGui:GetDescendants() do
@@ -1703,11 +1754,11 @@ function Hud.setStruggle(on)
 		end
 		holdFrame.Parent = struggleRoot
 		struggleGui.Enabled = true
-		local from = os.clock()
-		tapPulse = RunService.RenderStepped:Connect(function()
-			tapScale.Scale = 1 + Config.HoldOn.Tap.Pulse * math.sin((os.clock() - from) * math.pi * 2 * 1.6)
-		end)
+		local run = {}
+		struggleRun = run
+		task.spawn(runStruggle, run)
 	else
+		struggleRun = nil
 		for g in struggleWas do
 			if g.Parent then
 				g.Enabled = true
@@ -1716,9 +1767,10 @@ function Hud.setStruggle(on)
 		struggleWas = nil
 		holdFrame.Parent = rideRoot
 		struggleGui.Enabled = false
-		if tapPulse then
-			tapPulse:Disconnect()
-			tapPulse = nil
+		for _, child in struggleRoot:GetChildren() do
+			if child ~= holdFrame and child:IsA("GuiObject") then
+				child:Destroy()
+			end
 		end
 	end
 end

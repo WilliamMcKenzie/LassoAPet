@@ -23,9 +23,10 @@ local active = false
 local fill = 0
 local who -- the character the +1s pop over
 local perTap, drain = 0, 0 -- this time's (Config.HoldOn: your lasso level against its)
+local goAt = 0 -- os.clock() "Ready... Set..." is over: the bar holds and taps don't count till then
 
 function HoldOn.tap()
-	if not active then
+	if not active or os.clock() < goAt then
 		return
 	end
 	local cfg = Config.HoldOn
@@ -42,6 +43,7 @@ function HoldOn.start(character, yours, its)
 	perTap = math.min(cfg.PerTap * ratio, cfg.MaxTap)
 	drain = cfg.PerTap * cfg.DrawTaps
 	active, fill = true, cfg.Start
+	goAt = os.clock() + cfg.Ready.Time + cfg.Set.Time
 	Hud.setStruggle(true)
 	-- A tap or click anywhere, Space or A: over everything else's while it's on.
 	ContextActionService:BindActionAtPriority(ACTION, function(_, state)
@@ -61,6 +63,9 @@ function HoldOn.update(dt)
 	-- draining first took it straight back under, so it could never be won)
 	if fill >= 1 then
 		return 1, "won"
+	end
+	if os.clock() < goAt then
+		return fill, nil -- (Ready... Set...)
 	end
 	fill -= drain * dt
 	if fill <= 0 then
