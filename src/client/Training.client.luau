@@ -208,7 +208,7 @@ local Hud = require(script.Parent.Hud)
 local PlusPopup = require(script.Parent.PlusPopup)
 local Sounds = require(script.Parent.Sounds)
 local function popCatch(char, amount)
-	PlusPopup.at(char, amount, Hud.lassoIcon)
+	PlusPopup.at(char, amount, Hud.lassoIcon, PlusPopup.BURST)
 end
 
 -- Training ----------------------------------------------------------------------
