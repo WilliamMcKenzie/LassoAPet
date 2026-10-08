@@ -669,13 +669,13 @@ return {
 	-- (last ~6 h). Within a biome, more $/s = higher. Horse, Pig and Bunny are at or under
 	-- HoldOn.MinStrength: instant rides. Exclusives match their biome's top animal.
 	-- (QM, Oct 8: a much bigger gap by rarity: each biome's Legendary kept, Epic ~0.4x it,
-	-- Rare ~0.1x, Uncommon ~0.015x, rounded.)
+	-- Rare ~0.1x, Uncommon ~0.015x, rounded; the Snack Yak, a Robux exclusive, matches the Icebringer.)
 	LassoLevels = {
 		Horse = 5, Pig = 15, Bunny = 20, Pinto = 25, Fish = 150, Rhino = 600, Unicorn = 1500, -- Meadow
 		Kitten = 500, Cactus = 750, Scorpion = 5000, Sandworm = 18000, SpineLizard = 20000, Snake = 46000, -- Desert
-		Penguin = 500000, Boar = 750000, Snowman = 5000000, IceGolem = 18000000, SnackYak = 20000000, Icebringer = 46000000, -- Snow
+		Penguin = 500000, Boar = 750000, Snowman = 5000000, IceGolem = 18000000, SnackYak = 46000000, Icebringer = 46000000, -- Snow
 		Starfish = 15000000, Whale = 90000000, Squid = 300000000, FishSchool = 350000000, KingCrab = 400000000, BlueCrab = 660000000, RoboShark = 900000000, Kraken = 900000000, -- Ocean
-		Sludge = 70000000000, Beholder = 80000000000, WarElephant = 85000000000, Leviathan = 300000000000, SoulHorse = 330000000000, Loong = 820000000000, -- Godlands
+		Sludge = 75000000000, Beholder = 80000000000, WarElephant = 85000000000, Leviathan = 300000000000, SoulHorse = 330000000000, Loong = 820000000000, -- Godlands
 	},
 	-- Rarity text colours (QM, Oct 7): pet nameplates, lasso levels. Common keeps the inventory slots' grey.
 	RarityColors = {
