@@ -6,6 +6,8 @@
 -- Gold bought with Robux (the "BoughtGold" attribute, Shop.server's running
 -- total) is added once: the save keeps how much of it is in (bought), and only
 -- the rest is added, saved straight away.
+-- Lasso strength (the "Lasso" attribute, Training.server) is saved alongside, as
+-- `lasso` (Oct 8: new-loops; older saves have none and start at 0).
 
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
@@ -32,6 +34,7 @@ end
 
 local function load(player)
 	player:SetAttribute("Gold", 0)
+	player:SetAttribute("Lasso", 0)
 	if not store then
 		return
 	end
@@ -43,6 +46,8 @@ local function load(player)
 				local gold = if typeof(value) == "table" then value.gold else value
 				bought[player] = if typeof(value) == "table" then tonumber(value.bought) or 0 else 0
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + (tonumber(gold) or 0))
+				local lasso = if typeof(value) == "table" then tonumber(value.lasso) else nil
+				player:SetAttribute("Lasso", (player:GetAttribute("Lasso") or 0) + (lasso or 0))
 				loaded[player] = true
 			end
 			return
@@ -60,12 +65,13 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	local gold = player:GetAttribute("Gold") or 0
-	local as = gold .. "/" .. (bought[player] or 0)
+	local lasso = player:GetAttribute("Lasso") or 0
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. lasso
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0 }) then
+		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0, lasso = lasso }) then
 			savedAs[player] = as
 			return
 		end

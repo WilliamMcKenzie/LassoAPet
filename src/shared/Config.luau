@@ -551,6 +551,21 @@ return {
 	-- QM's cream marble column in the middle of a coiled grass snake (Props/GrassSnake,
 	-- PodiumSnake.client), in the base's right front corner, their username and best
 	-- distance over their head (QM, Oct 5).
+	-- Lasso training (QM, Oct 8: new-loops): a stitched horse dummy on a pole at home.
+	-- Stand within Radius of it (on foot) and you lasso it over and over, each catch
+	-- PerCatch lasso strength (the saved "Lasso" attribute, Training.server). It
+	-- doesn't gate anything yet. Training.client builds Design's Props/TrainingDummy
+	-- here, or a placeholder of blocks until that's in.
+	Training = {
+		Position = Vector3.new(30, 0, 66), -- on the grass between Pen1's and Pen3's ride lanes, behind the podium snake
+		Yaw = 200, -- degrees: the dummy faces back into the base
+		Radius = 14, -- studs from the pole you train from
+		PerCatch = 1,
+		Swing = 1.1, -- seconds of each catch: the loop spun overhead,
+		Throw = 0.45, -- flying out to the dummy's neck,
+		Pull = 0.5, -- cinching on it (the catch counts here),
+		Rest = 0.35, -- and slack before the next
+	},
 	Podium = {
 		Position = Vector3.new(58, 0, 16), -- the column, on the ground; the snake reaches x ~50..74, z ~2..47 (Pen5 is x >= 76)
 		Refresh = 120, -- seconds between re-reading the leader

@@ -48,6 +48,7 @@ local IMAGES = {
 	rollButton = { id = "rbxassetid://112026122025466", size = Vector2.new(960, 378) }, -- RollButton.png
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
+	lassoIcon = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) }, -- the coin until QM's LassoIcon.png is uploaded
 	upgradePen = { id = "rbxassetid://120690804030353", size = Vector2.new(1152, 284) }, -- UpgradePenActive.png
 	upgradePenDisabled = { id = "rbxassetid://134427342737800", size = Vector2.new(1158, 285) }, -- UpgradePenDisabled.png
 	-- Each biome's own Upgrade Pen (Config.Biomes[i].UpgradeImage), all this size.
@@ -563,19 +564,42 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	sideGui.IgnoreGuiInset = true
 	sideGui.Parent = playerGui
 	local sideRoot = root(sideGui)
-	-- Gold: the coin with the account's total over its bottom edge, like QM's Gold
-	-- mockup. Clicking it does nothing: the Shop button opens the shop (QM, Oct 5).
-	gold = button(sideRoot, "coin", UDim2.fromOffset(ICON_HEIGHT, ICON_HEIGHT), Vector2.new(0, 1), UDim2.new(0, MARGIN, 1, -MARGIN))
-	local total = label(gold, UDim2.fromOffset(0, ICON_HEIGHT * 0.4), UDim2.new(0.5, 0, 1, 2), 44, 4) -- 4px outline (QM)
-	total.AnchorPoint = Vector2.new(0.5, 1)
-	total.AutomaticSize = Enum.AutomaticSize.X
-	total.ZIndex = 2
+	-- Bottom left, two rows like QM's ref (Oct 8): lasso strength (the "Lasso"
+	-- attribute, from Training.server) over gold, each its icon with the number
+	-- beside it overlapping the icon's edge. `gold` is the pair, shown and hidden together.
+	gold = Instance.new("Frame")
+	gold.Name = "Counters"
+	gold.BackgroundTransparency = 1
+	gold.AutomaticSize = Enum.AutomaticSize.XY
+	gold.AnchorPoint = Vector2.new(0, 1)
+	gold.Position = UDim2.new(0, MARGIN, 1, -MARGIN)
+	local stack = Instance.new("UIListLayout")
+	stack.SortOrder = Enum.SortOrder.LayoutOrder
+	stack.Padding = UDim.new(0, 4)
+	stack.Parent = gold
+	gold.Parent = sideRoot
+	local lassoRow = cashRow(gold, ICON_HEIGHT, 44, Vector2.zero, UDim2.new(), 4) -- 4px outline (QM)
+	lassoRow.coin.Image = IMAGES.lassoIcon.id
+	local goldRow = cashRow(gold, ICON_HEIGHT, 44, Vector2.zero, UDim2.new(), 4)
+	goldRow.row.LayoutOrder = 1
 	local player = Players.LocalPlayer
 	local function showGold()
-		total.Text = money(player:GetAttribute("Gold") or 0)
+		goldRow.text.Text = money(player:GetAttribute("Gold") or 0)
 	end
 	player:GetAttributeChangedSignal("Gold"):Connect(showGold)
 	showGold()
+	local shownLasso = player:GetAttribute("Lasso") or 0
+	local function showLasso()
+		local n = player:GetAttribute("Lasso") or 0
+		lassoRow.text.Text = (money(n):gsub("%$", ""))
+		if n > shownLasso then -- a little bump with each catch
+			lassoRow.scale.Scale = 1.15
+			TweenService:Create(lassoRow.scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		end
+		shownLasso = n
+	end
+	player:GetAttributeChangedSignal("Lasso"):Connect(showLasso)
+	showLasso()
 	-- The coin keeps the bottom left to itself; the bottom right column is Fuse,
 	-- Shop, Pets from the top, all the same height (QM, Oct 6 19:24). Row 0 is the
 	-- bottom one. (The egg roll menu opens from Carl, its NPC.)
