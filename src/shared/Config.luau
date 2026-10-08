@@ -15,7 +15,7 @@ return {
 	Biomes = {
 		{
 			Name = "Meadow",
-			AnimalSize = 1, -- its animals are this much bigger (everywhere: Animals/Horse), its obstacles and nests ^0.8 of it (QM, Oct 8: each biome's beasts bigger; tools/funnel.luau)
+			AnimalSize = 1, -- its obstacles (tools/funnel.luau) and the Godlands' terrain grow ^0.8 of this. Animals no longer do (QM, Oct 8: back to their old sizes)
 			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
 			Length = 760,
 			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
@@ -241,7 +241,14 @@ return {
 	-- over a horse's - 1)), so twice a horse's width steers 1.2x, three times 1.4x.
 	SteerWidthScale = 0.2,
 	SteerResponse = 8,
-	HoldTime = 6,
+	HoldTime = 6, -- (a pet's own stamina: no longer used, the bar runs on your Stamina below)
+	-- Stamina (QM, Oct 8: the stamina loop): your saved stamina level (the "Stamina"
+	-- attribute, Gold.server), shown on the bar as you ride out. The bar lasts Seconds x
+	-- your level, draining SprintDrain x as fast while you sprint; lassoing doesn't refill
+	-- it. Empty: you turn round on whatever you're riding and race it home, and a wild
+	-- one's egg is yours over the line. Everyone starts at Start (training it comes later).
+	Stamina = { Start = 20, Seconds = 1 },
+	SprintDrain = 1.5, -- x the stamina bar's usual drain while sprinting
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"
 	-- (0.5 stud) MaterialVariant from MaterialService instead of a stud Texture per face,
@@ -311,13 +318,13 @@ return {
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
 	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
 	-- brings home an egg, one hint at a time and only the buttons each step needs.
-	-- false turns it off. On that first ride the stampede runs on the player's own
+	-- false turns it off (QM, Oct 8: off, to be redone from scratch). On that first ride the stampede runs on the player's own
 	-- clock so it can slow down to TutorialSlowMo x speed, and ever slower from there
 	-- (TutorialSlowDeepen), while LASSO or TAKE EGG is waiting to be pressed, and the
 	-- Hold bar never runs out. The tutorial's eggs hatch by themselves
 	-- (TutorialHatchTime); every other egg waits for you to hold F by it once it's
 	-- ready (Hatchery, Pen.client).
-	Tutorial = true,
+	Tutorial = false,
 	TutorialHatchTime = 0,
 	TutorialSlowMo = 0.2,
 	-- Seconds of waiting for that press before time runs at a quarter of TutorialSlowMo;
@@ -573,77 +580,6 @@ return {
 	-- QM's cream marble column in the middle of a coiled grass snake (Props/GrassSnake,
 	-- PodiumSnake.client), in the base's right front corner, their username and best
 	-- distance over their head (QM, Oct 5).
-	-- HOLD ON! (QM, Oct 8: the new core loop; HoldOn.luau): hanging off the rope after
-	-- lassoing, tap anywhere (or Space / A) to fill the top bar, the only thing on screen, which drains all the
-	-- while. Full: you hop on. Empty: you crash. Start: the bar's fill to begin with;
-	-- PerTap/DrawTaps/MaxTap: how much a tap fills and how fast it drains (below).
-	HoldOn = {
-		Start = 0.5, -- (QM, Oct 8: half full)
-		-- Your lasso level against the animal's (QM, Oct 8): each tap fills
-		-- PerTap x yours / its (its: Config.LassoLevels, the label over it; 1:1 if it has
-		-- none), at most MaxTap; it drains PerTap x DrawTaps a second. So matched, DrawTaps
-		-- taps a second is a draw; at twice its level half that, at half its level twice.
-		PerTap = 0.08,
-		DrawTaps = 3,
-		-- Your lasso level counts as at least this in every match-up (HOLD ON!'s taps, the
-		-- auto-ride, the level labels' colours), so Meadow's rabbits and horses are an
-		-- easy fight from the start (QM, Oct 8; the counter still shows the real one).
-		MinStrength = 20,
-		-- In the tutorial the bar never runs out: it holds at TutorialFloor, so nobody gets
-		-- stuck, and drains at TutorialDrain x the usual rate (QM: not overwhelming).
-		TutorialFloor = 0.15,
-		TutorialDrain = 0.25,
-		-- In the tutorial time slows while the bar's up (Tutorial): to TutorialSlow x speed
-		-- at first, then half as fast again every TutorialSlowHalf seconds, a slide and
-		-- never a freeze (QM, Oct 8). So however long it takes, the animal drags you only
-		-- TutorialSlow x TutorialSlowHalf / ln 2 seconds of its run (~1.4 s).
-		TutorialSlow = 0.5,
-		TutorialSlowHalf = 2,
-		MaxTap = 0.7,
-		Arm = "rbxassetid://81589206383908", -- assets/ui/FlexArm.png: the +1 popup's icon
-		Popup = false, -- a "+1" with the arm on each tap (QM, Oct 8: off)
-		-- The struggle's signs (Hud.setStruggle; QM, Oct 8): "Ready..." then "Set..." in the
-		-- middle for Time seconds each (the bar holds still and taps don't count till
-		-- they're done: HoldOn), then TAP!s by turns at each of Spots, every Every
-		-- seconds, rising Rise (of the screen's height) and fading over Life. At: a
-		-- centre (of the screen); Width: of the screen's width; Aspect: the art's.
-		Ready = { Image = "rbxassetid://83516113744656", At = Vector2.new(0.5, 0.46), Width = 0.236, Aspect = 451 / 138, Time = 1 }, -- assets/ui/Ready.png
-		Set = { Image = "rbxassetid://83245069401605", At = Vector2.new(0.5, 0.46), Width = 0.15, Aspect = 287 / 107, Time = 1 }, -- assets/ui/Set.png
-		Tap = {
-			Image = "rbxassetid://94705725691297", -- assets/ui/Tap.png
-			Width = 0.15,
-			Aspect = 188 / 72,
-			Spots = { { At = Vector2.new(0.32, 0.6), Rotation = -15 }, { At = Vector2.new(0.75, 0.35), Rotation = 20 } },
-			Every = 0.225, -- (QM, Oct 8: twice as fast as the first 0.45 / 0.9)
-			Rise = 0.08,
-			Life = 0.45,
-		},
-	},
-	-- Lassoing an animal while riding (QM, Oct 8: the new lasso, phase 1): once the loop's
-	-- round its neck you hang off the rope behind it (HOLD ON!, Config.HoldOn, decides
-	-- how long; Duration seconds in the tutorial, 0 skipping it there), then hop on
-	-- as before (RopeHang.luau). Locked straight behind it and high (QM: fast
-	-- and high-stakes, never drifting): Rope studs of rope from its neck, rising Height
-	-- studs to you; Follow how stiffly you follow its turns. The rope waves in the wind
-	-- round that line (QM's canvas sine waves, with noise): Wave studs side to side at
-	-- your end, WaveLength studs per ripple, travelling back at WaveSpeed studs/s; its
-	-- height breathes Breathe times a second; Noise (0..1) how unpredictable it is;
-	-- Segments: pieces the rope's drawn in. Fov: degrees wider; Zoom: the camera pulls
-	-- back this much, centred between you and it, to see you both.
-	LassoHang = {
-		Duration = 1.5,
-		Rope = 36, -- (QM: a long rope, clearly hanging onto it)
-		Height = 14,
-		Follow = 25,
-		Wave = 0.8, -- (QM: 80% less than the first 4)
-		WaveLength = 30,
-		WaveSpeed = 45,
-		Breathe = 0.6,
-		Noise = 0.4,
-		Segments = 24,
-		Fov = 12,
-		Zoom = 1.35,
-	},
 	-- Lasso training (QM, Oct 8: new-loops): a stitched horse dummy on a pole at home.
 	-- Stand within Radius of it (on foot) and you lasso it over and over, each catch
 	-- PerCatch lasso strength (the saved "Lasso" attribute, Training.server). It
@@ -679,23 +615,6 @@ return {
 		-- they see one straight away). The server rolls them from your CritSeed and its
 		-- own count of your throws (TrainingSpot.crit), so they can't be faked.
 		Crit = { Chance = 0.1, Mult = 10, First = 3, Time = 1.25 },
-	},
-	-- Lasso level for each animal (Game design, Oct 8; sim in project files balance/lasso/): placed
-	-- along a typical player's training (70% of their time at the dummy, today's PerCatch and
-	-- SpeedPerDecade) so a new animal unlocks every ~30 s at first and every 30-60 min at the end
-	-- (last ~6 h). Within a biome, more $/s = higher. Horse, Pig and Bunny are at or under
-	-- HoldOn.MinStrength: instant rides. Exclusives match their biome's top animal.
-	-- (QM, Oct 8: a much bigger gap by rarity: each biome's Legendary kept, Epic ~0.4x it,
-	-- Rare ~0.1x, Uncommon ~0.015x, rounded; the Snack Yak, a Robux exclusive, matches the Icebringer.)
-	-- (QM, Oct 8 evening: progression 2x faster with these levels kept: Training.SpeedBase,
-	-- PetIncome x3 and most hatch times halved instead. The whole game, the Godlands pen and
-	-- every animal, now takes ~4.5 h at that pace, was ~8.7 h; sim in balance/lasso/speedup/.)
-	LassoLevels = {
-		Horse = 5, Pig = 15, Bunny = 20, Pinto = 25, Fish = 150, Rhino = 600, Unicorn = 1500, -- Meadow
-		Kitten = 500, Cactus = 750, Scorpion = 5000, Sandworm = 18000, SpineLizard = 20000, Snake = 46000, -- Desert
-		Penguin = 500000, Boar = 750000, Snowman = 5000000, IceGolem = 18000000, SnackYak = 46000000, Icebringer = 46000000, -- Snow
-		Starfish = 15000000, Whale = 90000000, Squid = 300000000, FishSchool = 350000000, KingCrab = 400000000, BlueCrab = 660000000, RoboShark = 900000000, Kraken = 900000000, -- Ocean
-		Sludge = 75000000000, Beholder = 80000000000, WarElephant = 85000000000, Leviathan = 300000000000, SoulHorse = 330000000000, Loong = 820000000000, -- Godlands
 	},
 	-- Rarity text colours (QM, Oct 7): pet nameplates, lasso levels. Common keeps the inventory slots' grey.
 	RarityColors = {
@@ -771,9 +690,6 @@ return {
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
 	-- view (up to MaxFov) grow from Start studs/s. Each part off with On = false.
 	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)
-	-- The tutorial's arrow on the screen into your training ring (TrainArrow): px a side
-	-- (QM, Oct 8: 20% over the first 80).
-	TrainArrowSize = 96,
 	-- Speed lines and a wider view (SpeedFx), only while sprinting (QM, Oct 8: none
 	-- otherwise, and a lot more of them): at Min strength on the slowest sprint, rising
 	-- with speed as (speed / Ref) ^ Curve (a square root: quick to build, gentle at the

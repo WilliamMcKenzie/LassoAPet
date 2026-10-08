@@ -1109,7 +1109,7 @@ tutorialCommand.Triggered:Connect(function(source)
 	end
 	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
 	player:SetAttribute("PenLevel", 1)
-	player:SetAttribute("Lasso", 1) -- (lasso level starts at 1)
+	player:SetAttribute("Stamina", Config.Stamina.Start) -- (back to the starting stamina)
 	player:SetAttribute("CarriedEgg", nil)
 	player:SetAttribute("FuseLesson", nil)
 	player:SetAttribute("Tutorial", nil) -- off then on, so a tutorial already running starts over

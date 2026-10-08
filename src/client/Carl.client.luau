@@ -86,14 +86,6 @@ end
 -- Carl first: the stall is sized around him.
 local carl = Cactus.new()
 carl:setSaddled(false)
--- Back to his old size (QM, Oct 8): the Desert's bigger beasts (AnimalSize) are
--- baked into every Cactus, which put his head through the roof. Only Carl's undone.
-for _, biome in Config.Biomes do
-	if biome.Herd and biome.Herd.Cactus then
-		carl:setScale(1 / (biome.AnimalSize or 1))
-		break
-	end
-end
 for _, part in carl.model:GetDescendants() do
 	if part:IsA("BasePart") then
 		part.CanCollide = false

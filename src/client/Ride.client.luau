@@ -20,8 +20,6 @@ local Poof = require(script.Parent.Poof)
 local Dust = require(script.Parent.Dust)
 local Outline = require(script.Parent.Outline)
 local PenPets = require(script.Parent.PenPets)
-local Tutorial = require(script.Parent.Tutorial)
-local NestEggs = require(script.Parent.NestEggs)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -31,14 +29,13 @@ local world = workspace:WaitForChild("World")
 while not world:GetAttribute("Ready") do
 	world:GetAttributeChangedSignal("Ready"):Wait()
 end
--- Egg nests: NestEggs.luau shows them (yours alone, rolled each ride: NestOdds; the
--- egg you take is the animal you're riding). Here: grabbing one, and the guide to the nearest.
+-- The egg you bring home is the animal you're riding when your stamina runs out
+-- (QM, Oct 8: no nests): TakeEgg tells the server which (Nests.server).
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
 local deliverEgg = ReplicatedStorage:WaitForChild("DeliverEgg")
 local finishCourse = ReplicatedStorage:WaitForChild("FinishCourse")
 local ridePet = ReplicatedStorage:WaitForChild("RidePet")
-local nearEgg -- the waiting egg (NestEggs.waiting) in grab range, while actionTarget is "egg"
 
 local function rarityOf(kind)
 	return require(Animals[kind]).Rarity
@@ -134,25 +131,11 @@ local function tierOf(kind)
 end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
-vfx.lassoLevel = require(script.Parent.LassoLevel) -- the recommended lasso level over the target
-vfx.ropeHang = require(script.Parent.RopeHang) -- hanging off the rope before you hop on (Config.LassoHang)
-vfx.holdOn = require(script.Parent.HoldOn) -- HOLD ON!: tap to overpower it while you hang (Config.HoldOn)
--- Each biome's beasts are bigger (QM, Oct 8): an animal is its home biome's AnimalSize
--- (the first biome whose herd it's in; Animals/Horse sizes it so), and counts as that
--- many size tiers up (TierGrowth x is a tier) when it comes to who tramples whom.
-vfx.homeSize = {}
 vfx.homeBiome = {} -- [kind] = the index of the first biome whose herd lists it (the Horse: the Meadow)
 for b, biome in Config.Biomes do
 	for kind in biome.Herd or {} do
-		vfx.homeSize[kind] = vfx.homeSize[kind] or biome.AnimalSize or 1
 		vfx.homeBiome[kind] = vfx.homeBiome[kind] or b
 	end
-end
-function vfx.biomeSize(kind)
-	return vfx.homeSize[kind] or 1
-end
-function vfx.tierAt(kind)
-	return tierOf(kind) + math.log(vfx.biomeSize(kind)) / math.log(Config.TierGrowth)
 end
 -- Half its body's width and length on the ground (its real box, at the size it is).
 function vfx.halfBody(entity)
@@ -256,10 +239,10 @@ local function herdSpeed(kind)
 	return Config.HerdSpeed * statsOf(kind).Speed
 end
 
--- How long the Hold bar lasts on this mount (its Stamina x Config.HoldTime).
-local function holdTime(entity)
-	-- (a merged pet has more: Shared/Merge)
-	return Config.HoldTime * statsOf(entity.kind, entity).Stamina * require(ReplicatedStorage.Shared.Merge).stamina(entity.merged)
+-- How long the Hold bar lasts: your stamina level (the saved "Stamina", Gold.server)
+-- x Config.Stamina.Seconds, whatever you're riding (QM, Oct 8: a stat you'll train).
+local function holdTime(_entity)
+	return Config.Stamina.Seconds * (player:GetAttribute("Stamina") or Config.Stamina.Start)
 end
 local streams = {}
 -- The endless Godlands (Shared/Godlands): a stream per track, each running from
@@ -359,8 +342,6 @@ end
 
 local rng = Random.new()
 
-NestEggs.start()
-Tutorial.init()
 local herdFolder = Instance.new("Folder")
 herdFolder.Name = "Herd"
 herdFolder.Parent = workspace
@@ -622,12 +603,7 @@ local function cleanup()
 	if mount then
 		mount.animal.model:Destroy()
 	end
-	if transfer and transfer.hang then
-		vfx.ropeHang.stop(transfer.hang) -- (its rope goes too)
-	end
-	vfx.holdOn.stop()
 	mount, transfer, tumble, warpLevel = nil, nil, nil, nil
-	NestEggs.setMount("")
 	if carried then
 		carried.part:Destroy()
 		carried = nil
@@ -649,7 +625,6 @@ local function cleanup()
 	heroLeap = nil
 	Hud.setCutscene(false)
 	Outline.set(nil)
-	vfx.lassoLevel.set(nil)
 	unsmashAll()
 end
 
@@ -897,7 +872,7 @@ local function clearRideTarget()
 end
 
 local function rideFromHome()
-	if phase == "idle" and rideModel and rideShown and not Tutorial.busy then
+	if phase == "idle" and rideModel and rideShown then
 		startRide(rideModel)
 	end
 end
@@ -905,7 +880,7 @@ ridePrompt.Triggered:Connect(rideFromHome)
 
 -- Rides `model`: the starter, or a pet from your pen, which swaps places with the
 -- starter (the server makes it the one you ride, and the starter joins the pen).
--- `at`: set off from there instead of home (the tutorial's start line, Tutorial.toLine).
+-- `at`: set off from there instead of home.
 startRide = function(model, at)
 	local hrp, humanoid = character()
 	if not hrp then
@@ -941,13 +916,12 @@ startRide = function(model, at)
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
 		mount.merged, mount.fuse, mount.stats, mount.tier = fromPen.merged, fromPen.fuse, fromPen.stats, fromPen.tier
 		vfx.Fusion.paint(mount.animal.model, mount.kind, mount.fuse)
-		mount.own = true -- your own pet: the nests keep their rolled eggs (it stays yours once let go and lassoed back)
+		mount.own = true -- your own pet: no egg for bringing it home (it stays yours once let go and lassoed back)
 	else
 		mount, starter = starter, nil
 		mount.own = true
 		setClickable(mount.animal.model, false)
 	end
-	NestEggs.setMount(NestEggs.eggOf(mount))
 	if not fromHerd then
 		vfx.rideCue:FireServer("out") -- your pet's left your pen: others stop drawing it there (Riders.server, Pen.client)
 		vfx.syncing = true -- (so "end" follows, however soon the ride ends)
@@ -977,14 +951,8 @@ end
 -- Meadow animal there and then (QM, Oct 6), ridden like a stampede animal you
 -- jumped on at the start line. Any Meadow herd kind that spawns, all equally likely.
 require(script.Parent.StartLine).ride = function(x, z)
-	if phase ~= "idle" or Tutorial.busy then
+	if phase ~= "idle" then
 		return false
-	elseif player:GetAttribute("Tutorial") then -- (before your first ride: on your own pet, Tutorial.toLine)
-		return Tutorial.toLine(function()
-			if phase == "idle" and not Tutorial.busy then
-				startRide(nil, Vector3.new(x, 0, z))
-			end
-		end)
 	end
 	local kinds = {}
 	for kind, weight in Config.Biomes[1].Herd do
@@ -1006,7 +974,7 @@ end
 -- line riding a new `kind`, whatever you were doing. Your own pet stays home.
 ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, kind)
 	local hrp, humanoid = character()
-	if not hrp or Tutorial.busy then
+	if not hrp then
 		return
 	end
 	if phase ~= "idle" then
@@ -1093,7 +1061,7 @@ local function fail(reason, tip)
 	local gate = WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1))
 	vfx.revive = nil
 	if mount and (reason == "CRASH!" or reason == "BUCKED OFF") and (phase == "outbound" or phase == "return")
-		and not (phase == "outbound" and mount.z < gate + 2.4) and not Tutorial.active
+		and not (phase == "outbound" and mount.z < gate + 2.4)
 		and (RunService:IsStudio() or vfx.continueTier(-mount.z / STUDS_PER_METRE).ProductId ~= 0) then
 		vfx.revive = { kind = mount.kind, x = mount.x, z = mount.z, yaw = mount.yaw, speed = mount.speed, phase = phase, dir = dir }
 	end
@@ -1104,10 +1072,6 @@ local function fail(reason, tip)
 		release(mount)
 		mount = nil
 	end
-	if transfer and transfer.hang then
-		vfx.ropeHang.stop(transfer.hang)
-	end
-	vfx.holdOn.stop()
 	transfer = nil
 	if carried then
 		if vfx.revive then
@@ -1119,7 +1083,6 @@ local function fail(reason, tip)
 		carried = nil
 	end
 	Outline.set(nil)
-	vfx.lassoLevel.set(nil)
 	-- Thrown off behind the animal, landing flat on their back until they go home.
 	if hrp then -- (no character mid-respawn: nothing to throw)
 		local look = hrp.CFrame.LookVector
@@ -1161,28 +1124,20 @@ local function startTransfer(target)
 	vfx.sounds.play("lasso_throw")
 end
 
-local function grabEgg()
-	if NestEggs.waiting[nearEgg.nest] ~= nearEgg then
-		return -- (a hop just swapped it)
+-- Out of stamina (QM, Oct 8): you turn round on whatever you're riding and race it
+-- home. A wild one's egg goes up on your lasso, and it's yours once you're over the
+-- line (Hatchery's DeliverEgg); your own pet brings no egg.
+local function turnHome()
+	if not mount.own and Animals:FindFirstChild(mount.kind) then
+		takeEgg:FireServer(mount.kind) -- (the server checks you got on a wild one: Nests.server)
+		local egg = Egg.new(mount.kind)
+		egg.model.Parent = workspace
+		vfx.sounds.play("egg_grab")
+		carried = { part = egg.model, kind = mount.kind, stage = "held", t = 1, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	end
-	-- The nest's own egg goes on the lasso (building a new one here stalled the
-	-- grab). Out of NestEggs.waiting, so the nest stays empty for you this ride.
-	local egg = nearEgg.egg
-	NestEggs.waiting[nearEgg.nest] = nil
-	egg.t = math.huge
-	egg:update(0) -- stop any twitch, back to rest
-	local part = egg.model
-	part.Parent = workspace
-	takeEgg:FireServer(nearEgg.nest, NestEggs.mountKind) -- (says which animal you're on: the server rolls the rest)
-	vfx.sounds.play("lasso_throw")
-	vfx.sounds.play("egg_grab")
-	carried = { part = part, kind = nearEgg.kind, stage = "throw", t = 0, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	phase, turnT = "turning", 0
 	Hud.setAction(nil)
 	Hud.setHold(nil)
-	-- Cutscene: the camera snaps in on the egg and the UI hides until it's reeled in.
-	cutscene = { shake = 0 }
-	Hud.setCutscene(true)
 end
 
 -- The z of the first gate you can't pass yet (your pen's level decides; see Gate.client).
@@ -1193,10 +1148,9 @@ local function gateZ()
 	return WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1))
 end
 
--- On the way out, a trail of arrows on the ground from your pet to the nearest
--- egg still waiting ahead of you (not behind a locked gate). In the tutorial's
--- lasso step it leads to the nearest animal ahead instead (Tutorial.guideTo).
-local guide = { -- the egg guide: the beam and its two ends
+-- A trail of arrows on the ground: to the Robo Shark's prey while it hunts, and back
+-- home to your pen after a ride (vfx.updateHomeGuide).
+local guide = { -- the guide: the beam and its two ends
 	ARROW = "rbxassetid://101032148634562", -- assets/ui/GuideArrow.png (chevrons pointing along the trail)
 	AHEAD = 6, -- studs in front of the pet where the trail starts
 	MAX_LENGTH = 300, -- studs: the longest the trail is drawn, toward a farther target
@@ -1237,30 +1191,8 @@ local function updateGuide()
 	local target
 	-- From the pet, or the rider while they're pulled across to a lassoed one.
 	local at = if mount then Vector3.new(mount.x, 0, mount.z) else focus
-	local want = Tutorial.guideTo()
 	if vfx.huntTarget then
 		target = Vector3.new(vfx.huntTarget.x, 0, vfx.huntTarget.z) -- the Robo Shark's prey while it hunts
-	elseif phase == "outbound" and not cutscene and want == "animal" then
-		local best = math.huge
-		for _, entity in allAnimals() do
-			if entity ~= mount and not entity.popping and entity.z < at.Z - guide.AHEAD and entity.z > gateZ() then
-				local d = (Vector2.new(entity.x, entity.z) - Vector2.new(at.X, at.Z)).Magnitude
-				if d < best then
-					target, best = Vector3.new(entity.x, 0, entity.z), d
-				end
-			end
-		end
-	elseif phase == "outbound" and not cutscene and want == "egg" then
-		local best = math.huge
-		for nest, waiting in NestEggs.waiting do
-			local spot = nest:FindFirstChild("EggSpot")
-			if spot and waiting.egg.model.Parent and spot.Position.Z < at.Z - guide.AHEAD and spot.Position.Z > gateZ() then
-				local d = (Vector2.new(spot.Position.X, spot.Position.Z) - Vector2.new(at.X, at.Z)).Magnitude
-				if d < best then
-					target, best = spot.Position, d
-				end
-			end
-		end
 	end
 	vfx.drawGuide(at, target)
 end
@@ -1268,7 +1200,7 @@ end
 -- Back on foot after a ride (any ride, however it ended), the same arrows lead from
 -- you to your pen's entrance, so you go and ride again (QM). They go once
 -- you step into your pen (for good, till the next ride: QM, Oct 6), are up close
--- to the pet or riding, and never show during the tutorial (it has its own).
+-- to the pet or riding.
 function vfx.updateHomeGuide()
 	local hrp = character()
 	local area = vfx.rideAgain and hrp and myPen() and myPen():FindFirstChild("Area")
@@ -1279,7 +1211,7 @@ function vfx.updateHomeGuide()
 		end
 	end
 	local target
-	if vfx.rideAgain and hrp and not cutscene and not Tutorial.active then
+	if vfx.rideAgain and hrp and not cutscene then
 		-- To the gap in your pen's fence (QM, Oct 6): where the line from its Spawn
 		-- (just outside the gap) to its middle crosses the Area's edge.
 		local spot = homeSpot()
@@ -1328,17 +1260,6 @@ function vfx.drawGuide(at, target)
 	end
 end
 
-local function eggInRange(waiting)
-	local spot = waiting.nest:FindFirstChild("EggSpot")
-	if not spot then
-		return false
-	end
-	local eggPos = spot.Position
-	return NestEggs.waiting[waiting.nest] == waiting and waiting.egg.model.Parent ~= nil and eggPos.Z > gateZ()
-		and Vector2.new(eggPos.X - mount.x, eggPos.Z - mount.z).Magnitude < waiting.reach
-		and Tutorial.guideTo() ~= "animal" -- the tutorial's lasso step: no egg till you've lassoed, so TAKE EGG can't skip that lesson
-end
-
 local function animalInRange(entity)
 	if entity == mount or entity.popping or entity.z < gateZ() then
 		return nil -- no lassoing through a locked gate
@@ -1352,16 +1273,11 @@ local function animalInRange(entity)
 	return nil
 end
 
--- Everything that can be lassoed right now: waiting eggs, then animals.
+-- Every animal that can be lassoed right now.
 local function candidates()
 	local list = {}
 	if phase ~= "outbound" or transfer or not mount then
 		return list
-	end
-	for _, waiting in NestEggs.waiting do
-		if eggInRange(waiting) then
-			table.insert(list, waiting)
-		end
 	end
 	for _, entity in allAnimals() do
 		if animalInRange(entity) then
@@ -1378,22 +1294,10 @@ local function findTarget()
 	end
 	-- A target the player clicked stays chosen while it's still in range.
 	if picked then
-		if picked.nest and eggInRange(picked) then
-			nearEgg = picked
-			return "egg"
-		elseif not picked.nest and not Tutorial.noLasso() and table.find(allAnimals(), picked) and animalInRange(picked) then
+		if table.find(allAnimals(), picked) and animalInRange(picked) then
 			return picked
 		end
 		picked = nil
-	end
-	for _, waiting in NestEggs.waiting do
-		if eggInRange(waiting) then
-			nearEgg = waiting
-			return "egg"
-		end
-	end
-	if Tutorial.noLasso() then
-		return nil -- (the tutorial's ride, lassoed once: just the egg now)
 	end
 	local best, bestScore = nil, math.huge
 	for _, entity in allAnimals() do
@@ -1405,13 +1309,13 @@ local function findTarget()
 	return best
 end
 
--- The in-range egg or animal drawn nearest a click or tap, if it's close
+-- The in-range animal drawn nearest a click or tap, if it's close
 -- enough on screen to count as clicking it.
 local PICK_RADIUS = 70 -- pixels
 local function candidateAt(screenPos)
 	local best, bestScore = nil, math.huge
 	for _, c in candidates() do
-		local model = if c.nest then c.egg.model else c.animal.model
+		local model = c.animal.model
 		local cf, size = model:GetBoundingBox()
 		local point, onScreen = camera:WorldToScreenPoint(cf.Position)
 		if onScreen then
@@ -1427,14 +1331,10 @@ local function candidateAt(screenPos)
 end
 
 local function onAction()
-	if phase ~= "outbound" or transfer or not mount or not actionTarget or os.clock() < (vfx.actionsFrom or 0) then
+	if phase ~= "outbound" or transfer or not mount or not actionTarget then
 		return
 	end
-	if actionTarget == "egg" then
-		grabEgg()
-	else
-		startTransfer(actionTarget)
-	end
+	startTransfer(actionTarget)
 end
 
 -- The phone joystick while riding: the player controls stay on (the rider is
@@ -1485,14 +1385,10 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	if phase == "idle" then
 		return -- (RIDE always rides the nearest pet: clicking one doesn't pick it)
 	end
-	if transfer or os.clock() < (vfx.actionsFrom or 0) then
-		return -- (lassoing and HOLD ON!: every tap is the struggle's, QM; and a moment after, so its last taps don't grab)
-	end
 	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		-- Clicking or tapping another egg or animal in range targets it instead.
+		-- Clicking or tapping another animal in range targets it instead.
 		local hit = candidateAt(Vector2.new(input.Position.X, input.Position.Y))
-		local current = if actionTarget == "egg" then nearEgg else actionTarget
-		if hit and hit ~= current then
+		if hit and hit ~= actionTarget then
 			picked = hit
 			return
 		end
@@ -1526,7 +1422,7 @@ local function sprinting()
 	-- dynamic one (both drive the move vector, rideStick), or a controller's left stick)
 	local stickOut = (rideStick.on and controls:GetMoveVector().Magnitude >= Config.TouchSprintAt)
 		or (vfx.padPush or 0) >= Config.TouchSprintAt
-	return phase == "outbound" and not Tutorial.active and (sprintKey or Hud.sprintHeld() or stickOut)
+	return phase == "outbound" and (sprintKey or Hud.sprintHeld() or stickOut)
 end
 
 UserInputService.InputChanged:Connect(function(input)
@@ -1582,16 +1478,6 @@ end
 -- Strays carry their own entity.frostLeft. Only this player's copy slows, like slow-mo.
 vfx.frostLeft = {}
 vfx.frostLag = {}
--- Hanging off the rope (RopeHang), the animal you've lassoed runs at the sprint it'd
--- have with you on it (QM, Oct 8); a stampede animal pulls ahead of its schedule by
--- hangLead[key] studs (it's yours after, so it never has to catch back up).
-vfx.hangLead = {}
-function vfx.hangSprint(entity)
-	if transfer and transfer.stage == "hang" and transfer.target == entity then
-		return Config.MountSpeed * statsOf(entity.kind, entity).Speed * (Config.PetSprintSpeed[entity.kind] or Config.SprintSpeed)
-	end
-	return nil
-end
 vfx.frostSlow = 0 -- the share of its speed a slowed animal loses (the running Frost's Slow)
 vfx.FROST_TINT = Color3.fromRGB(150, 220, 255)
 vfx.FLAKE_TEXTURE = "rbxasset://textures/particles/sparkles_main.dds"
@@ -1971,13 +1857,8 @@ local function updateHerd(dt, slowed)
 				vfx.frostLag[key] = (vfx.frostLag[key] or 0) + speed * vfx.frostSlow * dt
 				speed *= 1 - vfx.frostSlow
 			end
+			local z = stream.spawnZ - dist + (vfx.frostLag[key] or 0)
 			local entity = herd[key]
-			local sprint = entity and vfx.hangSprint(entity)
-			if sprint and sprint > speed then
-				vfx.hangLead[key] = (vfx.hangLead[key] or 0) + (sprint - speed) * dt
-				speed = sprint
-			end
-			local z = stream.spawnZ - dist + (vfx.frostLag[key] or 0) - (vfx.hangLead[key] or 0)
 			-- The animal being lassoed runs on past the end until it's caught.
 			local lassoed = entity and transfer and transfer.target == entity
 			if (z <= stream.endZ or z < fromZ or z > toZ) and not lassoed then
@@ -2044,7 +1925,7 @@ local function updateHerd(dt, slowed)
 			entity.frostLeft = if entity.frostLeft > dt then entity.frostLeft - dt else nil
 		end
 		vfx.setFrosted(entity, entity.frostLeft ~= nil)
-		local pace = vfx.hangSprint(entity) or entity.speed * (if entity.frostLeft then 1 - vfx.frostSlow else 1)
+		local pace = entity.speed * (if entity.frostLeft then 1 - vfx.frostSlow else 1)
 		local look = CFrame.Angles(0, yaw, 0).LookVector
 		local z = entity.z + look.Z * pace * dt
 		-- Shrinks away at the end of the biome it's in, like the stampede.
@@ -2646,7 +2527,7 @@ end
 -- The mount's size tier right now: Grow and Crabwalk make it bigger while they run.
 function vfx.mountTier()
 	local a = activeAbility()
-	local tier = vfx.tierAt(mount.kind) -- (a native giant counts as its biome's size)
+	local tier = tierOf(mount.kind)
 	if a and a.cfg.Tier then
 		tier = math.max(tier, a.cfg.Tier)
 	end
@@ -3394,7 +3275,7 @@ local function updateAbility(dt)
 		endAbility(abilityMount)
 	end
 	abilityMount = mount
-	local cfg = mount and not Tutorial.active and vfx.abilityOf(mount) -- no abilities in the tutorial
+	local cfg = mount and vfx.abilityOf(mount)
 	if not cfg or (phase ~= "outbound" and phase ~= "turning" and phase ~= "return") then
 		if mount then
 			endAbility(mount)
@@ -3504,7 +3385,7 @@ local function updateMount(dt)
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	targetSpeed *= vfx.hazards.slow() -- stuck in a Sludge's sludge
-	-- (No stamina, so never tired: QM, Oct 8.)
+	-- (Out of stamina you turn for home, never ride on tired: checkRide.)
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
 	if ability and ability.cfg.MaxBoost then
@@ -3647,7 +3528,7 @@ local function checkRide(dt)
 	if ability and vfx.PLAIN[ability.cfg.Kind] then
 		ability = nil -- these still use Hold and can still crash (Config.Abilities)
 	end
-	if ability and ability.cfg.UntilFull and not Tutorial.active then
+	if ability and ability.cfg.UntilFull then
 		-- The Snack Yak's charge refills Hold as fast as it usually drains, and ends
 		-- once the bar is full.
 		hold += dt
@@ -3657,8 +3538,15 @@ local function checkRide(dt)
 			ability = nil
 		end
 	end
-	-- (No stamina any more, QM Oct 8: Hold never drains and you can always sprint. The
-	-- top bar is HOLD ON!'s now.)
+	-- Stamina (QM, Oct 8): the Hold bar drains as you ride out, quicker sprinting, and
+	-- lassoing doesn't refill it. Empty, you turn round on whatever you're on (turnHome).
+	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not mount.giant then -- abilities and the Giant Horse use no Hold
+		hold = math.max(hold - dt * (if sprinting() then Config.SprintDrain else 1), 0)
+		if hold <= 0 then
+			turnHome()
+			return
+		end
+	end
 	if mount.z < FINISH_Z - 8 then
 		return fail("TOO FAR!") -- only if something skipped the finish line
 	end
@@ -3754,8 +3642,7 @@ local function checkRide(dt)
 			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
 			-- Racing home on the Icebringer, an animal frozen in ice smashes whatever its size (QM).
 			local shatter = phase == "return" and entity.frostFx ~= nil and (vfx.abilityOf(mount) or {}).Kind == "Frost"
-			-- In the tutorial you can't crash racing home: you knock everything aside like an XXL pet (QM, Oct 6).
-			if ((phase == "return" or trample) and (vfx.tierAt(entity.kind) < myTier or Tutorial.active)) or kind == "Crabwalk" or shatter then
+			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
 				vfx.broke()
 				if kind == "Crabwalk" and special.RestorePer then
@@ -3801,51 +3688,6 @@ local function updateRider(dt)
 		focus = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
 		if transfer.t >= 1 then
 			transfer.stage, transfer.t, transfer.from = "pull", 0, hrp.Position
-			-- No struggle with an animal at or under your lasso strength (its level, the
-			-- label over it): you hop straight on (QM, Oct 8).
-			local its = Config.LassoLevels[transfer.target.kind]
-			local strength = math.max(player:GetAttribute("Lasso") or 0, Config.HoldOn.MinStrength)
-			local easy = not Tutorial.active and its ~= nil and its <= strength
-			if not easy then -- (the tutorial's always a struggle: QM)
-				-- Yanked off: hang from the rope round its neck first (QM, Oct 8).
-				transfer.stage = "hang"
-				transfer.hang = vfx.ropeHang.start(hrp.Position, hrp.Parent, Lasso.tier())
-				transfer.fill = Config.HoldOn.Start
-				vfx.holdOn.start(hrp.Parent, strength, its, Tutorial.active) -- (the tutorial's can't be lost)
-				Tutorial.struggled()
-			end
-		end
-		return
-	end
-	if transfer and transfer.stage == "hang" then
-		if not transfer.target.animal.model.Parent then
-			vfx.holdOn.stop() -- (it's gone from under you, whatever the reason: a crash, never a dangle)
-			return fail("CRASH!")
-		end
-		-- HOLD ON!: tap the bar full to hop on; let it run out and you're bucked off.
-		local won = false
-		if transfer.fill then
-			local result
-			transfer.fill, result = vfx.holdOn.update(dt)
-			if result == "lost" then
-				vfx.holdOn.stop()
-				return fail("CRASH!") -- (the CRASH graphic: QM)
-			end
-			won = result == "won"
-		else
-			transfer.t = math.min(transfer.t + dt / Config.LassoHang.Duration, 1)
-			won = transfer.t >= 1
-		end
-		local animal = transfer.target.animal
-		local at = vfx.ropeHang.update(transfer.hang, dt, animal:getNeck().cframe.Position, animal.model.PrimaryPart.CFrame.LookVector)
-		hrp.CFrame = at
-		local look = at.Position:Lerp(animal.model.PrimaryPart.Position, 0.4) -- (between you and it: both in view)
-		focus = focus:Lerp(Vector3.new(look.X, 0, look.Z), 1 - math.exp(-10 * dt)) -- (smooth through the jolts)
-		if won then
-			vfx.holdOn.stop()
-			vfx.ropeHang.stop(transfer.hang)
-			transfer.hang, transfer.fill = nil, nil
-			transfer.stage, transfer.t, transfer.from = "pull", 0, hrp.Position -- now hop on
 		end
 		return
 	end
@@ -3867,24 +3709,19 @@ local function updateRider(dt)
 				table.remove(strays, table.find(strays, target))
 			end
 			mount, transfer = target, nil
-			vfx.rideCue:FireServer("landed") -- (eggs can be taken again: Riders.server)
-			vfx.actionsFrom = os.clock() + 0.3 -- (the struggle's last taps don't grab an egg or lasso again)
+			vfx.rideCue:FireServer("landed") -- (Riders.server: not lassoing any more)
 			picked = nil
-			NestEggs.setMount(NestEggs.eggOf(mount)) -- the nests' eggs are this animal's now
 			vfx.sounds.play("lasso_land")
 			mount.popping, mount.hop = nil, 0
 			mount.animal:setScale(vfx.ownSize(mount)) -- (back on a pet you let go: merged or grown, it still is)
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
-			hold, grace = holdTime(mount), Config.LandingGrace
-			Tutorial.lassoed()
-			if not Tutorial.active then -- no money at all in the tutorial (Hatchery: pets earn nothing till it's done)
-				local earned = Config.LassoCoins[mount.kind] or Config.RarityCoins[mount.animal.Rarity]
-				coins += earned
-				Hud.setCoins(coins)
-				local point = camera:WorldToViewportPoint(hrp.Position + Vector3.new(0, 4, 0))
-				Hud.coinPopup(Vector2.new(point.X, point.Y), earned)
-			end
+			grace = Config.LandingGrace -- (stamina isn't refilled: QM, Oct 8)
+			local earned = Config.LassoCoins[mount.kind] or Config.RarityCoins[mount.animal.Rarity]
+			coins += earned
+			Hud.setCoins(coins)
+			local point = camera:WorldToViewportPoint(hrp.Position + Vector3.new(0, 4, 0))
+			Hud.coinPopup(Vector2.new(point.X, point.Y), earned)
 		end
 		return
 	end
@@ -3942,22 +3779,12 @@ local function updateRider(dt)
 end
 
 local function updateHud()
-	NestEggs.homeward = carried ~= nil or phase == "return" or phase == "turning" -- (the ride home's random eggs on a lassoed mount)
-	-- Your lasso level over your head while you ride (not hanging off the rope: then
-	-- the screen's just the bar).
-	vfx.lassoLevel.setSelf(if mount and not transfer and not carried and phase == "outbound" then player.Character else nil) -- (not on the way home with the egg: QM)
-	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out).
-	Hud.setSprint(phase == "outbound" and not Tutorial.active)
+	Hud.setSprint(phase == "outbound")
 	if phase == "outbound" then
-		Hud.setHold(if transfer and transfer.fill then transfer.fill else nil, false) -- HOLD ON!'s bar, only while it's on
-		Hud.setDistance(if Tutorial.active then "" else string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
-		if (transfer and transfer.fill) or (Tutorial.noLasso() and actionTarget ~= "egg") then
-			Hud.setAction(nil) -- (HOLD ON!'s on; or the tutorial's after its lasso, when only TAKE EGG shows)
-		elseif actionTarget == "egg" then
-			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
-		else
-			Hud.setAction("LASSO", actionTarget ~= nil)
-		end
+		-- The stamina bar, your stamina level on it (QM, Oct 8).
+		Hud.setHold(if mount then hold / holdTime(mount) else 1, true, player:GetAttribute("Stamina") or Config.Stamina.Start)
+		Hud.setDistance(string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
+		Hud.setAction("LASSO", actionTarget ~= nil)
 	end
 	if phase == "turning" or phase == "return" or phase == "home" then
 		local metres = math.max(0, -focus.Z / STUDS_PER_METRE)
@@ -4370,25 +4197,14 @@ end
 local timeScale = 1
 
 RunService.PreSimulation:Connect(function(dt)
-	Tutorial.update({
-		phase = phase,
-		target = actionTarget,
-		pet = starter and starter.animal.model,
-		transfer = transfer ~= nil,
-		cutscene = cutscene ~= nil or heroLeap ~= nil,
-	})
-	-- The tutorial slows time while LASSO or TAKE EGG waits for its first press.
-	local slow = cutscene ~= nil or heroLeap ~= nil or Tutorial.slowMo ~= nil
-	local slowTo = if heroLeap then Config.HomeSlowMo elseif cutscene then Config.EggSlowMo else Tutorial.slowMo
+	local slow = cutscene ~= nil or heroLeap ~= nil
+	local slowTo = if heroLeap then Config.HomeSlowMo else Config.EggSlowMo
 	timeScale += ((slow and slowTo or 1) - timeScale) * (1 - math.exp(-10 * dt))
 	if heroLeap then
 		heroLeap.t = math.min(heroLeap.t + dt / Config.HomeHeroTime, 1)
 	end
 	dt *= timeScale
-	NestEggs.update(dt, VIEW) -- the nests' eggs twitch, swap and pop
-	-- In the tutorial the stampede runs on your own clock, so it's never snapped
-	-- back to everyone else's after slowing down.
-	updateHerd(dt, (slow and not cutscene) or Tutorial.active)
+	updateHerd(dt, slow and not cutscene)
 	updateFlung(dt)
 	vfx.hazards.update(dt, herd, mount, phase == "outbound" or phase == "turning" or phase == "return",
 		mount and (vfx.sprintSpecial() or {}).Kind) -- (the Sludge's and Soul Horse's sprints lay trails)
@@ -4408,7 +4224,7 @@ RunService.PreSimulation:Connect(function(dt)
 		-- ride (WalkLimit holds you there), so only 8+ studs past it, where no
 		-- animal at the line reaches.
 		local hrp, humanoid = character()
-		if hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z - 8 and not Tutorial.active then
+		if hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z - 8 then
 			for _, entity in allAnimals() do
 				if not entity.popping and math.abs(entity.x - hrp.Position.X) < 2.6 and math.abs(entity.z - hrp.Position.Z) < 4 then
 					clearRideTarget()
@@ -4469,9 +4285,6 @@ RunService.PreSimulation:Connect(function(dt)
 		local neck = transfer.target.animal:getNeck()
 		if transfer.stage == "throw" then
 			Lasso.throw(transfer.t, neck)
-		elseif transfer.stage == "hang" then
-			Lasso.pull(1, neck, true) -- cinched (RopeHang draws the waving rope to your hands)
-			vfx.ropeHang.pose(transfer.hang)
 		else
 			Lasso.pull(transfer.t, neck)
 		end
@@ -4520,13 +4333,7 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 	end
 	actionTarget = findTarget()
-	if actionTarget == "egg" then
-		Outline.set(nearEgg.egg.model, Outline.NEST)
-		vfx.lassoLevel.set(nil)
-	else
-		Outline.set(if actionTarget then actionTarget.animal.model else nil)
-		vfx.lassoLevel.set(actionTarget and actionTarget.animal.model, actionTarget and actionTarget.kind)
-	end
+	Outline.set(if actionTarget then actionTarget.animal.model else nil)
 	updateHud()
 end)
 
@@ -4537,7 +4344,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 		return
 	end
 	camera.CameraType = Enum.CameraType.Scriptable
-	local targetYaw = mount and mount.yaw or (transfer and transfer.target.yaw) or camYaw -- (hanging off the rope: the animal's)
+	local targetYaw = mount and mount.yaw or camYaw
 	camYaw += (targetYaw - camYaw) * (1 - math.exp(-5 * dt))
 	local hrp = character()
 	if cutscene and carried and hrp then
@@ -4590,16 +4397,14 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	Hud.setAbilityTint(rattleHaze * (if vfx.hazeColor == vfx.FROST_HAZE then 0.6 elseif vfx.hazeColor == vfx.HUNT_HAZE then 1 else 0.85), vfx.hazeColor)
 	-- Bigger pets fill more of the view: the camera pulls back RideZoomPerTier
 	-- times further for each size tier above small (Config.PetTiers).
-	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1)
-		elseif transfer and transfer.stage == "hang" then Config.LassoHang.Zoom else 1
+	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local z = vfx.camZoom
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
-	local hanging = transfer and transfer.stage == "hang" -- off the rope (RopeHang): a wider view (no shake: QM)
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
-	local fov = (if phase == "return" then 70 + Config.ReturnFovKick else 70) + (if hanging then Config.LassoHang.Fov else 0)
+	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
 	fov = math.max(fov, math.min(fov + vfx.speedFx.fovKick(), Config.SpeedFeel.MaxFov))
 	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
 end)
@@ -4679,7 +4484,7 @@ end
 function vfx.updateMerge()
 	local hrp = character()
 	local home = phase == "idle" and hrp ~= nil and hrp.Position.Z > START_LINE_Z -- in the base (QM), not out on the course
-	Hud.showMerge(Config.MergeEnabled and home and not Tutorial.active and #vfx.mergeKinds() > 0)
+	Hud.showMerge(Config.MergeEnabled and home and #vfx.mergeKinds() > 0)
 end
 
 -- The just-merged starter popping out over the pen and dropping (PenPets.drop).
@@ -4812,7 +4617,7 @@ PenPets.pull = vfx.mergePull -- (FuseMenu pulls the two it fuses up the same way
 -- starts. Every animal in sight is knocked flying, and for the whole ride every
 -- obstacle within Config.Shop.NukeRange of you is blown away (back next ride).
 function vfx.startNuke()
-	if (player:GetAttribute("Nukes") or 0) < 1 or Tutorial.active or not mount then
+	if (player:GetAttribute("Nukes") or 0) < 1 or not mount then
 		return
 	end
 	local ride = mount
@@ -4858,7 +4663,7 @@ ReplicatedStorage:WaitForChild("ShopGrant").OnClientEvent:Connect(function(key)
 		return
 	end
 	giantWaiting = true
-	while phase ~= "idle" or Tutorial.busy or Tutorial.active or not character() do
+	while phase ~= "idle" or not character() do
 		task.wait(0.5)
 	end
 	local ok, spent = pcall(ReplicatedStorage:WaitForChild("UseGiant").InvokeServer, ReplicatedStorage.UseGiant)

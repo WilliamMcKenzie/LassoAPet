@@ -6,8 +6,9 @@
 -- Gold bought with Robux (the "BoughtGold" attribute, Shop.server's running
 -- total) is added once: the save keeps how much of it is in (bought), and only
 -- the rest is added, saved straight away.
--- Lasso strength (the "Lasso" attribute, Training.server) is saved alongside, as
--- `lasso` (Oct 8: new-loops; older saves have none and start at 0).
+-- Your stamina level (the "Stamina" attribute: how long the bar lasts on a ride,
+-- Ride.client) is saved alongside, as `stamina` (QM, Oct 8: the stamina loop; older
+-- saves have none and start at Config.Stamina.Start). Training it comes later.
 
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
@@ -34,7 +35,7 @@ end
 
 local function load(player)
 	player:SetAttribute("Gold", 0)
-	player:SetAttribute("Lasso", 0)
+	player:SetAttribute("Stamina", 0)
 	if not store then
 		return
 	end
@@ -46,8 +47,8 @@ local function load(player)
 				local gold = if typeof(value) == "table" then value.gold else value
 				bought[player] = if typeof(value) == "table" then tonumber(value.bought) or 0 else 0
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + (tonumber(gold) or 0))
-				local lasso = if typeof(value) == "table" then tonumber(value.lasso) else nil
-				player:SetAttribute("Lasso", (player:GetAttribute("Lasso") or 0) + (lasso or 0))
+				local stamina = if typeof(value) == "table" then tonumber(value.stamina) else nil
+				player:SetAttribute("Stamina", (player:GetAttribute("Stamina") or 0) + (stamina or 0))
 				loaded[player] = true
 			end
 			return
@@ -65,13 +66,13 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	local gold = player:GetAttribute("Gold") or 0
-	local lasso = player:GetAttribute("Lasso") or 0
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. lasso
+	local stamina = player:GetAttribute("Stamina") or 0
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. stamina
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0, lasso = lasso }) then
+		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0, stamina = stamina }) then
 			savedAs[player] = as
 			return
 		end
@@ -92,8 +93,8 @@ end
 
 local function join(player)
 	load(player)
-	if (player:GetAttribute("Lasso") or 0) < 1 then
-		player:SetAttribute("Lasso", 1) -- everyone starts at lasso level 1 (QM, Oct 8), old saves at 0 too
+	if (player:GetAttribute("Stamina") or 0) < Config.Stamina.Start then
+		player:SetAttribute("Stamina", Config.Stamina.Start) -- everyone starts here, old saves too
 	end
 	ready[player] = true
 	player:GetAttributeChangedSignal("BoughtGold"):Connect(function()
@@ -155,7 +156,7 @@ bankCoins.Parent = ReplicatedStorage
 -- Config.RarityCoins by its rarity), as Ride.client counts them. The server keeps its
 -- own count from the ride's cues (Riders.server's remotes): a "take" (you landed on
 -- a stampede animal) while you were already riding, then the next sync's animal is
--- what you landed on. At most one every MIN_TAKE_GAP seconds, none in the tutorial.
+-- what you landed on. At most one every MIN_TAKE_GAP seconds.
 -- BankCoins only says the ride's over: what's banked is the server's count (never
 -- more than the client's, which can only be lower if it dropped coins). "end" (the
 -- ride's over, after any banking) clears the count.
@@ -191,7 +192,7 @@ ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player
 		return -- ("": between animals, lassoed across)
 	end
 	local taken = pendingTake[player]
-	if taken and os.clock() - taken < 5 and not player:GetAttribute("Tutorial") then
+	if taken and os.clock() - taken < 5 then
 		pendingTake[player], lastTake[player] = nil, os.clock()
 		rideCash[player] = (rideCash[player] or 0) + coinsFor(kind)
 	end

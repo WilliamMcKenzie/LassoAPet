@@ -48,7 +48,6 @@ local IMAGES = {
 	rollButton = { id = "rbxassetid://112026122025466", size = Vector2.new(960, 378) }, -- RollButton.png
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
-	lassoIcon = { id = "rbxassetid://96847828944619", size = Vector2.new(256, 256) }, -- LassoIcon.png (QM's, Oct 8)
 	upgradePen = { id = "rbxassetid://120690804030353", size = Vector2.new(1152, 284) }, -- UpgradePenActive.png
 	upgradePenDisabled = { id = "rbxassetid://134427342737800", size = Vector2.new(1158, 285) }, -- UpgradePenDisabled.png
 	-- Each biome's own Upgrade Pen (Config.Biomes[i].UpgradeImage), all this size.
@@ -193,6 +192,7 @@ local lesson = false -- the fuse lesson's on (Hud.setLesson): nothing but Fuse s
 local upgradeScale -- Upgrade Pen's UIScale
 -- A line of text top centre (Hud.setNotice), in its own always-on ScreenGui.
 local NOTICE = { TEXT_SIZE = 40, TOP = 16 + 352 * 220 / 1292 + 36 } -- TOP: just under the Hold bar (QM; BAR_WIDTH x barEmpty's shape)
+local staminaText -- (the stamina level on the Hold bar)
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -392,6 +392,11 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	distance.Name = "Distance"
 	distance.Visible = SHOW_RIDE_TOP
 	distance.ZIndex = 2
+	-- Your stamina level on the bar (QM, Oct 8: a number you'll train, how far you get).
+	staminaText = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 3)
+	staminaText.Name = "Stamina"
+	staminaText.ZIndex = 2
+	staminaText.Visible = false
 
 	-- Ride back: only DODGE THE STAMPEDE!, pulsing between 90% and 110%, and a red
 	-- vignette that fades out over the last stretch home.
@@ -571,9 +576,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	sideGui.IgnoreGuiInset = true
 	sideGui.Parent = playerGui
 	local sideRoot = root(sideGui)
-	-- Bottom left, two rows like QM's ref (Oct 8): lasso strength (the "Lasso"
-	-- attribute, from Training.server) over gold, each its icon with the number
-	-- beside it overlapping the icon's edge. `gold` is the pair, shown and hidden together.
+	-- Bottom left: gold, its icon with the number beside it overlapping the icon's edge.
 	gold = Instance.new("Frame")
 	gold.Name = "Counters"
 	gold.BackgroundTransparency = 1
@@ -585,8 +588,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	stack.Padding = UDim.new(0, 4)
 	stack.Parent = gold
 	gold.Parent = sideRoot
-	local lassoRow = cashRow(gold, ICON_HEIGHT, 44, Vector2.zero, UDim2.new(), 4) -- 4px outline (QM)
-	lassoRow.coin.Image = IMAGES.lassoIcon.id
 	local goldRow = cashRow(gold, ICON_HEIGHT, 44, Vector2.zero, UDim2.new(), 4)
 	goldRow.row.LayoutOrder = 1
 	local player = Players.LocalPlayer
@@ -612,7 +613,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	task.spawn(function() -- (not holding up the HUD's build for it)
 	game:GetService("ReplicatedStorage"):WaitForChild("PetIncome").OnClientEvent:Connect(function(earned)
 		if type(earned) ~= "number" or earned <= 0 or not gold.Visible or not sideRoot:FindFirstAncestorOfClass("ScreenGui").Enabled then
-			return -- (nothing while the counter's hidden: riding, the struggle...)
+			return -- (nothing while the counter's hidden: riding...)
 		end
 		-- (its own label on sideRoot, outside the gold's layout: inside the gold text it
 		-- widened that text's AutomaticSize and pushed the number and coin about, Oct 8)
@@ -639,18 +640,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		end)
 	end)
 	end)
-	local shownLasso = player:GetAttribute("Lasso") or 0
-	local function showLasso()
-		local n = player:GetAttribute("Lasso") or 0
-		lassoRow.text.Text = (money(n):gsub("%$", ""))
-		if n > shownLasso then -- a little bump with each catch
-			lassoRow.scale.Scale = 1.15
-			TweenService:Create(lassoRow.scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-		end
-		shownLasso = n
-	end
-	player:GetAttributeChangedSignal("Lasso"):Connect(showLasso)
-	showLasso()
 	-- The coin keeps the bottom left to itself; the bottom right column is Fuse,
 	-- Shop, Pets from the top, all the same height (QM, Oct 6 19:24). Row 0 is the
 	-- bottom one. (The egg roll menu opens from Carl, its NPC.)
@@ -1136,8 +1125,13 @@ end
 local TIRED_RED = Color3.fromRGB(255, 90, 90)
 
 -- tired: whether an empty bar slows the mount (not while it carries an egg home).
-function Hud.setHold(fraction, tired)
+-- level: the stamina level written on the bar (nil: none).
+function Hud.setHold(fraction, tired, level)
 	holdFrame.Visible = fraction ~= nil
+	staminaText.Visible = fraction ~= nil and level ~= nil
+	if level then
+		staminaText.Text = tostring(level)
+	end
 	if fraction then
 		holdClip.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)
 		-- Empty (the mount's tired, at half speed): the bar pulses a subtle red (QM, Oct 5).
@@ -1650,195 +1644,8 @@ function Hud.setNotice(text)
 	NOTICE.label.Text = text or ""
 end
 
--- HOLD ON!'s struggle (QM, Oct 8): nothing on screen but the bar. Every ScreenGui and
--- BillboardGui of yours is switched off (and back as it was after), and the bar moves
--- onto a screen of its own, at the same spot and size.
-local struggleGui, struggleRoot, struggleWas, struggleRun, holdBounce, struggleCursor
-
--- The tutorial's pulsing click cursor in the middle of the screen during its struggle,
--- while you're not tapping (HoldOn; QM, Oct 8). A tap anywhere counts.
-function Hud.setStruggleCursor(on)
-	if not struggleRoot then
-		return
-	end
-	if not struggleCursor then
-		struggleCursor = Instance.new("ImageLabel")
-		struggleCursor.Name = "TapCursor"
-		struggleCursor.BackgroundTransparency = 1
-		struggleCursor.Image = "rbxassetid://93240211999923" -- assets/ui/TutorialCursor.png
-		struggleCursor.AnchorPoint = Vector2.new(29 / 256, 6 / 256) -- its tip
-		struggleCursor.Position = UDim2.fromScale(0.5, 0.5)
-		struggleCursor.SizeConstraint = Enum.SizeConstraint.RelativeYY
-		struggleCursor.Size = UDim2.fromScale(0.16, 0.16)
-		struggleCursor.ZIndex = 5
-		local scale = Instance.new("UIScale")
-		scale.Parent = struggleCursor
-		RunService.RenderStepped:Connect(function()
-			if struggleCursor.Visible then
-				scale.Scale = 1 + 0.15 * math.sin(os.clock() * math.pi * 2 * 1.6)
-			end
-		end)
-	end
-	struggleCursor.Visible = on
-	struggleCursor.Parent = struggleRoot
-end
-
--- The bar bounces on each HOLD ON! tap (QM, Oct 8): a subtle 1.04x punch easing back,
--- started afresh each tap (no stacking).
-function Hud.bounceHold()
-	if not holdFrame then
-		return
-	end
-	local scale = holdFrame:FindFirstChild("Bounce") or Instance.new("UIScale")
-	scale.Name = "Bounce"
-	scale.Parent = holdFrame
-	if holdBounce then
-		holdBounce:Cancel()
-	end
-	scale.Scale = 1.04 -- (subtle: QM)
-	holdBounce = TweenService:Create(scale, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 1 })
-	holdBounce:Play()
-end
-
--- One of QM's struggle signs (Config.HoldOn: Ready, Set, Tap): its art, or the word in
--- yellow with a black outline until that's uploaded.
-local function struggleSign(sign, word)
-	local label = Instance.new(if sign.Image ~= "" then "ImageLabel" else "TextLabel")
-	label.Name = word
-	label.BackgroundTransparency = 1
-	label.AnchorPoint = Vector2.new(0.5, 0.5)
-	label.SizeConstraint = Enum.SizeConstraint.RelativeXX
-	label.Size = UDim2.fromScale(sign.Width, sign.Width / sign.Aspect)
-	if sign.Image ~= "" then
-		label.Image = sign.Image
-		label.ScaleType = Enum.ScaleType.Fit
-	else
-		label.Text = word
-		label.Font = FONT
-		label.TextScaled = true
-		label.TextColor3 = Color3.fromRGB(255, 214, 40)
-		local edge = Instance.new("UIStroke")
-		edge.Thickness = 4
-		edge.Parent = label
-	end
-	local scale = Instance.new("UIScale")
-	scale.Parent = label
-	label.Parent = struggleRoot
-	return label, scale
-end
-
-local function fadeOut(label, info, goal)
-	goal = goal or {}
-	goal[if label:IsA("ImageLabel") then "ImageTransparency" else "TextTransparency"] = 1
-	TweenService:Create(label, info, goal):Play()
-	local edge = label:FindFirstChildOfClass("UIStroke")
-	if edge then
-		TweenService:Create(edge, info, { Transparency = 1 }):Play()
-	end
-end
-
--- "Ready..." then "Set..." in the middle, each popping in then shrinking away, then
--- TAP!s rising and fading on either side by turns, a reminder to keep tapping (not
--- one per tap), till it's over (QM, Oct 8).
-local function runStruggle(run)
-	local cfg = Config.HoldOn
-	for _, step in { { cfg.Ready, "READY" }, { cfg.Set, "SET" } } do
-		local sign = step[1]
-		local label, scale = struggleSign(sign, step[2])
-		label.Position = UDim2.fromScale(sign.At.X, sign.At.Y)
-		scale.Scale = 1.25
-		TweenService:Create(scale, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-		task.wait(sign.Time * 0.45)
-		local away = TweenInfo.new(sign.Time * 0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-		TweenService:Create(scale, away, { Scale = 0.4 }):Play()
-		fadeOut(label, away)
-		task.wait(sign.Time * 0.55)
-		label:Destroy()
-		if struggleRun ~= run then
-			return
-		end
-	end
-	local tap, side = cfg.Tap, 1
-	while struggleRun == run do
-		local spot = tap.Spots[side]
-		local label, scale = struggleSign(tap, "TAP!")
-		label.Rotation = spot.Rotation
-		label.Position = UDim2.fromScale(spot.At.X, spot.At.Y + tap.Rise / 2)
-		scale.Scale = 0.8
-		TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-		local life = TweenInfo.new(tap.Life, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-		TweenService:Create(label, life, { Position = UDim2.fromScale(spot.At.X, spot.At.Y - tap.Rise / 2) }):Play()
-		fadeOut(label, TweenInfo.new(tap.Life, Enum.EasingStyle.Quad, Enum.EasingDirection.In))
-		task.delay(tap.Life + 0.05, label.Destroy, label)
-		side = side % #tap.Spots + 1
-		task.wait(tap.Every)
-	end
-end
-
-function Hud.setStruggle(on)
-	if not holdFrame or (on == (struggleWas ~= nil)) then
-		return
-	end
-	local playerGui = Players.LocalPlayer:FindFirstChild("PlayerGui")
-	if on then
-		if not struggleGui then
-			struggleGui = Instance.new("ScreenGui")
-			struggleGui.Name = "Struggle"
-			struggleGui.ResetOnSpawn = false
-			struggleGui.IgnoreGuiInset = true
-			struggleGui.DisplayOrder = 10
-			struggleGui.Parent = playerGui
-			struggleRoot = root(struggleGui)
-		end
-		struggleWas = {}
-		for _, g in playerGui:GetDescendants() do
-			if (g:IsA("ScreenGui") or g:IsA("BillboardGui")) and g ~= struggleGui and g.Enabled then
-				struggleWas[g] = true
-				g.Enabled = false
-			end
-		end
-		holdFrame.Parent = struggleRoot
-		struggleGui.Enabled = true
-		Hud.struggling = true
-		local run = {}
-		struggleRun = run
-		task.spawn(runStruggle, run)
-	else
-		struggleRun = nil
-		Hud.struggling = nil
-		if struggleCursor then
-			struggleCursor.Visible = false
-		end
-		for g in struggleWas do
-			if g.Parent then
-				g.Enabled = true
-			end
-		end
-		struggleWas = nil
-		holdFrame.Parent = rideRoot
-		struggleGui.Enabled = false
-		for _, child in struggleRoot:GetChildren() do
-			if child ~= holdFrame and child ~= struggleCursor and child:IsA("GuiObject") then
-				child:Destroy()
-			end
-		end
-	end
-end
-
--- How much bigger than its target Tutorial's hand is drawn: on the merge lesson's Fuse
--- button, as big as when that button was 2x (QM: only the button got smaller).
-function Hud.cursorBoost(target)
-	return if target ~= nil and target == fuseIcon and lesson then 2 / LESSON_FUSE_SCALE else 1
-end
-
--- The ride's action button (LASSO / GRAB EGG): HOLD ON!'s takes its exact spot and size.
-function Hud.actionButton()
-	return action
-end
-
 -- Money as the HUD writes it: "$950", "$1.2k".
 Hud.money = money
-Hud.lassoIcon = IMAGES.lassoIcon.id -- (LassoLevel's tag)
 
 -- nil: no cash at all this time (run over on foot): the ride's cash and the
 -- fail screen's "+$N" stay hidden until the next ride.

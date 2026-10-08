@@ -88,21 +88,10 @@ local function silhouette(data)
 	return math.sqrt(sides[2] * sides[3])
 end
 
--- Each biome's animals are bigger (QM, Oct 8): x its AnimalSize (Config.Biomes), the
--- first biome whose herd it's in. One size, everywhere: pen, menus, the course.
-local function biomeSize(name)
-	for _, biome in Config.Biomes do
-		if biome.Herd and biome.Herd[name] then
-			return biome.AnimalSize or 1
-		end
-	end
-	return 1
-end
-
 -- The size that makes an animal of this tier read TierGrowth x the tier below.
 local function tierSize(name, data)
 	local tier = Config.PetTiers[name] or 1
-	local size = Config.PetSmallSize * Config.TierGrowth ^ (tier - 1) / silhouette(data) * biomeSize(name)
+	local size = Config.PetSmallSize * Config.TierGrowth ^ (tier - 1) / silhouette(data)
 	return math.round(size * 100) / 100 -- one template per animal (Rig caches by size)
 end
 
@@ -129,7 +118,7 @@ local function variant(name, data, rarity, points)
 		seatBone = points.seatBone,
 		gallopOnSprint = points.gallopOnSprint, -- gallops only while self.sprinting (Ride sets it)
 		neckLoop = points.neck or NECK_LOOP,
-		size = if points.size then points.size * biomeSize(name) else tierSize(name, data),
+		size = points.size or tierSize(name, data),
 	}, { __index = Horse })
 	class.__index = class
 
