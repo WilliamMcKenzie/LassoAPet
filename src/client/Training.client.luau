@@ -78,8 +78,12 @@ local function buildChair()
 	seat.CanQuery = false
 	seat.CanTouch = false
 	seat.CFrame = chair.PrimaryPart.CFrame * TrainingChair.seat.cframe
-	local weld = Instance.new("WeldConstraint")
+	-- (a Weld with its offset given, not a WeldConstraint: that takes the offset the parts
+	-- have when it first goes live in workspace, by which time the chair had been moved
+	-- to the pen and the seat hadn't, so it stayed at the origin: the start line)
+	local weld = Instance.new("Weld")
 	weld.Part0, weld.Part1 = chair.PrimaryPart, seat
+	weld.C0 = TrainingChair.seat.cframe
 	weld.Parent = seat
 	seat.Anchored = false
 	seat.Massless = true
