@@ -54,7 +54,16 @@ rideSync.OnServerEvent:Connect(function(player, kind, mountCFrame, riderCFrame, 
 end)
 
 rideCue.OnServerEvent:Connect(function(player, what, ...)
-	if what == "out" then
+	-- "Lassoing" from the throw till they're on it (or off the ride): no egg can be
+	-- taken meanwhile (Nests.server; QM, Oct 8: taps in the HOLD ON! struggle took one).
+	if what == "lasso" then
+		player:SetAttribute("Lassoing", true)
+	elseif what == "landed" or what == "crash" or what == "end" then
+		player:SetAttribute("Lassoing", nil)
+	end
+	if what == "landed" then
+		return -- (just for that)
+	elseif what == "out" then
 		player:SetAttribute("PetOut", true)
 		return
 	elseif what == "end" then

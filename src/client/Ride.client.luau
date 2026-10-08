@@ -1427,7 +1427,7 @@ local function candidateAt(screenPos)
 end
 
 local function onAction()
-	if phase ~= "outbound" or transfer or not mount or not actionTarget then
+	if phase ~= "outbound" or transfer or not mount or not actionTarget or os.clock() < (vfx.actionsFrom or 0) then
 		return
 	end
 	if actionTarget == "egg" then
@@ -1484,6 +1484,9 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 	if phase == "idle" then
 		return -- (RIDE always rides the nearest pet: clicking one doesn't pick it)
+	end
+	if transfer or os.clock() < (vfx.actionsFrom or 0) then
+		return -- (lassoing and HOLD ON!: every tap is the struggle's, QM; and a moment after, so its last taps don't grab)
 	end
 	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
 		-- Clicking or tapping another egg or animal in range targets it instead.
@@ -3864,6 +3867,9 @@ local function updateRider(dt)
 				table.remove(strays, table.find(strays, target))
 			end
 			mount, transfer = target, nil
+			vfx.rideCue:FireServer("landed") -- (eggs can be taken again: Riders.server)
+			vfx.actionsFrom = os.clock() + 0.6 -- (the struggle's last taps don't grab an egg or lasso again)
+			picked = nil
 			NestEggs.setMount(NestEggs.eggOf(mount)) -- the nests' eggs are this animal's now
 			vfx.sounds.play("lasso_land")
 			mount.popping, mount.hop = nil, 0

@@ -127,8 +127,8 @@ takeEgg.OnServerEvent:Connect(function(player, nest, mount)
 		return
 	end
 	local spot = nest:FindFirstChild("EggSpot")
-	if not spot then
-		return -- (not a whole nest: no egg)
+	if not spot or player:GetAttribute("Lassoing") then
+		return -- (not a whole nest: no egg; or mid-lasso, hanging on: Riders.server)
 	end
 	-- The wild animal they're riding, if one and the nest's in its biome (see the top),
 	-- else their roll for the nest.
