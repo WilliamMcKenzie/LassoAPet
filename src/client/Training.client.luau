@@ -31,6 +31,7 @@ local STUD_TEXTURE = { image = "rbxassetid://7447638591", tile = 0.5 } -- the an
 local training = Config.Training
 local player = Players.LocalPlayer
 local trainLasso = ReplicatedStorage:WaitForChild("TrainLasso")
+local trainingState = ReplicatedStorage:WaitForChild("TrainingState") -- (others see you train: their copies of this)
 
 -- The dummies -------------------------------------------------------------------
 -- Each pen's is its biome's (Props/TrainingByBiome: the owner's pen level picks it,
@@ -247,6 +248,9 @@ local function standUp()
 		sitWeld:Destroy()
 		sitWeld = nil
 	end
+	if player:GetAttribute("TrainingSeat") then
+		trainingState:FireServer(false)
+	end
 	player:SetAttribute("TrainingSeat", nil)
 end
 
@@ -268,6 +272,7 @@ local function sitDown(char, dummy, again)
 	humanoid.Sit = true
 	-- Sitting here isn't riding: the merge menu and pet plates stay (this client only).
 	player:SetAttribute("TrainingSeat", true)
+	trainingState:FireServer(true)
 end
 
 local function stop()
@@ -365,6 +370,79 @@ RunService.PreSimulation:Connect(function(dt)
 		Lasso.pull(k, target)
 	else
 		Lasso.hide()
+	end
+end)
+
+-- Everyone else training (their "Training" attribute, from the server): their throws at
+-- their own pen's dummy played here, as they'd see them (no +N popups: those are theirs).
+-- Each has a copy of the Lasso module (it holds one character). Only near ones.
+local OTHERS_NEAR = 300
+local others = {} -- [player] = { module, Lasso, t, counted, level }
+local function dropOther(p)
+	local o = others[p]
+	if o then
+		o.Lasso.stop()
+		o.module:Destroy()
+		others[p] = nil
+	end
+end
+Players.PlayerRemoving:Connect(dropOther)
+RunService.PreSimulation:Connect(function(dt)
+	local me = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	for _, p in Players:GetPlayers() do
+		local char = p ~= player and p:GetAttribute("Training") and p.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		local index = p:GetAttribute("Pen")
+		local pen = index and workspace.Pens:FindFirstChild("Pen" .. index)
+		local dummy = pen and dummies[pen]
+		local near = hrp and me and dummy and dummy.place and (hrp.Position - me.Position).Magnitude < OTHERS_NEAR
+		local o = others[p]
+		if not near or not char:FindFirstChild("RightGripAttachment", true) then
+			dropOther(p)
+			continue
+		end
+		local level = p:GetAttribute("PenLevel") or 1
+		if not o or o.char ~= char then
+			dropOther(p)
+			local module = script.Parent.Lasso:Clone()
+			module.Name = "TrainingLasso" .. p.UserId
+			module.Parent = script
+			o = { module = module, Lasso = require(module), t = 0, counted = false, char = char }
+			others[p] = o
+			o.level = level
+			o.Lasso.start(char, 1, level)
+		elseif o.level ~= level then
+			o.level = level
+			o.Lasso.start(char, 1, level)
+		end
+		local speed = TrainingSpot.speed(p:GetAttribute("Lasso"))
+		local step = dt * math.min(speed, CYCLE / training.MinCycle)
+		o.t += step
+		if not o.counted and o.t >= CATCH_AT then
+			o.counted = true
+			if dummy.hitT > 0.3 then
+				dummy.hitT = 0
+			end
+		end
+		if o.t >= CYCLE then
+			o.t, o.counted = o.t % CYCLE, false
+		end
+		local neck = dummy.entry.neck
+		local target = { cframe = dummy.place * CFrame.new(neck.center), radius = neck.radius }
+		if o.t < training.Swing then
+			o.Lasso.swing(step)
+		elseif o.t < training.Swing + training.Throw then
+			o.Lasso.throw((o.t - training.Swing) / training.Throw, target)
+		elseif o.t < training.Swing + training.Throw + training.Pull then
+			o.Lasso.pull((o.t - training.Swing - training.Throw) / training.Pull, target)
+		else
+			o.Lasso.hide()
+		end
+	end
+	for p in others do
+		if not p.Parent then
+			dropOther(p)
+		end
 	end
 end)
 

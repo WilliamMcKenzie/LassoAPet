@@ -18,6 +18,15 @@ local trainLasso = Instance.new("RemoteEvent")
 trainLasso.Name = "TrainLasso"
 trainLasso.Parent = ReplicatedStorage
 
+-- Sitting down to train or getting up (Training.client): the "Training" attribute,
+-- so everyone else's clients can play your throws at your dummy (QM, Oct 8).
+local trainingState = Instance.new("RemoteEvent")
+trainingState.Name = "TrainingState"
+trainingState.Parent = ReplicatedStorage
+trainingState.OnServerEvent:Connect(function(player, on)
+	player:SetAttribute("Training", if on == true then true else nil)
+end)
+
 -- Catches can come several to a throw once you're quick (Config.Training.MinCycle):
 -- each player has a budget of them, filling at their speed (a little over, for lag)
 -- and capped at a few throws' worth, and a report only counts what's in it.
