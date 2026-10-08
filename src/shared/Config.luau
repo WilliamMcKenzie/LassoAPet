@@ -576,6 +576,7 @@ return {
 		Width = 0.33,
 		Image = "rbxassetid://71069860798170", -- assets/ui/HoldOn.png
 		Arm = "rbxassetid://81589206383908", -- assets/ui/FlexArm.png: the +1 popup's icon
+		Popup = false, -- a "+1" with the arm on each tap (QM, Oct 8: off)
 	},
 	-- Lassoing an animal while riding (QM, Oct 8: the new lasso, phase 1): once the loop's
 	-- round its neck you hang off the rope behind it (HOLD ON!, Config.HoldOn, decides

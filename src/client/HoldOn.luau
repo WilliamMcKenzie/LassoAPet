@@ -88,7 +88,9 @@ function HoldOn.tap()
 	fill = math.min(fill + cfg.PerTap, 1)
 	lastTap = os.clock()
 	buttonScale.Scale = 0.92 -- a press, springing back in update
-	PlusPopup.at(who, 1, cfg.Arm, PlusPopup.SCATTER) -- (scattered wide: QM, not clustered)
+	if cfg.Popup then
+		PlusPopup.at(who, 1, cfg.Arm, PlusPopup.SCATTER) -- (scattered wide: QM, not clustered)
+	end
 end
 
 function HoldOn.start(character)
