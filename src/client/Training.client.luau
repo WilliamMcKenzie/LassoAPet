@@ -212,6 +212,7 @@ end
 
 -- Training ----------------------------------------------------------------------
 local CYCLE = training.Swing + training.Throw + training.Pull + training.Rest
+local perThrow, owed = 1, 0 -- catches each throw counts for (past MinCycle), and the fraction owed
 local CATCH_AT = training.Swing + training.Throw + training.Pull * 0.35 -- the loop's cinched on its neck
 local character -- the character the lasso's started on, while training
 local t = 0 -- seconds into this catch
@@ -304,7 +305,12 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	local neck = dummy.entry.neck
 	local target = { cframe = dummy.place * CFrame.new(neck.center), radius = neck.radius }
-	dt *= TrainingSpot.speed(player:GetAttribute("Lasso")) -- stronger, quicker (the swing spins faster too)
+	-- Stronger, quicker (the swing spins faster too), shown no quicker than MinCycle a
+	-- throw: past that each throw is speed / shown catches (perThrow).
+	local speed = TrainingSpot.speed(player:GetAttribute("Lasso"))
+	local shown = math.min(speed, CYCLE / training.MinCycle)
+	perThrow = speed / shown
+	dt *= shown
 	-- The catch counts once the loop's cinched (CATCH_AT into the cycle), even if a
 	-- long frame at a high speed steps right over the pull.
 	t += dt
@@ -313,8 +319,13 @@ RunService.PreSimulation:Connect(function(dt)
 		if dummy.hitT > 0.3 then -- (at high speeds the hit isn't restarted every catch: it'd only judder)
 			dummy.hitT = 0
 		end
-		trainLasso:FireServer()
-		popCatch(character, TrainingSpot.perCatch(player:GetAttribute("PenLevel")))
+		owed += perThrow
+		local n = math.floor(owed)
+		owed -= n
+		if n >= 1 then
+			trainLasso:FireServer(n)
+			popCatch(character, n * TrainingSpot.perCatch(player:GetAttribute("PenLevel")))
+		end
 	end
 	if t >= CYCLE then
 		t, counted = t % CYCLE, false

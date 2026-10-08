@@ -18,11 +18,24 @@ local trainLasso = Instance.new("RemoteEvent")
 trainLasso.Name = "TrainLasso"
 trainLasso.Parent = ReplicatedStorage
 
-local last = {} -- [player] = os.clock() of their last counted catch
+-- Catches can come several to a throw once you're quick (Config.Training.MinCycle):
+-- each player has a budget of them, filling at their speed (a little over, for lag)
+-- and capped at a few throws' worth, and a report only counts what's in it.
+local budget = {} -- [player] = catches they can still report
+local last = {} -- [player] = os.clock() the budget was last topped up
 
-trainLasso.OnServerEvent:Connect(function(player)
+trainLasso.OnServerEvent:Connect(function(player, n)
+	n = math.floor(tonumber(n) or 1)
+	if n < 1 or n ~= n then
+		return
+	end
 	local now = os.clock()
-	if now - (last[player] or 0) < CYCLE * 0.8 / TrainingSpot.speed(player:GetAttribute("Lasso")) then
+	local speed = TrainingSpot.speed(player:GetAttribute("Lasso"))
+	local perThrow = speed / math.min(speed, CYCLE / training.MinCycle)
+	budget[player] = math.min((budget[player] or 1) + (now - (last[player] or now)) * speed / CYCLE * 1.25, math.max(3 * perThrow, 2))
+	last[player] = now
+	n = math.min(n, math.floor(budget[player]))
+	if n < 1 then
 		return
 	end
 	local character = player.Character
@@ -33,10 +46,10 @@ trainLasso.OnServerEvent:Connect(function(player)
 	if not hrp or not spot or ((hrp.Position - spot.Position) * Vector3.new(1, 0, 1)).Magnitude > training.Radius + SLACK then
 		return
 	end
-	last[player] = now
-	player:SetAttribute("Lasso", (player:GetAttribute("Lasso") or 0) + TrainingSpot.perCatch(player:GetAttribute("PenLevel")))
+	budget[player] -= n
+	player:SetAttribute("Lasso", (player:GetAttribute("Lasso") or 0) + n * TrainingSpot.perCatch(player:GetAttribute("PenLevel")))
 end)
 
 Players.PlayerRemoving:Connect(function(player)
-	last[player] = nil
+	last[player], budget[player] = nil, nil
 end)
