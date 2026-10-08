@@ -602,9 +602,9 @@ return {
 			Width = 0.15,
 			Aspect = 188 / 72,
 			Spots = { { At = Vector2.new(0.32, 0.6), Rotation = -15 }, { At = Vector2.new(0.75, 0.35), Rotation = 20 } },
-			Every = 0.45,
+			Every = 0.225, -- (QM, Oct 8: twice as fast as the first 0.45 / 0.9)
 			Rise = 0.08,
-			Life = 0.9,
+			Life = 0.45,
 		},
 	},
 	-- Lassoing an animal while riding (QM, Oct 8: the new lasso, phase 1): once the loop's
