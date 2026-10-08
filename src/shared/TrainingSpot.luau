@@ -49,7 +49,7 @@ end
 
 function TrainingSpot.speed(lasso)
 	local training = Config.Training
-	return training.SpeedPerDecade ^ math.log10(math.max(lasso or 0, 1))
+	return (training.SpeedBase or 1) * training.SpeedPerDecade ^ math.log10(math.max(lasso or 0, 1))
 end
 
 -- Whether your throw number i (1 = your first since you joined) is a CRIT

@@ -299,11 +299,13 @@ return {
 		-- Balance pass (Oct 6): QM's pets JSON times, x1 in the Meadow (the first eggs stay quick),
 		-- x2 Desert, x4 Tundra, x6 Ocean, x8 Godlands; the exclusives 1 h / 16 h / 24 h. Eggs hatch
 		-- while you're offline, so long ones bring players back (Steal an Egg goes up to 12-36 h).
+		-- (QM, Oct 8 evening: progression 2x faster: the Desert's to the Godlands' halved, so
+		-- x1 / x2 / x3 / x4 of the JSON; the Meadow's and the exclusives' kept.)
 		Horse = 15, Pig = 15, Bunny = 15, Pinto = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
-		Cactus = 60, Kitten = 60, Scorpion = 180, Sandworm = 420, SpineLizard = 600, Snake = 1200, -- Desert
-		Penguin = 120, Boar = 180, Snowman = 480, IceGolem = 1440, Icebringer = 7200, -- Tundra
-		Starfish = 90, Whale = 21600, Squid = 5400, FishSchool = 4000, KingCrab = 7200, BlueCrab = 18000, Kraken = 20000, -- Ocean
-		Beholder = 5400, Sludge = 4800, WarElephant = 7200, Leviathan = 14400, SoulHorse = 19200, -- Godlands
+		Cactus = 30, Kitten = 30, Scorpion = 90, Sandworm = 210, SpineLizard = 300, Snake = 600, -- Desert
+		Penguin = 60, Boar = 90, Snowman = 240, IceGolem = 720, Icebringer = 3600, -- Tundra
+		Starfish = 45, Whale = 10800, Squid = 2700, FishSchool = 2000, KingCrab = 3600, BlueCrab = 9000, Kraken = 10000, -- Ocean
+		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		SnackYak = 3600, RoboShark = 57600, Loong = 86400, -- exclusives
 	},
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
@@ -508,14 +510,15 @@ return {
 	AutosaveEvery = 90, -- seconds between autosaves of each player's gold, pets and pen (Gold, Hatchery, PenLevel)
 	AwayCap = 10 * 3600,
 	-- Gold per second each pet in your pen earns you (the one you ride too), paid
-	-- every second while you're in the game.
+	-- every second while you're in the game. (QM, Oct 8 evening: progression 2x faster, so
+	-- x3 QM's pets JSON: rides don't get quicker, so the gold has to more than double.)
 	PetIncome = {
-		Horse = 1, Pig = 3, Bunny = 4, Pinto = 5, Fish = 8, Rhino = 30, Unicorn = 150, -- Meadow
-		Cactus = 6, Kitten = 8, Scorpion = 20, Sandworm = 60, SpineLizard = 80, Snake = 250, -- Desert
-		Penguin = 25, Boar = 50, Snowman = 100, IceGolem = 420, SnackYak = 3000, Icebringer = 1111, -- Tundra
-		Starfish = 100, Squid = 700, KingCrab = 950, FishSchool = 850, BlueCrab = 6000, RoboShark = 19000, Whale = 1500, Kraken = 8200, -- Ocean
-		Loong = 20000, Beholder = 3000, Leviathan = 15000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
-		WarElephant = 4000, SoulHorse = 20000, Sludge = 2500, -- so they pay more than the Ocean's)
+		Horse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, -- Meadow
+		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
+		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, -- Tundra
+		Starfish = 300, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, -- Ocean
+		Loong = 60000, Beholder = 9000, Leviathan = 45000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
+		WarElephant = 12000, SoulHorse = 60000, Sludge = 7500, -- so they pay more than the Ocean's)
 	},
 	-- Egg Machine (gacha) in the home base: walk up and roll for a random egg.
 	-- Odds picks a tier by weight (percent), then an egg from that tier's Pool,
@@ -660,12 +663,13 @@ return {
 		Throw = 0.45, -- flying out to the dummy's neck,
 		Pull = 0.5, -- cinching on it (the catch counts here),
 		Rest = 0.35, -- and slack before the next
-		-- The stronger your lasso, the faster you lasso (QM, Oct 8): x SpeedPerDecade
-		-- for every x10 of lasso strength, no cap (TrainingSpot.speed): 1 -> x1 (2.4 s a
-		-- catch), 10 -> x2, 100 -> x4, 1k -> x8, 10k -> x16, 1M -> x64, 10B -> x1024.
+		-- The stronger your lasso, the faster you lasso (QM, Oct 8): SpeedBase x SpeedPerDecade
+		-- for every x10 of lasso strength, no cap (TrainingSpot.speed): 1 -> x2 (1.2 s a
+		-- catch), 10 -> x4, 100 -> x8, 1k -> x16, 10k -> x32, 1M -> x128, 10B -> x2048.
 		-- The throw is never shown quicker than MinCycle seconds; past that each throw
 		-- counts as several catches (sent and popped as one), so the strength a second
-		-- still follows the curve.
+		-- still follows the curve. (SpeedBase: QM, Oct 8, progression 2x faster; was 1.)
+		SpeedBase = 2,
 		SpeedPerDecade = 2,
 		MinCycle = 0.25,
 		-- Lucky catches (QM, Oct 8: more spectacle): a throw is a CRIT one time in 1/Chance,
@@ -683,6 +687,9 @@ return {
 	-- HoldOn.MinStrength: instant rides. Exclusives match their biome's top animal.
 	-- (QM, Oct 8: a much bigger gap by rarity: each biome's Legendary kept, Epic ~0.4x it,
 	-- Rare ~0.1x, Uncommon ~0.015x, rounded; the Snack Yak, a Robux exclusive, matches the Icebringer.)
+	-- (QM, Oct 8 evening: progression 2x faster with these levels kept: Training.SpeedBase,
+	-- PetIncome x3 and most hatch times halved instead. The whole game, the Godlands pen and
+	-- every animal, now takes ~4.5 h at that pace, was ~8.7 h; sim in balance/lasso/speedup/.)
 	LassoLevels = {
 		Horse = 5, Pig = 15, Bunny = 20, Pinto = 25, Fish = 150, Rhino = 600, Unicorn = 1500, -- Meadow
 		Kitten = 500, Cactus = 750, Scorpion = 5000, Sandworm = 18000, SpineLizard = 20000, Snake = 46000, -- Desert
