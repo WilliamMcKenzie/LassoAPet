@@ -205,9 +205,13 @@ return {
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
-	-- Zone gates on? Off (QM, Oct 8: new-loops): ride anywhere, no gates, no Upgrade Pen
-	-- button, no tutorial flight to the next gate. PenLevel still loads and saves as before.
+	-- Zone gates on? Off (QM, Oct 8: new-loops): ride anywhere, no gates, no tutorial
+	-- flight to the next gate. PenLevel still loads and saves as before.
 	Gates = false,
+	-- The Upgrade Pen button (Hud): buys the next pen level at the next biome's
+	-- UnlockCost. With the gates off it only grows and repaints your pen and swaps in
+	-- that biome's training dummy and chair (QM, Oct 8); past the last, the Rainbow Trail.
+	PenUpgrades = true,
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	-- The course is a funnel (QM, Oct 8): CourseHalfWidth at the start line, each wall
