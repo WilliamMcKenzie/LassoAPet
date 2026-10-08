@@ -668,12 +668,14 @@ return {
 	-- SpeedPerDecade) so a new animal unlocks every ~30 s at first and every 30-60 min at the end
 	-- (last ~6 h). Within a biome, more $/s = higher. Horse, Pig and Bunny are at or under
 	-- HoldOn.MinStrength: instant rides. Exclusives match their biome's top animal.
+	-- (QM, Oct 8: a much bigger gap by rarity: each biome's Legendary kept, Epic ~0.4x it,
+	-- Rare ~0.1x, Uncommon ~0.015x, rounded.)
 	LassoLevels = {
-		Horse = 5, Pinto = 47, Pig = 10, Bunny = 20, Fish = 120, Rhino = 180, Unicorn = 1500, -- Meadow
-		Cactus = 5300, Kitten = 7500, Scorpion = 13000, Sandworm = 23000, SpineLizard = 33000, Snake = 46000, -- Desert
-		Penguin = 66000, Boar = 94000, Snowman = 3800000, IceGolem = 20000000, SnackYak = 46000000, Icebringer = 46000000, -- Snow
-		Starfish = 89000000, Whale = 470000000, Squid = 140000000, KingCrab = 320000000, FishSchool = 230000000, BlueCrab = 660000000, RoboShark = 900000000, Kraken = 900000000, -- Ocean
-		Beholder = 1700000000, WarElephant = 83000000000, Sludge = 1300000000, SoulHorse = 820000000000, Leviathan = 360000000000, Loong = 820000000000, -- Godlands
+		Horse = 5, Pig = 15, Bunny = 20, Pinto = 25, Fish = 150, Rhino = 600, Unicorn = 1500, -- Meadow
+		Kitten = 500, Cactus = 750, Scorpion = 5000, Sandworm = 18000, SpineLizard = 20000, Snake = 46000, -- Desert
+		Penguin = 500000, Boar = 750000, Snowman = 5000000, IceGolem = 18000000, SnackYak = 20000000, Icebringer = 46000000, -- Snow
+		Starfish = 15000000, Whale = 90000000, Squid = 300000000, FishSchool = 350000000, KingCrab = 400000000, BlueCrab = 660000000, RoboShark = 900000000, Kraken = 900000000, -- Ocean
+		Sludge = 70000000000, Beholder = 80000000000, WarElephant = 85000000000, Leviathan = 300000000000, SoulHorse = 330000000000, Loong = 820000000000, -- Godlands
 	},
 	-- Rarity text colours (QM, Oct 7): pet nameplates, lasso levels. Common keeps the inventory slots' grey.
 	RarityColors = {
