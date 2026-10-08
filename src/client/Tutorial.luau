@@ -26,6 +26,8 @@
 --            in the tutorial (QM). The arrows then lead to that new pet until you
 --            ride. (No fuse step: too confusing for kids, QM Oct 6 21:15.)
 --
+-- Running to the start line in step 1 or 2 skips them (Tutorial.toLine): the
+-- starter egg becomes your Horse there and then and you ride off on it at step 3.
 -- A failed ride goes back to step 2. Until it's done the stampede runs on your
 -- own clock (Ride), so slowing it down never snaps it back.
 --
@@ -556,6 +558,37 @@ function Tutorial.lassoed()
 	if Tutorial.active and step == "lasso" then
 		setStep("egg")
 	end
+end
+
+-- Walked over the start line before riding your first pet (StartLine, from Ride;
+-- QM, Oct 8: many kids run straight there): the server makes the starter egg the
+-- pet you ride (TutorialToLine, as if it had been placed, hatched and ridden), then
+-- `go` rides it off from the line and the tutorial carries on at "lasso". True
+-- while that's on (WalkLimit holds you at the line, with no notice), false when
+-- it can't be.
+local toLine = false
+function Tutorial.toLine(go)
+	if not (Tutorial.active and (step == "place" or step == "ride")) or Tutorial.busy then
+		return false
+	end
+	if not toLine then
+		toLine = true
+		task.spawn(function()
+			local remote = ReplicatedStorage:FindFirstChild("TutorialToLine")
+			local ok, rides = pcall(function()
+				return remote and remote:InvokeServer()
+			end)
+			local by = os.clock() + 5
+			while ok and rides and (player:GetAttribute("RidePet") or "") == "" and os.clock() < by do
+				task.wait() -- (till the pet you ride has come over)
+			end
+			if ok and rides and (player:GetAttribute("RidePet") or "") ~= "" and Tutorial.active then
+				go()
+			end
+			toLine = false
+		end)
+	end
+	return true
 end
 
 -- What Ride's guide arrows point at on the way out: the nearest animal ahead

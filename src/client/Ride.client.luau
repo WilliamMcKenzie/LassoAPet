@@ -863,7 +863,8 @@ ridePrompt.Triggered:Connect(rideFromHome)
 
 -- Rides `model`: the starter, or a pet from your pen, which swaps places with the
 -- starter (the server makes it the one you ride, and the starter joins the pen).
-startRide = function(model)
+-- `at`: set off from there instead of home (the tutorial's start line, Tutorial.toLine).
+startRide = function(model, at)
 	local hrp, humanoid = character()
 	if not hrp then
 		return
@@ -872,7 +873,7 @@ startRide = function(model)
 		spawnStarter()
 	end
 	humanoid:UnequipTools() -- put any egg away
-	local spot = homeSpot()
+	local spot = at or homeSpot()
 	local fromPen = model and PenPets.pets[model]
 	local fromHerd = model and herdRideable[model]
 	clearRideTarget()
@@ -912,7 +913,7 @@ startRide = function(model)
 	mount.animal:setSaddled(true)
 	vfx.rideAgain = nil
 	leadFromZ = spot.Z - 8
-	exitX = if fromHerd then nil else penExitX()
+	exitX = if fromHerd or at then nil else penExitX()
 	local runningAt = if fromHerd then fromHerd.speed or 0 else 0 -- a stampede animal keeps its pace
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, runningAt, 0
 	mount.feast = nil -- (the Blue Crab starts every ride at its own size)
@@ -934,8 +935,14 @@ end
 -- Meadow animal there and then (QM, Oct 6), ridden like a stampede animal you
 -- jumped on at the start line. Any Meadow herd kind that spawns, all equally likely.
 require(script.Parent.StartLine).ride = function(x, z)
-	if phase ~= "idle" or Tutorial.busy or player:GetAttribute("Tutorial") then
+	if phase ~= "idle" or Tutorial.busy then
 		return false
+	elseif player:GetAttribute("Tutorial") then -- (before your first ride: on your own pet, Tutorial.toLine)
+		return Tutorial.toLine(function()
+			if phase == "idle" and not Tutorial.busy then
+				startRide(nil, Vector3.new(x, 0, z))
+			end
+		end)
 	end
 	local kinds = {}
 	for kind, weight in Config.Biomes[1].Herd do

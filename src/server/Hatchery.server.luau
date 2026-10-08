@@ -711,6 +711,47 @@ remote("TutorialDone", function(player)
 	Funnel.step(player, "Tutorial Done")
 end)
 
+-- Ran to the start line in the tutorial before riding the starter pet (QM, Oct 8:
+-- many kids do): as if they'd placed the egg, it had hatched and they'd got on.
+-- The starter egg, in the inventory or in the pen (hatched or not), becomes the
+-- pet they ride (Tutorial.toLine, which then rides it from the line).
+local toLine = Instance.new("RemoteFunction")
+toLine.Name = "TutorialToLine"
+toLine.OnServerInvoke = function(player)
+	local profile = profiles[player]
+	if not profile or not player:GetAttribute("Tutorial") then
+		return false
+	end
+	if profile.ride then
+		return true
+	end
+	local kind = Config.DefaultPet
+	local placed
+	for id, item in profile.items do
+		if item.egg == kind or item.pet == kind then
+			placed = id
+			break
+		end
+	end
+	if placed then
+		profile.items[placed] = nil
+	elseif (profile.eggs[kind] or 0) > 0 then
+		profile.eggs[kind] -= 1
+		if profile.eggs[kind] == 0 then
+			profile.eggs[kind] = nil
+		end
+	else
+		return false
+	end
+	profile.ride = kind
+	Funnel.step(player, "Placed Starter Egg")
+	Funnel.step(player, "Starter Pet Ready")
+	Funnel.event(player, "Ran To Start Line")
+	publish(player)
+	return true
+end
+toLine.Parent = ReplicatedStorage
+
 -- Ride the pet `id` from now on; the pet you rode takes its place in the pen.
 remote("RidePet", function(player, id)
 	local profile = profiles[player]
