@@ -603,7 +603,13 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		if type(earned) ~= "number" or earned <= 0 then
 			return
 		end
-		local plus = label(goldRow.text, UDim2.fromOffset(0, 34), UDim2.new(1, 8, 0.5, 0), 30, 3)
+		-- (its own label on sideRoot, outside the gold's layout: inside the gold text it
+		-- widened that text's AutomaticSize and pushed the number and coin about, Oct 8)
+		local tx = goldRow.text
+		local scale = sideRoot.AbsoluteSize.X / math.max(sideRoot.Size.X.Offset, 1)
+		local right = tx.AbsolutePosition.X + (tx.AbsoluteSize.X + tx.TextBounds.X) / 2
+		local at = (Vector2.new(right, tx.AbsolutePosition.Y + tx.AbsoluteSize.Y / 2) - sideRoot.AbsolutePosition) / scale
+		local plus = label(sideRoot, UDim2.fromOffset(0, 34), UDim2.fromOffset(at.X + 8, at.Y), 30, 3)
 		plus.AnchorPoint = Vector2.new(0, 0.5)
 		plus.AutomaticSize = Enum.AutomaticSize.X
 		plus.TextColor3 = Color3.fromHex("FFC41E")
@@ -616,7 +622,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		TweenService:Create(pop, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
 		task.delay(0.4, function()
 			local away = TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-			TweenService:Create(plus, away, { Position = UDim2.new(1, 8, 0.5, -30), TextTransparency = 1 }):Play()
+			TweenService:Create(plus, away, { Position = plus.Position - UDim2.fromOffset(0, 30), TextTransparency = 1 }):Play()
 			TweenService:Create(stroke, away, { Transparency = 1 }):Play()
 			task.delay(0.6, plus.Destroy, plus)
 		end)
