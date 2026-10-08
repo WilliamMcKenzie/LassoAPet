@@ -48,7 +48,7 @@ local IMAGES = {
 	rollButton = { id = "rbxassetid://112026122025466", size = Vector2.new(960, 378) }, -- RollButton.png
 	eggs = { id = "rbxassetid://76827079745406", size = Vector2.new(264, 277) },
 	coin = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) },
-	lassoIcon = { id = "rbxassetid://99312860837685", size = Vector2.new(256, 256) }, -- the coin until QM's LassoIcon.png is uploaded
+	lassoIcon = { id = "rbxassetid://96847828944619", size = Vector2.new(256, 256) }, -- LassoIcon.png (QM's, Oct 8)
 	upgradePen = { id = "rbxassetid://120690804030353", size = Vector2.new(1152, 284) }, -- UpgradePenActive.png
 	upgradePenDisabled = { id = "rbxassetid://134427342737800", size = Vector2.new(1158, 285) }, -- UpgradePenDisabled.png
 	-- Each biome's own Upgrade Pen (Config.Biomes[i].UpgradeImage), all this size.
