@@ -1945,9 +1945,16 @@ local function updateHerd(dt, slowed)
 	local fromZ, toZ = vfx.viewWindow(camZ)
 	endless.near(fromZ, toZ)
 	vfx.godlands.update(camZ)
+	-- (the animal you're lassoing is kept however old it gets or far it runs: QM, Oct 8, a
+	-- Fish wrestled on into the Desert outlived its stream's schedule and vanished)
+	local held = transfer and transfer.target and transfer.target.n
 	for b, stream in streams do
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
-		for n = stream.oldest, newest do
+		local first = stream.oldest
+		if held and held % BIOME_KEYS == b - 1 then
+			first = math.min(first, held // BIOME_KEYS)
+		end
+		for n = first, newest do
 			local key = n * BIOME_KEYS + b - 1
 			-- (keep: spawn n runs if n x the golden ratio's fraction is under it, the same
 			-- on every client and spread evenly, without a pattern to the gaps)
@@ -1970,7 +1977,7 @@ local function updateHerd(dt, slowed)
 			local z = stream.spawnZ - dist + (vfx.frostLag[key] or 0) - (vfx.hangLead[key] or 0)
 			-- The animal being lassoed runs on past the end until it's caught.
 			local lassoed = entity and transfer and transfer.target == entity
-			if (z <= stream.endZ and not lassoed) or z < fromZ or z > toZ then
+			if (z <= stream.endZ or z < fromZ or z > toZ) and not lassoed then
 				continue
 			end
 			local x = laneX(p.x, z)
@@ -3807,6 +3814,10 @@ local function updateRider(dt)
 		return
 	end
 	if transfer and transfer.stage == "hang" then
+		if not transfer.target.animal.model.Parent then
+			vfx.holdOn.stop() -- (it's gone from under you, whatever the reason: a crash, never a dangle)
+			return fail("CRASH!")
+		end
 		-- HOLD ON!: tap the bar full to hop on; let it run out and you're bucked off.
 		local won = false
 		if transfer.fill then
