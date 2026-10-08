@@ -177,6 +177,9 @@ local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Abi
 local mergeButton, mergeWanted -- MERGE, in RIDE's spot when RIDE isn't up (Hud.showMerge), and whether there's anything to merge
 local fuseIcon -- Fuse, under Pets: picks two pets to fuse (FuseMenu, through Hud.onFuse)
 local fuseIconAt -- its usual { Size, AnchorPoint, Position }: the merge lesson shows it bigger
+-- The ride's distance ("238 m" over the top bar) and its cash (coin and "$0" beside
+-- it): off (QM, Oct 8: the top bar's HOLD ON!'s now). True brings them back.
+local SHOW_RIDE_TOP = false
 local LESSON_FUSE_SCALE = 2 -- (QM, Oct 8: so nobody can miss it; Tutorial's cursor scales with it)
 local shopIcon -- Shop, over Roll (or over Pets without Roll): opens the Robux shop (Shop)
 local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
@@ -387,6 +390,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- Distance, on the bar.
 	distance = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 3) -- 3px outline (QM)
 	distance.Name = "Distance"
+	distance.Visible = SHOW_RIDE_TOP
 	distance.ZIndex = 2
 
 	-- Ride back: only DODGE THE STAMPEDE!, pulsing between 90% and 110%, and a red
@@ -541,6 +545,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	Instance.new("UIScale").Parent = tip
 	tip.Parent = rideRoot
 	rideCash = cashRow(rideRoot, 60, 46, Vector2.new(0, 0.5), UDim2.new(0.5, BAR_WIDTH / 2 + 8, 0, holdFrame.Position.Y.Offset), 3) -- 3px outline (QM)
+	rideCash.row.Visible = SHOW_RIDE_TOP
 
 	-- Home buttons, always on screen outside a ride; Gold stays during rides too.
 	homeGui = Instance.new("ScreenGui")
@@ -1037,7 +1042,7 @@ function Hud.show(visible)
 	gained.row.Visible = false
 	noCash = false
 	Hud.setTip(nil)
-	rideCash.row.Visible = tutorial == nil
+	rideCash.row.Visible = SHOW_RIDE_TOP and (tutorial == nil)
 	Hud.setReturning(false)
 	Hud.setVignette(0)
 	actionScale.Scale = 1
@@ -1483,8 +1488,8 @@ function Hud.setReturning(returning)
 			end
 		end)
 	end
-	rideCash.row.Visible = not returning and tutorial == nil
-	distance.Visible = not returning
+	rideCash.row.Visible = SHOW_RIDE_TOP and (not returning and tutorial == nil)
+	distance.Visible = SHOW_RIDE_TOP and not returning
 end
 
 -- Ride back's red vignette: 1 full, 0 gone. It and DODGE THE STAMPEDE! go once it's 0.
@@ -1583,7 +1588,7 @@ function Hud.setTutorial(stage)
 	fuseIcon.Visible = not riding and ((stage == nil and Hud.fuseUnlocked()) or stage == "fuse")
 	shopIcon.Visible = pets.Visible
 	upgrade.Visible = upgradeShown and not riding and stage == nil
-	rideCash.row.Visible = stage == nil and not noCash
+	rideCash.row.Visible = SHOW_RIDE_TOP and (stage == nil and not noCash)
 end
 
 -- The Fuse button, for the fuse lesson's cursor.
@@ -1614,7 +1619,7 @@ Hud.lassoIcon = IMAGES.lassoIcon.id -- (LassoLevel's tag)
 -- fail screen's "+$N" stay hidden until the next ride.
 function Hud.setCash(amount)
 	noCash = amount == nil
-	rideCash.row.Visible = not noCash and tutorial == nil
+	rideCash.row.Visible = SHOW_RIDE_TOP and (not noCash and tutorial == nil)
 end
 
 -- Cash gained this ride.
