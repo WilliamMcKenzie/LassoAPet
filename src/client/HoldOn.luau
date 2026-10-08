@@ -69,6 +69,11 @@ function HoldOn.start(character, yours, its, cantLose)
 		Enum.KeyCode.ButtonL1, Enum.KeyCode.ButtonR1, Enum.KeyCode.ButtonL2, Enum.KeyCode.ButtonR2)
 end
 
+-- Is a struggle on? (The tutorial slows time while it is.)
+function HoldOn.isOn()
+	return active
+end
+
 function HoldOn.update(dt)
 	if not active then
 		return fill, nil
