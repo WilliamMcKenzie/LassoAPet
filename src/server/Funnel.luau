@@ -34,14 +34,16 @@ local STEPS = {
 	"Started Ride", -- (client)
 	"Rode Out", -- past the start line on an animal
 	"Threw Lasso",
-	"Landed Lasso", -- (client) on the lassoed animal: "Follow the arrows to the egg!"
+	"Started Struggle", -- (client) hanging off the rope: HOLD ON!'s tapping (QM, Oct 8)
+	"Landed Lasso", -- (client) won it and on the lassoed animal: "Follow the arrows to the egg!"
 	"Egg In Reach", -- (client) "Press E to take the egg!"
 	"Grabbed Egg",
 	"Turned Home", -- (client)
 	"Brought Egg Home",
 	"Placed Egg",
 	"Egg Hatched",
-	"Saw Gate", -- (client) the camera flies to the Desert gate
+	"Told To Train", -- (client) "Train your lasso for big pets", arrows to the chair (Oct 8: was "Saw Gate")
+	"Sat To Train", -- (client) sat in the chair: that ends the tutorial
 	"Tutorial Done",
 	"Rode Out Again",
 	"Brought Egg Home Again",
@@ -61,7 +63,9 @@ local CLIENT_STEPS = {
 	egg = "Landed Lasso",
 	take = "Egg In Reach",
 	home = "Turned Home",
-	gate = "Saw Gate",
+	struggle = "Started Struggle",
+	train = "Told To Train",
+	sat = "Sat To Train",
 }
 -- Done again once the tutorial's over.
 local AGAIN = {

@@ -489,6 +489,9 @@ function Tutorial.update(state)
 	lastPhase = phase
 
 	if step == "train" and player:GetAttribute("TrainingSeat") then
+		if not done then
+			report("sat")
+		end
 		finish() -- sat down to train: that's the tutorial done
 	end
 	if step == "place" and ((player:GetAttribute("RidePet") or "") ~= "" or myPet({}) ~= nil) then
@@ -545,6 +548,13 @@ function Tutorial.update(state)
 		end
 	end
 	pointTo(target)
+end
+
+-- The lasso's struggle has begun (Ride), for the analytics funnel.
+function Tutorial.struggled()
+	if Tutorial.active then
+		report("struggle")
+	end
 end
 
 -- Landed on a lassoed animal: on to the egg.

@@ -3798,6 +3798,7 @@ local function updateRider(dt)
 				transfer.hang = vfx.ropeHang.start(hrp.Position, hrp.Parent, Lasso.tier())
 				transfer.fill = Config.HoldOn.Start
 				vfx.holdOn.start(hrp.Parent, strength, its, Tutorial.active) -- (the tutorial's can't be lost)
+				Tutorial.struggled()
 			end
 		end
 		return
