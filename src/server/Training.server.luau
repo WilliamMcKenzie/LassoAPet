@@ -1,12 +1,14 @@
 -- Lasso training (Config.Training; the dummy and the throws are Training.client):
 -- each catch the client reports (TrainLasso) adds PerCatch to the player's "Lasso"
 -- attribute, their lasso strength, which Gold.server saves with their gold. Only
--- counted from near the dummy, and no faster than the throw itself takes.
+-- counted from near their own pen's dummy (TrainingSpot), and no faster than the
+-- throw itself takes.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local TrainingSpot = require(ReplicatedStorage.Shared.TrainingSpot)
 
 local training = Config.Training
 local CYCLE = training.Swing + training.Throw + training.Pull + training.Rest
@@ -25,7 +27,10 @@ trainLasso.OnServerEvent:Connect(function(player)
 	end
 	local character = player.Character
 	local hrp = character and character:FindFirstChild("HumanoidRootPart")
-	if not hrp or ((hrp.Position - training.Position) * Vector3.new(1, 0, 1)).Magnitude > training.Radius + SLACK then
+	local index = player:GetAttribute("Pen")
+	local pen = index and workspace.Pens:FindFirstChild("Pen" .. index)
+	local spot = pen and TrainingSpot.of(pen)
+	if not hrp or not spot or ((hrp.Position - spot.Position) * Vector3.new(1, 0, 1)).Magnitude > training.Radius + SLACK then
 		return
 	end
 	last[player] = now

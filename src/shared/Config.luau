@@ -554,11 +554,12 @@ return {
 	-- Lasso training (QM, Oct 8: new-loops): a stitched horse dummy on a pole at home.
 	-- Stand within Radius of it (on foot) and you lasso it over and over, each catch
 	-- PerCatch lasso strength (the saved "Lasso" attribute, Training.server). It
-	-- doesn't gate anything yet. Training.client builds Design's Props/TrainingDummy
-	-- here, or a placeholder of blocks until that's in.
+	-- doesn't gate anything yet. Each pen has its own dummy (Design's Props/TrainingDummy)
+	-- at a front corner, facing out (TrainingSpot); you train at your own pen's. It's
+	-- meant to upgrade with the pen later (QM).
 	Training = {
-		Position = Vector3.new(30, 0, 66), -- on the grass between Pen1's and Pen3's ride lanes, behind the podium snake
-		Yaw = 200, -- degrees: the dummy faces back into the base
+		Out = 8, -- studs in front of the pen's open side
+		In = 6, -- studs in from the pen's corner, along that side
 		Radius = 14, -- studs from the pole you train from
 		PerCatch = 1,
 		Swing = 1.1, -- seconds of each catch: the loop spun overhead,
