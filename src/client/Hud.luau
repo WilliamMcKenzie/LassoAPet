@@ -176,6 +176,8 @@ local sprint, sprintInput -- the Sprint button, and the touch or click holding i
 local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
 local mergeButton, mergeWanted -- MERGE, in RIDE's spot when RIDE isn't up (Hud.showMerge), and whether there's anything to merge
 local fuseIcon -- Fuse, under Pets: picks two pets to fuse (FuseMenu, through Hud.onFuse)
+local fuseIconAt -- its usual { Size, AnchorPoint, Position }: the merge lesson shows it bigger
+local LESSON_FUSE_SCALE = 2 -- (QM, Oct 8: so nobody can miss it; Tutorial's cursor scales with it)
 local shopIcon -- Shop, over Roll (or over Pets without Roll): opens the Robux shop (Shop)
 local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
 local CONTINUE_GAP = 12 -- between Continue and the Home button under it
@@ -614,6 +616,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			Hud.onFuse()
 		end
 	end)
+	fuseIconAt = { Size = fuseIcon.Size, AnchorPoint = fuseIcon.AnchorPoint, Position = fuseIcon.Position }
+
 	fuseIcon.Visible = pets.Visible and Hud.fuseUnlocked()
 	for _, name in { "PenLevel", "FuseLesson" } do
 		player:GetAttributeChangedSignal(name):Connect(function()
@@ -1438,6 +1442,19 @@ function Hud.setLesson(on)
 	lesson = on
 	if on then
 		ride.Visible, roll.Visible = false, false
+	end
+	-- The merge lesson's Fuse button: twice the size, kept on screen by growing up and
+	-- in from its bottom right corner.
+	if fuseIconAt then
+		local at = fuseIconAt
+		if on then
+			local size = at.Size
+			fuseIcon.Size = UDim2.fromOffset(size.X.Offset * LESSON_FUSE_SCALE, size.Y.Offset * LESSON_FUSE_SCALE)
+			fuseIcon.AnchorPoint = Vector2.new(1, 1)
+			fuseIcon.Position = at.Position + UDim2.fromOffset(size.X.Offset * (1 - at.AnchorPoint.X), 0)
+		else
+			fuseIcon.Size, fuseIcon.AnchorPoint, fuseIcon.Position = at.Size, at.AnchorPoint, at.Position
+		end
 	end
 	Hud.showMerge(mergeWanted)
 	Inventory.setVisible(not ride.Visible and not mergeButton.Visible and not rollShown and not gui.Enabled and not lesson)
