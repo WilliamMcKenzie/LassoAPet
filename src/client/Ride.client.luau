@@ -1550,6 +1550,16 @@ end
 -- Strays carry their own entity.frostLeft. Only this player's copy slows, like slow-mo.
 vfx.frostLeft = {}
 vfx.frostLag = {}
+-- Hanging off the rope (RopeHang), the animal you've lassoed runs at the sprint it'd
+-- have with you on it (QM, Oct 8); a stampede animal pulls ahead of its schedule by
+-- hangLead[key] studs (it's yours after, so it never has to catch back up).
+vfx.hangLead = {}
+function vfx.hangSprint(entity)
+	if transfer and transfer.stage == "hang" and transfer.target == entity then
+		return Config.MountSpeed * statsOf(entity.kind, entity).Speed * (Config.PetSprintSpeed[entity.kind] or Config.SprintSpeed)
+	end
+	return nil
+end
 vfx.frostSlow = 0 -- the share of its speed a slowed animal loses (the running Frost's Slow)
 vfx.FROST_TINT = Color3.fromRGB(150, 220, 255)
 vfx.FLAKE_TEXTURE = "rbxasset://textures/particles/sparkles_main.dds"
@@ -1922,8 +1932,13 @@ local function updateHerd(dt, slowed)
 				vfx.frostLag[key] = (vfx.frostLag[key] or 0) + speed * vfx.frostSlow * dt
 				speed *= 1 - vfx.frostSlow
 			end
-			local z = stream.spawnZ - dist + (vfx.frostLag[key] or 0)
 			local entity = herd[key]
+			local sprint = entity and vfx.hangSprint(entity)
+			if sprint and sprint > speed then
+				vfx.hangLead[key] = (vfx.hangLead[key] or 0) + (sprint - speed) * dt
+				speed = sprint
+			end
+			local z = stream.spawnZ - dist + (vfx.frostLag[key] or 0) - (vfx.hangLead[key] or 0)
 			-- The animal being lassoed runs on past the end until it's caught.
 			local lassoed = entity and transfer and transfer.target == entity
 			if (z <= stream.endZ and not lassoed) or z < fromZ or z > toZ then
@@ -1990,7 +2005,7 @@ local function updateHerd(dt, slowed)
 			entity.frostLeft = if entity.frostLeft > dt then entity.frostLeft - dt else nil
 		end
 		vfx.setFrosted(entity, entity.frostLeft ~= nil)
-		local pace = entity.speed * (if entity.frostLeft then 1 - vfx.frostSlow else 1)
+		local pace = vfx.hangSprint(entity) or entity.speed * (if entity.frostLeft then 1 - vfx.frostSlow else 1)
 		local look = CFrame.Angles(0, yaw, 0).LookVector
 		local z = entity.z + look.Z * pace * dt
 		-- Shrinks away at the end of the biome it's in, like the stampede.
