@@ -663,18 +663,17 @@ return {
 		SpeedPerDecade = 2,
 		MinCycle = 0.25,
 	},
-	-- Recommended lasso level for each animal, shown over the one you'd lasso as you
-	-- ride (LassoLevel.luau). PLACEHOLDERS until Game design sets them (QM, Oct 8): each
-	-- biome has a range (Meadow 10-100, Desert 100-10k, Snow 10k-500k, Ocean 1M-100M,
-	-- Godlands 100M-10B), Common at its bottom and Legendary at its top, the rarities
-	-- between evenly spaced on a log scale (2 significant figures). An animal not
-	-- listed shows nothing.
+	-- Lasso level for each animal (Game design, Oct 8; sim in project files balance/lasso/): placed
+	-- along a typical player's training (70% of their time at the dummy, today's PerCatch and
+	-- SpeedPerDecade) so a new animal unlocks every ~30 s at first and every 30-60 min at the end
+	-- (last ~6 h). Within a biome, more $/s = higher. Horse, Pig and Bunny are at or under
+	-- HoldOn.MinStrength: instant rides. Exclusives match their biome's top animal.
 	LassoLevels = {
-		Horse = 10, Pinto = 18, Pig = 18, Bunny = 18, Fish = 32, Rhino = 56, Unicorn = 100, -- Meadow
-		Cactus = 320, Kitten = 320, Scorpion = 1000, Sandworm = 3200, SpineLizard = 3200, Snake = 10000, -- Desert
-		Penguin = 27000, Boar = 27000, Snowman = 71000, IceGolem = 190000, SnackYak = 190000, Icebringer = 500000, -- Snow
-		Starfish = 3200000, Whale = 10000000, Squid = 32000000, KingCrab = 32000000, FishSchool = 32000000, BlueCrab = 100000000, RoboShark = 100000000, Kraken = 100000000, -- Ocean
-		Beholder = 1000000000, WarElephant = 1000000000, Sludge = 1000000000, SoulHorse = 3200000000, Leviathan = 3200000000, Loong = 10000000000, -- Godlands
+		Horse = 5, Pinto = 47, Pig = 10, Bunny = 20, Fish = 120, Rhino = 180, Unicorn = 1500, -- Meadow
+		Cactus = 5300, Kitten = 7500, Scorpion = 13000, Sandworm = 23000, SpineLizard = 33000, Snake = 46000, -- Desert
+		Penguin = 66000, Boar = 94000, Snowman = 3800000, IceGolem = 20000000, SnackYak = 46000000, Icebringer = 46000000, -- Snow
+		Starfish = 89000000, Whale = 470000000, Squid = 140000000, KingCrab = 320000000, FishSchool = 230000000, BlueCrab = 660000000, RoboShark = 900000000, Kraken = 900000000, -- Ocean
+		Beholder = 1700000000, WarElephant = 83000000000, Sludge = 1300000000, SoulHorse = 820000000000, Leviathan = 360000000000, Loong = 820000000000, -- Godlands
 	},
 	-- Rarity text colours (QM, Oct 7): pet nameplates, lasso levels. Common keeps the inventory slots' grey.
 	RarityColors = {
