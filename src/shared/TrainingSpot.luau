@@ -4,8 +4,11 @@
 -- the pen as it grows. Training.client builds the dummies, Training.server checks
 -- catches against the same spot.
 --
---   TrainingSpot.of(pen) -- CFrame at the dummy's foot, facing out (-Z), or nil
---   TrainingSpot.chair(pen) -- CFrame at the chair's feet beside it, -Z at the dummy, or nil
+--   TrainingSpot.of(pen, out) -- CFrame at the dummy's foot, facing out (-Z), or nil
+--   TrainingSpot.chair(pen, out, along) -- CFrame at the chair's feet beside it, -Z at the dummy, or nil
+-- out: studs from the pen's open side to the dummy's pole (default Config.Training.Out);
+-- along: from the pole to the chair (default Config.Training.Chair). Training.client
+-- sizes both to its biome's dummy.
 --   TrainingSpot.speed(lasso) -- how many times quicker this lasso strength throws
 
 local Config = require(script.Parent.Config)
@@ -22,7 +25,7 @@ local OPEN = {
 	Pen5 = { out = Vector3.new(-1, 0, 0), side = Vector3.new(0, 0, 1) },
 }
 
-function TrainingSpot.of(pen)
+function TrainingSpot.of(pen, out)
 	local open = OPEN[pen.Name]
 	local sizes = pen:FindFirstChild("Sizes")
 	local shown = sizes and sizes:FindFirstChildWhichIsA("Model")
@@ -33,7 +36,7 @@ function TrainingSpot.of(pen)
 	local depth = math.abs(size:Dot(open.out))
 	local width = math.abs(size:Dot(open.side))
 	local spot = box.Position
-		+ open.out * (depth / 2 + Config.Training.Out)
+		+ open.out * (depth / 2 + (out or Config.Training.Out))
 		+ open.side * (width / 2 - Config.Training.In)
 	spot = Vector3.new(spot.X, 0, spot.Z)
 	return CFrame.lookAt(spot, spot + open.out)
@@ -41,12 +44,12 @@ end
 
 -- The chair you lasso from (Props/TrainingChair): Config.Training.Chair studs along
 -- the pen's front from the dummy, towards the pen's middle, turned to face it.
-function TrainingSpot.chair(pen)
-	local spot = TrainingSpot.of(pen)
+function TrainingSpot.chair(pen, out, along)
+	local spot = TrainingSpot.of(pen, out)
 	if not spot then
 		return nil
 	end
-	local at = spot.Position - OPEN[pen.Name].side * Config.Training.Chair
+	local at = spot.Position - OPEN[pen.Name].side * (along or Config.Training.Chair)
 	return CFrame.lookAt(at, spot.Position)
 end
 

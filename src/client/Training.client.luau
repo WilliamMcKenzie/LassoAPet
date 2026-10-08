@@ -4,8 +4,8 @@
 -- lasso strength (TrainLasso; Training.server counts it into the "Lasso" attribute,
 -- which the HUD shows over the gold).
 --
--- Every pen has its own dummy (Design's Props/TrainingDummy) by its front corner,
--- facing out (TrainingSpot), and a chair beside it (Props/TrainingChair); you train at
+-- Every pen has its own dummy (Design's, one per biome: Props/TrainingByBiome) by its
+-- front corner, facing out (TrainingSpot), and a chair beside it; you train at
 -- your own pen's (your "Pen" attribute): walk up and you sit in the chair and lasso
 -- from it. Jump off and you stand until you've walked away and come back. Each
 -- plays its idle, and yours its hit on each catch. Built on each client like the
@@ -19,8 +19,7 @@ local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Rig = require(ReplicatedStorage.Shared.Animals.Rig)
-local TrainingDummy = require(ReplicatedStorage.Shared.Props.TrainingDummy)
-local TrainingChair = require(ReplicatedStorage.Shared.Props.TrainingChair)
+local TrainingByBiome = require(ReplicatedStorage.Shared.Props.TrainingByBiome)
 local TrainingSpot = require(ReplicatedStorage.Shared.TrainingSpot)
 
 local lassoModule = script.Parent.Lasso:Clone()
@@ -34,27 +33,12 @@ local player = Players.LocalPlayer
 local trainLasso = ReplicatedStorage:WaitForChild("TrainLasso")
 
 -- The dummies -------------------------------------------------------------------
--- Each faces -Z with its foot at y 0 in its own space; `neck` is where the loop
--- closes (centre in model space, cinched radius).
-local data = TrainingDummy.model
-local neck = TrainingDummy.neck
-local dummies = {} -- [pen] = { model, bones, place, idleT, hitT, chair, seat }
-
-local function place(dummy, pen)
-	local spot = TrainingSpot.of(pen)
-	local chair = TrainingSpot.chair(pen)
-	if spot and chair then
-		dummy.place = spot
-		dummy.model.PrimaryPart.CFrame = spot -- (Root is at the model's origin, its foot)
-		dummy.model.Parent = workspace
-		dummy.chair.PrimaryPart.CFrame = chair -- (the seat's welded on, and comes too)
-		dummy.chair.Parent = workspace
-	else
-		dummy.place = nil
-		dummy.model.Parent = nil
-		dummy.chair.Parent = nil
-	end
-end
+-- Each pen's is its biome's (Props/TrainingByBiome: the owner's pen level picks it,
+-- 1 for a free pen), swapped when that changes. Each faces -Z with its foot at y 0 in
+-- its own space; its entry's `neck` is where the loop closes (centre in model space,
+-- cinched radius). The bigger ones stand further out so their bases stay ~2 studs
+-- clear of the fence, and their chairs further along.
+local dummies = {} -- [pen] = { entry, level, model, bones, chair, seat, back, side, place, idleT, hitT }
 
 local function noCollide(model)
 	for _, part in model:GetDescendants() do
@@ -66,25 +50,45 @@ local function noCollide(model)
 	end
 end
 
+-- How far a built model (at the origin, facing -Z) reaches: behind its root along +Z
+-- near the ground (its base: the part that has to clear the fence), and to either side.
+local function reach(model)
+	local back, side = 0, 0
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") and part.Transparency < 1 then
+			local extent = Vector3.new(
+				math.abs(part.CFrame.RightVector.X * part.Size.X) + math.abs(part.CFrame.UpVector.X * part.Size.Y) + math.abs(part.CFrame.LookVector.X * part.Size.Z),
+				0,
+				math.abs(part.CFrame.RightVector.Z * part.Size.X) + math.abs(part.CFrame.UpVector.Z * part.Size.Y) + math.abs(part.CFrame.LookVector.Z * part.Size.Z)
+			) / 2
+			side = math.max(side, math.abs(part.Position.X) + extent.X)
+			if part.Position.Y - part.Size.Y / 2 < 3 then
+				back = math.max(back, part.Position.Z + extent.Z)
+			end
+		end
+	end
+	return back, side
+end
+
 -- The chair, with an invisible seat on its plank that you're welded to sitting in it.
-local function buildChair()
-	local chair = Rig.fromData(TrainingChair.model, "TrainingChair", STUD_TEXTURE)
+local function buildChair(entry)
+	local chair = Rig.fromData(entry.chair, "TrainingChair" .. entry.name, STUD_TEXTURE)
 	noCollide(chair)
 	local seat = Instance.new("Part")
 	seat.Name = "Seat"
-	seat.Size = TrainingChair.seat.size
+	seat.Size = TrainingByBiome.seat.size
 	seat.Transparency = 1
 	seat.Anchored = true
 	seat.CanCollide = false
 	seat.CanQuery = false
 	seat.CanTouch = false
-	seat.CFrame = chair.PrimaryPart.CFrame * TrainingChair.seat.cframe
+	seat.CFrame = chair.PrimaryPart.CFrame * TrainingByBiome.seat.cframe
 	-- (a Weld with its offset given, not a WeldConstraint: that takes the offset the parts
 	-- have when it first goes live in workspace, by which time the chair had been moved
 	-- to the pen and the seat hadn't, so it stayed at the origin: the start line)
 	local weld = Instance.new("Weld")
 	weld.Part0, weld.Part1 = chair.PrimaryPart, seat
-	weld.C0 = TrainingChair.seat.cframe
+	weld.C0 = TrainingByBiome.seat.cframe
 	weld.Parent = seat
 	seat.Anchored = false
 	seat.Massless = true
@@ -92,30 +96,78 @@ local function buildChair()
 	return chair, seat
 end
 
-local function build(pen)
-	local model, _, bones = Rig.fromData(data, "TrainingDummy", STUD_TEXTURE)
+local function levelOf(pen)
+	local owner = pen:GetAttribute("Owner") and Players:GetPlayerByUserId(pen:GetAttribute("Owner"))
+	local level = owner and owner:GetAttribute("PenLevel") or 1
+	return math.clamp(level, 1, #TrainingByBiome)
+end
+
+local function build(pen, level)
+	local old = dummies[pen]
+	if old then
+		old.model:Destroy()
+		old.chair:Destroy()
+	end
+	local entry = TrainingByBiome[level]
+	local model, _, bones = Rig.fromData(entry.dummy, "TrainingDummy" .. entry.name, STUD_TEXTURE)
 	model.Name = "TrainingDummy"
 	noCollide(model)
-	local chair, seat = buildChair()
-	local dummy = { model = model, bones = bones, idleT = math.random() * data.animations.idle.length, hitT = math.huge, chair = chair, seat = seat }
+	local back, side = reach(model)
+	local chair, seat = buildChair(entry)
+	local chairBack, chairSide = reach(chair)
+	local dummy = {
+		entry = entry,
+		level = level,
+		model = model,
+		bones = bones,
+		chair = chair,
+		seat = seat,
+		out = back + 2, -- (QM: right up against the fence, ~2 studs clear)
+		along = math.max(training.Chair, side + math.max(chairBack, chairSide) + 2),
+		idleT = math.random() * entry.dummy.animations.idle.length,
+		hitT = math.huge,
+	}
 	dummies[pen] = dummy
-	place(dummy, pen)
-	-- The pen grows with its level (a new SizeK model): move out with it.
-	local sizes = pen:WaitForChild("Sizes")
-	for _, signal in { sizes.ChildAdded, sizes.ChildRemoved } do
-		signal:Connect(function()
-			task.defer(place, dummy, pen)
-		end)
+	return dummy
+end
+
+local function place(dummy, pen)
+	local spot = TrainingSpot.of(pen, dummy.out)
+	local chair = TrainingSpot.chair(pen, dummy.out, dummy.along)
+	if spot and chair then
+		if dummy.place ~= spot then
+			dummy.place = spot
+			dummy.model.PrimaryPart.CFrame = spot -- (Root is at the model's origin, its foot)
+			dummy.chair.PrimaryPart.CFrame = chair -- (the seat's welded on, and comes too)
+		end
+		dummy.model.Parent = workspace
+		dummy.chair.Parent = workspace
+	else
+		dummy.place = nil
+		dummy.model.Parent = nil
+		dummy.chair.Parent = nil
 	end
 end
 
-for _, pen in workspace:WaitForChild("Pens"):GetChildren() do
-	task.spawn(build, pen)
-end
+-- Keeps every pen's dummy its owner's biome's, and in its spot as the pen grows.
+task.spawn(function()
+	local pens = workspace:WaitForChild("Pens")
+	while true do
+		for _, pen in pens:GetChildren() do
+			local level = levelOf(pen)
+			local dummy = dummies[pen]
+			if not dummy or dummy.level ~= level then
+				dummy = build(pen, level)
+			end
+			place(dummy, pen)
+		end
+		task.wait(0.5)
+	end
+end)
 
 -- Its idle on a loop, and its hit once per catch.
 local function animate(dummy, dt)
-	local animations = data.animations
+	local animations = dummy.entry.dummy.animations
 	local hit = animations.hit
 	local clip, t
 	if hit and dummy.hitT < hit.length then
@@ -233,7 +285,7 @@ local function near(dummy)
 		return nil
 	end
 	local flat = (hrp.Position - dummy.place.Position) * Vector3.new(1, 0, 1)
-	return if flat.Magnitude <= training.Radius then char else nil
+	return if flat.Magnitude <= math.max(training.Radius, dummy.along + 4) then char else nil -- (the chair's always in reach)
 end
 
 local function standUp()
@@ -301,6 +353,7 @@ RunService.PreSimulation:Connect(function(dt)
 	if not character then
 		return
 	end
+	local neck = dummy.entry.neck
 	local target = { cframe = dummy.place * CFrame.new(neck.center), radius = neck.radius }
 	dt *= TrainingSpot.speed(player:GetAttribute("Lasso")) -- stronger, quicker (the swing spins faster too)
 	-- The catch counts once the loop's cinched (CATCH_AT into the cycle), even if a

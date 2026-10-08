@@ -12,7 +12,7 @@ local TrainingSpot = require(ReplicatedStorage.Shared.TrainingSpot)
 
 local training = Config.Training
 local CYCLE = training.Swing + training.Throw + training.Pull + training.Rest
-local SLACK = 6 -- studs past Radius (lag, and the client checks first)
+local SLACK = 22 -- studs past Radius (lag; the bigger biomes' dummies stand further out than TrainingSpot's default)
 
 local trainLasso = Instance.new("RemoteEvent")
 trainLasso.Name = "TrainLasso"
