@@ -237,10 +237,9 @@ return {
 	MountSpeed = 44,
 	ReturnSpeed = 40,
 	SteerSpeed = 28,
-	-- Bigger mounts steer a little quicker (QM, Oct 8: "a marginal bump of say 20%"):
-	-- x1 at a horse's half width (1.6 studs), up to x SteerBigBoost at SteerBigHalfWidth.
-	SteerBigBoost = 1.2,
-	SteerBigHalfWidth = 20,
+	-- Wider mounts steer quicker, gently (QM, Oct 8): x (1 + SteerWidthScale x (width
+	-- over a horse's - 1)), so twice a horse's width steers 1.2x, three times 1.4x.
+	SteerWidthScale = 0.2,
 	SteerResponse = 8,
 	HoldTime = 6,
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)

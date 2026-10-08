@@ -3537,10 +3537,10 @@ local function updateMount(dt)
 		return
 	end
 	local steer = phase == "home" and 0 or readSteer()
-	-- A bigger body steers a little quicker (QM, Oct 8: a marginal bump): 1x at a horse's
-	-- width, up to Config.SteerBigBoost at Config.SteerBigHalfWidth and over.
+	-- A wider body steers quicker, gently (QM, Oct 8): Config.SteerWidthScale of each
+	-- extra horse-width (1.6 studs half) on top, so twice as wide steers 1.2x.
 	local halfWidth = vfx.halfBody(mount)
-	local wide = 1 + (Config.SteerBigBoost - 1) * math.clamp((halfWidth - 1.6) / (Config.SteerBigHalfWidth - 1.6), 0, 1)
+	local wide = 1 + Config.SteerWidthScale * math.max(halfWidth / 1.6 - 1, 0)
 	local targetLat = steer * Config.SteerSpeed * wide * -dir
 	-- Leaving the base from an outer pen: lean in so the animal reaches the
 	-- corridor by the start line.
