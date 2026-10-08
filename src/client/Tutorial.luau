@@ -215,7 +215,7 @@ local function showPicture(name, target)
 	if target then
 		local at, size = target.AbsolutePosition - gui.AbsolutePosition, target.AbsoluteSize -- (gui's is above 0 by the top bar)
 		cursor.Position = UDim2.fromOffset(at.X + CURSOR_AT.X * size.X, at.Y + CURSOR_AT.Y * size.Y)
-		local side = CURSOR_SIZE * math.min(size.X, size.Y)
+		local side = CURSOR_SIZE * math.min(size.X, size.Y) * Hud.cursorBoost(target)
 		cursor.Size = UDim2.fromOffset(side, side)
 	end
 end

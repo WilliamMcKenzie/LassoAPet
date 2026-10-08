@@ -180,7 +180,7 @@ local fuseIconAt -- its usual { Size, AnchorPoint, Position }: the merge lesson 
 -- The ride's distance ("238 m" over the top bar) and its cash (coin and "$0" beside
 -- it): off (QM, Oct 8: the top bar's HOLD ON!'s now). True brings them back.
 local SHOW_RIDE_TOP = false
-local LESSON_FUSE_SCALE = 2 -- (QM, Oct 8: so nobody can miss it; Tutorial's cursor scales with it)
+local LESSON_FUSE_SCALE = 2 / 1.5 -- (QM, Oct 8: big so nobody can miss it, then 1.5x smaller than 2x; Tutorial's hand stays at the 2x size: Hud.cursorBoost)
 local shopIcon -- Shop, over Roll (or over Pets without Roll): opens the Robux shop (Shop)
 local continueButton -- the fail screen's Continue, for Robux (Hud.showContinue)
 local CONTINUE_GAP = 12 -- between Continue and the Home button under it
@@ -1790,6 +1790,12 @@ function Hud.setStruggle(on)
 			end
 		end
 	end
+end
+
+-- How much bigger than its target Tutorial's hand is drawn: on the merge lesson's Fuse
+-- button, as big as when that button was 2x (QM: only the button got smaller).
+function Hud.cursorBoost(target)
+	return if target ~= nil and target == fuseIcon and lesson then 2 / LESSON_FUSE_SCALE else 1
 end
 
 -- The ride's action button (LASSO / GRAB EGG): HOLD ON!'s takes its exact spot and size.

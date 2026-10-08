@@ -92,6 +92,9 @@ end
 
 local function join(player)
 	load(player)
+	if (player:GetAttribute("Lasso") or 0) < 1 then
+		player:SetAttribute("Lasso", 1) -- everyone starts at lasso level 1 (QM, Oct 8), old saves at 0 too
+	end
 	ready[player] = true
 	player:GetAttributeChangedSignal("BoughtGold"):Connect(function()
 		addBought(player)
