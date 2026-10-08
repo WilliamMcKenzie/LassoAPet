@@ -2353,16 +2353,27 @@ function vfx.updateAvoid(dt)
 		table.clear(state.skip)
 	end
 	local maxSpeed = cfg and cfg.MaxSpeed or 140
+	-- (the crash check is whole bodies now, Oct 8: checkRide. The swerve clears them the
+	-- same way, so a wide mount or a big animal still gets out of the way in time.)
+	local mhx, mhz = 0, 0
+	if on then
+		mhx, mhz = vfx.halfBody(mount)
+	end
 	for _, entity in allAnimals() do
 		if entity == mount then
 			continue
 		end
-		local dz = if on then entity.z - mount.z - 5 else -math.huge -- (the crash check reaches 5 studs ahead)
+		local ehx, ehz = 0, 0
+		if on then
+			ehx, ehz = vfx.halfBody(entity)
+		end
+		local hitX = math.max((mhx + ehx) * 0.8, 2.6) -- (how close the crash check lets it come)
+		local dz = if on then entity.z - mount.z - math.max((mhz + ehz) * 0.8, 5) else -math.huge -- (from where the crash check reaches)
 		-- Less in each zone further out, none in the Godlands (Config.Biomes[].Swerve, QM).
 		local zone = if dz > 0 then Config.Biomes[WorldColors.biomeAt(entity.z)].Swerve or 1 else 0
 		-- (not a Godlands animal charging or hunting you: that one means it)
 		if zone > 0 and not (entity.popping or entity.event or entity.face or entity.rush) then
-			local clear = cfg.Clear * zone
+			local clear = (cfg.Clear + hitX - 2.6) * zone -- (Clear was tuned for the old 2.6-stud check)
 			local t = dz / math.max(state.vz + math.max(entity.speed or 0, 0), 1) -- seconds until it's on you
 			local base = entity.x - (entity.swerve or 0) -- its line without the swerve
 			local px = math.clamp(mount.x + state.vx * math.min(t, 1), -vfx.edge(entity.z), vfx.edge(entity.z)) -- where you'll be by then (a guess past 1 s)
