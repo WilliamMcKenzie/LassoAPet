@@ -20,8 +20,8 @@
 --   7. place2 the egg goes into the pen by itself (Hatchery's DeliverEgg, balance
 --            pass Oct 6: a fifth of new players left here when they had to place it)
 --   8. train the moment the egg's pet has hatched out: "Train your lasso for big
---            pets" (QM, Oct 8), arrows to your training chair (Training.client's
---            "TrainingChairAt"). Sitting down in it (its "TrainingSeat") ends it: the
+--            pets" (QM, Oct 8), arrows to your training dummy (Training.client's
+--            "TrainingAt"). Stepping into its ring to train ("Training") ends it: the
 --            money starts (Hatchery: pets earn nothing till now, QM Oct 6) and the rest
 --            of the HUD (Gold, Upgrade Pen, Pets, Fuse) comes back, none of which shows
 --            in the tutorial (QM). (No fuse step or lesson: QM, Oct 6 and Oct 8.)
@@ -489,11 +489,11 @@ function Tutorial.update(state)
 	end
 	lastPhase = phase
 
-	if step == "train" and player:GetAttribute("TrainingSeat") then
+	if step == "train" and player:GetAttribute("Training") then
 		if not done then
 			report("sat")
 		end
-		finish() -- sat down to train: that's the tutorial done
+		finish() -- training: that's the tutorial done
 	end
 	if step == "place" and ((player:GetAttribute("RidePet") or "") ~= "" or myPet({}) ~= nil) then
 		setStep("ride") -- it's hatched (or there was a pet already)
@@ -556,7 +556,7 @@ function Tutorial.update(state)
 			local pen = myPen()
 			target = pen and pen:FindFirstChild("Area") and pen.Area.Position
 		elseif step == "train" then
-			target = player:GetAttribute("TrainingChairAt") -- (your chair: Training.client)
+			target = player:GetAttribute("TrainingAt") -- (your dummy, in its ring: Training.client)
 		end
 	end
 	pointTo(target)

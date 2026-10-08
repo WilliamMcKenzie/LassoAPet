@@ -5,12 +5,12 @@
 -- which the HUD shows over the gold).
 --
 -- Every pen has its own dummy (Design's, one per biome: Props/TrainingByBiome) by its
--- front corner, facing out (TrainingSpot), and a chair beside it; you train at
--- your own pen's (your "Pen" attribute): step onto the chair and you sit and lasso
--- from it. Jump off and you can sit again once you've stepped off it. Each
--- plays its idle, and yours its hit on each catch. Built on each client like the
--- podium snake, so they can animate (Motor6D.Transform doesn't replicate). The lasso
--- is its own copy of the rider's (Lasso holds one character).
+-- front corner, facing out (TrainingSpot), and you train at your own pen's (your "Pen"
+-- attribute), on foot (QM, Oct 8: sitting in a chair wasn't fun): a ring round it on
+-- the floor, and anywhere in the ring you lasso it, turned to face it wherever you
+-- walk. Step out and you stop. Each plays its idle, and yours its hit on each catch.
+-- Built on each client like the podium snake, so they can animate (Motor6D.Transform
+-- doesn't replicate). The lasso is its own copy of the rider's (Lasso holds one character).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -38,8 +38,8 @@ local trainingState = ReplicatedStorage:WaitForChild("TrainingState") -- (others
 -- 1 for a free pen), swapped when that changes. Each faces -Z with its foot at y 0 in
 -- its own space; its entry's `neck` is where the loop closes (centre in model space,
 -- cinched radius). The bigger ones stand further out so their bases stay ~2 studs
--- clear of the fence, and their chairs further along.
-local dummies = {} -- [pen] = { entry, level, model, bones, chair, seat, back, side, place, idleT, hitT }
+-- clear of the fence, and have bigger rings.
+local dummies = {} -- [pen] = { entry, level, model, bones, ring, out, radius, place, idleT, hitT }
 
 local function noCollide(model)
 	for _, part in model:GetDescendants() do
@@ -71,30 +71,29 @@ local function reach(model)
 	return back, side
 end
 
--- The chair, with an invisible seat on its plank that you're welded to sitting in it.
-local function buildChair(entry)
-	local chair = Rig.fromData(entry.chair, "TrainingChair" .. entry.name, STUD_TEXTURE)
-	noCollide(chair)
-	local seat = Instance.new("Part")
-	seat.Name = "Seat"
-	seat.Size = TrainingByBiome.seat.size
-	seat.Transparency = 1
-	seat.Anchored = true
-	seat.CanCollide = false
-	seat.CanQuery = false
-	seat.CanTouch = false
-	seat.CFrame = chair.PrimaryPart.CFrame * TrainingByBiome.seat.cframe
-	-- (a Weld with its offset given, not a WeldConstraint: that takes the offset the parts
-	-- have when it first goes live in workspace, by which time the chair had been moved
-	-- to the pen and the seat hadn't, so it stayed at the origin: the start line)
-	local weld = Instance.new("Weld")
-	weld.Part0, weld.Part1 = chair.PrimaryPart, seat
-	weld.C0 = TrainingByBiome.seat.cframe
-	weld.Parent = seat
-	seat.Anchored = false
-	seat.Massless = true
-	seat.Parent = chair
-	return chair, seat
+-- The ring you train in (QM, Oct 8): white blocks on the floor round the pole, only
+-- in front of the fence (`out` studs behind the pole, +Z in its space: the pen's
+-- behind it). Built round the origin, placed with the dummy. Only yours is shown.
+local RING = { Segments = 72, Width = 1, Height = 0.2, Idle = 0.35 } -- Idle: its transparency till you're in it
+local function buildRing(radius, out)
+	local ring = Instance.new("Model")
+	ring.Name = "TrainingRing"
+	for i = 0, RING.Segments - 1 do
+		local a = (i + 0.5) / RING.Segments * 2 * math.pi
+		local x, z = radius * math.cos(a), radius * math.sin(a)
+		if z < out - 1 then
+			local part = Instance.new("Part")
+			part.Anchored, part.CanCollide, part.CanQuery, part.CanTouch, part.CastShadow = true, false, false, false, false
+			part.Size = Vector3.new(RING.Width, RING.Height, 2 * math.pi * radius / RING.Segments + 0.05)
+			part.Color = Color3.new(1, 1, 1)
+			part.Material = Enum.Material.SmoothPlastic
+			part.Transparency = RING.Idle
+			part.CFrame = CFrame.new(x, RING.Height / 2 + 0.02, z) * CFrame.Angles(0, -a, 0) -- (its length along the ring)
+			part.Parent = ring
+		end
+	end
+	ring.WorldPivot = CFrame.identity
+	return ring
 end
 
 local function levelOf(pen)
@@ -107,24 +106,22 @@ local function build(pen, level)
 	local old = dummies[pen]
 	if old then
 		old.model:Destroy()
-		old.chair:Destroy()
+		old.ring:Destroy()
 	end
 	local entry = TrainingByBiome[level]
 	local model, _, bones = Rig.fromData(entry.dummy, "TrainingDummy" .. entry.name, STUD_TEXTURE)
 	model.Name = "TrainingDummy"
 	noCollide(model)
 	local back, side = reach(model)
-	local chair, seat = buildChair(entry)
-	local chairBack, chairSide = reach(chair)
+	local radius = math.max(training.Radius, math.max(back, side) + 8) -- (room to walk round the bigger ones)
 	local dummy = {
 		entry = entry,
 		level = level,
 		model = model,
 		bones = bones,
-		chair = chair,
-		seat = seat,
 		out = back + 2, -- (QM: right up against the fence, ~2 studs clear)
-		along = math.max(training.Chair, side + math.max(chairBack, chairSide) + 2),
+		radius = radius,
+		ring = buildRing(radius, back + 2),
 		idleT = math.random() * entry.dummy.animations.idle.length,
 		hitT = math.huge,
 	}
@@ -134,22 +131,22 @@ end
 
 local function place(dummy, pen)
 	local spot = TrainingSpot.of(pen, dummy.out)
-	local chair = TrainingSpot.chair(pen, dummy.out, dummy.along)
-	if spot and chair then
+	local yours = pen.Name == "Pen" .. tostring(player:GetAttribute("Pen"))
+	if spot then
 		if dummy.place ~= spot then
 			dummy.place = spot
 			dummy.model.PrimaryPart.CFrame = spot -- (Root is at the model's origin, its foot)
-			dummy.chair.PrimaryPart.CFrame = chair -- (the seat's welded on, and comes too)
+			dummy.ring:PivotTo(spot)
 		end
 		dummy.model.Parent = workspace
-		dummy.chair.Parent = workspace
-		if pen.Name == "Pen" .. tostring(player:GetAttribute("Pen")) then
-			player:SetAttribute("TrainingChairAt", chair.Position) -- (the tutorial's arrows lead here; this client only)
+		dummy.ring.Parent = if yours then workspace else nil
+		if yours then
+			player:SetAttribute("TrainingAt", spot.Position) -- (the tutorial's arrows lead here; this client only)
 		end
 	else
 		dummy.place = nil
 		dummy.model.Parent = nil
-		dummy.chair.Parent = nil
+		dummy.ring.Parent = nil
 	end
 end
 
@@ -223,62 +220,36 @@ local CATCH_AT = training.Swing + training.Throw + training.Pull * 0.35 -- the l
 local character -- the character the lasso's started on, while training
 local t = 0 -- seconds into this catch
 local counted = false
-local sitWeld -- you in your chair: { Part0 = seat, Part1 = your root, C0 = offset } (held there each frame)
-local sitSeat -- the chair's seat you sat down in
 local lassoLevel -- the pen level whose lasso you're throwing (LassoTiers)
-local stoodUp = false -- jumped out of the chair: no sitting again till you've stepped off it
-local CHAIR_REACH = 2.5 -- studs from the seat's middle (flat) that count as stepping onto the chair
+local TURN = 10 -- how quickly you turn to face the dummy (per second, eased)
 
--- Near your dummy, on foot (not riding: Ride anchors you), alive, not in the tutorial.
+-- In your dummy's ring, on foot (not riding: Ride anchors you), alive, not in the
+-- tutorial. The ring stops at the fence: not from inside your pen.
 local function near(dummy)
 	local char = player.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
 	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-	if not dummy or not hrp or not humanoid or humanoid.Health <= 0 or hrp.Anchored or humanoid.PlatformStand then
+	if not dummy or not hrp or not humanoid or humanoid.Health <= 0 or hrp.Anchored or humanoid.PlatformStand or humanoid.Sit then
 		return nil
 	end
 	if not char:FindFirstChild("RightGripAttachment", true) then -- (the tutorial ends here now: QM)
 		return nil
 	end
-	local flat = (hrp.Position - dummy.place.Position) * Vector3.new(1, 0, 1)
-	return if flat.Magnitude <= math.max(training.Radius, dummy.along + 4) then char else nil -- (the chair's always in reach)
+	local at = dummy.place:PointToObjectSpace(hrp.Position)
+	return if Vector2.new(at.X, at.Z).Magnitude <= dummy.radius and at.Z < dummy.out then char else nil
 end
 
-local function standUp()
-	if sitWeld then
-		sitWeld:Destroy()
-		sitWeld = nil
-	end
-	if player:GetAttribute("TrainingSeat") then
-		trainingState:FireServer(false)
-	end
-	player:SetAttribute("TrainingSeat", nil)
-end
-
--- Into the chair, facing the dummy (the seat faces the chair's -Z, at it).
-local function sitDown(char, dummy, again)
-	local hrp = char.HumanoidRootPart
-	local humanoid = char:FindFirstChildOfClass("Humanoid")
-	if humanoid.Sit and not again then
-		return -- (in some other seat)
-	end
-	sitSeat = dummy.seat
-	local above = hrp.Size.Y / 2 + 0.4 * char:GetScale() -- the root's height over the plank, seated
-	hrp.CFrame = dummy.seat.CFrame * CFrame.new(0, above, 0)
-	-- Held on the seat every frame (below), not welded: welded to the (anchored) chair
-	-- your character stops replicating, and everyone else saw you sat where you'd
-	-- stood when you sat down (QM, Oct 8: "shifted over by a dozen studs").
-	sitWeld = { Part0 = dummy.seat, Part1 = hrp, C0 = CFrame.new(0, above, 0), Destroy = function() end }
-	humanoid.Sit = true
-	-- Sitting here isn't riding: the merge menu and pet plates stay (this client only).
-	player:SetAttribute("TrainingSeat", true)
-	trainingState:FireServer(true)
-end
-
+-- You stop training: the rope goes, you turn freely again, and everyone else stops
+-- seeing you throw (the server's "Training" attribute).
 local function stop()
 	if character then
 		Lasso.stop()
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.AutoRotate = true
+		end
 		character = nil
+		trainingState:FireServer(false)
 	end
 end
 
@@ -292,38 +263,6 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	local dummy = mine()
 	local char = near(dummy)
-	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-	if sitWeld and not (char and humanoid.Sit and sitWeld.Part0 == dummy.seat and sitWeld.Part1 == char.HumanoidRootPart) then
-		-- Your pen upgraded under you (a new dummy and chair, QM): straight into the new
-		-- chair, still training. Otherwise you jumped off (or respawned, or the pen moved).
-		local swapped = char and humanoid.Sit and sitSeat ~= dummy.seat
-		standUp()
-		if swapped then
-			sitDown(char, dummy, true)
-		else
-			stoodUp = char ~= nil
-		end
-	end
-	-- The chair is the trigger (QM, Oct 8: it used to be the whole area round the dummy,
-	-- and jumping out left you inside it, so you had to walk off and back): step onto it
-	-- and you sit; jump off and you can sit again as soon as you've stepped off it.
-	local onChair = false
-	if char and dummy.seat then
-		local d = (char.HumanoidRootPart.Position - dummy.seat.Position) * Vector3.new(1, 0, 1)
-		onChair = d.Magnitude <= CHAIR_REACH
-	end
-	if not onChair then
-		stoodUp = false
-	elseif not sitWeld and not stoodUp then
-		sitDown(char, dummy)
-	end
-	if sitWeld then
-		local hrp = sitWeld.Part1
-		hrp.CFrame = sitWeld.Part0.CFrame * sitWeld.C0
-		hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
-	else
-		char = nil -- you lasso from the chair
-	end
 	if char ~= character then
 		stop()
 		if char then
@@ -331,6 +270,16 @@ RunService.PreSimulation:Connect(function(dt)
 			lassoLevel = player:GetAttribute("PenLevel") or 1
 			Lasso.start(char, 1, lassoLevel) -- (your pen level's lasso: LassoTiers)
 			t, counted, whooshed = 0, false, false
+			char:FindFirstChildOfClass("Humanoid").AutoRotate = false -- (turned to the dummy below)
+			trainingState:FireServer(true)
+		end
+	end
+	-- Your ring lights up while you're in it.
+	local lit = character ~= nil
+	if dummy and dummy.lit ~= lit then
+		dummy.lit = lit
+		for _, part in dummy.ring:GetChildren() do
+			part.Transparency = if lit then 0 else RING.Idle
 		end
 	end
 	if character and (player:GetAttribute("PenLevel") or 1) ~= lassoLevel then
@@ -339,6 +288,14 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	if not character then
 		return
+	end
+	-- Facing the dummy wherever you walk in the ring (QM, Oct 8): you walk where you
+	-- steer, turned to it the whole time.
+	local hrp = character.HumanoidRootPart
+	local at = hrp.Position
+	local look = Vector3.new(dummy.place.Position.X, at.Y, dummy.place.Position.Z)
+	if (look - at).Magnitude > 0.5 then
+		hrp.CFrame = hrp.CFrame:Lerp(CFrame.lookAt(at, look), math.min(dt * TURN, 1))
 	end
 	local neck = dummy.entry.neck
 	local target = { cframe = dummy.place * CFrame.new(neck.center), radius = neck.radius }
@@ -458,7 +415,4 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 end)
 
-script.Destroying:Connect(function()
-	stop()
-	standUp()
-end)
+script.Destroying:Connect(stop)

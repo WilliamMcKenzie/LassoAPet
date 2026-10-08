@@ -18,7 +18,7 @@ local trainLasso = Instance.new("RemoteEvent")
 trainLasso.Name = "TrainLasso"
 trainLasso.Parent = ReplicatedStorage
 
--- Sitting down to train or getting up (Training.client): the "Training" attribute,
+-- Stepping into your dummy's ring to train or out of it (Training.client): the "Training" attribute,
 -- so everyone else's clients can play your throws at your dummy (QM, Oct 8).
 local trainingState = Instance.new("RemoteEvent")
 trainingState.Name = "TrainingState"

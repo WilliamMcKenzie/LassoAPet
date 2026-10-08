@@ -43,7 +43,7 @@ local STEPS = {
 	"Placed Egg",
 	"Egg Hatched",
 	"Told To Train", -- (client) "Train your lasso for big pets", arrows to the chair (Oct 8: was "Saw Gate")
-	"Sat To Train", -- (client) sat in the chair: that ends the tutorial
+	"Sat To Train", -- (client) stepped into the training ring (was the chair: name kept): that ends the tutorial
 	"Tutorial Done",
 	"Rode Out Again",
 	"Brought Egg Home Again",

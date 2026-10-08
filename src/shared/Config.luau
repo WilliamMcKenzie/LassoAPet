@@ -650,8 +650,7 @@ return {
 	Training = {
 		Out = 5.5, -- studs from the pen's open side (its fence) to the pole: the base (3.3 behind it) ~2 clear of the fence (QM)
 		In = 6, -- studs in from the pen's corner, along that side
-		Chair = 8, -- studs from the dummy to the chair you lasso it from (Design's TrainingChair), along the pen's front
-		Radius = 14, -- studs from the pole you train from
+		Radius = 14, -- studs from the pole: the ring you train in, on foot (QM, Oct 8; bigger round the bigger dummies)
 		-- Lasso strength per catch at each pen level (Config.Biomes order), tracking the
 		-- biomes' lasso level ranges so each takes some 100-1,000 catches (QM, Oct 8: the
 		-- shape matters, not the numbers): Meadow, Desert, Tundra, Ocean, Godlands.

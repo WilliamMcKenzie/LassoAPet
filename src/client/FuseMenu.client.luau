@@ -541,14 +541,14 @@ Hud.fuseGuide = function()
 	return if picks[1] then cards[picks[1]] else false -- (clicking it unpicks it)
 end
 
--- Riding off closes it (not sitting at your training dummy: Training.client's "TrainingSeat").
+-- Riding off closes it.
 player.CharacterAdded:Connect(function()
 	close(true)
 end)
 task.spawn(function()
 	while true do
 		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if open and humanoid and humanoid.Sit and not player:GetAttribute("TrainingSeat") then
+		if open and humanoid and humanoid.Sit then
 			close(true)
 		end
 		task.wait(0.3)
