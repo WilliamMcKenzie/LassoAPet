@@ -568,16 +568,17 @@ return {
 		Rest = 0.35, -- and slack before the next
 	},
 	-- Recommended lasso level for each animal, shown over the one you'd lasso as you
-	-- ride (LassoLevel.luau). PLACEHOLDERS (Oct 8) until Game design sets them: the
-	-- biome it first runs in (Meadow 10, Desert 100, Snow 1k, Ocean 10k, Godlands
-	-- 100k) x its rarity (Common 1, Uncommon 2, Rare 4, Epic 8, Legendary 16).
-	-- An animal not listed shows nothing.
+	-- ride (LassoLevel.luau). PLACEHOLDERS until Game design sets them (QM, Oct 8): each
+	-- biome has a range (Meadow 10-100, Desert 100-10k, Snow 10k-500k, Ocean 1M-100M,
+	-- Godlands 100M-10B), Common at its bottom and Legendary at its top, the rarities
+	-- between evenly spaced on a log scale (2 significant figures). An animal not
+	-- listed shows nothing.
 	LassoLevels = {
-		Horse = 10, Pinto = 20, Pig = 20, Bunny = 20, Fish = 40, Rhino = 80, Unicorn = 160, -- Meadow
-		Cactus = 200, Kitten = 200, Scorpion = 400, Sandworm = 800, SpineLizard = 800, Snake = 1600, -- Desert
-		Penguin = 2000, Boar = 2000, Snowman = 4000, IceGolem = 8000, SnackYak = 8000, Icebringer = 16000, -- Snow
-		Starfish = 20000, Whale = 40000, Squid = 80000, KingCrab = 80000, FishSchool = 80000, BlueCrab = 160000, RoboShark = 160000, Kraken = 160000, -- Ocean
-		Beholder = 400000, WarElephant = 400000, Sludge = 400000, SoulHorse = 800000, Leviathan = 800000, Loong = 1600000, -- Godlands
+		Horse = 10, Pinto = 18, Pig = 18, Bunny = 18, Fish = 32, Rhino = 56, Unicorn = 100, -- Meadow
+		Cactus = 320, Kitten = 320, Scorpion = 1000, Sandworm = 3200, SpineLizard = 3200, Snake = 10000, -- Desert
+		Penguin = 27000, Boar = 27000, Snowman = 71000, IceGolem = 190000, SnackYak = 190000, Icebringer = 500000, -- Snow
+		Starfish = 3200000, Whale = 10000000, Squid = 32000000, KingCrab = 32000000, FishSchool = 32000000, BlueCrab = 100000000, RoboShark = 100000000, Kraken = 100000000, -- Ocean
+		Beholder = 1000000000, WarElephant = 1000000000, Sludge = 1000000000, SoulHorse = 3200000000, Leviathan = 3200000000, Loong = 10000000000, -- Godlands
 	},
 	-- Rarity text colours (QM, Oct 7): pet nameplates, lasso levels. Common keeps the inventory slots' grey.
 	RarityColors = {
