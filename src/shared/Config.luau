@@ -757,6 +757,9 @@ return {
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
 	-- view (up to MaxFov) grow from Start studs/s. Each part off with On = false.
 	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)
+	-- The tutorial's arrow on the screen over your training chair (TrainArrow): px a side
+	-- (QM, Oct 8: 2x the first 80).
+	TrainArrowSize = 160,
 	-- Speed lines and a wider view (SpeedFx), only while sprinting (QM, Oct 8: none
 	-- otherwise, and a lot more of them): at Min strength on the slowest sprint, rising
 	-- with speed as (speed / Ref) ^ Curve (a square root: quick to build, gentle at the

@@ -8,9 +8,9 @@
 local Players = game:GetService("Players")
 
 local IMAGE = "rbxassetid://89957123476396" -- assets/ui/TrainArrow.png (256 px, pointing down)
-local SIZE = 80 -- px
+local SIZE = require(game:GetService("ReplicatedStorage").Shared.Config).TrainArrowSize -- px
 local ABOVE = 4 -- studs over the chair the arrow's tip points at
-local BOB = 8 -- px up and down
+local BOB = SIZE / 10 -- px up and down
 local EDGE = 70 -- px in from the screen's edge when the chair's off screen
 
 local TrainArrow = {}
