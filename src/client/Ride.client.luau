@@ -3902,7 +3902,7 @@ end
 local function updateHud()
 	-- Your lasso level over your head while you ride (not hanging off the rope: then
 	-- the screen's just the bar).
-	vfx.lassoLevel.setSelf(if mount and not transfer and (phase == "outbound" or phase == "return" or phase == "turning") then player.Character else nil)
+	vfx.lassoLevel.setSelf(if mount and not transfer and not carried and phase == "outbound" then player.Character else nil) -- (not on the way home with the egg: QM)
 	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out).
 	Hud.setSprint(phase == "outbound" and not Tutorial.active)
 	if phase == "outbound" then
