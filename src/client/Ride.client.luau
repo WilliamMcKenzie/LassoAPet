@@ -141,9 +141,11 @@ vfx.holdOn = require(script.Parent.HoldOn) -- HOLD ON!: tap to overpower it whil
 -- (the first biome whose herd it's in; Animals/Horse sizes it so), and counts as that
 -- many size tiers up (TierGrowth x is a tier) when it comes to who tramples whom.
 vfx.homeSize = {}
-for _, biome in Config.Biomes do
+vfx.homeBiome = {} -- [kind] = the index of the first biome whose herd lists it (the Horse: the Meadow)
+for b, biome in Config.Biomes do
 	for kind in biome.Herd or {} do
 		vfx.homeSize[kind] = vfx.homeSize[kind] or biome.AnimalSize or 1
+		vfx.homeBiome[kind] = vfx.homeBiome[kind] or b
 	end
 end
 function vfx.biomeSize(kind)
@@ -2370,7 +2372,14 @@ function vfx.updateAvoid(dt)
 		local hitX = math.max((mhx + ehx) * 0.8, 2.6) -- (how close the crash check lets it come)
 		local dz = if on then entity.z - mount.z - math.max((mhz + ehz) * 0.8, 5) else -math.huge -- (from where the crash check reaches)
 		-- Less in each zone further out, none in the Godlands (Config.Biomes[].Swerve, QM).
-		local zone = if dz > 0 then Config.Biomes[WorldColors.biomeAt(entity.z)].Swerve or 1 else 0
+		local here = WorldColors.biomeAt(entity.z)
+		local zone = if dz > 0 then Config.Biomes[here].Swerve or 1 else 0
+		-- And only for a mount from its biome or a later one (QM, Oct 8: punching above
+		-- your weight, nothing gets out of your way). One that's in no biome's herd (an
+		-- event's exclusive) counts as from the last.
+		if on and (vfx.homeBiome[mount.kind] or #Config.Biomes) < (vfx.homeBiome[entity.kind] or here) then
+			zone = 0
+		end
 		-- (not a Godlands animal charging or hunting you: that one means it)
 		if zone > 0 and not (entity.popping or entity.event or entity.face or entity.rush) then
 			local clear = (cfg.Clear + hitX - 2.6) * zone -- (Clear was tuned for the old 2.6-stud check)
