@@ -1,7 +1,8 @@
 -- HOLD ON! (QM, Oct 8: the new core loop): after you lasso an animal you hang off the
 -- rope (RopeHang) and have to overpower it. Everything leaves the screen but the top
 -- bar (Hud.setStruggle), and a tap anywhere on it (or a click, Space, A) fills the
--- bar, which drains all the time. Fill it and you hop on; let it run out and you
+-- bar, which drains all the time. "Ready... Set..." first (Hud): till then the bar holds
+-- and taps don't count. E, Space and A count as taps too. Fill it and you hop on; let it run out and you
 -- crash (Ride.client decides both from HoldOn.update). Config.HoldOn.
 --
 --   HoldOn.start(character, yourLevel, itsLevel) -- the struggle begins: bar at Start
@@ -31,6 +32,7 @@ function HoldOn.tap()
 	end
 	local cfg = Config.HoldOn
 	fill = math.min(fill + perTap, 1)
+	Hud.bounceHold() -- the bar bounces with each tap (QM)
 	if cfg.Popup then
 		PlusPopup.at(who, 1, cfg.Arm, PlusPopup.SCATTER)
 	end
@@ -52,7 +54,7 @@ function HoldOn.start(character, yours, its)
 		end
 		return Enum.ContextActionResult.Sink
 	end, false, Enum.ContextActionPriority.High.Value + 10, Enum.UserInputType.MouseButton1, Enum.UserInputType.Touch,
-		Enum.KeyCode.Space, Enum.KeyCode.ButtonA)
+		Enum.KeyCode.Space, Enum.KeyCode.E, Enum.KeyCode.ButtonA) -- (E too, QM; over the lasso's E while it's on)
 end
 
 function HoldOn.update(dt)

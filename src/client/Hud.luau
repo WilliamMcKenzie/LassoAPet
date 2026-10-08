@@ -1653,7 +1653,24 @@ end
 -- HOLD ON!'s struggle (QM, Oct 8): nothing on screen but the bar. Every ScreenGui and
 -- BillboardGui of yours is switched off (and back as it was after), and the bar moves
 -- onto a screen of its own, at the same spot and size.
-local struggleGui, struggleRoot, struggleWas, struggleRun
+local struggleGui, struggleRoot, struggleWas, struggleRun, holdBounce
+
+-- The bar bounces on each HOLD ON! tap (QM, Oct 8): a subtle 1.04x punch easing back,
+-- started afresh each tap (no stacking).
+function Hud.bounceHold()
+	if not holdFrame then
+		return
+	end
+	local scale = holdFrame:FindFirstChild("Bounce") or Instance.new("UIScale")
+	scale.Name = "Bounce"
+	scale.Parent = holdFrame
+	if holdBounce then
+		holdBounce:Cancel()
+	end
+	scale.Scale = 1.04 -- (subtle: QM)
+	holdBounce = TweenService:Create(scale, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Scale = 1 })
+	holdBounce:Play()
+end
 
 -- One of QM's struggle signs (Config.HoldOn: Ready, Set, Tap): its art, or the word in
 -- yellow with a black outline until that's uploaded.

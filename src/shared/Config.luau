@@ -582,13 +582,13 @@ return {
 		-- they're done: HoldOn), then TAP!s by turns at each of Spots, every Every
 		-- seconds, rising Rise (of the screen's height) and fading over Life. At: a
 		-- centre (of the screen); Width: of the screen's width; Aspect: the art's.
-		Ready = { Image = "", At = Vector2.new(0.5, 0.47), Width = 0.2, Aspect = 2.6, Time = 1 },
-		Set = { Image = "", At = Vector2.new(0.5, 0.47), Width = 0.15, Aspect = 2.6, Time = 1 },
+		Ready = { Image = "rbxassetid://83516113744656", At = Vector2.new(0.5, 0.46), Width = 0.236, Aspect = 451 / 138, Time = 1 }, -- assets/ui/Ready.png
+		Set = { Image = "rbxassetid://83245069401605", At = Vector2.new(0.5, 0.46), Width = 0.15, Aspect = 287 / 107, Time = 1 }, -- assets/ui/Set.png
 		Tap = {
 			Image = "rbxassetid://94705725691297", -- assets/ui/Tap.png
 			Width = 0.15,
 			Aspect = 188 / 72,
-			Spots = { { At = Vector2.new(0.32, 0.6), Rotation = -15 }, { At = Vector2.new(0.75, 0.35), Rotation = 18 } },
+			Spots = { { At = Vector2.new(0.32, 0.6), Rotation = -15 }, { At = Vector2.new(0.75, 0.35), Rotation = 20 } },
 			Every = 0.45,
 			Rise = 0.08,
 			Life = 0.9,
