@@ -47,6 +47,7 @@ local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
+local TrainArrow = require(script.Parent.TrainArrow) -- (the last step's arrow over your chair, on the screen)
 local HoldOn = require(script.Parent.HoldOn)
 
 local player = Players.LocalPlayer
@@ -463,6 +464,7 @@ function Tutorial.update(state)
 		end
 		local pet = newPet and not state.cutscene and petOut(newPet)
 		pointTo(pet and pet.PrimaryPart and pet.PrimaryPart.Position)
+		TrainArrow.update(nil)
 		lastPhase = phase
 		return
 	end
@@ -560,6 +562,8 @@ function Tutorial.update(state)
 		end
 	end
 	pointTo(target)
+	-- And QM's arrow on the screen over the chair till you sit (Oct 8: a third stopped here).
+	TrainArrow.update(if step == "train" and phase == "idle" and not player:GetAttribute("TrainingSeat") then player:GetAttribute("TrainingChairAt") else nil)
 end
 
 -- After the first lasso, the tutorial's ride is just the egg (QM, Oct 8: LASSO kept

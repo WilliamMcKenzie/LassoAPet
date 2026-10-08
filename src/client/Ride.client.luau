@@ -4532,7 +4532,7 @@ end)
 
 RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, function(dt)
 	local riding = mount and not cutscene and not heroLeap and (phase == "outbound" or phase == "return")
-	vfx.speedFx.update(dt, if riding then mount.speed * (vfx.speedGain or 1) else 0) -- speed lines, by the uncurved speed
+	vfx.speedFx.update(dt, if riding and sprinting() then mount.speed * (vfx.speedGain or 1) else 0) -- speed lines while sprinting, by the uncurved speed
 	if phase == "idle" then
 		return
 	end

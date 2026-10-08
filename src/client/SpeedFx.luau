@@ -3,7 +3,7 @@
 -- towards Max, and speed lines plus a wider field of view sell the rest.
 --
 --   SpeedFx.curve(speed)      -- studs/s asked for -> studs/s actually travelled
---   SpeedFx.update(dt, feel)  -- every frame: feel = the uncurved speed (0 off the ride)
+--   SpeedFx.update(dt, feel)  -- every frame: feel = the uncurved speed while sprinting (0 otherwise)
 --   SpeedFx.fovKick()         -- degrees to add to the ride camera's field of view
 
 local Players = game:GetService("Players")
@@ -63,8 +63,9 @@ end
 local intensity = 0
 
 function SpeedFx.update(dt, feel)
-	local target = if FEEL.On and feel > FEEL.Start then 1 - math.exp(-(feel - FEEL.Start) / FEEL.Scale) else 0
-	intensity += (target - intensity) * (1 - math.exp(-4 * dt))
+	-- Only while sprinting (Ride passes 0 otherwise): Min at once, easing up with speed.
+	local target = if FEEL.On and feel > 0 then FEEL.Min + (1 - FEEL.Min) * math.clamp(feel / FEEL.Ref, 0, 1) ^ FEEL.Curve else 0
+	intensity += (target - intensity) * (1 - math.exp(-(if target > intensity then 8 else 4) * dt)) -- (in snappy, out gently)
 	local count = math.floor(#lines * intensity + 0.5)
 	local view = workspace.CurrentCamera.ViewportSize
 	local half = view.Magnitude / 2
