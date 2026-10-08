@@ -243,7 +243,6 @@ return {
 	Sky = "Anime", -- "Anime" (the Creator Store's Anime sky, QM Oct 6; tried Flat again and kept Anime) or "Flat" (one flat #59D9FD): World.server
 	WalkSpeed = 32, -- on foot, studs a second (Roblox's default is 16; QM, Oct 6: 2x, walking round took too long)
 	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
-	TiredSpeed = 0.5, -- x speed once the Hold bar's empty: no more bucking off (QM, Oct 5)
 	-- On the ride home with an egg the stampede gets out of your way (QM, Oct 6, to
 	-- test: dodging home lost new players): an animal heading into you swerves aside
 	-- late, Warn seconds before it would hit, so it still looks like a near miss. It
@@ -563,9 +562,25 @@ return {
 	-- QM's cream marble column in the middle of a coiled grass snake (Props/GrassSnake,
 	-- PodiumSnake.client), in the base's right front corner, their username and best
 	-- distance over their head (QM, Oct 5).
+	-- HOLD ON! (QM, Oct 8: the new core loop; HoldOn.luau): hanging off the rope after
+	-- lassoing, tap the button (or Space / A) to fill the top bar, which drains all the
+	-- while. Full: you hop on. Empty: BUCKED OFF!. Start: the bar's fill to begin with;
+	-- PerTap: each tap's fill; Drain: fill lost a second (so it takes Drain / PerTap taps
+	-- a second to hold your own). CursorAfter: seconds without a tap before the pulsing
+	-- cursor comes back. Width: the button's share of the screen's width.
+	HoldOn = {
+		Start = 0.3,
+		PerTap = 0.08,
+		Drain = 0.25,
+		CursorAfter = 1,
+		Width = 0.33,
+		Image = "rbxassetid://71069860798170", -- assets/ui/HoldOn.png
+		Arm = "rbxassetid://81589206383908", -- assets/ui/FlexArm.png: the +1 popup's icon
+	},
 	-- Lassoing an animal while riding (QM, Oct 8: the new lasso, phase 1): once the loop's
-	-- round its neck you hang off the rope behind it for Duration seconds, then hop on
-	-- as before (RopeHang.luau; 0 skips it). Locked straight behind it and high (QM: fast
+	-- round its neck you hang off the rope behind it (HOLD ON!, Config.HoldOn, decides
+	-- how long; Duration seconds in the tutorial, 0 skipping it there), then hop on
+	-- as before (RopeHang.luau). Locked straight behind it and high (QM: fast
 	-- and high-stakes, never drifting): Rope studs of rope from its neck, rising Height
 	-- studs to you; Follow how stiffly you follow its turns. The rope waves in the wind
 	-- round that line (QM's canvas sine waves, with noise): Wave studs side to side at
@@ -694,7 +709,6 @@ return {
 	-- its reach sprints, easing it back stops.
 	TouchSprintAt = 0.85,
 	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
-	SprintDrain = 1.5, -- x the Hold bar's usual drain
 	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)
 	ReturnFovKick = 20, -- degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel

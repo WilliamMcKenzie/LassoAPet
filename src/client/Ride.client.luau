@@ -136,6 +136,7 @@ end
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.lassoLevel = require(script.Parent.LassoLevel) -- the recommended lasso level over the target
 vfx.ropeHang = require(script.Parent.RopeHang) -- hanging off the rope before you hop on (Config.LassoHang)
+vfx.holdOn = require(script.Parent.HoldOn) -- HOLD ON!: tap to overpower it while you hang (Config.HoldOn)
 -- (declared up here: smash() below already uses it, and was reading a nil global)
 
 -- An obstacle you ride into flies up and away and fades; it's back
@@ -602,6 +603,7 @@ local function cleanup()
 	if transfer and transfer.hang then
 		vfx.ropeHang.stop(transfer.hang) -- (its rope goes too)
 	end
+	vfx.holdOn.stop()
 	mount, transfer, tumble, warpLevel = nil, nil, nil, nil
 	NestEggs.setMount("")
 	if carried then
@@ -1082,6 +1084,7 @@ local function fail(reason, tip)
 	if transfer and transfer.hang then
 		vfx.ropeHang.stop(transfer.hang)
 	end
+	vfx.holdOn.stop()
 	transfer = nil
 	if carried then
 		if vfx.revive then
@@ -3446,11 +3449,7 @@ local function updateMount(dt)
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	targetSpeed *= vfx.hazards.slow() -- stuck in a Sludge's sludge
-	-- (carried, not the "CarriedEgg" attribute: the server leaves that set after a crash
-	-- with an egg, and then the next ride was never tired)
-	if hold <= 0 and not carried then
-		targetSpeed *= Config.TiredSpeed -- out of Hold: tired (checkRide), but not with an egg on the way home (QM, Oct 6)
-	end
+	-- (No stamina, so never tired: QM, Oct 8.)
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
 	if ability and ability.cfg.MaxBoost then
@@ -3598,11 +3597,8 @@ local function checkRide(dt)
 			ability = nil
 		end
 	end
-	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not Tutorial.active and not mount.giant then -- abilities, the tutorial and the Giant Horse use no Hold
-		-- Out of Hold the mount carries on, slower (Config.TiredSpeed; QM, Oct 5: it
-		-- used to buck you off).
-		hold = math.max(hold - dt * (if sprinting() then Config.SprintDrain else 1), 0)
-	end
+	-- (No stamina any more, QM Oct 8: Hold never drains and you can always sprint. The
+	-- top bar is HOLD ON!'s now.)
 	if mount.z < FINISH_Z - 8 then
 		return fail("TOO FAR!") -- only if something skipped the finish line
 	end
@@ -3737,24 +3733,42 @@ local function updateRider(dt)
 		focus = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
 		if transfer.t >= 1 then
 			transfer.stage, transfer.t, transfer.from = "pull", 0, hrp.Position
-			if Config.LassoHang.Duration > 0 then
+			if Config.LassoHang.Duration > 0 or not Tutorial.active then
 				-- Yanked off: hang from the rope round its neck first (QM, Oct 8).
 				transfer.stage = "hang"
 				transfer.hang = vfx.ropeHang.start(hrp.Position, hrp.Parent)
+				if not Tutorial.active then -- (the tutorial just hangs a moment: Duration)
+					transfer.fill = Config.HoldOn.Start
+					vfx.holdOn.start(hrp.Parent)
+				end
 			end
 		end
 		return
 	end
 	if transfer and transfer.stage == "hang" then
-		transfer.t = math.min(transfer.t + dt / Config.LassoHang.Duration, 1)
+		-- HOLD ON!: tap the bar full to hop on; let it run out and you're bucked off.
+		local won = false
+		if transfer.fill then
+			local result
+			transfer.fill, result = vfx.holdOn.update(dt)
+			if result == "lost" then
+				vfx.holdOn.stop()
+				return fail("BUCKED OFF!")
+			end
+			won = result == "won"
+		else
+			transfer.t = math.min(transfer.t + dt / Config.LassoHang.Duration, 1)
+			won = transfer.t >= 1
+		end
 		local animal = transfer.target.animal
 		local at = vfx.ropeHang.update(transfer.hang, dt, animal:getNeck().cframe.Position, animal.model.PrimaryPart.CFrame.LookVector)
 		hrp.CFrame = at
 		local look = at.Position:Lerp(animal.model.PrimaryPart.Position, 0.4) -- (between you and it: both in view)
 		focus = focus:Lerp(Vector3.new(look.X, 0, look.Z), 1 - math.exp(-10 * dt)) -- (smooth through the jolts)
-		if transfer.t >= 1 then
+		if won then
+			vfx.holdOn.stop()
 			vfx.ropeHang.stop(transfer.hang)
-			transfer.hang = nil
+			transfer.hang, transfer.fill = nil, nil
 			transfer.stage, transfer.t, transfer.from = "pull", 0, hrp.Position -- now hop on
 		end
 		return
@@ -3852,7 +3866,7 @@ local function updateHud()
 	-- The tutorial shows only LASSO / TAKE EGG: no Sprint and no Hold bar (it never runs out).
 	Hud.setSprint(phase == "outbound" and not Tutorial.active)
 	if phase == "outbound" then
-		Hud.setHold(if Tutorial.active then nil elseif mount then hold / holdTime(mount) else 1, carried == nil)
+		Hud.setHold(if transfer and transfer.fill then transfer.fill else nil, false) -- HOLD ON!'s bar, only while it's on
 		Hud.setDistance(if Tutorial.active then "" else string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		if actionTarget == "egg" then
 			Hud.setAction("GRAB EGG", true, rarityOf(nearEgg.kind))
