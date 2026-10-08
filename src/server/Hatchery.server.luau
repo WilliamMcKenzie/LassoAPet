@@ -249,7 +249,7 @@ local function load(player)
 					end
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
 					profile.rainbowTrail = data.rainbowTrail == true or nil
-					player:SetAttribute("FuseLesson", data.fuseLesson == true or nil) -- the fuse lesson's still to come (FuseLesson)
+					player:SetAttribute("FuseLesson", nil) -- (no fuse lesson any more: QM, Oct 8)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
 					for _, kind in typeof(data.ridden) == "table" and data.ridden or {} do
 						if isAnimal(kind) then

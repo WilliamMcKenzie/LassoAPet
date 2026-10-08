@@ -1616,7 +1616,7 @@ end
 -- till the fuse lesson (FuseLesson) has shown it to you.
 function Hud.fuseUnlocked()
 	local player = Players.LocalPlayer
-	return (player:GetAttribute("PenLevel") or 1) >= 2 and not player:GetAttribute("FuseLesson")
+	return true -- (no fuse lesson any more, QM Oct 8: it shows once the tutorial's done)
 end
 
 -- The first-time tutorial (Tutorial.luau) shows only what each step needs.

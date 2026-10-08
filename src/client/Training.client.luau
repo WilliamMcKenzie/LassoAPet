@@ -142,6 +142,9 @@ local function place(dummy, pen)
 		end
 		dummy.model.Parent = workspace
 		dummy.chair.Parent = workspace
+		if pen.Name == "Pen" .. tostring(player:GetAttribute("Pen")) then
+			player:SetAttribute("TrainingChairAt", chair.Position) -- (the tutorial's arrows lead here; this client only)
+		end
 	else
 		dummy.place = nil
 		dummy.model.Parent = nil
@@ -232,7 +235,7 @@ local function near(dummy)
 	if not dummy or not hrp or not humanoid or humanoid.Health <= 0 or hrp.Anchored or humanoid.PlatformStand then
 		return nil
 	end
-	if player:GetAttribute("Tutorial") or not char:FindFirstChild("RightGripAttachment", true) then
+	if not char:FindFirstChild("RightGripAttachment", true) then -- (the tutorial ends here now: QM)
 		return nil
 	end
 	local flat = (hrp.Position - dummy.place.Position) * Vector3.new(1, 0, 1)

@@ -19,12 +19,12 @@
 --   6. home  (DODGE THE STAMPEDE!)           home with the egg
 --   7. place2 the egg goes into the pen by itself (Hatchery's DeliverEgg, balance
 --            pass Oct 6: a fifth of new players left here when they had to place it)
---   8. goal  the moment the egg's pet has hatched out, the camera flies to the next
---            biome's gate: "Save $1k to unlock the Desert!". Then it's over: the money
---            starts (Hatchery: pets earn nothing till now, QM Oct 6) and the rest of
---            the HUD (Gold, Upgrade Pen, Pets, Fuse) comes back, none of which shows
---            in the tutorial (QM). The arrows then lead to that new pet until you
---            ride. (No fuse step: too confusing for kids, QM Oct 6 21:15.)
+--   8. train the moment the egg's pet has hatched out: "Train your lasso for big
+--            pets" (QM, Oct 8), arrows to your training chair (Training.client's
+--            "TrainingChairAt"). Sitting down in it (its "TrainingSeat") ends it: the
+--            money starts (Hatchery: pets earn nothing till now, QM Oct 6) and the rest
+--            of the HUD (Gold, Upgrade Pen, Pets, Fuse) comes back, none of which shows
+--            in the tutorial (QM). (No fuse step or lesson: QM, Oct 6 and Oct 8.)
 --
 -- Running to the start line in step 1 or 2 skips them (Tutorial.toLine): the
 -- starter egg becomes your Horse there and then and you ride off on it at step 3.
@@ -47,7 +47,6 @@ local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
-local FuseLesson = require(script.Parent.FuseLesson) -- (fusing's own lesson, once the Desert's unlocked)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -143,6 +142,8 @@ local PICTURES = {
 	-- (cost: the Desert price drawn in it; at any other price the text hint shows instead.
 	-- image "": not uploaded yet, the text hint too)
 	saveDesert = { image = "rbxassetid://94733777866922", width = 1830, height = 127, cost = 500 }, -- assets/ui/HintSaveDesert.png
+	-- (image "": not uploaded yet, the text hint shows)
+	trainLasso = { image = "rbxassetid://118992731250889", width = 1632, height = 145 }, -- assets/ui/TrainLasso.png (QM, Oct 8: 1024x91, shown at the others' letter size)
 }
 local picture = Instance.new("ImageLabel")
 picture.Name = "HintPicture"
@@ -404,9 +405,8 @@ local function gateFlight(level)
 	camera.CameraType = Enum.CameraType.Custom
 end
 
--- The ending: the egg's placed (`id` in the pen) and hatches by itself; the moment
--- its pet's out and landed, the camera flies over to the next biome's gate and back,
--- and it's over.
+-- The egg's placed (`id` in the pen) and hatches by itself; the moment its pet's out
+-- and landed: off to your training chair (step "train"), and sitting in it ends it.
 local function showGoal(id)
 	Tutorial.busy = true
 	local by = os.clock() + 6 -- (in case it never shows)
@@ -415,18 +415,8 @@ local function showGoal(id)
 	end
 	task.wait(LAND_WAIT)
 	newPet = id
-	controls:Disable()
-	local level = player:GetAttribute("PenLevel") or 1
-	local upNext = Config.Biomes[level + 1]
-	if upNext and Config.Gates then
-		goalText = "Save " .. Hud.money(upNext.UnlockCost) .. " to unlock the " .. upNext.Name .. "!"
-		goalDesert = upNext.Name == "Desert" and upNext.UnlockCost == PICTURES.saveDesert.cost and PICTURES.saveDesert.image ~= ""
-		report("gate")
-		gateFlight(level)
-	end
-	controls:Enable()
 	Tutorial.busy = false
-	finish()
+	setStep("train")
 end
 
 local function hintFor(state)
@@ -437,6 +427,8 @@ local function hintFor(state)
 		return if phase == "idle" then "Place your egg in your pen!" else nil
 	elseif step == "goal" then
 		return goalText
+	elseif step == "train" then
+		return "Train your lasso for big pets
 	elseif step == "ride" then
 		local _, kind = myPet(state)
 		return if kind and kind ~= "" then "Ride your " .. kind .. "!" else nil
@@ -456,11 +448,7 @@ end
 -- hero leap is on) }.
 function Tutorial.update(state)
 	local phase = state.phase
-	local lessonStage, lessonCursor
-	if not Tutorial.active then
-		lessonStage, lessonCursor = FuseLesson.update(phase, state.cutscene)
-	end
-	local stage = if Tutorial.active then "bare" else lessonStage
+	local stage = if Tutorial.active then "bare" else nil
 	if stage ~= hudStage then
 		hudStage = stage
 		Hud.setTutorial(stage)
@@ -468,7 +456,7 @@ function Tutorial.update(state)
 	if not Tutorial.active then
 		slowSince, Tutorial.slowMo = nil, nil
 		setHint(nil)
-		showPicture(nil, lessonCursor)
+		showPicture(nil, nil)
 		if phase ~= "idle" then
 			newPet = nil -- riding: the arrows have done their job
 		end
@@ -500,6 +488,9 @@ function Tutorial.update(state)
 	end
 	lastPhase = phase
 
+	if step == "train" and player:GetAttribute("TrainingSeat") then
+		finish() -- sat down to train: that's the tutorial done
+	end
 	if step == "place" and ((player:GetAttribute("RidePet") or "") ~= "" or myPet({}) ~= nil) then
 		setStep("ride") -- it's hatched (or there was a pet already)
 	elseif step == "place2" then
@@ -534,6 +525,7 @@ function Tutorial.update(state)
 		elseif PLACE_STEPS[step] then "place"
 		elseif step == "ride" and select(2, myPet(state)) == "Horse" then "rideHorse"
 		elseif step == "goal" and goalText and goalDesert then "saveDesert"
+		elseif step == "train" and PICTURES.trainLasso.image ~= "" then "trainLasso"
 		else nil
 	local cursorOn = if clickTool then Inventory.slot(clickTool.Name) else nil
 	showPicture(pictureName, cursorOn)
@@ -548,6 +540,8 @@ function Tutorial.update(state)
 		elseif PLACE_STEPS[step] then
 			local pen = myPen()
 			target = pen and pen:FindFirstChild("Area") and pen.Area.Position
+		elseif step == "train" then
+			target = player:GetAttribute("TrainingChairAt") -- (your chair: Training.client)
 		end
 	end
 	pointTo(target)
