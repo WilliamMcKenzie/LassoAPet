@@ -26,9 +26,9 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 	merge = { id = "rbxassetid://127823791499018", size = Vector2.new(600, 226) }, -- Merge.png
 	stamina = { id = "rbxassetid://84856325662967", size = Vector2.new(256, 256) }, -- Stamina.png
 	cash = { id = "rbxassetid://76663783463176", size = Vector2.new(256, 256) }, -- Cash.png
-	upgrade = { id = "rbxassetid://92263076758398", size = Vector2.new(1024, 220) }, -- Upgrade.png
-	upgradeGrey = { id = "rbxassetid://110399712531479", size = Vector2.new(1024, 220) }, -- UpgradeGrey.png: QM's disabled Upgrade, for when you can't afford it
-	unlock = { id = "rbxassetid://70859673608894", size = Vector2.new(1024, 220) }, -- Unlock.png ("FREE" drawn in)
+	upgrade = { id = "rbxassetid://71762829770863", size = Vector2.new(526, 113) }, -- Upgrade.png
+	upgradeGrey = { id = "rbxassetid://87365821705477", size = Vector2.new(526, 113) }, -- UpgradeGrey.png: QM's disabled Upgrade, for when you can't afford it
+	unlock = { id = "rbxassetid://123061923353074", size = Vector2.new(526, 113) }, -- Unlock.png ("FREE" drawn in)
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local CASH_GREEN = Color3.fromHex("00FF09")
