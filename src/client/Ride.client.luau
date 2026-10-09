@@ -3541,6 +3541,8 @@ local function reachHome()
 		phase = "home"
 		heroLeap = { t = 0, fromZ = mount.z, toZ = START_LINE_Z + Config.HomeLandPast }
 		vfx.sounds.play("arrive_home")
+		vfx.sounds.play("record_scratch") -- the run home's music stops dead, and it's the base's again (QM, Oct 9)
+		vfx.sounds.setMusic("base", true)
 		Hud.setCutscene(true)
 	end
 end
@@ -4577,7 +4579,8 @@ end
 -- and quicker the faster it goes. Sprint's whoosh as it starts.
 function vfx.updateSound()
 	vfx.sounds.setMusic(if phase == "idle" then "base"
-		elseif phase == "turning" or phase == "return" or phase == "home" then "home" .. (vfx.returnBiome or 1) -- (the biome you turned round in: Sounds)
+		elseif phase == "home" then "base" -- (over the line: back to the base's, cut with a scratch in reachHome)
+		elseif phase == "turning" or phase == "return" then "home" .. (vfx.returnBiome or 1) -- (the biome you turned round in: Sounds)
 		else "ride")
 	local riding = mount and (phase == "outbound" or phase == "return" or phase == "turning") and not transfer
 	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] ~= false and (mount.hop or 0) < 2,

@@ -28,6 +28,7 @@ local IDS = {
 	gate_break = "rbxassetid://9116938119", -- a zone gate shatters (Mirror Break, Roblox's ProSoundEffects; QM's pick, Oct 7)
 	crash = "rbxassetid://94142874131984", -- crashed or bucked off
 	arrive_home = "rbxassetid://87800549075293", -- back over the start line with an egg
+	record_scratch = "rbxassetid://9118086936", -- Record Scratch 1 (ProSoundEffects): the run home's music cut off at the line (QM, Oct 9)
 	reveal_tick = "rbxassetid://91812796089050", -- each flick of the egg card (and the roll's)
 	reveal_pop = "rbxassetid://117371326373841", -- the egg card lands on its rarity
 	egg_hatch = "rbxassetid://112644148635720", -- an egg in your pen hatches
@@ -129,7 +130,8 @@ end
 
 local music = {}
 local playing
-function Sounds.setMusic(which)
+-- cut: switch with no fade (the old track stops dead, the new one's straight in).
+function Sounds.setMusic(which, cut)
 	if which == playing then
 		return
 	end
@@ -144,6 +146,13 @@ function Sounds.setMusic(which)
 		if on and not s.IsPlaying then
 			s.TimePosition = 0
 			s:Play()
+		end
+		if cut then
+			s.Volume = if on then MUSIC_VOLUME else 0
+			if not on then
+				s:Stop()
+			end
+			continue
 		end
 		local fade = TweenService:Create(s, TweenInfo.new(MUSIC_FADE), { Volume = if on then MUSIC_VOLUME else 0 })
 		if not on then
