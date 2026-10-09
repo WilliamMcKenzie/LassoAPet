@@ -172,6 +172,7 @@ local function newTimer(parent)
 	gui.MaxDistance = 120
 	gui.LightInfluence = 0
 	gui.Enabled = false -- (on only near you: nearTimer)
+	gui.AlwaysOnTop = true -- (drawn over the egg, never hidden behind it: QM, Oct 9)
 	local text = Instance.new("TextLabel")
 	text.BackgroundTransparency = 1
 	text.Size = UDim2.fromScale(1, 1)
