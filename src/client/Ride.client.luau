@@ -840,6 +840,9 @@ local function updateRideTarget()
 		rideModel = target
 		if target then
 			rideOffset, rideSize = Outline.box(target)
+			-- The prompt's name line: the pet's name, a hybrid's fused one (as its plate).
+			local info = if starter and target == starter.animal.model then starter else PenPets.pets[target]
+			ridePrompt.ObjectText = if info and info.kind then vfx.Fusion.name(info.kind, info.fuse) else ""
 			rideSpot.Parent = workspace.Terrain
 		else
 			rideSpot.Parent = nil
