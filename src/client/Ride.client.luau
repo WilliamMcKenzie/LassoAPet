@@ -4579,7 +4579,7 @@ function vfx.updateSound()
 		mount and mount.speed / Config.MountSpeed or 0)
 	local now = phase == "outbound" and mount ~= nil and sprinting()
 	if now and not vfx.wasSprinting then
-		vfx.sounds.play("sprint_whoosh", 0.4) -- (20% under the usual 0.5: QM)
+		vfx.sounds.play("sprint_whoosh", 0.32) -- (20% and 20% again under the usual 0.5: QM)
 	end
 	vfx.wasSprinting = now
 	-- (the wind loop while you sprint on a mount, the run home's too: Sounds.sprint_wind)
