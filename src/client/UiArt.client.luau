@@ -24,7 +24,7 @@ if Config.UiArt ~= false then
 end
 
 local KEEP = {
-	["126644097924232"] = true, -- CommonPanel: QM's new egg slot panel (Oct 9), the one new art in
+	["100959066539289"] = true, -- CommonPanel: QM's new egg slot panel (Oct 9), the one new art in
 	["101217167881986"] = true, ["101851743328298"] = true, ["102165948456968"] = true, ["102545209742676"] = true,
 	["102795691143589"] = true, ["102872657938822"] = true, ["103163746025717"] = true, ["103485896070996"] = true,
 	["103638328020279"] = true, ["103797474563946"] = true, ["104966778015588"] = true, ["104986890781116"] = true,
