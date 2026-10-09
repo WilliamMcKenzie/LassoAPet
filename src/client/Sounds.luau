@@ -21,10 +21,10 @@ local IDS = {
 	egg_grab = "rbxassetid://94379425317312", -- an egg lassoed mid-ride
 	gallop_loop = "rbxassetid://129029116650332", -- while riding a galloping animal (Config.GallopSound)
 	sprint_whoosh = "rbxassetid://73983934702758", -- Sprint starts
-	-- A rush of wind looping while you sprint on a mount (QM, Oct 9): Plasma Trails Constant
-	-- Airy Whooshing Windy (ProSoundEffects, 0:33). Others to try: Spiraling Wind Data
-	-- Tunnel Travelling 2 9119462999 (0:31), Desert Wind Whistley Light Gusts 1 9114057104 (0:37).
-	sprint_wind = "rbxassetid://9125742262",
+	-- A rush of wind looping while you sprint on a mount, a subtle sense of speed (QM, Oct 9):
+	-- Spiraling Wind Data Tunnel Travelling 2 (ProSoundEffects, 0:31). Others tried: Plasma
+	-- Trails Constant Airy Whooshing Windy 9125742262, Desert Wind Whistley Light Gusts 1 9114057104.
+	sprint_wind = "rbxassetid://9119462999",
 	-- each lasso throw at your training dummy (Training.client; QM, Oct 8). For now Sprint's
 	-- whoosh: assets/sfx/LassoWhoosh.ogg needs uploading in Studio (audio can't be from here)
 	training_whoosh = "rbxassetid://73983934702758",
@@ -133,7 +133,7 @@ function Sounds.setGallop(on, pace)
 end
 
 -- The sprint's wind loop, faded in and out (Sounds.setSprintWind(on)).
-local SPRINT_WIND_VOLUME = 0.35
+local SPRINT_WIND_VOLUME = 0.15 -- (subtle: QM)
 local wind, windTween
 function Sounds.setSprintWind(on)
 	if IDS.sprint_wind == "" then
