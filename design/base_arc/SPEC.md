@@ -44,7 +44,7 @@ Studs, Roblox axes: the course runs to -z from the home line at z = 0, and the b
   goes.
 
 ## Mechanical bull spot (one per pen)
-- A pad 18 across, in the yard just right of each gate (from inside the pen looking out),
+- A pad 18 across, in the yard beside each gate, 18 along the arc and 13 out from the fence,
   facing the yard centre. Placeholder in the render: a red mat with a bull on a post.
 
 | Pen | Pad (x, z) |
