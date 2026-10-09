@@ -15,8 +15,10 @@ Studs, Roblox axes: the course runs to -z from the home line at z = 0, and the b
   into 154 rectangles [x0, z0, x1, z1]. Everything else is grass. Ground.heightAt should
   cover the base too, so pets and eggs stand on the sunk dirt.
 - What the dirt is: one natural yard in the middle with ragged edges and two grass islands,
-  a lane from the yard to the home line, an apron at each gate, and small patches out
-  in the grass. Pens stand on grass. No dirt within 8 studs (two tiles) of any wall, front wall stubs included, so the sunk dirt never opens a hole under a wall (QM).
+  a lane from the yard to the home line, and an apron at each gate. Outside the yard (QM Oct 9,
+  take B, `dirt_patterns.py`): six chunky Voronoi-cell patches in the grass wedges between the
+  pens, mirrored left/right, each with a grass gap to the yard. The old scattered small
+  patches are gone. Pens stand on grass. No dirt within 8 studs (two tiles) of any wall, front wall stubs included, so the sunk dirt never opens a hole under a wall (QM).
 
 ## Pens: five on one arc
 - The arc's centre is (0, 90), the middle of the yard. Pen centres sit 130 from it, at
