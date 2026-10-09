@@ -649,24 +649,21 @@ end
 
 -- Rides from an outer pen are steered into the corridor once past this z (the pen's open side).
 local leadFromZ = 0
--- A ride from a corner pen (open side facing in) first runs out sideways to this x,
--- curving round toward the start line; nil once it's out.
-local exitX = nil
-local EXIT_TURN = 10 -- studs from exitX where the curve toward the start line begins
+-- A ride from your pen (the arc base, QM Oct 9) runs out of its gap and straight
+-- across the yard to the corridor: these points in turn (Vector2 x, z), nil once
+-- it's in the corridor and riding as usual.
+local exitPath = nil
 
--- The x a ride from a sideways-facing pen runs out to, past its open side and inside the corridor.
-local function penExitX()
+-- Out of your pen's gap (to its Spawn, just outside it), then straight to the
+-- corridor's mouth, then a few studs on into it, square to the start line.
+local function penExitPath()
 	local pen = myPen()
-	local spawn, area = pen and pen:FindFirstChild("Spawn"), pen and pen:FindFirstChild("Area")
-	if not (spawn and area) then
+	local spawn = pen and pen:FindFirstChild("Spawn")
+	if not spawn then
 		return nil
 	end
-	local d = spawn.Position - area.Position
-	if math.abs(d.X) <= math.abs(d.Z) then
-		return nil -- faces the start line
-	end
-	-- Straight into the corridor: the corner pens' open sides sit just outside it.
-	return math.clamp(spawn.Position.X, -(EDGE - 4), EDGE - 4)
+	local x = math.clamp(spawn.Position.X * 0.25, -(EDGE - 8), EDGE - 8) -- (a little toward its side of the corridor)
+	return { Vector2.new(spawn.Position.X, spawn.Position.Z), Vector2.new(x, 24), Vector2.new(x, 4) }
 end
 
 -- Which way your pen's open side faces, as a yaw (0 = toward the start line).
@@ -929,9 +926,9 @@ startRide = function(model, at)
 	mount.animal:setSaddled(true)
 	vfx.rideAgain = nil
 	leadFromZ = spot.Z - 8
-	exitX = if fromHerd or at then nil else penExitX()
+	exitPath = if fromHerd or at then nil else penExitPath()
 	local runningAt = if fromHerd then fromHerd.speed or 0 else 0 -- a stampede animal keeps its pace
-	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, 0, runningAt, 0
+	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, if exitPath then penYaw() else 0, runningAt, 0 -- (out of your pen: facing out of its gap)
 	mount.feast = nil -- (the Blue Crab starts every ride at its own size)
 	vfx.applyMerge(mount)
 	phase, hold, grace, camYaw = "outbound", holdTime(mount), 0, 0
@@ -988,7 +985,7 @@ ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, ki
 	mount = newEntity(0, z, 0, kind)
 	mount.animal:setSaddled(true)
 	warpLevel = b
-	leadFromZ, exitX = z - 8, nil
+	leadFromZ, exitPath = z - 8, nil
 	phase, hold, grace, camYaw = "outbound", holdTime(mount), 1, 0
 	coins = 0
 	hrp.Anchored = true
@@ -1215,15 +1212,9 @@ function vfx.updateHomeGuide()
 		-- To the gap in your pen's fence (QM, Oct 6): where the line from its Spawn
 		-- (just outside the gap) to its middle crosses the Area's edge.
 		local spot = homeSpot()
-		local spawn = area and myPen():FindFirstChild("Spawn")
-		if spawn then
-			local d = (area.Position - spawn.Position) * Vector3.new(1, 0, 1)
-			if d.Magnitude > 0 then
-				d = d.Unit
-				local half = math.abs(d.X) * area.Size.X / 2 + math.abs(d.Z) * area.Size.Z / 2
-				local gap = area.Position - d * half
-				spot = Vector3.new(gap.X, 0, gap.Z)
-			end
+		if area then -- (the gap's in the side of the Area's frame facing -z: tools/pens.py)
+			local gap = area.CFrame:PointToWorldSpace(Vector3.new(0, 0, -area.Size.Z / 2))
+			spot = Vector3.new(gap.X, 0, gap.Z)
 		end
 		local at = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
 		if (spot - at).Magnitude > guide.HOME_CLOSE and not rideShown then
@@ -1628,8 +1619,8 @@ local function wander(entity, dt)
 			w.rest -= dt
 			if w.rest <= 0 then
 				local half = area.Size / 2
-				w.tx = area.Position.X + rng:NextNumber(-half.X, half.X)
-				w.tz = area.Position.Z + rng:NextNumber(-half.Z, half.Z)
+				local to = area.CFrame:PointToWorldSpace(Vector3.new(rng:NextNumber(-half.X, half.X), 0, rng:NextNumber(-half.Z, half.Z))) -- (in the pen's frame)
+				w.tx, w.tz = to.X, to.Z
 			end
 		elseif w.tx then
 			local dx, dz = w.tx - entity.x, w.tz - entity.z
@@ -3434,20 +3425,29 @@ local function updateMount(dt)
 		animate(mount, dt, mount.speed, 0)
 		return
 	end
-	if phase == "outbound" and exitX then
-		-- Out of a corner pen: sideways through its open side, curving toward the start line.
-		local d = exitX - mount.x
-		local side = math.clamp(math.abs(d) / EXIT_TURN, 0, 1)
-		local lat, fwd = math.sign(d) * side, 1 - side
-		local len = math.sqrt(lat * lat + fwd * fwd)
-		mount.latVel = mount.speed * lat / len
-		local step = mount.latVel * dt
-		mount.x = if math.abs(step) >= math.abs(d) then exitX else mount.x + step
-		mount.z += dir * mount.speed * fwd / len * dt
-		if math.abs(exitX - mount.x) < 0.2 then
-			exitX = nil
+	if phase == "outbound" and exitPath then
+		-- Out of your pen: out of its gap and straight across the yard to the corridor
+		-- (penExitPath), turning smoothly onto each leg.
+		local to = exitPath[1]
+		local dx, dz = to.X - mount.x, to.Y - mount.z
+		local len = math.sqrt(dx * dx + dz * dz)
+		local step = mount.speed * dt
+		if len <= step then
+			mount.x, mount.z = to.X, to.Y
+			table.remove(exitPath, 1)
+			if #exitPath == 0 then
+				exitPath = nil
+				mount.yaw, mount.latVel = 0, 0 -- (square to the start line: riding as usual from here)
+			end
+		else
+			mount.x += dx / len * step
+			mount.z += dz / len * step
+			local want = math.atan2(-dx, -dz) -- (yaw 0 faces -z)
+			local diff = (want - mount.yaw + math.pi) % (2 * math.pi) - math.pi
+			mount.yaw += diff * (1 - math.exp(-8 * dt))
 		end
-		place(mount, math.atan2(lat * dir, fwd))
+		mount.latVel = 0
+		place(mount, 0)
 		animate(mount, dt, mount.speed, 0)
 		return
 	end
@@ -4680,7 +4680,7 @@ ReplicatedStorage:WaitForChild("ShopGrant").OnClientEvent:Connect(function(key)
 	mount.feast = { count = 0, size = giant.Scale, speed = giant.Speed / statsOf("Horse").Speed }
 	mount.animal:setScale(giant.Scale)
 	mount.animal:setSaddled(true)
-	leadFromZ, exitX = mount.z - 8, nil
+	leadFromZ, exitPath = mount.z - 8, nil
 	phase, hold, grace, camYaw = "outbound", holdTime(mount), 1, 0
 	coins = 0
 	hrp.Anchored = true

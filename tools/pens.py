@@ -8,13 +8,15 @@ script would overwrite those edits.
 
 The pens copy the open farm pens of Roblox pet games (QM's references): low
 fences on the grass, dark posts, orange wooden rails top and bottom with an X
-brace in every span, and a gap in one side. Three stand along the back wall
-with their gaps facing the start line, and one sits in each front corner of the
-base with its gap facing in. Each covers exactly N x N floor tiles.
+brace in every span, and a gap in one side.
+
+The arc base (QM, Oct 9; design/base_arc/SPEC.md): the five pens stand on one arc
+round the dirt yard in the middle of the base, centre ARC, each turned to face
+it (CFrame.lookAt(pen centre, ARC)) with its gap in the side facing the yard.
 
 Pens grow as you unlock zones (QM, Oct 3): SIZES[level - 1] tiles a side, from
 12 at the start to 17 (about 2x the area) once the Ocean is open. A pen grows
-away from the wall it backs onto, so its back edge stays put. Each PenN holds
+outward, away from the yard: its gap stays put on the arc. Each PenN holds
 a Sizes folder with one SizeK model per level: its fence, plus copies of the
 markers below laid out for that size. PenLevel.server shows the owner's size
 and moves the live markers onto that size's copies.
@@ -24,7 +26,8 @@ size 1 here):
   Spawn  where the owner appears, outside the gap
   Sign   above the gap; the server hangs the owner's picture and name on it
   Area   the ground the pets wander over
-  Tiles  the pen's N x N floor tiles, for recolouring them
+  Tiles  the pen's N x N floor (its own floor, turned with the pen, PenLevel.server)
+The markers are turned with the pen too (the scripts read them in its frame).
   Slots  one invisible part per pet spot (all of the owner's pets live here);
          Slot1 is just inside the gap, where the pet you ride sets off from
 """
@@ -43,25 +46,30 @@ OUT = Path(__file__).resolve().parent.parent / "src" / "world" / "Pens.rbxmx"
 TILE = 4  # the floor's checker squares
 SIZES = [12, 14, 16, 17]  # tiles a side at pen level 1..4 (Meadow, Desert, Tundra, Ocean)
 GATE = 10
-HALF_W, DEPTH = 144, 144  # the home base: x -144..144, z 0..144 inside its walls
-# Pens in claim order: (back edge centre x, z, the way the open side faces, which
-# way an odd size's extra tile goes along the pen's local x). Three along the
-# back wall facing the start line, and one in each front corner of the base
-# facing in. Edges sit on tile lines at every size.
-PENS = [
-    (0, DEPTH, "front", 1),
-    (-76, DEPTH, "front", 1),
-    (76, DEPTH, "front", 1),
-    (-HALF_W, 32, "right", 1),
-    (HALF_W, 32, "left", -1),
-]
+HALF_W, DEPTH = 176, 264  # the home base: x -176..176, z 0..264 inside its walls
+ARC = (0, 90)  # the yard's middle: every pen faces it
+ARC_RADIUS = 130  # pen centres (at the biggest size) from ARC
+ANGLES = (90, 140, 40, 190, -10)  # degrees from +x toward +z, in claim order
+
+
+def _pen(angle):
+    """(gate middle x, z, unit x, z the gap faces): the gap's on the arc, ARC_RADIUS less half the biggest size."""
+    a = math.radians(angle)
+    out_x, out_z = math.cos(a), math.sin(a)
+    r = ARC_RADIUS - SIZES[-1] * TILE / 2
+    return (ARC[0] + out_x * r, ARC[1] + out_z * r, -out_x, -out_z)
+
+
+PENS = [_pen(a) for a in ANGLES]
 # Local pen frame: centred on the pen, open side at z = -SIZE / 2 facing -z.
-# These map it onto the world for each facing.
-FACING = {
-    "front": ((1, 0, 0), (0, 1, 0), (0, 0, 1)),
-    "right": ((0, 0, -1), (0, 1, 0), (1, 0, 0)),  # open side faces +x
-    "left": ((0, 0, 1), (0, 1, 0), (-1, 0, 0)),  # open side faces -x
-}
+
+
+def frame(fx, fz):
+    """The pen's rotation: local -z (its gap) faces (fx, fz), like CFrame.lookAt."""
+    look = np.array([fx, 0.0, fz])
+    up = np.array([0.0, 1.0, 0.0])
+    right = np.cross(look, up)
+    return np.column_stack([right, up, -look])
 SLOTS = [(0, 6)] + [(x, dz) for dz, xs in ((20, (-12, 12)), (34, (-14, 0, 14))) for x in xs]  # from the gap
 
 POST_COLOR = (62, 62, 72)
@@ -77,16 +85,14 @@ def rot_y(deg):
     return partlib.Ry(deg)[:3, :3]
 
 
-def pen_parts(bx, bz, facing, odd, n=SIZES[0]):
-    """The pen at n tiles a side; (bx, bz) is the middle of its back edge."""
+def pen_parts(gx, gz, fx, fz, n=SIZES[0]):
+    """The pen at n tiles a side; (gx, gz) is the middle of its gap, (fx, fz) the way it faces."""
     SIZE = n * TILE
     FRONT = -SIZE / 2
     SPAWN_Z = FRONT - 6
-    M = np.array(FACING[facing], float)
-    # centre: half a size in from the back edge; an odd size sits half a tile off
-    # centre along the pen so its edges stay on tile lines
-    shift = odd * TILE / 2 if n % 2 else 0
-    cx, _, cz = M @ np.array([shift, 0, -SIZE / 2]) + np.array([bx, 0, bz])
+    M = frame(fx, fz)
+    # centre: half a size back from the gap (it grows away from the yard)
+    cx, _, cz = M @ np.array([0, 0, SIZE / 2]) + np.array([gx, 0, gz])
     parts = []  # (name, size, centre, rotation 3x3, colour, visible), local frame first
 
     def box(name, lo, hi, color=RAIL_COLOR, visible=True):
@@ -145,10 +151,7 @@ def pen_parts(bx, bz, facing, odd, n=SIZES[0]):
     out = []
     for name, size, centre, R, color, visible in parts:
         world = M @ centre + np.array([cx, 0, cz])
-        if visible:
-            out.append((name, size, world, M @ R, color, visible))
-        else:  # markers stay axis-aligned (the scripts read their boxes)
-            out.append((name, np.abs(M @ size), world, np.eye(3), color, visible))
+        out.append((name, size, world, M @ R, color, visible))  # (markers too: read in the pen's frame)
     return out
 
 

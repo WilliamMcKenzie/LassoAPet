@@ -66,10 +66,11 @@ local function myPen()
 	return index and workspace.Pens:FindFirstChild("Pen" .. index)
 end
 
--- World ground point for (x, z) from the centre of the pen's Area.
+-- World ground point for (x, z) from the centre of the pen's Area, in the pen's
+-- frame (the arc base's pens are turned to face the yard).
 local function groundAt(pen, x, z)
 	local area = pen.Area
-	return Vector3.new(area.Position.X + x, area.Position.Y - area.Size.Y / 2, area.Position.Z + z)
+	return area.CFrame:PointToWorldSpace(Vector3.new(x, -area.Size.Y / 2, z))
 end
 
 -- Pets face out of the pen, toward its open side (where the owner spawns).
@@ -124,8 +125,8 @@ local function wander(pen, s, dt)
 			local area = pen.Area
 			local hx = math.max(0, area.Size.X / 2 - w.margin)
 			local hz = math.max(0, area.Size.Z / 2 - w.margin)
-			w.tx = area.Position.X + rng:NextNumber(-hx, hx)
-			w.tz = area.Position.Z + rng:NextNumber(-hz, hz)
+			local to = area.CFrame:PointToWorldSpace(Vector3.new(rng:NextNumber(-hx, hx), 0, rng:NextNumber(-hz, hz))) -- (in the pen's frame)
+			w.tx, w.tz = to.X, to.Z
 		end
 	else
 		local dx, dz = w.tx - s.at.X, w.tz - s.at.Z
@@ -348,8 +349,8 @@ local function ridePetOf(pen)
 		fuse = if fuse and Animals:FindFirstChild(fuse) then fuse else nil,
 		income = owner:GetAttribute("RideIncome"),
 		stats = if typeof(stats) == "Vector2" then { Speed = stats.X, Stamina = stats.Y } else nil,
-		x = slot.Position.X - pen.Area.Position.X,
-		z = slot.Position.Z - pen.Area.Position.Z,
+		x = pen.Area.CFrame:PointToObjectSpace(slot.Position).X, -- (in the pen's frame)
+		z = pen.Area.CFrame:PointToObjectSpace(slot.Position).Z,
 	}
 end
 
@@ -452,7 +453,7 @@ local function spotAt(screenX, screenY)
 	if t <= 0 then
 		return nil
 	end
-	local hit = ray.Origin + ray.Direction * t - area.Position
+	local hit = area.CFrame:PointToObjectSpace(ray.Origin + ray.Direction * t) -- (in the pen's frame)
 	if math.abs(hit.X) > area.Size.X / 2 - EDGE or math.abs(hit.Z) > area.Size.Z / 2 - EDGE then
 		return nil
 	end

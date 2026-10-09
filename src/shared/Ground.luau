@@ -1,9 +1,10 @@
 -- Floor height under a point. Most of the floor's top is at y = 0; patches
 -- in World.Ground can stand higher (the desert's sandstone) or sit lower (the
 -- meadow's dirt). They're laid out on an 8-stud grid (tools/desert_ground.py,
--- tools/meadow_ground.py), so the height is looked up per 8-stud cell.
+-- tools/meadow_ground.py; the arc base's on 4: tools/arc_base.py), so the height is looked
+-- up per 4-stud cell.
 
-local CELL = 8
+local CELL = 4 -- (4, Oct 9: the arc base's dirt is on 4-stud tiles; the course's 8-stud grid still fits)
 
 -- Past its line the Godlands is laid out on 4-stud tiles, built by each client
 -- as it goes (Shared/Godlands), so its heights come from its track grids instead.

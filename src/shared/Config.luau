@@ -229,8 +229,8 @@ return {
 	CourseWidening = 0.005,
 	CourseMaxHalfWidth = 137,
 	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
-	HomeHalfWidth = 144, -- tools/pens.py HALF_W: the base grew to fit the bigger pens (QM, Oct 3)
-	HomeDepth = 144, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
+	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
+	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
 	-- Ride
@@ -571,7 +571,7 @@ return {
 	-- the gap between the left corner pen and the start line. Talk to him and he asks
 	-- if you want to spin; Yes opens the roll menu. Faces into the base (+z).
 	Carl = {
-		Position = Vector3.new(-62, 0, 18), -- clear of Pen4 at its biggest (x <= -76) and its ride lane (z ~32); the egg heap behind reaches the wall
+		Position = Vector3.new(-104, 0, 20), -- the arc base's front left corner, beside the corridor (QM, Oct 9)
 		Yaw = 15, -- degrees it turns in toward the course, off square with the wall (QM)
 		Reach = 12, -- studs from the counter where Talk shows
 	},
@@ -589,7 +589,7 @@ return {
 		Legendary = Color3.fromHex("5CE6B7"),
 	},
 	Podium = {
-		Position = Vector3.new(58, 0, 16), -- the column, on the ground; the snake reaches x ~50..74, z ~2..47 (Pen5 is x >= 76)
+		Position = Vector3.new(104, 0, 20), -- the column, on the ground, in the arc base's front right corner (QM, Oct 9); the snake reaches ~-8..+16 in x, -14..+31 in z
 		Refresh = 120, -- seconds between re-reading the leader
 		AvatarScale = 1.5,
 		SnakeScale = 2, -- x the model (the Snake pet is about 1.9)

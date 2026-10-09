@@ -363,7 +363,7 @@ prepareHatch.OnInvoke = function(player, id)
 		or item.hatchAt <= os.time() or player:GetAttribute("Tutorial") or applyingHatch[player] then
 		return nil
 	end
-	local at = pen.Area.Position + Vector3.new(item.x, 0, item.z)
+	local at = pen.Area.CFrame:PointToWorldSpace(Vector3.new(item.x, 0, item.z)) -- (x, z in the pen's frame: its pens are turned)
 	if (root.Position - at).Magnitude > Config.SpeedupEgg.Range + 4 then
 		return nil
 	end
@@ -522,7 +522,7 @@ remote("HatchEgg", function(player, id)
 	if not loaded[player] or not pen or not root or not item or not item.egg or item.hatchAt > os.time() or applyingHatch[player] then
 		return
 	end
-	local at = pen.Area.Position + Vector3.new(item.x, 0, item.z)
+	local at = pen.Area.CFrame:PointToWorldSpace(Vector3.new(item.x, 0, item.z)) -- (x, z in the pen's frame: its pens are turned)
 	if (root.Position - at).Magnitude > Config.SpeedupEgg.Range + 4 then
 		return
 	end

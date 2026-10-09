@@ -141,7 +141,7 @@ local function floorOf(pen)
 	if floor or not tiles then
 		if floor and tiles then -- the pen may have grown
 			floor.Size = Vector3.new(tiles.Size.X, 0.1, tiles.Size.Z)
-			floor.CFrame = CFrame.new(tiles.Position.X, 0.25, tiles.Position.Z)
+			floor.CFrame = CFrame.new(tiles.Position.X, 0.25, tiles.Position.Z) * tiles.CFrame.Rotation
 		end
 		return floor
 	end
@@ -154,7 +154,7 @@ local function floorOf(pen)
 	floor.CastShadow = false
 	floor.TopSurface = Enum.SurfaceType.Smooth
 	floor.Size = Vector3.new(tiles.Size.X, 0.1, tiles.Size.Z)
-	floor.CFrame = CFrame.new(tiles.Position.X, 0.25, tiles.Position.Z)
+	floor.CFrame = CFrame.new(tiles.Position.X, 0.25, tiles.Position.Z) * tiles.CFrame.Rotation -- (turned with the pen: the arc base's pens face the yard)
 	local ground = world.Ground:GetChildren()[1]
 	for _, texture in ground:GetChildren() do
 		if texture:IsA("Texture") then
@@ -199,7 +199,7 @@ local function vipBanners(pen, fence, vip)
 	local centre, half = tiles.Position, tiles.Size / 2
 	local gold, red = Config.Vip.Fence.Post, Config.Vip.Banner
 	for _, corner in { Vector3.new(-1, 0, -1), Vector3.new(1, 0, -1), Vector3.new(-1, 0, 1), Vector3.new(1, 0, 1) } do
-		local want = centre + Vector3.new(corner.X * half.X, 0, corner.Z * half.Z)
+		local want = tiles.CFrame:PointToWorldSpace(Vector3.new(corner.X * half.X, 0, corner.Z * half.Z)) -- (in the pen's frame)
 		local best, bestD = nil, math.huge
 		for _, post in posts do
 			local d = (Vector3.new(post.Position.X, 0, post.Position.Z) - Vector3.new(want.X, 0, want.Z)).Magnitude

@@ -63,7 +63,7 @@ function GodlandsPen.build(sizeModel)
 		local s, c = tiles.Size, tiles.Position
 		local h = 0.2 -- standing a little proud of the floor
 		local function strip(dx, dz, sx, sz)
-			slab(model, "Border", Vector3.new(sx, h, sz), CFrame.new(c.X + dx, FLOOR_TOP + h / 2, c.Z + dz), DARK)
+			slab(model, "Border", Vector3.new(sx, h, sz), CFrame.new(c.X, FLOOR_TOP + h / 2, c.Z) * tiles.CFrame.Rotation * CFrame.new(dx, 0, dz), DARK) -- (in the pen's frame)
 		end
 		strip(0, -(s.Z - BORDER) / 2, s.X, BORDER)
 		strip(0, (s.Z - BORDER) / 2, s.X, BORDER)
