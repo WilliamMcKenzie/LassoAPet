@@ -1188,6 +1188,18 @@ awayCommand.Triggered:Connect(function(source)
 end)
 awayCommand.Parent = game:GetService("TextChatService")
 
+-- Testing: "/reset" puts back every biome barrier you've broken (Gate.client; QM, Oct 9).
+local resetCommand = Instance.new("TextChatCommand")
+resetCommand.Name = "ResetBarriers"
+resetCommand.PrimaryAlias = "/reset"
+resetCommand.Triggered:Connect(function(source)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	if player and allowed(player) then
+		player:SetAttribute("GatesBroken", 1)
+	end
+end)
+resetCommand.Parent = game:GetService("TextChatService")
+
 -- Fired to a player each time their pets pay out, so the client can pop "+N$"
 -- over each pet's head.
 local paid = Instance.new("RemoteEvent")
