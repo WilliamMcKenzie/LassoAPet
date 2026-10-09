@@ -665,7 +665,7 @@ return {
 	-- Fit: where they start showing, as a share of the way from the middle to the
 	-- screen's wider edges (they run off it from there). Size: width (studs, 10 ahead of
 	-- the camera), Squash: how much longer than wide, Transparency: while seen.
-	SpeedLines = { On = true, Rate = 25, Speed = 88, MaxScale = 2, Fit = 0.75, Size = 0.25, Squash = 4, Transparency = 0.3 },
+	SpeedLines = { On = true, Rate = 40, Speed = 88, MaxScale = 2, Fit = 0.75, Size = 0.25, Squash = 4, Transparency = 0.3 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
 	LassoRange = 34,
