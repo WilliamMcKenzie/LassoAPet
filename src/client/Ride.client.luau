@@ -2280,12 +2280,8 @@ function vfx.updateAvoid(dt)
 		-- Oct 6; off Oct 8, back on Oct 9)...
 		local here = WorldColors.biomeAt(entity.z)
 		local zone = if dz > 0 then Config.Biomes[here].Swerve or 1 else 0
-		-- ...but only for a mount from its biome or a later one (QM, Oct 8: punching above
-		-- your weight, nothing gets out of your way). One that's in no biome's herd (an
-		-- event's exclusive) counts as from the last.
-		if on and (vfx.homeBiome[mount.kind] or #Config.Biomes) < (vfx.homeBiome[entity.kind] or here) then
-			zone = 0
-		end
+		-- (Any mount: the Oct 8 rule that only a mount from its biome or later got swerved
+		-- for is off, QM Oct 9: no lasso levels now, you're nearly always on the latest biome's.)
 		-- (not a Godlands animal charging or hunting you: that one means it)
 		if zone > 0 and not (entity.popping or entity.event or entity.face or entity.rush) then
 			local clear = (cfg.Clear + hitX - 2.6) * zone -- (Clear was tuned for the old 2.6-stud check)
