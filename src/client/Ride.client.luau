@@ -932,7 +932,7 @@ startRide = function(model, at)
 	vfx.rideAgain = nil
 	leadFromZ = spot.Z - 8
 	exitPath = if fromHerd or at then nil else penExitPath()
-	vfx.exitTrack, vfx.exitLat = nil, nil
+	vfx.exitTrack, vfx.exitLat, vfx.exitRoute = nil, nil, nil
 	local runningAt = if fromHerd then fromHerd.speed or 0 else 0 -- a stampede animal keeps its pace
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, if exitPath then penYaw() else 0, runningAt, 0 -- (out of your pen: facing out of its gap)
 	mount.feast = nil -- (the Blue Crab starts every ride at its own size)
@@ -3442,16 +3442,30 @@ local function updateMount(dt)
 	end
 	if phase == "outbound" and exitPath then
 		-- Out of your pen: out of its gap and straight across the yard to the corridor
-		-- (penExitPath), turning smoothly onto each leg. You can steer off the line a
-		-- little on the way (QM, Oct 9: Config.ExitSteer), always drawn back to it, and
-		-- less so near the corridor, so it still gets there.
+		-- (penExitPath), turning smoothly onto each leg. You can steer off the line on
+		-- the way (QM, Oct 9: Config.ExitSteer), anywhere that still ends up across the
+		-- start line: the room either side grows from GateRoom in your pen's gap to the
+		-- start line's width (less Margin) by the corridor, and steering eases off
+		-- toward its edges (tanh) so you never reach them, however long the ride out.
 		local cfg = Config.ExitSteer
 		local track = vfx.exitTrack or Vector2.new(mount.x, mount.z) -- (the point on the path itself)
+		if not vfx.exitRoute then
+			-- (how far the route is, all told and to its first leg's end, and where it ends)
+			local total, from = 0, track
+			for _, p in exitPath do
+				total += (p - from).Magnitude
+				from = p
+			end
+			vfx.exitRoute = { total = math.max(total, 1), first = (exitPath[1] - track).Magnitude, gone = 0, endX = exitPath[#exitPath].X }
+			vfx.exitU = 0
+		end
+		local route = vfx.exitRoute
 		local to = exitPath[1]
 		local dx, dz = to.X - track.X, to.Y - track.Y
 		local len = math.sqrt(dx * dx + dz * dz)
 		local step = mount.speed * dt
 		local ux, uz = if len > 1e-3 then dx / len else 0, if len > 1e-3 then dz / len else -1
+		route.gone += math.min(step, len)
 		if len <= step then
 			track = to
 			table.remove(exitPath, 1)
@@ -3461,17 +3475,19 @@ local function updateMount(dt)
 			local diff = (want - mount.yaw + math.pi) % (2 * math.pi) - math.pi
 			mount.yaw += diff * (1 - math.exp(-8 * dt))
 		end
-		-- Off the line: your steering pushes it aside, and it's always pulled back.
-		local last = exitPath[#exitPath]
-		local left = if last then (last - track).Magnitude else 0
-		local most = cfg.MaxOffset * math.clamp(left / cfg.SettleOver, 0, 1)
-		local lat = (vfx.exitLat or 0) + readSteer() * Config.SteerSpeed * cfg.Strength * dt
-		lat *= math.exp(-cfg.Pull * dt)
-		lat = math.clamp(lat, -most, most)
+		-- Off the line: the room either side here (lo..hi studs, to its right), and where
+		-- in it you are (tanh of what you've steered: never quite at either end).
+		local f = math.clamp((route.gone - route.first) / math.max(route.total - route.first, 1), 0, 1) ^ 0.7
+		local reach = EDGE - cfg.Margin -- (the start line's half width, less a margin)
+		local lo = -cfg.GateRoom + (-reach - route.endX + cfg.GateRoom) * f
+		local hi = cfg.GateRoom + (reach - route.endX - cfg.GateRoom) * f
+		local mid, half = (lo + hi) / 2, (hi - lo) / 2
+		vfx.exitU += readSteer() * Config.SteerSpeed * cfg.Strength * dt / half
+		local lat = mid + half * math.tanh(vfx.exitU)
 		vfx.exitTrack, vfx.exitLat = track, lat
 		mount.x, mount.z = track.X - uz * lat, track.Y + ux * lat -- (its right: (-look.Z, look.X))
 		if #exitPath == 0 then
-			exitPath, vfx.exitTrack, vfx.exitLat = nil, nil, nil
+			exitPath, vfx.exitTrack, vfx.exitLat, vfx.exitRoute = nil, nil, nil, nil
 			mount.yaw, mount.latVel = 0, 0 -- (square to the start line: riding as usual from here)
 		end
 		mount.latVel = 0

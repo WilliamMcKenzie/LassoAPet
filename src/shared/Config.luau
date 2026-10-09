@@ -668,10 +668,12 @@ return {
 	-- degrees (a fisheye-like stretch at the edges) and the camera comes in to Zoom x
 	-- its usual distance, easing in over InTime seconds and back over OutTime.
 	-- Steering on the way out of your pen to the start line (QM, Oct 9; Ride's exit path):
-	-- Strength x the usual steering pushes you off the line, at most MaxOffset studs, and
-	-- you're pulled back at Pull a second; the room tapers to none over the last
-	-- SettleOver studs, so you always reach the corridor.
-	ExitSteer = { Strength = 0.5, MaxOffset = 14, Pull = 1.5, SettleOver = 30 },
+	-- Strength x the usual steering moves you off the line, anywhere that still ends up
+	-- across the start line (its half width less Margin studs), the room growing from
+	-- GateRoom studs either side in your pen's gap. It eases off toward the edges and
+	-- never reaches them, however slow the pet (checked from every pen at the biggest
+	-- pen size: clear of the pens, walls, Carl and the podium).
+	ExitSteer = { Strength = 0.5, GateRoom = 3, Margin = 6 },
 	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
