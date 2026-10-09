@@ -135,15 +135,21 @@ function Sounds.setGallop(on, pace)
 	end
 end
 
--- The sprint's wind loop, faded in and out (Sounds.setSprintWind(on)).
-local SPRINT_WIND_VOLUME = 0.15 -- (subtle: QM)
+-- The sprint's wind loop, faded in and out (Sounds.setSprintWind(on, loudness)):
+-- loudness x SPRINT_WIND_VOLUME (QM, Oct 9: louder the faster you go, up to 2x).
+local SPRINT_WIND_VOLUME = 0.15 -- (subtle: QM; at a horse's sprint)
 local wind, windTween
-function Sounds.setSprintWind(on)
+local windLoud = 1
+function Sounds.setSprintWind(on, loudness)
 	if IDS.sprint_wind == "" then
 		return
 	end
 	wind = wind or newSound(IDS.sprint_wind, 0, true)
+	windLoud = loudness or windLoud
 	if on == (wind:GetAttribute("On") == true) then
+		if on and not (windTween and windTween.PlaybackState == Enum.PlaybackState.Playing) then
+			wind.Volume = SPRINT_WIND_VOLUME * windLoud -- (following the speed once it's in)
+		end
 		return
 	end
 	wind:SetAttribute("On", on)
@@ -153,7 +159,7 @@ function Sounds.setSprintWind(on)
 	if windTween then
 		windTween:Cancel()
 	end
-	windTween = TweenService:Create(wind, TweenInfo.new(if on then 0.25 else 0.5), { Volume = if on then SPRINT_WIND_VOLUME else 0 })
+	windTween = TweenService:Create(wind, TweenInfo.new(if on then 0.25 else 0.5), { Volume = if on then SPRINT_WIND_VOLUME * windLoud else 0 })
 	windTween:Play()
 end
 

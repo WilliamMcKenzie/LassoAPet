@@ -4585,7 +4585,8 @@ function vfx.updateSound()
 	end
 	vfx.wasSprinting = now
 	-- (the wind loop while you sprint on a mount, the run home's too: Sounds.sprint_wind)
-	vfx.sounds.setSprintWind(mount ~= nil and not transfer and (phase == "outbound" or phase == "return") and sprinting())
+	vfx.sounds.setSprintWind(mount ~= nil and not transfer and (phase == "outbound" or phase == "return") and sprinting(),
+		mount and math.clamp(mount.speed / Config.SprintTrail.HorseSprint, 1, 2)) -- (louder the faster, up to 2x a horse's sprint: QM)
 end
 
 -- MERGE (QM, Oct 4): every pet going into a merge is pulled up into one spot 2 m
