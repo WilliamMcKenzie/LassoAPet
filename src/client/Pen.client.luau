@@ -239,6 +239,7 @@ local function showEgg(pen, id, item)
 		prompt.KeyboardKeyCode = Enum.KeyCode.F
 		prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
 		prompt.HoldDuration = 0.35
+		prompt.Style = Enum.ProximityPromptStyle.Custom -- (Roblox's look without its panel: PromptUi)
 		prompt.MaxActivationDistance = Config.SpeedupEgg.Range
 		prompt.RequiresLineOfSight = false
 		prompt.Enabled = false

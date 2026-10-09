@@ -125,6 +125,7 @@ local prompt = Instance.new("ProximityPrompt")
 prompt.Name = "TalkPrompt"
 prompt.ActionText = "Talk"
 prompt.ObjectText = "Carl"
+prompt.Style = Enum.ProximityPromptStyle.Custom -- (Roblox's look without its panel: PromptUi)
 prompt.RequiresLineOfSight = false
 prompt.MaxActivationDistance = carlConfig.Reach
 prompt.Parent = counter
