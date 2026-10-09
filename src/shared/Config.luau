@@ -718,6 +718,9 @@ return {
 	-- The game's owner gets their passes (Roblox has a creator own them all)? false: they
 	-- play without them, live and in Studio, like any player (QM, Oct 9). Passes.
 	OwnerPasses = false,
+	-- The UI's art (QM, Oct 9: all being redrawn). false: every UI picture is a plain
+	-- placeholder with its art's name on it (UiArt.client); true puts the art back.
+	UiArt = false,
 	Passes = {
 		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },
 		{ Key = "FastHatch", Name = "Fast Hatch", Price = 99, Id = 2014634454 },
