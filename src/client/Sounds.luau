@@ -30,7 +30,7 @@ local IDS = {
 	-- whoosh: assets/sfx/LassoWhoosh.ogg needs uploading in Studio (audio can't be from here)
 	training_whoosh = "rbxassetid://73983934702758",
 	smash = "rbxassetid://90604529915688", -- the pet smashes through an obstacle
-	gate_break = "rbxassetid://9116938119", -- a zone gate shatters (Mirror Break, Roblox's ProSoundEffects; QM's pick, Oct 7)
+	gate_break = "rbxassetid://139826391278483", -- a biome barrier shatters: glassshatter09 (QM's pick, Oct 9; was Mirror Break 9116938119)
 	crash = "rbxassetid://94142874131984", -- crashed or bucked off
 	arrive_home = "rbxassetid://87800549075293", -- back over the start line with an egg
 	record_scratch = "rbxassetid://112792997660073", -- RECORD SCRATCH (Creator Store, QM's pick): the run home's music cut off at the line (QM, Oct 9)
