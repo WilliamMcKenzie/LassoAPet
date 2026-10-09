@@ -18,6 +18,9 @@ What the Luau does to Workspace.World (re-running it is fine: it rebuilds the sa
     Ground.heightAt reads the sunk dirt.
   - World.BaseDecor: copies of the Meadow's Stone, Bush, Boulder and BoulderSplit
     (World.Obstacles), not course obstacles, standing on the floor under them
+  - the big rocks (QM, Oct 9): Design's CornerCrag, WallShelf and Tor models
+    (design/base_arc/*.rbxmx: studded rock parts in the meadow's rock colours), at the
+    layout's "big_rocks", also in World.BaseDecor
   - World.BullPads: a placeholder pad per pen (BullPadN, "Pen" attribute), a red
     mat 18 across with a bull on a post, facing the yard; with BULL_PADS off (now),
     none, and any already there go
@@ -25,6 +28,7 @@ What the Luau does to Workspace.World (re-running it is fine: it rebuilds the sa
 
 import json
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import numpy as np
@@ -78,6 +82,21 @@ def pen_cover(lx, lz):
                 n += abs(local[0]) < half and abs(local[2]) < half
         best = max(best, n / 36)
     return best
+
+
+def rock_parts(name):
+    """A big rock model's parts: (name, size x3, CFrame x12, r, g, b, collides), in its own frame."""
+    root = ET.parse(ROOT / "design" / "base_arc" / f"{name}.rbxmx").getroot()
+    out = []
+    for item in root.iter("Item"):
+        if item.get("class") != "Part":
+            continue
+        p = {c.get("name"): c for c in item.find("Properties")}
+        size = [float(p["size"].find(k).text) for k in "XYZ"]
+        cf = [float(p["CFrame"].find(k).text) for k in ("X", "Y", "Z", "R00", "R01", "R02", "R10", "R11", "R12", "R20", "R21", "R22")]
+        rgb = int(p["Color3uint8"].text) & 0xFFFFFF
+        out.append((p["Name"].text, *size, *cf, rgb >> 16 & 255, rgb >> 8 & 255, rgb & 255, 1 if p["CanCollide"].text == "true" else 0))
+    return out
 
 
 def main():
@@ -146,9 +165,13 @@ def main():
     props_lua = lua_list([(p["asset"], p["pos"][0], p["pos"][1], p["yaw"]) for p in d["props"]])
     bulls_lua = lua_list([(b["pen"], b["pos"][0], b["pos"][1]) for b in d["bulls"]] if BULL_PADS else [])
     floor_lua = lua_list(floor)
+    kinds = sorted({r["asset"] for r in d.get("big_rocks", [])})
+    rock_models_lua = "\n".join(f'\t{k} = {{\n' + "\n".join("\t" + line for line in lua_list(rock_parts(k)).split("\n")) + "\n\t}," for k in kinds)
+    rocks_lua = lua_list([(r["asset"], r["pos"][0], r["pos"][1], r["yaw"]) for r in d.get("big_rocks", [])])
     text = TEMPLATE
     for key, value in {"W": W, "D": D, "CX": centre[0], "CZ": centre[1], "WALLS": walls_lua, "FLOOR": floor_lua,
-                       "PROPS": props_lua, "BULLS": bulls_lua}.items():
+                       "PROPS": props_lua, "BULLS": bulls_lua,
+                       "ROCK_MODELS": rock_models_lua, "ROCKS": rocks_lua}.items():
         text = text.replace(f"@{key}@", f"{value:g}" if isinstance(value, (int, float)) else value)
     OUT.write_text(text)
     print(f"tools/arc_base.luau: {len(floor)} floor rectangles, {len(d['props'])} props, {len(d['bulls']) if BULL_PADS else 0} bull pads")
@@ -173,6 +196,14 @@ local FLOOR = {
 -- Meadow props: { model, x, z, yaw (degrees) }.
 local PROPS = {
 @PROPS@
+}
+-- The big rocks (design/base_arc/*.rbxmx): their parts { name, size x3, CFrame x12
+-- in the model's frame, r, g, b, collides (1/0) }, and where they go { model, x, z, yaw }.
+local ROCK_MODELS = {
+@ROCK_MODELS@
+}
+local ROCKS = {
+@ROCKS@
 }
 -- Bull pads: { pen, x, z }.
 local BULLS = {
@@ -277,6 +308,39 @@ for _, r in PROPS do
 		placed += 1
 	end
 end
+-- The big rocks: built from their parts, studded all over (0.5-stud studs, as Design's),
+-- pivot at their own origin, then placed and turned.
+local STUDS = "rbxassetid://7447638591"
+local rocks = 0
+for _, r in ROCKS do
+	local m = Instance.new("Model")
+	m.Name = r[1]
+	for _, s in ROCK_MODELS[r[1]] or {} do
+		local p = Instance.new("Part")
+		p.Name = s[1]
+		p.Anchored = true
+		p.CanCollide = s[20] == 1
+		p.Material = Enum.Material.SmoothPlastic
+		for _, surface in { "TopSurface", "BottomSurface", "FrontSurface", "BackSurface", "LeftSurface", "RightSurface" } do
+			p[surface] = Enum.SurfaceType.Smooth
+		end
+		p.Size = Vector3.new(s[2], s[3], s[4])
+		p.CFrame = CFrame.new(s[5], s[6], s[7], s[8], s[9], s[10], s[11], s[12], s[13], s[14], s[15], s[16])
+		p.Color = Color3.fromRGB(s[17], s[18], s[19])
+		for _, face in Enum.NormalId:GetEnumItems() do
+			local t = Instance.new("Texture")
+			t.Texture = STUDS
+			t.Face = face
+			t.StudsPerTileU, t.StudsPerTileV = 0.5, 0.5
+			t.Parent = p
+		end
+		p.Parent = m
+	end
+	m.WorldPivot = CFrame.new()
+	m:PivotTo(CFrame.new(r[2], 0, r[3]) * CFrame.Angles(0, math.rad(r[4]), 0))
+	m.Parent = decor
+	rocks += 1
+end
 decor.Parent = world
 
 -- Bull pads (placeholders): a red mat 18 across, a post and a bull on it, facing the yard.
@@ -318,7 +382,7 @@ if pads then
 	pads.Parent = world
 end
 
-return string.format("arc base: %d walls moved, %d floor parts, %d props, %d bull pads", moved, #FLOOR, placed, #BULLS)
+return string.format("arc base: %d walls moved, %d floor parts, %d props, %d big rocks, %d bull pads", moved, #FLOOR, placed, rocks, #BULLS)
 """
 
 if __name__ == "__main__":
