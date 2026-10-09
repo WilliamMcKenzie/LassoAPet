@@ -64,20 +64,16 @@ Studs, Roblox axes: the course runs to -z from the home line at z = 0, and the b
   Ground is y = 0. To place one: insert it as it is, set its WorldPivot to CFrame.new(0, 0, 0)
   (so the pivot is that local origin), then
   PivotTo(CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(yaw), 0)).
-- Placements are in `arc_layout.json` under `big_rocks` (10 of them):
+- Placements are in `arc_layout.json` under `big_rocks` (6 of them; QM removed every Tor, the triple stack):
 
 | Rock | x, z | yaw |
 |---|---|---|
 | CornerCrag | -176, 264 | 90 (back-left corner) |
 | CornerCrag | 176, 264 | 180 (back-right corner) |
-| Tor | -156, 0 | 0 (front wall, left corner) |
-| Tor | 156, 0 | 0 (front wall, right corner) |
 | WallShelf | -76, 264 | 180 (back wall) |
 | WallShelf | 76, 264 | 180 (back wall) |
 | WallShelf | -176, 140 | 90 (left wall) |
 | WallShelf | 176, 140 | -90 (right wall) |
-| Tor | -176, 204 | 90 (left wall) |
-| Tor | 176, 204 | -90 (right wall) |
 
 - None of them touch a pen at full size, Carl or the podium (checked).
 - The big rocks replace the small Stone/Bush/Boulder knots near them: `props` now keeps only
