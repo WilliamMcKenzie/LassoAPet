@@ -43,6 +43,7 @@ end)
 local EGG_CENTER = 1.6 -- egg pivot height above the ground (Egg.luau)
 local TOP_POPS = 1.58 -- seconds into the hatch animation when the top flies off
 local JUMP_TIME = 0.6
+local TIMER_SIZE = Vector2.new(5, 1.6) -- studs: an egg's "Ready" / countdown (the pets' plates' text size)
 local HATCH_SOUND_PEAK = 0.46 -- seconds into Sounds' egg_hatch (Rewards) where it's loudest (measured, Oct 9)
 local JUMP_HEIGHT = 5
 local TWITCH_EVERY = { 3, 6 }
@@ -152,22 +153,9 @@ local function startWander(s)
 	s.wander = { rest = rng:NextNumber(1, 4), margin = EDGE + math.min(size.X, size.Z) / 2 }
 end
 
--- The countdown's ("Ready"'s) outline: 3 px the way the HUD's are (QM, Oct 6), so
--- x the HUD's scale (Hud: screen width / 1320 x Config.HudScale), kept up as the
--- window changes size.
-local timerStrokes = {} -- [UIStroke] = true
-local function timerStroke()
-	return 3 * workspace.CurrentCamera.ViewportSize.X / 1320 * (Config.HudScale or 1)
-end
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-	for stroke in timerStrokes do
-		stroke.Thickness = timerStroke()
-	end
-end)
-
 local function newTimer(parent)
 	local gui = Instance.new("BillboardGui")
-	gui.Size = UDim2.fromOffset(120, 40)
+	gui.Size = UDim2.fromScale(TIMER_SIZE.X, TIMER_SIZE.Y) -- (studs: in the world like the pets' plates, smaller as you zoom out: QM, Oct 9)
 	gui.StudsOffsetWorldSpace = Vector3.new(0, 4.6, 0) -- above the egg (the egg's root is at its base)
 	gui.MaxDistance = 120
 	gui.LightInfluence = 0
@@ -177,15 +165,11 @@ local function newTimer(parent)
 	text.BackgroundTransparency = 1
 	text.Size = UDim2.fromScale(1, 1)
 	text.Font = Enum.Font.FredokaOne
-	text.TextSize = 28
+	text.TextScaled = true
 	text.TextColor3 = Color3.new(1, 1, 1)
 	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = timerStroke()
+	stroke.Thickness = 3 -- (as the pets' plates)
 	stroke.Parent = text
-	timerStrokes[stroke] = true
-	stroke.Destroying:Connect(function()
-		timerStrokes[stroke] = nil
-	end)
 	text.Parent = gui
 	gui.Parent = parent
 	return text
