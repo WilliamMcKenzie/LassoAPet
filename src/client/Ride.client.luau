@@ -4389,7 +4389,10 @@ end)
 RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, function(dt)
 	local riding = mount and not cutscene and not heroLeap and (phase == "outbound" or phase == "return")
 	vfx.speedFx.update(dt, if riding and sprinting() then mount.speed * (vfx.speedGain or 1) else 0) -- speed lines while sprinting, by the uncurved speed
-	vfx.speedLines.update(if riding then mount.speed * (vfx.speedGain or 1) else 0) -- QM's particle speed lines, riding at all (Config.SpeedLines)
+	-- QM's particle speed lines (Config.SpeedLines): full on any sprint (the run home's
+	-- one) whatever the pet's speed, half that otherwise (Oct 9: a slow pet racing home
+	-- showed hardly any).
+	vfx.speedLines.update(if not riding then 0 elseif sprinting() then Config.SpeedLines.Speed else Config.SpeedLines.Speed / 2)
 	if phase == "idle" then
 		return
 	end
