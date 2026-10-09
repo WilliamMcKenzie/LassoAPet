@@ -2276,10 +2276,10 @@ function vfx.updateAvoid(dt)
 		end
 		local hitX = math.max((mhx + ehx) * 0.8, 2.6) -- (how close the crash check lets it come)
 		local dz = if on then entity.z - mount.z - math.max((mhz + ehz) * 0.8, 5) else -math.huge -- (from where the crash check reaches)
-		-- Every one swerves, fully, in every zone (QM, Oct 8: Config.Biomes[].Swerve, which
-		-- weakened it further out, isn't used for this any more)...
+		-- Less in each zone further out, none in the Godlands (Config.Biomes[].Swerve: QM,
+		-- Oct 6; off Oct 8, back on Oct 9)...
 		local here = WorldColors.biomeAt(entity.z)
-		local zone = if dz > 0 then 1 else 0
+		local zone = if dz > 0 then Config.Biomes[here].Swerve or 1 else 0
 		-- ...but only for a mount from its biome or a later one (QM, Oct 8: punching above
 		-- your weight, nothing gets out of your way). One that's in no biome's herd (an
 		-- event's exclusive) counts as from the last.
@@ -2304,7 +2304,7 @@ function vfx.updateAvoid(dt)
 			w = math.clamp(math.max(w, 2 / math.max(t, 0.1)), 0.8, 12)
 			if t <= math.max(cfg.Warn, 4.74 / w) and math.abs(gap) < clear then
 				if state.skip[entity] == nil then
-					state.skip[entity] = false -- (always: QM, Oct 8; ReturnAvoid.Chance unused)
+					state.skip[entity] = rng:NextNumber() >= cfg.Chance * zone -- (ReturnAvoid.Chance x the zone's Swerve)
 				end
 				if not state.skip[entity] then
 					-- Away from you (the side it first picked), unless the wall leaves it in your way.
