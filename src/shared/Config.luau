@@ -745,9 +745,10 @@ return {
 	-- The home HUD's gold counter, Pets, Shop, Merge and Upgrade Pen buttons (QM, Oct 9:
 	-- off till the new UI). false hides them; true brings them back.
 	HomeHud = false,
-	-- The riding UI: the stamina bar, LASSO, Sprint, the ability button, DODGE, the fail
-	-- screen (QM, Oct 9: off for now; a crash takes you home by itself). The egg reveal
-	-- stays. true brings it back.
+	-- The old riding UI: the stamina bar, LASSO, Sprint, the ability button, DODGE, the
+	-- fail screen. false (QM, Oct 9): the new one instead (Client/RideUi: stamina bar,
+	-- LASSO, Sprint, ability), no fail screen (a crash takes you home by itself). true
+	-- brings the old one back.
 	RideHud = false,
 	PetPopups = false, -- the "+$N" over each pet at home as it pays out (QM, Oct 9: off for now; income's the same)
 	-- The base UI (BaseUi.client; QM, Oct 9): Montserrat ExtraBold, laid out on a

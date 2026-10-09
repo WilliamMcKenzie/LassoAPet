@@ -14,6 +14,8 @@ local RollMenu = require(script.Parent.RollMenu)
 local Shop = require(script.Parent.Shop)
 local Gamepad = require(script.Parent.Gamepad)
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
+-- The new riding UI (QM, Oct 9): with Config.RideHud off, the ride's calls below go to it.
+local RideUi = if Config.RideHud == false then require(script.Parent.RideUi) else nil
 
 local Hud = {}
 
@@ -360,6 +362,9 @@ local function setCash(amount)
 end
 
 function Hud.init(onAction, onHome, onRide, onContinue)
+	if RideUi then
+		RideUi.onAction = onAction
+	end
 	-- With ShowHud off the HUD is built but never parented, so nothing shows.
 	local playerGui = Config.ShowHud and Players.LocalPlayer:WaitForChild("PlayerGui") or nil
 	if not Config.ShowHud then
@@ -1052,6 +1057,9 @@ function Hud.show(visible)
 		mergeButton.Visible = false
 	end
 	gui.Enabled = visible
+	if RideUi then
+		RideUi.show(visible)
+	end
 	reveal += 1
 	card.Visible = false
 	cardFlash.Visible = false
@@ -1088,7 +1096,10 @@ end
 -- pushing the joystick out sprints there (Ride.client, Config.TouchSprintAt).
 local UIS = game:GetService("UserInputService")
 local touchOnly = UIS.TouchEnabled and not UIS.KeyboardEnabled and not UIS.MouseEnabled
-function Hud.setSprint(visible)
+function Hud.setSprint(visible, active)
+	if RideUi then
+		return RideUi.setSprint(visible, active)
+	end
 	sprint.Visible = visible and not touchOnly
 	if not visible then
 		sprintInput = nil
@@ -1097,7 +1108,10 @@ end
 
 -- The Ability button: nil hides it (the pet has no ability); otherwise ready is
 -- 0..1 of the cooldown done (1 = ready) and seconds is the time left on it.
-function Hud.setAbility(ready, seconds)
+function Hud.setAbility(ready, seconds, active)
+	if RideUi then
+		return RideUi.setAbility(ready, seconds, active)
+	end
 	ability.Visible = ready ~= nil
 	if not ready then
 		abilityPressed = nil
@@ -1111,6 +1125,9 @@ end
 -- Whether the Ability button was pressed since the last call (each press counts
 -- once, however quick the tap).
 function Hud.abilityPressed()
+	if RideUi then
+		return RideUi.abilityPressed()
+	end
 	local pressed = abilityPressed
 	abilityPressed = nil
 	return pressed == true
@@ -1118,6 +1135,9 @@ end
 
 -- Whether the Sprint button is being held down right now.
 function Hud.sprintHeld()
+	if RideUi then
+		return RideUi.sprintHeld()
+	end
 	if sprintInput and (sprintInput.UserInputState == Enum.UserInputState.End or sprintInput.UserInputState == Enum.UserInputState.Cancel) then
 		sprintInput = nil
 	end
@@ -1129,6 +1149,9 @@ local TIRED_RED = Color3.fromRGB(255, 90, 90)
 -- tired: whether an empty bar slows the mount (not while it carries an egg home).
 -- level: the stamina level written on the bar (nil: none).
 function Hud.setHold(fraction, tired, level)
+	if RideUi then
+		return RideUi.setHold(fraction, tired, level)
+	end
 	holdFrame.Visible = fraction ~= nil
 	staminaText.Visible = fraction ~= nil and level ~= nil
 	if level then
@@ -1150,6 +1173,9 @@ end
 -- text = nil hides the button; ready = false shows LASSO's disabled image;
 -- rarity picks TAKE EGG's colours.
 function Hud.setAction(text, ready, rarity)
+	if RideUi then
+		return RideUi.setAction(text, ready, rarity)
+	end
 	action.Visible = text ~= nil
 	if text then
 		local key = ACTIONS[text]

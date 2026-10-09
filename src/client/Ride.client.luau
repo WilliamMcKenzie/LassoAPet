@@ -3334,7 +3334,7 @@ local function updateAbility(dt)
 	end
 	active = a.active
 	if active then
-		Hud.setAbility(if active.cfg.Duration then 1 - active.t / active.cfg.Duration else hold / holdTime(mount), nil)
+		Hud.setAbility(if active.cfg.Duration then 1 - active.t / active.cfg.Duration else hold / holdTime(mount), nil, true)
 	else
 		local left = math.max(a.readyAt - abilityClock, 0)
 		Hud.setAbility(1 - left / cfg.Cooldown, left)
@@ -3832,7 +3832,7 @@ local function updateRider(dt)
 end
 
 local function updateHud()
-	Hud.setSprint(phase == "outbound")
+	Hud.setSprint(phase == "outbound", mount ~= nil and sprinting())
 	if phase == "outbound" then
 		-- The stamina bar, your stamina level on it (QM, Oct 8).
 		Hud.setHold(if mount then hold / holdTime(mount) else 1, true, player:GetAttribute("Stamina") or Config.Stamina.Start)
