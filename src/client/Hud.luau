@@ -1375,6 +1375,7 @@ function Hud.eggReveal(rarity, kind, rolled)
 		-- 2. Roll: the faces flick faster and faster while the card shakes and
 		-- swells with the tension. The flicks themselves are clean swaps.
 		local nextFlick, flick = gaps[1], 1
+		local gamble = Sounds.play("reveal_roll") -- (QM: under the roulette, cut as the card lands)
 		if not play(roll, function(t)
 			while flick < flicks and t >= nextFlick do
 				setCardFace(UNKNOWN_CARDS[flick % #UNKNOWN_CARDS + 1])
@@ -1416,6 +1417,9 @@ function Hud.eggReveal(rarity, kind, rolled)
 		-- 4. Pop: the real card, stretched tall and big, springs back with a
 		-- wobble, behind a white flash and the sunburst; the screen shakes.
 		setCardFace(final)
+		if gamble then
+			gamble:Stop()
+		end
 		Sounds.play(if rolled then "roll_reveal" else "reveal_pop")
 		cardExclusive.Visible = standIn
 		cardFlash.Visible = true
