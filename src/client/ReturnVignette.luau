@@ -10,7 +10,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 
-local IMAGE = "rbxassetid://117978202526782" -- assets/ui/Vignette.png (QM's, 512 px)
+local IMAGE = "rbxassetid://124966752636756" -- assets/ui/Vignette.png (QM's, 512 px)
 
 local ReturnVignette = {}
 
