@@ -313,15 +313,12 @@ for _, r in PROPS do
 		for _, name in { "FunnelPivot", "FunnelScale", "FunnelCF", "FunnelSize" } do
 			copy:SetAttribute(name, nil)
 		end
-		-- standing on the floor: its bottom as far over the floor's top as the original's
-		local box, size
-		if copy:IsA("Model") then
-			box, size = copy:GetBoundingBox()
-		else
-			box, size = copy.CFrame, copy.Size
-		end
+		-- standing on the floor as the original does: its invisible Base's top on the
+		-- floor's (a turned model's bounding box reaches lower than its parts: Oct 9,
+		-- standing that on the floor left them floating)
 		local pivot = if copy:IsA("Model") then copy:GetPivot() else copy.CFrame
-		local up = pivot.Y - (box.Y - size.Y / 2)
+		local base = copy:FindFirstChild("Base")
+		local up = if base and base:IsA("BasePart") then pivot.Y - (base.Position.Y + base.Size.Y / 2) else pivot.Y
 		local cf = CFrame.new(r[2], topAt(r[2], r[3]) + up, r[3]) * CFrame.Angles(0, math.rad(r[4]), 0)
 		if copy:IsA("Model") then
 			copy:PivotTo(cf)
