@@ -3,7 +3,8 @@
 -- over and under the middle of them, a Trail between that faces the camera, fading
 -- out behind. Rebuilt under the same name replaces the old one.
 --
---   RiderTrail.make(hrp, name, colors, lifetime) -> the Trail
+--   RiderTrail.make(hrp, name, colors, lifetime, head?) -> the Trail (head: its
+--                                                   transparency at you, 0.1 if not given)
 --   RiderTrail.remove(hrp, name)
 
 local RiderTrail = {}
@@ -19,7 +20,7 @@ function RiderTrail.remove(hrp, name)
 	end
 end
 
-function RiderTrail.make(hrp, name, colors, lifetime)
+function RiderTrail.make(hrp, name, colors, lifetime, head)
 	RiderTrail.remove(hrp, name)
 	local top, bottom = Instance.new("Attachment"), Instance.new("Attachment")
 	top.Name, bottom.Name = name .. "Top", name .. "Bottom"
@@ -29,7 +30,7 @@ function RiderTrail.make(hrp, name, colors, lifetime)
 	t.Name = name
 	t.Attachment0, t.Attachment1 = top, bottom
 	t.Color = ColorSequence.new(colors[1], colors[2] or colors[1])
-	t.Transparency = NumberSequence.new(0.1, 1)
+	t.Transparency = NumberSequence.new(head or 0.1, 1)
 	t.Lifetime = lifetime
 	t.MinLength = 0.2
 	t.LightEmission = 0.6

@@ -681,7 +681,7 @@ return {
 	-- A white trail off you while your mount sprints (QM, Oct 9; Client/SprintTrail):
 	-- Life seconds long at HorseSprint studs/s (a horse's sprint: a short streak), longer
 	-- the faster it goes, up to MaxLife. Built like VIP's gold trail (Shared/RiderTrail).
-	SprintTrail = { On = true, Life = 0.12, HorseSprint = 88, MaxLife = 0.6 },
+	SprintTrail = { On = true, Life = 0.12, HorseSprint = 88, MaxLife = 0.6, Transparency = 0.55 }, -- (Transparency at you: half VIP's opacity, QM)
 	-- How much scales with your speed (QM, Oct 9): x speed / HorseSprint (a horse's sprint
 	-- gets Fov / Zoom as set), between MinScale and MaxScale.
 	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5, HorseSprint = 88, MinScale = 0.5, MaxScale = 1.8 },

@@ -29,7 +29,7 @@ function SprintTrail.update(character, on, speed)
 		return
 	end
 	if not current then
-		local trail = RiderTrail.make(hrp, NAME, { WHITE, WHITE }, cfg.Life)
+		local trail = RiderTrail.make(hrp, NAME, { WHITE, WHITE }, cfg.Life, cfg.Transparency)
 		trail.Enabled = false
 		current = { hrp = hrp, trail = trail }
 	end
