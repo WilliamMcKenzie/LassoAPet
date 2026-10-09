@@ -21,9 +21,9 @@ local player = Players.LocalPlayer
 local cfg = Config.BaseUi
 
 local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
-	shop = { id = "rbxassetid://72615285013782", size = Vector2.new(600, 226) }, -- Shop.png
-	index = { id = "rbxassetid://113765538490307", size = Vector2.new(600, 226) }, -- Index.png
-	merge = { id = "rbxassetid://127823791499018", size = Vector2.new(600, 226) }, -- Merge.png
+	shop = { id = "rbxassetid://139736777854793", size = Vector2.new(300, 113) }, -- Shop.png
+	index = { id = "rbxassetid://103507449558349", size = Vector2.new(300, 113) }, -- Index.png
+	merge = { id = "rbxassetid://84318374397061", size = Vector2.new(300, 113) }, -- Merge.png
 	stamina = { id = "rbxassetid://84856325662967", size = Vector2.new(256, 256) }, -- Stamina.png
 	cash = { id = "rbxassetid://76663783463176", size = Vector2.new(256, 256) }, -- Cash.png
 	upgrade = { id = "rbxassetid://71762829770863", size = Vector2.new(526, 113) }, -- Upgrade.png
