@@ -1,6 +1,6 @@
 -- The base's UI (QM, Oct 9: the new look, from QM's Figma), in place of the old home
 -- HUD (Config.HomeHud off). Montserrat ExtraBold everywhere, white with a black stroke.
---   Left, centred top to bottom: Shop, Index and Merge, stacked (QM's art, label drawn in).
+--   Left, centred top to bottom: Merge, Shop and Index, stacked (QM's art, label drawn in).
 --   Bottom left: your stamina (the saved "Stamina", Gold.server) and your cash.
 --   Bottom centre, only by your pen's bull spot (Config.BullSpots): Upgrade, with the
 --     next pen level's price beside its cash icon, greyed when you can't afford it; the
@@ -132,7 +132,7 @@ end }, { "merge", function()
 end } } do
 	local b = picture("ImageButton", menu, ART[spec[1]], MENU_WIDTH)
 	b.Name = spec[1]
-	b.LayoutOrder = i
+	b.LayoutOrder = ({ shop = 2, index = 3, merge = 1 })[spec[1]] -- (top to bottom: Merge, Shop, Index: QM, Oct 9)
 	b:SetAttribute("Hover", 1.04) -- (ButtonHover: half its usual 1.08 grow, QM)
 	b.Activated:Connect(spec[2])
 	pressable(b)
