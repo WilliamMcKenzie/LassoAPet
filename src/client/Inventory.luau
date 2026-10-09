@@ -22,7 +22,7 @@ local PANEL = "rbxassetid://100959066539289" -- assets/ui/CommonPanel.png (512 p
 local PANEL_CORNER = 61 / 512 -- its corners' radius, of its width (measured from the PNG: QM rounded them less)
 local SCALE = 0.96 -- the whole bar, slots, numbers and outlines alike (QM, Oct 9: 20% smaller, was 1.2)
 local GAP = 10
-local BOTTOM = 24
+local BOTTOM = GAP * SCALE -- (QM, Oct 9: the same gap under the bar as between its slots, on screen; was 24)
 local MAX_SLOTS = 9
 local FONT = Enum.Font.FredokaOne
 
