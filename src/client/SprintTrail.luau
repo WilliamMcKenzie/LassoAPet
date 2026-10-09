@@ -1,7 +1,9 @@
 -- A white trail behind your mount while it sprints (QM, Oct 9), as long as it is fast:
 -- its Lifetime is Config.SprintTrail.Life at a horse's sprint (a short streak) and
--- grows with the speed (up to MaxLife). It runs through the middle of the animal's
--- body, Width x its height top to bottom, fading out along its length.
+-- grows with the speed (up to MaxLife). It's a flat ribbon exactly as wide as the
+-- animal's body (its box, side to side, x Width), coming out of the middle of the body
+-- at half its height, so from the camera it's the animal's own width (QM, Oct 9),
+-- fading out along its length.
 --
 --   SprintTrail.update(model, on, speed) -- every frame: your mount's model (or nil)
 
@@ -21,15 +23,14 @@ local function build(model)
 	end
 	local cfg = Config.SprintTrail
 	local box, size = Outline.box(model) -- (its box, from its root)
-	local mid = box.Position
-	local half = size.Y * cfg.Width / 2
+	local half = size.X * cfg.Width / 2
 	local a0 = Instance.new("Attachment")
-	a0.Name = "SprintTrailTop"
-	a0.Position = mid + Vector3.new(0, half, 0)
+	a0.Name = "SprintTrailLeft"
+	a0.CFrame = box * CFrame.new(-half, 0, 0) -- (the body's middle, its left side)
 	a0.Parent = root
 	local a1 = Instance.new("Attachment")
-	a1.Name = "SprintTrailBottom"
-	a1.Position = mid - Vector3.new(0, half, 0)
+	a1.Name = "SprintTrailRight"
+	a1.CFrame = box * CFrame.new(half, 0, 0)
 	a1.Parent = root
 	local trail = Instance.new("Trail")
 	trail.Name = "SprintTrail"
@@ -41,7 +42,7 @@ local function build(model)
 	})
 	trail.LightEmission = 0.5
 	trail.LightInfluence = 0
-	trail.FaceCamera = true
+	trail.FaceCamera = false -- (flat, side to side: the body's width)
 	trail.MinLength = 0.1
 	trail.Enabled = false
 	trail.Parent = root
