@@ -4394,7 +4394,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	-- one) whatever the pet's speed, half that otherwise (Oct 9: a slow pet racing home
 	-- showed hardly any).
 	vfx.speedLines.update(if not riding then 0 elseif sprinting() then Config.SpeedLines.Speed else Config.SpeedLines.Speed / 2)
-	vfx.sprintTrail.update(if riding then mount.animal.model else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0)
+	vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
 	vfx.returnVignette.update(dt, mount ~= nil and (phase == "turning" or phase == "return"))
 	if phase == "idle" then
 		return

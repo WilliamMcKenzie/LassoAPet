@@ -678,9 +678,9 @@ return {
 	-- InTime seconds and out over OutTime, its ImageTransparency between MaxTransparency
 	-- (out) and MinTransparency (in), from turning round till the leap over the line.
 	ReturnVignette = { On = true, InTime = 0.4, OutTime = 0.6, MinTransparency = 0, MaxTransparency = 1 },
-	-- A white trail behind your mount while it sprints (QM, Oct 9; Client/SprintTrail):
+	-- A white trail off you while your mount sprints (QM, Oct 9; Client/SprintTrail):
 	-- Life seconds long at HorseSprint studs/s (a horse's sprint: a short streak), longer
-	-- the faster it goes, up to MaxLife; Width x the animal's body width; Transparency at its head.
+	-- the faster it goes, up to MaxLife; Width x your body's width; Transparency at its head.
 	SprintTrail = { On = true, Life = 0.12, HorseSprint = 88, MaxLife = 0.6, Width = 1, Transparency = 0.35 },
 	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)

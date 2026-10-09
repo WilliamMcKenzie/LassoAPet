@@ -1,21 +1,18 @@
--- A white trail behind your mount while it sprints (QM, Oct 9), as long as it is fast:
--- its Lifetime is Config.SprintTrail.Life at a horse's sprint (a short streak) and
--- grows with the speed (up to MaxLife). It's a flat ribbon exactly as wide as the
--- animal's body (its box, side to side, x Width), laid along the ground under it (LIFT
--- studs up from the bottom of its box: the animal's drawn over it, QM Oct 9), so from
--- the camera it's the animal's own width, fading out along its length.
+-- A white trail off the rider while their mount sprints (QM, Oct 9: off the player,
+-- not the animal), as long as it is fast: its Lifetime is Config.SprintTrail.Life at a
+-- horse's sprint (a short streak) and grows with the speed (up to MaxLife). A flat
+-- ribbon as wide as the rider's body (their root part, side to side, x Width), from
+-- the middle of them, fading out along its length.
 --
---   SprintTrail.update(model, on, speed) -- every frame: your mount's model (or nil)
+--   SprintTrail.update(character, on, speed) -- every frame: the rider (or nil)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local Outline = require(script.Parent.Outline)
 
 local SprintTrail = {}
 
 local current -- { model, trail, a0, a1 }
-local LIFT = 0.3 -- studs off the bottom of the animal's box
 
 local function build(model)
 	local root = model.PrimaryPart
@@ -23,16 +20,14 @@ local function build(model)
 		return nil
 	end
 	local cfg = Config.SprintTrail
-	local box, size = Outline.box(model) -- (its box, from its root)
-	local half = size.X * cfg.Width / 2
-	local low = -size.Y / 2 + LIFT -- (under the body, just off the ground)
+	local half = root.Size.X * cfg.Width / 2
 	local a0 = Instance.new("Attachment")
 	a0.Name = "SprintTrailLeft"
-	a0.CFrame = box * CFrame.new(-half, low, 0) -- (under the body's middle, its left side)
+	a0.Position = Vector3.new(-half, 0, 0) -- (the rider's middle, their left side)
 	a0.Parent = root
 	local a1 = Instance.new("Attachment")
 	a1.Name = "SprintTrailRight"
-	a1.CFrame = box * CFrame.new(half, low, 0)
+	a1.Position = Vector3.new(half, 0, 0)
 	a1.Parent = root
 	local trail = Instance.new("Trail")
 	trail.Name = "SprintTrail"
@@ -44,7 +39,7 @@ local function build(model)
 	})
 	trail.LightEmission = 0.5
 	trail.LightInfluence = 0
-	trail.FaceCamera = false -- (flat, side to side: the body's width)
+	trail.FaceCamera = false -- (flat, side to side: the rider's width)
 	trail.MinLength = 0.1
 	trail.Enabled = false
 	trail.Parent = root
