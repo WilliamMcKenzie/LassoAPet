@@ -372,6 +372,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	gui.Enabled = false
 	gui.Parent = playerGui
 	rideRoot = root(gui)
+	rideRoot.Visible = Config.RideHud ~= false -- (QM, Oct 9: no riding UI for now)
 
 	-- Hold bar: the empty bar, with the full bar cropped to the Hold fraction on top.
 	-- The full image keeps the bar's size inside the clip, so the crop lines up 1:1.

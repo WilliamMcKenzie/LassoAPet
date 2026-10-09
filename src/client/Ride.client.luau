@@ -1101,6 +1101,14 @@ local function fail(reason, tip)
 			Hud.showContinue(if vfx.revive then "ready" else nil)
 		end
 	end)
+	if Config.RideHud == false then
+		vfx.revive = nil -- (no riding UI for now, QM Oct 9: no Home or Continue to press, so home you go)
+		task.delay(2, function()
+			if phase == "ended" and vfx.goHome then
+				vfx.goHome()
+			end
+		end)
+	end
 end
 
 local function goHome()
@@ -1113,6 +1121,7 @@ local function goHome()
 	local spot = if spawn then spawn.Position else homeSpot()
 	finishRide(spot.X - 6, spot.Z) -- just outside your pen's open side
 end
+vfx.goHome = goHome -- (fail, above, sends you home itself without the riding UI)
 
 local function startTransfer(target)
 	local hrp = character()

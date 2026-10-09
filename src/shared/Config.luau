@@ -724,6 +724,10 @@ return {
 	-- The home HUD's gold counter, Pets, Shop, Merge and Upgrade Pen buttons (QM, Oct 9:
 	-- off till the new UI). false hides them; true brings them back.
 	HomeHud = false,
+	-- The riding UI: the stamina bar, LASSO, Sprint, the ability button, DODGE, the fail
+	-- screen (QM, Oct 9: off for now; a crash takes you home by itself). The egg reveal
+	-- stays. true brings it back.
+	RideHud = false,
 	Passes = {
 		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },
 		{ Key = "FastHatch", Name = "Fast Hatch", Price = 99, Id = 2014634454 },
