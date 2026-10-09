@@ -56,7 +56,7 @@ Studs, Roblox axes: the course runs to -z from the home line at z = 0, and the b
 | 5 | 84.9, 93.3 |
 
 ## Meadow props and big rocks (QM Oct 9: rocks yes, no flowers)
-- Three giant rocks in the meadow Stone/Boulder style (grey tilted chunks, lit caps, mossy
+- Two giant rocks in the meadow Stone/Boulder style (grey tilted chunks, lit caps, mossy
   tops with a bush), as models: `CornerCrag.rbxmx` (about 42 x 42, 30 high), `WallShelf.rbxmx`
   (about 50 x 20, 20 high). Anchored, CanCollide on.
 - Each model is authored in its own local frame: the wall face is the z = 0 plane and the rock
