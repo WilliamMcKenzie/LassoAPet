@@ -9,7 +9,8 @@
 --     as it lasts; then the grey art with the pink filling up from the bottom till it's
 --     ready, when it bounces (1.1x and back) and shows its usual art.
 --   Bottom centre: LASSO, grey while there's nothing to lasso.
--- On a phone the ability's usual art is its fill art (no "[SPACE]" on it: QM).
+-- On a phone the ability's usual art is its fill art (no "[SPACE]" on it: QM), and
+-- there's no Sprint button (pushing the stick far out sprints there: Ride).
 -- Laid out on a RefWidth-wide screen (Config.BaseUi, QM's Figma; the art's drawn at it).
 --
 --   RideUi.show(visible)
@@ -187,9 +188,18 @@ function RideUi.setHold(fraction, _tired, stamina)
 	end
 end
 
+-- On a touch screen (the last input was a touch, or there's no keyboard): no keys to show.
+local function touching()
+	local last = UserInputService:GetLastInputType()
+	if last == Enum.UserInputType.Touch then
+		return true
+	end
+	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+end
+
 local sprinting = false
 function RideUi.setSprint(visible, active)
-	sprint.Visible = visible
+	sprint.Visible = visible and not touching()
 	active = visible and active == true
 	if active ~= sprinting then
 		sprinting = active
@@ -199,15 +209,6 @@ end
 
 function RideUi.sprintHeld()
 	return sprintInput ~= nil
-end
-
--- On a touch screen (the last input was a touch, or there's no keyboard): no keys to show.
-local function touching()
-	local last = UserInputService:GetLastInputType()
-	if last == Enum.UserInputType.Touch then
-		return true
-	end
-	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 end
 
 local abilityState -- "ready", "active", "cooldown"
