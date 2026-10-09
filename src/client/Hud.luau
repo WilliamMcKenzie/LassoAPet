@@ -1648,6 +1648,10 @@ end
 
 -- Money as the HUD writes it: "$950", "$1.2k".
 Hud.money = money
+-- On a ride (the ride's screen is up): BaseUi hides then.
+function Hud.isRiding()
+	return gui ~= nil and gui.Enabled
+end
 
 -- nil: no cash at all this time (run over on foot): the ride's cash and the
 -- fail screen's "+$N" stay hidden until the next ride.

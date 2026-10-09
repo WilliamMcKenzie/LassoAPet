@@ -728,6 +728,12 @@ return {
 	-- screen (QM, Oct 9: off for now; a crash takes you home by itself). The egg reveal
 	-- stays. true brings it back.
 	RideHud = false,
+	-- The base UI (BaseUi.client; QM, Oct 9): Montserrat ExtraBold, laid out on a
+	-- RefWidth-wide screen (QM's Figma) and scaled to yours (x HudScale). Upgrade / Unlock
+	-- shows within BullReach studs of your pen's bull spot (BullSpots, by pen number:
+	-- design/base_arc's bull pads, none built yet).
+	BaseUi = { RefWidth = 1920, BullReach = 16 },
+	BullSpots = { Vector3.new(-18, 0, 173), Vector3.new(-75.2, 0, 129.6), Vector3.new(52, 0, 157.1), Vector3.new(-78.6, 0, 57.9), Vector3.new(84.9, 0, 93.3) },
 	Passes = {
 		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },
 		{ Key = "FastHatch", Name = "Fast Hatch", Price = 99, Id = 2014634454 },

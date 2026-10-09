@@ -308,10 +308,23 @@ function Inventory.slot(name)
 	return bar and bar.Visible and bar:FindFirstChild(name) or nil
 end
 
-function Inventory.setVisible(visible)
+-- Whether the HUD wants the bar up; Inventory.hideFor keeps it down regardless.
+local wanted, hiddenFor = true, {}
+local function show()
 	if bar then
-		bar.Visible = visible
+		bar.Visible = wanted and next(hiddenFor) == nil
 	end
+end
+
+function Inventory.setVisible(visible)
+	wanted = visible
+	show()
+end
+
+-- Keeps the bar down while `reason` holds (BaseUi's Upgrade button by your bull: QM, Oct 9).
+function Inventory.hideFor(reason, hide)
+	hiddenFor[reason] = if hide then true else nil
+	show()
 end
 
 return Inventory

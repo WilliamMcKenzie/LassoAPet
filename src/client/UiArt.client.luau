@@ -105,7 +105,7 @@ local done = {} -- [image] = true once it's watched
 
 local function show(image)
 	local id = string.match(image.Image, "%d+")
-	if not id or KEEP[id] or image:FindFirstAncestor("PreloadWarm") then
+	if not id or KEEP[id] or not NAMES[id] or image:FindFirstAncestor("PreloadWarm") then -- (only the old art: new art, BaseUi's, shows)
 		return
 	end
 	local name = NAMES[id] or image.Name
