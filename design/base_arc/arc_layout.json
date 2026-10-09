@@ -123,182 +123,6 @@
   {
    "asset": "BoulderSplit",
    "pos": [
-    -168,
-    256
-   ],
-   "yaw": 291
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    -158.0,
-    255.4
-   ],
-   "yaw": 147
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    -166.5,
-    246.5
-   ],
-   "yaw": 351
-  },
-  {
-   "asset": "Boulder",
-   "pos": [
-    168,
-    256
-   ],
-   "yaw": 177
-  },
-  {
-   "asset": "BoulderSplit",
-   "pos": [
-    -168,
-    150
-   ],
-   "yaw": 7
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    -157.4,
-    148.5
-   ],
-   "yaw": 73
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    -168.6,
-    138.9
-   ],
-   "yaw": 288
-  },
-  {
-   "asset": "Stone",
-   "pos": [
-    -168.8,
-    159.5
-   ],
-   "yaw": 182
-  },
-  {
-   "asset": "Boulder",
-   "pos": [
-    168,
-    150
-   ],
-   "yaw": 5
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    167.7,
-    141.3
-   ],
-   "yaw": 267
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    168.5,
-    160.6
-   ],
-   "yaw": 231
-  },
-  {
-   "asset": "Boulder",
-   "pos": [
-    -58,
-    256
-   ],
-   "yaw": 249
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    -47.6,
-    255.6
-   ],
-   "yaw": 141
-  },
-  {
-   "asset": "Stone",
-   "pos": [
-    -67.1,
-    255.6
-   ],
-   "yaw": 339
-  },
-  {
-   "asset": "BoulderSplit",
-   "pos": [
-    58,
-    256
-   ],
-   "yaw": 144
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    47.5,
-    255.7
-   ],
-   "yaw": 227
-  },
-  {
-   "asset": "Stone",
-   "pos": [
-    59.3,
-    247.3
-   ],
-   "yaw": 68
-  },
-  {
-   "asset": "Boulder",
-   "pos": [
-    -168,
-    12
-   ],
-   "yaw": 26
-  },
-  {
-   "asset": "Stone",
-   "pos": [
-    -156.9,
-    13.0
-   ],
-   "yaw": 93
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    -168.7,
-    21.8
-   ],
-   "yaw": 70
-  },
-  {
-   "asset": "Boulder",
-   "pos": [
-    168,
-    12
-   ],
-   "yaw": 334
-  },
-  {
-   "asset": "Stone",
-   "pos": [
-    167.7,
-    22.3
-   ],
-   "yaw": 249
-  },
-  {
-   "asset": "BoulderSplit",
-   "pos": [
     -120,
     256
    ],
@@ -343,62 +167,6 @@
     244.6
    ],
    "yaw": 300
-  },
-  {
-   "asset": "Boulder",
-   "pos": [
-    -168,
-    210
-   ],
-   "yaw": 215
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    -157.3,
-    210.1
-   ],
-   "yaw": 221
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    -167.3,
-    221.4
-   ],
-   "yaw": 94
-  },
-  {
-   "asset": "Boulder",
-   "pos": [
-    168,
-    210
-   ],
-   "yaw": 6
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    157.0,
-    210.6
-   ],
-   "yaw": 69
-  },
-  {
-   "asset": "Bush",
-   "pos": [
-    168.5,
-    200.0
-   ],
-   "yaw": 99
-  },
-  {
-   "asset": "Stone",
-   "pos": [
-    168.0,
-    221.3
-   ],
-   "yaw": 90
   },
   {
    "asset": "Bush",
@@ -7852,5 +7620,87 @@
    168,
    196
   ]
+ ],
+ "big_rocks": [
+  {
+   "asset": "CornerCrag",
+   "pos": [
+    -176,
+    264
+   ],
+   "yaw": 90
+  },
+  {
+   "asset": "CornerCrag",
+   "pos": [
+    176,
+    264
+   ],
+   "yaw": 180
+  },
+  {
+   "asset": "Tor",
+   "pos": [
+    -156,
+    0
+   ],
+   "yaw": 0
+  },
+  {
+   "asset": "Tor",
+   "pos": [
+    156,
+    0
+   ],
+   "yaw": 0
+  },
+  {
+   "asset": "WallShelf",
+   "pos": [
+    -76,
+    264
+   ],
+   "yaw": 180
+  },
+  {
+   "asset": "WallShelf",
+   "pos": [
+    76,
+    264
+   ],
+   "yaw": 180
+  },
+  {
+   "asset": "WallShelf",
+   "pos": [
+    -176,
+    140
+   ],
+   "yaw": 90
+  },
+  {
+   "asset": "WallShelf",
+   "pos": [
+    176,
+    140
+   ],
+   "yaw": -90
+  },
+  {
+   "asset": "Tor",
+   "pos": [
+    -176,
+    204
+   ],
+   "yaw": 90
+  },
+  {
+   "asset": "Tor",
+   "pos": [
+    176,
+    204
+   ],
+   "yaw": -90
+  }
  ]
 }
