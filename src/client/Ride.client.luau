@@ -4580,13 +4580,16 @@ function vfx.updateSound()
 	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] ~= false and (mount.hop or 0) < 2,
 		mount and mount.speed / Config.MountSpeed or 0)
 	local now = phase == "outbound" and mount ~= nil and sprinting()
-	if now and not vfx.wasSprinting then
+	-- The whoosh as you start sprinting, and again each time you break into a faster
+	-- sprint tier (Config.SprintTiers; QM, Oct 9).
+	local tier = if now then vfx.sprintCam.tier(mount.speed * (vfx.speedGain or 1)) else 0
+	if (now and not vfx.wasSprinting) or (now and tier > (vfx.sprintTier or 0) and vfx.wasSprinting) then
 		vfx.sounds.play("sprint_whoosh", 0.32) -- (20% and 20% again under the usual 0.5: QM)
 	end
-	vfx.wasSprinting = now
+	vfx.wasSprinting, vfx.sprintTier = now, tier
 	-- (the wind loop while you sprint on a mount, the run home's too: Sounds.sprint_wind)
 	vfx.sounds.setSprintWind(mount ~= nil and not transfer and (phase == "outbound" or phase == "return") and sprinting(),
-		mount and math.clamp(mount.speed / Config.SprintTrail.HorseSprint, 1, 2)) -- (louder the faster, up to 2x a horse's sprint: QM)
+		vfx.sprintCam.tierLoudness(math.max(tier, 1))) -- (louder a step each sprint tier, up to 2x: QM)
 end
 
 -- MERGE (QM, Oct 4): every pet going into a merge is pulled up into one spot 2 m
