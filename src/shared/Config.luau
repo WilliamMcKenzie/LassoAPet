@@ -715,6 +715,9 @@ return {
 	--   AutoHatch: ready eggs hatch by themselves, no holding F
 	--   VIP: a gold fence with red banners round your pen (the floor stays the
 	--     biome's), your name over the pen in gold, and a gold trail behind you
+	-- The game's owner gets their passes (Roblox has a creator own them all)? false: they
+	-- play without them, live and in Studio, like any player (QM, Oct 9). Passes.
+	OwnerPasses = false,
 	Passes = {
 		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },
 		{ Key = "FastHatch", Name = "Fast Hatch", Price = 99, Id = 2014634454 },

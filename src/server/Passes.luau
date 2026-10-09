@@ -41,7 +41,23 @@ local function grant(player, pass, fresh)
 	end
 end
 
+-- The game's owner (Config.OwnerPasses false): Roblox has a game's creator own all its
+-- passes, so they're skipped for them, to play the game as everyone else does (QM, Oct 9).
+local function isOwner(player)
+	if game.CreatorType == Enum.CreatorType.User then
+		return player.UserId == game.CreatorId
+	end
+	local ok, group = pcall(function()
+		return game:GetService("GroupService"):GetGroupInfoAsync(game.CreatorId)
+	end)
+	return ok and group.Owner ~= nil and player.UserId == group.Owner.Id
+end
+
 local function check(player)
+	if not Config.OwnerPasses and isOwner(player) then
+		checked[player] = true
+		return
+	end
 	for _, pass in Config.Passes do
 		if pass.Id ~= 0 then
 			for attempt = 1, 3 do
