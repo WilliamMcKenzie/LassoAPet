@@ -4579,7 +4579,7 @@ function vfx.updateSound()
 	local riding = mount and (phase == "outbound" or phase == "return" or phase == "turning") and not transfer
 	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] ~= false and (mount.hop or 0) < 2,
 		mount and mount.speed / Config.MountSpeed or 0)
-	local now = phase == "outbound" and mount ~= nil and sprinting()
+	local now = (phase == "outbound" or phase == "return") and mount ~= nil and not transfer and sprinting() -- (the run home too: QM)
 	-- The whoosh as you start sprinting, and again each time you break into a faster
 	-- sprint tier (Config.SprintTiers; QM, Oct 9).
 	local tier = if now then vfx.sprintCam.tier(mount.speed * (vfx.speedGain or 1)) else 0
