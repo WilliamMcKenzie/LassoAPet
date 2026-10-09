@@ -30,8 +30,9 @@ function SprintCam.tier(speed)
 end
 
 function SprintCam.tierLoudness(tier)
-	local from = Config.SprintTiers[math.max(tier, 1)] or Config.SprintTiers[1]
-	return math.clamp(from / Config.SprintTiers[1], 1, 2)
+	-- even steps from 1x (the first tier) to 2x (the last: QM, Oct 9)
+	local n = #Config.SprintTiers
+	return if n > 1 then 1 + math.clamp(tier - 1, 0, n - 1) / (n - 1) else 1
 end
 
 function SprintCam.update(dt, sprinting, speed)

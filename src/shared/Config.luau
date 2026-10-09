@@ -694,7 +694,7 @@ return {
 	-- Sprint tiers (QM, Oct 9): the speeds (studs/s, the uncurved) each starts at. Breaking
 	-- into a new one replays the sprint whoosh, snaps the fisheye up (SprintCam) and
 	-- steps the wind louder (up to 2x). The first is a horse's sprint.
-	SprintTiers = { 88, 130, 180, 240, 320 },
+	SprintTiers = { 88, 180, 360, 440 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
 	LassoRange = 34,
