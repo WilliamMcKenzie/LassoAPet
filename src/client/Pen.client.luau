@@ -170,6 +170,7 @@ local function newTimer(parent)
 	gui.StudsOffsetWorldSpace = Vector3.new(0, 4.6, 0) -- above the egg (the egg's root is at its base)
 	gui.MaxDistance = 120
 	gui.LightInfluence = 0
+	gui.Enabled = false -- (on only near you: nearTimer)
 	local text = Instance.new("TextLabel")
 	text.BackgroundTransparency = 1
 	text.Size = UDim2.fromScale(1, 1)
@@ -496,9 +497,30 @@ local function penInView(pen)
 		and math.abs(at.Y) <= depth * tanY + radius * math.sqrt(1 + tanY * tanY)
 end
 
+-- An egg's "Ready" / countdown shows only while you're near it, as the pets' plates do
+-- (PetPlates: in at TIMER_REACH studs, out past TIMER_LEAVE, popping in; QM, Oct 9).
+local TIMER_REACH, TIMER_LEAVE = 16, 19
+local function nearTimer(s, hrp)
+	local root = s.egg.model.PrimaryPart
+	local d = if hrp and root then ((root.Position - hrp.Position) * Vector3.new(1, 0, 1)).Magnitude else math.huge
+	local on = d <= (if s.timerOn then TIMER_LEAVE else TIMER_REACH)
+	if on ~= s.timerOn then
+		s.timerOn = on
+		local gui = s.timer.Parent
+		gui.Enabled = on
+		if on then
+			local pop = s.timer:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
+			pop.Scale = 0
+			pop.Parent = s.timer
+			TweenService:Create(pop, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+		end
+	end
+end
+
 RunService.RenderStepped:Connect(function(dt)
 	local now = workspace:GetServerTimeNow()
 	local camPos = workspace.CurrentCamera.CFrame.Position
+	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	for pen, list in shown do
 		if (pen.Area.Position - camPos).Magnitude > FAR then
 			continue
@@ -518,6 +540,7 @@ RunService.RenderStepped:Connect(function(dt)
 						end
 					end
 					s.timer.Text = if ready then "Ready" else countdown((s.hatchAt or now) - now)
+					nearTimer(s, hrp)
 					local scale = eggScale(s, now)
 					if math.abs(scale - s.grown) > 0.004 then
 						sizeEgg(s, scale)
