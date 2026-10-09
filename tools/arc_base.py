@@ -101,6 +101,16 @@ def main():
         for j in range(nz):
             if under_pen(x0 + i * CELL, z0 + j * CELL):
                 grid[i][j] = 1
+    # Grass right along the walls (QM, Oct 9): sunk dirt against one opened a hole under it.
+    c = d["base"]["corridor_half_width"]
+    for i in range(nx):
+        for j in range(nz):
+            lx, lz = x0 + i * CELL, z0 + j * CELL
+            by_side = i == 0 or i == nx - 1
+            by_back = lz + CELL > z1 - CELL  # the last row inside, and under the back wall
+            by_front = j == 0 and (lx < -c or lx + CELL > c)  # (not the corridor's mouth)
+            if by_side or by_back or by_front:
+                grid[i][j] = 0
     floor = []
     for k, i0, j0, i1, j1 in rects(grid, nx, nz):
         lx, lz = x0 + i0 * CELL, z0 + j0 * CELL
