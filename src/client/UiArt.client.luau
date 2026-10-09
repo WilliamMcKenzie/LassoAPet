@@ -8,7 +8,8 @@
 --
 -- Left as they are: egg renders (Config.EggIcons), pet headshots (PetFaces) and the
 -- dictionary's running animals (AnimalDex): those are content, not UI. And two
--- effects: the ride's vignette and the sunburst behind the egg reveal.
+-- effects: the ride's vignette and the sunburst behind the egg reveal. And QM's new
+-- egg slot panel (CommonPanel), already the new art.
 --
 -- The names come from the art's file names in the scripts (made with a script;
 -- re-run it when art is added). Setting Config.UiArt back to true puts the art back.
@@ -23,6 +24,7 @@ if Config.UiArt ~= false then
 end
 
 local KEEP = {
+	["126644097924232"] = true, -- CommonPanel: QM's new egg slot panel (Oct 9), the one new art in
 	["101217167881986"] = true, ["101851743328298"] = true, ["102165948456968"] = true, ["102545209742676"] = true,
 	["102795691143589"] = true, ["102872657938822"] = true, ["103163746025717"] = true, ["103485896070996"] = true,
 	["103638328020279"] = true, ["103797474563946"] = true, ["104966778015588"] = true, ["104986890781116"] = true,
@@ -54,7 +56,7 @@ local KEEP = {
 local NAMES = {
 	["95632395593874"] = "Ability", ["86071723052223"] = "AbilityCooldown", ["85357705922490"] = "AbilitySPACE", ["13107325341"] = "Bk",
 	["13107329809"] = "Bk", ["13107334845"] = "Bk", ["84747779882944"] = "CHECKER", ["99312860837685"] = "COIN",
-	["135663178618300"] = "Claim", ["79697917998703"] = "Common", ["126644097924232"] = "CommonPanel", ["124255755969598"] = "Continue",
+	["135663178618300"] = "Claim", ["79697917998703"] = "Common", ["124255755969598"] = "Continue",
 	["130844925944438"] = "DexArrow", ["77735968469215"] = "DexDesertExamine", ["80615979394374"] = "DexGodlandsExamine", ["78091503897812"] = "DexMeadowExamine",
 	["93558185988056"] = "DexOceanExamine", ["112429560665609"] = "DexSnowExamine", ["71726481257884"] = "DisabledRainbowTrail", ["137693950544184"] = "Epic",
 	["94491197892789"] = "EpicEggRNG", ["81588505365795"] = "FLAT", ["92820434532680"] = "FuseButton", ["74328700033740"] = "FuseButtonOff",
