@@ -3219,6 +3219,7 @@ end
 local function startAbility(cfg)
 	local a = mount.ability
 	vfx.rideCue:FireServer("ability", cfg.Kind)
+	vfx.sounds.play("ability_use") -- (QM, Oct 9)
 	a.active = { kind = cfg.Kind, cfg = cfg, t = 0, fx = {} }
 	if cfg.Kind == "Charge" then
 		a.active.fx = chargeFx(mount)

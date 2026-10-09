@@ -21,6 +21,7 @@ local IDS = {
 	egg_grab = "rbxassetid://94379425317312", -- an egg lassoed mid-ride
 	gallop_loop = "rbxassetid://129029116650332", -- while riding a galloping animal (Config.GallopSound)
 	sprint_whoosh = "rbxassetid://73983934702758", -- Sprint starts
+	ability_use = "rbxassetid://9085320874", -- a pet's ability goes off: Speed Up (Brawl Stars SFX, QM's pick, Oct 9)
 	-- A rush of wind looping while you sprint on a mount, a subtle sense of speed (QM, Oct 9):
 	-- Spiraling Wind Data Tunnel Travelling 2 (ProSoundEffects, 0:31). Others tried: Plasma
 	-- Trails Constant Airy Whooshing Windy 9125742262, Desert Wind Whistley Light Gusts 1 9114057104.
