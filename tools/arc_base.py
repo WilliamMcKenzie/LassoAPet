@@ -11,8 +11,9 @@ What the Luau does to Workspace.World (re-running it is fine: it rebuilds the sa
     48-high checker walls, the corridor left open), like tools/home_base.py
   - the home floor: the old single Ground part goes; in its place rectangles named
     "Ground" (grass, top at 0) and "Dirt" (top 1 stud lower), each 2 studs deep at
-    the bottom like tools/meadow_ground.py, on the 4-stud tiles of the layout, the
-    checker kept in step from rectangle to rectangle. They're tagged "ArcBase" so a
+    the bottom like tools/meadow_ground.py, on 8-stud cells (a cell is dirt where half or
+    more of the layout's 4-stud tiles are), so the checker stays in step from part
+    to part, as on the course. They're tagged "ArcBase" so a
     re-run finds them. WorldColors paints them by name (the Meadow's), and
     Ground.heightAt reads the sunk dirt.
   - World.BaseDecor: copies of the Meadow's Stone, Bush, Boulder and BoulderSplit
@@ -28,7 +29,9 @@ ROOT = Path(__file__).resolve().parent.parent
 LAYOUT = ROOT / "design" / "base_arc" / "arc_layout.json"
 OUT = ROOT / "tools" / "arc_base.luau"
 
-TILE = 4
+TILE = 4  # the layout's dirt tiles
+CELL = 8  # what's built: the meadow's 8-stud cells (QM, Oct 9: on 4-stud parts the checker
+# fell out of step; on 8 every part starts on a whole checker square, like the course's)
 
 
 def rects(grid, nx, nz):
@@ -58,17 +61,19 @@ def main():
     x0, x1 = d["base"]["x"]
     z0, z1 = d["base"]["z"]
     W, D = x1, z1
-    nx = (x1 - x0) // TILE
-    nz = (z1 + 8 - z0) // TILE  # (and under the back wall, as the old floor went)
-    grid = [[0] * nz for _ in range(nx)]
+    nx = (x1 - x0) // CELL
+    nz = (z1 + 8 - z0) // CELL  # (and under the back wall, as the old floor went)
+    # an 8-stud cell is dirt if at least half its four 4-stud tiles are
+    count = [[0] * nz for _ in range(nx)]
     for cx, cz in d["dirt_tiles_4stud"]:
-        i, j = int((cx - x0) // TILE), int((cz - z0) // TILE)
+        i, j = int((cx - x0) // CELL), int((cz - z0) // CELL)
         if 0 <= i < nx and 0 <= j < nz:
-            grid[i][j] = 1
+            count[i][j] += 1
+    grid = [[1 if count[i][j] >= 2 else 0 for j in range(nz)] for i in range(nx)]
     floor = []
     for k, i0, j0, i1, j1 in rects(grid, nx, nz):
-        lx, lz = x0 + i0 * TILE, z0 + j0 * TILE
-        floor.append((k, lx, lz, (i1 - i0) * TILE, (j1 - j0) * TILE))
+        lx, lz = x0 + i0 * CELL, z0 + j0 * CELL
+        floor.append((k, lx, lz, (i1 - i0) * CELL, (j1 - j0) * CELL))
     c = d["base"]["corridor_half_width"]
     walls = [  # (name, which, centre, size), as tools/home_base.py LAYOUT
         ("Wall", "back", (0, 24, D + 4), (2 * W + 16, 48, 8)),
@@ -116,7 +121,7 @@ local world = workspace.World
 local WALLS = {
 @WALLS@
 }
--- The floor: { dirt (1) or grass (0), low x, low z, size x, size z }, 4-stud tiles.
+-- The floor: { dirt (1) or grass (0), low x, low z, size x, size z }, on 8-stud cells.
 local FLOOR = {
 @FLOOR@
 }
@@ -178,13 +183,7 @@ for _, r in FLOOR do
 	p.Name = if dirt then "Dirt" else "Ground"
 	p.Size = Vector3.new(sx, top + 2, sz)
 	p.CFrame = CFrame.new(x + sx / 2, (top - 2) / 2, z + sz / 2)
-	-- (the checker starts from each part's low-x, low-z corner: an odd tile there shifts it a tile)
-	local odd = (math.floor(x / 4 + 0.5) + math.floor(z / 4 + 0.5)) % 2
-	for _, t in p:GetChildren() do
-		if t:IsA("Texture") and t.Name == "Checker" then
-			t.OffsetStudsU = odd * t.StudsPerTileU / 2
-		end
-	end
+	-- (on 8-stud cells every corner starts on a whole checker square: no offsets, like the course)
 	p.Parent = world.Ground
 end
 
