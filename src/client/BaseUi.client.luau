@@ -27,7 +27,7 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 	stamina = { id = "rbxassetid://84856325662967", size = Vector2.new(256, 256) }, -- Stamina.png
 	cash = { id = "rbxassetid://76663783463176", size = Vector2.new(256, 256) }, -- Cash.png
 	upgrade = { id = "rbxassetid://71762829770863", size = Vector2.new(526, 113) }, -- Upgrade.png
-	upgradeGrey = { id = "rbxassetid://87365821705477", size = Vector2.new(526, 113) }, -- UpgradeGrey.png: QM's disabled Upgrade, for when you can't afford it
+	upgradeGrey = { id = "rbxassetid://130426326428487", size = Vector2.new(526, 113) }, -- UpgradeGrey.png: QM's disabled Upgrade, for when you can't afford it
 	unlock = { id = "rbxassetid://123061923353074", size = Vector2.new(526, 113) }, -- Unlock.png ("FREE" drawn in)
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)

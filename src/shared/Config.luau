@@ -475,7 +475,7 @@ return {
 	MergeMaxSpeed = 8,
 	-- The riding camera pulls back this much further per tier above small: 1x on a
 	-- small pet, 1.2x on a medium, 1.44x on a large (QM, Oct 2).
-	RideZoomPerTier = 1.2,
+	RideZoomPerTier = 1, -- (QM, Oct 9: riding always the same plain view; was 1.2)
 	ObstacleTiers = {
 		Bush = 1, Rock = 2, Stone = 1, Sandstone = 1, -- small
 		Boulder = 2, BoulderSplit = 2, Cactus = 2, SandBoulder = 2, SandBoulderCarved = 2, -- medium
@@ -649,7 +649,7 @@ return {
 	TouchSprintAt = 0.85,
 	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
 	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)
-	ReturnFovKick = 20, -- degrees added to the field of view on the ride home, to feel faster (0 = off)
+	ReturnFovKick = 0, -- (QM, Oct 9: plain, was 20) degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
 	-- view (up to MaxFov) grow from Start studs/s. Each part off with On = false.
@@ -659,7 +659,7 @@ return {
 	-- with speed as (speed / Ref) ^ Curve (a square root: quick to build, gentle at the
 	-- top) to full at Ref studs/s and over. Lines, their Opacity and LineSpeed, and
 	-- FovKick degrees wider (up to MaxFov), all at full strength.
-	SpeedFeel = { On = true, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
+	SpeedFeel = { On = false, -- (QM, Oct 9: no speed lines or wider view, riding's plain) Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
 	LassoRange = 34,
 	EggSlowMo = 0.5, -- time scale during the egg-grab close-up
 	-- Coming home with an egg: the pet leaps over the start line in slow motion while
