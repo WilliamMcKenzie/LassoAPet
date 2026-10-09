@@ -19,7 +19,8 @@ What the Luau does to Workspace.World (re-running it is fine: it rebuilds the sa
   - World.BaseDecor: copies of the Meadow's Stone, Bush, Boulder and BoulderSplit
     (World.Obstacles), not course obstacles, standing on the floor under them
   - World.BullPads: a placeholder pad per pen (BullPadN, "Pen" attribute), a red
-    mat 18 across with a bull on a post, facing the yard
+    mat 18 across with a bull on a post, facing the yard; with BULL_PADS off (now),
+    none, and any already there go
 """
 
 import json
@@ -30,6 +31,7 @@ LAYOUT = ROOT / "design" / "base_arc" / "arc_layout.json"
 OUT = ROOT / "tools" / "arc_base.luau"
 
 TILE = 4  # the layout's dirt tiles
+BULL_PADS = False  # QM, Oct 9: none for now (their spots stay in the layout's "bulls")
 CELL = 8  # what's built: the meadow's 8-stud cells (QM, Oct 9: on 4-stud parts the checker
 # fell out of step; on 8 every part starts on a whole checker square, like the course's)
 
@@ -99,14 +101,14 @@ def main():
         f'\t{{ "{n}", "{w}", Vector3.new({p[0]:g}, {p[1]:g}, {p[2]:g}), Vector3.new({s[0]:g}, {s[1]:g}, {s[2]:g}) }},'
         for n, w, p, s in walls)
     props_lua = lua_list([(p["asset"], p["pos"][0], p["pos"][1], p["yaw"]) for p in d["props"]])
-    bulls_lua = lua_list([(b["pen"], b["pos"][0], b["pos"][1]) for b in d["bulls"]])
+    bulls_lua = lua_list([(b["pen"], b["pos"][0], b["pos"][1]) for b in d["bulls"]] if BULL_PADS else [])
     floor_lua = lua_list(floor)
     text = TEMPLATE
     for key, value in {"W": W, "D": D, "CX": centre[0], "CZ": centre[1], "WALLS": walls_lua, "FLOOR": floor_lua,
                        "PROPS": props_lua, "BULLS": bulls_lua}.items():
         text = text.replace(f"@{key}@", f"{value:g}" if isinstance(value, (int, float)) else value)
     OUT.write_text(text)
-    print(f"tools/arc_base.luau: {len(floor)} floor rectangles, {len(d['props'])} props, {len(d['bulls'])} bull pads")
+    print(f"tools/arc_base.luau: {len(floor)} floor rectangles, {len(d['props'])} props, {len(d['bulls']) if BULL_PADS else 0} bull pads")
 
 
 TEMPLATE = """-- The arc home base (QM, Oct 9; design/base_arc/SPEC.md). Made by tools/arc_base.py
@@ -252,6 +254,10 @@ local function block(parent, name, size, cf, color, shape)
 	p.Parent = parent
 	return p
 end
+if #BULLS == 0 then
+	pads:Destroy() -- (none for now: BULL_PADS in tools/arc_base.py)
+	pads = nil
+end
 for _, r in BULLS do
 	local at = Vector3.new(r[2], topAt(r[2], r[3]), r[3])
 	local face = CFrame.lookAt(at, Vector3.new(YARD.X, at.Y, YARD.Z))
@@ -265,7 +271,9 @@ for _, r in BULLS do
 	m.PrimaryPart = m.Mat
 	m.Parent = pads
 end
-pads.Parent = world
+if pads then
+	pads.Parent = world
+end
 
 return string.format("arc base: %d walls moved, %d floor parts, %d props, %d bull pads", moved, #FLOOR, placed, #BULLS)
 """

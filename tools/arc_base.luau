@@ -224,11 +224,7 @@ local PROPS = {
 }
 -- Bull pads: { pen, x, z }.
 local BULLS = {
-	{ 1, -18, 173 },
-	{ 2, -75.2, 129.6 },
-	{ 3, 52, 157.1 },
-	{ 4, -78.6, 57.9 },
-	{ 5, 84.9, 93.3 },
+
 }
 
 -- Walls: the home base's are the ones round z 0..the old depth; which is which by where they are.
@@ -349,6 +345,10 @@ local function block(parent, name, size, cf, color, shape)
 	p.Parent = parent
 	return p
 end
+if #BULLS == 0 then
+	pads:Destroy() -- (none for now: BULL_PADS in tools/arc_base.py)
+	pads = nil
+end
 for _, r in BULLS do
 	local at = Vector3.new(r[2], topAt(r[2], r[3]), r[3])
 	local face = CFrame.lookAt(at, Vector3.new(YARD.X, at.Y, YARD.Z))
@@ -362,6 +362,8 @@ for _, r in BULLS do
 	m.PrimaryPart = m.Mat
 	m.Parent = pads
 end
-pads.Parent = world
+if pads then
+	pads.Parent = world
+end
 
 return string.format("arc base: %d walls moved, %d floor parts, %d props, %d bull pads", moved, #FLOOR, placed, #BULLS)
