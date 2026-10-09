@@ -56,7 +56,7 @@ local function setSign(pen, player)
 		label.Parent = gui
 		gui.Parent = sign
 	end
-	gui.Enabled = player ~= nil
+	gui.Enabled = player ~= nil and Config.PenProfile -- (hidden for now: QM, Oct 9)
 	-- VIP (game pass): the name and the ring round the picture in gold.
 	local vip = player ~= nil and player:GetAttribute("PassVIP") == true
 	gui.OwnerName.TextColor3 = if vip then Config.Vip.Name else Color3.new(1, 1, 1)

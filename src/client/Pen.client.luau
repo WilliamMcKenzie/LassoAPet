@@ -43,7 +43,7 @@ end)
 local EGG_CENTER = 1.6 -- egg pivot height above the ground (Egg.luau)
 local TOP_POPS = 1.58 -- seconds into the hatch animation when the top flies off
 local JUMP_TIME = 0.6
-local TIMER_SIZE = Vector2.new(5, 1.6) -- studs: an egg's "Ready" / countdown (the pets' plates' text size)
+local TIMER_SIZE = Vector2.new(4, 1.28) -- studs: an egg's "Ready" / countdown (was 5 x 1.6, 20% smaller: QM, Oct 9)
 local HATCH_SOUND_PEAK = 0.46 -- seconds into Sounds' egg_hatch (Rewards) where it's loudest (measured, Oct 9)
 local JUMP_HEIGHT = 5
 local TWITCH_EVERY = { 3, 6 }
