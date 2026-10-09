@@ -1152,6 +1152,7 @@ local function turnHome()
 		carried = { part = egg.model, kind = mount.kind, stage = "held", t = 1, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	end
 	phase, turnT = "turning", 0
+	vfx.returnBiome = math.min(WorldColors.biomeAt(mount.z), 5) -- (its run-home music: Sounds' home1..home5)
 	Hud.setAction(nil)
 	Hud.setHold(nil)
 end
@@ -4575,7 +4576,9 @@ end
 -- home; the gallop while you ride an animal that gallops (Config.GallopSound), louder
 -- and quicker the faster it goes. Sprint's whoosh as it starts.
 function vfx.updateSound()
-	vfx.sounds.setMusic(if phase == "idle" then "base" elseif phase == "turning" or phase == "return" or phase == "home" then "home" else "ride")
+	vfx.sounds.setMusic(if phase == "idle" then "base"
+		elseif phase == "turning" or phase == "return" or phase == "home" then "home" .. (vfx.returnBiome or 1) -- (the biome you turned round in: Sounds)
+		else "ride")
 	local riding = mount and (phase == "outbound" or phase == "return" or phase == "turning") and not transfer
 	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] ~= false and (mount.hop or 0) < 2,
 		mount and mount.speed / Config.MountSpeed or 0)

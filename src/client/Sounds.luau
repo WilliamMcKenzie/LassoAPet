@@ -44,9 +44,14 @@ local IDS = {
 local MUSIC = {
 	base = "rbxassetid://1840347412", -- Way Out West (APM): at home
 	ride = "rbxassetid://1836101135", -- Huba Huba Cartoon Chase (APM): out riding
-	-- The run home (QM, Oct 9: more panicked): Running Faster A (APM, Moritz Bintig, 2:19).
-	-- Others to try here: Frantic Pursuit 1845474796 (1:02), Crazy Hurry 1845693355 (1:04).
-	home = "rbxassetid://1847683499",
+	-- The run home (QM, Oct 9: more panicked), one per biome you turned round in ("home"
+	-- .. its number, Config.Biomes order), all APM, most from the same "Crime Scene -
+	-- Action, Race & Chase" album as the first QM liked:
+	home1 = "rbxassetid://1847683499", -- Meadow: Running Faster A (Moritz Bintig, 2:19)
+	home2 = "rbxassetid://1847683579", -- Desert: Frantic And Edgy B (Mac Prindy, 1:28)
+	home3 = "rbxassetid://1847683414", -- Tundra: High-tech Crime A (Mac Prindy, 2:21)
+	home4 = "rbxassetid://1847681727", -- Ocean: Motivating Forces A (Mac Prindy, 2:02)
+	home5 = "rbxassetid://1847683528", -- Godlands: Break The Barrier B (Mac Prindy, 2:04)
 }
 local VOLUME = 0.5
 local GALLOP_VOLUME = 0.35
