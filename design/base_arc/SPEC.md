@@ -16,7 +16,7 @@ Studs, Roblox axes: the course runs to -z from the home line at z = 0, and the b
   cover the base too, so pets and eggs stand on the sunk dirt.
 - What the dirt is: one natural yard in the middle with ragged edges and two grass islands,
   a lane from the yard to the home line, an apron at each gate, and small patches out
-  in the grass. Pens stand on grass, and the wall columns stay grass.
+  in the grass. Pens stand on grass. No dirt within 8 studs (two tiles) of any wall, front wall stubs included, so the sunk dirt never opens a hole under a wall (QM).
 
 ## Pens: five on one arc
 - The arc's centre is (0, 90), the middle of the yard. Pen centres sit 130 from it, at
