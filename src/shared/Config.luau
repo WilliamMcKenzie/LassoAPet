@@ -213,6 +213,10 @@ return {
 	-- Zone gates on? Off (QM, Oct 8: new-loops): ride anywhere, no gates, no tutorial
 	-- flight to the next gate. PenLevel still loads and saves as before.
 	Gates = false,
+	-- Breakable barriers instead (QM, Oct 9): the same sheets at each biome line (their
+	-- colour alone, no card), shattering the first time you ride through, gone for good
+	-- for you after (Gate.client; saved by Gold.server). They never stop you.
+	BreakGates = true,
 	-- The Upgrade Pen button (Hud): buys the next pen level at the next biome's
 	-- UnlockCost. With the gates off it only grows and repaints your pen and swaps in
 	-- that biome's training dummy (QM, Oct 8); past the last, the Rainbow Trail.

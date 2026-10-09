@@ -1,3 +1,9 @@
+-- Breakable barriers (Config.BreakGates, QM Oct 9): a sheet at each biome line you've
+-- never ridden through, just its colour fading up (no card). Ride through one and it
+-- shatters, gone for good for you (BreakGate: the server saves "GatesBroken", the last
+-- biome whose barrier you broke). Nothing stops you at them. (Below: the old locked
+-- gates, Config.Gates, for when that's back on.)
+--
 -- The gates at the biome lines you haven't unlocked: a sheet across the
 -- corridor, yellow at the floor fading to clear GateHeight studs up, with QM's
 -- "Zone Locked" card on it (each biome's GateImage). Only you see your gates; each one fades away
@@ -64,7 +70,9 @@ local function build(i)
 
 	local image = Config.Biomes[i].GateImage
 	local card
-	if image and image ~= "" then
+	if Config.BreakGates then
+		card = nil -- (no card: the colour alone, QM)
+	elseif image and image ~= "" then
 		card = Instance.new("ImageLabel")
 		card.Image = image
 		card.BackgroundTransparency = 1
@@ -84,10 +92,12 @@ local function build(i)
 		table.insert(fades, { card, "BackgroundTransparency" })
 		table.insert(fades, { stroke, "Transparency" })
 	end
-	card.AnchorPoint = Vector2.new(0.5, 0.5)
-	card.Position = UDim2.fromScale(0.5, 0.5)
-	card.Size = UDim2.fromScale(CARD_HEIGHT * height * CARD_ASPECT / width, CARD_HEIGHT)
-	card.Parent = sheet
+	if card then
+		card.AnchorPoint = Vector2.new(0.5, 0.5)
+		card.Position = UDim2.fromScale(0.5, 0.5)
+		card.Size = UDim2.fromScale(CARD_HEIGHT * height * CARD_ASPECT / width, CARD_HEIGHT)
+		card.Parent = sheet
+	end
 
 	-- (the part goes in first and carries its own sheet: a sheet adorned from PlayerGui
 	-- stopped drawing on these parts, Oct 5)
@@ -200,6 +210,39 @@ ReplicatedStorage:WaitForChild("ZoneUnlocked").OnClientEvent:Connect(function(i)
 		bought[i] = true
 	end
 end)
+
+-- Breakable barriers: one at each biome line past the last you've broken; riding
+-- through it (you crossing its line) shatters it and tells the server.
+local breakGate = ReplicatedStorage:WaitForChild("BreakGate")
+local function refreshBreakable()
+	local broken = player:GetAttribute("GatesBroken") or 1
+	for i = 2, #Config.Biomes do
+		if i > broken and not gates[i] then
+			build(i)
+		elseif i <= broken and gates[i] then
+			unlock(i) -- (broken elsewhere: just fade it)
+		end
+	end
+end
+if Config.BreakGates then
+	player:GetAttributeChangedSignal("GatesBroken"):Connect(refreshBreakable)
+	refreshBreakable()
+	RunService.RenderStepped:Connect(function()
+		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if not hrp then
+			return
+		end
+		for i, gate in gates do
+			if hrp.Position.Z < WorldColors.biomeStart(i) then
+				gates[i] = nil
+				gate.gui:Destroy()
+				gate.part:Destroy()
+				shatter(i)
+				breakGate:FireServer(i)
+			end
+		end
+	end)
+end
 
 local function refresh()
 	if not Config.Gates then

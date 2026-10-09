@@ -9,6 +9,8 @@
 -- Your stamina level (the "Stamina" attribute: how long the bar lasts on a ride,
 -- Ride.client) is saved alongside, as `stamina` (QM, Oct 8: the stamina loop; older
 -- saves have none and start at Config.Stamina.Start). Training it comes later.
+-- And the biome barriers you've broken (the "GatesBroken" attribute, the last biome
+-- whose barrier you rode through: Gate.client's BreakGate), as `gates` (QM, Oct 9).
 
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
@@ -36,6 +38,7 @@ end
 local function load(player)
 	player:SetAttribute("Gold", 0)
 	player:SetAttribute("Stamina", 0)
+	player:SetAttribute("GatesBroken", 1) -- (the last biome whose barrier you've ridden through: Gate.client; 1 = none yet)
 	if not store then
 		return
 	end
@@ -49,6 +52,8 @@ local function load(player)
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + (tonumber(gold) or 0))
 				local stamina = if typeof(value) == "table" then tonumber(value.stamina) else nil
 				player:SetAttribute("Stamina", (player:GetAttribute("Stamina") or 0) + (stamina or 0))
+				local gates = if typeof(value) == "table" then tonumber(value.gates) else nil
+				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
 				loaded[player] = true
 			end
 			return
@@ -67,12 +72,13 @@ local function save(player, onlyIfChanged)
 	end
 	local gold = player:GetAttribute("Gold") or 0
 	local stamina = player:GetAttribute("Stamina") or 0
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. stamina
+	local gates = player:GetAttribute("GatesBroken") or 1
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. stamina .. "/" .. gates
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0, stamina = stamina }) then
+		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0, stamina = stamina, gates = gates }) then
 			savedAs[player] = as
 			return
 		end
@@ -144,6 +150,17 @@ game:BindToClose(function()
 	local deadline = os.clock() + 25
 	while left > 0 and os.clock() < deadline do
 		task.wait(0.1)
+	end
+end)
+
+-- Riding through a biome's barrier breaks it for good (Gate.client): only ever up.
+local breakGate = Instance.new("RemoteEvent")
+breakGate.Name = "BreakGate"
+breakGate.Parent = ReplicatedStorage
+breakGate.OnServerEvent:Connect(function(player, i)
+	local broken = player:GetAttribute("GatesBroken") or 1
+	if typeof(i) == "number" and i > broken and i <= #Config.Biomes then
+		player:SetAttribute("GatesBroken", i)
 	end
 end)
 
