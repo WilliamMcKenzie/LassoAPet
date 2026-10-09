@@ -2300,7 +2300,7 @@ function vfx.updateAvoid(dt)
 			w = math.clamp(math.max(w, 2 / math.max(t, 0.1)), 0.8, 12)
 			if t <= math.max(cfg.Warn, 4.74 / w) and math.abs(gap) < clear then
 				if state.skip[entity] == nil then
-					state.skip[entity] = rng:NextNumber() >= cfg.Chance * zone -- (ReturnAvoid.Chance x the zone's Swerve)
+					state.skip[entity] = false -- (always: QM, Oct 9; the zone's Swerve only sets how far)
 				end
 				if not state.skip[entity] then
 					-- Away from you (the side it first picked), unless the wall leaves it in your way.
