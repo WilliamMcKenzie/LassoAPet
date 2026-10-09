@@ -674,6 +674,10 @@ return {
 	-- however slow the pet (checked from every pen at the biggest pen size: clear of
 	-- the pens, walls, Carl and the podium).
 	ExitSteer = { GateRoom = 3, Margin = 6 },
+	-- The run home's red vignette (QM, Oct 9; Client/ReturnVignette): pulses in over
+	-- InTime seconds and out over OutTime, its ImageTransparency between MaxTransparency
+	-- (out) and MinTransparency (in), from turning round till the leap over the line.
+	ReturnVignette = { On = true, InTime = 0.8, OutTime = 0.6, MinTransparency = 0, MaxTransparency = 1 },
 	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },

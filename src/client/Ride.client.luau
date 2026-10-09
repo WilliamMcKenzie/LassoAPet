@@ -133,6 +133,7 @@ end
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
+vfx.returnVignette = require(script.Parent.ReturnVignette) -- the run home's pulsing red edges (QM, Oct 9)
 vfx.homeBiome = {} -- [kind] = the index of the first biome whose herd lists it (the Horse: the Meadow)
 for b, biome in Config.Biomes do
 	for kind in biome.Herd or {} do
@@ -4393,6 +4394,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	-- one) whatever the pet's speed, half that otherwise (Oct 9: a slow pet racing home
 	-- showed hardly any).
 	vfx.speedLines.update(if not riding then 0 elseif sprinting() then Config.SpeedLines.Speed else Config.SpeedLines.Speed / 2)
+	vfx.returnVignette.update(dt, mount ~= nil and (phase == "turning" or phase == "return"))
 	if phase == "idle" then
 		return
 	end
