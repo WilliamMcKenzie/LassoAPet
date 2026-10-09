@@ -690,7 +690,7 @@ return {
 	-- gets Fov / Zoom as set), between MinScale and MaxScale.
 	-- Creep: within a sprint tier the fisheye grows only this share of what the speed
 	-- alone would give; crossing into a new tier snaps it up (QM, Oct 9).
-	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5, HorseSprint = 88, MinScale = 0.5, MaxScale = 1.8, Bounce = { In = 0.9, InTime = 0.1, Out = 1.2, OutTime = 0.15, SettleTime = 0.4 } },
+	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5, HorseSprint = 88, MinScale = 0.5, MaxScale = 1.8, Bounce = { In = 0.7, InTime = 0.1, Out = 1.2, OutTime = 0.15, SettleTime = 0.4 } },
 	-- Sprint tiers (QM, Oct 9): the speeds (studs/s, the uncurved) each starts at. Breaking
 	-- into a new one replays the sprint whoosh, snaps the fisheye up (SprintCam) and
 	-- steps the wind louder (up to 2x). The first is a horse's sprint.
