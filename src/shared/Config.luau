@@ -659,7 +659,8 @@ return {
 	-- with speed as (speed / Ref) ^ Curve (a square root: quick to build, gentle at the
 	-- top) to full at Ref studs/s and over. Lines, their Opacity and LineSpeed, and
 	-- FovKick degrees wider (up to MaxFov), all at full strength.
-	SpeedFeel = { On = false, -- (QM, Oct 9: no speed lines or wider view, riding's plain) Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
+	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
+	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
 	LassoRange = 34,
 	EggSlowMo = 0.5, -- time scale during the egg-grab close-up
 	-- Coming home with an egg: the pet leaps over the start line in slow motion while
