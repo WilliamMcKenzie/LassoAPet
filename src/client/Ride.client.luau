@@ -3442,11 +3442,12 @@ local function updateMount(dt)
 	end
 	if phase == "outbound" and exitPath then
 		-- Out of your pen: out of its gap and straight across the yard to the corridor
-		-- (penExitPath), turning smoothly onto each leg. You can steer off the line on
-		-- the way (QM, Oct 9: Config.ExitSteer), anywhere that still ends up across the
-		-- start line: the room either side grows from GateRoom in your pen's gap to the
-		-- start line's width (less Margin) by the corridor, and steering eases off
-		-- toward its edges (tanh) so you never reach them, however long the ride out.
+		-- (penExitPath), turning smoothly onto each leg. You steer on the way just as you
+		-- do riding the stampede (QM, Oct 9: the same SteerSpeed and response), anywhere
+		-- that still ends up across the start line: the room either side grows from
+		-- GateRoom in your pen's gap to the start line's width (less Margin) by the
+		-- corridor, and your sideways speed eases off toward its edges (tanh) so you
+		-- never reach them, however long the ride out (Config.ExitSteer).
 		local cfg = Config.ExitSteer
 		local track = vfx.exitTrack or Vector2.new(mount.x, mount.z) -- (the point on the path itself)
 		if not vfx.exitRoute then
@@ -3482,17 +3483,21 @@ local function updateMount(dt)
 		local lo = -cfg.GateRoom + (-reach - route.endX + cfg.GateRoom) * f
 		local hi = cfg.GateRoom + (reach - route.endX - cfg.GateRoom) * f
 		local mid, half = (lo + hi) / 2, (hi - lo) / 2
-		vfx.exitU += readSteer() * Config.SteerSpeed * cfg.Strength * dt / half
+		-- (steering as on the course: mount.latVel eases toward SteerSpeed x your input)
+		local targetLat = readSteer() * Config.SteerSpeed
+		mount.latVel += (targetLat - mount.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
+		local v = math.tanh(vfx.exitU)
+		vfx.exitU += mount.latVel * dt / half
 		local lat = mid + half * math.tanh(vfx.exitU)
+		local sideways = mount.latVel * (1 - v * v) -- (the speed it really moves aside at, slowing near the edges)
 		vfx.exitTrack, vfx.exitLat = track, lat
 		mount.x, mount.z = track.X - uz * lat, track.Y + ux * lat -- (its right: (-look.Z, look.X))
 		if #exitPath == 0 then
 			exitPath, vfx.exitTrack, vfx.exitLat, vfx.exitRoute = nil, nil, nil, nil
-			mount.yaw, mount.latVel = 0, 0 -- (square to the start line: riding as usual from here)
+			mount.yaw = 0 -- (square to the start line: riding on as usual from here, latVel and all)
 		end
-		mount.latVel = 0
-		place(mount, 0)
-		animate(mount, dt, mount.speed, 0)
+		place(mount, math.atan2(-sideways, math.max(mount.speed, 1)))
+		animate(mount, dt, mount.speed, sideways / Config.SteerSpeed)
 		return
 	end
 	local steer = phase == "home" and 0 or readSteer()
