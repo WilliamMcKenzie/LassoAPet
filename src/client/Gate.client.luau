@@ -125,7 +125,7 @@ end
 local function shatter(i)
 	-- It shatters like glass (QM, Oct 7: Mirror Break), then a little jingle (egg_hatch's) (QM).
 	Sounds.play("gate_break", 0.6) -- (a bit quieter, the reward a bit louder: QM, Oct 9; were 0.8, 0.6)
-	task.delay(0.3, Sounds.play, "egg_hatch", 1.2) -- (1.5x louder, back to 0.3 s after: QM)
+	Sounds.play("egg_hatch", 1.2) -- (1.5x louder, with the shatter: QM)
 	local width, height = WorldColors.halfWidth(WorldColors.biomeStart(i)) * 2, Config.GateHeight
 	local z = WorldColors.biomeStart(i)
 	local w, h = width / SHARDS_X, height / SHARDS_Y
