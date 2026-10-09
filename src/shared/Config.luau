@@ -695,6 +695,10 @@ return {
 	-- into a new one replays the sprint whoosh, snaps the fisheye up (SprintCam) and
 	-- steps the wind louder (up to 2x). The first is a horse's sprint.
 	PenProfile = false, -- the owner's headshot and name over their pen (off for now: QM, Oct 9)
+	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
+	-- Client/SkyFlash. Start: its see-through at the flash (0: solid white). Distance: studs
+	-- round the camera; anything further off goes white with the sky.
+	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
 	SprintTiers = { 180, 360, 440 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },

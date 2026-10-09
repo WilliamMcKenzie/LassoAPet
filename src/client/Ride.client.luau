@@ -132,6 +132,7 @@ end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
+vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
 vfx.sprintTrail = require(script.Parent.SprintTrail) -- a white trail behind your mount while it sprints (QM, Oct 9)
 vfx.returnVignette = require(script.Parent.ReturnVignette) -- the run home's pulsing red edges (QM, Oct 9)
@@ -4587,6 +4588,7 @@ function vfx.updateSound()
 		vfx.sounds.play("sprint_whoosh", 0.32) -- (20% and 20% again under the usual 0.5: QM)
 	elseif now and tier > (vfx.sprintTier or 0) then
 		vfx.sounds.play("sprint_tier", 0.5) -- (its own sound: QM)
+		vfx.skyFlash.flash() -- (and the sky flashes white: QM)
 	end
 	vfx.wasSprinting, vfx.sprintTier = now, tier
 	-- (the wind loop while you sprint on a mount, the run home's too: Sounds.sprint_wind)
