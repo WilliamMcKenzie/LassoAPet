@@ -1,6 +1,6 @@
 -- The base's UI (QM, Oct 9: the new look, from QM's Figma), in place of the old home
 -- HUD (Config.HomeHud off). Montserrat ExtraBold everywhere, white with a black stroke.
---   Top left: Shop, Index and Merge, stacked (QM's art, label drawn in).
+--   Left, centred top to bottom: Shop, Index and Merge, stacked (QM's art, label drawn in).
 --   Bottom left: your stamina (the saved "Stamina", Gold.server) and your cash.
 --   Bottom centre, only by your pen's bull spot (Config.BullSpots): Upgrade, with the
 --     next pen level's price beside its cash icon, greyed when you can't afford it; the
@@ -34,7 +34,6 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 local CASH_GREEN = Color3.fromHex("00FF09")
 -- (in RefWidth pixels: QM's mockups at 1300 wide, x 1920 / 1300)
 local MARGIN = 18
-local MENU_TOP = 136 -- under Roblox's top bar
 local MENU_WIDTH = 296 -- each of Shop, Index, Merge
 local MENU_GAP = 12
 local ICON = 74 -- the counters' icons
@@ -113,7 +112,8 @@ local menu = Instance.new("Frame")
 menu.Name = "Menu"
 menu.BackgroundTransparency = 1
 menu.AutomaticSize = Enum.AutomaticSize.XY
-menu.Position = UDim2.fromOffset(MARGIN, MENU_TOP)
+menu.AnchorPoint = Vector2.new(0, 0.5) -- (centred down the left edge: QM, Oct 9)
+menu.Position = UDim2.new(0, MARGIN, 0.5, 0)
 local list = Instance.new("UIListLayout")
 list.SortOrder = Enum.SortOrder.LayoutOrder
 list.Padding = UDim.new(0, MENU_GAP)
