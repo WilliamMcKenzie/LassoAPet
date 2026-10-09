@@ -227,7 +227,8 @@ local function paintPen(pen)
 	local fence = sizePen(pen, n) or pen
 	local floor = floorOf(pen)
 	if floor then
-		local show = n > 1 and not fence:GetAttribute("CustomFloor")
+		-- (level 1 too, QM Oct 9: the Meadow's dirt checker, turned with the pen like the rest)
+		local show = not fence:GetAttribute("CustomFloor")
 		floor.Transparency = if show then 0 else 1
 		for _, texture in floor:GetChildren() do
 			if texture:IsA("Texture") then
@@ -236,10 +237,12 @@ local function paintPen(pen)
 		end
 		if show then
 			local prefix = WorldColors.prefix(n)
-			floor.Color = WorldColors.saturate(world:GetAttribute(prefix .. "GroundA") or Config.Biomes[n].GroundColors[1])
+			local name = if n == 1 then "Dirt" else "Ground"
+			local colors = if n == 1 then Config.Biomes[1].Patches.Dirt else Config.Biomes[n].GroundColors
+			floor.Color = WorldColors.saturate(world:GetAttribute(prefix .. name .. "A") or colors[1])
 			for _, texture in floor:GetChildren() do
 				if texture.Name == "Checker" then
-					texture.Color3 = WorldColors.saturate(world:GetAttribute(prefix .. "GroundB") or Config.Biomes[n].GroundColors[2])
+					texture.Color3 = WorldColors.saturate(world:GetAttribute(prefix .. name .. "B") or colors[2])
 				end
 			end
 		end
