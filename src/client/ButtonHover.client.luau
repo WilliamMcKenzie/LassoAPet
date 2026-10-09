@@ -15,7 +15,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Sounds = require(script.Parent.Sounds)
 
-local HOVER = 1.08
+local HOVER = 1.08 -- (a button's "Hover" attribute, if it has one, instead: BaseUi's are 1.04, QM Oct 9)
 local GROW = TweenInfo.new(0.1, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local SHRINK = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 local TICK, TICK_VOLUME = "reveal_tick", 0.15
@@ -67,7 +67,7 @@ local function hook(button)
 				return
 			end
 			grown = true
-			growing = TweenService:Create(scale, GROW, { Scale = HOVER })
+			growing = TweenService:Create(scale, GROW, { Scale = button:GetAttribute("Hover") or HOVER })
 			growing:Play()
 			tick()
 		end)
@@ -77,7 +77,7 @@ local function hook(button)
 			local scale = button:FindFirstChildOfClass("UIScale")
 			-- back up from the press (its own handler eases it to 1), unless something else set it
 			if hovering and grown and scale and scale.Scale <= 1 then
-				growing = TweenService:Create(scale, GROW, { Scale = HOVER })
+				growing = TweenService:Create(scale, GROW, { Scale = button:GetAttribute("Hover") or HOVER })
 				growing:Play()
 			end
 		end)
@@ -91,7 +91,7 @@ local function hook(button)
 		task.defer(function()
 			local scale = button:FindFirstChildOfClass("UIScale")
 			local ours = growing and growing.PlaybackState == Enum.PlaybackState.Playing
-			if scale and (ours or math.abs(scale.Scale - HOVER) < 0.001) then -- still ours
+			if scale and (ours or math.abs(scale.Scale - (button:GetAttribute("Hover") or HOVER)) < 0.001) then -- still ours
 				TweenService:Create(scale, SHRINK, { Scale = 1 }):Play()
 			end
 		end)

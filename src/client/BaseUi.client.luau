@@ -133,6 +133,7 @@ end } } do
 	local b = picture("ImageButton", menu, ART[spec[1]], MENU_WIDTH)
 	b.Name = spec[1]
 	b.LayoutOrder = i
+	b:SetAttribute("Hover", 1.04) -- (ButtonHover: half its usual 1.08 grow, QM)
 	b.Activated:Connect(spec[2])
 	pressable(b)
 end
