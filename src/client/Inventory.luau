@@ -19,7 +19,7 @@ local Inventory = {}
 
 local SLOT = 84
 local OUTLINE = 2 -- px of black round each egg picture (QM: about the slot number's stroke)
-local PANEL = "rbxassetid://137842424291809" -- assets/ui/CommonPanel.png (512 px, no border: QM, Oct 8)
+local PANEL = "rbxassetid://126644097924232" -- assets/ui/CommonPanel.png (512 px, flat grey, no border: QM, Oct 9)
 local PANEL_CORNER = 61 / 512 -- its corners' radius, of its width (measured from the PNG: QM rounded them less)
 local SCALE = 1.2 -- the whole bar, slots, numbers and outlines alike
 local GAP = 10
