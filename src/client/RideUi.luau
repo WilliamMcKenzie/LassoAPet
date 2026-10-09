@@ -27,28 +27,37 @@ local UserInputService = game:GetService("UserInputService")
 local Config = require(ReplicatedStorage.Shared.Config)
 
 local ART = { -- assets/ui/ride_hud/*.png (QM, Oct 9), drawn at the RefWidth screen's size
-	progress = { id = "rbxassetid://86921556071460", size = Vector2.new(698, 96) }, -- Progress.png
-	progressGrey = { id = "rbxassetid://76578450659995", size = Vector2.new(698, 96) }, -- ProgressDisabled.png
-	sprint = { id = "rbxassetid://109639882860064", size = Vector2.new(309, 262) }, -- Sprint.png
-	ability = { id = "rbxassetid://88075614762733", size = Vector2.new(309, 262) }, -- Ability.png
+	-- (v2, QM's trial, Oct 9: PR 291. The ability's active / grey / fill art and the phone
+	-- versions aren't redrawn yet: the first ones, stretched to the new ability's shape.)
+	progress = { id = "rbxassetid://106564742417734", size = Vector2.new(646, 110) }, -- Progress.png
+	progressGrey = { id = "rbxassetid://128596579962806", size = Vector2.new(646, 110) }, -- ProgressDisabled.png
+	sprint = { id = "rbxassetid://130814098563129", size = Vector2.new(256, 279) }, -- Sprint.png (its SHIFT keycap drawn in)
+	ability = { id = "rbxassetid://102257813039670", size = Vector2.new(256, 226) }, -- Ability.png (the potion)
 	abilityActive = { id = "rbxassetid://104085750641497", size = Vector2.new(309, 262) }, -- AbilityActive.png
 	abilityGrey = { id = "rbxassetid://115361393403366", size = Vector2.new(309, 262) }, -- AbilityDisabled.png
 	abilityFill = { id = "rbxassetid://138465717992479", size = Vector2.new(309, 262) }, -- AbilityFill.png
-	lasso = { id = "rbxassetid://131980018378422", size = Vector2.new(440, 176) }, -- Lasso.png
-	lassoGrey = { id = "rbxassetid://124076174344578", size = Vector2.new(440, 176) }, -- LassoDisabled.png
+	lasso = { id = "rbxassetid://90889935622136", size = Vector2.new(376, 147) }, -- Lasso.png (the E keycap drawn in)
+	lassoGrey = { id = "rbxassetid://113802338611810", size = Vector2.new(376, 147) }, -- LassoDisabled.png
+	shift = { id = "rbxassetid://85118816608847", size = Vector2.new(211, 85) }, -- ShiftKeycap.png
+	shiftDown = { id = "rbxassetid://121018909533952", size = Vector2.new(211, 85) }, -- ShiftKeycapPressed.png
+	space = { id = "rbxassetid://75274806899737", size = Vector2.new(211, 85) }, -- SpaceKeycap.png
+	spaceDown = { id = "rbxassetid://139435649769384", size = Vector2.new(211, 85) }, -- SpaceKeycapPressed.png
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
--- (RefWidth px, from QM's proportions, Oct 9: a 1712-wide shot x 1920 / 1712)
-local TOP = 37 -- the bar off the top
-local BAR_WIDTH = 692
-local CORNER_WIDTH = 260 -- Sprint and the ability, each
-local SPRINT_IN = Vector2.new(37, 31) -- in from the bottom-left corner
-local ABILITY_IN = Vector2.new(25, 29) -- in from the bottom-right corner
-local LASSO_WIDTH = 356
-local LASSO_BOTTOM = 38
-local FILL_FROM, FILL_TO = 0.010, 0.989 -- the bar's inner fill, of its width
-local LEVEL_AT = 0.465 -- the stamina number's left edge, of the bar's width (right of the bicep)
-local LEVEL_TEXT, LEVEL_STROKE = 50, 5 -- (QM's Figma)
+-- (RefWidth px, from QM's v2 mock, Oct 9: a 1296-wide shot x 1920 / 1296; the art's
+-- drawn at this size)
+local TOP = 18 -- the bar off the top
+local BAR_WIDTH = 646
+local CORNER_WIDTH = 256 -- Sprint and the ability, each
+local SPRINT_IN = Vector2.new(21, 10) -- in from the bottom-left corner
+local KEY_AT = Vector2.new(23, 194) -- the SHIFT keycap in Sprint's picture (top left)
+local KEY_DROP = 279 - 226 -- the SPACE keycap hangs this far under the ability (as SHIFT does under Sprint)
+local ABILITY_IN = Vector2.new(21, 10 + KEY_DROP) -- in from the bottom-right corner
+local LASSO_WIDTH = 376
+local LASSO_BOTTOM = 21
+local FILL_FROM, FILL_TO = 0.015, 0.983 -- the bar's inner fill, of its width
+local LEVEL_AT = 0.41 -- the stamina number's left edge, of the bar's width (right of the bicep)
+local LEVEL_TEXT, LEVEL_STROKE = 44, 5
 local GROW = 1.1
 local QUICK = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
@@ -153,6 +162,17 @@ local ability = picture("ImageButton", root, ART.ability, Vector2.new(1, 1), UDi
 ability.Name = "Ability"
 ability.AutoButtonColor = false
 local abilityScale = scaler(ability)
+
+-- The keycaps (QM, Oct 9): pressed only while you're holding that very key; none on a
+-- phone. SHIFT over the one drawn in Sprint, SPACE at the same spot under the ability.
+local function keycap(parent, at)
+	local k = picture("ImageLabel", parent, ART.shift, Vector2.zero, UDim2.fromOffset(at.X, at.Y))
+	k.Name = "Keycap"
+	k.ZIndex = 3
+	return k
+end
+local shiftKey = keycap(sprint, KEY_AT)
+local spaceKey = keycap(ability, Vector2.new(CORNER_WIDTH - KEY_AT.X - ART.space.size.X, 226 - 85 + KEY_DROP))
 local fillClip = Instance.new("Frame") -- the pink, filling up from the bottom
 fillClip.Name = "Fill"
 fillClip.BackgroundTransparency = 1
@@ -181,6 +201,26 @@ function RideUi.show(visible)
 	gui.Enabled = visible
 end
 
+local function touching()
+	local last = UserInputService:GetLastInputType()
+	if last == Enum.UserInputType.Touch then
+		return true
+	end
+	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+	if not gui.Enabled then
+		return
+	end
+	local keys = not touching()
+	shiftKey.Visible, spaceKey.Visible = keys, keys
+	shiftKey.Image = if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
+		then ART.shiftDown.id
+		else ART.shift.id
+	spaceKey.Image = if UserInputService:IsKeyDown(Enum.KeyCode.Space) then ART.spaceDown.id else ART.space.id
+end)
+
 function RideUi.setHold(fraction, _tired, stamina)
 	bar.Visible = fraction ~= nil
 	if fraction then
@@ -193,14 +233,7 @@ function RideUi.setHold(fraction, _tired, stamina)
 	end
 end
 
--- On a touch screen (the last input was a touch, or there's no keyboard): no keys to show.
-local function touching()
-	local last = UserInputService:GetLastInputType()
-	if last == Enum.UserInputType.Touch then
-		return true
-	end
-	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-end
+-- (touching(), above: on a touch screen, the last input was a touch or there's no keyboard)
 
 local sprinting = false
 function RideUi.setSprint(visible, active)
