@@ -42,7 +42,9 @@ local TEXT = 55 -- the counters' text (QM's Figma: 55, stroke 5)
 local STROKE = 5
 local UPGRADE_WIDTH = 524
 local UPGRADE_BOTTOM = 44
-local PRICE_AT = Vector2.new(0.18, 0.5) -- the price's left middle, on the Upgrade art (just right of its cash icon)
+-- The price's box on the Upgrade art, between its cash icon and "Upgrade" (Design: x
+-- 0.19-0.57, y 0.25-0.75 of the button), left-aligned, as big as fits.
+local PRICE_FROM, PRICE_TO = Vector2.new(0.19, 0.25), Vector2.new(0.57, 0.75)
 local PRICE_TEXT, PRICE_STROKE = 46, 4
 
 local gui = Instance.new("ScreenGui")
@@ -182,8 +184,13 @@ upgrade.Position = UDim2.new(0.5, 0, 1, -UPGRADE_BOTTOM)
 upgrade.Visible = false
 pressable(upgrade)
 local price = text(upgrade, PRICE_TEXT, CASH_GREEN, PRICE_STROKE)
-price.AnchorPoint = Vector2.new(0, 0.5)
-price.Position = UDim2.fromScale(PRICE_AT.X, PRICE_AT.Y)
+price.AutomaticSize = Enum.AutomaticSize.None
+price.Position = UDim2.fromScale(PRICE_FROM.X, PRICE_FROM.Y)
+price.Size = UDim2.fromScale(PRICE_TO.X - PRICE_FROM.X, PRICE_TO.Y - PRICE_FROM.Y)
+price.TextScaled = true
+local fit = Instance.new("UITextSizeConstraint")
+fit.MaxTextSize = PRICE_TEXT
+fit.Parent = price
 
 local function costNow()
 	local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
