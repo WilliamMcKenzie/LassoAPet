@@ -721,6 +721,9 @@ return {
 	-- The UI's art (QM, Oct 9: all being redrawn). false: every UI picture is a plain
 	-- placeholder with its art's name on it (UiArt.client); true puts the art back.
 	UiArt = false,
+	-- The home HUD's gold counter, Pets, Shop, Merge and Upgrade Pen buttons (QM, Oct 9:
+	-- off till the new UI). false hides them; true brings them back.
+	HomeHud = false,
 	Passes = {
 		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },
 		{ Key = "FastHatch", Name = "Fast Hatch", Price = 99, Id = 2014634454 },

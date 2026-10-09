@@ -574,6 +574,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	sideGui.Name = "GoldPets"
 	sideGui.ResetOnSpawn = false
 	sideGui.IgnoreGuiInset = true
+	sideGui.Enabled = Config.HomeHud ~= false -- (QM, Oct 9: no gold, Pets, Shop or Merge for now)
 	sideGui.Parent = playerGui
 	local sideRoot = root(sideGui)
 	-- Bottom left: gold, its icon with the number beside it overlapping the icon's edge.
@@ -768,7 +769,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		if trail then
 			cost = Config.RainbowTrail.Price
 		end
-		upgradeShown = cost ~= nil
+		upgradeShown = cost ~= nil and Config.HomeHud ~= false -- (QM, Oct 9: none for now)
 		upgrade.Visible = upgradeShown and gold.Visible
 		if cost then
 			local affordable = (player:GetAttribute("Gold") or 0) >= cost
