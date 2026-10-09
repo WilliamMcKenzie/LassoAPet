@@ -18,7 +18,6 @@ local UserInputService = game:GetService("UserInputService")
 local Inventory = {}
 
 local SLOT = 84
-local OUTLINE = 2 -- px of black round each egg picture (QM: about the slot number's stroke)
 local PANEL = "rbxassetid://126644097924232" -- assets/ui/CommonPanel.png (512 px, flat grey, no border: QM, Oct 9)
 local PANEL_CORNER = 61 / 512 -- its corners' radius, of its width (measured from the PNG: QM rounded them less)
 local SCALE = 1.2 -- the whole bar, slots, numbers and outlines alike
@@ -70,7 +69,9 @@ local function text(parent, size, textSize, strokeThickness)
 	l.Font = FONT
 	l.TextSize = textSize
 	l.TextColor3 = Color3.new(1, 1, 1)
-	stroked(l, strokeThickness)
+	if strokeThickness then
+		stroked(l, strokeThickness)
+	end
 	l.Parent = parent
 	return l
 end
@@ -160,23 +161,14 @@ local function redraw()
 		picture.ScaleType = Enum.ScaleType.Fit -- keep the picture's own shape
 		picture.ZIndex = 2
 		picture.Parent = slot
-		-- A black outline round the egg (QM, Oct 8): the same picture in black, nudged
-		-- OUTLINE px out in 8 directions behind it (no Highlight: phones).
-		for k = 0, 7 do
-			local a = k * math.pi / 4
-			local shadow = picture:Clone()
-			shadow.ImageColor3 = Color3.new(0, 0, 0)
-			shadow.ZIndex = 1
-			shadow.Position = picture.Position + UDim2.fromOffset(math.round(math.cos(a) * OUTLINE), math.round(math.sin(a) * OUTLINE))
-			shadow.Parent = slot
-		end
-		local number = text(slot, UDim2.fromOffset(24, 24), 20, 2)
+		-- (no black outline round the egg or on the numbers any more: QM, Oct 9)
+		local number = text(slot, UDim2.fromOffset(24, 24), 20)
 		number.Position = UDim2.fromOffset(4, 2)
 		number.Text = tostring(i)
 		number.ZIndex = 3
 		local count = tool:GetAttribute("Count") or 1
 		if count > 1 then
-			local label = text(slot, UDim2.fromScale(1, 1), 34, 3)
+			local label = text(slot, UDim2.fromScale(1, 1), 34)
 			label.Text = "x" .. count
 			label.ZIndex = 3
 		end
