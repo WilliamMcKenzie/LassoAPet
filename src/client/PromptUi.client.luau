@@ -4,8 +4,10 @@
 -- ExtraContent/scripts/CoreScripts/CoreScripts/ProximityPrompt.lua, Oct 9), made to run
 -- as a game script (no CoreGui / CorePackages; its AppFonts medium is Builder Sans
 -- Medium) and drawing Style Custom prompts instead of Default ones. The only change to
--- the look: the panel's BackgroundTransparency stays 1 (it was 0.2). Ride, Carl's Talk,
--- the eggs' Hatch and the egg machine's Roll are Style Custom for this.
+-- the look: the panel's BackgroundTransparency stays 1 (it was 0.2), and a soft dark
+-- glow sits behind it instead, darkest in the middle (GLOW: assets/ui/PromptGlow.png,
+-- made by script; QM, Oct 9). Ride, Carl's Talk, the eggs' Hatch and the egg
+-- machine's Roll are Style Custom for this.
 
 local UserInputService = game:GetService("UserInputService")
 local ProximityPromptService = game:GetService("ProximityPromptService")
@@ -79,6 +81,9 @@ local KeyCodeToFontSize = {
 	[Enum.KeyCode.Insert] = 10,
 	[Enum.KeyCode.Delete] = 10,
 }
+
+local GLOW = "rbxassetid://78103765703011" -- assets/ui/PromptGlow.png: black, fading out from the middle
+local GLOW_SEEN = 0.45 -- its ImageTransparency while shown (about half dark at the middle)
 
 -- Colors
 local BackgroundColor = Color3.new(0.07, 0.07, 0.07)
@@ -170,6 +175,18 @@ local function createPrompt(prompt, inputType, gui)
 	local promptUI = Instance.new("BillboardGui")
 	promptUI.Name = "Prompt"
 	promptUI.AlwaysOnTop = true
+
+	-- The dark glow behind it all (ours), a little bigger than the prompt.
+	local glow = Instance.new("ImageLabel")
+	glow.Name = "Glow"
+	glow.BackgroundTransparency = 1
+	glow.Image = GLOW
+	glow.ImageTransparency = 1
+	glow.AnchorPoint = Vector2.new(0.5, 0.5)
+	glow.Position = UDim2.fromScale(0.5, 0.5)
+	glow.Size = UDim2.fromScale(1.5, 1.5)
+	glow.ZIndex = 0
+	glow.Parent = promptUI
 
 	local frame = Instance.new("Frame")
 	frame.Size = UDim2.fromScale(0.5, 1)
@@ -267,6 +284,8 @@ local function createPrompt(prompt, inputType, gui)
 	table.insert(tweensForButtonHoldEnd, TweenService:Create(frame, tweenInfoFast, { BackgroundTransparency = 1 })) -- (no panel: was 0.2)
 	table.insert(tweensForFadeOut, TweenService:Create(frame, tweenInfoFast, { BackgroundTransparency = 1 }))
 	table.insert(tweensForFadeIn, TweenService:Create(frame, tweenInfoFast, { BackgroundTransparency = 1 })) -- (no panel: was 0.2)
+	table.insert(tweensForFadeIn, TweenService:Create(glow, tweenInfoFast, { ImageTransparency = GLOW_SEEN }))
+	table.insert(tweensForFadeOut, TweenService:Create(glow, tweenInfoFast, { ImageTransparency = 1 }))
 
 	local roundFrame = Instance.new("Frame")
 	roundFrame.Name = "RoundFrame"
