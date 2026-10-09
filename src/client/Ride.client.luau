@@ -4574,7 +4574,7 @@ end
 -- home; the gallop while you ride an animal that gallops (Config.GallopSound), louder
 -- and quicker the faster it goes. Sprint's whoosh as it starts.
 function vfx.updateSound()
-	vfx.sounds.setMusic(if phase == "idle" then "base" else "ride")
+	vfx.sounds.setMusic(if phase == "idle" then "base" elseif phase == "turning" or phase == "return" or phase == "home" then "home" else "ride")
 	local riding = mount and (phase == "outbound" or phase == "return" or phase == "turning") and not transfer
 	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] ~= false and (mount.hop or 0) < 2,
 		mount and mount.speed / Config.MountSpeed or 0)

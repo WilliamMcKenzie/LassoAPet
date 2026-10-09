@@ -44,6 +44,9 @@ local IDS = {
 local MUSIC = {
 	base = "rbxassetid://1840347412", -- Way Out West (APM): at home
 	ride = "rbxassetid://1836101135", -- Huba Huba Cartoon Chase (APM): out riding
+	-- The run home (QM, Oct 9: more panicked): Running Faster A (APM, Moritz Bintig, 2:19).
+	-- Others to try here: Frantic Pursuit 1845474796 (1:02), Crazy Hurry 1845693355 (1:04).
+	home = "rbxassetid://1847683499",
 }
 local VOLUME = 0.5
 local GALLOP_VOLUME = 0.35
