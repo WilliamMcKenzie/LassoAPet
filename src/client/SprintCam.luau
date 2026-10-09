@@ -3,13 +3,13 @@
 -- the camera pulls in on you, easing in over InTime seconds and back over OutTime.
 -- How much goes with your speed (QM, Oct 9): Fov / Zoom as set at a horse's sprint
 -- (HorseSprint studs/s), more the faster you go (up to MaxScale x), less if slower,
--- in tiers (Config.SprintTiers: the speeds each one starts at): crossing into a new
--- tier snaps it to speed / HorseSprint, and within a tier it only creeps on at Creep x
--- that rate. Config.SprintCam.
+-- easing smoothly with it. Sprint tiers (Config.SprintTiers: the speeds each one starts
+-- at): breaking into a higher one bounces the camera's distance, animation style (QM,
+-- Oct 9): in to Bounce.In x, out to Bounce.Out x, then settling back. Config.SprintCam.
 --
 --   SprintCam.update(dt, sprinting, speed) -> degrees to add to the field of view, x the camera's distance
 --   SprintCam.tier(speed) -> 0 (under the first) .. #Config.SprintTiers
---   SprintCam.tierLoudness(tier) -> 1 .. 2: the wind's volume step for that tier
+--   SprintCam.tierLoudness(tier) -> 1 .. 2: the wind's volume step for that tier (0 = 1x)
 
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
@@ -17,7 +17,8 @@ local SprintCam = {}
 
 local t = 0 -- 0 (off) .. 1 (full sprint look)
 local scale = 1 -- how much, by speed (eased, so a speed change doesn't jump the view)
-local tierBase, lastTier = 1, 0
+local lastTier = 0
+local bounceT -- seconds into a tier-up bounce (nil: none)
 
 function SprintCam.tier(speed)
 	local n = 0
@@ -30,9 +31,27 @@ function SprintCam.tier(speed)
 end
 
 function SprintCam.tierLoudness(tier)
-	-- even steps from 1x (the first tier) to 2x (the last: QM, Oct 9)
+	-- even steps from 1x (under the first tier) to 2x (the last: QM, Oct 9)
 	local n = #Config.SprintTiers
-	return if n > 1 then 1 + math.clamp(tier - 1, 0, n - 1) / (n - 1) else 1
+	return if n > 0 then 1 + math.clamp(tier, 0, n) / n else 1
+end
+
+-- The bounce's x on the camera's distance, b seconds in: in (eased out), out past where
+-- it was (eased in and out), then back (eased out).
+local function bounce(cfg, b)
+	local function out(x)
+		return 1 - (1 - x) * (1 - x)
+	end
+	if b < cfg.InTime then
+		return 1 + (cfg.In - 1) * out(b / cfg.InTime)
+	end
+	b -= cfg.InTime
+	if b < cfg.OutTime then
+		local x = b / cfg.OutTime
+		return cfg.In + (cfg.Out - cfg.In) * x * x * (3 - 2 * x)
+	end
+	b -= cfg.OutTime
+	return cfg.Out + (1 - cfg.Out) * out(math.min(b / cfg.SettleTime, 1))
 end
 
 function SprintCam.update(dt, sprinting, speed)
@@ -50,17 +69,24 @@ function SprintCam.update(dt, sprinting, speed)
 	if sprinting and speed then
 		local full = math.clamp(speed / cfg.HorseSprint, cfg.MinScale, cfg.MaxScale)
 		local tier = SprintCam.tier(speed)
-		if tier ~= lastTier then
-			lastTier = tier
-			tierBase = full -- (a new tier: it snaps to the full amount for this speed)
+		if tier > lastTier then
+			bounceT = 0 -- (up a tier: bounce)
 		end
-		local want = tierBase + (full - tierBase) * cfg.Creep
-		scale += (want - scale) * (1 - math.exp(-(if math.abs(want - scale) > 0.05 then 18 else 4) * dt)) -- (snappy on a tier change)
+		lastTier = tier
+		scale += (full - scale) * (1 - math.exp(-4 * dt))
 	else
 		lastTier = 0
 	end
 	k *= scale
-	return (cfg.Fov - 70) * k, math.max(1 + (cfg.Zoom - 1) * k, 0.4)
+	local zoom = math.max(1 + (cfg.Zoom - 1) * k, 0.4)
+	if bounceT then
+		bounceT += dt
+		zoom *= bounce(cfg.Bounce, bounceT)
+		if bounceT >= cfg.Bounce.InTime + cfg.Bounce.OutTime + cfg.Bounce.SettleTime then
+			bounceT = nil
+		end
+	end
+	return (cfg.Fov - 70) * k, zoom
 end
 
 return SprintCam

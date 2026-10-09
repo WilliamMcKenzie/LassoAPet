@@ -4589,7 +4589,7 @@ function vfx.updateSound()
 	vfx.wasSprinting, vfx.sprintTier = now, tier
 	-- (the wind loop while you sprint on a mount, the run home's too: Sounds.sprint_wind)
 	vfx.sounds.setSprintWind(mount ~= nil and not transfer and (phase == "outbound" or phase == "return") and sprinting(),
-		vfx.sprintCam.tierLoudness(math.max(tier, 1))) -- (louder a step each sprint tier, up to 2x: QM)
+		vfx.sprintCam.tierLoudness(tier)) -- (louder a step each sprint tier, up to 2x: QM)
 end
 
 -- MERGE (QM, Oct 4): every pet going into a merge is pulled up into one spot 2 m
