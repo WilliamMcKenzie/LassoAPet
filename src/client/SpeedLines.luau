@@ -52,7 +52,9 @@ local function build()
 	emitter.Rotation = NumberRange.new(90)
 	emitter.RotSpeed = NumberRange.new(-0.5, 0.5)
 	emitter.Parent = attachment
-	part.Parent = workspace.CurrentCamera
+	-- (in the workspace, not the camera: when Roblox swaps the camera after a respawn the
+	-- old one goes, and the lines went with it for good, Oct 9)
+	part.Parent = workspace
 end
 
 function SpeedLines.update(speed)
@@ -62,7 +64,7 @@ function SpeedLines.update(speed)
 		end
 		return
 	end
-	if not part then
+	if not part or not part:IsDescendantOf(workspace) then -- (rebuilt if anything took it away)
 		build()
 	end
 	local camera = workspace.CurrentCamera
@@ -70,9 +72,6 @@ function SpeedLines.update(speed)
 	local offset = if view.X / math.max(view.Y, 1) > 1.5 then cfg.Offset else cfg.NarrowOffset
 	-- (QM's: the camera's own turn, moved forward along its look)
 	part.CFrame = camera.CFrame + camera.CFrame.LookVector * (offset / (camera.FieldOfView / 70))
-	if part.Parent ~= camera then
-		part.Parent = camera
-	end
 	emitter.Rate = cfg.Rate * math.clamp(speed / cfg.Speed, 0, cfg.MaxScale)
 end
 
