@@ -3768,12 +3768,7 @@ local function updateRider(dt)
 			mount.animal:setScale(vfx.ownSize(mount)) -- (back on a pet you let go: merged or grown, it still is)
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
-			grace = Config.LandingGrace -- (stamina isn't refilled: QM, Oct 8)
-			local earned = Config.LassoCoins[mount.kind] or Config.RarityCoins[mount.animal.Rarity]
-			coins += earned
-			Hud.setCoins(coins)
-			local point = camera:WorldToViewportPoint(hrp.Position + Vector3.new(0, 4, 0))
-			Hud.coinPopup(Vector2.new(point.X, point.Y), earned)
+			grace = Config.LandingGrace -- (stamina isn't refilled: QM, Oct 8; and no coins for it any more, Oct 9)
 		end
 		return
 	end
@@ -3835,7 +3830,7 @@ local function updateHud()
 	if phase == "outbound" then
 		-- The stamina bar, your stamina level on it (QM, Oct 8).
 		-- (the number's the stamina left, counting down with the bar: QM, Oct 9)
-		Hud.setHold(if mount then hold / holdTime(mount) else 1, true, math.ceil(hold / Config.Stamina.Seconds))
+		Hud.setHold(hold / holdTime(nil), true, math.ceil(hold / Config.Stamina.Seconds)) -- (mid-lasso too: no mount, the same stamina)
 		Hud.setDistance(string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		Hud.setAction("LASSO", actionTarget ~= nil)
 	end
