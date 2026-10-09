@@ -232,7 +232,7 @@ for z0 = 0, last + 0.5, -STRIP do
 	strip.CanQuery = false
 	strip.CanTouch = false
 	strip.Size = Vector3.new(2 * half, 2, z0 - z1)
-	strip.CFrame = CFrame.new(0, -2.2, zc) -- top 0.2 under the dirt patches' (a stud under the grass: Oct 9, at -0.2 it hid them)
+	strip.CFrame = CFrame.new(0, -3.2, zc) -- top at -2.2, under every ground part's bottom (-2): at -1.2, 0.2 under the dirt's top, it flickered through it far off (Oct 9; at -0.2 it hid the dirt)
 	if best then
 		strip.Color, strip.Material = best.Color, best.Material
 		strip.TopSurface = best.TopSurface
