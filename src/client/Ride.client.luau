@@ -132,6 +132,7 @@ end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
+vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
 vfx.homeBiome = {} -- [kind] = the index of the first biome whose herd lists it (the Horse: the Meadow)
 for b, biome in Config.Biomes do
 	for kind in biome.Herd or {} do
@@ -4413,14 +4414,18 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	-- times further for each size tier above small (Config.PetTiers).
 	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
-	local z = vfx.camZoom
+	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and phase == "outbound" and sprinting())
+	local z = vfx.camZoom * sprintZoom
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
 	fov = math.max(fov, math.min(fov + vfx.speedFx.fovKick(), Config.SpeedFeel.MaxFov))
-	camera.FieldOfView += (fov - camera.FieldOfView) * (1 - math.exp(-3 * dt))
+	-- (the sprint's widening on top, eased on its own: SprintCam; what's under it eases as before)
+	local base = camera.FieldOfView - (vfx.sprintFov or 0)
+	base += (fov - base) * (1 - math.exp(-3 * dt))
+	camera.FieldOfView, vfx.sprintFov = base + sprintFov, sprintFov
 end)
 
 -- Continue on the fail screen: the server asks for the Robux (Shop.server) and
