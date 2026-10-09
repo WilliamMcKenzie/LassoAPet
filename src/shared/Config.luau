@@ -255,7 +255,7 @@ return {
 	-- which cut tens of thousands of textures. Off (or those variants missing from
 	-- MaterialService): the stud Textures as before. Shared/Studs.
 	StudMaterial = true,
-	Sky = "Anime", -- "Anime" (the Creator Store's Anime sky, QM Oct 6; tried Flat again and kept Anime) or "Flat" (one flat #59D9FD): World.server
+	Sky = "Flat", -- (QM, Oct 9: back to Oct 5 evening's flat sky) "Anime" (the Creator Store's Anime sky, QM Oct 6) or "Flat" (one flat #59D9FD): World.server
 	WalkSpeed = 32, -- on foot, studs a second (Roblox's default is 16; QM, Oct 6: 2x, walking round took too long)
 	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
 	-- On the ride home with an egg the stampede gets out of your way (QM, Oct 6, to
