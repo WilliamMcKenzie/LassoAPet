@@ -64,21 +64,20 @@ def rects(grid, nx, nz):
     return out
 
 
-PEN_MARGIN = 1  # studs past the biggest pen's edge a cell counts as under it
-
-
-def under_pen(lx, lz):
-    """Does the 8-stud cell at (lx, lz) reach under any pen at its biggest?"""
-    half = pens.SIZES[-1] * pens.TILE / 2 + PEN_MARGIN
+def pen_cover(lx, lz):
+    """How much (0..1) of the 8-stud cell at (lx, lz) the most of any pen covers at its biggest."""
+    half = pens.SIZES[-1] * pens.TILE / 2
+    best = 0
     for gx, gz, fx, fz in pens.PENS:
         m = pens.frame(fx, fz)
-        centre = np.array([gx, 0, gz]) + m @ np.array([0, 0, half - PEN_MARGIN])
-        for a in np.linspace(0, CELL, 5):
-            for b in np.linspace(0, CELL, 5):
+        centre = np.array([gx, 0, gz]) + m @ np.array([0, 0, half])
+        n = 0
+        for a in np.linspace(0.5, CELL - 0.5, 6):
+            for b in np.linspace(0.5, CELL - 0.5, 6):
                 local = m.T @ (np.array([lx + a, 0, lz + b]) - centre)
-                if abs(local[0]) < half and abs(local[2]) < half:
-                    return True
-    return False
+                n += abs(local[0]) < half and abs(local[2]) < half
+        best = max(best, n / 36)
+    return best
 
 
 def main():
@@ -95,12 +94,17 @@ def main():
         if 0 <= i < nx and 0 <= j < nz:
             count[i][j] += 1
     grid = [[1 if count[i][j] >= 2 else 0 for j in range(nz)] for i in range(nx)]
-    # Under the pens (QM, Oct 9): every cell the biggest pen covers, even in part, is
-    # dirt, so no corner of grass pokes up beside a turned pen's floor (PenLevel).
+    # A grass cell nearly all under a turned pen (at its biggest), with only dirt round
+    # it outside, pokes a corner of grass out beside the pen's floor: those go dirt
+    # (QM, Oct 9: two of them; sinking everything under the pens was too much).
+    cover = [[pen_cover(x0 + i * CELL, z0 + j * CELL) for j in range(nz)] for i in range(nx)]
     for i in range(nx):
         for j in range(nz):
-            if under_pen(x0 + i * CELL, z0 + j * CELL):
-                grid[i][j] = 1
+            if grid[i][j] == 0 and 0 < cover[i][j] < 1:
+                out = [(a, b) for a, b in ((i + 1, j), (i - 1, j), (i, j + 1), (i, j - 1))
+                       if 0 <= a < nx and 0 <= b < nz and cover[a][b] < 1]
+                if out and all(grid[a][b] == 1 for a, b in out):
+                    grid[i][j] = 1
     # Grass right along the walls (QM, Oct 9): sunk dirt against one opened a hole under it.
     c = d["base"]["corridor_half_width"]
     for i in range(nx):
