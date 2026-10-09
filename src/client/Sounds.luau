@@ -21,6 +21,10 @@ local IDS = {
 	egg_grab = "rbxassetid://94379425317312", -- an egg lassoed mid-ride
 	gallop_loop = "rbxassetid://129029116650332", -- while riding a galloping animal (Config.GallopSound)
 	sprint_whoosh = "rbxassetid://73983934702758", -- Sprint starts
+	-- A rush of wind looping while you sprint on a mount (QM, Oct 9): Plasma Trails Constant
+	-- Airy Whooshing Windy (ProSoundEffects, 0:33). Others to try: Spiraling Wind Data
+	-- Tunnel Travelling 2 9119462999 (0:31), Desert Wind Whistley Light Gusts 1 9114057104 (0:37).
+	sprint_wind = "rbxassetid://9125742262",
 	-- each lasso throw at your training dummy (Training.client; QM, Oct 8). For now Sprint's
 	-- whoosh: assets/sfx/LassoWhoosh.ogg needs uploading in Studio (audio can't be from here)
 	training_whoosh = "rbxassetid://73983934702758",
@@ -126,6 +130,28 @@ function Sounds.setGallop(on, pace)
 	if not gallop.IsPlaying then
 		gallop:Play()
 	end
+end
+
+-- The sprint's wind loop, faded in and out (Sounds.setSprintWind(on)).
+local SPRINT_WIND_VOLUME = 0.35
+local wind, windTween
+function Sounds.setSprintWind(on)
+	if IDS.sprint_wind == "" then
+		return
+	end
+	wind = wind or newSound(IDS.sprint_wind, 0, true)
+	if on == (wind:GetAttribute("On") == true) then
+		return
+	end
+	wind:SetAttribute("On", on)
+	if on and not wind.IsPlaying then
+		wind:Play()
+	end
+	if windTween then
+		windTween:Cancel()
+	end
+	windTween = TweenService:Create(wind, TweenInfo.new(if on then 0.25 else 0.5), { Volume = if on then SPRINT_WIND_VOLUME else 0 })
+	windTween:Play()
 end
 
 local music = {}

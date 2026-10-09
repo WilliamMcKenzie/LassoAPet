@@ -3537,7 +3537,7 @@ local function reachHome()
 		phase = "home"
 		heroLeap = { t = 0, fromZ = mount.z, toZ = START_LINE_Z + Config.HomeLandPast }
 		vfx.sounds.play("arrive_home")
-		vfx.sounds.play("record_scratch") -- the run home's music stops dead, and it's the base's again (QM, Oct 9)
+		vfx.sounds.play("record_scratch", 0.45) -- (10% under the usual 0.5: QM) -- the run home's music stops dead, and it's the base's again (QM, Oct 9)
 		vfx.sounds.setMusic("base", true)
 		Hud.setCutscene(true)
 	end
@@ -4581,6 +4581,8 @@ function vfx.updateSound()
 		vfx.sounds.play("sprint_whoosh")
 	end
 	vfx.wasSprinting = now
+	-- (the wind loop while you sprint on a mount, the run home's too: Sounds.sprint_wind)
+	vfx.sounds.setSprintWind(mount ~= nil and not transfer and (phase == "outbound" or phase == "return") and sprinting())
 end
 
 -- MERGE (QM, Oct 4): every pet going into a merge is pulled up into one spot 2 m
