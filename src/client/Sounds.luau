@@ -20,6 +20,7 @@ local IDS = {
 	lasso_land = "rbxassetid://132698985263025", -- landed on the animal it caught
 	egg_grab = "rbxassetid://94379425317312", -- an egg lassoed mid-ride
 	gallop_loop = "rbxassetid://129029116650332", -- while riding a galloping animal (Config.GallopSound)
+	sprint_tier = "rbxassetid://137322083927464", -- Up a sprint tier: Speed Burst SFX (dash cloth, QM's pick, Oct 9)
 	sprint_whoosh = "rbxassetid://79833203443837", -- Sprint starts: speed woosh (compressed cloth sfx dash, QM's pick, Oct 9; was 73983934702758)
 	ability_use = "rbxassetid://9085320874", -- a pet's ability goes off: Speed Up (Brawl Stars SFX, QM's pick, Oct 9)
 	-- A rush of wind looping while you sprint on a mount, a subtle sense of speed (QM, Oct 9):

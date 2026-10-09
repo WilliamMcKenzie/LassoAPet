@@ -4583,8 +4583,10 @@ function vfx.updateSound()
 	-- The whoosh as you start sprinting, and again each time you break into a faster
 	-- sprint tier (Config.SprintTiers; QM, Oct 9).
 	local tier = if now then vfx.sprintCam.tier(mount.speed * (vfx.speedGain or 1)) else 0
-	if (now and not vfx.wasSprinting) or (now and tier > (vfx.sprintTier or 0) and vfx.wasSprinting) then
+	if now and not vfx.wasSprinting then
 		vfx.sounds.play("sprint_whoosh", 0.32) -- (20% and 20% again under the usual 0.5: QM)
+	elseif now and tier > (vfx.sprintTier or 0) then
+		vfx.sounds.play("sprint_tier", 0.5) -- (its own sound: QM)
 	end
 	vfx.wasSprinting, vfx.sprintTier = now, tier
 	-- (the wind loop while you sprint on a mount, the run home's too: Sounds.sprint_wind)
