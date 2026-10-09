@@ -131,6 +131,7 @@ local function tierOf(kind)
 end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
+vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
 vfx.homeBiome = {} -- [kind] = the index of the first biome whose herd lists it (the Horse: the Meadow)
 for b, biome in Config.Biomes do
 	for kind in biome.Herd or {} do
@@ -4352,6 +4353,7 @@ end)
 RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, function(dt)
 	local riding = mount and not cutscene and not heroLeap and (phase == "outbound" or phase == "return")
 	vfx.speedFx.update(dt, if riding and sprinting() then mount.speed * (vfx.speedGain or 1) else 0) -- speed lines while sprinting, by the uncurved speed
+	vfx.speedLines.update(if riding then mount.speed * (vfx.speedGain or 1) else 0) -- QM's particle speed lines, riding at all (Config.SpeedLines)
 	if phase == "idle" then
 		return
 	end

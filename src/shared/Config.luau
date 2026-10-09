@@ -659,6 +659,11 @@ return {
 	-- with speed as (speed / Ref) ^ Curve (a square root: quick to build, gentle at the
 	-- top) to full at Ref studs/s and over. Lines, their Opacity and LineSpeed, and
 	-- FovKick degrees wider (up to MaxFov), all at full strength.
+	-- Speed lines as particles in front of the camera (QM, Oct 9; Client/SpeedLines, the
+	-- Creator Store's "Speedlines"): Rate a second at Speed studs/s (a sprint), more or
+	-- fewer with your speed up to MaxScale x, none off a ride. Offset: studs ahead of
+	-- the camera (NarrowOffset on a screen 1.5 or less wide to high).
+	SpeedLines = { On = true, Rate = 1500, Speed = 88, MaxScale = 2, Offset = 10, NarrowOffset = 13 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
 	LassoRange = 34,
