@@ -21,14 +21,14 @@ local player = Players.LocalPlayer
 local cfg = Config.BaseUi
 
 local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
-	shop = { id = "rbxassetid://99934831903160", size = Vector2.new(600, 226) }, -- Shop.png
-	index = { id = "rbxassetid://133890395367376", size = Vector2.new(600, 226) }, -- Index.png
-	merge = { id = "rbxassetid://92300419097816", size = Vector2.new(600, 226) }, -- Merge.png
+	shop = { id = "rbxassetid://72615285013782", size = Vector2.new(600, 226) }, -- Shop.png
+	index = { id = "rbxassetid://113765538490307", size = Vector2.new(600, 226) }, -- Index.png
+	merge = { id = "rbxassetid://127823791499018", size = Vector2.new(600, 226) }, -- Merge.png
 	stamina = { id = "rbxassetid://84856325662967", size = Vector2.new(256, 256) }, -- Stamina.png
 	cash = { id = "rbxassetid://76663783463176", size = Vector2.new(256, 256) }, -- Cash.png
-	upgrade = { id = "rbxassetid://124904150733542", size = Vector2.new(1024, 220) }, -- Upgrade.png
-	upgradeGrey = { id = "rbxassetid://95580860390405", size = Vector2.new(1024, 220) }, -- UpgradeGrey.png: Upgrade at 0 saturation, for when you can't afford it
-	unlock = { id = "rbxassetid://73280420976306", size = Vector2.new(1024, 220) }, -- Unlock.png ("FREE" drawn in)
+	upgrade = { id = "rbxassetid://92263076758398", size = Vector2.new(1024, 220) }, -- Upgrade.png
+	upgradeGrey = { id = "rbxassetid://97703848306535", size = Vector2.new(1024, 220) }, -- UpgradeGrey.png: Upgrade at 0 saturation, for when you can't afford it
+	unlock = { id = "rbxassetid://70859673608894", size = Vector2.new(1024, 220) }, -- Unlock.png ("FREE" drawn in)
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local CASH_GREEN = Color3.fromHex("00FF09")
