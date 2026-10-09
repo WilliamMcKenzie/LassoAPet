@@ -34,8 +34,8 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 local CASH_GREEN = Color3.fromHex("00FF09")
 -- (in RefWidth pixels: QM's mockups at 1300 wide, x 1920 / 1300)
 local MARGIN = 18
-local MENU_WIDTH = 296 -- each of Shop, Index, Merge
-local MENU_GAP = 12
+local MENU_WIDTH = 266 -- each of Shop, Index, Merge (QM, Oct 9: a bit smaller, was 296)
+local MENU_GAP = 25
 local ICON = 74 -- the counters' icons
 local TEXT = 55 -- the counters' text (QM's Figma: 55, stroke 5)
 local STROKE = 5
