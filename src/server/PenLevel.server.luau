@@ -156,6 +156,9 @@ local function floorOf(pen)
 	floor.CanTouch = false
 	floor.CastShadow = false
 	floor.TopSurface = Enum.SurfaceType.Smooth
+	for _, side in { "FrontSurface", "BackSurface", "LeftSurface", "RightSurface" } do
+		floor[side] = Enum.SurfaceType.Studs -- (studded sides, like the ground's: QM)
+	end
 	floor.Size = Vector3.new(tiles.Size.X, FLOOR_DEPTH, tiles.Size.Z)
 	floor.CFrame = CFrame.new(tiles.Position.X, FLOOR_TOP - FLOOR_DEPTH / 2, tiles.Position.Z) * tiles.CFrame.Rotation -- (turned with the pen: the arc base's pens face the yard)
 	local ground = world.Ground:GetChildren()[1]

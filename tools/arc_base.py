@@ -24,7 +24,13 @@ What the Luau does to Workspace.World (re-running it is fine: it rebuilds the sa
 """
 
 import json
+import sys
 from pathlib import Path
+
+import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pens  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 LAYOUT = ROOT / "design" / "base_arc" / "arc_layout.json"
@@ -58,6 +64,23 @@ def rects(grid, nx, nz):
     return out
 
 
+PEN_MARGIN = 1  # studs past the biggest pen's edge a cell counts as under it
+
+
+def under_pen(lx, lz):
+    """Does the 8-stud cell at (lx, lz) reach under any pen at its biggest?"""
+    half = pens.SIZES[-1] * pens.TILE / 2 + PEN_MARGIN
+    for gx, gz, fx, fz in pens.PENS:
+        m = pens.frame(fx, fz)
+        centre = np.array([gx, 0, gz]) + m @ np.array([0, 0, half - PEN_MARGIN])
+        for a in np.linspace(0, CELL, 5):
+            for b in np.linspace(0, CELL, 5):
+                local = m.T @ (np.array([lx + a, 0, lz + b]) - centre)
+                if abs(local[0]) < half and abs(local[2]) < half:
+                    return True
+    return False
+
+
 def main():
     d = json.loads(LAYOUT.read_text())
     x0, x1 = d["base"]["x"]
@@ -72,6 +95,12 @@ def main():
         if 0 <= i < nx and 0 <= j < nz:
             count[i][j] += 1
     grid = [[1 if count[i][j] >= 2 else 0 for j in range(nz)] for i in range(nx)]
+    # Under the pens (QM, Oct 9): every cell the biggest pen covers, even in part, is
+    # dirt, so no corner of grass pokes up beside a turned pen's floor (PenLevel).
+    for i in range(nx):
+        for j in range(nz):
+            if under_pen(x0 + i * CELL, z0 + j * CELL):
+                grid[i][j] = 1
     floor = []
     for k, i0, j0, i1, j1 in rects(grid, nx, nz):
         lx, lz = x0 + i0 * CELL, z0 + j0 * CELL
