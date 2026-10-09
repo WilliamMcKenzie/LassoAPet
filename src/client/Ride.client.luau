@@ -758,7 +758,7 @@ end
 -- Config.PetIncome as "+N$" over its head, like the coins for switching rides,
 -- except the ones near you showing their nameplate (PenPets.plated: PetPlates.client).
 ReplicatedStorage:WaitForChild("PetIncome").OnClientEvent:Connect(function()
-	if phase ~= "idle" then
+	if phase ~= "idle" or not Config.PetPopups then -- (Config.PetPopups off: none, QM Oct 9)
 		return
 	end
 	for _, model in homePets() do

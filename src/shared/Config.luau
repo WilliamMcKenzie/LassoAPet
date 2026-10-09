@@ -729,6 +729,7 @@ return {
 	-- screen (QM, Oct 9: off for now; a crash takes you home by itself). The egg reveal
 	-- stays. true brings it back.
 	RideHud = false,
+	PetPopups = false, -- the "+$N" over each pet at home as it pays out (QM, Oct 9: off for now; income's the same)
 	-- The base UI (BaseUi.client; QM, Oct 9): Montserrat ExtraBold, laid out on a
 	-- RefWidth-wide screen (QM's Figma) and scaled to yours (x HudScale). Upgrade / Unlock
 	-- shows within BullReach studs of your pen's bull spot (BullSpots, by pen number:
