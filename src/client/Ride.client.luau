@@ -932,6 +932,7 @@ startRide = function(model, at)
 	vfx.rideAgain = nil
 	leadFromZ = spot.Z - 8
 	exitPath = if fromHerd or at then nil else penExitPath()
+	vfx.exitTrack, vfx.exitLat = nil, nil
 	local runningAt = if fromHerd then fromHerd.speed or 0 else 0 -- a stampede animal keeps its pace
 	mount.x, mount.z, mount.yaw, mount.speed, mount.latVel = spot.X, spot.Z, if exitPath then penYaw() else 0, runningAt, 0 -- (out of your pen: facing out of its gap)
 	mount.feast = nil -- (the Blue Crab starts every ride at its own size)
@@ -3441,24 +3442,37 @@ local function updateMount(dt)
 	end
 	if phase == "outbound" and exitPath then
 		-- Out of your pen: out of its gap and straight across the yard to the corridor
-		-- (penExitPath), turning smoothly onto each leg.
+		-- (penExitPath), turning smoothly onto each leg. You can steer off the line a
+		-- little on the way (QM, Oct 9: Config.ExitSteer), always drawn back to it, and
+		-- less so near the corridor, so it still gets there.
+		local cfg = Config.ExitSteer
+		local track = vfx.exitTrack or Vector2.new(mount.x, mount.z) -- (the point on the path itself)
 		local to = exitPath[1]
-		local dx, dz = to.X - mount.x, to.Y - mount.z
+		local dx, dz = to.X - track.X, to.Y - track.Y
 		local len = math.sqrt(dx * dx + dz * dz)
 		local step = mount.speed * dt
+		local ux, uz = if len > 1e-3 then dx / len else 0, if len > 1e-3 then dz / len else -1
 		if len <= step then
-			mount.x, mount.z = to.X, to.Y
+			track = to
 			table.remove(exitPath, 1)
-			if #exitPath == 0 then
-				exitPath = nil
-				mount.yaw, mount.latVel = 0, 0 -- (square to the start line: riding as usual from here)
-			end
 		else
-			mount.x += dx / len * step
-			mount.z += dz / len * step
+			track += Vector2.new(ux * step, uz * step)
 			local want = math.atan2(-dx, -dz) -- (yaw 0 faces -z)
 			local diff = (want - mount.yaw + math.pi) % (2 * math.pi) - math.pi
 			mount.yaw += diff * (1 - math.exp(-8 * dt))
+		end
+		-- Off the line: your steering pushes it aside, and it's always pulled back.
+		local last = exitPath[#exitPath]
+		local left = if last then (last - track).Magnitude else 0
+		local most = cfg.MaxOffset * math.clamp(left / cfg.SettleOver, 0, 1)
+		local lat = (vfx.exitLat or 0) + readSteer() * Config.SteerSpeed * cfg.Strength * dt
+		lat *= math.exp(-cfg.Pull * dt)
+		lat = math.clamp(lat, -most, most)
+		vfx.exitTrack, vfx.exitLat = track, lat
+		mount.x, mount.z = track.X - uz * lat, track.Y + ux * lat -- (its right: (-look.Z, look.X))
+		if #exitPath == 0 then
+			exitPath, vfx.exitTrack, vfx.exitLat = nil, nil, nil
+			mount.yaw, mount.latVel = 0, 0 -- (square to the start line: riding as usual from here)
 		end
 		mount.latVel = 0
 		place(mount, 0)
