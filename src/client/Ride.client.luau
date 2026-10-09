@@ -717,11 +717,12 @@ local function spawnStarter()
 	end
 end
 
--- One prompt, kept on whichever pet RIDE rides. It draws nothing; E still
--- works. The RIDE button shows while you're within RIDE_REACH of the pet, measured
--- here (updateRideTarget), not from the prompt's PromptShown: that didn't come back
--- after a respawn (QM, Oct 7), and RIDE was gone for good. It lives in Terrain and
--- follows the pet each frame, so it isn't destroyed along with a pet's model.
+-- One prompt, kept on whichever pet you'd ride: Roblox's own "Hold E to Ride"
+-- (QM, Oct 9: in place of the RIDE button; a controller's button and a tap on
+-- phones come with it). It's this client's alone, so only you see it on your pet.
+-- Whether you're near enough is still measured here (updateRideTarget). It lives
+-- in Terrain and follows the pet each frame, so it isn't destroyed along with a
+-- pet's model.
 local rideSpot = Instance.new("Attachment")
 local rideOffset = CFrame.identity -- rideSpot relative to the pet's root
 local rideSize = Vector3.one -- the pet's bounding box
@@ -731,7 +732,9 @@ local ridePrompt = Instance.new("ProximityPrompt")
 ridePrompt.ActionText = "Ride"
 ridePrompt.RequiresLineOfSight = false
 ridePrompt.MaxActivationDistance = RIDE_REACH
-ridePrompt.Style = Enum.ProximityPromptStyle.Custom
+ridePrompt.Style = Enum.ProximityPromptStyle.Default
+ridePrompt.KeyboardKeyCode = Enum.KeyCode.E
+ridePrompt.HoldDuration = 0.5
 ridePrompt.Parent = rideSpot
 
 -- Your pets at home: the starter's model and every pet in your pen.
@@ -857,9 +860,9 @@ local function updateRideTarget()
 	end
 	local near = rideModel ~= nil and hrp ~= nil and (rideSpot.WorldPosition - hrp.Position).Magnitude <= RIDE_REACH and not Hud.inLesson() -- (no riding in the fuse lesson)
 	if near ~= rideShown then
-		rideShown = near
-		Hud.showRide(near)
+		rideShown = near -- (no RIDE button any more: the prompt's the way to ride)
 	end
+	ridePrompt.Enabled = not Hud.inLesson()
 end
 
 local function clearRideTarget()
