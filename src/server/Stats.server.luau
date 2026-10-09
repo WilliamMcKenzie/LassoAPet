@@ -148,6 +148,9 @@ local function finish(player)
 		local desertAt = player:GetAttribute("DesertAt")
 		local after = if typeof(desertAt) == "number" and desertAt >= session.at then now - desertAt else nil
 		pending[key] = addInto(pending[key] or blank(), {
+			-- (V2: the stamina loop's sessions alone, to set against the old game's: QM, Oct 9)
+			v2Sessions = if Config.StatsV2 then 1 else 0,
+			v2Seconds = if Config.StatsV2 then length else 0,
 			["at" .. stage .. "Sessions"] = 1,
 			["at" .. stage .. "Seconds"] = length,
 			desertUnlocks = if after then 1 else 0,
@@ -322,6 +325,11 @@ local function report()
 		end
 	end
 	table.insert(lines, "Avg session, last 7 days: " .. average(week))
+	-- V2 AVG SESSION TIME: only sessions played on the stamina loop (Config.StatsV2), today and the last 7 days.
+	local function v2(t)
+		return average({ sessions = t.v2Sessions or 0, seconds = t.v2Seconds or 0 })
+	end
+	table.insert(lines, "V2 AVG SESSION TIME today: " .. v2(today) .. "; last 7 days: " .. v2(week))
 	table.insert(lines, "Longest session today: " .. longest(today))
 	table.insert(lines, "First play bounce today: " .. bounce(today))
 	table.insert(lines, "First play bounce, last 7 days: " .. bounce(week))
