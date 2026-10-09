@@ -83,8 +83,13 @@ def ground_kind():
                     kind[i, j] = 1
                 if abs(along) < PEN / 2 + 3 and -PEN / 2 + 1 < out < PEN / 2 + 3:
                     kind[i, j] = 0  # pens stand on grass
-    kind[0, :] = kind[-1, :] = 0
-    kind[:, -1] = 0
+    # QM (Oct 9): no dirt against any wall, or the sunk tiles leave holes under it.
+    # Two grass tiles along every wall, the front wall either side of the corridor too.
+    kind[:2, :] = kind[-2:, :] = 0
+    kind[:, -2:] = 0
+    for i in range(nx):
+        if abs(-W + i * 4 + 2) > CORR - 8:
+            kind[i, :2] = 0
     return kind
 
 
