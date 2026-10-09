@@ -682,7 +682,9 @@ return {
 	-- Life seconds long at HorseSprint studs/s (a horse's sprint: a short streak), longer
 	-- the faster it goes, up to MaxLife. Built like VIP's gold trail (Shared/RiderTrail).
 	SprintTrail = { On = true, Life = 0.12, HorseSprint = 88, MaxLife = 0.6 },
-	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5 },
+	-- How much scales with your speed (QM, Oct 9): x speed / HorseSprint (a horse's sprint
+	-- gets Fov / Zoom as set), between MinScale and MaxScale.
+	SprintCam = { On = true, Fov = 95, Zoom = 0.75, InTime = 0.3, OutTime = 0.5, HorseSprint = 88, MinScale = 0.5, MaxScale = 1.8 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
 	LassoRange = 34,
