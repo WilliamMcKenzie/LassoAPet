@@ -38,10 +38,14 @@ local ART = { -- assets/ui/ride_hud/*.png (QM, Oct 9), drawn at the RefWidth scr
 	lassoGrey = { id = "rbxassetid://124076174344578", size = Vector2.new(440, 176) }, -- LassoDisabled.png
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
--- (RefWidth px, from QM's mockup)
-local TOP = 22 -- the bar off the top
-local CORNER = 36 -- Sprint and the ability in from their corners
-local LASSO_BOTTOM = 30
+-- (RefWidth px, from QM's proportions, Oct 9: a 1712-wide shot x 1920 / 1712)
+local TOP = 37 -- the bar off the top
+local BAR_WIDTH = 692
+local CORNER_WIDTH = 260 -- Sprint and the ability, each
+local SPRINT_IN = Vector2.new(37, 31) -- in from the bottom-left corner
+local ABILITY_IN = Vector2.new(25, 29) -- in from the bottom-right corner
+local LASSO_WIDTH = 356
+local LASSO_BOTTOM = 38
 local FILL_FROM, FILL_TO = 0.010, 0.989 -- the bar's inner fill, of its width
 local LEVEL_AT = 0.465 -- the stamina number's left edge, of the bar's width (right of the bicep)
 local LEVEL_TEXT, LEVEL_STROKE = 50, 5 -- (QM's Figma)
@@ -72,11 +76,12 @@ end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
 resize()
 
-local function picture(class, parent, art, anchor, position)
+local function picture(class, parent, art, anchor, position, width)
 	local p = Instance.new(class)
 	p.BackgroundTransparency = 1
 	p.Image = art.id
-	p.Size = UDim2.fromOffset(art.size.X, art.size.Y)
+	width = width or art.size.X
+	p.Size = UDim2.fromOffset(width, width * art.size.Y / art.size.X)
 	p.AnchorPoint = anchor
 	p.Position = position
 	p.Parent = parent
@@ -99,7 +104,7 @@ local function scaler(button)
 end
 
 -- The stamina bar.
-local bar = picture("ImageLabel", root, ART.progressGrey, Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, TOP))
+local bar = picture("ImageLabel", root, ART.progressGrey, Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, TOP), BAR_WIDTH)
 bar.Name = "Stamina"
 local clip = Instance.new("Frame")
 clip.Name = "Fill"
@@ -108,7 +113,7 @@ clip.ClipsDescendants = true
 clip.Size = UDim2.fromScale(1, 1)
 clip.Parent = bar
 local green = picture("ImageLabel", clip, ART.progress, Vector2.zero, UDim2.new())
-green.Size = UDim2.fromOffset(ART.progress.size.X, ART.progress.size.Y)
+green.Size = bar.Size
 local level = Instance.new("TextLabel")
 level.BackgroundTransparency = 1
 level.FontFace = FONT
@@ -127,7 +132,7 @@ levelStroke.Parent = level
 level.Parent = bar
 
 -- Sprint, bottom left.
-local sprint = picture("ImageButton", root, ART.sprint, Vector2.new(0, 1), UDim2.new(0, CORNER, 1, -CORNER))
+local sprint = picture("ImageButton", root, ART.sprint, Vector2.new(0, 1), UDim2.new(0, SPRINT_IN.X, 1, -SPRINT_IN.Y), CORNER_WIDTH)
 sprint.Name = "Sprint"
 sprint.AutoButtonColor = false
 local sprintScale = scaler(sprint)
@@ -144,7 +149,7 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 -- The ability, bottom right.
-local ability = picture("ImageButton", root, ART.ability, Vector2.new(1, 1), UDim2.new(1, -CORNER, 1, -CORNER))
+local ability = picture("ImageButton", root, ART.ability, Vector2.new(1, 1), UDim2.new(1, -ABILITY_IN.X, 1, -ABILITY_IN.Y), CORNER_WIDTH)
 ability.Name = "Ability"
 ability.AutoButtonColor = false
 local abilityScale = scaler(ability)
@@ -163,7 +168,7 @@ ability.Activated:Connect(function()
 end)
 
 -- LASSO, bottom centre.
-local lasso = picture("ImageButton", root, ART.lasso, Vector2.new(0.5, 1), UDim2.new(0.5, 0, 1, -LASSO_BOTTOM))
+local lasso = picture("ImageButton", root, ART.lasso, Vector2.new(0.5, 1), UDim2.new(0.5, 0, 1, -LASSO_BOTTOM), LASSO_WIDTH)
 lasso.Name = "Lasso"
 lasso.AutoButtonColor = false
 lasso.Activated:Connect(function()
