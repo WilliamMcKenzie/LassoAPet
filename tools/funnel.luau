@@ -16,7 +16,8 @@
 -- START), past it (the walls, things built on them) it's moved out by the same as
 -- the edge. Ground patches have both edges mapped and snapped to the 8-stud cells
 -- (Shared/Ground's grid; the 4-stud checker keeps its parity), so the pixel art
--- widens with the course; World.Funnel's floor, a little lower, shows in any seam.
+-- widens with the course; World.Funnel's floor, a little under the lowest ground (the
+-- dirt patches, a stud down), shows in any seam.
 
 local MODE = "apply"
 local START, RATE, MAX = 56, 0.005, 137
@@ -231,7 +232,7 @@ for z0 = 0, last + 0.5, -STRIP do
 	strip.CanQuery = false
 	strip.CanTouch = false
 	strip.Size = Vector3.new(2 * half, 2, z0 - z1)
-	strip.CFrame = CFrame.new(0, -1.2, zc) -- top 0.2 under the ground's
+	strip.CFrame = CFrame.new(0, -2.2, zc) -- top 0.2 under the dirt patches' (a stud under the grass: Oct 9, at -0.2 it hid them)
 	if best then
 		strip.Color, strip.Material = best.Color, best.Material
 		strip.TopSurface = best.TopSurface
