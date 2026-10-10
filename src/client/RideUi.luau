@@ -2,8 +2,8 @@
 -- the only control, LassoPrompt), in place of the old riding HUD (Config.RideHud off).
 -- Hud hands its riding calls on to this.
 --   Top centre: "BOSS IN" over the bar (QM, Oct 10: the red one): the dark bar, and the
---     red one over it cut off at the ride's time left, turning white from half left down
---     to none; the seconds left in the middle ("15.6s", Fredoka One).
+--     red one over it cut off at the ride's time left; the seconds left in the middle
+--     ("15.6s", Fredoka One), white, turning red from half the time left down to none.
 -- Laid out on a RefWidth-wide screen (Config.BaseUi; the art's drawn at it).
 --
 --   RideUi.show(visible)
@@ -17,7 +17,6 @@ local Config = require(ReplicatedStorage.Shared.Config)
 
 local ART = { -- assets/ui/ride_hud/*.png, drawn at the RefWidth screen's size
 	progress = { id = "rbxassetid://107856418081919", size = Vector2.new(646, 91) }, -- BossBar.png (QM's FILLED)
-	progressWhite = { id = "rbxassetid://117455060633991", size = Vector2.new(646, 91) }, -- BossBarWhite.png (it, whitened)
 	progressGrey = { id = "rbxassetid://102078867817834", size = Vector2.new(646, 91) }, -- BossBarEmpty.png (QM's DISABLED)
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -25,7 +24,8 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 local TOP = 108 -- the bar off the top
 local BAR_WIDTH = 646
 local FILL_FROM, FILL_TO = 6 / 646, 640 / 646 -- the bar's inner fill, of its width
-local WHITE_FROM = 0.5 -- the fill turns white from this much time left down to none (QM)
+local RED_FROM = 0.5 -- the seconds turn from white to red from this much time left down to none (QM)
+local RED = Color3.fromRGB(255, 60, 80)
 local TITLE = "BOSS IN" -- (QM, Oct 10; was "Lasso will break", "Boss will spawn")
 local TITLE_Y, TITLE_TEXT = 69, 46 -- the title's middle off the top, its size
 local TIME_FONT = Font.fromEnum(Enum.Font.FredokaOne) -- (the bar's not Montserrat: QM)
@@ -102,9 +102,6 @@ clip.Size = UDim2.fromScale(1, 1)
 clip.Parent = bar
 local fill = picture(clip, ART.progress, Vector2.zero, UDim2.new())
 fill.Size = bar.Size
-local white = picture(fill, ART.progressWhite, Vector2.zero, UDim2.new())
-white.Size = UDim2.fromScale(1, 1)
-white.ImageTransparency = 1
 local seconds = text(bar, TIME_TEXT)
 seconds.FontFace = TIME_FONT
 seconds.UIStroke:Destroy() -- (plain white: QM's guide)
@@ -122,7 +119,7 @@ function RideUi.setHold(fraction)
 	if fraction then
 		local f = math.clamp(fraction, 0, 1)
 		clip.Size = UDim2.fromScale(if f <= 0 then 0 else FILL_FROM + (FILL_TO - FILL_FROM) * f, 1)
-		white.ImageTransparency = math.clamp(f / WHITE_FROM, 0, 1)
+		seconds.TextColor3 = RED:Lerp(Color3.new(1, 1, 1), math.clamp(f / RED_FROM, 0, 1))
 		seconds.Text = string.format("%.1fs", f * Config.RideSeconds)
 	end
 end
