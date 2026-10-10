@@ -704,6 +704,9 @@ return {
 	-- The run home's over-the-shoulder camera (QM, Oct 10): Client/ShoulderCam. Studs from
 	-- the rider (x the ride's zoom: bigger pets, the sprint tiers' bounce), easing in over
 	-- InTime seconds as you turn for home and out over OutTime at the home line.
+	-- The run home's fisheye and zoom stay put, as at a horse's sprint, whatever your speed
+	-- (no tier bounces either): QM, Oct 10, to test the shoulder camera. false: by speed.
+	ReturnCamFixed = true,
 	ShoulderCam = { On = true, Right = 1.5, Up = 3, Back = 6, Ahead = 60, LookUp = 2, InTime = 0.8, OutTime = 0.5 },
 	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
 	SprintTiers = { 180, 360, 440 },
