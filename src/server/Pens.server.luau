@@ -27,7 +27,7 @@ local function setSign(pen, player)
 	if not gui then
 		gui = Instance.new("BillboardGui")
 		gui.Name = "Owner"
-		gui.Size = UDim2.fromScale(16, 8)
+		gui.Size = UDim2.fromScale(32, 16) -- (QM, Oct 10: 2x)
 		gui.MaxDistance = 250
 		gui.LightInfluence = 0
 		local picture = Instance.new("ImageLabel")
