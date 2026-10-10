@@ -37,7 +37,12 @@ local IDS = {
 	record_scratch = "rbxassetid://112792997660073", -- RECORD SCRATCH (Creator Store, QM's pick): the run home's music cut off at the line (QM, Oct 9)
 	reveal_tick = "rbxassetid://91812796089050", -- each flick of the egg card (and the roll's)
 	reveal_roll = "rbxassetid://77968740492426", -- under the egg card's flicking roulette, stopped as it lands: GAMBLING (QM's pick, Oct 9)
-	boss_Chicken = "rbxassetid://77584650945481", -- the Chicken boss's cut to its face: chicken cluck (QM's pick, Oct 10; BossChase)
+	-- Each boss's cry as the camera cuts to its face (QM's picks, Oct 10; BossChase, volumes:
+	-- Config.Boss.CryVolume):
+	boss_Chicken = "rbxassetid://77584650945481", -- chicken cluck
+	boss_ElderBoar = "rbxassetid://129162115855106", -- monstergrowl
+	boss_SharkBoss = "rbxassetid://9125409840", -- Bubbles Small Underwater
+	boss_CactusBoss = "rbxassetid://95169379454314", -- angry alien cat growl
 	reveal_pop = "rbxassetid://4612378086", -- the egg card lands on its rarity (after the flicks): rewardscreenreveal (QM's pick, Oct 9; was 117371326373841)
 	egg_hatch = "rbxassetid://96102213526905", -- an egg in your pen hatches: Rewards (QM's pick, Oct 9; was 112644148635720)
 	gold_tick = "rbxassetid://123673857032707", -- gold counting up
