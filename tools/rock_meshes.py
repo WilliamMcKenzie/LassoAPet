@@ -1,4 +1,4 @@
-"""Low-poly rock meshes (QM, Oct 10): plain faceted rocks, no moss or grass caps,
+"""Low-poly rock meshes (QM, Oct 10): faceted rocks, no moss or grass caps, still studded (QM),
 in the style of QM's reference (chunky chamfered prisms, flat shaded).
 
 Each rock is a few convex "chunks" (a jittered polygon prism with a bevelled,
@@ -145,23 +145,40 @@ def build(builder, seed):
     return [hull_tris(c - shift) for c in chunks]
 
 
+STUD = 0.5  # stud size in studs, like the animals' and eggs' (StudsHalf)
+
+
+def stud_axes(n):
+    """Fixed in-plane axes for a face normal: every face on the same plane gets the
+    same axes, so the studs run on across its triangles without seams."""
+    n = np.asarray(n, float)
+    ref = np.array([0.0, 1.0, 0.0]) if abs(n[1]) < 0.9 else np.array([1.0, 0.0, 0.0])
+    e1 = np.cross(ref, n)
+    e1 /= np.linalg.norm(e1)
+    return e1, np.cross(n, e1)
+
+
 def write_obj(name, chunks, path):
-    """One OBJ per rock, every face with its own normal (flat shading in Roblox)."""
+    """One OBJ per rock, every face with its own normal (flat shading in Roblox).
+    UVs are planar per face in stud units (1 UV = one 0.5-stud stud), so a tiling
+    stud texture lays studs on every side, the same size as the animals' studs."""
     lines = [f"# {name}: low-poly rock, studs, y up, base at y=0", f"o {name}"]
-    vn = []
+    vn, vt = [], []
     nv = 0
     faces = []
     for tris in chunks:
         for t in tris:
             n = np.cross(t[1] - t[0], t[2] - t[0])
             n /= np.linalg.norm(n)
+            e1, e2 = stud_axes(n)
             for v in t:
                 lines.append("v %.4f %.4f %.4f" % tuple(v))
+                vt.append("vt %.4f %.4f" % (v @ e1 / STUD, v @ e2 / STUD))
             vn.append("vn %.4f %.4f %.4f" % tuple(n))
             faces.append((nv + 1, nv + 2, nv + 3, len(vn)))
             nv += 3
-    lines += vn
-    lines += ["f %d//%d %d//%d %d//%d" % (a, k, b, k, c, k) for a, b, c, k in faces]
+    lines += vt + vn
+    lines += ["f %d/%d/%d %d/%d/%d %d/%d/%d" % (a, a, k, b, b, k, c, c, k) for a, b, c, k in faces]
     with open(path, "w") as f:
         f.write("\n".join(lines) + "\n")
     return len(faces)
@@ -172,8 +189,9 @@ def as_parts(chunks, dx=0.0, dz=0.0, yaw=0.0, color=ROCK):
     cf = partlib.T(dx, 0, dz) @ partlib.Ry(yaw)
     out = []
     for tris in chunks:
-        p = Part("Rock", (1, 1, 1), cf, color, shape="Poly", plain=True)
+        p = Part("Rock", (1, 1, 1), cf, color, shape="Poly")
         p.polys = [t for t in tris]
+        p.stud_axes = lambda n, R=cf[:3, :3]: tuple(R @ a for a in stud_axes(R.T @ n))
         out.append(p)
     return out
 

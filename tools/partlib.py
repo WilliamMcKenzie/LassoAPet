@@ -269,12 +269,17 @@ def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0
         for poly, n in part_faces(p):
             poly = poly + off
             # face tangent axes for stud pattern
-            e1 = poly[1] - poly[0]
-            e1 /= np.linalg.norm(e1)
-            e2 = np.cross(n, e1)
+            if getattr(p, "stud_axes", None):  # shared axes per plane (mesh rocks: no seams)
+                e1, e2 = p.stud_axes(n)
+                origin = np.zeros(3)
+            else:
+                e1 = poly[1] - poly[0]
+                e1 /= np.linalg.norm(e1)
+                e2 = np.cross(n, e1)
+                origin = poly[0]
             for i in range(1, len(poly) - 1):
                 w3 = np.array([poly[0], poly[i], poly[i + 1]])
-                tris.append((proj(w3), w3, n, np.array(p.color, float), (poly[0], e1, e2), 2 if getattr(p, "neon", False) else p.plain))
+                tris.append((proj(w3), w3, n, np.array(p.color, float), (origin, e1, e2), 2 if getattr(p, "neon", False) else p.plain))
                 # shadow: project onto y=0 along light
                 s = w3 - LIGHT[None] * (w3[:, 1:2] / LIGHT[1])
                 s[:, 1] = 0.01
