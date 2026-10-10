@@ -147,7 +147,7 @@ end
 -- consonant (Snake on a Horse: "Snase", not "Snse"). Where two vowels meet, one
 -- goes ("Kra" + "ale" = "Krale"). Names can repeat: they're only for show.
 local NAMES = {
-	Horse = { "Hor", "se" }, Pinto = { "Pin", "to" }, Pig = { "P", "ig", "Pi" }, Bunny = { "Bun", "ny" }, Fish = { "F", "ish", "Fi" },
+	Horse = { "Hor", "se" }, Pinto = { "Pin", "to" }, Pig = { "P", "ig", "Pi" }, Bunny = { "Bun", "ny" }, Chicken = { "Chick", "en" }, Fish = { "F", "ish", "Fi" },
 	Rhino = { "Rhi", "no" }, Unicorn = { "Uni", "corn" }, Cactus = { "Cac", "tus" }, Kitten = { "Kit", "ten" }, Scorpion = { "Scor", "pion" },
 	Sandworm = { "Sand", "worm" }, SpineLizard = { "Spine", "lizard" }, Snake = { "Sn", "ake", "Sna" },
 	Beholder = { "Be", "holder" }, Penguin = { "Pen", "guin" }, Snowman = { "Snow", "man" }, Boar = { "B", "oar", "Bo" },

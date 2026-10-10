@@ -2,6 +2,7 @@
 "very simple and dumb"), in our studded-block style.
 
 Run: python3 tools/chicken_design.py [out_dir]    the takes, previews and run loops
+     python3 tools/chicken_design.py game        the picked take (A, red eyes) into the game files
 
 Two takes on the same build:
   A  Classic   the Minecraft chicken as is: white box body, tall box head,
@@ -37,7 +38,7 @@ OUT = "/mnt/project-files/animals/chicken"
 TAU = 2 * math.pi
 
 COL = dict(white=(250, 250, 246), wing=(230, 230, 224), beak=(255, 196, 40),
-           wattle=(232, 44, 52), leg=(255, 168, 36))
+           wattle=(232, 44, 52), leg=(255, 168, 36), eye=(236, 30, 40))
 TAKES = {"A": "Classic", "B": "Farm"}
 
 
@@ -67,7 +68,7 @@ def chicken(take="A"):
     a.b("Beak", (-1.2, 6.6, -5.4), (1.2, 7.8, -4.2), c["beak"], head)
     a.b("Wattle", (-0.6, 5.4, -4.8), (0.6, 6.6, -4.2), c["wattle"], head)
     for side, sx in SIDES:
-        a.side_eye(side, sx, 1.2, 7.8, 8.8, -4.0, -3.0, head)
+        a.side_eye(side, sx, 1.2, 7.8, 8.8, -4.0, -3.0, head, eye=c["eye"])
     if take == "B":
         a.b("Comb", (-0.3, 9.0, -3.9), (0.3, 9.9, -2.4), c["wattle"], head)
         a.b("CombTop", (-0.3, 9.9, -3.6), (0.3, 10.5, -3.0), c["wattle"], head)
@@ -180,5 +181,26 @@ def main(out=OUT):
     print("written to", out)
 
 
+
+
+def game():
+    """QM picked take A with red eyes (Oct 10): write designs/animals/Chicken.bbmodel,
+    its meta.json entry and src/shared/Animals/ChickenModel.luau."""
+    import bbmodel_to_luau
+    a, model, parts = build("A")
+    out = os.path.join(ROOT, "designs", "animals")
+    with open(os.path.join(out, "Chicken.bbmodel"), "w") as f:
+        json.dump(model, f, separators=(",", ":"))
+    path = os.path.join(out, "meta.json")
+    meta = json.load(open(path))
+    meta["Chicken"] = dict(rarity=a.rarity, **a.meta)
+    with open(path, "w") as f:
+        json.dump(meta, f, indent=1)
+    bbmodel_to_luau.main(os.path.join("designs", "animals", "Chicken.bbmodel"), os.path.join("src", "shared", "Animals", "ChickenModel.luau"))
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["game"]:
+        game()
+    else:
+        main(*sys.argv[1:])
