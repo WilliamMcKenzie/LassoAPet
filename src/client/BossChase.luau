@@ -122,6 +122,7 @@ function BossChase.update(dt, chasing, x, z, speed)
 	boss.scale = popScale(boss.t)
 	if was < cfg.ZoomAt and boss.t >= cfg.ZoomAt then
 		showBars(true)
+		Sounds.play("boss_" .. boss.kind, 0.6) -- (its own cry with the bars, if it has one: Sounds' boss_<Kind>)
 	elseif was < cfg.CutsceneTime - cfg.BarTime and boss.t >= cfg.CutsceneTime - cfg.BarTime then
 		showBars(false)
 	end

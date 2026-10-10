@@ -223,7 +223,7 @@ return {
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
 			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 3, 24) },
-			SharkBoss = { At = Vector3.new(0, -0.05, 0.5), From = Vector3.new(0, 2, 20) },
+			SharkBoss = { At = Vector3.new(0, 0, 0.4), From = Vector3.new(18, 2, 8) }, -- (from its side, so you see its eye: QM)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.62, 0.42), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 	},
