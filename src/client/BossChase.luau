@@ -60,8 +60,8 @@ local function letterbox()
 	vein.Position = UDim2.fromScale(Config.Boss.VeinAt.X, Config.Boss.VeinAt.Y)
 	vein.Size = UDim2.fromScale(Config.Boss.VeinSize, Config.Boss.VeinSize)
 	vein.SizeConstraint = Enum.SizeConstraint.RelativeYY
-	vein.ImageTransparency = 1
-	vein.ZIndex = 2 -- (over the bars: QM) -- (drawn, but clear, till it's wanted, and preloaded below: QM)
+	vein.ImageTransparency = 1 -- (drawn, but clear, till it's wanted, and preloaded below: QM)
+	vein.ZIndex = 2 -- (over the bars: QM)
 	local veinScale = Instance.new("UIScale")
 	veinScale.Parent = vein
 	vein.Parent = gui
