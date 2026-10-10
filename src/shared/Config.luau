@@ -250,13 +250,13 @@ return {
 	-- and race it home, and a wild one's egg is yours over the line.
 	RideSeconds = 30,
 	-- The boss when the ride's time runs out (QM, Oct 10: Client/BossChase): your animal
-	-- pulls up (Brake studs/s/s), the boss (Shared/Bosses: Kind) pops up Ahead studs in
+	-- stops dead, the boss (Shared/Bosses: Kind) pops up Ahead studs in
 	-- front, the camera's on its face (FaceAt: of its box, up and forward from the middle)
 	-- from ZoomAt s (FaceFrom studs off it, between black
 	-- bars sliding in over BarTime), and at CutsceneTime s you turn for home with it
 	-- chasing, at ChaseSpeed x yours and never nearer than Behind studs.
 	Boss = {
-		On = true, Kind = "Chicken", Brake = 120, Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
+		On = true, Kind = "Chicken", Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
 	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)

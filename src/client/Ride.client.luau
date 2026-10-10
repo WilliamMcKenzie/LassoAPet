@@ -3353,12 +3353,10 @@ end
 local function updateMount(dt)
 	local dir = travelDir()
 	if phase == "boss" then
-		-- Pulled up before the boss (BossChase), then off home once its cutscene's done.
-		mount.speed = math.max(mount.speed - Config.Boss.Brake * dt, 0)
-		mount.latVel *= math.exp(-6 * dt)
-		mount.z -= mount.speed * dt
+		-- Stopped before the boss (BossChase), then off home once its cutscene's done.
+		mount.speed, mount.latVel = 0, 0
 		place(mount, 0)
-		animate(mount, dt, mount.speed, 0)
+		animate(mount, dt, 0, 0)
 		if vfx.bossChase.over() then
 			turnHome()
 		end
@@ -3620,7 +3618,7 @@ local function checkRide(dt)
 		hold = math.max(hold - dt, 0) -- (no quicker sprinting: QM, Oct 10)
 		if hold <= 0 then
 			if Config.Boss.On then -- (the boss first: BossChase, then turnHome; QM, Oct 10)
-				phase = "boss"
+				phase, mount.speed = "boss", 0 -- (stopped dead, or you'd run on through it: QM)
 				vfx.bossChase.start(mount.x, mount.z)
 			else
 				turnHome()
