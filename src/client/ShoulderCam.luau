@@ -3,7 +3,10 @@
 -- home line. Config.ShoulderCam: Right / Up / Back studs from the rider, and the
 -- point it looks at, Ahead studs on and LookUp up.
 --
---   ShoulderCam.blend(dt, on) -> 0 .. 1: how far into it the camera is
+--   ShoulderCam.blend(dt, on, riding) -> 0 .. 1: how far into it the camera is
+--
+-- Tuning live in a playtest: Shoulder<Key> attributes on the camera (ShoulderRight...)
+-- win over Config, and ShoulderTest = true shows it on the way out too.
 --   ShoulderCam.pose(rider, yaw, zoom) -> its CFrame (zoom: x its distance)
 
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
@@ -12,9 +15,17 @@ local ShoulderCam = {}
 
 local k = 0
 
-function ShoulderCam.blend(dt, on)
+local function get(cfg, key)
+	local v = workspace.CurrentCamera:GetAttribute("Shoulder" .. key)
+	if v ~= nil then
+		return v
+	end
+	return cfg[key]
+end
+
+function ShoulderCam.blend(dt, on, riding)
 	local cfg = Config.ShoulderCam
-	on = on and cfg.On
+	on = (on or (riding and workspace.CurrentCamera:GetAttribute("ShoulderTest") == true)) and cfg.On
 	k = math.clamp(k + (if on then dt / cfg.InTime else -dt / cfg.OutTime), 0, 1)
 	return k * k * (3 - 2 * k)
 end
@@ -22,8 +33,8 @@ end
 function ShoulderCam.pose(rider, yaw, zoom)
 	local cfg = Config.ShoulderCam
 	local basis = CFrame.new(rider) * CFrame.Angles(0, yaw, 0)
-	local from = basis * Vector3.new(cfg.Right * zoom, cfg.Up * zoom, cfg.Back * zoom)
-	local at = basis * Vector3.new(cfg.Right * zoom, cfg.LookUp, -cfg.Ahead)
+	local from = basis * Vector3.new(get(cfg, "Right") * zoom, get(cfg, "Up") * zoom, get(cfg, "Back") * zoom)
+	local at = basis * Vector3.new(get(cfg, "LookRight") * zoom, get(cfg, "LookUp"), -get(cfg, "Ahead"))
 	return CFrame.lookAt(from, at)
 end
 
