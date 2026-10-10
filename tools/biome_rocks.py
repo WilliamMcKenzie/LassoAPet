@@ -34,10 +34,10 @@ KEEP = ["Cactus", "Pine", "TubeCoral", "BranchCoral", "FanCoral"]
 # and their tier.
 MESHES = {"Pebble": 97909332868672, "Stone": 116242154122535, "Slab": 118417030739444,
           "Boulder": 109133145406087, "Crag": 105444261900626}
-ROCK_SCALE = {"Pebble": 1.4, "Stone": 1.2, "Slab": 0.95, "Boulder": 1.1, "Crag": 0.85}
+ROCK_SCALE = {"Pebble": 2.8, "Stone": 2.4, "Slab": 1.9, "Boulder": 2.2, "Crag": 1.7}  # (QM: 2x the tier sizes)
 ROCK_TIER = {"Pebble": 1, "Stone": 1, "Slab": 2, "Boulder": 2, "Crag": 3}
 ROCK_COLOR = {  # QM, Oct 10 (design/rocks_biomes): the meadow's is the base's Fossil grey
-    "Meadow": (159, 161, 172), "Desert": (204, 124, 74), "Snow": (158, 200, 240), "Ocean": (242, 120, 98)}
+    "Meadow": (159, 161, 172), "Desert": (234, 190, 122), "Snow": (158, 200, 240), "Ocean": (242, 120, 98)}
 _built = {n: RM.build(f, s) for n, f, s, _ in RM.ROCKS}
 
 
@@ -48,12 +48,13 @@ def rock_radius(name):
 
 for _n in MESHES:  # the rocks join the layout's assets: (footprint radius, tier, kit)
     CL.ASSETS["Rock" + _n] = (rock_radius(_n) * 0.85, {1: "small", 2: "medium", 3: "large"}[ROCK_TIER[_n]], None)
-CL.REACH["Meadow"] = 18  # (the meadow hugs its walls too now)
+for _b in ("Meadow", "Desert", "Snow", "Ocean"):  # the band by each wall they stay in (big rocks need room)
+    CL.REACH[_b] = 32
 
 # per biome: anchors (one per cluster, weighted) and the small rocks round them
 PLAN = {
     "Meadow": dict(anchor=[("RockBoulder", 5), ("RockCrag", 2), ("RockSlab", 2)], small=["RockPebble", "RockStone"]),
-    "Desert": dict(anchor=[("Cactus", 4), ("RockBoulder", 3), ("RockCrag", 2), ("RockSlab", 2)], small=["RockPebble", "RockStone"],
+    "Desert": dict(anchor=[("Cactus", 3), ("RockBoulder", 4), ("RockCrag", 2), ("RockSlab", 2)], small=["RockPebble", "RockStone"],
                    extra="Cactus"),
     "Snow": dict(anchor=[("Pine", 5), ("RockBoulder", 3), ("RockCrag", 2)], small=["RockPebble", "RockStone"], extra="Pine"),
     "Ocean": dict(anchor=[("BranchCoral", 3), ("FanCoral", 3), ("RockBoulder", 2), ("RockCrag", 2)],
@@ -81,13 +82,13 @@ def cluster(c, rng, b, p, reach, side, bz):
     ax = side * (CL.HALF_W - r - rng.uniform(1, max(1.5, reach - 2 * r)))
     if c.put(anchor, ax, bz, b, jitter=4):
         ax, bz = c.items[-1]["x"], c.items[-1]["z"]
-    for k in range(int(rng.integers(2, 5))):  # small pieces round it, in its band by the wall
+    for k in range(int(rng.integers(0, 3))):  # a small piece or two round it, in its band by the wall
         s = str(rng.choice(p["small"]))
         e = CL.eff(s)
         sx = side * rng.uniform(CL.HALF_W - reach + e, CL.HALF_W - 1 - e)
         dz = (r + e + CL.GAP + rng.uniform(0, 5)) * (1 if k % 2 == 0 else -1) * (1 + k // 2)
         c.put(s, sx, bz + dz, b, jitter=2)
-    if p.get("extra") and rng.random() < 0.3:  # now and then a second tree/coral
+    if p.get("extra") and rng.random() < 0.15:  # now and then a second tree/coral
         e = p["extra"]
         c.put(e, ax, bz + rng.choice([-1, 1]) * (r + CL.eff(e) + 6), b, jitter=3)
 
@@ -101,11 +102,11 @@ def layout(seed=11):
         side = 1 if rng.random() < 0.5 else -1
         z = b["z0"] - CL.ENTRY - CL.BEAT / 2
         while z > b["z1"] + 40:
-            if rng.random() < 0.1:  # a quiet beat
+            if rng.random() < 0.4:  # a quiet beat (QM: accents, not litter)
                 z -= CL.BEAT
                 side = -side
                 continue
-            sides = [side, -side] if rng.random() < 0.35 else [side]  # now and then both walls
+            sides = [side]
             for k0, sd in enumerate(sides):
                 cluster(c, rng, b, p, reach, sd, z + rng.uniform(-18, 18) + k0 * CL.BEAT / 2)
             z -= CL.BEAT
