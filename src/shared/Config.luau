@@ -18,7 +18,7 @@ return {
 			AnimalSize = 1, -- its obstacles (tools/funnel.luau) and the Godlands' terrain grow ^0.8 of this. Animals no longer do (QM, Oct 8: back to their old sizes)
 			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
 			Length = 760,
-			GroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(105, 255, 74) },
+			GroundColors = { Color3.fromRGB(71, 184, 61), Color3.fromRGB(105, 255, 74) }, -- (QM, Oct 10: 20% more contrast, the dark squares darker; was 77, 196, 63)
 			WallColors = { Color3.fromRGB(225, 150, 104), Color3.fromRGB(248, 170, 114) },
 			-- Which animals run in this biome's stampede and how often (names are modules
 			-- in Shared/Animals). QM's spawn table (Oct 3): chances out of 1. They're
@@ -698,9 +698,6 @@ return {
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
 	-- Client/SkyFlash. Start: its see-through at the flash (0: solid white). Distance: studs
 	-- round the camera; anything further off goes white with the sky.
-	-- The home base's grass checker, on its own (QM, Oct 10: lighter squares #4BE62A; the
-	-- Meadow keeps its GroundColors). nil: the Meadow's. WorldColors.
-	BaseGroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(75, 230, 42) },
 	-- The run home's over-the-shoulder camera (QM, Oct 10): Client/ShoulderCam. Studs from
 	-- the rider (x the ride's zoom: bigger pets, the sprint tiers' bounce), easing in over
 	-- InTime seconds as you turn for home and out over OutTime at the home line.

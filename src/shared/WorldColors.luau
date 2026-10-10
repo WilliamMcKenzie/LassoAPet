@@ -1,6 +1,6 @@
 -- Live colour tuning for the ground and walls. In Studio, press Play, select
 -- Workspace > World and edit its GroundA / GroundB / WallA / WallB attributes
--- (the first biome and the home base; BaseGroundA / B for the base's own grass) or DesertGroundA and so on for the other
+-- (the first biome and the home base) or DesertGroundA and so on for the other
 -- biomes (DesertGrassA, DesertStoneA... for their Patches): the map recolours
 -- instantly. Copy the values you like into Config.
 
@@ -113,9 +113,6 @@ end
 
 local function get(world, part, name, which)
 	local z = part.Position.Z
-	if z > 0 and name == "Ground" and Config.BaseGroundColors then -- (the home base's own grass: QM, Oct 10)
-		return WorldColors.saturate(world:GetAttribute("BaseGround" .. which))
-	end
 	local i = WorldColors.biomeAt(z)
 	return WorldColors.saturate(depthColor(i, z, name, if which == "A" then 1 else 2) or world:GetAttribute(prefix(i) .. name .. which))
 end
@@ -151,17 +148,6 @@ end
 
 -- Seeds the attributes (server) and repaints whenever one changes.
 function WorldColors.watch(world)
-	if Config.BaseGroundColors then
-		for which, color in { A = Config.BaseGroundColors[1], B = Config.BaseGroundColors[2] } do
-			local key = "BaseGround" .. which
-			if world:GetAttribute(key) == nil then
-				world:SetAttribute(key, color)
-			end
-			world:GetAttributeChangedSignal(key):Connect(function()
-				WorldColors.apply(world)
-			end)
-		end
-	end
 	for i, biome in Config.Biomes do
 		local defaults = {
 			GroundA = biome.GroundColors[1],
