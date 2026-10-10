@@ -18,7 +18,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 
 local ART = { -- assets/ui/ride_hud/*.png, drawn at the RefWidth screen's size
-	progress = { id = "rbxassetid://87785264442897", size = Vector2.new(530, 91) }, -- BossBar.png (QM's FILLED 1: a bar of its own, stretched to the time left)
+	progress = { id = "rbxassetid://140037705020050", size = Vector2.new(646, 91) }, -- BossBar.png (QM's FILLED 2: a bar of its own, stretched to the time left)
 	progressGrey = { id = "rbxassetid://90506809044433", size = Vector2.new(646, 91) }, -- BossBarEmpty.png (QM's DISABLED 1)
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -29,7 +29,7 @@ local CAP = 45 -- the fill's rounded ends, px of its art (kept whole as it stret
 local RED_FROM = 0.5 -- the seconds turn from white to red from this much time left down to none (QM)
 local RED = Color3.fromRGB(255, 60, 80)
 -- Under From left, the bar's scale: in to In over InTime s, out to Out over OutTime s (QM).
-local PULSE = { From = 0.5, In = 0.9, Out = 1.05, InTime = 0.5, OutTime = 0.7 }
+local PULSE = { From = 0.5, In = 0.97, Out = 1.03, InTime = 0.5, OutTime = 0.7 }
 local POP_TIME = 0.4 -- its bounce in, s
 local TITLE = "BOSS IN" -- (QM, Oct 10; was "Lasso will break", "Boss will spawn")
 local TITLE_Y, TITLE_TEXT = 69, 46 -- the title's middle off the top, its size
