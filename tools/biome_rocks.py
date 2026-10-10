@@ -43,8 +43,8 @@ _built = {n: RM.build(f, s) for n, f, s, _ in RM.ROCKS}
 # Multi-piece rocks (QM, Oct 10, design/rocks_biomes/rocks_multishade.png): each piece
 # its own MeshPart (design/rocks/pieces/Rock<Name>_<i>.obj, uploaded by Studio, same
 # origin as the whole rock) in its own shade of the biome colour. 0 = not uploaded yet.
-PIECE_MESHES = {"Pebble": [97909332868672], "Stone": [0, 0], "Slab": [0, 0],
-                "Boulder": [0, 0], "Crag": [0, 0, 0, 0, 0]}
+PIECE_MESHES = {"Pebble": [97909332868672], "Stone": [112802048248632, 82884921728711], "Slab": [77459657567159, 75443554074464],
+                "Boulder": [89116112106227, 121000971017571], "Crag": [116203642190808, 137285736622590, 79842203430013, 116412510279796, 111736026009275]}
 _SHADE_STEPS = {  # each piece's shade (QM's pick: the steps below x 2.2 from the base)
     "Meadow": [(159, 161, 172), (148, 151, 163), (168, 170, 179), (153, 157, 164), (164, 164, 176)],
     "Desert": [(234, 190, 122), (224, 176, 110), (240, 200, 136), (228, 184, 112), (238, 194, 130)],

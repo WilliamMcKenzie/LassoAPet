@@ -262,7 +262,7 @@ local ITEMS = {
 	{ "FanCoral", -39.39, -16106.49, 160.8, 0, 1.000 },
 	{ "Pebble", -42.79, -16090.14, 311.9, 0, 76, 74, 90 },
 }
-local PIECES = { Pebble = { 97909332868672 }, Stone = { 0, 0 }, Slab = { 0, 0 }, Boulder = { 0, 0 }, Crag = { 0, 0, 0, 0, 0 } }
+local PIECES = { Pebble = { 97909332868672 }, Stone = { 112802048248632, 82884921728711 }, Slab = { 77459657567159, 75443554074464 }, Boulder = { 89116112106227, 121000971017571 }, Crag = { 116203642190808, 137285736622590, 79842203430013, 116412510279796, 111736026009275 } }
 local SCALE = { Pebble = 2.8, Stone = 2.4, Slab = 1.9, Boulder = 2.2, Crag = 1.7 }
 local TIER = { Pebble = 1, Stone = 1, Slab = 2, Boulder = 2, Crag = 3 }
 local RADIUS = { Pebble = 4.91, Stone = 5.47, Slab = 10.06, Boulder = 8.52, Crag = 13.76 }
