@@ -37,7 +37,7 @@ local DISTANCE_TEXT, STROKE = 46, 3
 local HINT_Y = 183 -- the Sprint hint's row, its middle, under Roblox's buttons
 local HINT_LEFT, HINT_TEXT = 29, 32 -- "Sprint"
 local HINT_KEY_LEFT, HINT_KEY = 196, 191 -- the SHIFT keycap's left edge and width
-local HINT_SEEN = 0.5 -- the hint's see-through (QM's mock: half)
+local HINT_SEEN = 0.5 -- the whole hint's see-through (QM: half)
 
 local RideUi = {}
 
@@ -75,19 +75,17 @@ local function picture(parent, art, anchor, position, width)
 	return p
 end
 
-local function text(parent, size, color, seeThrough)
+local function text(parent, size, color)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
 	label.FontFace = FONT
 	label.TextSize = size
 	label.TextColor3 = color
-	label.TextTransparency = seeThrough or 0
 	label.AutomaticSize = Enum.AutomaticSize.X
 	label.Size = UDim2.fromOffset(0, size)
 	local stroke = Instance.new("UIStroke")
 	stroke.Thickness = STROKE
 	stroke.Color = Color3.new(0, 0, 0)
-	stroke.Transparency = seeThrough or 0
 	stroke.LineJoinMode = Enum.LineJoinMode.Round
 	stroke.Parent = label
 	label.Parent = parent
@@ -116,17 +114,17 @@ trophy.Name = "Trophy"
 trophy.ZIndex = 2
 
 -- The Sprint hint, top left.
-local hint = Instance.new("Frame")
+local hint = Instance.new("CanvasGroup") -- (see-through as a whole, QM: its outline doesn't show through the text)
 hint.Name = "SprintHint"
 hint.BackgroundTransparency = 1
-hint.Size = UDim2.fromScale(1, 0)
-hint.Position = UDim2.fromOffset(0, HINT_Y)
-local hintText = text(hint, HINT_TEXT, Color3.new(1, 1, 1), HINT_SEEN)
+hint.GroupTransparency = HINT_SEEN
+hint.Size = UDim2.fromOffset(HINT_KEY_LEFT + HINT_KEY + 20, 120)
+hint.Position = UDim2.fromOffset(0, HINT_Y - 60)
+local hintText = text(hint, HINT_TEXT, Color3.new(1, 1, 1))
 hintText.Text = "Sprint"
 hintText.AnchorPoint = Vector2.new(0, 0.5)
-hintText.Position = UDim2.fromOffset(HINT_LEFT, 0)
-local hintKey = picture(hint, ART.shift, Vector2.new(0, 0.5), UDim2.fromOffset(HINT_KEY_LEFT, 0), HINT_KEY)
-hintKey.ImageTransparency = HINT_SEEN
+hintText.Position = UDim2.fromOffset(HINT_LEFT, 60)
+local hintKey = picture(hint, ART.shift, Vector2.new(0, 0.5), UDim2.fromOffset(HINT_KEY_LEFT, 60), HINT_KEY)
 hint.Parent = root
 
 function RideUi.show(visible)

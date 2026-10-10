@@ -1,11 +1,9 @@
 -- The lasso's prompt (QM, Oct 10: no buttons while riding): a prompt on the animal you'd
 -- lasso, drawn by PromptUi like the others: its name in its rarity's colour, "Lasso"
--- and the E key. E (Ride's own key) lassos; on a phone, tapping the prompt does.
+-- and the E key. A tap of E (no hold: QM, Oct 10), or of the prompt on a phone, lassos.
 --
 --   LassoPrompt.update(model, name, color) -- the target's model (nil: none)
---   LassoPrompt.onTap = fn                 -- the prompt tapped on a touch screen
-
-local UserInputService = game:GetService("UserInputService")
+--   LassoPrompt.onTap = fn                 -- the prompt triggered (E, tapped, gamepad A)
 
 local LassoPrompt = {}
 
@@ -21,8 +19,9 @@ prompt.MaxActivationDistance = 10000 -- (Ride says what's in range)
 prompt.Style = Enum.ProximityPromptStyle.Custom -- (PromptUi)
 prompt.Parent = attachment
 prompt.Triggered:Connect(function()
-	-- (E and the gamepad's A already lasso in Ride: only a tap goes through here)
-	if UserInputService:GetLastInputType() == Enum.UserInputType.Touch and LassoPrompt.onTap then
+	-- (the prompt takes E from Ride's own key handling while it's up; a second lasso
+	-- the same frame does nothing, as one's already flying)
+	if LassoPrompt.onTap then
 		LassoPrompt.onTap()
 	end
 end)
