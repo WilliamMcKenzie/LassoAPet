@@ -253,7 +253,7 @@ return {
 	-- one's egg is yours over the line. Everyone starts at Start (training it comes later).
 	Stamina = { Start = 20, Seconds = 1 },
 	SprintDrain = 1.5, -- x the stamina bar's usual drain while sprinting
-	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
+	TerrainSaturation = 0.9, -- (QM, Oct 10) x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"
 	-- (0.5 stud) MaterialVariant from MaterialService instead of a stud Texture per face,
 	-- which cut tens of thousands of textures. Off (or those variants missing from
