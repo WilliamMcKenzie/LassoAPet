@@ -221,6 +221,10 @@ return {
 	Boss = {
 		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss" }, Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
+		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
+			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 3, 24) },
+			SharkBoss = { At = Vector3.new(0, -0.05, 0.5), From = Vector3.new(0, 2, 20) },
+		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.62, 0.42), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)

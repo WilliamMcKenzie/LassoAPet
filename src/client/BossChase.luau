@@ -103,7 +103,7 @@ function BossChase.start(x, z)
 	local animal = require(ReplicatedStorage.Shared.Bosses[kind]).new()
 	animal.model.Name = "Boss"
 	animal.model.Parent = workspace
-	boss = { animal = animal, x = x, z = z - Config.Boss.Ahead, t = 0, scale = 0 }
+	boss = { kind = kind, animal = animal, x = x, z = z - Config.Boss.Ahead, t = 0, scale = 0 }
 	place()
 	Sounds.play("reveal_pop", 0.8)
 end
@@ -153,8 +153,10 @@ function BossChase.camera()
 	end
 	-- (its face: up its front, FaceAt of the way up its box from the middle, and as far forward)
 	local cf, size = boss.animal.model:GetBoundingBox()
-	local face = cf.Position + Vector3.new(0, size.Y * Config.Boss.FaceAt.Y, size.Z * Config.Boss.FaceAt.Z)
-	return CFrame.lookAt(face + Config.Boss.FaceFrom, face)
+	local own = Config.Boss.Faces[boss.kind] or {} -- (a boss's own, where its face isn't the Chicken's)
+	local at, from = own.At or Config.Boss.FaceAt, own.From or Config.Boss.FaceFrom
+	local face = cf.Position + Vector3.new(0, size.Y * at.Y, size.Z * at.Z)
+	return CFrame.lookAt(face + from, face)
 end
 
 function BossChase.stop()
