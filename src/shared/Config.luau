@@ -701,6 +701,10 @@ return {
 	-- The home base's grass checker, on its own (QM, Oct 10: lighter squares #4BE62A; the
 	-- Meadow keeps its GroundColors). nil: the Meadow's. WorldColors.
 	BaseGroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(75, 230, 42) },
+	-- The run home's over-the-shoulder camera (QM, Oct 10): Client/ShoulderCam. Studs from
+	-- the rider (x the ride's zoom: bigger pets, the sprint tiers' bounce), easing in over
+	-- InTime seconds as you turn for home and out over OutTime at the home line.
+	ShoulderCam = { On = true, Right = 2.5, Up = 4, Back = 11, Ahead = 60, LookUp = 1.5, InTime = 0.8, OutTime = 0.5 },
 	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
 	SprintTiers = { 180, 360, 440 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)

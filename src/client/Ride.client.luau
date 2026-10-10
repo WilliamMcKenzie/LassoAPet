@@ -132,6 +132,7 @@ end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
+vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
 vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
 vfx.sprintTrail = require(script.Parent.SprintTrail) -- a white trail behind your mount while it sprints (QM, Oct 9)
@@ -4459,6 +4460,10 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and ((phase == "outbound" and sprinting()) or (phase == "return" and Config.ReturnSprint)), mount and mount.speed * (vfx.speedGain or 1)) -- (the run home's a sprint too: QM)
 	local z = vfx.camZoom * sprintZoom
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
+	local shoulder = vfx.shoulderCam.blend(dt, mount ~= nil and hrp ~= nil and (phase == "turning" or phase == "return")) -- (the run home: over the shoulder, QM)
+	if shoulder > 0 and hrp then
+		desired = desired:Lerp(vfx.shoulderCam.pose(hrp.Position, camYaw, z), shoulder)
+	end
 	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
