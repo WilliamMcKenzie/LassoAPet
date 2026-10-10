@@ -400,6 +400,7 @@ return {
 	--     and Mouth (studs up its tentacles start from, default 3) are optional.
 	-- Charge swings the camera round to a cinematic front-side angle.
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
+	NativePrompts = true, -- Roblox's own interact prompts instead of ours (Client/PromptUi), to compare (QM, Oct 10)
 	AbilitiesOn = false, -- (QM, Oct 10: off till the riding UX is settled; Abilities below stay as they are)
 	Abilities = {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
