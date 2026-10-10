@@ -4460,12 +4460,14 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and ((phase == "outbound" and sprinting()) or (phase == "return" and Config.ReturnSprint)), if phase == "return" and Config.ReturnCamFixed then Config.SprintCam.HorseSprint elseif mount then mount.speed * (vfx.speedGain or 1) else nil) -- (the run home's a sprint too: QM)
 	local z = vfx.camZoom * sprintZoom
 	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
-	local shoulder = vfx.shoulderCam.blend(dt, mount ~= nil and hrp ~= nil and (phase == "turning" or phase == "return")) -- (the run home: over the shoulder, QM)
-	if shoulder > 0 and hrp then
-		desired = desired:Lerp(vfx.shoulderCam.pose(hrp.Position, camYaw, z), shoulder)
-	end
 	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
+	-- The run home: over the shoulder (QM, Oct 10), pinned to the rider rather than eased
+	-- after them (the ease above trailed far behind at the run home's speed).
+	local shoulder = vfx.shoulderCam.blend(dt, mount ~= nil and hrp ~= nil and (phase == "turning" or phase == "return"))
+	if shoulder > 0 and hrp then
+		camera.CFrame = camera.CFrame:Lerp(vfx.shoulderCam.pose(hrp.Position, camYaw, z), shoulder)
+	end
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
 	fov = math.max(fov, math.min(fov + vfx.speedFx.fovKick(), Config.SpeedFeel.MaxFov))
