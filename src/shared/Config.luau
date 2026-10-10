@@ -698,6 +698,9 @@ return {
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
 	-- Client/SkyFlash. Start: its see-through at the flash (0: solid white). Distance: studs
 	-- round the camera; anything further off goes white with the sky.
+	-- The home base's grass checker, on its own (QM, Oct 10: lighter squares #4BE62A; the
+	-- Meadow keeps its GroundColors). nil: the Meadow's. WorldColors.
+	BaseGroundColors = { Color3.fromRGB(77, 196, 63), Color3.fromRGB(75, 230, 42) },
 	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
 	SprintTiers = { 180, 360, 440 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
