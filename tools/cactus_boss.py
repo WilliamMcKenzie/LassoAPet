@@ -4,7 +4,9 @@ Snake's teeth and the Ice Golem's crystals) so it looks lethal.
 
 Run: python3 tools/cactus_boss.py [out_dir]
 writes designs/bosses/CactusBoss.bbmodel (rest pose, no animations yet) and
-a preview CactusBoss.png. Same bones as the Cactus (root, neck, ArmL, ArmR,
+a preview CactusBoss.png.
+     python3 tools/cactus_boss.py animate <QM's file> <out file>   its idle, walk and gallop, plus GIFs
+Same bones as the Cactus (root, neck, ArmL, ArmR,
 LegFL, LegFR) so its rig can be reused.
 """
 
@@ -139,5 +141,83 @@ def main(out=OUT):
     print("wrote", path, len(parts), "parts")
 
 
+
+
+# ---------------------------------------------------------------- animations (on QM's file)
+
+def animations(m):
+    """The boss's loops, on the Cactus pet's bones. A heavy, lumbering version of the
+    Cactus's moves: idle breathes and flexes its raised arms, walk stomps, gallop
+    leans in and charges with big hops and arms swinging. +X leans forward."""
+    import math
+    from snake_rig import track
+    from snow_rig import grounded
+    s, TAU = math.sin, 2 * math.pi
+    feet = {"LegL", "LegR"}
+
+    L = 3.0
+    idle = {
+        "root": [track(L, lambda u: (0, 0, 0), 4), track(L, lambda u: (0, 2 * (1 - math.cos(TAU * u)) / 2, 0), 12, "position")],
+        "neck": [track(L, lambda u: (-3 * s(TAU * u), 0, 4 * s(TAU * u)), 12)],
+        "ArmL": [track(L, lambda u: (0, 0, -10 * (1 - math.cos(TAU * u)) / 2), 12)],
+        "ArmR": [track(L, lambda u: (0, 0, 10 * (1 - math.cos(TAU * u)) / 2), 12)],
+    }
+
+    Lw = 0.9
+    walk = {
+        "root": [track(Lw, lambda u: (4, 0, 7 * s(TAU * u)), 16)],
+        "LegFL": [track(Lw, lambda u: (24 * s(TAU * u), 0, 0), 16)],
+        "LegFR": [track(Lw, lambda u: (-24 * s(TAU * u), 0, 0), 16)],
+        "ArmL": [track(Lw, lambda u: (-25 * s(TAU * u), 0, -8), 16)],
+        "ArmR": [track(Lw, lambda u: (25 * s(TAU * u), 0, 8), 16)],
+        "neck": [track(Lw, lambda u: (0, 0, -5 * s(TAU * u)), 16)],
+    }
+    walk["root"] = grounded(m, Lw, walk, feet, 16, extra=lambda u: 2 * abs(s(TAU * u)))
+
+    Lg = 0.6
+    gallop = {
+        "root": [track(Lg, lambda u: (12 + 3 * s(2 * TAU * u), 5 * s(TAU * u), 6 * s(TAU * u)), 16)],
+        "LegFL": [track(Lg, lambda u: (-12 + 45 * s(TAU * u), 0, 0), 16)],
+        "LegFR": [track(Lg, lambda u: (-12 - 45 * s(TAU * u), 0, 0), 16)],
+        "ArmL": [track(Lg, lambda u: (-50 * s(TAU * u), 0, -25), 16)],
+        "ArmR": [track(Lg, lambda u: (50 * s(TAU * u), 0, 25), 16)],
+        "neck": [track(Lg, lambda u: (-8 + 6 * s(2 * TAU * u), 0, 0), 16)],
+    }
+    gallop["root"] = grounded(m, Lg, gallop, feet, 16, extra=lambda u: 8 * abs(s(TAU * u)))
+    return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lg, gallop)}
+
+
+def animate(src, dst, out=OUT):
+    """Write the loops into QM's file (src) as dst, with preview GIFs."""
+    import horse_rig
+    horse_rig.EULER = "ZYX"  # QM's hand-made file
+    from horse_rig import write_animations
+    from snow_rig import group_ids, posed
+    m = json.load(open(src))
+    write_animations(m, group_ids(m), animations(m))
+    with open(dst, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    T = 420
+    cams = [dict(eye=(-26, 13, -30), target=(0, 6, 0), W=T, H=T, fov=36), dict(eye=(-38, 7, -1), target=(0, 6, 0), W=T, H=T, fov=34)]
+
+    def frame(name, t):
+        anim = next(x for x in m["animations"] if x["name"] == name)
+        ps = posed(m, anim, t)
+        for p in ps:
+            if p.name.startswith(("Eye", "Mouth", "Spike")):
+                p.plain = True
+        im = Image.new("RGB", (T * 2, T))
+        for i, c in enumerate(cams):
+            im.paste(render(ps, **c), (i * T, 0))
+        return A.label(im, [name, ""], 22)
+
+    for name, n in (("idle", 24), ("walk", 16), ("gallop", 16)):
+        L = next(x for x in m["animations"] if x["name"] == name)["length"]
+        A.gif(os.path.join(out, f"CactusBoss_{name}.gif"), [frame(name, L * i / n) for i in range(n)], fps=n / L)
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["animate"]:
+        animate(*sys.argv[2:])
+    else:
+        main(*sys.argv[1:])
