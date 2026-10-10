@@ -414,7 +414,7 @@ return {
 	--     and animal within Range studs of its mouth (Width wide) is burnt away, whatever
 	--     its size.
 	--   Goo (Sludge): it lays the wild Sludge's sludge behind it; stampede animals that
-	--     run into it are stuck, crawling, for a moment (Client/GodlandsHazards).
+	--     run into it are stuck, crawling, for a moment (Client/PetTrails).
 	--   SpikeTrail (Soul Horse): it leaves the wild Soul Horse's spikes behind it; stampede
 	--     animals that run into one are killed, whatever their size (they never crash you).
 	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, which
@@ -428,8 +428,8 @@ return {
 		Beholder = { Kind = "Fly", Height = 24, ScareRadius = 30, Haze = Color3.fromRGB(255, 110, 210) }, -- height and radius are guesses
 		Leviathan = { Kind = "Flame", Range = 5, Width = 9, OnReturn = true }, -- QM, Oct 4: "like 1m ahead" (4 studs a metre; the width is a guess)
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
-		SoulHorse = { Kind = "SpikeTrail" }, -- QM, Oct 4: the wild Soul Horse's spike trail behind it; stampede animals that run into a spike are killed (Client/GodlandsHazards)
-		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/GodlandsHazards)
+		SoulHorse = { Kind = "SpikeTrail" }, -- QM, Oct 4: the wild Soul Horse's spike trail behind it; stampede animals that run into a spike are killed (Client/PetTrails)
+		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/PetTrails)
 		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true, RestorePer = 0.2 }, -- QM, Oct 4: 20% Hold per animal it hits
 	},
 	-- Size tiers (any whole number, bigger is bigger). Racing home, a pet plows

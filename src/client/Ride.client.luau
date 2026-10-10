@@ -80,7 +80,6 @@ local slices = {
 	SWERVE_BEFORE = 40, -- studs: laneX's reach in front of an obstacle
 	SWERVE_AFTER = 28, -- and past it
 	BLOCK_PAD = 8, -- studs: the most padZ blockedAt is asked for and still uses the slices
-	SOLID = math.huge, -- blockedAt's tier for the solid obstacles (the Godlands' mountains) alone
 	swerve = {},
 	block = {},
 	NONE = {},
@@ -97,33 +96,6 @@ end
 for _, o in obstacles do
 	slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
 	slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
-end
--- The Godlands' terrain pieces come and go with the tracks built round you
--- (Client/GodlandsStream): in and out of the list and the slices.
-function slices.remove(list, o, zMin, zMax)
-	for slice = math.floor(zMin / slices.SIZE), math.floor(zMax / slices.SIZE) do
-		local i = list[slice] and table.find(list[slice], o)
-		if i then
-			table.remove(list[slice], i)
-		end
-	end
-end
-function slices.pieces(list, added)
-	for _, o in list do
-		if added then
-			o.solid = true -- mountains to dodge (QM, Oct 7): never smashed, they crash you
-			table.insert(obstacles, o)
-			slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
-			slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
-		else
-			local i = table.find(obstacles, o)
-			if i then
-				table.remove(obstacles, i)
-			end
-			slices.remove(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
-			slices.remove(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
-		end
-	end
 end
 
 local function tierOf(kind)
@@ -157,9 +129,6 @@ end
 -- on their screens it's back a few seconds later (remote).
 local SMASH_TIME = 0.7
 local function smash(o, dir, side, remote)
-	if o.solid then
-		return -- a mountain: nothing moves it (checkRide crashes you into it instead)
-	end
 	o.smashed = true
 	if not remote then
 		vfx.sounds.play("smash", 0.4)
@@ -229,8 +198,6 @@ local SHRINK = 12 -- studs before its biome's end over which an animal shrinks i
 -- Each biome's stream: where it spawns and ends, how long an animal lives in it and
 -- its kinds of animal by weight (Config.Biomes[b].Herd), sorted by name so every
 -- client picks the same animals. A stream's animals are keyed n * BIOME_KEYS + b - 1.
--- The endless Godlands has a stream per track instead (endless below), at b past the
--- other biomes', wrapping round well within BIOME_KEYS.
 local BIOME_KEYS = 1024
 
 -- An animal's stats (Config.AnimalStats), 1x for any animal not listed; a hybrid
@@ -253,11 +220,8 @@ local function holdTime(_entity)
 	return Config.RideSeconds
 end
 local streams = {}
--- The endless Godlands (Shared/Godlands): a stream per track, each running from
--- its track's line to the next, made as the camera nears it (endless.stream(k)).
-local endless = { Godlands = require(ReplicatedStorage.Shared.Godlands) }
 -- A stream from spawnZ to endZ of the herd's kinds; name labels its line in the Output.
-function endless.newStream(spawnZ, endZ, herd, name)
+local function newStream(spawnZ, endZ, herd, name)
 	local s = {
 		spawnZ = spawnZ,
 		endZ = endZ,
@@ -291,12 +255,7 @@ do
 		local startZ, endZ = edge, edge - biome.Length
 		edge = endZ
 		assert(biome.Herd, "Config.Biomes[" .. b .. "] (" .. tostring(biome.Name) .. ") has no Herd")
-		if b == endless.Godlands.biome then
-			endless.b, endless.herd = b, biome.Herd
-			print(string.format("[Herd] %s: a stream per %d-stud track from z %.0f on", biome.Name, endless.Godlands.length, startZ))
-			continue
-		end
-		streams[b] = endless.newStream(
+		streams[b] = newStream(
 			if b == 1 then SPAWN_Z else startZ - 2,
 			if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
 			biome.Herd,
@@ -305,46 +264,9 @@ do
 		streams[b].keep = biome.HerdKeep -- (fewer animals in the Meadow)
 	end
 end
--- Track k's stream, at streams[endless.b + k % 900] (made now if it isn't there).
--- Its animals pop in at the track's line and shrink away at the next one.
-function endless.stream(k)
-	local b = endless.b + k % 900
-	local s = streams[b]
-	if not s or s.k ~= k then
-		local z0 = endless.Godlands.segmentStart(k)
-		s = endless.newStream(z0 - 2, z0 - endless.Godlands.length + 2, endless.herd)
-		s.k = k
-		s.thin = Config.Biomes[endless.b].HerdThin -- (fewer animals in the Godlands)
-		streams[b] = s
-	end
-	return s
-end
--- Keeps streams for the tracks with stampede loaded (z from fromZ to toZ: vfx.viewWindow), and only those.
-function endless.near(fromZ, toZ)
-	if not endless.b then
-		return
-	end
-	local hi = endless.Godlands.segmentAt(fromZ)
-	local lo = endless.Godlands.segmentAt(toZ) or 0
-	for b, s in streams do
-		if s.k and (not hi or s.k < lo or s.k > hi) then
-			streams[b] = nil
-		end
-	end
-	for k = lo, hi or -1 do
-		endless.stream(k)
-	end
-end
-if endless.b then
-	endless.stream(0) -- so the pools below count its animals
-end
 
 -- Where an animal in biome b (at z) stops: its stream's end.
 local function streamAt(z)
-	local k = endless.Godlands.segmentAt(z)
-	if k and endless.b then
-		return endless.stream(k)
-	end
 	return streams[WorldColors.biomeAt(z)]
 end
 
@@ -411,9 +333,7 @@ end
 vfx.sounds = require(script.Parent.Sounds) -- sound effects and music (a field: this chunk is at the local limit)
 vfx.rideSync = ReplicatedStorage:WaitForChild("RideSync") -- multiplayer rides (Riders.server)
 vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
-vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
-vfx.godlands.onPieces = slices.pieces
-vfx.hazards = require(script.Parent.GodlandsHazards) -- the Godlands' wild animals: spikes, sludge, confusion, charges, hunts
+vfx.hazards = require(script.Parent.PetTrails) -- your Sludge's and Soul Horse's sprint trails
 vfx.speedFx = require(script.Parent.SpeedFx) -- the speed cap's curve, speed lines and wider view (QM, Oct 7)
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
@@ -507,13 +427,11 @@ local function popHop(t)
 end
 
 -- The first obstacle overlapping (x, z) that's still standing, of at least this tier (1 if nil).
--- Solid ones (mountains) only when slices.SOLID is asked for, so the loops that smash
--- whatever's in the way never get stuck on one.
 local function blockedAt(x, z, padX, padZ, tier)
 	local list = if padZ <= slices.BLOCK_PAD then slices.at(slices.block, z) else obstacles
 	tier = tier or 1
 	for _, o in list do
-		if not o.smashed and (if o.solid then tier == slices.SOLID else o.tier >= tier) and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
+		if not o.smashed and o.tier >= tier and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
 			return o
 		end
 	end
@@ -552,30 +470,6 @@ local function laneX(x0, z)
 	x0 *= vfx.widen(z) -- (lanes are in start-line units)
 	local EDGE = vfx.edge(z)
 	local x = x0
-	if endless.Godlands.segmentAt(z) then
-		-- The Godlands' walls (Shared/GodlandsTracks) run right across: rather than
-		-- swerving round each piece on its own, the lane is shoved out of one piece
-		-- after another until it's clear of them all (through the wall's gap).
-		local target, w = x0, 0
-		for _ = 1, 4 do
-			local moved = false
-			for _, o in slices.at(slices.swerve, z) do
-				local reach = o.hx + 6
-				local ow = smoothstep(o.z + o.hz + slices.SWERVE_BEFORE, o.z + o.hz + 4, z) * smoothstep(o.z - o.hz - slices.SWERVE_AFTER, o.z - o.hz - 4, z)
-				if ow > 0 and math.abs(target - o.x) < reach then
-					local side = if target >= o.x then 1 else -1
-					if math.abs(o.x + side * reach) > EDGE then
-						side = -side
-					end
-					target, w, moved = o.x + side * reach, math.max(w, ow), true
-				end
-			end
-			if not moved then
-				break
-			end
-		end
-		return math.clamp(x0 + (target - x0) * w, -EDGE, EDGE)
-	end
 	for _, o in slices.at(slices.swerve, z) do
 		local reach = o.hx + 6
 		local d = x0 - o.x
@@ -1205,7 +1099,6 @@ guide.beam.Transparency = NumberSequence.new({
 guide.beam.Attachment0, guide.beam.Attachment1 = guide.from, guide.to
 guide.beam.Enabled = false
 guide.beam.Parent = guide.from
-vfx.hazards.guideBeam = guide.beam -- (a War Elephant's charge arrows are a red copy)
 guide.from.Parent, guide.to.Parent = workspace.Terrain, workspace.Terrain
 task.spawn(function()
 	game:GetService("ContentProvider"):PreloadAsync({ guide.beam })
@@ -1394,7 +1287,7 @@ local function readSteer()
 	-- On a phone the usual movement joystick stays up while riding (rideStick) and
 	-- steers like the arrow keys.
 	local stick = if rideStick.on then controls:GetMoveVector().X else 0
-	return math.clamp(keys + touchSteer + padSteer + stick, -1, 1) * vfx.hazards.steerSign() -- (flipped while a Beholder has you confused)
+	return math.clamp(keys + touchSteer + padSteer + stick, -1, 1)
 end
 
 UserInputService.InputBegan:Connect(function(input, processed)
@@ -1480,7 +1373,6 @@ local function takeFromPool(n, x, z, kind)
 		entity = newEntity(x, z, 0, kind)
 	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
-	entity.face, entity.rush = nil, nil
 	entity.swerve, entity.swerveTo, entity.swerveV, entity.swerveSide, entity.lat = 0, 0, 0, nil, 0 -- (vfx.updateAvoid; moveAnimal)
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
 	-- Put where it now is at once: one taken out of view isn't moved until it comes
@@ -1681,9 +1573,8 @@ local function moveAnimal(entity, x, z, speed, dt, shown)
 	entity.lat = lat
 	entity.x, entity.z, entity.speed = x, z, speed
 	if shown then
-		-- (face and rush: a Godlands animal charging or hunting you, GodlandsHazards)
-		place(entity, entity.face or -math.atan2(lat, math.max(speed, 1)))
-		animate(entity, dt, entity.rush or speed, if entity.face then 0 else lat / 12)
+		place(entity, -math.atan2(lat, math.max(speed, 1)))
+		animate(entity, dt, speed, lat / 12)
 	end
 end
 
@@ -1851,8 +1742,6 @@ local function updateHerd(dt, slowed)
 		vfx.frostLeft[key] = if left > dt then left - dt else nil
 	end
 	local fromZ, toZ = vfx.viewWindow(camZ)
-	endless.near(fromZ, toZ)
-	vfx.godlands.update(camZ)
 	-- (the animal you're lassoing is kept however old it gets or far it runs: QM, Oct 8, a
 	-- Fish wrestled on into the Desert outlived its stream's schedule and vanished)
 	local held = transfer and transfer.target and transfer.target.n
@@ -1915,7 +1804,7 @@ local function updateHerd(dt, slowed)
 			if snapped then
 				entity.x = x + entity.dodge + (entity.swerve or 0) -- a snap doesn't swing them sideways
 			end
-			local ox, oz = vfx.hazards.offset(key) -- (charging or hunting you: off its place for a bit)
+			local ox, oz = vfx.hazards.offset(key) -- (stuck in your Sludge's sludge: falling behind)
 			moveAnimal(entity, math.clamp(x + entity.dodge + (entity.swerve or 0) + ox, -vfx.edge(z), vfx.edge(z)), z + oz, speed, dt, shown)
 			vfx.setFrosted(entity, vfx.frostLeft[key] ~= nil)
 		end
@@ -1928,7 +1817,7 @@ local function updateHerd(dt, slowed)
 		end
 	end
 	for key in plans do
-		local stream = streams[key % BIOME_KEYS + 1] -- (gone if it was a Godlands track's left behind)
+		local stream = streams[key % BIOME_KEYS + 1]
 		if not stream or key // BIOME_KEYS < stream.oldest then
 			plans[key], taken[key] = nil, nil
 			vfx.frostLag[key], vfx.frostLeft[key] = nil, nil
@@ -2107,7 +1996,6 @@ local function chargeFx(entity, scale, turn)
 	table.insert(fx, box)
 	return fx
 end
-vfx.hazards.chargeFx = chargeFx -- (a War Elephant charging you: the Rhino's charge)
 vfx.hazards.spiked = function(entity, dx) -- (a stampede animal ran into your Soul Horse's spike trail)
 	knock(entity, dx)
 end
@@ -2284,14 +2172,13 @@ function vfx.updateAvoid(dt)
 		end
 		local hitX = math.max((mhx + ehx) * 0.8, 2.6) -- (how close the crash check lets it come)
 		local dz = if on then entity.z - mount.z - math.max((mhz + ehz) * 0.8, 5) else -math.huge -- (from where the crash check reaches)
-		-- Less in each zone further out, none in the Godlands (Config.Biomes[].Swerve: QM,
-		-- Oct 6; off Oct 8, back on Oct 9)...
+		-- By each zone's Config.Biomes[].Swerve (QM, Oct 6; off Oct 8, back on Oct 9; all
+		-- the Meadow's, Oct 10)...
 		local here = WorldColors.biomeAt(entity.z)
 		local zone = if dz > 0 then Config.Biomes[here].Swerve or 1 else 0
 		-- (Any mount: the Oct 8 rule that only a mount from its biome or later got swerved
 		-- for is off, QM Oct 9: no lasso levels now, you're nearly always on the latest biome's.)
-		-- (not a Godlands animal charging or hunting you: that one means it)
-		if zone > 0 and not (entity.popping or entity.event or entity.face or entity.rush) then
+		if zone > 0 and not (entity.popping or entity.event) then
 			local clear = (cfg.Clear + hitX - 2.6) * zone -- (Clear was tuned for the old 2.6-stud check)
 			local t = dz / math.max(state.vz + math.max(entity.speed or 0, 0), 1) -- seconds until it's on you
 			local base = entity.x - (entity.swerve or 0) -- its line without the swerve
@@ -3413,7 +3300,6 @@ local function updateMount(dt)
 		targetSpeed *= (Config.PetSprintSpeed[mount.kind] or Config.SprintSpeed) * ((vfx.sprintSpecial() or {}).SpeedBoost or 1) -- the Blue Crab's crab walk: faster still
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
-	targetSpeed *= vfx.hazards.slow() -- stuck in a Sludge's sludge
 	-- (Out of stamina you turn for home, never ride on tired: checkRide.)
 	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
 	local ability = activeAbility()
@@ -3540,7 +3426,6 @@ local function updateMount(dt)
 		local prey = vfx.huntTarget
 		targetLat = if prey then math.clamp((prey.x - mount.x) * 4, -Config.SteerSpeed * 1.5, Config.SteerSpeed * 1.5) else 0
 	end
-	targetLat *= math.sqrt(vfx.hazards.slow())
 	mount.latVel += (targetLat - mount.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
 	-- At home the side limit widens from the corridor's to the base's over 40 studs,
 	-- so a ride from an outer pen is eased into the corridor.
@@ -3587,16 +3472,6 @@ local function checkRide(dt)
 	grace = math.max(grace - dt, 0)
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)
-	end
-	do
-		-- The Godlands' mountains crash you whatever you're riding or doing, unless
-		-- you're flying over or burrowing under them.
-		local special = vfx.sprintSpecial()
-		local hop = mount.hop or 0
-		local clear = special and ((special.Kind == "Fly" and hop > 8) or (special.Kind == "Burrow" and hop < -2))
-		if not clear and grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4, slices.SOLID) then
-			return fail("CRASH!")
-		end
 	end
 	local ability = activeAbility()
 	if ability and vfx.PLAIN[ability.cfg.Kind] then
@@ -3688,8 +3563,7 @@ local function checkRide(dt)
 		end
 	end
 	-- Obstacles never crash you: whatever you ride into is smashed (QM, Oct 6: new
-	-- players kept crashing into them), but the Godlands' mountains (above). Stampede
-	-- animals still go by size.
+	-- players kept crashing into them). Stampede animals still go by size.
 	local bodyX, bodyZ = vfx.halfBody(mount)
 	while true do
 		local o = blockedAt(mount.x, mount.z, math.max(1.3, bodyX * 0.7), math.max(2.4, bodyZ * 0.7))
@@ -3700,11 +3574,6 @@ local function checkRide(dt)
 		vfx.broke()
 	end
 	local myTier = vfx.mountTier()
-	-- The Godlands' wild animals (GodlandsHazards): spikes, charges, hunts.
-	local hazard = vfx.hazards.hit(mount, grace > 0)
-	if hazard then
-		return fail("CRASH!", hazard)
-	end
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
 		return fail("CRASH!") -- a locked gate
 	end
