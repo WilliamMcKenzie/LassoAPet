@@ -20,7 +20,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Sounds = require(script.Parent.Sounds)
 
-local VEIN = "rbxassetid://75617171153698" -- assets/ui/boss/AngerVein.png (QM's)
+local VEIN = "rbxassetid://71591128802233" -- assets/ui/boss/AngerVein.png (QM's second, Oct 10)
 
 local BossChase = {}
 
