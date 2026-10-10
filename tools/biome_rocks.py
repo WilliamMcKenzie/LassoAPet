@@ -40,6 +40,21 @@ ROCK_COLOR = {  # QM, Oct 10 (design/rocks_biomes): the meadow's is the base's F
     "Meadow": (159, 161, 172), "Desert": (234, 190, 122), "Snow": (158, 200, 240), "Ocean": (242, 120, 98)}
 _built = {n: RM.build(f, s) for n, f, s, _ in RM.ROCKS}
 
+# Multi-piece rocks (QM, Oct 10, design/rocks_biomes/rocks_multishade.png): each piece
+# its own MeshPart (design/rocks/pieces/Rock<Name>_<i>.obj, uploaded by Studio, same
+# origin as the whole rock) in its own shade of the biome colour. 0 = not uploaded yet.
+PIECE_MESHES = {"Pebble": [97909332868672], "Stone": [0, 0], "Slab": [0, 0],
+                "Boulder": [0, 0], "Crag": [0, 0, 0, 0, 0]}
+_SHADE_STEPS = {  # each piece's shade (QM's pick: the steps below x 2.2 from the base)
+    "Meadow": [(159, 161, 172), (148, 151, 163), (168, 170, 179), (153, 157, 164), (164, 164, 176)],
+    "Desert": [(234, 190, 122), (224, 176, 110), (240, 200, 136), (228, 184, 112), (238, 194, 130)],
+    "Snow": [(158, 200, 240), (146, 190, 234), (170, 210, 244), (152, 196, 232), (164, 202, 246)],
+    "Ocean": [(242, 120, 98), (232, 108, 90), (246, 134, 110), (236, 116, 92), (244, 126, 106)],
+}
+SHADE_SPREAD = 2.2
+SHADES = {b: [tuple(int(max(0, min(255, c0 + (c - c0) * SHADE_SPREAD))) for c0, c in zip(v[0], sh)) for sh in v]
+          for b, v in _SHADE_STEPS.items()}
+
 
 def rock_radius(name):
     pts = np.concatenate([np.concatenate(t) for t in _built["Rock" + name]])
@@ -119,12 +134,24 @@ def fade(z):
     return min(max(((OG.Z_START - z) / OG.OCEAN_LENGTH - 0.3) / 0.5, 0.0), 1.0)
 
 
-def rock_color(it):
-    c = ROCK_COLOR[it["biome"]]
+def rock_color(it, piece=0):
+    c = SHADES[it["biome"]][piece % len(SHADES[it["biome"]])]
     if it["biome"] == "Ocean":
         f = fade(it["z"])
         c = tuple(round(a + (b - a) * f) for a, b in zip(c, (76, 74, 90)))
     return c
+
+
+def write_pieces():
+    """One OBJ per piece of each multi-piece rock, in the whole rock's frame."""
+    out = os.path.join(HERE, "..", "design", "rocks", "pieces")
+    os.makedirs(out, exist_ok=True)
+    for name, ids in PIECE_MESHES.items():
+        chunks = _built["Rock" + name]
+        assert len(chunks) == len(ids), name
+        if len(chunks) > 1:
+            for i, ch in enumerate(chunks, 1):
+                RM.write_obj(f"Rock{name}_{i}", [ch], os.path.join(out, f"Rock{name}_{i}.obj"))
 
 
 LUAU = """-- The biomes redecorated with the rock meshes (QM, Oct 10). Made by tools/biome_rocks.py:
@@ -134,24 +161,30 @@ LUAU = """-- The biomes redecorated with the rock meshes (QM, Oct 10). Made by t
 --
 -- Everything in World.Obstacles goes except one of each kept asset (Cactus, Pine,
 -- TubeCoral, BranchCoral, FanCoral), cloned for its new spots. The rocks are Models named
--- Rock<Mesh> holding an invisible Base (Ride's footprint) and the MeshPart, with a "Tier"
--- attribute. Ocean pieces fade toward basalt with depth, like the corals did.
+-- Rock<Mesh> holding an invisible Base (Ride's footprint) and one MeshPart per piece
+-- (PIECES: the ids of design/rocks/pieces/Rock<Mesh>_<i>.obj in order), each piece its
+-- own shade of the biome colour, with a "Tier" attribute. Ocean pieces fade toward basalt with depth, like the corals did.
 
 local world = workspace.World
 local obstacles = world.Obstacles
 local AssetService = game:GetService("AssetService")
 local studs = game:GetService("MaterialService"):FindFirstChild("Studs", true)
 
--- { asset, x, z, yaw, y, r, g, b }: r, g, b only for rocks (their colour), or the ocean fade for kept ones
+-- { asset, x, z, yaw, y, r, g, b, r, g, b, ... }: rocks get one r, g, b per piece; kept ones the ocean fade
 local ITEMS = {
 @ITEMS@
 }
-local MESHES = { @MESHES@ }
+local PIECES = { @MESHES@ }
 local SCALE = { @SCALE@ }
 local TIER = { @TIER@ }
 local RADIUS = { @RADIUS@ }
 local BASALT = Color3.fromRGB(76, 74, 90)
 
+for name, ids in PIECES do
+	for _, id in ids do
+		assert(id ~= 0, "PIECES." .. name .. " has a piece not uploaded yet (0): upload design/rocks/pieces and fill in its ids")
+	end
+end
 for _, inst in obstacles:GetChildren() do
 	if inst:GetAttribute("FunnelPivot") then
 		error("World.Obstacles is still funnelled: run tools/funnel.luau with MODE = \\"undo\\" first")
@@ -185,12 +218,7 @@ local placed = 0
 for _, it in ITEMS do
 	local name, x, z, yaw, y = it[1], it[2], it[3], it[4], it[5]
 	local at = CFrame.new(x, y, z) * CFrame.Angles(0, math.rad(yaw), 0)
-	if MESHES[name] then
-		local from = meshes[name]
-		if not from then
-			from = AssetService:CreateMeshPartAsync(Content.fromUri("rbxassetid://" .. MESHES[name]))
-			meshes[name] = from
-		end
+	if PIECES[name] then
 		local m = Instance.new("Model")
 		m.Name = "Rock" .. name
 		m:SetAttribute("Tier", TIER[name])
@@ -202,21 +230,30 @@ for _, it in ITEMS do
 		base.Size = Vector3.new(side, 1, side)
 		base.CFrame = CFrame.new(x, y - 0.5, z)
 		base.Parent = m
-		local p = from:Clone()
-		p.Name = "Rock"
-		p.Size *= SCALE[name]
-		p.Anchored, p.CanCollide, p.CanTouch = true, false, false
-		p.Color = Color3.fromRGB(it[6], it[7], it[8])
-		if studs then
-			p.Material = studs.BaseMaterial
-			p.MaterialVariant = studs.Name
-			p.CustomPhysicalProperties = PhysicalProperties.new(Enum.Material.SmoothPlastic)
-		else
-			p.Material = Enum.Material.SmoothPlastic
+		for i, id in PIECES[name] do
+			local from = meshes[id]
+			if not from then
+				from = AssetService:CreateMeshPartAsync(Content.fromUri("rbxassetid://" .. id))
+				meshes[id] = from
+			end
+			local p = from:Clone()
+			p.Name = if #PIECES[name] > 1 then "Rock" .. i else "Rock"
+			p.Size *= SCALE[name]
+			p.Anchored, p.CanCollide, p.CanTouch = true, false, false
+			local k = 3 + 3 * i
+			p.Color = Color3.fromRGB(it[k], it[k + 1], it[k + 2])
+			if studs then
+				p.Material = studs.BaseMaterial
+				p.MaterialVariant = studs.Name
+				p.CustomPhysicalProperties = PhysicalProperties.new(Enum.Material.SmoothPlastic)
+			else
+				p.Material = Enum.Material.SmoothPlastic
+			end
+			-- (an uploaded mesh keeps its own origin at the part's position: its y 0 is the
+			-- rock's base, and every piece shares the whole rock's origin, so they fit together)
+			p.CFrame = at
+			p.Parent = m
 		end
-		-- (an uploaded mesh keeps its own origin at the part's position: its y 0 is the rock's base)
-		p.CFrame = at
-		p.Parent = m
 		m.PrimaryPart = base
 		m.Parent = obstacles
 	else
@@ -245,13 +282,13 @@ def write_luau(items):
     for it in items:
         a = it["asset"]
         if a.startswith("Rock"):
-            r, g, b = rock_color(it)
-            rows.append('\t{ "%s", %.2f, %.2f, %.1f, %g, %d, %d, %d },' % (a[4:], it["x"], it["z"], it["yaw"], it["y"], r, g, b))
+            cols = ", ".join("%d, %d, %d" % rock_color(it, i) for i in range(len(PIECE_MESHES[a[4:]])))
+            rows.append('\t{ "%s", %.2f, %.2f, %.1f, %g, %s },' % (a[4:], it["x"], it["z"], it["yaw"], it["y"], cols))
         else:
             f = fade(it["z"]) if it["biome"] == "Ocean" else 0
             rows.append('\t{ "%s", %.2f, %.2f, %.1f, %g, %.3f },' % (a, it["x"], it["z"], it["yaw"], it["y"], f))
     s = LUAU.replace("@ITEMS@", "\n".join(rows))
-    s = s.replace("@MESHES@", ", ".join(f"{n} = {v}" for n, v in MESHES.items()))
+    s = s.replace("@MESHES@", ", ".join(f"{n} = {{ {', '.join(map(str, v))} }}" for n, v in PIECE_MESHES.items()))
     s = s.replace("@SCALE@", ", ".join(f"{n} = {v}" for n, v in ROCK_SCALE.items()))
     s = s.replace("@TIER@", ", ".join(f"{n} = {v}" for n, v in ROCK_TIER.items()))
     s = s.replace("@RADIUS@", ", ".join(f"{n} = {CL.eff('Rock' + n):.2f}" for n in MESHES))
@@ -270,7 +307,7 @@ def placed_parts(items, z_lo, z_hi):
         if a.startswith("Rock"):
             s = ROCK_SCALE[a[4:]]
             chunks = [[t * s for t in tris] for tris in _built[a]]
-            ps = RM.as_parts(chunks, 0, 0, yaw=0, color=rock_color(it))
+            ps = [p for i, ch in enumerate(chunks) for p in RM.as_parts([ch], 0, 0, yaw=0, color=rock_color(it, i))]
             M = T(it["x"], it["y"], it["z"]) @ Ry(it["yaw"])
             for p in ps:
                 p.cf = M @ p.cf
@@ -307,6 +344,7 @@ if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     json.dump(items, open(os.path.join(OUT, "layout.json"), "w"), indent=0)
     write_luau(items)
+    write_pieces()
     from collections import Counter
     for b in CL.BIOMES:
         print(b["name"], dict(Counter(it["asset"] for it in items if it["biome"] == b["name"])))
