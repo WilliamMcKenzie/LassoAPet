@@ -66,6 +66,21 @@ end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
 resize()
 
+-- A dark shade up the left edge, behind the menu (QM, Oct 10: a trial): black at
+-- cfg.Shade's see-through on the edge, fading out halfway across the buttons.
+if cfg.Shade then
+	local shade = Instance.new("Frame")
+	shade.Name = "Shade"
+	shade.BorderSizePixel = 0
+	shade.BackgroundColor3 = Color3.new(0, 0, 0)
+	shade.Size = UDim2.new(0, MARGIN + MENU_WIDTH / 2, 1, 0)
+	shade.ZIndex = 0 -- (under the rest)
+	local fade = Instance.new("UIGradient")
+	fade.Transparency = NumberSequence.new(cfg.Shade, 1)
+	fade.Parent = shade
+	shade.Parent = root
+end
+
 local function text(parent, size, color, strokeWidth)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
