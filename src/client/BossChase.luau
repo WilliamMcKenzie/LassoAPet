@@ -1,8 +1,9 @@
 -- The boss (QM, Oct 10): when the BOSS IN timer runs out your animal stops, and the
 -- boss (Shared/Bosses: the Chicken, for every biome for now) pops up in front of you,
 -- angry. The camera zooms in on its face between
--- black bars (the middle third of the screen showing), an anger vein popping up on its
--- head with them, pulsing once and gone as they go (QM, Oct 10), then it chases you: you turn
+-- black bars (the middle third of the screen showing), an anger vein popping up on the
+-- screen by its head with them, pulsing once and gone as they go (QM, Oct 10: UI, not
+-- in the world), then it chases you: you turn
 -- round and race home with it behind you (out of sight, and never catching you: it's
 -- just there to scare). Config.Boss. Ride drives it:
 --
@@ -24,7 +25,7 @@ local VEIN = "rbxassetid://75617171153698" -- assets/ui/boss/AngerVein.png (QM's
 local BossChase = {}
 
 local boss -- { animal, x, z, t, scale, offset }
-local bars -- the letterbox: { gui, top, bottom }
+local bars -- the letterbox: { gui, top, bottom, vein, veinScale }
 
 local function popScale(t) -- 0 -> overshoot -> 1, as the stampede's animals pop in (Ride)
 	return 1 - math.exp(-12.6 * t) * math.cos(26 * t)
@@ -49,8 +50,21 @@ local function letterbox()
 		f.Parent = gui
 		return f
 	end
+	-- The anger vein, in the strip (Config.Boss.VeinAt: where, of the screen).
+	local vein = Instance.new("ImageLabel")
+	vein.Name = "AngerVein"
+	vein.BackgroundTransparency = 1
+	vein.Image = VEIN
+	vein.AnchorPoint = Vector2.new(0.5, 0.5)
+	vein.Position = UDim2.fromScale(Config.Boss.VeinAt.X, Config.Boss.VeinAt.Y)
+	vein.Size = UDim2.fromScale(Config.Boss.VeinSize, Config.Boss.VeinSize)
+	vein.SizeConstraint = Enum.SizeConstraint.RelativeYY
+	vein.Visible = false
+	local veinScale = Instance.new("UIScale")
+	veinScale.Parent = vein
+	vein.Parent = gui
 	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-	bars = { gui = gui, top = bar(1), bottom = bar(0) }
+	bars = { gui = gui, top = bar(1), bottom = bar(0), vein = vein, veinScale = veinScale }
 	bars.top.Position = UDim2.fromScale(0, 0)
 	bars.bottom.Position = UDim2.fromScale(0, 1)
 	return bars
@@ -84,24 +98,6 @@ function BossChase.start(x, z)
 	animal.model.Parent = workspace
 	boss = { animal = animal, x = x, z = z - Config.Boss.Ahead, t = 0, scale = 0 }
 	place()
-	-- The anger vein on its head, while the bars are in (update).
-	local vein = Instance.new("BillboardGui")
-	vein.Name = "AngerVein"
-	vein.Size = UDim2.fromScale(Config.Boss.VeinSize, Config.Boss.VeinSize)
-	vein.StudsOffsetWorldSpace = Config.Boss.VeinAt
-	vein.AlwaysOnTop = true
-	vein.LightInfluence = 0
-	vein.Adornee = animal.neck
-	vein.Enabled = false
-	boss.vein = vein
-	local image = Instance.new("ImageLabel")
-	image.BackgroundTransparency = 1
-	image.Image = VEIN
-	image.Size = UDim2.fromScale(1, 1)
-	image.Parent = vein
-	boss.veinScale = Instance.new("UIScale")
-	boss.veinScale.Parent = image
-	vein.Parent = animal.model
 	Sounds.play("reveal_pop", 0.8)
 end
 
@@ -124,11 +120,12 @@ function BossChase.update(dt, chasing, x, z, speed)
 	end
 	-- (the vein: with the bars, popping up and then pulsing once)
 	local barsIn = boss.t >= cfg.ZoomAt and boss.t < cfg.CutsceneTime - cfg.BarTime
-	boss.vein.Enabled = barsIn
+	local b = letterbox()
+	b.vein.Visible = barsIn
 	if barsIn then
 		local v = boss.t - cfg.ZoomAt
 		local pulse = math.clamp((v - cfg.VeinPopTime) / cfg.VeinPeriod, 0, 1)
-		boss.veinScale.Scale = popScale(v) + cfg.VeinPulse * math.sin(pulse * math.pi)
+		b.veinScale.Scale = popScale(v) + cfg.VeinPulse * math.sin(pulse * math.pi)
 	end
 	local moving = 0
 	if chasing and x then
@@ -159,6 +156,7 @@ function BossChase.stop()
 		if bars then
 			bars.top.Position = UDim2.fromScale(0, 0)
 			bars.bottom.Position = UDim2.fromScale(0, 1)
+			bars.vein.Visible = false
 		end
 	end
 end
