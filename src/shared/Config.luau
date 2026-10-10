@@ -221,7 +221,7 @@ return {
 	Boss = {
 		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss" }, Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
-		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 0.9, CactusBoss = 0.45 }, -- (each boss's cry: QM, Oct 10)
+		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3 }, -- (each boss's cry: QM, Oct 10)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
 			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 3, 24) },
 			SharkBoss = { At = Vector3.new(0, 0, 0.4), From = Vector3.new(18, 2, 8) }, -- (from its side, so you see its eye: QM)
