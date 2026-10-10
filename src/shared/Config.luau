@@ -610,7 +610,7 @@ return {
 		Pinto = "rbxassetid://79525419811481",
 		Pig = "rbxassetid://139970505549400",
 		Bunny = "rbxassetid://102165948456968", -- assets/ui/BunnyEggRender.png
-		Chicken = "rbxassetid://133104117017293", -- assets/ui/ChickenEggRender.png
+		Chicken = "", -- assets/ui/ChickenEggRender.png, once uploaded
 		Fish = "rbxassetid://105098230793344",
 		Rhino = "rbxassetid://139482781062355",
 		Unicorn = "rbxassetid://85066893166855",
