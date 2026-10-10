@@ -48,11 +48,11 @@ def frond(parts, M, segs, seglen, w0, thick, droop, colors, leaflets=True):
 def fern(x=0, z=0, yaw=0, s=1.0, seed=1):
     rng = np.random.default_rng(seed)
     parts = []
-    n = 8
+    n = 6  # (QM: fewer blocks: 6 fronds of 3 wide segments, no leaflets)
     for i in range(n):
         a = yaw + 360 * i / n + rng.uniform(-12, 12)
         M = T(x, 0.6 * s, z) @ Ry(a) @ Rx(-rng.uniform(48, 62))
-        frond(parts, M, 4, 2.0 * s, 1.3 * s, 0.45 * s, 24, FERN)
+        frond(parts, M, 3, 2.6 * s, 2.4 * s, 0.5 * s, 30, FERN, leaflets=False)
     block(parts, T(x, 0.6 * s, z), (1.6 * s, 1.2 * s, 1.6 * s), LEAF_DARK[0])  # the heart
     return parts
 
@@ -63,18 +63,18 @@ def cycad(x=0, z=0, yaw=0, s=1.0, seed=2):
     y = 0
     lean = rng.uniform(-6, 6)
     M = T(x, 0, z) @ Ry(yaw) @ Rz(lean)
-    for i in range(7):  # a scaly trunk: stacked blocks, each turned a little (pineapple bark)
-        h = 2.0 * s
-        w = (3.4 - 0.18 * i) * s
+    for i in range(4):  # a scaly trunk: stacked blocks, each turned a little (pineapple bark)
+        h = 3.5 * s
+        w = (3.4 - 0.3 * i) * s
         block(parts, M @ T(0, y + h / 2, 0) @ Ry(i * 22), (w, h * 1.02, w), CYCAD[i % 2], "Bark")
         y += h
     top = M @ T(0, y, 0)
     block(parts, top @ T(0, 0.6 * s, 0), (2.6 * s, 1.4 * s, 2.6 * s), LEAF_DARK[1])
-    n = 9
+    n = 7
     for i in range(n):
         a = 360 * i / n + rng.uniform(-10, 10)
         F = top @ T(0, 0.8 * s, 0) @ Ry(a) @ Rx(-rng.uniform(30, 45))
-        frond(parts, F, 5, 2.4 * s, 1.5 * s, 0.5 * s, 16, LEAF)
+        frond(parts, F, 3, 3.6 * s, 2.6 * s, 0.6 * s, 26, LEAF, leaflets=False)
     return parts
 
 
@@ -83,41 +83,36 @@ def jungle_tree(x=0, z=0, yaw=0, s=1.0, seed=3):
     parts = []
     B = T(x, 0, z) @ Ry(yaw)
     trunk_h = 20 * s
-    for i in range(5):  # trunk: thick, slightly narrowing, a few offset blocks for knots
-        h = trunk_h / 5
+    for i in range(3):  # trunk: thick, slightly narrowing, a few offset blocks for knots
+        h = trunk_h / 3
         w = (4.6 - 0.35 * i) * s
         block(parts, B @ T(rng.uniform(-0.3, 0.3) * s, h * i + h / 2, rng.uniform(-0.3, 0.3) * s) @ Ry(rng.uniform(-8, 8)),
               (w, h * 1.03, w), BARK[i % 3], "Bark")
-    for i in range(5):  # buttress roots: wedges of blocks leaning out from the base
-        a = 72 * i + rng.uniform(-15, 15)
+    for i in range(4):  # buttress roots: a block leaning out from the base
+        a = 90 * i + rng.uniform(-15, 15)
         R = B @ Ry(a) @ T(0, 0, 2.2 * s)
-        block(parts, R @ T(0, 2.4 * s, 0.6 * s) @ Rx(28), (1.2 * s, 5.0 * s, 2.0 * s), BARK[(i + 1) % 3], "Bark")
-        block(parts, R @ T(0, 0.8 * s, 2.0 * s) @ Rx(55), (1.0 * s, 2.6 * s, 2.2 * s), BARK[i % 3], "Bark")
-    for i in range(3):  # two or three branches out to the canopy
-        a = 120 * i + rng.uniform(-20, 20)
+        block(parts, R @ T(0, 1.8 * s, 1.0 * s) @ Rx(35), (1.4 * s, 5.0 * s, 2.4 * s), BARK[(i + 1) % 3], "Bark")
+    for i in range(2):  # two branches out to the canopy
+        a = 180 * i + rng.uniform(-20, 20)
         Br = B @ T(0, trunk_h * 0.78, 0) @ Ry(a) @ Rx(-50)
         block(parts, Br @ T(0, 0, 3.5 * s), (1.6 * s, 1.6 * s, 7 * s), BARK[1], "Bark")
     # canopy: a wide, flat-topped mass of leaf blocks, darker underneath
     cy = trunk_h + 2 * s
-    for k in range(14):
-        a = rng.uniform(0, 2 * math.pi)
-        r = rng.uniform(0, 9) * s
-        w = rng.uniform(7, 11) * s
+    for k in range(7):
+        a = 2 * math.pi * k / 6 + rng.uniform(-0.3, 0.3)
+        r = 0 if k == 6 else rng.uniform(6, 8) * s
+        w = rng.uniform(9, 12) * s
         h = rng.uniform(3.5, 5) * s
         px, pz = r * math.cos(a), r * math.sin(a)
         dy = -0.9 * s if r > 6 * s else rng.uniform(0, 1.5) * s
         block(parts, B @ T(px, cy + dy, pz) @ Ry(rng.uniform(0, 90)), (w, h, w * rng.uniform(0.8, 1.1)), LEAF[k % 3])
-    for k in range(6):  # under-canopy, darker
-        a = rng.uniform(0, 2 * math.pi)
-        r = rng.uniform(3, 10) * s
-        block(parts, B @ T(r * math.cos(a), cy - 2.6 * s, r * math.sin(a)) @ Ry(rng.uniform(0, 90)),
-              (6 * s, 2.2 * s, 6 * s), LEAF_DARK[k % 2])
-    for k in range(7):  # vines hanging from the canopy edge
-        a = rng.uniform(0, 2 * math.pi)
-        r = rng.uniform(6, 9) * s
+    for k in range(2):  # under-canopy, darker
+        block(parts, B @ T(0, cy - 2.6 * s, 0) @ Ry(45 * k), (16 * s, 2.2 * s, 16 * s), LEAF_DARK[k % 2])
+    for k in range(4):  # vines hanging from the canopy edge
+        a = 2 * math.pi * k / 4 + rng.uniform(-0.4, 0.4)
+        r = rng.uniform(6, 8) * s
         ln = rng.uniform(5, 10) * s
-        block(parts, B @ T(r * math.cos(a), cy - 3 * s - ln / 2, r * math.sin(a)), (0.6 * s, ln, 0.6 * s), LEAF_DARK[k % 2], "Vine")
-        block(parts, B @ T(r * math.cos(a), cy - 3 * s - ln, r * math.sin(a)) @ Ry(45), (1.4 * s, 1.0 * s, 1.4 * s), LEAF[2], "Vine")
+        block(parts, B @ T(r * math.cos(a), cy - 3 * s - ln / 2, r * math.sin(a)), (0.8 * s, ln, 0.8 * s), LEAF_DARK[k % 2], "Vine")
     return parts
 
 
