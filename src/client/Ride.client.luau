@@ -1157,7 +1157,6 @@ local function turnHome()
 		carried = { part = egg.model, kind = mount.kind, stage = "held", t = 1, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	end
 	phase, turnT = "turning", 0
-	vfx.returnBiome = math.min(WorldColors.biomeAt(mount.z), 5) -- (its run-home music: Sounds' home1..home5)
 	Hud.setAction(nil)
 	Hud.setHold(nil)
 end
@@ -4590,7 +4589,7 @@ end
 function vfx.updateSound()
 	vfx.sounds.setMusic(if phase == "idle" then "base"
 		elseif phase == "home" then "base" -- (over the line: back to the base's, cut with a scratch in reachHome)
-		elseif phase == "turning" or phase == "return" then "home" .. (vfx.returnBiome or 1) -- (the biome you turned round in: Sounds)
+		elseif phase == "turning" or phase == "return" then "home1" -- (the Meadow's, wherever you turned round: QM, Oct 10)
 		else "ride")
 	local riding = mount and (phase == "outbound" or phase == "return" or phase == "turning") and not transfer
 	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] ~= false and (mount.hop or 0) < 2,
