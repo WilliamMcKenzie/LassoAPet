@@ -50,6 +50,13 @@ return {
 		{ "Belly", 250, 236, 212 }, -- muzzle
 		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" }, -- (cream paws, like the muzzle)
 	},
+	Chicken = {
+		{ "Body", 250, 250, 246 },
+		{ "Body", 230, 230, 224 }, -- wings
+		{ "Horn", 255, 196, 40 }, -- beak
+		{ "Accent", 232, 44, 52 }, -- wattle
+		{ "Hoof", 255, 168, 36 }, -- legs and feet
+	},
 	Rhino = {
 		{ "Body", 150, 156, 170 },
 		{ "Marking", 112, 118, 134 }, -- back plates, tail tip

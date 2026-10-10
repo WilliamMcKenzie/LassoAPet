@@ -107,6 +107,7 @@ local PLACEHOLDER_BIO = "Description feijwufjewuejfw lorem ipsum" -- QM's placeh
 local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Horse = "Very thoughtful, horse sends gifts to his friends each year.",
 	Bunny = "Hops everywhere, even to the fridge. Has never once walked.",
+	Chicken = "Grew this big by eating everything. Still scared of worms.",
 	Pig = "Isn't actually pink, just always blushing. Recently losing weight, down 2 pounds.",
 	Pinto = "Cousin of horse, recently started playing water polo.",
 	Fish = "Never learned to swim, and thinks it's too late now. Scared of water.",
