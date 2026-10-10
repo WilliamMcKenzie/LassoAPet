@@ -4473,7 +4473,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	-- after them (the ease above trailed far behind at the run home's speed).
 	local shoulder = vfx.shoulderCam.blend(dt, mount ~= nil and hrp ~= nil and (phase == "turning" or phase == "return"), mount ~= nil and hrp ~= nil)
 	if shoulder > 0 and hrp then
-		camera.CFrame = camera.CFrame:Lerp(vfx.shoulderCam.pose(hrp.Position, camYaw, z), shoulder)
+		camera.CFrame = camera.CFrame:Lerp(vfx.shoulderCam.pose(hrp.Position, camYaw, z, hrp.Position.Y - (mount and mount.hop or 0), mount ~= nil and (mount.hop or 0) < -1), shoulder)
 	end
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
