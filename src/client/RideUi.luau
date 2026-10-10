@@ -3,9 +3,9 @@
 --   Top centre: the stamina bar: the grey bar, and the green one over it cut off at
 --     your stamina left (both have the bicep drawn in the same spot, so it always
 --     shows); your stamina level beside the bicep.
---   Bottom left: Sprint, in its corner; 1.1x while you sprint (Shift, holding it, or
+--   Bottom left: Sprint, in its corner (no grow while you sprint, QM Oct 10: Shift, holding it, or
 --     the run home). Holding it keeps you sprinting through lassoing and landing.
---   Bottom right: the ability, in its corner. Used: 1.1x, and its active art for as long
+--   Bottom right: the ability, in its corner. Used: its active art for as long
 --     as it lasts; then the grey art with the pink filling up from the bottom till it's
 --     ready, when it bounces (1.1x and back) and shows its usual art.
 --   Bottom centre: LASSO, grey while there's nothing to lasso.
@@ -52,12 +52,13 @@ local CORNER_WIDTH = 256 -- Sprint and the ability, each
 local SPRINT_IN = Vector2.new(21, 10) -- in from the bottom-left corner
 local KEY_AT = Vector2.new(23, 194) -- the SHIFT keycap in Sprint's picture (top left)
 local KEY_DROP = 279 - 226 -- the SPACE keycap hangs this far under the ability (as SHIFT does under Sprint)
-local ABILITY_IN = Vector2.new(21, 10 + KEY_DROP) -- in from the bottom-right corner
+local ABILITY_IN = Vector2.new(21, 10 + KEY_DROP * 0.9) -- (x SHRINK) in from the bottom-right corner
 local LASSO_WIDTH = 376
 local LASSO_BOTTOM = 21
 local FILL_FROM, FILL_TO = 0.015, 0.983 -- the bar's inner fill, of its width
 local LEVEL_AT = 0.41 -- the stamina number's left edge, of the bar's width (right of the bicep)
 local LEVEL_TEXT, LEVEL_STROKE = 44, 5
+local SHRINK = 0.9 -- all of it, 10% under the mock's size (QM, Oct 10), each keeping its spot
 local GROW = 1.1
 local QUICK = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
@@ -89,7 +90,7 @@ local function picture(class, parent, art, anchor, position, width)
 	local p = Instance.new(class)
 	p.BackgroundTransparency = 1
 	p.Image = art.id
-	width = width or art.size.X
+	width = (width or art.size.X) * SHRINK
 	p.Size = UDim2.fromOffset(width, width * art.size.Y / art.size.X)
 	p.AnchorPoint = anchor
 	p.Position = position
@@ -126,15 +127,15 @@ green.Size = bar.Size
 local level = Instance.new("TextLabel")
 level.BackgroundTransparency = 1
 level.FontFace = FONT
-level.TextSize = LEVEL_TEXT
+level.TextSize = LEVEL_TEXT * SHRINK
 level.TextColor3 = Color3.new(1, 1, 1)
 level.TextXAlignment = Enum.TextXAlignment.Left
 level.AnchorPoint = Vector2.new(0, 0.5)
 level.Position = UDim2.fromScale(LEVEL_AT, 0.5)
-level.Size = UDim2.fromOffset(200, LEVEL_TEXT)
+level.Size = UDim2.fromOffset(200, LEVEL_TEXT * SHRINK)
 level.ZIndex = 2
 local levelStroke = Instance.new("UIStroke")
-levelStroke.Thickness = LEVEL_STROKE
+levelStroke.Thickness = LEVEL_STROKE * SHRINK
 levelStroke.Color = Color3.new(0, 0, 0)
 levelStroke.LineJoinMode = Enum.LineJoinMode.Round
 levelStroke.Parent = level
@@ -144,7 +145,6 @@ level.Parent = bar
 local sprint = picture("ImageButton", root, ART.sprint, Vector2.new(0, 1), UDim2.new(0, SPRINT_IN.X, 1, -SPRINT_IN.Y), CORNER_WIDTH)
 sprint.Name = "Sprint"
 sprint.AutoButtonColor = false
-local sprintScale = scaler(sprint)
 local sprintInput -- the touch or click holding it down
 sprint.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -166,7 +166,7 @@ local abilityScale = scaler(ability)
 -- The keycaps (QM, Oct 9): pressed only while you're holding that very key; none on a
 -- phone. SHIFT over the one drawn in Sprint, SPACE at the same spot under the ability.
 local function keycap(parent, at)
-	local k = picture("ImageLabel", parent, ART.shift, Vector2.zero, UDim2.fromOffset(at.X, at.Y))
+	local k = picture("ImageLabel", parent, ART.shift, Vector2.zero, UDim2.fromOffset(at.X * SHRINK, at.Y * SHRINK))
 	k.Name = "Keycap"
 	k.ZIndex = 3
 	return k
@@ -241,7 +241,7 @@ function RideUi.setSprint(visible, active)
 	active = visible and active == true
 	if active ~= sprinting then
 		sprinting = active
-		sprintScale(if active then GROW else 1)
+		-- (no grow while it's on: QM, Oct 10)
 	end
 end
 
@@ -260,18 +260,9 @@ function RideUi.setAbility(ready, _seconds, active)
 	if state ~= abilityState then
 		local was = abilityState
 		abilityState = state
-		if state == "active" then
-			abilityScale(GROW) -- used: big while it lasts
-		elseif state == "cooldown" then
-			if was == "ready" then -- (used, but it doesn't last: a quick grow and back)
-				abilityScale(GROW).Completed:Once(function()
-					if abilityState == "cooldown" then
-						abilityScale(1)
-					end
-				end)
-			else
-				abilityScale(1)
-			end
+		-- (no grow on use or while it lasts: QM, Oct 10)
+		if state ~= "ready" then
+			abilityScale(1)
 		elseif state == "ready" and was == "cooldown" then
 			abilityScale(GROW).Completed:Once(function() -- ready again: one bounce
 				abilityScale(1)
