@@ -31,7 +31,15 @@ chunks = RM.build(*{n: (f, s) for n, f, s, _ in RM.ROCKS}["RockCrag"])
 wid = np.ptp(np.concatenate([np.concatenate(t) for t in chunks])[:, 0])
 
 
+SPREAD = 2.2  # (QM, Oct 10: more contrast between pieces) each shade's step from the base, scaled
+
+
+def spread(base, c):
+    return tuple(int(max(0, min(255, b + (x - b) * SPREAD))) for b, x in zip(base, c))
+
+
 def row(base, shades, ground):
+    shades = [spread(base, c) for c in shades]
     partlib.GROUND = np.array(ground[0], float)
     partlib.GROUND2 = np.array(ground[1], float)
     off = wid / 2 + 8
