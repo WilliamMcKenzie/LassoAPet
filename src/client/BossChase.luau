@@ -1,5 +1,5 @@
 -- The boss (QM, Oct 10): when the BOSS IN timer runs out your animal stops, and the
--- boss (Shared/Bosses: the Chicken, for every biome for now) pops up in front of you,
+-- boss (Shared/Bosses: each biome its own, Config.Boss.ByBiome) pops up in front of you,
 -- angry. The camera zooms in on its face between
 -- black bars (the middle third of the screen showing), an anger vein popping up on the
 -- screen by its head with them, pulsing once and gone as they go (QM, Oct 10: UI, not
@@ -18,6 +18,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Sounds = require(script.Parent.Sounds)
 
 local VEIN = "rbxassetid://85408798859805" -- assets/ui/boss/AngerMarkOutlined.png (QM's 💢, Oct 10, with a black outline baked in)
@@ -97,7 +98,8 @@ end)
 
 function BossChase.start(x, z)
 	BossChase.stop()
-	local kind = Config.Boss.Kind
+	local biome = Config.Biomes[WorldColors.biomeAt(z)]
+	local kind = Config.Boss.ByBiome[biome.Name] or Config.Boss.Kind -- (each biome its own boss: QM, Oct 10)
 	local animal = require(ReplicatedStorage.Shared.Bosses[kind]).new()
 	animal.model.Name = "Boss"
 	animal.model.Parent = workspace
