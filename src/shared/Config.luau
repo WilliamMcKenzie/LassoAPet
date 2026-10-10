@@ -704,7 +704,7 @@ return {
 	-- The run home's fisheye and zoom stay put, as at a horse's sprint, whatever your speed
 	-- (no tier bounces either): QM, Oct 10, to test the shoulder camera. false: by speed.
 	ReturnCamFixed = true,
-	ShoulderCam = { On = true, Right = 10, Up = 4.5, Back = 11, Ahead = 60, LookUp = 1, LookRight = 0, -- (QM's tuning, Oct 10)
+	ShoulderCam = { On = true, Right = 10, Up = 10, Back = 11, Ahead = 60, LookUp = 0, LookRight = 0, -- (QM's tuning, Oct 10)
 		InTime = 0.8, OutTime = 0.5 },
 	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
 	SprintTiers = { 180, 360, 440 },
