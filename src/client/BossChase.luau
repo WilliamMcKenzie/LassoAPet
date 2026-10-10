@@ -20,7 +20,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Sounds = require(script.Parent.Sounds)
 
-local VEIN = utf8.char(0x1F4A2) -- 💢 (QM, Oct 10: the emoji, as text, black-outlined)
+local VEIN = "rbxassetid://85408798859805" -- assets/ui/boss/AngerMarkOutlined.png (QM's 💢, Oct 10, with a black outline baked in)
 
 local BossChase = {}
 
@@ -51,23 +51,15 @@ local function letterbox()
 		return f
 	end
 	-- The anger vein, in the strip (Config.Boss.VeinAt: where, of the screen).
-	local vein = Instance.new("TextLabel")
+	local vein = Instance.new("ImageLabel")
 	vein.Name = "AngerVein"
 	vein.BackgroundTransparency = 1
-	vein.Text = VEIN
-	vein.TextScaled = true
-	vein.TextColor3 = Color3.new(1, 1, 1)
-	local outline = Instance.new("UIStroke")
-	outline.Thickness = 4
-	outline.Color = Color3.new(0, 0, 0)
-	outline.LineJoinMode = Enum.LineJoinMode.Round
-	outline.Transparency = 1
-	outline.Parent = vein
+	vein.Image = VEIN
 	vein.AnchorPoint = Vector2.new(0.5, 0.5)
 	vein.Position = UDim2.fromScale(Config.Boss.VeinAt.X, Config.Boss.VeinAt.Y)
 	vein.Size = UDim2.fromScale(Config.Boss.VeinSize, Config.Boss.VeinSize)
 	vein.SizeConstraint = Enum.SizeConstraint.RelativeYY
-	vein.TextTransparency = 1 -- (drawn, but clear, till it's wanted: so its glyph's ready, QM)
+	vein.ImageTransparency = 1 -- (drawn, but clear, till it's wanted, and preloaded below: QM)
 	local veinScale = Instance.new("UIScale")
 	veinScale.Parent = vein
 	vein.Parent = gui
@@ -99,7 +91,9 @@ local function place()
 end
 
 -- (made up front, so nothing in it is loading the first time it shows: QM)
-task.defer(letterbox)
+task.defer(function()
+	game:GetService("ContentProvider"):PreloadAsync({ letterbox().vein })
+end)
 
 function BossChase.start(x, z)
 	BossChase.stop()
@@ -132,8 +126,7 @@ function BossChase.update(dt, chasing, x, z, speed)
 	-- (the vein: with the bars, popping up and then pulsing once)
 	local barsIn = boss.t >= cfg.ZoomAt and boss.t < cfg.CutsceneTime - cfg.BarTime
 	local b = letterbox()
-	b.vein.TextTransparency = if barsIn then 0 else 1
-	b.vein.UIStroke.Transparency = b.vein.TextTransparency
+	b.vein.ImageTransparency = if barsIn then 0 else 1
 	if barsIn then
 		local v = boss.t - cfg.ZoomAt
 		local pulse = math.clamp((v - cfg.VeinPopTime) / cfg.VeinPeriod, 0, 1)
@@ -169,7 +162,7 @@ function BossChase.stop()
 		if bars then
 			bars.top.Position = UDim2.fromScale(0, 0)
 			bars.bottom.Position = UDim2.fromScale(0, 1)
-			bars.vein.TextTransparency, bars.vein.UIStroke.Transparency = 1, 1
+			bars.vein.ImageTransparency = 1
 		end
 	end
 end
