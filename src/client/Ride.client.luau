@@ -998,7 +998,7 @@ ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, ki
 	end
 	humanoid:UnequipTools()
 	clearRideTarget()
-	local z = if boss then WorldColors.biomeStart(b) - Config.Biomes[b].Length + 40
+	local z = if boss then WorldColors.biomeStart(b) - Config.Biomes[b].Length + Config.FinishFromEnd + 60 -- (short of the finish line, on the last)
 		elseif b == 1 then SPAWN_Z - 6 else WorldColors.biomeStart(b) - 10 -- the meadow's starts at the start line
 	mount = newEntity(0, z, 0, kind)
 	mount.animal:setSaddled(true)
@@ -3619,7 +3619,7 @@ local function checkRide(dt)
 		if hold <= 0 then
 			if Config.Boss.On then -- (the boss first: BossChase, then turnHome; QM, Oct 10)
 				phase, mount.speed = "boss", 0 -- (stopped dead, or you'd run on through it: QM)
-				vfx.bossChase.start(mount.x, mount.z)
+				vfx.bossChase.start(mount.x, mount.z, WorldColors.biomeAt(mount.z))
 			else
 				turnHome()
 			end

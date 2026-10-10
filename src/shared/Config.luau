@@ -165,48 +165,6 @@ return {
 				Bubbles = 24, -- per second
 			},
 		},
-		-- (Off for a while on Oct 4, back the same night as the endless endgame, QM.)
-		{
-			-- The endgame (QM, Oct 3), after Realm of the Mad God's godlands: dark stone
-			-- plates split by snow, with ice or lava cracks. It never ends: one 960-stud
-			-- track after another, each picked at random from four (two with ice, two
-			-- with lava; Shared/Godlands, Shared/GodlandsTracks), built round each rider
-			-- as they go (Client/GodlandsStream). It has no finish line.
-			Name = "Godlands",
-			AnimalSize = 3,
-			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0)
-			NestScale = 2.5,
-			Length = math.huge, -- endless
-			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
-			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)
-			-- Its own animals now; the Fish that stood in are gone (QM, Oct 4). (The Loong is
-			-- an event and roll exclusive, so it doesn't run here.) PlaceholderHerd keeps it
-			-- out of the finish line's egg odds (Hatchery).
-			Herd = { Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5, Leviathan = 0.1 }, -- its own animals, no Fish (QM, Oct 4; weights are guesses)
-			-- Its nests' eggs (Nests.server: one nest a track, near the riders) get rarer the
-			-- deeper in you are (QM, Oct 4), each tier's pool split evenly: at its line only
-			-- Rares; the Epic chance grows from 0 to Epic.Max over the first Epic.Over
-			-- studs; past Legendary.From studs the Legendary chance grows to Legendary.Max
-			-- over Legendary.Over studs, then holds. The rest is Rares.
-			NestDepth = {
-				Rare = { "Beholder", "Sludge", "WarElephant" },
-				Epic = { Pool = { "Leviathan", "SoulHorse" }, Max = 0.4, Over = 5000 },
-				Legendary = { Pool = { "Unicorn", "Snake", "Icebringer", "Kraken", "BlueCrab" }, From = 5000, Max = 0.1, Over = 5000 },
-			},
-			PlaceholderHerd = true,
-			HerdThin = 2, -- only every 2nd of the stampede's spawns runs here: half as many animals (QM, Oct 4)
-			Patches = {
-				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
-				Ice = { Color3.fromRGB(170, 196, 250), Color3.fromRGB(184, 208, 252) },
-				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon
-			},
-			UnlockCost = 300000000, -- QM, Oct 8: matches the new button art (Oct 7 had $150M: halved with the Tundra's; balance pass Oct 6 had it $300M, before that $10M (a guess). The Badlands (PR #154) would sit at about $50M
-			PostColor = Color3.fromRGB(62, 60, 72),
-			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
-			GateImage = "rbxassetid://81079145393331", -- assets/ui/GateGodlands.png
-			UpgradeImage = "rbxassetid://122300024756957", -- assets/ui/UpgradePenGodlandsEnabled.png (QM, Oct 8: price drawn in)
-			UpgradeImageDisabled = "rbxassetid://73528380270412", -- assets/ui/UpgradePenGodlandsDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
-		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
@@ -232,7 +190,7 @@ return {
 	CourseHalfWidth = 56,
 	CourseWidening = 0.005,
 	CourseMaxHalfWidth = 137,
-	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
+	CourseLength = 760 + 2280 + 5472 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands, so the Ocean's end is the end; off its edge, the void)
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
@@ -250,7 +208,8 @@ return {
 	-- and race it home, and a wild one's egg is yours over the line.
 	RideSeconds = 30,
 	-- The boss when the ride's time runs out (QM, Oct 10: Client/BossChase): your animal
-	-- stops dead, the boss (Shared/Bosses: Kind) pops up Ahead studs in
+	-- stops dead, the biome's boss (Shared/Bosses: Kinds, by biome; Kind for one with
+	-- none) pops up Ahead studs in
 	-- front, the camera's on its face (FaceAt: of its box, up and forward from the middle)
 	-- from ZoomAt s (FaceFrom studs off it, between black
 	-- bars sliding in over BarTime), and at CutsceneTime s you turn for home with it
@@ -260,7 +219,7 @@ return {
 	-- VeinPopTime s on pulsing once VeinPulse x bigger over VeinPeriod s, and turning
 	-- VeinSpin degrees a second.
 	Boss = {
-		On = true, Kind = "Chicken", Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
+		On = true, Kind = "Chicken", Kinds = { "Chicken" }, Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
 		VeinSize = 0.16, VeinAt = Vector2.new(0.62, 0.42), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 	},

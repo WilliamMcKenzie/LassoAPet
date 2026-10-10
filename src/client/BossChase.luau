@@ -7,7 +7,7 @@
 -- round and race home with it behind you (out of sight, and never catching you: it's
 -- just there to scare). Config.Boss. Ride drives it:
 --
---   BossChase.start(x, z)             -- the cutscene, in front of (x, z) (outbound: -z)
+--   BossChase.start(x, z, biome)      -- the cutscene, in front of (x, z) (outbound: -z), biome b's boss
 --   BossChase.over()                  -- true once the cutscene's done (turn for home)
 --   BossChase.update(dt, chasing, x, z, speed) -- every frame: chasing the rider at (x, z)
 --   BossChase.camera() -> CFrame?     -- the camera during the cutscene (nil: Ride's own)
@@ -95,9 +95,13 @@ task.defer(function()
 	game:GetService("ContentProvider"):PreloadAsync({ letterbox().vein })
 end)
 
-function BossChase.start(x, z)
+function BossChase.start(x, z, biome)
 	BossChase.stop()
-	local kind = Config.Boss.Kind
+	-- (each biome's own, Config.Boss.Kinds; Kind where it has none, or it's not in yet)
+	local kind = Config.Boss.Kinds[biome]
+	if not kind or not ReplicatedStorage.Shared.Bosses:FindFirstChild(kind) then
+		kind = Config.Boss.Kind
+	end
 	local animal = require(ReplicatedStorage.Shared.Bosses[kind]).new()
 	animal.model.Name = "Boss"
 	animal.model.Parent = workspace

@@ -41,7 +41,6 @@ end
 sky.Parent = Lighting
 -- The finish line: a copy of the start line at the end of the last biome
 -- (Config.FinishFromEnd before the far wall), so it moves as biomes are added.
--- The endless Godlands has no end, so no finish line.
 local endless = Config.CourseLength == math.huge
 local startLine = world:FindFirstChild("StartLine")
 if startLine and not endless then
@@ -52,23 +51,7 @@ if startLine and not endless then
 	finish.Parent = world
 end
 
--- The Godlands: each client builds the tracks near it (Client/GodlandsStream), in
--- the order this server's seed picks (Shared/Godlands). Anything saved in the map
--- past its line (walls, pieces, the far wall) is in the way, so it goes.
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
-local Godlands = require(ReplicatedStorage.Shared.Godlands)
-if Godlands.start then
-	world:SetAttribute("GodlandsSeed", Random.new():NextInteger(1, 1000000))
-	for _, folderName in { "Ground", "Walls", "Obstacles", "Decor" } do
-		local folder = world:FindFirstChild(folderName)
-		for _, child in folder and folder:GetChildren() or {} do
-			local box = if child:IsA("Model") then child:GetBoundingBox().Position elseif child:IsA("BasePart") then child.Position else nil
-			if box and box.Z < Godlands.start then
-				child:Destroy()
-			end
-		end
-	end
-end
 
 -- Resize the medium and large obstacles to their tier's size (Config.ObstacleScale),
 -- about the middle of their footprint on the floor, so they stay put and grounded.
