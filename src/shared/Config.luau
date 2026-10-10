@@ -36,7 +36,7 @@ return {
 		{
 			Name = "Desert",
 			AnimalSize = 1.35,
-			Swerve = 0.75,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.75)
 			NestScale = 2, -- its nests are this many times bigger, so they show from afar at its speed (Nests.server; QM, Oct 6)
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
@@ -63,7 +63,7 @@ return {
 		{
 			Name = "Snow",
 			AnimalSize = 1.8,
-			Swerve = 0.5,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.5)
 			NestScale = 2.25,
 			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
@@ -84,7 +84,7 @@ return {
 		{
 			Name = "Ocean",
 			AnimalSize = 2.6,
-			Swerve = 0.25,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.25)
 			NestScale = 2.5,
 			Length = 7680, -- 1.4x the snow (QM, Oct 2), a whole number of 240-stud depth bands
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
@@ -174,7 +174,7 @@ return {
 			-- as they go (Client/GodlandsStream). It has no finish line.
 			Name = "Godlands",
 			AnimalSize = 3,
-			Swerve = 0,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0)
 			NestScale = 2.5,
 			Length = math.huge, -- endless
 			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
@@ -249,6 +249,21 @@ return {
 	-- draining with it, sprinting or not. Empty: you turn round on whatever you're riding
 	-- and race it home, and a wild one's egg is yours over the line.
 	RideSeconds = 30,
+	-- The boss when the ride's time runs out (QM, Oct 10: Client/BossChase): your animal
+	-- stops dead, the boss (Shared/Bosses: Kind) pops up Ahead studs in
+	-- front, the camera's on its face (FaceAt: of its box, up and forward from the middle)
+	-- from ZoomAt s (FaceFrom studs off it, between black
+	-- bars sliding in over BarTime), and at CutsceneTime s you turn for home with it
+	-- chasing, at ChaseSpeed x yours and never nearer than Behind studs. Its anger vein,
+	-- on the screen while the bars are in: VeinSize x the screen's height, at VeinAt (of
+	-- the screen: by its head, in the strip), popping up, then
+	-- VeinPopTime s on pulsing once VeinPulse x bigger over VeinPeriod s, and turning
+	-- VeinSpin degrees a second.
+	Boss = {
+		On = true, Kind = "Chicken", Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
+		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
+		VeinSize = 0.16, VeinAt = Vector2.new(0.62, 0.42), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
+	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"
 	-- (0.5 stud) MaterialVariant from MaterialService instead of a stud Texture per face,
@@ -704,7 +719,7 @@ return {
 	-- The run home's fisheye and zoom stay put, as at a horse's sprint, whatever your speed
 	-- (no tier bounces either): QM, Oct 10, to test the shoulder camera. false: by speed.
 	ReturnCamFixed = true,
-	ShoulderCam = { On = true, Right = 10, Up = 10, Back = 11, Ahead = 60, LookUp = 0, LookRight = 0, -- (QM's tuning, Oct 10)
+	ShoulderCam = { On = true, Right = 10, UpMin = 5, UpMax = 12, UpBelow = 2.5, BurrowUp = 20, Back = 11, Ahead = 60, LookUp = 0, LookRight = 0, -- (QM's tuning, Oct 10)
 		InTime = 0.8, OutTime = 0.5 },
 	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
 	SprintTiers = { 180, 360, 440 },

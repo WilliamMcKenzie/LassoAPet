@@ -132,6 +132,7 @@ end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
+vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's out (QM, Oct 10)
 vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
 vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
@@ -984,7 +985,8 @@ end
 
 -- Testing (/biome, see Hatchery.server): drops you just inside biome b's start
 -- line riding a new `kind`, whatever you were doing. Your own pet stays home.
-ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, kind)
+-- /boss: at its end instead, with the timer at 0.01 s, so the boss comes (QM, Oct 10).
+ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, kind, boss)
 	local hrp, humanoid = character()
 	if not hrp then
 		return
@@ -996,12 +998,13 @@ ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, ki
 	end
 	humanoid:UnequipTools()
 	clearRideTarget()
-	local z = if b == 1 then SPAWN_Z - 6 else WorldColors.biomeStart(b) - 10 -- the meadow's starts at the start line
+	local z = if boss then WorldColors.biomeStart(b) - Config.Biomes[b].Length + 40
+		elseif b == 1 then SPAWN_Z - 6 else WorldColors.biomeStart(b) - 10 -- the meadow's starts at the start line
 	mount = newEntity(0, z, 0, kind)
 	mount.animal:setSaddled(true)
 	warpLevel = b
 	leadFromZ, exitPath = z - 8, nil
-	phase, hold, grace, camYaw = "outbound", holdTime(mount), 1, 0
+	phase, hold, grace, camYaw = "outbound", if boss then 0.01 else holdTime(mount), 1, 0
 	coins = 0
 	hrp.Anchored = true
 	humanoid.Sit = true
@@ -3349,6 +3352,16 @@ end
 
 local function updateMount(dt)
 	local dir = travelDir()
+	if phase == "boss" then
+		-- Stopped before the boss (BossChase), then off home once its cutscene's done.
+		mount.speed, mount.latVel = 0, 0
+		place(mount, 0)
+		animate(mount, dt, 0, 0)
+		if vfx.bossChase.over() then
+			turnHome()
+		end
+		return
+	end
 	if phase == "turning" then
 		turnT = math.min(turnT + dt / TURN_TIME, 1)
 		local eased = 0.5 - math.cos(turnT * math.pi) / 2
@@ -3546,7 +3559,7 @@ local function reachHome()
 		phase = "home"
 		heroLeap = { t = 0, fromZ = mount.z, toZ = START_LINE_Z + Config.HomeLandPast }
 		vfx.sounds.play("arrive_home")
-		vfx.sounds.play("record_scratch", 0.45) -- (10% under the usual 0.5: QM) -- the run home's music stops dead, and it's the base's again (QM, Oct 9)
+		vfx.sounds.play("record_scratch", 0.225) -- (half of 0.45: QM, Oct 10) -- the run home's music stops dead, and it's the base's again (QM, Oct 9)
 		vfx.sounds.setMusic("base", true)
 		Hud.setCutscene(true)
 	end
@@ -3568,7 +3581,7 @@ local function reachFinish()
 end
 
 local function checkRide(dt)
-	if phase == "finish" or reachFinish() then
+	if phase == "finish" or phase == "boss" or reachFinish() then -- (nothing crashes you in the boss's cutscene either)
 		return -- the leap over the finish line: nothing can go wrong now
 	end
 	grace = math.max(grace - dt, 0)
@@ -3604,7 +3617,12 @@ local function checkRide(dt)
 	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not mount.giant then -- abilities and the Giant Horse use no Hold
 		hold = math.max(hold - dt, 0) -- (no quicker sprinting: QM, Oct 10)
 		if hold <= 0 then
-			turnHome()
+			if Config.Boss.On then -- (the boss first: BossChase, then turnHome; QM, Oct 10)
+				phase, mount.speed = "boss", 0 -- (stopped dead, or you'd run on through it: QM)
+				vfx.bossChase.start(mount.x, mount.z)
+			else
+				turnHome()
+			end
 			return
 		end
 	end
@@ -4405,6 +4423,11 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	vfx.speedLines.update(if not riding then 0 elseif sprinting() then Config.SpeedLines.Speed else Config.SpeedLines.Speed / 2)
 	vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
 	vfx.returnVignette.update(dt, mount ~= nil and (phase == "turning" or phase == "return"))
+	if phase == "boss" or phase == "turning" or phase == "return" then -- (the boss, then after you home)
+		vfx.bossChase.update(dt, phase ~= "boss", mount and mount.x, mount and mount.z, mount and mount.speed)
+	else
+		vfx.bossChase.stop()
+	end
 	if phase == "idle" then
 		return
 	end
@@ -4466,14 +4489,15 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and ((phase == "outbound" and sprinting()) or (phase == "return" and Config.ReturnSprint)), if phase == "return" and Config.ReturnCamFixed then Config.SprintCam.HorseSprint elseif mount then mount.speed * (vfx.speedGain or 1) else nil) -- (the run home's a sprint too: QM)
 	local z = vfx.camZoom * sprintZoom
-	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
+	local desired = vfx.bossChase.camera() -- (on the boss's face in its cutscene)
+		or CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
 	-- The run home: over the shoulder (QM, Oct 10), pinned to the rider rather than eased
 	-- after them (the ease above trailed far behind at the run home's speed).
 	local shoulder = vfx.shoulderCam.blend(dt, mount ~= nil and hrp ~= nil and (phase == "turning" or phase == "return"), mount ~= nil and hrp ~= nil)
 	if shoulder > 0 and hrp then
-		camera.CFrame = camera.CFrame:Lerp(vfx.shoulderCam.pose(hrp.Position, camYaw, z), shoulder)
+		camera.CFrame = camera.CFrame:Lerp(vfx.shoulderCam.pose(hrp.Position, camYaw, z, hrp.Position.Y - (mount and mount.hop or 0), mount ~= nil and (mount.hop or 0) < -1), shoulder)
 	end
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
