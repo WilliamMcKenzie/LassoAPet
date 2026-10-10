@@ -787,7 +787,7 @@ return {
 	-- RefWidth-wide screen (QM's Figma) and scaled to yours (x HudScale). Upgrade / Unlock
 	-- shows within BullReach studs of your pen's bull spot (BullSpots, by pen number:
 	-- design/base_arc's bull pads, none built yet).
-	BaseUi = { RefWidth = 1920, BullReach = 16, Shade = 0.5 }, -- Shade: the left edge's dark fade, its see-through at the edge (nil: none; QM, Oct 10)
+	BaseUi = { RefWidth = 1920, BullReach = 16 },
 	BullSpots = { Vector3.new(-18, 0, 173), Vector3.new(-75.2, 0, 129.6), Vector3.new(52, 0, 157.1), Vector3.new(-78.6, 0, 57.9), Vector3.new(84.9, 0, 93.3) },
 	Passes = {
 		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },

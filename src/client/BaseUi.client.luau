@@ -66,7 +66,6 @@ end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
 resize()
 
-
 local function text(parent, size, color, strokeWidth)
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
@@ -120,43 +119,6 @@ list.SortOrder = Enum.SortOrder.LayoutOrder
 list.Padding = UDim.new(0, MENU_GAP)
 list.Parent = menu
 menu.Parent = root
-
--- A dark shade at the left edge round the menu (QM, Oct 10: a trial): black at
--- cfg.Shade's see-through on the edge, fading out halfway across the buttons, and soft
--- above and below them (SHADE_PAD past the top and bottom buttons, all fade).
-local SHADE_PAD = 60
-if cfg.Shade then
-	local shade = Instance.new("CanvasGroup") -- (so its up-and-down fade covers the side-to-side one)
-	shade.Name = "Shade"
-	shade.BackgroundTransparency = 1
-	shade.AnchorPoint = Vector2.new(0, 0.5)
-	shade.Position = UDim2.fromScale(0, 0.5)
-	shade.ZIndex = 0 -- (under the rest)
-	local fill = Instance.new("Frame")
-	fill.BorderSizePixel = 0
-	fill.BackgroundColor3 = Color3.new(0, 0, 0)
-	fill.Size = UDim2.fromScale(1, 1)
-	local across = Instance.new("UIGradient")
-	across.Transparency = NumberSequence.new(cfg.Shade, 1)
-	across.Parent = fill
-	fill.Parent = shade
-	local down = Instance.new("UIGradient")
-	down.Rotation = 90
-	down.Parent = shade
-	local function fit()
-		local height = menu.AbsoluteSize.Y / scale.Scale + SHADE_PAD * 2
-		shade.Size = UDim2.fromOffset(MARGIN + MENU_WIDTH / 2, height)
-		local edge = math.clamp(SHADE_PAD / height, 0.01, 0.49)
-		down.Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(edge, 0),
-			NumberSequenceKeypoint.new(1 - edge, 0), NumberSequenceKeypoint.new(1, 1),
-		})
-	end
-	menu:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
-	scale:GetPropertyChangedSignal("Scale"):Connect(fit)
-	fit()
-	shade.Parent = root
-end
 for i, spec in { { "shop", function()
 	if Shop.hasOffers() then
 		Shop.toggle()
