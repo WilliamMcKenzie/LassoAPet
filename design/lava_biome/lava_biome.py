@@ -328,7 +328,7 @@ def shot(parts, mask, inside, eye, target, W, H, fov):
     return Image.fromarray(a)
 
 
-CRACKS = [(-6, -40, 16), (22, -96, 12), (-24, -128, 11), (8, -170, 14), (-14, -205, 10)]
+CRACKS = [(0, -80, 48)]  # (QM, Oct 10: just one, 3x bigger)
 ROCKS = [("Boulder", -44, -22, 30, 2.2), ("Pebble", -38, -34, 0, 2.8), ("Crag", 44, -60, 200, 1.7),
          ("Stone", 38, -48, 90, 2.4), ("Slab", -46, -88, 140, 1.9), ("Boulder", 46, -132, 260, 2.2),
          ("Pebble", 40, -142, 30, 2.8), ("Crag", -44, -160, 60, 1.7), ("Stone", -36, -172, 10, 2.4),
@@ -342,7 +342,7 @@ if __name__ == "__main__":
     ride = shot(parts, mask, inside, eye=(0, 72, 36), target=(0, 0, -60), W=1400, H=900, fov=52)
     ride.save(os.path.join(OUT, "lava_ride.png"))
     print("ride")
-    close = shot(parts, mask, inside, eye=(10, 20, -2), target=(-6, -2, -42), W=1400, H=900, fov=48)
+    close = shot(parts, mask, inside, eye=(18, 46, -10), target=(0, -6, -80), W=1400, H=900, fov=48)
     close.save(os.path.join(OUT, "lava_crack_close.png"))
     print("close")
     sheet = Image.new("RGB", (1400, 1800 + 40), (255, 255, 255))
