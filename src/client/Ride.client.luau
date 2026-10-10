@@ -873,7 +873,7 @@ local function updateRideTarget()
 	if near ~= rideShown then
 		rideShown = near -- (no RIDE button any more: the prompt's the way to ride)
 	end
-	ridePrompt.Enabled = not Hud.inLesson()
+	ridePrompt.Enabled = not Hud.inLesson() and not player:GetAttribute("EggPromptUp") -- (not over an egg's prompt: Pen.client, QM)
 end
 
 local function clearRideTarget()
