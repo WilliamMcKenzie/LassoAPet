@@ -334,8 +334,10 @@ for _, r in ROCKS do
 	else
 		p.Material = Enum.Material.SmoothPlastic
 	end
-	-- (the mesh's base at its y 0, its chunks 0.6 into the ground)
-	p.CFrame = CFrame.new(r[2], topAt(r[2], r[3]) + p.Size.Y / 2 - 0.6, r[3]) * CFrame.Angles(0, math.rad(r[4]), 0)
+	-- (an uploaded mesh keeps its own origin at the part's position, not its box's middle:
+	-- the rock's base, at its y 0, goes on the floor, its chunks 0.6 into the ground. Up
+	-- by half its height, as first done, they floated: QM, Oct 10)
+	p.CFrame = CFrame.new(r[2], topAt(r[2], r[3]), r[3]) * CFrame.Angles(0, math.rad(r[4]), 0)
 	p.Parent = decor
 	rocks += 1
 end
