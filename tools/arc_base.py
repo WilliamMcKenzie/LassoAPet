@@ -99,6 +99,9 @@ def rock_parts(name):
     return out
 
 
+ISLAND = 4  # cells: grass patches this small, all in dirt, go dirt
+
+
 def main():
     d = json.loads(LAYOUT.read_text())
     x0, x1 = d["base"]["x"]
@@ -134,6 +137,25 @@ def main():
             by_front = j == 0 and (lx < -c or lx + CELL > c)  # (not the corridor's mouth)
             if by_side or by_back or by_front:
                 grid[i][j] = 0
+    # Lone grass patches out in the dirt yard (QM, Oct 10: two little islands in the
+    # middle): any patch of grass ISLAND cells or fewer with dirt all round, clear of the
+    # pens, goes dirt.
+    seen = [[False] * nz for _ in range(nx)]
+    for i in range(nx):
+        for j in range(nz):
+            if grid[i][j] == 0 and not seen[i][j]:
+                patch, stack = [], [(i, j)]
+                seen[i][j] = True
+                while stack:
+                    a, b = stack.pop()
+                    patch.append((a, b))
+                    for na, nb in ((a + 1, b), (a - 1, b), (a, b + 1), (a, b - 1)):
+                        if 0 <= na < nx and 0 <= nb < nz and grid[na][nb] == 0 and not seen[na][nb]:
+                            seen[na][nb] = True
+                            stack.append((na, nb))
+                if len(patch) <= ISLAND and not any(cover[a][b] > 0 for a, b in patch):  # (not round a pen)
+                    for a, b in patch:
+                        grid[a][b] = 1
     floor = []
     for k, i0, j0, i1, j1 in rects(grid, nx, nz):
         lx, lz = x0 + i0 * CELL, z0 + j0 * CELL
