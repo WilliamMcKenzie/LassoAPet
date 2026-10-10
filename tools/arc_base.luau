@@ -132,7 +132,7 @@ local ROCKS = {
 	{ "Boulder", -163, 11, 40 },
 	{ "Boulder", 163, 11, -40 },
 }
-local ROCK_COLOR = Color3.fromRGB(172, 184, 212)
+local ROCK_COLOR = Color3.fromRGB(159, 161, 172)
 local ROCK_SCALE = 2.5
 -- Bull pads: { pen, x, z }.
 local BULLS = {

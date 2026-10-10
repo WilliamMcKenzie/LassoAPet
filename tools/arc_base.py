@@ -17,7 +17,7 @@ What the Luau does to Workspace.World (re-running it is fine: it rebuilds the sa
     Ground.heightAt reads the sunk dirt.
   - World.BaseDecor: the rocks (QM, Oct 10): Design's studded low-poly meshes
     (design/rocks, MESHES below) as MeshParts in clusters along the walls and in the
-    corners (LEFT_ROCKS, mirrored, ROCK_SCALE x), the ground's 1-stud stud material, one pale blue-grey;
+    corners (LEFT_ROCKS, mirrored, ROCK_SCALE x), the ground's 1-stud stud material, Fossil grey;
     whatever was in BaseDecor before goes
   - World.BullPads: a placeholder pad per pen (BullPadN, "Pen" attribute), a red
     mat 18 across with a bull on a post, facing the yard; with BULL_PADS off (now),
@@ -44,13 +44,13 @@ CELL = 8  # what's built: the meadow's 8-stud cells (QM, Oct 9: on 4-stud parts 
 
 
 # The rocks (QM, Oct 10): Design's meshes (design/rocks/Rock<Name>.obj, tools/rock_meshes.py),
-# uploaded through Studio (.claude/studio-tools/meshup.py), one pale blue-grey.
+# uploaded through Studio (.claude/studio-tools/meshup.py).
 MESHES = {
     "Pebble": 97909332868672, "Stone": 116242154122535, "Pillar": 79713364061574,
     "Boulder": 109133145406087, "Twins": 121967427061110, "Slab": 118417030739444,
     "Crag": 105444261900626, "Cliff": 102261747583883,
 }
-ROCK_COLOR = (172, 184, 212)
+ROCK_COLOR = (159, 161, 172)  # BrickColor "Fossil" (QM, Oct 10; was a pale blue-grey, 172, 184, 212)
 # A few big rocks in key spots (QM, Oct 10: used sparingly, 2.5x their size), clear of
 # the pens (at their biggest), Carl and the podium: the left half { mesh, x, z, yaw },
 # mirrored for the right.
