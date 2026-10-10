@@ -1,7 +1,7 @@
 -- The riding UI (QM, Oct 10: v4, QM's UI guide; no buttons: E on the lasso's prompt is
 -- the only control, LassoPrompt), in place of the old riding HUD (Config.RideHud off).
 -- Hud hands its riding calls on to this.
---   Top centre: "Lasso will break" over the bar: the grey bar, and the green one over it
+--   Top centre: "Boss will come" over the bar: the grey bar, and the green one over it
 --     cut off at the ride's time left, the seconds left in the middle ("15.6s").
 -- Laid out on a RefWidth-wide screen (Config.BaseUi; the art's drawn at it).
 --
@@ -23,7 +23,7 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 local TOP = 116 -- the bar off the top
 local BAR_WIDTH = 646
 local FILL_FROM, FILL_TO = 0.015, 0.983 -- the bar's inner fill, of its width
-local TITLE = "Lasso will break"
+local TITLE = "Boss will come" -- (QM, Oct 10; was "Lasso will break")
 local TITLE_Y, TITLE_TEXT = 73, 46 -- the title's middle off the top, its size
 local TIME_TEXT = 44
 local STROKE = 4
