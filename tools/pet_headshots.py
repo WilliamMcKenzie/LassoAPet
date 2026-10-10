@@ -31,7 +31,7 @@ OUT = os.path.join(ROOT, "assets", "ui")
 PREVIEW = "/mnt/project-files/animals/headshots"
 
 MODELS = {
-    "Horse": "horses/Horse9_Leap", "Pinto": "horses/Pinto", "Pig": "animals/Pig", "Bunny": "animals/Bunny", "Chicken": "animals/Chicken", "Fish": "animals/Fish",
+    "Horse": "horses/Horse9_Leap", "Pinto": "horses/Pinto", "Pig": "animals/Pig", "Bunny": "animals/Bunny", "Fish": "animals/Fish",
     "Rhino": "animals/Rhino", "Unicorn": "animals/Unicorn",
     "Cactus": "desert/Cactus", "Kitten": "desert/Kitten", "Scorpion": "desert/Scorpion", "Sandworm": "desert/Sandworm",
     "SpineLizard": "converted/SpineLizard", "Snake": "desert/Snake",

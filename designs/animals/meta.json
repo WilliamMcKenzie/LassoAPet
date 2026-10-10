@@ -94,21 +94,5 @@
    ],
    "radius": 1.8
   }
- },
- "Chicken": {
-  "rarity": "Rare",
-  "seat": [
-   0,
-   7.4,
-   0.6
-  ],
-  "neck_loop": {
-   "center": [
-    0,
-    7.2,
-    -3.2
-   ],
-   "radius": 1.9
-  }
  }
 }

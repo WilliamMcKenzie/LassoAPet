@@ -26,7 +26,7 @@ return {
 			-- use the same odds (NestOdds). A 0 never spawns but keeps the animal on
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
-			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.22, Chicken = 0.1, Rhino = 0.13, Unicorn = 0.05 },
+			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.22, Rhino = 0.13, Unicorn = 0.05 },
 			-- Dirt patches in the walls' colours, a stud below the grass
 			-- (tools/meadow_ground.py); see the Desert's Patches.
 			Patches = {
@@ -308,7 +308,7 @@ return {
 		-- while you're offline, so long ones bring players back (Steal an Egg goes up to 12-36 h).
 		-- (QM, Oct 8 evening: progression 2x faster: the Desert's to the Godlands' halved, so
 		-- x1 / x2 / x3 / x4 of the JSON; the Meadow's and the exclusives' kept.)
-		Horse = 15, Pig = 15, Bunny = 15, Pinto = 15, Fish = 45, Chicken = 60, Rhino = 120, Unicorn = 300, -- Meadow
+		Horse = 15, Pig = 15, Bunny = 15, Pinto = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
 		Cactus = 30, Kitten = 30, Scorpion = 90, Sandworm = 210, SpineLizard = 300, Snake = 600, -- Desert
 		Penguin = 60, Boar = 90, Snowman = 240, IceGolem = 720, Icebringer = 3600, -- Tundra
 		Starfish = 45, Whale = 10800, Squid = 2700, FishSchool = 2000, KingCrab = 3600, BlueCrab = 9000, Kraken = 10000, -- Ocean
@@ -460,7 +460,7 @@ return {
 	-- Oct 6); their tier (model "Tier" attribute, else ObstacleTiers by name) only
 	-- decides which ones some abilities break.
 	PetTiers = {
-		Horse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Chicken = 3, Rhino = 2, Unicorn = 2, -- Meadow (the Chicken is giant)
+		Horse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
@@ -522,7 +522,7 @@ return {
 	-- every second while you're in the game. (QM, Oct 8 evening: progression 2x faster, so
 	-- x3 QM's pets JSON: rides don't get quicker, so the gold has to more than double.)
 	PetIncome = {
-		Horse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Chicken = 40, Rhino = 90, Unicorn = 450, -- Meadow
+		Horse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
 		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, -- Tundra
 		Starfish = 300, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, -- Ocean
@@ -549,7 +549,7 @@ return {
 		-- 70% split evenly over the other Legendaries (14% each).
 		Odds = { Legendary = 70, Exclusive = 30 },
 		Pool = {
-			Rare = { Fish = 1, Chicken = 1, Scorpion = 1, Snowman = 1, Whale = 1, Beholder = 1, Sludge = 1 },
+			Rare = { Fish = 1, Scorpion = 1, Snowman = 1, Whale = 1, Beholder = 1, Sludge = 1 },
 			Epic = { Rhino = 1, Sandworm = 1, SpineLizard = 1, IceGolem = 1, Squid = 1, KingCrab = 1, FishSchool = 1, Leviathan = 1 },
 			Legendary = { Unicorn = 1, Snake = 1, Icebringer = 1, Kraken = 1, BlueCrab = 1 },
 			-- New gacha-only animals go here once they're built (QM, Oct 1). A tier
@@ -610,7 +610,6 @@ return {
 		Pinto = "rbxassetid://79525419811481",
 		Pig = "rbxassetid://139970505549400",
 		Bunny = "rbxassetid://102165948456968", -- assets/ui/BunnyEggRender.png
-		Chicken = "", -- assets/ui/ChickenEggRender.png, once uploaded
 		Fish = "rbxassetid://105098230793344",
 		Rhino = "rbxassetid://139482781062355",
 		Unicorn = "rbxassetid://85066893166855",
@@ -837,7 +836,6 @@ return {
 		Horse = { Speed = 1, Stamina = 1 },
 		Pig = { Speed = 0.8, Stamina = 0.8 },
 		Bunny = { Speed = 1.2, Stamina = 0.7 }, -- quick hops, tires fast (guess)
-		Chicken = { Speed = 1.3, Stamina = 1.2 }, -- big legs, flaps a lot (guess)
 		Pinto = { Speed = 1.1, Stamina = 0.9 },
 		Fish = { Speed = 0.6, Stamina = 3 },
 		Rhino = { Speed = 1.5, Stamina = 1.8 },

@@ -11,7 +11,6 @@ local HEADSHOTS = {
 	Pinto = "rbxassetid://137788325926698", -- PetPinto.png
 	Pig = "rbxassetid://126771183103796", -- PetPig.png
 	Bunny = "rbxassetid://77770407898290", -- PetBunny.png
-	Chicken = "", -- PetChicken.png
 	Fish = "rbxassetid://73704828076245", -- PetFish.png
 	Rhino = "rbxassetid://135065306024440", -- PetRhino.png
 	Unicorn = "rbxassetid://123940745305285", -- PetUnicorn.png
