@@ -29,7 +29,7 @@ local world = workspace:WaitForChild("World")
 while not world:GetAttribute("Ready") do
 	world:GetAttributeChangedSignal("Ready"):Wait()
 end
--- The egg you bring home is the animal you're riding when your stamina runs out
+-- The egg you bring home is the animal you're riding when your time runs out
 -- (QM, Oct 8: no nests): TakeEgg tells the server which (Nests.server).
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
@@ -132,6 +132,7 @@ end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
+vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
 vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
@@ -245,10 +246,10 @@ local function herdSpeed(kind)
 	return Config.HerdSpeed * statsOf(kind).Speed
 end
 
--- How long the Hold bar lasts: your stamina level (the saved "Stamina", Gold.server)
--- x Config.Stamina.Seconds, whatever you're riding (QM, Oct 8: a stat you'll train).
+-- How long the Hold bar lasts: Config.RideSeconds, whatever you're riding (QM, Oct 10:
+-- no more stamina).
 local function holdTime(_entity)
-	return Config.Stamina.Seconds * (player:GetAttribute("Stamina") or Config.Stamina.Start)
+	return Config.RideSeconds
 end
 local streams = {}
 -- The endless Godlands (Shared/Godlands): a stream per track, each running from
@@ -872,7 +873,7 @@ local function updateRideTarget()
 	if near ~= rideShown then
 		rideShown = near -- (no RIDE button any more: the prompt's the way to ride)
 	end
-	ridePrompt.Enabled = not Hud.inLesson()
+	ridePrompt.Enabled = not Hud.inLesson() and not player:GetAttribute("EggPromptUp") -- (not over an egg's prompt: Pen.client, QM)
 end
 
 local function clearRideTarget()
@@ -1144,7 +1145,7 @@ local function startTransfer(target)
 	vfx.sounds.play("lasso_throw")
 end
 
--- Out of stamina (QM, Oct 8): you turn round on whatever you're riding and race it
+-- Out of time (QM, Oct 8; a fixed RideSeconds since Oct 10): you turn round on whatever you're riding and race it
 -- home. A wild one's egg goes up on your lasso, and it's yours once you're over the
 -- line (Hatchery's DeliverEgg); your own pet brings no egg.
 local function turnHome()
@@ -1156,7 +1157,6 @@ local function turnHome()
 		carried = { part = egg.model, kind = mount.kind, stage = "held", t = 1, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	end
 	phase, turnT = "turning", 0
-	vfx.returnBiome = math.min(WorldColors.biomeAt(mount.z), 5) -- (its run-home music: Sounds' home1..home5)
 	Hud.setAction(nil)
 	Hud.setHold(nil)
 end
@@ -1351,6 +1351,7 @@ local function onAction()
 	end
 	startTransfer(actionTarget)
 end
+vfx.lassoPrompt.onTap = onAction
 
 -- The phone joystick while riding: the player controls stay on (the rider is
 -- anchored, so it only steers, see readSteer) with jumping off, so no jump button.
@@ -2513,6 +2514,9 @@ end
 -- A pet's ability (Config.Abilities): a hybrid's is its donor's, the right pick's, or
 -- if that has none its body's (QM, Oct 6).
 function vfx.abilityOf(entity)
+	if not Config.AbilitiesOn then
+		return nil -- (abilities off for now: QM, Oct 10)
+	end
 	return entity and (entity.fuse and Config.Abilities[entity.fuse] or Config.Abilities[entity.kind])
 end
 
@@ -3595,10 +3599,10 @@ local function checkRide(dt)
 			ability = nil
 		end
 	end
-	-- Stamina (QM, Oct 8): the Hold bar drains as you ride out, quicker sprinting, and
-	-- lassoing doesn't refill it. Empty, you turn round on whatever you're on (turnHome).
+	-- The Hold bar drains as you ride out (Config.RideSeconds: QM, Oct 10), and lassoing
+	-- doesn't refill it. Empty, you turn round on whatever you're on (turnHome).
 	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not mount.giant then -- abilities and the Giant Horse use no Hold
-		hold = math.max(hold - dt * (if sprinting() then Config.SprintDrain else 1), 0)
+		hold = math.max(hold - dt, 0) -- (no quicker sprinting: QM, Oct 10)
 		if hold <= 0 then
 			turnHome()
 			return
@@ -3833,12 +3837,14 @@ end
 local function updateHud()
 	Hud.setSprint(phase == "outbound", mount ~= nil and sprinting())
 	if phase == "outbound" then
-		-- The stamina bar, your stamina level on it (QM, Oct 8).
-		-- (the number's the stamina left, counting down with the bar: QM, Oct 9)
-		Hud.setHold(hold / holdTime(nil), true, math.ceil(hold / Config.Stamina.Seconds)) -- (mid-lasso too: no mount, the same stamina)
-		Hud.setDistance(string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
+		-- The ride's time left (QM, Oct 10: RideSeconds, no more stamina).
+		-- (only once you're over the start line, QM: it's as full as it gets till then)
+		Hud.setHold(if focus.Z < 0 or hold < holdTime(nil) then hold / holdTime(nil) else nil, true) -- (mid-lasso too)
+		Hud.setDistance(string.format("%dm", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		Hud.setAction("LASSO", actionTarget ~= nil)
 	end
+	local t = phase == "outbound" and not transfer and actionTarget -- (the lasso's prompt on its target: QM, Oct 10)
+	vfx.lassoPrompt.update(t and t.animal.model, t and vfx.Fusion.name(t.kind, t.fuse), t and Config.RarityColors[vfx.Fusion.rarity(t.kind, t.fuse)])
 	if phase == "turning" or phase == "return" or phase == "home" then
 		local metres = math.max(0, -focus.Z / STUDS_PER_METRE)
 		Hud.setVignette(math.clamp(metres / Config.VignetteFadeMetres, 0, 1))
@@ -4583,7 +4589,7 @@ end
 function vfx.updateSound()
 	vfx.sounds.setMusic(if phase == "idle" then "base"
 		elseif phase == "home" then "base" -- (over the line: back to the base's, cut with a scratch in reachHome)
-		elseif phase == "turning" or phase == "return" then "home" .. (vfx.returnBiome or 1) -- (the biome you turned round in: Sounds)
+		elseif phase == "turning" or phase == "return" then "home1" -- (the Meadow's, wherever you turned round: QM, Oct 10)
 		else "ride")
 	local riding = mount and (phase == "outbound" or phase == "return" or phase == "turning") and not transfer
 	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] ~= false and (mount.hop or 0) < 2,

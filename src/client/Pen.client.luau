@@ -15,6 +15,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -215,7 +216,7 @@ local function showEgg(pen, id, item)
 		prompt.Name = "SpeedupEgg"
 		prompt:SetAttribute("ObjectColor", Config.RarityColors[Fusion.rarity(item.egg)]) -- (the name in its animal's rarity colour, as Ride's: PromptUi, QM Oct 10)
 		prompt.ObjectText = item.egg .. " Egg"
-		prompt.ActionText = "Speed up hatch"
+		prompt.ActionText = "Hatch" -- (counting down, the time left instead, below; held then, it's the paid hatch)
 		prompt.KeyboardKeyCode = Enum.KeyCode.F
 		prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
 		prompt.HoldDuration = 0.35
@@ -482,10 +483,27 @@ end
 -- An egg's "Ready" / countdown shows only while you're near it, as the pets' plates do
 -- (PetPlates: in at TIMER_REACH studs, out past TIMER_LEAVE, popping in; QM, Oct 9).
 local TIMER_REACH, TIMER_LEAVE = 16, 19
+-- While one of your eggs' prompts is up, everything else floating over the pen hides
+-- (QM, Oct 10): the eggs' timers here, the pets' plates (PetPlates) and RIDE (Ride), on
+-- this client's "EggPromptUp" attribute.
+local eggPrompts = {}
+ProximityPromptService.PromptShown:Connect(function(prompt)
+	if prompt.Name == "SpeedupEgg" then
+		eggPrompts[prompt] = true
+		player:SetAttribute("EggPromptUp", true)
+	end
+end)
+ProximityPromptService.PromptHidden:Connect(function(prompt)
+	if eggPrompts[prompt] then
+		eggPrompts[prompt] = nil
+		player:SetAttribute("EggPromptUp", next(eggPrompts) ~= nil)
+	end
+end)
+
 local function nearTimer(s, hrp)
 	local root = s.egg.model.PrimaryPart
 	local d = if hrp and root then ((root.Position - hrp.Position) * Vector3.new(1, 0, 1)).Magnitude else math.huge
-	local on = d <= (if s.timerOn then TIMER_LEAVE else TIMER_REACH)
+	local on = d <= (if s.timerOn then TIMER_LEAVE else TIMER_REACH) and not player:GetAttribute("EggPromptUp") -- (none while an egg's prompt is up: QM)
 	if on ~= s.timerOn then
 		s.timerOn = on
 		local gui = s.timer.Parent
@@ -515,13 +533,15 @@ RunService.RenderStepped:Connect(function(dt)
 					local ready = (s.hatchAt or now) <= now
 					if s.speedupPrompt then
 						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and not player:GetAttribute("Tutorial")
-						if ready then
-							s.speedupPrompt.ActionText = "Hatch"
-						else
-							s.speedupPrompt.ActionText = if (player:GetAttribute("HatchCredits") or 0) > 0 then "Use paid hatch" else "Speed up hatch" -- (no price on it: QM, Oct 10)
-						end
 					end
 					s.timer.Text = if ready then "Ready" else countdown((s.hatchAt or now) - now)
+					if s.speedupPrompt then
+						-- (its action: the time left, as over the egg, till it's ready: QM, Oct 10)
+						local action = if ready then "Hatch" else s.timer.Text
+						if s.speedupPrompt.ActionText ~= action then
+							s.speedupPrompt.ActionText = action
+						end
+					end
 					nearTimer(s, hrp)
 					local scale = eggScale(s, now)
 					if math.abs(scale - s.grown) > 0.004 then

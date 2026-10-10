@@ -10,7 +10,7 @@
 -- machine's Roll are Style Custom for this. Stronger (QM, Oct 10): the disc behind the
 -- key is darker (KEY_DISC), and the two lines are the game's Montserrat ExtraBold with a
 -- thin black outline, the name line in the prompt's "ObjectColor" attribute if it has
--- one (Ride: the pet's rarity colour).
+-- one (Ride: the pet's rarity colour), the action line in its "ActionColor" (LassoPrompt).
 
 local UserInputService = game:GetService("UserInputService")
 local ProximityPromptService = game:GetService("ProximityPromptService")
@@ -503,6 +503,7 @@ local function createPrompt(prompt, inputType, gui)
 		actionText.Text = prompt.ActionText
 		objectText.Text = prompt.ObjectText
 		objectText.TextColor3 = prompt:GetAttribute("ObjectColor") or Color3.new(1, 1, 1)
+		actionText.TextColor3 = prompt:GetAttribute("ActionColor") or ContentColor
 		actionText.AutoLocalize = prompt.AutoLocalize
 		actionText.RootLocalizationTable = prompt.RootLocalizationTable
 		objectText.AutoLocalize = prompt.AutoLocalize
@@ -639,6 +640,20 @@ local function createIndicator(prompt, gui)
 end
 
 local function onLoad()
+	-- Roblox's own prompts instead, to compare (QM, Oct 10: Config.NativePrompts): every
+	-- Custom one is switched to Default as it comes into the world, and this draws none.
+	if require(game:GetService("ReplicatedStorage").Shared.Config).NativePrompts then
+		local function native(item)
+			if item:IsA("ProximityPrompt") and item.Style == Enum.ProximityPromptStyle.Custom then
+				item.Style = Enum.ProximityPromptStyle.Default
+			end
+		end
+		for _, item in workspace:GetDescendants() do
+			native(item)
+		end
+		workspace.DescendantAdded:Connect(native)
+		return
+	end
 	ProximityPromptService.PromptShown:Connect(function(prompt, inputType)
 		if prompt.Style ~= Enum.ProximityPromptStyle.Custom then
 			return -- (Roblox draws the Default ones)

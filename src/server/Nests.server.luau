@@ -1,5 +1,5 @@
--- The egg you bring home (QM, Oct 8: the stamina loop, no more nests). Ride out as
--- far as your stamina takes you, lassoing animals; when it runs out you turn round
+-- The egg you bring home (QM, Oct 8: no more nests). Ride out for Config.RideSeconds
+-- (Oct 10: no more stamina), lassoing animals; when it runs out you turn round
 -- on whatever you're riding, and its egg is yours once you're over the line. Your
 -- Ride.client says which animal (TakeEgg) as it turns; here that's checked against
 -- this ride's cues: you must have got on a wild animal (a "lasso" or "take" cue: not
