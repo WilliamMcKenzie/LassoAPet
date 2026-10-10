@@ -194,7 +194,6 @@ local lesson = false -- the fuse lesson's on (Hud.setLesson): nothing but Fuse s
 local upgradeScale -- Upgrade Pen's UIScale
 -- A line of text top centre (Hud.setNotice), in its own always-on ScreenGui.
 local NOTICE = { TEXT_SIZE = 40, TOP = 16 + 352 * 220 / 1292 + 36 } -- TOP: just under the Hold bar (QM; BAR_WIDTH x barEmpty's shape)
-local staminaText -- (the stamina level on the Hold bar)
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -398,11 +397,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	distance.Name = "Distance"
 	distance.Visible = SHOW_RIDE_TOP
 	distance.ZIndex = 2
-	-- Your stamina level on the bar (QM, Oct 8: a number you'll train, how far you get).
-	staminaText = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 3)
-	staminaText.Name = "Stamina"
-	staminaText.ZIndex = 2
-	staminaText.Visible = false
 
 	-- Ride back: only DODGE THE STAMPEDE!, pulsing between 90% and 110%, and a red
 	-- vignette that fades out over the last stretch home.
@@ -1147,16 +1141,11 @@ end
 local TIRED_RED = Color3.fromRGB(255, 90, 90)
 
 -- tired: whether an empty bar slows the mount (not while it carries an egg home).
--- level: the stamina level written on the bar (nil: none).
-function Hud.setHold(fraction, tired, level)
+function Hud.setHold(fraction, tired)
 	if RideUi then
-		return RideUi.setHold(fraction, tired, level)
+		return RideUi.setHold(fraction, tired)
 	end
 	holdFrame.Visible = fraction ~= nil
-	staminaText.Visible = fraction ~= nil and level ~= nil
-	if level then
-		staminaText.Text = tostring(level)
-	end
 	if fraction then
 		holdClip.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)
 		-- Empty (the mount's tired, at half speed): the bar pulses a subtle red (QM, Oct 5).

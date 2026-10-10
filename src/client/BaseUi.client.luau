@@ -1,7 +1,7 @@
 -- The base's UI (QM, Oct 9: the new look, from QM's Figma), in place of the old home
 -- HUD (Config.HomeHud off). Montserrat ExtraBold everywhere, white with a black stroke.
 --   Left, centred top to bottom: Merge, Shop and Index, stacked (QM's art, label drawn in).
---   Bottom left: your stamina (the saved "Stamina", Gold.server) and your cash.
+--   Bottom left: your cash (no more stamina over it: QM, Oct 10).
 --   Bottom centre, only by your pen's bull spot (Config.BullSpots): Upgrade, with the
 --     next pen level's price beside its cash icon, greyed when you can't afford it; the
 --     free Unlock in the tutorial. The egg slots (Inventory) hide while it's up.
@@ -24,7 +24,6 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 	shop = { id = "rbxassetid://119060039201858", size = Vector2.new(267, 113) }, -- Shop.png
 	index = { id = "rbxassetid://135845846149671", size = Vector2.new(267, 113) }, -- Index.png
 	merge = { id = "rbxassetid://126251339270486", size = Vector2.new(267, 113) }, -- Merge.png
-	stamina = { id = "rbxassetid://84856325662967", size = Vector2.new(256, 256) }, -- Stamina.png
 	cash = { id = "rbxassetid://76663783463176", size = Vector2.new(256, 256) }, -- Cash.png
 	upgrade = { id = "rbxassetid://71762829770863", size = Vector2.new(526, 113) }, -- Upgrade.png
 	upgradeGrey = { id = "rbxassetid://84646084249698", size = Vector2.new(526, 113) }, -- UpgradeGrey.png: QM's disabled Upgrade, for when you can't afford it
@@ -138,7 +137,7 @@ end } } do
 	pressable(b)
 end
 
--- Bottom left: stamina over cash, each its icon with the number beside it.
+-- Bottom left: cash, its icon with the number beside it.
 local counters = Instance.new("Frame")
 counters.Name = "Counters"
 counters.BackgroundTransparency = 1
@@ -166,13 +165,10 @@ local function counter(order, art, color)
 	row.Parent = counters
 	return label
 end
-local staminaText = counter(1, ART.stamina)
-local cashText = counter(2, ART.cash, CASH_GREEN)
+local cashText = counter(1, ART.cash, CASH_GREEN)
 local function showCounters()
-	staminaText.Text = tostring(player:GetAttribute("Stamina") or Config.Stamina.Start)
 	cashText.Text = Hud.money(player:GetAttribute("Gold") or 0)
 end
-player:GetAttributeChangedSignal("Stamina"):Connect(showCounters)
 player:GetAttributeChangedSignal("Gold"):Connect(showCounters)
 showCounters()
 

@@ -29,7 +29,7 @@ local world = workspace:WaitForChild("World")
 while not world:GetAttribute("Ready") do
 	world:GetAttributeChangedSignal("Ready"):Wait()
 end
--- The egg you bring home is the animal you're riding when your stamina runs out
+-- The egg you bring home is the animal you're riding when your time runs out
 -- (QM, Oct 8: no nests): TakeEgg tells the server which (Nests.server).
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
@@ -246,10 +246,10 @@ local function herdSpeed(kind)
 	return Config.HerdSpeed * statsOf(kind).Speed
 end
 
--- How long the Hold bar lasts: your stamina level (the saved "Stamina", Gold.server)
--- x Config.Stamina.Seconds, whatever you're riding (QM, Oct 8: a stat you'll train).
+-- How long the Hold bar lasts: Config.RideSeconds, whatever you're riding (QM, Oct 10:
+-- no more stamina).
 local function holdTime(_entity)
-	return Config.Stamina.Seconds * (player:GetAttribute("Stamina") or Config.Stamina.Start)
+	return Config.RideSeconds
 end
 local streams = {}
 -- The endless Godlands (Shared/Godlands): a stream per track, each running from
@@ -1145,7 +1145,7 @@ local function startTransfer(target)
 	vfx.sounds.play("lasso_throw")
 end
 
--- Out of stamina (QM, Oct 8): you turn round on whatever you're riding and race it
+-- Out of time (QM, Oct 8; a fixed RideSeconds since Oct 10): you turn round on whatever you're riding and race it
 -- home. A wild one's egg goes up on your lasso, and it's yours once you're over the
 -- line (Hatchery's DeliverEgg); your own pet brings no egg.
 local function turnHome()
@@ -3600,10 +3600,10 @@ local function checkRide(dt)
 			ability = nil
 		end
 	end
-	-- Stamina (QM, Oct 8): the Hold bar drains as you ride out, quicker sprinting, and
-	-- lassoing doesn't refill it. Empty, you turn round on whatever you're on (turnHome).
+	-- The Hold bar drains as you ride out (Config.RideSeconds: QM, Oct 10), and lassoing
+	-- doesn't refill it. Empty, you turn round on whatever you're on (turnHome).
 	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not mount.giant then -- abilities and the Giant Horse use no Hold
-		hold = math.max(hold - dt * (if sprinting() then Config.SprintDrain else 1), 0)
+		hold = math.max(hold - dt, 0) -- (no quicker sprinting: QM, Oct 10)
 		if hold <= 0 then
 			turnHome()
 			return
@@ -3838,9 +3838,8 @@ end
 local function updateHud()
 	Hud.setSprint(phase == "outbound", mount ~= nil and sprinting())
 	if phase == "outbound" then
-		-- The stamina bar, your stamina level on it (QM, Oct 8).
-		-- (the number's the stamina left, counting down with the bar: QM, Oct 9)
-		Hud.setHold(hold / holdTime(nil), true, math.ceil(hold / Config.Stamina.Seconds)) -- (mid-lasso too: no mount, the same stamina)
+		-- The ride's time left (QM, Oct 10: RideSeconds, no more stamina).
+		Hud.setHold(hold / holdTime(nil), true) -- (mid-lasso too)
 		Hud.setDistance(string.format("%dm", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		Hud.setAction("LASSO", actionTarget ~= nil)
 	end

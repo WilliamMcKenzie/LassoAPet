@@ -245,14 +245,10 @@ return {
 	-- over a horse's - 1)), so twice a horse's width steers 1.2x, three times 1.4x.
 	SteerWidthScale = 0.2,
 	SteerResponse = 8,
-	HoldTime = 6, -- (a pet's own stamina: no longer used, the bar runs on your Stamina below)
-	-- Stamina (QM, Oct 8: the stamina loop): your saved stamina level (the "Stamina"
-	-- attribute, Gold.server), shown on the bar as you ride out. The bar lasts Seconds x
-	-- your level, draining SprintDrain x as fast while you sprint; lassoing doesn't refill
-	-- it. Empty: you turn round on whatever you're riding and race it home, and a wild
-	-- one's egg is yours over the line. Everyone starts at Start (training it comes later).
-	Stamina = { Start = 20, Seconds = 1 },
-	SprintDrain = 1.5, -- x the stamina bar's usual drain while sprinting
+	-- Every ride out lasts RideSeconds (QM, Oct 10: no more stamina), the bar at the top
+	-- draining with it, sprinting or not. Empty: you turn round on whatever you're riding
+	-- and race it home, and a wild one's egg is yours over the line.
+	RideSeconds = 30,
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"
 	-- (0.5 stud) MaterialVariant from MaterialService instead of a stud Texture per face,
