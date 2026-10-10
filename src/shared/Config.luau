@@ -692,7 +692,9 @@ return {
 	-- Sprint tiers (QM, Oct 9): the speeds (studs/s, the uncurved) each starts at. Breaking
 	-- into a new one replays the sprint whoosh, snaps the fisheye up (SprintCam) and
 	-- steps the wind louder (up to 2x). The first is a horse's sprint.
-	PenProfile = false, -- the owner's headshot and name over their pen (off for now: QM, Oct 9)
+	-- The owner's headshot and name over their pen (QM, Oct 10: back, Height studs over
+	-- the middle of its floor; off Oct 9).
+	PenProfile = { On = true, Height = 40 },
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
 	-- Client/SkyFlash. Start: its see-through at the flash (0: solid white). Distance: studs
 	-- round the camera; anything further off goes white with the sky.

@@ -16,8 +16,8 @@ for i = 1, 5 do
 	pens[i] = folder:WaitForChild("Pen" .. i)
 end
 
--- The owner's picture and name floating over the pen's open side, like the
--- base owners in Roblox pet games. Hidden while the pen is free.
+-- The owner's picture and name floating high over the middle of the pen (QM, Oct 10:
+-- Config.PenProfile), like the base owners in Roblox pet games. Hidden while the pen is free.
 local function setSign(pen, player)
 	local sign = pen:FindFirstChild("Sign")
 	if not sign then
@@ -27,7 +27,7 @@ local function setSign(pen, player)
 	if not gui then
 		gui = Instance.new("BillboardGui")
 		gui.Name = "Owner"
-		gui.Size = UDim2.fromScale(12, 6)
+		gui.Size = UDim2.fromScale(16, 8)
 		gui.MaxDistance = 250
 		gui.LightInfluence = 0
 		local picture = Instance.new("ImageLabel")
@@ -56,7 +56,10 @@ local function setSign(pen, player)
 		label.Parent = gui
 		gui.Parent = sign
 	end
-	gui.Enabled = player ~= nil and Config.PenProfile -- (hidden for now: QM, Oct 9)
+	-- (over the pen's middle, its floor, high up: as big as the pen gets, it stays there)
+	gui.Adornee = pen:FindFirstChild("Area") or sign
+	gui.StudsOffsetWorldSpace = Vector3.new(0, Config.PenProfile.Height, 0)
+	gui.Enabled = player ~= nil and Config.PenProfile.On
 	-- VIP (game pass): the name and the ring round the picture in gold.
 	local vip = player ~= nil and player:GetAttribute("PassVIP") == true
 	gui.OwnerName.TextColor3 = if vip then Config.Vip.Name else Color3.new(1, 1, 1)
