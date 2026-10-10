@@ -182,6 +182,114 @@ def crack_parts(cx, cz, size, seed):
     return mask, inside
 
 
+# ---- the demo's crack, recoloured (QM, Oct 10: "just use the demo and recolour it"). The
+# demo place's crack (ViewportStencil-Demo.rbxl, Assets.Crack: MeshPart "ground grack mesh
+# alpha", rbxassetid://139122215021953, Color 112,49,221, with a PointLight and particles)
+# can't be downloaded here, so this rebuilds its look from the demo screenshot: a jagged
+# body with long curling tendrils, walls straight down to a flat bottom, dark at the rim
+# and glowing at the bottom. Lava colours: a scorched red rim down to hot yellow.
+DEMO_GLOW = [(164, 46, 22), (204, 60, 20), (238, 86, 18), (255, 116, 22), (255, 152, 34), (255, 196, 70)]
+DEMO_GLOW = [lerp(DEMO_GLOW[int(t)], DEMO_GLOW[min(int(t) + 1, 5)], t - int(t)) for t in np.linspace(0, 5, 14)]  # smooth
+DEMO_BOTTOM = (255, 220, 110)
+LIGHT = np.array([-0.5, 0.4, -0.75])
+
+
+def ear_clip(poly):
+    """Triangles of a simple 2D polygon [(x, z)] by ear clipping."""
+    idx = list(range(len(poly)))
+    area = sum(poly[i][0] * poly[(i + 1) % len(poly)][1] - poly[(i + 1) % len(poly)][0] * poly[i][1] for i in idx)
+    sgn = 1 if area > 0 else -1
+    tris = []
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    def inside(p, a, b, c):
+        return cross(a, b, p) * sgn >= 0 and cross(b, c, p) * sgn >= 0 and cross(c, a, p) * sgn >= 0
+    while len(idx) > 3:
+        for k in range(len(idx)):
+            i0, i1, i2 = idx[k - 1], idx[k], idx[(k + 1) % len(idx)]
+            a, b, c = poly[i0], poly[i1], poly[i2]
+            if cross(a, b, c) * sgn <= 0:
+                continue
+            if any(inside(poly[j], a, b, c) for j in idx if j not in (i0, i1, i2)):
+                continue
+            tris.append((i0, i1, i2))
+            idx.pop(k)
+            break
+        else:  # (degenerate leftovers)
+            break
+    if len(idx) == 3:
+        tris.append(tuple(idx))
+    return tris
+
+
+def demo_outline(cx, cz, size, rng):
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    shapes = []
+    r0 = size * 0.42
+    body = []
+    n = 14
+    for i in range(n):  # the body: a jagged blob, every other point a spike
+        a = 2 * math.pi * i / n + rng.uniform(-0.12, 0.12)
+        r = r0 * (rng.uniform(1.1, 1.45) if i % 2 else rng.uniform(0.6, 0.85))
+        body.append((cx + r * math.cos(a), cz + r * math.sin(a)))
+    shapes.append(Polygon(body))
+    nt = int(rng.integers(5, 8))
+    for i in range(nt):  # tendrils: thin, tapering, curling
+        a = 2 * math.pi * i / nt + rng.uniform(-0.35, 0.35)
+        x, z = cx + r0 * 0.6 * math.cos(a), cz + r0 * 0.6 * math.sin(a)
+        steps = int(rng.integers(3, 5))
+        bend = rng.uniform(-0.5, 0.5)
+        w = size * rng.uniform(0.08, 0.12)
+        left, right = [], []
+        for k in range(steps + 1):
+            nx, nz = -math.sin(a), math.cos(a)
+            ww = w * (1 - k / steps) ** 1.3
+            left.append((x + nx * ww, z + nz * ww))
+            right.append((x - nx * ww, z - nz * ww))
+            ln = size * rng.uniform(0.14, 0.22)
+            x, z = x + ln * math.cos(a), z + ln * math.sin(a)
+            a += bend + rng.uniform(-0.35, 0.35)
+        shapes.append(Polygon(left + right[::-1]).buffer(0))
+    u = unary_union(shapes)
+    if u.geom_type != "Polygon":
+        u = max(u.geoms, key=lambda g: g.area)
+    return u.simplify(0.05)
+
+
+def demo_crack_parts(cx, cz, size, seed):
+    rng = np.random.default_rng(seed)
+    poly = demo_outline(cx, cz, size, rng)
+    ring = list(poly.exterior.coords)[:-1]
+    depth = size * 0.55
+    mask, inside = [], []
+    for t in ear_clip(ring):
+        tri = [ring[i] for i in t]
+        mask.append(face([(x, 0.04, z) for x, z in tri], KEY, True, (cx, 10, cz)))
+        inside.append(face([(x, -depth, z) for x, z in tri], DEMO_BOTTOM, True, (cx, 10, cz)))
+    from shapely.geometry import Point
+    nb = len(DEMO_GLOW)
+    for i in range(len(ring)):
+        (x0, z0), (x1, z1) = ring[i], ring[(i + 1) % len(ring)]
+        dx, dz = x1 - x0, z1 - z0
+        ln = math.hypot(dx, dz)
+        if ln < 1e-6:
+            continue
+        nx, nz = -dz / ln, dx / ln
+        mx, mz = (x0 + x1) / 2, (z0 + z1) / 2
+        if not poly.contains(Point(mx + nx * 0.02, mz + nz * 0.02)):
+            nx, nz = -nx, -nz  # (inward)
+        lit = 0.8 + 0.2 * max(-1, min(1, float(np.dot([nx, 0, nz], LIGHT[[0, 1, 2]] / np.linalg.norm(LIGHT)))))
+        toward = (mx + nx, -depth / 2, mz + nz)
+        for k, col in enumerate(DEMO_GLOW):
+            y0, y1 = -depth * k / nb, -depth * (k + 1) / nb
+            inside.append(face([(x0, y0, z0), (x1, y0, z1), (x1, y1, z1), (x0, y1, z0)],
+                               tuple(min(255, c * lit) for c in col), True, toward))
+    return mask, inside
+
+
 # ---- rocks
 BUILD = {n[4:]: (f, s) for n, f, s, _ in RM.ROCKS}
 
@@ -201,7 +309,7 @@ def scene(z_hi, z_lo, cracks, rocks):
         parts += rock(*r)
     mask, inside = [], []
     for i, (cx, cz, s) in enumerate(cracks):
-        m, ins = crack_parts(cx, cz, s, 100 + i)
+        m, ins = (demo_crack_parts if DEMO else crack_parts)(cx, cz, s, 100 + i)
         mask += m
         inside += ins
     return parts, mask, inside
@@ -215,16 +323,18 @@ def shot(parts, mask, inside, eye, target, W, H, fov):
                                 ground=False, studs=False))
     key = (a[..., 0] >= 250) & (a[..., 1] <= 4) & (a[..., 2] >= 250)
     hole = (np.abs(b.astype(int) - SKY.astype(int)).sum(-1) < 6)  # (seams inside a crack: the hot bottom)
-    b[hole] = CRACK[-1][0]
+    b[hole] = DEMO_BOTTOM if DEMO else CRACK[-1][0]
     a[key] = b[key]
     return Image.fromarray(a)
 
 
-CRACKS = [(-6, -40, 13), (22, -96, 10), (-24, -128, 9), (8, -170, 12), (-14, -205, 8)]
+CRACKS = [(-6, -40, 16), (22, -96, 12), (-24, -128, 11), (8, -170, 14), (-14, -205, 10)]
 ROCKS = [("Boulder", -44, -22, 30, 2.2), ("Pebble", -38, -34, 0, 2.8), ("Crag", 44, -60, 200, 1.7),
          ("Stone", 38, -48, 90, 2.4), ("Slab", -46, -88, 140, 1.9), ("Boulder", 46, -132, 260, 2.2),
          ("Pebble", 40, -142, 30, 2.8), ("Crag", -44, -160, 60, 1.7), ("Stone", -36, -172, 10, 2.4),
          ("Boulder", 44, -196, 120, 2.2), ("Slab", -46, -214, 300, 1.9)]
+
+DEMO = "--mine" not in sys.argv
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
