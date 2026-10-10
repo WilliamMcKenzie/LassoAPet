@@ -1167,6 +1167,9 @@ function Hud.setHold(fraction, tired, level)
 end
 
 function Hud.setDistance(text)
+	if RideUi then
+		return RideUi.setDistance(text)
+	end
 	distance.Text = text
 end
 

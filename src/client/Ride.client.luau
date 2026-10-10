@@ -132,6 +132,7 @@ end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
+vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
 vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
@@ -1351,6 +1352,7 @@ local function onAction()
 	end
 	startTransfer(actionTarget)
 end
+vfx.lassoPrompt.onTap = onAction
 
 -- The phone joystick while riding: the player controls stay on (the rider is
 -- anchored, so it only steers, see readSteer) with jumping off, so no jump button.
@@ -2513,6 +2515,9 @@ end
 -- A pet's ability (Config.Abilities): a hybrid's is its donor's, the right pick's, or
 -- if that has none its body's (QM, Oct 6).
 function vfx.abilityOf(entity)
+	if not Config.AbilitiesOn then
+		return nil -- (abilities off for now: QM, Oct 10)
+	end
 	return entity and (entity.fuse and Config.Abilities[entity.fuse] or Config.Abilities[entity.kind])
 end
 
@@ -3836,9 +3841,11 @@ local function updateHud()
 		-- The stamina bar, your stamina level on it (QM, Oct 8).
 		-- (the number's the stamina left, counting down with the bar: QM, Oct 9)
 		Hud.setHold(hold / holdTime(nil), true, math.ceil(hold / Config.Stamina.Seconds)) -- (mid-lasso too: no mount, the same stamina)
-		Hud.setDistance(string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
+		Hud.setDistance(string.format("%dm", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		Hud.setAction("LASSO", actionTarget ~= nil)
 	end
+	local t = phase == "outbound" and not transfer and actionTarget -- (the lasso's prompt on its target: QM, Oct 10)
+	vfx.lassoPrompt.update(t and t.animal.model, t and vfx.Fusion.name(t.kind, t.fuse), t and Config.RarityColors[vfx.Fusion.rarity(t.kind, t.fuse)])
 	if phase == "turning" or phase == "return" or phase == "home" then
 		local metres = math.max(0, -focus.Z / STUDS_PER_METRE)
 		Hud.setVignette(math.clamp(metres / Config.VignetteFadeMetres, 0, 1))
