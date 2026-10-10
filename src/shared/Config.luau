@@ -36,7 +36,7 @@ return {
 		{
 			Name = "Desert",
 			AnimalSize = 1.35,
-			Swerve = 0.75,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.75)
 			NestScale = 2, -- its nests are this many times bigger, so they show from afar at its speed (Nests.server; QM, Oct 6)
 			Length = 2280, -- 3x the meadow (QM)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
@@ -63,7 +63,7 @@ return {
 		{
 			Name = "Snow",
 			AnimalSize = 1.8,
-			Swerve = 0.5,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.5)
 			NestScale = 2.25,
 			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
@@ -84,7 +84,7 @@ return {
 		{
 			Name = "Ocean",
 			AnimalSize = 2.6,
-			Swerve = 0.25,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.25)
 			NestScale = 2.5,
 			Length = 7680, -- 1.4x the snow (QM, Oct 2), a whole number of 240-stud depth bands
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
@@ -174,7 +174,7 @@ return {
 			-- as they go (Client/GodlandsStream). It has no finish line.
 			Name = "Godlands",
 			AnimalSize = 3,
-			Swerve = 0,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0)
 			NestScale = 2.5,
 			Length = math.huge, -- endless
 			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
