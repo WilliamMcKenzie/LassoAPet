@@ -94,7 +94,8 @@ title.Text = TITLE
 title.Position = UDim2.new(0.5, 0, 0, TITLE_Y)
 
 -- The bar.
-local bar = picture(root, ART.progressGrey, Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, TOP), BAR_WIDTH)
+local BAR_MIDDLE = TOP + BAR_WIDTH * ART.progress.size.Y / ART.progress.size.X / 2
+local bar = picture(root, ART.progressGrey, Vector2.new(0.5, 0.5), UDim2.new(0.5, 0, 0, BAR_MIDDLE), BAR_WIDTH) -- (from its middle: it pulses about it)
 bar.Name = "Time"
 local clip = Instance.new("Frame")
 clip.Name = "Fill"
@@ -111,7 +112,7 @@ local seconds = text(root, TIME_TEXT)
 seconds.FontFace = TIME_FONT
 seconds.UIStroke:Destroy() -- (plain white: QM's guide)
 seconds.Name = "Seconds"
-seconds.Position = UDim2.new(0.5, 0, 0, TOP + BAR_WIDTH * ART.progress.size.Y / ART.progress.size.X / 2)
+seconds.Position = UDim2.new(0.5, 0, 0, BAR_MIDDLE)
 seconds.ZIndex = 2
 
 function RideUi.show(visible)
