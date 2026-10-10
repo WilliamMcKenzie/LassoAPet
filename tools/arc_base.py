@@ -58,6 +58,9 @@ ROCK_SCALE = 2.5
 LEFT_ROCKS = [
     ("Crag", -160, 250, 30),  # the back-left corner
     ("Boulder", -163, 11, 40),  # the front-left corner, beside Carl
+    # one on each dirt patch between the pens (QM, Oct 10: as Design's render)
+    ("Boulder", -140, 126, 20),  # between the left pens
+    ("Boulder", -57, 222, 60),  # between the back pen and the left one
 ]
 
 

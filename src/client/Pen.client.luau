@@ -18,7 +18,6 @@ local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local MarketplaceService = game:GetService("MarketplaceService")
 
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
@@ -33,12 +32,6 @@ local player = Players.LocalPlayer
 local placeEgg = ReplicatedStorage:WaitForChild("PlaceEgg")
 local speedupEgg = ReplicatedStorage:WaitForChild("SpeedupEgg")
 local hatchEgg = ReplicatedStorage:WaitForChild("HatchEgg")
-local hatchPrice = Config.SpeedupEgg.Price
--- Fetch the price on this client so regional pricing is displayed accurately.
-task.spawn(function()
-	local ok, info = pcall(MarketplaceService.GetProductInfoAsync, MarketplaceService, Config.SpeedupEgg.ProductId, Enum.InfoType.Product)
-	if ok and info.PriceInRobux then hatchPrice = info.PriceInRobux end
-end)
 
 local EGG_CENTER = 1.6 -- egg pivot height above the ground (Egg.luau)
 local TOP_POPS = 1.58 -- seconds into the hatch animation when the top flies off
@@ -220,8 +213,9 @@ local function showEgg(pen, id, item)
 		-- and F to hatch it once it's ready (QM; the frame loop below switches it over).
 		local prompt = Instance.new("ProximityPrompt")
 		prompt.Name = "SpeedupEgg"
+		prompt:SetAttribute("ObjectColor", Config.RarityColors[Fusion.rarity(item.egg)]) -- (the name in its animal's rarity colour, as Ride's: PromptUi, QM Oct 10)
 		prompt.ObjectText = item.egg .. " Egg"
-		prompt.ActionText = "Hatch now"
+		prompt.ActionText = "Speed up hatch"
 		prompt.KeyboardKeyCode = Enum.KeyCode.F
 		prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
 		prompt.HoldDuration = 0.35
@@ -524,7 +518,7 @@ RunService.RenderStepped:Connect(function(dt)
 						if ready then
 							s.speedupPrompt.ActionText = "Hatch"
 						else
-							s.speedupPrompt.ActionText = if (player:GetAttribute("HatchCredits") or 0) > 0 then "Use paid hatch" else "Hatch now — " .. hatchPrice .. " Robux"
+							s.speedupPrompt.ActionText = if (player:GetAttribute("HatchCredits") or 0) > 0 then "Use paid hatch" else "Speed up hatch" -- (no price on it: QM, Oct 10)
 						end
 					end
 					s.timer.Text = if ready then "Ready" else countdown((s.hatchAt or now) - now)

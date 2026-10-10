@@ -131,6 +131,10 @@ local ROCKS = {
 	{ "Crag", 160, 250, -30 },
 	{ "Boulder", -163, 11, 40 },
 	{ "Boulder", 163, 11, -40 },
+	{ "Boulder", -140, 126, 20 },
+	{ "Boulder", 140, 126, -20 },
+	{ "Boulder", -57, 222, 60 },
+	{ "Boulder", 57, 222, -60 },
 }
 local ROCK_COLOR = Color3.fromRGB(159, 161, 172)
 local ROCK_SCALE = 2.5

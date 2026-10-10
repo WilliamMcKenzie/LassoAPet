@@ -1,5 +1,5 @@
 -- Nameplates over your own pets when you walk up to them (QM, Oct 7), centred:
--- the pet's name in its rarity's colour (a hybrid's fused name), the gold it earns a
+-- the pet's rarity (QM, Oct 10: was its name) in its colour, the gold it earns a
 -- second, and its speed (its Speed stat x 20, "m/s").
 --
 -- Only the NEAREST few of your pets within REACH get one, and only while you're on
@@ -116,7 +116,7 @@ local function show(model, kind, fuse, stats, income)
 	local key = Fusion.key(kind, fuse) .. "/" .. s.Speed .. "/" .. income .. "/" .. tostring(player:GetAttribute("PassDoubleGold"))
 	if p.key ~= key then
 		p.key = key
-		p.name.Text = Fusion.name(kind, fuse) -- a hybrid's fused name (QM, Oct 7)
+		p.name.Text = (Fusion.rarity(kind, fuse)) -- its rarity, not its name (QM, Oct 10; a hybrid's: the rarer of its two)
 		p.name.TextColor3 = colorOf(kind, fuse)
 		p.gold.Text = "$" .. short(income * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)) .. "/s" -- (doubled by the x2 Gold pass)
 		p.speed.Text = math.floor(s.Speed * 20 + 0.5) .. "m/s"

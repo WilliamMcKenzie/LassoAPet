@@ -584,9 +584,9 @@ return {
 	-- QM's cream marble column in the middle of a coiled grass snake (Props/GrassSnake,
 	-- PodiumSnake.client), in the base's right front corner, their username and best
 	-- distance over their head (QM, Oct 5).
-	-- Rarity text colours (QM, Oct 7): pet nameplates, lasso levels. Common keeps the inventory slots' grey.
+	-- Rarity text colours (QM, Oct 7): pet nameplates, the ride and egg prompts' names.
 	RarityColors = {
-		Common = Color3.fromRGB(150, 160, 175),
+		Common = Color3.fromHex("DDDDDD"), -- (QM, Oct 10; was 150, 160, 175)
 		Uncommon = Color3.fromHex("43FA00"),
 		Rare = Color3.fromHex("40D6FF"),
 		Epic = Color3.fromHex("FF7CC6"),

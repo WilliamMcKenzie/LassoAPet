@@ -845,6 +845,7 @@ local function updateRideTarget()
 			rideOffset, rideSize = Outline.box(target)
 			-- The prompt's name line: the pet's name, a hybrid's fused one (as its plate).
 			local info = if starter and target == starter.animal.model then starter else PenPets.pets[target]
+			ridePrompt:SetAttribute("ObjectColor", info and info.kind and Config.RarityColors[vfx.Fusion.rarity(info.kind, info.fuse)]) -- (the name in its rarity's colour: PromptUi, QM)
 			ridePrompt.ObjectText = if info and info.kind then vfx.Fusion.name(info.kind, info.fuse) else ""
 			rideSpot.Parent = workspace.Terrain
 		else
