@@ -127,58 +127,13 @@ local MESHES = {
 	Cliff = 102261747583883,
 }
 local ROCKS = {
-	{ "Cliff", -158, 248, 30 },
-	{ "Cliff", 158, 248, -30 },
-	{ "Crag", -128, 254, 190 },
-	{ "Crag", 128, 254, -190 },
-	{ "Boulder", -141, 233, 70 },
-	{ "Boulder", 141, 233, -70 },
-	{ "Pillar", -170, 226, 10 },
-	{ "Pillar", 170, 226, -10 },
-	{ "Stone", -122, 240, 120 },
-	{ "Stone", 122, 240, -120 },
-	{ "Pebble", -131, 236, 40 },
-	{ "Pebble", 131, 236, -40 },
-	{ "Pebble", -151, 224, 200 },
-	{ "Pebble", 151, 224, -200 },
-	{ "Slab", -101, 258, 5 },
-	{ "Slab", 101, 258, -5 },
-	{ "Twins", -85, 256, 160 },
-	{ "Twins", 85, 256, -160 },
-	{ "Stone", -93, 249, 30 },
-	{ "Stone", 93, 249, -30 },
-	{ "Pebble", -73, 258, 80 },
-	{ "Pebble", 73, 258, -80 },
-	{ "Boulder", -58, 257, 300 },
-	{ "Boulder", 58, 257, -300 },
-	{ "Crag", -166, 186, 95 },
-	{ "Crag", 166, 186, -95 },
-	{ "Twins", -168, 206, 80 },
-	{ "Twins", 168, 206, -80 },
-	{ "Boulder", -167, 161, 20 },
-	{ "Boulder", 167, 161, -20 },
-	{ "Stone", -159, 170, 250 },
-	{ "Stone", 159, 170, -250 },
-	{ "Pebble", -158, 151, 130 },
-	{ "Pebble", 158, 151, -130 },
-	{ "Slab", -169, 136, 90 },
-	{ "Slab", 169, 136, -90 },
-	{ "Pillar", -170, 119, 0 },
-	{ "Pillar", 170, 119, 0 },
-	{ "Pebble", -162, 126, 300 },
-	{ "Pebble", 162, 126, -300 },
-	{ "Boulder", -166, 12, 40 },
-	{ "Boulder", 166, 12, -40 },
-	{ "Pillar", -172, 24, 160 },
-	{ "Pillar", 172, 24, -160 },
-	{ "Stone", -155, 8, 200 },
-	{ "Stone", 155, 8, -200 },
-	{ "Pebble", -147, 5, 20 },
-	{ "Pebble", 147, 5, -20 },
-	{ "Slab", -133, 6, 0 },
-	{ "Slab", 133, 6, 0 },
+	{ "Crag", -160, 250, 30 },
+	{ "Crag", 160, 250, -30 },
+	{ "Boulder", -163, 11, 40 },
+	{ "Boulder", 163, 11, -40 },
 }
 local ROCK_COLOR = Color3.fromRGB(172, 184, 212)
+local ROCK_SCALE = 2.5
 -- Bull pads: { pen, x, z }.
 local BULLS = {
 
@@ -263,6 +218,7 @@ for _, r in ROCKS do
 	end
 	local p = from:Clone()
 	p.Name = "Rock" .. r[1]
+	p.Size *= ROCK_SCALE
 	p.Anchored = true
 	p.Color = ROCK_COLOR
 	-- 1-stud studs, the same size as the ground's (QM, Oct 10; the meshes' UVs are drawn

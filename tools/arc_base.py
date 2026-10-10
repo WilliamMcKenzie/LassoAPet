@@ -17,7 +17,7 @@ What the Luau does to Workspace.World (re-running it is fine: it rebuilds the sa
     Ground.heightAt reads the sunk dirt.
   - World.BaseDecor: the rocks (QM, Oct 10): Design's studded low-poly meshes
     (design/rocks, MESHES below) as MeshParts in clusters along the walls and in the
-    corners (LEFT_ROCKS, mirrored), the ground's 1-stud stud material, one pale blue-grey;
+    corners (LEFT_ROCKS, mirrored, ROCK_SCALE x), the ground's 1-stud stud material, one pale blue-grey;
     whatever was in BaseDecor before goes
   - World.BullPads: a placeholder pad per pen (BullPadN, "Pen" attribute), a red
     mat 18 across with a bull on a post, facing the yard; with BULL_PADS off (now),
@@ -51,23 +51,13 @@ MESHES = {
     "Crag": 105444261900626, "Cliff": 102261747583883,
 }
 ROCK_COLOR = (172, 184, 212)
-# Clusters along the walls and in the corners, clear of the pens (at their biggest), Carl,
-# the podium and the corridor: the left half { mesh, x, z, yaw }, mirrored for the right.
+# A few big rocks in key spots (QM, Oct 10: used sparingly, 2.5x their size), clear of
+# the pens (at their biggest), Carl and the podium: the left half { mesh, x, z, yaw },
+# mirrored for the right.
+ROCK_SCALE = 2.5
 LEFT_ROCKS = [
-    # the back-left corner: the cliff in it, smaller rocks in front
-    ("Cliff", -158, 248, 30), ("Crag", -128, 254, 190), ("Boulder", -141, 233, 70),
-    ("Pillar", -170, 226, 10), ("Stone", -122, 240, 120), ("Pebble", -131, 236, 40),
-    ("Pebble", -151, 224, 200),
-    # along the back wall towards the middle pen
-    ("Slab", -101, 258, 5), ("Twins", -85, 256, 160), ("Stone", -93, 249, 30),
-    ("Pebble", -73, 258, 80), ("Boulder", -58, 257, 300),
-    # along the left wall, between the pens
-    ("Crag", -166, 186, 95), ("Twins", -168, 206, 80), ("Boulder", -167, 161, 20),
-    ("Stone", -159, 170, 250), ("Pebble", -158, 151, 130), ("Slab", -169, 136, 90),
-    ("Pillar", -170, 119, 0), ("Pebble", -162, 126, 300),
-    # the front-left corner, by Carl
-    ("Boulder", -166, 12, 40), ("Pillar", -172, 24, 160), ("Stone", -155, 8, 200),
-    ("Pebble", -147, 5, 20), ("Slab", -133, 6, 0),
+    ("Crag", -160, 250, 30),  # the back-left corner
+    ("Boulder", -163, 11, 40),  # the front-left corner, beside Carl
 ]
 
 
@@ -209,7 +199,7 @@ def main():
     text = TEMPLATE
     for key, value in {"W": W, "D": D, "CX": centre[0], "CZ": centre[1], "WALLS": walls_lua, "FLOOR": floor_lua,
                        "BULLS": bulls_lua, "MESHES": meshes_lua, "ROCKS": rocks_lua,
-                       "RC": "Color3.fromRGB(%d, %d, %d)" % ROCK_COLOR}.items():
+                       "RC": "Color3.fromRGB(%d, %d, %d)" % ROCK_COLOR, "RS": ROCK_SCALE}.items():
         text = text.replace(f"@{key}@", f"{value:g}" if isinstance(value, (int, float)) else value)
     OUT.write_text(text)
     print(f"tools/arc_base.luau: {len(floor)} floor rectangles, {len(rocks())} rocks, {len(d['bulls']) if BULL_PADS else 0} bull pads")
@@ -240,6 +230,7 @@ local ROCKS = {
 @ROCKS@
 }
 local ROCK_COLOR = @RC@
+local ROCK_SCALE = @RS@
 -- Bull pads: { pen, x, z }.
 local BULLS = {
 @BULLS@
@@ -324,6 +315,7 @@ for _, r in ROCKS do
 	end
 	local p = from:Clone()
 	p.Name = "Rock" .. r[1]
+	p.Size *= ROCK_SCALE
 	p.Anchored = true
 	p.Color = ROCK_COLOR
 	-- 1-stud studs, the same size as the ground's (QM, Oct 10; the meshes' UVs are drawn
