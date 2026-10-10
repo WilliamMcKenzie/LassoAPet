@@ -985,7 +985,8 @@ end
 
 -- Testing (/biome, see Hatchery.server): drops you just inside biome b's start
 -- line riding a new `kind`, whatever you were doing. Your own pet stays home.
-ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, kind)
+-- /boss: at its end instead, with the timer at 0.01 s, so the boss comes (QM, Oct 10).
+ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, kind, boss)
 	local hrp, humanoid = character()
 	if not hrp then
 		return
@@ -997,12 +998,13 @@ ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, ki
 	end
 	humanoid:UnequipTools()
 	clearRideTarget()
-	local z = if b == 1 then SPAWN_Z - 6 else WorldColors.biomeStart(b) - 10 -- the meadow's starts at the start line
+	local z = if boss then WorldColors.biomeStart(b) - Config.Biomes[b].Length + 40
+		elseif b == 1 then SPAWN_Z - 6 else WorldColors.biomeStart(b) - 10 -- the meadow's starts at the start line
 	mount = newEntity(0, z, 0, kind)
 	mount.animal:setSaddled(true)
 	warpLevel = b
 	leadFromZ, exitPath = z - 8, nil
-	phase, hold, grace, camYaw = "outbound", holdTime(mount), 1, 0
+	phase, hold, grace, camYaw = "outbound", if boss then 0.01 else holdTime(mount), 1, 0
 	coins = 0
 	hrp.Anchored = true
 	humanoid.Sit = true
