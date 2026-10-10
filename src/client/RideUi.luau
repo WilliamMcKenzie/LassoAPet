@@ -27,7 +27,8 @@ local BAR_WIDTH = 646
 local FILL_FROM, FILL_TO = 6 / 646, 640 / 646 -- the bar's inner fill, of its width
 local RED_FROM = 0.5 -- the seconds turn from white to red from this much time left down to none (QM)
 local RED = Color3.fromRGB(255, 60, 80)
-local PULSE = { From = 0.5, In = 0.9, Out = 1.05, Time = 0.8 } -- under From left: the bar's scale between In and Out, every Time s
+-- Under From left, the bar's scale: in to In over InTime s, out to Out over OutTime s (QM).
+local PULSE = { From = 0.5, In = 0.9, Out = 1.05, InTime = 0.5, OutTime = 0.7 }
 local TITLE = "BOSS IN" -- (QM, Oct 10; was "Lasso will break", "Boss will spawn")
 local TITLE_Y, TITLE_TEXT = 69, 46 -- the title's middle off the top, its size
 local TIME_FONT = Font.fromEnum(Enum.Font.FredokaOne) -- (the bar's not Montserrat: QM)
@@ -128,7 +129,9 @@ function RideUi.setHold(fraction)
 		clip.Size = UDim2.fromScale(if f <= 0 then 0 else FILL_FROM + (FILL_TO - FILL_FROM) * f, 1)
 		seconds.TextColor3 = RED:Lerp(Color3.new(1, 1, 1), math.clamp(f / RED_FROM, 0, 1))
 		seconds.Text = string.format("%.1fs", f * Config.RideSeconds)
-		local k = 0.5 - math.cos(os.clock() / PULSE.Time * 2 * math.pi) / 2 -- (0 -> 1 -> 0, eased)
+		local t = os.clock() % (PULSE.InTime + PULSE.OutTime)
+		local k = if t < PULSE.InTime then 1 - t / PULSE.InTime else (t - PULSE.InTime) / PULSE.OutTime -- (1 = out, 0 = in)
+		k = 0.5 - math.cos(k * math.pi) / 2 -- (eased)
 		barScale.Scale = if f < PULSE.From then PULSE.In + (PULSE.Out - PULSE.In) * k else 1
 	end
 end
