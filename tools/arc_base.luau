@@ -252,7 +252,7 @@ local AssetService = game:GetService("AssetService")
 local decor = world:FindFirstChild("BaseDecor") or Instance.new("Folder")
 decor.Name = "BaseDecor"
 decor:ClearAllChildren()
-local studs = game:GetService("MaterialService"):FindFirstChild("StudsHalf", true)
+local studs = game:GetService("MaterialService"):FindFirstChild("Studs", true)
 local made = {}
 local rocks = 0
 for _, r in ROCKS do
@@ -265,7 +265,8 @@ for _, r in ROCKS do
 	p.Name = "Rock" .. r[1]
 	p.Anchored = true
 	p.Color = ROCK_COLOR
-	-- 0.5-stud studs (the meshes' UVs are in those studs), as the animals' (Shared/Studs)
+	-- 1-stud studs, the same size as the ground's (QM, Oct 10; the meshes' UVs are drawn
+	-- for 0.5-stud ones, but the material sets the size: Shared/Studs' "Studs")
 	if studs then
 		p.Material = studs.BaseMaterial
 		p.MaterialVariant = studs.Name

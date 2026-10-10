@@ -17,7 +17,7 @@ What the Luau does to Workspace.World (re-running it is fine: it rebuilds the sa
     Ground.heightAt reads the sunk dirt.
   - World.BaseDecor: the rocks (QM, Oct 10): Design's studded low-poly meshes
     (design/rocks, MESHES below) as MeshParts in clusters along the walls and in the
-    corners (LEFT_ROCKS, mirrored), 0.5-stud stud material, one pale blue-grey;
+    corners (LEFT_ROCKS, mirrored), the ground's 1-stud stud material, one pale blue-grey;
     whatever was in BaseDecor before goes
   - World.BullPads: a placeholder pad per pen (BullPadN, "Pen" attribute), a red
     mat 18 across with a bull on a post, facing the yard; with BULL_PADS off (now),
@@ -313,7 +313,7 @@ local AssetService = game:GetService("AssetService")
 local decor = world:FindFirstChild("BaseDecor") or Instance.new("Folder")
 decor.Name = "BaseDecor"
 decor:ClearAllChildren()
-local studs = game:GetService("MaterialService"):FindFirstChild("StudsHalf", true)
+local studs = game:GetService("MaterialService"):FindFirstChild("Studs", true)
 local made = {}
 local rocks = 0
 for _, r in ROCKS do
@@ -326,7 +326,8 @@ for _, r in ROCKS do
 	p.Name = "Rock" .. r[1]
 	p.Anchored = true
 	p.Color = ROCK_COLOR
-	-- 0.5-stud studs (the meshes' UVs are in those studs), as the animals' (Shared/Studs)
+	-- 1-stud studs, the same size as the ground's (QM, Oct 10; the meshes' UVs are drawn
+	-- for 0.5-stud ones, but the material sets the size: Shared/Studs' "Studs")
 	if studs then
 		p.Material = studs.BaseMaterial
 		p.MaterialVariant = studs.Name
