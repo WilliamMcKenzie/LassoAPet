@@ -208,8 +208,7 @@ return {
 	-- and race it home, and a wild one's egg is yours over the line.
 	RideSeconds = 30,
 	-- The boss when the ride's time runs out (QM, Oct 10: Client/BossChase): your animal
-	-- stops dead, the biome's boss (Shared/Bosses: Kinds, by biome; Kind for one with
-	-- none) pops up Ahead studs in
+	-- stops dead, the biome's boss (Shared/Bosses: ByBiome; Kind for one with none) pops up Ahead studs in
 	-- front, the camera's on its face (FaceAt: of its box, up and forward from the middle)
 	-- from ZoomAt s (FaceFrom studs off it, between black
 	-- bars sliding in over BarTime), and at CutsceneTime s you turn for home with it
@@ -218,8 +217,9 @@ return {
 	-- the screen: by its head, in the strip), popping up, then
 	-- VeinPopTime s on pulsing once VeinPulse x bigger over VeinPeriod s, and turning
 	-- VeinSpin degrees a second.
+	-- ByBiome: which boss (Shared/Bosses) each biome (Config.Biomes Name) gets; Kind for any other.
 	Boss = {
-		On = true, Kind = "Chicken", Kinds = { "Chicken" }, Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
+		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss" }, Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
 		VeinSize = 0.16, VeinAt = Vector2.new(0.62, 0.42), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 	},

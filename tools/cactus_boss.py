@@ -4,7 +4,9 @@ Snake's teeth and the Ice Golem's crystals) so it looks lethal.
 
 Run: python3 tools/cactus_boss.py [out_dir]
 writes designs/bosses/CactusBoss.bbmodel (rest pose, no animations yet) and
-a preview CactusBoss.png. Same bones as the Cactus (root, neck, ArmL, ArmR,
+a preview CactusBoss.png.
+     python3 tools/cactus_boss.py animate <QM's file> <out file>   its idle, walk and gallop, plus GIFs
+Same bones as the Cactus (root, neck, ArmL, ArmR,
 LegFL, LegFR) so its rig can be reused.
 """
 
@@ -28,7 +30,7 @@ OUT = "/mnt/project-files/animals/bosses"
 GREEN, RIB, DARK = (104, 190, 56), (64, 136, 40), (40, 30, 26)
 SPIKE = (250, 238, 206)
 PETAL, PETAL_IN, BUD = (255, 90, 150), (255, 150, 190), (255, 210, 50)
-EYE, MOUTH = (255, 214, 40), (120, 20, 30)
+FACE = (54, 34, 24)  # the Cactus's eyes and mouth
 
 W, D = 2.6, 2.1  # body half width and half depth
 Y0, Y1 = 2.6, 10.0  # body bottom and top
@@ -58,7 +60,8 @@ def cactus_boss():
     # wide body with raised ribs (real depth) down every face
     a.b("Body", (-W, Y0, -D), (W, Y1, D), GREEN, "root")
     for i, x in enumerate((-1.75, -0.6, 0.6, 1.75)):
-        a.b(f"RibF{i}", (x - 0.14, Y0 + 0.2, -D - 0.15), (x + 0.14, Y1 - 0.2, -D), RIB, "root")
+        if abs(x) > 1.5:  # the front's middle ribs would cross the face
+            a.b(f"RibF{i}", (x - 0.14, Y0 + 0.2, -D - 0.15), (x + 0.14, Y1 - 0.2, -D), RIB, "root")
         a.b(f"RibB{i}", (x - 0.14, Y0 + 0.2, D), (x + 0.14, Y1 - 0.2, D + 0.15), RIB, "root")
     for side, sx in SIDES:
         x0, x1 = X(sx, W, W + 0.15)
@@ -74,20 +77,11 @@ def cactus_boss():
     for i, (x0, z0) in enumerate(((-1.5, -1.5), (0.6, -1.5), (-1.5, 0.6), (0.6, 0.6))):
         a.b(f"PetalIn{i}", (x0, py + 0.1, z0), (x0 + 0.9, py + 0.8, z0 + 0.9), PETAL_IN, head)
     a.b("Bud", (-0.6, py, -0.6), (0.6, py + 1.1, 0.6), BUD, head)
-    # angry face on the front: yellow eyes with dark slit pupils, brows slanting down to the middle,
-    # a wide mouth with teeth pointing down and up
+    # face: the Cactus's own, scaled to the wider body: two dark eyes and an O mouth
     for side, sx in SIDES:
-        x0, x1 = X(sx, 0.35, 1.45)
-        a.b("Eye" + side, (x0, 7.5, -D - 0.06), (x1, 8.4, -D), EYE, "root")
-        x0, x1 = X(sx, 0.75, 1.05)
-        a.b("Slit" + side, (x0, 7.55, -D - 0.09), (x1, 8.35, -D - 0.06), DARK, "root")
-        # brow: a dark wedge, high at the outside edge, low over the nose
-        a.prism("Brow" + side, [(sx * 1.6, 8.5), (sx * 0.2, 8.5), (sx * 1.6, 9.3)], -D - 0.35, -D, DARK, "root")
-    a.b("Mouth", (-1.5, 5.2, -D - 0.06), (1.5, 6.6, -D), MOUTH, "root")
-    for i, x in enumerate((-1.2, -0.6, 0.0, 0.6, 1.2)):
-        a.pyr(f"ToothTop{i}", (x - 0.22, 6.6, -D - 0.3), (x + 0.22, 6.6, -D - 0.06), "-y", 0.55, SPIKE, "root")
-    for i, x in enumerate((-0.9, 0.3, 0.9, -0.3)):
-        a.pyr(f"ToothLow{i}", (x - 0.2, 5.2, -D - 0.3), (x + 0.2, 5.2, -D - 0.06), "+y", 0.45, SPIKE, "root")
+        x0, x1 = X(sx, 0.4, 1.3)
+        a.b("Eye" + side, (x0, 8.2, -D - 0.06), (x1, 9.3, -D), FACE, "root")
+    a.b("Mouth", (-0.4, 5.6, -D - 0.12), (0.4, 7.5, -D), FACE, "root")
     # arms raised up like it's about to grab you, spiked
     for side, sx in SIDES:
         arm = a.bone("Arm" + side, "root", (sx * W, 6.8, 0))
@@ -122,7 +116,7 @@ def main(out=OUT):
         with open(p, "w") as f:
             json.dump(model, f, separators=(",", ":"))
     for p in parts:
-        if p.name.startswith(("Eye", "Slit", "Spike", "Tooth")):
+        if p.name.startswith(("Eye", "Mouth", "Spike")):
             p.plain = True
     lo, hi = C.bounds(parts)
     c = (lo + hi) / 2
@@ -147,5 +141,83 @@ def main(out=OUT):
     print("wrote", path, len(parts), "parts")
 
 
+
+
+# ---------------------------------------------------------------- animations (on QM's file)
+
+def animations(m):
+    """The boss's loops, on the Cactus pet's bones. A heavy, lumbering version of the
+    Cactus's moves: idle breathes and flexes its raised arms, walk stomps, gallop
+    leans in and charges with big hops and arms swinging. +X leans forward."""
+    import math
+    from snake_rig import track
+    from snow_rig import grounded
+    s, TAU = math.sin, 2 * math.pi
+    feet = {"LegL", "LegR"}
+
+    L = 3.0
+    idle = {
+        "root": [track(L, lambda u: (0, 0, 0), 4), track(L, lambda u: (0, 2 * (1 - math.cos(TAU * u)) / 2, 0), 12, "position")],
+        "neck": [track(L, lambda u: (-3 * s(TAU * u), 0, 4 * s(TAU * u)), 12)],
+        "ArmL": [track(L, lambda u: (0, 0, -10 * (1 - math.cos(TAU * u)) / 2), 12)],
+        "ArmR": [track(L, lambda u: (0, 0, 10 * (1 - math.cos(TAU * u)) / 2), 12)],
+    }
+
+    Lw = 0.9
+    walk = {
+        "root": [track(Lw, lambda u: (4, 0, 7 * s(TAU * u)), 16)],
+        "LegFL": [track(Lw, lambda u: (24 * s(TAU * u), 0, 0), 16)],
+        "LegFR": [track(Lw, lambda u: (-24 * s(TAU * u), 0, 0), 16)],
+        "ArmL": [track(Lw, lambda u: (-25 * s(TAU * u), 0, -8), 16)],
+        "ArmR": [track(Lw, lambda u: (25 * s(TAU * u), 0, 8), 16)],
+        "neck": [track(Lw, lambda u: (0, 0, -5 * s(TAU * u)), 16)],
+    }
+    walk["root"] = grounded(m, Lw, walk, feet, 16, extra=lambda u: 2 * abs(s(TAU * u)))
+
+    Lg = 0.6
+    gallop = {
+        "root": [track(Lg, lambda u: (12 + 3 * s(2 * TAU * u), 5 * s(TAU * u), 6 * s(TAU * u)), 16)],
+        "LegFL": [track(Lg, lambda u: (-12 + 45 * s(TAU * u), 0, 0), 16)],
+        "LegFR": [track(Lg, lambda u: (-12 - 45 * s(TAU * u), 0, 0), 16)],
+        "ArmL": [track(Lg, lambda u: (-50 * s(TAU * u), 0, -25), 16)],
+        "ArmR": [track(Lg, lambda u: (50 * s(TAU * u), 0, 25), 16)],
+        "neck": [track(Lg, lambda u: (-8 + 6 * s(2 * TAU * u), 0, 0), 16)],
+    }
+    gallop["root"] = grounded(m, Lg, gallop, feet, 16, extra=lambda u: 8 * abs(s(TAU * u)))
+    return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lg, gallop)}
+
+
+def animate(src, dst, out=OUT):
+    """Write the loops into QM's file (src) as dst, with preview GIFs."""
+    import horse_rig
+    horse_rig.EULER = "ZYX"  # QM's hand-made file
+    from horse_rig import write_animations
+    from snow_rig import group_ids, posed
+    m = json.load(open(src))
+    write_animations(m, group_ids(m), animations(m))
+    with open(dst, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    T = 420
+    cams = [dict(eye=(-26, 13, -30), target=(0, 6, 0), W=T, H=T, fov=36), dict(eye=(-38, 7, -1), target=(0, 6, 0), W=T, H=T, fov=34)]
+
+    def frame(name, t):
+        anim = next(x for x in m["animations"] if x["name"] == name)
+        ps = posed(m, anim, t)
+        for p in ps:
+            if p.name.startswith(("Eye", "Mouth", "Spike")):
+                p.plain = True
+        im = Image.new("RGB", (T * 2, T))
+        for i, c in enumerate(cams):
+            im.paste(render(ps, **c), (i * T, 0))
+        return A.label(im, [name, ""], 22)
+
+    for name, n in (("idle", 24), ("walk", 16), ("gallop", 16)):
+        L = next(x for x in m["animations"] if x["name"] == name)["length"]
+        A.gif(os.path.join(out, f"CactusBoss_{name}.gif"), [frame(name, L * i / n) for i in range(n)], fps=n / L)
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["animate"]:
+        animate(*sys.argv[2:])
+    else:
+        main(*sys.argv[1:])

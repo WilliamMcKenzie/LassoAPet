@@ -3619,7 +3619,7 @@ local function checkRide(dt)
 		if hold <= 0 then
 			if Config.Boss.On then -- (the boss first: BossChase, then turnHome; QM, Oct 10)
 				phase, mount.speed = "boss", 0 -- (stopped dead, or you'd run on through it: QM)
-				vfx.bossChase.start(mount.x, mount.z, WorldColors.biomeAt(mount.z))
+				vfx.bossChase.start(mount.x, mount.z)
 			else
 				turnHome()
 			end
