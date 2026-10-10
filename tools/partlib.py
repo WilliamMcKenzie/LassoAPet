@@ -382,6 +382,10 @@ def render(parts, eye, target, W=640, H=640, fov=32, studs=True, offset=(0, 0, 0
 
 # ---------------------------------------------------------------- Blockbench
 
+MESH_UV3 = ((0.1, 0.1), (0.9, 0.1), (0.5, 0.9))  # mesh face UVs inside one palette pixel
+MESH_UV4 = ((0.1, 0.1), (0.9, 0.1), (0.9, 0.9), (0.1, 0.9))
+
+
 def write_bbmodel(parts, name, path, scale=10, bones=None):
     """Blockbench 'Generic Model' project. Axis-aligned blocks become cubes,
     wedges and rotated blocks become meshes. Colours come from a small palette
@@ -450,7 +454,9 @@ def write_bbmodel(parts, name, path, scale=10, bones=None):
                         keys[k] = f"v{len(keys)}"
                         verts[keys[k]] = [float(x) for x in k]
                     vk.append(keys[k])
-                faces[f"f{fi}"] = {"uv": {k: [u + 0.5, v + 0.5] for k in vk}, "vertices": vk, "texture": 0}
+                # spread over the colour's pixel (not one point) so Blockbench's paint tools can hit it
+                corners = MESH_UV3 if len(vk) == 3 else MESH_UV4
+                faces[f"f{fi}"] = {"uv": {k: [u + cu, v + cv] for k, (cu, cv) in zip(vk, corners)}, "vertices": vk, "texture": 0}
             elements.append({
                 "name": p.name, "type": "mesh", "uuid": eid, "origin": [0, 0, 0],
                 "rotation": [0, 0, 0], "color": 0, "vertices": verts, "faces": faces,
