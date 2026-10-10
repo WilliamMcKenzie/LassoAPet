@@ -254,12 +254,10 @@ return {
 	-- front, the camera's on its face (FaceAt: of its box, up and forward from the middle)
 	-- from ZoomAt s (FaceFrom studs off it, between black
 	-- bars sliding in over BarTime), and at CutsceneTime s you turn for home with it
-	-- chasing, at ChaseSpeed x yours and never nearer than Behind studs. Its anger vein:
-	-- VeinSize studs, VeinAt off its head, pulsing VeinPulse x every VeinPeriod s.
+	-- chasing, at ChaseSpeed x yours and never nearer than Behind studs.
 	Boss = {
 		On = true, Kind = "Chicken", Brake = 120, Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
-		VeinSize = 10, VeinAt = Vector3.new(5, 6, 0), VeinPulse = 0.15, VeinPeriod = 0.5,
 	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"

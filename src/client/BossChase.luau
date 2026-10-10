@@ -1,6 +1,6 @@
 -- The boss (QM, Oct 10): when the BOSS IN timer runs out your animal stops, and the
 -- boss (Shared/Bosses: the Chicken, for every biome for now) pops up in front of you,
--- angry, an anger vein pulsing on its head. The camera zooms in on its face between
+-- angry (no anger vein: QM, Oct 10). The camera zooms in on its face between
 -- black bars (the middle third of the screen showing), then it chases you: you turn
 -- round and race home with it behind you (out of sight, and never catching you: it's
 -- just there to scare). Config.Boss. Ride drives it:
@@ -17,8 +17,6 @@ local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Sounds = require(script.Parent.Sounds)
-
-local VEIN = "rbxassetid://75617171153698" -- assets/ui/boss/AngerVein.png (QM's)
 
 local BossChase = {}
 
@@ -83,22 +81,6 @@ function BossChase.start(x, z)
 	animal.model.Parent = workspace
 	boss = { animal = animal, x = x, z = z - Config.Boss.Ahead, t = 0, scale = 0 }
 	place()
-	-- The anger vein on its head, pulsing.
-	local vein = Instance.new("BillboardGui")
-	vein.Name = "AngerVein"
-	vein.Size = UDim2.fromScale(Config.Boss.VeinSize, Config.Boss.VeinSize)
-	vein.StudsOffsetWorldSpace = Config.Boss.VeinAt
-	vein.AlwaysOnTop = true
-	vein.LightInfluence = 0
-	vein.Adornee = animal.neck
-	local image = Instance.new("ImageLabel")
-	image.BackgroundTransparency = 1
-	image.Image = VEIN
-	image.Size = UDim2.fromScale(1, 1)
-	image.Parent = vein
-	boss.veinScale = Instance.new("UIScale")
-	boss.veinScale.Parent = image
-	vein.Parent = animal.model
 	Sounds.play("reveal_pop", 0.8)
 end
 
@@ -119,8 +101,6 @@ function BossChase.update(dt, chasing, x, z, speed)
 	elseif was < cfg.CutsceneTime - cfg.BarTime and boss.t >= cfg.CutsceneTime - cfg.BarTime then
 		showBars(false)
 	end
-	-- (the vein: in and out, over and over)
-	boss.veinScale.Scale = 1 + cfg.VeinPulse * math.sin(boss.t * 2 * math.pi / cfg.VeinPeriod)
 	local moving = 0
 	if chasing and x then
 		-- After you, never catching up: at least Behind studs back, falling behind a little.
