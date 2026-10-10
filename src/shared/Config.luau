@@ -225,7 +225,7 @@ return {
 			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 3, 24) },
 			SharkBoss = { At = Vector3.new(0, 0, 0.4), From = Vector3.new(18, 2, 8) }, -- (from its side, so you see its eye: QM)
 		},
-		VeinSize = 0.16, VeinAt = Vector2.new(0.62, 0.42), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
+		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.35), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"
