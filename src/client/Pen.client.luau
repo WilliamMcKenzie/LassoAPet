@@ -216,7 +216,7 @@ local function showEgg(pen, id, item)
 		prompt.Name = "SpeedupEgg"
 		prompt:SetAttribute("ObjectColor", Config.RarityColors[Fusion.rarity(item.egg)]) -- (the name in its animal's rarity colour, as Ride's: PromptUi, QM Oct 10)
 		prompt.ObjectText = item.egg .. " Egg"
-		prompt.ActionText = "Hatch" -- (ready or not: the same prompt, QM Oct 10; held while it counts down, it's the paid hatch)
+		prompt.ActionText = "Hatch" -- (counting down, the time left instead, below; held then, it's the paid hatch)
 		prompt.KeyboardKeyCode = Enum.KeyCode.F
 		prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
 		prompt.HoldDuration = 0.35
@@ -535,6 +535,13 @@ RunService.RenderStepped:Connect(function(dt)
 						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and not player:GetAttribute("Tutorial")
 					end
 					s.timer.Text = if ready then "Ready" else countdown((s.hatchAt or now) - now)
+					if s.speedupPrompt then
+						-- (its action: the time left, as over the egg, till it's ready: QM, Oct 10)
+						local action = if ready then "Hatch" else s.timer.Text
+						if s.speedupPrompt.ActionText ~= action then
+							s.speedupPrompt.ActionText = action
+						end
+					end
 					nearTimer(s, hrp)
 					local scale = eggScale(s, now)
 					if math.abs(scale - s.grown) > 0.004 then
