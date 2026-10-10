@@ -1,6 +1,6 @@
 -- The lasso's prompt (QM, Oct 10: no buttons while riding): a prompt on the animal you'd
--- lasso, drawn by PromptUi like the others: its name in its rarity's colour, "Lasso"
--- and the E key. A tap of E (no hold: QM, Oct 10), or of the prompt on a phone, lassos.
+-- lasso, drawn by PromptUi like the others: just its name, big, in its rarity's colour
+-- (no "Lasso": QM), and the E key. A tap of E (no hold: QM, Oct 10), or of the prompt on a phone, lassos.
 --
 --   LassoPrompt.update(model, name, color) -- the target's model (nil: none)
 --   LassoPrompt.onTap = fn                 -- the prompt triggered (E, tapped, gamepad A)
@@ -10,7 +10,6 @@ local LassoPrompt = {}
 local attachment = Instance.new("Attachment")
 attachment.Name = "LassoPrompt"
 local prompt = Instance.new("ProximityPrompt")
-prompt.ActionText = "Lasso"
 prompt.KeyboardKeyCode = Enum.KeyCode.E
 prompt.GamepadKeyCode = Enum.KeyCode.ButtonA
 prompt.HoldDuration = 0
@@ -39,8 +38,8 @@ function LassoPrompt.update(model, name, color)
 		local _, size = model:GetBoundingBox()
 		attachment.Parent = part
 		attachment.WorldPosition = part.Position + Vector3.new(0, size.Y / 2, 0)
-		prompt:SetAttribute("ObjectColor", color)
-		prompt.ObjectText = name or ""
+		prompt:SetAttribute("ActionColor", color) -- (set first: the text's change redraws it)
+		prompt.ActionText = name or ""
 	end
 end
 
