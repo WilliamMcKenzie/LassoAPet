@@ -5,6 +5,7 @@
 --     red one over it cut off at the ride's time left; the seconds left in the middle
 --     ("15.6s", Fredoka One), white, turning red from half the time left down to none.
 --     Under half left, the bar (not the seconds) pulses in and out (PULSE: QM, Oct 10).
+--     It all bounces in as it shows (POP_TIME), once you're over the start line (Ride).
 -- Laid out on a RefWidth-wide screen (Config.BaseUi; the art's drawn at it).
 --
 --   RideUi.show(visible)
@@ -29,6 +30,7 @@ local RED_FROM = 0.5 -- the seconds turn from white to red from this much time l
 local RED = Color3.fromRGB(255, 60, 80)
 -- Under From left, the bar's scale: in to In over InTime s, out to Out over OutTime s (QM).
 local PULSE = { From = 0.5, In = 0.9, Out = 1.05, InTime = 0.5, OutTime = 0.7 }
+local POP_TIME = 0.4 -- its bounce in, s
 local TITLE = "BOSS IN" -- (QM, Oct 10; was "Lasso will break", "Boss will spawn")
 local TITLE_Y, TITLE_TEXT = 69, 46 -- the title's middle off the top, its size
 local TIME_FONT = Font.fromEnum(Enum.Font.FredokaOne) -- (the bar's not Montserrat: QM)
@@ -115,6 +117,15 @@ seconds.UIStroke:Destroy() -- (plain white: QM's guide)
 seconds.Name = "Seconds"
 seconds.Position = UDim2.new(0.5, 0, 0, BAR_MIDDLE)
 seconds.ZIndex = 2
+local titleScale, secondsScale = Instance.new("UIScale"), Instance.new("UIScale")
+titleScale.Parent, secondsScale.Parent = title, seconds
+
+-- Back out (overshoots a little, then settles), 0..1 over 0..1.
+local function backOut(x)
+	local c = 1.70158
+	return 1 + (c + 1) * (x - 1) ^ 3 + c * (x - 1) ^ 2
+end
+local shownAt -- when the bar last came up (nil: hidden)
 
 function RideUi.show(visible)
 	gui.Enabled = visible
@@ -124,7 +135,14 @@ function RideUi.setHold(fraction)
 	bar.Visible = fraction ~= nil
 	title.Visible = fraction ~= nil
 	seconds.Visible = fraction ~= nil
+	if not fraction then
+		shownAt = nil
+	elseif not shownAt then
+		shownAt = os.clock()
+	end
 	if fraction then
+		local pop = backOut(math.min((os.clock() - shownAt) / POP_TIME, 1))
+		titleScale.Scale, secondsScale.Scale = pop, pop
 		local f = math.clamp(fraction, 0, 1)
 		clip.Size = UDim2.fromScale(if f <= 0 then 0 else FILL_FROM + (FILL_TO - FILL_FROM) * f, 1)
 		seconds.TextColor3 = RED:Lerp(Color3.new(1, 1, 1), math.clamp(f / RED_FROM, 0, 1))
@@ -132,7 +150,7 @@ function RideUi.setHold(fraction)
 		local t = os.clock() % (PULSE.InTime + PULSE.OutTime)
 		local k = if t < PULSE.InTime then 1 - t / PULSE.InTime else (t - PULSE.InTime) / PULSE.OutTime -- (1 = out, 0 = in)
 		k = 0.5 - math.cos(k * math.pi) / 2 -- (eased)
-		barScale.Scale = if f < PULSE.From then PULSE.In + (PULSE.Out - PULSE.In) * k else 1
+		barScale.Scale = pop * (if f < PULSE.From then PULSE.In + (PULSE.Out - PULSE.In) * k else 1)
 	end
 end
 

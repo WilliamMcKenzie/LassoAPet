@@ -3839,7 +3839,8 @@ local function updateHud()
 	Hud.setSprint(phase == "outbound", mount ~= nil and sprinting())
 	if phase == "outbound" then
 		-- The ride's time left (QM, Oct 10: RideSeconds, no more stamina).
-		Hud.setHold(hold / holdTime(nil), true) -- (mid-lasso too)
+		-- (only once you're over the start line, QM: it's as full as it gets till then)
+		Hud.setHold(if focus.Z < 0 or hold < holdTime(nil) then hold / holdTime(nil) else nil, true) -- (mid-lasso too)
 		Hud.setDistance(string.format("%dm", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		Hud.setAction("LASSO", actionTarget ~= nil)
 	end
