@@ -15,6 +15,28 @@ local ShoulderCam = {}
 
 local k = 0
 
+-- In Studio the camera gets the attributes up front, at Config's values, so they're
+-- there to edit in a playtest (Workspace > Camera, in the Client view).
+local TUNE = { "Right", "Up", "Back", "Ahead", "LookUp", "LookRight" }
+if game:GetService("RunService"):IsStudio() then
+	local function seed()
+		local camera = workspace.CurrentCamera
+		if not camera then
+			return
+		end
+		for _, key in TUNE do
+			if camera:GetAttribute("Shoulder" .. key) == nil then
+				camera:SetAttribute("Shoulder" .. key, Config.ShoulderCam[key])
+			end
+		end
+		if camera:GetAttribute("ShoulderTest") == nil then
+			camera:SetAttribute("ShoulderTest", false)
+		end
+	end
+	seed()
+	workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(seed)
+end
+
 local function get(cfg, key)
 	local v = workspace.CurrentCamera:GetAttribute("Shoulder" .. key)
 	if v ~= nil then
