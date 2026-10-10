@@ -25,7 +25,7 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 -- (RefWidth px, from QM's guide, Oct 10: a 1522 x 826 shot, so its height is 1042 here)
 local TOP = 108 -- the bar off the top
 local BAR_WIDTH = 646
-local CAP = 45 -- the fill's rounded ends, px of its art (kept whole as it stretches: 9-slice)
+local CAP = 45 -- the fill's rounded right end, px of its art
 local RED_FROM = 0.5 -- the seconds turn from white to red from this much time left down to none (QM)
 local RED = Color3.fromRGB(255, 60, 80)
 -- Under From left, the bar's scale: in to In over InTime s, out to Out over OutTime s (QM).
@@ -106,11 +106,19 @@ clip.BackgroundTransparency = 1
 clip.ClipsDescendants = true
 clip.Size = UDim2.fromScale(1, 1)
 clip.Parent = bar
--- The fill: its own rounded bar, as wide as the time left (its ends kept whole), and under
--- the width of its two ends cut off instead.
+-- The fill, at its own size (nothing stretched: QM, Oct 10): the art cut off at the time
+-- left, less its right end, with that rounded end (the art's last CAP px) drawn on after
+-- the cut, so it always ends round. Under the width of the end, just the art cut off.
 local fill = picture(clip, ART.progress, Vector2.zero, UDim2.new())
-fill.ScaleType = Enum.ScaleType.Slice
-fill.SliceCenter = Rect.new(CAP, CAP, ART.progress.size.X - CAP, ART.progress.size.Y - CAP)
+fill.Size = bar.Size -- (the bar's, whatever the cut)
+local capClip = Instance.new("Frame")
+capClip.Name = "End"
+capClip.BackgroundTransparency = 1
+capClip.ClipsDescendants = true
+capClip.Size = UDim2.fromScale(CAP / ART.progress.size.X, 1)
+capClip.Parent = bar
+local cap = picture(capClip, ART.progress, Vector2.new(1, 0), UDim2.fromScale(1, 0))
+cap.Size = UDim2.fromScale(ART.progress.size.X / CAP, 1) -- (the whole art, its right end in the frame)
 local barScale = Instance.new("UIScale")
 barScale.Parent = bar
 -- (on its own over the bar's middle, so it doesn't pulse with it)
@@ -148,9 +156,11 @@ function RideUi.setHold(fraction)
 		titleScale.Scale, secondsScale.Scale = pop, pop
 		local f = math.clamp(fraction, 0, 1)
 		local width = BAR_WIDTH * f
-		local height = BAR_WIDTH * ART.progressGrey.size.Y / ART.progressGrey.size.X
-		fill.Size = UDim2.fromOffset(math.max(width, CAP * 2), height)
-		clip.Size = UDim2.new(0, width, 1, 0)
+		local capWidth = BAR_WIDTH * CAP / ART.progress.size.X
+		local ended = width >= capWidth * 2
+		clip.Size = UDim2.new(0, if ended then width - capWidth else width, 1, 0)
+		capClip.Visible = ended
+		capClip.Position = UDim2.fromOffset(width - capWidth, 0)
 		seconds.TextColor3 = RED:Lerp(Color3.new(1, 1, 1), math.clamp(f / RED_FROM, 0, 1))
 		seconds.Text = string.format("%.1fs", f * Config.RideSeconds)
 		local t = os.clock() % (PULSE.InTime + PULSE.OutTime)
