@@ -257,11 +257,12 @@ return {
 	-- chasing, at ChaseSpeed x yours and never nearer than Behind studs. Its anger vein,
 	-- on the screen while the bars are in: VeinSize x the screen's height, at VeinAt (of
 	-- the screen: by its head, in the strip), popping up, then
-	-- VeinPopTime s on pulsing once VeinPulse x bigger over VeinPeriod s.
+	-- VeinPopTime s on pulsing once VeinPulse x bigger over VeinPeriod s, and turning
+	-- VeinSpin degrees a second.
 	Boss = {
 		On = true, Kind = "Chicken", Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
-		VeinSize = 0.16, VeinAt = Vector2.new(0.62, 0.42), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4,
+		VeinSize = 0.16, VeinAt = Vector2.new(0.62, 0.42), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"

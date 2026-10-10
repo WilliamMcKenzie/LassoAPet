@@ -20,7 +20,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Sounds = require(script.Parent.Sounds)
 
-local VEIN = "rbxassetid://71591128802233" -- assets/ui/boss/AngerVein.png (QM's second, Oct 10)
+local VEIN = "rbxassetid://78329289177388" -- assets/ui/boss/AngerVeinOutlined.png (QM's second, Oct 10, with a black outline: ~4 px as shown)
 
 local BossChase = {}
 
@@ -126,6 +126,7 @@ function BossChase.update(dt, chasing, x, z, speed)
 		local v = boss.t - cfg.ZoomAt
 		local pulse = math.clamp((v - cfg.VeinPopTime) / cfg.VeinPeriod, 0, 1)
 		b.veinScale.Scale = popScale(v) + cfg.VeinPulse * math.sin(pulse * math.pi)
+		b.vein.Rotation = v * cfg.VeinSpin -- (turning slowly: QM)
 	end
 	local moving = 0
 	if chasing and x then
