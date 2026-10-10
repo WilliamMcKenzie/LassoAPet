@@ -1,0 +1,157 @@
+-- The boss (QM, Oct 10): when the BOSS IN timer runs out your animal stops, and the
+-- boss (Shared/Bosses: the Chicken, for every biome for now) pops up in front of you,
+-- angry, an anger vein pulsing on its head. The camera zooms in on its face between
+-- black bars (the middle third of the screen showing), then it chases you: you turn
+-- round and race home with it behind you (out of sight, and never catching you: it's
+-- just there to scare). Config.Boss. Ride drives it:
+--
+--   BossChase.start(x, z)             -- the cutscene, in front of (x, z) (outbound: -z)
+--   BossChase.over()                  -- true once the cutscene's done (turn for home)
+--   BossChase.update(dt, chasing, x, z, speed) -- every frame: chasing the rider at (x, z)
+--   BossChase.camera() -> CFrame?     -- the camera during the cutscene (nil: Ride's own)
+--   BossChase.stop()                  -- gone (home, or the ride over)
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
+local Config = require(ReplicatedStorage.Shared.Config)
+local Sounds = require(script.Parent.Sounds)
+
+local VEIN = "rbxassetid://75617171153698" -- assets/ui/boss/AngerVein.png (QM's)
+
+local BossChase = {}
+
+local boss -- { animal, x, z, t, scale, offset }
+local bars -- the letterbox: { gui, top, bottom }
+
+local function popScale(t) -- 0 -> overshoot -> 1, as the stampede's animals pop in (Ride)
+	return 1 - math.exp(-12.6 * t) * math.cos(26 * t)
+end
+
+local function letterbox()
+	if bars then
+		return bars
+	end
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "BossBars"
+	gui.IgnoreGuiInset = true
+	gui.ResetOnSpawn = false
+	gui.DisplayOrder = 50 -- (over the rest of the UI)
+	local function bar(anchorY)
+		local f = Instance.new("Frame")
+		f.BorderSizePixel = 0
+		f.BackgroundColor3 = Color3.new(0, 0, 0)
+		f.AnchorPoint = Vector2.new(0, anchorY)
+		f.Size = UDim2.fromScale(1, 1 / 3)
+		f.Position = UDim2.fromScale(0, anchorY) -- (hidden: pushed off, below)
+		f.Parent = gui
+		return f
+	end
+	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+	bars = { gui = gui, top = bar(1), bottom = bar(0) }
+	bars.top.Position = UDim2.fromScale(0, 0)
+	bars.bottom.Position = UDim2.fromScale(0, 1)
+	return bars
+end
+
+local function showBars(on)
+	local b = letterbox()
+	local info = TweenInfo.new(Config.Boss.BarTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(b.top, info, { Position = UDim2.fromScale(0, if on then 1 / 3 else 0) }):Play()
+	TweenService:Create(b.bottom, info, { Position = UDim2.fromScale(0, if on then 2 / 3 else 1) }):Play()
+end
+
+-- Its size: s x its own; stood on the ground at (x, z), facing +z (towards you).
+local function place()
+	local a = boss.animal
+	a:setScale(math.max(boss.scale, 0.05))
+	if boss.offsetAt ~= a.scale then -- (how high its root sits over its feet, at this size)
+		a.model.PrimaryPart.CFrame = CFrame.new()
+		local cf, size = a.model:GetBoundingBox()
+		boss.offset = a.model.PrimaryPart.Position.Y - (cf.Position.Y - size.Y / 2)
+		boss.offsetAt = a.scale
+	end
+	a.model.PrimaryPart.CFrame = CFrame.new(boss.x, boss.offset, boss.z) * CFrame.Angles(0, math.pi, 0)
+end
+
+function BossChase.start(x, z)
+	BossChase.stop()
+	local kind = Config.Boss.Kind
+	local animal = require(ReplicatedStorage.Shared.Bosses[kind]).new()
+	animal.model.Name = "Boss"
+	animal.model.Parent = workspace
+	boss = { animal = animal, x = x, z = z - Config.Boss.Ahead, t = 0, scale = 0 }
+	place()
+	-- The anger vein on its head, pulsing.
+	local vein = Instance.new("BillboardGui")
+	vein.Name = "AngerVein"
+	vein.Size = UDim2.fromScale(Config.Boss.VeinSize, Config.Boss.VeinSize)
+	vein.StudsOffsetWorldSpace = Config.Boss.VeinAt
+	vein.AlwaysOnTop = true
+	vein.LightInfluence = 0
+	vein.Adornee = animal.neck
+	local image = Instance.new("ImageLabel")
+	image.BackgroundTransparency = 1
+	image.Image = VEIN
+	image.Size = UDim2.fromScale(1, 1)
+	image.Parent = vein
+	boss.veinScale = Instance.new("UIScale")
+	boss.veinScale.Parent = image
+	vein.Parent = animal.model
+	Sounds.play("reveal_pop", 0.8)
+end
+
+function BossChase.over()
+	return boss ~= nil and boss.t >= Config.Boss.CutsceneTime
+end
+
+function BossChase.update(dt, chasing, x, z, speed)
+	if not boss then
+		return
+	end
+	local cfg = Config.Boss
+	local was = boss.t
+	boss.t += dt
+	boss.scale = popScale(boss.t)
+	if was < cfg.ZoomAt and boss.t >= cfg.ZoomAt then
+		showBars(true)
+	elseif was < cfg.CutsceneTime - cfg.BarTime and boss.t >= cfg.CutsceneTime - cfg.BarTime then
+		showBars(false)
+	end
+	-- (the vein: in and out, over and over)
+	boss.veinScale.Scale = 1 + cfg.VeinPulse * math.sin(boss.t * 2 * math.pi / cfg.VeinPeriod)
+	local moving = 0
+	if chasing and x then
+		-- After you, never catching up: at least Behind studs back, falling behind a little.
+		local want = z - cfg.Behind
+		boss.z = math.min(boss.z + (speed or 0) * cfg.ChaseSpeed * dt, want)
+		boss.x += (x - boss.x) * (1 - math.exp(-2 * dt))
+		moving = speed or 0
+	end
+	place()
+	boss.animal:update(dt, moving, 0)
+end
+
+function BossChase.camera()
+	if not boss or boss.t < Config.Boss.ZoomAt or boss.t > Config.Boss.CutsceneTime - Config.Boss.BarTime * 0.5 then
+		return nil
+	end
+	-- (its face: up its front, FaceAt of the way up its box from the middle, and as far forward)
+	local cf, size = boss.animal.model:GetBoundingBox()
+	local face = cf.Position + Vector3.new(0, size.Y * Config.Boss.FaceAt.Y, size.Z * Config.Boss.FaceAt.Z)
+	return CFrame.lookAt(face + Config.Boss.FaceFrom, face)
+end
+
+function BossChase.stop()
+	if boss then
+		boss.animal.model:Destroy()
+		boss = nil
+		if bars then
+			bars.top.Position = UDim2.fromScale(0, 0)
+			bars.bottom.Position = UDim2.fromScale(0, 1)
+		end
+	end
+end
+
+return BossChase

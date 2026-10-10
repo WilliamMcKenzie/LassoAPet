@@ -132,6 +132,7 @@ end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
 vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
+vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's out (QM, Oct 10)
 vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
 vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
@@ -3349,6 +3350,18 @@ end
 
 local function updateMount(dt)
 	local dir = travelDir()
+	if phase == "boss" then
+		-- Pulled up before the boss (BossChase), then off home once its cutscene's done.
+		mount.speed = math.max(mount.speed - Config.Boss.Brake * dt, 0)
+		mount.latVel *= math.exp(-6 * dt)
+		mount.z -= mount.speed * dt
+		place(mount, 0)
+		animate(mount, dt, mount.speed, 0)
+		if vfx.bossChase.over() then
+			turnHome()
+		end
+		return
+	end
 	if phase == "turning" then
 		turnT = math.min(turnT + dt / TURN_TIME, 1)
 		local eased = 0.5 - math.cos(turnT * math.pi) / 2
@@ -3568,7 +3581,7 @@ local function reachFinish()
 end
 
 local function checkRide(dt)
-	if phase == "finish" or reachFinish() then
+	if phase == "finish" or phase == "boss" or reachFinish() then -- (nothing crashes you in the boss's cutscene either)
 		return -- the leap over the finish line: nothing can go wrong now
 	end
 	grace = math.max(grace - dt, 0)
@@ -3604,7 +3617,12 @@ local function checkRide(dt)
 	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not mount.giant then -- abilities and the Giant Horse use no Hold
 		hold = math.max(hold - dt, 0) -- (no quicker sprinting: QM, Oct 10)
 		if hold <= 0 then
-			turnHome()
+			if Config.Boss.On then -- (the boss first: BossChase, then turnHome; QM, Oct 10)
+				phase = "boss"
+				vfx.bossChase.start(mount.x, mount.z)
+			else
+				turnHome()
+			end
 			return
 		end
 	end
@@ -4405,6 +4423,11 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	vfx.speedLines.update(if not riding then 0 elseif sprinting() then Config.SpeedLines.Speed else Config.SpeedLines.Speed / 2)
 	vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
 	vfx.returnVignette.update(dt, mount ~= nil and (phase == "turning" or phase == "return"))
+	if phase == "boss" or phase == "turning" or phase == "return" then -- (the boss, then after you home)
+		vfx.bossChase.update(dt, phase ~= "boss", mount and mount.x, mount and mount.z, mount and mount.speed)
+	else
+		vfx.bossChase.stop()
+	end
 	if phase == "idle" then
 		return
 	end
@@ -4466,7 +4489,8 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and ((phase == "outbound" and sprinting()) or (phase == "return" and Config.ReturnSprint)), if phase == "return" and Config.ReturnCamFixed then Config.SprintCam.HorseSprint elseif mount then mount.speed * (vfx.speedGain or 1) else nil) -- (the run home's a sprint too: QM)
 	local z = vfx.camZoom * sprintZoom
-	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
+	local desired = vfx.bossChase.camera() -- (on the boss's face in its cutscene)
+		or CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
 	-- The run home: over the shoulder (QM, Oct 10), pinned to the rider rather than eased
