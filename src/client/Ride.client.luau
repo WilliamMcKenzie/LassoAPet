@@ -3617,7 +3617,7 @@ local function checkRide(dt)
 		return fail("CRASH!") -- a locked gate
 	end
 	-- Whole bodies touching (QM, Oct 8): your mount's real box against each animal's,
-	-- a little forgiving at the edges. Smaller ones are trampled, others crash you.
+	-- a little forgiving at the edges. Smaller ones are trampled.
 	local mhx, mhz = vfx.halfBody(mount)
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
@@ -3629,14 +3629,13 @@ local function checkRide(dt)
 			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
 			-- Racing home on the Icebringer, an animal frozen in ice smashes whatever its size (QM).
 			local shatter = phase == "return" and entity.frostFx ~= nil and (vfx.abilityOf(mount) or {}).Kind == "Frost"
-			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
+			-- (racing home, nothing crashes you: whatever you run into is knocked away, QM Oct 11)
+			if phase == "return" or (trample and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
 				vfx.broke()
 				if kind == "Crabwalk" and special.RestorePer then
 					hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount)) -- 20% Hold per animal it hits (QM)
 				end
-			elseif phase == "return" and grace <= 0 then
-				return fail("CRASH!")
 			elseif phase == "outbound" and entity.n then
 				entity.dodge = math.clamp(entity.dodge + (if dx >= 0 then 1 else -1) * 12 * dt, -6, 6)
 			end
