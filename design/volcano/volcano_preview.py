@@ -152,8 +152,8 @@ if __name__ == "__main__":
     a = shot(*volcano(z + 40, z - 340), eye=(0, 130, z + 70), target=(0, 0, z - 170))
     ze = VO.END + 50
     b = shot(*volcano(ze + 460, ze - 10, crack=True), eye=(0, 120, ze + 420), target=(0, 0, ze + 110), fov=55)
-    sheet([(a, "Volcano: riding through (quasicrystal floor, rocks on its peaks)"),
-           (b, "The end of the volcano: the rings spread out from the big crack")],
+    sheet([(a, "Volcano: riding through (quasicrystal zoomed in, off centre; rocks on its peaks)"),
+           (b, "The end of the volcano: the big crack")],
           os.path.join(OUT, "volcano_biome.png"))
     print("volcano")
     zo = OG.Z_START - 900

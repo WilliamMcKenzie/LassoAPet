@@ -87,8 +87,8 @@ PLAN = {
 # wall gets a pebble or stone on its crust rim.
 VOLCANO = dict(name="Volcano", z0=VO.Z_START, z1=VO.END, small=[], medium=[], large=[],
                nests=[(FG.unmap_x(x, z), z) for x, z in VO.nest_spots()])  # (where the funnel puts them)
-SMALL_PEAK, BIG_PEAK = 0.6, 0.72
-PEAK_ROCKS = [(0.85, "RockCrag"), (0.78, "RockBoulder"), (BIG_PEAK, "RockSlab")]
+SMALL_PEAK, BIG_PEAK = 0.5, 0.6
+PEAK_ROCKS = [(0.74, "RockCrag"), (0.68, "RockBoulder"), (BIG_PEAK, "RockSlab")]
 
 
 class Layout(CL.Course):
@@ -170,12 +170,12 @@ def volcano_rocks(c, rng):
 
     def place(asset, gx, z):
         x = FG.unmap_x(gx, z)
-        for step in range(0, 9):  # (right by the wall: in a little, until it fits)
-            px = x - np.sign(x) * step
+        for step in (0, 2, -2, 4, -4, 6, -6, 8, -8, 10, -10, 12, -12):  # (nudged in or out until it fits)
+            px = x + np.sign(x) * step
             if c.fits(asset, px, z, VOLCANO):
                 return c.put(asset, px, z, VOLCANO, tries=1)
 
-    peaks = (q == maximum_filter(q, size=9)) & (q >= SMALL_PEAK)
+    peaks = (q == maximum_filter(q, size=9)) & (q >= SMALL_PEAK) & (abs(X) < 134)  # (not just cut off by the wall)
     for i, j in sorted(zip(*np.nonzero(peaks)), key=lambda ij: (-q[ij], ij[1], ij[0])):
         v = q[i, j]
         if v >= BIG_PEAK:
