@@ -129,6 +129,38 @@ def main(out=OUT):
 
 
 # ---------------------------------------------------------------- animations (on QM's file)
+JAW_OPEN = -28  # degrees the lower jaw drops at its widest (-X on this hinge: its front goes down)
+
+
+def add_jaw(m):
+    """A Jaw bone under the neck, hinged at the back of the lower jaw, holding the jaw
+    and its teeth (QM's file has them on the neck)."""
+    from horse_rig import group
+    if any(g["name"] == "Jaw" for g in m["groups"]):
+        return
+    jaw = next(e for e in m["elements"] if e["name"] == "Jaw")
+    hinge = (0, jaw["to"][1], jaw["to"][2])  # top-back edge
+    g = group("Jaw", hinge)
+    m["groups"].append(g)
+    moving = {e["uuid"] for e in m["elements"] if e["name"] == "Jaw" or e["name"].startswith("ToothLow")}
+    neck = next(x for x in m["groups"] if x["name"] == "neck")
+
+    def walk(node):
+        if isinstance(node, str):
+            return None
+        if node["uuid"] == neck["uuid"]:
+            return node
+        for c in node["children"]:
+            r = walk(c)
+            if r:
+                return r
+        return None
+
+    node = next(n for n in (walk(r) for r in m["outliner"]) if n)
+    node["children"] = [c for c in node["children"] if c not in moving]
+    node["children"].append({"uuid": g["uuid"], "isOpen": True, "children": sorted(moving)})
+
+
 def animations(m):
     import math
     from snake_rig import track
@@ -136,7 +168,7 @@ def animations(m):
     s, TAU = math.sin, 2 * math.pi
     feet = {e["name"] for e in m["elements"] if e["name"].startswith(("Toe", "Heel", "Claw"))}
 
-    def run(L, stride, lean, flap, bob, snap, hop, n=16):
+    def run(L, stride, lean, flap, bob, snap, hop, jaw, n=16):
         # a bird's run (as the Chicken's, +X leans nose-down): legs swing in turn, the
         # body leans in, the head thrusts forward twice a stride, wings and tail flap
         tr = {"root": [track(L, lambda u: (lean, 0, 2 * s(TAU * u)), n)]}
@@ -147,6 +179,7 @@ def animations(m):
         tr["neck"] = [track(L, lambda u: (-lean * 0.6 + snap * s(2 * TAU * u), 0, 0), n),
                       track(L, lambda u: (0, 0, -bob * (0.5 + 0.5 * s(2 * TAU * u))), n, "position")]
         tr["Tail"] = [track(L, lambda u: (-6 - 6 * s(2 * TAU * u), 0, 0), n)]
+        tr["Jaw"] = [track(L, lambda u: (jaw * (0.5 + 0.5 * s(2 * TAU * u + 1.0)), 0, 0), n)]  # chomps twice a stride
         tr["root"] = grounded(m, L, tr, feet, n, extra=lambda u: hop * abs(s(TAU * u)))
         return L, tr
 
@@ -158,9 +191,11 @@ def animations(m):
         "WingL": [track(L, lambda u: (0, 0, -25 * bump(u, 0.3, 0.06)), 32)],
         "WingR": [track(L, lambda u: (0, 0, 25 * bump(u, 0.3, 0.06)), 32)],
         "Tail": [track(L, lambda u: (-10 * bump(u, 0.3, 0.08), 0, 0), 32)],
+        # the jaw hangs a little open, gapes wide just before the snap and claps shut on it
+        "Jaw": [track(L, lambda u: (JAW_OPEN * (0.15 + 0.85 * bump(u, 0.55, 0.06) - 0.15 * bump(u, 0.62, 0.04)), 0, 0), 64)],
     })
-    out["walk"] = run(0.8, stride=28, lean=4, flap=6, bob=4, snap=4, hop=0)
-    out["gallop"] = run(0.4, stride=45, lean=16, flap=45, bob=6, snap=6, hop=8)
+    out["walk"] = run(0.8, stride=28, lean=4, flap=6, bob=4, snap=4, hop=0, jaw=JAW_OPEN * 0.3)
+    out["gallop"] = run(0.4, stride=45, lean=16, flap=45, bob=6, snap=6, hop=8, jaw=JAW_OPEN)
     return out
 
 
@@ -172,6 +207,7 @@ def animate(src, dst, out=OUT):
     from snow_rig import group_ids, posed
     m = json.load(open(src))
     m["animations"] = []
+    add_jaw(m)
     write_animations(m, group_ids(m), animations(m))
     with open(dst, "w") as f:
         json.dump(m, f, separators=(",", ":"))
