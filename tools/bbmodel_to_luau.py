@@ -254,6 +254,12 @@ def mesh_parts(e, model_center):
         return pyramid(e)
     if n % 4 == 1 and faces.count(3) == 4:
         return ringed(e)
+    if n == 8 and faces == [4] * 6:  # a turned box (e.g. on an octo egg's slanted face)
+        V = mesh_verts(e)
+        q = order_quad([V[k] for k in next(iter(e["faces"].values()))["vertices"]])
+        R = frame(q[1] - q[0], q[3] - q[0])
+        size, center = extents(list(V.values()), R)
+        return [("Part", center, R, size)]
     raise ValueError(f"{e['name']}: mesh with {n} vertices and faces {faces} isn't supported")
 
 
