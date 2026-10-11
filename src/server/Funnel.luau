@@ -43,7 +43,6 @@ local STEPS = {
 	"Lasso In Reach", -- (client) the first slow-down: an animal's in reach
 	"Threw Lasso",
 	"Landed Lasso", -- (client) on the animal you lassoed
-	"Sprinted", -- (client) the Sprint step done (Shift on a computer, the stick pushed out elsewhere)
 	"Boss Appeared", -- (client) BOSS IN let go: the Chicken's coming
 	"Brought Egg Home",
 	"Placed Egg", -- (it goes in your pen by itself in the tutorial)
@@ -67,7 +66,6 @@ local CLIENT_STEPS = {
 	ride = "Started Ride",
 	reach = "Lasso In Reach",
 	lasso = "Landed Lasso",
-	sprint = "Sprinted",
 	boss = "Boss Appeared",
 	tour = "Saw Next Zones",
 }

@@ -429,26 +429,7 @@ local function run()
 		end
 		funnel("lasso")
 		player:SetAttribute("NoSprint", nil)
-		-- Then sprinting: a computer gets QM's guide, and time slows till Shift.
-		if on() and Hud.isRiding() and UserInputService.KeyboardEnabled and not UserInputService.TouchEnabled then
-			sprintGuide.Visible = true
-			player:SetAttribute("NoLasso", true) -- (nothing but sprinting while it's up: QM)
-			task.wait(0.4)
-			local nextLog = os.clock() + 2
-			slowUntil(function()
-				local key = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
-				if os.clock() > nextLog and RunService:IsStudio() then -- (QM, Oct 11: Shift didn't end it once; this says why, in Studio's Output)
-					nextLog = os.clock() + 2
-					print("[Tutorial] waiting to sprint: Shift down", key, "Ride sprinting", TutorialRide.sprinting, "NoSprint", player:GetAttribute("NoSprint"))
-				end
-				return TutorialRide.sprinting or key
-			end)
-			sprintGuide.Visible = false
-			player:SetAttribute("NoLasso", nil)
-		end
-		if on() and Hud.isRiding() then
-			funnel("sprint")
-		end
+		-- (no Sprint step any more: pets always sprint on the way out, QM Oct 11)
 		-- A few more seconds, then BOSS IN, short.
 		local waitStart = os.clock()
 		while on() and Hud.isRiding() and os.clock() - waitStart < WAIT_FOR_BOSS do
