@@ -140,6 +140,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	TRex = "Tiny arms, huge attitude. Has never once managed to clap.",
 	Raptor = "Never hunts alone. Never knocks, either: it opens doors.",
 	Spinosaurus = "Built a sail on its back and still cannot sail. Fishes instead.",
+	Pterodactyl = "Not technically a dinosaur. Please do not tell it, it is very proud.",
 	Phoenix = "Burns up, crumbles to ash, hatches again. Has done it so many times it finds it boring.",
 	VolcanoTortoise = "Fell asleep in the sun for three hundred years. Woke up as a volcano.",
 	Loong = "The loongest dragon around. Ex sword-swallower for the circus, passionate about entertainment.",

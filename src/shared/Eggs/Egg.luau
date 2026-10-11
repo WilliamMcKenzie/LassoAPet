@@ -58,6 +58,7 @@ local KINDS = {
 	TRex = { data = require(script.Parent.TRexEggModel), center = 1.6 },
 	Raptor = { data = require(script.Parent.RaptorEggModel), center = 1.6 },
 	Spinosaurus = { data = require(script.Parent.SpinosaurusEggModel), center = 1.6 },
+	Pterodactyl = { data = require(script.Parent.PterodactylEggModel), center = 1.6 },
 	Phoenix = { data = require(script.Parent.PhoenixEggModel), center = 1.6 },
 	Starfish = { data = require(script.Parent.StarfishEggModel), center = 1.6 },
 	Lionfish = { data = require(script.Parent.LionfishEggModel), center = 1.6 },
