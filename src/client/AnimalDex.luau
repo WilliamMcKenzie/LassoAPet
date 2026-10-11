@@ -36,10 +36,10 @@ local NAME_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.Fon
 local BIO_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Bold)
 
 local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary" }
-local PANEL = "rbxassetid://94676711140802" -- assets/ui/dex/IndexPanelBare.png (IndexPanel.png, its arrows painted out: tools/index_panel.py)
+local PANEL = "rbxassetid://103615321543388" -- assets/ui/dex/IndexPanel.png (QM's, without arrows: they're buttons)
 local ARROW = "rbxassetid://133433182612945" -- assets/ui/dex/IndexArrow.png (points right)
 local CLOSE = "rbxassetid://84920756991403" -- assets/ui/dex/IndexClose.png
-local ARROW_AT = { 324, 396 } -- (left one's middle, as drawn on IndexPanel.png; the right one's mirrored)
+local ARROW_AT = { 324, 396 } -- (left one's middle, as in QM's mockup; the right one's mirrored)
 local ARROW_SIZE = Vector2.new(56, 53)
 
 -- Each animal running: its sprite sheets (tools/dex_sheets.py), 25 frames of
