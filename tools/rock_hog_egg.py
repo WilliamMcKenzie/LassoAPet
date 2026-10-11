@@ -49,7 +49,7 @@ def rock_hog_egg():
     return egg
 
 
-if __name__ == "__main__":
+def generated():
     O.EGGS = [("RockHog", rock_hog_egg)]
     O.main("RockHog", preview="/mnt/project-files/animals/rockhog")
     # the spikes poke out past ocean_eggs' 700 px wide frame: render the UI picture wider
@@ -60,3 +60,29 @@ if __name__ == "__main__":
     im = im.crop(im.getbbox())
     im.save(os.path.join(O.ROOT, "assets", "ui", "RockHogEggRender.png"))
     print("render", im.size)
+
+
+def qm_render():
+    """QM's hand-edited egg (designs/eggs/c_style/RockHogEgg.bbmodel, 2x horns) is the game's
+    now: convert it with `bbmodel_to_luau.py designs/eggs/c_style/RockHogEgg.bbmodel
+    src/shared/Eggs/RockHogEggModel.luau`, then this writes its UI picture (camera raised
+    so the tall horns fit). Run: python3 tools/rock_hog_egg.py qm"""
+    import json
+    import numpy as np
+    from horse_egg_takes import VIEWS
+    from partlib import render
+    from snow_rig import posed
+    m = json.load(open(os.path.join(O.ROOT, "designs", "eggs", "c_style", "RockHogEgg.bbmodel")))
+    ps = posed(m, None, 0)
+    for p in ps:
+        if p.name.startswith("Glow"):
+            p.neon = True
+    v = {k: tuple(np.array(x, float) + [0, 0.6, 0]) for k, x in VIEWS[0].items()}
+    im = render(ps, W=1100, H=1100, fov=28, transparent=True, **v)
+    im = im.crop(im.getbbox())
+    im.save(os.path.join(O.ROOT, "assets", "ui", "RockHogEggRender.png"))
+    print("render", im.size)
+
+
+if __name__ == "__main__":
+    qm_render() if sys.argv[1:2] == ["qm"] else generated()
