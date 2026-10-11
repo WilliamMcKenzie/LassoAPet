@@ -654,7 +654,7 @@ return {
 		KingCrab = "rbxassetid://80563240117126", -- assets/ui/KingCrabEggRender.png
 		BlueCrab = "rbxassetid://119349539273288", -- assets/ui/BlueCrabEggRender.png
 		RoboShark = "rbxassetid://95626930006876", -- assets/ui/RoboSharkEggRender.png
-		VolcanoTortoise = "", -- assets/ui/VolcanoTortoiseEggRender.png, once uploaded
+		VolcanoTortoise = "rbxassetid://89848692685766", -- assets/ui/VolcanoTortoiseEggRender.png
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://70469571709365", -- assets/ui/LoongEggRender.png
