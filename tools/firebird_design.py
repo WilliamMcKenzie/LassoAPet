@@ -127,5 +127,74 @@ def main(out=OUT):
     print("wrote", path, len(parts), "parts")
 
 
+
+# ---------------------------------------------------------------- animations (on QM's file)
+def animations(m):
+    import math
+    from snake_rig import track
+    from snow_rig import bump, grounded
+    s, TAU = math.sin, 2 * math.pi
+    feet = {e["name"] for e in m["elements"] if e["name"].startswith(("Toe", "Heel", "Claw"))}
+
+    def run(L, stride, lean, flap, bob, snap, hop, n=16):
+        # a bird's run (as the Chicken's, +X leans nose-down): legs swing in turn, the
+        # body leans in, the head thrusts forward twice a stride, wings and tail flap
+        tr = {"root": [track(L, lambda u: (lean, 0, 2 * s(TAU * u)), n)]}
+        for side, ph in (("L", 0.0), ("R", 0.5)):
+            tr["Leg" + side] = [track(L, lambda u, ph=ph: (-lean + stride * s(TAU * (u + ph)), 0, 0), n)]
+            sx = -1 if side == "L" else 1
+            tr["Wing" + side] = [track(L, lambda u, sx=sx: (0, 0, sx * flap * (0.4 + 0.6 * abs(s(TAU * u)))), n)]
+        tr["neck"] = [track(L, lambda u: (-lean * 0.6 + snap * s(2 * TAU * u), 0, 0), n),
+                      track(L, lambda u: (0, 0, -bob * (0.5 + 0.5 * s(2 * TAU * u))), n, "position")]
+        tr["Tail"] = [track(L, lambda u: (-6 - 6 * s(2 * TAU * u), 0, 0), n)]
+        tr["root"] = grounded(m, L, tr, feet, n, extra=lambda u: hop * abs(s(TAU * u)))
+        return L, tr
+
+    out = {}
+    # idle: looks about, a snap of the beak at the air, wings ruffle once
+    L = 3.2
+    out["idle"] = (L, {
+        "neck": [track(L, lambda u: (16 * bump(u, 0.6, 0.05) - 8 * bump(u, 0.68, 0.05), 25 * s(TAU * u), 0), 48)],
+        "WingL": [track(L, lambda u: (0, 0, -25 * bump(u, 0.3, 0.06)), 32)],
+        "WingR": [track(L, lambda u: (0, 0, 25 * bump(u, 0.3, 0.06)), 32)],
+        "Tail": [track(L, lambda u: (-10 * bump(u, 0.3, 0.08), 0, 0), 32)],
+    })
+    out["walk"] = run(0.8, stride=28, lean=4, flap=6, bob=4, snap=4, hop=0)
+    out["gallop"] = run(0.4, stride=45, lean=16, flap=45, bob=6, snap=6, hop=8)
+    return out
+
+
+def animate(src, dst, out=OUT):
+    """Write idle, walk and gallop into QM's file (src) as dst, with preview GIFs."""
+    import horse_rig
+    horse_rig.EULER = "ZYX"  # QM's hand-made file
+    from horse_rig import write_animations
+    from snow_rig import group_ids, posed
+    m = json.load(open(src))
+    m["animations"] = []
+    write_animations(m, group_ids(m), animations(m))
+    with open(dst, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    T = 420
+    cams = [dict(eye=(-28, 14, -30), target=(0, 6, -1), W=T, H=T, fov=38), dict(eye=(-40, 7, -1), target=(0, 6, -1), W=T, H=T, fov=36)]
+
+    def frame(name, t):
+        anim = next(x for x in m["animations"] if x["name"] == name)
+        ps = posed(m, anim, t)
+        for p in ps:
+            if p.name.startswith(("Eye", "Pupil", "Tooth", "Claw", "Spike", "Mouth")):
+                p.plain = True
+        im = Image.new("RGB", (T * 2, T))
+        for i, c in enumerate(cams):
+            im.paste(render(ps, **c), (i * T, 0))
+        return A.label(im, [name, ""], 22)
+
+    for name, n in (("idle", 24), ("walk", 14), ("gallop", 12)):
+        L = next(x for x in m["animations"] if x["name"] == name)["length"]
+        A.gif(os.path.join(out, f"Firebird_{name}.gif"), [frame(name, L * i / n) for i in range(n)], fps=n / L)
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["animate"]:
+        animate(*sys.argv[2:])
+    else:
+        main(*sys.argv[1:])
