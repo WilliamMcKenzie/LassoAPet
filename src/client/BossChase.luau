@@ -140,11 +140,12 @@ function BossChase.update(dt, chasing, x, z, speed)
 	end
 	local moving = 0
 	if chasing and x then
-		-- After you, never catching up: at least Behind studs back, falling behind a little.
-		local want = z - cfg.Behind - boss.room
-		boss.z = math.min(boss.z + (speed or 0) * cfg.ChaseSpeed * dt, want)
+		-- After you at your own speed (QM, Oct 10), so the gap holds all the way home,
+		-- never nearer than Behind studs, and pulling up short of the start line.
+		local was = boss.z
+		boss.z = math.min(boss.z + (speed or 0) * dt, z - cfg.Behind - boss.room, -cfg.StopShort - boss.room)
 		boss.x += (x - boss.x) * (1 - math.exp(-2 * dt))
-		moving = speed or 0
+		moving = math.max(boss.z - was, 0) / math.max(dt, 1e-3)
 	end
 	place()
 	boss.animal:update(dt, moving, 0)

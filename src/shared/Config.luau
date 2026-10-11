@@ -212,7 +212,8 @@ return {
 	-- front, the camera's on its face (FaceAt: of its box, up and forward from the middle)
 	-- from ZoomAt s (FaceFrom studs off it, between black
 	-- bars sliding in over BarTime), and at CutsceneTime s you turn for home with it
-	-- chasing, at ChaseSpeed x yours and never nearer than Behind studs. Its anger vein,
+	-- chasing at your speed (QM: the gap holds, so it's there at the end), never nearer than
+	-- Behind studs, and pulling up StopShort studs short of the start line. Its anger vein,
 	-- on the screen while the bars are in: VeinSize x the screen's height, at VeinAt (of
 	-- the screen: by its head, in the strip), popping up, then
 	-- VeinPopTime s on pulsing once VeinPulse x bigger over VeinPeriod s, and turning
@@ -221,7 +222,7 @@ return {
 	Boss = {
 		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
 		ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
-		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
+		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 40, StopShort = 30,
 		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3 }, -- (each boss's cry: QM, Oct 10)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
