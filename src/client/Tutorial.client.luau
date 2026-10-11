@@ -323,18 +323,24 @@ local function run()
 		TutorialRide.active, TutorialRide.holdFrozen, TutorialRide.invulnerable = true, true, true
 		player:SetAttribute("NoSprint", true)
 		player:SetAttribute("LassoGuide", true)
-		local firstMount = TutorialRide.mounts
-		-- Till your first lasso: time all but stops while an animal's in reach.
-		while on() and Hud.isRiding() and TutorialRide.mounts <= firstMount do
+		local firstThrow, firstMount = TutorialRide.throws, TutorialRide.mounts
+		-- Till your first lasso: time all but stops while an animal's in reach. (The
+		-- arrows go as soon as it's thrown: QM.)
+		while on() and Hud.isRiding() and TutorialRide.throws <= firstThrow do
 			if TutorialRide.canLasso then
 				slowUntil(function()
-					return TutorialRide.mounts > firstMount or not TutorialRide.canLasso
+					return TutorialRide.throws > firstThrow or not TutorialRide.canLasso
 				end)
 			end
 			RunService.Heartbeat:Wait()
 		end
-		funnel("lasso")
 		player:SetAttribute("LassoGuide", nil)
+		-- (and the sprint step waits for you to land on it, or a miss)
+		local thrown = os.clock()
+		while on() and Hud.isRiding() and TutorialRide.mounts <= firstMount and os.clock() - thrown < 3 do
+			task.wait(0.1)
+		end
+		funnel("lasso")
 		player:SetAttribute("NoSprint", nil)
 		-- Then sprinting: a computer gets QM's guide, and time slows till Shift.
 		if on() and Hud.isRiding() and UserInputService.KeyboardEnabled and not UserInputService.TouchEnabled then

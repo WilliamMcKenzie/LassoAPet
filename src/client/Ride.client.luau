@@ -1043,6 +1043,7 @@ local function startTransfer(target)
 	release(old)
 	mount = nil
 	transfer = { target = target, old = old, t = 0, stage = "throw", from = hrp.Position }
+	vfx.tutorialRide.throws += 1
 	vfx.rideCue:FireServer("lasso", target.n or false)
 	vfx.sounds.play("lasso_throw")
 end
@@ -4201,7 +4202,7 @@ RunService.PreSimulation:Connect(function(dt)
 		heroLeap.t = math.min(heroLeap.t + dt / Config.HomeHeroTime, 1)
 	end
 	dt *= timeScale
-	updateHerd(dt, (slow and not cutscene) or tr.timeScale < 1)
+	updateHerd(dt, (slow and not cutscene) or tr.active) -- (the tutorial's herd is yours alone: no snapping back to the shared one, QM)
 	updateFlung(dt)
 	if phase == "boss" or phase == "turning" or phase == "return" or phase == "home" then -- (the boss, then after you home, in the leap's slow motion too)
 		vfx.bossChase.update(dt, phase ~= "boss", mount and mount.x, mount and mount.z, mount and mount.speed)

@@ -10,6 +10,7 @@
 -- Ride sets:
 --   canLasso      an animal's in reach of your lasso right now
 --   mounts        how many animals you've been on (each lasso is one more)
+--   throws        how many lassoes you've thrown (hit or miss)
 --   sprinting     you're sprinting
 return {
 	active = false,
@@ -19,5 +20,6 @@ return {
 	invulnerable = false,
 	canLasso = false,
 	mounts = 0,
+	throws = 0,
 	sprinting = false,
 }
