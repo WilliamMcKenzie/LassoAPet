@@ -354,7 +354,7 @@ local function run()
 			local nextLog = os.clock() + 2
 			slowUntil(function()
 				local key = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
-				if os.clock() > nextLog then -- (QM, Oct 11: Shift didn't end it once; this says why, in the Output)
+				if os.clock() > nextLog and RunService:IsStudio() then -- (QM, Oct 11: Shift didn't end it once; this says why, in Studio's Output)
 					nextLog = os.clock() + 2
 					print("[Tutorial] waiting to sprint: Shift down", key, "Ride sprinting", TutorialRide.sprinting, "NoSprint", player:GetAttribute("NoSprint"))
 				end

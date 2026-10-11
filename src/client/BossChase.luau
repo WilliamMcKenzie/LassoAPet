@@ -26,7 +26,11 @@ local VEIN = "rbxassetid://85408798859805" -- assets/ui/boss/AngerMarkOutlined.p
 
 local BossChase = {}
 
-local boss -- { animal, x, z, t, scale, offset }
+local boss -- { animal, x, z, t, scale }
+-- Each boss is built once, ahead (building one, a few hundred blocks, hitched the frame
+-- it popped up: QM, Oct 11), and kept for the next time: [kind] = animal, not in the world.
+local spare = {}
+local offsets = {} -- [kind] = how high its root sits over its feet at its own size
 local bars -- the letterbox: { gui, top, bottom, vein, veinScale }
 
 local function popScale(t) -- 0 -> overshoot -> 1, as the stampede's animals pop in (Ride)
@@ -80,18 +84,38 @@ local function showBars(on)
 	TweenService:Create(b.bottom, info, { Position = UDim2.fromScale(0, if on then 1 - BAR else 1) }):Play()
 end
 
+local function build(kind)
+	local animal = require(ReplicatedStorage.Shared.Bosses[kind]).new()
+	animal.model.Name = "Boss"
+	animal.model.PrimaryPart.CFrame = CFrame.new()
+	local cf, size = animal.model:GetBoundingBox()
+	offsets[kind] = animal.model.PrimaryPart.Position.Y - (cf.Position.Y - size.Y / 2)
+	return animal
+end
+
 -- Its size: s x its own; stood on the ground at (x, z), facing +z (towards you).
+-- (in steps of a 50th: rescaling every block every frame of the pop was most of its cost,
+-- and once it's settled it isn't rescaled at all)
 local function place()
 	local a = boss.animal
-	a:setScale(math.max(boss.scale, 0.05))
-	if boss.offsetAt ~= a.scale then -- (how high its root sits over its feet, at this size)
-		a.model.PrimaryPart.CFrame = CFrame.new()
-		local cf, size = a.model:GetBoundingBox()
-		boss.offset = a.model.PrimaryPart.Position.Y - (cf.Position.Y - size.Y / 2)
-		boss.offsetAt = a.scale
-	end
-	a.model.PrimaryPart.CFrame = CFrame.new(boss.x, boss.offset, boss.z) * CFrame.Angles(0, math.pi, 0)
+	a:setScale(math.max(math.floor(boss.scale * 50 + 0.5) / 50, 0.05))
+	local offset = offsets[boss.kind] * a.scale -- (it scales about its root)
+	a.model.PrimaryPart.CFrame = CFrame.new(boss.x, offset, boss.z) * CFrame.Angles(0, math.pi, 0)
 end
+
+-- Every biome's boss, built a little after joining, a frame apart.
+task.delay(4, function()
+	local kinds = { [Config.Boss.Kind] = true }
+	for _, kind in Config.Boss.ByBiome do
+		kinds[kind] = true
+	end
+	for kind in kinds do
+		if not spare[kind] and ReplicatedStorage.Shared.Bosses:FindFirstChild(kind) then
+			spare[kind] = build(kind)
+			task.wait(0.3)
+		end
+	end
+end)
 
 -- (made up front, so nothing in it is loading the first time it shows: QM)
 task.defer(function()
@@ -102,8 +126,8 @@ function BossChase.start(x, z)
 	BossChase.stop()
 	local biome = Config.Biomes[WorldColors.biomeAt(z)]
 	local kind = Config.Boss.ByBiome[biome.Name] or Config.Boss.Kind -- (each biome its own boss: QM, Oct 10)
-	local animal = require(ReplicatedStorage.Shared.Bosses[kind]).new()
-	animal.model.Name = "Boss"
+	local animal = spare[kind] or build(kind)
+	spare[kind] = nil
 	animal.model.Parent = workspace
 	local room = Config.Boss.Room[kind] or 0 -- (a bigger one stands further off)
 	boss = { kind = kind, room = room, animal = animal, x = x, z = z - Config.Boss.Ahead - room, t = 0, scale = 0 }
@@ -166,7 +190,12 @@ end
 
 function BossChase.stop()
 	if boss then
-		boss.animal.model:Destroy()
+		if spare[boss.kind] then
+			boss.animal.model:Destroy()
+		else
+			boss.animal.model.Parent = nil -- (kept for next time)
+			spare[boss.kind] = boss.animal
+		end
 		boss = nil
 		if bars then
 			bars.top.Position = UDim2.fromScale(0, 0)
