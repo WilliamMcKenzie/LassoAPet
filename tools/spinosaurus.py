@@ -19,6 +19,7 @@ import json
 import math
 import os
 import sys
+import uuid
 
 from PIL import Image
 
@@ -181,5 +182,143 @@ def main(out=OUT):
     print("wrote", out, len(m["elements"]), "elements")
 
 
+
+# ---------------------------------------------------------------- on QM's edit (Oct 11 09:08)
+# QM rebuilt the sail as a fan of nine thin spines, each turned about X, and started the
+# webbing (thin orange slabs turned with the spines) at the front. finish_sail fills every
+# gap QM left: each gap gets three stacked slabs, each turned to the two spines' mean angle
+# and as wide as the gap at its top, so they meet the spines all the way up with no holes.
+
+
+def _spine_line(e):
+    """A turned spine cube's bottom and top centre points in model space (y, z)."""
+    a = math.radians(e.get("rotation", [0, 0, 0])[0])
+    oy, oz = e["origin"][1], e["origin"][2]
+    zc = (e["from"][2] + e["to"][2]) / 2
+
+    def rot(y, z):
+        dy, dz = y - oy, z - oz
+        return (oy + dy * math.cos(a) - dz * math.sin(a), oz + dy * math.sin(a) + dz * math.cos(a))
+
+    return rot(e["from"][1], zc), rot(e["to"][1], zc), a
+
+
+def finish_sail(m):
+    web_uv = next(e for e in m["elements"] if e["name"].startswith("SailSpine") and e["to"][0] - e["from"][0] < 2)["faces"]
+    spines = sorted((e for e in m["elements"] if e["name"].startswith("SailSpine") and e["to"][0] - e["from"][0] > 4),
+                    key=lambda e: (e["from"][2] + e["to"][2]) / 2)
+    root = next(g for g in m["groups"] if g["name"] == "root")
+    node = find(m["outliner"], root["uuid"])
+    # gaps QM already filled: the webs' own spine (origin) z
+    filled = {round(e["origin"][2]) for e in m["elements"] if e["name"].startswith("SailSpine") and e["to"][0] - e["from"][0] < 2}
+    new = []
+    for i in range(len(spines) - 1):
+        s0, s1 = spines[i], spines[i + 1]
+        if round(s0["origin"][2]) in filled:
+            continue
+        (b0, t0, a0), (b1, t1, a1) = _spine_line(s0), _spine_line(s1)
+        a = (a0 + a1) / 2
+        d = (math.cos(a), math.sin(a))  # the slab's up (y, z)
+        n = (-math.sin(a), math.cos(a))  # across the gap (y, z)
+        for j in range(3):
+            f0, f1 = j / 3, (j + 1) / 3
+            p = [(b0[0] + (t0[0] - b0[0]) * f, b0[1] + (t0[1] - b0[1]) * f) for f in (f0, f1)]
+            q = [(b1[0] + (t1[0] - b1[0]) * f, b1[1] + (t1[1] - b1[1]) * f) for f in (f0, f1)]
+            pts = p + q
+            cy = sum(v[0] for v in pts) / 4
+            cz = sum(v[1] for v in pts) / 4
+            along = [(v[0] - cy) * d[0] + (v[1] - cz) * d[1] for v in pts]
+            across = [(v[0] - cy) * n[0] + (v[1] - cz) * n[1] for v in pts]
+            h0, h1 = min(along) - 1.0, max(along) + 1.0
+            w0, w1 = min(across), max(across)
+            e = {"name": f"SailWeb{i}_{j}", "type": "cube", "uuid": str(uuid.uuid4()), "box_uv": False,
+                 "from": [-0.5, cy + h0, cz + w0], "to": [0.5, cy + h1, cz + w1], "origin": [0, cy, cz],
+                 "rotation": [round(math.degrees(a), 3), 0, 0], "autouv": 0, "color": 0,
+                 "faces": json.loads(json.dumps(web_uv))}
+            new.append(e)
+    # the front web (before the first spine) mirrored onto the back
+    front = min((e for e in m["elements"] if e["name"].startswith("SailSpine") and e["to"][0] - e["from"][0] < 2),
+                key=lambda e: e["origin"][2])
+    back = json.loads(json.dumps(front))
+    back.update(name="SailWebBack", uuid=str(uuid.uuid4()), origin=[0, front["origin"][1], -front["origin"][2]],
+                rotation=[-front["rotation"][0], 0, 0])
+    back["from"] = [front["from"][0], front["from"][1], -front["to"][2]]
+    back["to"] = [front["to"][0], front["to"][1], -front["from"][2]]
+    new.append(back)
+    m["elements"] += new
+    node["children"] += [e["uuid"] for e in new]
+    return m
+
+
+def animations(m):
+    """The Spinosaurus's own moves (QM's file holds the jaw open -15 at rest; +X shuts it, so
+    jaw keys stay within 0..15). Heavier and swayier than the T-Rex: the long tail swings
+    wide, the sail rolls with the body, and idle dips the snout to fish, snaps sideways, then
+    rears up with a roar."""
+    from snake_rig import track
+    from snow_rig import bump, grounded
+    s, TAU = math.sin, 2 * math.pi
+    feet = {e["name"] for e in m["elements"] if e["name"].startswith(("Foot", "Toe", "Claw"))}
+
+    def jaws(L, f, n):
+        return {j: [track(L, lambda u: (f(u), 0, 0), n)] for j in ("Jaw", "Jaw2")}
+
+    def run(L, stride, lean, roll, sway, bob, hop, shut, n=16):
+        tr = {"root": [track(L, lambda u: (lean, 0, roll * s(TAU * u)), n)]}
+        for side, ph in (("L", 0.0), ("R", 0.5)):
+            tr["Leg" + side] = [track(L, lambda u, ph=ph: (-lean + stride * s(TAU * (u + ph)), 0, 0), n)]
+            tr["Arm" + side] = [track(L, lambda u, ph=ph: (14 * s(TAU * (u + ph + 0.25)), 0, 0), n)]
+        tr["neck"] = [track(L, lambda u: (-lean * 0.6 + bob * s(2 * TAU * u), -sway * 0.5 * s(TAU * u), 0), n)]
+        tr["Tail"] = [track(L, lambda u: (-lean * 0.5 + 2 * s(2 * TAU * u), sway * s(TAU * u - 0.5), 0), n)]
+        tr["Tail2"] = [track(L, lambda u: (2 * s(2 * TAU * u - 1), sway * 1.5 * s(TAU * u - 1.4), 0), n)]
+        tr.update(jaws(L, lambda u: shut * (0.5 + 0.5 * s(2 * TAU * u)), n))
+        tr["root"] = grounded(m, L, tr, feet, n, extra=lambda u: hop * abs(s(TAU * u)))
+        return L, tr
+
+    out = {}
+    L = 5.0
+    dip = lambda u: bump(u, 0.3, 0.12)  # noqa: E731  fishing: snout down
+    snap = lambda u: bump(u, 0.45, 0.04)  # noqa: E731  quick sideways snap
+    roar = lambda u: bump(u, 0.78, 0.08)  # noqa: E731
+    out["idle"] = (L, {
+        "root": [track(L, lambda u: (1.5 * s(TAU * u) + 6 * dip(u) - 6 * roar(u), 0, 0), 40)],
+        "neck": [track(L, lambda u: (14 * dip(u) - 16 * roar(u) + 1.5 * s(TAU * u), 26 * snap(u) + 10 * s(TAU * u) * (1 - roar(u)), 0), 80)],
+        "Tail": [track(L, lambda u: (-4 * dip(u), 12 * s(TAU * u + 1), 0), 40)],
+        "Tail2": [track(L, lambda u: (0, 15 * s(TAU * u + 0.2), 0), 40)],
+        "ArmL": [track(L, lambda u: (-20 * roar(u) + 10 * dip(u), 0, 0), 60)],
+        "ArmR": [track(L, lambda u: (-20 * roar(u) + 10 * dip(u), 0, 0), 60)],
+        **jaws(L, lambda u: 15 * (1 - roar(u)) * (1 - snap(u)) * (0.5 + 0.5 * (1 - dip(u))), 80),
+    })
+    out["walk"] = run(1.2, stride=22, lean=3, roll=5, sway=14, bob=3, hop=0, shut=12)
+    out["gallop"] = run(0.6, stride=40, lean=11, roll=4, sway=9, bob=5, hop=9, shut=8)
+    return out
+
+
+def animate(src, dst=os.path.join(OUT, "Spinosaurus_anim.bbmodel")):
+    """QM's edit (src): finish the sail webbing, replace the animations, write dst + GIFs."""
+    horse_rig.EULER = "ZYX"
+    from horse_rig import write_animations
+    from snow_rig import group_ids
+    m = finish_sail(json.load(open(src)))
+    m["animations"] = []
+    write_animations(m, group_ids(m), animations(m))
+    with open(dst, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    T = 480
+    views = [dict(eye=(-46, 22, -50), target=(0, 9, -2), W=T, H=T, fov=40), dict(eye=(-66, 9, -2), target=(0, 10, -2), W=T, H=T, fov=38),
+             dict(eye=(-14, 16, -60), target=(0, 10, -6), W=T, H=T, fov=34)]
+    sheet = Image.new("RGB", (T * 3, T))
+    for i, v in enumerate(views):
+        sheet.paste(render(parts(m), **v), (i * T, 0))
+    A.label(sheet, ["Spinosaurus", "side", "face"], 22).save(os.path.join(OUT, "Spinosaurus_anim.png"))
+    if "gifs" in sys.argv:
+        for name, n in (("idle", 40), ("walk", 16), ("gallop", 12)):
+            anim = next(x for x in m["animations"] if x["name"] == name)
+            L = anim["length"]
+            A.gif(os.path.join(OUT, f"Spinosaurus_{name}.gif"),
+                  [A.label(render(parts(m, anim, L * i / n), **views[1]), [name], 22) for i in range(n)], fps=n / L)
+    print("wrote", dst, len(m["elements"]), "elements")
+
+
 if __name__ == "__main__":
-    main()
+    animate(sys.argv[2]) if sys.argv[1:2] == ["animate"] else main()
