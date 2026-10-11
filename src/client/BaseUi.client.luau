@@ -33,14 +33,14 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 }
 -- assets/ui/quests/*.png (QM, Oct 11). "" till Studio uploads them: plain boxes meanwhile.
 local QUEST_ART = {
-	top = "rbxassetid://76911261091418", -- QuestsTop.png, 453 x 90: Quests.png's header, "Quests" and its fold chevron
-	middle = "rbxassetid://121025867644756", -- QuestsMiddle.png, 453 x 20: a strip of its body, stretched to fit the quests
-	bottom = "rbxassetid://135782051653298", -- QuestsBottom.png, 453 x 40: its bottom edge
+	top = "rbxassetid://120142364189594", -- QuestsTop.png, 453 x 90: Quests.png's header, "Quests" and its fold chevron
+	middle = "rbxassetid://133997765094952", -- QuestsMiddle.png, 453 x 20: a strip of its body, stretched to fit the quests
+	bottom = "rbxassetid://72901094417133", -- QuestsBottom.png, 453 x 40: its bottom edge
 	-- (cut from Quests.png: a 9-slice drew its header at the art's own pixel size, not the
 	-- panel's, so "Quests" came out huge and the chevron got cut: QM, Oct 11)
-	panel = "rbxassetid://71052597087124", -- Quests.png, 453 x 265: open, "Quests" and its fold chevron drawn in
-	closed = "rbxassetid://123446992263929", -- QuestsClosed.png, 453 x 86: folded up
-	one = "rbxassetid://138850397244223", -- QuestsOne.png, 453 x 184: room for one quest, when one questline's done (QM, Oct 11; till it's uploaded, the pieces)
+	panel = "rbxassetid://72181051059940", -- Quests.png, 453 x 265: open, "Quests" and its fold chevron drawn in
+	closed = "rbxassetid://115847818752186", -- QuestsClosed.png, 453 x 85 (QM's QuestsHidden, Oct 11): folded up
+	one = "rbxassetid://136367932806454", -- QuestsOne.png, 453 x 184: room for one quest, when one questline's done (QM, Oct 11; till it's uploaded, the pieces)
 	bar = "rbxassetid://88826165672196", -- QuestBG.png, 407 x 22
 	fill = "rbxassetid://76511917573203", -- QuestFill.png, 406 x 22 (QM's second, Oct 11)
 	claim = "rbxassetid://113926447181781", -- ClaimQuest.png, 399 x 62
