@@ -26,8 +26,8 @@ DIRT = [(225, 150, 104), (248, 170, 114)]  # the meadow's WallColors
 DIRT_DOWN = 1
 WALL = [(225, 150, 104), (248, 170, 114)]
 LENGTH = 200
-MEADOW_LENGTH = 760
-NESTS = [(-20, -470), (22, -600), (0, -736)]
+MEADOW_LENGTH = 2168  # (QM, Oct 11: the pacing ladder, tools/course_resize.py; was 760)
+NESTS = [(-20, -470), (22, -600), (-20, -1174), (22, -1304), (-20, -1878), (22, -2008), (0, -2144)]
 NEST_CLEAR = 10
 START_CLEAR = 16  # studs of grass after the start line
 

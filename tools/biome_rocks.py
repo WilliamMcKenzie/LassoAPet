@@ -4,6 +4,8 @@ except Cactus, Pine, TubeCoral, BranchCoral and FanCoral; the rest is five rock 
 The Godlands are left alone (QM: going anyway).
 
 Run: python3 tools/biome_rocks.py
+(Laid out for the course before Oct 11: tools/course_resize.py has since moved biome_rocks.luau's
+rocks to the pacing ladder's lengths. Re-fit the biome spans here before re-running, or it puts them back.)
 Writes tools/biome_rocks.luau (Studio's builder), design/biome_rocks/layout.json and
 previews (a top-down plan per biome and a ride view of each).
 

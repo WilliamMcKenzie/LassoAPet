@@ -22,12 +22,12 @@ import quasicrystal as QC  # noqa: E402
 import ocean_walls as OW  # noqa: E402
 import ocean_nests as ON  # noqa: E402
 
-Z_START = -16192  # the ocean's far edge
-LENGTH = 7680     # as long as the ocean (Config.Biomes Volcano.Length)
+Z_START = -8416  # the ocean's far edge
+LENGTH = 5040     # Config.Biomes Volcano.Length (QM, Oct 11: the pacing ladder, tools/course_resize.py; was 7680)
 END = Z_START - LENGTH
 KINDS = ("Ground", "Ash", "Crust", "Lava")
 TOP = (0, 0, 1, -1)
-NESTS = [((16, -18) [k % 2], Z_START - 500 - k * 1100) for k in range(7)]
+NESTS = [((16, -18) [k % 2], Z_START - 500 - k * 1100) for k in range(5)]
 NEST_IN = 12  # tools/funnel.luau moves each nest this far in from the wall on its side
 NEST_CLEAR = 26  # game studs round a nest kept plain (it's grown 2.6^0.8 there)
 START_CLEAR = 16

@@ -17,7 +17,7 @@ return {
 			Name = "Meadow",
 			AnimalSize = 1, -- its obstacles (tools/funnel.luau) and the Godlands' terrain grow ^0.8 of this. Animals no longer do (QM, Oct 8: back to their old sizes)
 			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
-			Length = 760,
+			Length = 2168, -- (QM, Oct 11: the pacing ladder, below AnimalStats; was 760)
 			GroundColors = { Color3.fromRGB(113, 173, 31), Color3.fromRGB(122, 190, 25) }, -- (QM, Oct 10; was 77, 196, 63 / 105, 255, 74)
 			WallColors = { Color3.fromRGB(197, 126, 70), Color3.fromRGB(211, 142, 75) }, -- (QM, Oct 10; was 225, 150, 104 / 248, 170, 114)
 			-- Which animals run in this biome's stampede and how often (names are modules
@@ -38,7 +38,7 @@ return {
 			AnimalSize = 1.35,
 			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.75)
 			NestScale = 2, -- its nests are this many times bigger, so they show from afar at its speed (Nests.server; QM, Oct 6)
-			Length = 2280, -- 3x the meadow (QM)
+			Length = 1208, -- (QM, Oct 11: the pacing ladder; was 2280)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
 			Herd = { Cactus = 0.3, Kitten = 0.25, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05 },
@@ -65,7 +65,7 @@ return {
 			AnimalSize = 1.8,
 			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.5)
 			NestScale = 2.25,
-			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
+			Length = 1920, -- (QM, Oct 11: the pacing ladder; was 5472)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
 			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.06 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
@@ -86,7 +86,7 @@ return {
 			AnimalSize = 2.6,
 			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.25)
 			NestScale = 2.5,
-			Length = 7680, -- 1.4x the snow (QM, Oct 2), a whole number of 240-stud depth bands
+			Length = 3120, -- a whole number of 240-stud depth bands (QM, Oct 11: the pacing ladder; was 7680)
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
@@ -173,7 +173,7 @@ return {
 			AnimalSize = 2.6, -- (as the ocean's)
 			Swerve = 1,
 			NestScale = 2.5,
-			Length = 7680, -- as long as the ocean (a guess)
+			Length = 5040, -- (QM, Oct 11: the pacing ladder; was 7680)
 			GroundColors = { Color3.fromRGB(156, 98, 66), Color3.fromRGB(168, 108, 74) }, -- baked-earth brown
 			WallColors = { Color3.fromRGB(170, 92, 58), Color3.fromRGB(186, 104, 66) },
 			Herd = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (QM, Oct 11: the Firebird Uncommon, the Rock Hog and Fire Lobster Rare, the Rockworm Epic, the Phoenix Legendary and very rare, the Lava Whale Epic and as rare as the Phoenix; the weights a guess)
@@ -202,7 +202,7 @@ return {
 			AnimalSize = 2.6, -- (as the volcano's)
 			Swerve = 1,
 			NestScale = 2.5,
-			Length = 7680, -- as long as the volcano (a guess)
+			Length = 7680, -- as long as the volcano was (a guess; its animals aren't on the ladder yet)
 			GroundColors = { Color3.fromRGB(78, 140, 40), Color3.fromRGB(86, 152, 44) }, -- dark jungle grass
 			WallColors = { Color3.fromRGB(150, 102, 62), Color3.fromRGB(164, 114, 70) },
 			Herd = { Fish = 1 }, -- (QM, Oct 11: fish for now, until the dinosaurs are designed)
@@ -252,7 +252,7 @@ return {
 	CourseHalfWidth = 56,
 	CourseWidening = 0.005,
 	CourseMaxHalfWidth = 137,
-	CourseLength = 760 + 2280 + 5472 + 7680 + 7680 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, then the Jurassic, its end is the end; off its edge, the void)
+	CourseLength = 2168 + 1208 + 1920 + 3120 + 5040 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, then the Jurassic, its end is the end; off its edge, the void)
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
@@ -719,7 +719,7 @@ return {
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
 	-- view (up to MaxFov) grow from Start studs/s. Each part off with On = false.
-	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)
+	SpeedCurve = { On = true, Knee = 500, Max = 900 }, -- (QM, Oct 11: was 400 / 700 before the pacing ladder; the Phoenix sprints at 614)
 	-- Speed lines and a wider view (SpeedFx), only while sprinting (QM, Oct 8: none
 	-- otherwise, and a lot more of them): at Min strength on the slowest sprint, rising
 	-- with speed as (speed / Ref) ^ Curve (a square root: quick to build, gentle at the
@@ -897,51 +897,56 @@ return {
 	VignettePulse = 0.3, -- how much it fades on each breath (0 = steady)
 	VignetteFadeMetres = 25, -- fades out over this last stretch before home
 
-	-- Each animal's stats, relative to the horse (1x). Speed scales how fast it runs,
+	-- The pacing ladder (QM, Oct 11; balance/pacing_ladder_v1.md): Speed = 0.7 x 1.6 per biome
+	-- x 1.15 per rarity (Uncommon, Rare, Epic, Legendary), so any animal of a later biome
+	-- outruns every one behind it, and each biome's line sits where its biome before's Rares
+	-- just get to in a 30 s sprint: Epics and Legendaries take you into the next one. The
+	-- Horse (0.5) is the slowest. Change a biome's Length or these together.
+	-- Each animal's stats, x MountSpeed and HerdSpeed (1x). Speed scales how fast it runs,
 	-- ridden (MountSpeed, ReturnSpeed) and in the stampede (HerdSpeed). Stamina scales
 	-- how long the Hold bar lasts while you ride it: 2x lasts twice as long.
 	AnimalStats = {
 		-- Meadow
-		Horse = { Speed = 1, Stamina = 1 },
-		Pig = { Speed = 0.8, Stamina = 0.8 },
-		Bunny = { Speed = 1.2, Stamina = 0.7 }, -- quick hops, tires fast (guess)
-		Pinto = { Speed = 1.1, Stamina = 0.9 },
-		Fish = { Speed = 0.6, Stamina = 3 },
-		Rhino = { Speed = 1.5, Stamina = 1.8 },
-		Unicorn = { Speed = 2, Stamina = 2 },
+		Horse = { Speed = 0.5, Stamina = 1 },
+		Pig = { Speed = 0.7, Stamina = 0.8 },
+		Bunny = { Speed = 0.7, Stamina = 0.7 },
+		Pinto = { Speed = 0.7, Stamina = 0.9 },
+		Fish = { Speed = 0.81, Stamina = 3 },
+		Rhino = { Speed = 0.93, Stamina = 1.8 },
+		Unicorn = { Speed = 1.06, Stamina = 2 },
 		-- Desert
-		Cactus = { Speed = 1.2, Stamina = 1.5 },
-		Kitten = { Speed = 1.4, Stamina = 1.2 }, -- quick pounces (guess)
-		Scorpion = { Speed = 1.5, Stamina = 1.5 },
-		Sandworm = { Speed = 1.6, Stamina = 3 },
-		SpineLizard = { Speed = 1.8, Stamina = 2 },
-		Snake = { Speed = 2, Stamina = 3 },
+		Cactus = { Speed = 1.12, Stamina = 1.5 },
+		Kitten = { Speed = 1.12, Stamina = 1.2 },
+		Scorpion = { Speed = 1.29, Stamina = 1.5 },
+		Sandworm = { Speed = 1.48, Stamina = 3 },
+		SpineLizard = { Speed = 1.48, Stamina = 2 },
+		Snake = { Speed = 1.7, Stamina = 3 },
 		-- Tundra
-		Penguin = { Speed = 1.5, Stamina = 1.5 },
-		Boar = { Speed = 1.6, Stamina = 1.6 },
-		Snowman = { Speed = 1.9, Stamina = 1.3 },
-		IceGolem = { Speed = 1.6, Stamina = 3 },
+		Penguin = { Speed = 1.79, Stamina = 1.5 },
+		Boar = { Speed = 1.79, Stamina = 1.6 },
+		Snowman = { Speed = 2.06, Stamina = 1.3 },
+		IceGolem = { Speed = 2.37, Stamina = 3 },
 		SnackYak = { Speed = 3, Stamina = 2 }, -- QM, Oct 4 (stamina 1 -> 2)
-		Icebringer = { Speed = 2.7, Stamina = 4 },
+		Icebringer = { Speed = 2.73, Stamina = 4 },
 		-- Ocean
-		Starfish = { Speed = 2.5, Stamina = 2 },
-		Lionfish = { Speed = 2.7, Stamina = 2 }, -- QM Oct 11: "a touch faster than the starfish"
-		Clownfish = { Speed = 2.3, Stamina = 2.4 }, -- (a guess: a little slower than the Starfish)
-		Squid = { Speed = 3, Stamina = 2.6 },
-		KingCrab = { Speed = 3.1, Stamina = 3 },
-		BlueCrab = { Speed = 3.1, Stamina = 3 }, -- the King Crab's
+		Starfish = { Speed = 2.87, Stamina = 2 },
+		Squid = { Speed = 3.79, Stamina = 2.6 },
+		KingCrab = { Speed = 3.79, Stamina = 3 },
+		BlueCrab = { Speed = 4.36, Stamina = 3 },
+		Lionfish = { Speed = 3.3, Stamina = 2 }, -- QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
+		Clownfish = { Speed = 2.8, Stamina = 2.4 }, -- (a little slower than the Starfish, an Ocean Uncommon too)
 		RoboShark = { Speed = 1.2, Stamina = 3 }, -- QM, Oct 4: starts at 1.2x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed 2.5 x this)
-		FishSchool = { Speed = 3, Stamina = 2.8 }, -- a guess between the Squid and King Crab
-		Whale = { Speed = 1.2, Stamina = 10 },
-		Kraken = { Speed = 4.5, Stamina = 3 },
+		FishSchool = { Speed = 3.79, Stamina = 2.8 },
+		Whale = { Speed = 3.3, Stamina = 10 },
+		Kraken = { Speed = 4.36, Stamina = 3 },
 		-- Volcano
-		Firebird = { Speed = 3.8, Stamina = 2.5 }, -- (a guess: a quick runner)
-		RockHog = { Speed = 3.6, Stamina = 2.8 }, -- (a guess)
-		Rockworm = { Speed = 3.8, Stamina = 3 }, -- (a guess)
-		FireLobster = { Speed = 3.6, Stamina = 2.8 }, -- (a guess: as the Rock Hog)
-		Phoenix = { Speed = 4.2, Stamina = 3 }, -- (a guess: the Volcano's fastest)
-		LavaWhale = { Speed = 3.8, Stamina = 3 }, -- (a guess: a bit past the Rockworm's Epic)
-		VolcanoTortoise = { Speed = 3.5, Stamina = 3 }, -- (a guess: slow for a tortoise, but past the Ocean's)
+		Firebird = { Speed = 4.59, Stamina = 2.5 },
+		RockHog = { Speed = 5.28, Stamina = 2.8 },
+		Rockworm = { Speed = 6.07, Stamina = 3 },
+		FireLobster = { Speed = 5.28, Stamina = 2.8 },
+		Phoenix = { Speed = 6.98, Stamina = 3 },
+		LavaWhale = { Speed = 6.07, Stamina = 3 },
+		VolcanoTortoise = { Speed = 5.28, Stamina = 3 },
 		-- Godlands
 		Loong = { Speed = 0.5, Stamina = 8 }, -- QM, Oct 4: starts at 0.5x, its breath's kills take it up to 1x (Abilities.Loong.MaxSpeed 2 x this); sprints at 4x (PetSprintSpeed)
 		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
