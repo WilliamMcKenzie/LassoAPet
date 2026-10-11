@@ -50,7 +50,7 @@ local MENU_GAP = 20
 local ICON = 74 -- the counters' icons
 local TEXT = 55 -- the counters' text (QM's Figma: 55, stroke 5)
 local STROKE = 5
-local QUESTS_WIDTH = 365 -- (as in QM's mockup, next to the menu buttons; the art's 453)
+local QUESTS_WIDTH = 402 -- (QM's mockup's 365, 10% bigger: QM, Oct 11; the art's 453)
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "BaseUi"
