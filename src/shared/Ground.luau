@@ -3,7 +3,10 @@
 -- meadow's dirt). They're laid out on an 8-stud grid (tools/desert_ground.py,
 -- tools/meadow_ground.py), so the height is looked up per 8-stud cell.
 
+local Config = require(script.Parent.Config)
+
 local CELL = 8
+local endless = Config.Endless -- past its cut, the floor's the stretch before it, again and again (Client/Endless)
 
 local Ground = {}
 
@@ -31,6 +34,9 @@ end
 function Ground.heightAt(x, z)
 	if not heights then
 		load()
+	end
+	if endless and z < endless.Cut then
+		z = endless.Cut + (z - endless.Cut) % endless.Length
 	end
 	return heights[key(math.floor(x / CELL), math.floor(z / CELL))] or 0
 end

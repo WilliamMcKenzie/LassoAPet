@@ -254,6 +254,11 @@ return {
 	CourseWidening = 0.005,
 	CourseMaxHalfWidth = 137,
 	CourseLength = 2168 + 1816 + 1920 + 3120 + 5040 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, then the Jurassic, its end is the end; off its edge, the void)
+	-- The Jurassic goes on forever (QM, Oct 11: the temporary endgame): the course is
+	-- cut at Cut (World.server: no far wall, no finish line) and the Length studs
+	-- before it are laid again and again past it (Client/Endless). Cut and Length are
+	-- whole 16s, so the floor's checker keeps its step. nil: the course ends as before.
+	Endless = { Cut = -21504, Length = 1536 },
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)

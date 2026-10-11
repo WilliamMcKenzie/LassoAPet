@@ -182,7 +182,7 @@ end
 -- stream, and riding never changes it: an animal you lasso just leaves it.
 local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:GetBoundingBox().Position.Z else -2
 local SPAWN_Z = START_LINE_Z + 4
-local FINISH_Z = -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
+local FINISH_Z = if Config.Endless then -math.huge else -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
 local FINISH_DROP = 40 -- studs the leap off the end drops below the floor by the time it lands
 local VIEW = 320 -- stampede animals further than this from the camera aren't drawn
 local DUST_VIEW = 160 -- landings further than this from the camera kick up no dust
@@ -258,7 +258,7 @@ do
 		assert(biome.Herd, "Config.Biomes[" .. b .. "] (" .. tostring(biome.Name) .. ") has no Herd")
 		streams[b] = newStream(
 			if b == 1 then SPAWN_Z else startZ - 2,
-			if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
+			if b == #Config.Biomes then (if Config.Endless then Config.Endless.Cut else FINISH_Z) + 2 else endZ + 2, -- the course stops at the finish line
 			biome.Herd,
 			biome.Name
 		)
@@ -269,7 +269,7 @@ end
 
 -- Where an animal in biome b (at z) stops: its stream's end.
 local function streamAt(z)
-	return streams[WorldColors.biomeAt(z)]
+	return vfx.endless.streamAt(z) or streams[WorldColors.biomeAt(z)]
 end
 
 local rng = Random.new()
@@ -295,6 +295,8 @@ local transfer, tumble, carried
 vfx.Merge = require(ReplicatedStorage.Shared.Merge)
 vfx.Fusion = require(ReplicatedStorage.Shared.Fusion)
 vfx.HerdPacks = require(script.Parent.HerdPacks)
+vfx.endless = require(script.Parent.Endless) -- the endless Jurassic: copies past the cut (Config.Endless)
+vfx.endless.init({ obstacles = obstacles, slices = slices, streams = streams, newStream = newStream })
 vfx.Burrow = require(script.Parent.Burrow) -- the Sandworm's spray and mounds (yours and other riders')
 vfx.Studs = require(ReplicatedStorage.Shared.Studs) -- hybrids: the donor's size and colours
 -- The stretch of course with stampede loaded round the camera at camZ: VIEW either
@@ -1760,6 +1762,7 @@ local function updateHerd(dt, slowed)
 		vfx.frostLeft[key] = if left > dt then left - dt else nil
 	end
 	local fromZ, toZ = vfx.viewWindow(camZ)
+	vfx.endless.update(camZ)
 	-- (the animal you're lassoing is kept however old it gets or far it runs: QM, Oct 8, a
 	-- Fish wrestled on into the Desert outlived its stream's schedule and vanished)
 	local held = transfer and transfer.target and transfer.target.n

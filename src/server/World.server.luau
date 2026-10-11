@@ -43,7 +43,7 @@ sky.Parent = Lighting
 -- (Config.FinishFromEnd before the far wall), so it moves as biomes are added.
 local endless = Config.CourseLength == math.huge
 local startLine = world:FindFirstChild("StartLine")
-if startLine and not endless then
+if startLine and not endless and not Config.Endless then
 	local finish = startLine:Clone()
 	finish.Name = "FinishLine"
 	local z = startLine:GetBoundingBox().Position.Z
@@ -67,7 +67,19 @@ end
 -- Nothing past the finish line: the floor and walls stop at it, so the leap over
 -- it goes out into open sky. Parts that cross the line are cut back to it.
 local finishZ = -Config.CourseLength + Config.FinishFromEnd
-for _, folderName in if endless then {} else { "Ground", "Walls", "Obstacles", "Decor" } do
+-- (an endless course, Config.Endless: cut at its Cut instead, and whole models past it
+-- go, so nothing's left half there; Client/Endless lays the stretch before it on and on)
+if Config.Endless then
+	finishZ = Config.Endless.Cut
+	for _, folderName in { "Obstacles", "Decor", "Nests" } do
+		for _, model in world:FindFirstChild(folderName) and world[folderName]:GetChildren() or {} do
+			if model:IsA("Model") and model:GetPivot().Position.Z < finishZ then
+				model:Destroy()
+			end
+		end
+	end
+end
+for _, folderName in if endless then {} else { "Ground", "Walls", "Obstacles", "Decor", "Funnel" } do
 	local folder = world:FindFirstChild(folderName)
 	for _, part in folder and folder:GetDescendants() or {} do
 		if part:IsA("BasePart") then
