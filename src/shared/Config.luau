@@ -366,19 +366,17 @@ return {
 	-- pays out. Legendaries hatch slower (PetHatchTime: QM's D1 retention eggs).
 	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480 },
 	PetHatchTime = {
-		-- Balance pass (Oct 6): QM's pets JSON times, x1 in the Meadow (the first eggs stay quick),
-		-- x2 Desert, x4 Tundra, x6 Ocean, x8 Godlands; the exclusives 1 h / 16 h / 24 h. Eggs hatch
-		-- while you're offline, so long ones bring players back (Steal an Egg goes up to 12-36 h).
-		-- (QM, Oct 8 evening: progression 2x faster: the Desert's to the Godlands' halved, so
-		-- x1 / x2 / x3 / x4 of the JSON; the Meadow's and the exclusives' kept.)
-		Horse = 15, Pig = 15, Bunny = 15, Pinto = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
-		-- (the Desert to the Volcano: HatchTime by rarity, QM Oct 11)
-		-- The Legendaries are the one exception (QM, Oct 11: our D1 retention: long eggs you come back for;
-		-- the Unicorn's 5 min is in the Meadow line above):
-		Snake = 1800, Icebringer = 3600, BlueCrab = 14400, Kraken = 18000, Phoenix = 43200,
-		BoneRex = 43200, -- (QM, Oct 11: the "Collect animals" quest's egg, for D1; 12 h like the Phoenix's, a guess)
+		-- QM's own table (Oct 11, "new json"): every animal's egg, by biome. Uncommons and Rares
+		-- hatch within a run, each biome's Epics a little longer, the Legendaries are the long
+		-- D1 eggs you come back for.
+		Horse = 5, Pinto = 5, Pig = 5, Bunny = 5, Fish = 15, Rhino = 45, Unicorn = 300, -- Meadow
+		Cactus = 15, Kitten = 15, Scorpion = 30, Sandworm = 120, SpineLizard = 120, Snake = 600, -- Desert
+		Penguin = 15, Boar = 15, Snowman = 30, IceGolem = 120, Icebringer = 1200, SnackYak = 1200, -- Tundra
+		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 60, Squid = 75, KingCrab = 120, FishSchool = 200, BlueCrab = 1200, Kraken = 2800, -- Ocean
+		Firebird = 15, RockHog = 30, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 120, LavaWhale = 300, Phoenix = 2400, -- Volcano
+		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 300, Pterodactyl = 300, BoneRex = 24000, -- Jurassic
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
-		SnackYak = 3600, RoboShark = 57600, Loong = 86400, -- exclusives
+		RoboShark = 57600, Loong = 86400, -- exclusives
 	},
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
 	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
