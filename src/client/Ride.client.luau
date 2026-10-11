@@ -1514,7 +1514,9 @@ end
 
 -- Advances an animal's animation, kicking up hoof dust when a leap lands near the camera.
 local function animate(entity, dt, speed, turn)
-	if entity.animal:update(dt, speed, turn) then
+	local landed = entity.animal:update(dt, speed, turn)
+	vfx.Burrow.leaper(entity.animal) -- the Rockworm's dives under the floor
+	if landed then
 		local root = entity.animal.model.PrimaryPart.CFrame
 		if (root.Position - camera.CFrame.Position).Magnitude < DUST_VIEW then
 			Dust.kick(root, entity.animal.scale)
