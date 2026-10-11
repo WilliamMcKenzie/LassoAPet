@@ -214,7 +214,7 @@ end
 local shown = nil
 RunService.RenderStepped:Connect(function()
 	local riding = Hud.isRiding()
-	gui.Enabled = not riding
+	gui.Enabled = not riding and not player:GetAttribute("Cutscene") -- (none in the intro: Client/Intro)
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	local spot = bullSpot()
 	local cost = costNow()
