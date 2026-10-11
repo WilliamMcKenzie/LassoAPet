@@ -316,7 +316,7 @@ function showAnimal(at)
 	name.BackgroundTransparency = 1
 	name.FontFace = NAME_FONT
 	name.TextSize = 52
-	name.TextColor3 = Color3.new(1, 1, 1)
+	name.TextColor3 = if seen then Config.RarityColors[rarityOf(kind)] or Color3.new(1, 1, 1) else Color3.new(1, 1, 1) -- (its rarity's colour: QM)
 	name.TextXAlignment = Enum.TextXAlignment.Left
 	name.AnchorPoint = Vector2.new(0, 0.5)
 	name.Position = UDim2.fromOffset(60, DIVIDER - 8)
