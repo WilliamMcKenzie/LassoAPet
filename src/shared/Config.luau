@@ -697,8 +697,9 @@ return {
 	-- Rate a second at Speed studs/s (a sprint), more or fewer with your speed up to
 	-- MaxScale x, none otherwise. Each starts From of the way from the middle to a corner
 	-- and shoots Travel further out over Life seconds, Length by Thickness pixels (on a
-	-- 1000 px tall screen), white at Opacity at its most solid.
-	SpeedLines = { On = true, Rate = 200, Speed = 88, MaxScale = 2, From = 0.5, Travel = 0.55, Life = 0.32, Length = 230, Thickness = 4.5, Opacity = 0.9 },
+	-- 1000 px tall screen), white at Opacity at its most solid. Zoom: the whole effect's
+	-- size on the screen (over 1 spreads it out past the edges, under 1 pulls it in).
+	SpeedLines = { On = true, Zoom = 1, Rate = 200, Speed = 88, MaxScale = 2, From = 0.5, Travel = 0.55, Life = 0.32, Length = 230, Thickness = 4.5, Opacity = 0.9 },
 	-- The sprint camera (QM, Oct 9; Client/SprintCam): sprinting, the view widens to Fov
 	-- degrees (a fisheye-like stretch at the edges) and the camera comes in to Zoom x
 	-- its usual distance, easing in over InTime seconds and back over OutTime.

@@ -6,6 +6,12 @@
 --
 --   SpeedLines.update(speed, dt) -- every frame: studs/s to show lines for (0: none; the
 --                                -- ones out finish their run and fade)
+--
+-- Tuning (QM, Oct 11): in Studio the camera gets SpeedLines<Key> attributes at Config's
+-- values (Workspace > Camera, in the Client view of a playtest), and they win over it
+-- while set: Zoom (the whole effect's size on the screen: over 1 spreads it out past
+-- the edges, under 1 pulls it in toward the middle), Opacity, Rate, Length, Thickness,
+-- From, Travel and Life.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -14,7 +20,30 @@ local Config = require(ReplicatedStorage.Shared.Config)
 
 local SpeedLines = {}
 
-local cfg = Config.SpeedLines
+local base = Config.SpeedLines
+local TUNE = { "Zoom", "Opacity", "Rate", "Length", "Thickness", "From", "Travel", "Life" }
+if game:GetService("RunService"):IsStudio() then
+	local function seed()
+		local camera = workspace.CurrentCamera
+		for _, key in if camera then TUNE else {} do
+			if camera:GetAttribute("SpeedLines" .. key) == nil then
+				camera:SetAttribute("SpeedLines" .. key, base[key])
+			end
+		end
+	end
+	seed()
+	workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(seed)
+end
+-- Config.SpeedLines, with any of the camera's attributes over it.
+local cfg = setmetatable({}, {
+	__index = function(_, key)
+		local v = workspace.CurrentCamera and workspace.CurrentCamera:GetAttribute("SpeedLines" .. key)
+		if v ~= nil then
+			return v
+		end
+		return base[key]
+	end,
+})
 local rng = Random.new()
 local gui
 local lines = {} -- { frame, angle, r, speed, length, t, life }
@@ -60,7 +89,7 @@ function SpeedLines.update(speed, dt)
 	dt = dt or 1 / 60
 	local view = workspace.CurrentCamera.ViewportSize
 	local middle = view / 2
-	local reach = middle.Magnitude -- from the middle to a corner
+	local reach = middle.Magnitude * cfg.Zoom -- from the middle to a corner (x the zoom)
 	-- New lines: Rate a second at Speed studs/s, more or fewer with the speed.
 	if cfg.On and speed > 0 then
 		owed += cfg.Rate * math.clamp(speed / cfg.Speed, 0, cfg.MaxScale) * dt
@@ -82,7 +111,7 @@ function SpeedLines.update(speed, dt)
 		})
 	end
 	-- Each one shoots out from round the middle toward the edge, fading in and out.
-	local scale = view.Y / 1000 -- (Length and Thickness are for a 1000 px tall screen)
+	local scale = view.Y / 1000 * cfg.Zoom -- (Length and Thickness are for a 1000 px tall screen, x the zoom)
 	for i = #lines, 1, -1 do
 		local l = lines[i]
 		l.t += dt
