@@ -200,10 +200,12 @@ local claimQuest = ReplicatedStorage:WaitForChild("ClaimQuest")
 local Q = { -- (art pixels)
 	width = 453, header = 86, -- the folded art's height: the header's
 	top = 92, -- the first quest's name
-	x = 23, bar = Vector2.new(407, 22), inset = 3, -- (the fill inside the bar)
-	name = 26, nameStroke = 3,
-	barAt = 36, claimAt = 70, claim = Vector2.new(399, 62),
-	gap = 20, bottom = 24,
+	-- (the quests 10% bigger, words and bars, the title kept: QM, Oct 11; the bars and CLAIM
+	-- are as wide as the panel lets them be, so only taller)
+	x = 23, bar = Vector2.new(407, 24), inset = 3, -- (the fill inside the bar)
+	name = 29, nameStroke = 3,
+	barAt = 40, claimAt = 70, claim = Vector2.new(399, 62),
+	gap = 22, bottom = 24,
 }
 local quests = Instance.new("Frame")
 quests.Name = "Quests"
