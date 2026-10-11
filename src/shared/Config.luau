@@ -267,7 +267,7 @@ return {
 
 	-- Ride
 	MountSpeed = 44,
-	ReturnSpeed = 40,
+	ReturnSpeed = 70.4, -- 1.6x MountSpeed: the ride home 1.6x as fast as the ride out (QM, Oct 11; was 40)
 	SteerSpeed = 28,
 	-- Wider mounts steer quicker, gently (QM, Oct 8): x (1 + SteerWidthScale x (width
 	-- over a horse's - 1)), so twice a horse's width steers 1.2x, three times 1.4x.
