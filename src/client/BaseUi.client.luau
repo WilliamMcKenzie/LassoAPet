@@ -393,6 +393,19 @@ local function drawQuests()
 			y += questRow(quest.i, quest, y) + (if n < #questList then Q.gap else 0)
 		end
 	end
+	-- A pulsing tap hand on a quest ready to claim: the bottom one, if there are two (QM, Oct 11).
+	local lastClaim
+	for _, row in quests:GetChildren() do
+		local claim = row.Name == "Quest" and row:FindFirstChild("Claim")
+		if claim and (not lastClaim or row.Position.Y.Offset > lastClaim.Parent.Position.Y.Offset) then
+			lastClaim = claim
+		end
+	end
+	if lastClaim then
+		local hand = TapHand.new(90)
+		hand.Position = UDim2.fromScale(0.62, 0.6)
+		hand.Parent = lastClaim
+	end
 	quests.Size = UDim2.fromOffset(Q.width, if one then 184 else y + Q.bottom)
 	panelMiddle.Size = UDim2.fromOffset(Q.width, math.max(y + Q.bottom - 90 - 40, 0))
 end
