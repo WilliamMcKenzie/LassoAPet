@@ -11,10 +11,14 @@ from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "tools"))
-sys.path.insert(0, HERE)
+import importlib.util  # noqa: E402
 import partlib  # noqa: E402
 from partlib import Part, T, Rx, Ry, Rz  # noqa: E402
-import jurassic as J  # noqa: E402
+
+# (its mockup by path: tools/jurassic.py, the biome in game, has the same name)
+_spec = importlib.util.spec_from_file_location("jurassic_mockup", os.path.join(HERE, "jurassic.py"))
+J = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(J)
 
 OUT = J.OUT
 LEAF = [(70, 156, 52), (58, 138, 46), (90, 176, 62)]

@@ -193,6 +193,28 @@ return {
 			SkyLight = { Diffuse = 0, Specular = 1, Tint = Color3.new(1, 1, 1) }, -- (QM, Oct 11: no orange cast)
 			-- No Upgrade Pen art yet: the plain button with the price.
 		},
+		{
+			-- The Jurassic (QM, Oct 11): the final biome, after the volcano (design/jurassic_biome):
+			-- darker jungle grass, a rough dirt trail down the middle, brown rocks, jungle plants
+			-- and a giant ribcage halfway. Floor, walls, nests and ribcage: tools/jurassic.py;
+			-- rocks and plants: tools/biome_rocks.py.
+			Name = "Jurassic",
+			AnimalSize = 2.6, -- (as the volcano's)
+			Swerve = 1,
+			NestScale = 2.5,
+			Length = 7680, -- as long as the volcano (a guess)
+			GroundColors = { Color3.fromRGB(78, 140, 40), Color3.fromRGB(86, 152, 44) }, -- dark jungle grass
+			WallColors = { Color3.fromRGB(150, 102, 62), Color3.fromRGB(164, 114, 70) },
+			Herd = { Fish = 1 }, -- (QM, Oct 11: fish for now, until the dinosaurs are designed)
+			-- tools/jurassic.py: the dirt trail, flush.
+			Patches = {
+				Trail = { Color3.fromRGB(150, 104, 64), Color3.fromRGB(162, 114, 70) },
+			},
+			UnlockCost = 3000000000, -- a guess (10x the volcano)
+			PostColor = Color3.fromRGB(150, 102, 62),
+			GateColor = Color3.fromRGB(90, 200, 50), -- jungle green
+			-- No Upgrade Pen art or boss yet (Config.Boss falls back to the Chicken).
+		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
@@ -219,7 +241,7 @@ return {
 	-- to the next biome, later; for now it's only there). VolcanoCrack.client draws it
 	-- with ViewportStencil (Shared/ViewportStencil) from the Model named Model in
 	-- ReplicatedStorage: CrackMask and CrackInside, imported from design/volcano/VolcanoCrack.gltf
-	-- (tools/volcano_crack.py). FromFinish: studs before the finish line its middle is.
+	-- (tools/volcano_crack.py). FromFinish: studs before the volcano's end (where the finish line was) its middle is.
 	VolcanoCrack = {
 		Model = "VolcanoCrack",
 		FromFinish = 110,
@@ -230,7 +252,7 @@ return {
 	CourseHalfWidth = 56,
 	CourseWidening = 0.005,
 	CourseMaxHalfWidth = 137,
-	CourseLength = 760 + 2280 + 5472 + 7680 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, its end is the end; off its edge, the void)
+	CourseLength = 760 + 2280 + 5472 + 7680 + 7680 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, then the Jurassic, its end is the end; off its edge, the void)
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
@@ -513,6 +535,7 @@ return {
 		TubeCoral = 1, BrainCoral = 1, BranchCoral = 2, FanCoral = 2, ReefRock = 3, -- ocean
 		BasaltRock = 2, Vent = 3, -- the deep ocean
 		DeadBush = 1, DarkStone = 1, DeadTree = 2, Crag = 2, LavaRock = 3, -- Godlands
+		Fern = 1, Horsetail = 1, Cycad = 2, JungleTree = 3, -- Jurassic
 	},
 	-- How big each tier looks: each one is TierGrowth x the one below, so a medium is
 	-- 1.6x a small and a large 2.56x. "Size" is the square root of the two biggest sides of
