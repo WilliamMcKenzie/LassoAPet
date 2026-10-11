@@ -3,10 +3,10 @@ on a low, wide, four-legged tank for the Jurassic: mustard yellow with dark brow
 (each band one block, OVER bigger than the body on the sides and top, as QM draws the T-Rex's
 stripes), a cream belly and beak, bone-white spikes down both flanks and two rows along the
 back, horns at the back of a flat armoured head, and a long tail ending in a big brown club.
-Static draft.
 
 Run: python3 tools/ankylosaurus.py [out_dir]
 writes Ankylosaurus.bbmodel, Ankylosaurus.png (three views) and Ankylosaurus_vs_trex.png.
+`animate` then writes Ankylosaurus_anim.bbmodel (idle, walk, gallop) and GIFs.
 
 Bones: root, LegFL/LegFR/LegHL/LegHR, neck (head) > Jaw, Tail > Tail2 (the club).
 """
@@ -23,7 +23,7 @@ import animal_designs as A  # noqa: E402
 import convert_designs as C  # noqa: E402
 from convert_designs import Conv, SIDES, X  # noqa: E402
 from partlib import render  # noqa: E402
-from trex_v2 import CREAM, EYE, NOSTRIL, trex  # noqa: E402
+from trex_v2 import CREAM, NOSTRIL, trex  # noqa: E402
 
 OUT = "/mnt/project-files/animals/ankylosaurus"
 
@@ -69,14 +69,14 @@ def ankylosaurus():
             a.pyr(f"FlankSpike{side}{i}", (sx * 2.7, 3.3, z - 0.32), (sx * 2.7, 3.95, z + 0.32), "-x" if sx < 0 else "+x", ln, SPIKE, "root")
 
     # ---- head: short neck, flat wide head under a brown plate, horns out the back corners,
-    # a cream beak, yellow eye under a dark brow, and a jaw that opens with -X
+    # a cream beak, white eye under a dark brow, and a jaw that opens with -X
     head = a.bone("neck", "root", (0, 3.4, -3.6))
     a.b("Neck", (-1.5, 2.3, -4.3), (1.5, 4.2, -3.6), BODY, head)
     a.b("Head", (-1.5, 2.4, -6.4), (1.5, 3.9, -4.1), BODY, head)
     a.b("HeadPlate", (-1.5 - OVER, 3.5, -6.0), (1.5 + OVER, 3.9 + OVER, -4.1), BAND, head)
     a.b("Beak", (-1.0, 2.4, -7.1), (1.0, 3.3, -6.4), CREAM, head)
     for side, sx in SIDES:
-        a.side_eye(side, sx, 1.5, 2.8, 3.4, -5.6, -4.9, head, eye=EYE)
+        a.side_eye(side, sx, 1.5, 2.8, 3.4, -5.6, -4.9, head)
         x0, x1 = X(sx, 1.0, 1.55)
         a.b("Brow" + side, (x0, 3.4, -5.85), (x1, 3.75, -4.7), BAND, head)
         x0, x1 = X(sx, 0.35, 0.75)
@@ -136,5 +136,73 @@ def main(out=OUT):
     print("wrote", path, len(parts), "parts")
 
 
+def animations(m):
+    """A heavy four-legged plod: legs in diagonal pairs, the body rolling over them, the head
+    low and nodding, the tail swinging its club the other way. -X opens the jaw."""
+    import math
+    from snake_rig import track
+    from snow_rig import bump, grounded
+    s, TAU = math.sin, 2 * math.pi
+    feet = {e["name"] for e in m["elements"] if e["name"].startswith(("Foot", "Nail"))}
+
+    def run(L, stride, roll, swing, nod, hop, lean, n=16):
+        tr = {"root": [track(L, lambda u: (lean, 0, roll * s(TAU * u)), n)]}
+        # diagonal pairs: front left with hind right, front right with hind left
+        for leg, ph in (("FL", 0.0), ("HR", 0.0), ("FR", 0.5), ("HL", 0.5)):
+            tr["Leg" + leg] = [track(L, lambda u, ph=ph: (-lean + stride * s(TAU * (u + ph)), 0, 0), n)]
+        tr["neck"] = [track(L, lambda u: (-lean + nod * s(2 * TAU * u), -swing * 0.25 * s(TAU * u), 0), n)]
+        tr["Tail"] = [track(L, lambda u: (-lean * 0.5 + 2 * s(2 * TAU * u), swing * s(TAU * u + 0.6), 0), n)]
+        tr["Tail2"] = [track(L, lambda u: (0, swing * 1.2 * s(TAU * u), 0), n)]
+        tr["Jaw"] = [track(L, lambda u: (-4 * (0.5 + 0.5 * s(2 * TAU * u)), 0, 0), n)]
+        tr["root"] = grounded(m, L, tr, feet, n, extra=lambda u: hop * abs(s(TAU * u)))
+        return L, tr
+
+    out = {}
+    # idle: chews, looks about, then swings its club hard to one side and back
+    L = 4.0
+    out["idle"] = (L, {
+        "root": [track(L, lambda u: (0.8 * s(TAU * u), 0, 2 * bump(u, 0.7, 0.08)), 32)],
+        "neck": [track(L, lambda u: (4 * s(TAU * u), 20 * (bump(u, 0.15, 0.07) - bump(u, 0.35, 0.07)), 0), 64)],
+        "Jaw": [track(L, lambda u: (-12 * max(0.0, s(6 * TAU * u)) * (1 - bump(u, 0.7, 0.15)), 0, 0), 96)],
+        "Tail": [track(L, lambda u: (0, 4 * s(TAU * u) - 25 * bump(u, 0.7, 0.06), 0), 64)],
+        "Tail2": [track(L, lambda u: (0, -35 * bump(u, 0.71, 0.05) + 6 * s(TAU * u), 0), 64)],
+    })
+    out["walk"] = run(1.0, stride=22, roll=3, swing=10, nod=3, hop=0, lean=0)
+    out["gallop"] = run(0.5, stride=38, roll=5, swing=16, nod=6, hop=0.6, lean=6)
+    return out
+
+
+def animate(out=OUT):
+    """Ankylosaurus_anim.bbmodel: Ankylosaurus.bbmodel (main) with idle, walk and gallop, and GIFs."""
+    from horse_rig import write_animations
+    from snow_rig import group_ids, posed
+    m = json.load(open(os.path.join(out, "Ankylosaurus.bbmodel")))
+    m["animations"] = []
+    write_animations(m, group_ids(m), animations(m))
+    with open(os.path.join(out, "Ankylosaurus_anim.bbmodel"), "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    W = 420
+    cams = [dict(eye=(-22, 10, -24), target=(0, 3, 2), W=W, H=W, fov=40), dict(eye=(-32, 6, 2), target=(0, 3, 2.5), W=W, H=W, fov=38)]
+
+    def frame(name, t):
+        anim = next(x for x in m["animations"] if x["name"] == name)
+        ps = posed(m, anim, t)
+        for p in ps:
+            if p.name.startswith(PLAIN):
+                p.plain = True
+        im = Image.new("RGB", (W * 2, W))
+        for i, c in enumerate(cams):
+            im.paste(render(ps, **c), (i * W, 0))
+        return A.label(im, [name, ""], 22)
+
+    for name, n in (("idle", 32), ("walk", 14), ("gallop", 12)):
+        L = next(x for x in m["animations"] if x["name"] == name)["length"]
+        A.gif(os.path.join(out, f"Ankylosaurus_{name}.gif"), [frame(name, L * i / n) for i in range(n)], fps=n / L)
+    print("wrote Ankylosaurus_anim.bbmodel")
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["animate"]:
+        animate(*sys.argv[2:])
+    else:
+        main(*sys.argv[1:])
