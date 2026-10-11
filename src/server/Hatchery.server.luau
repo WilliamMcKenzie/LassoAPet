@@ -161,6 +161,19 @@ local function rollPrice(profile)
 end
 
 -- Copies the profile onto the player (inventory, ride pet) and their pen (what's in it).
+-- How full the pen is: every egg and pet in it, and the pet you ride (Config.PenCapacity).
+local function penCount(profile)
+	local n = if profile.ride then 1 else 0
+	for _ in profile.items do
+		n += 1
+	end
+	return n
+end
+local function penCap(player)
+	local cfg = Config.PenCapacity
+	return cfg.Base + cfg.PerUpgrade * ((player:GetAttribute("PenLevel") or 1) - 1)
+end
+
 local function publish(player)
 	local profile = profiles[player]
 	if not profile then
@@ -182,6 +195,8 @@ local function publish(player)
 	local pen = penOf(player)
 	if pen then
 		pen:SetAttribute("Contents", HttpService:JSONEncode(profile.items))
+		pen:SetAttribute("PetCount", penCount(profile)) -- (Pens.server's "5/10"; Pen.client stops placing when full)
+		pen:SetAttribute("PetCap", penCap(player))
 	end
 end
 
@@ -277,6 +292,9 @@ local function load(player)
 					profile.boughtGiantEggs = tonumber(data.boughtGiantEggs) -- Giant Horse eggs from the shop already in (addBoughtGiantEggs)
 				end
 				loaded[player] = true
+				player:GetAttributeChangedSignal("PenLevel"):Connect(function() -- (an upgrade makes room: Config.PenCapacity)
+					publish(player)
+				end)
 				break
 			end
 			if attempt == 3 or RunService:IsStudio() then
@@ -495,7 +513,7 @@ remote("DeliverEgg", function(player, kind)
 	-- fifth of new players left at "Place your egg" a second time). The first spot clear
 	-- of the starter pet, from the middle out.
 	local pen = penOf(player)
-	if player:GetAttribute("Tutorial") and pen and (profile.ride or next(profile.items)) then
+	if player:GetAttribute("Tutorial") and pen and (profile.ride or next(profile.items)) and penCount(profile) < penCap(player) then
 		for _, spot in TUTORIAL_SPOTS do
 			local clear = canPlace(pen, spot.X, spot.Y)
 			for _, item in profile.items do
@@ -664,6 +682,9 @@ remote("PlaceEgg", function(player, kind, x, z)
 	end
 	if typeof(x) ~= "number" or typeof(z) ~= "number" or not canPlace(pen, x, z) then
 		return
+	end
+	if penCount(profile) >= penCap(player) then
+		return -- the pen's full (Config.PenCapacity)
 	end
 	profile.eggs[kind] -= 1
 	if profile.eggs[kind] == 0 then

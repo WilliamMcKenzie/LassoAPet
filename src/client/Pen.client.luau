@@ -435,8 +435,8 @@ local mouse = player:GetMouse()
 -- them) looks at, as (x, z) from the Area's centre, if an egg can go there.
 local function spotAt(screenX, screenY)
 	local pen = myPen()
-	if not pen then
-		return nil
+	if not pen or (pen:GetAttribute("PetCount") or 0) >= (pen:GetAttribute("PetCap") or math.huge) then
+		return nil -- (no pen, or it's full: Config.PenCapacity)
 	end
 	-- Where the mouse ray meets the pen floor's plane. (Not mouse.Hit: that stops
 	-- on whatever's in the way first, a fence rail, your character, the pet
