@@ -30,6 +30,11 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 }
 -- assets/ui/quests/*.png (QM, Oct 11). "" till Studio uploads them: plain boxes meanwhile.
 local QUEST_ART = {
+	top = "QUESTS_TOP", -- QuestsTop.png, 453 x 90: Quests.png's header, "Quests" and its fold chevron
+	middle = "QUESTS_MIDDLE", -- QuestsMiddle.png, 453 x 20: a strip of its body, stretched to fit the quests
+	bottom = "QUESTS_BOTTOM", -- QuestsBottom.png, 453 x 40: its bottom edge
+	-- (cut from Quests.png: a 9-slice drew its header at the art's own pixel size, not the
+	-- panel's, so "Quests" came out huge and the chevron got cut: QM, Oct 11)
 	panel = "rbxassetid://71052597087124", -- Quests.png, 453 x 265: open, "Quests" and its fold chevron drawn in
 	closed = "rbxassetid://123446992263929", -- QuestsClosed.png, 453 x 86: folded up
 	bar = "rbxassetid://88826165672196", -- QuestBG.png, 407 x 22
@@ -184,12 +189,27 @@ local Q = { -- (art pixels)
 	barAt = 36, claimAt = 70, claim = Vector2.new(399, 62),
 	gap = 20, bottom = 24,
 }
-local quests = Instance.new("ImageLabel")
+local quests = Instance.new("Frame")
 quests.Name = "Quests"
-quests.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-quests.BackgroundTransparency = if QUEST_ART.panel == "" then 0.2 else 1
-quests.ScaleType = Enum.ScaleType.Slice -- (it grows down with its quests: corners and header kept)
-quests.SliceCenter = Rect.new(40, 90, 413, 225)
+quests.BackgroundTransparency = 1
+-- The panel in three pieces, so it grows down with its quests: header, body, bottom.
+local function piece(name, image, height)
+	local p = Instance.new("ImageLabel")
+	p.Name = name
+	p.BackgroundTransparency = 1
+	p.Image = image
+	p.ScaleType = Enum.ScaleType.Stretch
+	p.Size = UDim2.new(1, 0, 0, height)
+	p.Parent = quests
+	return p
+end
+local panelTop = piece("Top", QUEST_ART.top, 90)
+local panelMiddle = piece("Middle", QUEST_ART.middle, 0)
+panelMiddle.Position = UDim2.fromOffset(0, 90)
+local panelBottom = piece("Bottom", QUEST_ART.bottom, 40)
+panelBottom.AnchorPoint = Vector2.new(0, 1)
+panelBottom.Position = UDim2.fromScale(0, 1)
+local panelClosed = piece("Closed", QUEST_ART.closed, Q.header)
 quests.AnchorPoint = Vector2.new(1, 0)
 quests.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
 quests.Size = UDim2.fromOffset(Q.width, Q.header)
@@ -198,17 +218,12 @@ quests.Parent = root
 local questsScale = Instance.new("UIScale")
 questsScale.Scale = QUESTS_WIDTH / Q.width
 questsScale.Parent = quests
-if QUEST_ART.panel == "" then
-	Instance.new("UICorner").Parent = quests
-	local title = text(quests, 40)
-	title.Text = "Quests"
-	title.Position = UDim2.fromOffset(Q.x, 20)
-end
 local fold = Instance.new("TextButton") -- the header: folds it up and out again
 fold.Name = "Fold"
 fold.BackgroundTransparency = 1
 fold.Text = ""
 fold.Size = UDim2.fromOffset(Q.width, Q.header)
+fold.ZIndex = 3
 fold.Parent = quests
 local folded = false
 fold.Activated:Connect(function()
@@ -221,9 +236,12 @@ local function questRow(i, quest, y)
 	local row = Instance.new("Frame")
 	row.Name = "Quest"
 	row.BackgroundTransparency = 1
+	row.ZIndex = 2 -- (over the panel's pieces)
 	row.Position = UDim2.fromOffset(0, y)
-	row.Size = UDim2.fromOffset(Q.width, if done then Q.claimAt + Q.claim.Y else Q.barAt + Q.bar.Y)
+	row.Size = UDim2.fromOffset(Q.width, if done then Q.claim.Y else Q.barAt + Q.bar.Y)
+	-- (finished: its CLAIM button takes the quest's place, QM)
 	local name = text(row, Q.name, nil, Q.nameStroke)
+	name.Visible = not done
 	name.Text = quest.text
 	name.Position = UDim2.fromOffset(Q.x, 0)
 	local count = text(row, Q.name, nil, Q.nameStroke)
@@ -232,6 +250,7 @@ local function questRow(i, quest, y)
 	count.TextXAlignment = Enum.TextXAlignment.Right
 	count.Position = UDim2.fromOffset(Q.x, 0)
 	count.Size = UDim2.fromOffset(Q.bar.X, Q.name)
+	count.Visible = not done
 	local bar = Instance.new("ImageLabel")
 	bar.Name = "Bar"
 	bar.Image = QUEST_ART.bar
@@ -239,6 +258,7 @@ local function questRow(i, quest, y)
 	bar.BackgroundTransparency = if QUEST_ART.bar == "" then 0 else 1
 	bar.Position = UDim2.fromOffset(Q.x, Q.barAt)
 	bar.Size = UDim2.fromOffset(Q.bar.X, Q.bar.Y)
+	bar.Visible = not done
 	bar.Parent = row
 	local share = math.clamp(quest.have / quest.need, 0, 1)
 	if share > 0 then
@@ -261,7 +281,7 @@ local function questRow(i, quest, y)
 		claim.BackgroundColor3 = Color3.fromRGB(59, 255, 95)
 		claim.BackgroundTransparency = if QUEST_ART.claim == "" then 0 else 1
 		claim.AnchorPoint = Vector2.new(0.5, 0)
-		claim.Position = UDim2.fromOffset(Q.width / 2, Q.claimAt)
+		claim.Position = UDim2.fromOffset(Q.width / 2, 0)
 		claim.Size = UDim2.fromOffset(Q.claim.X, Q.claim.Y)
 		claim:SetAttribute("Hover", 1.04)
 		pressable(claim)
@@ -300,12 +320,12 @@ local function drawQuests()
 			child:Destroy()
 		end
 	end
+	panelClosed.Visible = folded
+	panelTop.Visible, panelMiddle.Visible, panelBottom.Visible = not folded, not folded, not folded
 	if folded then
-		quests.Image = QUEST_ART.closed
 		quests.Size = UDim2.fromOffset(Q.width, Q.header)
 		return
 	end
-	quests.Image = QUEST_ART.panel
 	local y = Q.top
 	for n, quest in questList do
 		if typeof(quest) == "table" and tonumber(quest.i) and tonumber(quest.have) and tonumber(quest.need) then
@@ -313,6 +333,7 @@ local function drawQuests()
 		end
 	end
 	quests.Size = UDim2.fromOffset(Q.width, y + Q.bottom)
+	panelMiddle.Size = UDim2.fromOffset(Q.width, math.max(y + Q.bottom - 90 - 40, 0))
 end
 player:GetAttributeChangedSignal("Quests"):Connect(drawQuests)
 quests:GetAttributeChangedSignal("Folded"):Connect(drawQuests)
