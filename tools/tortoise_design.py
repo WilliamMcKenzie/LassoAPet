@@ -139,5 +139,73 @@ def main(out=OUT):
     print("wrote", path, len(parts), "parts")
 
 
+
+# ---------------------------------------------------------------- animations (on QM's file)
+FEET = ("LegFL", "LegFR", "LegHL", "LegHR")
+
+
+def animations(m):
+    import math
+    from snake_rig import track
+    from snow_rig import bump, grounded
+    s, TAU = math.sin, 2 * math.pi
+    feet = {e["name"] for e in m["elements"] if e["name"].startswith(FEET) or e["name"].startswith("Plain_Nail")}
+
+    def run(L, stride, sway, bob, nod, n=16):
+        # diagonal pairs step together (front left with hind right), the shell rocks
+        # side to side over the planted pair, the head nods with each step
+        tr = {"root": [track(L, lambda u: (0, 0, sway * s(TAU * u)), n)]}
+        for leg, ph in (("LegFL", 0.0), ("LegHR", 0.0), ("LegFR", 0.5), ("LegHL", 0.5)):
+            tr[leg] = [track(L, lambda u, ph=ph: (stride * s(TAU * (u + ph)), 0, 0), n)]
+        tr["neck"] = [track(L, lambda u: (nod * s(2 * TAU * u), 4 * s(TAU * u), 0), n)]
+        tr["root"] = grounded(m, L, tr, feet, n, extra=lambda u: bob * abs(s(TAU * u)))
+        return L, tr
+
+    out = {}
+    # idle: slow breathing, looks left and right, and a slow blink of a nod
+    L = 4.0
+    out["idle"] = (L, {
+        "neck": [track(L, lambda u: (6 * bump(u, 0.75, 0.1), 22 * s(TAU * u), 0), 32)],
+        "root": [track(L, lambda u: (0, 0.3 + 0.3 * s(2 * TAU * u), 0), 16, "position")],
+    })
+    out["walk"] = run(1.2, stride=22, sway=3, bob=0.5, nod=4)
+    out["gallop"] = run(0.6, stride=34, sway=5, bob=2.0, nod=8)
+    return out
+
+
+def animate(src, dst, out=OUT):
+    """Write idle, walk and gallop into QM's file (src) as dst, with preview GIFs."""
+    import horse_rig
+    horse_rig.EULER = "ZYX"  # QM's hand-made file (rotated brows)
+    from horse_rig import write_animations
+    from snow_rig import group_ids, posed
+    m = json.load(open(src))
+    m["animations"] = []
+    write_animations(m, group_ids(m), animations(m))
+    with open(dst, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    T = 420
+    cams = [dict(eye=(-28, 14, -30), target=(0, 4, 0), W=T, H=T, fov=36), dict(eye=(-40, 6, -1), target=(0, 4, 0), W=T, H=T, fov=34)]
+
+    def frame(name, t):
+        anim = next(x for x in m["animations"] if x["name"] == name)
+        ps = posed(m, anim, t)
+        for p in ps:
+            if p.name.startswith(("Eye", "Pupil", "Plain")):
+                p.plain = True
+            if p.name.startswith("Glow"):
+                p.neon = True
+        im = Image.new("RGB", (T * 2, T))
+        for i, c in enumerate(cams):
+            im.paste(render(ps, **c), (i * T, 0))
+        return A.label(im, [name, ""], 22)
+
+    for name, n in (("idle", 24), ("walk", 16), ("gallop", 12)):
+        L = next(x for x in m["animations"] if x["name"] == name)["length"]
+        A.gif(os.path.join(out, f"VolcanoTortoise_{name}.gif"), [frame(name, L * i / n) for i in range(n)], fps=n / L)
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["animate"]:
+        animate(*sys.argv[2:])
+    else:
+        main(*sys.argv[1:])
