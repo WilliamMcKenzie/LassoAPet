@@ -4,7 +4,10 @@
 -- totals are across all servers. Totals only: no player ids are kept.
 --
 --   "/stats"  (the game's owner, or anyone in Studio) lists them in your chat window:
---             today's average session and today's longest session. That's all (QM, Oct 11).
+--             today's average session and today's longest session (QM, Oct 11), and the
+--             share of today's sessions whose player had reached each biome by the time
+--             they left (the furthest barrier they've ever ridden through, Gold.server's
+--             "GatesBroken"; QM, Oct 11). A player back twice counts twice.
 --
 -- QM, Oct 11: a blank slate. The old store ("Stats") is left behind, so nothing from
 -- older builds counts, even from their servers still running.
@@ -16,6 +19,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Config = require(ReplicatedStorage.Shared.Config)
+
 local FLUSH_EVERY = 60 -- seconds between adding this server's sessions into the store
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "SessionStats")
@@ -23,11 +28,17 @@ if not ok then
 	store = nil
 end
 
--- A day's totals: sessions and their seconds add up, longest keeps the biggest.
+-- A day's totals: longest keeps the biggest, everything else adds up (sessions, their
+-- seconds, and "reached<i>": sessions whose player had reached biome i).
 local function addInto(into, from)
-	into.sessions = (into.sessions or 0) + (from and tonumber(from.sessions) or 0)
-	into.seconds = (into.seconds or 0) + (from and tonumber(from.seconds) or 0)
+	into.sessions = into.sessions or 0
+	into.seconds = into.seconds or 0
 	into.longest = math.max(into.longest or 0, from and tonumber(from.longest) or 0)
+	for f, v in from or {} do
+		if f ~= "longest" and type(v) == "number" then
+			into[f] = (into[f] or 0) + v
+		end
+	end
 	return into
 end
 
@@ -72,7 +83,11 @@ local function finish(player)
 		local now = os.time()
 		local length = now - at
 		local key = dayKey(now)
-		pending[key] = addInto(pending[key] or {}, { sessions = 1, seconds = length, longest = length })
+		local session = { sessions = 1, seconds = length, longest = length }
+		for i = 2, math.min(player:GetAttribute("GatesBroken") or 1, #Config.Biomes) do
+			session["reached" .. i] = 1
+		end
+		pending[key] = addInto(pending[key] or {}, session)
 	end
 end
 Players.PlayerRemoving:Connect(finish)
@@ -127,6 +142,11 @@ local function report()
 	else
 		table.insert(lines, string.format("Avg session: %.1f min (%d sessions)", t.seconds / t.sessions / 60, t.sessions))
 		table.insert(lines, string.format("Longest session: %.1f min", t.longest / 60))
+		local reached = {}
+		for i = 2, #Config.Biomes do
+			table.insert(reached, string.format("%s %.0f%%", Config.Biomes[i].Name, 100 * (t["reached" .. i] or 0) / t.sessions))
+		end
+		table.insert(lines, "Reached: " .. table.concat(reached, ", "))
 	end
 	if not store then
 		table.insert(lines, "(No DataStore here: this server's sessions only)")
