@@ -1,22 +1,23 @@
--- FUSE (QM, Oct 6; Shared/Fusion): the Fuse button (Hud's, under Pets) opens QM's
--- FUSION panel: your pets on the dictionary's rarity cards, 8 to a page (arrows
--- for more), each still in 3D as it is (merged bigger, a hybrid in its colours).
--- Tap two to pick them (each gets an outline); their names show in the strip at the
--- bottom either side of QM's FUSE button ("???" till picked), with the price over
--- it. FUSE closes the panel and the two are pulled up over the pen and fuse, as merging does (PenPets.pull), and the
--- hybrid drops down where the base was (Hatchery.server's FusePets). The left pick
--- (the first) is the base, its body and ability; the right one sets its size and
--- paints it in its colours (QM). Hybrids fuse
--- again (QM; Fusion.combine), and so do two of the same animal (QM, Oct 7). A
--- hybrid's card has no name; picked, the strip shows its hybrid name (QM, Oct 6 20:15).
+-- MERGE (QM, Oct 6; the pen view, Oct 11; Shared/Fusion): the Merge button opens a
+-- view of your pen from above, your animals in it, and QM's Merge panel along the
+-- bottom. Click two animals and they fill its two slots; or click a slot, then the
+-- animal to put in it (QM). A picked animal glows purple, with a ring under it and a
+-- check over it (QM's mockup); clicking it again, or its slot, takes it out. The
+-- green Merge button, its price beside the cash, shows once both are picked (grey,
+-- "???", till then). Merging pulls the two up over the pen and the hybrid drops
+-- down where the base was (PenPets.pull; Hatchery.server's FusePets). The left slot
+-- is the base, its body and ability; the right one sets its size and paints it in
+-- its colours (QM). Hybrids merge again (Fusion.combine), and so do two of the same.
 --
--- Laid out in pixels of QM's 1102 x 829 panel (assets/ui/fuse/FusionPanel.png) and
--- scaled to fit the screen.
+-- The panel's laid out in pixels of QM's 996 x 378 art (assets/ui/merge/MergePenPanel.png)
+-- and scaled to fit the bottom of the screen.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
 
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -30,78 +31,25 @@ local Animals = ReplicatedStorage.Shared.Animals
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
-local PAGE = Vector2.new(1102, 829)
-local SCREEN_SHARE = 0.54 -- as the dictionary's
-local CARD, ART = 200, 180 -- the dictionary's grid: 200 px cards, the pet 180 px in the middle
-local COLUMNS, ROWS = 4, 2 -- 8 to a page (QM)
-local INSIDE = Rect.new(6, 43, 1096, 609) -- the panel's blue, down to the top of FUSE
-local STRIP_Y = 756 -- the middle of the strip along the bottom
-local BUTTON = Vector2.new(278, 189) -- QM's FUSE button (assets/ui/fuse/FuseButtonOn.png)
-local BUTTON_Y = 698 -- its middle, over the strip's top edge (QM's mockup)
--- The same space round every card and between them (QM: even margins), across and down.
-local GAP_X = (INSIDE.Width - COLUMNS * CARD) / (COLUMNS + 1)
-local GAP_Y = (INSIDE.Height - ROWS * CARD) / (ROWS + 1)
-local CARD_CORNER = UDim.new(0.05, 0) -- the rarity cards' own corners (10 px of 200), or the clip cuts their edge
-local FONT = Enum.Font.FredokaOne
-local PAGE_ART = "rbxassetid://92882303663654" -- assets/ui/fuse/MergePanel.png (QM, Oct 7: titled MERGE)
-local OLD_PAGE_ART = "rbxassetid://132460179762796" -- assets/ui/fuse/FusionPanel.png (till then)
--- QM's FUSE button, the price written under its arm (QM, Oct 7): green when you can
--- fuse the two picked, grey when you can't (or can't afford it). (The old art, with
--- FUSE written on it, stands in till the new ones are uploaded.)
-local BUTTON_ART = {
-	on = "rbxassetid://120348389827821", -- assets/ui/fuse/FuseButtonOn.png (QM)
-	off = "rbxassetid://74328700033740", -- assets/ui/fuse/FuseButtonOff.png (QM)
-	old = "rbxassetid://92820434532680", -- assets/ui/fuse/FuseButton.png
+local PANEL = { id = "rbxassetid://87361968703172", size = Vector2.new(996, 378) } -- assets/ui/merge/MergePenPanel.png
+local BUTTON = { on = "rbxassetid://77533462942727", off = "rbxassetid://88460994933250", size = Vector2.new(420, 113) } -- MergeButton.png / MergeButtonDisabled.png ("???" drawn on)
+local CLOSE = "rbxassetid://84920756991403" -- dex/IndexClose.png (the Index's and shop's X)
+local SCREEN_SHARE = 0.52 -- the panel's share of the screen's width (QM's mockup), or less to fit
+local HEIGHT_SHARE = 0.36 -- ... of its height
+local SLOTS = { Rect.new(32, 147, 228, 341), Rect.new(309, 147, 505, 341) } -- the two drawn on the panel
+local PILL = Vector2.new(455, 52) -- the dark strip by the title: "1/2 Selected"
+local BUTTON_AT = Vector2.new(761, 246)
+local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+local CASH_GREEN = Color3.fromHex("00FF09")
+local PURPLE = Color3.fromRGB(176, 76, 255) -- a picked animal's glow, ring and check (QM's mockup)
+-- The camera over your pen: from its open side, looking down.
+local VIEW = {
+	PITCH = math.rad(58), -- down from level
+	FOV = 50,
+	FIT = 1.05, -- the pen's width over what's needed to fit it
+	RAISE = 0.42, -- the pen's middle this far up the screen from its centre (of half its height: the panel's below)
+	TIME = 0.55,
 }
-local CARDS = { -- the dictionary's rarity cards (assets/ui/dex/Dex<Rarity>.png)
-	Common = "rbxassetid://79697917998703",
-	Uncommon = "rbxassetid://129147449223279",
-	Rare = "rbxassetid://72145821537095",
-	Epic = "rbxassetid://137693950544184",
-	Legendary = "rbxassetid://80504921595928",
-}
-local ARROW = "rbxassetid://130844925944438" -- assets/ui/dex/DexArrow.png (points up)
-local ARROW_Y = 340 -- beside the cards (QM's mockup)
-local kept = {} -- the panel's own parts, kept when a page's cards are cleared
-local PICKED = Color3.new(1, 1, 1) -- the outline on a picked pet (QM: white)
-
-local gui, page, scale
-local pop = 1
-local open = false
-local pets = {} -- this opening's: { model, id, kind, fuse, merged }
-local picks = {} -- up to two of `pets`
-local at = 1 -- the first pet on the page shown
-local cards = {} -- [pet] = its card
-local fuseButton, tip, nameA, nameB, priceLabel
-
--- Gold to fuse the two picked (QM: each pet adds its rarity's price, a hybrid all its pets').
-local function priceOf(a, b)
-	return Fusion.price(Fusion.worth(a.kind, a.fuse, a.worth) + Fusion.worth(b.kind, b.fuse, b.worth))
-end
-
-local function stroked(object, thickness)
-	local s = Instance.new("UIStroke")
-	s.Thickness = thickness
-	s.Color = Color3.new(0, 0, 0)
-	s.LineJoinMode = Enum.LineJoinMode.Round
-	s.Parent = object
-	return s
-end
-
-local function text(parent, size, position, textSize)
-	local label = Instance.new("TextLabel")
-	label.BackgroundTransparency = 1
-	label.Font = FONT
-	label.TextColor3 = Color3.new(1, 1, 1)
-	label.TextSize = textSize
-	label.Size = size
-	label.Position = position
-	label.AnchorPoint = Vector2.new(0.5, 0.5)
-	label.ZIndex = 4
-	stroked(label, 6) -- (QM: 6 px on the panel)
-	label.Parent = parent
-	return label
-end
 
 -- The headshot's camera (tools/pet_headshots.py, "action"): 3/4 front from a little
 -- above, mid-gallop (the Snake and Starfish in their idle stance).
@@ -206,36 +154,170 @@ local function yourPets()
 	return list
 end
 
--- Whether `pet` can go with what's picked (Fusion.combine: anything can, now).
-local function canPick(pet)
-	local other = picks[1]
-	return not other or other == pet or Fusion.combine(other.kind, other.fuse, pet.kind, pet.fuse) ~= nil
+-- Gold to merge the two picked (QM: each pet adds its rarity's price, a hybrid all its pets').
+local function priceOf(a, b)
+	return Fusion.price(Fusion.worth(a.kind, a.fuse, a.worth) + Fusion.worth(b.kind, b.fuse, b.worth))
 end
 
-local showPage
+local function stroked(object, thickness)
+	local s = Instance.new("UIStroke")
+	s.Thickness = thickness
+	s.Color = Color3.new(0, 0, 0)
+	s.LineJoinMode = Enum.LineJoinMode.Round
+	s.Parent = object
+	return s
+end
+
+local function text(parent, size, position, textSize, anchor)
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.FontFace = FONT
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextSize = textSize
+	label.Size = size
+	label.Position = position
+	label.AnchorPoint = anchor or Vector2.new(0.5, 0.5)
+	label.ZIndex = 4
+	label.Parent = parent
+	return label
+end
+
+local gui, panel, scale, fuseButton, priceLabel, pill, tip
+local pop = 1
+local open = false
+local pets = {} -- this opening's: { model, id, kind, fuse, merged, worth }
+local slots = {} -- [1], [2]: the pet in each (either may be nil)
+local active -- the slot clicked last, empty, that the next animal clicked goes in
+local slotUi = {} -- [i] = { button, frame (the outline), view, name, hint }
+local marks = {} -- [pet] = { ring, inner, glow, check }: the picked ones' looks in the pen
+local hover = Instance.new("Highlight") -- the animal under the mouse
+hover.FillTransparency = 1
+hover.OutlineColor = Color3.new(1, 1, 1)
+hover.DepthMode = Enum.HighlightDepthMode.Occluded
+local savedView -- the camera as it was: { type, cframe, fov }
+local viewAt -- the pen view's CFrame while it's open
+local blend = 0 -- 0: the camera as it was, 1: the pen view (eased in and out)
+
+local function pickedCount()
+	return (if slots[1] then 1 else 0) + (if slots[2] then 1 else 0)
+end
+
+local function slotOf(pet)
+	return if slots[1] == pet then 1 elseif slots[2] == pet then 2 else nil
+end
+
+-- A picked animal's look in the pen: a purple glow, a ring under it and a check over it.
+local function mark(pet)
+	local _, size = pet.model:GetBoundingBox()
+	local radius = math.max(size.X, size.Z) / 2 + 1.5
+	local function disc(r, transparency, color)
+		local d = Instance.new("Part")
+		d.Shape = Enum.PartType.Cylinder
+		d.Anchored, d.CanCollide, d.CanQuery, d.CanTouch, d.CastShadow = true, false, false, false, false
+		d.Material = Enum.Material.Neon
+		d.Color = color
+		d.Transparency = transparency
+		d.Size = Vector3.new(0.15, r * 2, r * 2)
+		d.Parent = workspace
+		return d
+	end
+	local glow = Instance.new("Highlight")
+	glow.FillColor = PURPLE
+	glow.FillTransparency = 0.75
+	glow.OutlineColor = PURPLE
+	glow.Adornee = pet.model
+	glow.Parent = gui
+	local check = Instance.new("BillboardGui")
+	check.Size = UDim2.fromOffset(40, 40)
+	check.AlwaysOnTop = true
+	check.Adornee = pet.model.PrimaryPart
+	check.Parent = gui
+	local badge = Instance.new("Frame")
+	badge.Size = UDim2.fromScale(1, 1)
+	badge.BackgroundColor3 = PURPLE
+	Instance.new("UICorner", badge).CornerRadius = UDim.new(0.5, 0)
+	local edge = Instance.new("UIStroke")
+	edge.Color = Color3.new(1, 1, 1)
+	edge.Thickness = 3
+	edge.Parent = badge
+	local tick = text(badge, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 28)
+	tick.Text = "✓"
+	tick.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Heavy)
+	badge.Parent = check
+	marks[pet] = {
+		ring = disc(radius, 0.25, PURPLE),
+		inner = disc(radius - 0.6, 0.7, Color3.fromRGB(225, 190, 255)),
+		glow = glow,
+		check = check,
+		top = size.Y,
+		radius = radius,
+	}
+	local s = Instance.new("UIScale")
+	s.Scale = 0.2
+	s.Parent = badge
+	TweenService:Create(s, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+end
+
+local function unmark(pet)
+	local m = marks[pet]
+	if m then
+		m.ring:Destroy()
+		m.inner:Destroy()
+		m.glow:Destroy()
+		m.check:Destroy()
+		marks[pet] = nil
+	end
+end
+
+-- The marks follow their animals about the pen.
+local FLAT = CFrame.Angles(0, 0, math.pi / 2)
+RunService.RenderStepped:Connect(function()
+	for pet, m in marks do
+		if not pet.model.Parent then
+			continue
+		end
+		local cf, size = pet.model:GetBoundingBox()
+		local floor = cf.Position - Vector3.new(0, size.Y / 2, 0)
+		m.ring.CFrame = CFrame.new(floor + Vector3.new(0, 0.1, 0)) * FLAT
+		m.inner.CFrame = CFrame.new(floor + Vector3.new(0, 0.14, 0)) * FLAT
+		local root = pet.model.PrimaryPart
+		if root then -- (over its head, a little to the right as you see it)
+			m.check.StudsOffsetWorldSpace = floor + Vector3.new(0, size.Y + 1.5, 0) + camera.CFrame.RightVector * size.X * 0.35 - root.Position
+		end
+	end
+end)
 
 local function refresh()
-	for pet, card in cards do
-		local picked = table.find(picks, pet) ~= nil
-		card.Outline.Enabled = picked
-		card.UIScale.Scale = if picked then 1.06 else 1
-		local dim = not picked and #picks >= 1 and not canPick(pet)
-		card.ImageTransparency = if dim then 0.5 else 0
-		card.Art.GroupTransparency = if dim then 0.5 else 0
+	for i = 1, 2 do
+		local ui, pet = slotUi[i], slots[i]
+		if ui.view then
+			ui.view:Destroy()
+			ui.view = nil
+		end
+		if pet then
+			local view = still3D(pet.kind, pet.fuse)
+			if view then
+				view.AnchorPoint = Vector2.new(0.5, 0.5)
+				view.Position = UDim2.fromScale(0.5, 0.44)
+				view.Size = UDim2.fromScale(0.82, 0.82)
+				view.ZIndex = 3
+				view.Parent = ui.button
+				ui.view = view
+			end
+		end
+		ui.name.Text = if pet then Fusion.name(pet.kind, pet.fuse) else ""
+		ui.hint.Visible = pet == nil
+		ui.frame.Enabled = active == i and pet == nil
 	end
-	-- The strip: the picks' names either side of FUSE, "???" till picked.
-	nameA.Text = if picks[1] then Fusion.name(picks[1].kind, picks[1].fuse) else "???"
-	nameB.Text = if picks[2] then Fusion.name(picks[2].kind, picks[2].fuse) else "???"
-	local ready = #picks == 2
-	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's fuse is free: QM)
-	local price = if ready and not lesson then priceOf(picks[1], picks[2]) else 0
-	-- (not ready: the least it could cost with what's picked, so it's never blank: QM)
-	local least = Fusion.price(if picks[1] then Fusion.worth(picks[1].kind, picks[1].fuse, picks[1].worth) + Config.FusePrice.Common else 2 * Config.FusePrice.Common)
-	priceLabel.Text = if lesson then "FREE" elseif ready then Hud.money(price) else Hud.money(least)
-	local can = ready and (player:GetAttribute("Gold") or 0) >= price
-	local art = if can then BUTTON_ART.on else BUTTON_ART.off
-	fuseButton.Image = if art ~= "" then art else BUTTON_ART.old
-	fuseButton.ImageColor3 = if can or art ~= "" then Color3.new(1, 1, 1) else Color3.fromRGB(150, 150, 150)
+	local count = pickedCount()
+	pill.Text = count .. "/2 Selected"
+	local ready = count == 2
+	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's merge is free: QM)
+	local price = if ready and not lesson then priceOf(slots[1], slots[2]) else 0
+	fuseButton.Image = if ready then BUTTON.on else BUTTON.off
+	priceLabel.Visible = ready
+	priceLabel.Text = if lesson then "FREE" else Hud.money(price)
+	priceLabel.TextColor3 = if lesson or (player:GetAttribute("Gold") or 0) >= price then CASH_GREEN else Color3.fromRGB(255, 70, 70)
 	if ready and not fuseButton:GetAttribute("Ready") then -- a pop once it's ready
 		local s = fuseButton:FindFirstChildOfClass("UIScale")
 		s.Scale = 0.85
@@ -244,131 +326,133 @@ local function refresh()
 	fuseButton:SetAttribute("Ready", ready)
 end
 
-local function toggle(pet)
-	local i = table.find(picks, pet)
+-- Clicking an animal: out if it's in, else into the slot you clicked, or the first free one.
+local function pickAnimal(pet)
+	local i = slotOf(pet)
 	if i then
-		table.remove(picks, i)
-	elseif canPick(pet) and #picks < 2 then
-		table.insert(picks, pet)
-		Sounds.play("merge_pop")
+		slots[i] = nil
+		unmark(pet)
 	else
-		return -- (it's dimmed: no tip, QM)
+		local into = if active and not slots[active] then active elseif not slots[1] then 1 elseif not slots[2] then 2 else nil
+		if not into then
+			return -- (both full: take one out first)
+		end
+		slots[into] = pet
+		active = nil
+		mark(pet)
+		Sounds.play("merge_pop")
 	end
 	refresh()
 end
 
-local function arrow(position, turn, onClick)
-	local a = Instance.new("ImageButton")
-	a.BackgroundTransparency = 1
-	a.AutoButtonColor = false
-	a.Image = ARROW
-	a.Rotation = turn
-	a.AnchorPoint = Vector2.new(0.5, 0.5)
-	a.Size = UDim2.fromOffset(140, 140)
-	a.Position = position
-	a.ZIndex = 3
-	a.Activated:Connect(onClick)
-	a.Parent = page
-	return a
+-- Clicking a slot: a full one empties; an empty one waits for the animal you click.
+local function clickSlot(i)
+	if slots[i] then
+		unmark(slots[i])
+		slots[i] = nil
+		active = nil
+	else
+		active = if active == i then nil else i
+	end
+	Sounds.play("button_click")
+	refresh()
 end
 
--- One page of up to 12 cards, with arrows to the pages either side.
-function showPage(first)
-	at = first
-	for _, child in page:GetChildren() do
-		if child:IsA("GuiObject") and not kept[child] then
-			child:Destroy()
+-- The animal at a point on the screen, if any.
+local function petAt(point)
+	local models, byModel = {}, {}
+	for _, pet in pets do
+		if pet.model.Parent then
+			table.insert(models, pet.model)
+			byModel[pet.model] = pet
 		end
 	end
-	table.clear(cards)
-	local perPage = COLUMNS * ROWS
-	if first > 1 then
-		arrow(UDim2.fromOffset(-100, ARROW_Y), -90, function()
-			Sounds.play("book_flip")
-			showPage(first - perPage)
-		end)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = models
+	local ray = camera:ViewportPointToRay(point.X, point.Y)
+	local hit = workspace:Raycast(ray.Origin, ray.Direction * 500, params)
+	if not hit then
+		return nil
 	end
-	if first + perPage <= #pets then
-		arrow(UDim2.fromOffset(PAGE.X + 100, ARROW_Y), 90, function()
-			Sounds.play("book_flip")
-			showPage(first + perPage)
-		end)
-	end
-	for i = first, math.min(first + perPage - 1, #pets) do
-		local pet = pets[i]
-		local slot = i - first
-		local col, row = slot % COLUMNS, slot // COLUMNS
-		local card = Instance.new("ImageButton")
-		card.Name = pet.kind
-		card.BackgroundTransparency = 1
-		card.AutoButtonColor = false
-		card.Image = CARDS[Fusion.rarity(pet.kind, pet.fuse)] or CARDS.Common -- (a hybrid: the rarer of its two)
-		card.Size = UDim2.fromOffset(CARD, CARD)
-		card.AnchorPoint = Vector2.new(0.5, 0.5)
-		card.Position = UDim2.fromOffset(
-			INSIDE.Min.X + GAP_X + col * (CARD + GAP_X) + CARD / 2,
-			INSIDE.Min.Y + GAP_Y + row * (CARD + GAP_Y) + CARD / 2
-		)
-		Instance.new("UIScale").Parent = card
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = CARD_CORNER
-		corner.Parent = card
-		local outline = Instance.new("UIStroke") -- picked (QM: choosing a pet outlines it)
-		outline.Name = "Outline"
-		outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		outline.Thickness = 8
-		outline.Color = PICKED
-		outline.Enabled = false
-		outline.Parent = card
-		local art = Instance.new("CanvasGroup") -- (fades with the card when it can't be picked)
-		art.Name = "Art"
-		art.BackgroundTransparency = 1
-		art.AnchorPoint = Vector2.new(0.5, 0.5)
-		art.Position = UDim2.fromScale(0.5, 0.5)
-		art.Size = UDim2.fromOffset(ART, ART)
-		art.Parent = card
-		local view = still3D(pet.kind, pet.fuse)
-		if view then
-			view.Size = UDim2.fromScale(1, 1)
-			view.Parent = art
+	for model, pet in byModel do
+		if hit.Instance:IsDescendantOf(model) then
+			return pet
 		end
-		if not pet.fuse and (pet.merged or 1) > 1 then -- how many it's merged from (no names: QM)
-			local tag = text(card, UDim2.new(1, 0, 0, 30), UDim2.new(0.5, 0, 1, -14), 26)
-			tag.Text = "x" .. pet.merged
-		end
-		card.Activated:Connect(function()
-			toggle(pet)
-		end)
-		card.Parent = page
-		cards[pet] = card
 	end
-	refresh()
+	return nil
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+	if not open or processed then
+		return
+	end
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		local pet = petAt(Vector2.new(input.Position.X, input.Position.Y))
+		if pet then
+			pickAnimal(pet)
+		end
+	end
+end)
+UserInputService.InputChanged:Connect(function(input)
+	if not open or input.UserInputType ~= Enum.UserInputType.MouseMovement then
+		return
+	end
+	local pet = petAt(Vector2.new(input.Position.X, input.Position.Y))
+	hover.Adornee = if pet and not marks[pet] then pet.model else nil
+end)
+
+-- The camera over your pen, from its open side (where you come in), looking down.
+local function penView()
+	local index = player:GetAttribute("Pen")
+	local pen = index and workspace:FindFirstChild("Pens") and workspace.Pens:FindFirstChild("Pen" .. index)
+	local area = pen and pen:FindFirstChild("Area")
+	if not area then
+		return nil
+	end
+	local middle = area.Position - Vector3.new(0, area.Size.Y / 2, 0)
+	local spawn = pen:FindFirstChild("Spawn")
+	local into = if spawn then (middle - spawn.Position) * Vector3.new(1, 0, 1) else area.CFrame.LookVector * Vector3.new(1, 0, 1)
+	into = if into.Magnitude > 0.01 then into.Unit else Vector3.new(0, 0, -1)
+	local look = into * math.cos(VIEW.PITCH) - Vector3.new(0, math.sin(VIEW.PITCH), 0)
+	local half = math.max(area.Size.X, area.Size.Z) / 2 * VIEW.FIT
+	local aspect = camera.ViewportSize.X / math.max(camera.ViewportSize.Y, 1)
+	local tanV = math.tan(math.rad(VIEW.FOV) / 2)
+	local distance = half / (tanV * aspect) -- (wide enough across)
+	distance = math.max(distance, half * math.sin(VIEW.PITCH) / (tanV * (1 - VIEW.RAISE)) + half * math.cos(VIEW.PITCH)) -- (and down)
+	local from = middle - look * distance
+	-- Turned down a touch, so the pen sits above the panel.
+	return CFrame.lookAt(from, middle) * CFrame.Angles(-math.atan(tanV * VIEW.RAISE), 0, 0)
+end
+
+local function sinkMoves()
+	return Enum.ContextActionResult.Sink
 end
 
 local function setPop(s)
 	pop = s
 	local screen = camera.ViewportSize
-	scale.Scale = math.min(screen.X * SCREEN_SHARE / PAGE.X, screen.Y * 0.8 / PAGE.Y) * pop
+	scale.Scale = math.min(screen.X * SCREEN_SHARE / PANEL.size.X, screen.Y * HEIGHT_SHARE / PANEL.size.Y) * pop
 end
 
 local close
 
+local function showTip(message)
+	tip.Text = message
+	tip.Visible = true
+	task.delay(1.6, function()
+		tip.Visible = false
+	end)
+end
+
 local function fuse()
-	local a, b = picks[1], picks[2]
+	local a, b = slots[1], slots[2]
 	if not a or not b then
-		tip.Text = "Pick two pets to merge"
-		tip.Visible = true
-		task.delay(1.6, function()
-			tip.Visible = false
-		end)
+		showTip("Pick two animals to merge")
 		return
 	end
 	if not player:GetAttribute("FuseLesson") and (player:GetAttribute("Gold") or 0) < priceOf(a, b) then
-		tip.Text = "Not enough gold"
-		tip.Visible = true
-		task.delay(1.6, function()
-			tip.Visible = false
-		end)
+		showTip("Not enough cash")
 		return
 	end
 	local base, donor, aIsBase = Fusion.combine(a.kind, a.fuse, b.kind, b.fuse)
@@ -376,7 +460,7 @@ local function fuse()
 		return
 	end
 	local baseModel = if aIsBase then a.model else b.model
-	-- The two are pulled up over the base and fuse, as a merge's are; the hybrid
+	-- The two are pulled up over the base and merge, as a merge's are; the hybrid
 	-- drops down from there (Pen.client, or Ride.client's starter).
 	if baseModel.Parent then
 		local index = player:GetAttribute("Pen")
@@ -392,16 +476,35 @@ local function fuse()
 	end
 	ReplicatedStorage:WaitForChild("FusePets"):FireServer(a.id, b.id)
 	Hud.fusedAt = os.clock() -- (Tutorial waits for it)
-	close()
+	-- (the view stays a moment, so you see them merge)
+	for pet in marks do
+		unmark(pet)
+	end
+	slots[1], slots[2] = nil, nil
+	refresh()
+	task.delay(1.6, function()
+		close()
+	end)
 end
 
 local function openPage()
+	local view = penView()
+	if not view then
+		return false
+	end
 	pets = yourPets()
 	open = true
-	table.clear(picks)
+	slots[1], slots[2], active = nil, nil, nil
 	gui.Enabled = true
-	showPage(1)
-	tip.Visible = false -- (no "two kinds" message: QM)
+	refresh()
+	tip.Visible = false
+	if not savedView then
+		savedView = { type = camera.CameraType, cframe = camera.CFrame, fov = camera.FieldOfView }
+	end
+	viewAt = view
+	ContextActionService:BindActionAtPriority("MergeViewStill", sinkMoves, false, Enum.ContextActionPriority.High.Value + 1,
+		Enum.PlayerActions.CharacterForward, Enum.PlayerActions.CharacterBackward, Enum.PlayerActions.CharacterLeft,
+		Enum.PlayerActions.CharacterRight, Enum.PlayerActions.CharacterJump)
 	ModalPop.open(setPop)
 	Gamepad.openMenu("Fuse", { close = close })
 	Hud.fuseToggled(true)
@@ -413,100 +516,138 @@ function close(instant)
 		return
 	end
 	open = false
+	hover.Adornee = nil
+	for pet in marks do
+		unmark(pet)
+	end
+	slots[1], slots[2], active = nil, nil, nil
+	ContextActionService:UnbindAction("MergeViewStill")
+	if instant then
+		blend = 0
+	end
 	Gamepad.closeMenu("Fuse")
 	ModalPop.close(setPop, function()
 		gui.Enabled = false
-		table.clear(cards)
-		for _, child in page:GetChildren() do
-			if child:IsA("GuiObject") and not kept[child] then
-				child:Destroy()
-			end
-		end
 	end, instant)
 	Hud.fuseToggled(false)
 end
 
--- The page in the middle of the screen, as the dictionary's; clicking off it closes it.
+-- The camera: eased over to the pen view while it's open and back again after, held
+-- there every frame (nothing else gets to move it meanwhile).
+RunService:BindToRenderStep("MergeView", Enum.RenderPriority.Camera.Value + 2, function(dt)
+	if not savedView then
+		return
+	end
+	blend = math.clamp(blend + (if open then dt else -dt) / VIEW.TIME, 0, 1)
+	if blend <= 0 and not open then
+		camera.CameraType = savedView.type
+		camera.FieldOfView = savedView.fov
+		savedView = nil
+		return
+	end
+	local e = blend * blend * (3 - 2 * blend)
+	camera.CameraType = Enum.CameraType.Scriptable
+	camera.CFrame = savedView.cframe:Lerp(viewAt, e)
+	camera.FieldOfView = savedView.fov + (VIEW.FOV - savedView.fov) * e
+end)
+
+-- QM's panel along the bottom of the screen.
 gui = Instance.new("ScreenGui")
 gui.Name = "FuseMenu"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
-gui.DisplayOrder = -1 -- under the HUD, so the Fuse button that closes it stays on top
+gui.DisplayOrder = -1 -- under the HUD
 gui.Enabled = false
-local function over(object, point)
-	local min, size = object.AbsolutePosition, object.AbsoluteSize
-	return point.X >= min.X and point.Y >= min.Y and point.X <= min.X + size.X and point.Y <= min.Y + size.Y
-end
-local backdrop = Instance.new("TextButton")
-backdrop.BackgroundTransparency = 1
-backdrop.Text = ""
-backdrop.AutoButtonColor = false
-backdrop.Selectable = false
-backdrop.Size = UDim2.fromScale(1, 1)
-backdrop.ZIndex = 0
-backdrop.Activated:Connect(function(input)
-	local point = Vector2.new(input.Position.X, input.Position.Y)
-	if over(page, point) then
-		return
-	end
-	for _, d in page:GetDescendants() do
-		if d:IsA("GuiButton") and d.Visible and over(d, point) then
-			return
-		end
-	end
-	close()
-end)
-backdrop.Parent = gui
-page = Instance.new("ImageLabel")
-page.Name = "Page"
-page.BackgroundTransparency = 1
-page.Image = if PAGE_ART ~= "" then PAGE_ART else OLD_PAGE_ART
-page.AnchorPoint = Vector2.new(0.5, 0.5)
-page.Position = UDim2.fromScale(0.5, 0.5)
-page.Size = UDim2.fromOffset(PAGE.X, PAGE.Y)
+hover.Parent = gui
+panel = Instance.new("ImageLabel")
+panel.Name = "Panel"
+panel.BackgroundTransparency = 1
+panel.Image = PANEL.id
+panel.AnchorPoint = Vector2.new(0.5, 1)
+panel.Position = UDim2.new(0.5, 0, 1, -16)
+panel.Size = UDim2.fromOffset(PANEL.size.X, PANEL.size.Y)
 scale = Instance.new("UIScale")
-scale.Parent = page
-page.Parent = gui
+scale.Parent = panel
+panel.Parent = gui
 
--- QM's FUSE button over the strip, grey till two are picked (and you can pay), the
--- price under its arm ("FREE" in the fuse lesson, as QM's mockups); the picks' names
--- either side.
+pill = text(panel, UDim2.fromOffset(236, 62), UDim2.fromOffset(PILL.X, PILL.Y), 30)
+
+for i, rect in SLOTS do
+	local button = Instance.new("TextButton")
+	button.Name = "Slot" .. i
+	button.Text = ""
+	button.BackgroundTransparency = 1
+	button.AutoButtonColor = false
+	button.Position = UDim2.fromOffset(rect.Min.X, rect.Min.Y)
+	button.Size = UDim2.fromOffset(rect.Width, rect.Height)
+	button.ZIndex = 2
+	local frame = Instance.new("UIStroke") -- (waiting for an animal: QM's "click the slot, then the animal")
+	frame.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	frame.Color = Color3.new(1, 1, 1)
+	frame.Thickness = 5
+	frame.Enabled = false
+	frame.Parent = button
+	Instance.new("UICorner", button).CornerRadius = UDim.new(0.1, 0)
+	local name = text(button, UDim2.new(1, -12, 0, 40), UDim2.new(0.5, 0, 1, -24), 32)
+	name.TextScaled = true
+	Instance.new("UITextSizeConstraint", name).MaxTextSize = 32
+	name.ZIndex = 5
+	stroked(name, 4)
+	local hint = text(button, UDim2.fromScale(1, 0.3), UDim2.fromScale(0.5, 0.5), 36)
+	hint.Text = "Select"
+	button.Activated:Connect(function()
+		clickSlot(i)
+	end)
+	button.Parent = panel
+	slotUi[i] = { button = button, frame = frame, name = name, hint = hint }
+end
+
 fuseButton = Instance.new("ImageButton")
-fuseButton.Name = "Fuse"
+fuseButton.Name = "Merge"
 fuseButton.BackgroundTransparency = 1
 fuseButton.AutoButtonColor = false
-fuseButton.Image = BUTTON_ART.old
+fuseButton.Image = BUTTON.off
 fuseButton.AnchorPoint = Vector2.new(0.5, 0.5)
-fuseButton.Size = UDim2.fromOffset(BUTTON.X, BUTTON.Y)
-fuseButton.Position = UDim2.fromOffset(PAGE.X / 2, BUTTON_Y)
+fuseButton.Size = UDim2.fromOffset(BUTTON.size.X, BUTTON.size.Y)
+fuseButton.Position = UDim2.fromOffset(BUTTON_AT.X, BUTTON_AT.Y)
 fuseButton.ZIndex = 5
 Instance.new("UIScale").Parent = fuseButton
 fuseButton.Activated:Connect(fuse)
-fuseButton.Parent = page
-priceLabel = text(fuseButton, UDim2.new(1, -24, 0, 70), UDim2.fromScale(0.5, 0.72), 60) -- (QM's mockups: under the arm; QM, Oct 7: a touch smaller than 76)
+fuseButton.Parent = panel
+-- The price, beside the drawn cash (QM's mockup).
+priceLabel = text(fuseButton, UDim2.fromOffset(150, 60), UDim2.fromOffset(112, BUTTON.size.Y / 2), 44, Vector2.new(0, 0.5))
+priceLabel.TextXAlignment = Enum.TextXAlignment.Left
+priceLabel.TextScaled = true
+Instance.new("UITextSizeConstraint", priceLabel).MaxTextSize = 44
 priceLabel.ZIndex = 6
-priceLabel.TextScaled = true -- (a long price fits)
-Instance.new("UITextSizeConstraint", priceLabel).MaxTextSize = 60
+stroked(priceLabel, 4)
 for _, name in { "Gold", "FuseLesson" } do
 	player:GetAttributeChangedSignal(name):Connect(function()
 		if open then
-			refresh() -- (grey or green as your gold changes)
+			refresh()
 		end
 	end)
 end
-local side = (PAGE.X - BUTTON.X) / 2 -- the strip either side of FUSE
-nameA = text(page, UDim2.fromOffset(side - 40, 70), UDim2.fromOffset(side / 2, STRIP_Y), 56)
-nameB = text(page, UDim2.fromOffset(side - 40, 70), UDim2.fromOffset(PAGE.X - side / 2, STRIP_Y), 56)
-for _, label in { nameA, nameB } do
-	label.TextScaled = true -- (a long name fits)
-	Instance.new("UITextSizeConstraint", label).MaxTextSize = 56
-end
-tip = text(page, UDim2.fromOffset(700, 50), UDim2.fromOffset(PAGE.X / 2, (INSIDE.Min.Y + INSIDE.Max.Y) / 2), 40)
+
+-- The X, on the panel's top right corner.
+local closeButton = Instance.new("ImageButton")
+closeButton.Name = "Close"
+closeButton.BackgroundTransparency = 1
+closeButton.AutoButtonColor = false
+closeButton.Image = CLOSE
+closeButton.AnchorPoint = Vector2.new(0.5, 0.5)
+closeButton.Position = UDim2.fromOffset(PANEL.size.X - 14, 58)
+closeButton.Size = UDim2.fromOffset(84, 84)
+closeButton.ZIndex = 6
+closeButton.Activated:Connect(function()
+	close()
+end)
+closeButton.Parent = panel
+
+tip = text(panel, UDim2.fromOffset(600, 50), UDim2.fromOffset(PANEL.size.X / 2, -40), 40)
 tip.ZIndex = 6
 tip.Visible = false
-for _, object in { fuseButton, priceLabel, nameA, nameB, tip } do
-	kept[object] = true
-end
+stroked(tip, 4)
 
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
 	setPop(pop)
@@ -514,7 +655,7 @@ end)
 setPop(1)
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- The Fuse button: opens the page, or closes it again.
+-- The Merge button: opens the view, or closes it again.
 Hud.onFuse = function()
 	if open then
 		close()
@@ -524,21 +665,21 @@ Hud.onFuse = function()
 end
 Hud.closeFuse = close
 
--- The tutorial's fuse step (Tutorial): what to click next while the page is open,
--- the next pet to pick or else FUSE (and true); nil while it's shut, false if
--- there's no pet on the page it can pick.
-Hud.fuseGuide = function()
-	if not open then
-		return nil
-	elseif #picks >= 2 then
-		return fuseButton, true
-	end
-	for _, pet in pets do
-		if cards[pet] and not table.find(picks, pet) and canPick(pet) then
-			return cards[pet]
+-- (Studio only, for trying it out from the command bar: the LocalPlayer's MergeTest
+-- attribute "open", "close", or a number to click that animal, "slot1" / "slot2".)
+if RunService:IsStudio() then
+	player:GetAttributeChangedSignal("MergeTest"):Connect(function()
+		local v = player:GetAttribute("MergeTest")
+		if v == "open" and not open then
+			openPage()
+		elseif v == "close" then
+			close()
+		elseif v == "slot1" or v == "slot2" then
+			clickSlot(if v == "slot1" then 1 else 2)
+		elseif typeof(v) == "number" and pets[v] then
+			pickAnimal(pets[v])
 		end
-	end
-	return if picks[1] then cards[picks[1]] else false -- (clicking it unpicks it)
+	end)
 end
 
 -- Riding off closes it.
