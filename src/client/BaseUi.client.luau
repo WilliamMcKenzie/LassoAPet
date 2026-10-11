@@ -37,7 +37,7 @@ local QUEST_ART = {
 	-- panel's, so "Quests" came out huge and the chevron got cut: QM, Oct 11)
 	panel = "rbxassetid://71052597087124", -- Quests.png, 453 x 265: open, "Quests" and its fold chevron drawn in
 	closed = "rbxassetid://123446992263929", -- QuestsClosed.png, 453 x 86: folded up
-	one = "", -- QuestsOne.png, 453 x 184: room for one quest, when one questline's done (QM, Oct 11; till it's uploaded, the pieces)
+	one = "rbxassetid://138850397244223", -- QuestsOne.png, 453 x 184: room for one quest, when one questline's done (QM, Oct 11; till it's uploaded, the pieces)
 	bar = "rbxassetid://88826165672196", -- QuestBG.png, 407 x 22
 	fill = "rbxassetid://76511917573203", -- QuestFill.png, 406 x 22 (QM's second, Oct 11)
 	claim = "rbxassetid://113926447181781", -- ClaimQuest.png, 399 x 62
