@@ -15,7 +15,7 @@
 --             pushing the stick right out). WAIT_FOR_BOSS seconds after that, BOSS IN
 --             shows with BOSS_SECONDS on it: still in the Meadow, so the Chicken.
 --   5. gate   home with an egg, it goes in your pen and hatches by itself (Hatchery);
---             the camera flies to the Desert's gate (the next goal) and back. Done:
+--             the camera zooms to the Desert's gate (the next goal) and back. Done:
 --             TutorialDone, and the rest of the UI comes back.
 --
 -- A ride that comes home with nothing goes back to step 3. Runs whenever the "Tutorial"
@@ -58,10 +58,7 @@ local SLOW_TIME = 0.5 -- seconds into the slow-down for its middle (the sigmoid'
 local SLOW_STEEP = 9 -- how sharp its turn is
 local WAIT_FOR_BOSS = 5 -- seconds after you sprint till BOSS IN shows (QM)
 local BOSS_SECONDS = 5 -- and how long it gives you
-local GATE_HOLD = 2 -- seconds the camera stays on the last gate (the Jurassic's)
-local GATE_BEAT = 0.5 -- and on each one before it
-local GATE_FLY = 1.1 -- seconds from one gate to the next
-local GATE_HIGH = 16 -- studs up the camera flies, near the ground (QM: not from so high), just past each gate
+local GATE_IN, GATE_HOLD, GATE_OUT = 0.8, 1.25, 0.65 -- seconds the camera takes to the Desert's gate, stays, and comes back (QM: twice as fast)
 local NEW_PET_WAIT = 12 -- seconds after a ride for its egg to hatch in your pen
 
 local function myPen()
@@ -315,13 +312,16 @@ local function slowUntil(waitFor)
 	TutorialRide.timeScale = 1
 end
 
--- The camera flies up and down the course through every biome past the Meadow, a beat on
--- each one's gate, to the Jurassic (QM, Oct 11: everything that's still to come), and
--- comes back.
+-- The camera zooms to the Desert's gate (the next goal) and back (QM, Oct 11: just the
+-- Desert again, not the whole course, and twice as fast).
 local function showGate()
+	local gateZ = -Config.Biomes[1].Length
+	local look = Vector3.new(0, 10, gateZ)
+	local view = CFrame.lookAt(look + Vector3.new(0, 26, 80), look)
 	local was, wasType = camera.CFrame, camera.CameraType
 	camera.CameraType = Enum.CameraType.Scriptable
 	player:SetAttribute("Cutscene", true)
+	local high = was + Vector3.new(0, 60, 0)
 	local function fly(a, b, c, time)
 		local t = 0
 		while t < time do
@@ -332,24 +332,9 @@ local function showGate()
 			camera.CFrame = CFrame.new(p) * a.Rotation:Lerp(c.Rotation, u)
 		end
 	end
-	-- Just past each gate in turn (it'd hide the biome from in front of it), low, down its biome.
-	local stops, edge = {}, 0
-	for i, biome in Config.Biomes do
-		edge -= biome.Length
-		local next = Config.Biomes[i + 1]
-		if next then
-			local look = Vector3.new(0, GATE_HIGH * 0.6, edge - 400)
-			table.insert(stops, CFrame.lookAt(Vector3.new(0, GATE_HIGH, edge - 40), look))
-		end
-	end
-	local at = was
-	for i, stop in stops do
-		local mid = CFrame.new(at.Position:Lerp(stop.Position, 0.5) + Vector3.new(0, if i == 1 then 40 else 6, 0)) * at.Rotation
-		fly(at, mid, stop, if i == 1 then 1.6 else GATE_FLY)
-		task.wait(if i == #stops then GATE_HOLD else GATE_BEAT)
-		at = stop
-	end
-	fly(at, CFrame.new(at.Position:Lerp(was.Position, 0.5) + Vector3.new(0, 120, 0)) * at.Rotation, was, 1.8)
+	fly(was, high, view, GATE_IN)
+	task.wait(GATE_HOLD)
+	fly(view, high, was, GATE_OUT)
 	camera.CameraType = wasType
 	player:SetAttribute("Cutscene", nil)
 end
