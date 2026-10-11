@@ -185,6 +185,16 @@ return {
 		{ "Marking", 146, 46, 60 }, -- cap
 		{ "Marking", 104, 30, 46 }, -- cap rim
 	},
+	VolcanoTortoise = {
+		{ "Body", 178, 150, 102 }, -- skin, beak
+		{ "Belly", 150, 122, 82 }, -- belly, lower jaw, brows
+		{ "Marking", 122, 66, 44 }, -- shell
+		{ "Marking", 92, 50, 36 }, -- shell rim
+		{ "Marking", 118, 78, 62 }, -- shell top
+		{ "Horn", 112, 96, 90 }, -- volcano
+		{ "Horn", 92, 78, 74 }, -- volcano top
+		{ "Hoof", 236, 214, 170 }, -- nails
+	},
 	KingCrab = {
 		{ "Body", 226, 58, 48 }, -- shell, claws, eye stalks
 		{ "Body", 160, 32, 40 }, -- face, pincer undersides

@@ -137,6 +137,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	SoulHorse = "Very thoughtful, soul horse sends souls to his friends each year.",
 	SnackYak = "A hungry yak tempted by carrots. Likes to snack on the go, can stampede for hours on end.",
 	RoboShark = "Built a suit of robo-armor to escape the ocean. Can eat any and all animals.",
+	VolcanoTortoise = "Fell asleep in the sun for three hundred years. Woke up as a volcano.",
 	Loong = "The loongest dragon around. Ex sword-swallower for the circus, passionate about entertainment.",
 }
 

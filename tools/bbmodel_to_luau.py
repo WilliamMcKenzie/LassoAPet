@@ -98,6 +98,35 @@ def wedge_frame(e):
     return center, R, (width, np.linalg.norm(u), np.linalg.norm(w))
 
 
+def wedge_at(a, u, w, d):
+    """WedgePart (center, rotation, size) with its right angle at a, legs u (up) and
+    w (back to front reversed), extruded along d."""
+    Y = u / np.linalg.norm(u)
+    Z = -w / np.linalg.norm(w)
+    X = np.cross(Y, Z)
+    center = a + u / 2 + w / 2 + X * np.dot(d, X) / 2
+    return center, np.stack([X, Y, Z], axis=1), (abs(np.dot(d, X)), np.linalg.norm(u), np.linalg.norm(w))
+
+
+def prism_wedges(e):
+    """A triangular prism whose triangle has no right angle (QM's beak, Oct 11), as two
+    WedgeParts split along the altitude from the corner opposite the longest side."""
+    verts = mesh_verts(e)
+    tris = [f["vertices"] for f in e["faces"].values() if len(f["vertices"]) == 3]
+    t0 = [verts[k] for k in tris[0]]
+    d = np.mean([verts[k] for k in tris[1]], axis=0) - np.mean(t0, axis=0)
+    i = max(range(3), key=lambda i: np.linalg.norm(t0[(i + 2) % 3] - t0[(i + 1) % 3]))
+    p, b, c = t0[i], t0[(i + 1) % 3], t0[(i + 2) % 3]
+    s = np.dot(p - b, c - b) / np.dot(c - b, c - b)
+    f = b + s * (c - b)
+    out = []
+    for q in (b, c):
+        if np.linalg.norm(q - f) > 1e-6:
+            center, R, size = wedge_at(f, p - f, q - f, d)
+            out.append(("WedgePart", center, R, size))
+    return out
+
+
 def mesh_verts(e):
     """Mesh vertices in model space (studs), in file order."""
     R0, o = element_rotation(e), np.array(e.get("origin") or (0, 0, 0), float)
@@ -216,7 +245,10 @@ def mesh_parts(e, model_center):
     if n == 4 and faces == [4]:
         return plate(e, model_center)
     if n == 6 and sorted(faces) == [3, 3, 4, 4, 4]:
-        center, R, size = wedge_frame(e)
+        try:
+            center, R, size = wedge_frame(e)
+        except ValueError:
+            return prism_wedges(e)  # a triangle with no right angle: two wedges back to back
         return [("WedgePart", center, R, size)]
     if n == 5 and sorted(faces) == [3, 3, 3, 3, 4]:
         return pyramid(e)

@@ -74,5 +74,15 @@ def main(out=OUT):
     print(len(egg.parts), "parts")
 
 
+def game():
+    """Into the game: designs/eggs/c_style/VolcanoTortoiseEgg.bbmodel, its Luau model and
+    assets/ui/VolcanoTortoiseEggRender.png (ocean_eggs.main)."""
+    O.EGGS = [("VolcanoTortoise", tortoise_egg)]
+    O.main("VolcanoTortoise", preview=OUT)
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["game"]:
+        game()
+    else:
+        main(*sys.argv[1:])
