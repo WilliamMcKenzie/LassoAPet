@@ -9,8 +9,13 @@
 -- lasso and gold are watched here; the rest are step() calls where they happen
 -- (Hatchery, Nests, PenLevel).
 --
--- Zones: every player's zone unlocks, one pass per player (the session id is
--- their UserId), so it runs across sessions.
+-- Captured Animals and Zones Reached (QM, Oct 11: the Egg Rodeo's progress): for
+-- players who started on it (Funnel.join: Hatchery, from their first session on),
+-- one pass per player (the session id is their UserId), so they run across
+-- sessions. Captured Animal N: the Nth animal brought home for its egg (1 to
+-- CAPTURE_STEPS). Reached <biome>: the first ride through each biome's barrier
+-- (Gold.server's BreakGate), every biome you skipped on the way counted too.
+-- (The old Zones funnel counted pen upgrades, which unlock nothing now.)
 --
 -- Shop: each time the shop opens is a pass: opened, picked an offer (the
 -- Robux prompt), bought it.
@@ -111,11 +116,28 @@ function Funnel.track(player)
 	end
 end
 
--- PenLevel: the player's pen went up to `level` (2 is the Desert).
-function Funnel.zone(player, level)
-	local biome = Config.Biomes[level]
-	if biome and level >= 2 then
-		pcall(AnalyticsService.LogFunnelStepEvent, AnalyticsService, player, "Zones", tostring(player.UserId), level - 1, "Unlocked " .. biome.Name)
+local CAPTURE_STEPS = 20
+local cohort = {} -- [player] = true: started on the Egg Rodeo, so in the progress funnels
+
+function Funnel.join(player)
+	cohort[player] = true
+end
+
+-- Hatchery: the player's `n`th animal brought home (their saved count).
+function Funnel.captured(player, n)
+	if cohort[player] and n >= 1 and n <= CAPTURE_STEPS then
+		pcall(AnalyticsService.LogFunnelStepEvent, AnalyticsService, player, "Captured Animals", tostring(player.UserId), n, "Captured Animal " .. n)
+	end
+end
+
+-- Gold.server: the player rode through biome `to`'s barrier, the last they'd broken
+-- `from` (1: none yet). Step 1 is the Desert (biome 2).
+function Funnel.reached(player, from, to)
+	if not cohort[player] then
+		return
+	end
+	for i = math.max(from + 1, 2), math.min(to, #Config.Biomes) do
+		pcall(AnalyticsService.LogFunnelStepEvent, AnalyticsService, player, "Zones Reached", tostring(player.UserId), i - 1, "Reached " .. Config.Biomes[i].Name)
 	end
 end
 
@@ -174,7 +196,7 @@ task.spawn(function() -- (Riders makes these: don't hold up whoever requires thi
 	end)
 end)
 Players.PlayerRemoving:Connect(function(player)
-	logged[player], shopPass[player] = nil, nil
+	logged[player], shopPass[player], cohort[player] = nil, nil, nil
 end)
 
 return Funnel

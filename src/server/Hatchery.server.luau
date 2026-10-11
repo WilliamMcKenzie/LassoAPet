@@ -263,6 +263,7 @@ local function load(player)
 						end
 					end
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
+					profile.homeEggs = tonumber(data.homeEggs) -- (animals brought home, counted from the Egg Rodeo's first session: Funnel)
 					profile.rainbowTrail = data.rainbowTrail == true or nil
 					player:SetAttribute("FuseLesson", nil) -- (no fuse lesson any more: QM, Oct 8)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
@@ -309,6 +310,10 @@ local function load(player)
 	profiles[player] = profile
 	if not profile.tutorial then
 		Funnel.track(player) -- a new player
+		profile.homeEggs = profile.homeEggs or 0 -- (in the progress funnels from now on)
+	end
+	if profile.homeEggs then
+		Funnel.join(player)
 	end
 	local tutorial = Config.Tutorial and not profile.tutorial
 	if tutorial then
@@ -330,7 +335,7 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
+		rainbowTrail = profile.rainbowTrail, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -509,6 +514,10 @@ remote("DeliverEgg", function(player, kind)
 	end
 	player:SetAttribute("CarriedEgg", nil)
 	Funnel.step(player, "Brought Egg Home")
+	if profile.homeEggs then
+		profile.homeEggs += 1
+		Funnel.captured(player, profile.homeEggs)
+	end
 	-- The tutorial's egg brought home goes straight into the pen (balance pass, Oct 6: a
 	-- fifth of new players left at "Place your egg" a second time). The first spot clear
 	-- of the starter pet, from the middle out.

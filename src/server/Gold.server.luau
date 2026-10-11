@@ -19,6 +19,7 @@ local RunService = game:GetService("RunService")
 local MAX_PER_RIDE = 100000 -- ignore anything bigger than a ride could earn
 local Config = require(ReplicatedStorage.Shared.Config)
 require(script.Parent.Passes) -- (PassDoubleGold: x2 ride cash, below)
+local Funnel = require(script.Parent.Funnel)
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "Gold")
 if not ok then
@@ -155,6 +156,7 @@ breakGate.OnServerEvent:Connect(function(player, i)
 	local broken = player:GetAttribute("GatesBroken") or 1
 	if typeof(i) == "number" and i > broken and i <= #Config.Biomes then
 		player:SetAttribute("GatesBroken", i)
+		Funnel.reached(player, broken, i) -- (analytics: Zones Reached)
 	end
 end)
 

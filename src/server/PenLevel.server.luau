@@ -367,6 +367,5 @@ upgrade.OnServerInvoke = function(player)
 		player:SetAttribute("DesertAt", os.time()) -- (Stats.server: how long they stay after)
 	end
 	Funnel.step(player, "Unlocked Zone 2")
-	Funnel.zone(player, level(player))
 	return true
 end
