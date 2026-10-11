@@ -185,6 +185,11 @@ return {
 		{ "Marking", 146, 46, 60 }, -- cap
 		{ "Marking", 104, 30, 46 }, -- cap rim
 	},
+	FireLobster = {
+		{ "Body", 226, 52, 36 }, -- shell
+		{ "Body", 170, 32, 30 }, -- seams, fingers, shins, antennae
+		{ "Marking", 255, 124, 40 }, -- shoulders, arms, thighs
+	},
 	Firebird = {
 		{ "Body", 255, 128, 32 }, -- feathers
 		{ "Belly", 232, 98, 22 },

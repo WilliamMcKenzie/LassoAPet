@@ -3,7 +3,7 @@ lobster's red and orange bands, two antennae standing up off the top and arching
 back with glowing tips, and a little crusher claw on each side.
 
 Run from the repo root: python3 tools/fire_lobster_egg.py [out_dir]
-Writes FireLobsterEgg.bbmodel and FireLobsterEgg.png to out_dir (not in game).
+Writes FireLobsterEgg.bbmodel and FireLobsterEgg.png to out_dir; `game` writes the game's files.
 """
 
 import os
@@ -59,5 +59,24 @@ def main(out=OUT):
     print(len(egg.parts), "parts")
 
 
+def game():
+    """Into the game: designs/eggs/c_style/FireLobsterEgg.bbmodel, its Luau model and
+    assets/ui/FireLobsterEggRender.png (ocean_eggs.main)."""
+    O.EGGS = [("FireLobster", fire_lobster_egg)]
+    O.main("FireLobster", preview=OUT)
+    # the claws poke out past ocean_eggs' 700 px wide frame: render the UI picture wider
+    egg = fire_lobster_egg()
+    for p in egg.parts:
+        if p.name.startswith("Glow"):
+            p.neon = True
+    im = render(egg.parts, W=1100, H=1100, fov=28, transparent=True, **C.VIEWS[0])
+    im = im.crop(im.getbbox())
+    im.save(os.path.join(O.ROOT, "assets", "ui", "FireLobsterEggRender.png"))
+    print("render", im.size)
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["game"]:
+        game()
+    else:
+        main(*sys.argv[1:])
