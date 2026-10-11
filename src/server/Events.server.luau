@@ -105,7 +105,8 @@ while true do
 		-- next one's due.
 		local nextCycle = cycleStart + EVENTS.Cycle
 		local speed = Config.HerdSpeed * ((Config.AnimalStats[kind] or {}).Speed or 1)
-		local runsOff = os.clock() + (START_Z + 44 - (-Config.CourseLength + Config.FinishFromEnd)) / speed + 1
+		local endZ = require(ReplicatedStorage.Shared.WorldColors).biomeStart(EVENTS.DespawnBiome) or (-Config.CourseLength + Config.FinishFromEnd) -- (the Jungle's edge: QM, Oct 11)
+		local runsOff = os.clock() + (START_Z + 44 - endZ) / speed + 1
 		while os.clock() < nextCycle - 1.5 and not forced and not world:GetAttribute("EventTaken") and os.clock() < runsOff do
 			task.wait(0.5)
 		end

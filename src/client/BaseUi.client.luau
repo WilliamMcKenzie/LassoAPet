@@ -5,7 +5,7 @@
 --   Top right, all the time at your base (QM, Oct 11: there's no bull to stand by any
 --     more): Upgrade, with the next pen level's price beside its cash icon, greyed when
 --     you can't afford it; the free Unlock in the tutorial. It steps aside while a menu
---     (Shop, Index, Roll, the merge view) is up. PassPopups' cards stack under it.
+--     (Shop, Index, Roll, the merge view) is up, and so do PassPopups' cards.
 -- All of it hides on a ride. Laid out on a Config.BaseUi.RefWidth-wide screen.
 
 local Players = game:GetService("Players")
@@ -39,7 +39,7 @@ local MENU_GAP = 20
 local ICON = 74 -- the counters' icons
 local TEXT = 55 -- the counters' text (QM's Figma: 55, stroke 5)
 local STROKE = 5
-local UPGRADE_WIDTH = 524
+local UPGRADE_WIDTH = 367 -- (QM, Oct 11: 30% smaller, was 524)
 -- The price's box on the Upgrade art, between its cash icon and "Upgrade" (Design: x
 -- 0.19-0.57, y 0.25-0.75 of the button), left-aligned, as big as fits.
 local PRICE_FROM, PRICE_TO = Vector2.new(0.19, 0.25), Vector2.new(0.57, 0.75)

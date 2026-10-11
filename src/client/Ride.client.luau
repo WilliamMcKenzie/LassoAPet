@@ -1656,6 +1656,7 @@ end
 -- can't be knocked away or crashed into. Built during the countdown, since a big
 -- animal is slow to build.
 vfx.EVENT_LANE = 0
+vfx.EVENT_END = WorldColors.biomeStart(Config.Events.DespawnBiome) or FINISH_Z -- (it runs off at the Jungle's edge: QM, Oct 11)
 function vfx.updateEvent(dt, seen, inView)
 	local id = world:GetAttribute("EventId") or 0
 	local key, kind = -id, world:GetAttribute("EventKind") or ""
@@ -1693,8 +1694,8 @@ function vfx.updateEvent(dt, seen, inView)
 	local dist, speed = run(herdSpeed(kind), math.max(age - START_AFTER, 0))
 	local z = SPAWN_Z - dist
 	local lassoed = transfer and transfer.target == entity
-	if z <= FINISH_Z + 2 and not lassoed then
-		-- Ran the whole course: shrinks away at the finish line, for good.
+	if z <= vfx.EVENT_END + 2 and not lassoed then
+		-- Ran its course: shrinks away at the Jungle's edge, for good.
 		event.entity = nil
 		if herd[key] == entity then
 			herd[key] = nil
@@ -1719,7 +1720,7 @@ function vfx.updateEvent(dt, seen, inView)
 	end
 	local x = laneX(vfx.EVENT_LANE, z)
 	local shown = near and (lassoed or inView(x, z))
-	local shrink = if lassoed then 1 else math.clamp((z - FINISH_Z - 2) / SHRINK, 0, 1)
+	local shrink = if lassoed then 1 else math.clamp((z - vfx.EVENT_END - 2) / SHRINK, 0, 1)
 	local scale = 1
 	if age < POP_TIME or shrink < 1 then
 		entity.popping = true

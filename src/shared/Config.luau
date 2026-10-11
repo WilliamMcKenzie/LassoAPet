@@ -347,6 +347,7 @@ return {
 		Animals = { "Loong", "SnackYak", "RoboShark" },
 		Countdown = 10,
 		Cycle = 600, -- seconds from one event to the next (QM: every 10 minutes)
+		DespawnBiome = "Jurassic", -- it runs off (gone) as it reaches this biome (QM, Oct 11: the Jungle)
 	},
 	-- Any pet can be ridden. Until pets can be picked in the pen, you ride this one
 	-- (it waits on the first pet spot in your pen).
