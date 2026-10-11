@@ -26,24 +26,24 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Funnel = {}
 
 local desert = Config.Biomes[2]
+-- The new tutorial (QM, Oct 11: Client/Tutorial), then on to the Desert.
 local STEPS = {
 	"Joined",
-	"Tutorial Started", -- (client)
+	"Tutorial Started", -- (client) the tap hand on the starter egg
+	"Held Starter Egg", -- (client) it's in your hand: the tap hand moves to your pen
 	"Placed Starter Egg",
-	"Starter Pet Ready", -- (client) the starter egg hatched: "Ride your Horse!"
-	"Started Ride", -- (client)
+	"Hatched Starter Egg", -- held E by it in your pen
+	"Started Ride", -- (client) on your new pet
 	"Rode Out", -- past the start line on an animal
+	"Lasso In Reach", -- (client) the first slow-down: an animal's in reach
 	"Threw Lasso",
-	"Started Struggle", -- (client) hanging off the rope: HOLD ON!'s tapping (QM, Oct 8)
-	"Landed Lasso", -- (client) won it and on the lassoed animal: "Follow the arrows to the egg!"
-	"Egg In Reach", -- (client) "Press E to take the egg!"
-	"Grabbed Egg",
-	"Turned Home", -- (client)
+	"Landed Lasso", -- (client) on the animal you lassoed
+	"Sprinted", -- (client) the Sprint step done (Shift on a computer, the stick pushed out elsewhere)
+	"Boss Appeared", -- (client) BOSS IN let go: the Chicken's coming
 	"Brought Egg Home",
-	"Placed Egg",
+	"Placed Egg", -- (it goes in your pen by itself in the tutorial)
 	"Egg Hatched",
-	"Told To Train", -- (client) "Train your lasso for big pets", arrows to the training ring (Oct 8: was "Saw Gate")
-	"Sat To Train", -- (client) stepped into the training ring (was the chair: name kept): that ends the tutorial
+	"Saw Next Zones", -- (client) the camera's tour of the gates to the Jurassic
 	"Tutorial Done",
 	"Rode Out Again",
 	"Brought Egg Home Again",
@@ -55,17 +55,16 @@ local stepIndex = {}
 for i, name in STEPS do
 	stepIndex[name] = i
 end
--- The tutorial's steps (Tutorial.luau's setStep names) the client reports.
+-- The tutorial's steps the client reports (Client/Tutorial's funnel()).
 local CLIENT_STEPS = {
 	place = "Tutorial Started",
-	ride = "Starter Pet Ready",
-	lasso = "Started Ride",
-	egg = "Landed Lasso",
-	take = "Egg In Reach",
-	home = "Turned Home",
-	struggle = "Started Struggle",
-	train = "Told To Train",
-	sat = "Sat To Train",
+	hold = "Held Starter Egg",
+	ride = "Started Ride",
+	reach = "Lasso In Reach",
+	lasso = "Landed Lasso",
+	sprint = "Sprinted",
+	boss = "Boss Appeared",
+	tour = "Saw Next Zones",
 }
 -- Done again once the tutorial's over.
 local AGAIN = {

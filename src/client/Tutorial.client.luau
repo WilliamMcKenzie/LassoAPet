@@ -65,10 +65,12 @@ local function hrp()
 	return player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 end
 
+local funnelSent = {} -- (each step once a visit: the server keeps only the first anyway)
 local function funnel(step)
 	local remote = ReplicatedStorage:FindFirstChild("FunnelStep")
-	if remote then
-		remote:FireServer(step)
+	if remote and not funnelSent[step] then
+		funnelSent[step] = true
+		remote:FireServer("tutorial", step) -- (Funnel.server's onboarding funnel)
 	end
 end
 
@@ -323,6 +325,7 @@ local function run()
 			pointAt(Inventory.slot(tool.Name))
 			guide(nil)
 		elseif tool and held and area then
+			funnel("hold")
 			pointAt(area.Position + Vector3.new(0, area.Size.Y / 2 + 1, 0))
 			guide(area.Position)
 		else
@@ -363,6 +366,7 @@ local function run()
 		-- arrows go as soon as it's thrown: QM.)
 		while on() and Hud.isRiding() and TutorialRide.throws <= firstThrow do
 			if TutorialRide.canLasso then
+				funnel("reach")
 				slowUntil(function()
 					return TutorialRide.throws > firstThrow or not TutorialRide.canLasso
 				end)
@@ -394,12 +398,16 @@ local function run()
 			sprintGuide.Visible = false
 			player:SetAttribute("NoLasso", nil)
 		end
+		if on() and Hud.isRiding() then
+			funnel("sprint")
+		end
 		-- A few more seconds, then BOSS IN, short.
 		local waitStart = os.clock()
 		while on() and Hud.isRiding() and os.clock() - waitStart < WAIT_FOR_BOSS do
 			task.wait(0.1)
 		end
 		TutorialRide.bossSeconds, TutorialRide.holdFrozen = BOSS_SECONDS, false
+		funnel("boss")
 		while on() and Hud.isRiding() do
 			task.wait(0.1)
 		end
@@ -413,9 +421,9 @@ local function run()
 			task.wait(0.2)
 		end
 		if #myPets() > before then
-			funnel("home")
 			task.wait(1)
 			showGate()
+			funnel("tour")
 			local done = ReplicatedStorage:FindFirstChild("TutorialDone")
 			if done then
 				done:FireServer()

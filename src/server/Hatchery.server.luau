@@ -527,9 +527,7 @@ remote("HatchEgg", function(player, id)
 		return
 	end
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
-	if profile.pastStarter then
-		Funnel.step(player, "Egg Hatched")
-	end
+	Funnel.step(player, if profile.pastStarter then "Egg Hatched" else "Hatched Starter Egg")
 	publish(player)
 end)
 
