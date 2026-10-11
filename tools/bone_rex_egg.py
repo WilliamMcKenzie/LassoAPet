@@ -48,146 +48,118 @@ def pyr(egg, name, base, d, hw, length, color, bone=None):
 
 
 def bone_rex_egg():
+    """Blocks only (QM: under 150 parts; a pyramid costs 4 in game), the octo shell is 63."""
     egg = shell([BASE] + [SHELL] * 6)
 
-    # ---- glowing cracks: zigzags running up the back and both sides, a layer a step
-    def crack(name, face, offsets, layers):
-        prev = None
-        for k, i in enumerate(layers):
-            a = WIDTHS[i] / 2
-            o = offsets[k]
-            y0, y1 = i * LH, (i + 1) * LH
-            if face == "back":
-                egg.block(f"Glow{name}{k}", (o - 0.04, y0, a - 0.02), (o + 0.04, y1, a + 0.04), GLOW)
-            else:
-                sx = -1 if face == "L" else 1
-                x0, x1 = sorted((sx * (a - 0.02), sx * (a + 0.04)))
-                egg.block(f"Glow{name}{k}", (x0, y0, o - 0.04), (x1, y1, o + 0.04), GLOW)
-            if prev is not None:  # a short run across to join the last step
-                lo, hi = sorted((prev, o))
-                if face == "back":
-                    egg.block(f"Glow{name}J{k}", (lo - 0.04, y0 - 0.04, a - 0.02), (hi + 0.04, y0 + 0.04, a + 0.04), GLOW)
-                else:
-                    egg.block(f"Glow{name}J{k}", (x0, y0 - 0.04, lo - 0.04), (x1, y0 + 0.04, hi + 0.04), GLOW)
-            prev = o
-    crack("CrackBackL", "back", (-0.5, -0.3, -0.55, -0.35, -0.2), (1, 2, 3, 4, 5))
-    crack("CrackBackR", "back", (0.45, 0.6, 0.4, 0.55), (1, 2, 3, 4))
-    crack("CrackL", "L", (0.3, 0.05, 0.35, 0.15), (2, 3, 4, 5))
-    crack("CrackR", "R", (-0.1, 0.25, 0.0, 0.3, 0.1), (1, 2, 3, 4, 5))
+    def blk(name, lo, hi, color, bone=None):
+        p = egg.block(name, lo, hi, color)
+        if bone:
+            p.bone = bone
+        return p
 
-    # ---- the ribcage: grey ribs wrapping round the front and sides on layers 1-3, a gap
-    # down the middle where the soul gem glows
+    # ---- glowing cracks: one zigzag up the back, one down the right side
+    for k, (i, o0, o1) in enumerate(((1, -0.5, -0.5), (2, -0.5, -0.2), (3, -0.2, -0.2), (4, -0.2, -0.45), (5, -0.45, -0.45))):
+        a = WIDTHS[i] / 2
+        lo, hi = sorted((o0, o1))
+        if o0 == o1:
+            blk(f"GlowCrackBack{k}", (o0 - 0.04, i * LH, a - 0.02), (o0 + 0.04, (i + 1) * LH, a + 0.04), GLOW)
+        else:  # a step across
+            blk(f"GlowCrackBack{k}", (lo - 0.04, i * LH, a - 0.02), (hi + 0.04, i * LH + 0.08, a + 0.04), GLOW)
+    for k, (i, o) in enumerate(((2, 0.25), (3, -0.05), (4, 0.2))):
+        a = WIDTHS[i] / 2
+        blk(f"GlowCrackR{k}", (a - 0.02, i * LH, o - 0.04), (a + 0.04, (i + 1) * LH + 0.04, o + 0.04), GLOW)
+
+    # ---- the ribcage: a rib per layer on each side, wrapping from beside the gem round the
+    # front corner and down the side; the soul gem glowing in the gap
     for i in (1, 2, 3):
         a = WIDTHS[i] / 2
         c = chamfer(WIDTHS[i])
-        for r, y in enumerate((i * LH + 0.1, i * LH + 0.29)):
-            yy = (y, y + 0.13)
-            for sx, side in ((-1, "L"), (1, "R")):
-                x0, x1 = sorted((sx * 0.3, sx * (a - c + 0.02)))
-                egg.block(f"Rib{i}{r}{side}F", (x0, yy[0], -a - 0.09), (x1, yy[1], -a + 0.02), BONE)
-                cx, cz = sx * (a - c / 2), -(a - c / 2)
-                h = c * 0.42
-                egg.block(f"Rib{i}{r}{side}C", (cx - h, yy[0], cz - h), (cx + h, yy[1], cz + h), BONE)
-                x0, x1 = sorted((sx * (a - 0.02), sx * (a + 0.09)))
-                egg.block(f"Rib{i}{r}{side}S", (x0, yy[0], -(a - c) - 0.02), (x1, yy[1], 0.35), BONE)
-    # sternum knobs either side of the gap
+        y = (i * LH + 0.15, i * LH + 0.3)
+        for sx, side in ((-1, "L"), (1, "R")):
+            x0, x1 = sorted((sx * 0.3, sx * (a - c * 0.35)))
+            blk(f"Rib{i}{side}F", (x0, y[0], -a - 0.09), (x1, y[1], -a + c * 0.65), BONE)
+            x0, x1 = sorted((sx * (a - c * 0.35), sx * (a + 0.09)))
+            blk(f"Rib{i}{side}S", (x0, y[0], -(a - c * 0.35)), (x1, y[1], 0.35), BONE)
+        x0 = 0.24
     for sx, side in ((-1, "L"), (1, "R")):
         x0, x1 = sorted((sx * 0.24, sx * 0.36))
-        egg.block("Sternum" + side, (x0, LH + 0.05, -WIDTHS[2] / 2 - 0.12), (x1, 4 * LH - 0.05, -WIDTHS[2] / 2 + 0.02), KNOB)
-    # the soul gem between the ribs: a glowing cross with a white-hot heart
+        blk("Sternum" + side, (x0, LH + 0.05, -WIDTHS[2] / 2 - 0.12), (x1, 4 * LH - 0.05, -WIDTHS[2] / 2 + 0.02), KNOB)
     z = -WIDTHS[2] / 2
-    egg.block("GlowGem", (-0.2, 1.5 * LH, z - 0.1), (0.2, 3.5 * LH, z + 0.02), GLOW)
-    egg.block("GlowGemX", (-0.26, 2.2 * LH, z - 0.12), (0.26, 2.8 * LH, z + 0.02), GLOW)
-    egg.block("GlowGemHot", (-0.1, 2.15 * LH, z - 0.16), (0.1, 2.85 * LH, z - 0.08), CORE)
+    blk("GlowGem", (-0.2, 1.5 * LH, z - 0.1), (0.2, 3.5 * LH, z + 0.02), GLOW)
+    blk("GlowGemX", (-0.26, 2.2 * LH, z - 0.12), (0.26, 2.8 * LH, z + 0.02), GLOW)
+    blk("GlowGemHot", (-0.1, 2.15 * LH, z - 0.16), (0.1, 2.85 * LH, z - 0.08), CORE)
 
-    # ---- tiny bone arms on the front, two glowing claws each
+    # ---- tiny bone arms on the front, a glowing claw each
     for sx, side in ((-1, "L"), (1, "R")):
         a = WIDTHS[4] / 2
         xa = sx * (a - chamfer(WIDTHS[4]) * 0.5)
         x0, x1 = sorted((xa - sx * 0.08, xa + sx * 0.1))
         y = 4 * LH + 0.1
-        egg.block("Shoulder" + side, (x0 - 0.04, y, -a + 0.1), (x1 + 0.04, y + 0.2, -a + 0.3), KNOB)
-        egg.block("Humerus" + side, (x0, y - 0.25, -a - 0.05), (x1, y + 0.1, -a + 0.15), BONE)
-        egg.block("Forearm" + side, (x0, y - 0.32, -a - 0.32), (x1, y - 0.17, -a - 0.05), BONE)
-        for k, dx in enumerate((-0.045, 0.045)):
-            pyr(egg, f"GlowArmClaw{side}{k}", (xa + dx, y - 0.25, -a - 0.32), (0, -0.4, -1), 0.035, 0.16, GLOW)
+        blk("Humerus" + side, (x0, y - 0.25, -a - 0.05), (x1, y + 0.15, -a + 0.15), BONE)
+        blk("Forearm" + side, (x0, y - 0.32, -a - 0.32), (x1, y - 0.17, -a - 0.05), BONE)
+        blk("GlowArmClaw" + side, (x0 + 0.02, y - 0.4, -a - 0.42), (x1 - 0.02, y - 0.28, -a - 0.3), GLOW)
 
-    # ---- spine down the back: vertebrae with a glowing disc each and a spike leaning up
-    # and back, then a little bone tail off the base
+    # ---- spine down the back: a vertebra and a glowing-tipped spike per layer, then a
+    # little bone tail off the base with a glowing tip
     for i in range(1, 6):
         a = WIDTHS[i] / 2
         y0, y1 = i * LH + 0.04, (i + 1) * LH - 0.04
-        egg.block(f"Vert{i}", (-0.14, y0, a - 0.04), (0.14, y1, a + 0.14), BONE)
-        egg.block(f"GlowVert{i}Disc", (-0.1, y1, a - 0.02), (0.1, y1 + 0.08, a + 0.1), GLOW)
-        pyr(egg, f"SpikeVert{i}", ((0, (y0 + y1) / 2, a + 0.14)), (0, 0.55, 1), 0.09, 0.32 + 0.04 * (3 - abs(i - 3)), BONE)
-        pyr(egg, f"GlowSpikeVert{i}", (0, (y0 + y1) / 2 + 0.13, a + 0.39 + 0.03 * (3 - abs(i - 3))), (0, 0.55, 1), 0.05, 0.16, GLOW)
+        h = 0.18 + 0.04 * (3 - abs(i - 3))
+        blk(f"Vert{i}", (-0.14, y0, a - 0.04), (0.14, y1, a + 0.14 + h), BONE)
+        blk(f"GlowSpikeVert{i}", (-0.07, y0 + 0.1, a + 0.14 + h), (0.07, y1, a + 0.26 + h), GLOW)
     zb = WIDTHS[0] / 2
-    for k, (z0, z1, h) in enumerate(((zb - 0.05, zb + 0.35, 0.3), (zb + 0.38, zb + 0.68, 0.24), (zb + 0.71, zb + 0.93, 0.18))):
-        egg.block(f"Tail{k}", (-h / 2, 0.02, z0), (h / 2, 0.02 + h, z1), BONE)
-        egg.block(f"GlowTail{k}Disc", (-h / 2 + 0.03, 0.05, z1), (h / 2 - 0.03, h - 0.01, z1 + 0.03), GLOW)
-        pyr(egg, f"GlowSpikeTail{k}", (0, 0.02 + h, (z0 + z1) / 2), (0, 1, 0.4), 0.05, 0.16 - 0.03 * k, GLOW)
-    pyr(egg, "GlowTailTip", (0, 0.11, zb + 0.96), (0, 0, 1), 0.06, 0.2, GLOW)
+    blk("Tail0", (-0.15, 0.02, zb - 0.05), (0.15, 0.3, zb + 0.4), BONE)
+    blk("Tail1", (-0.11, 0.02, zb + 0.4), (0.11, 0.22, zb + 0.75), BONE)
+    blk("GlowTailTip", (-0.06, 0.06, zb + 0.75), (0.06, 0.18, zb + 0.95), GLOW)
 
-    # ---- feet: bone toes splayed out of the base at the four corners, glowing talons
+    # ---- feet: a bone toe at each corner of the base, a glowing talon on its end
     a0 = WIDTHS[0] / 2
     for sx, sz, nm in ((-1, -1, "FL"), (1, -1, "FR"), (-1, 1, "BL"), (1, 1, "BR")):
-        d = np.array([sx, 0, sz]) / math.sqrt(2)
-        for k, off in enumerate((-0.12, 0.0, 0.12)):
-            side = np.array([-d[2], 0, d[0]]) * off
-            base = d * (a0 - 0.05) + side
-            tip = base + d * 0.28
-            lo, hi = np.minimum(base, tip) - [0.05, 0, 0.05], np.maximum(base, tip) + [0.05, 0, 0.05]
-            egg.block(f"Toe{nm}{k}", (lo[0], 0.0, lo[2]), (hi[0], 0.12, hi[2]), BONE)
-            pyr(egg, f"GlowTalon{nm}{k}", tuple(tip + d * 0.04 + [0, 0.06, 0]), tuple(d + [0, -0.3, 0]), 0.045, 0.16, GLOW)
+        cx, cz = sx * (a0 - 0.05), sz * (a0 - 0.05)
+        x0, x1 = sorted((cx, cx + sx * 0.3))
+        z0, z1 = sorted((cz, cz + sz * 0.3))
+        blk(f"Toe{nm}", (x0, 0, z0), (x1, 0.14, z1), BONE)
+        x0, x1 = sorted((cx + sx * 0.3, cx + sx * 0.42))
+        z0, z1 = sorted((cz + sz * 0.3, cz + sz * 0.42))
+        blk(f"GlowTalon{nm}", (x0, 0, z0), (x1, 0.1, z1), GLOW)
 
-    # ---- the skull crowning it, facing front: a heavy grey skull, dark sockets with burning
-    # eyes and slit pupils, nostrils, fangs hanging over the shell, horns, a spiked frill
+    # ---- the skull crowning it, facing front: dark sockets with burning eyes and slit
+    # pupils, a heavy brow and horns, fangs over the shell, a frill, soul fire streaming back
     top = H - 0.05
-    egg.block("Skull", (-0.5, top, -0.62), (0.5, top + 0.5, 0.28), BONE)
-    egg.block("SkullBack", (-0.56, top + 0.04, 0.0), (0.56, top + 0.46, 0.34), KNOB)
-    egg.block("Snout", (-0.38, top + 0.02, -1.05), (0.38, top + 0.4, -0.6), BONE)
-    egg.block("SnoutTip", (-0.3, top + 0.04, -1.16), (0.3, top + 0.34, -1.04), BONE)
+    S = 1.25
+
+    def sk(name, lo, hi, color):
+        """A skull block, a size up about the crown so the skull rules the egg."""
+        pv = np.array([0.0, top, -0.3])
+        lo = pv + (np.array(lo, float) - pv) * S
+        hi = pv + (np.array(hi, float) - pv) * S
+        return blk(name, tuple(lo), tuple(hi), color, "top")
+
+    sk("Skull", (-0.5, top, -0.62), (0.5, top + 0.5, 0.28), BONE)
+    sk("SkullBack", (-0.56, top + 0.04, 0.0), (0.56, top + 0.46, 0.34), KNOB)
+    sk("Snout", (-0.38, top + 0.02, -1.12), (0.38, top + 0.4, -0.6), BONE)
     for sx, side in ((-1, "L"), (1, "R")):
         x0, x1 = sorted((sx * 0.44, sx * 0.52))
-        egg.block("DarkSocket" + side, (x0, top + 0.14, -0.5), (x1, top + 0.42, -0.2), DARK)
+        sk("DarkSocket" + side, (x0, top + 0.14, -0.5), (x1, top + 0.42, -0.2), DARK)
         x0, x1 = sorted((sx * 0.48, sx * 0.53))
-        egg.block("GlowEye" + side, (x0, top + 0.18, -0.46), (x1, top + 0.38, -0.24), GLOW)
+        sk("GlowEye" + side, (x0, top + 0.18, -0.46), (x1, top + 0.38, -0.24), GLOW)
         x0, x1 = sorted((sx * 0.53, sx * 0.55))
-        egg.block("GlowPupil" + side, (x0, top + 0.21, -0.4), (x1, top + 0.35, -0.33), CORE)
+        sk("GlowPupil" + side, (x0, top + 0.21, -0.4), (x1, top + 0.35, -0.33), CORE)
         x0, x1 = sorted((sx * 0.3, sx * 0.56))
-        egg.block("Brow" + side, (x0, top + 0.42, -0.58), (x1, top + 0.56, -0.18), KNOB)
-        x0, x1 = sorted((sx * 0.34, sx * 0.39))
-        egg.block("DarkNostril" + side, (x0, top + 0.26, -1.12), (x1, top + 0.34, -1.02), DARK)
-        pyr(egg, "Horn" + side, (sx * 0.43, top + 0.56, -0.38), (sx * 0.35, 1, 0.25), 0.07, 0.3, BONE)
+        sk("Brow" + side, (x0, top + 0.42, -0.58), (x1, top + 0.56, -0.18), KNOB)
+        x0, x1 = sorted((sx * 0.38, sx * 0.5))
+        sk("Horn" + side, (x0, top + 0.56, -0.44), (x1, top + 0.82, -0.32), BONE)
+        # two long fangs down the side of the snout, over the shell's front
+        for k, (zf, ln) in enumerate(((-0.98, 0.14), (-0.78, 0.2))):
+            x0, x1 = sorted((sx * 0.28, sx * 0.36))
+            sk(f"Fang{side}{k}", (x0, top + 0.02 - ln, zf - 0.04), (x1, top + 0.02, zf + 0.04), BONE)
         # soul fire streaming up and back out of each socket
-        for j, (dy, dz, s) in enumerate(((0.52, -0.3, 0.12), (0.62, -0.08, 0.11), (0.72, 0.14, 0.095), (0.8, 0.36, 0.08), (0.86, 0.56, 0.06))):
-            col = CORE if j == 0 else GLOW
-            egg.block(f"GlowFlame{side}{j}", (sx * 0.48 - s, top + dy, dz - s), (sx * 0.48 + s, top + dy + 2 * s, dz + s), col)
-        # fangs down the side of the snout, over the shell's front
-        for k, zf in enumerate((-1.0, -0.86, -0.72, -0.58)):
-            pyr(egg, f"Fang{side}{k}", (sx * 0.33, top + 0.02, zf), (0, -1, 0), 0.04, 0.2 if k == 1 else 0.14, BONE)
-    for k, x in enumerate((-0.15, 0.0, 0.15)):
-        pyr(egg, f"FangFront{k}", (x, top + 0.04, -1.12), (0, -1, 0), 0.035, 0.13, BONE)
-    # crest spikes down the middle of the skull and the frill fanned behind it
-    for k, z in enumerate((-0.9, -0.6, -0.3)):
-        pyr(egg, f"SpikeSkull{k}", (0, top + 0.5 if z > -0.62 else top + 0.4, z), (0, 1, 0), 0.05, 0.1 + 0.03 * k, BONE)
-    for k, ang in enumerate((-50, -25, 0, 25, 50)):
-        r = math.radians(ang)
-        d = (math.sin(r) * 0.8, 0.45, 1)
-        base = (0.5 * math.sin(r), top + 0.3, 0.34)
-        pyr(egg, f"SpikeFrill{k}", base, d, 0.08, 0.34, BONE)
-        tip = np.array(base) + np.array(d) / np.linalg.norm(d) * 0.3
-        pyr(egg, f"GlowFrill{k}", tuple(tip), d, 0.04, 0.14, GLOW)
-    # the skull a size up, so it rules the egg
-    S, pivot = 1.25, np.array([0.0, top, -0.3])
-    for p in egg.parts:
-        if p.name.startswith(("Skull", "Snout", "DarkSocket", "DarkNostril", "GlowEye", "GlowPupil", "Brow", "Horn", "GlowFlame", "Fang", "SpikeSkull", "SpikeFrill", "GlowFrill")):
-            p.bone = "top"
-            if p.shape == "Poly":
-                p.polys = [pivot + (q - pivot) * S for q in p.polys]
-            else:
-                p.size = np.array(p.size) * S
-                p.cf[:3, 3] = pivot + (p.cf[:3, 3] - pivot) * S
+        for j, (dy, dz, s) in enumerate(((0.56, -0.26, 0.12), (0.7, 0.0, 0.1), (0.82, 0.26, 0.075))):
+            sk(f"GlowFlame{side}{j}", (sx * 0.48 - s, top + dy, dz - s), (sx * 0.48 + s, top + dy + 2 * s, dz + s), CORE if j == 0 else GLOW)
+    # a frill of three spiked plates fanned behind the skull, glowing on their tips
+    for k, (x, h) in enumerate(((-0.34, 0.36), (0.0, 0.48), (0.34, 0.36))):
+        sk(f"Frill{k}", (x - 0.1, top + 0.2, 0.34), (x + 0.1, top + 0.2 + h, 0.5), BONE)
+        sk(f"GlowFrill{k}", (x - 0.06, top + 0.2 + h, 0.36), (x + 0.06, top + 0.32 + h, 0.48), GLOW)
     return egg
 
 

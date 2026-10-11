@@ -121,7 +121,7 @@ local IMAGES = {
 	eggPterodactyl = { id = "rbxassetid://125349573529100", size = Vector2.new(944, 864) }, -- PterodactylEggRender.png
 	eggAnkylosaurus = { id = "rbxassetid://117144807245289", size = Vector2.new(591, 754) }, -- AnkylosaurusEggRender.png
 	eggPalmGuy = { id = "rbxassetid://119803210932578", size = Vector2.new(522, 734) }, -- PalmGuyEggRender.png
-	eggBoneRex = { id = "", size = Vector2.new(537, 886) }, -- BoneRexEggRender.png (to upload)
+	eggBoneRex = { id = "", size = Vector2.new(546, 911) }, -- BoneRexEggRender.png (to upload)
 	eggPhoenix = { id = "rbxassetid://77371080716061", size = Vector2.new(1034, 1099) }, -- PhoenixEggRender.png
 	eggVolcanoTortoise = { id = "rbxassetid://89848692685766", size = Vector2.new(502, 686) }, -- VolcanoTortoiseEggRender.png
 	eggStarfish = { id = "rbxassetid://114368032731288", size = Vector2.new(680, 783) }, -- StarfishEggRender.png
