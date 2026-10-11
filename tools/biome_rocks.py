@@ -84,11 +84,11 @@ PLAN = {
 # quasicrystal peaks (QM, Oct 11: placed by the pattern): each peak in the band by a
 # wall is a crust plate, and a rock stands on it, bigger the higher the peak (a peak
 # below SMALL_PEAK gets nothing, below BIG_PEAK a pebble or stone); each lava pool by a
-# wall gets a pebble or stone on its crust rim.
+# wall gets a pebble or stone on its crust rim (the deepest ones only).
 VOLCANO = dict(name="Volcano", z0=VO.Z_START, z1=VO.END, small=[], medium=[], large=[],
                nests=[(FG.unmap_x(x, z), z) for x, z in VO.nest_spots()])  # (where the funnel puts them)
-SMALL_PEAK, BIG_PEAK = 0.5, 0.6
-PEAK_ROCKS = [(0.74, "RockCrag"), (0.68, "RockBoulder"), (BIG_PEAK, "RockSlab")]
+SMALL_PEAK, BIG_PEAK = 0.8, 0.82
+PEAK_ROCKS = [(0.9, "RockCrag"), (0.86, "RockBoulder"), (BIG_PEAK, "RockSlab")]
 
 
 class Layout(CL.Course):
@@ -182,8 +182,8 @@ def volcano_rocks(c, rng):
             place(next(a for at, a in PEAK_ROCKS if v >= at), X[i, j], Z[i, j])
         else:
             place(str(rng.choice(PLAN["Volcano"]["small"])), X[i, j], Z[i, j])
-    # and a pebble or stone on each lava pool's crust rim, on its wall side
-    pools = (q == minimum_filter(q, size=9)) & (q < 0.25)
+    # and a pebble or stone on each deep lava pool's crust rim, on its wall side
+    pools = (q == minimum_filter(q, size=9)) & (q < 0.12)  # (the deepest pools only)
     for i, j in zip(*np.nonzero(pools)):
         k = i
         while 0 <= k < q.shape[0] and q[k, j] < 0.25:  # out of the lava toward the wall

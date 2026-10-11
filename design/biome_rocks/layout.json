@@ -1072,215 +1072,161 @@
 },
 {
 "asset": "RockBoulder",
-"x": -32.65,
-"z": -8585.24,
-"yaw": 83.6,
+"x": -38.89,
+"z": -8584.5,
+"yaw": 30.0,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "TubeCoral",
-"x": -41.48,
-"z": -8568.55,
-"yaw": 225.9,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "RockPebble",
-"x": -40.57,
-"z": -8603.36,
-"yaw": 231.0,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "FanCoral",
-"x": -28.56,
-"z": -8569.92,
+"asset": "RockStone",
+"x": -38.55,
+"z": -8566.44,
 "yaw": 204.5,
 "y": 0.0,
-"tier": 2,
+"tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "BranchCoral",
-"x": 48.63,
-"z": -8693.5,
-"yaw": 215.0,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockStone",
-"x": 34.07,
-"z": -8677.71,
-"yaw": 162.6,
+"asset": "RockPebble",
+"x": -43.1,
+"z": -8601.56,
+"yaw": 106.9,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
 "asset": "FanCoral",
-"x": 48.63,
-"z": -8708.76,
-"yaw": 341.0,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "FanCoral",
-"x": 42.83,
-"z": -8850.0,
-"yaw": 114.7,
+"x": 35.24,
+"z": -8854.04,
+"yaw": 224.3,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
 "asset": "RockPebble",
-"x": 41.33,
-"z": -8834.92,
-"yaw": 247.9,
+"x": 36.45,
+"z": -8837.25,
+"yaw": 32.7,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
 "asset": "FanCoral",
-"x": 48.59,
-"z": -9163.08,
-"yaw": 214.8,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "BranchCoral",
-"x": -42.5,
-"z": -9235.57,
-"yaw": 338.7,
+"x": -48.02,
+"z": -8915.91,
+"yaw": 202.5,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
 "asset": "FanCoral",
-"x": -42.5,
-"z": -9250.83,
-"yaw": 157.1,
+"x": -48.02,
+"z": -8901.55,
+"yaw": 287.5,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "BranchCoral",
-"x": 38.2,
-"z": -9323.83,
-"yaw": 2.2,
+"asset": "RockCrag",
+"x": -41.09,
+"z": -9079.01,
+"yaw": 107.2,
 "y": 0.0,
+"tier": 3,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": -45.59,
+"z": -9053.7,
+"yaw": 152.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": -30.44,
+"z": -9106.15,
+"yaw": 227.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "FanCoral",
+"x": 29.49,
+"z": -9329.08,
+"yaw": 172.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "TubeCoral",
+"x": 40.05,
+"z": -9314.71,
+"yaw": 311.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockBoulder",
+"x": -40.5,
+"z": -9390.76,
+"yaw": 53.8,
+"y": 1.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
 "asset": "RockStone",
-"x": 45.49,
-"z": -9308.41,
-"yaw": 193.4,
+"x": -42.19,
+"z": -9368.93,
+"yaw": 115.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": -33.54,
+"z": -9411.92,
+"yaw": 358.5,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
 "asset": "RockBoulder",
-"x": -36.99,
-"z": -9385.63,
-"yaw": 154.1,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "TubeCoral",
-"x": -45.49,
-"z": -9368.33,
-"yaw": 348.4,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "TubeCoral",
-"x": -49.22,
-"z": -9400.85,
-"yaw": 340.7,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "RockBoulder",
-"x": 44.6,
-"z": -9623.14,
-"yaw": 2.4,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "FanCoral",
-"x": -33.59,
-"z": -9709.02,
-"yaw": 324.8,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "FanCoral",
-"x": 46.97,
-"z": -10137.14,
-"yaw": 269.6,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "FanCoral",
-"x": 46.97,
-"z": -10122.78,
-"yaw": 96.8,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockBoulder",
-"x": -36.13,
-"z": -10188.89,
+"x": 36.13,
+"z": -9628.89,
 "yaw": 245.4,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "RockBoulder",
-"x": 45.52,
-"z": -10443.27,
-"yaw": 129.9,
+"asset": "RockPebble",
+"x": 36.17,
+"z": -9611.56,
+"yaw": 310.9,
 "y": 0.0,
-"tier": 2,
+"tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "TubeCoral",
-"x": 35.75,
-"z": -10425.48,
+"asset": "RockStone",
+"x": 47.49,
+"z": -9643.07,
 "yaw": 122.8,
 "y": 0.0,
 "tier": 1,
@@ -1289,520 +1235,448 @@
 {
 "asset": "BranchCoral",
 "x": -35.36,
-"z": -10679.67,
+"z": -9879.67,
 "yaw": 317.6,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "FanCoral",
-"x": -35.36,
-"z": -10664.41,
-"yaw": 175.7,
+"asset": "TubeCoral",
+"x": -27.4,
+"z": -9866.55,
+"yaw": 123.8,
 "y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockBoulder",
-"x": -40.66,
-"z": -10855.0,
-"yaw": 339.8,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockBoulder",
-"x": 43.94,
-"z": -10908.08,
-"yaw": 110.8,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockCrag",
-"x": -38.3,
-"z": -11008.53,
-"yaw": 127.9,
-"y": 0.0,
-"tier": 3,
+"tier": 1,
 "biome": "Ocean"
 },
 {
 "asset": "RockPebble",
-"x": -48.59,
-"z": -10985.78,
-"yaw": 327.3,
+"x": -43.16,
+"z": -10018.9,
+"yaw": 244.5,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "TubeCoral",
-"x": -45.34,
-"z": -11031.32,
-"yaw": 246.6,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "FanCoral",
-"x": 35.58,
-"z": -11090.9,
-"yaw": 174.8,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockStone",
-"x": 38.66,
-"z": -11074.23,
+"asset": "RockPebble",
+"x": -38.61,
+"z": -10068.68,
 "yaw": 259.5,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
+"asset": "FanCoral",
+"x": 31.95,
+"z": -10105.59,
+"yaw": 8.5,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
 "asset": "RockStone",
-"x": 31.26,
-"z": -11107.4,
-"yaw": 102.5,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "BranchCoral",
-"x": -37.8,
-"z": -11177.15,
-"yaw": 189.9,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "FanCoral",
-"x": -41.66,
-"z": -11302.38,
-"yaw": 218.7,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "FanCoral",
-"x": 45.01,
-"z": -11403.09,
-"yaw": 167.6,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "TubeCoral",
-"x": 36.72,
-"z": -11390.78,
-"yaw": 229.0,
+"x": 41.13,
+"z": -10090.3,
+"yaw": 297.0,
 "y": 1.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "RockPebble",
-"x": 46.95,
-"z": -11417.98,
-"yaw": 137.7,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "BranchCoral",
-"x": -41.89,
-"z": -11648.43,
-"yaw": 123.4,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockPebble",
-"x": -46.94,
-"z": -11633.99,
-"yaw": 47.8,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
 "asset": "TubeCoral",
-"x": -51.1,
-"z": -11661.25,
-"yaw": 129.9,
-"y": 1.0,
+"x": 32.62,
+"z": -10117.68,
+"yaw": 356.2,
+"y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
 "asset": "RockCrag",
-"x": 40.32,
-"z": -11719.63,
-"yaw": 126.2,
+"x": -40.61,
+"z": -10196.13,
+"yaw": 248.7,
 "y": 0.0,
 "tier": 3,
 "biome": "Ocean"
 },
 {
+"asset": "RockPebble",
+"x": -37.4,
+"z": -10173.18,
+"yaw": 167.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockCrag",
+"x": -39.29,
+"z": -10355.1,
+"yaw": 137.7,
+"y": 0.0,
+"tier": 3,
+"biome": "Ocean"
+},
+{
+"asset": "RockStone",
+"x": -32.93,
+"z": -10332.65,
+"yaw": 327.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "BranchCoral",
+"x": 45.43,
+"z": -10767.54,
+"yaw": 341.9,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": 36.55,
+"z": -10750.67,
+"yaw": 336.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": 46.16,
+"z": -10781.85,
+"yaw": 126.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
 "asset": "BranchCoral",
 "x": -42.65,
-"z": -12109.39,
+"z": -11149.39,
 "yaw": 260.0,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "RockBoulder",
-"x": 35.02,
-"z": -12209.45,
-"yaw": 146.5,
+"asset": "TubeCoral",
+"x": -41.05,
+"z": -11135.08,
+"yaw": 85.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "BranchCoral",
+"x": 49.23,
+"z": -11243.35,
+"yaw": 226.6,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "RockStone",
-"x": 30.13,
-"z": -12189.31,
-"yaw": 227.7,
-"y": 1.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "TubeCoral",
-"x": 26.63,
-"z": -12226.18,
+"asset": "RockPebble",
+"x": 28.93,
+"z": -11227.76,
 "yaw": 337.8,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "FanCoral",
-"x": 34.66,
-"z": -12234.5,
-"yaw": 23.9,
+"asset": "RockPebble",
+"x": 29.52,
+"z": -11257.03,
+"yaw": 20.8,
 "y": 0.0,
-"tier": 2,
+"tier": 1,
 "biome": "Ocean"
 },
 {
 "asset": "BranchCoral",
-"x": 41.7,
-"z": -12377.32,
-"yaw": 0.2,
-"y": 1.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockBoulder",
-"x": -37.4,
-"z": -12435.85,
-"yaw": 221.2,
+"x": 30.37,
+"z": -11415.61,
+"yaw": 6.8,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
 "asset": "TubeCoral",
-"x": -43.49,
-"z": -12418.81,
-"yaw": 78.4,
+"x": 36.77,
+"z": -11404.93,
+"yaw": 103.4,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "TubeCoral",
-"x": -32.73,
-"z": -12454.31,
-"yaw": 100.4,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "RockCrag",
-"x": 38.88,
-"z": -12510.6,
-"yaw": 150.1,
-"y": 0.0,
-"tier": 3,
-"biome": "Ocean"
-},
-{
-"asset": "RockPebble",
-"x": 40.67,
-"z": -12485.96,
-"yaw": 340.3,
+"asset": "RockStone",
+"x": 41.81,
+"z": -11432.2,
+"yaw": 234.3,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
 "asset": "BranchCoral",
-"x": -30.24,
-"z": -12617.39,
-"yaw": 90.4,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockPebble",
-"x": -48.32,
-"z": -12601.13,
-"yaw": 175.8,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "BranchCoral",
-"x": 47.0,
-"z": -12664.12,
-"yaw": 103.7,
+"x": 41.18,
+"z": -11556.98,
+"yaw": 85.6,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
 "asset": "RockStone",
-"x": 44.8,
-"z": -12646.4,
-"yaw": 50.7,
+"x": 35.06,
+"z": -11542.62,
+"yaw": 286.8,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
 "asset": "FanCoral",
-"x": 47.0,
-"z": -12679.38,
+"x": -40.05,
+"z": -11633.61,
+"yaw": 199.9,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "RockStone",
+"x": -48.43,
+"z": -11619.63,
+"yaw": 276.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": -29.27,
+"z": -11646.65,
+"yaw": 340.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockBoulder",
+"x": 39.66,
+"z": -11705.01,
+"yaw": 252.7,
+"y": 1.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "RockStone",
+"x": 48.35,
+"z": -11687.11,
+"yaw": 50.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "BranchCoral",
+"x": 48.4,
+"z": -11867.98,
 "yaw": 116.5,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "FanCoral",
-"x": -36.35,
-"z": -12750.27,
-"yaw": 330.3,
+"asset": "RockCrag",
+"x": -38.17,
+"z": -11954.99,
+"yaw": 42.4,
 "y": 0.0,
-"tier": 2,
+"tier": 3,
 "biome": "Ocean"
 },
 {
-"asset": "RockStone",
-"x": -31.83,
-"z": -12734.05,
-"yaw": 279.6,
+"asset": "RockPebble",
+"x": -45.36,
+"z": -11928.79,
+"yaw": 150.5,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "RockPebble",
-"x": -37.77,
-"z": -12763.14,
-"yaw": 170.6,
+"asset": "RockStone",
+"x": -32.6,
+"z": -11979.59,
+"yaw": 133.3,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
 "asset": "RockBoulder",
-"x": -37.37,
-"z": -12914.53,
+"x": 37.37,
+"z": -12034.53,
 "yaw": 51.0,
 "y": 1.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "RockPebble",
-"x": -37.28,
-"z": -12893.85,
+"asset": "TubeCoral",
+"x": 36.79,
+"z": -12016.16,
 "yaw": 233.5,
 "y": 1.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "TubeCoral",
-"x": -47.02,
-"z": -12931.77,
-"yaw": 282.4,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
 "asset": "RockCrag",
-"x": 38.66,
-"z": -12986.98,
-"yaw": 292.7,
+"x": -38.76,
+"z": -12109.76,
+"yaw": 310.2,
 "y": 0.0,
 "tier": 3,
 "biome": "Ocean"
 },
 {
-"asset": "TubeCoral",
-"x": 27.54,
-"z": -12963.01,
-"yaw": 85.6,
+"asset": "RockStone",
+"x": -44.33,
+"z": -12083.47,
+"yaw": 28.3,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
+"asset": "FanCoral",
+"x": -38.76,
+"z": -12133.7,
+"yaw": 85.6,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
 "asset": "RockBoulder",
 "x": 42.31,
-"z": -13176.93,
+"z": -12376.93,
 "yaw": 267.8,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "RockStone",
-"x": 43.32,
-"z": -13157.81,
+"asset": "RockPebble",
+"x": 43.53,
+"z": -12358.37,
 "yaw": 225.0,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "BranchCoral",
-"x": -31.59,
-"z": -13248.92,
-"yaw": 224.4,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "TubeCoral",
-"x": -40.81,
-"z": -13235.29,
-"yaw": 105.6,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "BranchCoral",
-"x": 41.72,
-"z": -13634.35,
-"yaw": 37.0,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
 "asset": "RockStone",
-"x": 46.62,
-"z": -13620.33,
-"yaw": 180.0,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "BranchCoral",
-"x": 38.61,
-"z": -13782.83,
-"yaw": 111.7,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "TubeCoral",
-"x": 42.14,
-"z": -13771.37,
-"yaw": 247.6,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "RockBoulder",
-"x": 42.49,
-"z": -13970.5,
-"yaw": 248.2,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockPebble",
-"x": 41.09,
-"z": -13952.98,
-"yaw": 300.3,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "TubeCoral",
-"x": 46.48,
-"z": -13987.0,
-"yaw": 161.3,
-"y": 0.0,
-"tier": 1,
-"biome": "Ocean"
-},
-{
-"asset": "RockBoulder",
-"x": 36.74,
-"z": -14121.98,
-"yaw": 340.3,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockStone",
-"x": 36.47,
-"z": -14100.01,
-"yaw": 185.9,
+"x": 46.63,
+"z": -12397.48,
+"yaw": 90.8,
 "y": 1.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
+"asset": "BranchCoral",
+"x": -37.36,
+"z": -12446.83,
+"yaw": 55.9,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "TubeCoral",
+"x": -45.88,
+"z": -12435.44,
+"yaw": 214.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockStone",
+"x": -33.65,
+"z": -12464.2,
+"yaw": 102.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "BranchCoral",
+"x": 32.53,
+"z": -12517.29,
+"yaw": 127.7,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "FanCoral",
+"x": -33.54,
+"z": -12592.36,
+"yaw": 160.2,
+"y": 1.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "TubeCoral",
+"x": -44.6,
+"z": -12577.85,
+"yaw": 147.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockStone",
+"x": -36.47,
+"z": -12609.98,
+"yaw": 185.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
 "asset": "RockCrag",
-"x": -38.61,
-"z": -14209.0,
+"x": 38.61,
+"z": -12689.0,
 "yaw": 233.7,
 "y": 0.0,
 "tier": 3,
 "biome": "Ocean"
 },
 {
-"asset": "RockPebble",
-"x": -46.05,
-"z": -14182.74,
+"asset": "TubeCoral",
+"x": 47.48,
+"z": -12665.05,
 "yaw": 284.9,
 "y": 0.0,
 "tier": 1,
@@ -1810,98 +1684,125 @@
 },
 {
 "asset": "FanCoral",
-"x": -49.01,
-"z": -14346.81,
+"x": 49.01,
+"z": -12826.81,
 "yaw": 195.3,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "RockBoulder",
-"x": -33.61,
-"z": -14513.4,
-"yaw": 141.9,
-"y": 0.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockPebble",
-"x": -30.32,
-"z": -14494.58,
-"yaw": 136.7,
+"asset": "TubeCoral",
+"x": 27.44,
+"z": -12812.35,
+"yaw": 299.6,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "RockBoulder",
-"x": 43.72,
-"z": -14762.31,
-"yaw": 16.4,
+"asset": "RockPebble",
+"x": 44.76,
+"z": -12842.26,
+"yaw": 166.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "FanCoral",
+"x": 49.01,
+"z": -12812.45,
+"yaw": 103.9,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "FanCoral",
+"x": -47.94,
+"z": -12917.04,
+"yaw": 123.2,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "TubeCoral",
+"x": -50.61,
+"z": -12906.16,
+"yaw": 141.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": -34.25,
+"z": -12931.6,
+"yaw": 199.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "FanCoral",
+"x": 35.54,
+"z": -13172.04,
+"yaw": 45.2,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
 "asset": "RockStone",
-"x": 30.86,
-"z": -14742.16,
-"yaw": 197.6,
+"x": 37.96,
+"z": -13154.55,
+"yaw": 4.1,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "BranchCoral",
-"x": 36.29,
-"z": -14933.31,
-"yaw": 59.6,
-"y": 1.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "RockPebble",
-"x": 43.21,
-"z": -14919.69,
-"yaw": 284.5,
-"y": 1.0,
+"asset": "TubeCoral",
+"x": 42.6,
+"z": -13183.11,
+"yaw": 145.0,
+"y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "BranchCoral",
-"x": -37.0,
-"z": -15017.59,
-"yaw": 92.6,
-"y": 1.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
 "asset": "RockBoulder",
-"x": -39.9,
-"z": -15310.11,
+"x": 39.9,
+"z": -13470.11,
 "yaw": 86.3,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "RockPebble",
-"x": -33.64,
-"z": -15292.68,
-"yaw": 326.7,
+"asset": "FanCoral",
+"x": 39.9,
+"z": -13488.81,
+"yaw": 72.1,
 "y": 0.0,
-"tier": 1,
+"tier": 2,
 "biome": "Ocean"
 },
 {
 "asset": "BranchCoral",
-"x": -29.5,
-"z": -15481.54,
+"x": -36.62,
+"z": -13563.32,
+"yaw": 164.6,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "FanCoral",
+"x": -36.62,
+"z": -13548.06,
 "yaw": 340.7,
 "y": 0.0,
 "tier": 2,
@@ -1909,387 +1810,1224 @@
 },
 {
 "asset": "RockBoulder",
-"x": 37.36,
-"z": -15561.62,
+"x": -37.36,
+"z": -13721.62,
 "yaw": 263.5,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": -32.01,
+"z": -13701.17,
+"yaw": 158.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": -38.27,
+"z": -13741.85,
+"yaw": 246.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "BranchCoral",
+"x": -44.61,
+"z": -13894.98,
+"yaw": 100.8,
 "y": 1.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
-"asset": "FanCoral",
-"x": 40.08,
-"z": -15722.9,
+"asset": "RockPebble",
+"x": -33.76,
+"z": -13877.31,
+"yaw": 154.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": -48.02,
+"z": -13911.95,
+"yaw": 277.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockCrag",
+"x": 41.15,
+"z": -13967.0,
+"yaw": 323.0,
+"y": 0.0,
+"tier": 3,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": 36.06,
+"z": -13942.96,
 "yaw": 143.9,
-"y": 1.0,
-"tier": 2,
+"y": 0.0,
+"tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "FanCoral",
-"x": -49.12,
-"z": -15809.62,
-"yaw": 267.3,
+"asset": "BranchCoral",
+"x": -40.75,
+"z": -14031.12,
+"yaw": 27.0,
 "y": 0.0,
 "tier": 2,
 "biome": "Ocean"
 },
 {
 "asset": "TubeCoral",
-"x": -36.82,
-"z": -15799.08,
-"yaw": 306.7,
+"x": -27.69,
+"z": -14018.46,
+"yaw": 54.4,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "TubeCoral",
-"x": -50.3,
-"z": -15820.85,
-"yaw": 314.1,
-"y": 1.0,
-"tier": 1,
+"asset": "RockCrag",
+"x": 40.62,
+"z": -14127.58,
+"yaw": 256.0,
+"y": 0.0,
+"tier": 3,
 "biome": "Ocean"
 },
 {
-"asset": "FanCoral",
-"x": 36.99,
-"z": -15888.98,
+"asset": "RockPebble",
+"x": 38.35,
+"z": -14102.86,
 "yaw": 126.4,
-"y": 1.0,
-"tier": 2,
-"biome": "Ocean"
-},
-{
-"asset": "TubeCoral",
-"x": 41.77,
-"z": -15875.23,
-"yaw": 358.5,
 "y": 0.0,
 "tier": 1,
 "biome": "Ocean"
 },
 {
-"asset": "RockCrag",
-"x": 38.7,
-"z": -19252.0,
-"yaw": 9.3,
-"y": 1.0,
-"tier": 3,
-"biome": "Volcano"
-},
-{
-"asset": "RockCrag",
-"x": 38.7,
-"z": -22878.0,
-"yaw": 89.9,
-"y": 1.0,
-"tier": 3,
-"biome": "Volcano"
-},
-{
-"asset": "RockCrag",
-"x": 38.7,
-"z": -17000.0,
-"yaw": 261.4,
+"asset": "TubeCoral",
+"x": 31.7,
+"z": -14149.88,
+"yaw": 285.8,
 "y": 0.0,
-"tier": 3,
-"biome": "Volcano"
+"tier": 1,
+"biome": "Ocean"
 },
 {
 "asset": "RockBoulder",
-"x": 33.52,
-"z": -21506.0,
-"yaw": 41.3,
-"y": 0.0,
-"tier": 2,
-"biome": "Volcano"
-},
-{
-"asset": "RockBoulder",
-"x": 34.34,
-"z": -20624.0,
-"yaw": 232.7,
-"y": 0.0,
-"tier": 2,
-"biome": "Volcano"
-},
-{
-"asset": "RockBoulder",
-"x": 35.15,
-"z": -17880.0,
-"yaw": 106.2,
-"y": 0.0,
-"tier": 2,
-"biome": "Volcano"
-},
-{
-"asset": "RockSlab",
-"x": -35.15,
-"z": -18120.0,
+"x": -42.36,
+"z": -14693.87,
 "yaw": 82.4,
 "y": 0.0,
 "tier": 2,
-"biome": "Volcano"
+"biome": "Ocean"
 },
 {
-"asset": "RockSlab",
-"x": -35.15,
-"z": -20390.0,
-"yaw": 174.1,
-"y": 0.0,
-"tier": 2,
-"biome": "Volcano"
-},
-{
-"asset": "RockSlab",
-"x": -34.34,
-"z": -21734.0,
-"yaw": 157.0,
-"y": 0.0,
-"tier": 2,
-"biome": "Volcano"
-},
-{
-"asset": "RockSlab",
-"x": -35.52,
-"z": -16776.0,
-"yaw": 160.8,
-"y": 0.0,
-"tier": 2,
-"biome": "Volcano"
-},
-{
-"asset": "RockSlab",
-"x": 44.15,
-"z": -18376.0,
+"asset": "RockPebble",
+"x": -38.15,
+"z": -14675.2,
 "yaw": 42.3,
 "y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "TubeCoral",
+"x": -49.87,
+"z": -14708.04,
+"yaw": 29.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockCrag",
+"x": 39.09,
+"z": -14926.91,
+"yaw": 10.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Ocean"
+},
+{
+"asset": "TubeCoral",
+"x": 28.55,
+"z": -14904.86,
+"yaw": 327.0,
+"y": 1.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "FanCoral",
+"x": 39.09,
+"z": -14950.85,
+"yaw": 10.1,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "RockCrag",
+"x": 39.22,
+"z": -15230.1,
+"yaw": 295.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Ocean"
+},
+{
+"asset": "FanCoral",
+"x": -32.19,
+"z": -15327.59,
+"yaw": 79.5,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "TubeCoral",
+"x": -43.86,
+"z": -15312.63,
+"yaw": 19.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "TubeCoral",
+"x": -38.66,
+"z": -15340.47,
+"yaw": 276.3,
+"y": 1.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockBoulder",
+"x": -40.03,
+"z": -15480.13,
+"yaw": 305.2,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "TubeCoral",
+"x": -26.81,
+"z": -15461.86,
+"yaw": 238.2,
+"y": 1.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockBoulder",
+"x": 39.62,
+"z": -15714.68,
+"yaw": 265.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": 44.16,
+"z": -15694.77,
+"yaw": 325.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockPebble",
+"x": 30.0,
+"z": -15734.45,
+"yaw": 134.4,
+"y": 1.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "FanCoral",
+"x": -37.05,
+"z": -15786.81,
+"yaw": 139.5,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "RockStone",
+"x": -45.39,
+"z": -15770.85,
+"yaw": 296.5,
+"y": 1.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockStone",
+"x": -40.92,
+"z": -15800.27,
+"yaw": 254.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "FanCoral",
+"x": 36.88,
+"z": -15897.93,
+"yaw": 227.1,
+"y": 0.0,
+"tier": 2,
+"biome": "Ocean"
+},
+{
+"asset": "RockStone",
+"x": 34.53,
+"z": -15882.01,
+"yaw": 238.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Ocean"
+},
+{
+"asset": "RockCrag",
+"x": 40.06,
+"z": -19856.0,
+"yaw": 26.3,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": 40.06,
+"z": -23024.0,
+"yaw": 47.5,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": 40.06,
+"z": -17898.0,
+"yaw": 27.9,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": 40.06,
+"z": -21814.0,
+"yaw": 149.4,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": 40.06,
+"z": -18646.0,
+"yaw": 294.1,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -18878.0,
+"yaw": 21.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -20836.0,
+"yaw": 146.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -22046.0,
+"yaw": 144.3,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -17668.0,
+"yaw": 143.3,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": 40.06,
+"z": -19108.0,
+"yaw": 189.6,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -16920.0,
+"yaw": 192.7,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -22794.0,
+"yaw": 73.5,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": 40.06,
+"z": -20604.0,
+"yaw": 286.0,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -40.06,
+"z": -17294.0,
+"yaw": 186.1,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -40.06,
+"z": -22420.0,
+"yaw": 126.7,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -40.06,
+"z": -20462.0,
+"yaw": 347.1,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -20088.0,
+"yaw": 254.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -40.06,
+"z": -19252.0,
+"yaw": 58.7,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -19626.0,
+"yaw": 348.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": 40.06,
+"z": -22276.0,
+"yaw": 208.2,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -40.06,
+"z": -18504.0,
+"yaw": 122.5,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -23256.0,
+"yaw": 85.5,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": 40.06,
+"z": -17436.0,
+"yaw": 24.4,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -40.06,
+"z": -21210.0,
+"yaw": 87.8,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": 40.06,
+"z": -17150.0,
+"yaw": 104.0,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -16458.0,
+"yaw": 123.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -40.06,
+"z": -21672.0,
+"yaw": 355.7,
+"y": 1.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": -38.61,
+"z": -18130.0,
+"yaw": 213.3,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockCrag",
+"x": 40.32,
+"z": -21440.0,
+"yaw": 69.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 46.32,
+"z": -18272.0,
+"yaw": 133.4,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 40.06,
+"z": -22562.0,
+"yaw": 155.7,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 46.32,
+"z": -16314.0,
+"yaw": 29.9,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": -40.06,
+"z": -18042.0,
+"yaw": 168.6,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 46.32,
+"z": -23398.0,
+"yaw": 183.0,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": -40.06,
+"z": -16546.0,
+"yaw": 327.5,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": -32.61,
+"z": -21584.0,
+"yaw": 156.0,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 46.32,
+"z": -19482.0,
+"yaw": 247.9,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 33.26,
+"z": -21958.0,
+"yaw": 244.7,
+"y": 0.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 46.32,
+"z": -20230.0,
+"yaw": 63.0,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": -40.06,
+"z": -23168.0,
+"yaw": 204.2,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 40.06,
+"z": -20318.0,
+"yaw": 161.6,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 46.32,
+"z": -22650.0,
+"yaw": 58.6,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": -32.61,
+"z": -21298.0,
+"yaw": 8.6,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 45.5,
+"z": -17062.0,
+"yaw": 358.5,
+"y": 0.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 45.5,
+"z": -17524.0,
+"yaw": 32.6,
+"y": 0.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": -40.06,
+"z": -19714.0,
+"yaw": 319.2,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 33.26,
+"z": -20924.0,
+"yaw": 132.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 40.06,
+"z": -19394.0,
+"yaw": 29.4,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": -32.61,
+"z": -18416.0,
+"yaw": 347.3,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 46.32,
+"z": -22190.0,
+"yaw": 237.7,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 45.5,
+"z": -20692.0,
+"yaw": 145.6,
+"y": 0.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 33.26,
+"z": -18788.0,
+"yaw": 301.7,
+"y": 0.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": -32.61,
+"z": -23542.0,
+"yaw": 254.8,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 40.88,
+"z": -23486.0,
+"yaw": 149.6,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": -40.06,
+"z": -22882.0,
+"yaw": 258.4,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockBoulder",
+"x": 45.5,
+"z": -19022.0,
+"yaw": 265.6,
+"y": 0.0,
 "tier": 2,
 "biome": "Volcano"
 },
 {
 "asset": "RockSlab",
-"x": -35.07,
-"z": -22662.0,
-"yaw": 203.3,
+"x": -40.06,
+"z": -16832.0,
+"yaw": 62.0,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": -34.61,
+"z": -19340.0,
+"yaw": 257.9,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": 40.88,
+"z": -18360.0,
+"yaw": 330.0,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": -40.06,
+"z": -17756.0,
+"yaw": 247.6,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": 43.5,
+"z": -18734.0,
+"yaw": 287.8,
+"y": 0.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": -34.61,
+"z": -20374.0,
+"yaw": 356.4,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": -40.06,
+"z": -21958.0,
+"yaw": 286.7,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": 40.88,
+"z": -21352.0,
+"yaw": 169.1,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": 43.5,
+"z": -20980.0,
+"yaw": 202.4,
+"y": 0.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": -34.61,
+"z": -22508.0,
+"yaw": 276.1,
+"y": 0.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": -40.06,
+"z": -20924.0,
+"yaw": 227.6,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": 40.88,
+"z": -21530.0,
+"yaw": 25.5,
+"y": 1.0,
+"tier": 2,
+"biome": "Volcano"
+},
+{
+"asset": "RockSlab",
+"x": 43.5,
+"z": -21902.0,
+"yaw": 21.7,
 "y": 0.0,
 "tier": 2,
 "biome": "Volcano"
 },
 {
 "asset": "RockStone",
-"x": -35.97,
-"z": -17052.0,
-"yaw": 3.3,
-"y": 0.0,
-"tier": 1,
-"biome": "Volcano"
-},
-{
-"asset": "RockPebble",
 "x": -40.06,
-"z": -17816.0,
-"yaw": 210.9,
+"z": -18790.0,
+"yaw": 79.8,
+"y": 1.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockPebble",
+"x": -29.43,
+"z": -17206.0,
+"yaw": 296.3,
+"y": 1.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": -31.43,
+"z": -17382.0,
+"yaw": 100.7,
+"y": 1.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockPebble",
+"x": 49.5,
+"z": -17812.0,
+"yaw": 92.3,
+"y": 1.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockPebble",
+"x": 40.88,
+"z": -18184.0,
+"yaw": 267.3,
+"y": 1.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockPebble",
+"x": 49.5,
+"z": -16776.0,
+"yaw": 146.7,
+"y": 1.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockPebble",
+"x": 40.88,
+"z": -16404.0,
+"yaw": 23.7,
+"y": 1.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": 30.44,
+"z": -22136.0,
+"yaw": 48.4,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": -39.24,
-"z": -20686.0,
-"yaw": 114.7,
+"x": -29.43,
+"z": -22332.0,
+"yaw": 125.4,
+"y": 1.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": 49.5,
+"z": -22938.0,
+"yaw": 182.5,
+"y": 1.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": -29.99,
+"z": -17190.0,
+"yaw": 201.7,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": -37.61,
-"z": -21450.0,
-"yaw": 355.7,
-"y": 0.0,
-"tier": 1,
-"biome": "Volcano"
-},
-{
-"asset": "RockPebble",
-"x": -32.7,
-"z": -22916.0,
-"yaw": 110.9,
+"x": -29.99,
+"z": -17396.0,
+"yaw": 114.2,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockStone",
-"x": -40.88,
-"z": -18442.0,
-"yaw": 222.1,
+"x": -29.99,
+"z": -17938.0,
+"yaw": 3.2,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": -30.61,
-"z": -19238.0,
-"yaw": 95.7,
+"x": -29.99,
+"z": -18608.0,
+"yaw": 5.5,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": -40.88,
-"z": -20062.0,
-"yaw": 27.3,
-"y": 0.0,
-"tier": 1,
-"biome": "Volcano"
-},
-{
-"asset": "RockPebble",
-"x": -39.24,
-"z": -16434.0,
-"yaw": 327.0,
+"x": -29.99,
+"z": -19148.0,
+"yaw": 294.1,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockStone",
-"x": -40.06,
-"z": -22070.0,
-"yaw": 18.9,
+"x": -29.99,
+"z": -20566.0,
+"yaw": 289.1,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": -37.61,
-"z": -22310.0,
-"yaw": 10.6,
+"x": -29.99,
+"z": -21106.0,
+"yaw": 232.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": -29.99,
+"z": -22316.0,
+"yaw": 241.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": -29.99,
+"z": -16648.0,
+"yaw": 123.7,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": -34.34,
-"z": -19820.0,
-"yaw": 59.8,
+"x": -29.99,
+"z": -21774.0,
+"yaw": 280.4,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": -31.07,
-"z": -18684.0,
-"yaw": 348.6,
+"x": -29.99,
+"z": -23064.0,
+"yaw": 77.8,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": -29.71,
-"z": -23442.0,
-"yaw": 338.1,
+"x": 29.43,
+"z": -16418.0,
+"yaw": 323.6,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockStone",
-"x": 31.26,
-"z": -17562.0,
-"yaw": 208.7,
+"x": 31.43,
+"z": -16958.0,
+"yaw": 321.8,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": 30.53,
-"z": -20946.0,
-"yaw": 255.2,
-"y": 0.0,
-"tier": 1,
-"biome": "Volcano"
-},
-{
-"asset": "RockStone",
-"x": 29.8,
-"z": -21184.0,
-"yaw": 105.2,
-"y": 0.0,
-"tier": 1,
-"biome": "Volcano"
-},
-{
-"asset": "RockStone",
-"x": 30.25,
-"z": -17322.0,
-"yaw": 104.1,
-"y": 0.0,
-"tier": 1,
-"biome": "Volcano"
-},
-{
-"asset": "RockStone",
-"x": 31.88,
-"z": -23200.0,
-"yaw": 167.1,
+"x": 29.43,
+"z": -17628.0,
+"yaw": 329.3,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": 32.7,
-"z": -18932.0,
-"yaw": 79.5,
-"y": 0.0,
-"tier": 1,
-"biome": "Volcano"
-},
-{
-"asset": "RockStone",
-"x": 32.7,
-"z": -19572.0,
-"yaw": 63.0,
-"y": 0.0,
-"tier": 1,
-"biome": "Volcano"
-},
-{
-"asset": "RockStone",
-"x": 32.7,
-"z": -22558.0,
-"yaw": 166.8,
-"y": 0.0,
-"tier": 1,
-"biome": "Volcano"
-},
-{
-"asset": "RockStone",
-"x": 31.07,
-"z": -21822.0,
-"yaw": 114.4,
+"x": 29.43,
+"z": -18168.0,
+"yaw": 271.9,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"
 },
 {
 "asset": "RockPebble",
-"x": 28.98,
-"z": -20308.0,
-"yaw": 101.0,
+"x": 29.43,
+"z": -18376.0,
+"yaw": 104.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockPebble",
+"x": 29.43,
+"z": -19586.0,
+"yaw": 354.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockPebble",
+"x": 29.43,
+"z": -20126.0,
+"yaw": 319.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": 31.43,
+"z": -20796.0,
+"yaw": 157.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": 31.43,
+"z": -21336.0,
+"yaw": 354.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockPebble",
+"x": 29.43,
+"z": -21544.0,
+"yaw": 352.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": 31.43,
+"z": -22086.0,
+"yaw": 259.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": 31.43,
+"z": -22754.0,
+"yaw": 287.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Volcano"
+},
+{
+"asset": "RockStone",
+"x": 30.61,
+"z": -23502.0,
+"yaw": 317.2,
 "y": 0.0,
 "tier": 1,
 "biome": "Volcano"

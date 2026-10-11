@@ -87,11 +87,11 @@ def colors_at(k, z):
 # The patches are a quasicrystal (QM, Oct 11: like his map maker's atlas patterns, so
 # they have a rhyme and reason): 7 waves round the circle, PATTERN studs a unit, drawn in
 # game coordinates (tools/funnel_grid.py), its middle OFFSET from the ocean's start (QM:
-# zoomed in and off centre, so it isn't mirrored). The highest values
+# zoomed well out and off centre, so it isn't mirrored). The highest values
 # are the raised patches (seagrass, then rock), the lowest the sunk ones (trenches at
 # the reef, lava deep down); Grass and Low say how much of the floor each covers at that
 # depth, and the pattern decides where.
-ANGLES, PATTERN = 7, 30
+ANGLES, PATTERN = 7, 10
 OFFSET = (-121.8, -427.3)  # studs (random): the pattern's middle, from the ocean's start
 STOPS = [(0.00, 0.14, 0.08), (0.33, 0.06, 0.0), (0.55, 0.10, 0.0), (0.75, 0.12, 0.04), (1.00, 0.18, 0.10)]
 NEST_IN = 12  # tools/funnel.luau moves each nest this far in from the wall on its side
