@@ -559,7 +559,7 @@ return {
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
 	-- or crashes into, is PetTiers'. Unlisted: 1.
-	AnimalScale = {},
+	AnimalScale = { LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2 }, -- (QM, Oct 11)
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
