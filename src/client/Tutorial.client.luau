@@ -147,7 +147,7 @@ end
 
 -- QM's big white arrow over the egg in your pen, bobbing, once it's placed, then over
 -- the pet that hatches, each till you're close enough for its prompt (QM, Oct 11).
-local ARROW = "rbxassetid://EGG_ARROW" -- assets/ui/TutorialArrow.png
+local ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
 local ARROW_SIZE = 7 -- studs
 local ARROW_UP = 9 -- studs over the egg's root, at the bottom of its bob
 local eggArrow = Instance.new("BillboardGui")
