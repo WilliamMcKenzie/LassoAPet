@@ -62,6 +62,7 @@ local MUSIC = {
 	-- The run home (QM, Oct 9: more panicked; Oct 10: the Meadow's wherever you turned
 	-- round), APM's "Crime Scene - Action, Race & Chase":
 	home1 = "rbxassetid://1847683499", -- Running Faster A (Moritz Bintig, 2:19)
+	intro = "rbxassetid://1837301451", -- Epic Battle Simulator (APM): the intro's fight (Client/Intro, QM Oct 11)
 }
 local VOLUME = 0.5
 local GALLOP_VOLUME = 0.35
@@ -168,6 +169,10 @@ end
 
 local music = {}
 local playing
+-- The track playing now (Client/Intro puts it back after its own).
+function Sounds.music()
+	return playing
+end
 -- cut: switch with no fade (the old track stops dead, the new one's straight in).
 function Sounds.setMusic(which, cut)
 	if which == playing then
