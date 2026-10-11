@@ -53,7 +53,7 @@ local BOSS_SECONDS = 5 -- and how long it gives you
 local GATE_HOLD = 2 -- seconds the camera stays on the last gate (the Jurassic's)
 local GATE_BEAT = 0.5 -- and on each one before it
 local GATE_FLY = 1.1 -- seconds from one gate to the next
-local GATE_HIGH = 70 -- studs up the camera flies over the gates
+local GATE_HIGH = 16 -- studs up the camera flies, near the ground (QM: not from so high), just past each gate
 local NEW_PET_WAIT = 12 -- seconds after a ride for its egg to hatch in your pen
 
 local function myPen()
@@ -302,19 +302,19 @@ local function showGate()
 			camera.CFrame = CFrame.new(p) * a.Rotation:Lerp(c.Rotation, u)
 		end
 	end
-	-- Over each gate in turn, high enough to see past it down its biome.
+	-- Just past each gate in turn (it'd hide the biome from in front of it), low, down its biome.
 	local stops, edge = {}, 0
 	for i, biome in Config.Biomes do
 		edge -= biome.Length
 		local next = Config.Biomes[i + 1]
 		if next then
-			local look = Vector3.new(0, 10, edge - 160)
-			table.insert(stops, CFrame.lookAt(Vector3.new(0, GATE_HIGH, edge + 90), look))
+			local look = Vector3.new(0, GATE_HIGH * 0.6, edge - 400)
+			table.insert(stops, CFrame.lookAt(Vector3.new(0, GATE_HIGH, edge - 40), look))
 		end
 	end
 	local at = was
 	for i, stop in stops do
-		local mid = CFrame.new(at.Position:Lerp(stop.Position, 0.5) + Vector3.new(0, 40, 0)) * at.Rotation
+		local mid = CFrame.new(at.Position:Lerp(stop.Position, 0.5) + Vector3.new(0, if i == 1 then 40 else 6, 0)) * at.Rotation
 		fly(at, mid, stop, if i == 1 then 1.6 else GATE_FLY)
 		task.wait(if i == #stops then GATE_HOLD else GATE_BEAT)
 		at = stop
