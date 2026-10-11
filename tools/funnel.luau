@@ -75,7 +75,11 @@ local function restore(inst)
 end
 for _, name in { "Ground", "Walls", "Obstacles", "Nests" } do
 	for _, inst in world[name]:GetChildren() do
-		restore(inst)
+		if inst:GetAttribute("FunnelPiece") then
+			inst:Destroy() -- (a long ground part's cut-off piece: the part itself goes back whole)
+		else
+			restore(inst)
+		end
 	end
 end
 if world:FindFirstChild("Funnel") then
@@ -86,10 +90,43 @@ if MODE == "undo" then
 end
 
 local function keep(part)
-	part:SetAttribute("FunnelCF", part.CFrame)
-	part:SetAttribute("FunnelSize", part.Size)
+	if part:GetAttribute("FunnelCF") == nil then -- (a cut part already kept its whole self)
+		part:SetAttribute("FunnelCF", part.CFrame)
+		part:SetAttribute("FunnelSize", part.Size)
+	end
 end
 local counts = { ground = 0, walls = 0, moved = 0, floor = 0 }
+
+-- Long flat ground parts are cut into PIECE-stud lengths first (QM, Oct 11: the pacing
+-- ladder's course has strips running hundreds of studs down the edge; widened by
+-- their middle's z, they left an 8-stud trench by the wall at one end). The part keeps
+-- the first piece and its FunnelCF/FunnelSize (undo puts it back whole); the others
+-- are FunnelPiece copies, which undo removes. (PIECE is a multiple of the 8-stud cell,
+-- so the checker keeps its parity.)
+local PIECE = 40
+for _, part in world.Ground:GetChildren() do
+	local cf, size = part.CFrame, part.Size
+	if part:IsA("BasePart") and cf.Position.Z < 0 and size.Y <= 3 and size.Z > PIECE * 1.5
+		and math.abs(cf.RightVector.X) > 0.999 and math.abs(cf.LookVector.Z) > 0.999 then
+		local back = cf.Position.Z + size.Z / 2 -- (its +z end)
+		local n = math.ceil(size.Z / PIECE)
+		for i = n, 1, -1 do
+			local z1 = back - (i - 1) * PIECE
+			local z0 = math.max(back - i * PIECE, back - size.Z)
+			local piece = if i == 1 then part else part:Clone()
+			if i == 1 then
+				keep(part)
+			else
+				piece:SetAttribute("FunnelPiece", true)
+			end
+			piece.Size = Vector3.new(size.X, size.Y, z1 - z0)
+			piece.CFrame = CFrame.new(cf.X, cf.Y, (z0 + z1) / 2) * cf.Rotation
+			if i ~= 1 then
+				piece.Parent = world.Ground
+			end
+		end
+	end
+end
 
 -- Ground: flat patches widen, anything standing on it moves.
 local edgeParts = {} -- ground parts that reached the old edge (World.Funnel copies their look)
@@ -101,6 +138,16 @@ for _, part in world.Ground:GetChildren() do
 		if size.Y <= 3 and math.abs(cf.RightVector.X) > 0.999 then
 			local l = snap(mapX(cf.X - size.X / 2, z))
 			local r = snap(mapX(cf.X + size.X / 2, z))
+			-- Ones along the old edge reach the wall (QM, Oct 11: snapped, they stopped up to
+			-- 4 studs short of it, a trench down to World.Funnel's floor): out to the next
+			-- cell past the wall's inner face at their far, widest end, under the 8-stud wall.
+			local far = halfWidth(z - size.Z / 2)
+			if cf.X - size.X / 2 <= -START + 0.1 then
+				l = -CELL * math.ceil(far / CELL)
+			end
+			if cf.X + size.X / 2 >= START - 0.1 then
+				r = CELL * math.ceil(far / CELL)
+			end
 			if r - l < CELL then
 				r = l + CELL
 			end
