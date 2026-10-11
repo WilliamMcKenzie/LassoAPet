@@ -180,5 +180,85 @@ def main(out=OUT):
     print("wrote", out, len(m["elements"]), "elements")
 
 
+
+# ---------------------------------------------------------------- two heads (on QM's file)
+SPLAY = 34  # degrees each neck turns out from the middle at NeckBase
+
+
+def two_heads(src, dst=NAME + "_2heads"):
+    """QM Oct 11: "make it have two heads (just copy the current head)". Copies the whole
+    neck from NeckBase (bones + parts, names + "B") and splays the two necks apart about Y.
+    The copy's animations are the original's mirrored (Y and Z turns negated), so the heads
+    sway as a pair instead of crossing. Multi-axis now: preview and convert with ZYX."""
+    import copy
+    import horse_rig
+    horse_rig.EULER = "ZYX"
+    m = json.load(open(src))
+    groups = {g["uuid"]: g for g in m["groups"]}
+    els = {e["uuid"]: e for e in m["elements"]}
+    base = next(g for g in m["groups"] if g["name"] == "NeckBase")
+    remap = {}
+
+    def clone(node):
+        if isinstance(node, str):
+            e = copy.deepcopy(els[node])
+            e["uuid"] = str(uuid.uuid4())
+            e["name"] += "B"
+            m["elements"].append(e)
+            return e["uuid"]
+        g = copy.deepcopy(groups[node["uuid"]])
+        g["uuid"] = str(uuid.uuid4())
+        g["name"] += "B"
+        remap[node["uuid"]] = g["uuid"]
+        m["groups"].append(g)
+        return {"uuid": g["uuid"], "isOpen": True, "children": [clone(c) for c in node["children"]]}
+
+    root = next(n for n in m["outliner"] if isinstance(n, dict))
+    node = find(m["outliner"], base["uuid"])
+    root["children"].append(clone(node))
+    base["rotation"] = [0, SPLAY, 0]
+    next(g for g in m["groups"] if g["uuid"] == remap[base["uuid"]])["rotation"] = [0, -SPLAY, 0]
+    for a in m["animations"]:
+        for gid, nid in remap.items():
+            if gid not in a["animators"]:
+                continue
+            an = copy.deepcopy(a["animators"][gid])
+            an["name"] += "B"
+            for k in an.get("keyframes", []):
+                k["uuid"] = str(uuid.uuid4())
+                if k["channel"] in ("rotation", "position"):
+                    for dp in k["data_points"]:
+                        axes = ("y", "z") if k["channel"] == "rotation" else ("x",)
+                        for ax in axes:
+                            v = str(dp.get(ax, "0")).strip() or "0"
+                            dp[ax] = str(-float(v)) if v.replace(".", "", 1).lstrip("-").isdigit() else f"-({v})"
+            a["animators"][nid] = an
+    with open(os.path.join(OUT, dst + ".bbmodel"), "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    return m
+
+
+def previews(m, stem):
+    idle = next(a for a in m["animations"] if a["name"] == "idle")
+    T = 480
+    views = [dict(eye=(-34, 22, -44), target=(0, 7, -4), W=T, H=T, fov=46), dict(eye=(-54, 8, -2), target=(0, 6, 2), W=T, H=T, fov=46),
+             dict(eye=(-6, 16, -48), target=(0, 9, -6), W=T, H=T, fov=40), dict(eye=(20, 20, 26), target=(0, 7, -4), W=T, H=T, fov=46)]
+    sheet = Image.new("RGB", (T * 4, T))
+    for i, v in enumerate(views):
+        sheet.paste(render(parts(m, idle, 0), **v), (i * T, 0))
+    A.label(sheet, ["Lava Wyrm", "side", "face", "back"], 22).save(os.path.join(OUT, stem + ".png"))
+    if "gifs" in sys.argv:
+        for name, n in (("idle", 20), ("walk", 16), ("gallop", 16)):
+            anim = next(x for x in m["animations"] if x["name"] == name)
+            L = anim["length"]
+            A.gif(os.path.join(OUT, f"{stem}_{name}.gif"),
+                  [A.label(render(parts(m, anim, L * i / n), **views[0]), [name], 22) for i in range(n)], fps=n / L)
+
+
+if __name__ == "__main__" and sys.argv[1:2] == ["twoheads"]:
+    previews(two_heads(sys.argv[2]), NAME + "_2heads")
+    sys.exit()
+
+
 if __name__ == "__main__":
     main()
