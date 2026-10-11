@@ -1,6 +1,6 @@
 -- The first-time tutorial (QM, Oct 11), after the intro (Client/Intro). One thing at a
--- time: a tap hand on what to touch, arrows on the ground to where to go, QM's line of
--- text along the top saying what to do (CAPTIONS), and only the UI each step needs (BaseUi stays hidden, the HUD is "bare": Hud.setTutorial).
+-- time: a tap hand on what to touch, arrows on the ground to where to go, QM's guide
+-- bar along the top saying what to do (CAPTIONS), and only the UI each step needs (BaseUi stays hidden, the HUD is "bare": Hud.setTutorial).
 --
 --   1. egg    a Horse egg in your inventory: the tap hand on its square; once it's in
 --             your hand, the tap hand over your pen: place it.
@@ -45,15 +45,18 @@ local SPRINT_GUIDE = {
 	size = Vector2.new(3846, 162),
 	strips = { { "rbxassetid://128484192846174", 962 }, { "rbxassetid://118018475359108", 962 }, { "rbxassetid://139647408711436", 961 }, { "rbxassetid://114889489768256", 961 } },
 }
--- QM's lines along the top, one per step (assets/ui/Tutorial*.png): { image, width, height }.
+-- QM's guide bars along the top, one per step, laid out like the Sprint guide (QM, Oct 11):
+-- each is 3846 x 142, a see-through black bar (alpha 77) across the screen with the words
+-- in the middle. The bar's drawn here (a Frame); only the words are uploads, cut out of
+-- QM's art at x 1411..2435 (assets/ui/TutorialGuide1-5.png, 1024 x 142, an upload's widest).
+local GUIDE_BAR = { size = Vector2.new(3846, 142), from = 1411, width = 1024, transparency = 1 - 77 / 255 }
 local CAPTIONS = {
-	clickEgg = { "rbxassetid://101774342383836", 468, 73 }, -- assets/ui/TutorialClickEgg.png: the egg in your inventory
-	hatchEgg = { "rbxassetid://102383563702992", 465, 73 }, -- assets/ui/TutorialHatchEgg.png: it's in your pen, waiting to be hatched (QM)
-	placeEgg = { "rbxassetid://102754390814286", 737, 73 }, -- assets/ui/TutorialPlaceEgg.png: holding it
-	ride = { "rbxassetid://108854850506856", 476, 73 }, -- assets/ui/TutorialRide.png: your Horse is out
-	lasso = { "rbxassetid://112913234859474", 471, 60 }, -- assets/ui/TutorialLasso.png: the first ride, till your first throw
+	clickEgg = "rbxassetid://TUTORIAL_GUIDE_1", -- assets/ui/TutorialGuide1.png "Click on the egg": the egg in your inventory
+	placeEgg = "rbxassetid://TUTORIAL_GUIDE_2", -- assets/ui/TutorialGuide2.png "Place the egg": holding it
+	hatchEgg = "rbxassetid://TUTORIAL_GUIDE_3", -- assets/ui/TutorialGuide3.png "Hatch your egg": it's in your pen, waiting to be hatched
+	ride = "rbxassetid://TUTORIAL_GUIDE_4", -- assets/ui/TutorialGuide4.png "Ride your horse!": your Horse is out
+	lasso = "rbxassetid://TUTORIAL_GUIDE_5", -- assets/ui/TutorialGuide5.png "Lasso an animal": the first ride, till your first throw
 }
-local CAPTION_HEIGHT = 0.065 -- of the screen's height, for a 73 px tall line
 local SLOW_FLOOR = 0.02 -- the slow-down's bottom (x speed): all but stopped
 local SLOW_TIME = 0.5 -- seconds into the slow-down for its middle (the sigmoid's)
 local SLOW_STEEP = 9 -- how sharp its turn is
@@ -118,25 +121,31 @@ guideRatio.Parent = sprintGuide
 sprintGuide.Visible = false
 sprintGuide.Parent = gui
 
--- QM's line of text for the step you're on, along the top.
-local caption = Instance.new("ImageLabel")
-caption.BackgroundTransparency = 1
+-- QM's guide bar for the step you're on, along the top (as the Sprint guide).
+local caption = Instance.new("Frame")
+caption.BackgroundColor3 = Color3.new(0, 0, 0)
+caption.BackgroundTransparency = GUIDE_BAR.transparency
+caption.BorderSizePixel = 0
 caption.AnchorPoint = Vector2.new(0.5, 0)
-caption.Position = UDim2.fromScale(0.5, 0.1)
+caption.Position = UDim2.fromScale(0.5, 0.12)
+caption.Size = UDim2.fromScale(1, 1)
 caption.Visible = false
 local captionRatio = Instance.new("UIAspectRatioConstraint")
+captionRatio.AspectRatio = GUIDE_BAR.size.X / GUIDE_BAR.size.Y
 captionRatio.Parent = caption
-local captionScale = Instance.new("UIScale") -- (it pulses: QM)
-captionScale.Parent = caption
+local words = Instance.new("ImageLabel")
+words.BackgroundTransparency = 1
+words.Position = UDim2.fromScale(GUIDE_BAR.from / GUIDE_BAR.size.X, 0)
+words.Size = UDim2.fromScale(GUIDE_BAR.width / GUIDE_BAR.size.X, 1)
+words.Parent = caption
+local captionScale = Instance.new("UIScale") -- (the words pulse: QM)
+captionScale.Parent = words
 caption.Parent = gui
 local captionOn -- the CAPTIONS key on show, or nil
 local function say(key)
 	captionOn = key
-	local c = key and CAPTIONS[key]
-	if c then
-		caption.Image = c[1]
-		caption.Size = UDim2.fromScale(1, CAPTION_HEIGHT * c[3] / 73)
-		captionRatio.AspectRatio = c[2] / c[3]
+	if key and CAPTIONS[key] then
+		words.Image = CAPTIONS[key]
 	end
 end
 
