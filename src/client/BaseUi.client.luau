@@ -30,9 +30,9 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 }
 -- assets/ui/quests/*.png (QM, Oct 11). "" till Studio uploads them: plain boxes meanwhile.
 local QUEST_ART = {
-	top = "QUESTS_TOP", -- QuestsTop.png, 453 x 90: Quests.png's header, "Quests" and its fold chevron
-	middle = "QUESTS_MIDDLE", -- QuestsMiddle.png, 453 x 20: a strip of its body, stretched to fit the quests
-	bottom = "QUESTS_BOTTOM", -- QuestsBottom.png, 453 x 40: its bottom edge
+	top = "rbxassetid://76911261091418", -- QuestsTop.png, 453 x 90: Quests.png's header, "Quests" and its fold chevron
+	middle = "rbxassetid://121025867644756", -- QuestsMiddle.png, 453 x 20: a strip of its body, stretched to fit the quests
+	bottom = "rbxassetid://135782051653298", -- QuestsBottom.png, 453 x 40: its bottom edge
 	-- (cut from Quests.png: a 9-slice drew its header at the art's own pixel size, not the
 	-- panel's, so "Quests" came out huge and the chevron got cut: QM, Oct 11)
 	panel = "rbxassetid://71052597087124", -- Quests.png, 453 x 265: open, "Quests" and its fold chevron drawn in
