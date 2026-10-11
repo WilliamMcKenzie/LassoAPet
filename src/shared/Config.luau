@@ -176,7 +176,7 @@ return {
 			Length = 7680, -- as long as the ocean (a guess)
 			GroundColors = { Color3.fromRGB(156, 98, 66), Color3.fromRGB(168, 108, 74) }, -- baked-earth brown
 			WallColors = { Color3.fromRGB(170, 92, 58), Color3.fromRGB(186, 104, 66) },
-			Herd = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03 }, -- (QM, Oct 11: the Firebird Uncommon, the Rock Hog and Fire Lobster Rare, the Rockworm Epic, the Phoenix Legendary and very rare; the weights a guess)
+			Herd = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (QM, Oct 11: the Firebird Uncommon, the Rock Hog and Fire Lobster Rare, the Rockworm Epic, the Phoenix Legendary and very rare, the Lava Whale Epic and as rare as the Phoenix; the weights a guess)
 			-- tools/volcano.py: lighter ash flush, darker crust plates a stud up, lava pools
 			-- a stud down out by the walls.
 			Patches = {
@@ -332,7 +332,7 @@ return {
 		Cactus = 30, Kitten = 30, Scorpion = 90, Sandworm = 210, SpineLizard = 300, Snake = 600, -- Desert
 		Penguin = 60, Boar = 90, Snowman = 240, IceGolem = 720, Icebringer = 3600, -- Tundra
 		Starfish = 45, Whale = 10800, Squid = 2700, FishSchool = 2000, KingCrab = 3600, BlueCrab = 9000, Kraken = 10000, -- Ocean
-		Firebird = 7200, RockHog = 10800, FireLobster = 10800, Rockworm = 12600, VolcanoTortoise = 14400, Phoenix = 21600, -- Volcano (guesses: past the Ocean's)
+		Firebird = 7200, RockHog = 10800, FireLobster = 10800, Rockworm = 12600, VolcanoTortoise = 14400, Phoenix = 21600, LavaWhale = 14400, -- Volcano (guesses: past the Ocean's)
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		SnackYak = 3600, RoboShark = 57600, Loong = 86400, -- exclusives
 	},
@@ -486,7 +486,7 @@ return {
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
 		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
-		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, -- Volcano (guesses)
+		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 	},
@@ -550,7 +550,7 @@ return {
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
 		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, -- Tundra
 		Starfish = 300, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, -- Ocean
-		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, -- Volcano (guesses: past the Ocean's)
+		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
 		Loong = 60000, Beholder = 9000, Leviathan = 45000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
 		WarElephant = 12000, SoulHorse = 60000, Sludge = 7500, -- so they pay more than the Ocean's)
 	},
@@ -663,6 +663,7 @@ return {
 		Rockworm = "rbxassetid://105149417332337", -- assets/ui/RockwormEggRender.png
 		FireLobster = "rbxassetid://83951862994609", -- assets/ui/FireLobsterEggRender.png
 		Phoenix = "rbxassetid://77371080716061", -- assets/ui/PhoenixEggRender.png
+		LavaWhale = "", -- assets/ui/LavaWhaleEggRender.png (Studio uploads)
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://70469571709365", -- assets/ui/LoongEggRender.png
@@ -903,6 +904,7 @@ return {
 		Rockworm = { Speed = 3.8, Stamina = 3 }, -- (a guess)
 		FireLobster = { Speed = 3.6, Stamina = 2.8 }, -- (a guess: as the Rock Hog)
 		Phoenix = { Speed = 4.2, Stamina = 3 }, -- (a guess: the Volcano's fastest)
+		LavaWhale = { Speed = 3.8, Stamina = 3 }, -- (a guess: a bit past the Rockworm's Epic)
 		VolcanoTortoise = { Speed = 3.5, Stamina = 3 }, -- (a guess: slow for a tortoise, but past the Ocean's)
 		-- Godlands
 		Loong = { Speed = 0.5, Stamina = 8 }, -- QM, Oct 4: starts at 0.5x, its breath's kills take it up to 1x (Abilities.Loong.MaxSpeed 2 x this); sprints at 4x (PetSprintSpeed)

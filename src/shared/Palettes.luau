@@ -196,6 +196,12 @@ return {
 		{ "Marking", 255, 132, 24 }, -- feathers
 		{ "Accent", 255, 188, 36 }, -- beak, feather ends, plumes
 	},
+	LavaWhale = {
+		{ "Body", 182, 100, 62 }, -- rock
+		{ "Body", 136, 74, 50 }, -- brow, horn bands
+		{ "Belly", 246, 196, 140 }, -- ash
+		{ "Marking", 255, 140, 30 }, -- lava glyphs
+	},
 	Firebird = {
 		{ "Body", 255, 128, 32 }, -- feathers
 		{ "Belly", 232, 98, 22 },
