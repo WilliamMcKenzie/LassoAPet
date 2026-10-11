@@ -658,7 +658,7 @@ return {
 		VolcanoTortoise = "rbxassetid://89848692685766", -- assets/ui/VolcanoTortoiseEggRender.png
 		Firebird = "rbxassetid://100787444937359", -- assets/ui/FirebirdEggRender.png
 		RockHog = "rbxassetid://82336240433052", -- assets/ui/RockHogEggRender.png
-		Rockworm = "", -- assets/ui/RockwormEggRender.png, once uploaded
+		Rockworm = "rbxassetid://125709953608225", -- assets/ui/RockwormEggRender.png
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://70469571709365", -- assets/ui/LoongEggRender.png
