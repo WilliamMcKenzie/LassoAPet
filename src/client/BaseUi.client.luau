@@ -2,9 +2,10 @@
 -- HUD (Config.HomeHud off). Montserrat ExtraBold everywhere, white with a black stroke.
 --   Left, centred top to bottom: Merge, Shop and Index, stacked (QM's art, label drawn in).
 --   Bottom left: your cash (no more stamina over it: QM, Oct 10).
---   Bottom centre, only by your pen's bull spot (Config.BullSpots): Upgrade, with the
---     next pen level's price beside its cash icon, greyed when you can't afford it; the
---     free Unlock in the tutorial. The egg slots (Inventory) hide while it's up.
+--   Top right, all the time at your base (QM, Oct 11: there's no bull to stand by any
+--     more): Upgrade, with the next pen level's price beside its cash icon, greyed when
+--     you can't afford it; the free Unlock in the tutorial. It steps aside while a menu
+--     (Shop, Index, Roll, the merge view) is up. PassPopups' cards stack under it.
 -- All of it hides on a ride. Laid out on a Config.BaseUi.RefWidth-wide screen.
 
 local Players = game:GetService("Players")
@@ -15,7 +16,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Hud = require(script.Parent.Hud)
 local Shop = require(script.Parent.Shop)
 local AnimalDex = require(script.Parent.AnimalDex)
-local Inventory = require(script.Parent.Inventory)
+local RollMenu = require(script.Parent.RollMenu)
 
 local player = Players.LocalPlayer
 local cfg = Config.BaseUi
@@ -39,7 +40,6 @@ local ICON = 74 -- the counters' icons
 local TEXT = 55 -- the counters' text (QM's Figma: 55, stroke 5)
 local STROKE = 5
 local UPGRADE_WIDTH = 524
-local UPGRADE_BOTTOM = 44
 -- The price's box on the Upgrade art, between its cash icon and "Upgrade" (Design: x
 -- 0.19-0.57, y 0.25-0.75 of the button), left-aligned, as big as fits.
 local PRICE_FROM, PRICE_TO = Vector2.new(0.19, 0.25), Vector2.new(0.57, 0.75)
@@ -172,12 +172,12 @@ end
 player:GetAttributeChangedSignal("Gold"):Connect(showCounters)
 showCounters()
 
--- Bottom centre: Upgrade (or the tutorial's free Unlock), by your bull spot.
+-- Top right: Upgrade (or the tutorial's free Unlock).
 local upgradePen = ReplicatedStorage:WaitForChild("UpgradePen")
 local upgrade = picture("ImageButton", root, ART.upgrade, UPGRADE_WIDTH)
 upgrade.Name = "Upgrade"
-upgrade.AnchorPoint = Vector2.new(0.5, 1)
-upgrade.Position = UDim2.new(0.5, 0, 1, -UPGRADE_BOTTOM)
+upgrade.AnchorPoint = Vector2.new(1, 0)
+upgrade.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
 upgrade.Visible = false
 pressable(upgrade)
 local price = text(upgrade, PRICE_TEXT, CASH_GREEN, PRICE_STROKE)
@@ -206,26 +206,20 @@ upgrade.Activated:Connect(function()
 	buying = false
 end)
 
-local function bullSpot()
-	local pen = tonumber(player:GetAttribute("Pen"))
-	return pen and Config.BullSpots[pen]
+-- A menu's up over the base: Upgrade (and PassPopups' cards, by the "Modal" attribute) step aside.
+local function modal()
+	return Shop.isOpen() or AnimalDex.isOpen() or RollMenu.isOpen() or player:GetAttribute("MergeView") == true
 end
 
-local shown = nil
 RunService.RenderStepped:Connect(function()
 	local riding = Hud.isRiding()
 	gui.Enabled = not riding and not player:GetAttribute("Cutscene") and not player:GetAttribute("Tutorial") -- (none in the intro or the tutorial: QM, minimal UI till it's done)
-	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	local spot = bullSpot()
 	local cost = costNow()
-	local near = not riding and cost ~= nil and spot ~= nil and hrp ~= nil
-		and (Vector3.new(hrp.Position.X, 0, hrp.Position.Z) - spot).Magnitude <= cfg.BullReach
-	if near ~= shown then
-		shown = near
-		upgrade.Visible = near
-		Inventory.hideFor("Upgrade", near) -- (the egg slots go while it's up: QM)
-	end
-	if near then
+	local covered = modal()
+	root:SetAttribute("Modal", covered)
+	local show = not riding and cost ~= nil and not covered
+	upgrade.Visible = show
+	if show then
 		local free = player:GetAttribute("Tutorial") == true
 		local affordable = (player:GetAttribute("Gold") or 0) >= cost
 		upgrade.Image = if free then ART.unlock.id elseif affordable then ART.upgrade.id else ART.upgradeGrey.id

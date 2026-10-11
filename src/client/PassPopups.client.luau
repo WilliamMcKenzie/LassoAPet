@@ -1,5 +1,5 @@
--- Game pass popups (QM, Oct 7): QM's card for a pass bounces in at the top right at
--- the moment it would help, and tapping it asks to buy the pass (BuyPass,
+-- Game pass popups (QM, Oct 7): QM's card for a pass bounces in at the top right, just
+-- under BaseUi's Upgrade (a stack: QM, Oct 11), at the moment it would help, and tapping it asks to buy the pass (BuyPass,
 -- Server/Passes). It stays until you leave your base (over the start line), then
 -- it's gone. They're kept rare: none in your first MIN_PLAY seconds (a moment
 -- before that waits till then), each pass pops at most once a visit, one at a
@@ -162,6 +162,28 @@ local function moment(key)
 	shownOnce[key] = true
 	show(key)
 end
+
+-- Where the card sits: its top right just under BaseUi's Upgrade when that's showing,
+-- else in the corner. Hidden while a menu's up over the base (BaseUi's "Modal").
+local GAP = 8 -- between Upgrade and the card, in this screen's units
+local baseRoot
+local function stack()
+	if not current then
+		return
+	end
+	baseRoot = baseRoot or player.PlayerGui:FindFirstChild("BaseUi") and player.PlayerGui.BaseUi:FindFirstChild("Root")
+	local upgrade = baseRoot and baseRoot:FindFirstChild("Upgrade")
+	local s = rootScale.Scale
+	if upgrade and upgrade.Visible and baseRoot.Parent.Enabled then
+		local right = upgrade.AbsolutePosition.X + upgrade.AbsoluteSize.X
+		local bottom = upgrade.AbsolutePosition.Y + upgrade.AbsoluteSize.Y
+		current.card.Position = UDim2.fromOffset(right / s, bottom / s + GAP)
+	else
+		current.card.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
+	end
+	current.card.Visible = not (baseRoot and baseRoot:GetAttribute("Modal"))
+end
+RunService.RenderStepped:Connect(stack)
 
 -- Leaving your base takes it away; a waiting one pops once it may.
 local wasAtBase = true

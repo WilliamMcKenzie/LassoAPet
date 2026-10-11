@@ -409,6 +409,10 @@ function AnimalDex.toggle(instant)
 	end
 end
 
+function AnimalDex.isOpen()
+	return open == true
+end
+
 function AnimalDex.close(instant)
 	if open then
 		AnimalDex.toggle(instant)
