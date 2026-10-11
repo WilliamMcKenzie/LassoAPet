@@ -73,6 +73,7 @@ local SHEETS = {
 	SnackYak = { frames = 18, time = 0.03, "rbxassetid://131389846384914" },
 	Icebringer = { frames = 24, time = 0.04, "rbxassetid://125520132317720" },
 	Starfish = { frames = 48, time = 0.06, "rbxassetid://79068936169772", "rbxassetid://103163746025717" },
+	Clownfish = { frames = 24, time = 0.03, "" }, -- dex/DexClownfish_1.png (Studio uploads)
 	Squid = { frames = 24, time = 0.05, "rbxassetid://103797474563946" },
 	KingCrab = { frames = 17, time = 0.03, "rbxassetid://88553226475116" },
 	BlueCrab = { frames = 17, time = 0.03, "rbxassetid://101217167881986" },
@@ -112,6 +113,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	IceGolem = "Travelled from Clash Royal just to stampede, can grow/shrink at will.",
 	Icebringer = "Found a legendary amulet under an iceberg, trying to return it to its owner. Can freeze nearby objects.",
 	Starfish = "Not actually a fish.",
+	Clownfish = "Lives in a stinging plant on purpose. Thinks it's hilarious.",
 	Whale = "A talented singer, but no one can hear it from underwater. Distant cousin of horse.",
 	Squid = "Started out with oil painting, but its art has gotten more abstract: now it just squirts ink blotches.",
 	FishSchool = "Schools out. Fish are in. Can destroy any obstacles in their path.",

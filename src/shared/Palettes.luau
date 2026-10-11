@@ -161,6 +161,12 @@ return {
 		{ "Horn", 110, 220, 245 },
 		{ "Horn", 243, 243, 243 }, -- tusks
 	},
+	Clownfish = {
+		{ "Body", 255, 112, 16 },
+		{ "Belly", 255, 150, 60 },
+		{ "Marking", 255, 255, 255 }, -- bands
+		{ "Accent", 24, 24, 30 }, -- band edges, fin tips
+	},
 	Starfish = {
 		{ "Body", 255, 128, 64 },
 		{ "Body", 232, 88, 52 }, -- arm tips

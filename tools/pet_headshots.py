@@ -37,7 +37,7 @@ MODELS = {
     "SpineLizard": "converted/SpineLizard", "Snake": "desert/Snake",
     "Penguin": "snow/Penguin", "Boar": "converted/Boar", "Snowman": "snow/Snowman",
     "IceGolem": "converted/IceGolem", "Icebringer": "converted/Icebringer", "SnackYak": "snow/SnackYak",
-    "Starfish": "ocean/Starfish", "Whale": "ocean/Whale", "Squid": "ocean/Squid",
+    "Starfish": "ocean/Starfish", "Clownfish": "ocean/Clownfish", "Whale": "ocean/Whale", "Squid": "ocean/Squid",
     "KingCrab": "ocean/KingCrab", "BlueCrab": "ocean/BlueCrab", "RoboShark": "ocean/RoboShark", "Kraken": "ocean/Kraken", "FishSchool": "ocean/FishSchool",
     "Loong": "godlands/Loong", "WarElephant": "godlands/WarElephant", "SoulHorse": "godlands/SoulHorse",
     "Sludge": "sludge/Sludge",

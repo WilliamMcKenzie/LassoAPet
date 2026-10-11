@@ -90,7 +90,7 @@ return {
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			Herd = { Fish = 0, Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0, Kraken = 0.05 }, -- (Blue Crab guessed like the Kraken; the Robo Shark never spawns: a future Robux pet, QM Oct 4)
+			Herd = { Fish = 0, Starfish = 0.3, Clownfish = 0.25, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0, Kraken = 0.05 }, -- (the Clownfish Uncommon, a little rarer than the Starfish, QM Oct 11; Blue Crab guessed like the Kraken; the Robo Shark never spawns: a future Robux pet, QM Oct 4)
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -356,7 +356,7 @@ return {
 		Horse = 15, Pig = 15, Bunny = 15, Pinto = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
 		Cactus = 30, Kitten = 30, Scorpion = 90, Sandworm = 210, SpineLizard = 300, Snake = 600, -- Desert
 		Penguin = 60, Boar = 90, Snowman = 240, IceGolem = 720, Icebringer = 3600, -- Tundra
-		Starfish = 45, Whale = 10800, Squid = 2700, FishSchool = 2000, KingCrab = 3600, BlueCrab = 9000, Kraken = 10000, -- Ocean
+		Starfish = 45, Clownfish = 300, Whale = 10800, Squid = 2700, FishSchool = 2000, KingCrab = 3600, BlueCrab = 9000, Kraken = 10000, -- Ocean
 		Firebird = 7200, RockHog = 10800, FireLobster = 10800, Rockworm = 12600, VolcanoTortoise = 14400, Phoenix = 21600, LavaWhale = 14400, -- Volcano (guesses: past the Ocean's)
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		SnackYak = 3600, RoboShark = 57600, Loong = 86400, -- exclusives
@@ -510,7 +510,7 @@ return {
 		Horse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
-		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
+		Starfish = 1, Clownfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
@@ -579,7 +579,7 @@ return {
 		Horse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
 		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, -- Tundra
-		Starfish = 300, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, -- Ocean
+		Starfish = 300, Clownfish = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, -- Ocean
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
 		Loong = 60000, Beholder = 9000, Leviathan = 45000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
 		WarElephant = 12000, SoulHorse = 60000, Sludge = 7500, -- so they pay more than the Ocean's)
@@ -695,6 +695,7 @@ return {
 		Phoenix = "rbxassetid://77371080716061", -- assets/ui/PhoenixEggRender.png
 		LavaWhale = "rbxassetid://137754762277353", -- assets/ui/LavaWhaleEggRender.png
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
+		Clownfish = "", -- assets/ui/ClownfishEggRender.png (Studio uploads)
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://70469571709365", -- assets/ui/LoongEggRender.png
 		WarElephant = "rbxassetid://84356622911486", -- assets/ui/WarElephantEggRender.png
@@ -923,6 +924,7 @@ return {
 		Icebringer = { Speed = 2.7, Stamina = 4 },
 		-- Ocean
 		Starfish = { Speed = 2.5, Stamina = 2 },
+		Clownfish = { Speed = 2.3, Stamina = 2.4 }, -- (a guess: a little slower than the Starfish)
 		Squid = { Speed = 3, Stamina = 2.6 },
 		KingCrab = { Speed = 3.1, Stamina = 3 },
 		BlueCrab = { Speed = 3.1, Stamina = 3 }, -- the King Crab's

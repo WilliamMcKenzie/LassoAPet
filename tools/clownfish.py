@@ -4,7 +4,7 @@ right round it: behind the eyes, mid-body and at the tail.
 
 Run: python3 tools/clownfish.py [egg] [out_dir]
 writes Clownfish.bbmodel, Clownfish.png and Clownfish_vs_fish.png; `egg` writes ClownfishEgg.bbmodel/.png
-(the Fish's egg in clownfish colours).
+(the Fish's egg in clownfish colours); `game` writes the game's files.
 """
 
 import base64
@@ -218,5 +218,20 @@ def egg_main(out=OUT):
     print(len(egg.parts), "parts")
 
 
+def game():
+    """The game's files: designs/ocean/Clownfish.bbmodel + ClownfishModel.luau, and the egg
+    (ocean_eggs.main: designs/eggs/c_style, Eggs/ClownfishEggModel.luau, assets/ui render)."""
+    import bbmodel_to_luau
+    import ocean_eggs as O
+    m = clownfish(json.load(open(FISH)))
+    path = os.path.join(ROOT, "designs", "ocean", "Clownfish.bbmodel")
+    with open(path, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    bbmodel_to_luau.main(path, os.path.join(ROOT, "src", "shared", "Animals", "ClownfishModel.luau"))
+    O.EGGS = [("Clownfish", clownfish_egg)]
+    O.main("Clownfish", preview=OUT)
+
+
 if __name__ == "__main__":
-    egg_main(*sys.argv[2:]) if sys.argv[1:2] == ["egg"] else main(*sys.argv[1:])
+    cmd = sys.argv[1:2]
+    egg_main(*sys.argv[2:]) if cmd == ["egg"] else game() if cmd == ["game"] else main(*sys.argv[1:])
