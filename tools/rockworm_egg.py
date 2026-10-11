@@ -36,6 +36,32 @@ def rockworm_egg():
     return egg
 
 
+def qm_render():
+    """QM's hand-edited egg (designs/eggs/c_style/RockwormEgg.bbmodel, Oct 11) is the game's
+    now: convert it with `bbmodel_to_luau.py --zyx designs/eggs/c_style/RockwormEgg.bbmodel
+    src/shared/Eggs/RockwormEggModel.luau`, then this writes its UI picture.
+    Run: python3 tools/rockworm_egg.py qm"""
+    import json
+    import numpy as np
+    from horse_egg_takes import VIEWS
+    from partlib import render
+    from snow_rig import posed
+    m = json.load(open(os.path.join(O.ROOT, "designs", "eggs", "c_style", "RockwormEgg.bbmodel")))
+    ps = posed(m, None, 0)
+    for p in ps:
+        if p.name.startswith("Glow"):
+            p.neon = True
+    v = {k: tuple(np.array(x, float) + [0, 0.3, 0]) for k, x in VIEWS[0].items()}
+    im = render(ps, W=1100, H=1100, fov=28, transparent=True, **v)
+    im = im.crop(im.getbbox())
+    im.save(os.path.join(O.ROOT, "assets", "ui", "RockwormEggRender.png"))
+    im.save("/mnt/project-files/animals/rockworm/RockwormEgg_QM.png")
+    print("render", im.size)
+
+
 if __name__ == "__main__":
-    O.EGGS = [("Rockworm", rockworm_egg)]
-    O.main("Rockworm", preview="/mnt/project-files/animals/rockworm")
+    if sys.argv[1:2] == ["qm"]:
+        qm_render()
+    else:
+        O.EGGS = [("Rockworm", rockworm_egg)]
+        O.main("Rockworm", preview="/mnt/project-files/animals/rockworm")
