@@ -73,7 +73,7 @@ local SHEETS = {
 	SnackYak = { frames = 18, time = 0.03, "rbxassetid://131389846384914" },
 	Icebringer = { frames = 24, time = 0.04, "rbxassetid://125520132317720" },
 	Starfish = { frames = 48, time = 0.06, "rbxassetid://79068936169772", "rbxassetid://103163746025717" },
-	Clownfish = { frames = 24, time = 0.03, "" }, -- dex/DexClownfish_1.png (Studio uploads)
+	Clownfish = { frames = 24, time = 0.03, "rbxassetid://98236364459356" }, -- dex/DexClownfish_1.png
 	Squid = { frames = 24, time = 0.05, "rbxassetid://103797474563946" },
 	KingCrab = { frames = 17, time = 0.03, "rbxassetid://88553226475116" },
 	BlueCrab = { frames = 17, time = 0.03, "rbxassetid://101217167881986" },
