@@ -1,6 +1,6 @@
--- Pen levels: your pen's level is how many biomes you've unlocked. Everyone
--- starts at 1 (the first biome). Upgrading to level n costs Config.Biomes[n].
--- UnlockCost gold (UpgradePen), opens biome n's gate for you (Gate.client) and
+-- Pen levels: everyone starts at 1, and each quest you claim takes it up one, to
+-- #Config.Biomes (QM, Oct 11: Hatchery's ClaimQuest; it used to cost the next biome's
+-- UnlockCost gold, UpgradePen). Level n opens biome n's gate for you (Gate.client) and
 -- repaints your pen for everyone: its N x N floor tiles (the pen's Tiles marker)
 -- take biome n's ground colours and its posts biome n's PostColor. The pen also
 -- grows with each level (QM, Oct 3), up to about twice the area at the Ocean:
@@ -352,8 +352,12 @@ local zoneUnlocked = Instance.new("RemoteEvent")
 zoneUnlocked.Name = "ZoneUnlocked"
 zoneUnlocked.Parent = ReplicatedStorage
 
--- Returns true if the upgrade went through.
+-- Returns true if the upgrade went through. Off with Config.PenUpgrades (QM, Oct 11:
+-- claiming a quest upgrades your pen now, Hatchery's ClaimQuest).
 upgrade.OnServerInvoke = function(player)
+	if not Config.PenUpgrades then
+		return false
+	end
 	local nextBiome = Config.Biomes[level(player) + 1]
 	local cost = nextBiome and nextBiome.UnlockCost
 	local gold = player:GetAttribute("Gold") or 0

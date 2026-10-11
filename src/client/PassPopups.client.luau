@@ -198,11 +198,15 @@ RunService.Heartbeat:Connect(function()
 	wasAtBase = here
 end)
 
--- VIP: you unlocked the Desert (PenLevel.server tells the buyer first).
-ReplicatedStorage:WaitForChild("ZoneUnlocked").OnClientEvent:Connect(function(level)
-	if level == 2 then
+-- VIP: your pen's first upgrade (your first quest claimed: QM, Oct 11). Not the
+-- saved level arriving as you join.
+local penLevel = player:GetAttribute("PenLevel") or 1
+player:GetAttributeChangedSignal("PenLevel"):Connect(function()
+	local level = player:GetAttribute("PenLevel") or 1
+	if penLevel == 1 and level == 2 and os.clock() - joinedAt > 15 then
 		moment("VIP")
 	end
+	penLevel = level
 end)
 
 -- Fast Hatch and Auto Hatch, from your pen's contents (Hatchery publishes them):

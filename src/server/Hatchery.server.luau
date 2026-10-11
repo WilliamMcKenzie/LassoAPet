@@ -35,6 +35,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Funnel = require(script.Parent.Funnel)
+local Quests = require(script.Parent.Quests)
 local Passes = require(script.Parent.Passes)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Animals = ReplicatedStorage.Shared.Animals
@@ -264,6 +265,7 @@ local function load(player)
 					end
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
 					profile.homeEggs = tonumber(data.homeEggs) -- (animals brought home, counted from the Egg Rodeo's first session: Funnel)
+					profile.quests = Quests.load(data.quests)
 					profile.rainbowTrail = data.rainbowTrail == true or nil
 					player:SetAttribute("FuseLesson", nil) -- (no fuse lesson any more: QM, Oct 8)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
@@ -308,6 +310,13 @@ local function load(player)
 		return
 	end
 	profiles[player] = profile
+	profile.quests = profile.quests or Quests.load(nil)
+	Quests.publish(player, profile.quests)
+	player:GetAttributeChangedSignal("GatesBroken"):Connect(function() -- ("Enter Desert" and the like)
+		if profiles[player] then
+			Quests.publish(player, profiles[player].quests)
+		end
+	end)
 	if not profile.tutorial then
 		Funnel.track(player) -- a new player
 		profile.homeEggs = profile.homeEggs or 0 -- (in the progress funnels from now on)
@@ -335,7 +344,7 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
+		rainbowTrail = profile.rainbowTrail, homeEggs = profile.homeEggs, quests = profile.quests, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -518,6 +527,7 @@ remote("DeliverEgg", function(player, kind)
 		profile.homeEggs += 1
 		Funnel.captured(player, profile.homeEggs)
 	end
+	Quests.count(player, profile.quests, "home")
 	-- The tutorial's egg brought home goes straight into the pen (balance pass, Oct 6: a
 	-- fifth of new players left at "Place your egg" a second time). The first spot clear
 	-- of the starter pet, from the middle out.
@@ -555,6 +565,7 @@ remote("HatchEgg", function(player, id)
 	end
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 	Funnel.step(player, if profile.pastStarter then "Egg Hatched" else "Hatched Starter Egg")
+	Quests.count(player, profile.quests, "hatch")
 	publish(player)
 end)
 
@@ -677,6 +688,37 @@ rollGacha.OnServerInvoke = function(player)
 	return kind, tier == "Exclusive"
 end
 rollGacha.Parent = ReplicatedStorage
+
+-- Claiming a finished quest (Config.Quests; BaseUi's CLAIM): your pen's next level (up
+-- to the last biome's) and an egg from the furthest biome you've reached, picked by its
+-- Herd's odds. Returns the egg's kind, for the egg reveal; nil if it didn't go through.
+local claimQuest = Instance.new("RemoteFunction")
+claimQuest.Name = "ClaimQuest"
+claimQuest.OnServerInvoke = function(player, i)
+	local profile = profiles[player]
+	if not profile or typeof(i) ~= "number" or not Quests.claim(player, profile.quests, i) then
+		return nil
+	end
+	local level = math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
+	if level < #Config.Biomes then
+		player:SetAttribute("PenLevel", level + 1)
+		Funnel.step(player, "Unlocked Zone 2")
+	end
+	local biome = Config.Biomes[math.clamp(player:GetAttribute("GatesBroken") or 1, 1, #Config.Biomes)]
+	local odds = {}
+	for kind, weight in biome.Herd do
+		if weight > 0 and isAnimal(kind) then
+			odds[kind] = weight
+		end
+	end
+	local kind = pick(odds)
+	if kind then
+		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	end
+	publish(player)
+	return kind
+end
+claimQuest.Parent = ReplicatedStorage
 Players.PlayerRemoving:Connect(function(player)
 	rolled[player] = nil
 end)
@@ -904,6 +946,7 @@ remote("FusePets", function(player, idA, idB)
 		profile.items[donorId] = nil
 	end
 	Funnel.event(player, "Fused Pets")
+	Quests.count(player, profile.quests, "merge")
 	publish(player)
 end)
 
@@ -1130,7 +1173,8 @@ tutorialCommand.Triggered:Connect(function(source)
 		return
 	end
 	local old = profiles[player]
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches }
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil) }
+	Quests.publish(player, profiles[player].quests)
 	if store and loaded[player] then
 		-- Keep the shop counts saved too: without them, rejoining hands every Giant Horse
 		-- egg and Legendary Pet ever bought over again (addBoughtGiantEggs / addBoughtPets).
@@ -1261,6 +1305,7 @@ while true do
 			if item.egg and now >= item.hatchAt and ((player:GetAttribute("Tutorial") and profile.ride ~= nil) or player:GetAttribute("PassAutoHatch")) then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
+				Quests.count(player, profile.quests, "hatch")
 				if profile.pastStarter then
 					Funnel.step(player, "Egg Hatched") -- (not the starter egg, which hatches before the first ride)
 				end

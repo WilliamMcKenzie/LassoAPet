@@ -2,12 +2,13 @@
 -- HUD (Config.HomeHud off). Montserrat ExtraBold everywhere, white with a black stroke.
 --   Left, centred top to bottom: Merge, Shop and Index, stacked (QM's art, label drawn in).
 --   Bottom left: your cash (no more stamina over it: QM, Oct 10).
---   Top right, all the time at your base (QM, Oct 11: there's no bull to stand by any
---     more): Upgrade, with the next pen level's price beside its cash icon, greyed when
---     you can't afford it; the free Unlock in the tutorial. It steps aside while a menu
+--   Top right, all the time at your base: Quests (QM, Oct 11, in place of Upgrade; QM's
+--     art, Config.Quests): the two quests up, each its name, N/M and a bar, and CLAIM
+--     once it's done. The header folds it up and out again. It steps aside while a menu
 --     (Shop, Index, Roll, the merge view) is up, and so do PassPopups' cards.
 -- All of it hides on a ride. Laid out on a Config.BaseUi.RefWidth-wide screen.
 
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -26,9 +27,14 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 	index = { id = "rbxassetid://135845846149671", size = Vector2.new(267, 113) }, -- Index.png
 	merge = { id = "rbxassetid://126251339270486", size = Vector2.new(267, 113) }, -- Merge.png
 	cash = { id = "rbxassetid://76663783463176", size = Vector2.new(256, 256) }, -- Cash.png
-	upgrade = { id = "rbxassetid://71762829770863", size = Vector2.new(526, 113) }, -- Upgrade.png
-	upgradeGrey = { id = "rbxassetid://84646084249698", size = Vector2.new(526, 113) }, -- UpgradeGrey.png: QM's disabled Upgrade, for when you can't afford it
-	unlock = { id = "rbxassetid://123061923353074", size = Vector2.new(526, 113) }, -- Unlock.png ("FREE" drawn in)
+}
+-- assets/ui/quests/*.png (QM, Oct 11). "" till Studio uploads them: plain boxes meanwhile.
+local QUEST_ART = {
+	panel = "", -- Quests.png, 453 x 265: open, "Quests" and its fold chevron drawn in
+	closed = "", -- QuestsClosed.png, 453 x 86: folded up
+	bar = "", -- QuestBG.png, 407 x 22
+	fill = "", -- QuestFill.png, 262 x 16
+	claim = "", -- ClaimQuest.png, 399 x 62
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local CASH_GREEN = Color3.fromHex("00FF09")
@@ -39,11 +45,7 @@ local MENU_GAP = 20
 local ICON = 74 -- the counters' icons
 local TEXT = 55 -- the counters' text (QM's Figma: 55, stroke 5)
 local STROKE = 5
-local UPGRADE_WIDTH = 367 -- (QM, Oct 11: 30% smaller, was 524)
--- The price's box on the Upgrade art, between its cash icon and "Upgrade" (Design: x
--- 0.19-0.57, y 0.25-0.75 of the button), left-aligned, as big as fits.
-local PRICE_FROM, PRICE_TO = Vector2.new(0.19, 0.25), Vector2.new(0.57, 0.75)
-local PRICE_TEXT, PRICE_STROKE = 46, 4
+local QUESTS_WIDTH = 365 -- (as in QM's mockup, next to the menu buttons; the art's 453)
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "BaseUi"
@@ -172,56 +174,151 @@ end
 player:GetAttributeChangedSignal("Gold"):Connect(showCounters)
 showCounters()
 
--- Top right: Upgrade (or the tutorial's free Unlock).
-local upgradePen = ReplicatedStorage:WaitForChild("UpgradePen")
-local upgrade = picture("ImageButton", root, ART.upgrade, UPGRADE_WIDTH)
-upgrade.Name = "Upgrade"
-upgrade.AnchorPoint = Vector2.new(1, 0)
-upgrade.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
-upgrade.Visible = false
-pressable(upgrade)
-local price = text(upgrade, PRICE_TEXT, CASH_GREEN, PRICE_STROKE)
-price.AutomaticSize = Enum.AutomaticSize.None
-price.Position = UDim2.fromScale(PRICE_FROM.X, PRICE_FROM.Y)
-price.Size = UDim2.fromScale(PRICE_TO.X - PRICE_FROM.X, PRICE_TO.Y - PRICE_FROM.Y)
-price.TextScaled = true
-local fit = Instance.new("UITextSizeConstraint")
-fit.MaxTextSize = PRICE_TEXT
-fit.Parent = price
-
--- The tutorial's tap hand (assets/ui/TapHand.png), pulsing on Upgrade whenever you can
--- afford it (QM, Oct 11). Fingertip on the button's lower middle.
-local hand = Instance.new("ImageLabel")
-hand.Name = "TapHand"
-hand.BackgroundTransparency = 1
-hand.Image = "rbxassetid://134865745295413"
-hand.AnchorPoint = Vector2.new(0.365, 0.03) -- (its fingertip)
-hand.Position = UDim2.fromScale(0.55, 0.7)
-hand.Size = UDim2.fromOffset(math.round(80 * 488 / 610), 80)
-hand.ZIndex = 5
-hand.Visible = false
-local handScale = Instance.new("UIScale")
-handScale.Parent = hand
-hand.Parent = upgrade
-
-local function costNow()
-	local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
-	return if nextBiome then nextBiome.UnlockCost else nil
+-- Top right: Quests. Laid out in the art's own pixels, scaled down to QUESTS_WIDTH.
+local claimQuest = ReplicatedStorage:WaitForChild("ClaimQuest")
+local Q = { -- (art pixels)
+	width = 453, header = 86, -- the folded art's height: the header's
+	top = 92, -- the first quest's name
+	x = 23, bar = Vector2.new(407, 22), inset = 3, -- (the fill inside the bar)
+	name = 26, nameStroke = 3,
+	barAt = 36, claimAt = 70, claim = Vector2.new(399, 62),
+	gap = 20, bottom = 24,
+}
+local quests = Instance.new("ImageLabel")
+quests.Name = "Quests"
+quests.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+quests.BackgroundTransparency = if QUEST_ART.panel == "" then 0.2 else 1
+quests.ScaleType = Enum.ScaleType.Slice -- (it grows down with its quests: corners and header kept)
+quests.SliceCenter = Rect.new(40, 90, 413, 225)
+quests.AnchorPoint = Vector2.new(1, 0)
+quests.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
+quests.Size = UDim2.fromOffset(Q.width, Q.header)
+quests.Visible = false
+quests.Parent = root
+local questsScale = Instance.new("UIScale")
+questsScale.Scale = QUESTS_WIDTH / Q.width
+questsScale.Parent = quests
+if QUEST_ART.panel == "" then
+	Instance.new("UICorner").Parent = quests
+	local title = text(quests, 40)
+	title.Text = "Quests"
+	title.Position = UDim2.fromOffset(Q.x, 20)
 end
-
-local buying = false
-upgrade.Activated:Connect(function()
-	local cost = costNow()
-	local free = player:GetAttribute("Tutorial") == true
-	if buying or not cost or (not free and (player:GetAttribute("Gold") or 0) < cost) then
-		return
-	end
-	buying = true
-	pcall(upgradePen.InvokeServer, upgradePen)
-	buying = false
+local fold = Instance.new("TextButton") -- the header: folds it up and out again
+fold.Name = "Fold"
+fold.BackgroundTransparency = 1
+fold.Text = ""
+fold.Size = UDim2.fromOffset(Q.width, Q.header)
+fold.Parent = quests
+local folded = false
+fold.Activated:Connect(function()
+	folded = not folded
+	quests:SetAttribute("Folded", folded) -- (draws again: below)
 end)
 
--- A menu's up over the base: Upgrade (and PassPopups' cards, by the "Modal" attribute) step aside.
+local function questRow(i, quest, y)
+	local done = quest.have >= quest.need
+	local row = Instance.new("Frame")
+	row.Name = "Quest"
+	row.BackgroundTransparency = 1
+	row.Position = UDim2.fromOffset(0, y)
+	row.Size = UDim2.fromOffset(Q.width, if done then Q.claimAt + Q.claim.Y else Q.barAt + Q.bar.Y)
+	local name = text(row, Q.name, nil, Q.nameStroke)
+	name.Text = quest.text
+	name.Position = UDim2.fromOffset(Q.x, 0)
+	local count = text(row, Q.name, nil, Q.nameStroke)
+	count.Text = string.format("%d/%d", quest.have, quest.need)
+	count.AutomaticSize = Enum.AutomaticSize.None
+	count.TextXAlignment = Enum.TextXAlignment.Right
+	count.Position = UDim2.fromOffset(Q.x, 0)
+	count.Size = UDim2.fromOffset(Q.bar.X, Q.name)
+	local bar = Instance.new("ImageLabel")
+	bar.Name = "Bar"
+	bar.Image = QUEST_ART.bar
+	bar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	bar.BackgroundTransparency = if QUEST_ART.bar == "" then 0 else 1
+	bar.Position = UDim2.fromOffset(Q.x, Q.barAt)
+	bar.Size = UDim2.fromOffset(Q.bar.X, Q.bar.Y)
+	bar.Parent = row
+	local share = math.clamp(quest.have / quest.need, 0, 1)
+	if share > 0 then
+		local fill = Instance.new("ImageLabel")
+		fill.Name = "Fill"
+		fill.Image = QUEST_ART.fill
+		fill.BackgroundColor3 = Color3.fromRGB(59, 255, 95)
+		fill.BackgroundTransparency = if QUEST_ART.fill == "" then 0 else 1
+		fill.ScaleType = Enum.ScaleType.Slice -- (its round ends kept as it stretches)
+		fill.SliceCenter = Rect.new(8, 0, 254, 16)
+		local height = Q.bar.Y - 2 * Q.inset
+		fill.Position = UDim2.fromOffset(Q.inset, Q.inset)
+		fill.Size = UDim2.fromOffset(math.max(height, (Q.bar.X - 2 * Q.inset) * share), height)
+		fill.Parent = bar
+	end
+	if done then
+		local claim = Instance.new("ImageButton")
+		claim.Name = "Claim"
+		claim.Image = QUEST_ART.claim
+		claim.BackgroundColor3 = Color3.fromRGB(59, 255, 95)
+		claim.BackgroundTransparency = if QUEST_ART.claim == "" then 0 else 1
+		claim.AnchorPoint = Vector2.new(0.5, 0)
+		claim.Position = UDim2.fromOffset(Q.width / 2, Q.claimAt)
+		claim.Size = UDim2.fromOffset(Q.claim.X, Q.claim.Y)
+		claim:SetAttribute("Hover", 1.04)
+		pressable(claim)
+		if QUEST_ART.claim == "" then
+			local label = text(claim, 34)
+			label.Text = "CLAIM"
+			label.AutomaticSize = Enum.AutomaticSize.None
+			label.TextXAlignment = Enum.TextXAlignment.Center
+			label.Size = UDim2.fromScale(1, 1)
+		end
+		local claiming = false
+		claim.Activated:Connect(function()
+			if claiming then
+				return
+			end
+			claiming = true
+			local ok, kind = pcall(claimQuest.InvokeServer, claimQuest, i)
+			local animal = ok and kind and ReplicatedStorage.Shared.Animals:FindFirstChild(kind)
+			if animal then
+				Hud.eggReveal(require(animal).Rarity, kind, true) -- (the egg it gave you)
+			end
+			claiming = false
+		end)
+		claim.Parent = row
+	end
+	row.Parent = quests
+	return row.Size.Y.Offset
+end
+
+local questList = {} -- what's up: { { i, text, have, need } } (Hatchery's "Quests")
+local function drawQuests()
+	local ok, list = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Quests") or "[]")
+	questList = if ok and typeof(list) == "table" then list else {}
+	for _, child in quests:GetChildren() do
+		if child.Name == "Quest" then
+			child:Destroy()
+		end
+	end
+	if folded then
+		quests.Image = QUEST_ART.closed
+		quests.Size = UDim2.fromOffset(Q.width, Q.header)
+		return
+	end
+	quests.Image = QUEST_ART.panel
+	local y = Q.top
+	for n, quest in questList do
+		if typeof(quest) == "table" and tonumber(quest.i) and tonumber(quest.have) and tonumber(quest.need) then
+			y += questRow(quest.i, quest, y) + (if n < #questList then Q.gap else 0)
+		end
+	end
+	quests.Size = UDim2.fromOffset(Q.width, y + Q.bottom)
+end
+player:GetAttributeChangedSignal("Quests"):Connect(drawQuests)
+quests:GetAttributeChangedSignal("Folded"):Connect(drawQuests)
+drawQuests()
+
+-- A menu's up over the base: Quests (and PassPopups' cards, by the "Modal" attribute) step aside.
 local function modal()
 	return Shop.isOpen() or AnimalDex.isOpen() or RollMenu.isOpen() or player:GetAttribute("MergeView") == true
 end
@@ -229,19 +326,7 @@ end
 RunService.RenderStepped:Connect(function()
 	local riding = Hud.isRiding()
 	gui.Enabled = not riding and not player:GetAttribute("Cutscene") and not player:GetAttribute("Tutorial") -- (none in the intro or the tutorial: QM, minimal UI till it's done)
-	local cost = costNow()
 	local covered = modal()
 	root:SetAttribute("Modal", covered)
-	local show = not riding and cost ~= nil and not covered
-	upgrade.Visible = show
-	if show then
-		local free = player:GetAttribute("Tutorial") == true
-		local affordable = (player:GetAttribute("Gold") or 0) >= cost
-		upgrade.Image = if free then ART.unlock.id elseif affordable then ART.upgrade.id else ART.upgradeGrey.id
-		price.Visible = not free
-		price.Text = Hud.money(cost)
-		price.TextColor3 = if affordable then CASH_GREEN else Color3.new(1, 1, 1)
-		hand.Visible = affordable and not free
-		handScale.Scale = 1 + 0.12 * math.sin(os.clock() * 6) -- (the tutorial hand's pulse)
-	end
+	quests.Visible = not riding and not covered and #questList > 0
 end)

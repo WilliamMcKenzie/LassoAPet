@@ -230,7 +230,8 @@ return {
 	-- The Upgrade Pen button (Hud): buys the next pen level at the next biome's
 	-- UnlockCost. With the gates off it only grows and repaints your pen and swaps in
 	-- that biome's training dummy (QM, Oct 8); past the last, the Rainbow Trail.
-	PenUpgrades = true,
+	-- Off (QM, Oct 11): claiming a quest upgrades your pen now (Quests, below).
+	PenUpgrades = false,
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	-- The course is a funnel (QM, Oct 8): CourseHalfWidth at the start line, each wall
@@ -902,6 +903,27 @@ return {
 	-- shows within BullReach studs of your pen's bull spot (BullSpots, by pen number:
 	-- design/base_arc's bull pads, none built yet).
 	BaseUi = { RefWidth = 1920, BullReach = 16 },
+	-- Quests (QM, Oct 11), top right at your base in place of the Upgrade button. Two are
+	-- up at a time, from this list in order. Claiming a finished one upgrades your pen
+	-- (PenLevel + 1, up to the last biome's: more room, Config.PenCapacity) and gives you
+	-- an egg from the furthest biome you've reached, and the next one takes its place.
+	-- Kind: "reach" (ride into Config.Biomes[Biome]), "home" (bring Need animals home),
+	-- "merge" (merge Need times), "hatch" (hatch Need eggs); those three count from when
+	-- the quest comes up. QM wrote the first three; the rest are a guess.
+	Quests = {
+		{ Text = "Enter Desert", Kind = "reach", Biome = 2 },
+		{ Text = "Collect animals", Kind = "home", Need = 5 },
+		{ Text = "Merge animals", Kind = "merge", Need = 3 },
+		{ Text = "Hatch eggs", Kind = "hatch", Need = 5 },
+		{ Text = "Enter Tundra", Kind = "reach", Biome = 3 },
+		{ Text = "Collect animals", Kind = "home", Need = 15 },
+		{ Text = "Enter Ocean", Kind = "reach", Biome = 4 },
+		{ Text = "Merge animals", Kind = "merge", Need = 5 },
+		{ Text = "Enter Volcano", Kind = "reach", Biome = 5 },
+		{ Text = "Hatch eggs", Kind = "hatch", Need = 15 },
+		{ Text = "Enter Jurassic", Kind = "reach", Biome = 6 },
+		{ Text = "Collect animals", Kind = "home", Need = 50 },
+	},
 	BullSpots = { Vector3.new(-18, 0, 173), Vector3.new(-75.2, 0, 129.6), Vector3.new(52, 0, 157.1), Vector3.new(-78.6, 0, 57.9), Vector3.new(84.9, 0, 93.3) },
 	Passes = {
 		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },
