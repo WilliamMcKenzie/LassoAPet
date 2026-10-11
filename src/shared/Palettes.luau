@@ -225,6 +225,13 @@ return {
 		{ "Marking", 36, 116, 92 }, -- stripes
 		{ "Accent", 255, 136, 40 }, -- sail
 	},
+	Pterodactyl = {
+		{ "Body", 150, 98, 222 },
+		{ "Belly", 252, 218, 166 },
+		{ "Marking", 82, 50, 156 }, -- stripes, brow
+		{ "Accent", 255, 150, 72 }, -- wings
+		{ "Accent", 255, 198, 52 }, -- beak
+	},
 	LavaWhale = {
 		{ "Body", 182, 100, 62 }, -- rock
 		{ "Body", 136, 74, 50 }, -- brow, horn bands
