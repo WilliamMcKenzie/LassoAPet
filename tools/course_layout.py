@@ -116,17 +116,14 @@ class Course:
         self.kind = DG.layout()  # desert patches, per 8-stud cell
         self.dirt = MG.layout(MG.MEADOW_LENGTH // MG.CELL)  # meadow dirt, per 8-stud cell
         self.snow = SG.full_layout()  # snow patches, per 8-stud cell
-        self.ocean = OG.full_layout()  # ocean patches, per 8-stud cell
+        self.ocean = OG.full_layout()  # ocean patches (a funnel_grid.Grid, laid out in game)
 
     def patch(self, x, z):
         """Desert: 0 sand, 1 dry grass, 2 sandstone. Meadow: 0 grass, 3 dirt.
         Snow: 4 snow, 5 cold grass, 6 ice. Ocean: 7 sand, 8 seagrass, 9 trench, 10 lava."""
         i = int((x + DG.HALF_W) // DG.CELL)
         if z <= OG.Z_START:
-            j = int((OG.Z_START - z) // OG.CELL)
-            if 0 <= i < self.ocean.shape[0] and 0 <= j < self.ocean.shape[1]:
-                return 7 + int(self.ocean[i, j])
-            return 7
+            return 7 + self.ocean.at(x, z)
         if z <= SG.Z_START:
             j = int((SG.Z_START - z) // SG.CELL)
             if 0 <= i < self.snow.shape[0] and 0 <= j < self.snow.shape[1]:

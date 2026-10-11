@@ -5,9 +5,9 @@ Run: python3 tools/volcano.py           writes them into src/world/World.rbxmx
 Re-running replaces what a previous run wrote (VGND floor, VWAL walls, VNST nests).
 
 Floor (8-stud cells, the 4-stud checker lines up): baked-earth brown at 0, lighter
-ash patches flush, darker crust plates a stud up, and lava pools a stud down (Neon)
-only out by the walls; the middle stays plain. The start, the nests and the end
-(where the big crack is, tools/volcano_crack.py) stay plain floor.
+ash flush, darker crust plates a stud up, and lava pools a stud down (Neon), laid out
+as a quasicrystal round the big crack (layout below). The start, the nests, the crack
+(tools/volcano_crack.py) and the finish stay plain floor.
 """
 import os
 import re
@@ -16,7 +16,9 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from desert_ground import WORLD, CELL, HALF_W, noise, rects, write_patches, item_span  # noqa: E402
+from desert_ground import WORLD, CELL, rects, write_patches, item_span  # noqa: E402
+import funnel_grid as FG  # noqa: E402
+import quasicrystal as QC  # noqa: E402
 import ocean_walls as OW  # noqa: E402
 import ocean_nests as ON  # noqa: E402
 
@@ -26,55 +28,53 @@ END = Z_START - LENGTH
 KINDS = ("Ground", "Ash", "Crust", "Lava")
 TOP = (0, 0, 1, -1)
 NESTS = [((16, -18) [k % 2], Z_START - 500 - k * 1100) for k in range(7)]
-NEST_CLEAR = 14
+NEST_IN = 12  # tools/funnel.luau moves each nest this far in from the wall on its side
+NEST_CLEAR = 26  # game studs round a nest kept plain (it's grown 2.6^0.8 there)
 START_CLEAR = 16
-END_CLEAR = 320  # studs before the far wall kept plain: the finish line (50 in) and the crack (Config.VolcanoCrack)
-LAVA_COLS = (1, 2, 3)  # cells in from each wall lava may lie in (the wall's own column stays solid)
-MAX_CELLS = 128  # parts at most 1024 studs long (Roblox caps a part at 2048)
+END_CLEAR = 320  # studs before the far wall no rocks go: the finish line (50 in) and the crack (Config.VolcanoCrack)
+CRACK_Z = END + 50 + 110  # Config: -CourseLength + FinishFromEnd + VolcanoCrack.FromFinish
+CRACK_CLEAR = 56  # game studs each way round the crack kept plain (its mask is 92.6 across)
+FINISH_CLEAR = 80
+BAND = 1024  # parts at most this long (Roblox caps a part at 2048)
+
+# The floor is a quasicrystal (QM, Oct 11: patterns with a rhyme and reason, like his
+# map maker's atlas; tools/quasicrystal.py), drawn as it shows in game (tools/funnel_grid.py).
+# Its middle is the big crack, so the rings spread out from it down the whole biome,
+# mirrored across the course. Like atlas's lava biome, the bands are lava, floor, ash
+# and crust, and every lava pool's edge cells turn to crust: lava ringed by a raised rim.
+ANGLES, PATTERN = 5, 24
+BANDS = (3, 0, 1, 2)  # lowest to highest value: lava, floor, ash, crust
 
 
-def layout(seed=61):
-    nx, nz = 2 * HALF_W // CELL, LENGTH // CELL
-    # broad blobs: few, big patches keep the 7680-stud floor to about the ocean's part count
-    ash = noise(nx, nz, 7.0, seed) * 0.8 + noise(nx, nz, 3.0, seed + 1) * 0.2
-    crust = noise(nx, nz, 7.0, seed + 2) * 0.85 + noise(nx, nz, 3.0, seed + 3) * 0.15
-    lava = noise(nx, nz, 5.0, seed + 4)
-    kind = np.zeros((nx, nz), int)
-    edge = np.zeros(nx, bool)
-    for c in LAVA_COLS:
-        edge[c] = edge[nx - 1 - c] = True
-    side = np.zeros(nx, bool)
-    side[:4] = side[-4:] = True
-    kind[ash > 0.6] = 1
-    kind[(crust > np.where(side, 0.6, 0.76)[:, None])] = 2
-    kind[edge[:, None] & (lava > 0.68)] = 3
-    kind[:, : START_CLEAR // CELL] = 0
-    kind[:, nz - END_CLEAR // CELL:] = 0
-    for i in range(nx):
-        for j in range(nz):
-            x, z = -HALF_W + i * CELL + CELL / 2, Z_START - j * CELL - CELL / 2
-            if any(abs(x - a) < NEST_CLEAR + CELL / 2 and abs(z - b) < NEST_CLEAR + CELL / 2 for a, b in NESTS):
-                kind[i, j] = 0
-    return kind
+def quasi(X, Z):
+    """The pattern's 0..1 value at game (x, z): centred on the crack, mirrored in x."""
+    return QC.value(Z - CRACK_Z, X, ANGLES, PATTERN)
 
 
-def split(rs):
-    for k, i0, j0, i1, j1 in rs:
-        j = j0
-        while j < j1:
-            end = min(j1, (j // MAX_CELLS + 1) * MAX_CELLS)
-            yield k, i0, j, i1, end
-            j = end
+def nest_spots():
+    """Where each nest ends up in game (the funnel moves it out by its wall)."""
+    return [(np.sign(x) * (FG.half_width(z) - NEST_IN), z) for x, z in NESTS]
 
 
-def boxes(kind):
-    out = []
-    for k, i0, j0, i1, j1 in split(rects(kind)):
-        top = TOP[k]
-        x0, x1 = -HALF_W + i0 * CELL, -HALF_W + i1 * CELL
-        z0, z1 = Z_START - j0 * CELL, Z_START - j1 * CELL
-        out.append((KINDS[k], ((x0 + x1) / 2, (top - 2) / 2, (z0 + z1) / 2), (x1 - x0, top + 2, z0 - z1)))
-    return out
+def layout():
+    """The floor as a funnel_grid.Grid of kinds (KINDS); .at(x, z) reads it on the straight course."""
+    grid = FG.Grid(Z_START, END, BAND)
+    for b in grid.bands:
+        X, Z = b.centres()
+        # (worked out a cell past each band end, so a rim never stops at a band's edge)
+        Xp, Zp = np.meshgrid(X[:, 0], np.concatenate([[Z[0, 0] + CELL], Z[0], [Z[0, -1] - CELL]]), indexing="ij")
+        kind = QC.selective_border(QC.pattern(quasi(Xp, Zp), BANDS), 2, 3)[:, 1:-1]
+        kind[Z_START - Z < START_CLEAR] = 0
+        kind[Z < END + FINISH_CLEAR] = 0
+        kind[(abs(X) < CRACK_CLEAR) & (abs(Z - CRACK_Z) < CRACK_CLEAR)] = 0
+        for nx, nz in nest_spots():
+            kind[(abs(X - nx) < NEST_CLEAR) & (abs(Z - nz) < NEST_CLEAR)] = 0
+        b.kind = kind
+    return grid
+
+
+def boxes(grid):
+    return grid.boxes(KINDS, TOP, rects)
 
 
 def glow_lava():
@@ -152,9 +152,9 @@ def nests():
 
 
 if __name__ == "__main__":
-    kind = layout()
-    print("cells", {KINDS[k]: int((kind == k).sum()) for k in range(4)})
-    print("wrote", write_patches(r"VGND\d+", "VGND", boxes(kind), template=r"DGND00000"), "volcano floor parts")
+    grid = layout()
+    print("cells", {KINDS[k]: sum(int((b.kind == k).sum()) for b in grid.bands) for k in range(4)})
+    print("wrote", write_patches(r"VGND\d+", "VGND", boxes(grid), template=r"DGND00000"), "volcano floor parts")
     glow_lava()
     print("wrote", walls(), "volcano wall parts; far wall at", END - 4)
     print("wrote", nests(), "volcano nests")
