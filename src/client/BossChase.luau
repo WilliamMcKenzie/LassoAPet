@@ -157,7 +157,7 @@ function BossChase.update(dt, chasing, x, z, speed)
 	-- (the vein: with the bars, popping up and then pulsing once)
 	local barsIn = boss.t >= cfg.ZoomAt and boss.t < cfg.CutsceneTime - cfg.BarTime
 	local b = letterbox()
-	b.vein.ImageTransparency = if barsIn then 0 else 1
+	b.vein.ImageTransparency = 1 -- (no anger vein any more: QM, Oct 11)
 	if barsIn then
 		local v = boss.t - cfg.ZoomAt
 		local pulse = math.clamp((v - cfg.VeinPopTime) / cfg.VeinPeriod, 0, 1)
