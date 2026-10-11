@@ -208,6 +208,11 @@ return {
 		{ "Marking", 255, 132, 24 }, -- feathers
 		{ "Accent", 255, 188, 36 }, -- beak, feather ends, plumes
 	},
+	TRex = {
+		{ "Body", 240, 140, 52 },
+		{ "Belly", 252, 218, 166 },
+		{ "Marking", 168, 82, 32 }, -- stripes, brow
+	},
 	LavaWhale = {
 		{ "Body", 182, 100, 62 }, -- rock
 		{ "Body", 136, 74, 50 }, -- brow, horn bands
