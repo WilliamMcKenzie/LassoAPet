@@ -1,9 +1,10 @@
 -- MERGE (QM, Oct 6; the pen view, Oct 11; Shared/Fusion): the Merge button opens a
 -- view of your pen from above, your animals in it, and QM's Merge panel along the
 -- bottom. Click two animals and they fill its two slots; or click a slot, then the
--- animal to put in it (QM). A picked animal glows purple, a ring round it and a
--- check over it (QM's mockup); clicking it again, or its slot, takes it out. (No
--- Highlights, as anywhere in the game: they hitch on phones. Outline's rings.) While
+-- animal to put in it (QM); with both full, the animal clicked takes the right slot.
+-- Clicking a picked one again, or its slot, takes it out. Nothing marks the picked
+-- ones in the pen (QM, Oct 11: too noisy); the one under the mouse gets a white
+-- dashed ring (Outline's: no Highlights, as anywhere in the game). While
 -- it's up, the pen's eggs and everything floating over it hide (QM): the eggs, their
 -- timers and the pets' plates on the "MergeView" attribute (Pen.client, PetPlates),
 -- the owner's sign and every prompt here. The
@@ -46,7 +47,6 @@ local PILL = Vector2.new(455, 52) -- the dark strip by the title: "1/2 Selected"
 local BUTTON_AT = Vector2.new(761, 246)
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local CASH_GREEN = Color3.fromHex("00FF09")
-local PURPLE = Color3.fromRGB(176, 76, 255) -- a picked animal's glow, ring and check (QM's mockup)
 -- The camera over your pen: from its open side, looking down.
 local VIEW = {
 	PITCH = math.rad(58), -- down from level
@@ -194,7 +194,7 @@ local pets = {} -- this opening's: { model, id, kind, fuse, merged, worth }
 local slots = {} -- [1], [2]: the pet in each (either may be nil)
 local active -- the slot clicked last, empty, that the next animal clicked goes in
 local slotUi = {} -- [i] = { button, frame (the outline), view, name, hint }
-local marks = {} -- [pet] = { ring, inner, dashes, check }: the picked ones' looks in the pen
+local marks = {} -- [pet] = true: the picked ones
 local hover = Outline.circle() -- the white dashed ring round the animal under the mouse
 local hovered -- its model
 local savedView -- the camera as it was: { type, cframe, fov }
@@ -209,82 +209,15 @@ local function slotOf(pet)
 	return if slots[1] == pet then 1 elseif slots[2] == pet then 2 else nil
 end
 
--- A picked animal's look in the pen: a purple glow, a ring under it and a check over it.
+-- Picked animals aren't marked in the pen at all (QM, Oct 11: too noisy); `marks` just
+-- keeps the hover ring off them.
 local function mark(pet)
-	local _, size = pet.model:GetBoundingBox()
-	local radius = math.max(size.X, size.Z) / 2 + 1.5
-	local function disc(r, transparency, color)
-		local d = Instance.new("Part")
-		d.Shape = Enum.PartType.Cylinder
-		d.Anchored, d.CanCollide, d.CanQuery, d.CanTouch, d.CastShadow = true, false, false, false, false
-		d.Material = Enum.Material.Neon
-		d.Color = color
-		d.Transparency = transparency
-		d.Size = Vector3.new(0.15, r * 2, r * 2)
-		d.Parent = workspace
-		return d
-	end
-	local dashes = Outline.ring(pet.model, PURPLE)
-	dashes:fade(1.2)
-	local check = Instance.new("BillboardGui")
-	check.Size = UDim2.fromOffset(40, 40)
-	check.AlwaysOnTop = true
-	check.Adornee = pet.model.PrimaryPart
-	check.Parent = gui
-	local badge = Instance.new("Frame")
-	badge.Size = UDim2.fromScale(1, 1)
-	badge.BackgroundColor3 = PURPLE
-	Instance.new("UICorner", badge).CornerRadius = UDim.new(0.5, 0)
-	local edge = Instance.new("UIStroke")
-	edge.Color = Color3.new(1, 1, 1)
-	edge.Thickness = 3
-	edge.Parent = badge
-	local tick = text(badge, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 28)
-	tick.Text = "✓"
-	tick.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Heavy)
-	badge.Parent = check
-	marks[pet] = {
-		ring = disc(radius, 0.25, PURPLE),
-		inner = disc(radius - 0.6, 0.7, Color3.fromRGB(225, 190, 255)),
-		dashes = dashes,
-		check = check,
-		top = size.Y,
-		radius = radius,
-	}
-	local s = Instance.new("UIScale")
-	s.Scale = 0.2
-	s.Parent = badge
-	TweenService:Create(s, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	marks[pet] = true
 end
 
 local function unmark(pet)
-	local m = marks[pet]
-	if m then
-		m.ring:Destroy()
-		m.inner:Destroy()
-		m.dashes:Destroy()
-		m.check:Destroy()
-		marks[pet] = nil
-	end
+	marks[pet] = nil
 end
-
--- The marks follow their animals about the pen.
-local FLAT = CFrame.Angles(0, 0, math.pi / 2)
-RunService.RenderStepped:Connect(function()
-	for pet, m in marks do
-		if not pet.model.Parent then
-			continue
-		end
-		local cf, size = pet.model:GetBoundingBox()
-		local floor = cf.Position - Vector3.new(0, size.Y / 2, 0)
-		m.ring.CFrame = CFrame.new(floor + Vector3.new(0, 0.1, 0)) * FLAT
-		m.inner.CFrame = CFrame.new(floor + Vector3.new(0, 0.14, 0)) * FLAT
-		local root = pet.model.PrimaryPart
-		if root then -- (over its head, a little to the right as you see it)
-			m.check.StudsOffsetWorldSpace = floor + Vector3.new(0, size.Y + 1.5, 0) + camera.CFrame.RightVector * size.X * 0.35 - root.Position
-		end
-	end
-end)
 
 local function refresh()
 	for i = 1, 2 do
@@ -332,9 +265,9 @@ local function pickAnimal(pet)
 		slots[i] = nil
 		unmark(pet)
 	else
-		local into = if active and not slots[active] then active elseif not slots[1] then 1 elseif not slots[2] then 2 else nil
-		if not into then
-			return -- (both full: take one out first)
+		local into = if active and not slots[active] then active elseif not slots[1] then 1 elseif not slots[2] then 2 else 2
+		if slots[into] then -- (both full: it takes the right one's place)
+			unmark(slots[into])
 		end
 		slots[into] = pet
 		active = nil
@@ -361,7 +294,11 @@ local function clickSlot(i)
 	refresh()
 end
 
--- The animal at a point on the screen, if any.
+-- The animal at a point on the screen, if any: the one whose blocks are under it (see-
+-- through parts, like a big animal's hit box, don't count), else the one drawn
+-- nearest it if it's close (the pet waiting on its spot isn't clickable by ray, and
+-- a small one's easily missed). Of several close, the smallest on screen wins.
+local PICK_SLACK = 14 -- pixels past an animal's drawn size that still count
 local function petAt(point)
 	local models, byModel = {}, {}
 	for _, pet in pets do
@@ -374,16 +311,35 @@ local function petAt(point)
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = models
 	local ray = camera:ViewportPointToRay(point.X, point.Y)
-	local hit = workspace:Raycast(ray.Origin, ray.Direction * 500, params)
-	if not hit then
-		return nil
+	local origin = ray.Origin
+	for _ = 1, 8 do
+		local hit = workspace:Raycast(origin, ray.Direction * 600, params)
+		if not hit then
+			break
+		end
+		if hit.Instance.Transparency < 0.95 then
+			for model, pet in byModel do
+				if hit.Instance:IsDescendantOf(model) then
+					return pet
+				end
+			end
+			break
+		end
+		origin = hit.Position + ray.Direction * 0.05 -- (see-through: on past it)
 	end
+	local best, bestRadius = nil, math.huge
+	local focal = camera.ViewportSize.Y / 2 / math.tan(math.rad(camera.FieldOfView) / 2)
 	for model, pet in byModel do
-		if hit.Instance:IsDescendantOf(model) then
-			return pet
+		local cf, size = model:GetBoundingBox()
+		local at, onScreen = camera:WorldToViewportPoint(cf.Position)
+		if onScreen and at.Z > 0 then
+			local radius = math.max(size.X, size.Y, size.Z) * 0.45 * focal / at.Z
+			if (Vector2.new(at.X, at.Y) - point).Magnitude <= radius + PICK_SLACK and radius < bestRadius then
+				best, bestRadius = pet, radius
+			end
 		end
 	end
-	return nil
+	return best
 end
 
 UserInputService.InputBegan:Connect(function(input, processed)
@@ -704,7 +660,8 @@ end
 Hud.closeFuse = close
 
 -- (Studio only, for trying it out from the command bar: the LocalPlayer's MergeTest
--- attribute "open", "close", or a number to click that animal, "slot1" / "slot2".)
+-- attribute "open", "close", a number to click that animal, "slot1" / "slot2", or a
+-- Vector2 to click that point on the screen.)
 if RunService:IsStudio() then
 	player:GetAttributeChangedSignal("MergeTest"):Connect(function()
 		local v = player:GetAttribute("MergeTest")
@@ -716,6 +673,12 @@ if RunService:IsStudio() then
 			clickSlot(if v == "slot1" then 1 else 2)
 		elseif typeof(v) == "number" and pets[v] then
 			pickAnimal(pets[v])
+		elseif typeof(v) == "Vector2" then
+			local pet = petAt(v)
+			player:SetAttribute("MergeTestHit", if pet then pet.kind else "none")
+			if pet then
+				pickAnimal(pet)
+			end
 		end
 	end)
 end
