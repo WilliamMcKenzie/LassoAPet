@@ -3676,7 +3676,11 @@ local function updateRider(dt)
 		end
 		hrp.CFrame = mount.animal:getSeatCFrame() * SEAT_OFFSET
 		if phase ~= "finish" or heroLeap then -- falling off the end: the camera stays at the edge
-			focus = Vector3.new(mount.x, math.max(mount.hop or 0, 0) * 0.85, mount.z) -- the camera rises with a leap, keeping the pet in view
+			-- (and with how high you sit: on a big pet the camera rises with you, eased so a
+			-- gallop's bob doesn't shake it, Config.RideCamSeat: QM, Oct 11)
+			local lift = math.max(hrp.Position.Y - (mount.hop or 0) - Config.RideCamSeat, 0)
+			vfx.seatLift = (vfx.seatLift or lift) + (lift - (vfx.seatLift or lift)) * (1 - math.exp(-2 * dt)) -- (slow: a Rockworm's leaps barely move it)
+			focus = Vector3.new(mount.x, math.max(mount.hop or 0, 0) * 0.85 + vfx.seatLift, mount.z) -- the camera rises with a leap, keeping the pet in view
 			if mount.animal.seatOnNeck then
 				-- A squid's rider sits far out on its leaning mantle: the camera follows the
 				-- rider instead (QM), eased so the glide's surges don't shake it.
