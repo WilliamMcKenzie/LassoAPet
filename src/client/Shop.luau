@@ -45,7 +45,7 @@ local CARDS = {
 -- [pass Key] = QM's card art for it ("" = the placeholder button with its name and price)
 local PASS_ART = { DoubleGold = "", FastHatch = "", AutoHatch = "", VIP = "" }
 local PASS_HEIGHT = 96
-local PANEL_WIDTH = 990 -- on the HUD's reference screen: about 75% of it, as in QM's mockup
+local PANEL_WIDTH = 800 -- on the HUD's reference screen: about 60% of it, nearer the Index's size (QM, Oct 11)
 local FIT = PANEL_WIDTH / PANEL.size.X
 local GAP = 30 -- between the passes
 local ODDS = { at = Vector2.new(0.895, 0.088), size = 0.21 } -- the ? drawn on the Legend Egg's card (of its width)
