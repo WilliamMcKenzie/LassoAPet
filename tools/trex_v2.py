@@ -5,6 +5,7 @@ round the jaw, tiny arms with black claws, thick legs and a long tail). Static d
 
 Run: python3 tools/trex_v2.py [out_dir]
 writes TRex.bbmodel, TRex.png (three views) and TRex_vs_horse.png to out_dir.
+`animate <src> <dst>` writes idle, walk and gallop into QM's file, with GIFs.
 
 Bones: root, LegL/LegR, ArmL/ArmR, neck (head) > Jaw, Tail > Tail2.
 """
@@ -158,5 +159,86 @@ def main(out=OUT):
     print("wrote", path, len(parts), "parts")
 
 
+def animations(m):
+    """QM's file holds the jaw wide open at rest (a roar), so the jaw keys close it from there
+    (+X shuts it). +X on root leans the body nose-down."""
+    import math
+    from snake_rig import track
+    from snow_rig import bump, grounded
+    s, TAU = math.sin, 2 * math.pi
+    feet = {e["name"] for e in m["elements"] if e["name"].startswith(("Foot", "Toe", "Claw"))}
+
+    def jaws(L, f, n):
+        return {j: [track(L, lambda u: (f(u), 0, 0), n)] for j in ("Jaw", "Jaw2")}
+
+    def run(L, stride, lean, roll, sway, bob, hop, shut, n=16):
+        # a heavy stomp: legs swing in turn, the body rolls over the planted leg, the tail
+        # swings the other way, the head bobs twice a stride and the jaw chomps
+        tr = {"root": [track(L, lambda u: (lean, 0, roll * s(TAU * u)), n)]}
+        for side, ph in (("L", 0.0), ("R", 0.5)):
+            tr["Leg" + side] = [track(L, lambda u, ph=ph: (-lean + stride * s(TAU * (u + ph)), 0, 0), n)]
+            tr["Arm" + side] = [track(L, lambda u, ph=ph: (12 * s(TAU * (u + ph + 0.25)), 0, 0), n)]
+        tr["neck"] = [track(L, lambda u: (-lean * 0.7 + bob * s(2 * TAU * u), -sway * 0.4 * s(TAU * u), 0), n)]
+        tr["Tail"] = [track(L, lambda u: (-lean * 0.5 + 3 * s(2 * TAU * u), sway * s(TAU * u), 0), n)]
+        tr["Tail2"] = [track(L, lambda u: (2 * s(2 * TAU * u - 1), sway * 1.2 * s(TAU * u - 0.9), 0), n)]
+        tr.update(jaws(L, lambda u: shut * (0.5 + 0.5 * s(2 * TAU * u)), n))
+        tr["root"] = grounded(m, L, tr, feet, n, extra=lambda u: hop * abs(s(TAU * u)))
+        return L, tr
+
+    out = {}
+    # idle: breathes, looks about, shuts its jaw, then throws its head up into a roar
+    L = 4.0
+    out["idle"] = (L, {
+        "root": [track(L, lambda u: (1.5 * s(TAU * u), 0, 0), 32)],
+        "neck": [track(L, lambda u: (-14 * bump(u, 0.72, 0.07) + 2 * s(TAU * u), 22 * s(TAU * u) * (1 - bump(u, 0.72, 0.12)), 0), 64)],
+        "Tail": [track(L, lambda u: (0, 10 * s(TAU * u + 1), 0), 32)],
+        "Tail2": [track(L, lambda u: (0, 12 * s(TAU * u + 0.2), 0), 32)],
+        "ArmL": [track(L, lambda u: (-18 * bump(u, 0.72, 0.07), 0, 0), 48)],
+        "ArmR": [track(L, lambda u: (-18 * bump(u, 0.72, 0.07), 0, 0), 48)],
+        **jaws(L, lambda u: 30 * (1 - bump(u, 0.72, 0.1)) * (0.6 + 0.4 * bump(u, 0.35, 0.15)), 64),
+    })
+    out["walk"] = run(1.0, stride=24, lean=3, roll=4, sway=10, bob=4, hop=0, shut=24)
+    out["gallop"] = run(0.5, stride=42, lean=12, roll=3, sway=6, bob=6, hop=10, shut=12)
+    return out
+
+
+def animate(src, dst, out=OUT):
+    """Write idle, walk and gallop into QM's file (src) as dst, with preview GIFs.
+    QM's right arm bone ArmL2 is renamed ArmR."""
+    import horse_rig
+    horse_rig.EULER = "ZYX"  # QM's hand-made file
+    from horse_rig import write_animations
+    from snow_rig import group_ids, posed
+    m = json.load(open(src))
+    for g in m["groups"]:
+        if g["name"] == "ArmL2":
+            g["name"] = "ArmR"
+    m["animations"] = []
+    write_animations(m, group_ids(m), animations(m))
+    with open(dst, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    W = 420
+    cams = [dict(eye=(-30, 13, -32), target=(0, 6, 0), W=W, H=W, fov=40), dict(eye=(-44, 7, 0), target=(0, 6, 1), W=W, H=W, fov=38)]
+
+    def frame(name, t):
+        anim = next(x for x in m["animations"] if x["name"] == name)
+        ps = posed(m, anim, t)
+        for p in ps:
+            if p.name.startswith(("Eye", "Pupil", "Tooth", "Claw", "ArmClaw", "Nostril")):
+                p.plain = True
+        im = Image.new("RGB", (W * 2, W))
+        for i, c in enumerate(cams):
+            im.paste(render(ps, **c), (i * W, 0))
+        return A.label(im, [name, ""], 22)
+
+    for name, n in (("idle", 32), ("walk", 16), ("gallop", 12)):
+        L = next(x for x in m["animations"] if x["name"] == name)["length"]
+        A.gif(os.path.join(out, f"TRex_{name}.gif"), [frame(name, L * i / n) for i in range(n)], fps=n / L)
+    print("wrote", dst)
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["animate"]:
+        animate(*sys.argv[2:])
+    else:
+        main(*sys.argv[1:])
