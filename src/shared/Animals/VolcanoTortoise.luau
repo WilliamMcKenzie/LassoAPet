@@ -8,7 +8,7 @@
 local Horse = require(script.Parent.Horse)
 local VolcanoTortoiseModel = require(script.Parent.VolcanoTortoiseModel)
 
-return Horse.variant("VolcanoTortoise", VolcanoTortoiseModel, "Epic", {
+return Horse.variant("VolcanoTortoise", VolcanoTortoiseModel, "Rare", { -- (QM, Oct 11: was Epic)
 	seat = Vector3.new(0, 5.2, 2.35),
 	neck = { center = Vector3.new(0, 4, -5.6), radius = 1.8 },
 })

@@ -1,10 +1,10 @@
 """Ocean biome ground concept: sea-floor sand with seagrass beds and deep blue
 trenches, coral clusters, under a blue haze with bubbles.
 
-Run: python3 tools/ocean_ground.py [out_dir]     render a preview
-     python3 tools/ocean_ground.py --map           also write it into src/world/World.rbxmx
+Run: python3 tools/ocean_ground.py --map           write it into src/world/World.rbxmx
+(preview: design/volcano/quasicrystal_preview.py)
 
-Same approach as tools/snow_ground.py: noise patches on an 8-stud grid so the
+Patches on the 8-stud cells the funnel leaves in game (tools/funnel_grid.py), so the
 4-stud checker lines up. Sand is the base at 0, seagrass beds stand a stud
 higher, and trenches are sunk a stud. The columns along the walls, the start
 and the nests stay sand.
@@ -18,9 +18,9 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(__file__))
-from partlib import Part, T, Ry, render  # noqa: E402
-from desert_ground import noise, rects, write_patches, CELL, HALF_W  # noqa: E402
-import terrain_assets as TA  # noqa: E402
+from desert_ground import rects, write_patches, CELL  # noqa: E402
+import funnel_grid as FG  # noqa: E402
+import quasicrystal as QC  # noqa: E402
 
 SAND = [(236, 214, 164), (246, 228, 184)]
 GRASS = [(64, 178, 122), (80, 196, 138)]  # seagrass
@@ -44,24 +44,18 @@ KINDS = ("Ground", "Grass", "Trench", "Lava")
 # The ocean gets darker the further you ride (QM, Oct 2): coral reef, sand flats,
 # dark rock with the first lava, volcanic abyss. At = fraction of the way along;
 # everything blends between stops. Grass is seagrass at the reef and turns into
-# raised dark rock. Cut: how rare the raised patches are (higher = fewer); TrenchCut
-# the same for trenches; Lava: how wide the lava streaks are (0 = none).
+# raised dark rock (how much of each: STOPS below).
 # Config.Biomes Ocean.Depths carries the same colours for WorldColors and Ocean.client.
 DEPTHS = [
-    dict(At=0.00, Ground=SAND, Grass=GRASS, Trench=TRENCH, Wall=WALL,
-         Cut=0.70, TrenchCut=0.72, Lava=0.00),
+    dict(At=0.00, Ground=SAND, Grass=GRASS, Trench=TRENCH, Wall=WALL),
     dict(At=0.33, Ground=[(222, 196, 150), (234, 210, 166)], Grass=[(76, 150, 112), (90, 164, 124)],
-         Trench=[(60, 120, 190), (74, 134, 204)], Wall=[(196, 150, 140), (212, 166, 154)],
-         Cut=0.86, TrenchCut=1.01, Lava=0.00),
+         Trench=[(60, 120, 190), (74, 134, 204)], Wall=[(196, 150, 140), (212, 166, 154)]),
     dict(At=0.55, Ground=[(150, 146, 150), (164, 160, 164)], Grass=[(84, 86, 102), (96, 98, 114)],
-         Trench=[(50, 80, 140), (60, 92, 152)], Wall=[(120, 116, 132), (136, 132, 148)],
-         Cut=0.80, TrenchCut=1.01, Lava=0.00),
+         Trench=[(50, 80, 140), (60, 92, 152)], Wall=[(120, 116, 132), (136, 132, 148)]),
     dict(At=0.75, Ground=[(104, 104, 120), (118, 118, 134)], Grass=[(66, 68, 86), (78, 80, 98)],
-         Trench=[(40, 50, 90), (50, 60, 100)], Wall=[(78, 82, 106), (92, 96, 120)],
-         Cut=0.75, TrenchCut=1.01, Lava=0.03),
+         Trench=[(40, 50, 90), (50, 60, 100)], Wall=[(78, 82, 106), (92, 96, 120)]),
     dict(At=1.00, Ground=[(54, 50, 62), (66, 62, 74)], Grass=[(36, 34, 44), (46, 44, 54)],
-         Trench=[(30, 30, 50), (40, 40, 60)], Wall=[(40, 38, 50), (52, 50, 62)],
-         Cut=0.68, TrenchCut=1.01, Lava=0.08),
+         Trench=[(30, 30, 50), (40, 40, 60)], Wall=[(40, 38, 50), (52, 50, 62)]),
 ]
 BAND = 240  # studs: the floor and walls are cut into bands this long, each painted its depth's colour
 
@@ -90,99 +84,55 @@ def colors_at(k, z):
     return (d["Ground"], d["Grass"], d["Trench"], LAVA, d["Wall"])[k]
 
 
-def layout(nz, seed=41, z_start=0, length=None):
-    """Kind per 8-stud cell: 0 sand, 1 seagrass / rock, 2 trench, 3 lava. length:
-    the studs the depths stretch over (the whole ocean); a short preview stays reef."""
-    nx = 2 * HALF_W // CELL
-    # broad blobs: fewer, bigger patches keep the 13680-stud floor down to fewer parts
-    a = noise(nx, nz, 5.0, seed) * 0.7 + noise(nx, nz, 2.2, seed + 1) * 0.3
-    b = noise(nx, nz, 6.0, seed + 2) * 0.75 + noise(nx, nz, 2.4, seed + 3) * 0.25
-    streak = np.abs(noise(nx, nz, 4.0, seed + 5) - 0.5)  # ridged noise: thin wandering lines
-    kind = np.zeros((nx, nz), int)
-    for j in range(nz):
-        d = depth(j * CELL / length if length else 0.0)
-        kind[a[:, j] > d["Cut"], j] = 1
-        kind[(b[:, j] > d["TrenchCut"]) & (kind[:, j] == 0), j] = 2
-        if d["Lava"] > 0:
-            kind[streak[:, j] < d["Lava"], j] = 3
-    # a sand margin between seagrass and trench
-    for i in range(nx):
-        for j in range(nz):
-            if kind[i, j] == 2 and any(0 <= i + di < nx and 0 <= j + dj < nz and kind[i + di, j + dj] == 1
-                                       for di in (-1, 0, 1) for dj in (-1, 0, 1)):
-                kind[i, j] = 0
-    for col in (0, -1):  # the wall columns stay flat
-        kind[col, :][kind[col, :] >= 2] = 0
-    kind[:, : START_CLEAR // CELL] = 0
-    for i in range(nx):
-        for j in range(nz):
-            x, z = -HALF_W + i * CELL + CELL / 2, z_start - j * CELL - CELL / 2
-            if any(abs(x - a) < NEST_CLEAR + CELL / 2 and abs(z - b) < NEST_CLEAR + CELL / 2 for a, b in NESTS):
-                kind[i, j] = 0
-    return kind
+# The patches are a quasicrystal (QM, Oct 11: like his map maker's atlas patterns, so
+# they have a rhyme and reason): 7 waves round the circle, PATTERN studs a unit, drawn in
+# game coordinates (tools/funnel_grid.py), its middle OFFSET from the ocean's start (QM:
+# zoomed well out and off centre, so it isn't mirrored). The highest values
+# are the raised patches (seagrass, then rock), the lowest the sunk ones (trenches at
+# the reef, lava deep down); Grass and Low say how much of the floor each covers at that
+# depth, and the pattern decides where.
+ANGLES, PATTERN = 7, 10
+OFFSET = (-121.8, -427.3)  # studs (random): the pattern's middle, from the ocean's start
+STOPS = [(0.00, 0.14, 0.08), (0.33, 0.06, 0.0), (0.55, 0.10, 0.0), (0.75, 0.12, 0.04), (1.00, 0.18, 0.10)]
+NEST_IN = 12  # tools/funnel.luau moves each nest this far in from the wall on its side
+
+
+def amounts(t):
+    """(raised, sunk) share of the floor at fraction t of the way along."""
+    t = min(max(t, 0.0), 1.0)
+    for (t0, g0, l0), (t1, g1, l1) in zip(STOPS, STOPS[1:]):
+        if t <= t1:
+            f = (t - t0) / (t1 - t0)
+            return g0 + (g1 - g0) * f, l0 + (l1 - l0) * f
+    return STOPS[-1][1:]
 
 
 def full_layout():
-    return layout(OCEAN_LENGTH // CELL, z_start=Z_START, length=OCEAN_LENGTH)
+    """The whole ocean's floor as a funnel_grid.Grid of kinds: 0 sand, 1 seagrass / rock,
+    2 trench, 3 lava. .at(x, z) reads it on the straight course."""
+    grid = FG.Grid(Z_START, Z_START - OCEAN_LENGTH, BAND)
+    sample = QC.value(*np.meshgrid(np.arange(-136, 136, 8) + 4.0 - OFFSET[0], np.arange(0, 8000, 8.0), indexing="ij"),
+                      ANGLES, PATTERN)
+    for b in grid.bands:
+        X, Z = b.centres()
+        q = QC.value(Z - Z_START - OFFSET[1], X - OFFSET[0], ANGLES, PATTERN)
+        t = (Z_START - (b.z0 + b.z1) / 2) / OCEAN_LENGTH
+        raised, sunk = amounts(t)
+        kind = np.zeros(q.shape, int)
+        kind[q >= np.quantile(sample, 1 - raised)] = 1
+        if sunk > 0:
+            kind[q <= np.quantile(sample, sunk)] = 2 if t < 0.5 else 3
+        kind[[0, -1], :] = np.where(kind[[0, -1], :] >= 2, 0, kind[[0, -1], :])  # the wall columns stay flat
+        kind[:, Z_START - Z[0] < START_CLEAR] = 0
+        for nx, nz in NESTS:
+            gx = np.sign(nx) * (FG.half_width(nz) - NEST_IN)
+            kind[(abs(X - gx) < NEST_CLEAR * 1.6 + CELL / 2) & (abs(Z - nz) < NEST_CLEAR * 1.6 + CELL / 2)] = 0
+        b.kind = kind
+    return grid
 
 
-MAX_CELLS = BAND // CELL  # also well under Roblox's 2048-stud part cap
-
-
-def split(rs):
-    """rects, cut at every band edge so each part sits in one band."""
-    for k, i0, j0, i1, j1 in rs:
-        j = j0
-        while j < j1:
-            end = min(j1, (j // MAX_CELLS + 1) * MAX_CELLS)
-            yield k, i0, j, i1, end
-            j = end
-
-
-def map_boxes(kind):
-    out = []
-    for k, i0, j0, i1, j1 in split(rects(kind)):
-        top = (0, GRASS_UP, -TRENCH_DOWN, -LAVA_DOWN)[k]
-        x0, x1 = -HALF_W + i0 * CELL, -HALF_W + i1 * CELL
-        z0, z1 = Z_START - j0 * CELL, Z_START - j1 * CELL
-        out.append((KINDS[k], ((x0 + x1) / 2, (top - 2) / 2, (z0 + z1) / 2), (x1 - x0, top + 2, z0 - z1)))
-    return out
-
-
-# a few coral clusters for the preview: (builder, x, z, yaw)
-PREVIEW_CORAL = [
-    (TA.reef_rock, -30, -60, 20), (TA.tube_coral, -18, -50, 0), (TA.brain_coral, -40, -76, 40),
-    (TA.branch_coral, 34, -40, 10), (TA.fan_coral, 42, -46, 70), (TA.tube_coral, 28, -30, 60),
-    (TA.brain_coral, 50, -100, 0), (TA.fan_coral, -46, -130, 80), (TA.branch_coral, 10, -120, 30),
-    (TA.tube_coral, 18, -126, 0), (TA.reef_rock, 30, -170, -20), (TA.brain_coral, -12, -160, 20),
-    (TA.tube_coral, -50, -24, 0), (TA.branch_coral, -24, -190, 0),
-]
-
-
-def scene(kind):
-    parts = []
-    nx, nz = kind.shape
-    for i in range(nx):
-        for j in range(nz):
-            k = kind[i, j]
-            top = (0, GRASS_UP, -TRENCH_DOWN)[k]
-            for di in (0, 1):
-                for dj in (0, 1):
-                    x = -HALF_W + i * CELL + di * 4 + 2
-                    z = -j * CELL - dj * 4 - 2
-                    c = (SAND, GRASS, TRENCH)[k][(di + dj) % 2]
-                    parts.append(Part("Floor", (4, top + 2, 4), T(x, (top - 2) / 2, z), c))
-    for side in (-1, 1):
-        for zi in range(LENGTH // 4):
-            for yi in range(5):
-                parts.append(Part("Wall", (4, 4, 4), T(side * (HALF_W + 2), yi * 4 + 2, -zi * 4 - 2),
-                                  WALL[(zi + yi) % 2], plain=True))
-    for builder, x, z, yaw in PREVIEW_CORAL:
-        k = TA.Kit()
-        builder(k)
-        M = T(x, 0, z) @ Ry(yaw)
-        parts += [Part(p.name, p.size, M @ p.cf, p.color, p.shape, p.plain) for p in k.parts]
-    return parts
+def map_boxes(grid):
+    return grid.boxes(KINDS, (0, GRASS_UP, -TRENCH_DOWN, -LAVA_DOWN), rects)
 
 
 def underwater(img, seed=3, strength=0.5):
@@ -204,27 +154,10 @@ def underwater(img, seed=3, strength=0.5):
     return Image.alpha_composite(out, layer).convert("RGB")
 
 
-def main(out):
-    os.makedirs(out, exist_ok=True)
-    kind = layout(LENGTH // CELL)
-    parts = scene(kind)
-    kw = dict(W=800, H=520, fog=False, ground=False)
-    ride = render(parts, eye=(0, 70, 30), target=(0, 0, -70), fov=50, **kw)
-    close = render(parts, eye=(-6, 18, -10), target=(-20, 2, -60), fov=50, **kw)
-    board = Image.new("RGB", (1600, 1040))
-    board.paste(ride, (0, 0))
-    board.paste(close, (0, 520))
-    board.paste(underwater(ride), (800, 0))
-    board.paste(underwater(close, 5), (800, 520))
-    d = ImageDraw.Draw(board)
-    for x, y, t in ((10, 10, "ground + coral"), (810, 10, "with blue haze + bubbles")):
-        d.text((x, y), t, fill=(255, 255, 255), font=TA.font(20), stroke_width=2, stroke_fill=(0, 0, 0))
-    board.save(os.path.join(out, "ocean_ground.png"))
-    print("wrote", out, {KINDS[k]: int((kind == k).sum()) for k in range(4)})
-    if "--map" in sys.argv:
-        print("wrote", write_patches(r"OGND\d+", "OGND", map_boxes(full_layout()), template=r"DGND00000"),
-              "ocean floor parts")
-        glow_lava()
+def main():
+    print("wrote", write_patches(r"OGND\d+", "OGND", map_boxes(full_layout()), template=r"DGND00000"),
+          "ocean floor parts")
+    glow_lava()
 
 
 def glow_lava():
@@ -237,6 +170,5 @@ def glow_lava():
     open(WORLD, "w").write(s)
 
 
-if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    main(args[0] if args else "/mnt/project-files/biomes/ocean")
+if __name__ == "__main__" and "--map" in sys.argv:
+    main()
