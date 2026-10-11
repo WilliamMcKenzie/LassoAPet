@@ -169,7 +169,39 @@ local function newTimer(parent)
 	return text
 end
 
+-- QM's big white arrow (Client/Tutorial's) bobbing over each of your eggs that's ready
+-- to hatch, till you're close enough for its prompt (QM, Oct 11). Not in the tutorial:
+-- it has its own.
+local READY_ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
+local function readyArrow(s, show)
+	if show and not s.arrow then
+		local gui = Instance.new("BillboardGui")
+		gui.Name = "ReadyArrow"
+		gui.Size = UDim2.fromScale(7, 7)
+		gui.AlwaysOnTop = true
+		gui.LightInfluence = 0
+		local image = Instance.new("ImageLabel")
+		image.BackgroundTransparency = 1
+		image.Image = READY_ARROW
+		image.Size = UDim2.fromScale(1, 1)
+		image.Parent = gui
+		gui.ResetOnSpawn = false
+		gui.Parent = player:WaitForChild("PlayerGui")
+		s.arrow = gui
+	end
+	if s.arrow then
+		local root = show and s.egg and s.egg.model.PrimaryPart
+		s.arrow.Adornee = root
+		s.arrow.Enabled = root ~= nil
+		s.arrow.StudsOffsetWorldSpace = Vector3.new(0, 14 + math.abs(math.sin(os.clock() * 3)) * 1.5, 0)
+	end
+end
+
 local function remove(s)
+	if s.arrow then
+		s.arrow:Destroy()
+		s.arrow = nil
+	end
 	if s.speedupAttachment then s.speedupAttachment:Destroy() end
 	if s.egg then
 		s.egg.model:Destroy()
@@ -295,6 +327,10 @@ local function hatch(pen, id, s)
 		task.delay(math.max(TOP_POPS - HATCH_SOUND_PEAK, 0), Sounds.play, "egg_hatch")
 	end
 	s.timer.Parent:Destroy() -- the countdown
+	if s.arrow then
+		s.arrow:Destroy()
+		s.arrow = nil
+	end
 	s.egg:play("hatch")
 	task.delay(TOP_POPS, function()
 		if shown[pen][id] ~= s then
@@ -561,6 +597,8 @@ RunService.RenderStepped:Connect(function(dt)
 						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and (ready or not player:GetAttribute("Tutorial")) -- (the tutorial: hatch it, no speeding up)
 					end
 					s.timer.Text = if ready then "Ready" else countdown((s.hatchAt or now) - now)
+					readyArrow(s, ready and pen == myPen() and not player:GetAttribute("Tutorial") and not player:GetAttribute("EggPromptUp")
+						and not player:GetAttribute("MergeView") and not player:GetAttribute("Cutscene"))
 					if s.speedupPrompt then
 						-- (its action: the time left, as over the egg, till it's ready: QM, Oct 10)
 						local action = if ready then "Hatch" else s.timer.Text
