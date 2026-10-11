@@ -1,8 +1,12 @@
 -- MERGE (QM, Oct 6; the pen view, Oct 11; Shared/Fusion): the Merge button opens a
 -- view of your pen from above, your animals in it, and QM's Merge panel along the
 -- bottom. Click two animals and they fill its two slots; or click a slot, then the
--- animal to put in it (QM). A picked animal glows purple, with a ring under it and a
--- check over it (QM's mockup); clicking it again, or its slot, takes it out. The
+-- animal to put in it (QM). A picked animal glows purple, a ring round it and a
+-- check over it (QM's mockup); clicking it again, or its slot, takes it out. (No
+-- Highlights, as anywhere in the game: they hitch on phones. Outline's rings.) While
+-- it's up, the pen's eggs and everything floating over it hide (QM): the eggs, their
+-- timers and the pets' plates on the "MergeView" attribute (Pen.client, PetPlates),
+-- the owner's sign and every prompt here. The
 -- green Merge button, its price beside the cash, shows once both are picked (grey,
 -- "???", till then). Merging pulls the two up over the pen and the hybrid drops
 -- down where the base was (PenPets.pull; Hatchery.server's FusePets). The left slot
@@ -26,6 +30,7 @@ local PenPets = require(script.Parent.PenPets)
 local ModalPop = require(script.Parent.ModalPop)
 local Sounds = require(script.Parent.Sounds)
 local Gamepad = require(script.Parent.Gamepad)
+local Outline = require(script.Parent.Outline)
 
 local Animals = ReplicatedStorage.Shared.Animals
 local player = Players.LocalPlayer
@@ -189,11 +194,9 @@ local pets = {} -- this opening's: { model, id, kind, fuse, merged, worth }
 local slots = {} -- [1], [2]: the pet in each (either may be nil)
 local active -- the slot clicked last, empty, that the next animal clicked goes in
 local slotUi = {} -- [i] = { button, frame (the outline), view, name, hint }
-local marks = {} -- [pet] = { ring, inner, glow, check }: the picked ones' looks in the pen
-local hover = Instance.new("Highlight") -- the animal under the mouse
-hover.FillTransparency = 1
-hover.OutlineColor = Color3.new(1, 1, 1)
-hover.DepthMode = Enum.HighlightDepthMode.Occluded
+local marks = {} -- [pet] = { ring, inner, dashes, check }: the picked ones' looks in the pen
+local hover = Outline.circle() -- the white dashed ring round the animal under the mouse
+local hovered -- its model
 local savedView -- the camera as it was: { type, cframe, fov }
 local viewAt -- the pen view's CFrame while it's open
 local blend = 0 -- 0: the camera as it was, 1: the pen view (eased in and out)
@@ -221,12 +224,8 @@ local function mark(pet)
 		d.Parent = workspace
 		return d
 	end
-	local glow = Instance.new("Highlight")
-	glow.FillColor = PURPLE
-	glow.FillTransparency = 0.75
-	glow.OutlineColor = PURPLE
-	glow.Adornee = pet.model
-	glow.Parent = gui
+	local dashes = Outline.ring(pet.model, PURPLE)
+	dashes:fade(1.2)
 	local check = Instance.new("BillboardGui")
 	check.Size = UDim2.fromOffset(40, 40)
 	check.AlwaysOnTop = true
@@ -247,7 +246,7 @@ local function mark(pet)
 	marks[pet] = {
 		ring = disc(radius, 0.25, PURPLE),
 		inner = disc(radius - 0.6, 0.7, Color3.fromRGB(225, 190, 255)),
-		glow = glow,
+		dashes = dashes,
 		check = check,
 		top = size.Y,
 		radius = radius,
@@ -263,7 +262,7 @@ local function unmark(pet)
 	if m then
 		m.ring:Destroy()
 		m.inner:Destroy()
-		m.glow:Destroy()
+		m.dashes:Destroy()
 		m.check:Destroy()
 		marks[pet] = nil
 	end
@@ -339,6 +338,10 @@ local function pickAnimal(pet)
 		end
 		slots[into] = pet
 		active = nil
+		if hovered == pet.model then
+			hovered = nil
+			hover:hide()
+		end
 		mark(pet)
 		Sounds.play("merge_pop")
 	end
@@ -399,7 +402,15 @@ UserInputService.InputChanged:Connect(function(input)
 		return
 	end
 	local pet = petAt(Vector2.new(input.Position.X, input.Position.Y))
-	hover.Adornee = if pet and not marks[pet] then pet.model else nil
+	local model = if pet and not marks[pet] then pet.model else nil
+	if model ~= hovered then
+		hovered = model
+		if model and model.PrimaryPart then
+			hover:fit(model, model.PrimaryPart)
+		else
+			hover:hide()
+		end
+	end
 end)
 
 -- The camera over your pen, from its open side (where you come in), looking down.
@@ -423,6 +434,31 @@ local function penView()
 	local from = middle - look * distance
 	-- Turned down a touch, so the pen sits above the panel.
 	return CFrame.lookAt(from, middle) * CFrame.Angles(-math.atan(tanV * VIEW.RAISE), 0, 0)
+end
+
+-- Everything floating over the pen hides while it's up (QM): the eggs, their timers and
+-- the pets' plates go on MergeView (Pen.client, PetPlates); the owner's sign and the
+-- prompts (RIDE, the eggs') here.
+local ProximityPromptService = game:GetService("ProximityPromptService")
+local hiddenSigns = {}
+local function hideOverPen(on)
+	player:SetAttribute("MergeView", on)
+	ProximityPromptService.Enabled = not on
+	if on then
+		local index = player:GetAttribute("Pen")
+		local pen = index and workspace:FindFirstChild("Pens") and workspace.Pens:FindFirstChild("Pen" .. index)
+		for _, d in if pen then pen:GetDescendants() else {} do
+			if d:IsA("BillboardGui") and d.Enabled then
+				d.Enabled = false
+				table.insert(hiddenSigns, d)
+			end
+		end
+	else
+		for _, d in hiddenSigns do
+			d.Enabled = true
+		end
+		table.clear(hiddenSigns)
+	end
 end
 
 local function sinkMoves()
@@ -502,6 +538,7 @@ local function openPage()
 		savedView = { type = camera.CameraType, cframe = camera.CFrame, fov = camera.FieldOfView }
 	end
 	viewAt = view
+	hideOverPen(true)
 	ContextActionService:BindActionAtPriority("MergeViewStill", sinkMoves, false, Enum.ContextActionPriority.High.Value + 1,
 		Enum.PlayerActions.CharacterForward, Enum.PlayerActions.CharacterBackward, Enum.PlayerActions.CharacterLeft,
 		Enum.PlayerActions.CharacterRight, Enum.PlayerActions.CharacterJump)
@@ -516,7 +553,9 @@ function close(instant)
 		return
 	end
 	open = false
-	hover.Adornee = nil
+	hovered = nil
+	hover:hide()
+	hideOverPen(false)
 	for pet in marks do
 		unmark(pet)
 	end
@@ -558,7 +597,6 @@ gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.DisplayOrder = -1 -- under the HUD
 gui.Enabled = false
-hover.Parent = gui
 panel = Instance.new("ImageLabel")
 panel.Name = "Panel"
 panel.BackgroundTransparency = 1

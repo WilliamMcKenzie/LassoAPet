@@ -4194,7 +4194,7 @@ RunService.PreSimulation:Connect(function(dt)
 			wander(starter, dt)
 		end
 		updateRideTarget()
-		Outline.set(if rideShown then rideModel else nil) -- the pet RIDE will ride
+		Outline.set(if rideShown and not player:GetAttribute("MergeView") then rideModel else nil) -- the pet RIDE will ride (not in the merge view: FuseMenu)
 		vfx.updateMerge()
 		return
 	end

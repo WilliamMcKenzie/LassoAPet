@@ -202,12 +202,25 @@ local function sizeEgg(s, scale)
 	end
 end
 
+-- The merge view (FuseMenu's "MergeView" attribute, QM Oct 11): your pen's eggs hide
+-- while it's up, their timers too (nearTimer).
+local function hideEgg(egg, hidden)
+	for _, d in egg.model:GetDescendants() do
+		if d:IsA("BasePart") or d:IsA("Decal") or d:IsA("Texture") then
+			d.LocalTransparencyModifier = if hidden then 1 else 0
+		end
+	end
+end
+
 local function showEgg(pen, id, item)
 	local s = { kind = item.egg, merged = item.merged or 1, eggScale = item.eggScale, at = groundAt(pen, item.x, item.z), yaw = facing(pen), hatchAt = item.hatchAt }
 	s.egg = Egg.new(item.egg)
 	shown[pen][id] = s -- tracked at once: if anything below fails, the next refresh still clears it
 	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER, 0)) * CFrame.Angles(0, s.yaw, 0))
 	s.egg.model.Parent = folder
+	if player:GetAttribute("MergeView") and pen == myPen() then
+		hideEgg(s.egg, true)
+	end
 	s.timer = newTimer(s.egg.model.PrimaryPart)
 	if pen == myPen() and pen:GetAttribute("Owner") == player.UserId then
 		-- One prompt on the egg: hold F for the paid hatch while it's counting down,
@@ -500,10 +513,20 @@ ProximityPromptService.PromptHidden:Connect(function(prompt)
 	end
 end)
 
+player:GetAttributeChangedSignal("MergeView"):Connect(function()
+	local pen = myPen()
+	for _, s in (pen and shown[pen]) or {} do
+		if s.egg then
+			hideEgg(s.egg, player:GetAttribute("MergeView") == true)
+		end
+	end
+end)
+
 local function nearTimer(s, hrp)
 	local root = s.egg.model.PrimaryPart
 	local d = if hrp and root then ((root.Position - hrp.Position) * Vector3.new(1, 0, 1)).Magnitude else math.huge
 	local on = d <= (if s.timerOn then TIMER_LEAVE else TIMER_REACH) and not player:GetAttribute("EggPromptUp") -- (none while an egg's prompt is up: QM)
+		and not player:GetAttribute("MergeView") -- (nor in the merge view: FuseMenu, QM)
 	if on ~= s.timerOn then
 		s.timerOn = on
 		local gui = s.timer.Parent
