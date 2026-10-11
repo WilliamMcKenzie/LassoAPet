@@ -22,7 +22,7 @@ function WorldColors.biomeAt(z)
 end
 
 -- Where the biome called name starts (its edge nearest home), or nil if there's none.
-function WorldColors.biomeStart(name)
+function WorldColors.biomeNamedStart(name)
 	local edge = 0
 	for _, biome in Config.Biomes do
 		if biome.Name == name then

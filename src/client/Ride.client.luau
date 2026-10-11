@@ -1651,7 +1651,7 @@ end
 -- can't be knocked away or crashed into. Built during the countdown, since a big
 -- animal is slow to build.
 vfx.EVENT_LANE = 0
-vfx.EVENT_END = WorldColors.biomeStart(Config.Events.DespawnBiome) or FINISH_Z -- (it runs off at the Jungle's edge: QM, Oct 11)
+vfx.EVENT_END = WorldColors.biomeNamedStart(Config.Events.DespawnBiome) or FINISH_Z -- (it runs off at the Jungle's edge: QM, Oct 11)
 function vfx.updateEvent(dt, seen, inView)
 	local id = world:GetAttribute("EventId") or 0
 	local key, kind = -id, world:GetAttribute("EventKind") or ""
