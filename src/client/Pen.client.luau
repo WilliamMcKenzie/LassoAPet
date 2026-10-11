@@ -307,6 +307,7 @@ local function hatch(pen, id, s)
 		pet.animal:setScale(pet.scale)
 		pet.animal.model.Parent = folder
 		s.pet, s.jump = pet, 0
+		pet.animal.model:SetAttribute("Hatching", true) -- (till it's landed: Client/Tutorial's arrow waits)
 		placePet(pet, s.at, s.yaw)
 		-- The empty shell fades away once the pet is out.
 		task.delay(JUMP_TIME, function()
@@ -591,6 +592,7 @@ RunService.RenderStepped:Connect(function(dt)
 					pet.hop = EGG_CENTER * (s.scale or 1) * (1 - t) + JUMP_HEIGHT * 4 * t * (1 - t)
 					if t >= 1 then
 						s.jump, s.hatching = nil, nil
+						pet.animal.model:SetAttribute("Hatching", nil)
 						startWander(s)
 					end
 				end

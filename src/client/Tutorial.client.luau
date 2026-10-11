@@ -150,6 +150,7 @@ end
 local ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
 local ARROW_SIZE = 7 -- studs
 local ARROW_UP = 20 -- (QM) studs over the egg's root, at the bottom of its bob
+local ARROW_UP_PET = 50 -- and over the pet's (QM)
 local eggArrow = Instance.new("BillboardGui")
 eggArrow.Name = "TutorialEggArrow"
 eggArrow.Size = UDim2.fromScale(ARROW_SIZE, ARROW_SIZE)
@@ -170,7 +171,8 @@ RunService.RenderStepped:Connect(function()
 	local root = arrowOver and arrowOver.Parent and (arrowOver.PrimaryPart or arrowOver:FindFirstChildWhichIsA("BasePart", true))
 	eggArrow.Adornee = root
 	eggArrow.Enabled = root ~= nil and not player:GetAttribute("Cutscene")
-	eggArrow.StudsOffsetWorldSpace = Vector3.new(0, ARROW_UP + math.abs(math.sin(os.clock() * 3)) * 1.5, 0)
+	local up = if arrowOver and arrowOver:IsA("Model") and not arrowOver.Name:match("Egg$") then ARROW_UP_PET else ARROW_UP
+	eggArrow.StudsOffsetWorldSpace = Vector3.new(0, up + math.abs(math.sin(os.clock() * 3)) * 1.5, 0)
 	-- The tap hand.
 	local show, flip = false, false
 	if typeof(tapAt) == "Instance" and tapAt:IsA("GuiObject") and tapAt.Visible then
@@ -368,7 +370,7 @@ local function run()
 			local pets = myPets()
 			-- (the arrow: over the egg, then the pet out of it, till you're close enough for its prompt: QM)
 			arrowOver = if egg and #pets == 0 then (if player:GetAttribute("EggPromptUp") then nil else egg)
-				elseif #pets > 0 and not player:GetAttribute("RidePromptUp") then pets[1]
+				elseif #pets > 0 and not player:GetAttribute("RidePromptUp") and not pets[1]:GetAttribute("Hatching") then pets[1] -- (once it's fully out: QM)
 				else nil
 			if egg and #pets == 0 then
 				pointAt(nil)
