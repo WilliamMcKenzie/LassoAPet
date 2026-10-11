@@ -149,7 +149,7 @@ end
 -- the pet that hatches, each till you're close enough for its prompt (QM, Oct 11).
 local ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
 local ARROW_SIZE = 7 -- studs
-local ARROW_UP = 16 -- (QM) studs over the egg's root, at the bottom of its bob
+local ARROW_UP = 14 -- (QM) studs over the egg's root, at the bottom of its bob
 local ARROW_UP_PET = 20 -- and over the pet's (QM)
 local eggArrow = Instance.new("BillboardGui")
 eggArrow.Name = "TutorialEggArrow"
