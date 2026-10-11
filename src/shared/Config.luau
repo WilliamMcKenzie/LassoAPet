@@ -376,6 +376,7 @@ return {
 		-- The Legendaries are the one exception (QM, Oct 11: our D1 retention: long eggs you come back for;
 		-- the Unicorn's 5 min is in the Meadow line above):
 		Snake = 1800, Icebringer = 3600, BlueCrab = 14400, Kraken = 18000, Phoenix = 43200,
+		BoneRex = 43200, -- (QM, Oct 11: the "Collect animals" quest's egg, for D1; 12 h like the Phoenix's, a guess)
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		SnackYak = 3600, RoboShark = 57600, Loong = 86400, -- exclusives
 	},
@@ -903,26 +904,27 @@ return {
 	-- shows within BullReach studs of your pen's bull spot (BullSpots, by pen number:
 	-- design/base_arc's bull pads, none built yet).
 	BaseUi = { RefWidth = 1920, BullReach = 16 },
-	-- Quests (QM, Oct 11), top right at your base in place of the Upgrade button. Two are
-	-- up at a time, from this list in order. Claiming a finished one upgrades your pen
-	-- (PenLevel + 1, up to the last biome's: more room, Config.PenCapacity) and gives you
-	-- an egg from the furthest biome you've reached, and the next one takes its place.
-	-- Kind: "reach" (ride into Config.Biomes[Biome]), "home" (bring Need animals home),
-	-- "merge" (merge Need times), "hatch" (hatch Need eggs); those three count from when
-	-- the quest comes up. QM wrote the first three; the rest are a guess.
+	-- Quests (QM, Oct 11), top right at your base in place of the Upgrade button: two
+	-- questlines, each showing its next quest, top and bottom (QM's final list). Claiming a
+	-- finished one gives its Egg and upgrades your pen (PenLevel + 1, up to the last
+	-- biome's: more room, Config.PenCapacity), and that line's next one comes up. A line
+	-- that's done leaves the other alone in the panel; both done, the panel's gone.
+	-- Kind: "reach" (ride into Config.Biomes[Biome]), "lasso" (land Need lassos on wild
+	-- animals), "home" (bring Need animals home), "merge" (merge Need times); the last
+	-- three count from when the quest comes up.
 	Quests = {
-		{ Text = "Enter Desert", Kind = "reach", Biome = 2 },
-		{ Text = "Collect animals", Kind = "home", Need = 5 },
-		{ Text = "Merge animals", Kind = "merge", Need = 3 },
-		{ Text = "Hatch eggs", Kind = "hatch", Need = 5 },
-		{ Text = "Enter Tundra", Kind = "reach", Biome = 3 },
-		{ Text = "Collect animals", Kind = "home", Need = 15 },
-		{ Text = "Enter Ocean", Kind = "reach", Biome = 4 },
-		{ Text = "Merge animals", Kind = "merge", Need = 5 },
-		{ Text = "Enter Volcano", Kind = "reach", Biome = 5 },
-		{ Text = "Hatch eggs", Kind = "hatch", Need = 15 },
-		{ Text = "Enter Jurassic", Kind = "reach", Biome = 6 },
-		{ Text = "Collect animals", Kind = "home", Need = 50 },
+		{
+			{ Text = "Enter the Desert", Kind = "reach", Biome = 2, Egg = "Unicorn" },
+			{ Text = "Enter the Tundra", Kind = "reach", Biome = 3, Egg = "Snake" },
+			{ Text = "Enter the Ocean", Kind = "reach", Biome = 4, Egg = "Icebringer" },
+			{ Text = "Enter the Volcano", Kind = "reach", Biome = 5, Egg = "Kraken" },
+			{ Text = "Enter the Jurassic", Kind = "reach", Biome = 6, Egg = "Phoenix" },
+		},
+		{
+			{ Text = "Lasso animals", Kind = "lasso", Need = 10, Egg = "SpineLizard" },
+			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "BoneRex" }, -- (for D1: its egg's long, QM)
+			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "Snowman" },
+		},
 	},
 	BullSpots = { Vector3.new(-18, 0, 173), Vector3.new(-75.2, 0, 129.6), Vector3.new(52, 0, 157.1), Vector3.new(-78.6, 0, 57.9), Vector3.new(84.9, 0, 93.3) },
 	Passes = {

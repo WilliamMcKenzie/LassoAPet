@@ -37,6 +37,7 @@ local QUEST_ART = {
 	-- panel's, so "Quests" came out huge and the chevron got cut: QM, Oct 11)
 	panel = "rbxassetid://71052597087124", -- Quests.png, 453 x 265: open, "Quests" and its fold chevron drawn in
 	closed = "rbxassetid://123446992263929", -- QuestsClosed.png, 453 x 86: folded up
+	one = "", -- QuestsOne.png, 453 x 184: room for one quest, when one questline's done (QM, Oct 11; till it's uploaded, the pieces)
 	bar = "rbxassetid://88826165672196", -- QuestBG.png, 407 x 22
 	fill = "rbxassetid://76511917573203", -- QuestFill.png, 406 x 22 (QM's second, Oct 11)
 	claim = "rbxassetid://113926447181781", -- ClaimQuest.png, 399 x 62
@@ -210,6 +211,7 @@ local panelBottom = piece("Bottom", QUEST_ART.bottom, 40)
 panelBottom.AnchorPoint = Vector2.new(0, 1)
 panelBottom.Position = UDim2.fromScale(0, 1)
 local panelClosed = piece("Closed", QUEST_ART.closed, Q.header)
+local panelOne = piece("One", QUEST_ART.one, 184)
 quests.AnchorPoint = Vector2.new(1, 0)
 quests.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
 quests.Size = UDim2.fromOffset(Q.width, Q.header)
@@ -324,8 +326,11 @@ local function drawQuests()
 			child:Destroy()
 		end
 	end
+	local one = not folded and #questList == 1 and QUEST_ART.one ~= ""
 	panelClosed.Visible = folded
-	panelTop.Visible, panelMiddle.Visible, panelBottom.Visible = not folded, not folded, not folded
+	panelOne.Visible = one
+	local pieces = not folded and not one
+	panelTop.Visible, panelMiddle.Visible, panelBottom.Visible = pieces, pieces, pieces
 	if folded then
 		quests.Size = UDim2.fromOffset(Q.width, Q.header)
 		return
@@ -336,7 +341,7 @@ local function drawQuests()
 			y += questRow(quest.i, quest, y) + (if n < #questList then Q.gap else 0)
 		end
 	end
-	quests.Size = UDim2.fromOffset(Q.width, y + Q.bottom)
+	quests.Size = UDim2.fromOffset(Q.width, if one then 184 else y + Q.bottom)
 	panelMiddle.Size = UDim2.fromOffset(Q.width, math.max(y + Q.bottom - 90 - 40, 0))
 end
 player:GetAttributeChangedSignal("Quests"):Connect(drawQuests)

@@ -565,7 +565,6 @@ remote("HatchEgg", function(player, id)
 	end
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 	Funnel.step(player, if profile.pastStarter then "Egg Hatched" else "Hatched Starter Egg")
-	Quests.count(player, profile.quests, "hatch")
 	publish(player)
 end)
 
@@ -689,14 +688,15 @@ rollGacha.OnServerInvoke = function(player)
 end
 rollGacha.Parent = ReplicatedStorage
 
--- Claiming a finished quest (Config.Quests; BaseUi's CLAIM): your pen's next level (up
--- to the last biome's) and an egg from the furthest biome you've reached, picked by its
--- Herd's odds. Returns the egg's kind, for the egg reveal; nil if it didn't go through.
+-- Claiming a finished quest (Config.Quests; BaseUi's CLAIM): its egg, and your pen's
+-- next level (up to the last biome's). Returns the egg's kind, for the egg reveal; nil
+-- if it didn't go through.
 local claimQuest = Instance.new("RemoteFunction")
 claimQuest.Name = "ClaimQuest"
 claimQuest.OnServerInvoke = function(player, i)
 	local profile = profiles[player]
-	if not profile or typeof(i) ~= "number" or not Quests.claim(player, profile.quests, i) then
+	local quest = profile and typeof(i) == "number" and Quests.claim(player, profile.quests, i)
+	if not quest then
 		return nil
 	end
 	local level = math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
@@ -704,21 +704,21 @@ claimQuest.OnServerInvoke = function(player, i)
 		player:SetAttribute("PenLevel", level + 1)
 		Funnel.step(player, "Unlocked Zone 2")
 	end
-	local biome = Config.Biomes[math.clamp(player:GetAttribute("GatesBroken") or 1, 1, #Config.Biomes)]
-	local odds = {}
-	for kind, weight in biome.Herd do
-		if weight > 0 and isAnimal(kind) then
-			odds[kind] = weight
-		end
-	end
-	local kind = pick(odds)
-	if kind then
-		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
-	end
+	profile.eggs[quest.Egg] = (profile.eggs[quest.Egg] or 0) + 1
 	publish(player)
-	return kind
+	return quest.Egg
 end
 claimQuest.Parent = ReplicatedStorage
+-- Gold.server's: a lasso landed on a wild animal ("Lasso animals").
+local questProgress = Instance.new("BindableEvent")
+questProgress.Name = "QuestProgress"
+questProgress.Event:Connect(function(player, kind)
+	local profile = profiles[player]
+	if profile then
+		Quests.count(player, profile.quests, kind)
+	end
+end)
+questProgress.Parent = game:GetService("ServerStorage")
 Players.PlayerRemoving:Connect(function(player)
 	rolled[player] = nil
 end)
@@ -1306,7 +1306,6 @@ while true do
 			if item.egg and now >= item.hatchAt and ((player:GetAttribute("Tutorial") and profile.ride ~= nil) or player:GetAttribute("PassAutoHatch")) then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
-				Quests.count(player, profile.quests, "hatch")
 				if profile.pastStarter then
 					Funnel.step(player, "Egg Hatched") -- (not the starter egg, which hatches before the first ride)
 				end
