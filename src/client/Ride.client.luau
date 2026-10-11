@@ -4152,6 +4152,9 @@ RunService.PreSimulation:Connect(function(dt)
 	dt *= timeScale
 	updateHerd(dt, slow and not cutscene)
 	updateFlung(dt)
+	if phase == "boss" or phase == "turning" or phase == "return" or phase == "home" then -- (the boss, then after you home, in the leap's slow motion too)
+		vfx.bossChase.update(dt, phase ~= "boss", mount and mount.x, mount and mount.z, mount and mount.speed)
+	end
 	vfx.hazards.update(dt, herd, mount, phase == "outbound" or phase == "turning" or phase == "return",
 		mount and (vfx.sprintSpecial() or {}).Kind) -- (the Sludge's and Soul Horse's sprints lay trails)
 	vfx.updateNuke()
@@ -4243,8 +4246,9 @@ RunService.PreSimulation:Connect(function(dt)
 		checkRide(dt)
 	end
 	if heroLeap and heroLeap.t >= 1 then
-		-- Landed: dust, then the egg reveal, then off the pet.
+		-- Landed: dust, then the egg reveal, then off the pet. The boss goes (QM, Oct 10).
 		heroLeap = nil
+		vfx.bossChase.stop()
 		mount.speed = RUN_OUT_SPEED
 		if phase ~= "finish" then
 			mount.hop = 0
@@ -4292,10 +4296,8 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	vfx.speedLines.update(if not riding then 0 elseif sprinting() then Config.SpeedLines.Speed else Config.SpeedLines.Speed / 2)
 	vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
 	vfx.returnVignette.update(dt, mount ~= nil and (phase == "turning" or phase == "return"))
-	if phase == "boss" or phase == "turning" or phase == "return" or phase == "home" then -- (the boss, then after you home, there at the line as you land)
-		vfx.bossChase.update(dt, phase ~= "boss", mount and mount.x, mount and mount.z, mount and mount.speed)
-	else
-		vfx.bossChase.stop()
+	if not (phase == "boss" or phase == "turning" or phase == "return" or phase == "home") then
+		vfx.bossChase.stop() -- (it moves with the ride, slow motion and all: below)
 	end
 	if phase == "idle" then
 		return
