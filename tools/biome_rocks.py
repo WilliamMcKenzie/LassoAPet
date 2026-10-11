@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import course_layout as CL  # noqa: E402
 import ocean_ground as OG  # noqa: E402
 import volcano as VO  # noqa: E402
+import funnel_grid as FG  # noqa: E402
 import rock_meshes as RM  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -76,11 +77,18 @@ PLAN = {
     "Snow": dict(anchor=[("Pine", 5), ("RockBoulder", 3), ("RockCrag", 2)], small=["RockPebble", "RockStone"], extra="Pine"),
     "Ocean": dict(anchor=[("BranchCoral", 3), ("FanCoral", 3), ("RockBoulder", 2), ("RockCrag", 2)],
                   small=["TubeCoral", "RockPebble", "RockStone"], extra="FanCoral"),
-    "Volcano": dict(anchor=[("RockBoulder", 4), ("RockCrag", 3), ("RockSlab", 2)], small=["RockPebble", "RockStone"]),
+    "Volcano": dict(small=["RockPebble", "RockStone"]),  # (its big rocks: PEAK_ROCKS)
 }
 # The Volcano (QM, Oct 11; tools/volcano.py): after the ocean, rocks only. Laid out after
-# the other four, so their layouts stay as they were.
-VOLCANO = dict(name="Volcano", z0=VO.Z_START, z1=VO.END, nests=VO.NESTS, small=[], medium=[], large=[])
+# the other four, so their layouts stay as they were. Its rocks go where its floor's
+# quasicrystal peaks (QM, Oct 11: placed by the pattern): each peak in the band by a
+# wall is a crust plate, and a rock stands on it, bigger the higher the peak (a peak
+# below SMALL_PEAK gets nothing, below BIG_PEAK a pebble or stone); each lava pool by a
+# wall gets a pebble or stone on its crust rim.
+VOLCANO = dict(name="Volcano", z0=VO.Z_START, z1=VO.END, small=[], medium=[], large=[],
+               nests=[(FG.unmap_x(x, z), z) for x, z in VO.nest_spots()])  # (where the funnel puts them)
+SMALL_PEAK, BIG_PEAK = 0.6, 0.72
+PEAK_ROCKS = [(0.85, "RockCrag"), (0.78, "RockBoulder"), (BIG_PEAK, "RockSlab")]
 
 
 class Layout(CL.Course):
@@ -91,10 +99,7 @@ class Layout(CL.Course):
     def patch(self, x, z):
         """As the Course's, and the Volcano: 11 floor, 12 ash, 13 crust, 14 lava."""
         if z <= VO.Z_START:
-            i, j = int((x + VO.HALF_W) // VO.CELL), int((VO.Z_START - z) // VO.CELL)
-            if 0 <= i < self.volcano.shape[0] and 0 <= j < self.volcano.shape[1]:
-                return 11 + int(self.volcano[i, j])
-            return 11
+            return 11 + self.volcano.at(x, z)
         return super().patch(x, z)
 
     def floor(self, x, z):
@@ -138,7 +143,7 @@ def cluster(c, rng, b, p, reach, side, bz):
 def layout(seed=11):
     c = Layout(seed)
     rng = c.rng
-    for b in CL.BIOMES + [VOLCANO]:
+    for b in CL.BIOMES:
         p = PLAN[b["name"]]
         reach = CL.REACH[b["name"]]
         side = 1 if rng.random() < 0.5 else -1
@@ -153,7 +158,38 @@ def layout(seed=11):
                 cluster(c, rng, b, p, reach, sd, z + rng.uniform(-18, 18) + k0 * CL.BEAT / 2)
             z -= CL.BEAT
             side = -side
+    volcano_rocks(c, rng)
     return c
+
+
+def volcano_rocks(c, rng):
+    """A rock on each of the volcano floor's pattern peaks by the walls (VOLCANO above)."""
+    from scipy.ndimage import maximum_filter, minimum_filter
+    X, Z = np.meshgrid(np.arange(-136, 137, 2.0), np.arange(VO.Z_START, VO.END, -2.0), indexing="ij")
+    q = VO.quasi(X, Z)
+
+    def place(asset, gx, z):
+        x = FG.unmap_x(gx, z)
+        for step in range(0, 9):  # (right by the wall: in a little, until it fits)
+            px = x - np.sign(x) * step
+            if c.fits(asset, px, z, VOLCANO):
+                return c.put(asset, px, z, VOLCANO, tries=1)
+
+    peaks = (q == maximum_filter(q, size=9)) & (q >= SMALL_PEAK)
+    for i, j in sorted(zip(*np.nonzero(peaks)), key=lambda ij: (-q[ij], ij[1], ij[0])):
+        v = q[i, j]
+        if v >= BIG_PEAK:
+            place(next(a for at, a in PEAK_ROCKS if v >= at), X[i, j], Z[i, j])
+        else:
+            place(str(rng.choice(PLAN["Volcano"]["small"])), X[i, j], Z[i, j])
+    # and a pebble or stone on each lava pool's crust rim, on its wall side
+    pools = (q == minimum_filter(q, size=9)) & (q < 0.25)
+    for i, j in zip(*np.nonzero(pools)):
+        k = i
+        while 0 <= k < q.shape[0] and q[k, j] < 0.25:  # out of the lava toward the wall
+            k += 1 if X[i, j] > 0 else -1
+        if 0 <= k < q.shape[0]:
+            place(str(rng.choice(PLAN["Volcano"]["small"])), X[k, j] + np.sign(X[i, j]) * 4, Z[i, j])
 
 
 def fade(z):
