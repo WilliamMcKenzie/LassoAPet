@@ -897,6 +897,7 @@ return {
 	-- brings the old one back.
 	RideHud = false,
 	StatsV2 = true, -- this build's sessions count towards /stats' "V2 AVG SESSION TIME" (the stamina loop, QM Oct 9)
+	StatsRodeo = true, -- and towards "NEW RODEO VERSION" (QM, Oct 11: the big Egg Rodeo update's sessions alone, not diluted by older builds)
 	PetPopups = false, -- the "+$N" over each pet at home as it pays out (QM, Oct 9: off for now; income's the same)
 	-- The base UI (BaseUi.client; QM, Oct 9): Montserrat ExtraBold, laid out on a
 	-- RefWidth-wide screen (QM's Figma) and scaled to yours (x HudScale). Upgrade / Unlock
