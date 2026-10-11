@@ -108,7 +108,7 @@ local IMAGES = {
 	eggRoboShark = { id = "rbxassetid://95626930006876", size = Vector2.new(514, 752) }, -- RoboSharkEggRender.png
 	eggFirebird = { id = "rbxassetid://100787444937359", size = Vector2.new(502, 956) }, -- FirebirdEggRender.png
 	eggRockHog = { id = "rbxassetid://82336240433052", size = Vector2.new(828, 998) }, -- RockHogEggRender.png
-	eggRockworm = { id = "rbxassetid://125709953608225", size = Vector2.new(498, 909) }, -- RockwormEggRender.png
+	eggRockworm = { id = "rbxassetid://105149417332337", size = Vector2.new(498, 909) }, -- RockwormEggRender.png
 	eggVolcanoTortoise = { id = "rbxassetid://89848692685766", size = Vector2.new(502, 686) }, -- VolcanoTortoiseEggRender.png
 	eggStarfish = { id = "rbxassetid://114368032731288", size = Vector2.new(680, 783) }, -- StarfishEggRender.png
 	eggFishSchool = { id = "rbxassetid://137156704531563", size = Vector2.new(530, 721) }, -- FishSchoolEggRender.png
