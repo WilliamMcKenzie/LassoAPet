@@ -148,7 +148,7 @@ local captionOn -- the CAPTIONS key on show, or nil
 -- screen with the words on it, fading in as it slides a little from the left, holding in
 -- the middle, then fading out as it slides on to the right. Its ends never show.
 local BANNER = {
-	strips = { { "PROMPT_BANNER_1", 962 }, { "PROMPT_BANNER_2", 961 } }, -- assets/ui/PromptBanner1-2.png (PromptBanner.png, 1923 x 113, halved: an upload's at most 1024 wide)
+	strips = { { "94539125298112", 962 }, { "113989164510552", 961 } }, -- assets/ui/PromptBanner1-2.png (PromptBanner.png, 1923 x 113, halved: an upload's at most 1024 wide)
 	size = Vector2.new(1923, 113),
 	width = 1.3, -- x the screen's width (so its ends are always off it, slid or not)
 	at = 0.17, -- its middle, down the screen
@@ -156,7 +156,7 @@ local BANNER = {
 	fade = 0.45, hold = 3, -- seconds
 }
 local BANNER_WORDS = { -- the words, as QM drew them, and their size in pixels
-	ride = { "BANNER_RIDE_HORSE", Vector2.new(354, 49) }, -- assets/ui/BannerRideHorse.png "Ride your horse!"
+	ride = { "138620110562195", Vector2.new(354, 49) }, -- assets/ui/BannerRideHorse.png "Ride your horse!"
 }
 local banner = Instance.new("CanvasGroup") -- (fades as one)
 banner.BackgroundTransparency = 1
