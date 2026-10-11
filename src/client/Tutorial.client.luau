@@ -427,7 +427,7 @@ local function run()
 		TutorialRide.active, TutorialRide.holdFrozen, TutorialRide.invulnerable = true, true, true
 		player:SetAttribute("NoSprint", true)
 		player:SetAttribute("LassoGuide", true)
-		say("lasso")
+		say(nil) -- (no "Lasso an animal" bar: the arrows are enough, QM)
 		local firstThrow, firstMount = TutorialRide.throws, TutorialRide.mounts
 		-- Till your first lasso: time all but stops while an animal's in reach. (The
 		-- arrows go as soon as it's thrown: QM.)
