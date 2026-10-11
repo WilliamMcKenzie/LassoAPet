@@ -3289,6 +3289,15 @@ local function updateMount(dt)
 		if turnT >= 1 then
 			phase, grace = "return", Config.TurnGrace
 			mount.speed = Config.ReturnSpeed * statsOf(mount.kind, mount).Speed
+			if vfx.tutorialRide.active then -- (the first ride home: a Unicorn gallops past you, to make you curious: QM)
+				local st = streams[1]
+				local n = math.floor(herdClock / st.every) + 1
+				while (st.thin and n % st.thin ~= 0) or (st.keep and (n * 0.6180339887) % 1 >= st.keep) do
+					n += 1
+				end
+				local p = plan(n * BIOME_KEYS)
+				p.kind, p.x = "Unicorn", (mount.x + (if mount.x > 0 then -12 else 12)) / vfx.widen(mount.z)
+			end
 		end
 		place(mount, 0)
 		animate(mount, dt, mount.speed, eased < 1 and -0.6 or 0)
