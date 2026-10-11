@@ -310,7 +310,9 @@ local function petAt(point)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = models
-	local ray = camera:ViewportPointToRay(point.X, point.Y)
+	-- (input positions are below Roblox's top bar, the GUI inset: ScreenPointToRay and
+	-- WorldToScreenPoint allow for it, the Viewport ones don't, and picks came out off)
+	local ray = camera:ScreenPointToRay(point.X, point.Y)
 	local origin = ray.Origin
 	for _ = 1, 8 do
 		local hit = workspace:Raycast(origin, ray.Direction * 600, params)
@@ -331,7 +333,7 @@ local function petAt(point)
 	local focal = camera.ViewportSize.Y / 2 / math.tan(math.rad(camera.FieldOfView) / 2)
 	for model, pet in byModel do
 		local cf, size = model:GetBoundingBox()
-		local at, onScreen = camera:WorldToViewportPoint(cf.Position)
+		local at, onScreen = camera:WorldToScreenPoint(cf.Position)
 		if onScreen and at.Z > 0 then
 			local radius = math.max(size.X, size.Y, size.Z) * 0.45 * focal / at.Z
 			if (Vector2.new(at.X, at.Y) - point).Magnitude <= radius + PICK_SLACK and radius < bestRadius then
@@ -661,7 +663,7 @@ Hud.closeFuse = close
 
 -- (Studio only, for trying it out from the command bar: the LocalPlayer's MergeTest
 -- attribute "open", "close", a number to click that animal, "slot1" / "slot2", or a
--- Vector2 to click that point on the screen.)
+-- Vector2 to click that point on the screen, as an input's Position.)
 if RunService:IsStudio() then
 	player:GetAttributeChangedSignal("MergeTest"):Connect(function()
 		local v = player:GetAttribute("MergeTest")
