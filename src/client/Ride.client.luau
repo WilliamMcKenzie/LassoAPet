@@ -1172,6 +1172,17 @@ function vfx.drawGuide(at, target)
 	end
 end
 
+-- How far off an animal can be lassoed: LassoRange for a Horse's size, and as much
+-- further as it's wider than one (QM, Oct 11: big animals from further away).
+local function lassoReach(entity)
+	local a = entity.animal
+	if entity.lassoAt ~= a.scale then -- (measured once, again only if it's rescaled)
+		local size = a.model:GetExtentsSize()
+		entity.lassoR, entity.lassoAt = math.max(size.X, size.Z) / 2, a.scale
+	end
+	return Config.LassoRange + math.max(entity.lassoR - Config.LassoRangeFrom, 0) * Config.LassoRangeGain
+end
+
 local function animalInRange(entity)
 	if entity == mount or entity.popping or entity.z < gateZ() then
 		return nil -- no lassoing through a locked gate
@@ -1179,7 +1190,7 @@ local function animalInRange(entity)
 	local ahead = mount.z - entity.z
 	local dx = entity.x - mount.x
 	local dist = math.sqrt(ahead * ahead + dx * dx)
-	if ahead > -3 and dist < Config.LassoRange then
+	if ahead > -3 and dist < lassoReach(entity) then
 		return dist + math.abs(dx) * 0.5 -- lower is a better default pick
 	end
 	return nil
