@@ -351,7 +351,7 @@ return {
 	-- By rarity from the Desert on (QM, Oct 11: no cliffs, ~5 runs a biome): each biome's
 	-- Epics are what carry you into the next one (the pacing ladder, below AnimalStats),
 	-- so they take ~5 runs to hatch; Uncommons and Rares hatch within a run, so every run
-	-- pays out; a Legendary skips a biome, so it's a little longer but still a shortcut.
+	-- pays out. Legendaries hatch slower (PetHatchTime: QM's D1 retention eggs).
 	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480 },
 	PetHatchTime = {
 		-- Balance pass (Oct 6): QM's pets JSON times, x1 in the Meadow (the first eggs stay quick),
@@ -361,6 +361,9 @@ return {
 		-- x1 / x2 / x3 / x4 of the JSON; the Meadow's and the exclusives' kept.)
 		Horse = 15, Pig = 15, Bunny = 15, Pinto = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
 		-- (the Desert to the Volcano: HatchTime by rarity, QM Oct 11)
+		-- The Legendaries are the one exception (QM, Oct 11: our D1 retention: long eggs you come back for;
+		-- the Unicorn's 5 min is in the Meadow line above):
+		Snake = 1800, Icebringer = 3600, BlueCrab = 14400, Kraken = 18000, Phoenix = 43200,
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		SnackYak = 3600, RoboShark = 57600, Loong = 86400, -- exclusives
 	},
