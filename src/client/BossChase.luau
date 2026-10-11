@@ -133,6 +133,7 @@ function BossChase.start(x, z)
 	boss = { kind = kind, room = room, animal = animal, x = x, z = z - Config.Boss.Ahead - room, t = 0, scale = 0 }
 	place()
 	Sounds.play("reveal_pop", 0.8)
+	ReplicatedStorage.RideCue:FireServer("boss", kind, x, z) -- (everyone else sees it chase you: Client/RemoteBosses, QM)
 end
 
 function BossChase.over()

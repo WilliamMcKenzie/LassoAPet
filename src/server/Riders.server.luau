@@ -11,7 +11,8 @@
 --     client -> server  what, ...
 --     server -> others  player, what, ...
 --     what: "take" key (jumped on or reeled in stampede animal key), "lasso" key,
---     "knock" key dx, "smash" x z dir side, "ability" kind, "crash" from yaw dir side, "end"
+--     "knock" key dx, "smash" x z dir side, "ability" kind, "crash" from yaw dir side, "end",
+--     "boss" kind x z (their ride's boss popped up in front of them: Client/RemoteBosses)
 --   "out" (client -> server only): the ride set off on the rider's own pet, so it's
 --     left their pen. It sets the player's "PetOut" attribute until "end", and
 --     Pen.client stops drawing that pet in their pen for everyone else meanwhile.
@@ -27,7 +28,7 @@ local rideCue = Instance.new("RemoteEvent")
 rideCue.Name = "RideCue"
 rideCue.Parent = ReplicatedStorage
 
-local CUES = { take = true, lasso = true, knock = true, smash = true, ability = true, crash = true, ["end"] = true }
+local CUES = { take = true, lasso = true, knock = true, smash = true, ability = true, crash = true, ["end"] = true, boss = true }
 local MAX_SYNC_RATE = 20 -- a second: anything faster is dropped
 
 local lastSync = {} -- [player] = os.clock() of their last passed-on sync
