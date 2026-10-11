@@ -219,6 +219,12 @@ return {
 		{ "Marking", 36, 70, 140 }, -- stripes
 		{ "Accent", 255, 146, 46 }, -- crest, arm and tail feathers
 	},
+	Spinosaurus = {
+		{ "Body", 64, 172, 132 },
+		{ "Belly", 252, 218, 166 },
+		{ "Marking", 36, 116, 92 }, -- stripes
+		{ "Accent", 255, 136, 40 }, -- sail
+	},
 	LavaWhale = {
 		{ "Body", 182, 100, 62 }, -- rock
 		{ "Body", 136, 74, 50 }, -- brow, horn bands
