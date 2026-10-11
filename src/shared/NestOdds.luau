@@ -7,7 +7,6 @@
 -- Eggs are rolled with exactly the odds of the nest's biome's stampede
 -- (Config.Biomes[b].Herd): an animal that's 1 in 100 of the stampede is 1 in 100
 -- of the eggs (QM, Oct 2), rarer ones likelier deeper in (Config.NestDepthOdds).
--- The Godlands' nests have their own odds, by how deep in they are (its NestDepth).
 --
 -- A rider on a wild animal takes that animal's egg instead (Nests.server, NestEggs),
 -- but only from the nests of the biome it runs in and later ones (QM, Oct 7/8: a
@@ -17,13 +16,12 @@
 --
 -- The rolled eggs are only ever Common or Uncommon (QM, Oct 8): Rare, Epic and Legendary
 -- eggs come only from riding the animal itself in its own biome (NestOdds.ridden). A
--- biome with no low ones (the Godlands) rolls the nearest earlier biome's.
+-- biome with no low ones rolls the nearest earlier biome's.
 --
 --   NestOdds.roll(nest, seed, full) -- the animal whose egg `nest` holds for the rider with `seed` ("" if there are no odds; full: from the whole table)
 --   NestOdds.ridden(kind, z)   -- the egg a nest at `z` gives a rider on wild animal `kind` in place of its roll: `kind`, or nil (the roll)
 
 local Config = require(script.Parent.Config)
-local Godlands = require(script.Parent.Godlands)
 local WorldColors = require(script.Parent.WorldColors)
 
 -- Per biome: { { name, weight, rare } }, sorted by name (Herd is a dictionary, and
@@ -56,15 +54,6 @@ for b, biome in Config.Biomes do
 	end
 end
 
--- A Godlands nest's egg, `depth` studs past its line (Config: the Godlands' NestDepth).
-local function rollDeep(r, depth, nd)
-	local epic = math.clamp(depth / nd.Epic.Over, 0, 1) * nd.Epic.Max
-	local legendary = math.clamp((depth - nd.Legendary.From) / nd.Legendary.Over, 0, 1) * nd.Legendary.Max
-	local pick = r:NextNumber()
-	local pool = if pick < legendary then nd.Legendary.Pool elseif pick < legendary + epic then nd.Epic.Pool else nd.Rare
-	return pool[r:NextInteger(1, #pool)]
-end
-
 local NestOdds = {}
 
 -- Per biome: its Common and Uncommon eggs (weight > 0), else the nearest earlier biome's.
@@ -83,7 +72,7 @@ for b in Config.Biomes do
 		end
 	end
 end
--- full: the biome's whole spawn table (the Godlands' deep odds too), for what the
+-- full: the biome's whole spawn table, for what the
 -- nests show on the ride home on a lassoed animal (QM, Oct 8; nothing's grabbed then).
 function NestOdds.roll(nest, seed, full)
 	local spot = nest:FindFirstChild("EggSpot")
@@ -95,10 +84,6 @@ function NestOdds.roll(nest, seed, full)
 	-- alike); the nest's spot tells the nests apart (they're all named Nest).
 	local r = Random.new(seed * 65536 + math.round(at.Z) * 64 + math.round(at.X))
 	local b = WorldColors.biomeAt(at.Z)
-	local nd = full and Config.Biomes[b] and Config.Biomes[b].NestDepth
-	if nd and Godlands.start then
-		return rollDeep(r, math.max(Godlands.start - at.Z, 0), nd)
-	end
 	local odds = (if full then eggOdds[b] else lowOdds[b]) or {} -- (grabbable rolls: Common and Uncommon only, QM Oct 8)
 	local depth = Config.NestDepthOdds
 	local boost = if depth and Config.Biomes[b] then depth.Near + (depth.Far - depth.Near) * WorldColors.along(b, at.Z) else 1

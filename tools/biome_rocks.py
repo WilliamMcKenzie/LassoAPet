@@ -23,6 +23,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import course_layout as CL  # noqa: E402
 import ocean_ground as OG  # noqa: E402
+import volcano as VO  # noqa: E402
 import rock_meshes as RM  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -50,6 +51,7 @@ _SHADE_STEPS = {  # each piece's shade (QM's pick: the steps below x 2.2 from th
     "Desert": [(234, 190, 122), (224, 176, 110), (240, 200, 136), (228, 184, 112), (238, 194, 130)],
     "Snow": [(158, 200, 240), (146, 190, 234), (170, 210, 244), (152, 196, 232), (164, 202, 246)],
     "Ocean": [(242, 120, 98), (232, 108, 90), (246, 134, 110), (236, 116, 92), (244, 126, 106)],
+    "Volcano": [(126, 88, 74), (120, 83, 69), (133, 93, 79), (122, 85, 72), (130, 90, 75)],  # warm brown (design/lava_biome)
 }
 SHADE_SPREAD = 2.2
 SHADES = {b: [tuple(int(max(0, min(255, c0 + (c - c0) * SHADE_SPREAD))) for c0, c in zip(v[0], sh)) for sh in v]
@@ -63,7 +65,7 @@ def rock_radius(name):
 
 for _n in MESHES:  # the rocks join the layout's assets: (footprint radius, tier, kit)
     CL.ASSETS["Rock" + _n] = (rock_radius(_n) * 0.85, {1: "small", 2: "medium", 3: "large"}[ROCK_TIER[_n]], None)
-for _b in ("Meadow", "Desert", "Snow", "Ocean"):  # the band by each wall they stay in (big rocks need room)
+for _b in ("Meadow", "Desert", "Snow", "Ocean", "Volcano"):  # the band by each wall they stay in (big rocks need room)
     CL.REACH[_b] = 32
 
 # per biome: anchors (one per cluster, weighted) and the small rocks round them
@@ -74,13 +76,38 @@ PLAN = {
     "Snow": dict(anchor=[("Pine", 5), ("RockBoulder", 3), ("RockCrag", 2)], small=["RockPebble", "RockStone"], extra="Pine"),
     "Ocean": dict(anchor=[("BranchCoral", 3), ("FanCoral", 3), ("RockBoulder", 2), ("RockCrag", 2)],
                   small=["TubeCoral", "RockPebble", "RockStone"], extra="FanCoral"),
+    "Volcano": dict(anchor=[("RockBoulder", 4), ("RockCrag", 3), ("RockSlab", 2)], small=["RockPebble", "RockStone"]),
 }
+# The Volcano (QM, Oct 11; tools/volcano.py): after the ocean, rocks only. Laid out after
+# the other four, so their layouts stay as they were.
+VOLCANO = dict(name="Volcano", z0=VO.Z_START, z1=VO.END, nests=VO.NESTS, small=[], medium=[], large=[])
 
 
 class Layout(CL.Course):
+    def __init__(self, seed=7):
+        super().__init__(seed)
+        self.volcano = VO.layout()
+
+    def patch(self, x, z):
+        """As the Course's, and the Volcano: 11 floor, 12 ash, 13 crust, 14 lava."""
+        if z <= VO.Z_START:
+            i, j = int((x + VO.HALF_W) // VO.CELL), int((VO.Z_START - z) // VO.CELL)
+            if 0 <= i < self.volcano.shape[0] and 0 <= j < self.volcano.shape[1]:
+                return 11 + int(self.volcano[i, j])
+            return 11
+        return super().patch(x, z)
+
+    def floor(self, x, z):
+        k = self.patch(x, z)
+        if k >= 11:
+            return float(VO.TOP[k - 11])
+        return super().floor(x, z)
+
     def fits(self, asset, x, z, biome):
-        if self.patch(x, z) in (9, 10):  # never in an ocean trench or on lava
+        if self.patch(x, z) in (9, 10, 14):  # never in an ocean trench or on lava
             return False
+        if biome["name"] == "Volcano" and z - CL.ASSETS[asset][0] < VO.END + VO.END_CLEAR:
+            return False  # the finish line and the big crack (Config.VolcanoCrack)
         return super().fits(asset, x, z, biome)
 
 
@@ -111,7 +138,7 @@ def cluster(c, rng, b, p, reach, side, bz):
 def layout(seed=11):
     c = Layout(seed)
     rng = c.rng
-    for b in CL.BIOMES:
+    for b in CL.BIOMES + [VOLCANO]:
         p = PLAN[b["name"]]
         reach = CL.REACH[b["name"]]
         side = 1 if rng.random() < 0.5 else -1
@@ -346,7 +373,7 @@ if __name__ == "__main__":
     write_luau(items)
     write_pieces()
     from collections import Counter
-    for b in CL.BIOMES:
+    for b in CL.BIOMES + [VOLCANO]:
         print(b["name"], dict(Counter(it["asset"] for it in items if it["biome"] == b["name"])))
     print(len(items), "placements")
     if "--preview" in sys.argv:

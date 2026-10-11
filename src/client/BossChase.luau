@@ -7,7 +7,7 @@
 -- round and race home with it behind you (out of sight, and never catching you: it's
 -- just there to scare). Config.Boss. Ride drives it:
 --
---   BossChase.start(x, z)             -- the cutscene, in front of (x, z) (outbound: -z)
+--   BossChase.start(x, z)             -- the cutscene, in front of (x, z) (outbound: -z), that biome's boss
 --   BossChase.over()                  -- true once the cutscene's done (turn for home)
 --   BossChase.update(dt, chasing, x, z, speed) -- every frame: chasing the rider at (x, z)
 --   BossChase.camera() -> CFrame?     -- the camera during the cutscene (nil: Ride's own)
@@ -61,6 +61,7 @@ local function letterbox()
 	vein.Size = UDim2.fromScale(Config.Boss.VeinSize, Config.Boss.VeinSize)
 	vein.SizeConstraint = Enum.SizeConstraint.RelativeYY
 	vein.ImageTransparency = 1 -- (drawn, but clear, till it's wanted, and preloaded below: QM)
+	vein.ZIndex = 2 -- (over the bars: QM)
 	local veinScale = Instance.new("UIScale")
 	veinScale.Parent = vein
 	vein.Parent = gui
@@ -103,7 +104,8 @@ function BossChase.start(x, z)
 	local animal = require(ReplicatedStorage.Shared.Bosses[kind]).new()
 	animal.model.Name = "Boss"
 	animal.model.Parent = workspace
-	boss = { animal = animal, x = x, z = z - Config.Boss.Ahead, t = 0, scale = 0 }
+	local room = Config.Boss.Room[kind] or 0 -- (a bigger one stands further off)
+	boss = { kind = kind, room = room, animal = animal, x = x, z = z - Config.Boss.Ahead - room, t = 0, scale = 0 }
 	place()
 	Sounds.play("reveal_pop", 0.8)
 end
@@ -122,6 +124,7 @@ function BossChase.update(dt, chasing, x, z, speed)
 	boss.scale = popScale(boss.t)
 	if was < cfg.ZoomAt and boss.t >= cfg.ZoomAt then
 		showBars(true)
+		Sounds.play("boss_" .. boss.kind, Config.Boss.CryVolume[boss.kind] or 0.6) -- (its own cry with the bars: Sounds' boss_<Kind>)
 	elseif was < cfg.CutsceneTime - cfg.BarTime and boss.t >= cfg.CutsceneTime - cfg.BarTime then
 		showBars(false)
 	end
@@ -137,11 +140,12 @@ function BossChase.update(dt, chasing, x, z, speed)
 	end
 	local moving = 0
 	if chasing and x then
-		-- After you, never catching up: at least Behind studs back, falling behind a little.
-		local want = z - cfg.Behind
-		boss.z = math.min(boss.z + (speed or 0) * cfg.ChaseSpeed * dt, want)
+		-- After you at your own speed (QM, Oct 10), so the gap holds all the way home,
+		-- never nearer than Behind studs, and pulling up short of the start line.
+		local was = boss.z
+		boss.z = math.min(boss.z + (speed or 0) * dt, z - cfg.Behind - boss.room, -cfg.StopShort - boss.room)
 		boss.x += (x - boss.x) * (1 - math.exp(-2 * dt))
-		moving = speed or 0
+		moving = math.max(boss.z - was, 0) / math.max(dt, 1e-3)
 	end
 	place()
 	boss.animal:update(dt, moving, 0)
@@ -153,8 +157,10 @@ function BossChase.camera()
 	end
 	-- (its face: up its front, FaceAt of the way up its box from the middle, and as far forward)
 	local cf, size = boss.animal.model:GetBoundingBox()
-	local face = cf.Position + Vector3.new(0, size.Y * Config.Boss.FaceAt.Y, size.Z * Config.Boss.FaceAt.Z)
-	return CFrame.lookAt(face + Config.Boss.FaceFrom, face)
+	local own = Config.Boss.Faces[boss.kind] or {} -- (a boss's own, where its face isn't the Chicken's)
+	local at, from = own.At or Config.Boss.FaceAt, own.From or Config.Boss.FaceFrom
+	local face = cf.Position + Vector3.new(0, size.Y * at.Y, size.Z * at.Z)
+	return CFrame.lookAt(face + from, face)
 end
 
 function BossChase.stop()

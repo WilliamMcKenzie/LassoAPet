@@ -165,47 +165,30 @@ return {
 				Bubbles = 24, -- per second
 			},
 		},
-		-- (Off for a while on Oct 4, back the same night as the endless endgame, QM.)
 		{
-			-- The endgame (QM, Oct 3), after Realm of the Mad God's godlands: dark stone
-			-- plates split by snow, with ice or lava cracks. It never ends: one 960-stud
-			-- track after another, each picked at random from four (two with ice, two
-			-- with lava; Shared/Godlands, Shared/GodlandsTracks), built round each rider
-			-- as they go (Client/GodlandsStream). It has no finish line.
-			Name = "Godlands",
-			AnimalSize = 3,
-			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0)
+			-- The volcano (QM, Oct 11): after the ocean, bright and warm, brown more than
+			-- black (design/lava_biome). Floor, walls and nests: tools/volcano.py; its rocks:
+			-- tools/biome_rocks.py; the big crack at its end: VolcanoCrack below.
+			Name = "Volcano",
+			AnimalSize = 2.6, -- (as the ocean's)
+			Swerve = 1,
 			NestScale = 2.5,
-			Length = math.huge, -- endless
-			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
-			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)
-			-- Its own animals now; the Fish that stood in are gone (QM, Oct 4). (The Loong is
-			-- an event and roll exclusive, so it doesn't run here.) PlaceholderHerd keeps it
-			-- out of the finish line's egg odds (Hatchery).
-			Herd = { Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5, Leviathan = 0.1 }, -- its own animals, no Fish (QM, Oct 4; weights are guesses)
-			-- Its nests' eggs (Nests.server: one nest a track, near the riders) get rarer the
-			-- deeper in you are (QM, Oct 4), each tier's pool split evenly: at its line only
-			-- Rares; the Epic chance grows from 0 to Epic.Max over the first Epic.Over
-			-- studs; past Legendary.From studs the Legendary chance grows to Legendary.Max
-			-- over Legendary.Over studs, then holds. The rest is Rares.
-			NestDepth = {
-				Rare = { "Beholder", "Sludge", "WarElephant" },
-				Epic = { Pool = { "Leviathan", "SoulHorse" }, Max = 0.4, Over = 5000 },
-				Legendary = { Pool = { "Unicorn", "Snake", "Icebringer", "Kraken", "BlueCrab" }, From = 5000, Max = 0.1, Over = 5000 },
-			},
-			PlaceholderHerd = true,
-			HerdThin = 2, -- only every 2nd of the stampede's spawns runs here: half as many animals (QM, Oct 4)
+			Length = 7680, -- as long as the ocean (a guess)
+			GroundColors = { Color3.fromRGB(156, 98, 66), Color3.fromRGB(168, 108, 74) }, -- baked-earth brown
+			WallColors = { Color3.fromRGB(170, 92, 58), Color3.fromRGB(186, 104, 66) },
+			-- Placeholder: the ocean's animals until the volcano's are designed.
+			Herd = { Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, Kraken = 0.05 },
+			-- tools/volcano.py: lighter ash flush, darker crust plates a stud up, lava pools
+			-- a stud down out by the walls.
 			Patches = {
-				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
-				Ice = { Color3.fromRGB(170, 196, 250), Color3.fromRGB(184, 208, 252) },
-				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon
+				Ash = { Color3.fromRGB(184, 124, 84), Color3.fromRGB(196, 134, 92) },
+				Crust = { Color3.fromRGB(124, 78, 58), Color3.fromRGB(136, 86, 64) },
+				Lava = { Color3.fromRGB(255, 116, 24), Color3.fromRGB(255, 146, 40) }, -- Neon
 			},
-			UnlockCost = 300000000, -- QM, Oct 8: matches the new button art (Oct 7 had $150M: halved with the Tundra's; balance pass Oct 6 had it $300M, before that $10M (a guess). The Badlands (PR #154) would sit at about $50M
-			PostColor = Color3.fromRGB(62, 60, 72),
-			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
-			GateImage = "rbxassetid://81079145393331", -- assets/ui/GateGodlands.png
-			UpgradeImage = "rbxassetid://122300024756957", -- assets/ui/UpgradePenGodlandsEnabled.png (QM, Oct 8: price drawn in)
-			UpgradeImageDisabled = "rbxassetid://73528380270412", -- assets/ui/UpgradePenGodlandsDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
+			UnlockCost = 300000000, -- a guess (the old Godlands price)
+			PostColor = Color3.fromRGB(170, 92, 58),
+			GateColor = Color3.fromRGB(255, 110, 20), -- lava orange
+			-- No Upgrade Pen art yet: the plain button with the price.
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
@@ -229,10 +212,22 @@ return {
 	-- widths: Meadow 112-120, Desert 120-142, Snow 142-197, Ocean 197-274, Godlands 274.
 	-- WorldColors.halfWidth(z) is the width at z. The place's walls, ground, obstacles
 	-- and nests are moved to it by tools/funnel.luau (re-run it after a World push).
+	-- The big lava crack at the volcano's end (QM, Oct 10-11: a geyser to launch you on
+	-- to the next biome, later; for now it's only there). VolcanoCrack.client draws it
+	-- with ViewportStencil (Shared/ViewportStencil) from the Model named Model in
+	-- ReplicatedStorage: CrackMask and CrackInside, imported from design/volcano/VolcanoCrack.gltf
+	-- (tools/volcano_crack.py). FromFinish: studs before the finish line its middle is.
+	VolcanoCrack = {
+		Model = "VolcanoCrack",
+		FromFinish = 110,
+		Yaw = 0,
+		Brightness = 1.4, -- SurfaceGui.Brightness: a little over 1 so it glows
+		MaxDistance = 900,
+	},
 	CourseHalfWidth = 56,
 	CourseWidening = 0.005,
 	CourseMaxHalfWidth = 137,
-	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
+	CourseLength = 760 + 2280 + 5472 + 7680 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, its end is the end; off its edge, the void)
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
@@ -250,20 +245,29 @@ return {
 	-- and race it home, and a wild one's egg is yours over the line.
 	RideSeconds = 30,
 	-- The boss when the ride's time runs out (QM, Oct 10: Client/BossChase): your animal
-	-- stops dead, the boss (Shared/Bosses: Kind) pops up Ahead studs in
+	-- stops dead, the biome's boss (Shared/Bosses: ByBiome; Kind for one with none) pops up Ahead studs in
 	-- front, the camera's on its face (FaceAt: of its box, up and forward from the middle)
 	-- from ZoomAt s (FaceFrom studs off it, between black
 	-- bars sliding in over BarTime), and at CutsceneTime s you turn for home with it
-	-- chasing, at ChaseSpeed x yours and never nearer than Behind studs. Its anger vein,
+	-- chasing at your speed (QM: the gap holds, so it's there at the end), never nearer than
+	-- Behind studs, and pulling up StopShort studs short of the start line. Its anger vein,
 	-- on the screen while the bars are in: VeinSize x the screen's height, at VeinAt (of
 	-- the screen: by its head, in the strip), popping up, then
 	-- VeinPopTime s on pulsing once VeinPulse x bigger over VeinPeriod s, and turning
 	-- VeinSpin degrees a second.
 	-- ByBiome: which boss (Shared/Bosses) each biome (Config.Biomes Name) gets; Kind for any other.
 	Boss = {
-		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss" }, Ahead = 70, ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
-		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
-		VeinSize = 0.16, VeinAt = Vector2.new(0.62, 0.42), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
+		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
+		ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
+		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 40, StopShort = 30,
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3 }, -- (each boss's cry: QM, Oct 10)
+		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
+			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 5, 41) }, -- (it's 1.7x the size: QM)
+			CactusBoss = { From = Vector3.new(0, 5, 34) }, -- (1.7x the size)
+			SharkBoss = { At = Vector3.new(0, 0, 0.4), From = Vector3.new(36, 4, 16) }, -- (from its side, so you see its eye: QM)
+		},
+		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.35), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"
@@ -452,11 +456,11 @@ return {
 	--     and animal within Range studs of its mouth (Width wide) is burnt away, whatever
 	--     its size.
 	--   Goo (Sludge): it lays the wild Sludge's sludge behind it; stampede animals that
-	--     run into it are stuck, crawling, for a moment (Client/GodlandsHazards).
+	--     run into it are stuck, crawling, for a moment (Client/PetTrails).
 	--   SpikeTrail (Soul Horse): it leaves the wild Soul Horse's spikes behind it; stampede
 	--     animals that run into one are killed, whatever their size (they never crash you).
-	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, which
-	-- is always a sprint (ReturnSprint).
+	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, while
+	-- you sprint.
 	SprintSpecials = {
 		Unicorn = { Kind = "Smash", Radius = 14, ScareRadius = 30, RestorePer = 0.02, OnReturn = true }, -- scares animals within ScareRadius off, 2% Hold each (QM, Oct 4)
 		Sandworm = { Kind = "Burrow", OnReturn = true },
@@ -466,8 +470,8 @@ return {
 		Beholder = { Kind = "Fly", Height = 24, ScareRadius = 30, Haze = Color3.fromRGB(255, 110, 210) }, -- height and radius are guesses
 		Leviathan = { Kind = "Flame", Range = 5, Width = 9, OnReturn = true }, -- QM, Oct 4: "like 1m ahead" (4 studs a metre; the width is a guess)
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
-		SoulHorse = { Kind = "SpikeTrail" }, -- QM, Oct 4: the wild Soul Horse's spike trail behind it; stampede animals that run into a spike are killed (Client/GodlandsHazards)
-		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/GodlandsHazards)
+		SoulHorse = { Kind = "SpikeTrail" }, -- QM, Oct 4: the wild Soul Horse's spike trail behind it; stampede animals that run into a spike are killed (Client/PetTrails)
+		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/PetTrails)
 		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true, RestorePer = 0.2 }, -- QM, Oct 4: 20% Hold per animal it hits
 	},
 	-- Size tiers (any whole number, bigger is bigger). Racing home, a pet plows
@@ -666,7 +670,7 @@ return {
 	-- its reach sprints, easing it back stops.
 	TouchSprintAt = 0.85,
 	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
-	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)
+	ReturnSprint = false, -- the ride home always a sprint (SprintSpeed x ReturnSpeed)? Off (QM, Oct 10): Shift sprints there, as on the way out
 	ReturnFovKick = 0, -- (QM, Oct 9: plain, was 20) degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
