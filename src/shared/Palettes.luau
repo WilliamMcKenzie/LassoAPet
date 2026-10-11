@@ -173,6 +173,12 @@ return {
 		{ "Belly", 255, 200, 156 },
 		{ "Marking", 255, 214, 96 }, -- bumps
 	},
+	Lionfish = {
+		{ "Body", 255, 240, 214 },
+		{ "Marking", 232, 72, 40 }, -- stripes, spines
+		{ "Belly", 255, 214, 186 },
+		{ "Accent", 150, 36, 52 }, -- fins
+	},
 	Whale = {
 		{ "Body", 40, 116, 206 },
 		{ "Belly", 214, 244, 250 },

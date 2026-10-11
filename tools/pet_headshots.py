@@ -37,7 +37,7 @@ MODELS = {
     "SpineLizard": "converted/SpineLizard", "Snake": "desert/Snake",
     "Penguin": "snow/Penguin", "Boar": "converted/Boar", "Snowman": "snow/Snowman",
     "IceGolem": "converted/IceGolem", "Icebringer": "converted/Icebringer", "SnackYak": "snow/SnackYak",
-    "Starfish": "ocean/Starfish", "Clownfish": "ocean/Clownfish", "Whale": "ocean/Whale", "Squid": "ocean/Squid",
+    "Starfish": "ocean/Starfish", "Lionfish": "ocean/Lionfish", "Clownfish": "ocean/Clownfish", "Whale": "ocean/Whale", "Squid": "ocean/Squid",
     "KingCrab": "ocean/KingCrab", "BlueCrab": "ocean/BlueCrab", "RoboShark": "ocean/RoboShark", "Kraken": "ocean/Kraken", "FishSchool": "ocean/FishSchool",
     "Loong": "godlands/Loong", "WarElephant": "godlands/WarElephant", "SoulHorse": "godlands/SoulHorse",
     "Sludge": "sludge/Sludge",
@@ -45,7 +45,7 @@ MODELS = {
     "Leviathan": "leviathan/Leviathan",
     "VolcanoTortoise": "volcano/VolcanoTortoise", "Firebird": "volcano/Firebird", "RockHog": "volcano/RockHog", "Rockworm": "volcano/Rockworm", "FireLobster": "volcano/FireLobster", "LavaWhale": "volcano/LavaWhale", "Phoenix": "volcano/Phoenix",
 }
-ZYX = {"KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale"}  # converted with --zyx (QM's hand-made multi-axis rotations)
+ZYX = {"KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}
 # Animals whose run makes a poor picture (the Snake stretches out thin, the Starfish
 # folds its arms up) keep their idle stance in the action style.
