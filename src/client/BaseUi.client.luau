@@ -189,6 +189,21 @@ local fit = Instance.new("UITextSizeConstraint")
 fit.MaxTextSize = PRICE_TEXT
 fit.Parent = price
 
+-- The tutorial's tap hand (assets/ui/TapHand.png), pulsing on Upgrade whenever you can
+-- afford it (QM, Oct 11). Fingertip on the button's lower middle.
+local hand = Instance.new("ImageLabel")
+hand.Name = "TapHand"
+hand.BackgroundTransparency = 1
+hand.Image = "rbxassetid://134865745295413"
+hand.AnchorPoint = Vector2.new(0.365, 0.03) -- (its fingertip)
+hand.Position = UDim2.fromScale(0.55, 0.7)
+hand.Size = UDim2.fromOffset(math.round(80 * 488 / 610), 80)
+hand.ZIndex = 5
+hand.Visible = false
+local handScale = Instance.new("UIScale")
+handScale.Parent = hand
+hand.Parent = upgrade
+
 local function costNow()
 	local nextBiome = Config.Biomes[(player:GetAttribute("PenLevel") or 1) + 1]
 	return if nextBiome then nextBiome.UnlockCost else nil
@@ -226,5 +241,7 @@ RunService.RenderStepped:Connect(function()
 		price.Visible = not free
 		price.Text = Hud.money(cost)
 		price.TextColor3 = if affordable then CASH_GREEN else Color3.new(1, 1, 1)
+		hand.Visible = affordable and not free
+		handScale.Scale = 1 + 0.12 * math.sin(os.clock() * 6) -- (the tutorial hand's pulse)
 	end
 end)
