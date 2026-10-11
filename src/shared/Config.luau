@@ -758,7 +758,7 @@ return {
 	-- its reach sprints, easing it back stops.
 	TouchSprintAt = 0.85,
 	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
-	ReturnSprint = false, -- the ride home always a sprint (SprintSpeed x ReturnSpeed)? Off (QM, Oct 10): Shift sprints there, as on the way out
+	ReturnSprint = true, -- the ride home always a sprint (SprintSpeed x ReturnSpeed)? On again (QM, Oct 11; Oct 10 had it off, Shift to sprint)
 	ReturnFovKick = 0, -- (QM, Oct 9: plain, was 20) degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
