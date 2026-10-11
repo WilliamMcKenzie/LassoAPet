@@ -145,7 +145,31 @@ local function guide(target)
 	guideAt = target
 end
 
+-- QM's big white arrow over the egg in your pen, bobbing, once it's placed (QM, Oct 11).
+local ARROW = "rbxassetid://EGG_ARROW" -- assets/ui/TutorialArrow.png
+local ARROW_SIZE = 7 -- studs
+local ARROW_UP = 9 -- studs over the egg's root, at the bottom of its bob
+local eggArrow = Instance.new("BillboardGui")
+eggArrow.Name = "TutorialEggArrow"
+eggArrow.Size = UDim2.fromScale(ARROW_SIZE, ARROW_SIZE)
+eggArrow.AlwaysOnTop = true
+eggArrow.LightInfluence = 0
+eggArrow.Enabled = false
+local arrowImage = Instance.new("ImageLabel")
+arrowImage.BackgroundTransparency = 1
+arrowImage.Image = ARROW
+arrowImage.Size = UDim2.fromScale(1, 1)
+arrowImage.Parent = eggArrow
+eggArrow.ResetOnSpawn = false
+eggArrow.Parent = player:WaitForChild("PlayerGui") -- (a BillboardGui draws from the PlayerGui, not inside a ScreenGui)
+local arrowOver -- the egg model it's over, or nil
+
 RunService.RenderStepped:Connect(function()
+	-- The egg arrow, bobbing.
+	local root = arrowOver and arrowOver.Parent and (arrowOver.PrimaryPart or arrowOver:FindFirstChildWhichIsA("BasePart", true))
+	eggArrow.Adornee = root
+	eggArrow.Enabled = root ~= nil and not player:GetAttribute("Cutscene")
+	eggArrow.StudsOffsetWorldSpace = Vector3.new(0, ARROW_UP + math.abs(math.sin(os.clock() * 3)) * 1.5, 0)
 	-- The tap hand.
 	local show, flip = false, false
 	if typeof(tapAt) == "Instance" and tapAt:IsA("GuiObject") and tapAt.Visible then
@@ -234,6 +258,7 @@ local function eggTool()
 end
 
 local function clear()
+	arrowOver = nil
 	pointAt(nil)
 	guide(nil)
 	player:SetAttribute("NoSprint", nil)
@@ -340,6 +365,7 @@ local function run()
 		while on() and not Hud.isRiding() do
 			local egg = penEgg()
 			local pets = myPets()
+			arrowOver = if egg and #pets == 0 then egg else nil
 			if egg and #pets == 0 then
 				pointAt(nil)
 				guide(egg)
