@@ -716,7 +716,7 @@ return {
 		TRex = "rbxassetid://132088301588431", -- assets/ui/TRexEggRender.png
 		Raptor = "rbxassetid://86585294053216", -- assets/ui/RaptorEggRender.png
 		Spinosaurus = "rbxassetid://118684084308728", -- assets/ui/SpinosaurusEggRender.png
-		Pterodactyl = "", -- assets/ui/PterodactylEggRender.png (to upload)
+		Pterodactyl = "rbxassetid://125349573529100", -- assets/ui/PterodactylEggRender.png
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		Lionfish = "rbxassetid://114164241366433", -- assets/ui/LionfishEggRender.png
 		Clownfish = "rbxassetid://130227469695086", -- assets/ui/ClownfishEggRender.png
