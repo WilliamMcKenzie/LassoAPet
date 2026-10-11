@@ -363,9 +363,6 @@ upgrade.OnServerInvoke = function(player)
 	player:SetAttribute("Gold", gold - cost)
 	zoneUnlocked:FireClient(player, level(player) + 1)
 	player:SetAttribute("PenLevel", level(player) + 1)
-	if level(player) == 2 then
-		player:SetAttribute("DesertAt", os.time()) -- (Stats.server: how long they stay after)
-	end
 	Funnel.step(player, "Unlocked Zone 2")
 	return true
 end
