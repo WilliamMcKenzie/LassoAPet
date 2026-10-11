@@ -808,7 +808,7 @@ return {
 	-- How many pets (and eggs waiting to hatch) your pen holds (QM, Oct 11): Base, and
 	-- PerUpgrade more for each pen upgrade (PenLevel). Full, you can't put an egg down;
 	-- "5/10" shows under your name over the pen (Pens.server).
-	PenCapacity = { Base = 10, PerUpgrade = 5 }, -- (QM, Oct 11: was 5)
+	PenCapacity = { Base = 10, PerUpgrade = 8 }, -- (QM, Oct 11: was 5; 8 a level since QM's Collect 50 quest: the top level, 6, holds 50, was 35)
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
 	-- Client/SkyFlash. Start: its see-through at the flash (0: solid white). Distance: studs
 	-- round the camera; anything further off goes white with the sky.
@@ -921,10 +921,11 @@ return {
 		{
 			{ Text = "Lasso animals", Kind = "lasso", Need = 10, Egg = "SpineLizard" },
 			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "BoneRex" }, -- (for D1: its egg's long, QM)
-			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "Snowman" },
+			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "SnackYak" }, -- (QM, Oct 11: the Snack Yak, was the Snowman)
 			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "TRex" }, -- (QM, Oct 11: these three after Merge)
 			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 5, Egg = "LavaWhale" }, -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
-			{ Text = "Collect animals", Kind = "home", Need = 30, Egg = "Pterodactyl" }, -- (pen space 35 by then: 5+ quests claimed, PenLevel 6)
+			{ Text = "Collect animals", Kind = "home", Need = 30, Egg = "RoboShark" }, -- (QM, Oct 11: the Robo Shark, was the Pterodactyl; pen space 50 by then: 5+ quests claimed, PenLevel 6)
+			{ Text = "Collect animals", Kind = "home", Need = 50, Egg = "Loong" }, -- (QM, Oct 11)
 		},
 	},
 	BullSpots = { Vector3.new(-18, 0, 173), Vector3.new(-75.2, 0, 129.6), Vector3.new(52, 0, 157.1), Vector3.new(-78.6, 0, 57.9), Vector3.new(84.9, 0, 93.3) },
