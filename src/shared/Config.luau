@@ -783,7 +783,7 @@ return {
 	SprintTiers = { 180, 360, 440 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
-	Intro = true, -- a new player's opening cutscene: the villain steals your egg (Client/Intro, QM Oct 11; "/tutorial" replays it)
+	Intro = false, -- (off for now: QM, Oct 11) a new player's opening cutscene: the villain steals your egg (Client/Intro, QM Oct 11; "/tutorial" replays it)
 	LassoRange = 34, -- studs, for a Horse-sized animal (QM, Oct 11: bigger ones further, below)
 	LassoRangeFrom = 4.6, -- a Horse's half width (studs): an animal this wide or narrower gets LassoRange
 	LassoRangeGain = 1, -- studs more range for each stud wider than that
