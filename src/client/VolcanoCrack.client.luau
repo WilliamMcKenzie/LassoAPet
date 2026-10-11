@@ -30,7 +30,17 @@ end
 -- The stencil sets the model's top flush with the floor: the mask's top is the floor.
 model.PrimaryPart = model:FindFirstChild("CrackMask", true) or model.PrimaryPart
 
-local z = -Config.CourseLength + Config.FinishFromEnd + settings.FromFinish
+-- Where the volcano ends (the finish line was there before the Jurassic came after it).
+local volcanoEnd = -Config.CourseLength
+local edge = 0
+for _, biome in Config.Biomes do
+	edge -= biome.Length
+	if biome.Name == "Volcano" then
+		volcanoEnd = edge
+		break
+	end
+end
+local z = volcanoEnd + Config.FinishFromEnd + settings.FromFinish
 ViewportStencil.new(model, CFrame.new(0, 0, z) * CFrame.Angles(0, math.rad(settings.Yaw or 0), 0), {
 	ambient = Color3.new(1, 1, 1), -- lit evenly: it glows
 	lightInfluence = 0,

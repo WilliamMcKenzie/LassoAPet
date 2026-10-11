@@ -95,12 +95,12 @@ def strip(s, pattern):
         s = s[:m.start()] + s[item_span(s, st):]
 
 
-def walls():
+def walls(prefix="VWAL", z_start=Z_START, length=LENGTH, far=None):
     """Side walls and caps (copies of the desert's) in 8 segments a side, and the far
-    wall moved to the volcano's end."""
-    s = strip(open(WORLD).read(), r"VWAL\d+")
+    wall moved to `far` when given (the course's last biome's end: tools/jurassic.py)."""
+    s = strip(open(WORLD).read(), prefix + r"\d+")
     segs = 8
-    zs = [Z_START - round(LENGTH * k / segs / 8) * 8 for k in range(segs + 1)]
+    zs = [z_start - round(length * k / segs / 8) * 8 for k in range(segs + 1)]
     new, n = [], 0
     for sx in (-1, 1):
         wall = s[slice(*OW.item(s, OW.WALL[sx]))]
@@ -111,22 +111,23 @@ def walls():
                 def ref(m):
                     nonlocal n
                     n += 1
-                    return f'referent="VWAL{n:05d}"'
+                    return f'referent="{prefix}{n:05d}"'
                 new.append(OW.resize(re.sub(r'referent="[A-Za-z0-9]+"', ref, tmpl), size, pos))
-    for ref, y, dz in ((OW.FAR_WALL, 24, -4), (OW.FAR_CAP, 49, -3)):
-        a, b = OW.item(s, ref)
-        xml = s[a:b]
-        size = re.search(r'<Vector3 name="size"><X>([^<]*)</X><Y>([^<]*)</Y><Z>([^<]*)</Z>', xml).groups()
-        s = s[:a] + OW.resize(xml, tuple(float(v) for v in size), (0, y, END + dz)) + s[b:]
+    if far is not None:
+        for ref, y, dz in ((OW.FAR_WALL, 24, -4), (OW.FAR_CAP, 49, -3)):
+            a, b = OW.item(s, ref)
+            xml = s[a:b]
+            size = re.search(r'<Vector3 name="size"><X>([^<]*)</X><Y>([^<]*)</Y><Z>([^<]*)</Z>', xml).groups()
+            s = s[:a] + OW.resize(xml, tuple(float(v) for v in size), (0, y, far + dz)) + s[b:]
     a, b = OW.item(s, OW.WALL[1])
     s = s[:b] + "\n" + "\n".join(new) + s[b:]
     open(WORLD, "w").write(s)
     return len(new)
 
 
-def nests():
+def nests(prefix="VNST", spots=NESTS):
     s = open(ON.PATH, encoding="utf-8").read()
-    s = ON.strip(s, "VNST")
+    s = ON.strip(s, prefix)
     a = s.index(f'<Item class="Model" referent="{ON.SRC}">')
     depth, i = 0, a
     for m in re.finditer(r"<Item\b|</Item>", s[a:]):
@@ -136,11 +137,11 @@ def nests():
             break
     block = s[a:i]
     out = []
-    for n, (x, z) in enumerate(NESTS):
+    for n, (x, z) in enumerate(spots):
         dx, dz = x - ON.SRC_AT[0], z - ON.SRC_AT[1]
         refs = {}
         b = re.sub(r'referent="(\w+)"', lambda m: 'referent="%s"' % refs.setdefault(
-            m.group(1), "VNST%d_%04d" % (n, len(refs))), block)
+            m.group(1), "%s%d_%04d" % (prefix, n, len(refs))), block)
 
         def move(m):
             return "<X>%g</X><Y>%s</Y><Z>%g</Z>" % (round(float(m.group(1)) + dx, 4), m.group(2),
@@ -157,5 +158,5 @@ if __name__ == "__main__":
     print("cells", {KINDS[k]: sum(int((b.kind == k).sum()) for b in grid.bands) for k in range(4)})
     print("wrote", write_patches(r"VGND\d+", "VGND", boxes(grid), template=r"DGND00000"), "volcano floor parts")
     glow_lava()
-    print("wrote", walls(), "volcano wall parts; far wall at", END - 4)
+    print("wrote", walls(), "volcano wall parts (the far wall: tools/jurassic.py)")
     print("wrote", nests(), "volcano nests")
