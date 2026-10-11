@@ -491,9 +491,16 @@ local function fuse()
 	end
 	slots[1], slots[2] = nil, nil
 	refresh()
-	task.delay(1.6, function()
-		close()
-	end)
+	-- It stays open (QM, Oct 11: keep merging): once the merge has landed, the list
+	-- picks up the merged pet and loses the two that went into it.
+	for _, after in { 1.6, 3 } do -- (and again, in case the server's pen update came late)
+		task.delay(after, function()
+			if open then
+				pets = yourPets()
+				refresh()
+			end
+		end)
+	end
 end
 
 local function openPage()
