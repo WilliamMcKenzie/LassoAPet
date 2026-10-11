@@ -4190,6 +4190,7 @@ RunService.PreSimulation:Connect(function(dt)
 	tr.canLasso = phase == "outbound" and actionTarget ~= nil and not transfer
 	tr.sprinting = mount ~= nil and sprinting()
 	timeScale += ((slow and slowTo or 1) * tr.timeScale - timeScale) * (1 - math.exp(-10 * dt))
+	vfx.sounds.setTimeScale(timeScale) -- (the sounds slow with it: QM)
 	if heroLeap then
 		heroLeap.t = math.min(heroLeap.t + dt / Config.HomeHeroTime, 1)
 	end

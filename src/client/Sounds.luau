@@ -73,12 +73,36 @@ local folder = Instance.new("Folder")
 folder.Name = "GameSounds"
 folder.Parent = SoundService
 
+-- Slow motion slows the sounds too (QM, Oct 11): each one's own speed (its "Base"
+-- attribute; 1 if it has none) x the ride's time scale, but never under SLOWEST, so a
+-- near stop is a low drawl rather than silence. UI clicks keep their speed.
+local SLOWEST = 0.25
+local timeScale = 1
+local function applySpeed(s)
+	if not s:GetAttribute("NoTimeScale") then
+		s.PlaybackSpeed = (s:GetAttribute("Base") or 1) * timeScale
+	end
+end
+function Sounds.setTimeScale(scale)
+	scale = math.max(scale, SLOWEST)
+	if math.abs(scale - timeScale) < 0.002 then
+		return
+	end
+	timeScale = scale
+	for _, s in folder:GetChildren() do
+		if s:IsA("Sound") then
+			applySpeed(s)
+		end
+	end
+end
+
 local function newSound(id, volume, looped)
 	local s = Instance.new("Sound")
 	s.SoundId = id
 	s.Volume = volume
 	s.Looped = looped or false
 	s.Parent = folder
+	applySpeed(s)
 	return s
 end
 
@@ -106,7 +130,8 @@ function Sounds.play(name, volume, speed)
 	local s = template:Clone()
 	s.Volume = volume or VOLUME
 	s.Parent = folder
-	s.PlaybackSpeed = speed or 1
+	s:SetAttribute("Base", speed or 1)
+	applySpeed(s)
 	s.Ended:Once(function()
 		s:Destroy()
 	end)
@@ -133,7 +158,8 @@ function Sounds.setGallop(on, pace)
 	end
 	pace = math.clamp(pace or 1, 0, 3)
 	gallop.Volume = GALLOP_VOLUME * math.min(pace, 1)
-	gallop.PlaybackSpeed = 0.8 + 0.3 * math.min(pace, 2)
+	gallop:SetAttribute("Base", 0.8 + 0.3 * math.min(pace, 2))
+	applySpeed(gallop)
 	if not gallop.IsPlaying then
 		gallop:Play()
 	end
@@ -220,6 +246,8 @@ local function playClick()
 	if not click then
 		click = templates.button_click:Clone()
 		click.Volume = 0.4
+		click:SetAttribute("NoTimeScale", true)
+		click.PlaybackSpeed = 1
 		click.Parent = folder
 	end
 	click.TimePosition = 0

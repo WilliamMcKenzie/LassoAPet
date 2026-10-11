@@ -39,7 +39,12 @@ local camera = workspace.CurrentCamera
 local TAP = "rbxassetid://134865745295413" -- assets/ui/TapHand.png (QM's)
 local TAP_SIZE = 96 -- px tall (it's 488 x 610)
 local TAP_TIP = Vector2.new(0.365, 0.03) -- the fingertip, in the picture
-local SPRINT_GUIDE = { id = "rbxassetid://109145650505243", size = Vector2.new(1923, 77) } -- assets/ui/SprintGuide.png (QM)
+-- QM's Sprint guide (assets/ui/SprintGuide.png, 3846 x 162), in four upright strips, each
+-- uploaded at full size (an upload's at most 1024 wide): SprintGuide1-4.png, left to right.
+local SPRINT_GUIDE = {
+	size = Vector2.new(3846, 162),
+	strips = { { "rbxassetid://128484192846174", 962 }, { "rbxassetid://118018475359108", 962 }, { "rbxassetid://139647408711436", 961 }, { "SPRINT4", 961 } },
+}
 local SLOW_FLOOR = 0.02 -- the slow-down's bottom (x speed): all but stopped
 local SLOW_TIME = 0.5 -- seconds into the slow-down for its middle (the sigmoid's)
 local SLOW_STEEP = 9 -- how sharp its turn is
@@ -81,9 +86,18 @@ tap.Parent = gui
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- QM's Sprint guide: a bar along the top (computers only).
-local sprintGuide = Instance.new("ImageLabel")
+local sprintGuide = Instance.new("Frame")
 sprintGuide.BackgroundTransparency = 1
-sprintGuide.Image = SPRINT_GUIDE.id
+local stripFrom = 0
+for _, strip in SPRINT_GUIDE.strips do
+	local piece = Instance.new("ImageLabel")
+	piece.BackgroundTransparency = 1
+	piece.Image = strip[1]
+	piece.Position = UDim2.fromScale(stripFrom / SPRINT_GUIDE.size.X, 0)
+	piece.Size = UDim2.fromScale(strip[2] / SPRINT_GUIDE.size.X, 1)
+	piece.Parent = sprintGuide
+	stripFrom += strip[2]
+end
 sprintGuide.AnchorPoint = Vector2.new(0.5, 0)
 sprintGuide.Position = UDim2.fromScale(0.5, 0.12)
 sprintGuide.Size = UDim2.fromScale(1, 1)
