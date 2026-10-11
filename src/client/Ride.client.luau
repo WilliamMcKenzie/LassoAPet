@@ -3695,6 +3695,7 @@ local function updateRider(dt)
 				table.remove(strays, table.find(strays, target))
 			end
 			mount, transfer = target, nil
+			exitPath, vfx.exitTrack, vfx.exitLat, vfx.exitRoute = nil, nil, nil, nil -- (lassoed off your pet still on its way out of your pen: it'd pull you back onto the path, QM)
 			vfx.rideCue:FireServer("landed") -- (Riders.server: not lassoing any more)
 			picked = nil
 			vfx.sounds.play("lasso_land")
