@@ -168,6 +168,10 @@ def main(out=OUT):
     m = rock_hog(json.load(open(BOAR)))
     with open(os.path.join(out, "RockHog.bbmodel"), "w") as f:
         json.dump(m, f, separators=(",", ":"))
+    previews(m, out)
+
+
+def previews(m, out=OUT):
     T = 420
     views = [dict(eye=(-20, 12, -26), target=(0, 5, -1), W=T, H=T, fov=38), dict(eye=(-32, 6, -2), target=(0, 5, -1), W=T, H=T, fov=36),
              dict(eye=(-7, 8, -26), target=(0, 6, -4), W=T, H=T, fov=30)]
@@ -188,6 +192,62 @@ def main(out=OUT):
     print("wrote", out)
 
 
+# ---------------------------------------------------------------- back spikes (on QM's file)
+# Horn-style spikes fanned out of the back like the Ice Golem's crystals: each one is its own
+# bone tilted backwards (X) and outwards (Z), built straight up from the bone's origin.
+SPIKES = [  # (name, origin on the body's top, rotation, scale)
+    ("SpikeC", (0.0, 70.0, -21.0), (30, 0, 0), 1.45),
+    ("SpikeL", (-20.0, 70.0, -19.0), (26, 0, 22), 1.25),
+    ("SpikeR", (20.0, 70.0, -19.0), (26, 0, -22), 1.25),
+    ("SpikeBL", (-11.0, 60.5, 24.0), (44, 0, 18), 1.0),
+    ("SpikeBR", (11.0, 60.5, 24.0), (44, 0, -18), 1.0),
+]
+
+
+def spike_els(name, o, k):
+    ox, oy, oz = o
+    els = []
+    y = oy
+    for i, (w, h) in enumerate(((6.0, 8.0), (5.0, 7.0), (4.0, 7.0))):
+        w, h = w * k, h * k
+        els.append(cube(f"Glow{name}{i}", (ox - w, y, oz - w), (ox + w, y + h, oz + w), HORN[i][0]))
+        y += h
+    w = 4.0 * k
+    els.append(spike(f"Glow{name}Tip", (ox - w, 0, oz - w), (ox + w, y, oz + w), (ox, y + 12 * k, oz), HORN[3][0]))
+    return els
+
+
+def back_spikes(src, dst="RockHog_spikes", out=OUT):
+    """Add the back spikes to QM's file (src); write dst.bbmodel and previews."""
+    import horse_rig
+    horse_rig.EULER = "ZYX"  # QM's hand-edited file
+    m = json.load(open(src))
+    root = next(g for g in m["groups"] if g["name"] == "root")
+    template = next(g for g in m["groups"] if g["name"] == "HornL")
+
+    def find(nodes, gid):
+        for n in nodes:
+            if isinstance(n, dict):
+                if n["uuid"] == gid:
+                    return n
+                r = find(n["children"], gid)
+                if r:
+                    return r
+
+    node = find(m["outliner"], root["uuid"])
+    names = {s[0] for s in SPIKES}
+    m["groups"] = [g for g in m["groups"] if g["name"] not in names]
+    for name, o, rot, k in SPIKES:
+        els = spike_els(name, o, k)
+        m["elements"] += els
+        g = dict(template, name=name, uuid=str(uuid.uuid4()), origin=list(o), rotation=list(rot))
+        m["groups"].append(g)
+        node["children"].append({"uuid": g["uuid"], "isOpen": True, "children": [e["uuid"] for e in els]})
+    with open(os.path.join(out, dst + ".bbmodel"), "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    previews(m, out)
+
+
 def takes(out=OUT):
     """All colour takes side by side, front three-quarter view."""
     boar = json.load(open(BOAR))
@@ -200,7 +260,9 @@ def takes(out=OUT):
 
 
 if __name__ == "__main__":
-    if sys.argv[1:2] == ["takes"]:
+    if sys.argv[1:2] == ["spikes"]:
+        back_spikes(*sys.argv[2:])
+    elif sys.argv[1:2] == ["takes"]:
         takes(*sys.argv[2:])
     else:
         main(*sys.argv[1:])
