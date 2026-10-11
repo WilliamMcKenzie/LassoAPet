@@ -10,7 +10,8 @@
 -- dictionary's running animals (AnimalDex): those are content, not UI. And two
 -- effects: the ride's vignette and the sunburst behind the egg reveal. And QM's new
 -- egg slot panel (CommonPanel), already the new art. And Carl's egg roll menu
--- (RollMenu), whose old art stays till it's redrawn (QM, Oct 11).
+-- (RollMenu) and the pass promo cards (PassPopups), whose old art stays till it's
+-- redrawn (QM, Oct 11).
 --
 -- The names come from the art's file names in the scripts (made with a script;
 -- re-run it when art is added). Setting Config.UiArt back to true puts the art back.
@@ -107,7 +108,7 @@ local done = {} -- [image] = true once it's watched
 local function show(image)
 	local id = string.match(image.Image, "%d+")
 	if not id or KEEP[id] or not NAMES[id] or image:FindFirstAncestor("PreloadWarm")
-		or image:FindFirstAncestor("RollMenu") then -- (only the old art: new art, BaseUi's, shows; and Carl's roll menu keeps its old art for now, QM Oct 11)
+		or image:FindFirstAncestor("RollMenu") or image:FindFirstAncestor("PassPopups") then -- (only the old art: new art, BaseUi's, shows; Carl's roll menu and the promo cards keep their old art for now, QM Oct 11)
 		return
 	end
 	local name = NAMES[id] or image.Name
