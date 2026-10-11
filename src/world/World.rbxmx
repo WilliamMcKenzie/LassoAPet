@@ -8,7 +8,7 @@
 <Item class="Part" referent="MGND00000"><Properties>
 <string name="Name">Ground</string>
 <bool name="Anchored">true</bool>
-<Vector3 name="size"><X>8</X><Y>2</Y><Z>2168</Z></Vector3>
+<Vector3 name="size"><X>8</X><Y>2</Y><Z>1084</Z></Vector3>
 <Color3uint8 name="Color3uint8">4283286591</Color3uint8>
 <token name="TopSurface">0</token>
 <token name="FrontSurface">3</token>
@@ -16,7 +16,7 @@
 <token name="LeftSurface">3</token>
 <token name="RightSurface">3</token>
 <token name="BottomSurface">4</token>
-<CoordinateFrame name="CFrame"><X>-52</X><Y>-1</Y><Z>-1084</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+<CoordinateFrame name="CFrame"><X>-52</X><Y>-1</Y><Z>-542</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
 </Properties>
 <Item class="Texture" referent="MGND00001"><Properties>
 <string name="Name">Checker</string>
@@ -28,6 +28,38 @@
 </Properties>
 </Item>
 <Item class="Texture" referent="MGND00002"><Properties>
+<string name="Name">Texture</string>
+<Content name="Texture"><url>rbxassetid://7447638591</url></Content>
+<token name="Face">1</token>
+<float name="StudsPerTileU">1</float>
+<float name="StudsPerTileV">1</float>
+<int name="ZIndex">2</int>
+</Properties>
+</Item>
+</Item>
+<Item class="Part" referent="MGND00000S"><Properties>
+<string name="Name">Ground</string>
+<bool name="Anchored">true</bool>
+<Vector3 name="size"><X>8</X><Y>2</Y><Z>1084</Z></Vector3>
+<Color3uint8 name="Color3uint8">4283286591</Color3uint8>
+<token name="TopSurface">0</token>
+<token name="FrontSurface">3</token>
+<token name="BackSurface">3</token>
+<token name="LeftSurface">3</token>
+<token name="RightSurface">3</token>
+<token name="BottomSurface">4</token>
+<CoordinateFrame name="CFrame"><X>-52</X><Y>-1</Y><Z>-1626</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+</Properties>
+<Item class="Texture" referent="MGND00001S"><Properties>
+<string name="Name">Checker</string>
+<Content name="Texture"><url>rbxassetid://84747779882944</url></Content>
+<token name="Face">1</token>
+<float name="StudsPerTileU">8</float>
+<float name="StudsPerTileV">8</float>
+<Color3 name="Color3"><R>0.411765</R><G>1</G><B>0.290196</B></Color3>
+</Properties>
+</Item>
+<Item class="Texture" referent="MGND00002S"><Properties>
 <string name="Name">Texture</string>
 <Content name="Texture"><url>rbxassetid://7447638591</url></Content>
 <token name="Face">1</token>
