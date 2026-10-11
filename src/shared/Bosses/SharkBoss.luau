@@ -11,5 +11,5 @@ local SharkBossModel = require(script.Parent.SharkBossModel)
 return Horse.variant("SharkBoss", SharkBossModel, "Legendary", {
 	seat = Vector3.new(0, 2.2, 0.5),
 	neck = { center = Vector3.new(0, 1.6, -1.45), radius = 0.6 },
-	size = 9, -- x the model: about 38 studs, like the Chicken; tune freely
+	size = 18, -- x the model: about 76 studs, twice the Chicken (QM, Oct 10; was 9)
 })

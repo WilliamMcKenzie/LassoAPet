@@ -10,5 +10,5 @@ local ElderBoarModel = require(script.Parent.ElderBoarModel)
 return Horse.variant("ElderBoar", ElderBoarModel, "Legendary", {
 	seat = Vector3.new(0, 9.4, 2.28), -- the Boar's, x1.5
 	neck = { center = Vector3.new(0, 7.41, -6.84), radius = 4 },
-	size = 2.3, -- x the model: about 38 studs, like the Chicken; tune freely
+	size = 4.6, -- x the model: about 76 studs, twice the Chicken (QM, Oct 10; was 2.3)
 })

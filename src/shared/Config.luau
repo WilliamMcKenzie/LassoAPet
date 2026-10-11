@@ -223,8 +223,9 @@ return {
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), ChaseSpeed = 0.9, Behind = 40,
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3 }, -- (each boss's cry: QM, Oct 10)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
-			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 3, 24) },
-			SharkBoss = { At = Vector3.new(0, 0, 0.4), From = Vector3.new(18, 2, 8) }, -- (from its side, so you see its eye: QM)
+			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 6, 48) }, -- (it's twice the size: QM)
+			CactusBoss = { From = Vector3.new(0, 6, 40) }, -- (twice the size)
+			SharkBoss = { At = Vector3.new(0, 0, 0.4), From = Vector3.new(36, 4, 16) }, -- (from its side, so you see its eye: QM)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.35), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 	},
