@@ -693,11 +693,12 @@ return {
 	-- with speed as (speed / Ref) ^ Curve (a square root: quick to build, gentle at the
 	-- top) to full at Ref studs/s and over. Lines, their Opacity and LineSpeed, and
 	-- FovKick degrees wider (up to MaxFov), all at full strength.
-	-- Speed lines as particles in front of the camera (QM, Oct 9; Client/SpeedLines, the
-	-- Creator Store's "Speedlines"): Rate a second at Speed studs/s (a sprint), more or
-	-- fewer with your speed up to MaxScale x, none off a ride. Offset: studs ahead of
-	-- the camera (NarrowOffset on a screen 1.5 or less wide to high).
-	SpeedLines = { On = true, Rate = 1500, Speed = 88, MaxScale = 2, Offset = 10, NarrowOffset = 13 },
+	-- Speed lines while you sprint (QM, Oct 9; drawn on the screen, Oct 11: Client/SpeedLines):
+	-- Rate a second at Speed studs/s (a sprint), more or fewer with your speed up to
+	-- MaxScale x, none otherwise. Each starts From of the way from the middle to a corner
+	-- and shoots Travel further out over Life seconds, Length by Thickness pixels (on a
+	-- 1000 px tall screen), white at Opacity at its most solid.
+	SpeedLines = { On = true, Rate = 200, Speed = 88, MaxScale = 2, From = 0.5, Travel = 0.55, Life = 0.32, Length = 230, Thickness = 4.5, Opacity = 0.9 },
 	-- The sprint camera (QM, Oct 9; Client/SprintCam): sprinting, the view widens to Fov
 	-- degrees (a fisheye-like stretch at the edges) and the camera comes in to Zoom x
 	-- its usual distance, easing in over InTime seconds and back over OutTime.

@@ -103,7 +103,7 @@ local function tierOf(kind)
 end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
-vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
+vfx.speedLines = require(script.Parent.SpeedLines) -- speed lines on the screen while sprinting (QM, Oct 9 / 11)
 vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's out (QM, Oct 10)
 vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
@@ -4296,10 +4296,9 @@ end)
 RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, function(dt)
 	local riding = mount and not cutscene and not heroLeap and (phase == "outbound" or phase == "return")
 	vfx.speedFx.update(dt, if riding and sprinting() then mount.speed * (vfx.speedGain or 1) else 0) -- speed lines while sprinting, by the uncurved speed
-	-- QM's particle speed lines (Config.SpeedLines): full on any sprint (the run home's
-	-- one) whatever the pet's speed, half that otherwise (Oct 9: a slow pet racing home
-	-- showed hardly any).
-	vfx.speedLines.update(if not riding then 0 elseif sprinting() then Config.SpeedLines.Speed else Config.SpeedLines.Speed / 2)
+	-- QM's speed lines (Config.SpeedLines): full on any sprint whatever the pet's speed,
+	-- none otherwise (QM, Oct 11).
+	vfx.speedLines.update(if riding and sprinting() then Config.SpeedLines.Speed else 0, dt)
 	vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
 	vfx.returnVignette.update(dt, mount ~= nil and (phase == "turning" or phase == "return"))
 	if not (phase == "boss" or phase == "turning" or phase == "return" or phase == "home") then
