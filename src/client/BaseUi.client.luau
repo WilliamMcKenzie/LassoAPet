@@ -30,11 +30,11 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 }
 -- assets/ui/quests/*.png (QM, Oct 11). "" till Studio uploads them: plain boxes meanwhile.
 local QUEST_ART = {
-	panel = "", -- Quests.png, 453 x 265: open, "Quests" and its fold chevron drawn in
-	closed = "", -- QuestsClosed.png, 453 x 86: folded up
-	bar = "", -- QuestBG.png, 407 x 22
-	fill = "", -- QuestFill.png, 262 x 16
-	claim = "", -- ClaimQuest.png, 399 x 62
+	panel = "rbxassetid://71052597087124", -- Quests.png, 453 x 265: open, "Quests" and its fold chevron drawn in
+	closed = "rbxassetid://123446992263929", -- QuestsClosed.png, 453 x 86: folded up
+	bar = "rbxassetid://88826165672196", -- QuestBG.png, 407 x 22
+	fill = "rbxassetid://107946623795335", -- QuestFill.png, 262 x 16
+	claim = "rbxassetid://113926447181781", -- ClaimQuest.png, 399 x 62
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local CASH_GREEN = Color3.fromHex("00FF09")
