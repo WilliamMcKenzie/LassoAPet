@@ -33,9 +33,9 @@ GRASS_UP = 1
 LAVA_DOWN = 1
 LENGTH = 200  # studs shown in the preview
 OCEAN_LENGTH = 3120  # on the 240-stud bands (QM, Oct 11: the pacing ladder, tools/course_resize.py; was 7680)
-Z_START = -5296  # the ocean's near edge (the snow's far one)
+Z_START = -5904  # the ocean's near edge (the snow's far one)
 # a nest about every 1100 studs
-NESTS = [(16, -5716), (-14, -6816), (18, -7916)]
+NESTS = [(16, -6324), (-14, -7424), (18, -8524)]
 NEST_CLEAR = 14
 START_CLEAR = 16
 KINDS = ("Ground", "Grass", "Trench", "Lava")
