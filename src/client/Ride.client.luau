@@ -4411,7 +4411,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
 	-- The run home: over the shoulder (QM, Oct 10), pinned to the rider rather than eased
 	-- after them (the ease above trailed far behind at the run home's speed).
-	local shoulder = vfx.shoulderCam.blend(dt, mount ~= nil and hrp ~= nil and (phase == "turning" or phase == "return"), mount ~= nil and hrp ~= nil)
+	local shoulder = vfx.shoulderCam.blend(dt, mount ~= nil and hrp ~= nil and (phase == "turning" or phase == "return") and not vfx.bossChase.lingering(), mount ~= nil and hrp ~= nil)
 	if shoulder > 0 and hrp then
 		camera.CFrame = camera.CFrame:Lerp(vfx.shoulderCam.pose(hrp.Position, camYaw, z, hrp.Position.Y - (mount and mount.hop or 0), mount ~= nil and (mount.hop or 0) < -1), shoulder)
 	end
