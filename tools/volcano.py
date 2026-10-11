@@ -39,10 +39,10 @@ BAND = 1024  # parts at most this long (Roblox caps a part at 2048)
 
 # The floor is a quasicrystal (QM, Oct 11: patterns with a rhyme and reason, like his
 # map maker's atlas; tools/quasicrystal.py), drawn as it shows in game (tools/funnel_grid.py).
-# Its middle is pushed off the course's centre line by OFFSET (QM, Oct 11: zoomed in,
-# off centre, so it isn't mirrored). Like atlas's lava biome, the bands are lava, floor, ash
+# Its middle is pushed off the course's centre line by OFFSET (QM, Oct 11: zoomed well
+# out, off centre, so it isn't mirrored). Like atlas's lava biome, the bands are lava, floor, ash
 # and crust, and every lava pool's edge cells turn to crust: lava ringed by a raised rim.
-ANGLES, PATTERN = 5, 36
+ANGLES, PATTERN = 5, 12
 OFFSET = (173.4, -291.7)  # studs (random): the pattern's middle, from the crack
 BANDS = (3, 0, 1, 2)  # lowest to highest value: lava, floor, ash, crust
 
