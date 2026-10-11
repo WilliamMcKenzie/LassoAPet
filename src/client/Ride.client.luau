@@ -1132,7 +1132,7 @@ end
 function vfx.updateHomeGuide()
 	local hrp = character()
 	local target
-	if vfx.rideAgain and hrp and not cutscene then
+	if hrp and hrp.Position.Z > 0 and not cutscene and not player:GetAttribute("Tutorial") and not player:GetAttribute("MergeView") then -- (always, at your base: QM, Oct 11)
 		local best, fastest = nil, -1
 		for _, model in homePets() do
 			local info = if starter and model == starter.animal.model then starter else PenPets.pets[model]
@@ -1145,8 +1145,6 @@ function vfx.updateHomeGuide()
 		local spot = best and best.PrimaryPart.Position * Vector3.new(1, 0, 1)
 		if spot and (spot - at).Magnitude > guide.HOME_CLOSE and not (rideShown and rideModel == best) then
 			target = spot
-		elseif spot then
-			vfx.rideAgain = nil -- (there)
 		end
 	end
 	vfx.drawGuide(if target then Vector3.new(hrp.Position.X, 0, hrp.Position.Z) else nil, target)
@@ -4214,7 +4212,7 @@ RunService.PreSimulation:Connect(function(dt)
 	Dust.update(dt)
 	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)
 	if phase == "idle" then
-		vfx.updateHomeGuide() -- (to the pet in your pen after a ride; else hidden)
+		vfx.updateHomeGuide() -- (to your fastest pet whenever you're at your base)
 		-- On foot out on the course, a stampede animal running you down throws you
 		-- like being bucked off (no cash on the fail screen: there was no ride).
 		-- Never at the start line (QM, Oct 8): walking up to it is how you start a
