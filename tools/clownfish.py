@@ -2,8 +2,9 @@
 flop animations kept) in clownfish orange, with three white bands edged in black wrapping
 right round it: behind the eyes, mid-body and at the tail.
 
-Run: python3 tools/clownfish.py [out_dir]
-writes Clownfish.bbmodel, Clownfish.png and Clownfish_vs_fish.png.
+Run: python3 tools/clownfish.py [egg] [out_dir]
+writes Clownfish.bbmodel, Clownfish.png and Clownfish_vs_fish.png; `egg` writes ClownfishEgg.bbmodel/.png
+(the Fish's egg in clownfish colours).
 """
 
 import base64
@@ -174,5 +175,48 @@ def main(out=OUT):
     print("wrote", out, len(m["elements"]), "elements")
 
 
+
+
+# ---- the egg: a reskin of the Fish's egg (horse_egg_takes.fish_c) ----
+EGG_SWAP = {(60, 140, 230): (255, 112, 16), (170, 215, 250): (255, 150, 60), (30, 90, 190): (255, 112, 16)}
+
+
+def clownfish_egg():
+    """The Fish's egg (horse_egg_takes.fish_c) in orange, its two stripe layers turned into
+    white bands edged in black that wrap right round, and a black-tipped tail fin."""
+    import horse_egg_takes as C
+    from egg_designs import octo_layer
+    egg = C.fish_c()
+    bands = (3, 5)
+    egg.parts = [p for p in egg.parts if not p.name.startswith("Stripe")
+                 and not any(p.name.startswith(f"L{i}") and p.name[len(f"L{i}")].isalpha() for i in bands)]
+    for p in egg.parts:
+        c = tuple(p.color)
+        if c in EGG_SWAP:
+            p.color = EGG_SWAP[c]
+    edge = 0.08
+    for i in bands:
+        y0, y1, bone = i * C.LH, (i + 1) * C.LH, "top" if i >= C.CRACK_LAYER else "bottom"
+        octo_layer(egg, f"{i}EdgeLow", y0, y0 + edge, C.WIDTHS[i], (24, 24, 30), bone)
+        octo_layer(egg, f"{i}Band", y0 + edge, y1 - edge, C.WIDTHS[i], (255, 255, 255), bone)
+        octo_layer(egg, f"{i}EdgeHigh", y1 - edge, y1, C.WIDTHS[i], (24, 24, 30), bone)
+    tip = next(p for p in egg.parts if p.name == "TailFin")
+    tip.color = (255, 112, 16)
+    return egg
+
+
+def egg_main(out=OUT):
+    import horse_egg_takes as C
+    os.makedirs(out, exist_ok=True)
+    egg = clownfish_egg()
+    C.build(egg, "ClownfishEgg", C.E.SPLIT, out)
+    tile = 420
+    sheet = Image.new("RGB", (tile * 2, tile))
+    for r, view in enumerate(C.VIEWS):
+        sheet.paste(render(egg.parts, W=tile, H=tile, fov=30, **view), (r * tile, 0))
+    sheet.save(os.path.join(out, "ClownfishEgg.png"))
+    print(len(egg.parts), "parts")
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    egg_main(*sys.argv[2:]) if sys.argv[1:2] == ["egg"] else main(*sys.argv[1:])
