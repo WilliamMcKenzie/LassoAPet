@@ -222,11 +222,15 @@ end
 local function refresh()
 	for i = 1, 2 do
 		local ui, pet = slotUi[i], slots[i]
-		if ui.view then
+		-- (its 3D picture is made again only when the pet in it changes: refresh runs
+		-- every time your cash ticks up, and remaking it each time made it flash: QM)
+		local changed = ui.shown ~= pet
+		ui.shown = pet
+		if changed and ui.view then
 			ui.view:Destroy()
 			ui.view = nil
 		end
-		if pet then
+		if changed and pet then
 			local view = still3D(pet.kind, pet.fuse)
 			if view then
 				view.AnchorPoint = Vector2.new(0.5, 0.5)
