@@ -10,5 +10,5 @@ local CactusBossModel = require(script.Parent.CactusBossModel)
 return Horse.variant("CactusBoss", CactusBossModel, "Legendary", {
 	seat = Vector3.new(0, 10.6, 0),
 	neck = { center = Vector3.new(0, 8, 0), radius = 3.2 },
-	size = 6.4, -- x the model: about 76 studs, twice the Chicken (QM, Oct 10; was 3.2)
+	size = 5.44, -- x the model: about 65 studs, 1.7x the Chicken (QM, Oct 10; was 3.2)
 })

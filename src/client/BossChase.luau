@@ -104,7 +104,8 @@ function BossChase.start(x, z)
 	local animal = require(ReplicatedStorage.Shared.Bosses[kind]).new()
 	animal.model.Name = "Boss"
 	animal.model.Parent = workspace
-	boss = { kind = kind, animal = animal, x = x, z = z - Config.Boss.Ahead, t = 0, scale = 0 }
+	local room = Config.Boss.Room[kind] or 0 -- (a bigger one stands further off)
+	boss = { kind = kind, room = room, animal = animal, x = x, z = z - Config.Boss.Ahead - room, t = 0, scale = 0 }
 	place()
 	Sounds.play("reveal_pop", 0.8)
 end
@@ -140,7 +141,7 @@ function BossChase.update(dt, chasing, x, z, speed)
 	local moving = 0
 	if chasing and x then
 		-- After you, never catching up: at least Behind studs back, falling behind a little.
-		local want = z - cfg.Behind
+		local want = z - cfg.Behind - boss.room
 		boss.z = math.min(boss.z + (speed or 0) * cfg.ChaseSpeed * dt, want)
 		boss.x += (x - boss.x) * (1 - math.exp(-2 * dt))
 		moving = speed or 0
