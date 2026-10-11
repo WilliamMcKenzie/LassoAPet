@@ -663,7 +663,7 @@ return {
 		Rockworm = "rbxassetid://105149417332337", -- assets/ui/RockwormEggRender.png
 		FireLobster = "rbxassetid://83951862994609", -- assets/ui/FireLobsterEggRender.png
 		Phoenix = "rbxassetid://77371080716061", -- assets/ui/PhoenixEggRender.png
-		LavaWhale = "", -- assets/ui/LavaWhaleEggRender.png (Studio uploads)
+		LavaWhale = "rbxassetid://137754762277353", -- assets/ui/LavaWhaleEggRender.png
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://70469571709365", -- assets/ui/LoongEggRender.png

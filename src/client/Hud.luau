@@ -110,7 +110,7 @@ local IMAGES = {
 	eggRockHog = { id = "rbxassetid://82336240433052", size = Vector2.new(828, 998) }, -- RockHogEggRender.png
 	eggRockworm = { id = "rbxassetid://105149417332337", size = Vector2.new(498, 909) }, -- RockwormEggRender.png
 	eggFireLobster = { id = "rbxassetid://83951862994609", size = Vector2.new(808, 882) }, -- FireLobsterEggRender.png
-	eggLavaWhale = { id = "", size = Vector2.new(502, 877) }, -- LavaWhaleEggRender.png (Studio uploads)
+	eggLavaWhale = { id = "rbxassetid://137754762277353", size = Vector2.new(502, 877) }, -- LavaWhaleEggRender.png
 	eggPhoenix = { id = "rbxassetid://77371080716061", size = Vector2.new(1034, 1099) }, -- PhoenixEggRender.png
 	eggVolcanoTortoise = { id = "rbxassetid://89848692685766", size = Vector2.new(502, 686) }, -- VolcanoTortoiseEggRender.png
 	eggStarfish = { id = "rbxassetid://114368032731288", size = Vector2.new(680, 783) }, -- StarfishEggRender.png
