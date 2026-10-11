@@ -642,6 +642,7 @@ local function setGhost(kind)
 	end
 	local special = Config.SpecialEggs[kind]
 	ghost = Egg.new(if special then special.Pet else kind).model
+	ghost:SetAttribute("Ghost", true) -- (not a placed egg: Client/Tutorial looks for those)
 	if special and special.EggScale then
 		ghost:ScaleTo(special.EggScale) -- (the Giant Horse's egg is 3x)
 		Egg.fitStuds(ghost)

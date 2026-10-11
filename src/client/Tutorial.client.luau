@@ -223,7 +223,7 @@ local function penEgg()
 		return nil
 	end
 	for _, m in folder:GetChildren() do
-		if m:IsA("Model") and m.Name:match("Egg$") then
+		if m:IsA("Model") and m.Name:match("Egg$") and not m:GetAttribute("Ghost") then -- (not Pen's ghost of the egg you're holding)
 			local p = area.CFrame:PointToObjectSpace(m:GetPivot().Position)
 			if math.abs(p.X) <= area.Size.X / 2 and math.abs(p.Z) <= area.Size.Z / 2 then
 				return m
