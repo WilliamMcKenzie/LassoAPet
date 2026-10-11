@@ -117,5 +117,28 @@ def main():
     print("render", im.size, len(egg.parts), "parts")
 
 
+def qm_render():
+    """QM's edited egg (designs/eggs/c_style/PhoenixEgg.bbmodel, Oct 11) is the game's: convert
+    it with `bbmodel_to_luau.py --zyx designs/eggs/c_style/PhoenixEgg.bbmodel
+    src/shared/Eggs/PhoenixEggModel.luau`, then this writes its UI picture.
+    Run: python3 tools/phoenix_egg.py qm"""
+    import json
+    from horse_egg_takes import VIEWS
+    from partlib import render
+    from snow_rig import posed
+    import horse_rig
+    horse_rig.EULER = "ZYX"  # QM's wing groups are turned about two axes
+    m = json.load(open(os.path.join(O.ROOT, "designs", "eggs", "c_style", "PhoenixEgg.bbmodel")))
+    ps = posed(m, None, 0)
+    for p in ps:
+        if p.name.startswith("Glow"):
+            p.neon = True
+    im = render(ps, W=1100, H=1300, fov=30, transparent=True, **VIEWS[0])
+    im = im.crop(im.getbbox())
+    im.save(os.path.join(O.ROOT, "assets", "ui", "PhoenixEggRender.png"))
+    im.save(os.path.join(PREVIEW, "PhoenixEgg_QM.png"))
+    print("render", im.size)
+
+
 if __name__ == "__main__":
-    main()
+    qm_render() if sys.argv[1:2] == ["qm"] else main()

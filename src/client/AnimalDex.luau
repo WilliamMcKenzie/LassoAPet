@@ -127,6 +127,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	RockHog = "Ate a lava rock for a dare. Now its horns won't stop smoking.",
 	Rockworm = "Tried burrowing through a volcano. Now it can't stop jumping out of the ground.",
 	FireLobster = "Fell into a pot of boiling lava. Came out redder and angrier.",
+	Phoenix = "Burns up, crumbles to ash, hatches again. Has done it so many times it finds it boring.",
 	VolcanoTortoise = "Fell asleep in the sun for three hundred years. Woke up as a volcano.",
 	Loong = "The loongest dragon around. Ex sword-swallower for the circus, passionate about entertainment.",
 }

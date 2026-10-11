@@ -190,6 +190,12 @@ return {
 		{ "Body", 170, 32, 30 }, -- seams, fingers, shins, antennae
 		{ "Marking", 255, 124, 40 }, -- shoulders, arms, thighs
 	},
+	Phoenix = {
+		{ "Body", 206, 34, 40 }, -- body, wing arms
+		{ "Body", 240, 72, 32 }, -- head, neck, wing bands
+		{ "Marking", 255, 132, 24 }, -- feathers
+		{ "Accent", 255, 188, 36 }, -- beak, feather ends, plumes
+	},
 	Firebird = {
 		{ "Body", 255, 128, 32 }, -- feathers
 		{ "Belly", 232, 98, 22 },
