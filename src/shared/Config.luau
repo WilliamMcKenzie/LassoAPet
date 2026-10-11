@@ -906,26 +906,27 @@ return {
 	-- outruns every one behind it (each animal a little either side of its rarity's speed, so
 	-- they feel different, never past the next rarity's), and each biome's line sits where its biome before's Rares
 	-- just get to in a 30 s sprint: Epics and Legendaries take you into the next one. The
-	-- Horse (0.5) is the slowest. Change a biome's Length or these together.
+	-- Meadow and Desert are off the ladder (QM, Oct 11: their old speeds, the Desert reached at once). Change a biome's Length or these together.
 	-- Each animal's stats, x MountSpeed and HerdSpeed (1x). Speed scales how fast it runs,
 	-- ridden (MountSpeed, ReturnSpeed) and in the stampede (HerdSpeed). Stamina scales
 	-- how long the Hold bar lasts while you ride it: 2x lasts twice as long.
 	AnimalStats = {
-		-- Meadow
-		Horse = { Speed = 0.5, Stamina = 1 },
-		Pig = { Speed = 0.66, Stamina = 0.8 },
-		Bunny = { Speed = 0.72, Stamina = 0.7 },
-		Pinto = { Speed = 0.74, Stamina = 0.9 },
-		Fish = { Speed = 0.81, Stamina = 3 },
-		Rhino = { Speed = 0.93, Stamina = 1.8 },
-		Unicorn = { Speed = 1.06, Stamina = 2 },
+		-- Meadow (QM, Oct 11: the Meadow's and the Desert's back to their speeds from before the ladder:
+		-- the Meadow is the tutorial and the Desert should come almost at once)
+		Horse = { Speed = 1, Stamina = 1 },
+		Pig = { Speed = 0.8, Stamina = 0.8 },
+		Bunny = { Speed = 1.2, Stamina = 0.7 },
+		Pinto = { Speed = 1.1, Stamina = 0.9 },
+		Fish = { Speed = 0.6, Stamina = 3 },
+		Rhino = { Speed = 1.5, Stamina = 1.8 },
+		Unicorn = { Speed = 2, Stamina = 2 },
 		-- Desert
-		Cactus = { Speed = 1.06, Stamina = 1.5 },
-		Kitten = { Speed = 1.18, Stamina = 1.2 },
-		Scorpion = { Speed = 1.29, Stamina = 1.5 },
-		Sandworm = { Speed = 1.42, Stamina = 3 },
-		SpineLizard = { Speed = 1.55, Stamina = 2 },
-		Snake = { Speed = 1.7, Stamina = 3 },
+		Cactus = { Speed = 1.2, Stamina = 1.5 },
+		Kitten = { Speed = 1.4, Stamina = 1.2 },
+		Scorpion = { Speed = 1.5, Stamina = 1.5 },
+		Sandworm = { Speed = 1.6, Stamina = 3 },
+		SpineLizard = { Speed = 1.8, Stamina = 2 },
+		Snake = { Speed = 2, Stamina = 3 },
 		-- Tundra
 		Penguin = { Speed = 1.72, Stamina = 1.5 },
 		Boar = { Speed = 1.86, Stamina = 1.6 },
