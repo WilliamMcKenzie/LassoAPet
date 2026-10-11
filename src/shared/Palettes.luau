@@ -225,6 +225,12 @@ return {
 		{ "Marking", 36, 116, 92 }, -- stripes
 		{ "Accent", 255, 136, 40 }, -- sail
 	},
+	PalmGuy = {
+		{ "Body", 150, 110, 66 }, -- trunk
+		{ "Body", 132, 96, 58 }, -- trunk, legs
+		{ "Marking", 104, 74, 44 }, -- joint rings
+		{ "Accent", 70, 156, 52 }, -- fronds, tufts
+	},
 	Ankylosaurus = {
 		{ "Body", 236, 190, 62 },
 		{ "Belly", 252, 218, 166 }, -- belly, beak

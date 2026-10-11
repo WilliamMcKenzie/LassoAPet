@@ -44,6 +44,7 @@ local HEADSHOTS = {
 	Spinosaurus = "rbxassetid://80632533990002", -- PetSpinosaurus.png
 	Pterodactyl = "rbxassetid://103216213990752", -- PetPterodactyl.png
 	Ankylosaurus = "rbxassetid://77760703895296", -- PetAnkylosaurus.png
+	PalmGuy = "", -- PetPalmGuy.png
 	Phoenix = "rbxassetid://86265592768260", -- PetPhoenix.png
 	Starfish = "rbxassetid://112526271674778", -- PetStarfish.png
 	Lionfish = "rbxassetid://110158665076562", -- PetLionfish.png

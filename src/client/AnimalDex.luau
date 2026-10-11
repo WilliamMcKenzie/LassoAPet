@@ -65,6 +65,7 @@ local SHEETS = {
 	Spinosaurus = { frames = 20, time = 0.03, "rbxassetid://122762734286787" }, -- dex/DexSpinosaurus_1.png
 	Pterodactyl = { frames = 24, time = 0.04, "rbxassetid://110282216559726" }, -- dex/DexPterodactyl_1.png
 	Ankylosaurus = { frames = 17, time = 0.03, "rbxassetid://122123351672825" }, -- dex/DexAnkylosaurus_1.png
+	PalmGuy = { frames = 12, time = 0.03, "" }, -- dex/DexPalmGuy_1.png
 	Phoenix = { frames = 24, time = 0.04, "rbxassetid://82014579609498" }, -- dex/DexPhoenix_1.png
 	Lionfish = { frames = 24, time = 0.03, "rbxassetid://111810935342924" }, -- dex/DexLionfish_1.png
 	VolcanoTortoise = { frames = 20, time = 0.03, "rbxassetid://120212888052337" }, -- dex/DexVolcanoTortoise_1.png
@@ -144,6 +145,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Spinosaurus = "Built a sail on its back and still cannot sail. Fishes instead.",
 	Pterodactyl = "Not technically a dinosaur. Please do not tell it, it is very proud.",
 	Ankylosaurus = "Built like a tank, swings its tail like a hammer. Hugs are not recommended.",
+	PalmGuy = "Thinks the Cactus is his long-lost cousin. The Cactus disagrees.",
 	Phoenix = "Burns up, crumbles to ash, hatches again. Has done it so many times it finds it boring.",
 	VolcanoTortoise = "Fell asleep in the sun for three hundred years. Woke up as a volcano.",
 	Loong = "The loongest dragon around. Ex sword-swallower for the circus, passionate about entertainment.",
