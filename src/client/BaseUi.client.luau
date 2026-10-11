@@ -273,6 +273,14 @@ local function hint(quest)
 	end
 end
 
+local claimPulses = {} -- [UIScale] = true: the CLAIM buttons up, pulsing (below)
+RunService.RenderStepped:Connect(function()
+	local s = 1 + 0.05 * math.sin(os.clock() * 5)
+	for pulse in claimPulses do
+		pulse.Scale = s
+	end
+end)
+
 local function questRow(i, quest, y)
 	local done = quest.have >= quest.need
 	local row = Instance.new("Frame")
@@ -338,9 +346,7 @@ local function questRow(i, quest, y)
 		claim.Image = QUEST_ART.claim
 		claim.BackgroundColor3 = Color3.fromRGB(59, 255, 95)
 		claim.BackgroundTransparency = if QUEST_ART.claim == "" then 0 else 1
-		claim.AnchorPoint = Vector2.new(0.5, 0)
-		claim.Position = UDim2.fromOffset(Q.width / 2, 0)
-		claim.Size = UDim2.fromOffset(Q.claim.X, Q.claim.Y)
+		claim.Size = UDim2.fromScale(1, 1)
 		claim:SetAttribute("Hover", 1.04)
 		pressable(claim)
 		if QUEST_ART.claim == "" then
@@ -363,7 +369,21 @@ local function questRow(i, quest, y)
 			end
 			claiming = false
 		end)
-		claim.Parent = row
+		-- (in a holder that pulses about its middle: QM, Oct 11; the button's own UIScale is its press)
+		local holder = Instance.new("Frame")
+		holder.Name = "ClaimPulse"
+		holder.BackgroundTransparency = 1
+		holder.AnchorPoint = Vector2.new(0.5, 0.5)
+		holder.Position = UDim2.fromOffset(Q.width / 2, Q.claim.Y / 2)
+		holder.Size = UDim2.fromOffset(Q.claim.X, Q.claim.Y)
+		local pulse = Instance.new("UIScale")
+		pulse.Parent = holder
+		claimPulses[pulse] = true
+		pulse.Destroying:Connect(function()
+			claimPulses[pulse] = nil
+		end)
+		claim.Parent = holder
+		holder.Parent = row
 	end
 	row.Parent = quests
 	return row.Size.Y.Offset
@@ -396,8 +416,8 @@ local function drawQuests()
 	-- A pulsing tap hand on a quest ready to claim: the bottom one, if there are two (QM, Oct 11).
 	local lastClaim
 	for _, row in quests:GetChildren() do
-		local claim = row.Name == "Quest" and row:FindFirstChild("Claim")
-		if claim and (not lastClaim or row.Position.Y.Offset > lastClaim.Parent.Position.Y.Offset) then
+		local claim = row.Name == "Quest" and row:FindFirstChild("Claim", true)
+		if claim and (not lastClaim or row.Position.Y.Offset > lastClaim.Parent.Parent.Position.Y.Offset) then
 			lastClaim = claim
 		end
 	end
