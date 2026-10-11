@@ -1110,8 +1110,9 @@ local function updateGuide()
 	if vfx.huntTarget then
 		target = Vector3.new(vfx.huntTarget.x, 0, vfx.huntTarget.z) -- the Robo Shark's prey while it hunts
 	elseif player:GetAttribute("LassoGuide") and mount and phase == "outbound" and not transfer then
-		-- (the tutorial's: to the nearest animal ahead, till you lasso one: Client/Tutorial)
-		local best, bestD = nil, 260
+		-- (the tutorial's: to the nearest animal ahead, till you lasso one: Client/Tutorial;
+		-- to the one the lasso prompt's on whenever there is one, QM)
+		local best, bestD = actionTarget, if actionTarget then -1 else 260
 		for _, e in allAnimals() do
 			local d = mount.z - e.z
 			if e ~= mount and not e.popping and d > 4 and d < bestD then
