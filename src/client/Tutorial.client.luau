@@ -284,8 +284,8 @@ local function run()
 	end
 	funnel("place")
 
-	-- 1. Place your egg.
-	while on() and not penEgg() and #myPets() == 0 do
+	-- 1. Place your egg: the tap hand on it, then on your pen.
+	local function placeEgg()
 		local tool, held = eggTool()
 		local pen = myPen()
 		local area = pen and pen:FindFirstChild("Area")
@@ -297,24 +297,26 @@ local function run()
 			guide(area.Position)
 		else
 			pointAt(nil)
+			guide(nil)
 		end
-		task.wait(0.1)
 	end
 
 	while on() do
-		-- 2. Hatch it, 3. ride it.
+		-- 1. Place it, 2. hatch it, 3. ride it: whichever you're at (a "/tutorial" mid-way
+		-- puts you back at 1 without this loop starting again).
 		while on() and not Hud.isRiding() do
 			local egg = penEgg()
 			local pets = myPets()
-			pointAt(nil)
 			if egg and #pets == 0 then
+				pointAt(nil)
 				guide(egg)
 			elseif #pets > 0 then
+				pointAt(nil)
 				guide(pets[1])
 			else
-				guide(nil)
+				placeEgg()
 			end
-			task.wait(0.15)
+			task.wait(0.1)
 		end
 		if not on() then
 			break
