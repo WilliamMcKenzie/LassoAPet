@@ -60,7 +60,7 @@ local SHEETS = {
 	Rockworm = { frames = 48, time = 0.06, "rbxassetid://101259765786362", "rbxassetid://98609799525177" }, -- dex/DexRockworm_1.png, _2
 	FireLobster = { frames = 48, time = 0.05, "rbxassetid://136257565701438", "rbxassetid://116867911164006" }, -- dex/DexFireLobster_1.png, _2
 	LavaWhale = { frames = 24, time = 0.03, "rbxassetid://107947322659885" }, -- dex/DexLavaWhale_1.png
-	TRex = { frames = 17, time = 0.03, "" }, -- dex/DexTRex_1.png (Studio uploads)
+	TRex = { frames = 17, time = 0.03, "rbxassetid://83277205426899" }, -- dex/DexTRex_1.png
 	Phoenix = { frames = 24, time = 0.04, "rbxassetid://82014579609498" }, -- dex/DexPhoenix_1.png
 	Lionfish = { frames = 24, time = 0.03, "rbxassetid://111810935342924" }, -- dex/DexLionfish_1.png
 	VolcanoTortoise = { frames = 20, time = 0.03, "rbxassetid://120212888052337" }, -- dex/DexVolcanoTortoise_1.png
