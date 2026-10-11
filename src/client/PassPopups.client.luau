@@ -17,6 +17,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Hud = require(script.Parent.Hud)
 
 local player = Players.LocalPlayer
 local world = workspace:WaitForChild("World")
@@ -163,12 +164,12 @@ local function moment(key)
 	show(key)
 end
 
--- Hidden while a menu's up over the base (BaseUi's "Modal").
+-- Hidden while a menu's up over the base (BaseUi's "Modal") or you're riding.
 local baseRoot
 RunService.RenderStepped:Connect(function()
 	if current then
 		baseRoot = baseRoot or player.PlayerGui:FindFirstChild("BaseUi") and player.PlayerGui.BaseUi:FindFirstChild("Root")
-		current.card.Visible = not (baseRoot and baseRoot:GetAttribute("Modal"))
+		current.card.Visible = not (baseRoot and baseRoot:GetAttribute("Modal")) and not Hud.isRiding() -- (none on a ride: QM)
 	end
 end)
 
