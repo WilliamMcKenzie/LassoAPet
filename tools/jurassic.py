@@ -7,7 +7,7 @@ Re-running replaces what a previous run wrote (JGND floor, JWAL walls, JNST nest
 JRIB ribcage in World.Decor). It also moves the far wall to the Jurassic's end.
 
 The floor is drawn as it shows in game, after tools/funnel.luau (tools/funnel_grid.py):
-grass with the trail wandering down the middle, flush. The ribcage stands in World.Decor
+grass with the trail wandering down the middle, a stud lower. The ribcage stands in World.Decor
 in game coordinates (the funnel leaves Decor be): bones only to look at, nothing hits them.
 """
 import math
@@ -28,7 +28,7 @@ Z_START = VO.END  # the volcano's far edge
 LENGTH = 7680     # as long as the volcano (Config.Biomes Jurassic.Length, a guess)
 END = Z_START - LENGTH
 KINDS = ("Ground", "Trail")
-TOP = (0, 0)
+TOP = (0, -1)  # the trail a stud below the grass, like the meadow's dirt (QM, Oct 11)
 NESTS = [((16, -18) [k % 2], Z_START - 500 - k * 1100) for k in range(7)]
 START_CLEAR = 16
 BAND = 1024

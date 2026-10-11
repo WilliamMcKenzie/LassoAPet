@@ -3034,386 +3034,917 @@
 },
 {
 "asset": "JungleTree",
-"x": 46.66,
-"z": -24042.81,
-"yaw": 72.6,
+"x": -49.98,
+"z": -13514,
+"yaw": 179.7,
 "y": 0.0,
 "tier": 3,
-"biome": "Jurassic"
-},
-{
-"asset": "RockPebble",
-"x": 30.45,
-"z": -24027.1,
-"yaw": 6.1,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockStone",
-"x": 43.97,
-"z": -24055.65,
-"yaw": 185.3,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": -36.55,
-"z": -24132.39,
-"yaw": 163.2,
-"y": 0.0,
-"tier": 2,
 "biome": "Jurassic"
 },
 {
 "asset": "Horsetail",
-"x": -33.93,
-"z": -24120.55,
-"yaw": 45.1,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockBoulder",
-"x": 36.57,
-"z": -24198.84,
-"yaw": 224.3,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": 38.28,
-"z": -24179.56,
-"yaw": 301.5,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockPebble",
-"x": 40.9,
-"z": -24215.86,
-"yaw": 153.4,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": -42.68,
-"z": -24445.48,
-"yaw": 66.5,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": -37.54,
-"z": -24432.14,
-"yaw": 222.6,
+"x": -47.23,
+"z": -13530,
+"yaw": 99.1,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": 46.55,
-"z": -24520.33,
-"yaw": 43.0,
+"x": 49.95,
+"z": -13566,
+"yaw": 283.7,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
-"asset": "RockPebble",
-"x": 31.83,
-"z": -24505.98,
-"yaw": 116.1,
+"asset": "Fern",
+"x": 39.54,
+"z": -13562.0,
+"yaw": 174.1,
 "y": 0.0,
 "tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": 44.28,
+"z": -13546,
+"yaw": 213.0,
+"y": 0.0,
+"tier": 2,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": -44.71,
-"z": -24607.26,
-"yaw": 339.7,
+"x": -49.52,
+"z": -13618,
+"yaw": 288.8,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": -34.49,
-"z": -24596.59,
-"yaw": 24.6,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockBoulder",
-"x": 32.6,
-"z": -24681.55,
-"yaw": 205.3,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Horsetail",
-"x": 47.32,
-"z": -24667.35,
-"yaw": 273.4,
+"x": -41.41,
+"z": -13610.65,
+"yaw": 46.4,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "Cycad",
-"x": -31.3,
-"z": -24774.45,
-"yaw": 148.2,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "RockBoulder",
-"x": 40.73,
-"z": -24837.9,
-"yaw": 93.0,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "RockPebble",
-"x": 31.33,
-"z": -24819.63,
-"yaw": 168.5,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockPebble",
-"x": 45.6,
-"z": -24856.46,
-"yaw": 202.4,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": -37.55,
-"z": -24903.31,
-"yaw": 7.0,
+"x": 50.45,
+"z": -13670,
+"yaw": 72.3,
 "y": 0.0,
 "tier": 2,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": -33.58,
-"z": -24893.59,
-"yaw": 186.9,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "JungleTree",
-"x": 45.82,
-"z": -24988.27,
-"yaw": 178.8,
-"y": 0.0,
-"tier": 3,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": 45.82,
-"z": -25001.21,
-"yaw": 207.0,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockBoulder",
-"x": 41.65,
-"z": -25157.46,
-"yaw": 135.7,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "RockStone",
-"x": 41.81,
-"z": -25135.89,
-"yaw": 90.9,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockStone",
-"x": 43.06,
-"z": -25175.08,
-"yaw": 27.4,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockBoulder",
-"x": -40.12,
-"z": -25245.03,
-"yaw": 102.6,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": 48.49,
-"z": -25332.6,
-"yaw": 348.5,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": 32.56,
-"z": -25323.73,
-"yaw": 77.2,
+"x": 42.34,
+"z": -13673.09,
+"yaw": 168.8,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "Horsetail",
-"x": 41.45,
-"z": -25343.09,
-"yaw": 256.2,
+"x": 47.71,
+"z": -13686,
+"yaw": 326.2,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": -46.41,
-"z": -25398.07,
-"yaw": 143.7,
+"x": -47.47,
+"z": -13722,
+"yaw": 122.2,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
-"asset": "JungleTree",
-"x": -35.33,
-"z": -25577.25,
-"yaw": 290.9,
+"asset": "Fern",
+"x": -39.37,
+"z": -13731.66,
+"yaw": 57.5,
 "y": 0.0,
-"tier": 3,
+"tier": 1,
 "biome": "Jurassic"
 },
 {
-"asset": "RockPebble",
-"x": -43.39,
-"z": -25564.86,
-"yaw": 355.6,
+"asset": "RockStone",
+"x": -44.35,
+"z": -13702,
+"yaw": 358.7,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": 27.95,
-"z": -25624.29,
-"yaw": 29.2,
+"x": 48.56,
+"z": -13774,
+"yaw": 248.8,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
-"asset": "RockPebble",
-"x": 34.35,
-"z": -25612.7,
-"yaw": 205.0,
+"asset": "Fern",
+"x": 40.47,
+"z": -13782.91,
+"yaw": 12.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 50.17,
+"z": -13791.48,
+"yaw": 8.9,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": -51.5,
-"z": -25721.38,
-"yaw": 249.1,
+"x": -46.87,
+"z": -13826,
+"yaw": 167.9,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
-"asset": "RockPebble",
-"x": -45.97,
-"z": -25708.34,
-"yaw": 329.4,
+"asset": "Fern",
+"x": -38.81,
+"z": -13833.46,
+"yaw": 266.1,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
-"asset": "RockPebble",
-"x": -48.37,
-"z": -25736.32,
-"yaw": 36.9,
+"asset": "Horsetail",
+"x": -44.16,
+"z": -13842,
+"yaw": 70.4,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "Cycad",
-"x": -30.36,
-"z": -25889.2,
-"yaw": 42.5,
+"x": 50.36,
+"z": -13878,
+"yaw": 215.4,
 "y": 0.0,
 "tier": 2,
 "biome": "Jurassic"
 },
 {
+"asset": "Fern",
+"x": 42.34,
+"z": -13870.08,
+"yaw": 9.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockStone",
+"x": 44.42,
+"z": -13858,
+"yaw": 68.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
 "asset": "JungleTree",
-"x": 49.65,
-"z": -25960.81,
-"yaw": 44.3,
+"x": -50.24,
+"z": -13930,
+"yaw": 6.5,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": 36.13,
-"z": -25946.99,
-"yaw": 163.1,
+"x": -40.32,
+"z": -13931.45,
+"yaw": 307.1,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": 36.03,
-"z": -25973.17,
+"x": -50.96,
+"z": -13949.89,
+"yaw": 157.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 49.26,
+"z": -13982,
+"yaw": 268.7,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.24,
+"z": -13991.2,
+"yaw": 24.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 49.6,
+"z": -14000.67,
+"yaw": 196.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.74,
+"z": -14034,
+"yaw": 249.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -39.3,
+"z": -14028.52,
+"yaw": 12.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": -44.5,
+"z": -14014,
+"yaw": 129.4,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.96,
+"z": -14086,
+"yaw": 359.6,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.98,
+"z": -14093.12,
+"yaw": 88.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -50.19,
+"z": -14138,
+"yaw": 199.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -40.59,
+"z": -14135.23,
+"yaw": 113.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -47.5,
+"z": -14154,
+"yaw": 142.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 46.68,
+"z": -14190,
+"yaw": 41.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 38.73,
+"z": -14198.28,
+"yaw": 202.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": 44.57,
+"z": -14170,
+"yaw": 326.6,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.63,
+"z": -14242,
+"yaw": 24.0,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -39.72,
+"z": -14235.87,
+"yaw": 246.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 50.12,
+"z": -14294,
+"yaw": 140.5,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.13,
+"z": -14291.03,
+"yaw": 224.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 47.46,
+"z": -14310,
+"yaw": 128.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.52,
+"z": -14346,
+"yaw": 104.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.95,
+"z": -14339.18,
+"yaw": 242.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": -45.34,
+"z": -14325.07,
+"yaw": 282.2,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 47.96,
+"z": -14398,
+"yaw": 324.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 39.35,
+"z": -14392.31,
+"yaw": 315.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.25,
+"z": -14450,
+"yaw": 178.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -39.41,
+"z": -14442.37,
+"yaw": 39.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -44.61,
+"z": -14466,
+"yaw": 315.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.15,
+"z": -14502,
+"yaw": 32.7,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 39.14,
+"z": -14499.16,
+"yaw": 222.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": 44.7,
+"z": -14482,
+"yaw": 190.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.61,
+"z": -14554,
+"yaw": 48.3,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.24,
+"z": -14552.32,
+"yaw": 74.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 50.45,
+"z": -14606,
+"yaw": 57.3,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 42.23,
+"z": -14611.62,
+"yaw": 138.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 47.81,
+"z": -14622,
+"yaw": 266.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.16,
+"z": -14658,
+"yaw": 10.5,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -40.35,
+"z": -14667.1,
+"yaw": 162.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockStone",
+"x": -44.77,
+"z": -14638,
+"yaw": 314.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 46.86,
+"z": -14710,
+"yaw": 131.4,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 39.09,
+"z": -14702.25,
+"yaw": 334.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -50.32,
+"z": -14762,
+"yaw": 324.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -42.56,
+"z": -14754.59,
+"yaw": 348.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -47.7,
+"z": -14778,
+"yaw": 213.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 47.93,
+"z": -14814,
+"yaw": 134.4,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.17,
+"z": -14820.34,
+"yaw": 105.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": 44.84,
+"z": -14794,
+"yaw": 117.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.87,
+"z": -14866,
+"yaw": 180.8,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 48.61,
+"z": -14918,
+"yaw": 143.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 39.89,
+"z": -14919.6,
+"yaw": 167.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 46.01,
+"z": -14934,
+"yaw": 258.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.0,
+"z": -14970,
+"yaw": 131.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -35.86,
+"z": -14968.75,
+"yaw": 283.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": -44.91,
+"z": -14950,
+"yaw": 6.5,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 50.76,
+"z": -15022,
+"yaw": 215.5,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.91,
+"z": -15028.83,
+"yaw": 0.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -43.25,
+"z": -15079.42,
+"yaw": 245.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -47.38,
+"z": -15090,
+"yaw": 145.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.64,
+"z": -15126,
+"yaw": 298.1,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.98,
+"z": -15130.5,
+"yaw": 11.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockStone",
+"x": 44.97,
+"z": -15106,
+"yaw": 7.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.46,
+"z": -15178,
+"yaw": 44.0,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -39.83,
+"z": -15168.52,
+"yaw": 76.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 49.77,
+"z": -15230,
+"yaw": 244.5,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 42.15,
+"z": -15222.34,
+"yaw": 106.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 47.2,
+"z": -15246,
+"yaw": 135.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.9,
+"z": -15282,
+"yaw": 285.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": -45.04,
+"z": -15262,
+"yaw": 207.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 48.06,
+"z": -15334,
+"yaw": 138.7,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 36.91,
+"z": -15336.48,
+"yaw": 255.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.54,
+"z": -15386,
+"yaw": 315.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -39.94,
+"z": -15392.95,
+"yaw": 222.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -44.98,
+"z": -15402,
+"yaw": 226.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 50.32,
+"z": -15438,
+"yaw": 300.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": 45.1,
+"z": -15418,
+"yaw": 166.1,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.97,
+"z": -15490,
+"yaw": 93.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.16,
+"z": -15497.15,
+"yaw": 353.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -51.08,
+"z": -15507.26,
 "yaw": 161.4,
 "y": 0.0,
 "tier": 1,
@@ -3421,575 +3952,1250 @@
 },
 {
 "asset": "Cycad",
-"x": -52.25,
-"z": -26031.08,
-"yaw": 277.1,
+"x": 48.32,
+"z": -15542,
+"yaw": 82.3,
 "y": 0.0,
 "tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.76,
+"z": -15551.57,
+"yaw": 243.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 47.8,
+"z": -15558.69,
+"yaw": 347.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -50.32,
+"z": -15594,
+"yaw": 59.4,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -41.93,
+"z": -15602.27,
+"yaw": 225.4,
+"y": 0.0,
+"tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "RockBoulder",
-"x": 45.13,
-"z": -26122.25,
-"yaw": 266.5,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": 44.21,
-"z": -26106.66,
-"yaw": 348.5,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": 31.89,
-"z": -26140.08,
-"yaw": 206.2,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": 50.04,
-"z": -26286.43,
-"yaw": 204.8,
+"x": -45.17,
+"z": -15574,
+"yaw": 163.6,
 "y": 0.0,
 "tier": 2,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": -35.71,
-"z": -26369.63,
-"yaw": 350.3,
+"x": 47.89,
+"z": -15646,
+"yaw": 290.2,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
-"asset": "RockPebble",
-"x": -33.55,
-"z": -26358.18,
-"yaw": 118.1,
+"asset": "Fern",
+"x": 51.18,
+"z": -15662.51,
+"yaw": 331.2,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": -36.98,
-"z": -26528.76,
-"yaw": 273.6,
+"x": -49.99,
+"z": -15698,
+"yaw": 186.8,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
 "asset": "Horsetail",
-"x": -35.09,
-"z": -26519.01,
+"x": -47.47,
+"z": -15714,
+"yaw": 119.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 46.94,
+"z": -15750,
+"yaw": 161.5,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 39.45,
+"z": -15756.82,
+"yaw": 190.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": 45.23,
+"z": -15730,
+"yaw": 249.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.24,
+"z": -15802,
+"yaw": 14.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -51.15,
+"z": -15818.39,
+"yaw": 111.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 50.59,
+"z": -15854,
+"yaw": 161.4,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 48.07,
+"z": -15870,
+"yaw": 333.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.6,
+"z": -15906,
+"yaw": 303.5,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -42.15,
+"z": -15915.09,
+"yaw": 319.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockStone",
+"x": -45.29,
+"z": -15886,
+"yaw": 85.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 50.31,
+"z": -15958,
+"yaw": 267.2,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 42.9,
+"z": -15948.21,
+"yaw": 345.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -50.98,
+"z": -16010,
+"yaw": 95.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -48.49,
+"z": -16026,
+"yaw": 167.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 51.04,
+"z": -16062,
+"yaw": 202.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": 45.35,
+"z": -16042,
+"yaw": 69.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -50.17,
+"z": -16114,
+"yaw": 58.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -42.78,
+"z": -16122.48,
+"yaw": 75.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 45.67,
+"z": -16182,
+"yaw": 47.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.63,
+"z": -16218,
+"yaw": 110.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -39.47,
+"z": -16222.95,
+"yaw": 270.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": -45.38,
+"z": -16198,
+"yaw": 103.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 49.39,
+"z": -16270,
+"yaw": 63.4,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 50.52,
+"z": -16289.78,
+"yaw": 146.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -50.63,
+"z": -16322,
+"yaw": 101.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -43.28,
+"z": -16315.06,
+"yaw": 349.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -48.18,
+"z": -16338,
+"yaw": 134.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 47.54,
+"z": -16374,
+"yaw": 314.5,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.18,
+"z": -16379.64,
+"yaw": 98.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": 45.37,
+"z": -16354,
+"yaw": 110.2,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.19,
+"z": -16426,
+"yaw": 131.4,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -50.57,
+"z": -16444.47,
+"yaw": 306.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 48.73,
+"z": -16478,
+"yaw": 218.0,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 46.27,
+"z": -16494,
+"yaw": 79.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.31,
+"z": -16530,
+"yaw": 318.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.88,
+"z": -16535.07,
+"yaw": 27.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": -45.37,
+"z": -16510,
+"yaw": 242.3,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 48.12,
+"z": -16582,
 "yaw": 10.4,
 "y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": -51.91,
-"z": -26675.42,
-"yaw": 13.4,
-"y": 0.0,
 "tier": 2,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": -39.28,
-"z": -26666.68,
-"yaw": 3.9,
+"x": 40.58,
+"z": -16587.12,
+"yaw": 193.3,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
-"asset": "RockPebble",
-"x": -35.78,
-"z": -26688.85,
-"yaw": 71.5,
+"asset": "JungleTree",
+"x": -50.6,
+"z": -16634,
+"yaw": 16.3,
 "y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": 39.54,
-"z": -26770.88,
-"yaw": 256.3,
-"y": 0.0,
-"tier": 2,
+"tier": 3,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": 43.02,
-"z": -26761.11,
-"yaw": 245.3,
+"x": -41.79,
+"z": -16640.49,
+"yaw": 208.9,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "Horsetail",
-"x": 26.8,
-"z": -26778.99,
-"yaw": 22.0,
+"x": -48.14,
+"z": -16650,
+"yaw": 212.6,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": -33.67,
-"z": -26843.86,
-"yaw": 204.8,
+"x": 47.73,
+"z": -16686,
+"yaw": 34.2,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": -27.84,
-"z": -26831.04,
-"yaw": 153.3,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockStone",
-"x": -38.19,
-"z": -26859.16,
-"yaw": 87.3,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "JungleTree",
-"x": -46.13,
-"z": -27002.25,
-"yaw": 142.3,
-"y": 0.0,
-"tier": 3,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": -29.91,
-"z": -26989.22,
-"yaw": 294.4,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockStone",
-"x": -30.81,
-"z": -27014.67,
+"x": 37.69,
+"z": -16688.1,
 "yaw": 274.7,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
-"asset": "Cycad",
-"x": 49.25,
-"z": -27233.54,
-"yaw": 356.6,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": -48.94,
-"z": -27801.13,
-"yaw": 296.5,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": -49.1,
-"z": -27787.89,
-"yaw": 188.4,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
 "asset": "RockStone",
-"x": -33.84,
-"z": -27812.24,
-"yaw": 252.3,
+"x": 45.37,
+"z": -16666,
+"yaw": 267.1,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": 35.16,
-"z": -27885.71,
-"yaw": 316.2,
-"y": 0.0,
-"tier": 3,
-"biome": "Jurassic"
-},
-{
-"asset": "RockCrag",
-"x": -39.24,
-"z": -28110.43,
-"yaw": 281.5,
-"y": 0.0,
-"tier": 3,
-"biome": "Jurassic"
-},
-{
-"asset": "JungleTree",
-"x": 44.18,
-"z": -28210.66,
-"yaw": 138.6,
+"x": -50.14,
+"z": -16738,
+"yaw": 103.4,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": 47.15,
-"z": -28197.0,
-"yaw": 321.0,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockStone",
-"x": 37.16,
-"z": -28227.27,
-"yaw": 326.8,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockBoulder",
-"x": 38.15,
-"z": -28523.94,
-"yaw": 21.5,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": 46.1,
-"z": -28507.1,
-"yaw": 105.4,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockPebble",
-"x": 38.95,
-"z": -28545.08,
-"yaw": 6.7,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockBoulder",
-"x": -33.54,
-"z": -28607.91,
-"yaw": 350.3,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "RockBoulder",
-"x": 41.59,
-"z": -28674.07,
-"yaw": 119.5,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": 28.22,
-"z": -28654.62,
-"yaw": 164.7,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": 42.63,
-"z": -28693.36,
-"yaw": 254.0,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "JungleTree",
-"x": -36.91,
-"z": -28908.81,
-"yaw": 303.8,
-"y": 0.0,
-"tier": 3,
-"biome": "Jurassic"
-},
-{
-"asset": "RockPebble",
-"x": -36.98,
-"z": -28895.32,
-"yaw": 185.2,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "JungleTree",
-"x": -29.29,
-"z": -29078.14,
-"yaw": 143.5,
-"y": 0.0,
-"tier": 3,
-"biome": "Jurassic"
-},
-{
-"asset": "RockPebble",
-"x": -35.21,
-"z": -29064.28,
-"yaw": 68.4,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "JungleTree",
-"x": 37.41,
-"z": -29321.78,
-"yaw": 82.8,
-"y": 0.0,
-"tier": 3,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": 41.09,
-"z": -29308.76,
-"yaw": 152.1,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": 45.22,
-"z": -29336.05,
-"yaw": 346.8,
+"x": -51.13,
+"z": -16755.67,
+"yaw": 225.9,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "Cycad",
-"x": -49.41,
-"z": -29384.22,
-"yaw": 230.8,
+"x": 48.84,
+"z": -16790,
+"yaw": 121.3,
 "y": 0.0,
 "tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "RockCrag",
-"x": -40.28,
-"z": -29565.53,
-"yaw": 172.0,
-"y": 0.0,
-"tier": 3,
-"biome": "Jurassic"
-},
-{
-"asset": "RockStone",
-"x": -34.68,
-"z": -29541.27,
-"yaw": 238.2,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockCrag",
-"x": 40.26,
-"z": -29638.13,
-"yaw": 219.3,
-"y": 0.0,
-"tier": 3,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": 29.68,
-"z": -29613.71,
-"yaw": 294.9,
+"x": 40.39,
+"z": -16786.41,
+"yaw": 45.0,
 "y": 0.0,
 "tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockPebble",
-"x": 40.83,
-"z": -29664.41,
-"yaw": 251.8,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": -26.26,
-"z": -29719.32,
-"yaw": 250.7,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "RockPebble",
-"x": -46.2,
-"z": -29708.47,
-"yaw": 13.5,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Fern",
-"x": -28.71,
-"z": -29731.17,
-"yaw": 283.5,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockBoulder",
-"x": 45.32,
-"z": -29807.13,
-"yaw": 279.6,
-"y": 0.0,
-"tier": 2,
 "biome": "Jurassic"
 },
 {
 "asset": "Horsetail",
-"x": 28.96,
-"z": -29789.46,
+"x": 46.39,
+"z": -16806,
+"yaw": 106.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -50.84,
+"z": -16842,
+"yaw": 215.0,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -43.48,
+"z": -16850.37,
+"yaw": 82.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": -45.37,
+"z": -16822,
+"yaw": 161.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 49.25,
+"z": -16894,
+"yaw": 11.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.89,
+"z": -16885.05,
+"yaw": 82.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 51.26,
+"z": -16910.14,
+"yaw": 114.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.16,
+"z": -16946,
+"yaw": 211.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.54,
+"z": -16941.31,
+"yaw": 39.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -46.7,
+"z": -16962,
+"yaw": 186.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 48.28,
+"z": -16998,
+"yaw": 224.3,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.92,
+"z": -17004.81,
+"yaw": 128.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": 45.37,
+"z": -16978,
+"yaw": 32.7,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": -48.32,
+"z": -17050,
+"yaw": 157.1,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -39.19,
+"z": -17049.11,
+"yaw": 134.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -49.91,
+"z": -17067.3,
+"yaw": 107.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.43,
+"z": -17102,
+"yaw": 283.5,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 42.07,
+"z": -17097.4,
+"yaw": 152.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 46.98,
+"z": -17118,
+"yaw": 4.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": -48.45,
+"z": -17154,
+"yaw": 146.4,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -41.09,
+"z": -17161.66,
+"yaw": 227.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": -45.37,
+"z": -17134,
+"yaw": 160.2,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.84,
+"z": -17206,
+"yaw": 96.9,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 50.56,
+"z": -17224.22,
+"yaw": 348.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 48.02,
+"z": -17310,
+"yaw": 266.8,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.12,
+"z": -17304.24,
+"yaw": 64.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": 45.37,
+"z": -17290,
+"yaw": 147.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.44,
+"z": -17362,
+"yaw": 24.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 47.24,
+"z": -17414,
+"yaw": 6.9,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 36.63,
+"z": -17417.29,
+"yaw": 272.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 44.78,
+"z": -17430,
+"yaw": 65.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.84,
+"z": -17466,
+"yaw": 264.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": -45.37,
+"z": -17446,
+"yaw": 247.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 48.29,
+"z": -17518,
+"yaw": 195.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.63,
+"z": -17570,
+"yaw": 305.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -39.04,
+"z": -17567.28,
+"yaw": 272.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -47.18,
+"z": -17586,
+"yaw": 348.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 47.41,
+"z": -17622,
+"yaw": 156.8,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.06,
+"z": -17615.33,
 "yaw": 8.5,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
+"asset": "JungleTree",
+"x": -50.35,
+"z": -17674,
+"yaw": 248.7,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 49.91,
+"z": -17726,
+"yaw": 47.8,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
 "asset": "Fern",
-"x": 45.32,
-"z": -29788.88,
-"yaw": 105.4,
+"x": 40.64,
+"z": -17729.65,
+"yaw": 129.9,
 "y": 0.0,
 "tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": -41.06,
-"z": -29896.09,
-"yaw": 63.7,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "RockBoulder",
-"x": 36.1,
-"z": -29958.45,
-"yaw": 242.9,
-"y": 0.0,
-"tier": 2,
 "biome": "Jurassic"
 },
 {
 "asset": "Horsetail",
-"x": 49.61,
-"z": -29943.98,
-"yaw": 32.1,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "RockStone",
-"x": 38.57,
-"z": -29975.98,
-"yaw": 212.7,
+"x": 47.46,
+"z": -17742,
+"yaw": 279.9,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": -38.72,
-"z": -30051.95,
-"yaw": 267.6,
+"x": -47.27,
+"z": -17778,
+"yaw": 183.7,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
+"asset": "Fern",
+"x": -40.11,
+"z": -17768.12,
+"yaw": 207.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": -47.42,
+"z": -17757.59,
+"yaw": 67.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
 "asset": "Cycad",
-"x": 34.53,
-"z": -30106.49,
-"yaw": 0.9,
+"x": 50.02,
+"z": -17830,
+"yaw": 302.2,
 "y": 0.0,
 "tier": 2,
 "biome": "Jurassic"
 },
 {
+"asset": "Fern",
+"x": 42.66,
+"z": -17824.1,
+"yaw": 41.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -50.96,
+"z": -17882,
+"yaw": 226.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -48.51,
+"z": -17898,
+"yaw": 72.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 47.26,
+"z": -17934,
+"yaw": 6.8,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 39.23,
+"z": -17941.51,
+"yaw": 221.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
 "asset": "RockPebble",
-"x": 30.75,
-"z": -30095.58,
-"yaw": 108.4,
+"x": 45.37,
+"z": -17914,
+"yaw": 234.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.58,
+"z": -17986,
+"yaw": 12.4,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -40.78,
+"z": -17978.54,
+"yaw": 312.5,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": 41.23,
-"z": -30115.53,
+"x": -50.95,
+"z": -18005.07,
+"yaw": 150.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.15,
+"z": -18038,
+"yaw": 199.9,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 46.7,
+"z": -18054,
+"yaw": 175.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.23,
+"z": -18090,
+"yaw": 352.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -40.87,
+"z": -18081.18,
+"yaw": 65.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockStone",
+"x": -45.8,
+"z": -18069.63,
+"yaw": 52.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 47.97,
+"z": -18142,
+"yaw": 300.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.61,
+"z": -18149.19,
+"yaw": 26.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.39,
+"z": -18194,
+"yaw": 150.5,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -40.03,
+"z": -18200.88,
+"yaw": 170.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -44.93,
+"z": -18210,
+"yaw": 133.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.49,
+"z": -18246,
+"yaw": 289.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.57,
+"z": -18243.44,
+"yaw": 51.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockStone",
+"x": 45.37,
+"z": -18226,
+"yaw": 142.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.62,
+"z": -18298,
+"yaw": 233.5,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.32,
+"z": -18291.11,
+"yaw": 358.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -51.0,
+"z": -18313.98,
+"yaw": 350.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -50.6,
+"z": -18402,
+"yaw": 141.7,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -43.24,
+"z": -18409.94,
+"yaw": 254.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": -45.37,
+"z": -18382,
+"yaw": 307.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 50.71,
+"z": -18454,
+"yaw": 180.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 43.36,
+"z": -18459.11,
+"yaw": 102.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 51.26,
+"z": -18476.01,
+"yaw": 51.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.66,
+"z": -18506,
+"yaw": 75.0,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -46.2,
+"z": -18522,
 "yaw": 256.4,
 "y": 0.0,
 "tier": 1,
@@ -3997,99 +5203,729 @@
 },
 {
 "asset": "JungleTree",
-"x": 48.77,
-"z": -30274.21,
-"yaw": 176.4,
+"x": 49.7,
+"z": -18558,
+"yaw": 274.8,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
-"asset": "RockPebble",
-"x": 39.76,
-"z": -30261.54,
-"yaw": 40.6,
+"asset": "Fern",
+"x": 40.73,
+"z": -18562.8,
+"yaw": 185.9,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
-"asset": "RockPebble",
-"x": 45.65,
-"z": -30286.13,
-"yaw": 353.1,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": -27.23,
-"z": -30371.2,
-"yaw": 42.8,
+"asset": "RockBoulder",
+"x": 45.37,
+"z": -18538,
+"yaw": 252.3,
 "y": 0.0,
 "tier": 2,
 "biome": "Jurassic"
 },
 {
+"asset": "JungleTree",
+"x": -50.07,
+"z": -18610,
+"yaw": 344.8,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -42.2,
+"z": -18603.88,
+"yaw": 311.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
 "asset": "Cycad",
-"x": -44.99,
-"z": -30503.77,
-"yaw": 347.0,
+"x": 49.2,
+"z": -18662,
+"yaw": 43.7,
 "y": 0.0,
 "tier": 2,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": -50.33,
-"z": -30493.24,
-"yaw": 52.4,
+"x": 40.19,
+"z": -18665.11,
+"yaw": 335.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 46.75,
+"z": -18678,
+"yaw": 79.5,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": 30.69,
-"z": -30594.13,
-"yaw": 220.0,
+"x": -49.48,
+"z": -18714,
+"yaw": 195.1,
 "y": 0.0,
 "tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "RockStone",
+"x": -45.37,
+"z": -18694,
+"yaw": 173.2,
+"y": 0.0,
+"tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": -41.41,
-"z": -30677.87,
-"yaw": 200.0,
+"x": 49.58,
+"z": -18766,
+"yaw": 88.9,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
+"asset": "Fern",
+"x": 39.03,
+"z": -18768.94,
+"yaw": 319.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -51.05,
+"z": -18818,
+"yaw": 28.3,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -48.6,
+"z": -18834,
+"yaw": 86.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
 "asset": "Cycad",
-"x": -31.29,
-"z": -30856.2,
-"yaw": 71.2,
+"x": 50.57,
+"z": -18870,
+"yaw": 80.4,
 "y": 0.0,
 "tier": 2,
 "biome": "Jurassic"
 },
 {
-"asset": "RockStone",
-"x": -32.28,
-"z": -30841.6,
-"yaw": 263.0,
+"asset": "Fern",
+"x": 43.21,
+"z": -18875.99,
+"yaw": 326.7,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "RockPebble",
-"x": -48.7,
-"z": -30867.46,
-"yaw": 61.3,
+"x": 45.37,
+"z": -18850,
+"yaw": 42.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.49,
+"z": -18922,
+"yaw": 164.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -41.13,
+"z": -18931.42,
+"yaw": 352.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 49.29,
+"z": -18974,
+"yaw": 159.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.28,
+"z": -18967.77,
+"yaw": 91.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 46.84,
+"z": -18990,
+"yaw": 100.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.27,
+"z": -19026,
+"yaw": 82.4,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -41.91,
+"z": -19017.28,
+"yaw": 154.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.38,
+"z": -19078,
+"yaw": 121.6,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 37.3,
+"z": -19078.03,
+"yaw": 27.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 50.42,
+"z": -19097.01,
+"yaw": 104.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.53,
+"z": -19130,
+"yaw": 64.1,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -36.85,
+"z": -19127.24,
+"yaw": 71.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -45.08,
+"z": -19146,
+"yaw": 211.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 47.85,
+"z": -19182,
+"yaw": 358.5,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": 45.37,
+"z": -19162,
+"yaw": 42.3,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.79,
+"z": -19234,
+"yaw": 324.8,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -41.43,
+"z": -19243.81,
+"yaw": 29.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 48.9,
+"z": -19286,
+"yaw": 327.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.54,
+"z": -19294.95,
+"yaw": 10.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 45.74,
+"z": -19303.55,
+"yaw": 279.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.26,
+"z": -19338,
+"yaw": 208.7,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.37,
+"z": -19330.9,
+"yaw": 306.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockStone",
+"x": -45.37,
+"z": -19318,
+"yaw": 166.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 50.38,
+"z": -19390,
+"yaw": 114.4,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.53,
+"z": -19393.11,
+"yaw": 103.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -41.97,
+"z": -19434.2,
+"yaw": 235.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 48.37,
+"z": -19494,
+"yaw": 134.4,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.01,
+"z": -19501.98,
+"yaw": 172.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": 45.37,
+"z": -19474,
+"yaw": 286.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -50.66,
+"z": -19546,
+"yaw": 72.8,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -40.63,
+"z": -19540.32,
+"yaw": 221.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -50.58,
+"z": -19564.06,
+"yaw": 235.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 47.61,
+"z": -19598,
+"yaw": 311.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 45.16,
+"z": -19614,
+"yaw": 103.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.8,
+"z": -19650,
+"yaw": 0.7,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.8,
+"z": -19652.12,
+"yaw": 202.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": -45.37,
+"z": -19630,
+"yaw": 90.7,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 48.42,
+"z": -19702,
+"yaw": 238.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.43,
+"z": -19698.37,
+"yaw": 329.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.19,
+"z": -19754,
+"yaw": 61.8,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -46.74,
+"z": -19770,
+"yaw": 242.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 50.18,
+"z": -19806,
+"yaw": 99.7,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.68,
+"z": -19799.16,
+"yaw": 327.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockStone",
+"x": 45.37,
+"z": -19786,
+"yaw": 294.3,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.97,
+"z": -19858,
+"yaw": 7.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -40.02,
+"z": -19864.0,
+"yaw": 39.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.4,
+"z": -19910,
+"yaw": 294.1,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 42.04,
+"z": -19918.83,
+"yaw": 146.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 47.65,
+"z": -19926.48,
+"yaw": 189.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.91,
+"z": -19962,
+"yaw": 73.5,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.71,
+"z": -19958.72,
+"yaw": 85.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockStone",
+"x": -45.37,
+"z": -19942,
+"yaw": 24.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 50.1,
+"z": -20014,
+"yaw": 104.0,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.6,
+"z": -20066,
+"yaw": 29.4,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -42.24,
+"z": -20056.71,
+"yaw": 237.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -47.14,
+"z": -20082,
+"yaw": 145.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 47.67,
+"z": -20118,
+"yaw": 254.8,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 38.83,
+"z": -20117.62,
+"yaw": 330.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": 45.37,
+"z": -20098,
+"yaw": 287.8,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.05,
+"z": -20170,
+"yaw": 286.7,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -48.86,
+"z": -20189.57,
+"yaw": 146.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 49.73,
+"z": -20222,
+"yaw": 23.7,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 42.38,
+"z": -20215.1,
+"yaw": 48.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 47.28,
+"z": -20238,
+"yaw": 102.8,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
@@ -4097,91 +5933,352 @@
 {
 "asset": "JungleTree",
 "x": -48.15,
-"z": -31010.64,
-"yaw": 253.2,
+"z": -20274,
+"yaw": 125.4,
 "y": 0.0,
 "tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": -45.37,
+"z": -20254,
+"yaw": 188.8,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 48.46,
+"z": -20326,
+"yaw": 241.7,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 41.1,
+"z": -20321.41,
+"yaw": 357.1,
+"y": 0.0,
+"tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "JungleTree",
-"x": -32.82,
-"z": -31176.05,
-"yaw": 185.7,
+"x": -48.01,
+"z": -20378,
+"yaw": 104.0,
 "y": 0.0,
 "tier": 3,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": -32.82,
-"z": -31163.11,
-"yaw": 133.6,
-"y": 0.0,
-"tier": 1,
-"biome": "Jurassic"
-},
-{
-"asset": "Cycad",
-"x": 30.56,
-"z": -31231.3,
-"yaw": 192.9,
-"y": 0.0,
-"tier": 2,
-"biome": "Jurassic"
-},
-{
-"asset": "Horsetail",
-"x": 40.45,
-"z": -31219.93,
-"yaw": 100.9,
+"x": -38.14,
+"z": -20382.37,
+"yaw": 275.2,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "Horsetail",
-"x": 43.1,
-"z": -31241.37,
-"yaw": 249.5,
+"x": -45.56,
+"z": -20394,
+"yaw": 157.0,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
-"asset": "Cycad",
-"x": 49.35,
-"z": -31387.48,
-"yaw": 289.4,
+"asset": "JungleTree",
+"x": 47.07,
+"z": -20430,
+"yaw": 205.4,
 "y": 0.0,
-"tier": 2,
+"tier": 3,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": 43.79,
-"z": -31378.31,
-"yaw": 282.5,
+"x": 39.71,
+"z": -20420.4,
+"yaw": 259.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.76,
+"z": -20482,
+"yaw": 26.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -40.4,
+"z": -20473.64,
+"yaw": 6.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.91,
+"z": -20534,
+"yaw": 336.4,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.24,
+"z": -20586,
+"yaw": 215.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -39.63,
+"z": -20581.17,
+"yaw": 203.8,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "RockPebble",
-"x": 47.76,
-"z": -31398.56,
-"yaw": 2.2,
+"x": -45.37,
+"z": -20566,
+"yaw": 42.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 49.35,
+"z": -20638,
+"yaw": 95.3,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 40.83,
+"z": -20647.2,
+"yaw": 125.2,
 "y": 0.0,
 "tier": 1,
 "biome": "Jurassic"
 },
 {
 "asset": "Fern",
-"x": -28.06,
-"z": -31453.66,
-"yaw": 16.0,
+"x": 51.19,
+"z": -20654.36,
+"yaw": 309.2,
 "y": 0.0,
 "tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.09,
+"z": -20690,
+"yaw": 5.9,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.69,
+"z": -20699.47,
+"yaw": 49.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -46.64,
+"z": -20706,
+"yaw": 232.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 49.78,
+"z": -20742,
+"yaw": 173.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 42.42,
+"z": -20736.87,
+"yaw": 107.4,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": 45.37,
+"z": -20722,
+"yaw": 103.7,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -47.24,
+"z": -20794,
+"yaw": 199.0,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -37.52,
+"z": -20797.28,
+"yaw": 31.9,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 48.81,
+"z": -20846,
+"yaw": 283.8,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 37.14,
+"z": -20849.65,
+"yaw": 168.5,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": 46.36,
+"z": -20862,
+"yaw": 283.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -49.36,
+"z": -20898,
+"yaw": 202.4,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -38.59,
+"z": -20894.08,
+"yaw": 7.0,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "RockPebble",
+"x": -45.37,
+"z": -20878,
+"yaw": 69.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Cycad",
+"x": 50.08,
+"z": -20950,
+"yaw": 76.0,
+"y": 0.0,
+"tier": 2,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": 50.18,
+"z": -20968.05,
+"yaw": 307.2,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": -48.58,
+"z": -21002,
+"yaw": 329.2,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "Fern",
+"x": -41.22,
+"z": -21009.01,
+"yaw": 140.6,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "Horsetail",
+"x": -46.13,
+"z": -21018,
+"yaw": 247.1,
+"y": 0.0,
+"tier": 1,
+"biome": "Jurassic"
+},
+{
+"asset": "JungleTree",
+"x": 49.59,
+"z": -21052.45,
+"yaw": 102.6,
+"y": 0.0,
+"tier": 3,
+"biome": "Jurassic"
+},
+{
+"asset": "RockBoulder",
+"x": 45.37,
+"z": -21034,
+"yaw": 238.9,
+"y": 0.0,
+"tier": 2,
 "biome": "Jurassic"
 }
 ]
