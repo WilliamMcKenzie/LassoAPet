@@ -136,7 +136,7 @@ function BossChase.start(x, z)
 end
 
 function BossChase.over()
-	return boss ~= nil and boss.t >= Config.Boss.CutsceneTime
+	return boss ~= nil and boss.t >= Config.Boss.CutsceneTime + (Config.Boss.ChargeTime or 0)
 end
 
 function BossChase.update(dt, chasing, x, z, speed)
@@ -170,6 +170,11 @@ function BossChase.update(dt, chasing, x, z, speed)
 		local was = boss.z
 		boss.z = math.min(boss.z + (speed or 0) * dt, z - cfg.Behind - boss.room, -cfg.StopShort - boss.room)
 		boss.x += (x - boss.x) * (1 - math.exp(-2 * dt))
+		moving = math.max(boss.z - was, 0) / math.max(dt, 1e-3)
+	elseif z and boss.t >= cfg.CutsceneTime - cfg.BarTime then
+		-- You're still stopped: it charges at you as the close-up ends (QM: so you see it start).
+		local was = boss.z
+		boss.z = math.min(boss.z + (cfg.ChargeSpeed or 0) * dt, z - cfg.Behind - boss.room)
 		moving = math.max(boss.z - was, 0) / math.max(dt, 1e-3)
 	end
 	place()

@@ -290,6 +290,9 @@ return {
 	Boss = {
 		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss", Volcano = "LavaWyrm" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
 		ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
+		-- (as the close-up ends it charges at you, ChargeSpeed studs/s, and you only turn for
+		-- home ChargeTime s after the cutscene, so you see it start the chase: QM, Oct 11)
+		ChargeTime = 1, ChargeSpeed = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 40, StopShort = 30,
 		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.6 }, -- (each boss's cry: QM, Oct 10)
