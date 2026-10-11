@@ -1,6 +1,6 @@
 -- The first-time tutorial (QM, Oct 11), after the intro (Client/Intro). One thing at a
--- time, no text: a tap hand on what to touch, arrows on the ground to where to go, and
--- only the UI each step needs (BaseUi stays hidden, the HUD is "bare": Hud.setTutorial).
+-- time: a tap hand on what to touch, arrows on the ground to where to go, QM's line of
+-- text along the top saying what to do (CAPTIONS), and only the UI each step needs (BaseUi stays hidden, the HUD is "bare": Hud.setTutorial).
 --
 --   1. egg    a Horse egg in your inventory: the tap hand on its square; once it's in
 --             your hand, the tap hand over your pen: place it.
@@ -45,6 +45,14 @@ local SPRINT_GUIDE = {
 	size = Vector2.new(3846, 162),
 	strips = { { "rbxassetid://128484192846174", 962 }, { "rbxassetid://118018475359108", 962 }, { "rbxassetid://139647408711436", 961 }, { "rbxassetid://114889489768256", 961 } },
 }
+-- QM's lines along the top, one per step (assets/ui/Tutorial*.png): { image, width, height }.
+local CAPTIONS = {
+	clickEgg = { "rbxassetid://TUTORIAL_CLICK_EGG", 468, 73 }, -- assets/ui/TutorialClickEgg.png: the egg in your inventory, and once it's placed, hatching it
+	placeEgg = { "rbxassetid://TUTORIAL_PLACE_EGG", 737, 73 }, -- assets/ui/TutorialPlaceEgg.png: holding it
+	ride = { "rbxassetid://TUTORIAL_RIDE", 476, 73 }, -- assets/ui/TutorialRide.png: your Horse is out
+	lasso = { "rbxassetid://TUTORIAL_LASSO", 471, 60 }, -- assets/ui/TutorialLasso.png: the first ride, till your first throw
+}
+local CAPTION_HEIGHT = 0.065 -- of the screen's height, for a 73 px tall line
 local SLOW_FLOOR = 0.02 -- the slow-down's bottom (x speed): all but stopped
 local SLOW_TIME = 0.5 -- seconds into the slow-down for its middle (the sigmoid's)
 local SLOW_STEEP = 9 -- how sharp its turn is
@@ -111,6 +119,26 @@ guideRatio.AspectRatio = SPRINT_GUIDE.size.X / SPRINT_GUIDE.size.Y
 guideRatio.Parent = sprintGuide
 sprintGuide.Visible = false
 sprintGuide.Parent = gui
+
+-- QM's line of text for the step you're on, along the top.
+local caption = Instance.new("ImageLabel")
+caption.BackgroundTransparency = 1
+caption.AnchorPoint = Vector2.new(0.5, 0)
+caption.Position = UDim2.fromScale(0.5, 0.1)
+caption.Visible = false
+local captionRatio = Instance.new("UIAspectRatioConstraint")
+captionRatio.Parent = caption
+caption.Parent = gui
+local captionOn -- the CAPTIONS key on show, or nil
+local function say(key)
+	captionOn = key
+	local c = key and CAPTIONS[key]
+	if c then
+		caption.Image = c[1]
+		caption.Size = UDim2.fromScale(1, CAPTION_HEIGHT * c[3] / 73)
+		captionRatio.AspectRatio = c[2] / c[3]
+	end
+end
 
 local tapAt -- a GuiObject, a Vector3 in the world, or nil
 local function pointAt(target)
@@ -187,6 +215,7 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 	tap.Visible = show and not player:GetAttribute("Cutscene")
+	caption.Visible = captionOn ~= nil and not player:GetAttribute("Cutscene")
 	-- (the fingertip on the spot, either way up: Rotation turns it about its middle)
 	tap.Rotation = if flip then 180 else 0
 	tap.AnchorPoint = if flip then Vector2.one - TAP_TIP else TAP_TIP
@@ -264,6 +293,7 @@ local function clear()
 	arrowOver = nil
 	pointAt(nil)
 	guide(nil)
+	say(nil)
 	player:SetAttribute("NoSprint", nil)
 	player:SetAttribute("NoLasso", nil)
 	player:SetAttribute("LassoGuide", nil)
@@ -352,13 +382,16 @@ local function run()
 		if tool and not held then
 			pointAt(Inventory.slot(tool.Name))
 			guide(nil)
+			say("clickEgg")
 		elseif tool and held and area then
 			funnel("hold")
 			pointAt(area.Position + Vector3.new(0, area.Size.Y / 2 + 1, 0))
 			guide(area.Position)
+			say("placeEgg")
 		else
 			pointAt(nil)
 			guide(nil)
+			say(nil)
 		end
 	end
 
@@ -375,9 +408,11 @@ local function run()
 			if egg and #pets == 0 then
 				pointAt(nil)
 				guide(egg)
+				say("clickEgg")
 			elseif #pets > 0 then
 				pointAt(nil)
 				guide(pets[1])
+				say("ride")
 			else
 				placeEgg()
 			end
@@ -393,6 +428,7 @@ local function run()
 		TutorialRide.active, TutorialRide.holdFrozen, TutorialRide.invulnerable = true, true, true
 		player:SetAttribute("NoSprint", true)
 		player:SetAttribute("LassoGuide", true)
+		say("lasso")
 		local firstThrow, firstMount = TutorialRide.throws, TutorialRide.mounts
 		-- Till your first lasso: time all but stops while an animal's in reach. (The
 		-- arrows go as soon as it's thrown: QM.)
@@ -406,6 +442,7 @@ local function run()
 			RunService.Heartbeat:Wait()
 		end
 		player:SetAttribute("LassoGuide", nil)
+		say(nil)
 		-- (and the sprint step waits for you to land on it, or a miss)
 		local thrown = os.clock()
 		while on() and Hud.isRiding() and TutorialRide.mounts <= firstMount and os.clock() - thrown < 3 do
