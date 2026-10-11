@@ -35,6 +35,7 @@ local HEADSHOTS = {
 	RoboShark = "rbxassetid://115675656988340", -- PetRoboShark.png
 	VolcanoTortoise = "rbxassetid://135342979510615", -- PetVolcanoTortoise.png
 	Firebird = "rbxassetid://95424707176181", -- PetFirebird.png
+	RockHog = "", -- PetRockHog.png, once uploaded
 	Starfish = "rbxassetid://112526271674778", -- PetStarfish.png
 	FishSchool = "rbxassetid://132126224577278", -- PetFishSchool.png
 	Loong = "rbxassetid://110728718265049", -- PetLoong.png

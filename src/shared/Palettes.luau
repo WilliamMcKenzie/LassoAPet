@@ -192,6 +192,12 @@ return {
 		{ "Accent", 34, 32, 38 }, -- crest, brows, wing tips, tail
 		{ "Hoof", 232, 224, 204 }, -- claws
 	},
+	RockHog = {
+		{ "Body", 88, 98, 128 }, -- basalt coat
+		{ "Marking", 54, 58, 82 }, -- jaw, cheeks, brows
+		{ "Horn", 255, 120, 20 }, -- fiery horns, tusks and spikes
+		{ "Hoof", 36, 38, 52 },
+	},
 	VolcanoTortoise = {
 		{ "Body", 178, 150, 102 }, -- skin, beak
 		{ "Belly", 150, 122, 82 }, -- belly, lower jaw, brows
