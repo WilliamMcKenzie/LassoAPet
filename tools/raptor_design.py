@@ -6,6 +6,7 @@ and a long stiff tail ending in an orange feather fan. Static draft.
 
 Run: python3 tools/raptor_design.py [out_dir]
 writes Raptor.bbmodel, Raptor.png (three views) and Raptor_vs_trex.png to out_dir.
+`animate` then writes Raptor_anim.bbmodel (idle, walk, gallop) and GIFs.
 
 Bones: root, LegL/LegR, ArmL/ArmR, neck (head) > Jaw, Tail > Tail2.
 """
@@ -154,5 +155,78 @@ def main(out=OUT):
     print("wrote", path, len(parts), "parts")
 
 
+def animations(m):
+    """Quicker and lighter than the T-Rex (trex_v2.animations): the jaw is shut at rest, -X
+    opens it; +X on root leans the body nose-down."""
+    import math
+    from snake_rig import track
+    from snow_rig import bump, grounded
+    s, TAU = math.sin, 2 * math.pi
+    feet = {e["name"] for e in m["elements"] if e["name"].startswith(("Foot", "Toe", "Claw"))}
+
+    def run(L, stride, lean, sway, bob, hop, gape, n=16):
+        # legs swing in turn, arms tucked and pumping, head darting twice a stride, the stiff
+        # tail swinging the other way, the jaw snapping
+        tr = {"root": [track(L, lambda u: (lean, 0, 2 * s(TAU * u)), n)]}
+        for side, ph in (("L", 0.0), ("R", 0.5)):
+            tr["Leg" + side] = [track(L, lambda u, ph=ph: (-lean + stride * s(TAU * (u + ph)), 0, 0), n)]
+            tr["Arm" + side] = [track(L, lambda u, ph=ph: (-20 + 10 * s(TAU * (u + ph + 0.25)), 0, 0), n)]
+        tr["neck"] = [track(L, lambda u: (-lean * 0.8 + bob * s(2 * TAU * u), -sway * 0.4 * s(TAU * u), 0), n)]
+        tr["Tail"] = [track(L, lambda u: (-lean * 0.6 + 3 * s(2 * TAU * u), sway * s(TAU * u), 0), n)]
+        tr["Tail2"] = [track(L, lambda u: (3 * s(2 * TAU * u - 1), sway * 0.8 * s(TAU * u - 0.8), 0), n)]
+        tr["Jaw"] = [track(L, lambda u: (-gape * (0.5 + 0.5 * s(2 * TAU * u + 1.0)), 0, 0), n)]
+        tr["root"] = grounded(m, L, tr, feet, n, extra=lambda u: hop * abs(s(TAU * u)))
+        return L, tr
+
+    out = {}
+    # idle: head cocks side to side like a bird, a quick snap, tail flicks, arms twitch
+    L = 3.2
+    out["idle"] = (L, {
+        "root": [track(L, lambda u: (1.5 * s(TAU * u), 0, 0), 32)],
+        "neck": [track(L, lambda u: (8 * bump(u, 0.6, 0.05), 30 * (bump(u, 0.2, 0.08) - bump(u, 0.4, 0.08)), 14 * (bump(u, 0.2, 0.08) - bump(u, 0.4, 0.08))), 64)],
+        "Jaw": [track(L, lambda u: (-30 * bump(u, 0.58, 0.04), 0, 0), 64)],
+        "Tail": [track(L, lambda u: (0, 8 * s(TAU * u), 0), 32)],
+        "Tail2": [track(L, lambda u: (0, 14 * bump(u, 0.8, 0.06) + 6 * s(TAU * u + 0.5), 0), 48)],
+        "ArmL": [track(L, lambda u: (-15 * bump(u, 0.58, 0.05), 0, 0), 48)],
+        "ArmR": [track(L, lambda u: (-15 * bump(u, 0.58, 0.05), 0, 0), 48)],
+    })
+    out["walk"] = run(0.7, stride=26, lean=4, sway=8, bob=5, hop=0, gape=10)
+    out["gallop"] = run(0.36, stride=48, lean=18, sway=5, bob=6, hop=12, gape=24)
+    return out
+
+
+def animate(out=OUT):
+    """Raptor_anim.bbmodel: Raptor.bbmodel (main) with idle, walk and gallop, and preview GIFs."""
+    from horse_rig import write_animations
+    from snow_rig import group_ids, posed
+    m = json.load(open(os.path.join(out, "Raptor.bbmodel")))
+    m["animations"] = []
+    write_animations(m, group_ids(m), animations(m))
+    with open(os.path.join(out, "Raptor_anim.bbmodel"), "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    W = 420
+    cams = [dict(eye=(-20, 9, -22), target=(0, 4.5, 1), W=W, H=W, fov=40), dict(eye=(-30, 5, 1), target=(0, 4.5, 1.5), W=W, H=W, fov=38)]
+    plain = ("Eye", "Pupil", "Tooth", "Claw", "ArmClaw", "Nostril", "Sickle", "Crest", "TailFeatherTip")
+
+    def frame(name, t):
+        anim = next(x for x in m["animations"] if x["name"] == name)
+        ps = posed(m, anim, t)
+        for p in ps:
+            if p.name.startswith(plain):
+                p.plain = True
+        im = Image.new("RGB", (W * 2, W))
+        for i, c in enumerate(cams):
+            im.paste(render(ps, **c), (i * W, 0))
+        return A.label(im, [name, ""], 22)
+
+    for name, n in (("idle", 32), ("walk", 14), ("gallop", 12)):
+        L = next(x for x in m["animations"] if x["name"] == name)["length"]
+        A.gif(os.path.join(out, f"Raptor_{name}.gif"), [frame(name, L * i / n) for i in range(n)], fps=n / L)
+    print("wrote Raptor_anim.bbmodel")
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["animate"]:
+        animate(*sys.argv[2:])
+    else:
+        main(*sys.argv[1:])
