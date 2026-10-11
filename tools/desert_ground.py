@@ -30,8 +30,8 @@ WORLD = os.path.join(ROOT, "src", "world", "World.rbxmx")
 
 CELL = 8
 HALF_W = 56  # corridor half width (Config.CourseHalfWidth)
-Z_START, Z_END = -2168, -3376  # the desert's near and far edges (QM, Oct 11: the pacing ladder, tools/course_resize.py; was -760, -3040)
-NESTS = [(16, -2388), (-14, -2588), (18, -2808), (-16, -3208)]  # desert nests stay on flat ground
+Z_START, Z_END = -2168, -3984  # the desert's near and far edges (QM, Oct 11: 1.5x as long, tools/course_resize.py; was -3376)
+NESTS = [(16, -2388), (-14, -2588), (18, -2808), (-14, -3196), (18, -3416), (-16, -3816)]  # desert nests stay on flat ground
 NEST_CLEAR = 14
 SAND = [(232, 188, 102), (250, 214, 130)]  # these match Config.Biomes Desert
 GRASS = [(184, 172, 70), (200, 188, 86)]

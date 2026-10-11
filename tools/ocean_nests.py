@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from ocean_ground import NESTS  # noqa: E402
 
 PATH = os.path.join(os.path.dirname(__file__), "..", "src", "world", "World.rbxmx")
-SRC, SRC_AT = "NS3_0417", (16, -980)
+SRC, SRC_AT = "NS3_0417", (16, -2388)  # (where tools/course_resize.py moved it; was -980)
 
 
 def strip(s, prefix):

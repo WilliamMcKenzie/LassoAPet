@@ -22,7 +22,7 @@ import quasicrystal as QC  # noqa: E402
 import ocean_walls as OW  # noqa: E402
 import ocean_nests as ON  # noqa: E402
 
-Z_START = -8416  # the ocean's far edge
+Z_START = -9024  # the ocean's far edge
 LENGTH = 5040     # Config.Biomes Volcano.Length (QM, Oct 11: the pacing ladder, tools/course_resize.py; was 7680)
 END = Z_START - LENGTH
 KINDS = ("Ground", "Ash", "Crust", "Lava")

@@ -23,7 +23,7 @@ local MODE = "apply"
 local START, RATE, MAX = 56, 0.005, 137
 -- Each biome's obstacles and nests grow with its beasts (QM, Oct 8): its far edge's z
 -- and Config.Biomes[i].AnimalSize, the obstacles and nests scaled by that ^ GROW.
-local BIOMES = { { -2168, 1 }, { -3376, 1.35 }, { -5296, 1.8 }, { -8416, 2.6 } } -- (QM, Oct 11: the pacing ladder's lengths, tools/course_resize.py)
+local BIOMES = { { -2168, 1 }, { -3984, 1.35 }, { -5904, 1.8 }, { -9024, 2.6 } } -- (QM, Oct 11: the pacing ladder's lengths, the Desert 1.5x; tools/course_resize.py)
 local GROW = 0.8
 local function grownAt(z)
 	for _, b in BIOMES do

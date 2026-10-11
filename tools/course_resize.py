@@ -1,24 +1,25 @@
-"""Re-lengths the course's biomes (QM, Oct 11: the pacing ladder, balance/pacing_ladder_v1.md).
-Each biome now runs only as long as its animals carry you in a 30 s ride, so the Meadow
-grows and the rest shrink:
+"""Re-lengths the course's biomes, one pass at a time (SEGMENTS below is the latest).
 
-    Meadow 760 -> 2168, Desert 2280 -> 1208, Snow 5472 -> 1920, Ocean 7680 -> 3120,
-    Volcano 7680 -> 5040, Jurassic 7680 (kept). Course 31552 -> 21136.
+Pass 2 (QM, Oct 11): the Desert 1.5x as long, 1208 -> 1816, by repeating its middle
+608 studs; everything past it moves 608 further out. Course 21136 -> 21744.
+(Pass 1, the pacing ladder, balance/pacing_ladder_v1.md, is in git history: Meadow
+760 -> 2168, Desert 2280 -> 1208, Snow 5472 -> 1920, Ocean 7680 -> 3120, Volcano
+7680 -> 5040, Jurassic 7680 kept.)
 
-Run once, on the straight course, from the repo root:
+Run once per pass, on the straight course, from the repo root:
     python3 tools/course_resize.py
 
 It works on the pieces no builder redraws: World.Walls, World.Obstacles, World.Nests (and
-World.Decor), plus the rock list in tools/biome_rocks.luau (ITEMS). SEGMENTS below maps
-old z to new: a shrunk biome keeps its first stretch (what lies past is dropped), the
-Meadow repeats its middle. Parts crossing a cut are trimmed to it; models go by their
-middle. The floors are redrawn by their builders at the new spots instead (meadow_ground,
-desert_ground, snow_ground, ocean_ground, volcano, jurassic: their constants already say
-the new lengths), and volcano.py / jurassic.py also redraw their walls, nests and the
-ribcage, so those are left to them here.
+World.Decor), plus the rock list in tools/biome_rocks.luau (ITEMS). SEGMENTS maps old z
+to new: a shrunk biome keeps its first stretch (what lies past is dropped), a grown one
+repeats its middle. Parts crossing a cut are trimmed to it; models go by their middle.
+The floors are redrawn by their builders at the new spots instead (desert_ground,
+snow_ground, ocean_ground, volcano, jurassic: their constants already say the new
+lengths), and volcano.py / jurassic.py also redraw their walls, nests and the ribcage,
+so those are left to them here.
 
 Shifts are whole multiples of 16 studs, so the 8-stud cells and the 4-stud checker keep
-their parity. Don't run it twice: it reads the world as it is.
+their parity. Don't run a pass twice: it reads the world as it is.
 """
 import math
 import os
@@ -33,15 +34,9 @@ INF = math.inf
 
 # (hi, lo, shift): what lies in lo < z <= hi (old, straight course) moves by shift
 SEGMENTS = [
-    (INF, -728, 0),            # home and the Meadow's start
-    (-24, -728, -704),         # the Meadow's middle, again
-    (-24, -728, -1408),        # and again
-    (-728, -760, -1408),       # the Meadow's last 32 studs: it ends at -2168
-    (-760, -1968, -1408),      # the Desert's first 1208: -2168 to -3376
-    (-3040, -4960, -336),      # the Snow's first 1920: to -5296
-    (-8512, -11632, 3216),     # the Ocean's first 3120: to -8416
-    (-16192, -21232, 7776),    # the Volcano's first 5040: to -13456
-    (-23872, -INF, 10416),     # the Jurassic and the far wall: to -21136
+    (INF, -3080, 0),           # home, the Meadow and the Desert's first 912
+    (-2472, -3080, -608),      # the Desert's middle 608, again: -3080 to -3688
+    (-3080, -INF, -608),       # the Desert's last 296 (it ends at -3984) and all past it
 ]
 REDRAWN = re.compile(r"^(VWAL|JWAL|VNST|JNST|JRIB)")  # volcano.py / jurassic.py write these
 MIN_PIECE = 0.5
