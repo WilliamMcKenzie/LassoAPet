@@ -47,11 +47,11 @@ local SPRINT_GUIDE = {
 }
 -- QM's lines along the top, one per step (assets/ui/Tutorial*.png): { image, width, height }.
 local CAPTIONS = {
-	clickEgg = { "rbxassetid://TUTORIAL_CLICK_EGG", 468, 73 }, -- assets/ui/TutorialClickEgg.png: the egg in your inventory
-	hatchEgg = { "rbxassetid://TUTORIAL_HATCH_EGG", 465, 73 }, -- assets/ui/TutorialHatchEgg.png: it's in your pen, waiting to be hatched (QM)
-	placeEgg = { "rbxassetid://TUTORIAL_PLACE_EGG", 737, 73 }, -- assets/ui/TutorialPlaceEgg.png: holding it
-	ride = { "rbxassetid://TUTORIAL_RIDE", 476, 73 }, -- assets/ui/TutorialRide.png: your Horse is out
-	lasso = { "rbxassetid://TUTORIAL_LASSO", 471, 60 }, -- assets/ui/TutorialLasso.png: the first ride, till your first throw
+	clickEgg = { "rbxassetid://101774342383836", 468, 73 }, -- assets/ui/TutorialClickEgg.png: the egg in your inventory
+	hatchEgg = { "rbxassetid://102383563702992", 465, 73 }, -- assets/ui/TutorialHatchEgg.png: it's in your pen, waiting to be hatched (QM)
+	placeEgg = { "rbxassetid://102754390814286", 737, 73 }, -- assets/ui/TutorialPlaceEgg.png: holding it
+	ride = { "rbxassetid://108854850506856", 476, 73 }, -- assets/ui/TutorialRide.png: your Horse is out
+	lasso = { "rbxassetid://112913234859474", 471, 60 }, -- assets/ui/TutorialLasso.png: the first ride, till your first throw
 }
 local CAPTION_HEIGHT = 0.065 -- of the screen's height, for a 73 px tall line
 local SLOW_FLOOR = 0.02 -- the slow-down's bottom (x speed): all but stopped
