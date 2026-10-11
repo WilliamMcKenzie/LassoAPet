@@ -899,7 +899,8 @@ return {
 
 	-- The pacing ladder (QM, Oct 11; balance/pacing_ladder_v1.md): Speed = 0.7 x 1.6 per biome
 	-- x 1.15 per rarity (Uncommon, Rare, Epic, Legendary), so any animal of a later biome
-	-- outruns every one behind it, and each biome's line sits where its biome before's Rares
+	-- outruns every one behind it (each animal a little either side of its rarity's speed, so
+	-- they feel different, never past the next rarity's), and each biome's line sits where its biome before's Rares
 	-- just get to in a 30 s sprint: Epics and Legendaries take you into the next one. The
 	-- Horse (0.5) is the slowest. Change a biome's Length or these together.
 	-- Each animal's stats, x MountSpeed and HerdSpeed (1x). Speed scales how fast it runs,
@@ -908,45 +909,45 @@ return {
 	AnimalStats = {
 		-- Meadow
 		Horse = { Speed = 0.5, Stamina = 1 },
-		Pig = { Speed = 0.7, Stamina = 0.8 },
-		Bunny = { Speed = 0.7, Stamina = 0.7 },
-		Pinto = { Speed = 0.7, Stamina = 0.9 },
+		Pig = { Speed = 0.66, Stamina = 0.8 },
+		Bunny = { Speed = 0.72, Stamina = 0.7 },
+		Pinto = { Speed = 0.74, Stamina = 0.9 },
 		Fish = { Speed = 0.81, Stamina = 3 },
 		Rhino = { Speed = 0.93, Stamina = 1.8 },
 		Unicorn = { Speed = 1.06, Stamina = 2 },
 		-- Desert
-		Cactus = { Speed = 1.12, Stamina = 1.5 },
-		Kitten = { Speed = 1.12, Stamina = 1.2 },
+		Cactus = { Speed = 1.06, Stamina = 1.5 },
+		Kitten = { Speed = 1.18, Stamina = 1.2 },
 		Scorpion = { Speed = 1.29, Stamina = 1.5 },
-		Sandworm = { Speed = 1.48, Stamina = 3 },
-		SpineLizard = { Speed = 1.48, Stamina = 2 },
+		Sandworm = { Speed = 1.42, Stamina = 3 },
+		SpineLizard = { Speed = 1.55, Stamina = 2 },
 		Snake = { Speed = 1.7, Stamina = 3 },
 		-- Tundra
-		Penguin = { Speed = 1.79, Stamina = 1.5 },
-		Boar = { Speed = 1.79, Stamina = 1.6 },
+		Penguin = { Speed = 1.72, Stamina = 1.5 },
+		Boar = { Speed = 1.86, Stamina = 1.6 },
 		Snowman = { Speed = 2.06, Stamina = 1.3 },
 		IceGolem = { Speed = 2.37, Stamina = 3 },
 		SnackYak = { Speed = 3, Stamina = 2 }, -- QM, Oct 4 (stamina 1 -> 2)
 		Icebringer = { Speed = 2.73, Stamina = 4 },
 		-- Ocean
 		Starfish = { Speed = 2.87, Stamina = 2 },
-		Squid = { Speed = 3.79, Stamina = 2.6 },
-		KingCrab = { Speed = 3.79, Stamina = 3 },
-		BlueCrab = { Speed = 4.36, Stamina = 3 },
-		Lionfish = { Speed = 3.3, Stamina = 2 }, -- QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
+		Squid = { Speed = 3.7, Stamina = 2.6 },
+		KingCrab = { Speed = 3.6, Stamina = 3 },
+		BlueCrab = { Speed = 4.2, Stamina = 3 },
+		Lionfish = { Speed = 3.4, Stamina = 2 }, -- QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
 		Clownfish = { Speed = 2.8, Stamina = 2.4 }, -- (a little slower than the Starfish, an Ocean Uncommon too)
 		RoboShark = { Speed = 1.2, Stamina = 3 }, -- QM, Oct 4: starts at 1.2x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed 2.5 x this)
-		FishSchool = { Speed = 3.79, Stamina = 2.8 },
-		Whale = { Speed = 3.3, Stamina = 10 },
-		Kraken = { Speed = 4.36, Stamina = 3 },
+		FishSchool = { Speed = 3.95, Stamina = 2.8 },
+		Whale = { Speed = 3.2, Stamina = 10 },
+		Kraken = { Speed = 4.55, Stamina = 3 },
 		-- Volcano
 		Firebird = { Speed = 4.59, Stamina = 2.5 },
-		RockHog = { Speed = 5.28, Stamina = 2.8 },
-		Rockworm = { Speed = 6.07, Stamina = 3 },
-		FireLobster = { Speed = 5.28, Stamina = 2.8 },
+		RockHog = { Speed = 5.4, Stamina = 2.8 },
+		Rockworm = { Speed = 6.3, Stamina = 3 },
+		FireLobster = { Speed = 5.15, Stamina = 2.8 },
 		Phoenix = { Speed = 6.98, Stamina = 3 },
-		LavaWhale = { Speed = 6.07, Stamina = 3 },
-		VolcanoTortoise = { Speed = 5.28, Stamina = 3 },
+		LavaWhale = { Speed = 5.85, Stamina = 3 },
+		VolcanoTortoise = { Speed = 5, Stamina = 3 },
 		-- Godlands
 		Loong = { Speed = 0.5, Stamina = 8 }, -- QM, Oct 4: starts at 0.5x, its breath's kills take it up to 1x (Abilities.Loong.MaxSpeed 2 x this); sprints at 4x (PetSprintSpeed)
 		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
