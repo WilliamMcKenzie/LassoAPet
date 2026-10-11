@@ -3,7 +3,7 @@
 Run: python3 tools/rock_hog.py [out_dir]
 Reads designs/converted/Boar.bbmodel (shapes and animations untouched), recolours it
 in the Volcano biome's palette (warm rock coat, dark crust mane, lava-orange spikes),
-and adds a pair of stepped horns on the head that run dark red to a yellow tip.
+makes the tusks fiery, and adds a pair of stepped horns on the head that run dark red to a yellow tip.
 Spikes and horns are named Glow* so they are Neon in game. Writes RockHog.bbmodel,
 RockHog.png, RockHog_vs_horse.png and idle/walk/gallop GIFs to out_dir.
 """
@@ -27,18 +27,27 @@ BOAR = os.path.join(ROOT, "designs", "converted", "Boar.bbmodel")
 HORSE = os.path.join(ROOT, "designs", "animals", "Horse.bbmodel")
 OUT = "/mnt/project-files/animals/rockhog"
 
-RECOLOR = {
-    (176, 108, 68): (148, 104, 88),  # coat: warm volcanic rock
-    (112, 66, 46): (98, 66, 56),  # mane, cheeks, jaw: dark crust
-    (236, 190, 136): (200, 186, 176),  # brows: ash
-    (86, 60, 52): (54, 42, 42),  # hooves
-    (248, 150, 158): (240, 134, 104),  # nose: ember
-    (130, 50, 70): (130, 40, 30),  # nostrils
-    (254, 246, 222): (242, 230, 204),  # tusks
+BOAR_COLS = ("coat", "mane", "brows", "hooves", "nose", "nostrils", "tusks")
+BOAR_RGB = [(176, 108, 68), (112, 66, 46), (236, 190, 136), (86, 60, 52), (248, 150, 158), (130, 50, 70), (254, 246, 222)]
+# colour takes: the Boar's palette, then the lava spikes and the horn base -> tip
+SCHEMES = {
+    "Rock": dict(coat=(148, 104, 88), mane=(98, 66, 56), brows=(200, 186, 176), hooves=(54, 42, 42), nose=(240, 134, 104),
+                 nostrils=(130, 40, 30), tusks=(242, 230, 204), lava=(255, 116, 24),
+                 horn=[(176, 24, 22), (224, 44, 24), (255, 96, 24), (255, 200, 70)]),
+    "Basalt": dict(coat=(88, 98, 128), mane=(54, 58, 82), brows=(255, 170, 40), hooves=(36, 38, 52), nose=(255, 120, 60),
+                   nostrils=(150, 40, 20), tusks=(255, 226, 120), lava=(255, 120, 20),
+                   horn=[(190, 20, 30), (240, 50, 24), (255, 120, 20), (255, 220, 80)]),
+    "Magma": dict(coat=(214, 70, 38), mane=(58, 48, 52), brows=(255, 210, 60), hooves=(40, 34, 36), nose=(255, 150, 80),
+                  nostrils=(120, 24, 20), tusks=(70, 60, 64), lava=(255, 200, 40),
+                  horn=[(60, 50, 54), (150, 30, 24), (240, 70, 20), (255, 210, 60)]),
+    "Obsidian": dict(coat=(116, 80, 158), mane=(70, 46, 104), brows=(255, 140, 40), hooves=(42, 30, 60), nose=(255, 120, 150),
+                     nostrils=(120, 30, 70), tusks=(250, 236, 214), lava=(255, 100, 40),
+                     horn=[(200, 20, 50), (250, 50, 40), (255, 130, 30), (255, 220, 90)]),
 }
-# new palette cells (2x2 texels each, free row y=2..3)
-LAVA = ((2, 2), (255, 116, 24))
-HORN = [((4, 2), (176, 24, 22)), ((6, 2), (224, 44, 24)), ((8, 2), (255, 96, 24)), ((10, 2), (255, 200, 70))]
+SCHEME = "Basalt"
+CELLS = [(2, 2), (4, 2), (6, 2), (8, 2), (10, 2)]  # new 2x2 palette cells: lava, horn base..tip
+LAVA = (CELLS[0], None)
+HORN = [(c, None) for c in CELLS[1:]]
 LAVA_SPIKES = ("Tuft0", "Tuft1", "Tuft2", "Tuft3", "Crest0", "Crest1")
 
 
@@ -83,7 +92,9 @@ def horn(side, s):
     return els
 
 
-def rock_hog(m):
+def rock_hog(m, scheme=SCHEME):
+    sc = SCHEMES[scheme]
+    recolor = {o: sc[k] for o, k in zip(BOAR_RGB, BOAR_COLS)}
     m = json.loads(json.dumps(m))
     m["name"] = "RockHog"
     m["meta"]["format_version"] = "5.0"
@@ -93,9 +104,9 @@ def rock_hog(m):
     for y in range(im.height):
         for x in range(im.width):
             r, g, b, a = px[x, y]
-            if (r, g, b) in RECOLOR:
-                px[x, y] = (*RECOLOR[(r, g, b)], a)
-    for (cx, cy), col in [LAVA] + HORN:
+            if (r, g, b) in recolor:
+                px[x, y] = (*recolor[(r, g, b)], a)
+    for (cx, cy), col in zip(CELLS, [sc["lava"]] + sc["horn"]):
         for dx in (0, 1):
             for dy in (0, 1):
                 px[cx + dx, cy + dy] = (*col, 255)
@@ -109,6 +120,13 @@ def rock_hog(m):
             e["name"] = "Glow" + e["name"]
             for f in e["faces"].values():
                 f["uv"] = {k: c for k in f["uv"]}
+    # tusks: fiery like the horns, red at the jaw to a yellow tip
+    for e in m["elements"]:
+        if e["name"].startswith("Tusk"):
+            cell = HORN[{"TuskL": 1, "TuskR": 1, "TuskUpL": 2, "TuskUpR": 2}.get(e["name"], 3)][0]
+            e["name"] = "Glow" + e["name"]
+            for f in e["faces"].values():
+                f["uv"] = uv(cell) if e["type"] == "cube" else {k: [cell[0] + 1.0, cell[1] + 1.0] for k in f["uv"]}
     # horns: one bone each, parented to the neck
     neck = next(g for g in m["groups"] if g["name"] == "neck")
     template = next(g for g in m["groups"] if g["name"] == "TuskL")
@@ -170,5 +188,19 @@ def main(out=OUT):
     print("wrote", out)
 
 
+def takes(out=OUT):
+    """All colour takes side by side, front three-quarter view."""
+    boar = json.load(open(BOAR))
+    T = 420
+    cam = dict(eye=(-20, 12, -26), target=(0, 5, -1), W=T, H=T, fov=38)
+    sheet = Image.new("RGB", (T * len(SCHEMES), T))
+    for i, k in enumerate(SCHEMES):
+        sheet.paste(render(parts(rock_hog(boar, k)), **cam), (i * T, 0))
+    A.label(sheet, list(SCHEMES), 22).save(os.path.join(out, "RockHog_takes.png"))
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["takes"]:
+        takes(*sys.argv[2:])
+    else:
+        main(*sys.argv[1:])
