@@ -112,25 +112,38 @@ PARENT = {"neck": "root", "Seg2": "root", "Seg3": "Seg2", "Seg4": "Seg3", "Seg5"
 ROOT_Z = 16  # root pivot
 
 
-def leap(L, wavelength, amp, depth, n=24):
-    """amp: path height either side of -depth (bb units); depth > 0 sinks the middle."""
+def leap(leap_time, wavelength, amp, ground=0.8, wiggle=8, n=48):
+    """One leap (an arc up and a dive back under, wavelength bb units long, amp high and
+    deep, taking leap_time s) then ground s of slithering flat along the ground (QM: 0.8 s)."""
     import math
     from snake_rig import track
     TAU = 2 * math.pi
+    v = wavelength / leap_time  # bb units a second along the path
+    cycle = wavelength + v * ground
+    L = leap_time + ground
 
-    def y(z, u):
-        return amp * math.sin(TAU * (u + (ROOT_Z - z) / wavelength)) - depth
+    def path(x):
+        x %= cycle
+        return amp * math.sin(TAU * x / wavelength) if x < wavelength else 0.0
+
+    def y(z, u):  # the piece at z is where the root was (z - ROOT_Z) / v seconds ago
+        return path(v * L * u - (z - ROOT_Z))
 
     def pitch(bone, u):  # nose up positive: front higher than back
         _, za, zb = next(c for c in CHAIN if c[0] == bone)
         return math.degrees(math.atan2(y(za, u) - y(zb, u), zb - za))
 
+    def sway(bone, u):  # a side-to-side wave while the root's on the ground
+        j = [c[0] for c in CHAIN].index(bone)
+        on = 1.0 if (v * L * u) % cycle >= wavelength else 0.0
+        return on * wiggle * math.sin(TAU * 3 * u * L / ground - 0.9 * j) if bone != "neck" else 0.0
+
     tr = {"root": [track(L, lambda u: (pitch("root", u), 0, 0), n),
                    track(L, lambda u: (0, y(ROOT_Z, u), 0), n, "position")]}
     for bone, parent in PARENT.items():
-        tr[bone] = [track(L, lambda u, b=bone, p=parent: (pitch(b, u) - pitch(p, u), 0, 0), n)]
+        tr[bone] = [track(L, lambda u, b=bone, p=parent: (pitch(b, u) - pitch(p, u), sway(b, u), 0), n)]
     # the fangs gape as it bursts out of the ground and snap shut at the top of the arc
-    gape = lambda u: max(0.0, math.sin(TAU * (u + 0.1))) ** 2  # noqa: E731
+    gape = lambda u: max(0.0, math.sin(TAU * (u * L / leap_time + 0.1))) ** 2 if u * L < leap_time else 0.0  # noqa: E731
     tr["MandTL"] = [track(L, lambda u: (0, 26 * gape(u), 0), n)]
     tr["MandTL2"] = [track(L, lambda u: (0, -26 * gape(u), 0), n)]
     return L, tr
@@ -144,13 +157,13 @@ def animate(src, dst=None, out=OUT):
     m = json.load(open(src))
     idle = next(a for a in m["animations"] if a["name"] == "idle")
     m["animations"] = []
-    write_animations(m, group_ids(m), {"walk": leap(1.6, 560, 70, 0), "gallop": leap(1.1, 560, 95, 0)})
+    write_animations(m, group_ids(m), {"walk": leap(1.6, 560, 70), "gallop": leap(1.1, 560, 95)})
     m["animations"].insert(0, idle)
     with open(dst, "w") as f:
         json.dump(m, f, separators=(",", ":"))
     T = 420
     cams = [dict(eye=(-36, 6, 2), target=(0, 1, 3), W=T, H=T, fov=44), dict(eye=(-24, 14, -26), target=(0, 1, 3), W=T, H=T, fov=44)]
-    for name, n in (("walk", 24), ("gallop", 20)):
+    for name, n in (("walk", 40), ("gallop", 32)):
         anim = next(a for a in m["animations"] if a["name"] == name)
         L = anim["length"]
         frames = []
