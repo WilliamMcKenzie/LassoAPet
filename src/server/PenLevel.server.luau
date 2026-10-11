@@ -270,27 +270,6 @@ local function paintPen(pen)
 	vipBanners(pen, fence, vip)
 end
 
--- The Godlands' own pen (Server/GodlandsPen), built from each pen's biggest size
--- when the place has none for it.
-do
-	local godlands
-	for i, biome in Config.Biomes do
-		if biome.Name == "Godlands" then
-			godlands = i
-		end
-	end
-	local GodlandsPen = require(script.Parent.GodlandsPen)
-	for _, pen in pens:GetChildren() do
-		local list = sizesOf(pen)
-		if godlands and pen:FindFirstChild("Sizes") and not list[godlands] and list[godlands - 1] then
-			local model = GodlandsPen.build(list[godlands - 1])
-			model.Name = "Size" .. godlands
-			model.Parent = spare
-			list[godlands] = model
-		end
-	end
-end
-
 for _, pen in pens:GetChildren() do
 	pen:GetAttributeChangedSignal("Owner"):Connect(function()
 		paintPen(pen)
