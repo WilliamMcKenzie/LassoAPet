@@ -15,8 +15,10 @@ round the dirt yard in the middle of the base, centre ARC, each turned to face
 it (CFrame.lookAt(pen centre, ARC)) with its gap in the side facing the yard.
 
 Pens grow as you unlock zones (QM, Oct 3): SIZES[level - 1] tiles a side, from
-12 at the start to 17 (about 2x the area) once the Ocean is open. A pen grows
-outward, away from the yard: its gap stays put on the arc. Each PenN holds
+14 at the start to 20 once the Jurassic is open. A pen grows outward, away from
+the yard: its gap stays put. At 20 tiles (80 studs) the pens fill the base (QM,
+Oct 11: "take up all the space we can"): 8 studs between pens, clear of the walls,
+the big rocks, Carl, the podium, the start line and every pen's ride lane. Each PenN holds
 a Sizes folder with one SizeK model per level: its fence, plus copies of the
 markers below laid out for that size. PenLevel.server shows the owner's size
 and moves the live markers onto that size's copies.
@@ -44,23 +46,22 @@ import partlib  # noqa: E402
 OUT = Path(__file__).resolve().parent.parent / "src" / "world" / "Pens.rbxmx"
 
 TILE = 4  # the floor's checker squares
-SIZES = [12, 14, 16, 17]  # tiles a side at pen level 1..4 (Meadow, Desert, Tundra, Ocean)
+SIZES = [14, 16, 17, 18, 19, 20]  # tiles a side at pen level 1..6 (Meadow .. Jurassic)
 GATE = 10
 HALF_W, DEPTH = 176, 264  # the home base: x -176..176, z 0..264 inside its walls
-ARC = (0, 90)  # the yard's middle: every pen faces it
-ARC_RADIUS = 130  # pen centres (at the biggest size) from ARC
+ARC = (0, 96)  # the yard's middle: every pen faces it
+GATES = (78, 100, 100, 78, 78)  # each pen's gap from ARC, in claim order
 ANGLES = (90, 140, 40, 190, -10)  # degrees from +x toward +z, in claim order
 
 
-def _pen(angle):
-    """(gate middle x, z, unit x, z the gap faces): the gap's on the arc, ARC_RADIUS less half the biggest size."""
+def _pen(angle, r):
+    """(gate middle x, z, unit x, z the gap faces): the gap's r from ARC."""
     a = math.radians(angle)
     out_x, out_z = math.cos(a), math.sin(a)
-    r = ARC_RADIUS - SIZES[-1] * TILE / 2
     return (ARC[0] + out_x * r, ARC[1] + out_z * r, -out_x, -out_z)
 
 
-PENS = [_pen(a) for a in ANGLES]
+PENS = [_pen(a, r) for a, r in zip(ANGLES, GATES)]
 # Local pen frame: centred on the pen, open side at z = -SIZE / 2 facing -z.
 
 
