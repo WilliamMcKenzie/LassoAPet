@@ -350,6 +350,7 @@ local function run()
 		-- Then sprinting: a computer gets QM's guide, and time slows till Shift.
 		if on() and Hud.isRiding() and UserInputService.KeyboardEnabled and not UserInputService.TouchEnabled then
 			sprintGuide.Visible = true
+			player:SetAttribute("NoLasso", true) -- (nothing but sprinting while it's up: QM)
 			task.wait(0.4)
 			local nextLog = os.clock() + 2
 			slowUntil(function()
@@ -361,6 +362,7 @@ local function run()
 				return TutorialRide.sprinting or key
 			end)
 			sprintGuide.Visible = false
+			player:SetAttribute("NoLasso", nil)
 		end
 		-- A few more seconds, then BOSS IN, short.
 		local waitStart = os.clock()
