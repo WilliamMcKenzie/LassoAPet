@@ -38,7 +38,7 @@ local QUEST_ART = {
 	panel = "rbxassetid://71052597087124", -- Quests.png, 453 x 265: open, "Quests" and its fold chevron drawn in
 	closed = "rbxassetid://123446992263929", -- QuestsClosed.png, 453 x 86: folded up
 	bar = "rbxassetid://88826165672196", -- QuestBG.png, 407 x 22
-	fill = "rbxassetid://107946623795335", -- QuestFill.png, 262 x 16
+	fill = "rbxassetid://107946623795335", -- QuestFill.png, 406 x 22 (QM's second, Oct 11)
 	claim = "rbxassetid://113926447181781", -- ClaimQuest.png, 399 x 62
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -268,10 +268,10 @@ local function questRow(i, quest, y)
 		fill.BackgroundColor3 = Color3.fromRGB(59, 255, 95)
 		fill.BackgroundTransparency = if QUEST_ART.fill == "" then 0 else 1
 		fill.ScaleType = Enum.ScaleType.Slice -- (its round ends kept as it stretches)
-		fill.SliceCenter = Rect.new(8, 0, 254, 16)
-		local height = Q.bar.Y - 2 * Q.inset
-		fill.Position = UDim2.fromOffset(Q.inset, Q.inset)
-		fill.Size = UDim2.fromOffset(math.max(height, (Q.bar.X - 2 * Q.inset) * share), height)
+		fill.SliceCenter = Rect.new(11, 0, 395, 22)
+		-- (QM's new fill, Oct 11: the bar's own size, outline and all, laid over it)
+		fill.Position = UDim2.fromOffset(0, 0)
+		fill.Size = UDim2.fromOffset(math.max(Q.bar.Y, Q.bar.X * share), Q.bar.Y)
 		fill.Parent = bar
 	end
 	if done then
