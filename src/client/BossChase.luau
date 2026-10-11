@@ -21,7 +21,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Sounds = require(script.Parent.Sounds)
 
-local BAR = 0.3 -- each black bar's share of the screen's height: the strip between is 0.4, 20% more than the third it was (QM, Oct 11)
+local BAR = 0.2 -- each black bar's share of the screen's height: 40% of it in all, the strip between 60% (QM, Oct 11)
 local VEIN = "rbxassetid://85408798859805" -- assets/ui/boss/AngerMarkOutlined.png (QM's 💢, Oct 10, with a black outline baked in)
 
 local BossChase = {}
