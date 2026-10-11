@@ -530,7 +530,9 @@ local function nearTimer(s, hrp)
 	if on ~= s.timerOn then
 		s.timerOn = on
 		local gui = s.timer.Parent
-		gui.Enabled = on
+		if gui then -- (gone with its egg, mid-hatch)
+			gui.Enabled = on
+		end
 		if on then
 			local pop = s.timer:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
 			pop.Scale = 0
