@@ -126,6 +126,8 @@ caption.Position = UDim2.fromScale(0.5, 0.1)
 caption.Visible = false
 local captionRatio = Instance.new("UIAspectRatioConstraint")
 captionRatio.Parent = caption
+local captionScale = Instance.new("UIScale") -- (it pulses: QM)
+captionScale.Parent = caption
 caption.Parent = gui
 local captionOn -- the CAPTIONS key on show, or nil
 local function say(key)
@@ -214,6 +216,7 @@ RunService.RenderStepped:Connect(function()
 	end
 	tap.Visible = show and not player:GetAttribute("Cutscene")
 	caption.Visible = captionOn ~= nil and not player:GetAttribute("Cutscene")
+	captionScale.Scale = 1 + 0.06 * math.sin(os.clock() * 5)
 	-- (the fingertip on the spot, either way up: Rotation turns it about its middle)
 	tap.Rotation = if flip then 180 else 0
 	tap.AnchorPoint = if flip then Vector2.one - TAP_TIP else TAP_TIP
