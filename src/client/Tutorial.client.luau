@@ -36,8 +36,9 @@ local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
-local TAP = "rbxasset://textures/ui/Controls/TouchTapIcon.png" -- Roblox's own tap hand (QM: TouchTapIcon)
-local TAP_SIZE = 84 -- px
+local TAP = "rbxassetid://134865745295413" -- assets/ui/TapHand.png (QM's)
+local TAP_SIZE = 96 -- px tall (it's 488 x 610)
+local TAP_TIP = Vector2.new(0.365, 0.03) -- the fingertip, in the picture
 local SPRINT_GUIDE = { id = "rbxassetid://109145650505243", size = Vector2.new(1923, 77) } -- assets/ui/SprintGuide.png (QM)
 local SLOW_FLOOR = 0.02 -- the slow-down's bottom (x speed): all but stopped
 local SLOW_TIME = 0.5 -- seconds into the slow-down for its middle (the sigmoid's)
@@ -72,8 +73,7 @@ gui.DisplayOrder = 40
 local tap = Instance.new("ImageLabel")
 tap.BackgroundTransparency = 1
 tap.Image = TAP
-tap.AnchorPoint = Vector2.new(0.3, 0.1) -- (the fingertip on the spot)
-tap.Size = UDim2.fromOffset(TAP_SIZE, TAP_SIZE)
+tap.Size = UDim2.fromOffset(math.round(TAP_SIZE * 488 / 610), TAP_SIZE)
 tap.Visible = false
 local tapScale = Instance.new("UIScale")
 tapScale.Parent = tap
@@ -128,11 +128,11 @@ end
 
 RunService.RenderStepped:Connect(function()
 	-- The tap hand.
-	local show = false
+	local show, flip = false, false
 	if typeof(tapAt) == "Instance" and tapAt:IsA("GuiObject") and tapAt.Visible then
 		local c = tapAt.AbsolutePosition + tapAt.AbsoluteSize / 2
 		tap.Position = UDim2.fromOffset(c.X, c.Y + game:GetService("GuiService"):GetGuiInset().Y)
-		show = true
+		show, flip = true, true -- (upside down over the inventory: reaching down from above, QM)
 	elseif typeof(tapAt) == "Vector3" then
 		local p, on = camera:WorldToViewportPoint(tapAt)
 		if on then
@@ -141,6 +141,9 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 	tap.Visible = show and not player:GetAttribute("Cutscene")
+	-- (the fingertip on the spot, either way up: Rotation turns it about its middle)
+	tap.Rotation = if flip then 180 else 0
+	tap.AnchorPoint = if flip then Vector2.one - TAP_TIP else TAP_TIP
 	tapScale.Scale = 1 + 0.12 * math.sin(os.clock() * 6)
 	-- The arrows.
 	local root = hrp()
@@ -346,8 +349,14 @@ local function run()
 		if on() and Hud.isRiding() and UserInputService.KeyboardEnabled and not UserInputService.TouchEnabled then
 			sprintGuide.Visible = true
 			task.wait(0.4)
+			local nextLog = os.clock() + 2
 			slowUntil(function()
-				return TutorialRide.sprinting
+				local key = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
+				if os.clock() > nextLog then -- (QM, Oct 11: Shift didn't end it once; this says why, in the Output)
+					nextLog = os.clock() + 2
+					print("[Tutorial] waiting to sprint: Shift down", key, "Ride sprinting", TutorialRide.sprinting, "NoSprint", player:GetAttribute("NoSprint"))
+				end
+				return TutorialRide.sprinting or key
 			end)
 			sprintGuide.Visible = false
 		end
