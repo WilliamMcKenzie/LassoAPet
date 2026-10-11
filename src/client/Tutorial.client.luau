@@ -144,10 +144,80 @@ local captionScale = Instance.new("UIScale") -- (the words pulse: QM)
 captionScale.Parent = words
 caption.Parent = gui
 local captionOn -- the CAPTIONS key on show, or nil
+-- QM's banner (Oct 11, in place of the guide bars along the top): a blue band wider than the
+-- screen with the words on it, fading in as it slides a little from the left, holding in
+-- the middle, then fading out as it slides on to the right. Its ends never show.
+local BANNER = {
+	strips = { { "PROMPT_BANNER_1", 962 }, { "PROMPT_BANNER_2", 961 } }, -- assets/ui/PromptBanner1-2.png (PromptBanner.png, 1923 x 113, halved: an upload's at most 1024 wide)
+	size = Vector2.new(1923, 113),
+	width = 1.3, -- x the screen's width (so its ends are always off it, slid or not)
+	at = 0.17, -- its middle, down the screen
+	slide = 0.06, -- of the screen's width either side of the middle
+	fade = 0.45, hold = 3, -- seconds
+}
+local BANNER_WORDS = { -- the words, as QM drew them, and their size in pixels
+	ride = { "BANNER_RIDE_HORSE", Vector2.new(354, 49) }, -- assets/ui/BannerRideHorse.png "Ride your horse!"
+}
+local banner = Instance.new("CanvasGroup") -- (fades as one)
+banner.BackgroundTransparency = 1
+banner.AnchorPoint = Vector2.new(0.5, 0.5)
+banner.Size = UDim2.fromScale(BANNER.width, 1)
+banner.GroupTransparency = 1
+banner.Visible = false
+local bannerRatio = Instance.new("UIAspectRatioConstraint")
+bannerRatio.AspectRatio = BANNER.size.X / BANNER.size.Y
+bannerRatio.Parent = banner
+do
+	local from = 0
+	for _, strip in BANNER.strips do
+		local piece = Instance.new("ImageLabel")
+		piece.BackgroundTransparency = 1
+		piece.Image = "rbxassetid://" .. strip[1]
+		piece.Position = UDim2.fromScale(from / BANNER.size.X, 0)
+		piece.Size = UDim2.fromScale(strip[2] / BANNER.size.X, 1)
+		piece.Parent = banner
+		from += strip[2]
+	end
+end
+local bannerWords = Instance.new("ImageLabel")
+bannerWords.BackgroundTransparency = 1
+bannerWords.AnchorPoint = Vector2.new(0.5, 0.5)
+bannerWords.Position = UDim2.fromScale(0.5, 0.5)
+bannerWords.ZIndex = 2
+bannerWords.Parent = banner
+banner.Parent = gui
+local bannerShown = {} -- [key] = true once it's been up
+local function showBanner(key)
+	local words = BANNER_WORDS[key]
+	if not words or bannerShown[key] then
+		return
+	end
+	bannerShown[key] = true
+	bannerWords.Image = "rbxassetid://" .. words[1]
+	-- (the words as tall as QM drew them on the band: 49 of its 113)
+	local tall = words[2].Y / BANNER.size.Y
+	bannerWords.Size = UDim2.fromScale(tall * words[2].X / words[2].Y * BANNER.size.Y / BANNER.size.X, tall)
+	local fade = TweenInfo.new(BANNER.fade, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local fadeOut = TweenInfo.new(BANNER.fade, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	banner.Position = UDim2.fromScale(0.5 - BANNER.slide, BANNER.at)
+	banner.GroupTransparency = 1
+	banner.Visible = true
+	TweenService:Create(banner, fade, { Position = UDim2.fromScale(0.5, BANNER.at), GroupTransparency = 0 }):Play()
+	task.delay(BANNER.fade + BANNER.hold, function()
+		local out = TweenService:Create(banner, fadeOut, { Position = UDim2.fromScale(0.5 + BANNER.slide, BANNER.at), GroupTransparency = 1 })
+		out.Completed:Once(function()
+			banner.Visible = false
+		end)
+		out:Play()
+	end)
+end
+
+-- The tutorial's prompts (QM, Oct 11): no guide bars any more; only "Ride your horse!",
+-- as a banner, for now.
 local function say(key)
-	captionOn = key
-	if key and CAPTIONS[key] then
-		words.Image = CAPTIONS[key]
+	captionOn = nil
+	if key == "ride" then
+		showBanner("ride")
 	end
 end
 
