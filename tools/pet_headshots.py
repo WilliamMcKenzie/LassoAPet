@@ -43,13 +43,13 @@ MODELS = {
     "Sludge": "sludge/Sludge",
     "Beholder": "beholder/Beholder",
     "Leviathan": "leviathan/Leviathan",
-    "VolcanoTortoise": "volcano/VolcanoTortoise", "Firebird": "volcano/Firebird", "RockHog": "volcano/RockHog",
+    "VolcanoTortoise": "volcano/VolcanoTortoise", "Firebird": "volcano/Firebird", "RockHog": "volcano/RockHog", "Rockworm": "volcano/Rockworm",
 }
-ZYX = {"KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog"}  # converted with --zyx (QM's hand-made multi-axis rotations)
+ZYX = {"KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}
 # Animals whose run makes a poor picture (the Snake stretches out thin, the Starfish
 # folds its arms up) keep their idle stance in the action style.
-ACTION_IDLE = {"Snake", "Starfish"}  # degrees the face is turned from -z (the Kraken's eye faces its rider)
+ACTION_IDLE = {"Snake", "Starfish", "Rockworm"}  # degrees the face is turned from -z (the Kraken's eye faces its rider)
 
 # Camera styles: yaw (degrees round from the front, + toward the animal's left),
 # pitch (degrees above level), field of view, and the pose (animation, time as a

@@ -198,6 +198,12 @@ return {
 		{ "Horn", 255, 120, 20 }, -- fiery horns, tusks and spikes
 		{ "Hoof", 36, 38, 52 },
 	},
+	Rockworm = {
+		{ "Body", 88, 98, 128 }, -- basalt segments
+		{ "Marking", 54, 58, 82 }, -- plates
+		{ "Belly", 120, 130, 162 },
+		{ "Horn", 255, 120, 20 }, -- lava fins, horn, tail spike and fangs
+	},
 	VolcanoTortoise = {
 		{ "Body", 178, 150, 102 }, -- skin, beak
 		{ "Belly", 150, 122, 82 }, -- belly, lower jaw, brows

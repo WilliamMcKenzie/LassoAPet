@@ -123,6 +123,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	RoboShark = "Built a suit of robo-armor to escape the ocean. Can eat any and all animals.",
 	Firebird = "Hatched in a volcano. Still thinks everything is food.",
 	RockHog = "Ate a lava rock for a dare. Now its horns won't stop smoking.",
+	Rockworm = "Tried burrowing through a volcano. Now it can't stop jumping out of the ground.",
 	VolcanoTortoise = "Fell asleep in the sun for three hundred years. Woke up as a volcano.",
 	Loong = "The loongest dragon around. Ex sword-swallower for the circus, passionate about entertainment.",
 }
