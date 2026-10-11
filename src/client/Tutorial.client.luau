@@ -158,12 +158,12 @@ local BANNER = {
 local BANNER_WORDS = { -- the words, as QM drew them, and their size in pixels
 	ride = { "138620110562195", Vector2.new(354, 49) }, -- assets/ui/BannerRideHorse.png "Ride your horse!"
 }
-local banner = Instance.new("CanvasGroup") -- (fades as one)
+local banner = Instance.new("Frame") -- (its pictures fade together: a CanvasGroup this wide didn't draw)
 banner.BackgroundTransparency = 1
 banner.AnchorPoint = Vector2.new(0.5, 0.5)
 banner.Size = UDim2.fromScale(BANNER.width, 1)
-banner.GroupTransparency = 1
 banner.Visible = false
+local bannerImages = {}
 local bannerRatio = Instance.new("UIAspectRatioConstraint")
 bannerRatio.AspectRatio = BANNER.size.X / BANNER.size.Y
 bannerRatio.Parent = banner
@@ -175,7 +175,9 @@ do
 		piece.Image = "rbxassetid://" .. strip[1]
 		piece.Position = UDim2.fromScale(from / BANNER.size.X, 0)
 		piece.Size = UDim2.fromScale(strip[2] / BANNER.size.X, 1)
+		piece.ImageTransparency = 1
 		piece.Parent = banner
+		table.insert(bannerImages, piece)
 		from += strip[2]
 	end
 end
@@ -184,7 +186,9 @@ bannerWords.BackgroundTransparency = 1
 bannerWords.AnchorPoint = Vector2.new(0.5, 0.5)
 bannerWords.Position = UDim2.fromScale(0.5, 0.5)
 bannerWords.ZIndex = 2
+bannerWords.ImageTransparency = 1
 bannerWords.Parent = banner
+table.insert(bannerImages, bannerWords)
 banner.Parent = gui
 local bannerShown = {} -- [key] = true once it's been up
 local function showBanner(key)
@@ -200,11 +204,17 @@ local function showBanner(key)
 	local fade = TweenInfo.new(BANNER.fade, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local fadeOut = TweenInfo.new(BANNER.fade, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 	banner.Position = UDim2.fromScale(0.5 - BANNER.slide, BANNER.at)
-	banner.GroupTransparency = 1
 	banner.Visible = true
-	TweenService:Create(banner, fade, { Position = UDim2.fromScale(0.5, BANNER.at), GroupTransparency = 0 }):Play()
+	TweenService:Create(banner, fade, { Position = UDim2.fromScale(0.5, BANNER.at) }):Play()
+	for _, image in bannerImages do
+		image.ImageTransparency = 1
+		TweenService:Create(image, fade, { ImageTransparency = 0 }):Play()
+	end
 	task.delay(BANNER.fade + BANNER.hold, function()
-		local out = TweenService:Create(banner, fadeOut, { Position = UDim2.fromScale(0.5 + BANNER.slide, BANNER.at), GroupTransparency = 1 })
+		for _, image in bannerImages do
+			TweenService:Create(image, fadeOut, { ImageTransparency = 1 }):Play()
+		end
+		local out = TweenService:Create(banner, fadeOut, { Position = UDim2.fromScale(0.5 + BANNER.slide, BANNER.at) })
 		out.Completed:Once(function()
 			banner.Visible = false
 		end)
@@ -461,7 +471,9 @@ local function run()
 			elseif #pets > 0 then
 				pointAt(nil)
 				guide(pets[1])
-				say("ride")
+				if not pets[1]:GetAttribute("Hatching") then -- (once it's out of the egg, so you see it)
+					say("ride")
+				end
 			else
 				placeEgg()
 			end
