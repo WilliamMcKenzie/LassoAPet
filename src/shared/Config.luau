@@ -276,7 +276,7 @@ return {
 	-- Every ride out lasts RideSeconds (QM, Oct 10: no more stamina), the bar at the top
 	-- draining with it, sprinting or not. Empty: you turn round on whatever you're riding
 	-- and race it home, and a wild one's egg is yours over the line.
-	RideSeconds = 30,
+	RideSeconds = 33, -- (QM, Oct 11: "a bit easier to get to each biome", kids don't sprint all the way: was 30. Each biome's Epic now reaches the next line sprinting ~70% of the ride, was ~90%; its Rares only past ~83%)
 	-- The boss when the ride's time runs out (QM, Oct 10: Client/BossChase): your animal
 	-- stops dead, the biome's boss (Shared/Bosses: ByBiome; Kind for one with none) pops up Ahead studs in
 	-- front, the camera's on its face (FaceAt: of its box, up and forward from the middle)
