@@ -47,7 +47,8 @@ local SPRINT_GUIDE = {
 }
 -- QM's lines along the top, one per step (assets/ui/Tutorial*.png): { image, width, height }.
 local CAPTIONS = {
-	clickEgg = { "rbxassetid://TUTORIAL_CLICK_EGG", 468, 73 }, -- assets/ui/TutorialClickEgg.png: the egg in your inventory, and once it's placed, hatching it
+	clickEgg = { "rbxassetid://TUTORIAL_CLICK_EGG", 468, 73 }, -- assets/ui/TutorialClickEgg.png: the egg in your inventory
+	hatchEgg = { "rbxassetid://TUTORIAL_HATCH_EGG", 465, 73 }, -- assets/ui/TutorialHatchEgg.png: it's in your pen, waiting to be hatched (QM)
 	placeEgg = { "rbxassetid://TUTORIAL_PLACE_EGG", 737, 73 }, -- assets/ui/TutorialPlaceEgg.png: holding it
 	ride = { "rbxassetid://TUTORIAL_RIDE", 476, 73 }, -- assets/ui/TutorialRide.png: your Horse is out
 	lasso = { "rbxassetid://TUTORIAL_LASSO", 471, 60 }, -- assets/ui/TutorialLasso.png: the first ride, till your first throw
@@ -393,7 +394,7 @@ local function run()
 			if egg and #pets == 0 then
 				pointAt(nil)
 				guide(egg)
-				say("clickEgg")
+				say("hatchEgg")
 			elseif #pets > 0 then
 				pointAt(nil)
 				guide(pets[1])
