@@ -1124,35 +1124,30 @@ local function updateGuide()
 end
 
 -- Back on foot after a ride (any ride, however it ended), the same arrows lead from
--- you to your pen's entrance, so you go and ride again (QM). They go once
--- you step into your pen (for good, till the next ride: QM, Oct 6), are up close
--- to the pet or riding.
+-- you to your strongest pet at home (QM, Oct 11: the fastest; was your pen's entrance),
+-- so you go and ride it next. They go once you're up close to it (for good, till the
+-- next ride) or riding.
 function vfx.updateHomeGuide()
 	local hrp = character()
-	local area = vfx.rideAgain and hrp and myPen() and myPen():FindFirstChild("Area")
-	if area then
-		local p = area.CFrame:PointToObjectSpace(hrp.Position)
-		if math.abs(p.X) <= area.Size.X / 2 and math.abs(p.Z) <= area.Size.Z / 2 then
-			vfx.rideAgain = nil -- in your pen
-		end
-	end
 	local target
 	if vfx.rideAgain and hrp and not cutscene then
-		-- To the gap in your pen's fence (QM, Oct 6): where the line from its Spawn
-		-- (just outside the gap) to its middle crosses the Area's edge.
-		local spot = homeSpot()
-		if area then -- (the gap's in the side of the Area's frame facing -z: tools/pens.py)
-			local gap = area.CFrame:PointToWorldSpace(Vector3.new(0, 0, -area.Size.Z / 2))
-			spot = Vector3.new(gap.X, 0, gap.Z)
+		local best, fastest = nil, -1
+		for _, model in homePets() do
+			local info = if starter and model == starter.animal.model then starter else PenPets.pets[model]
+			local speed = info and statsOf(info.kind, info).Speed or 0
+			if speed > fastest and model.PrimaryPart then
+				best, fastest = model, speed
+			end
 		end
 		local at = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
-		if (spot - at).Magnitude > guide.HOME_CLOSE and not rideShown then
+		local spot = best and best.PrimaryPart.Position * Vector3.new(1, 0, 1)
+		if spot and (spot - at).Magnitude > guide.HOME_CLOSE and not (rideShown and rideModel == best) then
 			target = spot
+		elseif spot then
+			vfx.rideAgain = nil -- (there)
 		end
-		vfx.drawGuide(at, target)
-	else
-		vfx.drawGuide(nil, nil)
 	end
+	vfx.drawGuide(if target then Vector3.new(hrp.Position.X, 0, hrp.Position.Z) else nil, target)
 end
 
 -- Draws the trail of arrows from `at` toward `target`, or hides it (no target).
