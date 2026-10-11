@@ -43,7 +43,7 @@ MODELS = {
     "Sludge": "sludge/Sludge",
     "Beholder": "beholder/Beholder",
     "Leviathan": "leviathan/Leviathan",
-    "VolcanoTortoise": "volcano/VolcanoTortoise", "Firebird": "volcano/Firebird", "RockHog": "volcano/RockHog", "Rockworm": "volcano/Rockworm", "FireLobster": "volcano/FireLobster", "TRex": "jurassic/TRex", "LavaWhale": "volcano/LavaWhale", "Phoenix": "volcano/Phoenix",
+    "VolcanoTortoise": "volcano/VolcanoTortoise", "Firebird": "volcano/Firebird", "RockHog": "volcano/RockHog", "Rockworm": "volcano/Rockworm", "FireLobster": "volcano/FireLobster", "TRex": "jurassic/TRex", "Raptor": "jurassic/Raptor", "LavaWhale": "volcano/LavaWhale", "Phoenix": "volcano/Phoenix",
 }
 ZYX = {"KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish", "TRex"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}

@@ -213,6 +213,12 @@ return {
 		{ "Belly", 252, 218, 166 },
 		{ "Marking", 168, 82, 32 }, -- stripes, brow
 	},
+	Raptor = {
+		{ "Body", 76, 154, 226 },
+		{ "Belly", 252, 218, 166 },
+		{ "Marking", 36, 70, 140 }, -- stripes
+		{ "Accent", 255, 146, 46 }, -- crest, arm and tail feathers
+	},
 	LavaWhale = {
 		{ "Body", 182, 100, 62 }, -- rock
 		{ "Body", 136, 74, 50 }, -- brow, horn bands

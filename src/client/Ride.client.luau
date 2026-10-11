@@ -294,6 +294,7 @@ local warpLevel -- /biome: the biome you were put in, so its gate (and those bef
 local transfer, tumble, carried
 vfx.Merge = require(ReplicatedStorage.Shared.Merge)
 vfx.Fusion = require(ReplicatedStorage.Shared.Fusion)
+vfx.HerdPacks = require(script.Parent.HerdPacks)
 vfx.Burrow = require(script.Parent.Burrow) -- the Sandworm's spray and mounds (yours and other riders')
 vfx.Studs = require(ReplicatedStorage.Shared.Studs) -- hybrids: the donor's size and colours
 -- The stretch of course with stampede loaded round the camera at camZ: VIEW either
@@ -446,17 +447,7 @@ local function plan(key)
 	local p = plans[key]
 	if not p then
 		local n, b = key // BIOME_KEYS, key % BIOME_KEYS + 1
-		local stream = streams[b]
-		local r = Random.new(if b == 1 then n else key)
-		p = { x = r:NextNumber(-EDGE, EDGE) }
-		local pick = r:NextNumber(0, stream.total)
-		for _, kind in stream.kinds do
-			p.kind = kind.name
-			pick -= kind.weight
-			if pick < 0 then
-				break
-			end
-		end
+		p = vfx.HerdPacks.plan(streams[b], n, b, BIOME_KEYS, EDGE) -- (Raptors in threes: Client/HerdPacks)
 		if p.kind == "Unicorn" and player:GetAttribute("Tutorial") then
 			p.kind = "Pinto" -- (no Unicorns in the tutorial: it'd carry you past the Desert's gate, QM)
 		end
@@ -1780,7 +1771,7 @@ local function updateHerd(dt, slowed)
 		if held and held % BIOME_KEYS == b - 1 then
 			first = math.min(first, held // BIOME_KEYS)
 		end
-		for n = first, newest do
+		for n = first, newest + vfx.HerdPacks.most - 1 do -- (a pack's followers pop in with it)
 			local key = n * BIOME_KEYS + b - 1
 			-- (keep: spawn n runs if n x the golden ratio's fraction is under it, the same
 			-- on every client and spread evenly, without a pattern to the gaps)
@@ -1788,7 +1779,10 @@ local function updateHerd(dt, slowed)
 				continue
 			end
 			local p = plan(key)
-			local age = herdClock - n * every
+			local age = herdClock - (n - p.lead) * every - p.lag
+			if age < 0 then
+				continue
+			end
 			local dist, speed = run(herdSpeed(p.kind), math.max(age - START_AFTER, 0))
 			if vfx.frostLeft[key] then
 				vfx.frostLag[key] = (vfx.frostLag[key] or 0) + speed * vfx.frostSlow * dt
