@@ -4,6 +4,7 @@ except Cactus, Pine, TubeCoral, BranchCoral and FanCoral; the rest is five rock 
 The Godlands are left alone (QM: going anyway).
 
 Run: python3 tools/biome_rocks.py
+     python3 tools/biome_rocks.py --jurassic   only re-lays the Jurassic (its rows in biome_rocks.luau)
 (Laid out for the course before Oct 11: tools/course_resize.py has since moved biome_rocks.luau's
 rocks to the pacing ladder's lengths. Re-fit the biome spans here before re-running, or it puts them back.)
 Writes tools/biome_rocks.luau (Studio's builder), design/biome_rocks/layout.json and
@@ -83,8 +84,6 @@ PLAN = {
     "Ocean": dict(anchor=[("BranchCoral", 3), ("FanCoral", 3), ("RockBoulder", 2), ("RockCrag", 2)],
                   small=["TubeCoral", "RockPebble", "RockStone"], extra="FanCoral"),
     "Volcano": dict(small=["RockPebble", "RockStone"]),  # (its big rocks: PEAK_ROCKS)
-    "Jurassic": dict(anchor=[("JungleTree", 4), ("Cycad", 3), ("RockBoulder", 2), ("RockCrag", 1)],
-                     small=["Fern", "Horsetail", "Fern", "RockPebble", "RockStone"], extra="Fern"),
 }
 # The Volcano (QM, Oct 11; tools/volcano.py): after the ocean, rocks only. Laid out after
 # the other four, so their layouts stay as they were. Its rocks go where its floor's
@@ -96,7 +95,7 @@ VOLCANO = dict(name="Volcano", z0=VO.Z_START, z1=VO.END, small=[], medium=[], la
                nests=[(FG.unmap_x(x, z), z) for x, z in VO.nest_spots()])  # (where the funnel puts them)
 SMALL_PEAK, BIG_PEAK = 0.8, 0.82
 # The Jurassic (QM, Oct 11; tools/jurassic.py): after the volcano, jungle plants and brown
-# rocks in wall clusters like the first four biomes, none under the ribcage.
+# rocks packed along both walls (jungle() below), only low plants under the ribcage.
 JURASSIC = dict(name="Jurassic", z0=JU.Z_START, z1=JU.END, small=[], medium=[], large=[],
                 nests=[(FG.unmap_x(x, z), z) for x, z in JU.nest_spots()])
 RIB_SPAN = (JU.RIB_Z0 + 40, JU.RIB_Z0 - (JU.RIB_N - 1) * JU.RIB_GAP - 60)
@@ -187,7 +186,7 @@ def layout(seed=11):
     for b in CL.BIOMES:
         wall_clusters(c, rng, b)
     volcano_rocks(c, rng)
-    wall_clusters(c, rng, JURASSIC, skip=RIB_SPAN)
+    jungle(c, rng)
     return c
 
 
@@ -208,6 +207,35 @@ def wall_clusters(c, rng, b, skip=None):
             cluster(c, rng, b, p, reach, sd, z + rng.uniform(-18, 18) + k0 * CL.BEAT / 2)
         z -= CL.BEAT
         side = -side
+
+
+JUNGLE_BEAT = 52  # studs between clusters, alternating walls (the mockup's 46, a little sparser for parts)
+
+
+def jungle(c, rng):
+    """The Jurassic as lush as the mockup (QM, Oct 11; design/jurassic_biome/jungle_plants.py
+    in_biome): every beat, alternating walls, a jungle tree (a cycad under the ribcage) with
+    a fern further in, and every few beats a horsetail clump or a brown rock beside it.
+    Spots are worked out in game studs, as the mockup's, then unmapped off the funnel."""
+    def put(asset, gx, z, tries=6):
+        return c.put(asset, FG.unmap_x(gx, z), z, JURASSIC, tries=tries, jitter=1.5)
+
+    z, k = JU.Z_START - CL.ENTRY - 10, 0
+    while z > JU.END + CL.FINISH_CLEAR:
+        side = 1 if k % 2 else -1
+        h = FG.half_width(z)
+        x = side * (h - rng.uniform(12, 22))
+        under = RIB_SPAN[0] > z > RIB_SPAN[1]
+        put("Cycad" if under or k % 4 == 3 else "JungleTree", x, z)
+        put("Fern", x - side * 18, z + rng.uniform(-10, 10))
+        if k % 3 == 0:
+            put("Horsetail", x - side * 6, z - 16)
+        elif k % 3 == 1:
+            put(str(rng.choice(["RockPebble", "RockStone", "RockBoulder"])), side * (h - 26), z + 20)
+        else:
+            put("Fern", side * (h - 7), z - 18)
+        z -= JUNGLE_BEAT
+        k += 1
 
 
 def volcano_rocks(c, rng):
@@ -389,7 +417,7 @@ return string.format("biome rocks: %d old obstacles out, %d placed", removed, pl
 """
 
 
-def write_luau(items):
+def luau_rows(items):
     rows = []
     for it in items:
         a = it["asset"]
@@ -399,6 +427,30 @@ def write_luau(items):
         else:
             f = fade(it["z"]) if it["biome"] == "Ocean" else 0
             rows.append('\t{ "%s", %.2f, %.2f, %.1f, %g, %.3f },' % (a, it["x"], it["z"], it["yaw"], it["y"], f))
+    return rows
+
+
+def write_jurassic_only():
+    """Lay out only the Jurassic and swap its rows in biome_rocks.luau, leaving the other
+    biomes' rows as tools/course_resize.py moved them."""
+    c = Layout(11)
+    jungle(c, c.rng)
+    path = os.path.join(HERE, "biome_rocks.luau")
+    lines = open(path).read().split("\n")
+    keep = [ln for ln in lines if not (ln.startswith('\t{ "') and float(ln.split(", ")[2]) <= JU.Z_START)]
+    at = keep.index("local ITEMS = {") + 1
+    while keep[at].startswith('\t{ "'):
+        at += 1
+    keep[at:at] = luau_rows(c.items)
+    open(path, "w").write("\n".join(keep))
+    lay = os.path.join(OUT, "layout.json")
+    old = [it for it in json.load(open(lay)) if it["biome"] != "Jurassic"]
+    json.dump(old + c.items, open(lay, "w"), indent=0)
+    return c.items
+
+
+def write_luau(items):
+    rows = luau_rows(items)
     s = LUAU.replace("@ITEMS@", "\n".join(rows))
     s = s.replace("@MESHES@", ", ".join(f"{n} = {{ {', '.join(map(str, v))} }}" for n, v in PIECE_MESHES.items()))
     s = s.replace("@SCALE@", ", ".join(f"{n} = {v}" for n, v in ROCK_SCALE.items()))
@@ -468,6 +520,13 @@ def previews(c, items):
         CL.ride_view(c, items, z, desert, os.path.join(OUT, f"ride_{name}.png"))
         print("ride", name)
 
+
+if __name__ == "__main__" and "--jurassic" in sys.argv:
+    from collections import Counter
+    items = write_jurassic_only()
+    print("wrote the jungle plant templates into World.Obstacles,", write_plant_templates(), "parts")
+    print("Jurassic", dict(Counter(it["asset"] for it in items)), "into biome_rocks.luau")
+    sys.exit()
 
 if __name__ == "__main__":
     c = layout()
