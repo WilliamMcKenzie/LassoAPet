@@ -199,6 +199,9 @@ local function publish(player)
 		pen:SetAttribute("PetCount", penCount(profile)) -- (Pens.server's "5/10"; Pen.client stops placing when full)
 		pen:SetAttribute("PetCap", penCap(player))
 	end
+	if profile.quests then
+		Quests.penCount(player, profile.quests, penCount(profile)) -- ("Collect animals": live)
+	end
 end
 
 -- Whether (x, z) in the pen's Area is inside it. Eggs can go anywhere in the
@@ -527,7 +530,6 @@ remote("DeliverEgg", function(player, kind)
 		profile.homeEggs += 1
 		Funnel.captured(player, profile.homeEggs)
 	end
-	Quests.count(player, profile.quests, "home")
 	-- The tutorial's egg brought home goes straight into the pen (balance pass, Oct 6: a
 	-- fifth of new players left at "Place your egg" a second time). The first spot clear
 	-- of the starter pet, from the middle out.

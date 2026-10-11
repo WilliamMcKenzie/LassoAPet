@@ -31,6 +31,7 @@ local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
 local TutorialRide = require(script.Parent.TutorialRide)
+local CameraHint = require(script.Parent.CameraHint)
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
@@ -329,28 +330,7 @@ end
 -- The camera zooms to the Desert's gate (the next goal) and back (QM, Oct 11: just the
 -- Desert again, not the whole course, and twice as fast).
 local function showGate()
-	local gateZ = -Config.Biomes[1].Length
-	local look = Vector3.new(0, 10, gateZ)
-	local view = CFrame.lookAt(look + Vector3.new(0, 26, 80), look)
-	local was, wasType = camera.CFrame, camera.CameraType
-	camera.CameraType = Enum.CameraType.Scriptable
-	player:SetAttribute("Cutscene", true)
-	local high = was + Vector3.new(0, 60, 0)
-	local function fly(a, b, c, time)
-		local t = 0
-		while t < time do
-			t += RunService.RenderStepped:Wait()
-			local u = math.clamp(t / time, 0, 1)
-			u = u * u * (3 - 2 * u)
-			local p = a.Position:Lerp(b.Position, u):Lerp(b.Position:Lerp(c.Position, u), u)
-			camera.CFrame = CFrame.new(p) * a.Rotation:Lerp(c.Rotation, u)
-		end
-	end
-	fly(was, high, view, GATE_IN)
-	task.wait(GATE_HOLD)
-	fly(view, high, was, GATE_OUT)
-	camera.CameraType = wasType
-	player:SetAttribute("Cutscene", nil)
+	CameraHint.show(Vector3.new(0, 10, -Config.Biomes[1].Length), Vector3.new(0, 26, 80), GATE_IN, GATE_HOLD, GATE_OUT)
 end
 
 local running = false

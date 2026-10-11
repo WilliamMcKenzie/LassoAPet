@@ -32,6 +32,7 @@ local ModalPop = require(script.Parent.ModalPop)
 local Sounds = require(script.Parent.Sounds)
 local Gamepad = require(script.Parent.Gamepad)
 local Outline = require(script.Parent.Outline)
+local TapHand = require(script.Parent.TapHand)
 
 local Animals = ReplicatedStorage.Shared.Animals
 local player = Players.LocalPlayer
@@ -485,6 +486,7 @@ local function fuse()
 	end
 	ReplicatedStorage:WaitForChild("FusePets"):FireServer(a.id, b.id)
 	Hud.fusedAt = os.clock() -- (Tutorial waits for it)
+	player:SetAttribute("MergeHint", nil) -- (the quest's hint: done)
 	-- (the view stays a moment, so you see them merge)
 	for pet in marks do
 		unmark(pet)
@@ -536,6 +538,7 @@ function close(instant)
 	hovered = nil
 	hover:hide()
 	hideOverPen(false)
+	player:SetAttribute("MergeHint", nil)
 	for pet in marks do
 		unmark(pet)
 	end
@@ -704,6 +707,44 @@ if RunService:IsStudio() then
 		end
 	end)
 end
+
+-- The "Merge animals" quest's hint (BaseUi sets "MergeHint"; QM, Oct 11): tap hands
+-- on two animals to pick, then on the Merge button once both are.
+local hintHands = { TapHand.new(80), TapHand.new(80), TapHand.new(80) }
+for _, hand in hintHands do
+	hand.Visible = false
+	hand.Parent = gui
+end
+RunService.RenderStepped:Connect(function()
+	local on = open and player:GetAttribute("MergeHint") == true
+	local shown = 0
+	local size = camera.ViewportSize.Y * 0.1
+	for _, hand in hintHands do
+		hand.Size = UDim2.fromOffset(math.round(size * 488 / 610), size)
+	end
+	if on and pickedCount() == 2 then
+		local at = fuseButton.AbsolutePosition + fuseButton.AbsoluteSize * Vector2.new(0.55, 0.7)
+		hintHands[3].Position = UDim2.fromOffset(at.X, at.Y)
+		hintHands[3].Visible = true
+	else
+		hintHands[3].Visible = false
+		for _, pet in (if on then pets else {}) do
+			if shown >= 2 - pickedCount() then
+				break
+			end
+			if not slotOf(pet) and pet.model.Parent then
+				local point, visible = camera:WorldToViewportPoint(pet.model:GetPivot().Position)
+				if visible then
+					shown += 1
+					hintHands[shown].Position = UDim2.fromOffset(point.X, point.Y)
+				end
+			end
+		end
+	end
+	for i = 1, 2 do
+		hintHands[i].Visible = i <= shown
+	end
+end)
 
 -- Riding off closes it.
 player.CharacterAdded:Connect(function()

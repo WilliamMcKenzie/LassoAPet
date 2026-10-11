@@ -18,6 +18,9 @@ local Hud = require(script.Parent.Hud)
 local Shop = require(script.Parent.Shop)
 local AnimalDex = require(script.Parent.AnimalDex)
 local RollMenu = require(script.Parent.RollMenu)
+local CameraHint = require(script.Parent.CameraHint)
+local TapHand = require(script.Parent.TapHand)
+local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 
 local player = Players.LocalPlayer
 local cfg = Config.BaseUi
@@ -143,6 +146,18 @@ end } } do
 	b:SetAttribute("Hover", 1.04) -- (ButtonHover: half its usual 1.08 grow, QM)
 	b.Activated:Connect(spec[2])
 	pressable(b)
+	if spec[1] == "merge" then -- the "Merge animals" quest's hint: a tap hand on it (below)
+		local hand = TapHand.new(80)
+		hand.Name = "MergeHint"
+		hand.Position = UDim2.fromScale(0.55, 0.7)
+		hand.Visible = false
+		hand.Parent = b
+		local function show()
+			hand.Visible = player:GetAttribute("MergeHint") == true and player:GetAttribute("MergeView") ~= true
+		end
+		player:GetAttributeChangedSignal("MergeHint"):Connect(show)
+		player:GetAttributeChangedSignal("MergeView"):Connect(show)
+	end
 end
 
 -- Bottom left: cash, its icon with the number beside it.
@@ -233,6 +248,28 @@ fold.Activated:Connect(function()
 	quests:SetAttribute("Folded", folded) -- (draws again: below)
 end)
 
+-- Tapping a quest shows how to do it, where there's a hint (QM, Oct 11): "Enter the ..."
+-- flies the camera to that biome's barrier (as the tutorial's to the Desert's),
+-- "Collect animals" to the count over your pen, and "Merge animals" puts tap hands on
+-- Merge, then on two animals and the merge (FuseMenu, by "MergeHint").
+local function hint(quest)
+	if quest.kind == "reach" and tonumber(quest.biome) then
+		task.spawn(CameraHint.show, Vector3.new(0, 10, WorldColors.biomeStart(quest.biome)), Vector3.new(0, 26, 80))
+	elseif quest.kind == "home" then
+		local index = player:GetAttribute("Pen")
+		local pen = index and workspace:FindFirstChild("Pens") and workspace.Pens:FindFirstChild("Pen" .. index)
+		local area = pen and pen:FindFirstChild("Area")
+		if area then
+			local look = area.Position + Vector3.new(0, Config.PenProfile.Height, 0)
+			local ahead = workspace.CurrentCamera.CFrame.LookVector * Vector3.new(1, 0, 1)
+			ahead = if ahead.Magnitude > 0.01 then ahead.Unit else Vector3.new(0, 0, -1)
+			task.spawn(CameraHint.show, look, -ahead * 70 + Vector3.new(0, 12, 0))
+		end
+	elseif quest.kind == "merge" then
+		player:SetAttribute("MergeHint", true)
+	end
+end
+
 local function questRow(i, quest, y)
 	local done = quest.have >= quest.need
 	local row = Instance.new("Frame")
@@ -242,6 +279,18 @@ local function questRow(i, quest, y)
 	row.Position = UDim2.fromOffset(0, y)
 	row.Size = UDim2.fromOffset(Q.width, if done then Q.claim.Y else Q.barAt + Q.bar.Y)
 	-- (finished: its CLAIM button takes the quest's place, QM)
+	if not done then
+		local tap = Instance.new("TextButton") -- (the whole quest: its hint)
+		tap.Name = "Hint"
+		tap.BackgroundTransparency = 1
+		tap.Text = ""
+		tap.Size = UDim2.fromScale(1, 1)
+		tap.ZIndex = 4
+		tap.Activated:Connect(function()
+			hint(quest)
+		end)
+		tap.Parent = row
+	end
 	local name = text(row, Q.name, nil, Q.nameStroke)
 	name.Visible = not done
 	name.Text = quest.text
