@@ -112,9 +112,10 @@ PARENT = {"neck": "root", "Seg2": "root", "Seg3": "Seg2", "Seg4": "Seg3", "Seg5"
 ROOT_Z = 16  # root pivot
 
 
-def leap(leap_time, wavelength, amp, ground=0.8, wiggle=8, n=48):
+def leap(leap_time, wavelength, amp, ground=0.0, wiggle=8, n=48):
     """One leap (an arc up and a dive back under, wavelength bb units long, amp high and
-    deep, taking leap_time s) then ground s of slithering flat along the ground (QM: 0.8 s)."""
+    deep, taking leap_time s) then ground s of slithering flat along the ground. QM tried
+    0.8 s, then went back to none (Oct 11 03:10)."""
     import math
     from snake_rig import track
     TAU = 2 * math.pi
@@ -135,6 +136,8 @@ def leap(leap_time, wavelength, amp, ground=0.8, wiggle=8, n=48):
 
     def sway(bone, u):  # a side-to-side wave while the root's on the ground
         j = [c[0] for c in CHAIN].index(bone)
+        if ground <= 0:
+            return 0.0
         on = 1.0 if (v * L * u) % cycle >= wavelength else 0.0
         return on * wiggle * math.sin(TAU * 3 * u * L / ground - 0.9 * j) if bone != "neck" else 0.0
 
