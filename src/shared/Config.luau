@@ -165,6 +165,31 @@ return {
 				Bubbles = 24, -- per second
 			},
 		},
+		{
+			-- The volcano (QM, Oct 11): after the ocean, bright and warm, brown more than
+			-- black (design/lava_biome). Floor, walls and nests: tools/volcano.py; its rocks:
+			-- tools/biome_rocks.py; the big crack at its end: VolcanoCrack below.
+			Name = "Volcano",
+			AnimalSize = 2.6, -- (as the ocean's)
+			Swerve = 1,
+			NestScale = 2.5,
+			Length = 7680, -- as long as the ocean (a guess)
+			GroundColors = { Color3.fromRGB(156, 98, 66), Color3.fromRGB(168, 108, 74) }, -- baked-earth brown
+			WallColors = { Color3.fromRGB(170, 92, 58), Color3.fromRGB(186, 104, 66) },
+			-- Placeholder: the ocean's animals until the volcano's are designed.
+			Herd = { Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, Kraken = 0.05 },
+			-- tools/volcano.py: lighter ash flush, darker crust plates a stud up, lava pools
+			-- a stud down out by the walls.
+			Patches = {
+				Ash = { Color3.fromRGB(184, 124, 84), Color3.fromRGB(196, 134, 92) },
+				Crust = { Color3.fromRGB(124, 78, 58), Color3.fromRGB(136, 86, 64) },
+				Lava = { Color3.fromRGB(255, 116, 24), Color3.fromRGB(255, 146, 40) }, -- Neon
+			},
+			UnlockCost = 300000000, -- a guess (the old Godlands price)
+			PostColor = Color3.fromRGB(170, 92, 58),
+			GateColor = Color3.fromRGB(255, 110, 20), -- lava orange
+			-- No Upgrade Pen art yet: the plain button with the price.
+		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
@@ -187,10 +212,22 @@ return {
 	-- widths: Meadow 112-120, Desert 120-142, Snow 142-197, Ocean 197-274, Godlands 274.
 	-- WorldColors.halfWidth(z) is the width at z. The place's walls, ground, obstacles
 	-- and nests are moved to it by tools/funnel.luau (re-run it after a World push).
+	-- The big lava crack at the volcano's end (QM, Oct 10-11: a geyser to launch you on
+	-- to the next biome, later; for now it's only there). VolcanoCrack.client draws it
+	-- with ViewportStencil (Shared/ViewportStencil) from the Model named Model in
+	-- ReplicatedStorage: CrackMask and CrackInside, imported from design/volcano/VolcanoCrack.gltf
+	-- (tools/volcano_crack.py). FromFinish: studs before the finish line its middle is.
+	VolcanoCrack = {
+		Model = "VolcanoCrack",
+		FromFinish = 110,
+		Yaw = 0,
+		Brightness = 1.4, -- SurfaceGui.Brightness: a little over 1 so it glows
+		MaxDistance = 900,
+	},
 	CourseHalfWidth = 56,
 	CourseWidening = 0.005,
 	CourseMaxHalfWidth = 137,
-	CourseLength = 760 + 2280 + 5472 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands, so the Ocean's end is the end; off its edge, the void)
+	CourseLength = 760 + 2280 + 5472 + 7680 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, its end is the end; off its edge, the void)
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
