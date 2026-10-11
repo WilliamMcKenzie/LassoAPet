@@ -262,6 +262,7 @@ do
 			biome.Name
 		)
 		streams[b].keep = biome.HerdKeep -- (fewer animals in the Meadow)
+		streams[b].every = biome.HerdSpawnEvery or Config.HerdSpawnEvery -- (more in the Ocean: QM, Oct 11)
 	end
 end
 
@@ -359,7 +360,7 @@ for _, stream in streams do
 	for _, kind in stream.kinds do
 		classes[kind.name] = classes[kind.name] or require(Animals[kind.name])
 		pools[kind.name] = pools[kind.name] or {}
-		local average = window * kind.weight / stream.total / (Config.HerdSpawnEvery * herdSpeed(kind.name))
+		local average = window * kind.weight / stream.total / (stream.every * herdSpeed(kind.name))
 		poolSizes[kind.name] = (poolSizes[kind.name] or 0) + average + math.sqrt(average)
 	end
 end
@@ -1728,8 +1729,6 @@ local function updateHerd(dt, slowed)
 		snapped = math.abs(now - herdClock) > 0.1
 		herdClock = now
 	end
-	local every = Config.HerdSpawnEvery
-	local newest = math.floor(herdClock / every)
 	local camZ = camera.CFrame.Position.Z
 	-- Animals behind the camera aren't moved on screen or animated, which is most
 	-- of the cost of an animal (a stampede animal is 20 to 200 blocks). Ones near
@@ -1748,6 +1747,8 @@ local function updateHerd(dt, slowed)
 	-- Fish wrestled on into the Desert outlived its stream's schedule and vanished)
 	local held = transfer and transfer.target and transfer.target.n
 	for b, stream in streams do
+		local every = stream.every
+		local newest = math.floor(herdClock / every)
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
 		local first = stream.oldest
 		if held and held % BIOME_KEYS == b - 1 then
