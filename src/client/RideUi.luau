@@ -9,7 +9,7 @@
 -- Laid out on a RefWidth-wide screen (Config.BaseUi; the art's drawn at it).
 --
 --   RideUi.show(visible)
---   RideUi.setHold(fraction)            -- of Config.RideSeconds left (nil: no bar)
+--   RideUi.setHold(fraction, _, total)  -- of total (Config.RideSeconds) seconds left (nil: no bar)
 --   (setDistance, setSprint, setAbility, setAction, sprintHeld, abilityPressed: nothing)
 
 local Players = game:GetService("Players")
@@ -131,7 +131,7 @@ function RideUi.show(visible)
 	gui.Enabled = visible
 end
 
-function RideUi.setHold(fraction)
+function RideUi.setHold(fraction, _tired, total)
 	bar.Visible = fraction ~= nil
 	title.Visible = fraction ~= nil
 	seconds.Visible = fraction ~= nil
@@ -146,7 +146,7 @@ function RideUi.setHold(fraction)
 		local f = math.clamp(fraction, 0, 1)
 		clip.Size = UDim2.new(0, BAR_WIDTH * f, 1, 0)
 		seconds.TextColor3 = RED:Lerp(Color3.new(1, 1, 1), math.clamp(f / RED_FROM, 0, 1))
-		seconds.Text = string.format("%.1fs", f * Config.RideSeconds)
+		seconds.Text = string.format("%.1fs", f * (total or Config.RideSeconds)) -- (total: the bar's length in seconds, if not a ride's)
 		local t = os.clock() % (PULSE.InTime + PULSE.OutTime)
 		local k = if t < PULSE.InTime then 1 - t / PULSE.InTime else (t - PULSE.InTime) / PULSE.OutTime -- (1 = out, 0 = in)
 		k = 0.5 - math.cos(k * math.pi) / 2 -- (eased)

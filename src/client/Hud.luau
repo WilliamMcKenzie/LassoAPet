@@ -1154,9 +1154,9 @@ end
 local TIRED_RED = Color3.fromRGB(255, 90, 90)
 
 -- tired: whether an empty bar slows the mount (not while it carries an egg home).
-function Hud.setHold(fraction, tired)
+function Hud.setHold(fraction, tired, total)
 	if RideUi then
-		return RideUi.setHold(fraction, tired)
+		return RideUi.setHold(fraction, tired, total)
 	end
 	holdFrame.Visible = fraction ~= nil
 	if fraction then

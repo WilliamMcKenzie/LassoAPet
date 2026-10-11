@@ -1232,7 +1232,8 @@ while true do
 	for player, profile in profiles do
 		local changed = false
 		for _, item in profile.items do
-			if item.egg and now >= item.hatchAt and (player:GetAttribute("Tutorial") or player:GetAttribute("PassAutoHatch")) then
+			-- (in the tutorial, not the starter egg: you hatch that one yourself, QM Oct 11)
+			if item.egg and now >= item.hatchAt and ((player:GetAttribute("Tutorial") and profile.ride ~= nil) or player:GetAttribute("PassAutoHatch")) then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
 				if profile.pastStarter then

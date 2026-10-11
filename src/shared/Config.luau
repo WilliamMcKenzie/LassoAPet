@@ -372,8 +372,9 @@ return {
 	-- Hold bar never runs out. The tutorial's eggs hatch by themselves
 	-- (TutorialHatchTime); every other egg waits for you to hold F by it once it's
 	-- ready (Hatchery, Pen.client).
-	Tutorial = false,
+	Tutorial = true, -- (QM, Oct 11: back, redone: Client/Intro, then Client/Tutorial)
 	TutorialHatchTime = 0,
+	TutorialRideSeconds = 20, -- the BOSS IN timer on the tutorial's ride (QM: not far enough to reach the Desert)
 	TutorialSlowMo = 0.2,
 	-- Seconds of waiting for that press before time runs at a quarter of TutorialSlowMo;
 	-- it keeps slowing (x 1 / (1 + waited / this)^2) till the press, so the stampede all

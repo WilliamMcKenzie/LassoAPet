@@ -207,6 +207,7 @@ local function intro()
 		return
 	end
 	playing = true
+	player:SetAttribute("IntroDone", nil)
 	task.wait(1.2) -- ("/tutorial" respawns you just after turning the tutorial on)
 	local character = player.Character or player.CharacterAdded:Wait()
 	local hrp = character:WaitForChild("HumanoidRootPart", 10)
@@ -218,6 +219,7 @@ local function intro()
 	local pen = myPen()
 	if not hrp or not humanoid or not pen or not pen:FindFirstChild("Area") then
 		playing = false
+		player:SetAttribute("IntroDone", true)
 		return
 	end
 	task.wait(0.4) -- (let the pen and character settle in)
@@ -678,6 +680,7 @@ local function intro()
 	Sounds.setMusic(musicWas or "base")
 	holdHidden:Disconnect()
 	player:SetAttribute("Cutscene", nil)
+	player:SetAttribute("IntroDone", true) -- (Client/Tutorial starts once it's over)
 	for _, g in hidden do
 		if g.Parent then
 			g.Enabled = true

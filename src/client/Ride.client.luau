@@ -103,6 +103,7 @@ local function tierOf(kind)
 end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
+vfx.tutorialRide = require(script.Parent.TutorialRide) -- (the tutorial's first ride: Client/Tutorial steers it)
 vfx.speedLines = require(script.Parent.SpeedLines) -- speed lines on the screen while sprinting (QM, Oct 9 / 11)
 vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's out (QM, Oct 10)
 vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
@@ -217,7 +218,7 @@ end
 -- How long the Hold bar lasts: Config.RideSeconds, whatever you're riding (QM, Oct 10:
 -- no more stamina).
 local function holdTime(_entity)
-	return Config.RideSeconds
+	return vfx.tutorialRide.bossSeconds or Config.RideSeconds -- (the tutorial's: a short one, once it's let go)
 end
 local streams = {}
 -- A stream from spawnZ to endZ of the herd's kinds; name labels its line in the Output.
@@ -455,6 +456,9 @@ local function plan(key)
 			if pick < 0 then
 				break
 			end
+		end
+		if p.kind == "Unicorn" and player:GetAttribute("Tutorial") then
+			p.kind = "Pinto" -- (no Unicorns in the tutorial: it'd carry you past the Desert's gate, QM)
 		end
 		plans[key] = p
 	end
@@ -1111,6 +1115,16 @@ local function updateGuide()
 	local at = if mount then Vector3.new(mount.x, 0, mount.z) else focus
 	if vfx.huntTarget then
 		target = Vector3.new(vfx.huntTarget.x, 0, vfx.huntTarget.z) -- the Robo Shark's prey while it hunts
+	elseif player:GetAttribute("LassoGuide") and mount and phase == "outbound" and not transfer then
+		-- (the tutorial's: to the nearest animal ahead, till you lasso one: Client/Tutorial)
+		local best, bestD = nil, 260
+		for _, e in allAnimals() do
+			local d = mount.z - e.z
+			if e ~= mount and not e.popping and d > 4 and d < bestD then
+				best, bestD = e, d
+			end
+		end
+		target = best and Vector3.new(best.x, 0, best.z)
 	end
 	vfx.drawGuide(at, target)
 end
@@ -1211,7 +1225,7 @@ local function candidates()
 end
 
 local function findTarget()
-	if phase ~= "outbound" or transfer or not mount then
+	if phase ~= "outbound" or transfer or not mount or player:GetAttribute("NoLasso") then -- (NoLasso: Client/Tutorial)
 		picked = nil
 		return nil
 	end
@@ -1336,7 +1350,7 @@ ContextActionService:BindActionAtPriority("Sprint", function(_, state)
 end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.LeftShift, Enum.KeyCode.RightShift, Enum.KeyCode.ButtonL2)
 
 local function sprinting()
-	if vfx.hunting then
+	if vfx.hunting or player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
 		return false -- the Robo Shark can't sprint while it hunts (QM)
 	end
 	if phase == "return" and Config.ReturnSprint then
@@ -3484,6 +3498,9 @@ local function checkRide(dt)
 		return -- the leap over the finish line: nothing can go wrong now
 	end
 	grace = math.max(grace - dt, 0)
+	if vfx.tutorialRide.invulnerable then
+		grace = math.max(grace, 0.1) -- (nothing crashes you on the tutorial's ride: QM)
+	end
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)
 	end
@@ -3503,7 +3520,11 @@ local function checkRide(dt)
 	end
 	-- The Hold bar drains as you ride out (Config.RideSeconds: QM, Oct 10), and lassoing
 	-- doesn't refill it. Empty, you turn round on whatever you're on (turnHome).
-	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not mount.giant then -- abilities and the Giant Horse use no Hold
+	local tr = vfx.tutorialRide
+	if tr.bossSeconds and not tr.bossStarted then
+		tr.bossStarted, hold = true, tr.bossSeconds -- (the tutorial lets BOSS IN go, short)
+	end
+	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not mount.giant and not tr.holdFrozen then -- abilities and the Giant Horse use no Hold
 		hold = math.max(hold - dt, 0) -- (no quicker sprinting: QM, Oct 10)
 		if hold <= 0 then
 			if Config.Boss.On then -- (the boss first: BossChase, then turnHome; QM, Oct 10)
@@ -3744,7 +3765,7 @@ local function updateHud()
 	if phase == "outbound" then
 		-- The ride's time left (QM, Oct 10: RideSeconds, no more stamina).
 		-- (only once you're over the start line, QM: it's as full as it gets till then)
-		Hud.setHold(if focus.Z < 0 or hold < holdTime(nil) then hold / holdTime(nil) else nil, true) -- (mid-lasso too)
+		Hud.setHold(if vfx.tutorialRide.holdFrozen then nil elseif focus.Z < 0 or hold < holdTime(nil) then hold / holdTime(nil) else nil, true, holdTime(nil)) -- (mid-lasso too)
 		Hud.setDistance(string.format("%dm", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		Hud.setAction("LASSO", actionTarget ~= nil)
 	end
@@ -4163,12 +4184,15 @@ local timeScale = 1
 RunService.PreSimulation:Connect(function(dt)
 	local slow = cutscene ~= nil or heroLeap ~= nil
 	local slowTo = if heroLeap then Config.HomeSlowMo else Config.EggSlowMo
-	timeScale += ((slow and slowTo or 1) - timeScale) * (1 - math.exp(-10 * dt))
+	local tr = vfx.tutorialRide -- (its slow motion: Client/Tutorial; Ride tells it what it needs)
+	tr.canLasso = phase == "outbound" and actionTarget ~= nil and not transfer
+	tr.sprinting = mount ~= nil and sprinting()
+	timeScale += ((slow and slowTo or 1) * tr.timeScale - timeScale) * (1 - math.exp(-10 * dt))
 	if heroLeap then
 		heroLeap.t = math.min(heroLeap.t + dt / Config.HomeHeroTime, 1)
 	end
 	dt *= timeScale
-	updateHerd(dt, slow and not cutscene)
+	updateHerd(dt, (slow and not cutscene) or tr.timeScale < 1)
 	updateFlung(dt)
 	if phase == "boss" or phase == "turning" or phase == "return" or phase == "home" then -- (the boss, then after you home, in the leap's slow motion too)
 		vfx.bossChase.update(dt, phase ~= "boss", mount and mount.x, mount and mount.z, mount and mount.speed)
@@ -4219,6 +4243,7 @@ RunService.PreSimulation:Connect(function(dt)
 	if mount and mount ~= vfx.riddenMount then
 		-- On a new animal: it goes in your animal dictionary (Hatchery.server, AnimalDex).
 		vfx.riddenMount = mount
+		vfx.tutorialRide.mounts += 1
 		ReplicatedStorage:WaitForChild("Ridden"):FireServer(mount.kind)
 	end
 	if mount then

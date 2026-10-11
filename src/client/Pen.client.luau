@@ -555,7 +555,7 @@ RunService.RenderStepped:Connect(function(dt)
 				if not s.hatching then
 					local ready = (s.hatchAt or now) <= now
 					if s.speedupPrompt then
-						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and not player:GetAttribute("Tutorial")
+						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and (ready or not player:GetAttribute("Tutorial")) -- (the tutorial: hatch it, no speeding up)
 					end
 					s.timer.Text = if ready then "Ready" else countdown((s.hatchAt or now) - now)
 					if s.speedupPrompt then
