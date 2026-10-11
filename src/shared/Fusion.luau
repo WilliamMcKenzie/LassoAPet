@@ -20,8 +20,9 @@
 --   Fusion.scale(kind, fuse, saved) how much bigger that makes it than its base (never smaller)
 --   Fusion.name(kind, fuse)       "Poong": the donor's front and the base's back
 --   Fusion.paint(model, kind, fuse)  repaints a built model in the donor's palette
---   Fusion.worth(kind, fuse, saved) what a pet adds to FUSE's price (a hybrid: all its pets)
---   Fusion.price(worth)              the gold FUSE charges for that (Config.FuseCostScale)
+--   Fusion.worth(kind, fuse, saved) what went into a pet by rarity (a hybrid: all its pets; saved, no longer priced)
+--   Fusion.earning(kind, merged, income)  what a pet earns a second
+--   Fusion.price(income)             the gold FUSE charges for two earning that (Config.FusePriceSeconds)
 
 local Config = require(script.Parent.Config)
 local Palettes = require(script.Parent.Palettes)
@@ -110,11 +111,11 @@ function Fusion.stats(kind, fuse, saved)
 	return Fusion.best(Config.AnimalStats[kind] or ONE, Config.AnimalStats[fuse] or ONE)
 end
 
--- The best of both worlds (QM): the faster one's Speed plus half the slower one's
--- (QM, Oct 7: max + min / 2), and the longer one's Stamina.
+-- The best of both worlds (QM): the faster one's Speed plus Config.FuseSpeedShare of the
+-- slower one's (QM, Oct 11: 0.15; Oct 7 had half), and the longer one's Stamina.
 function Fusion.best(a, b)
 	return {
-		Speed = math.max(a.Speed, b.Speed) + math.min(a.Speed, b.Speed) / 2,
+		Speed = math.max(a.Speed, b.Speed) + math.min(a.Speed, b.Speed) * Config.FuseSpeedShare,
 		Stamina = math.max(a.Stamina, b.Stamina),
 	}
 end
@@ -177,9 +178,15 @@ function Fusion.worth(kind, fuse, saved)
 	return one(kind) + (if fuse then one(fuse) else 0)
 end
 
--- The gold FUSE charges for pets worth `worth` in all (Config.FuseCostScale: QM, Oct 7).
-function Fusion.price(worth)
-	return math.floor(worth * (Config.FuseCostScale or 1) + 0.5)
+-- What a pet earns a second: a hybrid's saved income, else its kind's times its merges.
+function Fusion.earning(kind, merged, income)
+	return tonumber(income) or (Config.PetIncome[kind] or 0) * (merged or 1)
+end
+
+-- The gold FUSE charges for two pets earning `income` a second between them
+-- (Config.FusePriceSeconds of it: QM, Oct 11).
+function Fusion.price(income)
+	return math.floor(income * Config.FusePriceSeconds + 0.5)
 end
 
 function Fusion.name(kind, fuse)

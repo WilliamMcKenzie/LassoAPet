@@ -141,12 +141,12 @@ local function yourPets()
 	local list = {}
 	for model, pet in PenPets.pets do
 		if model.Parent then
-			table.insert(list, { model = model, id = pet.id, kind = pet.kind, fuse = pet.fuse, merged = pet.merged, worth = pet.worth })
+			table.insert(list, { model = model, id = pet.id, kind = pet.kind, fuse = pet.fuse, merged = pet.merged, worth = pet.worth, income = pet.income })
 		end
 	end
 	local starter = PenPets.starter
 	if starter and starter.animal.model.Parent and starter.kind == player:GetAttribute("RidePet") then
-		table.insert(list, { model = starter.animal.model, id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged, worth = player:GetAttribute("RideWorth") })
+		table.insert(list, { model = starter.animal.model, id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged, worth = player:GetAttribute("RideWorth"), income = player:GetAttribute("RideIncome") })
 	end
 	local ranks = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5 }
 	table.sort(list, function(a, b) -- rarest first, then by kind, so a kind's pets sit together
@@ -159,9 +159,9 @@ local function yourPets()
 	return list
 end
 
--- Gold to merge the two picked (QM: each pet adds its rarity's price, a hybrid all its pets').
+-- Gold to merge the two picked (QM, Oct 11: minutes of what the two earn, as the server charges).
 local function priceOf(a, b)
-	return Fusion.price(Fusion.worth(a.kind, a.fuse, a.worth) + Fusion.worth(b.kind, b.fuse, b.worth))
+	return Fusion.price(Fusion.earning(a.kind, a.merged, a.income) + Fusion.earning(b.kind, b.merged, b.income))
 end
 
 local function stroked(object, thickness)
@@ -190,7 +190,7 @@ end
 local gui, panel, scale, fuseButton, priceLabel, pill, tip
 local pop = 1
 local open = false
-local pets = {} -- this opening's: { model, id, kind, fuse, merged, worth }
+local pets = {} -- this opening's: { model, id, kind, fuse, merged, worth, income }
 local slots = {} -- [1], [2]: the pet in each (either may be nil)
 local active -- the slot clicked last, empty, that the next animal clicked goes in
 local slotUi = {} -- [i] = { button, frame (the outline), view, name, hint }
