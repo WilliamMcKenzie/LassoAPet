@@ -267,7 +267,7 @@ return {
 			CactusBoss = { From = Vector3.new(0, 5, 34) }, -- (1.7x the size)
 			SharkBoss = { At = Vector3.new(0, 0, 0.4), From = Vector3.new(36, 4, 16) }, -- (from its side, so you see its eye: QM)
 		},
-		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.35), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
+		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"
@@ -463,7 +463,7 @@ return {
 	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, while
 	-- you sprint.
 	SprintSpecials = {
-		Unicorn = { Kind = "Smash", Radius = 14, ScareRadius = 30, RestorePer = 0.02, OnReturn = true }, -- scares animals within ScareRadius off, 2% Hold each (QM, Oct 4)
+		Unicorn = { Kind = "Smash", Radius = 14, ScareRadius = 30, OnReturn = true }, -- scares animals within ScareRadius off (QM, Oct 4; no more Hold back for each: QM, Oct 11)
 		Sandworm = { Kind = "Burrow", OnReturn = true },
 		Whale = { Kind = "Fly", Height = 56 },
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
@@ -473,7 +473,7 @@ return {
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
 		SoulHorse = { Kind = "SpikeTrail" }, -- QM, Oct 4: the wild Soul Horse's spike trail behind it; stampede animals that run into a spike are killed (Client/PetTrails)
 		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/PetTrails)
-		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true, RestorePer = 0.2 }, -- QM, Oct 4: 20% Hold per animal it hits
+		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true }, -- QM, Oct 4 (QM, Oct 11: no more Hold back per animal it hits: passives leave the timer alone)
 	},
 	-- Size tiers (any whole number, bigger is bigger). Racing home, a pet plows
 	-- through stampede animals of a lower tier; one of its own tier or higher

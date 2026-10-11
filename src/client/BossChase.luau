@@ -1,7 +1,7 @@
 -- The boss (QM, Oct 10): when the BOSS IN timer runs out your animal stops, and the
 -- boss (Shared/Bosses: each biome its own, Config.Boss.ByBiome) pops up in front of you,
 -- angry. The camera zooms in on its face between
--- black bars (the middle third of the screen showing), an anger vein popping up on the
+-- black bars (the middle 40% of the screen showing: BAR), an anger vein popping up on the
 -- screen by its head with them, pulsing once and gone as they go (QM, Oct 10: UI, not
 -- in the world), then it chases you: you turn
 -- round and race home with it behind you (out of sight, and never catching you: it's
@@ -21,6 +21,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Sounds = require(script.Parent.Sounds)
 
+local BAR = 0.3 -- each black bar's share of the screen's height: the strip between is 0.4, 20% more than the third it was (QM, Oct 11)
 local VEIN = "rbxassetid://85408798859805" -- assets/ui/boss/AngerMarkOutlined.png (QM's 💢, Oct 10, with a black outline baked in)
 
 local BossChase = {}
@@ -46,7 +47,7 @@ local function letterbox()
 		f.BorderSizePixel = 0
 		f.BackgroundColor3 = Color3.new(0, 0, 0)
 		f.AnchorPoint = Vector2.new(0, anchorY)
-		f.Size = UDim2.fromScale(1, 1 / 3)
+		f.Size = UDim2.fromScale(1, BAR)
 		f.Position = UDim2.fromScale(0, anchorY) -- (hidden: pushed off, below)
 		f.Parent = gui
 		return f
@@ -75,8 +76,8 @@ end
 local function showBars(on)
 	local b = letterbox()
 	local info = TweenInfo.new(Config.Boss.BarTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	TweenService:Create(b.top, info, { Position = UDim2.fromScale(0, if on then 1 / 3 else 0) }):Play()
-	TweenService:Create(b.bottom, info, { Position = UDim2.fromScale(0, if on then 2 / 3 else 1) }):Play()
+	TweenService:Create(b.top, info, { Position = UDim2.fromScale(0, if on then BAR else 0) }):Play()
+	TweenService:Create(b.bottom, info, { Position = UDim2.fromScale(0, if on then 1 - BAR else 1) }):Play()
 end
 
 -- Its size: s x its own; stood on the ground at (x, z), facing +z (towards you).

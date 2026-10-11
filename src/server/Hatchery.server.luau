@@ -216,8 +216,8 @@ end
 
 -- While you were away (QM, Oct 3): back after time away, your pets have earned
 -- Config.AwayRate of their usual gold a second for up to Config.AwayCap seconds of
--- it. It waits in the "AwayGold" attribute (the client's popup) until ClaimAway;
--- unclaimed, it's saved and added to the next visit's.
+-- it. It waits in the "AwayGold" attribute until ClaimAway (the client sends it at
+-- once: QM, Oct 11, no popup); unclaimed, it's saved and added to the next visit's.
 local function awayGold(player, profile, data)
 	local seen = tonumber(data.seen)
 	local away = if seen then math.clamp(os.time() - seen, 0, Config.AwayCap) else 0
