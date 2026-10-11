@@ -3,8 +3,8 @@
 -- bottom. Click two animals and they fill its two slots; or click a slot, then the
 -- animal to put in it (QM); with both full, the animal clicked takes the right slot.
 -- Clicking a picked one again, or its slot, takes it out. Nothing marks the picked
--- ones in the pen (QM, Oct 11: too noisy); the one under the mouse gets a white
--- dashed ring (Outline's: no Highlights, as anywhere in the game). While
+-- ones in the pen but a white outline (QM, Oct 11); the one under the mouse gets a white
+-- dashed ring (Outline's). While
 -- it's up, the pen's eggs and everything floating over it hide (QM): the eggs, their
 -- timers and the pets' plates on the "MergeView" attribute (Pen.client, PetPlates),
 -- the owner's sign and every prompt here. The
@@ -194,7 +194,7 @@ local pets = {} -- this opening's: { model, id, kind, fuse, merged, worth }
 local slots = {} -- [1], [2]: the pet in each (either may be nil)
 local active -- the slot clicked last, empty, that the next animal clicked goes in
 local slotUi = {} -- [i] = { button, frame (the outline), view, name, hint }
-local marks = {} -- [pet] = true: the picked ones
+local marks = {} -- [pet] = its white outline (a Highlight): the picked ones
 local hover = Outline.circle() -- the white dashed ring round the animal under the mouse
 local hovered -- its model
 local savedView -- the camera as it was: { type, cframe, fov }
@@ -209,14 +209,25 @@ local function slotOf(pet)
 	return if slots[1] == pet then 1 elseif slots[2] == pet then 2 else nil
 end
 
--- Picked animals aren't marked in the pen at all (QM, Oct 11: too noisy); `marks` just
--- keeps the hover ring off them.
+-- A picked animal gets a white outline in the pen (QM, Oct 11: nothing else, the rest
+-- was too noisy). A Highlight, which the game otherwise avoids (it hitches on phones),
+-- but only ever these two and only while the menu's up (QM: "if it lags i will undo it").
 local function mark(pet)
-	marks[pet] = true
+	local outline = Instance.new("Highlight")
+	outline.FillTransparency = 1
+	outline.OutlineColor = Color3.new(1, 1, 1)
+	outline.OutlineTransparency = 0
+	outline.DepthMode = Enum.HighlightDepthMode.Occluded
+	outline.Adornee = pet.model
+	outline.Parent = gui
+	marks[pet] = outline
 end
 
 local function unmark(pet)
-	marks[pet] = nil
+	if marks[pet] then
+		marks[pet]:Destroy()
+		marks[pet] = nil
+	end
 end
 
 local function refresh()
@@ -614,13 +625,13 @@ fuseButton.ZIndex = 5
 Instance.new("UIScale").Parent = fuseButton
 fuseButton.Activated:Connect(fuse)
 fuseButton.Parent = panel
--- The price, beside the drawn cash (QM's mockup).
-priceLabel = text(fuseButton, UDim2.fromOffset(150, 60), UDim2.fromOffset(112, BUTTON.size.Y / 2), 44, Vector2.new(0, 0.5))
+-- The price, beside the drawn cash, where and as big as the grey button's "???" (QM).
+priceLabel = text(fuseButton, UDim2.fromOffset(158, 64), UDim2.fromOffset(83, 57), 54, Vector2.new(0, 0.5)) -- (to just short of "Merge": a long price shrinks)
 priceLabel.TextXAlignment = Enum.TextXAlignment.Left
 priceLabel.TextScaled = true
-Instance.new("UITextSizeConstraint", priceLabel).MaxTextSize = 44
+Instance.new("UITextSizeConstraint", priceLabel).MaxTextSize = 54
 priceLabel.ZIndex = 6
-stroked(priceLabel, 4)
+stroked(priceLabel, 5)
 for _, name in { "Gold", "FuseLesson" } do
 	player:GetAttributeChangedSignal(name):Connect(function()
 		if open then
