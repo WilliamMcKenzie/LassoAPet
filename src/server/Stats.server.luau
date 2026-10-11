@@ -151,6 +151,9 @@ local function finish(player)
 			-- (V2: the stamina loop's sessions alone, to set against the old game's: QM, Oct 9)
 			v2Sessions = if Config.StatsV2 then 1 else 0,
 			v2Seconds = if Config.StatsV2 then length else 0,
+			-- (NEW RODEO VERSION: the Egg Rodeo update's sessions alone: QM, Oct 11)
+			rodeoSessions = if Config.StatsRodeo then 1 else 0,
+			rodeoSeconds = if Config.StatsRodeo then length else 0,
 			["at" .. stage .. "Sessions"] = 1,
 			["at" .. stage .. "Seconds"] = length,
 			desertUnlocks = if after then 1 else 0,
@@ -330,6 +333,11 @@ local function report()
 		return average({ sessions = t.v2Sessions or 0, seconds = t.v2Seconds or 0 })
 	end
 	table.insert(lines, "V2 AVG SESSION TIME today: " .. v2(today) .. "; last 7 days: " .. v2(week))
+	-- NEW RODEO VERSION: only sessions played on the Egg Rodeo update (Config.StatsRodeo).
+	local function rodeo(t)
+		return average({ sessions = t.rodeoSessions or 0, seconds = t.rodeoSeconds or 0 })
+	end
+	table.insert(lines, "NEW RODEO VERSION avg session today: " .. rodeo(today) .. "; last 7 days: " .. rodeo(week))
 	table.insert(lines, "Longest session today: " .. longest(today))
 	table.insert(lines, "First play bounce today: " .. bounce(today))
 	table.insert(lines, "First play bounce, last 7 days: " .. bounce(week))
