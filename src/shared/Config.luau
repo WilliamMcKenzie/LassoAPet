@@ -348,7 +348,11 @@ return {
 	DefaultPet = "Horse",
 	-- Seconds an egg placed in your pen takes to hatch: PetHatchTime by the animal
 	-- inside (QM's pets JSON, Oct 4), else HatchTime by its rarity.
-	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
+	-- By rarity from the Desert on (QM, Oct 11: no cliffs, ~5 runs a biome): each biome's
+	-- Epics are what carry you into the next one (the pacing ladder, below AnimalStats),
+	-- so they take ~5 runs to hatch; Uncommons and Rares hatch within a run, so every run
+	-- pays out; a Legendary skips a biome, so it's a little longer but still a shortcut.
+	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480 },
 	PetHatchTime = {
 		-- Balance pass (Oct 6): QM's pets JSON times, x1 in the Meadow (the first eggs stay quick),
 		-- x2 Desert, x4 Tundra, x6 Ocean, x8 Godlands; the exclusives 1 h / 16 h / 24 h. Eggs hatch
@@ -356,10 +360,7 @@ return {
 		-- (QM, Oct 8 evening: progression 2x faster: the Desert's to the Godlands' halved, so
 		-- x1 / x2 / x3 / x4 of the JSON; the Meadow's and the exclusives' kept.)
 		Horse = 15, Pig = 15, Bunny = 15, Pinto = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
-		Cactus = 30, Kitten = 30, Scorpion = 90, Sandworm = 210, SpineLizard = 300, Snake = 600, -- Desert
-		Penguin = 60, Boar = 90, Snowman = 240, IceGolem = 720, Icebringer = 3600, -- Tundra
-		Starfish = 45, Clownfish = 300, Whale = 10800, Squid = 2700, FishSchool = 2000, KingCrab = 3600, BlueCrab = 9000, Kraken = 10000, Lionfish = 1800, -- Ocean
-		Firebird = 7200, RockHog = 10800, FireLobster = 10800, Rockworm = 12600, VolcanoTortoise = 14400, Phoenix = 21600, LavaWhale = 14400, -- Volcano (guesses: past the Ocean's)
+		-- (the Desert to the Volcano: HatchTime by rarity, QM Oct 11)
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		SnackYak = 3600, RoboShark = 57600, Loong = 86400, -- exclusives
 	},
@@ -948,7 +949,7 @@ return {
 		Kraken = { Speed = 5.8, Stamina = 3 }, -- (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
 		-- Volcano
 		Firebird = { Speed = 4.59, Stamina = 2.5 },
-		RockHog = { Speed = 5.4, Stamina = 2.8 },
+		RockHog = { Speed = 5.3, Stamina = 2.8 }, -- (QM, Oct 11: 5.4 crossed into the Jurassic, the only Rare to cross a line; the Epics are the gates)
 		Rockworm = { Speed = 6.3, Stamina = 3 },
 		FireLobster = { Speed = 5.15, Stamina = 2.8 },
 		Phoenix = { Speed = 6.98, Stamina = 3 },
