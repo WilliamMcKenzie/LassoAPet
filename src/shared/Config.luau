@@ -918,14 +918,14 @@ return {
 		Bunny = { Speed = 1.2, Stamina = 0.7 },
 		Pinto = { Speed = 1.1, Stamina = 0.9 },
 		Fish = { Speed = 0.6, Stamina = 3 },
-		Rhino = { Speed = 1.5, Stamina = 1.8 },
-		Unicorn = { Speed = 2, Stamina = 2 },
+		Rhino = { Speed = 1.35, Stamina = 1.8 },
+		Unicorn = { Speed = 1.8, Stamina = 2 },
 		-- Desert
 		Cactus = { Speed = 1.2, Stamina = 1.5 },
 		Kitten = { Speed = 1.4, Stamina = 1.2 },
 		Scorpion = { Speed = 1.5, Stamina = 1.5 },
 		Sandworm = { Speed = 1.6, Stamina = 3 },
-		SpineLizard = { Speed = 1.8, Stamina = 2 },
+		SpineLizard = { Speed = 1.62, Stamina = 2 },
 		Snake = { Speed = 2, Stamina = 3 },
 		-- Tundra
 		Penguin = { Speed = 1.72, Stamina = 1.5 },
