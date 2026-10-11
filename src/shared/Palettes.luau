@@ -225,6 +225,12 @@ return {
 		{ "Marking", 36, 116, 92 }, -- stripes
 		{ "Accent", 255, 136, 40 }, -- sail
 	},
+	Ankylosaurus = {
+		{ "Body", 236, 190, 62 },
+		{ "Belly", 252, 218, 166 }, -- belly, beak
+		{ "Marking", 138, 84, 40 }, -- armour bands, head plate, club
+		{ "Accent", 250, 240, 214 }, -- spikes
+	},
 	Pterodactyl = {
 		{ "Body", 150, 98, 222 },
 		{ "Belly", 252, 218, 166 },

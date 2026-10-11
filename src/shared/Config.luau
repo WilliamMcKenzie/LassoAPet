@@ -206,7 +206,7 @@ return {
 			Length = 7680, -- as long as the volcano was (a guess; its animals aren't on the ladder yet)
 			GroundColors = { Color3.fromRGB(78, 140, 40), Color3.fromRGB(86, 152, 44) }, -- dark jungle grass
 			WallColors = { Color3.fromRGB(150, 102, 62), Color3.fromRGB(164, 114, 70) },
-			Herd = { Fish = 0.45, Spinosaurus = 0.2, TRex = 0.12, Raptor = 0.15, Pterodactyl = 0.08 }, -- (the Pterodactyl an Epic, QM Oct 11; the Spinosaurus Rare, QM Oct 11; QM, Oct 11: fish for now, until the dinosaurs are designed; the T-Rex, an Epic, is the first; the Raptor a Rare that runs in packs of three (HerdPacks), so 0.15 is about a third of the stampede. Weights a guess)
+			Herd = { Fish = 0.45, Spinosaurus = 0.2, TRex = 0.12, Raptor = 0.15, Pterodactyl = 0.08, Ankylosaurus = 0.25 }, -- (the Ankylosaurus the Jurassic's Uncommon, QM Oct 11, weight a guess; the Pterodactyl an Epic, QM Oct 11; the Spinosaurus Rare, QM Oct 11; QM, Oct 11: fish for now, until the dinosaurs are designed; the T-Rex, an Epic, is the first; the Raptor a Rare that runs in packs of three (HerdPacks), so 0.15 is about a third of the stampede. Weights a guess)
 			-- tools/jurassic.py: the dirt trail, flush.
 			Patches = {
 				Trail = { Color3.fromRGB(150, 104, 64), Color3.fromRGB(162, 114, 70) },
@@ -522,6 +522,7 @@ return {
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
 		Spinosaurus = 4, -- Jurassic (QM: slightly smaller than the T-Rex: AnimalScale 0.85)
+		Ankylosaurus = 3, -- Jurassic (a guess: a wide armoured tank, under the T-Rex)
 		Pterodactyl = 1, -- Jurassic (QM: a small animal; AnimalScale 2 so its body is as big as a Horse's under the long wings)
 		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
@@ -600,6 +601,7 @@ return {
 		TRex = 60000, Raptor = 40000, -- Jurassic (guesses: past the Volcano's)
 		Spinosaurus = 40000, -- Jurassic (a guess: a Rare, under the T-Rex)
 		Pterodactyl = 60000, -- Jurassic (a guess: an Epic, as the T-Rex)
+		Ankylosaurus = 25000, -- Jurassic (a guess: an Uncommon, past the Volcano's Rares)
 		Loong = 60000, Beholder = 9000, Leviathan = 45000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
 		WarElephant = 12000, SoulHorse = 60000, Sludge = 7500, -- so they pay more than the Ocean's)
 	},
@@ -717,6 +719,7 @@ return {
 		Raptor = "rbxassetid://86585294053216", -- assets/ui/RaptorEggRender.png
 		Spinosaurus = "rbxassetid://118684084308728", -- assets/ui/SpinosaurusEggRender.png
 		Pterodactyl = "rbxassetid://125349573529100", -- assets/ui/PterodactylEggRender.png
+		Ankylosaurus = "", -- assets/ui/AnkylosaurusEggRender.png (Studio uploads it)
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
 		Lionfish = "rbxassetid://114164241366433", -- assets/ui/LionfishEggRender.png
 		Clownfish = "rbxassetid://130227469695086", -- assets/ui/ClownfishEggRender.png
@@ -978,6 +981,7 @@ return {
 		Raptor = { Speed = 5.6, Stamina = 3 }, -- (a guess: a Rare, past the Volcano's Rares and short of the T-Rex)
 		Spinosaurus = { Speed = 5.4, Stamina = 3 }, -- (a guess: a touch under the T-Rex)
 		Pterodactyl = { Speed = 6.2, Stamina = 3 }, -- (a guess: an Epic, a touch past the T-Rex)
+		Ankylosaurus = { Speed = 5, Stamina = 3 }, -- (a guess: the Jurassic's Uncommon, under its Rares)
 		VolcanoTortoise = { Speed = 5, Stamina = 3 },
 		-- Godlands
 		Loong = { Speed = 0.5, Stamina = 8 }, -- QM, Oct 4: starts at 0.5x, its breath's kills take it up to 1x (Abilities.Loong.MaxSpeed 2 x this); sprints at 4x (PetSprintSpeed)
