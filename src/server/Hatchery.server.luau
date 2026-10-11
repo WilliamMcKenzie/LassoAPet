@@ -711,13 +711,13 @@ claimQuest.OnServerInvoke = function(player, i)
 	return quest.Egg
 end
 claimQuest.Parent = ReplicatedStorage
--- Gold.server's: a lasso landed on a wild animal ("Lasso animals").
+-- Gold.server's: a lasso landed on a wild animal ("Lasso animals", and "Lasso Snowmen" by its kind).
 local questProgress = Instance.new("BindableEvent")
 questProgress.Name = "QuestProgress"
-questProgress.Event:Connect(function(player, kind)
+questProgress.Event:Connect(function(player, kind, animal)
 	local profile = profiles[player]
 	if profile then
-		Quests.count(player, profile.quests, kind)
+		Quests.count(player, profile.quests, kind, animal)
 	end
 end)
 questProgress.Parent = game:GetService("ServerStorage")

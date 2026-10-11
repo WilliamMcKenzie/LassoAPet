@@ -249,11 +249,12 @@ fold.Activated:Connect(function()
 end)
 
 -- Tapping a quest shows how to do it, where there's a hint (QM, Oct 11): "Enter the ..."
--- flies the camera to that biome's barrier (as the tutorial's to the Desert's),
+-- flies the camera to that biome's barrier (as the tutorial's to the Desert's), as does
+-- "Lasso Snowmen" to the barrier of the biome they run in,
 -- "Collect animals" to the count over your pen, and "Merge animals" puts tap hands on
 -- Merge, then on two animals and the merge (FuseMenu, by "MergeHint").
 local function hint(quest)
-	if quest.kind == "reach" and tonumber(quest.biome) then
+	if (quest.kind == "reach" or quest.kind == "lasso") and tonumber(quest.biome) then
 		task.spawn(CameraHint.show, Vector3.new(0, 10, WorldColors.biomeStart(quest.biome)), Vector3.new(0, 26, 80))
 	elseif quest.kind == "home" then
 		local index = player:GetAttribute("Pen")

@@ -210,7 +210,7 @@ ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player
 		rideCash[player] = (rideCash[player] or 0) + coinsFor(kind)
 		local quests = game:GetService("ServerStorage"):FindFirstChild("QuestProgress") -- (Hatchery's: "Lasso animals")
 		if quests then
-			quests:Fire(player, "lasso")
+			quests:Fire(player, "lasso", kind)
 		end
 	end
 	riding[player] = true

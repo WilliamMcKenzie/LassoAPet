@@ -924,6 +924,9 @@ return {
 			{ Text = "Lasso animals", Kind = "lasso", Need = 10, Egg = "SpineLizard" },
 			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "BoneRex" }, -- (for D1: its egg's long, QM)
 			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "Snowman" },
+			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "TRex" }, -- (QM, Oct 11: these three after Merge)
+			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 5, Egg = "LavaWhale" }, -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
+			{ Text = "Collect animals", Kind = "home", Need = 30, Egg = "Pterodactyl" }, -- (pen space 35 by then: 5+ quests claimed, PenLevel 6)
 		},
 	},
 	BullSpots = { Vector3.new(-18, 0, 173), Vector3.new(-75.2, 0, 129.6), Vector3.new(52, 0, 157.1), Vector3.new(-78.6, 0, 57.9), Vector3.new(84.9, 0, 93.3) },
