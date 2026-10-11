@@ -1,7 +1,7 @@
 -- The Robux shop (QM, Oct 4; Config.Shop): the gold icon at home opens it. QM's
--- panel with five cards laid out like QM's mockup: Giant Horse, Spawn Loong and the
--- two gold packs in a 2x2 grid, and the tall Legend Egg card on the right, whose ?
--- flips it between the mystery egg and its odds. Each card's picture, name and
+-- panel with five cards laid out like QM's mockup (Oct 11): the tall Legend Egg card
+-- on the left, whose ? flips it between the mystery egg and its odds, then Giant
+-- Horse, Spawn Loong and the two cash packs in a 2x2 grid; an X on the corner closes it. Each card's picture, name and
 -- Robux price are baked into QM's art; clicking a card buys it (BuyShop,
 -- Shop.server), which asks Roblox for the Robux. An offer whose product doesn't
 -- exist yet only shows in Studio, where it's free. It behaves like the roll menu
@@ -28,28 +28,27 @@ local Gamepad = require(script.Parent.Gamepad)
 local Shop = {}
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
--- QM's art (assets/ui/Shop*.png). The cards' prices are baked in: keep them in step
--- with the products' prices on the Creator Dashboard.
-local PANEL = { id = "rbxassetid://105155399825774", size = Vector2.new(2888, 1694) } -- ShopPanel.png ("Shop" on its top edge)
-local ODDS_BUTTON = "rbxassetid://83654143211576" -- ShopOddsButton.png (the green ?)
+-- QM's art (assets/ui/Shop*.png), laid out in pixels of the panel picture (the cards
+-- are drawn at that size, as in QM's mockup). The cards' prices are baked in: keep
+-- them in step with the products' prices on the Creator Dashboard.
+local PANEL = { id = "rbxassetid://103831602991183", size = Vector2.new(1444, 858) } -- ShopPanel.png ("Shop" on its top edge)
+local CLOSE = "rbxassetid://84920756991403" -- dex/IndexClose.png (the Index's X)
+local SMALL, TALL = Vector2.new(424, 333), Vector2.new(448, 681) -- the cards' art
 local CARDS = {
-	-- [offer Key] = the card's art, and its column and row in the grid (the
-	-- Legend Egg spans both rows)
-	GiantHorse = { id = "rbxassetid://73979296990982", column = 0, row = 0 }, -- ShopGiantHorse.png
-	SpawnLoong = { id = "rbxassetid://70887174133121", column = 1, row = 0 }, -- ShopSpawnLoong.png
-	Gold1 = { id = "rbxassetid://136220197688301", column = 0, row = 1 }, -- ShopGold100k.png
-	Gold4 = { id = "rbxassetid://103982023506783", column = 1, row = 1 }, -- ShopGold1M.png
-	Legendary = { id = "rbxassetid://125476338322601", odds = "rbxassetid://102515912144773", column = 2, row = 0, tall = true }, -- ShopLegendaryEgg.png / ShopLegendaryEggOdds.png
+	-- [offer Key] = the card's art, and its top left on the panel
+	Legendary = { id = "rbxassetid://99393989394598", odds = "rbxassetid://127128286637741", at = Vector2.new(44, 133), tall = true }, -- ShopLegendaryEgg.png / ShopLegendaryEggOdds.png
+	GiantHorse = { id = "rbxassetid://100105531661393", at = Vector2.new(512, 133) }, -- ShopGiantHorse.png
+	SpawnLoong = { id = "rbxassetid://104044722461852", at = Vector2.new(975, 133) }, -- ShopSpawnLoong.png
+	Gold1 = { id = "rbxassetid://95428452126143", at = Vector2.new(512, 481) }, -- ShopGold100k.png
+	Gold4 = { id = "rbxassetid://99027271786746", at = Vector2.new(975, 481) }, -- ShopGold1M.png
 }
 -- [pass Key] = QM's card art for it ("" = the placeholder button with its name and price)
 local PASS_ART = { DoubleGold = "", FastHatch = "", AutoHatch = "", VIP = "" }
 local PASS_HEIGHT = 96
-local PANEL_WIDTH = 930 -- about 70% of the screen, as in QM's mockup
-local CARD_WIDTH = 265
-local SMALL_HEIGHT = CARD_WIDTH * 666 / 848 -- the small cards' art is 848x666
-local TALL_HEIGHT = CARD_WIDTH * 1362 / 848 -- the Legend Egg's is 848x1362
-local GAP = 30 -- between columns
-local ODDS_SIZE = 58
+local PANEL_WIDTH = 990 -- on the HUD's reference screen: about 75% of it, as in QM's mockup
+local FIT = PANEL_WIDTH / PANEL.size.X
+local GAP = 30 -- between the passes
+local ODDS = { at = Vector2.new(0.895, 0.088), size = 0.21 } -- the ? drawn on the Legend Egg's card (of its width)
 
 local player = Players.LocalPlayer
 local open = false
@@ -153,19 +152,35 @@ panel.BackgroundTransparency = 1
 panel.Image = PANEL.id
 panel.AnchorPoint = Vector2.new(0.5, 0.5)
 panel.Position = UDim2.fromScale(0.5, 0.52) -- a little below centre, as in the mockup
-panel.Size = UDim2.fromOffset(PANEL_WIDTH, PANEL_WIDTH * PANEL.size.Y / PANEL.size.X)
+panel.Size = UDim2.fromOffset(PANEL.size.X, PANEL.size.Y)
 local panelScale = Instance.new("UIScale")
+panelScale.Scale = FIT
 panelScale.Parent = panel
 panel.Parent = root
 
--- The cards, centred in the panel under its title.
+-- The cards, where QM's mockup has them.
 local grid = Instance.new("Frame")
 grid.Name = "Cards"
 grid.BackgroundTransparency = 1
-grid.AnchorPoint = Vector2.new(0.5, 0.5)
-grid.Position = UDim2.fromScale(0.5, 0.54)
-grid.Size = UDim2.fromOffset(3 * CARD_WIDTH + 2 * GAP, TALL_HEIGHT)
+grid.Size = UDim2.fromScale(1, 1)
 grid.Parent = panel
+
+-- The X, on the panel's top right corner (QM's mockup).
+local closeButton = Instance.new("ImageButton")
+closeButton.Name = "Close"
+closeButton.BackgroundTransparency = 1
+closeButton.AutoButtonColor = false
+closeButton.Image = CLOSE
+closeButton.AnchorPoint = Vector2.new(0.5, 0.5)
+closeButton.Position = UDim2.fromOffset(PANEL.size.X - 26, 71)
+closeButton.Size = UDim2.fromOffset(88, 88)
+closeButton.ZIndex = 3
+closeButton.Selectable = false -- (a controller's B closes it)
+pressable(closeButton)
+closeButton.Activated:Connect(function()
+	Shop.close()
+end)
+closeButton.Parent = panel
 
 local legendCard, legendOdds
 local cards = {} -- every card, for a controller's first pick
@@ -179,11 +194,10 @@ for key, spot in CARDS do
 	card.BackgroundTransparency = 1
 	card.AutoButtonColor = false
 	card.Image = spot.id
-	card.AnchorPoint = Vector2.new(0.5, 0.5)
-	local height = if spot.tall then TALL_HEIGHT else SMALL_HEIGHT
-	local top = if spot.row == 0 then 0 else TALL_HEIGHT - SMALL_HEIGHT
-	card.Position = UDim2.fromOffset(spot.column * (CARD_WIDTH + GAP) + CARD_WIDTH / 2, top + height / 2)
-	card.Size = UDim2.fromOffset(CARD_WIDTH, height)
+	local size = if spot.tall then TALL else SMALL
+	card.AnchorPoint = Vector2.new(0.5, 0.5) -- (so it shrinks into its middle when pressed)
+	card.Position = UDim2.fromOffset(spot.at.X + size.X / 2, spot.at.Y + size.Y / 2)
+	card.Size = UDim2.fromOffset(size.X, size.Y)
 	card.Visible = offered(offer)
 	pressable(card)
 	card.Activated:Connect(function()
@@ -208,10 +222,11 @@ if legendCard then
 	flip.Name = "Odds"
 	flip.BackgroundTransparency = 1
 	flip.AutoButtonColor = false
-	flip.Image = ODDS_BUTTON
+	flip.Image = "" -- (the ? is drawn on the card: this is where it's clicked)
 	flip.AnchorPoint = Vector2.new(0.5, 0.5)
-	flip.Position = UDim2.fromScale(0.88, 0.055) -- on the card's top-right corner, right of its title
-	flip.Size = UDim2.fromOffset(ODDS_SIZE, ODDS_SIZE)
+	flip.Position = UDim2.fromScale(ODDS.at.X, ODDS.at.Y)
+	flip.Size = UDim2.fromScale(ODDS.size, ODDS.size)
+	flip.SizeConstraint = Enum.SizeConstraint.RelativeXX
 	flip.ZIndex = 2
 	pressable(flip)
 	local function flipOdds()
@@ -240,7 +255,7 @@ passRow.Name = "Passes"
 passRow.BackgroundTransparency = 1
 passRow.AnchorPoint = Vector2.new(0.5, 0)
 passRow.Position = UDim2.new(0.5, 0, 1, 54) -- just under the panel
-passRow.Size = UDim2.fromOffset(PANEL_WIDTH, PASS_HEIGHT)
+passRow.Size = UDim2.fromOffset(PANEL.size.X, PASS_HEIGHT)
 local passLayout = Instance.new("UIListLayout")
 passLayout.FillDirection = Enum.FillDirection.Horizontal
 passLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -265,7 +280,7 @@ for i, pass in Config.Passes do
 	card.Name = pass.Key
 	card.LayoutOrder = i
 	card.AutoButtonColor = false
-	card.Size = UDim2.fromOffset((PANEL_WIDTH - (#Config.Passes - 1) * GAP) / #Config.Passes, PASS_HEIGHT)
+	card.Size = UDim2.fromOffset((PANEL.size.X - (#Config.Passes - 1) * GAP) / #Config.Passes, PASS_HEIGHT)
 	card.Visible = passOffered(pass)
 	local art = PASS_ART[pass.Key] or ""
 	card.Image = art
@@ -327,7 +342,7 @@ backdrop.Size = UDim2.fromScale(1, 1)
 backdrop.ZIndex = 0
 backdrop.Activated:Connect(function(input)
 	local at = Vector2.new(input.Position.X, input.Position.Y)
-	if not over(panel, at) and not (passRow.Visible and over(passRow, at)) then
+	if not over(panel, at) and not over(closeButton, at) and not (passRow.Visible and over(passRow, at)) then
 		Shop.close()
 	end
 end)
@@ -337,7 +352,7 @@ gui.Parent = player:WaitForChild("PlayerGui")
 
 -- It pops in and out like the other menus (ModalPop), hiding once it has shrunk away.
 local function setScale(scale)
-	panelScale.Scale = scale
+	panelScale.Scale = scale * FIT
 end
 
 function Shop.open()

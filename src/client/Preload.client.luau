@@ -13,9 +13,9 @@ local Players = game:GetService("Players")
 -- The shop's, the roll menu's and the dictionary's pages, and the Fuse menu's art
 -- (its panel, FUSE button, rarity cards and the Fuse icon: QM, Oct 6).
 local PANELS = {
-	"rbxassetid://105155399825774", "rbxassetid://83654143211576", "rbxassetid://73979296990982",
-	"rbxassetid://70887174133121", "rbxassetid://136220197688301", "rbxassetid://103982023506783",
-	"rbxassetid://125476338322601", "rbxassetid://102515912144773", "rbxassetid://104698392936555",
+	"rbxassetid://103831602991183", "rbxassetid://83654143211576", "rbxassetid://100105531661393",
+	"rbxassetid://104044722461852", "rbxassetid://95428452126143", "rbxassetid://99027271786746",
+	"rbxassetid://99393989394598", "rbxassetid://127128286637741", "rbxassetid://104698392936555",
 	"rbxassetid://110875946388838", "rbxassetid://119520152431016", "rbxassetid://78091503897812",
 	"rbxassetid://77735968469215", "rbxassetid://112429560665609", "rbxassetid://93558185988056",
 	"rbxassetid://80615979394374", "rbxassetid://120348389827821", "rbxassetid://74328700033740", -- (the FUSE button on and off)
