@@ -347,9 +347,28 @@ def obsidian(out=OUT):
     BONE, KNOB, CLAW = swap[BONE], swap[KNOB], swap[CLAW]
     a, model, parts = build()
     model["name"] = "BoneRex"
+    # the green spike tips and talons burn: Glow* (Neon in game)
+    burn = ("Spike", "Talon", "Claw")
+    for e in model["elements"]:
+        if e["name"].startswith(burn) and not e["name"].startswith("SpikeSkull"):
+            e["name"] = "Glow" + e["name"]
+    for p in parts:
+        if p.name.startswith(burn) and not p.name.startswith("SpikeSkull"):
+            p.name = "Glow" + p.name
     with open(os.path.join(out, "BoneRex_obsidian.bbmodel"), "w") as f:
         json.dump(model, f, separators=(",", ":"))
     print("wrote BoneRex_obsidian.bbmodel", len(parts), "parts")
+    mark(parts)
+    lo, hi = C.bounds(parts)
+    c = (lo + hi) / 2
+    r = np.linalg.norm(hi - lo) / 2
+    T = 520
+    sheet = Image.new("RGB", (T * 3, T))
+    for i, v in enumerate(((-19, 8, -21), (-30, 3, 0), (19, 12, 21))):
+        v = np.array(v, float)
+        eye = c + v / np.linalg.norm(v) * r / np.tan(np.radians(17))
+        sheet.paste(render(parts, eye=eye, target=c, W=T, H=T, fov=34), (i * T, 0))
+    A.label(sheet, ["Bone Rex (obsidian)", "side", "back"], 22).save(os.path.join(out, "BoneRex_obsidian.png"))
 
 
 if __name__ == "__main__":

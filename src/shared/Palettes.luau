@@ -237,6 +237,11 @@ return {
 		{ "Marking", 138, 84, 40 }, -- armour bands, head plate, club
 		{ "Accent", 250, 240, 214 }, -- spikes
 	},
+	BoneRex = {
+		{ "Body", 66, 60, 76 }, -- bones
+		{ "Body", 46, 42, 56 }, -- joints
+		{ "Accent", 60, 255, 110 }, -- soul fire, spike tips, talons
+	},
 	Pterodactyl = {
 		{ "Body", 150, 98, 222 },
 		{ "Belly", 252, 218, 166 },
