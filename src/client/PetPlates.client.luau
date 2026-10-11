@@ -160,7 +160,7 @@ RunService.Heartbeat:Connect(function(dt)
 	-- (Sitting is riding; PlatformStand is lying flat after a crash.)
 	if root and humanoid and not humanoid.Sit and not humanoid.PlatformStand and not Hud.inLesson() -- (none in the fuse lesson)
 		and not player:GetAttribute("EggPromptUp") -- (nor while an egg's prompt is up: Pen.client, QM)
-		and not player:GetAttribute("MergeView") then -- (nor in the merge view: FuseMenu, QM)
+		and not player:GetAttribute("MergeView") and not player:GetAttribute("Tutorial") then -- (nor in the merge view: FuseMenu, QM; nor the tutorial, QM Oct 11)
 		local function consider(model, kind, fuse, stats, income)
 			local pet = model.PrimaryPart
 			if not kind or not pet or not model.Parent then

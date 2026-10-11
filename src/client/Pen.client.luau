@@ -564,6 +564,7 @@ local function nearTimer(s, hrp)
 	local d = if hrp and root then ((root.Position - hrp.Position) * Vector3.new(1, 0, 1)).Magnitude else math.huge
 	local on = d <= (if s.timerOn then TIMER_LEAVE else TIMER_REACH) and not player:GetAttribute("EggPromptUp") -- (none while an egg's prompt is up: QM)
 		and not player:GetAttribute("MergeView") -- (nor in the merge view: FuseMenu, QM)
+		and not player:GetAttribute("Tutorial") -- (nor in the tutorial: QM, Oct 11)
 	if on ~= s.timerOn then
 		s.timerOn = on
 		local gui = s.timer.Parent
