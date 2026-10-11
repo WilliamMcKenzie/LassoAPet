@@ -190,7 +190,7 @@ return {
 			Sky = "rbxassetid://87302593393430", -- assets/ui/SkyVolcano.png: a flat lava orange (QM, Oct 11; Client/BiomeSky)
 			-- How much that sky colours everything (the red-orange cast) and a tint over it
 			-- (QM, Oct 11; Client/BiomeSky): Diffuse 0 to 1, Specular 0 to 1, Tint white for none.
-			SkyLight = { Diffuse = 0.4, Specular = 1, Tint = Color3.new(1, 1, 1) },
+			SkyLight = { Diffuse = 0, Specular = 1, Tint = Color3.new(1, 1, 1) }, -- (QM, Oct 11: no orange cast)
 			-- No Upgrade Pen art yet: the plain button with the price.
 		},
 	},
