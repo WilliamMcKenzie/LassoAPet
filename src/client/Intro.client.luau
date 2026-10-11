@@ -640,7 +640,6 @@ local function intro()
 		decal.Parent = markPart
 		markPart.Parent = workspace
 		table.insert(made, markPart)
-		Sounds.play("boss_ElderBoar", 0.35)
 		play(2.2, function(u)
 			local v = u * 2.2
 			local s = math.max((1 - math.exp(-12.6 * v) * math.cos(26 * v)) + 0.15 * math.sin(v * math.pi * 3), 0.05)
