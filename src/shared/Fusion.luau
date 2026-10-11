@@ -153,7 +153,7 @@ local NAMES = {
 	Beholder = { "Be", "holder" }, Penguin = { "Pen", "guin" }, Snowman = { "Snow", "man" }, Boar = { "B", "oar", "Bo" },
 	IceGolem = { "Ice", "golem" }, SnackYak = { "Snack", "yak" }, Icebringer = { "Ice", "bringer" },
 	Starfish = { "Star", "fish" }, Whale = { "Wh", "ale", "Wha" }, Squid = { "Sq", "uid", "Squi" },
-	Kraken = { "Kra", "ken" }, KingCrab = { "King", "crab" }, BlueCrab = { "Blue", "crab" }, VolcanoTortoise = { "Volca", "toise" },
+	Kraken = { "Kra", "ken" }, KingCrab = { "King", "crab" }, BlueCrab = { "Blue", "crab" }, VolcanoTortoise = { "Volca", "toise" }, Firebird = { "Fire", "bird" },
 	RoboShark = { "Robo", "shark" }, FishSchool = { "Fish", "school" }, Loong = { "L", "oong", "Loo" },
 	WarElephant = { "War", "elephant" }, SoulHorse = { "Soul", "horse" }, Sludge = { "Slu", "udge" },
 	Leviathan = { "Levi", "athan" },

@@ -185,6 +185,13 @@ return {
 		{ "Marking", 146, 46, 60 }, -- cap
 		{ "Marking", 104, 30, 46 }, -- cap rim
 	},
+	Firebird = {
+		{ "Body", 255, 128, 32 }, -- feathers
+		{ "Belly", 232, 98, 22 },
+		{ "Marking", 64, 62, 70 }, -- beak, shins, feet, wing bars
+		{ "Accent", 34, 32, 38 }, -- crest, brows, wing tips, tail
+		{ "Hoof", 232, 224, 204 }, -- claws
+	},
 	VolcanoTortoise = {
 		{ "Body", 178, 150, 102 }, -- skin, beak
 		{ "Belly", 150, 122, 82 }, -- belly, lower jaw, brows
