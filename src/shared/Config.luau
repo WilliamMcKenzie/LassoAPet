@@ -558,13 +558,18 @@ return {
 	-- MERGE is off for now that there's FUSE (QM, Oct 6 19:16): no MERGE button, and
 	-- the server refuses MergePets. Pets already merged keep their size and gold.
 	MergeEnabled = false,
-	-- FUSE's price (Shared/Fusion.worth): each of the two pets adds its rarity's, so two
-	-- Legendaries $2M (QM; Common 100 is Claude's), and a hybrid every pet in it (QM). Back on Oct 7 (QM), after a spell free;
-	-- the fuse lesson's fuse is free (FuseLesson).
+	-- FUSE's ("Merge") price (Shared/Fusion.price; QM, Oct 11: cash should matter): this many
+	-- seconds of what the two pets earn between them (PetIncome, a hybrid's saved income), so
+	-- two Kittens ~$9k, two Snowmen ~$110k: a minute or two of a pen's gold wherever you are.
+	-- The fuse lesson's fuse is free (FuseLesson). (Was by rarity, FusePrice x 0.01.)
+	FusePriceSeconds = 180,
+	-- A hybrid's Speed: the faster one's plus this share of the slower one's (QM, Oct 11; was
+	-- 1/2, which let two Desert Kittens reach the Ocean). Two equal pets come out 1.15x, one
+	-- rarity step on the pacing ladder: two Rares merge to an Epic's speed, a way past the gate
+	-- that costs gold instead of waiting on the Epic's egg. Hybrids made before keep theirs.
+	FuseSpeedShare = 0.15,
+	-- (Shared/Fusion.worth: what went into a hybrid, by rarity; kept on saves, no longer priced.)
 	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000 },
-	-- What FUSE actually charges is that worth times this (QM, Oct 7: "100x cheaper"): Common $1,
-	-- two Legendaries $20k. Hybrids keep their saved worth on the scale above, so it's done here.
-	FuseCostScale = 0.01,
 	PetSmallSize = 10.4,
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through

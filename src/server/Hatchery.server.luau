@@ -60,8 +60,8 @@ local function savedStats(stats)
 	return if speed and stamina and speed > 0 and stamina > 0 then { Speed = speed, Stamina = stamina } else nil
 end
 
--- A saved hybrid's stats as it loads, brought up to the fusion speed formula (QM, Oct 7:
--- max + min / 2, Fusion.best) for its two animals. Only ever raises Speed, from the
+-- A saved hybrid's stats as it loads, brought up to the fusion speed formula (Fusion.best:
+-- max + min x Config.FuseSpeedShare) for its two animals. Only ever raises Speed, from the
 -- animals themselves, so loading again doesn't add to it.
 local function loadedHybridStats(kind, fuse, stats)
 	local saved = savedStats(stats)
@@ -853,15 +853,12 @@ remote("FusePets", function(player, idA, idB)
 	if not aIsBase then
 		a, b, baseId, donorId = b, a, idB, idA
 	end
-	local function earning(item) -- (a hybrid's is saved; a plain pet's is its kind's, times its merges)
-		return item.income or (Config.PetIncome[item.pet] or 0) * (item.merged or 1)
-	end
-	local earns = earning(a) + earning(b)
+	local earns = Fusion.earning(a.pet, a.merged, a.income) + Fusion.earning(b.pet, b.merged, b.income) -- (a hybrid's is saved)
 	local stats = Fusion.best(Fusion.stats(a.pet, a.fuse, a.stats), Fusion.stats(b.pet, b.fuse, b.stats)) -- the best of both (QM)
 	local tier = math.max(Fusion.tier(a.pet, a.fuse, a.tier), Fusion.tier(b.pet, b.fuse, b.tier)) -- the bigger of the two (QM, Oct 8)
 	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's fuse is free, once: QM)
 	local worth = Fusion.worth(a.pet, a.fuse, a.worth) + Fusion.worth(b.pet, b.fuse, b.worth) -- (QM: a hybrid costs all its pets)
-	local price = if lesson then 0 else Fusion.price(worth) -- (QM: fusing costs gold, by rarity; 100x less from Oct 7)
+	local price = if lesson then 0 else Fusion.price(earns) -- (QM, Oct 11: minutes of what the two earn)
 	local gold = player:GetAttribute("Gold") or 0
 	if gold < price then
 		return
