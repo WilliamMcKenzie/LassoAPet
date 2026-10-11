@@ -187,6 +187,7 @@ return {
 			UnlockCost = 300000000, -- a guess (the old Godlands price)
 			PostColor = Color3.fromRGB(170, 92, 58),
 			GateColor = Color3.fromRGB(255, 110, 20), -- lava orange
+			Sky = "rbxassetid://87302593393430", -- assets/ui/SkyVolcano.png: a flat lava orange (QM, Oct 11; Client/BiomeSky)
 			-- No Upgrade Pen art yet: the plain button with the price.
 		},
 	},
