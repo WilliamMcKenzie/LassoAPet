@@ -29,7 +29,7 @@ OUT = "/mnt/project-files/animals/raptor"
 BLUE = (76, 154, 226)
 STRIPE = (36, 70, 140)
 FEATHER = (255, 146, 46)
-T = 0.14  # stripe thickness
+OVER = 0.025  # how far a stripe block stands out of the body (QM's T-Rex: 0.25 Blockbench units)
 
 
 def raptor():
@@ -37,10 +37,9 @@ def raptor():
     a.pivots["root"] = (0, 5.4, 0)
 
     def stripe(name, hw, ytop, depth, z0, z1, bone):
-        a.b(name, (-hw - T, ytop, z0), (hw + T, ytop + T, z1), STRIPE, bone)
-        for side, sx in SIDES:
-            x0, x1 = X(sx, hw, hw + T)
-            a.b(name + side, (x0, ytop - depth, z0), (x1, ytop + T, z1), STRIPE, bone)
+        """A dark stripe as QM draws them on the T-Rex: one block over the band of the body it
+        crosses, OVER bigger than the body on each side and on top, so it shows round it."""
+        a.b(name, (-hw - OVER, ytop - depth, z0), (hw + OVER, ytop + OVER, z1), STRIPE, bone)
 
     # ---- slim legs: a striped thigh, a thin shin raked back, a foot with two clawed toes
     # forward and the big sickle claw held up off the ground on the inside
@@ -48,9 +47,9 @@ def raptor():
         leg = a.bone("Leg" + side, "root", (sx * 1.1, 5.0, 0.6))
         x0, x1 = X(sx, 0.45, 1.65)
         a.b("Thigh" + side, (x0, 3.0, -0.5), (x1, 5.6, 1.5), BLUE, leg)
-        xs0, xs1 = X(sx, 1.65, 1.65 + T)
+        x0, x1 = X(sx, 0.45 - OVER, 1.65 + OVER)
         for i, y0 in enumerate((4.6, 3.7)):
-            a.b(f"ThighStripe{side}{i}", (xs0, y0, -0.3), (xs1, y0 + 0.35, 1.3), STRIPE, leg)
+            a.b(f"ThighStripe{side}{i}", (x0, y0, -0.5 - OVER), (x1, y0 + 0.35, 1.5 + OVER), STRIPE, leg)
         x0, x1 = X(sx, 0.7, 1.4)
         a.b("Shin" + side, (x0, 0.7, 0.6), (x1, 3.2, 1.4), BLUE, leg)
         x0, x1 = X(sx, 0.6, 1.5)
