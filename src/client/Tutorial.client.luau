@@ -51,11 +51,11 @@ local SPRINT_GUIDE = {
 -- QM's art at x 1411..2435 (assets/ui/TutorialGuide1-5.png, 1024 x 142, an upload's widest).
 local GUIDE_BAR = { size = Vector2.new(3846, 142), from = 1411, width = 1024, transparency = 1 - 77 / 255 }
 local CAPTIONS = {
-	clickEgg = "rbxassetid://TUTORIAL_GUIDE_1", -- assets/ui/TutorialGuide1.png "Click on the egg": the egg in your inventory
-	placeEgg = "rbxassetid://TUTORIAL_GUIDE_2", -- assets/ui/TutorialGuide2.png "Place the egg": holding it
-	hatchEgg = "rbxassetid://TUTORIAL_GUIDE_3", -- assets/ui/TutorialGuide3.png "Hatch your egg": it's in your pen, waiting to be hatched
-	ride = "rbxassetid://TUTORIAL_GUIDE_4", -- assets/ui/TutorialGuide4.png "Ride your horse!": your Horse is out
-	lasso = "rbxassetid://TUTORIAL_GUIDE_5", -- assets/ui/TutorialGuide5.png "Lasso an animal": the first ride, till your first throw
+	clickEgg = "rbxassetid://90551038508587", -- assets/ui/TutorialGuide1.png "Click on the egg": the egg in your inventory
+	placeEgg = "rbxassetid://83311618092760", -- assets/ui/TutorialGuide2.png "Place the egg": holding it
+	hatchEgg = "rbxassetid://84547643672529", -- assets/ui/TutorialGuide3.png "Hatch your egg": it's in your pen, waiting to be hatched
+	ride = "rbxassetid://71738076831384", -- assets/ui/TutorialGuide4.png "Ride your horse!": your Horse is out
+	lasso = "rbxassetid://104793392329968", -- assets/ui/TutorialGuide5.png "Lasso an animal": the first ride, till your first throw
 }
 local SLOW_FLOOR = 0.02 -- the slow-down's bottom (x speed): all but stopped
 local SLOW_TIME = 0.5 -- seconds into the slow-down for its middle (the sigmoid's)
