@@ -808,7 +808,7 @@ return {
 	-- How many pets (and eggs waiting to hatch) your pen holds (QM, Oct 11): Base, and
 	-- PerUpgrade more for each pen upgrade (PenLevel). Full, you can't put an egg down;
 	-- "5/10" shows under your name over the pen (Pens.server).
-	PenCapacity = { Base = 5, PerUpgrade = 5 },
+	PenCapacity = { Base = 15, PerUpgrade = 5 }, -- (QM, Oct 11: 3x the default, was 5)
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
 	-- Client/SkyFlash. Start: its see-through at the flash (0: solid white). Distance: studs
 	-- round the camera; anything further off goes white with the sky.
