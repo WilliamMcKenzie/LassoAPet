@@ -626,10 +626,8 @@ Instance.new("UIScale").Parent = fuseButton
 fuseButton.Activated:Connect(fuse)
 fuseButton.Parent = panel
 -- The price, beside the drawn cash, where and as big as the grey button's "???" (QM).
-priceLabel = text(fuseButton, UDim2.fromOffset(158, 64), UDim2.fromOffset(83, 57), 54, Vector2.new(0, 0.5)) -- (to just short of "Merge": a long price shrinks)
+priceLabel = text(fuseButton, UDim2.fromOffset(158, 64), UDim2.fromOffset(83, 57), 48, Vector2.new(0, 0.5)) -- (48, not scaled: QM)
 priceLabel.TextXAlignment = Enum.TextXAlignment.Left
-priceLabel.TextScaled = true
-Instance.new("UITextSizeConstraint", priceLabel).MaxTextSize = 54
 priceLabel.ZIndex = 6
 stroked(priceLabel, 5)
 for _, name in { "Gold", "FuseLesson" } do
