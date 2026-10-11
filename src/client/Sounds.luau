@@ -75,13 +75,13 @@ folder.Parent = SoundService
 
 -- Slow motion slows the sounds too (QM, Oct 11): each one's own speed (its "Base"
 -- attribute; 1 if it has none) x the ride's time scale, but never under SLOWEST, so a
--- near stop is a low drawl rather than silence. UI clicks keep their speed.
+-- near stop is a low drawl rather than silence. UI clicks keep their speed, and so does
+-- the record scratch (QM, Oct 11: that's the exception).
 local SLOWEST = 0.25
 local timeScale = 1
+local UNSCALED = { record_scratch = true }
 local function applySpeed(s)
-	if not s:GetAttribute("NoTimeScale") then
-		s.PlaybackSpeed = (s:GetAttribute("Base") or 1) * timeScale
-	end
+	s.PlaybackSpeed = (s:GetAttribute("Base") or 1) * (if s:GetAttribute("NoTimeScale") then 1 else timeScale)
 end
 function Sounds.setTimeScale(scale)
 	scale = math.max(scale, SLOWEST)
@@ -112,6 +112,7 @@ local templates = {}
 for name, id in IDS do
 	if id ~= "" then
 		templates[name] = newSound(id, VOLUME)
+		templates[name]:SetAttribute("NoTimeScale", UNSCALED[name])
 	end
 end
 task.spawn(function()
