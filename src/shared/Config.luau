@@ -422,8 +422,8 @@ return {
 	--     run into it are stuck, crawling, for a moment (Client/PetTrails).
 	--   SpikeTrail (Soul Horse): it leaves the wild Soul Horse's spikes behind it; stampede
 	--     animals that run into one are killed, whatever their size (they never crash you).
-	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, which
-	-- is always a sprint (ReturnSprint).
+	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, while
+	-- you sprint.
 	SprintSpecials = {
 		Unicorn = { Kind = "Smash", Radius = 14, ScareRadius = 30, RestorePer = 0.02, OnReturn = true }, -- scares animals within ScareRadius off, 2% Hold each (QM, Oct 4)
 		Sandworm = { Kind = "Burrow", OnReturn = true },
@@ -633,7 +633,7 @@ return {
 	-- its reach sprints, easing it back stops.
 	TouchSprintAt = 0.85,
 	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
-	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)
+	ReturnSprint = false, -- the ride home always a sprint (SprintSpeed x ReturnSpeed)? Off (QM, Oct 10): Shift sprints there, as on the way out
 	ReturnFovKick = 0, -- (QM, Oct 9: plain, was 20) degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider

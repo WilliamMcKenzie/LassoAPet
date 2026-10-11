@@ -1327,14 +1327,14 @@ local function sprinting()
 	if vfx.hunting then
 		return false -- the Robo Shark can't sprint while it hunts (QM)
 	end
-	if phase == "return" then
-		return Config.ReturnSprint -- racing home with the egg
+	if phase == "return" and Config.ReturnSprint then
+		return true -- racing home with the egg, always
 	end
 	-- (the joystick pushed far out sprints, QM: a phone's, either the fixed or the
 	-- dynamic one (both drive the move vector, rideStick), or a controller's left stick)
 	local stickOut = (rideStick.on and controls:GetMoveVector().Magnitude >= Config.TouchSprintAt)
 		or (vfx.padPush or 0) >= Config.TouchSprintAt
-	return phase == "outbound" and (sprintKey or Hud.sprintHeld() or stickOut)
+	return (phase == "outbound" or phase == "return") and (sprintKey or Hud.sprintHeld() or stickOut) -- (the run home too: QM, Oct 10)
 end
 
 UserInputService.InputChanged:Connect(function(input)
@@ -4358,7 +4358,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	-- times further for each size tier above small (Config.PetTiers).
 	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
-	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and ((phase == "outbound" and sprinting()) or (phase == "return" and Config.ReturnSprint)), if phase == "return" and Config.ReturnCamFixed then Config.SprintCam.HorseSprint elseif mount then mount.speed * (vfx.speedGain or 1) else nil) -- (the run home's a sprint too: QM)
+	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and (phase == "outbound" or phase == "return") and sprinting(), if phase == "return" and Config.ReturnCamFixed then Config.SprintCam.HorseSprint elseif mount then mount.speed * (vfx.speedGain or 1) else nil) -- (the run home's a sprint too: QM)
 	local z = vfx.camZoom * sprintZoom
 	local desired = vfx.bossChase.camera() -- (on the boss's face in its cutscene)
 		or CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
