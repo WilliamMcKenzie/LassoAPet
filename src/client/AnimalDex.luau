@@ -56,6 +56,7 @@ local SHEETS = {
 	Bunny = { frames = 23, time = 0.03, "rbxassetid://109509060486808" },
 	Kitten = { frames = 24, time = 0.03, "rbxassetid://76735200273090" },
 	Firebird = { frames = 13, time = 0.03, "rbxassetid://92445178825484" }, -- dex/DexFirebird_1.png
+	RockHog = { frames = 20, time = 0.03, "rbxassetid://84423041173252" }, -- dex/DexRockHog_1.png
 	VolcanoTortoise = { frames = 20, time = 0.03, "rbxassetid://120212888052337" }, -- dex/DexVolcanoTortoise_1.png
 	Cactus = { frames = 20, time = 0.03, "rbxassetid://109623848986836" },
 	Scorpion = { frames = 15, time = 0.03, "rbxassetid://113606148401403" },
