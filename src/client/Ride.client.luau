@@ -1342,7 +1342,7 @@ local function sprinting()
 	if vfx.hunting or player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
 		return false -- the Robo Shark can't sprint while it hunts (QM)
 	end
-	if phase == "return" and Config.ReturnSprint then
+	if (phase == "return" and Config.ReturnSprint) or (phase == "outbound" and Config.OutboundSprint) then -- (the ride out always a sprint too: QM, Oct 11)
 		return true -- racing home with the egg, always
 	end
 	-- (the joystick pushed far out sprints, QM: a phone's, either the fixed or the
@@ -3332,7 +3332,7 @@ local function updateMount(dt)
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	-- (Out of stamina you turn for home, never ride on tired: checkRide.)
-	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
+	local rate = phase == "home" and 30 or (dir < 0 and (if (mount.rampUntil or 0) > os.clock() then Config.LandRamp.Rate else 90) or 40) -- snappy into and out of a sprint (gentler just after landing: from a walk to the sprint)
 	local ability = activeAbility()
 	if ability and ability.cfg.MaxBoost then
 		-- The Leviathan's hunt: faster and faster, steadily, up to MaxBoost x (QM).
@@ -3698,7 +3698,7 @@ local function updateRider(dt)
 			vfx.rideCue:FireServer("landed") -- (Riders.server: not lassoing any more)
 			picked = nil
 			vfx.sounds.play("lasso_land")
-			mount.popping, mount.hop = nil, 0
+			mount.popping, mount.hop, mount.rampUntil = nil, 0, os.clock() + Config.LandRamp.Time
 			mount.animal:setScale(vfx.ownSize(mount)) -- (back on a pet you let go: merged or grown, it still is)
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
