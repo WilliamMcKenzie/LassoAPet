@@ -533,6 +533,10 @@ return {
 	-- two Legendaries $20k. Hybrids keep their saved worth on the scale above, so it's done here.
 	FuseCostScale = 0.01,
 	PetSmallSize = 10.4,
+	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
+	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
+	-- or crashes into, is PetTiers'. Unlisted: 1.
+	AnimalScale = {},
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
