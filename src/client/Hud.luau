@@ -65,15 +65,19 @@ local IMAGES = {
 	-- even on a computer, where [SPACE] shows only once it's fully ready (QM).
 	abilityFilling = { id = "rbxassetid://95632395593874", size = Vector2.new(618, 524) }, -- Ability.png
 	-- Egg reveal cards (assets/ui).
-	-- cardLeft is where the card's rounded body starts in the image (the rarity
-	-- cards' banners stick out past it); the body is 975 x 1175 from y = 12 in all.
-	unknownEgg = { id = "rbxassetid://77096507947185", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg.png, 1/10
-	unknownEgg1 = { id = "rbxassetid://113381581343322", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg1.png, 1/100
-	unknownEgg2 = { id = "rbxassetid://111066508903972", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg2.png, 1/1000
-	cardUncommon = { id = "rbxassetid://73673910929091", size = Vector2.new(1229, 1223), cardLeft = 127 }, -- UncommonEggRNG.png
-	cardRare = { id = "rbxassetid://112042125080788", size = Vector2.new(1134, 1217), cardLeft = 82 }, -- RareEggRNG.png
-	cardEpic = { id = "rbxassetid://94491197892789", size = Vector2.new(1244, 1227), cardLeft = 154 }, -- EpicEggRNG.png
-	cardLegendary = { id = "rbxassetid://124659626997084", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- LegendaryEggRNG.png
+	-- cardLeft / cardTop are where the card's rounded body starts in the image (the
+	-- rarity cards' banners stick out past it), size the image's: all in units of
+	-- the body being 975 x 1175 (CARD_BODY). QM's new art (Oct 11) is drawn with the
+	-- body at the image's top, about 499 px wide, so each is its pixels x 975 / 499.
+	unknownEgg = { id = "rbxassetid://89190624413208", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg.png, 1/10
+	unknownEgg1 = { id = "rbxassetid://128255311278989", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg1.png, 1/100
+	unknownEgg2 = { id = "rbxassetid://79213006654938", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg2.png, 1/1000
+	unknownEgg3 = { id = "rbxassetid://84991607264564", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg3.png, 1/10k
+	unknownEgg4 = { id = "rbxassetid://77508300986598", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg4.png, 1/100k
+	cardUncommon = { id = "rbxassetid://87221432893647", size = Vector2.new(1204, 1198), cardLeft = 114, cardTop = 0 }, -- UncommonEggRNG.png
+	cardRare = { id = "rbxassetid://82895123115484", size = Vector2.new(1110, 1192), cardLeft = 69, cardTop = 0 }, -- RareEggRNG.png
+	cardEpic = { id = "rbxassetid://74773300097555", size = Vector2.new(1215, 1200), cardLeft = 139, cardTop = 0 }, -- EpicEggRNG.png
+	cardLegendary = { id = "rbxassetid://87136104713556", size = Vector2.new(1145, 1200), cardLeft = 76, cardTop = 0 }, -- LegendaryEggRNG.png
 	-- Gacha-only animals (Config.Gacha.Pool.Exclusive). Until QM's card is uploaded
 	-- the Legendary card stands in, tinted, with EXCLUSIVE! written over it.
 	cardExclusive = { id = "", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- ExclusiveEggRNG.png
@@ -168,7 +172,7 @@ local CARD_TOP = 12 -- body's top edge in every card image
 local CARD_WIDTH = 296
 local CARD_SCALE = CARD_WIDTH / CARD_BODY.X
 local CARD_EGG_HEIGHT = 0.37
-local UNKNOWN_CARDS = { "unknownEgg", "unknownEgg1", "unknownEgg2" }
+local UNKNOWN_CARDS = { "unknownEgg", "unknownEgg1", "unknownEgg2", "unknownEgg3", "unknownEgg4" }
 local RARITY_CARDS = { Uncommon = "cardUncommon", Rare = "cardRare", Epic = "cardEpic", Legendary = "cardLegendary", Exclusive = "cardExclusive" }
 local EXCLUSIVE_TINT = Color3.fromRGB(215, 150, 255) -- the stand-in Exclusive card's tint
 
@@ -503,10 +507,10 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	cardScale.Parent = card
 	-- Every card is its own image, stacked and already loaded; a flick only swaps
 	-- which one is opaque, in the same frame, so there's no blank frame or size jump.
-	for _, key in { "unknownEgg", "unknownEgg1", "unknownEgg2", "cardUncommon", "cardRare", "cardEpic", "cardLegendary", "cardExclusive" } do
+	for _, key in { "unknownEgg", "unknownEgg1", "unknownEgg2", "unknownEgg3", "unknownEgg4", "cardUncommon", "cardRare", "cardEpic", "cardLegendary", "cardExclusive" } do
 		local entry = IMAGES[key]
 		-- Sized as a share of the card's body, so squashing the card squashes its images.
-		local face = image(card, key, UDim2.fromScale(entry.size.X / CARD_BODY.X, entry.size.Y / CARD_BODY.Y), UDim2.fromScale(-entry.cardLeft / CARD_BODY.X, -CARD_TOP / CARD_BODY.Y))
+		local face = image(card, key, UDim2.fromScale(entry.size.X / CARD_BODY.X, entry.size.Y / CARD_BODY.Y), UDim2.fromScale(-entry.cardLeft / CARD_BODY.X, -(entry.cardTop or CARD_TOP) / CARD_BODY.Y))
 		face.Name = key
 		face.AnchorPoint = Vector2.zero
 		face.ZIndex = 3
