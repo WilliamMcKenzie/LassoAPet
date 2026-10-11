@@ -73,6 +73,80 @@ def glyph(name, x_face, sx, y_top, z_front, px, tex):
     return out
 
 
+FIN_BACK = (26, 52)  # how far back (bb units) the 2nd and 3rd fins sit behind the first
+
+
+FIN_GROW = (2.0, 1.3, 1.0)  # the Whale's fins scaled up about their hinge: out, thick, long
+
+
+def grow_fin(m, side):
+    """Scales Fin<side>'s blocks about its hinge, so the fins are big splayed slabs."""
+    fin = next(g for g in m["groups"] if g["name"] == "Fin" + side)
+    o = fin["origin"]
+    for e in m["elements"]:
+        if e["name"] in ("Fin" + side, "FinTip" + side):  # before add_fins copies them
+            for k in ("from", "to", "origin"):
+                e[k] = [o[i] + (e[k][i] - o[i]) * FIN_GROW[i] for i in range(3)]
+            if e["name"].startswith("FinTip"):  # glowing tips
+                e["name"] = "Glow" + e["name"]
+                lava = next(i for i, t in enumerate(m["textures"]) if t["name"] == "cyan")
+                for f in e["faces"].values():
+                    f["texture"] = lava
+
+
+def add_fins(m, side, add):
+    """Copies Fin<side> (group, blocks, animations) to Fin<side>2 and Fin<side>3."""
+    fin = next(g for g in m["groups"] if g["name"] == "Fin" + side)
+    els = {e["uuid"]: e for e in m["elements"]}
+
+    def kids(node):
+        if isinstance(node, str):
+            return None
+        if node["uuid"] == fin["uuid"]:
+            return node["children"]
+        for c in node["children"]:
+            r = kids(c)
+            if r is not None:
+                return r
+        return None
+
+    src = next(k for k in (kids(r) for r in m["outliner"]) if k is not None)
+    root = next(g for g in m["groups"] if g["name"] == "root")
+    for n, dz in enumerate(FIN_BACK, start=2):
+        g = json.loads(json.dumps(fin))
+        g["name"], g["uuid"] = f"Fin{side}{n}", str(uuid.uuid4())
+        g["origin"] = [fin["origin"][0], fin["origin"][1], fin["origin"][2] + dz]
+        m["groups"].append(g)
+        copies = []
+        for u in src:
+            e = json.loads(json.dumps(els[u]))
+            e["uuid"], e["name"] = str(uuid.uuid4()), e["name"].replace("Fin" + side, f"Fin{side}{n}").replace("FinTip" + side, f"FinTip{side}{n}")
+            for k in ("from", "to", "origin"):
+                e[k][2] += dz
+            copies.append(e)
+        m["elements"].extend(copies)
+
+        def attach(node):
+            if isinstance(node, str):
+                return False
+            if node["uuid"] == root["uuid"]:
+                node["children"].append({"uuid": g["uuid"], "isOpen": True, "children": [e["uuid"] for e in copies]})
+                return True
+            return any(attach(c) for c in node["children"])
+
+        for r in m["outliner"]:
+            if attach(r):
+                break
+        for anim in m["animations"]:
+            for key, a in list(anim["animators"].items()):
+                if a["name"] == "Fin" + side:
+                    b = json.loads(json.dumps(a))
+                    b["name"] = g["name"]
+                    for kf in b["keyframes"]:
+                        kf["uuid"] = str(uuid.uuid4())
+                    anim["animators"][g["uuid"]] = b
+
+
 def lava_whale(m):
     m = json.loads(json.dumps(m))
     m["name"] = "LavaWhale"
@@ -108,13 +182,20 @@ def lava_whale(m):
         add("root", glyph(f"GlowBodyGlyph{side}A", sx * 30, sx, 60, -20, 3.4, lava)
             + glyph(f"GlowBodyGlyph{side}B", sx * 30, sx, 54, 22, 3.4, lava))
         add("Tail1", glyph(f"GlowTailGlyph{side}", sx * 22, sx, 52, 55, 3.0, lava))
-    # a lava spout erupting from a rock blowhole on top of the head, curling forward
+    # a unicorn horn on the brow, leaning forward: rock rings banded with lava, tapering to a glowing tip
     rock = tex[ROCK]
-    add("neck", [cube("Blowhole", (-9, 76, -42), (9, 81, -24), rock),
-                 cube("GlowSpout", (-5.5, 81, -38.5), (5.5, 116, -27.5), lava),
-                 cube("GlowSpoutCurl", (-5.5, 110, -56), (5.5, 121, -38.5), lava),
-                 cube("GlowSpoutCurl2", (-5.5, 98, -64), (5.5, 116, -53), lava),
-                 cube("GlowSpoutDrip", (-4, 92, -62), (4, 98, -55), lava)])
+    horn = []
+    rings = ((10, 0), (9, -3), (8, -6), (7, -9), (6, -12), (5, -15), (4, -18), (3, -21), (2, -24))
+    for i, (hw, dz) in enumerate(rings):
+        y0 = 82 + i * 8
+        glows = i % 2 or i == len(rings) - 1
+        horn.append(cube(f"{'Glow' if glows else ''}Horn{i}", (-hw, y0, -94 + dz - hw), (hw, y0 + 8, -94 + dz + hw),
+                         lava if glows else rock))
+    add("neck", horn)
+    # three fins a side: the Whale's pair, copied twice further back (same bones' swing)
+    for side in ("L", "R"):
+        grow_fin(m, side)
+        add_fins(m, side, add)
     return m
 
 
