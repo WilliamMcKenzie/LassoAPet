@@ -765,6 +765,7 @@ local function updateRideTarget()
 	local near = rideModel ~= nil and hrp ~= nil and (rideSpot.WorldPosition - hrp.Position).Magnitude <= RIDE_REACH and not Hud.inLesson() -- (no riding in the fuse lesson)
 	if near ~= rideShown then
 		rideShown = near -- (no RIDE button any more: the prompt's the way to ride)
+		player:SetAttribute("RidePromptUp", near) -- (Client/Tutorial's arrow goes)
 	end
 	ridePrompt.Enabled = not Hud.inLesson() and not player:GetAttribute("EggPromptUp") -- (not over an egg's prompt: Pen.client, QM)
 end
