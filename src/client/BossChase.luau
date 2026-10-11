@@ -160,7 +160,7 @@ function BossChase.camera()
 	local cf, size = boss.animal.model:GetBoundingBox()
 	local own = Config.Boss.Faces[boss.kind] or {} -- (a boss's own, where its face isn't the Chicken's)
 	local at, from = own.At or Config.Boss.FaceAt, own.From or Config.Boss.FaceFrom
-	local face = cf.Position + Vector3.new(0, size.Y * at.Y, size.Z * at.Z)
+	local face = cf.Position + Vector3.new(size.X * at.X, size.Y * at.Y, size.Z * at.Z) -- (X: a head off to one side, the Lava Wyrm's)
 	return CFrame.lookAt(face + from, face)
 end
 

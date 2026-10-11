@@ -43,6 +43,7 @@ local IDS = {
 	boss_ElderBoar = "rbxassetid://129162115855106", -- monstergrowl
 	boss_SharkBoss = "rbxassetid://9125409840", -- Bubbles Small Underwater
 	boss_CactusBoss = "rbxassetid://95169379454314", -- angry alien cat growl
+	boss_LavaWyrm = "rbxassetid://129162115855106", -- monstergrowl, as the Elder Boar's (till it has a roar of its own)
 	reveal_pop = "rbxassetid://4612378086", -- the egg card lands on its rarity (after the flicks): rewardscreenreveal (QM's pick, Oct 9; was 117371326373841)
 	egg_hatch = "rbxassetid://96102213526905", -- an egg in your pen hatches: Rewards (QM's pick, Oct 9; was 112644148635720)
 	gold_tick = "rbxassetid://123673857032707", -- gold counting up
