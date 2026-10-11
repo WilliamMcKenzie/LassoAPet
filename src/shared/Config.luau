@@ -933,18 +933,18 @@ return {
 		Snowman = { Speed = 2.06, Stamina = 1.3 },
 		IceGolem = { Speed = 2.37, Stamina = 3 },
 		SnackYak = { Speed = 3, Stamina = 2 }, -- QM, Oct 4 (stamina 1 -> 2)
-		Icebringer = { Speed = 2.73, Stamina = 4 },
+		Icebringer = { Speed = 3.6, Stamina = 4 }, -- (QM, Oct 11: a Legendary well past the next biome's Uncommons: 1.25x the Starfish, it lands in the Volcano)
 		-- Ocean
 		Starfish = { Speed = 2.87, Stamina = 2 },
 		Squid = { Speed = 3.7, Stamina = 2.6 },
 		KingCrab = { Speed = 3.6, Stamina = 3 },
-		BlueCrab = { Speed = 4.2, Stamina = 3 },
+		BlueCrab = { Speed = 5.7, Stamina = 3 }, -- (QM, Oct 11: as the Kraken, a touch slower)
 		Lionfish = { Speed = 3.4, Stamina = 2 }, -- QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
 		Clownfish = { Speed = 2.8, Stamina = 2.4 }, -- (a little slower than the Starfish, an Ocean Uncommon too)
 		RoboShark = { Speed = 1.2, Stamina = 3 }, -- QM, Oct 4: starts at 1.2x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed 2.5 x this)
 		FishSchool = { Speed = 3.95, Stamina = 2.8 },
 		Whale = { Speed = 3.2, Stamina = 10 },
-		Kraken = { Speed = 4.55, Stamina = 3 },
+		Kraken = { Speed = 5.8, Stamina = 3 }, -- (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
 		-- Volcano
 		Firebird = { Speed = 4.59, Stamina = 2.5 },
 		RockHog = { Speed = 5.4, Stamina = 2.8 },
