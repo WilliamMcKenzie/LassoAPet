@@ -7,7 +7,11 @@
 --             today's average session and today's longest session (QM, Oct 11), and the
 --             share of today's sessions whose player had reached each biome by the time
 --             they left (the furthest barrier they've ever ridden through, Gold.server's
---             "GatesBroken"; QM, Oct 11). A player back twice counts twice.
+--             "GatesBroken"; QM, Oct 11). A player back twice counts twice. Under it, the
+--             average session on each of the 5 latest versions (game.PlaceVersion), over
+--             each version's whole life, so an update's effect shows (QM, Oct 11): kept
+--             under "version-<n>", the versions seen under "versions". Sessions from before
+--             that only count toward today's.
 --
 -- QM, Oct 11: a blank slate. The old store ("Stats") is left behind, so nothing from
 -- older builds counts, even from their servers still running.
@@ -60,6 +64,11 @@ local function dayKey(time)
 	return os.date("!day-%Y-%m-%d", time)
 end
 
+local VERSION = game.PlaceVersion
+local VERSION_KEY = "version-" .. VERSION
+local VERSIONS_SHOWN = 5
+local versionNoted = false -- this server's version is in "versions"
+
 local joined = {} -- [player] = os.time() they joined (players whose sessions count)
 local pending = {} -- [dayKey] = totals not in the store yet
 
@@ -88,6 +97,7 @@ local function finish(player)
 			session["reached" .. i] = 1
 		end
 		pending[key] = addInto(pending[key] or {}, session)
+		pending[VERSION_KEY] = addInto(pending[VERSION_KEY] or {}, { sessions = 1, seconds = length, longest = length })
 	end
 end
 Players.PlayerRemoving:Connect(finish)
@@ -95,6 +105,21 @@ Players.PlayerRemoving:Connect(finish)
 local function flush()
 	if not store then
 		return
+	end
+	if not versionNoted and next(pending) then
+		versionNoted = pcall(store.UpdateAsync, store, "versions", function(old)
+			local list = if typeof(old) == "table" then old else {}
+			if not table.find(list, VERSION) then
+				table.insert(list, VERSION)
+				table.sort(list, function(a, b)
+					return a > b
+				end)
+				while #list > 20 do
+					table.remove(list)
+				end
+			end
+			return list
+		end)
 	end
 	local batch = pending
 	pending = {}
@@ -121,9 +146,9 @@ game:BindToClose(function()
 	flush()
 end)
 
--- Today's totals: the store's plus this server's not yet added.
-local function today()
-	local key = dayKey(os.time())
+-- Today's totals (or a version's: key): the store's plus this server's not yet added.
+local function today(key)
+	key = key or dayKey(os.time())
 	local t = addInto({}, nil)
 	if store then
 		local got, data = pcall(store.GetAsync, store, key)
@@ -147,6 +172,29 @@ local function report()
 			table.insert(reached, string.format("%s %.0f%%", Config.Biomes[i].Name, 100 * (t["reached" .. i] or 0) / t.sessions))
 		end
 		table.insert(lines, "Reached: " .. table.concat(reached, ", "))
+	end
+	-- The latest versions' averages, newest first (each over its whole life).
+	local versions = {}
+	if store then
+		local got, list = pcall(store.GetAsync, store, "versions")
+		if got and typeof(list) == "table" then
+			versions = list
+		end
+	end
+	if pending[VERSION_KEY] and not table.find(versions, VERSION) then
+		table.insert(versions, VERSION)
+	end
+	table.sort(versions, function(a, b)
+		return a > b
+	end)
+	if #versions > 0 then
+		table.insert(lines, "Avg session by version (all time):")
+	end
+	for i = 1, math.min(#versions, VERSIONS_SHOWN) do
+		local v = today("version-" .. versions[i])
+		table.insert(lines, if v.sessions == 0
+			then string.format("  v%d: no sessions", versions[i])
+			else string.format("  v%d: %.1f min (%d sessions)", versions[i], v.seconds / v.sessions / 60, v.sessions))
 	end
 	if not store then
 		table.insert(lines, "(No DataStore here: this server's sessions only)")
