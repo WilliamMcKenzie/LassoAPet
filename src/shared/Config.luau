@@ -377,11 +377,11 @@ return {
 		-- hatch within a run, each biome's Epics a little longer, the Legendaries are the long
 		-- D1 eggs you come back for.
 		Horse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
-		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 300, SpineLizard = 300, Snake = 1800, -- Desert
-		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 300, Icebringer = 3600, SnackYak = 3600, -- Tundra
-		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 35, Squid = 45, KingCrab = 300, FishSchool = 200, BlueCrab = 2600, Kraken = 2000, -- Ocean
+		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 600, -- Desert
+		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 120, Icebringer = 900, SnackYak = 3600, -- Tundra
+		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 35, Squid = 45, KingCrab = 300, FishSchool = 200, BlueCrab = 800, Kraken = 1200, -- Ocean
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
-		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 300, Pterodactyl = 300, BoneRex = 43200, -- Jurassic
+		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
 	},
