@@ -191,14 +191,14 @@ for _, cl in CLUSTERS do
 	local big = rng:NextInteger(1, cl[2])
 	scatter("Tree", c, 18, big, 16)
 	scatter("TreeSmall", c, 20, cl[2] - big + 1, 11)
-	scatter("Flower", c, 22, rng:NextInteger(6, 10), 2, mixedPetals)
+	scatter("Flower", c, 22, rng:NextInteger(3, 5), 2, mixedPetals) -- (half as many: QM, Oct 12, too busy)
 	scatter("GrassTuft", c, 20, rng:NextInteger(2, 4), 1.6)
 end
 
 -- Flowers and tufts along the dirt's edges: grass spots with dirt a few studs off.
 local edges = 0
 for _ = 1, 4000 do
-	if edges >= 22 then
+	if edges >= 11 then -- (half as many: QM)
 		break
 	end
 	local p = Vector2.new(rng:NextNumber(-170, 170), rng:NextNumber(8, 258))
