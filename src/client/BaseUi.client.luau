@@ -245,6 +245,10 @@ local function popGain(gain)
 	local at = (cashText.AbsolutePosition + cashText.AbsoluteSize * Vector2.new(1, 0.5) - root.AbsolutePosition) / scale.Scale
 	pop.Position = UDim2.fromOffset(at.X + 14, at.Y)
 	local stroke = pop:FindFirstChildOfClass("UIStroke")
+	pop.TextTransparency = 0.5 -- (half see-through to start with: QM)
+	if stroke then
+		stroke.Transparency = 0.5
+	end
 	local info = TweenInfo.new(POP_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	TweenService:Create(pop, info, { Position = UDim2.fromOffset(at.X + 14, at.Y - POP_RISE) }):Play()
 	local fade = TweenInfo.new(POP_TIME * 0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, POP_TIME * 0.4)
