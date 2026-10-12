@@ -916,8 +916,8 @@ return {
 	-- three count from when the quest comes up.
 	Quests = {
 		{
-			{ Text = "Enter the Desert", Kind = "reach", Biome = 2, Egg = "Unicorn" },
-			{ Text = "Enter the Tundra", Kind = "reach", Biome = 3, Egg = "Snake" },
+			{ Text = "Enter the Desert", Kind = "reach", Biome = 2, Egg = "Penguin" }, -- (QM, Oct 11: quick eggs early, to speed you up; was the Unicorn)
+			{ Text = "Enter the Tundra", Kind = "reach", Biome = 3, Egg = "Starfish" }, -- (QM, Oct 11: was the Snake)
 			{ Text = "Enter the Ocean", Kind = "reach", Biome = 4, Egg = "Icebringer" },
 			{ Text = "Enter the Volcano", Kind = "reach", Biome = 5, Egg = "Kraken" },
 			{ Text = "Enter the Jurassic", Kind = "reach", Biome = 6, Egg = "Phoenix" },

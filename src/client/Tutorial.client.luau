@@ -26,6 +26,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Hud = require(script.Parent.Hud)
 local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
@@ -302,13 +303,15 @@ arrowImage.Parent = eggArrow
 eggArrow.ResetOnSpawn = false
 eggArrow.Parent = player:WaitForChild("PlayerGui") -- (a BillboardGui draws from the PlayerGui, not inside a ScreenGui)
 local arrowOver -- the egg model it's over, or nil
+local fastestOver -- once the tutorial's done, your fastest pet till you ride (below), or nil
 
 RunService.RenderStepped:Connect(function()
 	-- The egg arrow, bobbing.
-	local root = arrowOver and arrowOver.Parent and (arrowOver.PrimaryPart or arrowOver:FindFirstChildWhichIsA("BasePart", true))
+	local over = arrowOver or fastestOver
+	local root = over and over.Parent and (over.PrimaryPart or over:FindFirstChildWhichIsA("BasePart", true))
 	eggArrow.Adornee = root
 	eggArrow.Enabled = root ~= nil and not player:GetAttribute("Cutscene")
-	local up = if arrowOver and arrowOver:IsA("Model") and not arrowOver.Name:match("Egg$") then ARROW_UP_PET else ARROW_UP
+	local up = if over and over:IsA("Model") and not over.Name:match("Egg$") then ARROW_UP_PET else ARROW_UP
 	eggArrow.StudsOffsetWorldSpace = Vector3.new(0, up + math.abs(math.sin(os.clock() * 3)) * 1.5, 0)
 	-- The tap hand.
 	local show, flip = false, false
@@ -429,6 +432,28 @@ end
 -- Desert again, not the whole course, and twice as fast).
 local function showGate()
 	CameraHint.show(Vector3.new(0, 10, -Config.Biomes[1].Length), Vector3.new(0, 26, 80), GATE_IN, GATE_HOLD, GATE_OUT)
+end
+
+-- The tutorial's done: the big arrow over the fastest pet in your pen, till you ride
+-- (or you're by it, its prompt up), so you know to get back out there (QM, Oct 11).
+local function speedOf(model)
+	local starter = PenPets.starter
+	local info = if starter and starter.animal and starter.animal.model == model then starter else PenPets.pets[model]
+	return info and Fusion.stats(info.kind, info.fuse, info.stats).Speed or 0
+end
+local function pointAtFastest()
+	while not Hud.isRiding() and not player:GetAttribute("Tutorial") do
+		local best, fastest = nil, -1
+		for _, model in myPets() do
+			local ok, speed = pcall(speedOf, model)
+			if ok and speed > fastest then
+				best, fastest = model, speed
+			end
+		end
+		fastestOver = if player:GetAttribute("RidePromptUp") then nil else best
+		task.wait(0.2)
+	end
+	fastestOver = nil
 end
 
 local running = false
@@ -579,6 +604,12 @@ local function run()
 			if done then
 				done:FireServer()
 			end
+			task.spawn(function()
+				while player:GetAttribute("Tutorial") do -- (till the server's taken it off)
+					task.wait(0.2)
+				end
+				pointAtFastest()
+			end)
 			break
 		end
 		-- (nothing brought home: ride again)

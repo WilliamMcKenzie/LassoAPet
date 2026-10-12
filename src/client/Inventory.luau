@@ -10,6 +10,7 @@
 --
 --   Inventory.init(parent) -- builds the bar in a HUD frame (sizes in HUD pixels)
 --   Inventory.setVisible(v) -- hidden while riding
+--   Inventory.holdBack(kind, n) -- shows n fewer of that egg (n < 0 lets them back: BaseUi's quest egg, till its reveal's done)
 
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
@@ -107,6 +108,11 @@ local function allTools()
 	return found
 end
 
+local heldBack = {} -- [EggKind] = how many of it not to show yet
+local function shown(tool)
+	return (tool:GetAttribute("Count") or 1) - (heldBack[tool:GetAttribute("EggKind")] or 0)
+end
+
 local function redraw()
 	if not bar then
 		return
@@ -119,7 +125,7 @@ local function redraw()
 	local found = allTools()
 	table.clear(tools)
 	for _, name in order do
-		if found[name] and #tools < MAX_SLOTS then
+		if found[name] and #tools < MAX_SLOTS and shown(found[name]) > 0 then
 			table.insert(tools, found[name])
 		end
 	end
@@ -166,7 +172,7 @@ local function redraw()
 		number.Position = UDim2.fromOffset(4, 2)
 		number.Text = tostring(i)
 		number.ZIndex = 3
-		local count = tool:GetAttribute("Count") or 1
+		local count = shown(tool)
 		if count > 1 then
 			local label = text(slot, UDim2.fromScale(1, 1), 34)
 			label.Text = "x" .. count
@@ -296,6 +302,14 @@ end
 
 -- The square showing the tool called `name`, while the bar is up (the tutorial
 -- points at it).
+function Inventory.holdBack(kind, n)
+	heldBack[kind] = math.max((heldBack[kind] or 0) + n, 0)
+	if heldBack[kind] == 0 then
+		heldBack[kind] = nil
+	end
+	redraw()
+end
+
 function Inventory.slot(name)
 	return bar and bar.Visible and bar:FindFirstChild(name) or nil
 end

@@ -20,6 +20,7 @@ local AnimalDex = require(script.Parent.AnimalDex)
 local RollMenu = require(script.Parent.RollMenu)
 local CameraHint = require(script.Parent.CameraHint)
 local TapHand = require(script.Parent.TapHand)
+local Inventory = require(script.Parent.Inventory)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 
 local player = Players.LocalPlayer
@@ -250,6 +251,44 @@ fold.Activated:Connect(function()
 	quests:SetAttribute("Folded", folded) -- (draws again: below)
 end)
 
+-- A new quest pops in (QM, Oct 11): from nothing, overshooting, a wobble, and settles
+-- (anticipation, overshoot, follow-through), once the panel's up and no egg reveal's over
+-- it. And QM's red badge on the panel when a quest's ready to claim, till you hover it
+-- (or tap it).
+local POP_TIME = 0.6
+local pops = {} -- [quest i] = os.clock() it started popping, or false while it waits to
+local seenQuests -- [quest i] = true: what's been up (nil till the first list: those don't pop)
+local dot = Instance.new("ImageLabel")
+dot.Name = "ClaimBadge"
+dot.Image = "rbxassetid://136773861994278" -- assets/ui/quests/QuestNotification.png, 48 x 48 (QM)
+dot.BackgroundTransparency = 1
+dot.AnchorPoint = Vector2.new(0.5, 0.5)
+dot.Position = UDim2.fromOffset(10, 6) -- (on the panel's top left corner, as QM's mockup)
+dot.Size = UDim2.fromOffset(48, 48)
+dot.ZIndex = 10
+dot.Visible = false
+local claimable = {} -- [quest i] = true: ready to claim, as last drawn
+local dotScale = Instance.new("UIScale")
+dotScale.Parent = dot
+dot.Parent = quests
+local dotSince -- os.clock() it popped up
+local function seen()
+	dot.Visible, dotSince = false, nil
+end
+quests.MouseEnter:Connect(seen)
+quests.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch then
+		seen()
+	end
+end)
+fold.MouseEnter:Connect(seen)
+fold.Activated:Connect(seen)
+-- 0 to 1 over POP_TIME, overshooting to ~1.2 and settling.
+local function popScale(t)
+	local a = math.clamp(t / POP_TIME, 0, 1)
+	return 1 - math.exp(-6 * a) * math.cos(10 * a)
+end
+
 -- Tapping a quest shows how to do it, where there's a hint (QM, Oct 11): "Enter the ..."
 -- flies the camera to that biome's barrier (as the tutorial's to the Desert's), as does
 -- "Lasso Snowmen" to the barrier of the biome they run in,
@@ -287,8 +326,16 @@ local function questRow(i, quest, y)
 	row.Name = "Quest"
 	row.BackgroundTransparency = 1
 	row.ZIndex = 2 -- (over the panel's pieces)
-	row.Position = UDim2.fromOffset(0, y)
 	row.Size = UDim2.fromOffset(Q.width, if done then Q.claim.Y else Q.barAt + Q.bar.Y)
+	row.AnchorPoint = Vector2.new(0.5, 0.5) -- (its middle: a new one pops about it)
+	row.Position = UDim2.fromOffset(Q.width / 2, y + row.Size.Y.Offset / 2)
+	row:SetAttribute("Quest", i)
+	if pops[i] ~= nil then
+		local pop = Instance.new("UIScale")
+		pop.Name = "Pop"
+		pop.Scale = if pops[i] then popScale(os.clock() - pops[i]) else 0
+		pop.Parent = row
+	end
 	-- (finished: its CLAIM button takes the quest's place, QM)
 	if not done then
 		local tap = Instance.new("TextButton") -- (the whole quest: its hint)
@@ -362,12 +409,27 @@ local function questRow(i, quest, y)
 				return
 			end
 			claiming = true
+			-- (its egg stays out of the inventory till its reveal's over: QM, Oct 11)
+			local line = Config.Quests[i // 100]
+			local egg = line and line[i % 100] and line[i % 100].Egg
+			if egg then
+				Inventory.holdBack(egg, 1)
+			end
 			local ok, kind = pcall(claimQuest.InvokeServer, claimQuest, i)
 			local animal = ok and kind and ReplicatedStorage.Shared.Animals:FindFirstChild(kind)
 			if animal then
 				Hud.eggReveal(require(animal).Rarity, kind, true) -- (the egg it gave you)
 			end
 			claiming = false
+			if egg then
+				task.spawn(function()
+					task.wait(0.2)
+					while Hud.revealing() do
+						task.wait(0.1)
+					end
+					Inventory.holdBack(egg, -1)
+				end)
+			end
 		end)
 		-- (in a holder that pulses about its middle: QM, Oct 11; the button's own UIScale is its press)
 		local holder = Instance.new("Frame")
@@ -393,6 +455,43 @@ local questList = {} -- what's up: { { i, text, have, need } } (Hatchery's "Ques
 local function drawQuests()
 	local ok, list = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Quests") or "[]")
 	questList = if ok and typeof(list) == "table" then list else {}
+	-- (new ones pop; the first list's don't, unless it's a new player's, after the tutorial)
+	if #questList > 0 then
+		local first = seenQuests == nil
+		seenQuests = seenQuests or {}
+		for _, quest in questList do
+			local i = typeof(quest) == "table" and tonumber(quest.i)
+			if i and not seenQuests[i] then
+				seenQuests[i] = true
+				if not first or player:GetAttribute("Tutorial") then
+					pops[i] = false
+				end
+			end
+		end
+	end
+	-- The badge: on as a quest becomes ready to claim, off once you've hovered it or none is.
+	local now = {}
+	for _, quest in questList do
+		if typeof(quest) == "table" and tonumber(quest.i) and tonumber(quest.have) and tonumber(quest.need) and quest.have >= quest.need then
+			now[quest.i] = true
+			if not claimable[quest.i] then
+				dot.Visible, dotSince = true, os.clock()
+			end
+		end
+	end
+	claimable = now
+	if next(claimable) == nil then
+		seen()
+	end
+	for i in pops do -- (claimed before it ever showed)
+		local up = false
+		for _, quest in questList do
+			up = up or (typeof(quest) == "table" and tonumber(quest.i) == i)
+		end
+		if not up then
+			pops[i] = nil
+		end
+	end
 	for _, child in quests:GetChildren() do
 		if child.Name == "Quest" then
 			child:Destroy()
@@ -444,4 +543,28 @@ RunService.RenderStepped:Connect(function()
 	local covered = modal()
 	root:SetAttribute("Modal", covered)
 	quests.Visible = not riding and not covered and #questList > 0
+	-- New quests pop once you can see them.
+	local up = quests.Visible and gui.Enabled and not Hud.revealing()
+	for i, started in pops do
+		if started == false and up then
+			pops[i] = os.clock()
+		elseif started and os.clock() - started > POP_TIME then
+			pops[i] = nil
+		end
+	end
+	for _, row in quests:GetChildren() do
+		local pop = row.Name == "Quest" and row:FindFirstChild("Pop")
+		if pop then
+			local started = pops[row:GetAttribute("Quest")]
+			pop.Scale = if started then popScale(os.clock() - started) elseif started == false then 0 else 1
+			row.Rotation = if started then 6 * math.sin((os.clock() - started) * 18) * math.exp(-6 * (os.clock() - started)) else 0
+		end
+	end
+	if dotSince and not up then
+		dotSince = os.clock() -- (its pop waits till you can see it)
+	end
+	if dotSince then -- (the badge pops in too, then breathes)
+		local t = os.clock() - dotSince
+		dotScale.Scale = if t < POP_TIME then popScale(t) else 1 + 0.08 * math.sin(t * 5)
+	end
 end)

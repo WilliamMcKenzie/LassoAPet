@@ -1289,6 +1289,11 @@ local EXIT_TIME = 0.42
 -- the card is gone (nil if there's no card for that rarity, e.g. Common).
 -- rolled: a roll's (or the shop's Legend Egg's) card, which lands with roll_reveal
 -- rather than reveal_pop (Sounds).
+-- Whether an egg reveal's card is up (BaseUi's quest egg waits for it to go).
+function Hud.revealing()
+	return card ~= nil and card.Visible
+end
+
 function Hud.eggReveal(rarity, kind, rolled)
 	local final = RARITY_CARDS[rarity]
 	if not final then
