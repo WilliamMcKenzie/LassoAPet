@@ -52,7 +52,7 @@ local CASH_GREEN = Color3.fromHex("00FF09")
 -- (in RefWidth pixels: QM's mockups at 1300 wide, x 1920 / 1300)
 local MARGIN = 18
 local MENU_WIDTH = 213 -- each of Shop, Index, Merge (QM, Oct 9: 20% smaller again, was 266, at first 296)
-local MENU_GAP = 20
+local MENU_GAP = 12 -- (small even gaps: QM's mockup, Oct 12; was 20)
 local ICON = 74 -- the counters' icons
 local TEXT = 55 -- the counters' text (QM's Figma: 55, stroke 5)
 local STROKE = 5
@@ -134,7 +134,7 @@ local function promptInvite()
 	end)
 end
 
--- On the right, under Quests (QM, Oct 12; they were down the left): Merge, Shop, Index, Invite.
+-- On the right, under Quests (QM, Oct 12; they were down the left): Merge, Index, Shop, Invite.
 local menu = Instance.new("Frame")
 menu.Name = "Menu"
 menu.BackgroundTransparency = 1
@@ -160,9 +160,9 @@ end }, { "merge", function()
 		Hud.onFuse()
 	end
 end }, { "invite", promptInvite } } do
-	local b = picture("ImageButton", menu, ART[spec[1]], MENU_WIDTH)
+	local b = picture("ImageButton", menu, ART[spec[1]], QUESTS_WIDTH) -- (as wide as the Quests panel over them: QM's mockup)
 	b.Name = spec[1]
-	b.LayoutOrder = ({ shop = 2, index = 3, merge = 1, invite = 4 })[spec[1]] -- (top to bottom: Merge, Shop, Index, Invite: QM)
+	b.LayoutOrder = ({ merge = 1, index = 2, shop = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
 	if ART[spec[1]].id == "" then -- (no art yet: a plain button with its name)
 		b.BackgroundTransparency = 0
 		b.BackgroundColor3 = Color3.fromRGB(76, 200, 92)
