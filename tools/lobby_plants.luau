@@ -174,15 +174,20 @@ table.insert(placed, { Vector2.new(63.5, 24.6), 20 }) -- the podium (Config.Podi
 
 -- The tree clusters (QM's mock): both front corners (behind the gate and the podium), each
 -- side wall between the side pens by its boulder, both back corners flanking Pen 1.
+-- (QM, Oct 12: the front corners just one tree and two tufts each, no flowers: `bare`)
 local CLUSTERS = {
-	{ Vector2.new(-110, 16), 3 }, { Vector2.new(110, 16), 3 },
-	{ Vector2.new(-150, 20), 2 }, { Vector2.new(150, 20), 2 },
+	{ Vector2.new(-110, 16), 1, true }, { Vector2.new(110, 16), 1, true },
 	{ Vector2.new(-163, 150), 3 }, { Vector2.new(163, 150), 3 },
 	{ Vector2.new(-163, 120), 2 }, { Vector2.new(163, 120), 2 },
 	{ Vector2.new(-58, 246), 3 }, { Vector2.new(58, 246), 3 },
 }
 for _, cl in CLUSTERS do
 	local c = cl[1]
+	if cl[3] then
+		scatter("Tree", c, 6, 1, 16)
+		scatter("GrassTuft", c, 20, 2, 1.6)
+		continue
+	end
 	local big = rng:NextInteger(1, cl[2])
 	scatter("Tree", c, 18, big, 16)
 	scatter("TreeSmall", c, 20, cl[2] - big + 1, 11)
@@ -205,7 +210,7 @@ for _ = 1, 4000 do
 			nearDirt = true
 		end
 	end
-	if nearDirt and free(p, 2) then
+	if nearDirt and not (p.Y < 50 and math.abs(p.X) > 66) and free(p, 2) then -- (none in the front corners: QM)
 		table.insert(placed, { p, 2 })
 		if edges % 3 == 2 then
 			put("GrassTuft", p, rng:NextNumber() * 2 * math.pi)
