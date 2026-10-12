@@ -130,6 +130,8 @@ list.SortOrder = Enum.SortOrder.LayoutOrder
 list.Padding = UDim.new(0, MENU_GAP)
 list.Parent = menu
 menu.Parent = root
+local mergeBadge -- QM's red "1" on Merge while the "Merge animals" quest is up and you've not merged yet (QM, Oct 11)
+local mergeHinted = false -- (and the quest's tap hands, as tapping it, once as it comes up: QM)
 for i, spec in { { "shop", function()
 	if Shop.hasOffers() then
 		Shop.toggle()
@@ -158,6 +160,16 @@ end } } do
 		end
 		player:GetAttributeChangedSignal("MergeHint"):Connect(show)
 		player:GetAttributeChangedSignal("MergeView"):Connect(show)
+		mergeBadge = Instance.new("ImageLabel")
+		mergeBadge.Name = "QuestBadge"
+		mergeBadge.Image = "rbxassetid://136773861994278" -- assets/ui/quests/QuestNotification.png (QM)
+		mergeBadge.BackgroundTransparency = 1
+		mergeBadge.AnchorPoint = Vector2.new(0.5, 0.5)
+		mergeBadge.Position = UDim2.new(1, -8, 0, 8) -- (its top right corner, as QM's mockup)
+		mergeBadge.Size = UDim2.fromOffset(36, 36)
+		mergeBadge.ZIndex = 10
+		mergeBadge.Visible = false
+		mergeBadge.Parent = b
 	end
 end
 
@@ -260,7 +272,11 @@ local pops = {} -- [quest i] = os.clock() it started popping, or false while it 
 local seenQuests -- [quest i] = true: what's been up (nil till the first list: those don't pop)
 local dot = Instance.new("ImageLabel")
 dot.Name = "ClaimBadge"
-dot.Image = "rbxassetid://136773861994278" -- assets/ui/quests/QuestNotification.png, 48 x 48 (QM)
+local BADGES = {
+	"rbxassetid://136773861994278", -- assets/ui/quests/QuestNotification.png, 48 x 48 (QM): "1"
+	"rbxassetid://128175495014059", -- assets/ui/quests/QuestNotification2.png (QM): "2", two to claim
+}
+dot.Image = BADGES[1]
 dot.BackgroundTransparency = 1
 dot.AnchorPoint = Vector2.new(0.5, 0.5)
 dot.Position = UDim2.fromOffset(10, 6) -- (on the panel's top left corner, as QM's mockup)
@@ -472,7 +488,21 @@ local function drawQuests()
 		end
 	end
 	claimable = now
-	if next(claimable) == nil then
+	local merging = false
+	for _, quest in questList do
+		merging = merging or (typeof(quest) == "table" and quest.kind == "merge" and (tonumber(quest.have) or 0) == 0)
+	end
+	mergeBadge.Visible = merging -- (gone once you've merged)
+	if merging and not mergeHinted then
+		mergeHinted = true
+		player:SetAttribute("MergeHint", true)
+	end
+	local count = 0
+	for _ in claimable do
+		count += 1
+	end
+	dot.Image = BADGES[math.clamp(count, 1, #BADGES)]
+	if count == 0 then
 		seen()
 	end
 	for i in pops do -- (claimed before it ever showed)
