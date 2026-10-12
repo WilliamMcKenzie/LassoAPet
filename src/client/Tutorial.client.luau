@@ -434,27 +434,39 @@ local function showGate()
 	CameraHint.show(Vector3.new(0, 10, -Config.Biomes[1].Length), Vector3.new(0, 26, 80), GATE_IN, GATE_HOLD, GATE_OUT)
 end
 
--- The tutorial's done: the big arrow over the fastest pet in your pen, till you ride
--- (or you're by it, its prompt up), so you know to get back out there (QM, Oct 11).
+-- Once the tutorial's done: the big arrow over the fastest pet in your pen whenever you're
+-- at your base (not riding, by it with its prompt up, or in the merge view), so you know
+-- to get back out there (QM, Oct 11), moving to a new pet as soon as it's out of its egg
+-- and faster (it used to go for good after your first ride: QM).
 local function speedOf(model)
 	local starter = PenPets.starter
 	local info = if starter and starter.animal and starter.animal.model == model then starter else PenPets.pets[model]
 	return info and Fusion.stats(info.kind, info.fuse, info.stats).Speed or 0
 end
-local function pointAtFastest()
-	while not Hud.isRiding() and not player:GetAttribute("Tutorial") do
-		local best, fastest = nil, -1
-		for _, model in myPets() do
-			local ok, speed = pcall(speedOf, model)
-			if ok and speed > fastest then
-				best, fastest = model, speed
+task.spawn(function()
+	local best -- (kept while a new pet is still hatching)
+	while true do
+		if player:GetAttribute("Tutorial") or Hud.isRiding() then
+			fastestOver = nil
+		else
+			local kept, fastest = false, -1
+			if best and best.Parent then
+				kept, fastest = pcall(speedOf, best)
 			end
+			if not kept then
+				best, fastest = nil, -1
+			end
+			for _, model in myPets() do
+				local ok, speed = pcall(speedOf, model)
+				if ok and speed > fastest and not model:GetAttribute("Hatching") then
+					best, fastest = model, speed
+				end
+			end
+			fastestOver = if player:GetAttribute("RidePromptUp") then nil else best
 		end
-		fastestOver = if player:GetAttribute("RidePromptUp") then nil else best
 		task.wait(0.2)
 	end
-	fastestOver = nil
-end
+end)
 
 local running = false
 local function run()
@@ -604,12 +616,6 @@ local function run()
 			if done then
 				done:FireServer()
 			end
-			task.spawn(function()
-				while player:GetAttribute("Tutorial") do -- (till the server's taken it off)
-					task.wait(0.2)
-				end
-				pointAtFastest()
-			end)
 			break
 		end
 		-- (nothing brought home: ride again)
