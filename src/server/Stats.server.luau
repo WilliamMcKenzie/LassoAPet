@@ -106,7 +106,13 @@ local function finish(player)
 			session["reached" .. i] = 1
 		end
 		pending[key] = addInto(pending[key] or {}, session)
-		pending[VERSION_KEY] = addInto(pending[VERSION_KEY] or {}, { sessions = 1, seconds = length, longest = length })
+		local forVersion = { sessions = 1, seconds = length, longest = length }
+		for f, v in session do
+			if f:match("^quit") then
+				forVersion[f] = v -- (its quit band: "Quit at" is the latest version's)
+			end
+		end
+		pending[VERSION_KEY] = addInto(pending[VERSION_KEY] or {}, forVersion)
 	end
 end
 Players.PlayerRemoving:Connect(finish)
@@ -181,18 +187,6 @@ local function report()
 			table.insert(reached, string.format("%s %.0f%%", Config.Biomes[i].Name, 100 * (t["reached" .. i] or 0) / t.sessions))
 		end
 		table.insert(lines, "Reached: " .. table.concat(reached, ", "))
-		-- (of the sessions with a band: today's from before the bands have none)
-		local banded = 0
-		for i in BANDS do
-			banded += t["quit" .. i] or 0
-		end
-		if banded > 0 then
-			local quit = {}
-			for i, band in BANDS do
-				table.insert(quit, string.format("%s %.0f%%", band[2], 100 * (t["quit" .. i] or 0) / banded))
-			end
-			table.insert(lines, string.format("Quit at (%d sessions): %s", banded, table.concat(quit, ", ")))
-		end
 	end
 	-- The latest versions' averages, newest first (each over its whole life).
 	local versions = {}
@@ -208,7 +202,20 @@ local function report()
 	table.sort(versions, function(a, b)
 		return a > b
 	end)
+	-- Where sessions end on the latest version (QM, Oct 12), over its whole life.
 	if #versions > 0 then
+		local v = today("version-" .. versions[1])
+		local banded = 0
+		for i in BANDS do
+			banded += v["quit" .. i] or 0
+		end
+		if banded > 0 then
+			local quit = {}
+			for i, band in BANDS do
+				table.insert(quit, string.format("%s %.0f%%", band[2], 100 * (v["quit" .. i] or 0) / banded))
+			end
+			table.insert(lines, string.format("Quit at, v%d (%d sessions): %s", versions[1], banded, table.concat(quit, ", ")))
+		end
 		table.insert(lines, "Avg session by version (all time):")
 	end
 	for i = 1, math.min(#versions, VERSIONS_SHOWN) do
