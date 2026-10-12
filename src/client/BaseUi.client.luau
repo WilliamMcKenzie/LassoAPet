@@ -284,7 +284,11 @@ fold.Text = ""
 fold.Size = UDim2.fromOffset(Q.width, Q.header)
 fold.ZIndex = 3
 fold.Parent = quests
-local folded = false
+-- (folded to start with on a phone or tablet, so the column under it clears Roblox's jump
+-- button: QM, Oct 12; its claim badge still shows)
+local UserInputService = game:GetService("UserInputService")
+local folded = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
+quests:SetAttribute("Folded", folded)
 fold.Activated:Connect(function()
 	folded = not folded
 	quests:SetAttribute("Folded", folded) -- (draws again: below)
