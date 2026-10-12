@@ -455,6 +455,9 @@ local function run()
 		end
 	end
 
+	-- (the "Ride your horse!" banner only once this run has seen your egg in the pen: a
+	-- horse there at login, before your data's in, isn't one you hatched)
+	local sawEgg = false
 	while on() do
 		-- 1. Place it, 2. hatch it, 3. ride it: whichever you're at (a "/tutorial" mid-way
 		-- puts you back at 1 without this loop starting again).
@@ -468,11 +471,12 @@ local function run()
 			if egg and #pets == 0 then
 				pointAt(nil)
 				guide(egg)
+				sawEgg = true
 				say("hatchEgg")
 			elseif #pets > 0 then
 				pointAt(nil)
 				guide(pets[1])
-				if not pets[1]:GetAttribute("Hatching") then -- (once it's out of the egg, so you see it)
+				if sawEgg and not pets[1]:GetAttribute("Hatching") then -- (once it's out of the egg, so you see it)
 					say("ride")
 				end
 			else
