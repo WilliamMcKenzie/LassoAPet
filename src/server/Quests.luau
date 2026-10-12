@@ -73,6 +73,7 @@ function Quests.publish(player, state)
 		end
 	end
 	player:SetAttribute("Quests", HttpService:JSONEncode(list))
+	player:SetAttribute("MergeFree", if (state.counts.merge or 0) == 0 then true else nil) -- (your first merge is free: QM, Oct 11)
 end
 
 -- One more lasso landed ("lasso", on animal) or merge ("merge").

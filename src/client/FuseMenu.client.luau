@@ -260,7 +260,7 @@ local function refresh()
 	local count = pickedCount()
 	pill.Text = count .. "/2 Selected"
 	local ready = count == 2
-	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's merge is free: QM)
+	local lesson = player:GetAttribute("FuseLesson") == true or player:GetAttribute("MergeFree") == true -- (the fuse lesson's merge is free, and your first ever: QM)
 	local price = if ready and not lesson then priceOf(slots[1], slots[2]) else 0
 	fuseButton.Image = if ready then BUTTON.on else BUTTON.off
 	priceLabel.Visible = ready
@@ -461,7 +461,7 @@ local function fuse()
 		showTip("Pick two animals to merge")
 		return
 	end
-	if not player:GetAttribute("FuseLesson") and (player:GetAttribute("Gold") or 0) < priceOf(a, b) then
+	if not player:GetAttribute("FuseLesson") and not player:GetAttribute("MergeFree") and (player:GetAttribute("Gold") or 0) < priceOf(a, b) then
 		showTip("Not enough cash")
 		return
 	end

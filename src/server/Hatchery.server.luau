@@ -929,8 +929,9 @@ remote("FusePets", function(player, idA, idB)
 	local stats = Fusion.best(Fusion.stats(a.pet, a.fuse, a.stats), Fusion.stats(b.pet, b.fuse, b.stats)) -- the best of both (QM)
 	local tier = math.max(Fusion.tier(a.pet, a.fuse, a.tier), Fusion.tier(b.pet, b.fuse, b.tier)) -- the bigger of the two (QM, Oct 8)
 	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's fuse is free, once: QM)
+	local free = lesson or player:GetAttribute("MergeFree") == true -- (and your first merge ever: QM, Oct 11; Quests.publish)
 	local worth = Fusion.worth(a.pet, a.fuse, a.worth) + Fusion.worth(b.pet, b.fuse, b.worth) -- (QM: a hybrid costs all its pets)
-	local price = if lesson then 0 else Fusion.price(earns) -- (QM, Oct 11: minutes of what the two earn)
+	local price = if free then 0 else Fusion.price(earns) -- (QM, Oct 11: minutes of what the two earn)
 	local gold = player:GetAttribute("Gold") or 0
 	if gold < price then
 		return
