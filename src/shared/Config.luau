@@ -205,7 +205,7 @@ return {
 			Swerve = 1,
 			NestScale = 2.5,
 			Length = 7680, -- as long as the volcano was (a guess; its animals aren't on the ladder yet)
-			HerdSpawnEvery = 0.45, -- (twice the stampede of the rest, as the Ocean: QM Oct 11)
+			HerdSpawnEvery = 0.15, -- (3x its stampede again: QM Oct 12; was 0.45, twice the rest, as the Ocean)
 			GroundColors = { Color3.fromRGB(78, 140, 40), Color3.fromRGB(86, 152, 44) }, -- dark jungle grass
 			WallColors = { Color3.fromRGB(150, 102, 62), Color3.fromRGB(164, 114, 70) },
 			Herd = { Fish = 0, Spinosaurus = 0.2, TRex = 0.12, Raptor = 0.15, Pterodactyl = 0.08, Ankylosaurus = 0.25, PalmGuy = 0.25, BoneRex = 0.03 }, -- (the Bone Rex the final Legendary, as rare as the Phoenix, QM Oct 11; Palm Guy an Uncommon too, QM Oct 11, weight a guess; no more Fish: QM, Oct 11; the Ankylosaurus the Jurassic's Uncommon, QM Oct 11, weight a guess; the Pterodactyl an Epic, QM Oct 11; the Spinosaurus Rare, QM Oct 11; QM, Oct 11: fish for now, until the dinosaurs are designed; the T-Rex, an Epic, is the first; the Raptor a Rare that runs in packs of three (HerdPacks), so 0.15 is about a third of the stampede. Weights a guess)
