@@ -908,19 +908,21 @@ return {
 	BaseUi = { RefWidth = 1920, BullReach = 16 },
 	-- Quests (QM, Oct 11), top right at your base in place of the Upgrade button: two
 	-- questlines, each showing its next quest, top and bottom (QM's final list). Claiming a
-	-- finished one gives its Egg and upgrades your pen (PenLevel + 1, up to the last
+	-- finished one gives its Egg and upgrades your pen, unless NoPenLevel (PenLevel + 1, up to the last
 	-- biome's: more room, Config.PenCapacity), and that line's next one comes up. A line
 	-- that's done leaves the other alone in the panel; both done, the panel's gone.
-	-- Kind: "reach" (ride into Config.Biomes[Biome]), "lasso" (land Need lassos on wild
+	-- (QM, Oct 11: "Reach ...", was "Enter the ...")
+	-- Kind: "reach" (ride into Config.Biomes[Biome]; the Meadow's, 1, is done from the start), "lasso" (land Need lassos on wild
 	-- animals), "home" (bring Need animals home), "merge" (merge Need times); the last
 	-- three count from when the quest comes up.
 	Quests = {
 		{
-			{ Text = "Enter the Desert", Kind = "reach", Biome = 2, Egg = "Penguin" }, -- (QM, Oct 11: quick eggs early, to speed you up; was the Unicorn)
-			{ Text = "Enter the Tundra", Kind = "reach", Biome = 3, Egg = "Starfish" }, -- (QM, Oct 11: was the Snake)
-			{ Text = "Enter the Ocean", Kind = "reach", Biome = 4, Egg = "Icebringer" },
-			{ Text = "Enter the Volcano", Kind = "reach", Biome = 5, Egg = "Kraken" },
-			{ Text = "Enter the Jurassic", Kind = "reach", Biome = 6, Egg = "Phoenix" },
+			{ Text = "Reach Meadow", Kind = "reach", Biome = 1, Egg = "Cactus", NoPenLevel = true }, -- (QM, Oct 11: done from the start, so there's something to claim right away, and no pen upgrade; Quests.load moves saves from before it on one)
+			{ Text = "Reach Desert", Kind = "reach", Biome = 2, Egg = "Penguin" }, -- (QM, Oct 11: quick eggs early, to speed you up; was the Unicorn)
+			{ Text = "Reach Tundra", Kind = "reach", Biome = 3, Egg = "Starfish" }, -- (QM, Oct 11: was the Snake)
+			{ Text = "Reach Ocean", Kind = "reach", Biome = 4, Egg = "Icebringer" },
+			{ Text = "Reach Volcano", Kind = "reach", Biome = 5, Egg = "Kraken" },
+			{ Text = "Reach Jurassic", Kind = "reach", Biome = 6, Egg = "Phoenix" },
 		},
 		{
 			{ Text = "Lasso animals", Kind = "lasso", Need = 10, Egg = "SpineLizard" },

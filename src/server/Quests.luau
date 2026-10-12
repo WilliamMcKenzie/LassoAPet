@@ -1,6 +1,6 @@
 -- Quests (QM, Oct 11; Config.Quests): two questlines, each showing its next quest.
 -- Hatchery keeps each player's in their profile, saved with the pen:
---   { lines = { [line] = { at = its quest up (past the end: done) } }, counts = { lasso = n, merge = n, ["lasso:Snowman"] = n } }
+--   { lines = { [line] = { at = its quest up (past the end: done) } }, counts = { lasso = n, merge = n, ["lasso:Snowman"] = n }, v = 2 }
 -- and puts what's up on the player as the "Quests" attribute for BaseUi: JSON of
 -- { { i, text, have, need, kind, biome } }, i = line * 100 + the quest's place in it (ClaimQuest's).
 -- Progress is the player's own, live (QM, Oct 11), not counted from when the quest came
@@ -29,10 +29,18 @@ function Quests.load(saved)
 	for kind in COUNTS do
 		state.counts[kind] = state.counts[kind] or 0
 	end
+	-- (saved before "Reach Meadow" went first in line 1, QM Oct 11: past its first quest, one
+	-- on, so a Desert already claimed isn't up again)
+	local old = typeof(saved) == "table" and (tonumber(saved.v) or 1) < 2
 	for line, quests in Config.Quests do
 		local was = typeof(lines[line]) == "table" and lines[line] or {}
-		state.lines[line] = { at = math.clamp(math.floor(tonumber(was.at) or 1), 1, #quests + 1) }
+		local at = math.floor(tonumber(was.at) or 1)
+		if old and line == 1 and at > 1 then
+			at += 1
+		end
+		state.lines[line] = { at = math.clamp(at, 1, #quests + 1) }
 	end
+	state.v = 2
 	return state
 end
 

@@ -289,7 +289,7 @@ local function popScale(t)
 	return 1 - math.exp(-6 * a) * math.cos(10 * a)
 end
 
--- Tapping a quest shows how to do it, where there's a hint (QM, Oct 11): "Enter the ..."
+-- Tapping a quest shows how to do it, where there's a hint (QM, Oct 11): "Reach ..."
 -- flies the camera to that biome's barrier (as the tutorial's to the Desert's), as does
 -- "Lasso Snowmen" to the barrier of the biome they run in,
 -- "Collect animals" to the count over your pen, and "Merge animals" puts tap hands on
