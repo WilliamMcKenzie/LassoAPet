@@ -136,7 +136,8 @@ end
 -- A copy of the ground over the pen's tiles, with the ground's checker: a block as
 -- deep as the ground's (FLOOR_DEPTH), not a sheet (QM, Oct 9: turned with the pen,
 -- a sheet showed the grass round its edges). Top at 0.3: the underlying ground
--- textures bleed through the old 0.1 gap at shallow angles.
+-- textures bleed through the old 0.1 gap at shallow angles. Solid, so you stand on it
+-- rather than 0.3 into it on the ground under it (QM, Oct 11: feet in the pen's floor).
 local FLOOR_TOP, FLOOR_DEPTH = 0.3, 2.3
 local function floorOf(pen)
 	local floor = pen:FindFirstChild("Floor")
@@ -151,8 +152,7 @@ local function floorOf(pen)
 	floor = Instance.new("Part")
 	floor.Name = "Floor"
 	floor.Anchored = true
-	floor.CanCollide = false
-	floor.CanQuery = false
+	floor.CanCollide = true
 	floor.CanTouch = false
 	floor.CastShadow = false
 	floor.TopSurface = Enum.SurfaceType.Smooth
