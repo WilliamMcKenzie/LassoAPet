@@ -207,7 +207,10 @@ local function statsOf(kind, entity)
 	if entity and entity.fuse then
 		return vfx.Fusion.stats(kind, entity.fuse, entity.stats)
 	end
-	return Config.AnimalStats[kind] or { Speed = 1, Stamina = 1 }
+	local s = Config.AnimalStats[kind] or { Speed = 1, Stamina = 1 }
+	local biome = s.BiomeSpeed and entity and entity.z and Config.Biomes[WorldColors.biomeAt(entity.z)]
+	local as = biome and Config.AnimalStats[s.BiomeSpeed[biome.Name] or ""] -- (the Fish in the Ocean: QM)
+	return if as then { Speed = as.Speed, Stamina = s.Stamina } else s
 end
 
 -- How fast a kind runs in the stampede: always exactly this, no variance.

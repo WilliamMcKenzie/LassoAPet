@@ -993,7 +993,8 @@ return {
 	-- Meadow and Desert are off the ladder (QM, Oct 11: their old speeds, the Desert reached at once). Change a biome's Length or these together.
 	-- Each animal's stats, x MountSpeed and HerdSpeed (1x). Speed scales how fast it runs,
 	-- ridden (MountSpeed, ReturnSpeed) and in the stampede (HerdSpeed). Stamina scales
-	-- how long the Hold bar lasts while you ride it: 2x lasts twice as long.
+	-- how long the Hold bar lasts while you ride it: 2x lasts twice as long. BiomeSpeed:
+	-- ridden in that biome (by Name), as fast as the animal named.
 	AnimalStats = {
 		-- Meadow (QM, Oct 11: the Meadow's and the Desert's back to their speeds from before the ladder:
 		-- the Meadow is the tutorial and the Desert should come almost at once)
@@ -1001,7 +1002,7 @@ return {
 		Pig = { Speed = 0.8, Stamina = 0.8 },
 		Bunny = { Speed = 1.2, Stamina = 0.7 },
 		Pinto = { Speed = 1.1, Stamina = 0.9 },
-		Fish = { Speed = 0.6, Stamina = 3 },
+		Fish = { Speed = 0.6, Stamina = 3, BiomeSpeed = { Ocean = "Clownfish" } }, -- (slow everywhere but the Ocean, where it's as fast as a Clownfish: QM, Oct 11)
 		Rhino = { Speed = 1.35, Stamina = 1.8 },
 		Unicorn = { Speed = 1.8, Stamina = 2 },
 		-- Desert
