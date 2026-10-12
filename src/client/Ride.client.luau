@@ -730,12 +730,20 @@ local function updateRideTarget()
 		for model in rideableHerd() do
 			table.insert(pets, model)
 		end
-		-- Always the nearest one (QM: no clicking a pet to pick it any more).
-		local best = math.huge
+		-- The nearest one (QM: no clicking a pet to pick it any more), but of those in
+		-- reach, the fastest (QM, Oct 11).
+		local best, fastest = math.huge, -1
 		for _, model in pets do
-			local _, d = petDistance(model, hrp.Position) -- from the middle of its body, not its outline (QM)
-			if d < best then
-				target, best = model, d
+			local edge, d = petDistance(model, hrp.Position) -- from the middle of its body, not its outline (QM)
+			local info = if starter and model == starter.animal.model then starter else PenPets.pets[model] or herdRideable[model]
+			if edge <= RIDE_REACH and model.PrimaryPart then -- (in reach of its outline itself, as the prompt: below)
+				local offset, size = Outline.box(model)
+				local at = (model.PrimaryPart.CFrame * offset):PointToObjectSpace(hrp.Position)
+				edge = Vector2.new(math.max(math.abs(at.X) - size.X / 2, 0), math.max(math.abs(at.Z) - size.Z / 2, 0)).Magnitude
+			end
+			local speed = if edge <= RIDE_REACH and info and info.kind then statsOf(info.kind, info).Speed else -1
+			if speed > fastest or (speed == fastest and d < best) then
+				target, best, fastest = model, d, speed
 			end
 		end
 	end
