@@ -160,6 +160,7 @@ local BANNER = {
 }
 local BANNER_WORDS = { -- the words, as QM drew them, and their size in pixels
 	ride = { "138620110562195", Vector2.new(354, 49) }, -- assets/ui/BannerRideHorse.png "Ride your horse!"
+	lasso = { "118043862144339", Vector2.new(358, 41) }, -- assets/ui/BannerLassoAnimal.png "Lasso an animal!"
 }
 local banner = Instance.new("Frame") -- (its pictures fade together: a CanvasGroup this wide didn't draw)
 banner.BackgroundTransparency = 1
@@ -239,12 +240,12 @@ local function showBanner(key)
 	bannerSweep = sweep
 end
 
--- The tutorial's prompts (QM, Oct 11): no guide bars any more; only "Ride your horse!",
--- as a banner, for now.
+-- The tutorial's prompts (QM, Oct 11): no guide bars any more; only banners, "Ride your
+-- horse!" and "Lasso an animal!".
 local function say(key)
 	captionOn = nil
-	if key == "ride" then
-		showBanner("ride")
+	if BANNER_WORDS[key] then
+		showBanner(key)
 	end
 end
 
@@ -511,7 +512,24 @@ local function run()
 		TutorialRide.active, TutorialRide.holdFrozen, TutorialRide.invulnerable = true, true, true
 		player:SetAttribute("NoSprint", true)
 		player:SetAttribute("LassoGuide", true)
-		say(nil) -- (no "Lasso an animal" bar: the arrows are enough, QM)
+		say(nil)
+		task.spawn(function() -- "Lasso an animal!" once you're out of the pen (QM)
+			local function inPen()
+				local pen, root = myPen(), hrp()
+				local area = pen and pen:FindFirstChild("Area")
+				if not area or not root then
+					return true
+				end
+				local at = area.CFrame:PointToObjectSpace(root.Position)
+				return math.abs(at.X) <= area.Size.X / 2 and math.abs(at.Z) <= area.Size.Z / 2
+			end
+			while on() and Hud.isRiding() and inPen() do
+				task.wait(0.1)
+			end
+			if on() and Hud.isRiding() then
+				say("lasso")
+			end
+		end)
 		local firstThrow, firstMount = TutorialRide.throws, TutorialRide.mounts
 		-- Till your first lasso: time all but stops while an animal's in reach. (The
 		-- arrows go as soon as it's thrown: QM.)
