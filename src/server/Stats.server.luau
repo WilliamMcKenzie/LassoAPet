@@ -12,6 +12,8 @@
 --             each version's whole life, so an update's effect shows (QM, Oct 11): kept
 --             under "version-<n>", the versions seen under "versions". Sessions from before
 --             that only count toward today's.
+--             "Quit at:" (QM, Oct 12): the share of today's sessions, and the newest
+--             version's, that ended in each length band (QUIT_BANDS, below).
 --
 -- QM, Oct 11: a blank slate. The old store ("Stats") is left behind, so nothing from
 -- older builds counts, even from their servers still running.
@@ -67,6 +69,45 @@ end
 local VERSION = game.PlaceVersion
 local VERSION_KEY = "version-" .. VERSION
 local VERSIONS_SHOWN = 5
+
+-- Session length bands for "Quit at:" (QM, Oct 12; his list skipped 20-30, kept so the
+-- shares add up to 100%): a session of Upto minutes or less (and over the band before)
+-- counts in that band, as "quit<i>"; the last band has no Upto.
+local QUIT_BANDS = {
+	{ Name = "0-1m", Upto = 1 },
+	{ Name = "1-5m", Upto = 5 },
+	{ Name = "5-10m", Upto = 10 },
+	{ Name = "10-20m", Upto = 20 },
+	{ Name = "20-30m", Upto = 30 },
+	{ Name = "30+m" },
+}
+
+local function quitBand(seconds)
+	for i, band in QUIT_BANDS do
+		if not band.Upto or seconds <= band.Upto * 60 then
+			return i
+		end
+	end
+	return #QUIT_BANDS
+end
+
+-- "Quit at: 0-1m 12%, 1-5m 40%, ..." for a day's or a version's totals, out of the
+-- sessions that have a band (a day's from before this build have none); nil if none do.
+local function quitLine(t)
+	local banded = 0
+	for i in QUIT_BANDS do
+		banded += t["quit" .. i] or 0
+	end
+	if banded == 0 then
+		return nil
+	end
+	local shares = {}
+	for i, band in QUIT_BANDS do
+		table.insert(shares, string.format("%s %.0f%%", band.Name, 100 * (t["quit" .. i] or 0) / banded))
+	end
+	return table.concat(shares, ", ")
+end
+
 local versionNoted = false -- this server's version is in "versions"
 
 local joined = {} -- [player] = os.time() they joined (players whose sessions count)
@@ -92,12 +133,13 @@ local function finish(player)
 		local now = os.time()
 		local length = now - at
 		local key = dayKey(now)
-		local session = { sessions = 1, seconds = length, longest = length }
+		local band = "quit" .. quitBand(length)
+		local session = { sessions = 1, seconds = length, longest = length, [band] = 1 }
 		for i = 2, math.min(player:GetAttribute("GatesBroken") or 1, #Config.Biomes) do
 			session["reached" .. i] = 1
 		end
 		pending[key] = addInto(pending[key] or {}, session)
-		pending[VERSION_KEY] = addInto(pending[VERSION_KEY] or {}, { sessions = 1, seconds = length, longest = length })
+		pending[VERSION_KEY] = addInto(pending[VERSION_KEY] or {}, { sessions = 1, seconds = length, longest = length, [band] = 1 })
 	end
 end
 Players.PlayerRemoving:Connect(finish)
@@ -172,6 +214,10 @@ local function report()
 			table.insert(reached, string.format("%s %.0f%%", Config.Biomes[i].Name, 100 * (t["reached" .. i] or 0) / t.sessions))
 		end
 		table.insert(lines, "Reached: " .. table.concat(reached, ", "))
+		local quit = quitLine(t)
+		if quit then
+			table.insert(lines, "Quit at: " .. quit)
+		end
 	end
 	-- The latest versions' averages, newest first (each over its whole life).
 	local versions = {}
@@ -195,6 +241,10 @@ local function report()
 		table.insert(lines, if v.sessions == 0
 			then string.format("  v%d: no sessions", versions[i])
 			else string.format("  v%d: %.1f min (%d sessions)", versions[i], v.seconds / v.sessions / 60, v.sessions))
+		local quit = i == 1 and quitLine(v) -- (the newest version's only: QM, Oct 12)
+		if quit then
+			table.insert(lines, "    Quit at: " .. quit)
+		end
 	end
 	if not store then
 		table.insert(lines, "(No DataStore here: this server's sessions only)")
