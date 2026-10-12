@@ -253,8 +253,8 @@ end)
 
 -- A new quest pops in (QM, Oct 11): from nothing, overshooting, a wobble, and settles
 -- (anticipation, overshoot, follow-through), once the panel's up and no egg reveal's over
--- it. And QM's red badge on the panel when a quest's ready to claim, till you hover it
--- (or tap it).
+-- it. And QM's red badge on the panel while a quest's ready to claim, till you claim it
+-- (QM, Oct 11: not just till you hover it).
 local POP_TIME = 0.6
 local pops = {} -- [quest i] = os.clock() it started popping, or false while it waits to
 local seenQuests -- [quest i] = true: what's been up (nil till the first list: those don't pop)
@@ -275,14 +275,6 @@ local dotSince -- os.clock() it popped up
 local function seen()
 	dot.Visible, dotSince = false, nil
 end
-quests.MouseEnter:Connect(seen)
-quests.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch then
-		seen()
-	end
-end)
-fold.MouseEnter:Connect(seen)
-fold.Activated:Connect(seen)
 -- 0 to 1 over POP_TIME, overshooting to ~1.2 and settling.
 local function popScale(t)
 	local a = math.clamp(t / POP_TIME, 0, 1)
@@ -469,7 +461,7 @@ local function drawQuests()
 			end
 		end
 	end
-	-- The badge: on as a quest becomes ready to claim, off once you've hovered it or none is.
+	-- The badge: on as a quest becomes ready to claim, off once none is (all claimed).
 	local now = {}
 	for _, quest in questList do
 		if typeof(quest) == "table" and tonumber(quest.i) and tonumber(quest.have) and tonumber(quest.need) and quest.have >= quest.need then
