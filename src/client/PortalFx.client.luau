@@ -86,6 +86,33 @@ for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
 end
 plane.Parent = workspace
 
+-- "Coming soon" over the gate while you're near it (QM, Oct 12: it doesn't go anywhere yet).
+local SOON_NEAR = 25 -- studs from the opening
+local soon = Instance.new("BillboardGui")
+soon.Name = "PortalComingSoon"
+soon.Adornee = plane
+soon.Size = UDim2.fromScale(16, 3)
+soon.StudsOffsetWorldSpace = Vector3.new(0, SIZE.Y / 2 + 8, 0) -- (over the keystone)
+soon.LightInfluence = 0
+soon.Enabled = false
+local soonText = Instance.new("TextLabel")
+soonText.BackgroundTransparency = 1
+soonText.Size = UDim2.fromScale(1, 1)
+soonText.Text = "Coming soon"
+soonText.TextScaled = true
+soonText.TextColor3 = Color3.new(1, 1, 1)
+soonText.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+local soonStroke = Instance.new("UIStroke")
+soonStroke.Thickness = 3
+soonStroke.Parent = soonText
+soonText.Parent = soon
+soon.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+RunService.Heartbeat:Connect(function()
+	local character = game:GetService("Players").LocalPlayer.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	soon.Enabled = root ~= nil and (root.Position - plane.Position).Magnitude < SOON_NEAR + SIZE.Y / 2
+end)
+
 -- The image, its pixels' buffer and which pixels are in the opening (a rectangle with a
 -- half circle on top), (re)built for a pixel size.
 local image, pixels, inside, W, H, builtFor
