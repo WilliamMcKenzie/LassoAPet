@@ -8,7 +8,8 @@ of chunky blocks with a pointed keystone at the crown. Studs, y up, base at y = 
 gate faces -z (Roblox front), the opening centred on x = 0.
 
 Run: python3 tools/portal_gate.py
-Writes design/portal/PortalGate.obj and design/portal/portal_gate.png.
+Writes design/portal/PortalGate.obj (the whole gate), design/portal/pieces/PortalGate_<i>.obj
+(one per stone, same origin, each its own shade: pieces/shades.txt) and design/portal/portal_gate.png.
 Import like the rocks (Import 3D, studs; MeshPart, rock colour, stud material).
 """
 
@@ -116,6 +117,7 @@ def gate():
         corners = [P(cs[0], r_in, zf), P(cs[1], r_in, zf), P(cs[1], ro, zf), P(cs[0], ro, zf),
                    P(cs[0], r_in, zb), P(cs[1], r_in, zb), P(cs[1], ro, zb), P(cs[0], ro, zb)]
         chunks.append(block(corners, 0.4))
+    band = len(chunks)
     # a thin inner band under the arch (the reference's moulding), set back a little
     for i in range(n):
         a0, a1 = edges[i] + 0.01, edges[i + 1] - 0.01
@@ -126,13 +128,41 @@ def gate():
             return (c[0] * r, spring + c[1] * r, z)
         chunks.append(block([Q(cs[0], r0, zf2), Q(cs[1], r0, zf2), Q(cs[1], r1, zf2), Q(cs[0], r1, zf2),
                              Q(cs[0], r0, zb2), Q(cs[1], r0, zb2), Q(cs[1], r1, zb2), Q(cs[0], r1, zb2)], 0.15, 0.04))
-    return [hull_tris(c) for c in chunks]
+    tris = [hull_tris(c) for c in chunks]
+    # the pieces (QM, Oct 12: each stone its own shade, like the rocks): one per stone,
+    # the inner band as one piece; each a list of hulls
+    return tris, [[t] for t in tris[:band]] + [tris[band:]]
+
+
+def shades(n, seed=5):
+    """A shade index per piece (the meadow rock's five, tools/biome_rocks.SHADES),
+    never the same twice in a row."""
+    rng = np.random.default_rng(seed)
+    out = []
+    for _ in range(n):
+        out.append(int(rng.choice([k for k in range(5) if not out or k != out[-1]])))
+    return out
 
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    chunks = gate()
+    chunks, pieces = gate()
     nt = write_obj("PortalGate", chunks, os.path.join(OUT, "PortalGate.obj"))
+    # each piece its own OBJ, same origin as the whole gate (Studio uploads them, one
+    # MeshPart each, all at the gate's CFrame) in its shade (PIECE_SHADES)
+    import biome_rocks as BR
+    pdir = os.path.join(OUT, "pieces")
+    os.makedirs(pdir, exist_ok=True)
+    for f in os.listdir(pdir):
+        os.remove(os.path.join(pdir, f))
+    idx = shades(len(pieces))
+    for i, piece in enumerate(pieces):
+        write_obj(f"PortalGate_{i + 1}", piece, os.path.join(pdir, f"PortalGate_{i + 1}.obj"))
+    cols = [BR.SHADES["Meadow"][k] for k in idx]
+    with open(os.path.join(pdir, "shades.txt"), "w") as f:
+        f.write("# piece: RGB (the meadow rock shades, tools/biome_rocks.SHADES)\n")
+        f.writelines(f"PortalGate_{i + 1}: {c[0]}, {c[1]}, {c[2]}\n" for i, c in enumerate(cols))
+    print(f"{len(pieces)} pieces")
     pts = np.concatenate([np.concatenate(t) for t in chunks])
     size = pts.max(0) - np.array([pts.min(0)[0], 0, pts.min(0)[2]])
     print(f"PortalGate: {nt} tris, {size[0]:.1f} x {size[1]:.1f} x {size[2]:.1f} studs")
@@ -141,7 +171,7 @@ def main():
     k = TA.Kit()
     TA.figure(k, 0)
     fig = [Part(p.name, p.size, partlib.T(-3, 2.8, -8) @ p.cf, p.color) for p in k.parts]
-    parts = as_parts(chunks) + fig
+    parts = [p for piece, c in zip(pieces, cols) for p in as_parts(piece, color=c)] + fig
     from PIL import Image
     a = render(parts, eye=(-30, 18, -62), target=(0, 13, 0), W=900, H=900, fov=42, fog=False, outline=False)
     b = render(parts, eye=(0, 14, -70), target=(0, 14, 0), W=900, H=900, fov=40, fog=False, outline=False)
