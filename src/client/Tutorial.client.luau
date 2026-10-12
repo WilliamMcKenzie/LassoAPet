@@ -310,7 +310,7 @@ RunService.RenderStepped:Connect(function()
 	local over = arrowOver or fastestOver
 	local root = over and over.Parent and (over.PrimaryPart or over:FindFirstChildWhichIsA("BasePart", true))
 	eggArrow.Adornee = root
-	eggArrow.Enabled = root ~= nil and not player:GetAttribute("Cutscene")
+	eggArrow.Enabled = root ~= nil and not player:GetAttribute("Cutscene") and not player:GetAttribute("MergeView") -- (not over the merge view: QM)
 	local up = if over and over:IsA("Model") and not over.Name:match("Egg$") then ARROW_UP_PET else ARROW_UP
 	eggArrow.StudsOffsetWorldSpace = Vector3.new(0, up + math.abs(math.sin(os.clock() * 3)) * 1.5, 0)
 	-- The tap hand.
