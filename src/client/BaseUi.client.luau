@@ -30,6 +30,7 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 	shop = { id = "rbxassetid://119060039201858", size = Vector2.new(267, 113) }, -- Shop.png
 	index = { id = "rbxassetid://135845846149671", size = Vector2.new(267, 113) }, -- Index.png
 	merge = { id = "rbxassetid://126251339270486", size = Vector2.new(267, 113) }, -- Merge.png
+	invite = { id = "", size = Vector2.new(267, 113) }, -- Invite.png (QM, Oct 12; "" till it's uploaded: a plain green button)
 	cash = { id = "rbxassetid://76663783463176", size = Vector2.new(256, 256) }, -- Cash.png
 }
 -- assets/ui/quests/*.png (QM, Oct 11). "" till Studio uploads them: plain boxes meanwhile.
@@ -118,16 +119,32 @@ local function pressable(button)
 	end
 end
 
--- Top left: Shop, Index, Merge.
+-- Roblox's invite, carrying your id so the friend's join counts toward "Invite a friend"
+-- (Hatchery). From the Invite button and the quest.
+local function promptInvite()
+	task.spawn(function()
+		local SocialService = game:GetService("SocialService")
+		local okCan, can = pcall(SocialService.CanSendGameInviteAsync, SocialService, player)
+		if okCan and can then
+			local options = Instance.new("ExperienceInviteOptions")
+			options.LaunchData = tostring(player.UserId)
+			options.PromptMessage = "Ride with me!"
+			pcall(SocialService.PromptGameInvite, SocialService, player, options)
+		end
+	end)
+end
+
+-- On the right, under Quests (QM, Oct 12; they were down the left): Merge, Shop, Index, Invite.
 local menu = Instance.new("Frame")
 menu.Name = "Menu"
 menu.BackgroundTransparency = 1
 menu.AutomaticSize = Enum.AutomaticSize.XY
-menu.AnchorPoint = Vector2.new(0, 0.5) -- (centred down the left edge: QM, Oct 9)
-menu.Position = UDim2.new(0, MARGIN, 0.5, 0)
+menu.AnchorPoint = Vector2.new(1, 0) -- (under the Quests panel: placed every frame, below)
+menu.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
 local list = Instance.new("UIListLayout")
 list.SortOrder = Enum.SortOrder.LayoutOrder
 list.Padding = UDim.new(0, MENU_GAP)
+list.HorizontalAlignment = Enum.HorizontalAlignment.Right
 list.Parent = menu
 menu.Parent = root
 local mergeBadge -- QM's red "1" on Merge while the "Merge animals" quest is up and you've not merged yet (QM, Oct 11)
@@ -142,10 +159,20 @@ end }, { "merge", function()
 	if Hud.onFuse then
 		Hud.onFuse()
 	end
-end } } do
+end }, { "invite", promptInvite } } do
 	local b = picture("ImageButton", menu, ART[spec[1]], MENU_WIDTH)
 	b.Name = spec[1]
-	b.LayoutOrder = ({ shop = 2, index = 3, merge = 1 })[spec[1]] -- (top to bottom: Merge, Shop, Index: QM, Oct 9)
+	b.LayoutOrder = ({ shop = 2, index = 3, merge = 1, invite = 4 })[spec[1]] -- (top to bottom: Merge, Shop, Index, Invite: QM)
+	if ART[spec[1]].id == "" then -- (no art yet: a plain button with its name)
+		b.BackgroundTransparency = 0
+		b.BackgroundColor3 = Color3.fromRGB(76, 200, 92)
+		Instance.new("UICorner", b).CornerRadius = UDim.new(0.2, 0)
+		local label = text(b, 44)
+		label.Text = "Invite"
+		label.AutomaticSize = Enum.AutomaticSize.None
+		label.TextXAlignment = Enum.TextXAlignment.Center
+		label.Size = UDim2.fromScale(1, 1)
+	end
 	b:SetAttribute("Hover", 1.04) -- (ButtonHover: half its usual 1.08 grow, QM)
 	b.Activated:Connect(spec[2])
 	pressable(b)
@@ -317,17 +344,8 @@ local function hint(quest)
 		end
 	elseif quest.kind == "merge" then
 		player:SetAttribute("MergeHint", true)
-	elseif quest.kind == "invite" then -- Roblox's invite, carrying your id so the friend's join counts (Hatchery)
-		task.spawn(function()
-			local SocialService = game:GetService("SocialService")
-			local okCan, can = pcall(SocialService.CanSendGameInviteAsync, SocialService, player)
-			if okCan and can then
-				local options = Instance.new("ExperienceInviteOptions")
-				options.LaunchData = tostring(player.UserId)
-				options.PromptMessage = "Ride with me!"
-				pcall(SocialService.PromptGameInvite, SocialService, player, options)
-			end
-		end)
+	elseif quest.kind == "invite" then
+		promptInvite()
 	end
 end
 
@@ -580,6 +598,9 @@ RunService.RenderStepped:Connect(function()
 	local covered = modal()
 	root:SetAttribute("Modal", covered)
 	quests.Visible = not riding and not covered and #questList > 0
+	-- (the buttons right under the Quests panel, or the top corner with none)
+	local under = if quests.Visible then (quests.AbsolutePosition.Y + quests.AbsoluteSize.Y - root.AbsolutePosition.Y) / scale.Scale else 0
+	menu.Position = UDim2.new(1, -MARGIN, 0, under + MENU_GAP)
 	-- New quests pop once you can see them.
 	local up = quests.Visible and gui.Enabled and not Hud.revealing()
 	for i, started in pops do
