@@ -1011,21 +1011,21 @@ return {
 		Pinto = { Speed = 1.1, Stamina = 0.9 },
 		Fish = { Speed = 0.6, Stamina = 3, BiomeSpeed = { Ocean = "Clownfish" } }, -- (slow everywhere but the Ocean, where it's as fast as a Clownfish: QM, Oct 11)
 		Rhino = { Speed = 1.35, Stamina = 1.8 },
-		Unicorn = { Speed = 1.8, Stamina = 2 },
+		Unicorn = { Speed = 1.65, Stamina = 2 }, -- (QM, Oct 12: the Legendaries' flowers; it just reaches the Tundra from the start line, ~4,070 of 3,984; was 1.8)
 		-- Desert
 		Cactus = { Speed = 1.2, Stamina = 1.5 },
 		Kitten = { Speed = 1.4, Stamina = 1.2 },
 		Scorpion = { Speed = 1.5, Stamina = 1.5 },
 		Sandworm = { Speed = 1.6, Stamina = 3 },
 		SpineLizard = { Speed = 1.62, Stamina = 2 },
-		Snake = { Speed = 2, Stamina = 3 },
+		Snake = { Speed = 2.8, Stamina = 3 }, -- (QM, Oct 12: was 2)
 		-- Tundra
 		Penguin = { Speed = 1.72, Stamina = 1.5 },
 		Boar = { Speed = 1.86, Stamina = 1.6 },
 		Snowman = { Speed = 2.06, Stamina = 1.3 },
 		IceGolem = { Speed = 2.37, Stamina = 3 },
 		SnackYak = { Speed = 3, Stamina = 2 }, -- QM, Oct 4 (stamina 1 -> 2)
-		Icebringer = { Speed = 3.6, Stamina = 4 }, -- (QM, Oct 11: a Legendary well past the next biome's Uncommons: 1.25x the Starfish, it lands in the Volcano)
+		Icebringer = { Speed = 3.7, Stamina = 4 }, -- (QM, Oct 12: into the Volcano from the start line, ~9,130 of 9,024; was 3.6) -- (QM, Oct 11: a Legendary well past the next biome's Uncommons: 1.25x the Starfish, it lands in the Volcano)
 		-- Ocean
 		Starfish = { Speed = 2.87, Stamina = 2 },
 		Squid = { Speed = 3.7, Stamina = 2.6 },
@@ -1042,7 +1042,7 @@ return {
 		RockHog = { Speed = 5.3, Stamina = 2.8 }, -- (QM, Oct 11: 5.4 crossed into the Jurassic, the only Rare to cross a line; the Epics are the gates)
 		Rockworm = { Speed = 6.3, Stamina = 3 },
 		FireLobster = { Speed = 5.15, Stamina = 2.8 },
-		Phoenix = { Speed = 6.98, Stamina = 3 },
+		Phoenix = { Speed = 7.2, Stamina = 3 }, -- (QM, Oct 12: well into the Jurassic, a touch slower than the Bone Rex; was 6.98)
 		LavaWhale = { Speed = 5.85, Stamina = 3 },
 		TRex = { Speed = 6, Stamina = 3 }, -- (a guess: a touch past the Lava Whale)
 		Raptor = { Speed = 5.6, Stamina = 3 }, -- (a guess: a Rare, past the Volcano's Rares and short of the T-Rex)
