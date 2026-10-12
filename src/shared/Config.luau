@@ -268,7 +268,7 @@ return {
 
 	-- Ride
 	MountSpeed = 44,
-	RunSpeedFloor = 0.6, -- x the Speed of the pet you left your pen on: the slowest anything you lasso that run goes (Ride: QM, Oct 12; a Horse's Fish keeps its own 0.6)
+	RunSpeedLeeway = 0.5, -- Speed (10 m/s as the plates show it, x20): nothing you lasso in a run goes slower than the pet you left your pen on less this (Ride: QM, Oct 12; a Horse's Fish keeps its own 0.6)
 	ReturnSpeed = 88, -- 2x MountSpeed: the ride home twice as fast as the ride out (QM, Oct 11; was 1.6x, 70.4; at first 40)
 	SteerSpeed = 28,
 	-- Wider mounts steer quicker, gently (QM, Oct 8): x (1 + SteerWidthScale x (width
