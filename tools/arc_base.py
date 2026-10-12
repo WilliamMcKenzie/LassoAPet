@@ -303,9 +303,10 @@ local function topAt(x, z)
 end
 
 -- The rocks round the walls: everything that was in BaseDecor before goes (QM, Oct 10).
--- (Rerunning this clears BaseDecor.PortalGate too, QM's stone gate where Carl stood since
--- Oct 12: mesh 118189330543537, design/portal/PortalGate.obj, unscaled, at (-74, 0, 22)
--- turned 20 degrees, the rocks' colour and stud material. Put it back after.)
+-- (Rerunning this clears BaseDecor.PortalGate too, QM's stone gate by the start line since
+-- Oct 12: a Model of 29 shaded stones, design/portal/pieces (ids.lua: mesh ids and colours),
+-- each MeshPart unscaled at the gate's origin, (-63.5, 0, 24.6) turned 20 degrees, with the
+-- rocks' stud material. Put it back after.)
 local AssetService = game:GetService("AssetService")
 local decor = world:FindFirstChild("BaseDecor") or Instance.new("Folder")
 decor.Name = "BaseDecor"
