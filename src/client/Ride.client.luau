@@ -878,12 +878,23 @@ startRide = function(model, at)
 	Lasso.start(player.Character, nil, player:GetAttribute("PenLevel") or 1) -- (your pen level's lasso: LassoTiers)
 end
 
--- Walking over the start line on foot (WalkLimit.client): you're on a random
--- Meadow animal there and then (QM, Oct 6), ridden like a stampede animal you
--- jumped on at the start line. Any Meadow herd kind that spawns, all equally likely.
+-- Walking over the start line on foot (WalkLimit.client): you're on your fastest pet
+-- there and then (QM, Oct 12), else (none yet) a random Meadow animal (QM, Oct 6).
 require(script.Parent.StartLine).ride = function(x, z)
 	if phase ~= "idle" then
 		return false
+	end
+	local best, fastest = nil, -1
+	for _, model in homePets() do
+		local info = if starter and model == starter.animal.model then starter else PenPets.pets[model]
+		local speed = info and statsOf(info.kind, info).Speed or -1
+		if speed > fastest then
+			best, fastest = model, speed
+		end
+	end
+	if best then
+		startRide(best, Vector3.new(x, 0, z))
+		return phase == "outbound"
 	end
 	local kinds = {}
 	for kind, weight in Config.Biomes[1].Herd do
