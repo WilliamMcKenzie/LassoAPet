@@ -692,7 +692,7 @@ return {
 		Legendary = Color3.fromHex("5CE6B7"),
 	},
 	Podium = {
-		Position = Vector3.new(104, 0, 20), -- the column, on the ground, in the arc base's front right corner (QM, Oct 9); the snake reaches ~-8..+16 in x, -14..+31 in z
+		Position = Vector3.new(63.5, 0, 24.6), -- the column, on the ground, mirroring the portal gate across the start line (QM, Oct 12; was 104, 20, the front right corner); the snake reaches ~-8..+16 in x, -14..+31 in z
 		Refresh = 120, -- seconds between re-reading the leader
 		AvatarScale = 1.5,
 		SnakeScale = 2, -- x the model (the Snake pet is about 1.9)
