@@ -230,43 +230,8 @@ local function counter(order, art, color)
 	return label
 end
 local cashText = counter(1, ART.cash, CASH_GREEN)
--- "+$N" as money comes in (QM, Oct 12): the same font and green, a bit smaller, starting
--- just right of the cash and floating up as it fades.
-local POP_RISE, POP_TIME = 46, 1.1
-local lastGold = player:GetAttribute("Gold") or 0
-local function popGain(gain)
-	if not gui.Enabled or not cashText.Visible then
-		return
-	end
-	local pop = text(root, math.floor(TEXT * 0.72), CASH_GREEN)
-	pop.Name = "CashPop"
-	pop.Text = "+" .. Hud.money(gain)
-	pop.AnchorPoint = Vector2.new(0, 0.5)
-	local at = (cashText.AbsolutePosition + cashText.AbsoluteSize * Vector2.new(1, 0.5) - root.AbsolutePosition) / scale.Scale
-	pop.Position = UDim2.fromOffset(at.X + 14, at.Y)
-	local stroke = pop:FindFirstChildOfClass("UIStroke")
-	pop.TextTransparency = 0.5 -- (half see-through to start with: QM)
-	if stroke then
-		stroke.Transparency = 0.5
-	end
-	local info = TweenInfo.new(POP_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	TweenService:Create(pop, info, { Position = UDim2.fromOffset(at.X + 14, at.Y - POP_RISE) }):Play()
-	local fade = TweenInfo.new(POP_TIME * 0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, POP_TIME * 0.4)
-	TweenService:Create(pop, fade, { TextTransparency = 1 }):Play()
-	if stroke then
-		TweenService:Create(stroke, fade, { Transparency = 1 }):Play()
-	end
-	task.delay(POP_TIME + 0.05, function()
-		pop:Destroy()
-	end)
-end
 local function showCounters()
-	local gold = player:GetAttribute("Gold") or 0
-	cashText.Text = Hud.money(gold)
-	if gold > lastGold then
-		popGain(gold - lastGold)
-	end
-	lastGold = gold
+	cashText.Text = Hud.money(player:GetAttribute("Gold") or 0) -- (no "+$N" pop: QM, Oct 12, tried and dropped)
 end
 player:GetAttributeChangedSignal("Gold"):Connect(showCounters)
 showCounters()
