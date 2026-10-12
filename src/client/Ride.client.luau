@@ -213,6 +213,15 @@ local function statsOf(kind, entity)
 	return if as then { Speed = as.Speed, Stamina = s.Stamina } else s
 end
 
+-- A run's hidden speed floor (QM, Oct 12): whatever you lasso onto runs at least
+-- Config.RunSpeedFloor x the Speed of the pet you left your pen on, so a slow animal
+-- lassoed for fun doesn't strand you short of your biome (a Horse's Fish keeps its own
+-- 0.6; a T-Rex's Rhino runs at 3.6, not 1.35). 0 for a ride that didn't start on a pet.
+local runFloor = 0
+local function rideSpeed(entity)
+	return math.max(statsOf(entity.kind, entity).Speed, runFloor)
+end
+
 -- How fast a kind runs in the stampede: always exactly this, no variance. z: where (its
 -- biome's BiomeSpeed: the Fish in the Ocean).
 local herdSpeedOf = require(ReplicatedStorage.Shared.HerdSpeed) -- (past the Clownfish's, a fixed gap behind your sprint: QM)
@@ -846,6 +855,7 @@ startRide = function(model, at)
 		vfx.syncing = true -- (so "end" follows, however soon the ride ends)
 	end
 	mount.animal:setSaddled(true)
+	runFloor = if fromHerd then 0 else (Config.RunSpeedFloor or 0) * statsOf(mount.kind, mount).Speed
 	vfx.rideAgain = nil
 	leadFromZ = spot.Z - 8
 	exitPath = if fromHerd or at then nil else penExitPath()
@@ -3289,14 +3299,14 @@ local function updateMount(dt)
 		turnT = math.min(turnT + dt / TURN_TIME, 1)
 		local eased = 0.5 - math.cos(turnT * math.pi) / 2
 		mount.yaw = math.pi * eased
-		mount.speed = vfx.speedFx.curve(Config.MountSpeed * statsOf(mount.kind, mount).Speed * (1 - math.sin(turnT * math.pi) * 0.7))
+		mount.speed = vfx.speedFx.curve(Config.MountSpeed * rideSpeed(mount) * (1 - math.sin(turnT * math.pi) * 0.7))
 		mount.latVel *= math.exp(-6 * dt)
 		local look = CFrame.Angles(0, mount.yaw, 0).LookVector
 		mount.x = math.clamp(mount.x + look.X * mount.speed * dt, -vfx.edge(mount.z), vfx.edge(mount.z))
 		mount.z += look.Z * mount.speed * dt
 		if turnT >= 1 then
 			phase, grace = "return", Config.TurnGrace
-			mount.speed = Config.ReturnSpeed * statsOf(mount.kind, mount).Speed
+			mount.speed = Config.ReturnSpeed * rideSpeed(mount)
 			if vfx.tutorialRide.active then -- (the first ride home: a Unicorn gallops past you, to make you curious: QM)
 				local st = streams[1]
 				local n = math.floor(herdClock / st.every) + 1
@@ -3340,7 +3350,7 @@ local function updateMount(dt)
 		animate(mount, dt, mount.speed, 0)
 		return
 	end
-	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed) * statsOf(mount.kind, mount).Speed
+	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed) * rideSpeed(mount)
 	if sprinting() then
 		targetSpeed *= (Config.PetSprintSpeed[mount.kind] or Config.SprintSpeed) * ((vfx.sprintSpecial() or {}).SpeedBoost or 1) -- the Blue Crab's crab walk: faster still
 	end
