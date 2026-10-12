@@ -25,22 +25,22 @@
 local AssetService = game:GetService("AssetService")
 local RunService = game:GetService("RunService")
 
-local DEFAULTS = {
-	Angles = 7,
-	Speed = 1,
-	Scale = 1,
+local DEFAULTS = { -- (QM's picks, Oct 12)
+	Angles = 7.1,
+	Speed = 0.5,
+	Scale = 0.5,
 	Modifier = 0,
 	Seed = 0,
 	Contrast = 10,
-	FillColor = Color3.fromRGB(69, 142, 157), -- QM's teal
-	FillAlpha = 0.85,
+	FillColor = Color3.fromRGB(69, 142, 157), -- his teal
+	FillAlpha = 0.2,
 	BackColor = Color3.fromRGB(2, 125, 156), -- his tealbg
-	BackAlpha = 0,
-	PixelsPerStud = 2,
-	Glow = 1.6,
-	LightBrightness = 1.5,
-	LightRange = 20,
-	FPS = 24,
+	BackAlpha = 0.3,
+	PixelsPerStud = 4,
+	Glow = 5,
+	LightBrightness = 0,
+	LightRange = 0,
+	FPS = 16,
 }
 local SIZE = Vector2.new(14, 22) -- studs
 local CENTRE = Vector3.new(0, 2.8 + 11, 0) -- the opening's middle, in the gate's frame
