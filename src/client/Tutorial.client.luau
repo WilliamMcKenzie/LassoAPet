@@ -144,18 +144,19 @@ captionScale.Parent = words
 caption.Parent = gui
 local captionOn -- the CAPTIONS key on show, or nil
 -- QM's banner (Oct 11, in place of the guide bars along the top): a blue band wider than the
--- screen with the words on it, in one sweep from left to right: it fades in sliding in
--- fast, slows (sinusoidally) toward the middle without ever stopping, then speeds off to
--- the right, fading out. Its ends never show.
+-- screen with the words on it, as viggle-chess's PhaseBanner (QM, Oct 11): the band stays
+-- put and fades in and out, while the words sweep straight across it from off the left to
+-- off the right, fast at both edges and slowest in the middle (never stopping). Its ends
+-- never show.
 local BANNER = {
 	strips = { { "133460716318344", 863 }, { "123588848079137", 862 }, { "71619753997099", 862 } }, -- assets/ui/PromptBanner1-3.png (QM's longer PromptBanner.png, 2587 x 113, in thirds: an upload's at most 1024 wide)
 	size = Vector2.new(2587, 113),
-	width = 1.7, -- x the screen's width (so its ends are always off it, slid or not)
+	width = 1.3, -- x the screen's width (so its ends are always off it)
 	at = 0.17, -- its middle, down the screen
-	slide = 0.16, -- of the screen's width either side of the middle (QM: more slide)
-	slowest = 0.12, -- its speed in the middle, x its average (never 0: it never stops)
-	fade = 0.45, -- seconds fading in, and again out (QM: more fade)
-	time = 2.2, -- seconds, the whole sweep (QM: twice as fast)
+	travel = 0.6, -- the words go from this far left of the middle to this far right, x the screen's width
+	speed = { 2.592, 0.136 }, -- A, B: the words' speed A (2u - 1)^2 + B of their average (A / 3 + B = 1)
+	fade = 0.16, -- of the sweep fading in, and again out
+	time = 1.12, -- seconds, the whole sweep
 }
 local BANNER_WORDS = { -- the words, as QM drew them, and their size in pixels
 	ride = { "138620110562195", Vector2.new(354, 49) }, -- assets/ui/BannerRideHorse.png "Ride your horse!"
@@ -213,9 +214,9 @@ local function showBanner(key)
 	-- (the words as tall as QM drew them on the band: 49 of its 113)
 	local tall = words[2].Y / BANNER.size.Y
 	bannerWords.Size = UDim2.fromScale(tall * words[2].X / words[2].Y * BANNER.size.Y / BANNER.size.X, tall)
-	-- (its speed goes 1 + k cos(2 pi u) of its average: fastest at each end, slowest in the middle)
-	local k = 1 - BANNER.slowest
+	local A, B = BANNER.speed[1], BANNER.speed[2]
 	local started = os.clock()
+	banner.Position = UDim2.fromScale(0.5, BANNER.at)
 	banner.Visible = true
 	if bannerSweep then
 		bannerSweep:Disconnect()
@@ -224,10 +225,9 @@ local function showBanner(key)
 	sweep = RunService.RenderStepped:Connect(function()
 		local t = os.clock() - started
 		local u = math.min(t / BANNER.time, 1)
-		local along = u + k * math.sin(2 * math.pi * u) / (2 * math.pi) -- 0 to 1
-		banner.Position = UDim2.fromScale(0.5 + BANNER.slide * (2 * along - 1), BANNER.at)
-		local shown = math.min(t / BANNER.fade, (BANNER.time - t) / BANNER.fade, 1)
-		shown = math.sin(math.max(shown, 0) * math.pi / 2) -- (eased in and out)
+		local along = A * ((2 * u - 1) ^ 3 + 1) / 6 + B * u -- 0 to 1 (the speed's integral)
+		bannerWords.Position = UDim2.fromScale(0.5 + (2 * along - 1) * BANNER.travel / BANNER.width, 0.5)
+		local shown = math.clamp(math.min(u / BANNER.fade, (1 - u) / BANNER.fade), 0, 1)
 		for _, image in bannerImages do
 			image.ImageTransparency = 1 - shown
 		end
