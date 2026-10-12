@@ -1,14 +1,13 @@
--- The animal dictionary (QM's mockup, Oct 3): the Pets button opens it and closes
--- it again (the button stays up while it's open). It opens straight onto the Horse
--- (QM, Oct 4: no grid of animals to pick from any more): the animal running (its
--- sprite sheets) on its biome's examine page, with its name and bio, in colour
--- once you've ridden one and a black silhouette until then (the server keeps the
--- list: the "Ridden" attribute, Hatchery.server). Arrows step to the animal before
--- or after, on into the next biome's (its page turns with it). Biomes without a
--- page are left out.
+-- The animal dictionary, the Index (QM's mockup, Oct 3; one page for every biome,
+-- Oct 11): the Pets button opens it and closes it again (the button stays up while
+-- it's open), as does its X. It opens straight onto the Horse: the animal running (its
+-- sprite sheets) on the page, with its name and bio, in colour once you've ridden one
+-- and a black silhouette until then (the server keeps the list: the "Ridden"
+-- attribute, Hatchery.server). Arrows step to the animal before or after, biome by
+-- biome.
 --
--- Everything is laid out in pixels of QM's 1102 x 829 page (half the size of
--- the page pictures) and scaled to fit the screen.
+-- Everything is laid out in pixels of QM's 1102 x 840 page (assets/ui/dex/IndexPanel.png)
+-- and scaled to fit the screen.
 --
 --   AnimalDex.toggle()     -- the Pets button
 --   AnimalDex.close(instant)  -- instant: no closing animation (switching menus)
@@ -30,36 +29,18 @@ local Gamepad = require(script.Parent.Gamepad)
 
 local player = Players.LocalPlayer
 
-local PAGE = Vector2.new(1102, 829)
+local PAGE = Vector2.new(1102, 840)
 local SCREEN_SHARE = 0.54 -- the page is this share of the screen's width (QM's mockup), or less to fit its height
-local DIVIDER = 560 -- the examine page's line between the picture and the bio
-local FONT = Enum.Font.FredokaOne
+local DIVIDER = 575 -- the page's line between the picture and the bio
+local NAME_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+local BIO_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Bold)
 
 local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary" }
-local ARROW = "rbxassetid://130844925944438" -- assets/ui/dex/DexArrow.png (points up)
-
--- Each biome's page and examine page (Config.Biomes names). Biomes without
--- them aren't in the dictionary yet.
-local PAGES = {
-	Meadow = {
-		examine = "rbxassetid://78091503897812", -- assets/ui/dex/DexMeadowExamine.png
-	},
-	Desert = {
-		examine = "rbxassetid://77735968469215", -- assets/ui/dex/DexDesertExamine.png
-	},
-	Snow = { -- the Tundra
-		examine = "rbxassetid://112429560665609", -- assets/ui/dex/DexSnowExamine.png
-	},
-	Ocean = {
-		examine = "rbxassetid://93558185988056", -- assets/ui/dex/DexOceanExamine.png
-	},
-	Godlands = {
-		examine = "rbxassetid://80615979394374", -- assets/ui/dex/DexGodlandsExamine.png
-		-- The exclusives (the Loong, Snack Yak and Robo Shark) are on this page (QM),
-		-- though none runs in its stampede; they're left off their own biomes' pages.
-		extra = { "Loong", "SnackYak", "RoboShark" },
-	},
-}
+local PANEL = "rbxassetid://103615321543388" -- assets/ui/dex/IndexPanel.png (QM's, without arrows: they're buttons)
+local ARROW = "rbxassetid://133433182612945" -- assets/ui/dex/IndexArrow.png (points right)
+local CLOSE = "rbxassetid://84920756991403" -- assets/ui/dex/IndexClose.png
+local ARROW_AT = { 324, 396 } -- (left one's middle, as in QM's mockup; the right one's mirrored)
+local ARROW_SIZE = Vector2.new(56, 53)
 
 -- Each animal running: its sprite sheets (tools/dex_sheets.py), 25 frames of
 -- 192 px a sheet, 5 across and 5 down, with how many frames it has in all and
@@ -74,6 +55,21 @@ local SHEETS = {
 	Unicorn = { frames = 24, time = 0.03, "rbxassetid://96425037730261" },
 	Bunny = { frames = 23, time = 0.03, "rbxassetid://109509060486808" },
 	Kitten = { frames = 24, time = 0.03, "rbxassetid://76735200273090" },
+	Firebird = { frames = 13, time = 0.03, "rbxassetid://92445178825484" }, -- dex/DexFirebird_1.png
+	RockHog = { frames = 20, time = 0.03, "rbxassetid://84423041173252" }, -- dex/DexRockHog_1.png
+	Rockworm = { frames = 48, time = 0.06, "rbxassetid://101259765786362", "rbxassetid://98609799525177" }, -- dex/DexRockworm_1.png, _2
+	FireLobster = { frames = 48, time = 0.05, "rbxassetid://136257565701438", "rbxassetid://116867911164006" }, -- dex/DexFireLobster_1.png, _2
+	LavaWhale = { frames = 24, time = 0.03, "rbxassetid://107947322659885" }, -- dex/DexLavaWhale_1.png
+	TRex = { frames = 17, time = 0.03, "rbxassetid://83277205426899" }, -- dex/DexTRex_1.png
+	Raptor = { frames = 12, time = 0.03, "rbxassetid://118475104372693" }, -- dex/DexRaptor_1.png
+	Spinosaurus = { frames = 20, time = 0.03, "rbxassetid://122762734286787" }, -- dex/DexSpinosaurus_1.png
+	Pterodactyl = { frames = 24, time = 0.04, "rbxassetid://110282216559726" }, -- dex/DexPterodactyl_1.png
+	Ankylosaurus = { frames = 17, time = 0.03, "rbxassetid://122123351672825" }, -- dex/DexAnkylosaurus_1.png
+	PalmGuy = { frames = 12, time = 0.03, "rbxassetid://134915752151829" }, -- dex/DexPalmGuy_1.png
+	BoneRex = { frames = 17, time = 0.03, "rbxassetid://107213392278992" }, -- dex/DexBoneRex_1.png
+	Phoenix = { frames = 24, time = 0.04, "rbxassetid://82014579609498" }, -- dex/DexPhoenix_1.png
+	Lionfish = { frames = 24, time = 0.03, "rbxassetid://111810935342924" }, -- dex/DexLionfish_1.png
+	VolcanoTortoise = { frames = 20, time = 0.03, "rbxassetid://120212888052337" }, -- dex/DexVolcanoTortoise_1.png
 	Cactus = { frames = 20, time = 0.03, "rbxassetid://109623848986836" },
 	Scorpion = { frames = 15, time = 0.03, "rbxassetid://113606148401403" },
 	Sandworm = { frames = 20, time = 0.03, "rbxassetid://79124427569630" },
@@ -85,6 +81,7 @@ local SHEETS = {
 	SnackYak = { frames = 18, time = 0.03, "rbxassetid://131389846384914" },
 	Icebringer = { frames = 24, time = 0.04, "rbxassetid://125520132317720" },
 	Starfish = { frames = 48, time = 0.06, "rbxassetid://79068936169772", "rbxassetid://103163746025717" },
+	Clownfish = { frames = 24, time = 0.03, "rbxassetid://98236364459356" }, -- dex/DexClownfish_1.png
 	Squid = { frames = 24, time = 0.05, "rbxassetid://103797474563946" },
 	KingCrab = { frames = 17, time = 0.03, "rbxassetid://88553226475116" },
 	BlueCrab = { frames = 17, time = 0.03, "rbxassetid://101217167881986" },
@@ -124,6 +121,8 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	IceGolem = "Travelled from Clash Royal just to stampede, can grow/shrink at will.",
 	Icebringer = "Found a legendary amulet under an iceberg, trying to return it to its owner. Can freeze nearby objects.",
 	Starfish = "Not actually a fish.",
+	Lionfish = "All spikes, no roar. Still very proud of the name.",
+	Clownfish = "Lives in a stinging plant on purpose. Thinks it's hilarious.",
 	Whale = "A talented singer, but no one can hear it from underwater. Distant cousin of horse.",
 	Squid = "Started out with oil painting, but its art has gotten more abstract: now it just squirts ink blotches.",
 	FishSchool = "Schools out. Fish are in. Can destroy any obstacles in their path.",
@@ -137,6 +136,20 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	SoulHorse = "Very thoughtful, soul horse sends souls to his friends each year.",
 	SnackYak = "A hungry yak tempted by carrots. Likes to snack on the go, can stampede for hours on end.",
 	RoboShark = "Built a suit of robo-armor to escape the ocean. Can eat any and all animals.",
+	Firebird = "Hatched in a volcano. Still thinks everything is food.",
+	RockHog = "Ate a lava rock for a dare. Now its horns won't stop smoking.",
+	Rockworm = "Tried burrowing through a volcano. Now it can't stop jumping out of the ground.",
+	FireLobster = "Fell into a pot of boiling lava. Came out redder and angrier.",
+	LavaWhale = "Swims through lava like it's bathwater. The horn is just for showing off.",
+	TRex = "Tiny arms, huge attitude. Has never once managed to clap.",
+	Raptor = "Never hunts alone. Never knocks, either: it opens doors.",
+	Spinosaurus = "Built a sail on its back and still cannot sail. Fishes instead.",
+	Pterodactyl = "Not technically a dinosaur. Please do not tell it, it is very proud.",
+	Ankylosaurus = "Built like a tank, swings its tail like a hammer. Hugs are not recommended.",
+	PalmGuy = "Thinks the Cactus is his long-lost cousin. The Cactus disagrees.",
+	BoneRex = "Was a T-Rex once. Then it got angrier. Then it lost the skin.",
+	Phoenix = "Burns up, crumbles to ash, hatches again. Has done it so many times it finds it boring.",
+	VolcanoTortoise = "Fell asleep in the sun for three hundred years. Woke up as a volcano.",
 	Loong = "The loongest dragon around. Ex sword-swallower for the circus, passionate about entertainment.",
 }
 
@@ -152,40 +165,23 @@ local function rarityOf(kind)
 	return require(Animals[kind]).Rarity
 end
 
--- Every animal for the arrows: biome by biome (those with a page), each biome's in
--- rarity order (cheapest first within one).
+-- Every animal for the arrows: biome by biome, each biome's in rarity order
+-- (cheapest first within one).
 local order = {}
--- Animals put on another biome's page (a page's extra) aren't on their own one.
-local elsewhere = {}
-for name, page in PAGES do
-	for _, kind in page.extra or {} do
-		elsewhere[kind] = name
-	end
-end
 for _, biome in Config.Biomes do
-	if PAGES[biome.Name] then
-		local page = PAGES[biome.Name]
-		local kinds = {}
-		for kind in biome.Herd do
-			if not (page.skip and page.skip[kind]) and not elsewhere[kind] then
-				table.insert(kinds, kind)
-			end
+	local kinds = {}
+	for kind in biome.Herd do
+		table.insert(kinds, kind)
+	end
+	table.sort(kinds, function(a, b)
+		local ra, rb = table.find(RARITIES, rarityOf(a)), table.find(RARITIES, rarityOf(b))
+		if ra ~= rb then
+			return ra < rb
 		end
-		for _, kind in page.extra or {} do
-			if not table.find(kinds, kind) then
-				table.insert(kinds, kind)
-			end
-		end
-		table.sort(kinds, function(a, b)
-			local ra, rb = table.find(RARITIES, rarityOf(a)), table.find(RARITIES, rarityOf(b))
-			if ra ~= rb then
-				return ra < rb
-			end
-			return (Config.PetIncome[a] or 0) < (Config.PetIncome[b] or 0)
-		end)
-		for _, kind in kinds do
-			table.insert(order, { kind = kind, biome = biome.Name })
-		end
+		return (Config.PetIncome[a] or 0) < (Config.PetIncome[b] or 0)
+	end)
+	for _, kind in kinds do
+		table.insert(order, { kind = kind, biome = biome.Name })
 	end
 end
 
@@ -270,8 +266,7 @@ end
 
 local showAnimal, arrow
 
--- A biome's grid of cards, with arrows either side of the page to the biome
--- before and after (QM's mockup).
+-- An arrow either side of the animal (QM's page).
 function arrow(position, turn, onClick)
 	local a = Instance.new("ImageButton")
 	a.BackgroundTransparency = 1
@@ -279,7 +274,7 @@ function arrow(position, turn, onClick)
 	a.Image = ARROW
 	a.Rotation = turn
 	a.AnchorPoint = Vector2.new(0.5, 0.5)
-	a.Size = UDim2.fromOffset(140, 140)
+	a.Size = UDim2.fromOffset(ARROW_SIZE.X, ARROW_SIZE.Y)
 	a.Position = position
 	a.Activated:Connect(onClick)
 	bouncy(a)
@@ -293,12 +288,10 @@ function showAnimal(at)
 	clear()
 	shown = at
 	local kind = order[at].kind
-	page.Image = PAGES[order[at].biome].examine
 	local seen = ridden()[kind]
 
-	-- Its feet a little over the divider, as in the mockup, and drawn over
-	-- everything on the page, the bottom panel included (QM).
-	local run = image(page, "", UDim2.fromOffset(400, 400), UDim2.fromOffset(PAGE.X / 2, 395), Vector2.new(0.5, 0.5))
+	-- Between the arrows (QM's mockup), drawn over everything on the page.
+	local run = image(page, "", UDim2.fromOffset(400, 400), UDim2.fromOffset(PAGE.X / 2, ARROW_AT[2] + 10), Vector2.new(0.5, 0.5))
 	run.ZIndex = 5
 	run.ImageRectSize = Vector2.new(FRAME, FRAME)
 	run.ImageColor3 = if seen then Color3.new(1, 1, 1) else Color3.new(0, 0, 0)
@@ -320,26 +313,41 @@ function showAnimal(at)
 		run.ImageRectSize = Vector2.zero
 	end
 
-	arrow(UDim2.fromOffset(256, 340), -90, function()
+	arrow(UDim2.fromOffset(ARROW_AT[1], ARROW_AT[2]), 180, function()
 		Sounds.play("book_flip")
 		showAnimal((at - 2) % #order + 1)
 	end)
-	arrow(UDim2.fromOffset(PAGE.X - 256, 340), 90, function()
+	arrow(UDim2.fromOffset(PAGE.X - ARROW_AT[1], ARROW_AT[2]), 0, function()
 		Sounds.play("book_flip")
 		showAnimal(at % #order + 1)
 	end)
 	-- A controller's LB / RB, under the arrows (on the page: the arrows are turned).
-	Gamepad.hint(page, Enum.KeyCode.ButtonL1, Vector2.new(256 / PAGE.X, 430 / PAGE.Y), 80)
-	Gamepad.hint(page, Enum.KeyCode.ButtonR1, Vector2.new((PAGE.X - 256) / PAGE.X, 430 / PAGE.Y), 80)
+	Gamepad.hint(page, Enum.KeyCode.ButtonL1, Vector2.new(ARROW_AT[1] / PAGE.X, (ARROW_AT[2] + 70) / PAGE.Y), 80)
+	Gamepad.hint(page, Enum.KeyCode.ButtonR1, Vector2.new((PAGE.X - ARROW_AT[1]) / PAGE.X, (ARROW_AT[2] + 70) / PAGE.Y), 80)
+
+	-- The X, on the page's top right corner (QM's mockup).
+	local close = Instance.new("ImageButton")
+	close.BackgroundTransparency = 1
+	close.AutoButtonColor = false
+	close.Image = CLOSE
+	close.AnchorPoint = Vector2.new(0.5, 0.5)
+	close.Size = UDim2.fromOffset(96, 96)
+	close.Position = UDim2.fromOffset(PAGE.X - 19, 71)
+	close.ZIndex = 6
+	close.Activated:Connect(function()
+		AnimalDex.close()
+	end)
+	bouncy(close)
+	close.Parent = page
 
 	local name = Instance.new("TextLabel")
 	name.BackgroundTransparency = 1
-	name.Font = FONT
-	name.TextSize = 60
-	name.TextColor3 = Color3.new(1, 1, 1)
+	name.FontFace = NAME_FONT
+	name.TextSize = 52
+	name.TextColor3 = if seen then Config.RarityColors[rarityOf(kind)] or Color3.new(1, 1, 1) else Color3.new(1, 1, 1) -- (its rarity's colour: QM)
 	name.TextXAlignment = Enum.TextXAlignment.Left
 	name.AnchorPoint = Vector2.new(0, 0.5)
-	name.Position = UDim2.fromOffset(32, DIVIDER)
+	name.Position = UDim2.fromOffset(60, DIVIDER - 8)
 	name.Size = UDim2.fromOffset(600, 70)
 	name.Text = if seen then nameOf(kind) else "???"
 	local stroke = Instance.new("UIStroke")
@@ -350,15 +358,15 @@ function showAnimal(at)
 
 	local bio = Instance.new("TextLabel")
 	bio.BackgroundTransparency = 1
-	bio.Font = FONT
-	bio.TextSize = 44
+	bio.FontFace = BIO_FONT
+	bio.TextSize = 38
 	bio.TextColor3 = Color3.new(0, 0, 0)
 	bio.TextTransparency = 0.5 -- QM: black at 50%, no outline
 	bio.TextWrapped = true
 	bio.TextXAlignment = Enum.TextXAlignment.Left
 	bio.TextYAlignment = Enum.TextYAlignment.Top
-	bio.Position = UDim2.fromOffset(36, DIVIDER + 45)
-	bio.Size = UDim2.fromOffset(PAGE.X - 72, 829 - DIVIDER - 70)
+	bio.Position = UDim2.fromOffset(64, DIVIDER + 45)
+	bio.Size = UDim2.fromOffset(PAGE.X - 128, PAGE.Y - DIVIDER - 70)
 	bio.Text = if seen then BIOS[kind] or PLACEHOLDER_BIO else "Ride creature to unlock!" -- QM
 	bio.Parent = page
 end
@@ -413,6 +421,10 @@ function AnimalDex.toggle(instant)
 	end
 end
 
+function AnimalDex.isOpen()
+	return open == true
+end
+
 function AnimalDex.close(instant)
 	if open then
 		AnimalDex.toggle(instant)
@@ -460,6 +472,7 @@ page.BackgroundTransparency = 1
 page.AnchorPoint = Vector2.new(0.5, 0.5)
 page.Position = UDim2.fromScale(0.5, 0.5)
 page.Size = UDim2.fromOffset(PAGE.X, PAGE.Y)
+page.Image = PANEL
 scale = Instance.new("UIScale")
 scale.Parent = page
 page.Parent = gui
@@ -487,10 +500,7 @@ end)
 -- always on), so nothing pops in blank or plays choppy the first time it's seen.
 -- PreloadAsync alone left the sheets to load as they first played.
 do
-	local ids = { ARROW }
-	for _, p in PAGES do
-		table.insert(ids, p.examine)
-	end
+	local ids = { PANEL, ARROW, CLOSE }
 	for _, s in SHEETS do
 		for _, id in s do
 			if typeof(id) == "string" then

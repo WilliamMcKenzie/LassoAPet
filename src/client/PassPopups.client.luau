@@ -1,5 +1,5 @@
--- Game pass popups (QM, Oct 7): QM's card for a pass bounces in at the top right at
--- the moment it would help, and tapping it asks to buy the pass (BuyPass,
+-- Game pass popups (QM, Oct 7): QM's card for a pass bounces in at the bottom right
+-- (QM, Oct 11) at the moment it would help, and tapping it asks to buy the pass (BuyPass,
 -- Server/Passes). It stays until you leave your base (over the start line), then
 -- it's gone. They're kept rare: none in your first MIN_PLAY seconds (a moment
 -- before that waits till then), each pass pops at most once a visit, one at a
@@ -17,6 +17,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Hud = require(script.Parent.Hud)
 
 local player = Players.LocalPlayer
 local world = workspace:WaitForChild("World")
@@ -119,8 +120,8 @@ local function show(key)
 	card.BackgroundTransparency = 1
 	card.AutoButtonColor = false
 	card.Image = art.id
-	card.AnchorPoint = Vector2.new(1, 0)
-	card.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
+	card.AnchorPoint = Vector2.new(1, 1)
+	card.Position = UDim2.new(1, -MARGIN, 1, -MARGIN) -- bottom right (QM, Oct 11)
 	card.Size = UDim2.fromOffset(art.size.X * SCALE, art.size.Y * SCALE)
 	if art.id == "" then -- (until Studio uploads QM's art: a plain gold card with the name and price)
 		card.BackgroundTransparency = 0
@@ -163,6 +164,15 @@ local function moment(key)
 	show(key)
 end
 
+-- Hidden while a menu's up over the base (BaseUi's "Modal") or you're riding.
+local baseRoot
+RunService.RenderStepped:Connect(function()
+	if current then
+		baseRoot = baseRoot or player.PlayerGui:FindFirstChild("BaseUi") and player.PlayerGui.BaseUi:FindFirstChild("Root")
+		current.card.Visible = not (baseRoot and baseRoot:GetAttribute("Modal")) and not Hud.isRiding() -- (none on a ride: QM)
+	end
+end)
+
 -- Leaving your base takes it away; a waiting one pops once it may.
 local wasAtBase = true
 RunService.Heartbeat:Connect(function()
@@ -188,11 +198,15 @@ RunService.Heartbeat:Connect(function()
 	wasAtBase = here
 end)
 
--- VIP: you unlocked the Desert (PenLevel.server tells the buyer first).
-ReplicatedStorage:WaitForChild("ZoneUnlocked").OnClientEvent:Connect(function(level)
-	if level == 2 then
+-- VIP: your pen's first upgrade (your first quest claimed: QM, Oct 11). Not the
+-- saved level arriving as you join.
+local penLevel = player:GetAttribute("PenLevel") or 1
+player:GetAttributeChangedSignal("PenLevel"):Connect(function()
+	local level = player:GetAttribute("PenLevel") or 1
+	if penLevel == 1 and level == 2 and os.clock() - joinedAt > 15 then
 		moment("VIP")
 	end
+	penLevel = level
 end)
 
 -- Fast Hatch and Auto Hatch, from your pen's contents (Hatchery publishes them):

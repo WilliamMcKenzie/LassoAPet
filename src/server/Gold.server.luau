@@ -6,9 +6,8 @@
 -- Gold bought with Robux (the "BoughtGold" attribute, Shop.server's running
 -- total) is added once: the save keeps how much of it is in (bought), and only
 -- the rest is added, saved straight away.
--- Your stamina level (the "Stamina" attribute: how long the bar lasts on a ride,
--- Ride.client) is saved alongside, as `stamina` (QM, Oct 8: the stamina loop; older
--- saves have none and start at Config.Stamina.Start). Training it comes later.
+-- (The old stamina level, `stamina`: no more stamina since Oct 10 (QM), so it's no longer
+-- used, only written back as it was loaded.)
 -- And the biome barriers you've broken (the "GatesBroken" attribute, the last biome
 -- whose barrier you rode through: Gate.client's BreakGate), as `gates` (QM, Oct 9).
 
@@ -20,6 +19,7 @@ local RunService = game:GetService("RunService")
 local MAX_PER_RIDE = 100000 -- ignore anything bigger than a ride could earn
 local Config = require(ReplicatedStorage.Shared.Config)
 require(script.Parent.Passes) -- (PassDoubleGold: x2 ride cash, below)
+local Funnel = require(script.Parent.Funnel)
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "Gold")
 if not ok then
@@ -30,6 +30,7 @@ local loaded = {} -- players whose saved gold has loaded, so a failed load never
 local ready = {} -- players whose load is over (loaded or not)
 local bought = {} -- [player] = how much bought gold is already in their gold
 local savedAs = {} -- [player] = the gold and bought last saved (autosave skips it if they haven't changed)
+local oldStamina = {} -- [player] = the save's old stamina level, kept as it was
 
 local function key(player)
 	return "u" .. player.UserId
@@ -37,7 +38,6 @@ end
 
 local function load(player)
 	player:SetAttribute("Gold", 0)
-	player:SetAttribute("Stamina", 0)
 	player:SetAttribute("GatesBroken", 1) -- (the last biome whose barrier you've ridden through: Gate.client; 1 = none yet)
 	if not store then
 		return
@@ -50,8 +50,7 @@ local function load(player)
 				local gold = if typeof(value) == "table" then value.gold else value
 				bought[player] = if typeof(value) == "table" then tonumber(value.bought) or 0 else 0
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + (tonumber(gold) or 0))
-				local stamina = if typeof(value) == "table" then tonumber(value.stamina) else nil
-				player:SetAttribute("Stamina", (player:GetAttribute("Stamina") or 0) + (stamina or 0))
+				oldStamina[player] = if typeof(value) == "table" then tonumber(value.stamina) else nil
 				local gates = if typeof(value) == "table" then tonumber(value.gates) else nil
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
 				loaded[player] = true
@@ -71,14 +70,13 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	local gold = player:GetAttribute("Gold") or 0
-	local stamina = player:GetAttribute("Stamina") or 0
 	local gates = player:GetAttribute("GatesBroken") or 1
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. stamina .. "/" .. gates
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0, stamina = stamina, gates = gates }) then
+		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0, stamina = oldStamina[player], gates = gates }) then
 			savedAs[player] = as
 			return
 		end
@@ -99,9 +97,6 @@ end
 
 local function join(player)
 	load(player)
-	if (player:GetAttribute("Stamina") or 0) < Config.Stamina.Start then
-		player:SetAttribute("Stamina", Config.Stamina.Start) -- everyone starts here, old saves too
-	end
 	ready[player] = true
 	player:GetAttributeChangedSignal("BoughtGold"):Connect(function()
 		addBought(player)
@@ -115,7 +110,7 @@ end
 
 Players.PlayerRemoving:Connect(function(player)
 	save(player)
-	loaded[player], ready[player], bought[player], savedAs[player] = nil, nil, nil, nil
+	loaded[player], ready[player], bought[player], savedAs[player], oldStamina[player] = nil, nil, nil, nil, nil
 end)
 
 -- Autosave (QM, Oct 4): every Config.AutosaveEvery seconds each player's gold is saved
@@ -161,6 +156,7 @@ breakGate.OnServerEvent:Connect(function(player, i)
 	local broken = player:GetAttribute("GatesBroken") or 1
 	if typeof(i) == "number" and i > broken and i <= #Config.Biomes then
 		player:SetAttribute("GatesBroken", i)
+		Funnel.reached(player, broken, i) -- (analytics: Zones Reached)
 	end
 end)
 
@@ -212,6 +208,10 @@ ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player
 	if taken and os.clock() - taken < 5 then
 		pendingTake[player], lastTake[player] = nil, os.clock()
 		rideCash[player] = (rideCash[player] or 0) + coinsFor(kind)
+		local quests = game:GetService("ServerStorage"):FindFirstChild("QuestProgress") -- (Hatchery's: "Lasso animals")
+		if quests then
+			quests:Fire(player, "lasso", kind)
+		end
 	end
 	riding[player] = true
 end)

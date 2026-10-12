@@ -35,6 +35,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Funnel = require(script.Parent.Funnel)
+local Quests = require(script.Parent.Quests)
 local Passes = require(script.Parent.Passes)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Animals = ReplicatedStorage.Shared.Animals
@@ -60,8 +61,8 @@ local function savedStats(stats)
 	return if speed and stamina and speed > 0 and stamina > 0 then { Speed = speed, Stamina = stamina } else nil
 end
 
--- A saved hybrid's stats as it loads, brought up to the fusion speed formula (QM, Oct 7:
--- max + min / 2, Fusion.best) for its two animals. Only ever raises Speed, from the
+-- A saved hybrid's stats as it loads, brought up to the fusion speed formula (Fusion.best:
+-- max + min x Config.FuseSpeedShare) for its two animals. Only ever raises Speed, from the
 -- animals themselves, so loading again doesn't add to it.
 local function loadedHybridStats(kind, fuse, stats)
 	local saved = savedStats(stats)
@@ -161,6 +162,19 @@ local function rollPrice(profile)
 end
 
 -- Copies the profile onto the player (inventory, ride pet) and their pen (what's in it).
+-- How full the pen is: every egg and pet in it, and the pet you ride (Config.PenCapacity).
+local function penCount(profile)
+	local n = if profile.ride then 1 else 0
+	for _ in profile.items do
+		n += 1
+	end
+	return n
+end
+local function penCap(player)
+	local cfg = Config.PenCapacity
+	return cfg.Base + cfg.PerUpgrade * ((player:GetAttribute("PenLevel") or 1) - 1)
+end
+
 local function publish(player)
 	local profile = profiles[player]
 	if not profile then
@@ -182,6 +196,11 @@ local function publish(player)
 	local pen = penOf(player)
 	if pen then
 		pen:SetAttribute("Contents", HttpService:JSONEncode(profile.items))
+		pen:SetAttribute("PetCount", penCount(profile)) -- (Pens.server's "5/10"; Pen.client stops placing when full)
+		pen:SetAttribute("PetCap", penCap(player))
+	end
+	if profile.quests then
+		Quests.penCount(player, profile.quests, penCount(profile)) -- ("Collect animals": live)
 	end
 end
 
@@ -216,8 +235,8 @@ end
 
 -- While you were away (QM, Oct 3): back after time away, your pets have earned
 -- Config.AwayRate of their usual gold a second for up to Config.AwayCap seconds of
--- it. It waits in the "AwayGold" attribute (the client's popup) until ClaimAway;
--- unclaimed, it's saved and added to the next visit's.
+-- it. It waits in the "AwayGold" attribute until ClaimAway (the client sends it at
+-- once: QM, Oct 11, no popup); unclaimed, it's saved and added to the next visit's.
 local function awayGold(player, profile, data)
 	local seen = tonumber(data.seen)
 	local away = if seen then math.clamp(os.time() - seen, 0, Config.AwayCap) else 0
@@ -225,6 +244,7 @@ local function awayGold(player, profile, data)
 	return (tonumber(data.awayGold) or 0) + math.floor(income(profile) * x * Config.AwayRate * away)
 end
 
+local inviteCredits -- (below: "Invite a friend")
 local function load(player)
 	local profile = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {} }
 	if store then
@@ -248,6 +268,9 @@ local function load(player)
 						end
 					end
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
+					profile.homeEggs = tonumber(data.homeEggs) -- (animals brought home, counted from the Egg Rodeo's first session: Funnel)
+					profile.quests = Quests.load(data.quests)
+					profile.journey = data.journey == true or nil -- (started after the Player Journey funnel went in: Funnel)
 					profile.rainbowTrail = data.rainbowTrail == true or nil
 					player:SetAttribute("FuseLesson", nil) -- (no fuse lesson any more: QM, Oct 8)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
@@ -277,6 +300,9 @@ local function load(player)
 					profile.boughtGiantEggs = tonumber(data.boughtGiantEggs) -- Giant Horse eggs from the shop already in (addBoughtGiantEggs)
 				end
 				loaded[player] = true
+				player:GetAttributeChangedSignal("PenLevel"):Connect(function() -- (an upgrade makes room: Config.PenCapacity)
+					publish(player)
+				end)
 				break
 			end
 			if attempt == 3 or RunService:IsStudio() then
@@ -289,8 +315,28 @@ local function load(player)
 		return
 	end
 	profiles[player] = profile
+	profile.quests = profile.quests or Quests.load(nil)
+	Quests.publish(player, profile.quests)
+	task.spawn(function() -- friends you invited who joined while you were elsewhere ("Invite a friend")
+		local credits = inviteCredits(player)
+		for _ = 1, credits do
+			if profiles[player] then
+				Quests.count(player, profiles[player].quests, "invite")
+			end
+		end
+	end)
+	player:GetAttributeChangedSignal("GatesBroken"):Connect(function() -- ("Enter Desert" and the like)
+		if profiles[player] then
+			Quests.publish(player, profiles[player].quests)
+		end
+	end)
 	if not profile.tutorial then
+		profile.journey = true -- (in the funnels from now on: Funnel)
 		Funnel.track(player) -- a new player
+		profile.homeEggs = profile.homeEggs or 0
+	end
+	if profile.journey then
+		Funnel.join(player)
 	end
 	local tutorial = Config.Tutorial and not profile.tutorial
 	if tutorial then
@@ -302,6 +348,41 @@ local function load(player)
 	publish(player)
 end
 
+-- "Invite a friend" (QM, Oct 12): the invite (BaseUi: SocialService) carries the
+-- inviter's UserId as its launch data. When the friend joins, the inviter's quest counts
+-- one, here if they're in this server, else saved under InviteCredits for their next join.
+local inviteStore
+do
+	local okInvites, s = pcall(DataStoreService.GetDataStore, DataStoreService, "InviteCredits")
+	inviteStore = if okInvites then s else nil
+end
+inviteCredits = function(player) -- (taken: the count's gone from the store once read)
+	if not inviteStore then
+		return 0
+	end
+	local n = 0
+	pcall(inviteStore.UpdateAsync, inviteStore, "u" .. player.UserId, function(old)
+		n = tonumber(old) or 0
+		return if n > 0 then 0 else nil
+	end)
+	return n
+end
+Players.PlayerAdded:Connect(function(player)
+	local okJoin, data = pcall(player.GetJoinData, player)
+	local inviter = okJoin and data and tonumber(data.LaunchData)
+	if not inviter or inviter == player.UserId then
+		return
+	end
+	local there = Players:GetPlayerByUserId(inviter)
+	if there and profiles[there] then
+		Quests.count(there, profiles[there].quests, "invite")
+	elseif inviteStore then
+		pcall(inviteStore.UpdateAsync, inviteStore, "u" .. inviter, function(old)
+			return (tonumber(old) or 0) + 1
+		end)
+	end
+end)
+
 local savedAs = {} -- [player] = the profile as last saved, as JSON (autosave skips it if unchanged)
 
 -- onlyIfChanged: the autosave's, which skips it when nothing changed.
@@ -312,7 +393,7 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
+		rainbowTrail = profile.rainbowTrail, homeEggs = profile.homeEggs, quests = profile.quests, journey = profile.journey, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -491,11 +572,15 @@ remote("DeliverEgg", function(player, kind)
 	end
 	player:SetAttribute("CarriedEgg", nil)
 	Funnel.step(player, "Brought Egg Home")
+	if profile.homeEggs then
+		profile.homeEggs += 1
+		Funnel.captured(player, profile.homeEggs)
+	end
 	-- The tutorial's egg brought home goes straight into the pen (balance pass, Oct 6: a
 	-- fifth of new players left at "Place your egg" a second time). The first spot clear
 	-- of the starter pet, from the middle out.
 	local pen = penOf(player)
-	if player:GetAttribute("Tutorial") and pen and (profile.ride or next(profile.items)) then
+	if player:GetAttribute("Tutorial") and pen and (profile.ride or next(profile.items)) and penCount(profile) < penCap(player) then
 		for _, spot in TUTORIAL_SPOTS do
 			local clear = canPlace(pen, spot.X, spot.Y)
 			for _, item in profile.items do
@@ -527,9 +612,7 @@ remote("HatchEgg", function(player, id)
 		return
 	end
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
-	if profile.pastStarter then
-		Funnel.step(player, "Egg Hatched")
-	end
+	Funnel.step(player, if profile.pastStarter then "Egg Hatched" else "Hatched Starter Egg")
 	publish(player)
 end)
 
@@ -652,6 +735,38 @@ rollGacha.OnServerInvoke = function(player)
 	return kind, tier == "Exclusive"
 end
 rollGacha.Parent = ReplicatedStorage
+
+-- Claiming a finished quest (Config.Quests; BaseUi's CLAIM): its egg, and your pen's
+-- next level (up to the last biome's). Returns the egg's kind, for the egg reveal; nil
+-- if it didn't go through.
+local claimQuest = Instance.new("RemoteFunction")
+claimQuest.Name = "ClaimQuest"
+claimQuest.OnServerInvoke = function(player, i)
+	local profile = profiles[player]
+	local quest = profile and typeof(i) == "number" and Quests.claim(player, profile.quests, i)
+	if not quest then
+		return nil
+	end
+	local level = math.clamp(player:GetAttribute("PenLevel") or 1, 1, Config.PenLevels)
+	if level < Config.PenLevels and not quest.NoPenLevel then -- (not "Reach Meadow": QM)
+		player:SetAttribute("PenLevel", level + 1)
+	end
+	Funnel.claimed(player, i) -- (Player Journey)
+	profile.eggs[quest.Egg] = (profile.eggs[quest.Egg] or 0) + 1
+	publish(player)
+	return quest.Egg
+end
+claimQuest.Parent = ReplicatedStorage
+-- Gold.server's: a lasso landed on a wild animal ("Lasso animals", and "Lasso Snowmen" by its kind).
+local questProgress = Instance.new("BindableEvent")
+questProgress.Name = "QuestProgress"
+questProgress.Event:Connect(function(player, kind, animal)
+	local profile = profiles[player]
+	if profile then
+		Quests.count(player, profile.quests, kind, animal)
+	end
+end)
+questProgress.Parent = game:GetService("ServerStorage")
 Players.PlayerRemoving:Connect(function(player)
 	rolled[player] = nil
 end)
@@ -666,6 +781,9 @@ remote("PlaceEgg", function(player, kind, x, z)
 	end
 	if typeof(x) ~= "number" or typeof(z) ~= "number" or not canPlace(pen, x, z) then
 		return
+	end
+	if penCount(profile) >= penCap(player) then
+		return -- the pen's full (Config.PenCapacity)
 	end
 	profile.eggs[kind] -= 1
 	if profile.eggs[kind] == 0 then
@@ -853,15 +971,13 @@ remote("FusePets", function(player, idA, idB)
 	if not aIsBase then
 		a, b, baseId, donorId = b, a, idB, idA
 	end
-	local function earning(item) -- (a hybrid's is saved; a plain pet's is its kind's, times its merges)
-		return item.income or (Config.PetIncome[item.pet] or 0) * (item.merged or 1)
-	end
-	local earns = earning(a) + earning(b)
+	local earns = Fusion.earning(a.pet, a.merged, a.income) + Fusion.earning(b.pet, b.merged, b.income) -- (a hybrid's is saved)
 	local stats = Fusion.best(Fusion.stats(a.pet, a.fuse, a.stats), Fusion.stats(b.pet, b.fuse, b.stats)) -- the best of both (QM)
 	local tier = math.max(Fusion.tier(a.pet, a.fuse, a.tier), Fusion.tier(b.pet, b.fuse, b.tier)) -- the bigger of the two (QM, Oct 8)
 	local lesson = player:GetAttribute("FuseLesson") == true -- (the fuse lesson's fuse is free, once: QM)
+	local free = lesson or player:GetAttribute("MergeFree") == true -- (and your first merge ever: QM, Oct 11; Quests.publish)
 	local worth = Fusion.worth(a.pet, a.fuse, a.worth) + Fusion.worth(b.pet, b.fuse, b.worth) -- (QM: a hybrid costs all its pets)
-	local price = if lesson then 0 else Fusion.price(worth) -- (QM: fusing costs gold, by rarity; 100x less from Oct 7)
+	local price = if free then 0 else Fusion.price(earns) -- (QM, Oct 11: minutes of what the two earn)
 	local gold = player:GetAttribute("Gold") or 0
 	if gold < price then
 		return
@@ -879,6 +995,7 @@ remote("FusePets", function(player, idA, idB)
 		profile.items[donorId] = nil
 	end
 	Funnel.event(player, "Fused Pets")
+	Quests.count(player, profile.quests, "merge")
 	publish(player)
 end)
 
@@ -1061,33 +1178,38 @@ command.Parent = game:GetService("TextChatService")
 
 -- Testing: "/biome <meadow|desert|tundra|ocean>" puts you at the start of that
 -- biome riding a random animal from its herd, past any gate (Ride.client does
--- the ride). Same rule as /give for who can use it.
+-- the ride). "/boss <biome>" (QM, Oct 10): the same at its end, with the ride's
+-- timer at 0.01 s, so the boss comes. Same rule as /give for who can use them.
 local BIOME_ALIASES = { tundra = "snow" }
 local biomeWarp = Instance.new("RemoteEvent")
 biomeWarp.Name = "BiomeWarp"
 biomeWarp.Parent = ReplicatedStorage
-local biomeCommand = Instance.new("TextChatCommand")
-biomeCommand.Name = "Biome"
-biomeCommand.PrimaryAlias = "/biome"
-biomeCommand.Triggered:Connect(function(source, text)
-	local player = Players:GetPlayerByUserId(source.UserId)
-	local name = text:match("^/biome%s+(%S+)")
-	if not player or not name or not allowed(player) then
-		return
-	end
-	name = BIOME_ALIASES[name:lower()] or name:lower()
-	for index, biome in Config.Biomes do
-		if biome.Name:lower() == name then
-			local kinds = {}
-			for kind in biome.Herd do
-				table.insert(kinds, kind)
-			end
-			biomeWarp:FireClient(player, index, kinds[math.random(#kinds)])
+for alias, boss in { biome = false, boss = true } do
+	local biomeCommand = Instance.new("TextChatCommand")
+	biomeCommand.Name = if boss then "Boss" else "Biome"
+	biomeCommand.PrimaryAlias = "/" .. alias
+	biomeCommand.Triggered:Connect(function(source, text)
+		local player = Players:GetPlayerByUserId(source.UserId)
+		local name = text:match("^/" .. alias .. "%s+(%S+)")
+		if not player or not name or not allowed(player) then
 			return
 		end
-	end
-end)
-biomeCommand.Parent = game:GetService("TextChatService")
+		name = BIOME_ALIASES[name:lower()] or name:lower()
+		for index, biome in Config.Biomes do
+			if biome.Name:lower() == name then
+				local kinds = {}
+				for kind, weight in biome.Herd do
+					if weight > 0 then -- (one that runs in its stampede)
+						table.insert(kinds, kind)
+					end
+				end
+				biomeWarp:FireClient(player, index, kinds[math.random(#kinds)], boss)
+				return
+			end
+		end
+	end)
+	biomeCommand.Parent = game:GetService("TextChatService")
+end
 
 -- Testing: "/tutorial" wipes your progress (eggs, pen, pets, gold, pen level),
 -- saved as well, and starts the tutorial again from a fresh character.
@@ -1100,7 +1222,8 @@ tutorialCommand.Triggered:Connect(function(source)
 		return
 	end
 	local old = profiles[player]
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches }
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil) }
+	Quests.publish(player, profiles[player].quests)
 	if store and loaded[player] then
 		-- Keep the shop counts saved too: without them, rejoining hands every Giant Horse
 		-- egg and Legendary Pet ever bought over again (addBoughtGiantEggs / addBoughtPets).
@@ -1109,7 +1232,7 @@ tutorialCommand.Triggered:Connect(function(source)
 	end
 	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
 	player:SetAttribute("PenLevel", 1)
-	player:SetAttribute("Stamina", Config.Stamina.Start) -- (back to the starting stamina)
+	player:SetAttribute("GatesBroken", 1) -- (and every barrier back, as a new player's: else "Enter Desert" is done already)
 	player:SetAttribute("CarriedEgg", nil)
 	player:SetAttribute("FuseLesson", nil)
 	player:SetAttribute("Tutorial", nil) -- off then on, so a tutorial already running starts over
@@ -1228,7 +1351,8 @@ while true do
 	for player, profile in profiles do
 		local changed = false
 		for _, item in profile.items do
-			if item.egg and now >= item.hatchAt and (player:GetAttribute("Tutorial") or player:GetAttribute("PassAutoHatch")) then
+			-- (in the tutorial, not the starter egg: you hatch that one yourself, QM Oct 11)
+			if item.egg and now >= item.hatchAt and ((player:GetAttribute("Tutorial") and profile.ride ~= nil) or player:GetAttribute("PassAutoHatch")) then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
 				if profile.pastStarter then

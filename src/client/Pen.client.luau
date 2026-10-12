@@ -15,10 +15,10 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local MarketplaceService = game:GetService("MarketplaceService")
 
 local Animals = ReplicatedStorage.Shared.Animals
 local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
@@ -33,12 +33,6 @@ local player = Players.LocalPlayer
 local placeEgg = ReplicatedStorage:WaitForChild("PlaceEgg")
 local speedupEgg = ReplicatedStorage:WaitForChild("SpeedupEgg")
 local hatchEgg = ReplicatedStorage:WaitForChild("HatchEgg")
-local hatchPrice = Config.SpeedupEgg.Price
--- Fetch the price on this client so regional pricing is displayed accurately.
-task.spawn(function()
-	local ok, info = pcall(MarketplaceService.GetProductInfoAsync, MarketplaceService, Config.SpeedupEgg.ProductId, Enum.InfoType.Product)
-	if ok and info.PriceInRobux then hatchPrice = info.PriceInRobux end
-end)
 
 local EGG_CENTER = 1.6 -- egg pivot height above the ground (Egg.luau)
 local TOP_POPS = 1.58 -- seconds into the hatch animation when the top flies off
@@ -175,7 +169,39 @@ local function newTimer(parent)
 	return text
 end
 
+-- QM's big white arrow (Client/Tutorial's) bobbing over each of your eggs that's ready
+-- to hatch, till you're close enough for its prompt (QM, Oct 11). Not in the tutorial:
+-- it has its own.
+local READY_ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
+local function readyArrow(s, show)
+	if show and not s.arrow then
+		local gui = Instance.new("BillboardGui")
+		gui.Name = "ReadyArrow"
+		gui.Size = UDim2.fromScale(7, 7)
+		gui.AlwaysOnTop = true
+		gui.LightInfluence = 0
+		local image = Instance.new("ImageLabel")
+		image.BackgroundTransparency = 1
+		image.Image = READY_ARROW
+		image.Size = UDim2.fromScale(1, 1)
+		image.Parent = gui
+		gui.ResetOnSpawn = false
+		gui.Parent = player:WaitForChild("PlayerGui")
+		s.arrow = gui
+	end
+	if s.arrow then
+		local root = if show and s.egg then s.egg.model.PrimaryPart else nil -- (nil, not false: Adornee takes no boolean)
+		s.arrow.Adornee = root
+		s.arrow.Enabled = root ~= nil
+		s.arrow.StudsOffsetWorldSpace = Vector3.new(0, 14 + math.abs(math.sin(os.clock() * 3)) * 1.5, 0)
+	end
+end
+
 local function remove(s)
+	if s.arrow then
+		s.arrow:Destroy()
+		s.arrow = nil
+	end
 	if s.speedupAttachment then s.speedupAttachment:Destroy() end
 	if s.egg then
 		s.egg.model:Destroy()
@@ -208,20 +234,34 @@ local function sizeEgg(s, scale)
 	end
 end
 
+-- The merge view (FuseMenu's "MergeView" attribute, QM Oct 11): your pen's eggs hide
+-- while it's up, their timers too (nearTimer).
+local function hideEgg(egg, hidden)
+	for _, d in egg.model:GetDescendants() do
+		if d:IsA("BasePart") or d:IsA("Decal") or d:IsA("Texture") then
+			d.LocalTransparencyModifier = if hidden then 1 else 0
+		end
+	end
+end
+
 local function showEgg(pen, id, item)
 	local s = { kind = item.egg, merged = item.merged or 1, eggScale = item.eggScale, at = groundAt(pen, item.x, item.z), yaw = facing(pen), hatchAt = item.hatchAt }
 	s.egg = Egg.new(item.egg)
 	shown[pen][id] = s -- tracked at once: if anything below fails, the next refresh still clears it
 	s.egg.model:PivotTo(CFrame.new(s.at + Vector3.new(0, EGG_CENTER, 0)) * CFrame.Angles(0, s.yaw, 0))
 	s.egg.model.Parent = folder
+	if player:GetAttribute("MergeView") and pen == myPen() then
+		hideEgg(s.egg, true)
+	end
 	s.timer = newTimer(s.egg.model.PrimaryPart)
 	if pen == myPen() and pen:GetAttribute("Owner") == player.UserId then
 		-- One prompt on the egg: hold F for the paid hatch while it's counting down,
 		-- and F to hatch it once it's ready (QM; the frame loop below switches it over).
 		local prompt = Instance.new("ProximityPrompt")
 		prompt.Name = "SpeedupEgg"
+		prompt:SetAttribute("ObjectColor", Config.RarityColors[Fusion.rarity(item.egg)]) -- (the name in its animal's rarity colour, as Ride's: PromptUi, QM Oct 10)
 		prompt.ObjectText = item.egg .. " Egg"
-		prompt.ActionText = "Hatch now"
+		prompt.ActionText = "Hatch" -- (counting down, the time left instead, below; held then, it's the paid hatch)
 		prompt.KeyboardKeyCode = Enum.KeyCode.F
 		prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
 		prompt.HoldDuration = 0.35
@@ -278,6 +318,9 @@ end
 -- The egg hatched: play the hatch, then the pet jumps out onto the spot.
 local function hatch(pen, id, s)
 	s.hatching = true
+	if s.egg then
+		s.egg.model:SetAttribute("Hatching", true) -- (Client/Tutorial's arrow over it goes: it's hatched, only its animation's left)
+	end
 	if s.speedupAttachment then
 		s.speedupAttachment:Destroy()
 		s.speedupAttachment, s.speedupPrompt = nil, nil
@@ -287,6 +330,10 @@ local function hatch(pen, id, s)
 		task.delay(math.max(TOP_POPS - HATCH_SOUND_PEAK, 0), Sounds.play, "egg_hatch")
 	end
 	s.timer.Parent:Destroy() -- the countdown
+	if s.arrow then
+		s.arrow:Destroy()
+		s.arrow = nil
+	end
 	s.egg:play("hatch")
 	task.delay(TOP_POPS, function()
 		if shown[pen][id] ~= s then
@@ -299,6 +346,7 @@ local function hatch(pen, id, s)
 		pet.animal:setScale(pet.scale)
 		pet.animal.model.Parent = folder
 		s.pet, s.jump = pet, 0
+		pet.animal.model:SetAttribute("Hatching", true) -- (till it's landed: Client/Tutorial's arrow waits)
 		placePet(pet, s.at, s.yaw)
 		-- The empty shell fades away once the pet is out.
 		task.delay(JUMP_TIME, function()
@@ -426,8 +474,8 @@ local mouse = player:GetMouse()
 -- them) looks at, as (x, z) from the Area's centre, if an egg can go there.
 local function spotAt(screenX, screenY)
 	local pen = myPen()
-	if not pen then
-		return nil
+	if not pen or (pen:GetAttribute("PetCount") or 0) >= (pen:GetAttribute("PetCap") or math.huge) then
+		return nil -- (no pen, or it's full: Config.PenCapacity)
 	end
 	-- Where the mouse ray meets the pen floor's plane. (Not mouse.Hit: that stops
 	-- on whatever's in the way first, a fence rail, your character, the pet
@@ -488,14 +536,44 @@ end
 -- An egg's "Ready" / countdown shows only while you're near it, as the pets' plates do
 -- (PetPlates: in at TIMER_REACH studs, out past TIMER_LEAVE, popping in; QM, Oct 9).
 local TIMER_REACH, TIMER_LEAVE = 16, 19
+-- While one of your eggs' prompts is up, everything else floating over the pen hides
+-- (QM, Oct 10): the eggs' timers here, the pets' plates (PetPlates) and RIDE (Ride), on
+-- this client's "EggPromptUp" attribute.
+local eggPrompts = {}
+ProximityPromptService.PromptShown:Connect(function(prompt)
+	if prompt.Name == "SpeedupEgg" then
+		eggPrompts[prompt] = true
+		player:SetAttribute("EggPromptUp", true)
+	end
+end)
+ProximityPromptService.PromptHidden:Connect(function(prompt)
+	if eggPrompts[prompt] then
+		eggPrompts[prompt] = nil
+		player:SetAttribute("EggPromptUp", next(eggPrompts) ~= nil)
+	end
+end)
+
+player:GetAttributeChangedSignal("MergeView"):Connect(function()
+	local pen = myPen()
+	for _, s in (pen and shown[pen]) or {} do
+		if s.egg then
+			hideEgg(s.egg, player:GetAttribute("MergeView") == true)
+		end
+	end
+end)
+
 local function nearTimer(s, hrp)
 	local root = s.egg.model.PrimaryPart
 	local d = if hrp and root then ((root.Position - hrp.Position) * Vector3.new(1, 0, 1)).Magnitude else math.huge
-	local on = d <= (if s.timerOn then TIMER_LEAVE else TIMER_REACH)
+	local on = d <= (if s.timerOn then TIMER_LEAVE else TIMER_REACH) and not player:GetAttribute("EggPromptUp") -- (none while an egg's prompt is up: QM)
+		and not player:GetAttribute("MergeView") -- (nor in the merge view: FuseMenu, QM)
+		and not player:GetAttribute("Tutorial") -- (nor in the tutorial: QM, Oct 11)
 	if on ~= s.timerOn then
 		s.timerOn = on
 		local gui = s.timer.Parent
-		gui.Enabled = on
+		if gui then -- (gone with its egg, mid-hatch)
+			gui.Enabled = on
+		end
 		if on then
 			local pop = s.timer:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
 			pop.Scale = 0
@@ -511,23 +589,33 @@ RunService.RenderStepped:Connect(function(dt)
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	for pen, list in shown do
 		if (pen.Area.Position - camPos).Magnitude > FAR then
+			for _, s in list do
+				readyArrow(s, false) -- (not left up where it was: the merge view's camera is far up, QM)
+			end
 			continue
 		end
 		local inView = penInView(pen)
 		for _, s in list do
 			s.inView = inView
+			if not (s.egg and (inView or s.hatching)) or player:GetAttribute("MergeView") then
+				readyArrow(s, false)
+			end
 			if s.egg and (inView or s.hatching) then
 				if not s.hatching then
 					local ready = (s.hatchAt or now) <= now
 					if s.speedupPrompt then
-						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and not player:GetAttribute("Tutorial")
-						if ready then
-							s.speedupPrompt.ActionText = "Hatch"
-						else
-							s.speedupPrompt.ActionText = if (player:GetAttribute("HatchCredits") or 0) > 0 then "Use paid hatch" else "Hatch now — " .. hatchPrice .. " Robux"
-						end
+						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and (ready or not player:GetAttribute("Tutorial")) -- (the tutorial: hatch it, no speeding up)
 					end
 					s.timer.Text = if ready then "Ready" else countdown((s.hatchAt or now) - now)
+					readyArrow(s, ready and pen == myPen() and not player:GetAttribute("Tutorial") and not player:GetAttribute("EggPromptUp")
+						and not player:GetAttribute("MergeView") and not player:GetAttribute("Cutscene"))
+					if s.speedupPrompt then
+						-- (its action: the time left, as over the egg, till it's ready: QM, Oct 10)
+						local action = if ready then "Hatch" else s.timer.Text
+						if s.speedupPrompt.ActionText ~= action then
+							s.speedupPrompt.ActionText = action
+						end
+					end
 					nearTimer(s, hrp)
 					local scale = eggScale(s, now)
 					if math.abs(scale - s.grown) > 0.004 then
@@ -552,6 +640,7 @@ RunService.RenderStepped:Connect(function(dt)
 					pet.hop = EGG_CENTER * (s.scale or 1) * (1 - t) + JUMP_HEIGHT * 4 * t * (1 - t)
 					if t >= 1 then
 						s.jump, s.hatching = nil, nil
+						pet.animal.model:SetAttribute("Hatching", nil)
 						startWander(s)
 					end
 				end
@@ -603,6 +692,7 @@ local function setGhost(kind)
 	end
 	local special = Config.SpecialEggs[kind]
 	ghost = Egg.new(if special then special.Pet else kind).model
+	ghost:SetAttribute("Ghost", true) -- (not a placed egg: Client/Tutorial looks for those)
 	if special and special.EggScale then
 		ghost:ScaleTo(special.EggScale) -- (the Giant Horse's egg is 3x)
 		Egg.fitStuds(ghost)

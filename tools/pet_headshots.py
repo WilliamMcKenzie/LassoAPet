@@ -37,18 +37,19 @@ MODELS = {
     "SpineLizard": "converted/SpineLizard", "Snake": "desert/Snake",
     "Penguin": "snow/Penguin", "Boar": "converted/Boar", "Snowman": "snow/Snowman",
     "IceGolem": "converted/IceGolem", "Icebringer": "converted/Icebringer", "SnackYak": "snow/SnackYak",
-    "Starfish": "ocean/Starfish", "Whale": "ocean/Whale", "Squid": "ocean/Squid",
+    "Starfish": "ocean/Starfish", "Lionfish": "ocean/Lionfish", "Clownfish": "ocean/Clownfish", "Whale": "ocean/Whale", "Squid": "ocean/Squid",
     "KingCrab": "ocean/KingCrab", "BlueCrab": "ocean/BlueCrab", "RoboShark": "ocean/RoboShark", "Kraken": "ocean/Kraken", "FishSchool": "ocean/FishSchool",
     "Loong": "godlands/Loong", "WarElephant": "godlands/WarElephant", "SoulHorse": "godlands/SoulHorse",
     "Sludge": "sludge/Sludge",
     "Beholder": "beholder/Beholder",
     "Leviathan": "leviathan/Leviathan",
+    "VolcanoTortoise": "volcano/VolcanoTortoise", "Firebird": "volcano/Firebird", "RockHog": "volcano/RockHog", "Rockworm": "volcano/Rockworm", "FireLobster": "volcano/FireLobster", "TRex": "jurassic/TRex", "BoneRex": "jurassic/BoneRex", "Ankylosaurus": "jurassic/Ankylosaurus", "PalmGuy": "jurassic/PalmGuy", "Spinosaurus": "jurassic/Spinosaurus", "Pterodactyl": "jurassic/Pterodactyl", "Raptor": "jurassic/Raptor", "LavaWhale": "volcano/LavaWhale", "Phoenix": "volcano/Phoenix",
 }
-ZYX = {"KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant"}  # converted with --zyx (QM's hand-made multi-axis rotations)
+ZYX = {"BoneRex", "KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish", "TRex", "Spinosaurus"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}
 # Animals whose run makes a poor picture (the Snake stretches out thin, the Starfish
 # folds its arms up) keep their idle stance in the action style.
-ACTION_IDLE = {"Snake", "Starfish"}  # degrees the face is turned from -z (the Kraken's eye faces its rider)
+ACTION_IDLE = {"Snake", "Starfish", "Rockworm", "FireLobster"}  # degrees the face is turned from -z (the Kraken's eye faces its rider)
 
 # Camera styles: yaw (degrees round from the front, + toward the animal's left),
 # pitch (degrees above level), field of view, and the pose (animation, time as a

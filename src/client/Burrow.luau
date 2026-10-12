@@ -8,8 +8,11 @@
 --   Burrow.follow(b, x, z)       -- every frame: the spray moves over it, mounds go up
 --   Burrow.stop(b)               -- the spray goes (the mounds sink away on their own)
 --   Burrow.rider(rider, entity)  -- every frame for another rider's mount (or nil)
+--   Burrow.leaper(animal)        -- every frame it animates: the Rockworm's leaping run
+--                                -- dives under the floor, and gets the same burrow there
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -115,5 +118,45 @@ function Burrow.rider(rider, entity)
 		Burrow.follow(rider.burrow, entity.x, entity.z)
 	end
 end
+
+-- Animals whose own run dives under the floor (the Rockworm's leaps, QM): while
+-- its root bone sits this far below its rest (studs at the model's own size, about
+-- half the body under), its burrow shows.
+Burrow.LEAPERS = { Rockworm = -2 }
+
+local leaping = {} -- animal -> { burrow, seen = os.clock() it last animated }
+
+function Burrow.leaper(animal)
+	local depth = Burrow.LEAPERS[animal.Name]
+	local root = depth and animal.model.PrimaryPart
+	if not root then
+		return
+	end
+	local under = animal.pose.root[2] < depth
+	local l = leaping[animal]
+	local at = root.Position
+	if under and not l then
+		l = { burrow = Burrow.start(at.Z) }
+		leaping[animal] = l
+	elseif not under and l then
+		Burrow.stop(l.burrow)
+		leaping[animal], l = nil, nil
+	end
+	if l then
+		l.seen = os.clock()
+		Burrow.follow(l.burrow, at.X, at.Z)
+	end
+end
+
+-- A leaper that stopped animating (let go, out of view, gone) loses its spray.
+RunService.Heartbeat:Connect(function()
+	local now = os.clock()
+	for animal, l in leaping do
+		if now - l.seen > 0.25 then
+			Burrow.stop(l.burrow)
+			leaping[animal] = nil
+		end
+	end
+end)
 
 return Burrow

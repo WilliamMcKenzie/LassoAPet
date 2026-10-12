@@ -7,7 +7,10 @@
 -- the look: the panel's BackgroundTransparency stays 1 (it was 0.2), and a soft dark
 -- glow sits behind it instead, darkest in the middle (GLOW: assets/ui/PromptGlow.png,
 -- made by script; QM, Oct 9). Ride, Carl's Talk, the eggs' Hatch and the egg
--- machine's Roll are Style Custom for this.
+-- machine's Roll are Style Custom for this. Stronger (QM, Oct 10): the disc behind the
+-- key is darker (KEY_DISC), and the two lines are the game's Montserrat ExtraBold with a
+-- thin black outline, the name line in the prompt's "ObjectColor" attribute if it has
+-- one (Ride: the pet's rarity colour), the action line in its "ActionColor" (LassoPrompt).
 
 local UserInputService = game:GetService("UserInputService")
 local ProximityPromptService = game:GetService("ProximityPromptService")
@@ -83,6 +86,9 @@ local KeyCodeToFontSize = {
 }
 
 local GLOW = "rbxassetid://78103765703011" -- assets/ui/PromptGlow.png: black, fading out from the middle
+local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+local OUTLINE = 1.5 -- the text's black outline, px
+local KEY_DISC = 0.6 -- the disc behind the key: black, this see-through (about 40% dark: QM, Oct 10; was grey at 0.5)
 local GLOW_SEEN = 0.45 -- its ImageTransparency while shown (about half dark at the middle)
 
 -- Colors
@@ -165,6 +171,21 @@ local function createCircularProgressBar(tweensForFadeOut, tweensForFadeIn)
 	return bar
 end
 
+-- A thin black outline on a label, fading in and out with its text.
+local function outline(label, tweensForFadeOut, tweensForFadeIn, tweensForButtonHoldBegin, tweensForButtonHoldEnd)
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.new(0, 0, 0)
+	stroke.Thickness = OUTLINE
+	stroke.LineJoinMode = Enum.LineJoinMode.Round
+	stroke.Transparency = 1
+	stroke.Parent = label
+	local info = TweenInfo.new(0.06, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+	table.insert(tweensForButtonHoldBegin, TweenService:Create(stroke, info, { Transparency = 1 }))
+	table.insert(tweensForButtonHoldEnd, TweenService:Create(stroke, info, { Transparency = 0 }))
+	table.insert(tweensForFadeOut, TweenService:Create(stroke, info, { Transparency = 1 }))
+	table.insert(tweensForFadeIn, TweenService:Create(stroke, info, { Transparency = 0 }))
+end
+
 local function createPrompt(prompt, inputType, gui)
 	local tweensForButtonHoldBegin = {}
 	local tweensForButtonHoldEnd = {}
@@ -228,8 +249,8 @@ local function createPrompt(prompt, inputType, gui)
 
 	local actionText = Instance.new("TextLabel")
 	actionText.Name = "ActionText"
-	actionText.Font = Enum.Font.BuilderSansMedium
-	actionText.TextSize = 19
+	actionText.FontFace = FONT
+	actionText.TextSize = 22
 	actionText.BackgroundTransparency = 1
 	actionText.TextTransparency = 1
 	actionText.TextColor3 = ContentColor
@@ -241,8 +262,8 @@ local function createPrompt(prompt, inputType, gui)
 
 	local objectText = Instance.new("TextLabel")
 	objectText.Name = "ObjectText"
-	objectText.Font = Enum.Font.BuilderSansMedium
-	objectText.TextSize = 14
+	objectText.FontFace = FONT
+	objectText.TextSize = 16
 	objectText.BackgroundTransparency = 1
 	objectText.TextTransparency = 1
 	objectText.TextColor3 = SecondaryContentColor
@@ -279,6 +300,8 @@ local function createPrompt(prompt, inputType, gui)
 	table.insert(tweensForButtonHoldEnd, TweenService:Create(objectText, tweenInfoFast, { TextTransparency = 0 }))
 	table.insert(tweensForFadeOut, TweenService:Create(objectText, tweenInfoFast, { TextTransparency = 1 }))
 	table.insert(tweensForFadeIn, TweenService:Create(objectText, tweenInfoFast, { TextTransparency = 0 }))
+	outline(actionText, tweensForFadeOut, tweensForFadeIn, tweensForButtonHoldBegin, tweensForButtonHoldEnd)
+	outline(objectText, tweensForFadeOut, tweensForFadeIn, tweensForButtonHoldBegin, tweensForButtonHoldEnd)
 
 	table.insert(tweensForButtonHoldBegin, TweenService:Create(frame, tweenInfoFast, { BackgroundTransparency = 1 }))
 	table.insert(tweensForButtonHoldEnd, TweenService:Create(frame, tweenInfoFast, { BackgroundTransparency = 1 })) -- (no panel: was 0.2)
@@ -294,6 +317,7 @@ local function createPrompt(prompt, inputType, gui)
 	roundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 	roundFrame.Position = UDim2.fromScale(0.5, 0.5)
 	roundFrame.BackgroundTransparency = 1
+	roundFrame.BackgroundColor3 = Color3.new(0, 0, 0)
 	roundFrame.Parent = resizeableInputFrame
 
 	local roundedFrameCorner = Instance.new("UICorner")
@@ -301,7 +325,7 @@ local function createPrompt(prompt, inputType, gui)
 	roundedFrameCorner.Parent = roundFrame
 
 	table.insert(tweensForFadeOut, TweenService:Create(roundFrame, tweenInfoQuick, { BackgroundTransparency = 1 }))
-	table.insert(tweensForFadeIn, TweenService:Create(roundFrame, tweenInfoQuick, { BackgroundTransparency = 0.5 }))
+	table.insert(tweensForFadeIn, TweenService:Create(roundFrame, tweenInfoQuick, { BackgroundTransparency = KEY_DISC }))
 
 	if inputType == Enum.ProximityPromptInputType.Gamepad then
 
@@ -478,6 +502,8 @@ local function createPrompt(prompt, inputType, gui)
 
 		actionText.Text = prompt.ActionText
 		objectText.Text = prompt.ObjectText
+		objectText.TextColor3 = prompt:GetAttribute("ObjectColor") or Color3.new(1, 1, 1)
+		actionText.TextColor3 = prompt:GetAttribute("ActionColor") or ContentColor
 		actionText.AutoLocalize = prompt.AutoLocalize
 		actionText.RootLocalizationTable = prompt.RootLocalizationTable
 		objectText.AutoLocalize = prompt.AutoLocalize
@@ -614,6 +640,20 @@ local function createIndicator(prompt, gui)
 end
 
 local function onLoad()
+	-- Roblox's own prompts instead, to compare (QM, Oct 10: Config.NativePrompts): every
+	-- Custom one is switched to Default as it comes into the world, and this draws none.
+	if require(game:GetService("ReplicatedStorage").Shared.Config).NativePrompts then
+		local function native(item)
+			if item:IsA("ProximityPrompt") and item.Style == Enum.ProximityPromptStyle.Custom then
+				item.Style = Enum.ProximityPromptStyle.Default
+			end
+		end
+		for _, item in workspace:GetDescendants() do
+			native(item)
+		end
+		workspace.DescendantAdded:Connect(native)
+		return
+	end
 	ProximityPromptService.PromptShown:Connect(function(prompt, inputType)
 		if prompt.Style ~= Enum.ProximityPromptStyle.Custom then
 			return -- (Roblox draws the Default ones)

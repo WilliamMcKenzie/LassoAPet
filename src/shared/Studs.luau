@@ -17,7 +17,8 @@ local Config = require(script.Parent.Config)
 
 -- (a client sees MaterialService's variants once the place has loaded in: without
 -- this, the first animals and eggs built at join could miss them and keep textures)
-if Config.StudMaterial and RunService:IsClient() and not game:IsLoaded() then
+-- (not in Studio's Edit mode, where game.Loaded never fires: the lineup tool builds animals there)
+if Config.StudMaterial and RunService:IsClient() and RunService:IsRunning() and not game:IsLoaded() then
 	game.Loaded:Wait()
 end
 

@@ -37,6 +37,14 @@ local IDS = {
 	record_scratch = "rbxassetid://112792997660073", -- RECORD SCRATCH (Creator Store, QM's pick): the run home's music cut off at the line (QM, Oct 9)
 	reveal_tick = "rbxassetid://91812796089050", -- each flick of the egg card (and the roll's)
 	reveal_roll = "rbxassetid://77968740492426", -- under the egg card's flicking roulette, stopped as it lands: GAMBLING (QM's pick, Oct 9)
+	-- Each boss's cry as the camera cuts to its face (QM's picks, Oct 10; BossChase, volumes:
+	-- Config.Boss.CryVolume):
+	boss_Chicken = "rbxassetid://77584650945481", -- chicken cluck
+	boss_ElderBoar = "rbxassetid://129162115855106", -- monstergrowl
+	boss_SharkBoss = "rbxassetid://9125409840", -- Bubbles Small Underwater
+	boss_CactusBoss = "rbxassetid://95169379454314", -- angry alien cat growl
+	boss_LavaWyrm = "rbxassetid://137419707857339", -- T-Rex Roar 2 (Creator Store, AggrovatedSavage): a roar of its own (was the Boar's growl)
+	boss_TyrantRex = "rbxassetid://116844415804502", -- T-Rex Roar 1 (Creator Store, AggrovatedSavage): the Jurassic's boss
 	reveal_pop = "rbxassetid://4612378086", -- the egg card lands on its rarity (after the flicks): rewardscreenreveal (QM's pick, Oct 9; was 117371326373841)
 	egg_hatch = "rbxassetid://96102213526905", -- an egg in your pen hatches: Rewards (QM's pick, Oct 9; was 112644148635720)
 	gold_tick = "rbxassetid://123673857032707", -- gold counting up
@@ -52,14 +60,10 @@ local IDS = {
 local MUSIC = {
 	base = "rbxassetid://1840347412", -- Way Out West (APM): at home
 	ride = "rbxassetid://1836101135", -- Huba Huba Cartoon Chase (APM): out riding
-	-- The run home (QM, Oct 9: more panicked), one per biome you turned round in ("home"
-	-- .. its number, Config.Biomes order), all APM, most from the same "Crime Scene -
-	-- Action, Race & Chase" album as the first QM liked:
-	home1 = "rbxassetid://1847683499", -- Meadow: Running Faster A (Moritz Bintig, 2:19)
-	home2 = "rbxassetid://1847683579", -- Desert: Frantic And Edgy B (Mac Prindy, 1:28)
-	home3 = "rbxassetid://1847683414", -- Tundra: High-tech Crime A (Mac Prindy, 2:21)
-	home4 = "rbxassetid://1847681727", -- Ocean: Motivating Forces A (Mac Prindy, 2:02)
-	home5 = "rbxassetid://1847683528", -- Godlands: Break The Barrier B (Mac Prindy, 2:04)
+	-- The run home (QM, Oct 9: more panicked; Oct 10: the Meadow's wherever you turned
+	-- round), APM's "Crime Scene - Action, Race & Chase":
+	home1 = "rbxassetid://1847683499", -- Running Faster A (Moritz Bintig, 2:19)
+	intro = "rbxassetid://1837301451", -- Epic Battle Simulator (APM): the intro's fight (Client/Intro, QM Oct 11)
 }
 local VOLUME = 0.5
 local GALLOP_VOLUME = 0.35
@@ -70,12 +74,36 @@ local folder = Instance.new("Folder")
 folder.Name = "GameSounds"
 folder.Parent = SoundService
 
+-- Slow motion slows the sounds too (QM, Oct 11): each one's own speed (its "Base"
+-- attribute; 1 if it has none) x the ride's time scale, but never under SLOWEST, so a
+-- near stop is a low drawl rather than silence. UI clicks keep their speed, and so do
+-- the record scratch (QM, Oct 11: that's the exception) and the music (QM, Oct 11).
+local SLOWEST = 0.25
+local timeScale = 1
+local UNSCALED = { record_scratch = true, arrive_home = true } -- (and the hit that plays with the scratch, as you land home: slowed under it, the scratch sounded off, QM)
+local function applySpeed(s)
+	s.PlaybackSpeed = (s:GetAttribute("Base") or 1) * (if s:GetAttribute("NoTimeScale") then 1 else timeScale)
+end
+function Sounds.setTimeScale(scale)
+	scale = math.max(scale, SLOWEST)
+	if math.abs(scale - timeScale) < 0.002 then
+		return
+	end
+	timeScale = scale
+	for _, s in folder:GetChildren() do
+		if s:IsA("Sound") then
+			applySpeed(s)
+		end
+	end
+end
+
 local function newSound(id, volume, looped)
 	local s = Instance.new("Sound")
 	s.SoundId = id
 	s.Volume = volume
 	s.Looped = looped or false
 	s.Parent = folder
+	applySpeed(s)
 	return s
 end
 
@@ -85,6 +113,7 @@ local templates = {}
 for name, id in IDS do
 	if id ~= "" then
 		templates[name] = newSound(id, VOLUME)
+		templates[name]:SetAttribute("NoTimeScale", UNSCALED[name])
 	end
 end
 task.spawn(function()
@@ -103,7 +132,8 @@ function Sounds.play(name, volume, speed)
 	local s = template:Clone()
 	s.Volume = volume or VOLUME
 	s.Parent = folder
-	s.PlaybackSpeed = speed or 1
+	s:SetAttribute("Base", speed or 1)
+	applySpeed(s)
 	s.Ended:Once(function()
 		s:Destroy()
 	end)
@@ -130,7 +160,8 @@ function Sounds.setGallop(on, pace)
 	end
 	pace = math.clamp(pace or 1, 0, 3)
 	gallop.Volume = GALLOP_VOLUME * math.min(pace, 1)
-	gallop.PlaybackSpeed = 0.8 + 0.3 * math.min(pace, 2)
+	gallop:SetAttribute("Base", 0.8 + 0.3 * math.min(pace, 2))
+	applySpeed(gallop)
 	if not gallop.IsPlaying then
 		gallop:Play()
 	end
@@ -166,6 +197,10 @@ end
 
 local music = {}
 local playing
+-- The track playing now (Client/Intro puts it back after its own).
+function Sounds.music()
+	return playing
+end
 -- cut: switch with no fade (the old track stops dead, the new one's straight in).
 function Sounds.setMusic(which, cut)
 	if which == playing then
@@ -176,6 +211,8 @@ function Sounds.setMusic(which, cut)
 		local s = music[name]
 		if not s then
 			s = newSound(id, 0, true)
+			s:SetAttribute("NoTimeScale", true) -- (slow motion leaves the music be: QM)
+			s.PlaybackSpeed = s:GetAttribute("Base") or 1
 			music[name] = s
 		end
 		local on = name == which
@@ -213,6 +250,8 @@ local function playClick()
 	if not click then
 		click = templates.button_click:Clone()
 		click.Volume = 0.4
+		click:SetAttribute("NoTimeScale", true)
+		click.PlaybackSpeed = 1
 		click.Parent = folder
 	end
 	click.TimePosition = 0

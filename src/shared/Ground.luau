@@ -3,11 +3,10 @@
 -- meadow's dirt). They're laid out on an 8-stud grid (tools/desert_ground.py,
 -- tools/meadow_ground.py), so the height is looked up per 8-stud cell.
 
-local CELL = 8
+local Config = require(script.Parent.Config)
 
--- Past its line the Godlands is laid out on 4-stud tiles, built by each client
--- as it goes (Shared/Godlands), so its heights come from its track grids instead.
-local Godlands = require(script.Parent.Godlands)
+local CELL = 8
+local endless = Config.Endless -- past its cut, the floor's the stretch before it, again and again (Client/Endless)
 
 local Ground = {}
 
@@ -33,11 +32,11 @@ local function load()
 end
 
 function Ground.heightAt(x, z)
-	if Godlands.start and z < Godlands.start then
-		return Godlands.heightAt(x, z)
-	end
 	if not heights then
 		load()
+	end
+	if endless and z < endless.Cut then
+		z = endless.Cut + (z - endless.Cut) % endless.Length
 	end
 	return heights[key(math.floor(x / CELL), math.floor(z / CELL))] or 0
 end

@@ -161,11 +161,23 @@ return {
 		{ "Horn", 110, 220, 245 },
 		{ "Horn", 243, 243, 243 }, -- tusks
 	},
+	Clownfish = {
+		{ "Body", 255, 112, 16 },
+		{ "Belly", 255, 150, 60 },
+		{ "Marking", 255, 255, 255 }, -- bands
+		{ "Accent", 24, 24, 30 }, -- band edges, fin tips
+	},
 	Starfish = {
 		{ "Body", 255, 128, 64 },
 		{ "Body", 232, 88, 52 }, -- arm tips
 		{ "Belly", 255, 200, 156 },
 		{ "Marking", 255, 214, 96 }, -- bumps
+	},
+	Lionfish = {
+		{ "Body", 255, 240, 214 },
+		{ "Marking", 232, 72, 40 }, -- stripes, spines
+		{ "Belly", 255, 214, 186 },
+		{ "Accent", 150, 36, 52 }, -- fins
 	},
 	Whale = {
 		{ "Body", 40, 116, 206 },
@@ -184,6 +196,93 @@ return {
 		{ "Body", 40, 52, 94 }, -- head, funnel
 		{ "Marking", 146, 46, 60 }, -- cap
 		{ "Marking", 104, 30, 46 }, -- cap rim
+	},
+	FireLobster = {
+		{ "Body", 226, 52, 36 }, -- shell
+		{ "Body", 170, 32, 30 }, -- seams, fingers, shins, antennae
+		{ "Marking", 255, 124, 40 }, -- shoulders, arms, thighs
+	},
+	Phoenix = {
+		{ "Body", 206, 34, 40 }, -- body, wing arms
+		{ "Body", 240, 72, 32 }, -- head, neck, wing bands
+		{ "Marking", 255, 132, 24 }, -- feathers
+		{ "Accent", 255, 188, 36 }, -- beak, feather ends, plumes
+	},
+	TRex = {
+		{ "Body", 240, 140, 52 },
+		{ "Belly", 252, 218, 166 },
+		{ "Marking", 168, 82, 32 }, -- stripes, brow
+	},
+	Raptor = {
+		{ "Body", 76, 154, 226 },
+		{ "Belly", 252, 218, 166 },
+		{ "Marking", 36, 70, 140 }, -- stripes
+		{ "Accent", 255, 146, 46 }, -- crest, arm and tail feathers
+	},
+	Spinosaurus = {
+		{ "Body", 64, 172, 132 },
+		{ "Belly", 252, 218, 166 },
+		{ "Marking", 36, 116, 92 }, -- stripes
+		{ "Accent", 255, 136, 40 }, -- sail
+	},
+	PalmGuy = {
+		{ "Body", 150, 110, 66 }, -- trunk
+		{ "Body", 132, 96, 58 }, -- trunk, legs
+		{ "Marking", 104, 74, 44 }, -- joint rings
+		{ "Accent", 70, 156, 52 }, -- fronds, tufts
+	},
+	Ankylosaurus = {
+		{ "Body", 236, 190, 62 },
+		{ "Belly", 252, 218, 166 }, -- belly, beak
+		{ "Marking", 138, 84, 40 }, -- armour bands, head plate, club
+		{ "Accent", 250, 240, 214 }, -- spikes
+	},
+	BoneRex = {
+		{ "Body", 66, 60, 76 }, -- bones
+		{ "Body", 46, 42, 56 }, -- joints
+		{ "Accent", 60, 255, 110 }, -- soul fire, spike tips, talons
+	},
+	Pterodactyl = {
+		{ "Body", 150, 98, 222 },
+		{ "Belly", 252, 218, 166 },
+		{ "Marking", 82, 50, 156 }, -- stripes, brow
+		{ "Accent", 255, 150, 72 }, -- wings
+		{ "Accent", 255, 198, 52 }, -- beak
+	},
+	LavaWhale = {
+		{ "Body", 182, 100, 62 }, -- rock
+		{ "Body", 136, 74, 50 }, -- brow, horn bands
+		{ "Belly", 246, 196, 140 }, -- ash
+		{ "Marking", 255, 140, 30 }, -- lava glyphs
+	},
+	Firebird = {
+		{ "Body", 255, 128, 32 }, -- feathers
+		{ "Belly", 232, 98, 22 },
+		{ "Marking", 64, 62, 70 }, -- beak, shins, feet, wing bars
+		{ "Accent", 34, 32, 38 }, -- crest, brows, wing tips, tail
+		{ "Hoof", 232, 224, 204 }, -- claws
+	},
+	RockHog = {
+		{ "Body", 88, 98, 128 }, -- basalt coat
+		{ "Marking", 54, 58, 82 }, -- jaw, cheeks, brows
+		{ "Horn", 255, 120, 20 }, -- fiery horns, tusks and spikes
+		{ "Hoof", 36, 38, 52 },
+	},
+	Rockworm = {
+		{ "Body", 88, 98, 128 }, -- basalt segments
+		{ "Marking", 54, 58, 82 }, -- plates
+		{ "Belly", 120, 130, 162 },
+		{ "Horn", 255, 120, 20 }, -- lava fins, horn, tail spike and fangs
+	},
+	VolcanoTortoise = {
+		{ "Body", 178, 150, 102 }, -- skin, beak
+		{ "Belly", 150, 122, 82 }, -- belly, lower jaw, brows
+		{ "Marking", 122, 66, 44 }, -- shell
+		{ "Marking", 92, 50, 36 }, -- shell rim
+		{ "Marking", 118, 78, 62 }, -- shell top
+		{ "Horn", 112, 96, 90 }, -- volcano
+		{ "Horn", 92, 78, 74 }, -- volcano top
+		{ "Hoof", 236, 214, 170 }, -- nails
 	},
 	KingCrab = {
 		{ "Body", 226, 58, 48 }, -- shell, claws, eye stalks

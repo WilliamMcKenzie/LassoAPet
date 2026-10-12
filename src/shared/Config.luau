@@ -17,7 +17,7 @@ return {
 			Name = "Meadow",
 			AnimalSize = 1, -- its obstacles (tools/funnel.luau) and the Godlands' terrain grow ^0.8 of this. Animals no longer do (QM, Oct 8: back to their old sizes)
 			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
-			Length = 760,
+			Length = 2168, -- (QM, Oct 11: the pacing ladder, below AnimalStats; was 760)
 			GroundColors = { Color3.fromRGB(113, 173, 31), Color3.fromRGB(122, 190, 25) }, -- (QM, Oct 10; was 77, 196, 63 / 105, 255, 74)
 			WallColors = { Color3.fromRGB(197, 126, 70), Color3.fromRGB(211, 142, 75) }, -- (QM, Oct 10; was 225, 150, 104 / 248, 170, 114)
 			-- Which animals run in this biome's stampede and how often (names are modules
@@ -26,7 +26,7 @@ return {
 			-- use the same odds (NestOdds). A 0 never spawns but keeps the animal on
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
-			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.22, Rhino = 0.13, Unicorn = 0.05 },
+			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05 },
 			-- Dirt patches in the walls' colours, a stud below the grass
 			-- (tools/meadow_ground.py); see the Desert's Patches.
 			Patches = {
@@ -36,12 +36,12 @@ return {
 		{
 			Name = "Desert",
 			AnimalSize = 1.35,
-			Swerve = 0.75,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.75)
 			NestScale = 2, -- its nests are this many times bigger, so they show from afar at its speed (Nests.server; QM, Oct 6)
-			Length = 2280, -- 3x the meadow (QM)
+			Length = 1816, -- (QM, Oct 11: 1.5x as long; the pacing ladder made it 1208, was 2280)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
-			Herd = { Cactus = 0.3, Kitten = 0.25, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05 },
+			Herd = { Cactus = 0.3, Kitten = 0.1, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
 			-- Patches of other ground in the floor (parts named after them in
 			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
 			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
@@ -63,12 +63,12 @@ return {
 		{
 			Name = "Snow",
 			AnimalSize = 1.8,
-			Swerve = 0.5,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.5)
 			NestScale = 2.25,
-			Length = 5472, -- 3x the desert, then 0.8x (QM, Oct 2)
+			Length = 1920, -- (QM, Oct 11: the pacing ladder; was 5472)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
-			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.06 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
+			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.02 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
@@ -84,13 +84,14 @@ return {
 		{
 			Name = "Ocean",
 			AnimalSize = 2.6,
-			Swerve = 0.25,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.25)
 			NestScale = 2.5,
-			Length = 7680, -- 1.4x the snow (QM, Oct 2), a whole number of 240-stud depth bands
+			Length = 3120, -- a whole number of 240-stud depth bands (QM, Oct 11: the pacing ladder; was 7680)
 			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			Herd = { Fish = 0, Starfish = 0.3, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0, Kraken = 0.05 }, -- (Blue Crab guessed like the Kraken; the Robo Shark never spawns: a future Robux pet, QM Oct 4)
+			HerdSpawnEvery = 0.45, -- (twice the stampede of the rest: it looked barren, QM Oct 11)
+			Herd = { Fish = 0.1, Starfish = 0.3, Clownfish = 0.25, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0, Kraken = 0.05, Lionfish = 0.15 }, -- (the Lionfish Rare, a touch faster than the Starfish, QM Oct 11, weight a guess; the Clownfish Uncommon, a little rarer than the Starfish, QM Oct 11; Blue Crab guessed like the Kraken; the Robo Shark never spawns: a future Robux pet, QM Oct 4)
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -165,47 +166,57 @@ return {
 				Bubbles = 24, -- per second
 			},
 		},
-		-- (Off for a while on Oct 4, back the same night as the endless endgame, QM.)
 		{
-			-- The endgame (QM, Oct 3), after Realm of the Mad God's godlands: dark stone
-			-- plates split by snow, with ice or lava cracks. It never ends: one 960-stud
-			-- track after another, each picked at random from four (two with ice, two
-			-- with lava; Shared/Godlands, Shared/GodlandsTracks), built round each rider
-			-- as they go (Client/GodlandsStream). It has no finish line.
-			Name = "Godlands",
-			AnimalSize = 3,
-			Swerve = 0,
+			-- The volcano (QM, Oct 11): after the ocean, bright and warm, brown more than
+			-- black (design/lava_biome). Floor, walls and nests: tools/volcano.py; its rocks:
+			-- tools/biome_rocks.py; the big crack at its end: VolcanoCrack below.
+			Name = "Volcano",
+			AnimalSize = 2.6, -- (as the ocean's)
+			Swerve = 1,
 			NestScale = 2.5,
-			Length = math.huge, -- endless
-			GroundColors = { Color3.fromRGB(208, 212, 224), Color3.fromRGB(224, 228, 238) }, -- grey snow
-			WallColors = { Color3.fromRGB(48, 46, 58), Color3.fromRGB(62, 60, 74) }, -- dark stone (snow caps)
-			-- Its own animals now; the Fish that stood in are gone (QM, Oct 4). (The Loong is
-			-- an event and roll exclusive, so it doesn't run here.) PlaceholderHerd keeps it
-			-- out of the finish line's egg odds (Hatchery).
-			Herd = { Beholder = 0.1, WarElephant = 1, SoulHorse = 0.5, Sludge = 0.5, Leviathan = 0.1 }, -- its own animals, no Fish (QM, Oct 4; weights are guesses)
-			-- Its nests' eggs (Nests.server: one nest a track, near the riders) get rarer the
-			-- deeper in you are (QM, Oct 4), each tier's pool split evenly: at its line only
-			-- Rares; the Epic chance grows from 0 to Epic.Max over the first Epic.Over
-			-- studs; past Legendary.From studs the Legendary chance grows to Legendary.Max
-			-- over Legendary.Over studs, then holds. The rest is Rares.
-			NestDepth = {
-				Rare = { "Beholder", "Sludge", "WarElephant" },
-				Epic = { Pool = { "Leviathan", "SoulHorse" }, Max = 0.4, Over = 5000 },
-				Legendary = { Pool = { "Unicorn", "Snake", "Icebringer", "Kraken", "BlueCrab" }, From = 5000, Max = 0.1, Over = 5000 },
-			},
-			PlaceholderHerd = true,
-			HerdThin = 2, -- only every 2nd of the stampede's spawns runs here: half as many animals (QM, Oct 4)
+			Length = 5040, -- (QM, Oct 11: the pacing ladder; was 7680)
+			GroundColors = { Color3.fromRGB(156, 98, 66), Color3.fromRGB(168, 108, 74) }, -- baked-earth brown
+			WallColors = { Color3.fromRGB(170, 92, 58), Color3.fromRGB(186, 104, 66) },
+			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean and Jurassic: QM Oct 11)
+			Herd = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (QM, Oct 11: the Firebird Uncommon, the Rock Hog and Fire Lobster Rare, the Rockworm Epic, the Phoenix Legendary and very rare, the Lava Whale Epic and as rare as the Phoenix; the weights a guess)
+			-- tools/volcano.py: lighter ash flush, darker crust plates a stud up, lava pools
+			-- a stud down out by the walls.
 			Patches = {
-				Stone = { Color3.fromRGB(62, 60, 72), Color3.fromRGB(76, 74, 88) }, -- a stud up
-				Ice = { Color3.fromRGB(170, 196, 250), Color3.fromRGB(184, 208, 252) },
-				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon
+				Ash = { Color3.fromRGB(184, 124, 84), Color3.fromRGB(196, 134, 92) },
+				Crust = { Color3.fromRGB(124, 78, 58), Color3.fromRGB(136, 86, 64) },
+				Lava = { Color3.fromRGB(255, 116, 24), Color3.fromRGB(255, 146, 40) }, -- Neon
 			},
-			UnlockCost = 300000000, -- QM, Oct 8: matches the new button art (Oct 7 had $150M: halved with the Tundra's; balance pass Oct 6 had it $300M, before that $10M (a guess). The Badlands (PR #154) would sit at about $50M
-			PostColor = Color3.fromRGB(62, 60, 72),
-			GateColor = Color3.fromRGB(255, 72, 0), -- lava orange
-			GateImage = "rbxassetid://81079145393331", -- assets/ui/GateGodlands.png
-			UpgradeImage = "rbxassetid://122300024756957", -- assets/ui/UpgradePenGodlandsEnabled.png (QM, Oct 8: price drawn in)
-			UpgradeImageDisabled = "rbxassetid://73528380270412", -- assets/ui/UpgradePenGodlandsDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
+			UnlockCost = 300000000, -- a guess (the old Godlands price)
+			PostColor = Color3.fromRGB(170, 92, 58),
+			GateColor = Color3.fromRGB(255, 110, 20), -- lava orange
+			Sky = "rbxassetid://87302593393430", -- assets/ui/SkyVolcano.png: a flat lava orange (QM, Oct 11; Client/BiomeSky)
+			-- How much that sky colours everything (the red-orange cast) and a tint over it
+			-- (QM, Oct 11; Client/BiomeSky): Diffuse 0 to 1, Specular 0 to 1, Tint white for none.
+			SkyLight = { Diffuse = 0, Specular = 1, Tint = Color3.new(1, 1, 1) }, -- (QM, Oct 11: no orange cast)
+			-- No Upgrade Pen art yet: the plain button with the price.
+		},
+		{
+			-- The Jurassic (QM, Oct 11): the final biome, after the volcano (design/jurassic_biome):
+			-- darker jungle grass, a rough dirt trail down the middle, brown rocks, jungle plants
+			-- and a giant ribcage halfway. Floor, walls, nests and ribcage: tools/jurassic.py;
+			-- rocks and plants: tools/biome_rocks.py.
+			Name = "Jurassic",
+			AnimalSize = 2.6, -- (as the volcano's)
+			Swerve = 1,
+			NestScale = 2.5,
+			Length = 7680, -- as long as the volcano was (a guess; its animals aren't on the ladder yet)
+			HerdSpawnEvery = 0.15, -- (3x its stampede again: QM Oct 12; was 0.45, twice the rest, as the Ocean)
+			GroundColors = { Color3.fromRGB(78, 140, 40), Color3.fromRGB(86, 152, 44) }, -- dark jungle grass
+			WallColors = { Color3.fromRGB(150, 102, 62), Color3.fromRGB(164, 114, 70) },
+			Herd = { Fish = 0, Spinosaurus = 0.2, TRex = 0.12, Raptor = 0.15, Pterodactyl = 0.08, Ankylosaurus = 0.25, PalmGuy = 0.25, BoneRex = 0.03 }, -- (the Bone Rex the final Legendary, as rare as the Phoenix, QM Oct 11; Palm Guy an Uncommon too, QM Oct 11, weight a guess; no more Fish: QM, Oct 11; the Ankylosaurus the Jurassic's Uncommon, QM Oct 11, weight a guess; the Pterodactyl an Epic, QM Oct 11; the Spinosaurus Rare, QM Oct 11; QM, Oct 11: fish for now, until the dinosaurs are designed; the T-Rex, an Epic, is the first; the Raptor a Rare that runs in packs of three (HerdPacks), so 0.15 is about a third of the stampede. Weights a guess)
+			-- tools/jurassic.py: the dirt trail, flush.
+			Patches = {
+				Trail = { Color3.fromRGB(150, 104, 64), Color3.fromRGB(162, 114, 70) },
+			},
+			UnlockCost = 3000000000, -- a guess (10x the volcano)
+			PostColor = Color3.fromRGB(150, 102, 62),
+			GateColor = Color3.fromRGB(90, 200, 50), -- jungle green
+			-- No Upgrade Pen art or boss yet (Config.Boss falls back to the Chicken).
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
@@ -220,7 +231,8 @@ return {
 	-- The Upgrade Pen button (Hud): buys the next pen level at the next biome's
 	-- UnlockCost. With the gates off it only grows and repaints your pen and swaps in
 	-- that biome's training dummy (QM, Oct 8); past the last, the Rainbow Trail.
-	PenUpgrades = true,
+	-- Off (QM, Oct 11): claiming a quest upgrades your pen now (Quests, below).
+	PenUpgrades = false,
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
 	-- The course is a funnel (QM, Oct 8): CourseHalfWidth at the start line, each wall
@@ -229,30 +241,79 @@ return {
 	-- widths: Meadow 112-120, Desert 120-142, Snow 142-197, Ocean 197-274, Godlands 274.
 	-- WorldColors.halfWidth(z) is the width at z. The place's walls, ground, obstacles
 	-- and nests are moved to it by tools/funnel.luau (re-run it after a World push).
+	-- The big lava crack at the volcano's end (QM, Oct 10-11: a geyser to launch you on
+	-- to the next biome, later; for now it's only there). VolcanoCrack.client draws it
+	-- with ViewportStencil (Shared/ViewportStencil) from the Model named Model in
+	-- ReplicatedStorage: CrackMask and CrackInside, imported from design/volcano/VolcanoCrack.gltf
+	-- (tools/volcano_crack.py). FromFinish: studs before the volcano's end (where the finish line was) its middle is.
+	VolcanoCrack = {
+		Model = "VolcanoCrack",
+		FromFinish = 110,
+		Yaw = 0,
+		Brightness = 1.4, -- SurfaceGui.Brightness: a little over 1 so it glows
+		MaxDistance = 900,
+	},
 	CourseHalfWidth = 56,
 	CourseWidening = 0.005,
 	CourseMaxHalfWidth = 137,
-	CourseLength = math.huge, -- all the biomes' lengths added up: endless, with the Godlands last
+	CourseLength = 2168 + 1816 + 1920 + 3120 + 5040 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, then the Jurassic, its end is the end; off its edge, the void)
+	-- The Jurassic goes on forever (QM, Oct 11: the temporary endgame): the course is
+	-- cut at Cut (World.server: no far wall, no finish line) and the Length studs
+	-- before it are laid again and again past it (Client/Endless). Cut and Length are
+	-- whole 16s, so the floor's checker keeps its step. nil: the course ends as before.
+	Endless = { Cut = -21504, Length = 1536 },
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
 
 	-- Ride
 	MountSpeed = 44,
-	ReturnSpeed = 40,
+	RunSpeedLeeway = 0.1, -- Speed (2 m/s as the plates show it, x20): once you've reached the Desert, nothing you lasso in a run goes slower than the pet you left your pen on less this (Ride: QM, Oct 12: a Penguin's Rhino runs 1.62 and reaches the Tundra; before the Desert, no floor, so a new player's Horse's Fish keeps its own 0.6)
+	ReturnSpeed = 88, -- 2x MountSpeed: the ride home twice as fast as the ride out (QM, Oct 11; was 1.6x, 70.4; at first 40)
 	SteerSpeed = 28,
 	-- Wider mounts steer quicker, gently (QM, Oct 8): x (1 + SteerWidthScale x (width
 	-- over a horse's - 1)), so twice a horse's width steers 1.2x, three times 1.4x.
 	SteerWidthScale = 0.2,
 	SteerResponse = 8,
-	HoldTime = 6, -- (a pet's own stamina: no longer used, the bar runs on your Stamina below)
-	-- Stamina (QM, Oct 8: the stamina loop): your saved stamina level (the "Stamina"
-	-- attribute, Gold.server), shown on the bar as you ride out. The bar lasts Seconds x
-	-- your level, draining SprintDrain x as fast while you sprint; lassoing doesn't refill
-	-- it. Empty: you turn round on whatever you're riding and race it home, and a wild
-	-- one's egg is yours over the line. Everyone starts at Start (training it comes later).
-	Stamina = { Start = 20, Seconds = 1 },
-	SprintDrain = 1.5, -- x the stamina bar's usual drain while sprinting
+	-- Every ride out lasts RideSeconds (QM, Oct 10: no more stamina), the bar at the top
+	-- draining with it, sprinting or not. Empty: you turn round on whatever you're riding
+	-- and race it home, and a wild one's egg is yours over the line.
+	RideSeconds = 33, -- (QM, Oct 11: "a bit easier to get to each biome", kids don't sprint all the way: was 30. Each biome's Epic now reaches the next line sprinting ~70% of the ride, was ~90%; its Rares only past ~83%)
+	-- The boss when the ride's time runs out (QM, Oct 10: Client/BossChase): your animal
+	-- stops dead, the biome's boss (Shared/Bosses: ByBiome; Kind for one with none) pops up Ahead studs in
+	-- front, the camera's on its face (FaceAt: of its box, up and forward from the middle)
+	-- from ZoomAt s (FaceFrom studs off it, between black
+	-- bars sliding in over BarTime), and at CutsceneTime s you turn for home with it
+	-- chasing at your speed (QM: the gap holds, so it's there at the end), never nearer than
+	-- Behind studs, and pulling up StopShort studs short of the start line. Its anger vein,
+	-- on the screen while the bars are in: VeinSize x the screen's height, at VeinAt (of
+	-- the screen: by its head, in the strip), popping up, then
+	-- VeinPopTime s on pulsing once VeinPulse x bigger over VeinPeriod s, and turning
+	-- VeinSpin degrees a second.
+	-- ByBiome: which boss (Shared/Bosses) each biome (Config.Biomes Name) gets; Kind for any other.
+	Boss = {
+		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss", Volcano = "LavaWyrm", Jurassic = "TyrantRex" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
+		ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
+		-- (you turn for home at once, but the camera lingers behind you, on the boss, for
+		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
+		Linger = 1, ChaseMin = 70,
+		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 40, StopShort = 30,
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1 }, -- (each boss's cry: QM, Oct 10)
+		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
+			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 5, 41) }, -- (it's 1.7x the size: QM)
+			CactusBoss = { From = Vector3.new(0, 5, 34) }, -- (1.7x the size)
+			SharkBoss = { At = Vector3.new(0, 0, 0.4), From = Vector3.new(36, 4, 16) }, -- (from its side, so you see its eye: QM)
+			LavaWyrm = { At = Vector3.new(0.17, -0.06, 0.3), From = Vector3.new(0, 3, 58) }, -- (its head is out front and off to one side)
+			TyrantRex = { At = Vector3.new(0.12, 0.4, 0.38), From = Vector3.new(20, 4, 48) }, -- (its eye and snout, from a little to one side: the jaw hangs open)
+		},
+		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
+		-- On the run home it cries again every so often (QM, Oct 11): its opening cry, the
+		-- screen shaking and the red vignette surging with how loud the cry is (BossChase.roar).
+		-- First s after the close-up, then every Every[1] to Every[2] s; Shake degrees and
+		-- ShakeMove studs at its loudest.
+		Roar = { On = true, First = 3, Every = { 10, 10 }, Shake = 0.8, ShakeMove = 0.35 }, -- (every 10 s: QM, Oct 11; was 5 to 8)
+	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"
 	-- (0.5 stud) MaterialVariant from MaterialService instead of a stud Texture per face,
@@ -299,25 +360,31 @@ return {
 		Animals = { "Loong", "SnackYak", "RoboShark" },
 		Countdown = 10,
 		Cycle = 600, -- seconds from one event to the next (QM: every 10 minutes)
+		DespawnBiome = "Jurassic", -- it runs off (gone) as it reaches this biome (QM, Oct 11: the Jungle)
 	},
 	-- Any pet can be ridden. Until pets can be picked in the pen, you ride this one
 	-- (it waits on the first pet spot in your pen).
 	DefaultPet = "Horse",
 	-- Seconds an egg placed in your pen takes to hatch: PetHatchTime by the animal
 	-- inside (QM's pets JSON, Oct 4), else HatchTime by its rarity.
-	HatchTime = { Uncommon = 15, Rare = 45, Epic = 120, Legendary = 300 },
+	-- By rarity from the Desert on (QM, Oct 11: no cliffs, ~5 runs a biome): each biome's
+	-- Epics are what carry you into the next one (the pacing ladder, below AnimalStats),
+	-- so they take ~5 runs to hatch; Uncommons and Rares hatch within a run, so every run
+	-- pays out. Legendaries hatch slower (PetHatchTime: QM's D1 retention eggs).
+	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480 },
 	PetHatchTime = {
-		-- Balance pass (Oct 6): QM's pets JSON times, x1 in the Meadow (the first eggs stay quick),
-		-- x2 Desert, x4 Tundra, x6 Ocean, x8 Godlands; the exclusives 1 h / 16 h / 24 h. Eggs hatch
-		-- while you're offline, so long ones bring players back (Steal an Egg goes up to 12-36 h).
-		-- (QM, Oct 8 evening: progression 2x faster: the Desert's to the Godlands' halved, so
-		-- x1 / x2 / x3 / x4 of the JSON; the Meadow's and the exclusives' kept.)
-		Horse = 15, Pig = 15, Bunny = 15, Pinto = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
-		Cactus = 30, Kitten = 30, Scorpion = 90, Sandworm = 210, SpineLizard = 300, Snake = 600, -- Desert
-		Penguin = 60, Boar = 90, Snowman = 240, IceGolem = 720, Icebringer = 3600, -- Tundra
-		Starfish = 45, Whale = 10800, Squid = 2700, FishSchool = 2000, KingCrab = 3600, BlueCrab = 9000, Kraken = 10000, -- Ocean
+		-- (QM's spawn/hatch JSON, Oct 11, applied as given: the Herd weights in Biomes too)
+		-- QM's own table (Oct 11, "new json"): every animal's egg, by biome. Uncommons and Rares
+		-- hatch within a run, each biome's Epics a little longer, the Legendaries are the long
+		-- D1 eggs you come back for.
+		Horse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
+		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 600, -- Desert
+		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 120, Icebringer = 900, SnackYak = 3600, -- Tundra
+		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 35, Squid = 45, KingCrab = 300, FishSchool = 200, BlueCrab = 800, Kraken = 1200, -- Ocean
+		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
+		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
-		SnackYak = 3600, RoboShark = 57600, Loong = 86400, -- exclusives
+		RoboShark = 57600, Loong = 86400, -- exclusives
 	},
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
 	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
@@ -328,8 +395,9 @@ return {
 	-- Hold bar never runs out. The tutorial's eggs hatch by themselves
 	-- (TutorialHatchTime); every other egg waits for you to hold F by it once it's
 	-- ready (Hatchery, Pen.client).
-	Tutorial = false,
+	Tutorial = true, -- (QM, Oct 11: back, redone: Client/Intro, then Client/Tutorial)
 	TutorialHatchTime = 0,
+	TutorialRideSeconds = 20, -- the BOSS IN timer on the tutorial's ride (QM: not far enough to reach the Desert)
 	TutorialSlowMo = 0.2,
 	-- Seconds of waiting for that press before time runs at a quarter of TutorialSlowMo;
 	-- it keeps slowing (x 1 / (1 + waited / this)^2) till the press, so the stampede all
@@ -400,6 +468,8 @@ return {
 	--     and Mouth (studs up its tentacles start from, default 3) are optional.
 	-- Charge swings the camera round to a cinematic front-side angle.
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
+	NativePrompts = false, -- Roblox's own interact prompts instead of ours (Client/PromptUi), to compare (QM, Oct 10)
+	AbilitiesOn = false, -- (QM, Oct 10: off till the riding UX is settled; Abilities below stay as they are)
 	Abilities = {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
 		SnackYak = { Kind = "Charge", Duration = 10, Cooldown = 5, SpeedBoost = 2 }, -- QM, Oct 4; a fixed 10 s since Oct 8 (no more stamina to charge "until full")
@@ -438,23 +508,26 @@ return {
 	--     and animal within Range studs of its mouth (Width wide) is burnt away, whatever
 	--     its size.
 	--   Goo (Sludge): it lays the wild Sludge's sludge behind it; stampede animals that
-	--     run into it are stuck, crawling, for a moment (Client/GodlandsHazards).
+	--     run into it are stuck, crawling, for a moment (Client/PetTrails).
 	--   SpikeTrail (Soul Horse): it leaves the wild Soul Horse's spikes behind it; stampede
 	--     animals that run into one are killed, whatever their size (they never crash you).
-	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, which
-	-- is always a sprint (ReturnSprint).
+	-- OnReturn (QM, Oct 4): the special also runs on the ride home with the egg, while
+	-- you sprint.
 	SprintSpecials = {
-		Unicorn = { Kind = "Smash", Radius = 14, ScareRadius = 30, RestorePer = 0.02, OnReturn = true }, -- scares animals within ScareRadius off, 2% Hold each (QM, Oct 4)
+		Unicorn = { Kind = "Smash", Radius = 14, ScareRadius = 30, OnReturn = true }, -- scares animals within ScareRadius off (QM, Oct 4; no more Hold back for each: QM, Oct 11)
 		Sandworm = { Kind = "Burrow", OnReturn = true },
 		Whale = { Kind = "Fly", Height = 56 },
+		Phoenix = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: "fly like the whale"
+		Pterodactyl = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: a flying type, like the Phoenix
+		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
 		-- Whale, a pink haze round the screen, and scares the animals round it off.
 		Beholder = { Kind = "Fly", Height = 24, ScareRadius = 30, Haze = Color3.fromRGB(255, 110, 210) }, -- height and radius are guesses
 		Leviathan = { Kind = "Flame", Range = 5, Width = 9, OnReturn = true }, -- QM, Oct 4: "like 1m ahead" (4 studs a metre; the width is a guess)
 		Loong = { Kind = "Loom", Grow = 1.2, Radius = 40 }, -- QM: 1.2x; the radius is a guess
-		SoulHorse = { Kind = "SpikeTrail" }, -- QM, Oct 4: the wild Soul Horse's spike trail behind it; stampede animals that run into a spike are killed (Client/GodlandsHazards)
-		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/GodlandsHazards)
-		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true, RestorePer = 0.2 }, -- QM, Oct 4: 20% Hold per animal it hits
+		SoulHorse = { Kind = "SpikeTrail" }, -- QM, Oct 4: the wild Soul Horse's spike trail behind it; stampede animals that run into a spike are killed (Client/PetTrails)
+		Sludge = { Kind = "Goo", OnReturn = true }, -- QM, Oct 4: the wild Sludge's sludge trail; stampede animals that run into it get stuck and fall behind (Client/PetTrails)
+		BlueCrab = { Kind = "Crabwalk", SpeedBoost = 1.2, OnReturn = true }, -- QM, Oct 4 (QM, Oct 11: no more Hold back per animal it hits: passives leave the timer alone)
 	},
 	-- Size tiers (any whole number, bigger is bigger). Racing home, a pet plows
 	-- through stampede animals of a lower tier; one of its own tier or higher
@@ -465,7 +538,14 @@ return {
 		Horse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
-		Starfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, -- Ocean (the Robo Shark starts small and grows as it hunts)
+		Starfish = 1, Clownfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, Lionfish = 1, -- Ocean (the Robo Shark starts small and grows as it hunts)
+		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
+		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
+		Spinosaurus = 4, -- Jurassic (QM: slightly smaller than the T-Rex: AnimalScale 0.85)
+		Ankylosaurus = 3, -- Jurassic (a guess: a wide armoured tank, under the T-Rex)
+		PalmGuy = 2, -- Jurassic (QM: a bit bigger than the Cactus)
+		Pterodactyl = 1, -- Jurassic (QM: a small animal; AnimalScale 2 so its body is as big as a Horse's under the long wings)
+		BoneRex = 4, -- Jurassic (the final Legendary: the T-Rex's size, AnimalScale 1.15 so it towers over it)
 		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 	},
@@ -480,6 +560,7 @@ return {
 	-- The riding camera pulls back this much further per tier above small: 1x on a
 	-- small pet, 1.2x on a medium, 1.44x on a large (QM, Oct 2).
 	RideZoomPerTier = 1, -- (QM, Oct 9: riding always the same plain view; was 1.2)
+	RideCamSeat = 9, -- how high a Horse's rider sits (studs); on anything taller the ride out's camera rises by the difference (QM, Oct 11)
 	ObstacleTiers = {
 		Bush = 1, Rock = 2, Stone = 1, Sandstone = 1, -- small
 		Boulder = 2, BoulderSplit = 2, Cactus = 2, SandBoulder = 2, SandBoulderCarved = 2, -- medium
@@ -488,6 +569,7 @@ return {
 		TubeCoral = 1, BrainCoral = 1, BranchCoral = 2, FanCoral = 2, ReefRock = 3, -- ocean
 		BasaltRock = 2, Vent = 3, -- the deep ocean
 		DeadBush = 1, DarkStone = 1, DeadTree = 2, Crag = 2, LavaRock = 3, -- Godlands
+		Fern = 1, Horsetail = 1, Cycad = 2, JungleTree = 3, -- Jurassic
 	},
 	-- How big each tier looks: each one is TierGrowth x the one below, so a medium is
 	-- 1.6x a small and a large 2.56x. "Size" is the square root of the two biggest sides of
@@ -500,14 +582,23 @@ return {
 	-- MERGE is off for now that there's FUSE (QM, Oct 6 19:16): no MERGE button, and
 	-- the server refuses MergePets. Pets already merged keep their size and gold.
 	MergeEnabled = false,
-	-- FUSE's price (Shared/Fusion.worth): each of the two pets adds its rarity's, so two
-	-- Legendaries $2M (QM; Common 100 is Claude's), and a hybrid every pet in it (QM). Back on Oct 7 (QM), after a spell free;
-	-- the fuse lesson's fuse is free (FuseLesson).
+	-- FUSE's ("Merge") price (Shared/Fusion.price; QM, Oct 11: cash should matter): this many
+	-- seconds of what the two pets earn between them (PetIncome, a hybrid's saved income), so
+	-- two Kittens ~$9k, two Snowmen ~$110k: a minute or two of a pen's gold wherever you are.
+	-- The fuse lesson's fuse is free (FuseLesson). (Was by rarity, FusePrice x 0.01.)
+	FusePriceSeconds = 180,
+	-- A hybrid's Speed: the faster one's plus this share of the slower one's (QM, Oct 11; was
+	-- 1/2, which let two Desert Kittens reach the Ocean). Two equal pets come out 1.15x, one
+	-- rarity step on the pacing ladder: two Rares merge to an Epic's speed, a way past the gate
+	-- that costs gold instead of waiting on the Epic's egg. Hybrids made before keep theirs.
+	FuseSpeedShare = 0.15,
+	-- (Shared/Fusion.worth: what went into a hybrid, by rarity; kept on saves, no longer priced.)
 	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000 },
-	-- What FUSE actually charges is that worth times this (QM, Oct 7: "100x cheaper"): Common $1,
-	-- two Legendaries $20k. Hybrids keep their saved worth on the scale above, so it's done here.
-	FuseCostScale = 0.01,
 	PetSmallSize = 10.4,
+	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
+	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
+	-- or crashes into, is PetTiers'. Unlisted: 1.
+	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2 }, -- (QM, Oct 11)
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
@@ -527,7 +618,14 @@ return {
 		Horse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
 		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, -- Tundra
-		Starfish = 300, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, -- Ocean
+		Starfish = 300, Clownfish = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, Lionfish = 1500, -- Ocean
+		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
+		TRex = 60000, Raptor = 40000, -- Jurassic (guesses: past the Volcano's)
+		Spinosaurus = 40000, -- Jurassic (a guess: a Rare, under the T-Rex)
+		Pterodactyl = 60000, -- Jurassic (a guess: an Epic, as the T-Rex)
+		Ankylosaurus = 25000, -- Jurassic (a guess: an Uncommon, past the Volcano's Rares)
+		PalmGuy = 22000, -- Jurassic (a guess: an Uncommon, a touch under the Ankylosaurus)
+		BoneRex = 100000, -- Jurassic (a guess: the final Legendary, the best earner)
 		Loong = 60000, Beholder = 9000, Leviathan = 45000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
 		WarElephant = 12000, SoulHorse = 60000, Sludge = 7500, -- so they pay more than the Ocean's)
 	},
@@ -575,6 +673,7 @@ return {
 	-- the gap between the left corner pen and the start line. Talk to him and he asks
 	-- if you want to spin; Yes opens the roll menu. Faces into the base (+z).
 	Carl = {
+		On = false, -- (QM, Oct 12: Carl's gone; a stone portal gate stands there for now, World.BaseDecor.PortalGate, doing nothing yet)
 		Position = Vector3.new(-104, 0, 20), -- the arc base's front left corner, beside the corridor (QM, Oct 9)
 		Yaw = 15, -- degrees it turns in toward the course, off square with the wall (QM)
 		Reach = 12, -- studs from the counter where Talk shows
@@ -584,9 +683,9 @@ return {
 	-- QM's cream marble column in the middle of a coiled grass snake (Props/GrassSnake,
 	-- PodiumSnake.client), in the base's right front corner, their username and best
 	-- distance over their head (QM, Oct 5).
-	-- Rarity text colours (QM, Oct 7): pet nameplates, lasso levels. Common keeps the inventory slots' grey.
+	-- Rarity text colours (QM, Oct 7): pet nameplates, the ride and egg prompts' names.
 	RarityColors = {
-		Common = Color3.fromRGB(150, 160, 175),
+		Common = Color3.fromHex("DDDDDD"), -- (QM, Oct 10; was 150, 160, 175)
 		Uncommon = Color3.fromHex("43FA00"),
 		Rare = Color3.fromHex("40D6FF"),
 		Epic = Color3.fromHex("FF7CC6"),
@@ -634,7 +733,23 @@ return {
 		KingCrab = "rbxassetid://80563240117126", -- assets/ui/KingCrabEggRender.png
 		BlueCrab = "rbxassetid://119349539273288", -- assets/ui/BlueCrabEggRender.png
 		RoboShark = "rbxassetid://95626930006876", -- assets/ui/RoboSharkEggRender.png
+		VolcanoTortoise = "rbxassetid://89848692685766", -- assets/ui/VolcanoTortoiseEggRender.png
+		Firebird = "rbxassetid://100787444937359", -- assets/ui/FirebirdEggRender.png
+		RockHog = "rbxassetid://82336240433052", -- assets/ui/RockHogEggRender.png
+		Rockworm = "rbxassetid://105149417332337", -- assets/ui/RockwormEggRender.png
+		FireLobster = "rbxassetid://83951862994609", -- assets/ui/FireLobsterEggRender.png
+		Phoenix = "rbxassetid://77371080716061", -- assets/ui/PhoenixEggRender.png
+		LavaWhale = "rbxassetid://137754762277353", -- assets/ui/LavaWhaleEggRender.png
+		TRex = "rbxassetid://132088301588431", -- assets/ui/TRexEggRender.png
+		Raptor = "rbxassetid://86585294053216", -- assets/ui/RaptorEggRender.png
+		Spinosaurus = "rbxassetid://118684084308728", -- assets/ui/SpinosaurusEggRender.png
+		Pterodactyl = "rbxassetid://125349573529100", -- assets/ui/PterodactylEggRender.png
+		Ankylosaurus = "rbxassetid://117144807245289", -- assets/ui/AnkylosaurusEggRender.png
+		PalmGuy = "rbxassetid://119803210932578", -- assets/ui/PalmGuyEggRender.png
+		BoneRex = "rbxassetid://139955585467041", -- assets/ui/BoneRexEggRender.png
 		Starfish = "rbxassetid://114368032731288", -- assets/ui/StarfishEggRender.png
+		Lionfish = "rbxassetid://114164241366433", -- assets/ui/LionfishEggRender.png
+		Clownfish = "rbxassetid://130227469695086", -- assets/ui/ClownfishEggRender.png
 		FishSchool = "rbxassetid://137156704531563", -- assets/ui/FishSchoolEggRender.png
 		Loong = "rbxassetid://70469571709365", -- assets/ui/LoongEggRender.png
 		WarElephant = "rbxassetid://84356622911486", -- assets/ui/WarElephantEggRender.png
@@ -652,22 +767,28 @@ return {
 	-- its reach sprints, easing it back stops.
 	TouchSprintAt = 0.85,
 	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
-	ReturnSprint = true, -- the ride home with the egg is always a sprint (SprintSpeed x ReturnSpeed)
+	OutboundSprint = true, -- the ride out always a sprint too (QM, Oct 11)
+	-- Just lassoed onto an animal it's still at its stampede walk: for Time s it builds up to
+	-- the sprint at Rate studs/s a second (not the usual snap), so you see it break into it.
+	LandRamp = { Time = 2.5, Rate = 35 },
+	ReturnSprint = true, -- the ride home always a sprint (SprintSpeed x ReturnSpeed)? On again (QM, Oct 11; Oct 10 had it off, Shift to sprint)
 	ReturnFovKick = 0, -- (QM, Oct 9: plain, was 20) degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
 	-- straight up to Knee studs/s and then bend off towards Max; speed lines and a wider
 	-- view (up to MaxFov) grow from Start studs/s. Each part off with On = false.
-	SpeedCurve = { On = true, Knee = 400, Max = 700 }, -- (the Kraken sprints at 396)
+	SpeedCurve = { On = true, Knee = 500, Max = 900 }, -- (QM, Oct 11: was 400 / 700 before the pacing ladder; the Phoenix sprints at 614)
 	-- Speed lines and a wider view (SpeedFx), only while sprinting (QM, Oct 8: none
 	-- otherwise, and a lot more of them): at Min strength on the slowest sprint, rising
 	-- with speed as (speed / Ref) ^ Curve (a square root: quick to build, gentle at the
 	-- top) to full at Ref studs/s and over. Lines, their Opacity and LineSpeed, and
 	-- FovKick degrees wider (up to MaxFov), all at full strength.
-	-- Speed lines as particles in front of the camera (QM, Oct 9; Client/SpeedLines, the
-	-- Creator Store's "Speedlines"): Rate a second at Speed studs/s (a sprint), more or
-	-- fewer with your speed up to MaxScale x, none off a ride. Offset: studs ahead of
-	-- the camera (NarrowOffset on a screen 1.5 or less wide to high).
-	SpeedLines = { On = true, Rate = 1500, Speed = 88, MaxScale = 2, Offset = 10, NarrowOffset = 13 },
+	-- Speed lines while you sprint (QM, Oct 9; drawn on the screen, Oct 11: Client/SpeedLines):
+	-- Rate a second at Speed studs/s (a sprint), more or fewer with your speed up to
+	-- MaxScale x, none otherwise. Each starts From of the way from the middle to a corner
+	-- and shoots Travel further out over Life seconds, Length by Thickness pixels (on a
+	-- 1000 px tall screen), white at Opacity at its most solid. Zoom: the whole effect's
+	-- size on the screen (over 1 spreads it out past the edges, under 1 pulls it in).
+	SpeedLines = { On = true, Zoom = 1.2, Rate = 200, Speed = 88, MaxScale = 2, From = 0.5, Travel = 0.8, Life = 0.32, Length = 200, Thickness = 9, Opacity = 0.6 }, -- (QM's tuning, Oct 11)
 	-- The sprint camera (QM, Oct 9; Client/SprintCam): sprinting, the view widens to Fov
 	-- degrees (a fisheye-like stretch at the edges) and the camera comes in to Zoom x
 	-- its usual distance, easing in over InTime seconds and back over OutTime.
@@ -694,7 +815,14 @@ return {
 	-- Sprint tiers (QM, Oct 9): the speeds (studs/s, the uncurved) each starts at. Breaking
 	-- into a new one replays the sprint whoosh, snaps the fisheye up (SprintCam) and
 	-- steps the wind louder (up to 2x). The first is a horse's sprint.
-	PenProfile = false, -- the owner's headshot and name over their pen (off for now: QM, Oct 9)
+	-- The owner's headshot and name over their pen (QM, Oct 10: back, Height studs over
+	-- the middle of its floor; off Oct 9).
+	PenProfile = { On = true, Height = 40 },
+	-- How many pets (and eggs waiting to hatch) your pen holds (QM, Oct 11): Base, and
+	-- PerUpgrade more for each pen upgrade (PenLevel). Full, you can't put an egg down;
+	-- "5/10" shows under your name over the pen (Pens.server).
+	PenLevels = 13, -- pen levels, one per quest claimed after Reach Meadow, each with its own fence (tools/pens.py STYLES: QM, Oct 11)
+	PenCapacity = { Base = 10, PerUpgrade = 8 }, -- (QM, Oct 11: was 5; 8 a level since QM's Collect 50 quest: the top level, 6, holds 50, was 35)
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
 	-- Client/SkyFlash. Start: its see-through at the flash (0: solid white). Distance: studs
 	-- round the camera; anything further off goes white with the sky.
@@ -704,12 +832,16 @@ return {
 	-- The run home's fisheye and zoom stay put, as at a horse's sprint, whatever your speed
 	-- (no tier bounces either): QM, Oct 10, to test the shoulder camera. false: by speed.
 	ReturnCamFixed = true,
-	ShoulderCam = { On = true, Right = 3.5, Up = 4.5, Back = 11, Ahead = 60, LookUp = 1, LookRight = -4, InTime = 0.8, OutTime = 0.5 },
+	ShoulderCam = { On = true, Right = 15, UpMin = 5, UpMax = 12, UpBelow = 2.5, BurrowUp = 20, Back = 20, Ahead = 60, LookUp = 0, LookRight = 0, -- (QM's tuning, Oct 10)
+		InTime = 0.8, OutTime = 0.5 },
 	SkyFlash = { On = true, Time = 0.8, Start = 0, Distance = 1000 },
 	SprintTiers = { 180, 360, 440 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
-	LassoRange = 34,
+	Intro = false, -- (off for now: QM, Oct 11) a new player's opening cutscene: the villain steals your egg (Client/Intro, QM Oct 11; "/tutorial" replays it)
+	LassoRange = 51, -- studs, for a Horse-sized animal (QM, Oct 11: bigger ones further, below; Oct 12: 1.5x, was 34)
+	LassoRangeFrom = 4.6, -- a Horse's half width (studs): an animal this wide or narrower gets LassoRange
+	LassoRangeGain = 1.5, -- studs more range for each stud wider than that (1.5x with LassoRange, QM Oct 12; was 1)
 	EggSlowMo = 0.5, -- time scale during the egg-grab close-up
 	-- Coming home with an egg: the pet leaps over the start line in slow motion while
 	-- the camera swings round to a hero angle in front and back again, landing
@@ -778,13 +910,44 @@ return {
 	-- LASSO, Sprint, ability), no fail screen (a crash takes you home by itself). true
 	-- brings the old one back.
 	RideHud = false,
-	StatsV2 = true, -- this build's sessions count towards /stats' "V2 AVG SESSION TIME" (the stamina loop, QM Oct 9)
 	PetPopups = false, -- the "+$N" over each pet at home as it pays out (QM, Oct 9: off for now; income's the same)
 	-- The base UI (BaseUi.client; QM, Oct 9): Montserrat ExtraBold, laid out on a
 	-- RefWidth-wide screen (QM's Figma) and scaled to yours (x HudScale). Upgrade / Unlock
 	-- shows within BullReach studs of your pen's bull spot (BullSpots, by pen number:
 	-- design/base_arc's bull pads, none built yet).
 	BaseUi = { RefWidth = 1920, BullReach = 16 },
+	-- Quests (QM, Oct 11), top right at your base in place of the Upgrade button: two
+	-- questlines, each showing its next quest, top and bottom (QM's final list). Claiming a
+	-- finished one gives its Egg and upgrades your pen, unless NoPenLevel (PenLevel + 1, up to the last
+	-- biome's: more room, Config.PenCapacity), and that line's next one comes up. A line
+	-- that's done leaves the other alone in the panel; both done, the panel's gone.
+	-- (QM, Oct 11: "Reach ...", was "Enter the ...")
+	-- Kind: "reach" (ride into Config.Biomes[Biome]; the Meadow's, 1, is done from the start), "lasso" (land Need lassos on wild
+	-- animals), "home" (bring Need animals home), "merge" (merge Need times), "invite" (Need
+	-- friends you invited joined); the last
+	-- three count from when the quest comes up.
+	Quests = {
+		{
+			{ Text = "Reach Meadow", Kind = "reach", Biome = 1, Egg = "Cactus", NoPenLevel = true }, -- (QM, Oct 11: done from the start, so there's something to claim right away, and no pen upgrade; Quests.load moves saves from before it on one)
+			{ Text = "Reach Desert", Kind = "reach", Biome = 2, Egg = "Penguin" }, -- (QM, Oct 11: quick eggs early, to speed you up; was the Unicorn)
+			{ Text = "Reach Tundra", Kind = "reach", Biome = 3, Egg = "Snowman" }, -- (QM, Oct 11: was the Snake, then the Starfish, then the Boar)
+			{ Text = "Reach Ocean", Kind = "reach", Biome = 4, Egg = "Lionfish" }, -- (QM, Oct 11: was the Icebringer)
+			{ Text = "Reach Volcano", Kind = "reach", Biome = 5, Egg = "FireLobster" }, -- (QM, Oct 11: was the Kraken)
+			{ Text = "Reach Jurassic", Kind = "reach", Biome = 6, Egg = "PalmGuy" }, -- (QM, Oct 11: was the Phoenix)
+		},
+		{
+			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "SpineLizard" }, -- (QM, Oct 11: 3, was 10)
+			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "SnackYak" }, -- (QM, Oct 11: the Snack Yak, was the Snowman) -- (before Collect: QM, Oct 12)
+			{ Text = "Collect animals", Kind = "home", Need = 10, Egg = "BoneRex" }, -- (for D1: its egg's long, QM; 10, was 5: QM, Oct 11)
+			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "TRex" }, -- (QM, Oct 11: these three after Merge)
+			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 3, Egg = "LavaWhale" }, -- (QM, Oct 11: 3, was 5) -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
+			{ Text = "Lasso Lava Whales", Kind = "lasso", Animal = "LavaWhale", Need = 2, Egg = "RoboShark" }, -- (QM, Oct 11: was Collect 30)
+			{ Text = "Lasso a Bone Rex", Kind = "lasso", Animal = "BoneRex", Need = 1, Egg = "Loong" }, -- (QM, Oct 11: was Collect 50)
+		},
+		{ -- (QM, Oct 12: a third line, just this; tapping it opens Roblox's invite, done when an invited friend joins: Hatchery)
+			{ Text = "Invite a friend", Kind = "invite", Need = 1, Egg = "Squid", NoPenLevel = true },
+		},
+	},
 	BullSpots = { Vector3.new(-18, 0, 173), Vector3.new(-75.2, 0, 129.6), Vector3.new(52, 0, 157.1), Vector3.new(-78.6, 0, 57.9), Vector3.new(84.9, 0, 93.3) },
 	Passes = {
 		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },
@@ -830,41 +993,66 @@ return {
 	VignettePulse = 0.3, -- how much it fades on each breath (0 = steady)
 	VignetteFadeMetres = 25, -- fades out over this last stretch before home
 
-	-- Each animal's stats, relative to the horse (1x). Speed scales how fast it runs,
+	-- The pacing ladder (QM, Oct 11; balance/pacing_ladder_v1.md): Speed = 0.7 x 1.6 per biome
+	-- x 1.15 per rarity (Uncommon, Rare, Epic, Legendary), so any animal of a later biome
+	-- outruns every one behind it (each animal a little either side of its rarity's speed, so
+	-- they feel different, never past the next rarity's), and each biome's line sits where its biome before's Rares
+	-- just get to in a 30 s sprint: Epics and Legendaries take you into the next one. The
+	-- Meadow and Desert are off the ladder (QM, Oct 11: their old speeds, the Desert reached at once). Change a biome's Length or these together.
+	-- Each animal's stats, x MountSpeed and HerdSpeed (1x). Speed scales how fast it runs,
 	-- ridden (MountSpeed, ReturnSpeed) and in the stampede (HerdSpeed). Stamina scales
-	-- how long the Hold bar lasts while you ride it: 2x lasts twice as long.
+	-- how long the Hold bar lasts while you ride it: 2x lasts twice as long. BiomeSpeed:
+	-- ridden in that biome (by Name), as fast as the animal named.
 	AnimalStats = {
-		-- Meadow
+		-- Meadow (QM, Oct 11: the Meadow's and the Desert's back to their speeds from before the ladder:
+		-- the Meadow is the tutorial and the Desert should come almost at once)
 		Horse = { Speed = 1, Stamina = 1 },
 		Pig = { Speed = 0.8, Stamina = 0.8 },
-		Bunny = { Speed = 1.2, Stamina = 0.7 }, -- quick hops, tires fast (guess)
+		Bunny = { Speed = 1.2, Stamina = 0.7 },
 		Pinto = { Speed = 1.1, Stamina = 0.9 },
-		Fish = { Speed = 0.6, Stamina = 3 },
-		Rhino = { Speed = 1.5, Stamina = 1.8 },
-		Unicorn = { Speed = 2, Stamina = 2 },
+		Fish = { Speed = 0.6, Stamina = 3, BiomeSpeed = { Ocean = "Clownfish" } }, -- (slow everywhere but the Ocean, where it's as fast as a Clownfish: QM, Oct 11)
+		Rhino = { Speed = 1.35, Stamina = 1.8 },
+		Unicorn = { Speed = 1.8, Stamina = 2 }, -- (QM, Oct 12: kept at 1.8, into the Tundra from the start line, ~4,440 of 3,984)
 		-- Desert
-		Cactus = { Speed = 1.2, Stamina = 1.5 },
-		Kitten = { Speed = 1.4, Stamina = 1.2 }, -- quick pounces (guess)
-		Scorpion = { Speed = 1.5, Stamina = 1.5 },
-		Sandworm = { Speed = 1.6, Stamina = 3 },
-		SpineLizard = { Speed = 1.8, Stamina = 2 },
-		Snake = { Speed = 2, Stamina = 3 },
+		Cactus = { Speed = 1.31, Stamina = 1.5 }, -- (QM, Oct 12: 90% into the Desert; was 1.2)
+		Kitten = { Speed = 1.5, Stamina = 1.2 }, -- (QM, Oct 12: 20% into the Tundra; was 1.4)
+		Scorpion = { Speed = 1.77, Stamina = 1.5 }, -- (QM, Oct 12: 60% into the Tundra; was 1.5)
+		Sandworm = { Speed = 1.7, Stamina = 3 }, -- (QM, Oct 12: 50% into the Tundra; was 1.6)
+		SpineLizard = { Speed = 1.97, Stamina = 2 }, -- (QM, Oct 12: 90% into the Tundra; was 1.62)
+		Snake = { Speed = 2.8, Stamina = 3 }, -- (QM, Oct 12: was 2)
 		-- Tundra
-		Penguin = { Speed = 1.5, Stamina = 1.5 },
-		Boar = { Speed = 1.6, Stamina = 1.6 },
-		Snowman = { Speed = 1.9, Stamina = 1.3 },
-		IceGolem = { Speed = 1.6, Stamina = 3 },
+		Penguin = { Speed = 1.99, Stamina = 1.5 }, -- (QM, Oct 12: 93% into the Tundra; was 1.72)
+		Boar = { Speed = 2.36, Stamina = 1.6 }, -- (QM, Oct 12: 30% into the Ocean; was 1.86)
+		Snowman = { Speed = 2.52, Stamina = 1.3 }, -- (QM, Oct 12: 45% into the Ocean; was 2.06)
+		IceGolem = { Speed = 2.57, Stamina = 3 }, -- (QM, Oct 12: 50% into the Ocean; was 2.37)
 		SnackYak = { Speed = 3, Stamina = 2 }, -- QM, Oct 4 (stamina 1 -> 2)
-		Icebringer = { Speed = 2.7, Stamina = 4 },
+		Icebringer = { Speed = 3.8, Stamina = 4 }, -- (QM, Oct 12: into the Volcano from the start line, ~9,380 of 9,024; was 3.6) -- (QM, Oct 11: a Legendary well past the next biome's Uncommons: 1.25x the Starfish, it lands in the Volcano)
 		-- Ocean
-		Starfish = { Speed = 2.5, Stamina = 2 },
-		Squid = { Speed = 3, Stamina = 2.6 },
-		KingCrab = { Speed = 3.1, Stamina = 3 },
-		BlueCrab = { Speed = 3.1, Stamina = 3 }, -- the King Crab's
+		Starfish = { Speed = 3.37, Stamina = 2 }, -- (QM, Oct 12: 15% into the Volcano; was 2.87)
+		Squid = { Speed = 4.15, Stamina = 2.6 }, -- (QM, Oct 12: 60% into the Volcano; was 3.7)
+		KingCrab = { Speed = 3.98, Stamina = 3 }, -- (QM, Oct 12: 50% into the Volcano; was 3.6)
+		BlueCrab = { Speed = 5.7, Stamina = 3 }, -- (QM, Oct 11: as the Kraken, a touch slower)
+		Lionfish = { Speed = 3.54, Stamina = 2 }, -- (QM, Oct 12: 25% into the Volcano; was 3.4); QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
+		Clownfish = { Speed = 3.28, Stamina = 2.4 }, -- (QM, Oct 12: 10% into the Volcano; was 2.8); (a little slower than the Starfish, an Ocean Uncommon too)
 		RoboShark = { Speed = 1.2, Stamina = 3 }, -- QM, Oct 4: starts at 1.2x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed 2.5 x this)
-		FishSchool = { Speed = 3, Stamina = 2.8 }, -- a guess between the Squid and King Crab
-		Whale = { Speed = 1.2, Stamina = 10 },
-		Kraken = { Speed = 4.5, Stamina = 3 },
+		FishSchool = { Speed = 4.15, Stamina = 2.8 }, -- (QM, Oct 12: 60% into the Volcano; was 3.95)
+		Whale = { Speed = 3.45, Stamina = 10 }, -- (QM, Oct 12: 20% into the Volcano; was 3.2)
+		Kraken = { Speed = 5.8, Stamina = 3 }, -- (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
+		-- Volcano
+		Firebird = { Speed = 4.59, Stamina = 2.5 },
+		RockHog = { Speed = 5.3, Stamina = 2.8 }, -- (QM, Oct 11: 5.4 crossed into the Jurassic, the only Rare to cross a line; the Epics are the gates)
+		Rockworm = { Speed = 6.3, Stamina = 3 },
+		FireLobster = { Speed = 5.15, Stamina = 2.8 },
+		Phoenix = { Speed = 7.2, Stamina = 3 }, -- (QM, Oct 12: well into the Jurassic, a touch slower than the Bone Rex; was 6.98)
+		LavaWhale = { Speed = 5.85, Stamina = 3 },
+		TRex = { Speed = 6, Stamina = 3 }, -- (a guess: a touch past the Lava Whale)
+		Raptor = { Speed = 5.6, Stamina = 3 }, -- (a guess: a Rare, past the Volcano's Rares and short of the T-Rex)
+		Spinosaurus = { Speed = 5.4, Stamina = 3 }, -- (a guess: a touch under the T-Rex)
+		Pterodactyl = { Speed = 6.2, Stamina = 3 }, -- (a guess: an Epic, a touch past the T-Rex)
+		Ankylosaurus = { Speed = 5, Stamina = 3 }, -- (a guess: the Jurassic's Uncommon, under its Rares)
+		PalmGuy = { Speed = 4.9, Stamina = 3 }, -- (a guess: an Uncommon, a touch under the Ankylosaurus)
+		BoneRex = { Speed = 7.5, Stamina = 3 }, -- (a guess: the final Legendary, the fastest in the game)
+		VolcanoTortoise = { Speed = 5, Stamina = 3 },
 		-- Godlands
 		Loong = { Speed = 0.5, Stamina = 8 }, -- QM, Oct 4: starts at 0.5x, its breath's kills take it up to 1x (Abilities.Loong.MaxSpeed 2 x this); sprints at 4x (PetSprintSpeed)
 		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
@@ -884,5 +1072,12 @@ return {
 	-- at the biome's start (the start line, or the line from the biome before) and
 	-- shrink away at its end.
 	HerdSpawnEvery = 0.9,
+	-- Kinds that run in packs (Client/HerdPacks): when one is drawn, the next slots in its
+	-- stream are the rest of its pack, popping in with it in a V.
+	HerdPacks = { Raptor = 3 }, -- (QM, Oct 11)
 	HerdSpeed = 31, -- studs/s for a 1x animal; each kind runs at exactly this x its Speed
+	-- ...up to Speed HerdGapSpeed: past it, no further behind you riding it out at a sprint than
+	-- an animal of that Speed is (Shared/HerdSpeed: the later biomes' fast ones run faster, QM
+	-- Oct 11; Oct 12: a fixed 2, was the Clownfish's).
+	HerdGapSpeed = 2,
 }

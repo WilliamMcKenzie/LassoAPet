@@ -29,7 +29,7 @@ local world = workspace:WaitForChild("World")
 while not world:GetAttribute("Ready") do
 	world:GetAttributeChangedSignal("Ready"):Wait()
 end
--- The egg you bring home is the animal you're riding when your stamina runs out
+-- The egg you bring home is the animal you're riding when your time runs out
 -- (QM, Oct 8: no nests): TakeEgg tells the server which (Nests.server).
 local takeEgg = ReplicatedStorage:WaitForChild("TakeEgg")
 local bankCoins = ReplicatedStorage:WaitForChild("BankCoins")
@@ -80,7 +80,6 @@ local slices = {
 	SWERVE_BEFORE = 40, -- studs: laneX's reach in front of an obstacle
 	SWERVE_AFTER = 28, -- and past it
 	BLOCK_PAD = 8, -- studs: the most padZ blockedAt is asked for and still uses the slices
-	SOLID = math.huge, -- blockedAt's tier for the solid obstacles (the Godlands' mountains) alone
 	swerve = {},
 	block = {},
 	NONE = {},
@@ -98,40 +97,16 @@ for _, o in obstacles do
 	slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
 	slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
 end
--- The Godlands' terrain pieces come and go with the tracks built round you
--- (Client/GodlandsStream): in and out of the list and the slices.
-function slices.remove(list, o, zMin, zMax)
-	for slice = math.floor(zMin / slices.SIZE), math.floor(zMax / slices.SIZE) do
-		local i = list[slice] and table.find(list[slice], o)
-		if i then
-			table.remove(list[slice], i)
-		end
-	end
-end
-function slices.pieces(list, added)
-	for _, o in list do
-		if added then
-			o.solid = true -- mountains to dodge (QM, Oct 7): never smashed, they crash you
-			table.insert(obstacles, o)
-			slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
-			slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
-		else
-			local i = table.find(obstacles, o)
-			if i then
-				table.remove(obstacles, i)
-			end
-			slices.remove(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
-			slices.remove(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
-		end
-	end
-end
 
 local function tierOf(kind)
 	return Config.PetTiers[kind] or 1
 end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
-vfx.speedLines = require(script.Parent.SpeedLines) -- particle speed lines at the camera (QM, Oct 9)
+vfx.tutorialRide = require(script.Parent.TutorialRide) -- (the tutorial's first ride: Client/Tutorial steers it)
+vfx.speedLines = require(script.Parent.SpeedLines) -- speed lines on the screen while sprinting (QM, Oct 9 / 11)
+vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's out (QM, Oct 10)
+vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
 vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
@@ -155,9 +130,6 @@ end
 -- on their screens it's back a few seconds later (remote).
 local SMASH_TIME = 0.7
 local function smash(o, dir, side, remote)
-	if o.solid then
-		return -- a mountain: nothing moves it (checkRide crashes you into it instead)
-	end
 	o.smashed = true
 	if not remote then
 		vfx.sounds.play("smash", 0.4)
@@ -210,7 +182,7 @@ end
 -- stream, and riding never changes it: an animal you lasso just leaves it.
 local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:GetBoundingBox().Position.Z else -2
 local SPAWN_Z = START_LINE_Z + 4
-local FINISH_Z = -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
+local FINISH_Z = if Config.Endless then -math.huge else -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
 local FINISH_DROP = 40 -- studs the leap off the end drops below the floor by the time it lands
 local VIEW = 320 -- stampede animals further than this from the camera aren't drawn
 local DUST_VIEW = 160 -- landings further than this from the camera kick up no dust
@@ -227,8 +199,6 @@ local SHRINK = 12 -- studs before its biome's end over which an animal shrinks i
 -- Each biome's stream: where it spawns and ends, how long an animal lives in it and
 -- its kinds of animal by weight (Config.Biomes[b].Herd), sorted by name so every
 -- client picks the same animals. A stream's animals are keyed n * BIOME_KEYS + b - 1.
--- The endless Godlands has a stream per track instead (endless below), at b past the
--- other biomes', wrapping round well within BIOME_KEYS.
 local BIOME_KEYS = 1024
 
 -- An animal's stats (Config.AnimalStats), 1x for any animal not listed; a hybrid
@@ -237,34 +207,47 @@ local function statsOf(kind, entity)
 	if entity and entity.fuse then
 		return vfx.Fusion.stats(kind, entity.fuse, entity.stats)
 	end
-	return Config.AnimalStats[kind] or { Speed = 1, Stamina = 1 }
+	local s = Config.AnimalStats[kind] or { Speed = 1, Stamina = 1 }
+	local biome = s.BiomeSpeed and entity and entity.z and Config.Biomes[WorldColors.biomeAt(entity.z)]
+	local as = biome and Config.AnimalStats[s.BiomeSpeed[biome.Name] or ""] -- (the Fish in the Ocean: QM)
+	return if as then { Speed = as.Speed, Stamina = s.Stamina } else s
 end
 
--- How fast a kind runs in the stampede: always exactly this, no variance.
-local function herdSpeed(kind)
-	return Config.HerdSpeed * statsOf(kind).Speed
+-- A run's hidden speed floor (QM, Oct 12): whatever you lasso onto runs at least the
+-- Speed of the pet you left your pen on less Config.RunSpeedLeeway, so a slow animal
+-- lassoed for fun doesn't strand you short of your biome (a Penguin's Rhino runs 1.62,
+-- not 1.35). 0 for a ride that didn't start on a pet, or before you've reached the Desert
+-- (a new player's Horse's Fish keeps its own 0.6).
+local runFloor = 0
+local function rideSpeed(entity)
+	return math.max(statsOf(entity.kind, entity).Speed, runFloor)
 end
 
--- How long the Hold bar lasts: your stamina level (the saved "Stamina", Gold.server)
--- x Config.Stamina.Seconds, whatever you're riding (QM, Oct 8: a stat you'll train).
+-- How fast a kind runs in the stampede: always exactly this, no variance. z: where (its
+-- biome's BiomeSpeed: the Fish in the Ocean).
+local herdSpeedOf = require(ReplicatedStorage.Shared.HerdSpeed) -- (past the Clownfish's, a fixed gap behind your sprint: QM)
+local function herdSpeed(kind, z)
+	return herdSpeedOf(statsOf(kind, z and { z = z }).Speed)
+end
+
+-- How long the Hold bar lasts: Config.RideSeconds, whatever you're riding (QM, Oct 10:
+-- no more stamina).
 local function holdTime(_entity)
-	return Config.Stamina.Seconds * (player:GetAttribute("Stamina") or Config.Stamina.Start)
+	return vfx.tutorialRide.bossSeconds or Config.RideSeconds -- (the tutorial's: a short one, once it's let go)
 end
 local streams = {}
--- The endless Godlands (Shared/Godlands): a stream per track, each running from
--- its track's line to the next, made as the camera nears it (endless.stream(k)).
-local endless = { Godlands = require(ReplicatedStorage.Shared.Godlands) }
 -- A stream from spawnZ to endZ of the herd's kinds; name labels its line in the Output.
-function endless.newStream(spawnZ, endZ, herd, name)
+local function newStream(spawnZ, endZ, herd, name)
 	local s = {
 		spawnZ = spawnZ,
 		endZ = endZ,
 		kinds = {},
 		total = 0,
 	}
+	s.mid = (spawnZ + endZ) / 2 -- (its biome's speeds: herdSpeed)
 	local slowest = math.huge
 	for kind in herd do
-		slowest = math.min(slowest, herdSpeed(kind))
+		slowest = math.min(slowest, herdSpeed(kind, s.mid))
 	end
 	s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / slowest
 	local names = {}
@@ -289,61 +272,20 @@ do
 		local startZ, endZ = edge, edge - biome.Length
 		edge = endZ
 		assert(biome.Herd, "Config.Biomes[" .. b .. "] (" .. tostring(biome.Name) .. ") has no Herd")
-		if b == endless.Godlands.biome then
-			endless.b, endless.herd = b, biome.Herd
-			print(string.format("[Herd] %s: a stream per %d-stud track from z %.0f on", biome.Name, endless.Godlands.length, startZ))
-			continue
-		end
-		streams[b] = endless.newStream(
+		streams[b] = newStream(
 			if b == 1 then SPAWN_Z else startZ - 2,
-			if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
+			if b == #Config.Biomes then (if Config.Endless then Config.Endless.Cut else FINISH_Z) + 2 else endZ + 2, -- the course stops at the finish line
 			biome.Herd,
 			biome.Name
 		)
 		streams[b].keep = biome.HerdKeep -- (fewer animals in the Meadow)
+		streams[b].every = biome.HerdSpawnEvery or Config.HerdSpawnEvery -- (more in the Ocean: QM, Oct 11)
 	end
-end
--- Track k's stream, at streams[endless.b + k % 900] (made now if it isn't there).
--- Its animals pop in at the track's line and shrink away at the next one.
-function endless.stream(k)
-	local b = endless.b + k % 900
-	local s = streams[b]
-	if not s or s.k ~= k then
-		local z0 = endless.Godlands.segmentStart(k)
-		s = endless.newStream(z0 - 2, z0 - endless.Godlands.length + 2, endless.herd)
-		s.k = k
-		s.thin = Config.Biomes[endless.b].HerdThin -- (fewer animals in the Godlands)
-		streams[b] = s
-	end
-	return s
-end
--- Keeps streams for the tracks with stampede loaded (z from fromZ to toZ: vfx.viewWindow), and only those.
-function endless.near(fromZ, toZ)
-	if not endless.b then
-		return
-	end
-	local hi = endless.Godlands.segmentAt(fromZ)
-	local lo = endless.Godlands.segmentAt(toZ) or 0
-	for b, s in streams do
-		if s.k and (not hi or s.k < lo or s.k > hi) then
-			streams[b] = nil
-		end
-	end
-	for k = lo, hi or -1 do
-		endless.stream(k)
-	end
-end
-if endless.b then
-	endless.stream(0) -- so the pools below count its animals
 end
 
 -- Where an animal in biome b (at z) stops: its stream's end.
 local function streamAt(z)
-	local k = endless.Godlands.segmentAt(z)
-	if k and endless.b then
-		return endless.stream(k)
-	end
-	return streams[WorldColors.biomeAt(z)]
+	return vfx.endless.streamAt(z) or streams[WorldColors.biomeAt(z)]
 end
 
 local rng = Random.new()
@@ -368,6 +310,9 @@ local warpLevel -- /biome: the biome you were put in, so its gate (and those bef
 local transfer, tumble, carried
 vfx.Merge = require(ReplicatedStorage.Shared.Merge)
 vfx.Fusion = require(ReplicatedStorage.Shared.Fusion)
+vfx.HerdPacks = require(script.Parent.HerdPacks)
+vfx.endless = require(script.Parent.Endless) -- the endless Jurassic: copies past the cut (Config.Endless)
+vfx.endless.init({ obstacles = obstacles, slices = slices, streams = streams, newStream = newStream })
 vfx.Burrow = require(script.Parent.Burrow) -- the Sandworm's spray and mounds (yours and other riders')
 vfx.Studs = require(ReplicatedStorage.Shared.Studs) -- hybrids: the donor's size and colours
 -- The stretch of course with stampede loaded round the camera at camZ: VIEW either
@@ -409,9 +354,7 @@ end
 vfx.sounds = require(script.Parent.Sounds) -- sound effects and music (a field: this chunk is at the local limit)
 vfx.rideSync = ReplicatedStorage:WaitForChild("RideSync") -- multiplayer rides (Riders.server)
 vfx.rideCue = ReplicatedStorage:WaitForChild("RideCue")
-vfx.godlands = require(script.Parent.GodlandsStream) -- the endless Godlands, built round the camera
-vfx.godlands.onPieces = slices.pieces
-vfx.hazards = require(script.Parent.GodlandsHazards) -- the Godlands' wild animals: spikes, sludge, confusion, charges, hunts
+vfx.hazards = require(script.Parent.PetTrails) -- your Sludge's and Soul Horse's sprint trails
 vfx.speedFx = require(script.Parent.SpeedFx) -- the speed cap's curve, speed lines and wider view (QM, Oct 7)
 local cutscene -- TAKE EGG close-up: { shake } while the egg is lassoed and reeled in
 local heroLeap -- coming home: { t, fromZ, toZ } while the pet leaps the start line in slow motion
@@ -437,7 +380,7 @@ for _, stream in streams do
 	for _, kind in stream.kinds do
 		classes[kind.name] = classes[kind.name] or require(Animals[kind.name])
 		pools[kind.name] = pools[kind.name] or {}
-		local average = window * kind.weight / stream.total / (Config.HerdSpawnEvery * herdSpeed(kind.name))
+		local average = window * kind.weight / stream.total / (stream.every * herdSpeed(kind.name, stream.mid))
 		poolSizes[kind.name] = (poolSizes[kind.name] or 0) + average + math.sqrt(average)
 	end
 end
@@ -468,7 +411,7 @@ local function release(entity)
 	entity.animal:setSaddled(false)
 	entity.animal.sprinting = false -- (the Kraken walks again: Horse gallopOnSprint)
 	entity.lane = entity.x / vfx.widen(entity.z)
-	entity.cruise = herdSpeed(entity.kind)
+	entity.cruise = herdSpeed(entity.kind, entity.z)
 	table.insert(strays, entity)
 end
 
@@ -505,13 +448,11 @@ local function popHop(t)
 end
 
 -- The first obstacle overlapping (x, z) that's still standing, of at least this tier (1 if nil).
--- Solid ones (mountains) only when slices.SOLID is asked for, so the loops that smash
--- whatever's in the way never get stuck on one.
 local function blockedAt(x, z, padX, padZ, tier)
 	local list = if padZ <= slices.BLOCK_PAD then slices.at(slices.block, z) else obstacles
 	tier = tier or 1
 	for _, o in list do
-		if not o.smashed and (if o.solid then tier == slices.SOLID else o.tier >= tier) and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
+		if not o.smashed and o.tier >= tier and math.abs(o.x - x) < o.hx + padX and math.abs(o.z - z) < o.hz + padZ then
 			return o
 		end
 	end
@@ -524,16 +465,9 @@ local function plan(key)
 	local p = plans[key]
 	if not p then
 		local n, b = key // BIOME_KEYS, key % BIOME_KEYS + 1
-		local stream = streams[b]
-		local r = Random.new(if b == 1 then n else key)
-		p = { x = r:NextNumber(-EDGE, EDGE) }
-		local pick = r:NextNumber(0, stream.total)
-		for _, kind in stream.kinds do
-			p.kind = kind.name
-			pick -= kind.weight
-			if pick < 0 then
-				break
-			end
+		p = vfx.HerdPacks.plan(streams[b], n, b, BIOME_KEYS, EDGE) -- (Raptors in threes: Client/HerdPacks)
+		if p.kind == "Unicorn" and player:GetAttribute("Tutorial") then
+			p.kind = "Pinto" -- (no Unicorns in the tutorial: it'd carry you past the Desert's gate, QM)
 		end
 		plans[key] = p
 	end
@@ -550,30 +484,6 @@ local function laneX(x0, z)
 	x0 *= vfx.widen(z) -- (lanes are in start-line units)
 	local EDGE = vfx.edge(z)
 	local x = x0
-	if endless.Godlands.segmentAt(z) then
-		-- The Godlands' walls (Shared/GodlandsTracks) run right across: rather than
-		-- swerving round each piece on its own, the lane is shoved out of one piece
-		-- after another until it's clear of them all (through the wall's gap).
-		local target, w = x0, 0
-		for _ = 1, 4 do
-			local moved = false
-			for _, o in slices.at(slices.swerve, z) do
-				local reach = o.hx + 6
-				local ow = smoothstep(o.z + o.hz + slices.SWERVE_BEFORE, o.z + o.hz + 4, z) * smoothstep(o.z - o.hz - slices.SWERVE_AFTER, o.z - o.hz - 4, z)
-				if ow > 0 and math.abs(target - o.x) < reach then
-					local side = if target >= o.x then 1 else -1
-					if math.abs(o.x + side * reach) > EDGE then
-						side = -side
-					end
-					target, w, moved = o.x + side * reach, math.max(w, ow), true
-				end
-			end
-			if not moved then
-				break
-			end
-		end
-		return math.clamp(x0 + (target - x0) * w, -EDGE, EDGE)
-	end
 	for _, o in slices.at(slices.swerve, z) do
 		local reach = o.hx + 6
 		local d = x0 - o.x
@@ -830,12 +740,20 @@ local function updateRideTarget()
 		for model in rideableHerd() do
 			table.insert(pets, model)
 		end
-		-- Always the nearest one (QM: no clicking a pet to pick it any more).
-		local best = math.huge
+		-- The nearest one (QM: no clicking a pet to pick it any more), but of those in
+		-- reach, the fastest (QM, Oct 11).
+		local best, fastest = math.huge, -1
 		for _, model in pets do
-			local _, d = petDistance(model, hrp.Position) -- from the middle of its body, not its outline (QM)
-			if d < best then
-				target, best = model, d
+			local edge, d = petDistance(model, hrp.Position) -- from the middle of its body, not its outline (QM)
+			local info = if starter and model == starter.animal.model then starter else PenPets.pets[model] or herdRideable[model]
+			if edge <= RIDE_REACH and model.PrimaryPart then -- (in reach of its outline itself, as the prompt: below)
+				local offset, size = Outline.box(model)
+				local at = (model.PrimaryPart.CFrame * offset):PointToObjectSpace(hrp.Position)
+				edge = Vector2.new(math.max(math.abs(at.X) - size.X / 2, 0), math.max(math.abs(at.Z) - size.Z / 2, 0)).Magnitude
+			end
+			local speed = if edge <= RIDE_REACH and info and info.kind then statsOf(info.kind, info).Speed else -1
+			if speed > fastest or (speed == fastest and d < best) then
+				target, best, fastest = model, d, speed
 			end
 		end
 	end
@@ -845,6 +763,7 @@ local function updateRideTarget()
 			rideOffset, rideSize = Outline.box(target)
 			-- The prompt's name line: the pet's name, a hybrid's fused one (as its plate).
 			local info = if starter and target == starter.animal.model then starter else PenPets.pets[target]
+			ridePrompt:SetAttribute("ObjectColor", info and info.kind and Config.RarityColors[vfx.Fusion.rarity(info.kind, info.fuse)]) -- (the name in its rarity's colour: PromptUi, QM)
 			ridePrompt.ObjectText = if info and info.kind then vfx.Fusion.name(info.kind, info.fuse) else ""
 			rideSpot.Parent = workspace.Terrain
 		else
@@ -870,8 +789,9 @@ local function updateRideTarget()
 	local near = rideModel ~= nil and hrp ~= nil and (rideSpot.WorldPosition - hrp.Position).Magnitude <= RIDE_REACH and not Hud.inLesson() -- (no riding in the fuse lesson)
 	if near ~= rideShown then
 		rideShown = near -- (no RIDE button any more: the prompt's the way to ride)
+		player:SetAttribute("RidePromptUp", near) -- (Client/Tutorial's arrow goes)
 	end
-	ridePrompt.Enabled = not Hud.inLesson()
+	ridePrompt.Enabled = not Hud.inLesson() and not player:GetAttribute("EggPromptUp") -- (not over an egg's prompt: Pen.client, QM)
 end
 
 local function clearRideTarget()
@@ -936,6 +856,7 @@ startRide = function(model, at)
 		vfx.syncing = true -- (so "end" follows, however soon the ride ends)
 	end
 	mount.animal:setSaddled(true)
+	runFloor = if fromHerd or (player:GetAttribute("GatesBroken") or 1) < 2 then 0 else statsOf(mount.kind, mount).Speed - (Config.RunSpeedLeeway or math.huge) -- (none till you've reached the Desert)
 	vfx.rideAgain = nil
 	leadFromZ = spot.Z - 8
 	exitPath = if fromHerd or at then nil else penExitPath()
@@ -957,12 +878,23 @@ startRide = function(model, at)
 	Lasso.start(player.Character, nil, player:GetAttribute("PenLevel") or 1) -- (your pen level's lasso: LassoTiers)
 end
 
--- Walking over the start line on foot (WalkLimit.client): you're on a random
--- Meadow animal there and then (QM, Oct 6), ridden like a stampede animal you
--- jumped on at the start line. Any Meadow herd kind that spawns, all equally likely.
+-- Walking over the start line on foot (WalkLimit.client): you're on your fastest pet
+-- there and then (QM, Oct 12), else (none yet) a random Meadow animal (QM, Oct 6).
 require(script.Parent.StartLine).ride = function(x, z)
 	if phase ~= "idle" then
 		return false
+	end
+	local best, fastest = nil, -1
+	for _, model in homePets() do
+		local info = if starter and model == starter.animal.model then starter else PenPets.pets[model]
+		local speed = info and statsOf(info.kind, info).Speed or -1
+		if speed > fastest then
+			best, fastest = model, speed
+		end
+	end
+	if best then
+		startRide(best, Vector3.new(x, 0, z))
+		return phase == "outbound"
 	end
 	local kinds = {}
 	for kind, weight in Config.Biomes[1].Herd do
@@ -982,7 +914,8 @@ end
 
 -- Testing (/biome, see Hatchery.server): drops you just inside biome b's start
 -- line riding a new `kind`, whatever you were doing. Your own pet stays home.
-ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, kind)
+-- /boss: at its end instead, with the timer at 0.01 s, so the boss comes (QM, Oct 10).
+ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, kind, boss)
 	local hrp, humanoid = character()
 	if not hrp then
 		return
@@ -994,12 +927,13 @@ ReplicatedStorage:WaitForChild("BiomeWarp").OnClientEvent:Connect(function(b, ki
 	end
 	humanoid:UnequipTools()
 	clearRideTarget()
-	local z = if b == 1 then SPAWN_Z - 6 else WorldColors.biomeStart(b) - 10 -- the meadow's starts at the start line
+	local z = if boss then WorldColors.biomeStart(b) - Config.Biomes[b].Length + Config.FinishFromEnd + 60 -- (short of the finish line, on the last)
+		elseif b == 1 then SPAWN_Z - 6 else WorldColors.biomeStart(b) - 10 -- the meadow's starts at the start line
 	mount = newEntity(0, z, 0, kind)
 	mount.animal:setSaddled(true)
 	warpLevel = b
 	leadFromZ, exitPath = z - 8, nil
-	phase, hold, grace, camYaw = "outbound", holdTime(mount), 1, 0
+	phase, hold, grace, camYaw = "outbound", if boss then 0.01 else holdTime(mount), 1, 0
 	coins = 0
 	hrp.Anchored = true
 	humanoid.Sit = true
@@ -1139,11 +1073,12 @@ local function startTransfer(target)
 	release(old)
 	mount = nil
 	transfer = { target = target, old = old, t = 0, stage = "throw", from = hrp.Position }
+	vfx.tutorialRide.throws += 1
 	vfx.rideCue:FireServer("lasso", target.n or false)
 	vfx.sounds.play("lasso_throw")
 end
 
--- Out of stamina (QM, Oct 8): you turn round on whatever you're riding and race it
+-- Out of time (QM, Oct 8; a fixed RideSeconds since Oct 10): you turn round on whatever you're riding and race it
 -- home. A wild one's egg goes up on your lasso, and it's yours once you're over the
 -- line (Hatchery's DeliverEgg); your own pet brings no egg.
 local function turnHome()
@@ -1155,7 +1090,6 @@ local function turnHome()
 		carried = { part = egg.model, kind = mount.kind, stage = "held", t = 1, spin = rng:NextNumber() < 0.5 and -1 or 1 }
 	end
 	phase, turnT = "turning", 0
-	vfx.returnBiome = math.min(WorldColors.biomeAt(mount.z), 5) -- (its run-home music: Sounds' home1..home5)
 	Hud.setAction(nil)
 	Hud.setHold(nil)
 end
@@ -1201,7 +1135,6 @@ guide.beam.Transparency = NumberSequence.new({
 guide.beam.Attachment0, guide.beam.Attachment1 = guide.from, guide.to
 guide.beam.Enabled = false
 guide.beam.Parent = guide.from
-vfx.hazards.guideBeam = guide.beam -- (a War Elephant's charge arrows are a red copy)
 guide.from.Parent, guide.to.Parent = workspace.Terrain, workspace.Terrain
 task.spawn(function()
 	game:GetService("ContentProvider"):PreloadAsync({ guide.beam })
@@ -1213,40 +1146,44 @@ local function updateGuide()
 	local at = if mount then Vector3.new(mount.x, 0, mount.z) else focus
 	if vfx.huntTarget then
 		target = Vector3.new(vfx.huntTarget.x, 0, vfx.huntTarget.z) -- the Robo Shark's prey while it hunts
+	elseif player:GetAttribute("LassoGuide") and mount and phase == "outbound" and not transfer then
+		-- (the tutorial's: to the nearest animal ahead, till you lasso one: Client/Tutorial;
+		-- to the one the lasso prompt's on whenever there is one, QM)
+		local best, bestD = actionTarget, if actionTarget then -1 else 260
+		for _, e in allAnimals() do
+			local d = mount.z - e.z
+			if e ~= mount and not e.popping and d > 4 and d < bestD then
+				best, bestD = e, d
+			end
+		end
+		target = best and Vector3.new(best.x, 0, best.z)
 	end
 	vfx.drawGuide(at, target)
 end
 
 -- Back on foot after a ride (any ride, however it ended), the same arrows lead from
--- you to your pen's entrance, so you go and ride again (QM). They go once
--- you step into your pen (for good, till the next ride: QM, Oct 6), are up close
--- to the pet or riding.
+-- you to your strongest pet at home (QM, Oct 11: the fastest; was your pen's entrance),
+-- so you go and ride it next. They go once you're up close to it (for good, till the
+-- next ride) or riding.
 function vfx.updateHomeGuide()
 	local hrp = character()
-	local area = vfx.rideAgain and hrp and myPen() and myPen():FindFirstChild("Area")
-	if area then
-		local p = area.CFrame:PointToObjectSpace(hrp.Position)
-		if math.abs(p.X) <= area.Size.X / 2 and math.abs(p.Z) <= area.Size.Z / 2 then
-			vfx.rideAgain = nil -- in your pen
-		end
-	end
 	local target
-	if vfx.rideAgain and hrp and not cutscene then
-		-- To the gap in your pen's fence (QM, Oct 6): where the line from its Spawn
-		-- (just outside the gap) to its middle crosses the Area's edge.
-		local spot = homeSpot()
-		if area then -- (the gap's in the side of the Area's frame facing -z: tools/pens.py)
-			local gap = area.CFrame:PointToWorldSpace(Vector3.new(0, 0, -area.Size.Z / 2))
-			spot = Vector3.new(gap.X, 0, gap.Z)
+	if hrp and hrp.Position.Z > 0 and not cutscene and not player:GetAttribute("Tutorial") and not player:GetAttribute("MergeView") then -- (always, at your base: QM, Oct 11)
+		local best, fastest = nil, -1
+		for _, model in homePets() do
+			local info = if starter and model == starter.animal.model then starter else PenPets.pets[model]
+			local speed = info and statsOf(info.kind, info).Speed or 0
+			if speed > fastest and model.PrimaryPart then
+				best, fastest = model, speed
+			end
 		end
 		local at = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
-		if (spot - at).Magnitude > guide.HOME_CLOSE and not rideShown then
+		local spot = best and best.PrimaryPart.Position * Vector3.new(1, 0, 1)
+		if spot and (spot - at).Magnitude > guide.HOME_CLOSE and not (rideShown and rideModel == best) then
 			target = spot
 		end
-		vfx.drawGuide(at, target)
-	else
-		vfx.drawGuide(nil, nil)
 	end
+	vfx.drawGuide(if target then Vector3.new(hrp.Position.X, 0, hrp.Position.Z) else nil, target)
 end
 
 -- Draws the trail of arrows from `at` toward `target`, or hides it (no target).
@@ -1274,6 +1211,17 @@ function vfx.drawGuide(at, target)
 	end
 end
 
+-- How far off an animal can be lassoed: LassoRange for a Horse's size, and as much
+-- further as it's wider than one (QM, Oct 11: big animals from further away).
+local function lassoReach(entity)
+	local a = entity.animal
+	if entity.lassoAt ~= a.scale then -- (measured once, again only if it's rescaled)
+		local size = a.model:GetExtentsSize()
+		entity.lassoR, entity.lassoAt = math.max(size.X, size.Z) / 2, a.scale
+	end
+	return Config.LassoRange + math.max(entity.lassoR - Config.LassoRangeFrom, 0) * Config.LassoRangeGain
+end
+
 local function animalInRange(entity)
 	if entity == mount or entity.popping or entity.z < gateZ() then
 		return nil -- no lassoing through a locked gate
@@ -1281,7 +1229,7 @@ local function animalInRange(entity)
 	local ahead = mount.z - entity.z
 	local dx = entity.x - mount.x
 	local dist = math.sqrt(ahead * ahead + dx * dx)
-	if ahead > -3 and dist < Config.LassoRange then
+	if ahead > -3 and dist < lassoReach(entity) then
 		return dist + math.abs(dx) * 0.5 -- lower is a better default pick
 	end
 	return nil
@@ -1302,7 +1250,7 @@ local function candidates()
 end
 
 local function findTarget()
-	if phase ~= "outbound" or transfer or not mount then
+	if phase ~= "outbound" or transfer or not mount or player:GetAttribute("NoLasso") then -- (NoLasso: Client/Tutorial)
 		picked = nil
 		return nil
 	end
@@ -1350,6 +1298,7 @@ local function onAction()
 	end
 	startTransfer(actionTarget)
 end
+vfx.lassoPrompt.onTap = onAction
 
 -- The phone joystick while riding: the player controls stay on (the rider is
 -- anchored, so it only steers, see readSteer) with jumping off, so no jump button.
@@ -1389,7 +1338,7 @@ local function readSteer()
 	-- On a phone the usual movement joystick stays up while riding (rideStick) and
 	-- steers like the arrow keys.
 	local stick = if rideStick.on then controls:GetMoveVector().X else 0
-	return math.clamp(keys + touchSteer + padSteer + stick, -1, 1) * vfx.hazards.steerSign() -- (flipped while a Beholder has you confused)
+	return math.clamp(keys + touchSteer + padSteer + stick, -1, 1)
 end
 
 UserInputService.InputBegan:Connect(function(input, processed)
@@ -1426,17 +1375,17 @@ ContextActionService:BindActionAtPriority("Sprint", function(_, state)
 end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.LeftShift, Enum.KeyCode.RightShift, Enum.KeyCode.ButtonL2)
 
 local function sprinting()
-	if vfx.hunting then
+	if vfx.hunting or player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
 		return false -- the Robo Shark can't sprint while it hunts (QM)
 	end
-	if phase == "return" then
-		return Config.ReturnSprint -- racing home with the egg
+	if (phase == "return" and Config.ReturnSprint) or (phase == "outbound" and Config.OutboundSprint) then -- (the ride out always a sprint too: QM, Oct 11)
+		return true -- racing home with the egg, always
 	end
 	-- (the joystick pushed far out sprints, QM: a phone's, either the fixed or the
 	-- dynamic one (both drive the move vector, rideStick), or a controller's left stick)
 	local stickOut = (rideStick.on and controls:GetMoveVector().Magnitude >= Config.TouchSprintAt)
 		or (vfx.padPush or 0) >= Config.TouchSprintAt
-	return phase == "outbound" and (sprintKey or Hud.sprintHeld() or stickOut)
+	return (phase == "outbound" or phase == "return") and (sprintKey or Hud.sprintHeld() or stickOut) -- (the run home too: QM, Oct 10)
 end
 
 UserInputService.InputChanged:Connect(function(input)
@@ -1475,7 +1424,6 @@ local function takeFromPool(n, x, z, kind)
 		entity = newEntity(x, z, 0, kind)
 	end
 	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
-	entity.face, entity.rush = nil, nil
 	entity.swerve, entity.swerveTo, entity.swerveV, entity.swerveSide, entity.lat = 0, 0, 0, nil, 0 -- (vfx.updateAvoid; moveAnimal)
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
 	-- Put where it now is at once: one taken out of view isn't moved until it comes
@@ -1617,7 +1565,9 @@ end
 
 -- Advances an animal's animation, kicking up hoof dust when a leap lands near the camera.
 local function animate(entity, dt, speed, turn)
-	if entity.animal:update(dt, speed, turn) then
+	local landed = entity.animal:update(dt, speed, turn)
+	vfx.Burrow.leaper(entity.animal) -- the Rockworm's dives under the floor
+	if landed then
 		local root = entity.animal.model.PrimaryPart.CFrame
 		if (root.Position - camera.CFrame.Position).Magnitude < DUST_VIEW then
 			Dust.kick(root, entity.animal.scale)
@@ -1676,9 +1626,8 @@ local function moveAnimal(entity, x, z, speed, dt, shown)
 	entity.lat = lat
 	entity.x, entity.z, entity.speed = x, z, speed
 	if shown then
-		-- (face and rush: a Godlands animal charging or hunting you, GodlandsHazards)
-		place(entity, entity.face or -math.atan2(lat, math.max(speed, 1)))
-		animate(entity, dt, entity.rush or speed, if entity.face then 0 else lat / 12)
+		place(entity, -math.atan2(lat, math.max(speed, 1)))
+		animate(entity, dt, speed, lat / 12)
 	end
 end
 
@@ -1738,6 +1687,7 @@ end
 -- can't be knocked away or crashed into. Built during the countdown, since a big
 -- animal is slow to build.
 vfx.EVENT_LANE = 0
+vfx.EVENT_END = WorldColors.biomeNamedStart(Config.Events.DespawnBiome) or FINISH_Z -- (it runs off at the Jungle's edge: QM, Oct 11)
 function vfx.updateEvent(dt, seen, inView)
 	local id = world:GetAttribute("EventId") or 0
 	local key, kind = -id, world:GetAttribute("EventKind") or ""
@@ -1775,8 +1725,8 @@ function vfx.updateEvent(dt, seen, inView)
 	local dist, speed = run(herdSpeed(kind), math.max(age - START_AFTER, 0))
 	local z = SPAWN_Z - dist
 	local lassoed = transfer and transfer.target == entity
-	if z <= FINISH_Z + 2 and not lassoed then
-		-- Ran the whole course: shrinks away at the finish line, for good.
+	if z <= vfx.EVENT_END + 2 and not lassoed then
+		-- Ran its course: shrinks away at the Jungle's edge, for good.
 		event.entity = nil
 		if herd[key] == entity then
 			herd[key] = nil
@@ -1801,7 +1751,7 @@ function vfx.updateEvent(dt, seen, inView)
 	end
 	local x = laneX(vfx.EVENT_LANE, z)
 	local shown = near and (lassoed or inView(x, z))
-	local shrink = if lassoed then 1 else math.clamp((z - FINISH_Z - 2) / SHRINK, 0, 1)
+	local shrink = if lassoed then 1 else math.clamp((z - vfx.EVENT_END - 2) / SHRINK, 0, 1)
 	local scale = 1
 	if age < POP_TIME or shrink < 1 then
 		entity.popping = true
@@ -1830,8 +1780,6 @@ local function updateHerd(dt, slowed)
 		snapped = math.abs(now - herdClock) > 0.1
 		herdClock = now
 	end
-	local every = Config.HerdSpawnEvery
-	local newest = math.floor(herdClock / every)
 	local camZ = camera.CFrame.Position.Z
 	-- Animals behind the camera aren't moved on screen or animated, which is most
 	-- of the cost of an animal (a stampede animal is 20 to 200 blocks). Ones near
@@ -1846,18 +1794,19 @@ local function updateHerd(dt, slowed)
 		vfx.frostLeft[key] = if left > dt then left - dt else nil
 	end
 	local fromZ, toZ = vfx.viewWindow(camZ)
-	endless.near(fromZ, toZ)
-	vfx.godlands.update(camZ)
+	vfx.endless.update(camZ)
 	-- (the animal you're lassoing is kept however old it gets or far it runs: QM, Oct 8, a
 	-- Fish wrestled on into the Desert outlived its stream's schedule and vanished)
 	local held = transfer and transfer.target and transfer.target.n
 	for b, stream in streams do
+		local every = stream.every
+		local newest = math.floor(herdClock / every)
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
 		local first = stream.oldest
 		if held and held % BIOME_KEYS == b - 1 then
 			first = math.min(first, held // BIOME_KEYS)
 		end
-		for n = first, newest do
+		for n = first, newest + vfx.HerdPacks.most - 1 do -- (a pack's followers pop in with it)
 			local key = n * BIOME_KEYS + b - 1
 			-- (keep: spawn n runs if n x the golden ratio's fraction is under it, the same
 			-- on every client and spread evenly, without a pattern to the gaps)
@@ -1865,8 +1814,11 @@ local function updateHerd(dt, slowed)
 				continue
 			end
 			local p = plan(key)
-			local age = herdClock - n * every
-			local dist, speed = run(herdSpeed(p.kind), math.max(age - START_AFTER, 0))
+			local age = herdClock - (n - p.lead) * every - p.lag
+			if age < 0 then
+				continue
+			end
+			local dist, speed = run(herdSpeed(p.kind, stream.mid), math.max(age - START_AFTER, 0))
 			if vfx.frostLeft[key] then
 				vfx.frostLag[key] = (vfx.frostLag[key] or 0) + speed * vfx.frostSlow * dt
 				speed *= 1 - vfx.frostSlow
@@ -1910,7 +1862,7 @@ local function updateHerd(dt, slowed)
 			if snapped then
 				entity.x = x + entity.dodge + (entity.swerve or 0) -- a snap doesn't swing them sideways
 			end
-			local ox, oz = vfx.hazards.offset(key) -- (charging or hunting you: off its place for a bit)
+			local ox, oz = vfx.hazards.offset(key) -- (stuck in your Sludge's sludge: falling behind)
 			moveAnimal(entity, math.clamp(x + entity.dodge + (entity.swerve or 0) + ox, -vfx.edge(z), vfx.edge(z)), z + oz, speed, dt, shown)
 			vfx.setFrosted(entity, vfx.frostLeft[key] ~= nil)
 		end
@@ -1923,7 +1875,7 @@ local function updateHerd(dt, slowed)
 		end
 	end
 	for key in plans do
-		local stream = streams[key % BIOME_KEYS + 1] -- (gone if it was a Godlands track's left behind)
+		local stream = streams[key % BIOME_KEYS + 1]
 		if not stream or key // BIOME_KEYS < stream.oldest then
 			plans[key], taken[key] = nil, nil
 			vfx.frostLag[key], vfx.frostLeft[key] = nil, nil
@@ -2102,7 +2054,6 @@ local function chargeFx(entity, scale, turn)
 	table.insert(fx, box)
 	return fx
 end
-vfx.hazards.chargeFx = chargeFx -- (a War Elephant charging you: the Rhino's charge)
 vfx.hazards.spiked = function(entity, dx) -- (a stampede animal ran into your Soul Horse's spike trail)
 	knock(entity, dx)
 end
@@ -2279,14 +2230,13 @@ function vfx.updateAvoid(dt)
 		end
 		local hitX = math.max((mhx + ehx) * 0.8, 2.6) -- (how close the crash check lets it come)
 		local dz = if on then entity.z - mount.z - math.max((mhz + ehz) * 0.8, 5) else -math.huge -- (from where the crash check reaches)
-		-- Less in each zone further out, none in the Godlands (Config.Biomes[].Swerve: QM,
-		-- Oct 6; off Oct 8, back on Oct 9)...
+		-- By each zone's Config.Biomes[].Swerve (QM, Oct 6; off Oct 8, back on Oct 9; all
+		-- the Meadow's, Oct 10)...
 		local here = WorldColors.biomeAt(entity.z)
 		local zone = if dz > 0 then Config.Biomes[here].Swerve or 1 else 0
 		-- (Any mount: the Oct 8 rule that only a mount from its biome or later got swerved
 		-- for is off, QM Oct 9: no lasso levels now, you're nearly always on the latest biome's.)
-		-- (not a Godlands animal charging or hunting you: that one means it)
-		if zone > 0 and not (entity.popping or entity.event or entity.face or entity.rush) then
+		if zone > 0 and not (entity.popping or entity.event) then
 			local clear = (cfg.Clear + hitX - 2.6) * zone -- (Clear was tuned for the old 2.6-stud check)
 			local t = dz / math.max(state.vz + math.max(entity.speed or 0, 0), 1) -- seconds until it's on you
 			local base = entity.x - (entity.swerve or 0) -- its line without the swerve
@@ -2512,6 +2462,9 @@ end
 -- A pet's ability (Config.Abilities): a hybrid's is its donor's, the right pick's, or
 -- if that has none its body's (QM, Oct 6).
 function vfx.abilityOf(entity)
+	if not Config.AbilitiesOn then
+		return nil -- (abilities off for now: QM, Oct 10)
+	end
 	return entity and (entity.fuse and Config.Abilities[entity.fuse] or Config.Abilities[entity.kind])
 end
 
@@ -3344,18 +3297,37 @@ end
 
 local function updateMount(dt)
 	local dir = travelDir()
+	if phase == "boss" then
+		-- Stopped before the boss (BossChase), then off home once its cutscene's done.
+		mount.speed, mount.latVel = 0, 0
+		place(mount, 0)
+		animate(mount, dt, 0, 0)
+		if vfx.bossChase.over() then
+			turnHome()
+		end
+		return
+	end
 	if phase == "turning" then
 		turnT = math.min(turnT + dt / TURN_TIME, 1)
 		local eased = 0.5 - math.cos(turnT * math.pi) / 2
 		mount.yaw = math.pi * eased
-		mount.speed = vfx.speedFx.curve(Config.MountSpeed * statsOf(mount.kind, mount).Speed * (1 - math.sin(turnT * math.pi) * 0.7))
+		mount.speed = vfx.speedFx.curve(Config.MountSpeed * rideSpeed(mount) * (1 - math.sin(turnT * math.pi) * 0.7))
 		mount.latVel *= math.exp(-6 * dt)
 		local look = CFrame.Angles(0, mount.yaw, 0).LookVector
 		mount.x = math.clamp(mount.x + look.X * mount.speed * dt, -vfx.edge(mount.z), vfx.edge(mount.z))
 		mount.z += look.Z * mount.speed * dt
 		if turnT >= 1 then
 			phase, grace = "return", Config.TurnGrace
-			mount.speed = Config.ReturnSpeed * statsOf(mount.kind, mount).Speed
+			mount.speed = Config.ReturnSpeed * rideSpeed(mount)
+			if vfx.tutorialRide.active then -- (the first ride home: a Unicorn gallops past you, to make you curious: QM)
+				local st = streams[1]
+				local n = math.floor(herdClock / st.every) + 1
+				while (st.thin and n % st.thin ~= 0) or (st.keep and (n * 0.6180339887) % 1 >= st.keep) do
+					n += 1
+				end
+				local p = plan(n * BIOME_KEYS)
+				p.kind, p.x = "Unicorn", (mount.x + (if mount.x > 0 then -12 else 12)) / vfx.widen(mount.z)
+			end
 		end
 		place(mount, 0)
 		animate(mount, dt, mount.speed, eased < 1 and -0.6 or 0)
@@ -3390,14 +3362,13 @@ local function updateMount(dt)
 		animate(mount, dt, mount.speed, 0)
 		return
 	end
-	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed) * statsOf(mount.kind, mount).Speed
+	local targetSpeed = phase == "home" and 0 or (dir < 0 and Config.MountSpeed or Config.ReturnSpeed) * rideSpeed(mount)
 	if sprinting() then
 		targetSpeed *= (Config.PetSprintSpeed[mount.kind] or Config.SprintSpeed) * ((vfx.sprintSpecial() or {}).SpeedBoost or 1) -- the Blue Crab's crab walk: faster still
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
-	targetSpeed *= vfx.hazards.slow() -- stuck in a Sludge's sludge
 	-- (Out of stamina you turn for home, never ride on tired: checkRide.)
-	local rate = phase == "home" and 30 or (dir < 0 and 90 or 40) -- snappy into and out of a sprint
+	local rate = phase == "home" and 30 or (dir < 0 and (if (mount.rampUntil or 0) > os.clock() then Config.LandRamp.Rate else 90) or 40) -- snappy into and out of a sprint (gentler just after landing: from a walk to the sprint)
 	local ability = activeAbility()
 	if ability and ability.cfg.MaxBoost then
 		-- The Leviathan's hunt: faster and faster, steadily, up to MaxBoost x (QM).
@@ -3522,7 +3493,6 @@ local function updateMount(dt)
 		local prey = vfx.huntTarget
 		targetLat = if prey then math.clamp((prey.x - mount.x) * 4, -Config.SteerSpeed * 1.5, Config.SteerSpeed * 1.5) else 0
 	end
-	targetLat *= math.sqrt(vfx.hazards.slow())
 	mount.latVel += (targetLat - mount.latVel) * (1 - math.exp(-Config.SteerResponse * dt))
 	-- At home the side limit widens from the corridor's to the base's over 40 studs,
 	-- so a ride from an outer pen is eased into the corridor.
@@ -3541,7 +3511,7 @@ local function reachHome()
 		phase = "home"
 		heroLeap = { t = 0, fromZ = mount.z, toZ = START_LINE_Z + Config.HomeLandPast }
 		vfx.sounds.play("arrive_home")
-		vfx.sounds.play("record_scratch", 0.45) -- (10% under the usual 0.5: QM) -- the run home's music stops dead, and it's the base's again (QM, Oct 9)
+		vfx.sounds.play("record_scratch", 0.225) -- (half of 0.45: QM, Oct 10) -- the run home's music stops dead, and it's the base's again (QM, Oct 9)
 		vfx.sounds.setMusic("base", true)
 		Hud.setCutscene(true)
 	end
@@ -3563,22 +3533,15 @@ local function reachFinish()
 end
 
 local function checkRide(dt)
-	if phase == "finish" or reachFinish() then
+	if phase == "finish" or phase == "boss" or reachFinish() then -- (nothing crashes you in the boss's cutscene either)
 		return -- the leap over the finish line: nothing can go wrong now
 	end
 	grace = math.max(grace - dt, 0)
+	if vfx.tutorialRide.invulnerable then
+		grace = math.max(grace, 0.1) -- (nothing crashes you on the tutorial's ride: QM)
+	end
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)
-	end
-	do
-		-- The Godlands' mountains crash you whatever you're riding or doing, unless
-		-- you're flying over or burrowing under them.
-		local special = vfx.sprintSpecial()
-		local hop = mount.hop or 0
-		local clear = special and ((special.Kind == "Fly" and hop > 8) or (special.Kind == "Burrow" and hop < -2))
-		if not clear and grace <= 0 and blockedAt(mount.x, mount.z, 1.3, 2.4, slices.SOLID) then
-			return fail("CRASH!")
-		end
 	end
 	local ability = activeAbility()
 	if ability and vfx.PLAIN[ability.cfg.Kind] then
@@ -3594,12 +3557,21 @@ local function checkRide(dt)
 			ability = nil
 		end
 	end
-	-- Stamina (QM, Oct 8): the Hold bar drains as you ride out, quicker sprinting, and
-	-- lassoing doesn't refill it. Empty, you turn round on whatever you're on (turnHome).
-	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not mount.giant then -- abilities and the Giant Horse use no Hold
-		hold = math.max(hold - dt * (if sprinting() then Config.SprintDrain else 1), 0)
+	-- The Hold bar drains as you ride out (Config.RideSeconds: QM, Oct 10), and lassoing
+	-- doesn't refill it. Empty, you turn round on whatever you're on (turnHome).
+	local tr = vfx.tutorialRide
+	if tr.bossSeconds and not tr.bossStarted then
+		tr.bossStarted, hold = true, tr.bossSeconds -- (the tutorial lets BOSS IN go, short)
+	end
+	if phase == "outbound" and mount.z < 0 and not transfer and not ability and not mount.giant and not tr.holdFrozen then -- abilities and the Giant Horse use no Hold
+		hold = math.max(hold - dt, 0) -- (no quicker sprinting: QM, Oct 10)
 		if hold <= 0 then
-			turnHome()
+			if Config.Boss.On then -- (the boss first: BossChase, then turnHome; QM, Oct 10)
+				phase, mount.speed = "boss", 0 -- (stopped dead, or you'd run on through it: QM)
+				vfx.bossChase.start(mount.x, mount.z)
+			else
+				turnHome()
+			end
 			return
 		end
 	end
@@ -3665,8 +3637,7 @@ local function checkRide(dt)
 		end
 	end
 	-- Obstacles never crash you: whatever you ride into is smashed (QM, Oct 6: new
-	-- players kept crashing into them), but the Godlands' mountains (above). Stampede
-	-- animals still go by size.
+	-- players kept crashing into them). Stampede animals still go by size.
 	local bodyX, bodyZ = vfx.halfBody(mount)
 	while true do
 		local o = blockedAt(mount.x, mount.z, math.max(1.3, bodyX * 0.7), math.max(2.4, bodyZ * 0.7))
@@ -3677,16 +3648,11 @@ local function checkRide(dt)
 		vfx.broke()
 	end
 	local myTier = vfx.mountTier()
-	-- The Godlands' wild animals (GodlandsHazards): spikes, charges, hunts.
-	local hazard = vfx.hazards.hit(mount, grace > 0)
-	if hazard then
-		return fail("CRASH!", hazard)
-	end
 	if phase == "outbound" and mount.z < gateZ() + 2.4 then
 		return fail("CRASH!") -- a locked gate
 	end
 	-- Whole bodies touching (QM, Oct 8): your mount's real box against each animal's,
-	-- a little forgiving at the edges. Smaller ones are trampled, others crash you.
+	-- a little forgiving at the edges. Smaller ones are trampled.
 	local mhx, mhz = vfx.halfBody(mount)
 	for _, entity in allAnimals() do
 		local dx, dz = entity.x - mount.x, entity.z - mount.z
@@ -3698,14 +3664,13 @@ local function checkRide(dt)
 			local trample = kind == "Trample" and tierOf(entity.kind) < special.BelowTier -- the Kraken's sprint
 			-- Racing home on the Icebringer, an animal frozen in ice smashes whatever its size (QM).
 			local shatter = phase == "return" and entity.frostFx ~= nil and (vfx.abilityOf(mount) or {}).Kind == "Frost"
-			if ((phase == "return" or trample) and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
+			-- (racing home, nothing crashes you: whatever you run into is knocked away, QM Oct 11)
+			if phase == "return" or (trample and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
 				vfx.broke()
 				if kind == "Crabwalk" and special.RestorePer then
 					hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount)) -- 20% Hold per animal it hits (QM)
 				end
-			elseif phase == "return" and grace <= 0 then
-				return fail("CRASH!")
 			elseif phase == "outbound" and entity.n then
 				entity.dodge = math.clamp(entity.dodge + (if dx >= 0 then 1 else -1) * 12 * dt, -6, 6)
 			end
@@ -3765,10 +3730,11 @@ local function updateRider(dt)
 				table.remove(strays, table.find(strays, target))
 			end
 			mount, transfer = target, nil
+			exitPath, vfx.exitTrack, vfx.exitLat, vfx.exitRoute = nil, nil, nil, nil -- (lassoed off your pet still on its way out of your pen: it'd pull you back onto the path, QM)
 			vfx.rideCue:FireServer("landed") -- (Riders.server: not lassoing any more)
 			picked = nil
 			vfx.sounds.play("lasso_land")
-			mount.popping, mount.hop = nil, 0
+			mount.popping, mount.hop, mount.rampUntil = nil, 0, os.clock() + Config.LandRamp.Time
 			mount.animal:setScale(vfx.ownSize(mount)) -- (back on a pet you let go: merged or grown, it still is)
 			mount.animal:setSaddled(true)
 			mount.latVel = 0
@@ -3782,7 +3748,11 @@ local function updateRider(dt)
 		end
 		hrp.CFrame = mount.animal:getSeatCFrame() * SEAT_OFFSET
 		if phase ~= "finish" or heroLeap then -- falling off the end: the camera stays at the edge
-			focus = Vector3.new(mount.x, math.max(mount.hop or 0, 0) * 0.85, mount.z) -- the camera rises with a leap, keeping the pet in view
+			-- (and with how high you sit: on a big pet the camera rises with you, eased so a
+			-- gallop's bob doesn't shake it, Config.RideCamSeat: QM, Oct 11)
+			local lift = math.max(hrp.Position.Y - (mount.hop or 0) - Config.RideCamSeat, 0)
+			vfx.seatLift = (vfx.seatLift or lift) + (lift - (vfx.seatLift or lift)) * (1 - math.exp(-2 * dt)) -- (slow: a Rockworm's leaps barely move it)
+			focus = Vector3.new(mount.x, math.max(mount.hop or 0, 0) * 0.85 + vfx.seatLift, mount.z) -- the camera rises with a leap, keeping the pet in view
 			if mount.animal.seatOnNeck then
 				-- A squid's rider sits far out on its leaning mantle: the camera follows the
 				-- rider instead (QM), eased so the glide's surges don't shake it.
@@ -3832,12 +3802,14 @@ end
 local function updateHud()
 	Hud.setSprint(phase == "outbound", mount ~= nil and sprinting())
 	if phase == "outbound" then
-		-- The stamina bar, your stamina level on it (QM, Oct 8).
-		-- (the number's the stamina left, counting down with the bar: QM, Oct 9)
-		Hud.setHold(hold / holdTime(nil), true, math.ceil(hold / Config.Stamina.Seconds)) -- (mid-lasso too: no mount, the same stamina)
-		Hud.setDistance(string.format("%d m", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
+		-- The ride's time left (QM, Oct 10: RideSeconds, no more stamina).
+		-- (only once you're over the start line, QM: it's as full as it gets till then)
+		Hud.setHold(if vfx.tutorialRide.holdFrozen then nil elseif focus.Z < 0 or hold < holdTime(nil) then hold / holdTime(nil) else nil, true, holdTime(nil)) -- (mid-lasso too)
+		Hud.setDistance(string.format("%dm", math.max(0, math.floor(-focus.Z / STUDS_PER_METRE))))
 		Hud.setAction("LASSO", actionTarget ~= nil)
 	end
+	local t = phase == "outbound" and not transfer and actionTarget -- (the lasso's prompt on its target: QM, Oct 10)
+	vfx.lassoPrompt.update(t and t.animal.model, t and vfx.Fusion.name(t.kind, t.fuse), t and Config.RarityColors[vfx.Fusion.rarity(t.kind, t.fuse)])
 	if phase == "turning" or phase == "return" or phase == "home" then
 		local metres = math.max(0, -focus.Z / STUDS_PER_METRE)
 		Hud.setVignette(math.clamp(metres / Config.VignetteFadeMetres, 0, 1))
@@ -4251,13 +4223,20 @@ local timeScale = 1
 RunService.PreSimulation:Connect(function(dt)
 	local slow = cutscene ~= nil or heroLeap ~= nil
 	local slowTo = if heroLeap then Config.HomeSlowMo else Config.EggSlowMo
-	timeScale += ((slow and slowTo or 1) - timeScale) * (1 - math.exp(-10 * dt))
+	local tr = vfx.tutorialRide -- (its slow motion: Client/Tutorial; Ride tells it what it needs)
+	tr.canLasso = phase == "outbound" and actionTarget ~= nil and not transfer
+	tr.sprinting = mount ~= nil and sprinting()
+	timeScale += ((slow and slowTo or 1) * tr.timeScale - timeScale) * (1 - math.exp(-10 * dt))
+	vfx.sounds.setTimeScale(timeScale) -- (the sounds slow with it: QM)
 	if heroLeap then
 		heroLeap.t = math.min(heroLeap.t + dt / Config.HomeHeroTime, 1)
 	end
 	dt *= timeScale
-	updateHerd(dt, slow and not cutscene)
+	updateHerd(dt, (slow and not cutscene) or tr.active) -- (the tutorial's herd is yours alone: no snapping back to the shared one, QM)
 	updateFlung(dt)
+	if phase == "boss" or phase == "turning" or phase == "return" or phase == "home" then -- (the boss, then after you home, in the leap's slow motion too)
+		vfx.bossChase.update(dt, phase ~= "boss", mount and mount.x, mount and mount.z, mount and mount.speed)
+	end
 	vfx.hazards.update(dt, herd, mount, phase == "outbound" or phase == "turning" or phase == "return",
 		mount and (vfx.sprintSpecial() or {}).Kind) -- (the Sludge's and Soul Horse's sprints lay trails)
 	vfx.updateNuke()
@@ -4269,7 +4248,7 @@ RunService.PreSimulation:Connect(function(dt)
 	Dust.update(dt)
 	rideStick.set((phase == "outbound" or phase == "return") and mount ~= nil and not cutscene and not heroLeap)
 	if phase == "idle" then
-		vfx.updateHomeGuide() -- (to the pet in your pen after a ride; else hidden)
+		vfx.updateHomeGuide() -- (to your fastest pet whenever you're at your base)
 		-- On foot out on the course, a stampede animal running you down throws you
 		-- like being bucked off (no cash on the fail screen: there was no ride).
 		-- Never at the start line (QM, Oct 8): walking up to it is how you start a
@@ -4297,13 +4276,14 @@ RunService.PreSimulation:Connect(function(dt)
 			wander(starter, dt)
 		end
 		updateRideTarget()
-		Outline.set(if rideShown then rideModel else nil) -- the pet RIDE will ride
+		Outline.set(if rideShown and not player:GetAttribute("MergeView") then rideModel else nil) -- the pet RIDE will ride (not in the merge view: FuseMenu)
 		vfx.updateMerge()
 		return
 	end
 	if mount and mount ~= vfx.riddenMount then
 		-- On a new animal: it goes in your animal dictionary (Hatchery.server, AnimalDex).
 		vfx.riddenMount = mount
+		vfx.tutorialRide.mounts += 1
 		ReplicatedStorage:WaitForChild("Ridden"):FireServer(mount.kind)
 	end
 	if mount then
@@ -4349,8 +4329,9 @@ RunService.PreSimulation:Connect(function(dt)
 		checkRide(dt)
 	end
 	if heroLeap and heroLeap.t >= 1 then
-		-- Landed: dust, then the egg reveal, then off the pet.
+		-- Landed: dust, then the egg reveal, then off the pet. The boss goes (QM, Oct 10).
 		heroLeap = nil
+		vfx.bossChase.stop()
 		mount.speed = RUN_OUT_SPEED
 		if phase ~= "finish" then
 			mount.hop = 0
@@ -4392,12 +4373,14 @@ end)
 RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, function(dt)
 	local riding = mount and not cutscene and not heroLeap and (phase == "outbound" or phase == "return")
 	vfx.speedFx.update(dt, if riding and sprinting() then mount.speed * (vfx.speedGain or 1) else 0) -- speed lines while sprinting, by the uncurved speed
-	-- QM's particle speed lines (Config.SpeedLines): full on any sprint (the run home's
-	-- one) whatever the pet's speed, half that otherwise (Oct 9: a slow pet racing home
-	-- showed hardly any).
-	vfx.speedLines.update(if not riding then 0 elseif sprinting() then Config.SpeedLines.Speed else Config.SpeedLines.Speed / 2)
+	-- QM's speed lines (Config.SpeedLines): full on any sprint whatever the pet's speed,
+	-- none otherwise (QM, Oct 11).
+	vfx.speedLines.update(if riding and sprinting() then Config.SpeedLines.Speed else 0, dt)
 	vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
 	vfx.returnVignette.update(dt, mount ~= nil and (phase == "turning" or phase == "return"))
+	if not (phase == "boss" or phase == "turning" or phase == "return" or phase == "home") then
+		vfx.bossChase.stop() -- (it moves with the ride, slow motion and all: below)
+	end
 	if phase == "idle" then
 		return
 	end
@@ -4457,16 +4440,17 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	-- times further for each size tier above small (Config.PetTiers).
 	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
-	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and ((phase == "outbound" and sprinting()) or (phase == "return" and Config.ReturnSprint)), if phase == "return" and Config.ReturnCamFixed then Config.SprintCam.HorseSprint elseif mount then mount.speed * (vfx.speedGain or 1) else nil) -- (the run home's a sprint too: QM)
+	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and (phase == "outbound" or phase == "return") and sprinting(), if phase == "return" and Config.ReturnCamFixed then Config.SprintCam.HorseSprint elseif mount then mount.speed * (vfx.speedGain or 1) else nil) -- (the run home's a sprint too: QM)
 	local z = vfx.camZoom * sprintZoom
-	local desired = CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
+	local desired = vfx.bossChase.camera() -- (on the boss's face in its cutscene)
+		or CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
 	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
 	-- The run home: over the shoulder (QM, Oct 10), pinned to the rider rather than eased
 	-- after them (the ease above trailed far behind at the run home's speed).
-	local shoulder = vfx.shoulderCam.blend(dt, mount ~= nil and hrp ~= nil and (phase == "turning" or phase == "return"), mount ~= nil and hrp ~= nil)
+	local shoulder = vfx.shoulderCam.blend(dt, mount ~= nil and hrp ~= nil and (phase == "turning" or phase == "return") and not vfx.bossChase.lingering(), mount ~= nil and hrp ~= nil)
 	if shoulder > 0 and hrp then
-		camera.CFrame = camera.CFrame:Lerp(vfx.shoulderCam.pose(hrp.Position, camYaw, z), shoulder)
+		camera.CFrame = camera.CFrame:Lerp(vfx.shoulderCam.pose(hrp.Position, camYaw, z, hrp.Position.Y - (mount and mount.hop or 0), mount ~= nil and (mount.hop or 0) < -1), shoulder)
 	end
 	-- Racing home with the egg: a wider field of view to sell the speed, eased in.
 	local fov = if phase == "return" then 70 + Config.ReturnFovKick else 70
@@ -4582,7 +4566,7 @@ end
 function vfx.updateSound()
 	vfx.sounds.setMusic(if phase == "idle" then "base"
 		elseif phase == "home" then "base" -- (over the line: back to the base's, cut with a scratch in reachHome)
-		elseif phase == "turning" or phase == "return" then "home" .. (vfx.returnBiome or 1) -- (the biome you turned round in: Sounds)
+		elseif phase == "turning" or phase == "return" then "home1" -- (the Meadow's, wherever you turned round: QM, Oct 10)
 		else "ride")
 	local riding = mount and (phase == "outbound" or phase == "return" or phase == "turning") and not transfer
 	vfx.sounds.setGallop(riding and Config.GallopSound[mount.kind] ~= false and (mount.hop or 0) < 2,

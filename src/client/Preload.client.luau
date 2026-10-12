@@ -13,9 +13,9 @@ local Players = game:GetService("Players")
 -- The shop's, the roll menu's and the dictionary's pages, and the Fuse menu's art
 -- (its panel, FUSE button, rarity cards and the Fuse icon: QM, Oct 6).
 local PANELS = {
-	"rbxassetid://105155399825774", "rbxassetid://83654143211576", "rbxassetid://73979296990982",
-	"rbxassetid://70887174133121", "rbxassetid://136220197688301", "rbxassetid://103982023506783",
-	"rbxassetid://125476338322601", "rbxassetid://102515912144773", "rbxassetid://104698392936555",
+	"rbxassetid://103831602991183", "rbxassetid://83654143211576", "rbxassetid://100105531661393",
+	"rbxassetid://104044722461852", "rbxassetid://95428452126143", "rbxassetid://99027271786746",
+	"rbxassetid://99393989394598", "rbxassetid://127128286637741", "rbxassetid://104698392936555",
 	"rbxassetid://110875946388838", "rbxassetid://119520152431016", "rbxassetid://78091503897812",
 	"rbxassetid://77735968469215", "rbxassetid://112429560665609", "rbxassetid://93558185988056",
 	"rbxassetid://80615979394374", "rbxassetid://120348389827821", "rbxassetid://74328700033740", -- (the FUSE button on and off)
@@ -38,9 +38,9 @@ local REST = {
 	"rbxassetid://99312860837685", "rbxassetid://120690804030353", "rbxassetid://134427342737800",
 	"rbxassetid://137561422342054", "rbxassetid://114155984376753", "rbxassetid://93889609154413",
 	"rbxassetid://104509002348710", "rbxassetid://95632395593874", "rbxassetid://86071723052223",
-	"rbxassetid://77096507947185", "rbxassetid://113381581343322", "rbxassetid://111066508903972",
-	"rbxassetid://73673910929091", "rbxassetid://112042125080788", "rbxassetid://94491197892789",
-	"rbxassetid://124659626997084", "rbxassetid://96698232796495", "rbxassetid://79525419811481",
+	"rbxassetid://89190624413208", "rbxassetid://128255311278989", "rbxassetid://79213006654938",
+	"rbxassetid://87221432893647", "rbxassetid://82895123115484", "rbxassetid://74773300097555",
+	"rbxassetid://87136104713556", "rbxassetid://84991607264564", "rbxassetid://77508300986598", "rbxassetid://96698232796495", "rbxassetid://79525419811481",
 	"rbxassetid://139970505549400", "rbxassetid://105098230793344", "rbxassetid://139482781062355",
 	"rbxassetid://85066893166855", "rbxassetid://95599437590618", "rbxassetid://84668325203507",
 	"rbxassetid://102795691143589", "rbxassetid://90142926499080", "rbxassetid://111649507533762",

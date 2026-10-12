@@ -65,15 +65,19 @@ local IMAGES = {
 	-- even on a computer, where [SPACE] shows only once it's fully ready (QM).
 	abilityFilling = { id = "rbxassetid://95632395593874", size = Vector2.new(618, 524) }, -- Ability.png
 	-- Egg reveal cards (assets/ui).
-	-- cardLeft is where the card's rounded body starts in the image (the rarity
-	-- cards' banners stick out past it); the body is 975 x 1175 from y = 12 in all.
-	unknownEgg = { id = "rbxassetid://77096507947185", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg.png, 1/10
-	unknownEgg1 = { id = "rbxassetid://113381581343322", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg1.png, 1/100
-	unknownEgg2 = { id = "rbxassetid://111066508903972", size = Vector2.new(1000, 1223), cardLeft = 12 }, -- UnknownEgg2.png, 1/1000
-	cardUncommon = { id = "rbxassetid://73673910929091", size = Vector2.new(1229, 1223), cardLeft = 127 }, -- UncommonEggRNG.png
-	cardRare = { id = "rbxassetid://112042125080788", size = Vector2.new(1134, 1217), cardLeft = 82 }, -- RareEggRNG.png
-	cardEpic = { id = "rbxassetid://94491197892789", size = Vector2.new(1244, 1227), cardLeft = 154 }, -- EpicEggRNG.png
-	cardLegendary = { id = "rbxassetid://124659626997084", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- LegendaryEggRNG.png
+	-- cardLeft / cardTop are where the card's rounded body starts in the image (the
+	-- rarity cards' banners stick out past it), size the image's: all in units of
+	-- the body being 975 x 1175 (CARD_BODY). QM's new art (Oct 11) is drawn with the
+	-- body at the image's top, about 499 px wide, so each is its pixels x 975 / 499.
+	unknownEgg = { id = "rbxassetid://89190624413208", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg.png, 1/10
+	unknownEgg1 = { id = "rbxassetid://128255311278989", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg1.png, 1/100
+	unknownEgg2 = { id = "rbxassetid://79213006654938", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg2.png, 1/1000
+	unknownEgg3 = { id = "rbxassetid://84991607264564", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg3.png, 1/10k
+	unknownEgg4 = { id = "rbxassetid://77508300986598", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg4.png, 1/100k
+	cardUncommon = { id = "rbxassetid://87221432893647", size = Vector2.new(1204, 1198), cardLeft = 114, cardTop = 0 }, -- UncommonEggRNG.png
+	cardRare = { id = "rbxassetid://82895123115484", size = Vector2.new(1110, 1192), cardLeft = 69, cardTop = 0 }, -- RareEggRNG.png
+	cardEpic = { id = "rbxassetid://74773300097555", size = Vector2.new(1215, 1200), cardLeft = 139, cardTop = 0 }, -- EpicEggRNG.png
+	cardLegendary = { id = "rbxassetid://87136104713556", size = Vector2.new(1145, 1200), cardLeft = 76, cardTop = 0 }, -- LegendaryEggRNG.png
 	-- Gacha-only animals (Config.Gacha.Pool.Exclusive). Until QM's card is uploaded
 	-- the Legendary card stands in, tinted, with EXCLUSIVE! written over it.
 	cardExclusive = { id = "", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- ExclusiveEggRNG.png
@@ -106,7 +110,23 @@ local IMAGES = {
 	eggKingCrab = { id = "rbxassetid://80563240117126", size = Vector2.new(700, 668) }, -- KingCrabEggRender.png (QM's update)
 	eggBlueCrab = { id = "rbxassetid://119349539273288", size = Vector2.new(660, 668) }, -- BlueCrabEggRender.png
 	eggRoboShark = { id = "rbxassetid://95626930006876", size = Vector2.new(514, 752) }, -- RoboSharkEggRender.png
+	eggFirebird = { id = "rbxassetid://100787444937359", size = Vector2.new(502, 956) }, -- FirebirdEggRender.png
+	eggRockHog = { id = "rbxassetid://82336240433052", size = Vector2.new(828, 998) }, -- RockHogEggRender.png
+	eggRockworm = { id = "rbxassetid://105149417332337", size = Vector2.new(498, 909) }, -- RockwormEggRender.png
+	eggFireLobster = { id = "rbxassetid://83951862994609", size = Vector2.new(808, 882) }, -- FireLobsterEggRender.png
+	eggLavaWhale = { id = "rbxassetid://137754762277353", size = Vector2.new(502, 877) }, -- LavaWhaleEggRender.png
+	eggTRex = { id = "rbxassetid://132088301588431", size = Vector2.new(562, 677) }, -- TRexEggRender.png
+	eggRaptor = { id = "rbxassetid://86585294053216", size = Vector2.new(544, 725) }, -- RaptorEggRender.png
+	eggSpinosaurus = { id = "rbxassetid://118684084308728", size = Vector2.new(524, 1017) }, -- SpinosaurusEggRender.png
+	eggPterodactyl = { id = "rbxassetid://125349573529100", size = Vector2.new(944, 864) }, -- PterodactylEggRender.png
+	eggAnkylosaurus = { id = "rbxassetid://117144807245289", size = Vector2.new(591, 754) }, -- AnkylosaurusEggRender.png
+	eggPalmGuy = { id = "rbxassetid://119803210932578", size = Vector2.new(522, 734) }, -- PalmGuyEggRender.png
+	eggBoneRex = { id = "rbxassetid://139955585467041", size = Vector2.new(546, 911) }, -- BoneRexEggRender.png
+	eggPhoenix = { id = "rbxassetid://77371080716061", size = Vector2.new(1034, 1099) }, -- PhoenixEggRender.png
+	eggVolcanoTortoise = { id = "rbxassetid://89848692685766", size = Vector2.new(502, 686) }, -- VolcanoTortoiseEggRender.png
 	eggStarfish = { id = "rbxassetid://114368032731288", size = Vector2.new(680, 783) }, -- StarfishEggRender.png
+	eggLionfish = { id = "rbxassetid://114164241366433", size = Vector2.new(898, 929) }, -- LionfishEggRender.png
+	eggClownfish = { id = "rbxassetid://130227469695086", size = Vector2.new(593, 821) }, -- ClownfishEggRender.png
 	eggFishSchool = { id = "rbxassetid://137156704531563", size = Vector2.new(530, 721) }, -- FishSchoolEggRender.png
 	eggLoong = { id = "rbxassetid://70469571709365", size = Vector2.new(560, 863) }, -- LoongEggRender.png (QM's egg)
 	eggWarElephant = { id = "rbxassetid://84356622911486", size = Vector2.new(656, 673) }, -- WarElephantEggRender.png
@@ -159,7 +179,7 @@ local CARD_TOP = 12 -- body's top edge in every card image
 local CARD_WIDTH = 296
 local CARD_SCALE = CARD_WIDTH / CARD_BODY.X
 local CARD_EGG_HEIGHT = 0.37
-local UNKNOWN_CARDS = { "unknownEgg", "unknownEgg1", "unknownEgg2" }
+local UNKNOWN_CARDS = { "unknownEgg", "unknownEgg1", "unknownEgg2", "unknownEgg3", "unknownEgg4" }
 local RARITY_CARDS = { Uncommon = "cardUncommon", Rare = "cardRare", Epic = "cardEpic", Legendary = "cardLegendary", Exclusive = "cardExclusive" }
 local EXCLUSIVE_TINT = Color3.fromRGB(215, 150, 255) -- the stand-in Exclusive card's tint
 
@@ -194,7 +214,6 @@ local lesson = false -- the fuse lesson's on (Hud.setLesson): nothing but Fuse s
 local upgradeScale -- Upgrade Pen's UIScale
 -- A line of text top centre (Hud.setNotice), in its own always-on ScreenGui.
 local NOTICE = { TEXT_SIZE = 40, TOP = 16 + 352 * 220 / 1292 + 36 } -- TOP: just under the Hold bar (QM; BAR_WIDTH x barEmpty's shape)
-local staminaText -- (the stamina level on the Hold bar)
 local gui, homeGui, rideRoot, homeRoot, rootScale, holdFrame, holdClip, distance, action, message, home, banner, ride, gold, pets, upgrade, upgradeShown, rideCash, gained, dodge, dodgePulse, vignette, abilityTint, sunburst, actionScale
 
 -- Money as "$950", "$1.2k", "$104k", "$3.5M", "$2B": from 1000 up, a suffix
@@ -398,11 +417,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	distance.Name = "Distance"
 	distance.Visible = SHOW_RIDE_TOP
 	distance.ZIndex = 2
-	-- Your stamina level on the bar (QM, Oct 8: a number you'll train, how far you get).
-	staminaText = label(rideRoot, UDim2.fromOffset(BAR_WIDTH, barSize.Y.Offset), holdFrame.Position, 40, 3)
-	staminaText.Name = "Stamina"
-	staminaText.ZIndex = 2
-	staminaText.Visible = false
 
 	-- Ride back: only DODGE THE STAMPEDE!, pulsing between 90% and 110%, and a red
 	-- vignette that fades out over the last stretch home.
@@ -500,10 +514,10 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	cardScale.Parent = card
 	-- Every card is its own image, stacked and already loaded; a flick only swaps
 	-- which one is opaque, in the same frame, so there's no blank frame or size jump.
-	for _, key in { "unknownEgg", "unknownEgg1", "unknownEgg2", "cardUncommon", "cardRare", "cardEpic", "cardLegendary", "cardExclusive" } do
+	for _, key in { "unknownEgg", "unknownEgg1", "unknownEgg2", "unknownEgg3", "unknownEgg4", "cardUncommon", "cardRare", "cardEpic", "cardLegendary", "cardExclusive" } do
 		local entry = IMAGES[key]
 		-- Sized as a share of the card's body, so squashing the card squashes its images.
-		local face = image(card, key, UDim2.fromScale(entry.size.X / CARD_BODY.X, entry.size.Y / CARD_BODY.Y), UDim2.fromScale(-entry.cardLeft / CARD_BODY.X, -CARD_TOP / CARD_BODY.Y))
+		local face = image(card, key, UDim2.fromScale(entry.size.X / CARD_BODY.X, entry.size.Y / CARD_BODY.Y), UDim2.fromScale(-entry.cardLeft / CARD_BODY.X, -(entry.cardTop or CARD_TOP) / CARD_BODY.Y))
 		face.Name = key
 		face.AnchorPoint = Vector2.zero
 		face.ZIndex = 3
@@ -1147,16 +1161,11 @@ end
 local TIRED_RED = Color3.fromRGB(255, 90, 90)
 
 -- tired: whether an empty bar slows the mount (not while it carries an egg home).
--- level: the stamina level written on the bar (nil: none).
-function Hud.setHold(fraction, tired, level)
+function Hud.setHold(fraction, tired, total)
 	if RideUi then
-		return RideUi.setHold(fraction, tired, level)
+		return RideUi.setHold(fraction, tired, total)
 	end
 	holdFrame.Visible = fraction ~= nil
-	staminaText.Visible = fraction ~= nil and level ~= nil
-	if level then
-		staminaText.Text = tostring(level)
-	end
 	if fraction then
 		holdClip.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)
 		-- Empty (the mount's tired, at half speed): the bar pulses a subtle red (QM, Oct 5).
@@ -1167,6 +1176,9 @@ function Hud.setHold(fraction, tired, level)
 end
 
 function Hud.setDistance(text)
+	if RideUi then
+		return RideUi.setDistance(text)
+	end
 	distance.Text = text
 end
 
@@ -1277,6 +1289,11 @@ local EXIT_TIME = 0.42
 -- the card is gone (nil if there's no card for that rarity, e.g. Common).
 -- rolled: a roll's (or the shop's Legend Egg's) card, which lands with roll_reveal
 -- rather than reveal_pop (Sounds).
+-- Whether an egg reveal's card is up (BaseUi's quest egg waits for it to go).
+function Hud.revealing()
+	return card ~= nil and card.Visible
+end
+
 function Hud.eggReveal(rarity, kind, rolled)
 	local final = RARITY_CARDS[rarity]
 	if not final then

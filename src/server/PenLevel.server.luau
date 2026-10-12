@@ -1,13 +1,12 @@
--- Pen levels: your pen's level is how many biomes you've unlocked. Everyone
--- starts at 1 (the first biome). Upgrading to level n costs Config.Biomes[n].
--- UnlockCost gold (UpgradePen), opens biome n's gate for you (Gate.client) and
--- repaints your pen for everyone: its N x N floor tiles (the pen's Tiles marker)
--- take biome n's ground colours and its posts biome n's PostColor. The pen also
--- grows with each level (QM, Oct 3), up to about twice the area at the Ocean:
--- each pen's Sizes folder (tools/pens.py) holds one SizeK model per level, a
--- fence and its markers laid out for that size. The owner's level picks the
--- one on show, and the pen's live markers (Spawn, Sign, Area, Tiles, Slots)
--- move onto its copies, so pets, eggs and rides follow without knowing.
+-- Pen levels: everyone starts at 1, and each quest you claim takes it up one, to
+-- Config.PenLevels (QM, Oct 11: Hatchery's ClaimQuest; it used to cost the next biome's
+-- UnlockCost gold, UpgradePen). The pen grows with each level: each pen's Sizes folder
+-- (tools/pens.py) holds one SizeK model per level, its markers laid out for that size.
+-- The owner's level picks the one on show, and the pen's live markers (Spawn, Sign,
+-- Area, Tiles, Slots) move onto its copies, so pets, eggs and rides follow without
+-- knowing. Its look follows the furthest biome its owner has unlocked (QM, Oct 12;
+-- Gold.server's "GatesBroken"): that biome's fence, built round it (PenFence), and its
+-- ground colours on the floor.
 -- The level lives in the player's "PenLevel" attribute and is saved like Gold.
 
 local DataStoreService = game:GetService("DataStoreService")
@@ -20,6 +19,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Studs = require(ReplicatedStorage.Shared.Studs)
 local Funnel = require(script.Parent.Funnel)
+local PenFence = require(script.Parent.PenFence)
 require(script.Parent.Passes) -- (PassVIP: the gold fence, below)
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "PenLevel")
@@ -30,7 +30,7 @@ end
 local loaded = {}
 
 local function level(player)
-	return math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
+	return math.clamp(player:GetAttribute("PenLevel") or 1, 1, Config.PenLevels or #Config.Biomes)
 end
 
 local function load(player)
@@ -136,7 +136,8 @@ end
 -- A copy of the ground over the pen's tiles, with the ground's checker: a block as
 -- deep as the ground's (FLOOR_DEPTH), not a sheet (QM, Oct 9: turned with the pen,
 -- a sheet showed the grass round its edges). Top at 0.3: the underlying ground
--- textures bleed through the old 0.1 gap at shallow angles.
+-- textures bleed through the old 0.1 gap at shallow angles. Solid, so you stand on it
+-- rather than 0.3 into it on the ground under it (QM, Oct 11: feet in the pen's floor).
 local FLOOR_TOP, FLOOR_DEPTH = 0.3, 2.3
 local function floorOf(pen)
 	local floor = pen:FindFirstChild("Floor")
@@ -151,8 +152,7 @@ local function floorOf(pen)
 	floor = Instance.new("Part")
 	floor.Name = "Floor"
 	floor.Anchored = true
-	floor.CanCollide = false
-	floor.CanQuery = false
+	floor.CanCollide = true
 	floor.CanTouch = false
 	floor.CastShadow = false
 	floor.TopSurface = Enum.SurfaceType.Smooth
@@ -230,7 +230,18 @@ end
 local function paintPen(pen)
 	local owner = Players:GetPlayerByUserId(pen:GetAttribute("Owner") or 0)
 	local n = if owner then level(owner) else 1
+	-- (its look, fence and floor, the furthest biome its owner's unlocked: QM, Oct 12; its size the level's)
+	local b = math.clamp(if owner then owner:GetAttribute("GatesBroken") or 1 else 1, 1, #Config.Biomes)
 	local fence = sizePen(pen, n) or pen
+	local tiles = fence:FindFirstChild("Tiles")
+	if tiles and fence:GetAttribute("FenceBiome") ~= b then
+		local old = fence:FindFirstChild("Fence")
+		if old then
+			old:Destroy()
+		end
+		PenFence.build(tiles, b).Parent = fence
+		fence:SetAttribute("FenceBiome", b)
+	end
 	local floor = floorOf(pen)
 	if floor then
 		-- (level 1 too, QM Oct 9: the Meadow's dirt checker, turned with the pen like the rest)
@@ -242,9 +253,9 @@ local function paintPen(pen)
 			end
 		end
 		if show then
-			local prefix = WorldColors.prefix(n)
-			local name = if n == 1 then "Dirt" else "Ground"
-			local colors = if n == 1 then Config.Biomes[1].Patches.Dirt else Config.Biomes[n].GroundColors
+			local prefix = WorldColors.prefix(b)
+			local name = if b == 1 then "Dirt" else "Ground"
+			local colors = if b == 1 then Config.Biomes[1].Patches.Dirt else Config.Biomes[b].GroundColors
 			floor.Color = WorldColors.saturate(world:GetAttribute(prefix .. name .. "A") or colors[1])
 			for _, texture in floor:GetChildren() do
 				if texture.Name == "Checker" then
@@ -257,9 +268,7 @@ local function paintPen(pen)
 	for _, part in fence:GetDescendants() do
 		if part.Name == "Post" then
 			postColors[part] = postColors[part] or part.Color
-			part.Color = if vip then Config.Vip.Fence.Post
-				elseif n > 1 and Config.Biomes[n].PostColor then Config.Biomes[n].PostColor
-				else postColors[part]
+			part.Color = if vip then Config.Vip.Fence.Post else postColors[part] -- (each biome's fence has its own colours: PenFence)
 		elseif part:IsA("BasePart") and (part.Name == "Rail" or part.Name == "Brace") then
 			fenceLooks[part] = fenceLooks[part] or { part.Color, part.Material }
 			part.Color = if vip then Config.Vip.Fence[part.Name] else fenceLooks[part][1]
@@ -268,27 +277,6 @@ local function paintPen(pen)
 		end
 	end
 	vipBanners(pen, fence, vip)
-end
-
--- The Godlands' own pen (Server/GodlandsPen), built from each pen's biggest size
--- when the place has none for it.
-do
-	local godlands
-	for i, biome in Config.Biomes do
-		if biome.Name == "Godlands" then
-			godlands = i
-		end
-	end
-	local GodlandsPen = require(script.Parent.GodlandsPen)
-	for _, pen in pens:GetChildren() do
-		local list = sizesOf(pen)
-		if godlands and pen:FindFirstChild("Sizes") and not list[godlands] and list[godlands - 1] then
-			local model = GodlandsPen.build(list[godlands - 1])
-			model.Name = "Size" .. godlands
-			model.Parent = spare
-			list[godlands] = model
-		end
-	end
 end
 
 for _, pen in pens:GetChildren() do
@@ -305,7 +293,7 @@ local function penOf(player)
 end
 
 local function watch(player)
-	for _, name in { "PenLevel", "PassVIP" } do
+	for _, name in { "PenLevel", "PassVIP", "GatesBroken" } do
 		player:GetAttributeChangedSignal(name):Connect(function()
 			local pen = penOf(player)
 			if pen then
@@ -373,8 +361,12 @@ local zoneUnlocked = Instance.new("RemoteEvent")
 zoneUnlocked.Name = "ZoneUnlocked"
 zoneUnlocked.Parent = ReplicatedStorage
 
--- Returns true if the upgrade went through.
+-- Returns true if the upgrade went through. Off with Config.PenUpgrades (QM, Oct 11:
+-- claiming a quest upgrades your pen now, Hatchery's ClaimQuest).
 upgrade.OnServerInvoke = function(player)
+	if not Config.PenUpgrades then
+		return false
+	end
 	local nextBiome = Config.Biomes[level(player) + 1]
 	local cost = nextBiome and nextBiome.UnlockCost
 	local gold = player:GetAttribute("Gold") or 0
@@ -384,10 +376,6 @@ upgrade.OnServerInvoke = function(player)
 	player:SetAttribute("Gold", gold - cost)
 	zoneUnlocked:FireClient(player, level(player) + 1)
 	player:SetAttribute("PenLevel", level(player) + 1)
-	if level(player) == 2 then
-		player:SetAttribute("DesertAt", os.time()) -- (Stats.server: how long they stay after)
-	end
 	Funnel.step(player, "Unlocked Zone 2")
-	Funnel.zone(player, level(player))
 	return true
 end

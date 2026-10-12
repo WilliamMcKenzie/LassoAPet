@@ -10,6 +10,7 @@
 --
 --   Inventory.init(parent) -- builds the bar in a HUD frame (sizes in HUD pixels)
 --   Inventory.setVisible(v) -- hidden while riding
+--   Inventory.holdBack(kind, n) -- shows n fewer of that egg (n < 0 lets them back: BaseUi's quest egg, till its reveal's done)
 
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
@@ -18,8 +19,10 @@ local UserInputService = game:GetService("UserInputService")
 local Inventory = {}
 
 local SLOT = 84
-local PANEL = "rbxassetid://126644097924232" -- assets/ui/CommonPanel.png (512 px, flat grey, no border: QM, Oct 9)
-local PANEL_CORNER = 61 / 512 -- its corners' radius, of its width (measured from the PNG: QM rounded them less)
+local OUTLINE = 2 -- px of black round each egg picture (QM: about the slot number's stroke)
+local PANEL = "rbxassetid://86824541929406" -- assets/ui/InventoryBG.png (96 px, grey with a dark border: QM, Oct 11; was CommonPanel.png)
+local PANEL_SIZE = 96
+local PANEL_CORNER = 18 / 96 -- its corners' radius, of its width (measured from the PNG)
 local SCALE = 0.96 -- the whole bar, slots, numbers and outlines alike (QM, Oct 9: 20% smaller, was 1.2)
 local GAP = 10
 local BOTTOM = GAP * SCALE -- (QM, Oct 9: the same gap under the bar as between its slots, on screen; was 24)
@@ -107,6 +110,11 @@ local function allTools()
 	return found
 end
 
+local heldBack = {} -- [EggKind] = how many of it not to show yet
+local function shown(tool)
+	return (tool:GetAttribute("Count") or 1) - (heldBack[tool:GetAttribute("EggKind")] or 0)
+end
+
 local function redraw()
 	if not bar then
 		return
@@ -119,7 +127,7 @@ local function redraw()
 	local found = allTools()
 	table.clear(tools)
 	for _, name in order do
-		if found[name] and #tools < MAX_SLOTS then
+		if found[name] and #tools < MAX_SLOTS and shown(found[name]) > 0 then
 			table.insert(tools, found[name])
 		end
 	end
@@ -133,16 +141,16 @@ local function redraw()
 		slot.LayoutOrder = i
 		slot.Name = tool.Name
 		Instance.new("UICorner", slot).CornerRadius = UDim.new(PANEL_CORNER, 0) -- (the selected ring follows it: the panel's own corners)
-		-- Every slot on QM's CommonPanel (Oct 8, trying it out in place of the rarity
-		-- panels): a 9-slice, so its outline and round corners stay crisp at slot size.
+		-- Every slot on QM's InventoryBG (Oct 11; CommonPanel from Oct 8): a 9-slice, so its
+		-- border and round corners stay crisp at slot size.
 		slot.BackgroundTransparency = 1
 		local bg = Instance.new("ImageLabel")
 		bg.BackgroundTransparency = 1
 		bg.Size = UDim2.fromScale(1, 1)
 		bg.Image = PANEL
 		bg.ScaleType = Enum.ScaleType.Slice
-		bg.SliceCenter = Rect.new(96, 96, 416, 416) -- (just past its rounded corners)
-		bg.SliceScale = SLOT / 512 -- (the art's proportions at slot size)
+		bg.SliceCenter = Rect.new(24, 24, 72, 72) -- (just past its rounded corners)
+		bg.SliceScale = SLOT / PANEL_SIZE -- (the art's proportions at slot size)
 		bg.ZIndex = 0 -- (under the egg's outline)
 		bg.Parent = slot
 		if tool.Parent == player.Character then
@@ -161,14 +169,23 @@ local function redraw()
 		picture.ScaleType = Enum.ScaleType.Fit -- keep the picture's own shape
 		picture.ZIndex = 2
 		picture.Parent = slot
-		-- (no black outline round the egg or on the numbers any more: QM, Oct 9)
-		local number = text(slot, UDim2.fromOffset(24, 24), 20)
+		-- A black outline round the egg (QM, Oct 8; back Oct 11): the same picture in black,
+		-- nudged OUTLINE px out in 8 directions behind it (no Highlight: phones).
+		for k = 0, 7 do
+			local a = k * math.pi / 4
+			local shadow = picture:Clone()
+			shadow.ImageColor3 = Color3.new(0, 0, 0)
+			shadow.ZIndex = 1
+			shadow.Position = picture.Position + UDim2.fromOffset(math.round(math.cos(a) * OUTLINE), math.round(math.sin(a) * OUTLINE))
+			shadow.Parent = slot
+		end
+		local number = text(slot, UDim2.fromOffset(24, 24), 20, 2)
 		number.Position = UDim2.fromOffset(4, 2)
 		number.Text = tostring(i)
 		number.ZIndex = 3
-		local count = tool:GetAttribute("Count") or 1
+		local count = shown(tool)
 		if count > 1 then
-			local label = text(slot, UDim2.fromScale(1, 1), 34)
+			local label = text(slot, UDim2.fromScale(1, 1), 34, 3)
 			label.Text = "x" .. count
 			label.ZIndex = 3
 		end
@@ -296,6 +313,14 @@ end
 
 -- The square showing the tool called `name`, while the bar is up (the tutorial
 -- points at it).
+function Inventory.holdBack(kind, n)
+	heldBack[kind] = math.max((heldBack[kind] or 0) + n, 0)
+	if heldBack[kind] == 0 then
+		heldBack[kind] = nil
+	end
+	redraw()
+end
+
 function Inventory.slot(name)
 	return bar and bar.Visible and bar:FindFirstChild(name) or nil
 end

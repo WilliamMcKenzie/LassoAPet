@@ -16,8 +16,8 @@ for i = 1, 5 do
 	pens[i] = folder:WaitForChild("Pen" .. i)
 end
 
--- The owner's picture and name floating over the pen's open side, like the
--- base owners in Roblox pet games. Hidden while the pen is free.
+-- The owner's picture and name floating high over the middle of the pen (QM, Oct 10:
+-- Config.PenProfile), like the base owners in Roblox pet games. Hidden while the pen is free.
 local function setSign(pen, player)
 	local sign = pen:FindFirstChild("Sign")
 	if not sign then
@@ -27,14 +27,14 @@ local function setSign(pen, player)
 	if not gui then
 		gui = Instance.new("BillboardGui")
 		gui.Name = "Owner"
-		gui.Size = UDim2.fromScale(12, 6)
+		gui.Size = UDim2.fromScale(32, 20) -- (QM, Oct 10: 2x; taller for the pet count, Oct 11)
 		gui.MaxDistance = 250
 		gui.LightInfluence = 0
 		local picture = Instance.new("ImageLabel")
 		picture.Name = "Picture"
 		picture.AnchorPoint = Vector2.new(0.5, 0)
 		picture.Position = UDim2.fromScale(0.5, 0)
-		picture.Size = UDim2.fromScale(0.6, 0.6)
+		picture.Size = UDim2.fromScale(0.48, 0.48)
 		picture.SizeConstraint = Enum.SizeConstraint.RelativeYY
 		picture.BackgroundColor3 = Color3.new(1, 1, 1)
 		Instance.new("UICorner", picture).CornerRadius = UDim.new(0.5, 0)
@@ -44,8 +44,8 @@ local function setSign(pen, player)
 		picture.Parent = gui
 		local label = Instance.new("TextLabel")
 		label.Name = "OwnerName"
-		label.Position = UDim2.fromScale(0, 0.64)
-		label.Size = UDim2.fromScale(1, 0.36)
+		label.Position = UDim2.fromScale(0, 0.51)
+		label.Size = UDim2.fromScale(1, 0.29)
 		label.BackgroundTransparency = 1
 		label.Font = Enum.Font.FredokaOne
 		label.TextScaled = true
@@ -54,9 +54,28 @@ local function setSign(pen, player)
 		stroke.Thickness = 3
 		stroke.Parent = label
 		label.Parent = gui
+		-- How full the pen is, "5/10" (Config.PenCapacity: Hatchery keeps PetCount and PetCap
+		-- on the pen), red when it's full.
+		local count = label:Clone()
+		count.Name = "PetCount"
+		count.Position = UDim2.fromScale(0, 0.81)
+		count.Size = UDim2.fromScale(1, 0.19)
+		count.Text = ""
+		count.Parent = gui
+		local function showCount()
+			local n, cap = pen:GetAttribute("PetCount"), pen:GetAttribute("PetCap")
+			count.Text = if n and cap then n .. "/" .. cap else ""
+			count.TextColor3 = if n and cap and n >= cap then Color3.fromRGB(255, 90, 90) else Color3.new(1, 1, 1)
+		end
+		pen:GetAttributeChangedSignal("PetCount"):Connect(showCount)
+		pen:GetAttributeChangedSignal("PetCap"):Connect(showCount)
+		showCount()
 		gui.Parent = sign
 	end
-	gui.Enabled = player ~= nil and Config.PenProfile -- (hidden for now: QM, Oct 9)
+	-- (over the pen's middle, its floor, high up: as big as the pen gets, it stays there)
+	gui.Adornee = pen:FindFirstChild("Area") or sign
+	gui.StudsOffsetWorldSpace = Vector3.new(0, Config.PenProfile.Height, 0)
+	gui.Enabled = player ~= nil and Config.PenProfile.On
 	-- VIP (game pass): the name and the ring round the picture in gold.
 	local vip = player ~= nil and player:GetAttribute("PassVIP") == true
 	gui.OwnerName.TextColor3 = if vip then Config.Vip.Name else Color3.new(1, 1, 1)
@@ -115,6 +134,8 @@ local function release(player)
 		-- after this one, and then it no longer finds the pen as theirs and left
 		-- their pets in it for the next owner (QM, Oct 5).
 		pen:SetAttribute("Contents", "{}")
+		pen:SetAttribute("PetCount", nil)
+		pen:SetAttribute("PetCap", nil)
 		pen:SetAttribute("Owner", nil)
 		setSign(pen, nil)
 	end

@@ -21,6 +21,18 @@ function WorldColors.biomeAt(z)
 	return #Config.Biomes
 end
 
+-- Where the biome called name starts (its edge nearest home), or nil if there's none.
+function WorldColors.biomeNamedStart(name)
+	local edge = 0
+	for _, biome in Config.Biomes do
+		if biome.Name == name then
+			return edge
+		end
+		edge -= biome.Length
+	end
+	return nil
+end
+
 -- The course's half width at z (Config: a funnel, widening from the start line).
 function WorldColors.halfWidth(z)
 	return math.min(Config.CourseHalfWidth + Config.CourseWidening * math.max(-z, 0), Config.CourseMaxHalfWidth)

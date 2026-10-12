@@ -3,8 +3,7 @@
 Run: python3 tools/arc_base.py
 
 Then run tools/arc_base.luau in Studio's command bar (Edit, not Play) on the place.
-It reads design/base_arc/arc_layout.json for the dirt tiles, the props and the bull
-pads. The pens are tools/pens.py (Workspace.Pens); Carl and the podium are Config.
+It reads design/base_arc/arc_layout.json for the dirt tiles and the bull pads. The pens are tools/pens.py (Workspace.Pens); Carl and the podium are Config.
 
 What the Luau does to Workspace.World (re-running it is fine: it rebuilds the same):
   - the home walls and their caps: moved and resized to x -W..W, z 0..D (the same
@@ -16,11 +15,10 @@ What the Luau does to Workspace.World (re-running it is fine: it rebuilds the sa
     to part, as on the course. They're tagged "ArcBase" so a
     re-run finds them. WorldColors paints them by name (the Meadow's), and
     Ground.heightAt reads the sunk dirt.
-  - World.BaseDecor: copies of the Meadow's Stone, Bush, Boulder and BoulderSplit
-    (World.Obstacles), not course obstacles, standing on the floor under them
-  - the big rocks (QM, Oct 9): Design's CornerCrag, WallShelf and Tor models
-    (design/base_arc/*.rbxmx: studded rock parts in the meadow's rock colours), at the
-    layout's "big_rocks", also in World.BaseDecor
+  - World.BaseDecor: the rocks (QM, Oct 10): Design's studded low-poly meshes
+    (design/rocks, MESHES below) as MeshParts in clusters along the walls and in the
+    corners (LEFT_ROCKS, mirrored, ROCK_SCALE x), the ground's 1-stud stud material, Fossil grey;
+    whatever was in BaseDecor before goes
   - World.BullPads: a placeholder pad per pen (BullPadN, "Pen" attribute), a red
     mat 18 across with a bull on a post, facing the yard; with BULL_PADS off (now),
     none, and any already there go
@@ -28,7 +26,6 @@ What the Luau does to Workspace.World (re-running it is fine: it rebuilds the sa
 
 import json
 import sys
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import numpy as np
@@ -44,6 +41,35 @@ TILE = 4  # the layout's dirt tiles
 BULL_PADS = False  # QM, Oct 9: none for now (their spots stay in the layout's "bulls")
 CELL = 8  # what's built: the meadow's 8-stud cells (QM, Oct 9: on 4-stud parts the checker
 # fell out of step; on 8 every part starts on a whole checker square, like the course's)
+
+
+# The rocks (QM, Oct 10): Design's meshes (design/rocks/Rock<Name>.obj, tools/rock_meshes.py),
+# uploaded through Studio (.claude/studio-tools/meshup.py).
+MESHES = {
+    "Pebble": 97909332868672, "Stone": 116242154122535, "Pillar": 79713364061574,
+    "Boulder": 109133145406087, "Twins": 121967427061110, "Slab": 118417030739444,
+    "Crag": 105444261900626, "Cliff": 102261747583883,
+}
+ROCK_COLOR = (159, 161, 172)  # BrickColor "Fossil" (QM, Oct 10; was a pale blue-grey, 172, 184, 212)
+# A few big rocks in key spots (QM, Oct 10: used sparingly, 2.5x their size), clear of
+# the pens (at their biggest), Carl and the podium: the left half { mesh, x, z, yaw },
+# mirrored for the right.
+ROCK_SCALE = 2.5
+LEFT_ROCKS = [
+    ("Crag", -160, 250, 30),  # the back-left corner
+    ("Boulder", -163, 11, 40),  # the front-left corner, beside Carl
+    # one on each dirt patch between the pens (QM, Oct 10: as Design's render)
+    ("Boulder", -162, 140, 20),  # between the left pens, out by the wall (was -140, 126: the pens grew to 88, QM Oct 11)
+    ("Boulder", -57, 222, 60),  # between the back pen and the left one
+]
+
+
+def rocks():
+    out = []
+    for name, x, z, yaw in LEFT_ROCKS:
+        out.append((name, x, z, yaw))
+        out.append((name, -x, z, -yaw))
+    return out
 
 
 def rects(grid, nx, nz):
@@ -82,21 +108,6 @@ def pen_cover(lx, lz):
                 n += abs(local[0]) < half and abs(local[2]) < half
         best = max(best, n / 36)
     return best
-
-
-def rock_parts(name):
-    """A big rock model's parts: (name, size x3, CFrame x12, r, g, b, collides), in its own frame."""
-    root = ET.parse(ROOT / "design" / "base_arc" / f"{name}.rbxmx").getroot()
-    out = []
-    for item in root.iter("Item"):
-        if item.get("class") != "Part":
-            continue
-        p = {c.get("name"): c for c in item.find("Properties")}
-        size = [float(p["size"].find(k).text) for k in "XYZ"]
-        cf = [float(p["CFrame"].find(k).text) for k in ("X", "Y", "Z", "R00", "R01", "R02", "R10", "R11", "R12", "R20", "R21", "R22")]
-        rgb = int(p["Color3uint8"].text) & 0xFFFFFF
-        out.append((p["Name"].text, *size, *cf, rgb >> 16 & 255, rgb >> 8 & 255, rgb & 255, 1 if p["CanCollide"].text == "true" else 0))
-    return out
 
 
 ISLAND = 4  # cells: grass patches this small, all in dirt, go dirt
@@ -184,19 +195,17 @@ def main():
     walls_lua = "\n".join(
         f'\t{{ "{n}", "{w}", Vector3.new({p[0]:g}, {p[1]:g}, {p[2]:g}), Vector3.new({s[0]:g}, {s[1]:g}, {s[2]:g}) }},'
         for n, w, p, s in walls)
-    props_lua = lua_list([(p["asset"], p["pos"][0], p["pos"][1], p["yaw"]) for p in d["props"]])
     bulls_lua = lua_list([(b["pen"], b["pos"][0], b["pos"][1]) for b in d["bulls"]] if BULL_PADS else [])
     floor_lua = lua_list(floor)
-    kinds = sorted({r["asset"] for r in d.get("big_rocks", [])})
-    rock_models_lua = "\n".join(f'\t{k} = {{\n' + "\n".join("\t" + line for line in lua_list(rock_parts(k)).split("\n")) + "\n\t}," for k in kinds)
-    rocks_lua = lua_list([(r["asset"], r["pos"][0], r["pos"][1], r["yaw"]) for r in d.get("big_rocks", [])])
+    meshes_lua = "\n".join(f"\t{k} = {v}," for k, v in MESHES.items())
+    rocks_lua = lua_list(rocks())
     text = TEMPLATE
     for key, value in {"W": W, "D": D, "CX": centre[0], "CZ": centre[1], "WALLS": walls_lua, "FLOOR": floor_lua,
-                       "PROPS": props_lua, "BULLS": bulls_lua,
-                       "ROCK_MODELS": rock_models_lua, "ROCKS": rocks_lua}.items():
+                       "BULLS": bulls_lua, "MESHES": meshes_lua, "ROCKS": rocks_lua,
+                       "RC": "Color3.fromRGB(%d, %d, %d)" % ROCK_COLOR, "RS": ROCK_SCALE}.items():
         text = text.replace(f"@{key}@", f"{value:g}" if isinstance(value, (int, float)) else value)
     OUT.write_text(text)
-    print(f"tools/arc_base.luau: {len(floor)} floor rectangles, {len(d['props'])} props, {len(d['bulls']) if BULL_PADS else 0} bull pads")
+    print(f"tools/arc_base.luau: {len(floor)} floor rectangles, {len(rocks())} rocks, {len(d['bulls']) if BULL_PADS else 0} bull pads")
 
 
 TEMPLATE = """-- The arc home base (QM, Oct 9; design/base_arc/SPEC.md). Made by tools/arc_base.py
@@ -215,18 +224,16 @@ local WALLS = {
 local FLOOR = {
 @FLOOR@
 }
--- Meadow props: { model, x, z, yaw (degrees) }.
-local PROPS = {
-@PROPS@
-}
--- The big rocks (design/base_arc/*.rbxmx): their parts { name, size x3, CFrame x12
--- in the model's frame, r, g, b, collides (1/0) }, and where they go { model, x, z, yaw }.
-local ROCK_MODELS = {
-@ROCK_MODELS@
+-- The rocks (QM, Oct 10: Design's studded low-poly meshes, design/rocks/*.obj, uploaded
+-- as meshes): { mesh, x, z, yaw (degrees) }, along the walls and in the corners.
+local MESHES = {
+@MESHES@
 }
 local ROCKS = {
 @ROCKS@
 }
+local ROCK_COLOR = @RC@
+local ROCK_SCALE = @RS@
 -- Bull pads: { pen, x, z }.
 local BULLS = {
 @BULLS@
@@ -295,72 +302,42 @@ local function topAt(x, z)
 	return 0
 end
 
--- Meadow props round the walls.
+-- The rocks round the walls: everything that was in BaseDecor before goes (QM, Oct 10).
+-- (Rerunning this clears BaseDecor.PortalGate too, QM's stone gate where Carl stood since
+-- Oct 12: mesh 118189330543537, design/portal/PortalGate.obj, unscaled, at (-104, 0, 20)
+-- turned 15 degrees, the rocks' colour and stud material. Put it back after.)
+local AssetService = game:GetService("AssetService")
 local decor = world:FindFirstChild("BaseDecor") or Instance.new("Folder")
 decor.Name = "BaseDecor"
 decor:ClearAllChildren()
-local templates = {}
-for _, o in world.Obstacles:GetChildren() do
-	local cf = if o:IsA("Model") then o:GetPivot() elseif o:IsA("BasePart") then o.CFrame else nil
-	if cf and cf.Z < 0 and cf.Z > -760 and not templates[o.Name] then
-		templates[o.Name] = o
-	end
-end
-local placed = 0
-for _, r in PROPS do
-	local from = templates[r[1]]
-	if from then
-		local copy = from:Clone()
-		for _, name in { "FunnelPivot", "FunnelScale", "FunnelCF", "FunnelSize" } do
-			copy:SetAttribute(name, nil)
-		end
-		-- standing on the floor as the original does: its invisible Base's top on the
-		-- floor's (a turned model's bounding box reaches lower than its parts: Oct 9,
-		-- standing that on the floor left them floating)
-		local pivot = if copy:IsA("Model") then copy:GetPivot() else copy.CFrame
-		local base = copy:FindFirstChild("Base")
-		local up = if base and base:IsA("BasePart") then pivot.Y - (base.Position.Y + base.Size.Y / 2) else pivot.Y
-		local cf = CFrame.new(r[2], topAt(r[2], r[3]) + up, r[3]) * CFrame.Angles(0, math.rad(r[4]), 0)
-		if copy:IsA("Model") then
-			copy:PivotTo(cf)
-		else
-			copy.CFrame = cf
-		end
-		copy.Parent = decor
-		placed += 1
-	end
-end
--- The big rocks: built from their parts, studded all over (0.5-stud studs, as Design's),
--- pivot at their own origin, then placed and turned.
-local STUDS = "rbxassetid://7447638591"
+local studs = game:GetService("MaterialService"):FindFirstChild("Studs", true)
+local made = {}
 local rocks = 0
 for _, r in ROCKS do
-	local m = Instance.new("Model")
-	m.Name = r[1]
-	for _, s in ROCK_MODELS[r[1]] or {} do
-		local p = Instance.new("Part")
-		p.Name = s[1]
-		p.Anchored = true
-		p.CanCollide = s[20] == 1
-		p.Material = Enum.Material.SmoothPlastic
-		for _, surface in { "TopSurface", "BottomSurface", "FrontSurface", "BackSurface", "LeftSurface", "RightSurface" } do
-			p[surface] = Enum.SurfaceType.Smooth
-		end
-		p.Size = Vector3.new(s[2], s[3], s[4])
-		p.CFrame = CFrame.new(s[5], s[6], s[7], s[8], s[9], s[10], s[11], s[12], s[13], s[14], s[15], s[16])
-		p.Color = Color3.fromRGB(s[17], s[18], s[19])
-		for _, face in Enum.NormalId:GetEnumItems() do
-			local t = Instance.new("Texture")
-			t.Texture = STUDS
-			t.Face = face
-			t.StudsPerTileU, t.StudsPerTileV = 0.5, 0.5
-			t.Parent = p
-		end
-		p.Parent = m
+	local from = made[r[1]]
+	if not from then
+		from = AssetService:CreateMeshPartAsync(Content.fromUri("rbxassetid://" .. MESHES[r[1]]))
+		made[r[1]] = from
 	end
-	m.WorldPivot = CFrame.new()
-	m:PivotTo(CFrame.new(r[2], 0, r[3]) * CFrame.Angles(0, math.rad(r[4]), 0))
-	m.Parent = decor
+	local p = from:Clone()
+	p.Name = "Rock" .. r[1]
+	p.Size *= ROCK_SCALE
+	p.Anchored = true
+	p.Color = ROCK_COLOR
+	-- 1-stud studs, the same size as the ground's (QM, Oct 10; the meshes' UVs are drawn
+	-- for 0.5-stud ones, but the material sets the size: Shared/Studs' "Studs")
+	if studs then
+		p.Material = studs.BaseMaterial
+		p.MaterialVariant = studs.Name
+		p.CustomPhysicalProperties = PhysicalProperties.new(Enum.Material.SmoothPlastic)
+	else
+		p.Material = Enum.Material.SmoothPlastic
+	end
+	-- (an uploaded mesh keeps its own origin at the part's position, not its box's middle:
+	-- the rock's base, at its y 0, goes on the floor, its chunks 0.6 into the ground. Up
+	-- by half its height, as first done, they floated: QM, Oct 10)
+	p.CFrame = CFrame.new(r[2], topAt(r[2], r[3]), r[3]) * CFrame.Angles(0, math.rad(r[4]), 0)
+	p.Parent = decor
 	rocks += 1
 end
 decor.Parent = world
@@ -404,7 +381,7 @@ if pads then
 	pads.Parent = world
 end
 
-return string.format("arc base: %d walls moved, %d floor parts, %d props, %d big rocks, %d bull pads", moved, #FLOOR, placed, rocks, #BULLS)
+return string.format("arc base: %d walls moved, %d floor parts, %d rocks, %d bull pads", moved, #FLOOR, rocks, #BULLS)
 """
 
 if __name__ == "__main__":

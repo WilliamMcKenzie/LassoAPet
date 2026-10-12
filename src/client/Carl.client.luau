@@ -18,7 +18,7 @@ local StallModel = require(ReplicatedStorage.Shared.CarlStallModel)
 local Studs = require(ReplicatedStorage.Shared.Studs)
 local RollMenu = require(script.Parent.RollMenu)
 
-if not Config.Gacha.Enabled then
+if not Config.Gacha.Enabled or Config.Carl.On == false then -- (Carl's off: QM, Oct 12)
 	return
 end
 

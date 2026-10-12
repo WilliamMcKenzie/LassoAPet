@@ -1,66 +1,40 @@
--- The riding UI (QM, Oct 9: the new look, assets/ui/ride_hud/), in place of the old
--- riding HUD (Config.RideHud off). Hud hands its riding calls on to this.
---   Top centre: the stamina bar: the grey bar, and the green one over it cut off at
---     your stamina left (both have the bicep drawn in the same spot, so it always
---     shows); your stamina level beside the bicep.
---   Bottom left: Sprint, in its corner (no grow while you sprint, QM Oct 10: Shift, holding it, or
---     the run home). Holding it keeps you sprinting through lassoing and landing.
---   Bottom right: the ability, in its corner. Used: its active art for as long
---     as it lasts; then the grey art with the pink filling up from the bottom till it's
---     ready, when it bounces (1.1x and back) and shows its usual art.
---   Bottom centre: LASSO, grey while there's nothing to lasso.
--- On a phone the ability's usual art is its fill art (no "[SPACE]" on it: QM), and
--- there's no Sprint button (pushing the stick far out sprints there: Ride).
--- Laid out on a RefWidth-wide screen (Config.BaseUi, QM's Figma; the art's drawn at it).
+-- The riding UI (QM, Oct 10: v4, QM's UI guide; no buttons: E on the lasso's prompt is
+-- the only control, LassoPrompt), in place of the old riding HUD (Config.RideHud off).
+-- Hud hands its riding calls on to this.
+--   Top centre: "BOSS IN" over the bar (QM, Oct 10: the red one): the dark bar, and the
+--     red one over it cut off at the ride's time left; the seconds left in the middle
+--     ("15.6s", Fredoka One), white, turning red from half the time left down to none.
+--     Under half left, the bar (not the seconds) pulses in and out (PULSE: QM, Oct 10).
+--     It all bounces in as it shows (POP_TIME), once you're over the start line (Ride).
+-- Laid out on a RefWidth-wide screen (Config.BaseUi; the art's drawn at it).
 --
 --   RideUi.show(visible)
---   RideUi.setHold(fraction, tired, level) / setSprint(visible, active)
---   RideUi.setAbility(ready, seconds, active) / setAction(text, ready)
---   RideUi.sprintHeld() / abilityPressed()
---   RideUi.onAction = fn                -- LASSO pressed
+--   RideUi.setHold(fraction, _, total)  -- of total (Config.RideSeconds) seconds left (nil: no bar)
+--   (setDistance, setSprint, setAbility, setAction, sprintHeld, abilityPressed: nothing)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 
-local ART = { -- assets/ui/ride_hud/*.png (QM, Oct 9), drawn at the RefWidth screen's size
-	-- (v2, QM's trial, Oct 9: PR 291. The ability's active / grey / fill art and the phone
-	-- versions aren't redrawn yet: the first ones, stretched to the new ability's shape.)
-	progress = { id = "rbxassetid://106564742417734", size = Vector2.new(646, 110) }, -- Progress.png
-	progressGrey = { id = "rbxassetid://128596579962806", size = Vector2.new(646, 110) }, -- ProgressDisabled.png
-	sprint = { id = "rbxassetid://130814098563129", size = Vector2.new(256, 279) }, -- Sprint.png (its SHIFT keycap drawn in)
-	ability = { id = "rbxassetid://102257813039670", size = Vector2.new(256, 226) }, -- Ability.png (the potion)
-	abilityActive = { id = "rbxassetid://104085750641497", size = Vector2.new(309, 262) }, -- AbilityActive.png
-	abilityGrey = { id = "rbxassetid://115361393403366", size = Vector2.new(309, 262) }, -- AbilityDisabled.png
-	abilityFill = { id = "rbxassetid://138465717992479", size = Vector2.new(309, 262) }, -- AbilityFill.png
-	lasso = { id = "rbxassetid://90889935622136", size = Vector2.new(376, 147) }, -- Lasso.png (the E keycap drawn in)
-	lassoGrey = { id = "rbxassetid://113802338611810", size = Vector2.new(376, 147) }, -- LassoDisabled.png
-	shift = { id = "rbxassetid://85118816608847", size = Vector2.new(211, 85) }, -- ShiftKeycap.png
-	shiftDown = { id = "rbxassetid://121018909533952", size = Vector2.new(211, 85) }, -- ShiftKeycapPressed.png
-	space = { id = "rbxassetid://75274806899737", size = Vector2.new(211, 85) }, -- SpaceKeycap.png
-	spaceDown = { id = "rbxassetid://139435649769384", size = Vector2.new(211, 85) }, -- SpaceKeycapPressed.png
+local ART = { -- assets/ui/ride_hud/*.png, drawn at the RefWidth screen's size
+	progress = { id = "rbxassetid://140037705020050", size = Vector2.new(646, 91) }, -- BossBar.png (QM's FILLED 2: a bar of its own, stretched to the time left)
+	progressGrey = { id = "rbxassetid://90506809044433", size = Vector2.new(646, 91) }, -- BossBarEmpty.png (QM's DISABLED 1)
 }
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
--- (RefWidth px, from QM's v2 mock, Oct 9: a 1296-wide shot x 1920 / 1296; the art's
--- drawn at this size)
-local TOP = 18 -- the bar off the top
+-- (RefWidth px, from QM's guide, Oct 10: a 1522 x 826 shot, so its height is 1042 here)
+local TOP = 108 -- the bar off the top
 local BAR_WIDTH = 646
-local CORNER_WIDTH = 256 -- Sprint and the ability, each
-local SPRINT_IN = Vector2.new(21, 10) -- in from the bottom-left corner
-local KEY_AT = Vector2.new(23, 194) -- the SHIFT keycap in Sprint's picture (top left)
-local KEY_DROP = 279 - 226 -- the SPACE keycap hangs this far under the ability (as SHIFT does under Sprint)
-local ABILITY_IN = Vector2.new(21, 10 + KEY_DROP * 0.9) -- (x SHRINK) in from the bottom-right corner
-local LASSO_WIDTH = 376
-local LASSO_BOTTOM = 21
-local FILL_FROM, FILL_TO = 0.015, 0.983 -- the bar's inner fill, of its width
-local LEVEL_AT = 0.41 -- the stamina number's left edge, of the bar's width (right of the bicep)
-local LEVEL_TEXT, LEVEL_STROKE = 44, 5
-local SHRINK = 0.9 -- all of it, 10% under the mock's size (QM, Oct 10), each keeping its spot
-local GROW = 1.1
-local QUICK = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local RED_FROM = 0.5 -- the seconds turn from white to red from this much time left down to none (QM)
+local RED = Color3.fromRGB(255, 60, 80)
+-- Under From left, the bar's scale: in to In over InTime s, out to Out over OutTime s (QM).
+local PULSE = { From = 0.5, In = 0.97, Out = 1.03, InTime = 0.5, OutTime = 0.7 }
+local POP_TIME = 0.4 -- its bounce in, s
+local TITLE = "BOSS IN" -- (QM, Oct 10; was "Lasso will break", "Boss will spawn")
+local TITLE_Y, TITLE_TEXT = 69, 46 -- the title's middle off the top, its size
+local TIME_FONT = Font.fromEnum(Enum.Font.FredokaOne) -- (the bar's not Montserrat: QM)
+local TIME_TEXT = 42
+local STROKE = 4
 
 local RideUi = {}
 
@@ -86,11 +60,11 @@ end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
 resize()
 
-local function picture(class, parent, art, anchor, position, width)
-	local p = Instance.new(class)
+local function picture(parent, art, anchor, position, width)
+	local p = Instance.new("ImageLabel")
 	p.BackgroundTransparency = 1
 	p.Image = art.id
-	width = (width or art.size.X) * SHRINK
+	width = width or art.size.X
 	p.Size = UDim2.fromOffset(width, width * art.size.Y / art.size.X)
 	p.AnchorPoint = anchor
 	p.Position = position
@@ -98,203 +72,97 @@ local function picture(class, parent, art, anchor, position, width)
 	return p
 end
 
--- A scale on a button, tweened (grows about its AnchorPoint: a corner button grows outward).
-local function scaler(button)
-	local s = Instance.new("UIScale")
-	s.Parent = button
-	local tween
-	return function(to, info)
-		if tween then
-			tween:Cancel()
-		end
-		tween = TweenService:Create(s, info or QUICK, { Scale = to })
-		tween:Play()
-		return tween
-	end
+local function text(parent, size)
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.FontFace = FONT
+	label.TextSize = size
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.AutomaticSize = Enum.AutomaticSize.X
+	label.Size = UDim2.fromOffset(0, size)
+	label.AnchorPoint = Vector2.new(0.5, 0.5)
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = STROKE
+	stroke.Color = Color3.new(0, 0, 0)
+	stroke.LineJoinMode = Enum.LineJoinMode.Round
+	stroke.Parent = label
+	label.Parent = parent
+	return label
 end
 
--- The stamina bar.
-local bar = picture("ImageLabel", root, ART.progressGrey, Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, TOP), BAR_WIDTH)
-bar.Name = "Stamina"
+local title = text(root, TITLE_TEXT)
+title.Name = "Title"
+title.Text = TITLE
+title.Position = UDim2.new(0.5, 0, 0, TITLE_Y)
+
+-- The bar.
+local BAR_MIDDLE = TOP + BAR_WIDTH * ART.progress.size.Y / ART.progress.size.X / 2
+local bar = picture(root, ART.progressGrey, Vector2.new(0.5, 0.5), UDim2.new(0.5, 0, 0, BAR_MIDDLE), BAR_WIDTH) -- (from its middle: it pulses about it)
+bar.Name = "Time"
 local clip = Instance.new("Frame")
 clip.Name = "Fill"
 clip.BackgroundTransparency = 1
 clip.ClipsDescendants = true
 clip.Size = UDim2.fromScale(1, 1)
 clip.Parent = bar
-local green = picture("ImageLabel", clip, ART.progress, Vector2.zero, UDim2.new())
-green.Size = bar.Size
-local level = Instance.new("TextLabel")
-level.BackgroundTransparency = 1
-level.FontFace = FONT
-level.TextSize = LEVEL_TEXT * SHRINK
-level.TextColor3 = Color3.new(1, 1, 1)
-level.TextXAlignment = Enum.TextXAlignment.Left
-level.AnchorPoint = Vector2.new(0, 0.5)
-level.Position = UDim2.fromScale(LEVEL_AT, 0.5)
-level.Size = UDim2.fromOffset(200, LEVEL_TEXT * SHRINK)
-level.ZIndex = 2
-local levelStroke = Instance.new("UIStroke")
-levelStroke.Thickness = LEVEL_STROKE * SHRINK
-levelStroke.Color = Color3.new(0, 0, 0)
-levelStroke.LineJoinMode = Enum.LineJoinMode.Round
-levelStroke.Parent = level
-level.Parent = bar
+-- The fill: the filled bar over the empty one, just cut off at the time left (QM, Oct 10).
+local fill = picture(clip, ART.progress, Vector2.zero, UDim2.new())
+fill.Size = bar.Size -- (the bar's, whatever the cut)
+local barScale = Instance.new("UIScale")
+barScale.Parent = bar
+-- (on its own over the bar's middle, so it doesn't pulse with it)
+local seconds = text(root, TIME_TEXT)
+seconds.FontFace = TIME_FONT
+seconds.UIStroke:Destroy() -- (plain white: QM's guide)
+seconds.Name = "Seconds"
+seconds.Position = UDim2.new(0.5, 0, 0, BAR_MIDDLE)
+seconds.ZIndex = 2
+local titleScale, secondsScale = Instance.new("UIScale"), Instance.new("UIScale")
+titleScale.Parent, secondsScale.Parent = title, seconds
 
--- Sprint, bottom left.
-local sprint = picture("ImageButton", root, ART.sprint, Vector2.new(0, 1), UDim2.new(0, SPRINT_IN.X, 1, -SPRINT_IN.Y), CORNER_WIDTH)
-sprint.Name = "Sprint"
-sprint.AutoButtonColor = false
-local sprintInput -- the touch or click holding it down
-sprint.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		sprintInput = input
-	end
-end)
-UserInputService.InputEnded:Connect(function(input)
-	if input == sprintInput then
-		sprintInput = nil -- (only when that finger or button lets go: not on hiding, so it carries on through a lasso)
-	end
-end)
-
--- The ability, bottom right.
-local ability = picture("ImageButton", root, ART.ability, Vector2.new(1, 1), UDim2.new(1, -ABILITY_IN.X, 1, -ABILITY_IN.Y), CORNER_WIDTH)
-ability.Name = "Ability"
-ability.AutoButtonColor = false
-local abilityScale = scaler(ability)
-
--- The keycaps (QM, Oct 9): pressed only while you're holding that very key; none on a
--- phone. SHIFT over the one drawn in Sprint, SPACE at the same spot under the ability.
-local function keycap(parent, at)
-	local k = picture("ImageLabel", parent, ART.shift, Vector2.zero, UDim2.fromOffset(at.X * SHRINK, at.Y * SHRINK))
-	k.Name = "Keycap"
-	k.ZIndex = 3
-	return k
+-- Back out (overshoots a little, then settles), 0..1 over 0..1.
+local function backOut(x)
+	local c = 1.70158
+	return 1 + (c + 1) * (x - 1) ^ 3 + c * (x - 1) ^ 2
 end
-local shiftKey = keycap(sprint, KEY_AT)
-local spaceKey = keycap(ability, Vector2.new(CORNER_WIDTH - KEY_AT.X - ART.space.size.X, 226 - 85 + KEY_DROP))
-local fillClip = Instance.new("Frame") -- the pink, filling up from the bottom
-fillClip.Name = "Fill"
-fillClip.BackgroundTransparency = 1
-fillClip.ClipsDescendants = true
-fillClip.AnchorPoint = Vector2.new(0, 1)
-fillClip.Position = UDim2.fromScale(0, 1)
-fillClip.Size = UDim2.fromScale(1, 0)
-fillClip.Parent = ability
-local fill = picture("ImageLabel", fillClip, ART.abilityFill, Vector2.new(0, 1), UDim2.fromScale(0, 1))
-local pressed = false
-ability.Activated:Connect(function()
-	pressed = true
-end)
-
--- LASSO, bottom centre.
-local lasso = picture("ImageButton", root, ART.lasso, Vector2.new(0.5, 1), UDim2.new(0.5, 0, 1, -LASSO_BOTTOM), LASSO_WIDTH)
-lasso.Name = "Lasso"
-lasso.AutoButtonColor = false
-lasso.Activated:Connect(function()
-	if RideUi.onAction then
-		RideUi.onAction()
-	end
-end)
+local shownAt -- when the bar last came up (nil: hidden)
 
 function RideUi.show(visible)
 	gui.Enabled = visible
 end
 
-local function touching()
-	local last = UserInputService:GetLastInputType()
-	if last == Enum.UserInputType.Touch then
-		return true
-	end
-	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-end
-
-game:GetService("RunService").RenderStepped:Connect(function()
-	if not gui.Enabled then
-		return
-	end
-	local keys = not touching()
-	shiftKey.Visible, spaceKey.Visible = keys, keys
-	shiftKey.Image = if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
-		then ART.shiftDown.id
-		else ART.shift.id
-	spaceKey.Image = if UserInputService:IsKeyDown(Enum.KeyCode.Space) then ART.spaceDown.id else ART.space.id
-end)
-
-function RideUi.setHold(fraction, _tired, stamina)
+function RideUi.setHold(fraction, _tired, total)
 	bar.Visible = fraction ~= nil
+	title.Visible = fraction ~= nil
+	seconds.Visible = fraction ~= nil
+	if not fraction then
+		shownAt = nil
+	elseif not shownAt then
+		shownAt = os.clock()
+	end
 	if fraction then
+		local pop = backOut(math.min((os.clock() - shownAt) / POP_TIME, 1))
+		titleScale.Scale, secondsScale.Scale = pop, pop
 		local f = math.clamp(fraction, 0, 1)
-		clip.Size = UDim2.fromScale(if f <= 0 then 0 else FILL_FROM + (FILL_TO - FILL_FROM) * f, 1)
-		level.Visible = stamina ~= nil
-		if stamina then
-			level.Text = tostring(stamina)
-		end
+		clip.Size = UDim2.new(0, BAR_WIDTH * f, 1, 0)
+		seconds.TextColor3 = RED:Lerp(Color3.new(1, 1, 1), math.clamp(f / RED_FROM, 0, 1))
+		seconds.Text = string.format("%.1fs", f * (total or Config.RideSeconds)) -- (total: the bar's length in seconds, if not a ride's)
+		local t = os.clock() % (PULSE.InTime + PULSE.OutTime)
+		local k = if t < PULSE.InTime then 1 - t / PULSE.InTime else (t - PULSE.InTime) / PULSE.OutTime -- (1 = out, 0 = in)
+		k = 0.5 - math.cos(k * math.pi) / 2 -- (eased)
+		barScale.Scale = pop * (if f < PULSE.From then PULSE.In + (PULSE.Out - PULSE.In) * k else 1)
 	end
 end
 
--- (touching(), above: on a touch screen, the last input was a touch or there's no keyboard)
-
-local sprinting = false
-function RideUi.setSprint(visible, active)
-	sprint.Visible = visible and not touching()
-	active = visible and active == true
-	if active ~= sprinting then
-		sprinting = active
-		-- (no grow while it's on: QM, Oct 10)
-	end
-end
-
+function RideUi.setDistance() end
+function RideUi.setSprint() end
+function RideUi.setAbility() end
+function RideUi.setAction() end
 function RideUi.sprintHeld()
-	return sprintInput ~= nil
+	return false
 end
-
-local abilityState -- "ready", "active", "cooldown"
-function RideUi.setAbility(ready, _seconds, active)
-	ability.Visible = ready ~= nil
-	if ready == nil then
-		pressed, abilityState = false, nil
-		return
-	end
-	local state = if active then "active" elseif ready >= 1 then "ready" else "cooldown"
-	if state ~= abilityState then
-		local was = abilityState
-		abilityState = state
-		-- (no grow on use or while it lasts: QM, Oct 10)
-		if state ~= "ready" then
-			abilityScale(1)
-		elseif state == "ready" and was == "cooldown" then
-			abilityScale(GROW).Completed:Once(function() -- ready again: one bounce
-				abilityScale(1)
-			end)
-		end
-	end
-	ability.Image = if state == "active" then ART.abilityActive.id
-		elseif state == "cooldown" then ART.abilityGrey.id
-		elseif touching() then ART.abilityFill.id
-		else ART.ability.id
-	fillClip.Visible = state == "cooldown"
-	if state == "cooldown" then
-		local f = math.clamp(ready, 0, 1)
-		fillClip.Size = UDim2.fromScale(1, f)
-		fill.Position = UDim2.fromScale(0, 1)
-		fill.Size = UDim2.fromScale(1, if f > 0 then 1 / f else 0) -- (the whole picture, its bottom f showing)
-	end
-end
-
 function RideUi.abilityPressed()
-	local was = pressed
-	pressed = false
-	return was
-end
-
-function RideUi.setAction(text, ready)
-	lasso.Visible = text ~= nil
-	if text then
-		local grey = not ready
-		lasso.Image = if grey and ART.lassoGrey.id ~= "" then ART.lassoGrey.id else ART.lasso.id
-		lasso.ImageColor3 = if grey and ART.lassoGrey.id == "" then Color3.fromRGB(150, 150, 150) else Color3.new(1, 1, 1)
-	end
+	return false
 end
 
 return RideUi

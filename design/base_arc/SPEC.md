@@ -21,21 +21,25 @@ Studs, Roblox axes: the course runs to -z from the home line at z = 0, and the b
   patches are gone. Pens stand on grass. No dirt within 8 studs (two tiles) of any wall, front wall stubs included, so the sunk dirt never opens a hole under a wall (QM).
 
 ## Pens: five on one arc
-- The arc's centre is (0, 90), the middle of the yard. Pen centres sit 130 from it, at
-  angles 90, 140, 40, 190, -10 degrees (measured from +x toward +z), in claim order:
+- Grown to fill the base (QM, Oct 11): 80 x 80 at their biggest (20 tiles; levels 1..6 are
+  14, 16, 17, 18, 19, 20 tiles a side). The arc's centre moved to (0, 96) and each pen's gap
+  sits its own distance from it (78, 100, 100, 78, 78), at the same angles 90, 140, 40, 190,
+  -10 degrees (from +x toward +z), in claim order. 84 doesn't fit: 8 studs between pens, clear
+  of the walls, all six big rocks, Carl, the podium, the start line (x -64..64, z 0..44) and
+  every pen's lane from its gap to the start line (tools/pens.py).
 
-| Pen | Centre (x, z) | Gate middle (x, z) |
+| Pen | Centre at 80 (x, z) | Gate middle (x, z) |
 |---|---|---|
-| 1 | 0, 220 | 0, 186 |
-| 2 | -99.6, 173.6 | -73.5, 151.7 |
-| 3 | 99.6, 173.6 | 73.5, 151.7 |
-| 4 | -128.0, 67.4 | -94.5, 73.3 |
-| 5 | 128.0, 67.4 | 94.5, 73.3 |
+| 1 | 0, 214 | 0, 174 |
+| 2 | -107.2, 186.0 | -76.6, 160.3 |
+| 3 | 107.2, 186.0 | 76.6, 160.3 |
+| 4 | -116.2, 75.5 | -76.8, 82.5 |
+| 5 | 116.2, 75.5 | 76.8, 82.5 |
 
-- Each pen is turned to face the yard: CFrame.lookAt(penCentre, Vector3.new(0, 0, 90)),
+- Each pen is turned to face the yard: CFrame.lookAt(penCentre, Vector3.new(0, 0, 96)),
   with the 10-stud gate gap in the side that faces the yard. Same fence as now (dark posts,
   orange rails, X braces).
-- These are the pens at their biggest (68 x 68). A pen grows OUTWARD, away from the yard:
+- A pen grows OUTWARD, away from the yard:
   the gate side stays put on the arc and the back moves toward the wall. tools/pens.py
   needs an arbitrary yaw per pen instead of its three FACING frames.
 - Rotated pens no longer line up with the floor checker, so a per-level pen floor colour

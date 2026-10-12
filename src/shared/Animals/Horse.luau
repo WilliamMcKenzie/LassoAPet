@@ -118,7 +118,8 @@ local function variant(name, data, rarity, points)
 		seatBone = points.seatBone,
 		gallopOnSprint = points.gallopOnSprint, -- gallops only while self.sprinting (Ride sets it)
 		neckLoop = points.neck or NECK_LOOP,
-		size = points.size or tierSize(name, data),
+		-- (x Config.AnimalScale: how big it looks, QM, Oct 11)
+		size = (points.size or tierSize(name, data)) * (Config.AnimalScale[name] or 1),
 	}, { __index = Horse })
 	class.__index = class
 
