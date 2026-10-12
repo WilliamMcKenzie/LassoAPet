@@ -12,6 +12,7 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Hud = require(script.Parent.Hud)
@@ -229,8 +230,39 @@ local function counter(order, art, color)
 	return label
 end
 local cashText = counter(1, ART.cash, CASH_GREEN)
+-- "+$N" as money comes in (QM, Oct 12): the same font and green, a bit smaller, starting
+-- just right of the cash and floating up as it fades.
+local POP_RISE, POP_TIME = 46, 1.1
+local lastGold = player:GetAttribute("Gold") or 0
+local function popGain(gain)
+	if not gui.Enabled or not cashText.Visible then
+		return
+	end
+	local pop = text(root, math.floor(TEXT * 0.72), CASH_GREEN)
+	pop.Name = "CashPop"
+	pop.Text = "+" .. Hud.money(gain)
+	pop.AnchorPoint = Vector2.new(0, 0.5)
+	local at = (cashText.AbsolutePosition + cashText.AbsoluteSize * Vector2.new(1, 0.5) - root.AbsolutePosition) / scale.Scale
+	pop.Position = UDim2.fromOffset(at.X + 14, at.Y)
+	local stroke = pop:FindFirstChildOfClass("UIStroke")
+	local info = TweenInfo.new(POP_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(pop, info, { Position = UDim2.fromOffset(at.X + 14, at.Y - POP_RISE) }):Play()
+	local fade = TweenInfo.new(POP_TIME * 0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, POP_TIME * 0.4)
+	TweenService:Create(pop, fade, { TextTransparency = 1 }):Play()
+	if stroke then
+		TweenService:Create(stroke, fade, { Transparency = 1 }):Play()
+	end
+	task.delay(POP_TIME + 0.05, function()
+		pop:Destroy()
+	end)
+end
 local function showCounters()
-	cashText.Text = Hud.money(player:GetAttribute("Gold") or 0)
+	local gold = player:GetAttribute("Gold") or 0
+	cashText.Text = Hud.money(gold)
+	if gold > lastGold then
+		popGain(gold - lastGold)
+	end
+	lastGold = gold
 end
 player:GetAttributeChangedSignal("Gold"):Connect(showCounters)
 showCounters()
