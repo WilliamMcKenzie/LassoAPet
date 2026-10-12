@@ -1,6 +1,6 @@
 -- Quests (QM, Oct 11; Config.Quests): two questlines, each showing its next quest.
 -- Hatchery keeps each player's in their profile, saved with the pen:
---   { lines = { [line] = { at = its quest up (past the end: done) } }, counts = { lasso = n, merge = n, ["lasso:Snowman"] = n }, v = 2 }
+--   { lines = { [line] = { at = its quest up (past the end: done) } }, counts = { lasso = n, merge = n, ["lasso:Snowman"] = n }, v = 3 }  (skip: a quest already claimed, passed over)
 -- and puts what's up on the player as the "Quests" attribute for BaseUi: JSON of
 -- { { i, text, have, need, kind, biome } }, i = line * 100 + the quest's place in it (ClaimQuest's).
 -- Progress is the player's own, live (QM, Oct 11), not counted from when the quest came
@@ -31,16 +31,22 @@ function Quests.load(saved)
 	end
 	-- (saved before "Reach Meadow" went first in line 1, QM Oct 11: past its first quest, one
 	-- on, so a Desert already claimed isn't up again)
-	local old = typeof(saved) == "table" and (tonumber(saved.v) or 1) < 2
+	local v = typeof(saved) == "table" and tonumber(saved.v) or 1
 	for line, quests in Config.Quests do
 		local was = typeof(lines[line]) == "table" and lines[line] or {}
 		local at = math.floor(tonumber(was.at) or 1)
-		if old and line == 1 and at > 1 then
+		if v < 2 and line == 1 and at > 1 then
 			at += 1
 		end
-		state.lines[line] = { at = math.clamp(at, 1, #quests + 1) }
+		local skip = typeof(was.skip) == "number" and was.skip or nil -- (already claimed, passed over when it comes up)
+		-- (saved before Merge went before Collect in line 2, QM Oct 12: Collect claimed but
+		-- not Merge, back to Merge, and Collect passed over after it)
+		if v < 3 and line == 2 and at == 3 then
+			at, skip = 2, 3
+		end
+		state.lines[line] = { at = math.clamp(at, 1, #quests + 1), skip = skip }
 	end
-	state.v = 2
+	state.v = 3
 	return state
 end
 
@@ -104,7 +110,12 @@ function Quests.claim(player, state, i)
 	if have < need then
 		return nil
 	end
-	state.lines[line] = { at = at + 1 }
+	local slot = state.lines[line]
+	local nextAt = at + 1
+	if slot.skip == nextAt then -- (claimed before the line's order changed: Quests.load)
+		nextAt += 1
+	end
+	state.lines[line] = { at = nextAt }
 	Quests.publish(player, state)
 	return quest
 end
