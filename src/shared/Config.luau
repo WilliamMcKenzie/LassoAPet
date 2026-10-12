@@ -26,7 +26,7 @@ return {
 			-- use the same odds (NestOdds). A 0 never spawns but keeps the animal on
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
-			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.22, Rhino = 0.13, Unicorn = 0.05 },
+			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05 },
 			-- Dirt patches in the walls' colours, a stud below the grass
 			-- (tools/meadow_ground.py); see the Desert's Patches.
 			Patches = {
@@ -41,7 +41,7 @@ return {
 			Length = 1816, -- (QM, Oct 11: 1.5x as long; the pacing ladder made it 1208, was 2280)
 			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
-			Herd = { Cactus = 0.3, Kitten = 0.25, Scorpion = 0.25, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.05 },
+			Herd = { Cactus = 0.3, Kitten = 0.1, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
 			-- Patches of other ground in the floor (parts named after them in
 			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
 			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
@@ -68,7 +68,7 @@ return {
 			Length = 1920, -- (QM, Oct 11: the pacing ladder; was 5472)
 			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
-			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.06 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
+			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.02 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
 			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
@@ -366,15 +366,16 @@ return {
 	-- pays out. Legendaries hatch slower (PetHatchTime: QM's D1 retention eggs).
 	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480 },
 	PetHatchTime = {
+		-- (QM's spawn/hatch JSON, Oct 11, applied as given: the Herd weights in Biomes too)
 		-- QM's own table (Oct 11, "new json"): every animal's egg, by biome. Uncommons and Rares
 		-- hatch within a run, each biome's Epics a little longer, the Legendaries are the long
 		-- D1 eggs you come back for.
-		Horse = 5, Pinto = 5, Pig = 5, Bunny = 5, Fish = 15, Rhino = 45, Unicorn = 300, -- Meadow
-		Cactus = 15, Kitten = 15, Scorpion = 30, Sandworm = 120, SpineLizard = 120, Snake = 600, -- Desert
-		Penguin = 15, Boar = 15, Snowman = 30, IceGolem = 120, Icebringer = 1200, SnackYak = 1200, -- Tundra
-		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 60, Squid = 75, KingCrab = 120, FishSchool = 200, BlueCrab = 1200, Kraken = 2800, -- Ocean
-		Firebird = 15, RockHog = 30, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 120, LavaWhale = 300, Phoenix = 2400, -- Volcano
-		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 300, Pterodactyl = 300, BoneRex = 24000, -- Jurassic
+		Horse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
+		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 300, SpineLizard = 300, Snake = 1800, -- Desert
+		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 300, Icebringer = 3600, SnackYak = 3600, -- Tundra
+		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 60, Squid = 300, KingCrab = 300, FishSchool = 300, BlueCrab = 14400, Kraken = 18000, -- Ocean
+		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
+		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 300, Pterodactyl = 300, BoneRex = 43200, -- Jurassic
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
 	},
