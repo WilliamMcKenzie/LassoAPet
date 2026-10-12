@@ -488,14 +488,17 @@ local function drawQuests()
 		end
 	end
 	claimable = now
-	local merging = false
+	local merging, mergeUp = false, false
 	for _, quest in questList do
+		mergeUp = mergeUp or (typeof(quest) == "table" and quest.kind == "merge")
 		merging = merging or (typeof(quest) == "table" and quest.kind == "merge" and (tonumber(quest.have) or 0) == 0)
 	end
 	mergeBadge.Visible = merging -- (gone once you've merged)
-	if merging and not mergeHinted then
+	if merging and not mergeHinted and not player:GetAttribute("Tutorial") then -- (not till the tutorial's over)
 		mergeHinted = true
 		player:SetAttribute("MergeHint", true)
+	elseif not mergeUp and player:GetAttribute("MergeHint") then
+		player:SetAttribute("MergeHint", nil) -- (no Merge animals quest up: e.g. "/tutorial" set the quests back)
 	end
 	local count = 0
 	for _ in claimable do
@@ -551,6 +554,7 @@ local function drawQuests()
 	panelMiddle.Size = UDim2.fromOffset(Q.width, math.max(y + Q.bottom - 90 - 40, 0))
 end
 player:GetAttributeChangedSignal("Quests"):Connect(drawQuests)
+player:GetAttributeChangedSignal("Tutorial"):Connect(drawQuests)
 quests:GetAttributeChangedSignal("Folded"):Connect(drawQuests)
 drawQuests()
 
