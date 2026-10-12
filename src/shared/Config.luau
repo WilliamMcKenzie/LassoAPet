@@ -819,6 +819,7 @@ return {
 	-- How many pets (and eggs waiting to hatch) your pen holds (QM, Oct 11): Base, and
 	-- PerUpgrade more for each pen upgrade (PenLevel). Full, you can't put an egg down;
 	-- "5/10" shows under your name over the pen (Pens.server).
+	PenLevels = 13, -- pen levels, one per quest claimed after Reach Meadow, each with its own fence (tools/pens.py STYLES: QM, Oct 11)
 	PenCapacity = { Base = 10, PerUpgrade = 8 }, -- (QM, Oct 11: was 5; 8 a level since QM's Collect 50 quest: the top level, 6, holds 50, was 35)
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
 	-- Client/SkyFlash. Start: its see-through at the flash (0: solid white). Distance: studs

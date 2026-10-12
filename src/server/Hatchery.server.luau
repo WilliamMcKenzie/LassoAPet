@@ -701,8 +701,8 @@ claimQuest.OnServerInvoke = function(player, i)
 	if not quest then
 		return nil
 	end
-	local level = math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
-	if level < #Config.Biomes and not quest.NoPenLevel then -- (not "Reach Meadow": QM)
+	local level = math.clamp(player:GetAttribute("PenLevel") or 1, 1, Config.PenLevels)
+	if level < Config.PenLevels and not quest.NoPenLevel then -- (not "Reach Meadow": QM)
 		player:SetAttribute("PenLevel", level + 1)
 		Funnel.step(player, "Unlocked Zone 2")
 	end

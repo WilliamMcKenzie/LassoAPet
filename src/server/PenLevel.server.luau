@@ -1,5 +1,6 @@
 -- Pen levels: everyone starts at 1, and each quest you claim takes it up one, to
--- #Config.Biomes (QM, Oct 11: Hatchery's ClaimQuest; it used to cost the next biome's
+-- Config.PenLevels (QM, Oct 11: Hatchery's ClaimQuest; each level its own fence, tools/pens.py
+-- STYLES; the floor takes the biome n's colours up to the last biome's; it used to cost the next biome's
 -- UnlockCost gold, UpgradePen). Level n opens biome n's gate for you (Gate.client) and
 -- repaints your pen for everyone: its N x N floor tiles (the pen's Tiles marker)
 -- take biome n's ground colours and its posts biome n's PostColor. The pen also
@@ -30,7 +31,7 @@ end
 local loaded = {}
 
 local function level(player)
-	return math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
+	return math.clamp(player:GetAttribute("PenLevel") or 1, 1, Config.PenLevels or #Config.Biomes)
 end
 
 local function load(player)
@@ -242,9 +243,10 @@ local function paintPen(pen)
 			end
 		end
 		if show then
-			local prefix = WorldColors.prefix(n)
-			local name = if n == 1 then "Dirt" else "Ground"
-			local colors = if n == 1 then Config.Biomes[1].Patches.Dirt else Config.Biomes[n].GroundColors
+			local b = math.min(n, #Config.Biomes) -- (levels past the last biome keep its floor)
+			local prefix = WorldColors.prefix(b)
+			local name = if b == 1 then "Dirt" else "Ground"
+			local colors = if b == 1 then Config.Biomes[1].Patches.Dirt else Config.Biomes[b].GroundColors
 			floor.Color = WorldColors.saturate(world:GetAttribute(prefix .. name .. "A") or colors[1])
 			for _, texture in floor:GetChildren() do
 				if texture.Name == "Checker" then
@@ -257,9 +259,7 @@ local function paintPen(pen)
 	for _, part in fence:GetDescendants() do
 		if part.Name == "Post" then
 			postColors[part] = postColors[part] or part.Color
-			part.Color = if vip then Config.Vip.Fence.Post
-				elseif n > 1 and Config.Biomes[n].PostColor then Config.Biomes[n].PostColor
-				else postColors[part]
+			part.Color = if vip then Config.Vip.Fence.Post else postColors[part] -- (each level's fence has its own colours now, not the biome's PostColor)
 		elseif part:IsA("BasePart") and (part.Name == "Rail" or part.Name == "Brace") then
 			fenceLooks[part] = fenceLooks[part] or { part.Color, part.Material }
 			part.Color = if vip then Config.Vip.Fence[part.Name] else fenceLooks[part][1]
