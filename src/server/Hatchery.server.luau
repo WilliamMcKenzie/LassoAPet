@@ -269,6 +269,7 @@ local function load(player)
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
 					profile.homeEggs = tonumber(data.homeEggs) -- (animals brought home, counted from the Egg Rodeo's first session: Funnel)
 					profile.quests = Quests.load(data.quests)
+					profile.journey = data.journey == true or nil -- (started after the Player Journey funnel went in: Funnel)
 					profile.rainbowTrail = data.rainbowTrail == true or nil
 					player:SetAttribute("FuseLesson", nil) -- (no fuse lesson any more: QM, Oct 8)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
@@ -321,10 +322,11 @@ local function load(player)
 		end
 	end)
 	if not profile.tutorial then
+		profile.journey = true -- (in the funnels from now on: Funnel)
 		Funnel.track(player) -- a new player
-		profile.homeEggs = profile.homeEggs or 0 -- (in the progress funnels from now on)
+		profile.homeEggs = profile.homeEggs or 0
 	end
-	if profile.homeEggs then
+	if profile.journey then
 		Funnel.join(player)
 	end
 	local tutorial = Config.Tutorial and not profile.tutorial
@@ -347,7 +349,7 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail, homeEggs = profile.homeEggs, quests = profile.quests, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
+		rainbowTrail = profile.rainbowTrail, homeEggs = profile.homeEggs, quests = profile.quests, journey = profile.journey, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -704,8 +706,8 @@ claimQuest.OnServerInvoke = function(player, i)
 	local level = math.clamp(player:GetAttribute("PenLevel") or 1, 1, Config.PenLevels)
 	if level < Config.PenLevels and not quest.NoPenLevel then -- (not "Reach Meadow": QM)
 		player:SetAttribute("PenLevel", level + 1)
-		Funnel.step(player, "Unlocked Zone 2")
 	end
+	Funnel.claimed(player, i) -- (Player Journey)
 	profile.eggs[quest.Egg] = (profile.eggs[quest.Egg] or 0) + 1
 	publish(player)
 	return quest.Egg

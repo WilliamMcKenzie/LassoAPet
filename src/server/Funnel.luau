@@ -1,21 +1,15 @@
--- Analytics funnels for Creator Hub > Analytics > Funnels.
+-- Analytics funnels for Creator Hub > Analytics > Funnels (QM, Oct 11: the old ones,
+-- Onboarding, Zones, Captured Animals and Zones Reached, retired; nothing logs them now).
 --
--- Onboarding: a new player's first session, step by step through the tutorial
--- and on to unlocking the Desert. Hatchery calls track() for a player with no
--- save yet; only they're logged, each step once (Roblox also keeps only a
--- player's first of each step). Steps are logged when they happen, so one done
--- out of order still counts. Steps the server can't see (the tutorial's own
--- hints) come from the client over the FunnelStep remote; riding out, the
--- lasso and gold are watched here; the rest are step() calls where they happen
--- (Hatchery, Nests, PenLevel).
+-- Player Journey: a new player from their first join through the tutorial, then each
+-- quest claimed, in the rough order we expect players to get to them (JOURNEY), so its
+-- completion rate is the share who've done the lot. One pass per player (the session id
+-- is their UserId), so it runs across sessions; a step logged out of order still counts,
+-- and Roblox keeps only a player's first of each step. Only for players who started
+-- after it went in (Hatchery's profile.journey: Funnel.join).
 --
--- Captured Animals and Zones Reached (QM, Oct 11: the Egg Rodeo's progress): for
--- players who started on it (Funnel.join: Hatchery, from their first session on),
--- one pass per player (the session id is their UserId), so they run across
--- sessions. Captured Animal N: the Nth animal brought home for its egg (1 to
--- CAPTURE_STEPS). Reached <biome>: the first ride through each biome's barrier
--- (Gold.server's BreakGate), every biome you skipped on the way counted too.
--- (The old Zones funnel counted pen upgrades, which unlock nothing now.)
+-- Zones Unlocked: for the same players, the first ride through each biome's barrier
+-- (Gold.server's BreakGate), every biome skipped on the way counted too.
 --
 -- Shop: each time the shop opens is a pass: opened, picked an offer (the
 -- Robux prompt), bought it.
@@ -30,31 +24,32 @@ local Config = require(ReplicatedStorage.Shared.Config)
 
 local Funnel = {}
 
-local desert = Config.Biomes[2]
--- The new tutorial (QM, Oct 11: Client/Tutorial), then on to the Desert.
+local JOURNEY = "Player Journey"
+local ZONES = "Zones Unlocked"
+
+-- The tutorial, then the quests by [line * 100 + place] (Config.Quests, Quests.claim's i),
+-- each named for the quest.
 local STEPS = {
 	"Joined",
 	"Tutorial Started", -- (client) the tap hand on the starter egg
-	"Held Starter Egg", -- (client) it's in your hand: the tap hand moves to your pen
 	"Placed Starter Egg",
 	"Hatched Starter Egg", -- held E by it in your pen
 	"Started Ride", -- (client) on your new pet
 	"Rode Out", -- past the start line on an animal
-	"Lasso In Reach", -- (client) the first slow-down: an animal's in reach
-	"Threw Lasso",
 	"Landed Lasso", -- (client) on the animal you lassoed
 	"Boss Appeared", -- (client) BOSS IN let go: the Chicken's coming
 	"Brought Egg Home",
-	"Placed Egg", -- (it goes in your pen by itself in the tutorial)
-	"Egg Hatched",
-	"Saw Next Zones", -- (client) the camera's tour of the gates to the Jurassic
 	"Tutorial Done",
-	"Rode Out Again",
-	"Brought Egg Home Again",
-	"Saved Half For " .. desert.Name,
-	"Can Afford " .. desert.Name,
-	"Unlocked Zone 2",
 }
+local QUEST_ORDER = { 101, 201, 102, 202, 203, 103, 204, 104, 205, 105, 206, 106, 207 }
+local questStep = {} -- [quest i] = its step
+for _, i in QUEST_ORDER do
+	local quest = Config.Quests[i // 100] and Config.Quests[i // 100][i % 100]
+	if quest then
+		table.insert(STEPS, "Claimed " .. quest.Text .. (if quest.Need and quest.Need > 1 then " " .. quest.Need else ""))
+		questStep[i] = #STEPS
+	end
+end
 local stepIndex = {}
 for i, name in STEPS do
 	stepIndex[name] = i
@@ -62,70 +57,40 @@ end
 -- The tutorial's steps the client reports (Client/Tutorial's funnel()).
 local CLIENT_STEPS = {
 	place = "Tutorial Started",
-	hold = "Held Starter Egg",
 	ride = "Started Ride",
-	reach = "Lasso In Reach",
 	lasso = "Landed Lasso",
 	boss = "Boss Appeared",
-	tour = "Saw Next Zones",
 }
--- Done again once the tutorial's over.
-local AGAIN = {
-	["Rode Out"] = "Rode Out Again",
-	["Brought Egg Home"] = "Brought Egg Home Again",
-}
-local TUTORIAL_DONE = stepIndex["Tutorial Done"]
 
-local logged = {} -- [player] = { [step] = true }, only for players being tracked
+local cohort = {} -- [player] = { [step] = true }: in the funnels (started after they went in)
 
+local function log(player, i)
+	local done = cohort[player]
+	if done and i and not done[i] then
+		done[i] = true
+		pcall(AnalyticsService.LogFunnelStepEvent, AnalyticsService, player, JOURNEY, tostring(player.UserId), i, STEPS[i])
+	end
+end
+
+-- A tutorial step happened (by name; any other name is ignored).
 function Funnel.step(player, name)
-	local done = logged[player]
-	local i = stepIndex[name]
-	if done and i and done[i] and AGAIN[name] and done[TUTORIAL_DONE] then
-		name = AGAIN[name]
-		i = stepIndex[name]
-	end
-	if not done or not i or done[i] then
-		return
-	end
-	done[i] = true
-	pcall(AnalyticsService.LogOnboardingFunnelStepEvent, AnalyticsService, player, i, name)
+	log(player, stepIndex[name])
 end
 
-local function watchGold(player)
-	local function check()
-		local gold = player:GetAttribute("Gold") or 0
-		if gold >= desert.UnlockCost / 2 then
-			Funnel.step(player, "Saved Half For " .. desert.Name)
-		end
-		if gold >= desert.UnlockCost then
-			Funnel.step(player, "Can Afford " .. desert.Name)
-		end
-	end
-	player:GetAttributeChangedSignal("Gold"):Connect(check)
-	check()
-end
-
+-- Hatchery: a new player (no save yet): "Joined".
 function Funnel.track(player)
-	if not logged[player] then
-		logged[player] = {}
-		Funnel.step(player, "Joined")
-		watchGold(player)
-	end
+	Funnel.join(player)
+	Funnel.step(player, "Joined")
 end
 
-local CAPTURE_STEPS = 20
-local cohort = {} -- [player] = true: started on the Egg Rodeo, so in the progress funnels
-
+-- Hatchery: a player in the funnels (profile.journey), each session.
 function Funnel.join(player)
-	cohort[player] = true
+	cohort[player] = cohort[player] or {}
 end
 
--- Hatchery: the player's `n`th animal brought home (their saved count).
-function Funnel.captured(player, n)
-	if cohort[player] and n >= 1 and n <= CAPTURE_STEPS then
-		pcall(AnalyticsService.LogFunnelStepEvent, AnalyticsService, player, "Captured Animals", tostring(player.UserId), n, "Captured Animal " .. n)
-	end
+-- Hatchery: quest i claimed.
+function Funnel.claimed(player, i)
+	log(player, questStep[i])
 end
 
 -- Gold.server: the player rode through biome `to`'s barrier, the last they'd broken
@@ -135,9 +100,12 @@ function Funnel.reached(player, from, to)
 		return
 	end
 	for i = math.max(from + 1, 2), math.min(to, #Config.Biomes) do
-		pcall(AnalyticsService.LogFunnelStepEvent, AnalyticsService, player, "Zones Reached", tostring(player.UserId), i - 1, "Reached " .. Config.Biomes[i].Name)
+		pcall(AnalyticsService.LogFunnelStepEvent, AnalyticsService, player, ZONES, tostring(player.UserId), i - 1, "Unlocked " .. Config.Biomes[i].Name)
 	end
 end
+
+-- (no Captured Animals funnel any more)
+function Funnel.captured() end
 
 function Funnel.event(player, name)
 	pcall(AnalyticsService.LogCustomEvent, AnalyticsService, player, name)
@@ -183,7 +151,7 @@ funnelStep.Parent = ReplicatedStorage
 
 task.spawn(function() -- (Riders makes these: don't hold up whoever requires this)
 	ReplicatedStorage:WaitForChild("RideSync").OnServerEvent:Connect(function(player, kind, _, riderCFrame)
-		if logged[player] and type(kind) == "string" and kind ~= "" and typeof(riderCFrame) == "CFrame" and riderCFrame.Position.Z < 0 then
+		if cohort[player] and type(kind) == "string" and kind ~= "" and typeof(riderCFrame) == "CFrame" and riderCFrame.Position.Z < 0 then
 			Funnel.step(player, "Rode Out")
 		end
 	end)
@@ -194,7 +162,7 @@ task.spawn(function() -- (Riders makes these: don't hold up whoever requires thi
 	end)
 end)
 Players.PlayerRemoving:Connect(function(player)
-	logged[player], shopPass[player], cohort[player] = nil, nil, nil
+	shopPass[player], cohort[player] = nil, nil
 end)
 
 return Funnel
