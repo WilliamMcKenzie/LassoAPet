@@ -310,7 +310,7 @@ return {
 		-- screen shaking and the red vignette surging with how loud the cry is (BossChase.roar).
 		-- First s after the close-up, then every Every[1] to Every[2] s; Shake degrees and
 		-- ShakeMove studs at its loudest.
-		Roar = { On = true, First = 3, Every = { 5, 8 }, Shake = 0.8, ShakeMove = 0.35 },
+		Roar = { On = true, First = 3, Every = { 10, 10 }, Shake = 0.8, ShakeMove = 0.35 }, -- (every 10 s: QM, Oct 11; was 5 to 8)
 	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"
