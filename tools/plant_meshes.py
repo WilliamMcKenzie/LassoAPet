@@ -29,9 +29,9 @@ from rock_meshes import hull_tris, write_obj, as_parts, font  # noqa: E402
 OUT = os.path.join(HERE, "..", "design", "plants")
 
 TRUNK = (124, 86, 56)
-LEAF = [(98, 196, 72), (120, 214, 86), (86, 178, 64), (134, 224, 98)]  # canopy shades
-GRASS = [(84, 192, 60), (112, 218, 78)]
-STEM = (70, 150, 52)
+LEAF = [(62, 128, 54), (76, 144, 62), (52, 112, 46), (88, 156, 70)]  # canopy shades: forest/moss green (QM, Oct 12)
+GRASS = [(54, 122, 46), (70, 142, 56)]  # moss green (QM)
+STEM = (58, 120, 48)
 PETALS = {"Pink": (255, 148, 190), "White": (250, 248, 240), "Yellow": (255, 214, 64)}
 CENTRE = (255, 196, 40)
 CENTRE_ON_YELLOW = (236, 128, 40)
