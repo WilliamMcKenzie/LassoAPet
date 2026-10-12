@@ -190,7 +190,7 @@ local function readyArrow(s, show)
 		s.arrow = gui
 	end
 	if s.arrow then
-		local root = show and s.egg and s.egg.model.PrimaryPart
+		local root = if show and s.egg then s.egg.model.PrimaryPart else nil -- (nil, not false: Adornee takes no boolean)
 		s.arrow.Adornee = root
 		s.arrow.Enabled = root ~= nil
 		s.arrow.StudsOffsetWorldSpace = Vector3.new(0, 14 + math.abs(math.sin(os.clock() * 3)) * 1.5, 0)
