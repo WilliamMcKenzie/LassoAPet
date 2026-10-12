@@ -306,8 +306,8 @@ end
 -- (Rerunning this clears BaseDecor.PortalGate too, QM's stone gate by the start line since
 -- Oct 12: a Model of 29 shaded stones, design/portal/pieces (ids.lua: mesh ids and colours),
 -- each MeshPart unscaled at the gate's origin, (-63.5, 0, 24.6) turned 20 degrees, with the
--- rocks' stud material; with BaseDecor.PortalBoulder (a RockBoulder at -38.7, 16.6, yaw 130) and
--- PortalStone (Stone, 2.5x, at -83.1, 32.2, yaw 40) either side of it (QM). Put them back after.)
+-- rocks' stud material; with BaseDecor.PortalBoulder (a RockBoulder at -89.1, 24.3, yaw 130, its left) and
+-- PortalStone (Stone, 2.5x, at -43.6, 17.8, yaw 40, its right) (QM). Put them back after.)
 local AssetService = game:GetService("AssetService")
 local decor = world:FindFirstChild("BaseDecor") or Instance.new("Folder")
 decor.Name = "BaseDecor"
