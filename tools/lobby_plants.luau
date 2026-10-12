@@ -42,7 +42,7 @@ local PETALS = { -- (petals, centre)
 	{ Color3.fromRGB(250, 248, 240), Color3.fromRGB(255, 196, 40) }, -- white
 	{ Color3.fromRGB(255, 214, 64), Color3.fromRGB(236, 128, 40) }, -- yellow
 }
-local SCALE = { Tree = 2, TreeSmall = 2, GrassTuft = 2, Flower = 2 }
+local SCALE = { Tree = 4, TreeSmall = 4, GrassTuft = 2, Flower = 2 } -- (trees 2x again: QM, Oct 12)
 
 -- The pens at their biggest (tools/pens.py: 88 square, facing the yard's middle).
 local PENS = { Vector2.new(0, 218), Vector2.new(-110.3, 188.6), Vector2.new(110.3, 188.6), Vector2.new(-120.1, 74.8), Vector2.new(120.1, 74.8) }
@@ -184,8 +184,8 @@ local CLUSTERS = {
 for _, cl in CLUSTERS do
 	local c = cl[1]
 	local big = rng:NextInteger(1, cl[2])
-	scatter("Tree", c, 14, big, 9)
-	scatter("TreeSmall", c, 16, cl[2] - big + 1, 6)
+	scatter("Tree", c, 18, big, 16)
+	scatter("TreeSmall", c, 20, cl[2] - big + 1, 11)
 	scatter("Flower", c, 22, rng:NextInteger(6, 10), 2, mixedPetals)
 	scatter("GrassTuft", c, 20, rng:NextInteger(2, 4), 1.6)
 end
