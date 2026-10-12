@@ -64,6 +64,9 @@ local function dayKey(time)
 	return os.date("!day-%Y-%m-%d", time)
 end
 
+-- Where sessions end (QM, Oct 12): the share of today's in each band, minutes.
+local BANDS = { { 1, "0-1m" }, { 5, "1-5m" }, { 10, "5-10m" }, { 20, "10-20m" }, { 30, "20-30m" }, { math.huge, "30m+" } }
+
 local VERSION = game.PlaceVersion
 local VERSION_KEY = "version-" .. VERSION
 local VERSIONS_SHOWN = 5
@@ -93,6 +96,12 @@ local function finish(player)
 		local length = now - at
 		local key = dayKey(now)
 		local session = { sessions = 1, seconds = length, longest = length }
+		for i, band in BANDS do
+			if length < band[1] * 60 then
+				session["quit" .. i] = 1
+				break
+			end
+		end
 		for i = 2, math.min(player:GetAttribute("GatesBroken") or 1, #Config.Biomes) do
 			session["reached" .. i] = 1
 		end
@@ -172,6 +181,11 @@ local function report()
 			table.insert(reached, string.format("%s %.0f%%", Config.Biomes[i].Name, 100 * (t["reached" .. i] or 0) / t.sessions))
 		end
 		table.insert(lines, "Reached: " .. table.concat(reached, ", "))
+		local quit = {}
+		for i, band in BANDS do
+			table.insert(quit, string.format("%s %.0f%%", band[2], 100 * (t["quit" .. i] or 0) / t.sessions))
+		end
+		table.insert(lines, "Quit at: " .. table.concat(quit, ", "))
 	end
 	-- The latest versions' averages, newest first (each over its whole life).
 	local versions = {}
