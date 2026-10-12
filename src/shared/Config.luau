@@ -306,6 +306,11 @@ return {
 			TyrantRex = { At = Vector3.new(0.12, 0.4, 0.38), From = Vector3.new(20, 4, 48) }, -- (its eye and snout, from a little to one side: the jaw hangs open)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
+		-- On the run home it cries again every so often (QM, Oct 11): its opening cry, the
+		-- screen shaking and the red vignette surging with how loud the cry is (BossChase.roar).
+		-- First s after the close-up, then every Every[1] to Every[2] s; Shake degrees and
+		-- ShakeMove studs at its loudest.
+		Roar = { On = true, First = 3, Every = { 5, 8 }, Shake = 0.8, ShakeMove = 0.35 },
 	},
 	TerrainSaturation = 1, -- x the ground's, floor tiles' and walls' colour saturation (WorldColors.saturate): 1 leaves them as they are (QM, Oct 6: tried 1.15 and 1.05, back to the original)
 	-- Studs as a material (QM, Oct 7, FPS): parts get the "Studs" (1 stud) or "StudsHalf"

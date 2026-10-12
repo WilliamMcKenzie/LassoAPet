@@ -12,9 +12,11 @@
 --   BossChase.update(dt, chasing, x, z, speed) -- every frame: chasing the rider at (x, z)
 --   BossChase.camera() -> CFrame?     -- the camera during the cutscene (nil: Ride's own)
 --   BossChase.stop()                  -- gone (home, or the ride over)
+--   BossChase.roar() -> 0..1          -- how loud its cry on the run home is right now (ReturnVignette)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -32,6 +34,9 @@ local boss -- { animal, x, z, t, scale }
 local spare = {}
 local offsets = {} -- [kind] = how high its root sits over its feet at its own size
 local bars -- the letterbox: { gui, top, bottom, vein, veinScale }
+-- Its cries on the run home (Config.Boss.Roar): the sound playing, its loudest yet, the
+-- boss.t of the next, and how loud it is now (0..1, following PlaybackLoudness).
+local roar = { sound = nil, peak = 0, next = nil, level = 0 }
 
 local function popScale(t) -- 0 -> overshoot -> 1, as the stampede's animals pop in (Ride)
 	return 1 - math.exp(-12.6 * t) * math.cos(26 * t)
@@ -176,7 +181,51 @@ function BossChase.update(dt, chasing, x, z, speed)
 	boss.riderX, boss.riderZ = x, z
 	place()
 	boss.animal:update(dt, moving, 0)
+	-- Every so often on the run home, its cry again (QM, Oct 11).
+	local r = cfg.Roar
+	if r and r.On and chasing and boss.t >= cfg.CutsceneTime then
+		roar.next = roar.next or boss.t + r.First
+		if boss.t >= roar.next then
+			roar.next = boss.t + r.Every[1] + math.random() * (r.Every[2] - r.Every[1])
+			roar.sound, roar.peak = Sounds.play("boss_" .. boss.kind, cfg.CryVolume[boss.kind] or 0.6), 0
+		end
+	end
+	-- (how loud it is, of its loudest: fast up, slower down)
+	local loud = 0
+	if roar.sound and roar.sound.Parent and roar.sound.IsPlaying then
+		roar.peak = math.max(roar.peak, roar.sound.PlaybackLoudness, 40)
+		loud = math.clamp(roar.sound.PlaybackLoudness / roar.peak, 0, 1)
+	end
+	roar.level += (loud - roar.level) * (1 - math.exp(-(if loud > roar.level then 25 else 5) * dt))
 end
+
+function BossChase.roar()
+	return roar.level
+end
+
+-- The shake: put on the camera after Ride's camera (RideCamera) each frame and taken off
+-- again before it, so Ride's easing never sees it.
+local camera = workspace.CurrentCamera
+local shaken -- the camera's CFrame before this frame's shake, or nil
+RunService:BindToRenderStep("BossRoarUnshake", Enum.RenderPriority.Camera.Value, function()
+	if shaken then
+		camera.CFrame, shaken = shaken, nil
+	end
+end)
+RunService:BindToRenderStep("BossRoarShake", Enum.RenderPriority.Camera.Value + 2, function()
+	local r = Config.Boss.Roar
+	local s = roar.level
+	if not r or s < 0.02 then
+		return
+	end
+	local t = os.clock()
+	local function wobble(k) -- (smooth noise, not a jitter)
+		return math.noise(t * 18, k) * 2
+	end
+	shaken = camera.CFrame
+	camera.CFrame = shaken * CFrame.new(wobble(1) * r.ShakeMove * s, wobble(2) * r.ShakeMove * s, 0)
+		* CFrame.Angles(math.rad(wobble(3) * r.Shake * s), math.rad(wobble(4) * r.Shake * s), math.rad(wobble(5) * r.Shake * s))
+end)
 
 -- Lingering: just after the close-up, the camera stays behind you looking down the
 -- course at the boss for Linger s while you turn and it starts after you (QM, Oct 11).
@@ -202,6 +251,7 @@ function BossChase.camera()
 end
 
 function BossChase.stop()
+	roar.sound, roar.next, roar.level = nil, nil, 0
 	if boss then
 		if spare[boss.kind] then
 			boss.animal.model:Destroy()
