@@ -89,7 +89,7 @@ def rot_y(deg):
     return partlib.Ry(deg)[:3, :3]
 
 
-# The fences, one per pen level (QM, Oct 11: a new look with every quest claimed). Studded
+# Fence styles for previews (QM, Oct 11). In game the fence is the biome's (src/server/PenFence, QM Oct 12). Studded
 # blocks in bright colours, as the rest of the game. Uprights are named Post and the long
 # pieces Rail or Brace, so the VIP pass's gold fence repaints them (PenLevel.server);
 # everything else (Wall, Trim) keeps its colours.
@@ -295,7 +295,7 @@ def write():
         for k, size in enumerate(SIZES, 1):
             parts = pen_parts(*pen, size, k - 1)
             out.append(model(f"Size{k}"))
-            out += [xml_part(ref, *p) for p in parts if p[5]]  # the fence
+            # (no fence: PenLevel.server builds it in game, the owner's furthest biome's: PenFence)
             out += markers(parts)
             out.append("</Item>\n")
         out.append("</Item>\n</Item>\n")

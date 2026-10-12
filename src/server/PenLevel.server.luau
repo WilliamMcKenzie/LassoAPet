@@ -1,14 +1,12 @@
 -- Pen levels: everyone starts at 1, and each quest you claim takes it up one, to
--- Config.PenLevels (QM, Oct 11: Hatchery's ClaimQuest; each level its own fence, tools/pens.py
--- STYLES; the floor takes the biome n's colours up to the last biome's; it used to cost the next biome's
--- UnlockCost gold, UpgradePen). Level n opens biome n's gate for you (Gate.client) and
--- repaints your pen for everyone: its N x N floor tiles (the pen's Tiles marker)
--- take biome n's ground colours and its posts biome n's PostColor. The pen also
--- grows with each level (QM, Oct 3), up to about twice the area at the Ocean:
--- each pen's Sizes folder (tools/pens.py) holds one SizeK model per level, a
--- fence and its markers laid out for that size. The owner's level picks the
--- one on show, and the pen's live markers (Spawn, Sign, Area, Tiles, Slots)
--- move onto its copies, so pets, eggs and rides follow without knowing.
+-- Config.PenLevels (QM, Oct 11: Hatchery's ClaimQuest; it used to cost the next biome's
+-- UnlockCost gold, UpgradePen). The pen grows with each level: each pen's Sizes folder
+-- (tools/pens.py) holds one SizeK model per level, its markers laid out for that size.
+-- The owner's level picks the one on show, and the pen's live markers (Spawn, Sign,
+-- Area, Tiles, Slots) move onto its copies, so pets, eggs and rides follow without
+-- knowing. Its look follows the furthest biome its owner has unlocked (QM, Oct 12;
+-- Gold.server's "GatesBroken"): that biome's fence, built round it (PenFence), and its
+-- ground colours on the floor.
 -- The level lives in the player's "PenLevel" attribute and is saved like Gold.
 
 local DataStoreService = game:GetService("DataStoreService")
@@ -21,6 +19,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Studs = require(ReplicatedStorage.Shared.Studs)
 local Funnel = require(script.Parent.Funnel)
+local PenFence = require(script.Parent.PenFence)
 require(script.Parent.Passes) -- (PassVIP: the gold fence, below)
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "PenLevel")
@@ -231,7 +230,18 @@ end
 local function paintPen(pen)
 	local owner = Players:GetPlayerByUserId(pen:GetAttribute("Owner") or 0)
 	local n = if owner then level(owner) else 1
+	-- (its look, fence and floor, the furthest biome its owner's unlocked: QM, Oct 12; its size the level's)
+	local b = math.clamp(if owner then owner:GetAttribute("GatesBroken") or 1 else 1, 1, #Config.Biomes)
 	local fence = sizePen(pen, n) or pen
+	local tiles = fence:FindFirstChild("Tiles")
+	if tiles and fence:GetAttribute("FenceBiome") ~= b then
+		local old = fence:FindFirstChild("Fence")
+		if old then
+			old:Destroy()
+		end
+		PenFence.build(tiles, b).Parent = fence
+		fence:SetAttribute("FenceBiome", b)
+	end
 	local floor = floorOf(pen)
 	if floor then
 		-- (level 1 too, QM Oct 9: the Meadow's dirt checker, turned with the pen like the rest)
@@ -243,7 +253,6 @@ local function paintPen(pen)
 			end
 		end
 		if show then
-			local b = math.min(n, #Config.Biomes) -- (levels past the last biome keep its floor)
 			local prefix = WorldColors.prefix(b)
 			local name = if b == 1 then "Dirt" else "Ground"
 			local colors = if b == 1 then Config.Biomes[1].Patches.Dirt else Config.Biomes[b].GroundColors
@@ -259,7 +268,7 @@ local function paintPen(pen)
 	for _, part in fence:GetDescendants() do
 		if part.Name == "Post" then
 			postColors[part] = postColors[part] or part.Color
-			part.Color = if vip then Config.Vip.Fence.Post else postColors[part] -- (each level's fence has its own colours now, not the biome's PostColor)
+			part.Color = if vip then Config.Vip.Fence.Post else postColors[part] -- (each biome's fence has its own colours: PenFence)
 		elseif part:IsA("BasePart") and (part.Name == "Rail" or part.Name == "Brace") then
 			fenceLooks[part] = fenceLooks[part] or { part.Color, part.Material }
 			part.Color = if vip then Config.Vip.Fence[part.Name] else fenceLooks[part][1]
@@ -284,7 +293,7 @@ local function penOf(player)
 end
 
 local function watch(player)
-	for _, name in { "PenLevel", "PassVIP" } do
+	for _, name in { "PenLevel", "PassVIP", "GatesBroken" } do
 		player:GetAttributeChangedSignal(name):Connect(function()
 			local pen = penOf(player)
 			if pen then
