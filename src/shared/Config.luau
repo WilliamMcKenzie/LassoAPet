@@ -586,7 +586,7 @@ return {
 	-- seconds of what the two pets earn between them (PetIncome, a hybrid's saved income), so
 	-- two Kittens ~$9k, two Snowmen ~$110k: a minute or two of a pen's gold wherever you are.
 	-- The fuse lesson's fuse is free (FuseLesson). (Was by rarity, FusePrice x 0.01.)
-	FusePriceSeconds = 180,
+	FusePriceSeconds = 90, -- (merging 2x cheaper: QM, Oct 12; was 180)
 	-- A hybrid's Speed: the faster one's plus this share of the slower one's (QM, Oct 11; was
 	-- 1/2, which let two Desert Kittens reach the Ocean). Two equal pets come out 1.15x, one
 	-- rarity step on the pacing ladder: two Rares merge to an Epic's speed, a way past the gate
