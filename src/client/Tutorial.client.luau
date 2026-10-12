@@ -148,9 +148,9 @@ local captionOn -- the CAPTIONS key on show, or nil
 -- screen with the words on it, fading in as it slides a little from the left, holding in
 -- the middle, then fading out as it slides on to the right. Its ends never show.
 local BANNER = {
-	strips = { { "94539125298112", 962 }, { "113989164510552", 961 } }, -- assets/ui/PromptBanner1-2.png (PromptBanner.png, 1923 x 113, halved: an upload's at most 1024 wide)
-	size = Vector2.new(1923, 113),
-	width = 1.3, -- x the screen's width (so its ends are always off it, slid or not)
+	strips = { { " 133460716318344 123588848079137 71619753997099", 863 }, { "", 862 }, { "", 862 } }, -- assets/ui/PromptBanner1-3.png (QM's longer PromptBanner.png, 2587 x 113, in thirds: an upload's at most 1024 wide)
+	size = Vector2.new(2587, 113),
+	width = 1.4, -- x the screen's width (so its ends are always off it, slid or not)
 	at = 0.17, -- its middle, down the screen
 	slide = 0.06, -- of the screen's width either side of the middle
 	fade = 0.45, hold = 3, -- seconds
@@ -419,6 +419,7 @@ local function run()
 		return
 	end
 	running = true
+	bannerShown = {} -- (a new run, "/tutorial" too, shows its banners again)
 	-- After the intro (or straight away without one).
 	if Config.Intro ~= false then
 		while player:GetAttribute("Tutorial") and not player:GetAttribute("IntroDone") do
@@ -550,6 +551,7 @@ end
 
 local function check()
 	if player:GetAttribute("Tutorial") == true then
+		bannerShown = {} -- ("/tutorial" again: its banners show again)
 		task.spawn(run)
 	else
 		clear()
