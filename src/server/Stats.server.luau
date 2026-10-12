@@ -181,11 +181,18 @@ local function report()
 			table.insert(reached, string.format("%s %.0f%%", Config.Biomes[i].Name, 100 * (t["reached" .. i] or 0) / t.sessions))
 		end
 		table.insert(lines, "Reached: " .. table.concat(reached, ", "))
-		local quit = {}
-		for i, band in BANDS do
-			table.insert(quit, string.format("%s %.0f%%", band[2], 100 * (t["quit" .. i] or 0) / t.sessions))
+		-- (of the sessions with a band: today's from before the bands have none)
+		local banded = 0
+		for i in BANDS do
+			banded += t["quit" .. i] or 0
 		end
-		table.insert(lines, "Quit at: " .. table.concat(quit, ", "))
+		if banded > 0 then
+			local quit = {}
+			for i, band in BANDS do
+				table.insert(quit, string.format("%s %.0f%%", band[2], 100 * (t["quit" .. i] or 0) / banded))
+			end
+			table.insert(lines, string.format("Quit at (%d sessions): %s", banded, table.concat(quit, ", ")))
+		end
 	end
 	-- The latest versions' averages, newest first (each over its whole life).
 	local versions = {}
