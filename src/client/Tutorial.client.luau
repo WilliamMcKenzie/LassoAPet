@@ -156,7 +156,7 @@ local BANNER = {
 	travel = 0.6, -- the words go from this far left of the middle to this far right, x the screen's width
 	speed = { 2.592, 0.136 }, -- A, B: the words' speed A (2u - 1)^2 + B of their average (A / 3 + B = 1)
 	fade = 0.16, -- of the sweep fading in, and again out
-	time = 1.12, -- seconds, the whole sweep
+	time = 3, -- seconds, the whole sweep (QM)
 }
 local BANNER_WORDS = { -- the words, as QM drew them, and their size in pixels
 	ride = { "138620110562195", Vector2.new(354, 49) }, -- assets/ui/BannerRideHorse.png "Ride your horse!"
