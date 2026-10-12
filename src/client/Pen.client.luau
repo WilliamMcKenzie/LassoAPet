@@ -589,11 +589,17 @@ RunService.RenderStepped:Connect(function(dt)
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	for pen, list in shown do
 		if (pen.Area.Position - camPos).Magnitude > FAR then
+			for _, s in list do
+				readyArrow(s, false) -- (not left up where it was: the merge view's camera is far up, QM)
+			end
 			continue
 		end
 		local inView = penInView(pen)
 		for _, s in list do
 			s.inView = inView
+			if not (s.egg and (inView or s.hatching)) or player:GetAttribute("MergeView") then
+				readyArrow(s, false)
+			end
 			if s.egg and (inView or s.hatching) then
 				if not s.hatching then
 					local ready = (s.hatchAt or now) <= now
