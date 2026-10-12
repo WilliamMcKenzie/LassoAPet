@@ -215,8 +215,9 @@ end
 
 -- A run's hidden speed floor (QM, Oct 12): whatever you lasso onto runs at least the
 -- Speed of the pet you left your pen on less Config.RunSpeedLeeway, so a slow animal
--- lassoed for fun doesn't strand you short of your biome (a Horse's Fish keeps its own
--- 0.6; a T-Rex's Rhino runs at 5.5, not 1.35). 0 for a ride that didn't start on a pet.
+-- lassoed for fun doesn't strand you short of your biome (a Penguin's Rhino runs 1.62,
+-- not 1.35). 0 for a ride that didn't start on a pet, or before you've reached the Desert
+-- (a new player's Horse's Fish keeps its own 0.6).
 local runFloor = 0
 local function rideSpeed(entity)
 	return math.max(statsOf(entity.kind, entity).Speed, runFloor)
@@ -855,7 +856,7 @@ startRide = function(model, at)
 		vfx.syncing = true -- (so "end" follows, however soon the ride ends)
 	end
 	mount.animal:setSaddled(true)
-	runFloor = if fromHerd then 0 else statsOf(mount.kind, mount).Speed - (Config.RunSpeedLeeway or math.huge)
+	runFloor = if fromHerd or (player:GetAttribute("GatesBroken") or 1) < 2 then 0 else statsOf(mount.kind, mount).Speed - (Config.RunSpeedLeeway or math.huge) -- (none till you've reached the Desert)
 	vfx.rideAgain = nil
 	leadFromZ = spot.Z - 8
 	exitPath = if fromHerd or at then nil else penExitPath()
