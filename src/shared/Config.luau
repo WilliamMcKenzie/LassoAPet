@@ -673,6 +673,7 @@ return {
 	-- the gap between the left corner pen and the start line. Talk to him and he asks
 	-- if you want to spin; Yes opens the roll menu. Faces into the base (+z).
 	Carl = {
+		On = false, -- (QM, Oct 12: Carl's gone; a stone portal gate stands there for now, World.BaseDecor.PortalGate, doing nothing yet)
 		Position = Vector3.new(-104, 0, 20), -- the arc base's front left corner, beside the corridor (QM, Oct 9)
 		Yaw = 15, -- degrees it turns in toward the course, off square with the wall (QM)
 		Reach = 12, -- studs from the counter where Talk shows
