@@ -1013,29 +1013,29 @@ return {
 		Rhino = { Speed = 1.35, Stamina = 1.8 },
 		Unicorn = { Speed = 1.8, Stamina = 2 }, -- (QM, Oct 12: kept at 1.8, into the Tundra from the start line, ~4,440 of 3,984)
 		-- Desert
-		Cactus = { Speed = 1.2, Stamina = 1.5 },
-		Kitten = { Speed = 1.4, Stamina = 1.2 },
-		Scorpion = { Speed = 1.5, Stamina = 1.5 },
-		Sandworm = { Speed = 1.6, Stamina = 3 },
-		SpineLizard = { Speed = 1.62, Stamina = 2 },
+		Cactus = { Speed = 1.31, Stamina = 1.5 }, -- (QM, Oct 12: 90% into the Desert; was 1.2)
+		Kitten = { Speed = 1.5, Stamina = 1.2 }, -- (QM, Oct 12: 20% into the Tundra; was 1.4)
+		Scorpion = { Speed = 1.77, Stamina = 1.5 }, -- (QM, Oct 12: 60% into the Tundra; was 1.5)
+		Sandworm = { Speed = 1.7, Stamina = 3 }, -- (QM, Oct 12: 50% into the Tundra; was 1.6)
+		SpineLizard = { Speed = 1.97, Stamina = 2 }, -- (QM, Oct 12: 90% into the Tundra; was 1.62)
 		Snake = { Speed = 2.8, Stamina = 3 }, -- (QM, Oct 12: was 2)
 		-- Tundra
-		Penguin = { Speed = 1.72, Stamina = 1.5 },
-		Boar = { Speed = 1.86, Stamina = 1.6 },
-		Snowman = { Speed = 2.06, Stamina = 1.3 },
-		IceGolem = { Speed = 2.37, Stamina = 3 },
+		Penguin = { Speed = 1.99, Stamina = 1.5 }, -- (QM, Oct 12: 93% into the Tundra; was 1.72)
+		Boar = { Speed = 2.36, Stamina = 1.6 }, -- (QM, Oct 12: 30% into the Ocean; was 1.86)
+		Snowman = { Speed = 2.52, Stamina = 1.3 }, -- (QM, Oct 12: 45% into the Ocean; was 2.06)
+		IceGolem = { Speed = 2.57, Stamina = 3 }, -- (QM, Oct 12: 50% into the Ocean; was 2.37)
 		SnackYak = { Speed = 3, Stamina = 2 }, -- QM, Oct 4 (stamina 1 -> 2)
 		Icebringer = { Speed = 3.8, Stamina = 4 }, -- (QM, Oct 12: into the Volcano from the start line, ~9,380 of 9,024; was 3.6) -- (QM, Oct 11: a Legendary well past the next biome's Uncommons: 1.25x the Starfish, it lands in the Volcano)
 		-- Ocean
-		Starfish = { Speed = 2.87, Stamina = 2 },
-		Squid = { Speed = 3.7, Stamina = 2.6 },
-		KingCrab = { Speed = 3.6, Stamina = 3 },
+		Starfish = { Speed = 3.37, Stamina = 2 }, -- (QM, Oct 12: 15% into the Volcano; was 2.87)
+		Squid = { Speed = 4.15, Stamina = 2.6 }, -- (QM, Oct 12: 60% into the Volcano; was 3.7)
+		KingCrab = { Speed = 3.98, Stamina = 3 }, -- (QM, Oct 12: 50% into the Volcano; was 3.6)
 		BlueCrab = { Speed = 5.7, Stamina = 3 }, -- (QM, Oct 11: as the Kraken, a touch slower)
-		Lionfish = { Speed = 3.4, Stamina = 2 }, -- QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
-		Clownfish = { Speed = 2.8, Stamina = 2.4 }, -- (a little slower than the Starfish, an Ocean Uncommon too)
+		Lionfish = { Speed = 3.54, Stamina = 2 }, -- (QM, Oct 12: 25% into the Volcano; was 3.4); QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
+		Clownfish = { Speed = 3.28, Stamina = 2.4 }, -- (QM, Oct 12: 10% into the Volcano; was 2.8); (a little slower than the Starfish, an Ocean Uncommon too)
 		RoboShark = { Speed = 1.2, Stamina = 3 }, -- QM, Oct 4: starts at 1.2x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed 2.5 x this)
-		FishSchool = { Speed = 3.95, Stamina = 2.8 },
-		Whale = { Speed = 3.2, Stamina = 10 },
+		FishSchool = { Speed = 4.15, Stamina = 2.8 }, -- (QM, Oct 12: 60% into the Volcano; was 3.95)
+		Whale = { Speed = 3.45, Stamina = 10 }, -- (QM, Oct 12: 20% into the Volcano; was 3.2)
 		Kraken = { Speed = 5.8, Stamina = 3 }, -- (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
 		-- Volcano
 		Firebird = { Speed = 4.59, Stamina = 2.5 },
