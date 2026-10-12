@@ -20,8 +20,9 @@ local Inventory = {}
 
 local SLOT = 84
 local OUTLINE = 2 -- px of black round each egg picture (QM: about the slot number's stroke)
-local PANEL = "rbxassetid://126644097924232" -- assets/ui/CommonPanel.png (512 px, flat grey, no border: QM, Oct 9)
-local PANEL_CORNER = 61 / 512 -- its corners' radius, of its width (measured from the PNG: QM rounded them less)
+local PANEL = "rbxassetid://86824541929406" -- assets/ui/InventoryBG.png (96 px, grey with a dark border: QM, Oct 11; was CommonPanel.png)
+local PANEL_SIZE = 96
+local PANEL_CORNER = 18 / 96 -- its corners' radius, of its width (measured from the PNG)
 local SCALE = 0.96 -- the whole bar, slots, numbers and outlines alike (QM, Oct 9: 20% smaller, was 1.2)
 local GAP = 10
 local BOTTOM = GAP * SCALE -- (QM, Oct 9: the same gap under the bar as between its slots, on screen; was 24)
@@ -140,16 +141,16 @@ local function redraw()
 		slot.LayoutOrder = i
 		slot.Name = tool.Name
 		Instance.new("UICorner", slot).CornerRadius = UDim.new(PANEL_CORNER, 0) -- (the selected ring follows it: the panel's own corners)
-		-- Every slot on QM's CommonPanel (Oct 8, trying it out in place of the rarity
-		-- panels): a 9-slice, so its outline and round corners stay crisp at slot size.
+		-- Every slot on QM's InventoryBG (Oct 11; CommonPanel from Oct 8): a 9-slice, so its
+		-- border and round corners stay crisp at slot size.
 		slot.BackgroundTransparency = 1
 		local bg = Instance.new("ImageLabel")
 		bg.BackgroundTransparency = 1
 		bg.Size = UDim2.fromScale(1, 1)
 		bg.Image = PANEL
 		bg.ScaleType = Enum.ScaleType.Slice
-		bg.SliceCenter = Rect.new(96, 96, 416, 416) -- (just past its rounded corners)
-		bg.SliceScale = SLOT / 512 -- (the art's proportions at slot size)
+		bg.SliceCenter = Rect.new(24, 24, 72, 72) -- (just past its rounded corners)
+		bg.SliceScale = SLOT / PANEL_SIZE -- (the art's proportions at slot size)
 		bg.ZIndex = 0 -- (under the egg's outline)
 		bg.Parent = slot
 		if tool.Parent == player.Character then
