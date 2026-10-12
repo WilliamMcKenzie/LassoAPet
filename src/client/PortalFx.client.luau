@@ -8,7 +8,9 @@
 -- below; missing ones are added with these values). Change them in Studio's Properties,
 -- in Edit or while playing, and the swirl follows at once.
 --   Angles      his `angles`: how many wave directions (any number, 2 to 12 or so)
---   Speed       his `speed`: how fast it drifts (his offset += speed / 16 a frame at 60 fps)
+--   Speed       his `speed`: how fast it drifts far off (his offset += speed / 16 a frame at 60 fps)
+--   SpeedNear / NearDistance / FarDistance   it speeds up as you come close: Speed from
+--               FarDistance studs out to SpeedNear at NearDistance (QM, Oct 12)
 --   Scale       how big the pattern is: wave cycles per pixel (his 1 a cell; smaller: bigger blobs)
 --   Modifier    his `modifier`: twists each direction by 2 x modifier x (pi / angles x i)
 --   Seed        shifts each wave's phase at random (0: none, as his)
@@ -27,7 +29,10 @@ local RunService = game:GetService("RunService")
 
 local DEFAULTS = { -- (QM's picks, Oct 12)
 	Angles = 7.1,
-	Speed = 0.5,
+	Speed = 0.5, -- (far off; up to SpeedNear as you come close: QM)
+	SpeedNear = 2,
+	NearDistance = 10, -- studs from the opening: SpeedNear this close
+	FarDistance = 60, -- studs: Speed this far and beyond
 	Scale = 0.5,
 	Modifier = 0,
 	Seed = 0,
@@ -42,15 +47,17 @@ local DEFAULTS = { -- (QM's picks, Oct 12)
 	LightRange = 0,
 	FPS = 16,
 }
-local SIZE = Vector2.new(14, 22) -- studs
-local CENTRE = Vector3.new(0, 2.8 + 11, 0) -- the opening's middle, in the gate's frame
-local SPRING, R_IN = 17 - 2.8, 7.2 -- (in the opening's own frame, from its bottom)
 local NEAR = 220 -- studs: no drawing further off
 
 local gate = workspace:WaitForChild("World"):WaitForChild("BaseDecor"):WaitForChild("PortalGate", 30)
 if not gate then
 	return
 end
+-- (the gate's Model scale: 1.6 since QM, Oct 12; the opening's sizes below are at scale 1)
+local S = if gate:IsA("Model") then gate:GetScale() else 1
+local SIZE = Vector2.new(14, 22) * S -- studs
+local CENTRE = Vector3.new(0, 2.8 + 11, 0) * S -- the opening's middle, in the gate's frame
+local SPRING, R_IN = (17 - 2.8) * S, 7.2 * S -- (in the opening's own frame, from its bottom)
 for name, value in DEFAULTS do
 	if gate:GetAttribute(name) == nil then
 		gate:SetAttribute(name, value)
@@ -87,12 +94,12 @@ end
 plane.Parent = workspace
 
 -- "Coming soon" over the gate while you're near it (QM, Oct 12: it doesn't go anywhere yet).
-local SOON_NEAR = 25 -- studs from the opening
+local SOON_NEAR = 25 * S -- studs from the opening
 local soon = Instance.new("BillboardGui")
 soon.Name = "PortalComingSoon"
 soon.Adornee = plane
-soon.Size = UDim2.fromScale(16, 3)
-soon.StudsOffsetWorldSpace = Vector3.new(0, SIZE.Y / 2 + 8, 0) -- (over the keystone)
+soon.Size = UDim2.fromScale(16 * S, 3 * S)
+soon.StudsOffsetWorldSpace = Vector3.new(0, SIZE.Y / 2 + 8 * S, 0) -- (over the keystone)
 soon.LightInfluence = 0
 soon.Enabled = false
 local soonText = Instance.new("TextLabel")
@@ -213,8 +220,16 @@ local function draw()
 	image:WritePixelsBuffer(Vector2.zero, Vector2.new(W, H), pixels)
 end
 
+local speed = DEFAULTS.Speed -- (eased, so it doesn't jump)
 RunService.RenderStepped:Connect(function(dt)
-	offset += knob("Speed") / 16 * dt * 60
+	local character = game:GetService("Players").LocalPlayer.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local d = if root then (root.Position - plane.Position).Magnitude else math.huge
+	local near, far = knob("NearDistance"), knob("FarDistance")
+	local t = math.clamp((far - d) / math.max(far - near, 1), 0, 1)
+	local want = knob("Speed") + (knob("SpeedNear") - knob("Speed")) * (t * t * (3 - 2 * t))
+	speed += (want - speed) * (1 - math.exp(-4 * dt))
+	offset += speed / 16 * dt * 60
 	local now = os.clock()
 	if now - last < 1 / math.max(knob("FPS"), 1) then
 		return
