@@ -925,7 +925,7 @@ return {
 			{ Text = "Reach Jurassic", Kind = "reach", Biome = 6, Egg = "Phoenix" },
 		},
 		{
-			{ Text = "Lasso animals", Kind = "lasso", Need = 10, Egg = "SpineLizard" },
+			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "SpineLizard" }, -- (QM, Oct 11: 3, was 10)
 			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "BoneRex" }, -- (for D1: its egg's long, QM)
 			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "SnackYak" }, -- (QM, Oct 11: the Snack Yak, was the Snowman)
 			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "TRex" }, -- (QM, Oct 11: these three after Merge)
