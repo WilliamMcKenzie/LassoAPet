@@ -328,6 +328,7 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
+local claimBusy = false -- a claim's egg reveal is up: no other claim till it's over (QM, Oct 11)
 local function questRow(i, quest, y)
 	local done = quest.have >= quest.need
 	local row = Instance.new("Frame")
@@ -411,12 +412,11 @@ local function questRow(i, quest, y)
 			label.TextXAlignment = Enum.TextXAlignment.Center
 			label.Size = UDim2.fromScale(1, 1)
 		end
-		local claiming = false
 		claim.Activated:Connect(function()
-			if claiming then
+			if claimBusy or Hud.revealing() then
 				return
 			end
-			claiming = true
+			claimBusy = true
 			-- (its egg stays out of the inventory till its reveal's over: QM, Oct 11)
 			local line = Config.Quests[i // 100]
 			local egg = line and line[i % 100] and line[i % 100].Egg
@@ -428,16 +428,16 @@ local function questRow(i, quest, y)
 			if animal then
 				Hud.eggReveal(require(animal).Rarity, kind, true) -- (the egg it gave you)
 			end
-			claiming = false
-			if egg then
-				task.spawn(function()
-					task.wait(0.2)
-					while Hud.revealing() do
-						task.wait(0.1)
-					end
+			task.spawn(function()
+				task.wait(0.2)
+				while Hud.revealing() do
+					task.wait(0.1)
+				end
+				if egg then
 					Inventory.holdBack(egg, -1)
-				end)
-			end
+				end
+				claimBusy = false
+			end)
 		end)
 		-- (in a holder that pulses about its middle: QM, Oct 11; the button's own UIScale is its press)
 		local holder = Instance.new("Frame")
