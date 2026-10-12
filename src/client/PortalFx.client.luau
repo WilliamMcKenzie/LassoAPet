@@ -33,7 +33,7 @@ local DEFAULTS = { -- (QM's picks, Oct 12)
 	SpeedNear = 2,
 	NearDistance = 10, -- studs from the opening: SpeedNear this close
 	FarDistance = 60, -- studs: Speed this far and beyond
-	Scale = 0.5,
+	Scale = 0.4,
 	Modifier = 0,
 	Seed = 0,
 	Contrast = 10,
@@ -45,7 +45,7 @@ local DEFAULTS = { -- (QM's picks, Oct 12)
 	Glow = 5,
 	LightBrightness = 0,
 	LightRange = 0,
-	FPS = 16,
+	FPS = 48,
 }
 local NEAR = 220 -- studs: no drawing further off
 
