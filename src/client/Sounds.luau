@@ -80,7 +80,7 @@ folder.Parent = SoundService
 -- the record scratch (QM, Oct 11: that's the exception) and the music (QM, Oct 11).
 local SLOWEST = 0.25
 local timeScale = 1
-local UNSCALED = { record_scratch = true }
+local UNSCALED = { record_scratch = true, arrive_home = true } -- (and the hit that plays with the scratch, as you land home: slowed under it, the scratch sounded off, QM)
 local function applySpeed(s)
 	s.PlaybackSpeed = (s:GetAttribute("Base") or 1) * (if s:GetAttribute("NoTimeScale") then 1 else timeScale)
 end
