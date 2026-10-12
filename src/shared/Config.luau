@@ -1011,7 +1011,7 @@ return {
 		Pinto = { Speed = 1.1, Stamina = 0.9 },
 		Fish = { Speed = 0.6, Stamina = 3, BiomeSpeed = { Ocean = "Clownfish" } }, -- (slow everywhere but the Ocean, where it's as fast as a Clownfish: QM, Oct 11)
 		Rhino = { Speed = 1.35, Stamina = 1.8 },
-		Unicorn = { Speed = 1.65, Stamina = 2 }, -- (QM, Oct 12: the Legendaries' flowers; it just reaches the Tundra from the start line, ~4,070 of 3,984; was 1.8)
+		Unicorn = { Speed = 1.8, Stamina = 2 }, -- (QM, Oct 12: kept at 1.8, into the Tundra from the start line, ~4,440 of 3,984)
 		-- Desert
 		Cactus = { Speed = 1.2, Stamina = 1.5 },
 		Kitten = { Speed = 1.4, Stamina = 1.2 },
@@ -1025,7 +1025,7 @@ return {
 		Snowman = { Speed = 2.06, Stamina = 1.3 },
 		IceGolem = { Speed = 2.37, Stamina = 3 },
 		SnackYak = { Speed = 3, Stamina = 2 }, -- QM, Oct 4 (stamina 1 -> 2)
-		Icebringer = { Speed = 3.7, Stamina = 4 }, -- (QM, Oct 12: into the Volcano from the start line, ~9,130 of 9,024; was 3.6) -- (QM, Oct 11: a Legendary well past the next biome's Uncommons: 1.25x the Starfish, it lands in the Volcano)
+		Icebringer = { Speed = 3.8, Stamina = 4 }, -- (QM, Oct 12: into the Volcano from the start line, ~9,380 of 9,024; was 3.6) -- (QM, Oct 11: a Legendary well past the next biome's Uncommons: 1.25x the Starfish, it lands in the Volcano)
 		-- Ocean
 		Starfish = { Speed = 2.87, Stamina = 2 },
 		Squid = { Speed = 3.7, Stamina = 2.6 },
