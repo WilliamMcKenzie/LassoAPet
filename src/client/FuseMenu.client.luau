@@ -142,12 +142,12 @@ local function yourPets()
 	local list = {}
 	for model, pet in PenPets.pets do
 		if model.Parent then
-			table.insert(list, { model = model, id = pet.id, kind = pet.kind, fuse = pet.fuse, merged = pet.merged, worth = pet.worth, income = pet.income })
+			table.insert(list, { model = model, id = pet.id, kind = pet.kind, fuse = pet.fuse, merged = pet.merged, worth = pet.worth, income = pet.income, stats = pet.stats })
 		end
 	end
 	local starter = PenPets.starter
 	if starter and starter.animal.model.Parent and starter.kind == player:GetAttribute("RidePet") then
-		table.insert(list, { model = starter.animal.model, id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged, worth = player:GetAttribute("RideWorth"), income = player:GetAttribute("RideIncome") })
+		table.insert(list, { model = starter.animal.model, id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged, worth = player:GetAttribute("RideWorth"), income = player:GetAttribute("RideIncome"), stats = starter.stats })
 	end
 	local ranks = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5 }
 	table.sort(list, function(a, b) -- rarest first, then by kind, so a kind's pets sit together
@@ -709,7 +709,8 @@ if RunService:IsStudio() then
 end
 
 -- The "Merge animals" quest's hint (BaseUi sets "MergeHint"; QM, Oct 11): tap hands
--- on two animals to pick, then on the Merge button once both are.
+-- on two animals to pick, your two strongest (the fastest: QM), then on the Merge
+-- button once both are.
 local hintHands = { TapHand.new(80), TapHand.new(80), TapHand.new(80) }
 for _, hand in hintHands do
 	hand.Visible = false
@@ -728,7 +729,15 @@ RunService.RenderStepped:Connect(function()
 		hintHands[3].Visible = true
 	else
 		hintHands[3].Visible = false
-		for _, pet in (if on then pets else {}) do
+		local strongest = if on then table.clone(pets) else {}
+		local speed = {}
+		for _, pet in strongest do
+			speed[pet] = Fusion.stats(pet.kind, pet.fuse, pet.stats).Speed
+		end
+		table.sort(strongest, function(a, b)
+			return speed[a] > speed[b]
+		end)
+		for _, pet in strongest do
 			if shown >= 2 - pickedCount() then
 				break
 			end
