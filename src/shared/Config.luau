@@ -91,7 +91,7 @@ return {
 			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
 			HerdSpawnEvery = 0.45, -- (twice the stampede of the rest: it looked barren, QM Oct 11)
-			Herd = { Fish = 0, Starfish = 0.3, Clownfish = 0.25, Whale = 0.15, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0, Kraken = 0.05, Lionfish = 0.15 }, -- (the Lionfish Rare, a touch faster than the Starfish, QM Oct 11, weight a guess; the Clownfish Uncommon, a little rarer than the Starfish, QM Oct 11; Blue Crab guessed like the Kraken; the Robo Shark never spawns: a future Robux pet, QM Oct 4)
+			Herd = { Fish = 0.1, Starfish = 0.3, Clownfish = 0.25, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0, Kraken = 0.05, Lionfish = 0.15 }, -- (the Lionfish Rare, a touch faster than the Starfish, QM Oct 11, weight a guess; the Clownfish Uncommon, a little rarer than the Starfish, QM Oct 11; Blue Crab guessed like the Kraken; the Robo Shark never spawns: a future Robux pet, QM Oct 4)
 			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
 			Patches = {
 				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
@@ -378,7 +378,7 @@ return {
 		Horse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
 		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 300, SpineLizard = 300, Snake = 1800, -- Desert
 		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 300, Icebringer = 3600, SnackYak = 3600, -- Tundra
-		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 60, Squid = 300, KingCrab = 300, FishSchool = 300, BlueCrab = 14400, Kraken = 18000, -- Ocean
+		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 35, Squid = 45, KingCrab = 300, FishSchool = 200, BlueCrab = 2600, Kraken = 2000, -- Ocean
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
 		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 300, Pterodactyl = 300, BoneRex = 43200, -- Jurassic
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands

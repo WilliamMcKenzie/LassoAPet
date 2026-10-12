@@ -213,9 +213,10 @@ local function statsOf(kind, entity)
 	return if as then { Speed = as.Speed, Stamina = s.Stamina } else s
 end
 
--- How fast a kind runs in the stampede: always exactly this, no variance.
-local function herdSpeed(kind)
-	return Config.HerdSpeed * statsOf(kind).Speed
+-- How fast a kind runs in the stampede: always exactly this, no variance. z: where (its
+-- biome's BiomeSpeed: the Fish in the Ocean).
+local function herdSpeed(kind, z)
+	return Config.HerdSpeed * statsOf(kind, z and { z = z }).Speed
 end
 
 -- How long the Hold bar lasts: Config.RideSeconds, whatever you're riding (QM, Oct 10:
@@ -232,9 +233,10 @@ local function newStream(spawnZ, endZ, herd, name)
 		kinds = {},
 		total = 0,
 	}
+	s.mid = (spawnZ + endZ) / 2 -- (its biome's speeds: herdSpeed)
 	local slowest = math.huge
 	for kind in herd do
-		slowest = math.min(slowest, herdSpeed(kind))
+		slowest = math.min(slowest, herdSpeed(kind, s.mid))
 	end
 	s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / slowest
 	local names = {}
@@ -367,7 +369,7 @@ for _, stream in streams do
 	for _, kind in stream.kinds do
 		classes[kind.name] = classes[kind.name] or require(Animals[kind.name])
 		pools[kind.name] = pools[kind.name] or {}
-		local average = window * kind.weight / stream.total / (stream.every * herdSpeed(kind.name))
+		local average = window * kind.weight / stream.total / (stream.every * herdSpeed(kind.name, stream.mid))
 		poolSizes[kind.name] = (poolSizes[kind.name] or 0) + average + math.sqrt(average)
 	end
 end
@@ -398,7 +400,7 @@ local function release(entity)
 	entity.animal:setSaddled(false)
 	entity.animal.sprinting = false -- (the Kraken walks again: Horse gallopOnSprint)
 	entity.lane = entity.x / vfx.widen(entity.z)
-	entity.cruise = herdSpeed(entity.kind)
+	entity.cruise = herdSpeed(entity.kind, entity.z)
 	table.insert(strays, entity)
 end
 
@@ -1785,7 +1787,7 @@ local function updateHerd(dt, slowed)
 			if age < 0 then
 				continue
 			end
-			local dist, speed = run(herdSpeed(p.kind), math.max(age - START_AFTER, 0))
+			local dist, speed = run(herdSpeed(p.kind, stream.mid), math.max(age - START_AFTER, 0))
 			if vfx.frostLeft[key] then
 				vfx.frostLag[key] = (vfx.frostLag[key] or 0) + speed * vfx.frostSlow * dt
 				speed *= 1 - vfx.frostSlow
