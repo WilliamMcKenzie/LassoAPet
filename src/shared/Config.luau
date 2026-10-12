@@ -921,7 +921,8 @@ return {
 	-- that's done leaves the other alone in the panel; both done, the panel's gone.
 	-- (QM, Oct 11: "Reach ...", was "Enter the ...")
 	-- Kind: "reach" (ride into Config.Biomes[Biome]; the Meadow's, 1, is done from the start), "lasso" (land Need lassos on wild
-	-- animals), "home" (bring Need animals home), "merge" (merge Need times); the last
+	-- animals), "home" (bring Need animals home), "merge" (merge Need times), "invite" (Need
+	-- friends you invited joined); the last
 	-- three count from when the quest comes up.
 	Quests = {
 		{
@@ -940,6 +941,9 @@ return {
 			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 3, Egg = "LavaWhale" }, -- (QM, Oct 11: 3, was 5) -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
 			{ Text = "Lasso Lava Whales", Kind = "lasso", Animal = "LavaWhale", Need = 2, Egg = "RoboShark" }, -- (QM, Oct 11: was Collect 30)
 			{ Text = "Lasso a Bone Rex", Kind = "lasso", Animal = "BoneRex", Need = 1, Egg = "Loong" }, -- (QM, Oct 11: was Collect 50)
+		},
+		{ -- (QM, Oct 12: a third line, just this; tapping it opens Roblox's invite, done when an invited friend joins: Hatchery)
+			{ Text = "Invite a friend", Kind = "invite", Need = 1, Egg = "Squid", NoPenLevel = true },
 		},
 	},
 	BullSpots = { Vector3.new(-18, 0, 173), Vector3.new(-75.2, 0, 129.6), Vector3.new(52, 0, 157.1), Vector3.new(-78.6, 0, 57.9), Vector3.new(84.9, 0, 93.3) },

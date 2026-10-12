@@ -12,7 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 
-local COUNTS = { lasso = true, merge = true }
+local COUNTS = { lasso = true, merge = true, invite = true }
 
 local Quests = {}
 

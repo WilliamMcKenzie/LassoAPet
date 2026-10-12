@@ -244,6 +244,7 @@ local function awayGold(player, profile, data)
 	return (tonumber(data.awayGold) or 0) + math.floor(income(profile) * x * Config.AwayRate * away)
 end
 
+local inviteCredits -- (below: "Invite a friend")
 local function load(player)
 	local profile = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {} }
 	if store then
@@ -316,6 +317,14 @@ local function load(player)
 	profiles[player] = profile
 	profile.quests = profile.quests or Quests.load(nil)
 	Quests.publish(player, profile.quests)
+	task.spawn(function() -- friends you invited who joined while you were elsewhere ("Invite a friend")
+		local credits = inviteCredits(player)
+		for _ = 1, credits do
+			if profiles[player] then
+				Quests.count(player, profiles[player].quests, "invite")
+			end
+		end
+	end)
 	player:GetAttributeChangedSignal("GatesBroken"):Connect(function() -- ("Enter Desert" and the like)
 		if profiles[player] then
 			Quests.publish(player, profiles[player].quests)
@@ -338,6 +347,41 @@ local function load(player)
 	player:SetAttribute("AwayGold", if (profile.awayGold or 0) > 0 then profile.awayGold else nil)
 	publish(player)
 end
+
+-- "Invite a friend" (QM, Oct 12): the invite (BaseUi: SocialService) carries the
+-- inviter's UserId as its launch data. When the friend joins, the inviter's quest counts
+-- one, here if they're in this server, else saved under InviteCredits for their next join.
+local inviteStore
+do
+	local okInvites, s = pcall(DataStoreService.GetDataStore, DataStoreService, "InviteCredits")
+	inviteStore = if okInvites then s else nil
+end
+inviteCredits = function(player) -- (taken: the count's gone from the store once read)
+	if not inviteStore then
+		return 0
+	end
+	local n = 0
+	pcall(inviteStore.UpdateAsync, inviteStore, "u" .. player.UserId, function(old)
+		n = tonumber(old) or 0
+		return if n > 0 then 0 else nil
+	end)
+	return n
+end
+Players.PlayerAdded:Connect(function(player)
+	local okJoin, data = pcall(player.GetJoinData, player)
+	local inviter = okJoin and data and tonumber(data.LaunchData)
+	if not inviter or inviter == player.UserId then
+		return
+	end
+	local there = Players:GetPlayerByUserId(inviter)
+	if there and profiles[there] then
+		Quests.count(there, profiles[there].quests, "invite")
+	elseif inviteStore then
+		pcall(inviteStore.UpdateAsync, inviteStore, "u" .. inviter, function(old)
+			return (tonumber(old) or 0) + 1
+		end)
+	end
+end)
 
 local savedAs = {} -- [player] = the profile as last saved, as JSON (autosave skips it if unchanged)
 

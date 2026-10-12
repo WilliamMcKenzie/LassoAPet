@@ -317,6 +317,17 @@ local function hint(quest)
 		end
 	elseif quest.kind == "merge" then
 		player:SetAttribute("MergeHint", true)
+	elseif quest.kind == "invite" then -- Roblox's invite, carrying your id so the friend's join counts (Hatchery)
+		task.spawn(function()
+			local SocialService = game:GetService("SocialService")
+			local okCan, can = pcall(SocialService.CanSendGameInviteAsync, SocialService, player)
+			if okCan and can then
+				local options = Instance.new("ExperienceInviteOptions")
+				options.LaunchData = tostring(player.UserId)
+				options.PromptMessage = "Ride with me!"
+				pcall(SocialService.PromptGameInvite, SocialService, player, options)
+			end
+		end)
 	end
 end
 
