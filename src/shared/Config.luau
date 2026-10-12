@@ -935,7 +935,7 @@ return {
 			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "BoneRex" }, -- (for D1: its egg's long, QM)
 			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "SnackYak" }, -- (QM, Oct 11: the Snack Yak, was the Snowman)
 			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "TRex" }, -- (QM, Oct 11: these three after Merge)
-			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 5, Egg = "LavaWhale" }, -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
+			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 3, Egg = "LavaWhale" }, -- (QM, Oct 11: 3, was 5) -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
 			{ Text = "Collect animals", Kind = "home", Need = 30, Egg = "RoboShark" }, -- (QM, Oct 11: the Robo Shark, was the Pterodactyl; pen space 50 by then: 5+ quests claimed, PenLevel 6)
 			{ Text = "Collect animals", Kind = "home", Need = 50, Egg = "Loong" }, -- (QM, Oct 11)
 		},
