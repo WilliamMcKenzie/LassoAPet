@@ -148,7 +148,7 @@ local captionOn -- the CAPTIONS key on show, or nil
 -- screen with the words on it, fading in as it slides a little from the left, holding in
 -- the middle, then fading out as it slides on to the right. Its ends never show.
 local BANNER = {
-	strips = { { " 133460716318344 123588848079137 71619753997099", 863 }, { "", 862 }, { "", 862 } }, -- assets/ui/PromptBanner1-3.png (QM's longer PromptBanner.png, 2587 x 113, in thirds: an upload's at most 1024 wide)
+	strips = { { "133460716318344", 863 }, { "123588848079137", 862 }, { "71619753997099", 862 } }, -- assets/ui/PromptBanner1-3.png (QM's longer PromptBanner.png, 2587 x 113, in thirds: an upload's at most 1024 wide)
 	size = Vector2.new(2587, 113),
 	width = 1.4, -- x the screen's width (so its ends are always off it, slid or not)
 	at = 0.17, -- its middle, down the screen
