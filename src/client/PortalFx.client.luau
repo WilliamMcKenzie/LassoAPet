@@ -1,31 +1,64 @@
 -- The portal gate's swirl (QM, Oct 12: his quasicrystal, ported from his JS): a low-res
--- EditableImage in the gate's opening, both faces, see-through where the waves cancel,
--- a sum of cos waves over ANGLES directions drifting with time, in big square pixels,
--- with a soft light. Drawn only while the gate's near and on screen, at most FPS a second.
+-- EditableImage in the gate's opening, both faces. Each pixel sums cos waves over Angles
+-- directions (his getOpacity / getColor), drifting with time; that sets how much of the
+-- fill colour shows over the backdrop colour. Drawn only while the gate's near and on
+-- screen, at most FPS times a second.
+--
+-- Tuning, live (QM): every knob is an attribute on World.BaseDecor.PortalGate (DEFAULTS
+-- below; missing ones are added with these values). Change them in Studio's Properties,
+-- in Edit or while playing, and the swirl follows at once.
+--   Angles      his `angles`: how many wave directions (any number, 2 to 12 or so)
+--   Speed       his `speed`: how fast it drifts (his offset += speed / 16 a frame at 60 fps)
+--   Scale       how big the pattern is: wave cycles per pixel (his 1 a cell; smaller: bigger blobs)
+--   Modifier    his `modifier`: twists each direction by 2 x modifier x (pi / angles x i)
+--   Seed        shifts each wave's phase at random (0: none, as his)
+--   Contrast    his x10 on each wave: higher is harder edged
+--   FillColor / FillAlpha   the pattern's colour and how opaque it is (his fill, 0..1)
+--   BackColor / BackAlpha   the backdrop behind it (0: see-through, as his canvas)
+--   PixelsPerStud           the pixel size (2: half-stud pixels); rebuilds the image
+--   Glow        how bright the pixels are (SurfaceGui.Brightness; above 1 they glow)
+--   LightBrightness / LightRange   the soft light it casts (its colour is FillColor)
+--   FPS         redraws a second
 -- World.BaseDecor.PortalGate (tools/portal_gate.py: the opening is 14 wide, from the base's
 -- top at 2.8 up to the arch's inside, 7.2 round from 17).
 
 local AssetService = game:GetService("AssetService")
 local RunService = game:GetService("RunService")
 
-local W, H = 28, 44 -- pixels (each half a stud)
+local DEFAULTS = {
+	Angles = 7,
+	Speed = 1,
+	Scale = 1,
+	Modifier = 0,
+	Seed = 0,
+	Contrast = 10,
+	FillColor = Color3.fromRGB(69, 142, 157), -- QM's teal
+	FillAlpha = 0.85,
+	BackColor = Color3.fromRGB(2, 125, 156), -- his tealbg
+	BackAlpha = 0,
+	PixelsPerStud = 2,
+	Glow = 1.6,
+	LightBrightness = 1.5,
+	LightRange = 20,
+	FPS = 24,
+}
 local SIZE = Vector2.new(14, 22) -- studs
 local CENTRE = Vector3.new(0, 2.8 + 11, 0) -- the opening's middle, in the gate's frame
 local SPRING, R_IN = 17 - 2.8, 7.2 -- (in the opening's own frame, from its bottom)
-local ANGLES = 7
-local FILL = Color3.fromRGB(69, 142, 157) -- QM's teal
-local SPEED = 1 / 16 -- his offset step a frame, at 60 a second
-local FPS = 24
 local NEAR = 220 -- studs: no drawing further off
 
 local gate = workspace:WaitForChild("World"):WaitForChild("BaseDecor"):WaitForChild("PortalGate", 30)
 if not gate then
 	return
 end
-
-local okImage, image = pcall(AssetService.CreateEditableImage, AssetService, { Size = Vector2.new(W, H) })
-if not okImage or not image then
-	return -- (no EditableImage here: no swirl)
+for name, value in DEFAULTS do
+	if gate:GetAttribute(name) == nil then
+		gate:SetAttribute(name, value)
+	end
+end
+local function knob(name)
+	local v = gate:GetAttribute(name)
+	return if typeof(v) == typeof(DEFAULTS[name]) then v else DEFAULTS[name]
 end
 
 local plane = Instance.new("Part")
@@ -35,76 +68,128 @@ plane.Transparency = 1
 plane.Size = Vector3.new(SIZE.X, SIZE.Y, 0.2)
 plane.CFrame = (if gate:IsA("Model") then gate:GetPivot() else gate.CFrame) * CFrame.new(CENTRE) -- (29 shaded stones, pivoted on the gate's origin)
 local light = Instance.new("PointLight")
-light.Color = FILL
-light.Range = 20
-light.Brightness = 1.5
 light.Parent = plane
+local surfaces, labels = {}, {}
 for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
 	local surface = Instance.new("SurfaceGui")
 	surface.Face = face
-	surface.CanvasSize = Vector2.new(W * 8, H * 8)
+	surface.CanvasSize = Vector2.new(SIZE.X * 16, SIZE.Y * 16)
 	surface.LightInfluence = 0
-	surface.Brightness = 1.6 -- (a little brighter than lit: it glows)
 	surface.Parent = plane
 	local label = Instance.new("ImageLabel")
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(1, 1)
 	label.ResampleMode = Enum.ResamplerMode.Pixelated
-	label.ImageContent = Content.fromObject(image)
 	label.Parent = surface
+	table.insert(surfaces, surface)
+	table.insert(labels, label)
 end
 plane.Parent = workspace
 
--- Which pixels are in the opening (a rectangle with a half circle on top).
-local inside = table.create(W * H, false)
-for py = 0, H - 1 do
-	for px = 0, W - 1 do
-		local x = (px + 0.5) / W * SIZE.X - SIZE.X / 2
-		local y = SIZE.Y - (py + 0.5) / H * SIZE.Y
-		inside[py * W + px + 1] = y < SPRING or (x * x + (y - SPRING) * (y - SPRING) < R_IN * R_IN)
+-- The image, its pixels' buffer and which pixels are in the opening (a rectangle with a
+-- half circle on top), (re)built for a pixel size.
+local image, pixels, inside, W, H, builtFor
+local function build(perStud)
+	perStud = math.clamp(math.floor(perStud + 0.5), 1, 8)
+	if builtFor == perStud then
+		return image ~= nil
 	end
+	builtFor = perStud
+	W, H = math.floor(SIZE.X * perStud), math.floor(SIZE.Y * perStud)
+	local ok, made = pcall(AssetService.CreateEditableImage, AssetService, { Size = Vector2.new(W, H) })
+	if not ok or not made then
+		image = nil
+		return false -- (no EditableImage here: no swirl)
+	end
+	if image then
+		image:Destroy()
+	end
+	image = made
+	for _, label in labels do
+		label.ImageContent = Content.fromObject(image)
+	end
+	pixels = buffer.create(W * H * 4)
+	inside = table.create(W * H, false)
+	for py = 0, H - 1 do
+		for px = 0, W - 1 do
+			local x = (px + 0.5) / W * SIZE.X - SIZE.X / 2
+			local y = SIZE.Y - (py + 0.5) / H * SIZE.Y
+			inside[py * W + px + 1] = y < SPRING or (x * x + (y - SPRING) * (y - SPRING) < R_IN * R_IN)
+		end
+	end
+	return true
 end
 
-local dirs = {}
-for i = 0, ANGLES - 1 do
-	local a = 2 * math.pi - 2 * math.pi / ANGLES * i
-	dirs[i + 1] = { math.cos(a), math.sin(a) }
+-- His waves for the knobs now: { cos, sin, phase } a direction (his angle runs from 2 pi
+-- down by 2 pi / angles; bonus = pi / angles x i).
+local function waves()
+	local angles = math.max(knob("Angles"), 1)
+	local mod = knob("Modifier")
+	local seed = knob("Seed")
+	local rng = Random.new(math.floor(seed))
+	local list = {}
+	local angle = 2 * math.pi
+	local i = 0
+	while i < angles do
+		local bonus = math.pi / angles * i
+		local phase = if seed ~= 0 then rng:NextNumber() * 2 * math.pi else 0
+		table.insert(list, { math.cos(angle - 2 * (mod * bonus)), math.sin(angle + 2 * (mod * bonus)), phase })
+		angle -= 2 * math.pi / angles
+		i += 1
+	end
+	return list, angles
 end
-local r, g, b = math.floor(FILL.R * 255), math.floor(FILL.G * 255), math.floor(FILL.B * 255)
-local pixels = buffer.create(W * H * 4)
+
 local offset = 0
 local last = 0
 local camera = workspace.CurrentCamera
 
 local function draw()
+	local dirs, angles = waves()
+	local scale = knob("Scale")
+	local contrast = knob("Contrast")
+	local fill, back = knob("FillColor"), knob("BackColor")
+	local fa, ba = math.clamp(knob("FillAlpha"), 0, 1), math.clamp(knob("BackAlpha"), 0, 1)
+	local fr, fg, fb = fill.R, fill.G, fill.B
+	local br, bg, bb = back.R, back.G, back.B
+	local n = #dirs
 	for py = 0, H - 1 do
-		local y = py - H / 2
+		local y = (py - H / 2) * scale
 		for px = 0, W - 1 do
 			local i = py * W + px
-			local alpha = 0
-			if inside[i + 1] then
-				local x = px - W / 2
-				local sum = 0
-				for k = 1, ANGLES do
-					local d = dirs[k]
-					sum += math.cos(d[1] * x + d[2] * y + offset)
-				end
-				alpha = math.clamp(sum * 10 / ANGLES, 0, 1) -- (his: opacity / angles, each wave x10)
-			end
 			local o = i * 4
-			buffer.writeu8(pixels, o, r)
-			buffer.writeu8(pixels, o + 1, g)
-			buffer.writeu8(pixels, o + 2, b)
-			buffer.writeu8(pixels, o + 3, math.floor(alpha * 255 * 0.85))
+			if inside[i + 1] then
+				local x = (px - W / 2) * scale
+				local sum = 0
+				for k = 1, n do
+					local d = dirs[k]
+					sum += math.cos(d[1] * x + d[2] * y + offset + d[3])
+				end
+				-- (his rgba alpha: opacity / angles, each wave x Contrast; then over the backdrop)
+				local a = math.clamp(sum * contrast / angles, 0, 1) * fa
+				local outA = a + ba * (1 - a)
+				local r, g, b = 0, 0, 0
+				if outA > 0 then
+					r = (fr * a + br * ba * (1 - a)) / outA
+					g = (fg * a + bg * ba * (1 - a)) / outA
+					b = (fb * a + bb * ba * (1 - a)) / outA
+				end
+				buffer.writeu8(pixels, o, math.floor(r * 255))
+				buffer.writeu8(pixels, o + 1, math.floor(g * 255))
+				buffer.writeu8(pixels, o + 2, math.floor(b * 255))
+				buffer.writeu8(pixels, o + 3, math.floor(outA * 255))
+			else
+				buffer.writeu32(pixels, o, 0)
+			end
 		end
 	end
 	image:WritePixelsBuffer(Vector2.zero, Vector2.new(W, H), pixels)
 end
 
 RunService.RenderStepped:Connect(function(dt)
-	offset += SPEED * dt * 60
+	offset += knob("Speed") / 16 * dt * 60
 	local now = os.clock()
-	if now - last < 1 / FPS then
+	if now - last < 1 / math.max(knob("FPS"), 1) then
 		return
 	end
 	if (camera.CFrame.Position - plane.Position).Magnitude > NEAR then
@@ -115,6 +200,15 @@ RunService.RenderStepped:Connect(function(dt)
 		return
 	end
 	last = now
+	if not build(knob("PixelsPerStud")) then
+		return
+	end
+	for _, surface in surfaces do
+		surface.Brightness = knob("Glow")
+	end
+	light.Color = knob("FillColor")
+	light.Brightness = knob("LightBrightness")
+	light.Range = knob("LightRange")
 	local t = os.clock()
 	draw()
 	plane:SetAttribute("DrawMs", (os.clock() - t) * 1000) -- (for measuring)
