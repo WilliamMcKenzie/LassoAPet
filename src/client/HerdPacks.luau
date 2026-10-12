@@ -58,7 +58,7 @@ function HerdPacks.plan(stream, n, b, keys, edge)
 		if math.abs(x + dx) > edge then
 			dx = -dx
 		end
-		local speed = Config.HerdSpeed * (Config.AnimalStats[kind] or { Speed = 1 }).Speed
+		local speed = require(ReplicatedStorage.Shared.HerdSpeed)((Config.AnimalStats[kind] or { Speed = 1 }).Speed)
 		return { x = x + dx, kind = kind, lead = j, lag = BEHIND * row / speed }
 	end
 	x, kind = roll(stream, n, b, keys, edge)

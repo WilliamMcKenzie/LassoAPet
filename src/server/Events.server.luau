@@ -104,7 +104,7 @@ while true do
 		-- course at its stampede speed (as every client draws it, Ride.client), or the
 		-- next one's due.
 		local nextCycle = cycleStart + EVENTS.Cycle
-		local speed = Config.HerdSpeed * ((Config.AnimalStats[kind] or {}).Speed or 1)
+		local speed = require(ReplicatedStorage.Shared.HerdSpeed)((Config.AnimalStats[kind] or {}).Speed or 1) -- (as Ride.client's)
 		local endZ = require(ReplicatedStorage.Shared.WorldColors).biomeNamedStart(EVENTS.DespawnBiome) or (-Config.CourseLength + Config.FinishFromEnd) -- (the Jungle's edge: QM, Oct 11)
 		local runsOff = os.clock() + (START_Z + 44 - endZ) / speed + 1
 		while os.clock() < nextCycle - 1.5 and not forced and not world:GetAttribute("EventTaken") and os.clock() < runsOff do

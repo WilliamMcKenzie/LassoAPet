@@ -1069,4 +1069,7 @@ return {
 	-- stream are the rest of its pack, popping in with it in a V.
 	HerdPacks = { Raptor = 3 }, -- (QM, Oct 11)
 	HerdSpeed = 31, -- studs/s for a 1x animal; each kind runs at exactly this x its Speed
+	-- ...up to the Clownfish's: past it, no further behind you riding it out at a sprint than
+	-- a Clownfish is (Shared/HerdSpeed: the later biomes' fast ones run faster, QM Oct 11).
+	HerdGapFrom = "Clownfish",
 }

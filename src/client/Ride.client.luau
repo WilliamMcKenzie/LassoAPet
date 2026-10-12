@@ -215,8 +215,9 @@ end
 
 -- How fast a kind runs in the stampede: always exactly this, no variance. z: where (its
 -- biome's BiomeSpeed: the Fish in the Ocean).
+local herdSpeedOf = require(ReplicatedStorage.Shared.HerdSpeed) -- (past the Clownfish's, a fixed gap behind your sprint: QM)
 local function herdSpeed(kind, z)
-	return Config.HerdSpeed * statsOf(kind, z and { z = z }).Speed
+	return herdSpeedOf(statsOf(kind, z and { z = z }).Speed)
 end
 
 -- How long the Hold bar lasts: Config.RideSeconds, whatever you're riding (QM, Oct 10:
