@@ -30,7 +30,7 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 	shop = { id = "rbxassetid://119060039201858", size = Vector2.new(267, 113) }, -- Shop.png
 	index = { id = "rbxassetid://135845846149671", size = Vector2.new(267, 113) }, -- Index.png
 	merge = { id = "rbxassetid://126251339270486", size = Vector2.new(267, 113) }, -- Merge.png
-	invite = { id = "", size = Vector2.new(267, 113) }, -- Invite.png (QM, Oct 12; "" till it's uploaded: a plain green button)
+	invite = { id = "rbxassetid://72356826090260", size = Vector2.new(267, 113) }, -- Invite.png (QM, Oct 12)
 	cash = { id = "rbxassetid://76663783463176", size = Vector2.new(256, 256) }, -- Cash.png
 }
 -- assets/ui/quests/*.png (QM, Oct 11). "" till Studio uploads them: plain boxes meanwhile.
@@ -51,7 +51,7 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 local CASH_GREEN = Color3.fromHex("00FF09")
 -- (in RefWidth pixels: QM's mockups at 1300 wide, x 1920 / 1300)
 local MARGIN = 18
-local MENU_WIDTH = 213 -- each of Shop, Index, Merge (QM, Oct 9: 20% smaller again, was 266, at first 296)
+local MENU_WIDTH = 260 -- each of Merge, Index, Shop, Invite (QM's mockup, Oct 12: about 0.65 of the Quests panel's width; Oct 9 had 213)
 local MENU_GAP = 12 -- (small even gaps: QM's mockup, Oct 12; was 20)
 local ICON = 74 -- the counters' icons
 local TEXT = 55 -- the counters' text (QM's Figma: 55, stroke 5)
@@ -160,7 +160,7 @@ end }, { "merge", function()
 		Hud.onFuse()
 	end
 end }, { "invite", promptInvite } } do
-	local b = picture("ImageButton", menu, ART[spec[1]], QUESTS_WIDTH) -- (as wide as the Quests panel over them: QM's mockup)
+	local b = picture("ImageButton", menu, ART[spec[1]], MENU_WIDTH)
 	b.Name = spec[1]
 	b.LayoutOrder = ({ merge = 1, index = 2, shop = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
 	if ART[spec[1]].id == "" then -- (no art yet: a plain button with its name)
