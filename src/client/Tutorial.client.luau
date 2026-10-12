@@ -482,7 +482,7 @@ local function run()
 			local egg = penEgg()
 			local pets = myPets()
 			-- (the arrow: over the egg, then the pet out of it, till you're close enough for its prompt: QM)
-			arrowOver = if egg and #pets == 0 then (if player:GetAttribute("EggPromptUp") then nil else egg)
+			arrowOver = if egg and #pets == 0 then (if player:GetAttribute("EggPromptUp") or egg:GetAttribute("Hatching") then nil else egg) -- (none once you've held F: QM)
 				elseif #pets > 0 and not player:GetAttribute("RidePromptUp") and not pets[1]:GetAttribute("Hatching") then pets[1] -- (once it's fully out: QM)
 				else nil
 			if egg and #pets == 0 then

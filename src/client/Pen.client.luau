@@ -318,6 +318,9 @@ end
 -- The egg hatched: play the hatch, then the pet jumps out onto the spot.
 local function hatch(pen, id, s)
 	s.hatching = true
+	if s.egg then
+		s.egg.model:SetAttribute("Hatching", true) -- (Client/Tutorial's arrow over it goes: it's hatched, only its animation's left)
+	end
 	if s.speedupAttachment then
 		s.speedupAttachment:Destroy()
 		s.speedupAttachment, s.speedupPrompt = nil, nil
