@@ -1104,41 +1104,13 @@ end
 
 -- A trail of arrows on the ground: to the Robo Shark's prey while it hunts, and back
 -- home to your pen after a ride (vfx.updateHomeGuide).
-local guide = { -- the guide: the beam and its two ends
-	ARROW = "rbxassetid://101032148634562", -- assets/ui/GuideArrow.png (chevrons pointing along the trail)
+local guide = {
 	AHEAD = 6, -- studs in front of the pet where the trail starts
 	MAX_LENGTH = 300, -- studs: the longest the trail is drawn, toward a farther target
 	HEIGHT = 1.4, -- studs up: over the raised ground patches
 	HOME_CLOSE = 10, -- studs: back home, the arrows to your pen's entrance go once you're this close
-	from = Instance.new("Attachment"),
-	to = Instance.new("Attachment"),
-	beam = Instance.new("Beam"),
 }
-guide.from.Name, guide.to.Name = "GuideFrom", "GuideTo"
-guide.beam.Name = "EggGuide"
-guide.beam.Texture = guide.ARROW
-guide.beam.TextureMode = Enum.TextureMode.Static
-guide.beam.TextureLength = 5
-guide.beam.TextureSpeed = 1.2
-guide.beam.Width0, guide.beam.Width1 = 4, 4
-guide.beam.FaceCamera = false
-guide.beam.LightEmission = 1
-guide.beam.LightInfluence = 0
-guide.beam.ZOffset = 6
-guide.beam.Color = ColorSequence.new(Color3.fromRGB(255, 236, 120))
-guide.beam.Transparency = NumberSequence.new({
-	NumberSequenceKeypoint.new(0, 1),
-	NumberSequenceKeypoint.new(0.08, 0.15),
-	NumberSequenceKeypoint.new(0.9, 0.15),
-	NumberSequenceKeypoint.new(1, 1),
-})
-guide.beam.Attachment0, guide.beam.Attachment1 = guide.from, guide.to
-guide.beam.Enabled = false
-guide.beam.Parent = guide.from
-guide.from.Parent, guide.to.Parent = workspace.Terrain, workspace.Terrain
-task.spawn(function()
-	game:GetService("ContentProvider"):PreloadAsync({ guide.beam })
-end)
+local arrowTrail = require(script.Parent.ArrowTrail).new() -- (QM's arrows in a row, Oct 12; was a chevron beam)
 
 local function updateGuide()
 	local target
@@ -1188,8 +1160,10 @@ end
 
 -- Draws the trail of arrows from `at` toward `target`, or hides it (no target).
 function vfx.drawGuide(at, target)
-	guide.beam.Enabled = target ~= nil
-	if target then
+	if not target then
+		return arrowTrail.draw()
+	end
+	do
 		-- The trail starts a little out from the pet toward the target (guide.AHEAD, or
 		-- half way to a target that close), so it always comes straight off the pet,
 		-- whether it leads to an egg far ahead or the Robo Shark's prey right beside it.
@@ -1202,12 +1176,8 @@ function vfx.drawGuide(at, target)
 		if (flat - from).Magnitude > guide.MAX_LENGTH then
 			flat = from + along * guide.MAX_LENGTH
 		end
-		-- Lying flat just above the highest ground (raised patches are a stud up):
-		-- the attachments' up is the beam's width direction. ZOffset draws it
-		-- toward the camera, over the floor and the obstacles it passes.
-		local side = along:Cross(Vector3.yAxis)
-		guide.from.WorldCFrame = CFrame.fromMatrix(Vector3.new(from.X, guide.HEIGHT, from.Z), along, side)
-		guide.to.WorldCFrame = CFrame.fromMatrix(Vector3.new(flat.X, guide.HEIGHT, flat.Z), along, side)
+		-- (just above the highest ground: raised patches are a stud up)
+		arrowTrail.draw(Vector3.new(from.X, guide.HEIGHT, from.Z), Vector3.new(flat.X, guide.HEIGHT, flat.Z))
 	end
 end
 

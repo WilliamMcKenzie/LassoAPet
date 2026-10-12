@@ -256,28 +256,7 @@ local function pointAt(target)
 end
 
 -- The arrows on the ground, from you to a spot (as Ride's guide).
-local guideFrom, guideTo = Instance.new("Attachment"), Instance.new("Attachment")
-local beam = Instance.new("Beam")
-beam.Texture = "rbxassetid://101032148634562" -- assets/ui/GuideArrow.png
-beam.TextureMode = Enum.TextureMode.Static
-beam.TextureLength = 5
-beam.TextureSpeed = 1.2
-beam.Width0, beam.Width1 = 4, 4
-beam.FaceCamera = false
-beam.LightEmission = 1
-beam.LightInfluence = 0
-beam.ZOffset = 6
-beam.Color = ColorSequence.new(Color3.fromRGB(255, 236, 120))
-beam.Transparency = NumberSequence.new({
-	NumberSequenceKeypoint.new(0, 1),
-	NumberSequenceKeypoint.new(0.08, 0.15),
-	NumberSequenceKeypoint.new(0.9, 0.15),
-	NumberSequenceKeypoint.new(1, 1),
-})
-beam.Attachment0, beam.Attachment1 = guideFrom, guideTo
-beam.Enabled = false
-beam.Parent = guideFrom
-guideFrom.Parent, guideTo.Parent = workspace.Terrain, workspace.Terrain
+local trail = require(script.Parent.ArrowTrail).new() -- (QM's arrows in a row, Oct 12; was a chevron beam)
 local guideAt -- a Vector3 (or a model, followed) to lead you to, or nil
 local function guide(target)
 	guideAt = target
@@ -346,15 +325,12 @@ RunService.RenderStepped:Connect(function()
 		if along.Magnitude > 6 then
 			along = along.Unit
 			from += along * 3
-			local side = along:Cross(Vector3.yAxis)
-			guideFrom.WorldCFrame = CFrame.fromMatrix(Vector3.new(from.X, 1.4, from.Z), along, side)
-			guideTo.WorldCFrame = CFrame.fromMatrix(Vector3.new(to.X, 1.4, to.Z), along, side)
-			beam.Enabled = true
+			trail.draw(Vector3.new(from.X, 1.4, from.Z), Vector3.new(to.X, 1.4, to.Z))
 		else
-			beam.Enabled = false
+			trail.draw()
 		end
 	else
-		beam.Enabled = false
+		trail.draw()
 	end
 end)
 
