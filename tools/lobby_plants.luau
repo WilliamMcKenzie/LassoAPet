@@ -11,25 +11,25 @@
 
 local AssetService = game:GetService("AssetService")
 
-local PIECES = { -- [plant] = { { mesh id, colour } } (design/plants/pieces/colours.txt)
+local PIECES = { -- [plant] = { { mesh id, colour } } (design/plants/pieces/colours.txt; the greens darker, moss/forest: QM, Oct 12)
 	Tree = {
 		{ 122716762637835, Color3.fromRGB(124, 86, 56) },
-		{ 107212928998143, Color3.fromRGB(98, 196, 72) },
-		{ 90105828541940, Color3.fromRGB(120, 214, 86) },
-		{ 78902139089312, Color3.fromRGB(86, 178, 64) },
-		{ 79271687387611, Color3.fromRGB(134, 224, 98) },
+		{ 107212928998143, Color3.fromRGB(62, 128, 54) },
+		{ 90105828541940, Color3.fromRGB(76, 144, 62) },
+		{ 78902139089312, Color3.fromRGB(52, 112, 46) },
+		{ 79271687387611, Color3.fromRGB(88, 156, 70) },
 	},
 	TreeSmall = {
 		{ 89163282445563, Color3.fromRGB(124, 86, 56) },
-		{ 109370396013457, Color3.fromRGB(120, 214, 86) },
-		{ 109612738147316, Color3.fromRGB(98, 196, 72) },
+		{ 109370396013457, Color3.fromRGB(76, 144, 62) },
+		{ 109612738147316, Color3.fromRGB(62, 128, 54) },
 	},
 	GrassTuft = {
-		{ 92858311584509, Color3.fromRGB(84, 192, 60) },
-		{ 83041187034944, Color3.fromRGB(112, 218, 78) },
+		{ 92858311584509, Color3.fromRGB(54, 122, 46) },
+		{ 83041187034944, Color3.fromRGB(70, 142, 56) },
 	},
 	Flower = {
-		{ 119180919982842, Color3.fromRGB(70, 150, 52) },
+		{ 119180919982842, Color3.fromRGB(58, 120, 48) },
 		{ 95410071184502, "petals" },
 		{ 86751839950822, "centre" },
 	},
