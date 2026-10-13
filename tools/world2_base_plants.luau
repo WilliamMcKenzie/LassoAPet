@@ -1,6 +1,6 @@
 -- World 2's base set (QM, Oct 13: design/pines, the Rock mesh redesign thread): the
 -- copied lobby trees become low-poly pines (Pine / PineTall for the big trees, PineSmall
--- for the small ones, at 1x, in the same spots), the rocks take five warm grey shades,
+-- for the small ones, at 3x (QM), in the same spots), the rocks take five warm grey shades,
 -- tufts go mustard and flowers red with yellow centres and green stems (2x, as the
 -- lobby's). Studs throughout. Run in Studio (Edit, execute_luau) on the World 2 Place
 -- (ROOT = workspace.World) or on World 1's copy (ROOT = workspace.World2).
@@ -58,7 +58,9 @@ for _, m in plants:GetChildren() do
 			big += 1
 			kind = if big % 2 == 1 then "Pine" else "PineTall"
 		end
-		pine(kind, at, kind).Parent = plants
+		local tree = pine(kind, at, kind)
+		tree:ScaleTo(3) -- (QM, Oct 13: 3x)
+		tree.Parent = plants
 		m:Destroy()
 		trees += 1
 	elseif m.Name == "GrassTuft" then
