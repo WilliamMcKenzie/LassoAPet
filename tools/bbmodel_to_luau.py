@@ -306,7 +306,12 @@ def convert(model):
             return 255, 255, 255  # untextured: Blockbench shows it white
         im, sx, sy = texs[face["texture"]]
         uv = face["uv"]
-        u, v = uv[:2] if isinstance(uv, list) else next(iter(uv.values()))
+        if isinstance(uv, list) and len(uv) >= 4:
+            # the middle of the face's UV, not its corner (QM's Ivory Spider: a pupil's
+            # corner pixel was the black outline, so it came out black)
+            u, v = (uv[0] + uv[2]) / 2, (uv[1] + uv[3]) / 2
+        else:
+            u, v = uv[:2] if isinstance(uv, list) else next(iter(uv.values()))
         return im.getpixel((min(int(u * sx), im.width - 1), min(int(v * sy), im.height - 1)))
 
     def stripes(e):
