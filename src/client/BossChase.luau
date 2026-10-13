@@ -178,7 +178,10 @@ function BossChase.update(dt, chasing, x, z, speed)
 		-- After you at your own speed (QM, Oct 10), so the gap holds all the way home,
 		-- never nearer than Behind studs, and pulling up short of the start line.
 		local was = boss.z
-		boss.z = math.min(boss.z + math.max(speed or 0, cfg.ChaseMin or 0) * dt, z - cfg.Behind - boss.room, -cfg.StopShort - boss.room) -- (never slower than ChaseMin: it doesn't stall as you turn)
+		-- (closing, 0..1: how near it's got while you weren't at full speed, Client/ReturnRun;
+		-- at 1 it has you)
+		local closing = BossChase.closing or 0
+		boss.z = math.min(boss.z + (math.max(speed or 0, cfg.ChaseMin or 0) + 60 * closing) * dt, z - (cfg.Behind + boss.room) * (1 - 0.9 * closing), -cfg.StopShort - boss.room) -- (never slower than ChaseMin: it doesn't stall as you turn)
 		boss.x += (x - boss.x) * (1 - math.exp(-2 * dt))
 		moving = math.max(boss.z - was, 0) / math.max(dt, 1e-3)
 	end

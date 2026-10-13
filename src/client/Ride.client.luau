@@ -105,6 +105,7 @@ vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's ou
 vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
 vfx.newAnimal = require(script.Parent.NewAnimal) -- the animal you got, shown (QM, Oct 13)
+vfx.returnRun = require(script.Parent.ReturnRun) -- the run home (QM)
 vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
 vfx.sprintTrail = require(script.Parent.SprintTrail) -- a white trail behind your mount while it sprints (QM, Oct 9)
@@ -1354,6 +1355,9 @@ local function sprinting()
 	if vfx.hunting or player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
 		return false -- the Robo Shark can't sprint while it hunts (QM)
 	end
+	if phase == "return" and not vfx.tutorialRide.active then
+		return vfx.returnRun.pushing(controls, rideStick.on, vfx.padPush, sprintKey or Hud.sprintHeld())
+	end
 	if (phase == "return" and Config.ReturnSprint) or (phase == "outbound" and Config.OutboundSprint) then -- (the ride out always a sprint too: QM, Oct 11)
 		return true -- racing home with the egg, always
 	end
@@ -2459,6 +2463,9 @@ end
 
 -- The mount broke something (smashed an obstacle, knocked an animal flying).
 function vfx.broke()
+	if phase == "return" and mount and not activeAbility() then -- (back to a walk: ReturnRun)
+		mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
+	end
 	local feast = vfx.feastOf(mount)
 	if feast then
 		feast.count += 1
@@ -3296,6 +3303,7 @@ local function updateMount(dt)
 		mount.z += look.Z * mount.speed * dt
 		if turnT >= 1 then
 			phase, grace = "return", Config.TurnGrace
+			vfx.returnRun.reset()
 			mount.speed = Config.ReturnSpeed * rideSpeed(mount)
 			if vfx.tutorialRide.active then -- (the first ride home: a Unicorn gallops past you, to make you curious: QM)
 				local st = streams[1]
@@ -3345,8 +3353,12 @@ local function updateMount(dt)
 		targetSpeed *= (Config.PetSprintSpeed[mount.kind] or Config.SprintSpeed) * ((vfx.sprintSpecial() or {}).SpeedBoost or 1) -- the Blue Crab's crab walk: faster still
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
+	local walking = phase == "return" and not sprinting()
+	if walking then
+		targetSpeed = Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk
+	end
 	-- (Out of stamina you turn for home, never ride on tired: checkRide.)
-	local rate = phase == "home" and 30 or (dir < 0 and (if (mount.rampUntil or 0) > os.clock() then Config.LandRamp.Rate else 90) or 40) -- snappy into and out of a sprint (gentler just after landing: from a walk to the sprint)
+	local rate = phase == "home" and 30 or (dir < 0 and (if (mount.rampUntil or 0) > os.clock() then Config.LandRamp.Rate else 90) or math.max(40, targetSpeed / Config.ReturnRun.Ramp)) -- snappy into and out of a sprint (gentler just after landing: from a walk to the sprint)
 	local ability = activeAbility()
 	if ability and ability.cfg.MaxBoost then
 		-- The Leviathan's hunt: faster and faster, steadily, up to MaxBoost x (QM).
@@ -3374,6 +3386,9 @@ local function updateMount(dt)
 	vfx.speedGain = if curved > 0 then targetSpeed / curved else 1
 	targetSpeed = curved
 	mount.speed += math.clamp(targetSpeed - mount.speed, -rate * dt, rate * dt)
+	if phase == "return" then
+		vfx.returnRun.update(dt, not walking and mount.speed >= targetSpeed * 0.9)
+	end
 	if ability and ability.cfg.Kind == "Hunt" and vfx.huntTarget then
 		-- Hunting (the Robo Shark, QM): no momentum, any direction: it goes straight at
 		-- its prey at full charge speed, turning on the spot, whichever way that is.
@@ -3517,6 +3532,9 @@ local function checkRide(dt)
 	grace = math.max(grace - dt, 0)
 	if vfx.tutorialRide.invulnerable then
 		grace = math.max(grace, 0.1) -- (nothing crashes you on the tutorial's ride: QM)
+	end
+	if phase == "return" and vfx.returnRun.caught and not vfx.tutorialRide.active then
+		return fail("CAUGHT!")
 	end
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)

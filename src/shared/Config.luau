@@ -887,6 +887,11 @@ local Config = {
 	-- Just lassoed onto an animal it's still at its stampede walk: for Time s it builds up to
 	-- the sprint at Rate studs/s a second (not the usual snap), so you see it break into it.
 	LandRamp = { Time = 2.5, Rate = 35 },
+	-- The run home (QM, Oct 13; Client/ReturnRun): your pet walks (Walk x MountSpeed x its
+	-- Speed) unless you push forward, which runs it up to its full sprint in about Ramp
+	-- seconds; a hit drops it back to a walk; CatchAfter seconds in all under full speed and
+	-- the boss catches you. (The tutorial's first ride home still runs by itself.)
+	ReturnRun = { Walk = 0.4, Ramp = 1.2, CatchAfter = 10 },
 	ReturnSprint = true, -- the ride home always a sprint (SprintSpeed x ReturnSpeed)? On again (QM, Oct 11; Oct 10 had it off, Shift to sprint)
 	ReturnFovKick = 0, -- (QM, Oct 9: plain, was 20) degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
