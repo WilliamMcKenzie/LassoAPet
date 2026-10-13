@@ -21,11 +21,13 @@ return function(vfx)
 		local middle, size = entity.animal.model:GetBoundingBox()
 		local back = root.CFrame:ToObjectSpace(middle * CFrame.new(0, 0, size.Z * 0.3)) -- toward its tail (it faces -Z)
 		scale = scale or 1
-		local band = size.Y * 0.6 * scale / #colors
-		local lift = math.max(size.Y * 0.3 * scale - size.Y * 0.5, 0)
+		-- (no taller than a big horse's: a towering pet's trail was a wall across the screen, QM)
+		local tall = math.min(size.Y, 10)
+		local band = tall * 0.6 * scale / #colors
+		local lift = math.max(tall * 0.3 * scale - size.Y * 0.5, 0)
 		local parts = {}
 		for k, color in colors do
-			local y = size.Y * 0.3 * scale + lift - (k - 1) * band
+			local y = tall * 0.3 * scale + lift - (k - 1) * band
 			local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
 			a0.CFrame = back * CFrame.new(0, y, 0)
 			a1.CFrame = back * CFrame.new(0, y - band, 0)
