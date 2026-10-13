@@ -851,6 +851,7 @@ startRide = function(model, at)
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
 		mount.merged, mount.fuse, mount.stats, mount.tier = fromPen.merged, fromPen.fuse, fromPen.stats, fromPen.tier
 		vfx.Fusion.paint(mount.animal.model, mount.kind, mount.fuse)
+		vfx.Skins.apply(mount.animal.model, player:GetAttribute("Rebirths")) -- (your rebirth's skin, as in the pen)
 		mount.own = true -- your own pet: no egg for bringing it home (it stays yours once let go and lassoed back)
 	else
 		mount, starter = starter, nil
