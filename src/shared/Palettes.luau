@@ -360,6 +360,15 @@ return {
 		{ "Belly", 255, 200, 156 },
 		{ "Marking", 255, 214, 96 }, -- bumps
 	},
+	RollingLog = {
+		{ "Body", 170, 100, 52 }, -- bark
+		{ "Marking", 118, 66, 36 }, -- bark strips
+		{ "Belly", 242, 206, 148 }, -- cut ends
+		{ "Belly", 206, 148, 88 }, -- growth ring
+		{ "Belly", 228, 180, 116 }, -- core
+		{ "Horn", 176, 182, 196 }, -- spikes
+		{ "Horn", 96, 100, 116 }, -- spike collars
+	},
 	Lionfish = {
 		{ "Body", 255, 240, 214 },
 		{ "Marking", 232, 72, 40 }, -- stripes, spines
