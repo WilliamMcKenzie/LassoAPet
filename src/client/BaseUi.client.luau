@@ -296,7 +296,18 @@ fold.Activated:Connect(function()
 	if telemetry then
 		telemetry:FireServer("questsOpened") -- (Analytics V1)
 	end
+	if not folded and not player:GetAttribute("QuestsSeen") then
+		player:SetAttribute("QuestsSeen", true) -- (at once here; Hatchery saves it)
+		ReplicatedStorage:WaitForChild("QuestsSeen"):FireServer()
+	end
 end)
+-- A tap hand on the folded panel till you've opened it once, from your first quest on (QM,
+-- Oct 13). Its spotlight: TapHand's.
+local openHand = TapHand.new(80)
+openHand.Name = "OpenQuestsHint"
+openHand.Position = UDim2.fromScale(0.5, 0.6)
+openHand.Visible = false
+openHand.Parent = fold
 
 -- A new quest pops in (QM, Oct 11): from nothing, overshooting, a wobble, and settles
 -- (anticipation, overshoot, follow-through), once the panel's up and no egg reveal's over
@@ -609,6 +620,7 @@ RunService.RenderStepped:Connect(function()
 	local covered = modal()
 	root:SetAttribute("Modal", covered)
 	quests.Visible = not riding and not covered and #questList > 0
+	openHand.Visible = folded and not player:GetAttribute("QuestsSeen")
 	-- (the buttons right under the Quests panel, or the top corner with none)
 	local under = if quests.Visible then (quests.AbsolutePosition.Y + quests.AbsoluteSize.Y - root.AbsolutePosition.Y) / scale.Scale else 0
 	menu.Position = UDim2.new(1, -MARGIN, 0, under + MENU_GAP)

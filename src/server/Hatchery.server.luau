@@ -197,6 +197,7 @@ local function publish(player)
 	player:SetAttribute("RidePet", profile.ride or "")
 	player:SetAttribute("RollPrice", rollPrice(profile))
 	player:SetAttribute("RainbowTrail", profile.rainbowTrail or nil) -- bought (Config.RainbowTrail): every ride trails a rainbow
+	player:SetAttribute("QuestsSeen", profile.questsSeen or nil) -- (BaseUi: the tap hand on the folded Quests panel till it's opened once)
 	player:SetAttribute("RideMerged", profile.rideMerged or 1) -- how many pets it's merged from (Shared/Merge)
 	player:SetAttribute("RideFuse", profile.rideFuse) -- the donor, if it's a hybrid (Shared/Fusion)
 	player:SetAttribute("RideTier", profile.rideFuse and profile.rideTier or nil) -- its saved size tier (Fusion.tier)
@@ -327,6 +328,7 @@ local function load(player)
 					profile.homeEggs = tonumber(data.homeEggs) -- (animals brought home, counted from the Egg Rodeo's first session: Funnel)
 					profile.quests = Quests.load(data.quests)
 					profile.rainbowTrail = data.rainbowTrail == true or nil
+					profile.questsSeen = data.questsSeen == true or nil -- (opened the Quests panel: no tap hand on it)
 					player:SetAttribute("FuseLesson", nil) -- (no fuse lesson any more: QM, Oct 8)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
 					for _, kind in typeof(data.ridden) == "table" and data.ridden or {} do
@@ -453,7 +455,7 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail, homeEggs = profile.homeEggs, quests = profile.quests, v1 = profile.v1, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
+		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, homeEggs = profile.homeEggs, quests = profile.quests, v1 = profile.v1, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -902,6 +904,15 @@ end
 -- The client finished the tutorial: it never shows again.
 -- The rider got on an animal of this kind (Ride.client): it's in their animal
 -- dictionary from now on.
+-- The Quests panel opened for the first time (BaseUi): its tap hand's done for good.
+remote("QuestsSeen", function(player)
+	local profile = profiles[player]
+	if profile and not profile.questsSeen then
+		profile.questsSeen = true
+		publish(player)
+	end
+end)
+
 remote("Ridden", function(player, kind)
 	local profile = profiles[player]
 	if profile and isAnimal(kind) and not profile.ridden[kind] then

@@ -173,7 +173,8 @@ local function align()
 	if not quests or not baseScale then
 		return
 	end
-	local tall = QUESTS_HEADER * baseScale.Scale / rootScale.Scale
+	local questsScale = quests:FindFirstChildOfClass("UIScale")
+	local tall = QUESTS_HEADER * (questsScale and questsScale.Scale or 1) * baseScale.Scale / rootScale.Scale
 	local size = Vector2.new(tall * BAR.X / BAR.Y, tall)
 	bar.Size = UDim2.fromOffset(size.X, size.Y)
 	green.Size = bar.Size
