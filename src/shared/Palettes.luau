@@ -108,6 +108,12 @@ return {
 		{ "Belly", 214, 222, 140 },
 		{ "Accent", 236, 120, 140 }, -- mouth
 	},
+	Tiger = {
+		{ "Body", 247, 133, 32 },
+		{ "Belly", 255, 248, 236 }, -- muzzle, chin, cheeks, chest, belly
+		{ "Marking", 34, 30, 36 }, -- stripes, tail rings and tip
+		parts = { PawFL = "Hoof", PawFR = "Hoof", PawHL = "Hoof", PawHR = "Hoof", EarLIn = "Fixed", EarRIn = "Fixed" },
+	},
 	Cactus = {
 		{ "Body", 118, 204, 64 },
 		{ "Marking", 72, 150, 44 }, -- ribs

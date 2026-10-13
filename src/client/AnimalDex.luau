@@ -152,6 +152,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Starfish = "Not actually a fish.",
 	Lionfish = "All spikes, no roar. Still very proud of the name.",
 	RollingLog = "Has never once stopped to ask for directions. Can't stop, actually.",
+	Tiger = "Guards the temple steps. Mostly naps on them. Still counts.",
 	Clownfish = "Lives in a stinging plant on purpose. Thinks it's hilarious.",
 	Whale = "A talented singer, but no one can hear it from underwater. Distant cousin of horse.",
 	Squid = "Started out with oil painting, but its art has gotten more abstract: now it just squirts ink blotches.",
