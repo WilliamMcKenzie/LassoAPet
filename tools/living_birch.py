@@ -4,8 +4,8 @@ four stacked blocks narrowing upward, the Cactus's arms (left bent up, right ben
 with a leaf tuft on each hand, two stubby legs, and a crown of drooping branches round a
 leafy heart. Birch colours from the woodland's prop birches (tools/world2_prop_assets.luau):
 white bark with dark birch marks, autumn leaves in orange, red-orange, amber and yellow.
-The face is Palm Guy's layout (eyes on the top block, a tall open mouth below) with the
-standard white plate eyes and dark pupils.
+The face is Palm Guy's (the Cactus's): two dark eyes on the top block over a tall open
+mouth on the one below.
 
 Run: python3 tools/living_birch.py [out_dir]
 writes designs/woodland/LivingBirch.bbmodel and <out_dir>/LivingBirch.png (3/4 front).
@@ -34,7 +34,7 @@ BARK = [(238, 234, 226), (226, 221, 211)]  # the prop birches' trunk, and a touc
 MARK = (52, 46, 44)  # birch marks
 LEAF = [(242, 109, 57), (214, 72, 43), (248, 168, 64), (254, 234, 92)]  # the prop birches' leaves
 HEART = (196, 58, 36)
-WHITE, PUPIL, MOUTH = (255, 255, 255), (24, 20, 32), (54, 34, 24)
+MOUTH = (54, 34, 24)  # the Cactus's eyes and mouth
 BRANCHES = 6
 CROWN_Y = 11.0
 
@@ -69,10 +69,8 @@ def living_birch():
     # Palm Guy's face: plate eyes on the top block's front, the tall mouth on the one below
     ze, zm = -(3.6 - 0.2 * 3) / 2, -(3.6 - 0.2 * 2) / 2
     for side, sx in SIDES:
-        x0, x1 = X(sx, 0.12, 1.05)
-        a.b("Eye" + side, (x0, 9.0, ze - 0.05), (x1, 10.2, ze), WHITE, "root")
-        x0, x1 = X(sx, 0.2, 0.7)
-        a.b("Pupil" + side, (x0, 9.15, ze - 0.1), (x1, 9.85, ze - 0.05), PUPIL, "root")
+        x0, x1 = X(sx, 0.2, 0.75)
+        a.b("Eye" + side, (x0, 9.3, ze - 0.08), (x1, 10.1, ze + 0.02), MOUTH, "root")
     a.b("Mouth", (-0.3, 7.2, zm - 0.08), (0.3, 8.6, zm + 0.02), MOUTH, "root")
 
     # ---- arms like the Cactus's: out to the side then bent, the left up and the right down,
@@ -105,7 +103,7 @@ def living_birch():
     return a
 
 
-PLAIN = ("Eye", "Pupil", "Mouth", "Mark", "Band")
+PLAIN = ("Eye", "Mouth", "Mark", "Band")
 
 
 def main(out=OUT):
