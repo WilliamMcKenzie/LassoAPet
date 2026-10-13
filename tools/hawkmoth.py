@@ -7,9 +7,13 @@ in a stinger point. Long, sharp forewings swept back like a jet (dark brown with
 black leading edge) ending in pyramid points, with a row of pyramid spikes along the trailing
 edge; under them small fiery orange hindwings with a black band and spiked tips.
 
-Run: python3 tools/hawkmoth.py [out_dir]
+Run: python3 tools/hawkmoth.py [out_dir] [--gif]
 
-Phase 1 (model only, no animations yet). Built in Blockbench's ZYX Euler order; every bone
+  idle    hovers, wings whirring, body bobbing
+  walk    faster beats, nosing forward
+  gallop  big fast beats, diving into the chase
+
+Built in Blockbench's ZYX Euler order; every bone
 rests at 0 (wing sweep and dihedral baked into the cubes; spikes are pyramid meshes).
 Bones: root (the thorax) -> neck (head, eyes, brows, antennae); root -> Abdomen;
 root -> WingFL, WingFR (forewings), WingBL, WingBR (hindwings).
@@ -30,6 +34,9 @@ import snake_design as S  # noqa: E402
 import angel_boss as AB  # noqa: E402  (box, axis_rot)
 from partlib import render  # noqa: E402
 import animal_designs as A  # noqa: E402
+import math  # noqa: E402
+from horse_rig import write_animations  # noqa: E402
+from snake_rig import track  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 NAME = "Hawkmoth"
@@ -47,7 +54,9 @@ TEX = {n: i for i, n in enumerate(COLORS)}
 box = AB.box
 R = AB.axis_rot
 
-Y0 = 3.6  # the thorax's centre: the legs reach the ground
+Y0 = 3.6  # the thorax's centre, before floor() lifts the lowest point GAP over y = 0
+GAP = 1.5  # it hovers: the legs tucked under never touch the ground
+TAU = 2 * math.pi
 
 
 def pyr(name, base, d, wv, L, hw, ht, tex):
@@ -132,10 +141,10 @@ def build():
     parts.append(pyr("Stinger", (0, y0 - 0.85, z), (0, -0.15, 1), (1, 0, 0), 2.4, 0.8, 0.75, TEX["black"]))
     put(abd, parts)
 
-    # six thin legs splayed out to the ground
+    # six thin legs tucked under, trailing back as it flies
     for s in (-1, 1):
         for k, zz in enumerate((-1.4, 0.0, 1.4)):
-            M = R("z", s * 30) @ R("x", -20 + 20 * k)
+            M = R("z", s * 25) @ R("x", 30 + 12 * k)
             d = M @ np.array([0, -1.0, 0])
             base = np.array([s * 1.6, y0 - 1.7, zz])
             put(root, [box(f"Leg{'LR'[s > 0]}{k + 1}", base + d * 1.25, (0.4, 2.5, 0.4), TEX["furdark"], M)])
@@ -178,16 +187,43 @@ def build():
 
 
 def floor(model):
-    """Shift so the lowest point (the feet) sits on y = 0."""
+    """Shift so the lowest point (the feet) hovers GAP over y = 0."""
     lo = min(q[:, 1].min() for p in S.posed(model) for q in p.polys)
-    d = -lo * S.BB
+    d = (GAP - lo) * S.BB
     for e in model["elements"]:
         for k in ("from", "to", "origin"):
             if k in e:
                 e[k][1] = round(e[k][1] + d, 4)
     for g in model["groups"]:
         g["origin"][1] = round(g["origin"][1] + d, 4)
-    return -lo
+    return GAP - lo
+
+
+def animations():
+    """Fast hawkmoth wingbeats (about Z, forewings leading the hindwings), the body bobbing."""
+    def flap(L, amp, bias, beats, n):
+        out = {}
+        for w, ph, k in (("WingF", 0.0, 1.0), ("WingB", 0.6, 0.8)):
+            for s, nm in ((1, "R"), (-1, "L")):
+                out[w + nm] = [track(L, lambda u, s=s, ph=ph, k=k: (
+                    0, 0, s * k * (bias + amp * math.sin(TAU * beats * u - ph))), n)]
+        return out
+
+    L = 1.0
+    idle = {**flap(L, 26, 6, 4, 32),
+            "root": [track(L, lambda u: (0, 4 * math.sin(TAU * u), 0), 16, "position")],
+            "neck": [track(L, lambda u: (3 * math.sin(TAU * u), 5 * math.sin(TAU * u + 1), 0), 16)],
+            "Abdomen": [track(L, lambda u: (4 * math.sin(TAU * 2 * u), 3 * math.sin(TAU * u), 0), 16)]}
+    Lw = 0.5
+    walk = {**flap(Lw, 32, 6, 3, 24),
+            "root": [track(Lw, lambda u: (-5, 0, 0), 4), track(Lw, lambda u: (0, 4 * math.sin(TAU * u), 0), 16, "position")],
+            "Abdomen": [track(Lw, lambda u: (5 * math.sin(TAU * u), 0, 0), 16)]}
+    Lg = 0.4
+    gallop = {**flap(Lg, 36, 8, 4, 32),
+              "root": [track(Lg, lambda u: (-12, 0, 0), 4), track(Lg, lambda u: (0, 6 * math.sin(TAU * 2 * u), 0), 16, "position")],
+              "neck": [track(Lg, lambda u: (6, 0, 0), 4)],
+              "Abdomen": [track(Lg, lambda u: (8 + 5 * math.sin(TAU * u), 0, 0), 16)]}
+    return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lg, gallop)}
 
 
 def light_bg(im, bg=(238, 240, 236)):
@@ -202,6 +238,7 @@ def main(out="/mnt/project-files/world2/woodland"):
     os.makedirs(os.path.dirname(MODEL), exist_ok=True)
     m = build()
     shift = floor(m)
+    write_animations(m, {g["name"]: g for g in m["groups"]}, animations())
     for path in (MODEL, os.path.join(out, NAME + ".bbmodel")):
         with open(path, "w") as f:
             json.dump(m, f, separators=(",", ":"))
@@ -223,7 +260,19 @@ def main(out="/mnt/project-files/world2/woodland"):
     for i, cam in enumerate(cams):
         sheet.paste(render(parts + (hparts if i == 0 else []), W=Wd, H=Ht, fov=40, **cam), ((i % 2) * Wd, (i // 2) * Ht))
     sheet.save(os.path.join(out, NAME + "_sheet.png"))
+    if "--gif" in sys.argv:
+        frames = []
+        for name, n, loops in (("idle", 24, 1), ("walk", 12, 2), ("gallop", 10, 2)):
+            anim = next(a for a in m["animations"] if a["name"] == name)
+            for _ in range(loops):
+                for k in range(n):
+                    ps = S.posed(m, anim, anim["length"] * k / n)
+                    im = Image.new("RGB", (880, 360))
+                    im.paste(render(ps, W=440, H=360, fov=40, **cams[1]), (0, 0))
+                    im.paste(render(ps, W=440, H=360, fov=40, **cams[0]), (440, 0))
+                    frames.append(A.label(im, [name] * 2))
+        A.gif(os.path.join(out, NAME + "_anims.gif"), frames, fps=20)
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    main(*[a for a in sys.argv[1:] if not a.startswith("--")])
