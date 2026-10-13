@@ -439,6 +439,12 @@ return {
 		{ "Marking", 222, 38, 52 }, -- red markings, socks, mask, saddle cloth, bow
 		{ "Accent", 255, 196, 52 }, -- gold anklets, ear rings, bell, trims
 	},
+	Nut = {
+		{ "Body", 92, 150, 255 }, -- sky-blue skin, arms, feet
+		{ "Belly", 252, 250, 244 }, -- white linen robe
+		{ "Marking", 36, 44, 128 }, -- night-blue flight feathers, starry hem
+		{ "Accent", 255, 196, 40 }, -- gold collar, diadem, wing bars, trims
+	},
 	Kraken = {
 		{ "Body", 58, 76, 128 }, -- tentacles
 		{ "Body", 40, 52, 94 }, -- head, funnel
