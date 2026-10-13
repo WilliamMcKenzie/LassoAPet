@@ -110,6 +110,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	MarbleColossus = "Was a museum statue for 900 years. Got bored. Kept the gold.",
 	MarbleFish = "Saw a unicorn once and has been wearing the horn ever since. Still can't swim.",
 	Lion = "King of the meadow, by his own vote. The mane takes three hours every morning.",
+	Buffalo = "Has never once been in a hurry. Will flatten you anyway.",
 	MajesticUnicorn = "Never walks anywhere without a rainbow. Has a stylist for the mane. Two, actually.",
 	CrystalCentipede = "Grows a new crystal every birthday. Has a hundred legs and owns no shoes.",
 	RedMushroom = "Smallest of the bunch. Insists the spots are freckles.",

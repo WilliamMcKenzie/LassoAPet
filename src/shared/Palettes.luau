@@ -87,6 +87,14 @@ return {
 		{ "Marking", 150, 70, 26 }, -- back of the mane, inner ears, tail tuft
 		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" },
 	},
+	Buffalo = {
+		{ "Body", 178, 114, 64 },
+		{ "Marking", 120, 74, 44 }, -- hump, head, beard, cuffs, tufts
+		{ "Belly", 184, 136, 98 }, -- snout
+		{ "Horn", 240, 230, 205 },
+		{ "Horn", 150, 146, 140 }, -- horn tips
+		{ "Hoof", 58, 46, 42 },
+	},
 	Cactus = {
 		{ "Body", 118, 204, 64 },
 		{ "Marking", 72, 150, 44 }, -- ribs
