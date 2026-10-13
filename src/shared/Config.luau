@@ -887,7 +887,7 @@ local Config = {
 	OutboundSprint = true, -- the ride out always a sprint too (QM, Oct 11)
 	-- Just lassoed onto an animal it's still at its stampede walk: for Time s it builds up to
 	-- the sprint at Rate studs/s a second (not the usual snap), so you see it break into it.
-	LandRamp = { Time = 2.5, Rate = 35 },
+	LandRamp = { Time = 0, Rate = 35 }, -- (QM, Oct 13: none, just the usual quick ramp; was 2.5 s)
 	-- The run home (QM, Oct 13; Client/ReturnRun): your pet stands still (Idle x MountSpeed x
 	-- its Speed: QM, so you know to move) unless you push forward, which runs it up to its
 	-- full sprint in about Ramp seconds; a hit drops it back to a walk (Walk); CatchAfter
