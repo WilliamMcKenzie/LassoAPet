@@ -775,6 +775,7 @@ local Config = {
 		LivingBirch = "rbxassetid://78918914654470", -- assets/ui/LivingBirchEggRender.png (World 2)
 		GiantGolem = "rbxassetid://130649889910224", -- assets/ui/GiantGolemEggRender.png (World 2)
 		Hawkmoth = "rbxassetid://111594299533130", -- assets/ui/HawkmothEggRender.png (World 2)
+		RollingLog = "rbxassetid://125301165432908", -- assets/ui/RollingLogEggRender.png (World 2)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
