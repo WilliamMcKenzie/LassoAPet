@@ -86,7 +86,7 @@ end
 -- A pet in `pen` wears its owner's rebirth skin (Shared/Skins).
 local function skin(pen, pet)
 	local owner = Players:GetPlayerByUserId(pen:GetAttribute("Owner") or 0)
-	Skins.apply(pet.animal.model, owner and owner:GetAttribute("Rebirths"))
+	Skins.apply(pet.animal, owner and owner:GetAttribute("Rebirths"))
 end
 
 local function placePet(pet, at, yaw)

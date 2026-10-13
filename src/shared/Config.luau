@@ -1270,6 +1270,7 @@ Config.Rebirth = {
 	Prices = { 100000000, 1000000000, 10000000000 },
 	Gold = { 2, 4, 8 }, -- (each rebirth doubles again)
 	Speed = { 1.5, 1.5, 1.5 }, -- (QM's 1.5x: not stacked, so the courses stay ridable)
+	Scale = 1.5, -- (QM, Oct 13: rebirthed pets are this much bigger everywhere: Shared/Skins)
 }
 -- All your gold earnings' multiplier: the x2 Gold pass and your rebirths.
 function Config.goldX(player)
