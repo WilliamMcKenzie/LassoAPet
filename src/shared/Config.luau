@@ -1524,6 +1524,16 @@ if Config.World == 2 then
 		end
 		biome.Herd = if next(herd) then herd else { Fish = 1 }
 	end
+	-- The last three biomes' animals bigger, and more of them (QM, Oct 13): x their size
+	-- (AnimalScale, on top of any of their own: wild and as pets) and x how often they spawn.
+	Config.AnimalScale = table.clone(Config.AnimalScale)
+	for i, more in { [4] = { size = 2, spawn = 1.6 }, [5] = { size = 2.5, spawn = 2 }, [6] = { size = 3, spawn = 2.5 } } do
+		for kind in own[i] do
+			Config.AnimalScale[kind] = (Config.AnimalScale[kind] or 1) * more.size
+		end
+		local biome = Config.Biomes[i]
+		biome.HerdSpawnEvery = (biome.HerdSpawnEvery or Config.HerdSpawnEvery) / more.spawn
+	end
 	-- World 2's speeds (QM, Oct 13: each animal's % into a biome on a full sprint ride,
 	-- 2,904 studs per 1 Speed). The rest keep theirs (the Seraphs 0.5, the Majestic Unicorn,
 	-- Eyeworm, Asura and Crystal Centipede as they were).
