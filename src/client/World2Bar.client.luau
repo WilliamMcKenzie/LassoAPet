@@ -1,4 +1,4 @@
--- World 1's World 2 bar (QM, Oct 13): bottom centre of the base HUD till you own World 2,
+-- World 1's World 2 bar (QM, Oct 13): top centre of the base HUD till you own World 2,
 -- QM's grey track (World2BarEmpty.png) filling left to right with his green one
 -- (World2Bar.png: the cash, "WORLD 2") as your gold comes up to World 2's price, the gold
 -- over it ("$12m/10m"). Full: the tap hand pulses on it, and clicking it buys World 2 and
@@ -24,7 +24,7 @@ local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this w
 local FULL = if REBIRTH then "rbxassetid://134360719563119" else "rbxassetid://136963914635101" -- assets/ui/RebirthBar.png, World2Bar.png (964x103)
 local EMPTY = if REBIRTH then "rbxassetid://112501154569335" else "rbxassetid://113527973630301" -- assets/ui/RebirthBarEmpty.png, World2BarEmpty.png
 local BAR = Vector2.new(660, 660 * 103 / 964) -- (half the screen across: QM's mockup)
-local BOTTOM = 14 -- px from the screen's bottom
+local TOP = 14 -- px from the screen's top (QM, Oct 13: was at the bottom, over the egg inventory)
 local ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
 local NEAR = 30 -- studs from the gate: the Worlds menu's (no trail closer in)
 local function price()
@@ -59,8 +59,8 @@ bar.Name = "Bar"
 bar.AutoButtonColor = false
 bar.BackgroundTransparency = 1
 bar.Image = EMPTY
-bar.AnchorPoint = Vector2.new(0.5, 1)
-bar.Position = UDim2.new(0.5, 0, 1, -BOTTOM)
+bar.AnchorPoint = Vector2.new(0.5, 0)
+bar.Position = UDim2.new(0.5, 0, 0, TOP)
 bar.Size = UDim2.fromOffset(BAR.X, BAR.Y)
 bar.Parent = root
 local fill = Instance.new("Frame") -- (clips the green art to the gold so far)
@@ -91,12 +91,12 @@ stroke.Thickness = 2.5
 stroke.LineJoinMode = Enum.LineJoinMode.Round
 stroke.Parent = text
 text.Parent = bar
-local ask = text:Clone() -- (the Rebirth bar's "are you sure", over it)
+local ask = text:Clone() -- (the Rebirth bar's "are you sure", under it)
 ask.Name = "Ask"
 ask.Text = "TAP AGAIN TO REBIRTH"
 ask.TextXAlignment = Enum.TextXAlignment.Center
-ask.AnchorPoint = Vector2.new(0.5, 1)
-ask.Position = UDim2.new(0.5, 0, 0, -6)
+ask.AnchorPoint = Vector2.new(0.5, 0)
+ask.Position = UDim2.new(0.5, 0, 1, 6)
 ask.Size = UDim2.fromScale(0.6, 0.4)
 ask.Visible = false
 ask.Parent = bar
