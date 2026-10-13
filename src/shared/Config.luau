@@ -1129,6 +1129,13 @@ if Config.World == 2 then
 		Dirt = { rgb(118, 84, 50), rgb(104, 72, 42) },
 		Grass = { rgb(218, 173, 53), rgb(199, 156, 43) }, -- the darker grass, beside the dirt (20% brighter: QM)
 	}
+	-- The second biome: the Crimson Lands (QM, Oct 13; tools/world2_crimson.luau's floor).
+	local crimson = Config.Biomes[2]
+	crimson.GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) } -- #791425
+	crimson.Patches = {
+		Crimson = { rgb(144, 44, 43), rgb(132, 38, 38) }, -- #902C2B, round every stone tile
+		Stone = { rgb(119, 86, 86), rgb(108, 77, 77) }, -- #775656 single tiles
+	}
 end
 
 return Config
