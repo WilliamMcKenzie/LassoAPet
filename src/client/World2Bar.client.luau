@@ -162,7 +162,26 @@ arrow.Parent = player.PlayerGui
 local trail = ArrowTrail.new()
 
 local gate = if REBIRTH then nil else workspace:WaitForChild("World"):WaitForChild("BaseDecor"):WaitForChild("PortalGate", 30)
+-- In line with the Quests panel, as tall as it is folded (QM, Oct 13): its top and its
+-- header's height (BaseUi's 86, at BaseUi's scale).
+local QUESTS_HEADER = 86
+local function align()
+	local base = player.PlayerGui:FindFirstChild("BaseUi")
+	local baseRoot = base and base:FindFirstChild("Root")
+	local quests = baseRoot and baseRoot:FindFirstChild("Quests")
+	local baseScale = baseRoot and baseRoot:FindFirstChildOfClass("UIScale")
+	if not quests or not baseScale then
+		return
+	end
+	local tall = QUESTS_HEADER * baseScale.Scale / rootScale.Scale
+	local size = Vector2.new(tall * BAR.X / BAR.Y, tall)
+	bar.Size = UDim2.fromOffset(size.X, size.Y)
+	green.Size = bar.Size
+	bar.Position = UDim2.new(0.5, 0, 0, (quests.AbsolutePosition.Y - root.AbsolutePosition.Y) / rootScale.Scale)
+end
+
 RunService.RenderStepped:Connect(function()
+	align()
 	local owned = player:GetAttribute("OwnsWorld2") == true
 	local busy = Hud.isRiding() or player:GetAttribute("Cutscene") or player:GetAttribute("Tutorial")
 	local menu = player.PlayerGui:FindFirstChild("WorldsMenu")
