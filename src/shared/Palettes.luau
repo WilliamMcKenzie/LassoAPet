@@ -150,6 +150,12 @@ return {
 		{ "Hoof", 190, 100, 214 }, -- legs
 		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
 	},
+	CrystalElephant = {
+		{ "Body", 138, 142, 182 }, -- lavender skin
+		{ "Marking", 86, 54, 168 }, -- crystal armour plates
+		{ "Horn", 0, 190, 231 }, -- cyan crystals and trim
+		{ "Accent", 229, 131, 251 }, -- pink crystals
+	},
 	CrystalPhoenix = {
 		{ "Body", 104, 58, 184 }, -- body, wing arms
 		{ "Body", 146, 96, 226 }, -- head, neck, wing bands
