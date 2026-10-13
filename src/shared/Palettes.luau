@@ -110,6 +110,18 @@ return {
 		{ "Marking", 151, 44, 28 }, -- cap's underside (shade)
 		{ "Accent", 250, 248, 252 }, -- spots
 	},
+	BlueCrystal = {
+		{ "Body", 0, 190, 231 }, -- crystal
+		{ "Body", 90, 220, 245 }, -- facet stripe (lighter)
+		{ "Hoof", 0, 150, 190 }, -- legs
+		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
+	},
+	PinkCrystal = {
+		{ "Body", 229, 131, 251 }, -- crystal
+		{ "Body", 242, 170, 253 }, -- facet stripe (lighter)
+		{ "Hoof", 190, 100, 214 }, -- legs
+		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
+	},
 	CrystalCentipede = {
 		{ "Body", 124, 72, 200 },
 		{ "Hoof", 72, 44, 124 }, -- leg bars, tail feelers
