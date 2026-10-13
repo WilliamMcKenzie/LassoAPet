@@ -620,7 +620,6 @@ local function remote(name, handler)
 end
 
 local place -- (below, after PlaceEgg)
-local TUTORIAL_SPOTS = { Vector2.new(0, 0), Vector2.new(8, 0), Vector2.new(-8, 0), Vector2.new(0, 8), Vector2.new(0, -8), Vector2.new(8, 8) }
 
 -- An animal you rode home or over the finish line (QM, Oct 13: the animal itself, not its
 -- egg; eggs come from quests now): straight into your pen as a pet, at the first clear
@@ -657,8 +656,9 @@ local function givePet(player, profile, kind)
 	return false
 end
 
--- The ride got its animal home: in the tutorial its egg (hatched in the pen, the
--- tutorial's next step), else the animal itself (givePet).
+-- The ride got its animal home: the animal itself, into your pen (givePet), the
+-- tutorial's first ride's too (QM, Oct 13: its new animal cutscene; the tutorial goes on
+-- once there's a new pet in the pen).
 remote("DeliverEgg", function(player, kind)
 	local profile = profiles[player]
 	if not profile or not isAnimal(kind) or player:GetAttribute("CarriedEgg") ~= kind then
@@ -669,29 +669,6 @@ remote("DeliverEgg", function(player, kind)
 	if profile.homeEggs then
 		profile.homeEggs += 1
 		Funnel.captured(player, profile.homeEggs)
-	end
-	-- The tutorial's egg brought home goes straight into the pen (balance pass, Oct 6: a
-	-- fifth of new players left at "Place your egg" a second time). The first spot clear
-	-- of the starter pet, from the middle out.
-	local pen = penOf(player)
-	if player:GetAttribute("Tutorial") and pen and (profile.ride or next(profile.items)) and penCount(profile) < penCap(player) then
-		for _, spot in TUTORIAL_SPOTS do
-			local clear = canPlace(pen, spot.X, spot.Y)
-			for _, item in profile.items do
-				if clear and math.abs(item.x - spot.X) < 6 and math.abs(item.z - spot.Y) < 6 then
-					clear = false
-				end
-			end
-			if clear then
-				place(player, profile, kind, spot.X, spot.Y)
-				return
-			end
-		end
-	end
-	if player:GetAttribute("Tutorial") then
-		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
-		publish(player)
-		return
 	end
 	givePet(player, profile, kind)
 end)

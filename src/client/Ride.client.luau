@@ -37,10 +37,6 @@ local deliverEgg = ReplicatedStorage:WaitForChild("DeliverEgg")
 local finishCourse = ReplicatedStorage:WaitForChild("FinishCourse")
 local ridePet = ReplicatedStorage:WaitForChild("RidePet")
 
-local function rarityOf(kind)
-	return require(Animals[kind]).Rarity
-end
-
 -- Obstacle footprints from each obstacle's "Base" part (an invisible footprint),
 -- or else its lowest part (a tree's trunk, a rock's base).
 local obstacles = {}
@@ -4332,7 +4328,7 @@ RunService.PreSimulation:Connect(function(dt)
 			if kind then
 				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
 			end
-			task.delay(kind and (if player:GetAttribute("Tutorial") then Hud.eggReveal(rarityOf(kind), kind) else vfx.newAnimal.show(kind)) or 0.5, function() -- (the animal's in your pen; the tutorial's an egg)
+			task.delay(kind and vfx.newAnimal.show(kind) or 0.5, function() -- (the animal's in your pen)
 				if phase == "home" then
 					finishRide(mount.x, mount.z)
 				end
