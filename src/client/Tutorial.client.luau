@@ -251,12 +251,6 @@ local function say(key)
 end
 
 local tapAt -- a GuiObject, a Vector3 in the world, or nil
-require(script.Parent.TapHand).register(tap, function() -- (its spotlight: on the button it's over)
-	if typeof(tapAt) == "Instance" and tapAt:IsA("GuiObject") then
-		return tapAt.AbsolutePosition, tapAt.AbsoluteSize
-	end
-	return nil
-end)
 local function pointAt(target)
 	tapAt = target
 end

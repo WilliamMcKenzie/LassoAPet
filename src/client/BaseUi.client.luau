@@ -302,7 +302,7 @@ fold.Activated:Connect(function()
 	end
 end)
 -- A tap hand on the folded panel till you've opened it once, from your first quest on (QM,
--- Oct 13). Its spotlight: TapHand's.
+-- Oct 13).
 local openHand = TapHand.new(80)
 openHand.Name = "OpenQuestsHint"
 openHand.Position = UDim2.fromScale(0.5, 0.6)
