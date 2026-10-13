@@ -73,6 +73,20 @@ return {
 		{ "Belly", 222, 240, 255 },
 		{ "Marking", 36, 88, 184 }, -- fins
 	},
+	MarbleFish = {
+		{ "Body", 255, 204, 36 },
+		{ "Belly", 255, 244, 196 },
+		{ "Marking", 232, 150, 16 }, -- fins
+		{ "Horn", 246, 244, 238 }, -- marble horn
+		{ "Horn", 208, 205, 198 },
+	},
+	Lion = {
+		{ "Body", 232, 172, 72 },
+		{ "Belly", 255, 238, 200 }, -- muzzle, chest, paws
+		{ "Marking", 196, 102, 34 }, -- mane
+		{ "Marking", 150, 70, 26 }, -- back of the mane, inner ears, tail tuft
+		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" },
+	},
 	Cactus = {
 		{ "Body", 118, 204, 64 },
 		{ "Marking", 72, 150, 44 }, -- ribs

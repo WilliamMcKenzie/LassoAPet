@@ -96,6 +96,10 @@ local IMAGES = {
 	eggRedMushroom = { id = "rbxassetid://102610484944753", size = Vector2.new(502, 675) }, -- RedMushroomEggRender.png (World 2)
 	eggBrownMushroom = { id = "rbxassetid://84196239547123", size = Vector2.new(502, 668) }, -- BrownMushroomEggRender.png (World 2)
 	eggPurpleMushroom = { id = "rbxassetid://132151928968903", size = Vector2.new(502, 675) }, -- PurpleMushroomEggRender.png (World 2)
+	eggMarbleFish = { id = "rbxassetid://121162393893227", size = Vector2.new(593, 938) }, -- MarbleFishEggRender.png (World 2)
+	eggBlueCrystal = { id = "rbxassetid://112194074349421", size = Vector2.new(502, 877) }, -- BlueCrystalEggRender.png (World 2)
+	eggPinkCrystal = { id = "rbxassetid://117236752430565", size = Vector2.new(502, 877) }, -- PinkCrystalEggRender.png (World 2)
+	eggLion = { id = "rbxassetid://82682007346790", size = Vector2.new(518, 720) }, -- LionEggRender.png (World 2)
 	eggUnicorn = { id = "rbxassetid://85066893166855", size = Vector2.new(496, 859) }, -- UnicornEggRender.png
 	eggCactus = { id = "rbxassetid://95599437590618", size = Vector2.new(635, 766) }, -- CactusEggRender.png
 	eggKitten = { id = "rbxassetid://124881834655792", size = Vector2.new(502, 749) }, -- KittenEggRender.png
