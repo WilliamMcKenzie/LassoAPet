@@ -1490,6 +1490,9 @@ if Config.World == 2 then
 	crimson.GateColor = rgb(255, 59, 92)
 	cavern.GateColor = rgb(92, 225, 255)
 	woodland.WallColors = { rgb(70, 42, 24), rgb(60, 36, 20) } -- dark brown (QM, Oct 13)
+	-- Not the Ocean's sea any more (its blue haze, hue-turned pink here, and bubbles): a very
+	-- subtle autumn orange haze far off (QM, Oct 13; Ocean.client).
+	woodland.Haze = { Color = rgb(250, 176, 110), Tint = rgb(255, 248, 238), FogStart = 250, FogEnd = 1400, FadeTime = 1.5, Bubbles = 0, NoDepths = true }
 	woodland.CapColor = rgb(242, 109, 57) -- vibrant autumn leaves on top (QM, Oct 13)
 	woodland.GateColor = rgb(242, 109, 57)
 	temple.GateColor = rgb(130, 226, 80)
