@@ -47,6 +47,7 @@ local IDS = {
 	boss_TyrantRex = "rbxassetid://116844415804502", -- T-Rex Roar 1 (Creator Store, AggrovatedSavage): the Jurassic's boss
 	boss_Seraph = "rbxassetid://133260252239833", -- angelic sound (Creator Store, QM's pick, Oct 13): World 2 Meadow's angel
 	boss_CrystalTyrant = "rbxassetid://95169379454314", -- the Cactus boss's growl for now (World 2's Crystal Cavern; QM to pick its own)
+	boss_CrystalSeraph = "rbxassetid://133260252239833", -- the same angelic sound for the Crystal Cavern's angel (QM)
 	boss_CrimsonSeraph = "rbxassetid://133260252239833", -- the same angelic sound for the Crimson Lands' angel (QM)
 	reveal_pop = "rbxassetid://4612378086", -- the egg card lands on its rarity (after the flicks): rewardscreenreveal (QM's pick, Oct 9; was 117371326373841)
 	egg_hatch = "rbxassetid://96102213526905", -- an egg in your pen hatches: Rewards (QM's pick, Oct 9; was 112644148635720)

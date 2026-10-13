@@ -4,7 +4,8 @@ around it, each covered in eyes on both faces, spinning on their own axes, and s
 wings (three pairs, up, out and down) spread behind it all. A glowing gold halo floats on top.
 
 Run: python3 tools/angel_boss.py [out_dir] [--gif] [--crimson]
-(--crimson: the Crimson Seraph, the Crimson Lands' boss: the same angel in crimson)
+(--crimson: the Crimson Seraph, the Crimson Lands' boss: the same angel in crimson;
+ --crystal: the Crystal Seraph, the Crystal Cavern's boss: cyan and pink crystal)
 
 Built in Blockbench's ZYX Euler order so QM can edit it there. Every bone rests at 0:
 the ring and feather tilts are baked into the cubes (single bones never rest turned).
@@ -52,10 +53,16 @@ COLORS = {"gold": (255, 194, 38), "deep": (222, 146, 24), "white": (255, 255, 25
 CRIMSON = {"gold": (84, 22, 30), "deep": (56, 14, 20), "white": (255, 255, 255), "feather": (168, 30, 46),
            "cream": (136, 22, 38), "black": (20, 20, 26), "iris": (255, 59, 92), "glow": (255, 59, 92),
            "tip": (255, 92, 116)}
+# The Crystal Seraph (QM, Oct 13): the Crystal Cavern's boss, the cavern props' colours:
+# cyan crystal rings, pink crystal wings with glowing cyan tips, a pink iris, a cyan halo.
+CRYSTAL = {"gold": (0, 190, 231), "deep": (0, 146, 186), "white": (255, 255, 255), "feather": (229, 131, 251),
+           "cream": (242, 170, 253), "black": (20, 20, 26), "iris": (229, 131, 251), "glow": (92, 225, 255),
+           "tip": (92, 225, 255)}
 NAME = "Seraph"
-if "--crimson" in sys.argv:
-    COLORS, NAME = CRIMSON, "CrimsonSeraph"
-    MODEL = os.path.join(ROOT, "designs", "bosses", "CrimsonSeraph.bbmodel")
+for flag, colors, name in (("--crimson", CRIMSON, "CrimsonSeraph"), ("--crystal", CRYSTAL, "CrystalSeraph")):
+    if flag in sys.argv:
+        COLORS, NAME = colors, name
+        MODEL = os.path.join(ROOT, "designs", "bosses", name + ".bbmodel")
 TEX = {n: i for i, n in enumerate(COLORS)}
 
 HOVER = 16.0  # the core's centre, before floor() sets the lowest point GAP over y = 0
