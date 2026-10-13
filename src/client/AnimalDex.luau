@@ -129,6 +129,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	JadeStatue = "Guarded the temple gate for 600 years. Nobody ever told it the gate was open.",
 	GarnetStatue = "The Jade Statue's twin. Insists it's the older one by about four minutes.",
 	Hawkmoth = "The skull on its back is just a birthmark. It's very sensitive about it.",
+	EagleSentry = "Guarded the tomb for 3,000 years. Still hasn't been told what's inside.",
 	CrystalPhoenix = "The Phoenix's cousin who doesn't like getting burnt. Shatters instead.",
 	OrangeButterfly = "Used to be a caterpillar. Won't stop bringing it up.",
 	Rhino = "Ran away to join the mafia at a young age. Still pays horses tuition.",

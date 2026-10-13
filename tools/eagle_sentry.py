@@ -10,12 +10,16 @@ tail in a gold cuff, feathered thighs, yellow legs with gold anklets and black t
 long gold spear with a glowing head. A lapis saddle blanket with a gold frame and tassels, a red
 seat, and a glowing Horus eye on each side drape.
 
-Run: python3 tools/eagle_sentry.py [out_dir]
+Run: python3 tools/eagle_sentry.py [out_dir] [--gif]
 
-Phase 1 (model only, no animations yet). Built in Blockbench's ZYX Euler order; every bone rests
+  idle    hovers on big slow wingbeats, the hands whipping after, tail steering
+  walk    stronger beats, leaning forward, legs and spear swung back
+  gallop  full beats, diving into the chase, talons and spear trailing
+
+Built in Blockbench's ZYX Euler order; every bone rests
 at 0 (wing sweep and dihedral baked into the cubes; points are pyramid meshes). Bones follow the
-Phoenix: root (the body) -> neck (head, headdress, disc); root -> WingL, WingR, Tail, LegL, LegR
-(the spear rides on LegR).
+Phoenix: root (the body) -> neck (head, headdress, disc); root -> WingL, WingR (-> WingTipL,
+WingTipR: the primaries), Tail, LegL, LegR (the spear rides on LegR; both legs move as one).
 """
 
 import json
@@ -35,6 +39,10 @@ import angel_boss as AB  # noqa: E402  (box, axis_rot; sets S.SIZE = 1)
 from hawkmoth import pyr, light_bg  # noqa: E402
 from partlib import render  # noqa: E402
 import animal_designs as A  # noqa: E402
+from horse_rig import write_animations  # noqa: E402
+from snake_rig import track  # noqa: E402
+
+TAU = 2 * math.pi
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 NAME = "EagleSentry"
@@ -231,7 +239,10 @@ def build():
             L = 4.6 + 0.25 * j
             ps += [box(f"Secondary{n}{j + 1}", P(x, -0.15, 4.2 + L / 2), (1.4, 0.5, L), T["darkbrown"], M),
                    box(f"SecondaryBand{n}{j + 1}", P(x, -0.15, 4.2 + L - 1.3), (1.44, 0.54, 0.6), T["cream"], M)]
-        # primaries: six long barred feathers fanned out from the hand, gold tips
+        put(node, ps)
+        # primaries: six long barred feathers fanned out from the hand (its own bone), gold tips
+        hand = add_group("WingTip" + n, P(9.0, 0, 0.5), node)
+        ps = []
         for j in range(6):
             phi = 2 + 11 * j
             L = 8.0 - 0.5 * j
@@ -243,7 +254,7 @@ def build():
                    box(f"PrimaryBand{n}{j + 1}b", at(L * 0.7), (0.7, 0.54, 1.34), T["cream"], Ry(phi))]
             tip_d = M @ np.array([s * d[0], 0, d[2]])
             ps.append(pyr(f"PrimaryTip{n}{j + 1}", at(L), tip_d, M @ np.array([-d[2], 0, s * d[0]]), 1.6, 0.65, 0.25, T["gold"]))
-        put(node, ps)
+        put(hand, ps)
 
     # ---- tail: seven barred feathers fanned back from a gold cuff
     tail = add_group("Tail", (0, y0 + 0.6, 3.8), root)
@@ -296,6 +307,43 @@ def build():
     return model
 
 
+def animations():
+    """Big slow falcon wingbeats about Z (the hands lagging and whipping), the body rising on each
+    downstroke, the tail fanning and steering, the head steady like a hunting falcon."""
+    def flap(L, amp, bias, beats, n, lag=0.9, tip=0.7):
+        out = {}
+        for s, nm in ((1, "R"), (-1, "L")):
+            out["Wing" + nm] = [track(L, lambda u, s=s: (0, 0, s * (bias + amp * math.sin(TAU * beats * u))), n)]
+            out["WingTip" + nm] = [track(L, lambda u, s=s: (0, 0, s * tip * amp * math.sin(TAU * beats * u - lag)), n)]
+        return out
+
+    def bob(L, h, beats, n=16):  # up as the wings come down (position in Blockbench units)
+        return track(L, lambda u: (0, -h * math.sin(TAU * beats * u + 0.4), 0), n, "position")
+
+    L = 1.6
+    idle = {**flap(L, 24, 6, 1, 32),
+            "root": [bob(L, 5, 1)],
+            "neck": [track(L, lambda u: (2 * math.sin(TAU * u), 6 * math.sin(TAU * u / 1 + 1.2), 0), 16)],
+            "Tail": [track(L, lambda u: (3 * math.sin(TAU * u + 1), 4 * math.sin(TAU * u), 0), 16)],
+            "LegL": [track(L, lambda u: (4 * math.sin(TAU * u), 0, 0), 8)],
+            "LegR": [track(L, lambda u: (4 * math.sin(TAU * u), 0, 0), 8)]}
+    Lw = 1.0
+    walk = {**flap(Lw, 30, 6, 1, 24),
+            "root": [track(Lw, lambda u: (-5, 0, 0), 4), bob(Lw, 6, 1)],
+            "neck": [track(Lw, lambda u: (4, 0, 0), 4)],
+            "Tail": [track(Lw, lambda u: (4 * math.sin(TAU * u + 1), 0, 0), 12)],
+            "LegL": [track(Lw, lambda u: (12, 0, 0), 4)],
+            "LegR": [track(Lw, lambda u: (12, 0, 0), 4)]}
+    Lg = 0.7
+    gallop = {**flap(Lg, 38, 4, 1, 24, tip=0.8),
+              "root": [track(Lg, lambda u: (-12, 0, 0), 4), bob(Lg, 8, 1)],
+              "neck": [track(Lg, lambda u: (10, 0, 0), 4)],
+              "Tail": [track(Lg, lambda u: (-6 + 4 * math.sin(TAU * u + 1), 0, 0), 12)],
+              "LegL": [track(Lg, lambda u: (28, 0, 0), 4)],
+              "LegR": [track(Lg, lambda u: (28, 0, 0), 4)]}
+    return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lg, gallop)}
+
+
 def shrink(model, k=SCALE):
     """Scale the whole build about the origin (cubes, meshes, bone pivots)."""
     sc = lambda v: [round(x * k, 4) for x in v]  # noqa: E731
@@ -326,6 +374,14 @@ def floor(model):
     return GAP - lo
 
 
+def posed_anim(m, anim, t):
+    parts = S.posed(m, anim, t)
+    for p in parts:
+        if p.name.startswith("Glow"):
+            p.neon = True
+    return parts
+
+
 def posed(m):
     parts = S.posed(m)
     for p in parts:
@@ -341,6 +397,7 @@ def main(out="/mnt/project-files/world2/tomb"):
     m = build()
     shrink(m)
     shift = floor(m)
+    write_animations(m, {g["name"]: g for g in m["groups"]}, animations())
     with open(MODEL, "w") as f:
         json.dump(m, f, separators=(",", ":"))
     parts = posed(m)
@@ -361,7 +418,19 @@ def main(out="/mnt/project-files/world2/tomb"):
     for i, cam in enumerate(cams):
         sheet.paste(render(parts + (hparts if i == 0 else []), W=Wd, H=Ht, fov=40, **cam), ((i % 2) * Wd, (i // 2) * Ht))
     sheet.save(os.path.join(out, NAME + "_sheet.png"))
+    if "--gif" in sys.argv:
+        frames = []
+        for name, n, loops in (("idle", 24, 1), ("walk", 16, 2), ("gallop", 12, 2)):
+            anim = next(a for a in m["animations"] if a["name"] == name)
+            for _ in range(loops):
+                for k in range(n):
+                    ps = posed_anim(m, anim, anim["length"] * k / n)
+                    im = Image.new("RGB", (880, 360))
+                    im.paste(render(ps, W=440, H=360, fov=44, **cams[1]), (0, 0))
+                    im.paste(render(ps, W=440, H=360, fov=44, **cams[0]), (440, 0))
+                    frames.append(A.label(im, [name] * 2))
+        A.gif(os.path.join(out, NAME + "_anims.gif"), frames, fps=20)
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    main(*[a for a in sys.argv[1:] if not a.startswith("--")])

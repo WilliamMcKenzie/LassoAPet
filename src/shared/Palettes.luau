@@ -215,6 +215,15 @@ return {
 		{ "Horn", 240, 190, 24 }, -- gold horns, collar, bell, anklets, claws, ridge
 		{ "Horn", 196, 140, 16 },
 	},
+	EagleSentry = {
+		{ "Body", 128, 78, 42 }, -- body, head, wing coverts, thighs
+		{ "Body", 84, 50, 28 }, -- flight feathers, chest bars
+		{ "Belly", 246, 232, 196 }, -- chest, cheeks, feather bands
+		{ "Horn", 246, 192, 44 }, -- gold armour, headdress, spear, feather tips
+		{ "Horn", 204, 146, 30 }, -- dark gold brows, rims, spear shaft
+		{ "Accent", 36, 84, 196 }, -- lapis stripes and saddle
+		{ "Marking", 34, 196, 196 }, -- turquoise collar row
+	},
 	Hawkmoth = {
 		{ "Body", 62, 48, 44 }, -- body, head
 		{ "Body", 84, 54, 40 }, -- forewings
