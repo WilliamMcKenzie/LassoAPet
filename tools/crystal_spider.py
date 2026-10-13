@@ -4,7 +4,7 @@ animations of the Minecraft tarantula QM sent (designs/crystal/small_tarantula_r
 Run: python3 tools/crystal_spider.py [out_dir]
 
 Kept from the reference: every bone (root, abdomen, body, mouth, the 8 three-part legs),
-their pivots and rest turns, and the idle and walk animations (the run is the walk, faster).
+their pivots and rest turns, and its pose. The idle, walk and run are our own (a tetrapod gait).
 Restyled for us: the hair planes and flat bits are gone (QM: no 2D planes); each leg is
 three real blocks with a cyan crystal end; the body is slate blue with our plate eyes on
 the head, two cyan pyramid fangs, and three crystals (cube shaft + pyramid tip, cyan and
@@ -61,6 +61,56 @@ def crystal(name, base, w, hs, ht, tex, rot):
     tip = pyramid(name + "Tip", base, w, w, ht, tex, rot)
     tip["vertices"] = {k: [v[0], v[1] + hs * K, v[2]] for k, v in tip["vertices"].items()}
     return [shaft, tip]
+
+
+def euler_zyx(R):
+    """Blockbench angles (degrees, R = Rz Ry Rx) of a rotation matrix."""
+    import math
+    ry = math.asin(max(-1.0, min(1.0, -R[2, 0])))
+    rx = math.atan2(R[2, 1], R[2, 2])
+    rz = math.atan2(R[1, 0], R[0, 0])
+    return [round(math.degrees(a), 4) for a in (rx, ry, rz)]
+
+
+def bake_rests(model):
+    """Bake every bone's rest turn into its blocks, so all bones rest at 0 (Studio, Oct 13: the
+    legs' rest turns didn't come through in Roblox, leaving them flat). Each block gets its bone
+    chain's rest transform folded into its own position and rotation; pivots move with them."""
+    gmap = {g["uuid"]: g for g in model["groups"]}
+    emap = {e["uuid"]: e for e in model["elements"]}
+    rot = horse_rig.rotm
+
+    def walk(node, M):
+        if isinstance(node, str):
+            e = emap[node]
+            R0 = rot(np.array(e.get("rotation") or (0, 0, 0), float))
+            o = np.array(e["origin"], float)
+            Ro, to = M[:3, :3], M[:3, 3]
+            if e["type"] == "cube":
+                lo, hi = np.array(e["from"], float), np.array(e["to"], float)
+                c = R0 @ ((lo + hi) / 2 - o) + o  # the block's centre at rest, in its bone's frame
+                c2 = Ro @ c + to
+                half = (hi - lo) / 2
+                e["from"], e["to"] = [round(x, 4) for x in c2 - half], [round(x, 4) for x in c2 + half]
+                e["origin"] = [round(x, 4) for x in c2]
+            else:
+                e["origin"] = [round(x, 4) for x in Ro @ o + to]
+            e["rotation"] = euler_zyx(Ro @ R0)
+            return
+        g = gmap[node["uuid"]]
+        o = np.array(g["origin"], float)
+        L = np.eye(4)
+        R = rot(np.array(g.get("rotation") or (0, 0, 0), float))
+        L[:3, :3] = R
+        L[:3, 3] = o - R @ o
+        M2 = M @ L
+        g["origin"] = [round(x, 4) for x in M[:3, :3] @ o + M[:3, 3]]
+        g["rotation"] = [0, 0, 0]
+        for c in node["children"]:
+            walk(c, M2)
+
+    for n in model["outliner"]:
+        walk(n, np.eye(4))
 
 
 def build():
@@ -135,14 +185,9 @@ def build():
         g["origin"] = [round(c * K, 4) for c in g["origin"]]
         new_groups.append(g)
 
-    # the reference's idle; the walk and run are our own tetrapod gait (its walk, played on
-    # these multi-axis rest turns, flung the legs about), small turns added onto each rest
-    idle = copy.deepcopy(next(a for a in ref["animations"] if a["name"] == "idle"))
-    idle.update(loop="loop", length=2.0)
-    for v in idle["animators"].values():
-        for k in v["keyframes"]:
-            k["time"] = round(k["time"] * 2, 4)
-    anims = [idle]
+    # our own idle, walk and run (a tetrapod gait); the reference's walk, played on its
+    # multi-axis rest turns, flung the legs about. Small turns about each leg's pivot.
+    anims = []
     by_name = {g["name"]: g for g in ref_groups}
     from horse_rig import write_animations
     from snake_rig import track
@@ -161,6 +206,10 @@ def build():
         tr["root"] = [track(L, lambda u: (0, 0, 0), 4),
                       track(L, lambda u: (0, body_bob * abs(math.sin(2 * math.pi * u)), 0), 16, channel="position")]
         return tr
+    gait["idle"] = (2.4, {"abdomen": [track(2.4, lambda u: (15 + 5 * math.sin(2 * math.pi * u), 0, 0), 16)],
+                          "mouth": [track(2.4, lambda u: (4 * max(0.0, math.sin(4 * math.pi * u)) ** 2, 0, 0), 16)],
+                          **{f"{sd}_leg_{i}": [track(2.4, lambda u, i=i, sx=sx: (0, sx * 3 * math.sin(2 * math.pi * u + i), 0), 16)]
+                             for sd, sx in (("left", 1), ("right", -1)) for i in range(1, 5)}})
     gait["walk"] = (0.9, legs(0.9, 16, 10, 1.5))
     gait["gallop"] = (0.45, legs(0.45, 22, 14, 4.0))
     holder = {"animations": []}
@@ -170,6 +219,7 @@ def build():
     model = json.load(open(os.path.join(ROOT, "designs", "desert", "Snake.bbmodel")))
     model.update(name="CrystalSpider", elements=elements, groups=new_groups, outliner=outliner, animations=anims,
                  textures=[S.solid_texture(n, c) for n, c in COLORS.items()])
+    bake_rests(model)
     # stand it on the ground: lift everything so the lowest claw at rest touches y = 0
     low = min(q[:, 1].min() for p in S.posed(model) for q in p.polys)
     dy = -low * S.BB
