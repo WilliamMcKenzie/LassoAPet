@@ -155,7 +155,7 @@ function BossChase.update(dt, chasing, x, z, speed)
 	boss.scale = popScale(boss.t)
 	if was < cfg.ZoomAt and boss.t >= cfg.ZoomAt then
 		showBars(true)
-		Sounds.play("boss_" .. boss.kind, Config.Boss.CryVolume[boss.kind] or 0.6) -- (its own cry with the bars: Sounds' boss_<Kind>)
+		Sounds.play("boss_" .. boss.kind, Config.Boss.CryVolume[boss.kind] or 0.6, (Config.Boss.CryPitch or {})[boss.kind]) -- (its own cry with the bars: Sounds' boss_<Kind>)
 	elseif was < cfg.CutsceneTime - cfg.BarTime and boss.t >= cfg.CutsceneTime - cfg.BarTime then
 		showBars(false)
 	end
@@ -187,7 +187,7 @@ function BossChase.update(dt, chasing, x, z, speed)
 		roar.next = roar.next or boss.t + r.First
 		if boss.t >= roar.next then
 			roar.next = boss.t + r.Every[1] + math.random() * (r.Every[2] - r.Every[1])
-			roar.sound, roar.peak = Sounds.play("boss_" .. boss.kind, cfg.CryVolume[boss.kind] or 0.6), 0
+			roar.sound, roar.peak = Sounds.play("boss_" .. boss.kind, cfg.CryVolume[boss.kind] or 0.6, (cfg.CryPitch or {})[boss.kind]), 0
 		end
 	end
 	-- (how loud it is, of its loudest: fast up, slower down)
