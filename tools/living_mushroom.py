@@ -8,7 +8,7 @@ Run: python3 tools/living_mushroom.py [out_dir]
 Few parts (QM): a chunky cream body on two stubby legs with two stubby arms, a
 domed cap with a darker underside and raised white spots, and the animals' standard
 white plate eyes with dark pupils on the body's sides under the cap (QM: same style guide). Bones: root (body), neck (cap and eyes, the lasso loops
-round it), ArmL/R, LegL/R (the Cactus's names, so its animations can carry over).
+round it), ArmL/R, LegFL/FR (named like the Cactus's, so the gallop kicks up dust).
 """
 
 import json
@@ -65,8 +65,8 @@ def build(name):
                S.cube("Belly", (0, 1.15, 0), (bw - 0.8, 0.7, bw - 0.8), T["stemdark"]),
                S.cube("Shoulders", (0, 3.75, 0), (bw - 0.8, 0.5, bw - 0.8), T["stem"])])
     for s, sx in (("L", -1), ("R", 1)):
-        leg = add_group("Leg" + s, (sx * 0.9, 0.9, 0), root)
-        put(leg, [S.cube("Leg" + s, (sx * 0.9, 0.45, 0), (1.0, 0.9, 1.1), T["stemdark"])])
+        leg = add_group("LegF" + s, (sx * 0.9, 0.9, 0), root)
+        put(leg, [S.cube("LegF" + s, (sx * 0.9, 0.45, 0), (1.0, 0.9, 1.1), T["stemdark"])])
         arm = add_group("Arm" + s, (sx * bw / 2, 2.8, 0.6), root)
         put(arm, [S.cube("Arm" + s, (sx * (bw / 2 + 0.35), 2.3, 0.6), (0.7, 1.1, 0.9), T["stem"])])
 

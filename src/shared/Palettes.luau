@@ -90,6 +90,26 @@ return {
 		{ "Marking", 160, 70, 60 }, -- shoulders, arms, thighs, tail bulb
 		{ "Horn", 70, 44, 40 }, -- stinger
 	},
+	PurpleMushroom = {
+		{ "Body", 226, 212, 194 }, -- the cream body
+		{ "Hoof", 196, 178, 156 }, -- feet and the shaded bottom
+		{ "Marking", 134, 83, 142 }, -- cap
+		{ "Marking", 96, 59, 102 }, -- cap's underside (shade)
+		{ "Accent", 250, 248, 252 }, -- spots
+	},
+	BrownMushroom = {
+		{ "Body", 226, 212, 194 }, -- the cream body
+		{ "Hoof", 196, 178, 156 }, -- feet and the shaded bottom
+		{ "Marking", 131, 98, 103 }, -- cap
+		{ "Marking", 94, 70, 74 }, -- cap's underside (shade)
+	},
+	RedMushroom = {
+		{ "Body", 226, 212, 194 }, -- the cream body
+		{ "Hoof", 196, 178, 156 }, -- feet and the shaded bottom
+		{ "Marking", 210, 62, 40 }, -- cap
+		{ "Marking", 151, 44, 28 }, -- cap's underside (shade)
+		{ "Accent", 250, 248, 252 }, -- spots
+	},
 	CrystalCentipede = {
 		{ "Body", 124, 72, 200 },
 		{ "Hoof", 72, 44, 124 }, -- leg bars, tail feelers
