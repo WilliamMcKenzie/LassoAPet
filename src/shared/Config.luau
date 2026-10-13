@@ -403,7 +403,7 @@ local Config = {
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, Kitsune = 43200, -- Volcano
 		Catfish = 15, -- World 2 Temple (as the Firebird)
 		Fox = 15, NineTailedFox = 60, -- World 2 Temple (the Fox an Uncommon as the Firebird, the Nine-tailed Fox a Rare as the Fire Lobster, until QM sets them)
-		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, Nut = 43200, -- Jurassic (Nut: World 2's Ancient Tomb Legendary, as the Bone Rex)
+		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, Nut = 43200, Bes = 43200, -- Jurassic (Nut: World 2's Ancient Tomb Legendary, as the Bone Rex)
 		Geb = 43200, -- World 2 Ancient Tomb's Legendary Geb (as the Bone Rex until QM sets it)
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
@@ -587,6 +587,7 @@ local Config = {
 		PalmGuy = 2, -- Jurassic (QM: a bit bigger than the Cactus)
 		Pterodactyl = 1, -- Jurassic (QM: a small animal; AnimalScale 2 so its body is as big as a Horse's under the long wings)
 		Nut = 3, -- World 2 Ancient Tomb Legendary (large)
+		Bes = 3, -- World 2 Ancient Tomb Legendary (large)
 		BoneRex = 4, -- Jurassic (the final Legendary: the T-Rex's size, AnimalScale 1.15 so it towers over it)
 		Geb = 3, -- World 2 Ancient Tomb (a large Legendary: the earth-god centaur)
 		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
@@ -686,6 +687,7 @@ local Config = {
 		Nut = 100000, -- World 2 Ancient Tomb Legendary (the Bone Rex's, until QM sets it)
 		BoneRex = 100000, -- Jurassic (a guess: the final Legendary, the best earner)
 		Geb = 100000, -- World 2 Ancient Tomb's Legendary (as the Bone Rex until QM sets it)
+		Bes = 100000, -- World 2 Ancient Tomb Legendary (as the Bone Rex until QM sets it)
 		Loong = 60000, Beholder = 9000, Leviathan = 45000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
 		WarElephant = 12000, SoulHorse = 60000, Sludge = 7500, -- so they pay more than the Ocean's)
 	},
@@ -1192,6 +1194,7 @@ local Config = {
 		Ankylosaurus = { Speed = 5, Stamina = 3 }, -- (a guess: the Jurassic's Uncommon, under its Rares)
 		PalmGuy = { Speed = 4.9, Stamina = 3 }, -- (a guess: an Uncommon, a touch under the Ankylosaurus)
 		Nut = { Speed = 7.5, Stamina = 3 }, -- World 2's Ancient Tomb Legendary Nut (the Bone Rex's until QM sets it)
+		Bes = { Speed = 7.5, Stamina = 3 }, -- World 2's Tomb Legendary Bes (as the Bone Rex until QM sets it)
 		BoneRex = { Speed = 7.5, Stamina = 3 }, -- (a guess: the final Legendary, the fastest in the game)
 		Geb = { Speed = 7.5, Stamina = 3 }, -- World 2's Ancient Tomb Legendary Geb (as the Bone Rex until QM sets it)
 		VolcanoTortoise = { Speed = 6.17, Stamina = 3 }, -- (QM, Oct 13: 50% into the Jurassic; was 5)
@@ -1433,6 +1436,9 @@ if Config.World == 2 then
 		Frame = { rgb(196, 167, 3), rgb(180, 152, 2) },
 	}
 	tomb.WallColors = { rgb(211, 183, 66), rgb(196, 168, 54) } -- #D3B742
+	tomb.Herd = table.clone(tomb.Herd)
+	tomb.Herd.Bes = 0.03 -- Bes (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
+	tomb.Herd.Fish = 1 -- a placeholder till the rest of the Tomb's animals come, so Bes stays rare
 	tomb.CapColor = rgb(186, 158, 46)
 	tomb.Herd = table.clone(tomb.Herd)
 	tomb.Herd.TombJackal = 0.15 -- the Tomb's Rare (QM, Oct 13), as often as the Raptor
@@ -1465,7 +1471,7 @@ if Config.World == 2 then
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
 	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
 	ownHerd(5, { "Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune" }) -- the Temple
-	ownHerd(6, { "TombJackal", "LionArcher", "Nut", "Geb", "EagleSentry" }) -- the Tomb
+	ownHerd(6, { "TombJackal", "LionArcher", "Nut", "Geb", "EagleSentry", "Bes" }) -- the Tomb
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do

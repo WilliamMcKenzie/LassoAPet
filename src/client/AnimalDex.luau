@@ -167,6 +167,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	KingCrab = "Was almost boiled once. Still running to this day.",
 	BlueCrab = "Tried to join the crips, couldn't crip walk so got booted. Cousin of king crab.",
 	Geb = "Holds up the whole earth on his back. Still found time to learn archery.",
+	Bes = "Guards the Tomb with a shield, a fire boomerang and a very serious face. Has never lost a staring contest.",
 	Kitsune = "Nine tails, one wish jewel and zero patience for people who skip the shrine.",
 	GiantGolem = "Fell asleep in the woods for a thousand years. A tree moved in and now pays no rent.",
 	Kraken = "A squid turned looksmaxxer, hasn't acted the same since ascending.",

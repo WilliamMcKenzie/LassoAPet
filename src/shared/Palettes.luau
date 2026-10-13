@@ -447,6 +447,11 @@ return {
 		{ "Body", 92, 184, 84 }, -- the god's green skin
 		{ "Marking", 168, 156, 132 }, -- stone plates, pauldrons, knees
 		{ "Accent", 255, 196, 52 }, -- gold nemes, collar, bow, trims, hoof caps
+	Bes = {
+		{ "Body", 220, 201, 152 }, -- sandstone
+		{ "Belly", 208, 184, 134 }, -- darker stone: hips, shins, arms
+		{ "Marking", 40, 86, 206 }, -- lapis stripes, pleats, kohl
+		{ "Accent", 246, 196, 46 }, -- gold collar, kilt, crown, throne
 	},
 	Kitsune = {
 		{ "Body", 250, 248, 244 }, -- white fur, tails, paws
