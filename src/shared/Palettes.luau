@@ -353,6 +353,12 @@ return {
 		{ "Marking", 255, 138, 72 }, -- cap
 		{ "Marking", 226, 100, 50 }, -- cap rim
 	},
+	GiantGolem = {
+		{ "Body", 150, 142, 132 }, -- stone
+		{ "Body", 104, 97, 90 }, -- chest, forearms, head, spikes (shade)
+		{ "Marking", 184, 177, 166 }, -- pale plates, caps, brow, knuckles
+		{ "Accent", 110, 186, 68 }, -- moss
+	},
 	Kraken = {
 		{ "Body", 58, 76, 128 }, -- tentacles
 		{ "Body", 40, 52, 94 }, -- head, funnel
