@@ -140,12 +140,12 @@ local menu = Instance.new("Frame")
 menu.Name = "Menu"
 menu.BackgroundTransparency = 1
 menu.Size = UDim2.fromOffset(MENU_WIDTH, 0) -- (fixed, set below: a button growing under the mouse doesn't move the rest: QM)
-menu.AnchorPoint = Vector2.new(1, 0) -- (under the Quests panel: placed every frame, below)
-menu.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
+menu.AnchorPoint = Vector2.new(0, 0) -- (down the left, centred: placed every frame, below)
+menu.Position = UDim2.new(0, MARGIN, 0, MARGIN)
 local list = Instance.new("UIListLayout")
 list.SortOrder = Enum.SortOrder.LayoutOrder
 list.Padding = UDim.new(0, MENU_GAP)
-list.HorizontalAlignment = Enum.HorizontalAlignment.Right
+list.HorizontalAlignment = Enum.HorizontalAlignment.Left
 list.Parent = menu
 menu.Parent = root
 local mergeBadge -- QM's red "1" on Merge while the "Merge animals" quest is up and you've not merged yet (QM, Oct 11)
@@ -631,12 +631,10 @@ RunService.RenderStepped:Connect(function()
 	root:SetAttribute("Modal", covered)
 	quests.Visible = not riding and not covered and #questList > 0
 	openHand.Visible = folded and not player:GetAttribute("QuestsSeen")
-	-- (the buttons right under the Quests panel, or the top corner with none)
-	local under = if quests.Visible then (quests.AbsolutePosition.Y + quests.AbsoluteSize.Y - root.AbsolutePosition.Y) / scale.Scale else 0
-	-- (centred top to bottom, in line with the pass buttons on the left, unless the Quests
-	-- panel reaches down into that: then right under it. QM, Oct 13)
+	-- (down the left, centred top to bottom: QM, Oct 13, swapped with the pass buttons,
+	-- which have the right, under the Quests panel)
 	local centred = (root.Size.Y.Offset - menu.AbsoluteSize.Y / scale.Scale) / 2
-	menu.Position = UDim2.new(1, -MARGIN, 0, math.max(centred, under + MENU_GAP))
+	menu.Position = UDim2.new(0, MARGIN, 0, centred)
 	-- New quests pop once you can see them.
 	local up = quests.Visible and gui.Enabled and not Hud.revealing()
 	for i, started in pops do

@@ -1,4 +1,4 @@
--- QM's pass buttons down the left of the base HUD (Oct 13, a look test: "no functionality
+-- QM's pass buttons down the right of the base HUD (Oct 13, a look test: "no functionality
 -- yet"): Starter Pack, 1.5x Speed, 2x Cash, Giant Pets, each with QM's sunburst turning
 -- behind it. Shown whenever BaseUi is (not riding, in a cutscene or the tutorial) and no
 -- menu's up over the base.
@@ -41,8 +41,8 @@ root.Parent = gui
 local column = Instance.new("Frame")
 column.BackgroundTransparency = 1
 column.Size = UDim2.fromOffset(0, 0) -- (fixed, set below: a button growing under the mouse doesn't move the rest: QM)
-column.AnchorPoint = Vector2.new(0, 0.5)
-column.Position = UDim2.new(0, MARGIN, 0.5, 0)
+column.AnchorPoint = Vector2.new(1, 0) -- (down the right, QM, Oct 13: placed every frame, below)
+column.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
 local list = Instance.new("UIListLayout")
 list.SortOrder = Enum.SortOrder.LayoutOrder
 list.Padding = UDim.new(0, GAP)
@@ -145,6 +145,12 @@ RunService.RenderStepped:Connect(function()
 		local tall = list.AbsoluteContentSize.Y / rootScale.Scale / fit.Scale
 		column.Size = UDim2.fromOffset(column.Size.X.Offset, tall) -- (the slots' height, without the Starter Pack once it's gone)
 		fit.Scale = math.min(1, root.Size.Y.Offset * 0.62 / math.max(tall, 1))
+		-- (centred top to bottom, unless the Quests panel reaches down into that: then
+		-- right under it)
+		local quests = baseRoot and baseRoot:FindFirstChild("Quests")
+		local under = if quests and quests.Visible then (quests.AbsolutePosition.Y + quests.AbsoluteSize.Y - root.AbsolutePosition.Y) / rootScale.Scale else 0
+		local centred = (root.Size.Y.Offset - tall * fit.Scale) / 2
+		column.Position = UDim2.new(1, -MARGIN, 0, math.max(centred, under + 12))
 		for _, burst in bursts do
 			burst.Rotation = os.clock() * SPIN % 360
 		end
