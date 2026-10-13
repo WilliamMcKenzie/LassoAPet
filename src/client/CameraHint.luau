@@ -1,6 +1,6 @@
 -- The camera flies up and over to look at something, holds, and flies back (the
--- tutorial's zoom to the Desert's gate; the quests' hints: QM, Oct 11). The base UI
--- hides meanwhile ("Cutscene"). One at a time.
+-- tutorial's zoom to the Desert's gate; the quests' hints: QM, Oct 11). Every bit of UI
+-- hides meanwhile (QM, Oct 13: no HUD), and "Cutscene" is set. One at a time.
 --   CameraHint.show(look, from, [inTime, hold, outTime]) -- look: the point; from: the camera's offset from it
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -20,6 +20,15 @@ function CameraHint.show(look, from, inTime, hold, outTime)
 	local was, wasType = camera.CFrame, camera.CameraType
 	camera.CameraType = Enum.CameraType.Scriptable
 	player:SetAttribute("Cutscene", true)
+	local hidden = {}
+	local hiding = RunService.RenderStepped:Connect(function() -- (any that turn on meanwhile too)
+		for _, g in player.PlayerGui:GetChildren() do
+			if g:IsA("ScreenGui") and g.Enabled then
+				g.Enabled = false
+				table.insert(hidden, g)
+			end
+		end
+	end)
 	local high = was + Vector3.new(0, 60, 0)
 	local function fly(a, b, c, time)
 		local t = 0
@@ -35,6 +44,10 @@ function CameraHint.show(look, from, inTime, hold, outTime)
 	task.wait(hold or 1.25)
 	fly(view, high, was, outTime or 0.65)
 	camera.CameraType = wasType
+	hiding:Disconnect()
+	for _, g in hidden do
+		g.Enabled = true
+	end
 	player:SetAttribute("Cutscene", nil)
 	busy = false
 end

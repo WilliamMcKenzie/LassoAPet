@@ -318,8 +318,10 @@ fold.Activated:Connect(function()
 		ReplicatedStorage:WaitForChild("QuestsSeen"):FireServer()
 	end
 end)
--- A tap hand on the folded panel till you've opened it once, from your first quest on (QM,
--- Oct 13).
+-- The quest tutorial (QM, Oct 13): once you're back from your first ride after the
+-- tutorial (questGuide, below), and only while the starter quest (World 1's "Reach Meadow")
+-- is still to claim, a tap hand on the folded panel to open it, then on its Claim.
+local questGuide = false
 local openHand = TapHand.new(80)
 openHand.Name = "OpenQuestsHint"
 openHand:SetAttribute("Spotlight", true) -- (TapHand's: QM, Oct 13)
@@ -531,6 +533,17 @@ local function questRow(i, quest, y)
 end
 
 local questList = {} -- what's up: { { i, text, have, need } } (Hatchery's "Quests")
+local function starterUp()
+	if Config.World ~= 1 then
+		return false
+	end
+	for _, quest in questList do
+		if typeof(quest) == "table" and tonumber(quest.i) == 101 then
+			return true
+		end
+	end
+	return false
+end
 local function drawQuests()
 	local ok, list = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Quests") or "[]")
 	questList = if ok and typeof(list) == "table" then list else {}
@@ -624,7 +637,7 @@ local function drawQuests()
 		hand.Position = UDim2.fromScale(0.62, 0.6)
 		local row = lastClaim:FindFirstAncestor("Quest")
 		-- (the starter quest's claim, World 1's "Reach Meadow": in the spotlight, QM Oct 13)
-		local starter = Config.World == 1 and row ~= nil and row:GetAttribute("Quest") == 101
+		local starter = questGuide and Config.World == 1 and row ~= nil and row:GetAttribute("Quest") == 101
 		hand:SetAttribute("Spotlight", starter)
 		hand:SetAttribute("Focus", if starter then Focus.P.StarterQuest else Focus.P.Hand) -- (one goal at a time: Client/Focus)
 		hand:SetAttribute("FocusGoal", if starter then "starterQuest" else nil)
@@ -646,13 +659,23 @@ local function modal()
 	return Shop.isOpen() or AnimalDex.isOpen() or RollMenu.isOpen() or player:GetAttribute("MergeView") == true
 end
 
+local wasRiding = false
 RunService.RenderStepped:Connect(function()
 	local riding = Hud.isRiding()
 	gui.Enabled = not riding and not player:GetAttribute("Cutscene") and not player:GetAttribute("Tutorial") -- (none in the intro or the tutorial: QM, minimal UI till it's done)
 	local covered = modal()
 	root:SetAttribute("Modal", covered)
 	quests.Visible = not riding and not covered and #questList > 0
-	openHand.Visible = folded and not player:GetAttribute("QuestsSeen")
+	if riding then
+		wasRiding = true
+	elseif wasRiding and not player:GetAttribute("Cutscene") then -- (back from a ride, its reward shown)
+		wasRiding = false
+		if not questGuide and not player:GetAttribute("Tutorial") then
+			questGuide = true
+			drawQuests() -- (the starter quest's Claim gets its spotlight)
+		end
+	end
+	openHand.Visible = folded and questGuide and starterUp()
 	-- (down the left, centred top to bottom: QM, Oct 13, swapped with the pass buttons,
 	-- which have the right, under the Quests panel)
 	local centred = (root.Size.Y.Offset - menu.AbsoluteSize.Y / scale.Scale) / 2
