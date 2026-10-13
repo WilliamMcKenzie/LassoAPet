@@ -828,6 +828,7 @@ local Config = {
 		EagleSentry = "rbxassetid://117861828286868", -- assets/ui/EagleSentryEggRender.png (World 2)
 		Bes = "rbxassetid://91869381995495", -- assets/ui/BesEggRender.png (World 2)
 		BloatedMummy = "rbxassetid://113530717781179", -- assets/ui/BloatedMummyEggRender.png (World 2)
+		Scarab = "rbxassetid://90717259678888", -- assets/ui/ScarabEggRender.png (World 2)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
