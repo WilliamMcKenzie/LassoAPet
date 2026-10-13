@@ -1385,6 +1385,7 @@ local BUILD_PER_FRAME = 2
 local builtThisFrame = 0
 
 local function takeFromPool(n, x, z, kind)
+	pools[kind] = pools[kind] or {} -- (a kind no stream listed at load: built on the spot)
 	local entity = table.remove(pools[kind])
 	if not entity then
 		if builtThisFrame >= BUILD_PER_FRAME then
