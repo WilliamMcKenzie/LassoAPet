@@ -17,6 +17,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Focus = require(script.Parent.Focus)
+local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 
 local TapHand = {}
 local hands = {} -- [hand] = its UIScale (ours, which pulse)
@@ -102,7 +103,7 @@ copy.Parent = gui
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local function spotlight(image)
-	local target = image and image:GetAttribute("Spotlight") and image.Parent
+	local target = Config.World == 1 and image and image:GetAttribute("Spotlight") and image.Parent -- (World 1 only: by World 2 they know their way, QM)
 	gui.Enabled = typeof(target) == "Instance" and target:IsA("GuiObject") -- (Spotlight false: none)
 	if not gui.Enabled then
 		return
