@@ -33,6 +33,7 @@ local Inventory = require(script.Parent.Inventory)
 local TutorialRide = require(script.Parent.TutorialRide)
 local CameraHint = require(script.Parent.CameraHint)
 local BossChase = require(script.Parent.BossChase)
+local Banner = require(script.Parent.Banner)
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
@@ -588,7 +589,11 @@ local function run()
 			else
 				idleSince = idleSince or os.clock()
 			end
-			TutorialRide.timeScale = if idleSince and os.clock() - idleSince >= RUN_WAIT then RUN_SLOW else 1
+			local slow = idleSince ~= nil and os.clock() - idleSince >= RUN_WAIT
+			if slow and TutorialRide.timeScale == 1 then
+				Banner.show("run") -- (RUN!!! again as it slows: QM)
+			end
+			TutorialRide.timeScale = if slow then RUN_SLOW else 1
 			task.wait(0.05)
 		end
 		TutorialRide.timeScale = 1
