@@ -11,7 +11,8 @@ How a skin is applied (the same rule the game would use at build time):
   - Gold and Diamond add sparkle glints (a ParticleEmitter in game); Galaxy adds a
     star speckle on the body (a tiled star Texture in game, like the stud texture)
 
-Run: python3 tools/rebirth_skins.py [Kind ...]   -> /mnt/project-files/skins/
+Run: python3 tools/rebirth_skins.py [accent] [Kind ...]   -> /mnt/project-files/skins/
+     (accent: only the pet's trim takes the skin; see ACCENT_NAMES)
 """
 
 import colorsys
@@ -57,16 +58,39 @@ SKINS = {
 }
 
 
+# Accent mode (QM, Oct 13: "custom accents of gold and diamond moreso"): the pet keeps
+# its own colours and only its trim takes the skin: manes, tails, hooves, horns,
+# stripes, socks. Pets whose parts aren't named (Asura's cubes) use their minor
+# colours instead: any colour under ACCENT_SHARE of the model's volume, bar near-black.
+ACCENT_NAMES = ("Mane", "Tail", "Hoof", "Horn", "Stripe", "Cap", "Forelock", "Sock", "Blade")
+ACCENT_SHARE = 0.2
+ACCENT_SPAN = {"Gold": (0.5, 1.0), "Diamond": (0.3, 0.85), "Galaxy": (0.3, 0.95)}
+ACCENT = False
+
+
+def accents(parts):
+    named = [p for p in parts if p.name.startswith(ACCENT_NAMES)]
+    if named:
+        return set(map(id, named))
+    vol = {}
+    for p in parts:
+        vol[tuple(p.color)] = vol.get(tuple(p.color), 0) + float(np.prod(p.size))
+    total = sum(vol.values())
+    minor = {c for c, v in vol.items() if v / total < ACCENT_SHARE and lum(c) > 0.1}
+    return {id(p) for p in parts if tuple(p.color) in minor and not p.name.startswith(KEEP) and not p.neon}
+
+
 def skinned(parts, skin):
     s = SKINS[skin]
+    acc = accents(parts) if ACCENT else None
     for i, p in enumerate(parts):
-        if p.name.startswith(KEEP):
+        if p.name.startswith(KEEP) or (acc is not None and id(p) not in acc and not p.neon):
             continue
         if p.neon:
             p.color = s["glow"]
             continue
         t = lum(p.color)
-        lo, hi = s["span"]
+        lo, hi = ACCENT_SPAN[skin] if ACCENT else s["span"]
         t = lo + (hi - lo) * t  # blacks stay off the darkest stop, white bodies off the palest
         if s.get("facet") and hash(p.name) % 2:
             t += s["facet"]
@@ -74,11 +98,12 @@ def skinned(parts, skin):
     return parts
 
 
-def mask_pass(parts):
+def mask_pass(parts, skin=None):
     """Neon magenta for skinned parts, eyes as they are: where a pixel is magenta the
     skin's surface shows, so stars land on the body and never on the eyes."""
+    acc = accents(parts) if ACCENT else None
     for p in parts:
-        if not p.name.startswith(KEEP):
+        if not p.name.startswith(KEEP) and (acc is None or id(p) in acc):
             p.color, p.neon = (255, 0, 255), True
     return parts
 
@@ -117,7 +142,7 @@ def shoot(kind, skin, cam, st, model, R=900):
         # a starfield on the surface (in game: a tiled star Texture on each part)
         layer = Image.new("RGBA", im.size)
         d = ImageDraw.Draw(layer)
-        for _ in range(len(xs) // 260):
+        for _ in range(len(xs) // (180 if ACCENT else 260)):
             k = rnd.randrange(len(xs))
             x, y = xs[k], ys[k]
             big = rnd.random() < 0.12
@@ -144,7 +169,7 @@ def shoot(kind, skin, cam, st, model, R=900):
         # glints on the surface plus a few floating around it (a ParticleEmitter in game)
         layer = Image.new("RGBA", im.size)
         d = ImageDraw.Draw(layer)
-        for _ in range(max(10, len(xs) // 9000)):
+        for _ in range(max(6 if ACCENT else 10, len(xs) // 9000)):
             k = rnd.randrange(len(xs))
             star(d, xs[k], ys[k], rnd.uniform(8, 18), s["sparkle"])
         bb = im.getbbox()
@@ -189,11 +214,16 @@ def sheet(kinds):
             sq = sq.resize((C - 20, C - 20), Image.LANCZOS)
             out.paste(sq, (j * C + 10, head + i * C + 10), sq)
             full = Image.new("RGBA", sq.size, bgs[cols[j]] + (255,))
-            Image.alpha_composite(full, sq).save(os.path.join(OUT, f"{kind}_{cols[j] or 'Normal'}.png"))
+            tag = "Accent" if ACCENT and cols[j] else ""
+            Image.alpha_composite(full, sq).save(os.path.join(OUT, f"{kind}_{cols[j] or 'Normal'}{tag}.png"))
         d.text((10, head + i * C + 8), kind, fill=(200, 200, 220) if False else (90, 90, 110), font=small)
-    out.save(os.path.join(OUT, "rebirth_skins_lineup.png"))
-    print(os.path.join(OUT, "rebirth_skins_lineup.png"))
+    name = "rebirth_accents_lineup.png" if ACCENT else "rebirth_skins_lineup.png"
+    out.save(os.path.join(OUT, name))
+    print(os.path.join(OUT, name))
 
 
 if __name__ == "__main__":
-    sheet(sys.argv[1:] or ["Horse", "Lion", "MajesticUnicorn", "Asura"])
+    args = sys.argv[1:]
+    if args[:1] == ["accent"]:
+        ACCENT, args = True, args[1:]
+    sheet(args or ["Horse", "Lion", "MajesticUnicorn", "Asura"])
