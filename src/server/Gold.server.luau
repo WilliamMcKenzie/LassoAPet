@@ -71,6 +71,7 @@ local function load(player)
 				playedFull[player] = value == nil or (typeof(value) == "table" and value[PLAYED .. "Full"] == true)
 				local gates = if typeof(value) == "table" then tonumber(value[GATES]) else nil
 				player:SetAttribute("FinishTrail", if typeof(value) == "table" then tonumber(value.trail) else nil) -- (the finish line's trails: Config.FinishTrails, shared by every world)
+				player:SetAttribute("Rebirths", if typeof(value) == "table" then tonumber(value.rebirths) else nil) -- (Config.Rebirth, shared by every world)
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
 				for _, world in typeof(value) == "table" and typeof(value.worlds) == "table" and value.worlds or {} do
 					if tonumber(world) then
@@ -102,7 +103,8 @@ local function save(player, onlyIfChanged)
 		end
 	end
 	local trail = player:GetAttribute("FinishTrail")
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail)
+	local rebirths = player:GetAttribute("Rebirths")
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths)
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
@@ -111,6 +113,7 @@ local function save(player, onlyIfChanged)
 		record.gold, record.bought, record.stamina, record[GATES] = gold, bought[player] or 0, oldStamina[player], gates
 		record.worlds = if #worlds > 0 then worlds else nil
 		record.trail = trail
+		record.rebirths = rebirths
 		record[PLAYED] = math.floor(playedNow(player))
 		record[PLAYED .. "Full"] = playedFull[player] or nil
 		if pcall(store.SetAsync, store, key(player), record) then
@@ -196,6 +199,26 @@ travel.OnServerEvent:Connect(function(player, world)
 	travelTo(player, tonumber(world))
 end)
 travel.Parent = ReplicatedStorage
+
+-- Rebirth (Config.Rebirth; World 2's Rebirth bar): your next rebirth's price in gold, World
+-- 2 locked again, saved, and off to World 1.
+local rebirth = Instance.new("RemoteFunction")
+rebirth.Name = "Rebirth"
+rebirth.OnServerInvoke = function(player)
+	local n = (player:GetAttribute("Rebirths") or 0) + 1
+	local price = Config.Rebirth.Prices[n]
+	local gold = player:GetAttribute("Gold") or 0
+	if Config.World == 1 or not price or not loaded[player] or travelling[player] or gold < price then
+		return false
+	end
+	player:SetAttribute("Gold", gold - price)
+	player:SetAttribute("Rebirths", n)
+	player:SetAttribute("OwnsWorld2", nil)
+	save(player)
+	task.spawn(travelTo, player, 1)
+	return true
+end
+rebirth.Parent = ReplicatedStorage
 
 -- World 1's end portal (Config.EndPortal, World.server): ride into it and World 2 is
 -- yours, free, and you're on your way there.
@@ -345,9 +368,7 @@ bankCoins.OnServerEvent:Connect(function(player, amount)
 		return
 	end
 	local cash = math.min(rideCash[player] or 0, math.floor(amount), MAX_PER_RIDE)
-	if player:GetAttribute("PassDoubleGold") then
-		cash *= Config.PassGoldMultiplier -- x2 Gold (game pass; the HUD shows it doubled as you ride)
-	end
+	cash *= Config.goldX(player) -- x2 Gold (game pass) and rebirths (the HUD shows it multiplied as you ride)
 	rideCash[player] = nil
 	if cash > 0 then
 		player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + cash)

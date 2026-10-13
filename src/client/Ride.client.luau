@@ -221,7 +221,7 @@ end
 -- (a new player's Horse's Fish keeps its own 0.6).
 local runFloor = 0
 local function rideSpeed(entity)
-	return math.max(statsOf(entity.kind, entity).Speed, runFloor)
+	return math.max(statsOf(entity.kind, entity).Speed, runFloor) * Config.rebirthSpeed(player) -- (rebirths: Config.Rebirth)
 end
 
 -- How fast a kind runs in the stampede: always exactly this, no variance. z: where (its
@@ -311,6 +311,7 @@ local warpLevel -- /biome: the biome you were put in, so its gate (and those bef
 local transfer, tumble, carried
 vfx.Merge = require(ReplicatedStorage.Shared.Merge)
 vfx.Fusion = require(ReplicatedStorage.Shared.Fusion)
+vfx.Skins = require(ReplicatedStorage.Shared.Skins)
 vfx.HerdPacks = require(script.Parent.HerdPacks)
 vfx.endless = require(script.Parent.Endless) -- the endless Jurassic: copies past the cut (Config.Endless)
 vfx.endless.init({ obstacles = obstacles, slices = slices, streams = streams, newStream = newStream })
@@ -622,6 +623,7 @@ local function spawnStarter()
 	local stats = player:GetAttribute("RideStats") -- (and the best of both pets' Speed, Stamina)
 	starter.stats = stats and { Speed = stats.X, Stamina = stats.Y }
 	vfx.Fusion.paint(starter.animal.model, starter.kind, starter.fuse)
+	vfx.Skins.apply(starter.animal.model, player:GetAttribute("Rebirths")) -- (your rebirth's skin)
 	PenPets.starter = starter -- (FuseMenu: the one you ride can be fused too)
 	starter.animal:setScale(vfx.Merge.size(starter.kind, starter.merged) * vfx.Fusion.scale(starter.kind, starter.fuse, starter.tier)) -- a merged pet is bigger
 	setClickable(starter.animal.model, true)
@@ -635,6 +637,11 @@ local function spawnStarter()
 		starter.animal.model.Parent = nil
 	end
 end
+player:GetAttributeChangedSignal("Rebirths"):Connect(function() -- (loaded after the starter was drawn)
+	if starter then
+		vfx.Skins.apply(starter.animal.model, player:GetAttribute("Rebirths"))
+	end
+end)
 
 -- One prompt, kept on whichever pet you'd ride: Roblox's own "Hold E to Ride"
 -- (QM, Oct 9: in place of the RIDE button; a controller's button and a tap on
