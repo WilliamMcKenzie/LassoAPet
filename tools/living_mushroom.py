@@ -6,8 +6,8 @@ meshes branch): a giant purple one (#86538E with white spots), a medium brown on
 Run: python3 tools/living_mushroom.py [out_dir]
 
 Few parts (QM): a chunky cream body on two stubby legs with two stubby arms, a
-two-tier cap with a darker underside and raised white spots, dark Cactus-style eyes
-peeking out under the cap. Bones: root (body), neck (cap and eyes, the lasso loops
+domed cap with a darker underside and raised white spots, and the animals' standard
+white plate eyes with dark pupils on the body's sides under the cap (QM: same style guide). Bones: root (body), neck (cap and eyes, the lasso loops
 round it), ArmL/R, LegL/R (the Cactus's names, so its animations can carry over).
 """
 
@@ -24,7 +24,8 @@ from partlib import render  # noqa: E402
 import animal_designs as A  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
-STEM, STEM_DARK, SPOT, EYE = (236, 228, 218), (206, 190, 170), (250, 248, 252), (54, 34, 24)
+STEM, STEM_DARK, SPOT = (226, 212, 194), (196, 178, 156), (250, 248, 252)
+EYE_WHITE, PUPIL = (255, 255, 255), (24, 20, 32)
 
 
 def darker(c, k=0.72):
@@ -40,7 +41,7 @@ KINDS = {"PurpleMushroom": (1.5, (0x86, 0x53, 0x8E), True, 1.4),
 def build(name):
     size, cap, spots, capk = KINDS[name]
     S.SIZE = size
-    colors = {"stem": STEM, "stemdark": STEM_DARK, "cap": cap, "under": darker(cap), "spot": SPOT, "eye": EYE}
+    colors = {"stem": STEM, "stemdark": STEM_DARK, "cap": cap, "under": darker(cap), "spot": SPOT, "white": EYE_WHITE, "pupil": PUPIL}
     T = {n: i for i, n in enumerate(colors)}
     elements, groups = [], []
 
@@ -66,8 +67,8 @@ def build(name):
     for s, sx in (("L", -1), ("R", 1)):
         leg = add_group("Leg" + s, (sx * 0.9, 0.9, 0), root)
         put(leg, [S.cube("Leg" + s, (sx * 0.9, 0.45, 0), (1.0, 0.9, 1.1), T["stemdark"])])
-        arm = add_group("Arm" + s, (sx * bw / 2, 3.0, 0), root)
-        put(arm, [S.cube("Arm" + s, (sx * (bw / 2 + 0.35), 2.6, 0), (0.7, 1.1, 0.9), T["stem"])])
+        arm = add_group("Arm" + s, (sx * bw / 2, 2.8, 0.6), root)
+        put(arm, [S.cube("Arm" + s, (sx * (bw / 2 + 0.35), 2.3, 0.6), (0.7, 1.1, 0.9), T["stem"])])
 
     cw = bw * capk
     head = add_group("neck", (0, 4.0, 0), root)
@@ -76,9 +77,12 @@ def build(name):
                S.cube("Cap", (0, 4.7, 0), (cw, 0.9, cw), T["cap"]),
                S.cube("CapMid", (0, 5.55, 0), (cw * 0.8, 0.8, cw * 0.8), T["cap"]),
                S.cube("CapTop", (0, 6.2, 0), (cw * 0.52, 0.5, cw * 0.52), T["cap"])])
-    # dark eyes on the body's front just under the cap, a block deep (no plates)
+    # plate eyes on the body's sides by the front, pupils looking forward and set back
+    # from the plate's front edge (QM's z-fighting rule)
+    ey0, ey1, ez0, ez1 = 2.6, 3.8, -bw / 2 + 0.1, -bw / 2 + 1.5
     for s, sx in (("L", -1), ("R", 1)):
-        put(head, [S.cube("Eye" + s, (sx * 0.7, 3.3, -bw / 2 - 0.05), (0.5, 0.85, 0.2), T["eye"])])
+        put(head, [S.cube("Eye" + s, (sx * (bw / 2 + 0.025), (ey0 + ey1) / 2, (ez0 + ez1) / 2), (0.05, ey1 - ey0, ez1 - ez0), T["white"]),
+                   S.cube("Pupil" + s, (sx * (bw / 2 + 0.055), ey0 + 0.5, ez0 + 0.025 + 0.4), (0.05, 0.8, 0.75), T["pupil"])])
     if spots:
         r1, r2, r3 = cw / 2 - 0.25, cw * 0.4 - 0.4, cw * 0.26 - 0.45
         for i, (x, y, z, w) in enumerate([(-r1 * 0.6, 5.15, -r1, 0.7), (r1, 5.15, r1 * 0.5, 0.7), (-r1, 5.15, r1 * 0.7, 0.6),
@@ -113,7 +117,7 @@ def main(out="/mnt/project-files/animals/living_mushroom"):
         p.polys = [q + np.array([x + 2, 0, 0]) for q in p.polys]
     W, H = 1120, 520
     sheet = Image.new("RGB", (W, H * 2))
-    sheet.paste(render(parts + hparts, W=W, H=H, fov=34, eye=(-8, 10, -34), target=(-4, 3.5, 0)), (0, 0))
+    sheet.paste(render(parts + hparts, W=W, H=H, fov=34, eye=(-26, 10, -28), target=(-4, 3.5, 0)), (0, 0))
     sheet.paste(render(parts + hparts, W=W, H=H, fov=34, eye=(4, 16, 30), target=(-4, 3.5, 0)), (0, H))
     sheet.save(os.path.join(out, "LivingMushrooms.png"))
 
