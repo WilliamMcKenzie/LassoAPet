@@ -1,8 +1,8 @@
 """Living Birch: World 2's Woodland Maze Rare (QM, Oct 13), a walking autumn birch built
 on Palm Guy's body plan (tools/palm_guy.py; QM: "more like palm guy"): a stout trunk of
 four stacked blocks narrowing upward, the Cactus's arms (left bent up, right bent down)
-with a leaf tuft on each hand, two stubby legs, and a crown of drooping branches round a
-leafy heart. Birch colours from the woodland's prop birches (tools/world2_prop_assets.luau):
+with a leaf tuft on each hand, two stubby legs, and (QM: birch foliage, not the palm's
+fronds) a chunky round canopy of leaf blocks like the prop birches'. Birch colours from the woodland's prop birches (tools/world2_prop_assets.luau):
 white bark with dark birch marks, autumn leaves in orange, red-orange, amber and yellow.
 The face is Palm Guy's (the Cactus's): two dark eyes on the top block over a tall open
 mouth on the one below.
@@ -10,9 +10,8 @@ mouth on the one below.
 Run: python3 tools/living_birch.py [out_dir]
 writes designs/woodland/LivingBirch.bbmodel and <out_dir>/LivingBirch.png (3/4 front).
 
-Bones, as Palm Guy's (so his idle, walk and gallop fit): root, LegL/LegR, ArmL/ArmR, neck
-(the crown) > Branch<i> (turned round, rest Y) > Branch<i>Rise (tilted up, rest X) >
-Branch<i>Droop (the leafy end hanging down, rest X).
+Bones, as Palm Guy's (so his idle, walk and gallop fit), all at rest 0: root, LegL/LegR,
+ArmL/ArmR, neck (the crown).
 """
 
 import json
@@ -35,7 +34,6 @@ MARK = (52, 46, 44)  # birch marks
 LEAF = [(242, 109, 57), (214, 72, 43), (248, 168, 64), (254, 234, 92)]  # the prop birches' leaves
 HEART = (196, 58, 36)
 MOUTH = (54, 34, 24)  # the Cactus's eyes and mouth
-BRANCHES = 6
 CROWN_Y = 11.0
 
 
@@ -85,21 +83,26 @@ def living_birch():
         yt = y1 if up > 0 else y0 - 0.9
         a.b("Tuft" + side, (x0 - 0.3, yt, -0.75), (x1 + 0.3, yt + 0.9, 0.75), LEAF[3 if up > 0 else 2], arm)
 
-    # ---- the crown: a leafy heart on top, branches rising out all round and drooping, each
-    # ending in a broad clump of autumn leaves (a weeping birch)
+    # ---- the crown: a chunky round canopy of leaf blocks like the woodland's prop birches,
+    # in their autumn colours, a dark red heart underneath
     head = a.bone("neck", "root", (0, CROWN_Y, 0))
-    a.b("Heart", (-1.6, CROWN_Y - 0.2, -1.6), (1.6, CROWN_Y + 1.6, 1.6), HEART, head)
-    a.b("HeartTop", (-1.0, CROWN_Y + 1.6, -1.0), (1.0, CROWN_Y + 2.3, 1.0), LEAF[3], head)
-    yc = CROWN_Y + 0.8
-    for i in range(BRANCHES):
-        yaw = 360 * i / BRANCHES + 30
-        f = a.bone(f"Branch{i}", "neck", (0, yc, 0), rest=(0, yaw, 0))
-        rise = a.bone(f"Branch{i}Rise", f, (0, yc, 0.8), rest=(-30, 0, 0))
-        a.b(f"Branch{i}A", (-1.2, yc - 0.3, 0.8), (1.2, yc + 0.3, 3.0), LEAF[i % 4], rise)
-        droop = a.bone(f"Branch{i}Droop", rise, (0, yc, 3.0), rest=(62, 0, 0))
-        a.b(f"Branch{i}B", (-1.3, yc - 0.35, 3.0), (1.3, yc + 0.35, 5.0), LEAF[(i + 1) % 4], droop)
-        a.b(f"Branch{i}C", (-0.9, yc - 0.3, 5.0), (0.9, yc + 0.3, 6.4), LEAF[(i + 2) % 4], droop)
-    a.meta = {"seat": (0, CROWN_Y + 2.3, 0), "neck_loop": {"center": (0, 9.6, 0), "radius": 2.0}}
+    c = CROWN_Y
+    for name, lo, hi, col in [
+            ("Under", (-1.8, c - 0.3, -1.8), (1.8, c + 0.4, 1.8), HEART),
+            ("LeavesLow", (-2.4, c + 0.3, -2.3), (2.4, c + 1.6, 2.3), LEAF[1]),
+            ("Leaves", (-3.0, c + 1.4, -2.8), (3.0, c + 3.7, 2.8), LEAF[0]),
+            ("LeavesMid", (-2.4, c + 3.5, -2.3), (2.4, c + 4.9, 2.3), LEAF[0]),
+            ("LeavesTop", (-1.4, c + 4.8, -1.3), (1.2, c + 5.7, 1.3), LEAF[3]),
+            ("ClumpFL", (-3.5, c + 2.3, -3.3), (-1.3, c + 4.3, -1.3), LEAF[3]),
+            ("ClumpFR", (1.0, c + 1.0, -3.4), (3.2, c + 2.8, -1.4), LEAF[1]),
+            ("ClumpBL", (-3.3, c + 1.0, 1.2), (-1.1, c + 3.0, 3.3), LEAF[2]),
+            ("ClumpBR", (1.4, c + 2.5, 1.1), (3.5, c + 4.5, 3.3), LEAF[2]),
+            ("ClumpL", (-3.6, c + 3.5, -0.6), (-2.0, c + 4.9, 1.0), LEAF[1]),
+            ("ClumpR", (2.0, c + 3.7, -1.2), (3.4, c + 5.0, 0.4), LEAF[3]),
+            ("ClumpTop", (0.2, c + 5.4, -0.4), (1.6, c + 6.3, 1.0), LEAF[1]),
+            ("ClumpTopB", (-1.6, c + 5.3, 0.2), (-0.4, c + 6.0, 1.4), LEAF[2])]:
+        a.b(name, lo, hi, col, head)
+    a.meta = {"seat": (0, CROWN_Y + 5.7, 0), "neck_loop": {"center": (0, 9.6, 0), "radius": 2.0}}
     return a
 
 
@@ -121,12 +124,79 @@ def main(out=OUT):
     c = (lo + hi) / 2
     r = np.linalg.norm(hi - lo) / 2
     v = np.array((-14, 8, -24), float)
-    eye = c + v / np.linalg.norm(v) * r / np.tan(np.radians(15)) * 0.8
+    eye = c + v / np.linalg.norm(v) * r / np.tan(np.radians(15)) * 1.0
     img = render(parts, eye=eye, target=c, W=900, H=900, fov=30, transparent=True)
     bg = Image.new("RGBA", img.size, (238, 240, 244, 255))
     bg.alpha_composite(img)
     bg.convert("RGB").save(os.path.join(out, "LivingBirch.png"))
 
 
+def animations(m):
+    """Palm Guy's (tools/palm_guy.py): the Cactus's bouncy two-legged run, arms pumping, the
+    crown bobbing as he bounces; the idle sways like a tree in the breeze with a little wave."""
+    import math
+    from snake_rig import track
+    from snow_rig import bump, grounded
+    s, TAU = math.sin, 2 * math.pi
+    feet = {"LegL", "LegR"}
+
+    def run(L, swing, arms, lean, roll, hop, n=16):
+        tr = {
+            "root": [track(L, lambda u: (lean, 4 * s(TAU * u), roll * s(TAU * u)), n)],
+            "LegL": [track(L, lambda u: (-lean + swing * s(TAU * u), 0, 0), n)],
+            "LegR": [track(L, lambda u: (-lean - swing * s(TAU * u), 0, 0), n)],
+            "ArmL": [track(L, lambda u: (-arms * s(TAU * u), 0, 0), n)],
+            "ArmR": [track(L, lambda u: (arms * s(TAU * u), 0, 0), n)],
+            "neck": [track(L, lambda u: (-lean * 0.5 + 3 * s(2 * TAU * u), 0, -roll * 0.6 * s(TAU * u)), n)],
+        }
+        tr["root"] = grounded(m, L, tr, feet, n, extra=lambda u: hop * abs(s(TAU * u)))
+        return L, tr
+
+    L = 4.0
+    out = {"idle": (L, {
+        "root": [track(L, lambda u: (0, 0, 3 * s(TAU * u)), 32)],
+        "neck": [track(L, lambda u: (2 * s(2 * TAU * u), 6 * s(TAU * u), 4 * s(TAU * u + 0.6)), 32)],
+        "ArmL": [track(L, lambda u: (0, 0, 25 * bump(u, 0.65, 0.12) * (0.6 + 0.4 * s(8 * TAU * u))), 64)],
+        "ArmR": [track(L, lambda u: (4 * s(TAU * u), 0, 0), 32)],
+    })}
+    out["walk"] = run(0.6, swing=30, arms=30, lean=0, roll=5, hop=0.6)
+    out["gallop"] = run(0.36, swing=50, arms=55, lean=12, roll=4, hop=1.6)
+    return out
+
+
+def animate(out=OUT):
+    """Adds idle, walk and gallop to designs/woodland/LivingBirch.bbmodel and writes GIFs."""
+    from horse_rig import write_animations
+    from snow_rig import group_ids, posed
+    import animal_designs as A
+    path = os.path.join(ROOT, "designs", "woodland", "LivingBirch.bbmodel")
+    m = json.load(open(path))
+    m["animations"] = []
+    write_animations(m, group_ids(m), animations(m))
+    with open(path, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    W = 420
+    cams = [dict(eye=(-16, 11, -28), target=(0, 8, 0), W=W, H=W, fov=40), dict(eye=(-32, 9, 0), target=(0, 8, 0), W=W, H=W, fov=40)]
+
+    def frame(name, t):
+        anim = next(x for x in m["animations"] if x["name"] == name)
+        ps = posed(m, anim, t)
+        for p in ps:
+            if p.name.startswith(PLAIN):
+                p.plain = True
+        im = Image.new("RGB", (W * 2, W))
+        for i, c in enumerate(cams):
+            im.paste(render(ps, **c), (i * W, 0))
+        return A.label(im, [name, ""], 22)
+
+    for name, n in (("idle", 32), ("walk", 14), ("gallop", 12)):
+        L = next(x for x in m["animations"] if x["name"] == name)["length"]
+        A.gif(os.path.join(out, f"LivingBirch_{name}.gif"), [frame(name, L * i / n) for i in range(n)], fps=n / L)
+    print("animated", path)
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    if sys.argv[1:2] == ["animate"]:
+        animate(*sys.argv[2:])
+    else:
+        main(*sys.argv[1:])
