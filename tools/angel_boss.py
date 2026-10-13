@@ -142,7 +142,7 @@ def build():
     # the big eye on its front
     neck = add_group("neck", (0, y0, -CORE / 2), root)
     z = -CORE / 2
-    put(neck, [box("Eye", (0, y0, z - 0.1), (EYE, EYE, 0.2), TEX["white"]),
+    put(neck, [box("Glow_eye", (0, y0, z - 0.1), (EYE, EYE, 0.2), TEX["white"]),
                box("Glow_iris", (0, y0, z - 0.25), (IRIS, IRIS, 0.2), TEX["iris"]),
                box("Pupil", (0, y0, z - 0.4), (PUPIL, PUPIL, 0.2), TEX["black"])])
 
@@ -171,7 +171,7 @@ def build():
             if k % every == 1:
                 for side, sgn in (("F", -1), ("B", 1)):
                     q = p + sgn * nn * (dep / 2 + 0.1)
-                    parts.append(box(f"Eye_{bone}_{k + 1}{side}", q, (RING_EYE, RING_EYE, 0.2), TEX["white"], M))
+                    parts.append(box(f"Glow_eye_{bone}_{k + 1}{side}", q, (RING_EYE, RING_EYE, 0.2), TEX["white"], M))
                     q2 = p + sgn * nn * (dep / 2 + 0.25)
                     parts.append(box(f"Pupil_{bone}_{k + 1}{side}", q2, (RING_PUPIL, RING_PUPIL, 0.2), TEX["black"], M))
         put(node, parts)

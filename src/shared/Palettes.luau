@@ -482,4 +482,24 @@ return {
 		{ "Accent", 130, 30, 30 }, -- stalk tips and nubs
 		parts = { EyeL = "Fixed", EyeR = "Fixed" }, -- (belly coloured)
 	},
+	Seraph = { -- (its white feathers, eyes and halo stay as they are)
+		{ "Body", 255, 194, 38 }, -- gold rings and core
+		{ "Body", 222, 146, 24 }, -- darker gold
+		{ "Marking", 255, 244, 214 }, -- cream feathers
+		{ "Accent", 255, 214, 120 }, -- wing tips
+	},
+	CrimsonSeraph = {
+		{ "Body", 84, 22, 30 }, -- blood-red rings and core
+		{ "Body", 56, 14, 20 }, -- darker
+		{ "Marking", 168, 30, 46 }, -- crimson feathers
+		{ "Marking", 136, 22, 38 }, -- darker feathers
+		{ "Accent", 255, 92, 116 }, -- wing tips
+	},
+	CrystalSeraph = {
+		{ "Body", 0, 190, 231 }, -- cyan crystal rings and core
+		{ "Body", 0, 146, 186 }, -- darker cyan
+		{ "Marking", 229, 131, 251 }, -- pink feathers
+		{ "Marking", 242, 170, 253 }, -- lighter feathers
+		{ "Accent", 92, 225, 255 }, -- glowing wing tips (and halo)
+	},
 }
