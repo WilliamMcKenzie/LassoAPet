@@ -1,7 +1,7 @@
 """The Rolling Log's egg, in take C's style (tools/ocean_eggs.py): the octo shell in the log's
 bark (tools/rolling_log.py), darker at the bottom, with raised dark bark strips down the
-front and back, a pale cut-log end with a growth ring on each side, and a twig with a tuft
-of autumn leaves on top.
+front and back, a pale cut-log end with a growth ring on each side, and steel spikes on top
+and out the front and back, like the log's (QM: the Clash Royale log).
 
 Run from the repo root: python3 tools/rolling_log_egg.py
 Writes designs/eggs/c_style/RollingLogEgg.bbmodel, src/shared/Eggs/RollingLogEggModel.luau,
@@ -11,10 +11,18 @@ assets/ui/RollingLogEggRender.png and previews in /mnt/project-files/world2/wood
 import os
 import sys
 
+import numpy as np
+
 sys.path.insert(0, os.path.dirname(__file__))
 import ocean_eggs as O  # noqa: E402
-from rolling_log import BARK, BARK_DARK, WOOD, RING, CORE, LEAF, LEAF_GOLD  # noqa: E402
+from rolling_log import BARK, BARK_DARK, WOOD, RING, CORE, STEEL, STEEL_DARK  # noqa: E402
 from horse_egg_takes import CRACK_LAYER, LH, N, WIDTHS, shell  # noqa: E402
+
+
+def spike(egg, name, base, apex, color, bone):
+    c = [np.array(p, float) for p in base]
+    a = np.array(apex, float)
+    return egg.poly(name, [c] + [[c[i], c[(i + 1) % 4], a] for i in range(4)], color, bone=bone)
 
 
 def rolling_log_egg():
@@ -35,12 +43,18 @@ def rolling_log_egg():
         for i, (r, c) in enumerate(((0.55, WOOD), (0.38, RING), (0.26, WOOD), (0.12, CORE))):
             xa, xb = sorted((sx * (w + i * 0.03), sx * (w + (i + 1) * 0.03)))
             egg.block(f"End{side}{i + 1}", (xa, y - r, -r), (xb, y + r, r), c)
-    # a twig on top with autumn leaves
+    # a steel spike on top and one out the front and back, like the log's
     top = N * LH
-    egg.block("Twig", (-0.1, top - 0.05, -0.1), (0.1, top + 0.45, 0.1), BARK_DARK).bone = "top"
-    egg.block("Leaf1", (-0.32, top + 0.45, -0.32), (0.32, top + 0.75, 0.32), LEAF).bone = "top"
-    egg.block("Leaf2", (-0.16, top + 0.75, -0.16), (0.16, top + 0.95, 0.16), LEAF_GOLD).bone = "top"
-    egg.block("Leaf3", (0.1, top + 0.2, -0.16), (0.42, top + 0.42, 0.16), LEAF_GOLD).bone = "top"
+    egg.block("CollarUp", (-0.26, top - 0.05, -0.26), (0.26, top + 0.1, 0.26), STEEL_DARK).bone = "top"
+    spike(egg, "SpikeUp", [(-0.2, top + 0.1, -0.2), (0.2, top + 0.1, -0.2), (0.2, top + 0.1, 0.2), (-0.2, top + 0.1, 0.2)],
+          (0, top + 0.7, 0), STEEL, "top")
+    z, y = WIDTHS[3] / 2, 3.5 * LH
+    for d, sz in (("Front", -1), ("Back", 1)):
+        za, zb = sorted((sz * (z - 0.05), sz * (z + 0.1)))
+        egg.block("Collar" + d, (-0.26, y - 0.26, za), (0.26, y + 0.26, zb), STEEL_DARK)
+        zf = sz * (z + 0.1)
+        spike(egg, "Spike" + d, [(-0.2, y - 0.2, zf), (0.2, y - 0.2, zf), (0.2, y + 0.2, zf), (-0.2, y + 0.2, zf)],
+              (0, y, zf + sz * 0.5), STEEL, "bottom")
     return egg
 
 

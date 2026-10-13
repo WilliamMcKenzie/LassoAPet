@@ -1,9 +1,10 @@
 """Rolling Log: World 2 Woodland Maze's Rare (QM, Oct 13), a living log that rolls.
 
 A fat log lying across the path (its length runs left-right, so it rolls forward),
-warm bark with raised darker bark strips, pale cut ends with growth rings, brows
-and a big grin on the front of the bark (no eyes: QM, Oct 13),
-and a twig of autumn leaves (the Woodland walls' orange) sprouting off the top.
+warm bark with raised darker bark strips, pale cut ends with growth rings, and two rings
+of steel spikes near its ends pointing up, down, forward and back (QM, Oct 13: like the
+Clash Royale log, no face). It stands on its bottom pair; the rider sits between the top
+pair.
 
 The round log is stepped from three axis-aligned blocks per slice (a wide one, a tall
 one and a square one), so every part stays a plain cube.
@@ -30,19 +31,21 @@ import animal_designs as A  # noqa: E402
 from animal_designs import Animal  # noqa: E402
 from partlib import render  # noqa: E402
 from horse_rig import pose  # noqa: E402
+from snow_designs import pyramid  # noqa: E402
+import numpy as np  # noqa: E402
 
 BARK = (170, 100, 52)
 BARK_DARK = (118, 66, 36)
 WOOD = (242, 206, 148)
 RING = (206, 148, 88)
 CORE = (228, 180, 116)
-MOUTH = (70, 34, 26)
-LEAF = (0xF2, 0x6D, 0x39)
-LEAF_GOLD = (255, 190, 54)
+STEEL = (176, 182, 196)
+STEEL_DARK = (96, 100, 116)
 
 HALF_L = 4.0  # half the log's length (x)
 R = 2.5  # log radius
-CY = R  # axis height: resting on the ground
+SPIKE = 1.6  # how far the spikes stand off the bark
+CY = R + SPIKE  # axis height: standing on its bottom spikes
 
 
 def round_slice(a, name, x0, x1, r, color, bone="Log"):
@@ -77,25 +80,26 @@ def rolling_log():
                          ("StripFront", (-3.6, CY - 1.4, -R - t), (-2.0, CY - 0.6, -R))):
         a.box(name, lo, hi, BARK_DARK, "Log")
 
-    # face on the front of the bark: brows and a big grin, no eyes (QM, Oct 13)
-    z = -R
-    for side, sx in (("L", -1), ("R", 1)):
-        ba, bb = sorted((sx * 0.3, sx * 1.7))
-        a.box("Brow" + side, (ba, CY + 1.6, z - 0.2), (bb, CY + 1.85, z), BARK_DARK, "Log")
-    a.box("Mouth", (-0.9, CY - 0.75, z - A.PLATE), (0.9, CY - 0.4, z), MOUTH, "Log")
-    for side, sx in (("L", -1), ("R", 1)):
-        ma, mb = sorted((sx * 0.9, sx * 1.25))
-        a.box("MouthEnd" + side, (ma, CY - 0.5, z - A.PLATE), (mb, CY - 0.15, z), MOUTH, "Log")
-
-    # a twig off the top towards one end with a tuft of autumn leaves, and a broken stub
-    tx, tz = 2.6, 0.3
-    a.box("Twig", (tx - 0.25, CY + R, tz - 0.25), (tx + 0.25, CY + R + 1.3, tz + 0.25), BARK_DARK, "Log")
-    a.box("TwigSide", (tx + 0.25, CY + R + 0.8, tz - 0.2), (tx + 0.9, CY + R + 1.2, tz + 0.2), BARK_DARK, "Log")
-    a.box("Leaf1", (tx - 0.8, CY + R + 1.3, tz - 0.8), (tx + 0.8, CY + R + 2.1, tz + 0.8), LEAF, "Log")
-    a.box("Leaf2", (tx - 0.4, CY + R + 2.1, tz - 0.4), (tx + 0.4, CY + R + 2.6, tz + 0.4), LEAF_GOLD, "Log")
-    a.box("Leaf3", (tx + 0.9, CY + R + 0.7, tz - 0.45), (tx + 1.7, CY + R + 1.4, tz + 0.45), LEAF_GOLD, "Log")
-    a.box("Stub", (-2.6, CY + 0.6, R), (-1.8, CY + 1.4, R + 0.8), BARK_DARK, "Log")
-    a.box("StubTop", (-2.45, CY + 0.75, R + 0.8), (-1.95, CY + 1.25, R + 0.85), WOOD, "Log")
+    # two rings of steel spikes near the ends (QM: like the Clash Royale log), pointing up,
+    # down, forward and back; it stands on its bottom pair. A collar block, then a pyramid.
+    c, h, k = 0.65, 0.25, SPIKE - 0.25  # collar half-width, collar height, point length
+    for ring, x in (("L", -2.5), ("R", 2.5)):
+        for d, axis, sgn in (("Up", 1, 1), ("Down", 1, -1), ("Front", 2, -1), ("Back", 2, 1)):
+            base = np.array([x, CY, 0.0])
+            base[axis] += sgn * R
+            lo, hi = base.copy(), base.copy()
+            for i in (0, 1, 2):
+                if i != axis:
+                    lo[i] -= c
+                    hi[i] += c
+            hi[axis] = base[axis] + sgn * h
+            a.box(f"Collar{ring}{d}", tuple(np.minimum(lo, hi)), tuple(np.maximum(lo, hi)), STEEL_DARK, "Log")
+            tip = hi.copy()
+            lo2, hi2 = lo.copy(), hi.copy()
+            lo2[axis] = hi2[axis] = base[axis] + sgn * h
+            lo2 = lo2 + np.where(np.arange(3) == axis, 0, 0.1)
+            hi2 = hi2 - np.where(np.arange(3) == axis, 0, 0.1)
+            pyramid(a, f"Spike{ring}{d}", tuple(lo2), tuple(hi2), ("+" if sgn > 0 else "-") + "xyz"[axis], k, STEEL, "Log")
 
     # rider sits on top of the log (on root, so it stays upright while the log rolls)
     a.meta = {"seat": (0, CY + R + 0.3, 0), "neck_loop": {"center": (0, CY, 0), "radius": R + 0.4}}
