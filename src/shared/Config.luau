@@ -1476,7 +1476,13 @@ if Config.World == 2 then
 	woodland.Patches = {
 		Soil = { rgb(142, 81, 57), rgb(130, 74, 52) }, -- #8E5139
 		Path = { rgb(151, 89, 57), rgb(139, 81, 52) }, -- #975939, the middle
+		-- (the Ocean's patches under it: very dark soil, QM Oct 13; were its grass and trench,
+		-- green to blue to purple along the way)
+		Grass = { rgb(38, 25, 18), rgb(33, 21, 15) },
+		Trench = { rgb(38, 25, 18), rgb(33, 21, 15) },
+		Lava = { rgb(38, 25, 18), rgb(33, 21, 15) },
 	}
+	woodland.Depths = nil -- (no sea floor's colours along it: QM, Oct 13)
 	woodland.Herd = table.clone(woodland.Herd)
 	woodland.Herd.Caterpillar = 0.3 -- the Woodland Maze's Uncommon (QM, Oct 13), as often as the Starfish
 	woodland.Herd.PinkButterfly = 0.25 -- the Pink Butterfly (QM, Oct 13): Uncommon, as often as the Clownfish
@@ -1636,6 +1642,14 @@ if Config.World == 2 then
 	-- The trophy angels (QM, Oct 13: his weights; were 1 in 300 of their biome's stampede).
 	for i, weight in { 0.001, 0.002, 0.002 } do
 		Config.Biomes[i].Herd[({ "Seraph", "CrimsonSeraph", "CrystalSeraph" })[i]] = weight
+	end
+	-- And all three in the Ancient Tomb (QM, Oct 13): each 1 in 1,000 of its stampede.
+	local tombTotal = 0
+	for _, weight in Config.Biomes[6].Herd do
+		tombTotal += weight
+	end
+	for _, angel in { "Seraph", "CrimsonSeraph", "CrystalSeraph" } do
+		Config.Biomes[6].Herd[angel] = tombTotal / 997 -- (3 of them: each ends up 1 in 1,000 of the total)
 	end
 	-- The trophy Black Widow (QM, Oct 13): 1 in 500 of the Crimson Lands' stampede.
 	local crimsonTotal = 0
