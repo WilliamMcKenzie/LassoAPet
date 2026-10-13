@@ -193,6 +193,7 @@ end }, { "invite", promptInvite } } do
 		hand.Name = "MergeHint"
 		hand:SetAttribute("Focus", Focus.P.Merge)
 		hand:SetAttribute("FocusGoal", "merge")
+		hand:SetAttribute("Spotlight", true) -- (the Merge animals quest's first step: QM, Oct 13)
 		hand.Position = UDim2.fromScale(0.55, 0.7)
 		hand.Visible = false
 		hand.Parent = b
