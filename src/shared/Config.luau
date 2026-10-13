@@ -1275,6 +1275,30 @@ if Config.World == 2 then
 	woodland.GateColor = rgb(242, 109, 57)
 	temple.GateColor = rgb(130, 226, 80)
 	tomb.GateColor = rgb(255, 200, 30)
+	-- Only World 2's own animals run in its herds (QM, Oct 13: no World 1 animals in the
+	-- marble Meadow): each biome keeps the kinds the lines above added. A biome with none
+	-- yet runs Fish as a placeholder.
+	local own = {}
+	for i, biome in Config.Biomes do
+		own[i] = {}
+	end
+	local function ownHerd(i, kinds)
+		for _, kind in kinds do
+			own[i][kind] = true
+		end
+	end
+	ownHerd(1, { "MarbleFish", "Lion", "Buffalo", "Crocodile", "MarbleColossus", "MajesticUnicorn" })
+	ownHerd(2, { "Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura" })
+	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
+	for i, biome in Config.Biomes do
+		local herd = {}
+		for kind, weight in biome.Herd or {} do
+			if own[i][kind] then
+				herd[kind] = weight
+			end
+		end
+		biome.Herd = if next(herd) then herd else { Fish = 1 }
+	end
 end
 
 return Config
