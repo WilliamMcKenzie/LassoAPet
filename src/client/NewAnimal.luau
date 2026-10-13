@@ -1,7 +1,8 @@
 -- The new animal cutscene (QM, Oct 13): when an animal comes home with you (a ride home, the
 -- finish line), every bit of UI goes, the world behind goes hazy like frosted glass (the
--- Worlds menu's), and the animal's headshot (PetFaces) pops in black and fades to its
--- colours, holds a second, then pops out. NewAnimal.show(kind) starts it and returns how
+-- Worlds menu's), and the animal's headshot (PetFaces) bounces in, fading from black to its
+-- colours, with QM's sunburst turning behind it, holds a moment, then fades and shrinks
+-- away (QM: snappy). NewAnimal.show(kind) starts it and returns how
 -- long it takes (0 if there's no headshot for it).
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -11,7 +12,9 @@ local PetFaces = require(script.Parent.PetFaces)
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
-local POP_IN, COLOUR, HOLD, POP_OUT = 0.35, 0.7, 1, 0.3 -- seconds
+local POP_IN, HOLD, POP_OUT = 0.3, 0.6, 0.3 -- seconds (it goes from black to its colours as it pops in)
+local SUNBURST = "rbxassetid://85834206672187" -- assets/ui/Sunburst.png (QM's)
+local BURST_SIZE, BURST_SPIN = 2.1, 45 -- x the headshot's size; degrees a second
 local SIZE = 0.42 -- x the screen's height
 local HAZE = { blur = 14, brightness = 0.06, contrast = -0.15, saturation = -0.35 } -- (WorldsMenu's)
 
@@ -24,7 +27,7 @@ function NewAnimal.show(kind)
 		return 0
 	end
 	busy = true
-	local total = POP_IN + COLOUR + HOLD + POP_OUT
+	local total = POP_IN + HOLD + POP_OUT
 	task.spawn(function()
 		player:SetAttribute("Cutscene", true)
 		local hidden = {}
@@ -55,6 +58,20 @@ function NewAnimal.show(kind)
 		gui.IgnoreGuiInset = true
 		gui.ResetOnSpawn = false
 		gui.DisplayOrder = 50
+		local burst = Instance.new("ImageLabel")
+		burst.BackgroundTransparency = 1
+		burst.Image = SUNBURST
+		burst.ImageTransparency = 1
+		burst.AnchorPoint = Vector2.new(0.5, 0.5)
+		burst.Position = UDim2.fromScale(0.5, 0.5)
+		burst.Size = UDim2.fromScale(SIZE * BURST_SIZE, SIZE * BURST_SIZE)
+		local burstAspect = Instance.new("UIAspectRatioConstraint")
+		burstAspect.DominantAxis = Enum.DominantAxis.Height
+		burstAspect.Parent = burst
+		burst.Parent = gui
+		local spin = RunService.RenderStepped:Connect(function(dt)
+			burst.Rotation = (burst.Rotation + BURST_SPIN * dt) % 360
+		end)
 		local face = Instance.new("ImageLabel")
 		face.BackgroundTransparency = 1
 		face.Image = image
@@ -68,20 +85,23 @@ function NewAnimal.show(kind)
 		local scale = Instance.new("UIScale")
 		scale.Scale = 0
 		scale.Parent = face
+		face.ZIndex = 2
 		face.Parent = gui
 		gui.Parent = player.PlayerGui
 
 		TweenService:Create(scale, TweenInfo.new(POP_IN, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-		task.wait(POP_IN)
-		TweenService:Create(face, TweenInfo.new(COLOUR, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { ImageColor3 = Color3.new(1, 1, 1) }):Play()
-		task.wait(COLOUR + HOLD)
+		TweenService:Create(face, TweenInfo.new(POP_IN, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { ImageColor3 = Color3.new(1, 1, 1) }):Play()
+		TweenService:Create(burst, TweenInfo.new(POP_IN), { ImageTransparency = 0.15 }):Play()
+		task.wait(POP_IN + HOLD)
 		local out = TweenInfo.new(POP_OUT, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-		TweenService:Create(scale, out, { Scale = 1.25 }):Play()
+		TweenService:Create(scale, out, { Scale = 0 }):Play()
 		TweenService:Create(face, out, { ImageTransparency = 1 }):Play()
+		TweenService:Create(burst, out, { ImageTransparency = 1, Size = UDim2.fromScale(0, 0) }):Play()
 		TweenService:Create(blur, out, { Size = 0 }):Play()
 		TweenService:Create(tint, out, { Brightness = 0, Contrast = 0, Saturation = 0 }):Play()
 		task.wait(POP_OUT)
 
+		spin:Disconnect()
 		gui:Destroy()
 		blur:Destroy()
 		tint:Destroy()
