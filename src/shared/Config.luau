@@ -606,7 +606,7 @@ local Config = {
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
 	-- or crashes into, is PetTiers'. Unlisted: 1.
-	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2, CrimsonScorpion = 0.75 }, -- (QM, Oct 11; the Crimson Scorpion smaller than the Scorpion, Oct 13)
+	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2, CrimsonScorpion = 0.75, Crocodile = 2, Lion = 2, MarbleColossus = 1.6 }, -- (QM, Oct 11; the Crimson Scorpion smaller than the Scorpion, Oct 13; Crocodile and Lion 2x, Marble Colossus 1.6x, Oct 13)
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
