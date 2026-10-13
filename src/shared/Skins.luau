@@ -47,14 +47,38 @@ Skins.Skins = {
 		name = "Galaxy",
 		-- (darker than the mockup's: the game's Lighting brightens and saturates colours, so
 		-- the mockup's ramp came out flat bright purple: QM, Oct 13)
-		stops = { rgb(8, 6, 26), rgb(22, 14, 62), rgb(48, 24, 100), rgb(96, 40, 140) },
-		span = { 0.05, 0.7 },
+		-- (second try, Oct 13: still read royal blue in game, so darker again and toward magenta)
+		stops = { rgb(16, 6, 26), rgb(36, 12, 56), rgb(64, 22, 92), rgb(120, 44, 140) },
+		span = { 0.05, 0.6 },
+		texture = "", -- assets/particles/GalaxyStars.png: stars and nebula wisps over its faces (TODO upload)
 		glow = rgb(90, 230, 255),
 		light = rgb(180, 90, 255),
 	},
 }
 
 local KEEP = { "Eye", "Pupil", "Nostril" }
+local TEXTURE_TILE = 5 -- studs a tile of a skin's texture covers
+local TEXTURE_MIN = 1 -- studs: faces smaller than this either way go without (fewer Textures)
+local FACES = {
+	{ Enum.NormalId.Top, "X", "Z" }, { Enum.NormalId.Front, "X", "Y" }, { Enum.NormalId.Back, "X", "Y" },
+	{ Enum.NormalId.Left, "Z", "Y" }, { Enum.NormalId.Right, "Z", "Y" },
+} -- (not the Bottom: it's never seen)
+
+-- The skin's texture (the Galaxy's stars) over a part's bigger faces, untinted.
+local function textured(part, image)
+	for _, face in FACES do
+		if part.Size[face[2]] >= TEXTURE_MIN and part.Size[face[3]] >= TEXTURE_MIN then
+			local t = Instance.new("Texture")
+			t.Name = "SkinTexture"
+			t.Texture = image
+			t.Face = face[1]
+			t.StudsPerTileU, t.StudsPerTileV = TEXTURE_TILE, TEXTURE_TILE
+			t.OffsetStudsU, t.OffsetStudsV = (part.Position.X * 0.37) % TEXTURE_TILE, (part.Position.Y * 0.53) % TEXTURE_TILE -- (so neighbouring parts don't line up)
+			t.ZIndex = 2
+			t.Parent = part
+		end
+	end
+end
 
 local function kept(name)
 	for _, prefix in KEEP do
@@ -185,6 +209,9 @@ function Skins.apply(model, rebirths)
 			end
 		end
 		part.Color = color
+		if skin.texture and skin.texture ~= "" and part.Material ~= Enum.Material.Neon then
+			textured(part, skin.texture)
+		end
 	end
 	local root = model.PrimaryPart
 	if root then
