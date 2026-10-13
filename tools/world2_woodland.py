@@ -6,9 +6,8 @@ Run: python3 tools/world2_woodland.py [out_dir]
 
 Like the Crystal Cavern (tools/world2_woodland.py): a gradient from the walls in,
 #79482E (darkest) along the walls, #8E5139, then #975939 (lightest) down the middle,
-darkest never touching lightest. Scattered over it, drifts of fallen leaves: each
-tile of a drift one of the leaf colours (orange #F26D39, yellow #FEEA5C, and a red
-#D8432E standing in for the third, which QM's message gave as orange twice).
+darkest never touching lightest, each a step (the middle at 0, then a stud up, then
+two), so the floor rises toward the walls. (QM dropped the fallen-leaf patches, Oct 13.)
 
 Laid out in game space after the funnel, like tools/world2_meadow_ground.py.
 """
@@ -31,6 +30,7 @@ OUT = int(math.ceil(half_width(Z1) / CELL)) * CELL  # 104
 NX, NZ = 2 * OUT // CELL, (Z0 - Z1) // CELL
 VOID, DARK, MID, LIGHT, ORANGE, YELLOW, RED = -1, 0, 1, 2, 3, 4, 5
 LEAVES = (ORANGE, YELLOW, RED)
+TOPS = {DARK: 2, MID: 1, LIGHT: 0}  # tile heights (QM): the floor steps up toward the walls; leaves keep the height under them
 COLOURS = {  # part, checker
     DARK: [(121, 72, 46), (110, 65, 41)],  # #79482E
     MID: [(142, 81, 57), (130, 74, 52)],  # #8E5139
@@ -74,20 +74,8 @@ def layout(seed=53):
             for dj in (-1, 0, 1):
                 near |= p[1 + di:1 + di + NX, 1 + dj:1 + dj + NZ]
         kind[near & (kind == LIGHT)] = MID
-    # Fallen leaves: noise blobs a few tiles across, anywhere but against the walls; each
-    # tile a leaf colour from a second, slower noise (so colours drift in drifts), a few
-    # tiles flipped to another colour for a scattered look.
-    rng = np.random.default_rng(seed)
-    pile = noise(NX, NZ, 4.5, seed + 7) * 0.8 + noise(NX, NZ, 2, seed + 8) * 0.2
-    hue = noise(NX, NZ, 6, seed + 9)
-    for i in range(NX):
-        for j in range(NZ):
-            if kind[i, j] in (DARK, MID, LIGHT) and pile[i, j] > 0.74:
-                x, z = centre(i, j)
-                if abs(x) < half_width(z) - CELL * 1.5:
-                    c = LEAVES[min(2, int(hue[i, j] * 3))]
-                    kind[i, j] = c if rng.random() < 0.75 else LEAVES[int(rng.integers(0, 3))]
-    return kind
+    under = kind.copy()  # (QM, Oct 13: no leaf patches; kept so they can come back)
+    return kind, under
 
 
 def check(kind):
@@ -99,13 +87,15 @@ def check(kind):
     return bad
 
 
-def boxes(kind):
+def boxes(kind, top):
+    """(kind, x0, z_top, sx, sz, top) parts, merged by kind and height within each BLOCK of rows."""
+    key = np.where(kind == VOID, -1, kind * 10 + top)
     out = []
     rows = BLOCK // CELL
     for j0 in range(0, NZ, rows):
-        for k, i0, a, i1, b in rects(kind[:, j0:j0 + rows]):
-            if k != VOID:
-                out.append((int(k), -OUT + i0 * CELL, Z0 - (j0 + a) * CELL, (i1 - i0) * CELL, (b - a) * CELL))
+        for k, i0, a, i1, b in rects(key[:, j0:j0 + rows]):
+            if k != -1:
+                out.append((int(k) // 10, -OUT + i0 * CELL, Z0 - (j0 + a) * CELL, (i1 - i0) * CELL, (b - a) * CELL, int(k) % 10))
     return out
 
 
@@ -139,7 +129,7 @@ def render(kind, out, s=2, rows=4):
 
 
 def write_luau(parts):
-    floor = "\n".join("\t{ %d, %d, %d, %d, %d }," % p for p in parts)
+    floor = "\n".join("\t{ %d, %d, %d, %d, %d, %d }," % p for p in parts)
     body = open(os.path.join(HERE, "world2_woodland.luau.in")).read()
     open(os.path.join(HERE, "world2_woodland.luau"), "w").write(body.replace("--FLOOR--", floor))
 
@@ -147,10 +137,11 @@ def write_luau(parts):
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else "/mnt/project-files/biomes/world2_woodland"
     os.makedirs(out, exist_ok=True)
-    kind = layout()
+    kind, under = layout()
     bad = check(kind)
     assert bad == 0, f"{bad} lightest tiles touch the darkest"
-    parts = boxes(kind)
+    top = np.vectorize(lambda k: TOPS.get(int(k), 0))(under)
+    parts = boxes(kind, top)
     assert all(p[3] <= 2048 and p[4] <= 2048 for p in parts)
     render(kind, os.path.join(out, "woodland_overhead.png"))
     write_luau(parts)

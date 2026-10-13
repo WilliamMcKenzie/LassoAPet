@@ -4,16 +4,16 @@ Run: python3 tools/world2_crimson.py [out_dir]
      renders the layout and writes tools/world2_crimson.luau, which lays it in Studio
      over World2's copied second-biome floor (World 1's Desert).
 
-Three tiles in a gradient: crimson ground #791425, brighter crimson #902C2B in
-patches, and grey-rose stone #775656. Stone is only ever a single tile (the gradient's
-peak) and always has brighter crimson on all eight sides (QM). Round the stone tiles,
-on the brighter crimson, lie the stone plates from World 1's base (the StoneTile
-meshes) on 4-stud checker squares, a few per stone tile and a few more further out,
-so each stone tile reads as a stone patch fading into the crimson.
+Three tiles in a gradient: crimson ground #791425, brighter crimson #902C2B a stud
+higher, and grey-rose stone #775656 a stud higher again. The stone lies in real tile
+patches, big, sometimes joined up and sometimes running into a wall (QM), always with
+brighter crimson between it and the crimson ground, one or two tiles of it. A few of
+World 1's base stone plates (the StoneTile meshes) lie on the brighter crimson along
+the stone's edges.
 
 Laid out in game space after the funnel, like tools/world2_meadow_ground.py (8-stud
 cells on x multiples of 8, each 40-stud band out to its widest end, under the walls).
-Nothing stone within a tile of a wall; no plates under an obstacle or by a nest.
+No plates by a nest or against a wall.
 """
 
 import math
@@ -40,6 +40,7 @@ COLOURS = {  # part, checker
     BRIGHT: [(144, 44, 43), (132, 38, 38)],  # #902C2B
     STONE: [(119, 86, 86), (108, 77, 77)],  # #775656
 }
+TOPS = {GROUND: 0, BRIGHT: 1, STONE: 2}  # tile heights (QM: height variation): crimson, a step up, the stone peak another
 PLATE = [(119, 86, 86), (132, 98, 98)]  # the plates: the stone's colour and a touch lighter
 GROW = 1.35 ** 0.8  # the funnel grows this biome's obstacles and nests (tools/funnel.luau)
 NEST_CLEAR = 16
@@ -70,98 +71,103 @@ def nests():
     return [(float(map_x(x, z)), z) for x, z in DESERT_NESTS]
 
 
+def grow(mask, n=1):
+    """Cells within n tiles (8-way) of the mask."""
+    for _ in range(n):
+        p = np.pad(mask, 1)
+        mask = mask.copy()
+        for di in (-1, 0, 1):
+            for dj in (-1, 0, 1):
+                mask |= p[1 + di:1 + di + NX, 1 + dj:1 + dj + NZ]
+    return mask
+
+
+def drop_small(mask, keep):
+    """The mask without its (4-way) pieces smaller than keep cells."""
+    mask, seen = mask.copy(), np.zeros_like(mask)
+    for i in range(NX):
+        for j in range(NZ):
+            if mask[i, j] and not seen[i, j]:
+                comp, todo = [], [(i, j)]
+                seen[i, j] = True
+                while todo:
+                    a, b = todo.pop()
+                    comp.append((a, b))
+                    for c, d in ((a + 1, b), (a - 1, b), (a, b + 1), (a, b - 1)):
+                        if 0 <= c < NX and 0 <= d < NZ and mask[c, d] and not seen[c, d]:
+                            seen[c, d] = True
+                            todo.append((c, d))
+                if len(comp) < keep:
+                    for a, b in comp:
+                        mask[a, b] = False
+    return mask
+
+
 def layout(seed=41):
-    rng = np.random.default_rng(seed)
-    patch = noise(NX, NZ, 3.4, seed) * 0.7 + noise(NX, NZ, 1.6, seed + 1) * 0.3
+    """Stone in real tile patches (QM, Oct 13: bigger, sometimes joined, sometimes running
+    into a wall), each ringed by one or two tiles of brighter crimson, on crimson ground."""
+    stone_n = noise(NX, NZ, 4.2, seed) * 0.75 + noise(NX, NZ, 1.8, seed + 1) * 0.25
+    walls_n = noise(NX, NZ, 9, seed + 2)  # stretches where the stone runs to the walls
+    ring = noise(NX, NZ, 2.5, seed + 3)
+    glow = noise(NX, NZ, 3.4, seed + 4) * 0.7 + noise(NX, NZ, 1.6, seed + 5) * 0.3
     kind = np.full((NX, NZ), GROUND)
-    inside = np.zeros((NX, NZ), bool)  # far enough off the walls for stone
     for j in range(NZ):
         out = band_out(j)
         for i in range(NX):
             x, z = centre(i, j)
             if abs(x) > out:
                 kind[i, j] = VOID
-            elif abs(x) < half_width(z) - CELL * 1.5:
-                inside[i, j] = True
-    kind[(patch > 0.56) & (kind == GROUND)] = BRIGHT
-    # Stone peaks: single tiles deep in the brighter patches (all eight sides bright), spaced out.
-    order = [(i, j) for i in range(1, NX - 1) for j in range(1, NZ - 1)]
-    rng.shuffle(order)
-    order.sort(key=lambda c: -patch[c])  # the brightest middles first
-    stones = []
-    for i, j in order:
-        if not inside[i, j] or patch[i, j] < 0.66 or rng.random() < 0.45:
-            continue
-        if any(max(abs(i - a), abs(j - b)) < 5 for a, b in stones):
-            continue
-        stones.append((i, j))
-    for i, j in stones:  # (two tiles of bright crimson round each, room for its plates: QM wanted bigger stone patches)
-        a, b = slice(max(i - 2, 0), i + 3), slice(max(j - 2, 0), j + 3)
-        kind[a, b] = np.where(kind[a, b] == VOID, VOID, BRIGHT)
-        kind[i, j] = STONE
-    return kind, stones
+                continue
+            near_wall = abs(x) > half_width(z) - CELL * 2.5
+            if near_wall and walls_n[i, j] > 0.55:
+                stone_n[i, j] += 0.14  # (pulls the stone out to the wall there)
+    floor = kind != VOID
+    stone = (stone_n > 0.64) & floor
+    p = np.pad(stone, 1).astype(int)
+    n = sum(p[1 + di:1 + di + NX, 1 + dj:1 + dj + NZ] for di in (-1, 0, 1) for dj in (-1, 0, 1))
+    stone = ((stone & (n >= 4)) | (n >= 6)) & floor  # (smoothed: no lone strands)
+    stone = drop_small(stone, 5)
+    reach = np.where(ring > 0.6, 2, 1)
+    bright = (grow(stone, 1) | (grow(stone, 2) & (reach == 2)) | (glow > 0.7)) & floor & ~stone
+    kind[bright] = BRIGHT
+    kind[stone] = STONE
+    return kind
 
 
-def plates(kind, stones, seed=43):
-    """Stone plates: (x, z, variant, yaw degrees) on 4-stud squares (4k + 2) of bright crimson
-    round each stone tile: nearly all the squares beside it, most of the next ring out, a
-    few in the ring past that, so each stone patch is about five tiles across (QM: bigger)."""
+def plates(kind, seed=43):
+    """A few stone plates: (x, z, variant, yaw degrees) on 4-stud squares (4k + 2) of the
+    brighter crimson right beside the stone, about one bright tile in five along its edge."""
     rng = np.random.default_rng(seed)
-    obs, nst = obstacles(), nests()
+    nst = nests()
+    edge = grow(kind == STONE, 1) & (kind == BRIGHT)
     out = []
-
-    def free(x, z):
-        i, j = int((x + OUT) // CELL), int((Z0 - z) // CELL)
-        if not (0 <= i < NX and 0 <= j < NZ) or kind[i, j] != BRIGHT:
-            return False
-        if abs(x) > half_width(z) - 4:
-            return False
-        if any(math.hypot(x - a, z - b) < r + 3 for a, b, r in obs):
-            return False
-        if any(math.hypot(x - a, z - b) < NEST_CLEAR for a, b in nst):
-            return False
-        return all(math.hypot(x - a, z - b) > 3.9 for a, b, _, _ in out)
-
-    for i, j in stones:
-        x0, z0 = -OUT + i * CELL, Z0 - j * CELL  # the stone tile's corner (low x, near z)
-        ring1 = [(x0 + dx, z0 - dz) for dx in (-2, 2, 6, 10) for dz in (-2, 2, 6, 10)
-                 if not (0 < dx < 8 and 0 < dz < 8)]  # the 12 squares touching the tile
-        ring2 = [(x0 + dx, z0 - dz) for dx in (-6, -2, 2, 6, 10, 14) for dz in (-6, -2, 2, 6, 10, 14)
-                 if dx in (-6, 14) or dz in (-6, 14)]  # the 20 squares one further out
-        ring3 = [(x0 + dx, z0 - dz) for dx in range(-10, 19, 4) for dz in range(-10, 19, 4)
-                 if dx in (-10, 18) or dz in (-10, 18)]  # the 28 squares further out still
-        rng.shuffle(ring1)
-        rng.shuffle(ring2)
-        rng.shuffle(ring3)
-        for spots, n in ((ring1, rng.integers(9, 13)), (ring2, rng.integers(9, 15)), (ring3, rng.integers(3, 8))):
-            k = 0
-            for x, z in spots:
-                if k >= n:
-                    break
-                if free(x, z):
-                    out.append((x, z, int(rng.integers(1, 4)), int(rng.integers(0, 4)) * 90 + int(rng.integers(-8, 9))))
-                    k += 1
+    for i, j in zip(*np.nonzero(edge)):
+        if rng.random() > 0.2:
+            continue
+        x = -OUT + i * CELL + 2 + 4 * int(rng.integers(0, 2))
+        z = Z0 - j * CELL - 2 - 4 * int(rng.integers(0, 2))
+        if abs(x) > half_width(z) - 4 or any(math.hypot(x - a, z - b) < NEST_CLEAR for a, b in nst):
+            continue
+        out.append((x, z, int(rng.integers(1, 4)), int(rng.integers(0, 4)) * 90 + int(rng.integers(-8, 9))))
     return out
 
 
 def check(kind):
-    """Every stone tile is alone and has bright crimson on all eight sides."""
-    bad = 0
-    for i, j in zip(*np.nonzero(kind == STONE)):
-        for di in (-1, 0, 1):
-            for dj in (-1, 0, 1):
-                if (di or dj) and not (0 <= i + di < NX and 0 <= j + dj < NZ and kind[i + di, j + dj] == BRIGHT):
-                    bad += 1
-    return bad
+    """Stone never touches the crimson ground: brighter crimson always between."""
+    p = np.pad(kind == STONE, 1)
+    return int(sum(((kind == GROUND) & p[1 + di:1 + di + NX, 1 + dj:1 + dj + NZ]).sum()
+                   for di in (-1, 0, 1) for dj in (-1, 0, 1)))
 
 
-def boxes(kind):
+def boxes(kind, top):
+    """(kind, x0, z_top, sx, sz, top) parts, merged by kind and height within each BLOCK of rows."""
+    key = np.where(kind == VOID, -1, kind * 10 + top)
     out = []
     rows = BLOCK // CELL
     for j0 in range(0, NZ, rows):
-        for k, i0, a, i1, b in rects(kind[:, j0:j0 + rows]):
-            if k != VOID:
-                out.append((int(k), -OUT + i0 * CELL, Z0 - (j0 + a) * CELL, (i1 - i0) * CELL, (b - a) * CELL))
+        for k, i0, a, i1, b in rects(key[:, j0:j0 + rows]):
+            if k != -1:
+                out.append((int(k) // 10, -OUT + i0 * CELL, Z0 - (j0 + a) * CELL, (i1 - i0) * CELL, (b - a) * CELL, int(k) % 10))
     return out
 
 
@@ -208,8 +214,8 @@ def render(kind, pl, out, s=2, rows=4):
 
 
 def write_luau(parts, pl):
-    floor = "\n".join("\t{ %d, %d, %d, %d, %d }," % p for p in parts)
-    plates_ = "\n".join("\t{ %g, %g, %d, %d }," % p for p in pl)
+    floor = "\n".join("\t{ %d, %d, %d, %d, %d, %d }," % p for p in parts)
+    plates_ = "\n".join("\t{ %g, %g, %d, %d, %d }," % (*p, TOPS[BRIGHT]) for p in pl)  # (plates lie on the bright crimson)
     body = open(os.path.join(HERE, "world2_crimson.luau.in")).read()
     open(os.path.join(HERE, "world2_crimson.luau"), "w").write(body.replace("--FLOOR--", floor).replace("--PLATES--", plates_))
 
@@ -217,11 +223,12 @@ def write_luau(parts, pl):
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else "/mnt/project-files/biomes/world2_crimson"
     os.makedirs(out, exist_ok=True)
-    kind, stones = layout()
+    kind = layout()
     bad = check(kind)
-    assert bad == 0, f"{bad} stone tiles not ringed by bright crimson"
-    pl = plates(kind, stones)
-    parts = boxes(kind)
+    assert bad == 0, f"{bad} stone tiles touch the crimson ground"
+    pl = plates(kind)
+    top = np.vectorize(lambda k: TOPS.get(int(k), 0))(kind)
+    parts = boxes(kind, top)
     assert all(p[3] <= 2048 and p[4] <= 2048 for p in parts)
     render(kind, pl, os.path.join(out, "crimson_overhead.png"))
     write_luau(parts, pl)

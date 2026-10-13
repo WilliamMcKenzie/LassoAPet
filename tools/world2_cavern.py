@@ -7,7 +7,8 @@ Run: python3 tools/world2_cavern.py [out_dir]
 Walls #384867. The floor is a gradient from the walls in: #5A6D8F (darkest) along
 the walls, #6281A7, then #74BAD5 (lightest) down the middle, the bands wavering so
 they read as natural. Darkest never touches lightest: there's always the middle shade
-between. Twice along the biome the light middle turns to wooden planks for a long
+between. Each shade is a step: the light middle at 0, the middle shade a stud up, the
+darkest two, so the floor rises toward the walls. Twice along the biome the light middle turns to wooden planks for a long
 stretch (boards across the course, a few hundred studs each), their ends ragged.
 
 Laid out in game space after the funnel, like tools/world2_meadow_ground.py.
@@ -38,6 +39,7 @@ COLOURS = {  # part, checker
 }
 WALL = [(56, 72, 103), (48, 62, 90)]  # #384867, checker
 CAP = (44, 57, 82)
+TOPS = {DARK: 2, MID: 1, LIGHT: 0, PLANKS: 0}  # tile heights (QM): the floor steps up toward the walls
 STRETCHES = [(0.18, 0.34), (0.6, 0.8)]  # the plank stretches, as fractions of the biome's length
 
 
@@ -102,13 +104,15 @@ def check(kind):
     return bad
 
 
-def boxes(kind):
+def boxes(kind, top):
+    """(kind, x0, z_top, sx, sz, top) parts, merged by kind and height within each BLOCK of rows."""
+    key = np.where(kind == VOID, -1, kind * 10 + top)
     out = []
     rows = BLOCK // CELL
     for j0 in range(0, NZ, rows):
-        for k, i0, a, i1, b in rects(kind[:, j0:j0 + rows]):
-            if k != VOID:
-                out.append((int(k), -OUT + i0 * CELL, Z0 - (j0 + a) * CELL, (i1 - i0) * CELL, (b - a) * CELL))
+        for k, i0, a, i1, b in rects(key[:, j0:j0 + rows]):
+            if k != -1:
+                out.append((int(k) // 10, -OUT + i0 * CELL, Z0 - (j0 + a) * CELL, (i1 - i0) * CELL, (b - a) * CELL, int(k) % 10))
     return out
 
 
@@ -143,7 +147,7 @@ def render(kind, out, s=2, rows=4):
 
 
 def write_luau(parts):
-    floor = "\n".join("\t{ %d, %d, %d, %d, %d }," % p for p in parts)
+    floor = "\n".join("\t{ %d, %d, %d, %d, %d, %d }," % p for p in parts)
     body = open(os.path.join(HERE, "world2_cavern.luau.in")).read()
     open(os.path.join(HERE, "world2_cavern.luau"), "w").write(body.replace("--FLOOR--", floor))
 
@@ -154,7 +158,8 @@ def main():
     kind = layout()
     bad = check(kind)
     assert bad == 0, f"{bad} lightest tiles touch the darkest"
-    parts = boxes(kind)
+    top = np.vectorize(lambda k: TOPS.get(int(k), 0))(kind)
+    parts = boxes(kind, top)
     assert all(p[3] <= 2048 and p[4] <= 2048 for p in parts)
     render(kind, os.path.join(out, "cavern_overhead.png"))
     write_luau(parts)

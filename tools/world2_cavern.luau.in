@@ -2,7 +2,7 @@
 -- tools/world2_cavern.py: edit that and re-make this, not this. Run in Studio (Edit,
 -- execute_luau) on the place with World2, after tools/world2_terrain.luau. Re-running is fine.
 -- Floor a gradient from the walls in (#5A6D8F, #6281A7, #74BAD5), the darkest never
--- touching the lightest, and two long stretches of wooden planks down the middle.
+-- touching the lightest, each a stud higher toward the walls (0, 1, 2), and two long stretches of wooden planks down the middle.
 -- Replaces World2's copied floor between the second biome and the fourth (World 1's
 -- Tundra floor: its flat parts there) and paints the walls there #384867.
 local W = workspace.World2
@@ -16,7 +16,7 @@ local KINDS = { -- [kind] = { name, part colour, checker colour }
 }
 local BOARDS = { rgb(150, 98, 56), rgb(132, 84, 46) } -- planks: 4-stud boards across the course, alternating
 local WALL, WALL_CHECKER, CAP = rgb(56, 72, 103), rgb(48, 62, 90), rgb(44, 57, 82) -- #384867
--- { kind, low x, near z, size x, size z } in game space (x before the offset); kind 3 = planks
+-- { kind, low x, near z, size x, size z, top } in game space (x before the offset); kind 3 = planks
 local FLOOR = {
 --FLOOR--
 }
@@ -24,7 +24,7 @@ local FLOOR = {
 local template
 for _, p in W.Ground:GetChildren() do
 	local z = p:IsA("BasePart") and p.Position.Z
-	if z and z < NEAR and z > FAR and p.Size.Y <= 4 and math.abs(p.CFrame.RightVector.X) > 0.999 then
+	if z and z < NEAR and z > FAR and p.Size.Y <= 5 and math.abs(p.CFrame.RightVector.X) > 0.999 then
 		if not template and p.Name == "Ground" then
 			template = p:Clone()
 		end
@@ -41,11 +41,11 @@ for k in template:GetAttributes() do
 	template:SetAttribute(k, nil)
 end
 local n = 0
-local function lay(name, x, z, sx, sz, colour, checker)
+local function lay(name, x, z, sx, sz, top, colour, checker)
 	local p = template:Clone()
 	p.Name = name
-	p.Size = Vector3.new(sx, 2, sz)
-	p.CFrame = CFrame.new(x + sx / 2, -1, z - sz / 2)
+	p.Size = Vector3.new(sx, top + 2, sz)
+	p.CFrame = CFrame.new(x + sx / 2, (top - 2) / 2, z - sz / 2)
 	p.Color = colour
 	for _, t in p:GetChildren() do
 		if checker then
@@ -62,11 +62,11 @@ for _, r in FLOOR do
 	if r[1] == 3 then
 		for b = 0, sz / 4 - 1 do
 			local bz = z - b * 4
-			lay("Planks", x, bz, sx, 4, BOARDS[((NEAR - bz) / 4) % 2 + 1])
+			lay("Planks", x, bz, sx, 4, r[6], BOARDS[((NEAR - bz) / 4) % 2 + 1])
 		end
 	else
 		local k = KINDS[r[1]]
-		lay(k[1], x, z, sx, sz, k[2], k[3])
+		lay(k[1], x, z, sx, sz, r[6], k[2], k[3])
 	end
 end
 
@@ -86,4 +86,24 @@ for _, p in W.Walls:GetChildren() do
 		walls += 1
 	end
 end
-return string.format("%d floor parts, %d walls painted", n, walls)
+-- The nests stand on whatever tile is under them now (raised tiles would bury them).
+local function topAt(x, z)
+	for _, r in FLOOR do
+		local x0 = r[2] + OFFSET
+		if x >= x0 and x < x0 + r[4] and z <= r[3] and z > r[3] - r[5] then
+			return r[6]
+		end
+	end
+	return 0
+end
+local nests = 0
+for _, m in W.Nests:GetChildren() do
+	local pivot = m:GetPivot()
+	if pivot.Z < NEAR and pivot.Z > FAR then
+		local baseY = m:GetAttribute("FlatY") or pivot.Y -- (where it stood on the flat floor)
+		m:SetAttribute("FlatY", baseY)
+		m:PivotTo(pivot + Vector3.new(0, baseY + topAt(pivot.X, pivot.Z) - pivot.Y, 0))
+		nests += 1
+	end
+end
+return string.format("%d floor parts, %d walls painted, %d nests raised", n, walls, nests)
