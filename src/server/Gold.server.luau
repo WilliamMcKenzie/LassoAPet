@@ -144,6 +144,7 @@ local function addBought(player)
 end
 
 local travelTo -- (below: the Worlds menu's trips)
+local worldNoted -- (below: Analytics V1's World 2 counts)
 local function join(player)
 	load(player)
 	ready[player] = true
@@ -256,7 +257,7 @@ TeleportService.TeleportInitFailed:Connect(function(player)
 end)
 
 -- Analytics V1: World 2 unlocked and entered, of new World 1 players (once each, saved).
-local function worldNoted(player, field, stat)
+worldNoted = function(player, field, stat)
 	local record = others[player]
 	if not player:GetAttribute("V1New") or not loaded[player] then
 		return
