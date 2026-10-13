@@ -73,7 +73,7 @@ local PANELS = {
 	"rbxassetid://120075276423928", "rbxassetid://92909054184182", "rbxassetid://75096704585668",
 	"rbxassetid://100279863676585", "rbxassetid://85834206672187", "rbxassetid://100466055719917",
 	"rbxassetid://128119306382781", "rbxassetid://108884731983075", "rbxassetid://126647709261103",
-	"rbxassetid://78103765703011", "rbxassetid://75097533166591", "rbxassetid://118605133730785",
+	"rbxassetid://78103765703011", "rbxassetid://95624233682694", "rbxassetid://118605133730785",
 	"rbxassetid://124966752636756", "rbxassetid://17520182385", "rbxassetid://7216979807",
 	"rbxassetid://73420824782915", "rbxassetid://140037705020050", "rbxassetid://90506809044433",
 	"rbxassetid://83654143211576", "rbxassetid://103831602991183", "rbxassetid://99393989394598",

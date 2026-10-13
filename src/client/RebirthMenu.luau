@@ -1,6 +1,6 @@
 -- The Rebirth confirmation (QM, Oct 13: his panel): the full Rebirth bar (World2Bar, World
 -- 2) opens it. As the Starter Pack popup: the world behind hazy, every other bit of UI gone,
--- the X on its top right corner. QM's panel says what a rebirth gives (1.6x gold, bigger
+-- the X on its top right corner. QM's panel says what a rebirth gives (2x gold, bigger
 -- pets, their skins) and takes (all your pets, all your gold, back to World 1); Confirm
 -- rebirths you (Gold.server's Rebirth).
 --
@@ -17,7 +17,7 @@ local RebirthMenu = {}
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
 local CLOSE = "rbxassetid://84920756991403" -- dex/IndexClose.png (the Worlds menu's X)
 local ART = { -- assets/ui/rebirth (QM's)
-	panel = "rbxassetid://75097533166591", -- Panel.png (1230x778, shrunk to 1024x648 by the upload): its title over the top, what you gain and lose
+	panel = "rbxassetid://95624233682694", -- Panel.png (1230x778, shrunk to 1024x648 by the upload): its title over the top, what you gain and lose
 	confirm = "rbxassetid://118605133730785", -- Confirm.png (399x116)
 }
 local PANEL = Vector2.new(800, 800 * 778 / 1230) -- the art, title and all
