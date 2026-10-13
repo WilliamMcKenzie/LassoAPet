@@ -16,9 +16,10 @@ Three fireballs and two green Nile ankh artifacts float around him.
 
     python3 tools/geb.py
 
-writes designs/tomb/Geb.bbmodel (model and bones only so far, no animations) and the preview
-/mnt/project-files/world2/tomb/renders/Geb.png. Every tilted part is built already turned
-(rests baked into the parts, every bone at 0).
+writes designs/tomb/Geb.bbmodel (convert without --zyx), the preview
+/mnt/project-files/world2/tomb/renders/Geb.png, a four-view sheet and an animation gif
+(--still skips the gif). Every tilted part is built already turned (rests baked into the
+parts, every bone at 0).
 """
 
 import json
@@ -30,7 +31,8 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
-from partlib import Part, T, Rx, Ry, Rz, render, write_bbmodel  # noqa: E402
+from horse_rig import pose  # noqa: E402
+from partlib import Part, T, Rx, Ry, Rz, render  # noqa: E402
 from snow_designs import pyramid  # noqa: E402
 
 NAME = "Geb"
@@ -404,7 +406,51 @@ def geb():
     a.meta = {"seat": (0, 7.2, 1.2), "neck_loop": {"center": (0, 8.4, -2.6), "radius": 2.1}}
     for p in a.parts:
         p.neon = p.name.startswith("Glow")
+    a.animations = animations
     return a
+
+
+def animations():
+    """The Horse's idle, walk and leap gallop for the bull's body and legs, its neck swing
+    damped on the god's waist (neck) so he stays upright, his head steadying against it.
+    On top: he breathes and keeps the bow drawn, the bow arm swaying with the stride and
+    the draw hand pulling back harder the faster he goes; the tail swishes; the fireballs
+    and ankhs bob and spin."""
+    out = {}
+    for name, (L, tracks) in A.quad_animations().items():
+        tracks = {b: t for b, t in tracks.items() if b not in ("EarL", "EarR")}
+        strong = {"idle": 0.0, "walk": 0.5, "gallop": 1.0}[name]
+        cycles = max(1, round(L / 1.2)) if name == "idle" else 1
+        n = 16
+        wave = lambda k, ph=0.0: float(np.sin(2 * np.pi * (cycles * k / n - ph)))
+        ts = [round(L * k / n, 4) for k in range(n + 1)]
+        lean = -4 * strong  # leans into the run
+        neck = []
+        for tr in tracks.get("neck", []):
+            if tr["channel"] == "rotation":
+                tr = dict(tr, keys=[(t, (lean + 0.35 * r[0], 0.35 * r[1], 0.35 * r[2])) for t, r in tr["keys"]])
+            neck.append(tr)
+        tracks["neck"] = neck
+        tracks["Head"] = [{"channel": "rotation", "interp": "catmullrom",
+                           "keys": [(t, (-1.5 * wave(k, 0.1), 3 * wave(k, 0.3) * (1 - strong), 0)) for k, t in enumerate(ts)]}]
+        tracks["ArmL"] = [{"channel": "rotation", "interp": "catmullrom",
+                           "keys": [(t, ((2 + 3 * strong) * wave(k, 0.2), (1.5 + 2 * strong) * wave(k, 0.45), 0)) for k, t in enumerate(ts)]}]
+        tracks["ArmR"] = [{"channel": "rotation", "interp": "catmullrom",
+                           "keys": [(t, (-(1 + 4 * strong) - (1 + 2 * strong) * wave(k, 0.2), -(3 * strong) - 1.5 * wave(k, 0.45), 0))
+                                    for k, t in enumerate(ts)]}]
+        swish = (10 + 10 * strong)
+        tail = [tr for tr in tracks.get("Tail", []) if tr["channel"] != "rotation"]
+        tail.append({"channel": "rotation", "interp": "catmullrom",
+                     "keys": [(t, (-10 * strong + 6 * wave(k, 0.1), 0, swish * wave(k, 0.35))) for k, t in enumerate(ts)]})
+        tracks["Tail"] = tail
+        for j, bone in enumerate(["Fire1", "Fire2", "Fire3", "Ankh1", "Ankh2"]):
+            sign = 1 if j % 2 else -1
+            spin = [(round(L * k / 4, 4), (0, sign * 90 * k, 0)) for k in range(5)]
+            bob = [(t, (0, (2.5 + strong) * float(np.sin(2 * np.pi * (k / n + 0.2 * j))), 0)) for k, t in enumerate(ts)]
+            tracks[bone] = [{"channel": "rotation", "interp": "linear", "keys": spin},
+                            {"channel": "position", "interp": "catmullrom", "keys": bob}]
+        out[name] = (L, tracks)
+    return out
 
 
 SHOT = "/mnt/project-files/world2/tomb/renders"
@@ -422,10 +468,7 @@ def main(out=os.path.join(A.ROOT, "designs", "tomb")):
     os.makedirs(out, exist_ok=True)
     os.makedirs(SHOT, exist_ok=True)
     a = geb()
-    model, _ = write_bbmodel(a.parts, NAME, None, bones=a.bones())
-    model["animations"] = []
-    with open(os.path.join(out, NAME + ".bbmodel"), "w") as f:
-        json.dump(model, f, separators=(",", ":"))
+    model = A.build_animal(a, out)
     print(f"{NAME}: {len(a.parts)} parts")
     shot(a.parts, eye=(-22, 15, -21), target=(0, 7.6, -0.4), W=900, H=900, fov=42).save(os.path.join(SHOT, NAME + ".png"))
     views = [dict(eye=(-21, 14, -23), target=(0, 7.4, 0)), dict(eye=(-30, 9, 0), target=(0, 7.4, 0)),
@@ -434,7 +477,22 @@ def main(out=os.path.join(A.ROOT, "designs", "tomb")):
     for i, cam in enumerate(views):
         sheet.paste(shot(a.parts, W=500, H=500, fov=42, **cam), ((i % 2) * 500, (i // 2) * 500))
     sheet.save(os.path.join(os.path.dirname(SHOT), "Geb_views.png"))
+    if "--still" in sys.argv:
+        return
+    frames = []
+    cams = [dict(eye=(-30, 9, -2), target=(0, 7.4, 0)), dict(eye=(-22, 15, -21), target=(0, 7.6, -0.4))]
+    for name, nf in (("idle", 24), ("walk", 20), ("gallop", 16)):
+        anim = A.anim_named(model, name)
+        for k in range(nf):
+            ps = pose(model, anim, k / nf * anim["length"])
+            for p in ps:
+                p.neon = p.name.startswith("Glow")
+            im = Image.new("RGB", (800, 400))
+            for c, cam in enumerate(cams):
+                im.paste(shot(ps, W=400, H=400, fov=44, **cam), (400 * c, 0))
+            frames.append(A.label(im, ["run" if name == "gallop" else name] * 2))
+    A.gif(os.path.join(os.path.dirname(SHOT), "Geb_anims.gif"), frames, fps=20)
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    main(*[x for x in sys.argv[1:] if not x.startswith("--")])

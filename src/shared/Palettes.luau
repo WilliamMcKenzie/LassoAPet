@@ -418,6 +418,12 @@ return {
 		{ "Marking", 184, 177, 166 }, -- pale plates, caps, brow, knuckles
 		{ "Accent", 110, 186, 68 }, -- moss
 	},
+	Geb = {
+		{ "Body", 118, 150, 70 }, -- the bull's earth body and legs
+		{ "Body", 92, 184, 84 }, -- the god's green skin
+		{ "Marking", 168, 156, 132 }, -- stone plates, pauldrons, knees
+		{ "Accent", 255, 196, 52 }, -- gold nemes, collar, bow, trims, hoof caps
+	},
 	Kitsune = {
 		{ "Body", 250, 248, 244 }, -- white fur, tails, paws
 		{ "Belly", 236, 228, 214 }, -- belly, jaw, chest tuft
