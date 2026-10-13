@@ -302,6 +302,7 @@ local Config = {
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 40, StopShort = 30,
 		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 50, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3 }, -- (each boss's cry: QM, Oct 10)
+		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
 			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 5, 41) }, -- (it's 1.7x the size: QM)
 			CactusBoss = { From = Vector3.new(0, 5, 34) }, -- (1.7x the size)
@@ -607,7 +608,7 @@ local Config = {
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
 	-- or crashes into, is PetTiers'. Unlisted: 1.
-	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2, CrimsonScorpion = 0.75 }, -- (QM, Oct 11; the Crimson Scorpion smaller than the Scorpion, Oct 13)
+	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2, CrimsonScorpion = 0.75, Crocodile = 2, Lion = 2, MarbleColossus = 1.6, MajesticUnicorn = 1.4, IvorySpider = 2, Maw = 0.8, Eyeworm = 1.2, CrystalCentipede = 2 }, -- (QM, Oct 11; the Crimson Scorpion smaller than the Scorpion, Oct 13; Crocodile and Lion 2x, Marble Colossus 1.6x, Majestic Unicorn 1.4x, Ivory Spider 2x, Maw 0.8x, Eyeworm 1.2x, Crystal Centipede 2x, Oct 13)
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
@@ -718,6 +719,7 @@ local Config = {
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
 	EggIcons = {
 		Horse = "rbxassetid://96698232796495", -- assets/ui/HorseEggRender.png (the tutorial's first egg)
+		ArmoredHorse = "rbxassetid://96698232796495", -- the Horse's (QM, Oct 13)
 		Pinto = "rbxassetid://79525419811481",
 		Pig = "rbxassetid://139970505549400",
 		Bunny = "rbxassetid://102165948456968", -- assets/ui/BunnyEggRender.png
@@ -1201,7 +1203,7 @@ if Config.World == 2 then
 	meadow.GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) }
 	meadow.WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) } -- marble
 	meadow.Patches = {
-		Dirt = { rgb(118, 84, 50), rgb(104, 72, 42) },
+		Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (QM, Oct 13: 20% lighter, then its checker 20% less contrast; was 118, 84, 50 / 104, 72, 42)
 		Grass = { rgb(182, 144, 44), rgb(166, 130, 36) }, -- the darker grass, beside the dirt
 	}
 	-- The second biome: the Crimson Lands (QM, Oct 13; tools/world2_crimson.luau's floor).
@@ -1283,6 +1285,30 @@ if Config.World == 2 then
 	woodland.GateColor = rgb(242, 109, 57)
 	temple.GateColor = rgb(130, 226, 80)
 	tomb.GateColor = rgb(255, 200, 30)
+	-- Only World 2's own animals run in its herds (QM, Oct 13: no World 1 animals in the
+	-- marble Meadow): each biome keeps the kinds the lines above added. A biome with none
+	-- yet runs Fish as a placeholder.
+	local own = {}
+	for i, biome in Config.Biomes do
+		own[i] = {}
+	end
+	local function ownHerd(i, kinds)
+		for _, kind in kinds do
+			own[i][kind] = true
+		end
+	end
+	ownHerd(1, { "MarbleFish", "Lion", "Buffalo", "Crocodile", "MarbleColossus", "MajesticUnicorn" })
+	ownHerd(2, { "Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura" })
+	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
+	for i, biome in Config.Biomes do
+		local herd = {}
+		for kind, weight in biome.Herd or {} do
+			if own[i][kind] then
+				herd[kind] = weight
+			end
+		end
+		biome.Herd = if next(herd) then herd else { Fish = 1 }
+	end
 end
 
 return Config

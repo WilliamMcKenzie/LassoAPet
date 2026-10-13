@@ -1249,6 +1249,44 @@ command.Parent = game:GetService("TextChatService")
 -- the ride). "/boss <biome>" (QM, Oct 10): the same at its end, with the ride's
 -- timer at 0.01 s, so the boss comes. Same rule as /give for who can use them.
 local BIOME_ALIASES = { tundra = "snow" }
+if Config.World == 2 then -- (World 2's biomes keep World 1's names in Config: these are what QM calls them)
+	for alias, name in { marble = "meadow", crimson = "desert", cavern = "snow", crystal = "snow", woodland = "ocean", temple = "volcano", tomb = "jurassic" } do
+		BIOME_ALIASES[alias] = name
+	end
+end
+-- The biome a command names (its name, an alias, or its number), or nil.
+local function biomeNamed(name)
+	name = name and (BIOME_ALIASES[name:lower()] or name:lower())
+	local index = tonumber(name)
+	for i, biome in Config.Biomes do
+		if i == index or biome.Name:lower() == name then
+			return i, biome
+		end
+	end
+	return nil
+end
+
+-- Testing: "/egg <biome>" (QM, Oct 13): one egg of every animal in that biome's herd,
+-- into your inventory. Same rule as /give for who can use it.
+local eggCommand = Instance.new("TextChatCommand")
+eggCommand.Name = "Egg"
+eggCommand.PrimaryAlias = "/egg"
+eggCommand.Triggered:Connect(function(source, text)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	local profile = player and profiles[player]
+	local _, biome = biomeNamed(text:match("^/egg%s+(%S+)"))
+	if not profile or not biome or not allowed(player) then
+		return
+	end
+	for kind, weight in biome.Herd or {} do
+		if weight > 0 and eggPet(kind) then
+			profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+		end
+	end
+	publish(player)
+	save(player)
+end)
+eggCommand.Parent = game:GetService("TextChatService")
 local biomeWarp = Instance.new("RemoteEvent")
 biomeWarp.Name = "BiomeWarp"
 biomeWarp.Parent = ReplicatedStorage

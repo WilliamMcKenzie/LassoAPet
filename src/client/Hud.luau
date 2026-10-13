@@ -85,6 +85,7 @@ local IMAGES = {
 	roll = { id = "", size = Vector2.new(960, 308) }, -- Roll.png
 	-- Egg renders for the card, cropped to the egg (assets/ui/<Kind>EggRender.png).
 	eggHorse = { id = "rbxassetid://96698232796495", size = Vector2.new(502, 799) }, -- HorseEggRender.png
+	eggArmoredHorse = { id = "rbxassetid://96698232796495", size = Vector2.new(502, 799) }, -- the Horse's (QM, Oct 13)
 	eggPinto = { id = "rbxassetid://79525419811481", size = Vector2.new(496, 788) }, -- PintoEggRender.png
 	eggPig = { id = "rbxassetid://139970505549400", size = Vector2.new(496, 730) }, -- PigEggRender.png
 	eggBunny = { id = "rbxassetid://102165948456968", size = Vector2.new(502, 920) }, -- BunnyEggRender.png
