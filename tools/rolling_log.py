@@ -1,8 +1,8 @@
 """Rolling Log: World 2 Woodland Maze's Rare (QM, Oct 13), a living log that rolls.
 
 A fat log lying across the path (its length runs left-right, so it rolls forward),
-warm bark with raised darker bark strips, pale cut ends with growth rings, the
-animals' standard white plate eyes with pupils and a big grin on the front of the bark,
+warm bark with raised darker bark strips, pale cut ends with growth rings, brows
+and a big grin on the front of the bark (no eyes: QM, Oct 13),
 and a twig of autumn leaves (the Woodland walls' orange) sprouting off the top.
 
 The round log is stepped from three axis-aligned blocks per slice (a wide one, a tall
@@ -77,13 +77,9 @@ def rolling_log():
                          ("StripFront", (-3.6, CY - 1.4, -R - t), (-2.0, CY - 0.6, -R))):
         a.box(name, lo, hi, BARK_DARK, "Log")
 
-    # face on the front of the bark: plate eyes looking forward, brows, a big grin
+    # face on the front of the bark: brows and a big grin, no eyes (QM, Oct 13)
     z = -R
     for side, sx in (("L", -1), ("R", 1)):
-        xa, xb = sorted((sx * 0.35, sx * 1.65))
-        a.box("Eye" + side, (xa, CY + 0.05, z - A.PLATE), (xb, CY + 1.45, z), A.EYE_WHITE, "Log")
-        pa, pb = sorted((sx * 0.55, sx * 1.2))
-        a.box("Pupil" + side, (pa, CY + 0.2, z - A.PLATE - 0.03), (pb, CY + 0.95, z - A.PLATE), A.PUPIL, "Log")
         ba, bb = sorted((sx * 0.3, sx * 1.7))
         a.box("Brow" + side, (ba, CY + 1.6, z - 0.2), (bb, CY + 1.85, z), BARK_DARK, "Log")
     a.box("Mouth", (-0.9, CY - 0.75, z - A.PLATE), (0.9, CY - 0.4, z), MOUTH, "Log")
