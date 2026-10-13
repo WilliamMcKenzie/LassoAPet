@@ -47,6 +47,7 @@ local KINDS = {
 	CrystalElephant = { data = require(script.Parent.CrystalElephantEggModel), center = 1.6 },
 	CrystalPhoenix = { data = require(script.Parent.CrystalPhoenixEggModel), center = 1.6 },
 	OrangeButterfly = { data = require(script.Parent.OrangeButterflyEggModel), center = 1.6 },
+	Hawkmoth = { data = require(script.Parent.HawkmothEggModel), center = 1.6 },
 	Seraph = { data = require(script.Parent.SeraphEggModel), center = 1.6 }, -- World 2's trophy angels (tools/seraph_egg.py)
 	CrimsonSeraph = { data = require(script.Parent.CrimsonSeraphEggModel), center = 1.6 },
 	CrystalSeraph = { data = require(script.Parent.CrystalSeraphEggModel), center = 1.6 },
@@ -69,6 +70,7 @@ local KINDS = {
 	SnackYak = { data = require(script.Parent.SnackYakEggModel), center = 1.6 },
 	Icebringer = { data = require(script.Parent.IcebringerEggModel), center = 1.6 },
 	Kraken = { data = require(script.Parent.KrakenEggModel), center = 1.6 },
+	GiantGolem = { data = require(script.Parent.GiantGolemEggModel), center = 1.6 },
 	WarElephant = { data = require(script.Parent.WarElephantEggModel), center = 1.6 },
 	SoulHorse = { data = require(script.Parent.SoulHorseEggModel), center = 1.6 },
 	Squid = { data = require(script.Parent.SquidEggModel), center = 1.6 },
@@ -92,6 +94,7 @@ local KINDS = {
 	Phoenix = { data = require(script.Parent.PhoenixEggModel), center = 1.6 },
 	Starfish = { data = require(script.Parent.StarfishEggModel), center = 1.6 },
 	Lionfish = { data = require(script.Parent.LionfishEggModel), center = 1.6 },
+	RollingLog = { data = require(script.Parent.RollingLogEggModel), center = 1.6 },
 	Clownfish = { data = require(script.Parent.ClownfishEggModel), center = 1.6 },
 	PinkButterfly = { data = require(script.Parent.PinkButterflyEggModel), center = 1.6 },
 	FishSchool = { data = require(script.Parent.FishSchoolEggModel), center = 1.6 },
