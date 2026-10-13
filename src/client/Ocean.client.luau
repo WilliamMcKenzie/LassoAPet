@@ -64,15 +64,15 @@ local function settle(haze, i, z, dt, fadeTime)
 	if haze then
 		color, tint = haze.Color, haze.Tint
 		local a, b, f = WorldColors.depthAt(i, z)
-		if a then
+		if a and not haze.NoDepths then -- (NoDepths: one haze all the way, World 2's Woodland)
 			color, tint = a.Haze:Lerp(b.Haze, f), a.Tint:Lerp(b.Tint, f)
 		end
 	end
 	local k = 1 - math.exp(-3 * dt / fadeTime)
 	fog.Color = fog.Color:Lerp(color, k)
 	fog.Tint = fog.Tint:Lerp(tint, k)
-	fog.Start += ((if haze then FOG_START else dry.FogStart) - fog.Start) * k
-	fog.End += ((if haze then FOG_END else dry.FogEnd) - fog.End) * k
+	fog.Start += ((if haze then haze.FogStart or FOG_START else dry.FogStart) - fog.Start) * k -- (a haze's own FogStart, FogEnd: a light one)
+	fog.End += ((if haze then haze.FogEnd or FOG_END else dry.FogEnd) - fog.End) * k
 	Lighting.FogColor = fog.Color
 	Lighting.FogStart = fog.Start
 	Lighting.FogEnd = fog.End

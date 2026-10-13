@@ -38,7 +38,7 @@ PORTAL = (-63.5, 24.6)
 COLOURS = {  # part, checker (tools/world2_meadow.luau)
     BRIGHT: [(206, 168, 58), (190, 152, 46)],
     DARK: [(182, 144, 44), (166, 130, 36)],
-    DIRT: [(118, 84, 50), (104, 72, 42)],
+    DIRT: [(142, 101, 60), (128, 89, 52)],  # (QM: 20% lighter)
 }
 
 

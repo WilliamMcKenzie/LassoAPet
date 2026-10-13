@@ -37,10 +37,6 @@ local deliverEgg = ReplicatedStorage:WaitForChild("DeliverEgg")
 local finishCourse = ReplicatedStorage:WaitForChild("FinishCourse")
 local ridePet = ReplicatedStorage:WaitForChild("RidePet")
 
-local function rarityOf(kind)
-	return require(Animals[kind]).Rarity
-end
-
 -- Obstacle footprints from each obstacle's "Base" part (an invisible footprint),
 -- or else its lowest part (a tree's trunk, a rock's base).
 local obstacles = {}
@@ -108,6 +104,8 @@ vfx.speedLines = require(script.Parent.SpeedLines) -- speed lines on the screen 
 vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's out (QM, Oct 10)
 vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
+vfx.newAnimal = require(script.Parent.NewAnimal) -- the animal you got, shown (QM, Oct 13)
+vfx.returnRun = require(script.Parent.ReturnRun) -- the run home (QM)
 vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
 vfx.sprintTrail = require(script.Parent.SprintTrail) -- a white trail behind your mount while it sprints (QM, Oct 9)
@@ -220,7 +218,7 @@ end
 -- (a new player's Horse's Fish keeps its own 0.6).
 local runFloor = 0
 local function rideSpeed(entity)
-	return math.max(statsOf(entity.kind, entity).Speed, runFloor)
+	return math.max(statsOf(entity.kind, entity).Speed, runFloor) * Config.rebirthSpeed(player) -- (rebirths: Config.Rebirth)
 end
 
 -- How fast a kind runs in the stampede: always exactly this, no variance. z: where (its
@@ -310,6 +308,7 @@ local warpLevel -- /biome: the biome you were put in, so its gate (and those bef
 local transfer, tumble, carried
 vfx.Merge = require(ReplicatedStorage.Shared.Merge)
 vfx.Fusion = require(ReplicatedStorage.Shared.Fusion)
+vfx.Skins = require(ReplicatedStorage.Shared.Skins)
 vfx.HerdPacks = require(script.Parent.HerdPacks)
 vfx.endless = require(script.Parent.Endless) -- the endless Jurassic: copies past the cut (Config.Endless)
 vfx.endless.init({ obstacles = obstacles, slices = slices, streams = streams, newStream = newStream })
@@ -521,10 +520,12 @@ local function cleanup()
 	end
 	mount, transfer, tumble, warpLevel = nil, nil, nil, nil
 	if carried then
-		carried.part:Destroy()
+		if carried.part then
+			carried.part:Destroy()
+		end
 		carried = nil
 	end
-	if vfx.revive and vfx.revive.carried then
+	if vfx.revive and vfx.revive.carried and vfx.revive.carried.part then
 		vfx.revive.carried.part:Destroy() -- the egg kept for a Continue that wasn't bought
 	end
 	vfx.revive = nil
@@ -619,6 +620,7 @@ local function spawnStarter()
 	local stats = player:GetAttribute("RideStats") -- (and the best of both pets' Speed, Stamina)
 	starter.stats = stats and { Speed = stats.X, Stamina = stats.Y }
 	vfx.Fusion.paint(starter.animal.model, starter.kind, starter.fuse)
+	vfx.Skins.apply(starter.animal, player:GetAttribute("Rebirths"), player:GetAttribute("PassGiantPets")) -- (your rebirth's skin)
 	PenPets.starter = starter -- (FuseMenu: the one you ride can be fused too)
 	starter.animal:setScale(vfx.Merge.size(starter.kind, starter.merged) * vfx.Fusion.scale(starter.kind, starter.fuse, starter.tier)) -- a merged pet is bigger
 	setClickable(starter.animal.model, true)
@@ -632,6 +634,11 @@ local function spawnStarter()
 		starter.animal.model.Parent = nil
 	end
 end
+player:GetAttributeChangedSignal("Rebirths"):Connect(function() -- (loaded after the starter was drawn)
+	if starter then
+		vfx.Skins.apply(starter.animal, player:GetAttribute("Rebirths"), player:GetAttribute("PassGiantPets"))
+	end
+end)
 
 -- One prompt, kept on whichever pet you'd ride: Roblox's own "Hold E to Ride"
 -- (QM, Oct 9: in place of the RIDE button; a controller's button and a tap on
@@ -845,6 +852,7 @@ startRide = function(model, at)
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
 		mount.merged, mount.fuse, mount.stats, mount.tier = fromPen.merged, fromPen.fuse, fromPen.stats, fromPen.tier
 		vfx.Fusion.paint(mount.animal.model, mount.kind, mount.fuse)
+		vfx.Skins.apply(mount.animal, player:GetAttribute("Rebirths"), player:GetAttribute("PassGiantPets"))
 		mount.own = true -- your own pet: no egg for bringing it home (it stays yours once let go and lassoed back)
 	else
 		mount, starter = starter, nil
@@ -1020,8 +1028,10 @@ local function fail(reason, tip)
 	if carried then
 		if vfx.revive then
 			vfx.revive.carried = carried -- put away until Continue or Home
-			carried.part.Parent = nil
-		else
+			if carried.part then
+				carried.part.Parent = nil
+			end
+		elseif carried.part then
 			carried.part:Destroy()
 		end
 		carried = nil
@@ -1030,10 +1040,16 @@ local function fail(reason, tip)
 	-- Thrown off behind the animal, landing flat on their back until they go home.
 	if hrp then -- (no character mid-respawn: nothing to throw)
 		local look = hrp.CFrame.LookVector
-		tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1 }
+		local fling = reason == "CAUGHT!" -- (run over by the boss: flung by Roblox's own physics, QM)
+		tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1, fling = fling }
 		vfx.rideCue:FireServer("crash", tumble.from, tumble.yaw, tumble.dir, tumble.side) -- everyone sees you thrown off
 		humanoid.Sit = false
 		humanoid.PlatformStand = true -- no animations: lies stiff
+		if fling then
+			hrp.Anchored = false
+			hrp.AssemblyLinearVelocity = Vector3.new(tumble.side * 25, 120, 60 * dir)
+			hrp.AssemblyAngularVelocity = Vector3.new(10, 4, tumble.side * 8)
+		end
 	end
 	Hud.setAction(nil)
 	Hud.setHold(nil)
@@ -1084,10 +1100,7 @@ end
 local function turnHome()
 	if not mount.own and Animals:FindFirstChild(mount.kind) then
 		takeEgg:FireServer(mount.kind) -- (the server checks you got on a wild one: Nests.server)
-		local egg = Egg.new(mount.kind)
-		egg.model.Parent = workspace
-		vfx.sounds.play("egg_grab")
-		carried = { part = egg.model, kind = mount.kind, stage = "held", t = 1, spin = rng:NextNumber() < 0.5 and -1 or 1 }
+		carried = { kind = mount.kind, stage = "home" } -- (no egg on the lasso any more: you get the animal itself, QM Oct 13)
 	end
 	phase, turnT = "turning", 0
 	Hud.setAction(nil)
@@ -1111,6 +1124,7 @@ local guide = {
 	HOME_CLOSE = 10, -- studs: back home, the arrows to your pen's entrance go once you're this close
 }
 local arrowTrail = require(script.Parent.ArrowTrail).new() -- (QM's arrows in a row, Oct 12; was a chevron beam)
+local Focus = require(script.Parent.Focus) -- (the home guide: one goal at a time)
 
 local function updateGuide()
 	local target
@@ -1155,6 +1169,8 @@ function vfx.updateHomeGuide()
 			target = spot
 		end
 	end
+	Focus.want("homeGuide", target ~= nil, Focus.P.FastestPet, "fastestPet")
+	target = Focus.has("homeGuide") and target or nil
 	vfx.drawGuide(if target then Vector3.new(hrp.Position.X, 0, hrp.Position.Z) else nil, target)
 end
 
@@ -1189,7 +1205,9 @@ local function lassoReach(entity)
 		local size = a.model:GetExtentsSize()
 		entity.lassoR, entity.lassoAt = math.max(size.X, size.Z) / 2, a.scale
 	end
-	return Config.LassoRange + math.max(entity.lassoR - Config.LassoRangeFrom, 0) * Config.LassoRangeGain
+	local fast = Config.LassoSpeedReach -- (and further the faster you're going: QM)
+	return (Config.LassoRange + math.max(entity.lassoR - Config.LassoRangeFrom, 0) * Config.LassoRangeGain)
+		* math.clamp(1 + fast.Gain * ((mount and mount.speed or 0) / fast.Base - 1), 1, fast.Max)
 end
 
 local function animalInRange(entity)
@@ -2302,51 +2320,10 @@ function vfx.updateScared(dt)
 	end
 end
 
+require(script.Parent.RideRainbow)(vfx) -- (vfx.RAINBOW, vfx.rainbowFx)
+
 -- Frost: a blizzard bursting out round the Icebringer, then snow swirling round it
 -- while it lasts (the returned fx are cleared when it ends).
--- A rainbow streaming out behind a leaping animal while it's in the air: six
--- trails stacked one above another, a band of colour each. lifetime: how long
--- each band trails (the Leap's 1.4 s by default).
-vfx.RAINBOW = {
-	Color3.fromRGB(255, 70, 70),
-	Color3.fromRGB(255, 160, 50),
-	Color3.fromRGB(255, 235, 70),
-	Color3.fromRGB(80, 220, 90),
-	Color3.fromRGB(70, 150, 255),
-	Color3.fromRGB(170, 90, 240),
-}
--- scale: x the bands' height (the bought Rainbow Trail's Config.RainbowTrail.Width);
--- a taller rainbow is lifted so its bottom stays at the ground.
-function vfx.rainbowFx(entity, lifetime, scale)
-	local root = entity.animal.model.PrimaryPart
-	local middle, size = entity.animal.model:GetBoundingBox()
-	local back = root.CFrame:ToObjectSpace(middle * CFrame.new(0, 0, size.Z * 0.3)) -- toward its tail (it faces -Z)
-	scale = scale or 1
-	local band = size.Y * 0.6 * scale / #vfx.RAINBOW
-	local lift = math.max(size.Y * 0.3 * scale - size.Y * 0.5, 0)
-	local parts = {}
-	for k, color in vfx.RAINBOW do
-		local y = size.Y * 0.3 * scale + lift - (k - 1) * band
-		local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
-		a0.CFrame = back * CFrame.new(0, y, 0)
-		a1.CFrame = back * CFrame.new(0, y - band, 0)
-		a0.Parent, a1.Parent = root, root
-		local trail = Instance.new("Trail")
-		trail.Attachment0, trail.Attachment1 = a0, a1
-		trail.Color = ColorSequence.new(color)
-		trail.Lifetime = lifetime or 1.4
-		trail.MinLength = 0.2
-		trail.LightEmission = 0.4
-		trail.LightInfluence = 0
-		trail.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.05), NumberSequenceKeypoint.new(0.8, 0.35), NumberSequenceKeypoint.new(1, 1) })
-		trail.Parent = root
-		table.insert(parts, trail)
-		table.insert(parts, a0)
-		table.insert(parts, a1)
-	end
-	return parts
-end
-
 function vfx.frostFx(entity)
 	local root = entity.animal.model.PrimaryPart
 	local middle, size = entity.animal.model:GetBoundingBox()
@@ -2451,7 +2428,11 @@ function vfx.feastOf(entity)
 end
 
 -- The mount broke something (smashed an obstacle, knocked an animal flying).
-function vfx.broke()
+function vfx.broke(hit)
+	if phase == "return" and mount and not activeAbility() and not hit then -- (an obstacle: back to a walk, ReturnRun; animals you plough through)
+		vfx.returnRun.hits += 1
+		mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
+	end
 	local feast = vfx.feastOf(mount)
 	if feast then
 		feast.count += 1
@@ -3289,6 +3270,7 @@ local function updateMount(dt)
 		mount.z += look.Z * mount.speed * dt
 		if turnT >= 1 then
 			phase, grace = "return", Config.TurnGrace
+			vfx.returnRun.reset()
 			mount.speed = Config.ReturnSpeed * rideSpeed(mount)
 			if vfx.tutorialRide.active then -- (the first ride home: a Unicorn gallops past you, to make you curious: QM)
 				local st = streams[1]
@@ -3338,8 +3320,12 @@ local function updateMount(dt)
 		targetSpeed *= (Config.PetSprintSpeed[mount.kind] or Config.SprintSpeed) * ((vfx.sprintSpecial() or {}).SpeedBoost or 1) -- the Blue Crab's crab walk: faster still
 	end
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
+	local walking = phase == "return" and not sprinting()
+	if walking then
+		targetSpeed = Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Idle
+	end
 	-- (Out of stamina you turn for home, never ride on tired: checkRide.)
-	local rate = phase == "home" and 30 or (dir < 0 and (if (mount.rampUntil or 0) > os.clock() then Config.LandRamp.Rate else 90) or 40) -- snappy into and out of a sprint (gentler just after landing: from a walk to the sprint)
+	local rate = phase == "home" and 30 or (dir < 0 and (if (mount.rampUntil or 0) > os.clock() then Config.LandRamp.Rate else 90) or math.max(40, math.max(targetSpeed, mount.speed) / Config.ReturnRun.Ramp)) -- snappy into and out of a sprint (gentler just after landing: from a walk to the sprint)
 	local ability = activeAbility()
 	if ability and ability.cfg.MaxBoost then
 		-- The Leviathan's hunt: faster and faster, steadily, up to MaxBoost x (QM).
@@ -3367,6 +3353,9 @@ local function updateMount(dt)
 	vfx.speedGain = if curved > 0 then targetSpeed / curved else 1
 	targetSpeed = curved
 	mount.speed += math.clamp(targetSpeed - mount.speed, -rate * dt, rate * dt)
+	if phase == "return" then
+		vfx.returnRun.update(dt, not walking and mount.speed >= targetSpeed * 0.9)
+	end
 	if ability and ability.cfg.Kind == "Hunt" and vfx.huntTarget then
 		-- Hunting (the Robo Shark, QM): no momentum, any direction: it goes straight at
 		-- its prey at full charge speed, turning on the spot, whichever way that is.
@@ -3511,6 +3500,11 @@ local function checkRide(dt)
 	if vfx.tutorialRide.invulnerable then
 		grace = math.max(grace, 0.1) -- (nothing crashes you on the tutorial's ride: QM)
 	end
+	if phase == "return" and vfx.returnRun.caught and vfx.bossChase.ranOver() and not vfx.tutorialRide.active then
+		return fail("CAUGHT!")
+	elseif phase == "return" and vfx.returnRun.hits >= Config.ReturnRun.Crashes then
+		return fail("CRASH!")
+	end
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)
 	end
@@ -3540,6 +3534,7 @@ local function checkRide(dt)
 			if Config.Boss.On then -- (the boss first: BossChase, then turnHome; QM, Oct 10)
 				phase, mount.speed = "boss", 0 -- (stopped dead, or you'd run on through it: QM)
 				vfx.bossChase.start(mount.x, mount.z)
+				Hud.setHold(nil)
 			else
 				turnHome()
 			end
@@ -3638,7 +3633,7 @@ local function checkRide(dt)
 			-- (racing home, nothing crashes you: whatever you run into is knocked away, QM Oct 11)
 			if phase == "return" or (trample and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
-				vfx.broke()
+				vfx.broke(entity)
 				if kind == "Crabwalk" and special.RestorePer then
 					hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount)) -- 20% Hold per animal it hits (QM)
 				end
@@ -3668,8 +3663,10 @@ local function updateRider(dt)
 		return
 	end
 	if tumble then
-		tumble.t = math.min(tumble.t + dt / vfx.TUMBLE_TIME, 1)
-		hrp.CFrame = vfx.tumbleCFrame(tumble, tumble.t)
+		if not tumble.fling then -- (flung: physics has them)
+			tumble.t = math.min(tumble.t + dt / vfx.TUMBLE_TIME, 1)
+			hrp.CFrame = vfx.tumbleCFrame(tumble, tumble.t)
+		end
 		focus = focus:Lerp(Vector3.new(hrp.Position.X, 0, hrp.Position.Z), 1 - math.exp(-4 * dt))
 		return
 	end
@@ -3899,8 +3896,8 @@ vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, spee
 		rider.entity.animal:setSaddled(true)
 		rider.entity.dodge = 0
 		rider.kind = kind
-		if player:GetAttribute("RainbowTrail") then -- they bought the Rainbow Trail (Config.RainbowTrail)
-			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width)
+		if Config.trailColors(player) then -- the Rainbow Trail, or the finish line's (Config.FinishTrails)
+			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width, Config.trailColors(player))
 		end
 		rider.shown = nil
 	end
@@ -4087,15 +4084,16 @@ end)
 -- you're riding, moved over when you swap mounts and gone when the ride ends.
 vfx.trail = { parts = {} }
 function vfx.updateTrail()
-	local want = if mount and Players.LocalPlayer:GetAttribute("RainbowTrail") and mount.animal.model.PrimaryPart then mount else nil
-	if vfx.trail.entity == want then
+	local colors = Config.trailColors(Players.LocalPlayer)
+	local want = if mount and colors and mount.animal.model.PrimaryPart then mount else nil
+	if vfx.trail.entity == want and vfx.trail.colors == colors then
 		return
 	end
 	for _, fx in vfx.trail.parts do
 		fx:Destroy()
 	end
-	vfx.trail.entity = want
-	vfx.trail.parts = if want then vfx.rainbowFx(want, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width) else {}
+	vfx.trail.entity, vfx.trail.colors = want, colors
+	vfx.trail.parts = if want then vfx.rainbowFx(want, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width, colors) else {}
 end
 
 -- Every frame: each other rider's mount glides toward where it was last heard
@@ -4272,12 +4270,12 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	updateRider(dt)
 	-- What others see your lasso doing (sendRide; a throw at an animal is its own cue, "lasso").
-	vfx.lassoState = if carried and carried.stage == "held" then "twirl"
-		elseif not carried and not transfer and mount and (phase == "outbound" or phase == "return") then "swing"
+	vfx.lassoState = if carried and carried.part and carried.stage == "held" then "twirl"
+		elseif not (carried and carried.part) and not transfer and mount and (phase == "outbound" or phase == "return") then "swing"
 		else ""
-	if carried and carried.stage == "held" then
+	if carried and carried.part and carried.stage == "held" then
 		Lasso.twirl(dt, carried.part)
-	elseif carried then
+	elseif carried and carried.part then
 		local egg = { cframe = carried.part:GetPivot(), radius = Lasso.fitRadius(carried.part) }
 		if carried.stage == "throw" then
 			Lasso.throw(carried.t, egg)
@@ -4311,12 +4309,11 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		Hud.setCutscene(false)
 		if phase == "finish" then
-			-- Crossed the finish line: a random egg (the server draws it), its
-			-- reveal, then back home to your pen.
+			-- Crossed the finish line: the animal you rode is yours, in your pen
+			-- (Hatchery's FinishCourse), then back home to your pen.
 			task.spawn(function()
-				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse)
-				kind = ok and kind or nil
-				task.wait(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5)
+				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, mount.kind)
+				task.wait(ok and kind and vfx.newAnimal.show(kind) or 0.5)
 				if phase == "finish" then
 					local pen = myPen()
 					local spawn = pen and pen:FindFirstChild("Spawn")
@@ -4329,7 +4326,7 @@ RunService.PreSimulation:Connect(function(dt)
 			if kind then
 				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
 			end
-			task.delay(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function()
+			task.delay(kind and vfx.newAnimal.show(kind) or 0.5, function()
 				if phase == "home" then
 					finishRide(mount.x, mount.z)
 				end
@@ -4359,7 +4356,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	local targetYaw = mount and mount.yaw or camYaw
 	camYaw += (targetYaw - camYaw) * (1 - math.exp(-5 * dt))
 	local hrp = character()
-	if cutscene and carried and hrp then
+	if cutscene and carried and carried.part and hrp then
 		-- Close-up on the egg from the rider's side, slightly off to one side,
 		-- snapping in fast and punching the field of view in.
 		local egg = carried.part:GetPivot().Position
@@ -4474,7 +4471,7 @@ ReplicatedStorage:WaitForChild("ContinueRide").OnClientEvent:Connect(function(pa
 	mount.animal:setSaddled(true)
 	mount.speed = revive.speed
 	carried = revive.carried
-	if carried then
+	if carried and carried.part then
 		carried.part.Parent = workspace
 	end
 	phase, hold, grace = revive.phase, holdTime(mount), Config.ContinueGrace

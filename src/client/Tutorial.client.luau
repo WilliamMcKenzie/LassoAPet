@@ -14,8 +14,8 @@
 --             the same slow-down till you sprint (a phone or controller sprints by
 --             pushing the stick right out). WAIT_FOR_BOSS seconds after that, BOSS IN
 --             shows with BOSS_SECONDS on it: still in the Meadow, so the Chicken.
---   5. gate   home with an egg, it goes in your pen and hatches by itself (Hatchery);
---             the camera zooms to the Desert's gate (the next goal) and back. Done:
+--   5. gate   home with an animal, it goes in your pen (Hatchery; its new animal cutscene
+--             plays, Client/NewAnimal); the camera zooms to the Desert's gate (the next goal) and back. Done:
 --             TutorialDone, and the rest of the UI comes back.
 --
 -- A ride that comes home with nothing goes back to step 3. Runs whenever the "Tutorial"
@@ -98,6 +98,10 @@ tap.Visible = false
 local tapScale = Instance.new("UIScale")
 tapScale.Parent = tap
 tap.Parent = gui
+require(script.Parent.TapHand).register(tap) -- (one hand on screen at a time)
+local Focus = require(script.Parent.Focus) -- (one goal at a time: the tutorial's comes first)
+tap:SetAttribute("Focus", Focus.P.Tutorial)
+tap:SetAttribute("FocusGoal", "tutorial")
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- QM's Sprint guide: a bar along the top (computers only).
@@ -289,7 +293,10 @@ RunService.RenderStepped:Connect(function()
 	local over = arrowOver or fastestOver
 	local root = over and over.Parent and (over.PrimaryPart or over:FindFirstChildWhichIsA("BasePart", true))
 	eggArrow.Adornee = root
-	eggArrow.Enabled = root ~= nil and not player:GetAttribute("Cutscene") and not player:GetAttribute("MergeView") -- (not over the merge view: QM)
+	local arrowWanted = root ~= nil and not player:GetAttribute("Cutscene") and not player:GetAttribute("MergeView") -- (not over the merge view: QM)
+	Focus.want("tutorialArrow", arrowWanted and arrowOver ~= nil, Focus.P.Tutorial, "tutorial")
+	Focus.want("fastestPet", arrowWanted and arrowOver == nil, Focus.P.FastestPet, "fastestPet") -- (with Ride's home trail to it)
+	eggArrow.Enabled = arrowWanted and Focus.has(if arrowOver then "tutorialArrow" else "fastestPet")
 	local up = if over and over:IsA("Model") and not over.Name:match("Egg$") then ARROW_UP_PET else ARROW_UP
 	eggArrow.StudsOffsetWorldSpace = Vector3.new(0, up + math.abs(math.sin(os.clock() * 3)) * 1.5, 0)
 	-- The tap hand.
@@ -318,7 +325,9 @@ RunService.RenderStepped:Connect(function()
 	if typeof(target) == "Instance" then
 		target = if target.Parent then target:GetPivot().Position else nil
 	end
-	if root and target and not Hud.isRiding() and not player:GetAttribute("Cutscene") then
+	local trailWanted = root ~= nil and target ~= nil and not Hud.isRiding() and not player:GetAttribute("Cutscene")
+	Focus.want("tutorialTrail", trailWanted, Focus.P.Tutorial, "tutorial")
+	if trailWanted and Focus.has("tutorialTrail") then
 		local from = Vector3.new(root.Position.X, 0, root.Position.Z)
 		local to = Vector3.new(target.X, 0, target.Z)
 		local along = to - from
@@ -572,7 +581,9 @@ local function run()
 		end
 		TutorialRide.bossSeconds, TutorialRide.holdFrozen = BOSS_SECONDS, false
 		funnel("boss")
-		while on() and Hud.isRiding() do
+		-- (the run home: your pet sprints by itself, no slow motion; only obstacles can stop
+		-- you, ReturnRun.TutorialCrashes of them: QM, Oct 13)
+		while on() and (Hud.isRiding() or player:GetAttribute("Cutscene")) do -- (the new animal cutscene hides the ride's HUD: wait it out too)
 			task.wait(0.1)
 		end
 		clear()
@@ -586,6 +597,9 @@ local function run()
 		end
 		if #myPets() > before then
 			task.wait(1)
+			while on() and (Hud.isRiding() or player:GetAttribute("Cutscene") or camera.CameraType ~= Enum.CameraType.Custom) do
+				task.wait(0.1) -- (back on foot, the camera yours again, before it flies off)
+			end
 			showGate()
 			funnel("tour")
 			local done = ReplicatedStorage:FindFirstChild("TutorialDone")

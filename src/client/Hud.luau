@@ -128,6 +128,14 @@ local IMAGES = {
 	eggFox = { id = "rbxassetid://92522948167443", size = Vector2.new(502, 806) }, -- FoxEggRender.png (World 2)
 	eggNineTailedFox = { id = "rbxassetid://110560724842212", size = Vector2.new(544, 806) }, -- NineTailedFoxEggRender.png (World 2)
 	eggKitsune = { id = "rbxassetid://124688776792586", size = Vector2.new(522, 849) }, -- KitsuneEggRender.png (World 2)
+	eggTombJackal = { id = "rbxassetid://114106715330048", size = Vector2.new(530, 879) }, -- TombJackalEggRender.png (World 2)
+	eggLionArcher = { id = "rbxassetid://117473019333658", size = Vector2.new(505, 800) }, -- LionArcherEggRender.png (World 2)
+	eggNut = { id = "rbxassetid://120782360993998", size = Vector2.new(623, 874) }, -- NutEggRender.png (World 2)
+	eggGeb = { id = "rbxassetid://93281428675559", size = Vector2.new(522, 822) }, -- GebEggRender.png (World 2)
+	eggEagleSentry = { id = "rbxassetid://117861828286868", size = Vector2.new(585, 893) }, -- EagleSentryEggRender.png (World 2)
+	eggBes = { id = "rbxassetid://91869381995495", size = Vector2.new(517, 897) }, -- BesEggRender.png (World 2)
+	eggBloatedMummy = { id = "rbxassetid://113530717781179", size = Vector2.new(565, 691) }, -- BloatedMummyEggRender.png (World 2)
+	eggScarab = { id = "rbxassetid://90717259678888", size = Vector2.new(517, 770) }, -- ScarabEggRender.png (World 2)
 	eggUnicorn = { id = "rbxassetid://85066893166855", size = Vector2.new(496, 859) }, -- UnicornEggRender.png
 	eggCactus = { id = "rbxassetid://95599437590618", size = Vector2.new(635, 766) }, -- CactusEggRender.png
 	eggKitten = { id = "rbxassetid://124881834655792", size = Vector2.new(502, 749) }, -- KittenEggRender.png
@@ -1747,7 +1755,7 @@ end
 
 -- Cash gained this ride.
 function Hud.setCoins(amount)
-	setCash(amount and amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)) -- (the x2 Gold pass doubles what's banked: Passes)
+	setCash(amount and amount * Config.goldX(Players.LocalPlayer)) -- (the x2 Gold pass doubles what's banked: Passes)
 	rideCash.scale.Scale = 1.25
 	TweenService:Create(rideCash.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 end
@@ -1758,7 +1766,7 @@ function Hud.coinPopup(screenPoint, amount)
 	screenPoint /= rootScale -- screen pixels -> HUD root pixels
 	-- Same coin and "+N$" as the fail screen, a bit smaller.
 	local popup = cashRow(homeRoot, 64, 44, Vector2.new(0.5, 0.5), UDim2.fromOffset(screenPoint.X, screenPoint.Y))
-	popup.text.Text = "+" .. money(amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1))
+	popup.text.Text = "+" .. money(amount * Config.goldX(Players.LocalPlayer))
 	popup.text.TextColor3 = Color3.fromHex("FFC41E") -- golden yellow, like the login money (QM, Oct 8)
 	popup.scale.Scale = 0
 
@@ -1796,7 +1804,7 @@ function Hud.coinPopupAt(part, height, amount)
 	board.ResetOnSpawn = false
 	-- The same size as training's "+1" lasso popup (Training.client: 34 px icon, 30 px text; QM, Oct 8).
 	local popup = cashRow(board, 34, 30, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5))
-	popup.text.Text = "+" .. money(amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1))
+	popup.text.Text = "+" .. money(amount * Config.goldX(Players.LocalPlayer))
 	popup.scale.Scale = 0
 	board.Parent = homeGui.Parent
 

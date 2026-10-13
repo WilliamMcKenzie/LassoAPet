@@ -113,12 +113,12 @@ end
 local function show(model, kind, fuse, stats, income)
 	local p = plates[model] or build(model)
 	local s = Fusion.stats(kind, fuse, stats)
-	local key = Fusion.key(kind, fuse) .. "/" .. s.Speed .. "/" .. income .. "/" .. tostring(player:GetAttribute("PassDoubleGold"))
+	local key = Fusion.key(kind, fuse) .. "/" .. s.Speed .. "/" .. income .. "/" .. Config.goldX(player)
 	if p.key ~= key then
 		p.key = key
 		p.name.Text = (Fusion.rarity(kind, fuse)) -- its rarity, not its name (QM, Oct 10; a hybrid's: the rarer of its two)
 		p.name.TextColor3 = colorOf(kind, fuse)
-		p.gold.Text = "$" .. short(income * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)) .. "/s" -- (doubled by the x2 Gold pass)
+		p.gold.Text = "$" .. short(income * Config.goldX(Players.LocalPlayer)) .. "/s" -- (x the x2 Gold pass and rebirths)
 		p.speed.Text = math.floor(s.Speed * 20 + 0.5) .. "m/s"
 	end
 	local box, size = Outline.box(model)

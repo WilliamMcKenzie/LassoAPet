@@ -25,7 +25,9 @@ local Egg = require(ReplicatedStorage.Shared.Eggs.Egg)
 local Config = require(ReplicatedStorage.Shared.Config)
 local Merge = require(ReplicatedStorage.Shared.Merge)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
+local Skins = require(ReplicatedStorage.Shared.Skins)
 local PenPets = require(script.Parent.PenPets)
+local Focus = require(script.Parent.Focus)
 local Sounds = require(script.Parent.Sounds)
 local Gamepad = require(script.Parent.Gamepad)
 
@@ -80,6 +82,12 @@ local function newPet(kind)
 	local animal = classes[kind].new()
 	animal:setSaddled(false)
 	return { animal = animal, rootY = animal.model.PrimaryPart.Position.Y, scale = 1, hop = 0 }
+end
+
+-- A pet in `pen` wears its owner's rebirth skin (Shared/Skins).
+local function skin(pen, pet)
+	local owner = Players:GetPlayerByUserId(pen:GetAttribute("Owner") or 0)
+	Skins.apply(pet.animal, owner and owner:GetAttribute("Rebirths"), owner and owner:GetAttribute("PassGiantPets"))
 end
 
 local function placePet(pet, at, yaw)
@@ -190,6 +198,8 @@ local function readyArrow(s, show)
 		s.arrow = gui
 	end
 	if s.arrow then
+		Focus.want(s, show and s.egg ~= nil, Focus.P.EggReady, "eggReady")
+		show = show and Focus.has(s) -- (one goal at a time: Client/Focus)
 		local root = if show and s.egg then s.egg.model.PrimaryPart else nil -- (nil, not false: Adornee takes no boolean)
 		s.arrow.Adornee = root
 		s.arrow.Enabled = root ~= nil
@@ -198,6 +208,7 @@ local function readyArrow(s, show)
 end
 
 local function remove(s)
+	Focus.want(s, false)
 	if s.arrow then
 		s.arrow:Destroy()
 		s.arrow = nil
@@ -298,6 +309,7 @@ local function showPet(pen, id, item)
 	s.pet = newPet(item.pet)
 	shown[pen][id] = s -- tracked at once: if anything below fails, the next refresh still clears it
 	Fusion.paint(s.pet.animal.model, item.pet, item.fuse) -- a hybrid wears its donor's colours (Shared/Fusion)
+	skin(pen, s.pet)
 	s.pet.scale = Merge.size(item.pet, item.merged) * Fusion.scale(item.pet, item.fuse, item.tier) -- a merged pet is bigger (Shared/Merge)
 	s.pet.animal:setScale(s.pet.scale)
 	makeRideable(pen, id, s.pet, item.pet, item.merged, item.fuse, item.income, item.stats, item.worth, item.tier)
@@ -340,6 +352,7 @@ local function hatch(pen, id, s)
 			return
 		end
 		local pet = newPet(s.kind)
+		skin(pen, pet)
 		makeRideable(pen, id, pet, s.kind, s.merged)
 		s.full = Merge.size(s.kind, s.merged) -- (a special egg's pet can hatch merged: the Giant Horse)
 		pet.scale = 0.2 * s.full
@@ -454,6 +467,28 @@ end
 Players.PlayerAdded:Connect(watchRidePet)
 for _, other in Players:GetPlayers() do
 	watchRidePet(other)
+end
+
+-- Anyone's rebirths (or Giant Pets pass) loaded after their pets were drawn: skin and
+-- size them now.
+local function watchRebirths(other)
+	local function again()
+		for pen, list in shown do
+			if pen:GetAttribute("Owner") == other.UserId then
+				for _, s in list do
+					if s.pet then
+						skin(pen, s.pet)
+					end
+				end
+			end
+		end
+	end
+	other:GetAttributeChangedSignal("Rebirths"):Connect(again)
+	other:GetAttributeChangedSignal("PassGiantPets"):Connect(again)
+end
+Players.PlayerAdded:Connect(watchRebirths)
+for _, other in Players:GetPlayers() do
+	watchRebirths(other)
 end
 
 -- An egg's time left: "2h" from an hour up (whole hours, QM), else "m:ss".

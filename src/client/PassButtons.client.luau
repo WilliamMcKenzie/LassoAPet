@@ -1,0 +1,166 @@
+-- QM's pass buttons down the right of the base HUD (Oct 13): Starter Pack (its popup,
+-- StarterPackMenu), 1.5x Speed, 2x Cash, Giant Pets (Roblox's buy prompt: BuyPass, Config.Passes),
+-- each with QM's sunburst turning behind it. Shown whenever BaseUi is (not riding, in a cutscene or the tutorial) and no
+-- menu's up over the base.
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Config = require(ReplicatedStorage.Shared.Config)
+local player = Players.LocalPlayer
+
+local REFERENCE_WIDTH = 1320 -- (till BaseUi's scale is there to match: below)
+local MARGIN, GAP = 18, -2 -- (the price badges fill most of the gap: 30% less space between buttons, as on the left, QM)
+local SCALE = 234 / 270 -- QM's art's pixels to ours: each button as wide as Merge and the rest on the left (BaseUi's 234: QM, Oct 13, 10% smaller; the art's ~25 px more is the price badge sticking out)
+local SUNBURST = "rbxassetid://85834206672187" -- assets/ui/Sunburst.png (QM's)
+local SPIN = 30 -- degrees a second
+local BUTTONS = {
+	{ "StarterPack", "rbxassetid://100466055719917", Vector2.new(245, 138) }, -- assets/ui/PassStarterPack.png
+	{ "Speed", "rbxassetid://128119306382781", Vector2.new(295, 141), "Speed" }, -- assets/ui/PassSpeed.png (and its Config.Passes key)
+	{ "Cash", "rbxassetid://108884731983075", Vector2.new(295, 147), "DoubleGold" }, -- assets/ui/PassCash.png
+	{ "GiantPets", "rbxassetid://126647709261103", Vector2.new(302, 148), "GiantPets" }, -- assets/ui/PassGiantPets.png
+}
+
+local camera = workspace.CurrentCamera
+local gui = Instance.new("ScreenGui")
+gui.Name = "PassButtons"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+local root = Instance.new("Frame")
+root.BackgroundTransparency = 1
+local rootScale = Instance.new("UIScale")
+rootScale.Parent = root
+local function resize()
+	local screen = camera.ViewportSize
+	rootScale.Scale = screen.X / REFERENCE_WIDTH * Config.HudScale
+	root.Size = UDim2.fromOffset(screen.X / rootScale.Scale, screen.Y / rootScale.Scale)
+end
+camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
+resize()
+root.Parent = gui
+
+local column = Instance.new("Frame")
+column.BackgroundTransparency = 1
+column.Size = UDim2.fromOffset(0, 0) -- (fixed, set below: a button growing under the mouse doesn't move the rest: QM)
+column.AnchorPoint = Vector2.new(1, 0) -- (down the right, QM, Oct 13: placed every frame, below)
+column.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
+local list = Instance.new("UIListLayout")
+list.SortOrder = Enum.SortOrder.LayoutOrder
+list.Padding = UDim.new(0, GAP)
+list.HorizontalAlignment = Enum.HorizontalAlignment.Center -- (the Starter Pack centred over the rest: QM)
+list.Parent = column
+local fit = Instance.new("UIScale") -- (a short screen: shrunk to fit between the top bar and the gold)
+fit.Parent = column
+column.Parent = root
+
+local bursts = {}
+local STARTER_PACK_FOR = 10 * 60 -- seconds
+local NUDGE = 8 -- the Starter Pack right of centre by this
+local joinedAt = os.clock()
+local starterTimer, starterSlot
+for i, spec in BUTTONS do
+	local size = spec[3] * SCALE
+	local slot = Instance.new("Frame") -- (the sunburst and the button side by side, so it's behind)
+	slot.Name = spec[1]
+	slot.LayoutOrder = i
+	slot.BackgroundTransparency = 1
+	slot.Size = UDim2.fromOffset(size.X, size.Y)
+	local button = Instance.new("ImageButton")
+	button.Name = "Button"
+	button.BackgroundTransparency = 1
+	button.Image = spec[2]
+	button.Size = UDim2.fromOffset(size.X, size.Y)
+	button.AnchorPoint = Vector2.new(0.5, 0.5) -- (grows from its middle: QM)
+	button.Position = UDim2.fromScale(0.5, 0.5)
+	button.ZIndex = 2
+	local burst = Instance.new("ImageLabel") -- (behind it, turning)
+	burst.Name = "Sunburst"
+	burst.BackgroundTransparency = 1
+	burst.Image = SUNBURST
+	burst.ImageTransparency = 0.25
+	burst.AnchorPoint = Vector2.new(0.5, 0.5)
+	burst.Position = UDim2.fromScale(0.5, 0.55)
+	burst.Size = UDim2.fromOffset(size.X * 1.1, size.X * 1.1)
+	burst.ZIndex = 1
+	burst.Parent = slot
+	table.insert(bursts, burst)
+	local press = Instance.new("UIScale")
+	press.Parent = button
+	button.MouseButton1Down:Connect(function()
+		press.Scale = 0.94
+	end)
+	for _, event in { button.MouseButton1Up, button.MouseLeave } do
+		event:Connect(function()
+			press.Scale = 1
+		end)
+	end
+	if spec[1] ~= "StarterPack" then -- (Roblox's buy prompt: Server/Passes)
+		button.Activated:Connect(function()
+			ReplicatedStorage:WaitForChild("BuyPass"):FireServer(spec[4])
+		end)
+	end
+	if spec[1] == "StarterPack" then -- (QM's popup: Oct 13)
+		button.Activated:Connect(function()
+			require(script.Parent.StarterPackMenu).open()
+		end)
+		-- Its countdown, small and yellow over it (QM, Oct 13): STARTER_PACK_FOR from each
+		-- join, then the Starter Pack's gone till the next.
+		local timer = Instance.new("TextLabel")
+		timer.Name = "Countdown"
+		timer.BackgroundTransparency = 1
+		timer.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+		timer.TextScaled = true
+		timer.TextColor3 = Color3.fromRGB(255, 236, 64)
+		timer.AnchorPoint = Vector2.new(0.5, 1)
+		timer.Position = UDim2.new(0.5, NUDGE, 0, -2)
+		timer.Size = UDim2.fromOffset(120, 30)
+		timer.ZIndex = 3
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 2.5
+		stroke.LineJoinMode = Enum.LineJoinMode.Round
+		stroke.Parent = timer
+		timer.Parent = slot
+		starterTimer, starterSlot = timer, slot
+		-- (centred on the buttons' faces, not their art: their price badges stick out left)
+		slot.Size = UDim2.fromOffset(size.X + 2 * NUDGE, size.Y)
+		button.Position = UDim2.new(0.5, NUDGE, 0.5, 0)
+		burst.Position = UDim2.new(0.5, NUDGE, 0.55, 0)
+	end
+	button.Parent = slot
+	slot.Parent = column
+	column.Size = UDim2.fromOffset(math.max(column.Size.X.Offset, slot.Size.X.Offset), column.Size.Y.Offset + slot.Size.Y.Offset + (if i > 1 then GAP else 0))
+end
+gui.Parent = player:WaitForChild("PlayerGui")
+
+RunService.RenderStepped:Connect(function()
+	local base = player.PlayerGui:FindFirstChild("BaseUi")
+	local baseRoot = base and base:FindFirstChild("Root")
+	gui.Enabled = base ~= nil and base.Enabled and not (baseRoot and baseRoot:GetAttribute("Modal"))
+	if starterSlot then
+		local left = math.max(0, math.ceil(STARTER_PACK_FOR - (os.clock() - joinedAt)))
+		starterTimer.Text = string.format("%d:%02d", left // 60, left % 60)
+		starterSlot.Visible = left > 0 and not player:GetAttribute("PassStarterPack") -- (gone once it's yours)
+	end
+	local baseScale = baseRoot and baseRoot:FindFirstChildOfClass("UIScale")
+	if baseScale and rootScale.Scale ~= baseScale.Scale then -- (BaseUi's scale, so they match the buttons on the right: QM)
+		local screen = camera.ViewportSize
+		rootScale.Scale = baseScale.Scale
+		root.Size = UDim2.fromOffset(screen.X / rootScale.Scale, screen.Y / rootScale.Scale)
+	end
+	if gui.Enabled then
+		local tall = list.AbsoluteContentSize.Y / rootScale.Scale / fit.Scale
+		column.Size = UDim2.fromOffset(column.Size.X.Offset, tall) -- (the slots' height, without the Starter Pack once it's gone)
+		fit.Scale = math.min(1, root.Size.Y.Offset * 0.62 / math.max(tall, 1))
+		-- (its bottom level with the left column's, Merge to Invite: QM, Oct 13; centred if
+		-- that's not there; and right under the Quests panel if that reaches down into it)
+		local quests = baseRoot and baseRoot:FindFirstChild("Quests")
+		local menu = baseRoot and baseRoot:FindFirstChild("Menu")
+		local under = if quests and quests.Visible then (quests.AbsolutePosition.Y + quests.AbsoluteSize.Y - root.AbsolutePosition.Y) / rootScale.Scale else 0
+		local top = if menu
+			then (menu.AbsolutePosition.Y + menu.AbsoluteSize.Y - root.AbsolutePosition.Y) / rootScale.Scale - tall * fit.Scale
+			else (root.Size.Y.Offset - tall * fit.Scale) / 2
+		column.Position = UDim2.new(1, -MARGIN, 0, math.max(top, under + 12))
+		for _, burst in bursts do
+			burst.Rotation = os.clock() * SPIN % 360
+		end
+	end
+end)

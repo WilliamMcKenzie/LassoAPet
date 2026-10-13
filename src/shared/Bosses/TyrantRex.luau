@@ -11,5 +11,5 @@ local TyrantRexModel = require(script.Parent.TyrantRexModel)
 return Horse.variant("TyrantRex", TyrantRexModel, "Legendary", {
 	seat = Vector3.new(0, 10.38, 0.6), -- the T-Rex's
 	neck = { center = Vector3.new(0, 8.8, -4.7), radius = 2.2 },
-	size = 2.4, -- x the model (a guess: about 65 studs nose to tail, as the Cactus boss; Studio tunes it)
+	size = 4.8, -- x the model: about 130 studs nose to tail (QM, Oct 13: 2x, was 2.4)
 })

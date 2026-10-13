@@ -43,7 +43,7 @@ local CARDS = {
 	Gold4 = { id = "rbxassetid://99027271786746", at = Vector2.new(975, 481) }, -- ShopGold1M.png
 }
 -- [pass Key] = QM's card art for it ("" = the placeholder button with its name and price)
-local PASS_ART = { DoubleGold = "", FastHatch = "", AutoHatch = "", VIP = "" }
+local PASS_ART = { Speed = "", DoubleGold = "", GiantPets = "", StarterPack = "" }
 local PASS_HEIGHT = 96
 local PANEL_WIDTH = 800 -- on the HUD's reference screen: about 60% of it, nearer the Index's size (QM, Oct 11)
 local FIT = PANEL_WIDTH / PANEL.size.X

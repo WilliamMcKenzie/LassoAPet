@@ -80,6 +80,16 @@ return {
 		{ "Marking", 78, 108, 36 }, -- spots
 		{ "Whisker", 58, 40, 24 },
 	},
+	BloatedMummy = {
+		{ "Body", 242, 232, 200 }, -- fresh bandages: body, head, arms, legs
+		{ "Body", 220, 201, 152 }, -- sand wraps
+		{ "Body", 208, 184, 134 }, -- darker sand wraps, loose ends
+		{ "Belly", 176, 150, 104 }, -- grime seams, lip
+		{ "Accent", 240, 190, 24 }, -- gold collar, amulet, cuffs, anklets, headband
+		{ "Accent", 196, 140, 16 }, -- darker gold
+		{ "Marking", 40, 92, 206 }, -- lapis collar band, wings, gems
+		{ "Horn", 226, 72, 40 }, -- carnelian collar band, sun disc
+	},
 	MarbleFish = {
 		{ "Body", 255, 204, 36 },
 		{ "Belly", 255, 244, 196 },
@@ -107,6 +117,15 @@ return {
 		{ "Marking", 54, 112, 44 }, -- scutes, brows, feet, ridges
 		{ "Belly", 214, 222, 140 },
 		{ "Accent", 236, 120, 140 }, -- mouth
+	},
+	LionArcher = {
+		{ "Body", 238, 192, 112 }, -- coat, legs, head, tail
+		{ "Body", 214, 160, 84 }, -- haunches
+		{ "Belly", 255, 238, 204 }, -- muzzle, chin, belly, paws
+		{ "Marking", 34, 86, 210 }, -- nemes stripes, lappets, saddle cloth, beard bands, armband gems
+		{ "Marking", 24, 56, 150 }, -- the nemes' back
+		{ "Accent", 252, 200, 40 }, -- gold: nemes stripes, headband, cobra, collar, cuffs, trims, rings
+		{ "Accent", 206, 150, 22 },
 	},
 	Tiger = {
 		{ "Body", 247, 133, 32 },
@@ -174,6 +193,20 @@ return {
 		{ "Accent", 196, 58, 36 },
 		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
 	},
+	TombJackal = {
+		{ "Body", 58, 54, 84 },
+		{ "Marking", 255, 196, 46 }, -- gold armour, collar, cuffs
+		{ "Accent", 38, 92, 214 }, -- lapis stripes and drapes
+		{ "Hoof", 34, 32, 46 }, -- paws, tail tip
+	},
+	Scarab = {
+		{ "Body", 31, 181, 168 }, -- teal shell, shield, tibias
+		{ "Body", 18, 120, 120 }, -- darker teal head and tail
+		{ "Belly", 42, 38, 52 }, -- dark underside, femurs, mandibles, claws
+		{ "Marking", 242, 194, 48 }, -- gold seam, rims, ankhs, shovel, knees, feet
+		{ "Accent", 46, 91, 216 }, -- lapis stripes and glyph tiles
+		{ "Horn", 196, 146, 30 }, -- dark gold studs, spikes and horn
+	},
 	Fox = {
 		{ "Body", 240, 128, 36 },
 		{ "Belly", 255, 250, 242 }, -- chest, cheeks, chin, tail tip
@@ -214,6 +247,15 @@ return {
 		{ "Marking", 92, 8, 26 }, -- carved veins
 		{ "Horn", 240, 190, 24 }, -- gold horns, collar, bell, anklets, claws, ridge
 		{ "Horn", 196, 140, 16 },
+	},
+	EagleSentry = {
+		{ "Body", 128, 78, 42 }, -- body, head, wing coverts, thighs
+		{ "Body", 84, 50, 28 }, -- flight feathers, chest bars
+		{ "Belly", 246, 232, 196 }, -- chest, cheeks, feather bands
+		{ "Horn", 246, 192, 44 }, -- gold armour, headdress, spear, feather tips
+		{ "Horn", 204, 146, 30 }, -- dark gold brows, rims, spear shaft
+		{ "Accent", 36, 84, 196 }, -- lapis stripes and saddle
+		{ "Marking", 34, 196, 196 }, -- turquoise collar row
 	},
 	Hawkmoth = {
 		{ "Body", 62, 48, 44 }, -- body, head
@@ -418,11 +460,29 @@ return {
 		{ "Marking", 184, 177, 166 }, -- pale plates, caps, brow, knuckles
 		{ "Accent", 110, 186, 68 }, -- moss
 	},
+	Geb = {
+		{ "Body", 118, 150, 70 }, -- the bull's earth body and legs
+		{ "Body", 92, 184, 84 }, -- the god's green skin
+		{ "Marking", 168, 156, 132 }, -- stone plates, pauldrons, knees
+		{ "Accent", 255, 196, 52 }, -- gold nemes, collar, bow, trims, hoof caps
+	},
+	Bes = {
+		{ "Body", 220, 201, 152 }, -- sandstone
+		{ "Belly", 208, 184, 134 }, -- darker stone: hips, shins, arms
+		{ "Marking", 40, 86, 206 }, -- lapis stripes, pleats, kohl
+		{ "Accent", 246, 196, 46 }, -- gold collar, kilt, crown, throne
+	},
 	Kitsune = {
 		{ "Body", 250, 248, 244 }, -- white fur, tails, paws
 		{ "Belly", 236, 228, 214 }, -- belly, jaw, chest tuft
 		{ "Marking", 222, 38, 52 }, -- red markings, socks, mask, saddle cloth, bow
 		{ "Accent", 255, 196, 52 }, -- gold anklets, ear rings, bell, trims
+	},
+	Nut = {
+		{ "Body", 92, 150, 255 }, -- sky-blue skin, arms, feet
+		{ "Belly", 252, 250, 244 }, -- white linen robe
+		{ "Marking", 36, 44, 128 }, -- night-blue flight feathers, starry hem
+		{ "Accent", 255, 196, 40 }, -- gold collar, diadem, wing bars, trims
 	},
 	Kraken = {
 		{ "Body", 58, 76, 128 }, -- tentacles

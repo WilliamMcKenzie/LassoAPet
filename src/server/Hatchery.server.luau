@@ -35,6 +35,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Funnel = require(script.Parent.Funnel)
+local Telemetry = require(script.Parent.Telemetry)
 local Quests = require(script.Parent.Quests)
 local Passes = require(script.Parent.Passes)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
@@ -196,6 +197,7 @@ local function publish(player)
 	player:SetAttribute("RidePet", profile.ride or "")
 	player:SetAttribute("RollPrice", rollPrice(profile))
 	player:SetAttribute("RainbowTrail", profile.rainbowTrail or nil) -- bought (Config.RainbowTrail): every ride trails a rainbow
+	player:SetAttribute("QuestsSeen", profile.questsSeen or nil) -- (BaseUi: the tap hand on the folded Quests panel till it's opened once)
 	player:SetAttribute("RideMerged", profile.rideMerged or 1) -- how many pets it's merged from (Shared/Merge)
 	player:SetAttribute("RideFuse", profile.rideFuse) -- the donor, if it's a hybrid (Shared/Fusion)
 	player:SetAttribute("RideTier", profile.rideFuse and profile.rideTier or nil) -- its saved size tier (Fusion.tier)
@@ -223,9 +225,9 @@ local function canPlace(pen, x, z)
 end
 
 -- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
--- x2 Gold (game pass): x this on all the gold pets earn.
+-- x2 Gold (game pass) and rebirths (Config.goldX): x this on all the gold pets earn.
 local function goldX(player)
-	return if player:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1
+	return Config.goldX(player)
 end
 
 -- Fast Hatch (game pass): hatch times / this.
@@ -251,19 +253,20 @@ end
 local function awayGold(player, profile, data)
 	local seen = tonumber(data.seen)
 	local away = if seen then math.clamp(os.time() - seen, 0, Config.AwayCap) else 0
-	local x = if Passes.owns(player, "DoubleGold") then Config.PassGoldMultiplier else 1 -- (waits for the pass check)
+	local x = (if Passes.owns(player, "DoubleGold") then Config.PassGoldMultiplier else 1) -- (waits for the pass check)
+		* (Config.Rebirth.Gold[player:GetAttribute("Rebirths") or 0] or 1)
 	return (tonumber(data.awayGold) or 0) + math.floor(income(profile) * x * Config.AwayRate * away)
 end
 
--- A saved pen's gold a second (as income(), from its save).
-local function savedIncome(data)
+-- A saved pen's gold a second (as income(), from its save), at its own world's rates.
+local function savedIncome(data, world)
 	if typeof(data) ~= "table" or not (data.tutorial or next(data.items or {})) then
 		return 0
 	end
-	local total = tonumber(data.rideIncome) or (Config.PetIncome[data.ride] or 0) * (tonumber(data.rideMerged) or 1)
+	local total = tonumber(data.rideIncome) or (Config.incomeIn(world, data.ride) or 0) * (tonumber(data.rideMerged) or 1)
 	for _, item in typeof(data.items) == "table" and data.items or {} do
 		if typeof(item) == "table" and item.pet then
-			total += tonumber(item.income) or (Config.PetIncome[item.pet] or 0) * (tonumber(item.merged) or 1)
+			total += tonumber(item.income) or (Config.incomeIn(world, item.pet) or 0) * (tonumber(item.merged) or 1)
 		end
 	end
 	return total
@@ -271,10 +274,10 @@ end
 
 local function loadOtherWorlds(player)
 	local total = 0
-	for _, other in otherStores do
+	for world, other in otherStores do
 		local success, data = pcall(other.GetAsync, other, "u" .. player.UserId)
 		if success then
-			total += savedIncome(data)
+			total += savedIncome(data, world)
 		end
 	end
 	otherIncome[player] = total
@@ -295,14 +298,18 @@ local function markOtherWorldsSeen(player)
 end
 
 local inviteCredits -- (below: "Invite a friend")
+local claimStarter -- (below: the Starter Pack)
 local function load(player)
 	task.spawn(loadOtherWorlds, player)
 	local profile = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {} }
+	local fresh = true -- (no save in this world: a first visit, for Funnel)
 	if store then
 		for attempt = 1, 3 do
 			local success, data = pcall(store.GetAsync, store, "u" .. player.UserId)
 			if success then
 				if typeof(data) == "table" then
+					fresh = false
+					profile.v1 = data.v1 -- (Funnel's: entry build, enrolment, steps logged once)
 					for kind, n in data.eggs or {} do
 						if eggPet(kind) and tonumber(n) and n > 0 then
 							profile.eggs[kind] = math.floor(n)
@@ -321,8 +328,9 @@ local function load(player)
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
 					profile.homeEggs = tonumber(data.homeEggs) -- (animals brought home, counted from the Egg Rodeo's first session: Funnel)
 					profile.quests = Quests.load(data.quests)
-					profile.journey = data.journey == true or nil -- (started after the Player Journey funnel went in: Funnel)
 					profile.rainbowTrail = data.rainbowTrail == true or nil
+					profile.questsSeen = data.questsSeen == true or nil -- (opened the Quests panel: no tap hand on it)
+					profile.starterPack = data.starterPack == true or nil -- (the Starter Pack's gold and Snake given)
 					player:SetAttribute("FuseLesson", nil) -- (no fuse lesson any more: QM, Oct 8)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
 					for _, kind in typeof(data.ridden) == "table" and data.ridden or {} do
@@ -367,7 +375,17 @@ local function load(player)
 	end
 	profiles[player] = profile
 	profile.quests = profile.quests or Quests.load(nil)
+	-- (Analytics V1: a fresh pen is a new arrival only if its load went through, or in Studio)
+	Funnel.start(player, profile, fresh and (loaded[player] == true or RunService:IsStudio()))
+	Telemetry.profileReady(player, Config.World == 1 and fresh and (loaded[player] == true or RunService:IsStudio()))
+	if store and not loaded[player] and not RunService:IsStudio() then
+		Telemetry.loadFailed(player)
+	end
 	Quests.publish(player, profile.quests)
+	player:GetAttributeChangedSignal("PassStarterPack"):Connect(function()
+		claimStarter(player)
+	end)
+	task.spawn(claimStarter, player)
 	task.spawn(function() -- friends you invited who joined while you were elsewhere ("Invite a friend")
 		local credits = inviteCredits(player)
 		for _ = 1, credits do
@@ -382,12 +400,7 @@ local function load(player)
 		end
 	end)
 	if not profile.tutorial then
-		profile.journey = true -- (in the funnels from now on: Funnel)
-		Funnel.track(player) -- a new player
 		profile.homeEggs = profile.homeEggs or 0
-	end
-	if profile.journey then
-		Funnel.join(player)
 	end
 	-- Only World 1 has the tutorial: in the others you've done it (QM: a new pen there).
 	local tutorial = Config.Tutorial and not profile.tutorial and Config.World == 1
@@ -448,7 +461,7 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail, homeEggs = profile.homeEggs, quests = profile.quests, journey = profile.journey, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
+		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, homeEggs = profile.homeEggs, quests = profile.quests, v1 = profile.v1, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -481,7 +494,6 @@ local function applyHatch(player)
 	applyingHatch[player] = true
 	profile.usedHatches, profile.hatchTarget = used + 1, nil
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
-	Funnel.step(player, "Egg Hatched")
 	save(player)
 	publish(player)
 	applyingHatch[player] = nil
@@ -620,41 +632,84 @@ local function remote(name, handler)
 end
 
 local place -- (below, after PlaceEgg)
-local TUTORIAL_SPOTS = { Vector2.new(0, 0), Vector2.new(8, 0), Vector2.new(-8, 0), Vector2.new(0, 8), Vector2.new(0, -8), Vector2.new(8, 8) }
 
--- The ride got its egg home.
+-- An animal you rode home or over the finish line (QM, Oct 13: the animal itself, not its
+-- egg; eggs come from quests now): straight into your pen as a pet, at the first clear
+-- spot from the middle out. A full pen (Config.PenCapacity) gets its egg instead.
+local function givePet(player, profile, kind)
+	Funnel.rewarded(player) -- (the server's award: Analytics V1)
+	Telemetry.reward(player)
+	local pen = penOf(player)
+	local area = pen and pen:FindFirstChild("Area")
+	if area and penCount(profile) < penCap(player) then
+		local best
+		for r = 0, 6 do
+			for dx = -r, r do
+				for dz = -r, r do
+					if not best and math.max(math.abs(dx), math.abs(dz)) == r then
+						local x, z = dx * 7, dz * 7
+						local clear = canPlace(pen, x, z)
+						for _, item in profile.items do
+							if clear and math.abs(item.x - x) < 6 and math.abs(item.z - z) < 6 then
+								clear = false
+							end
+						end
+						best = if clear then Vector2.new(x, z) else nil
+					end
+				end
+			end
+		end
+		best = best or Vector2.new(Random.new():NextNumber(-1, 1) * (area.Size.X / 2 - EDGE), Random.new():NextNumber(-1, 1) * (area.Size.Z / 2 - EDGE)) -- (no clear spot: anywhere in it)
+		profile.items[HttpService:GenerateGUID(false)] = { x = best.X, z = best.Y, pet = kind }
+		profile.pastStarter = true
+		publish(player)
+		return true
+	end
+	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	publish(player)
+	return false
+end
+
+-- The ride got its animal home: the animal itself, into your pen (givePet), the
+-- tutorial's first ride's too (QM, Oct 13: its new animal cutscene; the tutorial goes on
+-- once there's a new pet in the pen).
 remote("DeliverEgg", function(player, kind)
 	local profile = profiles[player]
 	if not profile or not isAnimal(kind) or player:GetAttribute("CarriedEgg") ~= kind then
 		return
 	end
 	player:SetAttribute("CarriedEgg", nil)
-	Funnel.step(player, "Brought Egg Home")
 	if profile.homeEggs then
 		profile.homeEggs += 1
-		Funnel.captured(player, profile.homeEggs)
 	end
-	-- The tutorial's egg brought home goes straight into the pen (balance pass, Oct 6: a
-	-- fifth of new players left at "Place your egg" a second time). The first spot clear
-	-- of the starter pet, from the middle out.
-	local pen = penOf(player)
-	if player:GetAttribute("Tutorial") and pen and (profile.ride or next(profile.items)) and penCount(profile) < penCap(player) then
-		for _, spot in TUTORIAL_SPOTS do
-			local clear = canPlace(pen, spot.X, spot.Y)
-			for _, item in profile.items do
-				if clear and math.abs(item.x - spot.X) < 6 and math.abs(item.z - spot.Y) < 6 then
-					clear = false
-				end
-			end
-			if clear then
-				place(player, profile, kind, spot.X, spot.Y)
-				return
-			end
-		end
-	end
-	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
-	publish(player)
+	givePet(player, profile, kind)
 end)
+
+-- The Starter Pack (game pass, QM, Oct 13): Config.StarterPack's gold and pet, once, when
+-- you own it (bought now, or on joining), saved with the pen so it's never given twice.
+-- Not till the pen's loaded (a failed load could give it again) or the tutorial's done.
+claimStarter = function(player)
+	local profile = profiles[player]
+	if not profile or profile.starterPack or not player:GetAttribute("PassStarterPack") then
+		return
+	end
+	if not loaded[player] and not RunService:IsStudio() then
+		return
+	end
+	if player:GetAttribute("Tutorial") then
+		task.delay(5, claimStarter, player)
+		return
+	end
+	profile.starterPack = true
+	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + Config.StarterPack.Gold)
+	Telemetry.gold(player, "purchased", Config.StarterPack.Gold)
+	givePet(player, profile, Config.StarterPack.Pet)
+	task.spawn(save, player)
+	local newAnimal = ReplicatedStorage:FindFirstChild("NewAnimal")
+	if newAnimal then
+		newAnimal:FireClient(player, Config.StarterPack.Pet) -- (its cutscene, as /give's)
+	end
+end
 
 -- You held E by an egg in your pen that's ready (Pen.client): it hatches.
 remote("HatchEgg", function(player, id)
@@ -670,22 +725,32 @@ remote("HatchEgg", function(player, id)
 		return
 	end
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
-	Funnel.step(player, if profile.pastStarter then "Egg Hatched" else "Hatched Starter Egg")
+	if not profile.pastStarter then
+		Funnel.starterReady(player) -- (Analytics V1)
+	end
+	Telemetry.once(player, "eggHatched")
 	publish(player)
 end)
 
--- The ride crossed the finish line at the end of the course: a random egg, drawn
--- like the stampede itself (each biome's Herd counts as weights, so a Unicorn egg
--- is as rare as Unicorns are). Returns the kind, for the egg reveal.
+-- The ride crossed the finish line at the end of the course: the animal you rode there
+-- (QM, Oct 13: the animal itself, givePet), or (a hybrid, say) a random one, drawn like the
+-- stampede itself (each biome's Herd counts as weights, so a Unicorn is as rare as Unicorns are). And
+-- the next of Config.FinishTrails, silently (FinishTrail; Gold.server saves it). Returns
+-- the kind, for the egg reveal.
 local finished = {} -- [player] = os.clock() of their last finish
 local finishCourse = Instance.new("RemoteFunction")
 finishCourse.Name = "FinishCourse"
-finishCourse.OnServerInvoke = function(player)
+finishCourse.OnServerInvoke = function(player, rode)
 	local profile = profiles[player]
 	if not profile or (finished[player] and os.clock() - finished[player] < 10) then
 		return nil
 	end
 	finished[player] = os.clock()
+	player:SetAttribute("FinishTrail", math.min((player:GetAttribute("FinishTrail") or 0) + 1, #Config.FinishTrails))
+	if typeof(rode) == "string" and isAnimal(rode) then
+		givePet(player, profile, rode)
+		return rode
+	end
 	local pool, total = {}, 0
 	for _, biome in Config.Biomes do
 		-- (a borrowed placeholder herd would count its animals twice)
@@ -707,8 +772,7 @@ finishCourse.OnServerInvoke = function(player)
 	if not kind then
 		return nil
 	end
-	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
-	publish(player)
+	givePet(player, profile, kind)
 	return kind
 end
 finishCourse.Parent = ReplicatedStorage
@@ -809,10 +873,13 @@ claimQuest.OnServerInvoke = function(player, i)
 	if level < Config.PenLevels and not quest.NoPenLevel then -- (not "Reach Meadow": QM)
 		player:SetAttribute("PenLevel", level + 1)
 	end
-	Funnel.claimed(player, i) -- (Player Journey)
-	profile.eggs[quest.Egg] = (profile.eggs[quest.Egg] or 0) + 1
+	Funnel.claimed(player, i) -- (Analytics V1)
+	local eggs = if typeof(quest.Egg) == "table" then quest.Egg else { quest.Egg } -- (several: World 2's Kitsune quest)
+	for _, kind in eggs do
+		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	end
 	publish(player)
-	return quest.Egg
+	return eggs[1]
 end
 claimQuest.Parent = ReplicatedStorage
 -- Gold.server's: a lasso landed on a wild animal ("Lasso animals", and "Lasso Snowmen" by its kind).
@@ -855,6 +922,7 @@ place = function(player, profile, kind, x, z)
 	if profile.ride or next(profile.items) then
 		profile.pastStarter = true -- placed with a pet already there: not the starter egg (the funnel tells them apart)
 	end
+	Telemetry.once(player, "eggPlaced") -- (Analytics V1: the session's first)
 	local pet = eggPet(kind)
 	local special = Config.SpecialEggs[kind]
 	if special then -- (hatches into its Pet, merged from Merged: a Giant Horse is 10 horses)
@@ -862,17 +930,21 @@ place = function(player, profile, kind, x, z)
 	else
 		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else math.ceil(hatchTime(kind) / hatchX(player))) }
 	end
-	if profile.pastStarter then
-		Funnel.step(player, "Placed Egg") -- the egg brought home, not the starter egg placed before the first ride
-	else
-		Funnel.step(player, "Placed Starter Egg")
-	end
 	publish(player)
 end
 
 -- The client finished the tutorial: it never shows again.
 -- The rider got on an animal of this kind (Ride.client): it's in their animal
 -- dictionary from now on.
+-- The Quests panel opened for the first time (BaseUi): its tap hand's done for good.
+remote("QuestsSeen", function(player)
+	local profile = profiles[player]
+	if profile and not profile.questsSeen then
+		profile.questsSeen = true
+		publish(player)
+	end
+end)
+
 remote("Ridden", function(player, kind)
 	local profile = profiles[player]
 	if profile and isAnimal(kind) and not profile.ridden[kind] then
@@ -887,7 +959,8 @@ remote("TutorialDone", function(player)
 		profile.tutorial = true
 	end
 	player:SetAttribute("Tutorial", nil)
-	Funnel.step(player, "Tutorial Done")
+	Funnel.tutorialDone(player) -- (Analytics V1)
+	Telemetry.tutorialDone(player)
 end)
 
 -- Ran to the start line in the tutorial before riding the starter pet (QM, Oct 8:
@@ -923,8 +996,7 @@ toLine.OnServerInvoke = function(player)
 		return false
 	end
 	profile.ride = kind
-	Funnel.step(player, "Placed Starter Egg")
-	Funnel.step(player, "Starter Pet Ready")
+	Funnel.starterReady(player) -- (Analytics V1)
 	Funnel.event(player, "Ran To Start Line")
 	publish(player)
 	return true
@@ -1107,6 +1179,9 @@ local function playerNamed(name)
 end
 
 -- Dev chat replies (DevChat.client shows them in the chat window).
+local newAnimal = Instance.new("RemoteEvent") -- (the client's new animal cutscene, Client/NewAnimal: /give's)
+newAnimal.Name = "NewAnimal"
+newAnimal.Parent = ReplicatedStorage
 local devChat = Instance.new("RemoteEvent")
 devChat.Name = "DevChat"
 devChat.Parent = ReplicatedStorage
@@ -1160,6 +1235,7 @@ local function give(player, text)
 		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, pet = kind }
 	end
 	publish(player)
+	newAnimal:FireClient(player, kind) -- (its new animal cutscene, as a ride home's: QM)
 end
 
 -- The shop's Legendary Pet (Shop.server): its "BoughtPets" attribute is the
@@ -1417,17 +1493,65 @@ awayCommand.Triggered:Connect(function(source)
 end)
 awayCommand.Parent = game:GetService("TextChatService")
 
--- Testing: "/reset" puts back every biome barrier you've broken (Gate.client; QM, Oct 9).
+-- Testing: "/reset" wipes you completely (QM, Oct 13): gold, rebirths, finish line trails,
+-- World 2's unlock, every world's pen (pets, eggs, pen level, quests) and every barrier,
+-- saved at once. The tutorial stays done ("/tutorial" for that): you're left with a fresh
+-- Config.DefaultPet to ride. The shop counts are kept (else rejoining hands out every Giant
+-- Horse egg and Legendary Pet ever bought again). Gold.server's HardReset does its save.
 local resetCommand = Instance.new("TextChatCommand")
-resetCommand.Name = "ResetBarriers"
+resetCommand.Name = "HardReset"
 resetCommand.PrimaryAlias = "/reset"
 resetCommand.Triggered:Connect(function(source)
 	local player = Players:GetPlayerByUserId(source.UserId)
-	if player and allowed(player) then
-		player:SetAttribute("GatesBroken", 1)
+	local old = player and profiles[player]
+	if not old or not allowed(player) then
+		return
 	end
+	Telemetry.exclude(player) -- (a test from here on: not in the play data)
+	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {}, tutorial = true, boughtPets = old.boughtPets,
+		boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil) }
+	for _, other in otherStores do -- (the other worlds' pens, empty)
+		task.spawn(pcall, other.SetAsync, other, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = true })
+	end
+	otherIncome[player] = 0
+	for _, name in { "CarriedEgg", "FuseLesson", "Tutorial", "AwayGold" } do
+		player:SetAttribute(name, nil)
+	end
+	player:SetAttribute("PenLevel", 1)
+	local hardReset = game:GetService("ServerStorage"):FindFirstChild("HardReset")
+	if hardReset then
+		hardReset:Fire(player) -- (gold, rebirths, trails, worlds, barriers: Gold.server)
+	end
+	Quests.publish(player, profiles[player].quests)
+	publish(player)
+	task.spawn(save, player)
+	player:LoadCharacter() -- off any ride, back at your pen
 end)
 resetCommand.Parent = game:GetService("TextChatService")
+
+-- Testing: "/gold <amount>" adds that much gold, 5000, 2.5m, 10b (k, m, b, t); "/gold" alone
+-- 10m; a minus takes it away (QM, Oct 13).
+local goldCommand = Instance.new("TextChatCommand")
+goldCommand.Name = "Gold"
+goldCommand.PrimaryAlias = "/gold"
+goldCommand.Triggered:Connect(function(source, text)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	if not player or not allowed(player) then
+		return
+	end
+	local number, unit = text:lower():match("^/gold%s+(%-?[%d%.]+)%s*([kmbt]?)")
+	local amount = if number then (tonumber(number) or 0) * (({ k = 1e3, m = 1e6, b = 1e9, t = 1e12 })[unit] or 1) else 1e7
+	amount = math.floor(amount)
+	player:SetAttribute("Gold", math.max(0, (player:GetAttribute("Gold") or 0) + amount))
+	Telemetry.gold(player, "grant", math.abs(amount)) -- (test gold: their gold checkpoints aren't counted)
+	devChat:FireClient(player, "/gold: " .. (if amount < 0 then "-" else "+") .. "$" .. Config.short(math.abs(amount)) .. ", now $" .. Config.short(player:GetAttribute("Gold")))
+end)
+goldCommand.Parent = game:GetService("TextChatService")
+
+Telemetry.incomeOf = function(player) -- (gold a second: the gold checkpoints)
+	local profile = profiles[player]
+	return if profile then (income(profile) + (otherIncome[player] or 0)) * goldX(player) else 0
+end
 
 -- Fired to a player each time their pets pay out, so the client can pop "+N$"
 -- over each pet's head.
@@ -1442,6 +1566,7 @@ task.spawn(function()
 			local earned = if player:GetAttribute("Tutorial") then 0 else (income(profile) + (otherIncome[player] or 0)) * goldX(player) -- (nothing till the tutorial's done)
 			if earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
+				Telemetry.gold(player, "earned", earned)
 				paid:FireClient(player, earned) -- (the HUD shows it by the gold counter)
 			end
 		end
@@ -1461,8 +1586,8 @@ while true do
 			if item.egg and now >= item.hatchAt and ((player:GetAttribute("Tutorial") and profile.ride ~= nil) or player:GetAttribute("PassAutoHatch")) then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
+				Telemetry.once(player, "eggHatched")
 				if profile.pastStarter then
-					Funnel.step(player, "Egg Hatched") -- (not the starter egg, which hatches before the first ride)
 				end
 			end
 		end

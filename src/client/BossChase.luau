@@ -22,6 +22,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Sounds = require(script.Parent.Sounds)
+local Banner = require(script.Parent.Banner)
 
 local BAR = 0.2 -- each black bar's share of the screen's height: 40% of it in all, the strip between 60% (QM, Oct 11)
 local VEIN = "rbxassetid://85408798859805" -- assets/ui/boss/AngerMarkOutlined.png (QM's 💢, Oct 10, with a black outline baked in)
@@ -141,6 +142,11 @@ function BossChase.start(x, z)
 	ReplicatedStorage.RideCue:FireServer("boss", kind, x, z) -- (everyone else sees it chase you: Client/RemoteBosses, QM)
 end
 
+-- Whether it's reached the rider (charging once it's caught them: ReturnRun), so they're run over.
+function BossChase.ranOver()
+	return boss ~= nil and boss.riderZ ~= nil and boss.z >= boss.riderZ - boss.room * 0.5 - 4
+end
+
 function BossChase.over()
 	return boss ~= nil and boss.t >= Config.Boss.CutsceneTime
 end
@@ -159,6 +165,9 @@ function BossChase.update(dt, chasing, x, z, speed)
 	elseif was < cfg.CutsceneTime - cfg.BarTime and boss.t >= cfg.CutsceneTime - cfg.BarTime then
 		showBars(false)
 	end
+	if was < cfg.CutsceneTime and boss.t >= cfg.CutsceneTime then
+		Banner.show("run") -- (QM's red "RUN!!!" banner as it starts chasing you)
+	end
 	-- (the vein: with the bars, popping up and then pulsing once)
 	local barsIn = boss.t >= cfg.ZoomAt and boss.t < cfg.CutsceneTime - cfg.BarTime
 	local b = letterbox()
@@ -174,7 +183,14 @@ function BossChase.update(dt, chasing, x, z, speed)
 		-- After you at your own speed (QM, Oct 10), so the gap holds all the way home,
 		-- never nearer than Behind studs, and pulling up short of the start line.
 		local was = boss.z
-		boss.z = math.min(boss.z + math.max(speed or 0, cfg.ChaseMin or 0) * dt, z - cfg.Behind - boss.room, -cfg.StopShort - boss.room) -- (never slower than ChaseMin: it doesn't stall as you turn)
+		-- (closing, 0..1: how near it's got while you weren't at full speed, Client/ReturnRun;
+		-- at 1 it has you)
+		local closing = BossChase.closing or 0
+		local caught = closing >= 1 -- (it has you: it charges and runs you over, QM)
+		-- (closing in from Behind to just clear of the camera, CameraClear, till it has you)
+		local clear = boss.room + (cfg.CameraClear or 30)
+		local gap = if caught then -boss.room - 30 else clear + (cfg.Behind + boss.room - clear) * (1 - closing)
+		boss.z = math.min(boss.z + (math.max(speed or 0, cfg.ChaseMin or 0) + (if caught then 260 else 60 * closing)) * dt, z - gap, -cfg.StopShort - boss.room) -- (never slower than ChaseMin: it doesn't stall as you turn)
 		boss.x += (x - boss.x) * (1 - math.exp(-2 * dt))
 		moving = math.max(boss.z - was, 0) / math.max(dt, 1e-3)
 	end

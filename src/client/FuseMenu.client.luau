@@ -713,6 +713,8 @@ end
 -- button once both are.
 local hintHands = { TapHand.new(80), TapHand.new(80), TapHand.new(80) }
 for _, hand in hintHands do
+	hand:SetAttribute("Focus", require(script.Parent.Focus).P.Merge) -- (one goal at a time: Client/Focus)
+	hand:SetAttribute("FocusGoal", "merge")
 	hand.Visible = false
 	hand.Parent = gui
 end

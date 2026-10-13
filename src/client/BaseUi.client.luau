@@ -21,6 +21,7 @@ local AnimalDex = require(script.Parent.AnimalDex)
 local RollMenu = require(script.Parent.RollMenu)
 local CameraHint = require(script.Parent.CameraHint)
 local TapHand = require(script.Parent.TapHand)
+local Focus = require(script.Parent.Focus)
 local Inventory = require(script.Parent.Inventory)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 
@@ -52,8 +53,8 @@ local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeig
 local CASH_GREEN = Color3.fromHex("00FF09")
 -- (in RefWidth pixels: QM's mockups at 1300 wide, x 1920 / 1300)
 local MARGIN = 18
-local MENU_WIDTH = 260 -- each of Merge, Index, Shop, Invite (QM's mockup, Oct 12: about 0.65 of the Quests panel's width; Oct 9 had 213)
-local MENU_GAP = 12 -- (small even gaps: QM's mockup, Oct 12; was 20)
+local MENU_WIDTH = 234 -- each of Merge, Index, Shop, Invite (QM, Oct 13: 10% smaller, was 260 from his Oct 12 mockup; Oct 9 had 213)
+local MENU_GAP = 25 -- (spaced as the pass buttons on the right, whose art has its price badge over the button: QM, Oct 13, then 30% less; was 12)
 local ICON = 74 -- the counters' icons
 local TEXT = 55 -- the counters' text (QM's Figma: 55, stroke 5)
 local STROKE = 5
@@ -139,13 +140,13 @@ end
 local menu = Instance.new("Frame")
 menu.Name = "Menu"
 menu.BackgroundTransparency = 1
-menu.AutomaticSize = Enum.AutomaticSize.XY
-menu.AnchorPoint = Vector2.new(1, 0) -- (under the Quests panel: placed every frame, below)
-menu.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
+menu.Size = UDim2.fromOffset(MENU_WIDTH, 0) -- (fixed, set below: a button growing under the mouse doesn't move the rest: QM)
+menu.AnchorPoint = Vector2.new(0, 0) -- (down the left, centred: placed every frame, below)
+menu.Position = UDim2.new(0, MARGIN, 0, MARGIN)
 local list = Instance.new("UIListLayout")
 list.SortOrder = Enum.SortOrder.LayoutOrder
 list.Padding = UDim.new(0, MENU_GAP)
-list.HorizontalAlignment = Enum.HorizontalAlignment.Right
+list.HorizontalAlignment = Enum.HorizontalAlignment.Left
 list.Parent = menu
 menu.Parent = root
 local mergeBadge -- QM's red "1" on Merge while the "Merge animals" quest is up and you've not merged yet (QM, Oct 11)
@@ -161,9 +162,19 @@ end }, { "merge", function()
 		Hud.onFuse()
 	end
 end }, { "invite", promptInvite } } do
-	local b = picture("ImageButton", menu, ART[spec[1]], MENU_WIDTH)
+	-- (each in a slot of its own size, centred in it, so it grows from its middle and the
+	-- others stay put: QM, Oct 13)
+	local slot = Instance.new("Frame")
+	slot.Name = spec[1] .. "Slot"
+	slot.BackgroundTransparency = 1
+	slot.LayoutOrder = ({ merge = 1, index = 2, shop = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
+	slot.Parent = menu
+	local b = picture("ImageButton", slot, ART[spec[1]], MENU_WIDTH)
 	b.Name = spec[1]
-	b.LayoutOrder = ({ merge = 1, index = 2, shop = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
+	slot.Size = b.Size
+	b.AnchorPoint = Vector2.new(0.5, 0.5)
+	b.Position = UDim2.fromScale(0.5, 0.5)
+	menu.Size = UDim2.fromOffset(MENU_WIDTH, menu.Size.Y.Offset + b.Size.Y.Offset + (if i > 1 then MENU_GAP else 0))
 	if ART[spec[1]].id == "" then -- (no art yet: a plain button with its name)
 		b.BackgroundTransparency = 0
 		b.BackgroundColor3 = Color3.fromRGB(76, 200, 92)
@@ -180,6 +191,9 @@ end }, { "invite", promptInvite } } do
 	if spec[1] == "merge" then -- the "Merge animals" quest's hint: a tap hand on it (below)
 		local hand = TapHand.new(80)
 		hand.Name = "MergeHint"
+		hand:SetAttribute("Focus", Focus.P.Merge)
+		hand:SetAttribute("FocusGoal", "merge")
+		hand:SetAttribute("Spotlight", true) -- (the Merge animals quest's first step: QM, Oct 13)
 		hand.Position = UDim2.fromScale(0.55, 0.7)
 		hand.Visible = false
 		hand.Parent = b
@@ -285,15 +299,35 @@ fold.Text = ""
 fold.Size = UDim2.fromOffset(Q.width, Q.header)
 fold.ZIndex = 3
 fold.Parent = quests
--- (folded to start with on a phone or tablet, so the column under it clears Roblox's jump
--- button: QM, Oct 12; its claim badge still shows)
-local UserInputService = game:GetService("UserInputService")
-local folded = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
+-- (folded to start with everywhere, its claim badge still showing: QM, Oct 13; it was only
+-- on a phone or tablet, Oct 12, so the column under it cleared Roblox's jump button)
+local folded = true
 quests:SetAttribute("Folded", folded)
-fold.Activated:Connect(function()
-	folded = not folded
+local function setFolded(now)
+	folded = now
 	quests:SetAttribute("Folded", folded) -- (draws again: below)
+end
+fold.Activated:Connect(function()
+	setFolded(not folded)
+	local telemetry = not folded and ReplicatedStorage:FindFirstChild("Telemetry")
+	if telemetry then
+		telemetry:FireServer("questsOpened") -- (Analytics V1)
+	end
+	if not folded and not player:GetAttribute("QuestsSeen") then
+		player:SetAttribute("QuestsSeen", true) -- (at once here; Hatchery saves it)
+		ReplicatedStorage:WaitForChild("QuestsSeen"):FireServer()
+	end
 end)
+-- A tap hand on the folded panel till you've opened it once, from your first quest on (QM,
+-- Oct 13).
+local openHand = TapHand.new(80)
+openHand.Name = "OpenQuestsHint"
+openHand:SetAttribute("Spotlight", true) -- (TapHand's: QM, Oct 13)
+openHand:SetAttribute("Focus", Focus.P.StarterQuest)
+openHand:SetAttribute("FocusGoal", "starterQuest")
+openHand.Position = UDim2.fromScale(0.5, 0.6)
+openHand.Visible = false
+openHand.Parent = fold
 
 -- A new quest pops in (QM, Oct 11): from nothing, overshooting, a wobble, and settles
 -- (anticipation, overshoot, follow-through), once the panel's up and no egg reveal's over
@@ -454,21 +488,24 @@ local function questRow(i, quest, y)
 			-- (its egg stays out of the inventory till its reveal's over: QM, Oct 11)
 			local line = Config.Quests[i // 100]
 			local egg = line and line[i % 100] and line[i % 100].Egg
-			if egg then
-				Inventory.holdBack(egg, 1)
+			local eggs = if typeof(egg) == "table" then egg else { egg } -- (some give several: World 2's last, QM Oct 13)
+			for _, kind in eggs do
+				Inventory.holdBack(kind, 1)
 			end
 			local ok, kind = pcall(claimQuest.InvokeServer, claimQuest, i)
-			local animal = ok and kind and ReplicatedStorage.Shared.Animals:FindFirstChild(kind)
-			if animal then
-				Hud.eggReveal(require(animal).Rarity, kind, true) -- (the egg it gave you)
-			end
 			task.spawn(function()
-				task.wait(0.2)
-				while Hud.revealing() do
-					task.wait(0.1)
+				for _, each in if ok and kind then eggs else {} do
+					local animal = ReplicatedStorage.Shared.Animals:FindFirstChild(each)
+					if animal then
+						Hud.eggReveal(require(animal).Rarity, each, true) -- (the egg it gave you)
+						task.wait(0.2)
+						while Hud.revealing() do
+							task.wait(0.1)
+						end
+					end
 				end
-				if egg then
-					Inventory.holdBack(egg, -1)
+				for _, each in eggs do
+					Inventory.holdBack(each, -1)
 				end
 				claimBusy = false
 			end)
@@ -571,17 +608,26 @@ local function drawQuests()
 			y += questRow(quest.i, quest, y) + (if n < #questList then Q.gap else 0)
 		end
 	end
-	-- A pulsing tap hand on a quest ready to claim: the bottom one, if there are two (QM, Oct 11).
+	-- A pulsing tap hand on a quest ready to claim: the bottom one, if there are two (QM, Oct 11),
+	-- but the starter quest (World 1's "Reach Meadow") before any other.
 	local lastClaim
 	for _, row in quests:GetChildren() do
 		local claim = row.Name == "Quest" and row:FindFirstChild("Claim", true)
-		if claim and (not lastClaim or row.Position.Y.Offset > lastClaim.Parent.Parent.Position.Y.Offset) then
+		local starterRow = Config.World == 1 and row:GetAttribute("Quest") == 101 -- (the starter quest first: QM, Oct 13)
+		if claim and (starterRow or not lastClaim or (lastClaim:FindFirstAncestor("Quest"):GetAttribute("Quest") ~= 101
+			and row.Position.Y.Offset > lastClaim.Parent.Parent.Position.Y.Offset)) then
 			lastClaim = claim
 		end
 	end
 	if lastClaim then
 		local hand = TapHand.new(90)
 		hand.Position = UDim2.fromScale(0.62, 0.6)
+		local row = lastClaim:FindFirstAncestor("Quest")
+		-- (the starter quest's claim, World 1's "Reach Meadow": in the spotlight, QM Oct 13)
+		local starter = Config.World == 1 and row ~= nil and row:GetAttribute("Quest") == 101
+		hand:SetAttribute("Spotlight", starter)
+		hand:SetAttribute("Focus", if starter then Focus.P.StarterQuest else Focus.P.Hand) -- (one goal at a time: Client/Focus)
+		hand:SetAttribute("FocusGoal", if starter then "starterQuest" else nil)
 		hand.Parent = lastClaim
 	end
 	quests.Size = UDim2.fromOffset(Q.width, if one then 184 else y + Q.bottom)
@@ -589,7 +635,10 @@ local function drawQuests()
 end
 player:GetAttributeChangedSignal("Quests"):Connect(drawQuests)
 player:GetAttributeChangedSignal("Tutorial"):Connect(drawQuests)
-quests:GetAttributeChangedSignal("Folded"):Connect(drawQuests)
+quests:GetAttributeChangedSignal("Folded"):Connect(function()
+	folded = quests:GetAttribute("Folded") == true -- (kept in step, whoever folds it)
+	drawQuests()
+end)
 drawQuests()
 
 -- A menu's up over the base: Quests (and PassPopups' cards, by the "Modal" attribute) step aside.
@@ -603,9 +652,11 @@ RunService.RenderStepped:Connect(function()
 	local covered = modal()
 	root:SetAttribute("Modal", covered)
 	quests.Visible = not riding and not covered and #questList > 0
-	-- (the buttons right under the Quests panel, or the top corner with none)
-	local under = if quests.Visible then (quests.AbsolutePosition.Y + quests.AbsoluteSize.Y - root.AbsolutePosition.Y) / scale.Scale else 0
-	menu.Position = UDim2.new(1, -MARGIN, 0, under + MENU_GAP)
+	openHand.Visible = folded and not player:GetAttribute("QuestsSeen")
+	-- (down the left, centred top to bottom: QM, Oct 13, swapped with the pass buttons,
+	-- which have the right, under the Quests panel)
+	local centred = (root.Size.Y.Offset - menu.AbsoluteSize.Y / scale.Scale) / 2
+	menu.Position = UDim2.new(0, MARGIN, 0, centred)
 	-- New quests pop once you can see them.
 	local up = quests.Visible and gui.Enabled and not Hud.revealing()
 	for i, started in pops do

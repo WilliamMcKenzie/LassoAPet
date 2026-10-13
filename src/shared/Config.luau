@@ -31,6 +31,7 @@ local Config = {
 			-- (tools/meadow_ground.py); see the Desert's Patches.
 			Patches = {
 				Dirt = { Color3.fromRGB(206, 146, 84), Color3.fromRGB(222, 164, 100) }, -- (QM, Oct 10; was the walls' 225, 150, 104 / 248, 170, 114)
+				Grass = { Color3.fromRGB(92, 146, 30), Color3.fromRGB(100, 160, 26) }, -- the base's darker green band, between its grass and dirt (tools/world1_base.luau; QM, Oct 13)
 			},
 		},
 		{
@@ -299,16 +300,16 @@ local Config = {
 		-- (you turn for home at once, but the camera lingers behind you, on the boss, for
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
-		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 40, StopShort = 30,
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 50, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
-		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3 }, -- (each boss's cry: QM, Oct 10)
+		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
 			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 5, 41) }, -- (it's 1.7x the size: QM)
 			CactusBoss = { From = Vector3.new(0, 5, 34) }, -- (1.7x the size)
 			SharkBoss = { At = Vector3.new(0, 0, 0.4), From = Vector3.new(36, 4, 16) }, -- (from its side, so you see its eye: QM)
 			LavaWyrm = { At = Vector3.new(0.17, -0.06, 0.3), From = Vector3.new(0, 3, 58) }, -- (its head is out front and off to one side)
-			TyrantRex = { At = Vector3.new(0.12, 0.4, 0.38), From = Vector3.new(20, 4, 48) }, -- (its eye and snout, from a little to one side: the jaw hangs open)
+			TyrantRex = { At = Vector3.new(0.12, 0.4, 0.38), From = Vector3.new(40, 8, 96) }, -- (its eye and snout, from a little to one side: the jaw hangs open; 2x out for its 2x size, QM Oct 13)
 			Seraph = { At = Vector3.new(0, -0.15, 0.18), From = Vector3.new(0, 4, 60) }, -- (its big eye, low in the middle of its wings; a guess)
 			CrimsonSeraph = { At = Vector3.new(0, -0.15, 0.18), From = Vector3.new(0, 4, 60) }, -- (as the Seraph's)
 			CrystalSeraph = { At = Vector3.new(0, -0.15, 0.18), From = Vector3.new(0, 4, 60) }, -- (as the Seraph's)
@@ -396,13 +397,19 @@ local Config = {
 		OrangeButterfly = 35, -- World 2 Woodland Maze (the Orange Butterfly a Rare, as the Lionfish)
 		LivingBirch = 35, -- World 2 Woodland Maze (a Rare, as the Lionfish, until QM sets it)
 		Hawkmoth = 45, -- World 2 Woodland Maze's Hawkmoth (Epic, as the Squid until QM sets it)
+		EagleSentry = 90, -- World 2 Ancient Tomb's Eagle Sentry (Epic, as the Pterodactyl until QM sets it)
 		RollingLog = 35, -- World 2 Woodland Maze (as the Lionfish)
+		TombJackal = 60, -- World 2 Ancient Tomb (a Rare, as the Raptor until QM sets it)
 		Tiger = 60, -- World 2 Temple (a Rare, as the Fire Lobster)
+		LionArcher = 60, -- World 2 Ancient Tomb's Rare (as the Raptor until QM sets it)
 		JadeStatue = 300, GarnetStatue = 300, -- World 2 Temple's Epics (as the Rockworm until QM sets them)
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, Kitsune = 43200, -- Volcano
 		Catfish = 15, -- World 2 Temple (as the Firebird)
+		BloatedMummy = 15, -- World 2 Ancient Tomb's Uncommon (as the Ankylosaurus)
 		Fox = 15, NineTailedFox = 60, -- World 2 Temple (the Fox an Uncommon as the Firebird, the Nine-tailed Fox a Rare as the Fire Lobster, until QM sets them)
-		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
+		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, Nut = 43200, Bes = 43200, -- Jurassic (Nut: World 2's Ancient Tomb Legendary, as the Bone Rex)
+		Geb = 43200, -- World 2 Ancient Tomb's Legendary Geb (as the Bone Rex until QM sets it)
+		Scarab = 15, -- World 2 Ancient Tomb (an Uncommon, as the Ankylosaurus until QM sets it)
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
 		Seraph = 3600, CrimsonSeraph = 3600, CrystalSeraph = 3600, -- World 2's trophy angels, 1 in 300 of their stampedes (QM, Oct 13; the hatch a guess)
@@ -542,8 +549,10 @@ local Config = {
 		CrystalPhoenix = { Kind = "Fly", Height = 56 }, -- QM, Oct 13: "flying sprint like normal phoenix"
 		OrangeButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland Maze: flies like the Crystal Phoenix (QM, Oct 13)
 		Hawkmoth = { Kind = "Fly", Height = 56 }, -- (Oct 13) a flyer like the Crystal Phoenix
+		EagleSentry = { Kind = "Fly", Height = 56 }, -- (Oct 13) the Tomb's falcon, a flyer like the Crystal Phoenix
 		Pterodactyl = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: a flying type, like the Phoenix
 		PinkButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland: a flier like the Crystal Phoenix (Oct 13)
+		Nut = { Kind = "Fly", Height = 56 }, -- World 2 Tomb: the flying sky goddess, a flier like the Crystal Phoenix (Oct 13)
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
 		-- Whale, a pink haze round the screen, and scares the animals round it off.
@@ -568,18 +577,26 @@ local Config = {
 		Starfish = 1, Clownfish = 1, PinkButterfly = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, Lionfish = 1, LivingBirch = 2, GiantGolem = 3, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		OrangeButterfly = 1, -- World 2 Woodland Maze (as the Lionfish)
 		Hawkmoth = 2, -- World 2 Woodland Maze
+		EagleSentry = 2, -- World 2 Ancient Tomb
 		RollingLog = 1, -- World 2 Woodland Maze
+		TombJackal = 2, -- World 2 Ancient Tomb (Horse length, tall ears)
 		Tiger = 1, -- World 2 Temple (the Lion's body)
+		LionArcher = 2, -- World 2 Ancient Tomb
 		JadeStatue = 2, GarnetStatue = 2, -- World 2 Temple
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, Kitsune = 3, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		Catfish = 1, -- World 2 Temple (Fish-sized)
+		BloatedMummy = 2, -- World 2 Ancient Tomb (a fat ball, about 10 studs tall)
 		Fox = 1, NineTailedFox = 2, -- World 2 Temple (the Fox under the Horse's size; the Nine-tailed Fox's fan of tails)
 		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
 		Spinosaurus = 4, -- Jurassic (QM: slightly smaller than the T-Rex: AnimalScale 0.85)
 		Ankylosaurus = 3, -- Jurassic (a guess: a wide armoured tank, under the T-Rex)
+		Scarab = 2, -- World 2 Ancient Tomb (a chunky beetle, about the Horse's length)
 		PalmGuy = 2, -- Jurassic (QM: a bit bigger than the Cactus)
 		Pterodactyl = 1, -- Jurassic (QM: a small animal; AnimalScale 2 so its body is as big as a Horse's under the long wings)
+		Nut = 3, -- World 2 Ancient Tomb Legendary (large)
+		Bes = 3, -- World 2 Ancient Tomb Legendary (large)
 		BoneRex = 4, -- Jurassic (the final Legendary: the T-Rex's size, AnimalScale 1.15 so it towers over it)
+		Geb = 3, -- World 2 Ancient Tomb (a large Legendary: the earth-god centaur)
 		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
@@ -633,7 +650,7 @@ local Config = {
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
 	-- or crashes into, is PetTiers'. Unlisted: 1.
-	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2, Hawkmoth = 1.5, CrimsonScorpion = 0.75, Crocodile = 2, Lion = 2, MarbleColossus = 1.6, MajesticUnicorn = 1.4, IvorySpider = 2, Maw = 0.8, Eyeworm = 1.2, CrystalCentipede = 2, CrimsonSeraph = 1.5, CrystalSeraph = 2 }, -- (QM, Oct 11; the Crimson Scorpion smaller than the Scorpion, Oct 13; Crocodile and Lion 2x, Marble Colossus 1.6x, Majestic Unicorn 1.4x, Ivory Spider 2x, Maw 0.8x, Eyeworm 1.2x, Crystal Centipede 2x, Oct 13; the Crimson Seraph 1.5x and Crystal Seraph 2x, the Seraph 1x)
+	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2, Hawkmoth = 1.5, EagleSentry = 1.5, CrimsonScorpion = 0.75, Crocodile = 2, Lion = 2, MarbleColossus = 1.6, MajesticUnicorn = 1.4, IvorySpider = 2, Maw = 0.8, Eyeworm = 1.2, CrystalCentipede = 2, CrimsonSeraph = 1.5, CrystalSeraph = 2 }, -- (QM, Oct 11; the Crimson Scorpion smaller than the Scorpion, Oct 13; Crocodile and Lion 2x, Marble Colossus 1.6x, Majestic Unicorn 1.4x, Ivory Spider 2x, Maw 0.8x, Eyeworm 1.2x, Crystal Centipede 2x, Oct 13; the Crimson Seraph 1.5x and Crystal Seraph 2x, the Seraph 1x)
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
@@ -660,18 +677,26 @@ local Config = {
 		OrangeButterfly = 1500, -- World 2 Woodland Maze (as the Lionfish until QM sets it)
 		LivingBirch = 1500, -- World 2 Woodland Maze Rare (the Lionfish's, until QM sets it)
 		Hawkmoth = 2100, -- World 2 Woodland Maze (as the Squid)
+		EagleSentry = 60000, -- World 2 Ancient Tomb (as the Pterodactyl)
 		RollingLog = 1500, -- World 2 Woodland Maze (as the Lionfish)
+		TombJackal = 40000, -- World 2 Ancient Tomb (as the Raptor)
 		Tiger = 20000, -- World 2 Temple (as the Fire Lobster)
+		LionArcher = 40000, -- World 2 Ancient Tomb (as the Raptor)
 		JadeStatue = 25000, GarnetStatue = 25000, -- World 2 Temple (as the Rockworm)
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, Kitsune = 45000, -- Volcano (guesses: past the Ocean's)
 		Catfish = 12000, -- World 2 Temple (as the Firebird)
+		BloatedMummy = 25000, -- World 2 Ancient Tomb (as the Ankylosaurus)
 		Fox = 12000, NineTailedFox = 20000, -- World 2 Temple (the Firebird's and Fire Lobster's, until QM sets them)
 		TRex = 60000, Raptor = 40000, -- Jurassic (guesses: past the Volcano's)
 		Spinosaurus = 40000, -- Jurassic (a guess: a Rare, under the T-Rex)
 		Pterodactyl = 60000, -- Jurassic (a guess: an Epic, as the T-Rex)
 		Ankylosaurus = 25000, -- Jurassic (a guess: an Uncommon, past the Volcano's Rares)
+		Scarab = 25000, -- World 2 Ancient Tomb Uncommon (as the Ankylosaurus)
 		PalmGuy = 22000, -- Jurassic (a guess: an Uncommon, a touch under the Ankylosaurus)
+		Nut = 100000, -- World 2 Ancient Tomb Legendary (the Bone Rex's, until QM sets it)
 		BoneRex = 100000, -- Jurassic (a guess: the final Legendary, the best earner)
+		Geb = 100000, -- World 2 Ancient Tomb's Legendary (as the Bone Rex until QM sets it)
+		Bes = 100000, -- World 2 Ancient Tomb Legendary (as the Bone Rex until QM sets it)
 		Loong = 60000, Beholder = 9000, Leviathan = 45000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
 		WarElephant = 12000, SoulHorse = 60000, Sludge = 7500, -- so they pay more than the Ocean's)
 	},
@@ -797,6 +822,14 @@ local Config = {
 		Fox = "rbxassetid://92522948167443", -- assets/ui/FoxEggRender.png (World 2)
 		NineTailedFox = "rbxassetid://110560724842212", -- assets/ui/NineTailedFoxEggRender.png (World 2)
 		Kitsune = "rbxassetid://124688776792586", -- assets/ui/KitsuneEggRender.png (World 2)
+		TombJackal = "rbxassetid://114106715330048", -- assets/ui/TombJackalEggRender.png (World 2)
+		LionArcher = "rbxassetid://117473019333658", -- assets/ui/LionArcherEggRender.png (World 2)
+		Nut = "rbxassetid://120782360993998", -- assets/ui/NutEggRender.png (World 2)
+		Geb = "rbxassetid://93281428675559", -- assets/ui/GebEggRender.png (World 2)
+		EagleSentry = "rbxassetid://117861828286868", -- assets/ui/EagleSentryEggRender.png (World 2)
+		Bes = "rbxassetid://91869381995495", -- assets/ui/BesEggRender.png (World 2)
+		BloatedMummy = "rbxassetid://113530717781179", -- assets/ui/BloatedMummyEggRender.png (World 2)
+		Scarab = "rbxassetid://90717259678888", -- assets/ui/ScarabEggRender.png (World 2)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
@@ -854,7 +887,16 @@ local Config = {
 	OutboundSprint = true, -- the ride out always a sprint too (QM, Oct 11)
 	-- Just lassoed onto an animal it's still at its stampede walk: for Time s it builds up to
 	-- the sprint at Rate studs/s a second (not the usual snap), so you see it break into it.
-	LandRamp = { Time = 2.5, Rate = 35 },
+	LandRamp = { Time = 0, Rate = 35 }, -- (QM, Oct 13: none, just the usual quick ramp; was 2.5 s)
+	-- The run home (QM, Oct 13; Client/ReturnRun): your pet stands still (Idle x MountSpeed x
+	-- its Speed: QM, so you know to move) unless you push forward, which runs it up to its
+	-- full sprint in about Ramp seconds; a hit drops it back to a walk (Walk); CatchAfter
+	-- seconds in all under full speed and the boss runs you over. (The tutorial's first ride
+	-- home still runs by itself.)
+	-- (QM, Oct 13, later: the pet sprints home by itself again, everywhere, and the boss never
+	-- catches you (CatchAfter math.huge; it was 5 s): the only risk is obstacles, Crashes of them
+	-- crash you. Idle is unused while it sprints by itself.)
+	ReturnRun = { Idle = 0, Walk = 0.4, Ramp = 1.2, CatchAfter = math.huge, Crashes = 5 },
 	ReturnSprint = true, -- the ride home always a sprint (SprintSpeed x ReturnSpeed)? On again (QM, Oct 11; Oct 10 had it off, Shift to sprint)
 	ReturnFovKick = 0, -- (QM, Oct 9: plain, was 20) degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
@@ -926,6 +968,10 @@ local Config = {
 	LassoRange = 51, -- studs, for a Horse-sized animal (QM, Oct 11: bigger ones further, below; Oct 12: 1.5x, was 34)
 	LassoRangeFrom = 4.6, -- a Horse's half width (studs): an animal this wide or narrower gets LassoRange
 	LassoRangeGain = 1.5, -- studs more range for each stud wider than that (1.5x with LassoRange, QM Oct 12; was 1)
+	-- And the faster you're riding, the further (QM, Oct 13: too hard to lasso at speed; about
+	-- 1.8x in the Volcano): x (1 + Gain x (your speed / Base - 1)), from 1 up to Max. Base is a
+	-- Speed 1 pet's sprint (MountSpeed x SprintSpeed); the Volcano's pets sprint about 6x that.
+	LassoSpeedReach = { Base = 88, Gain = 0.16, Max = 2.5 },
 	EggSlowMo = 0.5, -- time scale during the egg-grab close-up
 	-- Coming home with an egg: the pet leaps over the start line in slow motion while
 	-- the camera swings round to a hero angle in front and back again, landing
@@ -1034,11 +1080,16 @@ local Config = {
 	},
 	BullSpots = { Vector3.new(-18, 0, 173), Vector3.new(-75.2, 0, 129.6), Vector3.new(52, 0, 157.1), Vector3.new(-78.6, 0, 57.9), Vector3.new(84.9, 0, 93.3) },
 	Passes = {
-		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },
-		{ Key = "FastHatch", Name = "Fast Hatch", Price = 99, Id = 2014634454 },
-		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 40, Id = 2012972449 },
-		{ Key = "VIP", Name = "VIP", Price = 199, Id = 2013764414 },
+		-- (QM, Oct 13: his four passes, renamed from the old ones on their ids, so their old
+		-- owners own these now. VIP, Fast Hatch and Auto Hatch are gone.)
+		{ Key = "Speed", Name = "1.5x Speed", Price = 4, Id = 2012972449 }, -- every ride x PassSpeed (Config.rebirthSpeed)
+		{ Key = "DoubleGold", Name = "2x Cash", Price = 99, Id = 2014634454 }, -- x PassGoldMultiplier (Config.goldX)
+		{ Key = "GiantPets", Name = "Giant Pets", Price = 299, Id = 2014472441 },
+		{ Key = "StarterPack", Name = "Starter Pack", Price = 19, Id = 2013764414 }, -- Config.StarterPack, once (Hatchery)
 	},
+	PassSpeed = 1.5, -- Speed's
+	PassGiantScale = 2, -- Giant Pets': every pet of yours this x bigger (Skins.apply)
+	StarterPack = { Gold = 150000, Pet = "Snake" }, -- (QM's popup: 150k and the Snake)
 	PassGoldMultiplier = 2, -- DoubleGold's
 	PassHatchSpeed = 2, -- FastHatch's: hatch times / this
 	Vip = {
@@ -1131,34 +1182,38 @@ local Config = {
 		CrystalSeraph = { Speed = 0.5, Stamina = 3 },
 		CrystalPhoenix = { Speed = 2.57, Stamina = 3 }, -- World 2's Cavern Crystal Phoenix: Epic (as the Ice Golem until QM sets it)
 		OrangeButterfly = { Speed = 3.54, Stamina = 2 }, -- World 2's Woodland Orange Butterfly: Rare (as the Lionfish until QM sets it)
-		Penguin = { Speed = 1.99, Stamina = 1.5 }, -- (QM, Oct 12: 93% into the Tundra; was 1.72)
-		Boar = { Speed = 2.36, Stamina = 1.6 }, -- (QM, Oct 12: 30% into the Ocean; was 1.86)
-		Snowman = { Speed = 2.52, Stamina = 1.3 }, -- (QM, Oct 12: 45% into the Ocean; was 2.06)
-		IceGolem = { Speed = 2.57, Stamina = 3 }, -- (QM, Oct 12: 50% into the Ocean; was 2.37)
+		Penguin = { Speed = 2.355, Stamina = 1.5 }, -- (QM, Oct 13: 30% into the Ocean; was 1.99); (QM, Oct 12: 93% into the Tundra; was 1.72)
+		Boar = { Speed = 2.517, Stamina = 1.6 }, -- (QM, Oct 13: 45% into the Ocean; was 2.36); (QM, Oct 12: 30% into the Ocean; was 1.86)
+		Snowman = { Speed = 2.678, Stamina = 1.3 }, -- (QM, Oct 13: 60% into the Ocean; was 2.52); (QM, Oct 12: 45% into the Ocean; was 2.06)
+		IceGolem = { Speed = 2.86, Stamina = 3 }, -- (QM, Oct 13: 77% into the Ocean; was 2.57); (QM, Oct 12: 50% into the Ocean; was 2.37)
 		SnackYak = { Speed = 3, Stamina = 2 }, -- QM, Oct 4 (stamina 1 -> 2)
 		Icebringer = { Speed = 3.8, Stamina = 4 }, -- (QM, Oct 12: into the Volcano from the start line, ~9,380 of 9,024; was 3.6) -- (QM, Oct 11: a Legendary well past the next biome's Uncommons: 1.25x the Starfish, it lands in the Volcano)
 		-- Ocean
-		Starfish = { Speed = 3.37, Stamina = 2 }, -- (QM, Oct 12: 15% into the Volcano; was 2.87)
-		Squid = { Speed = 4.15, Stamina = 2.6 }, -- (QM, Oct 12: 60% into the Volcano; was 3.7)
+		Starfish = { Speed = 3.544, Stamina = 2 }, -- (QM, Oct 13: 25% into the Volcano, +10 points; was 3.37); (QM, Oct 12: 15% into the Volcano; was 2.87)
+		Squid = { Speed = 4.324, Stamina = 2.6 }, -- (QM, Oct 13: 70% into the Volcano, +10 points; was 4.15); (QM, Oct 12: 60% into the Volcano; was 3.7)
+		LionArcher = { Speed = 5.6, Stamina = 3 }, -- World 2's Ancient Tomb Rare: the Raptor's numbers until QM sets them
 		JadeStatue = { Speed = 7.12, Stamina = 3 }, -- World 2's Temple Epics: the Rockworm's numbers until QM sets them
 		GarnetStatue = { Speed = 7.12, Stamina = 3 },
 		Hawkmoth = { Speed = 4.15, Stamina = 2.6 }, -- World 2's Woodland Hawkmoth: Epic, the Squid's numbers until QM sets it (60% into the Temple, as the Squid is 60% into the Volcano)
-		KingCrab = { Speed = 3.98, Stamina = 3 }, -- (QM, Oct 12: 50% into the Volcano; was 3.6)
-		BlueCrab = { Speed = 5.7, Stamina = 3 }, -- (QM, Oct 11: as the Kraken, a touch slower)
-		Lionfish = { Speed = 3.54, Stamina = 2 }, -- (QM, Oct 12: 25% into the Volcano; was 3.4); QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
+		EagleSentry = { Speed = 6.2, Stamina = 3 }, -- World 2's Tomb Eagle Sentry: Epic, the Pterodactyl's numbers until QM sets its % reach
+		KingCrab = { Speed = 4.154, Stamina = 3 }, -- (QM, Oct 13: 60% into the Volcano, +10 points; was 3.98); (QM, Oct 12: 50% into the Volcano; was 3.6)
+		BlueCrab = { Speed = 5.964, Stamina = 3 }, -- (QM, Oct 13: 42% into the Jurassic, +10 points; was 5.7); (QM, Oct 11: as the Kraken, a touch slower)
+		Lionfish = { Speed = 3.714, Stamina = 2 }, -- (QM, Oct 13: 35% into the Volcano, +10 points; was 3.54); (QM, Oct 12: 25% into the Volcano; was 3.4); QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
 		PinkButterfly = { Speed = 3.28, Stamina = 2.4 }, -- World 2's Woodland Pink Butterfly: Uncommon (as the Clownfish until QM sets it)
 		LivingBirch = { Speed = 3.54, Stamina = 2 }, -- World 2 Woodland Maze Rare: the Lionfish's (25% into the Temple), until QM sets it
 		RollingLog = { Speed = 3.54, Stamina = 2 }, -- World 2's Woodland Maze Rare (QM, Oct 13; as the Lionfish until QM sets it)
+		TombJackal = { Speed = 5.6, Stamina = 3 }, -- World 2's Ancient Tomb Rare: the Raptor's, until QM sets it
 		Tiger = { Speed = 6.43, Stamina = 2.8 }, -- World 2's Temple Rare (QM, Oct 13; as the Fire Lobster until QM sets it)
-		Clownfish = { Speed = 3.28, Stamina = 2.4 }, -- (QM, Oct 12: 10% into the Volcano; was 2.8); (a little slower than the Starfish, an Ocean Uncommon too)
+		Clownfish = { Speed = 3.454, Stamina = 2.4 }, -- (QM, Oct 13: 20% into the Volcano, +10 points; was 3.28); (QM, Oct 12: 10% into the Volcano; was 2.8); (a little slower than the Starfish, an Ocean Uncommon too)
 		RoboShark = { Speed = 1.2, Stamina = 3 }, -- QM, Oct 4: starts at 1.2x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed 2.5 x this)
-		FishSchool = { Speed = 4.15, Stamina = 2.8 }, -- (QM, Oct 12: 60% into the Volcano; was 3.95)
-		Whale = { Speed = 3.45, Stamina = 10 }, -- (QM, Oct 12: 20% into the Volcano; was 3.2)
+		FishSchool = { Speed = 4.324, Stamina = 2.8 }, -- (QM, Oct 13: 70% into the Volcano, +10 points; was 4.15); (QM, Oct 12: 60% into the Volcano; was 3.95)
+		Whale = { Speed = 3.624, Stamina = 10 }, -- (QM, Oct 13: 30% into the Volcano, +10 points; was 3.45); (QM, Oct 12: 20% into the Volcano; was 3.2)
 		GiantGolem = { Speed = 5.8, Stamina = 3 }, -- World 2's Woodland Legendary Giant Golem (as the Kraken until QM sets it)
-		Kraken = { Speed = 5.8, Stamina = 3 }, -- (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
+		Kraken = { Speed = 6.064, Stamina = 3 }, -- (QM, Oct 13: 46% into the Jurassic, +10 points; was 5.8); (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
 		-- Volcano
 		Firebird = { Speed = 5.11, Stamina = 2.5 }, -- (QM, Oct 13: 10% into the Jurassic; was 4.59)
 		Catfish = { Speed = 5.11, Stamina = 2.5 }, -- World 2's Temple Uncommon (as the Firebird until QM sets it)
+		BloatedMummy = { Speed = 5, Stamina = 3 }, -- World 2's Ancient Tomb Uncommon (as the Ankylosaurus until QM sets it)
 		RockHog = { Speed = 6.56, Stamina = 2.8 }, -- (QM, Oct 13: 65% into the Jurassic; was 5.3)
 		Rockworm = { Speed = 7.12, Stamina = 3 }, -- (QM, Oct 13: 86% into the Jurassic; was 6.3)
 		FireLobster = { Speed = 6.43, Stamina = 2.8 }, -- (QM, Oct 13: 60% into the Jurassic; was 5.15)
@@ -1172,8 +1227,12 @@ local Config = {
 		Spinosaurus = { Speed = 5.4, Stamina = 3 }, -- (a guess: a touch under the T-Rex)
 		Pterodactyl = { Speed = 6.2, Stamina = 3 }, -- (a guess: an Epic, a touch past the T-Rex)
 		Ankylosaurus = { Speed = 5, Stamina = 3 }, -- (a guess: the Jurassic's Uncommon, under its Rares)
+		Scarab = { Speed = 5, Stamina = 3 }, -- World 2 Ancient Tomb Uncommon: the Ankylosaurus's, until QM sets it
 		PalmGuy = { Speed = 4.9, Stamina = 3 }, -- (a guess: an Uncommon, a touch under the Ankylosaurus)
+		Nut = { Speed = 7.5, Stamina = 3 }, -- World 2's Ancient Tomb Legendary Nut (the Bone Rex's until QM sets it)
+		Bes = { Speed = 7.5, Stamina = 3 }, -- World 2's Tomb Legendary Bes (as the Bone Rex until QM sets it)
 		BoneRex = { Speed = 7.5, Stamina = 3 }, -- (a guess: the final Legendary, the fastest in the game)
+		Geb = { Speed = 7.5, Stamina = 3 }, -- World 2's Ancient Tomb Legendary Geb (as the Bone Rex until QM sets it)
 		VolcanoTortoise = { Speed = 6.17, Stamina = 3 }, -- (QM, Oct 13: 50% into the Jurassic; was 5)
 		-- Godlands
 		Loong = { Speed = 0.5, Stamina = 8 }, -- QM, Oct 4: starts at 0.5x, its breath's kills take it up to 1x (Abilities.Loong.MaxSpeed 2 x this); sprints at 4x (PetSprintSpeed)
@@ -1216,13 +1275,61 @@ Config.Water = {
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
 Config.Places = { 126872244121414, 139418530058790 } -- [world] = its PlaceId
 Config.World = table.find(Config.Places, game.PlaceId) or 1
--- World 1's end (QM, Oct 13): a giant copy of the base's portal gate (Scale x its 1 size)
--- across the course, At studs before the finish line (World.server). Riding into it
--- unlocks World 2 for free and takes you there (Gold.server). Not in the other worlds.
-Config.EndPortal = if Config.World == 1 then { Scale = 5, At = 24 } else nil
--- What each world costs in gold to unlock, once (the Worlds menu's Buy; QM, Oct 13).
--- World 1 is everyone's.
-Config.WorldPrices = { 0, 400 }
+-- (World 1 ended at a giant portal to World 2 for a while: QM, Oct 13 took it out. Both
+-- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
+Config.EndPortal = nil
+-- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's
+-- World 2 bar; QM, Oct 13: 200k, was 1m, then 10m). World 1 is everyone's.
+Config.WorldPrices = { 0, 200000 }
+-- Rebirth (QM, Oct 13): World 2's Rebirth bar (World2Bar.client) for Prices[n] gold, your
+-- nth. It re-locks World 2 (save up for it again) and sends you to World 1; your pets stay.
+-- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,
+-- and every pet of yours wears Shared/Skins' Skins[n]: Gold, Diamond, Galaxy.
+Config.Rebirth = {
+	Prices = { 100000000, 1000000000, 10000000000 },
+	Gold = { 2, 4, 8 }, -- (each rebirth doubles again)
+	Speed = { 1.5, 1.5, 1.5 }, -- (QM's 1.5x: not stacked, so the courses stay ridable)
+	Scale = 1.5, -- (QM, Oct 13: rebirthed pets are this much bigger everywhere: Shared/Skins)
+}
+-- All your gold earnings' multiplier: the x2 Gold pass and your rebirths.
+function Config.goldX(player)
+	return (if player:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)
+		* (Config.Rebirth.Gold[player:GetAttribute("Rebirths") or 0] or 1)
+end
+-- x every ride's speed: rebirths and the 1.5x Speed pass.
+function Config.rebirthSpeed(player)
+	return (Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1) * (if player:GetAttribute("PassSpeed") then Config.PassSpeed else 1)
+end
+-- 15, 1.2k, 3.4m, 10m... (gold, short: the Worlds menu's prices and the World 2 bar)
+function Config.short(n)
+	for _, unit in { { 1e12, "t" }, { 1e9, "b" }, { 1e6, "m" }, { 1e3, "k" } } do
+		if n >= unit[1] then
+			return (string.format("%.1f", math.floor(n / unit[1] * 10) / 10):gsub("%.0$", "")) .. unit[2]
+		end
+	end
+	return tostring(math.floor(n))
+end
+-- The finish line's trails (QM, Oct 13): each time you ride over the finish line, in either
+-- world, you get the next of these, no message (Hatchery's FinishCourse; FinishTrail, saved
+-- with your gold). Bands top to bottom, as the Rainbow Trail's. After the last, no more.
+Config.FinishTrails = {
+	{ Name = "Yellow", Colors = { Color3.fromRGB(255, 246, 120), Color3.fromRGB(255, 226, 60), Color3.fromRGB(255, 200, 20), Color3.fromRGB(240, 170, 0) } },
+	{ Name = "Blue", Colors = { Color3.fromRGB(140, 220, 255), Color3.fromRGB(70, 180, 255), Color3.fromRGB(30, 130, 240), Color3.fromRGB(20, 80, 200) } },
+	{ Name = "Red", Colors = { Color3.fromRGB(255, 130, 110), Color3.fromRGB(255, 70, 60), Color3.fromRGB(220, 30, 30), Color3.fromRGB(160, 10, 20) } },
+	{ Name = "Rainbow" }, -- (the Rainbow Trail's bands)
+	{ Name = "Galaxy", Colors = { Color3.fromRGB(235, 225, 255), Color3.fromRGB(190, 90, 230), Color3.fromRGB(120, 50, 200), Color3.fromRGB(60, 70, 210), Color3.fromRGB(40, 20, 110), Color3.fromRGB(15, 10, 50) } },
+}
+-- The bands a player's ride trails, or nil for none: the best of their finish line trail
+-- and the bought Rainbow Trail (Config.RainbowTrail).
+local RAINBOW = {
+	Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 160, 50), Color3.fromRGB(255, 235, 70),
+	Color3.fromRGB(80, 220, 90), Color3.fromRGB(70, 150, 255), Color3.fromRGB(170, 90, 240),
+}
+function Config.trailColors(player)
+	local n = math.max(player:GetAttribute("FinishTrail") or 0, if player:GetAttribute("RainbowTrail") then 4 else 0) -- (the bought one counts as the Rainbow)
+	local trail = Config.FinishTrails[n]
+	return if trail then trail.Colors or RAINBOW else nil
+end
 -- The per-world saves' DataStore names: World 1's as they've always been, the others' with
 -- this on the end ("Pen_W2"). Gold's store is shared.
 function Config.storeName(name, world)
@@ -1230,10 +1337,55 @@ function Config.storeName(name, world)
 	return if world == 1 then name else name .. "_W" .. world
 end
 
+-- World 2's Temple and Tomb animals on its own curve (below): { speed, gold a second, hatch
+-- seconds }, out here so every world knows them. Each pen earns its own world's gold a second
+-- wherever you are (Config.incomeIn: QM, Oct 13, a World 2 pen earned World 1's numbers
+-- while you were in World 1, the Kitsune 45k there and 20k at home).
+Config.World2Pets = {
+	Catfish = { 5.107, 1200, 15 }, -- 10% into the Tomb
+	Fox = { 5.107, 1200, 15 }, -- 10% into the Tomb
+	Tiger = { 5.372, 3000, 45 }, -- 20% into the Tomb
+	NineTailedFox = { 5.504, 3000, 60 }, -- 25% into the Tomb
+	JadeStatue = { 5.636, 4500, 240 }, -- 30% into the Tomb
+	GarnetStatue = { 5.636, 4500, 240 }, -- 30% into the Tomb
+	Kitsune = { 7.47, 20000, 1800 }, -- to the finish line
+	BloatedMummy = { 6.033, 2400, 15 }, -- 45% into the Tomb
+	Scarab = { 6.033, 2400, 15 }, -- 45% into the Tomb
+	TombJackal = { 6.43, 6000, 60 }, -- 60% into the Tomb
+	LionArcher = { 6.43, 6000, 60 }, -- 60% into the Tomb
+	EagleSentry = { 6.826, 9000, 300 }, -- 75% into the Tomb
+	Nut = { 7.47, 40000, 2400 }, -- to the finish line
+	Geb = { 7.47, 40000, 2400 },
+	Bes = { 7.47, 40000, 2400 },
+}
+local baseIncome = table.clone(Config.PetIncome) -- (World 1's, before World 2 changes its own)
+function Config.incomeIn(world, kind)
+	local own = world == 2 and Config.World2Pets[kind]
+	return if own then own[2] else baseIncome[kind]
+end
+
 -- World 2's look: its first biome and base as QM's reference (marble walls, yellow
 -- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
 -- hue-turned as placeholders (tools/world2_terrain.luau's turns).
 if Config.World == 2 then
+	-- World 2's quests (QM, Oct 13): reach each biome, its egg World 1's reward's
+	-- equivalent here; and the other line, merge 3, lasso 10 Lions, lasso 3 Kitsunes (that
+	-- last one's three eggs). No invite line here.
+	Config.Quests = {
+		{
+			{ Text = "Reach Meadow", Kind = "reach", Biome = 1, Egg = "Eyeworm", NoPenLevel = true }, -- (World 1's Cactus: the next biome's Uncommon)
+			{ Text = "Reach Crimson Lands", Kind = "reach", Biome = 2, Egg = "CrystalCentipede" }, -- (the Penguin)
+			{ Text = "Reach Crystal Cavern", Kind = "reach", Biome = 3, Egg = "BrownMushroom" }, -- (the Snowman)
+			{ Text = "Reach Woodland Maze", Kind = "reach", Biome = 4, Egg = "OrangeButterfly" }, -- (the Lionfish)
+			{ Text = "Reach Temple", Kind = "reach", Biome = 5, Egg = "Tiger" }, -- (the Fire Lobster)
+			{ Text = "Reach Tomb", Kind = "reach", Biome = 6, Egg = "BloatedMummy" }, -- (the Palm Guy: the Uncommon)
+		},
+		{
+			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "Seraph" },
+			{ Text = "Lasso Lions", Kind = "lasso", Animal = "Lion", Need = 10, Egg = "Asura" },
+			{ Text = "Lasso Kitsunes", Kind = "lasso", Animal = "Kitsune", Need = 3, Egg = { "Geb", "Nut", "Bes" } },
+		},
+	}
 	Config.DefaultPet = "ArmoredHorse" -- World 2's starter, in your pen from the start (QM, Oct 13)
 	local rgb = Color3.fromRGB
 	local TURN = { 0.55, 0.6, 0.35, 0.2, 0.45, 0.75 } -- [biome] hue turn
@@ -1354,6 +1506,15 @@ if Config.World == 2 then
 	-- The last: the Ancient Tomb (QM, Oct 13; tools/world2_tomb.luau): sand, a gold causeway a
 	-- stud up and gold daises two up in darker frames. (World 2's zones end: no endless.)
 	local tomb = Config.Biomes[6]
+	tomb.Herd = table.clone(tomb.Herd)
+	tomb.Herd.Geb = 0.03 -- Geb (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
+	tomb.Herd.Nut = 0.03 -- Nut (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
+	tomb.Herd.Bes = 0.03 -- Bes (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
+	tomb.Herd.TombJackal = 0.15 -- the Tomb's Rare (QM, Oct 13), as often as the Raptor
+	tomb.Herd.LionArcher = 0.15 -- the Lion Archer (QM, Oct 13), the Tomb's Rare, as often as the Raptor
+	tomb.Herd.EagleSentry = 0.08 -- the Eagle Sentry (QM, Oct 13), a Tomb Epic as often as the Pterodactyl
+	tomb.Herd.BloatedMummy = 0.25 -- the Tomb's Uncommon (QM, Oct 13), as often as the Ankylosaurus
+	tomb.Herd.Scarab = 0.25 -- the Tomb's Uncommon (QM, Oct 13), as often as the Ankylosaurus
 	tomb.GroundColors = { rgb(220, 201, 152), rgb(210, 191, 142) } -- (its base is Sand)
 	tomb.Patches = {
 		Sand = { rgb(220, 201, 152), rgb(210, 191, 142) }, -- #DCC998
@@ -1370,6 +1531,9 @@ if Config.World == 2 then
 	crimson.GateColor = rgb(255, 59, 92)
 	cavern.GateColor = rgb(92, 225, 255)
 	woodland.WallColors = { rgb(70, 42, 24), rgb(60, 36, 20) } -- dark brown (QM, Oct 13)
+	-- Not the Ocean's sea any more (its blue haze, hue-turned pink here, and bubbles): a very
+	-- subtle autumn orange haze far off (QM, Oct 13; Ocean.client).
+	woodland.Haze = { Color = rgb(250, 176, 110), Tint = rgb(255, 248, 238), FogStart = 250, FogEnd = 1400, FadeTime = 1.5, Bubbles = 0, NoDepths = true }
 	woodland.CapColor = rgb(242, 109, 57) -- vibrant autumn leaves on top (QM, Oct 13)
 	woodland.GateColor = rgb(242, 109, 57)
 	temple.GateColor = rgb(130, 226, 80)
@@ -1391,6 +1555,7 @@ if Config.World == 2 then
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
 	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
 	ownHerd(5, { "Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune" }) -- the Temple
+	ownHerd(6, { "TombJackal", "LionArcher", "Nut", "Geb", "EagleSentry", "Bes", "BloatedMummy", "Scarab" }) -- the Tomb
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do
@@ -1400,30 +1565,60 @@ if Config.World == 2 then
 		end
 		biome.Herd = if next(herd) then herd else { Fish = 1 }
 	end
+	-- The last three biomes' animals bigger, and more of them (QM, Oct 13): x their size
+	-- (AnimalScale, on top of any of their own: wild and as pets) and x how often they spawn.
+	Config.AnimalScale = table.clone(Config.AnimalScale)
+	for i, more in { [4] = { size = 2, spawn = 1.6 }, [5] = { size = 2.5, spawn = 2 }, [6] = { size = 3, spawn = 2.5 } } do
+		for kind in own[i] do
+			Config.AnimalScale[kind] = (Config.AnimalScale[kind] or 1) * more.size
+		end
+		local biome = Config.Biomes[i]
+		biome.HerdSpawnEvery = (biome.HerdSpawnEvery or Config.HerdSpawnEvery) / more.spawn
+	end
+	Config.Biomes[6].HerdSpawnEvery = Config.Biomes[4].HerdSpawnEvery -- (the Tomb as often as the Woodland: QM, Oct 13, 2.5x was far too many)
 	-- World 2's speeds (QM, Oct 13: each animal's % into a biome on a full sprint ride,
-	-- 2,904 studs per 1 Speed). The rest keep theirs (the Seraphs 0.5, the Majestic Unicorn,
-	-- Eyeworm, Asura and Crystal Centipede as they were).
+	-- 2,904 studs per 1 Speed). The rest keep theirs (the Seraphs 0.5, the Majestic Unicorn and
+	-- the Asura as they were).
 	for kind, speed in {
 		MarbleFish = 0.809, -- 10% into the Crimson Lands
 		Lion = 0.872, -- 20% into the Crimson Lands
 		Crocodile = 0.878, -- 21% into the Crimson Lands
 		Buffalo = 0.934, -- 30% into the Crimson Lands
 		MarbleColossus = 1.028, -- 45% into the Crimson Lands
-		CrimsonScorpion = 1.405, -- 5% into the Crystal Cavern
-		IvorySpider = 1.537, -- 25% into the Crystal Cavern (QM, Oct 13; was 45%)
-		Maw = 1.438, -- 10% into the Crystal Cavern
-		Beholder = 1.504, -- 20% into the Crystal Cavern
-		RedMushroom = 2.14, -- 10% into the Woodland
-		BlueCrystal = 2.14, -- 10% into the Woodland
-		BrownMushroom = 2.248, -- 20% into the Woodland
-		PinkCrystal = 2.248, -- 20% into the Woodland
-		PurpleMushroom = 2.302, -- 25% into the Woodland
-		CrystalSpider = 2.355, -- 30% into the Woodland
-		CrystalPhoenix = 3.097, -- 99% into the Woodland
-		CrystalElephant = 4.409, -- 75% into the Temple
+		CrimsonScorpion = 1.603, -- 35% into the Crystal Cavern (QM, Oct 13)
+		IvorySpider = 1.901, -- 80% into the Crystal Cavern (QM, Oct 13)
+		Maw = 1.702, -- 50% into the Crystal Cavern (QM, Oct 13)
+		Beholder = 1.769, -- 60% into the Crystal Cavern (QM, Oct 13)
+		RedMushroom = 2.355, -- 30% into the Woodland (QM, Oct 13)
+		BlueCrystal = 2.355, -- 30% into the Woodland (QM, Oct 13)
+		BrownMushroom = 2.57, -- 50% into the Woodland (QM, Oct 13)
+		PinkCrystal = 2.57, -- 50% into the Woodland (QM, Oct 13)
+		PurpleMushroom = 2.742, -- 66% into the Woodland (QM, Oct 13)
+		CrystalSpider = 2.764, -- 68% into the Woodland (QM, Oct 13)
+		CrystalPhoenix = 3.281, -- 10% into the Temple (QM, Oct 13)
+		CrystalElephant = 3.281, -- 10% into the Temple (QM, Oct 13)
+		Eyeworm = 1.438, -- 10% into the Crystal Cavern (QM, Oct 13)
+		CrystalCentipede = 2.14, -- 10% into the Woodland (QM, Oct 13)
+		Caterpillar = 3.541, -- 25% into the Temple (QM, Oct 13: +10 points, was 15%)
+		PinkButterfly = 3.455, -- 20% into the Temple (QM, Oct 13: +10 points, was 10%)
+		OrangeButterfly = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
+		LivingBirch = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
+		RollingLog = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
+		Hawkmoth = 4.322, -- 70% into the Temple (QM, Oct 13: +10 points, was 60%)
+		GiantGolem = 6.06, -- 46% into the Tomb (QM, Oct 13: +10 points, was 36%)
 	} do
 		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
 		Config.AnimalStats[kind].Speed = speed
+	end
+	-- The Temple and Tomb on World 2's own curve (QM, Oct 13: "balance them to whatever
+	-- seems reasonable"; they had World 1's Volcano and Jurassic numbers). Speed as above:
+	-- the Temple's reach into the Tomb, its Legendary to the finish line; the Tomb's (the
+	-- last biome) further into itself, its Legendaries to the finish line. Income about 2x a
+	-- biome by rarity; Legendaries hatch in 30 and 40 minutes, not World 1's 12 hours.
+	for kind, s in Config.World2Pets do
+		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
+		Config.AnimalStats[kind].Speed = s[1]
+		Config.PetIncome[kind], Config.PetHatchTime[kind] = s[2], s[3]
 	end
 	-- The trophy angels (QM, Oct 13: his weights; were 1 in 300 of their biome's stampede).
 	for i, weight in { 0.001, 0.002, 0.002 } do
