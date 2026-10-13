@@ -50,7 +50,7 @@ Skins.Skins = {
 		-- (second try, Oct 13: still read royal blue in game, so darker again and toward magenta)
 		stops = { rgb(16, 6, 26), rgb(36, 12, 56), rgb(64, 22, 92), rgb(120, 44, 140) },
 		span = { 0.05, 0.6 },
-		texture = "", -- assets/particles/GalaxyStars.png: stars and nebula wisps over its faces (TODO upload)
+		texture = "rbxassetid://88920972936817", -- assets/particles/GalaxyStars.png: stars and nebula wisps over its faces
 		glow = rgb(90, 230, 255),
 		light = rgb(180, 90, 255),
 	},
