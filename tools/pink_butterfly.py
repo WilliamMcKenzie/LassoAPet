@@ -5,14 +5,21 @@ four chunky stepped wings in a pink gradient: pale pink by the body, bubblegum i
 hot pink at the edges, a raised white spot on each wing. Few blocks (QM's World 2 rule), no
 black veins, so it reads apart from the Monarch boss and the Orange Butterfly.
 
-Run: python3 tools/pink_butterfly.py [out_dir]
+Run: python3 tools/pink_butterfly.py [out_dir] [--gif]
+Writes designs/woodland/PinkButterfly.bbmodel (animated), its game model
+src/shared/Animals/PinkButterflyModel.luau (--zyx) and the lineup render.
 
 Built in Blockbench's ZYX Euler order; every bone rests at 0 (the wings' shallow V is baked
 into the cubes). Bones (the Monarch's names): root (the thorax) -> neck (head, eyes,
 antennae); root -> WingFL, WingFR, WingBL, WingBR (flap about Z); root -> Abdomen.
+
+  idle    hovers, wings beating gently, bobbing with each beat
+  walk    quicker beats, nosing down a little
+  gallop  big fast beats, nosed down into the chase
 """
 
 import json
+import math
 import os
 import sys
 
@@ -25,7 +32,9 @@ import horse_rig  # noqa: E402
 horse_rig.EULER = "ZYX"
 import snake_design as S  # noqa: E402
 import angel_boss as AB  # noqa: E402  (box, axis_rot)
+from horse_rig import write_animations  # noqa: E402
 from partlib import render  # noqa: E402
+from snake_rig import track  # noqa: E402
 import animal_designs as A  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -126,6 +135,37 @@ def build():
     return model
 
 
+TAU = 2 * math.pi
+
+
+def animations():
+    """The Monarch's flaps, quicker and smaller for a pet: the forewings lead, the hindwings
+    follow, the body bobs up on each downstroke (position in Blockbench units, 10 a stud)."""
+    def flap(L, amp, bias, beats, lag=0.5, n=24):
+        out = {}
+        for w, ph in (("WingF", 0.0), ("WingB", lag)):
+            for s, n_ in ((1, "R"), (-1, "L")):
+                out[w + n_] = [track(L, lambda u, s=s, ph=ph, beats=beats: (
+                    0, 0, s * (bias + amp * math.sin(TAU * beats * u - ph))), n)]
+        return out
+
+    L = 1.0
+    idle = {**flap(L, 30, 8, 2),
+            "root": [track(L, lambda u: (0, 4 * math.sin(TAU * 2 * u - 0.6), 0), 16, "position")],
+            "neck": [track(L, lambda u: (3 * math.sin(TAU * u), 5 * math.sin(TAU * u), 0), 16)],
+            "Abdomen": [track(L, lambda u: (6 * math.sin(TAU * 2 * u), 0, 0), 16)]}
+    Lw = 0.5
+    walk = {**flap(Lw, 38, 8, 1, n=16),
+            "root": [track(Lw, lambda u: (-6, 0, 0), 4), track(Lw, lambda u: (0, 5 * math.sin(TAU * u - 0.6), 0), 16, "position")],
+            "Abdomen": [track(Lw, lambda u: (8 * math.sin(TAU * u), 0, 0), 16)]}
+    Lg = 0.3
+    gallop = {**flap(Lg, 45, 10, 1, n=16),
+              "root": [track(Lg, lambda u: (-12, 0, 0), 4), track(Lg, lambda u: (0, 6 * math.sin(TAU * u - 0.8), 0), 16, "position")],
+              "neck": [track(Lg, lambda u: (6, 0, 0), 4)],
+              "Abdomen": [track(Lg, lambda u: (10 * math.sin(TAU * u), 0, 0), 16)]}
+    return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lg, gallop)}
+
+
 def extent(parts):
     pts = np.concatenate([q for p in parts for q in p.polys])
     return pts.min(0), pts.max(0)
@@ -135,8 +175,12 @@ def main(out="/mnt/project-files/world2/woodland/renders"):
     os.makedirs(out, exist_ok=True)
     os.makedirs(os.path.dirname(MODEL), exist_ok=True)
     m = build()
+    write_animations(m, {g["name"]: g for g in m["groups"]}, animations())
     with open(MODEL, "w") as f:
         json.dump(m, f, separators=(",", ":"))
+    import bbmodel_to_luau
+    bbmodel_to_luau.ORDER = "ZYX"
+    bbmodel_to_luau.main(os.path.relpath(MODEL, ROOT), os.path.join(ROOT, "src", "shared", "Animals", NAME + "Model.luau"))
     parts = S.posed(m)
     lo, hi = extent(parts)
     print("elements", len(m["elements"]), "size", np.round(hi - lo, 1), "lowest", round(lo[1], 2))
@@ -155,7 +199,20 @@ def main(out="/mnt/project-files/world2/woodland/renders"):
     sheet.paste(render(parts + hparts, W=640, H=520, fov=40, eye=(-14, 22, -40), target=(6, 4, 0)), (0, 0))
     sheet.paste(render(parts, W=640, H=520, fov=40, eye=(0, 34, 6), target=(0, 5, 1)), (640, 0))
     sheet.save(os.path.join(os.environ.get("SHEET_DIR", "/tmp"), NAME + "_sheet.png"))
+    if "--gif" in sys.argv:
+        cams = [dict(eye=(-22, 17, -30), target=(0, 6.5, 0)), dict(eye=(0, 10, -34), target=(0, 6.5, 0))]
+        frames = []
+        for name, n, loops in (("idle", 20, 2), ("walk", 10, 4), ("gallop", 8, 5)):
+            anim = next(a for a in m["animations"] if a["name"] == name)
+            for _ in range(loops):
+                for k in range(n):
+                    ps = S.posed(m, anim, anim["length"] * k / n)
+                    im = Image.new("RGB", (880, 360))
+                    for i, cam in enumerate(cams):
+                        im.paste(render(ps, W=440, H=360, fov=44, **cam), (440 * i, 0))
+                    frames.append(A.label(im, [name] * 2))
+        A.gif(os.path.join(out, NAME + "_anims.gif"), frames, fps=20)
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    main(*[a for a in sys.argv[1:] if not a.startswith("--")])

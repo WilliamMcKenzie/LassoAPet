@@ -156,6 +156,13 @@ return {
 		{ "Horn", 0, 190, 231 }, -- cyan crystals and trim
 		{ "Accent", 229, 131, 251 }, -- pink crystals
 	},
+	PinkButterfly = {
+		{ "Body", 110, 44, 112 }, -- plum body
+		{ "Marking", 255, 126, 200 }, -- bubblegum wings
+		{ "Marking", 255, 200, 232 }, -- pale pink by the body
+		{ "Accent", 255, 52, 156 }, -- hot-pink wing edges
+		{ "Accent", 255, 110, 190 }, -- stripes and antenna tips
+	},
 	CrystalPhoenix = {
 		{ "Body", 104, 58, 184 }, -- body, wing arms
 		{ "Body", 146, 96, 226 }, -- head, neck, wing bands

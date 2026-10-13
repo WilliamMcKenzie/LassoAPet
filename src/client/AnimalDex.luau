@@ -121,6 +121,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	PinkCrystal = "Sparkles when it laughs, which is all the time.",
 	CrystalSpider = "Knits sweaters for all eight legs. Takes a while to get dressed.",
 	CrystalElephant = "Grew its own armour. Never forgets, and never lets you forget it's sparkly.",
+	PinkButterfly = "Was a caterpillar last week. Won't stop talking about it.",
 	CrystalPhoenix = "The Phoenix's cousin who doesn't like getting burnt. Shatters instead.",
 	Rhino = "Ran away to join the mafia at a young age. Still pays horses tuition.",
 	Unicorn = "Just a horse who can jump very high. The horn is glued on.",
