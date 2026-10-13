@@ -8,7 +8,7 @@ Run: python3 tools/world2_temple.py [out_dir]
   side of it (a stud up, the path worn into it).
 - In the first half, one or two little ponds in the grass, ringed by the path's rock,
   with a few lily pads. Their water is named Water (shallow, a stud down) and
-  DeepWater (two down) so Studio can run the flowing-water texture over them.
+  DeepWater (same level, deep only by its tint) so Studio can run the flowing-water texture over them.
 - In the second half the rock spreads out to the dirt, the grass thins to the odd patch, and marble
   #C8C8C8 lies in it, a stud up, always with rock on all eight sides.
 - Down both sides of the whole biome, a strip of #C8C8C8 dirt (the mesh thread's trees
@@ -43,7 +43,7 @@ COLOURS = {  # part, checker
     WATER: [(70, 156, 204), (62, 144, 190)],  # (Studio's flowing texture goes over these)
     DEEP: [(44, 110, 168), (38, 99, 154)],
 }
-TOPS = {ROCK: 0, GRASS: 1, MARBLE: 1, SIDE: 1, WATER: -1, DEEP: -2}
+TOPS = {ROCK: 0, GRASS: 1, MARBLE: 1, SIDE: 1, WATER: -1, DEEP: -1}  # (all water level, QM: deep only its tint)
 WALL, CAP = [(200, 200, 200), (186, 186, 186)], (176, 176, 176)
 LILY = (86, 150, 50)
 SIDE_W = 2  # tiles of dirt in from each wall
