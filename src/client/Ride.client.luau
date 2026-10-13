@@ -852,7 +852,7 @@ startRide = function(model, at)
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
 		mount.merged, mount.fuse, mount.stats, mount.tier = fromPen.merged, fromPen.fuse, fromPen.stats, fromPen.tier
 		vfx.Fusion.paint(mount.animal.model, mount.kind, mount.fuse)
-		vfx.Skins.apply(mount.animal, player:GetAttribute("Rebirths")) -- (your rebirth's skin, as in the pen)
+		vfx.Skins.apply(mount.animal, player:GetAttribute("Rebirths"))
 		mount.own = true -- your own pet: no egg for bringing it home (it stays yours once let go and lassoed back)
 	else
 		mount, starter = starter, nil
@@ -3565,7 +3565,7 @@ local function checkRide(dt)
 			if Config.Boss.On then -- (the boss first: BossChase, then turnHome; QM, Oct 10)
 				phase, mount.speed = "boss", 0 -- (stopped dead, or you'd run on through it: QM)
 				vfx.bossChase.start(mount.x, mount.z)
-				Hud.setHold(nil) -- (BOSS IN goes as it appears: QM)
+				Hud.setHold(nil)
 			else
 				turnHome()
 			end
@@ -4355,7 +4355,7 @@ RunService.PreSimulation:Connect(function(dt)
 			if kind then
 				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
 			end
-			task.delay(kind and vfx.newAnimal.show(kind) or 0.5, function() -- (the animal's in your pen)
+			task.delay(kind and vfx.newAnimal.show(kind) or 0.5, function()
 				if phase == "home" then
 					finishRide(mount.x, mount.z)
 				end
