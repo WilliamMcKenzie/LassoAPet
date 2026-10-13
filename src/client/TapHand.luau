@@ -81,16 +81,20 @@ gui.IgnoreGuiInset = true
 gui.ResetOnSpawn = false
 gui.DisplayOrder = 30
 gui.Enabled = false
-local sides = {}
-for i = 1, 4 do
-	local f = Instance.new("Frame")
-	f.BackgroundColor3 = Color3.new(0, 0, 0)
-	f.BackgroundTransparency = DIM
-	f.BorderSizePixel = 0
-	f.Active = false
-	f.Parent = gui
-	sides[i] = f
-end
+-- (one see-through box round the target, its border a huge dark stroke out over the rest
+-- of the screen: one piece, so no seams, QM)
+local hole = Instance.new("Frame")
+hole.BackgroundTransparency = 1
+hole.BorderSizePixel = 0
+hole.Active = false
+local dark = Instance.new("UIStroke")
+dark.Color = Color3.new(0, 0, 0)
+dark.Transparency = DIM
+dark.Thickness = 4000
+dark.LineJoinMode = Enum.LineJoinMode.Miter
+dark.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+dark.Parent = hole
+hole.Parent = gui
 local copy = Instance.new("ImageLabel") -- (the hand, over the dark)
 copy.BackgroundTransparency = 1
 copy.ZIndex = 2
@@ -105,13 +109,11 @@ local function spotlight(image)
 	end
 	-- (AbsolutePosition's the same frame for every ScreenGui; a Position here is from this
 	-- one's corner, which is above the screen's when it's under the top bar)
-	local view, corner = gui.AbsoluteSize, gui.AbsolutePosition
+	local corner = gui.AbsolutePosition
 	local low = target.AbsolutePosition - Vector2.new(PAD, PAD) - corner
-	local high = target.AbsolutePosition + target.AbsoluteSize + Vector2.new(PAD, PAD) - corner
-	sides[1].Position, sides[1].Size = UDim2.fromOffset(0, 0), UDim2.fromOffset(view.X, math.max(low.Y, 0))
-	sides[2].Position, sides[2].Size = UDim2.fromOffset(0, high.Y), UDim2.fromOffset(view.X, math.max(view.Y - high.Y, 0))
-	sides[3].Position, sides[3].Size = UDim2.fromOffset(0, low.Y), UDim2.fromOffset(math.max(low.X, 0), high.Y - low.Y)
-	sides[4].Position, sides[4].Size = UDim2.fromOffset(high.X, low.Y), UDim2.fromOffset(math.max(view.X - high.X, 0), high.Y - low.Y)
+	local size = target.AbsoluteSize + Vector2.new(PAD, PAD) * 2
+	hole.Position = UDim2.fromOffset(math.round(low.X), math.round(low.Y))
+	hole.Size = UDim2.fromOffset(math.round(size.X), math.round(size.Y))
 	local at = image.AbsolutePosition - corner
 	copy.Image = image.Image
 	copy.Position = UDim2.fromOffset(at.X, at.Y)
