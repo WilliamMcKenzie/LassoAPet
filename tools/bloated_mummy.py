@@ -14,7 +14,8 @@ and a teal scarab beetle crawls out of one. Loose bandage ends hang from the hea
 side, and one trails behind on the ground.
 
 Bones: root (body, seat on top behind the head), neck (head), ArmL/R, LegFL/FR, Tail (the
-trailing bandage). Phase 1: model only, no animations yet.
+trailing bandage). Animations: the Living Mushrooms' fat waddle (tools/living_mushroom_rig.py) with the zombie arms bobbing
+up and down, and the trailing bandage swishing behind.
 
     python3 tools/bloated_mummy.py
 
@@ -64,7 +65,7 @@ def build():
     a = Animal("BloatedMummy", "Uncommon")
     a.bone_order = [("root", None), ("neck", "root"), ("ArmL", "root"), ("ArmR", "root"),
                     ("LegFL", "root"), ("LegFR", "root"), ("Tail", "root")]
-    a.animations = lambda: {}
+    a.animations = animations
 
     def rbox(name, c, size, color, bone, R=None):
         p = a.box(name, np.array(c) - np.array(size) / 2, np.array(c) + np.array(size) / 2, color, bone)
@@ -124,19 +125,19 @@ def build():
         out = np.sign(c[0]) if ax == "x" else np.sign(c[2])
         k = 0 if ax == "x" else 2
         size = np.array([w, h, w]); size[k] = 0.06
-        a.box(name, c - size / 2, c + size / 2, GAP, "root").plain = True
+        a.box("Plain" + name, c - size / 2, c + size / 2, GAP, "root").plain = True
         c2 = c.copy(); c2[k] += out * 0.04
         s2 = size * np.array([0.55, 0.5, 0.55]); s2[k] = 0.06
-        g = a.box(name + "Glow", c2 - s2 / 2, c2 + s2 / 2, GLOW, "root")
+        g = a.box("Glow" + name, c2 - s2 / 2, c2 + s2 / 2, GLOW, "root")
         g.neon = True
         for j, (dy, d, sz) in enumerate([(0.7, 0.35, 0.28), (1.35, 0.6, 0.2), (1.9, 0.5, 0.14)]):
             wc = c.copy(); wc[1] += dy; wc[k] += out * d
             wc[2 if k == 0 else 0] += (-0.2, 0.15, -0.05)[j]
-            a.box(f"{name}Wisp{j + 1}", wc - sz / 2, wc + sz / 2, GLOW, "root").neon = True
+            a.box(f"GlowWisp{name[4:]}{j + 1}", wc - sz / 2, wc + sz / 2, GLOW, "root").neon = True
     # a little teal scarab crawling out of the left hole, heading forward
     sx0, sy0, sz0 = -HX - 0.06, 2.9, -1.3
     a.box("ScarabShell", (sx0 - 0.4, sy0 - 0.35, sz0 - 0.2), (sx0, sy0 + 0.35, sz0 + 0.6), TEAL, "root")
-    a.box("ScarabSeam", (sx0 - 0.43, sy0 - 0.03, sz0 - 0.2), (sx0 - 0.4, sy0 + 0.03, sz0 + 0.6), BEETLE, "root").plain = True
+    a.box("PlainScarabSeam", (sx0 - 0.43, sy0 - 0.03, sz0 - 0.2), (sx0 - 0.4, sy0 + 0.03, sz0 + 0.6), BEETLE, "root").plain = True
     a.box("ScarabBand", (sx0 - 0.42, sy0 - 0.37, sz0 + 0.0), (sx0 - 0.02, sy0 + 0.37, sz0 + 0.12), GOLD, "root")
     a.box("ScarabHead", (sx0 - 0.32, sy0 - 0.2, sz0 - 0.5), (sx0 - 0.05, sy0 + 0.2, sz0 - 0.2), BEETLE, "root")
     for i, dy in enumerate((-0.12, 0.12)):
@@ -168,7 +169,7 @@ def build():
     am = -HZ - P - 0.1
     a.box("AmuletBody", (-0.55, 3.55, am - 0.25), (0.55, 4.55, am), GOLD, "root")
     a.box("AmuletHead", (-0.35, 4.55, am - 0.2), (0.35, 4.85, am), GOLD_DARK, "root")
-    a.box("AmuletSplit", (-0.04, 3.6, am - 0.28), (0.04, 4.5, am - 0.24), GOLD_DARK, "root").plain = True
+    a.box("PlainAmuletSplit", (-0.04, 3.6, am - 0.28), (0.04, 4.5, am - 0.24), GOLD_DARK, "root").plain = True
     a.box("AmuletSun", (-0.3, 4.85, am - 0.18), (0.3, 5.3, am - 0.02), CARNELIAN, "root")
     a.box("AmuletGem", (-0.22, 3.85, am - 0.34), (0.22, 4.25, am - 0.24), TEAL, "root")
     for s, sx in (("L", -1), ("R", 1)):
@@ -188,9 +189,9 @@ def build():
     fz = z0 - 0.04
     a.box("EyeSlit", (-x + 0.15, 7.5, fz - 0.03), (x - 0.15, 8.6, fz + 0.04), GAP, "neck").plain = True
     a.box("EyeL", (-1.35, 7.35, fz - 0.1), (-0.15, 8.55, fz - 0.03), WHITE, "neck")
-    a.box("PupilL", (-0.95, 7.65, fz - 0.14), (-0.45, 8.15, fz - 0.1), PUPIL, "neck").neon = True
+    a.box("GlowPupilL", (-0.95, 7.65, fz - 0.14), (-0.45, 8.15, fz - 0.1), PUPIL, "neck").neon = True
     a.box("EyeR", (0.35, 7.6, fz - 0.1), (1.2, 8.45, fz - 0.03), WHITE, "neck")
-    a.box("PupilR", (0.55, 7.75, fz - 0.14), (0.95, 8.15, fz - 0.1), PUPIL, "neck").neon = True
+    a.box("GlowPupilR", (0.55, 7.75, fz - 0.14), (0.95, 8.15, fz - 0.1), PUPIL, "neck").neon = True
     # brow wrap over the slit, and a bandage slipped down across the right eye
     rbox("BrowWrap", (0, 8.75, fz - 0.06), (2 * x + 0.1, 0.3, 0.12), SAND, "neck", Rz(-3))
     rbox("Slipped", (0.75, 8.2, fz - 0.2), (1.4, 0.38, 0.1), SAND2, "neck", Rz(-28))
@@ -255,6 +256,28 @@ def build():
 
     a.meta = {"seat": (0, 6.85, 1.15), "neck_loop": {"center": (0, 7.6, -1.5), "radius": 2.3}}
     return a
+
+
+def animations():
+    """idle / walk / gallop from the Living Mushrooms (same bone names, 10 Blockbench units per
+    stud), and the trailing bandage (Tail) swishing side to side and lifting at speed."""
+    from living_mushroom_rig import animations as waddle
+    import math
+    out = {}
+    for name, (L, tracks) in waddle(1.0).items():
+        tracks = dict(tracks)
+        swish, lift, n = {"idle": (6, 0, 1), "walk": (14, 6, 1), "gallop": (20, 14, 2)}[name]
+        tracks["Tail"] = [{"channel": "rotation", "interp": "catmullrom", "keys": [
+            (round(L * k / 16, 4), (lift * (0.5 + 0.5 * math.sin(2 * math.pi * n * k / 16)),
+                                    swish * math.sin(2 * math.pi * k / 16), 0)) for k in range(17)]}]
+        # the zombie arms reach forward, so they bob up and down (X) instead of swinging
+        bob, sway, ph = {"idle": (4, 3, 0.5), "walk": (10, 6, 0.5), "gallop": (18, 4, 0.25)}[name]
+        for arm, sx, off in (("ArmL", -1, 0.0), ("ArmR", 1, ph)):
+            tracks[arm] = [{"channel": "rotation", "interp": "catmullrom", "keys": [
+                (round(L * k / 16, 4), (bob * math.sin(2 * math.pi * (k / 16 + off)),
+                                        sx * sway * math.sin(2 * math.pi * (k / 16 + off + 0.25)), 0)) for k in range(17)]}]
+        out[name] = (L, tracks)
+    return out
 
 
 CAM = dict(eye=(-15, 11, -22), target=(0, 4.4, -0.6), W=640, H=640, fov=32)
