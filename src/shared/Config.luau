@@ -1176,6 +1176,19 @@ if Config.World == 2 then
 	}
 	temple.WallColors = { rgb(200, 200, 200), rgb(186, 186, 186) }
 	temple.CapColor = rgb(176, 176, 176)
+	-- The last: the Ancient Tomb (QM, Oct 13; tools/world2_tomb.luau): sand, a gold causeway a
+	-- stud up and gold daises two up in darker frames. (World 2's zones end: no endless.)
+	local tomb = Config.Biomes[6]
+	tomb.GroundColors = { rgb(220, 201, 152), rgb(210, 191, 142) } -- (its base is Sand)
+	tomb.Patches = {
+		Sand = { rgb(220, 201, 152), rgb(210, 191, 142) }, -- #DCC998
+		Dune = { rgb(208, 184, 134), rgb(198, 174, 124) }, -- #D0B886
+		Paving = { rgb(208, 184, 134), rgb(198, 174, 124) },
+		Gold = { rgb(226, 194, 0), rgb(196, 167, 3) }, -- #E2C200 / #C4A703
+		Frame = { rgb(196, 167, 3), rgb(180, 152, 2) },
+	}
+	tomb.WallColors = { rgb(211, 183, 66), rgb(196, 168, 54) } -- #D3B742
+	tomb.CapColor = rgb(186, 158, 46)
 end
 
 return Config
