@@ -142,6 +142,21 @@ return {
 		{ "Horn", 0, 190, 231 }, -- cyan crystals and pincers
 		{ "Accent", 229, 131, 251 }, -- pink crystals
 	},
+	Eyeworm = {
+		{ "Body", 170, 22, 48 },
+		{ "Belly", 214, 70, 92 },
+		{ "Marking", 122, 44, 168 }, -- rings, brow, tail tip
+		parts = { Eye = "Fixed", Pupil = "Fixed", Mouth = "Fixed" },
+	},
+	Maw = {
+		{ "Body", 170, 22, 48 },
+		{ "Marking", 122, 44, 168 }, -- lips, tentacle tips
+	},
+	IvorySpider = {
+		{ "Body", 246, 240, 226 },
+		{ "Accent", 200, 190, 174 }, -- knees, spinnerets
+		{ "Hoof", 150, 138, 126 }, -- feet, fangs
+	},
 	Sandworm = {
 		{ "Body", 228, 178, 104 },
 		{ "Belly", 248, 224, 172 },

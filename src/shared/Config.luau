@@ -379,7 +379,7 @@ local Config = {
 		-- D1 eggs you come back for.
 		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, MarbleFish = 15, Lion = 60, MarbleColossus = 120, MajesticUnicorn = 300, -- Meadow (the Marble Fish, Lion, Marble Colossus and Majestic Unicorn: World 2's, as the Pinto, a Rare, the Rhino and Unicorn)
 		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 600, -- Desert
-		Eyeworm = 15, Maw = 60, -- World 2 Crimson Lands
+		Eyeworm = 15, Maw = 60, IvorySpider = 75, -- World 2 Crimson Lands
 		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 120, Icebringer = 900, SnackYak = 3600, CrystalCentipede = 15, RedMushroom = 15, BrownMushroom = 60, PurpleMushroom = 120, BlueCrystal = 15, PinkCrystal = 60, -- Tundra (World 2's Crystal Cavern animals, as the Penguin, Boar, Snowman and Ice Golem; the Living Crystals as the Boar and Snowman)
 		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 35, Squid = 45, KingCrab = 300, FishSchool = 200, BlueCrab = 800, Kraken = 1200, -- Ocean
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
@@ -538,7 +538,7 @@ local Config = {
 	PetTiers = {
 		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleFish = 1, Lion = 1, MarbleColossus = 2, MajesticUnicorn = 2, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
-		Eyeworm = 1, Maw = 1, -- World 2 Crimson Lands
+		Eyeworm = 1, Maw = 1, IvorySpider = 2, -- World 2 Crimson Lands
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, CrystalCentipede = 1, RedMushroom = 1, BrownMushroom = 1, PurpleMushroom = 2, BlueCrystal = 1, PinkCrystal = 1, -- Tundra
 		Starfish = 1, Clownfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, Lionfish = 1, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
@@ -619,7 +619,7 @@ local Config = {
 	PetIncome = {
 		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleFish = 15, Lion = 24, MarbleColossus = 90, MajesticUnicorn = 450, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
-		Eyeworm = 18, Maw = 60, -- World 2 Crimson Lands
+		Eyeworm = 18, Maw = 60, IvorySpider = 180, -- World 2 Crimson Lands
 		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, CrystalCentipede = 75, RedMushroom = 150, BrownMushroom = 300, PurpleMushroom = 1260, BlueCrystal = 150, PinkCrystal = 300, -- Tundra
 		Starfish = 300, Clownfish = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, Lionfish = 1500, -- Ocean
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
@@ -1034,6 +1034,7 @@ local Config = {
 		-- Desert
 		Eyeworm = { Speed = 1.31, Stamina = 1.5 }, -- World 2 Crimson Lands Uncommon: the Cactus's numbers (QM, Oct 13: World 2 ~matches World 1's speeds)
 		Maw = { Speed = 1.77, Stamina = 1.5 }, -- World 2 Crimson Lands Rare: the Scorpion's numbers
+		IvorySpider = { Speed = 1.7, Stamina = 3 }, -- World 2 Crimson Lands Epic: the Sandworm's numbers
 		Cactus = { Speed = 1.31, Stamina = 1.5 }, -- (QM, Oct 12: 90% into the Desert; was 1.2)
 		Kitten = { Speed = 1.5, Stamina = 1.2 }, -- (QM, Oct 12: 20% into the Tundra; was 1.4)
 		Scorpion = { Speed = 1.77, Stamina = 1.5 }, -- (QM, Oct 12: 60% into the Tundra; was 1.5)
@@ -1176,6 +1177,10 @@ if Config.World == 2 then
 		Crimson = { rgb(144, 44, 43), rgb(132, 38, 38) }, -- #902C2B, round every stone tile
 		Stone = { rgb(119, 86, 86), rgb(108, 77, 77) }, -- #775656 single tiles
 	}
+	crimson.Herd = table.clone(crimson.Herd)
+	crimson.Herd.Eyeworm = 0.3 -- the Crimson Lands' animals (QM, Oct 13): Uncommon, as often as the Cactus
+	crimson.Herd.Maw = 0.3 -- Rare, as the Scorpion
+	crimson.Herd.IvorySpider = 0.2 -- Epic, as the Sandworm
 	-- The third: the Crystal Cavern (QM, Oct 13; tools/world2_cavern.luau): blue-grey by the
 	-- walls to ice to crystal down the middle; its plank boards keep their own colours.
 	local cavern = Config.Biomes[3]

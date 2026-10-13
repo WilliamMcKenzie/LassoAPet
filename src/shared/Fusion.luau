@@ -150,7 +150,7 @@ end
 local NAMES = {
 	Horse = { "Hor", "se" }, Pinto = { "Pin", "to" }, Pig = { "P", "ig", "Pi" }, Bunny = { "Bun", "ny" }, Fish = { "F", "ish", "Fi" },
 	Rhino = { "Rhi", "no" }, Unicorn = { "Uni", "corn" }, MarbleColossus = { "Mar", "lossus" }, MarbleFish = { "Mar", "fish" }, Lion = { "L", "ion", "Li" }, MajesticUnicorn = { "Majes", "corn" }, CrystalCentipede = { "Crys", "pede" }, RedMushroom = { "Red", "shroom" }, BrownMushroom = { "Brown", "shroom" }, PurpleMushroom = { "Purp", "shroom" }, BlueCrystal = { "Blue", "crystal" }, PinkCrystal = { "Pink", "crystal" }, Cactus = { "Cac", "tus" }, Kitten = { "Kit", "ten" }, Scorpion = { "Scor", "pion" },
-	Sandworm = { "Sand", "worm" }, SpineLizard = { "Spine", "lizard" }, Snake = { "Sn", "ake", "Sna" },
+	Sandworm = { "Sand", "worm" }, Eyeworm = { "Eye", "worm" }, Maw = { "M", "aw", "Ma" }, IvorySpider = { "Ivo", "spider" }, SpineLizard = { "Spine", "lizard" }, Snake = { "Sn", "ake", "Sna" },
 	Beholder = { "Be", "holder" }, Penguin = { "Pen", "guin" }, Snowman = { "Snow", "man" }, Boar = { "B", "oar", "Bo" },
 	IceGolem = { "Ice", "golem" }, SnackYak = { "Snack", "yak" }, Icebringer = { "Ice", "bringer" },
 	Starfish = { "Star", "fish" }, Lionfish = { "Lion", "fish" }, Clownfish = { "Clown", "fish" }, Whale = { "Wh", "ale", "Wha" }, Squid = { "Sq", "uid", "Squi" },
