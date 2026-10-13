@@ -5,9 +5,9 @@
 -- plays the unlock cutscene (WorldUnlock). After that, till you go (GuideTravel): QM's big
 -- white arrow bobbing over the portal gate and the arrow trail on the ground to it.
 -- In World 2 it's the Rebirth bar (QM, Oct 13), in the same place: QM's RebirthBar art
--- filling to your next rebirth's price (Config.Rebirth). Full, the tap hand; a tap asks
--- "TAP AGAIN TO REBIRTH" (it sends you to World 1 and locks World 2 again), a second
--- tap within a few seconds rebirths you (Gold.server's Rebirth). Gone after the last.
+-- filling to your next rebirth's price (Config.Rebirth). Full, the tap hand; a tap opens
+-- QM's Rebirth panel (RebirthMenu): Confirm rebirths you (Gold.server's Rebirth). Gone
+-- after the last.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -92,16 +92,6 @@ stroke.Thickness = 2.5
 stroke.LineJoinMode = Enum.LineJoinMode.Round
 stroke.Parent = text
 text.Parent = bar
-local ask = text:Clone() -- (the Rebirth bar's "are you sure", under it)
-ask.Name = "Ask"
-ask.TextColor3 = Color3.new(1, 1, 1)
-ask.Text = "TAP AGAIN TO REBIRTH"
-ask.TextXAlignment = Enum.TextXAlignment.Center
-ask.AnchorPoint = Vector2.new(0.5, 0)
-ask.Position = UDim2.new(0.5, 0, 1, 6)
-ask.Size = UDim2.fromScale(0.6, 0.4)
-ask.Visible = false
-ask.Parent = bar
 local hand = TapHand.new(70)
 hand:SetAttribute("Spotlight", not REBIRTH) -- (buying World 2 here: in the spotlight, QM Oct 13)
 hand:SetAttribute("Focus", Focus.P.BuyWorld2) -- (one goal at a time: Client/Focus)
@@ -114,13 +104,11 @@ gui.Parent = player:WaitForChild("PlayerGui")
 local function full()
 	return price() ~= nil and (player:GetAttribute("Gold") or 0) >= price()
 end
-local asked = nil -- os.clock() of the Rebirth bar's first tap
 local function showGold()
 	local gold = player:GetAttribute("Gold") or 0
 	local p = price() or math.huge
 	fill.Size = UDim2.fromScale(math.clamp(gold / p, 0, 1), 1)
 	text.Text = "$" .. Config.short(gold) .. "/" .. Config.short(p)
-	ask.Visible = asked ~= nil
 	hand.Visible = full()
 end
 player:GetAttributeChangedSignal("Gold"):Connect(showGold)
@@ -133,19 +121,8 @@ bar.Activated:Connect(function()
 	end
 	if not REBIRTH then
 		WorldUnlock.buy(2)
-	elseif asked and os.clock() - asked < 4 then
-		asked = nil
-		pcall(ReplicatedStorage.Rebirth.InvokeServer, ReplicatedStorage.Rebirth)
-		showGold()
 	else
-		asked = os.clock()
-		showGold()
-		task.delay(4, function()
-			if asked and os.clock() - asked >= 4 then
-				asked = nil
-				showGold()
-			end
-		end)
+		require(script.Parent.RebirthMenu).open() -- (QM's panel: what you gain and lose, Confirm)
 	end
 end)
 

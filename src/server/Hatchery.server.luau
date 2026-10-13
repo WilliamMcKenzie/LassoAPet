@@ -1529,6 +1529,43 @@ resetCommand.Triggered:Connect(function(source)
 end)
 resetCommand.Parent = game:GetService("TextChatService")
 
+-- Rebirth (Gold.server, QM Oct 13: "lose all pets"): every pet and egg gone, in every world,
+-- saved before it returns (the trip to World 1 loads that world's pen next); a fresh
+-- Config.DefaultPet to ride. Quests, pen level, the tutorial and the shop counts stay.
+local rebirthPets = Instance.new("BindableFunction")
+rebirthPets.Name = "RebirthPets"
+rebirthPets.OnInvoke = function(player)
+	local old = profiles[player]
+	if not old then
+		return false
+	end
+	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = old.ridden or {}, tutorial = true, boughtPets = old.boughtPets,
+		boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = old.quests, v1 = old.v1, questsSeen = old.questsSeen,
+		starterPack = old.starterPack, rainbowTrail = old.rainbowTrail, homeEggs = old.homeEggs }
+	local writes = {}
+	for _, other in otherStores do -- (the other worlds' pens, empty)
+		table.insert(writes, task.spawn(function()
+			pcall(other.UpdateAsync, other, "u" .. player.UserId, function(data)
+				data = if typeof(data) == "table" then data else {}
+				data.eggs, data.items, data.ride, data.rideMerged, data.rideFuse, data.rideIncome, data.rideStats, data.rideWorth, data.rideTier = {}, {}, nil, nil, nil, nil, nil, nil, nil
+				data.tutorial = true
+				return data
+			end)
+		end))
+	end
+	otherIncome[player] = 0
+	player:SetAttribute("CarriedEgg", nil)
+	publish(player)
+	save(player)
+	for _, thread in writes do -- (wait for the other worlds' writes too)
+		while coroutine.status(thread) ~= "dead" do
+			task.wait(0.1)
+		end
+	end
+	return true
+end
+rebirthPets.Parent = game:GetService("ServerStorage")
+
 -- Testing: "/gold <amount>" adds that much gold, 5000, 2.5m, 10b (k, m, b, t); "/gold" alone
 -- 10m; a minus takes it away (QM, Oct 13).
 local goldCommand = Instance.new("TextChatCommand")

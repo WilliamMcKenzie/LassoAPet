@@ -291,10 +291,17 @@ rebirth.OnServerInvoke = function(player)
 	if Config.World == 1 or not price or not loaded[player] or travelling[player] or gold < price then
 		return false
 	end
-	player:SetAttribute("Gold", gold - price)
+	-- (QM's panel, Oct 13: lose all pets, lose all gold, back to World 1, with the buffs)
+	travelling[player] = true -- (nothing else sends them anywhere meanwhile)
+	player:SetAttribute("Gold", 0)
 	player:SetAttribute("Rebirths", n)
 	player:SetAttribute("OwnsWorld2", nil)
+	local pets = game:GetService("ServerStorage"):FindFirstChild("RebirthPets")
+	if pets then
+		pcall(pets.Invoke, pets, player) -- (every pet gone, in every world, saved: Hatchery)
+	end
 	save(player)
+	travelling[player] = nil
 	task.spawn(travelTo, player, 1)
 	return true
 end
