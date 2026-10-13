@@ -27,7 +27,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 
 local FLUSH_EVERY = 60 -- seconds between adding this server's sessions into the store
 
-local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "SessionStats")
+local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("SessionStats")) -- (each world's own)
 if not ok then
 	store = nil
 end
@@ -116,6 +116,19 @@ local function finish(player)
 	end
 end
 Players.PlayerRemoving:Connect(finish)
+
+-- How long players took to unlock each biome (QM, Oct 13): their play time in this world,
+-- all visits, when they first broke its barrier (Gold.server fires it, only for players
+-- counted from their first visit). Kept per version, as "unlock<i>" (seconds) and
+-- "unlocks<i>" (how many), so /stats shows the latest version's.
+local biomeUnlocked = Instance.new("BindableEvent")
+biomeUnlocked.Name = "BiomeUnlocked"
+biomeUnlocked.Event:Connect(function(player, biome, seconds)
+	if joined[player] and type(biome) == "number" and type(seconds) == "number" then
+		pending[VERSION_KEY] = addInto(pending[VERSION_KEY] or {}, { ["unlock" .. biome] = seconds, ["unlocks" .. biome] = 1 })
+	end
+end)
+biomeUnlocked.Parent = game:GetService("ServerStorage")
 
 local function flush()
 	if not store then
@@ -216,6 +229,15 @@ local function report()
 			end
 			table.insert(lines, string.format("Quit at, v%d (%d sessions): %s", versions[1], banded, table.concat(quit, ", ")))
 		end
+		-- Average play time to unlock each biome on the latest version (QM, Oct 13).
+		local unlock = {}
+		for i = 2, #Config.Biomes do
+			local n = v["unlocks" .. i] or 0
+			table.insert(unlock, if n > 0
+				then string.format("%s %.1f min (%d)", Config.Biomes[i].Name, (v["unlock" .. i] or 0) / n / 60, n)
+				else string.format("%s -", Config.Biomes[i].Name))
+		end
+		table.insert(lines, string.format("Time to unlock, v%d: %s", versions[1], table.concat(unlock, ", ")))
 		table.insert(lines, "Avg session by version (all time):")
 	end
 	for i = 1, math.min(#versions, VERSIONS_SHOWN) do
