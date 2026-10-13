@@ -1040,7 +1040,9 @@ local function fail(reason, tip)
 	-- Thrown off behind the animal, landing flat on their back until they go home.
 	if hrp then -- (no character mid-respawn: nothing to throw)
 		local look = hrp.CFrame.LookVector
-		tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1 }
+		local launched = reason == "CAUGHT!" -- (run over by the boss: flung high, OG Roblox style, QM)
+		tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1,
+			up = launched and 55 or nil, time = launched and 1.8 or nil }
 		vfx.rideCue:FireServer("crash", tumble.from, tumble.yaw, tumble.dir, tumble.side) -- everyone sees you thrown off
 		humanoid.Sit = false
 		humanoid.PlatformStand = true -- no animations: lies stiff
@@ -2312,52 +2314,10 @@ function vfx.updateScared(dt)
 	end
 end
 
+require(script.Parent.RideRainbow)(vfx) -- (vfx.RAINBOW, vfx.rainbowFx)
+
 -- Frost: a blizzard bursting out round the Icebringer, then snow swirling round it
 -- while it lasts (the returned fx are cleared when it ends).
--- A rainbow streaming out behind a leaping animal while it's in the air: six
--- trails stacked one above another, a band of colour each. lifetime: how long
--- each band trails (the Leap's 1.4 s by default).
-vfx.RAINBOW = {
-	Color3.fromRGB(255, 70, 70),
-	Color3.fromRGB(255, 160, 50),
-	Color3.fromRGB(255, 235, 70),
-	Color3.fromRGB(80, 220, 90),
-	Color3.fromRGB(70, 150, 255),
-	Color3.fromRGB(170, 90, 240),
-}
--- scale: x the bands' height (the bought Rainbow Trail's Config.RainbowTrail.Width);
--- a taller rainbow is lifted so its bottom stays at the ground.
-function vfx.rainbowFx(entity, lifetime, scale, colors)
-	colors = colors or vfx.RAINBOW
-	local root = entity.animal.model.PrimaryPart
-	local middle, size = entity.animal.model:GetBoundingBox()
-	local back = root.CFrame:ToObjectSpace(middle * CFrame.new(0, 0, size.Z * 0.3)) -- toward its tail (it faces -Z)
-	scale = scale or 1
-	local band = size.Y * 0.6 * scale / #colors
-	local lift = math.max(size.Y * 0.3 * scale - size.Y * 0.5, 0)
-	local parts = {}
-	for k, color in colors do
-		local y = size.Y * 0.3 * scale + lift - (k - 1) * band
-		local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
-		a0.CFrame = back * CFrame.new(0, y, 0)
-		a1.CFrame = back * CFrame.new(0, y - band, 0)
-		a0.Parent, a1.Parent = root, root
-		local trail = Instance.new("Trail")
-		trail.Attachment0, trail.Attachment1 = a0, a1
-		trail.Color = ColorSequence.new(color)
-		trail.Lifetime = lifetime or 1.4
-		trail.MinLength = 0.2
-		trail.LightEmission = 0.4
-		trail.LightInfluence = 0
-		trail.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.05), NumberSequenceKeypoint.new(0.8, 0.35), NumberSequenceKeypoint.new(1, 1) })
-		trail.Parent = root
-		table.insert(parts, trail)
-		table.insert(parts, a0)
-		table.insert(parts, a1)
-	end
-	return parts
-end
-
 function vfx.frostFx(entity)
 	local root = entity.animal.model.PrimaryPart
 	local middle, size = entity.animal.model:GetBoundingBox()
@@ -3683,7 +3643,7 @@ function vfx.tumbleCFrame(tumble, t)
 	local from = tumble.from
 	local gx, gz = from.X + tumble.side * 9, from.Z - 6 * tumble.dir
 	local ground = Vector3.new(gx, LIE_HEIGHT + Ground.heightAt(gx, gz), gz)
-	local pos = from:Lerp(ground, t) + Vector3.new(0, math.sin(t * math.pi) * 6, 0)
+	local pos = from:Lerp(ground, t) + Vector3.new(0, math.sin(t * math.pi) * (tumble.up or 6), 0) -- (up: run over by the boss, launched: QM)
 	return CFrame.new(pos) * CFrame.Angles(0, tumble.yaw, 0)
 		* CFrame.Angles(t * math.pi * 2.5, 0, tumble.side * math.sin(t * math.pi) * 0.8)
 end
@@ -3694,7 +3654,7 @@ local function updateRider(dt)
 		return
 	end
 	if tumble then
-		tumble.t = math.min(tumble.t + dt / vfx.TUMBLE_TIME, 1)
+		tumble.t = math.min(tumble.t + dt / (tumble.time or vfx.TUMBLE_TIME), 1)
 		hrp.CFrame = vfx.tumbleCFrame(tumble, tumble.t)
 		focus = focus:Lerp(Vector3.new(hrp.Position.X, 0, hrp.Position.Z), 1 - math.exp(-4 * dt))
 		return
