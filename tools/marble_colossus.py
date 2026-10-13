@@ -73,7 +73,8 @@ def colossus():
         xa, xb = sorted((sx * 0.25, sx * 1.0))
         a.box("Eye" + side, (xa, 5.7, -4.95), (xb, 6.65, -4.9), EYE_BLACK, "neck")
         pa, pb = sorted((sx * 0.4, sx * 0.8))
-        a.box("Pupil" + side, (pa, 5.8, -4.98), (pb, 6.4, -4.93 + A.PUPIL_BACK), EYE_YELLOW, "neck")
+        # Glow prefix: Neon in game (bbmodel_to_luau NEON)
+        a.box("GlowPupil" + side, (pa, 5.8, -4.98), (pb, 6.4, -4.93 + A.PUPIL_BACK), EYE_YELLOW, "neck").neon = True
     a.pivots["neck"] = (0, 7.3, -3.0)
 
     a.meta = {"seat": (0, 8.4, -0.6), "neck_loop": {"center": (0, 6.1, -4.0), "radius": 1.6}}
