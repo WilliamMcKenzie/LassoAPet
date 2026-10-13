@@ -139,7 +139,7 @@ end
 local menu = Instance.new("Frame")
 menu.Name = "Menu"
 menu.BackgroundTransparency = 1
-menu.AutomaticSize = Enum.AutomaticSize.XY
+menu.Size = UDim2.fromOffset(MENU_WIDTH, 0) -- (fixed, set below: a button growing under the mouse doesn't move the rest: QM)
 menu.AnchorPoint = Vector2.new(1, 0) -- (under the Quests panel: placed every frame, below)
 menu.Position = UDim2.new(1, -MARGIN, 0, MARGIN)
 local list = Instance.new("UIListLayout")
@@ -161,9 +161,19 @@ end }, { "merge", function()
 		Hud.onFuse()
 	end
 end }, { "invite", promptInvite } } do
-	local b = picture("ImageButton", menu, ART[spec[1]], MENU_WIDTH)
+	-- (each in a slot of its own size, centred in it, so it grows from its middle and the
+	-- others stay put: QM, Oct 13)
+	local slot = Instance.new("Frame")
+	slot.Name = spec[1] .. "Slot"
+	slot.BackgroundTransparency = 1
+	slot.LayoutOrder = ({ merge = 1, index = 2, shop = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
+	slot.Parent = menu
+	local b = picture("ImageButton", slot, ART[spec[1]], MENU_WIDTH)
 	b.Name = spec[1]
-	b.LayoutOrder = ({ merge = 1, index = 2, shop = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
+	slot.Size = b.Size
+	b.AnchorPoint = Vector2.new(0.5, 0.5)
+	b.Position = UDim2.fromScale(0.5, 0.5)
+	menu.Size = UDim2.fromOffset(MENU_WIDTH, menu.Size.Y.Offset + b.Size.Y.Offset + (if i > 1 then MENU_GAP else 0))
 	if ART[spec[1]].id == "" then -- (no art yet: a plain button with its name)
 		b.BackgroundTransparency = 0
 		b.BackgroundColor3 = Color3.fromRGB(76, 200, 92)

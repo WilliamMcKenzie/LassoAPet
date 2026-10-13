@@ -40,7 +40,7 @@ root.Parent = gui
 
 local column = Instance.new("Frame")
 column.BackgroundTransparency = 1
-column.AutomaticSize = Enum.AutomaticSize.XY
+column.Size = UDim2.fromOffset(0, 0) -- (fixed, set below: a button growing under the mouse doesn't move the rest: QM)
 column.AnchorPoint = Vector2.new(0, 0.5)
 column.Position = UDim2.new(0, MARGIN, 0.5, 0)
 local list = Instance.new("UIListLayout")
@@ -69,6 +69,8 @@ for i, spec in BUTTONS do
 	button.BackgroundTransparency = 1
 	button.Image = spec[2]
 	button.Size = UDim2.fromOffset(size.X, size.Y)
+	button.AnchorPoint = Vector2.new(0.5, 0.5) -- (grows from its middle: QM)
+	button.Position = UDim2.fromScale(0.5, 0.5)
 	button.ZIndex = 2
 	local burst = Instance.new("ImageLabel") -- (behind it, turning)
 	burst.Name = "Sunburst"
@@ -115,11 +117,12 @@ for i, spec in BUTTONS do
 		starterTimer, starterSlot = timer, slot
 		-- (centred on the buttons' faces, not their art: their price badges stick out left)
 		slot.Size = UDim2.fromOffset(size.X + 2 * NUDGE, size.Y)
-		button.Position = UDim2.fromOffset(2 * NUDGE, 0)
+		button.Position = UDim2.new(0.5, NUDGE, 0.5, 0)
 		burst.Position = UDim2.new(0.5, NUDGE, 0.55, 0)
 	end
 	button.Parent = slot
 	slot.Parent = column
+	column.Size = UDim2.fromOffset(math.max(column.Size.X.Offset, slot.Size.X.Offset), column.Size.Y.Offset + slot.Size.Y.Offset + (if i > 1 then GAP else 0))
 end
 gui.Parent = player:WaitForChild("PlayerGui")
 
@@ -140,6 +143,7 @@ RunService.RenderStepped:Connect(function()
 	end
 	if gui.Enabled then
 		local tall = list.AbsoluteContentSize.Y / rootScale.Scale / fit.Scale
+		column.Size = UDim2.fromOffset(column.Size.X.Offset, tall) -- (the slots' height, without the Starter Pack once it's gone)
 		fit.Scale = math.min(1, root.Size.Y.Offset * 0.62 / math.max(tall, 1))
 		for _, burst in bursts do
 			burst.Rotation = os.clock() * SPIN % 360
