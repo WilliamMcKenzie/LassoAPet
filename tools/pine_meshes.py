@@ -2,13 +2,13 @@
 (tools/plant_meshes.py): faceted convex pieces, flat shaded, studded, one colour per piece.
 
 A pine is a tall tapering trunk (wood #907D72, QM) with stacked faceted cone tiers,
-each tier its own piece in its own shade of pine green. Three sizes: tall, taller, small.
+each tier its own piece in its own shade of mustard (#E7B658). Three sizes: tall, taller, small.
 
 Run: python3 tools/pine_meshes.py
 Writes design/pines/<Name>.obj, design/pines/pieces/<Name>_<i>.obj (same origin; colours
 in pieces/colours.txt) and design/pines/pines_lineup.png.
-  --rocks: design/pines/rocks_w2.png, the rocks in ROCK_SHADES (near #907D72)
-  --scene: design/pines/world2_scene.png, pines, brown rocks, red flowers, pine-green tufts
+  --rocks: design/pines/rocks_w2.png, the rocks in ROCK_SHADES (near #999287)
+  --scene: design/pines/world2_scene.png, pines, brown rocks, red flowers, mustard tufts
 """
 
 import math
@@ -28,7 +28,7 @@ from plant_meshes import prism, parts_of  # noqa: E402
 
 OUT = os.path.join(HERE, "..", "design", "pines")
 WOOD = (0x90, 0x7D, 0x72)  # QM's #907D72
-NEEDLES = [(46, 96, 70), (58, 112, 80), (40, 86, 62), (66, 122, 88)]  # pine green shades (QM gave #907D72 twice)
+NEEDLES = [(231, 182, 88), (214, 166, 74), (242, 196, 104), (222, 172, 80)]  # QM: #E7B658 mustard, in four shades
 
 
 def cone(rng, y0, y1, r, sides=7, droop=0.5):
@@ -121,9 +121,9 @@ if __name__ == "__main__" and "--rocks" not in sys.argv and "--scene" not in sys
     main()
 
 
-# The rocks for the world 2 base (QM, Oct 13): near #907D72, five shades made the way
+# The rocks for the world 2 base (QM, Oct 13): near #999287, five shades made the way
 # tools/biome_rocks.SHADES makes the meadow's (the meadow's steps x 2.2 round the base).
-ROCK_SHADES = [(144, 125, 114), (120, 103, 94), (164, 145, 129), (131, 116, 96), (155, 132, 123)]
+ROCK_SHADES = [(153, 146, 135), (129, 124, 115), (173, 166, 150), (140, 137, 117), (164, 153, 144)]
 
 
 def rocks_render():
@@ -148,13 +148,13 @@ if __name__ == "__main__" and "--rocks" in sys.argv:
 
 
 # World 2 flowers and grass (QM, Oct 13): red petals (QM's colour came through as #907D72
-# again, so a plain red), and the grass tufts in the pines' greens.
+# again, so a plain red), and the grass tufts in the pines' mustard (#E7B658).
 RED_PETALS = (222, 52, 56)
 W2_GRASS = [NEEDLES[0], NEEDLES[1]]
 
 
 def scene_render():
-    """A world 2 corner: pines, the brown rocks, red flowers, pine-green tufts."""
+    """A world 2 corner: pines, the brown rocks, red flowers, mustard tufts."""
     import plant_meshes as PM
     import rock_meshes as RM
     partlib.GROUND = np.array((105, 255, 74), float)
@@ -173,7 +173,10 @@ def scene_render():
             scene += RM.as_parts([c], x, z, 30, color=ROCK_SHADES[i % 5])
     for _ in range(10):  # the flowers and tufts at 2x, as in the lobby
         x, z = rng.uniform(-20, 20), rng.uniform(-6, 10)
-        sc = [Part(p.name, p.size, partlib.T(x, 0, z) @ partlib.Ry(rng.uniform(0, 360)) @ np.diag([2, 2, 2, 1]) @ p.cf, p.color) for p in parts_of(flower, recolour={"Petals": RED_PETALS})]
+        sc = parts_of(flower, recolour={"Petals": RED_PETALS})
+        for p in sc:
+            p.cf = partlib.T(x, 0, z) @ partlib.Ry(rng.uniform(0, 360)) @ np.diag([2, 2, 2, 1]) @ p.cf
+            p.stud_axes = None
         scene += sc
     for _ in range(8):
         x, z = rng.uniform(-22, 22), rng.uniform(-6, 14)
