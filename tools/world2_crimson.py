@@ -92,18 +92,20 @@ def layout(seed=41):
     for i, j in order:
         if not inside[i, j] or patch[i, j] < 0.66 or rng.random() < 0.45:
             continue
-        if any(max(abs(i - a), abs(j - b)) < 4 for a, b in stones):
+        if any(max(abs(i - a), abs(j - b)) < 5 for a, b in stones):
             continue
         stones.append((i, j))
-    for i, j in stones:
-        kind[i - 1:i + 2, j - 1:j + 2] = np.where(kind[i - 1:i + 2, j - 1:j + 2] == VOID, VOID, BRIGHT)
+    for i, j in stones:  # (two tiles of bright crimson round each, room for its plates: QM wanted bigger stone patches)
+        a, b = slice(max(i - 2, 0), i + 3), slice(max(j - 2, 0), j + 3)
+        kind[a, b] = np.where(kind[a, b] == VOID, VOID, BRIGHT)
         kind[i, j] = STONE
     return kind, stones
 
 
 def plates(kind, stones, seed=43):
     """Stone plates: (x, z, variant, yaw degrees) on 4-stud squares (4k + 2) of bright crimson
-    round each stone tile, most right beside it, a few a square further out."""
+    round each stone tile: nearly all the squares beside it, most of the next ring out, a
+    few in the ring past that, so each stone patch is about five tiles across (QM: bigger)."""
     rng = np.random.default_rng(seed)
     obs, nst = obstacles(), nests()
     out = []
@@ -126,9 +128,12 @@ def plates(kind, stones, seed=43):
                  if not (0 < dx < 8 and 0 < dz < 8)]  # the 12 squares touching the tile
         ring2 = [(x0 + dx, z0 - dz) for dx in (-6, -2, 2, 6, 10, 14) for dz in (-6, -2, 2, 6, 10, 14)
                  if dx in (-6, 14) or dz in (-6, 14)]  # the 20 squares one further out
+        ring3 = [(x0 + dx, z0 - dz) for dx in range(-10, 19, 4) for dz in range(-10, 19, 4)
+                 if dx in (-10, 18) or dz in (-10, 18)]  # the 28 squares further out still
         rng.shuffle(ring1)
         rng.shuffle(ring2)
-        for spots, n in ((ring1, rng.integers(3, 6)), (ring2, rng.integers(0, 3))):
+        rng.shuffle(ring3)
+        for spots, n in ((ring1, rng.integers(9, 13)), (ring2, rng.integers(9, 15)), (ring3, rng.integers(3, 8))):
             k = 0
             for x, z in spots:
                 if k >= n:
