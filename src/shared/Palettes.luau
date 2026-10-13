@@ -136,6 +136,12 @@ return {
 		{ "Hoof", 190, 100, 214 }, -- legs
 		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
 	},
+	CrystalSpider = {
+		{ "Body", 96, 108, 200 },
+		{ "Hoof", 66, 74, 152 }, -- lower legs
+		{ "Horn", 0, 190, 231 }, -- cyan crystals, claws and fangs
+		{ "Accent", 229, 131, 251 }, -- the pink crystal
+	},
 	CrystalCentipede = {
 		{ "Body", 124, 72, 200 },
 		{ "Hoof", 72, 44, 124 }, -- leg bars, tail feelers
