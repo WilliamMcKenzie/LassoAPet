@@ -1544,26 +1544,28 @@ if Config.World == 2 then
 	end
 	Config.Biomes[6].HerdSpawnEvery = Config.Biomes[4].HerdSpawnEvery -- (the Tomb as often as the Woodland: QM, Oct 13, 2.5x was far too many)
 	-- World 2's speeds (QM, Oct 13: each animal's % into a biome on a full sprint ride,
-	-- 2,904 studs per 1 Speed). The rest keep theirs (the Seraphs 0.5, the Majestic Unicorn,
-	-- Eyeworm, Asura and Crystal Centipede as they were).
+	-- 2,904 studs per 1 Speed). The rest keep theirs (the Seraphs 0.5, the Majestic Unicorn and
+	-- the Asura as they were).
 	for kind, speed in {
 		MarbleFish = 0.809, -- 10% into the Crimson Lands
 		Lion = 0.872, -- 20% into the Crimson Lands
 		Crocodile = 0.878, -- 21% into the Crimson Lands
 		Buffalo = 0.934, -- 30% into the Crimson Lands
 		MarbleColossus = 1.028, -- 45% into the Crimson Lands
-		CrimsonScorpion = 1.405, -- 5% into the Crystal Cavern
-		IvorySpider = 1.537, -- 25% into the Crystal Cavern (QM, Oct 13; was 45%)
-		Maw = 1.438, -- 10% into the Crystal Cavern
-		Beholder = 1.504, -- 20% into the Crystal Cavern
-		RedMushroom = 2.14, -- 10% into the Woodland
-		BlueCrystal = 2.14, -- 10% into the Woodland
-		BrownMushroom = 2.248, -- 20% into the Woodland
-		PinkCrystal = 2.248, -- 20% into the Woodland
-		PurpleMushroom = 2.302, -- 25% into the Woodland
-		CrystalSpider = 2.355, -- 30% into the Woodland
-		CrystalPhoenix = 3.097, -- 99% into the Woodland
-		CrystalElephant = 4.409, -- 75% into the Temple
+		CrimsonScorpion = 1.603, -- 35% into the Crystal Cavern (QM, Oct 13)
+		IvorySpider = 1.901, -- 80% into the Crystal Cavern (QM, Oct 13)
+		Maw = 1.702, -- 50% into the Crystal Cavern (QM, Oct 13)
+		Beholder = 1.769, -- 60% into the Crystal Cavern (QM, Oct 13)
+		RedMushroom = 2.355, -- 30% into the Woodland (QM, Oct 13)
+		BlueCrystal = 2.355, -- 30% into the Woodland (QM, Oct 13)
+		BrownMushroom = 2.57, -- 50% into the Woodland (QM, Oct 13)
+		PinkCrystal = 2.57, -- 50% into the Woodland (QM, Oct 13)
+		PurpleMushroom = 2.742, -- 66% into the Woodland (QM, Oct 13)
+		CrystalSpider = 2.764, -- 68% into the Woodland (QM, Oct 13)
+		CrystalPhoenix = 3.281, -- 10% into the Temple (QM, Oct 13)
+		CrystalElephant = 3.281, -- 10% into the Temple (QM, Oct 13)
+		Eyeworm = 1.438, -- 10% into the Crystal Cavern (QM, Oct 13)
+		CrystalCentipede = 2.14, -- 10% into the Woodland (QM, Oct 13)
 	} do
 		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
 		Config.AnimalStats[kind].Speed = speed
