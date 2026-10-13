@@ -298,6 +298,7 @@ local function markOtherWorldsSeen(player)
 end
 
 local inviteCredits -- (below: "Invite a friend")
+local claimStarter -- (below: the Starter Pack)
 local function load(player)
 	task.spawn(loadOtherWorlds, player)
 	local profile = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {} }
@@ -329,6 +330,7 @@ local function load(player)
 					profile.quests = Quests.load(data.quests)
 					profile.rainbowTrail = data.rainbowTrail == true or nil
 					profile.questsSeen = data.questsSeen == true or nil -- (opened the Quests panel: no tap hand on it)
+					profile.starterPack = data.starterPack == true or nil -- (the Starter Pack's gold and Snake given)
 					player:SetAttribute("FuseLesson", nil) -- (no fuse lesson any more: QM, Oct 8)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
 					for _, kind in typeof(data.ridden) == "table" and data.ridden or {} do
@@ -380,6 +382,10 @@ local function load(player)
 		Telemetry.loadFailed(player)
 	end
 	Quests.publish(player, profile.quests)
+	player:GetAttributeChangedSignal("PassStarterPack"):Connect(function()
+		claimStarter(player)
+	end)
+	task.spawn(claimStarter, player)
 	task.spawn(function() -- friends you invited who joined while you were elsewhere ("Invite a friend")
 		local credits = inviteCredits(player)
 		for _ = 1, credits do
@@ -455,7 +461,7 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, homeEggs = profile.homeEggs, quests = profile.quests, v1 = profile.v1, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
+		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, homeEggs = profile.homeEggs, quests = profile.quests, v1 = profile.v1, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -678,6 +684,32 @@ remote("DeliverEgg", function(player, kind)
 	end
 	givePet(player, profile, kind)
 end)
+
+-- The Starter Pack (game pass, QM, Oct 13): Config.StarterPack's gold and pet, once, when
+-- you own it (bought now, or on joining), saved with the pen so it's never given twice.
+-- Not till the pen's loaded (a failed load could give it again) or the tutorial's done.
+claimStarter = function(player)
+	local profile = profiles[player]
+	if not profile or profile.starterPack or not player:GetAttribute("PassStarterPack") then
+		return
+	end
+	if not loaded[player] and not RunService:IsStudio() then
+		return
+	end
+	if player:GetAttribute("Tutorial") then
+		task.delay(5, claimStarter, player)
+		return
+	end
+	profile.starterPack = true
+	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + Config.StarterPack.Gold)
+	Telemetry.gold(player, "purchased", Config.StarterPack.Gold)
+	givePet(player, profile, Config.StarterPack.Pet)
+	task.spawn(save, player)
+	local newAnimal = ReplicatedStorage:FindFirstChild("NewAnimal")
+	if newAnimal then
+		newAnimal:FireClient(player, Config.StarterPack.Pet) -- (its cutscene, as /give's)
+	end
+end
 
 -- You held E by an egg in your pen that's ready (Pen.client): it hatches.
 remote("HatchEgg", function(player, id)

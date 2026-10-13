@@ -1,9 +1,9 @@
--- The Starter Pack popup (QM, Oct 13: his mockup; a look test, Buy does nothing yet): the
+-- The Starter Pack popup (QM, Oct 13: his mockup): the
 -- Starter Pack button (PassButtons) opens it. As the Worlds menu: QM's panel art (its
 -- chest and title over the top edge, "Amazing Deal!"), the X on its top right corner, the
 -- world behind hazy like frosted glass and every other bit of UI gone while it's up. QM's two
 -- cards (150k cash, the Snake), each with the sunburst turning behind it, and his Buy
--- button (Robux 19) under them.
+-- button (Robux 19) under them: the Starter Pack pass (Config.StarterPack, given by Hatchery).
 --
 --   StarterPackMenu.open()
 local Players = game:GetService("Players")
@@ -222,6 +222,10 @@ local function close()
 	end)
 end
 closeButton.Activated:Connect(close)
+buy.Activated:Connect(function()
+	ReplicatedStorage:WaitForChild("BuyPass"):FireServer("StarterPack") -- (Roblox's prompt: Server/Passes; Hatchery gives it)
+end)
+player:GetAttributeChangedSignal("PassStarterPack"):Connect(close) -- (bought: done)
 
 RunService.RenderStepped:Connect(function()
 	if gui.Enabled then

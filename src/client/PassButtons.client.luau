@@ -1,6 +1,6 @@
--- QM's pass buttons down the right of the base HUD (Oct 13, a look test: "no functionality
--- yet"): Starter Pack, 1.5x Speed, 2x Cash, Giant Pets, each with QM's sunburst turning
--- behind it. Shown whenever BaseUi is (not riding, in a cutscene or the tutorial) and no
+-- QM's pass buttons down the right of the base HUD (Oct 13): Starter Pack (its popup,
+-- StarterPackMenu), 1.5x Speed, 2x Cash, Giant Pets (Roblox's buy prompt: BuyPass, Config.Passes),
+-- each with QM's sunburst turning behind it. Shown whenever BaseUi is (not riding, in a cutscene or the tutorial) and no
 -- menu's up over the base.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -15,9 +15,9 @@ local SUNBURST = "rbxassetid://85834206672187" -- assets/ui/Sunburst.png (QM's)
 local SPIN = 30 -- degrees a second
 local BUTTONS = {
 	{ "StarterPack", "rbxassetid://100466055719917", Vector2.new(245, 138) }, -- assets/ui/PassStarterPack.png
-	{ "Speed", "rbxassetid://128119306382781", Vector2.new(295, 141) }, -- assets/ui/PassSpeed.png
-	{ "Cash", "rbxassetid://108884731983075", Vector2.new(295, 147) }, -- assets/ui/PassCash.png
-	{ "GiantPets", "rbxassetid://126647709261103", Vector2.new(302, 148) }, -- assets/ui/PassGiantPets.png
+	{ "Speed", "rbxassetid://128119306382781", Vector2.new(295, 141), "Speed" }, -- assets/ui/PassSpeed.png (and its Config.Passes key)
+	{ "Cash", "rbxassetid://108884731983075", Vector2.new(295, 147), "DoubleGold" }, -- assets/ui/PassCash.png
+	{ "GiantPets", "rbxassetid://126647709261103", Vector2.new(302, 148), "GiantPets" }, -- assets/ui/PassGiantPets.png
 }
 
 local camera = workspace.CurrentCamera
@@ -93,6 +93,11 @@ for i, spec in BUTTONS do
 			press.Scale = 1
 		end)
 	end
+	if spec[1] ~= "StarterPack" then -- (Roblox's buy prompt: Server/Passes)
+		button.Activated:Connect(function()
+			ReplicatedStorage:WaitForChild("BuyPass"):FireServer(spec[4])
+		end)
+	end
 	if spec[1] == "StarterPack" then -- (QM's popup: Oct 13)
 		button.Activated:Connect(function()
 			require(script.Parent.StarterPackMenu).open()
@@ -133,7 +138,7 @@ RunService.RenderStepped:Connect(function()
 	if starterSlot then
 		local left = math.max(0, math.ceil(STARTER_PACK_FOR - (os.clock() - joinedAt)))
 		starterTimer.Text = string.format("%d:%02d", left // 60, left % 60)
-		starterSlot.Visible = left > 0
+		starterSlot.Visible = left > 0 and not player:GetAttribute("PassStarterPack") -- (gone once it's yours)
 	end
 	local baseScale = baseRoot and baseRoot:FindFirstChildOfClass("UIScale")
 	if baseScale and rootScale.Scale ~= baseScale.Scale then -- (BaseUi's scale, so they match the buttons on the right: QM)

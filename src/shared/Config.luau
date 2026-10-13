@@ -1080,11 +1080,15 @@ local Config = {
 	},
 	BullSpots = { Vector3.new(-18, 0, 173), Vector3.new(-75.2, 0, 129.6), Vector3.new(52, 0, 157.1), Vector3.new(-78.6, 0, 57.9), Vector3.new(84.9, 0, 93.3) },
 	Passes = {
-		{ Key = "DoubleGold", Name = "x2 Gold", Price = 99, Id = 2014472441 },
-		{ Key = "FastHatch", Name = "Fast Hatch", Price = 99, Id = 2014634454 },
-		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 40, Id = 2012972449 },
-		{ Key = "VIP", Name = "VIP", Price = 199, Id = 2013764414 },
+		-- (QM, Oct 13: his four passes, renamed from the old ones on their ids, so their old
+		-- owners own these now. VIP, Fast Hatch and Auto Hatch are gone.)
+		{ Key = "Speed", Name = "1.5x Speed", Price = 4, Id = 2012972449 }, -- every ride x PassSpeed (Config.rebirthSpeed)
+		{ Key = "DoubleGold", Name = "2x Cash", Price = 99, Id = 2014634454 }, -- x PassGoldMultiplier (Config.goldX)
+		{ Key = "GiantPets", Name = "Giant Pets", Price = 299, Id = 2014472441 },
+		{ Key = "StarterPack", Name = "Starter Pack", Price = 19, Id = 2013764414 }, -- Config.StarterPack, once (Hatchery)
 	},
+	PassSpeed = 1.5, -- Speed's
+	StarterPack = { Gold = 150000, Pet = "Snake" }, -- (QM's popup: 150k and the Snake)
 	PassGoldMultiplier = 2, -- DoubleGold's
 	PassHatchSpeed = 2, -- FastHatch's: hatch times / this
 	Vip = {
@@ -1291,8 +1295,9 @@ function Config.goldX(player)
 	return (if player:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)
 		* (Config.Rebirth.Gold[player:GetAttribute("Rebirths") or 0] or 1)
 end
+-- x every ride's speed: rebirths and the 1.5x Speed pass.
 function Config.rebirthSpeed(player)
-	return Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1
+	return (Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1) * (if player:GetAttribute("PassSpeed") then Config.PassSpeed else 1)
 end
 -- 15, 1.2k, 3.4m, 10m... (gold, short: the Worlds menu's prices and the World 2 bar)
 function Config.short(n)
