@@ -17,32 +17,32 @@ local assets = game:GetService("ServerStorage"):WaitForChild("World2Assets", 5)
 assert(assets, "ServerStorage.World2Assets (the imported meshes) not found")
 -- { biome, name, x, y (the tile's top), z, yaw, tier (0 = walk-through decor), base size x, base size z, scale }
 local PROPS = {
-	{ "Meadow", "Pine", 42.2, 0, -42.4, 215, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "Pine", 42.2, 1, -42.4, 215, 3, 13.4, 12.0, 3 },
 	{ "Meadow", "PineTall", -42.7, 0, -134.0, 32, 3, 13.2, 13.2, 3 },
 	{ "Meadow", "PineTall", 43.2, 0, -249.6, 294, 3, 13.2, 13.2, 3 },
-	{ "Meadow", "Pine", -43.2, 0, -249.6, 349, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "Pine", -43.2, 1, -249.6, 349, 3, 13.4, 12.0, 3 },
 	{ "Meadow", "Pine", -43.6, 0, -322.2, 227, 3, 13.4, 12.0, 3 },
-	{ "Meadow", "Pine", 44.2, 0, -439.9, 54, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "Pine", 44.2, 1, -439.9, 54, 3, 13.4, 12.0, 3 },
 	{ "Meadow", "PineTall", -44.7, 0, -548.9, 167, 3, 13.2, 13.2, 3 },
-	{ "Meadow", "PineTall", 44.7, 0, -548.9, 73, 3, 13.2, 13.2, 3 },
-	{ "Meadow", "PineTall", 45.1, 0, -623.6, 57, 3, 13.2, 13.2, 3 },
-	{ "Meadow", "PineTall", -45.6, 0, -714.3, 44, 3, 13.2, 13.2, 3 },
+	{ "Meadow", "PineTall", 44.7, 1, -548.9, 73, 3, 13.2, 13.2, 3 },
+	{ "Meadow", "PineTall", 45.1, 1, -623.6, 57, 3, 13.2, 13.2, 3 },
+	{ "Meadow", "PineTall", -45.6, 1, -714.3, 44, 3, 13.2, 13.2, 3 },
 	{ "Meadow", "PineTall", 45.6, 0, -714.3, 341, 3, 13.2, 13.2, 3 },
 	{ "Meadow", "Pine", 45.9, 0, -784.8, 147, 3, 13.4, 12.0, 3 },
-	{ "Meadow", "PineTall", -45.9, 0, -784.8, 304, 3, 13.2, 13.2, 3 },
-	{ "Meadow", "Pine", -46.4, 0, -870.9, 292, 3, 13.4, 12.0, 3 },
-	{ "Meadow", "PineTall", 46.8, 0, -968.5, 300, 3, 13.2, 13.2, 3 },
-	{ "Meadow", "PineTall", -47.4, 0, -1079.8, 285, 3, 13.2, 13.2, 3 },
-	{ "Meadow", "Pine", 47.9, 0, -1171.3, 95, 3, 13.4, 12.0, 3 },
-	{ "Meadow", "Pine", -48.4, 0, -1281.8, 328, 3, 13.4, 12.0, 3 },
-	{ "Meadow", "Pine", 48.8, 0, -1360.9, 122, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "PineTall", -45.9, 1, -784.8, 304, 3, 13.2, 13.2, 3 },
+	{ "Meadow", "Pine", -46.4, 1, -870.9, 292, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "PineTall", 46.8, 1, -968.5, 300, 3, 13.2, 13.2, 3 },
+	{ "Meadow", "PineTall", -47.4, 1, -1079.8, 285, 3, 13.2, 13.2, 3 },
+	{ "Meadow", "Pine", 47.9, 1, -1171.3, 95, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "Pine", -48.4, 1, -1281.8, 328, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "Pine", 48.8, 1, -1360.9, 122, 3, 13.4, 12.0, 3 },
 	{ "Meadow", "Pine", -49.3, 0, -1455.5, 249, 3, 13.4, 12.0, 3 },
-	{ "Meadow", "Pine", 49.7, 0, -1541.7, 112, 3, 13.4, 12.0, 3 },
-	{ "Meadow", "Pine", -50.1, 0, -1624.4, 50, 3, 13.4, 12.0, 3 },
-	{ "Meadow", "Pine", 50.7, 0, -1736.9, 109, 3, 13.4, 12.0, 3 },
-	{ "Meadow", "PineTall", -51.2, 0, -1838.3, 181, 3, 13.2, 13.2, 3 },
+	{ "Meadow", "Pine", 49.7, 1, -1541.7, 112, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "Pine", -50.1, 1, -1624.4, 50, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "Pine", 50.7, 1, -1736.9, 109, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "PineTall", -51.2, 1, -1838.3, 181, 3, 13.2, 13.2, 3 },
 	{ "Meadow", "PineTall", 51.6, 0, -1918.1, 115, 3, 13.2, 13.2, 3 },
-	{ "Meadow", "Pine", -52.1, 0, -2026.5, 234, 3, 13.4, 12.0, 3 },
+	{ "Meadow", "Pine", -52.1, 1, -2026.5, 234, 3, 13.4, 12.0, 3 },
 	{ "Meadow", "PineTall", 52.7, 0, -2133.2, 11, 3, 13.2, 13.2, 3 },
 	{ "Crimson", "MushroomGiant", -57.0, 1, -2205.6, 229, 3, 12.0, 12.0, 2 },
 	{ "Crimson", "MushroomMedium", -53.8, 1, -2220.1, 188, 2, 8.0, 8.0, 2 },
@@ -1182,8 +1182,30 @@ decor = Instance.new("Folder")
 decor.Name = "Props"
 decor.Parent = W.Decor
 
-local missing, placed = {}, 0
+-- Others' obstacles already standing (the base set's meadow rocks: tools/world2_base_decor.luau):
+-- a piece that would stand on one is left out.
+local standing = {}
+for _, m in W.Obstacles:GetChildren() do
+	if m:IsA("Model") and not m:GetAttribute("World2Prop") then
+		table.insert(standing, m:GetPivot().Position)
+	end
+end
+local function clear(r)
+	local at = Vector3.new(r[3] + OFFSET, 0, r[5])
+	for _, p in standing do
+		if (Vector3.new(p.X, 0, p.Z) - at).Magnitude < math.max(r[8], r[9]) / 2 + 8 then
+			return false
+		end
+	end
+	return true
+end
+
+local missing, placed, skipped = {}, 0, 0
 for _, r in PROPS do
+	if r[7] > 0 and not clear(r) then
+		skipped += 1
+		continue
+	end
 	local template = assets:FindFirstChild(r[2])
 	if not template then
 		missing[r[2]] = true
@@ -1222,4 +1244,4 @@ local names = {}
 for n in missing do
 	table.insert(names, n)
 end
-return string.format("%d props placed%s", placed, if #names > 0 then " | missing in World2Assets: " .. table.concat(names, ", ") else "")
+return string.format("%d props placed, %d left out by others' obstacles%s", placed, skipped, if #names > 0 then " | missing in World2Assets: " .. table.concat(names, ", ") else "")

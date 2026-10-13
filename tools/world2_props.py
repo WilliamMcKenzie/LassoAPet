@@ -90,7 +90,7 @@ class Biome:
         got = mod.layout()
         self.kind, self.extra = (got if isinstance(got, tuple) else (got, None))
         if mod is meadow:
-            self.Z0, self.Z1, tops, self.COLOURS = 0, -meadow.LENGTH, {base.DIRT: -1}, base.COLOURS
+            self.Z0, self.Z1, tops, self.COLOURS = 0, -meadow.LENGTH, {base.BRIGHT: 1, base.DIRT: -1}, base.COLOURS  # (the light grass a stud up: QM, tools/world2_grass_step.luau)
         else:
             self.Z0, self.Z1, tops, self.COLOURS = mod.Z0, mod.Z1, mod.TOPS, mod.COLOURS
         self.top = np.vectorize(lambda k: tops.get(int(k), 0))(self.kind)

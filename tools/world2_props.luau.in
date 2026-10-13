@@ -33,8 +33,30 @@ decor = Instance.new("Folder")
 decor.Name = "Props"
 decor.Parent = W.Decor
 
-local missing, placed = {}, 0
+-- Others' obstacles already standing (the base set's meadow rocks: tools/world2_base_decor.luau):
+-- a piece that would stand on one is left out.
+local standing = {}
+for _, m in W.Obstacles:GetChildren() do
+	if m:IsA("Model") and not m:GetAttribute("World2Prop") then
+		table.insert(standing, m:GetPivot().Position)
+	end
+end
+local function clear(r)
+	local at = Vector3.new(r[3] + OFFSET, 0, r[5])
+	for _, p in standing do
+		if (Vector3.new(p.X, 0, p.Z) - at).Magnitude < math.max(r[8], r[9]) / 2 + 8 then
+			return false
+		end
+	end
+	return true
+end
+
+local missing, placed, skipped = {}, 0, 0
 for _, r in PROPS do
+	if r[7] > 0 and not clear(r) then
+		skipped += 1
+		continue
+	end
 	local template = assets:FindFirstChild(r[2])
 	if not template then
 		missing[r[2]] = true
@@ -73,4 +95,4 @@ local names = {}
 for n in missing do
 	table.insert(names, n)
 end
-return string.format("%d props placed%s", placed, if #names > 0 then " | missing in World2Assets: " .. table.concat(names, ", ") else "")
+return string.format("%d props placed, %d left out by others' obstacles%s", placed, skipped, if #names > 0 then " | missing in World2Assets: " .. table.concat(names, ", ") else "")
