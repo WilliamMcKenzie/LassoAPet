@@ -1196,7 +1196,7 @@ if Config.World == 2 then
 	meadow.GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) }
 	meadow.WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) } -- marble
 	meadow.Patches = {
-		Dirt = { rgb(118, 84, 50), rgb(104, 72, 42) },
+		Dirt = { rgb(142, 101, 60), rgb(125, 86, 50) }, -- (QM, Oct 13: 20% lighter; was 118, 84, 50 / 104, 72, 42)
 		Grass = { rgb(182, 144, 44), rgb(166, 130, 36) }, -- the darker grass, beside the dirt
 	}
 	-- The second biome: the Crimson Lands (QM, Oct 13; tools/world2_crimson.luau's floor).
