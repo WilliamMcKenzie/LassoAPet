@@ -1,18 +1,21 @@
--- World 2's props (QM, Oct 13; draft). Made by tools/world2_props.py: edit that and
+-- World 2's props (QM, Oct 13). Made by tools/world2_props.py: edit that and
 -- re-make this, not this. Run in Studio (Edit, execute_luau) on the place with World2,
 -- after the floor scripts and world2_clear. Re-running is fine (it replaces its own).
--- Clusters of the Rock mesh thread's crimson set (Crimson Lands) and crystals and fungi
--- (Crystal Cavern) hugging the walls, the course's middle clear. Big and middle pieces
+-- The Rock mesh thread's sets, hugging the walls, the course's middle clear: pines in the
+-- Meadow, mushrooms and runestones in the Crimson Lands, crystals and fungi in the
+-- Crystal Cavern, birches and the sword in the stone in the Woodland Maze, trees and
+-- lanterns down the Temple's sides with tombstones and lily pads (in place of
+-- world2_temple's discs), statues, sphinxes and gold in the Ancient Tomb. Big and middle pieces
 -- go in World2.Obstacles (smashed when ridden into: an invisible Base footprint and a
 -- Tier, like World 1's); small ones in World2.Decor.Props, walk-through.
 -- Each piece is cloned from ServerStorage.World2Assets.<Name>: a Model of its coloured
--- MeshParts at the mesh's own size, pivot at its base's middle.
+-- MeshParts at the mesh's own size, pivot at its base's middle. (The pines: one of each
+-- of the base's, Pine, PineTall and PineSmall, at 1x.)
 local W = workspace.World2
 local OFFSET = 1000
-local SCALE = --SCALE--
 local assets = game:GetService("ServerStorage"):WaitForChild("World2Assets", 5)
-assert(assets, "ServerStorage.World2Assets (the imported crimson and crystal meshes) not found")
--- { biome, name, x, y (the tile's top), z, yaw, tier (0 = walk-through decor), base size x, base size z }
+assert(assets, "ServerStorage.World2Assets (the imported meshes) not found")
+-- { biome, name, x, y (the tile's top), z, yaw, tier (0 = walk-through decor), base size x, base size z, scale }
 local PROPS = {
 --PROPS--
 }
@@ -39,7 +42,7 @@ for _, r in PROPS do
 	end
 	local m = template:Clone()
 	m:SetAttribute("World2Prop", r[1])
-	m:ScaleTo(SCALE)
+	m:ScaleTo(r[10])
 	m:PivotTo(CFrame.new(r[3] + OFFSET, r[4], r[5]) * CFrame.Angles(0, math.rad(r[6]), 0))
 	for _, p in m:GetDescendants() do
 		if p:IsA("BasePart") then
@@ -61,6 +64,10 @@ for _, r in PROPS do
 		m.Parent = decor
 	end
 	placed += 1
+end
+local lilies = W.Decor:FindFirstChild("Lilies") -- (world2_temple's stand-in discs: the lily pads above take over)
+if lilies and decor:FindFirstChild("LilyPad") then
+	lilies:Destroy()
 end
 local names = {}
 for n in missing do
