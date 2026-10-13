@@ -32,6 +32,12 @@ local bought = {} -- [player] = how much bought gold is already in their gold
 local savedAs = {} -- [player] = the gold and bought last saved (autosave skips it if they haven't changed)
 local oldStamina = {} -- [player] = the save's old stamina level, kept as it was
 
+-- Gold is shared by every world (QM, Oct 13); the barriers you've broken are each
+-- world's own: `gates` in World 1, `gates2` in World 2... The save keeps the other
+-- worlds' as it found them.
+local GATES = if Config.World == 1 then "gates" else "gates" .. Config.World
+local others = {} -- [player] = the loaded record, for the other worlds' fields
+
 local function key(player)
 	return "u" .. player.UserId
 end
@@ -51,7 +57,8 @@ local function load(player)
 				bought[player] = if typeof(value) == "table" then tonumber(value.bought) or 0 else 0
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + (tonumber(gold) or 0))
 				oldStamina[player] = if typeof(value) == "table" then tonumber(value.stamina) else nil
-				local gates = if typeof(value) == "table" then tonumber(value.gates) else nil
+				others[player] = if typeof(value) == "table" then value else nil
+				local gates = if typeof(value) == "table" then tonumber(value[GATES]) else nil
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
 				loaded[player] = true
 			end
@@ -76,7 +83,9 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	for attempt = 1, 3 do
-		if pcall(store.SetAsync, store, key(player), { gold = gold, bought = bought[player] or 0, stamina = oldStamina[player], gates = gates }) then
+		local record = table.clone(others[player] or {})
+		record.gold, record.bought, record.stamina, record[GATES] = gold, bought[player] or 0, oldStamina[player], gates
+		if pcall(store.SetAsync, store, key(player), record) then
 			savedAs[player] = as
 			return
 		end
@@ -110,7 +119,7 @@ end
 
 Players.PlayerRemoving:Connect(function(player)
 	save(player)
-	loaded[player], ready[player], bought[player], savedAs[player], oldStamina[player] = nil, nil, nil, nil, nil
+	loaded[player], ready[player], bought[player], savedAs[player], oldStamina[player], others[player] = nil, nil, nil, nil, nil, nil
 end)
 
 -- Autosave (QM, Oct 4): every Config.AutosaveEvery seconds each player's gold is saved

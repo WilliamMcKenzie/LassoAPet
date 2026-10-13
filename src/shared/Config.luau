@@ -1086,6 +1086,12 @@ local Config = {
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
 Config.Places = { 126872244121414, 139418530058790 } -- [world] = its PlaceId
 Config.World = table.find(Config.Places, game.PlaceId) or 1
+-- The per-world saves' DataStore names: World 1's as they've always been, the others' with
+-- this on the end ("Pen_W2"). Gold's store is shared.
+function Config.storeName(name, world)
+	world = world or Config.World
+	return if world == 1 then name else name .. "_W" .. world
+end
 
 -- World 2's look: its first biome and base as QM's reference (marble walls, yellow
 -- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
