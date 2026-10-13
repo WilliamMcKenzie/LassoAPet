@@ -120,6 +120,7 @@ local function save(player, onlyIfChanged)
 		record.trail = trail
 		record.rebirths = rebirths
 		record.v1new = player:GetAttribute("V1New") or record.v1new
+		record.lastWorld = Config.World -- (where you were last: a join from the home page goes back there)
 		record[PLAYED] = math.floor(playedNow(player))
 		record[PLAYED .. "Full"] = playedFull[player] or nil
 		if pcall(store.SetAsync, store, key(player), record) then
@@ -142,9 +143,21 @@ local function addBought(player)
 	save(player)
 end
 
+local travelTo -- (below: the Worlds menu's trips)
 local function join(player)
 	load(player)
 	ready[player] = true
+	-- Joining from the home page (no trip's teleport data) lands everyone in World 1: back to
+	-- World 2 if that's where you were last and it's still yours (QM, Oct 13).
+	if Config.World == 1 and loaded[player] and not RunService:IsStudio() and player:GetAttribute("OwnsWorld2")
+		and typeof(others[player]) == "table" and others[player].lastWorld == 2 then
+		local ok, data = pcall(function()
+			return player:GetJoinData().TeleportData
+		end)
+		if ok and data == nil then
+			task.spawn(travelTo, player, 2)
+		end
+	end
 	if Config.World == 2 then
 		worldNoted(player, "v1w2e", "w2entered")
 	end
@@ -216,7 +229,7 @@ end)
 hardReset.Parent = game:GetService("ServerStorage")
 
 local travelling = {}
-local function travelTo(player, world)
+travelTo = function(player, world)
 	local place = world and Config.Places[world]
 	if not place or world == Config.World or travelling[player] then
 		return

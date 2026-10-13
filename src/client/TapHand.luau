@@ -2,10 +2,13 @@
 -- or a spot (the quests' hints: QM, Oct 11). TapHand.new(height) makes one, not
 -- parented; its Position is its fingertip.
 --
--- One at a time (QM, Oct 13: two at once is confusing): of all the hands that would show
--- (visible, on a screen that's on), only one is drawn, the one that came up first; the
--- rest stay see-through till it goes. TapHand.register(image) counts another one in (the
--- Tutorial's own). Whoever shows a hand keeps setting Visible as before.
+-- One at a time (QM, Oct 13: two at once is confusing): every hand that would show (visible,
+-- on a screen that's on) asks Client/Focus, with the priority in its "Focus" attribute
+-- (Focus.P; a plain hand's Focus.P.Hand) and goal in "FocusGoal", and only one that has it
+-- is drawn: the rest,
+-- and the hands under an arrow that has it, stay see-through till it goes.
+-- TapHand.register(image) counts another one in (the Tutorial's own). Whoever shows a hand
+-- keeps setting Visible as before.
 --
 -- The spotlight (QM, Oct 13: only for buying World 2 from the bar, and opening and claiming
 -- the starter quest): a hand with the "Spotlight" attribute, while it's the one shown,
@@ -13,6 +16,7 @@
 -- drawn again over the dark. The dark doesn't take clicks.
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local Focus = require(script.Parent.Focus)
 
 local TapHand = {}
 local hands = {} -- [hand] = its UIScale (ours, which pulse)
@@ -28,6 +32,7 @@ local function track(image)
 		if i then
 			table.remove(all, i)
 		end
+		Focus.want(image, false)
 	end)
 end
 
@@ -121,13 +126,14 @@ RunService.RenderStepped:Connect(function()
 			scale.Scale = s
 		end
 	end
-	if not (current and current.Parent and showing(current)) then
-		current = nil
-		for _, image in all do
-			if showing(image) then
-				current = image
-				break
-			end
+	for _, image in all do
+		Focus.want(image, showing(image), image:GetAttribute("Focus") or Focus.P.Hand, image:GetAttribute("FocusGoal"))
+	end
+	current = nil
+	for _, image in all do
+		if Focus.has(image) then
+			current = image
+			break
 		end
 	end
 	for _, image in all do

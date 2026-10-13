@@ -18,6 +18,7 @@ local player = Players.LocalPlayer
 local Hud = require(script.Parent.Hud)
 local TapHand = require(script.Parent.TapHand)
 local ArrowTrail = require(script.Parent.ArrowTrail)
+local Focus = require(script.Parent.Focus)
 local WorldUnlock = require(script.Parent.WorldUnlock)
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
@@ -103,6 +104,8 @@ ask.Visible = false
 ask.Parent = bar
 local hand = TapHand.new(70)
 hand:SetAttribute("Spotlight", not REBIRTH) -- (buying World 2 here: in the spotlight, QM Oct 13)
+hand:SetAttribute("Focus", Focus.P.BuyWorld2) -- (one goal at a time: Client/Focus)
+hand:SetAttribute("FocusGoal", "buyWorld2")
 hand.Position = UDim2.fromScale(0.84, 0.6)
 hand.Visible = false
 hand.Parent = bar
@@ -194,6 +197,8 @@ RunService.RenderStepped:Connect(function()
 		return
 	end
 	local guide = owned and player:GetAttribute("GuideTravel") and not busy and gate ~= nil
+	Focus.want("travelGuide", guide == true, Focus.P.Travel, "travel")
+	guide = guide and Focus.has("travelGuide") -- (one goal at a time)
 	arrow.Enabled = guide == true
 	if not guide then
 		trail.draw()

@@ -177,6 +177,8 @@ list.ZIndex = 2
 list.Parent = panel
 
 local travelHand = TapHand.new(90)
+travelHand:SetAttribute("Focus", require(script.Parent.Focus).P.Travel) -- (one goal at a time: Client/Focus)
+travelHand:SetAttribute("FocusGoal", "travel")
 travelHand.Visible = false
 
 local cards = {}

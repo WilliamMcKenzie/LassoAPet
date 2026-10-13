@@ -1124,6 +1124,7 @@ local guide = {
 	HOME_CLOSE = 10, -- studs: back home, the arrows to your pen's entrance go once you're this close
 }
 local arrowTrail = require(script.Parent.ArrowTrail).new() -- (QM's arrows in a row, Oct 12; was a chevron beam)
+local Focus = require(script.Parent.Focus) -- (the home guide: one goal at a time)
 
 local function updateGuide()
 	local target
@@ -1168,6 +1169,8 @@ function vfx.updateHomeGuide()
 			target = spot
 		end
 	end
+	Focus.want("homeGuide", target ~= nil, Focus.P.FastestPet, "fastestPet")
+	target = Focus.has("homeGuide") and target or nil
 	vfx.drawGuide(if target then Vector3.new(hrp.Position.X, 0, hrp.Position.Z) else nil, target)
 end
 

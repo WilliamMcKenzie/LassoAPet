@@ -21,6 +21,7 @@ local AnimalDex = require(script.Parent.AnimalDex)
 local RollMenu = require(script.Parent.RollMenu)
 local CameraHint = require(script.Parent.CameraHint)
 local TapHand = require(script.Parent.TapHand)
+local Focus = require(script.Parent.Focus)
 local Inventory = require(script.Parent.Inventory)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 
@@ -190,6 +191,8 @@ end }, { "invite", promptInvite } } do
 	if spec[1] == "merge" then -- the "Merge animals" quest's hint: a tap hand on it (below)
 		local hand = TapHand.new(80)
 		hand.Name = "MergeHint"
+		hand:SetAttribute("Focus", Focus.P.Merge)
+		hand:SetAttribute("FocusGoal", "merge")
 		hand.Position = UDim2.fromScale(0.55, 0.7)
 		hand.Visible = false
 		hand.Parent = b
@@ -316,6 +319,8 @@ end)
 local openHand = TapHand.new(80)
 openHand.Name = "OpenQuestsHint"
 openHand:SetAttribute("Spotlight", true) -- (TapHand's: QM, Oct 13)
+openHand:SetAttribute("Focus", Focus.P.StarterQuest)
+openHand:SetAttribute("FocusGoal", "starterQuest")
 openHand.Position = UDim2.fromScale(0.5, 0.6)
 openHand.Visible = false
 openHand.Parent = fold
@@ -612,7 +617,10 @@ local function drawQuests()
 		hand.Position = UDim2.fromScale(0.62, 0.6)
 		local row = lastClaim:FindFirstAncestor("Quest")
 		-- (the starter quest's claim, World 1's "Reach Meadow": in the spotlight, QM Oct 13)
-		hand:SetAttribute("Spotlight", Config.World == 1 and row ~= nil and row:GetAttribute("Quest") == 101)
+		local starter = Config.World == 1 and row ~= nil and row:GetAttribute("Quest") == 101
+		hand:SetAttribute("Spotlight", starter)
+		hand:SetAttribute("Focus", if starter then Focus.P.StarterQuest else Focus.P.Hand) -- (one goal at a time: Client/Focus)
+		hand:SetAttribute("FocusGoal", if starter then "starterQuest" else nil)
 		hand.Parent = lastClaim
 	end
 	quests.Size = UDim2.fromOffset(Q.width, if one then 184 else y + Q.bottom)

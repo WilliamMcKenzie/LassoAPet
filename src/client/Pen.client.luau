@@ -27,6 +27,7 @@ local Merge = require(ReplicatedStorage.Shared.Merge)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
 local Skins = require(ReplicatedStorage.Shared.Skins)
 local PenPets = require(script.Parent.PenPets)
+local Focus = require(script.Parent.Focus)
 local Sounds = require(script.Parent.Sounds)
 local Gamepad = require(script.Parent.Gamepad)
 
@@ -197,6 +198,8 @@ local function readyArrow(s, show)
 		s.arrow = gui
 	end
 	if s.arrow then
+		Focus.want(s, show and s.egg ~= nil, Focus.P.EggReady, "eggReady")
+		show = show and Focus.has(s) -- (one goal at a time: Client/Focus)
 		local root = if show and s.egg then s.egg.model.PrimaryPart else nil -- (nil, not false: Adornee takes no boolean)
 		s.arrow.Adornee = root
 		s.arrow.Enabled = root ~= nil
@@ -205,6 +208,7 @@ local function readyArrow(s, show)
 end
 
 local function remove(s)
+	Focus.want(s, false)
 	if s.arrow then
 		s.arrow:Destroy()
 		s.arrow = nil

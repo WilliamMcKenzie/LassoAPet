@@ -99,6 +99,9 @@ local tapScale = Instance.new("UIScale")
 tapScale.Parent = tap
 tap.Parent = gui
 require(script.Parent.TapHand).register(tap) -- (one hand on screen at a time)
+local Focus = require(script.Parent.Focus) -- (one goal at a time: the tutorial's comes first)
+tap:SetAttribute("Focus", Focus.P.Tutorial)
+tap:SetAttribute("FocusGoal", "tutorial")
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- QM's Sprint guide: a bar along the top (computers only).
@@ -290,7 +293,10 @@ RunService.RenderStepped:Connect(function()
 	local over = arrowOver or fastestOver
 	local root = over and over.Parent and (over.PrimaryPart or over:FindFirstChildWhichIsA("BasePart", true))
 	eggArrow.Adornee = root
-	eggArrow.Enabled = root ~= nil and not player:GetAttribute("Cutscene") and not player:GetAttribute("MergeView") -- (not over the merge view: QM)
+	local arrowWanted = root ~= nil and not player:GetAttribute("Cutscene") and not player:GetAttribute("MergeView") -- (not over the merge view: QM)
+	Focus.want("tutorialArrow", arrowWanted and arrowOver ~= nil, Focus.P.Tutorial, "tutorial")
+	Focus.want("fastestPet", arrowWanted and arrowOver == nil, Focus.P.FastestPet, "fastestPet") -- (with Ride's home trail to it)
+	eggArrow.Enabled = arrowWanted and Focus.has(if arrowOver then "tutorialArrow" else "fastestPet")
 	local up = if over and over:IsA("Model") and not over.Name:match("Egg$") then ARROW_UP_PET else ARROW_UP
 	eggArrow.StudsOffsetWorldSpace = Vector3.new(0, up + math.abs(math.sin(os.clock() * 3)) * 1.5, 0)
 	-- The tap hand.
@@ -319,7 +325,9 @@ RunService.RenderStepped:Connect(function()
 	if typeof(target) == "Instance" then
 		target = if target.Parent then target:GetPivot().Position else nil
 	end
-	if root and target and not Hud.isRiding() and not player:GetAttribute("Cutscene") then
+	local trailWanted = root ~= nil and target ~= nil and not Hud.isRiding() and not player:GetAttribute("Cutscene")
+	Focus.want("tutorialTrail", trailWanted, Focus.P.Tutorial, "tutorial")
+	if trailWanted and Focus.has("tutorialTrail") then
 		local from = Vector3.new(root.Position.X, 0, root.Position.Z)
 		local to = Vector3.new(target.X, 0, target.Z)
 		local along = to - from
