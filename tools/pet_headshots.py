@@ -32,7 +32,7 @@ PREVIEW = "/mnt/project-files/animals/headshots"
 
 MODELS = {
     "Horse": "horses/Horse9_Leap", "Pinto": "horses/Pinto", "Pig": "animals/Pig", "Bunny": "animals/Bunny", "Fish": "animals/Fish",
-    "Rhino": "animals/Rhino", "Unicorn": "animals/Unicorn",
+    "Rhino": "animals/Rhino", "Unicorn": "animals/Unicorn", "MarbleColossus": "world2/MarbleColossus",
     "Cactus": "desert/Cactus", "Kitten": "desert/Kitten", "Scorpion": "desert/Scorpion", "Sandworm": "desert/Sandworm",
     "SpineLizard": "converted/SpineLizard", "Snake": "desert/Snake",
     "Penguin": "snow/Penguin", "Boar": "converted/Boar", "Snowman": "snow/Snowman",
@@ -49,7 +49,7 @@ ZYX = {"BoneRex", "KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "
 FACING = {"Kraken": 180}
 # Animals whose run makes a poor picture (the Snake stretches out thin, the Starfish
 # folds its arms up) keep their idle stance in the action style.
-ACTION_IDLE = {"Snake", "Starfish", "Rockworm", "FireLobster"}  # degrees the face is turned from -z (the Kraken's eye faces its rider)
+ACTION_IDLE = {"Snake", "Starfish", "Rockworm", "FireLobster", "MarbleColossus"}  # degrees the face is turned from -z (the Kraken's eye faces its rider)
 
 # Camera styles: yaw (degrees round from the front, + toward the animal's left),
 # pitch (degrees above level), field of view, and the pose (animation, time as a

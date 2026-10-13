@@ -50,6 +50,12 @@ return {
 		{ "Belly", 250, 236, 212 }, -- muzzle
 		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" }, -- (cream paws, like the muzzle)
 	},
+	MarbleColossus = {
+		{ "Body", 246, 244, 238 }, -- marble
+		{ "Body", 208, 205, 198 }, -- chest, shoulders, brow (shade)
+		{ "Hoof", 226, 223, 216 }, -- fists
+		{ "Horn", 240, 190, 24 }, -- gold spikes, bracers, headband
+	},
 	Rhino = {
 		{ "Body", 150, 156, 170 },
 		{ "Marking", 112, 118, 134 }, -- back plates, tail tip
