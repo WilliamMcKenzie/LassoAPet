@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local PetFaces = require(script.Parent.PetFaces)
+local Sounds = require(script.Parent.Sounds)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -126,6 +127,16 @@ function NewAnimal.show(kind)
 		-- sunburst kicking out.
 		tween(scale, REVEAL, Quad, Out, { Scale = 1.2 })
 		tween(face, REVEAL, Quad, Out, { ImageColor3 = Color3.new(1, 1, 1) })
+		Sounds.play("reveal_pop") -- (the egg reveal's pop and its shake: QM, Oct 13)
+		task.spawn(function()
+			local t = 0
+			while t < 0.35 do
+				local k = (1 - t / 0.35) * 10
+				face.Position = UDim2.new(0.5, math.random(-1, 1) * k, 0.5, math.random(-1, 1) * k)
+				t += RunService.Heartbeat:Wait()
+			end
+			face.Position = UDim2.fromScale(0.5, 0.5)
+		end)
 		flash.BackgroundTransparency = 0.35
 		tween(flash, 0.35, Quad, Out, { BackgroundTransparency = 1 })
 		burstScale.Scale = 1.15
