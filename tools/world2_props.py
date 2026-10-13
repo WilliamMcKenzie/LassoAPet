@@ -11,8 +11,7 @@ Clusters every 60 to 110 studs down each biome, one side then the other (now and
 both), each within REACH studs of its wall: a big piece against the wall, a middle
 one beside it, small ones round their feet. Big and middle pieces are Obstacles
 (smashed when ridden into, with an invisible Base footprint and a Tier); small ones
-are walk-through Decor. Nothing within NEST_CLEAR of a nest, nothing on the Cavern's
-planks, every piece on the tile height under it. In the Crimson Lands a cluster that
+are walk-through Decor. Nothing on the Cavern's planks, every piece on the tile height under it. In the Crimson Lands a cluster that
 lands on stone is runestones; elsewhere mushrooms. In the Cavern, crystal clusters
 and fungus clusters alternate.
 
@@ -35,7 +34,6 @@ import world2_cavern as cavern  # noqa: E402
 HERE = os.path.dirname(__file__)
 SCALE = 2  # (World 1's lobby plants are 2x to 4x their meshes)
 REACH = 28  # studs from the wall a cluster may reach
-NEST_CLEAR = 20
 OFFSET = 1000
 # name: (half footprint at 1x (x, z), tier or None for walk-through decor)
 PIECES = {
@@ -46,7 +44,6 @@ PIECES = {
     "CrystalPinkLarge": ((4.4, 4.4), 2), "CrystalCyanMedium": ((2.5, 2.5), None), "CrystalPinkMedium": ((2.5, 2.5), None),
     "FungusLarge": ((3, 3), 2), "FungusMedium": ((2, 2), 1), "FungusCluster": ((2.5, 2), None),
 }
-CRIMSON_NESTS = [(16, -2388), (-14, -2588), (18, -2808), (-14, -3196), (18, -3416), (-16, -3816)]  # (desert_ground.NESTS)
 COLOURS = {}  # piece colours for the renders, read from the pieces' colours.txt
 
 
@@ -56,7 +53,7 @@ def radius(name):
 
 
 class Biome:
-    def __init__(self, mod, name, nests, seed):
+    def __init__(self, mod, name, seed):
         self.mod, self.name, self.seed = mod, name, seed
         if mod is crimson:
             self.kind = mod.layout()
@@ -64,7 +61,6 @@ class Biome:
         else:
             self.kind = mod.layout()
             self.top = np.vectorize(lambda k: mod.TOPS.get(int(k), 0))(self.kind)
-        self.nests = [(float(map_x(x, z)), z) for x, z in nests]
 
     def cell(self, x, z):
         m = self.mod
@@ -84,8 +80,6 @@ def layout(b):
         if abs(x) > half_width(z) - r * 0.6 or abs(x) < half_width(z) - REACH:
             return False
         if z > m.Z0 - 12 or z < m.Z1 + 12:
-            return False
-        if any(math.hypot(x - a, z - c) < NEST_CLEAR + r for a, c in b.nests):
             return False
         k, _ = b.cell(x, z)
         if k == m.VOID or (m is cavern and k == cavern.PLANKS):
@@ -172,9 +166,6 @@ def overhead(b, props, path, s=2, rows=4):
                 tier = PIECES[name][1]
                 d.ellipse([*P(x - rad, z + rad), *P(x + rad, z - rad)], fill=col,
                           outline=(20, 20, 20) if tier else (255, 255, 255), width=s)
-        for x, z in b.nests:
-            if r * seg * m.CELL <= m.Z0 - z < (r + 1) * seg * m.CELL:
-                d.ellipse([*P(x - 6, z + 6), *P(x + 6, z - 6)], outline=(255, 255, 255), width=2 * s)
     im.save(path)
 
 
@@ -273,8 +264,8 @@ def main():
     os.makedirs(out, exist_ok=True)
     pieces = load_pieces(meshes) if os.path.exists(os.path.join(meshes, "design", "crimson", "pieces")) else {}
     sets = []
-    for mod, name, nests, seed in ((crimson, "Crimson", CRIMSON_NESTS, 71), (cavern, "Cavern", [(16, -4272), (-14, -4832), (18, -5472)], 73)):
-        b = Biome(mod, name, nests, seed)
+    for mod, name, seed in ((crimson, "Crimson", 71), (cavern, "Cavern", 73)):
+        b = Biome(mod, name, seed)
         props = layout(b)
         sets.append((name, props))
         overhead(b, props, os.path.join(out, f"{name.lower()}_props.png"))
