@@ -95,6 +95,12 @@ return {
 		{ "Horn", 150, 146, 140 }, -- horn tips
 		{ "Hoof", 58, 46, 42 },
 	},
+	Crocodile = {
+		{ "Body", 88, 158, 64 },
+		{ "Marking", 54, 112, 44 }, -- scutes, brows, feet, ridges
+		{ "Belly", 214, 222, 140 },
+		{ "Accent", 236, 120, 140 }, -- mouth
+	},
 	Cactus = {
 		{ "Body", 118, 204, 64 },
 		{ "Marking", 72, 150, 44 }, -- ribs
