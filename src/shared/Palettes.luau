@@ -73,6 +73,13 @@ return {
 		{ "Belly", 222, 240, 255 },
 		{ "Marking", 36, 88, 184 }, -- fins
 	},
+	MarbleFish = {
+		{ "Body", 255, 204, 36 },
+		{ "Belly", 255, 244, 196 },
+		{ "Marking", 232, 150, 16 }, -- fins
+		{ "Horn", 246, 244, 238 }, -- marble horn
+		{ "Horn", 208, 205, 198 },
+	},
 	Cactus = {
 		{ "Body", 118, 204, 64 },
 		{ "Marking", 72, 150, 44 }, -- ribs
