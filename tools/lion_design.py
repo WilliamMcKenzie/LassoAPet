@@ -9,7 +9,8 @@ QM's horse walk, the gallop the shared leap (a pounce).
 
     python3 tools/lion_design.py
 
-writes designs/world2/Lion.bbmodel and renders to /mnt/project-files/animals/lion/.
+wrote the first draft of designs/world2/Lion.bbmodel. QM has since edited that file in
+Blockbench (Oct 13): don't rerun this, it would overwrite QM's edit. Convert with --zyx.
 """
 
 import json

@@ -45,7 +45,7 @@ MODELS = {
     "Leviathan": "leviathan/Leviathan",
     "VolcanoTortoise": "volcano/VolcanoTortoise", "Firebird": "volcano/Firebird", "RockHog": "volcano/RockHog", "Rockworm": "volcano/Rockworm", "FireLobster": "volcano/FireLobster", "TRex": "jurassic/TRex", "BoneRex": "jurassic/BoneRex", "Ankylosaurus": "jurassic/Ankylosaurus", "PalmGuy": "jurassic/PalmGuy", "Spinosaurus": "jurassic/Spinosaurus", "Pterodactyl": "jurassic/Pterodactyl", "Raptor": "jurassic/Raptor", "LavaWhale": "volcano/LavaWhale", "Phoenix": "volcano/Phoenix",
 }
-ZYX = {"CrystalCentipede", "BoneRex", "KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish", "TRex", "Spinosaurus", "MajesticUnicorn"}  # converted with --zyx (QM's hand-made multi-axis rotations)
+ZYX = {"CrystalCentipede", "BoneRex", "KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish", "TRex", "Spinosaurus", "MajesticUnicorn", "Lion"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}
 # Animals whose run makes a poor picture (the Snake stretches out thin, the Starfish
 # folds its arms up) keep their idle stance in the action style.
