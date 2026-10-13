@@ -73,6 +73,13 @@ return {
 		{ "Belly", 222, 240, 255 },
 		{ "Marking", 36, 88, 184 }, -- fins
 	},
+	Catfish = {
+		{ "Body", 112, 146, 52 },
+		{ "Belly", 243, 231, 181 },
+		{ "Marking", 74, 104, 38 }, -- fins
+		{ "Marking", 78, 108, 36 }, -- spots
+		{ "Whisker", 58, 40, 24 },
+	},
 	MarbleFish = {
 		{ "Body", 255, 204, 36 },
 		{ "Belly", 255, 244, 196 },
