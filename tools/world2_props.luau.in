@@ -1,0 +1,69 @@
+-- World 2's props (QM, Oct 13; draft). Made by tools/world2_props.py: edit that and
+-- re-make this, not this. Run in Studio (Edit, execute_luau) on the place with World2,
+-- after the floor scripts and world2_clear. Re-running is fine (it replaces its own).
+-- Clusters of the Rock mesh thread's crimson set (Crimson Lands) and crystals and fungi
+-- (Crystal Cavern) hugging the walls, the course's middle clear. Big and middle pieces
+-- go in World2.Obstacles (smashed when ridden into: an invisible Base footprint and a
+-- Tier, like World 1's); small ones in World2.Decor.Props, walk-through.
+-- Each piece is cloned from ServerStorage.World2Assets.<Name>: a Model of its coloured
+-- MeshParts at the mesh's own size, pivot at its base's middle.
+local W = workspace.World2
+local OFFSET = 1000
+local SCALE = --SCALE--
+local assets = game:GetService("ServerStorage"):WaitForChild("World2Assets", 5)
+assert(assets, "ServerStorage.World2Assets (the imported crimson and crystal meshes) not found")
+-- { biome, name, x, y (the tile's top), z, yaw, tier (0 = walk-through decor), base size x, base size z }
+local PROPS = {
+--PROPS--
+}
+
+for _, m in W.Obstacles:GetChildren() do
+	if m:GetAttribute("World2Prop") then
+		m:Destroy()
+	end
+end
+local decor = W.Decor:FindFirstChild("Props")
+if decor then
+	decor:Destroy()
+end
+decor = Instance.new("Folder")
+decor.Name = "Props"
+decor.Parent = W.Decor
+
+local missing, placed = {}, 0
+for _, r in PROPS do
+	local template = assets:FindFirstChild(r[2])
+	if not template then
+		missing[r[2]] = true
+		continue
+	end
+	local m = template:Clone()
+	m:SetAttribute("World2Prop", r[1])
+	m:ScaleTo(SCALE)
+	m:PivotTo(CFrame.new(r[3] + OFFSET, r[4], r[5]) * CFrame.Angles(0, math.rad(r[6]), 0))
+	for _, p in m:GetDescendants() do
+		if p:IsA("BasePart") then
+			p.Anchored = true
+			p.CanCollide = r[7] > 0
+		end
+	end
+	if r[7] > 0 then
+		local base = Instance.new("Part")
+		base.Name = "Base"
+		base.Anchored, base.CanCollide, base.CanQuery, base.CanTouch = true, false, false, false
+		base.Transparency = 1
+		base.Size = Vector3.new(r[8], 1, r[9])
+		base.CFrame = CFrame.new(r[3] + OFFSET, r[4] + 0.5, r[5]) * CFrame.Angles(0, math.rad(r[6]), 0)
+		base.Parent = m
+		m:SetAttribute("Tier", r[7])
+		m.Parent = W.Obstacles
+	else
+		m.Parent = decor
+	end
+	placed += 1
+end
+local names = {}
+for n in missing do
+	table.insert(names, n)
+end
+return string.format("%d props placed%s", placed, if #names > 0 then " | missing in World2Assets: " .. table.concat(names, ", ") else "")
