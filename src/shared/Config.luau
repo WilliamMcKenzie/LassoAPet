@@ -1318,6 +1318,31 @@ if Config.World == 2 then
 		end
 		biome.Herd = if next(herd) then herd else { Fish = 1 }
 	end
+	-- World 2's speeds (QM, Oct 13: each animal's % into a biome on a full sprint ride,
+	-- 2,904 studs per 1 Speed). The rest keep theirs (the Seraphs 0.5, the Majestic Unicorn,
+	-- Eyeworm, Asura and Crystal Centipede as they were).
+	for kind, speed in {
+		MarbleFish = 0.809, -- 10% into the Crimson Lands
+		Lion = 0.872, -- 20% into the Crimson Lands
+		Crocodile = 0.878, -- 21% into the Crimson Lands
+		Buffalo = 0.934, -- 30% into the Crimson Lands
+		MarbleColossus = 1.028, -- 45% into the Crimson Lands
+		CrimsonScorpion = 1.405, -- 5% into the Crystal Cavern
+		IvorySpider = 1.669, -- 45% into the Crystal Cavern
+		Maw = 1.438, -- 10% into the Crystal Cavern
+		Beholder = 1.504, -- 20% into the Crystal Cavern
+		RedMushroom = 2.14, -- 10% into the Woodland
+		BlueCrystal = 2.14, -- 10% into the Woodland
+		BrownMushroom = 2.248, -- 20% into the Woodland
+		PinkCrystal = 2.248, -- 20% into the Woodland
+		PurpleMushroom = 2.302, -- 25% into the Woodland
+		CrystalSpider = 2.355, -- 30% into the Woodland
+		CrystalPhoenix = 3.097, -- 99% into the Woodland
+		CrystalElephant = 4.409, -- 75% into the Temple
+	} do
+		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
+		Config.AnimalStats[kind].Speed = speed
+	end
 	-- The trophy angels (QM, Oct 13): each 1 in 300 of its biome's stampede, whatever the
 	-- other weights add up to.
 	for i, kind in { "Seraph", "CrimsonSeraph", "CrystalSeraph" } do
