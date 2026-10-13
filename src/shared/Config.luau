@@ -1289,8 +1289,8 @@ if Config.World == 2 then
 	crimson.CapColor = rgb(72, 39, 42)
 	crimson.GateColor = rgb(255, 59, 92)
 	cavern.GateColor = rgb(92, 225, 255)
-	woodland.WallColors = { rgb(78, 44, 28), rgb(70, 39, 25) }
-	woodland.CapColor = rgb(62, 35, 22)
+	woodland.WallColors = { rgb(70, 42, 24), rgb(60, 36, 20) } -- dark brown (QM, Oct 13)
+	woodland.CapColor = rgb(242, 109, 57) -- vibrant autumn leaves on top (QM, Oct 13)
 	woodland.GateColor = rgb(242, 109, 57)
 	temple.GateColor = rgb(130, 226, 80)
 	tomb.GateColor = rgb(255, 200, 30)
