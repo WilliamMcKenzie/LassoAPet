@@ -128,6 +128,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Kitten = "Came to the desert for the world's biggest litter box. Has not left since.",
 	Cactus = "The fastest plant in the west. Deals eggs on the side.",
 	Scorpion = "Got busted dealing spice, now speaks about drug awareness at high school ceremonies.",
+	Caterpillar = "Eats one leaf a day and calls it a feast. Plans to be a butterfly but keeps hitting snooze.",
 	Eyeworm = "Has one eye and never blinks during staring contests. Undefeated.",
 	CrimsonScorpion = "Dyed itself red to look scarier. Now everyone just calls it Ketchup.",
 	Maw = "All mouth, no eyes. Finds snacks by smell and good luck.",

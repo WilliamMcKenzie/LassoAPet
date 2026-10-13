@@ -181,6 +181,15 @@ return {
 		{ "Horn", 0, 190, 231 }, -- cyan crystals and pincers
 		{ "Accent", 229, 131, 251 }, -- pink crystals
 	},
+	Caterpillar = {
+		{ "Body", 112, 206, 58 },
+		{ "Body", 156, 226, 70 }, -- the lime segments
+		{ "Belly", 196, 232, 96 }, -- belly, snout
+		{ "Accent", 255, 212, 40 }, -- back spots
+		{ "Horn", 242, 109, 57 }, -- antenna tips
+		{ "Hoof", 46, 122, 44 }, -- feet, antenna stalks
+		parts = { Eye = "Fixed", Pupil = "Fixed", Mouth = "Fixed" },
+	},
 	Eyeworm = {
 		{ "Body", 170, 22, 48 },
 		{ "Belly", 214, 70, 92 },
