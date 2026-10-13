@@ -1082,6 +1082,14 @@ local Config = {
 	HerdGapSpeed = 2,
 }
 
+-- Flowing water (QM, Oct 13; Client/WaterFlow): a Texture named "Water" on a tile's top
+-- with this Image flows Flow studs a second (U across the course, V along it).
+Config.Water = {
+	Image = "rbxassetid://77807866797953", -- assets/world2/WaterTile256.png (QM's 8 x 8 tile, x32 for crisp pixels)
+	StudsPerTile = 8, -- (a pixel a stud)
+	Flow = Vector2.new(0, 2),
+}
+
 -- Worlds (QM, Oct 13): each is its own Place in the experience, running this same code.
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
 Config.Places = { 126872244121414, 139418530058790 } -- [world] = its PlaceId
