@@ -124,6 +124,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Scorpion = "Got busted dealing spice, now speaks about drug awareness at high school ceremonies.",
 	Eyeworm = "Has one eye and never blinks during staring contests. Undefeated.",
 	Maw = "All mouth, no eyes. Finds snacks by smell and good luck.",
+	Asura = "Never sheathes its sword. Nobody has asked it to.",
 	IvorySpider = "Spins its webs in perfect white. Hates muddy boots.",
 	Sandworm = "Sandworm started out collecting old books, but they all got sandy. Now it just burrows.",
 	SpineLizard = "A natural solar panel, yet overheats easily. Going extinct.",

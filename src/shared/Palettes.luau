@@ -157,6 +157,13 @@ return {
 		{ "Accent", 200, 190, 174 }, -- knees, spinnerets
 		{ "Hoof", 150, 138, 126 }, -- feet, fangs
 	},
+	Asura = {
+		{ "Body", 72, 84, 85 }, -- armour
+		{ "Body", 53, 67, 69 }, -- cape, grip (darker)
+		{ "Marking", 121, 191, 202 }, -- hair, sword guard
+		{ "Accent", 111, 120, 121 }, -- helm, mask, shoulder pads, belt
+		{ "Horn", 130, 138, 140 }, -- blade
+	},
 	Sandworm = {
 		{ "Body", 228, 178, 104 },
 		{ "Belly", 248, 224, 172 },

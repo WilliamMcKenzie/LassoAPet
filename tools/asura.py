@@ -5,6 +5,7 @@ horned helm, cyan hair, a cape and a big sword, posed mid-stride; left arm and l
 Run: python3 tools/asura.py [base.bbmodel]
 
 What it changes, keeping QM's shapes and pose:
+- every part shown (QM's file had the body, arm and leg hidden in Blockbench)
 - 4.9 -> 5.0 file (groups list), scaled up SCALE times, feet put on the ground
 - the painted texture -> solid colours, each part the average of its own texture
   snapped to a small palette (slate, light slate, cyan, black)
@@ -142,6 +143,7 @@ def build(base=BASE):
         elif bone == "pelvis" and size[0] == 14:
             cols[e["uuid"]] = "light"
     for e in m["elements"]:
+        e["visibility"] = True  # QM's file had the body, arm and leg hidden (only the head showing)
         for i in range(3):  # no 2D planes: give flat parts depth
             if abs(e["to"][i] - e["from"][i]) < 1e-6:
                 e["from"][i] -= 0.5
