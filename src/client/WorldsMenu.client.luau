@@ -5,7 +5,6 @@
 -- price) for one you don't. The world you're in has a white outline round its card.
 -- For now there's only World 1 (you're always in it); World 2's Buy says "Coming soon"
 -- and charges nothing until World 2 exists.
--- Art: "" = a placeholder drawn in its place, until QM's files are uploaded.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -15,20 +14,24 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local ModalPop = require(script.Parent.ModalPop)
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
+-- (QM's mockup, Oct 13, was 1456 wide: its sizes x 1320 / 1456 here)
 local CLOSE = "rbxassetid://84920756991403" -- dex/IndexClose.png (the Index's X, as the shop's)
-local ART = {
-	World1 = "", -- World1.png: the banner (portal, tree, track; "World 1" on it)
-	Travel = "", -- Travel.png: the blue button
-	Buy = "", -- Buy.png: the green button, a cash stack on its left
+local ART = { -- assets/ui/worlds (QM's; World2.png is his World1.png with a 2)
+	World1 = "rbxassetid://117854477071908", -- World1.png: the banner (portal, tree, track; "World 1" on it)
+	World2 = "rbxassetid://139660587337646", -- World2.png
+	Travel = "rbxassetid://72409176941710", -- Travel.png: the blue button ("Travel" on it)
+	Buy = "rbxassetid://128346351326066", -- Buy.png: the green button, a cash stack left, "Buy" right
 }
 local WORLDS = {
 	{ name = "World 1", banner = "World1" },
-	{ name = "World 2", banner = "World1", price = 400 },
+	{ name = "World 2", banner = "World2", price = 400 },
 }
-local PANEL = Vector2.new(760, 470)
-local CARD = Vector2.new(700, 200)
-local BUTTON = Vector2.new(210, 84)
-local PAD = 30 -- the panel's edge to the cards, and between them
+local PANEL = Vector2.new(769, 520) -- about 58% of the screen across
+local CARD = Vector2.new(725, 210)
+local CARD_TOP, CARD_GAP = 63, 22 -- the first card's top below the panel's, and between them
+local BUTTON = Vector2.new(292, 73) -- (the art's 409 x 102)
+local BUTTON_INSET = 15 -- from the card's top right
+local MONTSERRAT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local NEAR = 30 -- studs (across the ground) from the gate's middle: it pops up
 local AWAY = 45 -- and you've walked off once you're this far
 
@@ -93,124 +96,115 @@ root.Parent = gui
 local panel = Instance.new("Frame")
 panel.Name = "Panel"
 panel.AnchorPoint = Vector2.new(0.5, 0.5)
-panel.Position = UDim2.fromScale(0.5, 0.53)
+panel.Position = UDim2.fromScale(0.5, 0.5)
 panel.Size = UDim2.fromOffset(PANEL.X, PANEL.Y)
-panel.BackgroundColor3 = Color3.fromRGB(40, 40, 44)
-panel.BackgroundTransparency = 0.25
-rounded(panel, 28)
+panel.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+panel.BackgroundTransparency = 0.15
+rounded(panel, 11)
+local panelEdge = Instance.new("UIStroke")
+panelEdge.Color = Color3.fromRGB(16, 16, 16)
+panelEdge.Thickness = 4
+panelEdge.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+panelEdge.Parent = panel
 local panelScale = Instance.new("UIScale")
 panelScale.Parent = panel
 panel.Parent = root
 
+-- "Worlds" across the panel's top edge.
 local title = Instance.new("TextLabel")
 title.Name = "Title"
-title.AnchorPoint = Vector2.new(0.5, 1)
-title.Position = UDim2.new(0.5, 0, 0, 22)
-title.Size = UDim2.fromOffset(360, 84)
+title.AnchorPoint = Vector2.new(0.5, 0.5)
+title.Position = UDim2.fromScale(0.5, 0)
+title.Size = UDim2.fromOffset(360, 41)
 title.Text = "Worlds"
 title.ZIndex = 3
-outlined(title, 5)
+outlined(title, 3)
+title.FontFace = MONTSERRAT
 title.Parent = panel
 
+-- The X, centred on the panel's top right corner.
 local closeButton = Instance.new("ImageButton")
 closeButton.Name = "Close"
 closeButton.BackgroundTransparency = 1
 closeButton.AutoButtonColor = false
 closeButton.Image = CLOSE
 closeButton.AnchorPoint = Vector2.new(0.5, 0.5)
-closeButton.Position = UDim2.fromOffset(PANEL.X - 8, 8)
-closeButton.Size = UDim2.fromOffset(80, 80)
+closeButton.Position = UDim2.fromScale(1, 0)
+closeButton.Size = UDim2.fromOffset(63, 63)
 closeButton.ZIndex = 4
 pressable(closeButton)
 closeButton.Parent = panel
 
--- A button: QM's art, or a coloured placeholder with its text.
-local function button(art, color, text)
+-- A button of QM's art, at the card's top right.
+local function button(art)
 	local b = Instance.new("ImageButton")
 	b.AutoButtonColor = false
-	b.AnchorPoint = Vector2.new(1, 0.5)
-	b.Position = UDim2.new(1, -24, 0.5, 0)
-	b.Size = UDim2.fromOffset(BUTTON.X, BUTTON.Y)
+	b.BackgroundTransparency = 1
 	b.Image = art
-	b.BackgroundTransparency = if art ~= "" then 1 else 0
-	b.BackgroundColor3 = color
+	b.AnchorPoint = Vector2.new(1, 0)
+	b.Position = UDim2.new(1, -BUTTON_INSET, 0, BUTTON_INSET)
+	b.Size = UDim2.fromOffset(BUTTON.X, BUTTON.Y)
 	b.ZIndex = 3
-	if art == "" then
-		rounded(b, 18)
-		local edge = Instance.new("UIStroke")
-		edge.Thickness = 4
-		edge.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		edge.Parent = b
-	end
-	local label = Instance.new("TextLabel")
-	label.Name = "Label"
-	label.AnchorPoint = Vector2.new(0.5, 0.5)
-	label.Position = UDim2.fromScale(0.5, 0.5)
-	label.Size = UDim2.fromScale(0.8, 0.6)
-	label.Text = text
-	label.ZIndex = 4
-	outlined(label, 3)
-	label.Parent = b
 	pressable(b)
-	return b, label
+	return b
 end
 
 local cards = {}
 for i, world in WORLDS do
 	local card = Instance.new("ImageLabel")
 	card.Name = world.name
+	card.BackgroundTransparency = 1
+	card.Image = ART[world.banner]
 	card.AnchorPoint = Vector2.new(0.5, 0)
-	card.Position = UDim2.new(0.5, 0, 0, PAD + (i - 1) * (CARD.Y + PAD))
+	card.Position = UDim2.new(0.5, 0, 0, CARD_TOP + (i - 1) * (CARD.Y + CARD_GAP))
 	card.Size = UDim2.fromOffset(CARD.X, CARD.Y)
-	local art = ART[world.banner] or ""
-	card.Image = art
-	card.ScaleType = Enum.ScaleType.Crop
-	card.BackgroundColor3 = Color3.fromRGB(96, 170, 90) -- (placeholder: grass)
-	card.BackgroundTransparency = if art ~= "" then 1 else 0
 	card.ZIndex = 2
-	rounded(card, 22)
-	-- The world you're in: a white outline round its card (QM).
-	local here = Instance.new("UIStroke")
+	-- The world you're in: a white outline in place of the art's black one (QM).
+	local here = Instance.new("Frame")
 	here.Name = "Here"
-	here.Color = Color3.new(1, 1, 1)
-	here.Thickness = 6
-	here.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	here.BackgroundTransparency = 1
+	here.Position = UDim2.fromOffset(4, 4)
+	here.Size = UDim2.new(1, -8, 1, -8)
+	here.ZIndex = 3
+	rounded(here, 12)
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.new(1, 1, 1)
+	stroke.Thickness = 4
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	stroke.Parent = here
 	here.Parent = card
-	-- Its name, top left (QM's banner has "World 1" drawn on: shown where the art isn't
-	-- this world's own).
-	local name = Instance.new("TextLabel")
-	name.Name = "WorldName"
-	name.Position = UDim2.fromOffset(22, 14)
-	name.Size = UDim2.fromOffset(240, 60)
-	name.TextXAlignment = Enum.TextXAlignment.Left
-	name.Text = world.name
-	name.ZIndex = 3
-	outlined(name, 4)
-	name.Visible = art == "" or world.banner ~= "World" .. i
-	name.Parent = card
 	if world.price then
-		local buy, label = button(ART.Buy, Color3.fromRGB(80, 200, 70), "$" .. world.price)
+		-- Buy: the art's cash stack, the price in green, then its "Buy".
+		local buy = button(ART.Buy)
 		buy.Name = "Buy"
-		if ART.Buy ~= "" then -- (the price beside the art's cash stack, over its "Buy")
-			label.AnchorPoint = Vector2.new(1, 0.5)
-			label.Position = UDim2.fromScale(0.94, 0.5)
-			label.Size = UDim2.fromScale(0.55, 0.6)
-		end
+		local price = Instance.new("TextLabel")
+		price.Name = "Price"
+		price.AnchorPoint = Vector2.new(0.5, 0.5)
+		price.Position = UDim2.fromScale(0.45, 0.5)
+		price.Size = UDim2.fromScale(0.3, 0.46)
+		price.Text = "$" .. world.price
+		price.ZIndex = 4
+		outlined(price, 3)
+		price.FontFace = MONTSERRAT
+		price.TextColor3 = Color3.fromRGB(110, 255, 90)
+		price.Parent = buy
 		local busy = false
 		buy.Activated:Connect(function()
 			if busy then
 				return
 			end
 			busy = true -- World 2 isn't there yet (QM): it charges nothing
-			label.Text = "Coming soon"
+			price.Text = "Coming soon"
+			price.TextColor3 = Color3.new(1, 1, 1)
 			task.delay(1.5, function()
-				label.Text = "$" .. world.price
+				price.Text = "$" .. world.price
+				price.TextColor3 = Color3.fromRGB(110, 255, 90)
 				busy = false
 			end)
 		end)
 		buy.Parent = card
 	else
-		local travel = button(ART.Travel, Color3.fromRGB(60, 140, 240), "Travel")
+		local travel = button(ART.Travel)
 		travel.Name = "Travel"
 		travel.Activated:Connect(function()
 			if open then
@@ -226,7 +220,7 @@ end
 local function showHere()
 	local world = player:GetAttribute("World") or 1 -- (only World 1 for now)
 	for i, c in cards do
-		c.here.Enabled = i == world
+		c.here.Visible = i == world
 	end
 end
 player:GetAttributeChangedSignal("World"):Connect(showHere)
