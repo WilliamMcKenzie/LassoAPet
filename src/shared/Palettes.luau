@@ -136,6 +136,12 @@ return {
 		{ "Hoof", 190, 100, 214 }, -- legs
 		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
 	},
+	CrystalPhoenix = {
+		{ "Body", 104, 58, 184 }, -- body, wing arms
+		{ "Body", 146, 96, 226 }, -- head, neck, wing bands
+		{ "Marking", 229, 131, 251 }, -- pink feathers
+		{ "Accent", 0, 190, 231 }, -- cyan beak, feathers and crystals
+	},
 	CrystalSpider = {
 		{ "Body", 96, 108, 200 },
 		{ "Hoof", 66, 74, 152 }, -- lower legs

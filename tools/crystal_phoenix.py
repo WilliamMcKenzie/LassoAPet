@@ -4,7 +4,9 @@ goes from fire to the cavern's crystals: purple body, violet head and wing bands
 cyan feathers (the props' #E583FB and #00BEE7), and the glowing flame tips become pale
 glowing crystal (still named Glow*, so they stay Neon in game).
 
-Run: python3 tools/crystal_phoenix.py [out_dir]
+Run: python3 tools/crystal_phoenix.py [out_dir]   (the first draft; DON'T rerun it:
+designs/crystal/CrystalPhoenix.bbmodel is now QM's edit, with crystals for head plumes)
+     python3 tools/crystal_phoenix.py egg         (the egg: QM's Phoenix egg, same colour swap)
 """
 
 import base64
@@ -161,5 +163,45 @@ def main(out="/mnt/project-files/animals/crystal_phoenix"):
     print("wrote", len(m["elements"]), "elements")
 
 
+def swap_texture(m):
+    for t in m["textures"]:
+        head, data = t["source"].split(",", 1)
+        im = Image.open(io.BytesIO(base64.b64decode(data))).convert("RGBA")
+        px = im.load()
+        for x in range(im.width):
+            for y in range(im.height):
+                r, g, b, a = px[x, y]
+                if (r, g, b) in SWAP:
+                    px[x, y] = (*SWAP[(r, g, b)], a)
+        buf = io.BytesIO()
+        im.save(buf, "PNG")
+        t["source"] = head + "," + base64.b64encode(buf.getvalue()).decode()
+
+
+def egg(out="/mnt/project-files/animals/crystal_phoenix"):
+    """The Phoenix's egg (QM's designs/eggs/c_style/PhoenixEgg.bbmodel) in the crystal colours:
+    writes CrystalPhoenixEgg.bbmodel, its game model (--zyx) and its UI picture."""
+    import bbmodel_to_luau
+    from horse_egg_takes import VIEWS
+    m = json.load(open(os.path.join(ROOT, "designs", "eggs", "c_style", "PhoenixEgg.bbmodel")))
+    swap_texture(m)
+    m["name"] = "CrystalPhoenixEgg"
+    path = os.path.join(ROOT, "designs", "eggs", "c_style", "CrystalPhoenixEgg.bbmodel")
+    with open(path, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    bbmodel_to_luau.ORDER = "ZYX"
+    bbmodel_to_luau.main(os.path.join("designs", "eggs", "c_style", "CrystalPhoenixEgg.bbmodel"),
+                         os.path.join(ROOT, "src", "shared", "Eggs", "CrystalPhoenixEggModel.luau"))
+    ps = S.posed(m)
+    for p in ps:
+        if p.name.startswith("Glow"):
+            p.neon = True
+    im = render(ps, W=1100, H=1300, fov=30, transparent=True, **VIEWS[0])
+    im = im.crop(im.getbbox())
+    im.save(os.path.join(ROOT, "assets", "ui", "CrystalPhoenixEggRender.png"))
+    im.save(os.path.join(out, "CrystalPhoenixEgg.png"))
+    print("egg", im.size)
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    egg(*sys.argv[2:]) if sys.argv[1:2] == ["egg"] else main(*sys.argv[1:])
