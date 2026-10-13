@@ -90,6 +90,12 @@ return {
 		{ "Marking", 160, 70, 60 }, -- shoulders, arms, thighs, tail bulb
 		{ "Horn", 70, 44, 40 }, -- stinger
 	},
+	CrystalCentipede = {
+		{ "Body", 124, 72, 200 },
+		{ "Hoof", 72, 44, 124 }, -- leg bars, tail feelers
+		{ "Horn", 0, 190, 231 }, -- cyan crystals and pincers
+		{ "Accent", 229, 131, 251 }, -- pink crystals
+	},
 	Sandworm = {
 		{ "Body", 228, 178, 104 },
 		{ "Belly", 248, 224, 172 },

@@ -379,7 +379,8 @@ local Config = {
 		-- D1 eggs you come back for.
 		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, MarbleColossus = 120, MajesticUnicorn = 300, -- Meadow (the Marble Colossus and Majestic Unicorn: World 2's, as the Rhino and Unicorn)
 		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 600, -- Desert
-		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 120, Icebringer = 900, SnackYak = 3600, -- Tundra
+		Eyeworm = 15, Maw = 60, -- World 2 Crimson Lands
+		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 120, Icebringer = 900, SnackYak = 3600, CrystalCentipede = 15, -- Tundra (the Crystal Centipede: World 2's Crystal Cavern, as the Penguin)
 		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 35, Squid = 45, KingCrab = 300, FishSchool = 200, BlueCrab = 800, Kraken = 1200, -- Ocean
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
 		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
@@ -537,7 +538,8 @@ local Config = {
 	PetTiers = {
 		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleColossus = 2, MajesticUnicorn = 2, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
-		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
+		Eyeworm = 1, Maw = 1, -- World 2 Crimson Lands
+		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, CrystalCentipede = 1, -- Tundra
 		Starfish = 1, Clownfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, Lionfish = 1, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
@@ -617,7 +619,8 @@ local Config = {
 	PetIncome = {
 		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleColossus = 90, MajesticUnicorn = 450, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
-		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, -- Tundra
+		Eyeworm = 18, Maw = 60, -- World 2 Crimson Lands
+		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, CrystalCentipede = 75, -- Tundra
 		Starfish = 300, Clownfish = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, Lionfish = 1500, -- Ocean
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
 		TRex = 60000, Raptor = 40000, -- Jurassic (guesses: past the Volcano's)
@@ -713,6 +716,8 @@ local Config = {
 		Bunny = "rbxassetid://102165948456968", -- assets/ui/BunnyEggRender.png
 		Fish = "rbxassetid://105098230793344",
 		Rhino = "rbxassetid://139482781062355",
+		MarbleColossus = "rbxassetid://110439659872687", -- assets/ui/MarbleColossusEggRender.png (World 2)
+		CrystalCentipede = "rbxassetid://101332917430774", -- assets/ui/CrystalCentipedeEggRender.png (World 2)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
@@ -1017,6 +1022,8 @@ local Config = {
 		MajesticUnicorn = { Speed = 1.8, Stamina = 2 }, -- World 2's Meadow Legendary (as the Unicorn until QM sets it)
 		Unicorn = { Speed = 1.8, Stamina = 2 }, -- (QM, Oct 12: kept at 1.8, into the Tundra from the start line, ~4,440 of 3,984)
 		-- Desert
+		Eyeworm = { Speed = 1.31, Stamina = 1.5 }, -- World 2 Crimson Lands Uncommon: the Cactus's numbers (QM, Oct 13: World 2 ~matches World 1's speeds)
+		Maw = { Speed = 1.77, Stamina = 1.5 }, -- World 2 Crimson Lands Rare: the Scorpion's numbers
 		Cactus = { Speed = 1.31, Stamina = 1.5 }, -- (QM, Oct 12: 90% into the Desert; was 1.2)
 		Kitten = { Speed = 1.5, Stamina = 1.2 }, -- (QM, Oct 12: 20% into the Tundra; was 1.4)
 		Scorpion = { Speed = 1.77, Stamina = 1.5 }, -- (QM, Oct 12: 60% into the Tundra; was 1.5)
@@ -1024,6 +1031,7 @@ local Config = {
 		SpineLizard = { Speed = 1.97, Stamina = 2 }, -- (QM, Oct 12: 90% into the Tundra; was 1.62)
 		Snake = { Speed = 2.8, Stamina = 3 }, -- (QM, Oct 12: was 2)
 		-- Tundra
+		CrystalCentipede = { Speed = 1.99, Stamina = 1.5 }, -- World 2's Crystal Cavern Uncommon (as the Penguin until QM sets it)
 		Penguin = { Speed = 1.99, Stamina = 1.5 }, -- (QM, Oct 12: 93% into the Tundra; was 1.72)
 		Boar = { Speed = 2.36, Stamina = 1.6 }, -- (QM, Oct 12: 30% into the Ocean; was 1.86)
 		Snowman = { Speed = 2.52, Stamina = 1.3 }, -- (QM, Oct 12: 45% into the Ocean; was 2.06)
@@ -1161,6 +1169,8 @@ if Config.World == 2 then
 	}
 	cavern.WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) } -- #384867
 	cavern.CapColor = rgb(44, 57, 82)
+	cavern.Herd = table.clone(cavern.Herd)
+	cavern.Herd.CrystalCentipede = 0.3 -- the Cavern's first animal (QM, Oct 13), an Uncommon as often as the Penguin
 	-- The fourth: the Woodland Maze (QM, Oct 13; tools/world2_woodland.luau): brown, darker
 	-- by the walls.
 	local woodland = Config.Biomes[4]
@@ -1196,6 +1206,16 @@ if Config.World == 2 then
 	}
 	tomb.WallColors = { rgb(211, 183, 66), rgb(196, 168, 54) } -- #D3B742
 	tomb.CapColor = rgb(186, 158, 46)
+	-- Walls and gate glows (QM, Oct 13: the Level design thread's batch; tools/world2_walls.luau).
+	crimson.WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) }
+	crimson.CapColor = rgb(72, 39, 42)
+	crimson.GateColor = rgb(255, 59, 92)
+	cavern.GateColor = rgb(92, 225, 255)
+	woodland.WallColors = { rgb(78, 44, 28), rgb(70, 39, 25) }
+	woodland.CapColor = rgb(62, 35, 22)
+	woodland.GateColor = rgb(242, 109, 57)
+	temple.GateColor = rgb(130, 226, 80)
+	tomb.GateColor = rgb(255, 200, 30)
 end
 
 return Config

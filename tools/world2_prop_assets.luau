@@ -1,4 +1,4 @@
--- World 2's prop assets (QM, Oct 13; design/crimson, crystals, birches, sword_stone, temple, tomb): one
+-- World 2's prop assets (QM, Oct 13; design/pines (needles 40% darker: QM), design/crimson, crystals, birches, sword_stone, temple, tomb): one
 -- Model per item in ServerStorage.World2Assets, one MeshPart per piece at the item's origin
 -- (the middle of its base, y = 0), at the .obj's size, studded; the pivot is that origin.
 -- tools/world2_props.luau (the Level design thread's) clones them into the world. Runes glow
@@ -45,6 +45,9 @@ local ITEMS = {
 	SwordStatue = {{ 1, 112964233742457, "Podium", 0, 17, 34 }, { 2, 82820386742475, "Trim", 226, 188, 52 }, { 3, 79811021056935, "Blade", 255, 236, 140 }, { 4, 112296390427850, "Fuller", 252, 222, 81 }, { 5, 129935920425181, "Guard", 226, 188, 52 }, { 6, 131663372925583, "Grip", 252, 222, 81 }, { 7, 91737581968653, "Wraps", 226, 188, 52 }, { 8, 105220508758553, "Pommel", 226, 188, 52 }},
 	Trophy = {{ 1, 103026547700001, "Foot", 226, 188, 52 }, { 2, 83902840936313, "Stem", 252, 222, 81 }, { 3, 134198565157827, "Cup", 252, 222, 81 }, { 4, 79786716186857, "Rim", 255, 236, 140 }, { 5, 133164382954124, "Handles", 255, 236, 140 }},
 	WarriorStatue = {{ 1, 79990305319774, "Podium", 0, 17, 34 }, { 2, 106307977497678, "Trim", 226, 188, 52 }, { 3, 122670971794103, "Legs", 226, 188, 52 }, { 4, 86630214359169, "Kilt", 255, 236, 140 }, { 5, 121984083272369, "Body", 252, 222, 81 }, { 6, 129256581605005, "Belt", 226, 188, 52 }, { 7, 82154432692698, "Arms", 252, 222, 81 }, { 8, 132908138884417, "Helmet", 255, 236, 140 }, { 9, 115754470697358, "Spear", 226, 188, 52 }, { 10, 85503619590755, "Shield", 255, 236, 140 }, { 11, 117090792552862, "Boss", 226, 188, 52 }},
+	Pine = {{ 1, 129639745763786, "Trunk", 144, 125, 114 }, { 2, 134328405965946, "Needles", 139, 109, 53 }, { 3, 127801090979853, "Needles", 128, 100, 44 }, { 4, 137098710373142, "Needles", 145, 118, 62 }, { 5, 129217607495851, "Needles", 133, 103, 48 }},
+	PineTall = {{ 1, 119676723278229, "Trunk", 144, 125, 114 }, { 2, 72922718315563, "Needles", 139, 109, 53 }, { 3, 140024416971821, "Needles", 128, 100, 44 }, { 4, 132404692065054, "Needles", 145, 118, 62 }, { 5, 140303392266349, "Needles", 133, 103, 48 }, { 6, 93345451060917, "Needles", 139, 109, 53 }},
+	PineSmall = {{ 1, 140029582646295, "Trunk", 144, 125, 114 }, { 2, 87590817074105, "Needles", 139, 109, 53 }, { 3, 125263470195454, "Needles", 128, 100, 44 }, { 4, 98751142734041, "Needles", 145, 118, 62 }},
 }
 local folder = game.ServerStorage:FindFirstChild("World2Assets") or Instance.new("Folder")
 folder.Name = "World2Assets"
