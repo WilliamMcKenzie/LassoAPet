@@ -401,6 +401,7 @@ local Config = {
 		Catfish = 15, -- World 2 Temple (as the Firebird)
 		Fox = 15, NineTailedFox = 60, -- World 2 Temple (the Fox an Uncommon as the Firebird, the Nine-tailed Fox a Rare as the Fire Lobster, until QM sets them)
 		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
+		Scarab = 15, -- World 2 Ancient Tomb (an Uncommon, as the Ankylosaurus until QM sets it)
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
 		Seraph = 3600, CrimsonSeraph = 3600, CrystalSeraph = 3600, -- World 2's trophy angels, 1 in 300 of their stampedes (QM, Oct 13; the hatch a guess)
@@ -575,6 +576,7 @@ local Config = {
 		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
 		Spinosaurus = 4, -- Jurassic (QM: slightly smaller than the T-Rex: AnimalScale 0.85)
 		Ankylosaurus = 3, -- Jurassic (a guess: a wide armoured tank, under the T-Rex)
+		Scarab = 2, -- World 2 Ancient Tomb (a chunky beetle, about the Horse's length)
 		PalmGuy = 2, -- Jurassic (QM: a bit bigger than the Cactus)
 		Pterodactyl = 1, -- Jurassic (QM: a small animal; AnimalScale 2 so its body is as big as a Horse's under the long wings)
 		BoneRex = 4, -- Jurassic (the final Legendary: the T-Rex's size, AnimalScale 1.15 so it towers over it)
@@ -668,6 +670,7 @@ local Config = {
 		Spinosaurus = 40000, -- Jurassic (a guess: a Rare, under the T-Rex)
 		Pterodactyl = 60000, -- Jurassic (a guess: an Epic, as the T-Rex)
 		Ankylosaurus = 25000, -- Jurassic (a guess: an Uncommon, past the Volcano's Rares)
+		Scarab = 25000, -- World 2 Ancient Tomb Uncommon (as the Ankylosaurus)
 		PalmGuy = 22000, -- Jurassic (a guess: an Uncommon, a touch under the Ankylosaurus)
 		BoneRex = 100000, -- Jurassic (a guess: the final Legendary, the best earner)
 		Loong = 60000, Beholder = 9000, Leviathan = 45000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
@@ -1170,6 +1173,7 @@ local Config = {
 		Spinosaurus = { Speed = 5.4, Stamina = 3 }, -- (a guess: a touch under the T-Rex)
 		Pterodactyl = { Speed = 6.2, Stamina = 3 }, -- (a guess: an Epic, a touch past the T-Rex)
 		Ankylosaurus = { Speed = 5, Stamina = 3 }, -- (a guess: the Jurassic's Uncommon, under its Rares)
+		Scarab = { Speed = 5, Stamina = 3 }, -- World 2 Ancient Tomb Uncommon: the Ankylosaurus's, until QM sets it
 		PalmGuy = { Speed = 4.9, Stamina = 3 }, -- (a guess: an Uncommon, a touch under the Ankylosaurus)
 		BoneRex = { Speed = 7.5, Stamina = 3 }, -- (a guess: the final Legendary, the fastest in the game)
 		VolcanoTortoise = { Speed = 6.17, Stamina = 3 }, -- (QM, Oct 13: 50% into the Jurassic; was 5)
@@ -1360,6 +1364,8 @@ if Config.World == 2 then
 	}
 	tomb.WallColors = { rgb(211, 183, 66), rgb(196, 168, 54) } -- #D3B742
 	tomb.CapColor = rgb(186, 158, 46)
+	tomb.Herd = table.clone(tomb.Herd)
+	tomb.Herd.Scarab = 0.25 -- the Tomb's Uncommon (QM, Oct 13), as often as the Ankylosaurus
 	-- Walls and gate glows (QM, Oct 13: the Level design thread's batch; tools/world2_walls.luau).
 	crimson.WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) }
 	crimson.CapColor = rgb(72, 39, 42)
@@ -1387,6 +1393,7 @@ if Config.World == 2 then
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
 	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
 	ownHerd(5, { "Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune" }) -- the Temple
+	ownHerd(6, { "Scarab" }) -- the Ancient Tomb
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do

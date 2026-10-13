@@ -13,7 +13,11 @@ Run: python3 tools/tomb_scarab.py [out_dir]
 
 Built in Blockbench's ZYX Euler order; every bone rests at 0 (leg angles baked into the cubes;
 spikes and teeth are pyramid meshes). Bones: root (body, shell, pronotum) -> head;
-root -> LegL1..3, LegR1..3 (1 = front). No animations yet (phase 1, model only).
+root -> LegL1..3, LegR1..3 (1 = front).
+
+  idle    legs shuffle, the head nods and twitches, the body breathes
+  walk    a tripod gait (front and back legs of one side with the middle of the other)
+  gallop  the same, faster and longer strides, the body bouncing and leaning in
 """
 
 import json
@@ -32,6 +36,11 @@ import angel_boss as AB  # noqa: E402  (box, axis_rot)
 from partlib import render  # noqa: E402
 import animal_designs as A  # noqa: E402
 from hawkmoth import pyr, light_bg  # noqa: E402
+import math  # noqa: E402
+from horse_rig import write_animations  # noqa: E402
+from snake_rig import track  # noqa: E402
+
+TAU = 2 * math.pi
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 NAME = "Scarab"
@@ -247,12 +256,43 @@ def floor(model):
     return -lo
 
 
+def animations():
+    """A tripod gait: L1, R2 and L3 step together, then R1, L2 and R3. Each leg swings
+    forward about Y and lifts about Z while it swings (signs per side: s * angle)."""
+    def legs(L, swing, lift, n):
+        tr = {}
+        for i in range(3):
+            for s, nm in ((-1, "L"), (1, "R")):
+                ph = 0.0 if (i % 2 == 0) == (s < 0) else 0.5
+                tr[f"Leg{nm}{i + 1}"] = [track(L, lambda u, s=s, ph=ph: (
+                    0, s * swing * math.sin(TAU * (u + ph)), s * lift * max(0.0, math.cos(TAU * (u + ph)))), n)]
+        return tr
+
+    L = 2.4
+    idle = {f"Leg{nm}{i + 1}": [track(L, lambda u, s=s, i=i: (0, s * 3 * math.sin(TAU * u + i * 1.3), 0), 16)]
+            for i in range(3) for s, nm in ((-1, "L"), (1, "R"))}
+    idle["root"] = [track(L, lambda u: (0, 1.2 * math.sin(TAU * u), 0), 16, "position")]
+    idle["head"] = [track(L, lambda u: (5 * max(0.0, math.sin(TAU * 2 * u)) ** 2, 4 * math.sin(TAU * u), 0), 24)]
+    Lw = 0.8
+    walk = {**legs(Lw, 18, 14, 16),
+            "root": [track(Lw, lambda u: (0, 0, 2 * math.sin(TAU * u)), 16),
+                     track(Lw, lambda u: (0, 1.0 * abs(math.sin(TAU * u)), 0), 16, "position")],
+            "head": [track(Lw, lambda u: (0, 4 * math.sin(TAU * u), 0), 16)]}
+    Lg = 0.4
+    gallop = {**legs(Lg, 26, 20, 16),
+              "root": [track(Lg, lambda u: (-4, 0, 3 * math.sin(TAU * u)), 16),
+                       track(Lg, lambda u: (0, 3.0 * abs(math.sin(TAU * u)), 0), 16, "position")],
+              "head": [track(Lg, lambda u: (4 + 3 * math.sin(TAU * 2 * u), 0, 0), 16)]}
+    return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lg, gallop)}
+
+
 def main(out="/mnt/project-files/world2/tomb"):
     renders = os.path.join(out, "renders")
     os.makedirs(renders, exist_ok=True)
     os.makedirs(os.path.dirname(MODEL), exist_ok=True)
     m = build()
     shift = floor(m)
+    write_animations(m, {g["name"]: g for g in m["groups"]}, animations())
     for path in (MODEL, os.path.join(out, NAME + ".bbmodel")):
         with open(path, "w") as f:
             json.dump(m, f, separators=(",", ":"))
@@ -276,6 +316,18 @@ def main(out="/mnt/project-files/world2/tomb"):
     for i, cam in enumerate(cams):
         sheet.paste(render(parts + (hparts if i == 0 else []), W=Wd, H=Ht, fov=40, **cam), ((i % 2) * Wd, (i // 2) * Ht))
     sheet.save(os.path.join(out, NAME + "_sheet.png"))
+    if "--gif" in sys.argv:
+        frames = []
+        for name, n, loops in (("idle", 24, 1), ("walk", 12, 3), ("gallop", 8, 4)):
+            anim = next(a for a in m["animations"] if a["name"] == name)
+            for _ in range(loops):
+                for k in range(n):
+                    ps = S.posed(m, anim, anim["length"] * k / n)
+                    im = Image.new("RGB", (880, 360))
+                    im.paste(render(ps, W=440, H=360, fov=40, **cams[1]), (0, 0))
+                    im.paste(render(ps, W=440, H=360, fov=40, eye=(-22, 12, -20), target=(0, 2.5, 0)), (440, 0))
+                    frames.append(A.label(im, [name] * 2))
+        A.gif(os.path.join(out, NAME + "_anims.gif"), frames, fps=20)
 
 
 if __name__ == "__main__":
