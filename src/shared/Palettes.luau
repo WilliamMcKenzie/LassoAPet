@@ -161,6 +161,18 @@ return {
 		{ "Accent", 196, 58, 36 },
 		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
 	},
+	Fox = {
+		{ "Body", 240, 128, 36 },
+		{ "Belly", 255, 250, 242 }, -- chest, cheeks, chin, tail tip
+		{ "Accent", 214, 40, 46 }, -- shrine bib
+		{ "Hoof", 52, 40, 40 }, -- stockings, ear tips
+	},
+	NineTailedFox = {
+		{ "Body", 250, 184, 52 },
+		{ "Belly", 255, 250, 242 }, -- chest, cheeks, chin, tail tips
+		{ "Marking", 200, 30, 60 }, -- ear tips, forehead flame, bib
+		{ "Hoof", 52, 40, 40 }, -- stockings
+	},
 	CrystalElephant = {
 		{ "Body", 138, 142, 182 }, -- lavender skin
 		{ "Marking", 86, 54, 168 }, -- crystal armour plates
