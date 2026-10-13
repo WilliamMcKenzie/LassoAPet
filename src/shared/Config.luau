@@ -717,6 +717,7 @@ local Config = {
 	-- Egg pictures for the eggs in your inventory (the renders the egg reveal uses).
 	EggIcons = {
 		Horse = "rbxassetid://96698232796495", -- assets/ui/HorseEggRender.png (the tutorial's first egg)
+		ArmoredHorse = "rbxassetid://96698232796495", -- the Horse's (QM, Oct 13)
 		Pinto = "rbxassetid://79525419811481",
 		Pig = "rbxassetid://139970505549400",
 		Bunny = "rbxassetid://102165948456968", -- assets/ui/BunnyEggRender.png

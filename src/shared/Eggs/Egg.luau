@@ -23,6 +23,7 @@ local STUD_TEXTURE = { image = "rbxassetid://7447638591", tile = 0.5 }
 
 local KINDS = {
 	Horse = { data = require(script.Parent.HorseEggModel), center = 1.6 },
+	ArmoredHorse = { data = require(script.Parent.HorseEggModel), center = 1.6 }, -- (World 2's starter: the Horse's egg, QM)
 	Pinto = { data = require(script.Parent.PintoEggModel), center = 1.6 },
 	Pig = { data = require(script.Parent.PigEggModel), center = 1.6 },
 	Fish = { data = require(script.Parent.FishEggModel), center = 1.6 },
