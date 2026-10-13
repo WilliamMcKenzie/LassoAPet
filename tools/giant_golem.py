@@ -19,9 +19,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
 from partlib import render  # noqa: E402
 from horse_rig import pose  # noqa: E402
-from partlib import Part, T, Rz  # noqa: E402
 from snow_designs import pyramid  # noqa: E402
-import numpy as np  # noqa: E402
 
 STONE = (150, 142, 132)
 DARK = (104, 97, 90)
@@ -40,12 +38,6 @@ def golem():
     def glow(name, lo, hi, bone):
         # Glow prefix: Neon in game (bbmodel_to_luau NEON)
         a.box("Glow" + name, lo, hi, GLOW, bone).neon = True
-
-    def tilted(name, center, size, color, bone, R):
-        p = Part(name, np.array(size, float), T(*center) @ R, color)
-        p.bone = bone
-        a.parts.append(p)
-        return p
 
     # ---- torso: deep chest up front, broad back behind it where the rider sits
     a.body(2.4, 3.8, 8.4, -0.6, 3.6, STONE)
@@ -70,9 +62,10 @@ def golem():
     a.box("Belly", (-2.2, 3.2, -3.0), (2.2, 3.8, 3.0), DARK, "root")
     a.box("Hip", (-2.2, 4.0, 3.6), (2.2, 7.8, 4.1), DARK, "root")
 
-    # ---- back: tilted stone slabs either side of the seat, mossy pad, spine of rock spikes
+    # ---- back: stone slabs either side of the seat (kept under it), mossy pad, spine of rock spikes
     for side, sx in (("L", -1), ("R", 1)):
-        tilted("BackSlab" + side, (sx * 1.9, 8.25, 1.2), (1.4, 0.6, 3.6), LIGHT, "root", Rz(-sx * 18))
+        x0, x1 = sorted((sx * 1.5, sx * 2.6))
+        a.box("BackSlab" + side, (x0, 7.9, -0.4), (x1, 8.5, 2.8), LIGHT, "root")
     a.box("MossBack", (-1.4, 8.4, -0.4), (1.4, 8.6, 2.8), MOSS, "root")
     a.box("Hump", (-1.4, 7.8, 2.8), (1.4, 9.4, 4.2), LIGHT, "root")
     a.box("HumpMoss", (-1.2, 9.4, 3.0), (1.2, 9.6, 4.0), MOSS, "root")
@@ -162,19 +155,61 @@ def golem():
 
     a.meta = {"seat": (0, 8.6, 1.2), "neck_loop": {"center": (0, 6.8, -4.0), "radius": 1.6}}
 
-    base = a.animations
-    a.animations = lambda: {k: (L, {b: t for b, t in tr.items() if b in dict(a.bone_order)})
-                            for k, (L, tr) in base().items()}
+    a.animations = animations
     return a
+
+
+def animations():
+    """Heavy and slow, not the horse's leap: a breathing idle, a lumbering diagonal walk with
+    a side-to-side sway, and a gorilla knuckle-run gallop (both fists reach and plant together,
+    the hind legs push off between). Angles in degrees, heights in Blockbench units (10 = 1 stud).
+    Front legs reach forward on +X, hind legs kick back on -X."""
+    rx, rz, py, at = A.rot_x, A.rot_z, A.pos_y, A.at
+    cr = "catmullrom"
+
+    L = 2.4
+    idle = (L, {
+        "root": [py(at(L, [(0, 0), (0.5, -1.5), (1, 0)]))],
+        "neck": [rx(at(L, [(0, 0), (0.5, 4), (1, 0)]), cr)],
+        "LegFL": [rx(at(L, [(0, 0), (0.5, 2), (1, 0)]), cr)],
+        "LegFR": [rx(at(L, [(0, 0), (0.5, 2), (1, 0)]), cr)],
+    })
+
+    L = 1.4
+    walk = (L, {
+        "root": [py(at(L, [(0, 0), (0.25, 4), (0.5, 0), (0.75, 4), (1, 0)])),
+                 rz(at(L, [(0, 0), (0.25, 3), (0.5, 0), (0.75, -3), (1, 0)]), cr)],
+        "neck": [rx(at(L, [(0, 0), (0.25, -3), (0.5, 0), (0.75, -3), (1, 0)]), cr)],
+        "LegFL": [rx(at(L, [(0, 20), (0.5, -20), (1, 20)]), cr)],
+        "LegFR": [rx(at(L, [(0, -20), (0.5, 20), (1, -20)]), cr)],
+        "LegHL": [rx(at(L, [(0, -18), (0.5, 18), (1, -18)]), cr)],
+        "LegHR": [rx(at(L, [(0, 18), (0.5, -18), (1, 18)]), cr)],
+    })
+
+    L = 0.9
+    fists = [(0, -22), (0.2, -22), (0.55, 38), (0.8, 38), (1, -22)]
+    gallop = (L, {
+        "root": [py(at(L, [(0, 0), (0.25, 2), (0.6, 14), (0.85, 4), (1, 0)])),
+                 rx(at(L, [(0, 5), (0.5, -4), (1, 5)]), cr)],
+        "neck": [rx(at(L, [(0, -6), (0.5, 2), (1, -6)]), cr)],
+        "LegFL": [rx(at(L, fists), cr)],
+        "LegFR": [rx(at(L, [(min(1, u + 0.04) if 0 < u < 1 else u, v) for u, v in fists]), cr)],
+        "LegHL": [rx(at(L, [(0, 26), (0.35, -30), (0.6, -30), (0.85, 26), (1, 26)]), cr)],
+        "LegHR": [rx(at(L, [(0, 26), (0.38, -30), (0.63, -30), (0.88, 26), (1, 26)]), cr)],
+    })
+    return {"idle": idle, "walk": walk, "gallop": gallop}
 
 
 CAM = dict(eye=(-15, 13, -27), target=(0, 6.0, 0.0), W=640, H=640, fov=36)
 BG = (238, 238, 232)
+SIDE = dict(eye=(-32, 9, -1), target=(0, 5.5, -0.5), W=360, H=360, fov=38)
+ANIMS = "/mnt/project-files/world2/woodland/giant_golem"
 
 
 def main(out=os.path.join(A.ROOT, "designs", "woodland"), shots="/mnt/project-files/world2/woodland/renders"):
     os.makedirs(out, exist_ok=True)
     os.makedirs(shots, exist_ok=True)
+    os.makedirs(ANIMS, exist_ok=True)
     a = golem()
     m = A.build_animal(a, out)
     print(f"{a.name}: {len(a.parts)} parts")
@@ -183,6 +218,12 @@ def main(out=os.path.join(A.ROOT, "designs", "woodland"), shots="/mnt/project-fi
     bg = Image.new("RGBA", im.size, BG + (255,))
     bg.alpha_composite(im)
     bg.convert("RGB").save(os.path.join(shots, "GiantGolem.png"))
+    frames = []
+    for name, n in (("idle", 24), ("walk", 28), ("gallop", 18)):
+        anim = A.anim_named(m, name)
+        for i in range(n):
+            frames.append(A.label(render(pose(m, anim, i / n * anim["length"]), **SIDE), [name]))
+    A.gif(os.path.join(ANIMS, "GiantGolem_anims.gif"), frames, fps=20)
 
 
 if __name__ == "__main__":

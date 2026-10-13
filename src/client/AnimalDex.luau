@@ -151,6 +151,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	FishSchool = "Schools out. Fish are in. Can destroy any obstacles in their path.",
 	KingCrab = "Was almost boiled once. Still running to this day.",
 	BlueCrab = "Tried to join the crips, couldn't crip walk so got booted. Cousin of king crab.",
+	GiantGolem = "Fell asleep in the woods for a thousand years. A tree moved in and now pays no rent.",
 	Kraken = "A squid turned looksmaxxer, hasn't acted the same since ascending.",
 	Beholder = "Really bad vision but can't afford the custom glasses. They say beauty is in it's eye.",
 	Sludge = "Straight from the sewer, smells like a winner.",
