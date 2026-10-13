@@ -1,0 +1,55 @@
+-- World 2's first biome floor (QM, Oct 13). Made by tools/world2_meadow_ground.py: edit
+-- that and re-make this, not this. Run in Studio (Edit, execute_luau) on the place with
+-- World2, after tools/world2_terrain.luau and tools/world2_meadow.luau. Re-running is fine.
+-- Yellow grass, darker yellow grass and brown dirt as a gradient: the bright grass never
+-- touches the dirt, there's always darker grass between. Replaces World2's copied floor
+-- between the home line and the Desert (its Ground, Grass and Dirt parts there); the
+-- funnel floor under it, the walls, obstacles and nests stay.
+local W = workspace.World2
+local OFFSET = 1000
+local EDGE = -2168 -- the first biome's far end
+local rgb = Color3.fromRGB
+local KINDS = { -- [kind] = { name, top, part colour, checker colour }
+	[0] = { "Ground", 0, rgb(206, 168, 58), rgb(190, 152, 46) },
+	[1] = { "Grass", 0, rgb(182, 144, 44), rgb(166, 130, 36) },
+	[2] = { "Dirt", -1, rgb(118, 84, 50), rgb(104, 72, 42) },
+	[3] = { "Ground", 1, rgb(206, 168, 58), rgb(190, 152, 46) }, -- the light grass a stud up (QM): all but under the pens and the start line's row
+}
+-- { kind, low x, near z (the top edge, z falls away from home), size x, size z } in game space (x before the offset)
+local FLOOR = {
+--FLOOR--
+}
+
+local template
+for _, p in W.Ground:GetChildren() do
+	local z = p:IsA("BasePart") and p.Position.Z
+	if z and z < 0 and z > EDGE and p.Size.Y <= 3 and (p.Name == "Ground" or p.Name == "Grass" or p.Name == "Dirt") then
+		if not template and p.Name == "Ground" then
+			template = p:Clone()
+		end
+		p:Destroy()
+	end
+end
+assert(template, "no first-biome Ground in World2.Ground to copy the look of")
+for _, t in template:GetChildren() do
+	if not t:IsA("Texture") then
+		t:Destroy()
+	end
+end
+for k in template:GetAttributes() do
+	template:SetAttribute(k, nil)
+end
+for _, r in FLOOR do
+	local k = KINDS[r[1]]
+	local x, z, sx, sz = r[2] + OFFSET, r[3], r[4], r[5]
+	local p = template:Clone()
+	p.Name = k[1]
+	p.Size = Vector3.new(sx, k[2] + 2, sz)
+	p.CFrame = CFrame.new(x + sx / 2, (k[2] - 2) / 2, z - sz / 2)
+	p.Color = k[3]
+	for _, t in p:GetChildren() do
+		t.Color3 = k[4]
+	end
+	p.Parent = W.Ground
+end
+return string.format("%d floor parts", #FLOOR)

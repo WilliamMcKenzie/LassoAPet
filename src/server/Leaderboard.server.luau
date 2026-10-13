@@ -29,7 +29,7 @@ local START_NEAR = -200 -- a ride's first sync must be closer to home than this 
 local FLUSH = 30 -- seconds between saving raised bests
 
 local podium = Config.Podium
-local ok, store = pcall(DataStoreService.GetOrderedDataStore, DataStoreService, "BestDistance")
+local ok, store = pcall(DataStoreService.GetOrderedDataStore, DataStoreService, Config.storeName("BestDistance"))
 if not ok then
 	store = nil
 end

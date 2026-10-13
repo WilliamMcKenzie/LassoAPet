@@ -130,14 +130,19 @@ local function get(world, part, name, which)
 end
 
 -- One floor part: "Ground" is the biome's base floor; other names are its Patches (Grass, Stone).
+-- A part whose name has no colours (World 2's Crystal Cavern planks) keeps its own.
 function WorldColors.paintGround(world, part)
-	paint(part, get(world, part, part.Name, "A"), get(world, part, part.Name, "B"))
+	local a = get(world, part, part.Name, "A")
+	if a then
+		paint(part, a, get(world, part, part.Name, "B") or a)
+	end
 end
 
 -- One wall part, or the cap along its top.
 function WorldColors.paintWall(world, part)
 	if part.Name == "Cap" then
-		part.Color = get(world, part, "Ground", "B")
+		local biome = Config.Biomes[WorldColors.biomeAt(part.Position.Z)]
+		part.Color = WorldColors.saturate(biome.CapColor) or get(world, part, "Ground", "B") -- (CapColor: World 2's cavern)
 	else
 		paint(part, get(world, part, "Wall", "A"), get(world, part, "Wall", "B"))
 	end

@@ -1,0 +1,109 @@
+-- World 2's fifth biome, the Temple (QM, Oct 13; draft). Made by tools/world2_temple.py:
+-- edit that and re-make this, not this. Run in Studio (Edit, execute_luau) on the place
+-- with World2, after tools/world2_terrain.luau. Re-running is fine.
+-- An old rocky path through grass, little ponds ringed by rock with lily pads, marble
+-- inlays in the second half, dirt strips down both sides, stone walls.
+-- Replaces World2's copied floor between the fourth biome and the sixth (World 1's
+-- Volcano floor: its flat parts there), paints the walls #C8C8C8, and lays
+-- World2.Decor.Lilies.
+-- The ponds' parts are named Water (shallow) and DeepWater, for the flowing-water texture.
+local W = workspace.World2
+local OFFSET = 1000
+local NEAR, FAR = -9024, -14064
+local rgb = Color3.fromRGB
+local KINDS = { -- [kind] = { name, part colour, checker colour }
+	[0] = { "Rock", rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
+	[1] = { "Grass", rgb(145, 178, 41), rgb(133, 164, 35) }, -- #91B229
+	[2] = { "Marble", rgb(200, 200, 200), rgb(186, 186, 186) }, -- #C8C8C8
+	[3] = { "SideDirt", rgb(200, 200, 200), rgb(190, 188, 184) }, -- #C8C8C8
+	[4] = { "Water", rgb(70, 156, 204), rgb(62, 144, 190) },
+	[5] = { "DeepWater", rgb(44, 110, 168), rgb(38, 99, 154) },
+}
+local WALL, WALL_CHECKER, CAP = rgb(200, 200, 200), rgb(186, 186, 186), rgb(176, 176, 176)
+-- { kind, low x, near z, size x, size z, top } in game space (x before the offset)
+local FLOOR = {
+--FLOOR--
+}
+-- { x, z, radius }: lily pads on the ponds
+local LILIES = {
+--LILIES--
+}
+
+local template
+for _, p in W.Ground:GetChildren() do
+	local z = p:IsA("BasePart") and p.Position.Z
+	if z and z < NEAR and z > FAR and p.Size.Y <= 5 and math.abs(p.CFrame.RightVector.X) > 0.999 then
+		if not template and p.Name == "Ground" then
+			template = p:Clone()
+		end
+		p:Destroy()
+	end
+end
+template = template or W.Ground:FindFirstChildWhichIsA("BasePart"):Clone()
+for _, t in template:GetChildren() do
+	if not t:IsA("Texture") then
+		t:Destroy()
+	end
+end
+for k in template:GetAttributes() do
+	template:SetAttribute(k, nil)
+end
+for _, r in FLOOR do
+	local k = KINDS[r[1]]
+	local top = r[6]
+	local p = template:Clone()
+	p.Name = k[1]
+	p.Size = Vector3.new(r[4], top + 3, r[5]) -- (bottom at -3, under the deep water)
+	p.CFrame = CFrame.new(r[2] + OFFSET + r[4] / 2, (top - 3) / 2, r[3] - r[5] / 2)
+	p.Color = k[2]
+	for _, t in p:GetChildren() do
+		t.Color3 = k[3]
+	end
+	p.Parent = W.Ground
+end
+
+for _, p in W.Walls:GetChildren() do
+	if p:IsA("BasePart") and p.Position.Z < NEAR and p.Position.Z > FAR then
+		if p.Name == "Cap" then
+			p.Color = CAP
+		else
+			p.Color = WALL
+			for _, t in p:GetChildren() do
+				if t:IsA("Texture") then
+					t.Color3 = WALL_CHECKER
+				end
+			end
+		end
+	end
+end
+
+local function folder(name)
+	local f = W.Decor:FindFirstChild(name)
+	if f then
+		f:Destroy()
+	end
+	f = Instance.new("Folder")
+	f.Name = name
+	f.Parent = W.Decor
+	return f
+end
+local function block(parent, name, size, cf, colour, shape)
+	local p = Instance.new("Part")
+	p.Name = name
+	p.Anchored, p.CanCollide = true, false
+	p.Material = Enum.Material.SmoothPlastic
+	p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+	if shape then
+		p.Shape = shape
+	end
+	p.Size, p.CFrame, p.Color = size, cf, colour
+	p.Parent = parent
+	return p
+end
+local lilies = folder("Lilies")
+for _, r in LILIES do
+	-- (on the water's surface, a hair up; a flat disc)
+	block(lilies, "LilyPad", Vector3.new(0.2, r[3] * 2, r[3] * 2), CFrame.new(r[1] + OFFSET, -0.9, r[2]) * CFrame.Angles(0, 0, math.pi / 2), rgb(86, 150, 50), Enum.PartType.Cylinder)
+end
+
+return string.format("%d floor parts, %d lily pads", #FLOOR, #LILIES)

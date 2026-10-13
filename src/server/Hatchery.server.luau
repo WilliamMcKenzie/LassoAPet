@@ -42,10 +42,21 @@ local Animals = ReplicatedStorage.Shared.Animals
 
 local EDGE = 2 -- studs kept from the pen's fences
 
-local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "Pen")
+-- Each world has its own pen (QM, Oct 13): World 1's is "Pen", World 2's "Pen_W2"...
+local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("Pen"))
 if not ok then
 	store = nil
 end
+-- The other worlds' pens: their pets keep earning you gold while you're here (QM), and
+-- leaving here marks them seen too, so their while-you-were-away gold doesn't count it.
+local otherStores = {} -- [world] = its "Pen" store
+for world in Config.Places do
+	if world ~= Config.World then
+		local okOther, other = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("Pen", world))
+		otherStores[world] = if okOther then other else nil
+	end
+end
+local otherIncome = {} -- [player] = what their pets in the other worlds earn a second
 
 -- [player] = { eggs = { [kind] = n }, items = { [id] = { x, z, egg, hatchAt } or { x, z, pet } }, ride = kind, tutorial = done }
 local profiles = {}
@@ -244,8 +255,48 @@ local function awayGold(player, profile, data)
 	return (tonumber(data.awayGold) or 0) + math.floor(income(profile) * x * Config.AwayRate * away)
 end
 
+-- A saved pen's gold a second (as income(), from its save).
+local function savedIncome(data)
+	if typeof(data) ~= "table" or not (data.tutorial or next(data.items or {})) then
+		return 0
+	end
+	local total = tonumber(data.rideIncome) or (Config.PetIncome[data.ride] or 0) * (tonumber(data.rideMerged) or 1)
+	for _, item in typeof(data.items) == "table" and data.items or {} do
+		if typeof(item) == "table" and item.pet then
+			total += tonumber(item.income) or (Config.PetIncome[item.pet] or 0) * (tonumber(item.merged) or 1)
+		end
+	end
+	return total
+end
+
+local function loadOtherWorlds(player)
+	local total = 0
+	for _, other in otherStores do
+		local success, data = pcall(other.GetAsync, other, "u" .. player.UserId)
+		if success then
+			total += savedIncome(data)
+		end
+	end
+	otherIncome[player] = total
+end
+
+-- Leaving: the other worlds' pens were "here" all along (their pets were earning).
+local function markOtherWorldsSeen(player)
+	local now = os.time()
+	for _, other in otherStores do
+		pcall(other.UpdateAsync, other, "u" .. player.UserId, function(data)
+			if typeof(data) ~= "table" then
+				return nil
+			end
+			data.seen = now
+			return data
+		end)
+	end
+end
+
 local inviteCredits -- (below: "Invite a friend")
 local function load(player)
+	task.spawn(loadOtherWorlds, player)
 	local profile = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {} }
 	if store then
 		for attempt = 1, 3 do
@@ -338,7 +389,11 @@ local function load(player)
 	if profile.journey then
 		Funnel.join(player)
 	end
-	local tutorial = Config.Tutorial and not profile.tutorial
+	-- Only World 1 has the tutorial: in the others you've done it (QM: a new pen there).
+	local tutorial = Config.Tutorial and not profile.tutorial and Config.World == 1
+	if Config.World ~= 1 then
+		profile.tutorial = true
+	end
 	if tutorial then
 		profile.ride = nil -- RidePet "": no pet waits in the pen yet
 		profile.eggs = { [Config.DefaultPet] = 1 }
@@ -515,8 +570,11 @@ Players.PlayerRemoving:Connect(function(player)
 	if pen then
 		clearPen(pen)
 	end
+	if loaded[player] then
+		task.spawn(markOtherWorldsSeen, player)
+	end
 	save(player)
-	profiles[player], loaded[player], savedAs[player], applyingHatch[player] = nil, nil, nil, nil
+	profiles[player], loaded[player], savedAs[player], applyingHatch[player], otherIncome[player] = nil, nil, nil, nil, nil
 end)
 
 -- Autosave (QM, Oct 4): every Config.AutosaveEvery seconds each player's eggs, pets and pen is saved
@@ -1112,6 +1170,12 @@ local function addBoughtPets(player)
 	local profile = profiles[player]
 	local pen = penOf(player)
 	local total = player:GetAttribute("BoughtPets")
+	if profile and total and profile.boughtPets == nil and Config.World ~= 1 then
+		-- (a new pen in another world: what was bought before landed in the world it was
+		-- bought in; only what's bought from now on comes here. QM, Oct 13)
+		profile.boughtPets = total
+		return
+	end
 	if not profile or not pen or not total or total <= (profile.boughtPets or 0) then
 		return
 	end
@@ -1139,6 +1203,10 @@ end
 local function addBoughtGiantEggs(player)
 	local profile = profiles[player]
 	local total = player:GetAttribute("BoughtGiantEggs")
+	if profile and total and profile.boughtGiantEggs == nil and Config.World ~= 1 then
+		profile.boughtGiantEggs = total -- (as addBoughtPets: bought before, landed in its own world)
+		return
+	end
 	if not profile or not total or total <= (profile.boughtGiantEggs or 0) then
 		return
 	end
@@ -1333,7 +1401,7 @@ task.spawn(function()
 	while true do
 		task.wait(1)
 		for player, profile in profiles do
-			local earned = if player:GetAttribute("Tutorial") then 0 else income(profile) * goldX(player) -- (nothing till the tutorial's done)
+			local earned = if player:GetAttribute("Tutorial") then 0 else (income(profile) + (otherIncome[player] or 0)) * goldX(player) -- (nothing till the tutorial's done)
 			if earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
 				paid:FireClient(player, earned) -- (the HUD shows it by the gold counter)

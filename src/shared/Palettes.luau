@@ -50,6 +50,18 @@ return {
 		{ "Belly", 250, 236, 212 }, -- muzzle
 		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" }, -- (cream paws, like the muzzle)
 	},
+	MajesticUnicorn = {
+		{ "Body", 252, 250, 255 }, -- pearl coat
+		{ "Belly", 226, 214, 246 }, -- lilac socks and muzzle
+		{ "Horn", 255, 200, 60 }, -- gold horn and brows
+		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" }, -- (gold like the horn)
+	},
+	MarbleColossus = {
+		{ "Body", 246, 244, 238 }, -- marble
+		{ "Body", 208, 205, 198 }, -- chest, shoulders, brow (shade)
+		{ "Hoof", 226, 223, 216 }, -- fists
+		{ "Horn", 240, 190, 24 }, -- gold spikes, bracers, headband
+	},
 	Rhino = {
 		{ "Body", 150, 156, 170 },
 		{ "Marking", 112, 118, 134 }, -- back plates, tail tip
@@ -60,6 +72,20 @@ return {
 		{ "Body", 60, 132, 232 },
 		{ "Belly", 222, 240, 255 },
 		{ "Marking", 36, 88, 184 }, -- fins
+	},
+	MarbleFish = {
+		{ "Body", 255, 204, 36 },
+		{ "Belly", 255, 244, 196 },
+		{ "Marking", 232, 150, 16 }, -- fins
+		{ "Horn", 246, 244, 238 }, -- marble horn
+		{ "Horn", 208, 205, 198 },
+	},
+	Lion = {
+		{ "Body", 232, 172, 72 },
+		{ "Belly", 255, 238, 200 }, -- muzzle, chest, paws
+		{ "Marking", 196, 102, 34 }, -- mane
+		{ "Marking", 150, 70, 26 }, -- back of the mane, inner ears, tail tuft
+		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" },
 	},
 	Cactus = {
 		{ "Body", 118, 204, 64 },
@@ -77,6 +103,44 @@ return {
 		{ "Body", 184, 110, 50 }, -- every other tail segment, pincer fingers, shins
 		{ "Marking", 160, 70, 60 }, -- shoulders, arms, thighs, tail bulb
 		{ "Horn", 70, 44, 40 }, -- stinger
+	},
+	PurpleMushroom = {
+		{ "Body", 226, 212, 194 }, -- the cream body
+		{ "Hoof", 196, 178, 156 }, -- feet and the shaded bottom
+		{ "Marking", 134, 83, 142 }, -- cap
+		{ "Marking", 96, 59, 102 }, -- cap's underside (shade)
+		{ "Accent", 250, 248, 252 }, -- spots
+	},
+	BrownMushroom = {
+		{ "Body", 226, 212, 194 }, -- the cream body
+		{ "Hoof", 196, 178, 156 }, -- feet and the shaded bottom
+		{ "Marking", 131, 98, 103 }, -- cap
+		{ "Marking", 94, 70, 74 }, -- cap's underside (shade)
+	},
+	RedMushroom = {
+		{ "Body", 226, 212, 194 }, -- the cream body
+		{ "Hoof", 196, 178, 156 }, -- feet and the shaded bottom
+		{ "Marking", 210, 62, 40 }, -- cap
+		{ "Marking", 151, 44, 28 }, -- cap's underside (shade)
+		{ "Accent", 250, 248, 252 }, -- spots
+	},
+	BlueCrystal = {
+		{ "Body", 0, 190, 231 }, -- crystal
+		{ "Body", 90, 220, 245 }, -- facet stripe (lighter)
+		{ "Hoof", 0, 150, 190 }, -- legs
+		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
+	},
+	PinkCrystal = {
+		{ "Body", 229, 131, 251 }, -- crystal
+		{ "Body", 242, 170, 253 }, -- facet stripe (lighter)
+		{ "Hoof", 190, 100, 214 }, -- legs
+		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
+	},
+	CrystalCentipede = {
+		{ "Body", 124, 72, 200 },
+		{ "Hoof", 72, 44, 124 }, -- leg bars, tail feelers
+		{ "Horn", 0, 190, 231 }, -- cyan crystals and pincers
+		{ "Accent", 229, 131, 251 }, -- pink crystals
 	},
 	Sandworm = {
 		{ "Body", 228, 178, 104 },

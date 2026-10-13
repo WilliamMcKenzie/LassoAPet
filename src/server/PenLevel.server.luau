@@ -22,7 +22,7 @@ local Funnel = require(script.Parent.Funnel)
 local PenFence = require(script.Parent.PenFence)
 require(script.Parent.Passes) -- (PassVIP: the gold fence, below)
 
-local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "PenLevel")
+local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("PenLevel"))
 if not ok then
 	store = nil
 end

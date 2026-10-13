@@ -1,5 +1,5 @@
 -- Tuning values shared by the map, the live colours and the ride.
-return {
+local Config = {
 	-- false hides every UI element (HUD, coins, Roblox menus, the ride prompt), e.g. for mockup screenshots.
 	ShowHud = true,
 	HudScale = 1, -- multiplies the whole HUD's size; 1 matches QM's mockups
@@ -377,10 +377,10 @@ return {
 		-- QM's own table (Oct 11, "new json"): every animal's egg, by biome. Uncommons and Rares
 		-- hatch within a run, each biome's Epics a little longer, the Legendaries are the long
 		-- D1 eggs you come back for.
-		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, -- Meadow
+		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, MarbleFish = 15, Lion = 60, MarbleColossus = 120, MajesticUnicorn = 300, -- Meadow (the Marble Fish, Lion, Marble Colossus and Majestic Unicorn: World 2's, as the Pinto, a Rare, the Rhino and Unicorn)
 		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 600, -- Desert
 		Eyeworm = 15, Maw = 60, -- World 2 Crimson Lands
-		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 120, Icebringer = 900, SnackYak = 3600, -- Tundra
+		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 120, Icebringer = 900, SnackYak = 3600, CrystalCentipede = 15, RedMushroom = 15, BrownMushroom = 60, PurpleMushroom = 120, BlueCrystal = 15, PinkCrystal = 60, -- Tundra (World 2's Crystal Cavern animals, as the Penguin, Boar, Snowman and Ice Golem; the Living Crystals as the Boar and Snowman)
 		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 35, Squid = 45, KingCrab = 300, FishSchool = 200, BlueCrab = 800, Kraken = 1200, -- Ocean
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
 		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
@@ -536,10 +536,10 @@ return {
 	-- Oct 6); their tier (model "Tier" attribute, else ObstacleTiers by name) only
 	-- decides which ones some abilities break.
 	PetTiers = {
-		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, -- Meadow
+		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleFish = 1, Lion = 1, MarbleColossus = 2, MajesticUnicorn = 2, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Eyeworm = 1, Maw = 1, -- World 2 Crimson Lands
-		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, -- Tundra
+		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, CrystalCentipede = 1, RedMushroom = 1, BrownMushroom = 1, PurpleMushroom = 2, BlueCrystal = 1, PinkCrystal = 1, -- Tundra
 		Starfish = 1, Clownfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, Lionfish = 1, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
@@ -617,10 +617,10 @@ return {
 	-- every second while you're in the game. (QM, Oct 8 evening: progression 2x faster, so
 	-- x3 QM's pets JSON: rides don't get quicker, so the gold has to more than double.)
 	PetIncome = {
-		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, -- Meadow
+		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleFish = 15, Lion = 24, MarbleColossus = 90, MajesticUnicorn = 450, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
 		Eyeworm = 18, Maw = 60, -- World 2 Crimson Lands
-		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, -- Tundra
+		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, CrystalCentipede = 75, RedMushroom = 150, BrownMushroom = 300, PurpleMushroom = 1260, BlueCrystal = 150, PinkCrystal = 300, -- Tundra
 		Starfish = 300, Clownfish = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, Lionfish = 1500, -- Ocean
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
 		TRex = 60000, Raptor = 40000, -- Jurassic (guesses: past the Volcano's)
@@ -716,6 +716,16 @@ return {
 		Bunny = "rbxassetid://102165948456968", -- assets/ui/BunnyEggRender.png
 		Fish = "rbxassetid://105098230793344",
 		Rhino = "rbxassetid://139482781062355",
+		MarbleColossus = "rbxassetid://110439659872687", -- assets/ui/MarbleColossusEggRender.png (World 2)
+		CrystalCentipede = "rbxassetid://101332917430774", -- assets/ui/CrystalCentipedeEggRender.png (World 2)
+		MajesticUnicorn = "rbxassetid://112045413530937", -- assets/ui/MajesticUnicornEggRender.png (World 2)
+		RedMushroom = "rbxassetid://102610484944753", -- assets/ui/RedMushroomEggRender.png (World 2)
+		BrownMushroom = "rbxassetid://84196239547123", -- assets/ui/BrownMushroomEggRender.png (World 2)
+		PurpleMushroom = "rbxassetid://132151928968903", -- assets/ui/PurpleMushroomEggRender.png (World 2)
+		MarbleFish = "rbxassetid://121162393893227", -- assets/ui/MarbleFishEggRender.png (World 2)
+		BlueCrystal = "rbxassetid://112194074349421", -- assets/ui/BlueCrystalEggRender.png (World 2)
+		PinkCrystal = "rbxassetid://117236752430565", -- assets/ui/PinkCrystalEggRender.png (World 2)
+		Lion = "rbxassetid://82682007346790", -- assets/ui/LionEggRender.png (World 2)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
@@ -1016,6 +1026,10 @@ return {
 		Pinto = { Speed = 1.1, Stamina = 0.9 },
 		Fish = { Speed = 0.6, Stamina = 3, BiomeSpeed = { Ocean = "Clownfish" } }, -- (slow everywhere but the Ocean, where it's as fast as a Clownfish: QM, Oct 11)
 		Rhino = { Speed = 1.35, Stamina = 1.8 },
+		MarbleColossus = { Speed = 1.35, Stamina = 1.8 }, -- World 2's Meadow Epic (as the Rhino until QM sets it)
+		MarbleFish = { Speed = 1.1, Stamina = 0.9 }, -- World 2's Meadow Uncommon (QM, Oct 13; as the Pinto until QM sets it)
+		Lion = { Speed = 1.25, Stamina = 1.2 }, -- World 2's Meadow Rare (QM, Oct 13; between the Pinto and the Rhino, a guess)
+		MajesticUnicorn = { Speed = 1.8, Stamina = 2 }, -- World 2's Meadow Legendary (as the Unicorn until QM sets it)
 		Unicorn = { Speed = 1.8, Stamina = 2 }, -- (QM, Oct 12: kept at 1.8, into the Tundra from the start line, ~4,440 of 3,984)
 		-- Desert
 		Eyeworm = { Speed = 1.31, Stamina = 1.5 }, -- World 2 Crimson Lands Uncommon: the Cactus's numbers (QM, Oct 13: World 2 ~matches World 1's speeds)
@@ -1027,6 +1041,12 @@ return {
 		SpineLizard = { Speed = 1.97, Stamina = 2 }, -- (QM, Oct 12: 90% into the Tundra; was 1.62)
 		Snake = { Speed = 2.8, Stamina = 3 }, -- (QM, Oct 12: was 2)
 		-- Tundra
+		CrystalCentipede = { Speed = 1.99, Stamina = 1.5 }, -- World 2's Crystal Cavern Uncommon (as the Penguin until QM sets it)
+		RedMushroom = { Speed = 2.36, Stamina = 1.6 }, -- World 2's Cavern Living Mushrooms: the small red one Uncommon (as the Boar),
+		BrownMushroom = { Speed = 2.52, Stamina = 1.3 }, -- the medium brown one Rare (as the Snowman),
+		PurpleMushroom = { Speed = 2.57, Stamina = 3 }, -- the giant purple one Epic (as the Ice Golem), until QM sets them
+		BlueCrystal = { Speed = 2.36, Stamina = 1.6 }, -- World 2's Cavern Living Crystals: blue Uncommon (as the Boar),
+		PinkCrystal = { Speed = 2.52, Stamina = 1.3 }, -- pink Rare (as the Snowman), until QM sets them
 		Penguin = { Speed = 1.99, Stamina = 1.5 }, -- (QM, Oct 12: 93% into the Tundra; was 1.72)
 		Boar = { Speed = 2.36, Stamina = 1.6 }, -- (QM, Oct 12: 30% into the Ocean; was 1.86)
 		Snowman = { Speed = 2.52, Stamina = 1.3 }, -- (QM, Oct 12: 45% into the Ocean; was 2.06)
@@ -1087,3 +1107,137 @@ return {
 	-- Oct 11; Oct 12: a fixed 2, was the Clownfish's).
 	HerdGapSpeed = 2,
 }
+
+-- Flowing water (QM, Oct 13; Client/WaterFlow): a Texture named "Water" on a tile's top
+-- with this Image flows Flow studs a second (U across the course, V along it).
+Config.Water = {
+	Image = "rbxassetid://77807866797953", -- assets/world2/WaterTile256.png (QM's 8 x 8 tile, x32 for crisp pixels)
+	StudsPerTile = 8, -- (a pixel a stud)
+	Flow = Vector2.new(0, 2),
+}
+
+-- Worlds (QM, Oct 13): each is its own Place in the experience, running this same code.
+-- Gold is shared; each world has its own pen, pets, pen levels and quests.
+Config.Places = { 126872244121414, 139418530058790 } -- [world] = its PlaceId
+Config.World = table.find(Config.Places, game.PlaceId) or 1
+-- What each world costs in gold to unlock, once (the Worlds menu's Buy; QM, Oct 13).
+-- World 1 is everyone's.
+Config.WorldPrices = { 0, 400 }
+-- The per-world saves' DataStore names: World 1's as they've always been, the others' with
+-- this on the end ("Pen_W2"). Gold's store is shared.
+function Config.storeName(name, world)
+	world = world or Config.World
+	return if world == 1 then name else name .. "_W" .. world
+end
+
+-- World 2's look: its first biome and base as QM's reference (marble walls, yellow
+-- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
+-- hue-turned as placeholders (tools/world2_terrain.luau's turns).
+if Config.World == 2 then
+	Config.DefaultPet = "ArmoredHorse" -- World 2's starter, in your pen from the start (QM, Oct 13)
+	local rgb = Color3.fromRGB
+	local TURN = { 0.55, 0.6, 0.35, 0.2, 0.45, 0.75 } -- [biome] hue turn
+	local function turn(value, by)
+		if typeof(value) == "Color3" then
+			local h, sat, v = value:ToHSV()
+			return if sat < 0.12 then value else Color3.fromHSV((h + by) % 1, sat, v)
+		elseif type(value) == "table" then
+			local out = {}
+			for k, v in value do
+				out[k] = turn(v, by)
+			end
+			return out
+		end
+		return value
+	end
+	for i, biome in Config.Biomes do
+		for _, key in { "GroundColors", "WallColors", "Patches", "Depths", "PostColor", "GateColor" } do
+			if biome[key] then
+				biome[key] = turn(biome[key], TURN[i] or 0)
+			end
+		end
+	end
+	local meadow = Config.Biomes[1]
+	meadow.Herd = table.clone(meadow.Herd)
+	meadow.Herd.MarbleFish = 0.3 -- World 2's Meadow Uncommon (QM, Oct 13), about as often as the Pinto
+	meadow.Herd.Lion = 0.13 -- World 2's Meadow Rare (QM, Oct 13), as often as the Fish
+	meadow.Herd.MarbleColossus = 0.08 -- World 2's Meadow Epic (QM, Oct 13), as often as the Rhino
+	meadow.Herd.MajesticUnicorn = 0.05 -- World 2's Meadow Legendary (QM, Oct 13), as often as the Unicorn
+	meadow.GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) }
+	meadow.WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) } -- marble
+	meadow.Patches = {
+		Dirt = { rgb(118, 84, 50), rgb(104, 72, 42) },
+		Grass = { rgb(182, 144, 44), rgb(166, 130, 36) }, -- the darker grass, beside the dirt
+	}
+	-- The second biome: the Crimson Lands (QM, Oct 13; tools/world2_crimson.luau's floor).
+	local crimson = Config.Biomes[2]
+	crimson.GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) } -- #791425
+	crimson.Patches = {
+		Crimson = { rgb(144, 44, 43), rgb(132, 38, 38) }, -- #902C2B, round every stone tile
+		Stone = { rgb(119, 86, 86), rgb(108, 77, 77) }, -- #775656 single tiles
+	}
+	-- The third: the Crystal Cavern (QM, Oct 13; tools/world2_cavern.luau): blue-grey by the
+	-- walls to ice to crystal down the middle; its plank boards keep their own colours.
+	local cavern = Config.Biomes[3]
+	cavern.GroundColors = { rgb(90, 109, 143), rgb(82, 99, 131) } -- #5A6D8F
+	cavern.Patches = {
+		Ice = { rgb(98, 129, 167), rgb(89, 118, 153) }, -- #6281A7
+		Crystal = { rgb(116, 186, 213), rgb(105, 171, 197) }, -- #74BAD5
+	}
+	cavern.WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) } -- #384867
+	cavern.CapColor = rgb(44, 57, 82)
+	cavern.Herd = table.clone(cavern.Herd)
+	cavern.Herd.CrystalCentipede = 0.3 -- the Cavern's first animal (QM, Oct 13), an Uncommon as often as the Penguin
+	cavern.Herd.RedMushroom = 0.25 -- the Living Mushrooms (QM, Oct 13), as often as the Boar, Snowman and Ice Golem
+	cavern.Herd.BrownMushroom = 0.22
+	cavern.Herd.PurpleMushroom = 0.12
+	cavern.Herd.BlueCrystal = 0.25 -- the Living Crystals (QM, Oct 13), as often as the Boar and Snowman
+	cavern.Herd.PinkCrystal = 0.22
+	-- The fourth: the Woodland Maze (QM, Oct 13; tools/world2_woodland.luau): brown, darker
+	-- by the walls.
+	local woodland = Config.Biomes[4]
+	woodland.GroundColors = { rgb(121, 72, 46), rgb(110, 65, 41) } -- #79482E
+	woodland.Patches = {
+		Soil = { rgb(142, 81, 57), rgb(130, 74, 52) }, -- #8E5139
+		Path = { rgb(151, 89, 57), rgb(139, 81, 52) }, -- #975939, the middle
+	}
+	-- The fifth: the Temple (QM, Oct 13; tools/world2_temple.luau): a rock path, grass and
+	-- marble a stud up, ponds a stud and two down (their flowing water: tools/world2_water.luau).
+	local temple = Config.Biomes[5]
+	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
+	temple.Patches = {
+		Rock = { rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
+		Grass = { rgb(145, 178, 41), rgb(133, 164, 35) }, -- #91B229
+		Marble = { rgb(200, 200, 200), rgb(186, 186, 186) }, -- #C8C8C8
+		SideDirt = { rgb(200, 200, 200), rgb(190, 188, 184) },
+		Water = { rgb(37, 81, 40), rgb(34, 99, 55) }, -- (QM's water tile's greens, so the pond sides match it)
+		DeepWater = { rgb(26, 57, 28), rgb(24, 69, 38) },
+	}
+	temple.WallColors = { rgb(200, 200, 200), rgb(186, 186, 186) }
+	temple.CapColor = rgb(176, 176, 176)
+	-- The last: the Ancient Tomb (QM, Oct 13; tools/world2_tomb.luau): sand, a gold causeway a
+	-- stud up and gold daises two up in darker frames. (World 2's zones end: no endless.)
+	local tomb = Config.Biomes[6]
+	tomb.GroundColors = { rgb(220, 201, 152), rgb(210, 191, 142) } -- (its base is Sand)
+	tomb.Patches = {
+		Sand = { rgb(220, 201, 152), rgb(210, 191, 142) }, -- #DCC998
+		Dune = { rgb(208, 184, 134), rgb(198, 174, 124) }, -- #D0B886
+		Paving = { rgb(208, 184, 134), rgb(198, 174, 124) },
+		Gold = { rgb(226, 194, 0), rgb(196, 167, 3) }, -- #E2C200 / #C4A703
+		Frame = { rgb(196, 167, 3), rgb(180, 152, 2) },
+	}
+	tomb.WallColors = { rgb(211, 183, 66), rgb(196, 168, 54) } -- #D3B742
+	tomb.CapColor = rgb(186, 158, 46)
+	-- Walls and gate glows (QM, Oct 13: the Level design thread's batch; tools/world2_walls.luau).
+	crimson.WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) }
+	crimson.CapColor = rgb(72, 39, 42)
+	crimson.GateColor = rgb(255, 59, 92)
+	cavern.GateColor = rgb(92, 225, 255)
+	woodland.WallColors = { rgb(78, 44, 28), rgb(70, 39, 25) }
+	woodland.CapColor = rgb(62, 35, 22)
+	woodland.GateColor = rgb(242, 109, 57)
+	temple.GateColor = rgb(130, 226, 80)
+	tomb.GateColor = rgb(255, 200, 30)
+end
+
+return Config
