@@ -1,7 +1,7 @@
 # piece: label, RGB
 SwordStone_1: Rock, 214, 196, 142
 SwordStone_2: Rock, 196, 178, 126
-SwordStone_3: Blade, 236, 222, 172
-SwordStone_4: Guard, 204, 186, 132
-SwordStone_5: Grip, 196, 178, 126
-SwordStone_6: Pommel, 222, 204, 150
+SwordStone_3: Blade, 206, 214, 224
+SwordStone_4: Guard, 232, 182, 58
+SwordStone_5: Grip, 112, 72, 46
+SwordStone_6: Pommel, 232, 182, 58

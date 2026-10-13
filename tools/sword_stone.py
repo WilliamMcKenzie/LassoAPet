@@ -1,5 +1,5 @@
 """Sword in the stone statue (QM, Oct 13): a chunky boulder with a sword stuck in its
-top, all carved from one yellowish-tinted stone, in the rock meshes' style (faceted convex
+top: the rock a yellowish-tinted stone, the sword a real one (steel, gold, leather), in the rock meshes' style (faceted convex
 pieces, flat shaded, studded; each piece its own MeshPart in its own shade).
 
 Run: python3 tools/sword_stone.py
@@ -24,7 +24,8 @@ from plant_meshes import blob, parts_of  # noqa: E402
 from crimson_meshes import slab  # noqa: E402
 
 OUT = os.path.join(HERE, "..", "design", "sword_stone")
-STONE = [(214, 196, 142), (196, 178, 126), (236, 222, 172), (204, 186, 132), (222, 204, 150)]  # yellowish rock
+STONE = [(214, 196, 142), (196, 178, 126)]  # yellowish rock
+STEEL, GOLD, LEATHER = (206, 214, 224), (232, 182, 58), (112, 72, 46)  # a real sword (QM)
 
 
 def sword_stone(rng):
@@ -55,8 +56,8 @@ def sword_stone(rng):
             grip.append(c + np.array([math.cos(a) * r * math.cos(tilt), -math.cos(a) * r * math.sin(tilt), math.sin(a) * r]))
     pommel = blob(rng, along(8.75), 0.75, 10, jitter=0.05)
     return [("Rock", STONE[0], [rock[0]]), ("Rock", STONE[1], rock[1:]),
-            ("Blade", STONE[2], [np.array(blade)]), ("Guard", STONE[3], [guard]),
-            ("Grip", STONE[1], [np.array(grip)]), ("Pommel", STONE[4], [pommel])]
+            ("Blade", STEEL, [np.array(blade)]), ("Guard", GOLD, [guard]),
+            ("Grip", LEATHER, [np.array(grip)]), ("Pommel", GOLD, [pommel])]
 
 
 def main():
