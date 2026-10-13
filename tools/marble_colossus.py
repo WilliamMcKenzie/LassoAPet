@@ -22,6 +22,8 @@ from horse_rig import pose  # noqa: E402
 MARBLE = (246, 244, 238)
 SHADE = (208, 205, 198)
 GOLD = (240, 190, 24)
+EYE_BLACK = (24, 24, 30)
+EYE_YELLOW = (255, 214, 40)
 FIST = (226, 223, 216)
 
 
@@ -59,9 +61,9 @@ def colossus():
     a.box("Band", (-1.25, 7.5, -5.0), (1.25, 7.9, -3.0), GOLD, "neck")
     for side, sx in (("L", -1), ("R", 1)):
         xa, xb = sorted((sx * 0.25, sx * 1.0))
-        a.box("Eye" + side, (xa, 5.7, -4.95), (xb, 6.65, -4.9), A.EYE_WHITE, "neck")
+        a.box("Eye" + side, (xa, 5.7, -4.95), (xb, 6.65, -4.9), EYE_BLACK, "neck")
         pa, pb = sorted((sx * 0.4, sx * 0.8))
-        a.box("Pupil" + side, (pa, 5.8, -4.98), (pb, 6.4, -4.93 + A.PUPIL_BACK), A.PUPIL, "neck")
+        a.box("Pupil" + side, (pa, 5.8, -4.98), (pb, 6.4, -4.93 + A.PUPIL_BACK), EYE_YELLOW, "neck")
     a.pivots["neck"] = (0, 7.3, -3.0)
 
     a.meta = {"seat": (0, 8.4, -0.6), "neck_loop": {"center": (0, 6.1, -4.0), "radius": 1.6}}
