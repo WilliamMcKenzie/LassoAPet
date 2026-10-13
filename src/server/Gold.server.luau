@@ -70,6 +70,7 @@ local function load(player)
 				playedFrom[player] = os.time()
 				playedFull[player] = value == nil or (typeof(value) == "table" and value[PLAYED .. "Full"] == true)
 				local gates = if typeof(value) == "table" then tonumber(value[GATES]) else nil
+				player:SetAttribute("FinishTrail", if typeof(value) == "table" then tonumber(value.trail) else nil) -- (the finish line's trails: Config.FinishTrails, shared by every world)
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
 				for _, world in typeof(value) == "table" and typeof(value.worlds) == "table" and value.worlds or {} do
 					if tonumber(world) then
@@ -100,7 +101,8 @@ local function save(player, onlyIfChanged)
 			table.insert(worlds, world)
 		end
 	end
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",")
+	local trail = player:GetAttribute("FinishTrail")
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail)
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
@@ -108,6 +110,7 @@ local function save(player, onlyIfChanged)
 		local record = table.clone(others[player] or {})
 		record.gold, record.bought, record.stamina, record[GATES] = gold, bought[player] or 0, oldStamina[player], gates
 		record.worlds = if #worlds > 0 then worlds else nil
+		record.trail = trail
 		record[PLAYED] = math.floor(playedNow(player))
 		record[PLAYED .. "Full"] = playedFull[player] or nil
 		if pcall(store.SetAsync, store, key(player), record) then

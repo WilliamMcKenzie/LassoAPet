@@ -25,7 +25,11 @@
 -- top at 2.8 up to the arch's inside, 7.2 round from 17).
 
 local AssetService = game:GetService("AssetService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Config = require(ReplicatedStorage.Shared.Config)
 
 local DEFAULTS = { -- (QM's picks, Oct 12)
 	Angles = 7.1,
@@ -48,6 +52,8 @@ local DEFAULTS = { -- (QM's picks, Oct 12)
 	FPS = 48,
 }
 local NEAR = 220 -- studs: no drawing further off
+-- World 2's portal is bright yellow (QM, Oct 13), whatever the gate's attributes say.
+local YELLOW = if Config.World == 2 then { FillColor = Color3.fromRGB(255, 236, 60), BackColor = Color3.fromRGB(255, 190, 0) } else nil
 
 -- Each portal gate gets its swirl: the base's (BaseDecor.PortalGate) and, in World 1, the
 -- giant one at the course's end (World.EndPortal, World.server: riding into it takes you
@@ -62,6 +68,9 @@ local function swirl(gate)
 		if gate:GetAttribute(name) == nil then
 			gate:SetAttribute(name, value)
 		end
+	end
+	for name, value in YELLOW or {} do
+		gate:SetAttribute(name, value)
 	end
 	local function knob(name)
 		local v = gate:GetAttribute(name)
@@ -92,6 +101,29 @@ local function swirl(gate)
 		table.insert(labels, label)
 	end
 	plane.Parent = workspace
+
+	-- World 1's base gate is just the rock arch till you own World 2 (QM, Oct 13): the swirl
+	-- fades in when you buy it, or when the unlock cutscene clears the gate's HideSwirl.
+	local player = Players.LocalPlayer
+	local shown = nil
+	local function showSwirl()
+		local want = Config.World ~= 1 or gate.Name ~= "PortalGate" or (player:GetAttribute("OwnsWorld2") == true and not gate:GetAttribute("HideSwirl"))
+		if want == shown then
+			return
+		end
+		local fade = shown ~= nil
+		shown = want
+		for _, label in labels do
+			if fade then
+				TweenService:Create(label, TweenInfo.new(if want then 1.5 else 0.2), { ImageTransparency = if want then 0 else 1 }):Play()
+			else
+				label.ImageTransparency = if want then 0 else 1
+			end
+		end
+	end
+	player:GetAttributeChangedSignal("OwnsWorld2"):Connect(showSwirl)
+	gate:GetAttributeChangedSignal("HideSwirl"):Connect(showSwirl)
+	showSwirl()
 
 	-- The image, its pixels' buffer and which pixels are in the opening (a rectangle with a
 	-- half circle on top), (re)built for a pixel size.
@@ -195,7 +227,7 @@ local function swirl(gate)
 
 	local speed = DEFAULTS.Speed -- (eased, so it doesn't jump)
 	RunService.RenderStepped:Connect(function(dt)
-		local character = game:GetService("Players").LocalPlayer.Character
+		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		local d = if root then (root.Position - plane.Position).Magnitude else math.huge
 		local near, far = knob("NearDistance"), knob("FarDistance")
@@ -211,7 +243,7 @@ local function swirl(gate)
 			return
 		end
 		local _, onScreen = camera:WorldToViewportPoint(plane.Position)
-		if not onScreen then
+		if not onScreen or not shown then
 			return
 		end
 		last = now
@@ -222,7 +254,7 @@ local function swirl(gate)
 			surface.Brightness = knob("Glow")
 		end
 		light.Color = knob("FillColor")
-		light.Brightness = knob("LightBrightness")
+		light.Brightness = if shown then knob("LightBrightness") else 0
 		light.Range = knob("LightRange")
 		local t = os.clock()
 		draw()

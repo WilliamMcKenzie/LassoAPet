@@ -1214,13 +1214,42 @@ Config.Water = {
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
 Config.Places = { 126872244121414, 139418530058790 } -- [world] = its PlaceId
 Config.World = table.find(Config.Places, game.PlaceId) or 1
--- World 1's end (QM, Oct 13): a giant copy of the base's portal gate (Scale x its 1 size)
--- across the course, At studs before the finish line (World.server). Riding into it
--- unlocks World 2 for free and takes you there (Gold.server). Not in the other worlds.
-Config.EndPortal = if Config.World == 1 then { Scale = 5, At = 24 } else nil
--- What each world costs in gold to unlock, once (the Worlds menu's Buy; QM, Oct 13).
--- World 1 is everyone's.
-Config.WorldPrices = { 0, 400 }
+-- (World 1 ended at a giant portal to World 2 for a while: QM, Oct 13 took it out. Both
+-- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
+Config.EndPortal = nil
+-- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's
+-- World 2 bar; QM, Oct 13: 10m). World 1 is everyone's.
+Config.WorldPrices = { 0, 10000000 }
+-- 15, 1.2k, 3.4m, 10m... (gold, short: the Worlds menu's prices and the World 2 bar)
+function Config.short(n)
+	for _, unit in { { 1e12, "t" }, { 1e9, "b" }, { 1e6, "m" }, { 1e3, "k" } } do
+		if n >= unit[1] then
+			return (string.format("%.1f", math.floor(n / unit[1] * 10) / 10):gsub("%.0$", "")) .. unit[2]
+		end
+	end
+	return tostring(math.floor(n))
+end
+-- The finish line's trails (QM, Oct 13): each time you ride over the finish line, in either
+-- world, you get the next of these, no message (Hatchery's FinishCourse; FinishTrail, saved
+-- with your gold). Bands top to bottom, as the Rainbow Trail's. After the last, no more.
+Config.FinishTrails = {
+	{ Name = "Yellow", Colors = { Color3.fromRGB(255, 246, 120), Color3.fromRGB(255, 226, 60), Color3.fromRGB(255, 200, 20), Color3.fromRGB(240, 170, 0) } },
+	{ Name = "Blue", Colors = { Color3.fromRGB(140, 220, 255), Color3.fromRGB(70, 180, 255), Color3.fromRGB(30, 130, 240), Color3.fromRGB(20, 80, 200) } },
+	{ Name = "Red", Colors = { Color3.fromRGB(255, 130, 110), Color3.fromRGB(255, 70, 60), Color3.fromRGB(220, 30, 30), Color3.fromRGB(160, 10, 20) } },
+	{ Name = "Rainbow" }, -- (the Rainbow Trail's bands)
+	{ Name = "Galaxy", Colors = { Color3.fromRGB(235, 225, 255), Color3.fromRGB(190, 90, 230), Color3.fromRGB(120, 50, 200), Color3.fromRGB(60, 70, 210), Color3.fromRGB(40, 20, 110), Color3.fromRGB(15, 10, 50) } },
+}
+-- The bands a player's ride trails, or nil for none: the best of their finish line trail
+-- and the bought Rainbow Trail (Config.RainbowTrail).
+local RAINBOW = {
+	Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 160, 50), Color3.fromRGB(255, 235, 70),
+	Color3.fromRGB(80, 220, 90), Color3.fromRGB(70, 150, 255), Color3.fromRGB(170, 90, 240),
+}
+function Config.trailColors(player)
+	local n = math.max(player:GetAttribute("FinishTrail") or 0, if player:GetAttribute("RainbowTrail") then 4 else 0) -- (the bought one counts as the Rainbow)
+	local trail = Config.FinishTrails[n]
+	return if trail then trail.Colors or RAINBOW else nil
+end
 -- The per-world saves' DataStore names: World 1's as they've always been, the others' with
 -- this on the end ("Pen_W2"). Gold's store is shared.
 function Config.storeName(name, world)
@@ -1232,6 +1261,24 @@ end
 -- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
 -- hue-turned as placeholders (tools/world2_terrain.luau's turns).
 if Config.World == 2 then
+	-- World 2's quests (QM, Oct 13): reach each biome, its egg World 1's reward's
+	-- equivalent here; and the other line, merge 3, lasso 10 Lions, lasso 3 Kitsunes (that
+	-- last one's three eggs). No invite line here.
+	Config.Quests = {
+		{
+			{ Text = "Reach Meadow", Kind = "reach", Biome = 1, Egg = "Eyeworm", NoPenLevel = true }, -- (World 1's Cactus: the next biome's Uncommon)
+			{ Text = "Reach Crimson Lands", Kind = "reach", Biome = 2, Egg = "CrystalCentipede" }, -- (the Penguin)
+			{ Text = "Reach Crystal Cavern", Kind = "reach", Biome = 3, Egg = "BrownMushroom" }, -- (the Snowman)
+			{ Text = "Reach Woodland Maze", Kind = "reach", Biome = 4, Egg = "OrangeButterfly" }, -- (the Lionfish)
+			{ Text = "Reach Temple", Kind = "reach", Biome = 5, Egg = "Tiger" }, -- (the Fire Lobster)
+			{ Text = "Reach Tomb", Kind = "reach", Biome = 6, Egg = "TombJackal" }, -- (the Palm Guy)
+		},
+		{
+			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "Seraph" },
+			{ Text = "Lasso Lions", Kind = "lasso", Animal = "Lion", Need = 10, Egg = "Asura" },
+			{ Text = "Lasso Kitsunes", Kind = "lasso", Animal = "Kitsune", Need = 3, Egg = { "Geb", "Nut", "Bes" } },
+		},
+	}
 	Config.DefaultPet = "ArmoredHorse" -- World 2's starter, in your pen from the start (QM, Oct 13)
 	local rgb = Color3.fromRGB
 	local TURN = { 0.55, 0.6, 0.35, 0.2, 0.45, 0.75 } -- [biome] hue turn

@@ -674,18 +674,26 @@ remote("HatchEgg", function(player, id)
 	publish(player)
 end)
 
--- The ride crossed the finish line at the end of the course: a random egg, drawn
--- like the stampede itself (each biome's Herd counts as weights, so a Unicorn egg
--- is as rare as Unicorns are). Returns the kind, for the egg reveal.
+-- The ride crossed the finish line at the end of the course: the egg of the animal you
+-- rode there (QM, Oct 13), or (a hybrid, say) a random egg, drawn like the stampede itself
+-- (each biome's Herd counts as weights, so a Unicorn egg is as rare as Unicorns are). And
+-- the next of Config.FinishTrails, silently (FinishTrail; Gold.server saves it). Returns
+-- the kind, for the egg reveal.
 local finished = {} -- [player] = os.clock() of their last finish
 local finishCourse = Instance.new("RemoteFunction")
 finishCourse.Name = "FinishCourse"
-finishCourse.OnServerInvoke = function(player)
+finishCourse.OnServerInvoke = function(player, rode)
 	local profile = profiles[player]
 	if not profile or (finished[player] and os.clock() - finished[player] < 10) then
 		return nil
 	end
 	finished[player] = os.clock()
+	player:SetAttribute("FinishTrail", math.min((player:GetAttribute("FinishTrail") or 0) + 1, #Config.FinishTrails))
+	if typeof(rode) == "string" and isAnimal(rode) then
+		profile.eggs[rode] = (profile.eggs[rode] or 0) + 1
+		publish(player)
+		return rode
+	end
 	local pool, total = {}, 0
 	for _, biome in Config.Biomes do
 		-- (a borrowed placeholder herd would count its animals twice)
@@ -810,9 +818,12 @@ claimQuest.OnServerInvoke = function(player, i)
 		player:SetAttribute("PenLevel", level + 1)
 	end
 	Funnel.claimed(player, i) -- (Player Journey)
-	profile.eggs[quest.Egg] = (profile.eggs[quest.Egg] or 0) + 1
+	local eggs = if typeof(quest.Egg) == "table" then quest.Egg else { quest.Egg } -- (several: World 2's Kitsune quest)
+	for _, kind in eggs do
+		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	end
 	publish(player)
-	return quest.Egg
+	return eggs[1]
 end
 claimQuest.Parent = ReplicatedStorage
 -- Gold.server's: a lasso landed on a wild animal ("Lasso animals", and "Lasso Snowmen" by its kind).

@@ -2317,15 +2317,16 @@ vfx.RAINBOW = {
 }
 -- scale: x the bands' height (the bought Rainbow Trail's Config.RainbowTrail.Width);
 -- a taller rainbow is lifted so its bottom stays at the ground.
-function vfx.rainbowFx(entity, lifetime, scale)
+function vfx.rainbowFx(entity, lifetime, scale, colors)
+	colors = colors or vfx.RAINBOW
 	local root = entity.animal.model.PrimaryPart
 	local middle, size = entity.animal.model:GetBoundingBox()
 	local back = root.CFrame:ToObjectSpace(middle * CFrame.new(0, 0, size.Z * 0.3)) -- toward its tail (it faces -Z)
 	scale = scale or 1
-	local band = size.Y * 0.6 * scale / #vfx.RAINBOW
+	local band = size.Y * 0.6 * scale / #colors
 	local lift = math.max(size.Y * 0.3 * scale - size.Y * 0.5, 0)
 	local parts = {}
-	for k, color in vfx.RAINBOW do
+	for k, color in colors do
 		local y = size.Y * 0.3 * scale + lift - (k - 1) * band
 		local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
 		a0.CFrame = back * CFrame.new(0, y, 0)
@@ -3899,8 +3900,8 @@ vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, spee
 		rider.entity.animal:setSaddled(true)
 		rider.entity.dodge = 0
 		rider.kind = kind
-		if player:GetAttribute("RainbowTrail") then -- they bought the Rainbow Trail (Config.RainbowTrail)
-			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width)
+		if Config.trailColors(player) then -- the Rainbow Trail, or the finish line's (Config.FinishTrails)
+			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width, Config.trailColors(player))
 		end
 		rider.shown = nil
 	end
@@ -4087,15 +4088,16 @@ end)
 -- you're riding, moved over when you swap mounts and gone when the ride ends.
 vfx.trail = { parts = {} }
 function vfx.updateTrail()
-	local want = if mount and Players.LocalPlayer:GetAttribute("RainbowTrail") and mount.animal.model.PrimaryPart then mount else nil
-	if vfx.trail.entity == want then
+	local colors = Config.trailColors(Players.LocalPlayer)
+	local want = if mount and colors and mount.animal.model.PrimaryPart then mount else nil
+	if vfx.trail.entity == want and vfx.trail.colors == colors then
 		return
 	end
 	for _, fx in vfx.trail.parts do
 		fx:Destroy()
 	end
-	vfx.trail.entity = want
-	vfx.trail.parts = if want then vfx.rainbowFx(want, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width) else {}
+	vfx.trail.entity, vfx.trail.colors = want, colors
+	vfx.trail.parts = if want then vfx.rainbowFx(want, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width, colors) else {}
 end
 
 -- Every frame: each other rider's mount glides toward where it was last heard
@@ -4314,7 +4316,7 @@ RunService.PreSimulation:Connect(function(dt)
 			-- Crossed the finish line: a random egg (the server draws it), its
 			-- reveal, then back home to your pen.
 			task.spawn(function()
-				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse)
+				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, mount.kind)
 				kind = ok and kind or nil
 				task.wait(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5)
 				if phase == "finish" then
