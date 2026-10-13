@@ -98,6 +98,7 @@ tap.Visible = false
 local tapScale = Instance.new("UIScale")
 tapScale.Parent = tap
 tap.Parent = gui
+require(script.Parent.TapHand).register(tap) -- (one hand on screen at a time)
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- QM's Sprint guide: a bar along the top (computers only).
