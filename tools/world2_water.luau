@@ -15,6 +15,7 @@ for _, p in ROOT.Ground:GetChildren() do
 				t:Destroy()
 			end
 		end
+		p.Color = if p.Name == "Water" then Color3.fromRGB(37, 81, 40) else Color3.fromRGB(26, 57, 28) -- (the sides match the tile)
 		local water = Instance.new("Texture")
 		water.Name = "Water"
 		water.Face = Enum.NormalId.Top

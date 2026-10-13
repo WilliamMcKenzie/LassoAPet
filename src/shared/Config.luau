@@ -1171,8 +1171,8 @@ if Config.World == 2 then
 		Grass = { rgb(145, 178, 41), rgb(133, 164, 35) }, -- #91B229
 		Marble = { rgb(200, 200, 200), rgb(186, 186, 186) }, -- #C8C8C8
 		SideDirt = { rgb(200, 200, 200), rgb(190, 188, 184) },
-		Water = { rgb(70, 156, 204), rgb(62, 144, 190) },
-		DeepWater = { rgb(44, 110, 168), rgb(38, 99, 154) },
+		Water = { rgb(37, 81, 40), rgb(34, 99, 55) }, -- (QM's water tile's greens, so the pond sides match it)
+		DeepWater = { rgb(26, 57, 28), rgb(24, 69, 38) },
 	}
 	temple.WallColors = { rgb(200, 200, 200), rgb(186, 186, 186) }
 	temple.CapColor = rgb(176, 176, 176)
