@@ -108,6 +108,15 @@ return {
 		{ "Belly", 214, 222, 140 },
 		{ "Accent", 236, 120, 140 }, -- mouth
 	},
+	LionArcher = {
+		{ "Body", 238, 192, 112 }, -- coat, legs, head, tail
+		{ "Body", 214, 160, 84 }, -- haunches
+		{ "Belly", 255, 238, 204 }, -- muzzle, chin, belly, paws
+		{ "Marking", 34, 86, 210 }, -- nemes stripes, lappets, saddle cloth, beard bands, armband gems
+		{ "Marking", 24, 56, 150 }, -- the nemes' back
+		{ "Accent", 252, 200, 40 }, -- gold: nemes stripes, headband, cobra, collar, cuffs, trims, rings
+		{ "Accent", 206, 150, 22 },
+	},
 	Tiger = {
 		{ "Body", 247, 133, 32 },
 		{ "Belly", 255, 248, 236 }, -- muzzle, chin, cheeks, chest, belly
