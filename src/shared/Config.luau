@@ -1298,6 +1298,7 @@ if Config.World == 2 then
 	local temple = Config.Biomes[5]
 	temple.Herd = table.clone(temple.Herd)
 	temple.Herd.Loong = 0.025 -- the Loong runs wild here as a Legendary (QM, Oct 13)
+	temple.Herd.Fish = 1 -- a placeholder till the Temple's own animals come, so the Loong stays rare
 	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
 	temple.Patches = {
 		Rock = { rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
@@ -1348,7 +1349,7 @@ if Config.World == 2 then
 	ownHerd(2, { "Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura" })
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
 	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "GiantGolem" }) -- the Woodland Maze
-	ownHerd(5, { "Loong" }) -- the Temple
+	ownHerd(5, { "Loong", "Fish" }) -- the Temple (the Fish a placeholder)
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do
