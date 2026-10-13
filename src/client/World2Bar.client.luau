@@ -165,6 +165,7 @@ local gate = if REBIRTH then nil else workspace:WaitForChild("World"):WaitForChi
 -- In line with the Quests panel, as tall as it is folded (QM, Oct 13): its top and its
 -- header's height (BaseUi's 86, at BaseUi's scale).
 local QUESTS_HEADER = 86
+local GROW = 1.2 -- (the art's panel is smaller than its picture, round the cash: 20% up to look as tall, QM)
 local function align()
 	local base = player.PlayerGui:FindFirstChild("BaseUi")
 	local baseRoot = base and base:FindFirstChild("Root")
@@ -174,11 +175,12 @@ local function align()
 		return
 	end
 	local questsScale = quests:FindFirstChildOfClass("UIScale")
-	local tall = QUESTS_HEADER * (questsScale and questsScale.Scale or 1) * baseScale.Scale / rootScale.Scale
+	local header = QUESTS_HEADER * (questsScale and questsScale.Scale or 1) * baseScale.Scale / rootScale.Scale
+	local tall = header * GROW
 	local size = Vector2.new(tall * BAR.X / BAR.Y, tall)
 	bar.Size = UDim2.fromOffset(size.X, size.Y)
 	green.Size = bar.Size
-	bar.Position = UDim2.new(0.5, 0, 0, (quests.AbsolutePosition.Y - root.AbsolutePosition.Y) / rootScale.Scale)
+	bar.Position = UDim2.new(0.5, 0, 0, (quests.AbsolutePosition.Y - root.AbsolutePosition.Y) / rootScale.Scale - (tall - header) / 2) -- (centred on it)
 end
 
 RunService.RenderStepped:Connect(function()
