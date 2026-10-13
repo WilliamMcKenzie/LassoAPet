@@ -21,15 +21,15 @@ Riding it from the start line for the whole 33 s ride, sprinting all the way (Mo
 | Snowman | Tundra | Rare | 2.678 | 2.52 | 7,777 | Ocean | 60% |
 | IceGolem | Tundra | Epic | 2.86 | 2.57 | 8,305 | Ocean | 77% |
 | Icebringer | Tundra | Legendary | 3.8 |  | 11,035 | Volcano | 40% |
-| Clownfish | Ocean | Uncommon | 3.608 | 3.28 | 10,478 | Volcano | 29% |
-| Starfish | Ocean | Uncommon | 3.707 | 3.37 | 10,765 | Volcano | 35% |
-| Whale | Ocean | Rare | 3.795 | 3.45 | 11,021 | Volcano | 40% |
-| Lionfish | Ocean | Rare | 3.894 | 3.54 | 11,308 | Volcano | 45% |
-| KingCrab | Ocean | Epic | 4.378 | 3.98 | 12,714 | Volcano | 73% |
-| FishSchool | Ocean | Epic | 4.565 | 4.15 | 13,257 | Volcano | 84% |
-| Squid | Ocean | Epic | 4.565 | 4.15 | 13,257 | Volcano | 84% |
-| BlueCrab | Ocean | Legendary | 6.27 | 5.7 | 18,208 | Jurassic | 54% |
-| Kraken | Ocean | Legendary | 6.38 | 5.8 | 18,528 | Jurassic | 58% |
+| Clownfish | Ocean | Uncommon | 3.454 | 3.28 | 10,030 | Volcano | 20% |
+| Starfish | Ocean | Uncommon | 3.544 | 3.37 | 10,292 | Volcano | 25% |
+| Whale | Ocean | Rare | 3.624 | 3.45 | 10,524 | Volcano | 30% |
+| Lionfish | Ocean | Rare | 3.714 | 3.54 | 10,785 | Volcano | 35% |
+| KingCrab | Ocean | Epic | 4.154 | 3.98 | 12,063 | Volcano | 60% |
+| FishSchool | Ocean | Epic | 4.324 | 4.15 | 12,557 | Volcano | 70% |
+| Squid | Ocean | Epic | 4.324 | 4.15 | 12,557 | Volcano | 70% |
+| BlueCrab | Ocean | Legendary | 5.964 | 5.7 | 17,319 | Jurassic | 42% |
+| Kraken | Ocean | Legendary | 6.064 | 5.8 | 17,610 | Jurassic | 46% |
 | Firebird | Volcano | Uncommon | 5.11 | 4.59 | 14,839 | Jurassic | 10% |
 | VolcanoTortoise | Volcano | Rare | 6.17 | 5 | 17,917 | Jurassic | 50% |
 | FireLobster | Volcano | Rare | 6.43 | 5.15 | 18,672 | Jurassic | 60% |

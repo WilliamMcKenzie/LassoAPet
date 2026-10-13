@@ -1189,27 +1189,27 @@ local Config = {
 		SnackYak = { Speed = 3, Stamina = 2 }, -- QM, Oct 4 (stamina 1 -> 2)
 		Icebringer = { Speed = 3.8, Stamina = 4 }, -- (QM, Oct 12: into the Volcano from the start line, ~9,380 of 9,024; was 3.6) -- (QM, Oct 11: a Legendary well past the next biome's Uncommons: 1.25x the Starfish, it lands in the Volcano)
 		-- Ocean
-		Starfish = { Speed = 3.707, Stamina = 2 }, -- (QM, Oct 13: 35% into the Volcano; was 3.37); (QM, Oct 12: 15% into the Volcano; was 2.87)
-		Squid = { Speed = 4.565, Stamina = 2.6 }, -- (QM, Oct 13: 84% into the Volcano; was 4.15); (QM, Oct 12: 60% into the Volcano; was 3.7)
+		Starfish = { Speed = 3.544, Stamina = 2 }, -- (QM, Oct 13: 25% into the Volcano, +10 points; was 3.37); (QM, Oct 12: 15% into the Volcano; was 2.87)
+		Squid = { Speed = 4.324, Stamina = 2.6 }, -- (QM, Oct 13: 70% into the Volcano, +10 points; was 4.15); (QM, Oct 12: 60% into the Volcano; was 3.7)
 		LionArcher = { Speed = 5.6, Stamina = 3 }, -- World 2's Ancient Tomb Rare: the Raptor's numbers until QM sets them
 		JadeStatue = { Speed = 7.12, Stamina = 3 }, -- World 2's Temple Epics: the Rockworm's numbers until QM sets them
 		GarnetStatue = { Speed = 7.12, Stamina = 3 },
 		Hawkmoth = { Speed = 4.15, Stamina = 2.6 }, -- World 2's Woodland Hawkmoth: Epic, the Squid's numbers until QM sets it (60% into the Temple, as the Squid is 60% into the Volcano)
 		EagleSentry = { Speed = 6.2, Stamina = 3 }, -- World 2's Tomb Eagle Sentry: Epic, the Pterodactyl's numbers until QM sets its % reach
-		KingCrab = { Speed = 4.378, Stamina = 3 }, -- (QM, Oct 13: 73% into the Volcano; was 3.98); (QM, Oct 12: 50% into the Volcano; was 3.6)
-		BlueCrab = { Speed = 6.27, Stamina = 3 }, -- (QM, Oct 13: 54% into the Jurassic; was 5.7); (QM, Oct 11: as the Kraken, a touch slower)
-		Lionfish = { Speed = 3.894, Stamina = 2 }, -- (QM, Oct 13: 45% into the Volcano; was 3.54); (QM, Oct 12: 25% into the Volcano; was 3.4); QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
+		KingCrab = { Speed = 4.154, Stamina = 3 }, -- (QM, Oct 13: 60% into the Volcano, +10 points; was 3.98); (QM, Oct 12: 50% into the Volcano; was 3.6)
+		BlueCrab = { Speed = 5.964, Stamina = 3 }, -- (QM, Oct 13: 42% into the Jurassic, +10 points; was 5.7); (QM, Oct 11: as the Kraken, a touch slower)
+		Lionfish = { Speed = 3.714, Stamina = 2 }, -- (QM, Oct 13: 35% into the Volcano, +10 points; was 3.54); (QM, Oct 12: 25% into the Volcano; was 3.4); QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
 		PinkButterfly = { Speed = 3.28, Stamina = 2.4 }, -- World 2's Woodland Pink Butterfly: Uncommon (as the Clownfish until QM sets it)
 		LivingBirch = { Speed = 3.54, Stamina = 2 }, -- World 2 Woodland Maze Rare: the Lionfish's (25% into the Temple), until QM sets it
 		RollingLog = { Speed = 3.54, Stamina = 2 }, -- World 2's Woodland Maze Rare (QM, Oct 13; as the Lionfish until QM sets it)
 		TombJackal = { Speed = 5.6, Stamina = 3 }, -- World 2's Ancient Tomb Rare: the Raptor's, until QM sets it
 		Tiger = { Speed = 6.43, Stamina = 2.8 }, -- World 2's Temple Rare (QM, Oct 13; as the Fire Lobster until QM sets it)
-		Clownfish = { Speed = 3.608, Stamina = 2.4 }, -- (QM, Oct 13: 29% into the Volcano; was 3.28); (QM, Oct 12: 10% into the Volcano; was 2.8); (a little slower than the Starfish, an Ocean Uncommon too)
+		Clownfish = { Speed = 3.454, Stamina = 2.4 }, -- (QM, Oct 13: 20% into the Volcano, +10 points; was 3.28); (QM, Oct 12: 10% into the Volcano; was 2.8); (a little slower than the Starfish, an Ocean Uncommon too)
 		RoboShark = { Speed = 1.2, Stamina = 3 }, -- QM, Oct 4: starts at 1.2x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed 2.5 x this)
-		FishSchool = { Speed = 4.565, Stamina = 2.8 }, -- (QM, Oct 13: 84% into the Volcano; was 4.15); (QM, Oct 12: 60% into the Volcano; was 3.95)
-		Whale = { Speed = 3.795, Stamina = 10 }, -- (QM, Oct 13: 40% into the Volcano; was 3.45); (QM, Oct 12: 20% into the Volcano; was 3.2)
+		FishSchool = { Speed = 4.324, Stamina = 2.8 }, -- (QM, Oct 13: 70% into the Volcano, +10 points; was 4.15); (QM, Oct 12: 60% into the Volcano; was 3.95)
+		Whale = { Speed = 3.624, Stamina = 10 }, -- (QM, Oct 13: 30% into the Volcano, +10 points; was 3.45); (QM, Oct 12: 20% into the Volcano; was 3.2)
 		GiantGolem = { Speed = 5.8, Stamina = 3 }, -- World 2's Woodland Legendary Giant Golem (as the Kraken until QM sets it)
-		Kraken = { Speed = 6.38, Stamina = 3 }, -- (QM, Oct 13: 58% into the Jurassic; was 5.8); (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
+		Kraken = { Speed = 6.064, Stamina = 3 }, -- (QM, Oct 13: 46% into the Jurassic, +10 points; was 5.8); (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
 		-- Volcano
 		Firebird = { Speed = 5.11, Stamina = 2.5 }, -- (QM, Oct 13: 10% into the Jurassic; was 4.59)
 		Catfish = { Speed = 5.11, Stamina = 2.5 }, -- World 2's Temple Uncommon (as the Firebird until QM sets it)
