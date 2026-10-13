@@ -347,7 +347,7 @@ def main(out="/mnt/project-files/world2/tomb"):
     P = np.concatenate([q for p in parts for q in p.polys])
     print("elements", len(m["elements"]), "shift", round(shift, 3), "bounds", P.min(0).round(1), P.max(0).round(1))
     # the 3/4 front view on a plain light background
-    light_bg(render(parts, W=1200, H=1000, fov=30, eye=(-30, 20, -36), target=(1.5, 6, 1), transparent=True)).save(
+    light_bg(render(parts, W=1200, H=1000, fov=36, eye=(-30, 20, -36), target=(3, 6.5, 1), transparent=True)).save(
         os.path.join(renders, NAME + ".png"))
     # a check sheet: next to the Horse, front, top, side
     from horse_rig import pose
