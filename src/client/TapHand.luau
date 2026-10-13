@@ -103,7 +103,7 @@ gui.Parent = player:WaitForChild("PlayerGui")
 
 local function spotlight(image)
 	local target = image and image:GetAttribute("Spotlight") and image.Parent
-	gui.Enabled = target ~= nil and target:IsA("GuiObject")
+	gui.Enabled = typeof(target) == "Instance" and target:IsA("GuiObject") -- (Spotlight false: none)
 	if not gui.Enabled then
 		return
 	end

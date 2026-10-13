@@ -302,9 +302,12 @@ fold.Parent = quests
 -- on a phone or tablet, Oct 12, so the column under it cleared Roblox's jump button)
 local folded = true
 quests:SetAttribute("Folded", folded)
-fold.Activated:Connect(function()
-	folded = not folded
+local function setFolded(now)
+	folded = now
 	quests:SetAttribute("Folded", folded) -- (draws again: below)
+end
+fold.Activated:Connect(function()
+	setFolded(not folded)
 	local telemetry = not folded and ReplicatedStorage:FindFirstChild("Telemetry")
 	if telemetry then
 		telemetry:FireServer("questsOpened") -- (Analytics V1)
@@ -604,11 +607,14 @@ local function drawQuests()
 			y += questRow(quest.i, quest, y) + (if n < #questList then Q.gap else 0)
 		end
 	end
-	-- A pulsing tap hand on a quest ready to claim: the bottom one, if there are two (QM, Oct 11).
+	-- A pulsing tap hand on a quest ready to claim: the bottom one, if there are two (QM, Oct 11),
+	-- but the starter quest (World 1's "Reach Meadow") before any other.
 	local lastClaim
 	for _, row in quests:GetChildren() do
 		local claim = row.Name == "Quest" and row:FindFirstChild("Claim", true)
-		if claim and (not lastClaim or row.Position.Y.Offset > lastClaim.Parent.Parent.Position.Y.Offset) then
+		local starterRow = Config.World == 1 and row:GetAttribute("Quest") == 101 -- (the starter quest first: QM, Oct 13)
+		if claim and (starterRow or not lastClaim or (lastClaim:FindFirstAncestor("Quest"):GetAttribute("Quest") ~= 101
+			and row.Position.Y.Offset > lastClaim.Parent.Parent.Position.Y.Offset)) then
 			lastClaim = claim
 		end
 	end
@@ -628,7 +634,10 @@ local function drawQuests()
 end
 player:GetAttributeChangedSignal("Quests"):Connect(drawQuests)
 player:GetAttributeChangedSignal("Tutorial"):Connect(drawQuests)
-quests:GetAttributeChangedSignal("Folded"):Connect(drawQuests)
+quests:GetAttributeChangedSignal("Folded"):Connect(function()
+	folded = quests:GetAttribute("Folded") == true -- (kept in step, whoever folds it)
+	drawQuests()
+end)
 drawQuests()
 
 -- A menu's up over the base: Quests (and PassPopups' cards, by the "Modal" attribute) step aside.
