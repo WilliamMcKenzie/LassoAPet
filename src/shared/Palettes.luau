@@ -187,6 +187,22 @@ return {
 		{ "Accent", 255, 52, 156 }, -- hot-pink wing edges
 		{ "Accent", 255, 110, 190 }, -- stripes and antenna tips
 	},
+	JadeStatue = {
+		{ "Body", 64, 176, 110 }, -- jade body, legs, head, tail
+		{ "Body", 34, 128, 80 }, -- mane, brow, shoulders, haunches
+		{ "Belly", 132, 222, 164 }, -- muzzle, chin, paws, curls, tail plume
+		{ "Marking", 24, 96, 62 }, -- carved veins
+		{ "Horn", 240, 190, 24 }, -- gold crown, collar, bell, anklets, claws, ridge
+		{ "Horn", 196, 140, 16 },
+	},
+	GarnetStatue = {
+		{ "Body", 186, 28, 52 }, -- garnet body, legs, head, tail
+		{ "Body", 122, 14, 36 }, -- mane, brow, shoulders, haunches
+		{ "Belly", 236, 84, 102 }, -- muzzle, chin, paws, curls, tail plume, spine shards
+		{ "Marking", 92, 8, 26 }, -- carved veins
+		{ "Horn", 240, 190, 24 }, -- gold horns, collar, bell, anklets, claws, ridge
+		{ "Horn", 196, 140, 16 },
+	},
 	Hawkmoth = {
 		{ "Body", 62, 48, 44 }, -- body, head
 		{ "Body", 84, 54, 40 }, -- forewings

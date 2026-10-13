@@ -396,6 +396,7 @@ local Config = {
 		Hawkmoth = 45, -- World 2 Woodland Maze's Hawkmoth (Epic, as the Squid until QM sets it)
 		RollingLog = 35, -- World 2 Woodland Maze (as the Lionfish)
 		Tiger = 60, -- World 2 Temple (a Rare, as the Fire Lobster)
+		JadeStatue = 300, GarnetStatue = 300, -- World 2 Temple's Epics (as the Rockworm until QM sets them)
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
 		Catfish = 15, -- World 2 Temple (as the Firebird)
 		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
@@ -566,6 +567,7 @@ local Config = {
 		Hawkmoth = 2, -- World 2 Woodland Maze
 		RollingLog = 1, -- World 2 Woodland Maze
 		Tiger = 1, -- World 2 Temple (the Lion's body)
+		JadeStatue = 2, GarnetStatue = 2, -- World 2 Temple
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		Catfish = 1, -- World 2 Temple (Fish-sized)
 		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
@@ -656,6 +658,7 @@ local Config = {
 		Hawkmoth = 2100, -- World 2 Woodland Maze (as the Squid)
 		RollingLog = 1500, -- World 2 Woodland Maze (as the Lionfish)
 		Tiger = 20000, -- World 2 Temple (as the Fire Lobster)
+		JadeStatue = 25000, GarnetStatue = 25000, -- World 2 Temple (as the Rockworm)
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
 		Catfish = 12000, -- World 2 Temple (as the Firebird)
 		TRex = 60000, Raptor = 40000, -- Jurassic (guesses: past the Volcano's)
@@ -1127,6 +1130,8 @@ local Config = {
 		-- Ocean
 		Starfish = { Speed = 3.37, Stamina = 2 }, -- (QM, Oct 12: 15% into the Volcano; was 2.87)
 		Squid = { Speed = 4.15, Stamina = 2.6 }, -- (QM, Oct 12: 60% into the Volcano; was 3.7)
+		JadeStatue = { Speed = 7.12, Stamina = 3 }, -- World 2's Temple Epics: the Rockworm's numbers until QM sets them
+		GarnetStatue = { Speed = 7.12, Stamina = 3 },
 		Hawkmoth = { Speed = 4.15, Stamina = 2.6 }, -- World 2's Woodland Hawkmoth: Epic, the Squid's numbers until QM sets it (60% into the Temple, as the Squid is 60% into the Volcano)
 		KingCrab = { Speed = 3.98, Stamina = 3 }, -- (QM, Oct 12: 50% into the Volcano; was 3.6)
 		BlueCrab = { Speed = 5.7, Stamina = 3 }, -- (QM, Oct 11: as the Kraken, a touch slower)
@@ -1315,6 +1320,8 @@ if Config.World == 2 then
 	temple.Herd.Loong = 0.025 -- the Loong runs wild here as a Legendary (QM, Oct 13)
 	temple.Herd.Catfish = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
 	temple.Herd.Tiger = 0.17 -- the Temple's Rare (QM, Oct 13), as often as the Fire Lobster
+	temple.Herd.JadeStatue = 0.13 -- the Jade and Garnet Statues (QM, Oct 13), Epics as often as the Rockworm
+	temple.Herd.GarnetStatue = 0.13
 	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
 	temple.Patches = {
 		Rock = { rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
@@ -1365,7 +1372,7 @@ if Config.World == 2 then
 	ownHerd(2, { "Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura" })
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
 	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
-	ownHerd(5, { "Loong", "Catfish", "Tiger" }) -- the Temple
+	ownHerd(5, { "Loong", "Catfish", "Tiger", "JadeStatue", "GarnetStatue" }) -- the Temple
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do

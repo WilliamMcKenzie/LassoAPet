@@ -49,6 +49,8 @@ local KINDS = {
 	CrystalPhoenix = { data = require(script.Parent.CrystalPhoenixEggModel), center = 1.6 },
 	OrangeButterfly = { data = require(script.Parent.OrangeButterflyEggModel), center = 1.6 },
 	Hawkmoth = { data = require(script.Parent.HawkmothEggModel), center = 1.6 },
+	JadeStatue = { data = require(script.Parent.JadeStatueEggModel), center = 1.6 },
+	GarnetStatue = { data = require(script.Parent.GarnetStatueEggModel), center = 1.6 },
 	Seraph = { data = require(script.Parent.SeraphEggModel), center = 1.6 }, -- World 2's trophy angels (tools/seraph_egg.py)
 	CrimsonSeraph = { data = require(script.Parent.CrimsonSeraphEggModel), center = 1.6 },
 	CrystalSeraph = { data = require(script.Parent.CrystalSeraphEggModel), center = 1.6 },
