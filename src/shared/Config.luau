@@ -395,7 +395,7 @@ local Config = {
 		LivingBirch = 35, -- World 2 Woodland Maze (a Rare, as the Lionfish, until QM sets it)
 		Hawkmoth = 45, -- World 2 Woodland Maze's Hawkmoth (Epic, as the Squid until QM sets it)
 		RollingLog = 35, -- World 2 Woodland Maze (as the Lionfish)
-		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
+		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, Kitsune = 43200, -- Volcano (the Kitsune: World 2's Temple Legendary, as the Phoenix)
 		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
@@ -563,7 +563,7 @@ local Config = {
 		OrangeButterfly = 1, -- World 2 Woodland Maze (as the Lionfish)
 		Hawkmoth = 2, -- World 2 Woodland Maze
 		RollingLog = 1, -- World 2 Woodland Maze
-		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
+		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, Kitsune = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
 		Spinosaurus = 4, -- Jurassic (QM: slightly smaller than the T-Rex: AnimalScale 0.85)
 		Ankylosaurus = 3, -- Jurassic (a guess: a wide armoured tank, under the T-Rex)
@@ -651,7 +651,7 @@ local Config = {
 		LivingBirch = 1500, -- World 2 Woodland Maze Rare (the Lionfish's, until QM sets it)
 		Hawkmoth = 2100, -- World 2 Woodland Maze (as the Squid)
 		RollingLog = 1500, -- World 2 Woodland Maze (as the Lionfish)
-		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
+		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, Kitsune = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
 		TRex = 60000, Raptor = 40000, -- Jurassic (guesses: past the Volcano's)
 		Spinosaurus = 40000, -- Jurassic (a guess: a Rare, under the T-Rex)
 		Pterodactyl = 60000, -- Jurassic (a guess: an Epic, as the T-Rex)
@@ -1138,6 +1138,7 @@ local Config = {
 		RockHog = { Speed = 6.56, Stamina = 2.8 }, -- (QM, Oct 13: 65% into the Jurassic; was 5.3)
 		Rockworm = { Speed = 7.12, Stamina = 3 }, -- (QM, Oct 13: 86% into the Jurassic; was 6.3)
 		FireLobster = { Speed = 6.43, Stamina = 2.8 }, -- (QM, Oct 13: 60% into the Jurassic; was 5.15)
+		Kitsune = { Speed = 7.2, Stamina = 3 }, -- World 2's Temple Legendary Kitsune (as the Phoenix until QM sets it)
 		Phoenix = { Speed = 7.2, Stamina = 3 }, -- (QM, Oct 12: well into the Jurassic, a touch slower than the Bone Rex; was 6.98)
 		LavaWhale = { Speed = 6.83, Stamina = 3 }, -- (QM, Oct 13: 75% into the Jurassic; was 5.85)
 		TRex = { Speed = 6, Stamina = 3 }, -- (a guess: a touch past the Lava Whale)
@@ -1304,6 +1305,7 @@ if Config.World == 2 then
 	local temple = Config.Biomes[5]
 	temple.Herd = table.clone(temple.Herd)
 	temple.Herd.Loong = 0.025 -- the Loong runs wild here as a Legendary (QM, Oct 13)
+	temple.Herd.Kitsune = 0.03 -- the Kitsune (QM, Oct 13), the Temple's Legendary, as rare as the Phoenix
 	temple.Herd.Fish = 1 -- a placeholder till the Temple's own animals come, so the Loong stays rare
 	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
 	temple.Patches = {
@@ -1355,7 +1357,7 @@ if Config.World == 2 then
 	ownHerd(2, { "Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura" })
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
 	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
-	ownHerd(5, { "Loong", "Fish" }) -- the Temple (the Fish a placeholder)
+	ownHerd(5, { "Loong", "Kitsune", "Fish" }) -- the Temple (the Fish a placeholder)
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do

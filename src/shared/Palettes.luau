@@ -377,6 +377,12 @@ return {
 		{ "Marking", 184, 177, 166 }, -- pale plates, caps, brow, knuckles
 		{ "Accent", 110, 186, 68 }, -- moss
 	},
+	Kitsune = {
+		{ "Body", 250, 248, 244 }, -- white fur, tails, paws
+		{ "Belly", 236, 228, 214 }, -- belly, jaw, chest tuft
+		{ "Marking", 222, 38, 52 }, -- red markings, socks, mask, saddle cloth, bow
+		{ "Accent", 255, 196, 52 }, -- gold anklets, ear rings, bell, trims
+	},
 	Kraken = {
 		{ "Body", 58, 76, 128 }, -- tentacles
 		{ "Body", 40, 52, 94 }, -- head, funnel

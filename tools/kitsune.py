@@ -6,10 +6,10 @@ red socks and gold anklets; four blue fox-fire wisps floating at its sides.
 
     python3 tools/kitsune.py
 
-writes designs/temple/Kitsune.bbmodel (model and bones only so far, no animations) and the
-preview /mnt/project-files/world2/temple/renders/Kitsune.png. The tails and wisps are built
-already turned (rests baked into the parts, every bone at 0), each tail a chain of three
-bones so it can flow later.
+writes designs/temple/Kitsune.bbmodel (convert without --zyx), the preview
+/mnt/project-files/world2/temple/renders/Kitsune.png, a four-view sheet and an animation gif
+(--still skips the gif). The tails and wisps are built already turned (rests baked into the
+parts, every bone at 0); each tail is a chain of three bones that ripples like a flame.
 """
 
 import json
@@ -21,7 +21,8 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
-from partlib import Part, T, Rx, Ry, Rz, render, write_bbmodel  # noqa: E402
+from horse_rig import pose  # noqa: E402
+from partlib import Part, T, Rx, Ry, Rz, render  # noqa: E402
 from snow_designs import pyramid  # noqa: E402
 
 NAME = "Kitsune"
@@ -166,12 +167,14 @@ def kitsune():
 
     # ---- nine tails fanned up behind like a halo, blue flame at every tip
     base = np.array([0, 5.7, 3.0])
+    a.tail_axes = []
     a.pivots["Tail"] = tuple(base)
     for i in range(TAILS):
         f = i / (TAILS - 1) * 2 - 1  # -1 .. 1, left to right
         phi = 70 * f
         k = (1.1 - 0.2 * abs(f)) * (1 if i % 2 == 0 else 0.92)  # the middle tails longest, the back row shorter
         M = T(*(base + (0.35 * f, 0, 0))) @ Rz(-phi) @ Rx(16 if i % 2 == 0 else 44)
+        a.tail_axes.append((M[:3, 0].copy(), M[:3, 2].copy()))  # its bend-back and fan-sideways axes
         parent = "Tail"
         for s, (ln, w) in enumerate(TAIL_SEGS):
             ln *= k
@@ -196,7 +199,44 @@ def kitsune():
     a.meta = {"seat": (0, 6.65, 0.7), "neck_loop": {"center": (0, 7.2, -2.7), "radius": 1.4}}
     for p in a.parts:
         p.neon = p.name.startswith("Glow")
+    a.animations = lambda: animations(a)
     return a
+
+
+def animations(a):
+    """The Horse's idle, walk and leap gallop for the body, legs, neck and ears. On top:
+    the tail fan bobs as one (Tail) and each tail ripples from its base out, bending back
+    and swaying in the fan, a little delayed per segment and per tail, so the nine flow
+    like flames; harder the faster it goes. The wisps bob and spin."""
+    out = {}
+    for name, (L, tracks) in A.quad_animations().items():
+        tracks = dict(tracks)
+        strong = {"idle": 0.0, "walk": 0.5, "gallop": 1.0}[name]
+        cycles = max(1, round(L / 1.2)) if name == "idle" else 1
+        n = 16
+        wave = lambda k, ph: np.sin(2 * np.pi * (cycles * k / n - ph))
+        # the whole fan: leans back a little at speed and bobs with the stride
+        tracks["Tail"] = [{"channel": "rotation", "interp": "catmullrom", "keys": [
+            (round(L * k / n, 4), (8 * strong + (2 + 3 * strong) * wave(k, 0), 0, 0)) for k in range(n + 1)]}]
+        for i, (bend, fan) in enumerate(a.tail_axes):
+            for s in range(3):
+                ph = 0.08 * s + 0.11 * i
+                back = (4 + 4 * strong) * (1 + 0.4 * s)
+                sway = (3 + 3 * strong) * (1 + 0.5 * s)
+                keys = []
+                for k in range(n + 1):
+                    v = bend * (back * wave(k, ph) + 4 * strong) + fan * sway * wave(k, ph + 0.25)
+                    keys.append((round(L * k / n, 4), tuple(float(x) for x in v)))
+                tracks[f"Tail{i + 1}{'abc'[s]}"] = [{"channel": "rotation", "interp": "catmullrom", "keys": keys}]
+        for j in range(4):
+            spin = [(round(L * k / 4, 4), (0, 90 * k * (1 if j % 2 else -1), 0)) for k in range(5)]
+            bob = [(round(L * k / n, 4), (0, (2 + strong) * float(np.sin(2 * np.pi * (k / n + 0.25 * j))), 0)) for k in range(n + 1)]
+            tracks[f"Wisp{j + 1}"] = [{"channel": "rotation", "interp": "linear", "keys": spin},
+                                      {"channel": "position", "interp": "catmullrom", "keys": bob}]
+        if name == "gallop":  # ears laid back a touch less than the Horse's
+            tracks["EarL"] = tracks["EarR"] = [A.rot_x([(0, 20), (L, 20)])]
+        out[name] = (L, tracks)
+    return out
 
 
 SHOT = "/mnt/project-files/world2/temple/renders"
@@ -214,10 +254,7 @@ def main(out=os.path.join(A.ROOT, "designs", "temple")):
     os.makedirs(out, exist_ok=True)
     os.makedirs(SHOT, exist_ok=True)
     a = kitsune()
-    model, _ = write_bbmodel(a.parts, NAME, None, bones=a.bones())
-    model["animations"] = []
-    with open(os.path.join(out, NAME + ".bbmodel"), "w") as f:
-        json.dump(model, f, separators=(",", ":"))
+    model = A.build_animal(a, out)
     print(f"{NAME}: {len(a.parts)} parts")
     shot(a.parts, eye=(-19, 12, -17), target=(0, 6.8, 0.8), W=900, H=900, fov=42).save(os.path.join(SHOT, NAME + ".png"))
     views = [dict(eye=(-17, 12, -19), target=(0, 6.2, 0.5)), dict(eye=(-26, 7, 0), target=(0, 6.2, 0.5)),
@@ -226,7 +263,22 @@ def main(out=os.path.join(A.ROOT, "designs", "temple")):
     for i, cam in enumerate(views):
         sheet.paste(shot(a.parts, W=500, H=500, fov=42, **cam), ((i % 2) * 500, (i // 2) * 500))
     sheet.save(os.path.join(os.path.dirname(SHOT), "Kitsune_views.png"))
+    if "--still" in sys.argv:
+        return
+    frames = []
+    cams = [dict(eye=(-26, 8, -2), target=(0, 6.2, 0.5)), dict(eye=(-19, 12, -17), target=(0, 6.8, 0.8))]
+    for name, nf in (("idle", 24), ("walk", 20), ("gallop", 16)):
+        anim = A.anim_named(model, name)
+        for k in range(nf):
+            ps = pose(model, anim, k / nf * anim["length"])
+            for p in ps:
+                p.neon = p.name.startswith("Glow")
+            im = Image.new("RGB", (800, 400))
+            for c, cam in enumerate(cams):
+                im.paste(shot(ps, W=400, H=400, fov=44, **cam), (400 * c, 0))
+            frames.append(A.label(im, ["run" if name == "gallop" else name] * 2))
+    A.gif(os.path.join(os.path.dirname(SHOT), "Kitsune_anims.gif"), frames, fps=20)
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    main(*[x for x in sys.argv[1:] if not x.startswith("--")])
