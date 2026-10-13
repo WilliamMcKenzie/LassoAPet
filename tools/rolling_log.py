@@ -7,7 +7,7 @@ Clash Royale log, no face). It stands on its bottom pair; the rider sits between
 pair.
 
 The round log is stepped from three axis-aligned blocks per slice (a wide one, a tall
-one and a square one), so every part stays a plain cube.
+one and a square one), so the log stays plain cubes; the spike points are pyramids.
 
 Bones: root (stays upright: the rider sits on top like log rolling), neck (empty, on the
 log's axis: the lasso loop holds still while the log turns) and Log (everything else,
