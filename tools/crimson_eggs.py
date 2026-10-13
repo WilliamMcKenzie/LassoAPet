@@ -3,6 +3,7 @@ shell in the animal's colours, its feature on top or at the crack, no face.
 
   Eyeworm      crimson with purple rings, a worm tip poking out of the top
   Maw          crimson with purple lips either side of the crack and ivory fangs across it
+  CrimsonScorpion  the Scorpion's egg (tools/desert_eggs.py) in the Crimson Scorpion's colours
   IvorySpider  ivory with a bone-grey bottom, four bent bone legs on its shoulders and a
                red hourglass on top
 
@@ -18,6 +19,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(__file__))
 import ocean_eggs as O  # noqa: E402
+from desert_eggs import scorpion_egg  # noqa: E402
 from horse_egg_takes import CRACK_LAYER, LH, N, WIDTHS, shell  # noqa: E402
 
 CRIMSON, PURPLE = (170, 22, 48), (122, 44, 168)
@@ -64,7 +66,11 @@ def ivory_spider_egg():
     return egg
 
 
-KINDS = [("Eyeworm", eyeworm_egg), ("Maw", maw_egg), ("IvorySpider", ivory_spider_egg)]
+def crimson_scorpion_egg():
+    return scorpion_egg((186, 26, 52), (132, 16, 40), (122, 44, 168), (44, 16, 48))  # tools/crimson_scorpion.py's colours
+
+
+KINDS = [("Eyeworm", eyeworm_egg), ("Maw", maw_egg), ("IvorySpider", ivory_spider_egg), ("CrimsonScorpion", crimson_scorpion_egg)]
 
 if __name__ == "__main__":
     O.EGGS = KINDS

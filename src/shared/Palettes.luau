@@ -174,6 +174,12 @@ return {
 		{ "Marking", 122, 44, 168 }, -- rings, brow, tail tip
 		parts = { Eye = "Fixed", Pupil = "Fixed", Mouth = "Fixed" },
 	},
+	CrimsonScorpion = {
+		{ "Body", 186, 26, 52 },
+		{ "Body", 132, 16, 40 }, -- every other tail segment, pincer fingers, shins
+		{ "Marking", 122, 44, 168 }, -- shoulders, arms, thighs, tail bulb
+		{ "Horn", 44, 16, 48 }, -- stinger
+	},
 	Maw = {
 		{ "Body", 170, 22, 48 },
 		{ "Marking", 122, 44, 168 }, -- lips, tentacle tips
