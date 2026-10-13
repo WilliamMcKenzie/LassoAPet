@@ -151,6 +151,7 @@ list.Parent = menu
 menu.Parent = root
 local mergeBadge -- QM's red "1" on Merge while the "Merge animals" quest is up and you've not merged yet (QM, Oct 11)
 local mergeHinted = false -- (and the quest's tap hands, as tapping it, once as it comes up: QM)
+local mergeHintDue = false -- (waiting for the egg reveal to finish and the quest to pop in: QM, Oct 13)
 for i, spec in { { "shop", function()
 	if Shop.hasOffers() then
 		Shop.toggle()
@@ -580,7 +581,7 @@ local function drawQuests()
 	mergeBadge.Visible = merging -- (gone once you've merged)
 	if merging and not mergeHinted and not player:GetAttribute("Tutorial") then -- (not till the tutorial's over)
 		mergeHinted = true
-		player:SetAttribute("MergeHint", true)
+		mergeHintDue = true -- (shown once the egg reveal's over and the quest's popped in: below)
 	elseif not mergeUp and player:GetAttribute("MergeHint") then
 		player:SetAttribute("MergeHint", nil) -- (no Merge animals quest up: e.g. "/tutorial" set the quests back)
 	end
@@ -687,6 +688,20 @@ RunService.RenderStepped:Connect(function()
 			pops[i] = os.clock()
 		elseif started and os.clock() - started > POP_TIME then
 			pops[i] = nil
+		end
+	end
+	-- The Merge animals quest's hint: only once the egg reveal's over and the quest has
+	-- popped in (QM, Oct 13: it showed while the egg was still rolling).
+	if mergeHintDue and up and not player:GetAttribute("Cutscene") then
+		local popping = false
+		for _, quest in questList do
+			if typeof(quest) == "table" and quest.kind == "merge" and pops[tonumber(quest.i)] ~= nil then
+				popping = true
+			end
+		end
+		if not popping then
+			mergeHintDue = false
+			player:SetAttribute("MergeHint", true)
 		end
 	end
 	for _, row in quests:GetChildren() do
