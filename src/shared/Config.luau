@@ -1146,6 +1146,14 @@ if Config.World == 2 then
 	}
 	cavern.WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) } -- #384867
 	cavern.CapColor = rgb(44, 57, 82)
+	-- The fourth: the Woodland Maze (QM, Oct 13; tools/world2_woodland.luau): brown, darker
+	-- by the walls.
+	local woodland = Config.Biomes[4]
+	woodland.GroundColors = { rgb(121, 72, 46), rgb(110, 65, 41) } -- #79482E
+	woodland.Patches = {
+		Soil = { rgb(142, 81, 57), rgb(130, 74, 52) }, -- #8E5139
+		Path = { rgb(151, 89, 57), rgb(139, 81, 52) }, -- #975939, the middle
+	}
 end
 
 return Config
