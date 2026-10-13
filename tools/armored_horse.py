@@ -4,7 +4,8 @@ gold trim), keeping the horse's exact shape, bones and animations.
 
     python3 tools/armored_horse.py
 
-writes designs/horses/ArmoredHorse.bbmodel. Units are Blockbench's (0.1 stud).
+wrote the first draft of designs/horses/ArmoredHorse.bbmodel. QM has since edited that
+file in Blockbench (Oct 13): don't rerun this, it would overwrite QM's edit. Units are Blockbench's (0.1 stud).
 """
 
 import copy
