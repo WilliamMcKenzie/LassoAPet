@@ -6,8 +6,9 @@ layout and quadruped animations) with the mane and tail bones added.
 
     python3 tools/majestic_unicorn.py
 
-writes designs/world2/MajesticUnicorn.bbmodel and renders to
-/mnt/project-files/animals/majestic_unicorn/.
+wrote the first draft of designs/world2/MajesticUnicorn.bbmodel. QM has since edited that
+file in Blockbench (Oct 13: gold brows, yellow eyes, puffier socks): don't rerun this, it
+would overwrite QM's edit. Convert with bbmodel_to_luau.py --zyx.
 """
 
 import math
