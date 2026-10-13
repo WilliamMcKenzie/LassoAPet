@@ -53,6 +53,9 @@ fit.Parent = column
 column.Parent = root
 
 local bursts = {}
+local STARTER_PACK_FOR = 10 * 60 -- seconds
+local joinedAt = os.clock()
+local starterTimer, starterSlot
 for i, spec in BUTTONS do
 	local size = spec[3] * SCALE
 	local slot = Instance.new("Frame") -- (the sunburst and the button side by side, so it's behind)
@@ -91,6 +94,24 @@ for i, spec in BUTTONS do
 		button.Activated:Connect(function()
 			require(script.Parent.StarterPackMenu).open()
 		end)
+		-- Its countdown, small and yellow over it (QM, Oct 13): STARTER_PACK_FOR from each
+		-- join, then the Starter Pack's gone till the next.
+		local timer = Instance.new("TextLabel")
+		timer.Name = "Countdown"
+		timer.BackgroundTransparency = 1
+		timer.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+		timer.TextScaled = true
+		timer.TextColor3 = Color3.fromRGB(255, 236, 64)
+		timer.AnchorPoint = Vector2.new(0.5, 1)
+		timer.Position = UDim2.new(0.5, 0, 0, -2)
+		timer.Size = UDim2.fromOffset(120, 30)
+		timer.ZIndex = 3
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 2.5
+		stroke.LineJoinMode = Enum.LineJoinMode.Round
+		stroke.Parent = timer
+		timer.Parent = slot
+		starterTimer, starterSlot = timer, slot
 	end
 	button.Parent = slot
 	slot.Parent = column
@@ -101,6 +122,11 @@ RunService.RenderStepped:Connect(function()
 	local base = player.PlayerGui:FindFirstChild("BaseUi")
 	local baseRoot = base and base:FindFirstChild("Root")
 	gui.Enabled = base ~= nil and base.Enabled and not (baseRoot and baseRoot:GetAttribute("Modal"))
+	if starterSlot then
+		local left = math.max(0, math.ceil(STARTER_PACK_FOR - (os.clock() - joinedAt)))
+		starterTimer.Text = string.format("%d:%02d", left // 60, left % 60)
+		starterSlot.Visible = left > 0
+	end
 	local baseScale = baseRoot and baseRoot:FindFirstChildOfClass("UIScale")
 	if baseScale and rootScale.Scale ~= baseScale.Scale then -- (BaseUi's scale, so they match the buttons on the right: QM)
 		local screen = camera.ViewportSize
