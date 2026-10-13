@@ -377,7 +377,7 @@ local Config = {
 		-- QM's own table (Oct 11, "new json"): every animal's egg, by biome. Uncommons and Rares
 		-- hatch within a run, each biome's Epics a little longer, the Legendaries are the long
 		-- D1 eggs you come back for.
-		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, MarbleFish = 15, MarbleColossus = 120, MajesticUnicorn = 300, -- Meadow (the Marble Fish, Marble Colossus and Majestic Unicorn: World 2's, as the Pinto, Rhino and Unicorn)
+		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, MarbleFish = 15, Lion = 60, MarbleColossus = 120, MajesticUnicorn = 300, -- Meadow (the Marble Fish, Lion, Marble Colossus and Majestic Unicorn: World 2's, as the Pinto, a Rare, the Rhino and Unicorn)
 		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 600, -- Desert
 		Eyeworm = 15, Maw = 60, -- World 2 Crimson Lands
 		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 120, Icebringer = 900, SnackYak = 3600, CrystalCentipede = 15, RedMushroom = 15, BrownMushroom = 60, PurpleMushroom = 120, -- Tundra (World 2's Crystal Cavern animals, as the Penguin, Boar, Snowman and Ice Golem)
@@ -536,7 +536,7 @@ local Config = {
 	-- Oct 6); their tier (model "Tier" attribute, else ObstacleTiers by name) only
 	-- decides which ones some abilities break.
 	PetTiers = {
-		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleFish = 1, MarbleColossus = 2, MajesticUnicorn = 2, -- Meadow
+		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleFish = 1, Lion = 1, MarbleColossus = 2, MajesticUnicorn = 2, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Eyeworm = 1, Maw = 1, -- World 2 Crimson Lands
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, CrystalCentipede = 1, RedMushroom = 1, BrownMushroom = 1, PurpleMushroom = 2, -- Tundra
@@ -617,7 +617,7 @@ local Config = {
 	-- every second while you're in the game. (QM, Oct 8 evening: progression 2x faster, so
 	-- x3 QM's pets JSON: rides don't get quicker, so the gold has to more than double.)
 	PetIncome = {
-		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleFish = 15, MarbleColossus = 90, MajesticUnicorn = 450, -- Meadow
+		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleFish = 15, Lion = 24, MarbleColossus = 90, MajesticUnicorn = 450, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
 		Eyeworm = 18, Maw = 60, -- World 2 Crimson Lands
 		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, CrystalCentipede = 75, RedMushroom = 150, BrownMushroom = 300, PurpleMushroom = 1260, -- Tundra
@@ -1024,6 +1024,7 @@ local Config = {
 		Rhino = { Speed = 1.35, Stamina = 1.8 },
 		MarbleColossus = { Speed = 1.35, Stamina = 1.8 }, -- World 2's Meadow Epic (as the Rhino until QM sets it)
 		MarbleFish = { Speed = 1.1, Stamina = 0.9 }, -- World 2's Meadow Uncommon (QM, Oct 13; as the Pinto until QM sets it)
+		Lion = { Speed = 1.25, Stamina = 1.2 }, -- World 2's Meadow Rare (QM, Oct 13; between the Pinto and the Rhino, a guess)
 		MajesticUnicorn = { Speed = 1.8, Stamina = 2 }, -- World 2's Meadow Legendary (as the Unicorn until QM sets it)
 		Unicorn = { Speed = 1.8, Stamina = 2 }, -- (QM, Oct 12: kept at 1.8, into the Tundra from the start line, ~4,440 of 3,984)
 		-- Desert
@@ -1153,6 +1154,7 @@ if Config.World == 2 then
 	local meadow = Config.Biomes[1]
 	meadow.Herd = table.clone(meadow.Herd)
 	meadow.Herd.MarbleFish = 0.3 -- World 2's Meadow Uncommon (QM, Oct 13), about as often as the Pinto
+	meadow.Herd.Lion = 0.13 -- World 2's Meadow Rare (QM, Oct 13), as often as the Fish
 	meadow.Herd.MarbleColossus = 0.08 -- World 2's Meadow Epic (QM, Oct 13), as often as the Rhino
 	meadow.Herd.MajesticUnicorn = 0.05 -- World 2's Meadow Legendary (QM, Oct 13), as often as the Unicorn
 	meadow.GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) }

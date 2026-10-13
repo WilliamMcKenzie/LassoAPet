@@ -32,7 +32,7 @@ PREVIEW = "/mnt/project-files/animals/headshots"
 
 MODELS = {
     "Horse": "horses/Horse9_Leap", "Pinto": "horses/Pinto", "Pig": "animals/Pig", "Bunny": "animals/Bunny", "Fish": "animals/Fish",
-    "Rhino": "animals/Rhino", "Unicorn": "animals/Unicorn", "MarbleColossus": "world2/MarbleColossus", "MajesticUnicorn": "world2/MajesticUnicorn", "MarbleFish": "world2/MarbleFish", "CrystalCentipede": "crystal/CrystalCentipede", "RedMushroom": "crystal/RedMushroom", "BrownMushroom": "crystal/BrownMushroom", "PurpleMushroom": "crystal/PurpleMushroom",
+    "Rhino": "animals/Rhino", "Unicorn": "animals/Unicorn", "MarbleColossus": "world2/MarbleColossus", "MajesticUnicorn": "world2/MajesticUnicorn", "MarbleFish": "world2/MarbleFish", "Lion": "world2/Lion", "CrystalCentipede": "crystal/CrystalCentipede", "RedMushroom": "crystal/RedMushroom", "BrownMushroom": "crystal/BrownMushroom", "PurpleMushroom": "crystal/PurpleMushroom",
     "Cactus": "desert/Cactus", "Kitten": "desert/Kitten", "Scorpion": "desert/Scorpion", "Sandworm": "desert/Sandworm",
     "SpineLizard": "converted/SpineLizard", "Snake": "desert/Snake",
     "Penguin": "snow/Penguin", "Boar": "converted/Boar", "Snowman": "snow/Snowman",
