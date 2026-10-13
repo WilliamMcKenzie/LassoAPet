@@ -4,12 +4,14 @@ and down both sides, on the forehead, legs and tail), white muzzle, chin, cheek 
 belly and paws, pink nose, round ears with white insides, Horse googly eyes, and a long
 striped tail with a black tip.
 
-Same bones as every quadruped (root, neck, EarL, EarR, Tail, Leg*). Phase 1 is the
-model only: no tiger-specific animations yet (it carries the shared quad set).
+Same bones and animations as every quadruped (root, neck, EarL, EarR, Tail, Leg*): QM's
+horse walk and the shared leap gallop (a pounce), as the Lion.
 
     python3 tools/tiger_design.py
 
-writes designs/temple/Tiger.bbmodel and /mnt/project-files/world2/temple/renders/Tiger.png.
+writes designs/temple/Tiger.bbmodel and /mnt/project-files/world2/temple/renders/Tiger.png
+(plus Tiger_vs_horse.png and Tiger_anims.gif). Convert without --zyx:
+    python3 tools/bbmodel_to_luau.py designs/temple/Tiger.bbmodel src/shared/Animals/TigerModel.luau
 """
 
 import json
@@ -99,6 +101,7 @@ def tiger():
     return a
 
 
+SIDE = dict(eye=(-28, 5, -1), target=(0, 4.2, -1), W=420, H=420, fov=34)
 CAM = dict(eye=(-19, 12, -21), target=(0, 4.0, 0.2), W=480, H=480, fov=30)
 
 
@@ -118,6 +121,12 @@ def main(out=os.path.join(A.ROOT, "designs", "temple"), shots="/mnt/project-file
     for i, t in enumerate(tiles):
         im.paste(t, (480 * i, 0))
     A.label(im, ["Horse (for size)", "Tiger · Rare"]).save(os.path.join(shots, "Tiger_vs_horse.png"))
+    frames = []
+    for name, n in (("idle", 16), ("walk", 20), ("gallop", 16)):
+        anim = A.anim_named(m, name)
+        for k in range(n):
+            frames.append(A.label(render(pose(m, anim, k / n * anim["length"]), **SIDE), [name]))
+    A.gif(os.path.join(shots, "Tiger_anims.gif"), frames, fps=20)
 
 
 if __name__ == "__main__":

@@ -39,6 +39,7 @@ MODELS = {
     "IceGolem": "converted/IceGolem", "Icebringer": "converted/Icebringer", "SnackYak": "snow/SnackYak",
     "Starfish": "ocean/Starfish", "Lionfish": "ocean/Lionfish", "Clownfish": "ocean/Clownfish", "Whale": "ocean/Whale", "Squid": "ocean/Squid",
     "RollingLog": "woodland/RollingLog",
+    "Tiger": "temple/Tiger",
     "KingCrab": "ocean/KingCrab", "BlueCrab": "ocean/BlueCrab", "RoboShark": "ocean/RoboShark", "Kraken": "ocean/Kraken", "FishSchool": "ocean/FishSchool",
     "Loong": "godlands/Loong", "WarElephant": "godlands/WarElephant", "SoulHorse": "godlands/SoulHorse",
     "Sludge": "sludge/Sludge",
