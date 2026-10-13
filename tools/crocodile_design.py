@@ -1,6 +1,6 @@
 """Crocodile: World 2 Meadow animal (QM, Oct 13), in our block style after QM's reference
 (a low Minecraft-style croc with a long snout, splayed legs and a long tail). Green with a
-pale yellow belly, a long snout with nostril bumps and white teeth along its sides, eye
+pale yellow belly, a long snout held open (pink inside, pyramid teeth up and down its jaws like the dinos'), eye
 bumps on top of the head with Horse googly eyes on their outsides, a row of dark scutes
 down each side of the back, short legs out at the corners and a tapering three-block tail
 with ridges.
@@ -22,7 +22,8 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
 from animal_designs import Animal, quad_animations  # noqa: E402
-from partlib import render  # noqa: E402
+from partlib import Part, T, Rx, render  # noqa: E402
+import numpy as np
 from horse_rig import pose  # noqa: E402
 
 GREEN = (88, 158, 64)
@@ -30,6 +31,8 @@ DARK = (54, 112, 44)
 BELLY = (214, 222, 140)
 TOOTH = (252, 250, 240)
 NOSTRIL = (40, 70, 34)
+MOUTH = (236, 120, 140)
+OPEN = 22  # degrees the upper jaw is held open
 
 
 def crocodile():
@@ -57,16 +60,50 @@ def crocodile():
         a.box("Hoof" + leg, (fa, 0, za - 0.2), (fb, 0.35, zb), DARK, name)
         a.pivots[name] = ((xa + xb) / 2, 1.875, zb - 0.05 if front else za + 0.05)
 
-    # head: skull, long snout with nostril bumps and teeth down its sides
+    # head: skull, then the jaws held open (as crocs rest): a flat lower jaw with a pink
+    # tongue, and the upper snout tipped up OPEN degrees about its hinge at the skull's
+    # front, pink underneath, nostril bumps on top. Pyramid teeth like the dinos': up off
+    # the lower jaw's edges, down off the upper's.
     a.box("Head", (-1.4, 1.0, -5.5), (1.4, 2.7, -3.499), GREEN, "neck")
-    a.box("Jaw", (-1.0, 1.0, -9.0), (1.0, 1.4, -5.5), BELLY, "neck")
-    a.box("Snout", (-1.0, 1.4, -9.0), (1.0, 2.1, -5.5), GREEN, "neck")
+    a.box("Jaw", (-1.0, 0.9, -9.0), (1.0, 1.4, -5.5), GREEN, "neck")
+    a.box("Tongue", (-0.7, 1.4, -8.6), (0.7, 1.5, -5.5), MOUTH, "neck")
+    hinge = np.array((0, 1.5, -5.5))
+    R = Rx(OPEN)
+
+    def up(pt):
+        return hinge + R[:3, :3] @ (np.array(pt, float) - hinge)
+
+    def turned(name, lo, hi, color):
+        lo, hi = np.array(lo, float), np.array(hi, float)
+        p = Part(name, hi - lo, T(*hinge) @ R @ T(*((lo + hi) / 2 - hinge)), color)
+        p.bone = "neck"
+        a.parts.append(p)
+
+    def pyr(name, base, apex, color):
+        c = [up(v) for v in base]
+        tip = up(apex)
+        p = Part(name, (1, 1, 1), np.eye(4), color, "Poly")
+        p.polys = [np.array(c)] + [np.array([c[i], c[(i + 1) % 4], tip]) for i in range(4)]
+        p.bone = "neck"
+        a.parts.append(p)
+
+    turned("Snout", (-1.0, 1.6, -9.0), (1.0, 2.2, -5.5), GREEN)
+    turned("Roof", (-0.8, 1.5, -8.8), (0.8, 1.6, -5.5), MOUTH)
     for side, sx in (("L", -1), ("R", 1)):
         xa, xb = sorted((sx * 0.25, sx * 0.75))
-        a.box("Nostril" + side, (xa, 2.1, -8.8), (xb, 2.35, -8.2), NOSTRIL, "neck")
-        for i, z in enumerate((-8.4, -7.2, -6.0)):
-            ta, tb = sorted((sx * 0.75, sx * 1.15))
-            a.box(f"Tooth{side}{i + 1}", (ta, 0.85, z), (tb, 1.45, z + 0.35), TOOTH, "neck")
+        turned("Nostril" + side, (xa, 2.2, -8.8), (xb, 2.45, -8.2), NOSTRIL)
+        for i, z in enumerate((-8.5, -7.6, -6.7, -5.8)):
+            ta, tb = sorted((sx * 0.65, sx * 0.95))
+            low = [(ta, 1.4, z), (tb, 1.4, z), (tb, 1.4, z + 0.3), (ta, 1.4, z + 0.3)]
+            apex = ((ta + tb) / 2, 1.4 + 0.45, z + 0.15)
+            c = [np.array(v, float) for v in low]
+            p = Part(f"Tooth{side}{i + 1}", (1, 1, 1), np.eye(4), TOOTH, "Poly")
+            p.polys = [np.array(c)] + [np.array([c[k], c[(k + 1) % 4], np.array(apex)]) for k in range(4)]
+            p.bone = "neck"
+            a.parts.append(p)
+            zu = z + 0.45
+            pyr(f"Fang{side}{i + 1}", [(ta, 1.6, zu), (tb, 1.6, zu), (tb, 1.6, zu + 0.3), (ta, 1.6, zu + 0.3)],
+                ((ta + tb) / 2, 1.15, zu + 0.15), TOOTH)
     a.pivots["neck"] = (0, 2.7, -3.5)
 
     # eye bumps on top of the skull (the ear bones), googly eyes on their outsides
