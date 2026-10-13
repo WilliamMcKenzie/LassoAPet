@@ -1274,8 +1274,8 @@ Config.World = table.find(Config.Places, game.PlaceId) or 1
 -- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
 Config.EndPortal = nil
 -- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's
--- World 2 bar; QM, Oct 13: 1m, was 10m). World 1 is everyone's.
-Config.WorldPrices = { 0, 1000000 }
+-- World 2 bar; QM, Oct 13: 200k, was 1m, then 10m). World 1 is everyone's.
+Config.WorldPrices = { 0, 200000 }
 -- Rebirth (QM, Oct 13): World 2's Rebirth bar (World2Bar.client) for Prices[n] gold, your
 -- nth. It re-locks World 2 (save up for it again) and sends you to World 1; your pets stay.
 -- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,
