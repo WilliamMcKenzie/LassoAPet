@@ -8,7 +8,10 @@
 -- itself. The googly eyes (Eye, Pupil) and Nostrils keep theirs; Neon parts glow the
 -- skin's accent. The aura is ParticleEmitters and a PointLight round it: no Highlight.
 --
---   Skins.apply(model, rebirths) -- after Fusion.paint, before setScale; 0/nil: nothing
+--   Skins.apply(animal, rebirths) -- after Fusion.paint; 0/nil: nothing. It also makes the pet
+--                                 -- Config.Rebirth.Scale x bigger (QM: 1.5x, Animal:grow)
+
+local Config = require(script.Parent.Config)
 
 local Skins = {}
 
@@ -182,7 +185,8 @@ local function aura(root, skin, extents)
 	end
 end
 
-function Skins.apply(model, rebirths)
+function Skins.apply(animal, rebirths)
+	local model = animal and animal.model
 	local skin = model and rebirths and Skins.Skins[math.min(rebirths, #Skins.Skins)]
 	if not skin or model:GetAttribute("Skin") then
 		return
@@ -222,6 +226,9 @@ function Skins.apply(model, rebirths)
 	if root then
 		local _, extents = model:GetBoundingBox()
 		aura(root, skin, extents)
+	end
+	if animal.grow then
+		animal:grow(Config.Rebirth.Scale)
 	end
 end
 

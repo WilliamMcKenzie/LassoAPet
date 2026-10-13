@@ -293,6 +293,18 @@ function Horse:setScale(s)
 	end
 end
 
+-- Rebirths (QM, Oct 13): your pets are k x bigger everywhere, once. Its own size grows,
+-- so every later setScale, its animations, its seat and its neck loop all scale with it.
+function Horse:grow(k)
+	if self.grown then
+		return
+	end
+	self.grown = k
+	self.size *= k
+	self.baseScale *= k
+	self.model:ScaleTo(self.scale * self.baseScale)
+end
+
 local Common = variant("Horse", HorseModel, "Common")
 Common.variant = variant
 return Common

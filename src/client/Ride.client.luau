@@ -619,7 +619,7 @@ local function spawnStarter()
 	local stats = player:GetAttribute("RideStats") -- (and the best of both pets' Speed, Stamina)
 	starter.stats = stats and { Speed = stats.X, Stamina = stats.Y }
 	vfx.Fusion.paint(starter.animal.model, starter.kind, starter.fuse)
-	vfx.Skins.apply(starter.animal.model, player:GetAttribute("Rebirths")) -- (your rebirth's skin)
+	vfx.Skins.apply(starter.animal, player:GetAttribute("Rebirths")) -- (your rebirth's skin)
 	PenPets.starter = starter -- (FuseMenu: the one you ride can be fused too)
 	starter.animal:setScale(vfx.Merge.size(starter.kind, starter.merged) * vfx.Fusion.scale(starter.kind, starter.fuse, starter.tier)) -- a merged pet is bigger
 	setClickable(starter.animal.model, true)
@@ -635,7 +635,7 @@ local function spawnStarter()
 end
 player:GetAttributeChangedSignal("Rebirths"):Connect(function() -- (loaded after the starter was drawn)
 	if starter then
-		vfx.Skins.apply(starter.animal.model, player:GetAttribute("Rebirths"))
+		vfx.Skins.apply(starter.animal, player:GetAttribute("Rebirths"))
 	end
 end)
 
@@ -851,7 +851,7 @@ startRide = function(model, at)
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
 		mount.merged, mount.fuse, mount.stats, mount.tier = fromPen.merged, fromPen.fuse, fromPen.stats, fromPen.tier
 		vfx.Fusion.paint(mount.animal.model, mount.kind, mount.fuse)
-		vfx.Skins.apply(mount.animal.model, player:GetAttribute("Rebirths")) -- (your rebirth's skin, as in the pen)
+		vfx.Skins.apply(mount.animal, player:GetAttribute("Rebirths")) -- (your rebirth's skin, as in the pen)
 		mount.own = true -- your own pet: no egg for bringing it home (it stays yours once let go and lassoed back)
 	else
 		mount, starter = starter, nil
