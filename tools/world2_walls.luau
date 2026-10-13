@@ -6,7 +6,7 @@
 --     Each is a Texture named "Engraving" over the wall's checker (no parts), from the
 --     see-through pixel art tools/world2_walls.py draws (assets/world2/WallMarble.png,
 --     WallTomb.png): upload those and put their ids in ENGRAVE below first.
---   * The Crimson Lands' and the Woodland Maze's wall colours (the others' are painted by
+--   * The Crimson Lands' wall colours (the others' are painted by
 --     their floor scripts). In game the walls take Config's WallColors and CapColor; these
 --     only show them here in Edit.
 local W = workspace.World2
@@ -21,7 +21,7 @@ local ENGRAVE = {
 -- { near z, far z, wall, checker, cap }
 local PAINT = {
 	{ -2168, -3984, rgb(91, 50, 54), rgb(82, 44, 48), rgb(72, 39, 42) }, -- the Crimson Lands: dark rose stone
-	{ -5904, -9024, rgb(78, 44, 28), rgb(70, 39, 25), rgb(62, 35, 22) }, -- the Woodland Maze: dark bark
+	-- (the Woodland Maze: QM set its own in Studio, dark brown with autumn-leaf tops; Config keeps them)
 }
 -- If the engravings jump where one wall part meets the next along a wall, set this to -1.
 local FLIP = 1
