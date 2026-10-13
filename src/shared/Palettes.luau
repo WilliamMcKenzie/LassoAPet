@@ -199,6 +199,14 @@ return {
 		{ "Accent", 38, 92, 214 }, -- lapis stripes and drapes
 		{ "Hoof", 34, 32, 46 }, -- paws, tail tip
 	},
+	Scarab = {
+		{ "Body", 31, 181, 168 }, -- teal shell, shield, tibias
+		{ "Body", 18, 120, 120 }, -- darker teal head and tail
+		{ "Belly", 42, 38, 52 }, -- dark underside, femurs, mandibles, claws
+		{ "Marking", 242, 194, 48 }, -- gold seam, rims, ankhs, shovel, knees, feet
+		{ "Accent", 46, 91, 216 }, -- lapis stripes and glyph tiles
+		{ "Horn", 196, 146, 30 }, -- dark gold studs, spikes and horn
+	},
 	Fox = {
 		{ "Body", 240, 128, 36 },
 		{ "Belly", 255, 250, 242 }, -- chest, cheeks, chin, tail tip

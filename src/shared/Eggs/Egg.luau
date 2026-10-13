@@ -83,6 +83,7 @@ local KINDS = {
 	Geb = { data = require(script.Parent.GebEggModel), center = 1.6 },
 	Bes = { data = require(script.Parent.BesEggModel), center = 1.6 },
 	BloatedMummy = { data = require(script.Parent.BloatedMummyEggModel), center = 1.6 },
+	Scarab = { data = require(script.Parent.ScarabEggModel), center = 1.6 },
 	WarElephant = { data = require(script.Parent.WarElephantEggModel), center = 1.6 },
 	SoulHorse = { data = require(script.Parent.SoulHorseEggModel), center = 1.6 },
 	Squid = { data = require(script.Parent.SquidEggModel), center = 1.6 },
