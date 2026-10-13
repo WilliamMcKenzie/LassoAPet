@@ -150,12 +150,15 @@ RunService.RenderStepped:Connect(function()
 		local tall = list.AbsoluteContentSize.Y / rootScale.Scale / fit.Scale
 		column.Size = UDim2.fromOffset(column.Size.X.Offset, tall) -- (the slots' height, without the Starter Pack once it's gone)
 		fit.Scale = math.min(1, root.Size.Y.Offset * 0.62 / math.max(tall, 1))
-		-- (centred top to bottom, unless the Quests panel reaches down into that: then
-		-- right under it)
+		-- (its bottom level with the left column's, Merge to Invite: QM, Oct 13; centred if
+		-- that's not there; and right under the Quests panel if that reaches down into it)
 		local quests = baseRoot and baseRoot:FindFirstChild("Quests")
+		local menu = baseRoot and baseRoot:FindFirstChild("Menu")
 		local under = if quests and quests.Visible then (quests.AbsolutePosition.Y + quests.AbsoluteSize.Y - root.AbsolutePosition.Y) / rootScale.Scale else 0
-		local centred = (root.Size.Y.Offset - tall * fit.Scale) / 2
-		column.Position = UDim2.new(1, -MARGIN, 0, math.max(centred, under + 12))
+		local top = if menu
+			then (menu.AbsolutePosition.Y + menu.AbsoluteSize.Y - root.AbsolutePosition.Y) / rootScale.Scale - tall * fit.Scale
+			else (root.Size.Y.Offset - tall * fit.Scale) / 2
+		column.Position = UDim2.new(1, -MARGIN, 0, math.max(top, under + 12))
 		for _, burst in bursts do
 			burst.Rotation = os.clock() * SPIN % 360
 		end
