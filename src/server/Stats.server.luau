@@ -11,7 +11,9 @@
 --             average session on each of the 5 latest versions (game.PlaceVersion), over
 --             each version's whole life, so an update's effect shows (QM, Oct 11): kept
 --             under "version-<n>", the versions seen under "versions". Sessions from before
---             that only count toward today's.
+--             that only count toward today's. In World 1, also the share of today's sessions
+--             whose player had World 2, and World 2's own today: its sessions and the share
+--             reaching each of its biomes (QM, Oct 13).
 --
 -- QM, Oct 11: a blank slate. The old store ("Stats") is left behind, so nothing from
 -- older builds counts, even from their servers still running.
@@ -30,6 +32,20 @@ local FLUSH_EVERY = 60 -- seconds between adding this server's sessions into the
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("SessionStats")) -- (each world's own)
 if not ok then
 	store = nil
+end
+-- World 2's, read from World 1 for its part of the report (QM, Oct 13).
+local ok2, store2 = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("SessionStats", 2))
+if not ok2 or Config.World == 2 then
+	store2 = nil
+end
+-- Each world's biome names, as players know them (World 2's are its own: its Config.Biomes
+-- keep World 1's names underneath).
+local NAMES = {
+	[2] = { "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
+}
+local function biomeName(i, world)
+	local names = NAMES[world or Config.World]
+	return names and names[i] or Config.Biomes[i].Name
 end
 
 -- A day's totals: longest keeps the biggest, everything else adds up (sessions, their
@@ -104,6 +120,9 @@ local function finish(player)
 		end
 		for i = 2, math.min(player:GetAttribute("GatesBroken") or 1, #Config.Biomes) do
 			session["reached" .. i] = 1
+		end
+		if Config.World == 1 and player:GetAttribute("OwnsWorld2") then
+			session.world2 = 1 -- (they'd made it to World 2 by the time they left: QM, Oct 13)
 		end
 		pending[key] = addInto(pending[key] or {}, session)
 		local forVersion = { sessions = 1, seconds = length, longest = length }
@@ -197,9 +216,28 @@ local function report()
 		table.insert(lines, string.format("Longest session: %.1f min", t.longest / 60))
 		local reached = {}
 		for i = 2, #Config.Biomes do
-			table.insert(reached, string.format("%s %.0f%%", Config.Biomes[i].Name, 100 * (t["reached" .. i] or 0) / t.sessions))
+			table.insert(reached, string.format("%s %.0f%%", biomeName(i), 100 * (t["reached" .. i] or 0) / t.sessions))
 		end
 		table.insert(lines, "Reached: " .. table.concat(reached, ", "))
+		if Config.World == 1 then
+			table.insert(lines, string.format("Made it to World 2: %.0f%% (%d)", 100 * (t.world2 or 0) / t.sessions, t.world2 or 0))
+		end
+	end
+	-- World 2 today (from World 1: its own store), of the sessions played there, how far they
+	-- got (QM, Oct 13: of the players who made it to World 2, the share reaching each biome).
+	if store2 then
+		local got, w2 = pcall(store2.GetAsync, store2, dayKey(os.time()))
+		w2 = if got and typeof(w2) == "table" then w2 else nil
+		if w2 and (w2.sessions or 0) > 0 then
+			local reached = {}
+			for i = 2, #Config.Biomes do
+				table.insert(reached, string.format("%s %.0f%%", biomeName(i, 2), 100 * (w2["reached" .. i] or 0) / w2.sessions))
+			end
+			table.insert(lines, string.format("World 2 today: avg %.1f min (%d sessions)", (w2.seconds or 0) / w2.sessions / 60, w2.sessions))
+			table.insert(lines, "World 2 reached: " .. table.concat(reached, ", "))
+		else
+			table.insert(lines, "World 2 today: no sessions yet")
+		end
 	end
 	-- The latest versions' averages, newest first (each over its whole life).
 	local versions = {}
@@ -234,8 +272,8 @@ local function report()
 		for i = 2, #Config.Biomes do
 			local n = v["unlocks" .. i] or 0
 			table.insert(unlock, if n > 0
-				then string.format("%s %.1f min (%d)", Config.Biomes[i].Name, (v["unlock" .. i] or 0) / n / 60, n)
-				else string.format("%s -", Config.Biomes[i].Name))
+				then string.format("%s %.1f min (%d)", biomeName(i), (v["unlock" .. i] or 0) / n / 60, n)
+				else string.format("%s -", biomeName(i)))
 		end
 		table.insert(lines, string.format("Time to unlock, v%d: %s", versions[1], table.concat(unlock, ", ")))
 		table.insert(lines, "Avg session by version (all time):")
