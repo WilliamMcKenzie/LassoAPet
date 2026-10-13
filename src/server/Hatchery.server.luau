@@ -35,6 +35,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Funnel = require(script.Parent.Funnel)
+local Telemetry = require(script.Parent.Telemetry)
 local Quests = require(script.Parent.Quests)
 local Passes = require(script.Parent.Passes)
 local Fusion = require(ReplicatedStorage.Shared.Fusion)
@@ -372,6 +373,10 @@ local function load(player)
 	profile.quests = profile.quests or Quests.load(nil)
 	-- (Analytics V1: a fresh pen is a new arrival only if its load went through, or in Studio)
 	Funnel.start(player, profile, fresh and (loaded[player] == true or RunService:IsStudio()))
+	Telemetry.profileReady(player, Config.World == 1 and fresh and (loaded[player] == true or RunService:IsStudio()))
+	if store and not loaded[player] and not RunService:IsStudio() then
+		Telemetry.loadFailed(player)
+	end
 	Quests.publish(player, profile.quests)
 	task.spawn(function() -- friends you invited who joined while you were elsewhere ("Invite a friend")
 		local credits = inviteCredits(player)
@@ -625,6 +630,7 @@ local place -- (below, after PlaceEgg)
 -- spot from the middle out. A full pen (Config.PenCapacity) gets its egg instead.
 local function givePet(player, profile, kind)
 	Funnel.rewarded(player) -- (the server's award: Analytics V1)
+	Telemetry.reward(player)
 	local pen = penOf(player)
 	local area = pen and pen:FindFirstChild("Area")
 	if area and penCount(profile) < penCap(player) then
@@ -688,6 +694,7 @@ remote("HatchEgg", function(player, id)
 	if not profile.pastStarter then
 		Funnel.starterReady(player) -- (Analytics V1)
 	end
+	Telemetry.once(player, "eggHatched")
 	publish(player)
 end)
 
@@ -881,6 +888,7 @@ place = function(player, profile, kind, x, z)
 	if profile.ride or next(profile.items) then
 		profile.pastStarter = true -- placed with a pet already there: not the starter egg (the funnel tells them apart)
 	end
+	Telemetry.once(player, "eggPlaced") -- (Analytics V1: the session's first)
 	local pet = eggPet(kind)
 	local special = Config.SpecialEggs[kind]
 	if special then -- (hatches into its Pet, merged from Merged: a Giant Horse is 10 horses)
@@ -909,6 +917,7 @@ remote("TutorialDone", function(player)
 	end
 	player:SetAttribute("Tutorial", nil)
 	Funnel.tutorialDone(player) -- (Analytics V1)
+	Telemetry.tutorialDone(player)
 end)
 
 -- Ran to the start line in the tutorial before riding the starter pet (QM, Oct 8:
@@ -1455,6 +1464,7 @@ resetCommand.Triggered:Connect(function(source)
 	if not old or not allowed(player) then
 		return
 	end
+	Telemetry.exclude(player) -- (a test from here on: not in the play data)
 	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {}, tutorial = true, boughtPets = old.boughtPets,
 		boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil) }
 	for _, other in otherStores do -- (the other worlds' pens, empty)
@@ -1490,9 +1500,15 @@ goldCommand.Triggered:Connect(function(source, text)
 	local amount = if number then (tonumber(number) or 0) * (({ k = 1e3, m = 1e6, b = 1e9, t = 1e12 })[unit] or 1) else 1e7
 	amount = math.floor(amount)
 	player:SetAttribute("Gold", math.max(0, (player:GetAttribute("Gold") or 0) + amount))
+	Telemetry.gold(player, "grant", math.abs(amount)) -- (test gold: their gold checkpoints aren't counted)
 	devChat:FireClient(player, "/gold: " .. (if amount < 0 then "-" else "+") .. "$" .. Config.short(math.abs(amount)) .. ", now $" .. Config.short(player:GetAttribute("Gold")))
 end)
 goldCommand.Parent = game:GetService("TextChatService")
+
+Telemetry.incomeOf = function(player) -- (gold a second: the gold checkpoints)
+	local profile = profiles[player]
+	return if profile then (income(profile) + (otherIncome[player] or 0)) * goldX(player) else 0
+end
 
 -- Fired to a player each time their pets pay out, so the client can pop "+N$"
 -- over each pet's head.
@@ -1507,6 +1523,7 @@ task.spawn(function()
 			local earned = if player:GetAttribute("Tutorial") then 0 else (income(profile) + (otherIncome[player] or 0)) * goldX(player) -- (nothing till the tutorial's done)
 			if earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
+				Telemetry.gold(player, "earned", earned)
 				paid:FireClient(player, earned) -- (the HUD shows it by the gold counter)
 			end
 		end
@@ -1526,6 +1543,7 @@ while true do
 			if item.egg and now >= item.hatchAt and ((player:GetAttribute("Tutorial") and profile.ride ~= nil) or player:GetAttribute("PassAutoHatch")) then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
+				Telemetry.once(player, "eggHatched")
 				if profile.pastStarter then
 				end
 			end

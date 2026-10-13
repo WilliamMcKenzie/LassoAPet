@@ -27,6 +27,11 @@
 -- returning, the world or quest key. The game's owner is never recorded (but is in Studio,
 -- where Roblox logs nothing and StatsStore only prints, for testing).
 --
+-- Where session funnels stopped, for /stats' "pending" against "ended without": as a player
+-- leaves (Telemetry.onLeave), "<funnel>|end<step>" counts the step they'd got to: Quest
+-- Claims on leaving the world, Tutorial and First Session Loop only when the session ends
+-- (not a trip to the other world).
+--
 -- Custom events (Analytics > Custom Events), every time: Funnel.event(player, name).
 local AnalyticsService = game:GetService("AnalyticsService")
 local HttpService = game:GetService("HttpService")
@@ -36,6 +41,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local StatsStore = require(script.Parent.StatsStore)
+local Telemetry = require(script.Parent.Telemetry)
 
 local Funnel = {}
 
@@ -97,6 +103,9 @@ local function log(player, name, id, memo, step, key, persist)
 	local counts = {}
 	for i = was + 1, step do
 		counts[name .. "|" .. i] = 1
+		if name == PROGRESS then
+			counts[name .. "|" .. key .. "|" .. i] = 1 -- (each quest's own: /stats names them)
+		end
 	end
 	StatsStore.add("v1-funnels", counts)
 end
@@ -278,8 +287,30 @@ task.spawn(function() -- (Riders makes these: don't hold up whoever requires thi
 		s.lastZ = if kind == "" then nil else z
 	end)
 end)
-Players.PlayerRemoving:Connect(function(player)
+Telemetry.onLeave(function(player, transferring)
+	local s = state[player]
 	state[player] = nil
+	if not s or s.excluded then
+		return
+	end
+	local ends = {}
+	if s.logged.claims then
+		ends[CLAIMS .. "|end" .. s.logged.claims] = 1
+	end
+	if s.firstSession and not transferring then
+		ends[TUTORIAL .. "|end" .. (s.logged.tut or 1)] = 1
+		ends[LOOP .. "|end" .. (s.logged.loop or 1)] = 1
+	end
+	if next(ends) then
+		StatsStore.add("v1-funnels", ends)
+	end
+end)
+Players.PlayerRemoving:Connect(function(player)
+	task.delay(5, function() -- (Telemetry's goes first; this only tidies up)
+		if not player.Parent then
+			state[player] = nil
+		end
+	end)
 end)
 
 return Funnel

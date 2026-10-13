@@ -292,6 +292,10 @@ quests:SetAttribute("Folded", folded)
 fold.Activated:Connect(function()
 	folded = not folded
 	quests:SetAttribute("Folded", folded) -- (draws again: below)
+	local telemetry = not folded and ReplicatedStorage:FindFirstChild("Telemetry")
+	if telemetry then
+		telemetry:FireServer("questsOpened") -- (Analytics V1)
+	end
 end)
 
 -- A new quest pops in (QM, Oct 11): from nothing, overshooting, a wobble, and settles

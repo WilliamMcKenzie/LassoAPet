@@ -34,6 +34,12 @@ function LassoPrompt.update(model, name, color)
 		return
 	end
 	if shownOn ~= model then
+		if not shownOn then -- (Analytics V1: a lasso chance; the server counts one a ride)
+			local telemetry = game:GetService("ReplicatedStorage"):FindFirstChild("Telemetry")
+			if telemetry then
+				telemetry:FireServer("lassoChance")
+			end
+		end
 		shownOn = model
 		local _, size = model:GetBoundingBox()
 		attachment.Parent = part

@@ -20,6 +20,8 @@ local MAX_PER_RIDE = 100000 -- ignore anything bigger than a ride could earn
 local Config = require(ReplicatedStorage.Shared.Config)
 require(script.Parent.Passes) -- (PassDoubleGold: x2 ride cash, below)
 local Funnel = require(script.Parent.Funnel)
+local Telemetry = require(script.Parent.Telemetry)
+local StatsStore = require(script.Parent.StatsStore)
 
 local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, "Gold")
 if not ok then
@@ -73,6 +75,9 @@ local function load(player)
 				player:SetAttribute("FinishTrail", if typeof(value) == "table" then tonumber(value.trail) else nil) -- (the finish line's trails: Config.FinishTrails, shared by every world)
 				player:SetAttribute("Rebirths", if typeof(value) == "table" then tonumber(value.rebirths) else nil) -- (Config.Rebirth, shared by every world)
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
+				if typeof(value) == "table" and value.v1new then -- (Analytics V1: a new World 1 player since V1)
+					player:SetAttribute("V1New", true)
+				end
 				for _, world in typeof(value) == "table" and typeof(value.worlds) == "table" and value.worlds or {} do
 					if tonumber(world) then
 						player:SetAttribute("OwnsWorld" .. world, true) -- (the Worlds menu: Travel, not Buy)
@@ -114,6 +119,7 @@ local function save(player, onlyIfChanged)
 		record.worlds = if #worlds > 0 then worlds else nil
 		record.trail = trail
 		record.rebirths = rebirths
+		record.v1new = player:GetAttribute("V1New") or record.v1new
 		record[PLAYED] = math.floor(playedNow(player))
 		record[PLAYED .. "Full"] = playedFull[player] or nil
 		if pcall(store.SetAsync, store, key(player), record) then
@@ -131,6 +137,7 @@ local function addBought(player)
 		return
 	end
 	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + total - (bought[player] or 0))
+	Telemetry.gold(player, "purchased", total - (bought[player] or 0))
 	bought[player] = total
 	save(player)
 end
@@ -138,6 +145,9 @@ end
 local function join(player)
 	load(player)
 	ready[player] = true
+	if Config.World == 2 then
+		worldNoted(player, "v1w2e", "w2entered")
+	end
 	player:GetAttributeChangedSignal("BoughtGold"):Connect(function()
 		addBought(player)
 	end)
@@ -171,6 +181,9 @@ buyWorld.OnServerInvoke = function(player, world)
 	end
 	player:SetAttribute("Gold", gold - price)
 	player:SetAttribute("OwnsWorld" .. world, true)
+	if tonumber(world) == 2 then
+		worldNoted(player, "v1w2u", "w2unlocked")
+	end
 	save(player)
 	return true
 end
@@ -213,11 +226,38 @@ local function travelTo(player, world)
 	end
 	travelling[player] = true
 	save(player) -- (first: the other world's server loads it)
-	local ok, err = pcall(TeleportService.TeleportAsync, TeleportService, place, { player })
+	-- (Analytics V1: the session goes along, not a quit; Telemetry.stayed if it fails)
+	local options = Instance.new("TeleportOptions")
+	pcall(function()
+		options:SetTeleportData({ v1 = Telemetry.leaving(player) })
+	end)
+	local ok, err = pcall(TeleportService.TeleportAsync, TeleportService, place, { player }, options)
 	if not ok then
 		warn("Travel to world " .. world .. ": " .. tostring(err))
+		Telemetry.stayed(player)
 	end
 	travelling[player] = nil
+end
+TeleportService.TeleportInitFailed:Connect(function(player)
+	Telemetry.stayed(player)
+end)
+
+-- Analytics V1: World 2 unlocked and entered, of new World 1 players (once each, saved).
+local function worldNoted(player, field, stat)
+	local record = others[player]
+	if not player:GetAttribute("V1New") or not loaded[player] then
+		return
+	end
+	if not record then
+		record = {}
+		others[player] = record
+	end
+	if record[field] then
+		return
+	end
+	record[field] = true
+	savedAs[player] = nil -- (the autosave saves it)
+	pcall(StatsStore.addShared, "v1-worlds", { [stat] = 1 })
 end
 local travel = Instance.new("RemoteEvent")
 travel.Name = "Travel"
@@ -269,6 +309,7 @@ if Config.EndPortal then
 					portalTried[player] = os.clock()
 					if not player:GetAttribute("OwnsWorld2") then
 						player:SetAttribute("OwnsWorld2", true)
+						worldNoted(player, "v1w2u", "w2unlocked")
 						save(player)
 					end
 					task.spawn(travelTo, player, 2)
@@ -398,6 +439,7 @@ bankCoins.OnServerEvent:Connect(function(player, amount)
 	rideCash[player] = nil
 	if cash > 0 then
 		player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + cash)
+		Telemetry.gold(player, "earned", cash)
 	end
 end)
 
