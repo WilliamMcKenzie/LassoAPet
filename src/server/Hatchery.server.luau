@@ -1170,6 +1170,12 @@ local function addBoughtPets(player)
 	local profile = profiles[player]
 	local pen = penOf(player)
 	local total = player:GetAttribute("BoughtPets")
+	if profile and total and profile.boughtPets == nil and Config.World ~= 1 then
+		-- (a new pen in another world: what was bought before landed in the world it was
+		-- bought in; only what's bought from now on comes here. QM, Oct 13)
+		profile.boughtPets = total
+		return
+	end
 	if not profile or not pen or not total or total <= (profile.boughtPets or 0) then
 		return
 	end
@@ -1197,6 +1203,10 @@ end
 local function addBoughtGiantEggs(player)
 	local profile = profiles[player]
 	local total = player:GetAttribute("BoughtGiantEggs")
+	if profile and total and profile.boughtGiantEggs == nil and Config.World ~= 1 then
+		profile.boughtGiantEggs = total -- (as addBoughtPets: bought before, landed in its own world)
+		return
+	end
 	if not profile or not total or total <= (profile.boughtGiantEggs or 0) then
 		return
 	end
