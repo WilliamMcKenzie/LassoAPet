@@ -24,7 +24,7 @@ return {
 		{ name = "TopFang0R", bone = "Top", class = "WedgePart", size = Vector3.new(0.5, 0.55, 1.1), cframe = CFrame.new(-3.025, 5.55, -3, 0, 1, 0, 0, 0, 1, 1, 0, 0), color = Color3.fromRGB(250, 244, 226) },
 		{ name = "TopFang1L", bone = "Top", class = "WedgePart", size = Vector3.new(0.5, 0.55, 1.1), cframe = CFrame.new(-2.475, 5.55, -3, 0, -1, 0, 0, 0, 1, -1, 0, 0), color = Color3.fromRGB(250, 244, 226) },
 		{ name = "TopFang1R", bone = "Top", class = "WedgePart", size = Vector3.new(0.5, 0.55, 1.1), cframe = CFrame.new(-1.925, 5.55, -3, 0, 1, 0, 0, 0, 1, 1, 0, 0), color = Color3.fromRGB(250, 244, 226) },
-		{ name = "Mouth", bone = "Top", class = "Part", size = Vector3.new(7.4, 2.6, 5.7), cframe = CFrame.new(0, 7.1, 0.05, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(64, 8, 24) },
+		{ name = "Mouth", bone = "Top", class = "Part", size = Vector3.new(7.4, 2.6, 5.3), cframe = CFrame.new(0, 7.1, -0.15, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(64, 8, 24) },
 		{ name = "TopFang2R", bone = "Top", class = "WedgePart", size = Vector3.new(0.5, 0.55, 1.1), cframe = CFrame.new(-0.825, 5.55, -3, 0, 1, 0, 0, 0, 1, 1, 0, 0), color = Color3.fromRGB(250, 244, 226) },
 		{ name = "TopFang2L", bone = "Top", class = "WedgePart", size = Vector3.new(0.5, 0.55, 1.1), cframe = CFrame.new(-1.375, 5.55, -3, 0, -1, 0, 0, 0, 1, -1, 0, 0), color = Color3.fromRGB(250, 244, 226) },
 		{ name = "TopFang3L", bone = "Top", class = "WedgePart", size = Vector3.new(0.5, 0.55, 1.1), cframe = CFrame.new(-0.275, 5.55, -3, 0, -1, 0, 0, 0, 1, -1, 0, 0), color = Color3.fromRGB(250, 244, 226) },
