@@ -376,6 +376,15 @@ local function myPets()
 	return list
 end
 
+-- How many pets you have (the server's count on your pen, "PetCount": the ride and
+-- everything in the pen). Not the pet models drawn: the pet you rode out is off its spot
+-- till the pen's drawn again, so counting those missed the new one (QM, Oct 13: the
+-- Desert's gate only showed after a second ride).
+local function penCount()
+	local pen = myPen()
+	return pen and pen:GetAttribute("PetCount") or #myPets()
+end
+
 local function eggTool()
 	for _, holder in { player.Character, player:FindFirstChild("Backpack") } do
 		for _, t in if holder then holder:GetChildren() else {} do
@@ -530,7 +539,7 @@ local function run()
 		-- 4. The first ride.
 		funnel("ride")
 		guide(nil)
-		local before = #myPets()
+		local before = penCount()
 		TutorialRide.active, TutorialRide.holdFrozen, TutorialRide.invulnerable = true, true, true
 		player:SetAttribute("NoSprint", true)
 		player:SetAttribute("LassoGuide", true)
@@ -592,10 +601,10 @@ local function run()
 		end
 		-- 5. Home with an egg: it hatches in your pen; then the Desert's gate.
 		local waited = os.clock()
-		while on() and #myPets() <= before and os.clock() - waited < NEW_PET_WAIT do
+		while on() and penCount() <= before and os.clock() - waited < NEW_PET_WAIT do
 			task.wait(0.2)
 		end
-		if #myPets() > before then
+		if penCount() > before then
 			task.wait(1)
 			while on() and (Hud.isRiding() or player:GetAttribute("Cutscene") or camera.CameraType ~= Enum.CameraType.Custom) do
 				task.wait(0.1) -- (back on foot, the camera yours again, before it flies off)
