@@ -80,6 +80,16 @@ return {
 		{ "Marking", 78, 108, 36 }, -- spots
 		{ "Whisker", 58, 40, 24 },
 	},
+	BloatedMummy = {
+		{ "Body", 242, 232, 200 }, -- fresh bandages: body, head, arms, legs
+		{ "Body", 220, 201, 152 }, -- sand wraps
+		{ "Body", 208, 184, 134 }, -- darker sand wraps, loose ends
+		{ "Belly", 176, 150, 104 }, -- grime seams, lip
+		{ "Accent", 240, 190, 24 }, -- gold collar, amulet, cuffs, anklets, headband
+		{ "Accent", 196, 140, 16 }, -- darker gold
+		{ "Marking", 40, 92, 206 }, -- lapis collar band, wings, gems
+		{ "Horn", 226, 72, 40 }, -- carnelian collar band, sun disc
+	},
 	MarbleFish = {
 		{ "Body", 255, 204, 36 },
 		{ "Belly", 255, 244, 196 },

@@ -109,6 +109,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Fish = "Never learned to swim, and thinks it's too late now. Scared of water.",
 	MarbleColossus = "Was a museum statue for 900 years. Got bored. Kept the gold.",
 	Catfish = "Grew the whiskers to look wise. Has never once said anything wise.",
+	BloatedMummy = "Ate one too many scarabs. Now they keep crawling back out.",
 	MarbleFish = "Saw a unicorn once and has been wearing the horn ever since. Still can't swim.",
 	Lion = "King of the meadow, by his own vote. The mane takes three hours every morning.",
 	Buffalo = "Has never once been in a hurry. Will flatten you anyway.",
