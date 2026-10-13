@@ -39,7 +39,7 @@ COLOURS = {  # part, checker
 }
 WALL = [(56, 72, 103), (48, 62, 90)]  # #384867, checker
 CAP = (44, 57, 82)
-TOPS = {DARK: 2, MID: 1, LIGHT: 0, PLANKS: 0}  # tile heights (QM): the floor steps up toward the walls
+TOPS = {DARK: 2, MID: 1, LIGHT: 0, PLANKS: 2}  # tile heights (QM): the floor steps up toward the walls; the planks a raised boardwalk (QM)
 STRETCHES = [(0.18, 0.34), (0.6, 0.8)]  # the plank stretches, as fractions of the biome's length
 
 
