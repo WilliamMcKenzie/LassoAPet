@@ -45,8 +45,10 @@ Skins.Skins = {
 	},
 	{
 		name = "Galaxy",
-		stops = { rgb(18, 14, 52), rgb(52, 28, 120), rgb(110, 48, 170), rgb(190, 80, 200) },
-		span = { 0.1, 0.75 },
+		-- (darker than the mockup's: the game's Lighting brightens and saturates colours, so
+		-- the mockup's ramp came out flat bright purple: QM, Oct 13)
+		stops = { rgb(8, 6, 26), rgb(22, 14, 62), rgb(48, 24, 100), rgb(96, 40, 140) },
+		span = { 0.05, 0.7 },
 		glow = rgb(90, 230, 255),
 		light = rgb(180, 90, 255),
 	},
@@ -93,7 +95,7 @@ local function aura(root, skin, extents)
 	local r = math.max(extents.X, extents.Z)
 	local box = Instance.new("Part")
 	box.Name = "SkinAura"
-	box.Size = extents * 0.7
+	box.Size = extents * (if skin.name == "Galaxy" then 1.05 else 0.7) -- (the galaxy's stars sit on its body too)
 	box.Transparency = 1
 	box.CanCollide, box.CanQuery, box.CanTouch, box.Massless, box.Anchored = false, false, false, true, false
 	box.CFrame = root.CFrame * CFrame.new(0, extents.Y / 2, 0)
@@ -127,17 +129,26 @@ local function aura(root, skin, extents)
 			Transparency = NumberSequence.new(0.7), Acceleration = Vector3.new(0, -2, 0),
 		})
 	else
-		emitter(box, { -- the nebula
+		emitter(box, { -- the nebula, hugging it
 			Texture = puff,
 			Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, rgb(255, 80, 220)), ColorSequenceKeypoint.new(0.5, rgb(150, 80, 255)), ColorSequenceKeypoint.new(1, rgb(90, 200, 255)) }),
-			Rate = 3, Lifetime = NumberRange.new(2, 3), Speed = NumberRange.new(0.2, 0.6), Size = size(r * 0.4),
-			Transparency = NumberSequence.new(0.75), LightEmission = 0.8,
+			Rate = 5, Lifetime = NumberRange.new(2, 3), Speed = NumberRange.new(0, 0.3), Size = size(r * 0.6),
+			Transparency = NumberSequence.new(0.45), LightEmission = 1, LockedToPart = true,
 		})
-		emitter(box, { -- twinkles
+		-- (QM, Oct 13: the mockup's stars on the body) a sky of still stars sprinkled over
+		-- and round it, riding with it, each twinkling in and out. Particles rather than a
+		-- star Texture on every face: the studs went to a material to get rid of those.
+		emitter(box, {
 			Texture = star,
-			Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, rgb(255, 255, 255)), ColorSequenceKeypoint.new(1, rgb(160, 240, 255)) }),
-			Rate = 8, Lifetime = NumberRange.new(0.6, 1.2), Speed = NumberRange.new(0, 0.5), Size = size(0.5),
-			LightEmission = 1,
+			Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, rgb(255, 255, 255)), ColorSequenceKeypoint.new(0.6, rgb(255, 210, 250)), ColorSequenceKeypoint.new(1, rgb(160, 240, 255)) }),
+			Rate = math.clamp(extents.X * extents.Y * extents.Z / 6, 15, 60), Lifetime = NumberRange.new(1.5, 3),
+			Speed = NumberRange.new(0, 0), Size = size(0.45), LightEmission = 1, LockedToPart = true,
+			ZOffset = 0.5, -- (a touch toward the camera: the ones on the body show over it)
+		})
+		emitter(box, { -- a few big twinkles
+			Texture = star, Color = ColorSequence.new(rgb(255, 255, 255)), Rate = 3,
+			Lifetime = NumberRange.new(0.6, 1.2), Speed = NumberRange.new(0, 0), Size = size(1.3),
+			LightEmission = 1, LockedToPart = true, ZOffset = 0.5,
 		})
 	end
 end
