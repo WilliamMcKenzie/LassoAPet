@@ -10,6 +10,7 @@ the eye bumps); walk is QM's horse walk, the gallop the shared leap.
 
     python3 tools/crocodile_design.py
 
+NOTE: designs/world2/Crocodile.bbmodel is now QM's Blockbench edit (brows); don't rerun.
 writes designs/world2/Crocodile.bbmodel and renders to /mnt/project-files/animals/crocodile/.
 """
 
