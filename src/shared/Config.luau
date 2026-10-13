@@ -1084,12 +1084,12 @@ local Config = {
 		Whale = { Speed = 3.45, Stamina = 10 }, -- (QM, Oct 12: 20% into the Volcano; was 3.2)
 		Kraken = { Speed = 5.8, Stamina = 3 }, -- (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
 		-- Volcano
-		Firebird = { Speed = 4.59, Stamina = 2.5 },
-		RockHog = { Speed = 5.3, Stamina = 2.8 }, -- (QM, Oct 11: 5.4 crossed into the Jurassic, the only Rare to cross a line; the Epics are the gates)
+		Firebird = { Speed = 5.11, Stamina = 2.5 }, -- (QM, Oct 13: 10% into the Jurassic; was 4.59)
+		RockHog = { Speed = 6.56, Stamina = 2.8 }, -- (QM, Oct 13: 65% into the Jurassic; was 5.3)
 		Rockworm = { Speed = 6.3, Stamina = 3 },
-		FireLobster = { Speed = 5.15, Stamina = 2.8 },
+		FireLobster = { Speed = 6.43, Stamina = 2.8 }, -- (QM, Oct 13: 60% into the Jurassic; was 5.15)
 		Phoenix = { Speed = 7.2, Stamina = 3 }, -- (QM, Oct 12: well into the Jurassic, a touch slower than the Bone Rex; was 6.98)
-		LavaWhale = { Speed = 5.85, Stamina = 3 },
+		LavaWhale = { Speed = 6.83, Stamina = 3 }, -- (QM, Oct 13: 75% into the Jurassic; was 5.85)
 		TRex = { Speed = 6, Stamina = 3 }, -- (a guess: a touch past the Lava Whale)
 		Raptor = { Speed = 5.6, Stamina = 3 }, -- (a guess: a Rare, past the Volcano's Rares and short of the T-Rex)
 		Spinosaurus = { Speed = 5.4, Stamina = 3 }, -- (a guess: a touch under the T-Rex)
@@ -1097,7 +1097,7 @@ local Config = {
 		Ankylosaurus = { Speed = 5, Stamina = 3 }, -- (a guess: the Jurassic's Uncommon, under its Rares)
 		PalmGuy = { Speed = 4.9, Stamina = 3 }, -- (a guess: an Uncommon, a touch under the Ankylosaurus)
 		BoneRex = { Speed = 7.5, Stamina = 3 }, -- (a guess: the final Legendary, the fastest in the game)
-		VolcanoTortoise = { Speed = 5, Stamina = 3 },
+		VolcanoTortoise = { Speed = 6.17, Stamina = 3 }, -- (QM, Oct 13: 50% into the Jurassic; was 5)
 		-- Godlands
 		Loong = { Speed = 0.5, Stamina = 8 }, -- QM, Oct 4: starts at 0.5x, its breath's kills take it up to 1x (Abilities.Loong.MaxSpeed 2 x this); sprints at 4x (PetSprintSpeed)
 		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
