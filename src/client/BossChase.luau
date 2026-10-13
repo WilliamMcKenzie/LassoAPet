@@ -22,6 +22,7 @@ local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Sounds = require(script.Parent.Sounds)
+local Banner = require(script.Parent.Banner)
 
 local BAR = 0.2 -- each black bar's share of the screen's height: 40% of it in all, the strip between 60% (QM, Oct 11)
 local VEIN = "rbxassetid://85408798859805" -- assets/ui/boss/AngerMarkOutlined.png (QM's 💢, Oct 10, with a black outline baked in)
@@ -158,6 +159,9 @@ function BossChase.update(dt, chasing, x, z, speed)
 		Sounds.play("boss_" .. boss.kind, Config.Boss.CryVolume[boss.kind] or 0.6, (Config.Boss.CryPitch or {})[boss.kind]) -- (its own cry with the bars: Sounds' boss_<Kind>)
 	elseif was < cfg.CutsceneTime - cfg.BarTime and boss.t >= cfg.CutsceneTime - cfg.BarTime then
 		showBars(false)
+	end
+	if was < cfg.CutsceneTime and boss.t >= cfg.CutsceneTime then
+		Banner.show("run") -- (QM's red "RUN!!!" banner as it starts chasing you)
 	end
 	-- (the vein: with the bars, popping up and then pulsing once)
 	local barsIn = boss.t >= cfg.ZoomAt and boss.t < cfg.CutsceneTime - cfg.BarTime
