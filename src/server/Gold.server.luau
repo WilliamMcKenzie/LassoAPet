@@ -176,6 +176,32 @@ buyWorld.OnServerInvoke = function(player, world)
 end
 buyWorld.Parent = ReplicatedStorage
 
+-- "/reset" (Hatchery): gold, rebirths, trails, the worlds bought and every world's
+-- barriers and played time gone, saved at once.
+local hardReset = Instance.new("BindableEvent")
+hardReset.Name = "HardReset"
+hardReset.Event:Connect(function(player)
+	player:SetAttribute("Gold", 0)
+	player:SetAttribute("GatesBroken", 1)
+	for _, name in { "Rebirths", "FinishTrail" } do
+		player:SetAttribute(name, nil)
+	end
+	for world in Config.Places do
+		player:SetAttribute("OwnsWorld" .. world, nil)
+	end
+	local record = others[player]
+	if record then
+		for field in table.clone(record) do
+			if type(field) == "string" and (field:match("^gates") or field:match("^played")) then
+				record[field] = nil
+			end
+		end
+	end
+	playedBase[player], playedFrom[player], playedFull[player] = 0, os.time(), true
+	save(player)
+end)
+hardReset.Parent = game:GetService("ServerStorage")
+
 local travelling = {}
 local function travelTo(player, world)
 	local place = world and Config.Places[world]

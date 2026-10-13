@@ -1448,15 +1448,38 @@ awayCommand.Triggered:Connect(function(source)
 end)
 awayCommand.Parent = game:GetService("TextChatService")
 
--- Testing: "/reset" puts back every biome barrier you've broken (Gate.client; QM, Oct 9).
+-- Testing: "/reset" wipes you completely (QM, Oct 13): gold, rebirths, finish line trails,
+-- World 2's unlock, every world's pen (pets, eggs, pen level, quests) and every barrier,
+-- saved at once. The tutorial stays done ("/tutorial" for that): you're left with a fresh
+-- Config.DefaultPet to ride. The shop counts are kept (else rejoining hands out every Giant
+-- Horse egg and Legendary Pet ever bought again). Gold.server's HardReset does its save.
 local resetCommand = Instance.new("TextChatCommand")
-resetCommand.Name = "ResetBarriers"
+resetCommand.Name = "HardReset"
 resetCommand.PrimaryAlias = "/reset"
 resetCommand.Triggered:Connect(function(source)
 	local player = Players:GetPlayerByUserId(source.UserId)
-	if player and allowed(player) then
-		player:SetAttribute("GatesBroken", 1)
+	local old = player and profiles[player]
+	if not old or not allowed(player) then
+		return
 	end
+	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {}, tutorial = true, boughtPets = old.boughtPets,
+		boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil) }
+	for _, other in otherStores do -- (the other worlds' pens, empty)
+		task.spawn(pcall, other.SetAsync, other, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = true })
+	end
+	otherIncome[player] = 0
+	for _, name in { "CarriedEgg", "FuseLesson", "Tutorial", "AwayGold" } do
+		player:SetAttribute(name, nil)
+	end
+	player:SetAttribute("PenLevel", 1)
+	local hardReset = game:GetService("ServerStorage"):FindFirstChild("HardReset")
+	if hardReset then
+		hardReset:Fire(player) -- (gold, rebirths, trails, worlds, barriers: Gold.server)
+	end
+	Quests.publish(player, profiles[player].quests)
+	publish(player)
+	task.spawn(save, player)
+	player:LoadCharacter() -- off any ride, back at your pen
 end)
 resetCommand.Parent = game:GetService("TextChatService")
 
