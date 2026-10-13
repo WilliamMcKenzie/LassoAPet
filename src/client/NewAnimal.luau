@@ -95,4 +95,9 @@ function NewAnimal.show(kind)
 	return total + 0.15 -- (the UI's back just before: the ride's own end goes after)
 end
 
+-- (the server's own: /give, Hatchery)
+task.spawn(function()
+	game:GetService("ReplicatedStorage"):WaitForChild("NewAnimal").OnClientEvent:Connect(NewAnimal.show)
+end)
+
 return NewAnimal

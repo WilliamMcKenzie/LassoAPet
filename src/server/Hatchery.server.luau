@@ -1134,6 +1134,9 @@ local function playerNamed(name)
 end
 
 -- Dev chat replies (DevChat.client shows them in the chat window).
+local newAnimal = Instance.new("RemoteEvent") -- (the client's new animal cutscene, Client/NewAnimal: /give's)
+newAnimal.Name = "NewAnimal"
+newAnimal.Parent = ReplicatedStorage
 local devChat = Instance.new("RemoteEvent")
 devChat.Name = "DevChat"
 devChat.Parent = ReplicatedStorage
@@ -1187,6 +1190,7 @@ local function give(player, text)
 		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, pet = kind }
 	end
 	publish(player)
+	newAnimal:FireClient(player, kind) -- (its new animal cutscene, as a ride home's: QM)
 end
 
 -- The shop's Legendary Pet (Shop.server): its "BoughtPets" attribute is the
