@@ -9,8 +9,8 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local player = Players.LocalPlayer
 
 local REFERENCE_WIDTH = 1320 -- (till BaseUi's scale is there to match: below)
-local MARGIN, GAP = 18, 10
-local SCALE = 260 / 270 -- QM's art's pixels to ours: each button as wide as Merge and the rest on the right (BaseUi's 260; the art's ~25 px more is the price badge sticking out)
+local MARGIN, GAP = 18, 9
+local SCALE = 234 / 270 -- QM's art's pixels to ours: each button as wide as Merge and the rest on the left (BaseUi's 234: QM, Oct 13, 10% smaller; the art's ~25 px more is the price badge sticking out)
 local SUNBURST = "rbxassetid://85834206672187" -- assets/ui/Sunburst.png (QM's)
 local SPIN = 30 -- degrees a second
 local BUTTONS = {
@@ -54,7 +54,7 @@ column.Parent = root
 
 local bursts = {}
 local STARTER_PACK_FOR = 10 * 60 -- seconds
-local NUDGE = 9 -- the Starter Pack right of centre by this
+local NUDGE = 8 -- the Starter Pack right of centre by this
 local joinedAt = os.clock()
 local starterTimer, starterSlot
 for i, spec in BUTTONS do
