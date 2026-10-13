@@ -3533,7 +3533,7 @@ local function checkRide(dt)
 	if vfx.tutorialRide.invulnerable then
 		grace = math.max(grace, 0.1) -- (nothing crashes you on the tutorial's ride: QM)
 	end
-	if phase == "return" and vfx.returnRun.caught and not vfx.tutorialRide.active then
+	if phase == "return" and vfx.returnRun.caught and vfx.bossChase.ranOver() and not vfx.tutorialRide.active then
 		return fail("CAUGHT!")
 	end
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then

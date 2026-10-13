@@ -142,6 +142,11 @@ function BossChase.start(x, z)
 	ReplicatedStorage.RideCue:FireServer("boss", kind, x, z) -- (everyone else sees it chase you: Client/RemoteBosses, QM)
 end
 
+-- Whether it's reached the rider (charging once it's caught them: ReturnRun), so they're run over.
+function BossChase.ranOver()
+	return boss ~= nil and boss.riderZ ~= nil and boss.z >= boss.riderZ - boss.room * 0.5 - 4
+end
+
 function BossChase.over()
 	return boss ~= nil and boss.t >= Config.Boss.CutsceneTime
 end
@@ -181,7 +186,9 @@ function BossChase.update(dt, chasing, x, z, speed)
 		-- (closing, 0..1: how near it's got while you weren't at full speed, Client/ReturnRun;
 		-- at 1 it has you)
 		local closing = BossChase.closing or 0
-		boss.z = math.min(boss.z + (math.max(speed or 0, cfg.ChaseMin or 0) + 60 * closing) * dt, z - (cfg.Behind + boss.room) * (1 - 0.9 * closing), -cfg.StopShort - boss.room) -- (never slower than ChaseMin: it doesn't stall as you turn)
+		local caught = closing >= 1 -- (it has you: it charges and runs you over, QM)
+		local gap = if caught then -boss.room - 30 else (cfg.Behind + boss.room) * (1 - 0.9 * closing)
+		boss.z = math.min(boss.z + (math.max(speed or 0, cfg.ChaseMin or 0) + (if caught then 260 else 60 * closing)) * dt, z - gap, -cfg.StopShort - boss.room) -- (never slower than ChaseMin: it doesn't stall as you turn)
 		boss.x += (x - boss.x) * (1 - math.exp(-2 * dt))
 		moving = math.max(boss.z - was, 0) / math.max(dt, 1e-3)
 	end
