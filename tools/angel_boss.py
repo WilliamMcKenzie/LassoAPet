@@ -3,7 +3,8 @@ angel"). A floating wheel-within-wheels: a big golden eye at the centre, three g
 around it, each covered in eyes on both faces, spinning on their own axes, and six white
 wings (three pairs, up, out and down) spread behind it all. A glowing gold halo floats on top.
 
-Run: python3 tools/angel_boss.py [out_dir] [--gif]
+Run: python3 tools/angel_boss.py [out_dir] [--gif] [--crimson]
+(--crimson: the Crimson Seraph, the Crimson Lands' boss: the same angel in crimson)
 
 Built in Blockbench's ZYX Euler order so QM can edit it there. Every bone rests at 0:
 the ring and feather tilts are baked into the cubes (single bones never rest turned).
@@ -43,8 +44,18 @@ MODEL = os.path.join(ROOT, "designs", "bosses", "Seraph.bbmodel")
 TAU = 2 * math.pi
 BB = S.BB
 
-COLORS = {"gold": (255, 194, 38), "deep": (222, 146, 24), "white": (255, 255, 255), "cream": (255, 244, 214),
+COLORS = {"gold": (255, 194, 38), "deep": (222, 146, 24), "white": (255, 255, 255), "feather": (255, 255, 255),
+          "cream": (255, 244, 214),
           "black": (20, 20, 26), "iris": (70, 178, 255), "glow": (255, 226, 90), "tip": (255, 214, 120)}
+# The Crimson Seraph (QM, Oct 13): the Crimson Lands' boss, the same angel reskinned crimson:
+# near-black blood-red rings, crimson wings with glowing red tips, a red iris and halo.
+CRIMSON = {"gold": (84, 22, 30), "deep": (56, 14, 20), "white": (255, 255, 255), "feather": (168, 30, 46),
+           "cream": (136, 22, 38), "black": (20, 20, 26), "iris": (255, 59, 92), "glow": (255, 59, 92),
+           "tip": (255, 92, 116)}
+NAME = "Seraph"
+if "--crimson" in sys.argv:
+    COLORS, NAME = CRIMSON, "CrimsonSeraph"
+    MODEL = os.path.join(ROOT, "designs", "bosses", "CrimsonSeraph.bbmodel")
 TEX = {n: i for i, n in enumerate(COLORS)}
 
 HOVER = 16.0  # the core's centre, before floor() sets the lowest point GAP over y = 0
@@ -186,7 +197,7 @@ def build():
                 start = sh + np.array([0, 0, 0.12 * k])
                 M = np.column_stack([d, np.cross([0, 0, 1.0], d), [0, 0, 1.0]])
                 mid = start + d * Lf / 2
-                tex = TEX["white"] if k % 2 == 0 else TEX["cream"]
+                tex = TEX["feather"] if k % 2 == 0 else TEX["cream"]
                 parts.append(box(f"Wing{side}{pair}F{k + 1}", mid, (Lf, FEATHER_W, FEATHER_T), tex, M))
                 # a pale gold tip
                 parts.append(box(f"Wing{side}{pair}T{k + 1}", start + d * (Lf + 0.9), (1.8, FEATHER_W * 0.8, FEATHER_T),
@@ -196,11 +207,11 @@ def build():
             d = np.array([math.cos(a), math.sin(a), 0])
             M = np.column_stack([d, np.cross([0, 0, 1.0], d), [0, 0, 1.0]])
             parts.append(box(f"Wing{side}{pair}Covert", sh + d * 5.5 + np.array([0, 0, -0.5]),
-                             (11, FEATHER_W * 2.2, 1.0), TEX["white"], M))
+                             (11, FEATHER_W * 2.2, 1.0), TEX["feather"], M))
             put(node, parts)
 
     model = json.load(open(os.path.join(ROOT, "designs", "desert", "Snake.bbmodel")))
-    model.update(name="Seraph", elements=elements, groups=groups, outliner=[root], animations=[],
+    model.update(name=NAME, elements=elements, groups=groups, outliner=[root], animations=[],
                  textures=[S.solid_texture(n, col) for n, col in COLORS.items()])
     model.setdefault("meta", {})["format_version"] = "5.0"
     return model
@@ -283,9 +294,9 @@ def previews(m, out, gif=True):
     for i, cam in enumerate(CAMS):
         ps = parts + (hparts if i == 0 else [])
         sheet.paste(render(ps, W=Wd, H=Ht, fov=40, **cam), ((i % 2) * Wd, (i // 2) * Ht))
-    sheet.save(os.path.join(out, "Seraph.png"))
+    sheet.save(os.path.join(out, NAME + ".png"))
     big = render(parts, W=1100, H=900, fov=40, eye=(-40, 26, -88), target=(0, 18, 0))
-    big.save(os.path.join(out, "Seraph_front.png"))
+    big.save(os.path.join(out, NAME + "_front.png"))
     if not gif:
         return
     Wd, Ht = 440, 360
@@ -299,7 +310,7 @@ def previews(m, out, gif=True):
                 im.paste(render(ps, W=Wd, H=Ht, fov=40, **CAMS[1]), (0, 0))
                 im.paste(render(ps, W=Wd, H=Ht, fov=40, **CAMS[2]), (Wd, 0))
                 frames.append(A.label(im, [label] * 2))
-    A.gif(os.path.join(out, "Seraph_anims.gif"), frames, fps=20)
+    A.gif(os.path.join(out, NAME + "_anims.gif"), frames, fps=20)
 
 
 def main(out="/mnt/project-files/animals/bosses"):
@@ -309,7 +320,7 @@ def main(out="/mnt/project-files/animals/bosses"):
     shift = floor(m)
     groups = {g["name"]: g for g in m["groups"]}
     write_animations(m, groups, animations())
-    for path in (MODEL, os.path.join(out, "Seraph.bbmodel")):
+    for path in (MODEL, os.path.join(out, NAME + ".bbmodel")):
         with open(path, "w") as f:
             json.dump(m, f, separators=(",", ":"))
     print("elements", len(m["elements"]), "bones", len(m["groups"]), "shift", round(shift, 3),
