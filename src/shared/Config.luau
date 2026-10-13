@@ -400,7 +400,7 @@ local Config = {
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, Kitsune = 43200, -- Volcano
 		Catfish = 15, -- World 2 Temple (as the Firebird)
 		Fox = 15, NineTailedFox = 60, -- World 2 Temple (the Fox an Uncommon as the Firebird, the Nine-tailed Fox a Rare as the Fire Lobster, until QM sets them)
-		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
+		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, Bes = 43200, -- Jurassic (Bes: World 2's Tomb Legendary, as the Bone Rex)
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
 		Seraph = 3600, CrimsonSeraph = 3600, CrystalSeraph = 3600, -- World 2's trophy angels, 1 in 300 of their stampedes (QM, Oct 13; the hatch a guess)
@@ -577,6 +577,7 @@ local Config = {
 		Ankylosaurus = 3, -- Jurassic (a guess: a wide armoured tank, under the T-Rex)
 		PalmGuy = 2, -- Jurassic (QM: a bit bigger than the Cactus)
 		Pterodactyl = 1, -- Jurassic (QM: a small animal; AnimalScale 2 so its body is as big as a Horse's under the long wings)
+		Bes = 3, -- World 2 Ancient Tomb Legendary (large)
 		BoneRex = 4, -- Jurassic (the final Legendary: the T-Rex's size, AnimalScale 1.15 so it towers over it)
 		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
@@ -670,6 +671,7 @@ local Config = {
 		Ankylosaurus = 25000, -- Jurassic (a guess: an Uncommon, past the Volcano's Rares)
 		PalmGuy = 22000, -- Jurassic (a guess: an Uncommon, a touch under the Ankylosaurus)
 		BoneRex = 100000, -- Jurassic (a guess: the final Legendary, the best earner)
+		Bes = 100000, -- World 2 Ancient Tomb Legendary (as the Bone Rex until QM sets it)
 		Loong = 60000, Beholder = 9000, Leviathan = 45000, -- Godlands (QM's pets JSON, Oct 4; the Godlands' raised in the balance pass, Oct 6,
 		WarElephant = 12000, SoulHorse = 60000, Sludge = 7500, -- so they pay more than the Ocean's)
 	},
@@ -1171,6 +1173,7 @@ local Config = {
 		Pterodactyl = { Speed = 6.2, Stamina = 3 }, -- (a guess: an Epic, a touch past the T-Rex)
 		Ankylosaurus = { Speed = 5, Stamina = 3 }, -- (a guess: the Jurassic's Uncommon, under its Rares)
 		PalmGuy = { Speed = 4.9, Stamina = 3 }, -- (a guess: an Uncommon, a touch under the Ankylosaurus)
+		Bes = { Speed = 7.5, Stamina = 3 }, -- World 2's Tomb Legendary Bes (as the Bone Rex until QM sets it)
 		BoneRex = { Speed = 7.5, Stamina = 3 }, -- (a guess: the final Legendary, the fastest in the game)
 		VolcanoTortoise = { Speed = 6.17, Stamina = 3 }, -- (QM, Oct 13: 50% into the Jurassic; was 5)
 		-- Godlands
@@ -1359,6 +1362,9 @@ if Config.World == 2 then
 		Frame = { rgb(196, 167, 3), rgb(180, 152, 2) },
 	}
 	tomb.WallColors = { rgb(211, 183, 66), rgb(196, 168, 54) } -- #D3B742
+	tomb.Herd = table.clone(tomb.Herd)
+	tomb.Herd.Bes = 0.03 -- Bes (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
+	tomb.Herd.Fish = 1 -- a placeholder till the rest of the Tomb's animals come, so Bes stays rare
 	tomb.CapColor = rgb(186, 158, 46)
 	-- Walls and gate glows (QM, Oct 13: the Level design thread's batch; tools/world2_walls.luau).
 	crimson.WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) }
@@ -1387,6 +1393,7 @@ if Config.World == 2 then
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
 	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
 	ownHerd(5, { "Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune" }) -- the Temple
+	ownHerd(6, { "Bes", "Fish" }) -- the Ancient Tomb (the Fish a placeholder)
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do

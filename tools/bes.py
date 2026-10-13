@@ -9,8 +9,10 @@ throne-saddle on his back, and three floating Pyramid Artifacts.
 
     python3 tools/bes.py [out_dir]
 
-writes designs/tomb/Bes.bbmodel and the render to /mnt/project-files/world2/tomb/renders/Bes.png.
-Every part is axis-aligned or turned about one axis only, all bones at 0.
+writes designs/tomb/Bes.bbmodel (convert without --zyx), the render
+/mnt/project-files/world2/tomb/renders/Bes.png and an animation gif in
+/mnt/project-files/world2/tomb/bes/ (--still skips the gif). Every part is axis-aligned or
+turned about one axis only, all bones at 0.
 """
 
 import os
@@ -306,19 +308,53 @@ def bes():
 
 
 def animations():
-    """Phase 1 placeholder: a slow breathing idle (walk and gallop come in phase 2)."""
-    py, rx, at = A.pos_y, A.rot_x, A.at
+    """Heavy and slow, a stone colossus: a breathing idle, a stomping walk (arms swing against
+    the legs, a sway side to side) and a pounding run, leaning in. The Pyramid Artifacts bob
+    and wobble on their own. Angles in degrees, heights in Blockbench units (10 = 1 stud).
+    Legs and arms swing forward on +X; the body leans forward on -X."""
+    rx, rz, py, at = A.rot_x, A.rot_z, A.pos_y, A.at
+    cr = "catmullrom"
+
     L = 2.6
     idle = (L, {
         "root": [py(at(L, [(0, 0), (0.5, -1.5), (1, 0)]))],
-        "neck": [rx(at(L, [(0, 0), (0.5, 3), (1, 0)]), "catmullrom")],
-        "Artifacts": [py(at(L, [(0, 0), (0.5, 6), (1, 0)]))],
+        "neck": [rx(at(L, [(0, 0), (0.5, 3), (1, 0)]), cr)],
+        "ArmL": [rx(at(L, [(0, 0), (0.5, 3), (1, 0)]), cr)],
+        "ArmR": [rx(at(L, [(0, 0), (0.5, -3), (1, 0)]), cr)],
+        "Artifacts": [py(at(L, [(0, 0), (0.5, 6), (1, 0)])), rz(at(L, [(0, -2), (0.5, 2), (1, -2)]), cr)],
     })
-    return {"idle": idle}
+
+    L = 1.5
+    walk = (L, {
+        "root": [py(at(L, [(0, 0), (0.25, 4), (0.5, 0), (0.75, 4), (1, 0)])),
+                 rz(at(L, [(0, 0), (0.25, 3), (0.5, 0), (0.75, -3), (1, 0)]), cr)],
+        "neck": [rx(at(L, [(0, 0), (0.25, -3), (0.5, 0), (0.75, -3), (1, 0)]), cr)],
+        "LegFL": [rx(at(L, [(0, 24), (0.5, -24), (1, 24)]), cr)],
+        "LegFR": [rx(at(L, [(0, -24), (0.5, 24), (1, -24)]), cr)],
+        "ArmL": [rx(at(L, [(0, -14), (0.5, 14), (1, -14)]), cr)],
+        "ArmR": [rx(at(L, [(0, 14), (0.5, -14), (1, 14)]), cr)],
+        "Artifacts": [py(at(L, [(0, 0), (0.5, 8), (1, 0)])), rz(at(L, [(0, -3), (0.5, 3), (1, -3)]), cr)],
+    })
+
+    L = 0.85
+    gallop = (L, {
+        "root": [py(at(L, [(0, 0), (0.25, 9), (0.5, 0), (0.75, 9), (1, 0)])),
+                 rx(at(L, [(0, -7), (0.25, -4), (0.5, -7), (0.75, -4), (1, -7)]), cr),
+                 rz(at(L, [(0, 0), (0.25, 4), (0.5, 0), (0.75, -4), (1, 0)]), cr)],
+        "neck": [rx(at(L, [(0, 6), (0.25, 2), (0.5, 6), (0.75, 2), (1, 6)]), cr)],
+        "LegFL": [rx(at(L, [(0, 40), (0.5, -36), (1, 40)]), cr)],
+        "LegFR": [rx(at(L, [(0, -36), (0.5, 40), (1, -36)]), cr)],
+        "ArmL": [rx(at(L, [(0, -32), (0.5, 30), (1, -32)]), cr)],
+        "ArmR": [rx(at(L, [(0, 30), (0.5, -32), (1, 30)]), cr)],
+        "Artifacts": [py(at(L, [(0, 0), (0.5, 10), (1, 0)])), rz(at(L, [(0, -4), (0.5, 4), (1, -4)]), cr)],
+    })
+    return {"idle": idle, "walk": walk, "gallop": gallop}
 
 
 CAM = dict(eye=(-20, 16, -34), target=(0, 9.5, 0.0), W=720, H=720, fov=40)
 BG = (238, 238, 232)
+SIDE = dict(eye=(-36, 12, -14), target=(0, 9.5, -0.5), W=400, H=400, fov=40)
+ANIMS = "/mnt/project-files/world2/tomb/bes"
 
 
 def main(out=os.path.join(A.ROOT, "designs", "tomb"), shots="/mnt/project-files/world2/tomb/renders"):
@@ -336,7 +372,19 @@ def main(out=os.path.join(A.ROOT, "designs", "tomb"), shots="/mnt/project-files/
     bg = Image.new("RGBA", im.size, BG + (255,))
     bg.alpha_composite(im)
     bg.convert("RGB").save(os.path.join(os.environ.get("BES_SCRATCH", "/tmp"), "Bes_back.png"))
+    if "--still" in sys.argv:
+        return
+    os.makedirs(ANIMS, exist_ok=True)
+    frames = []
+    for name, n in (("idle", 24), ("walk", 24), ("gallop", 16)):
+        anim = A.anim_named(m, name)
+        for i in range(n):
+            ps = pose(m, anim, i / n * anim["length"])
+            for p in ps:
+                p.neon = p.name.startswith("Glow")
+            frames.append(A.label(render(ps, **SIDE), ["run" if name == "gallop" else name]))
+    A.gif(os.path.join(ANIMS, "Bes_anims.gif"), frames, fps=20)
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    main(*[x for x in sys.argv[1:] if not x.startswith("--")])
