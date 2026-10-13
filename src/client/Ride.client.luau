@@ -3565,6 +3565,7 @@ local function checkRide(dt)
 			if Config.Boss.On then -- (the boss first: BossChase, then turnHome; QM, Oct 10)
 				phase, mount.speed = "boss", 0 -- (stopped dead, or you'd run on through it: QM)
 				vfx.bossChase.start(mount.x, mount.z)
+				Hud.setHold(nil) -- (BOSS IN goes as it appears: QM)
 			else
 				turnHome()
 			end
