@@ -893,7 +893,10 @@ local Config = {
 	-- full sprint in about Ramp seconds; a hit drops it back to a walk (Walk); CatchAfter
 	-- seconds in all under full speed and the boss runs you over. (The tutorial's first ride
 	-- home still runs by itself.)
-	ReturnRun = { Idle = 0, Walk = 0.4, Ramp = 1.2, CatchAfter = 5, TutorialCrashes = 5 }, -- (QM: 5 s; 10, then 4. The tutorial's run home: it sprints by itself, the boss never catches you, TutorialCrashes obstacles crash you)
+	-- (QM, Oct 13, later: the pet sprints home by itself again, everywhere, and the boss never
+	-- catches you (CatchAfter math.huge; it was 5 s): the only risk is obstacles, Crashes of them
+	-- crash you. Idle is unused while it sprints by itself.)
+	ReturnRun = { Idle = 0, Walk = 0.4, Ramp = 1.2, CatchAfter = math.huge, Crashes = 5 },
 	ReturnSprint = true, -- the ride home always a sprint (SprintSpeed x ReturnSpeed)? On again (QM, Oct 11; Oct 10 had it off, Shift to sprint)
 	ReturnFovKick = 0, -- (QM, Oct 9: plain, was 20) degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel

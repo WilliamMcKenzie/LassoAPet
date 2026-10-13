@@ -1,8 +1,8 @@
--- The ride home (QM, Oct 13): your pet stands still unless you push forward (W or Up, the phone's
--- joystick, a controller's stick, or Sprint), which runs it up to full speed; an obstacle
--- you hit drops it back to a walk to build up again (animals you plough through: QM). Every
--- second you're not at full speed brings the boss closer (BossChase.closing), and after
--- Config.ReturnRun.CatchAfter of them in all, it catches you. Ride drives it:
+-- The ride home (QM, Oct 13): your pet sprints home by itself; an obstacle you hit drops it
+-- back to a walk to build up again (animals you plough through), and Config.ReturnRun.Crashes
+-- of them crash you (Ride counts .hits). The boss closing in while you're under full speed
+-- (BossChase.closing, catching you after CatchAfter seconds) is off for now (CatchAfter
+-- math.huge); pushing() is kept for it, for a run home you steer the speed of.
 --   ReturnRun.reset()                -- a new run home
 --   ReturnRun.pushing(controls, stickOn, padPush, sprint) -- whether they're pushing forward
 --   ReturnRun.update(dt, atFull)     -- every frame of the run home; .caught once it has you

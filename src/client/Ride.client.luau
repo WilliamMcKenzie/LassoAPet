@@ -1361,9 +1361,6 @@ local function sprinting()
 	if vfx.hunting or player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
 		return false -- the Robo Shark can't sprint while it hunts (QM)
 	end
-	if phase == "return" and not vfx.tutorialRide.active then
-		return vfx.returnRun.pushing(controls, rideStick.on, vfx.padPush, sprintKey or Hud.sprintHeld())
-	end
 	if (phase == "return" and Config.ReturnSprint) or (phase == "outbound" and Config.OutboundSprint) then -- (the ride out always a sprint too: QM, Oct 11)
 		return true -- racing home with the egg, always
 	end
@@ -3500,7 +3497,7 @@ local function checkRide(dt)
 	end
 	if phase == "return" and vfx.returnRun.caught and vfx.bossChase.ranOver() and not vfx.tutorialRide.active then
 		return fail("CAUGHT!")
-	elseif phase == "return" and vfx.tutorialRide.active and vfx.returnRun.hits >= Config.ReturnRun.TutorialCrashes then
+	elseif phase == "return" and vfx.returnRun.hits >= Config.ReturnRun.Crashes then
 		return fail("CRASH!")
 	end
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
