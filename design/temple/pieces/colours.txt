@@ -28,3 +28,13 @@ StoneLantern_4: LightBox, 178, 162, 108
 StoneLantern_5: Windows, 58, 50, 34
 StoneLantern_6: Roof, 196, 181, 128
 StoneLantern_7: Knob, 156, 142, 94
+LilyPad_1: Pad, 104, 130, 40
+LilyPad_2: Centre, 88, 112, 32
+LilyPads_1: Pad, 104, 130, 40
+LilyPads_2: Pad, 122, 150, 52
+LilyPads_3: Pad, 88, 112, 32
+LilyFlower_1: Pad, 104, 130, 40
+LilyFlower_2: Centre, 88, 112, 32
+LilyFlower_3: Petals, 246, 168, 196
+LilyFlower_4: Petals, 255, 214, 228
+LilyFlower_5: Pollen, 252, 214, 70
