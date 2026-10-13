@@ -397,6 +397,7 @@ local Config = {
 		RollingLog = 35, -- World 2 Woodland Maze (as the Lionfish)
 		TombJackal = 60, -- World 2 Ancient Tomb (a Rare, as the Raptor until QM sets it)
 		Tiger = 60, -- World 2 Temple (a Rare, as the Fire Lobster)
+		LionArcher = 60, -- World 2 Ancient Tomb's Rare (as the Raptor until QM sets it)
 		JadeStatue = 300, GarnetStatue = 300, -- World 2 Temple's Epics (as the Rockworm until QM sets them)
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, Kitsune = 43200, -- Volcano
 		Catfish = 15, -- World 2 Temple (as the Firebird)
@@ -570,6 +571,7 @@ local Config = {
 		RollingLog = 1, -- World 2 Woodland Maze
 		TombJackal = 2, -- World 2 Ancient Tomb (Horse length, tall ears)
 		Tiger = 1, -- World 2 Temple (the Lion's body)
+		LionArcher = 2, -- World 2 Ancient Tomb
 		JadeStatue = 2, GarnetStatue = 2, -- World 2 Temple
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, Kitsune = 3, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		Catfish = 1, -- World 2 Temple (Fish-sized)
@@ -663,6 +665,7 @@ local Config = {
 		RollingLog = 1500, -- World 2 Woodland Maze (as the Lionfish)
 		TombJackal = 40000, -- World 2 Ancient Tomb (as the Raptor)
 		Tiger = 20000, -- World 2 Temple (as the Fire Lobster)
+		LionArcher = 40000, -- World 2 Ancient Tomb (as the Raptor)
 		JadeStatue = 25000, GarnetStatue = 25000, -- World 2 Temple (as the Rockworm)
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, Kitsune = 45000, -- Volcano (guesses: past the Ocean's)
 		Catfish = 12000, -- World 2 Temple (as the Firebird)
@@ -1142,6 +1145,7 @@ local Config = {
 		-- Ocean
 		Starfish = { Speed = 3.37, Stamina = 2 }, -- (QM, Oct 12: 15% into the Volcano; was 2.87)
 		Squid = { Speed = 4.15, Stamina = 2.6 }, -- (QM, Oct 12: 60% into the Volcano; was 3.7)
+		LionArcher = { Speed = 5.6, Stamina = 3 }, -- World 2's Ancient Tomb Rare: the Raptor's numbers until QM sets them
 		JadeStatue = { Speed = 7.12, Stamina = 3 }, -- World 2's Temple Epics: the Rockworm's numbers until QM sets them
 		GarnetStatue = { Speed = 7.12, Stamina = 3 },
 		Hawkmoth = { Speed = 4.15, Stamina = 2.6 }, -- World 2's Woodland Hawkmoth: Epic, the Squid's numbers until QM sets it (60% into the Temple, as the Squid is 60% into the Volcano)
@@ -1414,6 +1418,7 @@ if Config.World == 2 then
 	tomb.CapColor = rgb(186, 158, 46)
 	tomb.Herd = table.clone(tomb.Herd)
 	tomb.Herd.TombJackal = 0.15 -- the Tomb's Rare (QM, Oct 13), as often as the Raptor
+	tomb.Herd.LionArcher = 0.15 -- the Lion Archer (QM, Oct 13), the Tomb's Rare, as often as the Raptor
 	-- Walls and gate glows (QM, Oct 13: the Level design thread's batch; tools/world2_walls.luau).
 	crimson.WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) }
 	crimson.CapColor = rgb(72, 39, 42)
@@ -1441,7 +1446,7 @@ if Config.World == 2 then
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
 	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
 	ownHerd(5, { "Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune" }) -- the Temple
-	ownHerd(6, { "TombJackal" }) -- the Ancient Tomb
+	ownHerd(6, { "TombJackal", "LionArcher" }) -- the Tomb
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do

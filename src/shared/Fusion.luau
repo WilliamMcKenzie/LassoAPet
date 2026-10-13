@@ -157,7 +157,7 @@ local NAMES = {
 	JadeStatue = { "Jade", "tue" }, GarnetStatue = { "Gar", "net" },
 	Kraken = { "Kra", "ken" }, GiantGolem = { "Gi", "golem" }, KingCrab = { "King", "crab" }, BlueCrab = { "Blue", "crab" }, VolcanoTortoise = { "Volca", "toise" }, Firebird = { "Fire", "bird" }, RockHog = { "Rock", "hog" }, Rockworm = { "Rock", "worm" }, FireLobster = { "Fire", "lobster" }, LavaWhale = { "Lava", "whale" }, TRex = { "T-", "Rex" }, BoneRex = { "Bone", "rex" }, Ankylosaurus = { "Ankylo", "saurus" }, PalmGuy = { "Palm", "guy" }, Spinosaurus = { "Spino", "saurus" }, Pterodactyl = { "Ptero", "dactyl" }, Raptor = { "Rap", "tor" }, Phoenix = { "Phoe", "nix" }, Kitsune = { "Kit", "sune" },
 	RollingLog = { "Rol", "log" },
-	Tiger = { "Ti", "ger" },
+	Tiger = { "Ti", "ger" }, LionArcher = { "Lion", "archer" },
 	RoboShark = { "Robo", "shark" }, FishSchool = { "Fish", "school" }, Loong = { "L", "oong", "Loo" },
 	WarElephant = { "War", "elephant" }, SoulHorse = { "Soul", "horse" }, Sludge = { "Slu", "udge" },
 	Leviathan = { "Levi", "athan" },
