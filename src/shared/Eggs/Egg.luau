@@ -41,6 +41,7 @@ local KINDS = {
 	BlueCrystal = { data = require(script.Parent.BlueCrystalEggModel), center = 1.6 },
 	PinkCrystal = { data = require(script.Parent.PinkCrystalEggModel), center = 1.6 },
 	CrystalSpider = { data = require(script.Parent.CrystalSpiderEggModel), center = 1.6 },
+	CrystalPhoenix = { data = require(script.Parent.CrystalPhoenixEggModel), center = 1.6 },
 	Cactus = { data = require(script.Parent.CactusEggModel), center = 1.6 },
 	Kitten = { data = require(script.Parent.KittenEggModel), center = 1.6 },
 	Scorpion = { data = require(script.Parent.ScorpionEggModel), center = 1.6 },

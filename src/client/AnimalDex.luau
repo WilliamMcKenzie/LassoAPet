@@ -119,6 +119,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	BlueCrystal = "The Cactus's pen pal. Polishes itself every morning.",
 	PinkCrystal = "Sparkles when it laughs, which is all the time.",
 	CrystalSpider = "Knits sweaters for all eight legs. Takes a while to get dressed.",
+	CrystalPhoenix = "The Phoenix's cousin who doesn't like getting burnt. Shatters instead.",
 	Rhino = "Ran away to join the mafia at a young age. Still pays horses tuition.",
 	Unicorn = "Just a horse who can jump very high. The horn is glued on.",
 	Kitten = "Came to the desert for the world's biggest litter box. Has not left since.",

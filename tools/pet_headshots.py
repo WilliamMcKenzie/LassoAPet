@@ -32,7 +32,7 @@ PREVIEW = "/mnt/project-files/animals/headshots"
 
 MODELS = {
     "Horse": "horses/Horse9_Leap", "Pinto": "horses/Pinto", "Pig": "animals/Pig", "Bunny": "animals/Bunny", "Fish": "animals/Fish",
-    "Rhino": "animals/Rhino", "Unicorn": "animals/Unicorn", "MarbleColossus": "world2/MarbleColossus", "MajesticUnicorn": "world2/MajesticUnicorn", "MarbleFish": "world2/MarbleFish", "Lion": "world2/Lion", "Buffalo": "world2/Buffalo", "CrystalCentipede": "crystal/CrystalCentipede", "RedMushroom": "crystal/RedMushroom", "BrownMushroom": "crystal/BrownMushroom", "PurpleMushroom": "crystal/PurpleMushroom", "BlueCrystal": "crystal/BlueCrystal", "PinkCrystal": "crystal/PinkCrystal", "CrystalSpider": "crystal/CrystalSpider",
+    "Rhino": "animals/Rhino", "Unicorn": "animals/Unicorn", "MarbleColossus": "world2/MarbleColossus", "MajesticUnicorn": "world2/MajesticUnicorn", "MarbleFish": "world2/MarbleFish", "Lion": "world2/Lion", "Buffalo": "world2/Buffalo", "CrystalCentipede": "crystal/CrystalCentipede", "CrystalPhoenix": "crystal/CrystalPhoenix", "RedMushroom": "crystal/RedMushroom", "BrownMushroom": "crystal/BrownMushroom", "PurpleMushroom": "crystal/PurpleMushroom", "BlueCrystal": "crystal/BlueCrystal", "PinkCrystal": "crystal/PinkCrystal", "CrystalSpider": "crystal/CrystalSpider",
     "Cactus": "desert/Cactus", "Kitten": "desert/Kitten", "Scorpion": "desert/Scorpion", "Sandworm": "desert/Sandworm", "Eyeworm": "crimson/Eyeworm", "Maw": "crimson/Maw", "IvorySpider": "crimson/IvorySpider", "Asura": "crimson/Asura",
     "SpineLizard": "converted/SpineLizard", "Snake": "desert/Snake",
     "Penguin": "snow/Penguin", "Boar": "converted/Boar", "Snowman": "snow/Snowman",
@@ -45,7 +45,7 @@ MODELS = {
     "Leviathan": "leviathan/Leviathan",
     "VolcanoTortoise": "volcano/VolcanoTortoise", "Firebird": "volcano/Firebird", "RockHog": "volcano/RockHog", "Rockworm": "volcano/Rockworm", "FireLobster": "volcano/FireLobster", "TRex": "jurassic/TRex", "BoneRex": "jurassic/BoneRex", "Ankylosaurus": "jurassic/Ankylosaurus", "PalmGuy": "jurassic/PalmGuy", "Spinosaurus": "jurassic/Spinosaurus", "Pterodactyl": "jurassic/Pterodactyl", "Raptor": "jurassic/Raptor", "LavaWhale": "volcano/LavaWhale", "Phoenix": "volcano/Phoenix",
 }
-ZYX = {"Maw", "IvorySpider", "Asura", "CrystalCentipede", "BoneRex", "KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish", "TRex", "Spinosaurus", "MajesticUnicorn", "CrystalSpider", "Lion"}  # converted with --zyx (QM's hand-made multi-axis rotations)
+ZYX = {"CrystalCentipede", "CrystalPhoenix", "CrystalSpider", "BoneRex", "KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish", "TRex", "Spinosaurus", "MajesticUnicorn", "Maw", "IvorySpider", "Asura", "Lion"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}
 # Animals whose run makes a poor picture (the Snake stretches out thin, the Starfish
 # folds its arms up) keep their idle stance in the action style.

@@ -106,6 +106,7 @@ local IMAGES = {
 	eggMaw = { id = "rbxassetid://121895939250438", size = Vector2.new(513, 668) }, -- MawEggRender.png (World 2)
 	eggIvorySpider = { id = "rbxassetid://79662614434978", size = Vector2.new(556, 673) }, -- IvorySpiderEggRender.png (World 2)
 	eggAsura = { id = "rbxassetid://113695299206853", size = Vector2.new(590, 982) }, -- AsuraEggRender.png (World 2)
+	eggCrystalPhoenix = { id = "rbxassetid://137731947260447", size = Vector2.new(941, 1000) }, -- CrystalPhoenixEggRender.png (World 2)
 	eggUnicorn = { id = "rbxassetid://85066893166855", size = Vector2.new(496, 859) }, -- UnicornEggRender.png
 	eggCactus = { id = "rbxassetid://95599437590618", size = Vector2.new(635, 766) }, -- CactusEggRender.png
 	eggKitten = { id = "rbxassetid://124881834655792", size = Vector2.new(502, 749) }, -- KittenEggRender.png
