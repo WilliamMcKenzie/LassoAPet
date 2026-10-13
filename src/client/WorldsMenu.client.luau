@@ -266,7 +266,7 @@ for i, world in WORLDS do
 	-- Travel once it's yours (World 1 always is), Buy till then.
 	local function owned()
 		local has = i == 1 or player:GetAttribute("OwnsWorld" .. i) == true
-		travel.Visible = has
+		travel.Visible = has and i ~= Config.World -- (none on the world you're in: QM, Oct 13)
 		if buy then
 			buy.Visible = not has
 		end
