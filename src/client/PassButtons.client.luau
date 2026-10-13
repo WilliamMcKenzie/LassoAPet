@@ -8,9 +8,9 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local player = Players.LocalPlayer
 
-local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
+local REFERENCE_WIDTH = 1320 -- (till BaseUi's scale is there to match: below)
 local MARGIN, GAP = 18, 10
-local SCALE = 256 / 295 -- QM's art's pixels to ours (the 1.5x Speed, as wide as Merge)
+local SCALE = 260 / 270 -- QM's art's pixels to ours: each button as wide as Merge and the rest on the right (BaseUi's 260; the art's ~25 px more is the price badge sticking out)
 local SUNBURST = "rbxassetid://85834206672187" -- assets/ui/Sunburst.png (QM's)
 local SPIN = 30 -- degrees a second
 local BUTTONS = {
@@ -96,6 +96,12 @@ RunService.RenderStepped:Connect(function()
 	local base = player.PlayerGui:FindFirstChild("BaseUi")
 	local baseRoot = base and base:FindFirstChild("Root")
 	gui.Enabled = base ~= nil and base.Enabled and not (baseRoot and baseRoot:GetAttribute("Modal"))
+	local baseScale = baseRoot and baseRoot:FindFirstChildOfClass("UIScale")
+	if baseScale and rootScale.Scale ~= baseScale.Scale then -- (BaseUi's scale, so they match the buttons on the right: QM)
+		local screen = camera.ViewportSize
+		rootScale.Scale = baseScale.Scale
+		root.Size = UDim2.fromOffset(screen.X / rootScale.Scale, screen.Y / rootScale.Scale)
+	end
 	if gui.Enabled then
 		local tall = list.AbsoluteContentSize.Y / rootScale.Scale / fit.Scale
 		fit.Scale = math.min(1, root.Size.Y.Offset * 0.62 / math.max(tall, 1))
