@@ -239,9 +239,7 @@ def gold_stack(rng):
 
 
 def trophy(rng):
-    """A golden trophy cup on a navy base (about 7 wide, 9.5 tall)."""
-    base = slab(rng, -1.9, 0, -1.9, 1.9, 1.3, 1.9, 0.2, 0.0)
-    plate = slab(rng, -1.0, 0.35, -1.98, 1.0, 0.95, -1.88, 0.05, 0.0)
+    """A golden trophy cup standing on its own foot (about 7 wide, 7.6 tall)."""
     foot = frustum(8, 1.6, 1.3, 1.1, 1.9, math.pi / 8)
     stem = frustum(8, 0.5, 1.9, 0.4, 4.0, math.pi / 8)
     knot = blob(rng, (0, 3.2, 0), 0.75, 10, squash=(1, 0.7, 1), jitter=0.02)
@@ -252,9 +250,9 @@ def trophy(rng):
         a, b, c, d = (s * 2.2, 7.9, 0), (s * 3.6, 7.7, 0), (s * 3.6, 5.6, 0), (s * 2.0, 5.2, 0)
         handles += [prism(rng, a, b, 0.3, 0.3, 6, 0.0), prism(rng, b, c, 0.3, 0.3, 6, 0.0),
                     prism(rng, c, d, 0.3, 0.3, 6, 0.0)]
-    return [("Base", NAVY, [base]), ("Plate", GOLD[1], [plate]), ("Foot", GOLD[1], [foot, knot]),
-            ("Stem", GOLD[0], [stem]), ("Cup", GOLD[0], [cup]), ("Rim", GOLD[2], [rim]),
-            ("Handles", GOLD[2], handles)]
+    pieces = [("Foot", GOLD[1], [foot, knot]), ("Stem", GOLD[0], [stem]), ("Cup", GOLD[0], [cup]),
+              ("Rim", GOLD[2], [rim]), ("Handles", GOLD[2], handles)]
+    return [(l, c, [np.asarray(p, float) - (0, 1.3, 0) for p in pts]) for l, c, pts in pieces]  # foot on the ground
 
 
 ITEMS = [  # name, builder, seed, label, lineup width

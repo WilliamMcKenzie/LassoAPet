@@ -50,10 +50,8 @@ GoldBar_2: Stamp, 226, 188, 52
 GoldStack_1: Bars, 252, 222, 81
 GoldStack_2: Bars, 226, 188, 52
 GoldStack_3: Bars, 255, 236, 140
-Trophy_1: Base, 0, 17, 34
-Trophy_2: Plate, 226, 188, 52
-Trophy_3: Foot, 226, 188, 52
-Trophy_4: Stem, 252, 222, 81
-Trophy_5: Cup, 252, 222, 81
-Trophy_6: Rim, 255, 236, 140
-Trophy_7: Handles, 255, 236, 140
+Trophy_1: Foot, 226, 188, 52
+Trophy_2: Stem, 252, 222, 81
+Trophy_3: Cup, 252, 222, 81
+Trophy_4: Rim, 255, 236, 140
+Trophy_5: Handles, 255, 236, 140
