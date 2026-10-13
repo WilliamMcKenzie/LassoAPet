@@ -1,7 +1,7 @@
 """The Crystal Tyrant: World 2 Crystal Cavern's boss (QM, Oct 13: "a giant evil version of
 the crystal guy"). The Living Crystal (tools/living_crystal.py) made bulky and dark: a deep
-violet crystal shaft with a glowing cyan facet, a taller tip, angry brows over glowing red
-eyes, a jagged grin of white teeth, a crown of lighter shards with glowing cyan tips behind its head, and
+violet crystal shaft, a taller tip, angry brows over glowing red
+eyes, a grin of white pyramid teeth, a crown of lighter shards with glowing cyan tips behind its head, and
 shards on its arms. Same bones and animations as the Cactus and the Living Crystal (root,
 neck, ArmL, ArmR, LegFL, LegFR); every bone rests at 0.
 
@@ -75,7 +75,6 @@ def build():
     root = add_group("root", None)
     zf = -14  # the front face
     put(root, [box("Body", (-17, 32, -14), (17, 110, 14), T["main"]),
-               box("Glow_facet", (-18, 38, -15), (-11, 104, -13), T["glow"]),
                box("FacetSide", (17, 38, 4), (18, 104, 11), T["light"]),
                # glowing red eyes under angry brows (inner ends down)
                box("Glow_eyeL", (-10, 90, zf - 0.6), (-3, 97, zf), T["eye"]),
@@ -87,10 +86,10 @@ def build():
                # a jagged grin
                box("Mouth", (-9, 70, zf - 0.6), (9, 84, zf), T["mouth"])])
     teeth = []
-    for i, x in enumerate((-7, -2.5, 2.5, 7)):  # top row, pointing down
-        teeth.append(box(f"ToothT{i + 1}", (x - 1.6, 79, zf - 1.0), (x + 1.6, 84, zf - 0.4), T["tooth"]))
-    for i, x in enumerate((-4.75, 0, 4.75)):  # bottom row, between them
-        teeth.append(box(f"ToothB{i + 1}", (x - 1.6, 70, zf - 1.0), (x + 1.6, 74.5, zf - 0.4), T["tooth"]))
+    for i, x in enumerate((-6.75, -2.25, 2.25, 6.75)):  # top row: pyramids pointing down (QM)
+        teeth.append(pyramid(f"ToothT{i + 1}", x, 84, zf - 0.9, 2.25, 0.5, -6, T["tooth"]))
+    for i, x in enumerate((-4.5, 0, 4.5)):  # bottom row, between them, pointing up
+        teeth.append(pyramid(f"ToothB{i + 1}", x, 70, zf - 0.9, 2.25, 0.5, 5, T["tooth"]))
     put(root, teeth)
     # a crown of shards rising behind its head
     crown = []
