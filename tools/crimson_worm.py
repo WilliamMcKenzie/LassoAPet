@@ -5,9 +5,9 @@ Run: python3 tools/crimson_worm.py [out_dir]
 Built like the Sandworm (tools/sandworm_design.py): rest pose lies straight and flat
 on its belly facing -z, every cube axis-aligned; bones chain root (front segment,
 where you sit) -> Seg2..Seg6 to the tail, root -> neck (the head). Worm, not snake:
-blunt round-ended segments of even width with a purple ring at each joint, no
-spikes. One eye on the front of the head, black pupil on yellow, a purple brow
-and mouth. Same slither as the Sandworm (idle, walk, gallop = run).
+one block per segment with a purple ring at each joint, no spikes, as few
+parts as possible (QM). One eye on the front of the head, black pupil on yellow, a
+purple mouth. Same slither as the Sandworm (idle, walk, gallop = run).
 """
 
 import json
@@ -29,7 +29,7 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 NAME = "Eyeworm"
 OUT = "/mnt/project-files/animals/crimson_worm"
 
-COLORS = {"crimson": (170, 22, 48), "belly": (214, 70, 92), "purple": (122, 44, 168),
+COLORS = {"crimson": (170, 22, 48), "purple": (122, 44, 168),
           "yellow": (255, 214, 40), "black": (20, 16, 24)}
 TEX = {n: i for i, n in enumerate(COLORS)}
 
@@ -37,24 +37,17 @@ HEAD = ("neck", -4.6, 0.0, 2.6, 4.9)
 SEGMENTS = [("root", 0.0, 3.0, 2.1, 4.0), ("Seg2", 3.0, 5.8, 2.0, 3.8), ("Seg3", 5.8, 8.4, 1.9, 3.6),
             ("Seg4", 8.4, 10.8, 1.75, 3.3), ("Seg5", 10.8, 13.0, 1.55, 2.9), ("Seg6", 13.0, 15.0, 1.3, 2.5)]
 OVERLAP = 0.5
-BELLY = 0.25
 BODY = [s[0] for s in SEGMENTS[1:]]
 TAU = 2 * math.pi
 
 
 def segment(name, z0, z1, hw, h, ring=True):
-    """Crimson core with a pink belly, its top edges stepped in so it reads round, and a
-    purple ring just behind its front joint."""
+    """One crimson block and a purple ring just behind its front joint (QM: as few parts as possible)."""
     L = z1 - z0
     zc = (z0 + z1) / 2
-    belly = h * BELLY
-    cap = 0.7  # top and bottom edges stepped in, so the worm reads round
-    parts = [S.cube(name + "Belly", (0, cap / 2, zc), (2 * hw - 1.0, cap, L), TEX["belly"]),
-             S.cube(name, (0, h / 2, zc), (2 * hw, h - 2 * cap, L), TEX["crimson"]),
-             S.cube(name + "Top", (0, h - cap / 2, zc), (2 * hw - 1.0, cap, L), TEX["crimson"])]
+    parts = [S.cube(name, (0, h / 2, zc), (2 * hw, h, L), TEX["crimson"])]
     if ring:
-        parts += [S.cube(name + "Ring", (0, h / 2, z0 + OVERLAP + 0.45), (2 * hw + 0.3, h - 2 * cap + 0.3, 0.9), TEX["purple"]),
-                  S.cube(name + "RingTop", (0, h - cap / 2 + 0.15, z0 + OVERLAP + 0.45), (2 * hw - 0.7, cap + 0.3, 0.9), TEX["purple"])]
+        parts.append(S.cube(name + "Ring", (0, h / 2, z0 + OVERLAP + 0.45), (2 * hw + 0.3, h + 0.3, 0.9), TEX["purple"]))
     return parts
 
 
@@ -88,12 +81,10 @@ def build():
     bone, z0, z1, hw, h = HEAD
     head = add_group(bone, (0, h / 2, z1), root)
     put(head, segment("Head", z0, z1 + OVERLAP, hw, h, ring=False))
-    put(head, [S.cube("HeadRing", (0, h / 2, z1 - 0.45), (2 * hw + 0.3, h - 1.4 + 0.3, 0.9), TEX["purple"])])
     # the one eye: a yellow block standing proud of the face, black pupil on it
     ey = 2.85
     put(head, [S.cube("Eye", (0, ey, z0 - 0.2), (3.4, 3.0, 0.4), TEX["yellow"]),
                S.cube("Pupil", (0, ey - 0.1, z0 - 0.45), (1.3, 1.8, 0.1), TEX["black"]),
-               S.cube("Brow", (0, ey + 1.65, z0 - 0.15), (3.8, 0.5, 0.5), TEX["purple"]),
                S.cube("Mouth", (0, 0.75, z0 - 0.1), (1.8, 0.35, 0.2), TEX["purple"])])
 
     model = json.load(open(os.path.join(ROOT, "designs", "desert", "Snake.bbmodel")))
