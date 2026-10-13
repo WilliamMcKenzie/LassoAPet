@@ -15,8 +15,8 @@ local rgb = Color3.fromRGB
 local PERIOD, HEIGHT = 64, 48 -- each image's studs along and up (the wall's height)
 -- { near z, far z, image }: walls whose middle is in near..far (the base's are z > 0)
 local ENGRAVE = {
-	{ math.huge, -2168, "rbxassetid://0" }, -- WallMarble.png: the base and the Meadow
-	{ -14064, -21744, "rbxassetid://0" }, -- WallTomb.png: the Ancient Tomb
+	{ math.huge, -2168, "rbxassetid://113833092063949" }, -- WallMarble.png: the base and the Meadow
+	{ -14064, -21744, "rbxassetid://89369993644293" }, -- WallTomb.png: the Ancient Tomb
 }
 -- { near z, far z, wall, checker, cap }
 local PAINT = {

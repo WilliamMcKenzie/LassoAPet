@@ -1191,6 +1191,16 @@ if Config.World == 2 then
 	}
 	tomb.WallColors = { rgb(211, 183, 66), rgb(196, 168, 54) } -- #D3B742
 	tomb.CapColor = rgb(186, 158, 46)
+	-- Walls and gate glows (QM, Oct 13: the Level design thread's batch; tools/world2_walls.luau).
+	crimson.WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) }
+	crimson.CapColor = rgb(72, 39, 42)
+	crimson.GateColor = rgb(255, 59, 92)
+	cavern.GateColor = rgb(92, 225, 255)
+	woodland.WallColors = { rgb(78, 44, 28), rgb(70, 39, 25) }
+	woodland.CapColor = rgb(62, 35, 22)
+	woodland.GateColor = rgb(242, 109, 57)
+	temple.GateColor = rgb(130, 226, 80)
+	tomb.GateColor = rgb(255, 200, 30)
 end
 
 return Config
