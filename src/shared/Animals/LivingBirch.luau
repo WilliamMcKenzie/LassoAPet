@@ -9,6 +9,6 @@ local Horse = require(script.Parent.Horse)
 local LivingBirchModel = require(script.Parent.LivingBirchModel)
 
 return Horse.variant("LivingBirch", LivingBirchModel, "Rare", {
-	seat = Vector3.new(0, 16.8, 0),
+	seat = Vector3.new(0, 17.3, 0), -- on the top clumps, not in them
 	neck = { center = Vector3.new(0, 9.6, 0), radius = 2.0 },
 })

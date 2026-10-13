@@ -174,6 +174,15 @@ return {
 		{ "Accent", 255, 52, 156 }, -- hot-pink wing edges
 		{ "Accent", 255, 110, 190 }, -- stripes and antenna tips
 	},
+	Hawkmoth = {
+		{ "Body", 62, 48, 44 }, -- body, head
+		{ "Body", 84, 54, 40 }, -- forewings
+		{ "Body", 32, 26, 28 }, -- collar, legs, antennae
+		{ "Marking", 242, 109, 57 }, -- abdomen rings, hindwings, antenna tips
+		{ "Accent", 160, 72, 38 }, -- forewing bands
+		{ "Belly", 246, 228, 182 }, -- the skull on its back
+		{ "Horn", 24, 20, 22 }, -- spikes, stinger, brows, wing edges, black rings
+	},
 	CrystalPhoenix = {
 		{ "Body", 104, 58, 184 }, -- body, wing arms
 		{ "Body", 146, 96, 226 }, -- head, neck, wing bands
@@ -335,6 +344,15 @@ return {
 		{ "Belly", 255, 200, 156 },
 		{ "Marking", 255, 214, 96 }, -- bumps
 	},
+	RollingLog = {
+		{ "Body", 170, 100, 52 }, -- bark
+		{ "Marking", 118, 66, 36 }, -- bark strips
+		{ "Belly", 242, 206, 148 }, -- cut ends
+		{ "Belly", 206, 148, 88 }, -- growth ring
+		{ "Belly", 228, 180, 116 }, -- core
+		{ "Horn", 176, 182, 196 }, -- spikes
+		{ "Horn", 96, 100, 116 }, -- spike collars
+	},
 	Lionfish = {
 		{ "Body", 255, 240, 214 },
 		{ "Marking", 232, 72, 40 }, -- stripes, spines
@@ -352,6 +370,12 @@ return {
 		{ "Body", 236, 112, 132 }, -- head, funnel
 		{ "Marking", 255, 138, 72 }, -- cap
 		{ "Marking", 226, 100, 50 }, -- cap rim
+	},
+	GiantGolem = {
+		{ "Body", 150, 142, 132 }, -- stone
+		{ "Body", 104, 97, 90 }, -- chest, forearms, head, spikes (shade)
+		{ "Marking", 184, 177, 166 }, -- pale plates, caps, brow, knuckles
+		{ "Accent", 110, 186, 68 }, -- moss
 	},
 	Kraken = {
 		{ "Body", 58, 76, 128 }, -- tentacles
