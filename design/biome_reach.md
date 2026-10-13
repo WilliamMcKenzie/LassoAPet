@@ -35,7 +35,7 @@ Riding it from the start line for the whole 33 s ride, sprinting all the way (Mo
 | FireLobster | Volcano | Rare | 6.43 | 5.15 | 18,672 | Jurassic | 60% |
 | RockHog | Volcano | Rare | 6.56 | 5.3 | 19,050 | Jurassic | 65% |
 | LavaWhale | Volcano | Epic | 6.83 | 5.85 | 19,834 | Jurassic | 75% |
-| Rockworm | Volcano | Epic | 6.3 |  | 18,295 | Jurassic | 55% |
+| Rockworm | Volcano | Epic | 7.12 | 6.3 | 20,676 | Jurassic | 86% |
 | Phoenix | Volcano | Legendary | 7.2 |  | 20,909 | Jurassic | 89% |
 | PalmGuy | Jurassic | Uncommon | 4.9 |  | 14,230 | Jurassic | 2% |
 | Ankylosaurus | Jurassic | Uncommon | 5 |  | 14,520 | Jurassic | 6% |
