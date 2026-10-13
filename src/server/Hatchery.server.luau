@@ -257,15 +257,15 @@ local function awayGold(player, profile, data)
 	return (tonumber(data.awayGold) or 0) + math.floor(income(profile) * x * Config.AwayRate * away)
 end
 
--- A saved pen's gold a second (as income(), from its save).
-local function savedIncome(data)
+-- A saved pen's gold a second (as income(), from its save), at its own world's rates.
+local function savedIncome(data, world)
 	if typeof(data) ~= "table" or not (data.tutorial or next(data.items or {})) then
 		return 0
 	end
-	local total = tonumber(data.rideIncome) or (Config.PetIncome[data.ride] or 0) * (tonumber(data.rideMerged) or 1)
+	local total = tonumber(data.rideIncome) or (Config.incomeIn(world, data.ride) or 0) * (tonumber(data.rideMerged) or 1)
 	for _, item in typeof(data.items) == "table" and data.items or {} do
 		if typeof(item) == "table" and item.pet then
-			total += tonumber(item.income) or (Config.PetIncome[item.pet] or 0) * (tonumber(item.merged) or 1)
+			total += tonumber(item.income) or (Config.incomeIn(world, item.pet) or 0) * (tonumber(item.merged) or 1)
 		end
 	end
 	return total
@@ -273,10 +273,10 @@ end
 
 local function loadOtherWorlds(player)
 	local total = 0
-	for _, other in otherStores do
+	for world, other in otherStores do
 		local success, data = pcall(other.GetAsync, other, "u" .. player.UserId)
 		if success then
-			total += savedIncome(data)
+			total += savedIncome(data, world)
 		end
 	end
 	otherIncome[player] = total
