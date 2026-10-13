@@ -27,10 +27,10 @@ local WORLDS = {
 	{ name = "World 2", banner = "World2", price = 400 },
 }
 local PANEL = Vector2.new(769, 520) -- about 58% of the screen across
-local CARD = Vector2.new(725, 210)
-local CARD_TOP, CARD_GAP = 63, 22 -- the first card's top below the panel's, and between them
-local BUTTON = Vector2.new(292, 73) -- (the art's 409 x 102)
-local BUTTON_INSET = 15 -- from the card's top right
+local CARD = Vector2.new(723, 212)
+local CARD_TOP, CARD_GAP = 62, 22 -- the first card's top below the panel's, and between them
+local BUTTON = Vector2.new(294, 71)
+local BUTTON_INSET = 13 -- from the card's top right
 local MONTSERRAT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local NEAR = 30 -- studs (across the ground) from the gate's middle: it pops up
 local AWAY = 45 -- and you've walked off once you're this far
@@ -114,8 +114,8 @@ panel.Parent = root
 local title = Instance.new("TextLabel")
 title.Name = "Title"
 title.AnchorPoint = Vector2.new(0.5, 0.5)
-title.Position = UDim2.fromScale(0.5, 0)
-title.Size = UDim2.fromOffset(360, 41)
+title.Position = UDim2.new(0.5, 0, 0, -3)
+title.Size = UDim2.fromOffset(360, 48)
 title.Text = "Worlds"
 title.ZIndex = 3
 outlined(title, 3)
@@ -129,8 +129,8 @@ closeButton.BackgroundTransparency = 1
 closeButton.AutoButtonColor = false
 closeButton.Image = CLOSE
 closeButton.AnchorPoint = Vector2.new(0.5, 0.5)
-closeButton.Position = UDim2.fromScale(1, 0)
-closeButton.Size = UDim2.fromOffset(63, 63)
+closeButton.Position = UDim2.new(1, -5, 0, 6)
+closeButton.Size = UDim2.fromOffset(71, 71)
 closeButton.ZIndex = 4
 pressable(closeButton)
 closeButton.Parent = panel
@@ -180,8 +180,8 @@ for i, world in WORLDS do
 		local price = Instance.new("TextLabel")
 		price.Name = "Price"
 		price.AnchorPoint = Vector2.new(0.5, 0.5)
-		price.Position = UDim2.fromScale(0.45, 0.5)
-		price.Size = UDim2.fromScale(0.3, 0.46)
+		price.Position = UDim2.fromScale(0.336, 0.5)
+		price.Size = UDim2.fromScale(0.3, 0.52)
 		price.Text = "$" .. world.price
 		price.ZIndex = 4
 		outlined(price, 3)
