@@ -71,8 +71,9 @@ def unicorn():
         bone = f"Mane{i + 1}"
         top = 11.0 - i * 0.95
         length = 3.0 - i * 0.2
-        a.box(bone, (-0.45, top - 1.0, -1.15), (0.45, top, -1.15 + length), RAINBOW[i], bone)
-        a.wedge(bone + "Tip", (-0.45, top - 1.0, -1.15 + length), (0.45, top, -1.15 + length + 0.6), RAINBOW[i], bone, "up_back")
+        hw = (1.7 - 0.25 * i) / 2  # each strand 0.25 narrower than the one above: no z-fighting where they overlap (QM)
+        a.box(bone, (-hw, top - 1.0, -1.15), (hw, top, -1.15 + length), RAINBOW[i], bone)
+        a.wedge(bone + "Tip", (-hw, top - 1.0, -1.15 + length), (hw, top, -1.15 + length + 0.6), RAINBOW[i], bone, "up_back")
         a.pivots[bone] = (0, top - 0.5, -1.15)
         a.bone_order.append((bone, "neck"))
 
