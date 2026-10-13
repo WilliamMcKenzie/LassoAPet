@@ -3,7 +3,7 @@
 -- execute_luau) on World 1's Place, after tools/arc_base.luau. Re-running is fine.
 -- Green grass, darker green grass and tan dirt as a gradient: the bright grass never
 -- touches the dirt, there's always darker grass between. The bright grass is a stud up,
--- but flat under the pens and on the start line's row. Replaces the base floor (its
+-- but flat inside the pens (a tile round them) and on the start line's row. Replaces the base floor (its
 -- ArcBase parts), drops any plant now standing on dirt, and moves everything else in
 -- BaseDecor (and the spawn) up or down by however much the floor under it moved.
 -- In game the floor takes Config's Meadow colours: the darker grass is a Patch named
