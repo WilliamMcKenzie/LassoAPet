@@ -111,7 +111,11 @@ def build():
                    S.cube("Pupil" + s, (sx * (hw + 0.055), ey0 + 0.35, ez0 + 0.025 + 0.3), (0.05, 0.6, 0.6), TEX["pupil"])])
     # crystal pincers curving in at the front, antennae sweeping up and forward
     for s, sx in (("L", -1), ("R", 1)):
-        put(head, [S.cube("Pincer" + s, (sx * 0.95, LIFT + 0.25, z0 - 0.6), (0.5, 0.5, 1.5), TEX["cyan"]),
+        # spiked mandibles (QM): a forward point and an inward spike on each
+        px, py, pz = sx * 0.95, LIFT + 0.25, z0 - 0.6
+        put(head, [S.cube("Pincer" + s, (px, py, pz), (0.5, 0.5, 1.5), TEX["cyan"]),
+                   pyramid("PincerTip" + s, (px, py, pz - 0.75), 0, 0.5, 0.7, TEX["cyan"], (-90, 0, 0)),
+                   pyramid("PincerSpike" + s, (px - sx * 0.25, py, pz - 0.2), 0, 0.4, 0.45, TEX["cyan"], (0, 0, sx * 90)),
                    S.cube("Antenna" + s, (sx * 0.8, LIFT + h + 0.5, z0 + 0.1), (0.3, 0.3, 2.2), TEX["leg"], rx=-35)])
 
     model = json.load(open(os.path.join(ROOT, "designs", "desert", "Snake.bbmodel")))
