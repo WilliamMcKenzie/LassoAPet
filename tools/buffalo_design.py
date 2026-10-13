@@ -25,7 +25,7 @@ from animal_designs import Animal, quad_animations  # noqa: E402
 from partlib import render  # noqa: E402
 from horse_rig import pose  # noqa: E402
 
-PX = 0.25  # studs per pixel of QM's base
+PX = 0.3  # studs per pixel of QM's base
 COAT = (178, 114, 64)
 FUR = (120, 74, 44)
 SNOUT = (184, 136, 98)
@@ -90,8 +90,8 @@ def buffalo():
     return a
 
 
-CAM = dict(eye=(-19, 12, -21), target=(0, 4.2, -1.2), W=420, H=420, fov=36)
-SIDE = dict(eye=(-28, 4, -1.5), target=(0, 4.2, -1.5), W=420, H=420, fov=34)
+CAM = dict(eye=(-19, 12, -21), target=(0, 4.6, -1.2), W=420, H=420, fov=36)
+SIDE = dict(eye=(-28, 4, -1.5), target=(0, 4.6, -1.5), W=420, H=420, fov=34)
 FRONT = dict(eye=(-5, 6, -22), target=(0, 3.6, -1.5), W=420, H=420, fov=34)
 
 
@@ -101,13 +101,13 @@ def main(out=os.path.join(A.ROOT, "designs", "world2"), shots="/mnt/project-file
     a = buffalo()
     m = A.build_animal(a, out)
     print(f"{a.name}: {len(a.parts)} parts")
-    horse = json.load(open(os.path.join(A.ROOT, "designs", "animals", "Horse.bbmodel")))
+    horse = json.load(open(os.path.join(A.ROOT, "designs", "animals", "Rhino.bbmodel")))
     tiles = [render(pose(horse, None, 0), **CAM), render(pose(m, None, 0), **CAM),
              render(pose(m, None, 0), **FRONT), render(pose(m, None, 0), **SIDE)]
     im = Image.new("RGB", (420 * len(tiles), 420))
     for i, t in enumerate(tiles):
         im.paste(t, (420 * i, 0))
-    A.label(im, ["Horse (for size)", "Buffalo", "Front", "Side"]).save(os.path.join(shots, "Buffalo.png"))
+    A.label(im, ["Rhino (for size)", "Buffalo", "Front", "Side"]).save(os.path.join(shots, "Buffalo.png"))
     frames = []
     for name, n in (("walk", 20), ("gallop", 16)):
         anim = A.anim_named(m, name)
