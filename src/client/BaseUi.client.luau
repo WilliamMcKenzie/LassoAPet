@@ -288,7 +288,7 @@ fold.Parent = quests
 -- (folded to start with on a phone or tablet, so the column under it clears Roblox's jump
 -- button: QM, Oct 12; its claim badge still shows)
 local UserInputService = game:GetService("UserInputService")
-local folded = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
+local folded = true -- (folded to start with everywhere: QM, Oct 13; was phones and tablets only)
 quests:SetAttribute("Folded", folded)
 fold.Activated:Connect(function()
 	folded = not folded
