@@ -810,13 +810,19 @@ local Config = {
 		Hawkmoth = "rbxassetid://111594299533130", -- assets/ui/HawkmothEggRender.png (World 2)
 		RollingLog = "rbxassetid://125301165432908", -- assets/ui/RollingLogEggRender.png (World 2)
 		Catfish = "rbxassetid://136135901593127", -- assets/ui/CatfishEggRender.png (World 2)
-		TombJackal = "", -- assets/ui/TombJackalEggRender.png (World 2; Studio uploads it)
 		Tiger = "rbxassetid://112691374931555", -- assets/ui/TigerEggRender.png (World 2)
 		JadeStatue = "rbxassetid://106883633786837", -- assets/ui/JadeStatueEggRender.png (World 2)
 		GarnetStatue = "rbxassetid://121784684526161", -- assets/ui/GarnetStatueEggRender.png (World 2)
 		Fox = "rbxassetid://92522948167443", -- assets/ui/FoxEggRender.png (World 2)
 		NineTailedFox = "rbxassetid://110560724842212", -- assets/ui/NineTailedFoxEggRender.png (World 2)
 		Kitsune = "rbxassetid://124688776792586", -- assets/ui/KitsuneEggRender.png (World 2)
+		TombJackal = "rbxassetid://114106715330048", -- assets/ui/TombJackalEggRender.png (World 2)
+		LionArcher = "rbxassetid://117473019333658", -- assets/ui/LionArcherEggRender.png (World 2)
+		Nut = "rbxassetid://120782360993998", -- assets/ui/NutEggRender.png (World 2)
+		Geb = "rbxassetid://93281428675559", -- assets/ui/GebEggRender.png (World 2)
+		EagleSentry = "rbxassetid://117861828286868", -- assets/ui/EagleSentryEggRender.png (World 2)
+		Bes = "rbxassetid://91869381995495", -- assets/ui/BesEggRender.png (World 2)
+		BloatedMummy = "rbxassetid://113530717781179", -- assets/ui/BloatedMummyEggRender.png (World 2)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
@@ -1300,7 +1306,7 @@ if Config.World == 2 then
 			{ Text = "Reach Crystal Cavern", Kind = "reach", Biome = 3, Egg = "BrownMushroom" }, -- (the Snowman)
 			{ Text = "Reach Woodland Maze", Kind = "reach", Biome = 4, Egg = "OrangeButterfly" }, -- (the Lionfish)
 			{ Text = "Reach Temple", Kind = "reach", Biome = 5, Egg = "Tiger" }, -- (the Fire Lobster)
-			{ Text = "Reach Tomb", Kind = "reach", Biome = 6, Egg = "TombJackal" }, -- (the Palm Guy)
+			{ Text = "Reach Tomb", Kind = "reach", Biome = 6, Egg = "BloatedMummy" }, -- (the Palm Guy: the Uncommon)
 		},
 		{
 			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "Seraph" },
