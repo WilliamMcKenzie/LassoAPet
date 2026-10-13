@@ -37,6 +37,14 @@ local oldStamina = {} -- [player] = the save's old stamina level, kept as it was
 -- worlds' as it found them.
 local GATES = if Config.World == 1 then "gates" else "gates" .. Config.World
 local others = {} -- [player] = the loaded record, for the other worlds' fields
+-- How long you've played this world, all visits (`played`, `played2`...; QM, Oct 13: /stats'
+-- time to unlock each biome). `playedFull` marks a record that's counted it from its very
+-- first visit (records from before this only count from here on, so /stats skips them).
+local PLAYED = if Config.World == 1 then "played" else "played" .. Config.World
+local playedBase, playedFrom, playedFull = {}, {}, {} -- [player] = seconds at join, os.time() at join, counted from the start
+local function playedNow(player)
+	return (playedBase[player] or 0) + (if playedFrom[player] then os.time() - playedFrom[player] else 0)
+end
 
 local function key(player)
 	return "u" .. player.UserId
@@ -58,6 +66,9 @@ local function load(player)
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + (tonumber(gold) or 0))
 				oldStamina[player] = if typeof(value) == "table" then tonumber(value.stamina) else nil
 				others[player] = if typeof(value) == "table" then value else nil
+				playedBase[player] = if typeof(value) == "table" then tonumber(value[PLAYED]) or 0 else 0
+				playedFrom[player] = os.time()
+				playedFull[player] = value == nil or (typeof(value) == "table" and value[PLAYED .. "Full"] == true)
 				local gates = if typeof(value) == "table" then tonumber(value[GATES]) else nil
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
 				for _, world in typeof(value) == "table" and typeof(value.worlds) == "table" and value.worlds or {} do
@@ -97,6 +108,8 @@ local function save(player, onlyIfChanged)
 		local record = table.clone(others[player] or {})
 		record.gold, record.bought, record.stamina, record[GATES] = gold, bought[player] or 0, oldStamina[player], gates
 		record.worlds = if #worlds > 0 then worlds else nil
+		record[PLAYED] = math.floor(playedNow(player))
+		record[PLAYED .. "Full"] = playedFull[player] or nil
 		if pcall(store.SetAsync, store, key(player), record) then
 			savedAs[player] = as
 			return
@@ -132,6 +145,7 @@ end
 Players.PlayerRemoving:Connect(function(player)
 	save(player)
 	loaded[player], ready[player], bought[player], savedAs[player], oldStamina[player], others[player] = nil, nil, nil, nil, nil, nil
+	playedBase[player], playedFrom[player], playedFull[player] = nil, nil, nil
 end)
 
 -- Worlds (QM, Oct 13): each its own Place. BuyWorld unlocks one for Config.WorldPrices
@@ -221,6 +235,14 @@ breakGate.OnServerEvent:Connect(function(player, i)
 	local broken = player:GetAttribute("GatesBroken") or 1
 	if typeof(i) == "number" and i > broken and i <= #Config.Biomes then
 		player:SetAttribute("GatesBroken", i)
+		if playedFull[player] then -- (/stats: how long it took to get here, Stats.server)
+			local unlocked = game:GetService("ServerStorage"):FindFirstChild("BiomeUnlocked")
+			for b = broken + 1, i do
+				if unlocked then
+					unlocked:Fire(player, b, playedNow(player))
+				end
+			end
+		end
 		Funnel.reached(player, broken, i) -- (analytics: Zones Reached)
 	end
 end)

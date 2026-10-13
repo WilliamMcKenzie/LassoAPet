@@ -379,8 +379,8 @@ local Config = {
 		-- D1 eggs you come back for.
 		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 300, MarbleFish = 15, Lion = 60, Buffalo = 60, MarbleColossus = 120, MajesticUnicorn = 300, -- Meadow (the Marble Fish, Lion, Marble Colossus and Majestic Unicorn: World 2's, as the Pinto, a Rare, the Rhino and Unicorn)
 		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 600, -- Desert
-		Eyeworm = 15, Maw = 60, IvorySpider = 75, -- World 2 Crimson Lands
-		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 120, Icebringer = 900, SnackYak = 3600, CrystalCentipede = 15, RedMushroom = 15, BrownMushroom = 60, PurpleMushroom = 120, BlueCrystal = 15, PinkCrystal = 60, CrystalSpider = 120, -- Tundra (World 2's Crystal Cavern animals, as the Penguin, Boar, Snowman and Ice Golem; the Living Crystals as the Boar and Snowman)
+		Eyeworm = 15, Maw = 60, IvorySpider = 75, Asura = 600, -- World 2 Crimson Lands
+		Penguin = 15, Boar = 15, Snowman = 60, IceGolem = 120, Icebringer = 900, SnackYak = 3600, CrystalCentipede = 15, RedMushroom = 15, BrownMushroom = 60, PurpleMushroom = 120, BlueCrystal = 15, PinkCrystal = 60, CrystalSpider = 120, CrystalPhoenix = 120, -- Tundra (World 2's Crystal Cavern animals, as the Penguin, Boar, Snowman and Ice Golem; the Living Crystals as the Boar and Snowman)
 		Starfish = 15, Clownfish = 15, Whale = 60, Lionfish = 35, Squid = 45, KingCrab = 300, FishSchool = 200, BlueCrab = 800, Kraken = 1200, -- Ocean
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
 		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
@@ -519,6 +519,7 @@ local Config = {
 		Sandworm = { Kind = "Burrow", OnReturn = true },
 		Whale = { Kind = "Fly", Height = 56 },
 		Phoenix = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: "fly like the whale"
+		CrystalPhoenix = { Kind = "Fly", Height = 56 }, -- QM, Oct 13: "flying sprint like normal phoenix"
 		Pterodactyl = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: a flying type, like the Phoenix
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
@@ -538,8 +539,8 @@ local Config = {
 	PetTiers = {
 		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleFish = 1, Lion = 1, Buffalo = 2, MarbleColossus = 2, MajesticUnicorn = 2, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
-		Eyeworm = 1, Maw = 1, IvorySpider = 2, -- World 2 Crimson Lands
-		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, CrystalCentipede = 1, RedMushroom = 1, BrownMushroom = 1, PurpleMushroom = 2, BlueCrystal = 1, PinkCrystal = 1, CrystalSpider = 2, -- Tundra
+		Eyeworm = 1, Maw = 1, IvorySpider = 2, Asura = 3, -- World 2 Crimson Lands (the Asura large, QM)
+		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, CrystalCentipede = 1, RedMushroom = 1, BrownMushroom = 1, PurpleMushroom = 2, BlueCrystal = 1, PinkCrystal = 1, CrystalSpider = 2, CrystalPhoenix = 2, -- Tundra
 		Starfish = 1, Clownfish = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, Lionfish = 1, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
@@ -600,7 +601,7 @@ local Config = {
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
 	-- or crashes into, is PetTiers'. Unlisted: 1.
-	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2 }, -- (QM, Oct 11)
+	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2 }, -- (QM, Oct 11)
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
@@ -619,8 +620,8 @@ local Config = {
 	PetIncome = {
 		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleFish = 15, Lion = 24, Buffalo = 30, MarbleColossus = 90, MajesticUnicorn = 450, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
-		Eyeworm = 18, Maw = 60, IvorySpider = 180, -- World 2 Crimson Lands
-		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, CrystalCentipede = 75, RedMushroom = 150, BrownMushroom = 300, PurpleMushroom = 1260, BlueCrystal = 150, PinkCrystal = 300, CrystalSpider = 1260, -- Tundra
+		Eyeworm = 18, Maw = 60, IvorySpider = 180, Asura = 750, -- World 2 Crimson Lands
+		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, CrystalCentipede = 75, RedMushroom = 150, BrownMushroom = 300, PurpleMushroom = 1260, BlueCrystal = 150, PinkCrystal = 300, CrystalSpider = 1260, CrystalPhoenix = 1260, -- Tundra
 		Starfish = 300, Clownfish = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, Lionfish = 1500, -- Ocean
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
 		TRex = 60000, Raptor = 40000, -- Jurassic (guesses: past the Volcano's)
@@ -726,10 +727,13 @@ local Config = {
 		BlueCrystal = "rbxassetid://112194074349421", -- assets/ui/BlueCrystalEggRender.png (World 2)
 		PinkCrystal = "rbxassetid://117236752430565", -- assets/ui/PinkCrystalEggRender.png (World 2)
 		Lion = "rbxassetid://82682007346790", -- assets/ui/LionEggRender.png (World 2)
+		Buffalo = "rbxassetid://118027620960011", -- assets/ui/BuffaloEggRender.png (World 2)
 		CrystalSpider = "rbxassetid://98286776885826", -- assets/ui/CrystalSpiderEggRender.png (World 2)
 		Eyeworm = "rbxassetid://132028611021169", -- assets/ui/EyewormEggRender.png (World 2)
 		Maw = "rbxassetid://121895939250438", -- assets/ui/MawEggRender.png (World 2)
 		IvorySpider = "rbxassetid://79662614434978", -- assets/ui/IvorySpiderEggRender.png (World 2)
+		Asura = "rbxassetid://113695299206853", -- assets/ui/AsuraEggRender.png (World 2)
+		CrystalPhoenix = "rbxassetid://137731947260447", -- assets/ui/CrystalPhoenixEggRender.png (World 2; scaled to 941 x 1000)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
@@ -1040,6 +1044,7 @@ local Config = {
 		Eyeworm = { Speed = 1.31, Stamina = 1.5 }, -- World 2 Crimson Lands Uncommon: the Cactus's numbers (QM, Oct 13: World 2 ~matches World 1's speeds)
 		Maw = { Speed = 1.77, Stamina = 1.5 }, -- World 2 Crimson Lands Rare: the Scorpion's numbers
 		IvorySpider = { Speed = 1.7, Stamina = 3 }, -- World 2 Crimson Lands Epic: the Sandworm's numbers
+		Asura = { Speed = 2.8, Stamina = 3 }, -- World 2 Crimson Lands Legendary: the Snake's numbers
 		Cactus = { Speed = 1.31, Stamina = 1.5 }, -- (QM, Oct 12: 90% into the Desert; was 1.2)
 		Kitten = { Speed = 1.5, Stamina = 1.2 }, -- (QM, Oct 12: 20% into the Tundra; was 1.4)
 		Scorpion = { Speed = 1.77, Stamina = 1.5 }, -- (QM, Oct 12: 60% into the Tundra; was 1.5)
@@ -1054,6 +1059,7 @@ local Config = {
 		BlueCrystal = { Speed = 2.36, Stamina = 1.6 }, -- World 2's Cavern Living Crystals: blue Uncommon (as the Boar),
 		PinkCrystal = { Speed = 2.52, Stamina = 1.3 }, -- pink Rare (as the Snowman), until QM sets them
 		CrystalSpider = { Speed = 2.57, Stamina = 3 }, -- World 2's Cavern Crystal Spider: Epic (as the Ice Golem until QM sets it)
+		CrystalPhoenix = { Speed = 2.57, Stamina = 3 }, -- World 2's Cavern Crystal Phoenix: Epic (as the Ice Golem until QM sets it)
 		Penguin = { Speed = 1.99, Stamina = 1.5 }, -- (QM, Oct 12: 93% into the Tundra; was 1.72)
 		Boar = { Speed = 2.36, Stamina = 1.6 }, -- (QM, Oct 12: 30% into the Ocean; was 1.86)
 		Snowman = { Speed = 2.52, Stamina = 1.3 }, -- (QM, Oct 12: 45% into the Ocean; was 2.06)
@@ -1188,6 +1194,7 @@ if Config.World == 2 then
 	crimson.Herd.Eyeworm = 0.3 -- the Crimson Lands' animals (QM, Oct 13): Uncommon, as often as the Cactus
 	crimson.Herd.Maw = 0.3 -- Rare, as the Scorpion
 	crimson.Herd.IvorySpider = 0.2 -- Epic, as the Sandworm
+	crimson.Herd.Asura = 0.025 -- Legendary, as the Snake
 	-- The third: the Crystal Cavern (QM, Oct 13; tools/world2_cavern.luau): blue-grey by the
 	-- walls to ice to crystal down the middle; its plank boards keep their own colours.
 	local cavern = Config.Biomes[3]
@@ -1206,6 +1213,7 @@ if Config.World == 2 then
 	cavern.Herd.BlueCrystal = 0.25 -- the Living Crystals (QM, Oct 13), as often as the Boar and Snowman
 	cavern.Herd.PinkCrystal = 0.22
 	cavern.Herd.CrystalSpider = 0.12 -- the Crystal Spider (QM, Oct 13), an Epic as often as the Ice Golem
+	cavern.Herd.CrystalPhoenix = 0.12 -- the Crystal Phoenix (QM, Oct 13), an Epic too
 	-- The fourth: the Woodland Maze (QM, Oct 13; tools/world2_woodland.luau): brown, darker
 	-- by the walls.
 	local woodland = Config.Biomes[4]

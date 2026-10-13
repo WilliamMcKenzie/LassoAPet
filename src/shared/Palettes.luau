@@ -144,6 +144,12 @@ return {
 		{ "Hoof", 190, 100, 214 }, -- legs
 		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
 	},
+	CrystalPhoenix = {
+		{ "Body", 104, 58, 184 }, -- body, wing arms
+		{ "Body", 146, 96, 226 }, -- head, neck, wing bands
+		{ "Marking", 229, 131, 251 }, -- pink feathers
+		{ "Accent", 0, 190, 231 }, -- cyan beak, feathers and crystals
+	},
 	CrystalSpider = {
 		{ "Body", 96, 108, 200 },
 		{ "Hoof", 66, 74, 152 }, -- lower legs
@@ -170,6 +176,13 @@ return {
 		{ "Body", 246, 240, 226 },
 		{ "Accent", 200, 190, 174 }, -- knees, spinnerets
 		{ "Hoof", 150, 138, 126 }, -- feet, fangs
+	},
+	Asura = {
+		{ "Body", 72, 84, 85 }, -- armour
+		{ "Body", 53, 67, 69 }, -- cape, grip (darker)
+		{ "Marking", 121, 191, 202 }, -- hair, sword guard
+		{ "Accent", 111, 120, 121 }, -- helm, mask, shoulder pads, belt
+		{ "Horn", 130, 138, 140 }, -- blade
 	},
 	Sandworm = {
 		{ "Body", 228, 178, 104 },
