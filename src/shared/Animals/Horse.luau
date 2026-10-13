@@ -293,15 +293,17 @@ function Horse:setScale(s)
 	end
 end
 
--- Rebirths (QM, Oct 13): your pets are k x bigger everywhere, once. Its own size grows,
--- so every later setScale, its animations, its seat and its neck loop all scale with it.
+-- Rebirths and the Giant Pets pass (QM, Oct 13): your pets are k x their own size
+-- everywhere (k in all: a later call sets it again, not on top). Its own size grows, so
+-- every later setScale, its animations, its seat and its neck loop all scale with it.
 function Horse:grow(k)
-	if self.grown then
+	local was = self.grown or 1
+	if k == was then
 		return
 	end
 	self.grown = k
-	self.size *= k
-	self.baseScale *= k
+	self.size *= k / was
+	self.baseScale *= k / was
 	self.model:ScaleTo(self.scale * self.baseScale)
 end
 

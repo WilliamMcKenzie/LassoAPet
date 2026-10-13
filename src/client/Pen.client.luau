@@ -86,7 +86,7 @@ end
 -- A pet in `pen` wears its owner's rebirth skin (Shared/Skins).
 local function skin(pen, pet)
 	local owner = Players:GetPlayerByUserId(pen:GetAttribute("Owner") or 0)
-	Skins.apply(pet.animal, owner and owner:GetAttribute("Rebirths"))
+	Skins.apply(pet.animal, owner and owner:GetAttribute("Rebirths"), owner and owner:GetAttribute("PassGiantPets"))
 end
 
 local function placePet(pet, at, yaw)
@@ -465,9 +465,10 @@ for _, other in Players:GetPlayers() do
 	watchRidePet(other)
 end
 
--- Anyone's rebirths loaded after their pets were drawn: skin them now.
+-- Anyone's rebirths (or Giant Pets pass) loaded after their pets were drawn: skin and
+-- size them now.
 local function watchRebirths(other)
-	other:GetAttributeChangedSignal("Rebirths"):Connect(function()
+	local function again()
 		for pen, list in shown do
 			if pen:GetAttribute("Owner") == other.UserId then
 				for _, s in list do
@@ -477,7 +478,9 @@ local function watchRebirths(other)
 				end
 			end
 		end
-	end)
+	end
+	other:GetAttributeChangedSignal("Rebirths"):Connect(again)
+	other:GetAttributeChangedSignal("PassGiantPets"):Connect(again)
 end
 Players.PlayerAdded:Connect(watchRebirths)
 for _, other in Players:GetPlayers() do

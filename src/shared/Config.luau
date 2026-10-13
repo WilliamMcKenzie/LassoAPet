@@ -1088,6 +1088,7 @@ local Config = {
 		{ Key = "StarterPack", Name = "Starter Pack", Price = 19, Id = 2013764414 }, -- Config.StarterPack, once (Hatchery)
 	},
 	PassSpeed = 1.5, -- Speed's
+	PassGiantScale = 2, -- Giant Pets': every pet of yours this x bigger (Skins.apply)
 	StarterPack = { Gold = 150000, Pet = "Snake" }, -- (QM's popup: 150k and the Snake)
 	PassGoldMultiplier = 2, -- DoubleGold's
 	PassHatchSpeed = 2, -- FastHatch's: hatch times / this
