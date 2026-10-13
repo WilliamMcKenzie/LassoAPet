@@ -1,7 +1,7 @@
 -- The run home's red vignette (QM, Oct 9): QM's picture (red at the edges, clear in the
 -- middle) over the whole screen, under the rest of the UI, pulsing in over InTime
 -- seconds and out over OutTime, over and over, from turning round till the leap over
--- the home line. Config.ReturnVignette.
+-- the home line, stronger the nearer the boss is. Config.ReturnVignette.
 --
 --   ReturnVignette.update(dt, on)
 
@@ -54,15 +54,18 @@ function ReturnVignette.update(dt, on)
 	end
 	-- One pulse: in over InTime (eased), then out over OutTime.
 	local period = cfg.InTime + cfg.OutTime
-	t = (t + dt) % period
+	local near = BossChase.closing or 0 -- (how near the boss has got: Client/ReturnRun)
+	t = (t + dt * (1 + 1.5 * near)) % period -- (pulsing faster as it closes in)
 	local k = if t < cfg.InTime then t / cfg.InTime else 1 - (t - cfg.InTime) / cfg.OutTime
 	k = 0.5 - math.cos(k * math.pi) / 2
 	-- The boss's cry on the run home (BossChase.roar): the pulse held up and a second copy
 	-- over it, deeper red, as loud as the cry is.
+	-- And the nearer the boss, the stronger (QM, Oct 13): never fading below `near`, and the
+	-- deeper copy over it coming up with it, pulsing.
 	local roar = BossChase.roar()
-	local seen = math.max(k, roar) * strength
+	local seen = math.max(k, roar, near) * strength
 	image.ImageTransparency = cfg.MaxTransparency + (cfg.MinTransparency - cfg.MaxTransparency) * seen
-	surge.ImageTransparency = 1 - roar * strength
+	surge.ImageTransparency = 1 - math.max(roar, near * (0.55 + 0.45 * k)) * strength
 end
 
 return ReturnVignette
