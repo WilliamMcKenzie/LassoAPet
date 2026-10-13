@@ -31,6 +31,7 @@ local CARD = Vector2.new(723, 212)
 local CARD_TOP, CARD_GAP = 62, 22 -- the first card's top below the panel's, and between them
 local BUTTON = Vector2.new(294, 71)
 local BUTTON_INSET = 13 -- from the card's top right
+local CASH_GREEN, CASH_RED = Color3.fromHex("00FF09"), Color3.fromRGB(255, 70, 70) -- (the Merge button's)
 local MONTSERRAT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 local NEAR = 30 -- studs (across the ground) from the gate's middle: it pops up
 local AWAY = 45 -- and you've walked off once you're this far
@@ -177,29 +178,45 @@ for i, world in WORLDS do
 		-- Buy: the art's cash stack, the price in green, then its "Buy".
 		local buy = button(ART.Buy)
 		buy.Name = "Buy"
+		-- The price as the merge menu's Merge button has it (QM): left aligned just past
+		-- the cash, Montserrat ExtraBold with a round black stroke, green when you can
+		-- afford it and red when you can't (its 420-wide button's sizes x 0.7).
+		local K = BUTTON.X / 420
 		local price = Instance.new("TextLabel")
 		price.Name = "Price"
-		price.AnchorPoint = Vector2.new(0.5, 0.5)
-		price.Position = UDim2.fromScale(0.336, 0.5)
-		price.Size = UDim2.fromScale(0.3, 0.52)
-		price.Text = "$" .. world.price
-		price.ZIndex = 4
-		outlined(price, 3)
+		price.BackgroundTransparency = 1
 		price.FontFace = MONTSERRAT
-		price.TextColor3 = Color3.fromRGB(110, 255, 90)
+		price.TextSize = 48 * K
+		price.TextXAlignment = Enum.TextXAlignment.Left
+		price.AnchorPoint = Vector2.new(0, 0.5)
+		price.Position = UDim2.new(0, 83 * K, 0.5, 0)
+		price.Size = UDim2.fromOffset(158 * K, 64 * K)
+		price.ZIndex = 4
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 5 * K
+		stroke.LineJoinMode = Enum.LineJoinMode.Round
+		stroke.Parent = price
 		price.Parent = buy
 		local busy = false
+		local function showPrice()
+			if busy then
+				return
+			end
+			price.Text = "$" .. world.price
+			price.TextColor3 = if (player:GetAttribute("Gold") or 0) >= world.price then CASH_GREEN else CASH_RED
+		end
+		player:GetAttributeChangedSignal("Gold"):Connect(showPrice)
+		showPrice()
 		buy.Activated:Connect(function()
 			if busy then
 				return
 			end
 			busy = true -- World 2 isn't there yet (QM): it charges nothing
-			price.Text = "Coming soon"
+			price.Text = "Soon!"
 			price.TextColor3 = Color3.new(1, 1, 1)
 			task.delay(1.5, function()
-				price.Text = "$" .. world.price
-				price.TextColor3 = Color3.fromRGB(110, 255, 90)
 				busy = false
+				showPrice()
 			end)
 		end)
 		buy.Parent = card
