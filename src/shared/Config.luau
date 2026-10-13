@@ -1204,9 +1204,9 @@ if Config.World == 2 then
 	local meadow = Config.Biomes[1]
 	meadow.Herd = table.clone(meadow.Herd)
 	meadow.Herd.MarbleFish = 0.3 -- World 2's Meadow Uncommon (QM, Oct 13), about as often as the Pinto
-	meadow.Herd.Lion = 0.13 -- World 2's Meadow Rare (QM, Oct 13), as often as the Fish
+	meadow.Herd.Lion = 0.2 -- World 2's Meadow Rare (QM, Oct 13), as often as the Fish
 	meadow.Herd.Buffalo = 0.1 -- World 2's Meadow Rare (QM, Oct 13; a guess)
-	meadow.Herd.Crocodile = 0.12 -- World 2's Meadow Rare (QM, Oct 13; a guess)
+	meadow.Herd.Crocodile = 0.2 -- World 2's Meadow Rare (QM, Oct 13; a guess)
 	meadow.Herd.MarbleColossus = 0.08 -- World 2's Meadow Epic (QM, Oct 13), as often as the Rhino
 	meadow.Herd.MajesticUnicorn = 0.05 -- World 2's Meadow Legendary (QM, Oct 13), as often as the Unicorn
 	meadow.GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) }
@@ -1225,10 +1225,10 @@ if Config.World == 2 then
 	crimson.Herd = table.clone(crimson.Herd)
 	crimson.Herd.Eyeworm = 0.3 -- the Crimson Lands' animals (QM, Oct 13): Uncommon, as often as the Cactus
 	crimson.Herd.Maw = 0.3 -- Rare, as the Scorpion
-	crimson.Herd.IvorySpider = 0.2 -- Epic, as the Sandworm
-	crimson.Herd.Asura = 0.025 -- Legendary, as the Snake
-	crimson.Herd.CrimsonScorpion = 0.1 -- Uncommon, as the Kitten
-	crimson.Herd.Beholder = 0.2 -- the Godlands' Rare joins the Crimson Lands (QM, Oct 13), in the Spine Lizard's slot
+	crimson.Herd.IvorySpider = 0.1 -- Epic, as the Sandworm
+	crimson.Herd.Asura = 0.05 -- Legendary, as the Snake
+	crimson.Herd.CrimsonScorpion = 0.2 -- Uncommon, as the Kitten
+	crimson.Herd.Beholder = 0.3 -- the Godlands' Rare joins the Crimson Lands (QM, Oct 13), in the Spine Lizard's slot
 	-- The third: the Crystal Cavern (QM, Oct 13; tools/world2_cavern.luau): blue-grey by the
 	-- walls to ice to crystal down the middle; its plank boards keep their own colours.
 	local cavern = Config.Biomes[3]
@@ -1247,8 +1247,8 @@ if Config.World == 2 then
 	cavern.Herd.BlueCrystal = 0.25 -- the Living Crystals (QM, Oct 13), as often as the Boar and Snowman
 	cavern.Herd.PinkCrystal = 0.22
 	cavern.Herd.CrystalSpider = 0.12 -- the Crystal Spider (QM, Oct 13), an Epic as often as the Ice Golem
-	cavern.Herd.CrystalPhoenix = 0.12 -- the Crystal Phoenix (QM, Oct 13), an Epic too
-	cavern.Herd.CrystalElephant = 0.02 -- the Crystal Elephant (QM, Oct 13), the Legendary, as rare as the Icebringer
+	cavern.Herd.CrystalPhoenix = 0.08 -- the Crystal Phoenix (QM, Oct 13), an Epic too
+	cavern.Herd.CrystalElephant = 0.04 -- the Crystal Elephant (QM, Oct 13), the Legendary, as rare as the Icebringer
 	-- The fourth: the Woodland Maze (QM, Oct 13; tools/world2_woodland.luau): brown, darker
 	-- by the walls.
 	local woodland = Config.Biomes[4]
@@ -1343,14 +1343,9 @@ if Config.World == 2 then
 		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
 		Config.AnimalStats[kind].Speed = speed
 	end
-	-- The trophy angels (QM, Oct 13): each 1 in 300 of its biome's stampede, whatever the
-	-- other weights add up to.
-	for i, kind in { "Seraph", "CrimsonSeraph", "CrystalSeraph" } do
-		local herd, total = Config.Biomes[i].Herd, 0
-		for _, weight in herd do
-			total += weight
-		end
-		herd[kind] = total / 299
+	-- The trophy angels (QM, Oct 13: his weights; were 1 in 300 of their biome's stampede).
+	for i, weight in { 0.001, 0.002, 0.002 } do
+		Config.Biomes[i].Herd[({ "Seraph", "CrimsonSeraph", "CrystalSeraph" })[i]] = weight
 	end
 end
 
