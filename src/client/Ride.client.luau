@@ -1355,7 +1355,7 @@ local function sprinting()
 	if vfx.hunting or player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
 		return false -- the Robo Shark can't sprint while it hunts (QM)
 	end
-	if phase == "return" and not vfx.tutorialRide.active then
+	if phase == "return" then
 		return vfx.returnRun.pushing(controls, rideStick.on, vfx.padPush, sprintKey or Hud.sprintHeld())
 	end
 	if (phase == "return" and Config.ReturnSprint) or (phase == "outbound" and Config.OutboundSprint) then -- (the ride out always a sprint too: QM, Oct 11)

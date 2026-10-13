@@ -32,6 +32,7 @@ local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
 local TutorialRide = require(script.Parent.TutorialRide)
 local CameraHint = require(script.Parent.CameraHint)
+local BossChase = require(script.Parent.BossChase)
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
@@ -64,6 +65,7 @@ local SLOW_STEEP = 9 -- how sharp its turn is
 local WAIT_FOR_BOSS = 5 -- seconds after you sprint till BOSS IN shows (QM)
 local BOSS_SECONDS = 5 -- and how long it gives you
 local GATE_IN, GATE_HOLD, GATE_OUT = 0.8, 1.25, 0.65 -- seconds the camera takes to the Desert's gate, stays, and comes back (QM: twice as fast)
+local RUN_SLOW = 0.15 -- the slow motion on the run home till you run from the boss (QM)
 local NEW_PET_WAIT = 12 -- seconds after a ride for its egg to hatch in your pen
 
 local function myPen()
@@ -573,8 +575,13 @@ local function run()
 		TutorialRide.bossSeconds, TutorialRide.holdFrozen = BOSS_SECONDS, false
 		funnel("boss")
 		while on() and (Hud.isRiding() or player:GetAttribute("Cutscene")) do -- (the new animal cutscene hides the ride's HUD: wait it out too)
-			task.wait(0.1)
+			-- Running from the boss: time all but stops till you push forward and run (QM,
+			-- Oct 13: the run home stands still till you do; Client/ReturnRun).
+			local stuck = Hud.isRiding() and BossChase.over() and not TutorialRide.sprinting
+			TutorialRide.timeScale = if stuck then RUN_SLOW else 1
+			task.wait(0.05)
 		end
+		TutorialRide.timeScale = 1
 		clear()
 		if not on() then
 			break

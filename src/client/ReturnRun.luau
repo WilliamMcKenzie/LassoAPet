@@ -10,6 +10,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local BossChase = require(script.Parent.BossChase)
+local TutorialRide = require(script.Parent.TutorialRide)
 
 local PUSH = 0.25 -- of a stick's reach that counts as pushing
 
@@ -28,7 +29,7 @@ function ReturnRun.pushing(controls, stickOn, padPush, sprint)
 end
 
 function ReturnRun.update(dt, atFull)
-	if not atFull then
+	if not atFull and not TutorialRide.active then -- (the tutorial's slows time instead till you run: Client/Tutorial)
 		ReturnRun.slow += dt
 	end
 	local limit = Config.ReturnRun.CatchAfter
