@@ -12,7 +12,7 @@ local rgb = Color3.fromRGB
 local KINDS = { -- [kind] = { name, top, part colour, checker colour }
 	[0] = { "Ground", 0, rgb(206, 168, 58), rgb(190, 152, 46) },
 	[1] = { "Grass", 0, rgb(182, 144, 44), rgb(166, 130, 36) },
-	[2] = { "Dirt", -1, rgb(142, 101, 60), rgb(125, 86, 50) }, -- (QM: 20% lighter)
+	[2] = { "Dirt", -1, rgb(142, 101, 60), rgb(128, 89, 52) }, -- (QM: 20% lighter)
 	[3] = { "Ground", 1, rgb(206, 168, 58), rgb(190, 152, 46) }, -- the light grass a stud up (QM): all but under the pens and the start line's row
 }
 -- { kind, low x, near z (the top edge, z falls away from home), size x, size z } in game space (x before the offset)
