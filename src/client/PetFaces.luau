@@ -35,6 +35,7 @@ local HEADSHOTS = {
 	Seraph = "rbxassetid://86322926031259", -- PetSeraph.png (World 2)
 	CrimsonSeraph = "rbxassetid://104704985706188", -- PetCrimsonSeraph.png (World 2)
 	CrystalSeraph = "rbxassetid://127357727820671", -- PetCrystalSeraph.png (World 2)
+	BlackWidow = "rbxassetid://116913111074004", -- PetBlackWidow.png (World 2)
 	Caterpillar = "rbxassetid://70444854729766", -- PetCaterpillar.png (World 2)
 	PinkButterfly = "rbxassetid://119374884181309", -- PetPinkButterfly.png (World 2)
 	OrangeButterfly = "rbxassetid://90243386568029", -- PetOrangeButterfly.png (World 2)

@@ -811,6 +811,7 @@ local Config = {
 		Seraph = "rbxassetid://129763838096024", -- assets/ui/SeraphEggRender.png (World 2)
 		CrimsonSeraph = "rbxassetid://132120882288488", -- assets/ui/CrimsonSeraphEggRender.png (World 2)
 		CrystalSeraph = "rbxassetid://100476636621954", -- assets/ui/CrystalSeraphEggRender.png (World 2)
+		BlackWidow = "rbxassetid://131073330411941", -- assets/ui/BlackWidowEggRender.png (World 2)
 		Caterpillar = "rbxassetid://109185103681711", -- assets/ui/CaterpillarEggRender.png (World 2)
 		PinkButterfly = "rbxassetid://139551342957176", -- assets/ui/PinkButterflyEggRender.png (World 2)
 		OrangeButterfly = "rbxassetid://136557216823067", -- assets/ui/OrangeButterflyEggRender.png (World 2)
