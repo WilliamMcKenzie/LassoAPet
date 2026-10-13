@@ -30,11 +30,11 @@ Riding it from the start line for the whole 33 s ride, sprinting all the way (Mo
 | Squid | Ocean | Epic | 4.15 | 3.7 | 12,052 | Volcano | 60% |
 | BlueCrab | Ocean | Legendary | 5.7 |  | 16,553 | Jurassic | 32% |
 | Kraken | Ocean | Legendary | 5.8 |  | 16,843 | Jurassic | 36% |
-| Firebird | Volcano | Uncommon | 4.59 |  | 13,329 | Volcano | 85% |
-| VolcanoTortoise | Volcano | Rare | 5 |  | 14,520 | Jurassic | 6% |
-| FireLobster | Volcano | Rare | 5.15 |  | 14,956 | Jurassic | 12% |
-| RockHog | Volcano | Rare | 5.3 |  | 15,391 | Jurassic | 17% |
-| LavaWhale | Volcano | Epic | 5.85 |  | 16,988 | Jurassic | 38% |
+| Firebird | Volcano | Uncommon | 5.11 | 4.59 | 14,839 | Jurassic | 10% |
+| VolcanoTortoise | Volcano | Rare | 6.17 | 5 | 17,917 | Jurassic | 50% |
+| FireLobster | Volcano | Rare | 6.43 | 5.15 | 18,672 | Jurassic | 60% |
+| RockHog | Volcano | Rare | 6.56 | 5.3 | 19,050 | Jurassic | 65% |
+| LavaWhale | Volcano | Epic | 6.83 | 5.85 | 19,834 | Jurassic | 75% |
 | Rockworm | Volcano | Epic | 6.3 |  | 18,295 | Jurassic | 55% |
 | Phoenix | Volcano | Legendary | 7.2 |  | 20,909 | Jurassic | 89% |
 | PalmGuy | Jurassic | Uncommon | 4.9 |  | 14,230 | Jurassic | 2% |
