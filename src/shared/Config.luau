@@ -1566,6 +1566,13 @@ if Config.World == 2 then
 		CrystalElephant = 3.281, -- 10% into the Temple (QM, Oct 13)
 		Eyeworm = 1.438, -- 10% into the Crystal Cavern (QM, Oct 13)
 		CrystalCentipede = 2.14, -- 10% into the Woodland (QM, Oct 13)
+		Caterpillar = 3.541, -- 25% into the Temple (QM, Oct 13: +10 points, was 15%)
+		PinkButterfly = 3.455, -- 20% into the Temple (QM, Oct 13: +10 points, was 10%)
+		OrangeButterfly = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
+		LivingBirch = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
+		RollingLog = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
+		Hawkmoth = 4.322, -- 70% into the Temple (QM, Oct 13: +10 points, was 60%)
+		GiantGolem = 6.06, -- 46% into the Tomb (QM, Oct 13: +10 points, was 36%)
 	} do
 		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
 		Config.AnimalStats[kind].Speed = speed

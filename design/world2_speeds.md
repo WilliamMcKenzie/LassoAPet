@@ -31,8 +31,8 @@ Speed is x a Speed 1 pet. A full sprint ride goes 2,904 studs per 1 Speed; "reac
 | Animal | Rarity | Speed | Reaches |
 |---|---|---|---|
 | Crystal Centipede | Uncommon | 2.14 | 10% into the Woodland Maze |
-| Blue Crystal | Uncommon | 2.355 | 30% into the Woodland Maze |
 | Red Mushroom | Uncommon | 2.355 | 30% into the Woodland Maze |
+| Blue Crystal | Uncommon | 2.355 | 30% into the Woodland Maze |
 | Pink Crystal | Rare | 2.57 | 50% into the Woodland Maze |
 | Brown Mushroom | Rare | 2.57 | 50% into the Woodland Maze |
 | Purple Mushroom | Epic | 2.742 | 66% into the Woodland Maze |
@@ -44,13 +44,13 @@ Speed is x a Speed 1 pet. A full sprint ride goes 2,904 studs per 1 Speed; "reac
 
 | Animal | Rarity | Speed | Reaches |
 |---|---|---|---|
-| Pink Butterfly | Uncommon | 3.28 | 10% into the Temple |
-| Caterpillar | Uncommon | 3.37 | 15% into the Temple |
-| Rolling Log | Rare | 3.54 | 25% into the Temple |
-| Living Birch | Rare | 3.54 | 25% into the Temple |
-| Orange Butterfly | Rare | 3.54 | 25% into the Temple |
-| Hawkmoth | Epic | 4.15 | 60% into the Temple |
-| Giant Golem | Legendary | 5.8 | 36% into the Tomb |
+| Pink Butterfly | Uncommon | 3.455 | 20% into the Temple |
+| Caterpillar | Uncommon | 3.541 | 25% into the Temple |
+| Living Birch | Rare | 3.715 | 35% into the Temple |
+| Orange Butterfly | Rare | 3.715 | 35% into the Temple |
+| Rolling Log | Rare | 3.715 | 35% into the Temple |
+| Hawkmoth | Epic | 4.322 | 70% into the Temple |
+| Giant Golem | Legendary | 6.06 | 46% into the Tomb |
 
 ## Temple
 
@@ -61,8 +61,8 @@ Speed is x a Speed 1 pet. A full sprint ride goes 2,904 studs per 1 Speed; "reac
 | Fox | Uncommon | 5.107 | 10% into the Tomb |
 | Tiger | Rare | 5.372 | 20% into the Tomb |
 | Nine Tailed Fox | Rare | 5.504 | 25% into the Tomb |
-| Jade Statue | Epic | 5.636 | 30% into the Tomb |
 | Garnet Statue | Epic | 5.636 | 30% into the Tomb |
+| Jade Statue | Epic | 5.636 | 30% into the Tomb |
 | Kitsune | Legendary | 7.47 | 99% into the Tomb |
 
 ## Tomb
@@ -74,6 +74,6 @@ Speed is x a Speed 1 pet. A full sprint ride goes 2,904 studs per 1 Speed; "reac
 | Lion Archer | Rare | 6.43 | 60% into the Tomb |
 | Tomb Jackal | Rare | 6.43 | 60% into the Tomb |
 | Eagle Sentry | Epic | 6.826 | 75% into the Tomb |
-| Nut | Legendary | 7.47 | 99% into the Tomb |
 | Bes | Legendary | 7.47 | 99% into the Tomb |
 | Geb | Legendary | 7.47 | 99% into the Tomb |
+| Nut | Legendary | 7.47 | 99% into the Tomb |
