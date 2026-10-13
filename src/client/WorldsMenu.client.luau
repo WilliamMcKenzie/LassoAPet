@@ -244,7 +244,7 @@ for i, world in WORLDS do
 				return
 			end
 			busy = true
-			if not WorldUnlock.buy(i, closeMenu) then -- (not enough gold; bought: World 2's unlock cutscene in World 1)
+			if not WorldUnlock.buy(i) then -- (it stays open: QM) -- (not enough gold; bought: World 2's unlock cutscene in World 1)
 				price.Text = "Need $" .. Config.short(world.price)
 				price.TextColor3 = CASH_RED
 				task.wait(1.2)
@@ -260,10 +260,7 @@ for i, world in WORLDS do
 		if i ~= Config.World then
 			ReplicatedStorage.Travel:FireServer(i) -- (teleports: not in Studio)
 			player:SetAttribute("GuideTravel", nil)
-		end
-		if open then
-			closeMenu()
-		end
+		end -- (it stays open: only its X or walking off closes it, QM Oct 13)
 	end)
 	travel.Parent = card
 	-- Travel once it's yours (World 1 always is), Buy till then.

@@ -36,7 +36,7 @@ local function cutscene(portal)
 	local hidden = {}
 	local function hideAll()
 		for _, g in player.PlayerGui:GetChildren() do
-			if g:IsA("ScreenGui") and g.Enabled and g.Name ~= "WorldsMenu" then -- (the menu closes itself)
+			if g:IsA("ScreenGui") and g.Enabled then
 				g.Enabled = false
 				if not table.find(hidden, g) then
 					table.insert(hidden, g)
@@ -81,7 +81,10 @@ local function cutscene(portal)
 	for _, g in hidden do
 		g.Enabled = true
 	end
-	player:SetAttribute("Cutscene", nil)
+	local menu = player.PlayerGui:FindFirstChild("WorldsMenu")
+	if not (menu and menu.Enabled) then -- (bought from the Worlds menu: it's back, and keeps the rest hidden)
+		player:SetAttribute("Cutscene", nil)
+	end
 	player:SetAttribute("GuideTravel", true)
 end
 
