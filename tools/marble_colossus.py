@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
 from partlib import render  # noqa: E402
 from horse_rig import pose  # noqa: E402
+from snow_designs import pyramid  # noqa: E402
 
 MARBLE = (246, 244, 238)
 SHADE = (208, 205, 198)
@@ -34,6 +35,9 @@ def colossus():
     # torso: tall chest block in front of a lower back (gorilla stance)
     a.body(2.0, 3.8, 7.0, -1.6, 2.4, MARBLE)
     a.box("Chest", (-2.0, 3.8, -3.0), (2.0, 8.0, -1.6), SHADE, "root")
+    # two small gold spikes down the back behind the rider
+    for i, z in enumerate((0.9, 1.8)):
+        pyramid(a, f"SpikeBack{i + 1}", (-0.35, 7.0, z - 0.35), (0.35, 7.0, z + 0.35), "+y", 0.8, GOLD, "root")
 
     # arms (front legs): hang outside the torso to the ground, gold bracer over the fist
     for leg, sx in (("FL", -1), ("FR", 1)):
@@ -46,6 +50,12 @@ def colossus():
         pa, pb = sorted((sx * 1.8, sx * 3.9))
         a.box("Shoulder" + leg, (pa, 7.2, z0 - 0.2), (pb, 8.4, z1 + 0.3), SHADE, name)
         a.pivots[name] = ((xa + xb) / 2, 7.8, z1)
+        # gold spikes: two up off the shoulder, one out the side of the bracer
+        for i, cx in enumerate((2.35, 3.4)):
+            x0, x1 = sorted((sx * (cx - 0.4), sx * (cx + 0.4)))
+            pyramid(a, f"Spike{leg}{i + 1}", (x0, 8.4, -2.75), (x1, 8.4, -1.95), "+y", 1.3 - 0.3 * i, GOLD, name)
+        bx = sx * (3.6 + 0.05)
+        pyramid(a, f"Spike{leg}3", (bx, 1.3, -2.8), (bx, 1.9, -2.0), "+x" if sx > 0 else "-x", 0.6, GOLD, name)
 
     # short stumpy hind legs with a wider foot
     for leg, sx in (("HL", -1), ("HR", 1)):
