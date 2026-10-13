@@ -123,6 +123,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Cactus = "The fastest plant in the west. Deals eggs on the side.",
 	Scorpion = "Got busted dealing spice, now speaks about drug awareness at high school ceremonies.",
 	Eyeworm = "Has one eye and never blinks during staring contests. Undefeated.",
+	CrimsonScorpion = "Dyed itself red to look scarier. Now everyone just calls it Ketchup.",
 	Maw = "All mouth, no eyes. Finds snacks by smell and good luck.",
 	Asura = "Never sheathes its sword. Nobody has asked it to.",
 	IvorySpider = "Spins its webs in perfect white. Hates muddy boots.",
