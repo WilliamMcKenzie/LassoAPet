@@ -14,6 +14,7 @@ local HEADSHOTS = {
 	Fish = "rbxassetid://73704828076245", -- PetFish.png
 	Rhino = "rbxassetid://135065306024440", -- PetRhino.png
 	MarbleColossus = "rbxassetid://108907184921325", -- PetMarbleColossus.png (World 2)
+	CrystalCentipede = "rbxassetid://104988827630449", -- PetCrystalCentipede.png (World 2)
 	Unicorn = "rbxassetid://123940745305285", -- PetUnicorn.png
 	Cactus = "rbxassetid://95422181220957", -- PetCactus.png
 	Kitten = "rbxassetid://85779463172831", -- PetKitten.png

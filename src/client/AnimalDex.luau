@@ -108,6 +108,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Pinto = "Cousin of horse, recently started playing water polo.",
 	Fish = "Never learned to swim, and thinks it's too late now. Scared of water.",
 	MarbleColossus = "Was a museum statue for 900 years. Got bored. Kept the gold.",
+	CrystalCentipede = "Grows a new crystal every birthday. Has a hundred legs and owns no shoes.",
 	Rhino = "Ran away to join the mafia at a young age. Still pays horses tuition.",
 	Unicorn = "Just a horse who can jump very high. The horn is glued on.",
 	Kitten = "Came to the desert for the world's biggest litter box. Has not left since.",
