@@ -604,7 +604,10 @@ RunService.RenderStepped:Connect(function(dt)
 				if not s.hatching then
 					local ready = (s.hatchAt or now) <= now
 					if s.speedupPrompt then
+						-- (an egg only beats a pet's RIDE once it's ready to hatch: till then, by a
+						-- pet, the pet's prompt shows, Ride's "RidePromptUp"; QM, Oct 13)
 						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and (ready or not player:GetAttribute("Tutorial")) -- (the tutorial: hatch it, no speeding up)
+							and (ready or not player:GetAttribute("RidePromptUp"))
 					end
 					s.timer.Text = if ready then "Ready" else countdown((s.hatchAt or now) - now)
 					readyArrow(s, ready and pen == myPen() and not player:GetAttribute("Tutorial") and not player:GetAttribute("EggPromptUp")
