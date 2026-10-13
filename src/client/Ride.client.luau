@@ -2427,7 +2427,7 @@ end
 
 -- The mount broke something (smashed an obstacle, knocked an animal flying).
 function vfx.broke(hit)
-	if phase == "return" and mount and not activeAbility() and not vfx.returnRun.lesser(hit, mount) then -- (back to a walk: ReturnRun)
+	if phase == "return" and mount and not activeAbility() and not hit then -- (an obstacle: back to a walk, ReturnRun; animals you plough through)
 		mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
 	end
 	local feast = vfx.feastOf(mount)
