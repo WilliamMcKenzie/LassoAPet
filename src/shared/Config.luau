@@ -1123,11 +1123,11 @@ if Config.World == 2 then
 		end
 	end
 	local meadow = Config.Biomes[1]
-	meadow.GroundColors = { rgb(124, 101, 35), rgb(114, 91, 28) } -- (QM, Oct 13: 40% darker than 206, 168, 58 / 190, 152, 46)
+	meadow.GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) }
 	meadow.WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) } -- marble
 	meadow.Patches = {
 		Dirt = { rgb(118, 84, 50), rgb(104, 72, 42) },
-		Grass = { rgb(109, 86, 26), rgb(100, 78, 22) }, -- the darker grass, beside the dirt (40% darker: QM)
+		Grass = { rgb(182, 144, 44), rgb(166, 130, 36) }, -- the darker grass, beside the dirt
 	}
 	-- The second biome: the Crimson Lands (QM, Oct 13; tools/world2_crimson.luau's floor).
 	local crimson = Config.Biomes[2]

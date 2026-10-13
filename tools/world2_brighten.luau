@@ -1,6 +1,5 @@
--- World 2's grass and pine needles 40% darker (QM, Oct 13; tried 20% brighter first): the
--- first biome's and the base's Ground and Grass (part and checker), the pines' needles and
--- the grass tufts. Run in Studio (Edit) on the World 2 Place (workspace.World) or World 1's
+-- World 2's pine needles 40% darker (QM, Oct 13; tried 20% brighter first; only the trees'
+-- foliage, not the ground). Run in Studio (Edit) on the World 2 Place (workspace.World) or World 1's
 -- copy (World2) right after tools/world2_base.luau and world2_meadow_ground.luau (which lay
 -- the floor in its first colours); the needles and tufts are reset to theirs here.
 local ROOT = workspace:FindFirstChild("World2") or workspace.World
@@ -9,7 +8,7 @@ local function up(c)
 	return Color3.new(math.min(c.R * K, 1), math.min(c.G * K, 1), math.min(c.B * K, 1))
 end
 local n = 0
-for _, folder in { ROOT.Ground, ROOT.Funnel } do
+for _, folder in {} do -- (QM: not the ground, only the trees' foliage)
 	for _, p in folder:GetChildren() do
 		if (p.Name == "Ground" or p.Name == "Grass") and p.Position.Z > -2168 then
 			p.Color = up(p.Color)
