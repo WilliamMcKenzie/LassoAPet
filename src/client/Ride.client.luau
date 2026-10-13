@@ -522,10 +522,12 @@ local function cleanup()
 	end
 	mount, transfer, tumble, warpLevel = nil, nil, nil, nil
 	if carried then
-		carried.part:Destroy()
+		if carried.part then
+			carried.part:Destroy()
+		end
 		carried = nil
 	end
-	if vfx.revive and vfx.revive.carried then
+	if vfx.revive and vfx.revive.carried and vfx.revive.carried.part then
 		vfx.revive.carried.part:Destroy() -- the egg kept for a Continue that wasn't bought
 	end
 	vfx.revive = nil
@@ -1021,8 +1023,10 @@ local function fail(reason, tip)
 	if carried then
 		if vfx.revive then
 			vfx.revive.carried = carried -- put away until Continue or Home
-			carried.part.Parent = nil
-		else
+			if carried.part then
+				carried.part.Parent = nil
+			end
+		elseif carried.part then
 			carried.part:Destroy()
 		end
 		carried = nil
@@ -1085,10 +1089,7 @@ end
 local function turnHome()
 	if not mount.own and Animals:FindFirstChild(mount.kind) then
 		takeEgg:FireServer(mount.kind) -- (the server checks you got on a wild one: Nests.server)
-		local egg = Egg.new(mount.kind)
-		egg.model.Parent = workspace
-		vfx.sounds.play("egg_grab")
-		carried = { part = egg.model, kind = mount.kind, stage = "held", t = 1, spin = rng:NextNumber() < 0.5 and -1 or 1 }
+		carried = { kind = mount.kind, stage = "home" } -- (no egg on the lasso any more: you get the animal itself, QM Oct 13)
 	end
 	phase, turnT = "turning", 0
 	Hud.setAction(nil)
@@ -4275,12 +4276,12 @@ RunService.PreSimulation:Connect(function(dt)
 	end
 	updateRider(dt)
 	-- What others see your lasso doing (sendRide; a throw at an animal is its own cue, "lasso").
-	vfx.lassoState = if carried and carried.stage == "held" then "twirl"
-		elseif not carried and not transfer and mount and (phase == "outbound" or phase == "return") then "swing"
+	vfx.lassoState = if carried and carried.part and carried.stage == "held" then "twirl"
+		elseif not (carried and carried.part) and not transfer and mount and (phase == "outbound" or phase == "return") then "swing"
 		else ""
-	if carried and carried.stage == "held" then
+	if carried and carried.part and carried.stage == "held" then
 		Lasso.twirl(dt, carried.part)
-	elseif carried then
+	elseif carried and carried.part then
 		local egg = { cframe = carried.part:GetPivot(), radius = Lasso.fitRadius(carried.part) }
 		if carried.stage == "throw" then
 			Lasso.throw(carried.t, egg)
@@ -4361,7 +4362,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	local targetYaw = mount and mount.yaw or camYaw
 	camYaw += (targetYaw - camYaw) * (1 - math.exp(-5 * dt))
 	local hrp = character()
-	if cutscene and carried and hrp then
+	if cutscene and carried and carried.part and hrp then
 		-- Close-up on the egg from the rider's side, slightly off to one side,
 		-- snapping in fast and punching the field of view in.
 		local egg = carried.part:GetPivot().Position
@@ -4476,7 +4477,7 @@ ReplicatedStorage:WaitForChild("ContinueRide").OnClientEvent:Connect(function(pa
 	mount.animal:setSaddled(true)
 	mount.speed = revive.speed
 	carried = revive.carried
-	if carried then
+	if carried and carried.part then
 		carried.part.Parent = workspace
 	end
 	phase, hold, grace = revive.phase, holdTime(mount), Config.ContinueGrace
