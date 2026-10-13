@@ -680,6 +680,10 @@ local function intro()
 	Sounds.setMusic(musicWas or "base")
 	holdHidden:Disconnect()
 	player:SetAttribute("Cutscene", nil)
+	local funnelStep = ReplicatedStorage:FindFirstChild("FunnelStep") -- (Analytics V1: the intro's over)
+	if funnelStep then
+		funnelStep:FireServer("tutorial", "intro")
+	end
 	player:SetAttribute("IntroDone", true) -- (Client/Tutorial starts once it's over)
 	for _, g in hidden do
 		if g.Parent then

@@ -12,7 +12,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Funnel = require(script.Parent.Funnel)
 
 local world = workspace:WaitForChild("World")
 local nests = world:FindFirstChild("Nests")
@@ -53,5 +52,4 @@ takeEgg.OnServerEvent:Connect(function(player, mount)
 	end
 	player:SetAttribute("CarriedEgg", mount) -- theirs once they ride it home (Hatchery)
 	player:SetAttribute("CarriedEggScale", nil)
-	Funnel.step(player, "Grabbed Egg")
 end)

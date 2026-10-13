@@ -299,11 +299,14 @@ local inviteCredits -- (below: "Invite a friend")
 local function load(player)
 	task.spawn(loadOtherWorlds, player)
 	local profile = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {} }
+	local fresh = true -- (no save in this world: a first visit, for Funnel)
 	if store then
 		for attempt = 1, 3 do
 			local success, data = pcall(store.GetAsync, store, "u" .. player.UserId)
 			if success then
 				if typeof(data) == "table" then
+					fresh = false
+					profile.v1 = data.v1 -- (Funnel's: entry build, enrolment, steps logged once)
 					for kind, n in data.eggs or {} do
 						if eggPet(kind) and tonumber(n) and n > 0 then
 							profile.eggs[kind] = math.floor(n)
@@ -322,7 +325,6 @@ local function load(player)
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
 					profile.homeEggs = tonumber(data.homeEggs) -- (animals brought home, counted from the Egg Rodeo's first session: Funnel)
 					profile.quests = Quests.load(data.quests)
-					profile.journey = data.journey == true or nil -- (started after the Player Journey funnel went in: Funnel)
 					profile.rainbowTrail = data.rainbowTrail == true or nil
 					player:SetAttribute("FuseLesson", nil) -- (no fuse lesson any more: QM, Oct 8)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
@@ -368,6 +370,8 @@ local function load(player)
 	end
 	profiles[player] = profile
 	profile.quests = profile.quests or Quests.load(nil)
+	-- (Analytics V1: a fresh pen is a new arrival only if its load went through, or in Studio)
+	Funnel.start(player, profile, fresh and (loaded[player] == true or RunService:IsStudio()))
 	Quests.publish(player, profile.quests)
 	task.spawn(function() -- friends you invited who joined while you were elsewhere ("Invite a friend")
 		local credits = inviteCredits(player)
@@ -383,12 +387,7 @@ local function load(player)
 		end
 	end)
 	if not profile.tutorial then
-		profile.journey = true -- (in the funnels from now on: Funnel)
-		Funnel.track(player) -- a new player
 		profile.homeEggs = profile.homeEggs or 0
-	end
-	if profile.journey then
-		Funnel.join(player)
 	end
 	-- Only World 1 has the tutorial: in the others you've done it (QM: a new pen there).
 	local tutorial = Config.Tutorial and not profile.tutorial and Config.World == 1
@@ -449,7 +448,7 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail, homeEggs = profile.homeEggs, quests = profile.quests, journey = profile.journey, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
+		rainbowTrail = profile.rainbowTrail, homeEggs = profile.homeEggs, quests = profile.quests, v1 = profile.v1, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -482,7 +481,6 @@ local function applyHatch(player)
 	applyingHatch[player] = true
 	profile.usedHatches, profile.hatchTarget = used + 1, nil
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
-	Funnel.step(player, "Egg Hatched")
 	save(player)
 	publish(player)
 	applyingHatch[player] = nil
@@ -626,6 +624,7 @@ local place -- (below, after PlaceEgg)
 -- egg; eggs come from quests now): straight into your pen as a pet, at the first clear
 -- spot from the middle out. A full pen (Config.PenCapacity) gets its egg instead.
 local function givePet(player, profile, kind)
+	Funnel.rewarded(player) -- (the server's award: Analytics V1)
 	local pen = penOf(player)
 	local area = pen and pen:FindFirstChild("Area")
 	if area and penCount(profile) < penCap(player) then
@@ -666,10 +665,8 @@ remote("DeliverEgg", function(player, kind)
 		return
 	end
 	player:SetAttribute("CarriedEgg", nil)
-	Funnel.step(player, "Brought Egg Home")
 	if profile.homeEggs then
 		profile.homeEggs += 1
-		Funnel.captured(player, profile.homeEggs)
 	end
 	givePet(player, profile, kind)
 end)
@@ -688,7 +685,9 @@ remote("HatchEgg", function(player, id)
 		return
 	end
 	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
-	Funnel.step(player, if profile.pastStarter then "Egg Hatched" else "Hatched Starter Egg")
+	if not profile.pastStarter then
+		Funnel.starterReady(player) -- (Analytics V1)
+	end
 	publish(player)
 end)
 
@@ -833,7 +832,7 @@ claimQuest.OnServerInvoke = function(player, i)
 	if level < Config.PenLevels and not quest.NoPenLevel then -- (not "Reach Meadow": QM)
 		player:SetAttribute("PenLevel", level + 1)
 	end
-	Funnel.claimed(player, i) -- (Player Journey)
+	Funnel.claimed(player, i) -- (Analytics V1)
 	local eggs = if typeof(quest.Egg) == "table" then quest.Egg else { quest.Egg } -- (several: World 2's Kitsune quest)
 	for _, kind in eggs do
 		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
@@ -889,11 +888,6 @@ place = function(player, profile, kind, x, z)
 	else
 		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else math.ceil(hatchTime(kind) / hatchX(player))) }
 	end
-	if profile.pastStarter then
-		Funnel.step(player, "Placed Egg") -- the egg brought home, not the starter egg placed before the first ride
-	else
-		Funnel.step(player, "Placed Starter Egg")
-	end
 	publish(player)
 end
 
@@ -914,7 +908,7 @@ remote("TutorialDone", function(player)
 		profile.tutorial = true
 	end
 	player:SetAttribute("Tutorial", nil)
-	Funnel.step(player, "Tutorial Done")
+	Funnel.tutorialDone(player) -- (Analytics V1)
 end)
 
 -- Ran to the start line in the tutorial before riding the starter pet (QM, Oct 8:
@@ -950,8 +944,7 @@ toLine.OnServerInvoke = function(player)
 		return false
 	end
 	profile.ride = kind
-	Funnel.step(player, "Placed Starter Egg")
-	Funnel.step(player, "Starter Pet Ready")
+	Funnel.starterReady(player) -- (Analytics V1)
 	Funnel.event(player, "Ran To Start Line")
 	publish(player)
 	return true
@@ -1534,7 +1527,6 @@ while true do
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
 				if profile.pastStarter then
-					Funnel.step(player, "Egg Hatched") -- (not the starter egg, which hatches before the first ride)
 				end
 			end
 		end

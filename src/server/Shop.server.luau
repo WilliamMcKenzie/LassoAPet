@@ -16,7 +16,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local Funnel = require(script.Parent.Funnel)
 
 local continueRide = Instance.new("RemoteEvent")
 continueRide.Name = "ContinueRide"
@@ -249,7 +248,6 @@ buyShop.OnServerEvent:Connect(function(player, key)
 	if not offer or (offer.Key == "Legendary" and randomRestricted(player)) then
 		return
 	end
-	Funnel.shopPicked(player)
 	if offer.ProductId ~= 0 then
 		MarketplaceService:PromptProductPurchase(player, offer.ProductId)
 	elseif RunService:IsStudio() then
@@ -298,9 +296,6 @@ MarketplaceService.ProcessReceipt = function(receipt)
 	if offer then
 		local granted = record(receipt.PlayerId, receipt.PurchaseId, offer)
 		local buyer = Players:GetPlayerByUserId(receipt.PlayerId)
-		if granted and buyer then
-			Funnel.shopBought(buyer)
-		end
 		if granted and receipt.ProductId == Config.SpeedupEgg.ProductId then
 			local player = Players:GetPlayerByUserId(receipt.PlayerId)
 			if player then hatchPending[player] = nil end

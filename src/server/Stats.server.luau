@@ -26,6 +26,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Funnel = require(script.Parent.Funnel)
+local StatsStore = require(script.Parent.StatsStore)
 
 local FLUSH_EVERY = 60 -- seconds between adding this server's sessions into the store
 
@@ -283,6 +285,23 @@ local function report()
 		table.insert(lines, if v.sessions == 0
 			then string.format("  v%d: no sessions", versions[i])
 			else string.format("  v%d: %.1f min (%d sessions)", versions[i], v.seconds / v.sessions / 60, v.sessions))
+	end
+	-- The [V1] funnels (Analytics V1, Funnel): this world's totals since they went in, each
+	-- step's count, its share of the first step and of the step before.
+	local f = StatsStore.read("v1-funnels")
+	for _, name in { "[V1] Tutorial", "[V1] First Session Loop", Funnel.BIOMES, "[V1] Quest Claims", "[V1] Quest Progress" } do
+		local steps = Funnel.STEPS[name]
+		local base = f[name .. "|1"] or 0
+		local parts = {}
+		for i, step in steps do
+			local n = f[name .. "|" .. i] or 0
+			local prev = f[name .. "|" .. (i - 1)]
+			table.insert(parts, if i == 1 then string.format("%s %d", step, n)
+				else string.format("%s %d (%s, %s)", step, n,
+					if base > 0 then string.format("%.0f%%", 100 * n / base) else "N/A",
+					if prev and prev > 0 then string.format("%.0f%% of prev", 100 * n / prev) else "N/A"))
+		end
+		table.insert(lines, name .. ": " .. table.concat(parts, " > "))
 	end
 	if not store then
 		table.insert(lines, "(No DataStore here: this server's sessions only)")

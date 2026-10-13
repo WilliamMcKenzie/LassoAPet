@@ -11,6 +11,7 @@ local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Funnel = require(script.Parent.Funnel)
 
 local COUNTS = { lasso = true, merge = true, invite = true }
 
@@ -79,6 +80,7 @@ function Quests.publish(player, state)
 		end
 	end
 	player:SetAttribute("Quests", HttpService:JSONEncode(list))
+	Funnel.quests(player, list) -- (Analytics V1: Quest Claims, Quest Progress)
 	player:SetAttribute("MergeFree", if (state.counts.merge or 0) == 0 then true else nil) -- (your first merge is free: QM, Oct 11)
 end
 

@@ -18,7 +18,6 @@ local ServerStorage = game:GetService("ServerStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Studs = require(ReplicatedStorage.Shared.Studs)
-local Funnel = require(script.Parent.Funnel)
 local PenFence = require(script.Parent.PenFence)
 require(script.Parent.Passes) -- (PassVIP: the gold fence, below)
 
@@ -376,6 +375,5 @@ upgrade.OnServerInvoke = function(player)
 	player:SetAttribute("Gold", gold - cost)
 	zoneUnlocked:FireClient(player, level(player) + 1)
 	player:SetAttribute("PenLevel", level(player) + 1)
-	Funnel.step(player, "Unlocked Zone 2")
 	return true
 end
