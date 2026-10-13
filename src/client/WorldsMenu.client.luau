@@ -27,6 +27,7 @@ local ART = { -- assets/ui/worlds (QM's; World2.png is his World1.png with a 2)
 	World2 = "rbxassetid://123640921226077", -- World2.png: QM's marble temple banner (Oct 13)
 	World3 = "rbxassetid://122859842408693", -- World3.png: QM's "World 3" / COMING SOON banner (his World3 1.png)
 	Travel = "rbxassetid://72409176941710", -- Travel.png: the blue button ("Travel" on it)
+	TravelLoading = "rbxassetid://104387240097786", -- TravelLoading.png: the same in grey, while a trip's on its way
 	Buy = "rbxassetid://128346351326066", -- Buy.png: the green button, a cash stack left, "Buy" right
 }
 local WORLDS = {
@@ -47,6 +48,8 @@ local AWAY = 45 -- and you've walked off once you're this far
 
 local player = Players.LocalPlayer
 local open = false
+local travelling = false -- (a trip's on its way: every Travel button waits)
+local TRAVEL_WAIT = 15 -- seconds before Travel works again if the teleport never came
 local closeMenu
 
 local function pressable(button)
@@ -257,9 +260,17 @@ for i, world in WORLDS do
 	travel = button(ART.Travel)
 	travel.Name = "Travel"
 	travel.Activated:Connect(function()
-		if i ~= Config.World then
+		if i ~= Config.World and not travelling then
+			-- Loading (QM, Oct 13: a trip takes seconds): the button goes grey and does
+			-- nothing more till the teleport takes you, or TRAVEL_WAIT if it doesn't.
+			travelling = true
+			travel.Image = ART.TravelLoading
 			ReplicatedStorage.Travel:FireServer(i) -- (teleports: not in Studio)
 			player:SetAttribute("GuideTravel", nil)
+			task.delay(TRAVEL_WAIT, function()
+				travelling = false
+				travel.Image = ART.Travel
+			end)
 		end -- (it stays open: only its X or walking off closes it, QM Oct 13)
 	end)
 	travel.Parent = card
