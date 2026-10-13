@@ -45,6 +45,7 @@ local KINDS = {
 	Sandworm = { data = require(script.Parent.SandwormEggModel), center = 1.6 },
 	Eyeworm = { data = require(script.Parent.EyewormEggModel), center = 1.6 },
 	Maw = { data = require(script.Parent.MawEggModel), center = 1.6 },
+	CrimsonScorpion = { data = require(script.Parent.CrimsonScorpionEggModel), center = 1.6 },
 	IvorySpider = { data = require(script.Parent.IvorySpiderEggModel), center = 1.6 },
 	Asura = { data = require(script.Parent.AsuraEggModel), center = 1.6 },
 	Snake = { data = require(script.Parent.SnakeEggModel), center = 1.6 },

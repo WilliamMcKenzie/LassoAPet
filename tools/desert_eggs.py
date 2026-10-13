@@ -72,8 +72,7 @@ def cactus_egg():
     return egg
 
 
-def scorpion_egg():
-    shell_c, dark, joint, sting = (230, 160, 74), (184, 110, 50), (160, 70, 60), (70, 44, 40)
+def scorpion_egg(shell_c=(230, 160, 74), dark=(184, 110, 50), joint=(160, 70, 60), sting=(70, 44, 40)):
     egg = shell([dark, shell_c, shell_c, dark, shell_c, dark, shell_c])
     # pincers out the front on the bottom half: arm, hand, long outer finger, short inner one
     y0 = 3 * LH + 0.05
