@@ -1202,7 +1202,9 @@ local function lassoReach(entity)
 		local size = a.model:GetExtentsSize()
 		entity.lassoR, entity.lassoAt = math.max(size.X, size.Z) / 2, a.scale
 	end
-	return Config.LassoRange + math.max(entity.lassoR - Config.LassoRangeFrom, 0) * Config.LassoRangeGain
+	local fast = Config.LassoSpeedReach -- (and further the faster you're going: QM)
+	return (Config.LassoRange + math.max(entity.lassoR - Config.LassoRangeFrom, 0) * Config.LassoRangeGain)
+		* math.clamp(1 + fast.Gain * ((mount and mount.speed or 0) / fast.Base - 1), 1, fast.Max)
 end
 
 local function animalInRange(entity)

@@ -968,6 +968,10 @@ local Config = {
 	LassoRange = 51, -- studs, for a Horse-sized animal (QM, Oct 11: bigger ones further, below; Oct 12: 1.5x, was 34)
 	LassoRangeFrom = 4.6, -- a Horse's half width (studs): an animal this wide or narrower gets LassoRange
 	LassoRangeGain = 1.5, -- studs more range for each stud wider than that (1.5x with LassoRange, QM Oct 12; was 1)
+	-- And the faster you're riding, the further (QM, Oct 13: too hard to lasso at speed; about
+	-- 1.8x in the Volcano): x (1 + Gain x (your speed / Base - 1)), from 1 up to Max. Base is a
+	-- Speed 1 pet's sprint (MountSpeed x SprintSpeed); the Volcano's pets sprint about 6x that.
+	LassoSpeedReach = { Base = 88, Gain = 0.16, Max = 2.5 },
 	EggSlowMo = 0.5, -- time scale during the egg-grab close-up
 	-- Coming home with an egg: the pet leaps over the start line in slow motion while
 	-- the camera swings round to a hero angle in front and back again, landing
