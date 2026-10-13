@@ -34,7 +34,7 @@ Skins.Skins = {
 		-- and a polished-metal texture of highlight and shadow bands and glints over it)
 		stops = { rgb(92, 48, 0), rgb(168, 100, 8), rgb(212, 142, 22), rgb(240, 190, 70) },
 		span = { 0.1, 0.75 },
-		texture = "rbxassetid://111669458824464", -- assets/particles/GoldSheen.png
+		texture = "rbxassetid://111669458824464", -- assets/particles/GoldSheen.png (opaque since QM's "still studded": TODO re-upload)
 		glow = rgb(255, 230, 90),
 		reflectance = 0.25,
 		light = rgb(255, 200, 80),
@@ -43,10 +43,10 @@ Skins.Skins = {
 		name = "Diamond",
 		-- (Oct 13: came out pale ice with no facets, and Glass lost the studs: deeper blue, the
 		-- studs' own material, and a cut-facets-and-sparkles texture over it)
-		stops = { rgb(24, 80, 168), rgb(56, 132, 214), rgb(104, 184, 240), rgb(176, 222, 252) },
+		stops = { rgb(16, 60, 140), rgb(36, 100, 186), rgb(70, 150, 220), rgb(140, 200, 240) },
 		span = { 0.05, 0.75 },
 		facet = 0.18, -- (every other part a facet lighter)
-		texture = "rbxassetid://108987125795271", -- assets/particles/DiamondFacets.png
+		texture = "rbxassetid://108987125795271", -- assets/particles/DiamondFacets.png (opaque since QM's "still studded": TODO re-upload)
 		glow = rgb(150, 240, 255),
 		reflectance = 0.3,
 		light = rgb(170, 230, 255),
