@@ -1162,6 +1162,20 @@ if Config.World == 2 then
 		Soil = { rgb(142, 81, 57), rgb(130, 74, 52) }, -- #8E5139
 		Path = { rgb(151, 89, 57), rgb(139, 81, 52) }, -- #975939, the middle
 	}
+	-- The fifth: the Temple (QM, Oct 13; tools/world2_temple.luau): a rock path, grass and
+	-- marble a stud up, ponds a stud and two down (their flowing water: tools/world2_water.luau).
+	local temple = Config.Biomes[5]
+	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
+	temple.Patches = {
+		Rock = { rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
+		Grass = { rgb(145, 178, 41), rgb(133, 164, 35) }, -- #91B229
+		Marble = { rgb(200, 200, 200), rgb(186, 186, 186) }, -- #C8C8C8
+		SideDirt = { rgb(200, 200, 200), rgb(190, 188, 184) },
+		Water = { rgb(70, 156, 204), rgb(62, 144, 190) },
+		DeepWater = { rgb(44, 110, 168), rgb(38, 99, 154) },
+	}
+	temple.WallColors = { rgb(200, 200, 200), rgb(186, 186, 186) }
+	temple.CapColor = rgb(176, 176, 176)
 end
 
 return Config
