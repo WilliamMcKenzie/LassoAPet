@@ -100,6 +100,7 @@ local IMAGES = {
 	eggMarbleFish = { id = "rbxassetid://121162393893227", size = Vector2.new(593, 938) }, -- MarbleFishEggRender.png (World 2)
 	eggBlueCrystal = { id = "rbxassetid://112194074349421", size = Vector2.new(502, 877) }, -- BlueCrystalEggRender.png (World 2)
 	eggPinkCrystal = { id = "rbxassetid://117236752430565", size = Vector2.new(502, 877) }, -- PinkCrystalEggRender.png (World 2)
+	eggLivingBirch = { id = "", size = Vector2.new(557, 944) }, -- LivingBirchEggRender.png (World 2)
 	eggLion = { id = "rbxassetid://82682007346790", size = Vector2.new(518, 720) }, -- LionEggRender.png (World 2)
 	eggBuffalo = { id = "rbxassetid://118027620960011", size = Vector2.new(531, 713) }, -- BuffaloEggRender.png (World 2)
 	eggCrocodile = { id = "rbxassetid://138455431560057", size = Vector2.new(506, 719) }, -- CrocodileEggRender.png (World 2)
@@ -115,6 +116,11 @@ local IMAGES = {
 	eggCrimsonSeraph = { id = "rbxassetid://132120882288488", size = Vector2.new(700, 760) }, -- CrimsonSeraphEggRender.png (World 2)
 	eggCrystalSeraph = { id = "rbxassetid://100476636621954", size = Vector2.new(700, 760) }, -- CrystalSeraphEggRender.png (World 2)
 	eggCaterpillar = { id = "rbxassetid://109185103681711", size = Vector2.new(502, 841) }, -- CaterpillarEggRender.png (World 2)
+	eggPinkButterfly = { id = "rbxassetid://139551342957176", size = Vector2.new(700, 839) }, -- PinkButterflyEggRender.png (World 2)
+	eggOrangeButterfly = { id = "rbxassetid://136557216823067", size = Vector2.new(700, 826) }, -- OrangeButterflyEggRender.png (World 2)
+	eggLivingBirch = { id = "rbxassetid://78918914654470", size = Vector2.new(557, 944) }, -- LivingBirchEggRender.png (World 2)
+	eggGiantGolem = { id = "rbxassetid://130649889910224", size = Vector2.new(584, 902) }, -- GiantGolemEggRender.png (World 2)
+	eggHawkmoth = { id = "rbxassetid://111594299533130", size = Vector2.new(553, 817) }, -- HawkmothEggRender.png (World 2)
 	eggUnicorn = { id = "rbxassetid://85066893166855", size = Vector2.new(496, 859) }, -- UnicornEggRender.png
 	eggCactus = { id = "rbxassetid://95599437590618", size = Vector2.new(635, 766) }, -- CactusEggRender.png
 	eggKitten = { id = "rbxassetid://124881834655792", size = Vector2.new(502, 749) }, -- KittenEggRender.png

@@ -150,17 +150,55 @@ return {
 		{ "Hoof", 190, 100, 214 }, -- legs
 		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
 	},
+	LivingBirch = {
+		{ "Body", 238, 234, 226 }, -- white bark
+		{ "Body", 226, 221, 211 }, -- bark, legs
+		{ "Marking", 52, 46, 44 }, -- birch bands and marks
+		{ "Accent", 242, 109, 57 }, -- autumn leaves
+		{ "Accent", 214, 72, 43 },
+		{ "Accent", 248, 168, 64 },
+		{ "Accent", 254, 234, 92 },
+		{ "Accent", 196, 58, 36 },
+		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
+	},
 	CrystalElephant = {
 		{ "Body", 138, 142, 182 }, -- lavender skin
 		{ "Marking", 86, 54, 168 }, -- crystal armour plates
 		{ "Horn", 0, 190, 231 }, -- cyan crystals and trim
 		{ "Accent", 229, 131, 251 }, -- pink crystals
 	},
+	PinkButterfly = {
+		{ "Body", 110, 44, 112 }, -- plum body
+		{ "Marking", 255, 126, 200 }, -- bubblegum wings
+		{ "Marking", 255, 200, 232 }, -- pale pink by the body
+		{ "Accent", 255, 52, 156 }, -- hot-pink wing edges
+		{ "Accent", 255, 110, 190 }, -- stripes and antenna tips
+	},
+	Hawkmoth = {
+		{ "Body", 62, 48, 44 }, -- body, head
+		{ "Body", 84, 54, 40 }, -- forewings
+		{ "Body", 32, 26, 28 }, -- collar, legs, antennae
+		{ "Marking", 242, 109, 57 }, -- abdomen rings, hindwings, antenna tips
+		{ "Accent", 160, 72, 38 }, -- forewing bands
+		{ "Belly", 246, 228, 182 }, -- the skull on its back
+		{ "Horn", 24, 20, 22 }, -- spikes, stinger, brows, wing edges, black rings
+	},
 	CrystalPhoenix = {
 		{ "Body", 104, 58, 184 }, -- body, wing arms
 		{ "Body", 146, 96, 226 }, -- head, neck, wing bands
 		{ "Marking", 229, 131, 251 }, -- pink feathers
 		{ "Accent", 0, 190, 231 }, -- cyan beak, feathers and crystals
+	},
+	OrangeButterfly = {
+		{ "Body", 255, 128, 26 }, -- wings
+		{ "Body", 242, 109, 57 }, -- wing edges
+		{ "Body", 214, 74, 30 }, -- wing tips
+		{ "Belly", 255, 196, 58 }, -- the wings' yellow by the body
+		{ "Marking", 107, 63, 42 }, -- body, head, legs, antennae
+		{ "Accent", 255, 200, 58 }, -- abdomen bands, eye spot middles
+		{ "Accent", 255, 240, 214 }, -- collar fluff
+		{ "Accent", 255, 244, 214 }, -- forewing spots
+		{ "Hoof", 92, 50, 30 }, -- eye spots
 	},
 	CrystalSpider = {
 		{ "Body", 96, 108, 200 },
@@ -323,6 +361,12 @@ return {
 		{ "Body", 236, 112, 132 }, -- head, funnel
 		{ "Marking", 255, 138, 72 }, -- cap
 		{ "Marking", 226, 100, 50 }, -- cap rim
+	},
+	GiantGolem = {
+		{ "Body", 150, 142, 132 }, -- stone
+		{ "Body", 104, 97, 90 }, -- chest, forearms, head, spikes (shade)
+		{ "Marking", 184, 177, 166 }, -- pale plates, caps, brow, knuckles
+		{ "Accent", 110, 186, 68 }, -- moss
 	},
 	Kraken = {
 		{ "Body", 58, 76, 128 }, -- tentacles
