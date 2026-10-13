@@ -1,0 +1,65 @@
+-- World 2's fourth biome, the Woodland Maze (QM, Oct 13; draft): an autumn forest floor.
+-- Made by tools/world2_woodland.py: edit that and re-make this, not this. Run in Studio
+-- (Edit, execute_luau) on the place with World2, after tools/world2_terrain.luau.
+-- Re-running is fine. Floor a gradient from the walls in (#79482E, #8E5139, #975939),
+-- the darkest never touching the lightest, each a stud higher toward the walls (0, 1, 2), with patches of fallen leaves scattered on it.
+-- Replaces World2's copied floor between the third biome and the fifth (World 1's Ocean
+-- floor: its flat parts there). The walls stay as they are for now.
+local W = workspace.World2
+local OFFSET = 1000
+local NEAR, FAR = -5904, -9024
+local rgb = Color3.fromRGB
+local KINDS = { -- [kind] = { name, part colour, checker colour }
+	[0] = { "Ground", rgb(121, 72, 46), rgb(110, 65, 41) }, -- #79482E
+	[1] = { "Soil", rgb(142, 81, 57), rgb(130, 74, 52) }, -- #8E5139
+	[2] = { "Path", rgb(151, 89, 57), rgb(139, 81, 52) }, -- #975939
+	[3] = { "Leaves", rgb(242, 109, 57), rgb(228, 98, 48) }, -- #F26D39
+	[4] = { "Leaves", rgb(254, 234, 92), rgb(242, 218, 76) }, -- #FEEA5C
+	[5] = { "Leaves", rgb(216, 67, 46), rgb(200, 58, 40) }, -- #D8432E (a stand-in)
+}
+-- { kind, low x, near z, size x, size z, top } in game space (x before the offset)
+local FLOOR = {
+--FLOOR--
+}
+
+local template
+for _, p in W.Ground:GetChildren() do
+	local z = p:IsA("BasePart") and p.Position.Z
+	if z and z < NEAR and z > FAR and p.Size.Y <= 5 and math.abs(p.CFrame.RightVector.X) > 0.999 then
+		if not template and p.Name == "Ground" then
+			template = p:Clone()
+		end
+		p:Destroy()
+	end
+end
+assert(template, "no fourth-biome Ground in World2.Ground to copy the look of")
+for _, t in template:GetChildren() do
+	if not t:IsA("Texture") then
+		t:Destroy()
+	end
+end
+for k in template:GetAttributes() do
+	template:SetAttribute(k, nil)
+end
+local n = 0
+local function lay(name, x, z, sx, sz, top, colour, checker)
+	local p = template:Clone()
+	p.Name = name
+	p.Size = Vector3.new(sx, top + 2, sz)
+	p.CFrame = CFrame.new(x + sx / 2, (top - 2) / 2, z - sz / 2)
+	p.Color = colour
+	for _, t in p:GetChildren() do
+		if checker then
+			t.Color3 = checker
+		else
+			t:Destroy() -- (boards: plain, no checker)
+		end
+	end
+	p.Parent = W.Ground
+	n += 1
+end
+for _, r in FLOOR do
+	local k = KINDS[r[1]]
+	lay(k[1], r[2] + OFFSET, r[3], r[4], r[5], r[6], k[2], k[3])
+end
+return string.format("%d floor parts", n)
