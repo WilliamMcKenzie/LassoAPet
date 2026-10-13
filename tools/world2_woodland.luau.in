@@ -2,7 +2,7 @@
 -- Made by tools/world2_woodland.py: edit that and re-make this, not this. Run in Studio
 -- (Edit, execute_luau) on the place with World2, after tools/world2_terrain.luau.
 -- Re-running is fine. Floor a gradient from the walls in (#79482E, #8E5139, #975939),
--- the darkest never touching the lightest, with patches of fallen leaves scattered on it.
+-- the darkest never touching the lightest, each a stud higher toward the walls (0, 1, 2), with patches of fallen leaves scattered on it.
 -- Replaces World2's copied floor between the third biome and the fifth (World 1's Ocean
 -- floor: its flat parts there). The walls stay as they are for now.
 local W = workspace.World2
@@ -17,7 +17,7 @@ local KINDS = { -- [kind] = { name, part colour, checker colour }
 	[4] = { "Leaves", rgb(254, 234, 92), rgb(242, 218, 76) }, -- #FEEA5C
 	[5] = { "Leaves", rgb(216, 67, 46), rgb(200, 58, 40) }, -- #D8432E (a stand-in)
 }
--- { kind, low x, near z, size x, size z } in game space (x before the offset)
+-- { kind, low x, near z, size x, size z, top } in game space (x before the offset)
 local FLOOR = {
 --FLOOR--
 }
@@ -25,7 +25,7 @@ local FLOOR = {
 local template
 for _, p in W.Ground:GetChildren() do
 	local z = p:IsA("BasePart") and p.Position.Z
-	if z and z < NEAR and z > FAR and p.Size.Y <= 4 and math.abs(p.CFrame.RightVector.X) > 0.999 then
+	if z and z < NEAR and z > FAR and p.Size.Y <= 5 and math.abs(p.CFrame.RightVector.X) > 0.999 then
 		if not template and p.Name == "Ground" then
 			template = p:Clone()
 		end
@@ -42,11 +42,11 @@ for k in template:GetAttributes() do
 	template:SetAttribute(k, nil)
 end
 local n = 0
-local function lay(name, x, z, sx, sz, colour, checker)
+local function lay(name, x, z, sx, sz, top, colour, checker)
 	local p = template:Clone()
 	p.Name = name
-	p.Size = Vector3.new(sx, 2, sz)
-	p.CFrame = CFrame.new(x + sx / 2, -1, z - sz / 2)
+	p.Size = Vector3.new(sx, top + 2, sz)
+	p.CFrame = CFrame.new(x + sx / 2, (top - 2) / 2, z - sz / 2)
 	p.Color = colour
 	for _, t in p:GetChildren() do
 		if checker then
@@ -60,6 +60,26 @@ local function lay(name, x, z, sx, sz, colour, checker)
 end
 for _, r in FLOOR do
 	local k = KINDS[r[1]]
-	lay(k[1], r[2] + OFFSET, r[3], r[4], r[5], k[2], k[3])
+	lay(k[1], r[2] + OFFSET, r[3], r[4], r[5], r[6], k[2], k[3])
 end
-return string.format("%d floor parts", n)
+-- The nests stand on whatever tile is under them now (raised tiles would bury them).
+local function topAt(x, z)
+	for _, r in FLOOR do
+		local x0 = r[2] + OFFSET
+		if x >= x0 and x < x0 + r[4] and z <= r[3] and z > r[3] - r[5] then
+			return r[6]
+		end
+	end
+	return 0
+end
+local nests = 0
+for _, m in W.Nests:GetChildren() do
+	local pivot = m:GetPivot()
+	if pivot.Z < NEAR and pivot.Z > FAR then
+		local baseY = m:GetAttribute("FlatY") or pivot.Y -- (where it stood on the flat floor)
+		m:SetAttribute("FlatY", baseY)
+		m:PivotTo(pivot + Vector3.new(0, baseY + topAt(pivot.X, pivot.Z) - pivot.Y, 0))
+		nests += 1
+	end
+end
+return string.format("%d floor parts, %d nests raised", n, nests)
