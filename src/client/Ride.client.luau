@@ -4313,12 +4313,11 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 		Hud.setCutscene(false)
 		if phase == "finish" then
-			-- Crossed the finish line: a random egg (the server draws it), its
-			-- reveal, then back home to your pen.
+			-- Crossed the finish line: the animal you rode is yours, in your pen
+			-- (Hatchery's FinishCourse), then back home to your pen.
 			task.spawn(function()
-				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, mount.kind)
-				kind = ok and kind or nil
-				task.wait(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5)
+				pcall(finishCourse.InvokeServer, finishCourse, mount.kind)
+				task.wait(0.5)
 				if phase == "finish" then
 					local pen = myPen()
 					local spawn = pen and pen:FindFirstChild("Spawn")
@@ -4331,7 +4330,7 @@ RunService.PreSimulation:Connect(function(dt)
 			if kind then
 				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
 			end
-			task.delay(kind and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function()
+			task.delay(kind and player:GetAttribute("Tutorial") and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function() -- (the animal's in your pen: only the tutorial's egg is revealed)
 				if phase == "home" then
 					finishRide(mount.x, mount.z)
 				end
