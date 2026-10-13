@@ -722,6 +722,7 @@ local Config = {
 		RedMushroom = "rbxassetid://102610484944753", -- assets/ui/RedMushroomEggRender.png (World 2)
 		BrownMushroom = "rbxassetid://84196239547123", -- assets/ui/BrownMushroomEggRender.png (World 2)
 		PurpleMushroom = "rbxassetid://132151928968903", -- assets/ui/PurpleMushroomEggRender.png (World 2)
+		MarbleFish = "rbxassetid://121162393893227", -- assets/ui/MarbleFishEggRender.png (World 2)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
