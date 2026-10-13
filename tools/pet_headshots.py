@@ -33,7 +33,7 @@ PREVIEW = "/mnt/project-files/animals/headshots"
 MODELS = {
     "Horse": "horses/Horse9_Leap", "Pinto": "horses/Pinto", "Pig": "animals/Pig", "Bunny": "animals/Bunny", "Fish": "animals/Fish",
     "Rhino": "animals/Rhino", "Unicorn": "animals/Unicorn", "MarbleColossus": "world2/MarbleColossus", "MajesticUnicorn": "world2/MajesticUnicorn", "MarbleFish": "world2/MarbleFish", "Lion": "world2/Lion", "Buffalo": "world2/Buffalo", "Crocodile": "world2/Crocodile", "CrystalCentipede": "crystal/CrystalCentipede", "CrystalPhoenix": "crystal/CrystalPhoenix", "RedMushroom": "crystal/RedMushroom", "BrownMushroom": "crystal/BrownMushroom", "PurpleMushroom": "crystal/PurpleMushroom", "BlueCrystal": "crystal/BlueCrystal", "PinkCrystal": "crystal/PinkCrystal", "CrystalSpider": "crystal/CrystalSpider", "CrystalElephant": "crystal/CrystalElephant",
-    "Cactus": "desert/Cactus", "Kitten": "desert/Kitten", "Scorpion": "desert/Scorpion", "Sandworm": "desert/Sandworm", "Eyeworm": "crimson/Eyeworm", "Maw": "crimson/Maw", "CrimsonScorpion": "crimson/CrimsonScorpion", "IvorySpider": "crimson/IvorySpider", "Asura": "crimson/Asura",
+    "Cactus": "desert/Cactus", "Kitten": "desert/Kitten", "Scorpion": "desert/Scorpion", "Sandworm": "desert/Sandworm", "Eyeworm": "crimson/Eyeworm", "Caterpillar": "woodland/Caterpillar", "Maw": "crimson/Maw", "CrimsonScorpion": "crimson/CrimsonScorpion", "IvorySpider": "crimson/IvorySpider", "Asura": "crimson/Asura",
     "SpineLizard": "converted/SpineLizard", "Snake": "desert/Snake",
     "Penguin": "snow/Penguin", "Boar": "converted/Boar", "Snowman": "snow/Snowman",
     "IceGolem": "converted/IceGolem", "Icebringer": "converted/Icebringer", "SnackYak": "snow/SnackYak",

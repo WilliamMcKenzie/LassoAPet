@@ -52,6 +52,7 @@ local KINDS = {
 	Kitten = { data = require(script.Parent.KittenEggModel), center = 1.6 },
 	Scorpion = { data = require(script.Parent.ScorpionEggModel), center = 1.6 },
 	Sandworm = { data = require(script.Parent.SandwormEggModel), center = 1.6 },
+	Caterpillar = { data = require(script.Parent.CaterpillarEggModel), center = 1.6 },
 	Eyeworm = { data = require(script.Parent.EyewormEggModel), center = 1.6 },
 	Maw = { data = require(script.Parent.MawEggModel), center = 1.6 },
 	CrimsonScorpion = { data = require(script.Parent.CrimsonScorpionEggModel), center = 1.6 },
