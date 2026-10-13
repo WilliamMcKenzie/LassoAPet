@@ -155,7 +155,7 @@ local NAMES = {
 	IceGolem = { "Ice", "golem" }, SnackYak = { "Snack", "yak" }, Icebringer = { "Ice", "bringer" },
 	Starfish = { "Star", "fish" }, Lionfish = { "Lion", "fish" }, Clownfish = { "Clown", "fish" }, Whale = { "Wh", "ale", "Wha" }, Squid = { "Sq", "uid", "Squi" },
 	JadeStatue = { "Jade", "tue" }, GarnetStatue = { "Gar", "net" },
-	Kraken = { "Kra", "ken" }, GiantGolem = { "Gi", "golem" }, KingCrab = { "King", "crab" }, BlueCrab = { "Blue", "crab" }, VolcanoTortoise = { "Volca", "toise" }, Firebird = { "Fire", "bird" }, RockHog = { "Rock", "hog" }, Rockworm = { "Rock", "worm" }, FireLobster = { "Fire", "lobster" }, LavaWhale = { "Lava", "whale" }, TRex = { "T-", "Rex" }, BoneRex = { "Bone", "rex" }, Ankylosaurus = { "Ankylo", "saurus" }, PalmGuy = { "Palm", "guy" }, Spinosaurus = { "Spino", "saurus" }, Pterodactyl = { "Ptero", "dactyl" }, Raptor = { "Rap", "tor" }, Phoenix = { "Phoe", "nix" }, Kitsune = { "Kit", "sune" },
+	Kraken = { "Kra", "ken" }, GiantGolem = { "Gi", "golem" }, KingCrab = { "King", "crab" }, BlueCrab = { "Blue", "crab" }, VolcanoTortoise = { "Volca", "toise" }, Firebird = { "Fire", "bird" }, RockHog = { "Rock", "hog" }, Rockworm = { "Rock", "worm" }, FireLobster = { "Fire", "lobster" }, LavaWhale = { "Lava", "whale" }, TRex = { "T-", "Rex" }, BoneRex = { "Bone", "rex" }, Ankylosaurus = { "Ankylo", "saurus" }, PalmGuy = { "Palm", "guy" }, Spinosaurus = { "Spino", "saurus" }, Pterodactyl = { "Ptero", "dactyl" }, Raptor = { "Rap", "tor" }, Phoenix = { "Phoe", "nix" }, Kitsune = { "Kit", "sune" }, Nut = { "N", "ut", "Nu" },
 	RollingLog = { "Rol", "log" },
 	Tiger = { "Ti", "ger" },
 	RoboShark = { "Robo", "shark" }, FishSchool = { "Fish", "school" }, Loong = { "L", "oong", "Loo" },

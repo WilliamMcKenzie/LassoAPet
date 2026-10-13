@@ -9,12 +9,16 @@ two lapis sashes streaming from her belt and four little stars orbiting her.
 
     python3 tools/nut.py
 
-writes designs/tomb/Nut.bbmodel (model and bones only so far, no animations) and the
-preview /mnt/project-files/world2/tomb/renders/Nut.png. Every rest is baked into the
-parts; every bone sits at 0.
+writes designs/tomb/Nut.bbmodel (convert without --zyx), the preview
+/mnt/project-files/world2/tomb/renders/Nut.png, a four-view sheet and an animation gif
+(--still skips the gif). Every rest is baked into the parts; every bone sits at 0.
+
+  idle    hovers, slow deep wingbeats, robe and sashes rippling, head looking about
+  walk    quicker beats, nosing forward
+  gallop  big fast beats, diving into the chase, robe streaming flat
 """
 
-import json
+import math
 import os
 import sys
 
@@ -23,7 +27,8 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
-from partlib import Part, T, Rx, Ry, Rz, render, write_bbmodel  # noqa: E402
+from horse_rig import pose  # noqa: E402
+from partlib import Part, T, Rx, Ry, Rz, render  # noqa: E402
 from snow_designs import pyramid  # noqa: E402
 
 NAME = "Nut"
@@ -299,7 +304,44 @@ def nut():
     a.meta = {"seat": (0, 7.15, -0.9), "neck_loop": {"center": (0, 7.8, -4.0), "radius": 1.5}}
     for p in a.parts:
         p.neon = p.name.startswith("Glow")
+    a.animations = animations
     return a
+
+
+TAU = 2 * math.pi
+
+
+def track(L, fn, n=16, channel="rotation"):
+    """fn(u), u = 0..1 over the loop -> (x, y, z): degrees, or Blockbench units for position."""
+    return {"channel": channel, "interp": "catmullrom",
+            "keys": [(round(L * k / n, 4), tuple(round(float(v), 3) for v in fn(k / n))) for k in range(n + 1)]}
+
+
+def animations():
+    """Wings beat about Z (the outer half lagging and flexing), the robe chain and sashes
+    ripple from the waist back, the hands sway, the orbiting stars spin and bob."""
+    def moves(L, beats, amp, bias, pitch, bob, ripple, n):
+        w = lambda u, ph=0.0: math.sin(TAU * (beats * u - ph))
+        t = {"root": [track(L, lambda u: (pitch + 2 * w(u, 0.3), 0, 0), n),
+                      track(L, lambda u: (0, -bob * w(u, 0.25), 0), n, "position")],
+             "neck": [track(L, lambda u: (-pitch * 0.8 + 3 * w(u, 0.5), 6 * math.sin(TAU * u) if beats < 3 else 0, 0), n)]}
+        for side, sx in (("L", -1), ("R", 1)):
+            t["Wing" + side] = [track(L, lambda u, sx=sx: (0, 0, sx * (bias + amp * w(u))), n)]
+            t["Wing" + side + "2"] = [track(L, lambda u, sx=sx: (0, 0, sx * 0.45 * amp * w(u, 0.15)), n)]
+            t["Arm" + side] = [track(L, lambda u, sx=sx: (4 * w(u, 0.4) - pitch * 0.5, 0, sx * 3 * w(u, 0.6)), n)]
+            t["Sash" + side] = [track(L, lambda u, sx=sx: (ripple * w(u, 0.35), sx * ripple * 0.6 * w(u, 0.6), 0), n)]
+        for i in range(3):
+            t[f"Robe{i + 1}"] = [track(L, lambda u, i=i: (ripple * (0.6 + 0.3 * i) * w(u, 0.2 + 0.12 * i), 0, 0), n)]
+        for j in range(4):
+            d = 1 if j % 2 else -1
+            t[f"Star{j + 1}"] = [{"channel": "rotation", "interp": "linear",
+                                  "keys": [(round(L * k / 4, 4), (0, d * 90 * k, 0)) for k in range(5)]},
+                                 track(L, lambda u, j=j: (0, 4 * math.sin(TAU * (u + 0.25 * j)), 0), n, "position")]
+        return t
+
+    return {"idle": (2.0, moves(2.0, 2, 22, 2, 0, 3, 6, 32)),
+            "walk": (1.0, moves(1.0, 2, 26, 2, -6, 4, 9, 24)),
+            "gallop": (0.6, moves(0.6, 2, 32, 4, -12, 5, 12, 24))}
 
 
 SHOT = "/mnt/project-files/world2/tomb/renders"
@@ -317,10 +359,7 @@ def main(out=os.path.join(A.ROOT, "designs", "tomb")):
     os.makedirs(out, exist_ok=True)
     os.makedirs(SHOT, exist_ok=True)
     a = nut()
-    model, _ = write_bbmodel(a.parts, NAME, None, bones=a.bones())
-    model["animations"] = []
-    with open(os.path.join(out, NAME + ".bbmodel"), "w") as f:
-        json.dump(model, f, separators=(",", ":"))
+    model = A.build_animal(a, out)
     lo = np.min([q for p in a.parts for q in (p.polys if p.shape == "Poly" else [p.cf[:3, 3]])
                  for q in (q if np.ndim(q) == 2 else [q])], axis=0)
     hi = np.max([q for p in a.parts for q in (p.polys if p.shape == "Poly" else [p.cf[:3, 3]])
@@ -333,7 +372,22 @@ def main(out=os.path.join(A.ROOT, "designs", "tomb")):
     for i, cam in enumerate(views):
         sheet.paste(shot(a.parts, W=500, H=500, fov=48, **cam), ((i % 2) * 500, (i // 2) * 500))
     sheet.save(os.path.join(os.path.dirname(SHOT), "Nut_views.png"))
+    if "--still" in sys.argv:
+        return
+    frames = []
+    cams = [dict(eye=(-28, 9, -2), target=(0, 6, 0.5)), dict(eye=(-15, 21, -18), target=(0, 6, 0.8))]
+    for name, nf in (("idle", 30), ("walk", 20), ("gallop", 14)):
+        anim = A.anim_named(model, name)
+        for k in range(nf):
+            ps = pose(model, anim, k / nf * anim["length"])
+            for p in ps:
+                p.neon = p.name.startswith("Glow")
+            im = Image.new("RGB", (800, 400))
+            for c, cam in enumerate(cams):
+                im.paste(shot(ps, W=400, H=400, fov=48, **cam), (400 * c, 0))
+            frames.append(A.label(im, ["run" if name == "gallop" else name] * 2))
+    A.gif(os.path.join(os.path.dirname(SHOT), "Nut_anims.gif"), frames, fps=20)
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:])
+    main(*[x for x in sys.argv[1:] if not x.startswith("--")])

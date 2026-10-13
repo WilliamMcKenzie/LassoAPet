@@ -184,6 +184,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	Pterodactyl = "Not technically a dinosaur. Please do not tell it, it is very proud.",
 	Ankylosaurus = "Built like a tank, swings its tail like a hammer. Hugs are not recommended.",
 	PalmGuy = "Thinks the Cactus is his long-lost cousin. The Cactus disagrees.",
+	Nut = "Holds up the whole night sky with her back. Asks you to wipe your feet before riding.",
 	BoneRex = "Was a T-Rex once. Then it got angrier. Then it lost the skin.",
 	Phoenix = "Burns up, crumbles to ash, hatches again. Has done it so many times it finds it boring.",
 	VolcanoTortoise = "Fell asleep in the sun for three hundred years. Woke up as a volcano.",
