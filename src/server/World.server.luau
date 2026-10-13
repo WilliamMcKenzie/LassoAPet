@@ -95,5 +95,17 @@ for _, folderName in if endless then {} else { "Ground", "Walls", "Obstacles", "
 		end
 	end
 end
+-- World 1's end (Config.EndPortal; QM, Oct 13): the base's portal gate, giant, across
+-- the course just before the finish line, facing you as you ride in (Gold.server sends
+-- you through it to World 2; Client/PortalFx swirls its opening).
+local endPortal = Config.EndPortal
+local baseGate = world:FindFirstChild("BaseDecor") and world.BaseDecor:FindFirstChild("PortalGate")
+if endPortal and baseGate and not world:FindFirstChild("EndPortal") then
+	local gate = baseGate:Clone()
+	gate.Name = "EndPortal"
+	gate:ScaleTo(endPortal.Scale)
+	gate:PivotTo(CFrame.new(0, 0, finishZ + endPortal.At))
+	gate.Parent = world
+end
 WorldColors.watch(world)
 world:SetAttribute("Ready", true)

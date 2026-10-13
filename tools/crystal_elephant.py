@@ -87,12 +87,13 @@ def build():
             e["name"] = "Glow" + e["name"]  # glowing crystal tusks and cyan trim
     add = {"root": [], "neck": [], "LegFL": [], "LegFR": [], "LegHL": [], "LegHR": []}
 
-    # the back: a ridge of tall crystals, cyan and pink, tallest over the middle, leaning back
-    for i, (z, h, c) in enumerate(((-24, 14, "cyan"), (-8, 22, "pink"), (8, 25, "cyan"), (24, 16, "pink"))):
-        add["root"] += shard(f"CrystalSpine{i}", (0, 78, z), (0, 1, 0.25), 5.5 if c == "cyan" else 5, h, 11, uv[c])
+    # the back: tall crystals, cyan and pink, leaning back, clear of the rider's seat (z 12):
+    # one on the shoulders ahead of the rider, the tallest pair behind (Studio, Oct 13)
+    for i, (z, h, c) in enumerate(((-24, 14, "cyan"), (27, 20, "pink"), (34, 24, "cyan"))):
+        add["root"] += shard(f"CrystalSpine{i}", (0, 78, z), (0, 1, 0.3), 5.5 if c == "cyan" else 5, h, 11, uv[c])
     # side clusters on the back plate: smaller crystals leaning out
     for s in (-1, 1):
-        for i, (z, c) in enumerate(((-16, "pink"), (0, "cyan"), (16, "pink"))):
+        for i, (z, c) in enumerate(((-20, "pink"), (-8, "cyan"), (28, "pink"))):  # none beside the seat
             add["root"] += shard(f"CrystalBack{'LR'[s > 0]}{i}", (s * 15, 78, z), (s * 0.55, 1, 0.15), 3, 6, 6, uv[c])
     # skirts: a crystal point out of each panel
     for s in (-1, 1):

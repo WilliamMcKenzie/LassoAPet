@@ -257,11 +257,13 @@ local Config = {
 	CourseWidening = 0.005,
 	CourseMaxHalfWidth = 137,
 	CourseLength = 2168 + 1816 + 1920 + 3120 + 5040 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, then the Jurassic, its end is the end; off its edge, the void)
-	-- The Jurassic goes on forever (QM, Oct 11: the temporary endgame): the course is
+	-- The Jurassic went on forever (QM, Oct 11: the temporary endgame): the course was
 	-- cut at Cut (World.server: no far wall, no finish line) and the Length studs
-	-- before it are laid again and again past it (Client/Endless). Cut and Length are
+	-- before it laid again and again past it (Client/Endless). Cut and Length are
 	-- whole 16s, so the floor's checker keeps its step. nil: the course ends as before.
-	Endless = { Cut = -21504, Length = 1536 },
+	-- (QM, Oct 13: off; World 1 ends at a giant portal to World 2 instead, EndPortal below.
+	-- Was { Cut = -21504, Length = 1536 }.)
+	Endless = nil,
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
@@ -1084,12 +1086,12 @@ local Config = {
 		Whale = { Speed = 3.45, Stamina = 10 }, -- (QM, Oct 12: 20% into the Volcano; was 3.2)
 		Kraken = { Speed = 5.8, Stamina = 3 }, -- (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
 		-- Volcano
-		Firebird = { Speed = 4.59, Stamina = 2.5 },
-		RockHog = { Speed = 5.3, Stamina = 2.8 }, -- (QM, Oct 11: 5.4 crossed into the Jurassic, the only Rare to cross a line; the Epics are the gates)
-		Rockworm = { Speed = 6.3, Stamina = 3 },
-		FireLobster = { Speed = 5.15, Stamina = 2.8 },
+		Firebird = { Speed = 5.11, Stamina = 2.5 }, -- (QM, Oct 13: 10% into the Jurassic; was 4.59)
+		RockHog = { Speed = 6.56, Stamina = 2.8 }, -- (QM, Oct 13: 65% into the Jurassic; was 5.3)
+		Rockworm = { Speed = 7.12, Stamina = 3 }, -- (QM, Oct 13: 86% into the Jurassic; was 6.3)
+		FireLobster = { Speed = 6.43, Stamina = 2.8 }, -- (QM, Oct 13: 60% into the Jurassic; was 5.15)
 		Phoenix = { Speed = 7.2, Stamina = 3 }, -- (QM, Oct 12: well into the Jurassic, a touch slower than the Bone Rex; was 6.98)
-		LavaWhale = { Speed = 5.85, Stamina = 3 },
+		LavaWhale = { Speed = 6.83, Stamina = 3 }, -- (QM, Oct 13: 75% into the Jurassic; was 5.85)
 		TRex = { Speed = 6, Stamina = 3 }, -- (a guess: a touch past the Lava Whale)
 		Raptor = { Speed = 5.6, Stamina = 3 }, -- (a guess: a Rare, past the Volcano's Rares and short of the T-Rex)
 		Spinosaurus = { Speed = 5.4, Stamina = 3 }, -- (a guess: a touch under the T-Rex)
@@ -1097,7 +1099,7 @@ local Config = {
 		Ankylosaurus = { Speed = 5, Stamina = 3 }, -- (a guess: the Jurassic's Uncommon, under its Rares)
 		PalmGuy = { Speed = 4.9, Stamina = 3 }, -- (a guess: an Uncommon, a touch under the Ankylosaurus)
 		BoneRex = { Speed = 7.5, Stamina = 3 }, -- (a guess: the final Legendary, the fastest in the game)
-		VolcanoTortoise = { Speed = 5, Stamina = 3 },
+		VolcanoTortoise = { Speed = 6.17, Stamina = 3 }, -- (QM, Oct 13: 50% into the Jurassic; was 5)
 		-- Godlands
 		Loong = { Speed = 0.5, Stamina = 8 }, -- QM, Oct 4: starts at 0.5x, its breath's kills take it up to 1x (Abilities.Loong.MaxSpeed 2 x this); sprints at 4x (PetSprintSpeed)
 		Beholder = { Speed = 2, Stamina = 2 }, -- QM, Oct 4
@@ -1139,6 +1141,10 @@ Config.Water = {
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
 Config.Places = { 126872244121414, 139418530058790 } -- [world] = its PlaceId
 Config.World = table.find(Config.Places, game.PlaceId) or 1
+-- World 1's end (QM, Oct 13): a giant copy of the base's portal gate (Scale x its 1 size)
+-- across the course, At studs before the finish line (World.server). Riding into it
+-- unlocks World 2 for free and takes you there (Gold.server). Not in the other worlds.
+Config.EndPortal = if Config.World == 1 then { Scale = 5, At = 24 } else nil
 -- What each world costs in gold to unlock, once (the Worlds menu's Buy; QM, Oct 13).
 -- World 1 is everyone's.
 Config.WorldPrices = { 0, 400 }

@@ -171,10 +171,7 @@ end
 buyWorld.Parent = ReplicatedStorage
 
 local travelling = {}
-local travel = Instance.new("RemoteEvent")
-travel.Name = "Travel"
-travel.OnServerEvent:Connect(function(player, world)
-	world = tonumber(world)
+local function travelTo(player, world)
 	local place = world and Config.Places[world]
 	if not place or world == Config.World or travelling[player] then
 		return
@@ -189,8 +186,45 @@ travel.OnServerEvent:Connect(function(player, world)
 		warn("Travel to world " .. world .. ": " .. tostring(err))
 	end
 	travelling[player] = nil
+end
+local travel = Instance.new("RemoteEvent")
+travel.Name = "Travel"
+travel.OnServerEvent:Connect(function(player, world)
+	travelTo(player, tonumber(world))
 end)
 travel.Parent = ReplicatedStorage
+
+-- World 1's end portal (Config.EndPortal, World.server): ride into it and World 2 is
+-- yours, free, and you're on your way there.
+if Config.EndPortal then
+	task.spawn(function()
+		local world = workspace:WaitForChild("World")
+		local gate = world:WaitForChild("EndPortal", 60)
+		if not gate then
+			return
+		end
+		local gateZ = gate:GetPivot().Position.Z
+		local portalTried = {} -- [player] = os.clock() it last sent them
+		Players.PlayerRemoving:Connect(function(player)
+			portalTried[player] = nil
+		end)
+		while true do
+			task.wait(0.2)
+			for _, player in Players:GetPlayers() do
+				local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+				if root and root.Position.Z < gateZ + 2 and loaded[player] and not travelling[player]
+					and os.clock() - (portalTried[player] or -math.huge) > 10 then -- (a failed teleport, as in Studio: not again at once)
+					portalTried[player] = os.clock()
+					if not player:GetAttribute("OwnsWorld2") then
+						player:SetAttribute("OwnsWorld2", true)
+						save(player)
+					end
+					task.spawn(travelTo, player, 2)
+				end
+			end
+		end
+	end)
+end
 
 -- Autosave (QM, Oct 4): every Config.AutosaveEvery seconds each player's gold is saved
 -- if it changed since it was last saved (so a server crash loses that much at most),
