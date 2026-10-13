@@ -13,7 +13,7 @@ the stone's edges.
 
 Laid out in game space after the funnel, like tools/world2_meadow_ground.py (8-stud
 cells on x multiples of 8, each 40-stud band out to its widest end, under the walls).
-No plates by a nest or against a wall.
+No plates against a wall.
 """
 
 import math
@@ -25,7 +25,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(__file__))
-from desert_ground import noise, rects, NESTS as DESERT_NESTS  # noqa: E402
+from desert_ground import noise, rects  # noqa: E402
 from funnel_grid import half_width, map_x  # noqa: E402
 
 HERE = os.path.dirname(__file__)
@@ -43,7 +43,6 @@ COLOURS = {  # part, checker
 TOPS = {GROUND: 0, BRIGHT: 1, STONE: 2}  # tile heights (QM: height variation): crimson, a step up, the stone peak another
 PLATE = [(119, 86, 86), (132, 98, 98)]  # the plates: the stone's colour and a touch lighter
 GROW = 1.35 ** 0.8  # the funnel grows this biome's obstacles and nests (tools/funnel.luau)
-NEST_CLEAR = 16
 
 
 def centre(i, j):
@@ -65,10 +64,6 @@ def obstacles():
         if Z1 < z < Z0:
             out.append((float(map_x(x, z)), z, max(sx, sz) / 2 * GROW))
     return out
-
-
-def nests():
-    return [(float(map_x(x, z)), z) for x, z in DESERT_NESTS]
 
 
 def grow(mask, n=1):
@@ -138,7 +133,6 @@ def plates(kind, seed=43):
     """A few stone plates: (x, z, variant, yaw degrees) on 4-stud squares (4k + 2) of the
     brighter crimson right beside the stone, about one bright tile in five along its edge."""
     rng = np.random.default_rng(seed)
-    nst = nests()
     edge = grow(kind == STONE, 1) & (kind == BRIGHT)
     out = []
     for i, j in zip(*np.nonzero(edge)):
@@ -146,7 +140,7 @@ def plates(kind, seed=43):
             continue
         x = -OUT + i * CELL + 2 + 4 * int(rng.integers(0, 2))
         z = Z0 - j * CELL - 2 - 4 * int(rng.integers(0, 2))
-        if abs(x) > half_width(z) - 4 or any(math.hypot(x - a, z - b) < NEST_CLEAR for a, b in nst):
+        if abs(x) > half_width(z) - 4:
             continue
         out.append((x, z, int(rng.integers(1, 4)), int(rng.integers(0, 4)) * 90 + int(rng.integers(-8, 9))))
     return out
@@ -203,9 +197,6 @@ def render(kind, pl, out, s=2, rows=4):
         for x, z, rad in obstacles():
             if here(z):
                 d.ellipse([*P(x - rad, z + rad), *P(x + rad, z - rad)], outline=(60, 60, 70), width=s)
-        for x, z in nests():
-            if here(z):
-                d.ellipse([*P(x - 6, z + 6), *P(x + 6, z - 6)], outline=(255, 255, 255), width=s)
         for j in range(r * seg, min(NZ, (r + 1) * seg)):
             z = Z0 - j * CELL
             for sg in (-1, 1):

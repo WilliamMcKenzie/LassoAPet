@@ -3,7 +3,7 @@
 -- world2_meadow_ground, world2_crimson). Re-running is fine.
 -- Goes: everything in World2.Obstacles and World2.Decor (World 1's rocks, bushes, cacti,
 -- coral, icicles, pines, the ribcage...) and World2.BaseDecor's rocks and plants.
--- Stays: the floor, walls, start line, nests (the rides need them), the portal gate
+-- Stays: the floor, walls, start line, the portal gate
 -- (World travel) and the Crimson Lands' stone plates (World2.Decor.Plates, QM's ask).
 local W = workspace.World2
 local KEEP = { Plates = true, PortalGate = true }

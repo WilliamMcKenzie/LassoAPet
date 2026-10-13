@@ -11,8 +11,8 @@ Run: python3 tools/world2_temple.py [out_dir]
   DeepWater (two down) so Studio can run the flowing-water texture over them.
 - In the second half the rock spreads out to the dirt, the grass thins to the odd patch, and marble
   #C8C8C8 lies in it, a stud up, always with rock on all eight sides.
-- Down both sides of the whole biome, a strip of #C8C8C8 dirt with bonsai trees planted
-  in it at even spacing, in pairs facing each other across the course.
+- Down both sides of the whole biome, a strip of #C8C8C8 dirt (the mesh thread's trees
+  go in it later; QM scrapped the bonsai placeholders).
 - Walls #C8C8C8 (QM: stone).
 
 Laid out in game space after the funnel, like tools/world2_cavern.py.
@@ -47,9 +47,6 @@ TOPS = {ROCK: 0, GRASS: 1, MARBLE: 1, SIDE: 1, WATER: -1, DEEP: -2}
 WALL, CAP = [(200, 200, 200), (186, 186, 186)], (176, 176, 176)
 LILY = (86, 150, 50)
 SIDE_W = 2  # tiles of dirt in from each wall
-BONSAI_EVERY = 128  # studs between bonsai pairs
-NESTS = [((16, -18)[k % 2], Z0 - 500 - k * 1100) for k in range(5)]  # tools/volcano.py's, funnelled below
-NEST_CLEAR = 24
 
 
 def centre(i, j):
@@ -59,10 +56,6 @@ def centre(i, j):
 def band_out(j):
     z_far = max(Z1, Z0 - (((j * CELL) // BAND) + 1) * BAND)
     return int(math.ceil(half_width(z_far) / CELL)) * CELL
-
-
-def nests():
-    return [(float(map_x(x, z)), z) for x, z in NESTS]
 
 
 def grow(mask):
@@ -159,9 +152,6 @@ def add_ponds(kind, rng, half_j):
         ring = kind[i0 - 1:i0 + w + 1, j0 - 1:j0 + h + 1]
         if not np.all((ring == GRASS) | (ring == ROCK)) or (ring == GRASS).sum() < ring.size * 0.7:
             continue
-        x, z = centre(i0 + w / 2 - 0.5, j0 + h / 2 - 0.5)
-        if any(math.hypot(x - a, z - b) < NEST_CLEAR + 30 for a, b in nests()):
-            continue
         # a rounded pond: water inside an ellipse, deep in its middle, a ring of rock round it
         ci, cj = i0 + (w - 1) / 2, j0 + (h - 1) / 2
         for a in range(i0 - 1, i0 + w + 1):
@@ -186,17 +176,6 @@ def add_ponds(kind, rng, half_j):
     return lilies
 
 
-def bonsai():
-    """(x, z) of each bonsai: pairs facing each other in the side strips, evenly spaced."""
-    out = []
-    z = Z0 - BONSAI_EVERY / 2
-    while z > Z1 + BONSAI_EVERY / 4:
-        x = half_width(z) - SIDE_W * CELL / 2 - 1
-        out += [(-round(x, 1), z), (round(x, 1), z)]
-        z -= BONSAI_EVERY
-    return out
-
-
 def check(kind):
     """Marble only ever touches rock (or marble); water only ever touches rock (or water)."""
     bad = 0
@@ -219,7 +198,7 @@ def boxes(kind):
     return out
 
 
-def render(kind, lilies, trees, out, s=2, rows=5):
+def render(kind, lilies, out, s=2, rows=5):
     seg = int(math.ceil(NZ / rows))
     w, h = NX * CELL * s, seg * CELL * s
     im = Image.new("RGB", (rows * (w + 20), h), (255, 255, 255))
@@ -246,12 +225,6 @@ def render(kind, lilies, trees, out, s=2, rows=5):
         for x, z, rad in lilies:
             if here(z):
                 d.ellipse([*P(x - rad, z + rad), *P(x + rad, z - rad)], fill=LILY)
-        for x, z in trees:
-            if here(z):
-                d.ellipse([*P(x - 4, z + 4), *P(x + 4, z - 4)], fill=(60, 120, 50), outline=(90, 60, 40), width=s)
-        for x, z in nests():
-            if here(z):
-                d.ellipse([*P(x - 6, z + 6), *P(x + 6, z - 6)], outline=(255, 255, 255), width=2 * s)
         for j in range(r * seg, min(NZ, (r + 1) * seg)):
             z = Z0 - j * CELL
             for sg in (-1, 1):
@@ -259,11 +232,10 @@ def render(kind, lilies, trees, out, s=2, rows=5):
     im.save(out)
 
 
-def write_luau(parts, lilies, trees):
+def write_luau(parts, lilies):
     body = open(os.path.join(HERE, "world2_temple.luau.in")).read()
     body = body.replace("--FLOOR--", "\n".join("\t{ %d, %d, %d, %d, %d, %d }," % p for p in parts))
     body = body.replace("--LILIES--", "\n".join("\t{ %g, %g, %g }," % p for p in lilies))
-    body = body.replace("--BONSAI--", "\n".join("\t{ %g, %g }," % p for p in trees))
     open(os.path.join(HERE, "world2_temple.luau"), "w").write(body)
 
 
@@ -273,13 +245,12 @@ def main():
     kind, lilies = layout()
     bad = check(kind)
     assert bad == 0, f"{bad} marble or water tiles touch something but rock"
-    trees = bonsai()
     parts = boxes(kind)
     assert all(p[3] <= 2048 and p[4] <= 2048 for p in parts)
-    render(kind, lilies, trees, os.path.join(out, "temple_overhead.png"))
-    write_luau(parts, lilies, trees)
+    render(kind, lilies, os.path.join(out, "temple_overhead.png"))
+    write_luau(parts, lilies)
     names = ("rock", "grass", "marble", "side", "water", "deep")
-    print({n: int((kind == k).sum()) for k, n in enumerate(names)}, "lilies:", len(lilies), "bonsai:", len(trees),
+    print({n: int((kind == k).sum()) for k, n in enumerate(names)}, "lilies:", len(lilies),
           "parts:", len(parts))
 
 

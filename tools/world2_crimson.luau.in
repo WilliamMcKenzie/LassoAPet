@@ -5,7 +5,7 @@
 -- brighter crimson (each a stud higher: ground 0, brighter 1, stone 2), with World 1's base stone plates scattered round each stone tile.
 -- Replaces World2's copied floor between the first biome and the third (World 1's Desert
 -- floor: its flat Ground, Grass and Stone parts there) and lays World2.Decor.Plates.
--- Walls, obstacles and nests stay (placeholders for now).
+-- Walls stay (placeholders for now).
 local W = workspace.World2
 local OFFSET = 1000
 local NEAR, FAR = -2168, -3984
@@ -86,24 +86,4 @@ for i, r in PLATES do
 	p.Parent = folder
 end
 folder.Parent = W.Decor
--- The nests stand on whatever tile is under them now (raised tiles would bury them).
-local function topAt(x, z)
-	for _, r in FLOOR do
-		local x0 = r[2] + OFFSET
-		if x >= x0 and x < x0 + r[4] and z <= r[3] and z > r[3] - r[5] then
-			return r[6]
-		end
-	end
-	return 0
-end
-local nests = 0
-for _, m in W.Nests:GetChildren() do
-	local pivot = m:GetPivot()
-	if pivot.Z < NEAR and pivot.Z > FAR then
-		local baseY = m:GetAttribute("FlatY") or pivot.Y -- (where it stood on the flat floor)
-		m:SetAttribute("FlatY", baseY)
-		m:PivotTo(pivot + Vector3.new(0, baseY + topAt(pivot.X, pivot.Z) - pivot.Y, 0))
-		nests += 1
-	end
-end
-return string.format("%d floor parts, %d plates, %d nests raised", #FLOOR, #PLATES, nests)
+return string.format("%d floor parts, %d plates", #FLOOR, #PLATES)

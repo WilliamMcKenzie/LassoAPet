@@ -2,10 +2,10 @@
 -- edit that and re-make this, not this. Run in Studio (Edit, execute_luau) on the place
 -- with World2, after tools/world2_terrain.luau. Re-running is fine.
 -- An old rocky path through grass, little ponds ringed by rock with lily pads, marble
--- inlays in the second half, dirt strips with bonsai down both sides, stone walls.
+-- inlays in the second half, dirt strips down both sides, stone walls.
 -- Replaces World2's copied floor between the fourth biome and the sixth (World 1's
 -- Volcano floor: its flat parts there), paints the walls #C8C8C8, and lays
--- World2.Decor.Lilies and World2.Decor.Bonsai (placeholder trees until a bonsai mesh).
+-- World2.Decor.Lilies.
 -- The ponds' parts are named Water (shallow) and DeepWater, for the flowing-water texture.
 local W = workspace.World2
 local OFFSET = 1000
@@ -27,10 +27,6 @@ local FLOOR = {
 -- { x, z, radius }: lily pads on the ponds
 local LILIES = {
 --LILIES--
-}
--- { x, z }: bonsai in the side dirt
-local BONSAI = {
---BONSAI--
 }
 
 local template
@@ -109,35 +105,5 @@ for _, r in LILIES do
 	-- (on the water's surface, a hair up; a flat disc)
 	block(lilies, "LilyPad", Vector3.new(0.2, r[3] * 2, r[3] * 2), CFrame.new(r[1] + OFFSET, -0.9, r[2]) * CFrame.Angles(0, 0, math.pi / 2), rgb(86, 150, 50), Enum.PartType.Cylinder)
 end
-local trees = folder("Bonsai")
-for _, r in BONSAI do
-	-- (placeholders: a little trunk and a flat canopy, until the bonsai mesh)
-	local m = Instance.new("Model")
-	m.Name = "Bonsai"
-	local at = CFrame.new(r[1] + OFFSET, 1, r[2])
-	block(m, "Trunk", Vector3.new(1.6, 6, 1.6), at * CFrame.new(0, 3, 0), rgb(110, 78, 52))
-	block(m, "Canopy", Vector3.new(9, 2.4, 9), at * CFrame.new(0, 6.6, 0), rgb(72, 128, 52))
-	m.Parent = trees
-end
 
--- The nests stand on whatever tile is under them now.
-local function topAt(x, z)
-	for _, r in FLOOR do
-		local x0 = r[2] + OFFSET
-		if x >= x0 and x < x0 + r[4] and z <= r[3] and z > r[3] - r[5] then
-			return r[6]
-		end
-	end
-	return 0
-end
-local nests = 0
-for _, m in W.Nests:GetChildren() do
-	local pivot = m:GetPivot()
-	if pivot.Z < NEAR and pivot.Z > FAR then
-		local baseY = m:GetAttribute("FlatY") or pivot.Y
-		m:SetAttribute("FlatY", baseY)
-		m:PivotTo(pivot + Vector3.new(0, baseY + topAt(pivot.X, pivot.Z) - pivot.Y, 0))
-		nests += 1
-	end
-end
-return string.format("%d floor parts, %d lily pads, %d bonsai, %d nests raised", #FLOOR, #LILIES, #BONSAI, nests)
+return string.format("%d floor parts, %d lily pads", #FLOOR, #LILIES)

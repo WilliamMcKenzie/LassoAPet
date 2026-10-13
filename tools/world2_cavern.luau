@@ -486,24 +486,4 @@ for _, p in W.Walls:GetChildren() do
 		walls += 1
 	end
 end
--- The nests stand on whatever tile is under them now (raised tiles would bury them).
-local function topAt(x, z)
-	for _, r in FLOOR do
-		local x0 = r[2] + OFFSET
-		if x >= x0 and x < x0 + r[4] and z <= r[3] and z > r[3] - r[5] then
-			return r[6]
-		end
-	end
-	return 0
-end
-local nests = 0
-for _, m in W.Nests:GetChildren() do
-	local pivot = m:GetPivot()
-	if pivot.Z < NEAR and pivot.Z > FAR then
-		local baseY = m:GetAttribute("FlatY") or pivot.Y -- (where it stood on the flat floor)
-		m:SetAttribute("FlatY", baseY)
-		m:PivotTo(pivot + Vector3.new(0, baseY + topAt(pivot.X, pivot.Z) - pivot.Y, 0))
-		nests += 1
-	end
-end
-return string.format("%d floor parts, %d walls painted, %d nests raised", n, walls, nests)
+return string.format("%d floor parts, %d walls painted", n, walls)

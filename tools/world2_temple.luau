@@ -2,10 +2,10 @@
 -- edit that and re-make this, not this. Run in Studio (Edit, execute_luau) on the place
 -- with World2, after tools/world2_terrain.luau. Re-running is fine.
 -- An old rocky path through grass, little ponds ringed by rock with lily pads, marble
--- inlays in the second half, dirt strips with bonsai down both sides, stone walls.
+-- inlays in the second half, dirt strips down both sides, stone walls.
 -- Replaces World2's copied floor between the fourth biome and the sixth (World 1's
 -- Volcano floor: its flat parts there), paints the walls #C8C8C8, and lays
--- World2.Decor.Lilies and World2.Decor.Bonsai (placeholder trees until a bonsai mesh).
+-- World2.Decor.Lilies.
 -- The ponds' parts are named Water (shallow) and DeepWater, for the flowing-water texture.
 local W = workspace.World2
 local OFFSET = 1000
@@ -1209,87 +1209,6 @@ local LILIES = {
 	{ -41, -9318.3, 1.7 },
 	{ -46.9, -9320.1, 2.2 },
 }
--- { x, z }: bonsai in the side dirt
-local BONSAI = {
-	{ -92.4, -9088 },
-	{ 92.4, -9088 },
-	{ -93.1, -9216 },
-	{ 93.1, -9216 },
-	{ -93.7, -9344 },
-	{ 93.7, -9344 },
-	{ -94.4, -9472 },
-	{ 94.4, -9472 },
-	{ -95, -9600 },
-	{ 95, -9600 },
-	{ -95.6, -9728 },
-	{ 95.6, -9728 },
-	{ -96.3, -9856 },
-	{ 96.3, -9856 },
-	{ -96.9, -9984 },
-	{ 96.9, -9984 },
-	{ -97.6, -10112 },
-	{ 97.6, -10112 },
-	{ -98.2, -10240 },
-	{ 98.2, -10240 },
-	{ -98.8, -10368 },
-	{ 98.8, -10368 },
-	{ -99.5, -10496 },
-	{ 99.5, -10496 },
-	{ -100.1, -10624 },
-	{ 100.1, -10624 },
-	{ -100.8, -10752 },
-	{ 100.8, -10752 },
-	{ -101.4, -10880 },
-	{ 101.4, -10880 },
-	{ -102, -11008 },
-	{ 102, -11008 },
-	{ -102.7, -11136 },
-	{ 102.7, -11136 },
-	{ -103.3, -11264 },
-	{ 103.3, -11264 },
-	{ -104, -11392 },
-	{ 104, -11392 },
-	{ -104.6, -11520 },
-	{ 104.6, -11520 },
-	{ -105.2, -11648 },
-	{ 105.2, -11648 },
-	{ -105.9, -11776 },
-	{ 105.9, -11776 },
-	{ -106.5, -11904 },
-	{ 106.5, -11904 },
-	{ -107.2, -12032 },
-	{ 107.2, -12032 },
-	{ -107.8, -12160 },
-	{ 107.8, -12160 },
-	{ -108.4, -12288 },
-	{ 108.4, -12288 },
-	{ -109.1, -12416 },
-	{ 109.1, -12416 },
-	{ -109.7, -12544 },
-	{ 109.7, -12544 },
-	{ -110.4, -12672 },
-	{ 110.4, -12672 },
-	{ -111, -12800 },
-	{ 111, -12800 },
-	{ -111.6, -12928 },
-	{ 111.6, -12928 },
-	{ -112.3, -13056 },
-	{ 112.3, -13056 },
-	{ -112.9, -13184 },
-	{ 112.9, -13184 },
-	{ -113.6, -13312 },
-	{ 113.6, -13312 },
-	{ -114.2, -13440 },
-	{ 114.2, -13440 },
-	{ -114.8, -13568 },
-	{ 114.8, -13568 },
-	{ -115.5, -13696 },
-	{ 115.5, -13696 },
-	{ -116.1, -13824 },
-	{ 116.1, -13824 },
-	{ -116.8, -13952 },
-	{ 116.8, -13952 },
-}
 
 local template
 for _, p in W.Ground:GetChildren() do
@@ -1367,35 +1286,5 @@ for _, r in LILIES do
 	-- (on the water's surface, a hair up; a flat disc)
 	block(lilies, "LilyPad", Vector3.new(0.2, r[3] * 2, r[3] * 2), CFrame.new(r[1] + OFFSET, -0.9, r[2]) * CFrame.Angles(0, 0, math.pi / 2), rgb(86, 150, 50), Enum.PartType.Cylinder)
 end
-local trees = folder("Bonsai")
-for _, r in BONSAI do
-	-- (placeholders: a little trunk and a flat canopy, until the bonsai mesh)
-	local m = Instance.new("Model")
-	m.Name = "Bonsai"
-	local at = CFrame.new(r[1] + OFFSET, 1, r[2])
-	block(m, "Trunk", Vector3.new(1.6, 6, 1.6), at * CFrame.new(0, 3, 0), rgb(110, 78, 52))
-	block(m, "Canopy", Vector3.new(9, 2.4, 9), at * CFrame.new(0, 6.6, 0), rgb(72, 128, 52))
-	m.Parent = trees
-end
 
--- The nests stand on whatever tile is under them now.
-local function topAt(x, z)
-	for _, r in FLOOR do
-		local x0 = r[2] + OFFSET
-		if x >= x0 and x < x0 + r[4] and z <= r[3] and z > r[3] - r[5] then
-			return r[6]
-		end
-	end
-	return 0
-end
-local nests = 0
-for _, m in W.Nests:GetChildren() do
-	local pivot = m:GetPivot()
-	if pivot.Z < NEAR and pivot.Z > FAR then
-		local baseY = m:GetAttribute("FlatY") or pivot.Y
-		m:SetAttribute("FlatY", baseY)
-		m:PivotTo(pivot + Vector3.new(0, baseY + topAt(pivot.X, pivot.Z) - pivot.Y, 0))
-		nests += 1
-	end
-end
-return string.format("%d floor parts, %d lily pads, %d bonsai, %d nests raised", #FLOOR, #LILIES, #BONSAI, nests)
+return string.format("%d floor parts, %d lily pads", #FLOOR, #LILIES)
