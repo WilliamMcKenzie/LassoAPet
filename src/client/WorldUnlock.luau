@@ -2,7 +2,7 @@
 -- buying World 2 plays its unlock cutscene: every bit of UI goes, the camera flies in to
 -- the base's portal gate, its swirl (hidden till now: PortalFx's HideSwirl) fades in, and
 -- the camera flies back. Then "GuideTravel" is set: the arrows to the gate
--- (WorldUnlock.client) and the tap hand on World 2's Travel (WorldsMenu) till you go.
+-- (World2Bar.client) and the tap hand on World 2's Travel (WorldsMenu) till you go.
 --   WorldUnlock.buy(world, [bought]) -- true if it went through; bought() runs first, before the cutscene
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
