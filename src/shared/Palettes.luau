@@ -457,6 +457,7 @@ return {
 		{ "Body", 92, 184, 84 }, -- the god's green skin
 		{ "Marking", 168, 156, 132 }, -- stone plates, pauldrons, knees
 		{ "Accent", 255, 196, 52 }, -- gold nemes, collar, bow, trims, hoof caps
+	},
 	Bes = {
 		{ "Body", 220, 201, 152 }, -- sandstone
 		{ "Belly", 208, 184, 134 }, -- darker stone: hips, shins, arms
