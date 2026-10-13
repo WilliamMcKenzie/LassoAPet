@@ -88,7 +88,7 @@ stroke.LineJoinMode = Enum.LineJoinMode.Round
 stroke.Parent = text
 text.Parent = bar
 local hand = TapHand.new(70)
-hand.Position = UDim2.fromScale(0.62, 0.6)
+hand.Position = UDim2.fromScale(0.84, 0.6)
 hand.Visible = false
 hand.Parent = bar
 gui.Parent = player:WaitForChild("PlayerGui")
@@ -131,7 +131,8 @@ local gate = workspace:WaitForChild("World"):WaitForChild("BaseDecor"):WaitForCh
 RunService.RenderStepped:Connect(function()
 	local owned = player:GetAttribute("OwnsWorld2") == true
 	local busy = Hud.isRiding() or player:GetAttribute("Cutscene") or player:GetAttribute("Tutorial")
-	gui.Enabled = not owned and not busy
+	local menu = player.PlayerGui:FindFirstChild("WorldsMenu")
+	gui.Enabled = not owned and not busy and not (menu and menu.Enabled) -- (not under the Worlds menu)
 	local guide = owned and player:GetAttribute("GuideTravel") and not busy and gate ~= nil
 	arrow.Enabled = guide == true
 	if not guide then
