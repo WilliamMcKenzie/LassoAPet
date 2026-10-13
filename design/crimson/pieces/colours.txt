@@ -2,11 +2,9 @@
 MushroomGiant_1: Stem, 228, 172, 180
 MushroomGiant_2: Cap, 217, 15, 44
 MushroomGiant_3: Underside, 150, 10, 32
-MushroomGiant_4: Spots, 240, 70, 90
 MushroomMedium_1: Stem, 228, 172, 180
 MushroomMedium_2: Cap, 217, 15, 44
 MushroomMedium_3: Underside, 150, 10, 32
-MushroomMedium_4: Spots, 240, 70, 90
 MushroomSmall_1: Stem, 228, 172, 180
 MushroomSmall_2: Cap, 217, 15, 44
 MushroomSmall_3: Underside, 150, 10, 32

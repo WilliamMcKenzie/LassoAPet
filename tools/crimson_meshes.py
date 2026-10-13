@@ -30,7 +30,7 @@ from plant_meshes import blob, prism, parts_of  # noqa: E402
 OUT = os.path.join(HERE, "..", "design", "crimson")
 CAP = (0xD9, 0x0F, 0x2C)  # QM's #D90F2C
 CAP_UNDER = (150, 10, 32)  # the cap's underside, a darker red
-CAP_SPOTS = (240, 70, 90)  # a few lighter lumps on the cap
+CAP_SPOTS = (240, 70, 90)  # (unused: the cap's lumps went, QM)
 STEM = (228, 172, 180)  # pale pink, as the reference's
 TUFT = [CAP, (176, 12, 36)]
 STONE = [(156, 124, 120), (140, 110, 106), (170, 138, 132)]  # muted rose grey, a touch bright
@@ -38,7 +38,7 @@ RUNE = (255, 186, 60)
 
 
 def mushroom(rng, h, cap_r, stem_r, bend=1.5):
-    """A stem in two bent segments, a domed cap (top, underside rim) and a few lumps."""
+    """A stem in two bent segments and a domed cap with a darker underside."""
     mid = np.array([bend * 0.6, h * 0.5, 0.0])
     top = np.array([bend, h, rng.uniform(-0.3, 0.3)])
     stem = [prism(rng, (0, -0.4, 0), mid, stem_r * 1.15, stem_r * 1.02, 7, 0.04),
@@ -67,8 +67,8 @@ def mushroom(rng, h, cap_r, stem_r, bend=1.5):
         y = top[1] + cap_r * 0.18 + math.sqrt(max(0.0, 1 - (d / cap_r) ** 2)) * cap_r * 0.55
         spots.append(blob(rng, (top[0] + math.cos(a) * d, y - 0.1 * cap_r, top[2] + math.sin(a) * d), cap_r * 0.16, 8,
                           squash=(1.0, 0.6, 1.0)))
-    return [("Stem", STEM, stem), ("Cap", CAP, [dome]), ("Underside", CAP_UNDER, [np.array(rim)]),
-            ("Spots", CAP_SPOTS, spots)]
+    # (the spots are still made, so the shapes stay the same, but QM wanted them gone)
+    return [("Stem", STEM, stem), ("Cap", CAP, [dome]), ("Underside", CAP_UNDER, [np.array(rim)])]
 
 
 def giant(rng):
@@ -83,8 +83,7 @@ def medium(rng):
 
 def small(rng):
     """Little mushroom to scatter (about 2.4 across, 2.6 tall)."""
-    m = mushroom(rng, 1.7, 1.2, 0.25, bend=0.3)
-    return [p for p in m if p[0] != "Spots"]
+    return mushroom(rng, 1.7, 1.2, 0.25, bend=0.3)
 
 
 def tuft(rng):
