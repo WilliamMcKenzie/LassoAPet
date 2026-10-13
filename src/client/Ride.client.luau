@@ -3355,10 +3355,10 @@ local function updateMount(dt)
 	targetSpeed *= if mount.feast then mount.feast.speed else 1 -- the Blue Crab, grown by its Feasts
 	local walking = phase == "return" and not sprinting()
 	if walking then
-		targetSpeed = Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk
+		targetSpeed = Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Idle
 	end
 	-- (Out of stamina you turn for home, never ride on tired: checkRide.)
-	local rate = phase == "home" and 30 or (dir < 0 and (if (mount.rampUntil or 0) > os.clock() then Config.LandRamp.Rate else 90) or math.max(40, targetSpeed / Config.ReturnRun.Ramp)) -- snappy into and out of a sprint (gentler just after landing: from a walk to the sprint)
+	local rate = phase == "home" and 30 or (dir < 0 and (if (mount.rampUntil or 0) > os.clock() then Config.LandRamp.Rate else 90) or math.max(40, math.max(targetSpeed, mount.speed) / Config.ReturnRun.Ramp)) -- snappy into and out of a sprint (gentler just after landing: from a walk to the sprint)
 	local ability = activeAbility()
 	if ability and ability.cfg.MaxBoost then
 		-- The Leviathan's hunt: faster and faster, steadily, up to MaxBoost x (QM).
