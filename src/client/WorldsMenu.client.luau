@@ -333,11 +333,42 @@ local function haze(on)
 	t:Play()
 end
 
+-- Every other bit of UI goes while it's open (QM, Oct 13), and comes back when it closes.
+local hidden, holdHidden = {}, nil
+local function hideOthers(on)
+	if holdHidden then
+		holdHidden:Disconnect()
+		holdHidden = nil
+	end
+	if on then
+		player:SetAttribute("Cutscene", true) -- (BaseUi and the guides keep themselves off)
+		local function hideAll()
+			for _, g in player.PlayerGui:GetChildren() do
+				if g:IsA("ScreenGui") and g.Enabled and g ~= gui then
+					g.Enabled = false
+					if not table.find(hidden, g) then
+						table.insert(hidden, g)
+					end
+				end
+			end
+		end
+		hideAll()
+		holdHidden = RunService.RenderStepped:Connect(hideAll)
+	else
+		for _, g in hidden do
+			g.Enabled = true
+		end
+		table.clear(hidden)
+		player:SetAttribute("Cutscene", nil)
+	end
+end
+
 local function openMenu()
 	if open then
 		return
 	end
 	open = true
+	hideOthers(true)
 	showHere()
 	gui.Enabled = true
 	haze(true)
@@ -349,6 +380,7 @@ function closeMenu()
 		return
 	end
 	open = false
+	hideOthers(false)
 	haze(false)
 	ModalPop.close(setScale, function()
 		gui.Enabled = false

@@ -108,6 +108,7 @@ vfx.speedLines = require(script.Parent.SpeedLines) -- speed lines on the screen 
 vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's out (QM, Oct 10)
 vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
+vfx.newAnimal = require(script.Parent.NewAnimal) -- the animal you got, shown (QM, Oct 13)
 vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
 vfx.sprintTrail = require(script.Parent.SprintTrail) -- a white trail behind your mount while it sprints (QM, Oct 9)
@@ -4316,8 +4317,8 @@ RunService.PreSimulation:Connect(function(dt)
 			-- Crossed the finish line: the animal you rode is yours, in your pen
 			-- (Hatchery's FinishCourse), then back home to your pen.
 			task.spawn(function()
-				pcall(finishCourse.InvokeServer, finishCourse, mount.kind)
-				task.wait(0.5)
+				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, mount.kind)
+				task.wait(ok and kind and vfx.newAnimal.show(kind) or 0.5)
 				if phase == "finish" then
 					local pen = myPen()
 					local spawn = pen and pen:FindFirstChild("Spawn")
@@ -4330,7 +4331,7 @@ RunService.PreSimulation:Connect(function(dt)
 			if kind then
 				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
 			end
-			task.delay(kind and player:GetAttribute("Tutorial") and Hud.eggReveal(rarityOf(kind), kind) or 0.5, function() -- (the animal's in your pen: only the tutorial's egg is revealed)
+			task.delay(kind and (if player:GetAttribute("Tutorial") then Hud.eggReveal(rarityOf(kind), kind) else vfx.newAnimal.show(kind)) or 0.5, function() -- (the animal's in your pen; the tutorial's an egg)
 				if phase == "home" then
 					finishRide(mount.x, mount.z)
 				end
