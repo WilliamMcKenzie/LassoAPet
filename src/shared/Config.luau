@@ -1263,13 +1263,12 @@ if Config.World == 2 then
 	local woodland = Config.Biomes[4]
 	woodland.Herd = table.clone(woodland.Herd)
 	woodland.Herd.Caterpillar = 0.3 -- the Woodland Maze's Uncommon (QM, Oct 13), as often as the Starfish
+	woodland.Herd.PinkButterfly = 0.25 -- the Pink Butterfly (QM, Oct 13): Uncommon, as often as the Clownfish
 	woodland.GroundColors = { rgb(121, 72, 46), rgb(110, 65, 41) } -- #79482E
 	woodland.Patches = {
 		Soil = { rgb(142, 81, 57), rgb(130, 74, 52) }, -- #8E5139
 		Path = { rgb(151, 89, 57), rgb(139, 81, 52) }, -- #975939, the middle
 	}
-	woodland.Herd = table.clone(woodland.Herd)
-	woodland.Herd.PinkButterfly = 0.25 -- the Pink Butterfly (QM, Oct 13): Uncommon, as often as the Clownfish
 	-- The fifth: the Temple (QM, Oct 13; tools/world2_temple.luau): a rock path, grass and
 	-- marble a stud up, ponds a stud and two down (their flowing water: tools/world2_water.luau).
 	local temple = Config.Biomes[5]
@@ -1321,9 +1320,8 @@ if Config.World == 2 then
 	end
 	ownHerd(1, { "MarbleFish", "Lion", "Buffalo", "Crocodile", "MarbleColossus", "MajesticUnicorn", "Bunny", "Rhino" }) -- (the Bunny and Rhino too, at World 1's weights: QM, Oct 13)
 	ownHerd(2, { "Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura" })
-	ownHerd(4, { "PinkButterfly" })
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
-	ownHerd(4, { "Caterpillar" }) -- the Woodland Maze
+	ownHerd(4, { "Caterpillar", "PinkButterfly" }) -- the Woodland Maze
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do
