@@ -36,6 +36,8 @@ local KINDS = {
 	RedMushroom = { data = require(script.Parent.RedMushroomEggModel), center = 1.6 },
 	BrownMushroom = { data = require(script.Parent.BrownMushroomEggModel), center = 1.6 },
 	PurpleMushroom = { data = require(script.Parent.PurpleMushroomEggModel), center = 1.6 },
+	BlueCrystal = { data = require(script.Parent.BlueCrystalEggModel), center = 1.6 },
+	PinkCrystal = { data = require(script.Parent.PinkCrystalEggModel), center = 1.6 },
 	Cactus = { data = require(script.Parent.CactusEggModel), center = 1.6 },
 	Kitten = { data = require(script.Parent.KittenEggModel), center = 1.6 },
 	Scorpion = { data = require(script.Parent.ScorpionEggModel), center = 1.6 },
