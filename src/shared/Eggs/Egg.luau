@@ -89,6 +89,7 @@ local KINDS = {
 	Phoenix = { data = require(script.Parent.PhoenixEggModel), center = 1.6 },
 	Starfish = { data = require(script.Parent.StarfishEggModel), center = 1.6 },
 	Lionfish = { data = require(script.Parent.LionfishEggModel), center = 1.6 },
+	RollingLog = { data = require(script.Parent.RollingLogEggModel), center = 1.6 },
 	Clownfish = { data = require(script.Parent.ClownfishEggModel), center = 1.6 },
 	FishSchool = { data = require(script.Parent.FishSchoolEggModel), center = 1.6 },
 	Loong = { data = require(script.Parent.LoongEggModel), center = 1.6 },

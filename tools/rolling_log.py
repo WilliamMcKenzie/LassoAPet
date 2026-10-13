@@ -8,11 +8,15 @@ and a twig of autumn leaves (the Woodland walls' orange) sprouting off the top.
 The round log is stepped from three axis-aligned blocks per slice (a wide one, a tall
 one and a square one), so every part stays a plain cube.
 
-Bones: root (stays upright: the rider sits on top like log rolling) and Log (everything
-else, pivots on the log's axis so the roll spins it in place). Model only for now;
-rig, animations and egg come after QM approves the look.
+Bones: root (stays upright: the rider sits on top like log rolling), neck (empty, on the
+log's axis: the lasso loop holds still while the log turns) and Log (everything else,
+pivots on the axis so the roll spins it in place). Idle rocks, walk rocks harder, the
+gallop rolls.
 
     python3 tools/rolling_log.py
+
+writes designs/woodland/RollingLog.bbmodel, src/shared/Animals/RollingLogModel.luau and
+previews in /mnt/project-files/world2/woodland/renders. Egg: tools/rolling_log_egg.py.
 """
 
 import json
@@ -52,8 +56,8 @@ def round_slice(a, name, x0, x1, r, color, bone="Log"):
 
 def rolling_log():
     a = Animal("RollingLog", "Rare")
-    a.bone_order = [("root", None), ("Log", "root")]
-    a.pivots = {"root": (0, CY, 0), "Log": (0, CY, 0)}
+    a.bone_order = [("root", None), ("neck", "root"), ("Log", "root")]
+    a.pivots = {"root": (0, CY, 0), "neck": (0, CY, 0), "Log": (0, CY, 0)}
 
     round_slice(a, "Bark", -HALF_L, HALF_L, R, BARK)
     # cut ends: pale wood, a darker growth ring, a warm core, each standing a plate off the last
@@ -98,9 +102,22 @@ def rolling_log():
     a.box("StubTop", (-2.45, CY + 0.75, R + 0.8), (-1.95, CY + 1.25, R + 0.85), WOOD, "Log")
 
     # rider sits on top of the log (on root, so it stays upright while the log rolls)
-    a.meta = {"seat": (0, CY + R + 0.3, 0), "neck_loop": {"center": (0, CY, 0), "radius": R + 0.3}}
-    a.animations = dict
+    a.meta = {"seat": (0, CY + R + 0.3, 0), "neck_loop": {"center": (0, CY, 0), "radius": R + 0.4}}
+    a.animations = animations
     return a
+
+
+def animations():
+    """Only the Log bone moves (negative X = rolling forward, the front going down).
+    idle: a lazy rock. walk: rocks forward and back, about to roll. gallop: full forward
+    rolls, one per loop (it ends where it started, so the loop wraps without a jump)."""
+    rock = lambda L, keys: (L, {"Log": [A.rot_x(A.at(L, keys), "catmullrom")]})  # noqa: E731
+    gallop = 0.5
+    return {
+        "idle": rock(2.4, [(0, 0), (0.25, -4), (0.5, 0), (0.75, 3), (1, 0)]),
+        "walk": rock(1.0, [(0, 0), (0.25, -32), (0.5, 0), (0.75, 22), (1, 0)]),
+        "gallop": (gallop, {"Log": [A.rot_x([(gallop * i / 4, -90 * i) for i in range(5)])]}),
+    }
 
 
 CAM = dict(eye=(-17, 10, -20), target=(0, 2.6, 0), W=640, H=520, fov=34)
@@ -121,6 +138,15 @@ def main(out=os.path.join(A.ROOT, "designs", "woodland"), shots="/mnt/project-fi
     im.paste(render(pose(horse, None, 0), **side), (0, 0))
     im.paste(render(pose(m, None, 0), **side), (420, 0))
     A.label(im, ["Horse (for size)", "Rolling Log · Rare"]).save(os.path.join(shots, "RollingLog_vs_horse.png"))
+    frames = []
+    for name, n in (("idle", 16), ("walk", 20), ("gallop", 16)):
+        anim = A.anim_named(m, name)
+        for k in range(n):
+            frames.append(A.label(render(pose(m, anim, k / n * anim["length"]), **side), [name]))
+    A.gif(os.path.join(shots, "RollingLog_anims.gif"), frames, fps=16)
+    import bbmodel_to_luau
+    bbmodel_to_luau.main(os.path.join("designs", "woodland", "RollingLog.bbmodel"),
+                         os.path.join(A.ROOT, "src", "shared", "Animals", "RollingLogModel.luau"))
 
 
 if __name__ == "__main__":
