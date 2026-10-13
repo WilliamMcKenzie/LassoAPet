@@ -315,6 +315,7 @@ end)
 -- Oct 13).
 local openHand = TapHand.new(80)
 openHand.Name = "OpenQuestsHint"
+openHand:SetAttribute("Spotlight", true) -- (TapHand's: QM, Oct 13)
 openHand.Position = UDim2.fromScale(0.5, 0.6)
 openHand.Visible = false
 openHand.Parent = fold
@@ -609,6 +610,9 @@ local function drawQuests()
 	if lastClaim then
 		local hand = TapHand.new(90)
 		hand.Position = UDim2.fromScale(0.62, 0.6)
+		local row = lastClaim:FindFirstAncestor("Quest")
+		-- (the starter quest's claim, World 1's "Reach Meadow": in the spotlight, QM Oct 13)
+		hand:SetAttribute("Spotlight", Config.World == 1 and row ~= nil and row:GetAttribute("Quest") == 101)
 		hand.Parent = lastClaim
 	end
 	quests.Size = UDim2.fromOffset(Q.width, if one then 184 else y + Q.bottom)

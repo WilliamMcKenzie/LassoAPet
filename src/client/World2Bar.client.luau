@@ -102,6 +102,7 @@ ask.Size = UDim2.fromScale(0.6, 0.4)
 ask.Visible = false
 ask.Parent = bar
 local hand = TapHand.new(70)
+hand:SetAttribute("Spotlight", not REBIRTH) -- (buying World 2 here: in the spotlight, QM Oct 13)
 hand.Position = UDim2.fromScale(0.84, 0.6)
 hand.Visible = false
 hand.Parent = bar
