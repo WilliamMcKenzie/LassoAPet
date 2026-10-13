@@ -174,6 +174,12 @@ return {
 		{ "Accent", 196, 58, 36 },
 		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
 	},
+	TombJackal = {
+		{ "Body", 58, 54, 84 },
+		{ "Marking", 255, 196, 46 }, -- gold armour, collar, cuffs
+		{ "Accent", 38, 92, 214 }, -- lapis stripes and drapes
+		{ "Hoof", 34, 32, 46 }, -- paws, tail tip
+	},
 	Fox = {
 		{ "Body", 240, 128, 36 },
 		{ "Belly", 255, 250, 242 }, -- chest, cheeks, chin, tail tip
