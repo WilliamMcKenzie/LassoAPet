@@ -3,8 +3,8 @@
 -- back). A dark rounded panel with "Worlds" over it and a card per world, each QM's
 -- banner art with a button on its right: Travel for a world you have, Buy (with its
 -- price) for one you don't. The world you're in has a white outline round its card.
--- For now there's only World 1 (you're always in it); World 2's Buy says "Coming soon"
--- and charges nothing until World 2 exists.
+-- Each world is its own Place (Config.Places): Buy unlocks one for its gold
+-- (Config.WorldPrices; BuyWorld, Gold.server) and Travel teleports you there (Travel).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -24,7 +24,7 @@ local ART = { -- assets/ui/worlds (QM's; World2.png is his World1.png with a 2)
 }
 local WORLDS = {
 	{ name = "World 1", banner = "World1" },
-	{ name = "World 2", banner = "World2", price = 400 },
+	{ name = "World 2", banner = "World2" },
 }
 local PANEL = Vector2.new(769, 520) -- about 58% of the screen across
 local CARD = Vector2.new(723, 212)
@@ -173,9 +173,11 @@ for i, world in WORLDS do
 	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	stroke.Parent = here
 	here.Parent = card
-	if world.price then
+	world.price = Config.WorldPrices[i] or 0
+	local buy, travel
+	if world.price > 0 then
 		-- Buy: the art's cash stack, the price in green, then its "Buy".
-		local buy = button(ART.Buy)
+		buy = button(ART.Buy)
 		buy.Name = "Buy"
 		-- The price as the merge menu's Merge button has it (QM): left aligned just past
 		-- the cash, Montserrat ExtraBold with a round black stroke, green when you can
@@ -210,36 +212,47 @@ for i, world in WORLDS do
 			if busy then
 				return
 			end
-			busy = true -- World 2 isn't there yet (QM): it charges nothing
-			price.Text = "Soon!"
-			price.TextColor3 = Color3.new(1, 1, 1)
-			task.delay(1.5, function()
-				busy = false
-				showPrice()
-			end)
+			busy = true
+			if not ReplicatedStorage.BuyWorld:InvokeServer(i) then -- (not enough gold)
+				price.Text = "Need $" .. world.price
+				price.TextColor3 = CASH_RED
+				task.wait(1.2)
+			end
+			busy = false
+			showPrice()
 		end)
 		buy.Parent = card
-	else
-		local travel = button(ART.Travel)
-		travel.Name = "Travel"
-		travel.Activated:Connect(function()
-			if open then
-				closeMenu()
-			end
-		end)
-		travel.Parent = card
 	end
+	travel = button(ART.Travel)
+	travel.Name = "Travel"
+	travel.Activated:Connect(function()
+		if i ~= Config.World then
+			ReplicatedStorage.Travel:FireServer(i) -- (teleports: not in Studio)
+		end
+		if open then
+			closeMenu()
+		end
+	end)
+	travel.Parent = card
+	-- Travel once it's yours (World 1 always is), Buy till then.
+	local function owned()
+		local has = i == 1 or player:GetAttribute("OwnsWorld" .. i) == true
+		travel.Visible = has
+		if buy then
+			buy.Visible = not has
+		end
+	end
+	player:GetAttributeChangedSignal("OwnsWorld" .. i):Connect(owned)
+	owned()
 	cards[i] = { card = card, here = here }
 	card.Parent = panel
 end
 
 local function showHere()
-	local world = player:GetAttribute("World") or 1 -- (only World 1 for now)
 	for i, c in cards do
-		c.here.Visible = i == world
+		c.here.Visible = i == Config.World
 	end
 end
-player:GetAttributeChangedSignal("World"):Connect(showHere)
 showHere()
 
 gui.Parent = player:WaitForChild("PlayerGui")

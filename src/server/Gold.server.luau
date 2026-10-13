@@ -60,6 +60,11 @@ local function load(player)
 				others[player] = if typeof(value) == "table" then value else nil
 				local gates = if typeof(value) == "table" then tonumber(value[GATES]) else nil
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
+				for _, world in typeof(value) == "table" and typeof(value.worlds) == "table" and value.worlds or {} do
+					if tonumber(world) then
+						player:SetAttribute("OwnsWorld" .. world, true) -- (the Worlds menu: Travel, not Buy)
+					end
+				end
 				loaded[player] = true
 			end
 			return
@@ -78,13 +83,20 @@ local function save(player, onlyIfChanged)
 	end
 	local gold = player:GetAttribute("Gold") or 0
 	local gates = player:GetAttribute("GatesBroken") or 1
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates
+	local worlds = {} -- (the worlds bought, shared by them all)
+	for world in Config.Places do
+		if player:GetAttribute("OwnsWorld" .. world) then
+			table.insert(worlds, world)
+		end
+	end
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",")
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
 	for attempt = 1, 3 do
 		local record = table.clone(others[player] or {})
 		record.gold, record.bought, record.stamina, record[GATES] = gold, bought[player] or 0, oldStamina[player], gates
+		record.worlds = if #worlds > 0 then worlds else nil
 		if pcall(store.SetAsync, store, key(player), record) then
 			savedAs[player] = as
 			return
@@ -121,6 +133,50 @@ Players.PlayerRemoving:Connect(function(player)
 	save(player)
 	loaded[player], ready[player], bought[player], savedAs[player], oldStamina[player], others[player] = nil, nil, nil, nil, nil, nil
 end)
+
+-- Worlds (QM, Oct 13): each its own Place. BuyWorld unlocks one for Config.WorldPrices
+-- gold, once (saved at once); Travel saves your gold and teleports you to one you have
+-- (it does nothing in Studio, where teleports don't work).
+local TeleportService = game:GetService("TeleportService")
+local buyWorld = Instance.new("RemoteFunction")
+buyWorld.Name = "BuyWorld"
+buyWorld.OnServerInvoke = function(player, world)
+	local price = Config.WorldPrices[tonumber(world) or 0]
+	if not price or not loaded[player] or player:GetAttribute("OwnsWorld" .. world) then
+		return false
+	end
+	local gold = player:GetAttribute("Gold") or 0
+	if gold < price then
+		return false
+	end
+	player:SetAttribute("Gold", gold - price)
+	player:SetAttribute("OwnsWorld" .. world, true)
+	save(player)
+	return true
+end
+buyWorld.Parent = ReplicatedStorage
+
+local travelling = {}
+local travel = Instance.new("RemoteEvent")
+travel.Name = "Travel"
+travel.OnServerEvent:Connect(function(player, world)
+	world = tonumber(world)
+	local place = world and Config.Places[world]
+	if not place or world == Config.World or travelling[player] then
+		return
+	end
+	if world ~= 1 and not player:GetAttribute("OwnsWorld" .. world) then
+		return
+	end
+	travelling[player] = true
+	save(player) -- (first: the other world's server loads it)
+	local ok, err = pcall(TeleportService.TeleportAsync, TeleportService, place, { player })
+	if not ok then
+		warn("Travel to world " .. world .. ": " .. tostring(err))
+	end
+	travelling[player] = nil
+end)
+travel.Parent = ReplicatedStorage
 
 -- Autosave (QM, Oct 4): every Config.AutosaveEvery seconds each player's gold is saved
 -- if it changed since it was last saved (so a server crash loses that much at most),
