@@ -1,5 +1,5 @@
 -- Tuning values shared by the map, the live colours and the ride.
-return {
+local Config = {
 	-- false hides every UI element (HUD, coins, Roblox menus, the ride prompt), e.g. for mockup screenshots.
 	ShowHud = true,
 	HudScale = 1, -- multiplies the whole HUD's size; 1 matches QM's mockups
@@ -1081,3 +1081,45 @@ return {
 	-- Oct 11; Oct 12: a fixed 2, was the Clownfish's).
 	HerdGapSpeed = 2,
 }
+
+-- Worlds (QM, Oct 13): each is its own Place in the experience, running this same code.
+-- Gold is shared; each world has its own pen, pets, pen levels and quests.
+Config.Places = { 126872244121414, 139418530058790 } -- [world] = its PlaceId
+Config.World = table.find(Config.Places, game.PlaceId) or 1
+
+-- World 2's look: its first biome and base as QM's reference (marble walls, yellow
+-- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
+-- hue-turned as placeholders (tools/world2_terrain.luau's turns).
+if Config.World == 2 then
+	local rgb = Color3.fromRGB
+	local TURN = { 0.55, 0.6, 0.35, 0.2, 0.45, 0.75 } -- [biome] hue turn
+	local function turn(value, by)
+		if typeof(value) == "Color3" then
+			local h, sat, v = value:ToHSV()
+			return if sat < 0.12 then value else Color3.fromHSV((h + by) % 1, sat, v)
+		elseif type(value) == "table" then
+			local out = {}
+			for k, v in value do
+				out[k] = turn(v, by)
+			end
+			return out
+		end
+		return value
+	end
+	for i, biome in Config.Biomes do
+		for _, key in { "GroundColors", "WallColors", "Patches", "Depths", "PostColor", "GateColor" } do
+			if biome[key] then
+				biome[key] = turn(biome[key], TURN[i] or 0)
+			end
+		end
+	end
+	local meadow = Config.Biomes[1]
+	meadow.GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) }
+	meadow.WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) } -- marble
+	meadow.Patches = {
+		Dirt = { rgb(118, 84, 50), rgb(104, 72, 42) },
+		Grass = { rgb(182, 144, 44), rgb(166, 130, 36) }, -- the darker grass, beside the dirt
+	}
+end
+
+return Config
