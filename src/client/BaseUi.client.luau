@@ -623,7 +623,10 @@ RunService.RenderStepped:Connect(function()
 	openHand.Visible = folded and not player:GetAttribute("QuestsSeen")
 	-- (the buttons right under the Quests panel, or the top corner with none)
 	local under = if quests.Visible then (quests.AbsolutePosition.Y + quests.AbsoluteSize.Y - root.AbsolutePosition.Y) / scale.Scale else 0
-	menu.Position = UDim2.new(1, -MARGIN, 0, under + MENU_GAP)
+	-- (centred top to bottom, in line with the pass buttons on the left, unless the Quests
+	-- panel reaches down into that: then right under it. QM, Oct 13)
+	local centred = (root.Size.Y.Offset - menu.AbsoluteSize.Y / scale.Scale) / 2
+	menu.Position = UDim2.new(1, -MARGIN, 0, math.max(centred, under + MENU_GAP))
 	-- New quests pop once you can see them.
 	local up = quests.Visible and gui.Enabled and not Hud.revealing()
 	for i, started in pops do
