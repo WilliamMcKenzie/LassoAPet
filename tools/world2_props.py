@@ -13,8 +13,8 @@ Run: python3 tools/world2_props.py [out_dir] [--meshes DIR]
 - Woodland Maze: autumn birches, thick along both walls; the sword in the stone three times.
 - Temple: little trees and stone lanterns in a row down the side dirt, the same each side
   (QM: very purposefully); tombstones and temple stones now and then; lily pads on the ponds.
-- Ancient Tomb: an avenue of warrior and sword statues facing the course, standing
-  sarcophagi and gold between them, a sphinx either side before each dais.
+- Ancient Tomb (QM: sparse): a pair of warrior or sword statues facing the course every
+  240 studs, a standing sarcophagus or gold now and then, a sphinx pair before every other dais.
 
 Big and middle pieces are Obstacles (smashed when ridden into, with an invisible Base
 footprint and a Tier); small ones are walk-through Decor. Every piece stands on the tile
@@ -226,26 +226,25 @@ def temple_props(b, rng, out, put, scatter, facing):
 
 
 def tomb_props(b, rng, out, put, scatter, facing):
-    """A sphinx either side before each dais; then an avenue of statues down both walls."""
+    """A sphinx either side before every other dais; a pair of statues every 240 studs, a
+    standing sarcophagus or some gold now and then between (QM: fewer)."""
     k = b.kind
     framed = np.nonzero((k == tomb.FRAME).sum(axis=0) > 6)[0]
     starts = [j for n, j in enumerate(framed) if n == 0 or framed[n - 1] != j - 1]
-    for j in starts:
+    for j in starts[::2]:
         z = b.Z0 - j * b.CELL + 24
         for s in (-1, 1):
             put("Sphinx", s * (half_width(z) - 14), z, 180.0)
-    z, n = b.Z0 - 40, 0
+    z, n = b.Z0 - 60, 0
     while z > b.Z1 + 30:
         for s in (-1, 1):
             put("WarriorStatue" if n % 2 == 0 else "SwordStatue", s * (half_width(z) - 9), z, facing(s))
-            zz = z - 48  # between this pair and the next
-            if n % 2 == 0:
-                put("SarcophagusStanding", s * (half_width(zz) - 6), zz, facing(s))
-            elif rng.random() < 0.6:
-                cx = s * (half_width(zz) - 12)
-                if put("GoldStack", cx, zz):
-                    scatter(rng.choice(["GoldBar", "Trophy"]), cx, zz, s, 2, 12)
-        z -= 96
+        zz, s = z - 120, 1 if n % 2 == 0 else -1  # (between this pair and the next, one side)
+        if n % 2 == 0:
+            put("SarcophagusStanding", s * (half_width(zz) - 6), zz, facing(s))
+        elif rng.random() < 0.5:
+            put("GoldStack", s * (half_width(zz) - 12), zz)
+        z -= 240
         n += 1
     return out
 
