@@ -44,35 +44,46 @@ OUT = "/mnt/project-files/animals/asura"
 BASE = os.path.join(OUT, "Asura_QM.bbmodel")
 SCALE = 1.6
 
-PALETTE = {"slate": (72, 84, 85), "light": (100, 110, 111), "cyan": (121, 191, 202), "black": (23, 18, 19),
-           "red": (255, 40, 40)}
+PALETTE = {"slate": (72, 84, 85), "dark": (53, 67, 69), "light": (111, 120, 121), "steel": (130, 138, 140),
+           "cyan": (121, 191, 202), "black": (4, 6, 8), "red": (255, 40, 40)}
+CLASSES = ("slate", "dark", "light", "steel", "cyan", "black")
+SHARE = 0.1  # a part takes a trim colour when that colour covers this much of its texture
 TEX = {n: i for i, n in enumerate(PALETTE)}
 RENAME = {"head": "neck", "left_leg": "LegFL"}
 
 
 def texture_colors(m):
+    """Each part's colour (a game part has one): the commonest non-slate palette colour in
+    its patches of QM's texture if it covers SHARE of them, else slate."""
     tex = Image.open(io.BytesIO(base64.b64decode(m["textures"][0]["source"].split(",", 1)[1]))).convert("RGBA")
+    pal = np.array([PALETTE[n] for n in CLASSES], float)
     out = {}
     for e in m["elements"]:
-        px = []
-        for f in e["faces"].values():
+        allpx = []
+        for k, f in e["faces"].items():
             if f.get("texture") is None or "uv" not in f:
                 continue
             u0, v0, u1, v1 = f["uv"]
             a, b = sorted((u0, u1))
             c, d = sorted((v0, v1))
             arr = np.array(tex.crop((int(a), int(c), max(int(b), int(a) + 1), max(int(d), int(c) + 1)))).reshape(-1, 4)
-            arr = arr[arr[:, 3] > 0][:, :3]
-            if len(arr):
-                px.append(arr.mean(0))
-        rgb = np.mean(px, 0) if px else np.array(PALETTE["slate"])
-        out[e["uuid"]] = min(("slate", "light", "cyan", "black"), key=lambda n: np.sum((np.array(PALETTE[n]) - rgb) ** 2))
+            arr = arr[arr[:, 3] > 0][:, :3].astype(float)
+            allpx.append(arr)
+        if not allpx:
+            out[e["uuid"]] = "slate"
+            continue
+        arr = np.vstack(allpx)
+        idx = np.argmin(((arr[:, None, :] - pal[None]) ** 2).sum(-1), 1)
+        counts = np.bincount(idx, minlength=len(CLASSES)) / len(idx)
+        counts[0] = 0
+        out[e["uuid"]] = CLASSES[int(np.argmax(counts))] if counts.max() >= SHARE else "slate"
     return out
 
 
 def paint(e, col):
-    for f in e["faces"].values():
-        f["texture"] = TEX[col]
+    """col: one colour name, or {face: name} (faces missing from it are slate)."""
+    for k, f in e["faces"].items():
+        f["texture"] = TEX[col if isinstance(col, str) else col.get(k, "slate")]
         f["uv"] = [0, 0, 16, 16]
 
 
@@ -109,6 +120,27 @@ def build(base=BASE):
     m = json.load(open(base))
     to_v5(m)
     cols = texture_colors(m)
+    # QM's texture is nearly all one slate with thin trims, which solid parts lose; so pick
+    # the trims out as whole parts: a steel blade on a dark grip with a cyan guard, light
+    # shoulder pads and belt, a dark cape.
+    owner = {}
+    for n in iter_nodes(m["outliner"]):
+        for c in n["children"]:
+            if isinstance(c, str):
+                owner[c] = n["name"] if "name" in n else None
+    gnames = {g["uuid"]: g["name"] for g in m["groups"]}
+    for n in iter_nodes(m["outliner"]):
+        for c in n["children"]:
+            if isinstance(c, str):
+                owner[c] = gnames[n["uuid"]]
+    for e in m["elements"]:
+        bone, size = owner[e["uuid"]], [t - f for f, t in zip(e["from"], e["to"])]
+        if bone == "sword":
+            cols[e["uuid"]] = "dark" if e["from"][1] < 6 else "cyan" if size[1] == 3 else "steel"
+        elif bone in ("left_shoulder", "cape", "cape_segment"):
+            cols[e["uuid"]] = "light" if bone == "left_shoulder" else "dark"
+        elif bone == "pelvis" and size[0] == 14:
+            cols[e["uuid"]] = "light"
     for e in m["elements"]:
         for i in range(3):  # no 2D planes: give flat parts depth
             if abs(e["to"][i] - e["from"][i]) < 1e-6:
