@@ -713,6 +713,7 @@ local Config = {
 		Bunny = "rbxassetid://102165948456968", -- assets/ui/BunnyEggRender.png
 		Fish = "rbxassetid://105098230793344",
 		Rhino = "rbxassetid://139482781062355",
+		MarbleColossus = "rbxassetid://110439659872687", -- assets/ui/MarbleColossusEggRender.png (World 2)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
