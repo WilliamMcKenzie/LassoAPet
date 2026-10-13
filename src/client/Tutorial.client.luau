@@ -576,12 +576,14 @@ local function run()
 		TutorialRide.bossSeconds, TutorialRide.holdFrozen = BOSS_SECONDS, false
 		funnel("boss")
 		local idleSince -- (when you last weren't running, turned for home)
+		local ran = false -- (once you've run, no more slow motion: QM, just the once)
 		while on() and (Hud.isRiding() or player:GetAttribute("Cutscene")) do -- (the new animal cutscene hides the ride's HUD: wait it out too)
 			-- Running from the boss: once the camera's turned for home, a second without
 			-- running and time all but stops till you push forward and run (QM, Oct 13: the
 			-- run home stands still till you do; Client/ReturnRun).
 			local turned = Hud.isRiding() and BossChase.over() and camera.CFrame.LookVector.Z > 0.5 -- (facing home, +Z)
-			if not turned or TutorialRide.sprinting then
+			ran = ran or (turned and TutorialRide.sprinting)
+			if not turned or TutorialRide.sprinting or ran then
 				idleSince = nil
 			else
 				idleSince = idleSince or os.clock()
