@@ -804,7 +804,7 @@ local Config = {
 	-- Phones have no Sprint button (QM, Oct 4): pushing the joystick out past this share of
 	-- its reach sprints, easing it back stops.
 	TouchSprintAt = 0.85,
-	PetSprintSpeed = { Loong = 4 }, -- these sprint at this x instead (QM, Oct 4)
+	PetSprintSpeed = { Loong = 4, Seraph = 10, CrimsonSeraph = 10, CrystalSeraph = 10 }, -- these sprint at this x instead (QM, Oct 4; the Seraphs, Oct 13: slow in the stampede, very fast ridden)
 	OutboundSprint = true, -- the ride out always a sprint too (QM, Oct 11)
 	-- Just lassoed onto an animal it's still at its stampede walk: for Time s it builds up to
 	-- the sprint at Rate studs/s a second (not the usual snap), so you see it break into it.
