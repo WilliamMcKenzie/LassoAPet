@@ -1123,11 +1123,11 @@ if Config.World == 2 then
 		end
 	end
 	local meadow = Config.Biomes[1]
-	meadow.GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) }
+	meadow.GroundColors = { rgb(247, 202, 70), rgb(228, 182, 55) } -- (QM, Oct 13: 20% brighter; was 206, 168, 58 / 190, 152, 46)
 	meadow.WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) } -- marble
 	meadow.Patches = {
 		Dirt = { rgb(118, 84, 50), rgb(104, 72, 42) },
-		Grass = { rgb(182, 144, 44), rgb(166, 130, 36) }, -- the darker grass, beside the dirt
+		Grass = { rgb(218, 173, 53), rgb(199, 156, 43) }, -- the darker grass, beside the dirt (20% brighter: QM)
 	}
 end
 
