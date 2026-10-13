@@ -168,6 +168,68 @@ def lantern(rng):
             ("Knob", STONE[1], knob)]
 
 
+# ---------------------------------------------------------------- lily pads
+
+LILY = [(0x68, 0x82, 0x28), (122, 150, 52), (88, 112, 32)]  # the trees' foliage green and shades
+LOTUS = [(246, 168, 196), (255, 214, 228)]  # a pink lotus, lighter inner petals
+POLLEN = (252, 214, 70)
+
+
+def pad(rng, r, x=0.0, z=0.0, notch=0.5, a0=0.0, h=0.35):
+    """A flat round pad with a wedge-shaped notch: convex pie slices (a hull each) so the
+    notch stays open; a thin raised vein ring sits on top."""
+    gap = notch / 2
+    n = 9
+    span = 2 * math.pi - notch
+    slices = []
+    for i in range(n):
+        a, b = a0 + gap + span * i / n, a0 + gap + span * (i + 1) / n
+        pts = [(x, 0, z), (x, h, z)]
+        for t in np.linspace(a, b, 3):
+            rr = r * (1 + rng.uniform(-0.03, 0.03))
+            for y in (0, h * 0.85):
+                pts.append((x + math.cos(t) * rr, y, z + math.sin(t) * rr))
+        slices.append(np.array(pts))
+    centre = np.array(ring(6, r * 0.12, h, a0) + ring(6, r * 0.12, h + 0.08, a0)) + (x, 0, z)
+    return slices, centre
+
+
+def lily_pad(rng):
+    """One big lily pad (about 7 across)."""
+    s, c = pad(rng, 3.5, notch=0.55, a0=0.3)
+    return [("Pad", LILY[0], s), ("Centre", LILY[2], [c])]
+
+
+def lily_pads(rng):
+    """Three lily pads together, small to big (about 9 across)."""
+    groups = [[], [], []]
+    for i, (r, x, z, a) in enumerate(((2.6, -2.0, 0.6, 1.2), (1.8, 2.4, -0.8, 3.6), (1.2, 1.4, 2.6, 5.0))):
+        s, c = pad(rng, r, x, z, notch=0.6, a0=a)
+        groups[i].extend(s)
+        groups[2].append(c) if i < 2 else groups[2].append(c)
+    return [("Pad", LILY[0], groups[0]), ("Pad", LILY[1], groups[1]), ("Pad", LILY[2], groups[2])]
+
+
+def lily_flower(rng):
+    """A lily pad with a pink lotus flower on it (about 7 across, 2.6 tall)."""
+    s, c = pad(rng, 3.4, notch=0.55, a0=2.0)
+    outer, inner = [], []
+    for ring_i, (n, r, tilt, top, dst) in enumerate(((8, 1.3, 0.9, 1.6, outer), (6, 0.95, 0.5, 2.2, inner))):
+        for i in range(n):
+            a = 2 * math.pi * (i + 0.5 * ring_i) / n
+            d = np.array((math.cos(a), 0, math.sin(a)))
+            side = np.array((-math.sin(a), 0, math.cos(a)))
+            base = np.array((0, 0.4, 0)) + d * 0.3
+            tip = base + d * r * tilt + np.array((0, top, 0))
+            mid = base + d * r * 0.7 + np.array((0, top * 0.45, 0))
+            w = r * 0.42
+            dst.append(np.array([base + side * w * 0.4, base - side * w * 0.4, mid + side * w, mid - side * w,
+                                 tip, base + d * 0.25 + np.array((0, 0.15, 0)), mid - d * 0.18 + side * w * 0.5]))
+    heart = blob(rng, (0, 0.85, 0), 0.45, 8, squash=(1, 0.7, 1), jitter=0.03)
+    return [("Pad", LILY[0], s), ("Centre", LILY[2], [c]), ("Petals", LOTUS[0], outer),
+            ("Petals", LOTUS[1], inner), ("Pollen", POLLEN, [heart])]
+
+
 ITEMS = [  # name, builder, seed, label, lineup width
     ("TombTall", tomb_tall, 3, "Tombstone", 6),
     ("TombShort", tomb_short, 5, "Short tombstone", 6),
@@ -177,6 +239,9 @@ ITEMS = [  # name, builder, seed, label, lineup width
     ("TempleStone", lambda rng: stones("RockBoulder", 8), 0, "Stone", 9),
     ("TempleStoneTwin", lambda rng: stones("RockTwins", 21), 0, "Stones", 9),
     ("StoneLantern", lantern, 2, "Stone lantern", 7),
+    ("LilyPad", lily_pad, 3, "Lily pad", 8),
+    ("LilyPads", lily_pads, 5, "Lily pads", 9),
+    ("LilyFlower", lily_flower, 7, "Lily with lotus", 8),
 ]
 
 
