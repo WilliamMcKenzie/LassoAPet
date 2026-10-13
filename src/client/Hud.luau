@@ -1755,7 +1755,7 @@ end
 
 -- Cash gained this ride.
 function Hud.setCoins(amount)
-	setCash(amount and amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)) -- (the x2 Gold pass doubles what's banked: Passes)
+	setCash(amount and amount * Config.goldX(Players.LocalPlayer)) -- (the x2 Gold pass doubles what's banked: Passes)
 	rideCash.scale.Scale = 1.25
 	TweenService:Create(rideCash.scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 end
@@ -1766,7 +1766,7 @@ function Hud.coinPopup(screenPoint, amount)
 	screenPoint /= rootScale -- screen pixels -> HUD root pixels
 	-- Same coin and "+N$" as the fail screen, a bit smaller.
 	local popup = cashRow(homeRoot, 64, 44, Vector2.new(0.5, 0.5), UDim2.fromOffset(screenPoint.X, screenPoint.Y))
-	popup.text.Text = "+" .. money(amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1))
+	popup.text.Text = "+" .. money(amount * Config.goldX(Players.LocalPlayer))
 	popup.text.TextColor3 = Color3.fromHex("FFC41E") -- golden yellow, like the login money (QM, Oct 8)
 	popup.scale.Scale = 0
 
@@ -1804,7 +1804,7 @@ function Hud.coinPopupAt(part, height, amount)
 	board.ResetOnSpawn = false
 	-- The same size as training's "+1" lasso popup (Training.client: 34 px icon, 30 px text; QM, Oct 8).
 	local popup = cashRow(board, 34, 30, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5))
-	popup.text.Text = "+" .. money(amount * (if Players.LocalPlayer:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1))
+	popup.text.Text = "+" .. money(amount * Config.goldX(Players.LocalPlayer))
 	popup.scale.Scale = 0
 	board.Parent = homeGui.Parent
 

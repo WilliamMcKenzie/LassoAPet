@@ -1262,6 +1262,23 @@ Config.EndPortal = nil
 -- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's
 -- World 2 bar; QM, Oct 13: 10m). World 1 is everyone's.
 Config.WorldPrices = { 0, 10000000 }
+-- Rebirth (QM, Oct 13): World 2's Rebirth bar (World2Bar.client) for Prices[n] gold, your
+-- nth. It re-locks World 2 (save up for it again) and sends you to World 1; your pets stay.
+-- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,
+-- and every pet of yours wears Shared/Skins' Skins[n]: Gold, Diamond, Galaxy.
+Config.Rebirth = {
+	Prices = { 100000000, 1000000000, 10000000000 },
+	Gold = { 2, 4, 8 }, -- (each rebirth doubles again)
+	Speed = { 1.5, 1.5, 1.5 }, -- (QM's 1.5x: not stacked, so the courses stay ridable)
+}
+-- All your gold earnings' multiplier: the x2 Gold pass and your rebirths.
+function Config.goldX(player)
+	return (if player:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)
+		* (Config.Rebirth.Gold[player:GetAttribute("Rebirths") or 0] or 1)
+end
+function Config.rebirthSpeed(player)
+	return Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1
+end
 -- 15, 1.2k, 3.4m, 10m... (gold, short: the Worlds menu's prices and the World 2 bar)
 function Config.short(n)
 	for _, unit in { { 1e12, "t" }, { 1e9, "b" }, { 1e6, "m" }, { 1e3, "k" } } do

@@ -223,9 +223,9 @@ local function canPlace(pen, x, z)
 end
 
 -- Every pet in your pen earns Config.PetIncome gold a second (the pet you ride too).
--- x2 Gold (game pass): x this on all the gold pets earn.
+-- x2 Gold (game pass) and rebirths (Config.goldX): x this on all the gold pets earn.
 local function goldX(player)
-	return if player:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1
+	return Config.goldX(player)
 end
 
 -- Fast Hatch (game pass): hatch times / this.
@@ -251,7 +251,8 @@ end
 local function awayGold(player, profile, data)
 	local seen = tonumber(data.seen)
 	local away = if seen then math.clamp(os.time() - seen, 0, Config.AwayCap) else 0
-	local x = if Passes.owns(player, "DoubleGold") then Config.PassGoldMultiplier else 1 -- (waits for the pass check)
+	local x = (if Passes.owns(player, "DoubleGold") then Config.PassGoldMultiplier else 1) -- (waits for the pass check)
+		* (Config.Rebirth.Gold[player:GetAttribute("Rebirths") or 0] or 1)
 	return (tonumber(data.awayGold) or 0) + math.floor(income(profile) * x * Config.AwayRate * away)
 end
 
