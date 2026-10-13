@@ -31,4 +31,11 @@ for _, p in ROOT.Ground:GetChildren() do
 		n += 1
 	end
 end
+-- The lily pads float on it (discs 0.2 thick: tools/world2_temple.luau's).
+local lilies = ROOT.Decor:FindFirstChild("Lilies")
+for _, l in lilies and lilies:GetDescendants() or {} do
+	if l:IsA("BasePart") then
+		l.Position = Vector3.new(l.Position.X, -0.9, l.Position.Z)
+	end
+end
 return n .. " water tiles flowing"
