@@ -155,7 +155,7 @@ def main(out=OUT):
     m = build()
     groups = {g["name"]: g for g in m["groups"]}
     write_animations(m, groups, animations())
-    for path in (os.path.join(ROOT, "designs", "crimson", NAME + ".bbmodel"), os.path.join(out, NAME + ".bbmodel")):
+    for path in (os.path.join(out, NAME + ".bbmodel")):
         with open(path, "w") as f:
             json.dump(m, f, separators=(",", ":"))
     W, H = 560, 440
