@@ -395,6 +395,7 @@ local Config = {
 		LivingBirch = 35, -- World 2 Woodland Maze (a Rare, as the Lionfish, until QM sets it)
 		Hawkmoth = 45, -- World 2 Woodland Maze's Hawkmoth (Epic, as the Squid until QM sets it)
 		RollingLog = 35, -- World 2 Woodland Maze (as the Lionfish)
+		TombJackal = 60, -- World 2 Ancient Tomb (a Rare, as the Raptor until QM sets it)
 		Tiger = 60, -- World 2 Temple (a Rare, as the Fire Lobster)
 		JadeStatue = 300, GarnetStatue = 300, -- World 2 Temple's Epics (as the Rockworm until QM sets them)
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, Kitsune = 43200, -- Volcano
@@ -567,6 +568,7 @@ local Config = {
 		OrangeButterfly = 1, -- World 2 Woodland Maze (as the Lionfish)
 		Hawkmoth = 2, -- World 2 Woodland Maze
 		RollingLog = 1, -- World 2 Woodland Maze
+		TombJackal = 2, -- World 2 Ancient Tomb (Horse length, tall ears)
 		Tiger = 1, -- World 2 Temple (the Lion's body)
 		JadeStatue = 2, GarnetStatue = 2, -- World 2 Temple
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, Kitsune = 3, -- Volcano (guesses; the Lava Whale XL like the Whale)
@@ -659,6 +661,7 @@ local Config = {
 		LivingBirch = 1500, -- World 2 Woodland Maze Rare (the Lionfish's, until QM sets it)
 		Hawkmoth = 2100, -- World 2 Woodland Maze (as the Squid)
 		RollingLog = 1500, -- World 2 Woodland Maze (as the Lionfish)
+		TombJackal = 40000, -- World 2 Ancient Tomb (as the Raptor)
 		Tiger = 20000, -- World 2 Temple (as the Fire Lobster)
 		JadeStatue = 25000, GarnetStatue = 25000, -- World 2 Temple (as the Rockworm)
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, Kitsune = 45000, -- Volcano (guesses: past the Ocean's)
@@ -789,6 +792,7 @@ local Config = {
 		Hawkmoth = "rbxassetid://111594299533130", -- assets/ui/HawkmothEggRender.png (World 2)
 		RollingLog = "rbxassetid://125301165432908", -- assets/ui/RollingLogEggRender.png (World 2)
 		Catfish = "rbxassetid://136135901593127", -- assets/ui/CatfishEggRender.png (World 2)
+		TombJackal = "", -- assets/ui/TombJackalEggRender.png (World 2; Studio uploads it)
 		Tiger = "rbxassetid://112691374931555", -- assets/ui/TigerEggRender.png (World 2)
 		JadeStatue = "rbxassetid://106883633786837", -- assets/ui/JadeStatueEggRender.png (World 2)
 		GarnetStatue = "rbxassetid://121784684526161", -- assets/ui/GarnetStatueEggRender.png (World 2)
@@ -1147,6 +1151,7 @@ local Config = {
 		PinkButterfly = { Speed = 3.28, Stamina = 2.4 }, -- World 2's Woodland Pink Butterfly: Uncommon (as the Clownfish until QM sets it)
 		LivingBirch = { Speed = 3.54, Stamina = 2 }, -- World 2 Woodland Maze Rare: the Lionfish's (25% into the Temple), until QM sets it
 		RollingLog = { Speed = 3.54, Stamina = 2 }, -- World 2's Woodland Maze Rare (QM, Oct 13; as the Lionfish until QM sets it)
+		TombJackal = { Speed = 5.6, Stamina = 3 }, -- World 2's Ancient Tomb Rare: the Raptor's, until QM sets it
 		Tiger = { Speed = 6.43, Stamina = 2.8 }, -- World 2's Temple Rare (QM, Oct 13; as the Fire Lobster until QM sets it)
 		Clownfish = { Speed = 3.28, Stamina = 2.4 }, -- (QM, Oct 12: 10% into the Volcano; was 2.8); (a little slower than the Starfish, an Ocean Uncommon too)
 		RoboShark = { Speed = 1.2, Stamina = 3 }, -- QM, Oct 4: starts at 1.2x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed 2.5 x this)
@@ -1360,6 +1365,8 @@ if Config.World == 2 then
 	}
 	tomb.WallColors = { rgb(211, 183, 66), rgb(196, 168, 54) } -- #D3B742
 	tomb.CapColor = rgb(186, 158, 46)
+	tomb.Herd = table.clone(tomb.Herd)
+	tomb.Herd.TombJackal = 0.15 -- the Tomb's Rare (QM, Oct 13), as often as the Raptor
 	-- Walls and gate glows (QM, Oct 13: the Level design thread's batch; tools/world2_walls.luau).
 	crimson.WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) }
 	crimson.CapColor = rgb(72, 39, 42)
@@ -1387,6 +1394,7 @@ if Config.World == 2 then
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
 	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
 	ownHerd(5, { "Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune" }) -- the Temple
+	ownHerd(6, { "TombJackal" }) -- the Ancient Tomb
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do

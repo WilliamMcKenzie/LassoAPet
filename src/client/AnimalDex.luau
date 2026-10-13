@@ -122,6 +122,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	PinkCrystal = "Sparkles when it laughs, which is all the time.",
 	LivingBirch = "Thinks it is very well hidden in the woods. Its leaves are bright orange.",
 	Fox = "Guards the temple steps. Mostly naps on them.",
+	TombJackal = "Guards the pharaoh's treasure. Polishes its gold collar every night.",
 	NineTailedFox = "Grows one more tail every hundred years. Still counting.",
 	CrystalSpider = "Knits sweaters for all eight legs. Takes a while to get dressed.",
 	CrystalElephant = "Grew its own armour. Never forgets, and never lets you forget it's sparkly.",

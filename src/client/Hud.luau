@@ -125,6 +125,7 @@ local IMAGES = {
 	eggTiger = { id = "rbxassetid://112691374931555", size = Vector2.new(502, 720) }, -- TigerEggRender.png (World 2)
 	eggJadeStatue = { id = "rbxassetid://106883633786837", size = Vector2.new(502, 804) }, -- JadeStatueEggRender.png (World 2)
 	eggGarnetStatue = { id = "rbxassetid://121784684526161", size = Vector2.new(502, 752) }, -- GarnetStatueEggRender.png (World 2)
+	eggTombJackal = { id = "", size = Vector2.new(530, 879) }, -- TombJackalEggRender.png (World 2)
 	eggFox = { id = "rbxassetid://92522948167443", size = Vector2.new(502, 806) }, -- FoxEggRender.png (World 2)
 	eggNineTailedFox = { id = "rbxassetid://110560724842212", size = Vector2.new(544, 806) }, -- NineTailedFoxEggRender.png (World 2)
 	eggKitsune = { id = "rbxassetid://124688776792586", size = Vector2.new(522, 849) }, -- KitsuneEggRender.png (World 2)
