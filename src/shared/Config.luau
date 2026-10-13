@@ -393,6 +393,7 @@ local Config = {
 		Starfish = 15, Clownfish = 15, PinkButterfly = 15, Whale = 60, Lionfish = 35, Squid = 45, KingCrab = 300, FishSchool = 200, BlueCrab = 800, Kraken = 1200, GiantGolem = 1200, -- Ocean
 		OrangeButterfly = 35, -- World 2 Woodland Maze (the Orange Butterfly a Rare, as the Lionfish)
 		LivingBirch = 35, -- World 2 Woodland Maze (a Rare, as the Lionfish, until QM sets it)
+		Hawkmoth = 45, -- World 2 Woodland Maze's Hawkmoth (Epic, as the Squid until QM sets it)
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
 		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
@@ -533,6 +534,7 @@ local Config = {
 		Phoenix = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: "fly like the whale"
 		CrystalPhoenix = { Kind = "Fly", Height = 56 }, -- QM, Oct 13: "flying sprint like normal phoenix"
 		OrangeButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland Maze: flies like the Crystal Phoenix (QM, Oct 13)
+		Hawkmoth = { Kind = "Fly", Height = 56 }, -- (Oct 13) a flyer like the Crystal Phoenix
 		Pterodactyl = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: a flying type, like the Phoenix
 		PinkButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland: a flier like the Crystal Phoenix (Oct 13)
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
@@ -558,6 +560,7 @@ local Config = {
 		Penguin = 1, Boar = 1, Snowman = 1, IceGolem = 2, SnackYak = 2, Icebringer = 3, CrystalCentipede = 1, RedMushroom = 1, BrownMushroom = 1, PurpleMushroom = 2, BlueCrystal = 1, PinkCrystal = 1, CrystalSpider = 2, CrystalPhoenix = 2, CrystalElephant = 3, -- Tundra
 		Starfish = 1, Clownfish = 1, PinkButterfly = 1, Squid = 2, KingCrab = 2, FishSchool = 2, BlueCrab = 2, RoboShark = 1, Whale = 4, Kraken = 4, Lionfish = 1, LivingBirch = 2, GiantGolem = 3, -- Ocean (the Robo Shark starts small and grows as it hunts)
 		OrangeButterfly = 1, -- World 2 Woodland Maze (as the Lionfish)
+		Hawkmoth = 2, -- World 2 Woodland Maze
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
 		Spinosaurus = 4, -- Jurassic (QM: slightly smaller than the T-Rex: AnimalScale 0.85)
@@ -618,7 +621,7 @@ local Config = {
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
 	-- or crashes into, is PetTiers'. Unlisted: 1.
-	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2, CrimsonScorpion = 0.75, Crocodile = 2, Lion = 2, MarbleColossus = 1.6, MajesticUnicorn = 1.4, IvorySpider = 2, Maw = 0.8, Eyeworm = 1.2, CrystalCentipede = 2, CrimsonSeraph = 1.5, CrystalSeraph = 2 }, -- (QM, Oct 11; the Crimson Scorpion smaller than the Scorpion, Oct 13; Crocodile and Lion 2x, Marble Colossus 1.6x, Majestic Unicorn 1.4x, Ivory Spider 2x, Maw 0.8x, Eyeworm 1.2x, Crystal Centipede 2x, Oct 13; the Crimson Seraph 1.5x and Crystal Seraph 2x, the Seraph 1x)
+	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2, Hawkmoth = 1.5, CrimsonScorpion = 0.75, Crocodile = 2, Lion = 2, MarbleColossus = 1.6, MajesticUnicorn = 1.4, IvorySpider = 2, Maw = 0.8, Eyeworm = 1.2, CrystalCentipede = 2, CrimsonSeraph = 1.5, CrystalSeraph = 2 }, -- (QM, Oct 11; the Crimson Scorpion smaller than the Scorpion, Oct 13; Crocodile and Lion 2x, Marble Colossus 1.6x, Majestic Unicorn 1.4x, Ivory Spider 2x, Maw 0.8x, Eyeworm 1.2x, Crystal Centipede 2x, Oct 13; the Crimson Seraph 1.5x and Crystal Seraph 2x, the Seraph 1x)
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
@@ -644,6 +647,7 @@ local Config = {
 		Starfish = 300, Clownfish = 700, PinkButterfly = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, Lionfish = 1500, GiantGolem = 24600, -- Ocean
 		OrangeButterfly = 1500, -- World 2 Woodland Maze (as the Lionfish until QM sets it)
 		LivingBirch = 1500, -- World 2 Woodland Maze Rare (the Lionfish's, until QM sets it)
+		Hawkmoth = 2100, -- World 2 Woodland Maze (as the Squid)
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
 		TRex = 60000, Raptor = 40000, -- Jurassic (guesses: past the Volcano's)
 		Spinosaurus = 40000, -- Jurassic (a guess: a Rare, under the T-Rex)
@@ -1110,6 +1114,7 @@ local Config = {
 		-- Ocean
 		Starfish = { Speed = 3.37, Stamina = 2 }, -- (QM, Oct 12: 15% into the Volcano; was 2.87)
 		Squid = { Speed = 4.15, Stamina = 2.6 }, -- (QM, Oct 12: 60% into the Volcano; was 3.7)
+		Hawkmoth = { Speed = 4.15, Stamina = 2.6 }, -- World 2's Woodland Hawkmoth: Epic, the Squid's numbers until QM sets it (60% into the Temple, as the Squid is 60% into the Volcano)
 		KingCrab = { Speed = 3.98, Stamina = 3 }, -- (QM, Oct 12: 50% into the Volcano; was 3.6)
 		BlueCrab = { Speed = 5.7, Stamina = 3 }, -- (QM, Oct 11: as the Kraken, a touch slower)
 		Lionfish = { Speed = 3.54, Stamina = 2 }, -- (QM, Oct 12: 25% into the Volcano; was 3.4); QM Oct 11: "a touch faster than the starfish" (the ladder: an Ocean Rare)
@@ -1274,20 +1279,23 @@ if Config.World == 2 then
 	-- The fourth: the Woodland Maze (QM, Oct 13; tools/world2_woodland.luau): brown, darker
 	-- by the walls.
 	local woodland = Config.Biomes[4]
-	woodland.Herd = table.clone(woodland.Herd)
-	woodland.Herd.Caterpillar = 0.3 -- the Woodland Maze's Uncommon (QM, Oct 13), as often as the Starfish
-	woodland.Herd.PinkButterfly = 0.25 -- the Pink Butterfly (QM, Oct 13): Uncommon, as often as the Clownfish
 	woodland.GroundColors = { rgb(121, 72, 46), rgb(110, 65, 41) } -- #79482E
 	woodland.Patches = {
 		Soil = { rgb(142, 81, 57), rgb(130, 74, 52) }, -- #8E5139
 		Path = { rgb(151, 89, 57), rgb(139, 81, 52) }, -- #975939, the middle
 	}
 	woodland.Herd = table.clone(woodland.Herd)
+	woodland.Herd.Caterpillar = 0.3 -- the Woodland Maze's Uncommon (QM, Oct 13), as often as the Starfish
+	woodland.Herd.PinkButterfly = 0.25 -- the Pink Butterfly (QM, Oct 13): Uncommon, as often as the Clownfish
 	woodland.Herd.OrangeButterfly = 0.15 -- the Orange Butterfly (QM, Oct 13), a Rare as often as the Lionfish
 	woodland.Herd.LivingBirch = 0.15 -- the Woodland's Rare (QM, Oct 13), as often as the Lionfish
+	woodland.Herd.Hawkmoth = 0.15 -- the Hawkmoth (QM, Oct 13), an Epic as often as the King Crab
+	woodland.Herd.GiantGolem = 0.05 -- the Giant Golem (QM, Oct 13), the Legendary, as rare as the Kraken
 	-- The fifth: the Temple (QM, Oct 13; tools/world2_temple.luau): a rock path, grass and
 	-- marble a stud up, ponds a stud and two down (their flowing water: tools/world2_water.luau).
 	local temple = Config.Biomes[5]
+	temple.Herd = table.clone(temple.Herd)
+	temple.Herd.Loong = 0.025 -- the Loong runs wild here as a Legendary (QM, Oct 13)
 	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
 	temple.Patches = {
 		Rock = { rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
@@ -1320,7 +1328,6 @@ if Config.World == 2 then
 	woodland.WallColors = { rgb(70, 42, 24), rgb(60, 36, 20) } -- dark brown (QM, Oct 13)
 	woodland.CapColor = rgb(242, 109, 57) -- vibrant autumn leaves on top (QM, Oct 13)
 	woodland.GateColor = rgb(242, 109, 57)
-	woodland.Herd.GiantGolem = 0.05 -- the Giant Golem (QM, Oct 13), the Legendary, as rare as the Kraken
 	temple.GateColor = rgb(130, 226, 80)
 	tomb.GateColor = rgb(255, 200, 30)
 	-- Only World 2's own animals run in its herds (QM, Oct 13: no World 1 animals in the
@@ -1338,9 +1345,8 @@ if Config.World == 2 then
 	ownHerd(1, { "MarbleFish", "Lion", "Buffalo", "Crocodile", "MarbleColossus", "MajesticUnicorn", "Bunny", "Rhino" }) -- (the Bunny and Rhino too, at World 1's weights: QM, Oct 13)
 	ownHerd(2, { "Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura" })
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
-	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly" }) -- the Woodland Maze
-	ownHerd(4, { "LivingBirch" })
-	ownHerd(4, { "GiantGolem" })
+	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "GiantGolem" }) -- the Woodland Maze
+	ownHerd(5, { "Loong" }) -- the Temple
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do

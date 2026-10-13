@@ -174,6 +174,15 @@ return {
 		{ "Accent", 255, 52, 156 }, -- hot-pink wing edges
 		{ "Accent", 255, 110, 190 }, -- stripes and antenna tips
 	},
+	Hawkmoth = {
+		{ "Body", 62, 48, 44 }, -- body, head
+		{ "Body", 84, 54, 40 }, -- forewings
+		{ "Body", 32, 26, 28 }, -- collar, legs, antennae
+		{ "Marking", 242, 109, 57 }, -- abdomen rings, hindwings, antenna tips
+		{ "Accent", 160, 72, 38 }, -- forewing bands
+		{ "Belly", 246, 228, 182 }, -- the skull on its back
+		{ "Horn", 24, 20, 22 }, -- spikes, stinger, brows, wing edges, black rings
+	},
 	CrystalPhoenix = {
 		{ "Body", 104, 58, 184 }, -- body, wing arms
 		{ "Body", 146, 96, 226 }, -- head, neck, wing bands
