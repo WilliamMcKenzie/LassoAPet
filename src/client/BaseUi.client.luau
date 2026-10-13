@@ -53,7 +53,7 @@ local CASH_GREEN = Color3.fromHex("00FF09")
 -- (in RefWidth pixels: QM's mockups at 1300 wide, x 1920 / 1300)
 local MARGIN = 18
 local MENU_WIDTH = 260 -- each of Merge, Index, Shop, Invite (QM's mockup, Oct 12: about 0.65 of the Quests panel's width; Oct 9 had 213)
-local MENU_GAP = 12 -- (small even gaps: QM's mockup, Oct 12; was 20)
+local MENU_GAP = 40 -- (spaced as the pass buttons on the right, whose art has its price badge over the button: QM, Oct 13; was 12)
 local ICON = 74 -- the counters' icons
 local TEXT = 55 -- the counters' text (QM's Figma: 55, stroke 5)
 local STROKE = 5
