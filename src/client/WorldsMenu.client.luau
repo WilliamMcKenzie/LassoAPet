@@ -5,6 +5,10 @@
 -- price) for one you don't. The world you're in has a white outline round its card.
 -- Each world is its own Place (Config.Places): Buy unlocks one for its gold
 -- (Config.WorldPrices; BuyWorld, Gold.server) and Travel teleports you there (Travel).
+-- The same in every world (QM, Oct 13): the cards scroll, World 3's is QM's Coming Soon
+-- banner (no button), and the panel shows just a sliver of it so you can tell it scrolls.
+-- Buying World 2 from World 1 plays its unlock cutscene (WorldUnlock); after that the tap
+-- hand points at World 2's Travel till you go ("GuideTravel").
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,23 +16,28 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local ModalPop = require(script.Parent.ModalPop)
+local TapHand = require(script.Parent.TapHand)
+local WorldUnlock = require(script.Parent.WorldUnlock)
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
 -- (QM's mockup, Oct 13, was 1456 wide: its sizes x 1320 / 1456 here)
 local CLOSE = "rbxassetid://84920756991403" -- dex/IndexClose.png (the Index's X, as the shop's)
 local ART = { -- assets/ui/worlds (QM's; World2.png is his World1.png with a 2)
 	World1 = "rbxassetid://117854477071908", -- World1.png: the banner (portal, tree, track; "World 1" on it)
-	World2 = "rbxassetid://139660587337646", -- World2.png
+	World2 = "rbxassetid://123640921226077", -- World2.png: QM's marble temple banner (Oct 13)
+	World3 = "rbxassetid://122859842408693", -- World3.png: QM's "World 3" / COMING SOON banner (his World3 1.png)
 	Travel = "rbxassetid://72409176941710", -- Travel.png: the blue button ("Travel" on it)
 	Buy = "rbxassetid://128346351326066", -- Buy.png: the green button, a cash stack left, "Buy" right
 }
 local WORLDS = {
 	{ name = "World 1", banner = "World1" },
 	{ name = "World 2", banner = "World2" },
+	{ name = "World 3", banner = "World3", soon = true },
 }
-local PANEL = Vector2.new(769, 520) -- about 58% of the screen across
 local CARD = Vector2.new(723, 212)
-local CARD_TOP, CARD_GAP = 62, 22 -- the first card's top below the panel's, and between them
+local LIST_TOP, CARD_PAD, CARD_GAP = 50, 12, 22 -- the scrolling list's top below the panel's; the first card's below that, and between them
+local SLIVER = 34 -- px of the third card that shows (QM: so you can tell it scrolls)
+local PANEL = Vector2.new(769, LIST_TOP + CARD_PAD + 2 * (CARD.Y + CARD_GAP) + SLIVER + 8) -- about 58% of the screen across
 local BUTTON = Vector2.new(294, 71)
 local BUTTON_INSET = 13 -- from the card's top right
 local CASH_GREEN, CASH_RED = Color3.fromHex("00FF09"), Color3.fromRGB(255, 70, 70) -- (the Merge button's)
@@ -150,6 +159,23 @@ local function button(art)
 	return b
 end
 
+-- The cards scroll (QM, Oct 13), under the title.
+local list = Instance.new("ScrollingFrame")
+list.Name = "List"
+list.BackgroundTransparency = 1
+list.BorderSizePixel = 0
+list.Position = UDim2.fromOffset(0, LIST_TOP)
+list.Size = UDim2.new(1, 0, 1, -LIST_TOP - 8)
+list.CanvasSize = UDim2.fromOffset(0, CARD_PAD * 2 + #WORLDS * CARD.Y + (#WORLDS - 1) * CARD_GAP)
+list.ScrollingDirection = Enum.ScrollingDirection.Y
+list.ScrollBarThickness = 6
+list.ScrollBarImageColor3 = Color3.fromRGB(30, 30, 30)
+list.ZIndex = 2
+list.Parent = panel
+
+local travelHand = TapHand.new(90)
+travelHand.Visible = false
+
 local cards = {}
 for i, world in WORLDS do
 	local card = Instance.new("ImageLabel")
@@ -157,7 +183,7 @@ for i, world in WORLDS do
 	card.BackgroundTransparency = 1
 	card.Image = ART[world.banner]
 	card.AnchorPoint = Vector2.new(0.5, 0)
-	card.Position = UDim2.new(0.5, 0, 0, CARD_TOP + (i - 1) * (CARD.Y + CARD_GAP))
+	card.Position = UDim2.new(0.5, 0, 0, CARD_PAD + (i - 1) * (CARD.Y + CARD_GAP))
 	card.Size = UDim2.fromOffset(CARD.X, CARD.Y)
 	card.ZIndex = 2
 	-- The world you're in: a white outline round the art's black one (QM).
@@ -173,6 +199,11 @@ for i, world in WORLDS do
 	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	stroke.Parent = here
 	here.Parent = card
+	if world.soon then
+		cards[i] = { card = card, here = here }
+		card.Parent = list
+		continue -- (Coming Soon: no button)
+	end
 	world.price = Config.WorldPrices[i] or 0
 	local buy, travel
 	if world.price > 0 then
@@ -203,7 +234,7 @@ for i, world in WORLDS do
 			if busy then
 				return
 			end
-			price.Text = "$" .. world.price
+			price.Text = "$" .. Config.short(world.price)
 			price.TextColor3 = if (player:GetAttribute("Gold") or 0) >= world.price then CASH_GREEN else CASH_RED
 		end
 		player:GetAttributeChangedSignal("Gold"):Connect(showPrice)
@@ -213,8 +244,8 @@ for i, world in WORLDS do
 				return
 			end
 			busy = true
-			if not ReplicatedStorage.BuyWorld:InvokeServer(i) then -- (not enough gold)
-				price.Text = "Need $" .. world.price
+			if not WorldUnlock.buy(i) then -- (it stays open: QM) -- (not enough gold; bought: World 2's unlock cutscene in World 1)
+				price.Text = "Need $" .. Config.short(world.price)
 				price.TextColor3 = CASH_RED
 				task.wait(1.2)
 			end
@@ -228,10 +259,8 @@ for i, world in WORLDS do
 	travel.Activated:Connect(function()
 		if i ~= Config.World then
 			ReplicatedStorage.Travel:FireServer(i) -- (teleports: not in Studio)
-		end
-		if open then
-			closeMenu()
-		end
+			player:SetAttribute("GuideTravel", nil)
+		end -- (it stays open: only its X or walking off closes it, QM Oct 13)
 	end)
 	travel.Parent = card
 	-- Travel once it's yours (World 1 always is), Buy till then.
@@ -244,9 +273,19 @@ for i, world in WORLDS do
 	end
 	player:GetAttributeChangedSignal("OwnsWorld" .. i):Connect(owned)
 	owned()
+	if i == 2 then
+		travelHand.Position = UDim2.fromScale(0.55, 0.55) -- (its fingertip on the button)
+		travelHand.Parent = travel
+	end
 	cards[i] = { card = card, here = here }
-	card.Parent = panel
+	card.Parent = list
 end
+-- The tap hand on World 2's Travel once you've bought it, till you go (WorldUnlock).
+local function showHand()
+	travelHand.Visible = player:GetAttribute("GuideTravel") == true and Config.World ~= 2
+end
+player:GetAttributeChangedSignal("GuideTravel"):Connect(showHand)
+showHand()
 
 local function showHere()
 	for i, c in cards do
@@ -291,11 +330,42 @@ local function haze(on)
 	t:Play()
 end
 
+-- Every other bit of UI goes while it's open (QM, Oct 13), and comes back when it closes.
+local hidden, holdHidden = {}, nil
+local function hideOthers(on)
+	if holdHidden then
+		holdHidden:Disconnect()
+		holdHidden = nil
+	end
+	if on then
+		player:SetAttribute("Cutscene", true) -- (BaseUi and the guides keep themselves off)
+		local function hideAll()
+			for _, g in player.PlayerGui:GetChildren() do
+				if g:IsA("ScreenGui") and g.Enabled and g ~= gui then
+					g.Enabled = false
+					if not table.find(hidden, g) then
+						table.insert(hidden, g)
+					end
+				end
+			end
+		end
+		hideAll()
+		holdHidden = RunService.RenderStepped:Connect(hideAll)
+	else
+		for _, g in hidden do
+			g.Enabled = true
+		end
+		table.clear(hidden)
+		player:SetAttribute("Cutscene", nil)
+	end
+end
+
 local function openMenu()
 	if open then
 		return
 	end
 	open = true
+	hideOthers(true)
 	showHere()
 	gui.Enabled = true
 	haze(true)
@@ -307,6 +377,7 @@ function closeMenu()
 		return
 	end
 	open = false
+	hideOthers(false)
 	haze(false)
 	ModalPop.close(setScale, function()
 		gui.Enabled = false

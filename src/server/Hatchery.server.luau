@@ -622,7 +622,43 @@ end
 local place -- (below, after PlaceEgg)
 local TUTORIAL_SPOTS = { Vector2.new(0, 0), Vector2.new(8, 0), Vector2.new(-8, 0), Vector2.new(0, 8), Vector2.new(0, -8), Vector2.new(8, 8) }
 
--- The ride got its egg home.
+-- An animal you rode home or over the finish line (QM, Oct 13: the animal itself, not its
+-- egg; eggs come from quests now): straight into your pen as a pet, at the first clear
+-- spot from the middle out. A full pen (Config.PenCapacity) gets its egg instead.
+local function givePet(player, profile, kind)
+	local pen = penOf(player)
+	local area = pen and pen:FindFirstChild("Area")
+	if area and penCount(profile) < penCap(player) then
+		local best
+		for r = 0, 6 do
+			for dx = -r, r do
+				for dz = -r, r do
+					if not best and math.max(math.abs(dx), math.abs(dz)) == r then
+						local x, z = dx * 7, dz * 7
+						local clear = canPlace(pen, x, z)
+						for _, item in profile.items do
+							if clear and math.abs(item.x - x) < 6 and math.abs(item.z - z) < 6 then
+								clear = false
+							end
+						end
+						best = if clear then Vector2.new(x, z) else nil
+					end
+				end
+			end
+		end
+		best = best or Vector2.new(Random.new():NextNumber(-1, 1) * (area.Size.X / 2 - EDGE), Random.new():NextNumber(-1, 1) * (area.Size.Z / 2 - EDGE)) -- (no clear spot: anywhere in it)
+		profile.items[HttpService:GenerateGUID(false)] = { x = best.X, z = best.Y, pet = kind }
+		profile.pastStarter = true
+		publish(player)
+		return true
+	end
+	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	publish(player)
+	return false
+end
+
+-- The ride got its animal home: in the tutorial its egg (hatched in the pen, the
+-- tutorial's next step), else the animal itself (givePet).
 remote("DeliverEgg", function(player, kind)
 	local profile = profiles[player]
 	if not profile or not isAnimal(kind) or player:GetAttribute("CarriedEgg") ~= kind then
@@ -652,8 +688,12 @@ remote("DeliverEgg", function(player, kind)
 			end
 		end
 	end
-	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
-	publish(player)
+	if player:GetAttribute("Tutorial") then
+		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+		publish(player)
+		return
+	end
+	givePet(player, profile, kind)
 end)
 
 -- You held E by an egg in your pen that's ready (Pen.client): it hatches.
@@ -674,18 +714,25 @@ remote("HatchEgg", function(player, id)
 	publish(player)
 end)
 
--- The ride crossed the finish line at the end of the course: a random egg, drawn
--- like the stampede itself (each biome's Herd counts as weights, so a Unicorn egg
--- is as rare as Unicorns are). Returns the kind, for the egg reveal.
+-- The ride crossed the finish line at the end of the course: the animal you rode there
+-- (QM, Oct 13: the animal itself, givePet), or (a hybrid, say) a random one, drawn like the
+-- stampede itself (each biome's Herd counts as weights, so a Unicorn is as rare as Unicorns are). And
+-- the next of Config.FinishTrails, silently (FinishTrail; Gold.server saves it). Returns
+-- the kind, for the egg reveal.
 local finished = {} -- [player] = os.clock() of their last finish
 local finishCourse = Instance.new("RemoteFunction")
 finishCourse.Name = "FinishCourse"
-finishCourse.OnServerInvoke = function(player)
+finishCourse.OnServerInvoke = function(player, rode)
 	local profile = profiles[player]
 	if not profile or (finished[player] and os.clock() - finished[player] < 10) then
 		return nil
 	end
 	finished[player] = os.clock()
+	player:SetAttribute("FinishTrail", math.min((player:GetAttribute("FinishTrail") or 0) + 1, #Config.FinishTrails))
+	if typeof(rode) == "string" and isAnimal(rode) then
+		givePet(player, profile, rode)
+		return rode
+	end
 	local pool, total = {}, 0
 	for _, biome in Config.Biomes do
 		-- (a borrowed placeholder herd would count its animals twice)
@@ -707,8 +754,7 @@ finishCourse.OnServerInvoke = function(player)
 	if not kind then
 		return nil
 	end
-	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
-	publish(player)
+	givePet(player, profile, kind)
 	return kind
 end
 finishCourse.Parent = ReplicatedStorage
@@ -810,9 +856,12 @@ claimQuest.OnServerInvoke = function(player, i)
 		player:SetAttribute("PenLevel", level + 1)
 	end
 	Funnel.claimed(player, i) -- (Player Journey)
-	profile.eggs[quest.Egg] = (profile.eggs[quest.Egg] or 0) + 1
+	local eggs = if typeof(quest.Egg) == "table" then quest.Egg else { quest.Egg } -- (several: World 2's Kitsune quest)
+	for _, kind in eggs do
+		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	end
 	publish(player)
-	return quest.Egg
+	return eggs[1]
 end
 claimQuest.Parent = ReplicatedStorage
 -- Gold.server's: a lasso landed on a wild animal ("Lasso animals", and "Lasso Snowmen" by its kind).

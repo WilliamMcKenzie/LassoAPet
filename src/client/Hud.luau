@@ -128,6 +128,14 @@ local IMAGES = {
 	eggFox = { id = "rbxassetid://92522948167443", size = Vector2.new(502, 806) }, -- FoxEggRender.png (World 2)
 	eggNineTailedFox = { id = "rbxassetid://110560724842212", size = Vector2.new(544, 806) }, -- NineTailedFoxEggRender.png (World 2)
 	eggKitsune = { id = "rbxassetid://124688776792586", size = Vector2.new(522, 849) }, -- KitsuneEggRender.png (World 2)
+	eggTombJackal = { id = "rbxassetid://114106715330048", size = Vector2.new(530, 879) }, -- TombJackalEggRender.png (World 2)
+	eggLionArcher = { id = "rbxassetid://117473019333658", size = Vector2.new(505, 800) }, -- LionArcherEggRender.png (World 2)
+	eggNut = { id = "rbxassetid://120782360993998", size = Vector2.new(623, 874) }, -- NutEggRender.png (World 2)
+	eggGeb = { id = "rbxassetid://93281428675559", size = Vector2.new(522, 822) }, -- GebEggRender.png (World 2)
+	eggEagleSentry = { id = "rbxassetid://117861828286868", size = Vector2.new(585, 893) }, -- EagleSentryEggRender.png (World 2)
+	eggBes = { id = "rbxassetid://91869381995495", size = Vector2.new(517, 897) }, -- BesEggRender.png (World 2)
+	eggBloatedMummy = { id = "rbxassetid://113530717781179", size = Vector2.new(565, 691) }, -- BloatedMummyEggRender.png (World 2)
+	eggScarab = { id = "rbxassetid://90717259678888", size = Vector2.new(517, 770) }, -- ScarabEggRender.png (World 2)
 	eggUnicorn = { id = "rbxassetid://85066893166855", size = Vector2.new(496, 859) }, -- UnicornEggRender.png
 	eggCactus = { id = "rbxassetid://95599437590618", size = Vector2.new(635, 766) }, -- CactusEggRender.png
 	eggKitten = { id = "rbxassetid://124881834655792", size = Vector2.new(502, 749) }, -- KittenEggRender.png

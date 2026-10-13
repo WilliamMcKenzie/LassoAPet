@@ -454,21 +454,24 @@ local function questRow(i, quest, y)
 			-- (its egg stays out of the inventory till its reveal's over: QM, Oct 11)
 			local line = Config.Quests[i // 100]
 			local egg = line and line[i % 100] and line[i % 100].Egg
-			if egg then
-				Inventory.holdBack(egg, 1)
+			local eggs = if typeof(egg) == "table" then egg else { egg } -- (some give several: World 2's last, QM Oct 13)
+			for _, kind in eggs do
+				Inventory.holdBack(kind, 1)
 			end
 			local ok, kind = pcall(claimQuest.InvokeServer, claimQuest, i)
-			local animal = ok and kind and ReplicatedStorage.Shared.Animals:FindFirstChild(kind)
-			if animal then
-				Hud.eggReveal(require(animal).Rarity, kind, true) -- (the egg it gave you)
-			end
 			task.spawn(function()
-				task.wait(0.2)
-				while Hud.revealing() do
-					task.wait(0.1)
+				for _, each in if ok and kind then eggs else {} do
+					local animal = ReplicatedStorage.Shared.Animals:FindFirstChild(each)
+					if animal then
+						Hud.eggReveal(require(animal).Rarity, each, true) -- (the egg it gave you)
+						task.wait(0.2)
+						while Hud.revealing() do
+							task.wait(0.1)
+						end
+					end
 				end
-				if egg then
-					Inventory.holdBack(egg, -1)
+				for _, each in eggs do
+					Inventory.holdBack(each, -1)
 				end
 				claimBusy = false
 			end)
