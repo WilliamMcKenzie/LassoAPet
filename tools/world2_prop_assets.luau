@@ -1,4 +1,4 @@
--- World 2's prop assets (QM, Oct 13; design/crimson, crystals, birches, sword_stone): one
+-- World 2's prop assets (QM, Oct 13; design/crimson, crystals, birches, sword_stone, temple): one
 -- Model per item in ServerStorage.World2Assets, one MeshPart per piece at the item's origin
 -- (the middle of its base, y = 0), at the .obj's size, studded; the pivot is that origin.
 -- tools/world2_props.luau (the Level design thread's) clones them into the world. Runes glow
@@ -26,6 +26,14 @@ local ITEMS = {
 	RunestoneShort = {{ 1, 76425566347787, "Stone", 156, 124, 120 }, { 2, 111974434822198, "Cap", 140, 110, 106 }, { 3, 118815857600148, "Runes", 255, 186, 60 }},
 	RunestoneTall = {{ 1, 89336867376900, "Stone", 156, 124, 120 }, { 2, 137946154144534, "Cap", 140, 110, 106 }, { 3, 139822247577148, "Runes", 255, 186, 60 }},
 	SwordStone = {{ 1, 117918039589025, "Rock", 214, 196, 142 }, { 2, 92556836847130, "Rock", 196, 178, 126 }, { 3, 116200676311757, "Blade", 206, 214, 224 }, { 4, 77662760456357, "Guard", 232, 182, 58 }, { 5, 105597963152140, "Grip", 112, 72, 46 }, { 6, 90013430545752, "Pommel", 232, 182, 58 }},
+	StoneLantern = {{ 1, 75440915651750, "Foot", 156, 142, 94 }, { 2, 103852371605928, "Pillar", 178, 162, 108 }, { 3, 131699032648285, "Platform", 196, 181, 128 }, { 4, 124777961879766, "LightBox", 178, 162, 108 }, { 5, 107953062735066, "Windows", 58, 50, 34 }, { 6, 108354390411780, "Roof", 196, 181, 128 }, { 7, 116953667639987, "Knob", 156, 142, 94 }},
+	TempleStoneTwin = {{ 1, 128363002569104, "Stone", 178, 162, 108 }, { 2, 140161642242473, "Stone", 156, 142, 94 }, { 3, 95195736663167, "Stone", 196, 181, 128 }},
+	TempleStone = {{ 1, 77302032964144, "Stone", 178, 162, 108 }, { 2, 139450972893597, "Stone", 156, 142, 94 }},
+	TempleTreeSmall = {{ 1, 88339126745902, "Trunk", 42, 26, 0 }, { 2, 116048753771443, "Leaves", 104, 130, 40 }, { 3, 104221144075787, "Leaves", 122, 150, 52 }},
+	TempleTree = {{ 1, 85322910230225, "Trunk", 42, 26, 0 }, { 2, 117479880015241, "Leaves", 104, 130, 40 }, { 3, 94614824799319, "Leaves", 122, 150, 52 }},
+	TombLean = {{ 1, 108668461845130, "Stone", 177, 163, 103 }, { 2, 91889617241341, "Cap", 194, 180, 122 }, { 3, 77173807607245, "Moss", 159, 182, 0 }},
+	TombShort = {{ 1, 139650115910639, "Stone", 177, 163, 103 }, { 2, 117912541331041, "Cap", 194, 180, 122 }, { 3, 93377098954476, "Base", 156, 143, 90 }, { 4, 90992049804075, "Moss", 159, 182, 0 }},
+	TombTall = {{ 1, 91124793932064, "Stone", 177, 163, 103 }, { 2, 86412816204863, "Cap", 194, 180, 122 }, { 3, 99326142183124, "Base", 156, 143, 90 }, { 4, 78841153461251, "Moss", 159, 182, 0 }},
 }
 local folder = game.ServerStorage:FindFirstChild("World2Assets") or Instance.new("Folder")
 folder.Name = "World2Assets"
