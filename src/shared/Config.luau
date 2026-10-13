@@ -1225,7 +1225,7 @@ if Config.World == 2 then
 	crimson.Herd = table.clone(crimson.Herd)
 	crimson.Herd.Eyeworm = 0.3 -- the Crimson Lands' animals (QM, Oct 13): Uncommon, as often as the Cactus
 	crimson.Herd.Maw = 0.3 -- Rare, as the Scorpion
-	crimson.Herd.IvorySpider = 0.1 -- Epic, as the Sandworm
+	crimson.Herd.IvorySpider = 0.05 -- Epic, as the Sandworm
 	crimson.Herd.Asura = 0.05 -- Legendary, as the Snake
 	crimson.Herd.CrimsonScorpion = 0.2 -- Uncommon, as the Kitten
 	crimson.Herd.Beholder = 0.3 -- the Godlands' Rare joins the Crimson Lands (QM, Oct 13), in the Spine Lizard's slot
@@ -1328,7 +1328,7 @@ if Config.World == 2 then
 		Buffalo = 0.934, -- 30% into the Crimson Lands
 		MarbleColossus = 1.028, -- 45% into the Crimson Lands
 		CrimsonScorpion = 1.405, -- 5% into the Crystal Cavern
-		IvorySpider = 1.669, -- 45% into the Crystal Cavern
+		IvorySpider = 1.537, -- 25% into the Crystal Cavern (QM, Oct 13; was 45%)
 		Maw = 1.438, -- 10% into the Crystal Cavern
 		Beholder = 1.504, -- 20% into the Crystal Cavern
 		RedMushroom = 2.14, -- 10% into the Woodland
