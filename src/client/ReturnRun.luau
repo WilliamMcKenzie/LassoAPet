@@ -28,6 +28,23 @@ function ReturnRun.pushing(controls, stickOn, padPush, sprint)
 	return (stickOn and controls:GetMoveVector().Magnitude >= PUSH) or (padPush or 0) >= PUSH
 end
 
+-- The first biome a kind runs in (its herd), or nil.
+local function biomeOf(kind)
+	for i, biome in Config.Biomes do
+		if biome.Herd and (biome.Herd[kind] or 0) > 0 then
+			return i
+		end
+	end
+	return nil
+end
+
+-- Whether a hit on the run home is an animal from a lesser biome than the one you're riding
+-- (QM, Oct 13: those you plough through without slowing).
+function ReturnRun.lesser(hit, mount)
+	local a, b = hit and biomeOf(hit.kind), biomeOf(mount.kind)
+	return a ~= nil and b ~= nil and a < b
+end
+
 function ReturnRun.update(dt, atFull)
 	if not atFull and not TutorialRide.active then -- (the tutorial's slows time instead till you run: Client/Tutorial)
 		ReturnRun.slow += dt

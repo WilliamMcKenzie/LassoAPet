@@ -2426,8 +2426,8 @@ function vfx.feastOf(entity)
 end
 
 -- The mount broke something (smashed an obstacle, knocked an animal flying).
-function vfx.broke()
-	if phase == "return" and mount and not activeAbility() then -- (back to a walk: ReturnRun)
+function vfx.broke(hit)
+	if phase == "return" and mount and not activeAbility() and not vfx.returnRun.lesser(hit, mount) then -- (back to a walk: ReturnRun)
 		mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
 	end
 	local feast = vfx.feastOf(mount)
@@ -3628,7 +3628,7 @@ local function checkRide(dt)
 			-- (racing home, nothing crashes you: whatever you run into is knocked away, QM Oct 11)
 			if phase == "return" or (trample and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
-				vfx.broke()
+				vfx.broke(entity)
 				if kind == "Crabwalk" and special.RestorePer then
 					hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount)) -- 20% Hold per animal it hits (QM)
 				end
