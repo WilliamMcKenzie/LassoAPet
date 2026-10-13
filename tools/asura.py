@@ -46,7 +46,7 @@ BASE = os.path.join(OUT, "Asura_QM.bbmodel")
 SCALE = 1.6
 
 PALETTE = {"slate": (72, 84, 85), "dark": (53, 67, 69), "light": (111, 120, 121), "steel": (130, 138, 140),
-           "cyan": (121, 191, 202), "black": (4, 6, 8), "red": (255, 40, 40)}
+           "cyan": (121, 191, 202), "blade": (222, 228, 230), "black": (4, 6, 8), "red": (255, 40, 40)}
 CLASSES = ("slate", "dark", "light", "steel", "cyan", "black")
 SHARE = 0.1  # a part takes a trim colour when that colour covers this much of its texture
 TEX = {n: i for i, n in enumerate(PALETTE)}
@@ -137,7 +137,7 @@ def build(base=BASE):
     for e in m["elements"]:
         bone, size = owner[e["uuid"]], [t - f for f, t in zip(e["from"], e["to"])]
         if bone == "sword":
-            cols[e["uuid"]] = "dark" if e["from"][1] < 6 else "cyan" if size[1] == 3 else "steel"
+            cols[e["uuid"]] = "dark" if e["from"][1] < 6 else "cyan" if size[1] == 3 else "blade"  # QM: a white blade
         elif bone in ("left_shoulder", "cape", "cape_segment"):
             cols[e["uuid"]] = "light" if bone == "left_shoulder" else "dark"
         elif bone == "pelvis" and size[0] == 14:
