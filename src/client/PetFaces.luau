@@ -23,6 +23,7 @@ local HEADSHOTS = {
 	BlueCrystal = "rbxassetid://98660783250158", -- PetBlueCrystal.png (World 2)
 	PinkCrystal = "rbxassetid://81727302148573", -- PetPinkCrystal.png (World 2)
 	Lion = "rbxassetid://88231046504339", -- PetLion.png (World 2: QM's edit)
+	Buffalo = "rbxassetid://76004844910290", -- PetBuffalo.png (World 2)
 	Eyeworm = "rbxassetid://130020402774350", -- PetEyeworm.png (World 2)
 	Maw = "rbxassetid://116932906016084", -- PetMaw.png (World 2)
 	IvorySpider = "rbxassetid://122315330787047", -- PetIvorySpider.png (World 2)

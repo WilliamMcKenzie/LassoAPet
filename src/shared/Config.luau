@@ -726,6 +726,7 @@ local Config = {
 		BlueCrystal = "rbxassetid://112194074349421", -- assets/ui/BlueCrystalEggRender.png (World 2)
 		PinkCrystal = "rbxassetid://117236752430565", -- assets/ui/PinkCrystalEggRender.png (World 2)
 		Lion = "rbxassetid://82682007346790", -- assets/ui/LionEggRender.png (World 2)
+		Buffalo = "rbxassetid://118027620960011", -- assets/ui/BuffaloEggRender.png (World 2)
 		CrystalSpider = "rbxassetid://98286776885826", -- assets/ui/CrystalSpiderEggRender.png (World 2)
 		Eyeworm = "rbxassetid://132028611021169", -- assets/ui/EyewormEggRender.png (World 2)
 		Maw = "rbxassetid://121895939250438", -- assets/ui/MawEggRender.png (World 2)
