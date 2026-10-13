@@ -384,7 +384,7 @@ local function hint(quest)
 			ahead = if ahead.Magnitude > 0.01 then ahead.Unit else Vector3.new(0, 0, -1)
 			task.spawn(CameraHint.show, look, -ahead * 70 + Vector3.new(0, 12, 0))
 		end
-	elseif quest.kind == "merge" then
+	elseif quest.kind == "merge" and Config.World == 1 then -- (World 2: no hint, QM)
 		player:SetAttribute("MergeHint", true)
 	elseif quest.kind == "invite" then
 		promptInvite()
@@ -579,7 +579,7 @@ local function drawQuests()
 		merging = merging or (typeof(quest) == "table" and quest.kind == "merge" and (tonumber(quest.have) or 0) == 0)
 	end
 	mergeBadge.Visible = merging -- (gone once you've merged)
-	if merging and not mergeHinted and not player:GetAttribute("Tutorial") then -- (not till the tutorial's over)
+	if merging and not mergeHinted and not player:GetAttribute("Tutorial") and Config.World == 1 then -- (not till the tutorial's over; World 1 only: World 2's players know how, QM)
 		mergeHinted = true
 		mergeHintDue = true -- (shown once the egg reveal's over and the quest's popped in: below)
 	elseif not mergeUp and player:GetAttribute("MergeHint") then

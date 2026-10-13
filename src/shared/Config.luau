@@ -1625,6 +1625,14 @@ if Config.World == 2 then
 		Config.AnimalStats[kind].Speed = s[1]
 		Config.PetIncome[kind], Config.PetHatchTime[kind] = s[2], s[3]
 	end
+	-- Every animal in World 2's Meadow 30% faster still (QM, Oct 13: "they're too slow"), the
+	-- Bunny and Rhino too (here only: this is World 2's Config); not the trophy Seraph.
+	for kind in own[1] do
+		if Config.AnimalStats[kind] then
+			Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind])
+			Config.AnimalStats[kind].Speed *= 1.3
+		end
+	end
 	-- The trophy angels (QM, Oct 13: his weights; were 1 in 300 of their biome's stampede).
 	for i, weight in { 0.001, 0.002, 0.002 } do
 		Config.Biomes[i].Herd[({ "Seraph", "CrimsonSeraph", "CrystalSeraph" })[i]] = weight

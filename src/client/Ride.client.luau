@@ -3503,7 +3503,10 @@ local function checkRide(dt)
 	if phase == "return" and vfx.returnRun.caught and vfx.bossChase.ranOver() and not vfx.tutorialRide.active then
 		return fail("CAUGHT!")
 	elseif phase == "return" and vfx.returnRun.hits >= Config.ReturnRun.Crashes then
-		return fail("CRASH!")
+		if vfx.tutorialRide.active or vfx.returnRun.giveUp() then
+			return fail("CRASH!")
+		end
+		vfx.returnRun.runOver() -- (the boss charges and runs you over: CAUGHT!, flung)
 	end
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)
