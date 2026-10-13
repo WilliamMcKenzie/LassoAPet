@@ -8,6 +8,10 @@ Built like the Sandworm (tools/sandworm_design.py): rest pose lies straight and 
 bones chain from root (the front segment, where you sit) back through Seg2..Seg6
 and forward to the head ("neck"). Kept to few parts (QM): one block per segment,
 one leg bar under each segment poking out both sides, one crystal per segment.
+
+This wrote the first draft. QM has since edited designs/crystal/CrystalCentipede.bbmodel in
+Blockbench (Oct 13: antennae off, two crystals over the head): don't rerun this, it would
+overwrite QM's edit. tools/crystal_centipede_rig.py animates QM's file.
 """
 
 import json
