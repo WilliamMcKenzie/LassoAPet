@@ -397,7 +397,7 @@ local Config = {
 		RollingLog = 35, -- World 2 Woodland Maze (as the Lionfish)
 		Tiger = 60, -- World 2 Temple (a Rare, as the Fire Lobster)
 		JadeStatue = 300, GarnetStatue = 300, -- World 2 Temple's Epics (as the Rockworm until QM sets them)
-		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, -- Volcano
+		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 300, LavaWhale = 300, Phoenix = 43200, Kitsune = 43200, -- Volcano
 		Catfish = 15, -- World 2 Temple (as the Firebird)
 		Fox = 15, NineTailedFox = 60, -- World 2 Temple (the Fox an Uncommon as the Firebird, the Nine-tailed Fox a Rare as the Fire Lobster, until QM sets them)
 		Ankylosaurus = 15, PalmGuy = 15, Spinosaurus = 60, Raptor = 60, TRex = 190, Pterodactyl = 90, BoneRex = 43200, -- Jurassic
@@ -569,7 +569,7 @@ local Config = {
 		RollingLog = 1, -- World 2 Woodland Maze
 		Tiger = 1, -- World 2 Temple (the Lion's body)
 		JadeStatue = 2, GarnetStatue = 2, -- World 2 Temple
-		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, -- Volcano (guesses; the Lava Whale XL like the Whale)
+		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, Kitsune = 3, -- Volcano (guesses; the Lava Whale XL like the Whale)
 		Catfish = 1, -- World 2 Temple (Fish-sized)
 		Fox = 1, NineTailedFox = 2, -- World 2 Temple (the Fox under the Horse's size; the Nine-tailed Fox's fan of tails)
 		TRex = 4, Raptor = 2, -- Jurassic (QM: the T-Rex as big as the Whale; the Raptor smaller)
@@ -661,7 +661,7 @@ local Config = {
 		RollingLog = 1500, -- World 2 Woodland Maze (as the Lionfish)
 		Tiger = 20000, -- World 2 Temple (as the Fire Lobster)
 		JadeStatue = 25000, GarnetStatue = 25000, -- World 2 Temple (as the Rockworm)
-		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, -- Volcano (guesses: past the Ocean's)
+		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, Kitsune = 45000, -- Volcano (guesses: past the Ocean's)
 		Catfish = 12000, -- World 2 Temple (as the Firebird)
 		Fox = 12000, NineTailedFox = 20000, -- World 2 Temple (the Firebird's and Fire Lobster's, until QM sets them)
 		TRex = 60000, Raptor = 40000, -- Jurassic (guesses: past the Volcano's)
@@ -794,6 +794,7 @@ local Config = {
 		GarnetStatue = "rbxassetid://121784684526161", -- assets/ui/GarnetStatueEggRender.png (World 2)
 		Fox = "rbxassetid://92522948167443", -- assets/ui/FoxEggRender.png (World 2)
 		NineTailedFox = "rbxassetid://110560724842212", -- assets/ui/NineTailedFoxEggRender.png (World 2)
+		Kitsune = "rbxassetid://124688776792586", -- assets/ui/KitsuneEggRender.png (World 2)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
@@ -1161,6 +1162,7 @@ local Config = {
 		FireLobster = { Speed = 6.43, Stamina = 2.8 }, -- (QM, Oct 13: 60% into the Jurassic; was 5.15)
 		Fox = { Speed = 5.11, Stamina = 2.5 }, -- World 2 Temple Uncommon: the Firebird's, until QM sets it
 		NineTailedFox = { Speed = 6.43, Stamina = 2.8 }, -- World 2 Temple Rare: the Fire Lobster's, until QM sets it
+		Kitsune = { Speed = 7.2, Stamina = 3 }, -- World 2's Temple Legendary Kitsune (as the Phoenix until QM sets it)
 		Phoenix = { Speed = 7.2, Stamina = 3 }, -- (QM, Oct 12: well into the Jurassic, a touch slower than the Bone Rex; was 6.98)
 		LavaWhale = { Speed = 6.83, Stamina = 3 }, -- (QM, Oct 13: 75% into the Jurassic; was 5.85)
 		TRex = { Speed = 6, Stamina = 3 }, -- (a guess: a touch past the Lava Whale)
@@ -1333,6 +1335,7 @@ if Config.World == 2 then
 	temple.Herd.GarnetStatue = 0.13
 	temple.Herd.Fox = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
 	temple.Herd.NineTailedFox = 0.17 -- the Fox's rare variant (QM, Oct 13), as often as the Fire Lobster
+	temple.Herd.Kitsune = 0.03 -- the Kitsune (QM, Oct 13), the Temple's Legendary, as rare as the Phoenix
 	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
 	temple.Patches = {
 		Rock = { rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
@@ -1383,7 +1386,7 @@ if Config.World == 2 then
 	ownHerd(2, { "Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura" })
 	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
 	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
-	ownHerd(5, { "Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue" }) -- the Temple
+	ownHerd(5, { "Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune" }) -- the Temple
 	for i, biome in Config.Biomes do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do
