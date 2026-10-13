@@ -27,19 +27,24 @@ end
 Skins.Skins = {
 	{
 		name = "Gold",
-		stops = { rgb(120, 74, 8), rgb(214, 150, 20), rgb(255, 206, 52), rgb(255, 238, 150) },
-		span = { 0.15, 0.85 },
+		-- (Oct 13: came out flat lemon yellow under the game's Lighting: deeper, toward amber,
+		-- and a polished-metal texture of highlight and shadow bands and glints over it)
+		stops = { rgb(92, 48, 0), rgb(168, 100, 8), rgb(212, 142, 22), rgb(240, 190, 70) },
+		span = { 0.1, 0.75 },
+		texture = "", -- assets/particles/GoldSheen.png (TODO upload)
 		glow = rgb(255, 230, 90),
 		reflectance = 0.25,
 		light = rgb(255, 200, 80),
 	},
 	{
 		name = "Diamond",
-		stops = { rgb(36, 118, 222), rgb(80, 196, 250), rgb(160, 232, 255), rgb(232, 250, 255) },
-		span = { 0.1, 0.8 },
+		-- (Oct 13: came out pale ice with no facets, and Glass lost the studs: deeper blue, the
+		-- studs' own material, and a cut-facets-and-sparkles texture over it)
+		stops = { rgb(24, 80, 168), rgb(56, 132, 214), rgb(104, 184, 240), rgb(176, 222, 252) },
+		span = { 0.05, 0.75 },
 		facet = 0.18, -- (every other part a facet lighter)
+		texture = "", -- assets/particles/DiamondFacets.png (TODO upload)
 		glow = rgb(150, 240, 255),
-		material = Enum.Material.Glass,
 		reflectance = 0.3,
 		light = rgb(170, 230, 255),
 	},
@@ -64,7 +69,7 @@ local FACES = {
 	{ Enum.NormalId.Left, "Z", "Y" }, { Enum.NormalId.Right, "Z", "Y" },
 } -- (not the Bottom: it's never seen)
 
--- The skin's texture (the Galaxy's stars) over a part's bigger faces, untinted.
+-- The skin's texture (the Galaxy's stars, the Gold's sheen, the Diamond's facets) over a part's bigger faces, untinted.
 local function textured(part, image)
 	for _, face in FACES do
 		if part.Size[face[2]] >= TEXTURE_MIN and part.Size[face[3]] >= TEXTURE_MIN then
