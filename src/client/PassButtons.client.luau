@@ -87,6 +87,11 @@ for i, spec in BUTTONS do
 			press.Scale = 1
 		end)
 	end
+	if spec[1] == "StarterPack" then -- (QM's popup: Oct 13)
+		button.Activated:Connect(function()
+			require(script.Parent.StarterPackMenu).open()
+		end)
+	end
 	button.Parent = slot
 	slot.Parent = column
 end
