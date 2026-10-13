@@ -50,6 +50,12 @@ return {
 		{ "Belly", 250, 236, 212 }, -- muzzle
 		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" }, -- (cream paws, like the muzzle)
 	},
+	MajesticUnicorn = {
+		{ "Body", 252, 250, 255 }, -- pearl coat
+		{ "Belly", 226, 214, 246 }, -- lilac socks and muzzle
+		{ "Horn", 255, 200, 60 }, -- gold horn and brows
+		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" }, -- (gold like the horn)
+	},
 	MarbleColossus = {
 		{ "Body", 246, 244, 238 }, -- marble
 		{ "Body", 208, 205, 198 }, -- chest, shoulders, brow (shade)

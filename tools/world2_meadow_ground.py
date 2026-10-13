@@ -214,7 +214,9 @@ def main():
     kind = layout()
     bad = check(kind)
     assert bad == 0, f"{bad} bright tiles touch dirt"
-    parts = boxes(kind)
+    raised = kind.copy()
+    raised[:, 1:][kind[:, 1:] == BRIGHT] = 3  # the light grass a stud up (QM), but the start line's row
+    parts = boxes(raised)
     assert all(p[3] <= 2048 and p[4] <= 2048 for p in parts)
     render(kind, os.path.join(out, "world2_meadow.png"))
     write_luau(parts)

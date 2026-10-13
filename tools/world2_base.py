@@ -150,8 +150,23 @@ def world1():
     return kind
 
 
+RAISED = 3  # the light grass a stud up (QM, Oct 13): a kind of its own in the Luau
+PEN_FLAT = 64  # the ground stays flat this far round each pen's middle (its floor is at 0), as tools/world2_grass_step.luau
+
+
+def raise_grass(kind):
+    """The light grass a stud above the dark, but under the pens and the start line's row."""
+    out = kind.copy()
+    for i in range(NX):
+        for j in range(1, NZ):
+            x, z = -W + i * CELL + CELL / 2, j * CELL + CELL / 2
+            if kind[i, j] == BRIGHT and all(math.hypot(x - c[0], z - c[1]) >= PEN_FLAT for c in PENS):
+                out[i, j] = RAISED
+    return out
+
+
 def write_luau(kind):
-    boxes = rects(kind)
+    boxes = rects(raise_grass(kind))
     rows = []
     for k, i0, j0, i1, j1 in boxes:
         rows.append("\t{ %d, %d, %d, %d, %d }," % (k, -W + i0 * CELL, j0 * CELL, (i1 - i0) * CELL, (j1 - j0) * CELL))
