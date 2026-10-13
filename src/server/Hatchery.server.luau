@@ -1483,6 +1483,24 @@ resetCommand.Triggered:Connect(function(source)
 end)
 resetCommand.Parent = game:GetService("TextChatService")
 
+-- Testing: "/gold <amount>" adds that much gold, 5000, 2.5m, 10b (k, m, b, t); "/gold" alone
+-- 10m; a minus takes it away (QM, Oct 13).
+local goldCommand = Instance.new("TextChatCommand")
+goldCommand.Name = "Gold"
+goldCommand.PrimaryAlias = "/gold"
+goldCommand.Triggered:Connect(function(source, text)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	if not player or not allowed(player) then
+		return
+	end
+	local number, unit = text:lower():match("^/gold%s+(%-?[%d%.]+)%s*([kmbt]?)")
+	local amount = if number then (tonumber(number) or 0) * (({ k = 1e3, m = 1e6, b = 1e9, t = 1e12 })[unit] or 1) else 1e7
+	amount = math.floor(amount)
+	player:SetAttribute("Gold", math.max(0, (player:GetAttribute("Gold") or 0) + amount))
+	devChat:FireClient(player, "/gold: " .. (if amount < 0 then "-" else "+") .. "$" .. Config.short(math.abs(amount)) .. ", now $" .. Config.short(player:GetAttribute("Gold")))
+end)
+goldCommand.Parent = game:GetService("TextChatService")
+
 -- Fired to a player each time their pets pay out, so the client can pop "+N$"
 -- over each pet's head.
 local paid = Instance.new("RemoteEvent")
