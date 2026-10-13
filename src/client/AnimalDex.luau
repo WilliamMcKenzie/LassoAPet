@@ -119,6 +119,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	PurpleMushroom = "The big cousin. Gives the best hugs in the whole cave.",
 	BlueCrystal = "The Cactus's pen pal. Polishes itself every morning.",
 	PinkCrystal = "Sparkles when it laughs, which is all the time.",
+	LivingBirch = "Thinks it is very well hidden in the woods. Its leaves are bright orange.",
 	CrystalSpider = "Knits sweaters for all eight legs. Takes a while to get dressed.",
 	CrystalElephant = "Grew its own armour. Never forgets, and never lets you forget it's sparkly.",
 	PinkButterfly = "Was a caterpillar last week. Won't stop talking about it.",

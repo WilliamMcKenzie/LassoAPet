@@ -150,6 +150,17 @@ return {
 		{ "Hoof", 190, 100, 214 }, -- legs
 		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
 	},
+	LivingBirch = {
+		{ "Body", 238, 234, 226 }, -- white bark
+		{ "Body", 226, 221, 211 }, -- bark, legs
+		{ "Marking", 52, 46, 44 }, -- birch bands and marks
+		{ "Accent", 242, 109, 57 }, -- autumn leaves
+		{ "Accent", 214, 72, 43 },
+		{ "Accent", 248, 168, 64 },
+		{ "Accent", 254, 234, 92 },
+		{ "Accent", 196, 58, 36 },
+		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
+	},
 	CrystalElephant = {
 		{ "Body", 138, 142, 182 }, -- lavender skin
 		{ "Marking", 86, 54, 168 }, -- crystal armour plates
