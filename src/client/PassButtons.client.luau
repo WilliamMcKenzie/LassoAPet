@@ -46,7 +46,7 @@ column.Position = UDim2.new(0, MARGIN, 0.5, 0)
 local list = Instance.new("UIListLayout")
 list.SortOrder = Enum.SortOrder.LayoutOrder
 list.Padding = UDim.new(0, GAP)
-list.HorizontalAlignment = Enum.HorizontalAlignment.Left
+list.HorizontalAlignment = Enum.HorizontalAlignment.Center -- (the Starter Pack centred over the rest: QM)
 list.Parent = column
 local fit = Instance.new("UIScale") -- (a short screen: shrunk to fit between the top bar and the gold)
 fit.Parent = column
@@ -54,6 +54,7 @@ column.Parent = root
 
 local bursts = {}
 local STARTER_PACK_FOR = 10 * 60 -- seconds
+local NUDGE = 9 -- the Starter Pack right of centre by this
 local joinedAt = os.clock()
 local starterTimer, starterSlot
 for i, spec in BUTTONS do
@@ -103,7 +104,7 @@ for i, spec in BUTTONS do
 		timer.TextScaled = true
 		timer.TextColor3 = Color3.fromRGB(255, 236, 64)
 		timer.AnchorPoint = Vector2.new(0.5, 1)
-		timer.Position = UDim2.new(0.5, 0, 0, -2)
+		timer.Position = UDim2.new(0.5, NUDGE, 0, -2)
 		timer.Size = UDim2.fromOffset(120, 30)
 		timer.ZIndex = 3
 		local stroke = Instance.new("UIStroke")
@@ -112,6 +113,10 @@ for i, spec in BUTTONS do
 		stroke.Parent = timer
 		timer.Parent = slot
 		starterTimer, starterSlot = timer, slot
+		-- (centred on the buttons' faces, not their art: their price badges stick out left)
+		slot.Size = UDim2.fromOffset(size.X + 2 * NUDGE, size.Y)
+		button.Position = UDim2.fromOffset(2 * NUDGE, 0)
+		burst.Position = UDim2.new(0.5, NUDGE, 0.55, 0)
 	end
 	button.Parent = slot
 	slot.Parent = column
