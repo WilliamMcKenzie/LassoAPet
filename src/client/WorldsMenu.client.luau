@@ -160,14 +160,13 @@ for i, world in WORLDS do
 	card.Position = UDim2.new(0.5, 0, 0, CARD_TOP + (i - 1) * (CARD.Y + CARD_GAP))
 	card.Size = UDim2.fromOffset(CARD.X, CARD.Y)
 	card.ZIndex = 2
-	-- The world you're in: a white outline in place of the art's black one (QM).
+	-- The world you're in: a white outline round the art's black one (QM).
 	local here = Instance.new("Frame")
 	here.Name = "Here"
 	here.BackgroundTransparency = 1
-	here.Position = UDim2.fromOffset(4, 4)
-	here.Size = UDim2.new(1, -8, 1, -8)
+	here.Size = UDim2.fromScale(1, 1)
 	here.ZIndex = 3
-	rounded(here, 12)
+	rounded(here, 16)
 	local stroke = Instance.new("UIStroke")
 	stroke.Color = Color3.new(1, 1, 1)
 	stroke.Thickness = 4
@@ -249,6 +248,36 @@ local function setScale(scale)
 	panelScale.Scale = scale
 end
 
+-- While it's open the world behind goes hazy, like frosted glass (QM): blurred, paler
+-- and a little washed out, fading in and out.
+local HAZE = { blur = 14, brightness = 0.06, contrast = -0.15, saturation = -0.35 }
+local blur = Instance.new("BlurEffect")
+blur.Name = "WorldsMenuHaze"
+blur.Size = 0
+blur.Enabled = false
+blur.Parent = camera
+local tint = Instance.new("ColorCorrectionEffect")
+tint.Name = "WorldsMenuHaze"
+tint.Enabled = false
+tint.Parent = camera
+local hazeTween = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local function haze(on)
+	local k = if on then 1 else 0
+	blur.Enabled, tint.Enabled = true, true
+	TweenService:Create(blur, hazeTween, { Size = HAZE.blur * k }):Play()
+	local t = TweenService:Create(tint, hazeTween, {
+		Brightness = HAZE.brightness * k,
+		Contrast = HAZE.contrast * k,
+		Saturation = HAZE.saturation * k,
+	})
+	t.Completed:Connect(function()
+		if not open then
+			blur.Enabled, tint.Enabled = false, false
+		end
+	end)
+	t:Play()
+end
+
 local function openMenu()
 	if open then
 		return
@@ -256,6 +285,7 @@ local function openMenu()
 	open = true
 	showHere()
 	gui.Enabled = true
+	haze(true)
 	ModalPop.open(setScale)
 end
 
@@ -264,6 +294,7 @@ function closeMenu()
 		return
 	end
 	open = false
+	haze(false)
 	ModalPop.close(setScale, function()
 		gui.Enabled = false
 	end)
