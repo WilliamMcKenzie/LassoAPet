@@ -301,7 +301,7 @@ local Config = {
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 40, StopShort = 30,
 		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 50, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
-		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3 }, -- (each boss's cry: QM, Oct 10)
+		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
 			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 5, 41) }, -- (it's 1.7x the size: QM)
@@ -1544,6 +1544,32 @@ if Config.World == 2 then
 	} do
 		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
 		Config.AnimalStats[kind].Speed = speed
+	end
+	-- The Temple and Tomb on World 2's own curve (QM, Oct 13: "balance them to whatever
+	-- seems reasonable"; they had World 1's Volcano and Jurassic numbers). Speed as above:
+	-- the Temple's reach into the Tomb, its Legendary to the finish line; the Tomb's (the
+	-- last biome) further into itself, its Legendaries to the finish line. Income about 2x a
+	-- biome by rarity; Legendaries hatch in 30 and 40 minutes, not World 1's 12 hours.
+	for kind, s in {
+		Catfish = { 5.107, 1200, 15 }, -- 10% into the Tomb
+		Fox = { 5.107, 1200, 15 }, -- 10% into the Tomb
+		Tiger = { 5.372, 3000, 45 }, -- 20% into the Tomb
+		NineTailedFox = { 5.504, 3000, 60 }, -- 25% into the Tomb
+		JadeStatue = { 5.636, 4500, 240 }, -- 30% into the Tomb
+		GarnetStatue = { 5.636, 4500, 240 }, -- 30% into the Tomb
+		Kitsune = { 7.47, 20000, 1800 }, -- to the finish line
+		BloatedMummy = { 6.033, 2400, 15 }, -- 45% into the Tomb
+		Scarab = { 6.033, 2400, 15 }, -- 45% into the Tomb
+		TombJackal = { 6.43, 6000, 60 }, -- 60% into the Tomb
+		LionArcher = { 6.43, 6000, 60 }, -- 60% into the Tomb
+		EagleSentry = { 6.826, 9000, 300 }, -- 75% into the Tomb
+		Nut = { 7.47, 40000, 2400 }, -- to the finish line
+		Geb = { 7.47, 40000, 2400 },
+		Bes = { 7.47, 40000, 2400 },
+	} do
+		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
+		Config.AnimalStats[kind].Speed = s[1]
+		Config.PetIncome[kind], Config.PetHatchTime[kind] = s[2], s[3]
 	end
 	-- The trophy angels (QM, Oct 13: his weights; were 1 in 300 of their biome's stampede).
 	for i, weight in { 0.001, 0.002, 0.002 } do

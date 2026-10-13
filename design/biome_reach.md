@@ -44,3 +44,19 @@ Riding it from the start line for the whole 33 s ride, sprinting all the way (Mo
 | TRex | Jurassic | Epic | 6 |  | 17,424 | Jurassic | 44% |
 | Pterodactyl | Jurassic | Epic | 6.2 |  | 18,005 | Jurassic | 51% |
 | BoneRex | Jurassic | Legendary | 7.5 |  | 21,780 | Jurassic | 100% |
+
+## World 2: Temple and Tomb (Oct 13)
+
+QM asked to balance these on World 2's own curve (they had World 1's Volcano and Jurassic placeholders). A full sprint ride goes 2,904 studs per 1 Speed; the Tomb runs 14,064 to 21,744 (finish line 50 short).
+
+| Animal | Rarity | Speed | Reach | Income/s | Hatch |
+|---|---|---|---|---|---|
+| Catfish, Fox | Uncommon | 5.107 | 10% into the Tomb | 1,200 | 15 s |
+| Tiger | Rare | 5.372 | 20% into the Tomb | 3,000 | 45 s |
+| Nine-tailed Fox | Rare | 5.504 | 25% into the Tomb | 3,000 | 60 s |
+| Jade, Garnet Statue | Epic | 5.636 | 30% into the Tomb | 4,500 | 4 min |
+| Kitsune | Legendary | 7.47 | the finish line | 20,000 | 30 min |
+| Bloated Mummy, Scarab | Uncommon | 6.033 | 45% into the Tomb | 2,400 | 15 s |
+| Tomb Jackal, Lion Archer | Rare | 6.43 | 60% into the Tomb | 6,000 | 60 s |
+| Eagle Sentry | Epic | 6.826 | 75% into the Tomb | 9,000 | 5 min |
+| Nut, Geb, Bes | Legendary | 7.47 | the finish line | 40,000 | 40 min |
