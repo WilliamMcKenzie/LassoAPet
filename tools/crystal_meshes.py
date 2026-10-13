@@ -1,8 +1,8 @@
 """Crystals and fungi (QM, Oct 13), in the rock meshes' style: faceted convex pieces,
 flat shaded, studded, one colour per piece (each piece its own MeshPart).
 
-Fungi: QM's purple caps #86538E with white spots, stems #836267; large, medium and a
-small cluster of three. Crystals: clusters of pointed hexagonal prisms in QM's cyan
+Fungi (QM): a small cluster of three in purple #86538E with white spots, a medium one
+in #836267 and a large one in #00BEE7, on pale stems. Crystals: clusters of pointed hexagonal prisms in QM's cyan
 #00BEE7 and pink #E583FB, in three sizes: medium, large, XXL (each colour a main shade
 and a lighter one).
 
@@ -28,9 +28,16 @@ from plant_meshes import blob, parts_of  # noqa: E402
 import crimson_meshes as CM  # noqa: E402
 
 OUT = os.path.join(HERE, "..", "design", "crystals")
-CAP = (0x86, 0x53, 0x8E)  # QM's #86538E
-CAP_UNDER = (96, 56, 104)
-STEM = (0x83, 0x62, 0x67)  # QM's #836267
+# Fungus caps by size (QM): small purple #86538E (white spots), medium #836267, large
+# #00BEE7; each underside a darker shade. Stems a pale cream for all three.
+PURPLE = (0x86, 0x53, 0x8E)
+MAUVE = (0x83, 0x62, 0x67)
+CYAN_CAP = (0x00, 0xBE, 0xE7)
+STEM = (232, 220, 212)
+
+
+def darker(c, f=0.72):
+    return tuple(int(v * f) for v in c)
 SPOT = (250, 248, 252)
 CYAN = [(0x00, 0xBE, 0xE7), (90, 220, 245)]  # QM's #00BEE7 and a lighter facet shade
 PINK = [(0xE5, 0x83, 0xFB), (242, 170, 253)]  # QM's #E583FB and a lighter one
@@ -53,10 +60,10 @@ def surface_y(tris, x, z):
     return best
 
 
-def fungus(rng, h, cap_r, stem_r, bend, spots, x=0.0, z=0.0):
-    """Crimson_meshes' mushroom in QM's purple, with white spots sat on the cap."""
+def fungus(rng, h, cap_r, stem_r, bend, spots, x=0.0, z=0.0, cap=PURPLE):
+    """Crimson_meshes' mushroom with cap colour cap; with spots > 0, white spots sat on the cap."""
     m = CM.mushroom(rng, h, cap_r, stem_r, bend=bend)
-    colour = {"Stem": STEM, "Cap": CAP, "Underside": CAP_UNDER}
+    colour = {"Stem": STEM, "Cap": cap, "Underside": darker(cap)}
     out = [(label, colour[label], [p + (x, 0, z) for p in pts]) for label, _, pts in m]
     cap = hull_tris(out[1][2][0])
     centre = out[1][2][0].mean(0)
@@ -72,17 +79,17 @@ def fungus(rng, h, cap_r, stem_r, bend, spots, x=0.0, z=0.0):
     centre_y = surface_y(cap, centre[0], centre[2])
     r = cap_r * 0.19
     dots.append(blob(rng, (centre[0], centre_y - r * 0.15, centre[2]), r, 8, squash=(1.0, 0.55, 1.0), jitter=0.05))
-    return out + [("Spots", SPOT, dots)]
+    return out + [("Spots", SPOT, dots)] if spots else out
 
 
 def fungus_large(rng):
     """Large fungus (about 12 across, 14 tall)."""
-    return fungus(rng, 10.0, 6.0, 1.0, 1.8, 7)
+    return fungus(rng, 10.0, 6.0, 1.0, 1.8, 0, cap=CYAN_CAP)
 
 
 def fungus_medium(rng):
     """Medium fungus (about 7 across, 7.5 tall)."""
-    return fungus(rng, 5.5, 3.4, 0.6, 0.9, 5)
+    return fungus(rng, 5.5, 3.4, 0.6, 0.9, 0, cap=MAUVE)
 
 
 def fungus_cluster(rng):

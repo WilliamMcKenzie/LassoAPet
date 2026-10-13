@@ -1,15 +1,13 @@
 # piece: label, RGB (crystals: Glass or Neon in game might suit them)
-FungusLarge_1: Stem, 131, 98, 103
-FungusLarge_2: Cap, 134, 83, 142
-FungusLarge_3: Underside, 96, 56, 104
-FungusLarge_4: Spots, 250, 248, 252
-FungusMedium_1: Stem, 131, 98, 103
-FungusMedium_2: Cap, 134, 83, 142
-FungusMedium_3: Underside, 96, 56, 104
-FungusMedium_4: Spots, 250, 248, 252
-FungusCluster_1: Stem, 131, 98, 103
+FungusLarge_1: Stem, 232, 220, 212
+FungusLarge_2: Cap, 0, 190, 231
+FungusLarge_3: Underside, 0, 136, 166
+FungusMedium_1: Stem, 232, 220, 212
+FungusMedium_2: Cap, 131, 98, 103
+FungusMedium_3: Underside, 94, 70, 74
+FungusCluster_1: Stem, 232, 220, 212
 FungusCluster_2: Cap, 134, 83, 142
-FungusCluster_3: Underside, 96, 56, 104
+FungusCluster_3: Underside, 96, 59, 102
 FungusCluster_4: Spots, 250, 248, 252
 CrystalCyanMedium_1: Crystal, 0, 190, 231
 CrystalCyanMedium_2: Crystal, 90, 220, 245
