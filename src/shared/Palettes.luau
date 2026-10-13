@@ -73,6 +73,13 @@ return {
 		{ "Belly", 222, 240, 255 },
 		{ "Marking", 36, 88, 184 }, -- fins
 	},
+	Catfish = {
+		{ "Body", 112, 146, 52 },
+		{ "Belly", 243, 231, 181 },
+		{ "Marking", 74, 104, 38 }, -- fins
+		{ "Marking", 78, 108, 36 }, -- spots
+		{ "Whisker", 58, 40, 24 },
+	},
 	MarbleFish = {
 		{ "Body", 255, 204, 36 },
 		{ "Belly", 255, 244, 196 },
@@ -100,6 +107,12 @@ return {
 		{ "Marking", 54, 112, 44 }, -- scutes, brows, feet, ridges
 		{ "Belly", 214, 222, 140 },
 		{ "Accent", 236, 120, 140 }, -- mouth
+	},
+	Tiger = {
+		{ "Body", 247, 133, 32 },
+		{ "Belly", 255, 248, 236 }, -- muzzle, chin, cheeks, chest, belly
+		{ "Marking", 34, 30, 36 }, -- stripes, tail rings and tip
+		parts = { PawFL = "Hoof", PawFR = "Hoof", PawHL = "Hoof", PawHR = "Hoof", EarLIn = "Fixed", EarRIn = "Fixed" },
 	},
 	Cactus = {
 		{ "Body", 118, 204, 64 },
@@ -161,6 +174,18 @@ return {
 		{ "Accent", 196, 58, 36 },
 		parts = { EyeL = "Fixed", EyeR = "Fixed", Mouth = "Fixed" },
 	},
+	Fox = {
+		{ "Body", 240, 128, 36 },
+		{ "Belly", 255, 250, 242 }, -- chest, cheeks, chin, tail tip
+		{ "Accent", 214, 40, 46 }, -- shrine bib
+		{ "Hoof", 52, 40, 40 }, -- stockings, ear tips
+	},
+	NineTailedFox = {
+		{ "Body", 250, 184, 52 },
+		{ "Belly", 255, 250, 242 }, -- chest, cheeks, chin, tail tips
+		{ "Marking", 200, 30, 60 }, -- ear tips, forehead flame, bib
+		{ "Hoof", 52, 40, 40 }, -- stockings
+	},
 	CrystalElephant = {
 		{ "Body", 138, 142, 182 }, -- lavender skin
 		{ "Marking", 86, 54, 168 }, -- crystal armour plates
@@ -173,6 +198,22 @@ return {
 		{ "Marking", 255, 200, 232 }, -- pale pink by the body
 		{ "Accent", 255, 52, 156 }, -- hot-pink wing edges
 		{ "Accent", 255, 110, 190 }, -- stripes and antenna tips
+	},
+	JadeStatue = {
+		{ "Body", 64, 176, 110 }, -- jade body, legs, head, tail
+		{ "Body", 34, 128, 80 }, -- mane, brow, shoulders, haunches
+		{ "Belly", 132, 222, 164 }, -- muzzle, chin, paws, curls, tail plume
+		{ "Marking", 24, 96, 62 }, -- carved veins
+		{ "Horn", 240, 190, 24 }, -- gold crown, collar, bell, anklets, claws, ridge
+		{ "Horn", 196, 140, 16 },
+	},
+	GarnetStatue = {
+		{ "Body", 186, 28, 52 }, -- garnet body, legs, head, tail
+		{ "Body", 122, 14, 36 }, -- mane, brow, shoulders, haunches
+		{ "Belly", 236, 84, 102 }, -- muzzle, chin, paws, curls, tail plume, spine shards
+		{ "Marking", 92, 8, 26 }, -- carved veins
+		{ "Horn", 240, 190, 24 }, -- gold horns, collar, bell, anklets, claws, ridge
+		{ "Horn", 196, 140, 16 },
 	},
 	Hawkmoth = {
 		{ "Body", 62, 48, 44 }, -- body, head
@@ -376,6 +417,12 @@ return {
 		{ "Body", 104, 97, 90 }, -- chest, forearms, head, spikes (shade)
 		{ "Marking", 184, 177, 166 }, -- pale plates, caps, brow, knuckles
 		{ "Accent", 110, 186, 68 }, -- moss
+	},
+	Kitsune = {
+		{ "Body", 250, 248, 244 }, -- white fur, tails, paws
+		{ "Belly", 236, 228, 214 }, -- belly, jaw, chest tuft
+		{ "Marking", 222, 38, 52 }, -- red markings, socks, mask, saddle cloth, bow
+		{ "Accent", 255, 196, 52 }, -- gold anklets, ear rings, bell, trims
 	},
 	Kraken = {
 		{ "Body", 58, 76, 128 }, -- tentacles
