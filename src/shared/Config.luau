@@ -413,6 +413,7 @@ local Config = {
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
 		Seraph = 3600, CrimsonSeraph = 3600, CrystalSeraph = 3600, -- World 2's trophy angels, 1 in 300 of their stampedes (QM, Oct 13; the hatch a guess)
+		BlackWidow = 3600, -- World 2's trophy spider, 1 in 500 of the Crimson Lands' stampede (QM, Oct 13; the hatch a guess, as the Seraphs')
 	},
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
 	-- (a DefaultPet egg, hatching in TutorialHatchTime seconds), rides that pet and
@@ -600,6 +601,7 @@ local Config = {
 		WarElephant = 3, SoulHorse = 2, -- Godlands (QM: large, medium)
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
+		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -650,7 +652,7 @@ local Config = {
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
 	-- or crashes into, is PetTiers'. Unlisted: 1.
-	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2, Hawkmoth = 1.5, EagleSentry = 1.5, CrimsonScorpion = 0.75, Crocodile = 2, Lion = 2, MarbleColossus = 1.6, MajesticUnicorn = 1.4, IvorySpider = 2, Maw = 0.8, Eyeworm = 1.2, CrystalCentipede = 2, CrimsonSeraph = 1.5, CrystalSeraph = 2 }, -- (QM, Oct 11; the Crimson Scorpion smaller than the Scorpion, Oct 13; Crocodile and Lion 2x, Marble Colossus 1.6x, Majestic Unicorn 1.4x, Ivory Spider 2x, Maw 0.8x, Eyeworm 1.2x, Crystal Centipede 2x, Oct 13; the Crimson Seraph 1.5x and Crystal Seraph 2x, the Seraph 1x)
+	AnimalScale = { BoneRex = 1.15, PalmGuy = 1.15, Pterodactyl = 2, Spinosaurus = 0.85, LavaWhale = 2.5, VolcanoTortoise = 2.5, RockHog = 1.5, Phoenix = 2, CrystalPhoenix = 2, Hawkmoth = 1.5, EagleSentry = 1.5, CrimsonScorpion = 0.75, Crocodile = 2, Lion = 2, MarbleColossus = 1.6, MajesticUnicorn = 1.4, IvorySpider = 2, Maw = 0.8, Eyeworm = 1.2, CrystalCentipede = 2, CrimsonSeraph = 1.5, CrystalSeraph = 2, BlackWidow = 2 }, -- (QM, Oct 11; the Crimson Scorpion smaller than the Scorpion, Oct 13; Crocodile and Lion 2x, Marble Colossus 1.6x, Majestic Unicorn 1.4x, Ivory Spider 2x, Maw 0.8x, Eyeworm 1.2x, Crystal Centipede 2x, Oct 13; the Crimson Seraph 1.5x and Crystal Seraph 2x, the Seraph 1x)
 	ObstacleScale = {
 		Boulder = 0.83, BoulderSplit = 0.96, Cactus = 0.97, SandBoulder = 0.88, SandBoulderCarved = 0.93,
 		SandMound = 0.58, Pine = 0.78, IcicleLarge = 0.83, IceBoulder = 0.85,
@@ -672,6 +674,7 @@ local Config = {
 		Eyeworm = 18, CrimsonScorpion = 24, Maw = 60, IvorySpider = 180, Asura = 750, -- World 2 Crimson Lands
 		Caterpillar = 300, -- World 2 Woodland Maze (as the Starfish)
 		Seraph = 4500, CrimsonSeraph = 7500, CrystalSeraph = 33330, -- World 2's trophy angels (QM, Oct 13: slow but earn a lot): 10x their biome's Legendary (the Majestic Unicorn, Asura, Crystal Elephant)
+		BlackWidow = 12500, -- World 2's trophy spider: rarer than the Crimson Seraph (1 in 500, not 1 in 300), so 500/300 its gold (a guess)
 		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, CrystalCentipede = 75, RedMushroom = 150, BrownMushroom = 300, PurpleMushroom = 1260, BlueCrystal = 150, PinkCrystal = 300, CrystalSpider = 1260, CrystalPhoenix = 1260, CrystalElephant = 3333, -- Tundra
 		Starfish = 300, Clownfish = 700, PinkButterfly = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, Lionfish = 1500, GiantGolem = 24600, -- Ocean
 		OrangeButterfly = 1500, -- World 2 Woodland Maze (as the Lionfish until QM sets it)
@@ -1179,6 +1182,7 @@ local Config = {
 		CrystalElephant = { Speed = 3.8, Stamina = 4 }, -- World 2's Cavern Legendary Crystal Elephant (as the Icebringer until QM sets it)
 		Seraph = { Speed = 0.5, Stamina = 3 }, -- World 2's trophy angels (QM, Oct 13: "move quite slowly (like say 0.5 speed)")
 		CrimsonSeraph = { Speed = 0.5, Stamina = 3 },
+		BlackWidow = { Speed = 2.8, Stamina = 3 }, -- World 2's trophy spider: the Asura's numbers (a guess)
 		CrystalSeraph = { Speed = 0.5, Stamina = 3 },
 		CrystalPhoenix = { Speed = 2.57, Stamina = 3 }, -- World 2's Cavern Crystal Phoenix: Epic (as the Ice Golem until QM sets it)
 		OrangeButterfly = { Speed = 3.54, Stamina = 2 }, -- World 2's Woodland Orange Butterfly: Rare (as the Lionfish until QM sets it)
@@ -1624,6 +1628,12 @@ if Config.World == 2 then
 	for i, weight in { 0.001, 0.002, 0.002 } do
 		Config.Biomes[i].Herd[({ "Seraph", "CrimsonSeraph", "CrystalSeraph" })[i]] = weight
 	end
+	-- The trophy Black Widow (QM, Oct 13): 1 in 500 of the Crimson Lands' stampede.
+	local crimsonTotal = 0
+	for _, weight in Config.Biomes[2].Herd do
+		crimsonTotal += weight
+	end
+	Config.Biomes[2].Herd.BlackWidow = crimsonTotal / 499
 end
 
 return Config

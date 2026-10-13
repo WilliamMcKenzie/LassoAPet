@@ -325,6 +325,13 @@ return {
 		{ "Accent", 200, 190, 174 }, -- knees, spinnerets
 		{ "Hoof", 150, 138, 126 }, -- feet, fangs
 	},
+	BlackWidow = {
+		{ "Body", 22, 22, 28 },
+		{ "Body", 48, 48, 62 }, -- glossy top of the abdomen, spinnerets (lighter)
+		{ "Horn", 96, 100, 116 }, -- spikes, helm, flank armour, knee guards
+		{ "Hoof", 62, 64, 78 }, -- claws, spike tips, helm rim
+		{ "Horn", 236, 230, 214 }, -- fangs
+	},
 	Asura = {
 		{ "Body", 72, 84, 85 }, -- armour
 		{ "Body", 53, 67, 69 }, -- cape, grip (darker)

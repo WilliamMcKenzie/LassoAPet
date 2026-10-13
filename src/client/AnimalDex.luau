@@ -148,6 +148,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	CrimsonSeraph = "Be very afraid. Every one of its eyes is glaring, and its rings never stop spinning.",
 	CrystalSeraph = "Sparkles from every eye at once. Nobody has ever won a staring contest with it.",
 	IvorySpider = "Spins its webs in perfect white. Hates muddy boots.",
+	BlackWidow = "Wears its armour like a crown. One in five hundred ever leave the Crimson Lands.",
 	Sandworm = "Sandworm started out collecting old books, but they all got sandy. Now it just burrows.",
 	SpineLizard = "A natural solar panel, yet overheats easily. Going extinct.",
 	Snake = "Wants to write a love letter, but has no arms. Scares off animals with its rattle.",
