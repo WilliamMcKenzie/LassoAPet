@@ -21,8 +21,8 @@ local ArrowTrail = require(script.Parent.ArrowTrail)
 local WorldUnlock = require(script.Parent.WorldUnlock)
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
-local FULL = if REBIRTH then "rbxassetid://0" else "rbxassetid://97109374304895" -- assets/ui/RebirthBar.png, World2Bar.png (964x103) (TODO upload RebirthBar)
-local EMPTY = if REBIRTH then "rbxassetid://0" else "rbxassetid://88019344630997" -- assets/ui/RebirthBarEmpty.png, World2BarEmpty.png (TODO upload RebirthBarEmpty)
+local FULL = if REBIRTH then "rbxassetid://86333680091478" else "rbxassetid://97109374304895" -- assets/ui/RebirthBar.png, World2Bar.png (964x103)
+local EMPTY = if REBIRTH then "rbxassetid://96706985697078" else "rbxassetid://88019344630997" -- assets/ui/RebirthBarEmpty.png, World2BarEmpty.png
 local BAR = Vector2.new(660, 660 * 103 / 964) -- (half the screen across: QM's mockup)
 local BOTTOM = 14 -- px from the screen's bottom
 local ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png

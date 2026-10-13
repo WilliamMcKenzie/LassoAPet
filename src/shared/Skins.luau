@@ -14,9 +14,9 @@ local Skins = {}
 
 -- The aura's particle images (tools/rebirth_auras.py: assets/particles/*.png). Till
 -- they're uploaded ("") Roblox's own sparkles and smoke stand in.
-local STAR = "" -- assets/particles/AuraStar.png
-local SHARD = "" -- assets/particles/AuraShard.png
-local PUFF = "" -- assets/particles/AuraPuff.png
+local STAR = "rbxassetid://101417923883570" -- assets/particles/AuraStar.png
+local SHARD = "rbxassetid://92755387446581" -- assets/particles/AuraShard.png
+local PUFF = "rbxassetid://134638563995635" -- assets/particles/AuraPuff.png
 local SPARKLES = "rbxasset://textures/particles/sparkles_main.dds"
 local SMOKE = "rbxasset://textures/particles/smoke_main.dds"
 
