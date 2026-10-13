@@ -1136,6 +1136,16 @@ if Config.World == 2 then
 		Crimson = { rgb(144, 44, 43), rgb(132, 38, 38) }, -- #902C2B, round every stone tile
 		Stone = { rgb(119, 86, 86), rgb(108, 77, 77) }, -- #775656 single tiles
 	}
+	-- The third: the Crystal Cavern (QM, Oct 13; tools/world2_cavern.luau): blue-grey by the
+	-- walls to ice to crystal down the middle; its plank boards keep their own colours.
+	local cavern = Config.Biomes[3]
+	cavern.GroundColors = { rgb(90, 109, 143), rgb(82, 99, 131) } -- #5A6D8F
+	cavern.Patches = {
+		Ice = { rgb(98, 129, 167), rgb(89, 118, 153) }, -- #6281A7
+		Crystal = { rgb(116, 186, 213), rgb(105, 171, 197) }, -- #74BAD5
+	}
+	cavern.WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) } -- #384867
+	cavern.CapColor = rgb(44, 57, 82)
 end
 
 return Config
