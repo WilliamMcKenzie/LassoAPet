@@ -169,6 +169,17 @@ return {
 		{ "Marking", 229, 131, 251 }, -- pink feathers
 		{ "Accent", 0, 190, 231 }, -- cyan beak, feathers and crystals
 	},
+	OrangeButterfly = {
+		{ "Body", 255, 128, 26 }, -- wings
+		{ "Body", 242, 109, 57 }, -- wing edges
+		{ "Body", 214, 74, 30 }, -- wing tips
+		{ "Belly", 255, 196, 58 }, -- the wings' yellow by the body
+		{ "Marking", 107, 63, 42 }, -- body, head, legs, antennae
+		{ "Accent", 255, 200, 58 }, -- abdomen bands, eye spot middles
+		{ "Accent", 255, 240, 214 }, -- collar fluff
+		{ "Accent", 255, 244, 214 }, -- forewing spots
+		{ "Hoof", 92, 50, 30 }, -- eye spots
+	},
 	CrystalSpider = {
 		{ "Body", 96, 108, 200 },
 		{ "Hoof", 66, 74, 152 }, -- lower legs
