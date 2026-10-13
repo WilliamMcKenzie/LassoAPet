@@ -572,7 +572,7 @@ local function run()
 		end
 		TutorialRide.bossSeconds, TutorialRide.holdFrozen = BOSS_SECONDS, false
 		funnel("boss")
-		while on() and Hud.isRiding() do
+		while on() and (Hud.isRiding() or player:GetAttribute("Cutscene")) do -- (the new animal cutscene hides the ride's HUD: wait it out too)
 			task.wait(0.1)
 		end
 		clear()
@@ -586,6 +586,9 @@ local function run()
 		end
 		if #myPets() > before then
 			task.wait(1)
+			while on() and (Hud.isRiding() or player:GetAttribute("Cutscene") or camera.CameraType ~= Enum.CameraType.Custom) do
+				task.wait(0.1) -- (back on foot, the camera yours again, before it flies off)
+			end
 			showGate()
 			funnel("tour")
 			local done = ReplicatedStorage:FindFirstChild("TutorialDone")
