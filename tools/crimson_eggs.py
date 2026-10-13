@@ -6,6 +6,8 @@ shell in the animal's colours, its feature on top or at the crack, no face.
   CrimsonScorpion  the Scorpion's egg (tools/desert_eggs.py) in the Crimson Scorpion's colours
   IvorySpider  ivory with a bone-grey bottom, four bent bone legs on its shoulders and a
                red hourglass on top
+  BlackWidow   glossy black with a steel band, steel-footed legs, a glowing red hourglass
+               and two glowing red eyes
 
 Run from the repo root: python3 tools/crimson_eggs.py [Kind ...]
 Writes designs/eggs/c_style/<Kind>Egg.bbmodel, src/shared/Eggs/<Kind>EggModel.luau,
@@ -66,11 +68,32 @@ def ivory_spider_egg():
     return egg
 
 
+def black_widow_egg():
+    """The Black Widow's: glossy black with a steel band, four steel legs on its shoulders,
+    a glowing red hourglass on top and a glowing red eye-pair at the front."""
+    BLACK, GLOSS, STEEL, GLOW = (22, 22, 28), (48, 48, 62), (96, 100, 116), (255, 30, 40)
+    egg = shell([BLACK, STEEL, BLACK, BLACK, GLOSS, BLACK, BLACK])
+    y = 5 * LH
+    r = WIDTHS[5] / 2
+    for i, (sx, sz) in enumerate(((-1, -1), (1, -1), (-1, 1), (1, 1))):
+        x, z = sx * (r - 0.12), sz * (r - 0.35)
+        egg.block(f"Leg{i}", (x - 0.09, y - 0.05, z - 0.09), (x + 0.09, y + 0.55, z + 0.09), BLACK).bone = "top"
+        egg.block(f"Foot{i}", (min(x, x + sx * 0.4) - 0.09, y + 0.46, z - 0.09), (max(x, x + sx * 0.4) + 0.09, y + 0.64, z + 0.09), STEEL).bone = "top"
+    egg.block("GlowHourglass1", (-0.22, TOP - 0.05, -0.32), (0.22, TOP + 0.05, -0.06), GLOW).bone = "top"
+    egg.block("GlowHourglass2", (-0.22, TOP - 0.05, 0.06), (0.22, TOP + 0.05, 0.32), GLOW).bone = "top"
+    egg.block("GlowHourglass3", (-0.08, TOP - 0.05, -0.06), (0.08, TOP + 0.05, 0.06), GLOW).bone = "top"
+    z = -WIDTHS[4] / 2 - 0.02
+    for sx in (-1, 1):
+        egg.block(f"GlowEye{sx}", (min(sx * 0.12, sx * 0.34), 4.3 * LH, z - 0.04), (max(sx * 0.12, sx * 0.34), 4.3 * LH + 0.22, z), GLOW).bone = "top"
+    return egg
+
+
 def crimson_scorpion_egg():
     return scorpion_egg((186, 26, 52), (132, 16, 40), (122, 44, 168), (44, 16, 48))  # tools/crimson_scorpion.py's colours
 
 
-KINDS = [("Eyeworm", eyeworm_egg), ("Maw", maw_egg), ("IvorySpider", ivory_spider_egg), ("CrimsonScorpion", crimson_scorpion_egg)]
+KINDS = [("Eyeworm", eyeworm_egg), ("Maw", maw_egg), ("IvorySpider", ivory_spider_egg), ("CrimsonScorpion", crimson_scorpion_egg),
+         ("BlackWidow", black_widow_egg)]
 
 if __name__ == "__main__":
     O.EGGS = KINDS

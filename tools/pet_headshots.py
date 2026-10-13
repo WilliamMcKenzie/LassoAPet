@@ -44,11 +44,11 @@ MODELS = {
     "Loong": "godlands/Loong", "WarElephant": "godlands/WarElephant", "SoulHorse": "godlands/SoulHorse",
     "Sludge": "sludge/Sludge",
     "Beholder": "beholder/Beholder",
-    "Seraph": "bosses/Seraph", "CrimsonSeraph": "bosses/CrimsonSeraph", "CrystalSeraph": "bosses/CrystalSeraph",
+    "Seraph": "bosses/Seraph", "CrimsonSeraph": "bosses/CrimsonSeraph", "CrystalSeraph": "bosses/CrystalSeraph", "BlackWidow": "bosses/BlackWidow",
     "Leviathan": "leviathan/Leviathan",
     "VolcanoTortoise": "volcano/VolcanoTortoise", "Firebird": "volcano/Firebird", "RockHog": "volcano/RockHog", "Rockworm": "volcano/Rockworm", "JadeStatue": "temple/JadeStatue", "GarnetStatue": "temple/GarnetStatue", "FireLobster": "volcano/FireLobster", "TRex": "jurassic/TRex", "BoneRex": "jurassic/BoneRex", "Ankylosaurus": "jurassic/Ankylosaurus", "PalmGuy": "jurassic/PalmGuy", "Spinosaurus": "jurassic/Spinosaurus", "Pterodactyl": "jurassic/Pterodactyl", "Raptor": "jurassic/Raptor", "LavaWhale": "volcano/LavaWhale", "Phoenix": "volcano/Phoenix",
 }
-ZYX = {"EagleSentry", "PinkButterfly", "Seraph", "CrimsonSeraph", "CrystalSeraph", "CrystalCentipede", "CrystalPhoenix", "CrystalElephant", "CrystalSpider", "BoneRex", "KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish", "TRex", "Spinosaurus", "MajesticUnicorn", "Crocodile", "Maw", "IvorySpider", "Asura", "Lion", "OrangeButterfly", "Hawkmoth"}  # converted with --zyx (QM's hand-made multi-axis rotations)
+ZYX = {"EagleSentry", "PinkButterfly", "Seraph", "CrimsonSeraph", "CrystalSeraph", "CrystalCentipede", "CrystalPhoenix", "CrystalElephant", "CrystalSpider", "BoneRex", "KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish", "TRex", "Spinosaurus", "MajesticUnicorn", "Crocodile", "Maw", "IvorySpider", "BlackWidow", "Asura", "Lion", "OrangeButterfly", "Hawkmoth"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}
 # Animals whose run makes a poor picture (the Snake stretches out thin, the Starfish
 # folds its arms up) keep their idle stance in the action style.
