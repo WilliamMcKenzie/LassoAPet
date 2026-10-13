@@ -1,9 +1,10 @@
 -- The new animal cutscene (QM, Oct 13): when an animal comes home with you (a ride home, the
 -- finish line), every bit of UI goes, the world behind goes hazy like frosted glass (the
--- Worlds menu's), and the animal's headshot (PetFaces) bounces in, fading from black to its
--- colours, with QM's sunburst turning behind it, holds a moment, then fades and shrinks
--- away (QM: snappy). NewAnimal.show(kind) starts it and returns how
--- long it takes (0 if there's no headshot for it).
+-- Worlds menu's), QM's sunburst swells in turning behind, and the animal (PetFaces) pops in
+-- as a black silhouette: overshoot and settle, a second in black, a squash (anticipation),
+-- then it bursts into its colours with a stretch and a flash, settles, holds, rises a touch
+-- and snaps away (QM, Oct 13: bigger, snappier, the sunburst clearly turning).
+-- NewAnimal.show(kind) starts it and returns how long it takes (0 if there's no picture).
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -12,10 +13,12 @@ local PetFaces = require(script.Parent.PetFaces)
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
-local POP_IN, HOLD, POP_OUT = 0.3, 0.6, 0.3 -- seconds (it goes from black to its colours as it pops in)
+-- Seconds: popping in (overshoot, then settle), black, the squash before the reveal, the
+-- reveal's stretch, settling into its colours, holding, the rise before it goes, going.
+local POP, BLACK, SQUASH, REVEAL, SETTLE, HOLD, RISE, OUT = 0.16, 0.85, 0.12, 0.12, 0.2, 1, 0.08, 0.2
 local SUNBURST = "rbxassetid://85834206672187" -- assets/ui/Sunburst.png (QM's)
-local BURST_SIZE, BURST_SPIN = 2.1, 45 -- x the headshot's size; degrees a second
-local SIZE = 0.42 -- x the screen's height
+local BURST_SIZE, BURST_SPIN = 2.3, 80 -- x the animal's size; degrees a second (it turns a good way round)
+local SIZE = 0.6 -- x the screen's height
 local HAZE = { blur = 14, brightness = 0.06, contrast = -0.15, saturation = -0.35 } -- (WorldsMenu's)
 
 local NewAnimal = {}
@@ -27,7 +30,7 @@ function NewAnimal.show(kind)
 		return 0
 	end
 	busy = true
-	local total = POP_IN + HOLD + POP_OUT
+	local total = POP * 2 + BLACK + SQUASH + REVEAL + SETTLE + HOLD + RISE + OUT
 	task.spawn(function()
 		player:SetAttribute("Cutscene", true)
 		local hidden = {}
@@ -69,9 +72,18 @@ function NewAnimal.show(kind)
 		burstAspect.DominantAxis = Enum.DominantAxis.Height
 		burstAspect.Parent = burst
 		burst.Parent = gui
+		local burstScale = Instance.new("UIScale")
+		burstScale.Scale = 0.5
+		burstScale.Parent = burst
 		local spin = RunService.RenderStepped:Connect(function(dt)
 			burst.Rotation = (burst.Rotation + BURST_SPIN * dt) % 360
 		end)
+		local flash = Instance.new("Frame") -- (the reveal's white flash)
+		flash.BackgroundColor3 = Color3.new(1, 1, 1)
+		flash.BackgroundTransparency = 1
+		flash.Size = UDim2.fromScale(1, 1)
+		flash.ZIndex = 3
+		flash.Parent = gui
 		local face = Instance.new("ImageLabel")
 		face.BackgroundTransparency = 1
 		face.Image = image
@@ -89,17 +101,50 @@ function NewAnimal.show(kind)
 		face.Parent = gui
 		gui.Parent = player.PlayerGui
 
-		TweenService:Create(scale, TweenInfo.new(POP_IN, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-		TweenService:Create(face, TweenInfo.new(POP_IN, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { ImageColor3 = Color3.new(1, 1, 1) }):Play()
-		TweenService:Create(burst, TweenInfo.new(POP_IN), { ImageTransparency = 0.15 }):Play()
-		task.wait(POP_IN + HOLD)
-		local out = TweenInfo.new(POP_OUT, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-		TweenService:Create(scale, out, { Scale = 0 }):Play()
-		TweenService:Create(face, out, { ImageTransparency = 1 }):Play()
-		TweenService:Create(burst, out, { ImageTransparency = 1, Size = UDim2.fromScale(0, 0) }):Play()
-		TweenService:Create(blur, out, { Size = 0 }):Play()
-		TweenService:Create(tint, out, { Brightness = 0, Contrast = 0, Saturation = 0 }):Play()
-		task.wait(POP_OUT)
+		local function tween(object, time, style, direction, goal)
+			TweenService:Create(object, TweenInfo.new(time, style, direction), goal):Play()
+		end
+		local Quad, Back, Sine = Enum.EasingStyle.Quad, Enum.EasingStyle.Back, Enum.EasingStyle.Sine
+		local In, Out = Enum.EasingDirection.In, Enum.EasingDirection.Out
+		-- The sunburst swells in behind; the silhouette pops past full size and settles back,
+		-- with a little twist.
+		tween(burst, 0.3, Quad, Out, { ImageTransparency = 0.25 })
+		tween(burstScale, 0.4, Back, Out, { Scale = 0.85 })
+		face.Rotation = -10
+		tween(scale, POP, Quad, Out, { Scale = 1.15 })
+		tween(face, POP * 2, Back, Out, { Rotation = 0 })
+		task.wait(POP)
+		tween(scale, POP, Quad, Out, { Scale = 1 })
+		task.wait(POP)
+		-- In black, breathing a little.
+		tween(scale, BLACK, Sine, Out, { Scale = 1.04 })
+		task.wait(BLACK)
+		-- Anticipation: it squashes down...
+		tween(scale, SQUASH, Quad, In, { Scale = 0.86 })
+		task.wait(SQUASH)
+		-- ...and bursts into its colours, stretched past full size, with a flash and the
+		-- sunburst kicking out.
+		tween(scale, REVEAL, Quad, Out, { Scale = 1.2 })
+		tween(face, REVEAL, Quad, Out, { ImageColor3 = Color3.new(1, 1, 1) })
+		flash.BackgroundTransparency = 0.35
+		tween(flash, 0.35, Quad, Out, { BackgroundTransparency = 1 })
+		burstScale.Scale = 1.15
+		burst.ImageTransparency = 0
+		tween(burstScale, 0.4, Back, Out, { Scale = 1 })
+		tween(burst, 0.4, Quad, Out, { ImageTransparency = 0.12 })
+		task.wait(REVEAL)
+		tween(scale, SETTLE, Back, Out, { Scale = 1 })
+		task.wait(SETTLE + HOLD)
+		-- A rise before it goes (anticipation again), then it snaps small and away.
+		tween(scale, RISE, Quad, Out, { Scale = 1.08 })
+		task.wait(RISE)
+		tween(scale, OUT, Back, In, { Scale = 0 })
+		tween(face, OUT, Quad, In, { ImageTransparency = 1 })
+		tween(burstScale, OUT, Quad, In, { Scale = 0.3 })
+		tween(burst, OUT, Quad, In, { ImageTransparency = 1 })
+		tween(blur, OUT, Quad, In, { Size = 0 })
+		tween(tint, OUT, Quad, In, { Brightness = 0, Contrast = 0, Saturation = 0 })
+		task.wait(OUT)
 
 		spin:Disconnect()
 		gui:Destroy()
