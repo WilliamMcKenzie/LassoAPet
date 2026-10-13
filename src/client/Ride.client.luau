@@ -1361,7 +1361,7 @@ local function sprinting()
 	if vfx.hunting or player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
 		return false -- the Robo Shark can't sprint while it hunts (QM)
 	end
-	if phase == "return" then
+	if phase == "return" and not vfx.tutorialRide.active then
 		return vfx.returnRun.pushing(controls, rideStick.on, vfx.padPush, sprintKey or Hud.sprintHeld())
 	end
 	if (phase == "return" and Config.ReturnSprint) or (phase == "outbound" and Config.OutboundSprint) then -- (the ride out always a sprint too: QM, Oct 11)
@@ -2428,6 +2428,7 @@ end
 -- The mount broke something (smashed an obstacle, knocked an animal flying).
 function vfx.broke(hit)
 	if phase == "return" and mount and not activeAbility() and not hit then -- (an obstacle: back to a walk, ReturnRun; animals you plough through)
+		vfx.returnRun.hits += 1
 		mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
 	end
 	local feast = vfx.feastOf(mount)
@@ -3499,6 +3500,8 @@ local function checkRide(dt)
 	end
 	if phase == "return" and vfx.returnRun.caught and vfx.bossChase.ranOver() and not vfx.tutorialRide.active then
 		return fail("CAUGHT!")
+	elseif phase == "return" and vfx.tutorialRide.active and vfx.returnRun.hits >= Config.ReturnRun.TutorialCrashes then
+		return fail("CRASH!")
 	end
 	if carried and (phase == "return" or phase == "turning") and mount.z > START_LINE_Z - Config.HomeSafeZone then
 		grace = math.max(grace, 0.05) -- nearly home with the egg: nothing crashes you now (QM, Oct 6)

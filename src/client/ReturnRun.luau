@@ -14,10 +14,10 @@ local TutorialRide = require(script.Parent.TutorialRide)
 
 local PUSH = 0.25 -- of a stick's reach that counts as pushing
 
-local ReturnRun = { slow = 0, caught = false }
+local ReturnRun = { slow = 0, caught = false, hits = 0 } -- (hits: obstacles hit this run home)
 
 function ReturnRun.reset()
-	ReturnRun.slow, ReturnRun.caught = 0, false
+	ReturnRun.slow, ReturnRun.caught, ReturnRun.hits = 0, false, 0
 	BossChase.closing = 0
 end
 

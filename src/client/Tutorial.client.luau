@@ -32,8 +32,6 @@ local PenPets = require(script.Parent.PenPets)
 local Inventory = require(script.Parent.Inventory)
 local TutorialRide = require(script.Parent.TutorialRide)
 local CameraHint = require(script.Parent.CameraHint)
-local BossChase = require(script.Parent.BossChase)
-local Banner = require(script.Parent.Banner)
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
@@ -66,8 +64,6 @@ local SLOW_STEEP = 9 -- how sharp its turn is
 local WAIT_FOR_BOSS = 5 -- seconds after you sprint till BOSS IN shows (QM)
 local BOSS_SECONDS = 5 -- and how long it gives you
 local GATE_IN, GATE_HOLD, GATE_OUT = 0.8, 1.25, 0.65 -- seconds the camera takes to the Desert's gate, stays, and comes back (QM: twice as fast)
-local RUN_SLOW = 0.15 -- the slow motion on the run home till you run from the boss (QM)
-local RUN_WAIT = 1 -- seconds turned for home and not running before it starts (QM)
 local NEW_PET_WAIT = 12 -- seconds after a ride for its egg to hatch in your pen
 
 local function myPen()
@@ -576,27 +572,11 @@ local function run()
 		end
 		TutorialRide.bossSeconds, TutorialRide.holdFrozen = BOSS_SECONDS, false
 		funnel("boss")
-		local idleSince -- (when you last weren't running, turned for home)
-		local ran = false -- (once you've run, no more slow motion: QM, just the once)
+		-- (the run home: your pet sprints by itself, no slow motion; only obstacles can stop
+		-- you, ReturnRun.TutorialCrashes of them: QM, Oct 13)
 		while on() and (Hud.isRiding() or player:GetAttribute("Cutscene")) do -- (the new animal cutscene hides the ride's HUD: wait it out too)
-			-- Running from the boss: once the camera's turned for home, a second without
-			-- running and time all but stops till you push forward and run (QM, Oct 13: the
-			-- run home stands still till you do; Client/ReturnRun).
-			local turned = Hud.isRiding() and BossChase.over() and camera.CFrame.LookVector.Z > 0.5 -- (facing home, +Z)
-			ran = ran or (turned and TutorialRide.sprinting)
-			if not turned or TutorialRide.sprinting or ran then
-				idleSince = nil
-			else
-				idleSince = idleSince or os.clock()
-			end
-			local slow = idleSince ~= nil and os.clock() - idleSince >= RUN_WAIT
-			if slow and TutorialRide.timeScale == 1 then
-				Banner.show("run") -- (RUN!!! again as it slows: QM)
-			end
-			TutorialRide.timeScale = if slow then RUN_SLOW else 1
-			task.wait(0.05)
+			task.wait(0.1)
 		end
-		TutorialRide.timeScale = 1
 		clear()
 		if not on() then
 			break
