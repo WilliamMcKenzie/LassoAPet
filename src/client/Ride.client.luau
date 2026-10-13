@@ -1040,12 +1040,16 @@ local function fail(reason, tip)
 	-- Thrown off behind the animal, landing flat on their back until they go home.
 	if hrp then -- (no character mid-respawn: nothing to throw)
 		local look = hrp.CFrame.LookVector
-		local launched = reason == "CAUGHT!" -- (run over by the boss: flung high, OG Roblox style, QM)
-		tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1,
-			up = launched and 55 or nil, time = launched and 1.8 or nil }
+		local fling = reason == "CAUGHT!" -- (run over by the boss: flung by Roblox's own physics, QM)
+		tumble = { t = 0, from = hrp.Position, yaw = math.atan2(-look.X, -look.Z), dir = dir, side = rng:NextNumber() < 0.5 and -1 or 1, fling = fling }
 		vfx.rideCue:FireServer("crash", tumble.from, tumble.yaw, tumble.dir, tumble.side) -- everyone sees you thrown off
 		humanoid.Sit = false
 		humanoid.PlatformStand = true -- no animations: lies stiff
+		if fling then
+			hrp.Anchored = false
+			hrp.AssemblyLinearVelocity = Vector3.new(tumble.side * 25, 120, 60 * dir)
+			hrp.AssemblyAngularVelocity = Vector3.new(10, 4, tumble.side * 8)
+		end
 	end
 	Hud.setAction(nil)
 	Hud.setHold(nil)
@@ -3643,7 +3647,7 @@ function vfx.tumbleCFrame(tumble, t)
 	local from = tumble.from
 	local gx, gz = from.X + tumble.side * 9, from.Z - 6 * tumble.dir
 	local ground = Vector3.new(gx, LIE_HEIGHT + Ground.heightAt(gx, gz), gz)
-	local pos = from:Lerp(ground, t) + Vector3.new(0, math.sin(t * math.pi) * (tumble.up or 6), 0) -- (up: run over by the boss, launched: QM)
+	local pos = from:Lerp(ground, t) + Vector3.new(0, math.sin(t * math.pi) * 6, 0)
 	return CFrame.new(pos) * CFrame.Angles(0, tumble.yaw, 0)
 		* CFrame.Angles(t * math.pi * 2.5, 0, tumble.side * math.sin(t * math.pi) * 0.8)
 end
@@ -3654,8 +3658,10 @@ local function updateRider(dt)
 		return
 	end
 	if tumble then
-		tumble.t = math.min(tumble.t + dt / (tumble.time or vfx.TUMBLE_TIME), 1)
-		hrp.CFrame = vfx.tumbleCFrame(tumble, tumble.t)
+		if not tumble.fling then -- (flung: physics has them)
+			tumble.t = math.min(tumble.t + dt / vfx.TUMBLE_TIME, 1)
+			hrp.CFrame = vfx.tumbleCFrame(tumble, tumble.t)
+		end
 		focus = focus:Lerp(Vector3.new(hrp.Position.X, 0, hrp.Position.Z), 1 - math.exp(-4 * dt))
 		return
 	end
