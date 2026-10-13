@@ -794,6 +794,7 @@ local Config = {
 		GarnetStatue = "rbxassetid://121784684526161", -- assets/ui/GarnetStatueEggRender.png (World 2)
 		Fox = "rbxassetid://92522948167443", -- assets/ui/FoxEggRender.png (World 2)
 		NineTailedFox = "rbxassetid://110560724842212", -- assets/ui/NineTailedFoxEggRender.png (World 2)
+		Kitsune = "rbxassetid://124688776792586", -- assets/ui/KitsuneEggRender.png (World 2)
 		Unicorn = "rbxassetid://85066893166855",
 		Cactus = "rbxassetid://95599437590618",
 		Kitten = "rbxassetid://124881834655792", -- assets/ui/KittenEggRender.png
