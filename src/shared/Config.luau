@@ -1535,6 +1535,7 @@ if Config.World == 2 then
 		local biome = Config.Biomes[i]
 		biome.HerdSpawnEvery = (biome.HerdSpawnEvery or Config.HerdSpawnEvery) / more.spawn
 	end
+	Config.Biomes[6].HerdSpawnEvery = Config.Biomes[4].HerdSpawnEvery -- (the Tomb as often as the Woodland: QM, Oct 13, 2.5x was far too many)
 	-- World 2's speeds (QM, Oct 13: each animal's % into a biome on a full sprint ride,
 	-- 2,904 studs per 1 Speed). The rest keep theirs (the Seraphs 0.5, the Majestic Unicorn,
 	-- Eyeworm, Asura and Crystal Centipede as they were).
