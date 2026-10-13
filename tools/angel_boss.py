@@ -10,7 +10,7 @@ Run: python3 tools/angel_boss.py [out_dir] [--gif] [--crimson]
 Built in Blockbench's ZYX Euler order so QM can edit it there. Every bone rests at 0:
 the ring and feather tilts are baked into the cubes (single bones never rest turned).
 
-Bones: root (the core, where it floats) -> neck (the big eye: looks about) ;
+Bones: root (the core, where it floats) -> neck (the big eye: never animated, QM Oct 13) ;
 root -> Ring1 (in the XY plane, framing the eye: spins about Z), Ring2 (stands up,
 leaning 20 degrees: turns about Y like a gyroscope), Ring3 (lies down, tilted 25 degrees
 front-down: turns about Y, so it wobbles) ; root -> Halo ;
@@ -254,7 +254,6 @@ def animations():
     # position keys are in Blockbench units (0.1 stud)
     L = 4.0
     idle = {"root": [track(L, lambda u: (0, 8 * math.sin(TAU * u * 2), 0), 16, "position")],
-            "neck": [track(L, lambda u: (4 * math.sin(TAU * u * 2), 16 * math.sin(TAU * u), 0), 24)],
             "Ring1": [spin(L, "z", 1, 24)], "Ring2": [spin(L, "y", -1, 24)], "Ring3": [spin(L, "y", 1, 24)],
             "Halo": [track(L, lambda u: (0, 4 * math.sin(TAU * u * 2 + 0.6), 0), 16, "position")]}
     for pair, *_ in WINGS:  # a gentle beat, twice a loop
@@ -264,7 +263,6 @@ def animations():
 
     Lw = 2.0
     walk = {"root": [track(Lw, lambda u: (-8, 0, 0), 4), track(Lw, lambda u: (0, 6 * math.sin(TAU * u * 2), 0), 16, "position")],
-            "neck": [track(Lw, lambda u: (0, 6 * math.sin(TAU * u), 0), 16)],
             "Ring1": [spin(Lw, "z", 1, 24)], "Ring2": [spin(Lw, "y", -1, 24)], "Ring3": [spin(Lw, "y", 1, 24)],
             "Halo": [track(Lw, lambda u: (0, 3 * math.sin(TAU * u * 2 + 0.6), 0), 16, "position")]}
     for pair, *_ in WINGS:
@@ -274,7 +272,6 @@ def animations():
 
     Lg = 1.0
     gallop = {"root": [track(Lg, lambda u: (-16, 0, 0), 4), track(Lg, lambda u: (0, 8 * math.sin(TAU * u * 2 - 1.2), 0), 16, "position")],
-              "neck": [track(Lg, lambda u: (-4, 0, 0), 4)],
               "Ring1": [spin(Lg, "z", 1, 24)], "Ring2": [spin(Lg, "y", -1, 24)], "Ring3": [spin(Lg, "y", 1, 24)],
               "Halo": [track(Lg, lambda u: (0, 4 * math.sin(TAU * u * 2), 0), 16, "position")]}
     for pair, *_ in WINGS:
