@@ -1,4 +1,7 @@
-"""Red Crab: World 3 Pirate Cove's Common (Oct 14). A chunky beach crab: a wide faceted red shell (a
+"""SUPERSEDED (Oct 14): QM recoloured this crab green and dropped its side eye plates and mouth in
+Blockbench; designs/world3/pirate/GreenCrab.bbmodel is the source now, so don't rerun this over it.
+
+Red Crab: World 3 Pirate Cove's Common (Oct 14). A chunky beach crab: a wide faceted red shell (a
 low-poly mesh, QM Oct 14) with a pyramid spine at each side and a cream belly, two big black-tipped
 claws (their tops low-poly meshes too) held up in front (the right one bigger, fiddler style), googly plate
 eyes on short stalks and six jointed legs. You ride on its shell.

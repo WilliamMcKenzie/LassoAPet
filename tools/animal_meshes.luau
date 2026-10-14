@@ -10,9 +10,9 @@ local IDS = {
 	ToadstoolFrog_Cap_neck = 80583789207097,
 	ToadstoolFrog_Gill_neck = 90637008093060,
 	ToadstoolFrog_Spot_neck = 80302708979871,
-	RedCrab_Red_root = 89539779631438, -- (the Red Crab's carapace, QM Oct 14)
-	RedCrab_Red_ClawL = 79111445620149, -- (its claws' tops)
-	RedCrab_Red_ClawR = 114859450576389,
+	GreenCrab_Red_root = 129403060148775, -- (the Green Crab's carapace, QM Oct 14)
+	GreenCrab_Red_ClawL = 86915530155881, -- (its claws' tops)
+	GreenCrab_Red_ClawR = 88608798113715,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then

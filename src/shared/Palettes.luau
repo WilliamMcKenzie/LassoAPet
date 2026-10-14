@@ -325,11 +325,11 @@ return {
 		{ "Accent", 200, 190, 174 }, -- knees, spinnerets
 		{ "Hoof", 150, 138, 126 }, -- feet, fangs
 	},
-	RedCrab = { -- World 3 Pirate Cove
-		{ "Body", 232, 52, 40 },
-		{ "Body", 170, 28, 30 }, -- knees, claw tops (darker)
+	GreenCrab = { -- World 3 Pirate Cove (QM's green, Oct 14)
+		{ "Body", 19, 139, 58 },
+		{ "Body", 10, 105, 74 }, -- knees, elbows (darker)
 		{ "Belly", 255, 226, 176 }, -- belly, mandibles
-		{ "Hoof", 40, 30, 36 }, -- claw and leg tips
+		{ "Hoof", 1, 56, 53 }, -- claw and leg tips
 	},
 	Parrot = {
 		{ "Body", 232, 36, 44 },
