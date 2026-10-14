@@ -325,6 +325,62 @@ return {
 		{ "Accent", 200, 190, 174 }, -- knees, spinnerets
 		{ "Hoof", 150, 138, 126 }, -- feet, fangs
 	},
+	RedCrab = { -- World 3 Pirate Cove
+		{ "Body", 232, 52, 40 },
+		{ "Body", 170, 28, 30 }, -- knees, claw tops (darker)
+		{ "Belly", 255, 226, 176 }, -- belly, mandibles
+		{ "Hoof", 40, 30, 36 }, -- claw and leg tips
+	},
+	Parrot = {
+		{ "Body", 232, 36, 44 },
+		{ "Body", 168, 20, 36 }, -- back, belly (darker)
+		{ "Belly", 250, 246, 240 }, -- face patches
+		{ "Marking", 255, 206, 30 }, -- wing bands
+		{ "Accent", 36, 112, 236 }, -- wings, tail tip
+		{ "Accent", 24, 70, 180 }, -- flight feathers (darker)
+		{ "Horn", 250, 236, 200 }, -- beak
+	},
+	BananaMonkey = {
+		{ "Body", 140, 82, 44 },
+		{ "Body", 96, 54, 30 }, -- back, brow, nose (darker)
+		{ "Belly", 246, 200, 150 }, -- face, muzzle, hands, feet
+		{ "Belly", 214, 160, 112 }, -- knuckles, inner ears
+	},
+	TreasureHermit = {
+		{ "Body", 160, 70, 220 },
+		{ "Body", 104, 40, 160 }, -- knees, eyeballs (darker)
+		{ "Belly", 250, 200, 236 }, -- face
+		{ "Hoof", 40, 30, 50 }, -- claw and leg tips
+	},
+	EyepatchShark = {
+		{ "Body", 40, 150, 255 },
+		{ "Body", 26, 96, 200 }, -- fin undersides (darker)
+		{ "Belly", 30, 92, 196 }, -- underside
+	},
+	TreasureTurtle = {
+		{ "Body", 52, 196, 172 },
+		{ "Body", 28, 140, 128 }, -- spots, head top (darker)
+		{ "Marking", 60, 150, 60 }, -- shell
+		{ "Marking", 34, 100, 44 }, -- shell's bottom tier
+		{ "Horn", 250, 220, 120 }, -- beak, belly plate
+	},
+	GhostShip = {
+		{ "Body", 124, 66, 170 }, -- hull
+		{ "Body", 78, 38, 114 }, -- keel, jaw, brows (darker)
+		{ "Marking", 176, 118, 72 }, -- decks, barrels
+	},
+	JollyRogerWyvern = {
+		{ "Body", 248, 242, 222 }, -- bones
+		{ "Body", 196, 182, 156 }, -- horns, spikes, joints (darker)
+		{ "Accent", 36, 32, 48 }, -- sail wings
+		{ "Accent", 24, 20, 32 }, -- sail wings (darker)
+	},
+	Dreadstump = {
+		{ "Body", 214, 34, 44 }, -- coat
+		{ "Body", 150, 20, 34 }, -- collar, lapels (darker)
+		{ "Belly", 252, 248, 236 }, -- shirt, frills
+		{ "Marking", 44, 32, 30 }, -- beard, brows
+	},
 	BlackWidow = {
 		{ "Body", 22, 22, 28 },
 		{ "Body", 48, 48, 62 }, -- glossy top of the abdomen, spinnerets (lighter)

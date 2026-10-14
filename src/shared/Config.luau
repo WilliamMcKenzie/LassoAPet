@@ -301,7 +301,7 @@ local Config = {
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
@@ -316,6 +316,7 @@ local Config = {
 			Monarch = { At = Vector3.new(0, 0, 0.12), From = Vector3.new(0, 16, 75) }, -- (its head, from further out and above so the wings frame it: Studio saw the head too high from (0,4,50))
 			JadeAsura = { At = Vector3.new(0, 0.13, 0.3), From = Vector3.new(0, 6, 55) }, -- (its face and tusks, under the crown; a guess)
 			Sphinx = { At = Vector3.new(0, 0.28, 0.4), From = Vector3.new(0, 6, 60) }, -- (its pharaoh face, high at the front; a guess)
+			Dreadstump = { At = Vector3.new(0, 0.18, 0.3), From = Vector3.new(0, 6, 60) }, -- (World 3 Pirate Cove's Pirate King: his face under the tricorn; a guess)
 			CrystalTyrant = { At = Vector3.new(0, 0.02, 0.48), From = Vector3.new(0, 4, 34) }, -- (its eyes and teeth, halfway up: the crown makes it tall)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
@@ -554,6 +555,8 @@ local Config = {
 		Pterodactyl = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: a flying type, like the Phoenix
 		PinkButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland: a flier like the Crystal Phoenix (Oct 13)
 		Nut = { Kind = "Fly", Height = 56 }, -- World 2 Tomb: the flying sky goddess, a flier like the Crystal Phoenix (Oct 13)
+		Parrot = { Kind = "Fly", Height = 56 }, -- World 3 Pirate Cove: the pirate's macaw, a flier like the Crystal Phoenix (Oct 14)
+		JollyRogerWyvern = { Kind = "Fly", Height = 56 }, -- World 3 Pirate Cove's skeleton sea dragon, a flier (Oct 14)
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
 		-- Whale, a pink haze round the screen, and scares the animals round it off.
@@ -602,6 +605,8 @@ local Config = {
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
+		RedCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
+		GhostShip = 4, JollyRogerWyvern = 4, Dreadstump = 3, -- World 3 Pirate Cove's giga rares (XL) and its boss as a pet (guesses, Oct 14)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -1404,6 +1409,24 @@ Config.World2Pets = {
 for kind, w2 in Config.World2Pets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = w2[2], w2[3]
 end
+-- World 3's first biome, the Pirate Cove (Oct 14: tools/pirate_*.py): { speed, gold a second,
+-- hatch seconds }, a step past World 2's Tomb for each rarity. ALL GUESSES until QM sets World 3's
+-- economy (its biomes are about 2x World 2's length, so these speeds may need to go up).
+Config.World3Pets = {
+	RedCrab = { 7.6, 4000, 15 }, -- Common (guess)
+	Parrot = { 7.8, 6000, 20 }, -- Uncommon (guess)
+	BananaMonkey = { 7.8, 6000, 20 }, -- Uncommon (guess)
+	TreasureHermit = { 8.1, 12000, 90 }, -- Rare (guess)
+	EyepatchShark = { 8.5, 20000, 400 }, -- Epic (guess)
+	TreasureTurtle = { 9.2, 80000, 3000 }, -- Legendary (guess: 2x the Tomb's, as World 2 doubles each biome)
+	GhostShip = { 9.6, 400000, 3600 }, -- giga rare, 1 in 1,000 (guess: 5x the Legendary)
+	JollyRogerWyvern = { 9.6, 400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
+	Dreadstump = { 9.4, 200000, 3600 }, -- the boss as a trophy pet, 1 in 500 (guess)
+}
+for kind, w3 in Config.World3Pets do
+	Config.PetIncome[kind], Config.PetHatchTime[kind] = w3[2], w3[3]
+	Config.AnimalStats[kind] = { Speed = w3[1], Stamina = 3 }
+end
 local baseIncome = table.clone(Config.PetIncome) -- (World 1's, before World 2 changes its own)
 function Config.incomeIn(world, kind)
 	local own = world == 2 and Config.World2Pets[kind]
@@ -1421,6 +1444,7 @@ for _, kind in {
 	"Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune",
 	"TombJackal", "LionArcher", "Nut", "Geb", "EagleSentry", "Bes", "BloatedMummy", "Scarab",
 	"Seraph", "CrimsonSeraph", "CrystalSeraph",
+	"RedCrab", "Parrot", "BananaMonkey", "TreasureHermit", "EyepatchShark", "TreasureTurtle", "GhostShip", "JollyRogerWyvern", "Dreadstump", -- World 3's own (Oct 14: slowedHere doesn't tell World 2 from 3 yet, so they run full speed in both; QM to decide)
 } do
 	Config.World2Animals[kind] = true
 end
@@ -1743,6 +1767,25 @@ if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14
 		}
 		Config.Water = table.clone(Config.Water)
 		Config.Water.Image = "rbxassetid://128871935822673" -- assets/world3/WaterTile256.png (QM's blue 8 x 8 tile, x32)
+		-- World 3's first biome is the Pirate Cove (Oct 14, DRAFT: the weights are guesses, as the
+		-- Tomb's by rarity). Its two giga rares 1 in 1,000 of the stampede each, its boss
+		-- Dreadstump also a trophy pet 1 in 500, as World 2's angels and Black Widow.
+		meadow.Herd = {
+			RedCrab = 0.3, -- Common
+			Parrot = 0.25, -- Uncommon
+			BananaMonkey = 0.25, -- Uncommon
+			TreasureHermit = 0.15, -- Rare
+			EyepatchShark = 0.08, -- Epic
+			TreasureTurtle = 0.03, -- Legendary
+		}
+		local coveTotal = 0
+		for _, weight in meadow.Herd do
+			coveTotal += weight
+		end
+		meadow.Herd.GhostShip = coveTotal / 996
+		meadow.Herd.JollyRogerWyvern = coveTotal / 996
+		meadow.Herd.Dreadstump = coveTotal / 498
+		Config.Boss.ByBiome.Meadow = "Dreadstump" -- the Pirate King chases you home (silent until a cry is picked)
 	end
 else
 	-- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
