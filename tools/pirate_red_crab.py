@@ -1,6 +1,6 @@
-"""Red Crab: World 3 Pirate Cove's Common (Oct 14). A chunky beach crab: a wide red shell in two
-stepped layers with orange speckles and a cream belly, a little ridge of bumps along the front,
-two big black-tipped claws held up in front (the right one bigger, fiddler style), googly plate
+"""Red Crab: World 3 Pirate Cove's Common (Oct 14). A chunky beach crab: a wide faceted red shell (a
+low-poly mesh, QM Oct 14) with a pyramid spine at each side and a cream belly, two big black-tipped
+claws (their tops low-poly meshes too) held up in front (the right one bigger, fiddler style), googly plate
 eyes on short stalks and six jointed legs. You ride on its shell.
 
 Run: python3 tools/pirate_red_crab.py [--gif]
@@ -24,14 +24,40 @@ C = {"red": (232, 52, 40), "reddark": (170, 28, 30), "orange": (255, 128, 40), "
      "tip": (40, 30, 36)}
 
 
+def carapace(y0):
+    """Points of the shell: a thick rim ring, then two rings rising to a flat-ish top, each ring
+    an ellipse a little wider at the front (z < 0), turned half a step ring to ring for facets."""
+    pts = []
+    for y, sc, half in ((-0.25, 0.94, 0), (0.35, 1.0, 0.5), (1.45, 0.78, 0), (2.25, 0.42, 0.5)):
+        for i in range(12):
+            a = TAU * (i + half) / 12
+            x, z = math.cos(a), math.sin(a)
+            rx = 3.9 * (1 + 0.08 * max(0.0, -z))
+            pts.append((sc * rx * x, y0 + y, 0.2 + sc * 2.9 * z))
+    return pts
+
+
+def claw_top(pc, k):
+    """Points of the claw's top: a faceted palm, then a narrower ring where the finger ends."""
+    pts = []
+    for dz, rx, ry, dy in ((0.95, 0.85, 0.75, -0.05), (0.0, 1.15, 1.05, 0.05), (-1.0, 0.95, 0.75, 0.3), (-2.5, 0.48, 0.36, 0.35)):
+        for i in range(8):
+            a = TAU * (i + 0.5 * (dz < 0)) / 8
+            pts.append(pc + k * np.array([rx * math.cos(a), dy + ry * math.sin(a), dz]))
+    return pts
+
+
 def build():
     m = Model(NAME, C)
     y0 = 2.6
     root = m.group("root", (0, y0, 0))
+    # the carapace: one low-poly mesh (QM Oct 14), a wide faceted dome a little wider at the front,
+    # with a pyramid spine at each side corner; the cream belly underneath
     p = [m.box("Belly", (0, y0 - 0.5, 0), (6.4, 1.2, 4.8), "cream"),
-         m.box("Shell", (0, y0 + 0.5, 0.1), (7.6, 1.4, 5.4), "red"),
-         m.box("Shell2", (0, y0 + 1.5, 0.2), (6.2, 0.8, 4.4), "red"),
-         m.box("Shell3", (0, y0 + 2.1, 0.3), (4.4, 0.5, 3.2), "red")]
+         m.hull("Carapace", carapace(y0), "red")]
+    for s in (-1, 1):
+        p.append(m.pyr("Spine" + "LR"[s > 0], (s * 3.9, y0 + 0.45, -0.9), (s, 0.2, -0.45), (0, 1, 0), 1.5,
+                       0.5, 0.45, "red"))
     # mouth: a little dark slot with cream mandibles under the front
     p += [m.box("Mouth", (0, y0 - 0.15, -2.45), (1.6, 0.45, 0.2), "tip"),
           m.box("MandibleL", (-0.45, y0 - 0.55, -2.5), (0.5, 0.45, 0.3), "cream"),
@@ -56,16 +82,13 @@ def build():
         el = sh + np.array([s * 1.0, 0.7, -0.8])
         hand = el + np.array([-s * 0.3, 0.5, -1.1])
         pc = hand + np.array([0, 0.2 * k, -1.0 * k])  # the palm's centre
+        # the claw's top: one low-poly mesh, a fat palm tapering into the fixed finger, black tip
         q = [m.seg(f"Arm{n}", sh, el, 0.9, 0.9, "red"),
              m.box(f"Elbow{n}", el, (1.0, 1.0, 1.0), "reddark"),
              m.seg(f"Wrist{n}", el, hand, 0.9, 0.9, "red"),
-             m.box(f"Palm{n}", pc, (2.2 * k, 2.0 * k, 2.2 * k), "red"),
-             m.box(f"PalmTop{n}", pc + np.array([0, 1.05 * k, 0.1 * k]), (1.6 * k, 0.3 * k, 1.6 * k), "reddark"),
-             m.box(f"Finger{n}", pc + np.array([0, 0.45 * k, -1.7 * k]), (1.5 * k, 1.0 * k, 1.4 * k), "red"),
-             m.pyr(f"FingerTip{n}", pc + np.array([0, 0.45 * k, -2.4 * k]), (0, -0.25, -1), (1, 0, 0), 1.2 * k,
-                   0.65 * k, 0.45 * k, "tip")]
-        q.append(m.pyr(f"ClawTooth{n}", pc + np.array([0, -0.05 * k, -1.9 * k]), (0, -1, 0), (0, 0, 1),
-                       0.35 * k, 0.25 * k, 0.25 * k, "cream"))
+             m.hull(f"Claw{n}", claw_top(pc, k), "red"),
+             m.pyr(f"FingerTip{n}", pc + np.array([0, 0.35 * k, -2.5 * k]), (0, -0.2, -1), (1, 0, 0), 1.0 * k,
+                   0.5 * k, 0.38 * k, "tip")]
         m.put(claw, q)
         jaw_p = pc + np.array([0, -0.55 * k, -1.0 * k])
         jaw = m.group(f"Pincer{n}", tuple(jaw_p), claw)
