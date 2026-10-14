@@ -1,0 +1,258 @@
+"""Shared builder for World 3's Garden animals (tools/garden_*.py), in the Hawkmoth's style
+(tools/hawkmoth.py): free-form cubes turned by a rotation matrix (baked into the cube, Blockbench
+ZYX) and pyramid meshes, bones as groups that all rest at 0.
+
+    g = Garden("Ladybug", {"red": (220, 30, 40), ...})
+    root = g.group("root", (0, 3, 0))
+    g.box(root, "Shell", (0, 3, 0), (5, 2, 6), "red")
+    g.eyes(root, ...)
+    g.finish(animations)            # floor, animations, save designs/garden/<Name>.bbmodel, renders
+
+Part names: Eye/Pupil plain (no studs), Glow... Neon. Convert with bbmodel_to_luau.py --zyx.
+"""
+
+import json
+import math
+import os
+import sys
+
+import numpy as np
+from PIL import Image
+
+sys.path.insert(0, os.path.dirname(__file__))
+import horse_rig  # noqa: E402
+
+horse_rig.EULER = "ZYX"
+import snake_design as S  # noqa: E402
+import angel_boss as AB  # noqa: E402  (sets S.SIZE = 1; box, axis_rot)
+from partlib import render  # noqa: E402
+import animal_designs as A  # noqa: E402
+from horse_rig import write_animations  # noqa: E402
+from snake_rig import track  # noqa: E402
+
+ROOT = os.path.join(os.path.dirname(__file__), "..")
+OUT = "/mnt/project-files/world3/garden"
+TAU = 2 * math.pi
+R = AB.axis_rot
+EYE_WHITE = (255, 255, 255)
+PUPIL = (24, 22, 30)
+sin = math.sin
+
+
+def Rm(*turns):
+    """Rm(("y", 30), ("x", -20)) = Ry(30) @ Rx(-20): the last turn applies first."""
+    M = np.eye(3)
+    for ax, d in turns:
+        M = M @ R(ax, d)
+    return M
+
+
+class Garden:
+    def __init__(self, name, colors, group="garden"):
+        self.name = name
+        colors = dict(colors)
+        colors.setdefault("eyewhite", EYE_WHITE)
+        colors.setdefault("pupil", PUPIL)
+        self.colors = colors
+        self.tex = {n: i for i, n in enumerate(colors)}
+        self.elements, self.groups, self.outliner = [], [], []
+        self.path = os.path.join(ROOT, "designs", group, name + ".bbmodel")
+        self.count = {}
+
+    # ------------------------------------------------------------ building
+    def group(self, name, pivot, parent=None):
+        g = S.group(name, pivot)
+        self.groups.append(g)
+        node = {"uuid": g["uuid"], "isOpen": True, "children": []}
+        (parent["children"] if parent is not None else self.outliner).append(node)
+        return node
+
+    def _name(self, name):
+        k = self.count.get(name, 0)
+        self.count[name] = k + 1
+        return name if k == 0 else f"{name}{k + 1}"
+
+    def put(self, node, e):
+        self.elements.append(e)
+        node["children"].append(e["uuid"])
+        return e
+
+    def box(self, node, name, center, size, col, M=None):
+        return self.put(node, AB.box(self._name(name), center, size, self.tex[col], M))
+
+    def pyr(self, node, name, base, d, L, hw, ht=None, col="black", wv=None):
+        """A pyramid: base rectangle centred on `base` (half sizes hw, ht), apex L along d."""
+        ht = hw if ht is None else ht
+        d = np.array(d, float) / np.linalg.norm(d)
+        if wv is None:
+            wv = np.array([1.0, 0, 0]) if abs(d[0]) < 0.9 else np.array([0, 0, 1.0])
+        wv = np.array(wv, float)
+        wv = wv - d * (wv @ d)
+        wv /= np.linalg.norm(wv)
+        tv = np.cross(d, wv)
+        b = np.array(base, float)
+        pts = [b - wv * hw - tv * ht, b + wv * hw - tv * ht, b + wv * hw + tv * ht, b - wv * hw + tv * ht, b + d * L]
+        v = {f"v{i}": [round(float(x) * S.BB, 4) for x in q] for i, q in enumerate(pts)}
+        faces = {"base": ["v0", "v1", "v2", "v3"], "s0": ["v0", "v1", "v4"], "s1": ["v1", "v2", "v4"],
+                 "s2": ["v2", "v3", "v4"], "s3": ["v3", "v0", "v4"]}
+        t = self.tex[col]
+        return self.put(node, {"name": self._name(name), "type": "mesh", "uuid": S.uid(), "color": 0,
+                               "origin": [0, 0, 0], "rotation": [0, 0, 0], "vertices": v,
+                               "faces": {k: {"texture": t, "vertices": vs, "uv": {q: [0, 0] for q in vs}}
+                                         for k, vs in faces.items()}})
+
+    def spike(self, node, name, base, d, L, w, col, shaft=0.0, shaft_col=None):
+        """A cube shaft (optional) plus a pyramid tip, pointing along d."""
+        d = np.array(d, float) / np.linalg.norm(d)
+        b = np.array(base, float)
+        if shaft > 0:
+            M = frame(d)
+            self.box(node, name + "Shaft", b + d * shaft / 2, (w * 2, shaft, w * 2), shaft_col or col, M)
+            b = b + d * shaft
+        return self.pyr(node, name, b, d, L, w, w, col)
+
+    def eye(self, node, side, center, size, normal=(0, 0, -1), pupil=0.55, look=(0, 0), glow=False, white="eyewhite"):
+        """A googly plate eye: a white plate facing `normal`, a dark pupil plate on its face,
+        nudged by `look` (fractions of the eye size, across and up)."""
+        n = np.array(normal, float)
+        n /= np.linalg.norm(n)
+        M = frame(n)  # local y along the normal
+        c = np.array(center, float)
+        w, h = (size, size) if np.isscalar(size) else size
+        self.box(node, f"Eye{side}", c, (w, 0.2, h), white, M)
+        across, upv = M @ np.array([1.0, 0, 0]), -(M @ np.array([0, 0, 1.0]))  # local z points down
+        pc = c + n * 0.13 + across * look[0] * w + upv * look[1] * h
+        self.box(node, f"{'Glow_Pupil' if glow else 'Pupil'}{side}", pc, (w * pupil, 0.08, h * pupil),
+                 glow or "pupil", M)
+
+    # ------------------------------------------------------------ output
+    def model(self):
+        m = json.load(open(os.path.join(ROOT, "designs", "desert", "Snake.bbmodel")))
+        m.update(name=self.name, elements=self.elements, groups=self.groups, outliner=self.outliner, animations=[],
+                 textures=[S.solid_texture(n, c) for n, c in self.colors.items()])
+        m.setdefault("meta", {})["format_version"] = "5.0"
+        return m
+
+    def finish(self, anims=None, gap=0.0, out=OUT, lineup_cam=None):
+        m = self.model()
+        shift = floor(m, gap)
+        if anims:
+            write_animations(m, {g["name"]: g for g in m["groups"]}, anims(m) if callable(anims) else anims)
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        os.makedirs(os.path.join(out, "renders"), exist_ok=True)
+        for p in (self.path, os.path.join(out, self.name + ".bbmodel")):
+            with open(p, "w") as f:
+                json.dump(m, f, separators=(",", ":"))
+        parts = posed(m)
+        P = np.concatenate([q for p in parts for q in p.polys])
+        lo, hi = P.min(0), P.max(0)
+        print(self.name, "elements", len(m["elements"]), "bones", len(m["groups"]), "shift", round(shift, 2),
+              "size", (hi - lo).round(1))
+        hero(parts).save(os.path.join(out, "renders", self.name + ".png"))
+        sheet(parts).save(os.path.join(out, self.name + "_sheet.png"))
+        return m
+
+
+def frame(d):
+    """A rotation whose local +y points along d (local x kept as level as possible)."""
+    d = np.array(d, float) / np.linalg.norm(d)
+    ref = np.array([0, 1.0, 0]) if abs(d[1]) < 0.95 else np.array([0, 0, -1.0])
+    x = np.cross(ref, d)
+    if np.linalg.norm(x) < 1e-6:
+        x = np.array([1.0, 0, 0])
+    x /= np.linalg.norm(x)
+    z = np.cross(x, d)
+    return np.stack([x, d, z], 1)
+
+
+def floor(m, gap=0.0):
+    lo = min(q[:, 1].min() for p in S.posed(m) for q in p.polys)
+    d = (gap - lo) * S.BB
+    for e in m["elements"]:
+        if e["type"] == "mesh":
+            e["vertices"] = {k: [v[0], round(v[1] + d, 4), v[2]] for k, v in e["vertices"].items()}
+        for k in ("from", "to", "origin"):
+            if k in e and not (e["type"] == "mesh" and k == "origin"):
+                e[k][1] = round(e[k][1] + d, 4)
+    for g in m["groups"]:
+        g["origin"][1] = round(g["origin"][1] + d, 4)
+    return gap - lo
+
+
+def posed(m, anim=None, t=0.0):
+    ps = S.posed(m, anim, t)
+    for p in ps:
+        if p.name.startswith(("Eye", "Pupil", "Glow")):
+            p.plain = True
+        if p.name.startswith("Glow"):
+            p.neon = True
+    return ps
+
+
+def bounds(parts):
+    P = np.concatenate([q for p in parts for q in p.polys])
+    return P.min(0), P.max(0)
+
+
+def cam(parts, view=(-14, 8, -24), fov=30, fill=1.0):
+    lo, hi = bounds(parts)
+    c = (lo + hi) / 2
+    r = np.linalg.norm(hi - lo) / 2
+    v = np.array(view, float)
+    return dict(eye=c + v / np.linalg.norm(v) * r / np.tan(np.radians(fov / 2)) * fill, target=c, fov=fov)
+
+
+def hero(parts, W=1000, H=900, view=(-14, 8, -24)):
+    img = render(parts, W=W, H=H, transparent=True, **cam(parts, view))
+    bg = Image.new("RGBA", img.size, (238, 240, 236, 255))
+    bg.alpha_composite(img)
+    return bg.convert("RGB")
+
+
+def sheet(parts):
+    Wd, Ht = 640, 520
+    out = Image.new("RGB", (Wd * 2, Ht * 2))
+    for i, v in enumerate([(-14, 8, -24), (0, 4, -30), (24, 10, 16), (-30, 6, 0)]):
+        out.paste(render(parts, W=Wd, H=Ht, **cam(parts, v)), ((i % 2) * Wd, (i // 2) * Ht))
+    return out
+
+
+def gif(m, out_path, cams=((0, 4, -30), (-30, 6, 0)), names=(("idle", 24, 1), ("walk", 14, 2), ("gallop", 10, 2))):
+    base = posed(m)
+    cs = [cam(base, v, fov=40, fill=1.15) for v in cams]
+    Wd, Ht = 440, 360
+    frames = []
+    for name, n, loops in names:
+        anim = next(a for a in m["animations"] if a["name"] == name)
+        for _ in range(loops):
+            for k in range(n):
+                ps = posed(m, anim, anim["length"] * k / n)
+                im = Image.new("RGB", (Wd * len(cs), Ht))
+                for i, c in enumerate(cs):
+                    im.paste(render(ps, W=Wd, H=Ht, **c), (i * Wd, 0))
+                frames.append(A.label(im, [name] * len(cs)))
+    A.gif(out_path, frames, fps=20)
+
+
+# ------------------------------------------------------------ animation helpers
+
+def legs(L, pairs, swing, n=16, axis=0):
+    """{bone: track}: legs swing about X; pairs = [(bone, phase in turns)]."""
+    out = {}
+    for b, ph in pairs:
+        def fn(u, ph=ph):
+            v = [0.0, 0.0, 0.0]
+            v[axis] = swing * sin(TAU * (u + ph))
+            return tuple(v)
+        out[b] = [track(L, fn, n)]
+    return out
+
+
+def rot(L, fn, n=16):
+    return [track(L, fn, n)]
+
+
+def bob(L, amp, freq=2, lean=0.0, n=16, roll=0.0, ph=0.0):
+    """Root: a lean (X) plus a rocking roll, and an up-down bob in Blockbench units (0.1 stud)."""
+    return [track(L, lambda u: (lean, 0, roll * sin(TAU * u)), n),
+            track(L, lambda u: (0, amp * abs(sin(TAU * (u * freq / 2) + ph)) if freq else 0, 0), n, "position")]
