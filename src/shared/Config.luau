@@ -1907,7 +1907,7 @@ if Config.World == 3 then
 			Length = 4336, -- (2x the Meadow's 2168)
 			GroundColors = SAND,
 			WallColors = { rgb(226, 196, 146), rgb(214, 182, 132) }, -- sandstone cliff (QM, Oct 14: his lagoon-island concept; was wood 140, 98, 62)
-			CapColor = rgb(88, 158, 58), -- (foliage green along the top)
+			CapColor = rgb(70, 136, 52), -- (foliage green along the top)
 			-- (Oct 14, the Pirate Cove animals thread: weights guesses, as the Tomb's by rarity; its
 			-- giga rares and the boss as a trophy pet added below)
 			Herd = { GreenCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
@@ -1919,7 +1919,7 @@ if Config.World == 3 then
 				Water = { rgb(46, 178, 196), rgb(46, 178, 196) }, -- (the lagoon tile's main colour, so the sides match it)
 				-- The base's walls (QM, Oct 14): one plain wooden-brown part each, darker wood along the top.
 				BaseWall = { rgb(226, 196, 146), rgb(214, 182, 132) },
-				BaseCap = { rgb(88, 158, 58), rgb(88, 158, 58) },
+				BaseCap = { rgb(70, 136, 52), rgb(70, 136, 52) },
 			},
 			GateColor = rgb(255, 160, 40),
 		},
