@@ -2248,7 +2248,7 @@ for k in template:GetAttributes() do
 	template:SetAttribute(k, nil)
 end
 for _, p in W.Ground:GetChildren() do
-	if p:GetAttribute("World3Biome") == NAME then
+	if p:GetAttribute("World3Biome") == NAME and p.Position.Z < NEAR and p.Position.Z > FAR then -- (only its own parts, in its own stretch: never the base's)
 		p:Destroy()
 	end
 end
