@@ -255,13 +255,15 @@ def pirate_cove():
     """Sand islands in a lagoon: sand a stud up, wet sand, the water tile a stud down, its
     deep middles darker. 7 angles (lacy rings: atolls). More lagoon in the wide bays. Plank
     boardwalks a stud up carry the middle lane over any long stretch of water."""
+    # (Colours: QM's beach reference, Oct 14, stamina-loop beb5452d: golden sand, turquoise water,
+    # weathered planks, grey cliff walls.)
     b = Biome(0, [
-        ("DeepWater", -1, (30, 120, 205), None),  # the water tile's darker tint
-        ("Water", -1, (49, 170, 235), None),  # QM's blue tile (rbxassetid://128871935822673)
-        ("WetSand", 0, (225, 189, 120), (208, 172, 105)),  # (QM in Studio, Oct 14: stamina-loop d803ac1; was 206, 172, 110 / 194, 160, 98)
-        ("Ground", 2, (240, 218, 160), (230, 206, 146)),  # light sand, as the base's: a stud above the damp sand (QM, Oct 14: stamina-loop b7441d8; was 1)
-        ("Planks", 1, (150, 100, 60), None),  # boardwalks: plain boards, no checker
-        ("DampSand", 1, (233, 204, 140), (219, 189, 126)),  # (QM, Oct 14: stamina-loop 97c9aa0) between the sand and the wet sand, at the sand's height
+        ("DeepWater", -1, (36, 146, 160), None),  # the water tile's darker tint
+        ("Water", -1, (64, 200, 196), None),  # QM's blue tile (rbxassetid://128871935822673)
+        ("WetSand", 0, (204, 158, 102), (190, 145, 92)),  # (QM in Studio, Oct 14: stamina-loop d803ac1; was 206, 172, 110 / 194, 160, 98)
+        ("Ground", 2, (238, 202, 142), (228, 190, 128)),  # light sand, as the base's: a stud above the damp sand (QM, Oct 14: stamina-loop b7441d8; was 1)
+        ("Planks", 1, (132, 96, 66), None),  # boardwalks: plain boards, no checker
+        ("DampSand", 1, (222, 180, 120), (208, 167, 109)),  # (QM, Oct 14: stamina-loop 97c9aa0) between the sand and the wet sand, at the sand's height
     ])
     q = b.quasi(7, 13, (517, 233))
     q = q + 0.12 * (0.5 - along(b, 64, 108))  # (wider: more water, the lower q)
@@ -308,7 +310,7 @@ def pirate_cove():
         wet |= nb == 1
     b.rung[(b.rung == 3) & wet & ~b.free] = 5
     check(b, [0, 1, 2, 4, 4, 3])  # (the damp sand a step between the wet sand and the sand)
-    walls = dict(wall=[(124, 82, 50), (112, 73, 44)], cap=(240, 218, 160), gate=(255, 160, 40))  # driftwood, sand top, treasure gold
+    walls = dict(wall=[(146, 146, 156), (132, 132, 142)], cap=(238, 202, 142), gate=(255, 160, 40))  # driftwood, sand top, treasure gold
     return b, walls
 
 

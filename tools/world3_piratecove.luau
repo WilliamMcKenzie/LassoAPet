@@ -7,17 +7,17 @@
 -- this biome's walls and caps. In game the floor takes Config's colours by part name.
 local W = workspace.World
 local NAME, NEAR, FAR = "PirateCove", 0, -4336
-local WATER_IMAGE = "rbxassetid://128871935822673" -- (QM's blue tile; Config.Water.Image in World 3)
+local WATER_IMAGE = "rbxassetid://105892298500838" -- (QM's tile turned turquoise, Oct 14; Config.Water.Image in World 3; was his blue 128871935822673)
 local rgb = Color3.fromRGB
 local KINDS = { -- [kind] = { name, top, part colour, checker colour (nil: plain) }
-	[0] = { "DeepWater", -1, rgb(30, 120, 205), nil },
-	[1] = { "Water", -1, rgb(49, 170, 235), nil },
-	[2] = { "WetSand", 0, rgb(225, 189, 120), rgb(208, 172, 105) },
-	[3] = { "Ground", 2, rgb(240, 218, 160), rgb(230, 206, 146) },
-	[4] = { "Planks", 1, rgb(150, 100, 60), nil },
-	[5] = { "DampSand", 1, rgb(233, 204, 140), rgb(219, 189, 126) },
+	[0] = { "DeepWater", -1, rgb(36, 146, 160), nil },
+	[1] = { "Water", -1, rgb(64, 200, 196), nil },
+	[2] = { "WetSand", 0, rgb(204, 158, 102), rgb(190, 145, 92) },
+	[3] = { "Ground", 2, rgb(238, 202, 142), rgb(228, 190, 128) },
+	[4] = { "Planks", 1, rgb(132, 96, 66), nil },
+	[5] = { "DampSand", 1, rgb(222, 180, 120), rgb(208, 167, 109) },
 }
-local WALL, WALL_CHECKER, CAP = rgb(124, 82, 50), rgb(112, 73, 44), rgb(240, 218, 160)
+local WALL, WALL_CHECKER, CAP = rgb(146, 146, 156), rgb(132, 132, 142), rgb(238, 202, 142)
 -- { kind, low x, near z, size x, size z } on 8-stud cells, in game space
 local FLOOR = {
 	{ 3, -96, -816, 48, 8 },

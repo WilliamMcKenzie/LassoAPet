@@ -7,7 +7,7 @@
 -- this biome's walls and caps. In game the floor takes Config's colours by part name.
 local W = workspace.World
 local NAME, NEAR, FAR = "Garden", -4336, -7968
-local WATER_IMAGE = "rbxassetid://128871935822673" -- (QM's blue tile; Config.Water.Image in World 3)
+local WATER_IMAGE = "rbxassetid://105892298500838" -- (QM's tile turned turquoise, Oct 14; Config.Water.Image in World 3; was his blue 128871935822673)
 local rgb = Color3.fromRGB
 local KINDS = { -- [kind] = { name, top, part colour, checker colour (nil: plain) }
 	[0] = { "Soil", -1, rgb(110, 72, 44), rgb(98, 64, 38) },
