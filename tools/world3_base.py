@@ -2,7 +2,7 @@
 World 1's and 2's so the pens can grow bigger.
 
 Run: python3 tools/world3_base.py [out_dir]
-     renders the layout (top-down) to out_dir.
+     renders the layout (top-down) to out_dir and writes tools/world3_base.luau.
 
 - Sand everywhere, a darker wet sand on the paths (a lane to the start line, one to each
   pen's gate) and round all the water.
@@ -20,7 +20,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(__file__))
-from desert_ground import noise  # noqa: E402
+from desert_ground import noise, rects  # noqa: E402
 
 HERE = os.path.dirname(__file__)
 SCALE = 1.2
@@ -178,12 +178,37 @@ def render(kind, out, s=3):
     im.save(out)
 
 
+def walls():
+    """The base's walls and caps 1.2x out (tools/arc_base.luau's: 8 thick, 48 tall; caps 10
+    wide, 2 tall, at 49, a stud in)."""
+    b, d = W + 8, DEPTH  # (the side walls' outsides; the back wall's inside at DEPTH - 8)
+    front = (b - 56) // 2  # the front walls run from the course's mouth (56) to the side walls
+    return [
+        ("back", "Wall", (0, 24, d - 4), (2 * b, 48, 8)), ("back", "Cap", (0, 49, d - 5), (2 * b, 2, 10)),
+        ("left", "Wall", (-(W + 4), 24, (d - 8) / 2), (8, 48, d)), ("left", "Cap", (-(W + 3), 49, (d - 8) / 2 + 4), (10, 2, d - 12)),
+        ("right", "Wall", (W + 4, 24, (d - 8) / 2), (8, 48, d)), ("right", "Cap", (W + 3, 49, (d - 8) / 2 + 4), (10, 2, d - 12)),
+        ("frontleft", "Wall", (-(56 + front), 24, -4), (2 * front, 48, 8)), ("frontleft", "Cap", (-(56 + front + 3), 49, -3), (2 * front + 10, 2, 10)),
+        ("frontright", "Wall", (56 + front, 24, -4), (2 * front, 48, 8)), ("frontright", "Cap", (56 + front + 3, 49, -3), (2 * front + 10, 2, 10)),
+    ]
+
+
+def write_luau(kind):
+    rows = ["\t{ %d, %d, %d, %d, %d }," % (k, -W + i0 * CELL, j0 * CELL, (i1 - i0) * CELL, (j1 - j0) * CELL)
+            for k, i0, j0, i1, j1 in rects(kind)]
+    ws = ['\t{ "%s", "%s", Vector3.new(%g, %g, %g), Vector3.new(%g, %g, %g) },' % (a, n, *c, *sz) for a, n, c, sz in walls()]
+    body = open(os.path.join(HERE, "world3_base.luau.in")).read()
+    body = body.replace("--FLOOR--", "\n".join(rows)).replace("--WALLS--", "\n".join(ws))
+    open(os.path.join(HERE, "world3_base.luau"), "w").write(body)
+    return len(rows)
+
+
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else "/mnt/project-files/biomes/world3_base"
     os.makedirs(out, exist_ok=True)
     kind = layout()
     assert check(kind) == 0
     render(kind, os.path.join(out, "world3_base.png"))
+    print("parts:", write_luau(kind))
     print({n: int((kind == k).sum()) for n, k in (("sand", SAND), ("wet", WET), ("grass", GRASS), ("water", WATER))})
 
 
