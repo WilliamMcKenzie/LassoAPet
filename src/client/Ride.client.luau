@@ -313,6 +313,7 @@ vfx.HerdPacks = require(script.Parent.HerdPacks)
 vfx.endless = require(script.Parent.Endless) -- the endless Jurassic: copies past the cut (Config.Endless)
 vfx.endless.init({ obstacles = obstacles, slices = slices, streams = streams, newStream = newStream })
 vfx.Burrow = require(script.Parent.Burrow) -- the Sandworm's spray and mounds (yours and other riders')
+vfx.sink = require(script.Parent.WaterSink) -- sinking in water (QM, Oct 14)
 vfx.Studs = require(ReplicatedStorage.Shared.Studs) -- hybrids: the donor's size and colours
 -- The stretch of course with stampede loaded round the camera at camZ: VIEW either
 -- way. Racing home (+z) the wider field of view (Config.ReturnFovKick) sees to the
@@ -433,7 +434,7 @@ local function place(entity, yawOffset)
 	local lift = entity.lift or floor
 	lift += (floor - lift) * (1 - math.exp(-STEP_RATE * (now - (entity.liftAt or now))))
 	entity.lift, entity.liftAt = lift, now
-	entity.animal.model.PrimaryPart.CFrame = CFrame.new(entity.x, entity.rootY + lift + (entity.hop or 0), entity.z)
+	entity.animal.model.PrimaryPart.CFrame = CFrame.new(entity.x, entity.rootY + lift + (entity.hop or 0) - vfx.sink(entity, now), entity.z)
 		* CFrame.Angles(0, entity.yaw + yawOffset, 0)
 end
 

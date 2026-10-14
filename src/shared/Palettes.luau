@@ -325,6 +325,56 @@ return {
 		{ "Accent", 200, 190, 174 }, -- knees, spinnerets
 		{ "Hoof", 150, 138, 126 }, -- feet, fangs
 	},
+	GreenCrab = { -- World 3 Pirate Cove (QM's green, Oct 14)
+		{ "Body", 19, 139, 58 },
+		{ "Body", 10, 105, 74 }, -- knees, elbows (darker)
+		{ "Belly", 255, 226, 176 }, -- belly, mandibles
+		{ "Hoof", 1, 56, 53 }, -- claw and leg tips
+	},
+	Parrot = {
+		{ "Body", 232, 36, 44 },
+		{ "Body", 168, 20, 36 }, -- back, belly (darker)
+		{ "Belly", 250, 246, 240 }, -- face patches
+		{ "Marking", 255, 206, 30 }, -- wing bands
+		{ "Accent", 36, 112, 236 }, -- wings, tail tip
+		{ "Accent", 24, 70, 180 }, -- flight feathers (darker)
+		{ "Horn", 250, 236, 200 }, -- beak
+	},
+	BananaMonkey = {
+		{ "Body", 140, 82, 44 },
+		{ "Body", 96, 54, 30 }, -- back, brow, nose (darker)
+		{ "Belly", 246, 200, 150 }, -- face, muzzle, hands, feet
+		{ "Belly", 214, 160, 112 }, -- knuckles, inner ears
+	},
+	TreasureHermit = {
+		{ "Body", 160, 70, 220 },
+		{ "Body", 104, 40, 160 }, -- knees, eyeballs (darker)
+		{ "Belly", 250, 200, 236 }, -- face
+		{ "Hoof", 40, 30, 50 }, -- claw and leg tips
+	},
+	EyepatchShark = {
+		{ "Body", 40, 150, 255 },
+		{ "Body", 26, 96, 200 }, -- fins (darker)
+		{ "Belly", 244, 244, 240 }, -- underside, teeth (QM's model, Oct 14)
+	},
+	TreasureTurtle = {
+		{ "Body", 52, 196, 172 },
+		{ "Body", 28, 140, 128 }, -- spots, head top (darker)
+		{ "Marking", 60, 150, 60 }, -- shell
+		{ "Marking", 34, 100, 44 }, -- shell's bottom tier
+		{ "Horn", 250, 220, 120 }, -- beak, belly plate
+	},
+	GhostShip = {
+		{ "Body", 124, 66, 170 }, -- hull
+		{ "Body", 78, 38, 114 }, -- keel, jaw, brows (darker)
+		{ "Marking", 176, 118, 72 }, -- decks, barrels
+	},
+	JollyRogerWyvern = {
+		{ "Body", 248, 242, 222 }, -- bones
+		{ "Body", 196, 182, 156 }, -- horns, spikes, joints (darker)
+		{ "Accent", 36, 32, 48 }, -- sail wings
+		{ "Accent", 24, 20, 32 }, -- sail wings (darker)
+	},
 	BlackWidow = {
 		{ "Body", 22, 22, 28 },
 		{ "Body", 48, 48, 62 }, -- glossy top of the abdomen, spinnerets (lighter)
@@ -784,5 +834,60 @@ return {
 		{ "Horn", 252, 240, 206 }, -- spike
 		{ "Hoof", 96, 60, 44 }, -- root
 		{ "Hoof", 60, 38, 30 }, -- rootdark
+	},
+	GummyBear = { -- World 3 Candyland
+		{ "Body", 236, 36, 72 }, -- body, head, legs, ears
+		{ "Belly", 255, 92, 150 }, -- belly, chest, muzzle
+		{ "Hoof", 168, 18, 50 }, -- paws
+	},
+	GumdropFrog = { -- World 3 Candyland
+		{ "Body", 255, 140, 30 }, -- gumdrop body, head, thighs
+		{ "Body", 222, 96, 18 }, -- base band, feet (darker)
+		{ "Belly", 255, 200, 120 }, -- belly, jaw
+		{ "Marking", 255, 252, 246 }, -- sugar crystals
+	},
+	GingerbreadMan = { -- World 3 Candyland
+		{ "Body", 204, 112, 44 }, -- cookie
+		{ "Body", 150, 72, 26 }, -- baked edges (darker)
+		{ "Marking", 255, 255, 255 }, -- piped icing
+	},
+	Creampuff = { -- World 3 Candyland
+		{ "Body", 238, 172, 84 }, -- pastry bun and lid
+		{ "Body", 200, 124, 50 }, -- bun base, feet (darker)
+		{ "Marking", 255, 252, 246 }, -- whipped cream
+		{ "Accent", 150, 206, 60 }, -- mould
+		{ "Accent", 96, 150, 40 }, -- darker mould
+	},
+	SwollFairy = { -- World 3 Candyland
+		{ "Body", 255, 150, 206 }, -- skin
+		{ "Body", 232, 98, 170 }, -- knuckles, nose (darker)
+		{ "Marking", 60, 230, 176 }, -- tank top, slippers
+		{ "Marking", 24, 176, 136 }, -- darker top
+		{ "Accent", 204, 150, 255 }, -- tutu, lower wings
+		{ "Horn", 70, 196, 255 }, -- upper wings
+	},
+	DesireTroll = { -- World 3 Candyland
+		{ "Body", 255, 92, 150 }, -- skin
+		{ "Body", 214, 52, 118 }, -- darker skin
+		{ "Belly", 255, 150, 206 }, -- belly, chest, jaw
+		{ "Hoof", 160, 80, 240 }, -- fists, feet
+		{ "Hoof", 110, 46, 196 }, -- knuckles
+		{ "Marking", 204, 150, 255 }, -- cotton-candy hair
+	},
+	RockCandyDragon = { -- World 3 Candyland
+		{ "Body", 236, 36, 72 }, -- head, neck, body, tail, legs
+		{ "Body", 168, 18, 50 }, -- darker red
+		{ "Belly", 255, 252, 246 }, -- belly and chest plates
+	},
+	GumballGolem = { -- World 3 Candyland
+		{ "Body", 236, 36, 72 }, -- machine base, fists
+		{ "Marking", 250, 254, 255 }, -- glass globe
+	},
+	Gigacorn = { -- World 3 Candyland's boss
+		{ "Body", 255, 252, 246 }, -- white coat
+		{ "Marking", 255, 150, 206 }, -- cotton-candy mane and tail, frosting
+		{ "Marking", 232, 98, 170 }, -- darker pink
+		{ "Accent", 70, 196, 255 }, -- sky frosting and puffs
+		{ "Hoof", 200, 124, 50 }, -- waffle-cone hooves
 	},
 }

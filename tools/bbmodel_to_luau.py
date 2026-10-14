@@ -23,7 +23,8 @@ Blockbench (QM's King Crab), pass --zyx so those parts come out as Blockbench sh
 
 Meshes (QM, Oct 14: a mesh only where blocks can't make the shape): with --meshes DIR, the
 meshes the rules above can't make from blocks (a Garden.hull's low-poly dome) on a bone in
-one colour are merged into one mesh, written to DIR/<Kind>_<Part>.obj (flat shaded,
+one colour are merged into one mesh, written to DIR/<Kind>_<Part>.obj (flat shaded, or smooth
+and studless when a mesh in it is named Smooth...,
 planar UVs in 0.5-stud studs, centred on its box) and listed as a MeshPart with
 mesh = "<Kind>_<Part>"; Rig.luau clones it from ReplicatedStorage.AnimalMeshes.
   python3 tools/bbmodel_to_luau.py --zyx --meshes assets/meshes/ToadstoolFrog designs/garden/ToadstoolFrog.bbmodel src/shared/Animals/ToadstoolFrogModel.luau
@@ -42,6 +43,8 @@ SCALE = 0.1
 PLAIN = ("Eye", "Pupil", "Nostril", "Plain")  # name prefixes that skip the stud texture
 NEON = ("Slit_pupil", "Glow")  # name prefixes that glow
 METAL = ("Metal",)  # name prefixes drawn with the classic Weld texture instead of studs
+SMOOTH = ("Smooth",)  # name prefixes of meshes shaded smooth (--meshes), with no studs
+SMOOTH_ANGLE = 50  # degrees: faces turning more than this keep a hard edge between them
 PLATE = 0.04  # studs: thickness of a converted one-face plane
 FLUTE = 0.1  # studs: thickness of a stripe on a striped block (see stripes())
 
@@ -316,18 +319,30 @@ def stud_axes(n):
     return e1, np.cross(n, e1)
 
 
-def write_obj(name, tris, centre, path):
-    """One OBJ, vertices relative to `centre`, every face with its own normal (flat shading)."""
+def write_obj(name, tris, centre, path, smooth=False):
+    """One OBJ, vertices relative to `centre`, every face with its own normal (flat shading); with
+    smooth, each corner takes the area-weighted mean of the faces round that point that turn less
+    than SMOOTH_ANGLE from its own (smooth shading that keeps sharp rims)."""
     lines, vt, vn, faces = [f"# {name}: studs, y up, facing -z, centred on its box", f"o {name}"], [], [], []
+    N = [np.cross(t[1] - t[0], t[2] - t[0]) for t in tris]  # length = twice the area
+    near = {}
+    if smooth:
+        for k, t in enumerate(tris):
+            for v in t:
+                near.setdefault(tuple(np.round(v, 4)), []).append(k)
     for k, t in enumerate(tris):
-        n = np.cross(t[1] - t[0], t[2] - t[0])
-        n /= np.linalg.norm(n)
+        n = N[k] / np.linalg.norm(N[k])
         e1, e2 = stud_axes(n)
         for v in t:
             lines.append("v %.4f %.4f %.4f" % tuple(v - centre))
             vt.append("vt %.4f %.4f" % (v @ e1 / STUD, v @ e2 / STUD))
-        vn.append("vn %.4f %.4f %.4f" % tuple(n))
-        faces.append("f {0}/{0}/{3} {1}/{1}/{3} {2}/{2}/{3}".format(3 * k + 1, 3 * k + 2, 3 * k + 3, k + 1))
+            m = n
+            if smooth:
+                m = sum(N[j] for j in near[tuple(np.round(v, 4))] if N[j] @ n > math.cos(math.radians(SMOOTH_ANGLE)) * np.linalg.norm(N[j]))
+                m = m / np.linalg.norm(m)
+            vn.append("vn %.4f %.4f %.4f" % tuple(m))
+        a = 3 * k
+        faces.append("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}".format(a + 1, a + 2, a + 3))
     with open(path, "w") as f:
         f.write("\n".join(lines + vt + vn + faces) + "\n")
 
@@ -417,7 +432,10 @@ def convert(model, merge=None):
             if merge is not None and e["type"] == "mesh" and not supported(e, model_center):
                 face = next(f for f in e["faces"].values() if f.get("texture") is not None)
                 key = (parent, model["textures"][face["texture"]]["name"])
-                merge.setdefault(key, (color(e), []))[1].extend(element_tris(e))
+                entry = merge.setdefault(key, (color(e), [], [False, False]))
+                entry[1].extend(element_tris(e))
+                entry[2][0] |= e["name"].startswith(SMOOTH)
+                entry[2][1] |= neon
                 return
             if e["type"] == "cube":
                 lo, hi = np.array(e["from"]) * SCALE, np.array(e["to"]) * SCALE
@@ -474,14 +492,14 @@ def main(src, dst, mesh_dir=None):
         import os
         os.makedirs(mesh_dir, exist_ok=True)
         kind = os.path.basename(dst).replace("Model.luau", "")
-        for (bone, col), (rgb, tris) in merge.items():
+        for (bone, col), (rgb, tris, smooth) in merge.items():
             name = col[:1].upper() + col[1:] + "_" + bone
             P = np.concatenate(tris)
             lo, hi = P.min(0), P.max(0)
             centre = (lo + hi) / 2
             meshes[name] = f"{kind}_{name}"
-            write_obj(meshes[name], tris, centre, os.path.join(mesh_dir, meshes[name] + ".obj"))
-            parts.append((name, bone, "MeshPart", hi - lo, centre, np.eye(3), rgb, False, False, False))
+            write_obj(meshes[name], tris, centre, os.path.join(mesh_dir, meshes[name] + ".obj"), smooth[0])
+            parts.append((name, bone, "MeshPart", hi - lo, centre, np.eye(3), rgb, smooth[0] or smooth[1], smooth[1], False))  # smooth or Glow: no studs
             print(f"  {meshes[name]}: {len(tris)} tris")
 
     out = ["-- GENERATED by tools/bbmodel_to_luau.py from " + src + ". Don't edit by hand:",
