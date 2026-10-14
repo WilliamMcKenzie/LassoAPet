@@ -112,23 +112,21 @@ def prism_x(a, name, pts, x0, x1, color, bone):
     return p
 
 
-def ring(c, r, n=12, rot=0.0):
-    return [(c[1] + r * math.sin(math.radians(rot + 360 * i / n)), c[2] + r * math.cos(math.radians(rot + 360 * i / n)))
-            for i in range(n)]
-
-
 def peppermint(a, name, c, r, sx, bone="root"):
-    """A starlight peppermint on a side face (sx = -1 left, +1 right): a round white
-    disc on a darker rim, six red pie slices out from the centre."""
+    """A starlight peppermint on a side face (sx = -1 left, +1 right): a roundish white
+    disc (four squares turned in 22.5 degree steps) on a darker rim of the same shape, and
+    six red pie slices (triangular prisms) out from the centre."""
     c = np.array(c, float)
     x = c[0]
     o = (lambda d: x + sx * d)
-    prism_x(a, name + "Rim", ring(c, r * 1.08, 12, 15), *sorted((o(0), o(0.16))), C.CHERRY_DK, bone)
-    prism_x(a, name + "Disc", ring(c, r, 12, 15), *sorted((o(0), o(0.26))), C.WHITE, bone)
+    for i, deg in enumerate((0, 22.5, 45, 67.5)):
+        s = 1.8 * r
+        C.rbox(a, f"{name}Disc{i + 1}", (0.26, s, s), T(*(c + (sx * 0.13, 0, 0))) @ Rx(deg), C.WHITE, bone)
+        C.rbox(a, f"{name}Rim{i + 1}", (0.16, s + 0.24, s + 0.24), T(*(c + (sx * 0.08, 0, 0))) @ Rx(deg), C.CHERRY_DK, bone)
     for k in range(6):
         t0, t1 = math.radians(60 * k + 6), math.radians(60 * k + 34)
-        pts = [(c[1], c[2]), (c[1] + r * 0.93 * math.sin(t0), c[2] + r * 0.93 * math.cos(t0)),
-               (c[1] + r * 0.93 * math.sin(t1), c[2] + r * 0.93 * math.cos(t1))]
+        pts = [(c[1], c[2]), (c[1] + r * 0.84 * math.sin(t0), c[2] + r * 0.84 * math.cos(t0)),
+               (c[1] + r * 0.84 * math.sin(t1), c[2] + r * 0.84 * math.cos(t1))]
         prism_x(a, f"{name}Slice{k + 1}", pts, *sorted((o(0.2), o(0.34))), C.CHERRY, bone)
 
 
@@ -205,8 +203,8 @@ def gigacorn():
         drips(a, "DripWither" + side, C.SKY, C.SKY_DK, side,
               [(-4.0, 0.42, 1.55), (-3.25, 0.5, 0.6), (-2.45, 0.42, 0.9), (-1.85, 0.4, 1.45)], Y1 + 0.35)
     drips(a, "DripBack", C.BUBBLE, C.BUBBLE_DK, "B", [(-1.85, 0.5, 1.4), (-1.15, 0.42, 0.7), (1.15, 0.42, 0.95), (1.85, 0.5, 1.6)], Y1 + 0.35)
-    sprinkles(a, "Sprinkle", -1.9, 1.9, 2.15, 4.4, Y1 + 0.55, rng, 7, avoid=(C.BUBBLE,))
-    sprinkles(a, "SprinkleW", -1.9, 1.9, -3.9, -2.0, Y1 + 0.55, rng, 5, avoid=(C.SKY,))
+    sprinkles(a, "Sprinkle", -1.9, 1.9, 2.15, 4.4, Y1 + 0.55, rng, 5, avoid=(C.BUBBLE,))
+    sprinkles(a, "SprinkleW", -1.9, 1.9, -3.9, -2.0, Y1 + 0.55, rng, 3, avoid=(C.SKY,))
 
     # ---- peppermint swirls on the shoulders and haunches
     for side, sx in (("L", -1), ("R", 1)):
@@ -259,7 +257,6 @@ def gigacorn():
         xa, xb = sorted((sx * 0.7, sx * 2.2))
         name = "Leg" + leg
         a.box(name, (xa, 1.75, za), (xb, Y0, zb), COAT, name)
-        a.box("Knee" + leg, (xa - 0.08, 2.6, za - 0.08), (xb + 0.08, 3.1, zb + 0.08), COAT, name)
         a.box("Cuff" + leg, (xa - 0.15, 1.25, za - 0.15), (xb + 0.15, 1.85, zb + 0.15), LILAC, name)
         a.box("CuffTop" + leg, (xa - 0.02, 1.85, za - 0.02), (xb + 0.02, 2.05, zb + 0.02), LILAC, name)
         a.box("CuffDk" + leg, (xa - 0.1, 1.1, za - 0.1), (xb + 0.1, 1.25, zb + 0.1), LILAC_DK, name)
