@@ -1911,7 +1911,7 @@ if Config.World == 3 then
 			Herd = { RedCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
 			Patches = {
 				Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
-				WetSand = { rgb(206, 172, 110), rgb(194, 160, 98) },
+				WetSand = { rgb(225, 189, 120), rgb(208, 172, 105) }, -- (QM, Oct 14; was 206, 172, 110 / 194, 160, 98)
 				Grass = { rgb(96, 204, 60), rgb(84, 188, 50) }, -- (the base's)
 				Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
 				DeepWater = { rgb(30, 120, 205), rgb(30, 120, 205) },
