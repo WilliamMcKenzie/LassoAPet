@@ -1899,7 +1899,8 @@ if Config.World == 3 then
 		{
 			-- Its colours are the home base's too, a tropical island (QM, Oct 14; tools/world3_base.luau's
 			-- floor): sand, wet sand on the paths, grass a stud up, lagoons of the flowing water tile.
-			-- Tile tops: water -1, wet sand 0, sand and planks 1.
+			-- Tile tops: water -1, wet sand 0, damp 1, sand and planks 2. (No Planks colours: the boards keep
+			-- their own, World 2's Crystal Cavern planks, QM Oct 14.)
 			Name = "PirateCove",
 			AnimalSize = 1,
 			Swerve = 1,
@@ -1916,8 +1917,6 @@ if Config.World == 3 then
 				DampSand = { rgb(222, 180, 120), rgb(208, 167, 109) }, -- between the sand and the wet sand (QM, Oct 14; tools/world3_dampsand.luau)
 				Grass = { rgb(138, 158, 72), rgb(124, 144, 62) }, -- (the base's: muted olive, QM Oct 14; was 96, 204, 60)
 				Water = { rgb(53, 143, 192), rgb(53, 143, 192) }, -- (QM's tile's main colour, so the sides match it)
-				DeepWater = { rgb(38, 112, 156), rgb(38, 112, 156) },
-				Planks = { rgb(132, 96, 66), rgb(132, 96, 66) }, -- weathered dock wood
 				-- The base's walls (QM, Oct 14): one plain wooden-brown part each, darker wood along the top.
 				BaseWall = { rgb(140, 98, 62), rgb(128, 88, 55) },
 				BaseCap = { rgb(104, 70, 44), rgb(104, 70, 44) },
