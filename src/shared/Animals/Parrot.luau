@@ -9,5 +9,5 @@ local ParrotModel = require(script.Parent.ParrotModel)
 
 return Horse.variant("Parrot", ParrotModel, "Uncommon", {
 	seat = Vector3.new(0, 4.55, 0.6),
-	neck = { center = Vector3.new(0, 4.5, -3.4), radius = 1.8 },
+	neck = { center = Vector3.new(0, 3.5, -5.3), radius = 1.8 },
 })
