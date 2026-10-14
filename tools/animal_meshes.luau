@@ -17,6 +17,18 @@ local IDS = {
 	TreasureHermit_Crab_ClawL = 0,
 	TreasureHermit_Crab_ClawR = 0,
 	TreasureTurtle_Shell_root = 0, -- (the Treasure Turtle's shell, one smooth mesh: QM Oct 14)
+	GhostShip_Deck_root = 0, -- (the Ghost Ship, on the pirate ship prop: QM Oct 14)
+	GhostShip_Flag_Flag = 0,
+	GhostShip_Flag_root = 0,
+	GhostShip_Gold_root = 0,
+	GhostShip_Hull_root = 0,
+	GhostShip_Hulldark_Jaw = 0,
+	GhostShip_Mast_root = 0,
+	GhostShip_Rail_root = 0,
+	GhostShip_Sail_SailF = 0,
+	GhostShip_Sail_SailM = 0,
+	GhostShip_Sail_root = 0,
+	GhostShip_White_Flag = 0,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then
