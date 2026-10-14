@@ -1695,6 +1695,19 @@ if Config.World == 2 then
 		crimsonTotal += weight
 	end
 	Config.Biomes[2].Herd.BlackWidow = crimsonTotal / 499
+else
+	-- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
+	-- with you (QM, Oct 14), they're as big here too. (Not the Loong: World 1's own as well.)
+	Config.AnimalScale = table.clone(Config.AnimalScale)
+	for size, kinds in {
+		[2] = { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }, -- the Woodland Maze
+		[2.5] = { "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune" }, -- the Temple
+		[3] = { "TombJackal", "LionArcher", "Nut", "Geb", "EagleSentry", "Bes", "BloatedMummy", "Scarab" }, -- the Tomb
+	} do
+		for _, kind in kinds do
+			Config.AnimalScale[kind] = (Config.AnimalScale[kind] or 1) * size
+		end
+	end
 end
 
 return Config
