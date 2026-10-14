@@ -7,6 +7,18 @@
 -- Import 3D: units studs, no rig, keep the name) and put its mesh asset id next to its name.
 local AssetService = game:GetService("AssetService")
 local IDS = {
+	Bumblebee_Black_Abdomen = 0,
+	Bumblebee_Black_root = 0,
+	Bumblebee_Wing_WingBL = 0,
+	Bumblebee_Wing_WingBR = 0,
+	Bumblebee_Wing_WingFL = 0,
+	Bumblebee_Wing_WingFR = 0,
+	Bumblebee_Yellow_Abdomen = 0,
+	Bumblebee_Yellow_root = 0,
+	Ladybug_Black_ShellL = 0,
+	Ladybug_Black_ShellR = 0,
+	Ladybug_Red_ShellL = 0,
+	Ladybug_Red_ShellR = 0,
 	ToadstoolFrog_Cap_neck = 0,
 	ToadstoolFrog_Gill_neck = 0,
 	ToadstoolFrog_Spot_neck = 0,

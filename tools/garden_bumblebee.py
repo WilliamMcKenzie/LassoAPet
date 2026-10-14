@@ -24,19 +24,14 @@ def build():
     g = Garden("Bumblebee", C)
     y0 = 4.0
     root = g.group("root", (0, y0, 0))
-    # thorax: black with a fuzzy yellow collar and a tuft on top
-    g.box(root, "Thorax", (0, y0, -0.6), (5.0, 4.4, 3.6), "black")
-    g.box(root, "Collar", (0, y0 + 0.2, -2.3), (5.6, 4.8, 1.2), "yellow")
-    g.box(root, "Tuft", (0, y0 + 2.5, -1.2), (3.0, 0.8, 2.4), "fuzz")
-    # abdomen: fat, banded, tapering to a stubby stinger
+    # round body as low-poly meshes (QM Oct 14: meshes where blocks faked a curve): a black thorax
+    # with a yellow collar, and a fat abdomen in yellow and black bands meeting flush
+    for k, pts in enumerate(G.bands((0, y0, -0.5), (3.1, 2.9, 2.7), [-2.7, -1.5, 2.7])):
+        g.hull(root, "Collar" if k == 0 else "Thorax", pts, "yellow" if k == 0 else "black")
     abd = g.group("Abdomen", (0, y0, 1.2), root)
-    z = 1.2
-    for k, (w, h, L, col) in enumerate(((6.4, 5.6, 1.6, "yellow"), (6.8, 6.0, 1.5, "black"), (6.6, 5.8, 1.5, "yellow"),
-                                        (5.8, 5.0, 1.3, "black"), (4.4, 3.8, 1.1, "yellow"), (2.8, 2.4, 0.8, "black"))):
-        g.box(abd, f"Band{k + 1}", (0, y0 + 0.2 - 0.12 * k, z + L / 2), (w, h, L + 0.04), col)
-        z += L
-    g.box(abd, "BandEdge", (0, y0 + 0.2, 1.2 + 0.9), (5.6, 6.3, 1.0), "yellowdark")
-    g.spike(abd, "Stinger", (0, y0 - 0.5, z - 0.1), (0, -0.25, 1), 1.4, 0.45, "black")
+    for k, pts in enumerate(G.bands((0, y0 + 0.1, 5.1), (3.5, 3.1, 4.2), [-4.2, -2.7, -1.2, 0.3, 1.7, 3.0, 4.2])):
+        g.hull(abd, f"Band{k + 1}", pts, "yellow" if k % 2 == 0 else "black")
+    g.spike(abd, "Stinger", (0, y0, 9.1), (0, -0.25, 1), 1.4, 0.45, "black")
     # head: big, black, googly eyes on the front, pink cheeks, smile, antennae
     neck = g.group("neck", (0, y0, -2.8), root)
     hz = -4.4
@@ -63,17 +58,15 @@ def build():
             g.box(root, f"Leg{side}{k + 1}", base + d * 0.9, (0.5, 1.8, 0.5), "black", M)
             if k == 2:
                 g.box(root, f"Pollen{side}", base + d * 1.5, (1.0, 1.0, 1.0), "pollen", M)
-    # wings: rounded paddles of three blocks with a darker rim; fore and hind
+    # wings: flat oval paddles (one mesh each), fore and hind
     for wname, pz, py, span, chord, sweep in (("WingF", -1.0, 2.3, 7.6, 4.2, 30), ("WingB", 0.8, 2.1, 5.4, 3.2, 50)):
         for side, s in (("L", -1), ("R", 1)):
             pivot = np.array([s * 1.6, y0 + py, pz])
             node = g.group(wname + side, pivot, root)
             M = Rm(("z", s * 10), ("y", -s * sweep))
-            for k, (x, w, d) in enumerate(((span * 0.3, span * 0.6, chord), (span * 0.72, span * 0.36, chord * 0.82),
-                                           (span * 0.95, span * 0.16, chord * 0.5))):
-                g.box(node, f"{wname}{side}", pivot + M @ np.array([s * x, 0, chord * 0.1]), (w, 0.3, d), "wing", M)
-            g.box(node, f"{wname}Rim{side}", pivot + M @ np.array([s * span * 0.5, 0.02, -chord * 0.45]),
-                  (span, 0.34, 0.3), "wingrim", M)
+            oval = [pivot + M @ np.array([s * span * (0.5 + 0.5 * np.cos(a)), t, chord * (0.1 + 0.5 * np.sin(a))])
+                    for a in np.linspace(0, TAU, 12, endpoint=False) for t in (-0.12, 0.12)]
+            g.hull(node, f"{wname}{side}", oval, "wing")
     return g
 
 

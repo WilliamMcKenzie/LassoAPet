@@ -340,6 +340,62 @@ def prism(c, r, h, seg=8, top=1.0, M=None):
     return (M @ np.array(pts, float).T).T + np.array(c, float)
 
 
+def plates(g, node, name, pts, dirs, col, fill=0.75, most=None):
+    """Flat round spots lying in the flat faces of hull(pts), sunk in a little: one in the face
+    facing most along each direction in dirs (of those within ~30 degrees, the roomiest),
+    centred in it and sized to fit inside its edges (fill of the room), so none overhangs an
+    edge. They're meshes, so they merge into one MeshPart."""
+    faces = {}
+    for t in hull_tris(pts):
+        n = np.cross(t[1] - t[0], t[2] - t[0])
+        n /= np.linalg.norm(n)
+        key = tuple(np.round(n, 3))
+        faces.setdefault(key, (n, []))[1].extend(t)
+    polys = []
+    for n, P in faces.values():
+        P = np.unique(np.round(np.array(P), 5), axis=0)
+        c = P.mean(0)
+        e1 = P[0] - c
+        e1 /= np.linalg.norm(e1)
+        e2 = np.cross(n, e1)
+        P = P[np.argsort(np.arctan2((P - c) @ e2, (P - c) @ e1))]
+        room = min(np.linalg.norm(np.cross(P[(i + 1) % len(P)] - P[i], c - P[i])) / np.linalg.norm(P[(i + 1) % len(P)] - P[i])
+                   for i in range(len(P)))
+        polys.append((n, c, room))
+    used = set()
+    for d in dirs:
+        d = np.array(d, float) / np.linalg.norm(d)
+        near = [i for i in range(len(polys)) if i not in used and polys[i][0] @ d > 0.85] or \
+            [max((i for i in range(len(polys)) if i not in used), key=lambda i: polys[i][0] @ d)]
+        k = max(near, key=lambda i: polys[i][2])
+        used.add(k)
+        n, c, room = polys[k]
+        size = room * fill if most is None else min(room * fill, most)
+        g.hull(node, name, prism(c - n * 0.15, size, 0.2, seg=8, M=frame(n)), col)
+
+
+def bands(c, r, cuts, seg=10, M=None, tips=True):
+    """A faceted ellipsoid along its local z (centre c, radii r) cut into bands at the local
+    z values `cuts` (from -r[2] to r[2]): one point set per band, rings shared at each cut so
+    the bands meet flush (a striped bee's abdomen). tips: the end bands close to a point."""
+    M = np.eye(3) if M is None else M
+    r = np.array(r, float)
+
+    def ring_at(z, twist=0.0):
+        k = math.sqrt(max(0.0, 1 - (z / r[2]) ** 2))
+        return [(r[0] * k * math.cos(TAU * (i + twist) / seg), r[1] * k * math.sin(TAU * (i + twist) / seg), z)
+                for i in range(seg)]
+    out = []
+    for i, (z0, z1) in enumerate(zip(cuts, cuts[1:])):
+        pts = ring_at(z0) + ring_at(z1) + ring_at((z0 + z1) / 2, 0.5)
+        if tips and i == 0:
+            pts.append((0, 0, -r[2]))
+        if tips and i == len(cuts) - 2:
+            pts.append((0, 0, r[2]))
+        out.append((M @ np.array(pts, float).T).T + np.array(c, float))
+    return out
+
+
 def legs(L, pairs, swing, n=16, axis=0):
     """{bone: track}: legs swing about X; pairs = [(bone, phase in turns)]."""
     out = {}

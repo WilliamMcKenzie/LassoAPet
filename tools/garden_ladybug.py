@@ -24,27 +24,20 @@ def build():
     root = g.group("root", (0, y0, 0))
     # underbody
     g.box(root, "Belly", (0, y0 - 0.2, 0.4), (5.6, 1.6, 7.0), "black")
-    # shell halves: three stacked layers each side, a black seam between them, spots
-    layers = [(y0 + 0.9, 3.25, 1.2, 8.0), (y0 + 2.0, 3.05, 1.1, 7.6), (y0 + 2.95, 2.6, 0.9, 6.6), (y0 + 3.65, 1.8, 0.6, 5.0)]
+    # shell halves: each one faceted half-dome mesh (QM Oct 14: meshes where blocks faked a curve),
+    # with three flat black spots lying in its facets (one more mesh)
     for side, s in (("L", -1), ("R", 1)):
         sh = g.group("Shell" + side, (s * 0.15, y0 + 1.0, -2.8), root)
-        for k, (cy, w, h, d) in enumerate(layers):
-            g.box(sh, "Shell" + side, (s * (0.15 + w / 2), cy, 0.6), (w, h, d), "red" if k < 3 else "red")
-        # rim, darker, along the bottom edge
-        g.box(sh, "Rim" + side, (s * (0.15 + 3.35 / 2), y0 + 0.35, 0.6), (3.35, 0.2, 8.2), "reddark")
-        # spots: raised black blocks on top and sides
-        for (x, y, z, w, d) in ((1.4, layers[2][0] + 0.5, -0.6, 1.3, 1.4), (1.0, layers[3][0] + 0.3, 1.6, 1.0, 1.1),
-                                (2.2, layers[1][0] + 0.6, 2.4, 1.2, 1.4)):
-            g.box(sh, "Spot" + side, (s * x, y, z), (w, 0.3, d), "black")
-        g.box(sh, "SpotSide" + side, (s * 3.45, layers[0][0] + 0.1, -1.2), (0.3, 1.0, 1.4), "black")
-        g.box(sh, "SpotSide" + side, (s * 3.15, layers[1][0] + 0.1, 2.0), (0.3, 0.9, 1.3), "black")
+        half = G.ellipsoid((0, y0 + 0.3, 0.6), (3.45, 3.75, 4.2), seg=8, rings=4, twist=0)
+        half[:, 0] = s * np.maximum(s * half[:, 0], -0.12)  # (the inner face flat, at the seam)
+        half[:, 1] = np.maximum(half[:, 1], y0 + 0.3)
+        g.hull(sh, "Shell" + side, half, "red")
+        G.plates(g, sh, "Spot" + side, half, ((s * 0.5, 1, -0.3), (s * 0.4, 0.8, 0.8), (s * 1, 0.5, 0.1)), "black", most=1.1)
         # wings folded under the shell (they spread in the gallop)
         wg = g.group("Wing" + side, (s * 0.6, y0 + 1.3, -1.0), root)
         M = Rm(("y", -s * 12))
-        g.box(wg, "Wing" + side, np.array([s * 1.6, y0 + 1.25, 1.8]), (2.0, 0.2, 5.6), "wing", M)
-        g.box(wg, "WingVein" + side, np.array([s * 1.7, y0 + 1.3, 1.8]), (0.3, 0.3, 5.2), "wingvein", M)
-    g.box(root, "Seam", (0, y0 + 3.4, 0.6), (0.3, 1.0, 4.2), "black")
-    g.box(root, "SeamBack", (0, y0 + 2.4, 3.6), (0.3, 2.0, 1.0), "black")
+        g.box(wg, "Wing" + side, np.array([s * 1.3, y0 + 1.25, 1.4]), (1.8, 0.2, 4.4), "wing", M)
+        g.box(wg, "WingVein" + side, np.array([s * 1.4, y0 + 1.3, 1.4]), (0.3, 0.3, 4.0), "wingvein", M)
 
     # head: black, white cheek patches, big googly eyes on the front, curly antennae
     neck = g.group("neck", (0, y0 + 0.8, -3.6), root)
