@@ -1914,8 +1914,8 @@ if Config.World == 3 then
 				WetSand = { rgb(204, 158, 102), rgb(190, 145, 92) }, -- (QM, Oct 14: the beach reference; was 225, 189, 120 / 208, 172, 105)
 				DampSand = { rgb(222, 180, 120), rgb(208, 167, 109) }, -- between the sand and the wet sand (QM, Oct 14; tools/world3_dampsand.luau)
 				Grass = { rgb(138, 158, 72), rgb(124, 144, 62) }, -- (the base's: muted olive, QM Oct 14; was 96, 204, 60)
-				Water = { rgb(64, 200, 196), rgb(64, 200, 196) }, -- (the turquoise tile's main colour, so the sides match it)
-				DeepWater = { rgb(36, 146, 160), rgb(36, 146, 160) },
+				Water = { rgb(53, 143, 192), rgb(53, 143, 192) }, -- (QM's tile's main colour, so the sides match it)
+				DeepWater = { rgb(38, 112, 156), rgb(38, 112, 156) },
 				Planks = { rgb(132, 96, 66), rgb(132, 96, 66) }, -- weathered dock wood
 				-- The base's walls, bottom to top (QM, Oct 14): three tiles of dark sand, light sand
 				-- the rest of the way, green grass along the very top (WorldColors.paintWall).
@@ -2040,7 +2040,7 @@ if Config.World == 3 then
 		},
 	}
 	Config.Water = table.clone(Config.Water)
-	Config.Water.Image = "rbxassetid://105892298500838" -- assets/world3/WaterTileTeal256.png (QM's 8 x 8 tile turned turquoise for the beach look, Oct 14; was his blue WaterTile256.png, 128871935822673)
+	Config.Water.Image = "rbxassetid://113940500836253" -- assets/world3/WaterTileQM256.png (QM's darker 8 x 8 tile, Oct 14, x32; was his bright blue WaterTile256.png, 128871935822673)
 	-- World 1's animals ridden here: a Horse's speed (Config.slowedHere), World 3's own
 	-- on their own curve (Config.World3Pets).
 	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
