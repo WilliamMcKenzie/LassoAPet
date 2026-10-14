@@ -900,7 +900,9 @@ local Config = {
 	-- (QM, Oct 13, later: the pet sprints home by itself again, everywhere, and the boss never
 	-- catches you (CatchAfter math.huge; it was 5 s): the only risk is obstacles, Crashes of them
 	-- crash you. Idle is unused while it sprints by itself.)
-	ReturnRun = { Idle = 0, Walk = 0.4, Ramp = 1.2, CatchAfter = math.huge, Crashes = 5 },
+	-- (QM, Oct 14, an A/B test against the 1-5 min quits: obstacles on the way home don't
+	-- slow you or crash you any more, you plough through; was Walk = 0.4, Crashes = 5)
+	ReturnRun = { Idle = 0, Walk = math.huge, Ramp = 1.2, CatchAfter = math.huge, Crashes = math.huge },
 	ReturnSprint = true, -- the ride home always a sprint (SprintSpeed x ReturnSpeed)? On again (QM, Oct 11; Oct 10 had it off, Shift to sprint)
 	ReturnFovKick = 0, -- (QM, Oct 9: plain, was 20) degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
