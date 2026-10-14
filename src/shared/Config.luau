@@ -301,7 +301,7 @@ local Config = {
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
@@ -316,6 +316,7 @@ local Config = {
 			Monarch = { At = Vector3.new(0, 0, 0.12), From = Vector3.new(0, 16, 75) }, -- (its head, from further out and above so the wings frame it: Studio saw the head too high from (0,4,50))
 			JadeAsura = { At = Vector3.new(0, 0.13, 0.3), From = Vector3.new(0, 6, 55) }, -- (its face and tusks, under the crown; a guess)
 			Sphinx = { At = Vector3.new(0, 0.28, 0.4), From = Vector3.new(0, 6, 60) }, -- (its pharaoh face, high at the front; a guess)
+			Dreadstump = { At = Vector3.new(0, 0.18, 0.3), From = Vector3.new(0, 6, 60) }, -- (World 3 Pirate Cove's Pirate King: his face under the tricorn; a guess)
 			CrystalTyrant = { At = Vector3.new(0, 0.02, 0.48), From = Vector3.new(0, 4, 34) }, -- (its eyes and teeth, halfway up: the crown makes it tall)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
@@ -554,6 +555,8 @@ local Config = {
 		Pterodactyl = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: a flying type, like the Phoenix
 		PinkButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland: a flier like the Crystal Phoenix (Oct 13)
 		Nut = { Kind = "Fly", Height = 56 }, -- World 2 Tomb: the flying sky goddess, a flier like the Crystal Phoenix (Oct 13)
+		Parrot = { Kind = "Fly", Height = 56 }, -- World 3 Pirate Cove: the pirate's macaw, a flier like the Crystal Phoenix (Oct 14)
+		JollyRogerWyvern = { Kind = "Fly", Height = 56 }, -- World 3 Pirate Cove's skeleton sea dragon, a flier (Oct 14)
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
 		-- Whale, a pink haze round the screen, and scares the animals round it off.
@@ -602,6 +605,8 @@ local Config = {
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
+		RedCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
+		GhostShip = 4, JollyRogerWyvern = 4, Dreadstump = 3, -- World 3 Pirate Cove's giga rares (XL) and its boss as a pet (guesses, Oct 14)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -1409,6 +1414,24 @@ Config.World2Pets = {
 for kind, w2 in Config.World2Pets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = w2[2], w2[3]
 end
+-- World 3's first biome, the Pirate Cove (Oct 14: tools/pirate_*.py): { speed, gold a second,
+-- hatch seconds }, a step past World 2's Tomb for each rarity. ALL GUESSES until QM sets World 3's
+-- economy (its biomes are about 2x World 2's length, so these speeds may need to go up).
+Config.World3Pets = {
+	RedCrab = { 7.6, 4000, 15 }, -- Common (guess)
+	Parrot = { 7.8, 6000, 20 }, -- Uncommon (guess)
+	BananaMonkey = { 7.8, 6000, 20 }, -- Uncommon (guess)
+	TreasureHermit = { 8.1, 12000, 90 }, -- Rare (guess)
+	EyepatchShark = { 8.5, 20000, 400 }, -- Epic (guess)
+	TreasureTurtle = { 9.2, 80000, 3000 }, -- Legendary (guess: 2x the Tomb's, as World 2 doubles each biome)
+	GhostShip = { 9.6, 400000, 3600 }, -- giga rare, 1 in 1,000 (guess: 5x the Legendary)
+	JollyRogerWyvern = { 9.6, 400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
+	Dreadstump = { 9.4, 200000, 3600 }, -- the boss as a trophy pet, 1 in 500 (guess)
+}
+for kind, w3 in Config.World3Pets do
+	Config.PetIncome[kind], Config.PetHatchTime[kind] = w3[2], w3[3]
+	Config.AnimalStats[kind] = { Speed = w3[1], Stamina = 3 }
+end
 local baseIncome = table.clone(Config.PetIncome) -- (World 1's, before World 2 changes its own)
 function Config.incomeIn(world, kind)
 	local own = (world == 2 and Config.World2Pets[kind]) or (world == 3 and Config.World3Pets and Config.World3Pets[kind])
@@ -1429,21 +1452,14 @@ for _, kind in {
 } do
 	Config.World2Animals[kind] = true
 end
--- World 3's own animals (QM, Oct 14: Pirate Cove, Garden, Candyland, Cnidaria), filled in as
--- the biome animal threads hand them over. As in World 2, anyone else's pets ridden in World 3
--- (World 1's and World 2's) run at a Horse's speed there.
+-- World 3's own animals (Config.World3Pets'). Its speeds go on from the Tomb's, so World 2's pets
+-- keep theirs in World 3 and only World 1's run at a Horse's speed there (Oct 14; QM to decide).
 Config.World3Animals = {}
-for _, kind in { -- (none yet)
-} do
+for kind in Config.World3Pets do
 	Config.World3Animals[kind] = true
 end
--- World 3's animals on its own curve: { speed, gold a second, hatch seconds }, as World2Pets.
-Config.World3Pets = {}
-for kind, w3 in Config.World3Pets do
-	Config.PetIncome[kind], Config.PetHatchTime[kind] = w3[2], w3[3]
-end
--- Each world's own animals: [world] = the set (World 1's: everything not in the others).
-local OWN = { [2] = Config.World2Animals, [3] = Config.World3Animals }
+-- Each world's own animals: [world] = the set that runs at its own speed there (World 1's: all).
+local OWN = { [2] = Config.World2Animals, [3] = setmetatable(table.clone(Config.World2Animals), { __index = Config.World3Animals }) }
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
 function Config.slowedHere(kind, fuse)
 	local own = OWN[Config.World]
@@ -1790,7 +1806,9 @@ if Config.World == 3 then
 			GroundColors = SAND,
 			WallColors = { rgb(124, 82, 50), rgb(112, 73, 44) },
 			CapColor = rgb(240, 218, 160),
-			Herd = { Fish = 1 },
+			-- (Oct 14, the Pirate Cove animals thread: weights guesses, as the Tomb's by rarity; its
+			-- giga rares and the boss as a trophy pet added below)
+			Herd = { RedCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
 			Patches = {
 				Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
 				WetSand = { rgb(206, 172, 110), rgb(194, 160, 98) },
@@ -1877,7 +1895,25 @@ if Config.World == 3 then
 		{ -7968, 88 }, { -8400, 114 }, { -8880, 114 }, { -9320, 94 }, { -9880, 128 }, { -10520, 128 }, { -11040, 104 }, -- Candyland
 		{ -11808, 100 }, { -12400, 130 }, { -13000, 137 }, { -13640, 112 }, { -14320, 112 }, { -15000, 137 }, { -15840, 137 }, { -16520, 118 }, { -17280, 132 }, { -18048, 128 }, -- Cnidaria
 	}
-	Config.Boss.ByBiome = { PirateCove = "Seraph", Garden = "CrimsonSeraph", Candyland = "CrystalSeraph", Cnidaria = "Monarch" } -- (placeholders: World 2's in each slot)
+	-- Each biome's trophies (as World 2's angels and Black Widow): 1 in `n` of its stampede each.
+	local function trophies(i, n, kinds)
+		local total = 0
+		for _, weight in Config.Biomes[i].Herd do
+			total += weight
+		end
+		for _, kind in kinds do
+			Config.Biomes[i].Herd[kind] = total / (n - #kinds)
+		end
+	end
+	trophies(1, 1000, { "GhostShip", "JollyRogerWyvern" }) -- the Pirate Cove's giga rares
+	Config.Biomes[1].Herd.Dreadstump = Config.Biomes[1].Herd.GhostShip / 2 -- its boss as a trophy pet, 1 in 500
+	-- Bosses: each biome's own as they come; the rest World 2's in that slot for now.
+	Config.Boss.ByBiome = {
+		PirateCove = "Dreadstump", -- the Pirate King chases you home (silent till a cry is picked)
+		Garden = "CrimsonSeraph",
+		Candyland = "CrystalSeraph",
+		Cnidaria = "Monarch",
+	}
 	Config.DefaultPet = "ArmoredHorse" -- (World 2's starter for now)
 	-- World 3's quests: reach each biome (each egg a placeholder: World 2's in that slot), and
 	-- the merge line. (No invite line, as World 2.)
@@ -1894,13 +1930,13 @@ if Config.World == 3 then
 	}
 	Config.Water = table.clone(Config.Water)
 	Config.Water.Image = "rbxassetid://128871935822673" -- assets/world3/WaterTile256.png (QM's blue 8 x 8 tile, x32)
-	-- Everyone else's animals ridden here: a Horse's speed (Config.slowedHere), World 3's own
+	-- World 1's animals ridden here: a Horse's speed (Config.slowedHere), World 3's own
 	-- on their own curve (Config.World3Pets).
 	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
 	for kind, stats in Config.AnimalStats do
 		Config.AnimalStats[kind] = table.clone(stats)
 		Config.AnimalStats[kind].Speed = if Config.World3Pets[kind] then Config.World3Pets[kind][1]
-			elseif Config.World3Animals[kind] then stats.Speed
+			elseif Config.World3Animals[kind] or Config.World2Animals[kind] then stats.Speed
 			else horse
 	end
 	for kind, w3 in Config.World3Pets do
