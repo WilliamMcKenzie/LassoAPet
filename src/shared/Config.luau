@@ -301,7 +301,7 @@ local Config = {
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50, FlytrapQueen = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
@@ -317,6 +317,7 @@ local Config = {
 			JadeAsura = { At = Vector3.new(0, 0.13, 0.3), From = Vector3.new(0, 6, 55) }, -- (its face and tusks, under the crown; a guess)
 			Sphinx = { At = Vector3.new(0, 0.28, 0.4), From = Vector3.new(0, 6, 60) }, -- (its pharaoh face, high at the front; a guess)
 			Dreadstump = { At = Vector3.new(0, 0.18, 0.3), From = Vector3.new(0, 6, 60) }, -- (World 3 Pirate Cove's Pirate King: his face under the tricorn; a guess)
+			FlytrapQueen = { At = Vector3.new(0, 0.32, 0.3), From = Vector3.new(0, 10, 70) }, -- World 3 Garden: the Queen's crowned head, high in the middle (a guess)
 			CrystalTyrant = { At = Vector3.new(0, 0.02, 0.48), From = Vector3.new(0, 4, 34) }, -- (its eyes and teeth, halfway up: the crown makes it tall)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
@@ -551,6 +552,7 @@ local Config = {
 		CrystalPhoenix = { Kind = "Fly", Height = 56 }, -- QM, Oct 13: "flying sprint like normal phoenix"
 		OrangeButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland Maze: flies like the Crystal Phoenix (QM, Oct 13)
 		Hawkmoth = { Kind = "Fly", Height = 56 }, -- (Oct 13) a flyer like the Crystal Phoenix
+		Bumblebee = { Kind = "Fly", Height = 56 }, -- World 3 Garden: a flier like the Hawkmoth (Oct 14)
 		EagleSentry = { Kind = "Fly", Height = 56 }, -- (Oct 13) the Tomb's falcon, a flyer like the Crystal Phoenix
 		Pterodactyl = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: a flying type, like the Phoenix
 		PinkButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland: a flier like the Crystal Phoenix (Oct 13)
@@ -607,6 +609,8 @@ local Config = {
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
 		RedCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
 		GhostShip = 4, JollyRogerWyvern = 4, Dreadstump = 3, -- World 3 Pirate Cove's giga rares (XL) and its boss as a pet (guesses, Oct 14)
+		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
+		RafflesiaBeast = 4, AncientTreant = 4, FlytrapQueen = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -1414,7 +1418,7 @@ Config.World2Pets = {
 for kind, w2 in Config.World2Pets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = w2[2], w2[3]
 end
--- World 3's first biome, the Pirate Cove (Oct 14: tools/pirate_*.py): { speed, gold a second,
+-- World 3's own animals, the Pirate Cove's (Oct 14: tools/pirate_*.py) and the Garden's: { speed, gold a second,
 -- hatch seconds }, a step past World 2's Tomb for each rarity. ALL GUESSES until QM sets World 3's
 -- economy (its biomes are about 2x World 2's length, so these speeds may need to go up).
 Config.World3Pets = {
@@ -1427,6 +1431,19 @@ Config.World3Pets = {
 	GhostShip = { 9.6, 400000, 3600 }, -- giga rare, 1 in 1,000 (guess: 5x the Legendary)
 	JollyRogerWyvern = { 9.6, 400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
 	Dreadstump = { 9.4, 200000, 3600 }, -- the boss as a trophy pet, 1 in 500 (guess)
+	-- World 3's Garden (biome 2 of World 3; Oct 14). ALL GUESSES until QM sets them: about 2x the
+	-- Tomb's by rarity per biome past it (drafted before Pirate Cove's numbers), speeds a step
+	-- above the Tomb's. The giga rares and the Queen are slow trophies like the Seraphs (0.5),
+	-- earning 10x the Garden's Legendary.
+	Ladybug = { 8.0, 9600, 60 },
+	Bumblebee = { 8.2, 9600, 60 },
+	ToadstoolFrog = { 8.6, 24000, 240 },
+	VineMonster = { 8.6, 24000, 240 },
+	VenusFlytrap = { 9.2, 36000, 600 },
+	SunflowerLion = { 10.5, 160000, 2700 },
+	RafflesiaBeast = { 0.5, 1600000, 3600 },
+	AncientTreant = { 0.5, 1600000, 3600 },
+	FlytrapQueen = { 0.5, 1600000, 3600 },
 }
 for kind, w3 in Config.World3Pets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = w3[2], w3[3]
@@ -1834,7 +1851,9 @@ if Config.World == 3 then
 			GroundColors = { rgb(76, 170, 52), rgb(68, 156, 46) },
 			WallColors = { rgb(35, 86, 31), rgb(30, 74, 27) },
 			CapColor = rgb(255, 120, 170),
-			Herd = { Fish = 1 },
+			-- (Oct 14, the Garden animals thread: weights as the Crimson Lands' by rarity, guesses; its
+			-- giga rares and the Flytrap Queen added below)
+			Herd = { Ladybug = 0.3, Bumblebee = 0.3, ToadstoolFrog = 0.2, VineMonster = 0.2, VenusFlytrap = 0.12, SunflowerLion = 0.05 },
 			Patches = {
 				Soil = { rgb(110, 72, 44), rgb(98, 64, 38) },
 				Grass = { rgb(126, 214, 72), rgb(114, 200, 62) },
@@ -1906,11 +1925,12 @@ if Config.World == 3 then
 		end
 	end
 	trophies(1, 1000, { "GhostShip", "JollyRogerWyvern" }) -- the Pirate Cove's giga rares
-	Config.Biomes[1].Herd.Dreadstump = Config.Biomes[1].Herd.GhostShip / 2 -- its boss as a trophy pet, 1 in 500
+	Config.Biomes[1].Herd.Dreadstump = Config.Biomes[1].Herd.GhostShip * 2 -- its boss as a trophy pet, 1 in 500
+	trophies(2, 1000, { "RafflesiaBeast", "AncientTreant", "FlytrapQueen" }) -- the Garden's giga rares and its boss as a trophy pet
 	-- Bosses: each biome's own as they come; the rest World 2's in that slot for now.
 	Config.Boss.ByBiome = {
 		PirateCove = "Dreadstump", -- the Pirate King chases you home (silent till a cry is picked)
-		Garden = "CrimsonSeraph",
+		Garden = "FlytrapQueen",
 		Candyland = "CrystalSeraph",
 		Cnidaria = "Monarch",
 	}

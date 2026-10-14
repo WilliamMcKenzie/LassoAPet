@@ -53,6 +53,7 @@ local IDS = {
 	boss_Dreadstump = "", -- World 3 Pirate Cove's Pirate King: silent until a cry is picked (Oct 14)
 	boss_JadeAsura = "rbxassetid://129162115855106", -- the Temple's boss: the Elder Boar's monstergrowl (QM, Oct 13)
 	boss_Sphinx = "rbxassetid://95169379454314", -- the Ancient Tomb's boss: the Cactus's angry alien cat growl (QM, Oct 13)
+	boss_FlytrapQueen = "rbxassetid://95169379454314", -- World 3 Garden's boss: borrows the Cactus growl until QM picks a cry
 	reveal_pop = "rbxassetid://4612378086", -- the egg card lands on its rarity (after the flicks): rewardscreenreveal (QM's pick, Oct 9; was 117371326373841)
 	egg_hatch = "rbxassetid://96102213526905", -- an egg in your pen hatches: Rewards (QM's pick, Oct 9; was 112644148635720)
 	gold_tick = "rbxassetid://123673857032707", -- gold counting up
