@@ -23,7 +23,6 @@ local IDS = {
 	GhostShip_Flag_root = 0,
 	GhostShip_Gold_root = 0,
 	GhostShip_Hull_root = 0,
-	GhostShip_Hulldark_Jaw = 0,
 	GhostShip_Mast_root = 0,
 	GhostShip_Rail_root = 0,
 	GhostShip_Sail_SailF = 0,

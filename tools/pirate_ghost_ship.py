@@ -1,4 +1,7 @@
-"""Ghost Ship: World 3 Pirate Cove's giga rare (Oct 14; about 1 in 1000). QM (Oct 14): "use the actual
+"""SUPERSEDED (Oct 14): QM edited the result in Blockbench (dropped the face and jaw);
+designs/world3/pirate/GhostShip.bbmodel is the source now, so don't rerun this over it.
+
+Ghost Ship: World 3 Pirate Cove's giga rare (Oct 14; about 1 in 1000). QM (Oct 14): "use the actual
 ship mesh as a base", so it is the Pirate Cove's pirate ship prop (tools/pirate_meshes.py ship(),
 the big ship in the lagoon) at 0.6x, every convex piece a low-poly mesh, recoloured haunted: a
 purple hull with a gold stripe, glowing ghost-cyan sails, a black Jolly Roger. It's alive: big
