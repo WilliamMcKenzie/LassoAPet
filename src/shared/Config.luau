@@ -1920,6 +1920,7 @@ if Config.World == 3 then
 				-- The base's walls, bottom to top (QM, Oct 14): three tiles of dark sand, light sand
 				-- the rest of the way, green grass along the very top (WorldColors.paintWall).
 				BaseWallLow = { rgb(206, 172, 110), rgb(194, 160, 98) },
+				BaseWallMid = { rgb(233, 204, 140), rgb(219, 189, 126) }, -- the damp band between, ragged (QM, Oct 14; tools/world3_wallmid.luau)
 				BaseWall = SAND,
 				BaseCap = { rgb(96, 204, 60), rgb(96, 204, 60) },
 			},
