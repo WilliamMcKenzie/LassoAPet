@@ -199,7 +199,7 @@ def animations():
             a = math.radians(22.5 + 45 * k)
             tx, tz = math.cos(a), -math.sin(a)  # the panel's hinge (tangent) axis
             tr[f"Skirt{k + 1}"] = [track(L, lambda u, tx=tx, tz=tz: (
-                -tx * pulse * (0.5 + math.sin(TAU * u)), 0, -tz * pulse * (0.5 + math.sin(TAU * u))), 16)]
+                -tx * pulse * (0.5 + math.sin(TAU * u)), 0, -tz * pulse * (0.5 + math.sin(TAU * u))), 8)]
         for k in range(12):
             a = math.radians(15 + 30 * k)
             tx, tz = math.cos(a), -math.sin(a)
@@ -212,7 +212,7 @@ def animations():
                     w = amp * math.sin(TAU * u - ph)
                     s = 0.6 * amp * math.sin(TAU * u - ph - 1.3)
                     return (tx * w + sx * s + (trail if j == 0 else trail * 0.3), 0, tz * w + sz * s)
-                tr[f"Tent{k + 1}{sfx}"] = [track(L, f, 16)]
+                tr[f"Tent{k + 1}{sfx}"] = [track(L, f, 8)]  # (8 keys a loop: smooth sines, and keeps the model under the 200k-character script limit)
         for k in range(4):
             a = math.radians(45 + 90 * k)
             tx, tz = math.cos(a), -math.sin(a)
@@ -220,7 +220,7 @@ def animations():
                 amp = armamp * (1 + 0.3 * j)
                 tr[f"Arm{k + 1}{sfx}"] = [track(L, lambda u, amp=amp, k=k, j=j, tx=tx, tz=tz: (
                     tx * amp * math.sin(TAU * u - k - 1.0 * j) + (trail * 0.8 if j == 0 else 0), 0,
-                    tz * amp * math.sin(TAU * u - k - 1.0 * j)), 16)]
+                    tz * amp * math.sin(TAU * u - k - 1.0 * j)), 8)]
         tr["Orbit"] = [track(L, lambda u: (0, -spin * u, 0), 16, interp="linear")]
         for k in range(4):
             tr[f"Minion{k + 1}"] = [track(L, lambda u, k=k: (0, 0.6 * math.sin(TAU * 2 * u - k * 1.6), 0), 16, "position")]
