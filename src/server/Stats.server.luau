@@ -166,6 +166,14 @@ local function report(arg)
 	line("  Events: mounted %d, lasso chance %d, throws %d, landed %d, boss/return %d, quests opened %d",
 		r.c("mounted"), r.c("lassoChance"), r.c("lassoThrow"), r.c("lassoLand"), r.c("returnStart"), r.c("questsOpened"))
 
+	-- The shop and Robux (QM, Oct 14): % of completed sessions that opened the shop, and that bought anything.
+	line("SHOP: opened in %s of sessions (%d opens); bought something in %s (%d purchases, R$%d from products)",
+		pct(r.c("shopOpened"), ended), r.c("shopOpens"), pct(r.c("bought"), ended), r.c("purchases"), r.c("robux"))
+	for _, seg in { "new", "ret" } do
+		local e = r.c("end", seg)
+		line("  %s: opened %s, bought %s", if seg == "new" then "New" else "Returning", pct(r.c("shopOpened", seg), e), pct(r.c("bought", seg), e))
+	end
+
 	-- First-session survival (completed first sessions only).
 	local entrants = r.c("fsEntrant")
 	local alive = {}

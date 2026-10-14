@@ -16,6 +16,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Telemetry = require(script.Parent.Telemetry) -- (/stats: purchases)
 
 local continueRide = Instance.new("RemoteEvent")
 continueRide.Name = "ContinueRide"
@@ -296,6 +297,9 @@ MarketplaceService.ProcessReceipt = function(receipt)
 	if offer then
 		local granted = record(receipt.PlayerId, receipt.PurchaseId, offer)
 		local buyer = Players:GetPlayerByUserId(receipt.PlayerId)
+		if granted == true then
+			Telemetry.purchase(buyer, receipt.CurrencySpent) -- (/stats: % who bought)
+		end
 		if granted and receipt.ProductId == Config.SpeedupEgg.ProductId then
 			local player = Players:GetPlayerByUserId(receipt.PlayerId)
 			if player then hatchPending[player] = nil end
@@ -304,6 +308,7 @@ MarketplaceService.ProcessReceipt = function(receipt)
 	end
 	local player = Players:GetPlayerByUserId(receipt.PlayerId)
 	if player and isContinue[receipt.ProductId] then
+		Telemetry.purchase(player, receipt.CurrencySpent)
 		continueRide:FireClient(player, true)
 		return Enum.ProductPurchaseDecision.PurchaseGranted
 	end

@@ -364,6 +364,10 @@ function Shop.open()
 	if funnelStep then
 		funnelStep:FireServer("shop")
 	end
+	local telemetry = ReplicatedStorage:FindFirstChild("Telemetry") -- (/stats: the shop's open rate)
+	if telemetry then
+		telemetry:FireServer("shopOpened")
+	end
 	if legendCard and legendOdds then -- the mystery egg first, every time
 		legendOdds = false
 		legendCard.Image = CARDS.Legendary.id

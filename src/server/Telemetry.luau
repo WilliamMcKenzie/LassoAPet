@@ -150,6 +150,17 @@ function Telemetry.once(player, name)
 	end
 end
 
+-- A Robux purchase (Shop.server's products, Passes' game passes): /stats' "bought" rate.
+function Telemetry.purchase(player, robux)
+	if player and sessions[player] then
+		Telemetry.once(player, "bought")
+		count(player, "purchases")
+		if type(robux) == "number" and robux > 0 then
+			count(player, "robux", robux)
+		end
+	end
+end
+
 -- Online seconds this session, both worlds.
 local function elapsed(s)
 	return s.onlineBase + os.time() - s.arrived
@@ -591,7 +602,7 @@ end)
 -- The client's reports: "ready" (with its device), "lassoChance", "questsOpened". Each
 -- name counted at most once a ride or so (RATE seconds apart).
 local RATE = 5
-local CLIENT = { ready = true, lassoChance = true, questsOpened = true }
+local CLIENT = { ready = true, lassoChance = true, questsOpened = true, shopOpened = true }
 local DEVICES = { pc = true, phone = true, tablet = true, console = true }
 local remote = Instance.new("RemoteEvent")
 remote.Name = "Telemetry"
@@ -620,6 +631,9 @@ remote.OnServerEvent:Connect(function(player, name, device)
 		end
 		s.lassoChance = true
 		count(player, "lassoChance")
+	elseif name == "shopOpened" then -- (QM, Oct 14: /stats' shop open rate)
+		Telemetry.once(player, "shopOpened")
+		count(player, "shopOpens")
 	else
 		count(player, name)
 	end
