@@ -389,8 +389,14 @@ for _, p in W.Walls:GetChildren() do
 			elseif z < 0 and x < 0 then "frontleft"
 			elseif z < 0 and x > 0 then "frontright"
 			else nil
+		-- A wall already out on its new line is left alone (a rerun), so QM's restyle (dark
+		-- sand at the foot, light sand, grass-green top) is kept however Studio built it.
+		local placed = false
 		for _, w in WALLS do
-			if which and w[1] == which and w[2] == p.Name then
+			placed = placed or (math.abs(x - w[3].X) < 1 and math.abs(z - w[3].Z) < 1)
+		end
+		for _, w in WALLS do
+			if which and not placed and w[1] == which and w[2] == p.Name then
 				p.Size = w[4]
 				p.CFrame = CFrame.new(w[3])
 				moved += 1
