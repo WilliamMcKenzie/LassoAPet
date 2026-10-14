@@ -18,33 +18,45 @@ C = {"red": (214, 26, 38), "reddark": (150, 14, 28), "black": (30, 26, 32), "whi
      "wing": (255, 196, 92), "wingvein": (176, 98, 30)}
 
 
+def spot(c, r, d, size, n=16):
+    """A round black spot curving with the shell (ellipsoid c, r) round direction d: a thin lens of
+    shell-surface points just outside it, so it hugs the dome instead of standing off it flat."""
+    d = np.array(d, float) / np.linalg.norm(d)
+    e1 = np.cross(d, (0, 1, 0) if abs(d[1]) < 0.9 else (1, 0, 0))
+    e1 /= np.linalg.norm(e1)
+    e2 = np.cross(d, e1)
+    pts = []
+    for k in range(n + 1):
+        a = TAU * k / n
+        q = d * 3.6 + (e1 * np.cos(a) + e2 * np.sin(a)) * size * (k < n)  # (the last: the centre)
+        q /= np.linalg.norm(q)
+        p = q / np.linalg.norm(q / r)  # the shell's surface that way
+        pts += [c + p + q * 0.06, c + p - q * 0.25]
+    return pts
+
+
 def build():
     g = Garden("Ladybug", C)
     y0 = 2.0
     root = g.group("root", (0, y0, 0))
     # underbody
-    g.box(root, "Belly", (0, y0 - 0.2, 0.4), (5.6, 1.6, 7.0), "black")
-    # shell halves: three stacked layers each side, a black seam between them, spots
-    layers = [(y0 + 0.9, 3.25, 1.2, 8.0), (y0 + 2.0, 3.05, 1.1, 7.6), (y0 + 2.95, 2.6, 0.9, 6.6), (y0 + 3.65, 1.8, 0.6, 5.0)]
+    g.box(root, "Belly", (0, y0 - 0.2, 0.6), (4.4, 1.6, 6.0), "black")  # (inside the shell's round edge)
+    # shell halves: each one faceted half-dome mesh (QM Oct 14: meshes where blocks faked a curve),
+    # with three flat black spots lying in its facets (one more mesh)
     for side, s in (("L", -1), ("R", 1)):
         sh = g.group("Shell" + side, (s * 0.15, y0 + 1.0, -2.8), root)
-        for k, (cy, w, h, d) in enumerate(layers):
-            g.box(sh, "Shell" + side, (s * (0.15 + w / 2), cy, 0.6), (w, h, d), "red" if k < 3 else "red")
-        # rim, darker, along the bottom edge
-        g.box(sh, "Rim" + side, (s * (0.15 + 3.35 / 2), y0 + 0.35, 0.6), (3.35, 0.2, 8.2), "reddark")
-        # spots: raised black blocks on top and sides
-        for (x, y, z, w, d) in ((1.4, layers[2][0] + 0.5, -0.6, 1.3, 1.4), (1.0, layers[3][0] + 0.3, 1.6, 1.0, 1.1),
-                                (2.2, layers[1][0] + 0.6, 2.4, 1.2, 1.4)):
-            g.box(sh, "Spot" + side, (s * x, y, z), (w, 0.3, d), "black")
-        g.box(sh, "SpotSide" + side, (s * 3.45, layers[0][0] + 0.1, -1.2), (0.3, 1.0, 1.4), "black")
-        g.box(sh, "SpotSide" + side, (s * 3.15, layers[1][0] + 0.1, 2.0), (0.3, 0.9, 1.3), "black")
+        shell_c, shell_r = np.array([0, y0 + 0.3, 0.6]), np.array([3.45, 3.75, 4.2])
+        half = G.ellipsoid(shell_c, shell_r, seg=16, rings=8, twist=0)
+        half[:, 0] = s * np.maximum(s * half[:, 0], -0.12)  # (the inner face flat, at the seam)
+        half[:, 1] = np.maximum(half[:, 1], y0 + 0.3)
+        g.hull(sh, "SmoothShell" + side, half, "red")  # (smooth, no studs: coordinator Oct 14)
+        for d, r in (((s * 0.5, 1, -0.3), 0.75), ((s * 0.4, 0.8, 0.8), 0.6), ((s * 1, 0.45, 0.1), 0.85)):
+            g.hull(sh, "SmoothSpot" + side, spot(shell_c, shell_r, d, r), "black")
         # wings folded under the shell (they spread in the gallop)
         wg = g.group("Wing" + side, (s * 0.6, y0 + 1.3, -1.0), root)
         M = Rm(("y", -s * 12))
-        g.box(wg, "Wing" + side, np.array([s * 1.6, y0 + 1.25, 1.8]), (2.0, 0.2, 5.6), "wing", M)
-        g.box(wg, "WingVein" + side, np.array([s * 1.7, y0 + 1.3, 1.8]), (0.3, 0.3, 5.2), "wingvein", M)
-    g.box(root, "Seam", (0, y0 + 3.4, 0.6), (0.3, 1.0, 4.2), "black")
-    g.box(root, "SeamBack", (0, y0 + 2.4, 3.6), (0.3, 2.0, 1.0), "black")
+        g.box(wg, "Wing" + side, np.array([s * 1.3, y0 + 1.25, 1.4]), (1.8, 0.2, 4.4), "wing", M)
+        g.box(wg, "WingVein" + side, np.array([s * 1.4, y0 + 1.3, 1.4]), (0.3, 0.3, 4.0), "wingvein", M)
 
     # head: black, white cheek patches, big googly eyes on the front, curly antennae
     neck = g.group("neck", (0, y0 + 0.8, -3.6), root)

@@ -1,7 +1,7 @@
 -- Bumblebee: World 3's Garden Uncommon (Oct 14; roster approved by the coordinator for QM): a round fuzzy bumblebee in yellow and black bands, a big black head with googly
 -- eyes and pink cheeks, four pale blue wings, a pyramid stinger. It hovers and flies like the
 -- Hawkmoth (Config.SprintSpecials). You ride on its back.
--- designs/garden/Bumblebee.bbmodel (tools/garden_bumblebee.py), converted (--zyx) into BumblebeeModel.luau by
+-- designs/garden/Bumblebee.bbmodel (tools/garden_bumblebee.py), converted (--zyx --meshes: its round body and wings are low-poly meshes, QM Oct 14) into BumblebeeModel.luau by
 -- tools/bbmodel_to_luau.py.
 
 local Horse = require(script.Parent.Horse)

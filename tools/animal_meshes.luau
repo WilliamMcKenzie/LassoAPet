@@ -29,6 +29,18 @@ local IDS = {
 	GhostShip_Sail_SailM = 101983046030341,
 	GhostShip_Sail_root = 107969410845724,
 	GhostShip_White_Flag = 74100158036798,
+	Ladybug_Black_ShellL = 0, -- (the Ladybug shell and the Bumblebee body and wings, QM Oct 14)
+	Ladybug_Black_ShellR = 0,
+	Ladybug_Red_ShellL = 0,
+	Ladybug_Red_ShellR = 0,
+	Bumblebee_Black_Abdomen = 0,
+	Bumblebee_Black_root = 0,
+	Bumblebee_Wing_WingBL = 0,
+	Bumblebee_Wing_WingBR = 0,
+	Bumblebee_Wing_WingFL = 0,
+	Bumblebee_Wing_WingFR = 0,
+	Bumblebee_Yellow_Abdomen = 0,
+	Bumblebee_Yellow_root = 0,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then
