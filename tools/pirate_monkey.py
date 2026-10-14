@@ -1,4 +1,7 @@
-"""Banana Monkey: World 3 Pirate Cove's Rare (Oct 14), the pirate's monkey (RotMG's Cave Pirate
+"""SUPERSEDED (Oct 14): QM rebuilt the Banana Monkey in Blockbench (designs/world3/pirate/BananaMonkey.bbmodel is
+the source now); don't rerun this over it.
+
+Banana Monkey: World 3 Pirate Cove's Rare (Oct 14), the pirate's monkey (RotMG's Cave Pirate
 Monkey). A chunky brown monkey knuckle-walking on all fours, chest high like a little gorilla:
 a tan face and muzzle with a big grin, round ears, googly plate eyes, a red polka-dot pirate
 bandana knotted at the back, a gold hoop earring, tan hands and feet, and its long tail curled
