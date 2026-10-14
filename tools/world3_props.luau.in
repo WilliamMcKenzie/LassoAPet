@@ -1,0 +1,90 @@
+-- World 3's props (Oct 14; the World 3 props thread's sets, approved by the coordinator for
+-- QM). Made by tools/world3_props.py: edit that and re-make this, not this. Run in Studio
+-- (Edit, execute_luau) on the World 3 Place, after tools/world3_course.luau and the four
+-- floor scripts. Re-running is fine (it replaces its own, tagged World3Prop).
+-- Clusters hugging the walls, the course's middle clear: palms, crates, cannons, treasure,
+-- docks, rowboats, skull rocks and a shipwreck in Pirate Cove; giant flowers, hedges, fences,
+-- toadstools, topiary, gnomes and watering cans in the Garden; lollipops, candy canes, ice
+-- creams, cupcakes, chocolate, gingerbread houses and donut arches in Candyland; kelp, coral,
+-- sea fans, columns, bubble vents and clams in Cnidaria. Big pieces go in World.Obstacles
+-- (smashed when ridden into: an invisible Base footprint and a Tier); small ones in
+-- World.Decor.Props, walk-through.
+-- Each piece is cloned from the first Model of its name under ServerStorage.World3Assets
+-- (else anywhere under ServerStorage: the base's palms, crates and barrels): its coloured
+-- MeshParts at 1x, pivot at its base's middle, front facing -z.
+local W = workspace.World
+local storage = game:GetService("ServerStorage")
+local assets = storage:FindFirstChild("World3Assets") or storage
+-- { biome, name, x, y (the tile's top), z, yaw, tier (0 = walk-through decor), base size x, base size z, scale }
+local PROPS = {
+--PROPS--
+}
+
+for _, m in W.Obstacles:GetChildren() do
+	if m:GetAttribute("World3Prop") then
+		m:Destroy()
+	end
+end
+local decor = W.Decor:FindFirstChild("Props")
+if not decor then
+	decor = Instance.new("Folder")
+	decor.Name = "Props"
+	decor.Parent = W.Decor
+end
+for _, m in decor:GetChildren() do
+	if m:GetAttribute("World3Prop") then
+		m:Destroy()
+	end
+end
+
+local found = {}
+local function template(name)
+	if found[name] == nil then
+		local m = assets:FindFirstChild(name, true)
+		if not (m and m:IsA("Model")) then
+			m = storage:FindFirstChild(name, true)
+		end
+		found[name] = if m and m:IsA("Model") then m else false
+	end
+	return found[name] or nil
+end
+
+local missing, placed = {}, 0
+for _, r in PROPS do
+	local t = template(r[2])
+	if not t then
+		missing[r[2]] = true
+		continue
+	end
+	local m = t:Clone()
+	m:SetAttribute("World3Prop", r[1])
+	m:ScaleTo(r[10])
+	local at = CFrame.new(r[3], r[4], r[5]) * CFrame.Angles(0, math.rad(r[6]), 0)
+	m:PivotTo(at)
+	for _, p in m:GetDescendants() do
+		if p:IsA("BasePart") then
+			p.Anchored = true
+			p.CanCollide = r[7] > 0
+		end
+	end
+	if r[7] > 0 then
+		local base = Instance.new("Part")
+		base.Name = "Base"
+		base.Anchored, base.CanCollide, base.CanQuery, base.CanTouch = true, false, false, false
+		base.Transparency = 1
+		base.Size = Vector3.new(r[8], 1, r[9])
+		base.CFrame = at * CFrame.new(0, 0.5, 0)
+		base.Parent = m
+		m:SetAttribute("Tier", r[7])
+		m.Parent = W.Obstacles
+	else
+		m.Parent = decor
+	end
+	placed += 1
+end
+local names = {}
+for n in missing do
+	table.insert(names, n)
+end
+table.sort(names)
+return string.format("%d props placed%s", placed, if #names > 0 then " | not found in ServerStorage: " .. table.concat(names, ", ") else "")
