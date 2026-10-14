@@ -20,6 +20,13 @@ CFrame.Angles), the default here. Blockbench itself means R = Rz * Ry * Rx, whic
 differs when a rotation turns about two or more axes. For a model built by hand in
 Blockbench (QM's King Crab), pass --zyx so those parts come out as Blockbench shows them:
   python3 tools/bbmodel_to_luau.py --zyx designs/ocean/KingCrab.bbmodel src/shared/Animals/KingCrabModel.luau
+
+Meshes (QM, Oct 14: a mesh only where blocks can't make the shape): with --meshes DIR, the
+meshes the rules above can't make from blocks (a Garden.hull's low-poly dome) on a bone in
+one colour are merged into one mesh, written to DIR/<Kind>_<Part>.obj (flat shaded,
+planar UVs in 0.5-stud studs, centred on its box) and listed as a MeshPart with
+mesh = "<Kind>_<Part>"; Rig.luau clones it from ReplicatedStorage.AnimalMeshes.
+  python3 tools/bbmodel_to_luau.py --zyx --meshes assets/meshes/ToadstoolFrog designs/garden/ToadstoolFrog.bbmodel src/shared/Animals/ToadstoolFrogModel.luau
 """
 
 import base64
@@ -263,6 +270,68 @@ def mesh_parts(e, model_center):
     raise ValueError(f"{e['name']}: mesh with {n} vertices and faces {faces} isn't supported")
 
 
+def supported(e, model_center):
+    """Whether mesh_parts() makes this mesh from blocks and wedges."""
+    try:
+        mesh_parts(e, model_center)
+        return True
+    except ValueError:
+        return False
+
+
+def element_tris(e):
+    """An element's faces as outward triangles in model space (studs)."""
+    if e["type"] == "cube":
+        lo, hi = np.array(e["from"]) * SCALE, np.array(e["to"]) * SCALE
+        R = element_rotation(e)
+        o = np.array(e.get("origin") or (0, 0, 0), float) * SCALE
+        c = lambda i, j, k: R @ (np.array([(lo[0], hi[0])[i], (lo[1], hi[1])[j], (lo[2], hi[2])[k]]) - o) + o  # noqa: E731
+        polys = [[c(1, 0, 0), c(1, 1, 0), c(1, 1, 1), c(1, 0, 1)], [c(0, 0, 0), c(0, 1, 0), c(0, 1, 1), c(0, 0, 1)],
+                 [c(0, 1, 0), c(1, 1, 0), c(1, 1, 1), c(0, 1, 1)], [c(0, 0, 0), c(1, 0, 0), c(1, 0, 1), c(0, 0, 1)],
+                 [c(0, 0, 1), c(1, 0, 1), c(1, 1, 1), c(0, 1, 1)], [c(0, 0, 0), c(1, 0, 0), c(1, 1, 0), c(0, 1, 0)]]
+    else:
+        V = mesh_verts(e)
+        polys = [[V[k] for k in f["vertices"]] for f in e["faces"].values()]
+        polys = [order_quad(q) if len(q) == 4 else q for q in polys]
+    centre = np.mean([v for q in polys for v in q], axis=0)  # (elements are convex)
+    tris = []
+    for q in polys:
+        for t in range(1, len(q) - 1):
+            tri = np.array([q[0], q[t], q[t + 1]])
+            n = np.cross(tri[1] - tri[0], tri[2] - tri[0])
+            if np.linalg.norm(n) < 1e-9:
+                continue
+            tris.append(tri if np.dot(n, tri.mean(0) - centre) > 0 else tri[::-1])
+    return tris
+
+
+STUD = 0.5  # studs: a mesh's UVs are in these (the animals' StudsHalf studs)
+
+
+def stud_axes(n):
+    """Fixed in-plane axes for a face normal, so the studs run on across a plane's triangles."""
+    ref = np.array([0.0, 1.0, 0.0]) if abs(n[1]) < 0.9 else np.array([1.0, 0.0, 0.0])
+    e1 = np.cross(ref, n)
+    e1 /= np.linalg.norm(e1)
+    return e1, np.cross(n, e1)
+
+
+def write_obj(name, tris, centre, path):
+    """One OBJ, vertices relative to `centre`, every face with its own normal (flat shading)."""
+    lines, vt, vn, faces = [f"# {name}: studs, y up, facing -z, centred on its box", f"o {name}"], [], [], []
+    for k, t in enumerate(tris):
+        n = np.cross(t[1] - t[0], t[2] - t[0])
+        n /= np.linalg.norm(n)
+        e1, e2 = stud_axes(n)
+        for v in t:
+            lines.append("v %.4f %.4f %.4f" % tuple(v - centre))
+            vt.append("vt %.4f %.4f" % (v @ e1 / STUD, v @ e2 / STUD))
+        vn.append("vn %.4f %.4f %.4f" % tuple(n))
+        faces.append("f {0}/{0}/{3} {1}/{1}/{3} {2}/{2}/{3}".format(3 * k + 1, 3 * k + 2, 3 * k + 3, k + 1))
+    with open(path, "w") as f:
+        f.write("\n".join(lines + vt + vn + faces) + "\n")
+
+
 def bone_names(model):
     """Group uuid -> bone name, in outliner order; a repeated name gets _2, _3, ..."""
     groups = {g["uuid"]: g for g in model["groups"]}
@@ -282,10 +351,12 @@ def bone_names(model):
     return names
 
 
-def convert(model):
+def convert(model, merge=None):
     """(bones, parts) of a loaded .bbmodel: bones are (name, parent, pivot, rest
     rotation in degrees), parts (name, bone, class, size, center, rotation, rgb,
-    plain, neon, metal) in model space at rest (before bone rest rotations)."""
+    plain, neon, metal) in model space at rest (before bone rest rotations).
+    merge (a dict): meshes that blocks can't make go into merge[(bone, colour name)] =
+    (rgb, triangles) instead, for main() to make into MeshParts."""
     names = bone_names(model)
     res = model.get("resolution") or {"width": 16, "height": 16}
     texs = []
@@ -341,6 +412,13 @@ def convert(model):
             e = elements[node]
             if e.get("visibility") is False:
                 return
+            neon = e["name"].startswith(NEON)
+            metal = e["name"].startswith(METAL)
+            if merge is not None and e["type"] == "mesh" and not supported(e, model_center):
+                face = next(f for f in e["faces"].values() if f.get("texture") is not None)
+                key = (parent, model["textures"][face["texture"]]["name"])
+                merge.setdefault(key, (color(e), []))[1].extend(element_tris(e))
+                return
             if e["type"] == "cube":
                 lo, hi = np.array(e["from"]) * SCALE, np.array(e["to"]) * SCALE
                 R = element_rotation(e)
@@ -349,8 +427,6 @@ def convert(model):
             else:
                 pieces = mesh_parts(e, model_center)
             rgb = color(e)
-            neon = e["name"].startswith(NEON)
-            metal = e["name"].startswith(METAL)
             # plates, and the sloped faces of spikes, skip the studs
             flat = e["type"] == "mesh" and len(e["vertices"]) in (4, 5)
             plain = e["name"].startswith(PLAIN) or "In" in e["name"] or neon or flat
@@ -388,10 +464,25 @@ def convert(model):
     return bones, parts
 
 
-def main(src, dst):
+def main(src, dst, mesh_dir=None):
     model = json.load(open(src))
-    bones, parts = convert(model)
+    merge = {} if mesh_dir else None
+    bones, parts = convert(model, merge)
     names = bone_names(model)
+    meshes = {}
+    if merge:
+        import os
+        os.makedirs(mesh_dir, exist_ok=True)
+        kind = os.path.basename(dst).replace("Model.luau", "")
+        for (bone, col), (rgb, tris) in merge.items():
+            name = col[:1].upper() + col[1:] + "_" + bone
+            P = np.concatenate(tris)
+            lo, hi = P.min(0), P.max(0)
+            centre = (lo + hi) / 2
+            meshes[name] = f"{kind}_{name}"
+            write_obj(meshes[name], tris, centre, os.path.join(mesh_dir, meshes[name] + ".obj"))
+            parts.append((name, bone, "MeshPart", hi - lo, centre, np.eye(3), rgb, False, False, False))
+            print(f"  {meshes[name]}: {len(tris)} tris")
 
     out = ["-- GENERATED by tools/bbmodel_to_luau.py from " + src + ". Don't edit by hand:",
            "-- change the .bbmodel in Blockbench and regenerate.",
@@ -411,7 +502,8 @@ def main(src, dst):
     out.append("\tparts = {")
     for name, bone, cls, size, center, R, (r, g, b), plain, neon, metal in parts:
         extra = (", plain = true" if plain else "") + (", neon = true" if neon else "") + (", metal = true" if metal else "")
-        out.append(f'\t\t{{ name = "{name}", bone = "{bone}", class = "{cls}", size = {v3(size)}, '
+        mesh = f', mesh = "{meshes[name]}"' if cls == "MeshPart" else ""
+        out.append(f'\t\t{{ name = "{name}", bone = "{bone}", class = "{cls}"{mesh}, size = {v3(size)}, '
                    f"cframe = {cf(center, R)}, color = Color3.fromRGB({r}, {g}, {b}){extra} }},")
     out.append("\t},")
     out.append("\t-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor")
@@ -448,4 +540,9 @@ if __name__ == "__main__":
     if "--zyx" in args:
         args.remove("--zyx")
         ORDER = "ZYX"
-    main(*args)
+    mesh_dir = None
+    if "--meshes" in args:
+        i = args.index("--meshes")
+        mesh_dir = args.pop(i + 1)
+        args.pop(i)
+    main(*args, mesh_dir=mesh_dir)
