@@ -1,0 +1,114 @@
+-- World 3's home base as a pirate cove (QM, Oct 14: his reference picture). Made by
+-- tools/world3_cove_base.py: edit that and re-make this, not this. Run in Studio (Edit,
+-- execute_luau) on the World 3 Place (workspace.World), QM not in Play. Re-running is fine.
+-- - Floor: replaces the base's floor parts (World.Ground's Ground, DampSand, WetSand and Water
+--   parts in the base, z > 0, not the course's World3Biome ones) with sand and small pools,
+--   each copying the look of the old part of its name (checker, water tile). Config colours them.
+-- - Cliffs: sandstone blocks along the walls (ServerStorage ... Cliff1..Cliff6, Bush and
+--   PalmTreeSmall templates, found by name anywhere under ServerStorage) into World.BaseDecor.Cove.
+-- - The old base walls and caps stay as invisible barriers; the sea goes round outside.
+-- Leaves the pens, the spawn, the start line, the portal and QM's decor alone.
+local W = workspace.World
+local SS = game:GetService("ServerStorage")
+local SEA_TOP, CLIFF_FOOT = --SEA_TOP--, --CLIFF_FOOT--
+local KINDS = { Ground = true, DampSand = true, WetSand = true, Water = true }
+-- { name, low x, low z, size x, size z, top }
+local FLOOR = {
+--FLOOR--
+}
+-- { template, x, z, yaw, height scale }: each block's foot at CLIFF_FOOT
+local CLIFFS = {
+--CLIFFS--
+}
+-- { template, x, y, z, yaw, scale }
+local GREENS = {
+--GREENS--
+}
+
+local function find(name)
+	for _, d in SS:GetDescendants() do
+		if d.Name == name and d:IsA("Model") then
+			return d
+		end
+	end
+	error("no template " .. name .. " under ServerStorage")
+end
+
+-- floor
+local templates, old = {}, {}
+for _, p in W.Ground:GetChildren() do
+	if p:IsA("BasePart") and KINDS[p.Name] and p.Position.Z > 0 and not p:GetAttribute("World3Biome") then
+		if not templates[p.Name] then
+			templates[p.Name] = p:Clone()
+		end
+		table.insert(old, p)
+	end
+end
+for name in KINDS do
+	assert(templates[name], "no base " .. name .. " part to copy the look of")
+end
+for _, p in old do
+	p:Destroy()
+end
+for _, r in FLOOR do
+	local p = templates[r[1]]:Clone()
+	local sx, sz, top = r[4], r[5], r[6]
+	p.Size = Vector3.new(sx, top + 3, sz)
+	p.CFrame = CFrame.new(r[2] + sx / 2, (top - 3) / 2, r[3] + sz / 2)
+	p.Parent = W.Ground
+end
+
+-- the old walls: invisible barriers
+for _, p in W.Walls:GetChildren() do
+	if p.Name == "BaseWall" or p.Name == "BaseCap" then
+		p.Transparency = 1
+	end
+end
+
+-- cliffs, greens and the sea
+local old_cove = W.BaseDecor:FindFirstChild("Cove")
+if old_cove then
+	old_cove:Destroy()
+end
+local cove = Instance.new("Folder")
+cove.Name = "Cove"
+cove.Parent = W.BaseDecor
+local cache = {}
+local function place(name, cf, sy, scale, collide)
+	cache[name] = cache[name] or find(name)
+	local m = cache[name]:Clone()
+	local pivot = m:GetPivot()
+	for _, p in m:GetDescendants() do
+		if p:IsA("BasePart") then
+			p.Anchored = true
+			p.CanCollide = collide
+			p.CanQuery = collide
+			if sy ~= 1 then -- (taller or shorter: the meshes unrotated in their template)
+				local rel = pivot:ToObjectSpace(p.CFrame)
+				p.Size = Vector3.new(p.Size.X, p.Size.Y * sy, p.Size.Z)
+				p.CFrame = pivot * CFrame.new(rel.X, rel.Y * sy, rel.Z) * rel.Rotation
+			end
+		end
+	end
+	if scale ~= 1 then
+		m:ScaleTo(scale)
+	end
+	m:PivotTo(cf)
+	m.Parent = cove
+end
+for _, c in CLIFFS do
+	place(c[1], CFrame.new(c[2], CLIFF_FOOT, c[3]) * CFrame.Angles(0, math.rad(c[4]), 0), c[5], 1, true)
+end
+for _, g in GREENS do
+	place(g[1], CFrame.new(g[2], g[3], g[4]) * CFrame.Angles(0, math.rad(g[5]), 0), 1, g[6], false)
+end
+local water = templates.Water
+for _, s in { { -1500, -246, -400, 1500 }, { 246, 1500, -400, 1500 }, { -246, 246, 350, 1500 } } do
+	local p = water:Clone()
+	p.Name = "Sea"
+	p.Size = Vector3.new(s[2] - s[1], 2, s[4] - s[3])
+	p.CFrame = CFrame.new((s[1] + s[2]) / 2, SEA_TOP - 1, (s[3] + s[4]) / 2)
+	p.CanCollide = false
+	p.Parent = cove
+end
+print("cove base:", #FLOOR, "floor parts,", #CLIFFS, "cliffs,", #GREENS, "greens")
