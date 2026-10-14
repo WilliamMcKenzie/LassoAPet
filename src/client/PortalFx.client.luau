@@ -52,8 +52,10 @@ local DEFAULTS = { -- (QM's picks, Oct 12)
 	FPS = 48,
 }
 local NEAR = 220 -- studs: no drawing further off
--- World 2's portal is bright yellow (QM, Oct 13), whatever the gate's attributes say.
-local YELLOW = if Config.World >= 2 then { FillColor = Color3.fromRGB(255, 236, 60), BackColor = Color3.fromRGB(255, 190, 0) } else nil
+-- World 2's portal is bright yellow (QM, Oct 13), World 3's green (QM, Oct 14), whatever the gate's attributes say.
+local YELLOW = if Config.World == 3 then { FillColor = Color3.fromRGB(110, 255, 90), BackColor = Color3.fromRGB(40, 200, 60) }
+	elseif Config.World >= 2 then { FillColor = Color3.fromRGB(255, 236, 60), BackColor = Color3.fromRGB(255, 190, 0) }
+	else nil
 
 -- Each portal gate gets its swirl: the base's (BaseDecor.PortalGate) and, in World 1, the
 -- giant one at the course's end (World.EndPortal, World.server: riding into it takes you
