@@ -1,7 +1,7 @@
 """Sunflower Lion: World 3 Garden Legendary (draft, Oct 14). A golden lion whose mane is a giant
 sunflower wrapped round its head: a seed-brown collar and three layers of pyramid petals (sunny
 yellow out round the face, deeper gold out-and-back, yellow again sweeping back over the neck), so
-it reads as a flower from every side. Hefty, with a big head and big paws with little claws. Meadow-style blocky body (the Meadow animals are the style
+it reads as a flower from every side. Hefty, with a big head and big paws. Meadow-style blocky body (the Meadow animals are the style
 guide), cream muzzle, side plate eyes, little round ears, green leaf cuffs above its paws, and a
 long stem tail ending in a small sunflower.
 
@@ -46,9 +46,9 @@ def mane(g, node, c, r):
     g.box(node, "ManeSeed", c + (0, 0, 0.6), (2 * r, 2 * r, 2.6), "seed")
     g.box(node, "ManeSeedDark", c + (0, 0, -0.75), (2 * r - 1.0, 2 * r - 1.0, 0.3), "seeddark")
     g.box(node, "ManeSeedBack", c + (0, 0, 2.2), (2 * r - 1.2, 2 * r - 1.2, 1.0), "seed")
-    rings = ((12, 0.0, (1.0, 0.0), -0.2, r - 0.2, 3.2, "petal"),      # out, round the face
-             (12, 0.5, (0.75, 0.7), 1.2, r - 0.2, 3.0, "petaldark"),  # out and back
-             (8, 0.25, (0.5, 1.0), 2.9, 1.7, 2.6, "petal"))            # back, from the back of the head
+    rings = ((10, 0.0, (1.0, 0.0), -0.2, r - 0.2, 3.2, "petal"),      # out, round the face
+             (10, 0.5, (0.75, 0.7), 1.2, r - 0.2, 3.0, "petaldark"),  # out and back
+             (6, 0.25, (0.5, 1.0), 2.9, 1.7, 2.6, "petal"))            # back, from the back of the head
     for n, off, (ro, back), z, br, L, col in rings:
         for k in range(n):
             a = TAU * (k + off) / n
@@ -71,8 +71,6 @@ def build():
         leg = g.group("Leg" + nm, (x * 1.7, y0 - 1.8, z), root)
         g.box(leg, "Leg" + nm, (x * 1.7, (y0 - 1.8) / 2 + 0.4, z), (2.1, y0 - 1.0, 2.1), "fur")
         g.box(leg, "Paw" + nm, (x * 1.7, 0.45, z - 0.3), (2.6, 0.9, 2.8), "cream")
-        for t in (-1, 0, 1):
-            g.pyr(leg, "Claw" + nm, (x * 1.7 + t * 0.75, 0.35, z - 1.7), (0, -0.2, -1), 0.6, 0.25, 0.25, "nose")
         g.box(leg, "Cuff" + nm, (x * 1.7, 1.55, z), (2.4, 0.6, 2.4), "leaf")
     # tail: a stem with a leaf, a little sunflower at the tip
     tail = g.group("Tail", (0, y0 + 1.6, 5.1), root)
@@ -81,8 +79,8 @@ def build():
     g.box(tail, "TailStem", base + d * 2.0, (0.7, 4.0, 0.7), "leafdark", G.frame(d))
     g.box(tail, "TailLeaf", base + d * 1.6 + (0.8, 0.2, 0), (1.6, 0.35, 0.9), "leaf", Rm(("z", -20)))
     tip = base + d * 4.3
-    for k in range(6):
-        a = TAU * k / 6
+    for k in range(4):
+        a = TAU * k / 4 + 0.4
         dd = np.array([np.cos(a), np.sin(a) * 0.6, np.sin(a) * -0.8])
         dd /= np.linalg.norm(dd)
         g.pyr(tail, "TailPetal", tip + dd * 0.6, dd, 1.2, 0.45, 0.25, "petal")

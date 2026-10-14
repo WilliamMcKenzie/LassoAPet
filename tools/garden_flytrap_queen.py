@@ -2,11 +2,11 @@
 A towering many-headed flytrap: a huge dark bulb wrapped in two rings of giant leaves, scuttling on
 six gnarled root legs; a tall central stem carries the Queen's head (the biggest trap, wide open,
 magenta inside, ringed with cream spikes) wearing a crown of magenta petals (pyramids) with glowing
-gold tips; two more heads on curving stems at her sides and two small ones behind them. Every eye is
+gold tips; two more heads on curving stems at her sides. Every eye is
 a dark plate with a glowing green pupil (bosses glow). The heads chomp out of step as she charges.
 
 Run: python3 tools/garden_flytrap_queen.py [--gif]
-Bones (all rest 0): root -> HeadQ/HeadL/HeadR/HeadBL/HeadBR (stem + lower lobe) -> <name>Jaw;
+Bones (all rest 0): root -> HeadQ/HeadL/HeadR (stem + lower lobe) -> <name>Jaw;
 Leg1L..Leg3R. Reuses build_trap() from tools/garden_flytrap.py.
 """
 
@@ -51,8 +51,6 @@ def build():
             M = Rm(("y", ang), ("x", -tilt))
             c = np.array([rad * np.sin(a), yy, 1.0 + rad * np.cos(a)])
             g.box(root, "Leaf", c, (w, 0.6, L), cols[k % 2], M)
-            g.pyr(root, "LeafTip", c + M @ np.array([0, 0, L / 2]), M @ np.array([0, 0, 1.0]), 1.6, w / 2 - 0.2, 0.3,
-                  cols[k % 2])
     # six root legs: out, then down, a pyramid claw
     for i, z in enumerate((-2.8, 1.0, 4.8)):
         for side, s in (("L", -1), ("R", 1)):
@@ -83,20 +81,17 @@ def build():
         base = crown_c + M @ np.array([x, 0.5, 0])
         g.pyr(q, "CrownPetal", base, up, L, 0.8, 0.6, "crown" if k % 2 == 0 else "crowndark")
         g.box(q, "Glow_CrownTip", base + up / np.linalg.norm(up) * (L - 0.1), (0.7, 0.7, 0.7), "Glow")
-    # side heads on curving stems, two small ones behind
+    # side heads on curving stems (two small ones behind were cut: each spike is 4 parts in game)
     for side, s in (("L", -1), ("R", 1)):
         h = g.group("Head" + side, (s * 3.0, y0 + 3.6, 0.0), root)
         tip = stem(g, h, (s * 3.0, y0 + 3.6, 0.0), [((s * 1, 0.6, 0), 3.4, 2.0), ((s * 0.4, 1, -0.2), 3.0, 1.8),
                                                      ((0, 1, -0.7), 2.4, 1.7)])
         build_trap(g, h, h, tip + (0, 0.6, 0.8), (6.2, 6.4, 1.1), 36, name=side, **eyes)
-        b = g.group("HeadB" + side, (s * 2.6, y0 + 3.8, 4.0), root)
-        tip = stem(g, b, (s * 2.6, y0 + 3.8, 4.0), [((s * 0.6, 1, 0.5), 3.2, 1.5), ((s * 0.3, 1, -0.3), 2.6, 1.4)])
-        build_trap(g, b, b, tip + (0, 0.5, 0.6), (4.4, 4.6, 0.9), 32, name="B" + side, **eyes)
     return g
 
 
 def animations(m):
-    heads = (("Q", 0.0, 1.0), ("L", 0.33, 0.9), ("R", 0.66, 0.9), ("BL", 0.15, 0.7), ("BR", 0.8, 0.7))
+    heads = (("Q", 0.0, 1.0), ("L", 0.33, 0.9), ("R", 0.66, 0.9))
     legs = [(f"Leg{i}{s}", (0.0 if (i + (s == "R")) % 2 else 0.5)) for i in (1, 2, 3) for s in "LR"]
 
     def charge(L, swing, lean, hop, chomp, sway, n=16):

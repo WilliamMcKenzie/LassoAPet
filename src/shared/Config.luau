@@ -301,7 +301,7 @@ local Config = {
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, FlytrapQueen = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
@@ -316,6 +316,7 @@ local Config = {
 			Monarch = { At = Vector3.new(0, 0, 0.12), From = Vector3.new(0, 16, 75) }, -- (its head, from further out and above so the wings frame it: Studio saw the head too high from (0,4,50))
 			JadeAsura = { At = Vector3.new(0, 0.13, 0.3), From = Vector3.new(0, 6, 55) }, -- (its face and tusks, under the crown; a guess)
 			Sphinx = { At = Vector3.new(0, 0.28, 0.4), From = Vector3.new(0, 6, 60) }, -- (its pharaoh face, high at the front; a guess)
+			FlytrapQueen = { At = Vector3.new(0, 0.32, 0.3), From = Vector3.new(0, 10, 70) }, -- World 3 Garden: the Queen's crowned head, high in the middle (a guess)
 			CrystalTyrant = { At = Vector3.new(0, 0.02, 0.48), From = Vector3.new(0, 4, 34) }, -- (its eyes and teeth, halfway up: the crown makes it tall)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
@@ -550,6 +551,7 @@ local Config = {
 		CrystalPhoenix = { Kind = "Fly", Height = 56 }, -- QM, Oct 13: "flying sprint like normal phoenix"
 		OrangeButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland Maze: flies like the Crystal Phoenix (QM, Oct 13)
 		Hawkmoth = { Kind = "Fly", Height = 56 }, -- (Oct 13) a flyer like the Crystal Phoenix
+		Bumblebee = { Kind = "Fly", Height = 56 }, -- World 3 Garden: a flier like the Hawkmoth (Oct 14)
 		EagleSentry = { Kind = "Fly", Height = 56 }, -- (Oct 13) the Tomb's falcon, a flyer like the Crystal Phoenix
 		Pterodactyl = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: a flying type, like the Phoenix
 		PinkButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland: a flier like the Crystal Phoenix (Oct 13)
@@ -602,6 +604,8 @@ local Config = {
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
+		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
+		RafflesiaBeast = 4, AncientTreant = 4, FlytrapQueen = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -1399,6 +1403,19 @@ Config.World2Pets = {
 	Nut = { 7.47, 40000, 2400 }, -- to the finish line
 	Geb = { 7.47, 40000, 2400 },
 	Bes = { 7.47, 40000, 2400 },
+	-- World 3's Garden (biome 2 of World 3; Oct 14). ALL GUESSES until QM sets them: about 2x the
+	-- Tomb's by rarity per biome past it (Pirate Cove's numbers weren't in yet), speeds a step
+	-- above the Tomb's. The giga rares and the Queen are slow trophies like the Seraphs (0.5),
+	-- earning 10x the Garden's Legendary.
+	Ladybug = { 8.0, 9600, 60 },
+	Bumblebee = { 8.2, 9600, 60 },
+	ToadstoolFrog = { 8.6, 24000, 240 },
+	VineMonster = { 8.6, 24000, 240 },
+	VenusFlytrap = { 9.2, 36000, 600 },
+	SunflowerLion = { 10.5, 160000, 2700 },
+	RafflesiaBeast = { 0.5, 1600000, 3600 },
+	AncientTreant = { 0.5, 1600000, 3600 },
+	FlytrapQueen = { 0.5, 1600000, 3600 },
 }
 -- (and they earn and hatch the same in every world now pets go with you: QM, Oct 14)
 for kind, w2 in Config.World2Pets do
@@ -1421,6 +1438,7 @@ for _, kind in {
 	"Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune",
 	"TombJackal", "LionArcher", "Nut", "Geb", "EagleSentry", "Bes", "BloatedMummy", "Scarab",
 	"Seraph", "CrimsonSeraph", "CrystalSeraph",
+	"Ladybug", "Bumblebee", "ToadstoolFrog", "VineMonster", "VenusFlytrap", "SunflowerLion", "RafflesiaBeast", "AncientTreant", "FlytrapQueen", -- World 3 Garden
 } do
 	Config.World2Animals[kind] = true
 end
@@ -1743,6 +1761,19 @@ if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14
 		}
 		Config.Water = table.clone(Config.Water)
 		Config.Water.Image = "rbxassetid://128871935822673" -- assets/world3/WaterTile256.png (QM's blue 8 x 8 tile, x32)
+		-- The Garden (World 3's biome 2, Config's "Desert" slot; Oct 14, roster approved by the
+		-- coordinator for QM): its own herd in place of the Crimson Lands' (weights as the Crimson
+		-- Lands' by rarity, guesses), the giga rares and the Queen each 1 in 1,000, and its boss.
+		local garden = { Ladybug = 0.3, Bumblebee = 0.3, ToadstoolFrog = 0.2, VineMonster = 0.2, VenusFlytrap = 0.12, SunflowerLion = 0.05 }
+		local gardenTotal = 0
+		for _, weight in garden do
+			gardenTotal += weight
+		end
+		for _, trophy in { "RafflesiaBeast", "AncientTreant", "FlytrapQueen" } do
+			garden[trophy] = gardenTotal / 997 -- (3 of them: each ends up 1 in 1,000 of the total)
+		end
+		Config.Biomes[2].Herd = garden
+		Config.Boss.ByBiome.Desert = "FlytrapQueen"
 	end
 else
 	-- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go

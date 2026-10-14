@@ -61,12 +61,12 @@ def spikes(g, node, name, h, w, L, up, t, M=None):
     """Long cream spikes round a lobe's rim (front and both sides), pointing up (+1) or down (-1)."""
     M = np.eye(3) if M is None else M
     pts = []
-    n_side = max(3, int(L / 1.3))
+    n_side = max(3, int(L / 1.8))
     for k in range(n_side):
         z = -L * (0.12 + 0.8 * k / (n_side - 1))
         for s in (-1, 1):
             pts.append(((s * w / 2, 0, z), (s * 0.5, up, 0)))
-    n_front = max(2, int(w / 1.5))
+    n_front = max(2, int(w / 2.0))
     for k in range(n_front):
         x = -w * 0.35 + w * 0.7 * k / (n_front - 1)
         pts.append(((x, 0, -L - 0.4), (0, up, -0.45)))
