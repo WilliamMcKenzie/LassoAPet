@@ -125,24 +125,31 @@ def layout(f, seed):
 
     def fits(name, x, z, reach=REACH, on=None, edge=None):
         r = radius(name)
-        hw = half_width(z)
-        if abs(x) > hw - (r * 0.6 if edge is None else edge) or abs(x) < hw - reach:
+        hw = min(half_width(z - r), half_width(z), half_width(z + r))
+        if abs(x) > hw - (r * 0.9 + 3 if edge is None else edge) + 0.01 or abs(x) < hw - reach:
             return False
         if z > b.z0 - 16 or z < b.z1 + 16:
             return False
-        tile, _ = f.at(x, z)
-        if tile is None or tile in ("Planks", "Path", "Stripe", "Icing"):
-            return False
-        if on is not None and tile not in on:
-            return False
-        if on is None and tile in water:
-            return False
+        # every tile under its footprint (the middle and 8 points round it): dry ground unless
+        # it's a piece for the water, and never the boards, the path or the candy cane
+        kx, kz = (r * 0.7 if edge is None else edge * 0.7), r * 0.7  # (a long piece along the wall: its own depth)
+        for dx, dz in [(0, 0)] + [(kx * math.cos(a), kz * math.sin(a)) for a in np.arange(8) * math.pi / 4]:
+            tile, _ = f.at(x + dx, z + dz)
+            if tile is None or tile in ("Planks", "Path", "Stripe", "Icing"):
+                return False
+            if on is not None and tile not in on:
+                return False
+            if on is None and tile in water:
+                return False
         if f.name == "Cnidaria" and abs(x) < 36 + r:  # (the seabed lane)
             return False
         return all(math.hypot(x - a, z - c) > (r + radius(n2)) * 0.8 for n2, a, c, *_ in out)
 
     def put(name, x, z, yaw=None, reach=REACH, on=None, edge=None):
         name = str(name)
+        r = radius(name)
+        hw = min(half_width(z - r), half_width(z), half_width(z + r))
+        x = math.copysign(min(abs(x), hw - (r * 0.9 + 3 if edge is None else edge)), x)  # (clear of the wall: nothing clips into it)
         if fits(name, x, z, reach, on, edge):
             yaw = float(rng.uniform(0, 360)) if yaw is None else yaw + float(rng.uniform(-5, 5))
             out.append((name, round(x, 1), round(z, 1), yaw, f.at(x, z)[1], scale_of(name)))
@@ -223,25 +230,28 @@ def layout(f, seed):
                         if f.at(wall - s * 30, z - dz)[0] in water and put("Dock", wall - s * 12, z - dz, facing(s), on=("WetSand", "Ground", "Water")):
                             break
             elif f.name == "Garden":
-                if n % 5 == 2:
-                    for dz in (-20, 0, 20):
-                        along("HedgeWall", s, z + dz * 1.8)
-                    scatter("FlowerPatch", cx, z, s, 2, 18)
-                elif n % 5 == 4:
-                    along("PicketFence", s, z)
-                    along("PicketFence", s, z - 26)
+                pick = rng.choice(["hedge", "fence", "toadstools", "flowers", "flowers", "flowers"])
+                if pick == "hedge":
+                    for k in range(int(rng.integers(1, 4))):
+                        along("HedgeWall", s, z - k * 36)
+                    scatter("FlowerPatch", cx, z, s, int(rng.integers(1, 3)), 18)
+                elif pick == "fence":
+                    for k in range(int(rng.integers(1, 3))):
+                        along("PicketFence", s, z - k * 26)
                     put(rng.choice(["Topiary", "GardenGnome"]), cx - s * 4, z - 12, facing(s))
-                elif n % 3 == 0:
+                elif pick == "toadstools":
                     put("GiantToadstool", wall - s * 13, z)
-                    scatter("Toadstools", cx, z, s, 2, 16)
-                    scatter("GiantLeaf", cx, z, s, 1, 16)
+                    scatter("Toadstools", cx, z, s, int(rng.integers(1, 3)), 16)
+                    scatter("GiantLeaf", cx, z, s, int(rng.integers(0, 2)), 16)
                 else:
                     put(rng.choice(["GiantSunflower", "GiantDaisy", "GiantTulip"]), wall - s * 12, z, facing(s))
-                    scatter(rng.choice(["GiantDaisy", "GiantTulip"]), cx, z, s, 1, 16, facing(s))
-                    scatter("FlowerPatch", cx, z, s, int(rng.integers(1, 3)), 18)
+                    scatter(rng.choice(["GiantSunflower", "GiantDaisy", "GiantTulip"]), cx, z, s, int(rng.integers(0, 2)), 18, facing(s))
+                    scatter("FlowerPatch", cx, z, s, int(rng.integers(0, 3)), 18)
                     scatter("GiantLeaf", cx, z, s, int(rng.integers(0, 2)), 18)
             elif f.name == "Candyland":
-                if n % 4 == 1:
+                if rng.random() < 0.2:  # (room to breathe)
+                    pass
+                elif n % 4 == 1:
                     put("Lollipop", wall - s * 10, z, facing(s))
                     scatter("CandyCane", cx, z, s, 2, 16, facing(s))
                     scatter("Gumdrops", cx, z, s, 2, 18)
@@ -253,21 +263,17 @@ def layout(f, seed):
                     scatter(rng.choice(["Cupcake", "Lollipop"]), cx, z, s, 1, 16, facing(s))
                     scatter(rng.choice(["Gumdrops", "WrappedCandy"]), cx, z, s, int(rng.integers(1, 3)), 18)
             elif f.name == "Cnidaria":
-                if n % 3 == 0:
-                    put("Kelp", wall - s * 8, z)
-                    scatter("Kelp", cx, z, s, int(rng.integers(1, 3)), 16)
-                    scatter("TubeCoral", cx, z, s, 1, 18)
-                elif n % 3 == 1:
-                    put(rng.choice(["SeaFan", "Staghorn"]), wall - s * 10, z, facing(s))
-                    scatter("BrainCoral", cx, z, s, 1, 18)
-                    scatter("Anemone", cx, z, s, 1, 18)
-                else:
-                    put("Staghorn", wall - s * 12, z)
-                    scatter("Seashells", cx, z, s, 1, 18)
-                    scatter("Kelp", cx, z, s, 1, 16)
+                if rng.random() < 0.25:  # (room to breathe)
+                    n += 1
+                    continue
+                big = rng.choice(["Kelp", "Kelp", "SeaFan", "Staghorn"])
+                put(big, wall - s * 10, z, facing(s) if big == "SeaFan" else None)
+                for name in rng.choice(["Kelp", "SeaFan", "Staghorn", "BrainCoral", "TubeCoral", "Anemone", "Seashells"],
+                                       size=int(rng.integers(1, 3)), replace=False):
+                    scatter(name, cx, z, s, 1, 18)
             n += 1
         side = -side
-        z -= rng.uniform(70, 120)
+        z -= rng.uniform(50, 150) if f.name == "Garden" else rng.uniform(70, 120)
     return out
 
 
