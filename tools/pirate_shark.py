@@ -20,7 +20,7 @@ import numpy as np
 from pirate_lib import Model, track, TAU
 
 NAME = "EyepatchShark"
-C = {"shark": (82, 146, 214), "sharkdark": (50, 98, 164), "belly": (242, 246, 252), "mouth": (196, 36, 64),
+C = {"shark": (40, 150, 255), "sharkdark": (26, 96, 200), "belly": (30, 92, 196), "mouth": (196, 36, 64),
      "gum": (240, 110, 130), "red": (232, 36, 48), "scar": (240, 170, 170)}
 
 
@@ -41,15 +41,10 @@ def build():
          m.box("Mouth", (0, y0 - 1.15, -6.3), (W - 1.0, 0.9, 3.8), "mouth")]
     # upper teeth: pyramids hanging down along the front and both sides of the mouth
     mz = -6.4
-    for k, x in enumerate(np.linspace(-1.7, 1.7, 5)):
+    for k, x in enumerate(np.linspace(-1.5, 1.5, 4)):
         p.append(m.pyr(f"ToothU{k + 1}", (x, y0 - 0.7, -8.0), (0, -1, 0), (1, 0, 0), 0.9, 0.32, 0.26, "white"))
     for s in (-1, 1):
         n = "LR"[s > 0]
-        for k, z in enumerate((-7.0, -6.0, -5.0)):
-            p.append(m.pyr(f"ToothU{n}{k + 1}", (s * 2.0, y0 - 0.7, z), (0, -1, 0), (0, 0, 1), 0.8, 0.3, 0.24, "white"))
-        # gill slits: three dark ridges on each side behind the head
-        for k, z in enumerate((-3.4, -2.7, -2.0)):
-            p.append(m.box(f"Gill{n}{k + 1}", (s * (W / 2 + 0.02), y0 + 0.2, z), (0.1, 1.8, 0.22), "sharkdark"))
     # the eyes: a googly eye on the left under a pink scar; an eyepatch on the right
     ey, ez = y0 + 1.3, -6.6
     p += m.eye("EyeL", (-(W / 2 - 0.1), ey, ez), -1, size=1.6, look=(0, 0, -1))
@@ -75,11 +70,8 @@ def build():
     j = [m.box("JawBox", (0, y0 - 2.0, -6.4), (W - 0.6, 0.8, 4.2), "shark"),
          m.box("JawBelly", (0, y0 - 2.45, -6.2), (W - 1.2, 0.2, 3.6), "belly"),
          m.box("Tongue", (0, y0 - 1.55, -5.6), (W - 2.4, 0.2, 2.2), "gum")]
-    for k, x in enumerate(np.linspace(-1.3, 1.3, 4)):
+    for k, x in enumerate(np.linspace(-1.0, 1.0, 3)):
         j.append(m.pyr(f"ToothD{k + 1}", (x, y0 - 1.6, -8.1), (0, 1, 0), (1, 0, 0), 0.7, 0.3, 0.24, "white"))
-    for s in (-1, 1):
-        for k, z in enumerate((-6.5, -5.5)):
-            j.append(m.pyr(f"ToothD{'LR'[s > 0]}{k + 1}", (s * 1.95, y0 - 1.6, z), (0, 1, 0), (0, 0, 1), 0.65, 0.28, 0.22, "white"))
     m.put(jaw, j)
 
     # pectoral fins: wide fins swept back and down

@@ -33,15 +33,9 @@ def build():
     root = m.group("root", (0, y0, 0))
     # the shell: belly plate, a wide rim, three stepped layers
     p = [m.box("Plastron", (0, y0 - 0.6, 0), (8.0, 1.2, 10.0), "beak"),
-         m.box("Rim", (0, y0 + 0.4, 0), (10.0, 1.0, 12.0), "shelldark"),
-         m.box("Shell1", (0, y0 + 1.3, 0), (9.0, 1.0, 11.0), "shell"),
+         m.box("Shell1", (0, y0 + 0.8, 0), (10.0, 1.8, 12.0), "shelldark"),
          m.box("Shell2", (0, y0 + 2.2, 0), (7.4, 0.9, 9.2), "shell"),
          m.box("Shell3", (0, y0 + 3.0, 0), (5.6, 0.8, 7.0), "shell")]
-    # gold-edged scutes: dark green blocks round the shell's first step with gold dots between
-    for k, (x, z) in enumerate(((-3.6, -3.6), (3.6, -3.6), (-3.6, 0), (3.6, 0), (-3.6, 3.6), (3.6, 3.6),
-                                (0, -4.6), (0, 4.6))):
-        p.append(m.box(f"Scute{k + 1}", (x, y0 + 1.85, z), (1.8, 0.2, 1.8), "shelldark"))
-        p.append(m.box(f"ScuteGold{k + 1}", (x, y0 + 1.97, z), (0.6, 0.12, 0.6), "gold"))
     # the island: a stepped sand mound on top of the shell
     yi = y0 + 3.4
     p += [m.box("Sand1", (0, yi + 0.3, 0.2), (5.0, 0.6, 6.4), "sand"),
@@ -77,8 +71,6 @@ def build():
         q.append(m.seg(f"Frond{k + 1}A", top, mid, 1.2, 0.35, col, up=(0, 1, 0)))
         q.append(m.seg(f"Frond{k + 1}B", mid, tip, 1.0, 0.35, col, up=(0, 1, 0)))
         q.append(m.pyr(f"Frond{k + 1}Tip", tip, tip - mid, (d[2], 0, -d[0]) if abs(d[1]) < 0.9 else (1, 0, 0), 0.9, 0.5, 0.17, col))
-    for k, (dx, dz) in enumerate(((0.6, -0.4), (-0.5, -0.3), (0.0, 0.6))):
-        q.append(m.box(f"Coconut{k + 1}", top + [dx, -0.6, dz], (0.6, 0.6, 0.6), "coconut"))
     m.put(palm, q)
 
     # head: a big blunt head on a thick neck, hooked beak, plate eyes, spots

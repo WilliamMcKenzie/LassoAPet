@@ -42,16 +42,12 @@ def build():
               m.box(f"Foot{n}", (s * 0.9, y0 - 2.3, 1.2), (0.7, 0.4, 1.4), "hat")]
     m.put(root, p)
 
-    # tail: long red centre feathers flanked by blue ones, fanning slightly
+    # tail: one long red tail with a blue tip
     tail = m.group("Tail", (0, y0 - 0.2, 3.4), root)
-    t = []
-    for k, (x, col, L) in enumerate(((-1.0, "blue", 5.0), (-0.35, "red", 6.6), (0.35, "red", 6.6), (1.0, "blue", 5.0))):
-        a = np.array([x * 0.6, y0 - 0.2, 3.4])
-        b = a + np.array([x * 0.9, -0.6 - 0.05 * L, L])
-        t.append(m.seg(f"Tail{k + 1}", a, b, 1.0, 0.45, col, up=(0, 1, 0)))
-        t.append(m.box(f"TailTip{k + 1}", b, (1.05, 0.5, 0.9), "bluedark" if col == "blue" else "blue",
-                       ))
-    m.put(tail, t)
+    a, b = np.array([0, y0 - 0.2, 3.4]), np.array([0, y0 - 1.0, 9.4])
+    m.put(tail, [m.seg("Tail", a, b, 2.0, 0.6, "red", up=(0, 1, 0)),
+                 m.seg("TailTip", b - (b - a) * 0.12, b + (b - a) * 0.12, 2.1, 0.65, "blue", up=(0, 1, 0))])
+
 
     # head: red cap on top, white face patches with eyes, big hooked beak, tricorn hat
     hy, hz = y0 + 2.0, -3.4
@@ -61,11 +57,10 @@ def build():
          m.box("Cheek", (0, hy - 0.3, hz - 1.0), (3.0, 2.0, 1.2), "face")]
     for s in (-1, 1):
         n = "LR"[s > 0]
-        h.append(m.box(f"Face{n}", (s * 1.62, hy - 0.1, hz - 0.3), (0.1, 2.0, 2.2), "face"))
-        # a few little lines on the white face (macaws have feather stripes): dark red blocks
-        for j in range(2):
-            h.append(m.box(f"FaceLine{n}{j + 1}", (s * 1.66, hy - 0.7 + 0.4 * j, hz - 0.9), (0.08, 0.14, 0.8), "reddark"))
-        h += m.eye(f"Eye{n}", (s * 1.7, hy + 0.25, hz + 0.1), s, size=1.25, look=(0, 0, -1))
+        h.append(m.box(f"Face{n}", (s * 1.62, hy - 0.4, hz - 0.8), (0.1, 1.4, 1.4), "face"))
+        # a raised white plate eye with a big pupil, standing out from the red head
+        h += [m.box(f"EyeRim{n}", (s * 1.68, hy + 0.35, hz + 0.3), (0.1, 1.7, 1.7), "black")]
+        h += m.eye(f"Eye{n}", (s * 1.78, hy + 0.35, hz + 0.3), s, size=1.45, look=(0, 0, -1), pupil=0.6)
     # beak: upper beak block + hooked pyramid down, black lower beak
     bz = hz - 1.6
     h += [m.box("BeakTop", (0, hy + 0.1, bz - 0.5), (1.6, 1.4, 1.6), "beak"),
@@ -87,27 +82,18 @@ def build():
               m.box(f"SkullEye{n}", (s * 0.18, ty + 1.05, hz - 1.72), (0.18, 0.18, 0.05), "hat")]
     m.put(neck, h)
 
-    # wings: inner half red, a yellow band, blue coverts; the outer half blue with long feathers
+    # wings: a red inner slab with a yellow band, a blue outer slab with a dark blue feather slab
     for s in (-1, 1):
         n = "LR"[s > 0]
         sh = np.array([s * 1.9, y0 + 1.0, -0.8])
         w = m.group(f"Wing{n}", tuple(sh), root)
         x0 = sh[0]
-        q = [m.box(f"WingArm{n}", (x0 + s * 2.1, y0 + 1.0, -0.9), (4.2, 1.1, 1.6), "red"),
-             m.box(f"WingRed{n}", (x0 + s * 2.1, y0 + 0.9, 0.5), (4.2, 0.8, 1.4), "red"),
-             m.box(f"WingYellow{n}", (x0 + s * 2.1, y0 + 0.85, 1.6), (4.0, 0.7, 1.0), "yellow"),
-             m.box(f"WingBlue{n}", (x0 + s * 2.1, y0 + 0.8, 2.5), (3.8, 0.6, 1.0), "blue")]
-        m.put(w, q)
+        m.put(w, [m.box(f"WingRed{n}", (x0 + s * 2.1, y0 + 1.0, 0.3), (4.2, 1.0, 3.8), "red"),
+                  m.box(f"WingYellow{n}", (x0 + s * 2.1, y0 + 0.9, 2.65), (4.0, 0.8, 1.1), "yellow")])
         el = np.array([x0 + s * 4.2, y0 + 1.0, -0.8])
         w2 = m.group(f"Wing{n}2", tuple(el), w)
-        q2 = [m.box(f"WingHand{n}", (el[0] + s * 1.6, y0 + 1.0, -0.6), (3.2, 0.9, 1.4), "blue"),
-              m.box(f"WingHandYellow{n}", (el[0] + s * 1.4, y0 + 0.9, 0.6), (2.8, 0.7, 1.0), "yellow")]
-        # five long flight feathers fanning out and back
-        for j in range(5):
-            a = np.array([el[0] + s * (0.4 + 0.75 * j), y0 + 0.85, 0.9])
-            b = a + np.array([s * (0.2 + 0.45 * j), -0.1, 2.6 + 0.3 * j])
-            q2.append(m.seg(f"Feather{n}{j + 1}", a, b, 0.8, 0.45, "bluedark" if j % 2 else "blue", up=(0, 1, 0)))
-        m.put(w2, q2)
+        m.put(w2, [m.box(f"WingBlue{n}", (el[0] + s * 1.8, y0 + 1.0, 0.4), (3.6, 0.9, 3.4), "blue"),
+                   m.box(f"Feathers{n}", (el[0] + s * 2.4, y0 + 0.9, 3.4), (4.4, 0.7, 2.8), "bluedark")])
     return m
 
 

@@ -27,7 +27,7 @@ NAME = "GhostShip"
 C = {"hull": (124, 66, 170), "hulldark": (78, 38, 114), "deck": (176, 118, 72), "deckdark": (130, 82, 48),
      "mast": (120, 78, 46), "sail": (110, 255, 226), "saildark": (60, 200, 190), "eye": (150, 255, 110),
      "mist": (160, 236, 255), "lamp": (255, 214, 80), "rope": (60, 44, 40), "iron": (52, 52, 64),
-     "flag": (30, 28, 36)}
+     "flag": (30, 28, 36), "mouth": (150, 20, 60)}
 
 Y_BOT = 2.0   # bottom of the keel (the mist hangs below)
 Y_DECK = 8.0
@@ -55,9 +55,6 @@ def build():
             p.append(m.box(f"Rail{n}{k + 1}", (s * (hw - 0.2), Y_DECK + 1.0, zc), (0.4, 0.3, L), "gold"))
             for j, z in enumerate(np.arange(z0 + 0.6, z1, 1.6)):
                 p.append(m.box(f"Post{n}{k + 1}{j + 1}", (s * (hw - 0.2), Y_DECK + 0.5, z), (0.3, 0.8, 0.3), "golddark"))
-        # deck boards: dark seams across the planking
-        for j, x in enumerate(np.arange(-hw + 1.2, hw - 0.6, 1.2)):
-            p.append(m.box(f"Seam{k + 1}{j + 1}", (x, Y_DECK + 0.22, zc), (0.08, 0.05, L - 0.2), "deckdark"))
     # gold band along the waterline, a bow point, the bowsprit and the skull figurehead
     for s in (-1, 1):
         n = "LR"[s > 0]
@@ -73,10 +70,11 @@ def build():
     # the face on the bow: glowing eyes under angry plank brows, a mouth full of teeth
     for s in (-1, 1):
         n = "LR"[s > 0]
-        ex, ez = s * 3.65, -7.2
-        p += [m.box(f"Glow_Eye{n}", (ex + s * 0.25, 6.5, ez), (0.12, 2.6, 2.6), "eye"),
-              m.box(f"EyePupil{n}", (ex + s * 0.33, 6.4, ez - 0.45), (0.06, 1.2, 1.2), "pupil"),
-              m.box(f"Brow{n}", (s * 4.0, 7.95, ez), (0.4, 0.55, 3.2), "hulldark",
+        ez = -6.8
+        p += [m.box(f"EyeRim{n}", (s * 3.62, 6.3, ez), (0.12, 3.4, 3.4), "hulldark"),
+              m.box(f"Eye{n}", (s * 3.7, 6.3, ez), (0.12, 3.0, 3.0), "white"),
+              m.box(f"EyePupil{n}", (s * 3.78, 6.1, ez - 0.5), (0.06, 1.5, 1.5), "pupil"),
+              m.box(f"Brow{n}", (s * 3.85, 8.1, ez), (0.5, 0.6, 3.6), "hulldark",
                     np.array(m_rot("x", -s * 0 + 14 * 1))),
 ]
         for j, z in enumerate(np.linspace(-10.2, -5.0, 5)):
@@ -119,9 +117,6 @@ def build():
         a = j * math.pi / 2
         c = wc + np.array([math.cos(a) * 1.1, math.sin(a) * 1.1, 0])
         p.append(m.box(f"WheelRim{j + 1}", c, (0.3 if j % 2 == 0 else 1.6, 1.6 if j % 2 == 0 else 0.3, 0.25), "deck"))
-    for j in range(8):
-        a = j * math.pi / 4
-        p.append(m.seg(f"Spoke{j + 1}", wc, wc + np.array([math.cos(a) * 1.7, math.sin(a) * 1.7, 0]), 0.2, 0.2, "deckdark"))
     # forecastle: a raised step at the bow with a bell
     p += [m.box("Forecastle", (0, Y_DECK + 0.6, -9.6), (5.6, 1.2, 4.6), "hull"),
           m.box("ForeDeck", (0, Y_DECK + 1.25, -9.6), (5.2, 0.15, 4.2), "deck"),
@@ -140,11 +135,6 @@ def build():
         top = Y_DECK + h
         p += [m.seg(f"Mast{nm}", (0, Y_DECK, z), (0, top, z), 0.8, 0.8, "mast"),
               m.box(f"MastCap{nm}", (0, top + 0.2, z), (1.0, 0.4, 1.0), "gold")]
-        # rigging: ropes from the mast top down to both rails
-        for s in (-1, 1):
-            p.append(m.seg(f"Rope{nm}{'LR'[s > 0]}", (0, top - 0.6, z), (s * 3.9, Y_DECK + 1.1, z + 1.6), 0.18, 0.18, "rope"))
-    p += [m.seg("Stay", (0, Y_DECK + 17.0, 0.0), (0, Y_DECK + 3.4, -17.3), 0.18, 0.18, "rope"),
-          m.seg("Stay2", (0, Y_DECK + 12.5, -5.5), (0, Y_DECK + 3.2, -16.8), 0.18, 0.18, "rope")]
     # the crow's nest on the main mast
     cy = Y_DECK + 13.0
     p.append(m.box("NestFloor", (0, cy, 0), (2.6, 0.3, 2.6), "deckdark"))
@@ -179,8 +169,7 @@ def build():
             if r == len(rows) - 1:
                 for s in (-1, 1):
                     lx = s * (w / 2 + 0.6)
-                    q += [m.seg(f"Hang{nm}{'LR'[s > 0]}", (lx, yt, zz - 0.5), (lx, yt - 1.4, zz - 0.5), 0.12, 0.12, "rope"),
-                          m.box(f"Glow_Lantern{nm}{'LR'[s > 0]}", (lx, yt - 1.9, zz - 0.5), (0.6, 0.8, 0.6), "mist")]
+                    q += [m.box(f"Glow_Lantern{nm}{'LR'[s > 0]}", (lx, yt - 0.4, zz - 0.5), (0.7, 0.9, 0.7), "mist")]
         m.put(bone, q)
     # a white skull and crossbones on the lower mainsail's front
     sk = np.array([0, Y_DECK + 11.2 - 2.4, -0.6 - 0.55 - 0.23])
@@ -203,17 +192,17 @@ def build():
                  m.box("FlagBonesR", (0.14, ft + 0.75, 1.6), (0.06, 0.25, 1.4), "white")])
 
     # the jaw: the lower bow, with teeth pointing up
-    jaw = m.group("Jaw", (0, 3.9, -5.0), root)
-    j = [m.box("JawBow", (0, 3.0, -10.25), (4.4, 1.8, 3.5), "hulldark"),
-         m.box("JawMid", (0, 3.0, -6.75), (6.8, 1.8, 3.5), "hulldark"),
-         m.pyr("JawProw", (0, 3.0, -12.0), (0, 0, -1), (1, 0, 0), 1.6, 2.2, 0.9, "hulldark"),
-         m.box("MouthBow", (0, 4.15, -10.25), (4.2, 0.5, 3.3), "flag"),
-         m.box("MouthMid", (0, 4.15, -6.75), (6.6, 0.5, 3.3), "flag"),
-         m.box("JawGold", (0, 2.75, -8.5), (4.0, 0.3, 6.8), "gold")]
+    jaw = m.group("Jaw", (0, 3.5, -5.0), root)
+    j = [m.box("JawBow", (0, 2.7, -10.25), (4.4, 1.6, 3.5), "hulldark"),
+         m.box("JawMid", (0, 2.7, -6.75), (6.8, 1.6, 3.5), "hulldark"),
+         m.pyr("JawProw", (0, 2.7, -12.0), (0, 0, -1), (1, 0, 0), 1.6, 2.2, 0.9, "hulldark"),
+         m.box("MouthBow", (0, 3.95, -10.25), (4.7, 0.9, 3.3), "mouth"),
+         m.box("MouthMid", (0, 3.95, -6.75), (7.1, 0.9, 3.3), "mouth"),
+         m.box("JawGold", (0, 2.0, -8.5), (4.2, 0.3, 6.8), "gold")]
     for s in (-1, 1):
         for jj, z in enumerate(np.linspace(-10.6, -5.4, 4)):
             hwz = 2.2 if z < -8.5 else 3.4
-            j.append(m.pyr(f"Tusk{'LR'[s > 0]}{jj + 1}", (s * (hwz - 0.4), 3.9, z), (0, 1, 0), (0, 0, 1), 0.6, 0.3, 0.22, "white"))
+            j.append(m.pyr(f"Tusk{'LR'[s > 0]}{jj + 1}", (s * (hwz - 0.4), 3.5, z), (0, 1, 0), (0, 0, 1), 0.7, 0.3, 0.22, "white"))
     m.put(jaw, j)
 
     # ghost mist under the keel: glowing cyan puffs, and the wake trailing behind

@@ -44,22 +44,19 @@ def build():
     y0 = 7.0
     root = m.group("root", (0, y0, 0))
     p = []
-    # spine: vertebrae from the shoulders to the hips, a spike on each
-    for k, z in enumerate(np.linspace(-3.6, 3.6, 9)):
-        p += [m.box(f"Vert{k + 1}", (0, y0 + 1.1, z), (1.1, 0.9, 0.7), "bone"),
-              m.pyr(f"Spike{k + 1}", (0, y0 + 1.5, z), (0, 1, 0.35), (0, 0, 1), 1.0 - 0.04 * abs(k - 4), 0.3, 0.2, "bonedark")]
-    # ribcage: five pairs of ribs arcing down to a sternum, the cursed heart glowing inside
-    for k, z in enumerate(np.linspace(-2.8, 1.6, 5)):
-        sc = 1.0 - 0.08 * abs(k - 1.5)
+    # spine: one thick backbone with four spikes
+    p.append(m.box("Spine", (0, y0 + 1.1, 0), (1.6, 1.3, 8.4), "bone"))
+    for k, z in enumerate((-2.8, -0.9, 1.0, 2.9)):
+        p.append(m.pyr(f"Spike{k + 1}", (0, y0 + 1.7, z), (0, 1, 0.35), (0, 0, 1), 1.2, 0.45, 0.3, "bonedark"))
+    # ribcage: four pairs of thick ribs arcing down to a sternum, the cursed heart glowing inside
+    for k, z in enumerate(np.linspace(-2.8, 1.6, 4)):
         for s in (-1, 1):
             n = "LR"[s > 0]
-            a = np.array([s * 0.5, y0 + 1.0, z])
-            b = np.array([s * 3.0 * sc, y0 + 0.3, z + 0.3])
-            c = np.array([s * 2.8 * sc, y0 - 1.9 * sc, z + 0.5])
-            d = np.array([s * 0.6, y0 - 2.4 * sc, z + 0.5])
-            p += [m.seg(f"Rib{n}{k + 1}A", a, b, 0.42, 0.42, "bone"),
-                  m.seg(f"Rib{n}{k + 1}B", b, c, 0.42, 0.42, "bone"),
-                  m.seg(f"Rib{n}{k + 1}C", c, d, 0.42, 0.42, "bone")]
+            a = np.array([s * 0.6, y0 + 1.0, z])
+            b = np.array([s * 3.0, y0 + 0.0, z + 0.3])
+            d = np.array([s * 0.7, y0 - 2.3, z + 0.5])
+            p += [m.seg(f"Rib{n}{k + 1}A", a, b, 0.85, 0.85, "bone"),
+                  m.seg(f"Rib{n}{k + 1}B", b, d, 0.85, 0.85, "bone")]
     p += [m.box("Sternum", (0, y0 - 2.2, -0.4), (1.4, 0.5, 5.2), "bonedark"),
           m.box("Glow_Heart", (0, y0 - 0.4, -0.6), (2.6, 2.4, 2.4), "curse"),
           m.box("Glow_HeartCore", (0, y0 - 0.4, -0.6), (1.2, 2.6, 1.2), "curse"),
@@ -79,39 +76,38 @@ def build():
     # neck: vertebrae rising forward to the skull
     nb = np.array([0, y0 + 1.0, -3.9])
     neck = m.group("neck", tuple(nb), root)
-    pts = [nb + [0, 0.5 * k ** 1.2, -1.0 * k] for k in range(6)]
+    pts = [nb, nb + [0, 1.6, -2.6], nb + [0, 4.4, -5.0]]
     h = []
     for k, (a, b) in enumerate(zip(pts, pts[1:])):
-        h += [m.seg(f"NeckBone{k + 1}", a, b, 0.9 - 0.04 * k, 0.9 - 0.04 * k, "bone"),
-              m.box(f"NeckJoint{k + 1}", b, (1.1, 1.0, 0.5), "bonedark"),
-              m.pyr(f"NeckSpike{k + 1}", b + [0, 0.45, 0], (0, 1, 0.5), (0, 0, 1), 0.7, 0.25, 0.18, "bonedark")]
+        h += [m.seg(f"NeckBone{k + 1}", a, b, 1.4, 1.4, "bone"),
+              m.pyr(f"NeckSpike{k + 1}", (a + b) / 2 + [0, 0.65, 0], (0, 1, 0.5), (0, 0, 1), 0.9, 0.35, 0.25, "bonedark")]
     hc = pts[-1] + np.array([0, 0.6, -1.4])
     h += [m.box("Cranium", hc, (2.8, 2.2, 2.8), "bone"),
           m.box("Brow", hc + [0, 0.95, -1.0], (3.0, 0.5, 0.9), "bonedark"),
-          m.box("Snout", hc + [0, -0.2, -2.6], (2.0, 1.3, 2.6), "bone"),
-          m.box("SnoutTop", hc + [0, 0.5, -2.4], (1.4, 0.3, 2.2), "bonedark"),
-          m.box("NostrilL", hc + [-0.45, 0.2, -3.92], (0.35, 0.35, 0.06), "socket"),
-          m.box("NostrilR", hc + [0.45, 0.2, -3.92], (0.35, 0.35, 0.06), "socket")]
+          m.box("Snout", hc + [0, -0.2, -3.0], (2.0, 1.3, 3.4), "bone"),
+          m.box("SnoutTop", hc + [0, 0.5, -2.8], (1.4, 0.3, 3.0), "bonedark"),
+          m.box("NostrilL", hc + [-0.45, 0.6, -4.5], (0.35, 0.06, 0.35), "socket"),
+          m.box("NostrilR", hc + [0.45, 0.6, -4.5], (0.35, 0.06, 0.35), "socket")]
     for s in (-1, 1):
         n = "LR"[s > 0]
-        # eye sockets with glowing green googly eyes
-        h += [m.box(f"Socket{n}", hc + [s * 1.42, 0.2, -0.5], (0.1, 1.4, 1.4), "socket"),
-              m.box(f"Glow_Eye{n}", hc + [s * 1.48, 0.2, -0.5], (0.06, 1.05, 1.05), "curse"),
-              m.box(f"Pupil{n}", hc + [s * 1.52, 0.15, -0.7], (0.05, 0.5, 0.5), "pupil"),
+        # white plate eyes with pupils, set in dark sockets
+        h += [m.box(f"Socket{n}", hc + [s * 1.42, 0.2, -0.5], (0.1, 1.7, 1.7), "socket"),
+              m.box(f"Eye{n}", hc + [s * 1.5, 0.2, -0.5], (0.08, 1.4, 1.4), "white"),
+              m.box(f"Pupil{n}", hc + [s * 1.56, 0.15, -0.75], (0.05, 0.7, 0.7), "pupil"),
               # horns sweeping back, a smaller one under each
               m.pyr(f"Horn{n}", hc + [s * 0.9, 1.0, 0.8], (s * 0.35, 0.45, 1), (1, 0, 0), 3.2, 0.45, 0.45, "bonedark"),
               m.pyr(f"Horn2{n}", hc + [s * 1.3, 0.2, 1.0], (s * 0.5, 0.0, 1), (0, 1, 0), 1.8, 0.3, 0.3, "bonedark")]
         # upper teeth along the snout
-        for j, z in enumerate((-1.6, -2.4, -3.2)):
-            h.append(m.pyr(f"ToothU{n}{j + 1}", hc + [s * 0.75, -0.85, z], (0, -1, 0), (0, 0, 1), 0.55, 0.18, 0.16, "white"))
+        for j, z in enumerate((-2.2, -3.8)):
+            h.append(m.pyr(f"ToothU{n}{j + 1}", hc + [s * 0.75, -0.85, z], (0, -1, 0), (0, 0, 1), 0.7, 0.25, 0.2, "white"))
     # a gold hoop on the left horn
     hx = hc + np.array([-1.35, 1.65, 1.9])
     h += [m.box("HoopA", hx + [0, 0.35, 0], (0.16, 0.14, 0.6), "gold"), m.box("HoopB", hx + [0, -0.35, 0], (0.16, 0.14, 0.6), "gold"),
           m.box("HoopC", hx + [0, 0, -0.3], (0.16, 0.6, 0.14), "gold"), m.box("HoopD", hx + [0, 0, 0.3], (0.16, 0.6, 0.14), "gold")]
     m.put(neck, h)
     jaw = m.group("Jaw", tuple(hc + [0, -0.8, 0.6]), neck)
-    j = [m.box("JawBone", hc + [0, -1.25, -1.6], (1.9, 0.6, 3.6), "bone"),
-         m.box("Chin", hc + [0, -1.45, -3.2], (1.5, 0.5, 0.6), "bonedark")]
+    j = [m.box("JawBone", hc + [0, -1.25, -2.0], (1.9, 0.6, 4.4), "bone"),
+         m.box("Chin", hc + [0, -1.45, -4.0], (1.5, 0.5, 0.6), "bonedark")]
     for s in (-1, 1):
         for jj, z in enumerate((-2.0, -2.8)):
             j.append(m.pyr(f"ToothD{'LR'[s > 0]}{jj + 1}", hc + [s * 0.65, -0.95, z], (0, 1, 0), (0, 0, 1), 0.5, 0.17, 0.15, "white"))
@@ -128,11 +124,11 @@ def build():
         trail = [np.array([s * 1.6, y0 + 0.9, 4.2]), tips[2], tips[1], tips[0]]
         w1 = m.group(f"Wing{n}", tuple(sh), root)
         w2 = m.group(f"Wing{n}2", tuple(el), w1)
-        a1 = [m.seg(f"Humerus{n}", sh, el, 0.8, 0.8, "bone"), m.box(f"Elbow{n}", el, (1.0, 1.0, 1.0), "bonedark")]
-        a2 = [m.seg(f"Forearm{n}", el, wr, 0.7, 0.7, "bone"), m.box(f"Wrist{n}", wr, (0.95, 0.95, 0.95), "bonedark"),
+        a1 = [m.seg(f"Humerus{n}", sh, el, 1.1, 1.1, "bone"), m.box(f"Elbow{n}", el, (1.0, 1.0, 1.0), "bonedark")]
+        a2 = [m.seg(f"Forearm{n}", el, wr, 1.0, 1.0, "bone"), m.box(f"Wrist{n}", wr, (0.95, 0.95, 0.95), "bonedark"),
               m.pyr(f"Thumb{n}", wr + [0, 0.3, -0.3], (s * 0.3, 0.6, -1), (1, 0, 0), 1.3, 0.25, 0.25, "bonedark")]
         for k, t in enumerate(tips):
-            a2 += [m.seg(f"Finger{n}{k + 1}", wr, t, 0.45, 0.45, "bone"),
+            a2 += [m.seg(f"Finger{n}{k + 1}", wr, t, 0.7, 0.7, "bone"),
                    m.pyr(f"Claw{n}{k + 1}", t, t - wr, (0, 1, 0), 0.9, 0.22, 0.22, "bonedark")]
         # the sail cloth: strips across the wing between the leading and trailing edges
         xs = np.arange(1.9, 13.9, 1.3)
@@ -166,16 +162,16 @@ def build():
         q = []
         for k in range(nverts):
             c = a + (b - a) * (k + 0.5) / nverts
-            q += [m.box(f"{name}Vert{k + 1}", c, (size, size * 0.85, (np.linalg.norm(b - a) / nverts) * 0.8), "bone"),
+            q += [m.box(f"{name}Vert{k + 1}", c, (size, size * 0.85, (np.linalg.norm(b - a) / nverts) * 1.02), "bone"),
                   m.pyr(f"{name}Spike{k + 1}", c + [0, size * 0.42, 0], (0, 1, 0.5), (0, 0, 1), 0.5 * size + 0.2, 0.22, 0.15, "bonedark")]
         m.put(node, q)
         return node
 
     t0, t1, t2, t3 = (np.array([0, y0 + 0.4, 4.8]), np.array([0, y0 + 0.2, 8.4]), np.array([0, y0 - 0.2, 11.6]),
                       np.array([0, y0 - 0.8, 14.2]))
-    tb1 = tail_bone("Tail", t0, t1, root, 4, 1.0)
-    tb2 = tail_bone("Tail2", t1, t2, tb1, 4, 0.8)
-    tb3 = tail_bone("Tail3", t2, t3, tb2, 3, 0.65)
+    tb1 = tail_bone("Tail", t0, t1, root, 1, 1.5)
+    tb2 = tail_bone("Tail2", t1, t2, tb1, 1, 1.25)
+    tb3 = tail_bone("Tail3", t2, t3, tb2, 1, 1.0)
     ac = t3 + np.array([0, -0.6, 0.6])
     m.put(tb3, [m.box("AnchorRing", t3 + [0, 0, 0.1], (0.3, 0.9, 0.9), "gold"),
                 m.seg("AnchorShank", t3 + [0, -0.2, 0.3], ac + [0, -2.4, 0.6], 0.55, 0.55, "gold"),

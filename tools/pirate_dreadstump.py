@@ -45,21 +45,17 @@ def build():
          m.box("Belt", (0, yh + 2.0, -0.2), (6.8, 0.9, 5.6), "belt"),
          m.box("Buckle", (0, yh + 2.0, -3.05), (1.6, 1.3, 0.2), "gold"),
          m.box("BuckleHole", (0, yh + 2.0, -3.17), (0.8, 0.5, 0.06), "belt")]
-    # gold trim down both coat fronts, gold buttons, shirt frills
+    # gold trim down both coat fronts, shirt frills
     for s in (-1, 1):
         n = "LR"[s > 0]
         p += [m.box(f"Trim{n}", (s * 1.75, yh + 4.2, -2.95), (0.45, 6.2, 0.22), "gold"),
               m.box(f"Lapel{n}", (s * 1.4, yh + 6.6, -2.5), (1.2, 1.8, 0.3), "coatdark")]
-        for j, y in enumerate((yh + 3.2, yh + 4.4, yh + 5.6)):
-            p.append(m.box(f"Button{n}{j + 1}", (s * 2.4, y, -3.0), (0.45, 0.45, 0.2), "gold"))
     for j, y in enumerate((yh + 6.0, yh + 5.2, yh + 4.4)):
         p.append(m.box(f"Frill{j + 1}", (0, y, -3.05 - 0.15 * (j % 2)), (1.8 - 0.2 * j, 0.5, 0.35), "shirt"))
-    # epaulettes: gold pads with a fringe of little gold blocks
+    # epaulettes: gold pads
     for s in (-1, 1):
         n = "LR"[s > 0]
         p.append(m.box(f"Epaulette{n}", (s * 3.5, yh + 7.6, 0), (2.0, 0.5, 2.2), "gold"))
-        for j, z in enumerate((-0.8, 0, 0.8)):
-            p.append(m.box(f"Fringe{n}{j + 1}", (s * 4.4, yh + 7.0, z), (0.3, 0.8, 0.3), "golddark"))
 
     # head: skin face, big nose, brows, plate eyes, a huge beard with two braids
     hy = yh + 9.8

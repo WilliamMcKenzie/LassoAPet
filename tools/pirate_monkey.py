@@ -60,12 +60,6 @@ def build():
           m.box("Knot", (0, by - 0.1, hz + 1.9), (1.0, 0.9, 0.6), "red"),
           m.seg("BandTail1", (0.2, by - 0.2, hz + 2.1), (0.8, by - 1.6, hz + 2.9), 0.7, 0.3, "red"),
           m.seg("BandTail2", (-0.2, by - 0.2, hz + 2.1), (-0.6, by - 1.3, hz + 3.1), 0.7, 0.3, "red")]
-    for k, (x, z, side) in enumerate(((-1.0, -1.72, 0), (0.6, -1.72, 0), (-1.92, -0.6, -1), (1.92, 0.4, 1),
-                                      (-1.92, 0.9, -1), (1.92, -0.9, 1))):
-        if side == 0:
-            h.append(m.box(f"Dot{k + 1}", (x, by + 0.05, hz + z), (0.35, 0.35, 0.06), "white"))
-        else:
-            h.append(m.box(f"Dot{k + 1}", (side * 1.92, by + 0.05, hz + z), (0.06, 0.35, 0.35), "white"))
     # a gold hoop earring hanging from the left ear (a little square ring of blocks)
     ex, ey, ez = -2.15, hy - 1.0, hz + 0.1
     h += [m.box("HoopTop", (ex, ey + 0.4, ez), (0.18, 0.16, 0.6), "gold"),
@@ -94,30 +88,19 @@ def build():
                     m.seg(f"Shin{n}", kn, ft + np.array([0, 0.3, 0]), 1.3, 1.3, "fur"),
                     m.box(f"Foot{n}", ft + np.array([0, 0, -0.4]), (1.4, 0.9, 2.2), "tan")])
 
-    # tail: up out of the rump and curling forward over the back, the tip wrapped round a banana
+    # tail: three thick segments up out of the rump and curling forward, holding a banana
     t0 = np.array([0, y0 + 0.4, 3.1])
+    t1, t2 = t0 + [0, 2.0, 1.8], t0 + [0, 4.4, 1.6]
     tail = m.group("Tail", tuple(t0), root)
-    pts = [t0, t0 + [0, 1.2, 1.4], t0 + [0, 3.0, 2.0], t0 + [0, 4.4, 1.6]]
-    tq = [m.seg(f"Tail{k + 1}", a, b, 0.8, 0.8, "fur") for k, (a, b) in enumerate(zip(pts, pts[1:]))]
-    tq += [m.box(f"TailJoint{k + 1}", q, (0.85, 0.85, 0.85), "fur") for k, q in enumerate(pts[1:3])]
-    m.put(tail, tq)
-    t2 = pts[3]
+    m.put(tail, [m.seg("Tail1", t0, t1, 0.9, 0.9, "fur"), m.seg("Tail2", t1, t2, 0.9, 0.9, "fur")])
     tail2 = m.group("Tail2", tuple(t2), tail)
-    p2 = [t2 + [0, 1.0, -0.4], t2 + [0, 0.8, -1.4]]
-    q2 = [m.box("TailJoint3", t2, (0.85, 0.85, 0.85), "fur"),
-          m.seg("Tail5", t2, p2[0], 0.8, 0.8, "fur"),
-          m.seg("Tail6", p2[0], p2[1], 0.75, 0.75, "fur"),
-          m.box("TailCurl", p2[1] + [0, -0.4, -0.2], (0.9, 0.9, 0.9), "furdark")]
-    # the banana: a curved yellow bunch of five blocks held across the tail tip, brown ends
-    bc = p2[1] + np.array([0, -0.75, 0.0])
-    arc = [bc + [x, 0.9 * (x / 2.4) ** 2, 0] for x in np.linspace(-2.4, 2.4, 6)]
-    for k, (a, b) in enumerate(zip(arc, arc[1:])):
-        w = 1.05 - 0.12 * abs(k - 2)
-        q2.append(m.seg(f"Banana{k + 1}", a, b, w, w, "banana"))
-        q2.append(m.box(f"BananaRidge{k + 1}", (a + b) / 2 + [0, -w / 2 + 0.05, 0], (0.9 * np.linalg.norm(b - a), 0.12, 0.3), "bananadark"))
-    q2 += [m.seg("BananaStem", arc[0], arc[0] + [-0.5, 0.6, 0], 0.4, 0.4, "stem"),
-           m.box("BananaEnd", arc[-1] + [0.2, 0.15, 0], (0.4, 0.4, 0.4), "stem")]
-    m.put(tail2, q2)
+    t3 = t2 + [0, 0.9, -1.2]
+    # the banana: one curved-looking yellow bar held across the tip, a brown stem and end
+    bc = t3 + np.array([0, 0.1, -0.1])
+    m.put(tail2, [m.seg("Tail3", t2, t3, 0.85, 0.85, "fur"),
+                  m.box("Banana", bc, (2.4, 1.0, 1.0), "banana"),
+                  m.seg("BananaL", bc + [-1.1, 0, 0], bc + [-2.4, 0.9, 0], 0.9, 0.9, "banana"),
+                  m.seg("BananaR", bc + [1.1, 0, 0], bc + [2.4, 0.9, 0], 0.9, 0.9, "bananadark")])
     return m
 
 

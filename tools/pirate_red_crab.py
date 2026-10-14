@@ -31,15 +31,7 @@ def build():
     p = [m.box("Belly", (0, y0 - 0.5, 0), (6.4, 1.2, 4.8), "cream"),
          m.box("Shell", (0, y0 + 0.5, 0.1), (7.6, 1.4, 5.4), "red"),
          m.box("Shell2", (0, y0 + 1.5, 0.2), (6.2, 0.8, 4.4), "red"),
-         m.box("Shell3", (0, y0 + 2.1, 0.3), (4.4, 0.5, 3.2), "red"),
-         m.box("Rim", (0, y0 - 0.05, 0.1), (7.9, 0.3, 5.7), "reddark")]
-    # speckles on the shell's top steps (real little blocks)
-    for k, (x, z) in enumerate(((-1.6, -0.4), (1.3, 0.9), (-0.4, 1.3), (2.4, -0.6), (-2.5, 0.9), (0.6, -0.9))):
-        yy = y0 + (2.38 if abs(x) < 2.0 and abs(z) < 1.4 else 1.92)
-        p.append(m.box(f"Speck{k + 1}", (x, yy, z), (0.55, 0.12, 0.55), "orange"))
-    # a row of bumps along the shell's front edge
-    for k, x in enumerate(np.linspace(-3.0, 3.0, 5)):
-        p.append(m.box(f"Bump{k + 1}", (x, y0 + 1.05, -2.75), (0.6, 0.6, 0.4), "reddark"))
+         m.box("Shell3", (0, y0 + 2.1, 0.3), (4.4, 0.5, 3.2), "red")]
     # mouth: a little dark slot with cream mandibles under the front
     p += [m.box("Mouth", (0, y0 - 0.15, -2.45), (1.6, 0.45, 0.2), "tip"),
           m.box("MandibleL", (-0.45, y0 - 0.55, -2.5), (0.5, 0.45, 0.3), "cream"),
@@ -90,10 +82,10 @@ def build():
             leg = m.group(nm, tuple(hip), root)
             knee = hip + np.array([s * 1.9, 1.0, fz])
             tip = knee + np.array([s * 1.5, -(y0 + 0.8), fz * 0.8])
-            m.put(leg, [m.seg(nm + "Upper", hip, knee, 0.7, 0.7, "red"),
-                        m.box(nm + "Knee", knee, (0.8, 0.8, 0.8), "reddark"),
-                        m.seg(nm + "Lower", knee, tip + np.array([0, 0.5, 0]), 0.6, 0.6, "red"),
-                        m.pyr(nm + "Tip", tip + np.array([0, 0.55, 0]), (0, -1, 0), (1, 0, 0), 0.6, 0.28, 0.28, "tip")])
+            m.put(leg, [m.seg(nm + "Upper", hip, knee, 1.0, 1.0, "red"),
+                        m.box(nm + "Knee", knee, (1.15, 1.15, 1.15), "reddark"),
+                        m.seg(nm + "Lower", knee, tip + np.array([0, 0.5, 0]), 0.9, 0.9, "red"),
+                        m.pyr(nm + "Tip", tip + np.array([0, 0.55, 0]), (0, -1, 0), (1, 0, 0), 0.6, 0.42, 0.42, "tip")])
     return m
 
 
