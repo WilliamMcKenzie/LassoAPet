@@ -139,10 +139,8 @@ def tidy(rung, inside, passes=2):
     return rung
 
 
-def specks(rung, inside, least=5):
-    """No small patches either: any joined patch (4-way) of fewer than `least` cells takes
-    the rung most common round it (QM: big joined patches, no stray tiles)."""
-    rung = rung.copy()
+def patches(rung, inside):
+    """Each joined patch (4-way) of one rung: (rung, cells, the rungs round it)."""
     nx, nz = rung.shape
     seen = np.zeros_like(inside)
     for i in range(nx):
@@ -162,12 +160,54 @@ def specks(rung, inside, least=5):
                                 seen[a2, c2] = True
                                 todo.append((a2, c2))
                         else:
-                            rim.append(rung[a2, c2])
-            if len(cells) < least and rim:
-                vals, counts = np.unique(rim, return_counts=True)
-                for a, c in cells:
-                    rung[a, c] = vals[np.argmax(counts)]
+                            rim.append(int(rung[a2, c2]))
+            yield k, cells, rim
+
+
+def blocks(rung):
+    """Every cell that is part of a 2x2 block of its own rung."""
+    nx, nz = rung.shape
+    same = np.zeros((nx, nz), bool)
+    same[:-1, :-1] = (rung[:-1, :-1] == rung[1:, :-1]) & (rung[:-1, :-1] == rung[:-1, 1:]) & (rung[:-1, :-1] == rung[1:, 1:])
+    out = same.copy()
+    out[1:, :] |= same[:-1, :]
+    out[:, 1:] |= same[:, :-1]
+    out[1:, 1:] |= same[:-1, :-1]
+    return out
+
+
+def blocky(rung, inside):
+    """No patch smaller than 2x2 (QM: big joined patches, no stray tiles): a patch with no
+    2x2 block of itself in it takes the rung most common round it."""
+    rung = rung.copy()
+    block = blocks(rung)
+    for k, cells, rim in list(patches(rung, inside)):
+        if rim and not any(block[a, c] for a, c in cells):
+            vals, counts = np.unique(rim, return_counts=True)
+            for a, c in cells:
+                rung[a, c] = vals[np.argmax(counts)]
     return rung
+
+
+def despeck(rung, inside, keep=()):
+    """After the rims are drawn: a peak (or pit) with no 2x2 block in it, every neighbour a
+    rung below (above) it, drops (rises) to them. Keeps the layered rule. (Not rungs in keep.)"""
+    while True:
+        changed = False
+        block = blocks(rung)
+        for k, cells, rim in list(patches(rung, inside)):
+            if k not in keep and rim and len(set(rim)) == 1 and abs(rim[0] - k) == 1 and not any(block[a, c] for a, c in cells):
+                for a, c in cells:
+                    rung[a, c] = rim[0]
+                changed = True
+        if not changed:
+            return rung
+
+
+def settle(rung, inside):
+    """Banded tiles to a finished floor: no small patches, the transition rims, no specks."""
+    rung = blocky(tidy(rung, inside), inside)
+    return despeck(lower(rung, inside), inside)
 
 
 def check(b, ladder=None):
@@ -180,6 +220,16 @@ def check(b, ladder=None):
         both = (s != big) & (nb != big)
         bad = both & (np.abs(s - nb) > 1)
         assert not bad.any(), "%s: tiles two rungs apart touch at %s" % (b.name, np.argwhere(bad)[:5].tolist())
+
+
+def specks(b):
+    """How many patches have no 2x2 block (the transition rims excepted: rungs with a lower
+    and a higher one round them)."""
+    block, n = blocks(b.rung), 0
+    for k, cells, rim in patches(b.rung, b.inside & ~b.free):
+        if not any(block[a, c] for a, c in cells) and not (min(rim, default=k) < k < max(rim, default=k)):
+            n += 1
+    return n
 
 
 def seam(b, rows, r):
@@ -213,25 +263,31 @@ def pirate_cove():
     q = b.quasi(7, 13, (517, 233))
     q = q + 0.12 * (0.5 - along(b, 64, 108))  # (wider: more water, the lower q)
     b.band(q, [0.1, 0.32, 0.5])
-    b.rung = specks(tidy(b.rung, b.inside), b.inside)
+    b.rung[b.rung == 2] = 3  # (wet sand only as the rim round water, never a patch of its own)
     seam(b, 5, 3)
     b.rung[:, -5:] = 2  # (its far end wet sand at 0, level with the Garden's lawn)
-    b.rung = lower(b.rung, b.inside)
-    # Boardwalks: the middle four tiles across a lagoon (water all the way across them, 6 rows or more).
+    b.rung = settle(b.rung, b.inside)
+    # Boardwalks: the middle four tiles, in a few long runs that span the lagoons: water under
+    # the middle lane joined across gaps of under 120 studs, kept if 200 studs or longer, and
+    # run on to dry sand at both ends.
     mid = NX // 2
-    wet = (b.rung[mid - 2:mid + 2] <= 1).all(axis=0)
-    j = 0
-    while j < b.nz:
-        if wet[j]:
-            k = j
-            while k < b.nz and wet[k]:
-                k += 1
-            if k - j >= 6:
-                a, c = max(j - 1, 0), min(k + 1, b.nz)
-                b.rung[mid - 2:mid + 2, a:c] = 4
-                b.free[mid - 2:mid + 2, a:c] = True
-            j = k
-        j += 1
+    wet = np.nonzero((b.rung[mid - 2:mid + 2] <= 1).any(axis=0))[0]
+    runs = []
+    for j in wet:
+        if runs and j - runs[-1][1] < 15:
+            runs[-1][1] = j
+        else:
+            runs.append([j, j])
+    for a, c in runs:
+        if c - a < 25:
+            continue
+        while a > 6 and (b.rung[mid - 2:mid + 2, a] < 3).any():
+            a -= 1
+        while c < b.nz - 7 and (b.rung[mid - 2:mid + 2, c] < 3).any():
+            c += 1
+        b.rung[mid - 2:mid + 2, a:c + 1] = 4
+        b.free[mid - 2:mid + 2, a:c + 1] = True
+    b.rung = despeck(b.rung, b.inside & ~b.free)  # (water and wet sand cut to slivers beside the boards)
     check(b)
     walls = dict(wall=[(124, 82, 50), (112, 73, 44)], cap=(240, 218, 160), gate=(255, 160, 40))  # driftwood, sand top, treasure gold
     return b, walls
@@ -249,10 +305,9 @@ def garden():
         ("Path", 1, rgb("C4BEB0"), rgb("B4AEA0")),  # flagstones, flush with the bright lawn
     ])
     q = b.quasi(5, 10, (311, 977))
-    b.band(q, [0.14, 0.55, 0.88])
-    b.rung = specks(tidy(b.rung, b.inside), b.inside)
+    b.band(q, [0.12, 0.55, 0.94])  # (half the flowerbeds: QM's critic, Oct 14)
     seam(b, 5, 1)
-    b.rung = lower(b.rung, b.inside)
+    b.rung = settle(b.rung, b.inside)
     # The path: three tiles wide, swinging side to side, never within 24 of the walls.
     path = np.zeros_like(b.inside)
     for j in range(b.nz):
@@ -266,41 +321,39 @@ def garden():
     step = np.asarray(ladder)[b.rung]
     step = raise_(step, b.inside, path | (b.rung == 3))
     b.rung = np.where(path, 4, np.where(b.rung == 3, 3, step))
+    b.rung = despeck(b.rung, b.inside & ~path)
     check(b, ladder)
-    walls = dict(wall=[rgb("3A8234"), rgb("32742E")], cap=rgb("FF78AA"), gate=rgb("FF5CAA"))  # hedge, blossom top
+    walls = dict(wall=[rgb("23561F"), rgb("1E4A1B")], cap=rgb("FF78AA"), gate=rgb("FF5CAA"))  # dark hedge (the lawn's green hid the edge), blossom top
     return b, walls, ladder
 
 
 def candyland():
-    """Melted chocolate sunk a stud, pink frosting, pale cream a stud up, mint plateaus two up.
-    8 angles (rosettes). A candy-cane path, red and white bands across it, a stud up down the
-    middle, cream either side."""
+    """Melted chocolate sunk a stud, deep pink frosting, vanilla cream a stud up, mint plateaus two up.
+    8 angles (rosettes). A candy-cane path, red and white bands across it, a stud up all the
+    way down the middle, cream either side."""
     b = Biome(2, [
         ("Chocolate", -1, rgb("6E3E28"), rgb("623622")),
-        ("Ground", 0, rgb("FF96C8"), rgb("F688BE")),  # pink frosting
-        ("Cream", 1, rgb("FFD6E8"), rgb("FAC8DE")),
+        ("Ground", 0, rgb("F0609E"), rgb("E25292")),  # deep pink frosting
+        ("Cream", 1, rgb("FFECC8"), rgb("F8E0B8")),  # warm vanilla
         ("Mint", 2, rgb("82ECC4"), rgb("74E0B6")),
         ("Stripe", 1, rgb("F03C50"), rgb("DC3446")),  # the candy cane's red bands
         ("Icing", 1, rgb("FFF5F5"), rgb("F5E8EA")),  # and its white ones
     ])
-    q = b.quasi(8, 12, (743, 151))
-    b.band(q, [0.16, 0.5, 0.84])
-    b.rung = specks(tidy(b.rung, b.inside), b.inside)
+    q = b.quasi(8, 15, (743, 151))
+    b.band(q, [0.16, 0.52, 0.9])  # (fewer, bigger mint plateaus)
     seam(b, 5, 1)
-    b.rung = lower(b.rung, b.inside)
-    # The candy cane: four tiles wide down the middle, bands two tiles deep, breaking for the
-    # plazas (where the course is widest) so it doesn't run forever.
+    b.rung = settle(b.rung, b.inside)
+    # The candy cane: four tiles wide down the middle the whole way, bands two tiles deep.
     mid = NX // 2
     cane = np.zeros_like(b.inside)
-    for j in range(6, b.nz - 6):
-        if b.hw[j] < 120:
-            cane[mid - 2:mid + 2, j] = True
+    cane[mid - 2:mid + 2, 6:b.nz - 6] = True
     b.rung[cane] = 4
     stripes = (np.arange(b.nz) // 2) % 2 == 0
     b.rung[cane & stripes[None, :]] = 5
     ladder = [0, 1, 2, 3, 3, 3]
     step = raise_(np.asarray(ladder)[b.rung], b.inside, cane | (b.rung == 3))
     b.rung = np.where(cane | (b.rung == 3), b.rung, step)
+    b.rung = despeck(b.rung, b.inside & ~cane)  # (mint cut thin by the cane's cream back to cream)
     check(b, ladder)
     walls = dict(wall=[rgb("FFAAD2"), rgb("F59BC6")], cap=rgb("FFFFFF"), gate=rgb("8CF0DC"))  # frosting, icing top, mint gate
     return b, walls, ladder
@@ -308,26 +361,24 @@ def candyland():
 
 def cnidaria():
     """An underwater reef: deep blue trenches sunk a stud, pale seabed, pink coral a stud up,
-    purple coral two up, and glowing kelp-green at the reef's peaks. 9 angles (coral
-    rosettes). The reef grows where the course is wide, trenches where it narrows.
-    The rungs: trench, seabed, pink, purple, glow (the glow as high as the purple)."""
+    and glowing kelp-green at the reef's peaks two up, ringed by the coral. 9 angles (coral
+    rosettes). The reef grows where the course is wide, trenches where it narrows. A calm lane
+    of seabed down the middle to ride."""
     b = Biome(3, [
-        ("Trench", -1, rgb("24469A"), rgb("1E3C86")),
+        ("Trench", -1, rgb("1E50D2"), rgb("1A46BC")),  # saturated deep blue
         ("Ground", 0, rgb("ECDEB8"), rgb("E2D2AA")),  # pale seabed sand
         ("Coral", 1, rgb("FF8096"), rgb("F47088")),
-        ("DeepCoral", 2, rgb("AA5ADC"), rgb("9C4ECC")),
-        ("Glow", 2, rgb("78FF8C"), rgb("64F078")),  # glowing kelp-green peaks, level with the purple ringing them
+        ("Glow", 2, rgb("78FF8C"), rgb("64F078")),  # glowing kelp-green peaks
     ])
-    q = b.quasi(9, 12, (229, 661))
+    q = b.quasi(9, 16, (229, 661))
     w = along(b, 112, MAXW)
-    b.band(q + 0.1 * (w - 0.5), [0.12, 0.48, 0.78, 0.95])
-    b.rung = specks(tidy(b.rung, b.inside), b.inside)
+    b.band(q + 0.1 * (w - 0.5), [0.12, 0.55, 0.94])
+    b.rung[np.abs(b.x) < 24] = 1  # (the riding lane)
     seam(b, 5, 1)
-    b.rung = lower(b.rung, b.inside)  # (the glow, a rung above the purple, is ringed by it)
-    ladder = None
+    b.rung = settle(b.rung, b.inside)
     check(b)
-    walls = dict(wall=[rgb("28417E"), rgb("223870")], cap=rgb("FF6EBE"), gate=rgb("5AFFC8"))  # deep blue rock, coral top
-    return b, walls, ladder
+    walls = dict(wall=[rgb("142044"), rgb("101A3A")], cap=rgb("FF6EBE"), gate=rgb("5AFFC8"))  # dark blue rock (darker than the trenches), coral top
+    return b, walls, None
 
 
 # ---- output ----------------------------------------------------------------------------
@@ -451,7 +502,7 @@ def write(biomes, ladders):
                 .replace("--WALL--", "rgb(%d, %d, %d), rgb(%d, %d, %d), rgb(%d, %d, %d)" % (*walls["wall"][0], *walls["wall"][1], *walls["cap"]))
                 .replace("--FLOOR--", "\n".join("\t{ %d, %d, %d, %d, %d }," % p for p in parts)))
         open(os.path.join(HERE, "world3_%s.luau" % b.name.lower()), "w").write(body)
-        print(b.name, "parts:", len(parts), {t[0]: int(((b.rung == r) & b.inside).sum()) for r, t in enumerate(b.tiles)})
+        print(b.name, "specks:", specks(b), "parts:", len(parts), {t[0]: int(((b.rung == r) & b.inside).sum()) for r, t in enumerate(b.tiles)})
     body = open(os.path.join(HERE, "world3_course.luau.in")).read()
     body = body.replace("--END--", str(END)).replace("--WALLS--", "\n".join(
         "\t{ %s, %s, %s, %s }," % p[:4] for p in wall_segments()))
