@@ -1,0 +1,98 @@
+{
+ "Pinto": {
+  "rarity": "Uncommon",
+  "seat": [
+   0,
+   7.3,
+   1
+  ],
+  "neck_loop": {
+   "center": [
+    0,
+    7.4,
+    -1.9
+   ],
+   "radius": 1.35
+  }
+ },
+ "Pig": {
+  "rarity": "Uncommon",
+  "seat": [
+   0,
+   6.4,
+   0.4
+  ],
+  "neck_loop": {
+   "center": [
+    0,
+    4.2,
+    -3.9
+   ],
+   "radius": 1.9
+  }
+ },
+ "Fish": {
+  "rarity": "Rare",
+  "seat": [
+   0.0,
+   6.48,
+   -0.54
+  ],
+  "neck_loop": {
+   "center": [
+    0.0,
+    2.9700000000000006,
+    -3.5100000000000002
+   ],
+   "radius": 2.565
+  }
+ },
+ "Rhino": {
+  "rarity": "Epic",
+  "seat": [
+   0,
+   7.4,
+   2.2
+  ],
+  "neck_loop": {
+   "center": [
+    0,
+    5.2,
+    -3.7
+   ],
+   "radius": 1.9
+  }
+ },
+ "Unicorn": {
+  "rarity": "Legendary",
+  "seat": [
+   0,
+   7.3,
+   1
+  ],
+  "neck_loop": {
+   "center": [
+    0,
+    7.4,
+    -1.9
+   ],
+   "radius": 1.35
+  }
+ },
+ "Bunny": {
+  "rarity": "Uncommon",
+  "seat": [
+   0,
+   5.2,
+   0.6
+  ],
+  "neck_loop": {
+   "center": [
+    0,
+    4.4,
+    -3.4
+   ],
+   "radius": 1.8
+  }
+ }
+}

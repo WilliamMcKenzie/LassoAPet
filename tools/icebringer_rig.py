@@ -1,0 +1,322 @@
+"""Animations for the Icebringer (QM's ice-themed edit of their old Mixcoatl model,
+designs/converted/Icebringer.bbmodel): a gorilla knuckle-walker (QM 03:16: "full gorilla
+knuckledragger"). Snow Legendary; its Frost ability is in Ride.client.luau.
+
+  idle    knuckle stance, slow breathing, a subtle look round
+  idle, walk, gallop  QM's own (kept from the file since 17:04); idle(), walk() and
+          gallop() here made the earlier versions
+  jaw     its own bone, hinged at the back of the mouth (-X opens); Snake-style teeth
+  (charge() is an unused bounding gallop: fists together, then feet)
+
+Keyframes are offsets from QM's rest pose. Signs (from probing the rig): torso -X leans
+forward, arm +X swings forward, leg -X swings back, head +X looks up. Only the arm bones
+move the arms (QM 03:38: the bicep bones aren't meant to be animated). QM's own finger
+keys in the walk are kept when the animations are rewritten. The root's height
+comes from snow_rig.grounded(): each frame the lowest knuckle or foot touches the ground.
+
+Run: python3 tools/icebringer_rig.py   (rewrites the model's animations), then
+     python3 tools/bbmodel_to_luau.py designs/converted/Icebringer.bbmodel src/shared/Animals/IcebringerModel.luau
+"""
+
+import json
+import math
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+import bbmodel_to_luau  # noqa: E402
+from horse_rig import write_animations  # noqa: E402
+from snake_rig import track  # noqa: E402
+from snow_rig import bump, grounded, group_ids  # noqa: E402
+
+ROOT = os.path.join(os.path.dirname(__file__), "..")
+MODEL = os.path.join(ROOT, "designs", "converted", "Icebringer.bbmodel")
+TAU = 2 * math.pi
+
+# the knuckle stance every animation starts from
+LEAN, HEAD_UP, ARM, ARM_Y, ARM_Z, LEG, TAIL = -20, 16, 16, 29, 10, -22, -14  # ARM_Y, ARM_Z * side
+
+
+def s(x):
+    return math.sin(x)
+
+
+def contacts(model):
+    """Part names under the hands and legs: what touches the ground."""
+    G = {g["uuid"]: g["name"] for g in model["groups"]}
+    E = {e["uuid"]: e["name"] for e in model["elements"]}
+    out = set()
+
+    def walk(o, inside):
+        for c in o:
+            if isinstance(c, dict):
+                walk(c["children"], inside or G[c["uuid"]] in ("left_hand", "right_hand", "left_leg", "right_leg"))
+            elif inside:
+                out.add(E[c])
+
+    walk(model["outliner"], False)
+    return out
+
+
+def stance(L, n, torso=lambda u: (0, 0, 0), head=lambda u: (0, 0, 0)):
+    t = lambda u: (LEAN + torso(u)[0], torso(u)[1], torso(u)[2])  # noqa: E731
+    h = lambda u: (HEAD_UP + head(u)[0], head(u)[1], head(u)[2])  # noqa: E731
+    return {"torso": [track(L, t, n)], "head": [track(L, h, n)],
+            "tail": [track(L, lambda u: (TAIL, 0, 0), 4)]}
+
+
+def idle(m, feet):
+    """Knuckle stance, slow breathing and a subtle look round (QM 03:23: no drumming)."""
+    L, n = 4.0, 32
+    tr = stance(L, n, torso=lambda u: (1.5 * s(TAU * u), 0, 0),
+                head=lambda u: (2 * s(2 * TAU * u), 10 * s(TAU * u), 2 * s(TAU * u + 0.8)))
+    for side, sx in (("left", -1), ("right", 1)):
+        tr[side + "_arm"] = [track(L, lambda u, sx=sx: (ARM + 1.5 * s(TAU * u), sx * ARM_Y, sx * ARM_Z), n)]
+        tr[side + "_leg"] = [track(L, lambda u: (LEG, 0, 0), 4)]
+    tr["jaw"] = [track(L, lambda u: (-12 * bump(u, 0.6, 0.2), 0, 0), n)]  # a slow open and close
+    tr["root"] = grounded(m, L, tr, feet, n)
+    return L, tr
+
+
+def walk(m, feet, L=1.3, n=32, stride_arm=24, stride_leg=20, sway=7, lift=8):
+    # lateral sequence: left hand 0, right foot 0.25, right hand 0.5, left foot 0.75
+    phase = {"left_arm": 0.0, "right_leg": 0.25, "right_arm": 0.5, "left_leg": 0.75}
+    tr = stance(L, n, torso=lambda u: (2 * s(2 * TAU * u), sway * s(TAU * u), -4 * s(TAU * u)),
+                head=lambda u: (-2 * s(2 * TAU * u), -sway * 0.8 * s(TAU * u), 3 * s(TAU * u)))
+    for bone, ph in phase.items():
+        if bone.endswith("arm"):
+            sx = -1 if bone.startswith("left") else 1
+            # the swinging arm lifts out to the side a little to clear the ground
+            tr[bone] = [track(L, lambda u, ph=ph, sx=sx: (ARM + stride_arm * s(TAU * (u - ph)), sx * ARM_Y,
+                                                          sx * (ARM_Z + lift * max(0.0, math.cos(TAU * (u - ph))))), n)]
+        else:
+            tr[bone] = [track(L, lambda u, ph=ph: (LEG + stride_leg * s(TAU * (u - ph)), 0, 0), n)]
+    tr["tail"] = [track(L, lambda u: (TAIL, 10 * s(TAU * u + 1.2), 0), n)]
+    # mouth a little open, snapping wide and shut once a stride
+    tr["jaw"] = [track(L, lambda u: (-5 - 14 * bump(u, 0.4, 0.15), 0, 0), n)]
+    tr["root"] = grounded(m, L, tr, feet, n)
+    return L, tr
+
+
+def charge(m, feet, L=0.6, n=24):
+    # fists together at 0, feet together at 0.5; the back pitches between them
+    tr = stance(L, n, torso=lambda u: (9 * s(TAU * u + 0.6), 0, 0),
+                head=lambda u: (-7 * s(TAU * u + 0.6), 0, 0))
+    for side, sx in (("left", -1), ("right", 1)):
+        tr[side + "_arm"] = [track(L, lambda u, sx=sx: (ARM + 4 + 34 * s(TAU * u + 1.4), sx * ARM_Y, sx * ARM_Z), n)]
+        tr[side + "_leg"] = [track(L, lambda u: (LEG + 30 * s(TAU * u - 1.7), 0, 0), n)]
+    tr["tail"] = [track(L, lambda u: (TAIL - 10 * s(TAU * u), 0, 0), n)]
+    tr["root"] = grounded(m, L, tr, feet, n, extra=lambda u: 6 * max(0.0, s(TAU * u + 0.3)))
+    return L, tr
+
+
+# ---------------------------------------------------------------- model edits (QM 03:24)
+
+TOOTH_UV = (5.0, 3.0)  # the palette cell of the tooth white (250, 248, 238)
+
+
+def tooth(name, base_lo, base_hi, tip):
+    """A Snake-style tooth: a square pyramid mesh, base rectangle in a horizontal plane
+    (y = base_lo[1]) and its tip straight above or below."""
+    import uuid
+    (x0, y, z0), (x1, _, z1) = base_lo, base_hi
+    v = {"a": [x0, y, z0], "b": [x1, y, z0], "c": [x1, y, z1], "d": [x0, y, z1], "t": list(tip)}
+    up = tip[1] > y
+    tris = [("a", "b"), ("b", "c"), ("c", "d"), ("d", "a")]
+    faces = {}
+    base = ["a", "b", "c", "d"] if up else ["d", "c", "b", "a"]
+    faces["base"] = {"uv": {k: list(TOOTH_UV) for k in base}, "texture": 0, "vertices": base}
+    for i, (p, q) in enumerate(tris):
+        vs = [q, p, "t"] if up else [p, q, "t"]
+        faces[f"s{i}"] = {"uv": {k: list(TOOTH_UV) for k in vs}, "texture": 0, "vertices": vs}
+    return {"name": name, "color": 0, "origin": [0, 0, 0], "rotation": [0, 0, 0], "export": True,
+            "visibility": True, "locked": False, "render_order": "default", "allow_mirror_modeling": True,
+            "vertices": v, "faces": faces, "type": "mesh", "uuid": str(uuid.uuid4())}
+
+
+def edit_model(m):
+    """Snake-style teeth on the upper snout and the jaw, the jaw hinged at its back
+    centre, and the right eye mirrored from the left (QM's copy was dark and off)."""
+    import copy
+    import uuid
+    G = {g["name"]: g for g in m["groups"]}
+    if any(e["name"].startswith("Upper_tooth") for e in m["elements"]):
+        return
+    nodes = {}
+
+    def walk(o):
+        for c in o:
+            if isinstance(c, dict):
+                nodes[G_by_uuid[c["uuid"]]["name"]] = c
+                walk(c["children"])
+
+    G_by_uuid = {g["uuid"]: g for g in m["groups"]}
+    walk(m["outliner"])
+    # jaw hinge: centre of the jaw's back top edge
+    G["jaw"]["origin"] = [0, 98.39, -5.14]
+    # teeth: upper ones hang from the snout (y 101.32), lower ones stand on the jaw (y 98.39),
+    # staggered so they interleave when the mouth shuts
+    w = 1.4
+    up_z, lo_z = (-17.3, -13.4, -9.5), (-15.4, -11.5, -7.6)
+    for sx, side in ((-1, "L"), (1, "R")):
+        for i, z in enumerate(up_z):
+            x = sx * 5.4
+            t = tooth(f"Upper_tooth_{side}_{i}", (x - w, 101.32, z - w), (x + w, 101.32, z + w), (x, 97.1, z))
+            m["elements"].append(t)
+            nodes["head"]["children"].append(t["uuid"])
+        for i, z in enumerate(lo_z):
+            x = sx * 5.4
+            t = tooth(f"Lower_tooth_{side}_{i}", (x - w, 98.39, z - w), (x + w, 98.39, z + w), (x, 102.6, z))
+            m["elements"].append(t)
+            nodes["jaw"]["children"].append(t["uuid"])
+    # eyes: drop QM's right copy and mirror the left one into the mirrored bone
+    eyes = [e for e in m["elements"] if e["name"] in ("EyeL", "PupilL")]
+    right = [e for e in eyes if e["from"][0] > 0]
+    left = [e for e in eyes if e["from"][0] < 0]
+    gone = {e["uuid"] for e in right}
+    m["elements"] = [e for e in m["elements"] if e["uuid"] not in gone]
+    for n in nodes.values():
+        n["children"] = [c for c in n["children"] if not (isinstance(c, str) and c in gone)]
+    src_bone = next(b for b, n in nodes.items() if left[0]["uuid"] in n["children"])
+    g = G[src_bone]
+    mirror = next(b for b in G if b != src_bone and G[b]["origin"] == [-g["origin"][0], *g["origin"][1:]]
+                  and [round(v, 3) for v in G[b]["rotation"]] == [round(g["rotation"][0], 3), -round(g["rotation"][1], 3), -round(g["rotation"][2], 3)])
+    for e in left:
+        r = copy.deepcopy(e)
+        r["uuid"] = str(uuid.uuid4())
+        r["name"] = e["name"][:-1] + "R"
+        r["from"], r["to"] = [-e["to"][0], *e["from"][1:]], [-e["from"][0], *e["to"][1:]]
+        if "origin" in r:
+            r["origin"] = [-e["origin"][0], *e["origin"][1:]]
+        if "rotation" in r:
+            r["rotation"] = [e["rotation"][0], -e["rotation"][1], -e["rotation"][2]]
+        if "east" in r["faces"] and "west" in r["faces"]:
+            r["faces"]["east"], r["faces"]["west"] = r["faces"]["west"], r["faces"]["east"]
+        m["elements"].append(r)
+        nodes[mirror]["children"].append(r["uuid"])
+
+
+def name_front_teeth(m):
+    """QM added two front teeth by copying Upper_tooth_*_0 and moving its origin; give the
+    copies their own names."""
+    for e in m["elements"]:
+        if e["name"].startswith("Upper_tooth_") and e["name"].endswith("_0") and e.get("origin", [0, 0, 0]) != [0, 0, 0]:
+            e["name"] = e["name"][:-1] + "front"
+
+
+def add_neck(m):
+    """The game lassoes and finds the head by a bone called "neck": a plain one at the head's
+    pivot, holding QM's head bone."""
+    import copy
+    import uuid
+    if any(g["name"] == "neck" for g in m["groups"]):
+        return
+    head = next(g for g in m["groups"] if g["name"] == "head")
+    neck = copy.deepcopy(head)
+    neck.update(name="neck", uuid=str(uuid.uuid4()), rotation=[0, 0, 0])
+    m["groups"].append(neck)
+
+    def walk(o):
+        for i, c in enumerate(o):
+            if isinstance(c, dict):
+                if c["uuid"] == head["uuid"]:
+                    o[i] = {"uuid": neck["uuid"], "isOpen": True, "children": [c]}
+                    return True
+                if walk(c["children"]):
+                    return True
+        return False
+
+    walk(m["outliner"])
+
+
+def no_glow(m):
+    """QM 17:05: no glowing armour after all. Undo the Glow_ prefix (PR #65) that
+    bbmodel_to_luau turns into Neon."""
+    for e in m["elements"]:
+        if e["name"].startswith("Glow_"):
+            e["name"] = e["name"][len("Glow_"):]
+
+
+def gait(p, duty):
+    """One limb's knuckle-walk cycle at phase p (0..1): planted for `duty` of it, sliding from
+    +1 to -1 as the body vaults over it, then a quick swing back to +1. Returns (swing, lift):
+    swing in -1..1, lift 0..1 (off the ground mid-swing)."""
+    p %= 1.0
+    if p < duty:
+        return 1 - 2 * p / duty, 0.0
+    v = (p - duty) / (1 - duty)
+    return -1 + 2 * v * v * (3 - 2 * v), math.sin(math.pi * v)
+
+
+def gallop(m, feet, L=1.0, n=40, duty=0.6, arm=-20, stride_arm=11, leg=-10, stride_leg=20,
+           lift=12, raise_=30, sway=-8, lean=10):
+    """QM 16:19: the gallop is a gorilla knuckle-walk. Each fist plants beside the shoulder
+    and the body vaults over it (the limb slides back while planted, then swings forward
+    fast, lifted up and out to the side); lateral sequence: left hand, right foot, right
+    hand, left foot. The back is `lean` degrees more upright than the stance so the fists
+    and feet both reach the ground (probed: arm X -9..-31 keeps the fist within 0.1 studs of
+    the feet's height). The back pitches onto each hand, the shoulders roll and the body
+    swings toward the planted arm while the head stays level. Arms move only by the arm bones."""
+    phase = {"left_arm": 0.0, "right_leg": 0.25, "right_arm": 0.5, "left_leg": 0.75}
+    bob = lambda u: math.cos(2 * TAU * u)  # noqa: E731  # +1 as each hand lands
+    tr = stance(L, n, torso=lambda u: (lean - 3 * bob(u), sway * s(TAU * u + 0.6), -1.5 * s(TAU * u + 0.6)),
+                head=lambda u: (-lean + 4 * bob(u), -sway * 0.8 * s(TAU * u + 0.6), 4 * s(TAU * u + 0.6)))
+    for bone, ph in phase.items():
+        if bone.endswith("arm"):
+            sx = -1 if bone.startswith("left") else 1
+
+            def key(u, ph=ph, sx=sx):
+                swing, up = gait(u - ph, duty)
+                return (arm + stride_arm * swing + raise_ * up, sx * ARM_Y, sx * (ARM_Z + lift * up))
+            tr[bone] = [track(L, key, n)]
+        else:
+            tr[bone] = [track(L, lambda u, ph=ph: (leg + stride_leg * gait(u - ph, duty)[0], 0, 0), n)]
+    tr["tail"] = [track(L, lambda u: (TAIL - 4 * bob(u), 12 * s(TAU * u + 1.2), 0), n)]
+    tr["jaw"] = [track(L, lambda u: (-6 - 10 * bump(u, 0.4, 0.12) - 10 * bump(u, 0.9, 0.12), 0, 0), n)]
+    tr["root"] = grounded(m, L, tr, feet, n)
+    return L, tr
+
+
+def as_blockbench5(m):
+    """Blockbench 5 keyframes are already in the convention our renderer and the game use
+    (QM's 17:08 recording matched the raw keys, not negated ones). Blockbench 5 negates x and
+    y rotations when it opens a 4.x file, so anything this writes is marked 5.0."""
+    m["meta"]["format_version"] = "5.0"
+
+
+GREY = {(157, 157, 157), (103, 103, 103)}
+
+
+def metal_armour(m):
+    """QM 17:15/17:31: the grey armour gets the classic Weld texture, not studs.
+    bbmodel_to_luau and Rig draw Metal_ parts that way."""
+    _, parts = bbmodel_to_luau.convert(m)
+    grey = {p[0] for p in parts if tuple(p[6]) in GREY}
+    for e in m["elements"]:
+        if e["name"] in grey:
+            e["name"] = "Metal_" + e["name"]
+
+
+def main(path=MODEL, *flags):
+    """QM's file is the source of truth for every animation since 17:04 (their own idle, walk
+    and gallop): this keeps its keyframes as they are and only makes the model edits the
+    game needs. Pass "gallop" to replace the gallop with gallop() again."""
+    m = json.load(open(path))
+    as_blockbench5(m)
+    edit_model(m)
+    name_front_teeth(m)
+    add_neck(m)
+    no_glow(m)
+    metal_armour(m)
+    if "gallop" in flags:
+        feet = contacts(m)
+        kept = [a for a in m["animations"] if a["name"] != "gallop"]
+        write_animations(m, group_ids(m), {"gallop": gallop(m, feet)})
+        m["animations"] = kept + m["animations"]
+    with open(path, "w") as f:
+        json.dump(m, f, separators=(",", ":"))
+    return m
+
+
+if __name__ == "__main__":
+    main(*sys.argv[1:])

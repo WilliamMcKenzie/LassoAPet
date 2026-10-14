@@ -1,0 +1,108 @@
+-- World 1's home base floor, redone like World 2's (QM, Oct 13). Made by
+-- tools/world1_base.py: edit that and re-make this, not this. Run in Studio (Edit,
+-- execute_luau) on World 1's Place, after tools/arc_base.luau. Re-running is fine.
+-- Green grass, darker green grass and tan dirt as a gradient: the bright grass never
+-- touches the dirt, there's always darker grass between. The bright grass is a stud up,
+-- but flat inside the pens (a tile round them) and on the start line's row. Replaces the base floor (its
+-- ArcBase parts), drops any plant now standing on dirt, and moves everything else in
+-- BaseDecor (and the spawn) up or down by however much the floor under it moved.
+-- In game the floor takes Config's Meadow colours: the darker grass is a Patch named
+-- Grass (Config.Biomes[1].Patches.Grass), like World 2's.
+local W = workspace.World
+local OFFSET = 0
+local rgb = Color3.fromRGB
+local KINDS = { -- [kind] = { name, top, part colour, checker colour }
+	[0] = { "Ground", 0, rgb(113, 173, 31), rgb(122, 190, 25) },
+	[1] = { "Grass", 0, rgb(92, 146, 30), rgb(100, 160, 26) }, -- the darker green, beside the dirt
+	[2] = { "Dirt", -1, rgb(206, 146, 84), rgb(222, 164, 100) },
+	[3] = { "Ground", 1, rgb(113, 173, 31), rgb(122, 190, 25) }, -- the light grass a stud up
+}
+-- { kind, low x, low z, size x, size z } on 8-stud cells
+local FLOOR = {
+--FLOOR--
+}
+
+local function floorAt(pos)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { W.Ground }
+	local hit = workspace:Raycast(Vector3.new(pos.X, 50, pos.Z), Vector3.new(0, -100, 0), params)
+	return if hit then hit.Position.Y else 0
+end
+
+-- What stands on the base, and the floor's height under it before.
+local standing = {}
+local function note(inst)
+	if inst:IsA("Model") or inst:IsA("BasePart") then
+		local at = inst:GetPivot().Position
+		table.insert(standing, { inst, floorAt(at) })
+	end
+end
+local decor = W:FindFirstChild("BaseDecor")
+if decor then
+	for _, inst in decor:GetChildren() do
+		if inst:IsA("Folder") then
+			for _, m in inst:GetChildren() do
+				note(m)
+			end
+		else
+			note(inst)
+		end
+	end
+end
+local spawn = W:FindFirstChild("SpawnLocation", true) or workspace:FindFirstChild("SpawnLocation")
+if spawn then
+	note(spawn)
+end
+
+local template
+for _, p in W.Ground:GetChildren() do
+	if p:IsA("BasePart") and p:GetAttribute("ArcBase") then
+		template = template or p:Clone()
+		p:Destroy()
+	end
+end
+assert(template, "no ArcBase floor in World.Ground to copy the look of")
+for _, t in template:GetChildren() do
+	if not t:IsA("Texture") then
+		t:Destroy()
+	end
+end
+for _, r in FLOOR do
+	local k = KINDS[r[1]]
+	local x, z, sx, sz = r[2] + OFFSET, r[3], r[4], r[5]
+	local p = template:Clone()
+	p.Name = k[1]
+	p.Size = Vector3.new(sx, k[2] + 2, sz)
+	p.CFrame = CFrame.new(x + sx / 2, (k[2] - 2) / 2, z + sz / 2)
+	p.Color = k[3]
+	for _, t in p:GetChildren() do
+		t.Color3 = k[4]
+	end
+	p.Parent = W.Ground
+end
+
+local function dirtAt(x, z)
+	for _, r in FLOOR do
+		if r[1] == 2 and x >= r[2] + OFFSET and x < r[2] + OFFSET + r[4] and z >= r[3] and z < r[3] + r[5] then
+			return true
+		end
+	end
+	return false
+end
+local dropped, moved = 0, 0
+for _, s in standing do
+	local inst, before = s[1], s[2]
+	local at = inst:GetPivot().Position
+	if inst.Parent and inst.Parent.Name == "Plants" and dirtAt(at.X, at.Z) then
+		inst:Destroy()
+		dropped += 1
+	else
+		local dy = floorAt(at) - before
+		if math.abs(dy) > 0.01 then
+			inst:PivotTo(inst:GetPivot() + Vector3.new(0, dy, 0))
+			moved += 1
+		end
+	end
+end
+return string.format("%d floor parts, %d plants on dirt dropped, %d things moved with the floor", #FLOOR, dropped, moved)

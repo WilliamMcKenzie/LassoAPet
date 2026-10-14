@@ -1,0 +1,74 @@
+{
+  "name": "LassoForEggs",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerScriptService": {
+      "Server": {
+        "$path": "src/server"
+      }
+    },
+    "StarterPlayer": {
+      "$properties": {
+        "DevTouchMovementMode": "DynamicThumbstick"
+      },
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src/client"
+        }
+      }
+    },
+    "Workspace": {
+      "$properties": {
+        "StreamingEnabled": false
+      },
+      "World": {
+        "$path": "src/world/World.rbxmx"
+      },
+      "Pens": {
+        "$path": "src/world/Pens.rbxmx"
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "ShadowMap",
+        "Brightness": 1,
+        "GlobalShadows": false,
+        "ShadowSoftness": 0.2,
+        "Ambient": [
+          0.2745,
+          0.2745,
+          0.3137
+        ],
+        "OutdoorAmbient": [
+          0.6314,
+          0.6392,
+          0.6392
+        ],
+        "EnvironmentDiffuseScale": 0.4,
+        "EnvironmentSpecularScale": 1,
+        "ExposureCompensation": 0.5,
+        "ClockTime": 12,
+        "FogStart": 100000,
+        "FogEnd": 100000,
+        "GeographicLatitude": 0
+      },
+      "ColorCorrection": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Contrast": 0.05,
+          "Saturation": 0.25
+        }
+      }
+    },
+    "TextChatService": {
+      "$properties": {
+        "ChatVersion": "TextChatService"
+      }
+    }
+  }
+}

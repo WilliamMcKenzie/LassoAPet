@@ -1,0 +1,171 @@
+-- Five pens (src/world/Pens.rbxmx, Workspace.Pens), one per player: a player
+-- gets the lowest free pen on joining and it's freed when they leave. The pen
+-- is theirs only while they're online. Its number goes on the player as the
+-- "Pen" attribute (the ride reads it), its owner's UserId on the pen as "Owner".
+-- Players past the fifth get no pen and spawn at the base's SpawnLocation.
+
+local Players = game:GetService("Players")
+local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
+
+-- Walking speed on foot (Config.WalkSpeed): every character spawns with it.
+game:GetService("StarterPlayer").CharacterWalkSpeed = Config.WalkSpeed
+
+local folder = workspace:WaitForChild("Pens")
+local pens = {}
+for i = 1, 5 do
+	pens[i] = folder:WaitForChild("Pen" .. i)
+end
+
+-- The owner's picture and name floating high over the middle of the pen (QM, Oct 10:
+-- Config.PenProfile), like the base owners in Roblox pet games. Hidden while the pen is free.
+local function setSign(pen, player)
+	local sign = pen:FindFirstChild("Sign")
+	if not sign then
+		return
+	end
+	local gui = sign:FindFirstChild("Owner")
+	if not gui then
+		gui = Instance.new("BillboardGui")
+		gui.Name = "Owner"
+		gui.Size = UDim2.fromScale(32, 20) -- (QM, Oct 10: 2x; taller for the pet count, Oct 11)
+		gui.MaxDistance = 250
+		gui.LightInfluence = 0
+		local picture = Instance.new("ImageLabel")
+		picture.Name = "Picture"
+		picture.AnchorPoint = Vector2.new(0.5, 0)
+		picture.Position = UDim2.fromScale(0.5, 0)
+		picture.Size = UDim2.fromScale(0.48, 0.48)
+		picture.SizeConstraint = Enum.SizeConstraint.RelativeYY
+		picture.BackgroundColor3 = Color3.new(1, 1, 1)
+		Instance.new("UICorner", picture).CornerRadius = UDim.new(0.5, 0)
+		local ring = Instance.new("UIStroke")
+		ring.Thickness = 3
+		ring.Parent = picture
+		picture.Parent = gui
+		local label = Instance.new("TextLabel")
+		label.Name = "OwnerName"
+		label.Position = UDim2.fromScale(0, 0.51)
+		label.Size = UDim2.fromScale(1, 0.29)
+		label.BackgroundTransparency = 1
+		label.Font = Enum.Font.FredokaOne
+		label.TextScaled = true
+		label.TextColor3 = Color3.new(1, 1, 1)
+		local stroke = Instance.new("UIStroke")
+		stroke.Thickness = 3
+		stroke.Parent = label
+		label.Parent = gui
+		-- How full the pen is, "5/10" (Config.PenCapacity: Hatchery keeps PetCount and PetCap
+		-- on the pen), red when it's full.
+		local count = label:Clone()
+		count.Name = "PetCount"
+		count.Position = UDim2.fromScale(0, 0.81)
+		count.Size = UDim2.fromScale(1, 0.19)
+		count.Text = ""
+		count.Parent = gui
+		local function showCount()
+			local n, cap = pen:GetAttribute("PetCount"), pen:GetAttribute("PetCap")
+			count.Text = if n and cap then n .. "/" .. cap else ""
+			count.TextColor3 = if n and cap and n >= cap then Color3.fromRGB(255, 90, 90) else Color3.new(1, 1, 1)
+		end
+		pen:GetAttributeChangedSignal("PetCount"):Connect(showCount)
+		pen:GetAttributeChangedSignal("PetCap"):Connect(showCount)
+		showCount()
+		gui.Parent = sign
+	end
+	-- (over the pen's middle, its floor, high up: as big as the pen gets, it stays there)
+	gui.Adornee = pen:FindFirstChild("Area") or sign
+	gui.StudsOffsetWorldSpace = Vector3.new(0, Config.PenProfile.Height, 0)
+	gui.Enabled = player ~= nil and Config.PenProfile.On
+	-- VIP (game pass): the name and the ring round the picture in gold.
+	local vip = player ~= nil and player:GetAttribute("PassVIP") == true
+	gui.OwnerName.TextColor3 = if vip then Config.Vip.Name else Color3.new(1, 1, 1)
+	gui.Picture.UIStroke.Color = if vip then Config.Vip.Name else Color3.new(0, 0, 0)
+	if player then
+		gui.OwnerName.Text = player.DisplayName
+		gui.Picture.Image = ""
+		task.spawn(function()
+			local ok, image = pcall(Players.GetUserThumbnailAsync, Players, player.UserId,
+				Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+			if ok and pen:GetAttribute("Owner") == player.UserId then
+				gui.Picture.Image = image
+			end
+		end)
+	end
+end
+
+local function penOf(player)
+	local index = player:GetAttribute("Pen")
+	return index and pens[index]
+end
+
+local SPAWN_BACK = 10 -- QM's spawn view
+
+local function toPen(player, character)
+	local pen = penOf(player)
+	local spawn = pen and pen:FindFirstChild("Spawn")
+	if spawn then
+		character:WaitForChild("HumanoidRootPart")
+		task.wait() -- let the default spawn finish placing the character first
+		-- Facing into the pen (Pen.client puts the camera behind you).
+		-- SPAWN_BACK studs further out than the Spawn part, so the pen's in view.
+		local at = spawn.Position + Vector3.new(0, 3, 0)
+		local area = pen:FindFirstChild("Area")
+		local ahead = if area then Vector3.new(area.Position.X, at.Y, area.Position.Z) else at + Vector3.zAxis
+		at -= (ahead - at).Unit * SPAWN_BACK
+		character:PivotTo(CFrame.lookAt(at, ahead))
+	end
+end
+
+local function claim(player)
+	for i, pen in pens do
+		if pen:GetAttribute("Owner") == nil then
+			pen:SetAttribute("Owner", player.UserId)
+			player:SetAttribute("Pen", i)
+			setSign(pen, player)
+			return
+		end
+	end
+end
+
+local function release(player)
+	local pen = penOf(player)
+	if pen and pen:GetAttribute("Owner") == player.UserId then
+		-- Emptied here too, with the owner: Hatchery's own PlayerRemoving can run
+		-- after this one, and then it no longer finds the pen as theirs and left
+		-- their pets in it for the next owner (QM, Oct 5).
+		pen:SetAttribute("Contents", "{}")
+		pen:SetAttribute("PetCount", nil)
+		pen:SetAttribute("PetCap", nil)
+		pen:SetAttribute("Owner", nil)
+		setSign(pen, nil)
+	end
+end
+
+local function onJoin(player)
+	claim(player)
+	player:GetAttributeChangedSignal("PassVIP"):Connect(function()
+		local pen = penOf(player)
+		if pen and pen:GetAttribute("Owner") == player.UserId then
+			setSign(pen, player)
+		end
+	end)
+	player.CharacterAdded:Connect(function(character)
+		local humanoid = character:WaitForChild("Humanoid", 5)
+		if humanoid then
+			humanoid.WalkSpeed = Config.WalkSpeed
+		end
+		toPen(player, character)
+	end)
+	if player.Character then
+		task.spawn(toPen, player, player.Character)
+	end
+end
+
+for _, pen in pens do
+	setSign(pen, nil)
+end
+Players.PlayerAdded:Connect(onJoin)
+Players.PlayerRemoving:Connect(release)
+for _, player in Players:GetPlayers() do
+	task.spawn(onJoin, player)
+end
