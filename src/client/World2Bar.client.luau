@@ -148,35 +148,28 @@ local gate = if REBIRTH then nil else workspace:WaitForChild("World"):WaitForChi
 local QUESTS_HEADER = 86
 local GROW = 1.2 -- (the art's panel is smaller than its picture, round the cash: 20% up to look as tall, QM)
 local Inventory = require(script.Parent.Inventory)
--- Just over the inventory slots (QM, Oct 14), as wide as their row, with the same gap
--- between them as between two slots. (Over the Quests panel's line, the old place, when
--- the slots aren't up.)
+-- At the bottom, under the inventory slots (QM, Oct 14: the slots above it), as wide as 8
+-- slots, the same gap between it and the slots as between two slots; the slots lifted to
+-- make room (Inventory.lift). (The old place, over the Quests panel's line, when the slots
+-- aren't up.)
 local function overSlots()
 	local inv = Inventory.frame()
-	if not (inv and inv.Visible and inv.AbsoluteSize.X > 0) then
+	local m = Inventory.metrics()
+	if not (m and inv.Visible and gui.Enabled) then
+		Inventory.lift(0)
 		return false
 	end
-	local slots = {}
-	for _, child in inv:GetChildren() do
-		if child:IsA("GuiObject") then
-			table.insert(slots, child)
-		end
-	end
-	table.sort(slots, function(a, b)
-		return a.AbsolutePosition.X < b.AbsolutePosition.X
-	end)
-	if #slots < 2 then
-		return false
-	end
-	local gap = slots[2].AbsolutePosition.X - slots[1].AbsolutePosition.X - slots[1].AbsoluteSize.X
 	local s = rootScale.Scale
-	local width = inv.AbsoluteSize.X / s
-	bar.Size = UDim2.fromOffset(width, width * BAR.Y / BAR.X)
+	local width = m.row / s
+	local height = width * BAR.Y / BAR.X
+	bar.Size = UDim2.fromOffset(width, height)
 	green.Size = bar.Size
 	bar.AnchorPoint = Vector2.new(0.5, 1)
-	-- (the art's panel ends 12 px of its 103 above the picture's bottom: the gap's from the panel)
-	local under = (103 - 91) / 103 * bar.Size.Y.Offset
-	bar.Position = UDim2.new(0, (inv.AbsolutePosition.X + inv.AbsoluteSize.X / 2 - root.AbsolutePosition.X) / s, 0, (inv.AbsolutePosition.Y - gap - root.AbsolutePosition.Y) / s + under)
+	-- (the art's panel ends 12 px of its 103 above the picture's bottom)
+	local under = (103 - 91) / 103 * height
+	bar.Position = UDim2.new(0, (m.centreX - root.AbsolutePosition.X) / s, 0, (m.bottom - root.AbsolutePosition.Y) / s + under)
+	local over = 11 / 103 * height -- (and starts 11 px down)
+	Inventory.lift((height - under - over) * s + m.gap) -- (the panel's own height, and a gap)
 	return true
 end
 

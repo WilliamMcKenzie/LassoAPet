@@ -27,7 +27,8 @@ local SCALE = 0.96 -- the whole bar, slots, numbers and outlines alike (QM, Oct 
 local GAP = 10
 local BOTTOM = GAP * SCALE -- (QM, Oct 9: the same gap under the bar as between its slots, on screen; was 24)
 local MAX_SLOTS = 16 -- (more slots as you get more kinds of egg: QM, Oct 14)
-local MIN_SLOTS = 8 -- always this many, empty ones too (QM, Oct 14)
+local MIN_SLOTS = 0 -- (empty slots up to this many: QM, Oct 14, none again; was 8)
+local ROW = 8 -- slots' worth of width World2Bar's bar takes under them
 local FONT = Enum.Font.FredokaOne
 
 -- Square backgrounds by the item's rarity: QM's slot pictures (the colour is a
@@ -346,9 +347,26 @@ function Inventory.holdBack(kind, n)
 	redraw()
 end
 
--- The bar itself (World2Bar sits on top of it).
+-- The bar itself, and its measures on screen (World2Bar sits under it, QM Oct 14): px per
+-- slot unit, the gap between slots, ROW slots' width, and where its bottom is unlifted.
 function Inventory.frame()
 	return bar
+end
+local lifted = 0 -- screen px it's lifted by (World2Bar's bar under it)
+function Inventory.metrics()
+	if not bar or bar.AbsoluteSize.Y <= 0 then
+		return nil
+	end
+	local k = bar.AbsoluteSize.Y / SLOT
+	return { gap = GAP * k, row = (ROW * SLOT + (ROW - 1) * GAP) * k, bottom = bar.AbsolutePosition.Y + bar.AbsoluteSize.Y + lifted, centreX = bar.AbsolutePosition.X + bar.AbsoluteSize.X / 2 }
+end
+function Inventory.lift(px)
+	if not bar or bar.AbsoluteSize.Y <= 0 or math.abs(px - lifted) < 0.5 then
+		return
+	end
+	local parentScale = bar.AbsoluteSize.Y / (SLOT * SCALE) -- (screen px per unit of the bar's parent)
+	lifted = px
+	bar.Position = UDim2.new(0.5, 0, 1, -BOTTOM - px / parentScale)
 end
 
 function Inventory.slot(name)
