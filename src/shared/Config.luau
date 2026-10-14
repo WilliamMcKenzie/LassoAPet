@@ -1552,6 +1552,7 @@ end
 for _, kind in { "GreenCrab", "Parrot", "BananaMonkey", "TreasureHermit", "EyepatchShark", "TreasureTurtle", "GhostShip", "JollyRogerWyvern" } do
 	Config.AnimalScale[kind] = 2
 end
+Config.AnimalScale.Parrot = 3 -- (the Parrot 1.5x more again: QM, Oct 14)
 -- Each world's own animals: [world] = the set that runs at its own speed there (World 1's: all).
 local OWN = { [2] = Config.World2Animals, [3] = setmetatable(table.clone(Config.World2Animals), { __index = Config.World3Animals }) }
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
