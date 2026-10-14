@@ -1293,7 +1293,7 @@ Config.WorldPrices = { 0, 100000 }
 -- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,
 -- and every pet of yours wears Shared/Skins' Skins[n]: Gold, Diamond, Galaxy.
 Config.Rebirth = {
-	Prices = { 100000000, 1000000000, 10000000000 },
+	Prices = { 10000000, 100000000, 1000000000 }, -- (QM, Oct 14: each 10x cheaper; was 100m, 1b, 10b)
 	Gold = { 2, 4, 8 }, -- (each rebirth doubles again: QM's rebirth panel's "2x Gold")
 	Speed = { 1.5, 1.5, 1.5 }, -- (QM's 1.5x: not stacked, so the courses stay ridable)
 	Scale = 1.5, -- (QM, Oct 13: rebirthed pets are this much bigger everywhere: Shared/Skins)
