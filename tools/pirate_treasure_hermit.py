@@ -2,12 +2,12 @@
 a pirate's treasure chest: a wooden chest of planks with gold bands, gold corners, a big gold
 lock with a keyhole and studs, its lid propped open on gold coins, pearls and a glowing ruby.
 Out of the front pokes the crab: a purple head with eye stalks and googly eyes, two claws
-(the right one huge) and four walking legs. You ride on the chest's lid.
+(the right one huge; built like the Green Crab's, their tops and the head low-poly meshes) and four walking legs. You ride on the chest's lid.
 
 Run: python3 tools/pirate_treasure_hermit.py [--gif]
 
 Bones: root (chest) -> Lid (hinged at the back, peeks open), neck (head), ClawL, ClawR,
-LegL1..2, LegR1..2.
+LegL1..2, LegR1..2; ClawL, ClawR -> PincerL, PincerR (the lower jaws, snap).
 
   idle    the lid creaks open and shut, the claws snap, eyes look about
   walk    legs scuttle, the chest rocks side to side
@@ -19,6 +19,7 @@ import math
 import numpy as np
 
 from pirate_lib import Model, track, TAU
+from pirate_red_crab import claw_top
 
 NAME = "TreasureHermit"
 C = {"wood": (170, 98, 46), "wooddark": (110, 60, 30), "crab": (160, 70, 220), "crabdark": (104, 40, 160),
@@ -66,7 +67,13 @@ def build():
     # the crab: its body tucked into the front of the chest, the head poking out under the lip
     hy, hz = y_b + 1.4, zc - D / 2 - 1.3
     neck = m.group("neck", (0, hy, zc - D / 2), root)
-    h = [m.box("Head", (0, hy, hz), (3.2, 2.0, 2.4), "crab"),
+    # the head is a little faceted shell like the Green Crab's carapace (a low-poly mesh)
+    head = []
+    for y, sc, half in ((-1.0, 0.9, 0), (-0.2, 1.0, 0.5), (0.7, 0.75, 0), (1.1, 0.4, 0.5)):
+        for i in range(8):
+            a = math.tau * (i + half) / 8
+            head.append((sc * 1.7 * math.cos(a), hy + y, hz + sc * 1.3 * math.sin(a)))
+    h = [m.hull("Head", head, "crab"),
          m.box("Face", (0, hy - 0.4, hz - 1.25), (2.2, 0.8, 0.12), "crabbelly"),
          m.box("Mouth", (0, hy - 0.5, hz - 1.33), (1.0, 0.2, 0.06), "tip")]
     for s in (-1, 1):
@@ -81,17 +88,25 @@ def build():
     for s in (-1, 1):
         n = "LR"[s > 0]
         k = 1.35 if s > 0 else 0.9
+        # claws built as the Green Crab's (QM Oct 14): arm, dark elbow, wrist, the claw's top a
+        # low-poly mesh with a black tip, and a lower pincer on its own bone that snaps
+        k *= 0.8
         sh = np.array([s * 1.9, hy - 0.2, zc - D / 2 - 0.6])
         claw = m.group(f"Claw{n}", tuple(sh), root)
-        el = sh + np.array([s * 0.9, 0.2, -1.0])
-        pc = el + np.array([0, 0.3 * k, -1.2 * k])
-        q = [m.seg(f"Arm{n}", sh, el, 1.0, 1.0, "crab"),
-             m.box(f"Palm{n}", pc, (1.7 * k, 1.7 * k, 1.9 * k), "crab"),
-             m.box(f"Finger{n}", pc + np.array([0, 0.4 * k, -1.4 * k]), (1.2 * k, 0.8 * k, 1.0 * k), "crab"),
-             m.pyr(f"FingerTip{n}", pc + np.array([0, 0.4 * k, -1.9 * k]), (0, -0.25, -1), (1, 0, 0), 1.0 * k, 0.55 * k, 0.38 * k, "tip"),
-             m.box(f"Thumb{n}", pc + np.array([0, -0.55 * k, -1.3 * k]), (1.0 * k, 0.6 * k, 0.9 * k), "crab"),
-             m.pyr(f"ThumbTip{n}", pc + np.array([0, -0.55 * k, -1.75 * k]), (0, 0.25, -1), (1, 0, 0), 0.8 * k, 0.45 * k, 0.28 * k, "tip")]
-        m.put(claw, q)
+        el = sh + np.array([s * 0.9, 0.5, -0.7])
+        hand = el + np.array([-s * 0.2, 0.4, -0.9])
+        pc = hand + np.array([0, 0.2 * k, -1.0 * k])
+        m.put(claw, [m.seg(f"Arm{n}", sh, el, 0.9, 0.9, "crab"),
+                     m.box(f"Elbow{n}", el, (1.0, 1.0, 1.0), "crabdark"),
+                     m.seg(f"Wrist{n}", el, hand, 0.9, 0.9, "crab"),
+                     m.hull(f"Claw{n}", claw_top(pc, k), "crab"),
+                     m.pyr(f"FingerTip{n}", pc + np.array([0, 0.35 * k, -2.5 * k]), (0, -0.2, -1), (1, 0, 0), 1.0 * k,
+                           0.5 * k, 0.38 * k, "tip")])
+        jaw_p = pc + np.array([0, -0.55 * k, -1.0 * k])
+        jaw = m.group(f"Pincer{n}", tuple(jaw_p), claw)
+        m.put(jaw, [m.box(f"Jaw{n}", jaw_p + np.array([0, -0.15 * k, -0.6 * k]), (1.3 * k, 0.75 * k, 1.2 * k), "crab"),
+                    m.pyr(f"JawTip{n}", jaw_p + np.array([0, -0.15 * k, -1.2 * k]), (0, 0.25, -1), (1, 0, 0), 1.0 * k,
+                          0.55 * k, 0.35 * k, "tip")])
         for i, (zz, fz) in enumerate(((zc - D / 2 - 0.4, -0.7), (zc - D / 2 + 0.6, 0.2))):
             nm = f"Leg{n}{i + 1}"
             hip = np.array([s * (W / 2 - 0.3), y_b + 0.6, zz])
@@ -115,24 +130,29 @@ def animations():
                     0, s * swing * math.sin(TAU * (u + ph)), s * lift * max(0.0, math.cos(TAU * (u + ph)))), n)]
         return tr
 
+    def snap(L, amp, speed=1, n=16):
+        return {f"Pincer{nm}": [track(L, lambda u, s=s: (amp * max(0.0, math.sin(TAU * speed * u + (s > 0) * 1.5)) ** 2, 0, 0), n)]
+                for s, nm in ((-1, "L"), (1, "R"))}
+
     L = 3.0
     idle = {"Lid": [track(L, lambda u: (-10 * max(0.0, math.sin(TAU * u)) ** 2, 0, 0), 24)],
             "ClawR": [track(L, lambda u: (6 * math.sin(TAU * 2 * u), 0, 0), 16)],
             "ClawL": [track(L, lambda u: (-5 * math.sin(TAU * 2 * u + 1), 0, 0), 16)],
-            "neck": [track(L, lambda u: (0, 12 * math.sin(TAU * u), 0), 16)]}
+            "neck": [track(L, lambda u: (0, 12 * math.sin(TAU * u), 0), 16)],
+            **snap(L, 28, 2)}
     Lw = 0.7
     walk = {**legs(Lw, 22, 18),
             "root": [track(Lw, lambda u: (0, 0, 3 * math.sin(TAU * u)), 16)],
             "Lid": [track(Lw, lambda u: (-3 * max(0.0, math.sin(TAU * 2 * u)), 0, 0), 16)],
             "ClawR": [track(Lw, lambda u: (5 * math.sin(TAU * u), 0, 0), 16)],
-            "ClawL": [track(Lw, lambda u: (-5 * math.sin(TAU * u), 0, 0), 16)]}
+            "ClawL": [track(Lw, lambda u: (-5 * math.sin(TAU * u), 0, 0), 16)], **snap(Lw, 14)}
     Lg = 0.36
     gallop = {**legs(Lg, 30, 24),
               "root": [track(Lg, lambda u: (-3, 0, 4 * math.sin(TAU * u)), 16),
                        track(Lg, lambda u: (0, 0.7 * abs(math.sin(TAU * u)), 0), 16, "position")],
               "Lid": [track(Lg, lambda u: (-8 * max(0.0, math.sin(TAU * u)), 0, 0), 16)],
               "ClawR": [track(Lg, lambda u: (-15 + 8 * math.sin(TAU * u), 0, 0), 16)],
-              "ClawL": [track(Lg, lambda u: (-15 - 8 * math.sin(TAU * u), 0, 0), 16)]}
+              "ClawL": [track(Lg, lambda u: (-15 - 8 * math.sin(TAU * u), 0, 0), 16)], **snap(Lg, 30, 2)}
     return {"idle": (L, idle), "walk": (Lw, walk), "gallop": (Lg, gallop)}
 
 
