@@ -301,7 +301,7 @@ local Config = {
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50, FlytrapQueen = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50, FlytrapQueen = 60, RoyalCnidarian = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
@@ -318,6 +318,7 @@ local Config = {
 			Sphinx = { At = Vector3.new(0, 0.28, 0.4), From = Vector3.new(0, 6, 60) }, -- (its pharaoh face, high at the front; a guess)
 			Dreadstump = { At = Vector3.new(0, 0.18, 0.3), From = Vector3.new(0, 6, 60) }, -- (World 3 Pirate Cove's Pirate King: his face under the tricorn; a guess)
 			FlytrapQueen = { At = Vector3.new(0, 0.32, 0.3), From = Vector3.new(0, 10, 70) }, -- World 3 Garden: the Queen's crowned head, high in the middle (a guess)
+			RoyalCnidarian = { At = Vector3.new(0, 0.1, 0.33), From = Vector3.new(0, 6, 60) }, -- (World 3 Cnidaria's crowned jellyfish: its eyes and teeth under the crown; a guess)
 			CrystalTyrant = { At = Vector3.new(0, 0.02, 0.48), From = Vector3.new(0, 4, 34) }, -- (its eyes and teeth, halfway up: the crown makes it tall)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
@@ -559,6 +560,8 @@ local Config = {
 		Nut = { Kind = "Fly", Height = 56 }, -- World 2 Tomb: the flying sky goddess, a flier like the Crystal Phoenix (Oct 13)
 		Parrot = { Kind = "Fly", Height = 56 }, -- World 3 Pirate Cove: the pirate's macaw, a flier like the Crystal Phoenix (Oct 14)
 		JollyRogerWyvern = { Kind = "Fly", Height = 56 }, -- World 3 Pirate Cove's skeleton sea dragon, a flier (Oct 14)
+		MoonJellyfish = { Kind = "Fly", Height = 56 }, Anomalocaris = { Kind = "Fly", Height = 56 }, BoxJellyfish = { Kind = "Fly", Height = 56 }, BlueRingOctopus = { Kind = "Fly", Height = 56 }, ManOWar = { Kind = "Fly", Height = 56 }, -- World 3 Cnidaria: all swimmers, fliers like the Crystal Phoenix (Oct 14)
+		Mermaid = { Kind = "Fly", Height = 56 }, AbyssalDragon = { Kind = "Fly", Height = 56 }, ReefTitan = { Kind = "Fly", Height = 56 }, RoyalCnidarian = { Kind = "Fly", Height = 56 },
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
 		-- Whale, a pink haze round the screen, and scares the animals round it off.
@@ -611,6 +614,8 @@ local Config = {
 		GhostShip = 4, JollyRogerWyvern = 4, Dreadstump = 3, -- World 3 Pirate Cove's giga rares (XL) and its boss as a pet (guesses, Oct 14)
 		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
 		RafflesiaBeast = 4, AncientTreant = 4, FlytrapQueen = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
+		MoonJellyfish = 1, Anomalocaris = 2, BoxJellyfish = 2, BlueRingOctopus = 2, ManOWar = 2, Mermaid = 3, -- World 3 Cnidaria (guesses, Oct 14)
+		AbyssalDragon = 4, ReefTitan = 4, RoyalCnidarian = 3, -- World 3 Cnidaria's giga rares (XL) and its boss as a pet (guesses, Oct 14)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -1444,6 +1449,18 @@ Config.World3Pets = {
 	RafflesiaBeast = { 0.5, 1600000, 3600 },
 	AncientTreant = { 0.5, 1600000, 3600 },
 	FlytrapQueen = { 0.5, 1600000, 3600 },
+	-- World 3's last biome, Cnidaria (Oct 14: tools/moon_jellyfish.py etc.): the top of the game,
+	-- above Candyland. Legendary 640k (Garden's 160k x2 x2), the others by Pirate Cove's ratios to
+	-- its Legendary; trophies 10x the Legendary, as the Seraphs. ALL GUESSES.
+	MoonJellyfish = { 10.5, 32000, 15 }, -- Common (guess)
+	Anomalocaris = { 10.7, 48000, 20 }, -- Uncommon (guess)
+	BoxJellyfish = { 11.1, 96000, 90 }, -- Rare (guess)
+	BlueRingOctopus = { 11.1, 96000, 90 }, -- Rare (guess)
+	ManOWar = { 11.6, 160000, 400 }, -- Epic (guess)
+	Mermaid = { 12.6, 640000, 3000 }, -- Legendary (guess: to the finish line)
+	AbyssalDragon = { 13, 6400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
+	ReefTitan = { 13, 6400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
+	RoyalCnidarian = { 0.5, 6400000, 3600 }, -- the boss as a trophy pet, 1 in 1,000; slow like the Seraphs (guess)
 }
 for kind, w3 in Config.World3Pets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = w3[2], w3[3]
@@ -1474,6 +1491,11 @@ end
 Config.World3Animals = {}
 for kind in Config.World3Pets do
 	Config.World3Animals[kind] = true
+end
+-- World 3's Cnidaria animals big, like the Tomb's, in every world (pets go with you; the giga
+-- rares are XL already; guesses).
+for kind, size in { MoonJellyfish = 2.5, Anomalocaris = 2.5, BoxJellyfish = 2.5, BlueRingOctopus = 2.5, ManOWar = 2.5, Mermaid = 1.5 } do
+	Config.AnimalScale[kind] = size
 end
 -- Each world's own animals: [world] = the set that runs at its own speed there (World 1's: all).
 local OWN = { [2] = Config.World2Animals, [3] = setmetatable(table.clone(Config.World2Animals), { __index = Config.World3Animals }) }
@@ -1894,7 +1916,9 @@ if Config.World == 3 then
 			GroundColors = { rgb(236, 222, 184), rgb(226, 210, 170) },
 			WallColors = { rgb(20, 32, 68), rgb(16, 26, 58) },
 			CapColor = rgb(255, 110, 190),
-			Herd = { Fish = 1 },
+			-- (Oct 14, the Cnidaria animals thread: weights as the Tomb's by rarity, guesses; its giga
+			-- rares and the Royal Cnidarian added below. All of them swim: SprintSpecials Fly.)
+			Herd = { MoonJellyfish = 0.3, Anomalocaris = 0.25, BoxJellyfish = 0.15, BlueRingOctopus = 0.15, ManOWar = 0.08, Mermaid = 0.03 },
 			Patches = {
 				Trench = { rgb(30, 80, 210), rgb(26, 70, 188) },
 				Coral = { rgb(255, 128, 150), rgb(244, 112, 136) },
@@ -1927,12 +1951,13 @@ if Config.World == 3 then
 	trophies(1, 1000, { "GhostShip", "JollyRogerWyvern" }) -- the Pirate Cove's giga rares
 	Config.Biomes[1].Herd.Dreadstump = Config.Biomes[1].Herd.GhostShip * 2 -- its boss as a trophy pet, 1 in 500
 	trophies(2, 1000, { "RafflesiaBeast", "AncientTreant", "FlytrapQueen" }) -- the Garden's giga rares and its boss as a trophy pet
+	trophies(4, 1000, { "AbyssalDragon", "ReefTitan", "RoyalCnidarian" }) -- Cnidaria's giga rares and its boss as a trophy pet
 	-- Bosses: each biome's own as they come; the rest World 2's in that slot for now.
 	Config.Boss.ByBiome = {
 		PirateCove = "Dreadstump", -- the Pirate King chases you home (silent till a cry is picked)
 		Garden = "FlytrapQueen",
 		Candyland = "CrystalSeraph",
-		Cnidaria = "Monarch",
+		Cnidaria = "RoyalCnidarian", -- the crowned jellyfish (silent till a cry is picked)
 	}
 	Config.DefaultPet = "ArmoredHorse" -- (World 2's starter for now)
 	-- World 3's quests: reach each biome (each egg a placeholder: World 2's in that slot), and
