@@ -2,8 +2,8 @@
 -- that and re-make this, not this. Run in Studio (Edit, execute_luau) on the World 3 Place
 -- (workspace.World). Re-running is fine.
 -- 1.2x the old base (x -216..216, z 0..328) so the pens can grow to 104: the base's walls
--- move out to it. Sand, wet sand on the paths and round the lagoons, grass patches a stud
--- up, and lagoons of the flowing water tile (a Texture named "Water", Client/WaterFlow) a
+-- move out to it. Water with sand islands round the pens, joined to a central sandbar, wet
+-- sand round the shores, and lagoons of the flowing water tile (a Texture named "Water", Client/WaterFlow) a
 -- stud down. Replaces the base floor (its ArcBase parts), drops base decor now standing in
 -- water or past the new walls' old line, and moves the rest with the floor under it.
 -- In game the floor takes Config's Meadow colours by part name: Ground (sand), and the
@@ -407,9 +407,16 @@ for _, p in W.Ground:GetChildren() do
 	end
 end
 assert(template, "no ArcBase floor in World.Ground to copy the look of")
-for _, t in template:GetChildren() do
-	if not t:IsA("Texture") then
-		t:Destroy()
+-- (On a rerun that part can be a lagoon, so take the checker from the rest of the ground.)
+template:ClearAllChildren()
+for _, p in W.Ground:GetChildren() do
+	if p:IsA("BasePart") and not p:GetAttribute("ArcBase") and p:FindFirstChild("Checker") then
+		for _, t in p:GetChildren() do
+			if t:IsA("Texture") then
+				t:Clone().Parent = template
+			end
+		end
+		break
 	end
 end
 for _, r in FLOOR do
@@ -450,8 +457,8 @@ local dropped, lifted = 0, 0
 for _, s in standing do
 	local inst, before = s[1], s[2]
 	local at = inst:GetPivot().Position
-	if inst ~= spawn and kindAt(at.X, at.Z) == 3 then
-		inst:Destroy() -- (in a lagoon)
+	if inst ~= spawn and not inst.Name:match("^Portal") and kindAt(at.X, at.Z) == 3 then
+		inst:Destroy() -- (in a lagoon; never the PortalGate, the game needs it)
 		dropped += 1
 	else
 		local dy = floorAt(at) - before
