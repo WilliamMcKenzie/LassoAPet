@@ -2426,7 +2426,7 @@ end
 
 local walls = 0
 for _, p in W.Walls:GetChildren() do
-	if p:IsA("BasePart") and p.Position.Z <= NEAR and p.Position.Z > FAR then
+	if p:IsA("BasePart") and p:GetAttribute("World3Wall") and p.Position.Z <= NEAR and p.Position.Z > FAR then -- (only the course's own walls: never the base's, QM's ragged sand bands)
 		if p.Name == "Cap" then
 			p.Color = CAP
 		else
