@@ -19,14 +19,14 @@ for _, p in W:GetChildren() do
 	local old = p:FindFirstChild("Engraving")
 	if old then old:Destroy() end
 	local target = if p.Name:find("^Base") then Vector3.new(baseMiddle.X, p.Position.Y, baseMiddle.Z) else Vector3.new(0, p.Position.Y, p.Position.Z)
-	local alongX = p.Size.X > p.Size.Z
-	local ids = if alongX then { Enum.NormalId.Front, Enum.NormalId.Back } else { Enum.NormalId.Right, Enum.NormalId.Left }
+	-- (whichever side faces in: a one-column part is as wide as it is thick, so don't guess from its size)
+	local ids = { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Right, Enum.NormalId.Left }
 	local face, normal
 	for _, id in ids do
 		local nrm = p.CFrame:VectorToWorldSpace(Vector3.FromNormalId(id))
 		if not normal or nrm:Dot(target - p.Position) > normal:Dot(target - p.Position) then face, normal = id, nrm end
 	end
-	local length = if alongX then p.Size.X else p.Size.Z
+	local length = if face == Enum.NormalId.Front or face == Enum.NormalId.Back then p.Size.X else p.Size.Z
 	local u = (-normal):Cross(Vector3.yAxis)
 	local start = p.Position:Dot(u) - length / 2
 	local top = p.Position.Y + p.Size.Y / 2
@@ -36,7 +36,7 @@ for _, p in W:GetChildren() do
 	t.Face = face
 	t.StudsPerTileU, t.StudsPerTileV = PERIOD, HEIGHT
 	t.OffsetStudsU = (-start) % PERIOD
-	t.OffsetStudsV = (HEIGHT - top) % HEIGHT -- (the image's row for 48 studs up sits at the top of a full wall)
+	t.OffsetStudsV = (HEIGHT - top) % HEIGHT -- (so the band sits at the same height on every part, whatever its top)
 	t.ZIndex = 2
 	t.Parent = p
 	done += 1
