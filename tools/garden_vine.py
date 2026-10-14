@@ -15,15 +15,30 @@ import numpy as np
 import garden_lib as G
 from garden_lib import Garden, Rm, track, sin, TAU
 
-C = {"vine": (48, 150, 56), "vinedark": (26, 96, 40), "vinelight": (110, 196, 64), "leaf": (124, 214, 60),
+C = {"vine": (64, 192, 64), "vinedark": (30, 116, 46), "vinelight": (150, 226, 70), "vinemid": (96, 210, 70), "leaf": (124, 214, 60),
      "thorn": (150, 64, 40), "tooth": (246, 236, 200), "mouth": (40, 18, 24), "rose": (250, 84, 140),
      "rosedark": (198, 30, 92), "bark": (110, 70, 44)}
 
 
-def coil(g, node, name, c, w, h, d, twist, cols=("vine", "vinedark")):
+def coil(g, node, name, c, w, h, d, twist, cols=("vine", "vinemid")):
     """A twisted vine coil: two overlapping blocks turned +-twist about Y (strands 0.25 narrower)."""
     g.box(node, name, c, (w, h, d), cols[0], Rm(("y", twist)))
     g.box(node, name + "B", np.array(c) + (0, 0.05, 0), (w - 0.25, h - 0.1, d - 0.25), cols[1], Rm(("y", -twist)))
+
+
+def tendril(g, node, name, axis_x, axis_z, y_lo, y_hi, r, turns=1.25, phase=0.0, col="vinelight"):
+    """A chunky tendril spiralling round a vertical limb: blocks stepping round the axis as they climb,
+    each turned to follow the curl, ending in a curled tip (a pyramid) poking out."""
+    n = max(4, int(turns * 6))
+    for k in range(n):
+        u = k / (n - 1)
+        a = TAU * (phase + turns * u)
+        y = y_lo + (y_hi - y_lo) * u
+        p = (axis_x + r * np.sin(a), y, axis_z + r * np.cos(a))
+        g.box(node, name, p, (0.7, 0.7, 1.4), col, Rm(("y", np.degrees(a) + 90), ("x", -20)))
+    a = TAU * (phase + turns)
+    out = np.array([np.sin(a), 0.6, np.cos(a)])
+    g.pyr(node, name + "Tip", (axis_x + r * np.sin(a), y_hi + 0.3, axis_z + r * np.cos(a)), out, 1.2, 0.35, 0.35, col)
 
 
 def build():
@@ -46,7 +61,7 @@ def build():
     # head: a vine knot, rose on top, brows, thorn teeth
     neck = g.group("neck", (0, y0 + 4.0, -1.6), root)
     hy, hz = y0 + 5.0, -2.6
-    coil(g, neck, "Head", (0, hy, hz), 4.4, 3.4, 3.6, 8, ("vine", "vinedark"))
+    coil(g, neck, "Head", (0, hy, hz), 4.4, 3.4, 3.6, 8)
     g.box(neck, "Brow", (0, hy + 0.9, hz - 1.9), (4.2, 0.6, 0.8), "vinedark")
     g.box(neck, "Mouth", (0, hy - 0.9, hz - 1.82), (3.2, 1.0, 0.2), "mouth")
     for t in (-1.2, -0.4, 0.4, 1.2):
@@ -75,12 +90,13 @@ def build():
         g.box(arm, "Knuckle" + side, (ax, 1.3, -3.15), (2.4, 1.2, 0.3), "vine")
         g.spike(arm, "FistThorn" + side, (ax + s * 1.3, 1.6, -1.8), (s, 0.3, 0), 1.0, 0.35, "thorn")
         g.spike(arm, "FistThorn" + side, (ax, 2.2, -2.2), (0, 1, -0.3), 0.9, 0.3, "thorn")
-        g.box(arm, "Tendril" + side, (ax + s * 0.6, y0 + 0.6, -0.1), (0.4, 2.4, 0.4), "vinelight", Rm(("z", s * 25)))
+        tendril(g, arm, "Tendril" + side, ax, -1.15, 2.4, y0 + 3.4, 1.15, turns=1.5, phase=0.1 if s > 0 else 0.6)
     # root legs: short and thick
     for side, s in (("L", -1), ("R", 1)):
         leg = g.group("Leg" + side, (s * 1.5, y0 - 1.8, 1.0), root)
         coil(g, leg, "Leg" + side, (s * 1.6, (y0 - 1.8) / 2, 1.0), 1.9, y0 - 1.8, 1.9, 12, ("bark", "vinedark"))
         g.box(leg, "Foot" + side, (s * 1.7, 0.35, 0.5), (2.4, 0.7, 2.8), "bark")
+        tendril(g, leg, "LegTendril" + side, s * 1.6, 1.0, 1.0, y0 - 2.2, 1.2, turns=1.0, phase=0.3 if s > 0 else 0.8)
     return g
 
 

@@ -1,7 +1,7 @@
-"""Toadstool Frog: World 3 Garden Rare (draft, Oct 14). A fat lime frog wearing a giant red
+"""Toadstool Frog: World 3 Garden Rare (draft, Oct 14). A fat lime frog wearing a giant purple
 toadstool for a hat: a squat body with a pale yellow belly and darker green spots, a wide head
 with a long grin and pink tongue tip, big googly eyes on bumps, folded hind legs with webbed
-orange-ish toes, and a domed red cap with chunky white spots and a cream gill rim on top of
+orange-ish toes, and a domed purple cap with chunky white spots and a cream gill rim on top of
 its head. Ridden on the cap. It hops: the walk is small hops, the gallop big leaps.
 
 Run: python3 tools/garden_frog.py [--gif]
@@ -16,7 +16,7 @@ import garden_lib as G
 from garden_lib import Garden, track, sin, TAU
 
 C = {"green": (92, 196, 52), "greendark": (40, 128, 40), "belly": (246, 236, 140), "mouth": (64, 24, 30),
-     "tongue": (240, 92, 120), "cap": (226, 32, 40), "capdark": (160, 18, 30), "spot": (252, 248, 236),
+     "tongue": (240, 92, 120), "cap": (156, 72, 214), "capdark": (98, 40, 150), "spot": (252, 248, 236),  # cap purple: the Rafflesia is red over green
      "gill": (240, 218, 176), "toe": (250, 160, 70)}
 
 

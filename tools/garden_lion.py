@@ -1,6 +1,7 @@
 """Sunflower Lion: World 3 Garden Legendary (draft, Oct 14). A golden lion whose mane is a giant
-sunflower: a ring of sunny yellow petals (pyramids, two layers, the back layer deeper gold) round a
-dark brown seed disc behind its head. Meadow-style blocky body (the Meadow animals are the style
+sunflower wrapped round its head: a seed-brown collar and three layers of pyramid petals (sunny
+yellow out round the face, deeper gold out-and-back, yellow again sweeping back over the neck), so
+it reads as a flower from every side. Hefty, with a big head and big paws with little claws. Meadow-style blocky body (the Meadow animals are the style
 guide), cream muzzle, side plate eyes, little round ears, green leaf cuffs above its paws, and a
 long stem tail ending in a small sunflower.
 
@@ -37,41 +38,69 @@ def sunflower(g, node, name, c, r, petals, plen, layer2=True, depth=1.0):
             g.pyr(node, name + "Petal", c + d * (r - 0.2) + (0, 0, z), d, L, r * 0.55, 0.3, col, wv=(-d[1], d[0], 0))
 
 
+def mane(g, node, c, r):
+    """The sunflower mane wrapped round the head in layers, so it has depth from every side: a seed-brown
+    collar, then rings of pyramid petals pointing out, out-and-back and back (front ring yellow, the
+    deeper rings gold), and a few framing the face."""
+    c = np.array(c, float)
+    g.box(node, "ManeSeed", c + (0, 0, 0.6), (2 * r, 2 * r, 2.6), "seed")
+    g.box(node, "ManeSeedDark", c + (0, 0, -0.75), (2 * r - 1.0, 2 * r - 1.0, 0.3), "seeddark")
+    g.box(node, "ManeSeedBack", c + (0, 0, 2.2), (2 * r - 1.2, 2 * r - 1.2, 1.0), "seed")
+    rings = ((12, 0.0, (1.0, 0.0), -0.2, r - 0.2, 3.2, "petal"),      # out, round the face
+             (12, 0.5, (0.75, 0.7), 1.2, r - 0.2, 3.0, "petaldark"),  # out and back
+             (8, 0.25, (0.5, 1.0), 2.9, 1.7, 2.6, "petal"))            # back, from the back of the head
+    for n, off, (ro, back), z, br, L, col in rings:
+        for k in range(n):
+            a = TAU * (k + off) / n
+            rad = np.array([np.cos(a), np.sin(a), 0])
+            d = rad * ro + np.array([0, 0, back])
+            d /= np.linalg.norm(d)
+            base = c + rad * br + (0, 0, z)
+            g.pyr(node, "Petal", base, d, L, r * 0.5, 0.4, col, wv=(-rad[1], rad[0], 0))
+
+
 def build():
     g = Garden("SunflowerLion", C)
-    y0 = 6.0
+    y0 = 6.4
     root = g.group("root", (0, y0, 0))
-    g.box(root, "Body", (0, y0, 0.6), (4.4, 4.0, 8.4), "fur")
-    g.box(root, "Belly", (0, y0 - 2.05, 0.6), (3.6, 0.3, 7.0), "cream")
-    # legs, leaf cuffs above the paws
-    for nm, (x, z) in (("FL", (-1, -2.4)), ("FR", (1, -2.4)), ("HL", (-1, 3.4)), ("HR", (1, 3.4))):
-        leg = g.group("Leg" + nm, (x * 1.3, y0 - 1.6, z), root)
-        g.box(leg, "Leg" + nm, (x * 1.3, (y0 - 1.6) / 2 + 0.3, z), (1.5, y0 - 1.0, 1.5), "fur")
-        g.box(leg, "Paw" + nm, (x * 1.3, 0.35, z - 0.15), (1.7, 0.7, 1.8), "cream")
-        g.box(leg, "Cuff" + nm, (x * 1.3, 1.3, z), (1.8, 0.5, 1.8), "leaf")
+    g.box(root, "Body", (0, y0, 0.6), (5.6, 4.8, 9.0), "fur")
+    g.box(root, "Belly", (0, y0 - 2.45, 0.6), (4.6, 0.3, 7.4), "cream")
+    g.box(root, "Back", (0, y0 + 2.45, 1.4), (3.6, 0.3, 6.0), "furdark")
+    # legs: thick, big cream paws with pyramid claws, leaf cuffs
+    for nm, (x, z) in (("FL", (-1, -2.6)), ("FR", (1, -2.6)), ("HL", (-1, 3.6)), ("HR", (1, 3.6))):
+        leg = g.group("Leg" + nm, (x * 1.7, y0 - 1.8, z), root)
+        g.box(leg, "Leg" + nm, (x * 1.7, (y0 - 1.8) / 2 + 0.4, z), (2.1, y0 - 1.0, 2.1), "fur")
+        g.box(leg, "Paw" + nm, (x * 1.7, 0.45, z - 0.3), (2.6, 0.9, 2.8), "cream")
+        for t in (-1, 0, 1):
+            g.pyr(leg, "Claw" + nm, (x * 1.7 + t * 0.75, 0.35, z - 1.7), (0, -0.2, -1), 0.6, 0.25, 0.25, "nose")
+        g.box(leg, "Cuff" + nm, (x * 1.7, 1.55, z), (2.4, 0.6, 2.4), "leaf")
     # tail: a stem with a leaf, a little sunflower at the tip
-    tail = g.group("Tail", (0, y0 + 1.4, 4.8), root)
+    tail = g.group("Tail", (0, y0 + 1.6, 5.1), root)
     d = np.array([0, 0.75, 1.0]) / 1.25
-    g.box(tail, "TailStem", np.array([0, y0 + 1.4, 4.8]) + d * 2.0, (0.6, 4.0, 0.6), "leafdark", G.frame(d))
-    g.box(tail, "TailLeaf", np.array([0.7, y0 + 2.4, 5.8]), (1.4, 0.3, 0.8), "leaf", Rm(("z", -20)))
-    tip = np.array([0, y0 + 1.4, 4.8]) + d * 4.2
+    base = np.array([0, y0 + 1.6, 5.1])
+    g.box(tail, "TailStem", base + d * 2.0, (0.7, 4.0, 0.7), "leafdark", G.frame(d))
+    g.box(tail, "TailLeaf", base + d * 1.6 + (0.8, 0.2, 0), (1.6, 0.35, 0.9), "leaf", Rm(("z", -20)))
+    tip = base + d * 4.3
     for k in range(6):
         a = TAU * k / 6
         dd = np.array([np.cos(a), np.sin(a) * 0.6, np.sin(a) * -0.8])
         dd /= np.linalg.norm(dd)
-        g.pyr(tail, "TailPetal", tip + dd * 0.5, dd, 1.0, 0.4, 0.2, "petal")
-    g.box(tail, "TailDisc", tip, (1.1, 1.1, 1.1), "seed")
-    # head and the sunflower mane
-    neck = g.group("neck", (0, y0 + 1.6, -3.4), root)
-    hy, hz = y0 + 2.8, -4.6
-    sunflower(g, neck, "Mane", (0, hy + 0.2, hz + 1.4), 3.0, 11, 2.4, depth=1.4)
-    g.box(neck, "Head", (0, hy, hz), (3.8, 3.6, 3.4), "fur")
-    g.box(neck, "Muzzle", (0, hy - 0.8, hz - 2.1), (2.4, 1.6, 1.0), "cream")
-    g.box(neck, "Nose", (0, hy - 0.2, hz - 2.7), (1.0, 0.5, 0.3), "nose")
-    g.box(neck, "Mouth", (0, hy - 1.15, hz - 2.62), (1.2, 0.2, 0.1), "nose")
+        g.pyr(tail, "TailPetal", tip + dd * 0.6, dd, 1.2, 0.45, 0.25, "petal")
+    g.box(tail, "TailDisc", tip, (1.3, 1.3, 1.3), "seed")
+    # head inside the sunflower mane
+    neck = g.group("neck", (0, y0 + 1.8, -3.6), root)
+    hy, hz = y0 + 3.2, -5.2
+    mane(g, neck, (0, hy + 0.2, hz + 1.8), 3.0)
+    g.box(neck, "Head", (0, hy, hz), (4.8, 4.4, 4.2), "fur")
+    g.box(neck, "Muzzle", (0, hy - 1.0, hz - 2.55), (3.0, 1.9, 1.0), "cream")
+    g.box(neck, "Nose", (0, hy - 0.2, hz - 3.15), (1.3, 0.6, 0.3), "nose")
+    g.box(neck, "Mouth", (0, hy - 1.45, hz - 3.08), (1.5, 0.25, 0.1), "nose")
+    g.box(neck, "Chin", (0, hy - 2.05, hz - 1.9), (2.2, 0.5, 1.4), "cream")
     for side, s in (("L", -1), ("R", 1)):
-        g.eye(neck, side, (s * 1.95, hy + 0.5, hz - 0.8), (1.1, 1.1), normal=(s, 0, 0), look=(0.2 * -s, 0))
-        g.box(neck, "Ear" + side, (s * 1.3, hy + 2.0, hz + 0.6), (1.0, 0.9, 0.6), "furdark")
+        # side plate eyes set at the front corners, a brow over each so the face reads from the front
+        g.eye(neck, side, (s * 2.45, hy + 0.6, hz - 1.1), (1.4, 1.4), normal=(s, 0, 0), look=(0.2 * -s, 0))
+        g.box(neck, "Brow" + side, (s * 1.7, hy + 1.45, hz - 2.2), (1.6, 0.45, 0.4), "furdark")
+        g.box(neck, "Ear" + side, (s * 1.6, hy + 2.5, hz + 0.6), (1.2, 1.0, 0.7), "furdark")
     return g
 
 
