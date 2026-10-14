@@ -1904,8 +1904,8 @@ if Config.World == 3 then
 			Swerve = 1,
 			Length = 4336, -- (2x the Meadow's 2168)
 			GroundColors = SAND,
-			WallColors = { rgb(146, 146, 156), rgb(132, 132, 142) }, -- grey cliff rock (QM, Oct 14; was wood 124, 82, 50)
-			CapColor = rgb(238, 202, 142),
+			WallColors = { rgb(196, 190, 182), rgb(184, 178, 170) }, -- warm stone, runes carved in (QM, Oct 14: tools/world3_runes.luau; was wood 124, 82, 50)
+			CapColor = rgb(122, 142, 62), -- (olive grass on top, as the base's)
 			-- (Oct 14, the Pirate Cove animals thread: weights guesses, as the Tomb's by rarity; its
 			-- giga rares and the boss as a trophy pet added below)
 			Herd = { GreenCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
@@ -1919,9 +1919,9 @@ if Config.World == 3 then
 				Planks = { rgb(132, 96, 66), rgb(132, 96, 66) }, -- weathered dock wood
 				-- The base's walls, bottom to top (QM, Oct 14): three tiles of dark sand, light sand
 				-- the rest of the way, green grass along the very top (WorldColors.paintWall).
-				BaseWallLow = { rgb(204, 158, 102), rgb(190, 145, 92) }, -- (the wet sand's)
-				BaseWallMid = { rgb(222, 180, 120), rgb(208, 167, 109) }, -- the damp band between, ragged (QM, Oct 14; tools/world3_wallmid.luau)
-				BaseWall = SAND,
+				BaseWallLow = { rgb(150, 145, 138), rgb(140, 135, 128) }, -- stone, darkest at the bottom (QM, Oct 14: stone walls with runes)
+				BaseWallMid = { rgb(174, 168, 160), rgb(164, 158, 150) }, -- the damp band between, ragged (QM, Oct 14; tools/world3_wallmid.luau)
+				BaseWall = { rgb(196, 190, 182), rgb(184, 178, 170) },
 				BaseCap = { rgb(122, 142, 62), rgb(122, 142, 62) }, -- (olive grass)
 			},
 			GateColor = rgb(255, 160, 40),
