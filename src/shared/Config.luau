@@ -1280,7 +1280,7 @@ Config.Water = {
 
 -- Worlds (QM, Oct 13): each is its own Place in the experience, running this same code.
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
-Config.Places = { 126872244121414, 139418530058790 } -- [world] = its PlaceId
+Config.Places = { 126872244121414, 139418530058790, 117724433633972 } -- [world] = its PlaceId (World 3: QM, Oct 14, a copy of World 2 for now; not for sale yet, so no way in)
 Config.World = table.find(Config.Places, game.PlaceId) or 1
 -- (World 1 ended at a giant portal to World 2 for a while: QM, Oct 13 took it out. Both
 -- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
@@ -1425,13 +1425,13 @@ for _, kind in {
 end
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
 function Config.slowedHere(kind, fuse)
-	return Config.World == 2 and not Config.World2Animals[kind] and not (fuse and Config.World2Animals[fuse])
+	return Config.World >= 2 and not Config.World2Animals[kind] and not (fuse and Config.World2Animals[fuse])
 end
 
 -- World 2's look: its first biome and base as QM's reference (marble walls, yellow
 -- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
 -- hue-turned as placeholders (tools/world2_terrain.luau's turns).
-if Config.World == 2 then
+if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14)
 	-- World 2's quests (QM, Oct 13): reach each biome, its egg World 1's reward's
 	-- equivalent here; and the other line, merge 3, lasso 10 Lions, lasso 3 Kitsunes (that
 	-- last one's three eggs). No invite line here.
