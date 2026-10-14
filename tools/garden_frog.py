@@ -48,15 +48,18 @@ def build():
         g.box(neck, "Bump" + side, (s * 2.2, hy + 1.8, hz - 0.8), (2.4, 1.6, 2.2), "green")
         g.eye(neck, side, (s * 2.2, hy + 1.9, hz - 1.98), 1.7, look=(0, -0.1))
         g.box(neck, "Nostril" + side, (s * 0.6, hy + 0.3, hz - 2.05), (0.4, 0.3, 0.15), "greendark")
-    # the toadstool, 1 stud higher than it was (the eyes clear the brim): a stalk, a gill rim,
-    # a dark brim and the cap, the one mesh (QM Oct 14: only what blocks can't do), 8 broad
-    # facets, with 5 flat white spots in them (one more mesh)
+    # the toadstool, 1 stud higher than it was (the eyes clear the brim): a stalk, and the cap and
+    # its underside as meshes the way the Garden's GiantToadstool prop makes them (QM Oct 14: "copy
+    # the mushroom decor", no cubes in them; tools/w3_garden.py mushroom()), with 5 flat white spots
     cy, cz = hy + 3.9, hz + 0.9
     g.box(neck, "Stalk", (0, cy - 0.9, cz), (2.4, 2.4, 2.4), "gill")
-    g.box(neck, "Gills", (0, cy + 0.3, cz), (7.6, 0.5, 7.0), "gill")
-    g.box(neck, "Brim", (0, cy + 0.85, cz), (8.8, 0.6, 8.2), "capdark")
-    cap = G.dome((0, cy + 1.15, cz), (4.8, 4.5), 3.6, seg=8, rings=2)
+    top, r = np.array([0, cy + 1.2, cz]), 4.7
+    rng = np.random.default_rng(7)
+    dome = blob(rng, top + (0, r * 0.1, 0), r, 22, squash=(1.0, 0.62, 1.0), jitter=0.04)
+    dome = dome[dome[:, 1] > top[1] - 0.2]
+    cap = np.concatenate([dome, ring(14, r * 1.03, top[1] - 0.25, top)])
     g.hull(neck, "Cap", cap, "cap")
+    g.hull(neck, "Underside", ring(12, r * 0.9, top[1] - 0.15, top) + ring(12, 1.35, top[1] - r * 0.3, top), "gill")
     plates(g, neck, "CapSpot", cap, ((0, 1, -0.3), (0, 0.4, -1), (-1, 0.4, 0.3), (1, 0.4, 0.3), (0, 0.4, 1)), "spot")
 
     # legs: short front legs, big folded hind legs, orange toes
@@ -73,18 +76,41 @@ def build():
     return g
 
 
+def blob(rng, c, r, n=12, squash=(1.0, 1.0, 1.0), jitter=0.12):
+    """A faceted lump: n points spread over a sphere (jittered); as tools/plant_meshes.py."""
+    pts = []
+    for i in range(n):
+        y = 1 - 2 * (i + 0.5) / n
+        a = i * np.pi * (3 - np.sqrt(5)) + rng.uniform(-0.3, 0.3)
+        s = np.sqrt(1 - y * y)
+        rr = r * (1 + rng.uniform(-jitter, jitter))
+        pts.append((c[0] + np.cos(a) * s * rr * squash[0], c[1] + y * rr * squash[1], c[2] + np.sin(a) * s * rr * squash[2]))
+    return np.array(pts)
+
+
+def ring(n, r, y, c):
+    """n points round a circle of radius r at height y about c's x, z."""
+    return [(c[0] + np.cos(2 * np.pi * i / n) * r, y, c[2] + np.sin(2 * np.pi * i / n) * r) for i in range(n)]
+
+
 def plates(g, node, name, pts, dirs, col, fill=0.75):
     """Flat round spots lying in the facets of hull(pts), sunk in a little: one in the facet
     facing most along each direction in dirs, centred on its incircle (fill of its radius),
     so none overhangs an edge. They're meshes, so they merge into one MeshPart."""
     tris = G.hull_tris(pts)
+
+    def inr(t):
+        a, b, c = np.linalg.norm(t[1] - t[2]), np.linalg.norm(t[2] - t[0]), np.linalg.norm(t[0] - t[1])
+        return np.linalg.norm(np.cross(t[1] - t[0], t[2] - t[0])) / (a + b + c)
+
+    def facing(t, d):
+        n = np.cross(t[1] - t[0], t[2] - t[0])
+        return np.dot(n / np.linalg.norm(n), d)
     used = set()
     for d in dirs:
         d = np.array(d, float) / np.linalg.norm(d)
-        k = max((i for i in range(len(tris)) if i not in used),
-                key=lambda i: np.dot(np.cross(tris[i][1] - tris[i][0], tris[i][2] - tris[i][0]), d)
-                / np.linalg.norm(np.cross(tris[i][1] - tris[i][0], tris[i][2] - tris[i][0])))
-        used.add(k)
+        k = max((i for i in range(len(tris)) if i not in used and facing(tris[i], d) > 0.85),
+                key=lambda i: inr(tris[i]))  # (the roomiest facet facing about that way)
         A, B, Cc = tris[k]
         n = np.cross(B - A, Cc - A)
         area2 = np.linalg.norm(n)

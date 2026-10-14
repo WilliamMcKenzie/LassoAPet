@@ -8,6 +8,7 @@
 local AssetService = game:GetService("AssetService")
 local IDS = {
 	ToadstoolFrog_Cap_neck = 0,
+	ToadstoolFrog_Gill_neck = 0,
 	ToadstoolFrog_Spot_neck = 0,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
