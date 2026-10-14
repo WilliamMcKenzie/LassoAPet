@@ -1734,6 +1734,11 @@ if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14
 			WetSand = { rgb(206, 172, 110), rgb(194, 160, 98) },
 			Grass = { rgb(96, 204, 60), rgb(84, 188, 50) },
 			Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
+			-- The base's walls, bottom to top (QM, Oct 14): three tiles of dark sand, light sand
+			-- the rest of the way, green grass along the very top (WorldColors.paintWall).
+			BaseWallLow = { rgb(206, 172, 110), rgb(194, 160, 98) },
+			BaseWall = { rgb(240, 218, 160), rgb(230, 206, 146) },
+			BaseCap = { rgb(96, 204, 60), rgb(96, 204, 60) },
 		}
 		Config.Water = table.clone(Config.Water)
 		Config.Water.Image = "rbxassetid://128871935822673" -- assets/world3/WaterTile256.png (QM's blue 8 x 8 tile, x32)

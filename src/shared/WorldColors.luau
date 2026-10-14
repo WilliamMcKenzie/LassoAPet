@@ -138,9 +138,13 @@ function WorldColors.paintGround(world, part)
 	end
 end
 
--- One wall part, or the cap along its top.
+-- One wall part, or the cap along its top. A wall part with its own name (World 3's base
+-- walls: BaseWallLow, BaseWall, BaseCap) takes that name's colours from the biome's Patches.
 function WorldColors.paintWall(world, part)
-	if part.Name == "Cap" then
+	local own = part.Name ~= "Wall" and part.Name ~= "Cap" and get(world, part, part.Name, "A")
+	if own then
+		paint(part, own, get(world, part, part.Name, "B") or own)
+	elseif part.Name == "Cap" then
 		local biome = Config.Biomes[WorldColors.biomeAt(part.Position.Z)]
 		part.Color = WorldColors.saturate(biome.CapColor) or get(world, part, "Ground", "B") -- (CapColor: World 2's cavern)
 	else
