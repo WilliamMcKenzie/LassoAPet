@@ -10,12 +10,12 @@
 -- Patches WetSand, Grass and Water (World 3's block in Config).
 local W = workspace.World
 local rgb = Color3.fromRGB
-local WATER_IMAGE = "rbxassetid://77807866797953" -- (Config.Water.Image)
+local WATER_IMAGE = "rbxassetid://128871935822673" -- (QM's blue tile, assets/world3/WaterTile256.png; Config.Water.Image in World 3)
 local KINDS = { -- [kind] = { name, top, part colour, checker colour }
 	[0] = { "Ground", 0, rgb(240, 218, 160), rgb(230, 206, 146) }, -- sand
 	[1] = { "WetSand", 0, rgb(206, 172, 110), rgb(194, 160, 98) },
 	[2] = { "Grass", 1, rgb(96, 204, 60), rgb(84, 188, 50) },
-	[3] = { "Water", -1, rgb(37, 81, 40), rgb(37, 81, 40) }, -- (its sides match the tile)
+	[3] = { "Water", -1, rgb(49, 170, 235), rgb(49, 170, 235) }, -- (its sides match the tile)
 }
 -- The base's walls and caps: { which, centre, size } (tools/arc_base.luau's, 1.2x out)
 local WALLS = {

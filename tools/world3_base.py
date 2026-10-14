@@ -30,7 +30,7 @@ COLOURS = {  # part, checker
     SAND: [(240, 218, 160), (230, 206, 146)],
     WET: [(206, 172, 110), (194, 160, 98)],
     GRASS: [(96, 204, 60), (84, 188, 50)],
-    WATER: [(64, 190, 214), (52, 174, 200)],  # (the animated tile goes over it)
+    WATER: [(49, 170, 235), (49, 170, 235)],  # (the animated tile goes over it)
 }
 PENS = [(x * SCALE, z * SCALE) for x, z in [(0, 218), (-110.3, 188.6), (110.3, 188.6), (-120.1, 74.8), (120.1, 74.8)]]
 PEN_HALF = 52
