@@ -7,7 +7,6 @@ Run: python3 tools/world3_base.py [out_dir]
 - All water (the animated tile, Config.Water: parts named Water, a stud down) (QM).
 - A sand island round each pen, sandbars from each to a big central sandbar, and that out
   along the lane to the start line and the first biome. Wet sand along every shore.
-- Patches of bright green grass a stud up on the dry sand, out of the pens.
 - 1.2x the old base: x -216..216, z 0..328; pens up to 104 square, at 1.2x their places.
 """
 
@@ -111,7 +110,6 @@ def layout(seed=7):
     """All water (QM, Oct 14), with a sand island round each pen, sandbars from each to a
     big central sandbar, and that out along the lane to the start line (and the first biome)."""
     wob = noise(NX, NZ, 3, seed) - 0.5
-    grs = noise(NX, NZ, 4, seed + 3) * 0.75 + noise(NX, NZ, 1.8, seed + 4) * 0.25
     ring = noise(NX, NZ, 2.5, seed + 5)
     land = np.zeros((NX, NZ), bool)
     for i in range(NX):
@@ -133,11 +131,6 @@ def layout(seed=7):
     kind[water] = WATER
     shore = (grow(water, 1) | (grow(water, 2) & (ring > 0.55))) & land
     kind[shore] = WET
-    inside = np.array([[in_pen(*centre(i, j), CELL) for j in range(NZ)] for i in range(NX)])
-    grass = smooth((grs > 0.42) & (kind == SAND)) & (kind == SAND) & ~inside
-    grass &= ~grow(kind == WET, 1)  # (a tile of dry sand between the wet and the grass)
-    grass = drop_small(grass, 6)
-    kind[grass] = GRASS
     return kind
 
 
