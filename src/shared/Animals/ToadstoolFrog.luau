@@ -8,7 +8,7 @@ local Horse = require(script.Parent.Horse)
 local ToadstoolFrogModel = require(script.Parent.ToadstoolFrogModel)
 
 return Horse.variant("ToadstoolFrog", ToadstoolFrogModel, "Rare", {
-	seat = Vector3.new(0, 12.3, -2.1),
+	seat = Vector3.new(0, 13.3, -2.1),
 	seatBone = "neck",
 	neck = { center = Vector3.new(0, 4.6, -3.0), radius = 3.8 },
 })

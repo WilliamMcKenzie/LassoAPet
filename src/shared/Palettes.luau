@@ -698,12 +698,12 @@ return {
 		{ "Hoof", 255, 140, 30 }, -- pollen
 	},
 	ToadstoolFrog = {
-		{ "Body", 92, 196, 52 }, -- green
+		{ "Body", 150, 222, 40 }, -- green
 		{ "Belly", 246, 236, 140 }, -- belly
 		{ "Belly", 240, 218, 176 }, -- gill
 		{ "Marking", 156, 72, 214 }, -- cap
 		{ "Marking", 98, 40, 150 }, -- capdark
-		{ "Accent", 40, 128, 40 }, -- greendark
+		{ "Accent", 60, 150, 40 }, -- greendark
 		{ "Horn", 252, 248, 236 }, -- spot
 		{ "Hoof", 250, 160, 70 }, -- toe
 	},
