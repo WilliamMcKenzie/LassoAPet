@@ -184,6 +184,7 @@ local function redraw()
 		number.Position = UDim2.fromOffset(4, 2)
 		number.Text = tostring(i)
 		number.ZIndex = 3
+		number.Visible = false -- (no slot numbers: QM, Oct 14; the keys 1-8 still work)
 		local count = shown(tool)
 		if count > 1 then
 			local label = text(slot, UDim2.fromScale(1, 1), 34, 3)
@@ -225,6 +226,7 @@ local function redraw()
 		number.Position = UDim2.fromOffset(4, 2)
 		number.Text = tostring(i)
 		number.ZIndex = 3
+		number.Visible = false -- (no slot numbers: QM, Oct 14; the keys 1-8 still work)
 		slot.Parent = bar
 	end
 end
