@@ -1730,6 +1730,7 @@ if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14
 	if Config.World == 3 then
 		meadow.GroundColors = { rgb(240, 218, 160), rgb(230, 206, 146) } -- sand
 		meadow.Patches = {
+			Dirt = meadow.Patches.Dirt, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
 			WetSand = { rgb(206, 172, 110), rgb(194, 160, 98) },
 			Grass = { rgb(96, 204, 60), rgb(84, 188, 50) },
 			Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
