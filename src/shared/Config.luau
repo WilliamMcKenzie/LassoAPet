@@ -1864,6 +1864,12 @@ if Config.World == 2 then
 			Config.AnimalStats[kind].Speed = horse
 		end
 	end
+	-- The 45 s timer (QM, Oct 14): every animal here 33/45 as fast, so each still reaches as far
+	-- as it did in 33 s (the % into a biome in the comments above still hold).
+	for kind, stats in Config.AnimalStats do
+		Config.AnimalStats[kind] = table.clone(stats)
+		Config.AnimalStats[kind].Speed = stats.Speed * 33 / Config.RideSeconds
+	end
 end
 -- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
 -- with you (QM, Oct 14), they're as big in the other worlds too. (Not the Loong: World 1's own as well.)
