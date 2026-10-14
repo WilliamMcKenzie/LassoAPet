@@ -13,7 +13,9 @@
 -- The spotlight (QM, Oct 13: only for buying World 2 from the bar, and opening and claiming
 -- the starter quest): a hand with the "Spotlight" attribute, while it's the one shown,
 -- darkens the whole screen but for a box round what it points at (its parent), and is
--- drawn again over the dark. The dark doesn't take clicks.
+-- drawn again over the dark. The dark doesn't take clicks, unless the hand also has the
+-- "Force" attribute (QM, Oct 14: buying World 2): then nothing but its target can be
+-- tapped, no prompts, no walking, till it goes (bought: the cutscene takes over).
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Focus = require(script.Parent.Focus)
@@ -100,12 +102,56 @@ local copy = Instance.new("ImageLabel") -- (the hand, over the dark)
 copy.BackgroundTransparency = 1
 copy.ZIndex = 2
 copy.Parent = gui
+-- (Force: four see-through buttons round the box take every tap but the target's)
+local blockers = {}
+for i = 1, 4 do
+	local b = Instance.new("TextButton")
+	b.Name = "Block"
+	b.Text = ""
+	b.BackgroundTransparency = 1
+	b.AutoButtonColor = false
+	b.Visible = false
+	b.ZIndex = 3
+	b.Parent = gui
+	blockers[i] = b
+end
 gui.Parent = player:WaitForChild("PlayerGui")
+
+local ProximityPromptService = game:GetService("ProximityPromptService")
+local forcing = false
+local controls
+local function force(on, low, size)
+	for i, b in blockers do
+		b.Visible = on
+	end
+	if on then
+		local x0, y0, x1, y1 = math.round(low.X), math.round(low.Y), math.round(low.X + size.X), math.round(low.Y + size.Y)
+		local W, H = 100000, 100000
+		blockers[1].Position, blockers[1].Size = UDim2.fromOffset(-W, -H), UDim2.fromOffset(2 * W, H + y0) -- above
+		blockers[2].Position, blockers[2].Size = UDim2.fromOffset(-W, y1), UDim2.fromOffset(2 * W, H) -- below
+		blockers[3].Position, blockers[3].Size = UDim2.fromOffset(-W, y0), UDim2.fromOffset(W + x0, y1 - y0) -- left
+		blockers[4].Position, blockers[4].Size = UDim2.fromOffset(x1, y0), UDim2.fromOffset(W, y1 - y0) -- right
+	end
+	if on == forcing then
+		return
+	end
+	forcing = on
+	ProximityPromptService.Enabled = not on
+	pcall(function()
+		controls = controls or require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
+		if on then
+			controls:Disable()
+		elseif not player:GetAttribute("Cutscene") then -- (a cutscene, buying: it gives control back itself)
+			controls:Enable()
+		end
+	end)
+end
 
 local function spotlight(image)
 	local target = Config.World == 1 and image and image:GetAttribute("Spotlight") and image.Parent -- (World 1 only: by World 2 they know their way, QM)
 	gui.Enabled = typeof(target) == "Instance" and target:IsA("GuiObject") -- (Spotlight false: none)
 	if not gui.Enabled then
+		force(false)
 		return
 	end
 	-- (AbsolutePosition's the same frame for every ScreenGui; a Position here is from this
@@ -115,6 +161,7 @@ local function spotlight(image)
 	local size = target.AbsoluteSize + Vector2.new(PAD, PAD) * 2
 	hole.Position = UDim2.fromOffset(math.round(low.X), math.round(low.Y))
 	hole.Size = UDim2.fromOffset(math.round(size.X), math.round(size.Y))
+	force(image:GetAttribute("Force") == true, low, size)
 	local at = image.AbsolutePosition - corner
 	copy.Image = image.Image
 	copy.Position = UDim2.fromOffset(at.X, at.Y)

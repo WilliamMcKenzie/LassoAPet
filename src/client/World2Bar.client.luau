@@ -94,6 +94,7 @@ stroke.Parent = text
 text.Parent = bar
 local hand = TapHand.new(70)
 hand:SetAttribute("Spotlight", not REBIRTH) -- (buying World 2 here: in the spotlight, QM Oct 13)
+hand:SetAttribute("Force", not REBIRTH) -- (and nothing else can be tapped till it's bought: QM, Oct 14)
 hand:SetAttribute("Focus", Focus.P.BuyWorld2) -- (one goal at a time: Client/Focus)
 hand:SetAttribute("FocusGoal", "buyWorld2")
 hand.Position = UDim2.fromScale(0.84, 0.6)
