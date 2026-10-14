@@ -25,7 +25,7 @@ SCALE = 1.2
 W, DEPTH, CELL = 216, 328, 8
 NX, NZ = 2 * W // CELL, DEPTH // CELL
 SAND, WET, GRASS, WATER = 0, 1, 2, 3
-TOPS = {SAND: 0, WET: 0, GRASS: 1, WATER: -1}
+TOPS = {SAND: 1, WET: 0, GRASS: 1, WATER: -1}  # (QM: light sand a stud above dark)
 COLOURS = {  # part, checker
     SAND: [(240, 218, 160), (230, 206, 146)],
     WET: [(206, 172, 110), (194, 160, 98)],
@@ -131,12 +131,16 @@ def layout(seed=7):
     kind[water] = WATER
     shore = (grow(water, 1) | (grow(water, 2) & (ring > 0.55))) & land
     kind[shore] = WET
+    # Under the pens it's all light sand, so they sit flat (QM had Studio do this).
+    under = np.array([[in_pen(*centre(i, j)) for j in range(NZ)] for i in range(NX)])
+    kind[under & (kind == WET)] = SAND
     return kind
 
 
 def check(kind):
-    """Water only ever touches wet sand (or water)."""
-    p = np.pad(kind, 1, constant_values=WET)
+    """Water only ever touches wet sand (or water), or the light sand under a pen."""
+    under = np.array([[in_pen(*centre(i, j)) for j in range(NZ)] for i in range(NX)])
+    p = np.pad(np.where(under, WET, kind), 1, constant_values=WET)
     bad = 0
     for di in (-1, 0, 1):
         for dj in (-1, 0, 1):
