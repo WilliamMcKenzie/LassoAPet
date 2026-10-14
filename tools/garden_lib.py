@@ -203,7 +203,7 @@ def floor(m, gap=0.0):
 def posed(m, anim=None, t=0.0):
     ps = S.posed(m, anim, t)
     for p in ps:
-        if p.name.startswith(("Eye", "Pupil", "Glow")):
+        if p.name.startswith(("Eye", "Pupil", "Glow", "Smooth")):
             p.plain = True
         if p.name.startswith("Glow"):
             p.neon = True
@@ -340,7 +340,7 @@ def prism(c, r, h, seg=8, top=1.0, M=None):
     return (M @ np.array(pts, float).T).T + np.array(c, float)
 
 
-def plates(g, node, name, pts, dirs, col, fill=0.75, most=None):
+def plates(g, node, name, pts, dirs, col, fill=0.75, most=None, seg=8):
     """Flat round spots lying in the flat faces of hull(pts), sunk in a little: one in the face
     facing most along each direction in dirs (of those within ~30 degrees, the roomiest),
     centred in it and sized to fit inside its edges (fill of the room), so none overhangs an
@@ -371,7 +371,7 @@ def plates(g, node, name, pts, dirs, col, fill=0.75, most=None):
         used.add(k)
         n, c, room = polys[k]
         size = room * fill if most is None else min(room * fill, most)
-        g.hull(node, name, prism(c - n * 0.15, size, 0.2, seg=8, M=frame(n)), col)
+        g.hull(node, name, prism(c - n * 0.15, size, 0.2, seg=seg, M=frame(n)), col)
 
 
 def bands(c, r, cuts, seg=10, M=None, tips=True):
@@ -387,7 +387,7 @@ def bands(c, r, cuts, seg=10, M=None, tips=True):
                 for i in range(seg)]
     out = []
     for i, (z0, z1) in enumerate(zip(cuts, cuts[1:])):
-        pts = ring_at(z0) + ring_at(z1) + ring_at((z0 + z1) / 2, 0.5)
+        pts = ring_at(z0) + ring_at(z1) + ring_at((z0 + z1) / 2)
         if tips and i == 0:
             pts.append((0, 0, -r[2]))
         if tips and i == len(cuts) - 2:

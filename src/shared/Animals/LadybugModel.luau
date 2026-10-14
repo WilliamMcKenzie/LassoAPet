@@ -18,7 +18,7 @@ return {
 		{ name = "LegR3", parent = "root", pivot = Vector3.new(2.6, 1.9384, 2.8) },
 	},
 	parts = {
-		{ name = "Belly", bone = "root", class = "Part", size = Vector3.new(5.6, 1.6, 7), cframe = CFrame.new(0, 1.93844, 0.4, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 26, 32) },
+		{ name = "Belly", bone = "root", class = "Part", size = Vector3.new(4.4, 1.6, 6), cframe = CFrame.new(0, 1.93844, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 26, 32) },
 		{ name = "WingL", bone = "WingL", class = "Part", size = Vector3.new(1.8, 0.2, 4.4), cframe = CFrame.new(-1.3, 3.38844, 1.4, 0.978148, 0, 0.207912, 0, 1, 0, -0.207912, 0, 0.978148), color = Color3.fromRGB(255, 196, 92) },
 		{ name = "WingVeinL", bone = "WingL", class = "Part", size = Vector3.new(0.3, 0.3, 4), cframe = CFrame.new(-1.4, 3.43844, 1.4, 0.978148, 0, 0.207912, 0, 1, 0, -0.207912, 0, 0.978148), color = Color3.fromRGB(176, 98, 30) },
 		{ name = "WingR", bone = "WingR", class = "Part", size = Vector3.new(1.8, 0.2, 4.4), cframe = CFrame.new(1.3, 3.38844, 1.4, 0.978148, 0, -0.207912, 0, 1, 0, 0.207912, 0, 0.978148), color = Color3.fromRGB(255, 196, 92) },
@@ -56,10 +56,10 @@ return {
 		{ name = "LegR3", bone = "LegR3", class = "Part", size = Vector3.new(0.6, 1.8, 0.6), cframe = CFrame.new(3.47313, 2.15672, 2.8, 0, 0.970144, 0.242532, 0, 0.242532, -0.970144, -1, 0, 0), color = Color3.fromRGB(30, 26, 32) },
 		{ name = "LegR3Shin", bone = "LegR3", class = "Part", size = Vector3.new(0.55, 2.1, 0.55), cframe = CFrame.new(4.49626, 1.275, 2.8, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 26, 32) },
 		{ name = "LegR3Foot", bone = "LegR3", class = "Part", size = Vector3.new(0.9, 0.35, 0.8), cframe = CFrame.new(4.69626, 0.175, 2.8, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 26, 32) },
-		{ name = "Red_ShellL", bone = "ShellL", class = "MeshPart", mesh = "Ladybug_Red_ShellL", size = Vector3.new(3.57, 3.75, 8.4), cframe = CFrame.new(-1.665, 4.31344, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(214, 26, 38) },
-		{ name = "Black_ShellL", bone = "ShellL", class = "MeshPart", mesh = "Ladybug_Black_ShellL", size = Vector3.new(2.7575, 2.8339, 5.7538), cframe = CFrame.new(-1.59251, 4.27639, 1.29376, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 26, 32) },
-		{ name = "Red_ShellR", bone = "ShellR", class = "MeshPart", mesh = "Ladybug_Red_ShellR", size = Vector3.new(3.57, 3.75, 8.4), cframe = CFrame.new(1.665, 4.31344, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(214, 26, 38) },
-		{ name = "Black_ShellR", bone = "ShellR", class = "MeshPart", mesh = "Ladybug_Black_ShellR", size = Vector3.new(2.7575, 2.8339, 3.3684), cframe = CFrame.new(1.59251, 4.27639, 2.48643, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 26, 32) },
+		{ name = "Red_ShellL", bone = "ShellL", class = "MeshPart", mesh = "Ladybug_Red_ShellL", size = Vector3.new(3.57, 3.75, 8.4), cframe = CFrame.new(-1.665, 4.31344, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(214, 26, 38), plain = true },
+		{ name = "Black_ShellL", bone = "ShellL", class = "MeshPart", mesh = "Ladybug_Black_ShellL", size = Vector3.new(2.8056, 2.995, 4.8709), cframe = CFrame.new(-2.04417, 4.54035, 1.30881, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 26, 32), plain = true },
+		{ name = "Red_ShellR", bone = "ShellR", class = "MeshPart", mesh = "Ladybug_Red_ShellR", size = Vector3.new(3.57, 3.75, 8.4), cframe = CFrame.new(1.665, 4.31344, 0.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(214, 26, 38), plain = true },
+		{ name = "Black_ShellR", bone = "ShellR", class = "MeshPart", mesh = "Ladybug_Black_ShellR", size = Vector3.new(2.8056, 2.995, 4.8709), cframe = CFrame.new(2.04417, 4.54035, 1.30881, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 26, 32), plain = true },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
 	animations = {

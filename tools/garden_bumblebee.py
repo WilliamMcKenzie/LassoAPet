@@ -26,11 +26,14 @@ def build():
     root = g.group("root", (0, y0, 0))
     # round body as low-poly meshes (QM Oct 14: meshes where blocks faked a curve): a black thorax
     # with a yellow collar, and a fat abdomen in yellow and black bands meeting flush
-    for k, pts in enumerate(G.bands((0, y0, -0.5), (3.1, 2.9, 2.7), [-2.7, -1.5, 2.7])):
-        g.hull(root, "Collar" if k == 0 else "Thorax", pts, "yellow" if k == 0 else "black")
+    for k, pts in enumerate(G.bands((0, y0, -0.5), (3.1, 2.9, 2.7), [-2.7, -1.5, 0.0, 1.4, 2.7], seg=16)):
+        g.hull(root, f"SmoothThorax{k + 1}", pts, "yellow" if k == 0 else "black")
     abd = g.group("Abdomen", (0, y0, 1.2), root)
-    for k, pts in enumerate(G.bands((0, y0 + 0.1, 5.1), (3.5, 3.1, 4.2), [-4.2, -2.7, -1.2, 0.3, 1.7, 3.0, 4.2])):
-        g.hull(abd, f"Band{k + 1}", pts, "yellow" if k % 2 == 0 else "black")
+    # (the first yellow band shows right behind the thorax, so the black head, thorax and
+    # first black band don't run together)
+    cuts = [-4.2, -1.9, -0.6, 0.6, 1.8, 3.0, 4.2]
+    for k, pts in enumerate(G.bands((0, y0 + 0.1, 5.1), (3.5, 3.1, 4.2), cuts, seg=16)):
+        g.hull(abd, f"SmoothBand{k + 1}", pts, "yellow" if k % 2 == 0 else "black")
     g.spike(abd, "Stinger", (0, y0, 9.1), (0, -0.25, 1), 1.4, 0.45, "black")
     # head: big, black, googly eyes on the front, pink cheeks, smile, antennae
     neck = g.group("neck", (0, y0, -2.8), root)
@@ -65,7 +68,7 @@ def build():
             node = g.group(wname + side, pivot, root)
             M = Rm(("z", s * 10), ("y", -s * sweep))
             oval = [pivot + M @ np.array([s * span * (0.5 + 0.5 * np.cos(a)), t, chord * (0.1 + 0.5 * np.sin(a))])
-                    for a in np.linspace(0, TAU, 12, endpoint=False) for t in (-0.12, 0.12)]
+                    for a in np.linspace(0, TAU, 12, endpoint=False) for t in (-0.22, 0.22)]
             g.hull(node, f"{wname}{side}", oval, "wing")
     return g
 
