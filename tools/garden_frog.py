@@ -50,14 +50,14 @@ def build():
         g.box(neck, "Nostril" + side, (s * 0.6, hy + 0.3, hz - 2.05), (0.4, 0.3, 0.15), "greendark")
     # the toadstool, 1 stud higher than it was (the eyes clear the brim): a stalk, a gill rim,
     # a dark brim and the cap, the one mesh (QM Oct 14: only what blocks can't do), 8 broad
-    # facets, with 5 flat white spots on them
+    # facets, with 5 flat white spots in them (one more mesh)
     cy, cz = hy + 3.9, hz + 0.9
     g.box(neck, "Stalk", (0, cy - 0.9, cz), (2.4, 2.4, 2.4), "gill")
     g.box(neck, "Gills", (0, cy + 0.3, cz), (7.6, 0.5, 7.0), "gill")
     g.box(neck, "Brim", (0, cy + 0.85, cz), (8.8, 0.6, 8.2), "capdark")
     cap = G.dome((0, cy + 1.15, cz), (4.8, 4.5), 3.6, seg=8, rings=2)
     g.hull(neck, "Cap", cap, "cap")
-    plates(g, neck, "CapSpot", cap, ((0, 1, 0), (0, 0.5, -1), (-1, 0.5, 0.3), (1, 0.5, 0.3), (0, 0.5, 1)), 1.3, "spot")
+    plates(g, neck, "CapSpot", cap, ((0, 1, -0.3), (0, 0.4, -1), (-1, 0.4, 0.3), (1, 0.4, 0.3), (0, 0.4, 1)), "spot")
 
     # legs: short front legs, big folded hind legs, orange toes
     for side, s in (("L", -1), ("R", 1)):
@@ -73,22 +73,26 @@ def build():
     return g
 
 
-def plates(g, node, name, pts, dirs, size, col):
-    """Flat square spots (thin blocks) lying on the facets of hull(pts): one on the facet
-    facing most along each direction in dirs."""
-    faces = {}
-    for t in G.hull_tris(pts):
-        n = np.cross(t[1] - t[0], t[2] - t[0])
-        n /= np.linalg.norm(n)
-        faces.setdefault(tuple(np.round(n, 3)), []).extend(t)
+def plates(g, node, name, pts, dirs, col, fill=0.75):
+    """Flat round spots lying in the facets of hull(pts), sunk in a little: one in the facet
+    facing most along each direction in dirs, centred on its incircle (fill of its radius),
+    so none overhangs an edge. They're meshes, so they merge into one MeshPart."""
+    tris = G.hull_tris(pts)
     used = set()
     for d in dirs:
         d = np.array(d, float) / np.linalg.norm(d)
-        k = max((k for k in faces if k not in used), key=lambda k: np.dot(k, d))
+        k = max((i for i in range(len(tris)) if i not in used),
+                key=lambda i: np.dot(np.cross(tris[i][1] - tris[i][0], tris[i][2] - tris[i][0]), d)
+                / np.linalg.norm(np.cross(tris[i][1] - tris[i][0], tris[i][2] - tris[i][0])))
         used.add(k)
-        n = np.array(k)
-        c = np.mean(np.unique(np.round(faces[k], 5), axis=0), 0)
-        g.box(node, name, c + n * 0.05, (size, 0.3, size), col, G.frame(n))
+        A, B, Cc = tris[k]
+        n = np.cross(B - A, Cc - A)
+        area2 = np.linalg.norm(n)
+        n /= area2
+        a, b, c = np.linalg.norm(B - Cc), np.linalg.norm(Cc - A), np.linalg.norm(A - B)
+        centre = (a * A + b * B + c * Cc) / (a + b + c)
+        r = area2 / (a + b + c)
+        g.hull(node, name, G.prism(centre - n * 0.15, r * fill, 0.2, seg=8, M=G.frame(n)), col)
 
 
 def animations(m):

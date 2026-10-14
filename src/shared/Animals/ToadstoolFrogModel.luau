@@ -36,11 +36,6 @@ return {
 		{ name = "Stalk", bone = "neck", class = "Part", size = Vector3.new(2.4, 2.4, 2.4), cframe = CFrame.new(0, 7.6, -2.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(240, 218, 176) },
 		{ name = "Gills", bone = "neck", class = "Part", size = Vector3.new(7.6, 0.5, 7), cframe = CFrame.new(0, 8.8, -2.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(240, 218, 176) },
 		{ name = "Brim", bone = "neck", class = "Part", size = Vector3.new(8.8, 0.6, 8.2), cframe = CFrame.new(0, 9.35, -2.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(98, 40, 150) },
-		{ name = "CapSpot", bone = "neck", class = "Part", size = Vector3.new(1.3, 0.3, 1.3), cframe = CFrame.new(-2.10645, 12.5945, -2.1, 0, -0.318926, -0.94778, 0, 0.94778, -0.318926, 1, 0, 0), color = Color3.fromRGB(252, 248, 236) },
-		{ name = "CapSpot2", bone = "neck", class = "Part", size = Vector3.new(1.3, 0.3, 1.3), cframe = CFrame.new(0, 11.3732, -5.6025, -1, 0, 0, 0, 0.522707, -0.852512, 0, -0.852512, -0.522707), color = Color3.fromRGB(252, 248, 236) },
-		{ name = "CapSpot3", bone = "neck", class = "Part", size = Vector3.new(1.3, 0.3, 1.3), cframe = CFrame.new(-3.81902, 10.5173, -0.61469, 0.404439, -0.84785, -0.342898, 0, 0.37493, -0.927053, 0.914565, 0.374937, 0.151637), color = Color3.fromRGB(252, 248, 236) },
-		{ name = "CapSpot4", bone = "neck", class = "Part", size = Vector3.new(1.3, 0.3, 1.3), cframe = CFrame.new(3.81902, 10.5173, -0.61469, 0.404439, 0.84785, 0.342898, 0, 0.37493, -0.927053, -0.914565, 0.374937, 0.151637), color = Color3.fromRGB(252, 248, 236) },
-		{ name = "CapSpot5", bone = "neck", class = "Part", size = Vector3.new(1.3, 0.3, 1.3), cframe = CFrame.new(0, 11.3732, 1.4025, 1, 0, 0, 0, 0.522707, -0.852512, 0, 0.852512, 0.522707), color = Color3.fromRGB(252, 248, 236) },
 		{ name = "LegFL", bone = "LegFL", class = "Part", size = Vector3.new(1.5, 2.6, 1.5), cframe = CFrame.new(-2.6, 1.4, -2.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(150, 222, 40) },
 		{ name = "ToeFL", bone = "LegFL", class = "Part", size = Vector3.new(0.45, 0.5, 1.4), cframe = CFrame.new(-2.05, 0.25, -2.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 160, 70) },
 		{ name = "ToeFL2", bone = "LegFL", class = "Part", size = Vector3.new(0.45, 0.5, 1.4), cframe = CFrame.new(-2.6, 0.25, -2.8, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 160, 70) },
@@ -60,6 +55,7 @@ return {
 		{ name = "ToeHR2", bone = "LegHR", class = "Part", size = Vector3.new(0.5, 0.5, 1.6), cframe = CFrame.new(3.8, 0.25, -1.4, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 160, 70) },
 		{ name = "ToeHR3", bone = "LegHR", class = "Part", size = Vector3.new(0.5, 0.5, 1.6), cframe = CFrame.new(4.4, 0.25, -1.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 160, 70) },
 		{ name = "Cap_neck", bone = "neck", class = "MeshPart", mesh = "ToadstoolFrog_Cap_neck", size = Vector3.new(9.6, 3.6, 9), cframe = CFrame.new(0, 11.45, -2.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(156, 72, 214) },
+		{ name = "Spot_neck", bone = "neck", class = "MeshPart", mesh = "ToadstoolFrog_Spot_neck", size = Vector3.new(8.3263, 2.8717, 7.4712), cframe = CFrame.new(0, 11.3021, -2.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(252, 248, 236) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
 	animations = {
