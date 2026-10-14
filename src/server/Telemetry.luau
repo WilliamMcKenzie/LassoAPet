@@ -426,7 +426,13 @@ local function quitSnapshot(s, player, length, counts)
 	end)
 	put("claim:" .. claim)
 	if WORLD == 1 and not player:GetAttribute("OwnsWorld2") then
-		put("w2gold:" .. (if (player:GetAttribute("Gold") or 0) >= (Config.WorldPrices[2] or math.huge) then "yes" else "no"))
+		local can = (player:GetAttribute("Gold") or 0) >= (Config.WorldPrices[2] or math.huge)
+		put("w2gold:" .. (if can then "yes" else "no"))
+		if can and s.affordAt then -- (how long they'd had it, and whether they were at base since, where the bar's prompt is: QM, Oct 14)
+			local held = os.clock() - s.affordAt
+			put("w2for:" .. (if held < 60 then "<1m" elseif held < 300 then "1-5m" else "5m+"))
+			put("w2seen:" .. (if s.sawW2 then "yes" else "no"))
+		end
 	end
 end
 
@@ -612,6 +618,9 @@ task.spawn(function() -- (Riders makes these)
 		elseif what == "end" then
 			s.lastRide = if s.rideAnimal then "animal" elseif s.rideCrash then "crash" else "empty"
 			s.riding, s.lastEnd = false, os.clock()
+			if s.affordAt then
+				s.sawW2 = true -- (back at base with World 2's gold: the bar's prompt)
+			end
 			if tut == "post" then
 				s.postRides = (s.postRides or 0) + 1
 			end
@@ -648,13 +657,16 @@ for _, player in Players:GetPlayers() do
 	task.spawn(join, player)
 end
 Players.PlayerRemoving:Connect(leave)
-task.spawn(function() -- (the quit snapshot's copy of each pen)
+task.spawn(function() -- (the quit snapshot's copy of each pen, and when they could first buy World 2)
 	while true do
 		task.wait(5)
 		for player, s in sessions do
 			local pens = workspace:FindFirstChild("Pens")
 			local pen = pens and pens:FindFirstChild("Pen" .. tostring(player:GetAttribute("Pen")))
 			s.penContents = pen and pen:GetAttribute("Contents") or s.penContents
+			if WORLD == 1 and not s.affordAt and not player:GetAttribute("OwnsWorld2") and (player:GetAttribute("Gold") or 0) >= (Config.WorldPrices[2] or math.huge) then
+				s.affordAt, s.sawW2 = os.clock(), not s.riding -- (first could buy World 2: at base, the prompt's up)
+			end
 		end
 	end
 end)

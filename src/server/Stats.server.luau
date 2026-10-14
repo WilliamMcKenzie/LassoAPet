@@ -199,6 +199,8 @@ local function report(arg)
 		{ "egg in pen", { "egg:ready", "egg:hatching", "egg:none" } },
 		{ "quest to claim", { "claim:yes", "claim:no" } },
 		{ "World 2 gold (W1, not owned)", { "w2gold:yes", "w2gold:no" } },
+		{ "had it for", { "w2for:<1m", "w2for:1-5m", "w2for:5m+" } },
+		{ "at base since", { "w2seen:yes", "w2seen:no" } },
 	}
 	line("AS THEY LEFT (quit snapshot):")
 	for q, band in { "<1m", "1-5m", "5-10m", "10-20m", "20m+" } do
@@ -210,7 +212,7 @@ local function report(arg)
 				for _, what in group[2] do
 					local c = r.c("q" .. q .. ":" .. what)
 					if c > 0 then
-						table.insert(bits, what:gsub("^%a+:", "") .. " " .. pct(c, n))
+						table.insert(bits, what:gsub("^%w+:", "") .. " " .. pct(c, n))
 					end
 				end
 				if #bits > 0 then
