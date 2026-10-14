@@ -259,7 +259,7 @@ def pirate_cove():
     # weathered planks, grey cliff walls.)
     b = Biome(0, [
         ("DeepWater", -1, (38, 112, 156), None),  # the water tile's darker tint
-        ("Water", -1, (53, 143, 192), None),  # QM's blue tile (rbxassetid://128871935822673)
+        ("Water", -1, (53, 143, 192), None),  # QM's darker tile (rbxassetid://113940500836253)
         ("WetSand", 0, (204, 158, 102), (190, 145, 92)),  # (QM in Studio, Oct 14: stamina-loop d803ac1; was 206, 172, 110 / 194, 160, 98)
         ("Ground", 2, (238, 202, 142), (228, 190, 128)),  # light sand, as the base's: a stud above the damp sand (QM, Oct 14: stamina-loop b7441d8; was 1)
         ("Planks", 1, (132, 96, 66), None),  # boardwalks: plain boards, no checker
