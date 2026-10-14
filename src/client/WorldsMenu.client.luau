@@ -48,6 +48,7 @@ local AWAY = 45 -- and you've walked off once you're this far
 
 local player = Players.LocalPlayer
 local open = false
+local prompted = false -- (opened by World2Bar's prompt, not the gate: walking about doesn't close it)
 local travelling = false -- (a trip's on its way: every Travel button waits)
 local TRAVEL_WAIT = 15 -- seconds before Travel works again if the teleport never came
 local closeMenu
@@ -390,6 +391,7 @@ function closeMenu()
 		return
 	end
 	open = false
+	prompted = false
 	hideOthers(false)
 	haze(false)
 	ModalPop.close(setScale, function()
@@ -399,6 +401,18 @@ end
 closeButton.Activated:Connect(function()
 	closeMenu()
 end)
+
+-- World 1's World 2 prompt (QM, Oct 14: was a forced box over the World 2 bar; softened so
+-- players can close it and play on): World2Bar fires this to open the menu wherever you are.
+local promptEvent = Instance.new("BindableEvent")
+promptEvent.Name = "OpenWorldsMenu"
+promptEvent.Event:Connect(function()
+	if not open then
+		openMenu()
+		prompted = true
+	end
+end)
+promptEvent.Parent = script
 
 -- Walking up to the gate pops it up, once a visit: walk off (AWAY) and back for it again.
 local gate = workspace:WaitForChild("World"):WaitForChild("BaseDecor"):WaitForChild("PortalGate", 30)
@@ -417,7 +431,7 @@ RunService.Heartbeat:Connect(function()
 	local d = Vector2.new(root.Position.X - centre.X, root.Position.Z - centre.Z).Magnitude
 	if d > AWAY then
 		armed = true
-		if open then
+		if open and not prompted then
 			closeMenu()
 		end
 	elseif d < NEAR and armed and not humanoid.SeatPart then -- (not riding past)

@@ -41,4 +41,27 @@ function Ground.heightAt(x, z)
 	return heights[key(math.floor(x / CELL), math.floor(z / CELL))] or 0
 end
 
+-- The water under a point (QM, Oct 14: things sink a bit in it, Client/WaterSink): "DeepWater",
+-- "Water" (a Water part or any with the flowing water tile, a Texture named Water), or nil.
+local waters -- [cell key] = its kind
+function Ground.waterAt(x, z)
+	if not waters then
+		waters = {}
+		for _, part in workspace:WaitForChild("World"):WaitForChild("Ground"):GetChildren() do
+			local kind = if part.Name == "DeepWater" then "DeepWater"
+				elseif part.Name == "Water" or part:FindFirstChild("Water") then "Water"
+				else nil
+			if kind and part:IsA("BasePart") then
+				local lo = part.Position - part.Size / 2
+				for px = lo.X + CELL / 2, lo.X + part.Size.X, CELL do
+					for pz = lo.Z + CELL / 2, lo.Z + part.Size.Z, CELL do
+						waters[key(math.floor(px / CELL), math.floor(pz / CELL))] = kind
+					end
+				end
+			end
+		end
+	end
+	return waters[key(math.floor(x / CELL), math.floor(z / CELL))]
+end
+
 return Ground

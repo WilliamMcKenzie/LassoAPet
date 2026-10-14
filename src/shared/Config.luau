@@ -1278,6 +1278,11 @@ Config.Water = {
 	StudsPerTile = 8, -- (a pixel a stud)
 	Flow = Vector2.new(0, 2),
 }
+-- Sinking in water (QM, Oct 14: as RotMG drops a character half its height into deep water):
+-- over Water or DeepWater (Ground.waterAt) an animal, wild or ridden, and a player on foot are
+-- drawn this fraction of their height lower, easing in and out at Rate (1/s). Only the look:
+-- their physics and hit boxes stay where they were (Client/WaterSink). 0 for none.
+Config.WaterSink = { Water = 0.3, DeepWater = 0.5, Rate = 6 }
 
 -- Worlds (QM, Oct 13): each is its own Place in the experience, running this same code.
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
@@ -1406,7 +1411,7 @@ for kind, w2 in Config.World2Pets do
 end
 local baseIncome = table.clone(Config.PetIncome) -- (World 1's, before World 2 changes its own)
 function Config.incomeIn(world, kind)
-	local own = world == 2 and Config.World2Pets[kind]
+	local own = (world == 2 and Config.World2Pets[kind]) or (world == 3 and Config.World3Pets and Config.World3Pets[kind])
 	return if own then own[2] else baseIncome[kind]
 end
 
@@ -1424,15 +1429,39 @@ for _, kind in {
 } do
 	Config.World2Animals[kind] = true
 end
+-- World 3's own animals (QM, Oct 14: Pirate Cove, Garden, Candyland, Cnidaria), filled in as
+-- the biome animal threads hand them over. As in World 2, anyone else's pets ridden in World 3
+-- (World 1's and World 2's) run at a Horse's speed there.
+Config.World3Animals = {}
+for _, kind in { -- (none yet)
+} do
+	Config.World3Animals[kind] = true
+end
+-- World 3's animals on its own curve: { speed, gold a second, hatch seconds }, as World2Pets.
+Config.World3Pets = {}
+for kind, w3 in Config.World3Pets do
+	Config.PetIncome[kind], Config.PetHatchTime[kind] = w3[2], w3[3]
+end
+-- Each world's own animals: [world] = the set (World 1's: everything not in the others).
+local OWN = { [2] = Config.World2Animals, [3] = Config.World3Animals }
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
 function Config.slowedHere(kind, fuse)
-	return Config.World >= 2 and not Config.World2Animals[kind] and not (fuse and Config.World2Animals[fuse])
+	local own = OWN[Config.World]
+	return own ~= nil and not own[kind] and not (fuse and own[fuse])
 end
+
+-- Each world's biome names, as players know them (Stats, Funnel; World 2's and 3's Config.Biomes
+-- Names are different: World 2's keep World 1's).
+Config.BiomeNames = {
+	{ "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" },
+	{ "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
+	{ "Pirate Cove", "Garden", "Candyland", "Cnidaria" },
+}
 
 -- World 2's look: its first biome and base as QM's reference (marble walls, yellow
 -- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
 -- hue-turned as placeholders (tools/world2_terrain.luau's turns).
-if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14)
+if Config.World == 2 then
 	-- World 2's quests (QM, Oct 13): reach each biome, its egg World 1's reward's
 	-- equivalent here; and the other line, merge 3, lasso 10 Lions, lasso 3 Kitsunes (that
 	-- last one's three eggs). No invite line here.
@@ -1725,28 +1754,10 @@ if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14
 			Config.AnimalStats[kind].Speed = horse
 		end
 	end
-	-- World 3's home base, a tropical island (QM, Oct 14; tools/world3_base.luau's floor): sand,
-	-- wet sand on the paths, grass a stud up, lagoons of the flowing water tile. Its Meadow's
-	-- walls stay World 2's marble for now (QM hasn't picked).
-	if Config.World == 3 then
-		meadow.GroundColors = { rgb(240, 218, 160), rgb(230, 206, 146) } -- sand
-		meadow.Patches = {
-			Dirt = meadow.Patches.Dirt, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
-			WetSand = { rgb(206, 172, 110), rgb(194, 160, 98) },
-			Grass = { rgb(96, 204, 60), rgb(84, 188, 50) },
-			Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
-			-- The base's walls, bottom to top (QM, Oct 14): three tiles of dark sand, light sand
-			-- the rest of the way, green grass along the very top (WorldColors.paintWall).
-			BaseWallLow = { rgb(206, 172, 110), rgb(194, 160, 98) },
-			BaseWall = { rgb(240, 218, 160), rgb(230, 206, 146) },
-			BaseCap = { rgb(96, 204, 60), rgb(96, 204, 60) },
-		}
-		Config.Water = table.clone(Config.Water)
-		Config.Water.Image = "rbxassetid://128871935822673" -- assets/world3/WaterTile256.png (QM's blue 8 x 8 tile, x32)
-	end
-else
-	-- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
-	-- with you (QM, Oct 14), they're as big here too. (Not the Loong: World 1's own as well.)
+end
+-- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
+-- with you (QM, Oct 14), they're as big in the other worlds too. (Not the Loong: World 1's own as well.)
+if Config.World ~= 2 then
 	Config.AnimalScale = table.clone(Config.AnimalScale)
 	for size, kinds in {
 		[2] = { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }, -- the Woodland Maze
@@ -1756,6 +1767,144 @@ else
 		for _, kind in kinds do
 			Config.AnimalScale[kind] = (Config.AnimalScale[kind] or 1) * size
 		end
+	end
+end
+
+-- World 3 (QM, Oct 14): its own four biomes, Pirate Cove, Garden, Candyland and Cnidaria, each
+-- about 2x as long as World 1's first four (2168, 1816, 1920, 3120; whole 16s, for the checker).
+-- Floors, walls and their colours: the World 3 terrain thread's (tools/world3_course.luau, then
+-- world3_<biome>.luau; not funnel.luau). Animals and bosses come from the biome animal threads;
+-- until then each herd runs Fish (World 2's way) and each boss is World 2's in that slot.
+if Config.World == 3 then
+	local rgb = Color3.fromRGB
+	local SAND = { rgb(240, 218, 160), rgb(230, 206, 146) }
+	Config.Biomes = {
+		{
+			-- Its colours are the home base's too, a tropical island (QM, Oct 14; tools/world3_base.luau's
+			-- floor): sand, wet sand on the paths, grass a stud up, lagoons of the flowing water tile.
+			-- Tile tops: water -1, wet sand 0, sand and planks 1.
+			Name = "PirateCove",
+			AnimalSize = 1,
+			Swerve = 1,
+			Length = 4336, -- (2x the Meadow's 2168)
+			GroundColors = SAND,
+			WallColors = { rgb(124, 82, 50), rgb(112, 73, 44) },
+			CapColor = rgb(240, 218, 160),
+			Herd = { Fish = 1 },
+			Patches = {
+				Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
+				WetSand = { rgb(206, 172, 110), rgb(194, 160, 98) },
+				Grass = { rgb(96, 204, 60), rgb(84, 188, 50) }, -- (the base's)
+				Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
+				DeepWater = { rgb(30, 120, 205), rgb(30, 120, 205) },
+				Planks = { rgb(150, 100, 60), rgb(150, 100, 60) },
+				-- The base's walls, bottom to top (QM, Oct 14): three tiles of dark sand, light sand
+				-- the rest of the way, green grass along the very top (WorldColors.paintWall).
+				BaseWallLow = { rgb(206, 172, 110), rgb(194, 160, 98) },
+				BaseWall = SAND,
+				BaseCap = { rgb(96, 204, 60), rgb(96, 204, 60) },
+			},
+			GateColor = rgb(255, 160, 40),
+		},
+		{
+			-- Tile tops: soil -1, dark lawn 0, bright lawn and path 1, flowers 2.
+			Name = "Garden",
+			AnimalSize = 1.35,
+			Swerve = 1,
+			NestScale = 2,
+			Length = 3632, -- (2x the Desert's 1816)
+			GroundColors = { rgb(76, 170, 52), rgb(68, 156, 46) },
+			WallColors = { rgb(35, 86, 31), rgb(30, 74, 27) },
+			CapColor = rgb(255, 120, 170),
+			Herd = { Fish = 1 },
+			Patches = {
+				Soil = { rgb(110, 72, 44), rgb(98, 64, 38) },
+				Grass = { rgb(126, 214, 72), rgb(114, 200, 62) },
+				Flowers = { rgb(255, 130, 190), rgb(244, 112, 176) },
+				Path = { rgb(196, 190, 176), rgb(180, 174, 160) },
+			},
+			GateColor = rgb(255, 92, 170),
+		},
+		{
+			-- Tile tops: chocolate -1, frosting 0, cream and candy cane 1, mint 2.
+			Name = "Candyland",
+			AnimalSize = 1.8,
+			Swerve = 1,
+			NestScale = 2.25,
+			Length = 3840, -- (2x the Tundra's 1920)
+			GroundColors = { rgb(240, 96, 158), rgb(226, 82, 146) },
+			WallColors = { rgb(255, 170, 210), rgb(245, 155, 198) },
+			CapColor = rgb(255, 255, 255),
+			Herd = { Fish = 1 },
+			Patches = {
+				Chocolate = { rgb(110, 62, 40), rgb(98, 54, 34) },
+				Cream = { rgb(255, 236, 200), rgb(248, 224, 184) },
+				Mint = { rgb(130, 236, 196), rgb(116, 224, 182) },
+				Stripe = { rgb(240, 60, 80), rgb(220, 52, 70) },
+				Icing = { rgb(255, 245, 245), rgb(245, 232, 234) },
+			},
+			GateColor = rgb(140, 240, 220),
+		},
+		{
+			-- Jellyfish country, under the sea: a blue haze and bubbles as World 1's Ocean's (Ocean.client).
+			-- Tile tops: trench -1, seabed 0, coral 1, glow 2.
+			Name = "Cnidaria",
+			AnimalSize = 2.6,
+			Swerve = 1,
+			NestScale = 2.5,
+			Length = 6240, -- (2x the Ocean's 3120)
+			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean's)
+			GroundColors = { rgb(236, 222, 184), rgb(226, 210, 170) },
+			WallColors = { rgb(20, 32, 68), rgb(16, 26, 58) },
+			CapColor = rgb(255, 110, 190),
+			Herd = { Fish = 1 },
+			Patches = {
+				Trench = { rgb(30, 80, 210), rgb(26, 70, 188) },
+				Coral = { rgb(255, 128, 150), rgb(244, 112, 136) },
+				Glow = { rgb(120, 255, 140), rgb(100, 240, 120) },
+			},
+			GateColor = rgb(90, 255, 200),
+			Haze = { Color = rgb(60, 150, 235), Density = 0.45, Tint = rgb(200, 228, 255), FadeTime = 1.5, Bubbles = 24, NoDepths = true },
+		},
+	}
+	Config.CourseLength = 4336 + 3632 + 3840 + 6240
+	-- Its funnel widens and narrows (QM, Oct 14), never wider than World 1's and 2's widest
+	-- (CourseMaxHalfWidth, 137): { z, half width }, straight walls between, the last held past
+	-- the end (WorldColors.halfWidth). The terrain thread's walls follow it.
+	Config.CourseProfile = {
+		{ 0, 56 }, { -480, 64 }, { -880, 92 }, { -1440, 92 }, { -1840, 68 }, { -2240, 72 }, { -2680, 108 }, { -3240, 108 }, { -3760, 80 }, -- Pirate Cove
+		{ -4336, 76 }, { -4800, 102 }, { -5240, 82 }, { -5720, 82 }, { -6200, 118 }, { -6840, 118 }, { -7360, 92 }, -- Garden
+		{ -7968, 88 }, { -8400, 114 }, { -8880, 114 }, { -9320, 94 }, { -9880, 128 }, { -10520, 128 }, { -11040, 104 }, -- Candyland
+		{ -11808, 100 }, { -12400, 130 }, { -13000, 137 }, { -13640, 112 }, { -14320, 112 }, { -15000, 137 }, { -15840, 137 }, { -16520, 118 }, { -17280, 132 }, { -18048, 128 }, -- Cnidaria
+	}
+	Config.Boss.ByBiome = { PirateCove = "Seraph", Garden = "CrimsonSeraph", Candyland = "CrystalSeraph", Cnidaria = "Monarch" } -- (placeholders: World 2's in each slot)
+	Config.DefaultPet = "ArmoredHorse" -- (World 2's starter for now)
+	-- World 3's quests: reach each biome (each egg a placeholder: World 2's in that slot), and
+	-- the merge line. (No invite line, as World 2.)
+	Config.Quests = {
+		{
+			{ Text = "Reach Pirate Cove", Kind = "reach", Biome = 1, Egg = "Eyeworm", NoPenLevel = true },
+			{ Text = "Reach Garden", Kind = "reach", Biome = 2, Egg = "CrystalCentipede" },
+			{ Text = "Reach Candyland", Kind = "reach", Biome = 3, Egg = "BrownMushroom" },
+			{ Text = "Reach Cnidaria", Kind = "reach", Biome = 4, Egg = "OrangeButterfly" },
+		},
+		{
+			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "Seraph" },
+		},
+	}
+	Config.Water = table.clone(Config.Water)
+	Config.Water.Image = "rbxassetid://128871935822673" -- assets/world3/WaterTile256.png (QM's blue 8 x 8 tile, x32)
+	-- Everyone else's animals ridden here: a Horse's speed (Config.slowedHere), World 3's own
+	-- on their own curve (Config.World3Pets).
+	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
+	for kind, stats in Config.AnimalStats do
+		Config.AnimalStats[kind] = table.clone(stats)
+		Config.AnimalStats[kind].Speed = if Config.World3Pets[kind] then Config.World3Pets[kind][1]
+			elseif Config.World3Animals[kind] then stats.Speed
+			else horse
+	end
+	for kind, w3 in Config.World3Pets do
+		Config.AnimalStats[kind] = Config.AnimalStats[kind] or { Speed = w3[1], Stamina = 1 }
 	end
 end
 

@@ -20,6 +20,9 @@
 -- dirt patches, a stud down), shows in any seam.
 
 local MODE = "apply"
+if require(game:GetService("ReplicatedStorage").Shared.Config).CourseProfile then
+	error("World 3's course is laid at its own widths already (tools/world3_course.luau): don't funnel it")
+end
 local START, RATE, MAX = 56, 0.005, 137
 -- Each biome's obstacles and nests grow with its beasts (QM, Oct 8): its far edge's z
 -- and Config.Biomes[i].AnimalSize, the obstacles and nests scaled by that ^ GROW.
