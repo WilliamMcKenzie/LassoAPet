@@ -22,7 +22,7 @@ C = {"green": (78, 186, 50), "greendark": (34, 120, 40), "red": (214, 30, 52), "
      "brow": (24, 70, 30)}
 
 
-def build_trap(g, node, jaw_parent, hinge, size, open_deg, name="", eyes=True, glow=None):
+def build_trap(g, node, jaw_parent, hinge, size, open_deg, name="", eyes=True, glow=None, white="eyewhite"):
     """A trap head hinged at `hinge` (its back edge), facing -Z: lower lobe on `node`, upper lobe on a
     new bone '<name>Jaw' (rest 0, its opening baked in). size = (width, length, lobe thickness)."""
     w, L, t = size
@@ -51,7 +51,7 @@ def build_trap(g, node, jaw_parent, hinge, size, open_deg, name="", eyes=True, g
             base = P((s * w * 0.22, t + 0.5 + es * 0.45, -L * 0.62))
             g.box(jaw, name + "EyeStalk" + side, P((s * w * 0.22, t + 0.4, -L * 0.55)), (es * 1.1, 0.8, es * 1.1), "green", M)
             g.eye(jaw, name + side, base + M @ np.array([0, 0, -es * 0.56]), es, normal=M @ np.array([0, 0.25, -1.0]),
-                  look=(0, -0.1), glow=glow)
+                  look=(0, -0.1), glow=glow, white=white)
             g.box(jaw, name + "Brow" + side, P((s * w * 0.22, t + 0.6 + es * 1.05, -L * 0.62 - es * 0.5)),
                   (es * 1.3, 0.4, 0.5), "brow", M @ Rm(("z", s * 16)))
     return jaw
