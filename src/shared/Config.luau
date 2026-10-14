@@ -301,7 +301,7 @@ local Config = {
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50, FlytrapQueen = 60, RoyalCnidarian = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50, FlytrapQueen = 60, RoyalCnidarian = 50, Gigacorn = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
@@ -319,6 +319,7 @@ local Config = {
 			Dreadstump = { At = Vector3.new(0, 0.18, 0.3), From = Vector3.new(0, 6, 60) }, -- (World 3 Pirate Cove's Pirate King: his face under the tricorn; a guess)
 			FlytrapQueen = { At = Vector3.new(0, 0.32, 0.3), From = Vector3.new(0, 10, 70) }, -- World 3 Garden: the Queen's crowned head, high in the middle (a guess)
 			RoyalCnidarian = { At = Vector3.new(0, 0.1, 0.33), From = Vector3.new(0, 6, 60) }, -- (World 3 Cnidaria's crowned jellyfish: its eyes and teeth under the crown; a guess)
+			Gigacorn = { At = Vector3.new(0, 0.2, 0.4), From = Vector3.new(0, 8, 65) }, -- (World 3 Candyland's candy unicorn: its face under the horn, high at the front; a guess)
 			CrystalTyrant = { At = Vector3.new(0, 0.02, 0.48), From = Vector3.new(0, 4, 34) }, -- (its eyes and teeth, halfway up: the crown makes it tall)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
@@ -562,6 +563,8 @@ local Config = {
 		JollyRogerWyvern = { Kind = "Fly", Height = 56 }, -- World 3 Pirate Cove's skeleton sea dragon, a flier (Oct 14)
 		MoonJellyfish = { Kind = "Fly", Height = 56 }, Anomalocaris = { Kind = "Fly", Height = 56 }, BoxJellyfish = { Kind = "Fly", Height = 56 }, BlueRingOctopus = { Kind = "Fly", Height = 56 }, ManOWar = { Kind = "Fly", Height = 56 }, -- World 3 Cnidaria: all swimmers, fliers like the Crystal Phoenix (Oct 14)
 		Mermaid = { Kind = "Fly", Height = 56 }, AbyssalDragon = { Kind = "Fly", Height = 56 }, ReefTitan = { Kind = "Fly", Height = 56 }, RoyalCnidarian = { Kind = "Fly", Height = 56 },
+		SwollFairy = { Kind = "Fly", Height = 56 }, -- World 3 Candyland: the buff fairy, a flier (Oct 14)
+		RockCandyDragon = { Kind = "Fly", Height = 56 }, -- World 3 Candyland's giga rare dragon, a flier (Oct 14)
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
 		-- Whale, a pink haze round the screen, and scares the animals round it off.
@@ -616,6 +619,8 @@ local Config = {
 		RafflesiaBeast = 4, AncientTreant = 4, FlytrapQueen = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
 		MoonJellyfish = 1, Anomalocaris = 2, BoxJellyfish = 2, BlueRingOctopus = 2, ManOWar = 2, Mermaid = 3, -- World 3 Cnidaria (guesses, Oct 14)
 		AbyssalDragon = 4, ReefTitan = 4, RoyalCnidarian = 3, -- World 3 Cnidaria's giga rares (XL) and its boss as a pet (guesses, Oct 14)
+		GummyBear = 1, GumdropFrog = 1, GingerbreadMan = 1, Creampuff = 2, SwollFairy = 2, DesireTroll = 3, -- World 3 Candyland (guesses, Oct 14)
+		RockCandyDragon = 4, GumballGolem = 4, Gigacorn = 3, -- World 3 Candyland's giga rares (XL) and its boss as a trophy pet (guesses, Oct 14)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -1461,6 +1466,19 @@ Config.World3Pets = {
 	AbyssalDragon = { 13, 6400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
 	ReefTitan = { 13, 6400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
 	RoyalCnidarian = { 0.5, 6400000, 3600 }, -- the boss as a trophy pet, 1 in 1,000; slow like the Seraphs (guess)
+	-- World 3's third biome, Candyland (Oct 14: tools/gummy_bear.py etc., tools/candy_eggs.py).
+	-- ALL GUESSES: a step past the Garden's (its Legendary 10.5 / 160k), about 2x its gold by
+	-- rarity, speeds +0.4 to +0.5; the giga rares and the Gigacorn slow trophies like the Garden's
+	-- (0.5) at 10x Candyland's Legendary.
+	GummyBear = { 8.4, 19200, 60 }, -- Common (guess)
+	GumdropFrog = { 8.6, 19200, 60 }, -- Uncommon (guess)
+	GingerbreadMan = { 8.6, 19200, 60 }, -- Uncommon (guess)
+	Creampuff = { 9.0, 48000, 240 }, -- Rare (guess)
+	SwollFairy = { 9.6, 72000, 600 }, -- Epic (guess)
+	DesireTroll = { 11.0, 320000, 2700 }, -- Legendary (guess)
+	RockCandyDragon = { 0.5, 3200000, 3600 }, -- giga rare, 1 in 1,000 (guess)
+	GumballGolem = { 0.5, 3200000, 3600 }, -- giga rare, 1 in 1,000 (guess)
+	Gigacorn = { 0.5, 3200000, 3600 }, -- the boss as a trophy pet, 1 in 1,000 (guess)
 }
 for kind, w3 in Config.World3Pets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = w3[2], w3[3]
@@ -1894,7 +1912,9 @@ if Config.World == 3 then
 			GroundColors = { rgb(240, 96, 158), rgb(226, 82, 146) },
 			WallColors = { rgb(255, 170, 210), rgb(245, 155, 198) },
 			CapColor = rgb(255, 255, 255),
-			Herd = { Fish = 1 },
+			-- (Oct 14, the Candyland animals thread: weights as the Pirate Cove's by rarity, guesses;
+			-- its giga rares and the Gigacorn added below)
+			Herd = { GummyBear = 0.3, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, SwollFairy = 0.08, DesireTroll = 0.03 },
 			Patches = {
 				Chocolate = { rgb(110, 62, 40), rgb(98, 54, 34) },
 				Cream = { rgb(255, 236, 200), rgb(248, 224, 184) },
@@ -1951,12 +1971,13 @@ if Config.World == 3 then
 	trophies(1, 1000, { "GhostShip", "JollyRogerWyvern" }) -- the Pirate Cove's giga rares
 	Config.Biomes[1].Herd.Dreadstump = Config.Biomes[1].Herd.GhostShip * 2 -- its boss as a trophy pet, 1 in 500
 	trophies(2, 1000, { "RafflesiaBeast", "AncientTreant", "FlytrapQueen" }) -- the Garden's giga rares and its boss as a trophy pet
+	trophies(3, 1000, { "RockCandyDragon", "GumballGolem", "Gigacorn" }) -- Candyland's giga rares and its boss as a trophy pet
 	trophies(4, 1000, { "AbyssalDragon", "ReefTitan", "RoyalCnidarian" }) -- Cnidaria's giga rares and its boss as a trophy pet
-	-- Bosses: each biome's own as they come; the rest World 2's in that slot for now.
+	-- Each biome's boss.
 	Config.Boss.ByBiome = {
 		PirateCove = "Dreadstump", -- the Pirate King chases you home (silent till a cry is picked)
 		Garden = "FlytrapQueen",
-		Candyland = "CrystalSeraph",
+		Candyland = "Gigacorn", -- the candy unicorn (silent till a cry is picked)
 		Cnidaria = "RoyalCnidarian", -- the crowned jellyfish (silent till a cry is picked)
 	}
 	Config.DefaultPet = "ArmoredHorse" -- (World 2's starter for now)

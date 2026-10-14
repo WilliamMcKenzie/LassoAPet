@@ -51,6 +51,7 @@ local IDS = {
 	boss_CrimsonSeraph = "rbxassetid://133260252239833", -- the same angelic sound for the Crimson Lands' angel (QM)
 	boss_Monarch = "", -- the Woodland Maze's butterfly: silent (QM, Oct 13: no cry needed)
 	boss_Dreadstump = "", -- World 3 Pirate Cove's Pirate King: silent until a cry is picked (Oct 14)
+	boss_Gigacorn = "", -- World 3 Candyland's candy unicorn: silent until a cry is picked (Oct 14)
 	boss_JadeAsura = "rbxassetid://129162115855106", -- the Temple's boss: the Elder Boar's monstergrowl (QM, Oct 13)
 	boss_Sphinx = "rbxassetid://95169379454314", -- the Ancient Tomb's boss: the Cactus's angry alien cat growl (QM, Oct 13)
 	boss_FlytrapQueen = "rbxassetid://95169379454314", -- World 3 Garden's boss: borrows the Cactus growl until QM picks a cry
