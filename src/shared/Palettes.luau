@@ -354,8 +354,8 @@ return {
 	},
 	EyepatchShark = {
 		{ "Body", 40, 150, 255 },
-		{ "Body", 26, 96, 200 }, -- fin undersides (darker)
-		{ "Belly", 30, 92, 196 }, -- underside
+		{ "Body", 26, 96, 200 }, -- fins (darker)
+		{ "Belly", 244, 244, 240 }, -- underside, teeth (QM's model, Oct 14)
 	},
 	TreasureTurtle = {
 		{ "Body", 52, 196, 172 },
