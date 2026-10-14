@@ -259,7 +259,7 @@ def pirate_cove():
         ("DeepWater", -1, (30, 120, 205), None),  # the water tile's darker tint
         ("Water", -1, (49, 170, 235), None),  # QM's blue tile (rbxassetid://128871935822673)
         ("WetSand", 0, (225, 189, 120), (208, 172, 105)),  # (QM in Studio, Oct 14: stamina-loop d803ac1; was 206, 172, 110 / 194, 160, 98)
-        ("Ground", 1, (240, 218, 160), (230, 206, 146)),  # light sand, as the base's
+        ("Ground", 2, (240, 218, 160), (230, 206, 146)),  # light sand, as the base's: a stud above the damp sand (QM, Oct 14: stamina-loop b7441d8; was 1)
         ("Planks", 1, (150, 100, 60), None),  # boardwalks: plain boards, no checker
         ("DampSand", 1, (233, 204, 140), (219, 189, 126)),  # (QM, Oct 14: stamina-loop 97c9aa0) between the sand and the wet sand, at the sand's height
     ])

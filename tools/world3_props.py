@@ -175,7 +175,7 @@ def layout(f, seed):
     if f.name == "PirateCove":
         for z, s in ((-1160, -1), (-2960, 1)):  # (the two bays' widest)
             for dz in range(0, 160, 16):
-                if put("SkullRock", s * (half_width(z - dz) - 18), z - dz, facing(s), reach=40, on=water + ("WetSand", "Ground")):
+                if put("SkullRock", s * (half_width(z - dz) - 18), z - dz, facing(s), reach=40, on=water + ("WetSand", "DampSand", "Ground")):
                     break
         for z in (-2780, -3100):  # (the big bay's lagoon: the wreck on the water)
             for s in (1, -1):
@@ -227,7 +227,7 @@ def layout(f, seed):
                 scatter("Rowboat", cx, z, s, 1 if rng.random() < 0.35 else 0, 18, on=water)
                 if n % 9 == 4:
                     for dz in range(0, 40, 8):  # (a dock reaching from the wall into a lagoon)
-                        if f.at(wall - s * 30, z - dz)[0] in water and put("Dock", wall - s * 12, z - dz, facing(s), on=("WetSand", "Ground", "Water")):
+                        if f.at(wall - s * 30, z - dz)[0] in water and put("Dock", wall - s * 12, z - dz, facing(s), on=("WetSand", "DampSand", "Ground", "Water")):
                             break
             elif f.name == "Garden":
                 pick = rng.choice(["hedge", "fence", "toadstools", "flowers", "flowers", "flowers"])
