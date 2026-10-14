@@ -12,7 +12,7 @@ local rgb = Color3.fromRGB
 local KINDS = { -- [kind] = { name, top, part colour, checker colour (nil: plain) }
 	[0] = { "DeepWater", -1, rgb(30, 120, 205), nil },
 	[1] = { "Water", -1, rgb(49, 170, 235), nil },
-	[2] = { "WetSand", 0, rgb(206, 172, 110), rgb(194, 160, 98) },
+	[2] = { "WetSand", 0, rgb(225, 189, 120), rgb(208, 172, 105) },
 	[3] = { "Ground", 1, rgb(240, 218, 160), rgb(230, 206, 146) },
 	[4] = { "Planks", 1, rgb(150, 100, 60), nil },
 }
