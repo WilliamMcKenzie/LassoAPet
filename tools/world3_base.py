@@ -4,11 +4,10 @@ World 1's and 2's so the pens can grow bigger.
 Run: python3 tools/world3_base.py [out_dir]
      renders the layout (top-down) to out_dir and writes tools/world3_base.luau.
 
-- Sand everywhere, a darker wet sand on the paths (a lane to the start line, one to each
-  pen's gate) and round all the water.
-- Lagoons of the animated water tile (Config.Water: parts named Water, a stud down), always
-  ringed by wet sand, never touching dry sand or grass.
-- Patches of bright green grass a stud up, away from the water.
+- All water (the animated tile, Config.Water: parts named Water, a stud down) (QM).
+- A sand island round each pen, sandbars from each to a big central sandbar, and that out
+  along the lane to the start line and the first biome. Wet sand along every shore.
+- Patches of bright green grass a stud up on the dry sand, out of the pens.
 - 1.2x the old base: x -216..216, z 0..328; pens up to 104 square, at 1.2x their places.
 """
 
@@ -109,34 +108,34 @@ def smooth(mask, keep_n=4, add_n=6):
 
 
 def layout(seed=7):
+    """All water (QM, Oct 14), with a sand island round each pen, sandbars from each to a
+    big central sandbar, and that out along the lane to the start line (and the first biome)."""
     wob = noise(NX, NZ, 3, seed) - 0.5
-    lag = noise(NX, NZ, 5, seed + 1) * 0.75 + noise(NX, NZ, 2, seed + 2) * 0.25
     grs = noise(NX, NZ, 4, seed + 3) * 0.75 + noise(NX, NZ, 1.8, seed + 4) * 0.25
     ring = noise(NX, NZ, 2.5, seed + 5)
-    kind = np.full((NX, NZ), SAND)
-    path = np.zeros((NX, NZ), bool)
-    free = np.zeros((NX, NZ), bool)  # where water may go
+    land = np.zeros((NX, NZ), bool)
     for i in range(NX):
         for j in range(NZ):
             x, z = centre(i, j)
-            lane = (20 - abs(x) + max(0, 12 - z) * 0.6) / 20 if z < YARD[1] else -1
-            yard = 1 - math.hypot(x / 52, (z - YARD[1]) / 40)
-            paths = max(1 - seg_dist((x, z), YARD, gate(c)) / 10 for c in PENS)
-            f = max(lane, yard * 1.4, paths) + wob[i, j] * 0.8
-            if f > 0 and not in_pen(x, z) and z < DEPTH - 16:
-                path[i, j] = True
-            far_wall = abs(x) < W - 16 and z < DEPTH - 24 and z > 12
-            if far_wall and not in_pen(x, z, 12) and f < -0.25 and math.hypot(x - PORTAL[0], z - PORTAL[1]) > 28:
-                free[i, j] = True
-    water = (lag > 0.42) & free
-    for _ in range(3):
-        water = smooth(water, 5, 5) & free  # (rounded off)
-    water = drop_small(water, 14)
-    wet = (grow(water, 1) | (grow(water, 2) & (ring > 0.55)) | path) & ~water
-    kind[wet] = WET
+            e = wob[i, j] * 14  # (ragged shores)
+            island = in_pen(x, z, 14 + e)
+            bar = 1 - math.hypot(x / 70, (z - YARD[1]) / 56) + wob[i, j] * 0.3  # the central sandbar
+            lane = abs(x) < 34 + e * 0.6 and z < YARD[1]  # out to the start line
+            bridges = min(seg_dist((x, z), YARD, gate(c)) for c in PENS) < 16 + e * 0.5
+            portal = math.hypot(x - PORTAL[0], z - PORTAL[1]) < 26 + e
+            land[i, j] = island or bar > 0 or lane or bridges or portal or j == 0 and abs(x) < 64
+    for _ in range(2):
+        land = smooth(land, 4, 6)
+    land[:, 0] |= np.array([abs(centre(i, 0)[0]) < 64 for i in range(NX)])  # (the course's mouth)
+    water = drop_small(~land, 6)  # (no puddles)
+    land = ~water
+    kind = np.full((NX, NZ), SAND)
     kind[water] = WATER
+    shore = (grow(water, 1) | (grow(water, 2) & (ring > 0.55))) & land
+    kind[shore] = WET
     inside = np.array([[in_pen(*centre(i, j), CELL) for j in range(NZ)] for i in range(NX)])
-    grass = smooth((grs > 0.42) & (kind == SAND)) & (kind == SAND) & ~grow(water, 3) & ~inside
+    grass = smooth((grs > 0.42) & (kind == SAND)) & (kind == SAND) & ~inside
+    grass &= ~grow(kind == WET, 1)  # (a tile of dry sand between the wet and the grass)
     grass = drop_small(grass, 6)
     kind[grass] = GRASS
     return kind
