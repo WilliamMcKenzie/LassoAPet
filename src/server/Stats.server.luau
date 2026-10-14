@@ -191,6 +191,45 @@ local function report(arg)
 	end
 	line("EXIT PHASE (%d): %s", ended, table.concat(exits, ", "))
 
+	-- What they were doing as they left (Telemetry's quit snapshot), by when they left.
+	local SNAP = {
+		{ "rides since tutorial", { "rides0", "rides1", "rides2", "rides3-5", "rides6+" } },
+		{ "last ride", { "last:animal", "last:crash", "last:empty", "last:riding", "last:none" } },
+		{ "since it ended", { "idle:<15", "idle:<60", "idle:60+" } },
+		{ "egg in pen", { "egg:ready", "egg:hatching", "egg:none" } },
+		{ "quest to claim", { "claim:yes", "claim:no" } },
+		{ "World 2 gold (W1, not owned)", { "w2gold:yes", "w2gold:no" } },
+	}
+	line("AS THEY LEFT (quit snapshot):")
+	for q, band in { "<1m", "1-5m", "5-10m", "10-20m", "20m+" } do
+		local n = r.c("q" .. q .. ":n")
+		if n > 0 then
+			local parts = {}
+			for _, group in SNAP do
+				local bits = {}
+				for _, what in group[2] do
+					local c = r.c("q" .. q .. ":" .. what)
+					if c > 0 then
+						table.insert(bits, what:gsub("^%a+:", "") .. " " .. pct(c, n))
+					end
+				end
+				if #bits > 0 then
+					table.insert(parts, group[1] .. ": " .. table.concat(bits, ", "))
+				end
+			end
+			local reach = {}
+			for w = 1, 2 do
+				for i = 1, #NAMES[w] do
+					local c = r.c("q" .. q .. ":w" .. w .. "reach" .. i)
+					if c > 0 then
+						table.insert(reach, "W" .. w .. " " .. NAMES[w][i] .. " " .. pct(c, n))
+					end
+				end
+			end
+			line("  Quit %s (%d): %s; barrier: %s", band, n, table.concat(parts, "; "), table.concat(reach, ", "))
+		end
+	end
+
 	-- Pacing and replay.
 	line("PACING: first ride %s; first reward %s; next ride after tutorial %s", r.spread("toFirstRide"), r.spread("toFirstReward"), r.spread("toNextRide"))
 	line("  Replay (rode again within 90s of the tutorial): %s (%d)", pct(r.c("replay"), r.c("replayEligible")), r.c("replayEligible"))
