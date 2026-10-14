@@ -1,9 +1,8 @@
 """Reef Titan: World 3 Cnidaria (the reef), GIGA RARE (1 in 1000). An ancient colossal sea
 turtle carrying a whole living reef on its back. A stepped dome of deep sea-green shell
-tiers, each lipped with gold-ochre scute rims over dark stops; on top a garden of staghorn
-coral (pink and orange), brain coral domes, lattice fan corals, tube sponges, glowing sea
-anemones, a giant clam with a glowing pearl, the ruins of a little sunken temple and a
-school of tiny fish circling it all. A mossy stone platform at the front of the shell is the
+tiers with three chunky gold-ochre scute bands over dark stops; on top six bold coral
+clusters (pink and orange staghorn, brain domes, lattice fans, tube sponges, glowing sea
+anemones, a giant clam with a glowing pearl) ringing the ruins of a little sunken temple. A mossy stone platform at the front of the shell is the
 rider's seat. A wise old head with a hooked beak, googly eyes under bushy white brows,
 barnacles and a kelp beard; long front flippers, paddle back flippers, a short tail.
 
@@ -13,7 +12,7 @@ writes designs/cnidaria/ReefTitan.bbmodel and previews in
 /mnt/project-files/world3/cnidaria/renders/. ZYX, every bone rests at 0. Faces -Z.
 Bones: root -> Head -> Beard -> Beard2; root -> FlipperFL/FR -> FlipperFLb/FRb;
 root -> FlipperBL/BR; root -> Tail; root -> Anemone1..5 (tentacle crowns); root -> Kelp1..4;
-root -> ClamLid; root -> Fish1..3 (circle the reef).
+root -> ClamLid.
 
   idle    slow flipper strokes, gentle bob and roll, head looking about
   walk    steady strokes, nosing forward
@@ -43,8 +42,7 @@ COLORS = {
     "brain": (255, 206, 50), "brain2": (196, 120, 20), "brainp": (178, 92, 236), "brainp2": (106, 44, 168),
     "fan": (214, 52, 220), "fan2": (255, 52, 74), "sponge": (110, 82, 255), "sponge2": (255, 150, 30),
     "hole": (30, 20, 50), "stalk": (255, 120, 170), "glow": (110, 255, 226), "glow2": (255, 120, 236),
-    "clam": (70, 116, 236), "clam2": (40, 70, 178), "mantle": (110, 236, 255), "pearl": (255, 250, 236),
-    "fishy": (255, 226, 30), "fishb": (40, 170, 255), "fishs": (24, 30, 60), "kelp": (76, 196, 64), "kelp2": (36, 128, 50),
+    "clam": (70, 116, 236), "clam2": (40, 70, 178), "mantle": (110, 236, 255), "pearl": (255, 250, 236), "kelp": (76, 196, 64), "kelp2": (36, 128, 50),
 }
 
 # shell tiers: (centre y, height, half-width x, half-length z)
@@ -99,23 +97,14 @@ def shell(b, root):
     # a dark stop line under the rim
     b.box(root, "RimStopA", (0, TIERS[0][0] - 0.75, 0), (2 * 10.6, 0.4, 2 * 12.8 * 0.72), "dark")
     b.box(root, "RimStopB", (0, TIERS[0][0] - 0.75, 0), (2 * 10.6 * 0.72, 0.4, 2 * 12.8), "dark")
-    # marginal scutes: a serrated gold rim round the bottom tier, dark stops between
-    y0, h0, ax0, az0 = TIERS[0]
-    n = 22
-    for i in range(n):
-        a = TAU * (i + 0.5) / n
-        p, yaw = ell(a, ax0 + 0.35, az0 + 0.35)
-        if abs(math.sin(a)) < 0.25 and math.cos(a) < 0:
-            continue  # the neck comes out here
-        b.box(root, f"Marg{i}", p + (0, y0 - 0.1, 0), (2.5, 1.3, 1.1), "rim" if i % 2 else "rim2", rot(("y", yaw)))
-    # scute lips round each upper tier
-    for k, (y, h, ax, az) in enumerate(TIERS[1:], 1):
-        n = (10, 10, 8, 6)[k - 1]
-        L = TAU * math.sqrt((ax * ax + az * az) / 2) / n
-        for i in range(n):
-            a = TAU * (i + 0.5) / n
-            p, yaw = ell(a, ax + 0.1, az + 0.1)
-            b.box(root, f"Lip{k}_{i}", p + (0, y + h / 2 - 0.15, 0), (L * 0.85, 0.6, 0.8), "rim", rot(("y", yaw)))
+    # three chunky gold scute bands round the bottom, middle and top tiers, each on a dark stop
+    for k in (0, 2, 4):
+        y, h, ax, az = TIERS[k]
+        bh = 0.8 if k == 0 else 0.6
+        for part, (fx, fz) in zip("abc", ((1, 0.72), (0.72, 1), (0.9, 0.9))):
+            b.box(root, f"Band{k}{part}", (0, y + 0.05, 0), (2 * (ax + 0.3) * fx, bh, 2 * (az + 0.3) * fz), "rim")
+            if k:
+                b.box(root, f"BandStop{k}{part}", (0, y - bh / 2 - 0.08, 0), (2 * (ax + 0.18) * fx, 0.18, 2 * (az + 0.18) * fz), "dark")
     # barnacles on the shell flanks
     rng = np.random.default_rng(7)
     for i in range(6):
@@ -223,20 +212,34 @@ def flippers(b, root):
 def reef(b, root):
     seat(b, root)
     temple(b, root, np.array([0.0, TOP, 3.6]))
-    for i, (x, z, c, ht, sd) in enumerate(((-5.4, -1.2, "pink", 4.6, 1), (5.8, 3.0, "pink", 4.0, 2), (-3.6, 8.2, "pink", 3.6, 3),
-                                           (5.0, -4.2, "orange", 4.2, 4), (-6.8, 4.6, "orange", 4.4, 5))):
-        staghorn(b, root, f"Stag{i}", np.array([x, surf(x, z) - 0.3, z]), c, ht, sd)
-    for i, (x, z, r, c) in enumerate(((-7.0, -5.2, 1.9, "brain"), (3.0, 8.0, 1.7, "brainp"), (7.8, -0.8, 1.5, "brain"))):
-        brain(b, root, f"Brain{i}", np.array([x, surf(x, z) - 0.2, z]), r, c)
-    for i, (x, z, yaw, c, s) in enumerate(((7.6, 2.6, 90, "fan", 1.0), (-2.6, -7.6, 15, "fan2", 0.9), (-7.6, 7.4, -50, "fan2", 1.0))):
-        fan(b, root, f"Fan{i}", np.array([x, surf(x, z) - 0.2, z]), yaw, c, s)
-    for i, (x, z, c) in enumerate(((6.4, -6.6, "sponge"), (-0.8, 9.6, "sponge2"), (-8.6, -1.6, "sponge2"))):
-        sponges(b, root, f"Sponge{i}", np.array([x, surf(x, z) - 0.2, z]), c, i)
-    for i, (x, z, g) in enumerate(((-3.6, -6.0, "glow"), (3.4, -1.0, "glow2"), (-7.6, 1.6, "glow2"), (8.4, -4.2, "glow"))):
-        anemone(b, root, i + 1, np.array([x, surf(x, z) - 0.2, z]), g)
-    clam(b, root, np.array([5.0, surf(5.0, 6.8) - 0.2, 6.8]))
+    # six bold coral clusters round the rim of the top, leaving the seat (front) and temple (back) clear
+    def at(x, z, dy=-0.25):
+        return np.array([x, surf(x, z) + dy, z])
+    # 1 front-left: big pink staghorn, a brain dome, an aqua anemone
+    staghorn(b, root, "Stag0", at(-5.6, -5.2, -0.3), "pink", 5.4, 1)
+    brain(b, root, "Brain0", at(-7.6, -2.6), 1.8, "brain")
+    anemone(b, root, 1, at(-3.4, -7.0), "glow")
+    # 2 front-right: orange staghorn, purple sponges, a pink anemone
+    staghorn(b, root, "Stag1", at(5.4, -5.0, -0.3), "orange", 5.0, 4)
+    sponges(b, root, "Sponge0", at(7.4, -2.4), "sponge", 0)
+    anemone(b, root, 2, at(3.4, -7.2), "glow2")
+    # 3 mid-left: a red fan over a purple brain dome and an anemone
+    fan(b, root, "Fan0", at(-7.8, 2.6), -90, "fan2", 1.25)
+    brain(b, root, "Brain1", at(-5.6, 1.6), 1.9, "brainp")
+    anemone(b, root, 3, at(-8.2, 5.0), "glow2")
+    # 4 mid-right: a magenta fan, a pink staghorn, orange sponges
+    fan(b, root, "Fan1", at(7.8, 2.6), 90, "fan", 1.25)
+    staghorn(b, root, "Stag2", at(5.8, 1.4, -0.3), "pink", 4.6, 2)
+    sponges(b, root, "Sponge1", at(8.0, 5.2), "sponge2", 1)
+    # 5 back-left: orange staghorn, orange sponges, a yellow brain dome
+    staghorn(b, root, "Stag3", at(-4.6, 8.4, -0.3), "orange", 4.8, 5)
+    sponges(b, root, "Sponge2", at(-6.6, 7.0), "sponge2", 2)
+    brain(b, root, "Brain2", at(-2.4, 10.0), 1.6, "brain")
+    # 6 back-right: the giant clam, a pink staghorn and an anemone
+    clam(b, root, at(4.4, 8.2, -0.2))
+    staghorn(b, root, "Stag4", at(2.4, 10.4, -0.3), "pink", 4.0, 3)
+    anemone(b, root, 4, at(6.8, 7.6), "glow")
     kelp(b, root)
-    fish(b, root)
 
 
 def seat(b, root):
@@ -393,23 +396,6 @@ def kelp(b, root):
         b.box(g, f"KelpFloat{i}", prev + (0, 0.3, 0), (0.8, 0.8, 0.8), "moss")
 
 
-def fish(b, root):
-    """Three tiny reef fish circling over the reef, each on a bone turning about the centre."""
-    piv = np.array([0, TOP, 2.0])
-    for i, (r, h, c, a0) in enumerate(((8.5, 6.0, "fishy", 0.0), (9.5, 7.2, "fishb", 2.1), (7.8, 5.2, "fishy", 4.2))):
-        g = b.group(f"Fish{i + 1}", piv, root)
-        a = a0
-        pos = piv + np.array([r * math.sin(a), h, r * math.cos(a)])
-        fwd = np.array([math.cos(a), 0, -math.sin(a)])  # +Y turn moves it this way
-        yaw = math.degrees(math.atan2(-fwd[0], -fwd[2]))  # local -Z along fwd
-        M = rot(("y", yaw))
-        b.box(g, f"Fish{i}Body", pos, (0.9, 1.3, 1.9), c, M)
-        b.box(g, f"Fish{i}Stripe", pos + M @ np.array([0, 0, 0.1]), (0.95, 1.35, 0.4), "fishs" if c == "fishy" else "white", M)
-        b.box(g, f"Fish{i}Tail", pos + M @ np.array([0, 0, 1.3]), (0.3, 1.3, 0.7), c, M)
-        for s in (-1, 1):
-            b.eye(g, f"Fish{i}{'LR'[s > 0]}", pos + M @ np.array([s * 0.47, 0.15, -0.5]), M @ np.array([s, 0, -0.3]), 0.5)
-
-
 # ---------------------------------------------------------------- animations
 
 def animations():
@@ -441,10 +427,6 @@ def animations():
             tr[f"Anemone{i}"] = [track(L, lambda u, i=i: (5 * math.sin(TAU * u + i) + (8 if fast else 0), 0, 6 * math.sin(TAU * u + 2 * i)), 12)]
         for i in range(1, 5):
             tr[f"Kelp{i}"] = [track(L, lambda u, i=i: (12 * math.sin(w * u + i) + (30 if fast else 8), 0, 10 * math.sin(TAU * u + i)), 16)]
-        for i in range(1, 4):
-            turns = (1, 1, 2)[i - 1] if L >= 2 else 1
-            tr[f"Fish{i}"] = [track(L, lambda u, t=turns: (0, 360 * t * u, 0), 32, interp="linear"),
-                              track(L, lambda u, i=i: (0, 6 * math.sin(TAU * u * 2 + i), 0), 16, "position")]
         return tr
 
     return {"idle": (4.0, swim(4.0, 22, 18, 5, 3, 0, 18)),

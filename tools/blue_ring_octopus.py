@@ -39,8 +39,8 @@ def ring(b, node, name, center, normal, size=1.5):
     x /= np.linalg.norm(x)
     M = np.stack([x, np.cross(n, x), n], axis=1)
     c = np.array(center, float)
-    b.box(node, "Glow" + name, c, (size, size, 0.3), "ring", M)
-    b.box(node, "RingC" + name, c + n * 0.04, (size * 0.45, size * 0.45, 0.32), "ringc", M)
+    b.box(node, "Glow" + name, c, (size, size, 0.5), "ring", M)
+    b.box(node, "RingC" + name, c + n * 0.04, (size * 0.45, size * 0.45, 0.54), "ringc", M)
 
 
 def build():
@@ -56,22 +56,15 @@ def build():
         b.box(root, f"Mantle{k + 1}a", (0, y + h / 2, back), (w, h, w * 0.7), "skin" if k != 1 else "skin2")
         b.box(root, f"Mantle{k + 1}b", (0, y + h / 2, back), (w * 0.7, h, w), "skin" if k != 1 else "skin2")
         y += h
-    # rings over the mantle and head sides/back
-    spots = [((0, Y + 2.5, 2.95), (0, 0, 1)), ((-2.6, Y + 2.6, 0.6), (-1, 0, 0)), ((2.6, Y + 2.6, 0.6), (1, 0, 0)),
-             ((-1.6, Y + 4.2, 2.7), (0, 0, 1)), ((1.6, Y + 4.2, 2.7), (0, 0, 1)), ((-2.1, Y + 4.0, -0.4), (-1, 0, 0)),
-             ((2.1, Y + 4.0, -0.4), (1, 0, 0)), ((0, Y + 5.0, -1.7), (0, 0, -1)), ((-3.0, Y - 0.4, 0), (-1, 0, 0)),
-             ((3.0, Y - 0.4, 0), (1, 0, 0)), ((0, Y + 0.2, 3.0), (0, 0, 1))]
-    for k, (c, n) in enumerate(spots):
-        ring(b, root, f"Ring{k + 1}", c, n)
+    # three big rings: on the back of the mantle and on each side of the head
+    for k, (c, n) in enumerate((((0, Y + 2.6, 2.95), (0, 0, 1)), ((-3.0, Y - 0.1, 0), (-1, 0, 0)), ((3.0, Y - 0.1, 0), (1, 0, 0)))):
+        ring(b, root, f"Ring{k + 1}", c, n, 1.9)
     # bulging eyes on the front, beak smile under them
     for s in (-1, 1):
         n = "LR"[s > 0]
         b.box(root, "EyeBump" + n, (s * 1.5, Y + 1.0, -2.6), (2.0, 2.0, 1.2), "skin2")
         b.eye(root, n, (s * 1.5, Y + 1.05, -3.24), (0, 0, -1), 1.6, look=(-s * 0.3, 0))
-        b.box(root, "Lid" + n, (s * 1.5, Y + 2.3, -2.7), (2.2, 0.5, 0.9), "skin")
     b.box(root, "Beak", (0, Y - 0.6, -3.05), (1.2, 0.5, 0.3), "beak")
-    for s in (-1, 1):
-        b.box(root, "BeakEnd" + "LR"[s > 0], (s * 0.7, Y - 0.42, -3.05), (0.35, 0.5, 0.3), "beak")
     # eight curly arms in a skirt, ringed, tips curling up
     for k in range(8):
         a = math.radians(22.5 + 45 * k)
@@ -84,13 +77,13 @@ def build():
         tip = p3 - d * 0.5 + up * 0.9
         arm = b.group(f"Arm{k + 1}", p0, root)
         b.bar(arm, f"Arm{k + 1}a", p0, p1, 1.5, "skin", over=0.3)
-        ring(b, arm, f"ArmRing{k + 1}a", (p0 + p1) / 2 + up * 0.62 + d * 0.5, up + d * 0.9, 1.2)
         arm2 = b.group(f"Arm{k + 1}b", p1, arm)
         b.bar(arm2, f"Arm{k + 1}b", p1, p2, 1.2, "skin", over=0.3)
-        ring(b, arm2, f"ArmRing{k + 1}b", (p1 + p2) / 2 + up * 0.62, up + d * 0.3, 1.0)
+        sg = (p2 - p1) / np.linalg.norm(p2 - p1)
+        nrm = up - sg * np.dot(up, sg)  # straight up off the arm's top face
+        ring(b, arm2, f"ArmRing{k + 1}", (p1 + p2) / 2 + nrm / np.linalg.norm(nrm) * 0.55, nrm, 1.1)
         arm3 = b.group(f"Arm{k + 1}c", p2, arm2)
         b.bar(arm3, f"Arm{k + 1}c", p2, p3, 0.9, "skin2", over=0.25)
-        b.bar(arm3, f"Arm{k + 1}d", p3, tip, 0.65, "skin2", over=0.2)
     return b.model()
 
 

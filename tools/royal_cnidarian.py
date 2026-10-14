@@ -1,7 +1,7 @@
 """The Royal Cnidarian: World 3 Cnidaria (the reef)'s boss, also a Legendary pet (ref RotMG's
 Cnidarian Reef boss: "electric jellyfish ensnare all trespassers"). A gigantic crowned
 jellyfish: a tall domed bell of stacked royal violet / magenta tiers with dark stops between
-them, crackling cyan and hot-pink lightning running down its sides, a big gold crown with
+them, a big gold crown with
 glowing jewels on top (the rider sits inside the crown ring), an angry face on the front
 (googly eyes, scowling brows, a jagged toothy mouth), a frilled skirt of eight rim panels,
 a curtain of twelve long glowing trailing tentacles and four thick frilly oral arms, and
@@ -80,24 +80,6 @@ def build():
             b.box(root, f"Stop{k + 1}b", (0, yy, 0), (w * 0.62 + 0.12, 0.3, w + 0.12), "stop")
     # the underside, a little recessed
     b.box(root, "Subumbrella", (0, Y - 0.1, 0), (10.5, 0.3, 10.5), "stop")
-
-    # ---- electric lightning: a jagged bolt down each face (not across the face), one
-    # slanted bar flush on each tier, zigzagging from tier to tier
-    for k in range(8):
-        if k == 4 or k % 2:
-            continue  # front: the face; the narrow diagonal faces stay plain
-        a = math.radians(45 * k)
-        d, t = outdir(a), np.array([math.cos(a), 0, -math.sin(a)])
-        diag = k % 2 == 1
-        zig = 0.45 if diag else 1.0
-        col = "glowc" if k in (0, 3, 5) else "glowp"
-        for j in range(5):
-            w, h, _ = TIERS[j]
-            r = (0.573 if diag else 0.5) * w + 0.12
-            s0, s1 = zig * (1 if j % 2 else -1), zig * (-1 if j % 2 else 1)
-            p0 = d * r + t * s0 + np.array([0, tier_y(j) + 0.12, 0])
-            p1 = d * r + t * s1 + np.array([0, tier_y(j) + h - 0.12, 0])
-            b.bar(root, f"GlowBolt{k + 1}{'abcde'[j]}", p0, p1, 0.5, col, d=0.3, over=0.15)
 
     # ---- the face (front, -Z)
     zf = -6.75

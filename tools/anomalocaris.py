@@ -1,8 +1,8 @@
 """Anomalocaris: World 3 Cnidaria (the reef), Uncommon. The prehistoric "weird shrimp":
-a long coral-red segmented body with a row of overlapping orange swim flaps down each side
+a long coral-red segmented body with four chunky orange swim lobes down each side
 that ripple in a wave, a rounded head with two big googly eyes up on stalks, two spiny
-grasping arms curled under its chin (cream with dark red spines), a little yellow ring
-mouth underneath, and a tail fan of three pairs of blue-tipped blades.
+grasping arms curled under its chin (cream with dark red pyramid spines), a little yellow ring
+mouth underneath, and a tail fan of three blue pyramid blades.
 
     python3 tools/anomalocaris.py [--gif]
 
@@ -41,46 +41,32 @@ def build():
     parent = bones["root"]
     for name, z0, *_ in SEGS[2:]:
         bones[name] = parent = b.group(name, (0, Y, z0), parent)
-    # body segments: a block each, a darker band at the back edge, flaps on both sides
+    # body segments: a block each, alternating two reds; four chunky flap lobes down each side
     for i, (bone, z0, z1, w, h) in enumerate(SEGS):
         node = bones[bone]
         y = Y - 0.05 * i
-        b.box(node, f"Body{i + 1}", (0, y, (z0 + z1) / 2), (w, h, z1 - z0 + 0.1), "body")
-        b.box(node, f"Band{i + 1}", (0, y + 0.1, z1 - 0.25), (w + 0.12, h + 0.12, 0.5), "body2")
-        b.box(node, f"Belly{i + 1}", (0, y - h / 2 - 0.05, (z0 + z1) / 2), (w * 0.7, 0.3, z1 - z0 - 0.2), "dark")
-        if i < 5:
-            fl = 3.4 - 0.35 * i  # flap reach
+        b.box(node, f"Body{i + 1}", (0, y, (z0 + z1) / 2), (w, h, z1 - z0 + 0.1), "body" if i % 2 == 0 else "body2")
+        if 1 <= i <= 4:
+            fl = 3.6 - 0.4 * (i - 1)  # lobe reach
             for s in (-1, 1):
                 n = "LR"[s > 0]
                 piv = (s * (w / 2 - 0.2), y - 0.3, (z0 + z1) / 2)
-                f = b.group(f"Flap{n}{i + 1}", piv, node)
+                f = b.group(f"Flap{n}{i}", piv, node)
                 M = rot(("z", s * 10), ("y", s * -14))
-                L = z1 - z0 + 0.5
-                col = "flap" if i % 2 == 0 else "flap2"
-                b.box(f, f"Flap{n}{i + 1}", np.array(piv) + M @ np.array([s * fl * 0.4, 0, 0.2]),
-                      (fl * 0.8, 0.35, L), col, M)
-                b.box(f, f"FlapEdge{n}{i + 1}", np.array(piv) + M @ np.array([s * (fl * 0.8 + 0.3), 0, 0.2]),
-                      (0.9, 0.35, L * 0.65), col, M)
-                b.box(f, f"FlapVein{n}{i + 1}", np.array(piv) + M @ np.array([s * fl * 0.45, 0.06, 0.2]),
-                      (fl * 0.7, 0.35, 0.3), "dark", M)
-    # tail fan: three pairs of blades flaring up and out
+                b.box(f, f"Flap{n}{i}", np.array(piv) + M @ np.array([s * fl / 2, 0, 0.3]),
+                      (fl, 0.5, z1 - z0 + 0.8), "flap" if i % 2 else "flap2", M)
+    # tail fan: three blue pyramid blades flaring out the back
     tail = bones["Tail"]
-    for k, (yaw, up) in enumerate(((14, 18), (34, 10), (56, 2))):
-        for s in (-1, 1):
-            n = "LR"[s > 0]
-            base = np.array([s * 0.6, Y - 0.2, 10.4])
-            d = rot(("y", s * yaw), ("x", up)) @ np.array([0, 0, 1.0])
-            tip = base + d * (4.0 - 0.5 * k)
-            b.bar(tail, f"TailBlade{n}{k + 1}", base, tip, 1.2, "body2", d=0.4)
-            b.spike(tail, f"TailTip{n}{k + 1}", tip - d * 0.3, tip + d * 1.6, 1.2, "tail", d=0.45)
+    for k, yaw in enumerate((-34, 0, 34)):
+        d = rot(("y", yaw), ("x", 8)) @ np.array([0, 0, 1.0])
+        base = np.array([0, Y - 0.2, 10.4])
+        b.spike(tail, f"TailBlade{k + 1}", base, base + d * (4.2 - 0.8 * (yaw == 0)), 1.6, "tail", d=0.5)
 
     # head: rounded, ring mouth underneath, eyes on stalks, two spiny arms
     neck = bones["neck"] = b.group("neck", (0, Y, -3.0), bones["root"])
     b.box(neck, "Head", (0, Y + 0.1, -4.5), (4.0, 2.6, 3.2), "body")
-    b.box(neck, "HeadTop", (0, Y + 1.5, -4.3), (3.0, 0.5, 2.4), "body2")
     b.box(neck, "Snout", (0, Y - 0.2, -6.4), (2.8, 2.0, 1.0), "body")
     b.box(neck, "Mouth", (0, Y - 1.3, -4.8), (1.8, 0.4, 1.8), "mouth")
-    b.box(neck, "MouthHole", (0, Y - 1.36, -4.8), (0.9, 0.4, 0.9), "dark")
     for s in (-1, 1):
         n = "LR"[s > 0]
         stalk0 = np.array([s * 1.4, Y + 1.2, -5.2])
@@ -93,18 +79,12 @@ def build():
         arm = b.group("Arm" + n, sh, neck)
         el = sh + np.array([s * 0.3, -1.4, -1.6])
         b.bar(arm, f"Arm{n}1", sh, el, 0.8, "arm", over=0.2)
-        for j, t in enumerate((0.35, 0.75)):
-            p = sh + (el - sh) * t
-            b.spike(arm, f"ArmSpine{n}{j + 1}", p, p + np.array([0, -0.2, 0.7]), 0.35, "spine")
         arm2 = b.group("Arm" + n + "2", el, arm)
         wr = el + np.array([0, -1.5, 0.9])
         b.bar(arm2, f"Arm{n}2", el, wr, 0.7, "arm", over=0.2)
-        tip = wr + np.array([0, 0.1, 1.2])
-        b.bar(arm2, f"Arm{n}3", wr, tip, 0.6, "arm", over=0.15)
-        for j, t in enumerate((0.3, 0.7)):
-            p = el + (wr - el) * t
-            b.spike(arm2, f"ArmSpine{n}{j + 3}", p, p + np.array([0, 0.5, 0.6]), 0.32, "spine")
-        b.spike(arm2, f"ArmClaw{n}", tip, tip + np.array([0, 0.7, 0.4]), 0.45, "spine")
+        p = (el + wr) / 2
+        b.spike(arm2, f"ArmSpine{n}", p, p + np.array([0, 0.5, 0.7]), 0.4, "spine")
+        b.spike(arm2, f"ArmClaw{n}", wr, wr + np.array([0, 0.6, 1.1]), 0.6, "spine")
     return b.model()
 
 
@@ -115,9 +95,9 @@ def animations():
               "neck": [track(L, lambda u: (-und * 0.4 * math.sin(TAU * u + 0.6), 0, 0), 16)]}
         for j, bone in enumerate(("Seg2", "Seg3", "Seg4", "Tail")):
             tr[bone] = [track(L, lambda u, j=j: (und * math.sin(TAU * u - 0.9 * (j + 1)), 0, 0), 16)]
-        for i in range(5):
+        for i in range(1, 5):
             for s, n in ((1, "R"), (-1, "L")):
-                tr[f"Flap{n}{i + 1}"] = [track(L, lambda u, i=i, s=s: (
+                tr[f"Flap{n}{i}"] = [track(L, lambda u, i=i, s=s: (
                     0, 0, s * flap * math.sin(TAU * ripple * u - 1.1 * i)), 16)]
         for s, n in ((1, "R"), (-1, "L")):
             tr["Arm" + n] = [track(L, lambda u: (-tuck + armamp * math.sin(TAU * u), 0, 0), 16)]

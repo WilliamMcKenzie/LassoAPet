@@ -1,7 +1,7 @@
 """Moon Jellyfish: World 3 Cnidaria (the reef), Common. A chubby lilac bell of stacked
 octagonal tiers (two crossed slabs each), four glowing pink horseshoe rings showing through
 the top around the rider, big googly eyes on the front of the bell, a skirt of four
-rim panels with little fringe tentacles that pulse in and out, and four frilly pink oral
+rim panels with little pink fringe tentacles with darker tips that pulse in and out, and four frilly pink oral
 arms dangling underneath.
 
     python3 tools/moon_jellyfish.py [--gif]
@@ -27,7 +27,7 @@ from cnidaria_kit import TAU, Build, finish, rot, track  # noqa: E402
 
 NAME = "MoonJellyfish"
 COLORS = {"bell": (196, 170, 255), "bell2": (170, 142, 245), "rim": (122, 88, 206), "glow": (255, 98, 186),
-          "arm": (255, 150, 206), "arm2": (226, 92, 162), "fringe": (240, 214, 255), "white": (255, 255, 255),
+          "arm": (255, 150, 206), "arm2": (226, 92, 162), "fringe": (255, 96, 186), "fringe2": (196, 40, 132), "white": (255, 255, 255),
           "pupil": (24, 20, 40)}
 Y = 7.0  # the bell's rim height
 
@@ -59,7 +59,10 @@ def build():
               M @ rot(("x", 25)))
         for j, t in enumerate((-2.2, 0, 2.2)):
             top = pivot + out * 0.7 + side * t + np.array([0, -1.0, 0])
-            b.bar(sk, f"Fringe{n}{j + 1}", top, top + out * 0.4 + np.array([0, -2.6 - 0.5 * (j == 1), 0]), 0.35, "fringe")
+            end = top + out * 0.4 + np.array([0, -2.6 - 0.5 * (j == 1), 0])
+            mid = top + (end - top) * 0.7
+            b.bar(sk, f"Fringe{n}{j + 1}", top, mid, 0.4, "fringe")
+            b.bar(sk, f"FringeTip{n}{j + 1}", mid, end, 0.4, "fringe2")
     # four frilly oral arms
     for k in range(4):
         a = math.radians(45 + 90 * k)

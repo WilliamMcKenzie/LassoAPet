@@ -6,7 +6,11 @@ Pointy bits are pyramids.
   Anomalocaris      coral red with dark bands, orange side flaps, eye stalks, cream arms, blue tail
   BoxJellyfish      cyan, deep-blue corner pillars, a glowing bolt, tentacles with glowing tips
   BlueRingOctopus   sunny yellow covered in glowing blue rings, curly arm stubs round the bottom
-  ManOWar           periwinkle with a pink top, a magenta crest sail, stinging tentacles
+  ManOWar           periwinkle running to pink, a magenta crest sail, stinging tentacles
+  Mermaid           teal tail layers, pink shell and hair, a gold crown, pearls, a fluke, a trident
+  AbyssalDragon     navy, turquoise belly plates, glowing back spines, gold horns and whiskers
+  ReefTitan         sea green with a gold scute rim, coral and an anemone on top, flipper stubs
+  RoyalCnidarian    violet and magenta, a gold crown with gems, scowling brows, glowing tentacles
 
 Run from the repo root: python3 tools/cnidaria_eggs.py [Kind ...]
 Writes designs/eggs/c_style/<Kind>Egg.bbmodel, src/shared/Eggs/<Kind>EggModel.luau,
@@ -58,7 +62,7 @@ def moon_egg():
     for k, (x, z) in enumerate(((-0.25, -0.25), (0.25, -0.25), (0.25, 0.25), (-0.25, 0.25))):
         egg.block(f"GlowPad{k + 1}", (x - 0.15, TOP - 0.02, z - 0.15), (x + 0.15, TOP + 0.1, z + 0.15), C["glow"]).bone = "top"
     for k, (x, z) in enumerate(((-0.9, -0.9), (0.9, -0.9), (0.9, 0.9), (-0.9, 0.9), (0, -1.2), (0, 1.2), (-1.2, 0), (1.2, 0))):
-        egg.block(f"Fringe{k + 1}", (x - 0.08, LH, z - 0.08), (x + 0.08, 2 * LH + 0.05, z + 0.08), C["fringe"])
+        egg.block(f"Fringe{k + 1}", (x - 0.08, LH, z - 0.08), (x + 0.08, 2 * LH + 0.05, z + 0.08), C["fringe2"])
     return egg
 
 
@@ -139,12 +143,12 @@ def octopus_egg():
 
 def man_o_war_egg():
     C = man_o_war.COLORS
-    egg = shell([C["float2"], C["float"], C["float"], C["float"], C["float"], C["blush"], C["blush"]])
+    egg = shell([C["stop"], C["f0"], C["f1"], C["f2"], C["f3"], C["f4"], C["f5"]])
     # crest sail along the top, front to back
     for k, (z, h) in enumerate(((-0.3, 0.35), (-0.1, 0.55), (0.1, 0.65), (0.3, 0.45))):
         col = C["crest"] if k % 2 == 0 else C["crest2"]
         egg.block(f"Crest{k + 1}", (-0.1, TOP - 0.05, z - 0.1), (0.1, TOP + h, z + 0.1), col).bone = "top"
-        egg.block(f"CrestRim{k + 1}", (-0.12, TOP + h, z - 0.1), (0.12, TOP + h + 0.1, z + 0.1), C["rim"]).bone = "top"
+        egg.block(f"CrestRim{k + 1}", (-0.12, TOP + h, z - 0.1), (0.12, TOP + h + 0.1, z + 0.1), C["rib"]).bone = "top"
     # stinging tentacles down the sides with glowing pink pyramid tips
     for k, (x, z) in enumerate(((-1.0, -0.3), (1.0, -0.3), (-0.7, 0.7), (0.7, 0.7), (0, -1.05))):
         egg.block(f"Tent{k + 1}", (x - 0.08, 0.3, z - 0.08), (x + 0.08, 1.4 * LH + 0.2, z + 0.08), C["tent"])
@@ -154,6 +158,115 @@ def man_o_war_egg():
 
 EGGS = [("MoonJellyfish", moon_egg), ("Anomalocaris", anomalocaris_egg), ("BoxJellyfish", box_egg),
         ("BlueRingOctopus", octopus_egg), ("ManOWar", man_o_war_egg)]
+
+
+
+# ---------------------------------------------------------------- the big four
+
+GOLD, GOLD_DK, PEARL = (255, 196, 40), (214, 140, 20), (250, 244, 236)
+
+
+def up_spike(egg, name, x, y, z, w, h, color, lean=(0, 0)):
+    """A pyramid standing point-up on (x, y, z), its tip leaning by lean (dx, dz)."""
+    return pyramid(egg, name, [(x - w, y, z - w), (x + w, y, z - w), (x + w, y, z + w), (x - w, y, z + w)],
+                   (x + lean[0], y + h, z + lean[1]), color)
+
+
+def crown(egg, y, r, color, gems, points=(0.5, 0.35)):
+    """A gold band round the top with pyramid points, gems on the front."""
+    egg.block("Crown", (-r, y, -r), (r, y + 0.22, r), color).bone = "top"
+    for k, (x, z) in enumerate(((-r + 0.12, -r + 0.12), (0, -r + 0.12), (r - 0.12, -r + 0.12), (r - 0.12, 0),
+                                (r - 0.12, r - 0.12), (0, r - 0.12), (-r + 0.12, r - 0.12), (-r + 0.12, 0))):
+        up_spike(egg, f"CrownPoint{k + 1}", x, y + 0.22, z, 0.12, points[k % 2], color).bone = "top"
+    for k, (x, col) in enumerate(((-0.2, gems[0]), (0.2, gems[1]))):
+        egg.block(f"GlowGem{k + 1}", (x - 0.07, y + 0.05, -r - 0.05), (x + 0.07, y + 0.17, -r + 0.02), col).bone = "top"
+
+
+def mermaid_egg():
+    tail, tail2, tail_dk = (34, 206, 190), (20, 160, 168), (10, 100, 110)
+    hair, shell_pk = (255, 92, 150), (255, 170, 190)
+    egg = shell([tail_dk, tail2, tail, tail2, shell_pk, hair, hair])
+    crown(egg, TOP - 0.05, WIDTHS[6] / 2 - 0.05, GOLD, (PEARL, PEARL))
+    # pearl necklace band round the shell layer
+    zf = -WIDTHS[4] / 2 - 0.03
+    for k in range(5):
+        x = -0.6 + 0.3 * k
+        egg.block(f"Pearl{k + 1}", (x - 0.08, 4 * LH + 0.05, zf - 0.06), (x + 0.08, 4 * LH + 0.21, zf + 0.04), PEARL)
+    # a forked fluke out of the back at the bottom
+    zb = WIDTHS[1] / 2
+    for s in (-1, 1):
+        pyramid(egg, "Fluke" + "LR"[s > 0], [(s * 0.05, 0.9 * LH, zb - 0.1), (s * 0.05, 1.7 * LH, zb - 0.1),
+                                            (s * 0.25, 1.7 * LH, zb - 0.1), (s * 0.25, 0.9 * LH, zb - 0.1)],
+                (s * 0.7, 2.3 * LH, zb + 0.5), tail2)
+    # a gold trident up the right side, glowing prongs
+    x = WIDTHS[3] / 2 + 0.12
+    egg.block("TridentShaft", (x - 0.06, 0.2, -0.06), (x + 0.06, 5.6 * LH, 0.06), GOLD)
+    egg.block("TridentBar", (x - 0.06, 5.6 * LH, -0.3), (x + 0.06, 5.6 * LH + 0.1, 0.3), GOLD).bone = "top"
+    for k, z in enumerate((-0.25, 0, 0.25)):
+        up_spike(egg, f"GlowProng{k + 1}", x, 5.6 * LH + 0.1, z, 0.06, 0.3 + 0.1 * (z == 0), (150, 240, 255)).bone = "top"
+    return egg
+
+
+def dragon_egg():
+    navy, indigo, teal, belly = (30, 30, 120), (64, 48, 180), (24, 190, 200), (90, 230, 220)
+    egg = shell([teal, navy, navy, indigo, navy, navy, indigo])
+    # turquoise belly plates down the front
+    zf = -WIDTHS[3] / 2
+    for i in range(1, 5):
+        w = WIDTHS[i] / 2 * 0.45
+        egg.block(f"Belly{i}", (-w, i * LH + 0.04, -WIDTHS[i] / 2 - 0.05), (w, (i + 1) * LH - 0.04, -WIDTHS[i] / 2 + 0.1), belly)
+    # glowing spines down the back
+    for i in range(1, 7):
+        z = WIDTHS[i] / 2 - 0.05
+        col = (60, 240, 255) if i % 2 else (170, 80, 255)
+        pyramid(egg, f"GlowSpine{i}", [(-0.1, i * LH + 0.05, z), (0.1, i * LH + 0.05, z), (0.1, i * LH + 0.35, z), (-0.1, i * LH + 0.35, z)],
+                (0, i * LH + 0.35, z + 0.4), col)
+    # gold swept-back horns and whiskers
+    for s in (-1, 1):
+        up_spike(egg, "Horn" + "LR"[s > 0], s * 0.3, TOP - 0.05, 0.05, 0.12, 0.8, GOLD, lean=(s * 0.3, 0.35)).bone = "top"
+        sided(egg, "Whisker", WIDTHS[5] / 2 - 0.05, WIDTHS[5] / 2 + 0.55, 5.3 * LH, 5.3 * LH + 0.1, zf * 0.7 - 0.05, zf * 0.7 + 0.05, GOLD, s)
+    return egg
+
+
+def titan_egg():
+    green, green2, dark, ochre = (30, 150, 110), (20, 118, 90), (16, 60, 50), (240, 170, 40)
+    egg = shell([dark, green2, green, green, green2, green, green])
+    # gold scute rim round the middle
+    for i, w in ((2, WIDTHS[2] / 2 + 0.06),):
+        egg.block("Rim", (-w, i * LH, -w * 0.6), (w, i * LH + 0.2, w * 0.6), ochre)
+        egg.block("Rim2", (-w * 0.6, i * LH, -w), (w * 0.6, i * LH + 0.2, w), ochre)
+    # coral on top: staghorn branches with pyramid tips, a brain coral, glowing anemone
+    for k, (x, z, h, col) in enumerate(((-0.25, 0.1, 0.5, (255, 100, 170)), (0.25, -0.1, 0.4, (255, 140, 40)), (0.0, 0.3, 0.3, (255, 100, 170)))):
+        egg.block(f"Coral{k + 1}", (x - 0.07, TOP - 0.05, z - 0.07), (x + 0.07, TOP + h, z + 0.07), col).bone = "top"
+        up_spike(egg, f"CoralTip{k + 1}", x, TOP + h, z, 0.09, 0.2, col).bone = "top"
+    egg.block("BrainCoral", (0.1, TOP - 0.05, 0.12), (0.4, TOP + 0.18, 0.4), (255, 210, 60)).bone = "top"
+    egg.block("GlowAnemone", (-0.4, TOP - 0.05, -0.35), (-0.18, TOP + 0.2, -0.13), (90, 240, 230)).bone = "top"
+    # flipper stubs out the sides
+    for s in (-1, 1):
+        sided(egg, "Flipper", WIDTHS[2] / 2 - 0.05, WIDTHS[2] / 2 + 0.5, 2 * LH - 0.1, 2 * LH + 0.1, -0.5, 0.1, (90, 190, 130), s)
+    return egg
+
+
+def boss_egg():
+    violet, magenta, orchid, plum = (120, 40, 200), (220, 60, 190), (240, 150, 240), (70, 20, 90)
+    egg = shell([plum, magenta, violet, magenta, violet, orchid, orchid])
+    crown(egg, TOP - 0.05, WIDTHS[6] / 2 - 0.02, GOLD, ((80, 240, 255), (255, 70, 170)))
+    # scowling brows on the front
+    zf = -WIDTHS[5] / 2 - 0.04
+    for s in (-1, 1):
+        sided(egg, "Brow", 0.1, 0.5, 5.3 * LH, 5.3 * LH + 0.12, zf - 0.06, zf + 0.06, plum, s)
+    # glowing tentacles down the sides with pyramid tips
+    for k in range(6):
+        a = np.radians(30 + 60 * k)
+        r = WIDTHS[1] / 2 + 0.03
+        x, z = np.sin(a) * r, np.cos(a) * r
+        col = (80, 240, 255) if k % 2 else (255, 70, 170)
+        egg.block(f"GlowTent{k + 1}", (x - 0.07, 0.3, z - 0.07), (x + 0.07, 2.2 * LH, z + 0.07), col)
+        down_spike(egg, f"GlowTip{k + 1}", x, 0.3, z, 0.1, 0.3, col)
+    return egg
+
+
+EGGS += [("Mermaid", mermaid_egg), ("AbyssalDragon", dragon_egg), ("ReefTitan", titan_egg), ("RoyalCnidarian", boss_egg)]
 
 if __name__ == "__main__":
     O.EGGS = EGGS

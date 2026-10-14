@@ -3,9 +3,9 @@ She swims flat out like a dolphin, so the rider sits on a scallop-shell saddle b
 shoulder blades. A long two-tone turquoise fish tail in three sections (dark teal stops
 between the bands, a glowing dorsal stripe and glowing scale highlights) ends in a big forked
 fluke. Coral-pink hair in chunky locks streams back past her shoulders, fin ears, a pink and
-peach seashell top, a pearl necklace and a gold crown with pearls and coral branches. Her
+peach seashell top, a pearl necklace and a gold crown with pearls. Her
 right hand holds a gold trident forward like a lance (glowing tips), her left a glowing pearl
-in an open clam. Two big fins flare from her hips and four bubbles drift round her.
+in an open clam. Two big fins flare from her hips.
 
     python3 tools/mermaid.py
 
@@ -32,6 +32,7 @@ from horse_rig import pose  # noqa: E402
 from partlib import Part, T, Rx, Ry, Rz, render  # noqa: E402
 
 NAME = "Mermaid"
+SCALE = 1.25  # (coordinator, Oct 14; was 1.0) chunkier, horse-sized at lineup scale
 SKIN = (250, 196, 156)      # warm skin
 SKIN_DK = (226, 156, 120)
 HAIR = (255, 74, 150)       # coral pink / magenta locks
@@ -58,7 +59,6 @@ PUPIL = (20, 20, 30)
 LASH = (40, 20, 50)
 LIP = (236, 60, 110)
 BLUSH = (255, 140, 170)
-IRIS = (30, 170, 200)
 
 
 def frame(p0, p1):
@@ -134,29 +134,29 @@ def mermaid():
         return ends
 
     # ---- torso (lying flat, facing -z), shoulders, the seashell top
-    a.box("Torso", (-1.55, 4.85, -3.4), (1.55, 6.8, 0.45), SKIN, "root")
-    a.box("Shoulders", (-2.0, 5.3, -3.5), (2.0, 6.95, -2.1), SKIN, "root")
+    a.box("Torso", (-1.85, 4.2, -3.4), (1.85, 6.85, 0.45), SKIN, "root")
+    a.box("Shoulders", (-2.25, 4.5, -3.55), (2.25, 6.95, -2.1), SKIN, "root")
     a.box("Back", (-1.3, 6.8, -2.1), (1.3, 6.95, 0.3), SKIN_DK, "root")
     # shell straps round the chest and over the shoulders
-    a.box("ShellStrap", (-2.08, 5.22, -2.75), (2.08, 7.02, -2.48), SHELL_DK, "root")
+    a.box("ShellStrap", (-2.33, 4.42, -2.75), (2.33, 7.02, -2.48), SHELL_DK, "root")
     for side, sx in (("L", -1), ("R", 1)):
         xs = sorted((sx * 0.75, sx * 1.05))
         a.box("ShellStrapUp" + side, (xs[0], 6.95, -3.55), (xs[1], 7.03, -2.48), SHELL_DK, "root")
         a.box("ShellKnot" + side, (xs[0] - 0.05, 6.95, -2.85), (xs[1] + 0.05, 7.18, -2.4), PEARL, "root")
         # two big scallop shells under the chest, ribs fanning forward and out the sides
-        cx = sx * 0.95
-        a.box("ShellHinge" + side, (cx - 0.35, 4.62, -1.95), (cx + 0.35, 5.0, -1.6), SHELL_DK, "root")
-        fan("Shell" + side, (cx, 4.72, -1.75), -75, 75, 7,
-            lambda t: 1.55 - 0.2 * abs(t - 0.5), 0.36, 0.3, (SHELL, PEACH), "root")
+        cx = sx * 1.05
+        a.box("ShellHinge" + side, (cx - 0.4, 4.0, -1.95), (cx + 0.4, 4.4, -1.6), SHELL_DK, "root")
+        fan("Shell" + side, (cx, 4.1, -1.75), -75, 75, 7,
+            lambda t: 1.75 - 0.2 * abs(t - 0.5), 0.45, 0.36, (SHELL, PEACH), "root")
         # shell cups showing at the sides of the chest
-        xc = sorted((sx * 1.95, sx * 2.18))
-        a.box("ShellSide" + side, (xc[0], 4.85, -3.25), (xc[1], 5.75, -2.05), SHELL, "root")
-        a.box("ShellSideRib" + side, (xc[0] - 0.04, 4.85, -2.8), (xc[1] + 0.04, 5.8, -2.55), PEACH, "root")
-        a.box("ShellSideRim" + side, (xc[0] - 0.02, 4.72, -3.3), (xc[1] + 0.02, 4.9, -2.0), SHELL_DK, "root")
+        xc = sorted((sx * 2.2, sx * 2.45))
+        a.box("ShellSide" + side, (xc[0], 4.3, -3.3), (xc[1], 5.5, -2.05), SHELL, "root")
+        a.box("ShellSideRib" + side, (xc[0] - 0.04, 4.3, -2.8), (xc[1] + 0.04, 5.55, -2.55), PEACH, "root")
+        a.box("ShellSideRim" + side, (xc[0] - 0.02, 4.15, -3.35), (xc[1] + 0.02, 4.35, -2.0), SHELL_DK, "root")
 
     # ---- waist: a pearl girdle and a scale band where the tail begins
-    a.box("Waist", (-1.68, 4.75, 0.3), (1.68, 6.92, 0.95), TEAL, "root")
-    a.box("WaistBand", (-1.74, 4.7, 0.25), (1.74, 6.98, 0.42), DEEP, "root")
+    a.box("Waist", (-2.0, 4.15, 0.3), (2.0, 6.92, 0.95), TEAL, "root")
+    a.box("WaistBand", (-2.06, 4.1, 0.25), (2.06, 6.98, 0.42), DEEP, "root")
     for i in range(7):
         x = -1.5 + i * 0.5
         a.box(f"GirdlePearl{i + 1}", (x - 0.15, 6.92, 0.18), (x + 0.15, 7.18, 0.48), PEARL, "root")
@@ -166,14 +166,14 @@ def mermaid():
     # frilly fin skirt where skin meets scales
     for side, sx in (("L", -1), ("R", 1)):
         for k in range(3):
-            y = 5.05 + 0.62 * k
-            P0 = np.array([sx * 1.65, y, 0.55])
-            beam(f"Frill{side}{k + 1}", P0, P0 + (sx * 0.75, -0.15, 0.9), 0.5, 0.18,
+            y = 4.55 + 0.85 * k
+            P0 = np.array([sx * 1.95, y, 0.55])
+            beam(f"Frill{side}{k + 1}", P0, P0 + (sx * 0.9, -0.15, 1.0), 0.6, 0.22,
                  FIN_A if k % 2 == 0 else FIN_B, "root", pad=0.1)
 
     # ---- the fish tail in three sections: two-tone scale bands, dark stops, a glowing stripe
-    tail = [("Tail1", 0.95, 3.8, 1.55, 4.85, 6.8), ("Tail2", 3.8, 6.55, 1.25, 5.0, 6.6),
-            ("Tail3", 6.55, 9.0, 0.95, 5.2, 6.35)]
+    tail = [("Tail1", 0.95, 3.8, 1.9, 4.2, 6.85), ("Tail2", 3.8, 6.55, 1.6, 4.45, 6.7),
+            ("Tail3", 6.55, 9.0, 1.25, 4.75, 6.5)]
     for bone, z0, z1, hw, y0, y1 in tail:
         a.pivots[bone] = (0, (y0 + y1) / 2, z0)
         a.box(bone, (-hw, y0, z0), (hw, y1, z1), TEAL, bone)
@@ -195,35 +195,35 @@ def mermaid():
     # a small dorsal frill on the second section
     for k in range(4):
         z = 4.3 + 0.55 * k
-        rpyr(f"DorsalSpine{k + 1}", T(0, 6.62, z) @ Rx(-25), 0.22, 0.5, 0.9 - 0.12 * k, FIN_B, "Tail2")
+        rpyr(f"DorsalSpine{k + 1}", T(0, 6.75, z) @ Rx(-25), 0.3, 0.6, 0.9 - 0.12 * k, FIN_B, "Tail2")
     # tail stalk
-    a.box("Stalk", (-0.6, 5.35, 9.0), (0.6, 6.2, 10.0), TEAL, "Fluke")
-    a.box("StalkStop", (-0.68, 5.28, 9.0), (0.68, 6.27, 9.25), DEEP, "Fluke")
-    a.box("GlowStalkStripe", (-0.14, 6.2, 9.25), (0.14, 6.3, 10.0), GLOW, "Fluke")
+    a.box("Stalk", (-0.85, 5.0, 9.0), (0.85, 6.35, 10.0), TEAL, "Fluke")
+    a.box("StalkStop", (-0.93, 4.93, 9.0), (0.93, 6.42, 9.25), DEEP, "Fluke")
+    a.box("GlowStalkStripe", (-0.16, 6.35, 9.25), (0.16, 6.45, 10.0), GLOW, "Fluke")
     a.pivots["Fluke"] = (0, 5.8, 9.0)
     # ---- the big forked fluke: two lobes of rays fanning back and out, flat like a dolphin's
-    a.box("FlukeCore", (-0.95, 5.4, 9.7), (0.95, 6.15, 10.9), FIN_B, "Fluke")
-    a.box("FlukeCoreTop", (-0.7, 6.15, 9.8), (0.7, 6.28, 10.7), FIN_DK, "Fluke")
+    a.box("FlukeCore", (-1.25, 5.2, 9.7), (1.25, 6.25, 11.2), FIN_B, "Fluke")
+    a.box("FlukeCoreTop", (-0.9, 6.25, 9.8), (0.9, 6.4, 11.0), FIN_DK, "Fluke")
     for side, sx in (("L", -1), ("R", 1)):
-        hinge = (sx * 0.5, 5.78, 10.3)
+        hinge = (sx * 0.65, 5.72, 10.4)
         M = T(*hinge) @ Ry(180)  # local -z points back (+z world)
         ang = (-25, -85) if sx < 0 else (25, 85)
         # Ry(180) mirrors x: angles toward +x local are toward -x world
         ang = (-ang[0], -ang[1])
         ends = fan("Fluke" + side, (0, 0, 0), ang[0], ang[1], 6,
-                   lambda t: 3.9 - 1.0 * abs(t - 0.35) * 2, 0.62, 0.3,
+                   lambda t: 5.0 - 1.3 * abs(t - 0.35) * 2, 0.85, 0.42,
                    (FIN_A, (80, 170, 255), FIN_B), "Fluke", M=M, tip=(FIN_DK, 0.7), glow_every=2)
         # webbing between the rays
         for k in range(len(ends) - 1):
             mid = (ends[k] + ends[k + 1]) / 2
             h = np.array(hinge)
-            beam(f"FlukeWeb{side}{k + 1}", h + 0.25 * (mid - h), h + 0.85 * (mid - h), 0.6, 0.22,
+            beam(f"FlukeWeb{side}{k + 1}", h + 0.25 * (mid - h), h + 0.85 * (mid - h), 0.8, 0.3,
                  (110, 190, 255), "Fluke")
 
     # ---- the hip fins: two big fins flaring from her hips like wings
     for side, sx in (("L", -1), ("R", 1)):
         bone = "Fin" + side
-        root = np.array([sx * 1.7, 5.6, 1.4])
+        root = np.array([sx * 2.0, 5.5, 1.4])
         a.pivots[bone] = tuple(root)
         M = T(*root) @ Rz(sx * 12)
         a.box("FinBase" + side, *[tuple(v) for v in np.sort([root + (sx * -0.1, -0.35, -0.6), root + (sx * 0.5, 0.35, 0.8)], axis=0)],
@@ -245,10 +245,10 @@ def mermaid():
     a.box("Pommel", (-0.3, 7.15, -2.25), (0.3, 7.7, -1.95), CORAL, "root")
     pearl("GlowPommelPearl", (0, 7.85, -2.1), 0.36, "root", PEARL_GLOW)
     for side, sx in (("L", -1), ("R", 1)):
-        xs = sorted((sx * 1.6, sx * 1.75))
-        a.box("Drape" + side, (xs[0], 5.4, -1.9), (xs[1], 7.0, 0.1), CORAL, "root")
-        xh = sorted((sx * 1.6, sx * 1.82))
-        a.box("DrapeHem" + side, (xh[0], 5.2, -1.95), (xh[1], 5.45, 0.15), GOLD, "root")
+        xs = sorted((sx * 1.85, sx * 2.0))
+        a.box("Drape" + side, (xs[0], 5.0, -1.9), (xs[1], 7.0, 0.1), CORAL, "root")
+        xh = sorted((sx * 1.85, sx * 2.07))
+        a.box("DrapeHem" + side, (xh[0], 4.8, -1.95), (xh[1], 5.05, 0.15), GOLD, "root")
     # ---- neck, pearl necklace, head
     a.box("Neck", (-0.6, 6.2, -4.3), (0.6, 7.6, -3.4), SKIN, "neck")
     neck_c = np.array([0, 6.85, -3.75])
@@ -261,23 +261,21 @@ def mermaid():
         a.box(f"Necklace{k + 1}", tuple(c - 0.15), tuple(c + 0.15), PEARL, "neck")
     pearl("GlowNecklacePendant", (0, 5.82, -4.0), 0.36, "neck", PEARL_GLOW)
     a.box("Head", (-1.15, 7.0, -5.6), (1.15, 9.3, -3.5), SKIN, "neck")
-    a.box("Nose", (-0.17, 7.8, -5.76), (0.17, 8.2, -5.6), SKIN_DK, "neck")
+    a.box("Nose", (-0.15, 7.6, -5.76), (0.15, 7.9, -5.6), SKIN_DK, "neck")
     a.box("PlainMouth", (-0.36, 7.38, -5.64), (0.36, 7.52, -5.6), LIP, "neck")
     for side, sx in (("L", -1), ("R", 1)):
         ma, mb = sorted((sx * 0.36, sx * 0.48))
         a.box("PlainSmile" + side, (ma, 7.48, -5.64), (mb, 7.62, -5.6), LIP, "neck")
         # googly plate eyes, teal irises behind dark pupils, lashes flicking out
-        xa, xb = sorted((sx * 0.2, sx * 0.94))
-        a.box("Eye" + side, (xa, 8.1, -5.66), (xb, 8.9, -5.6), EYE_W, "neck")
-        c = sx * 0.52
-        a.box("PupilIris" + side, (c - 0.24, 8.16, -5.69), (c + 0.24, 8.66, -5.66), IRIS, "neck")
-        a.box("Pupil" + side, (c - 0.15, 8.22, -5.72), (c + 0.15, 8.58, -5.69), PUPIL, "neck")
-        a.box("PupilShine" + side, (c - 0.1 + sx * 0.05, 8.44, -5.74), (c + sx * 0.05, 8.54, -5.72), EYE_W, "neck")
-        a.box("PlainLash" + side, (xa - 0.04, 8.9, -5.68), (xb + 0.04, 9.0, -5.6), LASH, "neck")
+        xa, xb = sorted((sx * 0.1, sx * 1.04))
+        a.box("Eye" + side, (xa, 7.85, -5.66), (xb, 8.92, -5.6), EYE_W, "neck")
+        c = sx * 0.5
+        a.box("Pupil" + side, (c - 0.24, 7.95, -5.7), (c + 0.24, 8.55, -5.66), PUPIL, "neck")
+        a.box("PlainLash" + side, (xa - 0.04, 8.92, -5.68), (xb + 0.04, 9.02, -5.6), LASH, "neck")
         ka, kb = sorted((sx * 0.94, sx * 1.16))
-        a.box("PlainLashFlick" + side, (ka, 8.82, -5.68), (kb, 9.0, -5.58), LASH, "neck")
-        ba, bb = sorted((sx * 0.55, sx * 0.97))
-        a.box("PlainBlush" + side, (ba, 7.6, -5.64), (bb, 7.82, -5.6), BLUSH, "neck")
+        a.box("PlainLashFlick" + side, (ka, 8.84, -5.68), (kb, 9.02, -5.58), LASH, "neck")
+        ba, bb = sorted((sx * 0.6, sx * 1.0))
+        a.box("PlainBlush" + side, (ba, 7.5, -5.64), (bb, 7.7, -5.6), BLUSH, "neck")
         # front locks framing the face, banded with pearls
         la, lb = sorted((sx * 0.98, sx * 1.48))
         a.box("Lock" + side, (la, 6.05, -5.3), (lb, 9.0, -4.3), HAIR, "neck")
@@ -300,7 +298,7 @@ def mermaid():
     a.box("Fringe", (-1.22, 9.0, -5.74), (1.22, 9.6, -5.05), HAIR, "neck")
     a.box("FringeSweep", (-1.22, 8.75, -5.78), (-0.25, 9.05, -5.2), HAIR_LT, "neck")
     a.box("FringeSweepR", (0.6, 8.85, -5.76), (1.22, 9.05, -5.2), HAIR_DK, "neck")
-    # gold crown: band, five points with pearls, a big glowing pearl, coral branches
+    # gold crown: band, five points with pearls, a big glowing pearl
     a.box("CrownBand", (-1.4, 9.45, -5.4), (1.4, 9.85, -3.3), GOLD, "neck")
     a.box("CrownRim", (-1.44, 9.4, -5.44), (1.44, 9.52, -3.26), GOLD_DK, "neck")
     for k, x in enumerate((-1.05, -0.52, 0, 0.52, 1.05)):
@@ -310,15 +308,6 @@ def mermaid():
     for k, x in enumerate((-0.75, 0.75)):
         a.box(f"CrownGem{k + 1}", (x - 0.15, 9.52, -5.47), (x + 0.15, 9.78, -5.4), CORAL, "neck")
     pearl("GlowCrownPearl", (0, 9.66, -5.5), 0.36, "neck", PEARL_GLOW)
-    for side, sx in (("L", -1), ("R", 1)):
-        b0 = np.array([sx * 1.1, 9.8, -3.7])
-        b1 = b0 + (sx * 0.5, 1.3, 0.3)
-        beam("CoralBranch" + side, b0, b1, 0.28, 0.28, CORAL, "neck", pad=0.1)
-        beam("CoralTwig" + side, b0 + 0.5 * (b1 - b0), b0 + 0.5 * (b1 - b0) + (sx * 0.6, 0.45, 0.0), 0.22, 0.22, CORAL, "neck", pad=0.1)
-        beam("CoralTwigB" + side, b1, b1 + (-sx * 0.3, 0.5, 0.1), 0.22, 0.22, CORAL, "neck", pad=0.1)
-        a.box("CoralTipA" + side, tuple(b1 + (-sx * 0.3, 0.5, 0.1) - 0.15), tuple(b1 + (-sx * 0.3, 0.5, 0.1) + 0.15), SHELL, "neck")
-        tw = b0 + 0.5 * (b1 - b0) + (sx * 0.6, 0.45, 0.0)
-        a.box("CoralTipB" + side, tuple(tw - 0.15), tuple(tw + 0.15), SHELL, "neck")
     # ---- long locks streaming back along her sides, each on its own bone
     for side, sx in (("L", -1), ("R", 1)):
         for k in (1, 2, 3):
@@ -341,17 +330,17 @@ def mermaid():
     # ---- arms reaching forward: a gold trident in the right hand, a glowing pearl in the left
     for side, sx in (("L", -1), ("R", 1)):
         bone = "Arm" + side
-        S, E, H = (sx * 1.85, 6.1, -3.0), (sx * 2.7, 5.5, -5.3), (sx * 2.9, 5.45, -7.3)
+        S, E, H = (sx * 2.1, 5.9, -3.0), (sx * 2.95, 5.3, -5.3), (sx * 3.15, 5.25, -7.3)
         a.pivots[bone] = S
-        beam("UpperArm" + side, S, E, 0.85, 0.85, SKIN, bone, pad=0.4)
-        beam("Forearm" + side, E, H, 0.78, 0.78, SKIN, bone, pad=0.3)
+        beam("UpperArm" + side, S, E, 1.0, 1.0, SKIN, bone, pad=0.4)
+        beam("Forearm" + side, E, H, 0.92, 0.92, SKIN, bone, pad=0.3)
         Sv, Ev, Hv = np.array(S), np.array(E), np.array(H)
-        beam("Armlet" + side, Sv + 0.45 * (Ev - Sv), Sv + 0.62 * (Ev - Sv), 1.0, 1.0, GOLD, bone)
-        beam("ArmletPearl" + side, Sv + 0.5 * (Ev - Sv), Sv + 0.57 * (Ev - Sv), 1.06, 1.06, PEARL, bone)
-        beam("Bracelet" + side, Ev + 0.62 * (Hv - Ev), Ev + 0.82 * (Hv - Ev), 0.95, 0.95, GOLD, bone)
-        beam("BraceletBand" + side, Ev + 0.68 * (Hv - Ev), Ev + 0.76 * (Hv - Ev), 1.0, 1.0, CORAL, bone)
+        beam("Armlet" + side, Sv + 0.45 * (Ev - Sv), Sv + 0.62 * (Ev - Sv), 1.15, 1.15, GOLD, bone)
+        beam("ArmletPearl" + side, Sv + 0.5 * (Ev - Sv), Sv + 0.57 * (Ev - Sv), 1.21, 1.21, PEARL, bone)
+        beam("Bracelet" + side, Ev + 0.62 * (Hv - Ev), Ev + 0.82 * (Hv - Ev), 1.1, 1.1, GOLD, bone)
+        beam("BraceletBand" + side, Ev + 0.68 * (Hv - Ev), Ev + 0.76 * (Hv - Ev), 1.15, 1.15, CORAL, bone)
         d = (Hv - Ev) / np.linalg.norm(Hv - Ev)
-        rbox("Hand" + side, (0.9, 0.5, 1.0), frame(Hv, Hv + d) @ T(0, 0, -0.1), SKIN, bone)
+        rbox("Hand" + side, (1.05, 0.6, 1.1), frame(Hv, Hv + d) @ T(0, 0, -0.1), SKIN, bone)
         rbox("Thumb" + side, (0.3, 0.3, 0.5), frame(Hv, Hv + d) @ T(-sx * 0.5, 0.15, -0.2), SKIN, bone)
         if sx < 0:
             # an open clam on the palm, a glowing pearl in it
@@ -381,19 +370,10 @@ def mermaid():
                     rpyr(f"TridentBarb{k + 1}", Fm @ T(x + (0.15 if x > 0 else -0.15), 0, 0.15 + ln - 0.45) @ Rz(-90 if x > 0 else 90),
                          0.26, 0.26, 0.3, GOLD_DK, bone)
 
-    # ---- four glowing bubbles drifting round her
-    for j, (x, y, z) in enumerate(((-4.4, 8.6, -5.6), (4.6, 8.9, -3.8), (-3.6, 4.4, 4.6), (3.4, 4.0, 6.4))):
-        bone = f"Bubble{j + 1}"
-        a.bone_order.append((bone, "root"))
-        a.pivots[bone] = (x, y, z)
-        r = 0.55 if j < 2 else 0.42
-        pearl(f"GlowBubble{j + 1}", (x, y, z), r * 1.4, bone, (150, 236, 255))
-        a.box(f"BubbleShine{j + 1}", (x - r * 0.55, y + r * 0.2, z - r * 0.9), (x - r * 0.1, y + r * 0.6, z - r * 0.7), EYE_W, bone)
-        pearl(f"GlowBubbleSmall{j + 1}", (x + r * 1.3, y + r * 1.4, z + r * 0.4), r * 0.6, bone, (150, 236, 255))
-
     a.pivots["root"] = (0, 5.8, 0)
     a.pivots["neck"] = (0, 6.9, -3.6)
     a.meta = {"seat": (0, 7.15, -0.9), "neck_loop": {"center": (0, 7.8, -4.0), "radius": 1.5}}
+    a.scale(SCALE)
     for p in a.parts:
         p.neon = p.name.startswith("Glow")
     a.animations = animations
@@ -412,7 +392,7 @@ def track(L, fn, n=16, channel="rotation"):
 def animations():
     """A dolphin kick: the tail chain bends about X with growing amplitude and phase lag down to
     the fluke while the body counter-pitches; hair locks and hip fins ripple behind; the trident
-    arm holds steady; the bubbles spin and bob."""
+    arm holds steady."""
     def moves(L, kicks, amp, pitch, bob, ripple, n):
         w = lambda u, ph=0.0: math.sin(TAU * (kicks * u - ph))
         t = {"root": [track(L, lambda u: (pitch + 2.5 * w(u, 0.0), 0, 0), n),
@@ -429,11 +409,6 @@ def animations():
             for k in (1, 2, 3):
                 t[f"Hair{side}{k}"] = [track(L, lambda u, sx=sx, k=k: (ripple * 0.8 * w(u, 0.2 + 0.1 * k),
                                                                        sx * ripple * 0.6 * w(u, 0.45 + 0.08 * k), 0), n)]
-        for j in range(4):
-            d = 1 if j % 2 else -1
-            t[f"Bubble{j + 1}"] = [{"channel": "rotation", "interp": "linear",
-                                    "keys": [(round(L * k / 4, 4), (0, d * 90 * k, 0)) for k in range(5)]},
-                                   track(L, lambda u, j=j: (0, 4 * math.sin(TAU * (u + 0.25 * j)), 0), n, "position")]
         return t
 
     return {"idle": (2.0, moves(2.0, 1, 10, 0, 3, 6, 32)),
@@ -446,6 +421,9 @@ BG = (232, 244, 250)
 
 
 def shot(parts, crop=False, pad=50, **cam):
+    """Cameras are written for the unscaled body; they scale with her."""
+    cam["eye"] = tuple(v * SCALE for v in cam["eye"])
+    cam["target"] = tuple(v * SCALE for v in cam["target"])
     im = render(parts, transparent=True, **cam)
     if crop and im.getbbox():
         x0, y0, x1, y1 = im.getbbox()

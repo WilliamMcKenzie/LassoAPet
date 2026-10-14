@@ -3,8 +3,9 @@
 An eastern-style long sea dragon swimming through the deep: a serpentine body of eight
 segment bones, deep navy over an indigo back with bright teal flanks and turquoise belly
 plates (dark stops between them), a glowing crest of cyan and electric-violet fin spines
-down the back, glowing photophores along the flanks, four small webbed clawed limbs,
-lateral fin fans and a big vertical fan tail. The head is fierce but friendly: big googly
+down the back, glowing photophores along the flanks, four small webbed clawed limbs
+and a big vertical fan tail. At rest the body lies in a gentle S-curve (baked into the
+cubes; every bone still rests at 0). The head is fierce but friendly: big googly
 eyes under angry brows, swept-back golden antler horns, long golden whiskers with glowing
 tips, gill frills, an open jaw full of pyramid teeth and a little spiky beard.
 
@@ -16,8 +17,8 @@ writes designs/cnidaria/AbyssalDragon.bbmodel and previews in
 Bones:
   root (the first body segment: the rider sits here, just behind the head)
     -> neck (the head; the lasso loops round it) -> Jaw, WhiskerL/R, GillL/R
-    -> LegFL, LegFR (front paddles), FinL1, FinR1
-    -> Seg2 -> Seg3 -> Seg4 (LegBL, LegBR) -> Seg5 (FinL5, FinR5) -> Seg6 -> Seg7 -> Seg8 -> TailFin
+    -> LegFL, LegFR (front paddles)
+    -> Seg2 -> Seg3 -> Seg4 (LegBL, LegBR) -> Seg5 -> Seg6 -> Seg7 -> Seg8 -> TailFin
 
   idle    hovering: a slow sinuous wave down the body, the head looking about, the jaw
           breathing open and shut, whiskers and fins drifting
@@ -133,15 +134,6 @@ def segment(b, k, node, name, z0, z1, hw, hh, idx):
                 1.5, 0.55, "glowc" if idx % 2 else "glowv", normal=(1, 0, 0))
         # a little violet membrane at the spine's foot, joining the crest into one fin
         b.box(node, name + "Membrane", (0, top + 0.45, zs + 1.2), (0.3, 0.7, L - 1.2), "fin")
-
-
-def fin_fan(b, k, node, name, pivot, s, rays, color, tipcol):
-    """A fan of flat blade rays from `pivot` (rays: list of tip offsets for the right side)."""
-    p = V(*pivot)
-    for j, (dx, dy, dz) in enumerate(rays):
-        tip = p + V(s * dx, dy, dz)
-        k.blade(node, f"{name}Ray{j + 1}", p, tip, 1.8, 0.35, color if j % 2 == 0 else tipcol, normal=(s, 0.5, 0))
-    b.box(node, name + "Root", p, (0.7, 1.6, 1.4), "turq")
 
 
 def leg(b, k, parent, name, s, shoulder, scale=1.0):
@@ -284,10 +276,6 @@ def build():
     head(b, k, root)
     for s in (-1, 1):
         leg(b, k, root, "LegF" + "LR"[s > 0], s, (s * 2.35, YC - 1.3, 2.4))
-        # lateral fin behind the front paddles
-        g = b.group("Fin" + "LR"[s > 0] + "1", V(s * 2.7, YC + 0.3, 4.4), root)
-        fin_fan(b, k, g, "Fin" + "LR"[s > 0] + "1", (s * 2.7, YC + 0.3, 4.4), s,
-                ((2.6, 1.6, 2.4), (3.4, 0.2, 3.2), (2.6, -1.3, 3.6)), "fin", "glowc")
     parent = root
     for idx, (name, z0, z1, hw, hh) in enumerate(SEGS[1:], start=1):
         node = b.group(name, (0, YC, z0), parent)
@@ -295,13 +283,6 @@ def build():
         if name == "Seg4":
             for s in (-1, 1):
                 leg(b, k, node, "LegB" + "LR"[s > 0], s, (s * 2.0, YC - 1.2, 16.4), 0.9)
-        if name == "Seg5":
-            for s in (-1, 1):
-                sd = "LR"[s > 0]
-                p = (s * 2.0, YC + 0.2, 19.6)
-                g = b.group("Fin" + sd + "5", V(*p), node)
-                fin_fan(b, k, g, "Fin" + sd + "5", p, s, ((2.2, 1.3, 2.0), (2.8, 0.1, 2.8), (2.1, -1.1, 3.1)),
-                        "fin", "glowv")
         parent = node
     # the tail: a big vertical fan of violet blades with turquoise ribs and glowing tips
     zt = SEGS[-1][2]
@@ -317,7 +298,87 @@ def build():
         k.blade(tf, (f"GlowTail{j + 1}" if j % 2 else f"TailRay{j + 1}"), p, tip, 3.0, 0.5,
                 ("glowc" if j % 4 == 1 else "glowv") if j % 2 else col, normal=(1, 0, 0))
     b.box(tf, "TailHub", p + V(0, 0, 0.3), (0.9, 1.4, 1.4), "dark")
-    return b.model()
+    m = b.model()
+    s_curve(m)
+    return m
+
+
+# ---------------------------------------------------------------- the resting S-curve
+
+CURVE_AMP = 1.9  # studs of side-to-side swing in the resting S (QM-coordinator, Oct 14: was straight)
+CURVE_LEN = 26.0  # studs per full side-to-side wave
+
+
+def curve_x(z):
+    z0 = SEGS[1][1]
+    return 0.0 if z <= z0 else CURVE_AMP * math.sin(TAU * (z - z0) / CURVE_LEN) * min(1.0, (z - z0) / 4.0)
+
+
+def euler_m(r):
+    """Blockbench ZYX Euler (degrees) -> rotation matrix (Rz Ry Rx)."""
+    return rot(("z", r[2]), ("y", r[1]), ("x", r[0]))
+
+
+def s_curve(m):
+    """Bake the gentle resting S into the body: every Seg (with its limbs) is moved rigidly so
+    its pivot sits on the end of the one before and it is yawed along the curve. Bones stay
+    at 0; the yaw lives in the cubes and the pyramid vertices."""
+    from angel_boss import rot_to_zyx
+    groups = {g["uuid"]: g for g in m["groups"]}
+    elems = {e["uuid"]: e for e in m["elements"]}
+    owner, gowner = {}, {}  # element / group uuid -> the body bone that carries it
+
+    def walk(node, seg):
+        g = groups[node["uuid"]]
+        if g["name"] in BODY or g["name"] == "root":
+            seg = g["name"]
+        if g["name"] == "TailFin":
+            seg = BODY[-1]
+        gowner[node["uuid"]] = seg
+        for c in node["children"]:
+            if isinstance(c, dict):
+                walk(c, seg)
+            else:
+                owner[c] = seg
+    for n in m["outliner"]:
+        walk(n, "root")
+    xf = {"root": (np.eye(3), np.zeros(3))}  # bone -> (R, t) in studs: p' = R p + t
+    prev = "root"
+    for name, z0, z1, hw, hh in SEGS[1:]:
+        R0, t0 = xf[prev]
+        P = V(0, YC, z0)
+        P2 = R0 @ P + t0  # the pivot rides on the end of the segment before
+        zm = P2[2] + (z1 - z0)
+        yaw = math.degrees(math.atan2(curve_x(zm) - P2[0], zm - P2[2]))
+        R = rot(("y", yaw))
+        xf[name] = (R, P2 - R @ P)
+        prev = name
+    for uid, seg in owner.items():
+        R, t = xf[seg]
+        if seg == "root":
+            continue
+        e = elems[uid]
+        o = np.array(e["origin"], float) / 10
+        o2 = R @ o + t
+        if e["type"] == "mesh":
+            e["origin"] = [round(float(c) * 10, 4) for c in o2]
+            e["vertices"] = {k: [round(float(c), 4) for c in R @ np.array(v, float)] for k, v in e["vertices"].items()}
+        else:
+            lo, hi = np.array(e["from"], float) / 10, np.array(e["to"], float) / 10
+            c = (lo + hi) / 2
+            assert np.allclose(c, o, atol=1e-3), e["name"]
+            h = (hi - lo) / 2
+            e["origin"] = [round(float(v) * 10, 4) for v in o2]
+            e["from"] = [round(float(v) * 10, 4) for v in o2 - h]
+            e["to"] = [round(float(v) * 10, 4) for v in o2 + h]
+            r = rot_to_zyx(R @ euler_m(e["rotation"]))
+            e["rotation"] = [0.0 if abs(v) < 1e-3 else v for v in r]
+    for uid, seg in gowner.items():
+        if seg == "root":
+            continue
+        R, t = xf[seg]
+        g = groups[uid]
+        g["origin"] = [round(float(c) * 10, 4) for c in R @ (np.array(g["origin"], float) / 10) + t]
 
 
 # ---------------------------------------------------------------- animations
@@ -343,9 +404,6 @@ def animations():
             tr["Whisker" + sd] = [track(L, lambda u, s=s: (
                 10 * math.sin(w * u - 1.0), -s * fin_sweep * 0.5 + 12 * math.sin(w * u - 1.6), s * 8 * math.sin(w * u - 0.6)), 24)]
             tr["Gill" + sd] = [track(L, lambda u, s=s: (0, -s * fin_sweep * 0.4 + s * 0.6 * fin_amp * math.sin(w * u), 0), 16)]
-            for f, ph in (("1", 0.0), ("5", 2.4)):
-                tr["Fin" + sd + f] = [track(L, lambda u, s=s, ph=ph: (
-                    0, -s * fin_sweep, s * fin_amp * math.sin(w * u * 2 - ph)), 24)]
             for lg, ph in (("LegF", 0.0), ("LegB", math.pi)):
                 tr[lg + sd] = [track(L, lambda u, s=s, ph=ph: (
                     leg_amp * math.sin(w * u + ph + (s > 0) * math.pi * 0.5), 0, s * 0.3 * leg_amp * math.cos(w * u + ph)), 16)]
