@@ -2647,18 +2647,16 @@ for _, p in W.Ground:GetChildren() do
 		p:Destroy()
 	end
 end
-for _, r in FLOOR do
-	local k = KINDS[r[1]]
-	local x, z, sx, sz = r[2], r[3], r[4], r[5]
+local function lay(k, x, z, sx, sz, colour, checker)
 	local p = template:Clone()
 	p.Name = k[1]
 	p.Size = Vector3.new(sx, k[2] + 2, sz)
 	p.CFrame = CFrame.new(x + sx / 2, (k[2] - 2) / 2, z - sz / 2)
-	p.Color = k[3]
+	p.Color = colour
 	local water = k[1] == "Water" or k[1] == "DeepWater"
 	for _, t in p:GetChildren() do
-		if k[4] and not water then
-			t.Color3 = k[4]
+		if checker and not water and k[1] ~= "Planks" then
+			t.Color3 = checker
 		else
 			t:Destroy() -- (water wears the flowing tile instead; boards are plain)
 		end
@@ -2674,6 +2672,18 @@ for _, r in FLOOR do
 	end
 	p:SetAttribute("World3Biome", NAME)
 	p.Parent = W.Ground
+end
+for _, r in FLOOR do
+	local k = KINDS[r[1]]
+	local x, z, sx, sz = r[2], r[3], r[4], r[5]
+	if k[1] == "Planks" then -- (World 2's Crystal Cavern boards: 4 studs deep across the course, alternating)
+		for b = 0, sz / 4 - 1 do
+			local bz = z - b * 4
+			lay(k, x, bz, sx, 4, if ((NEAR - bz) / 4) % 2 == 0 then k[3] else k[4])
+		end
+	else
+		lay(k, x, z, sx, sz, k[3], k[4])
+	end
 end
 
 local walls = 0

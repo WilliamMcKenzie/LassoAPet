@@ -252,17 +252,18 @@ def rgb(h):
 
 
 def pirate_cove():
-    """Sand islands in a lagoon: sand a stud up, wet sand, the water tile a stud down, its
-    deep middles darker. 7 angles (lacy rings: atolls). More lagoon in the wide bays. Plank
-    boardwalks a stud up carry the middle lane over any long stretch of water."""
+    """Sand islands in a lagoon: sand a stud up, wet sand, the water tile a stud down, all one
+    water (QM, Oct 14: no darker deep shade). 7 angles (lacy rings: atolls). More lagoon in the
+    wide bays. Plank boardwalks, World 2's Crystal Cavern boards, carry the middle lane over any
+    long stretch of water."""
     # (Colours: QM's beach reference, Oct 14, stamina-loop beb5452d and f6fac9e2: golden sand, QM's darker water tile,
     # weathered planks; walls plain wooden brown with darker wood tops, 7c527722.)
     b = Biome(0, [
-        ("DeepWater", -1, (38, 112, 156), None),  # the water tile's darker tint
+        ("DeepWater", -1, (38, 112, 156), None),  # (the layout's deep middles; joined to the water below, QM, Oct 14)
         ("Water", -1, (53, 143, 192), None),  # QM's darker tile (rbxassetid://113940500836253)
         ("WetSand", 0, (204, 158, 102), (190, 145, 92)),  # (QM in Studio, Oct 14: stamina-loop d803ac1; was 206, 172, 110 / 194, 160, 98)
         ("Ground", 2, (238, 202, 142), (228, 190, 128)),  # light sand, as the base's: a stud above the damp sand (QM, Oct 14: stamina-loop b7441d8; was 1)
-        ("Planks", 1, (132, 96, 66), None),  # boardwalks: plain boards, no checker
+        ("Planks", 2, (150, 98, 56), (132, 84, 46)),  # boardwalks: the Crystal Cavern's (tools/world2_cavern.py), 4-stud boards across the course, alternating, top 2 (QM, Oct 14; was 132, 96, 66 plain, top 1)
         ("DampSand", 1, (222, 180, 120), (208, 167, 109)),  # (QM, Oct 14: stamina-loop 97c9aa0) between the sand and the wet sand, at the sand's height
     ])
     q = b.quasi(7, 13, (517, 233))
@@ -310,6 +311,9 @@ def pirate_cove():
         wet |= nb == 1
     b.rung[(b.rung == 3) & wet & ~b.free] = 5
     check(b, [0, 1, 2, 4, 4, 3])  # (the damp sand a step between the wet sand and the sand)
+    # All one water (QM, Oct 14): the deep middles join the water, after the layout so it stays as approved.
+    b.rung = np.maximum(b.rung, 1) - 1
+    b.tiles = b.tiles[1:]
     walls = dict(wall=[(140, 98, 62), (128, 88, 55)], cap=(104, 70, 44), gate=(255, 160, 40))  # plain wooden brown, darker wood top (QM, Oct 14: stamina-loop 7c527722; no bands or runes)
     return b, walls
 
@@ -460,7 +464,7 @@ def render(b, walls, out, rows=4, s=1):
                         if name in ("Water", "DeepWater"):
                             colour = col if (a + c + (i + j) % 2) % 2 else tuple(min(255, v + 14) for v in col)
                         if name == "Planks":
-                            colour = col if c == 0 else tuple(v - 12 for v in col)
+                            colour = col if (j * 2 + c) % 2 == 0 else chk  # (4-stud boards, alternating)
                         x0, y0 = ox + (i * CELL + a * 4) * s, ((j - r * seg) * CELL + c * 4) * s
                         d.rectangle([x0, y0, x0 + 4 * s - 1, y0 + 4 * s - 1], fill=colour)
             # a dark line along every step, on its low side: shows the heights
