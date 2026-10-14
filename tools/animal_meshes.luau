@@ -16,6 +16,7 @@ local IDS = {
 	TreasureHermit_Crab_neck = 0, -- (the Treasure Hermit's head and claw tops, like the Green Crab's: QM Oct 14)
 	TreasureHermit_Crab_ClawL = 0,
 	TreasureHermit_Crab_ClawR = 0,
+	TreasureTurtle_Shell_root = 0, -- (the Treasure Turtle's shell, one smooth mesh: QM Oct 14)
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then

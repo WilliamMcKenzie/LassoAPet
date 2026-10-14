@@ -1,4 +1,7 @@
-"""Treasure Turtle: World 3 Pirate Cove's Legendary (Oct 14). A huge old sea turtle carrying its own
+"""SUPERSEDED (Oct 14): designs/world3/pirate/TreasureTurtle.bbmodel is QM's Blockbench edit with its shell
+one smooth mesh (SmoothShell); don't rerun this over it.
+
+Treasure Turtle: World 3 Pirate Cove's Legendary (Oct 14). A huge old sea turtle carrying its own
 desert island: a stepped green shell with gold-edged scutes, a sand island on top with a leaning
 palm tree (coconuts, drooping fronds with pyramid tips) and a little treasure chest. Teal skin
 with darker spots, a hooked pyramid beak, googly plate eyes, big front flippers and small back
