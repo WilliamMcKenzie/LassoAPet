@@ -44,10 +44,17 @@ end
 -- The water under a point (QM, Oct 14: things sink a bit in it, Client/WaterSink): "DeepWater",
 -- "Water" (a Water part or any with the flowing water tile, a Texture named Water), or nil.
 local waters -- [cell key] = its kind
+local watching, dirty, builtAt = false, false, 0
 function Ground.waterAt(x, z)
-	if not waters then
-		waters = {}
-		for _, part in workspace:WaitForChild("World"):WaitForChild("Ground"):GetChildren() do
+	if not waters or (dirty and os.clock() - builtAt > 1) then
+		waters, dirty, builtAt = {}, false, os.clock()
+		local ground = workspace:WaitForChild("World"):WaitForChild("Ground")
+		if not watching then -- (a client asks before all the floor has arrived: look again, at most once a second, as parts come and go)
+			watching = true
+			ground.ChildAdded:Connect(function() dirty = true end)
+			ground.ChildRemoved:Connect(function() dirty = true end)
+		end
+		for _, part in ground:GetChildren() do
 			local kind = if part.Name == "DeepWater" then "DeepWater"
 				elseif part.Name == "Water" or part:FindFirstChild("Water") then "Water"
 				else nil

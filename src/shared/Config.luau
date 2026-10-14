@@ -845,7 +845,7 @@ local Config = {
 		Fox = "rbxassetid://92522948167443", -- assets/ui/FoxEggRender.png (World 2)
 		NineTailedFox = "rbxassetid://110560724842212", -- assets/ui/NineTailedFoxEggRender.png (World 2)
 		Kitsune = "rbxassetid://124688776792586", -- assets/ui/KitsuneEggRender.png (World 2)
-		GreenCrab = "rbxassetid://77340253953044", -- assets/ui/GreenCrabEggRender.png (World 3; STILL THE RED EGG until the green render is uploaded)
+		GreenCrab = "rbxassetid://74196090261063", -- assets/ui/GreenCrabEggRender.png (World 3)
 		Parrot = "rbxassetid://96862284524676", -- assets/ui/ParrotEggRender.png (World 3)
 		BananaMonkey = "rbxassetid://128398088115519", -- assets/ui/BananaMonkeyEggRender.png (World 3)
 		TreasureHermit = "rbxassetid://87618949538639", -- assets/ui/TreasureHermitEggRender.png (World 3)
@@ -1912,6 +1912,7 @@ if Config.World == 3 then
 			Patches = {
 				Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
 				WetSand = { rgb(225, 189, 120), rgb(208, 172, 105) }, -- (QM, Oct 14; was 206, 172, 110 / 194, 160, 98)
+				DampSand = { rgb(233, 204, 140), rgb(219, 189, 126) }, -- between the sand and the wet sand (QM, Oct 14; tools/world3_dampsand.luau)
 				Grass = { rgb(96, 204, 60), rgb(84, 188, 50) }, -- (the base's)
 				Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
 				DeepWater = { rgb(30, 120, 205), rgb(30, 120, 205) },
@@ -1919,6 +1920,7 @@ if Config.World == 3 then
 				-- The base's walls, bottom to top (QM, Oct 14): three tiles of dark sand, light sand
 				-- the rest of the way, green grass along the very top (WorldColors.paintWall).
 				BaseWallLow = { rgb(206, 172, 110), rgb(194, 160, 98) },
+				BaseWallMid = { rgb(233, 204, 140), rgb(219, 189, 126) }, -- the damp band between, ragged (QM, Oct 14; tools/world3_wallmid.luau)
 				BaseWall = SAND,
 				BaseCap = { rgb(96, 204, 60), rgb(96, 204, 60) },
 			},
