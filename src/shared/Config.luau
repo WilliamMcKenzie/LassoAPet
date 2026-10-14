@@ -1284,8 +1284,8 @@ Config.World = table.find(Config.Places, game.PlaceId) or 1
 -- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
 Config.EndPortal = nil
 -- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's
--- World 2 bar; QM, Oct 13: 200k, was 1m, then 10m). World 1 is everyone's.
-Config.WorldPrices = { 0, 200000 }
+-- World 2 bar; QM, Oct 14: 100k, was 200k, 1m, then 10m). World 1 is everyone's.
+Config.WorldPrices = { 0, 100000 }
 -- Rebirth (QM, Oct 13): World 2's Rebirth bar (World2Bar.client) for Prices[n] gold, your
 -- nth. It re-locks World 2 (save up for it again) and sends you to World 1; your pets stay.
 -- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,
@@ -1340,6 +1340,40 @@ end
 function Config.storeName(name, world)
 	world = world or Config.World
 	return if world == 1 then name else name .. "_W" .. world
+end
+
+-- The income curve past the Desert (QM, Oct 14: "flatten it to the Desert's level"): each
+-- biome's animals earn about 2x the one before on average (herd-weighted), not the old ~3-7x,
+-- so going further helps but World 2 doesn't need it. Each biome's animals keep their order;
+-- the Robux pets (Snack Yak, Robo Shark) and the Fish (a Meadow animal) keep theirs.
+do
+	local skip = { SnackYak = true, RoboShark = true, Fish = true }
+	local function average(biome)
+		local weights, total = 0, 0
+		for kind, weight in biome.Herd do
+			if weight > 0 and Config.PetIncome[kind] and not skip[kind] then
+				weights += weight
+				total += weight * Config.PetIncome[kind]
+			end
+		end
+		return if weights > 0 then total / weights else nil
+	end
+	local previous = average(Config.Biomes[2]) -- the Desert's, as it is
+	for i = 3, #Config.Biomes do
+		local biome = Config.Biomes[i]
+		local was = average(biome)
+		if was and previous then
+			local k = previous * 2 / was
+			for kind, weight in biome.Herd do
+				if weight > 0 and Config.PetIncome[kind] and not skip[kind] then
+					local n = Config.PetIncome[kind] * k
+					local step = if n >= 1000 then 50 elseif n >= 100 then 5 else 1
+					Config.PetIncome[kind] = math.max(1, math.floor(n / step + 0.5) * step)
+				end
+			end
+			previous = average(biome)
+		end
+	end
 end
 
 -- World 2's Temple and Tomb animals on its own curve (below): { speed, gold a second, hatch
