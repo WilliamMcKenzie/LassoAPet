@@ -300,14 +300,23 @@ def gigacorn():
     a.box("Mouth", (-1.1, 10.5, -9.6), (1.1, 10.64, -9.55), C.CHOC_DK, N)
 
     # big googly eyes under thick, angry chocolate brows
-    a.eyes(1.55, 11.55, 13.0, -7.35, -5.6)
+    # googly eyes that wrap the head's front corners: a socket block bulges out of each
+    # corner, with a white plate on its side and another on its front (seen head-on)
+    ex, ey0, ey1, ez0, ez1 = 2.05, 11.5, 13.1, -8.1, -5.7
     for side, sx in (("L", -1), ("R", 1)):
-        C.rbox(a, "Brow" + side, (0.42, 0.42, 2.2), T(sx * 1.7, 13.2, -6.45) @ Rx(-17), C.CHOC, N)
+        xa, xb = sorted((sx * 1.3, sx * ex))
+        a.box("Socket" + side, (xa, ey0 - 0.05, ez0), (xb, ey1 + 0.05, ez1), COAT, N)
+        fa, fb = sorted((sx * 1.36, sx * (ex - 0.06)))
+        a.box("EyeFront" + side, (fa, ey0 + 0.05, ez0 - C.PLATE), (fb, ey1 - 0.05, ez0), C.EYE_WHITE, N)
+        pa, pb = sorted((sx * 1.4, sx * 1.75))
+        a.box("PupilFront" + side, (pa, ey0 + 0.2, ez0 - C.PLATE - 0.03), (pb, ey0 + 1.0, ez0 - C.PLATE + C.PUPIL_BACK), C.PUPIL, N)
+    a.eyes(ex, ey0 + 0.05, ey1 - 0.05, ez0 + 0.06, ez1 - 0.1)
+    for side, sx in (("L", -1), ("R", 1)):
+        C.rbox(a, "Brow" + side, (0.85, 0.42, 2.7), T(sx * 1.62, 13.5, -6.85) @ Rz(sx * 14) @ Rx(-14), C.CHOC, N)
         # licorice bridle: noseband, cheek strap, a strap behind the eye, gumdrop rosettes
         a.box("Cheek" + side, tuple(sorted((sx * 1.55, sx * 1.7))) [0:1] + (11.18, -7.62), tuple(sorted((sx * 1.55, sx * 1.7)))[1:2] + (11.45, -4.9), C.CHERRY, N)
         a.box("CheekUp" + side, tuple(sorted((sx * 1.55, sx * 1.7)))[0:1] + (11.18, -5.25), tuple(sorted((sx * 1.55, sx * 1.7)))[1:2] + (hy1, -4.95), C.CHERRY, N)
         gumdrop(a, "Rosette" + side, (sx * 1.7, 11.32, -5.1), C.SKY, C.SKY_DK, ("-x" if sx < 0 else "+x"), 0.5, N)
-        gumdrop(a, "NoseGem" + side, (sx * 1.42, 11.6, -8.15), C.LEMON, C.LEMON_DK, ("-x" if sx < 0 else "+x"), 0.36, N)
     a.box("Noseband", (-1.42, 11.18, -8.35), (1.42, 13.02, -7.95), C.CHERRY, N)
     a.box("Crown", (-1.6, hy1, -5.25), (1.6, hy1 + 0.15, -4.95), C.CHERRY, N)
 

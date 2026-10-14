@@ -1,7 +1,7 @@
 """Spoiled Creampuff: World 3 Candyland Rare (after the Candyland Hunting Grounds creampuffs).
-A grumpy cream puff: a golden choux pastry bun cut in half with a thick ring of whipped
+A grumpy cream puff gone off: a golden choux pastry bun cut in half with a thick ring of whipped
 cream between, the top half a lid that chomps open and shut like a mouth, a cherry on top,
-googly eyes with chocolate brows, and four stubby pastry feet. It hops.
+googly eyes with chocolate brows, and four stubby pastry feet, green mould spots, a sour green drip and a crack in the lid. It hops.
 
 Bones: root (bottom bun and cream), neck (the lid: opens with +X), EarL/EarR empty, Tail
 empty, Leg* (feet). Nothing turned.
@@ -21,6 +21,9 @@ from snow_designs import pyramid  # noqa: E402
 BUN = C.PASTRY
 BUN_DK = C.PASTRY_DK
 CREAM = C.WHITE
+MOULD = (150, 206, 60)
+MOULD_DK = (96, 150, 40)
+SOUR = (196, 236, 90)
 
 
 def creampuff(name="Creampuff", rarity="Rare"):
@@ -36,6 +39,11 @@ def creampuff(name="Creampuff", rarity="Rare"):
         a.box(f"DripF{i + 1}", (dx - 0.3, y1 - 0.5 + 0.15 * i, z0 - 0.25), (dx + 0.3, y1, z0), CREAM, "root")
     C.sym(a, "DripS*", (x, y1 - 0.6, -0.8), (x + 0.25, y1, -0.2), CREAM, "root")
     C.sym(a, "DripB*", (x, y1 - 0.4, 1.2), (x + 0.25, y1, 1.7), CREAM, "root")
+    # one sour green drip and mould on the bottom bun
+    a.box("SourDrip", (0.7, y1 - 0.9, z0 - 0.25), (1.1, y1, z0), SOUR, "root")
+    a.box("SourDripEnd", (0.75, y1 - 1.1, z0 - 0.22), (1.05, y1 - 0.9, z0 - 0.03), MOULD, "root")
+    a.box("Mould4", (-x - 0.15, 1.6, 0.6), (-x, 2.2, 1.6), MOULD, "root")
+    a.box("Mould5", (-1.8, 1.4, z0 - 0.15), (-1.2, 1.9, z0), MOULD_DK, "root")
 
     # four stubby feet
     for leg in ("FL", "FR", "HL", "HR"):
@@ -62,6 +70,13 @@ def creampuff(name="Creampuff", rarity="Rare"):
     C.front_eyes(a, 0.85, ly0 + 0.15, ly0 + 1.2, -2.2, 0.9, "neck")
     for side, sx in (("L", -1), ("R", 1)):  # angry: inner ends low
         C.rbox(a, "Brow" + side, (1.2, 0.3, 0.3), C.T(sx * 0.85, ly0 + 1.38, -2.35) @ C.Rz(sx * 16), C.CHOC, "neck")
+    # spoiled: chunky green mould spots, a crack down the lid's side
+    a.box("Mould1", (-2.1, ly0 + 0.2, -2.35), (-1.5, ly0 + 0.7, -2.2), MOULD, "neck")
+    a.box("Mould2", (2.2, ly0 + 0.3, -0.6), (2.4, ly0 + 1.0, 0.4), MOULD, "neck")
+    a.box("Mould2b", (2.4, ly0 + 0.45, -0.35), (2.5, ly0 + 0.8, 0.1), MOULD_DK, "neck")
+    a.box("Mould3", (0.5, ly0 + 2.0, 0.6), (1.2, ly0 + 2.2, 1.3), MOULD, "neck")
+    a.box("Crack1", (-2.3, ly0 + 0.9, 0.6), (-2.15, ly0 + 1.5, 0.8), C.CHOC_DK, "neck")
+    a.box("Crack2", (-2.3, ly0 + 0.5, 0.8), (-2.15, ly0 + 0.95, 1.0), C.CHOC_DK, "neck")
     a.pivots["neck"] = (0, ly0, 2.2)
     # the bottom bun's grumpy teeth: little cream pyramids along the front of the cream
     for i, dx in enumerate((-1.2, -0.4, 0.4, 1.2)):

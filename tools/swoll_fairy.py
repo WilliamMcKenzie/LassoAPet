@@ -90,7 +90,7 @@ def swoll_fairy(name="SwollFairy", rarity="Epic"):
     for side, sx in (("L", -1), ("R", 1)):
         bone = "Wing" + side
         base = (sx * 0.5, 4.9, 1.2)
-        for j, (ang, L, wd, col, edge) in enumerate(((58, 5.6, 2.2, WING, WING_DK), (-15, 3.6, 1.4, C.LILAC, C.GRAPE))):
+        for j, (ang, L, wd, col, edge) in enumerate(((58, 5.6, 2.2, WING, WING_DK), (-15, 2.8, 0.9, C.LILAC, C.GRAPE))):
             M = C.T(*base) @ C.Rz(sx * ang) @ C.T(sx * L / 2, 0, 0.15 * j)
             C.rbox(a, f"{bone}Pane{j + 1}", (L, wd, 0.3), M, col, bone)
             C.rbox(a, f"{bone}Edge{j + 1}", (0.35, wd + 0.1, 0.36), M @ C.T(sx * (L / 2 - 0.17), 0, 0), edge, bone)

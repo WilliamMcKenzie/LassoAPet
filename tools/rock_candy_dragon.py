@@ -1,16 +1,16 @@
 """Rock Candy Dragon: World 3 Candyland giga-rare chase pet (about 1 in 1000 spawns).
 
-A big flying dragon grown out of rainbow rock candy. Its faceted body, neck and tail are
-chunky crystallised-sugar segments shading nose to tail through the rainbow (cherry head,
-orange neck, lemon chest, lime back, mint rump, sky, periwinkle and grape tail), every
-segment bristling with sugar-crystal clusters (a square shaft and a pyramid tip, like the
-cavern crystals). A spine of crystal spikes runs from the crown to the tail, every other
-tip glowing. Two huge wings: candy-cane wing bones with thick hard-candy stained-glass
-panes between them (sky, lime, lemon, orange, cherry), glowing crystal claws on the
-wrists. A cherry head with big googly plate eyes, sugar-white crystal horns, a toothy
-candy grin and swirled lollipop cheeks; the tail ends in a candy stick and a big grape
-swirl lollipop. A peppermint saddle blanket and chocolate saddle with a lollipop pommel
-sit on its back; four stubby legs are tucked up under it with sugar-crystal claws.
+A big flying dragon made of rock candy. Head, neck, body, tail and legs are one bright
+cherry red (darker cherry stop on the undersides) with a cream-and-white sugar belly; the
+faceted body segments are chunky crystallised sugar. The rainbow lives on the rock-candy
+clusters along the spine (lemon, orange, lime, mint, sky, periwinkle, grape, bubblegum
+crystals nose to tail, each a square shaft and a pyramid tip, with white sugar crystals
+mixed in and some tips glowing) and in the wings: bat-dragon wings with a white candy-stick
+arm, three white finger sticks fanning from the wrist (one red band each) and thick
+stained-glass hard-candy panes between them (grape, sky, lime), scalloped along the back
+edge. Big googly plate eyes, white crystal horns with glowing pink tips, a toothy grin,
+lollipop-swirl cheeks; the tail ends in a candy stick and a big grape swirl lollipop. No
+saddle: the rider sits on the back between the wings (meta seat). Legs hang under it.
 
 Bones (each at 0, rests baked into the parts, so convert WITHOUT --zyx):
   root, neck (neck + head), WingL/WingL2, WingR/WingR2 (flap about Z), Tail1 > Tail2 > Tail3,
@@ -45,8 +45,6 @@ LEMON_P = (255, 240, 150)   # pastel sugar crystal colours for the spine cluster
 LILAC_P = (226, 196, 255)
 MINT_P = (170, 246, 214)
 SKY_P = (170, 224, 255)
-ORCHID = (226, 110, 230)    # middle wing pane, between bubblegum and grape
-ORCHID_DK = (176, 66, 196)
 
 
 def lighten(c, k=0.45):
@@ -104,17 +102,17 @@ def rock_candy_dragon():
     # ================================================================ body (root)
     # nose-to-tail rainbow: head cherry, neck orange, chest lemon, back lime, rump mint, tail sky > periwinkle > grape
     cy = 7.2
-    segs = [("Chest", -4.8, -1.6, 3.2, 2.8, C.LEMON, C.LEMON_DK),
-            ("Back", -1.6, 1.6, 2.9, 2.45, C.LIME, C.LIME_DK),
-            ("Rump", 1.6, 4.6, 2.6, 2.25, C.MINT, C.MINT_DK)]
+    segs = [("Chest", -4.8, -1.6, 3.2, 2.8, C.CHERRY, C.CHERRY_DK),
+            ("Back", -1.6, 1.6, 2.9, 2.45, C.CHERRY, C.CHERRY_DK),
+            ("Rump", 1.6, 4.6, 2.6, 2.25, C.CHERRY, C.CHERRY_DK)]
     for name, z0, z1, hx, hy, col, dk in segs:
         octo(name, z0, z1, hx, hy, cy, 1.0, col, "root", dk)
     # broad shoulders over the front legs
     for side, sx in (("L", -1), ("R", 1)):
         xs = sorted((sx * 2.6, sx * 3.6))
-        a.box("Shoulder" + side, (xs[0], 6.2, -4.5), (xs[1], 8.9, -2.0), C.LEMON_DK, "root")
+        a.box("Shoulder" + side, (xs[0], 6.2, -4.5), (xs[1], 8.9, -2.0), C.CHERRY_DK, "root")
     # darker sugar collars where the segments meet (proud rings, no coplanar faces)
-    for i, (z, hx, hy, col) in enumerate(((-1.6, 2.75, 2.5, C.LEMON_DK), (1.6, 2.65, 2.4, C.LIME_DK))):
+    for i, (z, hx, hy, col) in enumerate(((-1.6, 2.75, 2.5, C.CHERRY_DK), (1.6, 2.65, 2.4, C.CHERRY_DK))):
         a.box(f"Collar{i + 1}", (-hx - 0.2 + 0.9, cy - hy - 0.02, z - 0.22), (hx + 0.2 - 0.9, cy + hy + 0.15, z + 0.22), col, "root")
         a.box(f"CollarW{i + 1}", (-hx - 0.15, cy - hy + 0.9, z - 0.22), (hx + 0.15, cy + hy - 0.9, z + 0.22), col, "root")
     # sugar-white belly plates
@@ -125,7 +123,7 @@ def rock_candy_dragon():
     a.box("ChestPlate", (-1.6, 4.9, -5.15), (1.6, 8.4, -4.7), C.CREAM, "root")
 
     # big rock-candy clusters on both flanks (two crystals splaying out of one spot)
-    clusters = [(0.0, 5.6, C.LIME, C.LIME_DK), (3.1, 5.9, C.MINT, C.MINT_DK)]
+    clusters = [(0.0, 5.6, C.LIME, C.LIME_DK), (3.1, 5.9, C.SKY, C.SKY_DK)]
     for side, sx in (("L", -1), ("R", 1)):
         for j, (z, y, col, dk) in enumerate(clusters):
             hx = 2.8 if abs(z) < 1.6 else 2.5
@@ -143,30 +141,12 @@ def rock_candy_dragon():
             crystal(f"{name}{'abc'[k]}", base + (dx * 0.3 * s, 0, 0), (dx, dy, dz), w * s, sh * s, tp * s, col,
                     GLOW_PINK if k == glow else lighten(col, 0.4), bone, 0, k == glow)
 
-    cluster("Spine1", (0, cy + 2.5, -4.0), "root", 1.6, (C.WHITE, LEMON_P, C.BUBBLE))
-    cluster("Spine2", (0, cy + 2.4, -2.3), "root", 1.3, (LEMON_P, C.WHITE, LILAC_P), glow=1)
-    cluster("Spine3", (0, cy + 2.0, 2.4), "root", 1.4, (MINT_P, C.WHITE, SKY_P))
-    cluster("Spine4", (0, cy + 1.9, 3.9), "root", 1.2, (C.WHITE, SKY_P, MINT_P), glow=2)
+    cluster("Spine1", (0, cy + 2.5, -4.0), "root", 1.6, (C.LEMON, LEMON_P, C.WHITE))
+    cluster("Spine2", (0, cy + 2.4, -2.3), "root", 1.3, (C.LIME, C.WHITE, lighten(C.LIME, 0.5)), glow=1)
+    cluster("Spine3", (0, cy + 2.0, 2.4), "root", 1.4, (C.MINT, MINT_P, C.WHITE))
+    cluster("Spine4", (0, cy + 1.9, 3.9), "root", 1.2, (C.SKY, C.WHITE, SKY_P), glow=2)
 
-    # ---- saddle: peppermint blanket, chocolate seat, lollipop pommel
-    top = cy + 2.45  # 9.65, the Back segment's top
-    for i in range(5):
-        z0 = -1.5 + i * 0.56
-        a.box(f"Blanket{i + 1}", (-2.95, top - 1.35, z0), (2.95, top + 0.12, z0 + 0.56),
-              C.WHITE if i % 2 == 0 else C.CHERRY, "root")
-    a.box("BlanketHemL", (-3.05, top - 1.6, -1.55), (-2.95, top - 1.2, 1.35), C.CHERRY_DK, "root")
-    a.box("BlanketHemR", (2.95, top - 1.6, -1.55), (3.05, top - 1.2, 1.35), C.CHERRY_DK, "root")
-    a.box("Seat", (-1.55, top + 0.12, -1.3), (1.55, top + 0.45, 1.1), C.CHOC, "root")
-    a.box("Cushion", (-1.3, top + 0.45, -1.05), (1.3, top + 0.62, 0.65), C.BUBBLE, "root")
-    a.box("Cantle", (-1.55, top + 0.45, 0.65), (1.55, top + 1.3, 1.1), C.CHOC, "root")
-    a.box("CantleTrim", (-1.6, top + 1.3, 0.6), (1.6, top + 1.5, 1.15), C.STRAWB, "root")
-    a.box("PommelPost", (-0.18, top + 0.45, -1.3), (0.18, top + 1.25, -0.95), C.WHITE, "root")
-    swirl("Pommel", (0, top + 1.75, -1.12), (0, 0, -1), 0.6, [C.LEMON, C.WHITE, C.CHERRY], "root", thick=0.35)
-    for side, sx in (("L", -1), ("R", 1)):  # stirrups: candy-stick straps with gumdrop steps
-        xs = sorted((sx * 3.05, sx * 3.2))
-        a.box("Strap" + side, (xs[0], top - 3.0, -0.35), (xs[1], top - 1.2, -0.05), C.CHOC_DK, "root")
-        xg = sorted((sx * 2.95, sx * 3.55))
-        a.box("Stirrup" + side, (xg[0], top - 3.4, -0.6), (xg[1], top - 3.0, 0.2), C.STRAWB, "root")
+    top = cy + 2.45  # 9.65, the Back segment's top: the rider sits here between the wings
 
     # ---- legs hanging under it in flight: chunky thigh, shin, foot, crystal claws (pyramids)
     for side, sx in (("L", -1), ("R", 1)):
@@ -176,18 +156,18 @@ def rock_candy_dragon():
         # front legs, under the shoulders, reaching a little forward
         bone = "LegF" + side
         a.pivots[bone] = (sx * 2.6, 6.0, -3.2)
-        lb("UpperArm", 1.9, 3.3, 3.6, 6.2, -4.1, -2.4, C.LEMON, bone)
-        lb("Forearm", 2.0, 3.2, 2.2, 3.8, -4.5, -3.0, C.LEMON_DK, bone)
-        lb("Hand", 1.9, 3.3, 1.6, 2.3, -4.9, -2.9, C.LEMON_DK, bone)
+        lb("UpperArm", 1.9, 3.3, 3.6, 6.2, -4.1, -2.4, C.CHERRY, bone)
+        lb("Forearm", 2.0, 3.2, 2.2, 3.8, -4.5, -3.0, C.CHERRY_DK, bone)
+        lb("Hand", 1.9, 3.3, 1.6, 2.3, -4.9, -2.9, C.CHERRY_DK, bone)
         for k in range(3):
             x = sx * (2.15 + 0.45 * k)
             rpyr(f"ClawF{side}{k + 1}", T(x, 1.95, -4.9) @ Rx(-90), 0.36, 0.5, 0.6, CRYSTAL, bone)
         # hind legs: big drumstick thighs, shins swept back, long feet
         bone = "LegH" + side
         a.pivots[bone] = (sx * 2.5, 6.2, 3.0)
-        lb("Thigh", 1.7, 3.4, 3.8, 7.6, 1.6, 4.4, C.MINT, bone)
-        lb("Shin", 1.9, 3.2, 2.0, 4.0, 3.0, 4.8, C.MINT_DK, bone)
-        lb("Foot", 1.8, 3.3, 1.4, 2.1, 2.3, 4.9, C.MINT_DK, bone)
+        lb("Thigh", 1.7, 3.4, 3.8, 7.6, 1.6, 4.4, C.CHERRY, bone)
+        lb("Shin", 1.9, 3.2, 2.0, 4.0, 3.0, 4.8, C.CHERRY_DK, bone)
+        lb("Foot", 1.8, 3.3, 1.4, 2.1, 2.3, 4.9, C.CHERRY_DK, bone)
         for k in range(3):
             x = sx * (2.05 + 0.5 * k)
             rpyr(f"ClawH{side}{k + 1}", T(x, 1.75, 2.3) @ Rx(-90), 0.38, 0.5, 0.65, CRYSTAL, bone)
@@ -197,16 +177,16 @@ def rock_candy_dragon():
     neck_pts = [np.array(p) for p in ((0, 7.8, -4.0), (0, 9.4, -5.8), (0, 11.0, -7.4))]
     neck_w = [2.5, 2.2]
     for k in range(2):
-        beam(f"Neck{k + 1}", neck_pts[k], neck_pts[k + 1], neck_w[k], neck_w[k], C.ORANGE, "neck", pad=1.0)
+        beam(f"Neck{k + 1}", neck_pts[k], neck_pts[k + 1], neck_w[k], neck_w[k], C.CHERRY, "neck", pad=1.0)
         rbox(f"NeckFacet{k + 1}", (neck_w[k] * 0.86, neck_w[k] * 0.86, np.linalg.norm(neck_pts[k + 1] - neck_pts[k]) + 0.6),
-             C.frame(neck_pts[k], neck_pts[k + 1]) @ Rz(45), C.ORANGE_DK, "neck")
+             C.frame(neck_pts[k], neck_pts[k + 1]) @ Rz(45), C.CHERRY_DK, "neck")
         # cream throat plates
         mid = (neck_pts[k] + neck_pts[k + 1]) / 2
         d = (neck_pts[k + 1] - neck_pts[k]) / np.linalg.norm(neck_pts[k + 1] - neck_pts[k])
         rbox(f"Throat{k + 1}", (neck_w[k] * 0.62, 0.4, 1.6), C.frame(mid, mid + d) @ T(0, -neck_w[k] / 2 - 0.05, 0), C.CREAM, "neck")
     for i, t in enumerate((0.35, 1.05)):
         p = neck_pts[0] + (neck_pts[2] - neck_pts[0]) * (t / 1.6)
-        cluster(f"NeckSpine{i + 1}", p + (0, 0.9, 0.2), "neck", 1.15, (C.WHITE, C.BUBBLE, LEMON_P), glow=0 if i else 3)
+        cluster(f"NeckSpine{i + 1}", p + (0, 0.9, 0.2), "neck", 1.15, ((C.ORANGE, C.WHITE, lighten(C.ORANGE, 0.5)) if i else (C.LEMON, C.WHITE, LEMON_P)), glow=0 if i else 3)
 
     # head: chunky cherry skull, snout with an open toothy grin, googly eyes on the face
     HR, HR_DK = C.CHERRY, C.CHERRY_DK
@@ -250,14 +230,14 @@ def rock_candy_dragon():
                 lighten(HR, 0.6) if i else lighten(HR, 0.3), "neck", 45, i == 1)
 
     # ================================================================ tail: Tail1 > Tail2 > Tail3, lollipop tip
-    tails = [("Tail1", 4.6, 8.6, 2.0, 1.85, 7.0, C.SKY, C.SKY_DK),
-             ("Tail2", 8.6, 12.4, 1.5, 1.4, 6.7, PERI, PERI_DK),
-             ("Tail3", 12.4, 15.8, 1.05, 1.0, 6.4, C.GRAPE, C.GRAPE_DK)]
+    tails = [("Tail1", 4.6, 8.6, 2.0, 1.85, 7.0, C.CHERRY, C.CHERRY_DK),
+             ("Tail2", 8.6, 12.4, 1.5, 1.4, 6.7, C.CHERRY, C.CHERRY_DK),
+             ("Tail3", 12.4, 15.8, 1.05, 1.0, 6.4, C.CHERRY, C.CHERRY_DK)]
     for bone, z0, z1, hx, hy, ty, col, dk in tails:
         a.pivots[bone] = (0, ty, z0)
         octo(bone, z0 - 0.3, z1, hx, hy, ty, 0.6 if hx > 1.2 else 0.4, col, bone, dk)
         cluster(f"{bone}Spine", (0, ty + hy - 0.2, (z0 + z1) / 2), bone, hx * 0.75,
-                (C.WHITE, SKY_P if bone != "Tail3" else LILAC_P, C.BUBBLE), glow=0 if bone == "Tail2" else 3)
+                {"Tail1": (PERI, C.WHITE, SKY_P), "Tail2": (C.GRAPE, C.WHITE, LILAC_P), "Tail3": (C.BUBBLE, C.WHITE, LILAC_P)}[bone], glow=0 if bone == "Tail2" else 3)
     # candy stick and the big grape swirl lollipop
     a.box("TailStick", (-0.35, 6.05, 15.7), (0.35, 6.75, 17.4), C.WHITE, "Tail3")
     a.box("TailStickBand", (-0.4, 6.0, 16.3), (0.4, 6.8, 16.75), C.CHERRY, "Tail3")
@@ -267,11 +247,11 @@ def rock_candy_dragon():
     # ================================================================ wings
     # Bat-dragon wings: a candy-stick arm out to the wrist, three finger sticks fanning out
     # and back from the wrist, thick hard-candy membrane between them with a scalloped
-    # trailing edge (each pane dips between the finger tips). One colour family: bubblegum
-    # pink at the tip through orchid to grape at the body, darker stop at the trailing edge.
+    # trailing edge (each pane dips between the finger tips). The panes are
+    # stained glass, one rainbow colour per pane (grape, sky, lime), darker stop at the trailing edge.
     ARM = 5.6                                   # shoulder to wrist, along the wing
     fingers = [(86, 8.2), (52, 8.8), (16, 7.2)]  # (angle from the arm toward the back, length)
-    panes = [(C.GRAPE, C.GRAPE_DK), (ORCHID, ORCHID_DK), (C.BUBBLE, C.BUBBLE_DK)]
+    panes = [(C.GRAPE, C.GRAPE_DK), (C.SKY, C.SKY_DK), (C.LIME, C.LIME_DK)]
     root_edge = 5.6                              # how far back the membrane reaches at the body
     for side, sx in (("L", -1), ("R", 1)):
         inner, outer = "Wing" + side, "Wing" + side + "2"
@@ -296,10 +276,10 @@ def rock_candy_dragon():
         rpyr("GlowThumb" + side, W @ T(sx * ARM, 0, -0.6) @ Rx(-90), 0.75, 0.75, 1.2, GLOW_PINK, outer)
         # fingers: white candy sticks, one red band, crystal claw tips
         for k, (phi, ln) in enumerate(fingers):
-            strip(f"Finger{side}{k + 1}", ARM, 0, phi, 0.4, ln, 0.6, 0.62, C.WHITE, outer)
-            strip(f"FingerBand{side}{k + 1}", ARM, 0, phi, ln * 0.5, ln * 0.5 + 0.45, 0.7, 0.72, C.CHERRY, outer)
+            strip(f"Finger{side}{k + 1}", ARM, 0, phi, 0.4, ln, 0.7, 0.85, C.WHITE, outer)
+            strip(f"FingerBand{side}{k + 1}", ARM, 0, phi, ln * 0.5, ln * 0.5 + 0.45, 0.8, 0.95, C.CHERRY, outer)
             rpyr(f"FingerTip{side}{k + 1}", W @ T(sx * ARM, 0, 0) @ Ry(sx * (90 - phi)) @ T(0, 0, ln) @ Rx(90),
-                 0.6, 0.62, 1.0, CRYSTAL, outer)
+                 0.7, 0.85, 1.0, CRYSTAL, outer)
         # membranes fanning between the fingers (outer bone), a scalloped edge
         nst = 6
         for p in range(2):
@@ -311,7 +291,7 @@ def rock_candy_dragon():
                 R = la + (lb - la) * t - 1.7 * math.sin(math.pi * t) - 0.2
                 step = math.radians(abs(pb - pa) / nst)
                 cutr = R * 0.6
-                th = 0.36 if j % 2 == 0 else 0.42
+                th = 0.55 if j % 2 == 0 else 0.62
                 strip(f"Pane{side}{p + 1}{j + 1}", ARM, 0, phi, 0.3, cutr, cutr * step * 1.25 + 0.2, th, col, outer)
                 strip(f"PaneDk{side}{p + 1}{j + 1}", ARM, 0, phi, cutr - 0.05, R, R * step * 1.2, th + 0.02, dk, outer)
         # the grape membrane between the body and the first finger (inner bone), scalloped too
@@ -322,14 +302,14 @@ def rock_candy_dragon():
             u = 0.3 + (tip1[0] - 0.6) * t
             R = root_edge + (tip1[1] - root_edge) * t - 1.5 * math.sin(math.pi * t)
             wd = (tip1[0] - 0.6) / nin + 0.12
-            th = 0.36 if j % 2 == 0 else 0.42
+            th = 0.55 if j % 2 == 0 else 0.62
             strip(f"PaneRoot{side}{j + 1}", u, 0, 90, 0.2, R * 0.6, wd, th, panes[0][0], inner)
             strip(f"PaneRootDk{side}{j + 1}", u, 0, 90, R * 0.6 - 0.05, R, wd, th + 0.02, panes[0][1], inner)
 
     # ================================================================ wrap up
     a.pivots["root"] = (0, cy, 0)
     lo, hi = C.extent(a)
-    a.meta = {"seat": (0, round(top + 0.62, 2), -0.2), "neck_loop": {"center": (0, 9.4, -5.8), "radius": 1.9}}
+    a.meta = {"seat": (0, round(top, 2), -0.2), "neck_loop": {"center": (0, 9.4, -5.8), "radius": 1.9}}
     for p in a.parts:
         if "In" in p.name and not p.name.startswith(("Eye", "Pupil", "Plain", "Mouth", "Nostril")):
             raise ValueError("'In' in a part name makes it plain: " + p.name)

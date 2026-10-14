@@ -45,22 +45,25 @@ def gummy_bear(name="GummyBear", rarity="Common", body=BODY, dark=DARK, light=LI
     a.box("Head", (-hx, hy0, hz0), (hx, hy1, hz1), body, "neck")
     a.box("HeadTop", (-hx + 0.35, hy1, hz0 + 0.35), (hx - 0.35, hy1 + 0.3, hz1 - 0.35), body, "neck")
     a.box("Cheeks", (-hx - 0.2, hy0 + 0.3, hz0 + 0.5), (hx + 0.2, hy0 + 1.4, hz1 - 0.6), body, "neck")
-    a.box("Muzzle", (-0.95, hy0 + 0.25, hz0 - 0.9), (0.95, hy0 + 1.55, hz0), light, "neck")
-    a.box("MuzzleTop", (-0.7, hy0 + 1.55, hz0 - 0.75), (0.7, hy0 + 1.75, hz0), light, "neck")
-    a.box("Nose", (-0.42, hy0 + 1.1, hz0 - 1.05), (0.42, hy0 + 1.65, hz0 - 0.75), C.CHOC, "neck")
-    a.box("Mouth", (-0.3, hy0 + 0.45, hz0 - 0.95), (0.3, hy0 + 0.6, hz0 - 0.9), C.CHOC, "neck")
-    a.eyes(hx, 5.3, 6.5, -5.05, -4.05)
+    # a short round muzzle and big front-facing googly eyes (bear, not pig)
+    a.box("Muzzle", (-0.85, hy0 + 0.3, hz0 - 0.5), (0.85, hy0 + 1.4, hz0), light, "neck")
+    a.box("Nose", (-0.4, hy0 + 1.0, hz0 - 0.65), (0.4, hy0 + 1.45, hz0 - 0.4), C.CHOC, "neck")
+    a.box("Mouth", (-0.3, hy0 + 0.5, hz0 - 0.55), (0.3, hy0 + 0.62, hz0 - 0.5), C.CHOC, "neck")
+    C.front_eyes(a, 0.95, 5.35, 6.45, hz0, 0.8, "neck")
     a.pivots["neck"] = (0, 4.2, -2.1)
 
-    # ---- round ears: stepped blocks with bubblegum insides
+    # ---- round ears on the head's top corners: a stepped disc with a bubblegum middle
     for side, sx in (("L", -1), ("R", 1)):
         bone = "Ear" + side
-        xa, xb = sorted((sx * 0.55, sx * 1.55))
-        a.box(bone, (xa, hy1 + 0.3, -4.3), (xb, hy1 + 1.1, -3.6), body, bone)
-        xc, xd = sorted((sx * 0.7, sx * 1.4))
-        a.box(bone + "Top", (xc, hy1 + 1.1, -4.25), (xd, hy1 + 1.3, -3.65), body, bone)
-        a.box(bone + "In", (xc, hy1 + 0.4, -4.36), (xd, hy1 + 1.05, -4.3), C.BUBBLE, bone)
-        a.pivots[bone] = ((xa + xb) / 2, hy1 + 0.3, -4.3)
+
+        def xs(p, q):
+            return tuple(sorted((sx * p, sx * q)))
+        lo, hi = xs(0.55, 1.75)
+        a.box(bone, (lo, hy1 + 0.25, -4.4), (hi, hy1 + 1.05, -3.7), body, bone)
+        lo, hi = xs(0.8, 1.5)
+        a.box(bone + "Top", (lo, hy1 + 1.05, -4.4), (hi, hy1 + 1.4, -3.7), body, bone)
+        a.box(bone + "In", (lo, hy1 + 0.4, -4.46), (hi, hy1 + 1.1, -4.4), C.BUBBLE, bone)
+        a.pivots[bone] = (sx * 1.15, hy1 + 0.25, -4.4)
 
     a.box("Tail", (-0.45, 3.6, z1 + 0.25), (0.45, 4.5, z1 + 0.85), body, "Tail")
     a.pivots["Tail"] = (0, 4.5, z1 + 0.25)

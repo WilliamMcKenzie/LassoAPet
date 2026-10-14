@@ -1,4 +1,4 @@
-"""Gumdrop Frog: World 3 Candyland Uncommon. A squat frog shaped like a lime gumdrop: a
+"""Gumdrop Frog: World 3 Candyland Uncommon. A squat frog shaped like an orange gumdrop: a
 stepped dome body (widest at the bottom like a gumdrop) rolled in white sugar crystals, a
 darker lime base band, a wide frog head with two bulging eye turrets on top (googly plates
 facing forward), a wide chocolate grin with a cherry tongue tip, bubblegum cheeks, short
@@ -14,9 +14,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 import candy_common as C  # noqa: E402
 from animal_designs import Animal, quad_animations  # noqa: E402
 
-GUM = C.LIME
-GUM_DK = C.LIME_DK
-BELLY = (196, 246, 120)
+GUM = C.ORANGE
+GUM_DK = C.ORANGE_DK
+BELLY = (255, 200, 120)
 SUGAR = C.WHITE
 
 
@@ -28,11 +28,13 @@ def gumdrop_frog(name="GumdropFrog", rarity="Uncommon", gum=GUM, gum_dk=GUM_DK, 
     a.box("Base", (-x, y0, z0), (x, y0 + 0.5, z1), gum_dk, "root")
     a.box("Body", (-x, y0 + 0.5, z0), (x, y1, z1), gum, "root")
     a.box("Dome1", (-x + 0.4, y1, z0 + 0.3), (x - 0.4, y1 + 0.7, z1 - 0.3), gum, "root")
-    a.box("Dome2", (-x + 0.9, y1 + 0.7, z0 + 0.7), (x - 0.9, y1 + 1.2, z1 - 0.7), gum, "root")
+    a.box("Dome2", (-x + 0.9, y1 + 0.7, z0 + 0.7), (x - 0.9, y1 + 1.3, z1 - 0.7), gum, "root")
+    a.box("Dome3", (-x + 1.4, y1 + 1.3, z0 + 1.2), (x - 1.4, y1 + 1.7, z1 - 1.2), gum, "root")
     a.box("Belly", (-1.5, y0 - 0.15, z0 + 0.3), (1.5, y0, z1 - 0.5), belly, "root")
     # sugar crystals rolled all over the dome
     grains = [(-1.6, y1, -1.4), (1.3, y1, -0.6), (-1.5, y1, 1.2), (1.5, y1, 1.8), (-0.6, y1 + 0.7, -1.0),
-              (0.7, y1 + 0.7, 0.2), (-0.8, y1 + 0.7, 1.5), (0.2, y1 + 1.2, -0.4), (-0.3, y1 + 1.2, 0.9),
+              (0.7, y1 + 0.7, 0.2), (-0.8, y1 + 0.7, 1.5), (0.4, y1 + 1.3, -0.5), (-0.6, y1 + 1.3, 0.6), (0.6, y1 + 1.3, 1.2), (-0.3, y1 + 1.7, 0.3),
+              (0.3, y1 + 1.7, -0.3), (1.5, y1, 0.4), (-1.5, y1, -0.2), (0.1, y1 + 0.7, 1.6), (-1.0, y1 + 0.7, -0.1),
               (0.9, y1 + 0.7, -1.2)]
     for i, (gx, gy, gz) in enumerate(grains):
         a.box(f"Sugar{i + 1}", (gx - 0.14, gy, gz - 0.14), (gx + 0.14, gy + 0.2, gz + 0.14), SUGAR, "root")
@@ -70,7 +72,7 @@ def gumdrop_frog(name="GumdropFrog", rarity="Uncommon", gum=GUM, gum_dk=GUM_DK, 
     C.sym(a, "MouthEnd*", (hx - 0.4, hy0 + 0.5, hz0 - 0.06), (hx - 0.25, hy0 + 0.75, hz0), C.CHOC, "neck")
     a.box("Tongue", (-0.35, hy0 + 0.1, hz0 - 0.25), (0.35, hy0 + 0.38, hz0 + 0.2), C.CHERRY, "neck")
     C.sym(a, "Cheek*", (1.05, hy0 + 0.7, hz0 - 0.08), (1.6, hy0 + 1.05, hz0), C.BUBBLE, "neck")
-    C.sym(a, "Nostril*", (0.25, hy1 - 0.45, hz0 - 0.06), (0.45, hy1 - 0.3, hz0), GUM_DK, "neck")
+    C.sym(a, "Nostril*", (0.25, hy1 - 0.45, hz0 - 0.06), (0.45, hy1 - 0.3, hz0), gum_dk, "neck")
     for side, sx in (("L", -1), ("R", 1)):
         xa, xb = sorted((sx * 0.45, sx * 1.75))
         a.box("Turret" + side, (xa, hy1, -3.7), (xb, hy1 + 1.4, -2.3), gum, "neck")
@@ -86,7 +88,7 @@ def gumdrop_frog(name="GumdropFrog", rarity="Uncommon", gum=GUM, gum_dk=GUM_DK, 
     a.box("Tail", (-0.4, 1.6, z1), (0.4, 2.3, z1 + 0.45), gum, "Tail")
     a.pivots["Tail"] = (0, 2.3, z1)
 
-    a.meta = {"seat": (0, y1 + 1.2, 0.3), "neck_loop": {"center": (0, 2.6, -3.0), "radius": 2.3}}
+    a.meta = {"seat": (0, y1 + 1.7, 0.2), "neck_loop": {"center": (0, 2.6, -3.0), "radius": 2.3}}
     a.animations = quad_animations
     return a
 
