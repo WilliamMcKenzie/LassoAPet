@@ -1,4 +1,7 @@
-"""Jolly Roger Wyvern: World 3 Pirate Cove's second giga rare (Oct 14; about 1 in 1000). (A Kraken was
+"""SUPERSEDED (Oct 14): QM rebuilt the wyvern in Blockbench (designs/world3/pirate/JollyRogerWyvern.bbmodel is the
+source now; its right wing mirrored from the left, two wing-tip spikes reattached); don't rerun this over it.
+
+Jolly Roger Wyvern: World 3 Pirate Cove's second giga rare (Oct 14; about 1 in 1000). (A Kraken was
 the first idea, but World 1's Ocean already has one.) A cursed skeleton sea dragon whose wings
 are tattered black pirate sails: a bone skull with backswept pyramid horns, a jaw of pyramid
 teeth and glowing green eyes; a long spine of vertebrae with pyramid spikes, a ribcage round a
