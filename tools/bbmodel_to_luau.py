@@ -21,9 +21,9 @@ differs when a rotation turns about two or more axes. For a model built by hand 
 Blockbench (QM's King Crab), pass --zyx so those parts come out as Blockbench shows them:
   python3 tools/bbmodel_to_luau.py --zyx designs/ocean/KingCrab.bbmodel src/shared/Animals/KingCrabModel.luau
 
-Meshes (QM, Oct 14: one mesh where blocks imitate low poly): with --meshes DIR, every
-element on a bone in one colour (cubes and meshes alike, all but the plain, neon and metal
-ones) is merged into one low-poly mesh, written to DIR/<Kind>_<Part>.obj (flat shaded,
+Meshes (QM, Oct 14: a mesh only where blocks can't make the shape): with --meshes DIR, the
+meshes the rules above can't make from blocks (a Garden.hull's low-poly dome) on a bone in
+one colour are merged into one mesh, written to DIR/<Kind>_<Part>.obj (flat shaded,
 planar UVs in 0.5-stud studs, centred on its box) and listed as a MeshPart with
 mesh = "<Kind>_<Part>"; Rig.luau clones it from ReplicatedStorage.AnimalMeshes.
   python3 tools/bbmodel_to_luau.py --zyx --meshes assets/meshes/ToadstoolFrog designs/garden/ToadstoolFrog.bbmodel src/shared/Animals/ToadstoolFrogModel.luau
@@ -270,6 +270,15 @@ def mesh_parts(e, model_center):
     raise ValueError(f"{e['name']}: mesh with {n} vertices and faces {faces} isn't supported")
 
 
+def supported(e, model_center):
+    """Whether mesh_parts() makes this mesh from blocks and wedges."""
+    try:
+        mesh_parts(e, model_center)
+        return True
+    except ValueError:
+        return False
+
+
 def element_tris(e):
     """An element's faces as outward triangles in model space (studs)."""
     if e["type"] == "cube":
@@ -346,8 +355,8 @@ def convert(model, merge=None):
     """(bones, parts) of a loaded .bbmodel: bones are (name, parent, pivot, rest
     rotation in degrees), parts (name, bone, class, size, center, rotation, rgb,
     plain, neon, metal) in model space at rest (before bone rest rotations).
-    merge (a dict): elements that would be studded go into merge[(bone, colour name)] =
-    (rgb, triangles) instead, for main() to make into meshes."""
+    merge (a dict): meshes that blocks can't make go into merge[(bone, colour name)] =
+    (rgb, triangles) instead, for main() to make into MeshParts."""
     names = bone_names(model)
     res = model.get("resolution") or {"width": 16, "height": 16}
     texs = []
@@ -405,7 +414,7 @@ def convert(model, merge=None):
                 return
             neon = e["name"].startswith(NEON)
             metal = e["name"].startswith(METAL)
-            if merge is not None and not (e["name"].startswith(PLAIN) or "In" in e["name"] or neon or metal):
+            if merge is not None and e["type"] == "mesh" and not supported(e, model_center):
                 face = next(f for f in e["faces"].values() if f.get("texture") is not None)
                 key = (parent, model["textures"][face["texture"]]["name"])
                 merge.setdefault(key, (color(e), []))[1].extend(element_tris(e))

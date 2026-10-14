@@ -7,26 +7,7 @@
 -- Import 3D: units studs, no rig, keep the name) and put its mesh asset id next to its name.
 local AssetService = game:GetService("AssetService")
 local IDS = {
-	ToadstoolFrog_Belly_neck = 0,
-	ToadstoolFrog_Belly_root = 0,
 	ToadstoolFrog_Cap_neck = 0,
-	ToadstoolFrog_Capdark_neck = 0,
-	ToadstoolFrog_Gill_neck = 0,
-	ToadstoolFrog_Green_LegFL = 0,
-	ToadstoolFrog_Green_LegFR = 0,
-	ToadstoolFrog_Green_LegHL = 0,
-	ToadstoolFrog_Green_LegHR = 0,
-	ToadstoolFrog_Green_neck = 0,
-	ToadstoolFrog_Green_root = 0,
-	ToadstoolFrog_Greendark_neck = 0,
-	ToadstoolFrog_Greendark_root = 0,
-	ToadstoolFrog_Mouth_neck = 0,
-	ToadstoolFrog_Spot_neck = 0,
-	ToadstoolFrog_Toe_LegFL = 0,
-	ToadstoolFrog_Toe_LegFR = 0,
-	ToadstoolFrog_Toe_LegHL = 0,
-	ToadstoolFrog_Toe_LegHR = 0,
-	ToadstoolFrog_Tongue_neck = 0,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then
