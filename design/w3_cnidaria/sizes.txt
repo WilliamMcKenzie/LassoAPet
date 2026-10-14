@@ -1,0 +1,11 @@
+# name: width x height x depth (studs, at 1x), tris, pieces
+Kelp: 5.8 x 24.0 x 4.4, 492 tris, 3 pieces
+SunkenColumn: 13.4 x 12.1 x 7.8, 378 tris, 3 pieces
+BubbleVent: 8.5 x 15.5 x 7.0, 300 tris, 4 pieces
+SeaFan: 9.6 x 10.0 x 3.3, 370 tris, 4 pieces
+Staghorn: 9.1 x 7.6 x 7.2, 1512 tris, 2 pieces
+BrainCoral: 8.9 x 3.8 x 8.7, 376 tris, 2 pieces
+GiantClam: 10.2 x 5.5 x 5.5, 180 tris, 4 pieces
+TubeCoral: 6.3 x 6.7 x 4.8, 320 tris, 2 pieces
+Anemone: 8.7 x 4.8 x 8.7, 1216 tris, 4 pieces
+Seashells: 7.0 x 2.6 x 5.9, 302 tris, 4 pieces
