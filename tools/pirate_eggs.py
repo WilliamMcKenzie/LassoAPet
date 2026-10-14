@@ -53,8 +53,8 @@ def tricorn(egg, name, hat=BLACK, trim=GOLD, w=1.1):
         p.bone = "top"
 
 
-def red_crab():
-    R, RD, CR, OR, TIP = (232, 52, 40), (170, 28, 30), (255, 226, 176), (255, 128, 40), (40, 30, 36)
+def green_crab():
+    R, RD, CR, OR, TIP = (19, 139, 58), (10, 105, 74), (255, 226, 176), (255, 128, 40), (1, 56, 53)  # QM's green (Oct 14)
     egg = shell([CR, CR, R, R, R, R, RD])
     for i, (x, y) in enumerate(((-0.5, 2.6), (0.6, 2.2), (0.0, 1.5))):
         egg.block(f"Speck{i}", (x - 0.12, y - 0.12, zf(int(y / LH), 0.03)), (x + 0.12, y + 0.12, zf(int(y / LH), -0.02)), OR)
@@ -205,7 +205,7 @@ def dreadstump():
     return egg
 
 
-EGGS = [("RedCrab", red_crab), ("Parrot", parrot), ("BananaMonkey", banana_monkey), ("TreasureHermit", treasure_hermit),
+EGGS = [("GreenCrab", green_crab), ("Parrot", parrot), ("BananaMonkey", banana_monkey), ("TreasureHermit", treasure_hermit),
         ("EyepatchShark", eyepatch_shark), ("TreasureTurtle", treasure_turtle), ("GhostShip", ghost_ship),
         ("JollyRogerWyvern", jolly_roger_wyvern), ("Dreadstump", dreadstump)]
 

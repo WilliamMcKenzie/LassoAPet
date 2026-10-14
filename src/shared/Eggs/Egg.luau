@@ -95,7 +95,7 @@ local KINDS = {
 	Bes = { data = require(script.Parent.BesEggModel), center = 1.6 },
 	BloatedMummy = { data = require(script.Parent.BloatedMummyEggModel), center = 1.6 },
 	Scarab = { data = require(script.Parent.ScarabEggModel), center = 1.6 },
-	RedCrab = { data = require(script.Parent.RedCrabEggModel), center = 1.6 }, -- World 3 Pirate Cove (tools/pirate_eggs.py)
+	GreenCrab = { data = require(script.Parent.GreenCrabEggModel), center = 1.6 }, -- World 3 Pirate Cove (tools/pirate_eggs.py)
 	Parrot = { data = require(script.Parent.ParrotEggModel), center = 1.6 },
 	BananaMonkey = { data = require(script.Parent.BananaMonkeyEggModel), center = 1.6 },
 	TreasureHermit = { data = require(script.Parent.TreasureHermitEggModel), center = 1.6 },

@@ -613,7 +613,7 @@ local Config = {
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
-		RedCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
+		GreenCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
 		GhostShip = 4, JollyRogerWyvern = 4, Dreadstump = 3, -- World 3 Pirate Cove's giga rares (XL) and its boss as a pet (guesses, Oct 14)
 		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
 		RafflesiaBeast = 4, AncientTreant = 4, FlytrapQueen = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
@@ -845,7 +845,7 @@ local Config = {
 		Fox = "rbxassetid://92522948167443", -- assets/ui/FoxEggRender.png (World 2)
 		NineTailedFox = "rbxassetid://110560724842212", -- assets/ui/NineTailedFoxEggRender.png (World 2)
 		Kitsune = "rbxassetid://124688776792586", -- assets/ui/KitsuneEggRender.png (World 2)
-		RedCrab = "rbxassetid://77340253953044", -- assets/ui/RedCrabEggRender.png (World 3)
+		GreenCrab = "rbxassetid://77340253953044", -- assets/ui/GreenCrabEggRender.png (World 3; STILL THE RED EGG until the green render is uploaded)
 		Parrot = "rbxassetid://96862284524676", -- assets/ui/ParrotEggRender.png (World 3)
 		BananaMonkey = "rbxassetid://128398088115519", -- assets/ui/BananaMonkeyEggRender.png (World 3)
 		TreasureHermit = "rbxassetid://87618949538639", -- assets/ui/TreasureHermitEggRender.png (World 3)
@@ -1468,7 +1468,7 @@ end
 -- hatch seconds }, a step past World 2's Tomb for each rarity. ALL GUESSES until QM sets World 3's
 -- economy (its biomes are about 2x World 2's length, so these speeds may need to go up).
 Config.World3Pets = {
-	RedCrab = { 7.6, 4000, 15 }, -- Common (guess)
+	GreenCrab = { 7.6, 4000, 15 }, -- Common (guess)
 	Parrot = { 7.8, 6000, 20 }, -- Uncommon (guess)
 	BananaMonkey = { 7.8, 6000, 20 }, -- Uncommon (guess)
 	TreasureHermit = { 8.1, 12000, 90 }, -- Rare (guess)
@@ -1908,7 +1908,7 @@ if Config.World == 3 then
 			CapColor = rgb(240, 218, 160),
 			-- (Oct 14, the Pirate Cove animals thread: weights guesses, as the Tomb's by rarity; its
 			-- giga rares and the boss as a trophy pet added below)
-			Herd = { RedCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
+			Herd = { GreenCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
 			Patches = {
 				Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
 				WetSand = { rgb(225, 189, 120), rgb(208, 172, 105) }, -- (QM, Oct 14; was 206, 172, 110 / 194, 160, 98)
