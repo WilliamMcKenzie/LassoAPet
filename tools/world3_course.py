@@ -256,7 +256,7 @@ def pirate_cove():
     deep middles darker. 7 angles (lacy rings: atolls). More lagoon in the wide bays. Plank
     boardwalks a stud up carry the middle lane over any long stretch of water."""
     # (Colours: QM's beach reference, Oct 14, stamina-loop beb5452d and f6fac9e2: golden sand, QM's darker water tile,
-    # weathered planks; walls warm stone with olive grass tops and a rune band, 5bd670d7.)
+    # weathered planks; walls plain wooden brown with darker wood tops, 7c527722.)
     b = Biome(0, [
         ("DeepWater", -1, (38, 112, 156), None),  # the water tile's darker tint
         ("Water", -1, (53, 143, 192), None),  # QM's darker tile (rbxassetid://113940500836253)
@@ -310,7 +310,7 @@ def pirate_cove():
         wet |= nb == 1
     b.rung[(b.rung == 3) & wet & ~b.free] = 5
     check(b, [0, 1, 2, 4, 4, 3])  # (the damp sand a step between the wet sand and the sand)
-    walls = dict(wall=[(196, 190, 182), (184, 178, 170)], cap=(122, 142, 62), gate=(255, 160, 40))  # warm stone, olive grass top (QM, Oct 14: stamina-loop 5bd670d7; rerun tools/world3_runes.luau after for the carved band)  # driftwood, sand top, treasure gold
+    walls = dict(wall=[(140, 98, 62), (128, 88, 55)], cap=(104, 70, 44), gate=(255, 160, 40))  # plain wooden brown, darker wood top (QM, Oct 14: stamina-loop 7c527722; no bands or runes)
     return b, walls
 
 

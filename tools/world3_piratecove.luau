@@ -17,7 +17,7 @@ local KINDS = { -- [kind] = { name, top, part colour, checker colour (nil: plain
 	[4] = { "Planks", 1, rgb(132, 96, 66), nil },
 	[5] = { "DampSand", 1, rgb(222, 180, 120), rgb(208, 167, 109) },
 }
-local WALL, WALL_CHECKER, CAP = rgb(196, 190, 182), rgb(184, 178, 170), rgb(122, 142, 62)
+local WALL, WALL_CHECKER, CAP = rgb(140, 98, 62), rgb(128, 88, 55), rgb(104, 70, 44)
 -- { kind, low x, near z, size x, size z } on 8-stud cells, in game space
 local FLOOR = {
 	{ 3, -96, -816, 48, 8 },
