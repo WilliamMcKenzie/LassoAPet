@@ -1,4 +1,7 @@
-"""Eyepatch Shark: World 3 Pirate Cove's Epic (Oct 14). A land shark that swims through the air just
+"""SUPERSEDED (Oct 14): the Eyepatch Shark is now QM's remodel of the Ocean SharkBoss
+(designs/world3/pirate/EyepatchShark.bbmodel, recoloured to these blues); don't rerun this over it.
+
+Eyepatch Shark: World 3 Pirate Cove's Epic (Oct 14). A land shark that swims through the air just
 above the sand: a chunky blue shark with a white belly, gill slits, a tall dorsal fin, wide
 pectoral fins and a big two-lobed tail. It's a pirate: a black eyepatch over its right eye on a
 strap round its head, a red bandana with white dots knotted behind, a scar over the left eye,
