@@ -1,4 +1,7 @@
-"""Parrot: World 3 Pirate Cove's Uncommon (Oct 14), the pirate's macaw (RotMG's Cave Pirate Macaw).
+"""SUPERSEDED (Oct 14): QM rebuilt the Parrot in Blockbench (designs/world3/pirate/Parrot.bbmodel is the
+source now, its right wing mirrored from the left); don't rerun this over it.
+
+Parrot: World 3 Pirate Cove's Uncommon (Oct 14), the pirate's macaw (RotMG's Cave Pirate Macaw).
 A scarlet macaw that flies everywhere: red body, wings banded red, yellow and blue with long
 blue flight feathers, a long red and blue tail, a white face patch with googly plate eyes, a big
 hooked cream beak over a black lower beak, and a little black tricorn pirate hat with gold trim
