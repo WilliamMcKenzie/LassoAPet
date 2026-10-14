@@ -8,6 +8,6 @@ local Horse = require(script.Parent.Horse)
 local BananaMonkeyModel = require(script.Parent.BananaMonkeyModel)
 
 return Horse.variant("BananaMonkey", BananaMonkeyModel, "Uncommon", {
-	seat = Vector3.new(0, 7.9, -1.0),
+	seat = Vector3.new(0, 7.1, 0.4), -- (on the back behind the shoulders of QM's model, Oct 14)
 	neck = { center = Vector3.new(0, 7.2, -4.6), radius = 2.0 },
 })
