@@ -38,23 +38,10 @@ WAFER_DARK = (206, 150, 76)
 STICK = (250, 246, 236)
 
 
-def sprinkles(rng, centre, r, y, n, cols, lift=0.0):
-    """Little candy rods scattered on a dome/plate; returns {colour: [hulls]}."""
-    out = {c: [] for c in cols}
-    for i in range(n):
-        a = rng.uniform(0, 2 * math.pi)
-        d = r * math.sqrt(rng.uniform(0.05, 1.0))
-        p = np.array((centre[0] + math.cos(a) * d, y(d), centre[2] + math.sin(a) * d))
-        b = rng.uniform(0, math.pi)
-        q = p + (math.cos(b) * 0.35, 0.05, math.sin(b) * 0.35)
-        out[cols[i % len(cols)]].append(prism(rng, p - (q - p), q, 0.12, 0.12, 4, 0.0))
-    return out
-
-
 def lollipop(rng):
     """A giant swirl lollipop (about 15 tall): white stick, a round candy of alternating
     pink and white wedges with a raised rim."""
-    r, t, cy = 4.4, 1.2, 10.6
+    r, t, cy = 4.4, 2.4, 10.6
     stick = [prism(rng, (0, -0.4, 0.2), (0, cy, 0.2), 0.42, 0.4, 8, 0.0)]
     wedges = [[], []]
     n = 12
@@ -67,11 +54,8 @@ def lollipop(rng):
             for z in (-t / 2, t / 2):
                 pts.append((math.cos(a) * r, cy + math.sin(a) * r, z))
         wedges[i % 2].append(np.array(pts))
-    rim = torus((0, cy, 0), r, 0.45, 16, 6, axis="z")
-    bow = [np.array([(0, cy - r + 0.2, 0), (-1.6, cy - r - 0.8, -0.3), (-1.6, cy - r + 0.6, -0.3), (-1.6, cy - r - 0.8, 0.3), (-1.6, cy - r + 0.6, 0.3)]),
-           np.array([(0, cy - r + 0.2, 0), (1.6, cy - r - 0.8, -0.3), (1.6, cy - r + 0.6, -0.3), (1.6, cy - r - 0.8, 0.3), (1.6, cy - r + 0.6, 0.3)])]
-    return [("Stick", STICK, stick), ("Swirl", PINK, wedges[0]), ("Swirl", WHITE, wedges[1]), ("Rim", (255, 90, 160), rim),
-            ("Bow", MINT, bow)]
+    rim = torus((0, cy, 0), r, 1.25, 16, 6, axis="z")
+    return [("Stick", STICK, stick), ("Swirl", PINK, wedges[0]), ("Swirl", WHITE, wedges[1]), ("Rim", (255, 90, 160), rim)]
 
 
 def candy_cane(rng):
@@ -91,7 +75,7 @@ def candy_cane(rng):
 
 def cupcake(rng):
     """A giant cupcake (about 11 tall): ridged pink wrapper, swirled frosting in three
-    tiers, sprinkles and a cherry with a stem."""
+    tiers and a cherry with a stem."""
     wrapper = []
     for i in range(14):
         a0, a1 = 2 * math.pi * i / 14, 2 * math.pi * (i + 1) / 14
@@ -106,15 +90,13 @@ def cupcake(rng):
              + [ball((0, 9.2, 0), 1.1, 14), ball((0, 6.2, 0), 2.8, 16), ball((0, 7.6, 0), 1.8, 12)])
     cherry = [ball((0.2, 10.6, 0), 0.9, 14)]
     stem = tube(rng, [(0.3, 11.2, 0), (0.6, 12.2, 0.1), (1.3, 12.8, 0.2)], 0.12, 0.1, 5)
-    sp = sprinkles(rng, (0, 0, 0), 3.6, lambda d: 5.3 + 1.1 if d > 2.9 else 6.9 + 0.9 if d > 1.9 else 8.4 + 0.8, 26, [LEMON, MINT, BLUE, GRAPE])
     return ([("Wrapper", PINK, wrapper[0::2]), ("Wrapper", (240, 96, 160), wrapper[1::2]), ("Cake", CHOC_LIGHT, cake),
-             ("Frosting", PINK_LIGHT, frost), ("Cherry", CHERRY, cherry), ("Stem", (90, 160, 60), stem)]
-            + [("Sprinkles", c, h) for c, h in sp.items()])
+             ("Frosting", PINK_LIGHT, frost), ("Cherry", CHERRY, cherry), ("Stem", (90, 160, 60), stem)])
 
 
 def gingerbread_house(rng):
     """A gingerbread house (about 12 wide, 13 tall): walls, a pitched roof with white icing
-    edges, a door, two windows, gumdrops along the ridge and candy cane corners."""
+    edges, a door, two windows and candy cane corners."""
     w, d, h = 10.0, 8.0, 6.0
     walls = [slab(rng, -w / 2, 0, -d / 2, w / 2, h, d / 2, 0.2, 0.0)]
     gables = [np.array([(-w / 2 + 0.1, h, z), (w / 2 - 0.1, h, z), (0, h + 4.2, z)] + [(-w / 2 + 0.1, h, z2), (w / 2 - 0.1, h, z2), (0, h + 4.2, z2)])
@@ -136,9 +118,6 @@ def gingerbread_house(rng):
     knob = [ball((0.8, 1.9, -d / 2 - 0.3), 0.25, 8)]
     windows = [slab(rng, x - 1.0, 2.6, -d / 2 - 0.15, x + 1.0, 4.6, -d / 2 + 0.1, 0.05, 0.0) for x in (-3.3, 3.3)]
     frames = [slab(rng, x - 1.25, 2.35, -d / 2 - 0.1, x + 1.25, 4.85, -d / 2 + 0.05, 0.05, 0.0) for x in (-3.3, 3.3)]
-    drops = {CHERRY: [], MINT: [], LEMON: [], GRAPE: []}
-    for i, z in enumerate(np.linspace(-d / 2 - 0.4, d / 2 + 0.4, 5)):
-        drops[list(drops)[i % 4]].append(np.array(ring(10, 0.75, h + 4.8) + ring(10, 0.5, h + 5.6) + [(0, h + 6.0, z * 0 + 0)]) + (0, 0, z))
     canes = []
     stripes = []
     for x in (-w / 2 - 0.4, w / 2 + 0.4):
@@ -146,13 +125,12 @@ def gingerbread_house(rng):
         canes += segs[0::2]
         stripes += segs[1::2]
     return ([("Walls", GINGER, walls + gables), ("Roof", GINGER_DARK, roof), ("Icing", WHITE, icing + frames + canes),
-             ("Door", CHOC, door), ("Knob", LEMON, knob), ("Windows", (120, 210, 255), windows), ("Stripes", CHERRY, stripes)]
-            + [("Gumdrops", c, hs) for c, hs in drops.items()])
+             ("Door", CHOC, door), ("Knob", LEMON, knob), ("Windows", (120, 210, 255), windows), ("Stripes", CHERRY, stripes)])
 
 
 def donut_arch(rng):
     """A giant donut standing on its edge as an arch (about 14 tall), half sunk in the
-    ground: dough ring, pink icing on the front and back faces, sprinkles."""
+    ground: dough ring, pink icing on the front and back faces."""
     R, r = 5.6, 2.3
     cy = R + r - 1.6
     dough = torus((0, cy, 0), R, r, 20, 8, axis="z")
@@ -166,20 +144,7 @@ def donut_arch(rng):
                     zz = side * (r + 0.15) * math.sin(b)
                     pts.append((math.cos(a) * (R + (r + 0.15) * math.cos(b)), cy + math.sin(a) * (R + (r + 0.15) * math.cos(b)), zz))
         icing.append(np.array(pts))
-    sp = {LEMON: [], MINT: [], BLUE: [], WHITE: []}
-    cols = list(sp)
-    for i in range(36):
-        a = rng.uniform(0, 2 * math.pi)
-        b = rng.uniform(-0.5, 0.5)
-        side = -1 if i % 2 else 1
-        rr = R + (r + 0.2) * math.sin(b)
-        p = np.array((math.cos(a) * rr, cy + math.sin(a) * rr, side * (r + 0.2) * math.cos(b)))
-        if p[1] < 0.3:
-            continue
-        t = rng.uniform(0, math.pi)
-        q = p + (math.cos(t) * 0.4, math.sin(t) * 0.4, 0)
-        sp[cols[i % 4]].append(prism(rng, p - (q - p) * 0.5, q, 0.13, 0.13, 4, 0.0))
-    return [("Dough", WAFER, dough), ("Icing", PINK, icing)] + [("Sprinkles", c, h) for c, h in sp.items() if h]
+    return [("Dough", WAFER, dough), ("Icing", PINK, icing)]
 
 
 def ice_cream(rng):

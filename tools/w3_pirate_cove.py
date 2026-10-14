@@ -81,9 +81,8 @@ def treasure_chest(rng):
 
 
 def treasure_pile(rng):
-    """A heap of gold coins with a goblet, a crown and a few loose coins (about 6 across)."""
+    """A heap of gold coins with a goblet and a crown (about 6 across)."""
     heap = [coins(rng, (0, 0, 0), 3.0, 1.6), coins(rng, (1.6, 0, 1.0), 1.8, 1.1), coins(rng, (-1.8, 0, 0.6), 1.6, 0.9)]
-    loose = [disc((x, 0.12, z), 0.45, 0.22, 10) for x, z in ((3.4, -1.2), (-3.1, -1.6), (2.6, 2.4), (-0.4, -3.0))]
     goblet = [frustum(10, 0.55, 1.2, 0.95, 3.4, c=(-0.8, 0.2)), frustum(10, 0.18, 0.6, 0.18, 1.4, c=(-0.8, 0.2)),
               frustum(10, 0.7, 0.4, 0.5, 0.75, c=(-0.8, 0.2))]
     crown = []
@@ -93,8 +92,7 @@ def treasure_pile(rng):
         a = 2 * math.pi * i / 5
         p = np.array((cx + math.cos(a) * 0.95, cy + 0.6, cz + math.sin(a) * 0.95))
         crown.append(np.array([p + (dx, 0, dz) for dx in (-0.25, 0.25) for dz in (-0.25, 0.25)] + [p + (0, 0.7, 0)]))
-    gems = [ball((cx + math.cos(a) * 1.05, cy + 0.35, cz + math.sin(a) * 1.05), 0.2, 6) for a in (-1.57, 0.3, 2.9)]
-    return [("Gold", GOLD, heap + loose), ("Goblet", GOLD_DARK, goblet), ("Crown", GOLD_DARK, crown), ("Gems", RUBY, gems)]
+    return [("Gold", GOLD, heap), ("Goblet", GOLD_DARK, goblet), ("Crown", GOLD_DARK, crown)]
 
 
 # ---------------------------------------------------------------- cannon
@@ -223,8 +221,9 @@ def shipwreck(rng):
     yard = [prism(rng, (-6.0, 15.0, 0.0), (6.0, 15.6, 0.0), 0.3, 0.3, 6, 0.0)]
     sail = []
     for x0, x1, drop in ((-5.6, -1.5, 5.2), (-1.5, 2.0, 3.6), (2.0, 5.6, 4.6)):
-        sail.append(np.array([(x0, 15.2, -0.6), (x1, 15.3, -0.6), (x0, 15.2 - drop, -1.6), (x1, 15.3 - drop * 0.8, -1.4),
-                              (x0, 15.2, -0.35), (x1, 15.3, -0.35), (x0, 15.2 - drop, -1.35), (x1, 15.3 - drop * 0.8, -1.15)]))
+        # a chunky wedge, thick at the yard and thinner at the torn foot
+        sail.append(np.array([(x0, 15.2, -1.0), (x1, 15.3, -1.0), (x0, 15.2 - drop, -1.9), (x1, 15.3 - drop * 0.8, -1.7),
+                              (x0, 15.2, 0.3), (x1, 15.3, 0.3), (x0, 15.2 - drop, -1.3), (x1, 15.3 - drop * 0.8, -1.1)]))
     sprit = [prism(rng, (0, dy + 1, -12.5), (0, 10.0, -17.5), 0.45, 0.35, 6, 0.0)]
     tilt = lambda p: rot_z(p, 0.32) + (0, -1.4, 0)  # noqa: E731  keeled over, sunk into the sand
     turn = lambda p: rot_y(tilt(p), 0.5)  # noqa: E731
@@ -235,7 +234,7 @@ def shipwreck(rng):
 
 def rowboat(rng):
     """A little rowboat (about 9 long) beached on the sand, two benches and crossed oars."""
-    st = [(-4.6, 0.3, 0.2, 1.8), (-3.0, 1.9, 0.6, 0.4), (0.0, 2.3, 0.9, 0.0), (3.0, 2.1, 0.9, 0.1), (4.4, 1.7, 0.8, 0.6)]
+    st = [(-5.2, 0.05, 0.05, 2.4), (-3.6, 1.3, 0.35, 0.6), (-1.0, 2.2, 0.85, 0.0), (2.6, 2.2, 0.9, 0.05), (4.4, 1.8, 0.8, 0.5)]  # pointed bow
     dy = 2.2
     outer = hull(st, dy)
     inner = []
@@ -253,13 +252,13 @@ def rowboat(rng):
         oars.append(prism(rng, a, b, 0.14, 0.14, 6, 0.0))
         blade = b + (b - a) / np.linalg.norm(b - a) * 1.2
         oars.append(np.array([b + (dx, dy_, 0) for dx in (-0.4, 0.4) for dy_ in (-0.07, 0.07)] + [blade + (dx, dy_, 0) for dx in (-0.5, 0.5) for dy_ in (-0.07, 0.07)]))
-    tilt = lambda p: rot_y(rot_z(p, 0.08), 0.3) + (0, -0.2, 0)  # noqa: E731
-    return [("Hull", (64, 156, 214), move([outer], tilt)), ("Inside", PLANK, move([inner], tilt)), ("Rim", WHITE, move([rim], tilt)),
+    tilt = lambda p: rot_y(rot_z(p, 0.08), 1.25) + (0, -0.2, 0)  # noqa: E731  side on, so the pointed bow shows
+    return [("Hull", WOOD, move([outer], tilt)), ("Inside", PLANK, move([inner], tilt)), ("Rim", WOOD_DARK, move([rim], tilt)),
             ("Benches", WOOD, move(benches, tilt)), ("Oars", WOOD_DARK, move(oars, tilt))]
 
 
 def dock(rng):
-    """A short jetty (about 6 x 13) on posts, the end posts taller with rope looped between."""
+    """A short jetty (about 6 x 13) on posts, the two end posts taller."""
     planks = [slab(rng, -2.8, 2.0, z - 0.6, 2.8, 2.45, z + 0.6, 0.06, 0.04) for z in np.arange(-5.8, 6.2, 1.3)]
     posts = []
     tall = []
@@ -268,12 +267,7 @@ def dock(rng):
             h = 5.2 if z == 6.2 else 2.0
             (tall if h > 3 else posts).append(prism(rng, (s * 2.9, -0.6, z), (s * 2.9, h, z), 0.5, 0.5, 8, 0.0))
     caps = [ball((s * 2.9, 5.2, 6.2), 0.5, 8) for s in (-1, 1)]
-    rope = []
-    for s in (-1, 1):  # rope sagging along each side from the tall posts
-        path = [(s * 2.9, 4.6, 6.2), (s * 2.95, 3.5, 4.0), (s * 2.95, 3.3, 2.0), (s * 2.95, 3.6, 0.0)]
-        rope += tube(rng, path, 0.16, 0.16, 5)
-    rope += torus((-2.9, 4.0, 6.2), 0.6, 0.18, 8, 5, axis="y") + torus((2.9, 4.0, 6.2), 0.6, 0.18, 8, 5, axis="y")
-    return [("Planks", PLANK, planks), ("Posts", WOOD, posts + tall), ("Caps", WOOD_DARK, caps), ("Rope", ROPE, rope)]
+    return [("Planks", PLANK, planks), ("Posts", WOOD, posts + tall), ("Caps", WOOD_DARK, caps)]
 
 
 ITEMS = [  # name, builder, seed, label

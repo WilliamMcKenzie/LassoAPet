@@ -1,11 +1,11 @@
 # name: width x height x depth (studs, at 1x), tris, pieces
-GingerbreadHouse: 13.7 x 12.0 x 10.3, 1018 tris, 11 pieces
-DonutArch: 15.8 x 14.2 x 5.3, 1528 tris, 6 pieces
-Lollipop: 9.7 x 15.4 x 1.2, 552 tris, 5 pieces
+GingerbreadHouse: 13.7 x 11.6 x 10.3, 828 tris, 7 pieces
+DonutArch: 15.8 x 14.2 x 4.7, 1120 tris, 2 pieces
+Lollipop: 11.3 x 16.2 x 2.4, 540 tris, 4 pieces
 CandyCane: 5.3 x 13.1 x 1.5, 668 tris, 2 pieces
 IceCream: 6.0 x 15.3 x 6.0, 404 tris, 7 pieces
 ChocolateBar: 10.8 x 13.2 x 6.9, 584 tris, 4 pieces
-Cupcake: 9.0 x 12.9 x 8.8, 1484 tris, 10 pieces
+Cupcake: 9.0 x 12.9 x 8.8, 1172 tris, 6 pieces
 ChocolateRocks: 12.9 x 4.8 x 8.9, 210 tris, 2 pieces
 WrappedCandy: 9.5 x 3.7 x 5.5, 214 tris, 3 pieces
 Gumdrops: 6.7 x 2.6 x 5.2, 290 tris, 5 pieces

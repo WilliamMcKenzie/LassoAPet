@@ -43,9 +43,9 @@ ROCK_DARK = (84, 90, 126)
 BUBBLE = (196, 238, 255)
 TUBE = (255, 200, 80)
 TUBE_IN = (230, 120, 40)
-SHELL = (255, 226, 200)
-SHELL_PINK = (255, 170, 160)
-STAR = (255, 96, 70)
+SHELL = (255, 214, 120)
+SHELL_PINK = (255, 110, 160)
+STAR = (255, 80, 60)
 
 
 def brain_coral(rng):
@@ -66,7 +66,7 @@ def staghorn(rng):
         q = p + d * length
         branches.extend(tube(rng, [p, p + d * length * 0.5 + (rng.uniform(-0.3, 0.3), 0, rng.uniform(-0.3, 0.3)), q], r, r * 0.8, 7))
         if depth == 0:
-            tips.append(ball(q, r * 0.85, 8))
+            tips.append(np.array(ring(4, r * 0.9, 0) + [(0, r * 2.2, 0)]) @ np.eye(3) + q - (0, r * 0.3, 0))  # pyramid tip
             return
         for k in range(2 if depth > 1 else 3):
             a = rng.uniform(0, 2 * math.pi)
@@ -102,27 +102,24 @@ def sea_fan(rng):
 
 
 def kelp(rng):
-    """Tall glowing kelp (about 24 tall): five wavy blades with yellow floats."""
+    """Tall glowing kelp (about 24 tall): three thick, tapered wavy fronds."""
     blades = [[], []]
-    floats = []
-    for i, (x, z, h) in enumerate(((0, 0, 24), (1.6, 0.8, 19), (-1.5, 0.9, 17), (0.7, -1.4, 21), (-0.9, -1.2, 14))):
+    for i, (x, z, h) in enumerate(((0, 0, 24), (1.8, 0.9, 18), (-1.7, 0.5, 15))):
         prev = np.array((x, -0.4, z))
         ph = rng.uniform(0, 6.28)
-        n = 7
+        n = 5
         for k in range(1, n + 1):
             t = k / n
             p = np.array((x + 1.1 * math.sin(ph + t * 5.5) * t, h * t, z + 0.6 * math.cos(ph + t * 4) * t))
-            w = 1.25 * (1 - 0.55 * t)
+            w = 1.6 * (1 - 0.7 * t) + 0.15
             yaw = ph + t * 2
             s = np.array((math.cos(yaw), 0, math.sin(yaw)))
-            nrm = np.array((-s[2], 0, s[0])) * 0.12
+            nrm = np.array((-s[2], 0, s[0])) * (0.5 * (1 - 0.6 * t))  # thick, tapering
             pts = [prev + s * w + nrm, prev - s * w + nrm, prev + s * w - nrm, prev - s * w - nrm,
                    p + s * w * 0.9 + nrm, p - s * w * 0.9 + nrm, p + s * w * 0.9 - nrm, p - s * w * 0.9 - nrm]
             blades[(i + k) % 2].append(np.array(pts))
-            if k in (3, 5) and i % 2 == 0:
-                floats.append(ball(p + s * w * 1.1, 0.55, 8))
             prev = p
-    return [("Kelp", KELP, blades[0]), ("Kelp", KELP_LIGHT, blades[1]), ("Floats", FLOAT, floats)]
+    return [("Kelp", KELP, blades[0]), ("Kelp", KELP_LIGHT, blades[1])]
 
 
 def anemone(rng):
@@ -138,7 +135,7 @@ def anemone(rng):
             p1 = p0 + d * L * 0.4 + (0, L * 0.5, 0)
             p2 = p1 + d * L * 0.45 + (0, L * 0.15, 0)
             tents += tube(rng, [p0, p1, p2], 0.3, 0.22, 6)
-            tips.append(ball(p2, 0.3, 8))
+            tips.append(np.array(ring(4, 0.3, 0) + [(0, 0.9, 0)]) + p2 - (0, 0.1, 0))  # pyramid tip
     return [("Body", ANEMONE, body), ("Mouth", (30, 150, 160), mouth), ("Tentacles", TENTACLE, tents), ("Tips", (255, 220, 240), tips)]
 
 
@@ -161,7 +158,7 @@ def giant_clam(rng):
 
     hinge = np.array((0, 1.7, R * 0.5))
     lower = [p + (0, 0, R * 0.5) for p in half()]
-    upper = [rot_x(p * (1, -1, 1), 0.85) + hinge for p in half()]
+    upper = [rot_x(p * (1, -1, 1), 1.35) + hinge for p in half()]  # opened wide, a clear lid
     flesh = [blob(rng, (0, 1.3, 0.2), 3.4, 16, squash=(1.0, 0.3, 0.8), jitter=0.04)]
     pearl = [ball((0, 2.9, -0.6), 1.45, 18)]
     return [("Shell", CLAM, lower[0::2] + upper[0::2]), ("Shell", CLAM_LIGHT, lower[1::2] + upper[1::2]),
@@ -209,7 +206,7 @@ def bubble_vent(rng):
 
 
 def shells(rng):
-    """Seashells (about 6 across): a spiral conch, a scallop and a starfish."""
+    """Seashells (about 12 across): a spiral conch, a scallop and a starfish."""
     conch = []
     for i in range(7):
         t = i / 6
@@ -232,7 +229,9 @@ def shells(rng):
         s = np.array((-d[2], 0, d[0]))
         c = np.array((0.6, 0, -1.8))
         star.append(np.array([c + s * 0.6, c - s * 0.6, c + s * 0.6 + (0, 0.5, 0), c - s * 0.6 + (0, 0.5, 0), c + d * 1.8 + (0, 0.1, 0), c + d * 1.8 + (0, 0.25, 0)]))
-    return [("Conch", SHELL, conch), ("Scallop", SHELL_PINK, scallop[0::2]), ("Scallop", (255, 200, 190), scallop[1::2]), ("Starfish", STAR, star)]
+    big = lambda hs: [np.asarray(h) * 1.8 for h in hs]  # noqa: E731  bigger, so they read at a glance
+    return [("Conch", SHELL, big(conch)), ("Scallop", SHELL_PINK, big(scallop[0::2])), ("Scallop", (255, 160, 200), big(scallop[1::2])),
+            ("Starfish", STAR, big(star))]
 
 
 ITEMS = [  # name, builder, seed, label

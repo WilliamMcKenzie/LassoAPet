@@ -2,9 +2,9 @@
 SkullRock: 20.8 x 17.5 x 16.3, 662 tris, 6 pieces
 Shipwreck: 16.4 x 18.3 x 27.2, 338 tris, 6 pieces
 Anchor: 9.7 x 11.9 x 1.8, 688 tris, 3 pieces
-Dock: 7.4 x 5.6 x 13.7, 984 tris, 4 pieces
-Rowboat: 5.8 x 2.4 x 9.6, 268 tris, 5 pieces
+Dock: 6.8 x 5.6 x 13.4, 632 tris, 3 pieces
+Rowboat: 10.1 x 2.4 x 5.7, 264 tris, 5 pieces
 Cannon: 4.2 x 4.1 x 8.3, 676 tris, 6 pieces
 Cannonballs: 4.4 x 2.4 x 3.0, 240 tris, 1 pieces
 TreasureChest: 5.6 x 6.5 x 6.2, 284 tris, 7 pieces
-TreasurePile: 7.4 x 3.4 x 6.4, 438 tris, 4 pieces
+TreasurePile: 6.6 x 3.4 x 5.8, 270 tris, 3 pieces

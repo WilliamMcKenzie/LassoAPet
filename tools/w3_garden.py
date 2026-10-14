@@ -60,7 +60,7 @@ def petal(c, d, n, length, width, thick=0.25, cup=0.0, start=0.0):
     for t, w in ((start, 0.25), (0.35, 1.0), (0.75, 0.8), (1.0, 0.15)):
         p = c + d * length * t + n * cup * t * t
         for k in (-1, 1):
-            for h in (-thick / 2, thick / 2):
+            for h in (-thick / 2 * (1 - 0.6 * t), thick / 2 * (1 - 0.6 * t)):  # a wedge, thinning to the tip
                 pts.append(p + s * k * width / 2 * w + n * h)
     return np.array(pts)
 
@@ -76,7 +76,7 @@ def leaf(rng, base, yaw, length, width, rise=0.3, droop=1.0, roll=0.0):
     for p, q, st in ((np.asarray(base, float), mid, 0.0), (mid, tip, -0.1)):
         dd = (q - p) / np.linalg.norm(q - p)
         n = math.cos(roll) * np.cross(dd, n1) + math.sin(roll) * n1
-        out.append(petal(p, dd, n / np.linalg.norm(n), np.linalg.norm(q - p) * (1.05 if st == 0 else 1.0), width, 0.25, 0.0, st))
+        out.append(petal(p, dd, n / np.linalg.norm(n), np.linalg.norm(q - p) * (1.05 if st == 0 else 1.0), width, 0.7, 0.0, st))
     return out
 
 
@@ -88,7 +88,7 @@ def flower_head(c, n, r_centre, n_petals, petal_len, petal_w, petal_col, centre_
     for i in range(n_petals):
         a = a0 + 2 * math.pi * i / n_petals
         d = u * math.cos(a) + v * math.sin(a)
-        petals.append(petal(np.asarray(c) + d * r_centre * 0.6 - n * 0.1, d, n, petal_len, petal_w, 0.3, cup))
+        petals.append(petal(np.asarray(c) + d * r_centre * 0.6 - n * 0.1, d, n, petal_len, petal_w, petal_w * 0.6, cup))
     pts = []
     for i in range(12):
         a = 2 * math.pi * i / 12
@@ -219,7 +219,7 @@ def watering_can(rng):
 
 def gnome(rng):
     """A giant garden gnome (about 10 tall): boots, blue coat, belt, white beard, round nose,
-    tall red hat."""
+    tall red pyramid hat."""
     boots = [blob(rng, (s * 0.9, 0.5, -0.3), 0.9, 12, squash=(0.9, 0.6, 1.3), jitter=0.03) for s in (-1, 1)]
     coat = [frustum(10, 2.0, 0.6, 1.5, 4.6)]
     belt = [band(coat[0], 2.6, 3.1, 0.04)]
@@ -230,41 +230,39 @@ def gnome(rng):
     nose = [ball((0, 5.4, -1.45), 0.5, 10)]
     beard = [np.array([(0, 2.6, -1.85), (-1.4, 5.0, -1.0), (1.4, 5.0, -1.0), (-0.9, 3.6, -1.6), (0.9, 3.6, -1.6),
                        (-1.3, 5.0, 0.2), (1.3, 5.0, 0.2), (0, 3.4, -0.4)])]
-    eyes = [ball((s * 0.55, 5.85, -1.25), 0.2, 6) for s in (-1, 1)]
-    hat = [np.array(ring(10, 1.6, 6.1) + [(0.4, 10.4, 0.9)])]
-    brim = [frustum(10, 1.65, 5.9, 1.65, 6.4)]
+    hat = [np.array(ring(4, 1.75, 6.1, a0=math.pi / 4) + [(0.4, 10.4, 0.9)])]  # a pyramid
+    brim = [frustum(4, 1.8, 5.9, 1.8, 6.4, a0=math.pi / 4)]
     return [("Boots", BOOT, boots), ("Coat", BLUE, coat + arms), ("Belt", SEEDS, belt), ("Buckle", YELLOW, buckle),
-            ("Skin", SKIN, head + nose + hands), ("Beard", PETAL_WHITE, beard), ("Eyes", (40, 40, 50), eyes), ("Hat", RED, hat + brim)]
+            ("Skin", SKIN, head + nose + hands), ("Beard", PETAL_WHITE, beard), ("Hat", RED, hat + brim)]
 
 
 def giant_leaf(rng):
-    """A giant fallen leaf (about 12 long) curling up at the edges, with a lighter midrib."""
-    halves, rib = [], []
+    """A giant fallen leaf (about 9 x 14): a thick faceted body in two shades, edges curled up,
+    a raised pale midrib and a stalk."""
+    halves = []
     for s in (-1, 1):
         pts = []
         for z, w in ((-6.0, 0.4), (-3.6, 3.0), (0.0, 4.2), (3.4, 3.2), (5.8, 0.4)):
-            pts += [(0, 0.3, z), (0, 0.6, z), (s * w, 0.3 + w * 0.32, z), (s * w, 0.6 + w * 0.32, z), (s * w * 0.5, 0.3, z), (s * w * 0.5, 0.55, z)]
+            pts += [(0, 0.0, z), (0, 1.3, z), (s * w, 0.6 + w * 0.3, z), (s * w, 1.3 + w * 0.3, z), (s * w * 0.55, 0.0, z), (s * w * 0.55, 1.1, z)]
         halves.append(np.array(pts))
-    rib = [prism(rng, (0, 0.5, -6.6), (0, 0.65, 6.0), 0.35, 0.18, 6, 0.0)]
-    stalk = [prism(rng, (0, 0.5, -6.4), (0.4, 1.4, -8.0), 0.3, 0.25, 6, 0.0)]
+    rib = [np.array([(dx, y, z) for z, wz in ((-6.6, 0.5), (0.0, 0.7), (6.0, 0.25)) for dx in (-wz, wz) for y in (1.0, 1.75 - abs(z) * 0.06)])]
+    stalk = [prism(rng, (0, 0.9, -6.4), (0.4, 1.9, -8.2), 0.45, 0.35, 6, 0.0)]
     return [("Leaf", LEAF, halves[:1]), ("Leaf", LEAF_LIGHT, halves[1:]), ("Rib", (170, 220, 110), rib + stalk)]
 
 
 def flower_patch(rng):
-    """A patch of small flowers (about 6 across) in pink, purple, yellow and white."""
-    out = {PINK: [], PURPLE: [], YELLOW: [], PETAL_WHITE: []}
+    """Three big blooms (about 6 across) in pink, purple and yellow, with chunky leaves."""
     stems, centres, leaves = [], [], []
-    cols = list(out)
-    for i, (x, z, h) in enumerate(((0, 0, 3.0), (1.8, 1.0, 2.2), (-1.7, 0.8, 2.5), (0.6, -1.9, 1.8), (-1.2, -1.6, 2.0), (2.4, -1.1, 1.6), (-2.6, -0.6, 1.4))):
+    blooms = []
+    for (x, z, h), col in zip(((0, 0, 3.4), (2.2, 1.0, 2.4), (-2.1, 0.9, 2.8)), (PINK, PURPLE, YELLOW)):
         top = np.array((x, h, z))
-        stems.append(prism(rng, (x, -0.2, z), top, 0.18, 0.15, 5, 0.0))
-        n = np.array((rng.uniform(-0.3, 0.3), 1.0, -0.4))
-        p, c = flower_head(top, n, 0.35, 5, 0.75, 0.6, None, None, 0.2, rng.uniform(0, 1))
-        out[cols[i % 4]] += p
+        stems.append(prism(rng, (x, -0.2, z), top, 0.3, 0.25, 6, 0.0))
+        n = np.array((x * 0.1, 1.0, -0.5))
+        p, c = flower_head(top, n, 0.55, 5, 1.3, 1.0, None, None, 0.3, rng.uniform(0, 1))
+        blooms.append(("Petals", col, p))
         centres += c
-        leaves += [petal((x, 0.1, z), (math.cos(a), 0.25, math.sin(a)), (0, 1, 0), 1.0, 0.5, 0.15, 0.1) for a in (0.5 + i, 2.6 + i, 4.4 + i)]
-    return ([("Stems", STEM, stems + leaves), ("Centres", ORANGE, centres)]
-            + [("Petals", col, ps) for col, ps in out.items() if ps])
+        leaves += [petal((x, 0.1, z), (math.cos(a), 0.3, math.sin(a)), (0, 1, 0), 1.6, 0.9, 0.5, 0.2) for a in (0.6 + x, 3.7 + x)]
+    return [("Stems", STEM, stems + leaves), ("Centres", ORANGE, centres)] + blooms
 
 
 ITEMS = [  # name, builder, seed, label

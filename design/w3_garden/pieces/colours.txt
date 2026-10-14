@@ -27,8 +27,7 @@ GardenGnome_3: Belt, 120, 74, 40
 GardenGnome_4: Buckle, 255, 204, 40
 GardenGnome_5: Skin, 255, 200, 160
 GardenGnome_6: Beard, 250, 250, 244
-GardenGnome_7: Eyes, 40, 40, 50
-GardenGnome_8: Hat, 236, 50, 60
+GardenGnome_7: Hat, 236, 50, 60
 Topiary_1: Pot, 214, 112, 70
 Topiary_2: Rim, 188, 92, 56
 Topiary_3: Soil, 120, 74, 40
@@ -47,4 +46,3 @@ FlowerPatch_2: Centres, 250, 150, 30
 FlowerPatch_3: Petals, 250, 110, 170
 FlowerPatch_4: Petals, 160, 96, 230
 FlowerPatch_5: Petals, 255, 204, 40
-FlowerPatch_6: Petals, 250, 250, 244

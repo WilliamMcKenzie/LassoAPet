@@ -1,13 +1,13 @@
 # name: width x height x depth (studs, at 1x), tris, pieces
-GiantSunflower: 10.9 x 22.6 x 11.6, 784 tris, 4 pieces
+GiantSunflower: 10.9 x 22.6 x 11.7, 784 tris, 4 pieces
 GiantDaisy: 10.8 x 18.5 x 10.0, 672 tris, 4 pieces
-GiantTulip: 10.7 x 15.3 x 5.9, 396 tris, 4 pieces
+GiantTulip: 10.8 x 15.3 x 6.0, 396 tris, 4 pieces
 GiantToadstool: 12.4 x 14.7 x 12.1, 162 tris, 3 pieces
 HedgeWall: 18.1 x 6.7 x 5.3, 212 tris, 2 pieces
 WateringCan: 7.0 x 9.2 x 13.3, 480 tris, 5 pieces
-GardenGnome: 5.0 x 10.4 x 4.0, 362 tris, 8 pieces
+GardenGnome: 5.0 x 10.4 x 4.0, 310 tris, 7 pieces
 Topiary: 5.5 x 11.5 x 5.2, 224 tris, 5 pieces
 PicketFence: 12.4 x 4.2 x 0.6, 232 tris, 2 pieces
-GiantLeaf: 8.4 x 1.9 x 14.1, 108 tris, 3 pieces
+GiantLeaf: 8.4 x 2.6 x 14.4, 108 tris, 3 pieces
 Toadstools: 7.5 x 5.7 x 4.9, 490 tris, 3 pieces
-FlowerPatch: 6.9 x 3.8 x 4.9, 2156 tris, 6 pieces
+FlowerPatch: 7.3 x 4.4 x 4.0, 852 tris, 5 pieces
