@@ -1,7 +1,7 @@
 -- Treasure Hermit: World 3 Pirate Cove's Rare (Oct 14). A purple hermit crab living in a treasure
 -- chest: two gold straps, a gold lock, the lid propped open on a bed of gold with a glowing ruby;
 -- the crab's head, eye stalks, claws (one huge) and four legs out front. You ride on the gold.
--- designs/world3/pirate/TreasureHermit.bbmodel (tools/pirate_treasure_hermit.py), converted (--zyx) into TreasureHermitModel.luau by
+-- designs/world3/pirate/TreasureHermit.bbmodel (tools/pirate_treasure_hermit.py), converted (--zyx --meshes; the head and the claws' tops MeshParts from ReplicatedStorage.AnimalMeshes, like the Green Crab's) into TreasureHermitModel.luau by
 -- tools/bbmodel_to_luau.py.
 
 local Horse = require(script.Parent.Horse)

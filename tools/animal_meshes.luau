@@ -13,6 +13,9 @@ local IDS = {
 	GreenCrab_Red_root = 0, -- (the Green Crab's carapace, QM Oct 14)
 	GreenCrab_Red_ClawL = 0, -- (its claws' tops)
 	GreenCrab_Red_ClawR = 0,
+	TreasureHermit_Crab_neck = 0, -- (the Treasure Hermit's head and claw tops, like the Green Crab's: QM Oct 14)
+	TreasureHermit_Crab_ClawL = 0,
+	TreasureHermit_Crab_ClawR = 0,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then
