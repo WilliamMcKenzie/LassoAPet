@@ -261,6 +261,7 @@ def pirate_cove():
         ("WetSand", 0, (225, 189, 120), (208, 172, 105)),  # (QM in Studio, Oct 14: stamina-loop d803ac1; was 206, 172, 110 / 194, 160, 98)
         ("Ground", 1, (240, 218, 160), (230, 206, 146)),  # light sand, as the base's
         ("Planks", 1, (150, 100, 60), None),  # boardwalks: plain boards, no checker
+        ("DampSand", 1, (233, 204, 140), (219, 189, 126)),  # (QM, Oct 14: stamina-loop 97c9aa0) between the sand and the wet sand, at the sand's height
     ])
     q = b.quasi(7, 13, (517, 233))
     q = q + 0.12 * (0.5 - along(b, 64, 108))  # (wider: more water, the lower q)
@@ -301,7 +302,12 @@ def pirate_cove():
                 for a, c in cells:
                     b.rung[a, c] = 3
     b.rung = despeck(b.rung, keep, only=3)
-    check(b)
+    # Damp sand: every sand cell touching wet sand (diagonals too), so sand never meets it directly.
+    wet = np.zeros_like(b.inside)
+    for nb in neighbours(np.where(b.inside & ~b.free & (b.rung == 2), 1, 0), 0):
+        wet |= nb == 1
+    b.rung[(b.rung == 3) & wet & ~b.free] = 5
+    check(b, [0, 1, 2, 4, 4, 3])  # (the damp sand a step between the wet sand and the sand)
     walls = dict(wall=[(124, 82, 50), (112, 73, 44)], cap=(240, 218, 160), gate=(255, 160, 40))  # driftwood, sand top, treasure gold
     return b, walls
 
