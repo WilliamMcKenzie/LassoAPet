@@ -43,21 +43,30 @@ local Animals = ReplicatedStorage.Shared.Animals
 
 local EDGE = 2 -- studs kept from the pen's fences
 
--- Each world has its own pen (QM, Oct 13): World 1's is "Pen", World 2's "Pen_W2"...
-local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("Pen"))
+-- One pen across every world (QM, Oct 14: "you have the same pets in each world"): World
+-- 1's store, "Pen", in all of them. Each world's own quests and Analytics V1 record are
+-- kept in it apart (WORLD_KEYS). The old per-world pens ("Pen_W2"...) are merged into it
+-- once, the first time a player loads after this (mergeOld, data.merged), and kept as they
+-- were as a backup.
+local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("Pen", 1))
 if not ok then
 	store = nil
 end
--- The other worlds' pens: their pets keep earning you gold while you're here (QM), and
--- leaving here marks them seen too, so their while-you-were-away gold doesn't count it.
-local otherStores = {} -- [world] = its "Pen" store
+local oldStores = {} -- [world] = its old "Pen_W<world>" store (merged in once)
 for world in Config.Places do
-	if world ~= Config.World then
-		local okOther, other = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("Pen", world))
-		otherStores[world] = if okOther then other else nil
+	if world ~= 1 then
+		local okOld, old = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("Pen", world))
+		oldStores[world] = if okOld then old else nil
 	end
 end
-local otherIncome = {} -- [player] = what their pets in the other worlds earn a second
+local otherStores = {} -- (no other worlds' pens any more: one pen)
+local otherIncome = {} -- [player] = 0 (it was what their pets in the other worlds earned)
+-- A world's own fields in the shared pen: World 1's as they were, the others' with the
+-- world's number on ("quests2", "v1_2").
+local function worldKey(name, world)
+	world = world or Config.World
+	return if world == 1 then name elseif name == "v1" then "v1_" .. world else name .. world
+end
 
 -- [player] = { eggs = { [kind] = n }, items = { [id] = { x, z, egg, hatchAt } or { x, z, pet } }, ride = kind, tutorial = done }
 local profiles = {}
@@ -297,6 +306,63 @@ local function markOtherWorldsSeen(player)
 	end
 end
 
+-- The old per-world pens into the shared one, once (QM, Oct 14): their pets and eggs added
+-- to it (a world's ride as a pet in the pen), their quests and Analytics V1 record under
+-- that world's own keys, the shop counts the higher of the two. nil data: no shared pen yet.
+-- Returns the data to load, with .merged set, or nil and false if an old pen couldn't be
+-- read (tried again next time; nothing's lost meanwhile).
+local function mergeOld(player, data)
+	if typeof(data) == "table" and data.merged then
+		return data, true
+	end
+	local olds = {}
+	for world, old in oldStores do
+		local success, value = pcall(old.GetAsync, old, "u" .. player.UserId)
+		if not success then
+			return data, false
+		end
+		olds[world] = value
+	end
+	local merged = if typeof(data) == "table" then data else nil
+	for world, old in olds do
+		if typeof(old) ~= "table" then
+			continue
+		end
+		merged = merged or { eggs = {}, items = {}, tutorial = old.tutorial }
+		merged.eggs = typeof(merged.eggs) == "table" and merged.eggs or {}
+		merged.items = typeof(merged.items) == "table" and merged.items or {}
+		for kind, n in typeof(old.eggs) == "table" and old.eggs or {} do
+			if tonumber(n) then
+				merged.eggs[kind] = (tonumber(merged.eggs[kind]) or 0) + n
+			end
+		end
+		for id, item in typeof(old.items) == "table" and old.items or {} do
+			merged.items[id] = item
+		end
+		if isAnimal(old.ride) then -- (the pet you rode there: into the pen with the rest)
+			local k = 0
+			for _ in merged.items do
+				k += 1
+			end
+			merged.items[HttpService:GenerateGUID(false)] = { x = -14 + (k % 5) * 7, z = 14 - (k // 5 % 5) * 7, pet = old.ride,
+				merged = old.rideMerged, fuse = old.rideFuse, income = old.rideFuse and old.rideIncome or nil, stats = old.rideStats,
+				worth = old.rideWorth, tier = old.rideTier }
+		end
+		merged[worldKey("quests", world)] = old.quests
+		merged[worldKey("v1", world)] = old.v1
+		for _, field in { "boughtPets", "boughtGiantEggs", "usedHatches", "homeEggs" } do
+			if tonumber(old[field]) then
+				merged[field] = math.max(tonumber(merged[field]) or 0, old[field])
+			end
+		end
+		merged.tutorial = merged.tutorial or old.tutorial
+	end
+	if merged then
+		merged.merged = true
+	end
+	return merged, true
+end
+
 local inviteCredits -- (below: "Invite a friend")
 local claimStarter -- (below: the Starter Pack)
 local function load(player)
@@ -306,10 +372,25 @@ local function load(player)
 	if store then
 		for attempt = 1, 3 do
 			local success, data = pcall(store.GetAsync, store, "u" .. player.UserId)
+			local mergedOk
+			if success then
+				data, mergedOk = mergeOld(player, data)
+				profile.merged = mergedOk or nil -- (saved with it: not merged again)
+			end
 			if success then
 				if typeof(data) == "table" then
-					fresh = false
-					profile.v1 = data.v1 -- (Funnel's: entry build, enrolment, steps logged once)
+					-- (a first visit to this world: no record of it in the shared pen yet. World 1
+					-- keeps meaning a brand new player.)
+					fresh = if Config.World == 1 then false else data[worldKey("v1")] == nil
+					profile.keep = {} -- (the other worlds' own fields, written back as they were)
+					for world in Config.Places do
+						if world ~= Config.World then
+							for _, name in { "quests", "v1" } do
+								profile.keep[worldKey(name, world)] = data[worldKey(name, world)]
+							end
+						end
+					end
+					profile.v1 = data[worldKey("v1")] -- (Funnel's: entry build, enrolment, steps logged once)
 					for kind, n in data.eggs or {} do
 						if eggPet(kind) and tonumber(n) and n > 0 then
 							profile.eggs[kind] = math.floor(n)
@@ -327,7 +408,7 @@ local function load(player)
 					end
 					profile.rolls = tonumber(data.rolls) and math.max(0, math.floor(data.rolls)) or nil
 					profile.homeEggs = tonumber(data.homeEggs) -- (animals brought home, counted from the Egg Rodeo's first session: Funnel)
-					profile.quests = Quests.load(data.quests)
+					profile.quests = Quests.load(data[worldKey("quests")])
 					profile.rainbowTrail = data.rainbowTrail == true or nil
 					profile.questsSeen = data.questsSeen == true or nil -- (opened the Quests panel: no tap hand on it)
 					profile.starterPack = data.starterPack == true or nil -- (the Starter Pack's gold and Snake given)
@@ -461,7 +542,12 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, homeEggs = profile.homeEggs, quests = profile.quests, v1 = profile.v1, fuseLesson = player:GetAttribute("FuseLesson") == true or nil }
+		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
+		merged = profile.merged }
+	data[worldKey("quests")], data[worldKey("v1")] = profile.quests, profile.v1 -- (this world's own)
+	for name, value in profile.keep or {} do -- (the other worlds', as they were)
+		data[name] = value
+	end
 	local as = HttpService:JSONEncode(data)
 	if onlyIfChanged and savedAs[player] == as then
 		return true
@@ -1404,13 +1490,13 @@ tutorialCommand.Triggered:Connect(function(source)
 		return
 	end
 	local old = profiles[player]
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil) }
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
 	Quests.publish(player, profiles[player].quests)
 	if store and loaded[player] then
 		-- Keep the shop counts saved too: without them, rejoining hands every Giant Horse
 		-- egg and Legendary Pet ever bought over again (addBoughtGiantEggs / addBoughtPets).
 		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false, usedHatches = old.usedHatches,
-			boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs })
+			boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, merged = old.merged })
 	end
 	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
 	player:SetAttribute("PenLevel", 1)
@@ -1509,7 +1595,7 @@ resetCommand.Triggered:Connect(function(source)
 	end
 	Telemetry.exclude(player) -- (a test from here on: not in the play data)
 	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {}, tutorial = true, boughtPets = old.boughtPets,
-		boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil) }
+		boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
 	for _, other in otherStores do -- (the other worlds' pens, empty)
 		task.spawn(pcall, other.SetAsync, other, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = true })
 	end
@@ -1541,7 +1627,7 @@ rebirthPets.OnInvoke = function(player)
 	end
 	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = old.ridden or {}, tutorial = true, boughtPets = old.boughtPets,
 		boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = old.quests, v1 = old.v1, questsSeen = old.questsSeen,
-		starterPack = old.starterPack, rainbowTrail = old.rainbowTrail, homeEggs = old.homeEggs }
+		starterPack = old.starterPack, rainbowTrail = old.rainbowTrail, homeEggs = old.homeEggs, merged = old.merged, keep = old.keep }
 	local writes = {}
 	for _, other in otherStores do -- (the other worlds' pens, empty)
 		table.insert(writes, task.spawn(function()

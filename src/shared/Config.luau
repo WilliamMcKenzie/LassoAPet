@@ -1397,6 +1397,10 @@ Config.World2Pets = {
 	Geb = { 7.47, 40000, 2400 },
 	Bes = { 7.47, 40000, 2400 },
 }
+-- (and they earn and hatch the same in every world now pets go with you: QM, Oct 14)
+for kind, w2 in Config.World2Pets do
+	Config.PetIncome[kind], Config.PetHatchTime[kind] = w2[2], w2[3]
+end
 local baseIncome = table.clone(Config.PetIncome) -- (World 1's, before World 2 changes its own)
 function Config.incomeIn(world, kind)
 	local own = world == 2 and Config.World2Pets[kind]

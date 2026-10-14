@@ -21,9 +21,21 @@ local Studs = require(ReplicatedStorage.Shared.Studs)
 local PenFence = require(script.Parent.PenFence)
 require(script.Parent.Passes) -- (PassVIP: the gold fence, below)
 
-local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("PenLevel"))
+-- One pen level across every world (QM, Oct 14: the pen carries over, and its size): World
+-- 1's store in all of them. The old per-world levels ("PenLevel_W2"...) count too: the
+-- highest of them all (read every load, so nothing's lost).
+local ok, store = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("PenLevel", 1))
 if not ok then
 	store = nil
+end
+local oldStores = {}
+for world in Config.Places do
+	if world ~= 1 then
+		local okOld, old = pcall(DataStoreService.GetDataStore, DataStoreService, Config.storeName("PenLevel", world))
+		if okOld then
+			table.insert(oldStores, old)
+		end
+	end
 end
 
 local loaded = {}
@@ -41,7 +53,14 @@ local function load(player)
 		local success, value = pcall(store.GetAsync, store, "u" .. player.UserId)
 		if success then
 			if player.Parent then
-				player:SetAttribute("PenLevel", math.max(level(player), tonumber(value) or 1))
+				local best = tonumber(value) or 1
+				for _, old in oldStores do
+					local got, was = pcall(old.GetAsync, old, "u" .. player.UserId)
+					if got and tonumber(was) then
+						best = math.max(best, tonumber(was))
+					end
+				end
+				player:SetAttribute("PenLevel", math.max(level(player), best))
 				loaded[player] = true
 			end
 			return
