@@ -2,6 +2,7 @@
 -- per item in ServerStorage.PirateProps, its pieces' MeshParts at the mesh origin (base y=0,
 -- facing -z), studded (StudsHalf) and coloured from pieces/colours.txt. Rerunnable.
 local AssetService = game:GetService("AssetService")
+local SCALE = { PalmTree = 3, PalmTreeSmall = 3, Crate = 2, CrateStack = 2, Barrel = 2, BarrelGroup = 2, PirateShip = 1.5 } -- (the ship 1.5x: 2x has no room in a back lagoon clear of the pens)
 local PIECES = {
 	{ "BarrelGroup_1", "Barrel", 100566992923439, 188, 118, 62 },
 	{ "BarrelGroup_2", "Hoops", 75965717922896, 86, 88, 98 },
@@ -68,6 +69,7 @@ end
 local sizes = {}
 for name, model in models do
 	model.WorldPivot = CFrame.new()
+	model:ScaleTo(SCALE[name] or 1) -- (QM, Oct 14: palms 3x, the rest 2x)
 	local cf, s = model:GetBoundingBox()
 	table.insert(sizes, string.format("%s %.1fx%.1fx%.1f at y%.1f", name, s.X, s.Y, s.Z, cf.Position.Y - s.Y / 2))
 end

@@ -39,31 +39,31 @@ cands=[]
 for i,r in enumerate(rows):
     for j,ch in enumerate(r):
         x,z=-212+8*j,4+8*i
-        if ch in 'Sw' and wallok(x,z,8) and not inpen(x,z,8) and not onpath(x,z,16):
+        if ch in 'Sw' and wallok(x,z,10) and not inpen(x,z,10) and not onpath(x,z,16):
             a=nearwater(x,z,10)
             if a is not None: cands.append((x,z,a))
 random.shuffle(cands)
 palms=[]
 for x,z,a in cands:
-    if all(math.hypot(x-p[0],z-p[1])>34 for p in palms): palms.append((x,z,a))
-palms=palms[:14]
+    if all(math.hypot(x-p[0],z-p[1])>46 for p in palms): palms.append((x,z,a))
+palms=palms[:12]
 for k,(x,z,a) in enumerate(palms):
     big = k%3!=2
     out.append(dict(item='PalmTree' if big else 'PalmTreeSmall',x=x,z=z,yaw=random.uniform(0,360),lean=10,leanTo=a,y=-0.4))
     if not big or k%4==0:  # a small one or two beside it
         for n in range(1 if big else 2):
             for _ in range(20):
-                ang=random.uniform(0,2*math.pi); dd=random.uniform(7,11)
+                ang=random.uniform(0,2*math.pi); dd=random.uniform(20,28)
                 sx,sz=x+dd*math.cos(ang),z+dd*math.sin(ang)
-                if land(sx,sz) and wallok(sx,sz,6) and not inpen(sx,sz,6) and not onpath(sx,sz,12):
+                if land(sx,sz) and wallok(sx,sz,10) and not inpen(sx,sz,10) and not onpath(sx,sz,14):
                     out.append(dict(item='PalmTreeSmall',x=sx,z=sz,yaw=random.uniform(0,360),lean=12,leanTo=math.degrees(math.atan2(sz-z,sx-x)),y=-0.4)); break
 # --- crate and barrel piles
-PILES=[[('CrateStack',0,0,0),('Barrel',6.5,-2,0),('Crate',-6,1.5,20)],
-       [('BarrelGroup',0,0,0),('Crate',5.5,-3,10)],
-       [('Crate',0,0,0),('Crate',4.4,0.5,15),('Barrel',2,4.5,0),('Barrel',-2.5,4,0)],
-       [('CrateStack',0,0,90),('BarrelGroup',7.5,1,0)]]
+PILES=[[('CrateStack',0,0,0),('Barrel',13,-4,0),('Crate',-12,3,20)],
+       [('BarrelGroup',0,0,0),('Crate',11,-6,10)],
+       [('Crate',0,0,0),('Crate',8.8,1,15),('Barrel',4,9,0),('Barrel',-5,8,0)],
+       [('CrateStack',0,0,90),('BarrelGroup',15,2,0)]]
 def pile_ok(x,z):
-    return all(land(x+dx,z+dz) for dx in (-6,0,6) for dz in (-6,0,6)) and wallok(x,z,6) and not inpen(x,z,5) and not onpath(x,z,14)
+    return all(land(x+dx,z+dz) for dx in (-6,0,6) for dz in (-6,0,6)) and wallok(x,z,8) and not inpen(x,z,6) and not onpath(x,z,12)
 spots=[]
 # near the portal, by pen back corners, by the walls
 want=[(-104,44),(-50,56)]
@@ -78,34 +78,19 @@ for wx,wz in want:
     for r in range(0,40,4):
         for a in range(0,360,30):
             x,z=wx+r*math.cos(math.radians(a)),wz+r*math.sin(math.radians(a))
-            if pile_ok(x,z) and all(math.hypot(x-s[0],z-s[1])>40 for s in spots) and all(math.hypot(x-o['x'],z-o['z'])>9 for o in out):
+            if pile_ok(x,z) and all(math.hypot(x-s[0],z-s[1])>34 for s in spots) and all(math.hypot(x-o['x'],z-o['z'])>(26 if o['item'].startswith('Palm') else 16) for o in out):
                 best=(x,z); break
         if best: break
     if best: spots.append(best)
-for k,(x,z) in enumerate(spots[:8]):
+for k,(x,z) in enumerate(spots[:7]):
     rot=random.uniform(0,360)
     for item,dx,dz,yy in PILES[k%len(PILES)]:
         c,s=math.cos(math.radians(rot)),math.sin(math.radians(rot))
         out.append(dict(item=item,x=x+dx*c-dz*s,z=z+dx*s+dz*c,yaw=rot+yy,y=0))
-# --- the ship: all water under it, out of the pens, nearest the spawn's view
-best=None
-for i in range(len(rows)):
-    for j in range(len(rows[0])):
-        x,z=-212+8*j,4+8*i
-        for yaw in (0,30,60,90,120,150):
-            c,s=math.cos(math.radians(yaw)),math.sin(math.radians(yaw))
-            ok=True
-            for u in range(-26,27,4):
-                for v in range(-10,11,4):
-                    px,pz=x+v*c+u*s, z-v*s+u*c
-                    if cell(px,pz)!='~' or inpen(px,pz,2) or not wallok(px,pz,4): ok=False; break
-                if not ok: break
-            if ok:
-                dist=math.hypot(x,z-20); ahead=(z-20)/max(dist,1)
-                score=dist*(1.6-ahead)
-                if best is None or score<best[0]: best=(score,x,z,yaw)
+# --- the ship (QM, Oct 14: in a back lagoon; 1.5x, the most that fits clear of the pens)
+best=(0.93,-192,284,20)
 print('ship',best)
-if best: out.append(dict(item='PirateShip',x=best[1],z=best[2],yaw=best[3]+180,y=-4))
+if best: out.append(dict(item='PirateShip',x=best[1],z=best[2],yaw=best[3]+180,y=-5.5))
 json.dump(out,open('pirate_place.json','w'))
 from collections import Counter
 print(len(out),Counter(o['item'] for o in out),'piles',len(spots))

@@ -74,6 +74,8 @@ if os.environ.get("WORLD") == "3":
     ARC = (0, 96 * 1.2)
     _full = ((0, 262), (-132.4, 226.3), (132.4, 226.3), (-144.1, 89.8), (144.1, 89.8))
     GATES = tuple(math.hypot(x - ARC[0], z - ARC[1]) - SIZES[-1] * TILE / 2 for x, z in _full)
+    LIFT = 1  # (QM, Oct 14: on the light sand, a stud up: tools/world3_sandstep.luau)
+LIFT = globals().get("LIFT", 0)
 PENS = [_pen(a, r) for a, r in zip(ANGLES, GATES)]
 # Local pen frame: centred on the pen, open side at z = -SIZE / 2 facing -z.
 
@@ -235,7 +237,7 @@ def pen_parts(gx, gz, fx, fz, n=SIZES[0], style=0):
 
     out = []
     for name, size, centre, R, color, visible, material, transparency in parts:
-        world = M @ centre + np.array([cx, 0, cz])
+        world = M @ centre + np.array([cx, LIFT, cz])
         out.append((name, size, world, M @ R, color, visible, material, transparency))  # (markers too: read in the pen's frame)
     return out
 
