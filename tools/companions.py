@@ -22,6 +22,10 @@ import animal_designs as A  # noqa: E402
 from animal_designs import Animal  # noqa: E402
 from partlib import render, write_bbmodel  # noqa: E402
 from horse_rig import pose  # noqa: E402
+import horse_rig  # noqa: E402
+import snake_design as SD  # noqa: E402
+
+horse_rig.EULER = "ZYX"  # the War Elephant and Firebird are QM's files, converted with --zyx
 
 PX = 0.75  # studs per pixel of QM's sheet
 
@@ -249,19 +253,188 @@ def tortoise():
     return a
 
 
+# ---------------------------------------------------------------- reskins of QM's models
+# QM (Oct 14): the Mammoth is the War Elephant without its armour, the Hula is the Firebird,
+# both recoloured to the sheet. Same bones and animations as the originals; the extra
+# pieces are plain boxes in Blockbench units (10 per stud).
+
+
+def reskin(src, name, colors, recolor, drop, add, resize=(), rename=()):
+    """Load src, put `colors` on free palette cells, repaint elements (by name in recolor,
+    else by old colour), drop elements whose names start with `drop`, resize/rename some,
+    and add boxes: add = [(group, name, lo, hi, color key)]."""
+    import base64
+    import io
+    m = json.load(open(src))
+    t = m["textures"][0]
+    head, data = t["source"].split(",", 1)
+    im = Image.open(io.BytesIO(base64.b64decode(data))).convert("RGBA")
+    old = im.copy()
+    free = [(x, y) for y in range(0, 16, 2) for x in range(0, 16, 2)
+            if all(im.getpixel((x + dx, y + dy))[3] == 0 for dx in (0, 1) for dy in (0, 1))]
+    uv = {}
+    for (k, c), (x, y) in zip(colors.items(), free):
+        for dx in (0, 1):
+            for dy in (0, 1):
+                im.putpixel((x + dx, y + dy), (*c, 255))
+        uv[k] = [x + 1, y + 1]
+    assert len(uv) == len(colors), "palette full"
+    buf = io.BytesIO()
+    im.save(buf, "PNG")
+    t["source"] = head + "," + base64.b64encode(buf.getvalue()).decode()
+    m["name"] = name
+
+    def paint(e, key):
+        u = uv[key]
+        for f in e["faces"].values():
+            if e.get("type") == "mesh":
+                f["uv"] = {k: u for k in f["uv"]}
+            else:
+                f["uv"] = [u[0] - 0.5, u[1] - 0.5, u[0] + 0.5, u[1] + 0.5]
+
+    gone = set()
+    for e in m["elements"]:
+        if e["name"].startswith(drop):
+            gone.add(e["uuid"])
+            continue
+        f = next(iter(e["faces"].values()))["uv"]
+        u, v = f[:2] if isinstance(f, list) else next(iter(f.values()))
+        c = old.getpixel((int(u), int(v)))[:3]
+        key = next((k for n, k in recolor if isinstance(n, str) and e["name"].startswith(n)), None) or recolor_by_color(recolor, c)
+        if key:
+            paint(e, key)
+        for n, lo, hi in resize:
+            if e["name"] == n:
+                e["from"], e["to"] = list(lo), list(hi)
+        for a, b in rename:
+            if e["name"] == a:
+                e["name"] = b
+    gname = {g["uuid"]: g["name"] for g in m["groups"]}
+    new = {}
+    for g, n, lo, hi, key in add:
+        assert g in gname.values(), g
+        new.setdefault(g, []).append({"name": n, "type": "cube", "uuid": SD.uid(), "from": list(lo), "to": list(hi),
+                                      "origin": [0, 0, 0], "rotation": [0, 0, 0], "color": 0, "autouv": 0,
+                                      "faces": {k: {"uv": [uv[key][0] - 0.5, uv[key][1] - 0.5, uv[key][0] + 0.5, uv[key][1] + 0.5],
+                                                    "texture": 0} for k in ("north", "east", "south", "west", "up", "down")}})
+
+    def fix(nodes):
+        out = []
+        for n in nodes:
+            if isinstance(n, dict):
+                n["children"] = fix(n["children"]) + [e["uuid"] for e in new.get(gname[n["uuid"]], [])]
+                out.append(n)
+            elif n not in gone:
+                out.append(n)
+        return out
+    m["outliner"] = fix(m["outliner"])
+    m["elements"] = [e for e in m["elements"] if e["uuid"] not in gone] + [e for v in new.values() for e in v]
+    return m
+
+
+def recolor_by_color(recolor, c):
+    return next((k for n, k in recolor if n == c), None)
+
+
+SADDLE_COLORS = {"blanket": BLANKET, "hem": HEM, "seat": SEAT, "tan": TAN, "gold": GOLD}
+
+
+def saddle_boxes(half, y_top, y_hem, z0, z1, seat_half, k=10):
+    """saddle() in Blockbench units, for the reskins."""
+    zm, gy = (z0 + z1) / 2, (y_hem + 6 + y_top) / 2
+    out = [("root", "Blanket", (-half, y_hem + 6, z0), (half, y_top, z1), "blanket"),
+           ("root", "Hem", (-half - 0.5, y_hem, z0 - 0.5), (half + 0.5, y_hem + 6, z1 + 0.5), "hem"),
+           ("root", "Seat", (-seat_half, y_top, z0 + 5), (seat_half, y_top + 6, z1 - 5), "seat"),
+           ("root", "Pommel", (-8, y_top, z0 + 2), (8, y_top + 15, z0 + 9), "tan"),
+           ("root", "Cantle", (-seat_half, y_top + 6, z1 - 11), (seat_half, y_top + 12, z1 - 4), "tan")]
+    for side, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * half, sx * (half + 0.5)))
+        out.append(("root", "Gem" + side, (xa, gy - 6, zm - 6), (xb, gy + 6, zm + 6), "gold"))
+    return out
+
+
+def mammoth_reskin():
+    src = os.path.join(A.ROOT, "designs", "godlands", "WarElephant.bbmodel")
+    colors = dict(coat=COAT, coat_dark=COAT_DARK, speck=SPECK, tusk=TUSK, tip=TRUNK_TIP, nail=NAIL, **SADDLE_COLORS)
+    recolor = [("Head", "coat_dark"), ("Trunk", "coat_dark"), ("Ear", "coat_dark"), ("Tusk", "tusk"),
+               ((156, 152, 166), "coat"), ((60, 56, 64), "coat_dark"), ((226, 218, 198), "nail")]
+    drop = ("HeadPlate", "HeadRidge", "BackPlate", "BackTrim", "Skirt", "Spine", "SideSpike", "EarLLobe", "EarRLobe")
+    # small mammoth ears (the elephant's are huge)
+    resize = [("EarL", (-19, 58, -48), (-16, 74, -34)), ("EarR", (16, 58, -48), (19, 74, -34))]
+    add = [("neck", "Crown", (-14, 82, -62), (14, 88, -38), "coat_dark"),
+           ("root", "Hump", (-20, 76, -30), (20, 82, -8), "coat"),
+           ("neck", "TrunkTip", (-5.5, 22, -84), (5.5, 30, -76), "tip")]
+    for side, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * 22, sx * 22.5))
+        for i, (y, z) in enumerate(((62, 28), (40, -22), (36, 30))):
+            add.append(("root", f"Speck{i}{side}", (xa, y, z), (xb, y + 6, z + 6), "speck"))
+        xa, xb = sorted((sx * 16, sx * 16.5))
+        add.append(("neck", "Speck3" + side, (xa, 56, -48), (xb, 62, -42), "speck"))
+    add += saddle_boxes(22.5, 77, 50, -6, 30, 13)
+    # the War Elephant has two elements named TuskL and EarL: name the right ones properly
+    m = reskin(src, "Mammoth", colors, recolor, drop, add, resize)
+    for e in m["elements"]:
+        if e["name"] in ("TuskL", "EarL", "TuskTipL") and e.get("from", [0])[0] > 0:
+            e["name"] = e["name"][:-1] + "R"
+    return m
+
+
+def hula_reskin():
+    src = os.path.join(A.ROOT, "designs", "volcano", "Firebird.bbmodel")
+    colors = dict(hide=HIDE, hide_dark=HIDE_DARK, hide_light=HIDE_LIGHT, antler=ANTLER, antler_tip=ANTLER_TIP,
+                  hoof=HOOF, claw=(170, 172, 176), white=A.EYE_WHITE, **SADDLE_COLORS)
+    recolor = [("Thigh", "hide_dark"), ("Shin", "hide_light"), ("Heel", "hoof"), ("Toe", "hoof"), ("Claw", "claw"),
+               ("Belly", "hide_dark"), ("Neck", "hide_dark"), ("Beak", "hide_dark"), ("Eye", "white"),
+               ("Tail1", "hide_dark"), ((255, 128, 32), "hide")]
+    drop = ("Wing", "Tail0", "Tail2", "BeakHook", "Jaw", "Mouth", "Tooth", "Brow", "Spike")
+    resize = [("Beak", (-10, 96, -84), (10, 114, -65.9)),  # the beak becomes a short deer snout
+              ("Tail1", (-5, 76, 28), (5, 108, 38))]  # one tail sticking straight up
+    rename = [("Beak", "Snout")]
+    add = []
+    for side, sx in (("L", -1), ("R", 1)):
+        xa, xb = sorted((sx * 4, sx * 10))
+        add.append(("neck", "Antler" + side, (xa, 126, -46), (xb, 136, -40), "antler"))
+        add.append(("neck", "AntlerTip" + side, (xa, 136, -44), (xb, 146, -34), "antler_tip"))
+        ea, eb = sorted((sx * 14, sx * 22))
+        add.append(("neck", "Ear" + side, (ea, 114, -40), (eb, 121, -24), "antler"))
+        add.append(("neck", "EarTip" + side, (ea, 114, -24), (eb, 121, -17), "antler_tip"))
+        add.append(("root", "Speck" + side, (sx * 6 - 4, 86, -6 + 18 * (sx > 0)), (sx * 6 + 4, 86.5, 2 + 18 * (sx > 0)), "hide_light"))
+    add += saddle_boxes(18.5, 87, 64, -14, 18, 12)
+    return reskin(src, "Hula", colors, recolor, drop, add, resize, rename)
+
+
 ANIMALS = (mammoth, snail, hula, tortoise)
+RESKINS = {"Mammoth": mammoth_reskin, "Hula": hula_reskin}
 
 S = 420
-Q34 = dict(eye=(-26, 15, -24), target=(0, 4.5, 6), W=S, H=S, fov=34)
+Q34 = dict(eye=(-30, 17, -28), target=(0, 5, 6), W=S, H=S, fov=34)
 FRONT = dict(eye=(-6, 8, -26), target=(0, 4.5, 6), W=S, H=S, fov=34)
-SIDE = dict(eye=(-34, 5, 6), target=(0, 4.5, 6), W=S, H=S, fov=34)
+SIDE = dict(eye=(-40, 6, 6), target=(0, 5, 6), W=S, H=S, fov=34)
 BACK = dict(eye=(20, 14, 34), target=(0, 4.5, 6), W=S, H=S, fov=34)
+
+
+def framed(parts, cam, z_mid):
+    """The camera moved along z so the animal's middle is where the drafts' middle was."""
+    dz = z_mid - cam["target"][2]
+    return dict(cam, eye=(cam["eye"][0], cam["eye"][1], cam["eye"][2] + dz),
+                target=(cam["target"][0], cam["target"][1], cam["target"][2] + dz))
+
+
+def z_mid(parts):
+    zs = []
+    for p in parts:
+        if p.shape == "Poly":
+            zs += [v[2] for q in p.polys for v in q]
+        else:
+            zs += [p.cf[2, 3] - p.size[2] / 2, p.cf[2, 3] + p.size[2] / 2]
+    return (min(zs) + max(zs)) / 2
 
 
 def tiles(parts, cams):
     im = Image.new("RGB", (S * len(cams), S))
+    zm = z_mid(parts)
     for i, c in enumerate(cams):
-        im.paste(render(parts, **c), (S * i, 0))
+        im.paste(render(parts, **framed(parts, c, zm)), (S * i, 0))
     return im
 
 
@@ -272,19 +445,25 @@ def main(out=os.path.join(A.ROOT, "designs", "world3"), shots="/mnt/project-file
     rows, names = [], []
     for fn in ANIMALS:
         a = fn()
-        model, _ = write_bbmodel(a.parts, a.name, None, bones=a.bones())
-        model["lasso_meta"] = a.meta
+        if a.name in RESKINS:
+            model = RESKINS[a.name]()
+            parts = SD.posed(model)
+        else:
+            model, _ = write_bbmodel(a.parts, a.name, None, bones=a.bones())
+            model["lasso_meta"] = a.meta
+            parts = a.parts
         json.dump(model, open(os.path.join(out, a.name + ".bbmodel"), "w"), separators=(",", ":"))
-        print(f"{a.name}: {len(a.parts)} parts")
-        im = A.label(tiles(a.parts, (Q34, FRONT, SIDE, BACK)), [a.name, "Front", "Side", "Back"])
+        print(f"{a.name}: {len(model['elements'])} parts")
+        im = A.label(tiles(parts, (Q34, FRONT, SIDE, BACK)), [a.name, "Front", "Side", "Back"])
         im.save(os.path.join(shots, a.name + ".png"))
-        rows.append(a.parts)
+        rows.append(parts)
         names.append(a.name)
     # one lineup: horse for size, then the four, 3/4 view on top and side view below
     lineup = Image.new("RGB", (S * 5, S * 2))
     for i, parts in enumerate([horse] + rows):
-        lineup.paste(render(parts, **Q34), (S * i, 0))
-        lineup.paste(render(parts, **SIDE), (S * i, S))
+        zm = z_mid(parts)
+        lineup.paste(render(parts, **framed(parts, Q34, zm)), (S * i, 0))
+        lineup.paste(render(parts, **framed(parts, SIDE, zm)), (S * i, S))
     A.label(lineup, ["Horse (for size)"] + names).save(os.path.join(shots, "Companions_lineup.png"))
 
 
