@@ -58,7 +58,6 @@ local HEADSHOTS = {
 	TreasureTurtle = "rbxassetid://126205240913873", -- PetTreasureTurtle.png (World 3)
 	GhostShip = "rbxassetid://97788026498553", -- PetGhostShip.png (World 3)
 	JollyRogerWyvern = "rbxassetid://85794887151153", -- PetJollyRogerWyvern.png (World 3)
-	Dreadstump = "rbxassetid://85113431468524", -- PetDreadstump.png (World 3)
 	Ladybug = "rbxassetid://86984367642458", -- PetLadybug.png (World 3)
 	Bumblebee = "rbxassetid://73522883516227", -- PetBumblebee.png (World 3)
 	ToadstoolFrog = "rbxassetid://103072616165137", -- PetToadstoolFrog.png (World 3)

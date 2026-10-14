@@ -301,7 +301,7 @@ local Config = {
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50, FlytrapQueen = 60, RoyalCnidarian = 50, Gigacorn = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, FlytrapQueen = 60, RoyalCnidarian = 50, Gigacorn = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
@@ -316,7 +316,6 @@ local Config = {
 			Monarch = { At = Vector3.new(0, 0, 0.12), From = Vector3.new(0, 16, 75) }, -- (its head, from further out and above so the wings frame it: Studio saw the head too high from (0,4,50))
 			JadeAsura = { At = Vector3.new(0, 0.13, 0.3), From = Vector3.new(0, 6, 55) }, -- (its face and tusks, under the crown; a guess)
 			Sphinx = { At = Vector3.new(0, 0.28, 0.4), From = Vector3.new(0, 6, 60) }, -- (its pharaoh face, high at the front; a guess)
-			Dreadstump = { At = Vector3.new(0, 0.18, 0.3), From = Vector3.new(0, 6, 60) }, -- (World 3 Pirate Cove's Pirate King: his face under the tricorn; a guess)
 			FlytrapQueen = { At = Vector3.new(0, 0.32, 0.3), From = Vector3.new(0, 10, 70) }, -- World 3 Garden: the Queen's crowned head, high in the middle (a guess)
 			RoyalCnidarian = { At = Vector3.new(0, 0.1, 0.33), From = Vector3.new(0, 6, 60) }, -- (World 3 Cnidaria's crowned jellyfish: its eyes and teeth under the crown; a guess)
 			Gigacorn = { At = Vector3.new(0, 0.2, 0.4), From = Vector3.new(0, 8, 65) }, -- (World 3 Candyland's candy unicorn: its face under the horn, high at the front; a guess)
@@ -614,7 +613,7 @@ local Config = {
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
 		GreenCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
-		GhostShip = 4, JollyRogerWyvern = 4, Dreadstump = 3, -- World 3 Pirate Cove's giga rares (XL) and its boss as a pet (guesses, Oct 14)
+		GhostShip = 4, JollyRogerWyvern = 4, -- World 3 Pirate Cove's giga rares (XL) (guesses, Oct 14)
 		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
 		RafflesiaBeast = 4, AncientTreant = 4, FlytrapQueen = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
 		MoonJellyfish = 1, Anomalocaris = 2, BoxJellyfish = 2, BlueRingOctopus = 2, ManOWar = 2, Mermaid = 3, -- World 3 Cnidaria (guesses, Oct 14)
@@ -853,7 +852,6 @@ local Config = {
 		TreasureTurtle = "rbxassetid://94903975169870", -- assets/ui/TreasureTurtleEggRender.png (World 3)
 		GhostShip = "rbxassetid://83345853164128", -- assets/ui/GhostShipEggRender.png (World 3)
 		JollyRogerWyvern = "rbxassetid://106595353110687", -- assets/ui/JollyRogerWyvernEggRender.png (World 3)
-		Dreadstump = "rbxassetid://134454736448129", -- assets/ui/DreadstumpEggRender.png (World 3)
 		Ladybug = "rbxassetid://108874116333491", -- assets/ui/LadybugEggRender.png (World 3)
 		Bumblebee = "rbxassetid://126546375629358", -- assets/ui/BumblebeeEggRender.png (World 3)
 		ToadstoolFrog = "rbxassetid://115536781118070", -- assets/ui/ToadstoolFrogEggRender.png (World 3)
@@ -1476,7 +1474,6 @@ Config.World3Pets = {
 	TreasureTurtle = { 9.2, 80000, 3000 }, -- Legendary (guess: 2x the Tomb's, as World 2 doubles each biome)
 	GhostShip = { 9.6, 400000, 3600 }, -- giga rare, 1 in 1,000 (guess: 5x the Legendary)
 	JollyRogerWyvern = { 9.6, 400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
-	Dreadstump = { 9.4, 200000, 3600 }, -- the boss as a trophy pet, 1 in 500 (guess)
 	-- World 3's Garden (biome 2 of World 3; Oct 14). ALL GUESSES until QM sets them: about 2x the
 	-- Tomb's by rarity per biome past it (drafted before Pirate Cove's numbers), speeds a step
 	-- above the Tomb's. The giga rares and the Queen are slow trophies like the Seraphs (0.5),
@@ -2011,13 +2008,12 @@ if Config.World == 3 then
 		end
 	end
 	trophies(1, 1000, { "GhostShip", "JollyRogerWyvern" }) -- the Pirate Cove's giga rares
-	Config.Biomes[1].Herd.Dreadstump = Config.Biomes[1].Herd.GhostShip * 2 -- its boss as a trophy pet, 1 in 500
 	trophies(2, 1000, { "RafflesiaBeast", "AncientTreant", "FlytrapQueen" }) -- the Garden's giga rares and its boss as a trophy pet
 	trophies(3, 1000, { "RockCandyDragon", "GumballGolem", "Gigacorn" }) -- Candyland's giga rares and its boss as a trophy pet
 	trophies(4, 1000, { "AbyssalDragon", "ReefTitan", "RoyalCnidarian" }) -- Cnidaria's giga rares and its boss as a trophy pet
 	-- Each biome's boss.
 	Config.Boss.ByBiome = {
-		PirateCove = "Dreadstump", -- the Pirate King chases you home (silent till a cry is picked)
+		-- PirateCove: none, so the default Kind (the Chicken, as World 1's first biome) (QM, Oct 14: Dreadstump cut)
 		Garden = "FlytrapQueen",
 		Candyland = "Gigacorn", -- the candy unicorn (silent till a cry is picked)
 		Cnidaria = "RoyalCnidarian", -- the crowned jellyfish (silent till a cry is picked)

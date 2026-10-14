@@ -375,12 +375,6 @@ return {
 		{ "Accent", 36, 32, 48 }, -- sail wings
 		{ "Accent", 24, 20, 32 }, -- sail wings (darker)
 	},
-	Dreadstump = {
-		{ "Body", 214, 34, 44 }, -- coat
-		{ "Body", 150, 20, 34 }, -- collar, lapels (darker)
-		{ "Belly", 252, 248, 236 }, -- shirt, frills
-		{ "Marking", 44, 32, 30 }, -- beard, brows
-	},
 	BlackWidow = {
 		{ "Body", 22, 22, 28 },
 		{ "Body", 48, 48, 62 }, -- glossy top of the abdomen, spinnerets (lighter)

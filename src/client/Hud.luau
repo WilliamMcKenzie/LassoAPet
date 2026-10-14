@@ -137,7 +137,6 @@ local IMAGES = {
 	eggTreasureTurtle = { id = "rbxassetid://94903975169870", size = Vector2.new(502, 817) }, -- TreasureTurtleEggRender.png (World 3)
 	eggGhostShip = { id = "rbxassetid://83345853164128", size = Vector2.new(522, 868) }, -- GhostShipEggRender.png (World 3)
 	eggJollyRogerWyvern = { id = "rbxassetid://106595353110687", size = Vector2.new(602, 734) }, -- JollyRogerWyvernEggRender.png (World 3)
-	eggDreadstump = { id = "rbxassetid://134454736448129", size = Vector2.new(502, 775) }, -- DreadstumpEggRender.png (World 3)
 	eggLadybug = { id = "rbxassetid://108874116333491", size = Vector2.new(502, 778) }, -- LadybugEggRender.png (World 3)
 	eggBumblebee = { id = "rbxassetid://126546375629358", size = Vector2.new(645, 727) }, -- BumblebeeEggRender.png (World 3)
 	eggToadstoolFrog = { id = "rbxassetid://115536781118070", size = Vector2.new(502, 676) }, -- ToadstoolFrogEggRender.png (World 3)

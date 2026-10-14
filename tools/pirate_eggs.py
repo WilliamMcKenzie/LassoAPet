@@ -188,26 +188,9 @@ def jolly_roger_wyvern():
     return glow(egg)
 
 
-def dreadstump():
-    C, CD, BE = (214, 34, 44), (150, 20, 34), (44, 32, 30)
-    egg = shell([(60, 70, 140), C, C, C, (250, 196, 150), (250, 196, 150), (250, 196, 150)])
-    tricorn(egg, "Hat", w=0.95)
-    z = zf(4, 0.02)
-    egg.block("Beard", (-0.55, 1.5, z), (0.55, 2.1, z + 0.05), BE)
-    egg.block("Nose", (-0.1, 2.2, zf(5, 0.1)), (0.1, 2.4, zf(5, -0.02)), (236, 110, 100)).bone = "top"
-    googly(egg, "EyeL", -0.27, 2.6, zf(5) - 0.02, 0.13)
-    googly(egg, "EyeR", 0.27, 2.6, zf(5) - 0.02, 0.13)
-    egg.block("Buckle", (-0.15, 0.55, zf(1, 0.04)), (0.15, 0.8, zf(1, -0.01)), GOLD)
-    egg.block("Belt", (-WIDTHS[1] / 2 - 0.02, 0.6, -0.5), (WIDTHS[1] / 2 + 0.02, 0.75, 0.5), BLACK)
-    for p in egg.parts:
-        if p.name.startswith("Eye"):
-            p.bone = "top"
-    return egg
-
-
 EGGS = [("GreenCrab", green_crab), ("Parrot", parrot), ("BananaMonkey", banana_monkey), ("TreasureHermit", treasure_hermit),
         ("EyepatchShark", eyepatch_shark), ("TreasureTurtle", treasure_turtle), ("GhostShip", ghost_ship),
-        ("JollyRogerWyvern", jolly_roger_wyvern), ("Dreadstump", dreadstump)]
+        ("JollyRogerWyvern", jolly_roger_wyvern)]
 
 if __name__ == "__main__":
     O.EGGS = EGGS

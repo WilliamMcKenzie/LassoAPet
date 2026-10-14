@@ -175,7 +175,6 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	TreasureTurtle = "Old enough to remember when its island was just a pebble.",
 	GhostShip = "Sank three hundred years ago. Nobody told it to stop sailing.",
 	JollyRogerWyvern = "All bones, no fear. Flies the black flag wherever it goes.",
-	Dreadstump = "King of the Pirate Cove. The parrot does most of the talking.",
 	GummyBear = "Squishy, sticky and proud of it. Do not leave it in the sun.",
 	GumdropFrog = "Rolled itself in sugar on purpose. Leaves a sparkly trail.",
 	GingerbreadMan = "Runs as fast as he can. You still caught him.",
