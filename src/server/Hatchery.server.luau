@@ -193,6 +193,9 @@ local function penCount(profile)
 end
 local function penCap(player)
 	local cfg = Config.PenCapacity
+	if not cfg then
+		return math.huge -- (uncapped: QM, Oct 14)
+	end
 	return cfg.Base + cfg.PerUpgrade * ((player:GetAttribute("PenLevel") or 1) - 1)
 end
 
@@ -220,7 +223,7 @@ local function publish(player)
 	if pen then
 		pen:SetAttribute("Contents", HttpService:JSONEncode(profile.items))
 		pen:SetAttribute("PetCount", penCount(profile)) -- (Pens.server's "5/10"; Pen.client stops placing when full)
-		pen:SetAttribute("PetCap", penCap(player))
+		pen:SetAttribute("PetCap", if Config.PenCapacity then penCap(player) else nil) -- (none: no "5/10" on the sign)
 	end
 	if profile.quests then
 		Quests.penCount(player, profile.quests, penCount(profile)) -- ("Collect animals": live)
