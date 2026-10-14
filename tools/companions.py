@@ -384,12 +384,11 @@ def hula_reskin():
     colors = dict(hide=HIDE, hide_dark=HIDE_DARK, hide_light=HIDE_LIGHT, antler=ANTLER, antler_tip=ANTLER_TIP,
                   hoof=HOOF, claw=(170, 172, 176), white=A.EYE_WHITE, **SADDLE_COLORS)
     recolor = [("Thigh", "hide_dark"), ("Shin", "hide_light"), ("Heel", "hoof"), ("Toe", "hoof"), ("Claw", "claw"),
-               ("Belly", "hide_dark"), ("Neck", "hide_dark"), ("Beak", "hide_dark"), ("Eye", "white"),
+               ("Belly", "hide_dark"), ("Neck", "hide_dark"), ("Eye", "white"),
                ("Tail1", "hide_dark"), ((255, 128, 32), "hide")]
-    drop = ("Wing", "Tail0", "Tail2", "BeakHook", "Jaw", "Mouth", "Tooth", "Brow", "Spike")
-    resize = [("Beak", (-10, 96, -84), (10, 114, -65.9)),  # the beak becomes a short deer snout
-              ("Tail1", (-5, 76, 28), (5, 108, 38))]  # one tail sticking straight up
-    rename = [("Beak", "Snout")]
+    drop = ("Wing", "Tail0", "Tail2", "Spike")  # keeps the Firebird's beak, jaw, teeth and brows (QM)
+    resize = [("Tail1", (-5, 76, 28), (5, 108, 38))]  # one tail sticking straight up
+    rename = []
     add = []
     for side, sx in (("L", -1), ("R", 1)):
         xa, xb = sorted((sx * 4, sx * 10))
