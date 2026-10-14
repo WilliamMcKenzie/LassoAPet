@@ -2052,11 +2052,11 @@ if Config.World == 3 then
 		Config.AnimalStats[kind] = Config.AnimalStats[kind] or { Speed = w3[1], Stamina = 1 }
 	end
 	-- World 3's boss timer, 60 s (QM, Oct 14: was 33), and every animal here 33/60 as fast, so each
-	-- still reaches as far as its numbers above were set for.
+	-- still reaches as far as its numbers above were set for; then all of them half as fast again (QM, Oct 14).
 	Config.RideSeconds = 60
 	for kind, stats in Config.AnimalStats do
 		Config.AnimalStats[kind] = table.clone(stats)
-		Config.AnimalStats[kind].Speed = stats.Speed * 33 / Config.RideSeconds
+		Config.AnimalStats[kind].Speed = stats.Speed * 33 / Config.RideSeconds * 0.5
 	end
 end
 
