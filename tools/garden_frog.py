@@ -4,6 +4,9 @@ with a long grin and pink tongue tip, big googly eyes on bumps, folded hind legs
 orange-ish toes, and a domed purple cap with chunky white spots and a cream gill rim on top of
 its head. Ridden on the cap. It hops: the walk is small hops, the gallop big leaps.
 
+Low-poly meshes (QM Oct 14 pilot), not blocks: convert with
+  python3 tools/bbmodel_to_luau.py --zyx --meshes assets/meshes/ToadstoolFrog designs/garden/ToadstoolFrog.bbmodel src/shared/Animals/ToadstoolFrogModel.luau
+
 Run: python3 tools/garden_frog.py [--gif]
 Bones (all rest 0): root -> neck (head + cap), LegFL/FR, LegHL/HR.
 """
@@ -20,58 +23,94 @@ C = {"green": (92, 196, 52), "greendark": (40, 128, 40), "belly": (246, 236, 140
      "gill": (240, 218, 176), "toe": (250, 160, 70)}
 
 
+def on(c, r, d):
+    """The point on ellipsoid (c, r) in direction d from its centre, and its outward normal."""
+    d = np.array(d, float) / np.linalg.norm(d)
+    r = np.array(r, float)
+    t = 1 / np.linalg.norm(d / r)
+    p = d * t
+    n = p / r ** 2
+    return np.array(c, float) + p, n / np.linalg.norm(n)
+
+
+def spot(g, node, name, c, r, d, size, col, h=0.22):
+    """A flat faceted spot sitting on ellipsoid (c, r) in direction d (its base sunk in)."""
+    p, n = on(c, r, d)
+    sz = (size, size * 0.85) if np.isscalar(size) else size
+    g.hull(node, name, G.dome(p, sz, h, seg=6, rings=2, M=G.frame(n), base=0.35), col)
+
+
+def foot(g, node, name, heel, toes, col):
+    """A webbed foot: one flat fan from the heel out to the toe tips."""
+    pts = []
+    for q in [heel] + toes:
+        q = np.array(q, float)
+        for dx, dz in ((-0.25, 0), (0.25, 0), (0, -0.25), (0, 0.25)):
+            pts += [q + (dx, 0, dz), q + (dx * 0.7, 0.45, dz * 0.7)]
+    g.hull(node, name, pts, col)
+
+
 def build():
+    """Low-poly meshes (QM Oct 14: one mesh where blocks were imitating low poly). Every
+    shape on a bone in one colour becomes one MeshPart (bbmodel_to_luau.py --meshes);
+    the eyes stay plate blocks."""
     g = Garden("ToadstoolFrog", C)
     y0 = 3.0
     root = g.group("root", (0, y0, 0))
-    g.box(root, "Body", (0, y0, 0.6), (6.4, 4.0, 6.0), "green")
-    g.box(root, "Belly", (0, y0 - 0.5, -2.45), (4.6, 2.8, 0.3), "belly")
-    g.box(root, "BellyLow", (0, y0 - 1.95, 0.2), (5.0, 0.3, 4.6), "belly")
-    g.box(root, "Rump", (0, y0 + 0.4, 3.9), (5.2, 3.2, 1.0), "green")
-    for (x, y, z) in ((-2.2, 2.05, 1.2), (1.6, 2.05, 2.4), (0.4, 2.05, -0.4), (3.25, 0.8, 1.6), (-3.25, 0.4, 2.4)):
-        sz = (1.2, 0.3, 1.2) if abs(x) < 3 else (0.3, 1.2, 1.2)
-        g.box(root, "Spot", (x, y0 + y, z), sz, "greendark")
+    body_c, body_r = (0, y0 + 0.1, 0.8), (3.3, 2.2, 3.4)
+    g.hull(root, "Body", G.ellipsoid(body_c, body_r, seg=8, rings=4, cut=-1.7), "green")
+    g.hull(root, "Belly", G.ellipsoid((0, y0 - 0.5, -1.2), (2.5, 1.6, 1.45), seg=8, rings=4, cut=-1.2), "belly")
+    for d, sz in (((-0.5, 1, 0.1), 1.2), ((0.45, 1, 0.5), 1.0), ((0.1, 1, -0.35), 0.8), ((1, 0.3, 0.4), 0.9),
+                  ((-1, 0.1, 0.6), 1.0)):
+        spot(g, root, "Spot", body_c, body_r, d, sz, "greendark")
 
     # head: wide, grinning, eyes on bumps, the toadstool on top
     neck = g.group("neck", (0, y0 + 1.0, -1.8), root)
-    hy, hz = y0 + 1.6, -3.0
-    g.box(neck, "Head", (0, hy, hz), (7.0, 3.0, 4.0), "green")
-    g.box(neck, "Jaw", (0, hy - 1.6, hz - 0.2), (6.6, 0.6, 3.8), "belly")
-    g.box(neck, "Mouth", (0, hy - 1.15, hz - 2.0), (5.6, 0.35, 0.2), "mouth")
-    g.box(neck, "Tongue", (1.2, hy - 1.3, hz - 2.08), (1.0, 0.35, 0.2), "tongue")
+    head_c, head_r = np.array([0, y0 + 1.7, -3.0]), np.array([3.6, 1.7, 2.4])
+    g.hull(neck, "Head", G.ellipsoid(head_c, head_r, seg=8, rings=4), "green")
     for side, s in (("L", -1), ("R", 1)):
-        g.box(neck, "EyeBump" + side, (s * 2.2, hy + 1.8, hz - 0.8), (2.4, 1.6, 2.2), "green")
-        g.eye(neck, side, (s * 2.2, hy + 1.9, hz - 1.98), 1.7, look=(0, -0.1))
-        g.box(neck, "Nostril" + side, (s * 0.6, hy + 0.3, hz - 2.05), (0.4, 0.3, 0.15), "greendark")
-    # the toadstool: a gill rim, a domed cap in three layers, chunky white spots
-    cy = hy + 2.9
-    g.box(neck, "Stalk", (0, cy - 0.4, hz + 0.9), (2.4, 1.4, 2.4), "gill")
-    g.box(neck, "Gills", (0, cy + 0.3, hz + 0.9), (7.6, 0.5, 7.0), "gill")
-    for k, (w, d, h) in enumerate(((9.0, 8.4, 1.3), (7.8, 7.2, 1.1), (5.8, 5.4, 0.9), (3.4, 3.2, 0.6))):
-        yy = cy + 0.9 + sum(x[2] for x in ((9.0, 8.4, 1.3), (7.8, 7.2, 1.1), (5.8, 5.4, 0.9))[:k]) - (0 if k == 0 else 0)
-        g.box(neck, "Cap", (0, yy, hz + 0.9), (w, h, d), "cap" if k else "capdark")
-    top = cy + 0.9 + 1.3 + 1.1 + 0.9
-    for (x, y, z, sz) in ((0, top + 0.05, 0.9, (1.6, 0.4, 1.6)), (-2.6, cy + 2.6, -1.0, (1.4, 0.4, 1.4)),
-                          (2.4, cy + 2.6, 2.6, (1.4, 0.4, 1.4)), (2.6, cy + 2.6, -1.4, (1.1, 0.4, 1.1)),
-                          (-2.2, cy + 2.6, 2.8, (1.2, 0.4, 1.2))):
-        g.box(neck, "CapSpot", (x, y, hz + z), sz, "spot")
-    for (x, z) in ((-4.55, 0.0), (4.55, 1.6)):
-        g.box(neck, "CapSpotSide", (x, cy + 1.6, hz + 0.9 + z - 0.8), (0.3, 1.0, 1.4), "spot")
-    g.box(neck, "CapSpotFront", (1.6, cy + 1.6, hz + 0.9 - 4.25), (1.4, 1.0, 0.3), "spot")
-    g.box(neck, "CapSpotFront", (-2.4, cy + 1.4, hz + 0.9 - 4.25), (1.0, 0.8, 0.3), "spot")
+        bump = np.array([s * 2.1, y0 + 3.2, -3.7])
+        g.hull(neck, "Bump" + side, G.ellipsoid(bump, (1.25, 1.1, 1.25), seg=8, rings=4), "green")
+        g.eye(neck, side, bump + (0, 0.1, -1.3), 1.7, look=(0, -0.1))
+        p, n = on(head_c, head_r, (s * 0.25, 0.25, -1))
+        g.hull(neck, "Nose", G.ellipsoid(p, (0.22, 0.16, 0.16), seg=6, rings=2), "greendark")
+    g.hull(neck, "Jaw", G.ellipsoid(head_c + (0, -1.25, -0.15), (3.35, 0.75, 2.2), seg=8, rings=4), "belly")
+    # the grin: a thin band round the front of the head, just proud of it
+    grin = []
+    for x in np.linspace(-2.7, 2.7, 9):
+        for dy in (-0.16, 0.16):
+            y = -0.55 + dy - 0.12 * (1 - (x / 2.7) ** 2)  # (a smile: the middle dips)
+            u = 1 - (x / head_r[0]) ** 2 - (y / head_r[1]) ** 2
+            z = -head_r[2] * np.sqrt(max(u, 0)) - 0.06
+            grin += [head_c + (x, y, z), head_c + (x * 0.9, y, z * 0.7)]
+    g.hull(neck, "Mouth", grin, "mouth")
+    g.hull(neck, "Tongue", G.ellipsoid(head_c + (1.2, -0.85, -2.1), (0.5, 0.3, 0.4), seg=6, rings=2), "tongue")
 
-    # legs: short front legs, big folded hind legs, orange toes
+    # the toadstool: a stalk, a gill skirt, a dark rim, a domed purple cap, chunky white spots
+    hz = -2.1
+    g.hull(neck, "Stalk", G.prism((0, y0 + 3.0, hz), 1.3, 1.9, seg=8, top=0.9), "gill")
+    g.hull(neck, "Gills", G.prism((0, y0 + 4.7, hz), (4.1, 3.8), 0.5, seg=10, top=1.08), "gill")
+    g.hull(neck, "CapRim", G.prism((0, y0 + 5.0, hz), (4.7, 4.4), 0.6, seg=10, top=1.0), "capdark")
+    cap_c, cap_r, cap_h = np.array([0, y0 + 5.5, hz]), (4.55, 4.25), 3.7
+    g.hull(neck, "Cap", G.dome(cap_c, cap_r, cap_h, seg=10, rings=3), "cap")
+    cap_e = (cap_r[0], cap_h, cap_r[1])
+    for d, sz in (((0, 1, 0), 1.3), ((-0.8, 0.8, -0.6), 1.0), ((0.9, 0.7, 0.6), 1.0), ((0.8, 0.9, -0.7), 0.8),
+                  ((-0.7, 0.8, 0.8), 0.9), ((-1, 0.25, 0), 0.8), ((1, 0.3, -0.1), 0.7), ((0.3, 0.3, -1), 0.8),
+                  ((-0.4, 0.25, -1), 0.6), ((0, 0.3, 1), 0.8)):
+        spot(g, neck, "CapSpot", cap_c, cap_e, d, sz, "spot", h=0.25)
+
+    # legs: short front legs, big folded hind legs, webbed orange feet
     for side, s in (("L", -1), ("R", 1)):
         fl = g.group("LegF" + side, (s * 2.4, y0 - 0.6, -1.8), root)
-        g.box(fl, "LegF" + side, (s * 2.6, y0 - 1.6, -2.2), (1.2, 2.6, 1.2), "green")
-        for t in (-1, 0, 1):
-            g.box(fl, "ToeF" + side, (s * 2.6 + t * 0.55 * s, 0.25, -2.8 + abs(t) * 0.2), (0.45, 0.5, 1.4), "toe")
+        g.hull(fl, "LegF" + side, G.ellipsoid((s * 2.6, y0 - 1.5, -2.1), (0.9, 1.6, 0.9), seg=6, rings=3), "green")
+        foot(g, fl, "ToeF" + side, (s * 2.6, 0, -2.2), [(s * 2.6 + t * 0.7, 0, -3.3 + abs(t) * 0.25) for t in (-1, 0, 1)],
+             "toe")
         hl = g.group("LegH" + side, (s * 3.0, y0 - 0.2, 2.4), root)
-        g.box(hl, "Thigh" + side, (s * 3.6, y0 - 0.4, 2.4), (1.6, 3.0, 4.0), "green")
-        g.box(hl, "ThighSpot" + side, (s * 4.45, y0 - 0.2, 2.6), (0.2, 1.0, 1.2), "greendark")
-        g.box(hl, "Shin" + side, (s * 3.8, 0.6, 1.2), (1.4, 1.2, 4.4), "green")
-        for t in (-1, 0, 1):
-            g.box(hl, "ToeH" + side, (s * 3.8 + t * 0.6, 0.25, -1.4 + abs(t) * 0.3), (0.5, 0.5, 1.6), "toe")
+        g.hull(hl, "Thigh" + side, G.ellipsoid((s * 3.5, y0 - 0.5, 2.4), (1.0, 1.7, 2.2), seg=8, rings=4,
+                                               M=G.Rm(("x", 25))), "green")
+        g.hull(hl, "Shin" + side, G.ellipsoid((s * 3.8, 0.75, 1.0), (0.8, 0.75, 2.3), seg=8, rings=3), "green")
+        foot(g, hl, "ToeH" + side, (s * 3.8, 0, -0.6), [(s * 3.8 + t * 0.8, 0, -1.9 + abs(t) * 0.3) for t in (-1, 0, 1)],
+             "toe")
     return g
 
 

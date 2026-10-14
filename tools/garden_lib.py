@@ -101,6 +101,27 @@ class Garden:
                                "faces": {k: {"texture": t, "vertices": vs, "uv": {q: [0, 0] for q in vs}}
                                          for k, vs in faces.items()}})
 
+    def hull(self, node, name, pts, col):
+        """A low-poly mesh: the convex hull of `pts` (studs), flat triangles. With
+        bbmodel_to_luau.py --meshes, every non-plain element on a bone in one colour
+        becomes one MeshPart."""
+        pts = np.array(pts, float)
+        tris = hull_tris(pts)
+        keys, v = {}, {}
+        for t in tris:
+            for q in t:
+                k = tuple(np.round(q, 5))
+                if k not in keys:
+                    keys[k] = f"v{len(keys)}"
+                    v[keys[k]] = [round(float(x) * S.BB, 4) for x in q]
+        t_ = self.tex[col]
+        faces = {}
+        for i, t in enumerate(tris):
+            vs = [keys[tuple(np.round(q, 5))] for q in t]
+            faces[f"f{i}"] = {"texture": t_, "vertices": vs, "uv": {q: [0, 0] for q in vs}}
+        return self.put(node, {"name": self._name(name), "type": "mesh", "uuid": S.uid(), "color": 0,
+                               "origin": [0, 0, 0], "rotation": [0, 0, 0], "vertices": v, "faces": faces})
+
     def spike(self, node, name, base, d, L, w, col, shaft=0.0, shaft_col=None):
         """A cube shaft (optional) plus a pyramid tip, pointing along d."""
         d = np.array(d, float) / np.linalg.norm(d)
@@ -235,6 +256,89 @@ def gif(m, out_path, cams=((0, 4, -30), (-30, 6, 0)), names=(("idle", 24, 1), ("
 
 
 # ------------------------------------------------------------ animation helpers
+
+# ------------------------------------------------------------ low-poly shapes (point sets for Garden.hull)
+
+def hull_tris(pts, eps=1e-4):
+    """Outward triangles (each 3x3) of the convex hull of a small point set, each flat
+    face fanned once (no scipy: every plane through three points that has all the
+    others behind it is a face)."""
+    P = np.unique(np.round(np.array(pts, float), 5), axis=0)
+    n = len(P)
+    i, j, k = np.array([(a, b, c) for a in range(n) for b in range(a + 1, n) for c in range(b + 1, n)]).T
+    N = np.cross(P[j] - P[i], P[k] - P[i])
+    ok = np.linalg.norm(N, axis=1) > 1e-6
+    N = N[ok] / np.linalg.norm(N[ok], axis=1)[:, None]
+    i = i[ok]
+    D = (P @ N.T) - np.einsum("ij,ij->i", P[i], N)  # [point, plane]
+    out = np.all(D <= eps, 0)
+    inn = np.all(D >= -eps, 0)
+    planes = {}
+    for q in np.nonzero(out | inn)[0]:
+        nrm = N[q] if out[q] else -N[q]
+        key = tuple(np.round(np.append(nrm, nrm @ P[i[q]]), 3))
+        if key not in planes:
+            planes[key] = (nrm, np.nonzero(np.abs(D[:, q]) <= eps)[0])
+    tris = []
+    for nrm, idx in planes.values():
+        F = P[idx]
+        c = F.mean(0)
+        e1 = F[0] - c
+        e1 /= np.linalg.norm(e1)
+        e2 = np.cross(nrm, e1)
+        F = F[np.argsort(np.arctan2((F - c) @ e2, (F - c) @ e1))]
+        for t in range(1, len(F) - 1):
+            tris.append(np.array([F[0], F[t], F[t + 1]]))
+    return tris
+
+
+def ellipsoid(c, r, seg=8, rings=4, M=None, cut=None, twist=0.5):
+    """Points of a faceted ellipsoid: centre c, radii r (x, y, z), `seg` around Y and
+    `rings` from pole to pole (alternate rings turned half a step, for chunky facets).
+    cut: drop the points below this local y (a flat bottom), M turns it."""
+    M = np.eye(3) if M is None else M
+    r = np.array(r, float)
+    pts = [(0, 1, 0), (0, -1, 0)]
+    for i in range(1, rings):
+        phi = math.pi * i / rings
+        for k in range(seg):
+            a = TAU * (k + twist * (i % 2)) / seg
+            pts.append((math.sin(phi) * math.cos(a), math.cos(phi), math.sin(phi) * math.sin(a)))
+    P = np.array(pts) * r
+    if cut is not None:
+        P[:, 1] = np.maximum(P[:, 1], cut)
+    return (M @ P.T).T + np.array(c, float)
+
+
+def dome(c, r, h, seg=10, rings=3, M=None, base=0.0):
+    """A faceted dome: a ring of radius r (x, z: r may be a pair) at c, rising h; `base`
+    adds a straight band below the ring that deep."""
+    M = np.eye(3) if M is None else M
+    rx, rz = (r, r) if np.isscalar(r) else r
+    pts = [(0, h, 0)]
+    for i in range(rings):
+        phi = (math.pi / 2) * i / rings
+        for k in range(seg):
+            a = TAU * (k + 0.5 * (i % 2)) / seg
+            pts.append((rx * math.cos(phi) * math.cos(a), h * math.sin(phi), rz * math.cos(phi) * math.sin(a)))
+    if base:
+        for k in range(seg):
+            a = TAU * k / seg
+            pts.append((rx * math.cos(a), -base, rz * math.sin(a)))
+    return (M @ np.array(pts, float).T).T + np.array(c, float)
+
+
+def prism(c, r, h, seg=8, top=1.0, M=None):
+    """A faceted cylinder (top scales the top ring: < 1 tapers it) standing on c."""
+    M = np.eye(3) if M is None else M
+    rx, rz = (r, r) if np.isscalar(r) else r
+    pts = []
+    for y, s in ((0, 1.0), (h, top)):
+        for k in range(seg):
+            a = TAU * (k + 0.5) / seg
+            pts.append((rx * s * math.cos(a), y, rz * s * math.sin(a)))
+    return (M @ np.array(pts, float).T).T + np.array(c, float)
+
 
 def legs(L, pairs, swing, n=16, axis=0):
     """{bone: track}: legs swing about X; pairs = [(bone, phase in turns)]."""
