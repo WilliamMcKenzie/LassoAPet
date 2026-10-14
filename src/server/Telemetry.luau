@@ -168,6 +168,7 @@ local function phaseOf(s, player)
 end
 
 local close -- (below)
+local rideFacts -- (below)
 
 -- A session from its snapshot (Telemetry.leaving's), for closing a trip that never arrived.
 local function fromSnapshot(snap)
@@ -350,6 +351,7 @@ end
 local function rideStarted(player, s)
 	local tut = player:GetAttribute("Tutorial") and "tut" or "post"
 	s.runs += 1
+	s.rideFar, s.rideGates = 0, player:GetAttribute("GatesBroken") or 1 -- (the quit snapshot's: how far this ride got)
 	s.phase, s.phaseAt = "outbound", os.clock()
 	s.lassoChance = false
 	local counts, samples = { [tut .. "Run"] = 1 }, {}
@@ -379,6 +381,31 @@ end
 
 -- The session's over (not a trip to the other world). (s: a session from a trip that never
 -- arrived, closed by the world it left: Telemetry's transfer check.)
+-- How far a ride got (s.rideFar, s.rideGates: since it crossed the start line): how far into
+-- the furthest biome they've opened, the one whose barrier's next ("<50", "<80", "<95",
+-- "95+" %, or "gate" when it broke a barrier), and against their best ride before it
+-- this session ("first", "best": further, "near": at least 90% of it, "short").
+function rideFacts(player, s)
+	local gates = player:GetAttribute("GatesBroken") or 1
+	local into
+	if gates > (s.rideGates or gates) then
+		into = "gate"
+	else
+		local edge = 0
+		for i = 1, gates - 1 do
+			edge -= Config.Biomes[i].Length
+		end
+		local biome = Config.Biomes[gates]
+		local f = if biome then math.clamp((edge - s.rideFar) / biome.Length, 0, 1) else 0
+		into = if f < 0.5 then "<50" elseif f < 0.8 then "<80" elseif f < 0.95 then "<95" else "95+"
+	end
+	local vs = if not s.bestFar or s.bestFar >= 0 then "first"
+		elseif s.rideFar < s.bestFar then "best"
+		elseif s.rideFar <= s.bestFar * 0.9 then "near"
+		else "short"
+	return into, vs
+end
+
 -- What the player was doing as they left (QM, Oct 14: "so we stop guessing"), by when they
 -- left (Q: 1 under a minute, 2 at 1-5, 3 at 5-10, 4 at 10-20, 5 later), all as
 -- "q<Q>:<what>" counts: rides since the tutorial (0, 1, 2, 3-5, 6+), how the last one ended
@@ -401,6 +428,22 @@ local function quitSnapshot(s, player, length, counts)
 	local rides = s.postRides or 0
 	put("rides" .. (if rides >= 6 then "6+" elseif rides >= 3 then "3-5" else tostring(rides)))
 	put("last:" .. (if s.riding then "riding" else s.lastRide or "none"))
+	-- (that ride, or the one they're on: how far it got, QM, Oct 14: "WHY they decided to leave")
+	local far, vs = s.lastRideFar, s.lastRideVs
+	if s.riding and s.rideFar then
+		far, vs = rideFacts(player, s)
+	end
+	if far then
+		put("far:" .. far)
+		put("vs:" .. vs)
+		local since = s.ridesSinceGate or 0
+		if s.riding and s.rideFar and far ~= "gate" then
+			since += 1
+		elseif s.riding and far == "gate" then
+			since = 0
+		end
+		put("stuck:" .. (if since == 0 then "0" elseif since <= 2 then "1-2" elseif since <= 5 then "3-5" else "6+"))
+	end
 	if s.lastEnd and not s.riding then
 		local idle = os.clock() - s.lastEnd
 		put("idle:" .. (if idle < 15 then "<15" elseif idle < 60 then "<60" else "60+"))
@@ -594,6 +637,9 @@ task.spawn(function() -- (Riders makes these)
 			rideStarted(player, s)
 		end
 		s.lastZ = if kind == "" then nil else z
+		if kind ~= "" and z and s.rideFar then
+			s.rideFar = math.min(s.rideFar, z) -- (the course runs toward -z)
+		end
 	end)
 	ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
 		local s = sessions[player]
@@ -618,6 +664,12 @@ task.spawn(function() -- (Riders makes these)
 		elseif what == "end" then
 			s.lastRide = if s.rideAnimal then "animal" elseif s.rideCrash then "crash" else "empty"
 			s.riding, s.lastEnd = false, os.clock()
+			if s.rideFar then -- (how far it got: the quit snapshot's)
+				s.lastRideFar, s.lastRideVs = rideFacts(player, s)
+				s.ridesSinceGate = if (player:GetAttribute("GatesBroken") or 1) > s.rideGates then 0 else (s.ridesSinceGate or 0) + 1
+				s.bestFar = math.min(s.bestFar or 0, s.rideFar)
+				s.rideFar = nil
+			end
 			if s.affordAt then
 				s.sawW2 = true -- (back at base with World 2's gold: the bar's prompt)
 			end
