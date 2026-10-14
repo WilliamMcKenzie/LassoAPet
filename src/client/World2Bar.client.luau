@@ -147,7 +147,44 @@ local gate = if REBIRTH then nil else workspace:WaitForChild("World"):WaitForChi
 -- header's height (BaseUi's 86, at BaseUi's scale).
 local QUESTS_HEADER = 86
 local GROW = 1.2 -- (the art's panel is smaller than its picture, round the cash: 20% up to look as tall, QM)
+local Inventory = require(script.Parent.Inventory)
+-- Just over the inventory slots (QM, Oct 14), as wide as their row, with the same gap
+-- between them as between two slots. (Over the Quests panel's line, the old place, when
+-- the slots aren't up.)
+local function overSlots()
+	local inv = Inventory.frame()
+	if not (inv and inv.Visible and inv.AbsoluteSize.X > 0) then
+		return false
+	end
+	local slots = {}
+	for _, child in inv:GetChildren() do
+		if child:IsA("GuiObject") then
+			table.insert(slots, child)
+		end
+	end
+	table.sort(slots, function(a, b)
+		return a.AbsolutePosition.X < b.AbsolutePosition.X
+	end)
+	if #slots < 2 then
+		return false
+	end
+	local gap = slots[2].AbsolutePosition.X - slots[1].AbsolutePosition.X - slots[1].AbsoluteSize.X
+	local s = rootScale.Scale
+	local width = inv.AbsoluteSize.X / s
+	bar.Size = UDim2.fromOffset(width, width * BAR.Y / BAR.X)
+	green.Size = bar.Size
+	bar.AnchorPoint = Vector2.new(0.5, 1)
+	-- (the art's panel ends 12 px of its 103 above the picture's bottom: the gap's from the panel)
+	local under = (103 - 91) / 103 * bar.Size.Y.Offset
+	bar.Position = UDim2.new(0, (inv.AbsolutePosition.X + inv.AbsoluteSize.X / 2 - root.AbsolutePosition.X) / s, 0, (inv.AbsolutePosition.Y - gap - root.AbsolutePosition.Y) / s + under)
+	return true
+end
+
 local function align()
+	if overSlots() then
+		return
+	end
+	bar.AnchorPoint = Vector2.new(0.5, 0)
 	local base = player.PlayerGui:FindFirstChild("BaseUi")
 	local baseRoot = base and base:FindFirstChild("Root")
 	local quests = baseRoot and baseRoot:FindFirstChild("Quests")

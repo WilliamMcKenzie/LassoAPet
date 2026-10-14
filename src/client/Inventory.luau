@@ -26,7 +26,8 @@ local PANEL_CORNER = 18 / 96 -- its corners' radius, of its width (measured from
 local SCALE = 0.96 -- the whole bar, slots, numbers and outlines alike (QM, Oct 9: 20% smaller, was 1.2)
 local GAP = 10
 local BOTTOM = GAP * SCALE -- (QM, Oct 9: the same gap under the bar as between its slots, on screen; was 24)
-local MAX_SLOTS = 9
+local MAX_SLOTS = 16 -- (more slots as you get more kinds of egg: QM, Oct 14)
+local MIN_SLOTS = 8 -- always this many, empty ones too (QM, Oct 14)
 local FONT = Enum.Font.FredokaOne
 
 -- Square backgrounds by the item's rarity: QM's slot pictures (the colour is a
@@ -204,6 +205,28 @@ local function redraw()
 		end
 		slot.Parent = bar
 	end
+	-- The rest of the MIN_SLOTS, empty: just the panel and its number.
+	for i = #tools + 1, MIN_SLOTS do
+		local slot = Instance.new("Frame")
+		slot.Name = "Empty"
+		slot.BackgroundTransparency = 1
+		slot.Size = UDim2.fromOffset(SLOT, SLOT)
+		slot.LayoutOrder = i
+		local bg = Instance.new("ImageLabel")
+		bg.BackgroundTransparency = 1
+		bg.Size = UDim2.fromScale(1, 1)
+		bg.Image = PANEL
+		bg.ScaleType = Enum.ScaleType.Slice
+		bg.SliceCenter = Rect.new(24, 24, 72, 72)
+		bg.SliceScale = SLOT / PANEL_SIZE
+		bg.ZIndex = 0
+		bg.Parent = slot
+		local number = text(slot, UDim2.fromOffset(24, 24), 20, 2)
+		number.Position = UDim2.fromOffset(4, 2)
+		number.Text = tostring(i)
+		number.ZIndex = 3
+		slot.Parent = bar
+	end
 end
 
 local watched = {}
@@ -319,6 +342,11 @@ function Inventory.holdBack(kind, n)
 		heldBack[kind] = nil
 	end
 	redraw()
+end
+
+-- The bar itself (World2Bar sits on top of it).
+function Inventory.frame()
+	return bar
 end
 
 function Inventory.slot(name)
