@@ -1429,8 +1429,12 @@ command.Parent = game:GetService("TextChatService")
 -- the ride). "/boss <biome>" (QM, Oct 10): the same at its end, with the ride's
 -- timer at 0.01 s, so the boss comes. Same rule as /give for who can use them.
 local BIOME_ALIASES = { tundra = "snow" }
-if Config.World >= 2 then -- (World 3 too, for now; World 2's biomes keep World 1's names in Config: these are what QM calls them)
+if Config.World == 2 then -- (World 2's biomes keep World 1's names in Config: these are what QM calls them)
 	for alias, name in { marble = "meadow", crimson = "desert", cavern = "snow", crystal = "snow", woodland = "ocean", temple = "volcano", tomb = "jurassic" } do
+		BIOME_ALIASES[alias] = name
+	end
+elseif Config.World == 3 then
+	for alias, name in { pirate = "piratecove", cove = "piratecove", candy = "candyland", jelly = "cnidaria" } do
 		BIOME_ALIASES[alias] = name
 	end
 end

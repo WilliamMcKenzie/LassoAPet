@@ -301,7 +301,7 @@ local Config = {
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50, RoyalCnidarian = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, Dreadstump = 50, FlytrapQueen = 60, RoyalCnidarian = 50, Gigacorn = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
@@ -317,7 +317,9 @@ local Config = {
 			JadeAsura = { At = Vector3.new(0, 0.13, 0.3), From = Vector3.new(0, 6, 55) }, -- (its face and tusks, under the crown; a guess)
 			Sphinx = { At = Vector3.new(0, 0.28, 0.4), From = Vector3.new(0, 6, 60) }, -- (its pharaoh face, high at the front; a guess)
 			Dreadstump = { At = Vector3.new(0, 0.18, 0.3), From = Vector3.new(0, 6, 60) }, -- (World 3 Pirate Cove's Pirate King: his face under the tricorn; a guess)
+			FlytrapQueen = { At = Vector3.new(0, 0.32, 0.3), From = Vector3.new(0, 10, 70) }, -- World 3 Garden: the Queen's crowned head, high in the middle (a guess)
 			RoyalCnidarian = { At = Vector3.new(0, 0.1, 0.33), From = Vector3.new(0, 6, 60) }, -- (World 3 Cnidaria's crowned jellyfish: its eyes and teeth under the crown; a guess)
+			Gigacorn = { At = Vector3.new(0, 0.2, 0.4), From = Vector3.new(0, 8, 65) }, -- (World 3 Candyland's candy unicorn: its face under the horn, high at the front; a guess)
 			CrystalTyrant = { At = Vector3.new(0, 0.02, 0.48), From = Vector3.new(0, 4, 34) }, -- (its eyes and teeth, halfway up: the crown makes it tall)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
@@ -552,6 +554,7 @@ local Config = {
 		CrystalPhoenix = { Kind = "Fly", Height = 56 }, -- QM, Oct 13: "flying sprint like normal phoenix"
 		OrangeButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland Maze: flies like the Crystal Phoenix (QM, Oct 13)
 		Hawkmoth = { Kind = "Fly", Height = 56 }, -- (Oct 13) a flyer like the Crystal Phoenix
+		Bumblebee = { Kind = "Fly", Height = 56 }, -- World 3 Garden: a flier like the Hawkmoth (Oct 14)
 		EagleSentry = { Kind = "Fly", Height = 56 }, -- (Oct 13) the Tomb's falcon, a flyer like the Crystal Phoenix
 		Pterodactyl = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: a flying type, like the Phoenix
 		PinkButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland: a flier like the Crystal Phoenix (Oct 13)
@@ -560,6 +563,8 @@ local Config = {
 		JollyRogerWyvern = { Kind = "Fly", Height = 56 }, -- World 3 Pirate Cove's skeleton sea dragon, a flier (Oct 14)
 		MoonJellyfish = { Kind = "Fly", Height = 56 }, Anomalocaris = { Kind = "Fly", Height = 56 }, BoxJellyfish = { Kind = "Fly", Height = 56 }, BlueRingOctopus = { Kind = "Fly", Height = 56 }, ManOWar = { Kind = "Fly", Height = 56 }, -- World 3 Cnidaria: all swimmers, fliers like the Crystal Phoenix (Oct 14)
 		Mermaid = { Kind = "Fly", Height = 56 }, AbyssalDragon = { Kind = "Fly", Height = 56 }, ReefTitan = { Kind = "Fly", Height = 56 }, RoyalCnidarian = { Kind = "Fly", Height = 56 },
+		SwollFairy = { Kind = "Fly", Height = 56 }, -- World 3 Candyland: the buff fairy, a flier (Oct 14)
+		RockCandyDragon = { Kind = "Fly", Height = 56 }, -- World 3 Candyland's giga rare dragon, a flier (Oct 14)
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
 		-- Whale, a pink haze round the screen, and scares the animals round it off.
@@ -610,8 +615,12 @@ local Config = {
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
 		RedCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
 		GhostShip = 4, JollyRogerWyvern = 4, Dreadstump = 3, -- World 3 Pirate Cove's giga rares (XL) and its boss as a pet (guesses, Oct 14)
+		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
+		RafflesiaBeast = 4, AncientTreant = 4, FlytrapQueen = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
 		MoonJellyfish = 1, Anomalocaris = 2, BoxJellyfish = 2, BlueRingOctopus = 2, ManOWar = 2, Mermaid = 3, -- World 3 Cnidaria (guesses, Oct 14)
 		AbyssalDragon = 4, ReefTitan = 4, RoyalCnidarian = 3, -- World 3 Cnidaria's giga rares (XL) and its boss as a pet (guesses, Oct 14)
+		GummyBear = 1, GumdropFrog = 1, GingerbreadMan = 1, Creampuff = 2, SwollFairy = 2, DesireTroll = 3, -- World 3 Candyland (guesses, Oct 14)
+		RockCandyDragon = 4, GumballGolem = 4, Gigacorn = 3, -- World 3 Candyland's giga rares (XL) and its boss as a trophy pet (guesses, Oct 14)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
 	-- 1.5x medium, 2.25x large, 3.4x XL (QM, Oct 4: was 1.2x per tier; Eggs/Egg.luau).
@@ -1288,6 +1297,11 @@ Config.Water = {
 	StudsPerTile = 8, -- (a pixel a stud)
 	Flow = Vector2.new(0, 2),
 }
+-- Sinking in water (QM, Oct 14: as RotMG drops a character half its height into deep water):
+-- over Water or DeepWater (Ground.waterAt) an animal, wild or ridden, and a player on foot are
+-- drawn this fraction of their height lower, easing in and out at Rate (1/s). Only the look:
+-- their physics and hit boxes stay where they were (Client/WaterSink). 0 for none.
+Config.WaterSink = { Water = 0.3, DeepWater = 0.5, Rate = 6 }
 
 -- Worlds (QM, Oct 13): each is its own Place in the experience, running this same code.
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
@@ -1414,7 +1428,7 @@ Config.World2Pets = {
 for kind, w2 in Config.World2Pets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = w2[2], w2[3]
 end
--- World 3's first biome, the Pirate Cove (Oct 14: tools/pirate_*.py): { speed, gold a second,
+-- World 3's own animals, the Pirate Cove's (Oct 14: tools/pirate_*.py) and the Garden's: { speed, gold a second,
 -- hatch seconds }, a step past World 2's Tomb for each rarity. ALL GUESSES until QM sets World 3's
 -- economy (its biomes are about 2x World 2's length, so these speeds may need to go up).
 Config.World3Pets = {
@@ -1427,6 +1441,19 @@ Config.World3Pets = {
 	GhostShip = { 9.6, 400000, 3600 }, -- giga rare, 1 in 1,000 (guess: 5x the Legendary)
 	JollyRogerWyvern = { 9.6, 400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
 	Dreadstump = { 9.4, 200000, 3600 }, -- the boss as a trophy pet, 1 in 500 (guess)
+	-- World 3's Garden (biome 2 of World 3; Oct 14). ALL GUESSES until QM sets them: about 2x the
+	-- Tomb's by rarity per biome past it (drafted before Pirate Cove's numbers), speeds a step
+	-- above the Tomb's. The giga rares and the Queen are slow trophies like the Seraphs (0.5),
+	-- earning 10x the Garden's Legendary.
+	Ladybug = { 8.0, 9600, 60 },
+	Bumblebee = { 8.2, 9600, 60 },
+	ToadstoolFrog = { 8.6, 24000, 240 },
+	VineMonster = { 8.6, 24000, 240 },
+	VenusFlytrap = { 9.2, 36000, 600 },
+	SunflowerLion = { 10.5, 160000, 2700 },
+	RafflesiaBeast = { 0.5, 1600000, 3600 },
+	AncientTreant = { 0.5, 1600000, 3600 },
+	FlytrapQueen = { 0.5, 1600000, 3600 },
 	-- World 3's last biome, Cnidaria (Oct 14: tools/moon_jellyfish.py etc.): the top of the game,
 	-- above Candyland. Legendary 640k (Garden's 160k x2 x2), the others by Pirate Cove's ratios to
 	-- its Legendary; trophies 10x the Legendary, as the Seraphs. ALL GUESSES.
@@ -1439,6 +1466,19 @@ Config.World3Pets = {
 	AbyssalDragon = { 13, 6400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
 	ReefTitan = { 13, 6400000, 3600 }, -- giga rare, 1 in 1,000 (guess)
 	RoyalCnidarian = { 0.5, 6400000, 3600 }, -- the boss as a trophy pet, 1 in 1,000; slow like the Seraphs (guess)
+	-- World 3's third biome, Candyland (Oct 14: tools/gummy_bear.py etc., tools/candy_eggs.py).
+	-- ALL GUESSES: a step past the Garden's (its Legendary 10.5 / 160k), about 2x its gold by
+	-- rarity, speeds +0.4 to +0.5; the giga rares and the Gigacorn slow trophies like the Garden's
+	-- (0.5) at 10x Candyland's Legendary.
+	GummyBear = { 8.4, 19200, 60 }, -- Common (guess)
+	GumdropFrog = { 8.6, 19200, 60 }, -- Uncommon (guess)
+	GingerbreadMan = { 8.6, 19200, 60 }, -- Uncommon (guess)
+	Creampuff = { 9.0, 48000, 240 }, -- Rare (guess)
+	SwollFairy = { 9.6, 72000, 600 }, -- Epic (guess)
+	DesireTroll = { 11.0, 320000, 2700 }, -- Legendary (guess)
+	RockCandyDragon = { 0.5, 3200000, 3600 }, -- giga rare, 1 in 1,000 (guess)
+	GumballGolem = { 0.5, 3200000, 3600 }, -- giga rare, 1 in 1,000 (guess)
+	Gigacorn = { 0.5, 3200000, 3600 }, -- the boss as a trophy pet, 1 in 1,000 (guess)
 }
 for kind, w3 in Config.World3Pets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = w3[2], w3[3]
@@ -1446,7 +1486,7 @@ for kind, w3 in Config.World3Pets do
 end
 local baseIncome = table.clone(Config.PetIncome) -- (World 1's, before World 2 changes its own)
 function Config.incomeIn(world, kind)
-	local own = world == 2 and Config.World2Pets[kind]
+	local own = (world == 2 and Config.World2Pets[kind]) or (world == 3 and Config.World3Pets and Config.World3Pets[kind])
 	return if own then own[2] else baseIncome[kind]
 end
 
@@ -1461,20 +1501,40 @@ for _, kind in {
 	"Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune",
 	"TombJackal", "LionArcher", "Nut", "Geb", "EagleSentry", "Bes", "BloatedMummy", "Scarab",
 	"Seraph", "CrimsonSeraph", "CrystalSeraph",
-	"RedCrab", "Parrot", "BananaMonkey", "TreasureHermit", "EyepatchShark", "TreasureTurtle", "GhostShip", "JollyRogerWyvern", "Dreadstump",
-	"MoonJellyfish", "Anomalocaris", "BoxJellyfish", "BlueRingOctopus", "ManOWar", "Mermaid", "AbyssalDragon", "ReefTitan", "RoyalCnidarian", -- World 3's own (Oct 14: slowedHere doesn't tell World 2 from 3 yet, so they run full speed in both; QM to decide)
 } do
 	Config.World2Animals[kind] = true
 end
+-- World 3's own animals (Config.World3Pets'). Its speeds go on from the Tomb's, so World 2's pets
+-- keep theirs in World 3 and only World 1's run at a Horse's speed there (Oct 14; QM to decide).
+Config.World3Animals = {}
+for kind in Config.World3Pets do
+	Config.World3Animals[kind] = true
+end
+-- World 3's Cnidaria animals big, like the Tomb's, in every world (pets go with you; the giga
+-- rares are XL already; guesses).
+for kind, size in { MoonJellyfish = 2.5, Anomalocaris = 2.5, BoxJellyfish = 2.5, BlueRingOctopus = 2.5, ManOWar = 2.5, Mermaid = 1.5 } do
+	Config.AnimalScale[kind] = size
+end
+-- Each world's own animals: [world] = the set that runs at its own speed there (World 1's: all).
+local OWN = { [2] = Config.World2Animals, [3] = setmetatable(table.clone(Config.World2Animals), { __index = Config.World3Animals }) }
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
 function Config.slowedHere(kind, fuse)
-	return Config.World >= 2 and not Config.World2Animals[kind] and not (fuse and Config.World2Animals[fuse])
+	local own = OWN[Config.World]
+	return own ~= nil and not own[kind] and not (fuse and own[fuse])
 end
+
+-- Each world's biome names, as players know them (Stats, Funnel; World 2's and 3's Config.Biomes
+-- Names are different: World 2's keep World 1's).
+Config.BiomeNames = {
+	{ "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" },
+	{ "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
+	{ "Pirate Cove", "Garden", "Candyland", "Cnidaria" },
+}
 
 -- World 2's look: its first biome and base as QM's reference (marble walls, yellow
 -- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
 -- hue-turned as placeholders (tools/world2_terrain.luau's turns).
-if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14)
+if Config.World == 2 then
 	-- World 2's quests (QM, Oct 13): reach each biome, its egg World 1's reward's
 	-- equivalent here; and the other line, merge 3, lasso 10 Lions, lasso 3 Kitsunes (that
 	-- last one's three eggs). No invite line here.
@@ -1767,70 +1827,10 @@ if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14
 			Config.AnimalStats[kind].Speed = horse
 		end
 	end
-	-- World 3's home base, a tropical island (QM, Oct 14; tools/world3_base.luau's floor): sand,
-	-- wet sand on the paths, grass a stud up, lagoons of the flowing water tile. Its Meadow's
-	-- walls stay World 2's marble for now (QM hasn't picked).
-	if Config.World == 3 then
-		meadow.GroundColors = { rgb(240, 218, 160), rgb(230, 206, 146) } -- sand
-		meadow.Patches = {
-			Dirt = meadow.Patches.Dirt, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
-			WetSand = { rgb(206, 172, 110), rgb(194, 160, 98) },
-			Grass = { rgb(96, 204, 60), rgb(84, 188, 50) },
-			Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
-			-- The base's walls, bottom to top (QM, Oct 14): three tiles of dark sand, light sand
-			-- the rest of the way, green grass along the very top (WorldColors.paintWall).
-			BaseWallLow = { rgb(206, 172, 110), rgb(194, 160, 98) },
-			BaseWall = { rgb(240, 218, 160), rgb(230, 206, 146) },
-			BaseCap = { rgb(96, 204, 60), rgb(96, 204, 60) },
-		}
-		Config.Water = table.clone(Config.Water)
-		Config.Water.Image = "rbxassetid://128871935822673" -- assets/world3/WaterTile256.png (QM's blue 8 x 8 tile, x32)
-		-- World 3's first biome is the Pirate Cove (Oct 14, DRAFT: the weights are guesses, as the
-		-- Tomb's by rarity). Its two giga rares 1 in 1,000 of the stampede each, its boss
-		-- Dreadstump also a trophy pet 1 in 500, as World 2's angels and Black Widow.
-		meadow.Herd = {
-			RedCrab = 0.3, -- Common
-			Parrot = 0.25, -- Uncommon
-			BananaMonkey = 0.25, -- Uncommon
-			TreasureHermit = 0.15, -- Rare
-			EyepatchShark = 0.08, -- Epic
-			TreasureTurtle = 0.03, -- Legendary
-		}
-		local coveTotal = 0
-		for _, weight in meadow.Herd do
-			coveTotal += weight
-		end
-		meadow.Herd.GhostShip = coveTotal / 996
-		meadow.Herd.JollyRogerWyvern = coveTotal / 996
-		meadow.Herd.Dreadstump = coveTotal / 498
-		Config.Boss.ByBiome.Meadow = "Dreadstump" -- the Pirate King chases you home (silent until a cry is picked)
-		-- World 3's last biome is Cnidaria, the reef (Oct 14, DRAFT: weights as the Tomb's by
-		-- rarity, guesses). Its two giga rares and its boss the Royal Cnidarian (also a trophy pet)
-		-- each 1 in 1,000 of the stampede. All of them swim (SprintSpecials Fly).
-		woodland.Herd = {
-			MoonJellyfish = 0.3, -- Common
-			Anomalocaris = 0.25, -- Uncommon
-			BoxJellyfish = 0.15, -- Rare
-			BlueRingOctopus = 0.15, -- Rare
-			ManOWar = 0.08, -- Epic
-			Mermaid = 0.03, -- Legendary
-		}
-		local reefTotal = 0
-		for _, weight in woodland.Herd do
-			reefTotal += weight
-		end
-		for _, trophy in { "AbyssalDragon", "ReefTitan", "RoyalCnidarian" } do
-			woodland.Herd[trophy] = reefTotal / 997 -- (3 of them: each ends up 1 in 1,000)
-		end
-		Config.Boss.ByBiome.Ocean = "RoyalCnidarian" -- (biome 4 is "Ocean" inside) the crowned jellyfish chases you home (silent until a cry is picked)
-		-- Big, like the Tomb's (x3 there); the giga rares are XL already (guesses).
-		for kind, size in { MoonJellyfish = 2.5, Anomalocaris = 2.5, BoxJellyfish = 2.5, BlueRingOctopus = 2.5, ManOWar = 2.5, Mermaid = 1.5 } do
-			Config.AnimalScale[kind] = size
-		end
-	end
-else
-	-- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
-	-- with you (QM, Oct 14), they're as big here too. (Not the Loong: World 1's own as well.)
+end
+-- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
+-- with you (QM, Oct 14), they're as big in the other worlds too. (Not the Loong: World 1's own as well.)
+if Config.World ~= 2 then
 	Config.AnimalScale = table.clone(Config.AnimalScale)
 	for size, kinds in {
 		[2] = { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }, -- the Woodland Maze
@@ -1840,6 +1840,173 @@ else
 		for _, kind in kinds do
 			Config.AnimalScale[kind] = (Config.AnimalScale[kind] or 1) * size
 		end
+	end
+end
+
+-- World 3 (QM, Oct 14): its own four biomes, Pirate Cove, Garden, Candyland and Cnidaria, each
+-- about 2x as long as World 1's first four (2168, 1816, 1920, 3120; whole 16s, for the checker).
+-- Floors, walls and their colours: the World 3 terrain thread's (tools/world3_course.luau, then
+-- world3_<biome>.luau; not funnel.luau). Animals and bosses come from the biome animal threads;
+-- until then each herd runs Fish (World 2's way) and each boss is World 2's in that slot.
+if Config.World == 3 then
+	local rgb = Color3.fromRGB
+	local SAND = { rgb(240, 218, 160), rgb(230, 206, 146) }
+	Config.Biomes = {
+		{
+			-- Its colours are the home base's too, a tropical island (QM, Oct 14; tools/world3_base.luau's
+			-- floor): sand, wet sand on the paths, grass a stud up, lagoons of the flowing water tile.
+			-- Tile tops: water -1, wet sand 0, sand and planks 1.
+			Name = "PirateCove",
+			AnimalSize = 1,
+			Swerve = 1,
+			Length = 4336, -- (2x the Meadow's 2168)
+			GroundColors = SAND,
+			WallColors = { rgb(124, 82, 50), rgb(112, 73, 44) },
+			CapColor = rgb(240, 218, 160),
+			-- (Oct 14, the Pirate Cove animals thread: weights guesses, as the Tomb's by rarity; its
+			-- giga rares and the boss as a trophy pet added below)
+			Herd = { RedCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
+			Patches = {
+				Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
+				WetSand = { rgb(206, 172, 110), rgb(194, 160, 98) },
+				Grass = { rgb(96, 204, 60), rgb(84, 188, 50) }, -- (the base's)
+				Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
+				DeepWater = { rgb(30, 120, 205), rgb(30, 120, 205) },
+				Planks = { rgb(150, 100, 60), rgb(150, 100, 60) },
+				-- The base's walls, bottom to top (QM, Oct 14): three tiles of dark sand, light sand
+				-- the rest of the way, green grass along the very top (WorldColors.paintWall).
+				BaseWallLow = { rgb(206, 172, 110), rgb(194, 160, 98) },
+				BaseWall = SAND,
+				BaseCap = { rgb(96, 204, 60), rgb(96, 204, 60) },
+			},
+			GateColor = rgb(255, 160, 40),
+		},
+		{
+			-- Tile tops: soil -1, dark lawn 0, bright lawn and path 1, flowers 2.
+			Name = "Garden",
+			AnimalSize = 1.35,
+			Swerve = 1,
+			NestScale = 2,
+			Length = 3632, -- (2x the Desert's 1816)
+			GroundColors = { rgb(76, 170, 52), rgb(68, 156, 46) },
+			WallColors = { rgb(35, 86, 31), rgb(30, 74, 27) },
+			CapColor = rgb(255, 120, 170),
+			-- (Oct 14, the Garden animals thread: weights as the Crimson Lands' by rarity, guesses; its
+			-- giga rares and the Flytrap Queen added below)
+			Herd = { Ladybug = 0.3, Bumblebee = 0.3, ToadstoolFrog = 0.2, VineMonster = 0.2, VenusFlytrap = 0.12, SunflowerLion = 0.05 },
+			Patches = {
+				Soil = { rgb(110, 72, 44), rgb(98, 64, 38) },
+				Grass = { rgb(126, 214, 72), rgb(114, 200, 62) },
+				Flowers = { rgb(255, 130, 190), rgb(244, 112, 176) },
+				Path = { rgb(196, 190, 176), rgb(180, 174, 160) },
+			},
+			GateColor = rgb(255, 92, 170),
+		},
+		{
+			-- Tile tops: chocolate -1, frosting 0, cream and candy cane 1, mint 2.
+			Name = "Candyland",
+			AnimalSize = 1.8,
+			Swerve = 1,
+			NestScale = 2.25,
+			Length = 3840, -- (2x the Tundra's 1920)
+			GroundColors = { rgb(240, 96, 158), rgb(226, 82, 146) },
+			WallColors = { rgb(255, 170, 210), rgb(245, 155, 198) },
+			CapColor = rgb(255, 255, 255),
+			-- (Oct 14, the Candyland animals thread: weights as the Pirate Cove's by rarity, guesses;
+			-- its giga rares and the Gigacorn added below)
+			Herd = { GummyBear = 0.3, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, SwollFairy = 0.08, DesireTroll = 0.03 },
+			Patches = {
+				Chocolate = { rgb(110, 62, 40), rgb(98, 54, 34) },
+				Cream = { rgb(255, 236, 200), rgb(248, 224, 184) },
+				Mint = { rgb(130, 236, 196), rgb(116, 224, 182) },
+				Stripe = { rgb(240, 60, 80), rgb(220, 52, 70) },
+				Icing = { rgb(255, 245, 245), rgb(245, 232, 234) },
+			},
+			GateColor = rgb(140, 240, 220),
+		},
+		{
+			-- Jellyfish country, under the sea: a blue haze and bubbles as World 1's Ocean's (Ocean.client).
+			-- Tile tops: trench -1, seabed 0, coral 1, glow 2.
+			Name = "Cnidaria",
+			AnimalSize = 2.6,
+			Swerve = 1,
+			NestScale = 2.5,
+			Length = 6240, -- (2x the Ocean's 3120)
+			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean's)
+			GroundColors = { rgb(236, 222, 184), rgb(226, 210, 170) },
+			WallColors = { rgb(20, 32, 68), rgb(16, 26, 58) },
+			CapColor = rgb(255, 110, 190),
+			-- (Oct 14, the Cnidaria animals thread: weights as the Tomb's by rarity, guesses; its giga
+			-- rares and the Royal Cnidarian added below. All of them swim: SprintSpecials Fly.)
+			Herd = { MoonJellyfish = 0.3, Anomalocaris = 0.25, BoxJellyfish = 0.15, BlueRingOctopus = 0.15, ManOWar = 0.08, Mermaid = 0.03 },
+			Patches = {
+				Trench = { rgb(30, 80, 210), rgb(26, 70, 188) },
+				Coral = { rgb(255, 128, 150), rgb(244, 112, 136) },
+				Glow = { rgb(120, 255, 140), rgb(100, 240, 120) },
+			},
+			GateColor = rgb(90, 255, 200),
+			Haze = { Color = rgb(60, 150, 235), Density = 0.45, Tint = rgb(200, 228, 255), FadeTime = 1.5, Bubbles = 24, NoDepths = true },
+		},
+	}
+	Config.CourseLength = 4336 + 3632 + 3840 + 6240
+	-- Its funnel widens and narrows (QM, Oct 14), never wider than World 1's and 2's widest
+	-- (CourseMaxHalfWidth, 137): { z, half width }, straight walls between, the last held past
+	-- the end (WorldColors.halfWidth). The terrain thread's walls follow it.
+	Config.CourseProfile = {
+		{ 0, 56 }, { -480, 64 }, { -880, 92 }, { -1440, 92 }, { -1840, 68 }, { -2240, 72 }, { -2680, 108 }, { -3240, 108 }, { -3760, 80 }, -- Pirate Cove
+		{ -4336, 76 }, { -4800, 102 }, { -5240, 82 }, { -5720, 82 }, { -6200, 118 }, { -6840, 118 }, { -7360, 92 }, -- Garden
+		{ -7968, 88 }, { -8400, 114 }, { -8880, 114 }, { -9320, 94 }, { -9880, 128 }, { -10520, 128 }, { -11040, 104 }, -- Candyland
+		{ -11808, 100 }, { -12400, 130 }, { -13000, 137 }, { -13640, 112 }, { -14320, 112 }, { -15000, 137 }, { -15840, 137 }, { -16520, 118 }, { -17280, 132 }, { -18048, 128 }, -- Cnidaria
+	}
+	-- Each biome's trophies (as World 2's angels and Black Widow): 1 in `n` of its stampede each.
+	local function trophies(i, n, kinds)
+		local total = 0
+		for _, weight in Config.Biomes[i].Herd do
+			total += weight
+		end
+		for _, kind in kinds do
+			Config.Biomes[i].Herd[kind] = total / (n - #kinds)
+		end
+	end
+	trophies(1, 1000, { "GhostShip", "JollyRogerWyvern" }) -- the Pirate Cove's giga rares
+	Config.Biomes[1].Herd.Dreadstump = Config.Biomes[1].Herd.GhostShip * 2 -- its boss as a trophy pet, 1 in 500
+	trophies(2, 1000, { "RafflesiaBeast", "AncientTreant", "FlytrapQueen" }) -- the Garden's giga rares and its boss as a trophy pet
+	trophies(3, 1000, { "RockCandyDragon", "GumballGolem", "Gigacorn" }) -- Candyland's giga rares and its boss as a trophy pet
+	trophies(4, 1000, { "AbyssalDragon", "ReefTitan", "RoyalCnidarian" }) -- Cnidaria's giga rares and its boss as a trophy pet
+	-- Each biome's boss.
+	Config.Boss.ByBiome = {
+		PirateCove = "Dreadstump", -- the Pirate King chases you home (silent till a cry is picked)
+		Garden = "FlytrapQueen",
+		Candyland = "Gigacorn", -- the candy unicorn (silent till a cry is picked)
+		Cnidaria = "RoyalCnidarian", -- the crowned jellyfish (silent till a cry is picked)
+	}
+	Config.DefaultPet = "ArmoredHorse" -- (World 2's starter for now)
+	-- World 3's quests: reach each biome (each egg a placeholder: World 2's in that slot), and
+	-- the merge line. (No invite line, as World 2.)
+	Config.Quests = {
+		{
+			{ Text = "Reach Pirate Cove", Kind = "reach", Biome = 1, Egg = "Eyeworm", NoPenLevel = true },
+			{ Text = "Reach Garden", Kind = "reach", Biome = 2, Egg = "CrystalCentipede" },
+			{ Text = "Reach Candyland", Kind = "reach", Biome = 3, Egg = "BrownMushroom" },
+			{ Text = "Reach Cnidaria", Kind = "reach", Biome = 4, Egg = "OrangeButterfly" },
+		},
+		{
+			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "Seraph" },
+		},
+	}
+	Config.Water = table.clone(Config.Water)
+	Config.Water.Image = "rbxassetid://128871935822673" -- assets/world3/WaterTile256.png (QM's blue 8 x 8 tile, x32)
+	-- World 1's animals ridden here: a Horse's speed (Config.slowedHere), World 3's own
+	-- on their own curve (Config.World3Pets).
+	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
+	for kind, stats in Config.AnimalStats do
+		Config.AnimalStats[kind] = table.clone(stats)
+		Config.AnimalStats[kind].Speed = if Config.World3Pets[kind] then Config.World3Pets[kind][1]
+			elseif Config.World3Animals[kind] or Config.World2Animals[kind] then stats.Speed
+			else horse
+	end
+	for kind, w3 in Config.World3Pets do
+		Config.AnimalStats[kind] = Config.AnimalStats[kind] or { Speed = w3[1], Stamina = 1 }
 	end
 end
 

@@ -25,10 +25,7 @@ biomeUnlocked.Name = "BiomeUnlocked"
 biomeUnlocked.Parent = game:GetService("ServerStorage")
 
 -- Each world's biome names, as players know them.
-local NAMES = {
-	[1] = { "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" },
-	[2] = { "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
-}
+local NAMES = Config.BiomeNames
 local QUIT = { "0-1m", "1-5m", "5-10m", "10-20m", "20-30m", "30m+" }
 local EXITS = { "startup", "tutorial", "base", "outbound", "return", "reward", "transfer" }
 
@@ -144,7 +141,7 @@ local function report(arg)
 		table.insert(quit, band .. " " .. pct(r.c("quit" .. i), ended))
 	end
 	line("  Quit at: %s", table.concat(quit, ", "))
-	for w = 1, 2 do
+	for w = 1, #NAMES do
 		line("  Place visits, World %d: %d, mean %s, median %s", w, r.c("placeVisit" .. w), minutes(r.mean("placeVisit" .. w)), minutes(r.p("placeVisit" .. w, 0.5)))
 	end
 	local devices = {}
@@ -231,7 +228,7 @@ local function report(arg)
 				end
 			end
 			local reach = {}
-			for w = 1, 2 do
+			for w = 1, #NAMES do
 				for i = 1, #NAMES[w] do
 					local c = r.c("q" .. q .. ":w" .. w .. "reach" .. i)
 					if c > 0 then
@@ -246,7 +243,7 @@ local function report(arg)
 	-- Pacing and replay.
 	line("PACING: first ride %s; first reward %s; next ride after tutorial %s", r.spread("toFirstRide"), r.spread("toFirstReward"), r.spread("toNextRide"))
 	line("  Replay (rode again within 90s of the tutorial): %s (%d)", pct(r.c("replay"), r.c("replayEligible")), r.c("replayEligible"))
-	for w = 1, 2 do
+	for w = 1, #NAMES do
 		local times = {}
 		for i = 2, #NAMES[w] do
 			table.insert(times, NAMES[w][i] .. " " .. r.spread("w" .. w .. "biome" .. i))
@@ -260,7 +257,7 @@ local function report(arg)
 		table.insert(first, NAMES[1][i] .. " " .. pct(r.c("fv" .. i), entrants))
 	end
 	line("REACH, first sessions (%d): %s", entrants, table.concat(first, ", "))
-	for w = 1, 2 do
+	for w = 1, #NAMES do
 		local visits = r.c("placeVisit" .. w)
 		local reach = {}
 		for i = 2, #NAMES[w] do

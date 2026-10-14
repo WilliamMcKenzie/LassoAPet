@@ -734,4 +734,166 @@ return {
 		{ "Marking", 242, 170, 253 }, -- lighter feathers
 		{ "Accent", 92, 225, 255 }, -- glowing wing tips (and halo)
 	},
+	-- World 3's Garden (tools/garden_*.py)
+	Ladybug = {
+		{ "Body", 214, 26, 38 }, -- red
+		{ "Body", 150, 14, 28 }, -- reddark
+		{ "Belly", 250, 246, 236 }, -- white
+		{ "Marking", 30, 26, 32 }, -- black
+		{ "Accent", 255, 196, 92 }, -- wing
+		{ "Accent", 176, 98, 30 }, -- wingvein
+	},
+	Bumblebee = {
+		{ "Body", 255, 196, 20 }, -- yellow
+		{ "Body", 224, 146, 10 }, -- yellowdark
+		{ "Belly", 255, 226, 120 }, -- fuzz
+		{ "Marking", 34, 28, 30 }, -- black
+		{ "Accent", 176, 226, 255 }, -- wing
+		{ "Accent", 90, 160, 214 }, -- wingrim
+		{ "Accent", 250, 120, 150 }, -- pink
+		{ "Hoof", 255, 140, 30 }, -- pollen
+	},
+	ToadstoolFrog = {
+		{ "Body", 92, 196, 52 }, -- green
+		{ "Belly", 246, 236, 140 }, -- belly
+		{ "Belly", 240, 218, 176 }, -- gill
+		{ "Marking", 156, 72, 214 }, -- cap
+		{ "Marking", 98, 40, 150 }, -- capdark
+		{ "Accent", 40, 128, 40 }, -- greendark
+		{ "Horn", 252, 248, 236 }, -- spot
+		{ "Hoof", 250, 160, 70 }, -- toe
+	},
+	VineMonster = {
+		{ "Body", 64, 192, 64 }, -- vine
+		{ "Body", 96, 210, 70 }, -- vinemid
+		{ "Body", 30, 116, 46 }, -- vinedark
+		{ "Marking", 150, 226, 70 }, -- vinelight
+		{ "Marking", 124, 214, 60 }, -- leaf
+		{ "Accent", 250, 84, 140 }, -- rose
+		{ "Accent", 198, 30, 92 }, -- rosedark
+		{ "Horn", 150, 64, 40 }, -- thorn
+		{ "Horn", 246, 236, 200 }, -- tooth
+		{ "Hoof", 110, 70, 44 }, -- bark
+	},
+	VenusFlytrap = {
+		{ "Body", 78, 186, 50 }, -- green
+		{ "Body", 34, 120, 40 }, -- greendark
+		{ "Belly", 214, 30, 52 }, -- red
+		{ "Belly", 140, 14, 40 }, -- reddark
+		{ "Marking", 110, 210, 60 }, -- leaf
+		{ "Horn", 252, 240, 200 }, -- spike
+		{ "Hoof", 118, 76, 46 }, -- root
+		{ "Hoof", 78, 50, 34 }, -- rootdark
+	},
+	SunflowerLion = {
+		{ "Body", 228, 146, 58 }, -- fur
+		{ "Body", 176, 96, 34 }, -- furdark
+		{ "Belly", 252, 232, 176 }, -- cream
+		{ "Marking", 255, 214, 30 }, -- petal
+		{ "Marking", 246, 156, 20 }, -- petaldark
+		{ "Accent", 96, 56, 30 }, -- seed
+		{ "Accent", 56, 32, 22 }, -- seeddark
+		{ "Hoof", 70, 176, 52 }, -- leaf
+		{ "Hoof", 36, 120, 40 }, -- leafdark
+	},
+	RafflesiaBeast = {
+		{ "Body", 70, 140, 60 }, -- moss
+		{ "Body", 40, 92, 44 }, -- mossdark
+		{ "Body", 120, 186, 70 }, -- mosslight
+		{ "Belly", 246, 226, 200 }, -- rim
+		{ "Marking", 220, 62, 40 }, -- petal
+		{ "Marking", 150, 30, 30 }, -- petaldark
+		{ "Marking", 196, 44, 60 }, -- bud
+		{ "Accent", 250, 222, 196 }, -- wart
+		{ "Accent", 90, 18, 34 }, -- well
+		{ "Accent", 60, 150, 50 }, -- vine
+		{ "Horn", 250, 236, 210 }, -- spine
+		{ "Horn", 252, 244, 220 }, -- tooth
+		{ "Hoof", 110, 72, 46 }, -- root
+		{ "Hoof", 70, 46, 32 }, -- rootdark
+	},
+	AncientTreant = {
+		{ "Body", 126, 84, 52 }, -- bark
+		{ "Body", 84, 54, 36 }, -- barkdark
+		{ "Body", 160, 112, 70 }, -- barklight
+		{ "Belly", 96, 170, 60 }, -- moss
+		{ "Belly", 56, 120, 44 }, -- mossdark
+		{ "Marking", 60, 160, 60 }, -- leaf
+		{ "Marking", 34, 112, 46 }, -- leafdark
+		{ "Marking", 120, 200, 70 }, -- leaflight
+		{ "Accent", 255, 140, 190 }, -- blossom
+		{ "Accent", 220, 80, 150 }, -- blossomdark
+		{ "Horn", 240, 132, 40 }, -- shroom
+		{ "Horn", 190, 90, 30 }, -- shroomdark
+	},
+	FlytrapQueen = {
+		{ "Body", 52, 150, 52 }, -- green
+		{ "Body", 24, 88, 40 }, -- greendark
+		{ "Belly", 220, 36, 140 }, -- red
+		{ "Belly", 130, 16, 90 }, -- reddark
+		{ "Marking", 84, 184, 60 }, -- leaf
+		{ "Marking", 38, 120, 48 }, -- leafdark
+		{ "Marking", 236, 60, 170 }, -- crown
+		{ "Marking", 170, 30, 120 }, -- crowndark
+		{ "Accent", 86, 40, 96 }, -- bulb
+		{ "Accent", 52, 22, 64 }, -- bulbdark
+		{ "Horn", 252, 240, 206 }, -- spike
+		{ "Hoof", 96, 60, 44 }, -- root
+		{ "Hoof", 60, 38, 30 }, -- rootdark
+	},
+	GummyBear = { -- World 3 Candyland
+		{ "Body", 236, 36, 72 }, -- body, head, legs, ears
+		{ "Belly", 255, 92, 150 }, -- belly, chest, muzzle
+		{ "Hoof", 168, 18, 50 }, -- paws
+	},
+	GumdropFrog = { -- World 3 Candyland
+		{ "Body", 255, 140, 30 }, -- gumdrop body, head, thighs
+		{ "Body", 222, 96, 18 }, -- base band, feet (darker)
+		{ "Belly", 255, 200, 120 }, -- belly, jaw
+		{ "Marking", 255, 252, 246 }, -- sugar crystals
+	},
+	GingerbreadMan = { -- World 3 Candyland
+		{ "Body", 204, 112, 44 }, -- cookie
+		{ "Body", 150, 72, 26 }, -- baked edges (darker)
+		{ "Marking", 255, 255, 255 }, -- piped icing
+	},
+	Creampuff = { -- World 3 Candyland
+		{ "Body", 238, 172, 84 }, -- pastry bun and lid
+		{ "Body", 200, 124, 50 }, -- bun base, feet (darker)
+		{ "Marking", 255, 252, 246 }, -- whipped cream
+		{ "Accent", 150, 206, 60 }, -- mould
+		{ "Accent", 96, 150, 40 }, -- darker mould
+	},
+	SwollFairy = { -- World 3 Candyland
+		{ "Body", 255, 150, 206 }, -- skin
+		{ "Body", 232, 98, 170 }, -- knuckles, nose (darker)
+		{ "Marking", 60, 230, 176 }, -- tank top, slippers
+		{ "Marking", 24, 176, 136 }, -- darker top
+		{ "Accent", 204, 150, 255 }, -- tutu, lower wings
+		{ "Horn", 70, 196, 255 }, -- upper wings
+	},
+	DesireTroll = { -- World 3 Candyland
+		{ "Body", 255, 92, 150 }, -- skin
+		{ "Body", 214, 52, 118 }, -- darker skin
+		{ "Belly", 255, 150, 206 }, -- belly, chest, jaw
+		{ "Hoof", 160, 80, 240 }, -- fists, feet
+		{ "Hoof", 110, 46, 196 }, -- knuckles
+		{ "Marking", 204, 150, 255 }, -- cotton-candy hair
+	},
+	RockCandyDragon = { -- World 3 Candyland
+		{ "Body", 236, 36, 72 }, -- head, neck, body, tail, legs
+		{ "Body", 168, 18, 50 }, -- darker red
+		{ "Belly", 255, 252, 246 }, -- belly and chest plates
+	},
+	GumballGolem = { -- World 3 Candyland
+		{ "Body", 236, 36, 72 }, -- machine base, fists
+		{ "Marking", 250, 254, 255 }, -- glass globe
+	},
+	Gigacorn = { -- World 3 Candyland's boss
+		{ "Body", 255, 252, 246 }, -- white coat
+		{ "Marking", 255, 150, 206 }, -- cotton-candy mane and tail, frosting
+		{ "Marking", 232, 98, 170 }, -- darker pink
+		{ "Accent", 70, 196, 255 }, -- sky frosting and puffs
+		{ "Hoof", 200, 124, 50 }, -- waffle-cone hooves
+	},
 }

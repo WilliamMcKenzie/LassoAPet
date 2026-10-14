@@ -33,8 +33,20 @@ function WorldColors.biomeNamedStart(name)
 	return nil
 end
 
--- The course's half width at z (Config: a funnel, widening from the start line).
+-- The course's half width at z (Config: a funnel, widening from the start line; or World 3's
+-- Config.CourseProfile, { z, half width } stops widening and narrowing, straight between).
 function WorldColors.halfWidth(z)
+	local profile = Config.CourseProfile
+	if profile then
+		z = math.min(z, 0)
+		for k = 2, #profile do
+			local a, b = profile[k - 1], profile[k]
+			if z >= b[1] then
+				return a[2] + (b[2] - a[2]) * (a[1] - z) / (a[1] - b[1])
+			end
+		end
+		return profile[#profile][2]
+	end
 	return math.min(Config.CourseHalfWidth + Config.CourseWidening * math.max(-z, 0), Config.CourseMaxHalfWidth)
 end
 

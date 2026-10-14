@@ -58,9 +58,7 @@ Funnel.STEPS = { -- (by funnel: /stats lists them)
 	[CLAIMS] = { "Has Unfinished Quests", "Has Claimable Quest", "Claimed 1", "Claimed 2", "Claimed 3" },
 	[PROGRESS] = { "Current", "Ready", "Claimed" },
 }
-local BIOME_NAMES = if WORLD == 2
-	then { "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" }
-	else { "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" }
+local BIOME_NAMES = Config.BiomeNames[WORLD]
 Funnel.STEPS[BIOMES] = { "First Arrival" }
 for _, name in BIOME_NAMES do
 	table.insert(Funnel.STEPS[BIOMES], name)
