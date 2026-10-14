@@ -105,10 +105,12 @@ function Fusion.stats(kind, fuse, saved)
 	if not fuse then
 		return Config.AnimalStats[kind] or ONE
 	end
-	if typeof(saved) == "table" and tonumber(saved.Speed) and tonumber(saved.Stamina) then
-		return saved
+	local stats = if typeof(saved) == "table" and tonumber(saved.Speed) and tonumber(saved.Stamina) then saved
+		else Fusion.best(Config.AnimalStats[kind] or ONE, Config.AnimalStats[fuse] or ONE)
+	if Config.slowedHere(kind, fuse) then -- (a World 1 hybrid in World 2: a Horse's speed, QM Oct 14)
+		return { Speed = Config.AnimalStats.Horse.Speed, Stamina = stats.Stamina }
 	end
-	return Fusion.best(Config.AnimalStats[kind] or ONE, Config.AnimalStats[fuse] or ONE)
+	return stats
 end
 
 -- The best of both worlds (QM): the faster one's Speed plus Config.FuseSpeedShare of the

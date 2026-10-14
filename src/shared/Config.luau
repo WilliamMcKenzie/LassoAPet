@@ -1409,6 +1409,25 @@ function Config.incomeIn(world, kind)
 	return if own then own[2] else baseIncome[kind]
 end
 
+-- World 2's own animals (QM, Oct 14). Pets go with you between worlds, so a World 1 pet ridden
+-- in World 2 runs at a Horse's speed there (below), or World 1's fast pets would blitz it.
+Config.World2Animals = {}
+for _, kind in {
+	"ArmoredHorse", "MarbleFish", "Lion", "Buffalo", "Crocodile", "MarbleColossus", "MajesticUnicorn", "Bunny", "Rhino", "Fish",
+	"Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura", "BlackWidow",
+	"CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant",
+	"Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem",
+	"Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune",
+	"TombJackal", "LionArcher", "Nut", "Geb", "EagleSentry", "Bes", "BloatedMummy", "Scarab",
+	"Seraph", "CrimsonSeraph", "CrystalSeraph",
+} do
+	Config.World2Animals[kind] = true
+end
+-- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
+function Config.slowedHere(kind, fuse)
+	return Config.World == 2 and not Config.World2Animals[kind] and not (fuse and Config.World2Animals[fuse])
+end
+
 -- World 2's look: its first biome and base as QM's reference (marble walls, yellow
 -- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
 -- hue-turned as placeholders (tools/world2_terrain.luau's turns).
@@ -1697,6 +1716,14 @@ if Config.World == 2 then
 		crimsonTotal += weight
 	end
 	Config.Biomes[2].Herd.BlackWidow = crimsonTotal / 499
+	-- World 1's animals ridden here: a Horse's speed (QM, Oct 14; Config.slowedHere).
+	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
+	for kind, stats in Config.AnimalStats do
+		if not Config.World2Animals[kind] then
+			Config.AnimalStats[kind] = table.clone(stats)
+			Config.AnimalStats[kind].Speed = horse
+		end
+	end
 else
 	-- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
 	-- with you (QM, Oct 14), they're as big here too. (Not the Loong: World 1's own as well.)
