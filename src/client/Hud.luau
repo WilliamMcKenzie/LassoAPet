@@ -1386,11 +1386,13 @@ function Hud.eggReveal(rarity, kind, rolled)
 		cardEgg.Position = UDim2.new(0.5, 0, 0.5, -lift)
 	end
 	-- Runs step(t) every frame for a duration; false if the reveal was cancelled.
+	-- (Config.EggRevealSpeed: t runs that much faster, so every part of it does)
+	local speed = Config.EggRevealSpeed or 1
 	local function play(duration, step)
 		local t = 0
 		while t < duration do
 			step(t)
-			t += RunService.Heartbeat:Wait()
+			t += RunService.Heartbeat:Wait() * speed
 			if reveal ~= token then
 				return false
 			end
@@ -1542,7 +1544,7 @@ function Hud.eggReveal(rarity, kind, rolled)
 			cardExclusive.Visible = false
 		end
 	end)
-	return ENTER_TIME + roll + ANTICIPATION + hold + EXIT_TIME
+	return (ENTER_TIME + roll + ANTICIPATION + hold + EXIT_TIME) / speed
 end
 
 -- Cutscenes hide the whole ride HUD.
