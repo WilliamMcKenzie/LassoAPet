@@ -94,6 +94,23 @@ class Model:
         """A pyramid: base rectangle at `base` (half sizes hw along wv, ht across), apex L along d."""
         return _pyr(name, base, d, wv, L, hw, ht, self.tex[color])
 
+    def hull(self, name, pts, color):
+        """A low-poly mesh: the convex hull of `pts` (studs), flat triangles (garden_lib's). With
+        bbmodel_to_luau.py --meshes, the hulls on a bone in one colour become one MeshPart."""
+        import garden_lib as G
+        keys, v, faces = {}, {}, {}
+        for i, t in enumerate(G.hull_tris(pts)):
+            vs = []
+            for q in t:
+                k = tuple(np.round(q, 5))
+                if k not in keys:
+                    keys[k] = f"v{len(keys)}"
+                    v[keys[k]] = [round(float(x) * S.BB, 4) for x in q]
+                vs.append(keys[k])
+            faces[f"f{i}"] = {"texture": self.tex[color], "vertices": vs, "uv": {q: [0, 0] for q in vs}}
+        return {"name": name, "type": "mesh", "uuid": S.uid(), "color": 0, "origin": [0, 0, 0],
+                "rotation": [0, 0, 0], "vertices": v, "faces": faces}
+
     def eye(self, name, c, side, size=1.2, look=(0, 0, -1), pupil=0.55):
         """A googly plate eye on a side face (side = +-1 on x, or 'front' facing -z): a white
         plate with a dark pupil pushed toward `look`."""
