@@ -26,9 +26,7 @@ local PANEL_CORNER = 18 / 96 -- its corners' radius, of its width (measured from
 local SCALE = 0.96 -- the whole bar, slots, numbers and outlines alike (QM, Oct 9: 20% smaller, was 1.2)
 local GAP = 10
 local BOTTOM = GAP * SCALE -- (QM, Oct 9: the same gap under the bar as between its slots, on screen; was 24)
-local MAX_SLOTS = 16 -- (more slots as you get more kinds of egg: QM, Oct 14)
-local MIN_SLOTS = 0 -- (empty slots up to this many: QM, Oct 14, none again; was 8)
-local ROW = 8 -- slots' worth of width World2Bar's bar takes under them
+local MAX_SLOTS = 9
 local FONT = Enum.Font.FredokaOne
 
 -- Square backgrounds by the item's rarity: QM's slot pictures (the colour is a
@@ -185,7 +183,6 @@ local function redraw()
 		number.Position = UDim2.fromOffset(4, 2)
 		number.Text = tostring(i)
 		number.ZIndex = 3
-		number.Visible = false -- (no slot numbers: QM, Oct 14; the keys 1-8 still work)
 		local count = shown(tool)
 		if count > 1 then
 			local label = text(slot, UDim2.fromScale(1, 1), 34, 3)
@@ -205,29 +202,6 @@ local function redraw()
 		if tool.Parent == player.Character then
 			Gamepad.hint(slot, Enum.KeyCode.ButtonR2, Vector2.new(0.84, 0.16), 36)
 		end
-		slot.Parent = bar
-	end
-	-- The rest of the MIN_SLOTS, empty: just the panel and its number.
-	for i = #tools + 1, MIN_SLOTS do
-		local slot = Instance.new("Frame")
-		slot.Name = "Empty"
-		slot.BackgroundTransparency = 1
-		slot.Size = UDim2.fromOffset(SLOT, SLOT)
-		slot.LayoutOrder = i
-		local bg = Instance.new("ImageLabel")
-		bg.BackgroundTransparency = 1
-		bg.Size = UDim2.fromScale(1, 1)
-		bg.Image = PANEL
-		bg.ScaleType = Enum.ScaleType.Slice
-		bg.SliceCenter = Rect.new(24, 24, 72, 72)
-		bg.SliceScale = SLOT / PANEL_SIZE
-		bg.ZIndex = 0
-		bg.Parent = slot
-		local number = text(slot, UDim2.fromOffset(24, 24), 20, 2)
-		number.Position = UDim2.fromOffset(4, 2)
-		number.Text = tostring(i)
-		number.ZIndex = 3
-		number.Visible = false -- (no slot numbers: QM, Oct 14; the keys 1-8 still work)
 		slot.Parent = bar
 	end
 end
@@ -345,28 +319,6 @@ function Inventory.holdBack(kind, n)
 		heldBack[kind] = nil
 	end
 	redraw()
-end
-
--- The bar itself, and its measures on screen (World2Bar sits under it, QM Oct 14): px per
--- slot unit, the gap between slots, ROW slots' width, and where its bottom is unlifted.
-function Inventory.frame()
-	return bar
-end
-local lifted = 0 -- screen px it's lifted by (World2Bar's bar under it)
-function Inventory.metrics()
-	if not bar or bar.AbsoluteSize.Y <= 0 then
-		return nil
-	end
-	local k = bar.AbsoluteSize.Y / SLOT
-	return { gap = GAP * k, row = (ROW * SLOT + (ROW - 1) * GAP) * k, bottom = bar.AbsolutePosition.Y + bar.AbsoluteSize.Y + lifted, centreX = bar.AbsolutePosition.X + bar.AbsoluteSize.X / 2 }
-end
-function Inventory.lift(px)
-	if not bar or bar.AbsoluteSize.Y <= 0 or math.abs(px - lifted) < 0.5 then
-		return
-	end
-	local parentScale = bar.AbsoluteSize.Y / (SLOT * SCALE) -- (screen px per unit of the bar's parent)
-	lifted = px
-	bar.Position = UDim2.new(0.5, 0, 1, -BOTTOM - px / parentScale)
 end
 
 function Inventory.slot(name)
