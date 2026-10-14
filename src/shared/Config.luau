@@ -1724,6 +1724,17 @@ if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14
 			Config.AnimalStats[kind].Speed = horse
 		end
 	end
+	-- World 3's home base, a tropical island (QM, Oct 14; tools/world3_base.luau's floor): sand,
+	-- wet sand on the paths, grass a stud up, lagoons of the flowing water tile. Its Meadow's
+	-- walls stay World 2's marble for now (QM hasn't picked).
+	if Config.World == 3 then
+		meadow.GroundColors = { rgb(240, 218, 160), rgb(230, 206, 146) } -- sand
+		meadow.Patches = {
+			WetSand = { rgb(206, 172, 110), rgb(194, 160, 98) },
+			Grass = { rgb(96, 204, 60), rgb(84, 188, 50) },
+			Water = { rgb(37, 81, 40), rgb(37, 81, 40) },
+		}
+	end
 else
 	-- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
 	-- with you (QM, Oct 14), they're as big here too. (Not the Loong: World 1's own as well.)
