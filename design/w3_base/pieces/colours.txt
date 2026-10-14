@@ -1,0 +1,16 @@
+# piece: label, RGB
+Cliff1_1: Rock, 214, 182, 132
+Cliff1_2: Top, 226, 196, 146
+Cliff2_1: Rock, 214, 182, 132
+Cliff2_2: Top, 226, 196, 146
+Cliff3_1: Rock, 214, 182, 132
+Cliff3_2: Top, 226, 196, 146
+Cliff4_1: Rock, 214, 182, 132
+Cliff4_2: Top, 226, 196, 146
+Cliff5_1: Rock, 214, 182, 132
+Cliff5_2: Top, 226, 196, 146
+Cliff6_1: Rock, 214, 182, 132
+Cliff6_2: Top, 226, 196, 146
+Bush_1: Leaves1, 70, 136, 52
+Bush_2: Leaves2, 95, 168, 62
+Bush_3: Leaves3, 95, 168, 62
