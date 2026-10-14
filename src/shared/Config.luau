@@ -640,7 +640,7 @@ local Config = {
 	-- seconds of what the two pets earn between them (PetIncome, a hybrid's saved income), so
 	-- two Kittens ~$9k, two Snowmen ~$110k: a minute or two of a pen's gold wherever you are.
 	-- The fuse lesson's fuse is free (FuseLesson). (Was by rarity, FusePrice x 0.01.)
-	FusePriceSeconds = 90, -- (merging 2x cheaper: QM, Oct 12; was 180)
+	FusePriceSeconds = 10, -- (QM, Oct 14: trivially cheap, 10 s of what the two earn; was 90, 180)
 	-- A hybrid's Speed: the faster one's plus this share of the slower one's (QM, Oct 11; was
 	-- 1/2, which let two Desert Kittens reach the Ocean). Two equal pets come out 1.15x, one
 	-- rarity step on the pacing ladder: two Rares merge to an Epic's speed, a way past the gate
@@ -1071,7 +1071,7 @@ local Config = {
 		},
 		{
 			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "SpineLizard" }, -- (QM, Oct 11: 3, was 10)
-			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "SnackYak" }, -- (QM, Oct 11: the Snack Yak, was the Snowman) -- (before Collect: QM, Oct 12)
+			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "SnackYak" }, -- (QM, Oct 14: 1 merge, was 3; QM, Oct 11: the Snack Yak, was the Snowman) -- (before Collect: QM, Oct 12)
 			{ Text = "Collect animals", Kind = "home", Need = 10, Egg = "BoneRex" }, -- (for D1: its egg's long, QM; 10, was 5: QM, Oct 11)
 			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "TRex" }, -- (QM, Oct 11: these three after Merge)
 			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 3, Egg = "LavaWhale" }, -- (QM, Oct 11: 3, was 5) -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
@@ -1424,7 +1424,7 @@ if Config.World == 2 then
 			{ Text = "Reach Tomb", Kind = "reach", Biome = 6, Egg = "BloatedMummy" }, -- (the Palm Guy: the Uncommon)
 		},
 		{
-			{ Text = "Merge animals", Kind = "merge", Need = 3, Egg = "Seraph" },
+			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "Seraph" }, -- (QM, Oct 14: 1, was 3)
 			{ Text = "Lasso Lions", Kind = "lasso", Animal = "Lion", Need = 10, Egg = "Asura" },
 			{ Text = "Lasso Kitsunes", Kind = "lasso", Animal = "Kitsune", Need = 3, Egg = { "Geb", "Nut", "Bes" } },
 		},
