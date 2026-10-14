@@ -1894,7 +1894,7 @@ end
 -- until then each herd runs Fish (World 2's way) and each boss is World 2's in that slot.
 if Config.World == 3 then
 	local rgb = Color3.fromRGB
-	local SAND = { rgb(238, 202, 142), rgb(228, 190, 128) } -- warm golden sand (QM, Oct 14: his beach reference; was 240, 218, 160 / 230, 206, 146)
+	local SAND = { rgb(236, 210, 156), rgb(230, 203, 148) } -- soft pale sand, a gentle checker (QM, Oct 14: his lagoon-island concept; was 238, 202, 142) -- warm golden sand (QM, Oct 14: his beach reference; was 240, 218, 160 / 230, 206, 146)
 	Config.Biomes = {
 		{
 			-- Its colours are the home base's too, a tropical island (QM, Oct 14; tools/world3_base.luau's
@@ -1906,20 +1906,20 @@ if Config.World == 3 then
 			Swerve = 1,
 			Length = 4336, -- (2x the Meadow's 2168)
 			GroundColors = SAND,
-			WallColors = { rgb(140, 98, 62), rgb(128, 88, 55) }, -- wooden brown (QM, Oct 14: plain, no bands or runes)
-			CapColor = rgb(104, 70, 44), -- (darker wood along the top)
+			WallColors = { rgb(226, 196, 146), rgb(214, 182, 132) }, -- sandstone cliff (QM, Oct 14: his lagoon-island concept; was wood 140, 98, 62)
+			CapColor = rgb(88, 158, 58), -- (foliage green along the top)
 			-- (Oct 14, the Pirate Cove animals thread: weights guesses, as the Tomb's by rarity; its
 			-- giga rares and the boss as a trophy pet added below)
 			Herd = { GreenCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
 			Patches = {
 				Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
-				WetSand = { rgb(204, 158, 102), rgb(190, 145, 92) }, -- (QM, Oct 14: the beach reference; was 225, 189, 120 / 208, 172, 105)
-				DampSand = { rgb(222, 180, 120), rgb(208, 167, 109) }, -- between the sand and the wet sand (QM, Oct 14; tools/world3_dampsand.luau)
-				Grass = { rgb(138, 158, 72), rgb(124, 144, 62) }, -- (the base's: muted olive, QM Oct 14; was 96, 204, 60)
-				Water = { rgb(53, 143, 192), rgb(53, 143, 192) }, -- (QM's tile's main colour, so the sides match it)
+				WetSand = { rgb(244, 230, 196), rgb(238, 223, 188) }, -- the pale rim round every pool (QM's concept) -- (QM, Oct 14: the beach reference; was 225, 189, 120 / 208, 172, 105)
+				DampSand = { rgb(224, 194, 140), rgb(218, 188, 134) }, -- between the sand and the wet sand (QM, Oct 14; tools/world3_dampsand.luau)
+				Grass = { rgb(95, 168, 62), rgb(86, 156, 56) }, -- (the base's: muted olive, QM Oct 14; was 96, 204, 60)
+				Water = { rgb(46, 178, 196), rgb(46, 178, 196) }, -- (the lagoon tile's main colour, so the sides match it)
 				-- The base's walls (QM, Oct 14): one plain wooden-brown part each, darker wood along the top.
-				BaseWall = { rgb(140, 98, 62), rgb(128, 88, 55) },
-				BaseCap = { rgb(104, 70, 44), rgb(104, 70, 44) },
+				BaseWall = { rgb(226, 196, 146), rgb(214, 182, 132) },
+				BaseCap = { rgb(88, 158, 58), rgb(88, 158, 58) },
 			},
 			GateColor = rgb(255, 160, 40),
 		},
@@ -2036,7 +2036,7 @@ if Config.World == 3 then
 		},
 	}
 	Config.Water = table.clone(Config.Water)
-	Config.Water.Image = "rbxassetid://113940500836253" -- assets/world3/WaterTileQM256.png (QM's darker 8 x 8 tile, Oct 14, x32; was his bright blue WaterTile256.png, 128871935822673)
+	Config.Water.Image = "rbxassetid://130686065972507" -- assets/world3/WaterTileLagoon256.png (QM's darker tile turned lagoon turquoise for his concept, Oct 14; was 113940500836253)
 	-- World 1's animals ridden here: a Horse's speed (Config.slowedHere), World 3's own
 	-- on their own curve (Config.World3Pets).
 	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
