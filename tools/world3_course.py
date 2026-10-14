@@ -189,14 +189,16 @@ def blocky(rung, inside):
     return rung
 
 
-def despeck(rung, inside, keep=()):
-    """After the rims are drawn: a peak (or pit) with no 2x2 block in it, every neighbour a
-    rung below (above) it, drops (rises) to them. Keeps the layered rule. (Not rungs in keep.)"""
+def despeck(rung, inside, keep=(), least=0, only=None):
+    """After the rims are drawn: a peak (or pit) with no 2x2 block in it (or under `least`
+    cells), every neighbour a rung below (above) it, drops (rises) to them. Keeps the layered
+    rule. (Not rungs in keep; with `only`, just that rung.)"""
     while True:
         changed = False
         block = blocks(rung)
         for k, cells, rim in list(patches(rung, inside)):
-            if k not in keep and rim and len(set(rim)) == 1 and abs(rim[0] - k) == 1 and not any(block[a, c] for a, c in cells):
+            small = len(cells) < least or not any(block[a, c] for a, c in cells)
+            if k not in keep and (only is None or k == only) and rim and len(set(rim)) == 1 and abs(rim[0] - k) == 1 and small:
                 for a, c in cells:
                     rung[a, c] = rim[0]
                 changed = True
@@ -288,6 +290,17 @@ def pirate_cove():
         b.rung[mid - 2:mid + 2, a:c + 1] = 4
         b.free[mid - 2:mid + 2, a:c + 1] = True
     b.rung = despeck(b.rung, b.inside & ~b.free)  # (water and wet sand cut to slivers beside the boards)
+    # Wet sand only by water: a stretch of wet sand touching no water (the rims of pools the
+    # boards paved over) goes dry; then sand flecks between pools (no 2x2) go wet.
+    keep = b.inside & ~b.free
+    for k, cells, rim in list(patches(b.rung, keep)):
+        if k == 2:
+            near = {b.rung[a + da, c + dc] for a, c in cells for da in (-1, 0, 1) for dc in (-1, 0, 1)
+                    if 0 <= a + da < NX and 0 <= c + dc < b.nz and keep[a + da, c + dc]}
+            if not near & {0, 1}:
+                for a, c in cells:
+                    b.rung[a, c] = 3
+    b.rung = despeck(b.rung, keep, only=3)
     check(b)
     walls = dict(wall=[(124, 82, 50), (112, 73, 44)], cap=(240, 218, 160), gate=(255, 160, 40))  # driftwood, sand top, treasure gold
     return b, walls
@@ -353,7 +366,7 @@ def candyland():
     ladder = [0, 1, 2, 3, 3, 3]
     step = raise_(np.asarray(ladder)[b.rung], b.inside, cane | (b.rung == 3))
     b.rung = np.where(cane | (b.rung == 3), b.rung, step)
-    b.rung = despeck(b.rung, b.inside & ~cane)  # (mint cut thin by the cane's cream back to cream)
+    b.rung = despeck(b.rung, b.inside & ~cane, least=16, only=3)  # (mint: a few big plateaus, no small blocks)
     check(b, ladder)
     walls = dict(wall=[rgb("FFAAD2"), rgb("F59BC6")], cap=rgb("FFFFFF"), gate=rgb("8CF0DC"))  # frosting, icing top, mint gate
     return b, walls, ladder
@@ -373,9 +386,13 @@ def cnidaria():
     q = b.quasi(9, 16, (229, 661))
     w = along(b, 112, MAXW)
     b.band(q + 0.1 * (w - 0.5), [0.12, 0.55, 0.94])
-    b.rung[np.abs(b.x) < 24] = 1  # (the riding lane)
+    lane = np.abs(b.x) < 36  # (the riding lane: plain seabed)
+    b.rung[lane] = 1
     seam(b, 5, 1)
     b.rung = settle(b.rung, b.inside)
+    b.rung[lane] = 1
+    b.rung = despeck(lower(b.rung, b.inside), b.inside)
+    b.rung = despeck(b.rung, b.inside, least=24, only=0)  # (no confetti of little trenches)
     check(b)
     walls = dict(wall=[rgb("142044"), rgb("101A3A")], cap=rgb("FF6EBE"), gate=rgb("5AFFC8"))  # dark blue rock (darker than the trenches), coral top
     return b, walls, None
