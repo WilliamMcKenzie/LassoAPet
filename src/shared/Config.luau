@@ -1732,8 +1732,10 @@ if Config.World >= 2 then -- (World 3 too, for now: a copy of World 2, QM Oct 14
 		meadow.Patches = {
 			WetSand = { rgb(206, 172, 110), rgb(194, 160, 98) },
 			Grass = { rgb(96, 204, 60), rgb(84, 188, 50) },
-			Water = { rgb(37, 81, 40), rgb(37, 81, 40) },
+			Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
 		}
+		Config.Water = table.clone(Config.Water)
+		Config.Water.Image = "rbxassetid://128871935822673" -- assets/world3/WaterTile256.png (QM's blue 8 x 8 tile, x32)
 	end
 else
 	-- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
