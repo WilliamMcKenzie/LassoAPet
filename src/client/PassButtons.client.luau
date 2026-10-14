@@ -13,6 +13,7 @@ local MARGIN, GAP = 18, -2 -- (the price badges fill most of the gap: 30% less s
 local SCALE = 234 / 270 -- QM's art's pixels to ours: each button as wide as Merge and the rest on the left (BaseUi's 234: QM, Oct 13, 10% smaller; the art's ~25 px more is the price badge sticking out)
 local SUNBURST = "rbxassetid://85834206672187" -- assets/ui/Sunburst.png (QM's)
 local SPIN = 30 -- degrees a second
+local AFTER_RIDES = 3 -- (not till this many rides are done: QM, Oct 14)
 local SHOWN = true -- (QM, Oct 14: hidden a while for the shop's redo, then back; false hides them)
 local BUTTONS = {
 	{ "StarterPack", "rbxassetid://100466055719917", Vector2.new(245, 138) }, -- assets/ui/PassStarterPack.png
@@ -135,7 +136,7 @@ gui.Parent = player:WaitForChild("PlayerGui")
 RunService.RenderStepped:Connect(function()
 	local base = player.PlayerGui:FindFirstChild("BaseUi")
 	local baseRoot = base and base:FindFirstChild("Root")
-	gui.Enabled = SHOWN and base ~= nil and base.Enabled and not (baseRoot and baseRoot:GetAttribute("Modal"))
+	gui.Enabled = SHOWN and (player:GetAttribute("RidesDone") or 0) >= AFTER_RIDES and base ~= nil and base.Enabled and not (baseRoot and baseRoot:GetAttribute("Modal"))
 	if starterSlot then
 		local left = math.max(0, math.ceil(STARTER_PACK_FOR - (os.clock() - joinedAt)))
 		starterTimer.Text = string.format("%d:%02d", left // 60, left % 60)

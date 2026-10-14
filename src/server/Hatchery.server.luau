@@ -207,6 +207,7 @@ local function publish(player)
 	player:SetAttribute("RollPrice", rollPrice(profile))
 	player:SetAttribute("RainbowTrail", profile.rainbowTrail or nil) -- bought (Config.RainbowTrail): every ride trails a rainbow
 	player:SetAttribute("QuestsSeen", profile.questsSeen or nil) -- (BaseUi: the tap hand on the folded Quests panel till it's opened once)
+	player:SetAttribute("RidesDone", profile.ridesDone or 0) -- (PassButtons: from the 3rd)
 	player:SetAttribute("RideMerged", profile.rideMerged or 1) -- how many pets it's merged from (Shared/Merge)
 	player:SetAttribute("RideFuse", profile.rideFuse) -- the donor, if it's a hybrid (Shared/Fusion)
 	player:SetAttribute("RideTier", profile.rideFuse and profile.rideTier or nil) -- its saved size tier (Fusion.tier)
@@ -412,6 +413,9 @@ local function load(player)
 					profile.rainbowTrail = data.rainbowTrail == true or nil
 					profile.questsSeen = data.questsSeen == true or nil -- (opened the Quests panel: no tap hand on it)
 					profile.starterPack = data.starterPack == true or nil -- (the Starter Pack's gold and Snake given)
+					-- (rides finished, for the pass buttons: they show from the 3rd, QM Oct 14. A save
+					-- from before this, past the tutorial, counts as plenty)
+					profile.ridesDone = tonumber(data.ridesDone) or (if data.tutorial then 3 else 0)
 					player:SetAttribute("FuseLesson", nil) -- (no fuse lesson any more: QM, Oct 8)
 					profile.tutorial = data.tutorial == true or next(data.eggs or {}) ~= nil or next(data.items or {}) ~= nil
 					for _, kind in typeof(data.ridden) == "table" and data.ridden or {} do
@@ -542,7 +546,7 @@ local function save(player, onlyIfChanged)
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
-		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
+		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, ridesDone = profile.ridesDone, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
 		merged = profile.merged }
 	data[worldKey("quests")], data[worldKey("v1")] = profile.quests, profile.v1 -- (this world's own)
 	for name, value in profile.keep or {} do -- (the other worlds', as they were)
@@ -1022,6 +1026,17 @@ end
 -- The client finished the tutorial: it never shows again.
 -- The rider got on an animal of this kind (Ride.client): it's in their animal
 -- dictionary from now on.
+-- A ride's over ("end": Ride.client): counted (saved), up to a point.
+task.spawn(function()
+	ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
+		local profile = profiles[player]
+		if what == "end" and profile and (profile.ridesDone or 0) < 100 then
+			profile.ridesDone = (profile.ridesDone or 0) + 1
+			player:SetAttribute("RidesDone", profile.ridesDone)
+		end
+	end)
+end)
+
 -- The Quests panel opened for the first time (BaseUi): its tap hand's done for good.
 remote("QuestsSeen", function(player)
 	local profile = profiles[player]
@@ -1627,7 +1642,7 @@ rebirthPets.OnInvoke = function(player)
 	end
 	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = old.ridden or {}, tutorial = true, boughtPets = old.boughtPets,
 		boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = old.quests, v1 = old.v1, questsSeen = old.questsSeen,
-		starterPack = old.starterPack, rainbowTrail = old.rainbowTrail, homeEggs = old.homeEggs, merged = old.merged, keep = old.keep }
+		starterPack = old.starterPack, rainbowTrail = old.rainbowTrail, homeEggs = old.homeEggs, merged = old.merged, keep = old.keep, ridesDone = old.ridesDone }
 	local writes = {}
 	for _, other in otherStores do -- (the other worlds' pens, empty)
 		table.insert(writes, task.spawn(function()
