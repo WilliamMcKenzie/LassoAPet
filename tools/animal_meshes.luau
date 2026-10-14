@@ -17,6 +17,7 @@ local IDS = {
 	TreasureHermit_Crab_ClawL = 0,
 	TreasureHermit_Crab_ClawR = 0,
 	TreasureTurtle_Shell_root = 0, -- (the Treasure Turtle's shell, one smooth mesh: QM Oct 14)
+	TreasureTurtle_Sanddark_root = 0, -- (the sand island dome on its shell, QM Oct 14)
 	GhostShip_Deck_root = 0, -- (the Ghost Ship, on the pirate ship prop: QM Oct 14)
 	GhostShip_Flag_Flag = 0,
 	GhostShip_Flag_root = 0,
