@@ -2055,7 +2055,8 @@ if Config.World == 3 then
 	Config.RideSeconds = 60
 	for kind, stats in Config.AnimalStats do
 		Config.AnimalStats[kind] = table.clone(stats)
-		Config.AnimalStats[kind].Speed = stats.Speed * 33 / Config.RideSeconds * 0.5
+		-- (never slower than a Horse, or than it was: the starter crawled at a quarter speed, QM Oct 15)
+		Config.AnimalStats[kind].Speed = math.max(stats.Speed * 33 / Config.RideSeconds * 0.5, math.min(stats.Speed, 1))
 	end
 end
 
