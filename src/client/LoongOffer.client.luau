@@ -89,9 +89,9 @@ model.Parent = folder
 
 -- Its price and the prompt.
 local tag = Instance.new("BillboardGui")
-tag.Size = UDim2.fromScale(14, 3)
+tag.Size = UDim2.fromScale(28, 6) -- (2x: QM, Oct 15)
 local boxAt, box = model:GetBoundingBox()
-tag.StudsOffsetWorldSpace = Vector3.new(0, math.max(boxAt.Y + box.Y / 2 - at.Y, offer.Rise) + 2.5, 0) -- (over the Loong's head)
+tag.StudsOffsetWorldSpace = Vector3.new(0, math.max(boxAt.Y + box.Y / 2 - at.Y, offer.Rise) + 8, 0) -- (well over the Loong's head: QM, Oct 15, higher)
 tag.AlwaysOnTop = false
 tag.LightInfluence = 0
 tag.MaxDistance = 200
@@ -110,7 +110,7 @@ end
 workspace:GetAttributeChangedSignal("LoongLeft"):Connect(showLeft)
 showLeft()
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 3
+stroke.Thickness = 5
 stroke.Parent = label
 label.Parent = tag
 tag.Adornee = hub
