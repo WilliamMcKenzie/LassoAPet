@@ -2571,7 +2571,8 @@ function vfx.feed(cfg, n)
 	local feast = vfx.feastOf(mount)
 	local max = Config.TierGrowth ^ math.max(cfg.MaxTier - tierOf(mount.kind), 0)
 	if feast.size < max then
-		local size = math.min(feast.size * cfg.Grow ^ n, max)
+		-- (LinearGrow: the same step every animal, not compounding: the Robo Shark, QM Oct 15)
+		local size = math.min(if cfg.LinearGrow then feast.size + (cfg.Grow - 1) * n else feast.size * cfg.Grow ^ n, max)
 		local looming = vfx.sprintMount == mount and vfx.sprintKind == "Loom"
 		local special = Config.SprintSpecials[mount.kind]
 		local show = if looming and special then size * special.Grow else size -- (bigger still while it looms)
