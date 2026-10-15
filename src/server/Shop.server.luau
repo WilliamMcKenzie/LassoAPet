@@ -215,7 +215,7 @@ petSold = function(pet)
 		end))
 	end)
 end
-if Config.Podium.Hidden then
+if Config.Podium.Hidden and Config.PetOffersLimited then
 	for _, pet in Config.PetOffers do
 		showLeft(pet, nil)
 	end
@@ -262,7 +262,7 @@ local function record(userId, purchaseId, offer)
 		end
 		return true
 	end)
-	if ledger and fresh and petOfferOf[offer.Key] then
+	if ledger and fresh and petOfferOf[offer.Key] and Config.PetOffersLimited then
 		task.spawn(petSold, petOfferOf[offer.Key])
 	end
 	if ledger and fresh and offer.Key == "SpawnLoong" then

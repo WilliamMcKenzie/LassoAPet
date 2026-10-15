@@ -124,7 +124,7 @@ stroke.Thickness = 8
 stroke.Parent = label
 label.Parent = tag
 tag.Adornee = hub
-tag.Parent = hub
+tag.Parent = if Config.PetOffersLimited then hub else nil -- (no text over them now: QM, Oct 15)
 local prompt = Instance.new("ProximityPrompt")
 prompt.ActionText = "Buy " .. name
 prompt.ObjectText = if offer.Price > 0 then "R$" .. offer.Price else name
@@ -133,12 +133,12 @@ prompt.MaxActivationDistance = R
 prompt.RequiresLineOfSight = false
 prompt.Parent = hub
 local function promptOn()
-	prompt.Enabled = (workspace:GetAttribute(LEFT) or 1) > 0 -- (none at SOLD OUT)
+	prompt.Enabled = not Config.PetOffersLimited or (workspace:GetAttribute(LEFT) or 1) > 0 -- (none at SOLD OUT)
 end
 workspace:GetAttributeChangedSignal(LEFT):Connect(promptOn)
 promptOn()
 prompt.Triggered:Connect(function()
-	if (workspace:GetAttribute(LEFT) or 0) <= 0 then
+	if Config.PetOffersLimited and (workspace:GetAttribute(LEFT) or 0) <= 0 then
 		return -- (checked first: sold out)
 	elseif offer.ProductId ~= 0 then
 		MarketplaceService:PromptProductPurchase(player, offer.ProductId)

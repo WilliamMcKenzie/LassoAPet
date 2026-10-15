@@ -1683,6 +1683,8 @@ Config.AnimalScale.RoyalCnidarian = 2 -- (QM, Oct 15)
 Config.AnimalScale.GiantRafflesia = 2 -- the Garden's boss (QM, Oct 15)
 Config.AnimalScale.Loong = 4 -- (QM, Oct 15: "very tiny"; its breath still grows it from there)
 Config.AnimalScale.RoboShark = 4 -- (QM, Oct 15; its hunting still grows it from there)
+-- (QM, Oct 15: not limited any more, and no text over them: the Stock counts below are off)
+Config.PetOffersLimited = false
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
