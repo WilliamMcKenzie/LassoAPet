@@ -31,6 +31,7 @@ local NEAR = 30 -- studs from the gate: the Worlds menu's (no trail closer in)
 local function price()
 	return if REBIRTH then Config.Rebirth.Prices[(player:GetAttribute("Rebirths") or 0) + 1] else Config.WorldPrices[2]
 end
+local JOIN_GRACE = 15 -- s
 local PROMPT_EVERY = 300 -- s: a full World 2 bar pops the Worlds menu up at most this often (at the base, not riding)
 local MONTSERRAT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 
@@ -167,6 +168,7 @@ local function align()
 end
 
 local lastPrompt = -math.huge
+local joined = os.clock()
 RunService.RenderStepped:Connect(function()
 	align()
 	local owned = player:GetAttribute("OwnsWorld2") == true
@@ -178,6 +180,11 @@ RunService.RenderStepped:Connect(function()
 	end
 	-- The World 2 prompt (QM, Oct 14): full, at the base, the Worlds menu pops up (Buy, or its
 	-- X and play on); again PROMPT_EVERY s later if it's still not bought.
+	-- (Full already as you join, QM Oct 15: not straight away, but PROMPT_EVERY s in; your
+	-- gold can take a few seconds to arrive, so "as you join" is the first JOIN_GRACE s.)
+	if lastPrompt == -math.huge and os.clock() - joined < JOIN_GRACE and not owned and full() then
+		lastPrompt = os.clock()
+	end
 	if not owned and full() and gui.Enabled and os.clock() - lastPrompt > PROMPT_EVERY then
 		local menu = script.Parent:FindFirstChild("WorldsMenu")
 		local event = menu and menu:FindFirstChild("OpenWorldsMenu")
