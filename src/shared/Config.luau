@@ -1508,7 +1508,7 @@ Config.World3Pets = {
 	-- rarity, speeds +0.4 to +0.5; the giga rares and the Gigacorn slow trophies like the Garden's
 	-- (0.5) at 10x Candyland's Legendary.
 	GummyBear = { 8.4, 19200, 60 }, -- Common (guess)
-	YellowGummyBear = { 8.6, 19200, 60 }, -- Uncommon: the Gummy Bear in lemon, 1.5x its size (QM, Oct 15; numbers as the Gumdrop Frog's, guess)
+	YellowGummyBear = { 9.0, 48000, 240 }, -- Rare (QM): the Gummy Bear in lemon, 1.5x its size (QM, Oct 15; numbers as the Creampuff's, guess)
 	GreenGummyBear = { 9.0, 48000, 240 }, -- Rare: the Gummy Bear in lime, 2x its size (QM, Oct 15; numbers as the Creampuff's, guess)
 	GumdropFrog = { 8.6, 19200, 60 }, -- Uncommon (guess)
 	GingerbreadMan = { 8.6, 19200, 60 }, -- Uncommon (guess)
