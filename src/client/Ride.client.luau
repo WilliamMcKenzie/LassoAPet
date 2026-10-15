@@ -110,6 +110,7 @@ vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM,
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
 vfx.sprintTrail = require(script.Parent.SprintTrail) -- a white trail behind your mount while it sprints (QM, Oct 9)
 vfx.returnVignette = require(script.Parent.ReturnVignette) -- the run home's pulsing red edges (QM, Oct 9)
+vfx.huntVignette = require(script.Parent.HuntVignette) -- the Robo Shark's hunt: hard red edges (QM, Oct 15)
 vfx.homeBiome = {} -- [kind] = the index of the first biome whose herd lists it (the Horse: the Meadow)
 for b, biome in Config.Biomes do
 	for kind in biome.Herd or {} do
@@ -3190,6 +3191,8 @@ end
 local abilityMount -- the mount last frame: when it changes (lassoed a new one, thrown off), the old one's ability stops
 local function updateAbility(dt)
 	abilityClock += dt
+	local hunting = mount and mount.ability and mount.ability.active
+	vfx.huntVignette.update(dt, hunting ~= nil and hunting.cfg.Kind == "Hunt")
 	if abilityMount and abilityMount ~= mount then
 		endAbility(abilityMount)
 	end
