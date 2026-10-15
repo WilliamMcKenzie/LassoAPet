@@ -84,7 +84,7 @@ def build():
             g.spike(arm, "Twig" + side, hand + np.array(dd) * 0.8, dd, 1.2, 0.3, "barkdark", shaft=1.2)
         g.box(arm, "ElbowTwig" + side, el + (0, 1.2, 0), (0.6, 2.4, 0.6), "barkdark", Rm(("z", -s * 20)))
         g.hull(arm, "ElbowLeaf" + side, G.ellipsoid(el + (s * -0.4, 2.6, 0), (1.2, 0.9, 1.1), seg=7, rings=3), "leaf")
-        for k, (dx, dy, dz, r) in enumerate(((0.4, 1.8, -0.6, 1.8), (1.6, 1.4, 0.8, 1.6), (-0.2, 1.6, 1.4, 1.5))):
+        for k, (dx, dy, dz, r) in enumerate(((0.4, 1.2, -0.6, 1.8), (1.6, 0.9, 0.8, 1.6), (-0.2, 1.0, 1.4, 1.5))):
             g.hull(arm, "ShoulderLeaf" + side, G.ellipsoid(sh + (s * dx, dy, dz), (r, r * 0.8, r), seg=7, rings=3), "leaf")
     # canopy (QM Oct 15: "the whole tree foliage could be one mesh"): faceted leafy clumps, all one colour, so
     # they merge into one MeshPart, pink blossoms half sunk into them (one more mesh)

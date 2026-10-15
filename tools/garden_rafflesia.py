@@ -1,10 +1,9 @@
 """Rafflesia Beast: World 3 Garden giga rare (draft, Oct 14; about 1 in 1,000). A hulking
 moss-green beast carrying a giant corpse flower on its back: five huge warty red-orange petals
 spread over it like a saddle cloth, a dark maroon well in the middle ringed by a cream rim and
-bristling with pyramid spines (you ride in the well). Oct 15 (QM: "with some mesh usage"): petals, warts,
-rim, well, neck frill and the tail vine and bud are low-poly meshes; body, head and legs stay blocks. Four thick root legs with pyramid root-claws,
-a broad head with two googly eyes, a wide grin of pyramid fangs, a frill of small red petals round
-its neck, vines hanging from the petal tips, and a heavy vine tail ending in a fat bud.
+bristling with pyramid spines (you ride in the well). Oct 15 (QM: "with some mesh usage"): petals (thick, drooping),
+warts, rim, well and the tail vine and bud are low-poly meshes (petal-tip vines and the neck frill cut); body, head and legs stay blocks. Four thick root legs with pyramid root-claws,
+a broad head with two googly eyes, a wide grin of pyramid fangs,  a heavy vine tail ending in a fat bud.
 
 Run: python3 tools/garden_rafflesia.py [--gif]
 Bones (all rest 0): root -> neck -> Jaw; Petal1..5; Tail; LegFL/FR/HL/HR.
@@ -47,7 +46,6 @@ def build():
         a = TAU * (k + 0.5) / 7
         g.pyr(root, "Spine", fc + (2.4 * np.sin(a), 1.3, 2.4 * np.cos(a)), (0.25 * np.sin(a), 1, 0.25 * np.cos(a)),
               1.6, 0.35, 0.35, "spine")
-    R_ = np.array((5.0, 0.7, 6.2))
     for i in range(5):
         ang = 72 * i  # 0 = straight back; the front (the head) falls between two petals
         a = np.radians(ang)
@@ -57,14 +55,19 @@ def build():
         M = Rm(("y", ang), ("x", -8))  # local +z out along the petal, cupped a little up
         def P(p):
             return pivot + M @ np.array(p, float)
-        g.hull(node, f"Petal{i + 1}", G.ellipsoid(P((0, 0, 6.0)), R_, seg=10, rings=4, M=M), "petal")
-        for (x, z, sz) in ((-2.6, 3.0, 1.4), (2.4, 3.8, 1.6), (-0.4, 6.0, 1.3), (2.8, 7.6, 1.1), (-2.6, 8.0, 1.2), (0.4, 10.0, 1.1)):
-            ys = R_[1] * np.sqrt(max(0.0, 1 - (x / R_[0]) ** 2 - ((z - 6.0) / R_[2]) ** 2))
-            g.hull(node, f"Wart{i + 1}", G.ellipsoid(P((x, ys, z)), (sz / 2, 0.3, sz / 2), seg=6, rings=2, M=M), "wart")
-        # a vine hanging off the tip
-        tip = P((0, -0.4, 11.4))
-        g.box(node, f"Vine{i + 1}", tip + (0, -1.6, 0), (0.5, 3.2, 0.5), "vine")
-        g.box(node, f"VineLeaf{i + 1}", tip + (0.5, -2.8, 0), (1.2, 0.3, 0.7), "mosslight", Rm(("z", -25)))
+        # two thick lobes: the inner one cupped up, the outer one drooping over the body's edge
+        Md = M @ Rm(("x", 22))
+        hinge = np.array([0, 0, 6.0])
+        def Pd(p):
+            return pivot + M @ hinge + Md @ (np.array(p, float) - hinge)
+        g.hull(node, f"Petal{i + 1}", G.ellipsoid(P((0, 0, 3.6)), (4.4, 1.2, 3.9), seg=10, rings=4, M=M), "petal")
+        g.hull(node, f"Petal{i + 1}", G.ellipsoid(Pd((0, 0, 8.4)), (5.0, 1.1, 4.0), seg=10, rings=4, M=Md), "petal")
+        for (x, z, sz, f, rr, cz) in ((-2.4, 2.6, 1.4, P, (4.4, 1.2, 3.9), 3.6), (2.2, 3.8, 1.6, P, (4.4, 1.2, 3.9), 3.6),
+                                      (-0.4, 5.2, 1.3, P, (4.4, 1.2, 3.9), 3.6), (2.6, 8.0, 1.1, Pd, (5.0, 1.1, 4.0), 8.4),
+                                      (-2.6, 8.6, 1.2, Pd, (5.0, 1.1, 4.0), 8.4), (0.4, 10.6, 1.1, Pd, (5.0, 1.1, 4.0), 8.4)):
+            ys = rr[1] * np.sqrt(max(0.0, 1 - (x / rr[0]) ** 2 - ((z - cz) / rr[2]) ** 2))
+            g.hull(node, f"Wart{i + 1}", G.ellipsoid(f((x, ys, z)), (sz / 2, 0.3, sz / 2), seg=6, rings=2,
+                                                     M=M if f is P else Md), "wart")
     # head: broad, low, eyes on top corners, a grin of fangs; the jaw drops in the gallop
     neck = g.group("neck", (0, y0 + 0.5, -8.6), root)
     hy, hz = y0 + 1.0, -12.0
@@ -84,13 +87,6 @@ def build():
     for k in range(5):
         x = -2.8 + 5.6 * k / 4
         g.pyr(jaw, "LowFang", (x, hy - 1.8, hz - 3.0), (0, 1, 0), 1.0 if k in (0, 4) else 0.7, 0.35, 0.2, "tooth")
-    # neck frill: small red petals (pyramids) round the back of the head
-    for k in range(9):
-        a = np.radians(-80 + 160 * k / 8)
-        d = np.array([np.sin(a), np.cos(a) * 0.9 + 0.2, 0.6])
-        d /= np.linalg.norm(d)
-        g.hull(neck, "Frill", G.leaf((np.sin(a) * 4.4, hy + 0.5 + np.cos(a) * 2.6, hz + 3.6), d, (0, 0, 1), 3.0, 2.2, 0.3),
-               "petal" if k % 2 else "bud")
     # legs: thick root columns, a knee band, pyramid root-claws
     for nm, (x, z) in (("FL", (-1, -6.0)), ("FR", (1, -6.0)), ("HL", (-1, 6.5)), ("HR", (1, 6.5))):
         leg = g.group("Leg" + nm, (x * 5.0, y0 - 3.0, z), root)
