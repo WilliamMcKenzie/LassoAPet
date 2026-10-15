@@ -1932,7 +1932,7 @@ if Config.World == 3 then
 			Swerve = 1,
 			NestScale = 2,
 			Length = 3632, -- (2x the Desert's 1816)
-			GroundColors = { rgb(76, 170, 52), rgb(68, 156, 46) },
+			GroundColors = { rgb(122, 165, 83), rgb(135, 177, 84) }, -- the dark lawn (QM, Oct 15)
 			WallColors = { rgb(68, 106, 84), rgb(68, 115, 90) }, -- (QM, Oct 15)
 			CapColor = rgb(150, 164, 115), -- (QM, Oct 15; was #3E634E, pink before that)
 			-- (Oct 14, the Garden animals thread: weights as the Crimson Lands' by rarity, guesses; its
