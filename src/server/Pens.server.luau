@@ -12,7 +12,7 @@ game:GetService("StarterPlayer").CharacterWalkSpeed = Config.WalkSpeed
 
 local folder = workspace:WaitForChild("Pens")
 local pens = {}
-for i = 1, 5 do
+for i = 1, Config.PenCount do -- (10 in the Halloween world: QM, Oct 15)
 	pens[i] = folder:WaitForChild("Pen" .. i)
 end
 

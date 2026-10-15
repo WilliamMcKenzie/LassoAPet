@@ -149,7 +149,9 @@ function Funnel.start(player, profile, isNew)
 		log(player, BIOMES, player.UserId .. ":w" .. WORLD, "b", 1, "w" .. WORLD, true)
 	end
 	s.arrivedAt = os.clock()
-	log(player, WORLDS, tostring(player.UserId), "worlds", ARRIVED[WORLD], "w" .. WORLD, true)
+	if ARRIVED[WORLD] then -- (not the Halloween world's)
+		log(player, WORLDS, tostring(player.UserId), "worlds", ARRIVED[WORLD], "w" .. WORLD, true)
+	end
 	if WORLD == 3 and not isNew then
 		log(player, WORLDS, tostring(player.UserId), "worldsBack", 8, "w3", true) -- (a later session in World 3)
 	end

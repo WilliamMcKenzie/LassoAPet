@@ -1364,7 +1364,12 @@ Config.WaterSink = { Water = 0.3, DeepWater = 0.5, Rate = 6 }
 -- Worlds (QM, Oct 13): each is its own Place in the experience, running this same code.
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
 Config.Places = { 126872244121414, 139418530058790, 117724433633972 } -- [world] = its PlaceId (World 3: QM, Oct 14, a copy of World 2 for now; not for sale yet, so no way in)
-Config.World = table.find(Config.Places, game.PlaceId) or 1
+-- The Halloween event world (QM, Oct 15: a copy of World 1 for now, 10 players, its own saves):
+-- World 4, outside Config.Places so the Worlds menu and the top bar don't list it yet.
+Config.HalloweenPlace = 139057235302936
+Config.World = table.find(Config.Places, game.PlaceId) or (if game.PlaceId == Config.HalloweenPlace then 4 else 1)
+-- Pens in the base (Server/Pens): one per player.
+Config.PenCount = if Config.World == 4 then 10 else 5
 -- (World 1 ended at a giant portal to World 2 for a while: QM, Oct 13 took it out. Both
 -- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
 Config.EndPortal = nil
@@ -1735,6 +1740,7 @@ Config.BiomeNames = {
 	{ "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" },
 	{ "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
 	{ "Pirate Cove", "Garden", "Candyland", "Cnidaria" },
+	{ "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" }, -- (Halloween: World 1's for now)
 }
 
 -- World 2's look: its first biome and base as QM's reference (marble walls, yellow
