@@ -319,7 +319,7 @@ def pirate_cove():
 
 
 def garden():
-    """Rich soil sunk a stud, dark lawn, bright lawn a stud up, and raised flowerbeds two up
+    """Dark lawn (no soil: QM, Oct 15), bright lawn a stud up, and raised flowerbeds two up
     ringed by the bright lawn. 5 angles (stars: formal beds). A flagstone path winds down
     the course a stud up, bright lawn either side."""
     b = Biome(1, [
@@ -348,6 +348,11 @@ def garden():
     b.rung = np.where(path, 4, np.where(b.rung == 3, 3, step))
     b.rung = despeck(b.rung, b.inside & ~path)
     check(b, ladder)
+    # No soil (QM, Oct 15: "get rid of the dirt patches"; Studio a4ee735/90f9c0b): it becomes dark lawn,
+    # after the layout so the rest stays as approved.
+    b.rung = np.maximum(b.rung, 1) - 1
+    b.tiles = b.tiles[1:]
+    ladder = [0, 1, 2, 2]
     walls = dict(wall=[rgb("23561F"), rgb("1E4A1B")], cap=rgb("FF78AA"), gate=rgb("FF5CAA"))  # dark hedge (the lawn's green hid the edge), blossom top
     return b, walls, ladder
 
