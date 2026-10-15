@@ -85,6 +85,12 @@ list.AutomaticCanvasSize = Enum.AutomaticSize.Y
 list.CanvasSize = UDim2.new()
 list.ScrollingDirection = Enum.ScrollingDirection.Y
 list.Parent = page
+-- (room round the grid for a pet growing as it's hovered, ButtonHover: the list crops at its edges)
+local pad = Instance.new("UIPadding")
+for _, side in { "PaddingTop", "PaddingBottom", "PaddingLeft", "PaddingRight" } do
+	pad[side] = UDim.new(0, 12)
+end
+pad.Parent = list
 local grid = Instance.new("UIGridLayout")
 grid.CellSize = UDim2.fromOffset(CELL, CELL)
 grid.CellPadding = UDim2.fromOffset(GAP, GAP)
