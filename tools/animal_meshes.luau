@@ -60,6 +60,27 @@ local IDS = {
 	SunflowerLion_Seed_Tail = 82159190123765,
 	SunflowerLion_Seeddark_Mane = 92069771151078,
 	SunflowerLion_Seeddark_Tail = 138276175726502,
+	RafflesiaBeast_Bud_Tail = 0, -- (the Rafflesia Beast with meshes, QM Oct 15)
+	RafflesiaBeast_Bud_neck = 0,
+	RafflesiaBeast_Petal_Petal1 = 0,
+	RafflesiaBeast_Petal_Petal2 = 0,
+	RafflesiaBeast_Petal_Petal3 = 0,
+	RafflesiaBeast_Petal_Petal4 = 0,
+	RafflesiaBeast_Petal_Petal5 = 0,
+	RafflesiaBeast_Petal_neck = 0,
+	RafflesiaBeast_Petaldark_root = 0,
+	RafflesiaBeast_Rim_root = 0,
+	RafflesiaBeast_Vine_Tail = 0,
+	RafflesiaBeast_Wart_Petal1 = 0,
+	RafflesiaBeast_Wart_Petal2 = 0,
+	RafflesiaBeast_Wart_Petal3 = 0,
+	RafflesiaBeast_Wart_Petal4 = 0,
+	RafflesiaBeast_Wart_Petal5 = 0,
+	RafflesiaBeast_Well_root = 0,
+	AncientTreant_Blossom_neck = 0, -- (the Ancient Treant's foliage as one mesh, QM Oct 15)
+	AncientTreant_Leaf_ArmL = 0,
+	AncientTreant_Leaf_ArmR = 0,
+	AncientTreant_Leaf_neck = 0,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then

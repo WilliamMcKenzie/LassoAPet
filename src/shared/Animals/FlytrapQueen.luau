@@ -6,6 +6,6 @@ local Horse = require(script.Parent.Horse)
 local FlytrapQueenModel = require(script.Parent.Parent.Bosses.FlytrapQueenModel)
 
 return Horse.variant("FlytrapQueen", FlytrapQueenModel, "Legendary", {
-	seat = Vector3.new(0, 12.0, 3.0),
-	neck = { center = Vector3.new(0, 13.8, 0.5), radius = 2.0 },
+	seat = Vector3.new(0, 11.2, 3.0),
+	neck = { center = Vector3.new(0, 13.0, -2.0), radius = 2.0 },
 })
