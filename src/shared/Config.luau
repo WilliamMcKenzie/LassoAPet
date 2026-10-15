@@ -1569,6 +1569,37 @@ for kind, w3 in Config.World3Pets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = w3[2], w3[3]
 	Config.AnimalStats[kind] = { Speed = w3[1], Stamina = 3 }
 end
+-- Worlds 2 and 3 earn World 1's gold a second (QM, Oct 15: "copy world 1 as closely as possible";
+-- theirs were placeholders): each biome k's animals, lowest to highest, get World 1's biome k
+-- incomes at the same place in its range (as paid, after the curve above), and its 1-in-1,000
+-- trophies 2x that biome's best. World 1's own animals (the Bunny, Rhino) and the Loong keep theirs;
+-- the scrapped Swoll Fairy, Abyssal Dragon and Gigacorn trophy as their biome's, for saved ones.
+Config.IncomeCopy = {
+	AbyssalDragon = 7400, AncientTreant = 1500, Anomalocaris = 225, Asura = 240, BananaMonkey = 13, Beholder = 750,
+	Bes = 4800, BlackWidow = 1500, BloatedMummy = 1050, BlueCrystal = 91, BlueRingOctopus = 385, BoxJellyfish = 385,
+	BrownMushroom = 180, Buffalo = 20, Bumblebee = 18, Caterpillar = 45, Catfish = 555, Creampuff = 180,
+	CrimsonScorpion = 24, CrimsonSeraph = 1500, Crocodile = 13, CrystalCentipede = 45, CrystalElephant = 2000, CrystalPhoenix = 760,
+	CrystalSeraph = 4000, CrystalSpider = 760, DesireTroll = 2000, EagleSentry = 2900, EyepatchShark = 74, Eyeworm = 18,
+	Fox = 555, GarnetStatue = 1400, Geb = 4800, GhostShip = 900, GiantGolem = 3700, GiantRafflesia = 1500,
+	Gigacorn = 4000, GingerbreadMan = 45, GreenCrab = 9, GreenGummyBear = 180, GumballGolem = 4000, GumdropFrog = 45,
+	GummyBear = 45, Hawkmoth = 680, IvorySpider = 180, JadeStatue = 1400, JollyRogerWyvern = 900, Kitsune = 2100,
+	Ladybug = 18, LimeCrab = 13, Lion = 13, LionArcher = 1950, LivingBirch = 385, MajesticUnicorn = 450,
+	ManOWar = 680, MarbleColossus = 74, MarbleFish = 9, Maw = 60, Mermaid = 3700, MoonJellyfish = 45,
+	NineTailedFox = 925, Nut = 4800, OrangeButterfly = 385, Parrot = 13, PinkButterfly = 225, PinkCrystal = 180,
+	PurpleMushroom = 760, RafflesiaBeast = 1500, RedMushroom = 91, ReefTitan = 7400, RockCandyDragon = 4000, RollingLog = 385,
+	RoyalCnidarian = 7400, Scarab = 1050, Seraph = 900, SunflowerLion = 750, SwollFairy = 760, Tiger = 925,
+	ToadstoolFrog = 48, TombJackal = 1950, TreasureHermit = 20, TreasureTurtle = 450, VenusFlytrap = 200, VineMonster = 48,
+	YellowGummyBear = 180,
+}
+for kind, gold in Config.IncomeCopy do
+	Config.PetIncome[kind] = gold
+	if Config.World2Pets[kind] then
+		Config.World2Pets[kind][2] = gold
+	end
+	if Config.World3Pets[kind] then
+		Config.World3Pets[kind][2] = gold
+	end
+end
 local baseIncome = table.clone(Config.PetIncome) -- (World 1's, before World 2 changes its own)
 function Config.incomeIn(world, kind)
 	local own = (world == 2 and Config.World2Pets[kind]) or (world == 3 and Config.World3Pets and Config.World3Pets[kind])
