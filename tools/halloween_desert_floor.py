@@ -6,7 +6,8 @@ Run: python3 tools/halloween_desert_floor.py [desert|tundra] [out_dir]
      first) and writes tools/halloween_<biome>_floor.luau (template halloween_floor_biome.luau.in).
 
 The Tundra the same way in QM's autumn colours (Oct 15, his harvest picture): tan
-flagstones down the middle, sage green along the walls, brown patches inside the green.
+flagstones down the middle, then green and brown randomly mixed along the walls (QM: "no
+real rules to how its layered"), so the brown can meet the tan.
 
 His picture: pale flagstones down the middle, ragged patches of a darker flagstone mostly
 along the walls (a few out in the middle), and the darkest slate in small patches inside
@@ -33,7 +34,7 @@ BIOMES = {
         "Stone": [(104, 154, 186), (96, 146, 178)],  # darker flagstone
         "Grass": [(86, 122, 150), (78, 114, 142)],  # slate
     }),
-    "tundra": dict(name="Tundra", z0=-2168 - 1816, length=1920, seed=53, colours={  # (Config World 4 Tundra: Studio adds)
+    "tundra": dict(name="Tundra", z0=-2168 - 1816, length=1920, seed=53, mixed=True, colours={  # (Config World 4 Tundra: Studio adds)
         "Ground": [(214, 184, 134), (204, 174, 124)],  # tan
         "Grass": [(136, 156, 104), (126, 146, 96)],  # sage green
         "Dirt": [(160, 112, 74), (148, 102, 66)],  # brown
@@ -111,6 +112,10 @@ def layout(seed=B["seed"]):
     kind = np.full((NX, NZ), PALE)
     kind[mid] = MID
     kind[slate] = SLATE
+    if B.get("mixed"):  # (the wall bands green and brown mixed any old how)
+        kind[mid] = MID
+        kind[mid & no_specks(noise(NX, NZ, 14, seed + 4) > 0.5)] = SLATE
+        return kind
     for _ in range(6):  # (a middle-tone cell in no 2x2 of its own: whichever side it can join)
         sp = specks(kind == MID)
         if not sp.any():
@@ -174,8 +179,8 @@ def main():
     out = args[0] if args else "/mnt/project-files/biomes/halloween_" + KEY
     os.makedirs(out, exist_ok=True)
     kind = layout()
-    assert check(kind) == 0, "pale touches slate"
-    for k in (PALE, MID, SLATE):
+    assert B.get("mixed") or check(kind) == 0, "pale touches slate"
+    for k in ((PALE,) if B.get("mixed") else (PALE, MID, SLATE)):
         assert not specks(kind == k).any(), f"specks of {k}"
     render(kind, os.path.join(out, "halloween_%s.png" % KEY))
     rows = ['\t{ "%s", %d, %d, %d, %d },' % p for p in parts(kind)]
