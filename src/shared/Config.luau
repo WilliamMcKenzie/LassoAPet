@@ -1700,6 +1700,11 @@ Config.PetNames = {
 -- Every pet ridden in a world not its own runs at a Horse's speed there (QM, Oct 15; World 2's
 -- kept theirs in World 3 before), but these keep theirs everywhere (QM: the Robux pets).
 Config.CrossWorldExempt = { Loong = true, RoboShark = true, SnackYak = true }
+-- (and the same speed in every world, whatever a world does to the rest: QM, Oct 15; put back at the end)
+local EXEMPT_STATS = {}
+for kind in Config.CrossWorldExempt do
+	EXEMPT_STATS[kind] = Config.AnimalStats[kind] and table.clone(Config.AnimalStats[kind])
+end
 -- (World 1's animals World 2's Meadow has too: World 1's own as well)
 local SHARED = { Bunny = true, Rhino = true, Fish = true }
 -- Whether `kind` is one of `world`'s own animals.
@@ -2281,6 +2286,12 @@ if Config.World == 3 then
 		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind])
 		Config.AnimalStats[kind].Speed *= 1.2
 	end
+end
+
+-- The Loong, Robo Shark and Snack Yak run as they do in World 1 in every world (QM, Oct 15: "the same
+-- speed everywhere"), past every world's own rescaling above.
+for kind, stats in EXEMPT_STATS do
+	Config.AnimalStats[kind] = table.clone(stats)
 end
 
 return Config
