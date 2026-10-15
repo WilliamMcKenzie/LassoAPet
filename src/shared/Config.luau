@@ -1860,7 +1860,15 @@ if Config.World == 2 then
 	-- marble a stud up, ponds a stud and two down (their flowing water: tools/world2_water.luau).
 	local temple = Config.Biomes[5]
 	temple.Herd = table.clone(temple.Herd)
-	temple.Herd.Loong = 0.025 -- the Loong runs wild here as a Legendary (QM, Oct 13)
+	do -- the Loong runs wild here (QM, Oct 13), 1 in 4,000 of the stampede (QM, Oct 15: was 0.025, now it's sold at World 1's base)
+		local others = 0
+		for kind, weight in temple.Herd do
+			if kind ~= "Loong" then
+				others += weight
+			end
+		end
+		temple.Herd.Loong = others / 3999
+	end
 	temple.Herd.Catfish = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
 	temple.Herd.Tiger = 0.17 -- the Temple's Rare (QM, Oct 13), as often as the Fire Lobster
 	temple.Herd.JadeStatue = 0.13 -- the Jade and Garnet Statues (QM, Oct 13), Epics as often as the Rockworm
