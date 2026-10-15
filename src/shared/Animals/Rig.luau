@@ -18,6 +18,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Studs = require(script.Parent.Parent.Studs)
+local Config = require(script.Parent.Parent.Config)
 
 local Rig = {}
 
@@ -231,7 +232,10 @@ function Rig.fromData(data, name, studTexture, size)
 		if size ~= 1 then
 			model:ScaleTo(size)
 			if studTexture then
-				Studs.fit(model, studTexture.tile * size) -- (the material's studs don't scale with it)
+				-- (the material's studs don't scale with it; Config.FineStuds kinds keep their
+				-- unscaled size's studs, so a bigger recolour reads as glossy as its original)
+				local studScale = if Config.FineStuds[name] then size / (Config.AnimalScale[name] or 1) else size
+				Studs.fit(model, studTexture.tile * studScale)
 			end
 		end
 		template = { model = model, pivots = pivots }

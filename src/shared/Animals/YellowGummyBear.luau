@@ -1,6 +1,6 @@
 -- Yellow Gummy Bear: World 3 Candyland's Rare (QM, Oct 15): the Gummy Bear in lemon, 1.5x its size (Config.AnimalScale). A chunky cherry gummy bear on all fours with a
 -- lighter strawberry belly and muzzle, round ears and front-facing googly eyes. You ride on its back.
--- designs/candyland/YellowGummyBear.bbmodel (tools/gummy_recolors.py recolours QM's GummyBear.bbmodel), converted (no --zyx) into YellowGummyBearModel.luau by
+-- designs/candyland/YellowGummyBear.bbmodel (tools/gummy_recolors.py recolours QM's GummyBear.bbmodel), converted (--zyx, as QM's Gummy Bear) into YellowGummyBearModel.luau by
 -- tools/bbmodel_to_luau.py.
 
 local Horse = require(script.Parent.Horse)

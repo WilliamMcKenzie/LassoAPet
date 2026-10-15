@@ -6,8 +6,8 @@ with its palette's cherry and strawberry pinks swapped for lemon or lime. Sizes 
 rarities are in Config.
 
 Run: python3 tools/gummy_recolors.py
-Convert: python3 tools/bbmodel_to_luau.py designs/candyland/YellowGummyBear.bbmodel src/shared/Animals/YellowGummyBearModel.luau
-         python3 tools/bbmodel_to_luau.py designs/candyland/GreenGummyBear.bbmodel src/shared/Animals/GreenGummyBearModel.luau
+Convert: python3 tools/bbmodel_to_luau.py --zyx designs/candyland/YellowGummyBear.bbmodel src/shared/Animals/YellowGummyBearModel.luau
+         python3 tools/bbmodel_to_luau.py --zyx designs/candyland/GreenGummyBear.bbmodel src/shared/Animals/GreenGummyBearModel.luau
 """
 
 import base64
