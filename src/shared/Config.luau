@@ -1974,18 +1974,18 @@ if Config.World == 3 then
 			Swerve = 1,
 			NestScale = 2.25,
 			Length = 3840, -- (2x the Tundra's 1920)
-			GroundColors = { rgb(240, 96, 158), rgb(226, 82, 146) },
-			WallColors = { rgb(255, 170, 210), rgb(245, 155, 198) },
-			CapColor = rgb(255, 255, 255),
+			GroundColors = { rgb(245, 153, 175), rgb(252, 172, 187) }, -- (QM, Oct 15)
+			WallColors = { rgb(233, 110, 144), rgb(236, 121, 152) }, -- (QM, Oct 15)
+			CapColor = Color3.fromHex("FEEDCF"), -- (QM, Oct 15)
 			-- (Oct 14, the Candyland animals thread: weights as the Pirate Cove's by rarity, guesses;
 			-- its giga rares and the Gigacorn added below)
 			Herd = { GummyBear = 0.3, YellowGummyBear = 0.05, GreenGummyBear = 0.05, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, DesireTroll = 0.03 }, -- (no Swoll Fairy: scrapped, QM Oct 15; its stats, egg and headshot stay for saved ones)
 			Patches = {
 				Chocolate = { rgb(110, 62, 40), rgb(98, 54, 34) },
-				Cream = { rgb(255, 236, 200), rgb(248, 224, 184) },
-				Mint = { rgb(130, 236, 196), rgb(116, 224, 182) },
-				Stripe = { rgb(240, 60, 80), rgb(220, 52, 70) },
-				Icing = { rgb(255, 245, 245), rgb(245, 232, 234) },
+				Cream = { rgb(244, 212, 158), rgb(250, 221, 169) }, -- (QM, Oct 15)
+				Mint = { rgb(121, 230, 205), rgb(109, 223, 198) }, -- (QM, Oct 15)
+				Stripe = { rgb(249, 94, 129), rgb(250, 98, 132) }, -- (QM, Oct 15)
+				Icing = { rgb(254, 234, 201), rgb(253, 230, 197) }, -- (QM, Oct 15)
 			},
 			GateColor = rgb(140, 240, 220),
 		},
