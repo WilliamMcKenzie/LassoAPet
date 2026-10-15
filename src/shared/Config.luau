@@ -2184,10 +2184,8 @@ if Config.World == 4 then
 		Dirt = { rgb(160, 112, 74), rgb(148, 102, 66) },
 	}
 	patch.Haze, patch.Depths, patch.Sky = nil, nil, nil
+	patch.Herd = {} -- (empty till its own animals are in: QM, Oct 15, every World 1 animal scrapped here; was the Tundra's)
 	patch.Length = 256 -- (one chunk: past the cut it's all chunks)
-	-- No animals in the Pumpkin Patch yet (QM, Oct 15: World 1's scrapped from here, its own
-	-- Halloween ones to come): an empty stampede, no nest eggs.
-	patch.Herd = {}
 	Config.Biomes = { meadow, desert, patch }
 	Config.CourseLength = meadow.Length + desert.Length + patch.Length
 	Config.Endless = { Cut = -(meadow.Length + desert.Length), Length = 256, Chunks = "PumpkinPatchChunks" } -- (3984: a whole 16)

@@ -44,8 +44,6 @@ return {
 		{ name = "LInsideBottomCornerLB", bone = "bottom", class = "WedgePart", size = Vector3.new(0.02, 0.6, 0.6), cframe = CFrame.new(-0.72, 1.83857, 0.72, 0, 0, 1, 1, 0, 0, 0, 1, 0), color = Color3.fromRGB(0, 0, 0), plain = true },
 		{ name = "LInsideBottomCornerRF", bone = "bottom", class = "WedgePart", size = Vector3.new(0.02, 0.6, 0.6), cframe = CFrame.new(0.72, 1.83857, -0.72, 0, 0, -1, 1, 0, 0, 0, -1, 0), color = Color3.fromRGB(0, 0, 0), plain = true },
 		{ name = "LInsideBottomCornerRB", bone = "bottom", class = "WedgePart", size = Vector3.new(0.02, 0.6, 0.6), cframe = CFrame.new(0.72, 1.83857, 0.72, 0, 1, 0, 1, 0, 0, 0, 0, -1), color = Color3.fromRGB(0, 0, 0), plain = true },
-		{ name = "Plaque", bone = "bottom", class = "Part", size = Vector3.new(0.8, 0.5, 0.07), cframe = CFrame.new(0, 1.45, -1.225, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(60, 72, 86) },
-		{ name = "Letters", bone = "bottom", class = "Part", size = Vector3.new(0.56, 0.1, 0.04), cframe = CFrame.new(0, 1.45, -1.27, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(230, 240, 236) },
 		{ name = "L4Mid", bone = "top", class = "Part", size = Vector3.new(2.2, 0.4571, 1), cframe = CFrame.new(0, 2.05714, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(170, 182, 190) },
 		{ name = "L4Front", bone = "top", class = "Part", size = Vector3.new(1, 0.4571, 0.6), cframe = CFrame.new(0, 2.05714, -0.8, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(170, 182, 190) },
 		{ name = "L4Back", bone = "top", class = "Part", size = Vector3.new(1, 0.4571, 0.6), cframe = CFrame.new(0, 2.05714, 0.8, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(170, 182, 190) },
@@ -74,10 +72,10 @@ return {
 		{ name = "LInsideTopCornerLB", bone = "top", class = "WedgePart", size = Vector3.new(0.02, 0.6, 0.6), cframe = CFrame.new(-0.72, 1.81857, 0.72, 0, 0, 1, 1, 0, 0, 0, 1, 0), color = Color3.fromRGB(0, 0, 0), plain = true },
 		{ name = "LInsideTopCornerRF", bone = "top", class = "WedgePart", size = Vector3.new(0.02, 0.6, 0.6), cframe = CFrame.new(0.72, 1.81857, -0.72, 0, 0, -1, 1, 0, 0, 0, -1, 0), color = Color3.fromRGB(0, 0, 0), plain = true },
 		{ name = "LInsideTopCornerRB", bone = "top", class = "WedgePart", size = Vector3.new(0.02, 0.6, 0.6), cframe = CFrame.new(0.72, 1.81857, 0.72, 0, 1, 0, 1, 0, 0, 0, 0, -1), color = Color3.fromRGB(0, 0, 0), plain = true },
-		{ name = "EyeL", bone = "top", class = "Part", size = Vector3.new(0.34, 0.34, 0.06), cframe = CFrame.new(-0.27, 2.4, -0.92, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilL", bone = "top", class = "Part", size = Vector3.new(0.17, 0.17, 0.04), cframe = CFrame.new(-0.27, 2.37, -0.96, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(24, 22, 30), plain = true },
-		{ name = "EyeR", bone = "top", class = "Part", size = Vector3.new(0.34, 0.34, 0.06), cframe = CFrame.new(0.27, 2.4, -0.92, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilR", bone = "top", class = "Part", size = Vector3.new(0.17, 0.17, 0.04), cframe = CFrame.new(0.27, 2.37, -0.96, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(24, 22, 30), plain = true },
+		{ name = "Cross", bone = "top", class = "Part", size = Vector3.new(0.24, 1.1143, 0.2), cframe = CFrame.new(0, 1.92857, -1.15, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(112, 124, 136) },
+		{ name = "CrossBar", bone = "top", class = "Part", size = Vector3.new(0.8, 0.25, 0.2), cframe = CFrame.new(0, 2.05357, -1.15, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(112, 124, 136) },
+		{ name = "MossL", bone = "top", class = "Part", size = Vector3.new(0.4, 0.25, 0.8), cframe = CFrame.new(-0.8, 2.41071, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(90, 200, 120) },
+		{ name = "MossR", bone = "top", class = "Part", size = Vector3.new(0.4, 0.25, 0.8), cframe = CFrame.new(0.8, 2.41071, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(90, 200, 120) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
 	animations = {
