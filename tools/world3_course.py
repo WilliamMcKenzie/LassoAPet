@@ -361,14 +361,37 @@ def garden():
     return b, walls, ladder
 
 
-def candy_props():
-    """The Candyland props as placed (tools/world3_props.luau): (name, x, z, footprint radius)."""
-    out = []
+def candy_props(dump="/mnt/project-files/world3_candy_props.json"):
+    """The Candyland props where they stand (Studio's dump of the live World 3 when there is one,
+    QM's hand edits included; else tools/world3_props.luau): (name, x, z, footprint radius)."""
+    size = {}
+    rows = []
     for line in open(os.path.join(HERE, "world3_props.luau")):
         if line.strip().startswith('{ "Candyland"'):
             f = [t.strip().strip('"') for t in line.strip().strip("{},").split(",")]
-            out.append((f[1], float(f[2]), float(f[4]), max(float(f[7]), float(f[8])) / 2))
-    return out
+            size[f[1]] = max(float(f[7]), float(f[8])) / 2
+            rows.append((f[1], float(f[2]), float(f[4])))
+    if os.path.exists(dump):
+        import json
+        d = json.load(open(dump))
+        d = d.get("props", d) if isinstance(d, dict) else d
+        rows = []
+        for r in d:
+            pos = r.get("pivot") or r.get("pos") or [r["x"], r.get("y", 0), r["z"]]
+            rows.append((r["name"], float(pos[0]), float(pos[2])))
+    return [(n, x, z, size.get(n, 6.0)) for n, x, z in rows]
+
+
+def grow(m, n=1):
+    """Grow a mask by n tiles, 4 ways (rounder than 8)."""
+    for _ in range(n):
+        p = np.pad(m, 1)
+        m = m | p[:-2, 1:-1] | p[2:, 1:-1] | p[1:-1, :-2] | p[1:-1, 2:]
+    return m
+
+
+def shrink(m, n=1):
+    return ~grow(~m, n)
 
 
 def candyland():
@@ -385,7 +408,9 @@ def candyland():
     mid = NX // 2
     cane = np.zeros_like(b.inside)
     cane[mid - 2:mid + 2, 6:b.nz - 6] = True
-    # Clusters: props within 24 studs of each other; a patch round each, a tile past its props.
+    # Clusters: props within 24 studs of each other; a patch round each (a tile past its props, its
+    # outline smoothed, a little ragged), a tile of cream from the walls, and at least three tiles of
+    # cream between patches: a nearer, smaller patch gives way.
     props = [p for p in candy_props() if b.z1 < p[2] <= b.z0]
     group = list(range(len(props)))
 
@@ -397,19 +422,39 @@ def candyland():
         for j in range(i):
             if math.hypot(props[i][1] - props[j][1], props[i][2] - props[j][2]) < 24:
                 group[root(i)] = root(j)
+    wobble = b.quasi(5, 3, (91, 37))  # (a ragged edge)
+    room = b.inside & ~grow(cane) & (np.abs(b.x) < b.hw[None, :] - CELL * 1.5)
+
+    def patch(members):
+        # one round blob over the cluster, a tile past its props, its edge wobbling a little
+        cx = sum(p[1] for p in members) / len(members)
+        cz = sum(p[2] for p in members) / len(members)
+        rx = max(max(abs(p[1] - cx) + p[3] for p in members) + CELL * 1.5, CELL * 3)
+        rz = max(max(abs(p[2] - cz) + p[3] for p in members) + CELL * 1.5, CELL * 3)
+        m = room & ((b.x - cx) ** 2 / rx ** 2 + (b.z - cz) ** 2 / rz ** 2 < (1 + (wobble - 0.5) * 0.35) ** 2)
+        for _ in range(2):  # (majority of each 3x3: no 1-tile spurs or notches)
+            n = sum(nb.astype(int) for nb in neighbours(m, False))
+            m = room & ((m & (n >= 4)) | (~m & (n >= 5)))
+        return m
+
     clusters = {}
     for k, p in enumerate(props):
         clusters.setdefault(root(k), []).append(p)
-    wobble = b.quasi(5, 3, (91, 37))  # (a ragged edge)
-    for members in clusters.values():
-        cx = sum(p[1] for p in members) / len(members)
-        cz = sum(p[2] for p in members) / len(members)
-        r = max(math.hypot(p[1] - cx, p[2] - cz) + p[3] for p in members) + CELL
-        mint = any(p[0] in ("Lollipop", "IceCream") for p in members) and not any(p[0] in ("Cupcake", "ChocolateBar") for p in members)
-        d = np.hypot(b.x - cx, b.z - cz)
-        patch = b.inside & ~cane & (d < r + (wobble - 0.5) * CELL) & (b.rung == 0)
-        b.rung[patch] = 2 if mint else 1
-    b.rung = despeck(b.rung, b.inside & ~cane)
+    masks, taken = {}, np.zeros_like(b.inside)
+    for k in sorted(clusters, key=lambda k: -len(clusters[k])):  # (the biggest first; a nearer one gives way)
+        m = patch(clusters[k]) & ~grow(taken, 3)
+        for _ in range(2):  # (no tile left hanging on by one side)
+            p4 = np.pad(m, 1)
+            m &= (p4[:-2, 1:-1].astype(int) + p4[2:, 1:-1] + p4[1:-1, :-2] + p4[1:-1, 2:]) >= 2
+        if m.sum() < 9:  # (a scrap squeezed out by its neighbours: none)
+            continue
+        masks[k] = m
+        taken |= m
+    clusters = {k: clusters[k] for k in masks}
+    for k, members in clusters.items():
+        names = {p[0] for p in members}
+        mint = bool(names & {"Lollipop", "IceCream"}) and not names & {"Cupcake", "ChocolateBar"}
+        b.rung[masks[k]] = 2 if mint else 1
     b.rung[cane] = 3
     stripes = (np.arange(b.nz) // 2) % 2 == 0
     b.rung[cane & stripes[None, :]] = 4
