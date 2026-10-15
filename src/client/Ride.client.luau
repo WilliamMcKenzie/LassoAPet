@@ -1365,8 +1365,8 @@ ContextActionService:BindActionAtPriority("Sprint", function(_, state)
 end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.LeftShift, Enum.KeyCode.RightShift, Enum.KeyCode.ButtonL2)
 
 local function sprinting()
-	if vfx.hunting or player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
-		return false -- the Robo Shark can't sprint while it hunts (QM)
+	if player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
+		return false -- (the Robo Shark sprints on while it hunts now: QM, Oct 15, no slowing at all)
 	end
 	if (phase == "return" and Config.ReturnSprint) or (phase == "outbound" and Config.OutboundSprint) then -- (the ride out always a sprint too: QM, Oct 11)
 		return true -- racing home with the egg, always
