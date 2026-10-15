@@ -431,7 +431,10 @@ def convert(model, merge=None):
             metal = e["name"].startswith(METAL)
             if merge is not None and e["type"] == "mesh" and not supported(e, model_center):
                 face = next(f for f in e["faces"].values() if f.get("texture") is not None)
-                key = (parent, model["textures"][face["texture"]]["name"])
+                col = model["textures"][face["texture"]]["name"]
+                if col.endswith(".png"):  # one palette texture for every colour (partlib): name the mesh by its colour
+                    col = "%02X%02X%02X" % tuple(color(e)[:3])
+                key = (parent, col)
                 entry = merge.setdefault(key, (color(e), [], [False, False]))
                 entry[1].extend(element_tris(e))
                 entry[2][0] |= e["name"].startswith(SMOOTH)

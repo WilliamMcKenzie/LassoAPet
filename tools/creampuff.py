@@ -1,7 +1,8 @@
-"""Spoiled Creampuff: World 3 Candyland Rare (after the Candyland Hunting Grounds creampuffs).
-A grumpy cream puff gone off: a golden choux pastry bun cut in half with a thick ring of whipped
-cream between, the top half a lid that chomps open and shut like a mouth, a cherry on top,
-googly eyes with chocolate brows, and four stubby pastry feet, green mould spots, a sour green drip and a crack in the lid. It hops.
+"""Creampuff: World 3 Candyland Rare (after the Candyland Hunting Grounds creampuffs).
+A grumpy cream puff: a golden choux bun cut in half with a fat puffy ring of whipped cream
+between, the top half a round lid that chomps open and shut like a mouth, a cherry on top,
+powdered sugar, googly eyes with chocolate brows and four stubby pastry feet. It hops. (QM, Oct 15: no longer spoiled; the bun, cream, lid and cherry are smooth
+meshes.)
 
 Bones: root (bottom bun and cream), neck (the lid: opens with +X), EarL/EarR empty, Tail
 empty, Leg* (feet). Nothing turned.
@@ -13,17 +14,15 @@ import math
 import os
 import sys
 
+import numpy as np
+
 sys.path.insert(0, os.path.dirname(__file__))
 import candy_common as C  # noqa: E402
 from animal_designs import Animal  # noqa: E402
-from snow_designs import pyramid  # noqa: E402
 
 BUN = C.PASTRY
 BUN_DK = C.PASTRY_DK
 CREAM = C.WHITE
-MOULD = (150, 206, 60)
-MOULD_DK = (96, 150, 40)
-SOUR = (196, 236, 90)
 
 
 def creampuff(name="Creampuff", rarity="Rare"):
@@ -31,19 +30,15 @@ def creampuff(name="Creampuff", rarity="Rare"):
     x, y0, y1, z0, z1 = 2.4, 0.9, 2.6, -2.4, 2.4
     a.dims = dict(x=x, y0=y0, y1=y1, z0=z0, z1=z1)
     a.pivots["root"] = (0, 2.0, 0)
-    a.box("Bun", (-x, y0 + 0.3, z0), (x, y1, z1), BUN, "root")
-    a.box("BunBase", (-x + 0.4, y0, z0 + 0.4), (x - 0.4, y0 + 0.3, z1 - 0.4), BUN_DK, "root")
-    # whipped cream ring, bulging past the bun, with drips down the sides
-    a.box("Cream", (-x - 0.25, y1, z0 - 0.25), (x + 0.25, y1 + 0.8, z1 + 0.25), CREAM, "root")
-    for i, (dx, dz) in enumerate(((-1.4, None), (0.2, None), (1.5, None))):
-        a.box(f"DripF{i + 1}", (dx - 0.3, y1 - 0.5 + 0.15 * i, z0 - 0.25), (dx + 0.3, y1, z0), CREAM, "root")
-    C.sym(a, "DripS*", (x, y1 - 0.6, -0.8), (x + 0.25, y1, -0.2), CREAM, "root")
-    C.sym(a, "DripB*", (x, y1 - 0.4, 1.2), (x + 0.25, y1, 1.7), CREAM, "root")
-    # one sour green drip and mould on the bottom bun
-    a.box("SourDrip", (0.7, y1 - 0.9, z0 - 0.25), (1.1, y1, z0), SOUR, "root")
-    a.box("SourDripEnd", (0.75, y1 - 1.1, z0 - 0.22), (1.05, y1 - 0.9, z0 - 0.03), MOULD, "root")
-    a.box("Mould4", (-x - 0.15, 1.6, 0.6), (-x, 2.2, 1.6), MOULD, "root")
-    a.box("Mould5", (-1.8, 1.4, z0 - 0.15), (-1.2, 1.9, z0), MOULD_DK, "root")
+    # bottom bun: a squashed round bun, flat underneath and cut flat on top
+    P = C.G.ellipsoid((0, 1.95, 0), (x, 1.25, x), seg=14, rings=7)
+    P[:, 1] = np.clip(P[:, 1], y0, y1 + 0.1)
+    C.hull(a, "SmoothBun", P, BUN, "root")
+    # whipped cream piped round the cut: a ring of fat puffs bulging out past the bun
+    C.hull(a, "SmoothCream", C.G.ellipsoid((0, y1 + 0.45, 0), (x - 0.1, 0.55, x - 0.1), seg=14, rings=5), CREAM, "root")
+    for k in range(10):
+        t = C.TAU * (k + 0.5) / 10
+        C.hull(a, "SmoothCream", C.G.ellipsoid((2.05 * math.sin(t), y1 + 0.45, 2.05 * math.cos(t)), (0.8, 0.62, 0.8), seg=8, rings=4), CREAM, "root")
 
     # four stubby feet
     for leg in ("FL", "FR", "HL", "HR"):
@@ -54,33 +49,34 @@ def creampuff(name="Creampuff", rarity="Rare"):
         a.box("Leg" + leg, (xa, 0, za), (xb, y0 + 0.35, za + 1.1), BUN_DK, "Leg" + leg)
         a.pivots["Leg" + leg] = ((xa + xb) / 2, y0, za + (1.0 if front else 0.1))
 
-    # ---- the lid (neck bone, hinged at the back of the cream)
-    ly0 = y1 + 0.8
-    a.box("Lid", (-2.2, ly0, -2.2), (2.2, ly0 + 1.5, 2.2), BUN, "neck")
-    a.box("LidTop", (-1.7, ly0 + 1.5, -1.7), (1.7, ly0 + 2.0, 1.7), BUN, "neck")
-    a.box("LidCap", (-1.0, ly0 + 2.0, -1.0), (1.0, ly0 + 2.25, 1.0), BUN_DK, "neck")
+    # ---- the lid (neck bone, hinged at the back of the cream): a round choux dome
+    ly0 = y1 + 0.9
+    r, h = 2.5, 1.9
+    C.hull(a, "SmoothLid", C.G.dome((0, ly0, 0), r, h, seg=14, rings=5, base=0.25), BUN, "neck")
+
+    def surf(phi, az):
+        """A point on the lid (phi up from its rim, az round from the front) and its normal."""
+        p_, a_ = math.radians(phi), math.radians(az)
+        q = np.array((r * math.cos(p_) * math.sin(a_), ly0 + h * math.sin(p_), -r * math.cos(p_) * math.cos(a_)))
+        n = np.array(((q[0]) / r ** 2, (q[1] - ly0) / h ** 2, q[2] / r ** 2))
+        return q, n / np.linalg.norm(n)
+
+    def on_lid(name, phi, az, size, col, turn=0.0):
+        q, n = surf(phi, az)
+        C.stick(a, name, q, n, size, col, "neck", turn)
+
     # powdered sugar dusting
-    for i, (sx, sz) in enumerate(((-1.2, -0.6), (0.9, -1.2), (1.2, 0.8), (-0.6, 1.2))):
-        a.box(f"Sugar{i + 1}", (sx - 0.15, ly0 + 2.0, sz - 0.15), (sx + 0.15, ly0 + 2.12, sz + 0.15), C.ICING, "neck")
-    # cherry with a stem
-    a.box("Cherry", (-0.5, ly0 + 2.25, -0.5), (0.5, ly0 + 3.1, 0.5), C.CHERRY, "neck")
-    a.box("CherryTop", (-0.3, ly0 + 3.1, -0.3), (0.3, ly0 + 3.25, 0.3), C.CHERRY_DK, "neck")
-    C.beam(a, "Stem", (0, ly0 + 3.2, 0), (0.35, ly0 + 4.0, 0.25), 0.14, 0.14, C.LIME_DK, "neck")
-    # cross eyes on the lid front, chocolate brows slanting down to the middle
-    C.front_eyes(a, 0.85, ly0 + 0.15, ly0 + 1.2, -2.2, 0.9, "neck")
-    for side, sx in (("L", -1), ("R", 1)):  # angry: inner ends low
-        C.rbox(a, "Brow" + side, (1.2, 0.3, 0.3), C.T(sx * 0.85, ly0 + 1.38, -2.35) @ C.Rz(sx * 16), C.CHOC, "neck")
-    # spoiled: chunky green mould spots, a crack down the lid's side
-    a.box("Mould1", (-2.1, ly0 + 0.2, -2.35), (-1.5, ly0 + 0.7, -2.2), MOULD, "neck")
-    a.box("Mould2", (2.2, ly0 + 0.3, -0.6), (2.4, ly0 + 1.0, 0.4), MOULD, "neck")
-    a.box("Mould2b", (2.4, ly0 + 0.45, -0.35), (2.5, ly0 + 0.8, 0.1), MOULD_DK, "neck")
-    a.box("Mould3", (0.5, ly0 + 2.0, 0.6), (1.2, ly0 + 2.2, 1.3), MOULD, "neck")
-    a.box("Crack1", (-2.3, ly0 + 0.9, 0.6), (-2.15, ly0 + 1.5, 0.8), C.CHOC_DK, "neck")
-    a.box("Crack2", (-2.3, ly0 + 0.5, 0.8), (-2.15, ly0 + 0.95, 1.0), C.CHOC_DK, "neck")
+    for i, (phi, az) in enumerate(((62, 140), (58, 230), (66, 320), (55, 50), (72, 190))):
+        on_lid(f"Sugar{i + 1}", phi, az, (0.3, 0.3, 0.12), C.ICING)
+    # a round cherry with a stem
+    C.hull(a, "SmoothCherry", C.G.ellipsoid((0, ly0 + h + 0.45, 0), (0.55, 0.5, 0.55), seg=10, rings=5), C.CHERRY, "neck")
+    C.beam(a, "Stem", (0, ly0 + h + 0.85, 0), (0.35, ly0 + h + 1.6, 0.25), 0.14, 0.14, C.LIME_DK, "neck")
+    # googly eyes on the lid front, chocolate brows slanting down to the middle
+    for side, sx in (("L", -1), ("R", 1)):
+        q, n = surf(24, sx * 22)
+        C.surface_eye(a, side, q, n, 0.9, 1.0, "neck")
+        on_lid("Brow" + side, 50, sx * 20, (1.2, 0.3, 0.3), C.CHOC, sx * 16)
     a.pivots["neck"] = (0, ly0, 2.2)
-    # the bottom bun's grumpy teeth: little cream pyramids along the front of the cream
-    for i, dx in enumerate((-1.2, -0.4, 0.4, 1.2)):
-        pyramid(a, f"Tooth{i + 1}", (dx - 0.25, y1 + 0.8, z0 + 0.3), (dx + 0.25, y1 + 0.8, z0 + 0.7), "+y", 0.45, CREAM, "root")
 
     a.pivots["EarL"] = (-1, ly0 + 2, -1)
     a.pivots["EarR"] = (1, ly0 + 2, -1)

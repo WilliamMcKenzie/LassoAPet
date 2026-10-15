@@ -1,14 +1,18 @@
 """Gumdrop Frog: World 3 Candyland Uncommon. A squat frog shaped like an orange gumdrop: a
-stepped dome body (widest at the bottom like a gumdrop) rolled in white sugar crystals, a
-darker lime base band, a wide frog head with two bulging eye turrets on top (googly plates
+smooth dome body (widest at the bottom like a gumdrop) rolled in white sugar crystals, a
+darker orange base band, a wide frog head with two round smooth eye bumps on top (googly plates
 facing forward), a wide chocolate grin with a cherry tongue tip, bubblegum cheeks, short
 front legs and big folded hind thighs with webbed feet. It hops (the quadruped leap gallop).
+(QM, Oct 15: the gumdrop, base band and eye bumps are smooth meshes.)
 
     python3 tools/gumdrop_frog.py [--still]
 """
 
+import math
 import os
 import sys
+
+import numpy as np
 
 sys.path.insert(0, os.path.dirname(__file__))
 import candy_common as C  # noqa: E402
@@ -25,21 +29,22 @@ def gumdrop_frog(name="GumdropFrog", rarity="Uncommon", gum=GUM, gum_dk=GUM_DK, 
     x, y0, y1, z0, z1 = 2.1, 1.1, 3.4, -2.0, 2.4
     a.dims = dict(x=x, y0=y0, y1=y1, z0=z0, z1=z1)
     a.pivots["root"] = (0, (y0 + y1) / 2, (z0 + z1) / 2)
-    a.box("Base", (-x, y0, z0), (x, y0 + 0.5, z1), gum_dk, "root")
-    a.box("Body", (-x, y0 + 0.5, z0), (x, y1, z1), gum, "root")
-    a.box("Dome1", (-x + 0.4, y1, z0 + 0.3), (x - 0.4, y1 + 0.7, z1 - 0.3), gum, "root")
-    a.box("Dome2", (-x + 0.9, y1 + 0.7, z0 + 0.7), (x - 0.9, y1 + 1.3, z1 - 0.7), gum, "root")
-    a.box("Dome3", (-x + 1.4, y1 + 1.3, z0 + 1.2), (x - 1.4, y1 + 1.7, z1 - 1.2), gum, "root")
+    # the gumdrop: a smooth dome (widest at the bottom) on a darker base band, rolled in sugar
+    cz, rx, rz, h = (z0 + z1) / 2, x + 0.1, (z1 - z0) / 2 + 0.1, y1 + 1.7 - (y0 + 0.9)
+    C.hull(a, "SmoothBase", C.G.prism((0, y0, cz), (rx + 0.08, rz + 0.08), 0.55, seg=16), gum_dk, "root")
+    C.hull(a, "SmoothBody", C.G.dome((0, y0 + 0.9, cz), (rx, rz), h, seg=16, rings=5, base=0.75), gum, "root")
     a.box("Belly", (-1.5, y0 - 0.15, z0 + 0.3), (1.5, y0, z1 - 0.5), belly, "root")
-    # sugar crystals rolled all over the dome
-    grains = [(-1.6, y1, -1.4), (1.3, y1, -0.6), (-1.5, y1, 1.2), (1.5, y1, 1.8), (-0.6, y1 + 0.7, -1.0),
-              (0.7, y1 + 0.7, 0.2), (-0.8, y1 + 0.7, 1.5), (0.4, y1 + 1.3, -0.5), (-0.6, y1 + 1.3, 0.6), (0.6, y1 + 1.3, 1.2), (-0.3, y1 + 1.7, 0.3),
-              (0.3, y1 + 1.7, -0.3), (1.5, y1, 0.4), (-1.5, y1, -0.2), (0.1, y1 + 0.7, 1.6), (-1.0, y1 + 0.7, -0.1),
-              (0.9, y1 + 0.7, -1.2)]
-    for i, (gx, gy, gz) in enumerate(grains):
-        a.box(f"Sugar{i + 1}", (gx - 0.14, gy, gz - 0.14), (gx + 0.14, gy + 0.2, gz + 0.14), SUGAR, "root")
-    for i, (gy, gz) in enumerate(((2.2, -0.8), (2.9, 0.9), (1.9, 1.7))):
-        C.sym(a, f"SideSugar{i + 1}*", (x, gy - 0.14, gz - 0.14), (x + 0.18, gy + 0.14, gz + 0.14), SUGAR, "root")
+
+    def surf(phi, az):
+        p_, a_ = math.radians(phi), math.radians(az)
+        q = np.array((rx * math.cos(p_) * math.sin(a_), y0 + 0.9 + h * math.sin(p_), cz - rz * math.cos(p_) * math.cos(a_)))
+        n = np.array((q[0] / rx ** 2, (q[1] - y0 - 0.9) / h ** 2, (q[2] - cz) / rz ** 2))
+        return q, n
+    # sugar crystals rolled all over the dome (none on the front, where the head sits)
+    for i in range(22):  # spread evenly (golden angle round, rising up the dome)
+        phi, az = 8 + 70 * (i + 0.5) / 22, 55 + 250 * (i * 0.618 % 1)
+        q, n = surf(phi, az)
+        C.stick(a, f"Sugar{i + 1}", q, n, (0.28, 0.28, 0.2), SUGAR, "root", (i * 37) % 90)
 
     # ---- short front legs with three toes
     for side, sx in (("L", -1), ("R", 1)):
@@ -73,13 +78,12 @@ def gumdrop_frog(name="GumdropFrog", rarity="Uncommon", gum=GUM, gum_dk=GUM_DK, 
     a.box("Tongue", (-0.35, hy0 + 0.1, hz0 - 0.25), (0.35, hy0 + 0.38, hz0 + 0.2), C.CHERRY, "neck")
     C.sym(a, "Cheek*", (1.05, hy0 + 0.7, hz0 - 0.08), (1.6, hy0 + 1.05, hz0), C.BUBBLE, "neck")
     C.sym(a, "Nostril*", (0.25, hy1 - 0.45, hz0 - 0.06), (0.45, hy1 - 0.3, hz0), gum_dk, "neck")
-    for side, sx in (("L", -1), ("R", 1)):
-        xa, xb = sorted((sx * 0.45, sx * 1.75))
-        a.box("Turret" + side, (xa, hy1, -3.7), (xb, hy1 + 1.4, -2.3), gum, "neck")
-        xc, xd = sorted((sx * 0.6, sx * 1.6))
-        a.box("TurretTop" + side, (xc, hy1 + 1.4, -3.55), (xd, hy1 + 1.65, -2.45), gum, "neck")
-        a.box("Sugar" + side + "T", (sx * 1.1 - 0.13, hy1 + 1.65, -3.1), (sx * 1.1 + 0.13, hy1 + 1.82, -2.84), SUGAR, "neck")
-    C.front_eyes(a, 1.1, hy1 + 0.2, hy1 + 1.3, -3.7, 1.05, "neck")
+    for side, sx in (("L", -1), ("R", 1)):  # round eye bumps, googly eyes looking forward
+        c = np.array((sx * 1.1, hy1 + 0.3, -3.0))
+        C.hull(a, "SmoothTurret", C.G.ellipsoid(c, (0.8, 0.95, 0.8), seg=10, rings=5, cut=0.0), gum, "neck")
+        d = np.array((sx * 0.25, 0.45, -1.0))
+        d /= np.linalg.norm(d)
+        C.surface_eye(a, side, c + d * np.array((0.8, 0.95, 0.8)), d, 0.95, 1.0, "neck")
     a.pivots["neck"] = (0, 2.0, -1.95)
 
     # EarL/EarR stay as empty bones for the quadruped animations; a sugar-tipped tail nub

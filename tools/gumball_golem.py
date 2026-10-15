@@ -70,38 +70,25 @@ def gumball_golem():
                     ("LegFL", "root"), ("LegFR", "root"), ("Crank", "root")]
     rnd = random.Random(7)
 
-    def ball(name, M, s, col, bone, shine=False):
-        """A rounded stepped gumball of size s placed by M; its rounded face looks down local z."""
-        C.rbox(a, name + "A", (s, 0.72 * s, 0.86 * s), M, col, bone)
-        C.rbox(a, name + "B", (0.72 * s, s, 0.86 * s), M, col, bone)
-        C.rbox(a, name + "C", (0.56 * s, 0.56 * s, s), M, col, bone)
-        if shine:
-            C.rbox(a, name + "Shine", (0.2 * s, 0.2 * s, 0.1 * s), M @ T(-0.13 * s, 0.16 * s, 0.5 * s + 0.02),
-                   SHINE, bone)
+    def cube_ball(name, c, s, col, bone, shine=False, M=None, seg=10):
+        """A round gumball of diameter s centred on c (a smooth mesh)."""
+        C.hull(a, "Smooth" + name, C.G.ellipsoid(c, (s / 2,) * 3, seg=seg, rings=seg // 2), col, bone)
 
-    def cube_ball(name, c, s, col, bone, shine=False, M=None):
-        """An upright gumball (all three axes rounded): good from every side."""
-        M = T(*c) @ (M if M is not None else np.eye(4))
-        C.rbox(a, name + "A", (s, 0.7 * s, 0.7 * s), M, col, bone)
-        C.rbox(a, name + "B", (0.7 * s, s, 0.7 * s), M, col, bone)
-        C.rbox(a, name + "C", (0.7 * s, 0.7 * s, s), M, col, bone)
-        C.rbox(a, name + "D", (0.86 * s, 0.86 * s, 0.86 * s), M, col, bone)
-        if shine:
-            C.rbox(a, name + "Shine", (0.18 * s, 0.18 * s, 0.1 * s), M @ T(-0.14 * s, 0.16 * s, -0.5 * s - 0.02),
-                   SHINE, bone)
+    def band(name, c, r, dy, h, col, bone, seg=12):
+        """A stripe round a ball: the slice of a slightly bigger sphere from dy - h/2 to dy + h/2."""
+        P = C.G.ellipsoid(c, (r * 1.05,) * 3, seg=seg, rings=8, twist=0.0)
+        P[:, 1] = np.clip(P[:, 1], c[1] + dy - h / 2, c[1] + dy + h / 2)
+        C.hull(a, "Smooth" + name, P, col, bone)
 
     def jaw(name, c, r, cols, bone, **_):
-        """A striped jawbreaker: a rounded ball in cols[0] wrapped by bands in the other colours."""
+        """A striped jawbreaker: a round ball in cols[0] wrapped by bands in the other colours."""
+        c = np.array(c, float)
         s = 2 * r
-        cube_ball(name, c, s, cols[0], bone)
+        cube_ball(name, c, s, cols[0], bone, seg=12)
         nb = len(cols) - 1
         for k, col in enumerate(cols[1:]):
             dy = (k - (nb - 1) / 2) * min(0.42 * s / max(nb - 1, 1), 0.28 * s) if nb > 1 else 0.0
-            M = T(*(np.array(c, float) + (0, dy, 0)))
-            h = 0.12 * s
-            C.rbox(a, f"{name}Band{k + 1}A", (1.05 * s, h, 0.76 * s), M, col, bone)
-            C.rbox(a, f"{name}Band{k + 1}B", (0.76 * s, h, 1.05 * s), M, col, bone)
-            C.rbox(a, f"{name}Band{k + 1}C", (0.92 * s, h, 0.92 * s), M, col, bone)
+            band(f"{name}Band{k + 1}", c, r, dy, 0.12 * s, col, bone)
 
     # ================================================================ machine base (root)
     bx, by0, by1, bz = 3.4, 4.9, 8.9, 2.9
@@ -113,8 +100,7 @@ def gumball_golem():
     a.box("Plinth", (-bx - 0.3, by0 - 0.35, -bz - 0.45), (bx + 0.3, by0 + 0.35, bz + 0.45), RED_DK, "root")
     a.box("Lip", (-bx - 0.2, by1 - 0.4, -bz - 0.4), (bx + 0.2, by1 + 0.1, bz + 0.4), RED_DK, "root")
     # chrome collar the globe sits in (stepped rings)
-    a.box("MetalCollar1", (-3.0, by1 + 0.1, -2.6), (3.0, by1 + 0.5, 2.6), CHROME, "root")
-    a.box("MetalCollar2", (-2.5, by1 + 0.5, -2.1), (2.5, by1 + 0.95, 2.1), CHROME_DK, "root")
+    C.hull(a, "SmoothCollar", C.G.prism((0, by1 + 0.1, 0), 3.1, 0.9, seg=16, top=0.95), CHROME, "root")
     # chrome corner posts (rivets down the edges)
     for sx in (-1, 1):
         for sz in (-1, 1):
@@ -154,7 +140,7 @@ def gumball_golem():
         a.box(f"Tooth{k + 1}", (x - 0.24, 5.9, fz - 0.55), (x + 0.24, 6.25, fz - 0.3), C.WHITE, "root")
     a.box("Tongue", (-0.85, 5.35, fz - 0.7), (0.85, 5.55, fz - 0.3), C.BUBBLE, "root")
     a.box("TongueTip", (-0.7, 5.25, fz - 1.0), (0.7, 5.45, fz - 0.7), C.BUBBLE_DK, "root")
-    cube_ball("ChuteGum", (0.25, 5.85, fz - 0.95), 0.6, C.LIME, "root", shine=True)
+    cube_ball("ChuteGum", (0.25, 5.85, fz - 0.95), 0.6, C.LIME, "root")
     # back: a lemon price label tablet and a big screw-in coin box
     a.box("BackPanel", (-1.4, 6.0, bz + 0.25), (1.4, 8.0, bz + 0.5), RED_DK, "root")
     a.box("Label", (-1.1, 6.3, bz + 0.5), (1.1, 7.7, bz + 0.7), C.LEMON, "root")
@@ -174,64 +160,50 @@ def gumball_golem():
     # gumballs pressed into every side, bulging out between glass mullions.
     a.pivots["neck"] = (0, by1 + 0.5, 0)
     a.pivots["Balls"] = tuple(GC)
-    g = 4.0  # globe half size
-    a.box("Glass", (-g, GC[1] - 3.0, -3.0), (g, GC[1] + 3.0, 3.0), GLASS, "neck")
-    a.box("GlassTall", (-3.0, GC[1] - g, -3.0), (3.0, GC[1] + g, 3.0), GLASS, "neck")
-    a.box("GlassDeep", (-3.0, GC[1] - 3.0, -g), (3.0, GC[1] + 3.0, g), GLASS, "neck")
-    a.box("GlassCorner", (-3.6, GC[1] - 3.6, -3.6), (3.6, GC[1] + 3.6, 3.6), GLASS_DK, "neck")
-    s, step = 1.6, 1.95
+    g = 4.2  # globe radius
+    C.hull(a, "SmoothGlobe", C.G.ellipsoid(GC, (g, g, g), seg=20, rings=10), GLASS, "neck")
     k_ball = [0]
 
-    def gum(c, size=s, shine=True):
+    def gum(c, size=1.6):
         k_ball[0] += 1
-        col = GUM[(k_ball[0] * 3) % len(GUM)]
-        cube_ball(f"Gum{k_ball[0]}", c, size, col, "Balls", shine=shine)
+        col = rnd.choice(GUM)
+        cube_ball(f"Gum{k_ball[0]}", c, size, col, "Balls")
 
-    rows = (GC[1] + 1.95, GC[1], GC[1] - 1.95)
-    for face in ("F", "B", "L", "R"):
-        for j, y in enumerate(rows):
-            for i, u in enumerate((-step, 0.0, step)):
-                if face == "F" and j == 0 and i != 1:
-                    continue  # the eyes
-                if face == "F" and j == 1 and i != 1:
-                    continue  # under the eyes
-                if face in "LR" and j == 1 and i == 1:
-                    continue  # the shoulder hubs
-                d = g - s / 2 + 0.75  # half buried, bulging 0.75 out of the glass
-                c = {"F": (u, y, -d), "B": (u, y, d), "L": (-d, y, u), "R": (d, y, u)}[face]
-                gum(c)
-    # gumballs on the four diagonal corners, peeking out of the corner glass
-    for sx in (-1, 1):
-        for sz in (-1, 1):
-            for y in (GC[1] + 1.2, GC[1] - 1.2):
-                gum((sx * 3.25, y, sz * 3.25), 1.3, shine=False)
+    # rainbow gumballs pressed into the glass all over, bulging out (a golden spiral, skipping
+    # the face and the shoulder hubs)
+    for i in range(130):
+        y = 1 - 2 * (i + 0.5) / 130
+        rr, t = math.sqrt(1 - y * y), i * 2.39996
+        d = np.array((rr * math.cos(t), y, rr * math.sin(t)))
+        if y > 0.8 or y < -0.72 or (d[2] < -0.55 and -0.25 < y < 0.75) or abs(d[0]) > 0.85 and abs(y) < 0.3:
+            continue
+        gum(GC + d * (g - 0.15), 1.55)
     print("globe gumballs:", k_ball[0])
-    # a glass glint (white streaks) on the upper-left front corner
-    a.box("Glint1", (-3.55, GC[1] - 0.6, -3.8), (-3.1, GC[1] + 2.0, -3.6), SHINE, "neck")
-    a.box("Glint2", (-3.55, GC[1] + 2.35, -3.8), (-3.1, GC[1] + 2.9, -3.6), SHINE, "neck")
-    # googly eyes straight on the front glass, under chunky lemon-stick brows
+    # a glass glint on the upper-left front
+    for k, (phi, az, h) in enumerate(((28, -42, 1.6), (48, -36, 0.5))):
+        p_, a_ = math.radians(phi), math.radians(az)
+        d = np.array((math.cos(p_) * math.sin(a_), math.sin(p_), -math.cos(p_) * math.cos(a_)))
+        C.stick(a, f"Glint{k + 1}", GC + d * g, d, (0.4, h, 0.2), SHINE, "neck", 0, 0.5)
+    # googly eyes on the front of the glass, under chunky lemon-stick brows
     for side, sx in (("L", -1), ("R", 1)):
-        x0, x1 = sorted((sx * 0.7, sx * 2.95))
-        a.box("Eye" + side, (x0, GC[1] + 0.4, -g - C.PLATE), (x1, GC[1] + 2.9, -g), C.EYE_WHITE, "neck")
-        pc = sx * 1.85
-        a.box("Pupil" + side, (pc - 0.45, GC[1] + 0.75, -g - C.PLATE - 0.03), (pc + 0.45, GC[1] + 1.85, -g - C.PLATE + C.PUPIL_BACK),
-              C.PUPIL, "neck")
-        a.box("Brow" + side, (x0 - 0.1, GC[1] + 3.05, -g - 0.4), (x1 + 0.1, GC[1] + 3.5, -g + 0.3), C.LEMON_DK, "neck")
-    # chrome band round the bottom of the globe, shoulder hubs on the sides
-    a.box("MetalBand", (-g - 0.2, GC[1] - 3.3, -g - 0.2), (g + 0.2, GC[1] - 2.7, g + 0.2), CHROME, "neck")
+        d = np.array((sx * 0.3, 0.3, -1.0))
+        d /= np.linalg.norm(d)
+        C.surface_eye(a, side, GC + d * g, d, 2.0, 2.3, "neck")
+        d2 = np.array((sx * 0.3, 0.68, -0.85))
+        d2 /= np.linalg.norm(d2)
+        C.stick(a, "Brow" + side, GC + d2 * g, d2, (2.4, 0.5, 0.6), C.LEMON_DK, "neck", sx * 8, 0.3)
+    # chrome shoulder hubs on the sides
     for side, sx in (("L", -1), ("R", 1)):
-        xs = sorted((sx * g, sx * (g + 0.45)))
-        a.box("MetalShoulderHub" + side, (xs[0], GC[1] - 1.1, -1.1), (xs[1], GC[1] + 1.1, 1.1), CHROME, "neck")
+        C.hull(a, "SmoothShoulderHub" + side, C.G.prism(GC + (sx * (g - 0.6), 0, 0), 1.3, 1.0, seg=12,
+               M=C.G.R("z", -90 * sx)), CHROME, "neck")
     # chrome lid on top, the seat on it
     top = GC[1] + g
-    a.box("MetalLid1", (-3.3, top - 0.35, -3.3), (3.3, top + 0.35, 3.3), CHROME_DK, "neck")
-    a.box("MetalLid2", (-2.6, top + 0.35, -2.6), (2.6, top + 0.85, 2.6), CHROME, "neck")
-    a.box("MetalLid3", (-1.9, top + 0.85, -1.9), (1.9, top + 1.15, 1.9), CHROME_DK, "neck")
+    C.hull(a, "SmoothLid", C.G.dome((0, top - 0.75, 0), 3.0, 1.9, seg=16, rings=4, base=0.3), CHROME, "neck")
     sy = top + 1.15
     a.box("Seat", (-1.25, sy, -0.9), (1.25, sy + 0.4, 1.5), RED, "neck")
     a.box("SeatBack", (-1.3, sy, 1.5), (1.3, sy + 1.0, 1.95), RED_DK, "neck")
     a.box("SeatPipe", (-1.38, sy + 1.0, 1.45), (1.38, sy + 1.2, 2.0), C.WHITE, "neck")
-    cube_ball("Pommel", (0, sy + 0.45, -1.2), 0.8, C.LEMON, "neck", shine=True)
+    cube_ball("Pommel", (0, sy + 0.45, -1.2), 0.8, C.LEMON, "neck")
     for side, sx in (("L", -1), ("R", 1)):
         xs = sorted((sx * 1.25, sx * 1.45))
         a.box("SeatSide" + side, (xs[0], sy - 0.05, -0.9), (xs[1], sy + 0.55, 1.5), C.WHITE, "neck")
@@ -243,18 +215,15 @@ def gumball_golem():
         a.pivots[bone] = tuple(S)
         jaw("Shoulder" + side, S + (sx * 0.95, 0.1, 0), 1.35, [C.SKY, C.WHITE, C.CHERRY, C.WHITE], bone)
         E = S + (sx * 1.7, -3.2, 0.25)
-        cube_ball("UpperArm" + side, S + (sx * 1.35, -1.8, 0.1), 1.9, C.LIME, bone, shine=True)
+        cube_ball("UpperArm" + side, S + (sx * 1.35, -1.8, 0.1), 1.9, C.LIME, bone)
         jaw("Elbow" + side, E, 1.0, [C.ORANGE, C.LEMON], bone)
-        cube_ball("Forearm" + side, E + (sx * 0.2, -1.45, -0.2), 1.85, C.BUBBLE, bone, shine=True)
+        cube_ball("Forearm" + side, E + (sx * 0.2, -1.45, -0.2), 1.85, C.BUBBLE, bone)
         F = E + (sx * 0.35, -3.9, -0.4)
         # the jawbreaker fist: a big cherry ball banded with white and lemon stripes
         fs = 3.3
-        cube_ball("Fist" + side, F, fs, C.CHERRY, bone, shine=True)
+        cube_ball("Fist" + side, F, fs, C.CHERRY, bone)
         for k, (dy, col) in enumerate(((0.75, C.WHITE), (0.0, C.LEMON), (-0.75, C.WHITE))):
-            M = T(*(F + (0, dy, 0)))
-            C.rbox(a, f"Fist{side}Band{k + 1}A", (1.05 * fs, 0.4, 0.76 * fs), M, col, bone)
-            C.rbox(a, f"Fist{side}Band{k + 1}B", (0.76 * fs, 0.4, 1.05 * fs), M, col, bone)
-            C.rbox(a, f"Fist{side}Band{k + 1}C", (0.92 * fs, 0.4, 0.92 * fs), M, col, bone)
+            band(f"Fist{side}Band{k + 1}", F, fs / 2, dy, 0.4, col, bone)
         for k in range(3):  # gumball knuckles across the front
             cube_ball(f"Knuckle{side}{k + 1}", F + (sx * 0.95 * (k - 1), 0.3, -1.8), 0.9,
                       GUM[(k * 3 + (2 if sx > 0 else 0)) % 8], bone)
@@ -268,7 +237,7 @@ def gumball_golem():
         H = np.array([sx * HIP_X, HIP_Y, 0.0])
         a.pivots[bone] = tuple(H)
         jaw("Hip" + side, H + (0, -0.35, 0), 1.35, [C.LEMON, C.WHITE, C.CHERRY, C.WHITE], bone)
-        cube_ball("Thigh" + side, H + (sx * 0.1, -1.75, 0), 2.0, C.SKY, bone, shine=True)
+        cube_ball("Thigh" + side, H + (sx * 0.1, -1.75, 0), 2.0, C.SKY, bone)
         jaw("Knee" + side, H + (sx * 0.15, -3.1, -0.15), 1.1, [C.GRAPE, C.BUBBLE], bone)
         # chunky grape foot: stepped slab, dark sole, white gumball toes
         fx0, fx1 = sx * HIP_X - 1.45, sx * HIP_X + 1.45

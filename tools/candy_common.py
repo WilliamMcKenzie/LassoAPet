@@ -8,6 +8,10 @@ to /mnt/project-files/world3/candyland/renders/.
 Colours are bright and saturated with a dark stop under each, because game Lighting washes
 colours out. Name prefixes the converter reads: Glow* = neon, Eye*/Pupil*/Plain* = no studs,
 and any name containing "In" is drawn plain too, so avoid "In" in ordinary part names.
+
+Meshes (QM, Oct 15): hull() makes a curved low-poly shape from points (garden_lib's ellipsoid,
+dome, prism); named Smooth... it converts (with --meshes) smooth-shaded and studless. Every
+mesh on a bone in one colour merges into one MeshPart.
 """
 
 import math
@@ -22,6 +26,11 @@ import animal_designs as A  # noqa: E402
 from animal_designs import EYE_WHITE, PUPIL, PLATE, PUPIL_BACK  # noqa: E402,F401
 from horse_rig import pose  # noqa: E402
 from partlib import Part, T, Rx, Ry, Rz, render  # noqa: E402,F401
+import horse_rig  # noqa: E402
+
+_euler = horse_rig.EULER
+import garden_lib as G  # noqa: E402  (only its mesh shapes; it sets Blockbench's euler order, undone below)
+horse_rig.EULER = _euler
 
 OUT = os.path.join(A.ROOT, "designs", "candyland")
 SHOTS = "/mnt/project-files/world3/candyland/renders"
@@ -110,6 +119,42 @@ def rpyr(a, name, M, w, d, h, color, bone):
     p.bone = bone
     a.parts.append(p)
     return p
+
+
+def hull(a, name, pts, color, bone):
+    """A convex low-poly mesh round the points (studs)."""
+    p = Part(name, (1, 1, 1), np.eye(4), color, "Poly", plain=name.startswith("Smooth"))
+    p.polys = G.hull_tris(pts)
+    p.bone = bone
+    a.parts.append(p)
+    return p
+
+
+def stick(a, name, p, n, size, color, bone, turn=0.0, sink=0.2):
+    """A box (w, h, depth) set on a curved surface at p, its face looking out along n
+    (turn: degrees about n), sunk `sink` of its depth into the surface."""
+    n = np.array(n, float)
+    n /= np.linalg.norm(n)
+    x = np.cross((0, 1.0, 0), -n) if abs(n[1]) < 0.99 else np.array((1.0, 0, 0))
+    x /= np.linalg.norm(x)
+    M = np.eye(4)
+    M[:3, 0], M[:3, 1], M[:3, 2], M[:3, 3] = x, np.cross(-n, x), -n, np.array(p, float) + n * size[2] * (0.5 - sink)
+    return rbox(a, name, size, M @ Rz(turn), color, bone)
+
+
+def surface_eye(a, side, p, n, w, h, bone, look=(0.0, 0.0)):
+    """A googly plate eye standing on a curved surface at p, facing out along n: a white
+    plate w x h and a pupil on it, lower middle (look shifts it: (sideways, up) in eye widths)."""
+    n = np.array(n, float)
+    n /= np.linalg.norm(n)
+    x = np.cross((0, 1.0, 0), -n)
+    x /= np.linalg.norm(x)
+    y = np.cross(-n, x)
+    M = np.eye(4)
+    M[:3, 0], M[:3, 1], M[:3, 2], M[:3, 3] = x, y, -n, np.array(p, float) + n * PLATE / 2
+    rbox(a, "Eye" + side, (w, h, PLATE), M, EYE_WHITE, bone)
+    P = M @ T(look[0] * w, -h * 0.1 + look[1] * h, -PLATE / 2 - 0.015)
+    rbox(a, "Pupil" + side, (w * 0.5, h * 0.55, 0.03), P, PUPIL, bone)
 
 
 def eyes(a, x, y0, y1, z0, z1, bone="neck", glow=False):

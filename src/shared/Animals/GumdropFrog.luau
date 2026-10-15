@@ -1,5 +1,6 @@
 -- Gumdrop Frog: World 3 Candyland Uncommon (Oct 14). A squat orange frog shaped like a sugar-crusted
--- gumdrop, with eye turrets and a wide grin; it hops. You ride on top of its dome.
+-- gumdrop, with round eye bumps and a wide grin; it hops. You ride on top of its dome. (QM, Oct 15:
+-- the gumdrop and eye bumps are smooth meshes, converted with --meshes assets/meshes/GumdropFrog.)
 -- designs/candyland/GumdropFrog.bbmodel (tools/gumdrop_frog.py), converted (no --zyx) into GumdropFrogModel.luau by
 -- tools/bbmodel_to_luau.py.
 
