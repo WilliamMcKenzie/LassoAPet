@@ -1860,6 +1860,13 @@ if Config.World == 2 then
 	-- marble a stud up, ponds a stud and two down (their flowing water: tools/world2_water.luau).
 	local temple = Config.Biomes[5]
 	temple.Herd = table.clone(temple.Herd)
+	temple.Herd.Catfish = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
+	temple.Herd.Tiger = 0.17 -- the Temple's Rare (QM, Oct 13), as often as the Fire Lobster
+	temple.Herd.JadeStatue = 0.13 -- the Jade and Garnet Statues (QM, Oct 13), Epics as often as the Rockworm
+	temple.Herd.GarnetStatue = 0.13
+	temple.Herd.Fox = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
+	temple.Herd.NineTailedFox = 0.17 -- the Fox's rare variant (QM, Oct 13), as often as the Fire Lobster
+	temple.Herd.Kitsune = 0.03 -- the Kitsune (QM, Oct 13), the Temple's Legendary, as rare as the Phoenix
 	do -- the Loong runs wild here (QM, Oct 13), 1 in 4,000 of the stampede (QM, Oct 15: was 0.025, now it's sold at World 1's base)
 		local others = 0
 		for kind, weight in temple.Herd do
@@ -1869,13 +1876,6 @@ if Config.World == 2 then
 		end
 		temple.Herd.Loong = others / 3999
 	end
-	temple.Herd.Catfish = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
-	temple.Herd.Tiger = 0.17 -- the Temple's Rare (QM, Oct 13), as often as the Fire Lobster
-	temple.Herd.JadeStatue = 0.13 -- the Jade and Garnet Statues (QM, Oct 13), Epics as often as the Rockworm
-	temple.Herd.GarnetStatue = 0.13
-	temple.Herd.Fox = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
-	temple.Herd.NineTailedFox = 0.17 -- the Fox's rare variant (QM, Oct 13), as often as the Fire Lobster
-	temple.Herd.Kitsune = 0.03 -- the Kitsune (QM, Oct 13), the Temple's Legendary, as rare as the Phoenix
 	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
 	temple.Patches = {
 		Rock = { rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
