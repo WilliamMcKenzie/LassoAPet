@@ -124,6 +124,11 @@ local function pets()
 			table.insert(out, { id = id, kind = item.pet, equipped = true })
 		end
 	end
+	-- (and the one you ride, waiting at your pen's gap: always in, QM Oct 15)
+	local ride = player:GetAttribute("RidePet")
+	if typeof(ride) == "string" and ride ~= "" then
+		table.insert(out, { id = "ride", kind = ride, equipped = true, ride = true })
+	end
 	for id, item in decode(player:GetAttribute("StoredPets")) do
 		if typeof(item) == "table" and item.pet then
 			table.insert(out, { id = id, kind = item.pet, equipped = false })
@@ -169,7 +174,7 @@ local function fill()
 		face.ImageTransparency = if pet.equipped then 0 else 0.2 -- (80% opaque out of the pen: QM)
 		face.Parent = cell
 		cell.Activated:Connect(function()
-			if busy then
+			if busy or pet.ride then -- (the pet you ride stays in)
 				return
 			end
 			busy = true
@@ -200,6 +205,11 @@ local function watchPen()
 end
 player:GetAttributeChangedSignal("Pen"):Connect(watchPen)
 watchPen()
+player:GetAttributeChangedSignal("RidePet"):Connect(function()
+	if open then
+		fill()
+	end
+end)
 player:GetAttributeChangedSignal("StoredPets"):Connect(function()
 	if open then
 		fill()
