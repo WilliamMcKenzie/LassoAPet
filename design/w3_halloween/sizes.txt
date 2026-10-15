@@ -4,5 +4,5 @@ JackOLantern: 5.5 x 5.5 x 5.9, 344 tris, 4 pieces
 JackOLanternSmall: 3.7 x 3.6 x 3.9, 344 tris, 4 pieces
 Pumpkin: 4.6 x 4.3 x 4.6, 260 tris, 3 pieces
 PumpkinPile: 9.1 x 3.8 x 4.7, 780 tris, 3 pieces
-LeafPile: 6.8 x 1.9 x 7.3, 680 tris, 3 pieces
-LeafScatter: 3.7 x 1.3 x 4.0, 356 tris, 3 pieces
+LeafPile: 6.4 x 2.9 x 6.6, 352 tris, 3 pieces
+LeafScatter: 6.8 x 1.5 x 6.2, 220 tris, 3 pieces

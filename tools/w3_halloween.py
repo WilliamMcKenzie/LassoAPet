@@ -22,8 +22,8 @@ BARK = (96, 64, 58)
 BARK_DARK = (74, 50, 50)
 IRON = (52, 46, 58)
 GLOW = (255, 214, 60)  # lantern glass and carved faces (Neon in Studio)
-PUMPKIN = (236, 96, 20)  # a redder orange than the grass so it stands out
-PUMPKIN_DARK = (204, 76, 16)
+PUMPKIN = (206, 70, 18)  # a deep red-orange, darker than the grass so it pops
+PUMPKIN_DARK = (172, 54, 14)
 STEM = (104, 120, 46)
 LEAF_COLS = [(214, 52, 40), (252, 200, 50), (150, 80, 40)]  # red, yellow, brown: they read on orange grass
 
@@ -55,7 +55,7 @@ def spooky_tree(rng):
         q = p + d * length
         branches.extend(tube(rng, [p, mid, q], r, r * 0.7, 6))
         if depth == 0:
-            tips.append(cone(q - d * 0.1, q + d * length * 0.45, r * 0.75))
+            tips.append(cone(q - d * 0.1, q + d * length * 0.45, r * 0.9))
             return
         for turn in (-0.55, 0.5):
             nd = rot_y(np.array([d]), turn + rng.uniform(-0.2, 0.2))[0] + (0, 0.25, 0)
@@ -169,51 +169,53 @@ def pumpkin_pile(rng):
 
 # ---------------------------------------------------------------- autumn leaves
 
-def maple(c, s, yaw, tilt=0.0):
-    """A chunky maple leaf lying on the ground: three pointed lobes (pyramid-ish plates) and
-    a short stalk, about s across."""
-    lobes = []
-    for a, L in ((0.0, 1.0), (1.15, 0.8), (-1.15, 0.8)):
-        d = np.array((math.sin(a), 0, -math.cos(a)))
-        sd = np.array((-d[2], 0, d[0]))
-        tip = d * s * 0.55 * L
-        pts = [sd * s * 0.16, -sd * s * 0.16, tip, d * s * 0.28 * L + sd * s * 0.2, d * s * 0.28 * L - sd * s * 0.2]
-        pts = [np.asarray(p) for p in pts]
-        lobes.append(np.array(pts + [p + (0, 0.45, 0) for p in pts[:2]] + [pts[2] + (0, 0.15, 0)] + [p + (0, 0.35, 0) for p in pts[3:]]))
-    stalk = np.array([(0, 0, 0.0), (0, 0.1, 0.0), (0.05, 0, s * 0.3), (0.05, 0.08, s * 0.3), (-0.05, 0, s * 0.3)])
-    out = []
-    for p in lobes + [stalk]:
-        q = rot_y(p, yaw)
-        q[:, 1] += 0.02 + tilt * q[:, 0]
-        out.append(q + (c[0], 0, c[2]))
-    return out
+def leaf_wedge(p, n, yaw, L, w, t=0.45):
+    """A thick pointed leaf: a diamond of length L and width w lying on a surface at p with
+    normal n, its top face smaller so it reads as a chunky wedge. Sunk a little into p."""
+    n = np.asarray(n, float) / np.linalg.norm(n)
+    u = np.cross(n, (math.cos(yaw), 0, math.sin(yaw)))
+    if np.linalg.norm(u) < 1e-3:
+        u = np.cross(n, (1, 0, 0))
+    u /= np.linalg.norm(u)
+    v = np.cross(n, u)
+    base = np.asarray(p, float) - n * 0.15
+    flat = [u * L / 2, v * w / 2, -u * L / 2, -v * w / 2]
+    return np.array([base + f for f in flat] + [base + n * t + f * 0.55 for f in flat])
 
 
-def leaves(rng, n, spread, mound):
-    """A low chunky mound of leaves (no flat decals): a faceted heap in two leaf colours with
-    thick maple leaves lying on and around it."""
+def leaves(rng, R, H, n_on, n_ground=0, ground_r=0.0):
+    """A dome of leaves: a mound (half ellipsoid, R across, H tall) covered in thick leaf
+    wedges resting on its surface, plus a few wedges lying on the ground round it. Mixed red,
+    yellow and brown."""
     cols = {c: [] for c in LEAF_COLS}
-    heap = blob(rng, (0, 0, 0), spread, 16, squash=(1.0, mound / spread, 0.85), jitter=0.08)
-    heap = heap[heap[:, 1] > -0.05]
-    heap = np.concatenate([heap, np.array(ring(10, spread * 0.95, 0.0, sz=0.85))])
-    cols[LEAF_COLS[0]].append(heap)
-    for i in range(n):
-        a = rng.uniform(0, 2 * math.pi)
-        d = spread * math.sqrt(rng.uniform(0.02, 1.2))
-        y = mound * max(0.0, 1 - (d / spread) ** 2) * 0.85
-        lf = maple((math.cos(a) * d, 0, math.sin(a) * d), rng.uniform(2.0, 2.6), rng.uniform(0, 6.28), rng.uniform(-0.1, 0.1))
-        cols[LEAF_COLS[1 + i % 2]] += [p + (0, y, 0) for p in lf]
+    dome = blob(rng, (0, 0, 0), R, 20, squash=(1.0, H / R, 1.0), jitter=0.04)
+    dome = np.concatenate([dome[dome[:, 1] > -0.05], np.array(ring(12, R, 0.0))])
+    cols[LEAF_COLS[0]].append(dome)
+    for i in range(n_on):
+        # spread evenly over the upper dome (golden angle), not too near the rim
+        k = (i + 0.5) / n_on
+        el = math.asin(0.15 + 0.85 * (1 - k))  # high to low
+        az = i * 2.39996 + rng.uniform(-0.2, 0.2)
+        x, y, z = math.cos(el) * math.cos(az) * R, math.sin(el) * H, math.cos(el) * math.sin(az) * R
+        nrm = (x / R ** 2, y / H ** 2, z / R ** 2)
+        L = rng.uniform(1.5, 2.1)
+        cols[LEAF_COLS[i % 3]].append(leaf_wedge((x, y, z), nrm, rng.uniform(0, 6.28), L, L * 0.62))
+    for i in range(n_ground):
+        az = 2 * math.pi * i / n_ground + rng.uniform(-0.3, 0.3)
+        d = ground_r * rng.uniform(0.85, 1.1)
+        L = rng.uniform(1.5, 2.0)
+        cols[LEAF_COLS[(i + 1) % 3]].append(leaf_wedge((math.cos(az) * d, 0.15, math.sin(az) * d), (0, 1, 0), rng.uniform(0, 6.28), L, L * 0.62))
     return [("Leaves", c, hs) for c, hs in cols.items() if hs]
 
 
 def leaf_pile(rng):
-    """A raked pile of autumn leaves (about 7 across, 2 tall) in red, yellow and brown."""
-    return leaves(rng, 12, 3.0, 1.9)
+    """A raked dome of autumn leaves (about 7 across, 3 tall) in red, yellow and brown."""
+    return leaves(rng, 3.0, 2.6, 26)
 
 
 def leaf_scatter(rng):
-    """A small heap of leaves (about 4 across)."""
-    return leaves(rng, 6, 1.6, 1.0)
+    """A low heap of leaves with a ring of fallen ones round it (about 7 across)."""
+    return leaves(rng, 1.6, 1.1, 9, 6, 2.8)
 
 
 ITEMS = [  # name, builder, seed, label
