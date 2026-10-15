@@ -2098,6 +2098,16 @@ function Config.bossTimePrice(bought)
 	return math.floor(Config.Gems.Price * Config.Gems.Growth ^ (bought or 0) + 0.5)
 end
 Config.GemYellow = Color3.fromHex("FFFC2E") -- (gems' yellow, where cash is green: QM, Oct 15)
+-- The Halloween animals (QM, Oct 15): pets are shared by every world, Halloween ones too, but
+-- a Halloween pet earns only gems, and only in the Halloween world, and the rest only cash,
+-- only outside it: anywhere else they're "useless". [kind] = true (none yet: the Halloween
+-- world's herds are World 1's animals for now, so nothing earns gems there till they're in).
+Config.HalloweenAnimals = {}
+-- Whether a pet of `kind` (a hybrid: `fuse` its other half, Halloween if either is) earns here.
+function Config.earnsHere(kind, fuse)
+	local halloween = Config.HalloweenAnimals[kind] == true or (fuse ~= nil and Config.HalloweenAnimals[fuse] == true)
+	return halloween == (Config.World == 4)
+end
 
 if Config.World == 4 then
 	local rgb = Color3.fromRGB

@@ -285,9 +285,12 @@ end
 
 local function income(profile)
 	-- (a merged pet earns for all it's made of; a hybrid what both its pets earned)
-	local total = profile.rideIncome or (Config.PetIncome[profile.ride] or 0) * (profile.rideMerged or 1)
+	-- (only the pets that earn in this world: Halloween ones in the Halloween world, the rest
+	-- everywhere else, Config.earnsHere; QM, Oct 15)
+	local total = if profile.ride and not Config.earnsHere(profile.ride, profile.rideFuse) then 0
+		else profile.rideIncome or (Config.PetIncome[profile.ride] or 0) * (profile.rideMerged or 1)
 	for _, item in profile.items do
-		if item.pet then
+		if item.pet and Config.earnsHere(item.pet, item.fuse) then
 			total += item.income or (Config.PetIncome[item.pet] or 0) * (item.merged or 1)
 		end
 	end

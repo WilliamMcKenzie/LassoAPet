@@ -111,6 +111,7 @@ local function short(n)
 end
 
 local function show(model, kind, fuse, stats, income)
+	income = if Config.earnsHere(kind, fuse) then income else 0 -- (a pet from the other side of the Halloween line earns nothing here: QM, Oct 15)
 	local p = plates[model] or build(model)
 	local s = Fusion.stats(kind, fuse, stats)
 	local key = Fusion.key(kind, fuse) .. "/" .. s.Speed .. "/" .. income .. "/" .. Config.goldX(player)
