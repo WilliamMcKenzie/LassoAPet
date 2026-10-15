@@ -1577,6 +1577,7 @@ Config.AnimalScale.GumdropFrog = 1.6 -- (QM, Oct 15)
 Config.AnimalScale.GingerbreadMan = 2 -- (QM, Oct 15)
 Config.AnimalScale.RockCandyDragon = 2 -- (QM, Oct 15)
 Config.AnimalScale.ReefTitan = 3 -- (QM, Oct 15)
+Config.AnimalScale.AncientTreant = 2 -- (QM, Oct 15)
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)

@@ -274,6 +274,13 @@ def mesh_parts(e, model_center):
         q = order_quad([V[k] for k in next(iter(e["faces"].values()))["vertices"]])
         R = frame(q[1] - q[0], q[3] - q[0])
         size, center = extents(list(V.values()), R)
+        # (only a true box: a tapered one, QM's dragged-vertex Treant trunk, Oct 15, would come
+        # out as its whole bounding box, burying what's on its face; with --meshes it's a mesh)
+        if MESHES:
+            for v in V.values():
+                local = np.abs(R.T @ (v - center))
+                if np.any(np.abs(local - size / 2) > 0.02 * max(size.max(), 1e-6)):
+                    raise ValueError(f"{e['name']}: an 8-vertex mesh that isn't a box")
         return [("Part", center, R, size)]
     raise ValueError(f"{e['name']}: mesh with {n} vertices and faces {faces} isn't supported")
 

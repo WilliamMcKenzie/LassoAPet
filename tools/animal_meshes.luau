@@ -85,6 +85,10 @@ local IDS = {
 	AncientTreant_Leaf_ArmL = 72520559240156, -- (the Ancient Treant: QM's edit, Oct 15)
 	AncientTreant_Leaf_ArmR = 138556975636001,
 	AncientTreant_Leaf_neck = 135473395019785,
+	AncientTreant_Bark_ArmL = 100405580096422, -- (its tapered trunk, moss mouth and leaning fingers as meshes: QM Oct 15)
+	AncientTreant_Bark_ArmR = 91526866992805,
+	AncientTreant_Bark_root = 115478703668645,
+	AncientTreant_Moss_root = 93576707636543,
 	GiantRafflesia_Mosslight_Stem = 138897571228769, -- (the Giant Rafflesia, the Garden's new boss, QM Oct 15)
 	GiantRafflesia_Petal_Petal1 = 134402827558101,
 	GiantRafflesia_Petal_Petal2 = 122501213903802,
@@ -164,6 +168,7 @@ for name, id in IDS do
 	local ok, part = pcall(function()
 		return AssetService:CreateMeshPartAsync(Content.fromUri("rbxassetid://" .. id), {
 			CollisionFidelity = Enum.CollisionFidelity.Box,
+			RenderFidelity = Enum.RenderFidelity.Precise, -- (no level-of-detail blobbing: QM, Oct 15, the Treant's low-poly canopy came out lumpy)
 		})
 	end)
 	if not ok then
