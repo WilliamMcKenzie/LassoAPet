@@ -1,9 +1,12 @@
-"""Rafflesia Beast: World 3 Garden giga rare (draft, Oct 14; about 1 in 1,000). A hulking
+"""DON'T RERUN: QM edited designs/garden/RafflesiaBeast.bbmodel by hand in Blockbench (Oct 15), which is now the
+source; this would overwrite it. Convert that file instead.
+
+Rafflesia Beast: World 3 Garden giga rare (draft, Oct 14; about 1 in 1,000). A hulking
 moss-green beast carrying a giant corpse flower on its back: five huge warty red-orange petals
 spread over it like a saddle cloth, a dark maroon well in the middle ringed by a cream rim and
-bristling with pyramid spines (you ride in the well). Four thick root legs with pyramid root-claws,
-a broad head with two googly eyes, a wide grin of pyramid fangs, a frill of small red petals round
-its neck, vines hanging from the petal tips, and a heavy vine tail ending in a fat bud.
+bristling with pyramid spines (you ride in the well). Oct 15 (QM: "with some mesh usage"): petals (thick, drooping),
+warts, rim, well and the tail vine and bud are low-poly meshes (petal-tip vines and the neck frill cut); body, head and legs stay blocks. Four thick root legs with pyramid root-claws,
+a broad head with two googly eyes, a wide grin of pyramid fangs,  a heavy vine tail ending in a fat bud.
 
 Run: python3 tools/garden_rafflesia.py [--gif]
 Bones (all rest 0): root -> neck -> Jaw; Petal1..5; Tail; LegFL/FR/HL/HR.
@@ -37,13 +40,11 @@ def build():
     # the flower: a raised well in the middle, five petals radiating out over the back
     top = y0 + 4.0
     fc = np.array([0, top, 0.5])
-    g.box(root, "FlowerBase", fc + (0, 0.5, 0), (10.0, 1.0, 10.0), "petaldark")
-    for k in range(10):  # the rim: ten blocks in a ring
-        a = TAU * k / 10
-        p = fc + (4.0 * np.sin(a), 2.0, 4.0 * np.cos(a))
-        g.box(root, "Rim", p, (2.9, 2.0, 1.2), "rim", Rm(("y", np.degrees(a))))
-    g.box(root, "Well", fc + (0, 1.1, 0), (7.2, 0.4, 7.2), "well")
-    g.box(root, "RimBand", fc + (0, 1.2, 0), (9.6, 0.6, 9.6), "petaldark", Rm(("y", 18)))
+    # (Oct 15, QM: "redo with some mesh usage"): the flower base, well, rim and petals are meshes
+    g.hull(root, "FlowerBase", G.prism(fc, 5.2, 1.2, seg=12), "petaldark")
+    g.hull(root, "Well", G.prism(fc + (0, 1.0, 0), 3.6, 0.4, seg=12), "well")
+    ring = [fc + (4.0 * np.sin(a), 1.9, 4.0 * np.cos(a)) for a in np.linspace(0, TAU, 15)]
+    G.tube(g, root, "Rim", ring, [1.0] * len(ring), "rim", seg=8)
     for k in range(7):  # spines standing in the well, ringed round the seat
         a = TAU * (k + 0.5) / 7
         g.pyr(root, "Spine", fc + (2.4 * np.sin(a), 1.3, 2.4 * np.cos(a)), (0.25 * np.sin(a), 1, 0.25 * np.cos(a)),
@@ -57,15 +58,19 @@ def build():
         M = Rm(("y", ang), ("x", -8))  # local +z out along the petal, cupped a little up
         def P(p):
             return pivot + M @ np.array(p, float)
-        for k, (z, w, L, col) in enumerate(((3.0, 9.4, 6.0, "petal"), (7.6, 8.2, 3.6, "petal"), (10.4, 5.8, 2.4, "petal"))):
-            g.box(node, f"Petal{i + 1}", P((0, 0, z)), (w, 1.1, L), col, M)
-        g.box(node, f"PetalEdge{i + 1}", P((0, -0.3, 7.0)), (9.0, 0.9, 8.4), "petaldark", M)
-        for (x, z, sz) in ((-2.8, 2.2, 1.3), (2.4, 3.4, 1.5), (-0.4, 5.4, 1.2), (3.0, 7.4, 1.0), (-2.8, 7.8, 1.1), (0.4, 9.8, 1.1), (-0.8, 2.0, 0.9), (1.4, 11.0, 0.7)):
-            g.box(node, f"Wart{i + 1}", P((x, 0.7, z)), (sz, 0.4, sz), "wart", M)
-        # a vine hanging off the tip
-        tip = P((0, -0.4, 11.4))
-        g.box(node, f"Vine{i + 1}", tip + (0, -1.6, 0), (0.5, 3.2, 0.5), "vine")
-        g.box(node, f"VineLeaf{i + 1}", tip + (0.5, -2.8, 0), (1.2, 0.3, 0.7), "mosslight", Rm(("z", -25)))
+        # two thick lobes: the inner one cupped up, the outer one drooping over the body's edge
+        Md = M @ Rm(("x", 22))
+        hinge = np.array([0, 0, 6.0])
+        def Pd(p):
+            return pivot + M @ hinge + Md @ (np.array(p, float) - hinge)
+        g.hull(node, f"Petal{i + 1}", G.ellipsoid(P((0, 0, 3.6)), (4.4, 1.2, 3.9), seg=10, rings=4, M=M), "petal")
+        g.hull(node, f"Petal{i + 1}", G.ellipsoid(Pd((0, 0, 8.4)), (5.0, 1.1, 4.0), seg=10, rings=4, M=Md), "petal")
+        for (x, z, sz, f, rr, cz) in ((-2.4, 2.6, 1.4, P, (4.4, 1.2, 3.9), 3.6), (2.2, 3.8, 1.6, P, (4.4, 1.2, 3.9), 3.6),
+                                      (-0.4, 5.2, 1.3, P, (4.4, 1.2, 3.9), 3.6), (2.6, 8.0, 1.1, Pd, (5.0, 1.1, 4.0), 8.4),
+                                      (-2.6, 8.6, 1.2, Pd, (5.0, 1.1, 4.0), 8.4), (0.4, 10.6, 1.1, Pd, (5.0, 1.1, 4.0), 8.4)):
+            ys = rr[1] * np.sqrt(max(0.0, 1 - (x / rr[0]) ** 2 - ((z - cz) / rr[2]) ** 2))
+            g.hull(node, f"Wart{i + 1}", G.ellipsoid(f((x, ys, z)), (sz / 2, 0.3, sz / 2), seg=6, rings=2,
+                                                     M=M if f is P else Md), "wart")
     # head: broad, low, eyes on top corners, a grin of fangs; the jaw drops in the gallop
     neck = g.group("neck", (0, y0 + 0.5, -8.6), root)
     hy, hz = y0 + 1.0, -12.0
@@ -85,13 +90,6 @@ def build():
     for k in range(5):
         x = -2.8 + 5.6 * k / 4
         g.pyr(jaw, "LowFang", (x, hy - 1.8, hz - 3.0), (0, 1, 0), 1.0 if k in (0, 4) else 0.7, 0.35, 0.2, "tooth")
-    # neck frill: small red petals (pyramids) round the back of the head
-    for k in range(9):
-        a = np.radians(-80 + 160 * k / 8)
-        d = np.array([np.sin(a), np.cos(a) * 0.9 + 0.2, 0.6])
-        d /= np.linalg.norm(d)
-        g.pyr(neck, "Frill", (np.sin(a) * 4.4, hy + 0.5 + np.cos(a) * 2.6, hz + 3.6), d, 2.6, 1.0, 0.3,
-              "petal" if k % 2 else "bud")
     # legs: thick root columns, a knee band, pyramid root-claws
     for nm, (x, z) in (("FL", (-1, -6.0)), ("FR", (1, -6.0)), ("HL", (-1, 6.5)), ("HR", (1, 6.5))):
         leg = g.group("Leg" + nm, (x * 5.0, y0 - 3.0, z), root)
@@ -101,17 +99,17 @@ def build():
         g.box(leg, "Foot" + nm, (x * 5.0, 0.6, z - 0.4), (4.8, 1.2, 5.0), "rootdark")
         for t in (-1, 0, 1):
             g.pyr(leg, "Claw" + nm, (x * 5.0 + t * 1.5, 0.6, z - 2.9), (t * 0.3, -0.25, -1), 1.6, 0.55, 0.5, "root")
-    # tail: two vine segments and a fat bud
+    # tail: a curving vine (mesh) and a fat bud in three sepals
     tail = g.group("Tail", (0, y0 + 1.0, 9.4), root)
-    d = np.array([0, 0.35, 1.0])
-    d /= np.linalg.norm(d)
     base = np.array([0, y0 + 1.0, 9.4])
-    g.box(tail, "Tail", base + d * 3.0, (2.2, 6.0, 2.2), "vine", G.frame(d))
-    g.box(tail, "TailBud", base + d * 6.6, (3.0, 3.0, 3.0), "bud", Rm(("x", -20)))
-    for k in range(4):
-        a = TAU * k / 4 + 0.4
-        g.pyr(tail, "TailSepal", base + d * 5.6 + (1.2 * np.cos(a), 1.2 * np.sin(a), 0), (np.cos(a), np.sin(a), 0.6),
-              1.4, 0.5, 0.25, "vine")
+    path = [base + (0, 2.4 * u + 1.2 * u * u, 6.0 * u) for u in np.linspace(0, 1, 6)]
+    G.tube(g, tail, "Tail", path, [1.2, 1.1, 1.0, 0.95, 0.9, 0.9], "vine", seg=8)
+    bud = path[-1] + (0, 0.9, 1.4)
+    g.hull(tail, "TailBud", G.ellipsoid(bud, (1.6, 1.9, 1.6), seg=8, rings=4, M=Rm(("x", 35))), "bud")
+    for k in range(3):
+        a = TAU * k / 3 + 0.5
+        d = np.array([np.cos(a), np.sin(a) * 0.7 + 0.3, 0.8])
+        g.hull(tail, "TailSepal", G.leaf(bud - (0, 0.4, 0.9), d, (0, 0, 1), 2.4, 1.3, 0.2), "vine")
     return g
 
 
