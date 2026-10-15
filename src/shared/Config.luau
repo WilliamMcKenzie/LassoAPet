@@ -1686,7 +1686,7 @@ Config.AnimalScale.RoboShark = 4 -- (QM, Oct 15; its hunting still grows it from
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
-Config.PetOffers = { Config.LoongOffer, Config.RoboSharkOffer }
+Config.PetOffers = if Config.World == 4 then {} else { Config.LoongOffer, Config.RoboSharkOffer } -- (none in the Halloween world's stripped base for now: QM, Oct 15)
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)
