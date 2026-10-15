@@ -8,7 +8,6 @@ Pointy bits are pyramids.
   BlueRingOctopus   sunny yellow covered in glowing blue rings, curly arm stubs round the bottom
   ManOWar           periwinkle running to pink, a magenta crest sail, stinging tentacles
   Mermaid           teal tail layers, pink shell and hair, a gold crown, pearls, a fluke, a trident
-  AbyssalDragon     navy, turquoise belly plates, glowing back spines, gold horns and whiskers
   ReefTitan         sea green with a gold scute rim, coral and an anemone on top, flipper stubs
   RoyalCnidarian    violet and magenta, a gold crown with gems, scowling brows, glowing tentacles
 
@@ -207,27 +206,6 @@ def mermaid_egg():
     return egg
 
 
-def dragon_egg():
-    navy, indigo, teal, belly = (30, 30, 120), (64, 48, 180), (24, 190, 200), (90, 230, 220)
-    egg = shell([teal, navy, navy, indigo, navy, navy, indigo])
-    # turquoise belly plates down the front
-    zf = -WIDTHS[3] / 2
-    for i in range(1, 5):
-        w = WIDTHS[i] / 2 * 0.45
-        egg.block(f"Belly{i}", (-w, i * LH + 0.04, -WIDTHS[i] / 2 - 0.05), (w, (i + 1) * LH - 0.04, -WIDTHS[i] / 2 + 0.1), belly)
-    # glowing spines down the back
-    for i in range(1, 7):
-        z = WIDTHS[i] / 2 - 0.05
-        col = (60, 240, 255) if i % 2 else (170, 80, 255)
-        pyramid(egg, f"GlowSpine{i}", [(-0.1, i * LH + 0.05, z), (0.1, i * LH + 0.05, z), (0.1, i * LH + 0.35, z), (-0.1, i * LH + 0.35, z)],
-                (0, i * LH + 0.35, z + 0.4), col)
-    # gold swept-back horns and whiskers
-    for s in (-1, 1):
-        up_spike(egg, "Horn" + "LR"[s > 0], s * 0.3, TOP - 0.05, 0.05, 0.12, 0.8, GOLD, lean=(s * 0.3, 0.35)).bone = "top"
-        sided(egg, "Whisker", WIDTHS[5] / 2 - 0.05, WIDTHS[5] / 2 + 0.55, 5.3 * LH, 5.3 * LH + 0.1, zf * 0.7 - 0.05, zf * 0.7 + 0.05, GOLD, s)
-    return egg
-
-
 def titan_egg():
     green, green2, dark, ochre = (30, 150, 110), (20, 118, 90), (16, 60, 50), (240, 170, 40)
     egg = shell([dark, green2, green, green, green2, green, green])
@@ -266,7 +244,7 @@ def boss_egg():
     return egg
 
 
-EGGS += [("Mermaid", mermaid_egg), ("AbyssalDragon", dragon_egg), ("ReefTitan", titan_egg), ("RoyalCnidarian", boss_egg)]
+EGGS += [("Mermaid", mermaid_egg), ("ReefTitan", titan_egg), ("RoyalCnidarian", boss_egg)]
 
 if __name__ == "__main__":
     O.EGGS = EGGS

@@ -2036,7 +2036,7 @@ if Config.World == 3 then
 	trophies(1, 1000, { "GhostShip", "JollyRogerWyvern" }) -- the Pirate Cove's giga rares
 	trophies(2, 1000, { "RafflesiaBeast", "AncientTreant", "GiantRafflesia" }) -- the Garden's giga rares and its boss as a trophy pet
 	trophies(3, 1000, { "RockCandyDragon", "GumballGolem", "Gigacorn" }) -- Candyland's giga rares and its boss as a trophy pet
-	trophies(4, 1000, { "AbyssalDragon", "ReefTitan", "RoyalCnidarian" }) -- Cnidaria's giga rares and its boss as a trophy pet
+	trophies(4, 1000, { "ReefTitan", "RoyalCnidarian" }) -- Cnidaria's giga rare and its boss as a trophy pet (no Abyssal Dragon: scrapped, QM Oct 15; its stats, egg and headshot stay for saved ones)
 	-- Each biome's boss.
 	Config.Boss.ByBiome = {
 		-- PirateCove: none, so the default Kind (the Chicken, as World 1's first biome) (QM, Oct 14: Dreadstump cut)
