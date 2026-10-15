@@ -23,7 +23,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.dirname(__file__))
 import horse_rig as HR  # noqa: E402
 import snake_design as S  # noqa: E402
-from bbmodel_to_luau import NEON, PLAIN  # noqa: E402
+from bbmodel_to_luau import NEON, PLAIN, SMOOTH  # noqa: E402
 from partlib import render  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -86,7 +86,7 @@ def parts_of(kind, model, pose=None):
     parts = S.posed(model, anim, t)
     for p in parts:
         p.neon = p.name.startswith(NEON)
-        p.plain = p.plain or p.neon or p.name.startswith(PLAIN) or "In" in p.name
+        p.plain = p.plain or p.neon or p.name.startswith(PLAIN + SMOOTH) or "In" in p.name
     return parts
 
 

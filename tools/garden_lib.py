@@ -396,6 +396,45 @@ def bands(c, r, cuts, seg=10, M=None, tips=True):
     return out
 
 
+def ring(c, t, r, seg=6):
+    """A ring of seg points of radius r round c, square to the direction t."""
+    M = frame(t)
+    return [np.array(c) + M @ (r * np.cos(TAU * k / seg), 0, r * np.sin(TAU * k / seg)) for k in range(seg)]
+
+
+def tube(g, node, name, path, radii, col, seg=6):
+    """A smooth vine along path: one hull per step between neighbouring rings (they share rings, so
+    with a Smooth name the merged mesh shades as one round tube)."""
+    path = [np.array(p, float) for p in path]
+    for i in range(len(path) - 1):
+        t = path[i + 1] - path[i]
+        t0 = path[i + 1] - path[max(0, i - 1)]
+        t1 = path[min(len(path) - 1, i + 2)] - path[i]
+        pts = ring(path[i], t0, radii[i], seg) + ring(path[i + 1], t1, radii[i + 1], seg)
+        if radii[i + 1] < 0.05:
+            pts = ring(path[i], t0, radii[i], seg) + [path[i + 1] + t * 0.0]
+        g.hull(node, name, pts, col)
+
+
+def leaf(c, d, n, L, W, T=0.25, steps=7):
+    """A pointed leaf lying in the plane square to n, stalk at c, tip L along d, W wide: a thin
+    lens (raised mid-rib on top), convex so it is one hull."""
+    d = np.array(d, float) / np.linalg.norm(d)
+    n = np.array(n, float)
+    n = n - d * (n @ d)
+    n /= np.linalg.norm(n)
+    s = np.cross(d, n)
+    c = np.array(c, float)
+    pts = []
+    for t in np.linspace(0, 1, steps):
+        w = W / 2 * np.sin(np.pi * t) ** 0.8
+        p = c + d * L * t
+        pts += [p + s * w, p - s * w]
+        if 0 < t < 1:
+            pts += [p + n * T, p - n * T * 0.4]
+    return pts
+
+
 def legs(L, pairs, swing, n=16, axis=0):
     """{bone: track}: legs swing about X; pairs = [(bone, phase in turns)]."""
     out = {}

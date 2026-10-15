@@ -41,6 +41,26 @@ local IDS = {
 	Bumblebee_Wing_WingFR = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
 	Bumblebee_Yellow_Abdomen = 79819704203552,
 	Bumblebee_Yellow_root = 73623092957303,
+	VineMonster_Leaf_neck = 0, -- (the Vine Monster redone cleaner, QM Oct 15)
+	VineMonster_Leaf_root = 0,
+	VineMonster_Rose_neck = 0,
+	VineMonster_Rosedark_neck = 0,
+	VineMonster_Vinelight_ArmL = 0,
+	VineMonster_Vinelight_ArmR = 0,
+	SunflowerLion_Leaf_LegFL = 0, -- (the Sunflower Lion made majestic, QM Oct 15)
+	SunflowerLion_Leaf_LegFR = 0,
+	SunflowerLion_Leaf_LegHL = 0,
+	SunflowerLion_Leaf_LegHR = 0,
+	SunflowerLion_Leafdark_Tail = 0,
+	SunflowerLion_Leafdark_neck = 0,
+	SunflowerLion_Petal_Tail = 0,
+	SunflowerLion_Petal_neck = 0,
+	SunflowerLion_Petaldark_Tail = 0,
+	SunflowerLion_Petaldark_neck = 0,
+	SunflowerLion_Seed_Tail = 0,
+	SunflowerLion_Seed_neck = 0,
+	SunflowerLion_Seeddark_Tail = 0,
+	SunflowerLion_Seeddark_neck = 0,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then

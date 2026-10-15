@@ -1,4 +1,4 @@
-"""Vine Monster: World 3 Garden Rare (draft, Oct 14). A gorilla-shaped knot of living vines that
+"""Vine Monster: World 3 Garden Rare (draft, Oct 14; redone cleaner Oct 15). A gorilla-shaped knot of living vines that
 knuckle-walks: a barrel chest of twisted vine coils (each block turned a little against the next),
 leafy shoulder pads, long dangling arms of braided vine ending in big knotted fists with thorns, two
 stumpy root legs, a row of red-brown thorns down its back, and a vine-knot head with googly eyes
@@ -20,83 +20,84 @@ C = {"vine": (64, 192, 64), "vinedark": (30, 116, 46), "vinelight": (150, 226, 7
      "rosedark": (198, 30, 92), "bark": (110, 70, 44)}
 
 
-def coil(g, node, name, c, w, h, d, twist, cols=("vine", "vinemid")):
-    """A twisted vine coil: two overlapping blocks turned +-twist about Y (strands 0.25 narrower)."""
-    g.box(node, name, c, (w, h, d), cols[0], Rm(("y", twist)))
-    g.box(node, name + "B", np.array(c) + (0, 0.05, 0), (w - 0.25, h - 0.1, d - 0.25), cols[1], Rm(("y", -twist)))
-
-
-def tendril(g, node, name, axis_x, axis_z, y_lo, y_hi, r, turns=1.25, phase=0.0, col="vinelight"):
-    """A chunky tendril spiralling round a vertical limb: blocks stepping round the axis as they climb,
-    each turned to follow the curl, ending in a curled tip (a pyramid) poking out."""
-    n = max(4, int(turns * 6))
+def helix(x, z, y_lo, y_hi, r, turns, phase, n_per_turn=8):
+    """Points of a vine spiralling up round a vertical limb at (x, z), then curling out at the top."""
+    n = int(turns * n_per_turn) + 1
+    pts = []
     for k in range(n):
         u = k / (n - 1)
         a = TAU * (phase + turns * u)
-        y = y_lo + (y_hi - y_lo) * u
-        p = (axis_x + r * np.sin(a), y, axis_z + r * np.cos(a))
-        g.box(node, name, p, (0.7, 0.7, 1.4), col, Rm(("y", np.degrees(a) + 90), ("x", -20)))
+        pts.append((x + r * np.sin(a), y_lo + (y_hi - y_lo) * u, z + r * np.cos(a)))
     a = TAU * (phase + turns)
-    out = np.array([np.sin(a), 0.6, np.cos(a)])
-    g.pyr(node, name + "Tip", (axis_x + r * np.sin(a), y_hi + 0.3, axis_z + r * np.cos(a)), out, 1.2, 0.35, 0.35, col)
+    out = np.array([np.sin(a), 0, np.cos(a)])
+    side = np.array([np.cos(a), 0, -np.sin(a)])
+    end = np.array(pts[-1])
+    for k, (o, up, sd) in enumerate(((0.7, 0.4, 0.3), (1.3, 1.0, 0.3), (1.5, 1.6, -0.2))):
+        pts.append(end + out * o + (0, up, 0) + side * sd)
+    return pts
 
 
 def build():
+    """Cleaner (QM Oct 15: "redo vine monster to be cleaner, and use mesh where needed"): a plain
+    block gorilla (chest, hips, hunched head, thick forearms, fists), with meshes only for the
+    curved things: smooth vines spiralling up the arms, leaf shoulder pads and the rose."""
     g = Garden("VineMonster", C)
     y0 = 5.0
     root = g.group("root", (0, y0, 0))
-    # chest: three coils, the top one widest (gorilla shoulders), leaning forward
-    for k, (yy, w, h, d, tw) in enumerate(((y0 - 0.6, 5.0, 2.2, 4.4, 12), (y0 + 1.4, 6.4, 2.2, 5.0, -14),
-                                           (y0 + 3.2, 7.6, 2.0, 5.2, 10))):
-        coil(g, root, f"Coil{k + 1}", (0, yy, -0.4 * k), w, h, d, tw)
-    g.box(root, "Hips", (0, y0 - 1.6, 0.8), (4.6, 1.6, 3.6), "vinedark")
-    # leafy shoulder pads
+    g.box(root, "Chest", (0, y0 + 2.2, -0.6), (7.2, 4.4, 4.8), "vine")
+    g.box(root, "ChestPlate", (0, y0 + 1.6, -3.1), (4.6, 2.8, 0.2), "vinelight")
+    g.box(root, "Hips", (0, y0 - 0.6, 1.0), (5.0, 2.4, 4.0), "vinedark")
+    # back thorns down the spine
+    for k, (yy, zz) in enumerate(((y0 + 4.4, 0.2), (y0 + 3.6, 1.8), (y0 + 2.0, 1.8))):
+        d = (0, 1, 0.5) if k == 0 else (0, 0.4, 1)
+        g.pyr(root, "Thorn", (0, yy, zz), d, 1.4 - 0.2 * k, 0.45, 0.45, "thorn")
+    # leaf shoulder pads: three leaves fanned over each shoulder
     for side, s in (("L", -1), ("R", 1)):
-        for k, (dx, dz, tilt) in enumerate(((3.6, -1.4, 20), (3.9, 0.4, 28), (3.4, 1.8, 16))):
-            g.box(root, f"Leaf{side}", (s * dx, y0 + 4.4, dz - 0.8), (2.8, 0.4, 1.8), "leaf" if k != 1 else "vinelight",
-                  Rm(("z", -s * tilt), ("y", s * 15 * (k - 1))))
-    # back thorns, a row down the spine
-    for k, (yy, zz) in enumerate(((y0 + 4.1, 0.6), (y0 + 3.0, 2.1), (y0 + 1.6, 2.6), (y0 + 0.0, 2.4))):
-        g.spike(root, "Thorn", (0, yy, zz), (0, 0.5, 1), 1.4 - 0.15 * k, 0.45, "thorn")
-    # head: a vine knot, rose on top, brows, thorn teeth
-    neck = g.group("neck", (0, y0 + 4.0, -1.6), root)
-    hy, hz = y0 + 5.0, -2.6
-    coil(g, neck, "Head", (0, hy, hz), 4.4, 3.4, 3.6, 8)
-    g.box(neck, "Brow", (0, hy + 0.9, hz - 1.9), (4.2, 0.6, 0.8), "vinedark")
-    g.box(neck, "Mouth", (0, hy - 0.9, hz - 1.82), (3.2, 1.0, 0.2), "mouth")
-    for t in (-1.2, -0.4, 0.4, 1.2):
-        g.pyr(neck, "Tooth", (t, hy - 0.45, hz - 1.95), (0, -1, 0), 0.6, 0.25, 0.1, "tooth")
-    for side, s in (("L", -1), ("R", 1)):
-        g.eye(neck, side, (s * 1.0, hy + 0.15, hz - 1.92), 1.3, look=(0, 0))
-        g.box(neck, "BrowTilt" + side, (s * 1.0, hy + 0.95, hz - 2.25), (1.6, 0.4, 0.3), "vinedark", Rm(("z", s * 18)))
-    # the rose: a stem knot and three rings of petals, darkest in the middle
-    ry = hy + 1.9
-    g.box(neck, "RoseBase", (0.6, ry, hz + 0.2), (1.6, 0.6, 1.6), "vinelight")
-    for ring, (rad, tilt, sz, col, off) in enumerate(((1.3, -50, (1.9, 1.6, 0.4), "rose", 0), (0.7, -25, (1.3, 1.5, 0.4), "rosedark", 36))):
-        for ang in range(off, 360 + off, 72):
+        for k, (dz, ang) in enumerate(((-1.6, -35), (-0.4, 0), (0.8, 35))):
             a = np.radians(ang)
-            g.box(neck, "Petal", (0.6 + rad * np.sin(a), ry + 0.9 + 0.2 * ring, hz + 0.2 + rad * np.cos(a)), sz, col,
-                  Rm(("y", ang), ("x", tilt)))
-    g.box(neck, "RoseMid", (0.6, ry + 1.1, hz + 0.2), (0.9, 1.4, 0.9), "rosedark", Rm(("y", 45)))
+            d = np.array([s * np.cos(a), -0.35, np.sin(a)])
+            g.hull(root, "SmoothLeaf", G.leaf((s * 2.6, y0 + 4.5, dz), d, (0, 1, 0), 3.8, 2.4), "leaf")
+    # head: hunched forward between the shoulders, heavy brows, a muzzle full of thorn teeth
+    neck = g.group("neck", (0, y0 + 3.4, -2.6), root)
+    hy, hz = y0 + 3.8, -3.6
+    g.box(neck, "Head", (0, hy, hz), (4.4, 3.6, 3.6), "vine")
+    g.box(neck, "Muzzle", (0, hy - 0.9, hz - 2.2), (3.4, 1.8, 0.8), "vinelight")
+    g.box(neck, "Mouth", (0, hy - 1.05, hz - 2.65), (2.6, 0.9, 0.1), "mouth")
+    for t in (-0.9, -0.3, 0.3, 0.9):
+        g.pyr(neck, "Tooth", (t, hy - 0.62, hz - 2.72), (0, -1, 0), 0.55, 0.22, 0.05, "tooth")
     for side, s in (("L", -1), ("R", 1)):
-        g.box(neck, "RoseLeaf" + side, (0.6 + s * 1.5, ry + 0.2, hz + 0.6), (1.8, 0.3, 1.0), "leaf", Rm(("z", -s * 15)))
-    # arms: long braided vines to the ground, knotted fists with thorns
+        g.eye(neck, side, (s * 1.0, hy + 0.55, hz - 1.9), 1.2, look=(0, -0.05))
+        g.box(neck, "Brow" + side, (s * 1.05, hy + 1.3, hz - 2.0), (2.0, 0.6, 0.8), "vinedark", Rm(("z", s * 14)))
+    # the rose on top: a bud and two rings of cupped petals, two leaves under it
+    rc, k_ = np.array([0.7, hy + 1.8, hz + 0.3]), 1.4
+    g.hull(neck, "SmoothRoseBud", G.ellipsoid(rc + (0, 1.0 * k_, 0), np.array((0.6, 0.8, 0.6)) * k_, seg=8, rings=4), "rosedark")
+    for ring_i, (n, rad, h, tilt, col, off) in enumerate(((5, 0.75, 0.9, 25, "rosedark", 0.5), (5, 1.0, 0.7, 45, "rose", 0.0))):
+        rad, h = rad * k_, h * k_
+        for k in range(n):
+            a = TAU * (k + off) / n
+            out = np.array([np.sin(a), 0, np.cos(a)])
+            M = G.frame(out * np.sin(np.radians(tilt)) + (0, np.cos(np.radians(tilt)), 0))
+            pc = rc + out * rad + (0, h, 0)
+            g.hull(neck, "SmoothRose", G.ellipsoid(pc, np.array((0.75, 0.75, 0.22)) * k_, seg=8, rings=3, M=M @ Rm(("x", 90))), col)
+    for side, s in (("L", -1), ("R", 1)):
+        g.hull(neck, "SmoothRoseLeaf", G.leaf(rc + (s * 0.6, 0.15, 0), (s, -0.15, 0.2), (0, 1, 0), 2.4, 1.3, 0.18), "leaf")
+    # arms: to the ground, thick forearms, big knotted fists with thorns, a vine spiralling up each
     for side, s in (("L", -1), ("R", 1)):
         arm = g.group("Arm" + side, (s * 4.0, y0 + 3.6, -0.8), root)
-        ax = s * 4.6
-        for k, (yy, h, tw) in enumerate(((y0 + 2.2, 3.4, 15), (y0 - 0.9, 3.2, -15))):
-            coil(g, arm, f"Arm{side}{k + 1}", (ax, yy, -1.0 - 0.3 * k), 1.8, h, 1.8, tw)
-        g.box(arm, "Fist" + side, (ax, 1.1, -1.8), (2.6, 2.2, 2.6), "vinedark")
-        g.box(arm, "Knuckle" + side, (ax, 1.3, -3.15), (2.4, 1.2, 0.3), "vine")
-        g.spike(arm, "FistThorn" + side, (ax + s * 1.3, 1.6, -1.8), (s, 0.3, 0), 1.0, 0.35, "thorn")
-        g.spike(arm, "FistThorn" + side, (ax, 2.2, -2.2), (0, 1, -0.3), 0.9, 0.3, "thorn")
-        tendril(g, arm, "Tendril" + side, ax, -1.15, 2.4, y0 + 3.4, 1.15, turns=1.5, phase=0.1 if s > 0 else 0.6)
-    # root legs: short and thick
+        ax, az = s * 4.6, -1.0
+        g.box(arm, "Arm" + side, (ax, y0 + 2.4, az), (2.4, 3.2, 2.4), "vine")
+        g.box(arm, "Forearm" + side, (ax, 4.0, az - 0.2), (2.8, 3.6, 2.8), "vinemid")
+        g.box(arm, "Fist" + side, (ax, 1.1, az - 0.4), (3.0, 2.2, 3.0), "vinedark")
+        g.pyr(arm, "FistThorn" + side, (ax + s * 1.5, 1.5, az - 0.4), (s, 0.3, 0), 1.0, 0.35, 0.35, "thorn")
+        g.pyr(arm, "FistThorn" + side, (ax, 2.2, az - 1.3), (0, 1, -0.4), 0.9, 0.3, 0.3, "thorn")
+        path = helix(ax, az - 0.1, 2.3, y0 + 2.6, 1.75, 1.6, 0.15 if s > 0 else 0.65)
+        radii = [0.38] * (len(path) - 3) + [0.32, 0.24, 0.0]
+        G.tube(g, arm, "SmoothVine" + side, path, radii, "vinelight")
+    # legs: short thick roots
     for side, s in (("L", -1), ("R", 1)):
-        leg = g.group("Leg" + side, (s * 1.5, y0 - 1.8, 1.0), root)
-        coil(g, leg, "Leg" + side, (s * 1.6, (y0 - 1.8) / 2, 1.0), 1.9, y0 - 1.8, 1.9, 12, ("bark", "vinedark"))
-        g.box(leg, "Foot" + side, (s * 1.7, 0.35, 0.5), (2.4, 0.7, 2.8), "bark")
-        tendril(g, leg, "LegTendril" + side, s * 1.6, 1.0, 1.0, y0 - 2.2, 1.2, turns=1.0, phase=0.3 if s > 0 else 0.8)
+        leg = g.group("Leg" + side, (s * 1.6, y0 - 1.6, 1.2), root)
+        g.box(leg, "Leg" + side, (s * 1.6, (y0 - 1.2 + 0.7) / 2, 1.2), (2.2, y0 - 1.9, 2.2), "bark")
+        g.box(leg, "Foot" + side, (s * 1.7, 0.35, 0.8), (2.8, 0.7, 3.0), "bark")
     return g
 
 
