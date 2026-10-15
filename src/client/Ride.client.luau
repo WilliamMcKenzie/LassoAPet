@@ -4327,7 +4327,7 @@ RunService.PreSimulation:Connect(function(dt)
 			-- Crossed the finish line: the animal you rode is yours, in your pen
 			-- (Hatchery's FinishCourse), then back home to your pen.
 			task.spawn(function()
-				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, mount.kind)
+				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, if mount.own then nil else mount.kind) -- (your own pet: not a copy of it, a random one: QM, Oct 15)
 				task.wait(ok and kind and vfx.newAnimal.show(kind) or 0.5)
 				if phase == "finish" then
 					local pen = myPen()
