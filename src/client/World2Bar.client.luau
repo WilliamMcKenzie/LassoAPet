@@ -33,6 +33,7 @@ local WORLD_ART = {
 	[2] = { "rbxassetid://108726643390976", "rbxassetid://108345016053649" }, -- World2Bar.png, World2BarEmpty.png
 	[3] = { "rbxassetid://114072165271854", "rbxassetid://134941502651415" }, -- World3Bar.png, World3BarEmpty.png (QM, Oct 15)
 }
+local TRAIL_ART = { "rbxassetid://96598497238200", "rbxassetid://130130177164969" } -- TrailBar.png, TrailBarEmpty.png (QM's, "TRAIL" on them; the colour's name goes before it)
 local BAR = Vector2.new(660, 660 * 103 / 964) -- (half the screen across: QM's mockup)
 local TOP = 14 -- px from the screen's top (QM, Oct 13: was at the bottom, over the egg inventory)
 local ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
@@ -49,7 +50,7 @@ local function goal()
 		end
 	end
 	local i = Config.nextTrail(player)
-	return i and { price = Config.TrailBars[i].Price, label = string.upper(Config.TrailBars[i].Name) .. " TRAIL", trail = i }
+	return i and { price = Config.TrailBars[i].Price, label = string.upper(Config.TrailBars[i].Name), trail = i }
 end
 local function price()
 	local g = goal()
@@ -125,8 +126,8 @@ label.TextScaled = true
 label.TextColor3 = Color3.new(1, 1, 1)
 label.TextXAlignment = Enum.TextXAlignment.Right
 label.AnchorPoint = Vector2.new(1, 0.5)
-label.Position = UDim2.fromScale(0.935, 0.5)
-label.Size = UDim2.fromScale(0.45, 0.46)
+label.Position = UDim2.fromScale(0.815, 0.515) -- (just left of the art's "TRAIL", its height)
+label.Size = UDim2.fromScale(0.35, 0.43)
 label.ZIndex = 3
 local labelStroke = Instance.new("UIStroke")
 labelStroke.Thickness = 3
@@ -152,8 +153,8 @@ local function showGold()
 	fill.Size = UDim2.fromScale(math.clamp(gold / p, 0, 1), 1)
 	text.Text = "$" .. Config.short(gold) .. "/" .. Config.short(p)
 	local g = goal()
-	local art = g and g.world and WORLD_ART[g.world]
-	label.Text = if g and not art then g.label else ""
+	local art = g and (if g.world then WORLD_ART[g.world] elseif g.trail then TRAIL_ART else nil)
+	label.Text = if g and g.trail then g.label else ""
 	green.Image = if art then art[1] else FULL
 	bar.Image = if art then art[2] else EMPTY
 	hand.Visible = full()
