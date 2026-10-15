@@ -845,6 +845,7 @@ local Config = {
 		NineTailedFox = "rbxassetid://110560724842212", -- assets/ui/NineTailedFoxEggRender.png (World 2)
 		Kitsune = "rbxassetid://124688776792586", -- assets/ui/KitsuneEggRender.png (World 2)
 		GreenCrab = "rbxassetid://74196090261063", -- assets/ui/GreenCrabEggRender.png (World 3)
+		LimeCrab = "rbxassetid://85578461423986", -- assets/ui/LimeCrabEggRender.png (World 3)
 		Parrot = "rbxassetid://96862284524676", -- assets/ui/ParrotEggRender.png (World 3)
 		BananaMonkey = "rbxassetid://128398088115519", -- assets/ui/BananaMonkeyEggRender.png (World 3)
 		TreasureHermit = "rbxassetid://87618949538639", -- assets/ui/TreasureHermitEggRender.png (World 3)
