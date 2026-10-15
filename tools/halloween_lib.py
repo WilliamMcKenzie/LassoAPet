@@ -45,8 +45,9 @@ def quad_anims(swing=(24, 42), lean=-4, hop=(2, 8), tail="Tail", head="neck", id
     gait 'bound' puts the hind pair a quarter step behind in the gallop (cats, wolves)."""
     def run(L, sw, ln, hp, gallop, n=16):
         tr = {"root": [track(L, lambda u: (ln + 3 * sin(TAU * u), 0, 0), n),
-                       track(L, lambda u: (0, hp * abs(sin(TAU * u)), 0), n, "position")],
-              head: [track(L, lambda u: (-ln - 4 * sin(TAU * u), 0, 0), n)]}
+                       track(L, lambda u: (0, hp * abs(sin(TAU * u)), 0), n, "position")]}
+        if head:
+            tr[head] = [track(L, lambda u: (-ln - 4 * sin(TAU * u), 0, 0), n)]
         if tail:
             tr[tail] = [track(L, lambda u: (10 + 10 * sin(TAU * u), 12 * sin(TAU * u), 0), n)]
         bound = gallop and gait == "bound"
@@ -59,8 +60,9 @@ def quad_anims(swing=(24, 42), lean=-4, hop=(2, 8), tail="Tail", head="neck", id
 
     def anims(m):
         L = 3.0
-        idle = {head: [track(L, lambda u: (3 * sin(TAU * u), idle_head * sin(TAU * u), 4 * sin(TAU * u + 1)), 24)],
-                "root": [track(L, lambda u: (0, 1.2 * sin(TAU * 2 * u), 0), 24, "position")]}
+        idle = {"root": [track(L, lambda u: (0, 1.2 * sin(TAU * 2 * u), 0), 24, "position")]}
+        if head:
+            idle[head] = [track(L, lambda u: (3 * sin(TAU * u), idle_head * sin(TAU * u), 4 * sin(TAU * u + 1)), 24)]
         if tail:
             idle[tail] = [track(L, lambda u: (10, 25 * sin(TAU * u), 0), 24)]
         return {"idle": (L, idle), "walk": (0.8, run(0.8, swing[0], 0, hop[0], False)),
