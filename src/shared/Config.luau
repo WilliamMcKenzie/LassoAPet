@@ -2006,7 +2006,7 @@ if Config.World == 3 then
 			Herd = { MoonJellyfish = 0.3, Anomalocaris = 0.25, BoxJellyfish = 0.15, BlueRingOctopus = 0.15, ManOWar = 0.08, Mermaid = 0.03 },
 			Patches = {
 				Trench = { rgb(81, 109, 175), rgb(87, 116, 182) }, -- (QM, Oct 15)
-				Coral = { rgb(255, 128, 150), rgb(244, 112, 136) },
+				Coral = { Color3.fromHex("9AC4D9"), Color3.fromHex("91BDD4") }, -- (QM, Oct 15)
 				Glow = { rgb(63, 179, 202), rgb(73, 200, 212) }, -- (QM, Oct 15)
 			},
 			GateColor = rgb(90, 255, 200),
