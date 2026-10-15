@@ -5,6 +5,8 @@
 -- A quasicrystal floor (QM's map maker) in tiles of a ladder: each tile only touches the
 -- tiles a rung either side, so there's always a transition ring (QM's layered rule). Paints
 -- this biome's walls and caps. In game the floor takes Config's colours by part name.
+-- After re-running the Pirate Cove's, run stamina-loop's tools/world3_shallowwater.luau (QM, Oct 15:
+-- a one-tile ring of shallow water inside every pool, 2a59cc6); its boardwalk is baked in at top 3.
 local W = workspace.World
 local NAME, NEAR, FAR = "Cnidaria", -11808, -18048
 local WATER_IMAGE = "rbxassetid://113940500836253" -- (QM's darker tile, Oct 14: stamina-loop f6fac9e2; Config.Water.Image in World 3)
