@@ -301,7 +301,7 @@ local Config = {
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, FlytrapQueen = 60, RoyalCnidarian = 50, Gigacorn = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, GiantRafflesia = 60, RoyalCnidarian = 50, Gigacorn = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
 		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
 		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
@@ -316,7 +316,7 @@ local Config = {
 			Monarch = { At = Vector3.new(0, 0, 0.12), From = Vector3.new(0, 16, 75) }, -- (its head, from further out and above so the wings frame it: Studio saw the head too high from (0,4,50))
 			JadeAsura = { At = Vector3.new(0, 0.13, 0.3), From = Vector3.new(0, 6, 55) }, -- (its face and tusks, under the crown; a guess)
 			Sphinx = { At = Vector3.new(0, 0.28, 0.4), From = Vector3.new(0, 6, 60) }, -- (its pharaoh face, high at the front; a guess)
-			FlytrapQueen = { At = Vector3.new(0, 0.32, 0.3), From = Vector3.new(0, 10, 70) }, -- World 3 Garden: the Queen's crowned head, high in the middle (a guess)
+			GiantRafflesia = { At = Vector3.new(0, 0.32, 0.3), From = Vector3.new(0, 10, 70) }, -- World 3 Garden: the flower, high on its stem (a guess; was the Flytrap Queen's)
 			RoyalCnidarian = { At = Vector3.new(0, 0.1, 0.33), From = Vector3.new(0, 6, 60) }, -- (World 3 Cnidaria's crowned jellyfish: its eyes and teeth under the crown; a guess)
 			Gigacorn = { At = Vector3.new(0, 0.2, 0.4), From = Vector3.new(0, 8, 65) }, -- (World 3 Candyland's candy unicorn: its face under the horn, high at the front; a guess)
 			CrystalTyrant = { At = Vector3.new(0, 0.02, 0.48), From = Vector3.new(0, 4, 34) }, -- (its eyes and teeth, halfway up: the crown makes it tall)
@@ -615,7 +615,7 @@ local Config = {
 		GreenCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
 		GhostShip = 4, JollyRogerWyvern = 4, -- World 3 Pirate Cove's giga rares (XL) (guesses, Oct 14)
 		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
-		RafflesiaBeast = 4, AncientTreant = 4, FlytrapQueen = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
+		RafflesiaBeast = 4, AncientTreant = 4, GiantRafflesia = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
 		MoonJellyfish = 1, Anomalocaris = 2, BoxJellyfish = 2, BlueRingOctopus = 2, ManOWar = 2, Mermaid = 3, -- World 3 Cnidaria (guesses, Oct 14)
 		AbyssalDragon = 4, ReefTitan = 4, RoyalCnidarian = 3, -- World 3 Cnidaria's giga rares (XL) and its boss as a pet (guesses, Oct 14)
 		GummyBear = 1, GumdropFrog = 1, GingerbreadMan = 1, Creampuff = 2, SwollFairy = 2, DesireTroll = 3, -- World 3 Candyland (guesses, Oct 14)
@@ -860,7 +860,7 @@ local Config = {
 		SunflowerLion = "rbxassetid://109315089615628", -- assets/ui/SunflowerLionEggRender.png (World 3)
 		RafflesiaBeast = "rbxassetid://105998022695625", -- assets/ui/RafflesiaBeastEggRender.png (World 3)
 		AncientTreant = "rbxassetid://100941370514849", -- assets/ui/AncientTreantEggRender.png (World 3)
-		FlytrapQueen = "rbxassetid://81971373381902", -- assets/ui/FlytrapQueenEggRender.png (World 3)
+		GiantRafflesia = "rbxassetid://81971373381902", -- assets/ui/FlytrapQueenEggRender.png (World 3; the Flytrap Queen's egg for now)
 		GummyBear = "rbxassetid://82472901970710", -- assets/ui/GummyBearEggRender.png (World 3)
 		GumdropFrog = "rbxassetid://96785493203961", -- assets/ui/GumdropFrogEggRender.png (World 3)
 		GingerbreadMan = "rbxassetid://109625880806599", -- assets/ui/GingerbreadManEggRender.png (World 3)
@@ -1486,7 +1486,7 @@ Config.World3Pets = {
 	SunflowerLion = { 10.5, 160000, 2700 },
 	RafflesiaBeast = { 0.5, 1600000, 3600 },
 	AncientTreant = { 0.5, 1600000, 3600 },
-	FlytrapQueen = { 0.5, 1600000, 3600 },
+	GiantRafflesia = { 0.5, 1600000, 3600 },
 	-- World 3's last biome, Cnidaria (Oct 14: tools/moon_jellyfish.py etc.): the top of the game,
 	-- above Candyland. Legendary 640k (Garden's 160k x2 x2), the others by Pirate Cove's ratios to
 	-- its Legendary; trophies 10x the Legendary, as the Seraphs. ALL GUESSES.
@@ -1935,7 +1935,7 @@ if Config.World == 3 then
 			WallColors = { rgb(35, 86, 31), rgb(30, 74, 27) },
 			CapColor = rgb(255, 120, 170),
 			-- (Oct 14, the Garden animals thread: weights as the Crimson Lands' by rarity, guesses; its
-			-- giga rares and the Flytrap Queen added below)
+			-- giga rares and the Giant Rafflesia added below)
 			Herd = { Ladybug = 0.3, Bumblebee = 0.3, ToadstoolFrog = 0.2, VineMonster = 0.2, VenusFlytrap = 0.12, SunflowerLion = 0.05 },
 			Patches = {
 				Soil = { rgb(110, 72, 44), rgb(98, 64, 38) },
@@ -2012,13 +2012,13 @@ if Config.World == 3 then
 		end
 	end
 	trophies(1, 1000, { "GhostShip", "JollyRogerWyvern" }) -- the Pirate Cove's giga rares
-	trophies(2, 1000, { "RafflesiaBeast", "AncientTreant", "FlytrapQueen" }) -- the Garden's giga rares and its boss as a trophy pet
+	trophies(2, 1000, { "RafflesiaBeast", "AncientTreant", "GiantRafflesia" }) -- the Garden's giga rares and its boss as a trophy pet
 	trophies(3, 1000, { "RockCandyDragon", "GumballGolem", "Gigacorn" }) -- Candyland's giga rares and its boss as a trophy pet
 	trophies(4, 1000, { "AbyssalDragon", "ReefTitan", "RoyalCnidarian" }) -- Cnidaria's giga rares and its boss as a trophy pet
 	-- Each biome's boss.
 	Config.Boss.ByBiome = {
 		-- PirateCove: none, so the default Kind (the Chicken, as World 1's first biome) (QM, Oct 14: Dreadstump cut)
-		Garden = "FlytrapQueen",
+		Garden = "GiantRafflesia", -- (QM Oct 15: replaces the Flytrap Queen)
 		Candyland = "Gigacorn", -- the candy unicorn (silent till a cry is picked)
 		Cnidaria = "RoyalCnidarian", -- the crowned jellyfish (silent till a cry is picked)
 	}

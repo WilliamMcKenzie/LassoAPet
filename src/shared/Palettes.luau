@@ -820,20 +820,15 @@ return {
 		{ "Horn", 240, 132, 40 }, -- shroom
 		{ "Horn", 190, 90, 30 }, -- shroomdark
 	},
-	FlytrapQueen = {
-		{ "Body", 52, 150, 52 }, -- green
-		{ "Body", 24, 88, 40 }, -- greendark
-		{ "Belly", 220, 36, 140 }, -- red
-		{ "Belly", 130, 16, 90 }, -- reddark
-		{ "Marking", 84, 184, 60 }, -- leaf
-		{ "Marking", 38, 120, 48 }, -- leafdark
-		{ "Marking", 236, 60, 170 }, -- crown
-		{ "Marking", 170, 30, 120 }, -- crowndark
-		{ "Accent", 86, 40, 96 }, -- bulb
-		{ "Accent", 52, 22, 64 }, -- bulbdark
-		{ "Horn", 252, 240, 206 }, -- spike
-		{ "Hoof", 96, 60, 44 }, -- root
-		{ "Hoof", 60, 38, 30 }, -- rootdark
+	GiantRafflesia = { -- World 3 Garden's boss (Oct 15, replaces the Flytrap Queen)
+		{ "Body", 60, 150, 50 }, -- vine: stem, leaves
+		{ "Body", 120, 186, 70 }, -- mosslight: stem leaves
+		{ "Belly", 246, 226, 200 }, -- rim
+		{ "Marking", 220, 62, 40 }, -- petal
+		{ "Marking", 150, 30, 30 }, -- petaldark
+		{ "Accent", 250, 222, 196 }, -- wart
+		{ "Accent", 90, 18, 34 }, -- well
+		{ "Horn", 250, 236, 210 }, -- spine
 	},
 	GummyBear = { -- World 3 Candyland
 		{ "Body", 236, 36, 72 }, -- body, head, legs, ears

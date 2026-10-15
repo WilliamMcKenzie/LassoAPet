@@ -77,7 +77,7 @@ local KINDS = {
 	SunflowerLion = { data = require(script.Parent.SunflowerLionEggModel), center = 1.6 },
 	RafflesiaBeast = { data = require(script.Parent.RafflesiaBeastEggModel), center = 1.6 },
 	AncientTreant = { data = require(script.Parent.AncientTreantEggModel), center = 1.6 },
-	FlytrapQueen = { data = require(script.Parent.FlytrapQueenEggModel), center = 1.6 },
+	GiantRafflesia = { data = require(script.Parent.FlytrapQueenEggModel), center = 1.6 }, -- (still the Flytrap Queen's egg, Oct 15)
 	Asura = { data = require(script.Parent.AsuraEggModel), center = 1.6 },
 	Snake = { data = require(script.Parent.SnakeEggModel), center = 1.6 },
 	Penguin = { data = require(script.Parent.PenguinEggModel), center = 1.6 },
