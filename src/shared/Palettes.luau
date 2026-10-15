@@ -866,8 +866,7 @@ return {
 		{ "Body", 238, 172, 84 }, -- pastry bun and lid
 		{ "Body", 200, 124, 50 }, -- bun base, feet (darker)
 		{ "Marking", 255, 252, 246 }, -- whipped cream
-		{ "Accent", 150, 206, 60 }, -- mould
-		{ "Accent", 96, 150, 40 }, -- darker mould
+		{ "Accent", 236, 36, 72 }, -- cherry (QM Oct 15: no longer spoiled; was green mould)
 	},
 	SwollFairy = { -- World 3 Candyland
 		{ "Body", 255, 150, 206 }, -- skin

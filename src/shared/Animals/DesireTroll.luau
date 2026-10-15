@@ -1,4 +1,4 @@
--- Desire Troll: World 3 Candyland Legendary (Oct 14). A hulking strawberry troll knuckle-walking on
+-- Desire Troll (shown as "Sugar Troll", Config.PetNames: QM Oct 15): World 3 Candyland Legendary (Oct 14). A hulking strawberry troll knuckle-walking on
 -- grape fists, with candy-corn tusks and cotton-candy hair. Large. You ride on its wrapper saddle.
 -- designs/candyland/DesireTroll.bbmodel (tools/desire_troll.py), converted (no --zyx) into DesireTrollModel.luau by
 -- tools/bbmodel_to_luau.py.
