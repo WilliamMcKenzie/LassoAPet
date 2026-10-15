@@ -526,7 +526,7 @@ local Config = {
 		 RestorePer = 0 --[[ (no time back for eating: QM, Oct 15, was 0.3) ]], MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
 		-- QM, Oct 4: one animal, however long it takes, speeding up from 1x to MaxBoost x over RampTime s
 		Leviathan = { Kind = "Hunt", Once = true, Cooldown = 5, SpeedBoost = 1, MaxBoost = 8, RampTime = 10, RestorePer = 0.2, Grow = 1, SpeedUp = 1, MaxTier = 2 },
-		Loong = { Kind = "Breath", Duration = 4.2, FireFrom = 0.95, FireTo = 3.95, Cooldown = 8, Range = 140, Width = 22, Crawl = 1, RestorePer = 0.1, Grow = 1.025, LinearGrow = true, SpeedUp = 1.1, MaxSpeed = 2, MaxTier = 4 }, -- (MaxSpeed: x its 0.5x speed, so up to 1x; Crawl 1: no slowing while it breathes, QM Oct 15, was 0.15; Grow: 2.5% an animal, added, not compounded, QM Oct 15, was 1.1)
+		Loong = { Kind = "Breath", Duration = 4.2, FireFrom = 0.95, FireTo = 3.95, Cooldown = 8, Range = 140, Width = 22, Crawl = 1, RestorePer = 0, Grow = 1.025, LinearGrow = true, SpeedUp = 1.1, MaxSpeed = 2, MaxTier = 4 }, -- (MaxSpeed: x its 0.5x speed, so up to 1x; Crawl 1: no slowing while it breathes, QM Oct 15, was 0.15; Grow: 2.5% an animal, added, not compounded, QM Oct 15, was 1.1; RestorePer 0: no ride time back for what it burns, QM Oct 15, was 0.1)
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
 	-- automatic sprint home with the egg). Like any sprint they drain Hold faster.

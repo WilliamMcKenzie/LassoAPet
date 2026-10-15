@@ -2748,9 +2748,7 @@ function vfx.breathAim()
 	if UserInputService.MouseEnabled and not UserInputService.TouchEnabled then
 		local m = UserInputService:GetMouseLocation()
 		ray = camera:ViewportPointToRay(m.X, m.Y)
-	elseif vfx.lastTap then
-		ray = camera:ScreenPointToRay(vfx.lastTap.X, vfx.lastTap.Y)
-	end
+	end -- (on a phone, straight ahead: no aiming, QM Oct 15)
 	if not ray or ray.Direction.Y > -1e-3 then
 		return ahead
 	end
