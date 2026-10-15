@@ -1664,12 +1664,36 @@ Config.AnimalScale.Gigacorn = 2.625 -- 3x the Majestic Unicorn it reskins: 3 x i
 Config.PetNames = {
 	DesireTroll = "Sugar Troll", -- (QM, Oct 15; was "Desire Troll")
 }
--- Each world's own animals: [world] = the set that runs at its own speed there (World 1's: all).
-local OWN = { [2] = Config.World2Animals, [3] = setmetatable(table.clone(Config.World2Animals), { __index = Config.World3Animals }) }
+-- Every pet ridden in a world not its own runs at a Horse's speed there (QM, Oct 15; World 2's
+-- kept theirs in World 3 before), but these keep theirs everywhere (QM: the Robux pets).
+Config.CrossWorldExempt = { Loong = true, RoboShark = true, SnackYak = true }
+-- (World 1's animals World 2's Meadow has too: World 1's own as well)
+local SHARED = { Bunny = true, Rhino = true, Fish = true }
+-- Whether `kind` is one of `world`'s own animals.
+function Config.ownHere(kind, world)
+	world = world or Config.World
+	if Config.CrossWorldExempt[kind] then
+		return true
+	elseif world == 2 then
+		return Config.World2Animals[kind] == true
+	elseif world == 3 then
+		return Config.World3Animals[kind] == true
+	end
+	return not Config.World3Animals[kind] and (not Config.World2Animals[kind] or SHARED[kind] == true)
+end
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
 function Config.slowedHere(kind, fuse)
-	local own = OWN[Config.World]
-	return own ~= nil and not own[kind] and not (fuse and own[fuse])
+	return not Config.ownHere(kind) and not (fuse and Config.ownHere(fuse))
+end
+-- World 1: World 2's and 3's pets ridden here at a Horse's speed (QM, Oct 15).
+if Config.World == 1 then
+	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
+	for kind, stats in Config.AnimalStats do
+		if not Config.ownHere(kind, 1) then
+			Config.AnimalStats[kind] = table.clone(stats)
+			Config.AnimalStats[kind].Speed = horse
+		end
+	end
 end
 
 -- Each world's biome names, as players know them (Stats, Funnel; World 2's and 3's Config.Biomes
@@ -1973,7 +1997,7 @@ if Config.World == 2 then
 	-- World 1's animals ridden here: a Horse's speed (QM, Oct 14; Config.slowedHere).
 	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
 	for kind, stats in Config.AnimalStats do
-		if not Config.World2Animals[kind] then
+		if not Config.ownHere(kind, 2) then -- (and World 3's: QM, Oct 15)
 			Config.AnimalStats[kind] = table.clone(stats)
 			Config.AnimalStats[kind].Speed = horse
 		end
@@ -2160,7 +2184,7 @@ if Config.World == 3 then
 	for kind, stats in Config.AnimalStats do
 		Config.AnimalStats[kind] = table.clone(stats)
 		Config.AnimalStats[kind].Speed = if Config.World3Pets[kind] then Config.World3Pets[kind][1]
-			elseif Config.World3Animals[kind] or Config.World2Animals[kind] then stats.Speed
+			elseif Config.ownHere(kind, 3) then stats.Speed -- (World 2's at a Horse's too: QM, Oct 15)
 			else horse
 	end
 	for kind, w3 in Config.World3Pets do
