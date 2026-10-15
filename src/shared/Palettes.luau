@@ -893,11 +893,10 @@ return {
 		{ "Body", 236, 36, 72 }, -- machine base, fists
 		{ "Marking", 250, 254, 255 }, -- glass globe
 	},
-	Gigacorn = { -- World 3 Candyland's boss
-		{ "Body", 255, 252, 246 }, -- white coat
-		{ "Marking", 255, 150, 206 }, -- cotton-candy mane and tail, frosting
-		{ "Marking", 232, 98, 170 }, -- darker pink
-		{ "Accent", 70, 196, 255 }, -- sky frosting and puffs
-		{ "Hoof", 200, 124, 50 }, -- waffle-cone hooves
+	Gigacorn = { -- World 3 Candyland's boss: the Majestic Unicorn in candy colours (QM, Oct 15)
+		{ "Body", 252, 250, 255 }, -- pearl coat
+		{ "Belly", 255, 150, 206 }, -- bubblegum socks and muzzle
+		{ "Horn", 236, 36, 72 }, -- cherry horn and brows
+		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" }, -- (cherry like the horn)
 	},
 }

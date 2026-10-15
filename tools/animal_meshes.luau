@@ -101,17 +101,6 @@ local IDS = {
 	GiantRafflesia_Wart_Petal4 = 124018537708046,
 	GiantRafflesia_Wart_Petal5 = 78180364957226,
 	GiantRafflesia_Well_Flower = 88148812378304,
-	Gigacorn_46C4FF_Tail = 0, -- (the Gigacorn, Candyland's boss, made clean and majestic: QM Oct 15; its cotton-candy mane and tail, candy-cane horn, muzzle, chest, rump and peppermints)
-	Gigacorn_46C4FF_neck = 0,
-	Gigacorn_CC96FF_Tail = 0,
-	Gigacorn_CC96FF_neck = 0,
-	Gigacorn_EC2448_neck = 0,
-	Gigacorn_EC2448_root = 0,
-	Gigacorn_FF78D2_neck = 0,
-	Gigacorn_FF96CE_Tail = 0,
-	Gigacorn_FF96CE_neck = 0,
-	Gigacorn_FFFCF6_neck = 0,
-	Gigacorn_FFFCF6_root = 0,
 	Creampuff_EC2448_neck = 0, -- (the Creampuff's bun, cream, lid and cherry: QM Oct 15; 0 = not uploaded yet)
 	Creampuff_EEAC54_neck = 0,
 	Creampuff_EEAC54_root = 0,

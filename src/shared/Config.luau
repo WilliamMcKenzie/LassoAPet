@@ -1569,6 +1569,7 @@ Config.AnimalScale.Ladybug = 2 -- (QM, Oct 15; was 1x)
 Config.AnimalScale.Bumblebee = 2 -- (QM, Oct 15; was 1x)
 Config.AnimalScale.YellowGummyBear = 1.5 -- the Gummy Bear recoloured, 1.5x (QM, Oct 15)
 Config.AnimalScale.GreenGummyBear = 2 -- and 2x (QM, Oct 15)
+Config.AnimalScale.Gigacorn = 2.625 -- 3x the Majestic Unicorn it reskins: 3 x its 1.4, over the 1.6 its tier 3 adds (QM, Oct 15)
 -- Each world's own animals: [world] = the set that runs at its own speed there (World 1's: all).
 local OWN = { [2] = Config.World2Animals, [3] = setmetatable(table.clone(Config.World2Animals), { __index = Config.World3Animals }) }
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
