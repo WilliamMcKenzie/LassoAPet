@@ -1895,7 +1895,7 @@ end
 -- until then each herd runs Fish (World 2's way) and each boss is World 2's in that slot.
 if Config.World == 3 then
 	local rgb = Color3.fromRGB
-	local SAND = { rgb(236, 204, 146), rgb(224, 188, 128) } -- warm golden sand, a clear checker (QM, Oct 14: his blocky island mock-up)
+	local SAND = { rgb(246, 226, 173), rgb(237, 216, 160) } -- (QM, Oct 15: his GroundA/B)
 	Config.Biomes = {
 		{
 			-- Its colours are the home base's too, a tropical island (QM, Oct 14; tools/world3_base.luau's
@@ -1914,8 +1914,8 @@ if Config.World == 3 then
 			Herd = { GreenCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
 			Patches = {
 				Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
-				WetSand = { rgb(206, 166, 108), rgb(196, 156, 100) }, -- the darker ring round every pool (QM's mock-up)
-				DampSand = { rgb(222, 186, 126), rgb(212, 176, 118) }, -- between the sand and the wet sand (QM, Oct 14; tools/world3_dampsand.luau)
+				WetSand = { rgb(218, 193, 140), rgb(204, 181, 132) }, -- (QM, Oct 15)
+				DampSand = { rgb(229, 202, 143), rgb(220, 193, 136) }, -- between the sand and the wet sand (QM, Oct 15)
 				Grass = { rgb(95, 168, 62), rgb(86, 156, 56) }, -- (the base's: muted olive, QM Oct 14; was 96, 204, 60)
 				Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
 				ShallowWater = { rgb(70, 180, 237), rgb(70, 180, 237) }, -- the light ring round each pool, under the see-through tile (QM, Oct 15; tools/world3_shallowwater.luau)
