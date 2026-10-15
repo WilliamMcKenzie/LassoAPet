@@ -1,17 +1,15 @@
--- The Halloween world's Desert floor (QM, Oct 15: "make new desert terrain to match this
--- ground pattern", his teal graveyard picture). Made by tools/halloween_desert_floor.py:
--- edit that and re-make this, not this. Run in Studio (Edit, execute_luau) on the Halloween
--- Place, after tools/halloween_desert.luau. Re-running is fine.
--- Pale flagstones down the middle ("Ground"), ragged patches of darker flagstone mostly along
--- the walls ("Stone"), and the slate ("Grass") in patches inside those, always ringed by the
--- darker flagstone. All flush (the old floor's sandstone was a stud up, so the props on it
--- come down with it). Replaces every floor part in World.Ground between the Desert's lines
--- and lays these over, the outer columns on under the walls. In game the colours are
--- Config's World 4 Desert (GroundColors, Patches.Stone and Patches.Grass) by part name.
+-- A Halloween world biome's floor, the Desert (QM, Oct 15: his picture's pattern: light
+-- flagstones down the middle, ragged bands of the middle tone along the walls, the darkest in
+-- patches inside those, always ringed by the middle tone; all flush). Made by
+-- tools/halloween_desert_floor.py: edit that and re-make this, not this. Run in Studio (Edit,
+-- execute_luau) on the Halloween Place. Re-running is fine. Replaces every floor part in
+-- World.Ground between the biome's lines and lays these over, the outer columns on under the
+-- walls; moves its Obstacles and Decor with the floor under them. In game the colours are
+-- Config's World 4 Desert by part name (GroundColors, then its Patches).
 local W = workspace.World
 local Z0, Z1 = -2168, -2168 - 1816
 local rgb = Color3.fromRGB
-local LOOK = { -- (as Config's World 4 Desert, so Studio shows it)
+local LOOK = { -- (as Config's, so Studio shows it)
 	Ground = { rgb(126, 180, 210), rgb(116, 170, 202) },
 	Stone = { rgb(104, 154, 186), rgb(96, 146, 178) },
 	Grass = { rgb(86, 122, 150), rgb(78, 114, 142) },
@@ -373,7 +371,7 @@ end
 
 local template, removed = nil, 0
 for _, p in W.Ground:GetChildren() do
-	if p:IsA("BasePart") and inDesert(p.Position.Z) and p.Position.Y < 2 then
+	if p:IsA("BasePart") and inDesert(p.Position.Z) and p.Position.Y < 4 then
 		if not template and p:FindFirstChildWhichIsA("Texture") then
 			template = p:Clone()
 		end

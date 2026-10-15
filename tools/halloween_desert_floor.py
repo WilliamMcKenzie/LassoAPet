@@ -1,9 +1,12 @@
 """The Halloween world's Desert floor (QM, Oct 15: "make new desert terrain to match this
 ground pattern", his teal night graveyard picture).
 
-Run: python3 tools/halloween_desert_floor.py [out_dir]
-     renders it (the Desert cut into four strips side by side, start line at the top of the
-     first) and writes tools/halloween_desert_floor.luau.
+Run: python3 tools/halloween_desert_floor.py [desert|tundra] [out_dir]
+     renders it (the biome cut into four strips side by side, start line at the top of the
+     first) and writes tools/halloween_<biome>_floor.luau (template halloween_floor_biome.luau.in).
+
+The Tundra the same way in QM's autumn colours (Oct 15, his harvest picture): tan
+flagstones down the middle, sage green along the walls, brown patches inside the green.
 
 His picture: pale flagstones down the middle, ragged patches of a darker flagstone mostly
 along the walls (a few out in the middle), and the darkest slate in small patches inside
@@ -24,15 +27,25 @@ sys.path.insert(0, os.path.dirname(__file__))
 from desert_ground import noise, rects  # noqa: E402
 
 HERE = os.path.dirname(__file__)
-Z0, Z1 = -2168, -2168 - 1816  # the Desert (Config.Biomes[2].Length)
+BIOMES = {
+    "desert": dict(name="Desert", z0=-2168, length=1816, seed=41, colours={  # Config World 4 Desert
+        "Ground": [(126, 180, 210), (116, 170, 202)],  # pale flagstone
+        "Stone": [(104, 154, 186), (96, 146, 178)],  # darker flagstone
+        "Grass": [(86, 122, 150), (78, 114, 142)],  # slate
+    }),
+    "tundra": dict(name="Tundra", z0=-2168 - 1816, length=1920, seed=53, colours={  # (Config World 4 Tundra: Studio adds)
+        "Ground": [(214, 184, 134), (204, 174, 124)],  # tan
+        "Grass": [(136, 156, 104), (126, 146, 96)],  # sage green
+        "Dirt": [(160, 112, 74), (148, 102, 66)],  # brown
+    }),
+}
+KEY = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in BIOMES else "desert"
+B = BIOMES[KEY]
+Z0, Z1 = B["z0"], B["z0"] - B["length"]
 CELL, BAND = 8, 64
 PALE, MID, SLATE = 0, 1, 2
-NAMES = {PALE: "Ground", MID: "Stone", SLATE: "Grass"}  # (Config's World 4 Desert colours by name)
-COLOURS = {  # Config World 4: GroundColors, Patches.Stone, Patches.Grass
-    PALE: [(126, 180, 210), (116, 170, 202)],
-    MID: [(104, 154, 186), (96, 146, 178)],
-    SLATE: [(86, 122, 150), (78, 114, 142)],
-}
+NAMES = dict(zip((PALE, MID, SLATE), B["colours"]))  # light, middle, darkest
+COLOURS = {k: B["colours"][n] for k, n in NAMES.items()}
 
 
 def half_width(z):  # tools/funnel.luau (Config.CourseHalfWidth, CourseWidening, CourseMaxHalfWidth)
@@ -78,7 +91,7 @@ def no_specks(m):
     return m
 
 
-def layout(seed=41):
+def layout(seed=B["seed"]):
     rag = noise(NX, NZ, 6, seed)  # how far each wall band reaches in
     mids = noise(NX, NZ, 3, seed + 1) * 0.7 + noise(NX, NZ, 8, seed + 2) * 0.3  # patches out in the middle
     dark = noise(NX, NZ, 7, seed + 3)
@@ -149,7 +162,7 @@ def render(kind, out, s=3, strips=4):
             ox = st * (NX * CELL * s + gap * s)
             for a in range(2):
                 for b in range(2):
-                    col = (42, 88, 104) if k is None else COLOURS[k][(i * 2 + a + j * 2 + b) % 2]
+                    col = (60, 50, 66) if k is None else COLOURS[k][(i * 2 + a + j * 2 + b) % 2]
                     for u in range(4 * s):
                         for v in range(4 * s):
                             px[ox + (i * CELL + a * 4) * s + u, (jj * CELL + b * 4) * s + v] = col
@@ -157,16 +170,20 @@ def render(kind, out, s=3, strips=4):
 
 
 def main():
-    out = sys.argv[1] if len(sys.argv) > 1 else "/mnt/project-files/biomes/halloween_desert"
+    args = [a for a in sys.argv[1:] if a not in BIOMES]
+    out = args[0] if args else "/mnt/project-files/biomes/halloween_" + KEY
     os.makedirs(out, exist_ok=True)
     kind = layout()
     assert check(kind) == 0, "pale touches slate"
     for k in (PALE, MID, SLATE):
         assert not specks(kind == k).any(), f"specks of {k}"
-    render(kind, os.path.join(out, "halloween_desert.png"))
+    render(kind, os.path.join(out, "halloween_%s.png" % KEY))
     rows = ['\t{ "%s", %d, %d, %d, %d },' % p for p in parts(kind)]
-    body = open(os.path.join(HERE, "halloween_desert_floor.luau.in")).read()
-    open(os.path.join(HERE, "halloween_desert_floor.luau"), "w").write(body.replace("--FLOOR--", "\n".join(rows)))
+    look = "\n".join("\t%s = { rgb%s, rgb%s }," % (n, tuple(c[0]), tuple(c[1])) for n, c in B["colours"].items())
+    body = open(os.path.join(HERE, "halloween_floor_biome.luau.in")).read()
+    body = body.replace("--NAME--", B["name"]).replace("--Z0--", str(Z0)).replace("--LENGTH--", str(B["length"]))
+    body = body.replace("--LOOK--", look).replace("--FLOOR--", "\n".join(rows))
+    open(os.path.join(HERE, "halloween_%s_floor.luau" % KEY), "w").write(body)
     print({n: int((kind == k).sum()) for n, k in (("pale", PALE), ("mid", MID), ("slate", SLATE))}, "parts:", len(rows))
 
 
