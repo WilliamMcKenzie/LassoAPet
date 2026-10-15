@@ -829,11 +829,10 @@ end
 assert(template, "no Halloween base floor in World.Ground: run tools/halloween_base.luau first")
 template:SetAttribute("HalloweenBase", nil)
 template:SetAttribute("HalloweenFloor", true)
-local checker
+-- (keeping both its textures: the studs and the 8-stud checkerboard, QM Oct 15: "why isnt
+-- the halloween base floor checkerboard"; every part starts on the 8-stud grid, so the squares line up)
 for _, t in template:GetChildren() do
-	if t:IsA("Texture") and not checker then
-		checker = t
-	else
+	if not t:IsA("Texture") then
 		t:Destroy()
 	end
 end
