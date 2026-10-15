@@ -560,6 +560,9 @@ local Config = {
 		OrangeButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland Maze: flies like the Crystal Phoenix (QM, Oct 13)
 		Hawkmoth = { Kind = "Fly", Height = 56 }, -- (Oct 13) a flyer like the Crystal Phoenix
 		Bumblebee = { Kind = "Fly", Height = 56 }, -- World 3 Garden: a flier like the Hawkmoth (Oct 14)
+		Bat = { Kind = "Fly", Height = 56 }, -- the Halloween world's fliers and floaters (Oct 15)
+		Ghost = { Kind = "Fly", Height = 56 },
+		GrimReaper = { Kind = "Fly", Height = 56 },
 		EagleSentry = { Kind = "Fly", Height = 56 }, -- (Oct 13) the Tomb's falcon, a flyer like the Crystal Phoenix
 		Pterodactyl = { Kind = "Fly", Height = 56 }, -- QM, Oct 11: a flying type, like the Phoenix
 		PinkButterfly = { Kind = "Fly", Height = 56 }, -- World 2 Woodland: a flier like the Crystal Phoenix (Oct 13)
@@ -1596,6 +1599,30 @@ for kind, w3 in Config.World3Pets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = w3[2], w3[3]
 	Config.AnimalStats[kind] = { Speed = w3[1], Stamina = 3 }
 end
+-- The Halloween world's own animals (QM, Oct 15: all new, tools/halloween_*.py): { speed, GEMS a
+-- second (they earn gems, only there: Config.earnsHere), hatch seconds, size tier }. Speeds and
+-- hatch times are World 1's Meadow and Desert ones by rarity (Haunted Hills is the Meadow's slot,
+-- Soul Valley the Desert's); gems ALL GUESSES (the first +5s of boss time costs 100 gems).
+Config.HalloweenPets = {
+	-- Haunted Hills
+	BlackCat = { 1.1, 1, 15, 1 }, -- Common
+	Bat = { 1.2, 2, 15, 1 }, -- Uncommon, flies
+	PumpkinPup = { 1.2, 2, 15, 1 }, -- Uncommon
+	PurpleTarantula = { 1.25, 4, 60, 1 }, -- Rare
+	Werewolf = { 1.35, 8, 90, 2 }, -- Epic
+	SoulHorse = { 1.8, 20, 300, 2 }, -- Legendary: the Godlands' Soul Horse, repurposed (QM, Oct 15; was speed 2, 60,000 gold, hatch 600, Epic)
+	-- Soul Valley
+	Ghost = { 1.31, 3, 15, 1 }, -- Common, floats
+	SkeletonDog = { 1.5, 5, 15, 1 }, -- Uncommon
+	TombstoneCrawler = { 1.5, 5, 15, 1 }, -- Uncommon
+	ZombieBear = { 1.77, 10, 60, 2 }, -- Rare
+	WispWolf = { 1.97, 20, 180, 2 }, -- Epic
+	GrimReaper = { 2.8, 50, 600, 2 }, -- Legendary, floats
+}
+for kind, h in Config.HalloweenPets do
+	Config.PetIncome[kind], Config.PetHatchTime[kind], Config.PetTiers[kind] = h[2], h[3], h[4]
+	Config.AnimalStats[kind] = { Speed = h[1], Stamina = 3 }
+end
 -- Worlds 2 and 3 earn World 1's gold a second (QM, Oct 15: "copy world 1 as closely as possible";
 -- theirs were placeholders): each biome k's animals, lowest to highest, get World 1's biome k
 -- incomes at the same place in its range (as paid, after the curve above), and its 1-in-1,000
@@ -1712,6 +1739,8 @@ function Config.ownHere(kind, world)
 	world = world or Config.World
 	if Config.CrossWorldExempt[kind] then
 		return true
+	elseif Config.HalloweenPets[kind] then -- (the Halloween world's own run at a Horse's speed elsewhere)
+		return world == 4
 	elseif world == 2 then
 		return Config.World2Animals[kind] == true
 	elseif world == 3 then
@@ -2100,9 +2129,11 @@ end
 Config.GemYellow = Color3.fromHex("FFFC2E") -- (gems' yellow, where cash is green: QM, Oct 15)
 -- The Halloween animals (QM, Oct 15): pets are shared by every world, Halloween ones too, but
 -- a Halloween pet earns only gems, and only in the Halloween world, and the rest only cash,
--- only outside it: anywhere else they're "useless". [kind] = true (none yet: the Halloween
--- world's herds are World 1's animals for now, so nothing earns gems there till they're in).
+-- only outside it: anywhere else they're "useless". [kind] = true: Config.HalloweenPets'.
 Config.HalloweenAnimals = {}
+for kind in Config.HalloweenPets do
+	Config.HalloweenAnimals[kind] = true
+end
 -- Whether a pet of `kind` (a hybrid: `fuse` its other half, Halloween if either is) earns here.
 function Config.earnsHere(kind, fuse)
 	local halloween = Config.HalloweenAnimals[kind] == true or (fuse ~= nil and Config.HalloweenAnimals[fuse] == true)
@@ -2139,6 +2170,10 @@ if Config.World == 4 then
 	-- ReplicatedStorage.PumpkinPatchChunks, dressed with the harvest and pumpkin props). Its
 	-- stampede the Tundra's for now. Its colours are the chunks' own (and the pens' tiles').
 	meadow.Name, desert.Name = "Haunted Hills", "Soul Valley"
+	-- Their own animals (QM, Oct 15: all World 1's scrapped here), weights as the Meadow's and the
+	-- Desert's by rarity (guesses). The Pumpkin Patch keeps the Tundra's till its own are in.
+	meadow.Herd = { BlackCat = 0.35, Bat = 0.25, PumpkinPup = 0.25, PurpleTarantula = 0.13, Werewolf = 0.08, SoulHorse = 0.05 }
+	desert.Herd = { Ghost = 0.3, SkeletonDog = 0.25, TombstoneCrawler = 0.25, ZombieBear = 0.2, WispWolf = 0.12, GrimReaper = 0.025 }
 	local patch = table.clone(Config.Biomes[3])
 	patch.Name = "Pumpkin Patch"
 	patch.GroundColors = { rgb(214, 184, 134), rgb(204, 174, 124) } -- tan
@@ -2157,15 +2192,15 @@ if Config.World == 4 then
 	-- The quests: World 1's, to this world's three biomes, and only animals that run here.
 	Config.Quests = {
 		{
-			{ Text = "Reach Haunted Hills", Kind = "reach", Biome = 1, Egg = "Cactus", NoPenLevel = true },
-			{ Text = "Reach Soul Valley", Kind = "reach", Biome = 2, Egg = "Penguin" },
-			{ Text = "Reach Pumpkin Patch", Kind = "reach", Biome = 3, Egg = "Snowman" },
+			{ Text = "Reach Haunted Hills", Kind = "reach", Biome = 1, Egg = "Bat", NoPenLevel = true }, -- (Halloween eggs, Oct 15: were World 1's Cactus,
+			{ Text = "Reach Soul Valley", Kind = "reach", Biome = 2, Egg = "SkeletonDog" }, -- Penguin,
+			{ Text = "Reach Pumpkin Patch", Kind = "reach", Biome = 3, Egg = "ZombieBear" }, -- Snowman)
 		},
 		{
-			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "SpineLizard" },
+			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "Werewolf" }, -- (was the Spine Lizard's)
 			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "SnackYak" },
-			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "Boar" },
-			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "IceGolem" },
+			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "TombstoneCrawler" }, -- (was the Boar's)
+			{ Text = "Lasso Ghosts", Kind = "lasso", Animal = "Ghost", Need = 4, Egg = "WispWolf" }, -- (was 4 Snowmen for the Ice Golem's)
 			{ Text = "Collect animals", Kind = "home", Need = 20, Egg = "SnackYak" }, -- (no finish line on an endless course)
 		},
 		Config.Quests[3],
