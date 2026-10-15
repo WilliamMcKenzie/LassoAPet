@@ -105,11 +105,14 @@ for _, model in models do
 		local bottom = base.Position.Y - base.Size.Y / 2
 		base.Size = Vector3.new(own.X * grow, own.Y, own.Z * grow)
 		base.Position = Vector3.new(base.Position.X, bottom + own.Y / 2, base.Position.Z)
-		-- facing the middle, give or take 20 degrees; its origin (the props' foot, their pieces'
+		-- facing the middle and a little back up the course, give or take 10 degrees; its origin (the props' foot, their pieces'
 		-- shared Position) on the floor
 		local front = FRONT[pick[1]] or FRONT_ALL
-		local toward = if base.Position.X > 0 then math.pi else 0 -- (the angle of -x or +x, in x, z)
-		local jitter = math.rad(((counts[model.Name] * 53) % 41) - 20)
+		-- (the angle of -x or +x in x, z, turned 30 degrees to +z: towards the riders coming
+		-- from the base, QM Oct 15)
+		local TILT = math.rad(30)
+		local toward = if base.Position.X > 0 then math.pi - TILT else TILT
+		local jitter = math.rad(((counts[model.Name] * 53) % 21) - 10)
 		local yaw = math.atan2(front.Y, front.X) - toward + jitter -- (CFrame.Angles(0, a, 0) turns angle phi to phi - a)
 		local hit = workspace:Raycast(Vector3.new(base.Position.X, 60, base.Position.Z), Vector3.new(0, -120, 0), params)
 		local floor = if hit then hit.Position.Y else 0
