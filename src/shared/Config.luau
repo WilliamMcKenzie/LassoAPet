@@ -1942,7 +1942,7 @@ if Config.World == 3 then
 				Soil = { rgb(110, 72, 44), rgb(98, 64, 38) },
 				Grass = { rgb(126, 214, 72), rgb(114, 200, 62) },
 				Flowers = { rgb(255, 130, 190), rgb(244, 112, 176) },
-				Path = { rgb(196, 190, 176), rgb(180, 174, 160) },
+				Path = { rgb(235, 215, 172), rgb(244, 227, 186) }, -- (QM, Oct 15)
 			},
 			GateColor = rgb(255, 92, 170),
 		},
