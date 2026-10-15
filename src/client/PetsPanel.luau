@@ -96,7 +96,20 @@ local function decode(text)
 	return if ok and typeof(t) == "table" then t else {}
 end
 
--- Every pet you have: { id, kind, equipped }, equipped ones first, then by what they earn.
+-- Each kind's rarity's place (Common 1 .. Legendary 5, Exclusive 6), from its animal module.
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Exclusive" }
+local rank = {}
+local function rarityRank(kind)
+	if rank[kind] == nil then
+		local module = ReplicatedStorage.Shared.Animals:FindFirstChild(kind)
+		local ok, class = pcall(require, module)
+		rank[kind] = ok and class and table.find(RARITIES, class.Rarity) or 0
+	end
+	return rank[kind]
+end
+
+-- Every pet you have: { id, kind, equipped }, rarest first (QM, Oct 15: by rarity, not by
+-- whether it's in your pen), then by what it earns.
 local function pets()
 	local out = {}
 	local pen = workspace:FindFirstChild("Pens") and workspace.Pens:FindFirstChild("Pen" .. tostring(player:GetAttribute("Pen")))
@@ -111,8 +124,9 @@ local function pets()
 		end
 	end
 	table.sort(out, function(a, b)
-		if a.equipped ~= b.equipped then
-			return a.equipped
+		local ra, rb = rarityRank(a.kind), rarityRank(b.kind)
+		if ra ~= rb then
+			return ra > rb
 		end
 		local ia, ib = Config.PetIncome[a.kind] or 0, Config.PetIncome[b.kind] or 0
 		if ia ~= ib then
