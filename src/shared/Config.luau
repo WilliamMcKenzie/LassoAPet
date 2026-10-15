@@ -2213,6 +2213,17 @@ if Config.World == 4 then
 	Config.CourseLength = meadow.Length + desert.Length + patch.Length
 	Config.Endless = { Cut = -(meadow.Length + desert.Length), Length = 256, Chunks = "PumpkinPatchChunks" } -- (3984: a whole 16)
 	Config.BiomeNames[4] = { "Haunted Hills", "Soul Valley", "Pumpkin Patch" }
+	-- Its bosses (QM, Oct 15: "make bosses for each zone, last one grim reaper"; was the Chicken
+	-- everywhere): a giant jack-o'-lantern, a giant Soul Horse reskinned, and a giant Grim Reaper.
+	Config.Boss.ByBiome = {
+		["Haunted Hills"] = "GiantPumpkin", -- (QM: a giant pumpkin)
+		["Soul Valley"] = "GiantSoulHorse", -- (QM: "a giant soul horse make it reskinned to be cooler")
+		["Pumpkin Patch"] = "GiantGrimReaper",
+	}
+	Config.Boss.Room.GiantPumpkin, Config.Boss.Room.GiantSoulHorse, Config.Boss.Room.GiantGrimReaper = 60, 50, 70 -- (guesses)
+	Config.Boss.Faces.GiantPumpkin = { At = Vector3.new(0, 0.05, 0.45), From = Vector3.new(0, 6, 60) } -- (its carved face; a guess)
+	Config.Boss.Faces.GiantSoulHorse = { At = Vector3.new(0, 0.3, 0.38), From = Vector3.new(24, 6, 55) } -- (its head, a little from the side for its eye; a guess)
+	Config.Boss.Faces.GiantGrimReaper = { At = Vector3.new(0, 0.25, 0.3), From = Vector3.new(0, 6, 70) } -- (its skull under the hood; a guess)
 	-- The quests: World 1's, to this world's three biomes, and only animals that run here.
 	Config.Quests = {
 		{

@@ -6,6 +6,7 @@ Run from the repo root:
   python3 tools/halloween_giga.py            check the swaps, lineup -> /mnt/project-files/halloween/animals/renders/Giga_lineup.png
   python3 tools/halloween_giga.py headshots  assets/ui/Pet<Kind>.png
   python3 tools/halloween_giga.py eggs       assets/ui/<Kind>EggRender.png
+  python3 tools/halloween_giga.py bosses     the Halloween bosses -> renders/Bosses_lineup.png
 """
 
 import copy
@@ -28,8 +29,16 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 OUT = "/mnt/project-files/halloween/animals"
 FONT = ImageFont.load_default(size=22)
 SRC = open(os.path.join(ROOT, "src", "shared", "HalloweenSkins.luau")).read()
-SKINS = {name: {k: tuple(int(v[i:i + 2], 16) for i in (0, 2, 4)) for k, v in re.findall(r'\["([0-9A-F]{6})"\] = "([0-9A-F]{6})"', body)}
-         for name, body in re.findall(r"(Halloween\w+) = \{ --[^\n]*\n(.*?)\n\t\},", SRC, re.S)}
+def rgb(v):
+    return tuple(int(v[i:i + 2], 16) for i in (0, 2, 4))
+
+
+SKINS = {name: {k: rgb(v) for k, v in re.findall(r'\["([0-9A-F]{6})"\] = "([0-9A-F]{6})"', body)}
+         for name, body in re.findall(r"\n\t(\w+) = \{[^\n]*\n(.*?)\n\t\},", SRC, re.S)}
+GLOW = {name: (rgb(col), re.findall(r'"(\w+)"', names))
+        for name, col, names in re.findall(r'\t(\w+) = \{ color = "([0-9A-F]{6})", names = \{([^}]*)\}', SRC)}
+# The Halloween bosses (Shared/Bosses): kind -> the model it's drawn from
+BOSSES = {"GiantPumpkin": "halloween/GiantPumpkin", "GiantSoulHorse": "godlands/SoulHorse", "GiantGrimReaper": "halloween/GrimReaper"}
 BASE = dict(re.findall(r'(Halloween\w+) = "(\w+)",', SRC))
 
 
@@ -38,11 +47,14 @@ def hexof(c):
 
 
 def recolor(kind, parts):
-    swap = SKINS[kind]
+    swap = SKINS.get(kind, {})
+    col, names = GLOW.get(kind, (None, []))
     for p in parts:
         to = swap.get(hexof(p.color))
         if to:
             p.color = to
+        if any(n in p.name for n in names):
+            p.color, p.neon, p.plain = col, True, True
     return parts
 
 
@@ -59,7 +71,11 @@ def check():
         print(kind, "keeps", sorted(c for c in cols if c not in SKINS[kind]))
 
 
-# pet_headshots draws a giga rare as its base, recoloured
+# pet_headshots draws a giga rare as its base, recoloured (and a boss as its model)
+for kind, path in BOSSES.items():
+    P.MODELS[kind] = path
+    if path.startswith("halloween"):
+        P.ZYX.add(kind)
 for kind, base in BASE.items():
     P.MODELS[kind] = P.MODELS[base]
     if base in P.ZYX:
@@ -69,20 +85,19 @@ for kind, base in BASE.items():
     if base in P.ACTION_IDLE:
         P.ACTION_IDLE.add(kind)
 _parts_of = P.parts_of
-P.parts_of = lambda kind, model, pose=None: recolor(kind, _parts_of(kind, model, pose)) if kind in SKINS else _parts_of(kind, model, pose)
+P.parts_of = lambda kind, model, pose=None: recolor(kind, _parts_of(kind, model, pose)) if kind in SKINS or kind in BOSSES else _parts_of(kind, model, pose)
 
 
-def lineup():
-    kinds = list(BASE)
+def lineup(kinds=None, name="Giga_lineup.png", cols=5):
+    kinds = kinds or list(BASE)
     tile = 420
-    cols = 5
-    out = Image.new("RGB", (tile * cols, tile * 2), (238, 240, 236))
+    out = Image.new("RGB", (tile * cols, tile * -(-len(kinds) // cols)), (238, 240, 236))
     for i, kind in enumerate(kinds):
         im = P.shot(kind, "hero", size=tile - 20)
         out.paste(im, ((i % cols) * tile + 10, (i // cols) * tile + 10), im)
         ImageDraw.Draw(out).text(((i % cols) * tile + 14, (i // cols) * tile + 8), re.sub(r"(\w)([A-Z])", r"\1 \2", kind),
                                  fill=(40, 30, 50), font=FONT)
-    path = os.path.join(OUT, "renders", "Giga_lineup.png")
+    path = os.path.join(OUT, "renders", name)
     out.save(path)
     print(path)
 
@@ -111,6 +126,8 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     if a and a[0] == "headshots":
         P.main(list(BASE))
+    elif a and a[0] == "bosses":
+        lineup(list(BOSSES), "Bosses_lineup.png", 3)
     elif a and a[0] == "eggs":
         eggs()
     else:
