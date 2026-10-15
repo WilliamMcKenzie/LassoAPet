@@ -8,6 +8,6 @@ local Horse = require(script.Parent.Horse)
 local GingerbreadManModel = require(script.Parent.GingerbreadManModel)
 
 return Horse.variant("GingerbreadMan", GingerbreadManModel, "Uncommon", {
-	seat = Vector3.new(0, 6.6, 1.5),
+	seat = Vector3.new(0, 6.6, 1.0), -- (on its back: QM took the cushion off, Oct 15; was z 1.5)
 	neck = { center = Vector3.new(0, 8.2, 0), radius = 2.2 },
 })
