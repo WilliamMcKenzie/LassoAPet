@@ -1918,6 +1918,7 @@ if Config.World == 3 then
 				DampSand = { rgb(222, 186, 126), rgb(212, 176, 118) }, -- between the sand and the wet sand (QM, Oct 14; tools/world3_dampsand.luau)
 				Grass = { rgb(95, 168, 62), rgb(86, 156, 56) }, -- (the base's: muted olive, QM Oct 14; was 96, 204, 60)
 				Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
+				ShallowWater = { rgb(140, 225, 225), rgb(140, 225, 225) }, -- the light ring round each pool, under the see-through tile (QM, Oct 15; tools/world3_shallowwater.luau)
 				-- The base's walls (QM, Oct 14): one plain wooden-brown part each, darker wood along the top.
 				BaseWall = { rgb(228, 198, 148), rgb(216, 184, 134) },
 				BaseCap = { rgb(236, 208, 160), rgb(236, 208, 160) },
