@@ -112,6 +112,24 @@ class Build:
         base, tip = np.array(base, float), np.array(tip, float)
         return self.pyramid(node, name, base, w / 2, (d or w) / 2, np.linalg.norm(tip - base), color, frame_to(base, tip))
 
+    def hull(self, node, name, pts, color):
+        """A low-poly mesh: the convex hull of `pts` (studs), flat facets. With bbmodel_to_luau.py
+        --meshes, the meshes on one bone in one colour become one studded MeshPart (QM, Oct 15:
+        meshes only where layered cubes were faking a curve)."""
+        from garden_lib import hull_tris
+        keys, v, faces = {}, {}, {}
+        for i, t in enumerate(hull_tris(pts)):
+            vs = []
+            for q in t:
+                k = tuple(np.round(q, 5))
+                if k not in keys:
+                    keys[k] = f"v{len(keys)}"
+                    v[keys[k]] = [round(float(x) * S.BB, 4) for x in q]
+                vs.append(keys[k])
+            faces[f"f{i}"] = {"texture": self.tex[color], "vertices": vs, "uv": {q: [0, 0] for q in vs}}
+        return self._put(node, {"name": name, "type": "mesh", "uuid": S.uid(), "color": 0, "origin": [0, 0, 0],
+                                "rotation": [0, 0, 0], "vertices": v, "faces": faces})
+
     def eye(self, node, name, center, normal, size, white="white", pupil="pupil", look=(0, 0), glow=False):
         """A googly plate eye facing `normal`: a white plate and a pupil plate just in front."""
         n = np.array(normal, float)
@@ -147,6 +165,59 @@ class Build:
         return m
 
 
+FRONT9 = (144, 216, 252, 288, 324, 0, 36, 72, 108)  # a 9-sided ring with one wide flat face on -Z (for a face)
+FB8 = (144, 216, 252, 288, 324, 36, 72, 108)  # wide flat faces front (0) and back (4), narrow sides (2: -X, 6: +X)
+OCT = tuple(22.5 + 45 * k for k in range(8))  # an octagon with flat faces on the axes
+
+
+class Lathe:
+    """A faceted shell of stacked rings: rings = [(y, rx, rz, zoff)] bottom to top (rz and zoff
+    optional), vertices at `angles` (degrees round Y from +Z, x = sin, z = cos), centred at c and
+    turned by M. pts feeds Build.hull; face() finds a spot on a flat face for eyes and badges."""
+
+    def __init__(self, c, rings, angles=OCT, M=None):
+        self.c = np.array(c, float)
+        self.M = np.eye(3) if M is None else M
+        self.rings = [(r[0], r[1], r[2] if len(r) > 2 else r[1], r[3] if len(r) > 3 else 0.0) for r in rings]
+        self.angles = [math.radians(a) for a in angles]
+
+    def ring(self, j):
+        y, rx, rz, zo = self.rings[j]
+        return [self.c + self.M @ np.array([rx * math.sin(a), y, rz * math.cos(a) + zo]) for a in self.angles]
+
+    @property
+    def pts(self):
+        return [p for j in range(len(self.rings)) for p in self.ring(j)]
+
+    def section(self, j0, j1):
+        """Points of the rings j0..j1 only (a band in its own colour)."""
+        return [p for j in range(j0, j1 + 1) for p in self.ring(j)]
+
+    def face(self, i, y):
+        """(point, outward normal) on face i (between vertices i and i+1) at local height y."""
+        for j in range(len(self.rings) - 1):
+            if self.rings[j][0] <= y <= self.rings[j + 1][0] or j == len(self.rings) - 2:
+                break
+        lo, hi = self.ring(j), self.ring(j + 1)
+        n = len(self.angles)
+        a0, a1, b0, b1 = lo[i], lo[(i + 1) % n], hi[i], hi[(i + 1) % n]
+        u = (y - self.rings[j][0]) / (self.rings[j + 1][0] - self.rings[j][0])
+        p = (a0 + a1) / 2 * (1 - u) + (b0 + b1) / 2 * u
+        nrm = np.cross(b0 - a0, a1 - a0)
+        if nrm @ (p - (self.c + self.M @ np.array([0, y, 0]))) < 0:
+            nrm = -nrm
+        return p, nrm / np.linalg.norm(nrm)
+
+
+def lay(n):
+    """A rotation whose local +Y is the normal n and local +X runs level along the face (to lay a
+    flat block on a sloped face)."""
+    n = np.array(n, float) / np.linalg.norm(n)
+    x = np.cross(np.array([0, 1.0, 0]), n)
+    x = x / np.linalg.norm(x) if np.linalg.norm(x) > 1e-6 else np.array([1.0, 0, 0])
+    return np.stack([x, n, np.cross(x, n)], axis=1)
+
+
 def on_light(im, pad=50):
     box = im.getbbox()
     if not box:
@@ -160,7 +231,7 @@ def on_light(im, pad=50):
 
 def roblox_parts(m):
     """How many Roblox parts the converter makes: cubes 1, pyramids 4."""
-    return sum(4 if e["type"] == "mesh" and len(e["vertices"]) == 5 else 1 for e in m["elements"])
+    return sum(4 if e["type"] == "mesh" and len(e["vertices"]) == 5 else 1 for e in m["elements"])  # (hulls: 1 each, before merging)
 
 
 def finish(m, anims, hero, sheet_target=(0, 6, 0), sheet_dist=1.0, gif_cam=None, out=RENDERS, luau=False):

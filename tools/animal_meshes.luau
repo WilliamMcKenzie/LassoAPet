@@ -101,6 +101,17 @@ local IDS = {
 	GiantRafflesia_Wart_Petal4 = 124018537708046,
 	GiantRafflesia_Wart_Petal5 = 78180364957226,
 	GiantRafflesia_Well_Flower = 88148812378304,
+	MoonJellyfish_Bell_root = 0, -- (the Cnidaria jellies and octopus, QM Oct 15: their bells and bodies)
+	BoxJellyfish_Bell_root = 0,
+	BoxJellyfish_Edge_root = 0,
+	BlueRingOctopus_Skin_root = 0,
+	RoyalCnidarian_Bell2_root = 0,
+	RoyalCnidarian_Bell3_root = 0,
+	RoyalCnidarian_Bell_root = 0,
+	RoyalCnidarian_Mgold_Minion1 = 0,
+	RoyalCnidarian_Mgold_Minion2 = 0,
+	RoyalCnidarian_Mgold_Minion3 = 0,
+	RoyalCnidarian_Mgold_Minion4 = 0,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then

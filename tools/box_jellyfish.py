@@ -1,5 +1,5 @@
 """Box Jellyfish: World 3 Cnidaria (the reef), Rare. A real cube of a jellyfish (made for
-studs): a bright cyan box bell with a cap, deep-blue corner pillars, glowing yellow
+studs): a bright cyan box bell (one chamfered mesh) on a deep-blue lip, glowing yellow
 sense-eyes on the back and sides, big googly eyes on the front, a skirt lip, and at each
 bottom corner a thick pedalium arm carrying three long ribbon tentacles (two segments each, the lower one
 curling back in) that trail and sway.
@@ -35,20 +35,20 @@ H = 3.4  # half the bell's size
 def build():
     b = Build(NAME, COLORS)
     root = b.group("root", (0, Y, 0))
-    b.box(root, "Bell", (0, Y, 0), (2 * H, 2 * H, 2 * H), "bell")
-    b.box(root, "Cap", (0, Y + H + 0.35, 0), (2 * H - 1.2, 0.7, 2 * H - 1.2), "bell2")
-    b.box(root, "Lip", (0, Y - H - 0.3, 0), (2 * H - 0.6, 0.6, 2 * H - 0.6), "bell2")
-    for k in range(4):  # corner pillars
-        sx, sz = (1, 1, -1, -1)[k], (1, -1, -1, 1)[k]
-        b.box(root, f"Pillar{k + 1}", (sx * (H - 0.1), Y, sz * (H - 0.1)), (0.8, 2 * H + 0.2, 0.8), "edge")
-    # glowing sense-eyes on the back and both sides; googly eyes in front
+    # the bell: one boxy mesh with chamfered corners and a sloped top (QM Oct 15: a mesh, not
+    # layered cubes), a darker lip under it
+    def sq(h, c):  # a square h half-wide with its corners cut c deep, flat faces on the axes
+        return [(h, h - c), (h - c, h), (-(h - c), h), (-h, h - c), (-h, -(h - c)), (-(h - c), -h), (h - c, -h), (h, -(h - c))]
+    rings = [(Y - H, sq(H - 0.1, 1.0)), (Y + H - 1.0, sq(H + 0.1, 1.1)), (Y + H + 0.4, sq(H - 1.0, 0.8))]
+    b.hull(root, "Bell", [(x, y, z) for y, ring in rings for x, z in ring], "bell")
+    lip = [(Y - H - 0.6, sq(H - 0.6, 0.8)), (Y - H + 0.1, sq(H - 0.3, 0.9))]
+    b.hull(root, "Lip", [(x, y, z) for y, ring in lip for x, z in ring], "edge")
+    # glowing sense-eyes low on the back and both sides; googly eyes in front
     for n, out, right in (("B", (0, 0, 1), (-1, 0, 0)), ("L", (-1, 0, 0), (0, 0, -1)), ("R", (1, 0, 0), (0, 0, 1))):
         out, right = np.array(out, float), np.array(right, float)
-        c = np.array([0, Y, 0]) + out * H
-        b.box(root, "GlowSense" + n, c + out * 0.1 + np.array([0, -H + 1.3, 0]), np.abs(right) * 1.0 + np.abs(out) * 0.3 + (0, 0.8, 0), "glow")
+        b.box(root, "GlowSense" + n, np.array([0, Y - H + 1.3, 0]) + out * 3.4, np.abs(right) * 1.0 + np.abs(out) * 0.3 + (0, 0.8, 0), "glow")
     for s in (-1, 1):
-        n = "LR"[s > 0]
-        b.eye(root, n, (s * 1.45, Y + 0.8, -H - 0.04), (0, 0, -1), 2.0, look=(-s * 0.3, 0))
+        b.eye(root, "LR"[s > 0], (s * 1.45, Y + 0.8, -3.48), (0, 0, -1), 2.0, look=(-s * 0.3, 0))
     # corner pedalia with three trailing ribbon tentacles each
     for k in range(4):
         sx, sz = (1, 1, -1, -1)[k], (1, -1, -1, 1)[k]

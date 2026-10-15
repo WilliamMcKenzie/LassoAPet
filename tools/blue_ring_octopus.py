@@ -22,7 +22,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(__file__))
-from cnidaria_kit import TAU, Build, finish, rot, track  # noqa: E402
+from cnidaria_kit import FB8, TAU, Build, Lathe, finish, rot, track  # noqa: E402
 
 NAME = "BlueRingOctopus"
 COLORS = {"skin": (255, 204, 40), "skin2": (240, 168, 24), "dark": (176, 104, 18), "ring": (38, 120, 255),
@@ -46,25 +46,21 @@ def ring(b, node, name, center, normal, size=1.5):
 def build():
     b = Build(NAME, COLORS)
     root = b.group("root", (0, Y, 0))
-    # head: a rounded block (two crossed slabs) with the mantle dome above, leaning back a little
-    b.box(root, "Head1", (0, Y, 0), (6.0, 3.4, 4.4), "skin")
-    b.box(root, "Head2", (0, Y, 0), (4.4, 3.4, 6.0), "skin")
-    b.box(root, "Skirt", (0, Y - 1.9, 0), (5.2, 0.6, 5.2), "skin2")
-    tiers = ((6.0, 1.6, 0.4), (5.0, 1.4, 0.8), (3.6, 1.0, 1.1))
-    y = Y + 1.7
-    for k, (w, h, back) in enumerate(tiers):
-        b.box(root, f"Mantle{k + 1}a", (0, y + h / 2, back), (w, h, w * 0.7), "skin" if k != 1 else "skin2")
-        b.box(root, f"Mantle{k + 1}b", (0, y + h / 2, back), (w * 0.7, h, w), "skin" if k != 1 else "skin2")
-        y += h
+    # head and mantle: one low-poly egg leaning back (a mesh: QM Oct 15), a wide flat face in front
+    body = Lathe((0, 0, 0), [(Y - 2.0, 2.5), (Y - 0.6, 3.25), (Y + 1.0, 3.35), (Y + 2.7, 3.0, 3.0, 0.4),
+                             (Y + 4.4, 2.3, 2.3, 0.8), (Y + 5.7, 1.3, 1.3, 1.0)], FB8)
+    b.hull(root, "Body", body.pts, "skin")
     # three big rings: on the back of the mantle and on each side of the head
-    for k, (c, n) in enumerate((((0, Y + 2.6, 2.95), (0, 0, 1)), ((-3.0, Y - 0.1, 0), (-1, 0, 0)), ((3.0, Y - 0.1, 0), (1, 0, 0)))):
-        ring(b, root, f"Ring{k + 1}", c, n, 1.9)
+    for k, (i, y) in enumerate(((4, Y + 2.6), (2, Y), (6, Y))):
+        p, n = body.face(i, y)
+        ring(b, root, f"Ring{k + 1}", p + n * 0.05, n, 1.9)
     # bulging eyes on the front, beak smile under them
     for s in (-1, 1):
         n = "LR"[s > 0]
-        b.box(root, "EyeBump" + n, (s * 1.5, Y + 1.0, -2.6), (2.0, 2.0, 1.2), "skin2")
-        b.eye(root, n, (s * 1.5, Y + 1.05, -3.24), (0, 0, -1), 1.6, look=(-s * 0.3, 0))
-    b.box(root, "Beak", (0, Y - 0.6, -3.05), (1.2, 0.5, 0.3), "beak")
+        b.box(root, "EyeBump" + n, (s * 1.5, Y + 1.0, -2.5), (2.0, 2.0, 1.6), "skin2")
+        b.eye(root, n, (s * 1.5, Y + 1.05, -3.34), (0, 0, -1), 1.6, look=(-s * 0.3, 0))
+    p, nrm = body.face(0, Y - 0.6)
+    b.box(root, "Beak", p + nrm * 0.1, (1.2, 0.5, 0.3), "beak")
     # eight curly arms in a skirt, ringed, tips curling up
     for k in range(8):
         a = math.radians(22.5 + 45 * k)
