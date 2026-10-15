@@ -1999,7 +1999,7 @@ if Config.World == 3 then
 			Length = 6240, -- (2x the Ocean's 3120)
 			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean's)
 			GroundColors = { rgb(236, 222, 184), rgb(226, 210, 170) },
-			WallColors = { rgb(20, 32, 68), rgb(16, 26, 58) },
+			WallColors = { rgb(13, 53, 87), rgb(14, 63, 104) }, -- (QM, Oct 15)
 			CapColor = rgb(255, 110, 190),
 			-- (Oct 14, the Cnidaria animals thread: weights as the Tomb's by rarity, guesses; its giga
 			-- rares and the Royal Cnidarian added below. All of them swim: SprintSpecials Fly.)
