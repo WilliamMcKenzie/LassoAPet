@@ -90,7 +90,7 @@ def lantern(rng, hx, hz, top):
 
 def lantern_tree(rng):
     """An autumn tree (about 13 tall): a short trunk and three thick branches under a round
-    canopy of faceted leaf clumps in red, orange and crimson, red apples hanging below, and
+    canopy of faceted leaf clumps in red, orange and crimson, golden apples on the canopy edge, and
     an iron lantern hanging from a low branch."""
     trunk = tube(rng, [(0, -0.4, 0), (0.4, 3.0, 0.1), (0.1, 6.0, 0)], 1.3, 0.85, 7)
     roots = [prism(rng, (math.cos(a) * 0.6, 0.9, math.sin(a) * 0.6), (math.cos(a) * 2.3, -0.2, math.sin(a) * 2.3), 0.55, 0.25, 6, 0.0)
@@ -112,7 +112,7 @@ def lantern_tree(rng):
         apples.append(blob(rng, (x, y, z), 0.6, 12, jitter=0.03))
         stems.append(prism(rng, (x, y + 0.4, z), (x, y + 0.9, z), 0.07, 0.07, 4, 0.0))
     return [("Trunk", BARK, trunk + roots + branches), ("Leaves", (204, 52, 40), clumps[0]), ("Leaves", (232, 102, 36), clumps[1]),
-            ("Leaves", (160, 34, 62), clumps[2]), ("Apples", (226, 30, 40), apples), ("Lantern", IRON, rod_frame + stems),
+            ("Leaves", (160, 34, 62), clumps[2]), ("Apples", (250, 200, 40), apples), ("Lantern", IRON, rod_frame + stems),
             ("Glass", GLOW, glass)]
 
 
@@ -139,9 +139,9 @@ def hay_bale(rng):
 
 
 def hay_stack(rng):
-    """Two bales side by side and one on top (about 5 wide, 4 tall)."""
+    """Two bales side by side and one on top (about 8 wide, 4 tall), twine on all three."""
     S, T = [], []
-    for x, y, z, yaw in ((-1.0, 0, 0.0, 1.57), (1.4, 0, 0.1, 1.57), (0.2, 1.8, 0.05, 0.08)):
+    for x, y, z, yaw in ((-1.9, 0, 0.0, 0.0), (1.9, 0, 0.1, 0.0), (0.1, 1.8, 0.05, 0.08)):
         s, t = bale(rng, x, y, z, yaw)
         S += s
         T += t
@@ -159,9 +159,9 @@ def scarecrow(rng):
     rope = [slab(rng, -1.35, 3.0, -0.8, 1.35, 3.3, 0.8, 0.0, 0.0)]
     straw = []
     for s in (-1, 1):  # straw tufts out of each cuff: pyramids
-        for dy, dz in ((0.25, 0.0), (-0.2, 0.25), (-0.15, -0.25)):
+        for dy, dz in ((0.25, 0.0), (-0.2, 0.3), (-0.15, -0.3)):
             c = np.array((s * 3.0, 5.25 + dy, dz))
-            straw.append(np.array([c + (0, dy2, dz2) for dy2 in (-0.22, 0.22) for dz2 in (-0.22, 0.22)] + [c + (s * 1.0, dy * 0.8, dz * 0.8)]))
+            straw.append(np.array([c + (0, dy2, dz2) for dy2 in (-0.3, 0.3) for dz2 in (-0.3, 0.3)] + [c + (s * 1.1, dy * 1.6, dz * 1.6)]))
     for x in (-0.9, -0.3, 0.3, 0.9):  # and down from the hem
         c = np.array((x, 2.7, -0.2))
         straw.append(np.array([c + (dx, 0, dz) for dx in (-0.25, 0.25) for dz in (-0.25, 0.25)] + [c + (x * 0.15, -1.0, 0)]))
@@ -172,7 +172,7 @@ def scarecrow(rng):
     band_ = [frustum(4, 1.12, 7.5, 1.0, 7.85, a0=math.pi / 4)]
     return [("Post", WOOD, post + bar), ("Shirt", (96, 140, 70), shirt + sleeves), ("Patches", (176, 92, 56), patches),
             ("Rope", TWINE, rope), ("Straw", STRAW, straw), ("Pumpkin", PUMPKIN, a), ("Pumpkin", PUMPKIN_DARK, b),
-            ("Stem", STEM, stem), ("Face", GLOW, fc), ("Hat", (70, 46, 74), hat + hat_brim), ("HatBand", (232, 102, 36), band_)]
+            ("Stem", STEM, stem), ("Face", GLOW, fc), ("Hat", (150, 96, 60), hat + hat_brim), ("HatBand", (232, 102, 36), band_)]
 
 
 # ---------------------------------------------------------------- pumpkins

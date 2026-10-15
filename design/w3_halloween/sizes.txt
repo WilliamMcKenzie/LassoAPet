@@ -7,6 +7,6 @@ PumpkinPile: 9.1 x 3.8 x 4.7, 780 tris, 3 pieces
 LeafPile: 6.4 x 2.9 x 6.6, 352 tris, 3 pieces
 LeafScatter: 6.8 x 1.5 x 6.2, 220 tris, 3 pieces
 LanternTree: 10.6 x 13.2 x 9.5, 846 tris, 7 pieces
-Scarecrow: 8.0 x 10.0 x 3.8, 770 tris, 11 pieces
+Scarecrow: 8.2 x 10.0 x 3.8, 770 tris, 11 pieces
 HayBale: 3.6 x 1.9 x 2.3, 68 tris, 2 pieces
-HayStack: 4.7 x 3.7 x 3.7, 204 tris, 3 pieces
+HayStack: 7.4 x 3.7 x 2.5, 204 tris, 3 pieces

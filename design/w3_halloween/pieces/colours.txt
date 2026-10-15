@@ -27,7 +27,7 @@ LanternTree_1: Trunk, 96, 64, 58
 LanternTree_2: Leaves, 204, 52, 40
 LanternTree_3: Leaves, 232, 102, 36
 LanternTree_4: Leaves, 160, 34, 62
-LanternTree_5: Apples, 226, 30, 40
+LanternTree_5: Apples, 250, 200, 40
 LanternTree_6: Lantern, 52, 46, 58
 LanternTree_7: Glass, 255, 214, 60
 Scarecrow_1: Post, 120, 82, 52
@@ -39,7 +39,7 @@ Scarecrow_6: Pumpkin, 206, 70, 18
 Scarecrow_7: Pumpkin, 172, 54, 14
 Scarecrow_8: Stem, 104, 120, 46
 Scarecrow_9: Face, 255, 214, 60
-Scarecrow_10: Hat, 70, 46, 74
+Scarecrow_10: Hat, 150, 96, 60
 Scarecrow_11: HatBand, 232, 102, 36
 HayBale_1: Straw, 232, 196, 96
 HayBale_2: Twine, 120, 78, 44
