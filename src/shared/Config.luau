@@ -1867,15 +1867,6 @@ if Config.World == 2 then
 	temple.Herd.Fox = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
 	temple.Herd.NineTailedFox = 0.17 -- the Fox's rare variant (QM, Oct 13), as often as the Fire Lobster
 	temple.Herd.Kitsune = 0.03 -- the Kitsune (QM, Oct 13), the Temple's Legendary, as rare as the Phoenix
-	do -- the Loong runs wild here (QM, Oct 13), 1 in 4,000 of the stampede (QM, Oct 15: was 0.025, now it's sold at World 1's base)
-		local others = 0
-		for kind, weight in temple.Herd do
-			if kind ~= "Loong" then
-				others += weight
-			end
-		end
-		temple.Herd.Loong = others / 3999
-	end
 	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
 	temple.Patches = {
 		Rock = { rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
@@ -2065,6 +2056,18 @@ end
 -- Floors, walls and their colours: the World 3 terrain thread's (tools/world3_course.luau, then
 -- world3_<biome>.luau; not funnel.luau). Animals and bosses come from the biome animal threads;
 -- until then each herd runs Fish (World 2's way) and each boss is World 2's in that slot.
+-- World 2's Temple: the Loong runs wild there (QM, Oct 13), 1 in 4,000 of its stampede (QM, Oct 15:
+-- was 0.025, now it's sold at World 1's base), counted once the Temple's herd is all in.
+if Config.World == 2 then
+	local temple = Config.Biomes[5].Herd
+	local others = 0
+	for kind, weight in temple do
+		if kind ~= "Loong" then
+			others += weight
+		end
+	end
+	temple.Loong = others / 3999
+end
 if Config.World == 3 then
 	local rgb = Color3.fromRGB
 	local SAND = { rgb(246, 226, 173), rgb(237, 216, 160) } -- (QM, Oct 15: his GroundA/B)
