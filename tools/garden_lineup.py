@@ -19,7 +19,7 @@ ROWS = [[("Horse (for size)", None), ("Ladybug - Uncommon", "garden/Ladybug"), (
          ("Toadstool Frog - Rare", "garden/ToadstoolFrog"), ("Vine Monster - Rare", "garden/VineMonster"),
          ("Venus Flytrap - Epic", "garden/VenusFlytrap"), ("Sunflower Lion - Legendary", "garden/SunflowerLion")],
         [("Horse (for size)", None), ("Rafflesia Beast - giga rare", "garden/RafflesiaBeast"),
-         ("Ancient Treant - giga rare", "garden/AncientTreant"), ("Flytrap Queen - boss", "bosses/FlytrapQueen")]]
+         ("Ancient Treant - giga rare", "garden/AncientTreant"), ("Giant Rafflesia - boss", "bosses/GiantRafflesia")]]
 
 
 def parts_for(path):

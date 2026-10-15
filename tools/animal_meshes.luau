@@ -79,6 +79,22 @@ local IDS = {
 	AncientTreant_Leaf_ArmL = 72520559240156, -- (the Ancient Treant: QM's edit, Oct 15)
 	AncientTreant_Leaf_ArmR = 138556975636001,
 	AncientTreant_Leaf_neck = 135473395019785,
+	GiantRafflesia_Mosslight_Stem = 0, -- (the Giant Rafflesia, the Garden's new boss, QM Oct 15)
+	GiantRafflesia_Petal_Petal1 = 0,
+	GiantRafflesia_Petal_Petal2 = 0,
+	GiantRafflesia_Petal_Petal3 = 0,
+	GiantRafflesia_Petal_Petal4 = 0,
+	GiantRafflesia_Petal_Petal5 = 0,
+	GiantRafflesia_Petaldark_Flower = 0,
+	GiantRafflesia_Rim_Flower = 0,
+	GiantRafflesia_Vine_Stem = 0,
+	GiantRafflesia_Vine_root = 0,
+	GiantRafflesia_Wart_Petal1 = 0,
+	GiantRafflesia_Wart_Petal2 = 0,
+	GiantRafflesia_Wart_Petal3 = 0,
+	GiantRafflesia_Wart_Petal4 = 0,
+	GiantRafflesia_Wart_Petal5 = 0,
+	GiantRafflesia_Well_Flower = 0,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then

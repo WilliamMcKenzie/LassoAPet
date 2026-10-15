@@ -11,6 +11,7 @@ ZYX) and pyramid meshes, bones as groups that all rest at 0.
 Part names: Eye/Pupil plain (no studs), Glow... Neon. Convert with bbmodel_to_luau.py --zyx.
 """
 
+import copy
 import json
 import math
 import os
@@ -452,6 +453,43 @@ def cupped_leaf(c, d, n, L, W, T=0.45, cup=0.5, steps=7):
         for h, sg in zip(halves, (1, -1)):
             h += [p, p - n * T * 0.5 * np.sin(np.pi * t), p + sg * s * w + lift, p + sg * s * w + lift + n * T * 0.5 * np.sin(np.pi * t)]
     return halves
+
+
+def clone(g, src, node, parent, scale, at, frm=(0, 0, 0), names=None, colour=None):
+    """Copy QM's bone `node` (with its parts and child bones) into g under `parent`, scaled about
+    `frm` and moved to `at`; bones renamed by `names`, colour names mapped by `colour` (all must be in g's palette)."""
+    names = names or {}
+    colour = colour or {}
+    frm, at = np.array(frm, float), np.array(at, float)
+    tex = [t["name"] for t in src["textures"]]
+    grp = next(x for x in src["groups"] if x["uuid"] == node["uuid"])
+    P = lambda p: list(((np.array(p, float) / S.BB - frm) * scale + at) * S.BB)  # Blockbench units
+    ng = g.group(names.get(grp["name"], grp["name"]), (np.array(grp["origin"]) / S.BB - frm) * scale + at, parent)
+    g.groups[-1]["rotation"] = list(grp.get("rotation", [0, 0, 0]))
+    for c in node["children"]:
+        if isinstance(c, dict):
+            clone(g, src, c, ng, scale, at, frm, names, colour)
+            continue
+        e = copy.deepcopy(next(x for x in src["elements"] if x["uuid"] == c))
+        e["uuid"] = S.uid()
+        for k in ("from", "to", "origin"):
+            if k in e and not (e["type"] == "mesh" and k == "origin"):
+                e[k] = P(e[k])
+        if e["type"] == "mesh":
+            o = np.array(e["origin"], float)  # mesh vertices are relative to its origin
+            e["vertices"] = {k: list(np.array(v, float) * scale) for k, v in e["vertices"].items()}
+            e["origin"] = P(o)
+        if e["type"] == "cube" and "inflate" in e:
+            e["inflate"] = e["inflate"] * scale
+        col = None
+        for f in e["faces"].values():
+            if f.get("texture") is not None:
+                n = tex[f["texture"]]
+                col = colour.get(n, n)
+                f["texture"] = g.tex[col]
+        e["name"] = g._name(e["name"])
+        g.put(ng, e)
+    return ng
 
 
 def legs(L, pairs, swing, n=16, axis=0):
