@@ -31,7 +31,6 @@ local NEAR = 30 -- studs from the gate: the Worlds menu's (no trail closer in)
 local function price()
 	return if REBIRTH then Config.Rebirth.Prices[(player:GetAttribute("Rebirths") or 0) + 1] else Config.WorldPrices[2]
 end
-local PROMPT_EVERY = 300 -- s: a full World 2 bar pops the Worlds menu up at most this often (at the base, not riding)
 local MONTSERRAT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 
 local camera = workspace.CurrentCamera
@@ -94,8 +93,8 @@ stroke.LineJoinMode = Enum.LineJoinMode.Round
 stroke.Parent = text
 text.Parent = bar
 local hand = TapHand.new(70)
--- (No spotlight or Force box any more: QM, Oct 14, it made players quit. A full bar pops the
--- Worlds menu up instead, which its X closes: PROMPT_EVERY.)
+-- (No spotlight or Force box any more: QM, Oct 14, it made players quit. And no Worlds menu
+-- popping up on a full bar either, nor its reminder: QM, Oct 15, bad UX; the tap hand guides.)
 hand:SetAttribute("Focus", Focus.P.BuyWorld2) -- (one goal at a time: Client/Focus)
 hand:SetAttribute("FocusGoal", "buyWorld2")
 hand.Position = UDim2.fromScale(0.84, 0.6)
@@ -166,7 +165,6 @@ local function align()
 	bar.Position = UDim2.new(0.5, 0, 0, (quests.AbsolutePosition.Y - root.AbsolutePosition.Y) / rootScale.Scale - (tall - header) / 2) -- (centred on it)
 end
 
-local lastPrompt = -math.huge
 RunService.RenderStepped:Connect(function()
 	align()
 	local owned = player:GetAttribute("OwnsWorld2") == true
@@ -175,16 +173,6 @@ RunService.RenderStepped:Connect(function()
 	gui.Enabled = (REBIRTH or not owned) and price() ~= nil and not busy and not (menu and menu.Enabled) -- (not under the Worlds menu)
 	if REBIRTH then
 		return
-	end
-	-- The World 2 prompt (QM, Oct 14): full, at the base, the Worlds menu pops up (Buy, or its
-	-- X and play on); again PROMPT_EVERY s later if it's still not bought.
-	if not owned and full() and gui.Enabled and os.clock() - lastPrompt > PROMPT_EVERY then
-		local menu = script.Parent:FindFirstChild("WorldsMenu")
-		local event = menu and menu:FindFirstChild("OpenWorldsMenu")
-		if event then
-			lastPrompt = os.clock()
-			event:Fire()
-		end
 	end
 	local guide = owned and player:GetAttribute("GuideTravel") and not busy and gate ~= nil
 	Focus.want("travelGuide", guide == true, Focus.P.Travel, "travel")
