@@ -2831,6 +2831,10 @@ function vfx.breathBlast(active)
 	if active.t < cfg.FireFrom or active.t > cfg.FireTo then
 		return
 	end
+	if not active.flamed then -- (its fire starting: QM, Oct 15)
+		active.flamed = true
+		vfx.sounds.play("flame")
+	end
 	local half = cfg.Width / 2
 	local function inPath(x, z, extra)
 		local rx, rz = x - mount.x, z - mount.z
