@@ -2150,6 +2150,9 @@ if Config.World == 4 then
 	}
 	patch.Haze, patch.Depths, patch.Sky = nil, nil, nil
 	patch.Length = 256 -- (one chunk: past the cut it's all chunks)
+	-- No animals yet (QM, Oct 15: World 1's scrapped from here, all new Halloween ones to come:
+	-- Config.HalloweenAnimals): empty stampedes, no nest eggs.
+	meadow.Herd, desert.Herd, patch.Herd = {}, {}, {}
 	Config.Biomes = { meadow, desert, patch }
 	Config.CourseLength = meadow.Length + desert.Length + patch.Length
 	Config.Endless = { Cut = -(meadow.Length + desert.Length), Length = 256, Chunks = "PumpkinPatchChunks" } -- (3984: a whole 16)
@@ -2165,7 +2168,6 @@ if Config.World == 4 then
 			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "SpineLizard" },
 			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "SnackYak" },
 			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "Boar" },
-			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "IceGolem" },
 			{ Text = "Collect animals", Kind = "home", Need = 20, Egg = "SnackYak" }, -- (no finish line on an endless course)
 		},
 		Config.Quests[3],
