@@ -218,6 +218,22 @@ local function publish(player)
 	player:SetAttribute("RideWorth", profile.rideWorth) -- (a hybrid's FUSE price: Fusion.worth)
 	local stats = profile.rideFuse and profile.rideStats
 	player:SetAttribute("RideStats", stats and Vector2.new(stats.Speed, stats.Stamina) or nil) -- (a hybrid's Speed, Stamina: Fusion.stats)
+	-- (caught, for the Index, QM Oct 15: ridden, or ever had as a pet or its egg, kept for good)
+	for kind in profile.eggs do
+		if isAnimal(kind) then
+			profile.ridden[kind] = true
+		end
+	end
+	for _, item in profile.items do
+		for _, kind in { item.pet, item.egg } do
+			if typeof(kind) == "string" and isAnimal(kind) then
+				profile.ridden[kind] = true
+			end
+		end
+	end
+	if profile.ride and isAnimal(profile.ride) then
+		profile.ridden[profile.ride] = true
+	end
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
 	local pen = penOf(player)
 	if pen then
