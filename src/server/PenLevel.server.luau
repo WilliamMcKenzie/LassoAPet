@@ -156,14 +156,17 @@ end
 -- a sheet showed the grass round its edges). Top at 0.3: the underlying ground
 -- textures bleed through the old 0.1 gap at shallow angles. Solid, so you stand on it
 -- rather than 0.3 into it on the ground under it (QM, Oct 11: feet in the pen's floor).
-local FLOOR_TOP, FLOOR_DEPTH = 0.3, 2.3
+local FLOOR_TOP, FLOOR_DEPTH = 0.3, 2.3 -- (FLOOR_TOP: above the bottom of the pen's tiles, so a pen set higher, World 3's on its sand, keeps its floor on top: QM, Oct 14)
+local function floorY(tiles)
+	return tiles.Position.Y - tiles.Size.Y / 2 + FLOOR_TOP - FLOOR_DEPTH / 2
+end
 local function floorOf(pen)
 	local floor = pen:FindFirstChild("Floor")
 	local tiles = pen:FindFirstChild("Tiles")
 	if floor or not tiles then
 		if floor and tiles then -- the pen may have grown
 			floor.Size = Vector3.new(tiles.Size.X, FLOOR_DEPTH, tiles.Size.Z)
-			floor.CFrame = CFrame.new(tiles.Position.X, FLOOR_TOP - FLOOR_DEPTH / 2, tiles.Position.Z) * tiles.CFrame.Rotation
+			floor.CFrame = CFrame.new(tiles.Position.X, floorY(tiles), tiles.Position.Z) * tiles.CFrame.Rotation
 		end
 		return floor
 	end
@@ -178,7 +181,7 @@ local function floorOf(pen)
 		floor[side] = Enum.SurfaceType.Studs -- (studded sides, like the ground's: QM)
 	end
 	floor.Size = Vector3.new(tiles.Size.X, FLOOR_DEPTH, tiles.Size.Z)
-	floor.CFrame = CFrame.new(tiles.Position.X, FLOOR_TOP - FLOOR_DEPTH / 2, tiles.Position.Z) * tiles.CFrame.Rotation -- (turned with the pen: the arc base's pens face the yard)
+	floor.CFrame = CFrame.new(tiles.Position.X, floorY(tiles), tiles.Position.Z) * tiles.CFrame.Rotation -- (turned with the pen: the arc base's pens face the yard)
 	local ground = world.Ground:GetChildren()[1]
 	for _, texture in ground:GetChildren() do
 		if texture:IsA("Texture") then
