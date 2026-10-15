@@ -102,8 +102,9 @@ close.Name = "Close"
 close.BackgroundTransparency = 1
 close.Image = CLOSE
 close.AnchorPoint = Vector2.new(0.5, 0.5)
-close.Position = UDim2.fromOffset(PAGE.X - 18, 30)
-close.Size = UDim2.fromOffset(110, 110)
+-- (centred on the panel's top right corner, as big on screen as the Worlds menu's: QM, Oct 15)
+close.Position = UDim2.fromOffset(PAGE.X - 9, 49 + 9)
+close.Size = UDim2.fromOffset(94, 94)
 close.ZIndex = 5
 close.Parent = page
 
