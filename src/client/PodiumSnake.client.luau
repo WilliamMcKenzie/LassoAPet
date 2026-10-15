@@ -19,6 +19,9 @@ local SnakeModel = GrassSnake.data
 local COLUMN = GrassSnake.capTop * Vector3.new(1, 0, 1) -- the column's foot in the model
 
 local podium = Config.Podium
+if podium.Hidden then
+	return -- (World 1: the Loong offer stands there instead, Client/LoongOffer)
+end
 local size = podium.SnakeScale
 local model, _, bones = Rig.fromData(SnakeModel, "GrassSnake", STUD_TEXTURE, size)
 for _, part in model:GetDescendants() do

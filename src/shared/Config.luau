@@ -789,7 +789,13 @@ local Config = {
 		AvatarScale = 1.5,
 		SnakeScale = 2, -- x the model (the Snake pet is about 1.9)
 		SnakeYaw = 165, -- degrees: its head rears in front of the column, looking into the base
+		Hidden = nil, -- (World 1: the Loong offer stands here instead, below)
 	},
+	-- The Loong for Robux at World 1's base (QM, Oct 15: "for mono", in the podium's place): it
+	-- idles on a glowing cyan ring with light rising round it; its prompt buys ProductId (a
+	-- developer product QM makes: 0 till then, and the prompt does nothing), the Loong into
+	-- your pen (Shop.server's ledger, Hatchery's addBoughtLoongs). Client/LoongOffer.
+	LoongOffer = { ProductId = 0, Price = 0, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165 },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
 	-- (Shared/Merge). They look like Pet's egg, EggScale x as big (QM).
@@ -1688,6 +1694,8 @@ function Config.slowedHere(kind, fuse)
 end
 -- World 1: World 2's and 3's pets ridden here at a Horse's speed (QM, Oct 15).
 if Config.World == 1 then
+	Config.Podium = table.clone(Config.Podium)
+	Config.Podium.Hidden = true -- (the Loong offer in its place: QM, Oct 15)
 	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
 	for kind, stats in Config.AnimalStats do
 		if not Config.ownHere(kind, 1) then

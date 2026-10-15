@@ -73,6 +73,9 @@ for _, list in { Config.Shop.Gold, Config.Shop.Specials } do
 end
 
 offerOf[Config.SpeedupEgg.ProductId] = { Key = "SpeedupEgg" }
+if Config.LoongOffer and Config.LoongOffer.ProductId ~= 0 then
+	offerOf[Config.LoongOffer.ProductId] = { Key = "Loong" } -- (World 1's base Loong: Client/LoongOffer)
+end
 
 -- Paid random items (the Legendary Pet, and egg rolls now gold can be bought) are
 -- never sold where the player's policy restricts them. Unknown counts as restricted.
@@ -112,7 +115,7 @@ local ledgers = {} -- [player] = the ledger as last read or written
 local MAX_RECEIPTS = 200
 
 local function blank()
-	return { receipts = {}, gold = 0, pets = 0, giant = 0, giantUsed = 0, giantEggs = 0, nukes = 0, nukesUsed = 0, hatches = 0 }
+	return { receipts = {}, gold = 0, pets = 0, giant = 0, giantUsed = 0, giantEggs = 0, nukes = 0, nukesUsed = 0, hatches = 0, loongs = 0 }
 end
 
 local function show(player, ledger)
@@ -121,6 +124,7 @@ local function show(player, ledger)
 	player:SetAttribute("BoughtGold", ledger.gold)
 	player:SetAttribute("BoughtPets", ledger.pets)
 	player:SetAttribute("BoughtGiantEggs", ledger.giantEggs)
+	player:SetAttribute("BoughtLoongs", ledger.loongs)
 	local rides, nukes = ledger.giant - ledger.giantUsed, ledger.nukes - ledger.nukesUsed
 	player:SetAttribute("GiantRides", if rides > 0 then rides else nil)
 	player:SetAttribute("Nukes", if nukes > 0 then nukes else nil)
@@ -199,6 +203,8 @@ local function record(userId, purchaseId, offer)
 			ledger.hatches = (ledger.hatches or 0) + 1
 		elseif offer.Key == "Nuke" then
 			ledger.nukes += 1
+		elseif offer.Key == "Loong" then
+			ledger.loongs = (ledger.loongs or 0) + 1 -- a Loong into your pen (Config.LoongOffer)
 		end
 		return true
 	end)

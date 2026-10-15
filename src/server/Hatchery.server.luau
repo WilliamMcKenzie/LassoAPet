@@ -354,7 +354,7 @@ local function mergeOld(player, data)
 		end
 		merged[worldKey("quests", world)] = old.quests
 		merged[worldKey("v1", world)] = old.v1
-		for _, field in { "boughtPets", "boughtGiantEggs", "usedHatches", "homeEggs" } do
+		for _, field in { "boughtPets", "boughtGiantEggs", "boughtLoongs", "usedHatches", "homeEggs" } do
 			if tonumber(old[field]) then
 				merged[field] = math.max(tonumber(merged[field]) or 0, old[field])
 			end
@@ -445,6 +445,7 @@ local function load(player)
 					profile.hatchTarget = typeof(data.hatchTarget) == "string" and data.hatchTarget or nil
 					profile.boughtPets = tonumber(data.boughtPets) -- Legendary Pets from the shop already in (addBoughtPets)
 					profile.boughtGiantEggs = tonumber(data.boughtGiantEggs) -- Giant Horse eggs from the shop already in (addBoughtGiantEggs)
+					profile.boughtLoongs = tonumber(data.boughtLoongs) -- Loongs bought at the base already in (addBoughtLoongs)
 				end
 				loaded[player] = true
 				player:GetAttributeChangedSignal("PenLevel"):Connect(function() -- (an upgrade makes room: Config.PenCapacity)
@@ -548,7 +549,7 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
-		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
+		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, boughtLoongs = profile.boughtLoongs, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
 		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, ridesDone = profile.ridesDone, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
 		merged = profile.merged }
 	data[worldKey("quests")], data[worldKey("v1")] = profile.quests, profile.v1 -- (this world's own)
@@ -1396,9 +1397,40 @@ local function addBoughtGiantEggs(player)
 	publish(player)
 	save(player)
 end
+-- The Loong at World 1's base (Config.LoongOffer, QM Oct 15): "BoughtLoongs" is the running
+-- total bought (Shop.server); each one not yet in your profile (boughtLoongs) is a Loong straight
+-- into your pen, as the Legendary Pet's are.
+local function addBoughtLoongs(player)
+	local profile = profiles[player]
+	local pen = penOf(player)
+	local total = player:GetAttribute("BoughtLoongs")
+	if profile and total and profile.boughtLoongs == nil and Config.World ~= 1 then
+		profile.boughtLoongs = total -- (as addBoughtPets: bought before, landed in its own world)
+		return
+	end
+	if not profile or not pen or not total or total <= (profile.boughtLoongs or 0) then
+		return
+	end
+	local area = pen.Area
+	local n = total - (profile.boughtLoongs or 0)
+	for _ = 1, n do
+		local x = (math.random() - 0.5) * (area.Size.X - 2 * EDGE)
+		local z = (math.random() - 0.5) * (area.Size.Z - 2 * EDGE)
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, pet = "Loong" }
+	end
+	profile.boughtLoongs = total
+	publish(player)
+	save(player)
+	for _ = 1, n do
+		ReplicatedStorage:WaitForChild("ShopGrant"):FireClient(player, "LegendaryPet", "Loong")
+	end
+end
 Players.PlayerAdded:Connect(function(player)
 	player:GetAttributeChangedSignal("BoughtPets"):Connect(function()
 		addBoughtPets(player)
+	end)
+	player:GetAttributeChangedSignal("BoughtLoongs"):Connect(function()
+		addBoughtLoongs(player)
 	end)
 	player:GetAttributeChangedSignal("BoughtGiantEggs"):Connect(function()
 		addBoughtGiantEggs(player)
@@ -1411,6 +1443,7 @@ Players.PlayerAdded:Connect(function(player)
 	end
 	addBoughtPets(player)
 	addBoughtGiantEggs(player)
+	addBoughtLoongs(player)
 end)
 
 -- A chat command, so the "/give ..." line itself doesn't show in chat.
@@ -1513,13 +1546,13 @@ tutorialCommand.Triggered:Connect(function(source)
 		return
 	end
 	local old = profiles[player]
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
 	Quests.publish(player, profiles[player].quests)
 	if store and loaded[player] then
 		-- Keep the shop counts saved too: without them, rejoining hands every Giant Horse
 		-- egg and Legendary Pet ever bought over again (addBoughtGiantEggs / addBoughtPets).
 		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false, usedHatches = old.usedHatches,
-			boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, merged = old.merged })
+			boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, merged = old.merged })
 	end
 	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
 	player:SetAttribute("PenLevel", 1)
@@ -1618,7 +1651,7 @@ resetCommand.Triggered:Connect(function(source)
 	end
 	Telemetry.exclude(player) -- (a test from here on: not in the play data)
 	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {}, tutorial = true, boughtPets = old.boughtPets,
-		boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
+		boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
 	for _, other in otherStores do -- (the other worlds' pens, empty)
 		task.spawn(pcall, other.SetAsync, other, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = true })
 	end
@@ -1649,7 +1682,7 @@ rebirthPets.OnInvoke = function(player)
 		return false
 	end
 	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = old.ridden or {}, tutorial = true, boughtPets = old.boughtPets,
-		boughtGiantEggs = old.boughtGiantEggs, usedHatches = old.usedHatches, quests = old.quests, v1 = old.v1, questsSeen = old.questsSeen,
+		boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, usedHatches = old.usedHatches, quests = old.quests, v1 = old.v1, questsSeen = old.questsSeen,
 		starterPack = old.starterPack, rainbowTrail = old.rainbowTrail, homeEggs = old.homeEggs, merged = old.merged, keep = old.keep, ridesDone = old.ridesDone }
 	local writes = {}
 	for _, other in otherStores do -- (the other worlds' pens, empty)
