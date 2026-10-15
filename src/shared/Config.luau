@@ -521,7 +521,7 @@ local Config = {
 		-- the animation's length and fire window; the range, width and cooldown are guesses
 		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 1, -- (no slowing while it hunts: QM, Oct 15, was 0.8)
 		Grow = 1.0125, LinearGrow = true, SpeedUp = 1.05, MaxSpeed = 2.5, -- (Grow: 1.25% of its size an animal eaten, added, not compounded: QM Oct 15; was 1.1, then 1.05)
-		 RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
+		 RestorePer = 0 --[[ (no time back for eating: QM, Oct 15, was 0.3) ]], MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
 		-- QM, Oct 4: one animal, however long it takes, speeding up from 1x to MaxBoost x over RampTime s
 		Leviathan = { Kind = "Hunt", Once = true, Cooldown = 5, SpeedBoost = 1, MaxBoost = 8, RampTime = 10, RestorePer = 0.2, Grow = 1, SpeedUp = 1, MaxTier = 2 },
 		Loong = { Kind = "Breath", Duration = 4.2, FireFrom = 0.95, FireTo = 3.95, Cooldown = 8, Range = 140, Width = 22, Crawl = 1, RestorePer = 0.1, Grow = 1.1, SpeedUp = 1.1, MaxSpeed = 2, MaxTier = 4 }, -- (MaxSpeed: x its 0.5x speed, so up to 1x; Crawl 1: no slowing while it breathes, QM Oct 15, was 0.15)
