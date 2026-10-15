@@ -8,6 +8,10 @@
 -- filling to your next rebirth's price (Config.Rebirth). Full, the tap hand; a tap opens
 -- QM's Rebirth panel (RebirthMenu): Confirm rebirths you (Gold.server's Rebirth). Gone
 -- after the last.
+-- One bar for every world (QM, Oct 15): it fills to the next world you don't have, in whichever
+-- world you're in (World 2, then World 3: Config.WorldPrices), and once they're all yours to the
+-- next trail (Config.TrailBars: Grey ... Rainbow; Gold.server's BuyTrail). The label's on QM's
+-- art with its "WORLD 2" painted out (BarFill.png, BarEmpty.png).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,14 +26,29 @@ local Focus = require(script.Parent.Focus)
 local WorldUnlock = require(script.Parent.WorldUnlock)
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
-local FULL = if REBIRTH then "rbxassetid://73306793972865" else "rbxassetid://108726643390976" -- assets/ui/RebirthBar.png, World2Bar.png (964x103; QM's thinner one, Oct 13)
-local EMPTY = if REBIRTH then "rbxassetid://88891851849945" else "rbxassetid://108345016053649" -- assets/ui/RebirthBarEmpty.png, World2BarEmpty.png
+local FULL = if REBIRTH then "rbxassetid://73306793972865" else "rbxassetid://100062651101544" -- assets/ui/RebirthBar.png, BarFill.png (964x103; QM's World2Bar.png, its label painted out)
+local EMPTY = if REBIRTH then "rbxassetid://88891851849945" else "rbxassetid://105502035787337" -- assets/ui/RebirthBarEmpty.png, BarEmpty.png
 local BAR = Vector2.new(660, 660 * 103 / 964) -- (half the screen across: QM's mockup)
 local TOP = 14 -- px from the screen's top (QM, Oct 13: was at the bottom, over the egg inventory)
 local ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
 local NEAR = 30 -- studs from the gate: the Worlds menu's (no trail closer in)
+-- What the bar's for now: { price, label, world or trail }, or nil when there's nothing left.
+local function goal()
+	if REBIRTH then
+		local p = Config.Rebirth.Prices[(player:GetAttribute("Rebirths") or 0) + 1]
+		return p and { price = p, label = "" }
+	end
+	for world = 2, #Config.Places do
+		if not player:GetAttribute("OwnsWorld" .. world) and Config.WorldPrices[world] then
+			return { price = Config.WorldPrices[world], label = "WORLD " .. world, world = world }
+		end
+	end
+	local i = Config.nextTrail(player)
+	return i and { price = Config.TrailBars[i].Price, label = string.upper(Config.TrailBars[i].Name) .. " TRAIL", trail = i }
+end
 local function price()
-	return if REBIRTH then Config.Rebirth.Prices[(player:GetAttribute("Rebirths") or 0) + 1] else Config.WorldPrices[2]
+	local g = goal()
+	return g and g.price
 end
 local MONTSERRAT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 
@@ -92,6 +111,23 @@ stroke.Thickness = 2.5
 stroke.LineJoinMode = Enum.LineJoinMode.Round
 stroke.Parent = text
 text.Parent = bar
+-- What it's for, right of the gold, as QM's art had "WORLD 2".
+local label = Instance.new("TextLabel")
+label.Name = "Label"
+label.BackgroundTransparency = 1
+label.FontFace = MONTSERRAT
+label.TextScaled = true
+label.TextColor3 = Color3.new(1, 1, 1)
+label.TextXAlignment = Enum.TextXAlignment.Right
+label.AnchorPoint = Vector2.new(1, 0.5)
+label.Position = UDim2.fromScale(0.935, 0.5)
+label.Size = UDim2.fromScale(0.45, 0.46)
+label.ZIndex = 3
+local labelStroke = Instance.new("UIStroke")
+labelStroke.Thickness = 3
+labelStroke.LineJoinMode = Enum.LineJoinMode.Round
+labelStroke.Parent = label
+label.Parent = bar
 local hand = TapHand.new(70)
 -- (No spotlight or Force box any more: QM, Oct 14, it made players quit. And no Worlds menu
 -- popping up on a full bar either, nor its reminder: QM, Oct 15, bad UX; the tap hand guides.)
@@ -110,18 +146,26 @@ local function showGold()
 	local p = price() or math.huge
 	fill.Size = UDim2.fromScale(math.clamp(gold / p, 0, 1), 1)
 	text.Text = "$" .. Config.short(gold) .. "/" .. Config.short(p)
+	local g = goal()
+	label.Text = g and g.label or ""
 	hand.Visible = full()
 end
-player:GetAttributeChangedSignal("Gold"):Connect(showGold)
-player:GetAttributeChangedSignal("Rebirths"):Connect(showGold)
+for _, name in { "Gold", "Rebirths", "OwnsWorld2", "OwnsWorld3", "TrailsOwned", "FinishTrail", "RainbowTrail" } do
+	player:GetAttributeChangedSignal(name):Connect(showGold)
+end
 showGold()
 
 bar.Activated:Connect(function()
 	if not full() then
 		return
 	end
-	if not REBIRTH then
-		WorldUnlock.buy(2)
+	local g = goal()
+	if not g then
+		return
+	elseif g.world then
+		WorldUnlock.buy(g.world)
+	elseif g.trail then
+		pcall(ReplicatedStorage.BuyTrail.InvokeServer, ReplicatedStorage.BuyTrail)
 	else
 		require(script.Parent.RebirthMenu).open() -- (QM's panel: what you gain and lose, Confirm)
 	end
@@ -143,7 +187,10 @@ arrowImage.Parent = arrow
 arrow.Parent = player.PlayerGui
 local trail = ArrowTrail.new()
 
-local gate = if REBIRTH then nil else workspace:WaitForChild("World"):WaitForChild("BaseDecor"):WaitForChild("PortalGate", 30)
+local gate = nil -- (looked for without holding the bar up: not every world's base has one)
+task.spawn(function()
+	gate = workspace:WaitForChild("World"):WaitForChild("BaseDecor"):WaitForChild("PortalGate", 30)
+end)
 -- In line with the Quests panel, as tall as it is folded (QM, Oct 13): its top and its
 -- header's height (BaseUi's 86, at BaseUi's scale).
 local QUESTS_HEADER = 86
@@ -170,7 +217,7 @@ RunService.RenderStepped:Connect(function()
 	local owned = player:GetAttribute("OwnsWorld2") == true
 	local busy = Hud.isRiding() or player:GetAttribute("Cutscene") or player:GetAttribute("Tutorial")
 	local menu = player.PlayerGui:FindFirstChild("WorldsMenu")
-	gui.Enabled = (REBIRTH or (Config.World == 1 and not owned)) and price() ~= nil and not busy and not (menu and menu.Enabled) -- (not under the Worlds menu)
+	gui.Enabled = price() ~= nil and not busy and not (menu and menu.Enabled) -- (not under the Worlds menu; in every world: QM, Oct 15)
 	if REBIRTH then
 		return
 	end

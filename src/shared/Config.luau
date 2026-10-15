@@ -1398,10 +1398,52 @@ local RAINBOW = {
 	Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 160, 50), Color3.fromRGB(255, 235, 70),
 	Color3.fromRGB(80, 220, 90), Color3.fromRGB(70, 150, 255), Color3.fromRGB(170, 90, 240),
 }
+-- The trail bars (QM, Oct 15): once every world is yours, the top bar (World2Bar.client) fills
+-- to each of these in turn, for gold; a tap on a full one buys it (Gold.server's BuyTrail).
+-- Bought ones are saved as bits of "TrailsOwned", shared by every world. Your trail is the
+-- best one you own (the last in this list). Prices are guesses past World 3's 10m.
+local rgb = Color3.fromRGB
+Config.TrailBars = {
+	{ Name = "Grey", Price = 25000000, Colors = { rgb(240, 240, 245), rgb(200, 200, 208), rgb(150, 150, 160), rgb(100, 100, 112) } },
+	{ Name = "Green", Price = 50000000, Colors = { rgb(180, 255, 160), rgb(100, 230, 90), rgb(40, 190, 60), rgb(20, 130, 40) } },
+	{ Name = "Blue", Price = 100000000, Colors = Config.FinishTrails[2].Colors },
+	{ Name = "Purple", Price = 250000000, Colors = { rgb(235, 190, 255), rgb(200, 120, 255), rgb(150, 60, 230), rgb(100, 30, 170) } },
+	{ Name = "Golden", Price = 500000000, Colors = Config.FinishTrails[1].Colors },
+	{ Name = "Red", Price = 1000000000, Colors = Config.FinishTrails[3].Colors },
+	{ Name = "Galaxy", Price = 2500000000, Colors = Config.FinishTrails[5].Colors },
+	{ Name = "Rainbow", Price = 5000000000 }, -- (the Rainbow Trail's bands)
+}
+-- (the finish line's old trails, FinishTrail n, count as these: Yellow the Golden one)
+local OLD = { Golden = 1, Blue = 2, Red = 3, Rainbow = 4, Galaxy = 5 }
+function Config.ownsTrail(player, i)
+	local bar = Config.TrailBars[i]
+	if not bar then
+		return false
+	end
+	if bit32.btest(tonumber(player:GetAttribute("TrailsOwned")) or 0, bit32.lshift(1, i - 1)) then
+		return true
+	end
+	if OLD[bar.Name] and (player:GetAttribute("FinishTrail") or 0) >= OLD[bar.Name] then
+		return true
+	end
+	return bar.Name == "Rainbow" and player:GetAttribute("RainbowTrail") == true -- (the bought Rainbow Trail)
+end
+-- The next trail bar to fill (not yet yours), or nil when you have them all.
+function Config.nextTrail(player)
+	for i in Config.TrailBars do
+		if not Config.ownsTrail(player, i) then
+			return i
+		end
+	end
+	return nil
+end
 function Config.trailColors(player)
-	local n = math.max(player:GetAttribute("FinishTrail") or 0, if player:GetAttribute("RainbowTrail") then 4 else 0) -- (the bought one counts as the Rainbow)
-	local trail = Config.FinishTrails[n]
-	return if trail then trail.Colors or RAINBOW else nil
+	for i = #Config.TrailBars, 1, -1 do
+		if Config.ownsTrail(player, i) then
+			return Config.TrailBars[i].Colors or RAINBOW
+		end
+	end
+	return nil
 end
 -- The per-world saves' DataStore names: World 1's as they've always been, the others' with
 -- this on the end ("Pen_W2"). Gold's store is shared.

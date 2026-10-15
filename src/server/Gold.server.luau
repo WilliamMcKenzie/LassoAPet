@@ -74,6 +74,7 @@ local function load(player)
 				local gates = if typeof(value) == "table" then tonumber(value[GATES]) else nil
 				player:SetAttribute("FinishTrail", if typeof(value) == "table" then tonumber(value.trail) else nil) -- (the finish line's trails: Config.FinishTrails, shared by every world)
 				player:SetAttribute("Rebirths", if typeof(value) == "table" then tonumber(value.rebirths) else nil) -- (Config.Rebirth, shared by every world)
+				player:SetAttribute("TrailsOwned", if typeof(value) == "table" then tonumber(value.trails) else nil) -- (Config.TrailBars, shared by every world)
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
 				if typeof(value) == "table" and value.v1new then -- (Analytics V1: a new World 1 player since V1)
 					player:SetAttribute("V1New", true)
@@ -109,7 +110,8 @@ local function save(player, onlyIfChanged)
 	end
 	local trail = player:GetAttribute("FinishTrail")
 	local rebirths = player:GetAttribute("Rebirths")
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths)
+	local trails = player:GetAttribute("TrailsOwned")
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths) .. "/" .. tostring(trails)
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
@@ -119,6 +121,7 @@ local function save(player, onlyIfChanged)
 		record.worlds = if #worlds > 0 then worlds else nil
 		record.trail = trail
 		record.rebirths = rebirths
+		record.trails = trails
 		record.v1new = player:GetAttribute("V1New") or record.v1new
 		record.lastWorld = Config.World -- (where you were last: a join from the home page goes back there)
 		record[PLAYED] = math.floor(playedNow(player))
@@ -203,6 +206,31 @@ buyWorld.OnServerInvoke = function(player, world)
 end
 buyWorld.Parent = ReplicatedStorage
 
+-- BuyTrail (Config.TrailBars, QM Oct 15): with every world yours, the next trail for its gold.
+local buyTrail = Instance.new("RemoteFunction")
+buyTrail.Name = "BuyTrail"
+buyTrail.OnServerInvoke = function(player)
+	if not loaded[player] then
+		return false
+	end
+	for world in Config.Places do
+		if world ~= 1 and not player:GetAttribute("OwnsWorld" .. world) then
+			return false
+		end
+	end
+	local i = Config.nextTrail(player)
+	local price = i and Config.TrailBars[i].Price
+	local gold = player:GetAttribute("Gold") or 0
+	if not price or gold < price then
+		return false
+	end
+	player:SetAttribute("Gold", gold - price)
+	player:SetAttribute("TrailsOwned", bit32.bor(tonumber(player:GetAttribute("TrailsOwned")) or 0, bit32.lshift(1, i - 1)))
+	save(player)
+	return true
+end
+buyTrail.Parent = ReplicatedStorage
+
 -- "/reset" (Hatchery): gold, rebirths, trails, the worlds bought and every world's
 -- barriers and played time gone, saved at once.
 local hardReset = Instance.new("BindableEvent")
@@ -210,7 +238,7 @@ hardReset.Name = "HardReset"
 hardReset.Event:Connect(function(player)
 	player:SetAttribute("Gold", 0)
 	player:SetAttribute("GatesBroken", 1)
-	for _, name in { "Rebirths", "FinishTrail" } do
+	for _, name in { "Rebirths", "FinishTrail", "TrailsOwned" } do
 		player:SetAttribute(name, nil)
 	end
 	for world in Config.Places do
