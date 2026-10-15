@@ -2068,8 +2068,10 @@ if Config.World == 3 then
 			{ Text = "Reach Candyland", Kind = "reach", Biome = 3, Egg = "GummyBear" }, -- (QM, Oct 15: the red one)
 			{ Text = "Reach Cnidaria", Kind = "reach", Biome = 4, Egg = "BlueRingOctopus" }, -- (QM, Oct 15)
 		},
-		{
-			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "Seraph" },
+		{ -- (QM, Oct 15: was "Merge an animal" for a Seraph egg; World 3 was never for sale till now)
+			{ Text = "Lasso an Ancient Treant", Kind = "lasso", Animal = "AncientTreant", Need = 1, Egg = { "AncientTreant", "AncientTreant", "AncientTreant" } },
+			{ Text = "Lasso 5 Sunflower Lions", Kind = "lasso", Animal = "SunflowerLion", Need = 5, Egg = "Mermaid" },
+			{ Text = "Lasso 100 Banana Monkeys", Kind = "lasso", Animal = "BananaMonkey", Need = 100, Egg = "ReefTitan" },
 		},
 	}
 	Config.Water = table.clone(Config.Water)
