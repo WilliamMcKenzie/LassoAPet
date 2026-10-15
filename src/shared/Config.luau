@@ -1940,7 +1940,7 @@ if Config.World == 3 then
 			Herd = { Ladybug = 0.3, Bumblebee = 0.3, ToadstoolFrog = 0.2, VineMonster = 0.2, VenusFlytrap = 0.12, SunflowerLion = 0.05 },
 			Patches = {
 				Soil = { rgb(110, 72, 44), rgb(98, 64, 38) },
-				Grass = { rgb(126, 214, 72), rgb(114, 200, 62) },
+				Grass = { rgb(166, 205, 94), rgb(182, 214, 103) }, -- the light lawn (QM, Oct 15)
 				Flowers = { rgb(255, 130, 190), rgb(244, 112, 176) },
 				Path = { rgb(235, 215, 172), rgb(244, 227, 186) }, -- (QM, Oct 15)
 			},
