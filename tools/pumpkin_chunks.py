@@ -81,23 +81,35 @@ def radius(item):
     return k * max(w, d) / 2
 
 
+def reach(item, yaw):
+    """How far its footprint reaches across the course from its middle, turned by yaw."""
+    k, w, d = SIZE[item]
+    a = math.radians(yaw)
+    return k * (w * abs(math.cos(a)) + d * abs(math.sin(a))) / 2
+
+
 def place(n):
     """[(item, x, z, yaw degrees)]: z from 0 at the chunk's start going -z; yaw is
     CFrame.Angles(0, rad(yaw), 0) on a model facing -z: -90 faces +x, 90 faces -x, 180 +z."""
     out = []
-    for (side, at), scene in zip(SLOTS, ORDER[n]):
-        flip = (n + at // 64) % 2  # (mirror some scenes along the course so they don't repeat)
+    rng = random.Random(900 + n)
+    first = -1 if n % 2 == 0 else 1  # (the chunks don't all start on the same wall)
+    for k, ((side, at), scene) in enumerate(zip(SLOTS, ORDER[n])):
+        side *= -first
+        at += rng.randint(-6, 6)
+        flip = rng.random() < 0.5  # (mirror some scenes along the course so they don't repeat)
         for item, along, inn, turn in SCENES[scene]:
             along = -along if flip else along
-            x = side * (HALF - inn)
-            z = -(at + along)
             yaw = side * 120 + side * turn  # (in from the wall, turned 30 back toward the riders)
-            out.append((item, x, z, yaw))
-        lx = -side * (HALF - 6)
-        out.append((LOOSE[(n + at // 64) % 4], lx, -(at + 8 * (1 if n % 2 else -1)), 0))
-    for item, x, z, _ in out:
+            inn = max(inn, reach(item, yaw) + 1)  # (its footprint clear of the wall face)
+            out.append((item, side * (HALF - inn), -(at + along), yaw))
+        item = LOOSE[(n + k) % 4]
+        inn, yaw = rng.randint(5, 10), rng.randrange(0, 360, 15)
+        out.append((item, -side * (HALF - max(inn, reach(item, yaw) + 1)), -(at + rng.randint(-14, 14)), yaw))
+    for item, x, z, _ in out:  # (_: its yaw)
         r = radius(item) if item not in ("LeafScatter", "LeafPile") else 3
         assert HALF - abs(x) + r <= LANE + 6, (item, x)  # (in the wall band)
+        assert abs(x) + reach(item, _) <= HALF, (item, x)  # (clear of the wall face)
         assert -z - radius(item) > 8 and -z + radius(item) < LENGTH - 8, (item, z)  # (clear of the seams)
     return out
 
@@ -124,29 +136,22 @@ def no_specks(m):
 
 
 def chunk(seed):
-    rag = noise(NX, NZ, 3, seed)
-    blobs = noise(NX, NZ, 2, seed + 1)
-    xs = -EDGE + CELL * np.arange(NX) + CELL / 2
-    wall = HALF - np.abs(xs)[:, None] * np.ones((1, NZ))  # studs in from the wall
-    reach = 8 + rag * 36
-    for j in range(NZ):  # (ease to the seam band at both ends)
-        t = min(j, NZ - 1 - j)
-        if t < SEAM:
-            reach[:, j] = SEAM_REACH + (reach[:, j] - SEAM_REACH) * t / SEAM
-    band = (wall < reach) | ((blobs > 0.78) & (wall < 50))
-    band[:, :1] = band[:, -1:] = wall[:, :1] < SEAM_REACH
-    band = no_specks(band)
-    band[:, :1] = band[:, -1:] = wall[:, :1] < SEAM_REACH  # (the seams exact)
-    kind = np.full((NX, NZ), TAN)
-    kind[band] = GREEN
-    # green or brown picked at random per 16-stud block (2x2 tiles)
+    """Laid out on 16-stud blocks (2x2 tiles), so there's never a lone tile of anything."""
+    BX, BZ = NX // 2, NZ // 2
+    rag = noise(BX, BZ, 2, seed)
+    blobs = noise(BX, BZ, 1.5, seed + 1)
+    xs = -EDGE + 2 * CELL * np.arange(BX) + CELL
+    wall = HALF - np.abs(xs)[:, None] * np.ones((1, BZ))  # studs in from the wall
+    reach = 10 + rag * 34
+    band = (wall < reach) | ((blobs > 0.8) & (wall < 50))
+    band[:, :1] = band[:, -1:] = wall[:, :1] < SEAM_REACH  # (the seams: the same set band)
     rng = np.random.default_rng(seed)
-    pick = rng.random((NX // 2 + 1, NZ // 2 + 1)) < 0.45
-    blocks = np.kron(pick, np.ones((2, 2), bool))[:NX, :NZ]
-    brown = band & blocks & ~specks(band & blocks)
-    brown[:, :2] = brown[:, -2:] = False  # (the seams all green)
+    brown = band & (rng.random((BX, BZ)) < 0.45)  # green or brown at random per block
+    brown[:, :1] = brown[:, -1:] = False  # (the seams all green)
+    kind = np.full((BX, BZ), TAN)
+    kind[band] = GREEN
     kind[brown] = BROWN
-    return kind
+    return np.kron(kind, np.ones((2, 2), int))
 
 
 def draw(kinds, out, s=3, gap=6):
@@ -208,7 +213,8 @@ def main():
     kinds = [chunk(70 + 10 * n) for n in range(4)]
     for k in kinds:
         assert (k[:, 0] == kinds[0][:, 0]).all() and (k[:, -1] == kinds[0][:, 0]).all(), "seams differ"
-        assert not specks(k == TAN).any()
+        for t in (TAN, GREEN, BROWN):
+            assert not specks(k == t).any(), ("specks", t)
     props = [place(n) for n in range(4)]
     draw(kinds, os.path.join(out, "pumpkin_chunks.png"))
     im = Image.open(os.path.join(out, "pumpkin_chunks.png"))
