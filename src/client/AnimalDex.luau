@@ -182,6 +182,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	GumdropFrog = "Rolled itself in sugar on purpose. Leaves a sparkly trail.",
 	GingerbreadMan = "Runs as fast as he can. You still caught him.",
 	Creampuff = "Fresh from the oven and furious about it.",
+	SwollFairy = "Grants wishes, but only if you can out-flex her first.",
 	DesireTroll = "Guards the candy. Eats most of it too.",
 	RockCandyDragon = "Grew its crystals one sugar grain at a time. Took a thousand years.",
 	GumballGolem = "Insert one coin. Get one golem. No refunds.",
