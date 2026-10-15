@@ -194,6 +194,7 @@ def stripes_box(a, name, lo, hi, colors, axis, bone, n=None):
 def mark_glow(parts):
     for p in parts:
         p.neon = p.name.startswith("Glow")
+        p.plain = p.plain or p.name.startswith("Smooth")  # the game draws smooth meshes studless
     return parts
 
 

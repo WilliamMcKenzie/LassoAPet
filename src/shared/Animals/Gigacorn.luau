@@ -7,6 +7,6 @@ local Horse = require(script.Parent.Horse)
 local GigacornModel = require(script.Parent.Parent.Bosses.GigacornModel)
 
 return Horse.variant("Gigacorn", GigacornModel, "Legendary", {
-	seat = Vector3.new(0, 8.7, 0.1),
-	neck = { center = Vector3.new(0, 9.8, -4.0), radius = 2.2 },
+	seat = Vector3.new(0, 9.2, 0.15),
+	neck = { center = Vector3.new(0, 10.4, -3.75), radius = 2.0 },
 })
