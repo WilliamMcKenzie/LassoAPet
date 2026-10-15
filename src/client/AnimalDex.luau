@@ -28,7 +28,7 @@ local LIST_TOP, LIST_SIDE, LIST_BOTTOM = 105, 40, 32 -- the scrolling list's ins
 local PER_ROW = 5
 local CELL = 200 -- each animal's square
 local GAP = 16
-local HEADER = 70 -- a biome name's height
+local HEADER = 56 -- a biome name's height (QM, Oct 15: 20% smaller, was 70)
 local FREDOKA = Font.new("rbxasset://fonts/families/FredokaOne.json")
 local SCREEN_SHARE = 0.7 -- of the screen's width, at most (and 85% of its height)
 
