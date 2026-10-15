@@ -8,6 +8,7 @@ local PetFaces = {}
 -- Headshots rendered from each pet's model; "" until uploaded.
 local HEADSHOTS = {
 	Horse = "rbxassetid://129206679931938", -- PetHorse.png
+	ArmoredHorse = "rbxassetid://76132901999900", -- PetArmoredHorse.png (World 2's starter, QM Oct 15)
 	Pinto = "rbxassetid://137788325926698", -- PetPinto.png
 	Pig = "rbxassetid://126771183103796", -- PetPig.png
 	Bunny = "rbxassetid://77770407898290", -- PetBunny.png
