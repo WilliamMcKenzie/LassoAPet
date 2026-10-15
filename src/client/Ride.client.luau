@@ -3206,12 +3206,13 @@ local function updateAbility(dt)
 		Hud.setAbility(nil)
 		return
 	end
+	local auto = not Config.AbilitiesOn -- (only AutoAbilities pets get here then: on its own, no button)
 	local a = mount.ability
 	if not a then
-		a = { readyAt = 0 }
+		-- (an automatic one starts on its cooldown, not before the start line: QM, Oct 15)
+		a = { readyAt = if auto then abilityClock + cfg.Cooldown else 0 }
 		mount.ability = a
 	end
-	local auto = not Config.AbilitiesOn -- (only AutoAbilities pets get here then: on its own, no button)
 	local pressed = abilityPressed() or auto
 	local active = a.active
 	if active then
