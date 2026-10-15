@@ -1127,6 +1127,7 @@ local Config = {
 			{ Text = "Reach Ocean", Kind = "reach", Biome = 4, Egg = "Lionfish" }, -- (QM, Oct 11: was the Icebringer)
 			{ Text = "Reach Volcano", Kind = "reach", Biome = 5, Egg = "FireLobster" }, -- (QM, Oct 11: was the Kraken)
 			{ Text = "Reach Jurassic", Kind = "reach", Biome = 6, Egg = "PalmGuy" }, -- (QM, Oct 11: was the Phoenix)
+			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "Loong" }, -- (QM, Oct 15: the end of every line)
 		},
 		{
 			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "SpineLizard" }, -- (QM, Oct 11: 3, was 10)
@@ -1136,6 +1137,7 @@ local Config = {
 			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 3, Egg = "LavaWhale" }, -- (QM, Oct 11: 3, was 5) -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
 			{ Text = "Lasso Lava Whales", Kind = "lasso", Animal = "LavaWhale", Need = 2, Egg = "RoboShark" }, -- (QM, Oct 11: was Collect 30)
 			{ Text = "Lasso a Bone Rex", Kind = "lasso", Animal = "BoneRex", Need = 1, Egg = "Seraph" }, -- (QM, Oct 14: World 2's Seraph egg, was the Loong; QM, Oct 11: was Collect 50)
+			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "Loong" }, -- (QM, Oct 15: the end of every line)
 		},
 		{ -- (QM, Oct 12: a third line, just this; tapping it opens Roblox's invite, done when an invited friend joins: Hatchery)
 			{ Text = "Invite a friend", Kind = "invite", Need = 1, Egg = "Squid", NoPenLevel = true },
@@ -1619,11 +1621,13 @@ if Config.World == 2 then
 			{ Text = "Reach Woodland Maze", Kind = "reach", Biome = 4, Egg = "OrangeButterfly" }, -- (the Lionfish)
 			{ Text = "Reach Temple", Kind = "reach", Biome = 5, Egg = "Tiger" }, -- (the Fire Lobster)
 			{ Text = "Reach Tomb", Kind = "reach", Biome = 6, Egg = "BloatedMummy" }, -- (the Palm Guy: the Uncommon)
+			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "Loong" }, -- (QM, Oct 15: the end of every line)
 		},
 		{
 			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "Seraph" }, -- (QM, Oct 14: 1, was 3)
 			{ Text = "Lasso Lions", Kind = "lasso", Animal = "Lion", Need = 10, Egg = "Asura" },
 			{ Text = "Lasso Kitsunes", Kind = "lasso", Animal = "Kitsune", Need = 3, Egg = { "Geb", "Nut", "Bes" } },
+			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "Loong" }, -- (QM, Oct 15: the end of every line)
 		},
 	}
 	Config.DefaultPet = "ArmoredHorse" -- World 2's starter, in your pen from the start (QM, Oct 13)
@@ -2067,11 +2071,13 @@ if Config.World == 3 then
 			{ Text = "Reach Garden", Kind = "reach", Biome = 2, Egg = "VenusFlytrap" }, -- (QM, Oct 15)
 			{ Text = "Reach Candyland", Kind = "reach", Biome = 3, Egg = "GummyBear" }, -- (QM, Oct 15: the red one)
 			{ Text = "Reach Cnidaria", Kind = "reach", Biome = 4, Egg = "BlueRingOctopus" }, -- (QM, Oct 15)
+			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "Loong" }, -- (QM, Oct 15: the end of every line)
 		},
 		{ -- (QM, Oct 15: was "Merge an animal" for a Seraph egg; World 3 was never for sale till now)
 			{ Text = "Lasso an Ancient Treant", Kind = "lasso", Animal = "AncientTreant", Need = 1, Egg = { "AncientTreant", "AncientTreant", "AncientTreant" } },
 			{ Text = "Lasso 5 Sunflower Lions", Kind = "lasso", Animal = "SunflowerLion", Need = 5, Egg = "Mermaid" },
 			{ Text = "Lasso 100 Banana Monkeys", Kind = "lasso", Animal = "BananaMonkey", Need = 100, Egg = "ReefTitan" },
+			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "Loong" }, -- (QM, Oct 15: the end of every line)
 		},
 	}
 	Config.Water = table.clone(Config.Water)

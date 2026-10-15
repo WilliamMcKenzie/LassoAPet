@@ -840,6 +840,7 @@ finishCourse.OnServerInvoke = function(player, rode)
 	end
 	finished[player] = os.clock()
 	-- (no trail for it any more: QM, Oct 15; ones already earned stay, Config.FinishTrails)
+	Quests.count(player, profile.quests, "finish") -- ("Cross the finish line 5 times", QM Oct 15)
 	if typeof(rode) == "string" and isAnimal(rode) then
 		givePet(player, profile, rode)
 		return rode
