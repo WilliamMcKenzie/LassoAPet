@@ -1,4 +1,7 @@
-"""Rafflesia Beast: World 3 Garden giga rare (draft, Oct 14; about 1 in 1,000). A hulking
+"""DON'T RERUN: QM edited designs/garden/RafflesiaBeast.bbmodel by hand in Blockbench (Oct 15), which is now the
+source; this would overwrite it. Convert that file instead.
+
+Rafflesia Beast: World 3 Garden giga rare (draft, Oct 14; about 1 in 1,000). A hulking
 moss-green beast carrying a giant corpse flower on its back: five huge warty red-orange petals
 spread over it like a saddle cloth, a dark maroon well in the middle ringed by a cream rim and
 bristling with pyramid spines (you ride in the well). Oct 15 (QM: "with some mesh usage"): petals (thick, drooping),
