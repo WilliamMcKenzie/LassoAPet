@@ -828,7 +828,7 @@ end)
 -- The ride crossed the finish line at the end of the course: the animal you rode there
 -- (QM, Oct 13: the animal itself, givePet), or (a hybrid, say) a random one, drawn like the
 -- stampede itself (each biome's Herd counts as weights, so a Unicorn is as rare as Unicorns are). And
--- the next of Config.FinishTrails, silently (FinishTrail; Gold.server saves it). Returns
+-- (until Oct 15, the next of Config.FinishTrails too). Returns
 -- the kind, for the egg reveal.
 local finished = {} -- [player] = os.clock() of their last finish
 local finishCourse = Instance.new("RemoteFunction")
@@ -839,7 +839,7 @@ finishCourse.OnServerInvoke = function(player, rode)
 		return nil
 	end
 	finished[player] = os.clock()
-	player:SetAttribute("FinishTrail", math.min((player:GetAttribute("FinishTrail") or 0) + 1, #Config.FinishTrails))
+	-- (no trail for it any more: QM, Oct 15; ones already earned stay, Config.FinishTrails)
 	if typeof(rode) == "string" and isAnimal(rode) then
 		givePet(player, profile, rode)
 		return rode
