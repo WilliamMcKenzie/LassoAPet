@@ -1933,7 +1933,7 @@ if Config.World == 3 then
 			Length = 3632, -- (2x the Desert's 1816)
 			GroundColors = { rgb(76, 170, 52), rgb(68, 156, 46) },
 			WallColors = { rgb(35, 86, 31), rgb(30, 74, 27) },
-			CapColor = rgb(255, 120, 170),
+			CapColor = rgb(62, 99, 78), -- #3E634E (QM, Oct 15; was pink 255, 120, 170)
 			-- (Oct 14, the Garden animals thread: weights as the Crimson Lands' by rarity, guesses; its
 			-- giga rares and the Flytrap Queen added below)
 			Herd = { Ladybug = 0.3, Bumblebee = 0.3, ToadstoolFrog = 0.2, VineMonster = 0.2, VenusFlytrap = 0.12, SunflowerLion = 0.05 },
