@@ -1,4 +1,7 @@
-"""Toadstool Frog: World 3 Garden Rare (draft, Oct 14). A fat lime frog wearing a giant purple
+"""DON'T RERUN: QM edited designs/garden/<this animal>.bbmodel by hand in Blockbench (Oct 15), which is now
+the source; this would overwrite it. Convert that file instead.
+
+Toadstool Frog: World 3 Garden Rare (draft, Oct 14). A fat lime frog wearing a giant purple
 toadstool for a hat: a squat body with a pale yellow belly and darker green spots, a wide head
 with a long grin and pink tongue tip, big googly eyes on bumps, folded hind legs with webbed
 orange-ish toes, and a domed purple cap with chunky white spots and a cream gill rim on top of

@@ -1,4 +1,7 @@
-"""Bumblebee: World 3 Garden Uncommon flier (draft, Oct 14). A round, fuzzy bumblebee you ride
+"""DON'T RERUN: QM edited designs/garden/<this animal>.bbmodel by hand in Blockbench (Oct 15), which is now
+the source; this would overwrite it. Convert that file instead.
+
+Bumblebee: World 3 Garden Uncommon flier (draft, Oct 14). A round, fuzzy bumblebee you ride
 on its back: a fat body in sunny yellow and black bands with a tufted collar, a big black head
 with googly eyes, pink cheeks and a little smile, bent antennae, a stubby stinger, six short legs
 tucked under (the back pair carrying pollen baskets), and four pale blue wings that whirr.

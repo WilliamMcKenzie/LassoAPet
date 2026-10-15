@@ -1,4 +1,7 @@
-"""Ladybug: World 3 Garden Uncommon (draft, Oct 14). A chunky ladybird you ride on its shell:
+"""DON'T RERUN: QM edited designs/garden/<this animal>.bbmodel by hand in Blockbench (Oct 15), which is now
+the source; this would overwrite it. Convert that file instead.
+
+Ladybug: World 3 Garden Uncommon (draft, Oct 14). A chunky ladybird you ride on its shell:
 a domed red shell in two halves (the elytra) with raised black spots and a black seam, a black
 head with white cheek patches, big googly eyes, curly antennae with ball tips, six black legs.
 When it runs flat out (gallop) the shell halves lift and clear amber wings buzz underneath.
