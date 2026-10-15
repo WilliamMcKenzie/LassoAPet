@@ -16,39 +16,32 @@ return {
 	},
 	parts = {
 		{ name = "Head", bone = "neck", class = "Part", size = Vector3.new(3.8, 1.8, 2.1), cframe = CFrame.new(0, 2.3, -2.95, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
-		{ name = "Jaw", bone = "neck", class = "Part", size = Vector3.new(3.6, 0.4, 2), cframe = CFrame.new(0, 1.2, -2.9, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 120) },
-		{ name = "HeadTop", bone = "neck", class = "Part", size = Vector3.new(3, 0.35, 1.8), cframe = CFrame.new(0, 3.375, -2.8, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
-		{ name = "Mouth", bone = "neck", class = "Part", size = Vector3.new(3.3, 0.15, 0.06), cframe = CFrame.new(0, 1.425, -4.03, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(110, 58, 32) },
-		{ name = "MouthEndL", bone = "neck", class = "Part", size = Vector3.new(0.15, 0.25, 0.06), cframe = CFrame.new(-1.575, 1.625, -4.03, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(110, 58, 32) },
-		{ name = "MouthEndR", bone = "neck", class = "Part", size = Vector3.new(0.15, 0.25, 0.06), cframe = CFrame.new(1.575, 1.625, -4.03, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(110, 58, 32) },
-		{ name = "Tongue", bone = "neck", class = "Part", size = Vector3.new(0.7, 0.28, 0.45), cframe = CFrame.new(0, 1.24, -4.025, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(236, 36, 72) },
-		{ name = "CheekL", bone = "neck", class = "Part", size = Vector3.new(0.55, 0.35, 0.08), cframe = CFrame.new(-1.325, 1.875, -4.04, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 206) },
-		{ name = "CheekR", bone = "neck", class = "Part", size = Vector3.new(0.55, 0.35, 0.08), cframe = CFrame.new(1.325, 1.875, -4.04, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 150, 206) },
+		{ name = "Jaw", bone = "neck", class = "Part", size = Vector3.new(2.6, 0.4, 2), cframe = CFrame.new(0, 1.2, -2.9, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 120) },
+		{ name = "HeadTop", bone = "neck", class = "Part", size = Vector3.new(1.4, 1.45, 1.8), cframe = CFrame.new(0, 3.925, -2.8, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
+		{ name = "HeadTop4", bone = "neck", class = "Part", size = Vector3.new(0.4, 0.35, 1.8), cframe = CFrame.new(-0.9, 4.475, -2.8, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
+		{ name = "HeadTop2", bone = "neck", class = "Part", size = Vector3.new(0.025, 1.15, 0.7), cframe = CFrame.new(-0.7125, 3.775, -2.95, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255) },
+		{ name = "HeadTop3", bone = "neck", class = "Part", size = Vector3.new(0.025, 0.55, 0.3), cframe = CFrame.new(-0.7375, 3.675, -3.05, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45) },
+		{ name = "HeadTop5", bone = "neck", class = "Part", size = Vector3.new(0.025, 0.55, 0.3), cframe = CFrame.new(0.7375, 3.675, -3.05, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45) },
+		{ name = "HeadTop6", bone = "neck", class = "Part", size = Vector3.new(0.025, 1.15, 0.7), cframe = CFrame.new(0.7125, 3.775, -2.95, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255) },
+		{ name = "HeadTop7", bone = "neck", class = "Part", size = Vector3.new(0.4, 0.35, 1.8), cframe = CFrame.new(0.9, 4.475, -2.8, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
 		{ name = "NostrilL", bone = "neck", class = "Part", size = Vector3.new(0.2, 0.15, 0.06), cframe = CFrame.new(-0.35, 2.825, -4.03, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18), plain = true },
 		{ name = "NostrilR", bone = "neck", class = "Part", size = Vector3.new(0.2, 0.15, 0.06), cframe = CFrame.new(0.35, 2.825, -4.03, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18), plain = true },
-		{ name = "EyeL", bone = "neck", class = "Part", size = Vector3.new(1, 0.0502, 0.95), cframe = CFrame.new(-1.28338, 3.8901, -3.73351, 0.097027, 0.222424, 0.97011, 0.916496, -0.400043, 5.6e-05, 0.388099, 0.889097, -0.242666), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilL", bone = "neck", class = "Part", size = Vector3.new(0.55, 0.0301, 0.475), cframe = CFrame.new(-1.30197, 3.81445, -3.80789, 0.097033, 0.222044, 0.970196, 0.916481, -0.400079, -9.7e-05, 0.388134, 0.889176, -0.24232), color = Color3.fromRGB(30, 30, 45), plain = true },
-		{ name = "EyeR", bone = "neck", class = "Part", size = Vector3.new(1, 0.0501, 0.95), cframe = CFrame.new(1.28337, 3.8901, -3.73352, -0.097031, -0.222234, 0.970153, 0.916488, -0.400061, 2.2e-05, 0.388116, 0.889136, 0.242493), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilR", bone = "neck", class = "Part", size = Vector3.new(0.55, 0.0301, 0.475), cframe = CFrame.new(1.30197, 3.81445, -3.80789, -0.097026, -0.222361, 0.970125, 0.916494, -0.400049, -3.2e-05, 0.388105, 0.88911, 0.242608), color = Color3.fromRGB(30, 30, 45), plain = true },
-		{ name = "Tail", bone = "Tail", class = "Part", size = Vector3.new(0.8, 0.7, 0.45), cframe = CFrame.new(0, 1.95, 2.625, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
 		{ name = "LegFL", bone = "LegFL", class = "Part", size = Vector3.new(0.8, 0.85, 0.8), cframe = CFrame.new(-1.4, 0.725, -1.4, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
 		{ name = "FootLegFL", bone = "LegFL", class = "Part", size = Vector3.new(0.95, 0.3, 1.2), cframe = CFrame.new(-1.475, 0.15, -1.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
 		{ name = "LegFR", bone = "LegFR", class = "Part", size = Vector3.new(0.8, 0.85, 0.8), cframe = CFrame.new(1.4, 0.725, -1.4, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
 		{ name = "FootLegFR", bone = "LegFR", class = "Part", size = Vector3.new(0.95, 0.3, 1.2), cframe = CFrame.new(1.475, 0.15, -1.6, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
 		{ name = "ThighL", bone = "LegHL", class = "Part", size = Vector3.new(0.7, 2, 2.2), cframe = CFrame.new(-2.45, 1.5, 1.3, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
-		{ name = "KneeL", bone = "LegHL", class = "Part", size = Vector3.new(0.7, 0.8, 0.6), cframe = CFrame.new(-2.45, 0.9, -0.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
-		{ name = "ShinL", bone = "LegHL", class = "Part", size = Vector3.new(0.7, 0.25, 1.8), cframe = CFrame.new(-2.45, 0.375, 1.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
-		{ name = "FootLegHL", bone = "LegHL", class = "Part", size = Vector3.new(1.1, 0.25, 1.3), cframe = CFrame.new(-2.55, 0.125, -0.45, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
-		{ name = "ToeL1", bone = "LegHL", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(-2.1, 0.125, -1.275, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
-		{ name = "ToeL2", bone = "LegHL", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(-2.55, 0.125, -1.275, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
-		{ name = "ToeL3", bone = "LegHL", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(-3, 0.125, -1.275, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
+		{ name = "KneeL", bone = "LegHL", class = "Part", size = Vector3.new(0.7, 0.9, 0.6), cframe = CFrame.new(-2.45, 0.553015, 0.482899, 1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693), color = Color3.fromRGB(255, 140, 30) },
+		{ name = "FootLegHL", bone = "LegHL", class = "Part", size = Vector3.new(1.1, 0.25, 1.3), cframe = CFrame.new(-2.54587, 0.125, 0.916181, 0.67559, 0, 0.737277, 0, 1, 0, -0.737277, 0, 0.67559), color = Color3.fromRGB(222, 96, 18) },
+		{ name = "ToeL1", bone = "LegHL", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(-2.85011, 0.125, 0.027044, 0.67559, 0, 0.737277, 0, 1, 0, -0.737277, 0, 0.67559), color = Color3.fromRGB(222, 96, 18) },
+		{ name = "ToeL2", bone = "LegHL", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(-3.15413, 0.125, 0.358819, 0.67559, 0, 0.737277, 0, 1, 0, -0.737277, 0, 0.67559), color = Color3.fromRGB(222, 96, 18) },
+		{ name = "ToeL3", bone = "LegHL", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(-3.45814, 0.125, 0.690594, 0.67559, 0, 0.737277, 0, 1, 0, -0.737277, 0, 0.67559), color = Color3.fromRGB(222, 96, 18) },
 		{ name = "ThighR", bone = "LegHR", class = "Part", size = Vector3.new(0.7, 2, 2.2), cframe = CFrame.new(2.45, 1.5, 1.3, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
-		{ name = "KneeR", bone = "LegHR", class = "Part", size = Vector3.new(0.7, 0.8, 0.6), cframe = CFrame.new(2.45, 0.9, -0.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
-		{ name = "ShinR", bone = "LegHR", class = "Part", size = Vector3.new(0.7, 0.25, 1.8), cframe = CFrame.new(2.45, 0.375, 1.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
-		{ name = "FootLegHR", bone = "LegHR", class = "Part", size = Vector3.new(1.1, 0.25, 1.3), cframe = CFrame.new(2.55, 0.125, -0.45, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
-		{ name = "ToeR1", bone = "LegHR", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(2.1, 0.125, -1.275, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
-		{ name = "ToeR2", bone = "LegHR", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(2.55, 0.125, -1.275, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
-		{ name = "ToeR3", bone = "LegHR", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(3, 0.125, -1.275, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
+		{ name = "KneeR", bone = "LegHR", class = "Part", size = Vector3.new(0.7, 0.9, 0.6), cframe = CFrame.new(2.45, 0.553015, 0.482899, 1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939693), color = Color3.fromRGB(255, 140, 30) },
+		{ name = "FootLegHR", bone = "LegHR", class = "Part", size = Vector3.new(1.1, 0.25, 1.3), cframe = CFrame.new(2.54587, 0.125, 0.916181, 0.67559, 0, -0.737277, 0, 1, 0, 0.737277, 0, 0.67559), color = Color3.fromRGB(222, 96, 18) },
+		{ name = "ToeR2", bone = "LegHR", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(2.85011, 0.125, 0.027044, 0.67559, 0, -0.737277, 0, 1, 0, 0.737277, 0, 0.67559), color = Color3.fromRGB(222, 96, 18) },
+		{ name = "ToeR3", bone = "LegHR", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(3.15413, 0.125, 0.358819, 0.67559, 0, -0.737277, 0, 1, 0, 0.737277, 0, 0.67559), color = Color3.fromRGB(222, 96, 18) },
+		{ name = "ToeR4", bone = "LegHR", class = "Part", size = Vector3.new(0.2, 0.25, 0.35), cframe = CFrame.new(3.45814, 0.125, 0.690594, 0.67559, 0, -0.737277, 0, 1, 0, 0.737277, 0, 0.67559), color = Color3.fromRGB(222, 96, 18) },
 		{ name = "Belly", bone = "root", class = "Part", size = Vector3.new(3, 0.15, 3.6), cframe = CFrame.new(0, 1.025, 0.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 200, 120) },
 		{ name = "Sugar1", bone = "root", class = "Part", size = Vector3.new(0.28, 0.2, 0.28), cframe = CFrame.new(1.82643, 2.52374, -1.13393, 0.100319, 0.824775, 0.556491, -0.992683, 0.120754, -1.7e-05, -0.067213, -0.552417, 0.830854), color = Color3.fromRGB(255, 252, 246) },
 		{ name = "Sugar2", bone = "root", class = "Part", size = Vector3.new(0.28, 0.2, 0.28), cframe = CFrame.new(-1.08666, 2.6952, 2.20323, 0.584668, 0.502199, -0.637149, 0.787834, -0.16405, 0.593637, 0.1936, -0.849049, -0.491564), color = Color3.fromRGB(255, 252, 246) },
@@ -72,8 +65,7 @@ return {
 		{ name = "Sugar20", bone = "root", class = "Part", size = Vector3.new(0.28, 0.2, 0.28), cframe = CFrame.new(-0.677303, 4.96741, 0.599419, 0.684557, 0.397261, 0.6112, 0.13209, -0.892176, 0.431943, 0.716892, -0.214956, -0.663219), color = Color3.fromRGB(255, 252, 246) },
 		{ name = "Sugar21", bone = "root", class = "Part", size = Vector3.new(0.28, 0.2, 0.28), cframe = CFrame.new(0.37766, 5.02358, 0.762149, -0.23718, -0.225207, -0.945001, 0.358241, -0.924477, 0.130403, -0.903, -0.307609, 0.299946), color = Color3.fromRGB(255, 252, 246) },
 		{ name = "Sugar22", bone = "root", class = "Part", size = Vector3.new(0.28, 0.2, 0.28), cframe = CFrame.new(-0.46681, 5.07005, -0.075265, -0.054715, -0.28095, 0.958161, -0.173989, 0.947601, 0.267918, -0.983226, -0.15205, -0.10073), color = Color3.fromRGB(255, 252, 246) },
-		{ name = "FF8C1E_neck", bone = "neck", class = "MeshPart", mesh = "GumdropFrog_FF8C1E_neck", size = Vector3.new(3.5856, 0.95, 1.3856), cframe = CFrame.new(0, 3.975, -3, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
-		{ name = "DE6012_root", bone = "root", class = "MeshPart", mesh = "GumdropFrog_DE6012_root", size = Vector3.new(4.2129, 0.55, 4.3977), cframe = CFrame.new(0, 1.375, 0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
+		{ name = "DE6012_root", bone = "root", class = "MeshPart", mesh = "GumdropFrog_DE6012_root", size = Vector3.new(4.6129, 0.55, 4.5977), cframe = CFrame.new(0, 1.375, 0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
 		{ name = "FF8C1E_root", bone = "root", class = "MeshPart", mesh = "GumdropFrog_FF8C1E_root", size = Vector3.new(4.4, 3.85, 4.6), cframe = CFrame.new(0, 3.175, 0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
@@ -82,16 +74,16 @@ return {
 			length = 2.4,
 			tracks = {
 				neck = {
-					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 1.2, -0.06981, 0, 0 }, { 2.4, 0, 0, 0 } } },
+					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 1.2, 0.06981, 0, 0 }, { 2.4, 0, 0, 0 } } },
 				},
 				Tail = {
-					rotation = { smooth = true, keys = { { 0, -0.06981, 0, 0 }, { 1.2, -0.20944, 0, 0 }, { 2.4, -0.06981, 0, 0 } } },
+					rotation = { smooth = true, keys = { { 0, 0.06981, 0, 0 }, { 1.2, 0.20944, 0, 0 }, { 2.4, 0.06981, 0, 0 } } },
 				},
 				EarL = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 1.5, 0, 0, 0 }, { 1.6, 0.43633, 0, 0 }, { 1.75, 0, 0, 0 }, { 2.4, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 1.5, 0, 0, 0 }, { 1.6, -0.43633, 0, 0 }, { 1.75, 0, 0, 0 }, { 2.4, 0, 0, 0 } } },
 				},
 				EarR = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 1.55, 0, 0, 0 }, { 1.65, 0.43633, 0, 0 }, { 1.8, 0, 0, 0 }, { 2.4, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 1.55, 0, 0, 0 }, { 1.65, -0.43633, 0, 0 }, { 1.8, 0, 0, 0 }, { 2.4, 0, 0, 0 } } },
 				},
 			},
 		},
@@ -99,25 +91,25 @@ return {
 			length = 1,
 			tracks = {
 				LegFL = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.25, 0, 0, 0 }, { 0.3625, 0.34208, 0, 0 }, { 0.475, 0.48869, 0, 0 }, { 0.5875, 0.34208, 0, 0 }, { 0.7, 0, 0, 0 }, { 1, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.25, 0, 0, 0 }, { 0.3625, -0.34208, 0, 0 }, { 0.475, -0.48869, 0, 0 }, { 0.5875, -0.34208, 0, 0 }, { 0.7, 0, 0, 0 }, { 1, 0, 0, 0 } } },
 				},
 				LegFR = {
-					rotation = { smooth = false, keys = { { 0, 0.45611, 0, 0 }, { 0.0875, 0.34208, 0, 0 }, { 0.2, 0, 0, 0 }, { 0.75, 0, 0, 0 }, { 0.8625, 0.34208, 0, 0 }, { 0.975, 0.48869, 0, 0 }, { 1, 0.45611, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, -0.45611, 0, 0 }, { 0.0875, -0.34208, 0, 0 }, { 0.2, 0, 0, 0 }, { 0.75, 0, 0, 0 }, { 0.8625, -0.34208, 0, 0 }, { 0.975, -0.48869, 0, 0 }, { 1, -0.45611, 0, 0 } } },
 				},
 				LegHL = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.1125, -0.34208, 0, 0 }, { 0.225, -0.48869, 0, 0 }, { 0.3375, -0.34208, 0, 0 }, { 0.45, 0, 0, 0 }, { 1, 0, 0, 0 } } },
-				},
-				LegHR = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.5, 0, 0, 0 }, { 0.6125, -0.34208, 0, 0 }, { 0.725, -0.48869, 0, 0 }, { 0.8375, -0.34208, 0, 0 }, { 0.95, 0, 0, 0 }, { 1, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.1125, 0.34208, 0, 0 }, { 0.225, 0.48869, 0, 0 }, { 0.3375, 0.34208, 0, 0 }, { 0.45, 0, 0, 0 }, { 1, 0, 0, 0 } } },
 				},
 				root = {
 					position = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.125, 0, 0.08, 0 }, { 0.25, 0, 0, 0 }, { 0.375, 0, 0.08, 0 }, { 0.5, 0, 0, 0 }, { 0.625, 0, 0.08, 0 }, { 0.75, 0, 0, 0 }, { 0.875, 0, 0.08, 0 }, { 1, 0, 0, 0 } } },
 				},
 				neck = {
-					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.25, -0.08727, 0, 0 }, { 0.5, 0, 0, 0 }, { 0.75, -0.08727, 0, 0 }, { 1, 0, 0, 0 } } },
+					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.25, 0.08727, 0, 0 }, { 0.5, 0, 0, 0 }, { 0.75, 0.08727, 0, 0 }, { 1, 0, 0, 0 } } },
 				},
 				Tail = {
-					rotation = { smooth = true, keys = { { 0, -0.13963, 0, 0 }, { 0.5, -0.24435, 0, 0 }, { 1, -0.13963, 0, 0 } } },
+					rotation = { smooth = true, keys = { { 0, 0.13963, 0, 0 }, { 0.5, 0.24435, 0, 0 }, { 1, 0.13963, 0, 0 } } },
+				},
+				LegHR = {
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.5, 0, 0, 0 }, { 0.6125, -0.34208, 0, 0 }, { 0.725, -0.48869, 0, 0 }, { 0.8375, -0.34208, 0, 0 }, { 0.95, 0, 0, 0 }, { 1, 0, 0, 0 } } },
 				},
 			},
 		},
@@ -125,32 +117,32 @@ return {
 			length = 0.8,
 			tracks = {
 				root = {
+					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.12, -0.13963, 0, 0 }, { 0.4, 0, 0, 0 }, { 0.68, 0.13963, 0, 0 }, { 0.8, 0, 0, 0 } } },
 					position = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.12, 0, 0.5, 0 }, { 0.24, 0, 1.875, 0 }, { 0.4, 0, 2.5, 0 }, { 0.56, 0, 1.875, 0 }, { 0.68, 0, 0.5, 0 }, { 0.8, 0, 0, 0 } } },
-					rotation = { smooth = true, keys = { { 0, 0, 0, 0 }, { 0.12, 0.13963, 0, 0 }, { 0.4, 0, 0, 0 }, { 0.68, -0.13963, 0, 0 }, { 0.8, 0, 0, 0 } } },
 				},
 				LegFL = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.12, 0, 0, 0 }, { 0.216, 0.95993, 0, 0 }, { 0.584, 0.95993, 0, 0 }, { 0.68, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.12, 0, 0, 0 }, { 0.216, -0.95993, 0, 0 }, { 0.584, -0.95993, 0, 0 }, { 0.68, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
 				},
 				LegFR = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.136, 0, 0, 0 }, { 0.232, 0.95993, 0, 0 }, { 0.6, 0.95993, 0, 0 }, { 0.696, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.136, 0, 0, 0 }, { 0.232, -0.95993, 0, 0 }, { 0.6, -0.95993, 0, 0 }, { 0.696, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
 				},
 				LegHL = {
-					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.12, 0, 0, 0 }, { 0.216, -0.95993, 0, 0 }, { 0.584, -0.95993, 0, 0 }, { 0.68, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
+					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.12, 0, 0, 0 }, { 0.216, 0.95993, 0, 0 }, { 0.584, 0.95993, 0, 0 }, { 0.68, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
+				},
+				neck = {
+					rotation = { smooth = true, keys = { { 0, 0.20944, 0, 0 }, { 0.16, 0.05236, 0, 0 }, { 0.4, 0.03491, 0, 0 }, { 0.64, 0.10472, 0, 0 }, { 0.8, 0.20944, 0, 0 } } },
+				},
+				Tail = {
+					rotation = { smooth = true, keys = { { 0, 0.34907, 0, 0 }, { 0.24, 0.95993, 0, 0 }, { 0.48, 1.0472, 0, 0 }, { 0.72, 0.5236, 0, 0 }, { 0.8, 0.34907, 0, 0 } } },
+				},
+				EarL = {
+					rotation = { smooth = false, keys = { { 0, -0.61087, 0, 0 }, { 0.8, -0.61087, 0, 0 } } },
+				},
+				EarR = {
+					rotation = { smooth = false, keys = { { 0, -0.61087, 0, 0 }, { 0.8, -0.61087, 0, 0 } } },
 				},
 				LegHR = {
 					rotation = { smooth = false, keys = { { 0, 0, 0, 0 }, { 0.104, 0, 0, 0 }, { 0.2, -0.95993, 0, 0 }, { 0.568, -0.95993, 0, 0 }, { 0.664, 0, 0, 0 }, { 0.8, 0, 0, 0 } } },
-				},
-				neck = {
-					rotation = { smooth = true, keys = { { 0, -0.20944, 0, 0 }, { 0.16, -0.05236, 0, 0 }, { 0.4, -0.03491, 0, 0 }, { 0.64, -0.10472, 0, 0 }, { 0.8, -0.20944, 0, 0 } } },
-				},
-				Tail = {
-					rotation = { smooth = true, keys = { { 0, -0.34907, 0, 0 }, { 0.24, -0.95993, 0, 0 }, { 0.48, -1.0472, 0, 0 }, { 0.72, -0.5236, 0, 0 }, { 0.8, -0.34907, 0, 0 } } },
-				},
-				EarL = {
-					rotation = { smooth = false, keys = { { 0, 0.61087, 0, 0 }, { 0.8, 0.61087, 0, 0 } } },
-				},
-				EarR = {
-					rotation = { smooth = false, keys = { { 0, 0.61087, 0, 0 }, { 0.8, 0.61087, 0, 0 } } },
 				},
 			},
 		},
