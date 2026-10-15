@@ -98,7 +98,8 @@ return {
 		{ name = "FlipBL", bone = "FlipperBL", class = "Part", size = Vector3.new(1.8, 3.7202, 0.7), cframe = CFrame.new(-4.5, 1.58099, 4.9, -0.633232, -0.591367, -0.499302, 0, -0.645124, 0.764078, -0.773962, 0.483839, 0.408514), color = Color3.fromRGB(52, 196, 172) },
 		{ name = "FlipFR", bone = "FlipperFR", class = "Part", size = Vector3.new(2.4, 5.5209, 0.8), cframe = CFrame.new(6.5, 1.68099, -2.4, -0.32852, 0.833205, 0.444797, 0, -0.470935, 0.882168, 0.944497, 0.28981, 0.154712), color = Color3.fromRGB(52, 196, 172) },
 		{ name = "FlipBR", bone = "FlipperBR", class = "Part", size = Vector3.new(1.8, 3.7202, 0.7), cframe = CFrame.new(4.5, 1.58099, 4.9, -0.633232, 0.591367, 0.499302, 0, -0.645124, 0.764078, 0.773962, 0.483839, 0.408514), color = Color3.fromRGB(52, 196, 172) },
-		{ name = "Shell_root", bone = "root", class = "MeshPart", mesh = "TreasureTurtle_Shell_root", size = Vector3.new(10, 3.5, 12), cframe = CFrame.new(0, 4.83, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(60, 150, 60), plain = true },
+		{ name = "Shelldark_root", bone = "root", class = "MeshPart", mesh = "TreasureTurtle_Shelldark_root", size = Vector3.new(10, 3.22, 12), cframe = CFrame.new(0, 4.69, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(34, 100, 44) },
+		{ name = "Shell_root", bone = "root", class = "MeshPart", mesh = "TreasureTurtle_Shell_root", size = Vector3.new(10.4588, 2.7297, 12.0274), cframe = CFrame.new(0, 4.81616, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(60, 150, 60) },
 		{ name = "Sanddark_root", bone = "root", class = "MeshPart", mesh = "TreasureTurtle_Sanddark_root", size = Vector3.new(8, 3.2, 10.6), cframe = CFrame.new(0, 5.38, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(226, 190, 110), plain = true },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
