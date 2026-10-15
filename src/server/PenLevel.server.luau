@@ -182,9 +182,16 @@ local function floorOf(pen)
 	end
 	floor.Size = Vector3.new(tiles.Size.X, FLOOR_DEPTH, tiles.Size.Z)
 	floor.CFrame = CFrame.new(tiles.Position.X, floorY(tiles), tiles.Position.Z) * tiles.CFrame.Rotation -- (turned with the pen: the arc base's pens face the yard)
-	local ground = world.Ground:GetChildren()[1]
+	local ground -- (a ground tile with the checker: the first child may be water or a plain tile, World 3's were, QM Oct 15)
+	for _, part in world.Ground:GetChildren() do
+		if part:FindFirstChild("Checker") then
+			ground = part
+			break
+		end
+	end
+	ground = ground or world.Ground:GetChildren()[1]
 	for _, texture in ground:GetChildren() do
-		if texture:IsA("Texture") then
+		if texture:IsA("Texture") and texture.Name ~= "Water" then
 			texture:Clone().Parent = floor
 		end
 	end
