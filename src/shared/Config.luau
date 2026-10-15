@@ -502,6 +502,8 @@ local Config = {
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
 	NativePrompts = false, -- Roblox's own interact prompts instead of ours (Client/PromptUi), to compare (QM, Oct 10)
 	AbilitiesOn = false, -- (QM, Oct 10: off till the riding UX is settled; Abilities below stay as they are)
+	-- These use theirs anyway, on their own, whenever it's off cooldown (QM, Oct 15), with no button.
+	AutoAbilities = { RoboShark = true, Loong = true },
 	Abilities = {
 		Rhino = { Kind = "Charge", Duration = 4, Cooldown = 7, SpeedBoost = 1.2 },
 		SnackYak = { Kind = "Charge", Duration = 10, Cooldown = 5, SpeedBoost = 2 }, -- QM, Oct 4; a fixed 10 s since Oct 8 (no more stamina to charge "until full")
@@ -520,7 +522,7 @@ local Config = {
 		RoboShark = { Kind = "Hunt", Duration = 3, Cooldown = 8, SpeedBoost = 0.8, Grow = 1.1, SpeedUp = 1.05, MaxSpeed = 2.5, RestorePer = 0.3, MaxTier = 4 }, -- QM, Oct 4 (cooldown and charge speed are guesses)
 		-- QM, Oct 4: one animal, however long it takes, speeding up from 1x to MaxBoost x over RampTime s
 		Leviathan = { Kind = "Hunt", Once = true, Cooldown = 5, SpeedBoost = 1, MaxBoost = 8, RampTime = 10, RestorePer = 0.2, Grow = 1, SpeedUp = 1, MaxTier = 2 },
-		Loong = { Kind = "Breath", Duration = 4.2, FireFrom = 0.95, FireTo = 3.95, Cooldown = 8, Range = 140, Width = 22, Crawl = 0.15, RestorePer = 0.1, Grow = 1.1, SpeedUp = 1.1, MaxSpeed = 2, MaxTier = 4 }, -- (MaxSpeed: x its 0.5x speed, so up to 1x)
+		Loong = { Kind = "Breath", Duration = 4.2, FireFrom = 0.95, FireTo = 3.95, Cooldown = 8, Range = 140, Width = 22, Crawl = 1, RestorePer = 0.1, Grow = 1.1, SpeedUp = 1.1, MaxSpeed = 2, MaxTier = 4 }, -- (MaxSpeed: x its 0.5x speed, so up to 1x; Crawl 1: no slowing while it breathes, QM Oct 15, was 0.15)
 	},
 	-- Special sprints: what holding Sprint does for these pets on the way out (not the
 	-- automatic sprint home with the egg). Like any sprint they drain Hold faster.

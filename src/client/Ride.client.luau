@@ -2412,7 +2412,9 @@ end
 -- if that has none its body's (QM, Oct 6).
 function vfx.abilityOf(entity)
 	if not Config.AbilitiesOn then
-		return nil -- (abilities off for now: QM, Oct 10)
+		-- (abilities off for now: QM, Oct 10; but the AutoAbilities pets' go off on their own)
+		local kind = entity and (if entity.fuse and Config.AutoAbilities[entity.fuse] then entity.fuse else entity.kind)
+		return kind and Config.AutoAbilities[kind] and Config.Abilities[kind] or nil
 	end
 	return entity and (entity.fuse and Config.Abilities[entity.fuse] or Config.Abilities[entity.kind])
 end
@@ -3206,7 +3208,8 @@ local function updateAbility(dt)
 		a = { readyAt = 0 }
 		mount.ability = a
 	end
-	local pressed = abilityPressed()
+	local auto = not Config.AbilitiesOn -- (only AutoAbilities pets get here then: on its own, no button)
+	local pressed = abilityPressed() or auto
 	local active = a.active
 	if active then
 		active.t += dt
@@ -3240,7 +3243,9 @@ local function updateAbility(dt)
 		startAbility(cfg)
 	end
 	active = a.active
-	if active then
+	if auto then
+		Hud.setAbility(nil)
+	elseif active then
 		Hud.setAbility(if active.cfg.Duration then 1 - active.t / active.cfg.Duration else hold / holdTime(mount), nil, true)
 	else
 		local left = math.max(a.readyAt - abilityClock, 0)
