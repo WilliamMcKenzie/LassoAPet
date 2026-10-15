@@ -80,6 +80,7 @@ local IDS = {
 	RafflesiaBeast_Wart_Petal3 = 107309004723908,
 	RafflesiaBeast_Wart_Petal4 = 71880267995445,
 	RafflesiaBeast_Wart_Petal5 = 134325203482611,
+	RafflesiaBeast_Vine_root = 127163766775155, -- (QM's remodel, Oct 15)
 	RafflesiaBeast_Well_head = 134791278182948,
 	AncientTreant_Leaf_ArmL = 72520559240156, -- (the Ancient Treant: QM's edit, Oct 15)
 	AncientTreant_Leaf_ArmR = 138556975636001,

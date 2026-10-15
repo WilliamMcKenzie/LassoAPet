@@ -33,14 +33,24 @@ def front_dot(egg, name, x, layer, y, r, color, d=0.06):
     egg.block(name, (x - r, y - r, zf(layer, d)), (x + r, y + r, zf(layer, -0.04)), color)
 
 
-def gummy_bear():
-    egg = shell([C.CHERRY_DK, C.STRAWB, C.CHERRY, C.CHERRY, C.CHERRY, C.CHERRY, C.CHERRY])
+def gummy_bear(body=C.CHERRY, dark=C.CHERRY_DK, belly=C.STRAWB):
+    egg = shell([dark, belly, body, body, body, body, body])
     for s in (-1, 1):  # round bear ears on top
         x = s * 0.42
-        egg.block(f"Ear{'LR'[s > 0]}", (x - 0.28, TOP - 0.1, -0.15), (x + 0.28, TOP + 0.35, 0.15), C.CHERRY)
-        egg.block(f"EarTop{'LR'[s > 0]}", (x - 0.18, TOP + 0.35, -0.12), (x + 0.18, TOP + 0.45, 0.12), C.CHERRY)
+        egg.block(f"Ear{'LR'[s > 0]}", (x - 0.28, TOP - 0.1, -0.15), (x + 0.28, TOP + 0.35, 0.15), body)
+        egg.block(f"EarTop{'LR'[s > 0]}", (x - 0.18, TOP + 0.35, -0.12), (x + 0.18, TOP + 0.45, 0.12), body)
     on_top(egg, 4)
     return egg
+
+
+def yellow_gummy_bear():
+    """The Gummy Bear's egg in the Yellow Gummy Bear's lemon (QM, Oct 15)."""
+    return gummy_bear((250, 196, 28), (206, 142, 12), (255, 226, 92))
+
+
+def green_gummy_bear():
+    """The Gummy Bear's egg in the Green Gummy Bear's lime (QM, Oct 15)."""
+    return gummy_bear((58, 184, 58), (28, 124, 40), (132, 224, 88))
 
 
 def gumdrop_frog():
@@ -144,7 +154,7 @@ def gigacorn():
     return egg
 
 
-O.EGGS = [("GummyBear", gummy_bear), ("GumdropFrog", gumdrop_frog), ("GingerbreadMan", gingerbread_man),
+O.EGGS = [("GummyBear", gummy_bear), ("YellowGummyBear", yellow_gummy_bear), ("GreenGummyBear", green_gummy_bear), ("GumdropFrog", gumdrop_frog), ("GingerbreadMan", gingerbread_man),
           ("Creampuff", creampuff), ("SwollFairy", swoll_fairy), ("DesireTroll", desire_troll),
           ("RockCandyDragon", rock_candy_dragon), ("GumballGolem", gumball_golem), ("Gigacorn", gigacorn)]
 
