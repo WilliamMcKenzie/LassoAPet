@@ -234,7 +234,13 @@ local function publish(player)
 	if profile.ride and isAnimal(profile.ride) then
 		profile.ridden[profile.ride] = true
 	end
+	for _, item in profile.stored or {} do
+		if isAnimal(item.pet) then
+			profile.ridden[item.pet] = true
+		end
+	end
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
+	player:SetAttribute("StoredPets", HttpService:JSONEncode(profile.stored or {})) -- (the Pets panel's unequipped ones: Client/PetsPanel)
 	local pen = penOf(player)
 	if pen then
 		pen:SetAttribute("Contents", HttpService:JSONEncode(profile.items))
@@ -454,6 +460,19 @@ local function load(player)
 							profile.items[id] = item
 						end
 					end
+					-- (pets taken out of the pen in the Pets panel: kept, not earning, QM Oct 15)
+					profile.stored = {}
+					for id, item in typeof(data.stored) == "table" and data.stored or {} do
+						if typeof(item) == "table" and isAnimal(item.pet) then
+							if not (isAnimal(item.fuse) and tonumber(item.income)) then
+								item.fuse, item.income = nil, nil
+							end
+							item.stats = item.fuse and loadedHybridStats(item.pet, item.fuse, item.stats) or nil
+							item.worth = item.fuse and tonumber(item.worth) and math.max(0, tonumber(item.worth)) or nil
+							item.tier = item.fuse and tonumber(item.tier) or nil
+							profile.stored[id] = item
+						end
+					end
 					if profile.tutorial then
 						profile.awayGold = awayGold(player, profile, data)
 					end
@@ -565,7 +584,7 @@ local function save(player, onlyIfChanged)
 	if not store or not profile or not loaded[player] or player:GetAttribute("Tutorial") then
 		return
 	end
-	local data = { eggs = profile.eggs, items = profile.items, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
+	local data = { eggs = profile.eggs, items = profile.items, stored = profile.stored, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, boughtLoongs = profile.boughtLoongs, boughtRoboSharks = profile.boughtRoboSharks, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
 		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, ridesDone = profile.ridesDone, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
 		merged = profile.merged }
@@ -747,12 +766,8 @@ local place -- (below, after PlaceEgg)
 -- An animal you rode home or over the finish line (QM, Oct 13: the animal itself, not its
 -- egg; eggs come from quests now): straight into your pen as a pet, at the first clear
 -- spot from the middle out. A full pen (Config.PenCapacity) gets its egg instead.
-local function givePet(player, profile, kind)
-	Funnel.rewarded(player) -- (the server's award: Analytics V1)
-	Telemetry.reward(player)
-	local pen = penOf(player)
-	local area = pen and pen:FindFirstChild("Area")
-	if area and penCount(profile) < penCap(player) then
+-- The first clear spot in your pen from the middle out (or anywhere in it).
+local function freeSpot(pen, profile, area)
 		local best
 		for r = 0, 6 do
 			for dx = -r, r do
@@ -770,7 +785,15 @@ local function givePet(player, profile, kind)
 				end
 			end
 		end
-		best = best or Vector2.new(Random.new():NextNumber(-1, 1) * (area.Size.X / 2 - EDGE), Random.new():NextNumber(-1, 1) * (area.Size.Z / 2 - EDGE)) -- (no clear spot: anywhere in it)
+		return best or Vector2.new(Random.new():NextNumber(-1, 1) * (area.Size.X / 2 - EDGE), Random.new():NextNumber(-1, 1) * (area.Size.Z / 2 - EDGE)) -- (no clear spot: anywhere in it)
+end
+local function givePet(player, profile, kind)
+	Funnel.rewarded(player) -- (the server's award: Analytics V1)
+	Telemetry.reward(player)
+	local pen = penOf(player)
+	local area = pen and pen:FindFirstChild("Area")
+	if area and penCount(profile) < penCap(player) then
+		local best = freeSpot(pen, profile, area)
 		profile.items[HttpService:GenerateGUID(false)] = { x = best.X, z = best.Y, pet = kind }
 		profile.pastStarter = true
 		publish(player)
@@ -780,6 +803,37 @@ local function givePet(player, profile, kind)
 	publish(player)
 	return false
 end
+
+-- The Pets panel (QM, Oct 15): a pet in your pen taken out (stored: it keeps everything but its
+-- spot, and earns nothing), or a stored one put back in at the first clear spot, room allowing.
+remote("UnequipPet", function(player, id)
+	local profile = profiles[player]
+	local item = profile and typeof(id) == "string" and profile.items[id]
+	if not item or not isAnimal(item.pet) then
+		return
+	end
+	profile.stored = profile.stored or {}
+	profile.items[id] = nil
+	item.x, item.z = nil, nil
+	profile.stored[id] = item
+	publish(player)
+	save(player)
+end)
+remote("EquipPet", function(player, id)
+	local profile = profiles[player]
+	local item = profile and profile.stored and typeof(id) == "string" and profile.stored[id]
+	local pen = penOf(player)
+	local area = pen and pen:FindFirstChild("Area")
+	if not item or not area or penCount(profile) >= penCap(player) then
+		return
+	end
+	local spot = freeSpot(pen, profile, area)
+	profile.stored[id] = nil
+	item.x, item.z = spot.X, spot.Y
+	profile.items[id] = item
+	publish(player)
+	save(player)
+end)
 
 -- The ride got its animal home: the animal itself, into your pen (givePet), the
 -- tutorial's first ride's too (QM, Oct 13: its new animal cutscene; the tutorial goes on

@@ -1426,7 +1426,7 @@ local RAINBOW = {
 -- The trail bars (QM, Oct 15): once every world is yours, the top bar (World2Bar.client) fills
 -- to each of these in turn, for gold; a tap on a full one buys it (Gold.server's BuyTrail).
 -- Bought ones are saved as bits of "TrailsOwned", shared by every world. Your trail is the
--- best one you own (the last in this list). Prices QM's (Oct 15).
+-- best one you own (the last in this list). Prices QM's (Oct 15; Purple to Rainbow 5x later that day).
 local rgb = Color3.fromRGB
 -- (on your character only, Server/PlayerTrail: QM, Oct 15, not on what you ride any more)
 Config.AnimalTrails = false
@@ -1434,11 +1434,11 @@ Config.TrailBars = {
 	{ Name = "Grey", Price = 100000, Colors = { rgb(240, 240, 245), rgb(200, 200, 208), rgb(150, 150, 160), rgb(100, 100, 112) } },
 	{ Name = "Green", Price = 500000, Colors = { rgb(180, 255, 160), rgb(100, 230, 90), rgb(40, 190, 60), rgb(20, 130, 40) } },
 	{ Name = "Blue", Price = 1000000, Colors = Config.FinishTrails[2].Colors },
-	{ Name = "Purple", Price = 5000000, Colors = { rgb(235, 190, 255), rgb(200, 120, 255), rgb(150, 60, 230), rgb(100, 30, 170) } },
-	{ Name = "Golden", Price = 10000000, Colors = Config.FinishTrails[1].Colors },
-	{ Name = "Red", Price = 15000000, Colors = Config.FinishTrails[3].Colors },
-	{ Name = "Galaxy", Price = 20000000, Colors = Config.FinishTrails[5].Colors },
-	{ Name = "Rainbow", Price = 40000000 }, -- (the Rainbow Trail's bands)
+	{ Name = "Purple", Price = 25000000, Colors = { rgb(235, 190, 255), rgb(200, 120, 255), rgb(150, 60, 230), rgb(100, 30, 170) } },
+	{ Name = "Golden", Price = 50000000, Colors = Config.FinishTrails[1].Colors },
+	{ Name = "Red", Price = 75000000, Colors = Config.FinishTrails[3].Colors },
+	{ Name = "Galaxy", Price = 100000000, Colors = Config.FinishTrails[5].Colors },
+	{ Name = "Rainbow", Price = 200000000 }, -- (the Rainbow Trail's bands)
 }
 -- (the finish line's old trails, FinishTrail n, count as these: Yellow the Golden one)
 local OLD = { Golden = 1, Blue = 2, Red = 3, Rainbow = 4, Galaxy = 5 }

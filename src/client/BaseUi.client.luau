@@ -18,6 +18,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Hud = require(script.Parent.Hud)
 local Shop = require(script.Parent.Shop)
 local AnimalDex = require(script.Parent.AnimalDex)
+local PetsPanel = require(script.Parent.PetsPanel)
 local RollMenu = require(script.Parent.RollMenu)
 local CameraHint = require(script.Parent.CameraHint)
 local TapHand = require(script.Parent.TapHand)
@@ -30,6 +31,7 @@ local cfg = Config.BaseUi
 
 local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 	shop = { id = "rbxassetid://119060039201858", size = Vector2.new(267, 113) }, -- Shop.png
+	pets = { id = "rbxassetid://132882732722928", size = Vector2.new(267, 113) }, -- Pets.png (QM, Oct 15)
 	index = { id = "rbxassetid://135845846149671", size = Vector2.new(267, 113) }, -- Index.png
 	merge = { id = "rbxassetid://126251339270486", size = Vector2.new(267, 113) }, -- Merge.png
 	invite = { id = "rbxassetid://72356826090260", size = Vector2.new(267, 113) }, -- Invite.png (QM, Oct 12)
@@ -156,7 +158,11 @@ for i, spec in { { "shop", function()
 	if Shop.hasOffers() then
 		Shop.toggle()
 	end
+end }, { "pets", function()
+	AnimalDex.close(true)
+	PetsPanel.toggle()
 end }, { "index", function()
+	PetsPanel.close(true)
 	AnimalDex.toggle()
 end }, { "merge", function()
 	if Hud.onFuse then
@@ -171,7 +177,7 @@ end }, { "invite", promptInvite } } do
 	local slot = Instance.new("Frame")
 	slot.Name = spec[1] .. "Slot"
 	slot.BackgroundTransparency = 1
-	slot.LayoutOrder = ({ merge = 1, index = 2, shop = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
+	slot.LayoutOrder = ({ merge = 1, index = 2, shop = 3, pets = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
 	slot.Parent = menu
 	local b = picture("ImageButton", slot, ART[spec[1]], MENU_WIDTH)
 	b.Name = spec[1]
@@ -660,7 +666,7 @@ drawQuests()
 
 -- A menu's up over the base: Quests (and PassPopups' cards, by the "Modal" attribute) step aside.
 local function modal()
-	return Shop.isOpen() or AnimalDex.isOpen() or RollMenu.isOpen() or player:GetAttribute("MergeView") == true
+	return Shop.isOpen() or AnimalDex.isOpen() or PetsPanel.isOpen() or RollMenu.isOpen() or player:GetAttribute("MergeView") == true
 end
 
 local wasRiding = false
