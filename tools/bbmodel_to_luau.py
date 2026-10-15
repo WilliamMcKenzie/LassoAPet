@@ -43,6 +43,7 @@ SCALE = 0.1
 PLAIN = ("Eye", "Pupil", "Nostril", "Plain")  # name prefixes that skip the stud texture
 NEON = ("Slit_pupil", "Glow")  # name prefixes that glow
 METAL = ("Metal",)  # name prefixes drawn with the classic Weld texture instead of studs
+MESHES = False  # set by --meshes
 SMOOTH = ("Smooth",)  # name prefixes of meshes shaded smooth (--meshes), with no studs
 SMOOTH_ANGLE = 50  # degrees: faces turning more than this keep a hard edge between them
 PLATE = 0.04  # studs: thickness of a converted one-face plane
@@ -175,7 +176,7 @@ def plate(e, model_center):
     return [("Part", center + n * PLATE / 2, R, size)]
 
 
-def spike(base, apex):
+def spike(base, apex, lean_ok=True):
     """A pyramid from four CornerWedgeParts, one per quarter of its base, each
     with its peak over the point under the apex. A CornerWedgePart's peak is at
     (+X/2, +Y/2, -Z/2). When the apex leans out past its base, the spike is
@@ -189,6 +190,8 @@ def spike(base, apex):
     local = R.T @ (apex - center)
     half = size / 2
     if abs(local[0]) > half[0] * 0.95 or abs(local[2]) > half[2] * 0.95:
+        if not lean_ok:
+            raise ValueError("a pyramid whose tip leans out past its base")
         d = apex - b
         up = d / np.linalg.norm(d)
         R = frame(base[1] - base[0], up)
@@ -219,7 +222,9 @@ def pyramid(e):
     V = mesh_verts(e)
     quad = next(f["vertices"] for f in e["faces"].values() if len(f["vertices"]) == 4)
     apex = next(v for k, v in V.items() if k not in quad)
-    return spike(order_quad([V[k] for k in quad]), apex)
+    # (a tip leaning out past its base, QM's dragged-vertex mane spikes, Oct 15: a mesh with
+    # --meshes, as stood-up wedges lose the lean)
+    return spike(order_quad([V[k] for k in quad]), apex, lean_ok=not MESHES)
 
 
 def order_quad(pts):
@@ -566,4 +571,5 @@ if __name__ == "__main__":
         i = args.index("--meshes")
         mesh_dir = args.pop(i + 1)
         args.pop(i)
+        MESHES = True
     main(*args, mesh_dir=mesh_dir)

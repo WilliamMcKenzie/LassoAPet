@@ -53,8 +53,8 @@ def tricorn(egg, name, hat=BLACK, trim=GOLD, w=1.1):
         p.bone = "top"
 
 
-def green_crab():
-    R, RD, CR, OR, TIP = (19, 139, 58), (10, 105, 74), (255, 226, 176), (255, 128, 40), (1, 56, 53)  # QM's green (Oct 14)
+def green_crab(R=(19, 139, 58), RD=(10, 105, 74), TIP=(1, 56, 53)):  # QM's green (Oct 14)
+    CR, OR = (255, 226, 176), (255, 128, 40)
     egg = shell([CR, CR, R, R, R, R, RD])
     for i, (x, y) in enumerate(((-0.5, 2.6), (0.6, 2.2), (0.0, 1.5))):
         egg.block(f"Speck{i}", (x - 0.12, y - 0.12, zf(int(y / LH), 0.03)), (x + 0.12, y + 0.12, zf(int(y / LH), -0.02)), OR)
@@ -188,7 +188,12 @@ def jolly_roger_wyvern():
     return glow(egg)
 
 
-EGGS = [("GreenCrab", green_crab), ("Parrot", parrot), ("BananaMonkey", banana_monkey), ("TreasureHermit", treasure_hermit),
+def lime_crab():
+    """The Green Crab's egg in the Lime Crab's greens (QM, Oct 15)."""
+    return green_crab((86, 168, 40), (58, 128, 34), (34, 70, 20))
+
+
+EGGS = [("GreenCrab", green_crab), ("LimeCrab", lime_crab), ("Parrot", parrot), ("BananaMonkey", banana_monkey), ("TreasureHermit", treasure_hermit),
         ("EyepatchShark", eyepatch_shark), ("TreasureTurtle", treasure_turtle), ("GhostShip", ghost_ship),
         ("JollyRogerWyvern", jolly_roger_wyvern)]
 

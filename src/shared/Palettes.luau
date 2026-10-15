@@ -331,6 +331,12 @@ return {
 		{ "Belly", 255, 226, 176 }, -- belly, mandibles
 		{ "Hoof", 1, 56, 53 }, -- claw and leg tips
 	},
+	LimeCrab = { -- World 3 Pirate Cove (the Green Crab in lime, QM Oct 15)
+		{ "Body", 86, 168, 40 },
+		{ "Body", 58, 128, 34 }, -- knees, elbows (darker)
+		{ "Belly", 255, 226, 176 }, -- belly, mandibles
+		{ "Hoof", 34, 70, 20 }, -- claw and leg tips
+	},
 	Parrot = {
 		{ "Body", 232, 36, 44 },
 		{ "Body", 168, 20, 36 }, -- back, belly (darker)
