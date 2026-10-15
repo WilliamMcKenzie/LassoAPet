@@ -18,6 +18,7 @@ local Rig = require(ReplicatedStorage.Shared.Animals.Rig)
 local STUD_TEXTURE = { image = "rbxassetid://7447638591", tile = 0.5 } -- the animals'
 local player = Players.LocalPlayer
 
+local stands = {} -- { model, tag }: lined up after (below)
 local function build(offer)
 local at = Config.Podium.Position + (offer.Offset or Vector3.zero)
 local LoongModel = require(ReplicatedStorage.Shared.Animals:FindFirstChild(offer.Kind .. "Model"))
@@ -99,6 +100,7 @@ local tag = Instance.new("BillboardGui")
 tag.Size = UDim2.fromScale(40, 6) -- (2x: QM, Oct 15; wide enough for "Robo Shark 870/1000 left" on one line)
 local boxAt, box = model:GetBoundingBox()
 tag.StudsOffsetWorldSpace = Vector3.new(0, math.max(boxAt.Y + box.Y / 2 - at.Y, offer.Rise) + 8, 0) -- (well over the Loong's head: QM, Oct 15, higher)
+table.insert(stands, { model = model, tag = tag })
 tag.AlwaysOnTop = false
 tag.LightInfluence = 0
 tag.MaxDistance = 200
@@ -174,4 +176,15 @@ end
 
 for _, offer in Config.PetOffers do
 	build(offer)
+end
+-- Every stand's text at the lowest one's height, its pet down with it (QM, Oct 15: the Loong's
+-- in line with the Robo Shark's).
+local lowest = math.huge
+for _, stand in stands do
+	lowest = math.min(lowest, stand.tag.StudsOffsetWorldSpace.Y)
+end
+for _, stand in stands do
+	local down = stand.tag.StudsOffsetWorldSpace.Y - lowest
+	stand.model:PivotTo(stand.model:GetPivot() - Vector3.new(0, down, 0))
+	stand.tag.StudsOffsetWorldSpace = Vector3.new(0, lowest, 0)
 end
