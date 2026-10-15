@@ -1914,8 +1914,8 @@ if Config.World == 3 then
 			Herd = { GreenCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
 			Patches = {
 				Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
-				WetSand = { rgb(218, 193, 140), rgb(204, 181, 132) }, -- (QM, Oct 15)
-				DampSand = { rgb(229, 202, 143), rgb(220, 193, 136) }, -- between the sand and the wet sand (QM, Oct 15)
+				WetSand = { rgb(229, 202, 143), rgb(220, 193, 136) }, -- (QM, Oct 15: the damp sand's, swapped)
+				DampSand = { rgb(238, 214, 158), rgb(229, 205, 148) }, -- halfway between the sand and the wet sand (QM, Oct 15)
 				Grass = { rgb(95, 168, 62), rgb(86, 156, 56) }, -- (the base's: muted olive, QM Oct 14; was 96, 204, 60)
 				Water = { rgb(49, 170, 235), rgb(49, 170, 235) }, -- (QM's blue tile's main colour, so the sides match it)
 				ShallowWater = { rgb(70, 180, 237), rgb(70, 180, 237) }, -- the light ring round each pool, under the see-through tile (QM, Oct 15; tools/world3_shallowwater.luau)
