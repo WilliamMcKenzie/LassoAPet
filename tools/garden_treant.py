@@ -1,4 +1,7 @@
-"""Ancient Treant: World 3 Garden giga rare (draft, Oct 14; about 1 in 1,000). A towering old tree
+"""DON'T RERUN: QM edited designs/garden/AncientTreant.bbmodel by hand in Blockbench (Oct 15), which is now the
+source; this would overwrite it. Convert that file instead (animations() is still used for its walk).
+
+Ancient Treant: World 3 Garden giga rare (draft, Oct 14; about 1 in 1,000). A towering old tree
 that walks: a thick trunk of stacked bark blocks with darker ridges, a face in the bark (deep
 sockets with big googly eyes, a knotted nose, a wide mossy beard), shelf mushrooms and moss patches
 up its sides, branch arms ending in forked twig fingers (pyramid tips), two huge root legs with
