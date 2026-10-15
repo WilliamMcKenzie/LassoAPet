@@ -199,10 +199,23 @@ local function penCap(player)
 	return cfg.Base + cfg.PerUpgrade * ((player:GetAttribute("PenLevel") or 1) - 1)
 end
 
+local freeSpot -- (below)
 local function publish(player)
 	local profile = profiles[player]
 	if not profile then
 		return
+	end
+	-- No pet waits at the pen's gap any more (QM, Oct 15: "the starter is just whichever pet is
+	-- fastest": Client/Ride rides your fastest at the start line): the one that did is an ordinary
+	-- pen pet now. (Not mid-tutorial: its first ride is still from there.)
+	local gapPen = profile.ride and not player:GetAttribute("Tutorial") and penOf(player)
+	local gapArea = gapPen and gapPen:FindFirstChild("Area")
+	if gapArea and freeSpot then
+		local spot = freeSpot(gapPen, profile, gapArea)
+		profile.items[HttpService:GenerateGUID(false)] = { x = spot.X, z = spot.Y, pet = profile.ride, merged = profile.rideMerged, fuse = profile.rideFuse,
+			income = profile.rideIncome, stats = profile.rideStats, worth = profile.rideWorth, tier = profile.rideTier, auto = profile.rideAuto }
+		profile.ride, profile.rideMerged, profile.rideFuse, profile.rideIncome = nil, nil, nil, nil
+		profile.rideStats, profile.rideWorth, profile.rideTier, profile.rideAuto = nil, nil, nil, nil
 	end
 	syncTools(player, profile.eggs)
 	player:SetAttribute("HatchCredits", math.max(0, (player:GetAttribute("BoughtHatches") or 0) - (profile.usedHatches or 0)))
@@ -775,7 +788,7 @@ local place -- (below, after PlaceEgg)
 -- egg; eggs come from quests now): straight into your pen as a pet, at the first clear
 -- spot from the middle out. A full pen (Config.PenCapacity) gets its egg instead.
 -- The first clear spot in your pen from the middle out (or anywhere in it).
-local function freeSpot(pen, profile, area)
+freeSpot = function(pen, profile, area)
 		local best
 		for r = 0, 6 do
 			for dx = -r, r do
@@ -860,7 +873,7 @@ remote("EquipPet", function(player, id)
 		return
 	end
 	profile.stored[id] = nil
-	if not profile.ride then -- (nothing at the gap: it waits there, the one a ride sets off on)
+	if not profile.ride and player:GetAttribute("Tutorial") then -- (mid-tutorial, nothing at the gap: it waits there)
 		profile.ride, profile.rideMerged, profile.rideFuse, profile.rideIncome = item.pet, item.merged, item.fuse, item.income
 		profile.rideStats, profile.rideWorth, profile.rideTier, profile.rideAuto = item.stats, item.worth, item.tier, item.auto
 	else
@@ -1219,6 +1232,9 @@ toLine.Parent = ReplicatedStorage
 
 -- Ride the pet `id` from now on; the pet you rode takes its place in the pen.
 remote("RidePet", function(player, id)
+	if not player:GetAttribute("Tutorial") then
+		return -- (no pet waits at the gap any more: the one you ride stays a pen pet, QM Oct 15)
+	end
 	local profile = profiles[player]
 	local item = profile and typeof(id) == "string" and profile.items[id]
 	if not item or not item.pet then

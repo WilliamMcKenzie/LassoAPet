@@ -865,7 +865,7 @@ startRide = function(model, at)
 		setClickable(mount.animal.model, false)
 	end
 	if not fromHerd then
-		vfx.rideCue:FireServer("out") -- your pet's left your pen: others stop drawing it there (Riders.server, Pen.client)
+		vfx.rideCue:FireServer("out", fromPen and fromPen.id) -- your pet's left your pen: it isn't drawn there meanwhile (Riders.server, Pen.client)
 		vfx.syncing = true -- (so "end" follows, however soon the ride ends)
 	end
 	mount.animal:setSaddled(true)

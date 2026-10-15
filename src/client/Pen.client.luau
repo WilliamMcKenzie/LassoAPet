@@ -409,6 +409,12 @@ local function refresh(pen)
 	items = ok and typeof(items) == "table" and items or {}
 	contents[pen] = items
 	items = table.clone(items)
+	-- (a pen pet out on a ride isn't drawn at home meanwhile: its owner's "PetOut", Riders.server)
+	local owner = Players:GetPlayerByUserId(pen:GetAttribute("Owner") or 0)
+	local out = owner and owner:GetAttribute("PetOut")
+	if typeof(out) == "string" then
+		items[out] = nil
+	end
 	items.ride = ridePetOf(pen)
 	local list = shown[pen]
 	for id, s in list do
@@ -451,10 +457,7 @@ end
 
 -- Someone else's ride pet changed, set off or came home: redraw their pen.
 local function watchRidePet(other)
-	if other == player then
-		return
-	end
-	for _, name in { "RidePet", "RideMerged", "RideFuse", "PetOut" } do
+	for _, name in (if other == player then { "PetOut" } else { "RidePet", "RideMerged", "RideFuse", "PetOut" }) do
 		other:GetAttributeChangedSignal(name):Connect(function()
 			for pen in shown do
 				if pen:GetAttribute("Owner") == other.UserId then
