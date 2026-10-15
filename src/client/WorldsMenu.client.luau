@@ -33,7 +33,7 @@ local ART = { -- assets/ui/worlds (QM's; World2.png is his World1.png with a 2)
 local WORLDS = {
 	{ name = "World 1", banner = "World1" },
 	{ name = "World 2", banner = "World2" },
-	{ name = "World 3", banner = "World3", soon = true },
+	{ name = "World 3", banner = "World3" }, -- (for sale: QM, Oct 15, 10m)
 }
 local CARD = Vector2.new(723, 212)
 local LIST_TOP, CARD_PAD, CARD_GAP = 50, 12, 22 -- the scrolling list's top below the panel's; the first card's below that, and between them

@@ -1348,12 +1348,15 @@ Config.World = table.find(Config.Places, game.PlaceId) or 1
 -- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
 Config.EndPortal = nil
 -- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's
--- World 2 bar; QM, Oct 14: 100k, was 200k, 1m, then 10m). World 1 is everyone's.
-Config.WorldPrices = { 0, 100000 }
+-- World 2 bar; QM, Oct 14: 100k, was 200k, 1m, then 10m; World 3 10m, QM Oct 15). World 1 is everyone's.
+Config.WorldPrices = { 0, 100000, 10000000 }
 -- Rebirth (QM, Oct 13): World 2's Rebirth bar (World2Bar.client) for Prices[n] gold, your
 -- nth. It re-locks World 2 (save up for it again) and sends you to World 1; your pets stay.
 -- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,
 -- and every pet of yours wears Shared/Skins' Skins[n]: Gold, Diamond, Galaxy.
+-- Off for the time being (QM, Oct 15: "scrap the rebirth system for the time being"): no Rebirth
+-- bar or panel, and the server refuses one. Rebirths already saved keep their buffs and skins.
+Config.RebirthOn = false
 Config.Rebirth = {
 	Prices = { 10000000, 100000000, 1000000000 }, -- (QM, Oct 14: each 10x cheaper; was 100m, 1b, 10b)
 	Gold = { 2, 4, 8 }, -- (each rebirth doubles again: QM's rebirth panel's "2x Gold")
@@ -2039,7 +2042,7 @@ if Config.World == 3 then
 	trophies(4, 1000, { "ReefTitan", "RoyalCnidarian" }) -- Cnidaria's giga rare and its boss as a trophy pet (no Abyssal Dragon: scrapped, QM Oct 15; its stats, egg and headshot stay for saved ones)
 	-- Each biome's boss.
 	Config.Boss.ByBiome = {
-		-- PirateCove: none, so the default Kind (the Chicken, as World 1's first biome) (QM, Oct 14: Dreadstump cut)
+		PirateCove = "SharkBoss", -- World 1's Ocean shark (QM, Oct 15; Dreadstump was cut)
 		Garden = "GiantRafflesia", -- (QM Oct 15: replaces the Flytrap Queen)
 		Candyland = "Gigacorn", -- the candy unicorn (silent till a cry is picked)
 		Cnidaria = "RoyalCnidarian", -- the crowned jellyfish (silent till a cry is picked)

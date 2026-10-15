@@ -288,7 +288,7 @@ rebirth.OnServerInvoke = function(player)
 	local n = (player:GetAttribute("Rebirths") or 0) + 1
 	local price = Config.Rebirth.Prices[n]
 	local gold = player:GetAttribute("Gold") or 0
-	if Config.World == 1 or not price or not loaded[player] or travelling[player] or gold < price then
+	if not Config.RebirthOn or Config.World == 1 or not price or not loaded[player] or travelling[player] or gold < price then
 		return false
 	end
 	-- (QM's panel, Oct 13: lose all pets, lose all gold, back to World 1, with the buffs)

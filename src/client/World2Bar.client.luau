@@ -13,7 +13,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
-local REBIRTH = Config.World ~= 1
+local REBIRTH = Config.World ~= 1 and Config.RebirthOn -- (off: no bar outside World 1, QM Oct 15)
 local player = Players.LocalPlayer
 local Hud = require(script.Parent.Hud)
 local TapHand = require(script.Parent.TapHand)
@@ -170,7 +170,7 @@ RunService.RenderStepped:Connect(function()
 	local owned = player:GetAttribute("OwnsWorld2") == true
 	local busy = Hud.isRiding() or player:GetAttribute("Cutscene") or player:GetAttribute("Tutorial")
 	local menu = player.PlayerGui:FindFirstChild("WorldsMenu")
-	gui.Enabled = (REBIRTH or not owned) and price() ~= nil and not busy and not (menu and menu.Enabled) -- (not under the Worlds menu)
+	gui.Enabled = (REBIRTH or (Config.World == 1 and not owned)) and price() ~= nil and not busy and not (menu and menu.Enabled) -- (not under the Worlds menu)
 	if REBIRTH then
 		return
 	end
