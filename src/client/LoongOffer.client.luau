@@ -88,11 +88,15 @@ for _, p in model:GetDescendants() do
 	end
 end
 model:PivotTo(CFrame.new(at + Vector3.new(0, 0.3, 0)) * CFrame.Angles(0, math.rad(offer.Yaw), 0))
+do -- (floating its own height over the ring: QM, Oct 15)
+	local _, standing = model:GetBoundingBox()
+	model:PivotTo(model:GetPivot() + Vector3.new(0, standing.Y, 0))
+end
 model.Parent = folder
 
 -- Its price and the prompt.
 local tag = Instance.new("BillboardGui")
-tag.Size = UDim2.fromScale(28, 6) -- (2x: QM, Oct 15)
+tag.Size = UDim2.fromScale(40, 6) -- (2x: QM, Oct 15; wide enough for "Robo Shark 870/1000 left" on one line)
 local boxAt, box = model:GetBoundingBox()
 tag.StudsOffsetWorldSpace = Vector3.new(0, math.max(boxAt.Y + box.Y / 2 - at.Y, offer.Rise) + 8, 0) -- (well over the Loong's head: QM, Oct 15, higher)
 tag.AlwaysOnTop = false
@@ -103,6 +107,7 @@ label.BackgroundTransparency = 1
 label.Size = UDim2.fromScale(1, 1)
 label.FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json")
 label.TextScaled = true
+label.TextWrapped = false
 label.TextColor3 = Color3.new(1, 1, 1)
 local function showLeft()
 	local left = workspace:GetAttribute(LEFT)
