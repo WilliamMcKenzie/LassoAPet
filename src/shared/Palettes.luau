@@ -841,6 +841,16 @@ return {
 		{ "Belly", 255, 92, 150 }, -- belly, chest, muzzle
 		{ "Hoof", 168, 18, 50 }, -- paws
 	},
+	YellowGummyBear = { -- World 3 Candyland (the Gummy Bear in lemon, QM Oct 15)
+		{ "Body", 250, 196, 28 }, -- body, head, legs, ears
+		{ "Belly", 255, 226, 92 }, -- belly, chest, muzzle
+		{ "Hoof", 206, 142, 12 }, -- paws
+	},
+	GreenGummyBear = { -- World 3 Candyland (the Gummy Bear in lime, QM Oct 15)
+		{ "Body", 58, 184, 58 }, -- body, head, legs, ears
+		{ "Belly", 132, 224, 88 }, -- belly, chest, muzzle
+		{ "Hoof", 28, 124, 40 }, -- paws
+	},
 	GumdropFrog = { -- World 3 Candyland
 		{ "Body", 255, 140, 30 }, -- gumdrop body, head, thighs
 		{ "Body", 222, 96, 18 }, -- base band, feet (darker)

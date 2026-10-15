@@ -618,7 +618,7 @@ local Config = {
 		RafflesiaBeast = 4, AncientTreant = 4, GiantRafflesia = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
 		MoonJellyfish = 1, Anomalocaris = 2, BoxJellyfish = 2, BlueRingOctopus = 2, ManOWar = 2, Mermaid = 3, -- World 3 Cnidaria (guesses, Oct 14)
 		AbyssalDragon = 4, ReefTitan = 4, RoyalCnidarian = 3, -- World 3 Cnidaria's giga rares (XL) and its boss as a pet (guesses, Oct 14)
-		GummyBear = 1, GumdropFrog = 1, GingerbreadMan = 1, Creampuff = 2, SwollFairy = 2, DesireTroll = 3, -- World 3 Candyland (guesses, Oct 14)
+		GummyBear = 1, YellowGummyBear = 1, GreenGummyBear = 2, GumdropFrog = 1, GingerbreadMan = 1, Creampuff = 2, SwollFairy = 2, DesireTroll = 3, -- World 3 Candyland (guesses, Oct 14)
 		RockCandyDragon = 4, GumballGolem = 4, Gigacorn = 3, -- World 3 Candyland's giga rares (XL) and its boss as a trophy pet (guesses, Oct 14)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
@@ -863,6 +863,8 @@ local Config = {
 		AncientTreant = "rbxassetid://100941370514849", -- assets/ui/AncientTreantEggRender.png (World 3)
 		GiantRafflesia = "rbxassetid://81971373381902", -- assets/ui/FlytrapQueenEggRender.png (World 3; the Flytrap Queen's egg for now)
 		GummyBear = "rbxassetid://82472901970710", -- assets/ui/GummyBearEggRender.png (World 3)
+		YellowGummyBear = "rbxassetid://71659275230398", -- assets/ui/YellowGummyBearEggRender.png (World 3)
+		GreenGummyBear = "rbxassetid://133913042752808", -- assets/ui/GreenGummyBearEggRender.png (World 3)
 		GumdropFrog = "rbxassetid://96785493203961", -- assets/ui/GumdropFrogEggRender.png (World 3)
 		GingerbreadMan = "rbxassetid://109625880806599", -- assets/ui/GingerbreadManEggRender.png (World 3)
 		Creampuff = "rbxassetid://139714019730087", -- assets/ui/CreampuffEggRender.png (World 3)
@@ -1506,6 +1508,8 @@ Config.World3Pets = {
 	-- rarity, speeds +0.4 to +0.5; the giga rares and the Gigacorn slow trophies like the Garden's
 	-- (0.5) at 10x Candyland's Legendary.
 	GummyBear = { 8.4, 19200, 60 }, -- Common (guess)
+	YellowGummyBear = { 8.6, 19200, 60 }, -- Uncommon: the Gummy Bear in lemon, 1.5x its size (QM, Oct 15; numbers as the Gumdrop Frog's, guess)
+	GreenGummyBear = { 9.0, 48000, 240 }, -- Rare: the Gummy Bear in lime, 2x its size (QM, Oct 15; numbers as the Creampuff's, guess)
 	GumdropFrog = { 8.6, 19200, 60 }, -- Uncommon (guess)
 	GingerbreadMan = { 8.6, 19200, 60 }, -- Uncommon (guess)
 	Creampuff = { 9.0, 48000, 240 }, -- Rare (guess)
@@ -1563,6 +1567,8 @@ Config.AnimalScale.VenusFlytrap = 1.5 -- (QM, Oct 15; was 1x)
 Config.AnimalScale.SunflowerLion = 2 -- (QM, Oct 15; was 1x)
 Config.AnimalScale.Ladybug = 2 -- (QM, Oct 15; was 1x)
 Config.AnimalScale.Bumblebee = 2 -- (QM, Oct 15; was 1x)
+Config.AnimalScale.YellowGummyBear = 1.5 -- the Gummy Bear recoloured, 1.5x (QM, Oct 15)
+Config.AnimalScale.GreenGummyBear = 2 -- and 2x (QM, Oct 15)
 -- Each world's own animals: [world] = the set that runs at its own speed there (World 1's: all).
 local OWN = { [2] = Config.World2Animals, [3] = setmetatable(table.clone(Config.World2Animals), { __index = Config.World3Animals }) }
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
@@ -1968,7 +1974,7 @@ if Config.World == 3 then
 			CapColor = rgb(255, 255, 255),
 			-- (Oct 14, the Candyland animals thread: weights as the Pirate Cove's by rarity, guesses;
 			-- its giga rares and the Gigacorn added below)
-			Herd = { GummyBear = 0.3, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, SwollFairy = 0.08, DesireTroll = 0.03 },
+			Herd = { GummyBear = 0.3, YellowGummyBear = 0.1, GreenGummyBear = 0.05, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, SwollFairy = 0.08, DesireTroll = 0.03 },
 			Patches = {
 				Chocolate = { rgb(110, 62, 40), rgb(98, 54, 34) },
 				Cream = { rgb(255, 236, 200), rgb(248, 224, 184) },

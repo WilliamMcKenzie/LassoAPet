@@ -105,6 +105,8 @@ local KINDS = {
 	GhostShip = { data = require(script.Parent.GhostShipEggModel), center = 1.6 },
 	JollyRogerWyvern = { data = require(script.Parent.JollyRogerWyvernEggModel), center = 1.6 },
 	GummyBear = { data = require(script.Parent.GummyBearEggModel), center = 1.6 }, -- World 3 Candyland (tools/candy_eggs.py)
+	YellowGummyBear = { data = require(script.Parent.YellowGummyBearEggModel), center = 1.6 },
+	GreenGummyBear = { data = require(script.Parent.GreenGummyBearEggModel), center = 1.6 },
 	GumdropFrog = { data = require(script.Parent.GumdropFrogEggModel), center = 1.6 },
 	GingerbreadMan = { data = require(script.Parent.GingerbreadManEggModel), center = 1.6 },
 	Creampuff = { data = require(script.Parent.CreampuffEggModel), center = 1.6 },

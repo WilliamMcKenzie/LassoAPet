@@ -148,6 +148,8 @@ local IMAGES = {
 	eggAncientTreant = { id = "rbxassetid://100941370514849", size = Vector2.new(502, 694) }, -- AncientTreantEggRender.png (World 3)
 	eggGiantRafflesia = { id = "rbxassetid://81971373381902", size = Vector2.new(564, 764) }, -- FlytrapQueenEggRender.png (World 3; the Giant Rafflesia keeps the Flytrap Queen's egg for now)
 	eggGummyBear = { id = "rbxassetid://82472901970710", size = Vector2.new(502, 750) }, -- GummyBearEggRender.png (World 3)
+	eggYellowGummyBear = { id = "rbxassetid://71659275230398", size = Vector2.new(502, 750) }, -- YellowGummyBearEggRender.png (World 3)
+	eggGreenGummyBear = { id = "rbxassetid://133913042752808", size = Vector2.new(502, 750) }, -- GreenGummyBearEggRender.png (World 3)
 	eggGumdropFrog = { id = "rbxassetid://96785493203961", size = Vector2.new(502, 719) }, -- GumdropFrogEggRender.png (World 3)
 	eggGingerbreadMan = { id = "rbxassetid://109625880806599", size = Vector2.new(502, 668) }, -- GingerbreadManEggRender.png (World 3)
 	eggCreampuff = { id = "rbxassetid://139714019730087", size = Vector2.new(502, 780) }, -- CreampuffEggRender.png (World 3)
