@@ -1,0 +1,5 @@
+# piece: label, RGB
+BeachBush_1: Leaves, 58, 125, 21
+BeachBush_2: Leaves, 84, 150, 34
+BeachBushSmall_1: Leaves, 58, 125, 21
+BeachBushSmall_2: Leaves, 84, 150, 34

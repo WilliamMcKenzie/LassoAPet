@@ -3,7 +3,7 @@
 -- first, the old water parts removed after. Rerunnable.
 local G = workspace.World.Ground
 local CELL = 8
-local SHALLOW, DEEP, TINT = Color3.fromRGB(95, 205, 215), Color3.fromRGB(49, 170, 235), Color3.fromRGB(150, 200, 255)
+local SHALLOW, DEEP, TINT = Color3.fromRGB(70, 180, 237), Color3.fromRGB(49, 170, 235), Color3.fromRGB(150, 200, 255)
 local IMAGE = (function() local m = game.ReplicatedStorage.Shared.Config:Clone(); m.Name = "ConfigCopy"; m.Parent = game.ReplicatedStorage.Shared; local C = require(m); m:Destroy(); return C.Water.Image end)()
 local function key(i, j) return i * 100000 + j end
 local out = {}
@@ -50,8 +50,8 @@ for _, region in { { 0, math.huge, nil }, { -4336, 0, "PirateCove" } } do
 		local t = Instance.new("Texture")
 		t.Name = "Water"; t.Face = Enum.NormalId.Top; t.Texture = IMAGE
 		t.StudsPerTileU, t.StudsPerTileV = 8, 8
-		t.Color3 = if name == "ShallowWater" then Color3.new(1, 1, 1) else TINT
-		t.Transparency = if name == "ShallowWater" then 0.3 else 0
+		t.Color3 = if name == "ShallowWater" then Color3.fromRGB(165, 220, 255) else TINT
+		t.Transparency = 0
 		t.Parent = p
 		if biome then p:SetAttribute("World3Biome", biome) end
 		p.Parent = G
