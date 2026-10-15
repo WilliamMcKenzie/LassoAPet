@@ -1,6 +1,6 @@
 """Beach bushes for World 3 (QM, Oct 15): the leafy clumps by the walls in his screenshot.
 Broad pointed leaves fanning out from the ground, each folded along its midrib so one
-half is Camo (the World 3 palm frond green) and the other a lighter Camo; the inner\nupright leaves are Parsley green for shade.
+half is Camo (the World 3 palm frond green) and the other a lighter Camo.
 
 Run: python3 tools/w3_bushes.py
 Writes design/w3_bushes/<Name>.obj, pieces/<Name>_<i>.obj + colours.txt, sizes.txt and
