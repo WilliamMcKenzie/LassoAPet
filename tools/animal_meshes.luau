@@ -7,9 +7,9 @@
 -- Import 3D: units studs, no rig, keep the name) and put its mesh asset id next to its name.
 local AssetService = game:GetService("AssetService")
 local IDS = {
-	ToadstoolFrog_Cap_neck = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
-	ToadstoolFrog_Gill_neck = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
-	ToadstoolFrog_Spot_neck = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
+	ToadstoolFrog_Cap_neck = 113676246756247, -- (re-upload: QM's Blockbench edit, Oct 15)
+	ToadstoolFrog_Gill_neck = 118811291987440, -- (re-upload: QM's Blockbench edit, Oct 15)
+	ToadstoolFrog_Spot_neck = 101087756608521, -- (re-upload: QM's Blockbench edit, Oct 15)
 	GreenCrab_Red_root = 129403060148775, -- (the Green Crab's carapace, QM Oct 14)
 	GreenCrab_Red_ClawL = 86915530155881, -- (its claws' tops)
 	GreenCrab_Red_ClawR = 88608798113715,
@@ -29,16 +29,16 @@ local IDS = {
 	GhostShip_Sail_SailM = 101983046030341,
 	GhostShip_Sail_root = 107969410845724,
 	GhostShip_White_Flag = 74100158036798,
-	Ladybug_Black_ShellL = 0, -- (re-upload: QM's Blockbench edit, Oct 15; the Ladybug shell and the Bumblebee body and wings, QM Oct 14)
-	Ladybug_Black_ShellR = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
-	Ladybug_Red_ShellL = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
-	Ladybug_Red_ShellR = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Ladybug_Black_ShellL = 85921473817669, -- (re-upload: QM's Blockbench edit, Oct 15; the Ladybug shell and the Bumblebee body and wings, QM Oct 14)
+	Ladybug_Black_ShellR = 98752802337169, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Ladybug_Red_ShellL = 103177915144410, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Ladybug_Red_ShellR = 110848259912731, -- (re-upload: QM's Blockbench edit, Oct 15)
 	Bumblebee_Black_Abdomen = 88744261457751,
 	Bumblebee_Black_root = 114671736332286,
-	Bumblebee_Wing_WingBL = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
-	Bumblebee_Wing_WingBR = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
-	Bumblebee_Wing_WingFL = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
-	Bumblebee_Wing_WingFR = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Wing_WingBL = 126428174511432, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Wing_WingBR = 124395339512885, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Wing_WingFL = 126854557968209, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Wing_WingFR = 76404368724892, -- (re-upload: QM's Blockbench edit, Oct 15)
 	Bumblebee_Yellow_Abdomen = 79819704203552,
 	Bumblebee_Yellow_root = 73623092957303,
 }
