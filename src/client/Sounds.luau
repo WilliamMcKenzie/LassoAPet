@@ -23,6 +23,7 @@ local IDS = {
 	sprint_tier = "rbxassetid://137322083927464", -- Up a sprint tier: Speed Burst SFX (dash cloth, QM's pick, Oct 9)
 	sprint_whoosh = "rbxassetid://79833203443837", -- Sprint starts: speed woosh (compressed cloth sfx dash, QM's pick, Oct 9; was 73983934702758)
 	ability_use = "rbxassetid://9085320874", -- a pet's ability goes off: Speed Up (Brawl Stars SFX, QM's pick, Oct 9)
+	bite = "rbxassetid://136650469995272", -- the Robo Shark eats an animal: Bite Sound (hitsound) (Creator Store, QM's pick, Oct 15)
 	-- A rush of wind looping while you sprint on a mount, a subtle sense of speed (QM, Oct 9):
 	-- Spiraling Wind Data Tunnel Travelling 2 (ProSoundEffects, 0:31). Others tried: Plasma
 	-- Trails Constant Airy Whooshing Windy 9125742262, Desert Wind Whistley Light Gusts 1 9114057104.

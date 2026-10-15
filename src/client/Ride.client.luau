@@ -2552,6 +2552,7 @@ function vfx.huntStep(cfg)
 			table.remove(strays, table.find(strays, prey))
 		end
 		Poof.at(Vector3.new(prey.x, 0, prey.z))
+		vfx.sounds.play("bite") -- (QM, Oct 15)
 		retire(prey)
 		vfx.huntTarget = nil
 		vfx.feed(cfg, 1)
