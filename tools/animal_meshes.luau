@@ -61,6 +61,7 @@ local IDS = {
 	SunflowerLion_Petaldark_Mane = 119624135948732,
 	SunflowerLion_Petaldark_Tail = 127848487802117,
 	SunflowerLion_Seed_Mane = 117384319496301,
+	SunflowerLion_Seed_neck = 125216012628886, -- (the mane's spikes, leaning tips: QM, Oct 15)
 	SunflowerLion_Seed_Tail = 82159190123765,
 	SunflowerLion_Seeddark_Mane = 92069771151078,
 	SunflowerLion_Seeddark_Tail = 138276175726502,
