@@ -47,20 +47,19 @@ local IDS = {
 	VineMonster_Rosedark_Rose = 0,
 	VineMonster_Vinelight_VineL = 0,
 	VineMonster_Vinelight_VineR = 0,
-	SunflowerLion_Leaf_LegFL = 0, -- (the Sunflower Lion made majestic, QM Oct 15)
+	SunflowerLion_Leaf_LegFL = 0, -- (the Sunflower Lion: QM's Blockbench edit, Oct 15)
 	SunflowerLion_Leaf_LegFR = 0,
 	SunflowerLion_Leaf_LegHL = 0,
 	SunflowerLion_Leaf_LegHR = 0,
 	SunflowerLion_Leafdark_Tail = 0,
-	SunflowerLion_Leafdark_neck = 0,
+	SunflowerLion_Petal_Mane = 0,
 	SunflowerLion_Petal_Tail = 0,
-	SunflowerLion_Petal_neck = 0,
+	SunflowerLion_Petaldark_Mane = 0,
 	SunflowerLion_Petaldark_Tail = 0,
-	SunflowerLion_Petaldark_neck = 0,
+	SunflowerLion_Seed_Mane = 0,
 	SunflowerLion_Seed_Tail = 0,
-	SunflowerLion_Seed_neck = 0,
+	SunflowerLion_Seeddark_Mane = 0,
 	SunflowerLion_Seeddark_Tail = 0,
-	SunflowerLion_Seeddark_neck = 0,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then

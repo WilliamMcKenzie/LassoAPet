@@ -1,4 +1,7 @@
-"""Sunflower Lion: World 3 Garden Legendary (draft, Oct 14; made majestic Oct 15). A golden lion whose mane is a giant
+"""DON'T RERUN: QM edited designs/garden/SunflowerLion.bbmodel by hand in Blockbench (Oct 15), which is now the
+source; this would overwrite it. Convert that file instead.
+
+Sunflower Lion: World 3 Garden Legendary (draft, Oct 14; made majestic Oct 15). A golden lion whose mane is a giant
 sunflower wrapped round its head: a seed-brown collar and three layers of pyramid petals (sunny
 yellow out round the face, deeper gold out-and-back, yellow again sweeping back over the neck), so
 it reads as a flower from every side. Hefty, with a big head and big paws. Meadow-style blocky body (the Meadow animals are the style
