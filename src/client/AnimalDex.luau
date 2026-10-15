@@ -168,6 +168,7 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	IvorySpider = "Spins its webs in perfect white. Hates muddy boots.",
 	BlackWidow = "Wears its armour like a crown. One in five hundred ever leave the Crimson Lands.",
 	GreenCrab = "Walks sideways, pinches forwards. Has never once lost a staring contest.",
+	LimeCrab = "The Green Crab's big cousin. Ate a lot of limes, mostly to avoid scurvy.",
 	Parrot = "Knows three words: gold, crackers, and gold.",
 	BananaMonkey = "Its tail holds the banana. It will not tell you who the banana is for.",
 	TreasureHermit = "Moved into a treasure chest and refuses to pay rent.",
