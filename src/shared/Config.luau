@@ -1711,10 +1711,15 @@ end
 function Config.slowedHere(kind, fuse)
 	return not Config.ownHere(kind) and not (fuse and Config.ownHere(fuse))
 end
+-- The pets for Robux in the podium's place in every world (QM, Oct 15: World 1's first, then all).
+Config.Podium = table.clone(Config.Podium)
+Config.Podium.Hidden = true
+if Config.World ~= 1 then
+	-- (World 2's base has a pine and World 3's a palm where World 1's Robo Shark stands: further along the wall)
+	Config.RoboSharkOffer.Offset = Vector3.new(76, 0, -11)
+end
 -- World 1: World 2's and 3's pets ridden here at a Horse's speed (QM, Oct 15).
 if Config.World == 1 then
-	Config.Podium = table.clone(Config.Podium)
-	Config.Podium.Hidden = true -- (the Loong offer in its place: QM, Oct 15)
 	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
 	for kind, stats in Config.AnimalStats do
 		if not Config.ownHere(kind, 1) then
