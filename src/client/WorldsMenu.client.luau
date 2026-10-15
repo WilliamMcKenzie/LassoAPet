@@ -23,8 +23,8 @@ local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this w
 -- (QM's mockup, Oct 13, was 1456 wide: its sizes x 1320 / 1456 here)
 local CLOSE = "rbxassetid://84920756991403" -- dex/IndexClose.png (the Index's X, as the shop's)
 local ART = { -- assets/ui/worlds (QM's; World2.png is his World1.png with a 2)
-	World1 = "rbxassetid://117854477071908", -- World1.png: the banner (portal, tree, track; "World 1" on it)
-	World2 = "rbxassetid://123640921226077", -- World2.png: QM's marble temple banner (Oct 13)
+	World1 = "rbxassetid://97539379085415", -- World1.png: QM's World 1 banner (his World1 1.png, Oct 15)
+	World2 = "rbxassetid://118848669288128", -- World2.png: QM's World 2 banner (his World2 5.png, Oct 15)
 	World3 = "rbxassetid://79877009915322", -- World3.png: QM's World 3 banner (his World3 3.png, Oct 15; was the COMING SOON one)
 	Travel = "rbxassetid://72409176941710", -- Travel.png: the blue button ("Travel" on it)
 	TravelLoading = "rbxassetid://104387240097786", -- TravelLoading.png: the same in grey, while a trip's on its way
