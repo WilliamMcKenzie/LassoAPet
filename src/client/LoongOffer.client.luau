@@ -89,8 +89,9 @@ model.Parent = folder
 
 -- Its price and the prompt.
 local tag = Instance.new("BillboardGui")
-tag.Size = UDim2.fromScale(10, 2.5)
-tag.StudsOffsetWorldSpace = Vector3.new(0, offer.Rise + 2, 0)
+tag.Size = UDim2.fromScale(14, 3)
+local boxAt, box = model:GetBoundingBox()
+tag.StudsOffsetWorldSpace = Vector3.new(0, math.max(boxAt.Y + box.Y / 2 - at.Y, offer.Rise) + 2.5, 0) -- (over the Loong's head)
 tag.AlwaysOnTop = false
 tag.LightInfluence = 0
 tag.MaxDistance = 200
@@ -100,7 +101,7 @@ label.Size = UDim2.fromScale(1, 1)
 label.FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json")
 label.TextScaled = true
 label.TextColor3 = Color3.new(1, 1, 1)
-label.Text = if offer.Price > 0 then "LOONG  R$" .. offer.Price else "LOONG"
+label.Text = if offer.Price > 0 then "BUY LOONG  R$" .. offer.Price else "BUY LOONG" -- (QM, Oct 15)
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 3
 stroke.Parent = label
