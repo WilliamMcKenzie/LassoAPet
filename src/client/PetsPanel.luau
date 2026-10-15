@@ -25,7 +25,7 @@ local LIST_TOP, LIST_SIDE, LIST_BOTTOM = 105, 40, 32
 local PER_ROW = 5
 local CELL = 200
 local GAP = 16
-local GREEN = Color3.fromRGB(70, 230, 90)
+local SELECTED = "rbxassetid://92986714288079" -- assets/ui/dex/SelectedPanel.png: behind a pet in your pen (QM, Oct 15; was a green outline)
 local SCREEN_SHARE = 0.7
 
 local PetsPanel = {}
@@ -150,17 +150,18 @@ local function fill()
 		cell.LayoutOrder = i
 		cell.AutoButtonColor = false
 		cell.BackgroundTransparency = 1
-		cell.Image = PetFaces.HEADSHOTS[pet.kind] or ""
-		cell.ScaleType = Enum.ScaleType.Fit
-		cell.ImageTransparency = if pet.equipped then 0 else 0.2 -- (80% opaque out of the pen: QM)
-		Instance.new("UICorner", cell).CornerRadius = UDim.new(0.12, 0)
-		if pet.equipped then
-			local stroke = Instance.new("UIStroke")
-			stroke.Color = GREEN
-			stroke.Thickness = 6
-			stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			stroke.Parent = cell
-		end
+		cell.Image = if pet.equipped then SELECTED else ""
+		cell.ScaleType = Enum.ScaleType.Stretch
+		local face = Instance.new("ImageLabel")
+		face.Name = "Face"
+		face.BackgroundTransparency = 1
+		face.AnchorPoint = Vector2.new(0.5, 0.5)
+		face.Position = UDim2.fromScale(0.5, 0.5)
+		face.Size = UDim2.fromScale(0.9, 0.9)
+		face.Image = PetFaces.HEADSHOTS[pet.kind] or ""
+		face.ScaleType = Enum.ScaleType.Fit
+		face.ImageTransparency = if pet.equipped then 0 else 0.2 -- (80% opaque out of the pen: QM)
+		face.Parent = cell
 		cell.Activated:Connect(function()
 			if busy then
 				return
