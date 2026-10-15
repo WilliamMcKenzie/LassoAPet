@@ -218,34 +218,26 @@ local function publish(player)
 	player:SetAttribute("RideWorth", profile.rideWorth) -- (a hybrid's FUSE price: Fusion.worth)
 	local stats = profile.rideFuse and profile.rideStats
 	player:SetAttribute("RideStats", stats and Vector2.new(stats.Speed, stats.Stamina) or nil) -- (a hybrid's Speed, Stamina: Fusion.stats)
-	-- (caught, for the Index, QM Oct 15: ridden, or ever had as a pet or its egg, kept for good)
-	for kind in profile.eggs do
-		if isAnimal(kind) then
-			profile.ridden[kind] = true
-		end
-	end
-	for _, item in profile.items do
-		for _, kind in { item.pet, item.egg } do
-			if typeof(kind) == "string" and isAnimal(kind) then
-				profile.ridden[kind] = true
+	-- Caught, for the Index (QM, Oct 15: "any you either hatch as a pet, or come back from riding
+	-- with it": a pet you actually got): every pet you have now (in your pen, taken out, the one
+	-- you ride) goes in, kept for good (saved as "caught").
+	profile.caught = profile.caught or {}
+	for _, list in { profile.items, profile.stored or {} } do
+		for _, item in list do
+			if typeof(item.pet) == "string" and isAnimal(item.pet) then
+				profile.caught[item.pet] = true
 			end
 		end
 	end
 	if profile.ride and isAnimal(profile.ride) then
-		profile.ridden[profile.ride] = true
+		profile.caught[profile.ride] = true
 	end
-	for _, item in profile.stored or {} do
-		if isAnimal(item.pet) then
-			profile.ridden[item.pet] = true
-		end
+	local caught = {}
+	for kind in profile.caught do
+		table.insert(caught, kind)
 	end
-	-- (and every kind you've ever lassoed: the quests keep the counts, "lasso:<kind>", QM Oct 15)
-	for key in profile.quests and profile.quests.counts or {} do
-		local kind = typeof(key) == "string" and key:match("^lasso:(.+)$")
-		if kind and isAnimal(kind) then
-			profile.ridden[kind] = true
-		end
-	end
+	table.sort(caught)
+	player:SetAttribute("Caught", HttpService:JSONEncode(caught))
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
 	player:SetAttribute("StoredPets", HttpService:JSONEncode(profile.stored or {})) -- (the Pets panel's unequipped ones: Client/PetsPanel)
 	local pen = penOf(player)
@@ -467,6 +459,12 @@ local function load(player)
 							profile.items[id] = item
 						end
 					end
+					profile.caught = {} -- (the Index's: pets you've had, publish)
+					for _, kind in typeof(data.caught) == "table" and data.caught or {} do
+						if isAnimal(kind) then
+							profile.caught[kind] = true
+						end
+					end
 					-- (pets taken out of the pen in the Pets panel: kept, not earning, QM Oct 15)
 					profile.stored = {}
 					for id, item in typeof(data.stored) == "table" and data.stored or {} do
@@ -591,7 +589,7 @@ local function save(player, onlyIfChanged)
 	if not store or not profile or not loaded[player] or player:GetAttribute("Tutorial") then
 		return
 	end
-	local data = { eggs = profile.eggs, items = profile.items, stored = profile.stored, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
+	local data = { eggs = profile.eggs, items = profile.items, stored = profile.stored, caught = profile.caught and (function() local t = {} for k in profile.caught do table.insert(t, k) end return t end)() or nil, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, boughtLoongs = profile.boughtLoongs, boughtRoboSharks = profile.boughtRoboSharks, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
 		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, ridesDone = profile.ridesDone, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
 		merged = profile.merged }

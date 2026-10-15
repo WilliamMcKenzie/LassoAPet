@@ -25,7 +25,7 @@ local LIST_TOP, LIST_SIDE, LIST_BOTTOM = 105, 40, 32
 local PER_ROW = 5
 local CELL = 200
 local GAP = 16
-local SELECTED = "rbxassetid://92986714288079" -- assets/ui/dex/SelectedPanel.png: behind a pet in your pen (QM, Oct 15; was a green outline)
+local SELECTED = "rbxassetid://111082975846791" -- assets/ui/dex/SelectedPanel2.png: behind a pet in your pen (QM, Oct 15: his BG 2; was SelectedPanel.png, before that a green outline)
 local SCREEN_SHARE = 0.7
 
 local PetsPanel = {}

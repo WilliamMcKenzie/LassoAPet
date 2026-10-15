@@ -1,8 +1,8 @@
 -- The Index (QM, Oct 15: "completely different ... very simple", the old book of pages scrapped):
 -- QM's panel (assets/ui/dex/IndexPanel2.png, "Index" and its book on the top edge) with every
 -- animal of this world's biomes, biome by biome under its name (Fredoka One), five to a row:
--- each one's headshot (PetFaces) in colour once you've ridden it, a black silhouette until
--- then (the server keeps the list: the "Ridden" attribute, Hatchery.server). Per world: only
+-- each one's headshot (PetFaces) in colour once you've had it as a pet (hatched, or brought
+-- home from a ride), a black silhouette until then (the "Caught" attribute, Hatchery.server). Per world: only
 -- this world's biomes and the animals in their herds (QM). Its X, or a click off it, closes it.
 --
 --   AnimalDex.toggle(instant)     -- the Index button
@@ -56,7 +56,7 @@ for i, biome in Config.Biomes do
 end
 
 local function ridden()
-	local ok, list = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Ridden") or "[]")
+	local ok, list = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Caught") or "[]")
 	local set = {}
 	for _, kind in if ok and typeof(list) == "table" then list else {} do
 		set[kind] = true
@@ -177,7 +177,7 @@ local function paint()
 		picture.ImageColor3 = if seen[kind] then Color3.new(1, 1, 1) else Color3.new(0, 0, 0)
 	end
 end
-player:GetAttributeChangedSignal("Ridden"):Connect(paint)
+player:GetAttributeChangedSignal("Caught"):Connect(paint)
 paint()
 
 local camera = workspace.CurrentCamera
