@@ -798,7 +798,11 @@ local Config = {
 	-- Stock (QM, Oct 15: "Loong 435/500 left"): Stock in all, shared by every server (Shop.server
 	-- counts each sale in a DataStore; workspace's "LoongLeft" is what's left), SOLD OUT at 0. It
 	-- starts at StartLeft (QM: "to make it feel like its selling"): no count saved yet means that.
-	LoongOffer = { ProductId = 3718721407, Price = 999, Stock = 500, StartLeft = 435, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165 },
+	LoongOffer = { Kind = "Loong", ProductId = 3718721407, Price = 999, Stock = 500, StartLeft = 435, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.zero,
+		Ledger = "loongs", StockKey = "sold" },
+	-- The Robo Shark beside it the same way (QM, Oct 15: 1,000 of them; ProductId: QM's to make).
+	RoboSharkOffer = { Kind = "RoboShark", ProductId = 0, Price = 0, Stock = 1000, StartLeft = 870, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(0, 0, 30),
+		Ledger = "roboSharks", StockKey = "sold_RoboShark" },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
 	-- (Shared/Merge). They look like Pet's egg, EggScale x as big (QM).
@@ -1666,6 +1670,11 @@ Config.AnimalScale.AncientTreant = 2 -- (QM, Oct 15)
 Config.AnimalScale.RoyalCnidarian = 2 -- (QM, Oct 15)
 Config.AnimalScale.GiantRafflesia = 2 -- the Garden's boss (QM, Oct 15)
 Config.AnimalScale.Loong = 4 -- (QM, Oct 15: "very tiny"; its breath still grows it from there)
+Config.AnimalScale.RoboShark = 4 -- (QM, Oct 15; its hunting still grows it from there)
+-- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
+-- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
+-- what's left is workspace's "<Kind>Left".
+Config.PetOffers = { Config.LoongOffer, Config.RoboSharkOffer }
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)

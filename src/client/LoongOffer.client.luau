@@ -1,5 +1,5 @@
--- The Loong for Robux at World 1's base (Config.LoongOffer, QM Oct 15: in the podium's place):
--- the Loong idling over a glowing cyan ring, light rising round it in a curtain that fades
+-- The pets for Robux at World 1's base (Config.PetOffers, QM Oct 15: the Loong in the podium's
+-- place, the Robo Shark beside it), each idling over a glowing cyan ring, light rising round it in a curtain that fades
 -- as it goes up, so it reads as something you can buy. Its prompt opens the Loong's
 -- developer product (Shop.server grants it). Built on each client, as the podium's snake
 -- was, so its idle plays (Motor6D.Transform doesn't replicate).
@@ -10,19 +10,22 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local offer = Config.LoongOffer
-if not (Config.Podium and Config.Podium.Hidden and offer) then
+if not (Config.Podium and Config.Podium.Hidden and Config.PetOffers) then
 	return
 end
 local Rig = require(ReplicatedStorage.Shared.Animals.Rig)
-local LoongModel = require(ReplicatedStorage.Shared.Animals.LoongModel)
 
 local STUD_TEXTURE = { image = "rbxassetid://7447638591", tile = 0.5 } -- the animals'
-local at = Config.Podium.Position
 local player = Players.LocalPlayer
 
+local function build(offer)
+local at = Config.Podium.Position + (offer.Offset or Vector3.zero)
+local LoongModel = require(ReplicatedStorage.Shared.Animals:FindFirstChild(offer.Kind .. "Model"))
+local name = (offer.Kind:gsub("(%l)(%u)", "%1 %2"))
+local LEFT = offer.Kind .. "Left"
+
 local folder = Instance.new("Model")
-folder.Name = "LoongOffer"
+folder.Name = offer.Kind .. "Offer"
 
 local function part(props)
 	local p = Instance.new("Part")
@@ -78,7 +81,7 @@ sparks.Parent = spark
 
 -- The Loong, idling over the ring.
 local size = offer.Scale
-local model, _, bones = Rig.fromData(LoongModel, "Loong", STUD_TEXTURE, size)
+local model, _, bones = Rig.fromData(LoongModel, offer.Kind, STUD_TEXTURE, size)
 for _, p in model:GetDescendants() do
 	if p:IsA("BasePart") then
 		p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
@@ -102,12 +105,12 @@ label.FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json")
 label.TextScaled = true
 label.TextColor3 = Color3.new(1, 1, 1)
 local function showLeft()
-	local left = workspace:GetAttribute("LoongLeft")
-	label.Text = if left == nil then "Loong"
-		elseif left <= 0 then "Loong SOLD OUT"
-		else string.format("Loong %d/%d left", left, offer.Stock) -- (QM, Oct 15)
+	local left = workspace:GetAttribute(LEFT)
+	label.Text = if left == nil then name
+		elseif left <= 0 then name .. " SOLD OUT"
+		else string.format("%s %d/%d left", name, left, offer.Stock) -- (QM, Oct 15)
 end
-workspace:GetAttributeChangedSignal("LoongLeft"):Connect(showLeft)
+workspace:GetAttributeChangedSignal(LEFT):Connect(showLeft)
 showLeft()
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 5
@@ -116,30 +119,30 @@ label.Parent = tag
 tag.Adornee = hub
 tag.Parent = hub
 local prompt = Instance.new("ProximityPrompt")
-prompt.ActionText = "Buy Loong"
-prompt.ObjectText = if offer.Price > 0 then "R$" .. offer.Price else "Loong"
+prompt.ActionText = "Buy " .. name
+prompt.ObjectText = if offer.Price > 0 then "R$" .. offer.Price else name
 prompt.HoldDuration = 0
 prompt.MaxActivationDistance = R
 prompt.RequiresLineOfSight = false
 prompt.Parent = hub
 local function promptOn()
-	prompt.Enabled = (workspace:GetAttribute("LoongLeft") or 1) > 0 -- (none at SOLD OUT)
+	prompt.Enabled = (workspace:GetAttribute(LEFT) or 1) > 0 -- (none at SOLD OUT)
 end
-workspace:GetAttributeChangedSignal("LoongLeft"):Connect(promptOn)
+workspace:GetAttributeChangedSignal(LEFT):Connect(promptOn)
 promptOn()
 prompt.Triggered:Connect(function()
-	if (workspace:GetAttribute("LoongLeft") or 0) <= 0 then
+	if (workspace:GetAttribute(LEFT) or 0) <= 0 then
 		return -- (checked first: sold out)
 	elseif offer.ProductId ~= 0 then
 		MarketplaceService:PromptProductPurchase(player, offer.ProductId)
 	else
-		warn("LoongOffer: no ProductId yet (Config.LoongOffer)")
+		warn("LoongOffer: no ProductId yet for " .. offer.Kind .. " (Config.PetOffers)")
 	end
 end)
 
 folder.Parent = workspace
 
-local idle = LoongModel.animations.idle
+local idle = LoongModel.animations.idle or select(2, next(LoongModel.animations))
 local t = 0
 RunService.Heartbeat:Connect(function(dt)
 	t = (t + dt) % idle.length
@@ -162,3 +165,8 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 	end
 end)
+end
+
+for _, offer in Config.PetOffers do
+	build(offer)
+end

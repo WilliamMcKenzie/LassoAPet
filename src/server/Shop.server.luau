@@ -73,8 +73,12 @@ for _, list in { Config.Shop.Gold, Config.Shop.Specials } do
 end
 
 offerOf[Config.SpeedupEgg.ProductId] = { Key = "SpeedupEgg" }
-if Config.LoongOffer and Config.LoongOffer.ProductId ~= 0 then
-	offerOf[Config.LoongOffer.ProductId] = { Key = "Loong" } -- (World 1's base Loong: Client/LoongOffer)
+local petOfferOf = {} -- [Key] = the Config.PetOffers entry
+for _, pet in Config.PetOffers do
+	petOfferOf[pet.Kind] = pet
+	if pet.ProductId ~= 0 then
+		offerOf[pet.ProductId] = { Key = pet.Kind } -- (World 1's base stands: Client/LoongOffer)
+	end
 end
 
 -- Paid random items (the Legendary Pet, and egg rolls now gold can be bought) are
@@ -124,7 +128,9 @@ local function show(player, ledger)
 	player:SetAttribute("BoughtGold", ledger.gold)
 	player:SetAttribute("BoughtPets", ledger.pets)
 	player:SetAttribute("BoughtGiantEggs", ledger.giantEggs)
-	player:SetAttribute("BoughtLoongs", ledger.loongs)
+	for _, pet in Config.PetOffers do
+		player:SetAttribute("Bought" .. pet.Kind .. "s", ledger[pet.Ledger] or 0)
+	end
 	local rides, nukes = ledger.giant - ledger.giantUsed, ledger.nukes - ledger.nukesUsed
 	player:SetAttribute("GiantRides", if rides > 0 then rides else nil)
 	player:SetAttribute("Nukes", if nukes > 0 then nukes else nil)
@@ -181,43 +187,49 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- Records `offer` bought with receipt `purchaseId` (once). True once it's saved.
-local loongSold
--- The Loong offer's stock (Config.LoongOffer.Stock): sales counted in one DataStore key every
+local petSold
+-- The base stands' stock (Config.PetOffers: Stock each): sales counted in a DataStore key every
 -- server shares (UpdateAsync, so two can't both take the last), what's left on workspace's
--- "LoongLeft" for Client/LoongOffer, read again every LOONG_REFRESH seconds.
-local LOONG_REFRESH = 10
-local okLoong, loongStore = pcall(function()
+-- "<Kind>Left" for Client/LoongOffer, read again every STOCK_REFRESH seconds. No count saved
+-- yet means StartLeft are left (QM: "to make it feel like its selling").
+local STOCK_REFRESH = 10
+local okStock, stockStore = pcall(function()
 	return game:GetService("DataStoreService"):GetDataStore("LoongStock")
 end)
-if not okLoong then
-	loongStore = nil
+if not okStock then
+	stockStore = nil
 end
-local LOONG_START = Config.LoongOffer.Stock - (Config.LoongOffer.StartLeft or Config.LoongOffer.Stock) -- (sold before the first sale)
-local function showLoongLeft(sold)
-	workspace:SetAttribute("LoongLeft", math.max(0, Config.LoongOffer.Stock - (tonumber(sold) or LOONG_START)))
+local function showLeft(pet, sold)
+	local start = pet.Stock - (pet.StartLeft or pet.Stock)
+	workspace:SetAttribute(pet.Kind .. "Left", math.max(0, pet.Stock - (tonumber(sold) or start)))
 end
-loongSold = function()
-	if not loongStore then
-		showLoongLeft((Config.LoongOffer.Stock - (workspace:GetAttribute("LoongLeft") or Config.LoongOffer.Stock)) + 1)
+petSold = function(pet)
+	local start = pet.Stock - (pet.StartLeft or pet.Stock)
+	if not stockStore then
+		showLeft(pet, (pet.Stock - (workspace:GetAttribute(pet.Kind .. "Left") or pet.Stock)) + 1)
 		return
 	end
 	pcall(function()
-		showLoongLeft(loongStore:UpdateAsync("sold", function(n)
-			return (tonumber(n) or LOONG_START) + 1
+		showLeft(pet, stockStore:UpdateAsync(pet.StockKey, function(n)
+			return (tonumber(n) or start) + 1
 		end))
 	end)
 end
-if Config.LoongOffer and Config.Podium.Hidden then
-	showLoongLeft(nil)
+if Config.Podium.Hidden then
+	for _, pet in Config.PetOffers do
+		showLeft(pet, nil)
+	end
 	task.spawn(function()
 		while true do
-			if loongStore then
-				local ok, sold = pcall(loongStore.GetAsync, loongStore, "sold")
-				if ok then
-					showLoongLeft(sold)
+			for _, pet in Config.PetOffers do
+				if stockStore then
+					local ok, sold = pcall(stockStore.GetAsync, stockStore, pet.StockKey)
+					if ok then
+						showLeft(pet, sold)
+					end
 				end
 			end
-			task.wait(LOONG_REFRESH)
+			task.wait(STOCK_REFRESH)
 		end
 	end)
 end
@@ -244,13 +256,14 @@ local function record(userId, purchaseId, offer)
 			ledger.hatches = (ledger.hatches or 0) + 1
 		elseif offer.Key == "Nuke" then
 			ledger.nukes += 1
-		elseif offer.Key == "Loong" then
-			ledger.loongs = (ledger.loongs or 0) + 1 -- a Loong into your pen (Config.LoongOffer)
+		elseif petOfferOf[offer.Key] then
+			local field = petOfferOf[offer.Key].Ledger
+			ledger[field] = (ledger[field] or 0) + 1 -- a Loong (or Robo Shark) into your pen (Config.PetOffers)
 		end
 		return true
 	end)
-	if ledger and fresh and offer.Key == "Loong" then
-		task.spawn(loongSold)
+	if ledger and fresh and petOfferOf[offer.Key] then
+		task.spawn(petSold, petOfferOf[offer.Key])
 	end
 	if ledger and fresh and offer.Key == "SpawnLoong" then
 		workspace.World:SetAttribute("ForceEventNow", true) -- (bought: no countdown)
