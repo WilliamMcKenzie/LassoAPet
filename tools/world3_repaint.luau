@@ -16,7 +16,7 @@ for _, folder in { workspace.World.Ground, workspace.World.Walls } do
 				p.Color = c[1]
 				for _, t in p:GetChildren() do
 					if t.Name == "Checker" then t.Color3 = c[2] elseif t.Name == "Texture" then t.Color3 = c[1] end
-					if t:IsA("Texture") and t.Name == "Water" then t.Texture = C.Water.Image; t.Color3 = Color3.fromRGB(150, 200, 255); w += 1 end
+					if t:IsA("Texture") and t.Name == "Water" then t.Texture = C.Water.Image; t.Color3 = if p.Name == "ShallowWater" then Color3.fromRGB(165, 220, 255) else Color3.fromRGB(150, 200, 255); w += 1 end
 				end
 				n += 1
 			end
