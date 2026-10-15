@@ -7,9 +7,9 @@
 -- Import 3D: units studs, no rig, keep the name) and put its mesh asset id next to its name.
 local AssetService = game:GetService("AssetService")
 local IDS = {
-	ToadstoolFrog_Cap_neck = 80583789207097,
-	ToadstoolFrog_Gill_neck = 90637008093060,
-	ToadstoolFrog_Spot_neck = 80302708979871,
+	ToadstoolFrog_Cap_neck = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
+	ToadstoolFrog_Gill_neck = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
+	ToadstoolFrog_Spot_neck = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
 	GreenCrab_Red_root = 129403060148775, -- (the Green Crab's carapace, QM Oct 14)
 	GreenCrab_Red_ClawL = 86915530155881, -- (its claws' tops)
 	GreenCrab_Red_ClawR = 88608798113715,
@@ -29,16 +29,16 @@ local IDS = {
 	GhostShip_Sail_SailM = 101983046030341,
 	GhostShip_Sail_root = 107969410845724,
 	GhostShip_White_Flag = 74100158036798,
-	Ladybug_Black_ShellL = 91146133545633, -- (the Ladybug shell and the Bumblebee body and wings, QM Oct 14)
-	Ladybug_Black_ShellR = 91719640383647,
-	Ladybug_Red_ShellL = 87350773037345,
-	Ladybug_Red_ShellR = 127503051211000,
+	Ladybug_Black_ShellL = 0, -- (re-upload: QM's Blockbench edit, Oct 15; the Ladybug shell and the Bumblebee body and wings, QM Oct 14)
+	Ladybug_Black_ShellR = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Ladybug_Red_ShellL = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Ladybug_Red_ShellR = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
 	Bumblebee_Black_Abdomen = 88744261457751,
 	Bumblebee_Black_root = 114671736332286,
-	Bumblebee_Wing_WingBL = 78105600604638,
-	Bumblebee_Wing_WingBR = 81278188679551,
-	Bumblebee_Wing_WingFL = 92468553337907,
-	Bumblebee_Wing_WingFR = 103867336770699,
+	Bumblebee_Wing_WingBL = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Wing_WingBR = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Wing_WingFL = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Wing_WingFR = 0, -- (re-upload: QM's Blockbench edit, Oct 15)
 	Bumblebee_Yellow_Abdomen = 79819704203552,
 	Bumblebee_Yellow_root = 73623092957303,
 }
