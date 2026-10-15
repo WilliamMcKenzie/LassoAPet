@@ -1958,6 +1958,10 @@ if Config.World == 2 then
 	Config.AnimalScale = table.clone(Config.AnimalScale)
 	for i, more in { [4] = { size = 2, spawn = 1.6 }, [5] = { size = 2.5, spawn = 2 }, [6] = { size = 3, spawn = 2.5 } } do
 		for kind in own[i] do
+			-- (not the Loong running wild in the Temple: it's 4x everywhere already, QM Oct 15)
+			if Config.CrossWorldExempt[kind] then
+				continue
+			end
 			Config.AnimalScale[kind] = (Config.AnimalScale[kind] or 1) * more.size
 		end
 		local biome = Config.Biomes[i]
