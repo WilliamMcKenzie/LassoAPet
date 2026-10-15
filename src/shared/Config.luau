@@ -2115,6 +2115,11 @@ if Config.World == 3 then
 		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 3 })
 		Config.AnimalStats[kind].Speed = d / (sprint * Config.RideSeconds)
 	end
+	-- Then every Pirate Cove animal 20% faster (QM, Oct 15).
+	for _, kind in { "GreenCrab", "LimeCrab", "Parrot", "BananaMonkey", "TreasureHermit", "EyepatchShark", "TreasureTurtle", "GhostShip", "JollyRogerWyvern" } do
+		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind])
+		Config.AnimalStats[kind].Speed *= 1.2
+	end
 end
 
 return Config
