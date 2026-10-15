@@ -1998,16 +1998,16 @@ if Config.World == 3 then
 			NestScale = 2.5,
 			Length = 6240, -- (2x the Ocean's 3120)
 			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean's)
-			GroundColors = { rgb(236, 222, 184), rgb(226, 210, 170) },
+			GroundColors = { rgb(111, 152, 207), rgb(120, 162, 211) }, -- (QM, Oct 15)
 			WallColors = { rgb(13, 53, 87), rgb(14, 63, 104) }, -- (QM, Oct 15)
-			CapColor = rgb(255, 110, 190),
+			CapColor = rgb(103, 180, 198), -- (QM, Oct 15)
 			-- (Oct 14, the Cnidaria animals thread: weights as the Tomb's by rarity, guesses; its giga
 			-- rares and the Royal Cnidarian added below. All of them swim: SprintSpecials Fly.)
 			Herd = { MoonJellyfish = 0.3, Anomalocaris = 0.25, BoxJellyfish = 0.15, BlueRingOctopus = 0.15, ManOWar = 0.08, Mermaid = 0.03 },
 			Patches = {
 				Trench = { rgb(30, 80, 210), rgb(26, 70, 188) },
 				Coral = { rgb(255, 128, 150), rgb(244, 112, 136) },
-				Glow = { rgb(120, 255, 140), rgb(100, 240, 120) },
+				Glow = { rgb(63, 179, 202), rgb(73, 200, 212) }, -- (QM, Oct 15)
 			},
 			GateColor = rgb(90, 255, 200),
 			Haze = { Color = rgb(60, 150, 235), Density = 0.45, Tint = rgb(200, 228, 255), FadeTime = 1.5, Bubbles = 24, NoDepths = true },
