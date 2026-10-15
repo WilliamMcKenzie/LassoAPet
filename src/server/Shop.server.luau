@@ -181,6 +181,46 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- Records `offer` bought with receipt `purchaseId` (once). True once it's saved.
+local loongSold
+-- The Loong offer's stock (Config.LoongOffer.Stock): sales counted in one DataStore key every
+-- server shares (UpdateAsync, so two can't both take the last), what's left on workspace's
+-- "LoongLeft" for Client/LoongOffer, read again every LOONG_REFRESH seconds.
+local LOONG_REFRESH = 10
+local okLoong, loongStore = pcall(function()
+	return game:GetService("DataStoreService"):GetDataStore("LoongStock")
+end)
+if not okLoong then
+	loongStore = nil
+end
+local function showLoongLeft(sold)
+	workspace:SetAttribute("LoongLeft", math.max(0, Config.LoongOffer.Stock - (tonumber(sold) or 0)))
+end
+loongSold = function()
+	if not loongStore then
+		showLoongLeft((Config.LoongOffer.Stock - (workspace:GetAttribute("LoongLeft") or Config.LoongOffer.Stock)) + 1)
+		return
+	end
+	pcall(function()
+		showLoongLeft(loongStore:UpdateAsync("sold", function(n)
+			return (tonumber(n) or 0) + 1
+		end))
+	end)
+end
+if Config.LoongOffer and Config.Podium.Hidden then
+	showLoongLeft(0)
+	task.spawn(function()
+		while true do
+			if loongStore then
+				local ok, sold = pcall(loongStore.GetAsync, loongStore, "sold")
+				if ok then
+					showLoongLeft(sold)
+				end
+			end
+			task.wait(LOONG_REFRESH)
+		end
+	end)
+end
+
 local function record(userId, purchaseId, offer)
 	local fresh = false
 	local ledger = update(userId, function(ledger)
@@ -208,6 +248,9 @@ local function record(userId, purchaseId, offer)
 		end
 		return true
 	end)
+	if ledger and fresh and offer.Key == "Loong" then
+		task.spawn(loongSold)
+	end
 	if ledger and fresh and offer.Key == "SpawnLoong" then
 		workspace.World:SetAttribute("ForceEventNow", true) -- (bought: no countdown)
 		workspace.World:SetAttribute("ForceEvent", "Loong")

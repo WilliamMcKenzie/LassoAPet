@@ -795,7 +795,9 @@ local Config = {
 	-- idles on a glowing cyan ring with light rising round it; its prompt buys ProductId (a
 	-- developer product QM makes: 0 till then, and the prompt does nothing), the Loong into
 	-- your pen (Shop.server's ledger, Hatchery's addBoughtLoongs). Client/LoongOffer.
-	LoongOffer = { ProductId = 0, Price = 0, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165 },
+	-- Stock (QM, Oct 15: "Loong 435/500 left"): Stock in all, shared by every server (Shop.server
+	-- counts each sale in a DataStore; workspace's "LoongLeft" is what's left), SOLD OUT at 0.
+	LoongOffer = { ProductId = 0, Price = 0, Stock = 500, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165 },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
 	-- (Shared/Merge). They look like Pet's egg, EggScale x as big (QM).

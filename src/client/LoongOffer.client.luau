@@ -101,7 +101,14 @@ label.Size = UDim2.fromScale(1, 1)
 label.FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json")
 label.TextScaled = true
 label.TextColor3 = Color3.new(1, 1, 1)
-label.Text = if offer.Price > 0 then "BUY LOONG  R$" .. offer.Price else "BUY LOONG" -- (QM, Oct 15)
+local function showLeft()
+	local left = workspace:GetAttribute("LoongLeft")
+	label.Text = if left == nil then "Loong"
+		elseif left <= 0 then "Loong SOLD OUT"
+		else string.format("Loong %d/%d left", left, offer.Stock) -- (QM, Oct 15)
+end
+workspace:GetAttributeChangedSignal("LoongLeft"):Connect(showLeft)
+showLeft()
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 3
 stroke.Parent = label
@@ -115,8 +122,15 @@ prompt.HoldDuration = 0
 prompt.MaxActivationDistance = R
 prompt.RequiresLineOfSight = false
 prompt.Parent = hub
+local function promptOn()
+	prompt.Enabled = (workspace:GetAttribute("LoongLeft") or 1) > 0 -- (none at SOLD OUT)
+end
+workspace:GetAttributeChangedSignal("LoongLeft"):Connect(promptOn)
+promptOn()
 prompt.Triggered:Connect(function()
-	if offer.ProductId ~= 0 then
+	if (workspace:GetAttribute("LoongLeft") or 0) <= 0 then
+		return -- (checked first: sold out)
+	elseif offer.ProductId ~= 0 then
 		MarketplaceService:PromptProductPurchase(player, offer.ProductId)
 	else
 		warn("LoongOffer: no ProductId yet (Config.LoongOffer)")
