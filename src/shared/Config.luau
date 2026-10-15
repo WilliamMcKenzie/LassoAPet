@@ -2078,6 +2078,18 @@ end
 -- Floors, walls and their colours: the World 3 terrain thread's (tools/world3_course.luau, then
 -- world3_<biome>.luau; not funnel.luau). Animals and bosses come from the biome animal threads;
 -- until then each herd runs Fish (World 2's way) and each boss is World 2's in that slot.
+-- The Halloween world's base (QM, Oct 15: orange grass, dark stone paths, like the Meadow's;
+-- tools/halloween_floor.luau): its first biome's colours, which paint the base floor by part name.
+if Config.World == 4 then
+	local rgb = Color3.fromRGB
+	local meadow = table.clone(Config.Biomes[1])
+	meadow.GroundColors = { rgb(240, 136, 36), rgb(226, 122, 28) } -- bright orange grass
+	meadow.Patches = table.clone(meadow.Patches or {})
+	meadow.Patches.Grass = { rgb(200, 98, 26), rgb(186, 88, 22) } -- darker orange, between the grass and the stone
+	meadow.Patches.Dirt = { rgb(70, 66, 80), rgb(60, 56, 70) } -- dark stone yard and paths
+	Config.Biomes = table.clone(Config.Biomes)
+	Config.Biomes[1] = meadow
+end
 -- World 2's Temple: the Loong runs wild there (QM, Oct 13), 1 in 4,000 of its stampede (QM, Oct 15:
 -- was 0.025, now it's sold at World 1's base), counted once the Temple's herd is all in.
 if Config.World == 2 then
