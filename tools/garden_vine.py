@@ -1,4 +1,7 @@
-"""Vine Monster: World 3 Garden Rare (draft, Oct 14; redone cleaner Oct 15). A gorilla-shaped knot of living vines that
+"""DON'T RERUN: QM edited designs/garden/VineMonster.bbmodel by hand in Blockbench (Oct 15), which is now the
+source; this would overwrite it. Convert that file instead (animations() is still used for its walk).
+
+Vine Monster: World 3 Garden Rare (draft, Oct 14; redone cleaner Oct 15). A gorilla-shaped knot of living vines that
 knuckle-walks: a barrel chest of twisted vine coils (each block turned a little against the next),
 leafy shoulder pads, long dangling arms of braided vine ending in big knotted fists with thorns, two
 stumpy root legs, a row of red-brown thorns down its back, and a vine-knot head with googly eyes
