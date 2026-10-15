@@ -1286,7 +1286,7 @@ local Config = {
 		TombJackal = { Speed = 5.6, Stamina = 3 }, -- World 2's Ancient Tomb Rare: the Raptor's, until QM sets it
 		Tiger = { Speed = 6.43, Stamina = 2.8 }, -- World 2's Temple Rare (QM, Oct 13; as the Fire Lobster until QM sets it)
 		Clownfish = { Speed = 3.454, Stamina = 2.4 }, -- (QM, Oct 13: 20% into the Volcano, +10 points; was 3.28); (QM, Oct 12: 10% into the Volcano; was 2.8); (a little slower than the Starfish, an Ocean Uncommon too)
-		RoboShark = { Speed = 1.2, Stamina = 3 }, -- QM, Oct 4: starts at 1.2x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed 2.5 x this)
+		RoboShark = { Speed = 1.8, Stamina = 3 }, -- (QM, Oct 15: 1.5x, was 1.2) QM, Oct 4: starts at 1.2x, eating takes it up to 3x (Abilities.RoboShark.MaxSpeed 2.5 x this)
 		FishSchool = { Speed = 4.324, Stamina = 2.8 }, -- (QM, Oct 13: 70% into the Volcano, +10 points; was 4.15); (QM, Oct 12: 60% into the Volcano; was 3.95)
 		Whale = { Speed = 3.624, Stamina = 10 }, -- (QM, Oct 13: 30% into the Volcano, +10 points; was 3.45); (QM, Oct 12: 20% into the Volcano; was 3.2)
 		GiantGolem = { Speed = 5.8, Stamina = 3 }, -- World 2's Woodland Legendary Giant Golem (as the Kraken until QM sets it)
