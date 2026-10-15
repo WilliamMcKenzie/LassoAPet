@@ -502,6 +502,7 @@ local Config = {
 	-- Charge swings the camera round to a cinematic front-side angle.
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
 	NativePrompts = false, -- Roblox's own interact prompts instead of ours (Client/PromptUi), to compare (QM, Oct 10)
+	ShopOn = false, -- (QM, Oct 15: the Robux shop hidden for now, its buttons too: Client/Shop, Hud, BaseUi)
 	AbilitiesOn = false, -- (QM, Oct 10: off till the riding UX is settled; Abilities below stay as they are)
 	-- These use theirs anyway, on their own, whenever it's off cooldown (QM, Oct 15), with no button.
 	AutoAbilities = { RoboShark = true, Loong = true },

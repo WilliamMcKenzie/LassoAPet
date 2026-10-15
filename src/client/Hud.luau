@@ -778,7 +778,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			Shop.toggle()
 		end
 	end)
-	shopIcon.Visible = pets.Visible
+	shopIcon.Visible = pets.Visible and Config.ShopOn
 	if IMAGES.shopIcon.id == "" then
 		local shopText = label(shopIcon, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 34, 3) -- 3px outline (QM)
 		shopText.Text = "Shop"
@@ -1180,7 +1180,7 @@ function Hud.show(visible)
 	gold.Visible = not visible and tutorial == nil
 	pets.Visible = not visible and tutorial == nil
 	fuseIcon.Visible = not visible and ((tutorial == nil and Hud.fuseUnlocked()) or tutorial == "fuse")
-	shopIcon.Visible = pets.Visible
+	shopIcon.Visible = pets.Visible and Config.ShopOn
 	upgrade.Visible = upgradeShown and not visible and tutorial == nil
 	Inventory.setVisible(not visible and not lesson) -- your eggs, hidden while riding
 	gained.row.Visible = false
@@ -1762,7 +1762,7 @@ function Hud.setTutorial(stage)
 	gold.Visible = not riding and stage == nil
 	pets.Visible = not riding and stage == nil
 	fuseIcon.Visible = not riding and ((stage == nil and Hud.fuseUnlocked()) or stage == "fuse")
-	shopIcon.Visible = pets.Visible
+	shopIcon.Visible = pets.Visible and Config.ShopOn
 	upgrade.Visible = upgradeShown and not riding and stage == nil
 	rideCash.row.Visible = SHOW_RIDE_TOP and (stage == nil and not noCash)
 end

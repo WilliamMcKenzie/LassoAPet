@@ -95,6 +95,9 @@ local function passOffered(pass)
 end
 
 function Shop.hasOffers()
+	if not Config.ShopOn then
+		return false -- (hidden for now: QM, Oct 15)
+	end
 	for _, pass in Config.Passes do
 		if passOffered(pass) then
 			return true

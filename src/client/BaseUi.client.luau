@@ -165,6 +165,9 @@ end }, { "merge", function()
 end }, { "invite", promptInvite } } do
 	-- (each in a slot of its own size, centred in it, so it grows from its middle and the
 	-- others stay put: QM, Oct 13)
+	if spec[1] == "shop" and not Config.ShopOn then
+		continue -- (the shop hidden for now: QM, Oct 15)
+	end
 	local slot = Instance.new("Frame")
 	slot.Name = spec[1] .. "Slot"
 	slot.BackgroundTransparency = 1
@@ -175,7 +178,7 @@ end }, { "invite", promptInvite } } do
 	slot.Size = b.Size
 	b.AnchorPoint = Vector2.new(0.5, 0.5)
 	b.Position = UDim2.fromScale(0.5, 0.5)
-	menu.Size = UDim2.fromOffset(MENU_WIDTH, menu.Size.Y.Offset + b.Size.Y.Offset + (if i > 1 then MENU_GAP else 0))
+	menu.Size = UDim2.fromOffset(MENU_WIDTH, menu.Size.Y.Offset + b.Size.Y.Offset + (if menu.Size.Y.Offset > 0 then MENU_GAP else 0))
 	if ART[spec[1]].id == "" then -- (no art yet: a plain button with its name)
 		b.BackgroundTransparency = 0
 		b.BackgroundColor3 = Color3.fromRGB(76, 200, 92)
