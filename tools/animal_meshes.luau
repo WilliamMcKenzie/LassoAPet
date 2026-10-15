@@ -7,6 +7,25 @@
 -- Import 3D: units studs, no rig, keep the name) and put its mesh asset id next to its name.
 local AssetService = game:GetService("AssetService")
 local IDS = {
+	-- The Halloween world's animals (Oct 15): upload assets/meshes/<Kind>/*.obj, put the ids here
+	Bat_Fur_neck = 0,
+	Bat_Fur_root = 0,
+	Bat_Wing_WingL = 0,
+	Bat_Wing_WingL2 = 0,
+	Bat_Wing_WingR = 0,
+	Bat_Wing_WingR2 = 0,
+	Ghost_Ghost_root = 0,
+	GrimReaper_Robe_root = 0,
+	GrimReaper_Robedark_neck = 0,
+	PumpkinPup_Leaf_neck = 0,
+	PumpkinPup_Pumpkin_neck = 0,
+	PumpkinPup_Stem_Tail = 0,
+	PurpleTarantula_Fur_Abdomen = 0,
+	PurpleTarantula_Fur_root = 0,
+	PurpleTarantula_Furdark_neck = 0,
+	PurpleTarantula_Orange_Abdomen = 0,
+	TombstoneCrawler_Stone_root = 0,
+	ZombieBear_Furdark_neck = 0,
 	ToadstoolFrog_Cap_neck = 113676246756247, -- (re-upload: QM's Blockbench edit, Oct 15)
 	ToadstoolFrog_Gill_neck = 118811291987440, -- (re-upload: QM's Blockbench edit, Oct 15)
 	ToadstoolFrog_Spot_neck = 101087756608521, -- (re-upload: QM's Blockbench edit, Oct 15)

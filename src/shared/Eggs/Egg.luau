@@ -68,6 +68,18 @@ local KINDS = {
 	CrimsonScorpion = { data = require(script.Parent.CrimsonScorpionEggModel), center = 1.6 },
 	IvorySpider = { data = require(script.Parent.IvorySpiderEggModel), center = 1.6 },
 	BlackWidow = { data = require(script.Parent.BlackWidowEggModel), center = 1.6 },
+	-- The Halloween world's (tools/halloween_eggs.py)
+	BlackCat = { data = require(script.Parent.BlackCatEggModel), center = 1.6 },
+	Bat = { data = require(script.Parent.BatEggModel), center = 1.6 },
+	PumpkinPup = { data = require(script.Parent.PumpkinPupEggModel), center = 1.6 },
+	PurpleTarantula = { data = require(script.Parent.PurpleTarantulaEggModel), center = 1.6 },
+	Werewolf = { data = require(script.Parent.WerewolfEggModel), center = 1.6 },
+	Ghost = { data = require(script.Parent.GhostEggModel), center = 1.6 },
+	SkeletonDog = { data = require(script.Parent.SkeletonDogEggModel), center = 1.6 },
+	TombstoneCrawler = { data = require(script.Parent.TombstoneCrawlerEggModel), center = 1.6 },
+	ZombieBear = { data = require(script.Parent.ZombieBearEggModel), center = 1.6 },
+	WispWolf = { data = require(script.Parent.WispWolfEggModel), center = 1.6 },
+	GrimReaper = { data = require(script.Parent.GrimReaperEggModel), center = 1.6 },
 	-- World 3's Garden (tools/garden_eggs.py)
 	Ladybug = { data = require(script.Parent.LadybugEggModel), center = 1.6 },
 	Bumblebee = { data = require(script.Parent.BumblebeeEggModel), center = 1.6 },

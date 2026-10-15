@@ -899,4 +899,69 @@ return {
 		{ "Horn", 236, 36, 72 }, -- cherry horn and brows
 		parts = { HoofFL = "Hoof", HoofFR = "Hoof", HoofHL = "Hoof", HoofHR = "Hoof" }, -- (cherry like the horn)
 	},
+	-- The Halloween world's (tools/halloween_*.py; glows, eyes and noses stay)
+	BlackCat = {
+		{ "Body", 44, 40, 54 }, -- fur
+		{ "Belly", 70, 64, 86 }, -- furlight
+		{ "Accent", 150, 70, 220 }, -- collar
+		{ "Accent", 255, 150, 30 }, -- bell
+	},
+	Bat = {
+		{ "Body", 110, 60, 150 }, -- fur
+		{ "Body", 66, 34, 96 }, -- furdark
+		{ "Marking", 52, 28, 76 }, -- wing
+		{ "Horn", 252, 250, 244 }, -- fang
+	},
+	PumpkinPup = {
+		{ "Body", 196, 132, 78 }, -- fur
+		{ "Marking", 255, 136, 24 }, -- pumpkin
+		{ "Accent", 70, 150, 50 }, -- stem
+		{ "Accent", 110, 196, 60 }, -- leaf
+		{ "Hoof", 150, 92, 50 }, -- furdark
+	},
+	PurpleTarantula = {
+		{ "Body", 124, 58, 190 }, -- fur
+		{ "Body", 82, 34, 130 }, -- furdark
+		{ "Marking", 255, 140, 30 }, -- orange
+	},
+	Werewolf = {
+		{ "Body", 112, 122, 150 }, -- fur
+		{ "Belly", 170, 178, 200 }, -- furlight
+		{ "Marking", 74, 80, 106 }, -- furdark
+		{ "Accent", 140, 70, 200 }, -- shorts
+		{ "Horn", 252, 250, 244 }, -- fang
+	},
+	Ghost = {
+		{ "Body", 220, 255, 246 }, -- ghost
+		{ "Body", 150, 226, 214 }, -- ghostdark
+	},
+	SkeletonDog = {
+		{ "Body", 250, 246, 228 }, -- bone
+		{ "Body", 206, 198, 172 }, -- bonedark
+		{ "Accent", 40, 190, 190 }, -- collar
+	},
+	TombstoneCrawler = {
+		{ "Body", 170, 182, 190 }, -- stone
+		{ "Marking", 90, 200, 120 }, -- moss
+		{ "Accent", 60, 72, 86 }, -- plaque
+		{ "Hoof", 112, 124, 136 }, -- stonedark
+	},
+	ZombieBear = {
+		{ "Body", 120, 190, 110 }, -- fur
+		{ "Body", 84, 140, 80 }, -- furdark
+		{ "Belly", 200, 230, 180 }, -- muzzle
+		{ "Marking", 246, 240, 222 }, -- bandage
+		{ "Accent", 150, 80, 200 }, -- patch
+	},
+	WispWolf = {
+		{ "Body", 60, 170, 180 }, -- fur
+		{ "Belly", 150, 230, 226 }, -- snout
+		{ "Marking", 36, 116, 130 }, -- furdark
+	},
+	GrimReaper = {
+		{ "Body", 52, 46, 70 }, -- robe
+		{ "Body", 32, 28, 46 }, -- robedark
+		{ "Belly", 250, 246, 230 }, -- skull
+		{ "Accent", 120, 78, 50 }, -- wood
+	},
 }
