@@ -2045,7 +2045,7 @@ if Config.World == 3 then
 	end
 	trophies(1, 1000, { "GhostShip", "JollyRogerWyvern" }) -- the Pirate Cove's giga rares
 	trophies(2, 1000, { "RafflesiaBeast", "AncientTreant", "GiantRafflesia" }) -- the Garden's giga rares and its boss as a trophy pet
-	trophies(3, 1000, { "RockCandyDragon", "GumballGolem", "Gigacorn" }) -- Candyland's giga rares and its boss as a trophy pet
+	trophies(3, 1000, { "RockCandyDragon", "GumballGolem" }) -- Candyland's giga rares (no Gigacorn trophy: QM, Oct 15, the boss isn't catchable; its stats stay for saved ones)
 	trophies(4, 1000, { "ReefTitan", "RoyalCnidarian" }) -- Cnidaria's giga rare and its boss as a trophy pet (no Abyssal Dragon: scrapped, QM Oct 15; its stats, egg and headshot stay for saved ones)
 	-- Each biome's boss.
 	Config.Boss.ByBiome = {
