@@ -619,6 +619,7 @@ local function spawnStarter()
 	starter.merged = player:GetAttribute("RideMerged") or 1
 	starter.fuse = player:GetAttribute("RideFuse") -- a hybrid (Shared/Fusion): its donor's colours and size
 	starter.tier = player:GetAttribute("RideTier") -- (its saved size tier: Fusion.tier)
+	starter.auto = player:GetAttribute("RideAuto") -- (its kept automatic ability: Fusion.autoAbility)
 	local stats = player:GetAttribute("RideStats") -- (and the best of both pets' Speed, Stamina)
 	starter.stats = stats and { Speed = stats.X, Stamina = stats.Y }
 	vfx.Fusion.paint(starter.animal.model, starter.kind, starter.fuse)
@@ -842,6 +843,7 @@ startRide = function(model, at)
 		end
 		mount = fromHerd
 		mount.popping, mount.hop, mount.dodge, mount.merged, mount.fuse, mount.tier = nil, 0, 0, nil, nil, nil
+		mount.auto = nil
 		mount.swerve, mount.swerveTo, mount.swerveV, mount.swerveSide = 0, 0, 0, nil
 		mount.animal:setScale(1)
 		spot = Vector3.new(mount.x, 0, mount.z)
@@ -853,6 +855,7 @@ startRide = function(model, at)
 		end
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
 		mount.merged, mount.fuse, mount.stats, mount.tier = fromPen.merged, fromPen.fuse, fromPen.stats, fromPen.tier
+		mount.auto = fromPen.auto -- (its kept automatic ability: Fusion.autoAbility)
 		vfx.Fusion.paint(mount.animal.model, mount.kind, mount.fuse)
 		vfx.Skins.apply(mount.animal, player:GetAttribute("Rebirths"), player:GetAttribute("PassGiantPets"))
 		mount.own = true -- your own pet: no egg for bringing it home (it stays yours once let go and lassoed back)
@@ -1537,7 +1540,7 @@ local function putInPool(entity)
 	entity.animal:setScale(1)
 	if entity.fuse then -- a hybrid you let go: back to its own colours for the stampede
 		vfx.Fusion.paint(entity.animal.model, entity.kind, nil)
-		entity.fuse, entity.stats = nil, nil
+		entity.fuse, entity.stats, entity.auto = nil, nil, nil
 	end
 	entity.hop, entity.popping, entity.lift = 0, nil, nil
 	entity.ability, entity.frostLeft, entity.fall, entity.scaredOffBy = nil, nil, nil, nil
@@ -2414,8 +2417,9 @@ end
 function vfx.abilityOf(entity)
 	if not Config.AbilitiesOn then
 		-- (abilities off for now: QM, Oct 10; but the AutoAbilities pets' go off on their own)
-		local kind = entity and (if entity.fuse and Config.AutoAbilities[entity.fuse] then entity.fuse else entity.kind)
-		return kind and Config.AutoAbilities[kind] and Config.Abilities[kind] or nil
+		-- (a hybrid keeps one through all its fuses, the Loong's over the Robo Shark's: QM, Oct 15)
+		local kind = entity and vfx.Fusion.autoAbility(entity.auto, entity.kind, entity.fuse)
+		return kind and Config.Abilities[kind] or nil
 	end
 	return entity and (entity.fuse and Config.Abilities[entity.fuse] or Config.Abilities[entity.kind])
 end

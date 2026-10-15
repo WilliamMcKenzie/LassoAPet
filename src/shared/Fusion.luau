@@ -95,6 +95,22 @@ function Fusion.combine(a, aFuse, b, bFuse)
 	return a, bFuse or b, true
 end
 
+-- The automatic ability a hybrid keeps through every fuse (QM, Oct 15: the Loong's and the Robo
+-- Shark's, Config.AutoAbilities, "always preserved through the lineage"; both: the Loong's): from
+-- any of the kinds and saved abilities given (nil ones skipped). nil if none of them has one.
+function Fusion.autoAbility(...)
+	local found
+	for i = 1, select("#", ...) do
+		local kind = select(i, ...)
+		if kind == "Loong" then
+			return "Loong"
+		elseif kind and Config.AutoAbilities[kind] then
+			found = kind
+		end
+	end
+	return found
+end
+
 local ONE = { Speed = 1, Stamina = 1 }
 
 -- A pet's Speed and Stamina (Config.AnimalStats, 1x if not listed). A hybrid's are
