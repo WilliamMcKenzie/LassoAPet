@@ -2103,24 +2103,26 @@ if Config.World == 4 then
 	desert.Patches.Stone = { rgb(104, 154, 186), rgb(96, 146, 178) } -- (its sandstone, a stud up: darker flagstone)
 	Config.Biomes[2] = desert
 	-- Three biomes here (QM, Oct 15): Haunted Hills (the Meadow), Soul Valley (the Desert), then
-	-- the Pumpkin Patch, laid on the Tundra's stretch as a meadow (no snow, no haze), its
-	-- stampede the Tundra's for now, and endless: the course is cut at its end and the
-	-- Patch laid again and again past it (Config.Endless, Client/Endless). Its look:
-	-- tools/halloween_patch.luau (the orange Halloween props in place of its pines and rocks).
+	-- the Pumpkin Patch, endless: the course is cut where Soul Valley ends and past it the
+	-- Patch's chunks are laid one after another, picked at random ("like roadwork": Config.Endless
+	-- Chunks, Client/Endless; the chunks tools/pumpkin_chunks.luau builds in
+	-- ReplicatedStorage.PumpkinPatchChunks, dressed with the harvest and pumpkin props). Its
+	-- stampede the Tundra's for now. Its colours are the chunks' own (and the pens' tiles').
 	meadow.Name, desert.Name = "Haunted Hills", "Soul Valley"
 	local patch = table.clone(Config.Biomes[3])
 	patch.Name = "Pumpkin Patch"
-	patch.GroundColors = { rgb(70, 108, 58), rgb(64, 100, 52) } -- dark autumn grass
+	patch.GroundColors = { rgb(214, 184, 134), rgb(204, 174, 124) } -- tan
 	patch.WallColors = meadow.WallColors
 	patch.CapColor = rgb(240, 140, 40) -- pumpkin orange tops
 	patch.Patches = {
-		Grass = { rgb(58, 90, 48), rgb(52, 84, 44) }, -- (its cold grass: darker grass)
-		Ice = { rgb(104, 72, 52), rgb(96, 66, 48) }, -- (its ice ponds, a stud down: tilled soil)
+		Grass = { rgb(136, 156, 104), rgb(126, 146, 96) },
+		Dirt = { rgb(160, 112, 74), rgb(148, 102, 66) },
 	}
 	patch.Haze, patch.Depths, patch.Sky = nil, nil, nil
+	patch.Length = 256 -- (one chunk: past the cut it's all chunks)
 	Config.Biomes = { meadow, desert, patch }
 	Config.CourseLength = meadow.Length + desert.Length + patch.Length
-	Config.Endless = { Cut = -Config.CourseLength, Length = patch.Length } -- (5904 and 1920: whole 16s)
+	Config.Endless = { Cut = -(meadow.Length + desert.Length), Length = 256, Chunks = "PumpkinPatchChunks" } -- (3984: a whole 16)
 	Config.BiomeNames[4] = { "Haunted Hills", "Soul Valley", "Pumpkin Patch" }
 	-- The quests: World 1's, to this world's three biomes, and only animals that run here.
 	Config.Quests = {
