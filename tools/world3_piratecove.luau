@@ -13,7 +13,7 @@ local KINDS = { -- [kind] = { name, top, part colour, checker colour (nil: plain
 	[0] = { "Water", -1, rgb(53, 143, 192), nil },
 	[1] = { "WetSand", 0, rgb(204, 158, 102), rgb(190, 145, 92) },
 	[2] = { "Ground", 2, rgb(238, 202, 142), rgb(228, 190, 128) },
-	[3] = { "Planks", 2, rgb(150, 98, 56), rgb(132, 84, 46) },
+	[3] = { "Planks", 3, rgb(150, 98, 56), rgb(132, 84, 46) },
 	[4] = { "DampSand", 1, rgb(222, 180, 120), rgb(208, 167, 109) },
 }
 local WALL, WALL_CHECKER, CAP = rgb(140, 98, 62), rgb(128, 88, 55), rgb(104, 70, 44)

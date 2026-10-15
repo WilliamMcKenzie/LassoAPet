@@ -263,7 +263,7 @@ def pirate_cove():
         ("Water", -1, (53, 143, 192), None),  # QM's darker tile (rbxassetid://113940500836253)
         ("WetSand", 0, (204, 158, 102), (190, 145, 92)),  # (QM in Studio, Oct 14: stamina-loop d803ac1; was 206, 172, 110 / 194, 160, 98)
         ("Ground", 2, (238, 202, 142), (228, 190, 128)),  # light sand, as the base's: a stud above the damp sand (QM, Oct 14: stamina-loop b7441d8; was 1)
-        ("Planks", 2, (150, 98, 56), (132, 84, 46)),  # boardwalks: the Crystal Cavern's (tools/world2_cavern.py), 4-stud boards across the course, alternating, top 2 (QM, Oct 14; was 132, 96, 66 plain, top 1)
+        ("Planks", 3, (150, 98, 56), (132, 84, 46)),  # boardwalks: the Crystal Cavern's (tools/world2_cavern.py), 4-stud boards across the course, alternating, top 3 (QM in Studio, Oct 15: a stud higher; was 2, and 132, 96, 66 plain at 1)
         ("DampSand", 1, (222, 180, 120), (208, 167, 109)),  # (QM, Oct 14: stamina-loop 97c9aa0) between the sand and the wet sand, at the sand's height
     ])
     q = b.quasi(7, 13, (517, 233))
