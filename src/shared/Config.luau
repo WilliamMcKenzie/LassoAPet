@@ -2091,15 +2091,16 @@ if Config.World == 4 then
 	meadow.WallColors = { rgb(63, 38, 77), rgb(74, 44, 87) } -- dark purple walls (QM, Oct 15)
 	meadow.CapColor = rgb(240, 128, 200) -- pink wall tops (QM, Oct 15)
 	Config.Biomes[1] = meadow
-	-- The Desert in the same scheme (QM, Oct 15): sand as the base's ground, its dry grass as
-	-- the darker purple, its sandstone as the lilac paths, the same walls and tops.
+	-- The Desert as a teal night graveyard (QM, Oct 15, his picture: was the base's purples):
+	-- pale blue flagstones, slate-blue patches (bluer than his picture: the Lighting's warm Ambient pinks them), dark teal walls with teal tops. Its cacti
+	-- and rocks are the Halloween props in teal (tools/halloween_desert.luau).
 	local desert = table.clone(Config.Biomes[2])
-	desert.GroundColors = meadow.GroundColors
-	desert.WallColors = meadow.WallColors
-	desert.CapColor = meadow.CapColor
+	desert.GroundColors = { rgb(126, 180, 210), rgb(116, 170, 202) }
+	desert.WallColors = { rgb(42, 88, 104), rgb(50, 100, 116) }
+	desert.CapColor = rgb(86, 172, 182)
 	desert.Patches = table.clone(desert.Patches or {})
-	desert.Patches.Grass = meadow.Patches.Grass
-	desert.Patches.Stone = meadow.Patches.Dirt
+	desert.Patches.Grass = { rgb(86, 122, 150), rgb(78, 114, 142) } -- (its dry grass: slate blue)
+	desert.Patches.Stone = { rgb(104, 154, 186), rgb(96, 146, 178) } -- (its sandstone, a stud up: darker flagstone)
 	Config.Biomes[2] = desert
 	Config.Sky = "Default" -- Roblox's own sky with its clouds and stars (QM, Oct 15: World.server)
 end

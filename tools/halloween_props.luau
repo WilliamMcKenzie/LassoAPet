@@ -68,6 +68,7 @@ for item, pieces in ITEMS do
 			continue
 		end
 		part.Name = piece[1]
+		part:SetAttribute("Piece", i) -- (its place in pieces/colours.txt: the names repeat)
 		part.Anchored = true
 		part.Position = Vector3.zero -- (the mesh's own origin: the pieces share it)
 		part.Color = piece[3]

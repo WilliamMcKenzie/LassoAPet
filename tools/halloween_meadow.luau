@@ -1,4 +1,4 @@
--- The Halloween world's Meadow and Desert recoloured to match its base (QM, Oct 15): the rocks in
+-- The Halloween world's Meadow recoloured to match its base (QM, Oct 15): the rocks in
 -- QM's purple greys (as he set the base's: the lighter piece 147,117,155, the darker
 -- 128,102,135), and the ground, walls and wall tops as Config's World 4 block paints them
 -- in game (so Studio shows it too). Run in Studio (Edit) on the Halloween Place; re-running is fine.
@@ -16,7 +16,7 @@ local C = {
 local CAP = rgb(240, 128, 200)
 local W = workspace.World
 local function inMeadow(p)
-	return p.Position.Z < 0 and p.Position.Z > -(2168 + 1816) -- (the Meadow and the Desert)
+	return p.Position.Z < 0 and p.Position.Z > -2168 -- (the Desert: tools/halloween_desert.luau)
 end
 local function paint(p, c)
 	p.Color = c[1]
