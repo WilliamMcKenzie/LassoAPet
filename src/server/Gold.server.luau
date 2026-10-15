@@ -52,8 +52,16 @@ local function key(player)
 	return "u" .. player.UserId
 end
 
+-- The Halloween world's gems and the boss time bought with them (Config.Gems, QM Oct 15), as
+-- `gems4` and `bossTime4` (only there: the other worlds keep them as they found them).
+local GEMS = Config.Gems ~= nil
+
 local function load(player)
 	player:SetAttribute("Gold", 0)
+	if GEMS then
+		player:SetAttribute("Gems", 0)
+		player:SetAttribute("BossTime", 0)
+	end
 	player:SetAttribute("GatesBroken", 1) -- (the last biome whose barrier you've ridden through: Gate.client; 1 = none yet)
 	if not store then
 		return
@@ -75,6 +83,10 @@ local function load(player)
 				player:SetAttribute("FinishTrail", if typeof(value) == "table" then tonumber(value.trail) else nil) -- (the finish line's trails: Config.FinishTrails, shared by every world)
 				player:SetAttribute("Rebirths", if typeof(value) == "table" then tonumber(value.rebirths) else nil) -- (Config.Rebirth, shared by every world)
 				player:SetAttribute("TrailsOwned", if typeof(value) == "table" then tonumber(value.trails) else nil) -- (Config.TrailBars, shared by every world)
+				if GEMS and typeof(value) == "table" then
+					player:SetAttribute("Gems", (player:GetAttribute("Gems") or 0) + (tonumber(value.gems4) or 0))
+					player:SetAttribute("BossTime", tonumber(value.bossTime4) or 0)
+				end
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
 				if typeof(value) == "table" and value.v1new then -- (Analytics V1: a new World 1 player since V1)
 					player:SetAttribute("V1New", true)
@@ -111,7 +123,8 @@ local function save(player, onlyIfChanged)
 	local trail = player:GetAttribute("FinishTrail")
 	local rebirths = player:GetAttribute("Rebirths")
 	local trails = player:GetAttribute("TrailsOwned")
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths) .. "/" .. tostring(trails)
+	local gems, bossTime = player:GetAttribute("Gems"), player:GetAttribute("BossTime")
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths) .. "/" .. tostring(trails) .. "/" .. tostring(gems) .. "/" .. tostring(bossTime)
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
@@ -122,6 +135,9 @@ local function save(player, onlyIfChanged)
 		record.trail = trail
 		record.rebirths = rebirths
 		record.trails = trails
+		if GEMS then
+			record.gems4, record.bossTime4 = gems, bossTime
+		end
 		record.v1new = player:GetAttribute("V1New") or record.v1new
 		record.lastWorld = Config.World -- (where you were last: a join from the home page goes back there)
 		record[PLAYED] = math.floor(playedNow(player))
@@ -232,6 +248,27 @@ buyTrail.OnServerInvoke = function(player)
 end
 buyTrail.Parent = ReplicatedStorage
 
+-- BuyBossTime (Config.Gems, the Halloween world; QM Oct 15): the "+5s TIME" bar, the next
+-- BossStep seconds on the boss timer for its gems.
+local buyBossTime = Instance.new("RemoteFunction")
+buyBossTime.Name = "BuyBossTime"
+buyBossTime.OnServerInvoke = function(player)
+	if not GEMS or not loaded[player] then
+		return false
+	end
+	local bossTime = player:GetAttribute("BossTime") or 0
+	local price = Config.bossTimePrice(bossTime)
+	local gems = player:GetAttribute("Gems") or 0
+	if gems < price then
+		return false
+	end
+	player:SetAttribute("Gems", gems - price)
+	player:SetAttribute("BossTime", bossTime + 1)
+	save(player)
+	return true
+end
+buyBossTime.Parent = ReplicatedStorage
+
 -- "/reset" (Hatchery): gold, rebirths, trails, the worlds bought and every world's
 -- barriers and played time gone, saved at once.
 local hardReset = Instance.new("BindableEvent")
@@ -241,6 +278,10 @@ hardReset.Event:Connect(function(player)
 	player:SetAttribute("GatesBroken", 1)
 	for _, name in { "Rebirths", "FinishTrail", "TrailsOwned" } do
 		player:SetAttribute(name, nil)
+	end
+	if GEMS then
+		player:SetAttribute("Gems", 0)
+		player:SetAttribute("BossTime", 0)
 	end
 	for world in Config.Places do
 		player:SetAttribute("OwnsWorld" .. world, nil)

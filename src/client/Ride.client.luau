@@ -232,7 +232,7 @@ end
 -- How long the Hold bar lasts: Config.RideSeconds, whatever you're riding (QM, Oct 10:
 -- no more stamina).
 local function holdTime(_entity)
-	return vfx.tutorialRide.bossSeconds or Config.RideSeconds -- (the tutorial's: a short one, once it's let go)
+	return vfx.tutorialRide.bossSeconds or Config.bossSeconds(Players.LocalPlayer) -- (the tutorial's: a short one, once it's let go; with Gems, the time bought: Halloween)
 end
 local streams = {}
 -- A stream from spawnZ to endZ of the herd's kinds; name labels its line in the Output.

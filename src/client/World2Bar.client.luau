@@ -12,12 +12,17 @@
 -- world you're in (World 2, then World 3: Config.WorldPrices), and once they're all yours to the
 -- next trail (Config.TrailBars: Grey ... Rainbow; Gold.server's BuyTrail). The label's on QM's
 -- art with its "WORLD 2" painted out (BarFill.png, BarEmpty.png).
+-- In the Halloween world (Config.Gems, QM Oct 15) it's the "+5s TIME" bar instead: QM's art
+-- (gems/BossTimeBar.png on BossTimeBarDisabled.png) filling as your gems come up to the next
+-- 5 seconds' price, the gems over it in their yellow; tapped when full, it buys them
+-- (Gold.server's BuyBossTime): BossStep more seconds on every ride's boss timer.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local REBIRTH = Config.World ~= 1 and Config.RebirthOn -- (off: no bar outside World 1, QM Oct 15)
+local GEMS = Config.Gems ~= nil -- (the Halloween world's "+5s TIME" bar)
 local player = Players.LocalPlayer
 local Hud = require(script.Parent.Hud)
 local TapHand = require(script.Parent.TapHand)
@@ -26,8 +31,8 @@ local Focus = require(script.Parent.Focus)
 local WorldUnlock = require(script.Parent.WorldUnlock)
 
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
-local FULL = if REBIRTH then "rbxassetid://73306793972865" else "rbxassetid://100062651101544" -- assets/ui/RebirthBar.png, BarFill.png (964x103; QM's World2Bar.png, its label painted out)
-local EMPTY = if REBIRTH then "rbxassetid://88891851849945" else "rbxassetid://105502035787337" -- assets/ui/RebirthBarEmpty.png, BarEmpty.png
+local FULL = if GEMS then "rbxassetid://111546355637207" elseif REBIRTH then "rbxassetid://73306793972865" else "rbxassetid://100062651101544" -- assets/ui/RebirthBar.png, BarFill.png (964x103; QM's World2Bar.png, its label painted out)
+local EMPTY = if GEMS then "rbxassetid://106586945972314" elseif REBIRTH then "rbxassetid://88891851849945" else "rbxassetid://105502035787337" -- assets/ui/RebirthBarEmpty.png, BarEmpty.png
 -- QM's own art for a world's bar, its name on it (no label over it): [world] = { full, empty }
 local WORLD_ART = {
 	[2] = { "rbxassetid://108726643390976", "rbxassetid://108345016053649" }, -- World2Bar.png, World2BarEmpty.png
@@ -40,6 +45,9 @@ local ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
 local NEAR = 30 -- studs from the gate: the Worlds menu's (no trail closer in)
 -- What the bar's for now: { price, label, world or trail }, or nil when there's nothing left.
 local function goal()
+	if GEMS then
+		return { price = Config.bossTimePrice(player:GetAttribute("BossTime") or 0), label = "", gems = true }
+	end
 	if REBIRTH then
 		local p = Config.Rebirth.Prices[(player:GetAttribute("Rebirths") or 0) + 1]
 		return p and { price = p, label = "" }
@@ -106,7 +114,7 @@ text.Name = "Gold"
 text.BackgroundTransparency = 1
 text.FontFace = MONTSERRAT
 text.TextScaled = true
-text.TextColor3 = Color3.fromHex("00FF09") -- (the cash green, as the HUD's gold: QM, Oct 13)
+text.TextColor3 = if GEMS then Config.GemYellow else Color3.fromHex("00FF09") -- (the cash green, as the HUD's gold: QM, Oct 13; gems' yellow)
 text.TextXAlignment = Enum.TextXAlignment.Left
 text.AnchorPoint = Vector2.new(0, 0.5)
 text.Position = UDim2.fromScale(0.145, 0.5)
@@ -144,14 +152,15 @@ hand.Visible = false
 hand.Parent = bar
 gui.Parent = player:WaitForChild("PlayerGui")
 
+local CURRENCY = if GEMS then "Gems" else "Gold"
 local function full()
-	return price() ~= nil and (player:GetAttribute("Gold") or 0) >= price()
+	return price() ~= nil and (player:GetAttribute(CURRENCY) or 0) >= price()
 end
 local function showGold()
-	local gold = player:GetAttribute("Gold") or 0
+	local gold = player:GetAttribute(CURRENCY) or 0
 	local p = price() or math.huge
 	fill.Size = UDim2.fromScale(math.clamp(gold / p, 0, 1), 1)
-	text.Text = "$" .. Config.short(gold) .. "/" .. Config.short(p)
+	text.Text = (if GEMS then "" else "$") .. Config.short(gold) .. "/" .. Config.short(p)
 	local g = goal()
 	local art = g and (if g.world then WORLD_ART[g.world] elseif g.trail then TRAIL_ART else nil)
 	label.Text = if g and g.trail then g.label else ""
@@ -159,7 +168,7 @@ local function showGold()
 	bar.Image = if art then art[2] else EMPTY
 	hand.Visible = full()
 end
-for _, name in { "Gold", "Rebirths", "OwnsWorld2", "OwnsWorld3", "TrailsOwned", "FinishTrail", "RainbowTrail" } do
+for _, name in { "Gold", "Gems", "BossTime", "Rebirths", "OwnsWorld2", "OwnsWorld3", "TrailsOwned", "FinishTrail", "RainbowTrail" } do
 	player:GetAttributeChangedSignal(name):Connect(showGold)
 end
 showGold()
@@ -171,6 +180,8 @@ bar.Activated:Connect(function()
 	local g = goal()
 	if not g then
 		return
+	elseif g.gems then
+		pcall(ReplicatedStorage.BuyBossTime.InvokeServer, ReplicatedStorage.BuyBossTime)
 	elseif g.world then
 		WorldUnlock.buy(g.world)
 	elseif g.trail then
@@ -227,7 +238,7 @@ RunService.RenderStepped:Connect(function()
 	local busy = Hud.isRiding() or player:GetAttribute("Cutscene") or player:GetAttribute("Tutorial")
 	local menu = player.PlayerGui:FindFirstChild("WorldsMenu")
 	gui.Enabled = price() ~= nil and not busy and not (menu and menu.Enabled) -- (not under the Worlds menu; in every world: QM, Oct 15)
-	if REBIRTH then
+	if REBIRTH or GEMS then
 		return
 	end
 	local guide = owned and player:GetAttribute("GuideTravel") and not busy and gate ~= nil

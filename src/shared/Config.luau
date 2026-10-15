@@ -2080,8 +2080,28 @@ end
 -- until then each herd runs Fish (World 2's way) and each boss is World 2's in that slot.
 -- The Halloween world's base (QM, Oct 15: orange grass, dark stone paths, like the Meadow's;
 -- tools/halloween_floor.luau): its first biome's colours, which paint the base floor by part name.
+-- Gems (QM, Oct 15): the Halloween world's own currency, nothing anywhere else. There your
+-- pets earn gems instead of cash (their PetIncome x Rate a second), and the ride's boss timer
+-- starts at BossStart seconds, BossStep more for each "+5s TIME" bought with gems (the top
+-- bar: World2Bar.client; Gold.server's BuyBossTime), the nth (from 0) for Price x Growth^n.
+-- nil in the other worlds.
+Config.Gems = nil
+-- The ride's boss timer, in seconds (Ride's Hold bar): RideSeconds, or with Gems its start
+-- and the time bought.
+function Config.bossSeconds(player)
+	if not Config.Gems then
+		return Config.RideSeconds
+	end
+	return Config.Gems.BossStart + Config.Gems.BossStep * (player and player:GetAttribute("BossTime") or 0)
+end
+function Config.bossTimePrice(bought)
+	return math.floor(Config.Gems.Price * Config.Gems.Growth ^ (bought or 0) + 0.5)
+end
+Config.GemYellow = Color3.fromHex("FFFC2E") -- (gems' yellow, where cash is green: QM, Oct 15)
+
 if Config.World == 4 then
 	local rgb = Color3.fromRGB
+	Config.Gems = { BossStart = 5, BossStep = 5, Price = 100, Growth = 1.6, Rate = 1 }
 	local meadow = table.clone(Config.Biomes[1])
 	meadow.GroundColors = { rgb(121, 65, 137), rgb(113, 61, 130) } -- (QM, Oct 15: purple, set in Play; was orange 240,136,36)
 	meadow.Patches = table.clone(meadow.Patches or {})

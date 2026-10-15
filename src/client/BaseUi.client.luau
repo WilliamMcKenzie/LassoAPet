@@ -36,6 +36,7 @@ local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 	merge = { id = "rbxassetid://126251339270486", size = Vector2.new(267, 113) }, -- Merge.png
 	invite = { id = "rbxassetid://72356826090260", size = Vector2.new(267, 113) }, -- Invite.png (QM, Oct 12)
 	cash = { id = "rbxassetid://76663783463176", size = Vector2.new(256, 256) }, -- Cash.png
+	crystal = { id = "rbxassetid://128722118314123", size = Vector2.new(256, 256) }, -- gems/Crystal.png (QM's, Oct 15: the Halloween world's gems)
 }
 -- assets/ui/quests/*.png (QM, Oct 11). "" till Studio uploads them: plain boxes meanwhile.
 local QUEST_ART = {
@@ -259,6 +260,15 @@ local function showCounters()
 end
 player:GetAttributeChangedSignal("Gold"):Connect(showCounters)
 showCounters()
+-- The Halloween world's gems (Config.Gems, QM Oct 15), over the cash, in gems' yellow.
+if Config.Gems then
+	local gemText = counter(0, ART.crystal, Config.GemYellow)
+	local function showGems()
+		gemText.Text = (Hud.money(player:GetAttribute("Gems") or 0):gsub("%$", ""))
+	end
+	player:GetAttributeChangedSignal("Gems"):Connect(showGems)
+	showGems()
+end
 
 -- Top right: Quests. Laid out in the art's own pixels, scaled down to QUESTS_WIDTH.
 local claimQuest = ReplicatedStorage:WaitForChild("ClaimQuest")

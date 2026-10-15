@@ -1728,7 +1728,8 @@ remote("ClaimAway", function(player)
 	if not profile or (profile.awayGold or 0) <= 0 then
 		return
 	end
-	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + profile.awayGold)
+	local currency = if Config.Gems then "Gems" else "Gold" -- (the Halloween world's pets earn gems: Config.Gems)
+	player:SetAttribute(currency, (player:GetAttribute(currency) or 0) + profile.awayGold * (if Config.Gems then Config.Gems.Rate else 1))
 	profile.awayGold = nil
 	player:SetAttribute("AwayGold", nil)
 end)
@@ -1876,7 +1877,12 @@ task.spawn(function()
 		task.wait(1)
 		for player, profile in profiles do
 			local earned = if player:GetAttribute("Tutorial") then 0 else (income(profile) + (otherIncome[player] or 0)) * goldX(player) -- (nothing till the tutorial's done)
-			if earned > 0 and player.Parent then
+			if earned > 0 and player.Parent and Config.Gems then
+				-- (the Halloween world: your pets earn gems, not cash: Config.Gems, QM Oct 15)
+				local gems = earned * Config.Gems.Rate
+				player:SetAttribute("Gems", (player:GetAttribute("Gems") or 0) + gems)
+				paid:FireClient(player, gems) -- (the HUD shows it by the gem counter)
+			elseif earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
 				Telemetry.gold(player, "earned", earned)
 				paid:FireClient(player, earned) -- (the HUD shows it by the gold counter)
