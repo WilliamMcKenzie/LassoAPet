@@ -361,36 +361,61 @@ def garden():
     return b, walls, ladder
 
 
+def candy_props():
+    """The Candyland props as placed (tools/world3_props.luau): (name, x, z, footprint radius)."""
+    out = []
+    for line in open(os.path.join(HERE, "world3_props.luau")):
+        if line.strip().startswith('{ "Candyland"'):
+            f = [t.strip().strip('"') for t in line.strip().strip("{},").split(",")]
+            out.append((f[1], float(f[2]), float(f[4]), max(float(f[7]), float(f[8])) / 2))
+    return out
+
+
 def candyland():
-    """Melted chocolate sunk a stud, deep pink frosting, vanilla cream a stud up, mint plateaus two up.
-    8 angles (rosettes). A candy-cane path, red and white bands across it, a stud up all the
-    way down the middle, cream either side."""
+    """Vanilla cream all over, flat (QM, Oct 15: his reference picture), with a small patch of pink
+    frosting or mint under each cluster of candy props, ragged at the edge; the candy cane, red and
+    white bands across it, down the middle. Everything at top 1, so the props stand level."""
     b = Biome(2, [
-        ("Chocolate", -1, rgb("6E3E28"), rgb("623622")),
-        ("Ground", 0, rgb("F0609E"), rgb("E25292")),  # deep pink frosting
-        ("Cream", 1, rgb("FFECC8"), rgb("F8E0B8")),  # warm vanilla
-        ("Mint", 2, rgb("82ECC4"), rgb("74E0B6")),
+        ("Cream", 1, rgb("FFECC8"), rgb("F8E0B8")),  # the tan ground (QM, Oct 15; was the frosting)
+        ("Ground", 1, rgb("F0609E"), rgb("E25292")),  # pink frosting patches (was the base, top 0)
+        ("Mint", 1, rgb("82ECC4"), rgb("74E0B6")),  # mint patches (was plateaus, top 2)
         ("Stripe", 1, rgb("F03C50"), rgb("DC3446")),  # the candy cane's red bands
         ("Icing", 1, rgb("FFF5F5"), rgb("F5E8EA")),  # and its white ones
     ])
-    q = b.quasi(8, 15, (743, 151))
-    b.band(q, [0.16, 0.52, 0.9])  # (fewer, bigger mint plateaus)
-    seam(b, 5, 1)
-    b.rung = settle(b.rung, b.inside)
-    # The candy cane: four tiles wide down the middle the whole way, bands two tiles deep.
     mid = NX // 2
     cane = np.zeros_like(b.inside)
     cane[mid - 2:mid + 2, 6:b.nz - 6] = True
-    b.rung[cane] = 4
+    # Clusters: props within 24 studs of each other; a patch round each, a tile past its props.
+    props = [p for p in candy_props() if b.z1 < p[2] <= b.z0]
+    group = list(range(len(props)))
+
+    def root(k):
+        while group[k] != k:
+            k = group[k]
+        return k
+    for i in range(len(props)):
+        for j in range(i):
+            if math.hypot(props[i][1] - props[j][1], props[i][2] - props[j][2]) < 24:
+                group[root(i)] = root(j)
+    clusters = {}
+    for k, p in enumerate(props):
+        clusters.setdefault(root(k), []).append(p)
+    wobble = b.quasi(5, 3, (91, 37))  # (a ragged edge)
+    for members in clusters.values():
+        cx = sum(p[1] for p in members) / len(members)
+        cz = sum(p[2] for p in members) / len(members)
+        r = max(math.hypot(p[1] - cx, p[2] - cz) + p[3] for p in members) + CELL
+        mint = any(p[0] in ("Lollipop", "IceCream") for p in members) and not any(p[0] in ("Cupcake", "ChocolateBar") for p in members)
+        d = np.hypot(b.x - cx, b.z - cz)
+        patch = b.inside & ~cane & (d < r + (wobble - 0.5) * CELL) & (b.rung == 0)
+        b.rung[patch] = 2 if mint else 1
+    b.rung = despeck(b.rung, b.inside & ~cane)
+    b.rung[cane] = 3
     stripes = (np.arange(b.nz) // 2) % 2 == 0
-    b.rung[cane & stripes[None, :]] = 5
-    ladder = [0, 1, 2, 3, 3, 3]
-    step = raise_(np.asarray(ladder)[b.rung], b.inside, cane | (b.rung == 3))
-    b.rung = np.where(cane | (b.rung == 3), b.rung, step)
-    b.rung = despeck(b.rung, b.inside & ~cane, least=16, only=3)  # (mint: a few big plateaus, no small blocks)
-    check(b, ladder)
+    b.rung[cane & stripes[None, :]] = 4
+    check(b, [0, 1, 1, 0, 0])  # (patches only touch the cream or the cane)
     walls = dict(wall=[rgb("FFAAD2"), rgb("F59BC6")], cap=rgb("FFFFFF"), gate=rgb("8CF0DC"))  # frosting, icing top, mint gate
-    return b, walls, ladder
+    return b, walls, [0, 1, 1, 0, 0]
 
 
 def cnidaria():
