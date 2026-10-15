@@ -2831,9 +2831,9 @@ function vfx.breathBlast(active)
 	if active.t < cfg.FireFrom or active.t > cfg.FireTo then
 		return
 	end
-	if not active.flamed then -- (its fire starting: QM, Oct 15)
-		active.flamed = true
-		vfx.sounds.play("flame")
+	if active.t >= (active.flameAt or 0) then -- (a burst of flame sound every 0.3 s while it breathes: QM, Oct 15)
+		active.flameAt = active.t + 0.3
+		vfx.sounds.play("flame", 0.8)
 	end
 	local half = cfg.Width / 2
 	local function inPath(x, z, extra)
