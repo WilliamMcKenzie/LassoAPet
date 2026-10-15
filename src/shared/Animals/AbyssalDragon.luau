@@ -5,6 +5,9 @@
 -- Model from designs/cnidaria/AbyssalDragon.bbmodel (tools/sea_dragon.py), converted into AbyssalDragonModel.luau by
 -- tools/bbmodel_to_luau.py --zyx.
 
+-- SCRAPPED (QM, Oct 15): in no herd, egg, quest or shop. Kept only so pets already saved still load
+-- (Pen and Ride require every saved kind's module). Its design tool and .bbmodel are gone.
+
 local Horse = require(script.Parent.Horse)
 local AbyssalDragonModel = require(script.Parent.AbyssalDragonModel)
 
