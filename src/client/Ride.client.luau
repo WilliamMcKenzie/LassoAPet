@@ -3900,7 +3900,7 @@ vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, spee
 		rider.entity.animal:setSaddled(true)
 		rider.entity.dodge = 0
 		rider.kind = kind
-		if Config.trailColors(player) then -- the Rainbow Trail, or the finish line's (Config.FinishTrails)
+		if Config.AnimalTrails and Config.trailColors(player) then -- the Rainbow Trail, or the finish line's (Config.FinishTrails)
 			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width, Config.trailColors(player))
 		end
 		rider.shown = nil
@@ -4088,7 +4088,7 @@ end)
 -- you're riding, moved over when you swap mounts and gone when the ride ends.
 vfx.trail = { parts = {} }
 function vfx.updateTrail()
-	local colors = Config.trailColors(Players.LocalPlayer)
+	local colors = Config.AnimalTrails and Config.trailColors(Players.LocalPlayer)
 	local want = if mount and colors and mount.animal.model.PrimaryPart then mount else nil
 	if vfx.trail.entity == want and vfx.trail.colors == colors then
 		return

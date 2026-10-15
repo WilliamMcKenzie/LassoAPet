@@ -1403,6 +1403,8 @@ local RAINBOW = {
 -- Bought ones are saved as bits of "TrailsOwned", shared by every world. Your trail is the
 -- best one you own (the last in this list). Prices are guesses past World 3's 10m.
 local rgb = Color3.fromRGB
+-- (on your character only, Server/PlayerTrail: QM, Oct 15, not on what you ride any more)
+Config.AnimalTrails = false
 Config.TrailBars = {
 	{ Name = "Grey", Price = 25000000, Colors = { rgb(240, 240, 245), rgb(200, 200, 208), rgb(150, 150, 160), rgb(100, 100, 112) } },
 	{ Name = "Green", Price = 50000000, Colors = { rgb(180, 255, 160), rgb(100, 230, 90), rgb(40, 190, 60), rgb(20, 130, 40) } },
