@@ -4,6 +4,7 @@
 -- as the base's *Model.luau and its egg's have them); any colour not listed stays.
 -- Animals/Halloween<Base>.luau and their eggs (Eggs/Egg.luau) build from the base's data
 -- through HalloweenSkins.model; tools/halloween_giga.py renders them from the same lists.
+-- The Soul Valley boss (Bosses/GiantSoulHorse) is a skin too.
 -- How often they run: Config.HalloweenGiga.
 
 local SKINS = {
@@ -49,6 +50,16 @@ local SKINS = {
 		["00BEE7"] = "FF780A", ["E583FB"] = "96F03C", ["5636A8"] = "282034", ["8A8EB6"] = "5A4A78",
 		["B0F6FF"] = "FFC878", ["D2D6EC"] = "C8AAE6", ["686A96"] = "3C3250", ["3A2478"] = "1C1626",
 	},
+	-- The Soul Valley boss (QM, Oct 15: "a giant soul horse make it reskinned to be cooler"): an
+	-- obsidian war horse with soul fire for a mane and tail and glowing teal spikes, trim and hooves.
+	GiantSoulHorse = {
+		["223C34"] = "141A1E", ["182824"] = "141A1E", ["8490A2"] = "465264", ["70609C"] = "2AD6B4",
+		["464A2E"] = "3C1E56", ["50DCFF"] = "C8FFF0",
+	},
+}
+-- Parts whose names have any of `names` in them glow (Neon) in `color` (a skin's soul fire).
+local GLOW = {
+	GiantSoulHorse = { color = "3CFFD2", names = { "Spike", "Trim", "Mane", "Tail", "Hoof" } },
 }
 
 local HalloweenSkins = {}
@@ -75,16 +86,24 @@ function HalloweenSkins.model(kind, data)
 	local swap = SKINS[kind]
 	local out = table.clone(data)
 	out.parts = {}
+	local glow = GLOW[kind]
 	for i, part in data.parts do
 		local to = swap[hex(part.color)]
 		if to then
 			part = table.clone(part)
 			part.color = Color3.fromHex(to)
 		end
+		for _, name in if glow then glow.names else {} do
+			if string.find(part.name, name, 1, true) then
+				part = table.clone(part)
+				part.color, part.neon = Color3.fromHex(glow.color), true
+				break
+			end
+		end
 		out.parts[i] = part
 	end
 	return out
 end
 
-HalloweenSkins.SKINS = SKINS
+HalloweenSkins.SKINS, HalloweenSkins.GLOW = SKINS, GLOW
 return HalloweenSkins
