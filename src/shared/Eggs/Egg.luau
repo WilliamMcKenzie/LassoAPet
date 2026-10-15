@@ -110,6 +110,7 @@ local KINDS = {
 	GumdropFrog = { data = require(script.Parent.GumdropFrogEggModel), center = 1.6 },
 	GingerbreadMan = { data = require(script.Parent.GingerbreadManEggModel), center = 1.6 },
 	Creampuff = { data = require(script.Parent.CreampuffEggModel), center = 1.6 },
+	SwollFairy = { data = require(script.Parent.SwollFairyEggModel), center = 1.6 }, -- (scrapped Oct 15: kept only so saved eggs still hatch)
 	DesireTroll = { data = require(script.Parent.DesireTrollEggModel), center = 1.6 },
 	RockCandyDragon = { data = require(script.Parent.RockCandyDragonEggModel), center = 1.6 },
 	GumballGolem = { data = require(script.Parent.GumballGolemEggModel), center = 1.6 },
