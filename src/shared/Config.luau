@@ -1570,6 +1570,10 @@ Config.AnimalScale.Bumblebee = 2 -- (QM, Oct 15; was 1x)
 Config.AnimalScale.YellowGummyBear = 1.5 -- the Gummy Bear recoloured, 1.5x (QM, Oct 15)
 Config.AnimalScale.GreenGummyBear = 2 -- and 2x (QM, Oct 15)
 Config.AnimalScale.Gigacorn = 2.625 -- 3x the Majestic Unicorn it reskins: 3 x its 1.4, over the 1.6 its tier 3 adds (QM, Oct 15)
+-- Shown names that differ from the kind spelled out (the kind stays, so saved pets keep working).
+Config.PetNames = {
+	DesireTroll = "Sugar Troll", -- (QM, Oct 15; was "Desire Troll")
+}
 -- Each world's own animals: [world] = the set that runs at its own speed there (World 1's: all).
 local OWN = { [2] = Config.World2Animals, [3] = setmetatable(table.clone(Config.World2Animals), { __index = Config.World3Animals }) }
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
@@ -1975,7 +1979,7 @@ if Config.World == 3 then
 			CapColor = rgb(255, 255, 255),
 			-- (Oct 14, the Candyland animals thread: weights as the Pirate Cove's by rarity, guesses;
 			-- its giga rares and the Gigacorn added below)
-			Herd = { GummyBear = 0.3, YellowGummyBear = 0.05, GreenGummyBear = 0.05, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, SwollFairy = 0.08, DesireTroll = 0.03 },
+			Herd = { GummyBear = 0.3, YellowGummyBear = 0.05, GreenGummyBear = 0.05, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, DesireTroll = 0.03 }, -- (no Swoll Fairy: scrapped, QM Oct 15; its stats, egg and headshot stay for saved ones)
 			Patches = {
 				Chocolate = { rgb(110, 62, 40), rgb(98, 54, 34) },
 				Cream = { rgb(255, 236, 200), rgb(248, 224, 184) },

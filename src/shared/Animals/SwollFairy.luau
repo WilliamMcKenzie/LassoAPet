@@ -1,3 +1,5 @@
+-- SCRAPPED (QM, Oct 15): in no herd, egg, quest or shop. Kept only so pets already saved still load
+-- (Pen and Ride require every saved kind's module).
 -- Swoll Fairy: World 3 Candyland Epic (Oct 14). A hugely muscly pink fairy in a mint top and lilac
 -- tutu, flexing both biceps as she flies on candy-glass wings. You ride on her back cushion.
 -- designs/candyland/SwollFairy.bbmodel (tools/swoll_fairy.py), converted (no --zyx) into SwollFairyModel.luau by

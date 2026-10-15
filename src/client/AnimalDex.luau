@@ -279,7 +279,7 @@ local function ridden()
 end
 
 local function nameOf(kind)
-	return (kind:gsub("(%l)(%u)", "%1 %2")) -- "SpineLizard" reads "Spine Lizard"
+	return Config.PetNames[kind] or (kind:gsub("(%l)(%u)", "%1 %2")) -- "SpineLizard" reads "Spine Lizard"
 end
 
 local function image(parent, id, size, position, anchor)
