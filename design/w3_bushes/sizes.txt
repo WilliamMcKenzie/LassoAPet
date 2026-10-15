@@ -1,0 +1,3 @@
+# name: width x height x depth (studs, at 1x), tris, pieces
+BeachBush: 9.1 x 4.7 x 9.5, 600 tris, 2 pieces
+BeachBushSmall: 6.0 x 3.3 x 5.8, 480 tris, 2 pieces
