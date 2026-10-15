@@ -454,6 +454,8 @@ for n, list in CHUNKS do
 		local prop = source:Clone()
 		prop:PivotTo(CFrame.new(q[2], 0, q[3]) * CFrame.Angles(0, math.rad(q[4] + YAW_OFFSET), 0))
 		-- (the props' pivot is their foot, their pieces' shared origin: already on the floor)
+		-- QM, Oct 15: everything 1.6x, the trees 3x, about that foot
+		prop:ScaleTo(prop:GetScale() * (if q[1] == "LanternTree" or q[1] == "SpookyTree" then 3 else 1.6))
 		local cf, size
 		for _, p in prop:GetDescendants() do
 			if p:IsA("BasePart") then
