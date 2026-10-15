@@ -124,7 +124,7 @@ local function pets()
 			table.insert(out, { id = id, kind = item.pet, equipped = true })
 		end
 	end
-	-- (and the one you ride, waiting at your pen's gap: always in, QM Oct 15)
+	-- (and the one at your pen's gap, that a ride sets off on: in your pen like the rest)
 	local ride = player:GetAttribute("RidePet")
 	if typeof(ride) == "string" and ride ~= "" then
 		table.insert(out, { id = "ride", kind = ride, equipped = true, ride = true })
@@ -174,7 +174,7 @@ local function fill()
 		face.ImageTransparency = if pet.equipped then 0 else 0.2 -- (80% opaque out of the pen: QM)
 		face.Parent = cell
 		cell.Activated:Connect(function()
-			if busy or pet.ride then -- (the pet you ride stays in)
+			if busy then
 				return
 			end
 			busy = true

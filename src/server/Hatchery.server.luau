@@ -816,6 +816,30 @@ end
 -- spot, and earns nothing), or a stored one put back in at the first clear spot, room allowing.
 remote("UnequipPet", function(player, id)
 	local profile = profiles[player]
+	if profile and id == "ride" and profile.ride then
+		-- (the pet at your pen's gap, the one a ride sets off on: out like any other, QM Oct 15;
+		-- your best other pet in the pen takes its place there, if you have one)
+		profile.stored = profile.stored or {}
+		profile.stored[HttpService:GenerateGUID(false)] = { pet = profile.ride, merged = profile.rideMerged, fuse = profile.rideFuse,
+			income = profile.rideIncome, stats = profile.rideStats, worth = profile.rideWorth, tier = profile.rideTier, auto = profile.rideAuto }
+		local bestId, best
+		for itemId, item in profile.items do
+			local earns = item.pet and Fusion.earning(item.pet, item.merged, item.income)
+			if earns and (not best or earns > best) then
+				bestId, best = itemId, earns
+			end
+		end
+		local next = bestId and profile.items[bestId]
+		profile.ride = next and next.pet
+		profile.rideMerged, profile.rideFuse, profile.rideIncome = next and next.merged, next and next.fuse, next and next.income
+		profile.rideStats, profile.rideWorth, profile.rideTier, profile.rideAuto = next and next.stats, next and next.worth, next and next.tier, next and next.auto
+		if bestId then
+			profile.items[bestId] = nil
+		end
+		publish(player)
+		save(player)
+		return
+	end
 	local item = profile and typeof(id) == "string" and profile.items[id]
 	if not item or not isAnimal(item.pet) then
 		return
@@ -835,10 +859,15 @@ remote("EquipPet", function(player, id)
 	if not item or not area or penCount(profile) >= penCap(player) then
 		return
 	end
-	local spot = freeSpot(pen, profile, area)
 	profile.stored[id] = nil
-	item.x, item.z = spot.X, spot.Y
-	profile.items[id] = item
+	if not profile.ride then -- (nothing at the gap: it waits there, the one a ride sets off on)
+		profile.ride, profile.rideMerged, profile.rideFuse, profile.rideIncome = item.pet, item.merged, item.fuse, item.income
+		profile.rideStats, profile.rideWorth, profile.rideTier, profile.rideAuto = item.stats, item.worth, item.tier, item.auto
+	else
+		local spot = freeSpot(pen, profile, area)
+		item.x, item.z = spot.X, spot.Y
+		profile.items[id] = item
+	end
 	publish(player)
 	save(player)
 end)
