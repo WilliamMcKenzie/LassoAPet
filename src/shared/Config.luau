@@ -612,7 +612,7 @@ local Config = {
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
-		GreenCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
+		GreenCrab = 1, LimeCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
 		GhostShip = 4, JollyRogerWyvern = 4, -- World 3 Pirate Cove's giga rares (XL) (guesses, Oct 14)
 		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
 		RafflesiaBeast = 4, AncientTreant = 4, GiantRafflesia = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
@@ -1467,6 +1467,7 @@ end
 -- economy (its biomes are about 2x World 2's length, so these speeds may need to go up).
 Config.World3Pets = {
 	GreenCrab = { 7.6, 4000, 15 }, -- Common (guess)
+	LimeCrab = { 7.8, 6000, 20 }, -- Uncommon: the Green Crab in lime, 2x its size, 1/3 as often (QM, Oct 15; numbers as the Parrot's, guess)
 	Parrot = { 7.8, 6000, 20 }, -- Uncommon (guess)
 	BananaMonkey = { 7.8, 6000, 20 }, -- Uncommon (guess)
 	TreasureHermit = { 8.1, 12000, 90 }, -- Rare (guess)
@@ -1552,6 +1553,7 @@ end
 for _, kind in { "GreenCrab", "Parrot", "BananaMonkey", "TreasureHermit", "EyepatchShark", "TreasureTurtle", "GhostShip", "JollyRogerWyvern" } do
 	Config.AnimalScale[kind] = 2
 end
+Config.AnimalScale.LimeCrab = 4 -- the Lime Crab 2x the Green Crab (QM, Oct 15)
 Config.AnimalScale.Parrot = 3 -- (the Parrot 1.5x more again: QM, Oct 14)
 -- Each world's own animals: [world] = the set that runs at its own speed there (World 1's: all).
 local OWN = { [2] = Config.World2Animals, [3] = setmetatable(table.clone(Config.World2Animals), { __index = Config.World3Animals }) }
@@ -1911,7 +1913,7 @@ if Config.World == 3 then
 			CapColor = rgb(236, 208, 160), -- (lighter sandstone along the top)
 			-- (Oct 14, the Pirate Cove animals thread: weights guesses, as the Tomb's by rarity; its
 			-- giga rares and the boss as a trophy pet added below)
-			Herd = { GreenCrab = 0.3, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
+			Herd = { GreenCrab = 0.3, LimeCrab = 0.1, Parrot = 0.25, BananaMonkey = 0.25, TreasureHermit = 0.15, EyepatchShark = 0.08, TreasureTurtle = 0.03 },
 			Patches = {
 				Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (the pens' floor: PenLevel paints it; without it the pens never showed)
 				WetSand = { rgb(229, 202, 143), rgb(220, 193, 136) }, -- (QM, Oct 15: the damp sand's, swapped)
