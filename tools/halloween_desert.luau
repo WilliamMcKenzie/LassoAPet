@@ -62,6 +62,7 @@ local OLD = {
 	Cactus = Vector3.new(8.8, 14.7, 8.8), RockCrag = Vector3.new(25.1, 29.6, 26.9), RockSlab = Vector3.new(28.7, 10.4, 17.6),
 	RockPebble = Vector3.new(13.6, 7.4, 10), RockStone = Vector3.new(13.3, 10.9, 12.4),
 }
+local GROW = 2 -- (QM, Oct 15: the Desert's props 2x, their footprints with them)
 local counts, swapped = {}, 0
 local models = W.Obstacles:GetChildren()
 table.sort(models, function(a, b)
@@ -86,7 +87,13 @@ for _, model in models do
 		local prop = night[pick[1]]:Clone()
 		local _, size = prop:GetBoundingBox()
 		local k = if pick[2] == "height" then old.Y / size.Y else math.max(old.X, old.Z) / math.max(size.X, size.Z)
-		prop:ScaleTo(prop:GetScale() * k * pick[3])
+		prop:ScaleTo(prop:GetScale() * k * pick[3] * GROW)
+		-- (its footprint GROW x the Desert's own, kept on the Base so re-running doesn't grow it again)
+		local own = base:GetAttribute("DesertSize") or base.Size
+		base:SetAttribute("DesertSize", own)
+		local bottom = base.Position.Y - base.Size.Y / 2
+		base.Size = Vector3.new(own.X * GROW, own.Y, own.Z * GROW)
+		base.Position = Vector3.new(base.Position.X, bottom + own.Y / 2, base.Position.Z)
 		local yaw = CFrame.Angles(0, math.rad((counts[model.Name] * 137) % 360), 0)
 		prop:PivotTo(CFrame.new(prop:GetPivot().Position) * yaw)
 		local cf, box = prop:GetBoundingBox()
