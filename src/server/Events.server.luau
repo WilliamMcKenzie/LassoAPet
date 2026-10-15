@@ -60,7 +60,7 @@ eventCommand.Parent = game:GetService("TextChatService")
 local forcedNow = false
 world:GetAttributeChangedSignal("ForceEvent"):Connect(function()
 	local kind = world:GetAttribute("ForceEvent")
-	if kind and table.find(EVENTS.Animals, kind) then
+	if kind and table.find(EVENTS.Forceable or EVENTS.Animals, kind) then
 		forced = kind
 		forcedNow = world:GetAttribute("ForceEventNow") == true
 	end

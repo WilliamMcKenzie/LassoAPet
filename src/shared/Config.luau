@@ -371,7 +371,8 @@ local Config = {
 	-- egg, like any wild animal's. The event's over once someone's riding it, it's run
 	-- off the course, or the next one's due.
 	Events = {
-		Animals = { "Loong", "SnackYak", "RoboShark" },
+		Animals = { "SnackYak" }, -- (QM, Oct 15: no more Loong or Robo Shark every 10 minutes, now they're sold at the base)
+		Forceable = { "Loong", "SnackYak", "RoboShark" }, -- (what "/event" and the shop's Spawn Loong can still start)
 		Countdown = 10,
 		Cycle = 600, -- seconds from one event to the next (QM: every 10 minutes)
 		DespawnBiome = "Jurassic", -- it runs off (gone) as it reaches this biome (QM, Oct 11: the Jungle)
@@ -1152,9 +1153,9 @@ local Config = {
 			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "BoneRex" }, -- (for D1: its egg's long, QM; QM, Oct 14: 5, was 10, then 5 before that)
 			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "TRex" }, -- (QM, Oct 11: these three after Merge)
 			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 3, Egg = "LavaWhale" }, -- (QM, Oct 11: 3, was 5) -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
-			{ Text = "Lasso Lava Whales", Kind = "lasso", Animal = "LavaWhale", Need = 2, Egg = "RoboShark" }, -- (QM, Oct 11: was Collect 30)
+			{ Text = "Lasso Lava Whales", Kind = "lasso", Animal = "LavaWhale", Need = 2, Egg = "SnackYak" }, -- (QM, Oct 15: was the Robo Shark; QM, Oct 11: was Collect 30)
 			{ Text = "Lasso a Bone Rex", Kind = "lasso", Animal = "BoneRex", Need = 1, Egg = "Seraph" }, -- (QM, Oct 14: World 2's Seraph egg, was the Loong; QM, Oct 11: was Collect 50)
-			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "Loong" }, -- (QM, Oct 15: the end of every line)
+			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "SnackYak" }, -- (QM, Oct 15: the end of every line; the Snack Yak, not the Loong)
 		},
 		{ -- (QM, Oct 12: a third line, just this; tapping it opens Roblox's invite, done when an invited friend joins: Hatchery)
 			{ Text = "Invite a friend", Kind = "invite", Need = 1, Egg = "Squid", NoPenLevel = true },
@@ -1750,7 +1751,7 @@ if Config.World == 2 then
 			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "Seraph" }, -- (QM, Oct 14: 1, was 3)
 			{ Text = "Lasso Lions", Kind = "lasso", Animal = "Lion", Need = 10, Egg = "Asura" },
 			{ Text = "Lasso Kitsunes", Kind = "lasso", Animal = "Kitsune", Need = 3, Egg = { "Geb", "Nut", "Bes" } },
-			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "Loong" }, -- (QM, Oct 15: the end of every line)
+			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "SnackYak" }, -- (QM, Oct 15: the end of every line; the Snack Yak, not the Loong)
 		},
 	}
 	Config.DefaultPet = "ArmoredHorse" -- World 2's starter, in your pen from the start (QM, Oct 13)
@@ -2199,7 +2200,7 @@ if Config.World == 3 then
 			{ Text = "Lasso an Ancient Treant", Kind = "lasso", Animal = "AncientTreant", Need = 1, Egg = { "AncientTreant", "AncientTreant", "AncientTreant" } },
 			{ Text = "Lasso 5 Sunflower Lions", Kind = "lasso", Animal = "SunflowerLion", Need = 5, Egg = "Mermaid" },
 			{ Text = "Lasso 100 Banana Monkeys", Kind = "lasso", Animal = "BananaMonkey", Need = 100, Egg = "ReefTitan" },
-			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "Loong" }, -- (QM, Oct 15: the end of every line)
+			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "SnackYak" }, -- (QM, Oct 15: the end of every line; the Snack Yak, not the Loong)
 		},
 	}
 	Config.Water = table.clone(Config.Water)
