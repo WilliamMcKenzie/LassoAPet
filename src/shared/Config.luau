@@ -1578,6 +1578,7 @@ Config.AnimalScale.GingerbreadMan = 2 -- (QM, Oct 15)
 Config.AnimalScale.RockCandyDragon = 2 -- (QM, Oct 15)
 Config.AnimalScale.ReefTitan = 3 -- (QM, Oct 15)
 Config.AnimalScale.AncientTreant = 2 -- (QM, Oct 15)
+Config.AnimalScale.RoyalCnidarian = 2 -- (QM, Oct 15)
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)
@@ -2091,6 +2092,28 @@ if Config.World == 3 then
 		Config.AnimalStats[kind] = table.clone(stats)
 		-- (never slower than a Horse, or than it was: the starter crawled at a quarter speed, QM Oct 15)
 		Config.AnimalStats[kind].Speed = math.max(stats.Speed * 33 / Config.RideSeconds * 0.5, math.min(stats.Speed, 1))
+	end
+	-- Where each of these gets to sprinting the whole ride in World 3 (QM, Oct 15: the slow
+	-- trophies sat still waiting to be caught; his reach for each): [kind] = { biome, % through
+	-- it }, so Speed = that distance / (sprint 88 studs/s x RideSeconds). The rest stay as above.
+	local REACH = {
+		GreenCrab = { 2, 5 }, LimeCrab = { 2, 30 }, BananaMonkey = { 2, 10 }, Parrot = { 2, 20 },
+		TreasureHermit = { 2, 35 }, EyepatchShark = { 2, 45 }, TreasureTurtle = { 2, 65 },
+		JollyRogerWyvern = { 3, 50 }, GhostShip = { 4, 50 },
+		Ladybug = { 3, 10 }, Bumblebee = { 3, 10 }, ToadstoolFrog = { 3, 20 }, VineMonster = { 3, 40 },
+		VenusFlytrap = { 3, 35 }, SunflowerLion = { 4, 100 },
+		RafflesiaBeast = { 3, 50 }, GiantRafflesia = { 3, 99 }, AncientTreant = { 4, 20 },
+		RockCandyDragon = { 4, 55 }, GumballGolem = { 4, 35 }, RoyalCnidarian = { 4, 100 },
+	}
+	local sprint = Config.MountSpeed * Config.SprintSpeed
+	for kind, at in REACH do
+		local d = 0
+		for i = 1, at[1] - 1 do
+			d += Config.Biomes[i].Length
+		end
+		d += Config.Biomes[at[1]].Length * at[2] / 100
+		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 3 })
+		Config.AnimalStats[kind].Speed = d / (sprint * Config.RideSeconds)
 	end
 end
 
