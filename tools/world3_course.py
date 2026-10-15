@@ -328,7 +328,7 @@ def garden():
         ("Ground", 0, rgb("4CAA34"), rgb("449C2E")),  # dark lawn
         ("Grass", 1, rgb("7ED648"), rgb("72C83E")),  # bright lawn
         ("Flowers", 2, rgb("FF82BE"), rgb("F470B0")),  # flowerbeds, a stud above the lawn
-        ("Path", 1, rgb("C4BEB0"), rgb("B4AEA0")),  # flagstones, flush with the bright lawn
+        ("Path", 2, rgb("C4BEB0"), rgb("B4AEA0")),  # (a stud above the grass: QM in Studio, Oct 15, stamina-loop world3_elevation; was 1)  # flagstones, flush with the bright lawn
     ])
     q = b.quasi(5, 10, (311, 977))
     b.band(q, [0.12, 0.55, 0.94])  # (half the flowerbeds: QM's critic, Oct 14)
@@ -356,7 +356,7 @@ def garden():
     b.rung[b.rung == 2] = 1
     b.rung[b.rung == 3] = 2
     b.tiles = [b.tiles[1], b.tiles[2], b.tiles[4]]
-    ladder = [0, 1, 1]
+    ladder = [0, 1, 2]  # (the path, now a stud above the grass, still ringed by it)
     walls = dict(wall=[rgb("23561F"), rgb("1E4A1B")], cap=rgb("FF78AA"), gate=rgb("FF5CAA"))  # dark hedge (the lawn's green hid the edge), blossom top
     return b, walls, ladder
 
@@ -397,14 +397,14 @@ def shrink(m, n=1):
 def candyland():
     """Vanilla cream all over, flat (QM, Oct 15: his reference picture), with a small patch of pink
     frosting or mint under each cluster of candy props, ragged at the edge; the candy cane, red and
-    white bands across it, down the middle. Everything at top 1, so the props stand level."""
+    white bands across it, down the middle. The cream at top 1, the patches and the cane a stud up (QM, Oct 15)."""
     b = Biome(2, [
         ("Cream", 1, (244, 212, 158), (250, 221, 169)),  # the tan ground (QM, Oct 15; was the frosting)
-        ("Ground", 1, (245, 153, 175), (252, 172, 187)),  # pink frosting patches (was the base, top 0)
-        ("Mint", 1, (121, 230, 205), (109, 223, 198)),  # mint patches (was plateaus, top 2)
-        ("Stripe", 1, (249, 94, 129), (250, 98, 132)),  # the candy cane's red bands
-        ("Icing", 1, (254, 234, 201), (253, 230, 197)),  # and its white ones
-    ])  # (colours: QM in Studio, Oct 15, stamina-loop 4ef69fa)
+        ("Ground", 2, (245, 153, 175), (252, 172, 187)),  # pink frosting patches (was the base, top 0)
+        ("Mint", 2, (121, 230, 205), (109, 223, 198)),  # mint patches (was plateaus, top 2)
+        ("Stripe", 2, (249, 94, 129), (250, 98, 132)),  # the candy cane's red bands
+        ("Icing", 2, (254, 234, 201), (253, 230, 197)),  # and its white ones
+    ])  # (colours: QM in Studio, Oct 15, stamina-loop 4ef69fa; patches and cane a stud above the cream, QM 05:42, world3_elevation)
     mid = NX // 2
     cane = np.zeros_like(b.inside)
     cane[mid - 2:mid + 2, 6:b.nz - 6] = True

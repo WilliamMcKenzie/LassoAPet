@@ -14,7 +14,7 @@ local rgb = Color3.fromRGB
 local KINDS = { -- [kind] = { name, top, part colour, checker colour (nil: plain) }
 	[0] = { "Ground", 0, rgb(76, 170, 52), rgb(68, 156, 46) },
 	[1] = { "Grass", 1, rgb(126, 214, 72), rgb(114, 200, 62) },
-	[2] = { "Path", 1, rgb(196, 190, 176), rgb(180, 174, 160) },
+	[2] = { "Path", 2, rgb(196, 190, 176), rgb(180, 174, 160) },
 }
 local WALL, WALL_CHECKER, CAP = rgb(35, 86, 31), rgb(30, 74, 27), rgb(255, 120, 170)
 -- { kind, low x, near z, size x, size z } on 8-stud cells, in game space

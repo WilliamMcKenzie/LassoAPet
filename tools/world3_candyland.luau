@@ -13,10 +13,10 @@ local WATER_IMAGE = "rbxassetid://113940500836253" -- (QM's darker tile, Oct 14:
 local rgb = Color3.fromRGB
 local KINDS = { -- [kind] = { name, top, part colour, checker colour (nil: plain) }
 	[0] = { "Cream", 1, rgb(244, 212, 158), rgb(250, 221, 169) },
-	[1] = { "Ground", 1, rgb(245, 153, 175), rgb(252, 172, 187) },
-	[2] = { "Mint", 1, rgb(121, 230, 205), rgb(109, 223, 198) },
-	[3] = { "Stripe", 1, rgb(249, 94, 129), rgb(250, 98, 132) },
-	[4] = { "Icing", 1, rgb(254, 234, 201), rgb(253, 230, 197) },
+	[1] = { "Ground", 2, rgb(245, 153, 175), rgb(252, 172, 187) },
+	[2] = { "Mint", 2, rgb(121, 230, 205), rgb(109, 223, 198) },
+	[3] = { "Stripe", 2, rgb(249, 94, 129), rgb(250, 98, 132) },
+	[4] = { "Icing", 2, rgb(254, 234, 201), rgb(253, 230, 197) },
 }
 local WALL, WALL_CHECKER, CAP = rgb(233, 110, 144), rgb(236, 121, 152), rgb(254, 237, 207)
 -- { kind, low x, near z, size x, size z } on 8-stud cells, in game space
