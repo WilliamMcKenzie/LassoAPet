@@ -1933,7 +1933,7 @@ if Config.World == 3 then
 			NestScale = 2,
 			Length = 3632, -- (2x the Desert's 1816)
 			GroundColors = { rgb(76, 170, 52), rgb(68, 156, 46) },
-			WallColors = { rgb(35, 86, 31), rgb(30, 74, 27) },
+			WallColors = { rgb(68, 106, 84), rgb(68, 115, 90) }, -- (QM, Oct 15)
 			CapColor = rgb(150, 164, 115), -- (QM, Oct 15; was #3E634E, pink before that)
 			-- (Oct 14, the Garden animals thread: weights as the Crimson Lands' by rarity, guesses; its
 			-- giga rares and the Giant Rafflesia added below)
