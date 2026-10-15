@@ -18,6 +18,15 @@
 --       1 Has Unfinished Quests, 2 Has Claimable Quest, 3 Claimed 1, 4 Claimed 2, 5 Claimed 3
 --   [V1] Quest Progress        one instance per player, world and quest, from when it's the
 --       current quest (never backfilled for quests claimed before): 1 Current, 2 Ready, 3 Claimed
+--   [V1] Worlds                one instance per player across all three worlds (QM, Oct 15: do
+--       they leave after joining World 3?): 1 Joined World 1, 2 Bought World 2, 3 Arrived World 2,
+--       4 Rode In World 2, 5 Bought World 3, 6 Arrived World 3, 7 Rode In World 3,
+--       8 Back In World 3 (a later session there). Each world logs its own steps.
+--
+-- Leaving (QM, Oct 15), on Telemetry.onLeave: custom events "Left Game In World <n>" (the
+-- session ended there) or "Travelled From World <n>" (a teleport to another), and "Left World
+-- <n> After <time>" (time in that world this visit: Under 1m, 1-5m, 5-15m, 15m+); and in
+-- StatsStore's "v1-leaves" for /stats: "w<n>|quit|<time>" and "w<n>|travel|<time>".
 --
 -- A run starts when the ride crosses the start line (RideSync); a reward is the server's
 -- award (Hatchery's givePet). Session funnels use a new id each session; persistent ones
@@ -52,12 +61,17 @@ local LOOP = "[V1] First Session Loop"
 local BIOMES = "[V1] World " .. WORLD .. " Biomes"
 local CLAIMS = "[V1] Quest Claims"
 local PROGRESS = "[V1] Quest Progress"
+local WORLDS = "[V1] Worlds"
 Funnel.STEPS = { -- (by funnel: /stats lists them)
 	[TUTORIAL] = { "New Profile Loaded", "Intro Finished", "Starter Pet Ready", "Crossed Start Line", "First Animal Awarded", "Tutorial Finished" },
 	[LOOP] = { "New Profile Loaded", "Tutorial Finished", "Ride Started", "Reward Received", "Another Ride Started", "Another Reward Received" },
 	[CLAIMS] = { "Has Unfinished Quests", "Has Claimable Quest", "Claimed 1", "Claimed 2", "Claimed 3" },
 	[PROGRESS] = { "Current", "Ready", "Claimed" },
+	[WORLDS] = { "Joined World 1", "Bought World 2", "Arrived World 2", "Rode In World 2", "Bought World 3", "Arrived World 3", "Rode In World 3", "Back In World 3" },
 }
+local ARRIVED = { [1] = 1, [2] = 3, [3] = 6 } -- [world] = its Worlds step
+local RODE = { [2] = 4, [3] = 7 }
+local BOUGHT = { [2] = 2, [3] = 5 }
 local BIOME_NAMES = Config.BiomeNames[WORLD]
 Funnel.STEPS[BIOMES] = { "First Arrival" }
 for _, name in BIOME_NAMES do
@@ -134,6 +148,18 @@ function Funnel.start(player, profile, isNew)
 	if v1.biomes then
 		log(player, BIOMES, player.UserId .. ":w" .. WORLD, "b", 1, "w" .. WORLD, true)
 	end
+	s.arrivedAt = os.clock()
+	log(player, WORLDS, tostring(player.UserId), "worlds", ARRIVED[WORLD], "w" .. WORLD, true)
+	if WORLD == 3 and not isNew then
+		log(player, WORLDS, tostring(player.UserId), "worldsBack", 8, "w3", true) -- (a later session in World 3)
+	end
+end
+
+-- Gold.server: the player bought world `world`.
+function Funnel.boughtWorld(player, world)
+	if BOUGHT[world] then
+		log(player, WORLDS, tostring(player.UserId), "worlds", BOUGHT[world], "w" .. world, true)
+	end
 end
 
 -- (client) the intro's over.
@@ -160,6 +186,9 @@ local function rideStarted(player)
 	end
 	if s.profile.v1.biomes then
 		log(player, BIOMES, player.UserId .. ":w" .. WORLD, "b", 2, "w" .. WORLD, true)
+	end
+	if RODE[WORLD] then
+		log(player, WORLDS, tostring(player.UserId), "worldsRode", RODE[WORLD], "w" .. WORLD, true)
 	end
 	if not s.firstSession then
 		return
@@ -291,6 +320,12 @@ Telemetry.onLeave(function(player, transferring)
 	if not s or s.excluded then
 		return
 	end
+	-- How long they were in this world this visit, and whether they left the game or travelled on.
+	local minutes = (os.clock() - (s.arrivedAt or os.clock())) / 60
+	local spent = if minutes < 1 then "Under 1m" elseif minutes < 5 then "1-5m" elseif minutes < 15 then "5-15m" else "15m+"
+	Funnel.event(player, (if transferring then "Travelled From World " else "Left Game In World ") .. WORLD)
+	Funnel.event(player, "Left World " .. WORLD .. " After " .. spent)
+	StatsStore.add("v1-leaves", { ["w" .. WORLD .. "|" .. (if transferring then "travel" else "quit") .. "|" .. spent] = 1 })
 	local ends = {}
 	if s.logged.claims then
 		ends[CLAIMS .. "|end" .. s.logged.claims] = 1

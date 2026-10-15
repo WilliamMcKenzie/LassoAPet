@@ -198,6 +198,7 @@ buyWorld.OnServerInvoke = function(player, world)
 	end
 	player:SetAttribute("Gold", gold - price)
 	player:SetAttribute("OwnsWorld" .. world, true)
+	Funnel.boughtWorld(player, tonumber(world)) -- ([V1] Worlds: QM, Oct 15)
 	if tonumber(world) == 2 then
 		worldNoted(player, "v1w2u", "w2unlocked")
 	end
