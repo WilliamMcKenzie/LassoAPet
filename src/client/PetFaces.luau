@@ -74,7 +74,6 @@ local HEADSHOTS = {
 	GumdropFrog = "rbxassetid://82833548136447", -- PetGumdropFrog.png (World 3)
 	GingerbreadMan = "rbxassetid://90611463224869", -- PetGingerbreadMan.png (World 3)
 	Creampuff = "rbxassetid://130620829311023", -- PetCreampuff.png (World 3)
-	SwollFairy = "rbxassetid://74427825885581", -- PetSwollFairy.png (World 3)
 	DesireTroll = "rbxassetid://119934046905439", -- PetDesireTroll.png (World 3)
 	RockCandyDragon = "rbxassetid://80568575802236", -- PetRockCandyDragon.png (World 3)
 	GumballGolem = "rbxassetid://125156238731512", -- PetGumballGolem.png (World 3)

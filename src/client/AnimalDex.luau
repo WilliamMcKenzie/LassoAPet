@@ -182,7 +182,6 @@ local BIOS = { -- QM's (Oct 4, the pets JSON)
 	GumdropFrog = "Rolled itself in sugar on purpose. Leaves a sparkly trail.",
 	GingerbreadMan = "Runs as fast as he can. You still caught him.",
 	Creampuff = "Fresh from the oven and furious about it.",
-	SwollFairy = "Grants wishes, but only if you can out-flex her first.",
 	DesireTroll = "Guards the candy. Eats most of it too.",
 	RockCandyDragon = "Grew its crystals one sugar grain at a time. Took a thousand years.",
 	GumballGolem = "Insert one coin. Get one golem. No refunds.",
@@ -279,7 +278,7 @@ local function ridden()
 end
 
 local function nameOf(kind)
-	return (kind:gsub("(%l)(%u)", "%1 %2")) -- "SpineLizard" reads "Spine Lizard"
+	return Config.PetNames[kind] or (kind:gsub("(%l)(%u)", "%1 %2")) -- "SpineLizard" reads "Spine Lizard"
 end
 
 local function image(parent, id, size, position, anchor)

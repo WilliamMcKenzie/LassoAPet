@@ -91,20 +91,6 @@ def creampuff():
     return egg
 
 
-def swoll_fairy():
-    egg = shell([C.MINT_DK, C.BUBBLE, C.LILAC, C.MINT, C.MINT, C.BUBBLE, C.BUBBLE])
-    for s in (-1, 1):  # little candy-glass wings on the sides
-        w = WIDTHS[4] / 2
-        xa, xb = sorted((s * w, s * (w + 0.5)))
-        egg.block(f"Wing{'LR'[s > 0]}", (xa, 1.9, 0.05), (xb, 2.6, 0.2), C.SKY)
-        xc, xd = sorted((s * w, s * (w + 0.32)))
-        egg.block(f"WingLow{'LR'[s > 0]}", (xc, 1.5, 0.05), (xd, 1.9, 0.2), C.LILAC)
-    egg.block("Bun", (-0.25, TOP - 0.05, -0.2), (0.25, TOP + 0.3, 0.25), C.GRAPE)
-    egg.block("Bow", (-0.35, TOP + 0.05, 0.25), (0.35, TOP + 0.25, 0.35), C.CHERRY)
-    on_top(egg, 2)
-    return egg
-
-
 def desire_troll():
     egg = shell([C.STRAWB_DK, C.STRAWB, C.STRAWB, C.STRAWB, C.STRAWB, C.STRAWB, C.STRAWB])
     for s in (-1, 1):  # candy-corn tusks up the front
@@ -155,7 +141,7 @@ def gigacorn():
 
 
 O.EGGS = [("GummyBear", gummy_bear), ("YellowGummyBear", yellow_gummy_bear), ("GreenGummyBear", green_gummy_bear), ("GumdropFrog", gumdrop_frog), ("GingerbreadMan", gingerbread_man),
-          ("Creampuff", creampuff), ("SwollFairy", swoll_fairy), ("DesireTroll", desire_troll),
+          ("Creampuff", creampuff), ("DesireTroll", desire_troll),
           ("RockCandyDragon", rock_candy_dragon), ("GumballGolem", gumball_golem), ("Gigacorn", gigacorn)]
 
 if __name__ == "__main__":

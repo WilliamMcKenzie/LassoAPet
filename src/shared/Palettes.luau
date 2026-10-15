@@ -868,14 +868,6 @@ return {
 		{ "Marking", 255, 252, 246 }, -- whipped cream
 		{ "Accent", 236, 36, 72 }, -- cherry (QM Oct 15: no longer spoiled; was green mould)
 	},
-	SwollFairy = { -- World 3 Candyland
-		{ "Body", 255, 150, 206 }, -- skin
-		{ "Body", 232, 98, 170 }, -- knuckles, nose (darker)
-		{ "Marking", 60, 230, 176 }, -- tank top, slippers
-		{ "Marking", 24, 176, 136 }, -- darker top
-		{ "Accent", 204, 150, 255 }, -- tutu, lower wings
-		{ "Horn", 70, 196, 255 }, -- upper wings
-	},
 	DesireTroll = { -- World 3 Candyland
 		{ "Body", 255, 92, 150 }, -- skin
 		{ "Body", 214, 52, 118 }, -- darker skin

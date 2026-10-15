@@ -153,7 +153,6 @@ local IMAGES = {
 	eggGumdropFrog = { id = "rbxassetid://96785493203961", size = Vector2.new(502, 719) }, -- GumdropFrogEggRender.png (World 3)
 	eggGingerbreadMan = { id = "rbxassetid://109625880806599", size = Vector2.new(502, 668) }, -- GingerbreadManEggRender.png (World 3)
 	eggCreampuff = { id = "rbxassetid://139714019730087", size = Vector2.new(502, 780) }, -- CreampuffEggRender.png (World 3)
-	eggSwollFairy = { id = "rbxassetid://127716474790012", size = Vector2.new(600, 721) }, -- SwollFairyEggRender.png (World 3)
 	eggDesireTroll = { id = "rbxassetid://100253441445728", size = Vector2.new(502, 760) }, -- DesireTrollEggRender.png (World 3)
 	eggRockCandyDragon = { id = "rbxassetid://112086344358353", size = Vector2.new(502, 815) }, -- RockCandyDragonEggRender.png (World 3)
 	eggGumballGolem = { id = "rbxassetid://125539296607125", size = Vector2.new(502, 727) }, -- GumballGolemEggRender.png (World 3)

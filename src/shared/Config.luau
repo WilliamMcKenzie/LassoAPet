@@ -562,7 +562,6 @@ local Config = {
 		JollyRogerWyvern = { Kind = "Fly", Height = 56 }, -- World 3 Pirate Cove's skeleton sea dragon, a flier (Oct 14)
 		MoonJellyfish = { Kind = "Fly", Height = 56 }, Anomalocaris = { Kind = "Fly", Height = 56 }, BoxJellyfish = { Kind = "Fly", Height = 56 }, BlueRingOctopus = { Kind = "Fly", Height = 56 }, ManOWar = { Kind = "Fly", Height = 56 }, -- World 3 Cnidaria: all swimmers, fliers like the Crystal Phoenix (Oct 14)
 		Mermaid = { Kind = "Fly", Height = 56 }, AbyssalDragon = { Kind = "Fly", Height = 56 }, ReefTitan = { Kind = "Fly", Height = 56 }, RoyalCnidarian = { Kind = "Fly", Height = 56 },
-		SwollFairy = { Kind = "Fly", Height = 56 }, -- World 3 Candyland: the buff fairy, a flier (Oct 14)
 		RockCandyDragon = { Kind = "Fly", Height = 56 }, -- World 3 Candyland's giga rare dragon, a flier (Oct 14)
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
@@ -618,7 +617,7 @@ local Config = {
 		RafflesiaBeast = 4, AncientTreant = 4, GiantRafflesia = 3, -- World 3 Garden's giga rares (XL) and trophy boss (large, like the Seraphs)
 		MoonJellyfish = 1, Anomalocaris = 2, BoxJellyfish = 2, BlueRingOctopus = 2, ManOWar = 2, Mermaid = 3, -- World 3 Cnidaria (guesses, Oct 14)
 		AbyssalDragon = 4, ReefTitan = 4, RoyalCnidarian = 3, -- World 3 Cnidaria's giga rares (XL) and its boss as a pet (guesses, Oct 14)
-		GummyBear = 1, YellowGummyBear = 1, GreenGummyBear = 2, GumdropFrog = 1, GingerbreadMan = 1, Creampuff = 2, SwollFairy = 2, DesireTroll = 3, -- World 3 Candyland (guesses, Oct 14)
+		GummyBear = 1, YellowGummyBear = 1, GreenGummyBear = 2, GumdropFrog = 1, GingerbreadMan = 1, Creampuff = 2, DesireTroll = 3, -- World 3 Candyland (guesses, Oct 14)
 		RockCandyDragon = 4, GumballGolem = 4, Gigacorn = 3, -- World 3 Candyland's giga rares (XL) and its boss as a trophy pet (guesses, Oct 14)
 	},
 	-- Eggs are this much bigger per tier above small, like their animals: 1x small,
@@ -868,7 +867,6 @@ local Config = {
 		GumdropFrog = "rbxassetid://96785493203961", -- assets/ui/GumdropFrogEggRender.png (World 3)
 		GingerbreadMan = "rbxassetid://109625880806599", -- assets/ui/GingerbreadManEggRender.png (World 3)
 		Creampuff = "rbxassetid://139714019730087", -- assets/ui/CreampuffEggRender.png (World 3)
-		SwollFairy = "rbxassetid://127716474790012", -- assets/ui/SwollFairyEggRender.png (World 3)
 		DesireTroll = "rbxassetid://100253441445728", -- assets/ui/DesireTrollEggRender.png (World 3)
 		RockCandyDragon = "rbxassetid://112086344358353", -- assets/ui/RockCandyDragonEggRender.png (World 3)
 		GumballGolem = "rbxassetid://125539296607125", -- assets/ui/GumballGolemEggRender.png (World 3)
@@ -1513,7 +1511,6 @@ Config.World3Pets = {
 	GumdropFrog = { 8.6, 19200, 60 }, -- Uncommon (guess)
 	GingerbreadMan = { 8.6, 19200, 60 }, -- Uncommon (guess)
 	Creampuff = { 9.0, 48000, 240 }, -- Rare (guess)
-	SwollFairy = { 9.6, 72000, 600 }, -- Epic (guess)
 	DesireTroll = { 11.0, 320000, 2700 }, -- Legendary (guess)
 	RockCandyDragon = { 0.5, 3200000, 3600 }, -- giga rare, 1 in 1,000 (guess)
 	GumballGolem = { 0.5, 3200000, 3600 }, -- giga rare, 1 in 1,000 (guess)
@@ -1580,6 +1577,10 @@ end
 
 -- Each world's biome names, as players know them (Stats, Funnel; World 2's and 3's Config.Biomes
 -- Names are different: World 2's keep World 1's).
+-- Shown names that differ from the kind spelled out (the kind stays, so saved pets keep working).
+Config.PetNames = {
+	DesireTroll = "Sugar Troll", -- (QM, Oct 15; was "Desire Troll")
+}
 Config.BiomeNames = {
 	{ "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" },
 	{ "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
@@ -1975,7 +1976,7 @@ if Config.World == 3 then
 			CapColor = rgb(255, 255, 255),
 			-- (Oct 14, the Candyland animals thread: weights as the Pirate Cove's by rarity, guesses;
 			-- its giga rares and the Gigacorn added below)
-			Herd = { GummyBear = 0.3, YellowGummyBear = 0.05, GreenGummyBear = 0.05, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, SwollFairy = 0.08, DesireTroll = 0.03 },
+			Herd = { GummyBear = 0.3, YellowGummyBear = 0.05, GreenGummyBear = 0.05, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, DesireTroll = 0.03 },
 			Patches = {
 				Chocolate = { rgb(110, 62, 40), rgb(98, 54, 34) },
 				Cream = { rgb(255, 236, 200), rgb(248, 224, 184) },
