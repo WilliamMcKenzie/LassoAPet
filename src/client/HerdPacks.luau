@@ -30,6 +30,14 @@ local function roll(stream, n, b, keys, edge)
 			break
 		end
 	end
+	local giga = Config.HalloweenGiga
+	if giga and Config.World == 4 then
+		-- (one of the Halloween world's giga rares instead, likelier further down the course)
+		local far = math.clamp(stream.spawnZ / giga.FarZ, 0, 1)
+		if r:NextNumber() < giga.Chance + (giga.MaxChance - giga.Chance) * far then
+			kind = giga.Kinds[r:NextInteger(1, #giga.Kinds)]
+		end
+	end
 	return x, kind
 end
 

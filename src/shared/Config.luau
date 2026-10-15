@@ -1630,6 +1630,23 @@ Config.HalloweenPets = {
 	WispWolf = { 1.97, 20, 180, 2 }, -- Epic
 	GrimReaper = { 2.8, 50, 600, 2 }, -- Legendary, floats
 }
+-- Its giga rares (QM, Oct 15: "giga rare haloween colored reskins of legenaries"): nine
+-- Legendaries in Halloween colours (Shared/HalloweenSkins, tools/halloween_giga.py), each its
+-- base's model, size, animations and sprint, as "Halloween<Base>". Any stampede animal in
+-- the Halloween world is one of them, all equally likely (QM), with a chance that grows with
+-- how far down the course it starts: Chance at the start, rising evenly to MaxChance (the cap)
+-- at FarZ and staying there (Client/HerdPacks). They earn gems like the rest.
+Config.HalloweenGiga = {
+	Kinds = { "HalloweenSnake", "HalloweenUnicorn", "HalloweenKraken", "HalloweenBoneRex", "HalloweenSeraph", "HalloweenKitsune", "HalloweenLoong", "HalloweenPhoenix", "HalloweenCrystalElephant" },
+	Chance = 0.01, -- (QM: 1 in 100)
+	MaxChance = 0.05, -- (QM: 5 in 100 "when you are like really far out and thats the cap")
+	FarZ = -8000, -- about 4,000 studs (16 chunks) into the Pumpkin Patch, which starts at z -3984 (a guess)
+	Pet = { 3, 100, 3600 }, -- speed, gems a second, hatch seconds: guesses (past the Grim Reaper's 2.8 and 50; 2x, as other worlds' giga rares earn 2x their biome's best)
+}
+for _, kind in Config.HalloweenGiga.Kinds do
+	local g = Config.HalloweenGiga.Pet
+	Config.HalloweenPets[kind] = { g[1], g[2], g[3], Config.PetTiers[string.sub(kind, 10)] } -- (the base's size tier: "Halloween" is 9 letters)
+end
 for kind, h in Config.HalloweenPets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind], Config.PetTiers[kind] = h[2], h[3], h[4]
 	Config.AnimalStats[kind] = { Speed = h[1], Stamina = 3 }
@@ -1731,6 +1748,12 @@ Config.PetOffers = if Config.World == 4 then {} else { Config.LoongOffer, Config
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)
 Config.AnimalScale.Gigacorn = 2.625 -- 3x the Majestic Unicorn it reskins: 3 x its 1.4, over the 1.6 its tier 3 adds (QM, Oct 15)
+-- (the Halloween giga rares: their bases' scale and sprint, Config.HalloweenGiga)
+for _, kind in Config.HalloweenGiga.Kinds do
+	local base = string.sub(kind, 10)
+	Config.AnimalScale[kind] = Config.AnimalScale[base]
+	Config.SprintSpecials[kind] = Config.SprintSpecials[base]
+end
 -- Shown names that differ from the kind spelled out (the kind stays, so saved pets keep working).
 Config.PetNames = {
 	DesireTroll = "Sugar Troll", -- (QM, Oct 15; was "Desire Troll")
