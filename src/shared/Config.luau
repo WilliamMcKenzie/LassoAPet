@@ -1571,10 +1571,13 @@ Config.AnimalScale.SunflowerLion = 2 -- (QM, Oct 15; was 1x)
 Config.AnimalScale.Ladybug = 2 -- (QM, Oct 15; was 1x)
 Config.AnimalScale.Bumblebee = 2 -- (QM, Oct 15; was 1x)
 Config.AnimalScale.YellowGummyBear = 1.5 -- the Gummy Bear recoloured, 1.5x (QM, Oct 15)
-Config.AnimalScale.GreenGummyBear = 2 -- and 2x (QM, Oct 15)
+Config.AnimalScale.GreenGummyBear = 1.5 -- (QM, Oct 15: all three gummy bears the Yellow's size; was 2x)
+Config.AnimalScale.GummyBear = 1.5 -- (the same: QM, Oct 15)
+Config.AnimalScale.GumdropFrog = 1.6 -- (QM, Oct 15)
+Config.AnimalScale.GingerbreadMan = 2 -- (QM, Oct 15)
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
-Config.FineStuds = { YellowGummyBear = true, GreenGummyBear = true }
+Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)
 Config.AnimalScale.Gigacorn = 2.625 -- 3x the Majestic Unicorn it reskins: 3 x its 1.4, over the 1.6 its tier 3 adds (QM, Oct 15)
 -- Shown names that differ from the kind spelled out (the kind stays, so saved pets keep working).
 Config.PetNames = {
