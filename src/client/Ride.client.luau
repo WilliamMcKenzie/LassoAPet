@@ -4780,11 +4780,13 @@ spawnStarter()
 -- The server hands out pens just after joining: move the waiting pet to yours.
 -- Picking another pet to ride (in the pen) swaps the waiting one; it's used from
 -- the next ride if you're out on one.
-for _, name in { "Pen", "RidePet", "RideMerged", "RideFuse", "RideStats", "RideTier" } do
+for _, name in { "Pen", "RidePet", "RideMerged", "RideFuse", "RideStats", "RideTier", "RideAuto" } do
 	player:GetAttributeChangedSignal(name):Connect(function()
-		if phase == "idle" and starter then
-			starter.animal.model:Destroy()
-			starter = nil
+		if phase == "idle" then -- (none drawn before, too: all your pets taken out, then one put back, QM Oct 15)
+			if starter then
+				starter.animal.model:Destroy()
+				starter = nil
+			end
 			spawnStarter()
 		end
 	end)
