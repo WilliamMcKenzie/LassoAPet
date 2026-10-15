@@ -2091,6 +2091,16 @@ if Config.World == 4 then
 	meadow.WallColors = { rgb(63, 38, 77), rgb(74, 44, 87) } -- dark purple walls (QM, Oct 15)
 	meadow.CapColor = rgb(240, 128, 200) -- pink wall tops (QM, Oct 15)
 	Config.Biomes[1] = meadow
+	-- The Desert in the same scheme (QM, Oct 15): sand as the base's ground, its dry grass as
+	-- the darker purple, its sandstone as the lilac paths, the same walls and tops.
+	local desert = table.clone(Config.Biomes[2])
+	desert.GroundColors = meadow.GroundColors
+	desert.WallColors = meadow.WallColors
+	desert.CapColor = meadow.CapColor
+	desert.Patches = table.clone(desert.Patches or {})
+	desert.Patches.Grass = meadow.Patches.Grass
+	desert.Patches.Stone = meadow.Patches.Dirt
+	Config.Biomes[2] = desert
 	Config.Sky = "Default" -- Roblox's own sky with its clouds and stars (QM, Oct 15: World.server)
 end
 -- World 2's Temple: the Loong runs wild there (QM, Oct 13), 1 in 4,000 of its stampede (QM, Oct 15:
