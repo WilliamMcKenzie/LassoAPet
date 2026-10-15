@@ -1560,6 +1560,7 @@ Config.AnimalScale.JollyRogerWyvern = 4 -- (2x more: QM, Oct 15)
 Config.AnimalScale.GhostShip = 3 -- (1.5x more: QM, Oct 15)
 Config.AnimalScale.VineMonster = 2 -- (QM, Oct 15; was 1x)
 Config.AnimalScale.VenusFlytrap = 1.5 -- (QM, Oct 15; was 1x)
+Config.AnimalScale.SunflowerLion = 2 -- (QM, Oct 15; was 1x)
 -- Each world's own animals: [world] = the set that runs at its own speed there (World 1's: all).
 local OWN = { [2] = Config.World2Animals, [3] = setmetatable(table.clone(Config.World2Animals), { __index = Config.World3Animals }) }
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
