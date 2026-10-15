@@ -69,16 +69,110 @@ def spooky_tree(rng):
     arm_end = np.array((5.6, 7.2, -0.6))
     branches += tube(rng, [(0.2, 5.6, 0), (2.6, 6.6, -0.3), arm_end], 0.5, 0.3, 6)
     tips.append(cone(arm_end - (0.2, 0, 0), arm_end + (1.2, 0.3, 0), 0.25))
-    hx, hz = 5.0, -0.55
-    rod = [prism(rng, (hx, 7.1, hz), (hx, 5.6, hz), 0.08, 0.08, 4, 0.0)]
-    frame = [slab(rng, hx - 0.65, 3.4, hz - 0.65, hx + 0.65, 3.65, hz + 0.65, 0.05, 0.0),
-             slab(rng, hx - 0.7, 5.15, hz - 0.7, hx + 0.7, 5.4, hz + 0.7, 0.05, 0.0)]
-    frame += [slab(rng, hx + sx * 0.6 - 0.1, 3.6, hz + sz * 0.6 - 0.1, hx + sx * 0.6 + 0.1, 5.2, hz + sz * 0.6 + 0.1, 0.0, 0.0)
-              for sx in (-1, 1) for sz in (-1, 1)]
-    roof = [np.array(ring(4, 1.0, 5.35, a0=math.pi / 4, c=(hx, hz)) + [(hx, 6.1, hz)])]
-    glass = [slab(rng, hx - 0.55, 3.6, hz - 0.55, hx + 0.55, 5.2, hz + 0.55, 0.0, 0.0)]
+    rod_frame, glass = lantern(rng, 5.0, -0.55, 7.1)
     return [("Trunk", BARK, trunk + roots), ("Branches", BARK_DARK, branches + tips),
-            ("Lantern", IRON, rod + frame + roof), ("Glass", GLOW, glass)]
+            ("Lantern", IRON, rod_frame), ("Glass", GLOW, glass)]
+
+
+def lantern(rng, hx, hz, top):
+    """An iron lantern hanging on a rod from (hx, top, hz): base and cap plates, corner
+    posts, a pyramid roof and a glowing pane. Returns (iron, glass)."""
+    b = top - 3.7  # the lantern's base
+    rod = [prism(rng, (hx, top, hz), (hx, b + 2.2, hz), 0.08, 0.08, 4, 0.0)]
+    frame = [slab(rng, hx - 0.65, b, hz - 0.65, hx + 0.65, b + 0.25, hz + 0.65, 0.05, 0.0),
+             slab(rng, hx - 0.7, b + 1.75, hz - 0.7, hx + 0.7, b + 2.0, hz + 0.7, 0.05, 0.0)]
+    frame += [slab(rng, hx + sx * 0.6 - 0.1, b + 0.2, hz + sz * 0.6 - 0.1, hx + sx * 0.6 + 0.1, b + 1.8, hz + sz * 0.6 + 0.1, 0.0, 0.0)
+              for sx in (-1, 1) for sz in (-1, 1)]
+    roof = [np.array(ring(4, 1.0, b + 1.95, a0=math.pi / 4, c=(hx, hz)) + [(hx, b + 2.7, hz)])]
+    glass = [slab(rng, hx - 0.55, b + 0.2, hz - 0.55, hx + 0.55, b + 1.8, hz + 0.55, 0.0, 0.0)]
+    return rod + frame + roof, glass
+
+
+def lantern_tree(rng):
+    """An autumn tree (about 13 tall): a short trunk and three thick branches under a round
+    canopy of faceted leaf clumps in red, orange and crimson, red apples hanging below, and
+    an iron lantern hanging from a low branch."""
+    trunk = tube(rng, [(0, -0.4, 0), (0.4, 3.0, 0.1), (0.1, 6.0, 0)], 1.3, 0.85, 7)
+    roots = [prism(rng, (math.cos(a) * 0.6, 0.9, math.sin(a) * 0.6), (math.cos(a) * 2.3, -0.2, math.sin(a) * 2.3), 0.55, 0.25, 6, 0.0)
+             for a in (0.4, 2.3, 4.3)]
+    branches = []
+    for a, e, L in ((0.3, 0.6, 3.6), (2.8, 0.6, 3.4), (4.5, 0.8, 2.8)):
+        d = np.array((math.cos(a) * math.cos(e), math.sin(e), math.sin(a) * math.cos(e)))
+        branches += tube(rng, [(0.1, 5.4, 0), (0.1, 5.4, 0) + d * L], 0.6, 0.35, 6)
+    # the lantern arm, low and to the right, sticking out from under the canopy
+    arm_end = np.array((5.4, 5.6, -0.8))
+    branches += tube(rng, [(0.2, 4.4, 0), (2.8, 5.2, -0.4), arm_end], 0.5, 0.3, 6)
+    rod_frame, glass = lantern(rng, 4.9, -0.75, 5.5)
+    clumps = [[], [], []]
+    for i, (x, y, z, r) in enumerate(((0, 10.6, 0, 3.2), (2.9, 9.4, 0.6, 2.4), (-2.9, 9.2, 0.4, 2.5), (0.6, 9.0, -2.5, 2.3),
+                                      (-0.8, 9.2, 2.6, 2.3), (2.0, 11.6, 1.2, 1.9), (-1.9, 11.4, -1.0, 2.0))):
+        clumps[i % 3].append(blob(rng, (x, y, z), r, 22, squash=(1.0, 0.85, 1.0), jitter=0.06))
+    apples, stems = [], []
+    for x, y, z in ((1.6, 7.9, -2.9), (-1.8, 8.1, -2.8), (3.9, 8.4, -1.2), (-4.1, 8.2, -0.6), (0.2, 7.4, -1.6), (2.6, 7.6, 2.2)):
+        apples.append(blob(rng, (x, y, z), 0.6, 12, jitter=0.03))
+        stems.append(prism(rng, (x, y + 0.4, z), (x, y + 0.9, z), 0.07, 0.07, 4, 0.0))
+    return [("Trunk", BARK, trunk + roots + branches), ("Leaves", (204, 52, 40), clumps[0]), ("Leaves", (232, 102, 36), clumps[1]),
+            ("Leaves", (160, 34, 62), clumps[2]), ("Apples", (226, 30, 40), apples), ("Lantern", IRON, rod_frame + stems),
+            ("Glass", GLOW, glass)]
+
+
+# ---------------------------------------------------------------- harvest
+
+STRAW = (232, 196, 96)
+STRAW_DARK = (206, 166, 70)
+TWINE = (120, 78, 44)
+WOOD = (120, 82, 52)
+
+
+def bale(rng, x, y, z, yaw=0.0, w=3.6, h=1.8, d=2.2):
+    """A hay bale: a straw block with two twine bands round it. Returns (straw, twine)."""
+    body = slab(rng, -w / 2, 0, -d / 2, w / 2, h, d / 2, 0.18, 0.0)
+    bands = [slab(rng, bx - 0.14, -0.04, -d / 2 - 0.06, bx + 0.14, h + 0.06, d / 2 + 0.06, 0.0, 0.0) for bx in (-w * 0.26, w * 0.26)]
+    put = lambda p: rot_y(p, yaw) + (x, y, z)  # noqa: E731
+    return [put(body)], [put(b) for b in bands]
+
+
+def hay_bale(rng):
+    """One hay bale (about 4 x 2 x 2)."""
+    s, t = bale(rng, 0, 0, 0)
+    return [("Straw", STRAW, s), ("Twine", TWINE, t)]
+
+
+def hay_stack(rng):
+    """Two bales side by side and one on top (about 5 wide, 4 tall)."""
+    S, T = [], []
+    for x, y, z, yaw in ((-1.0, 0, 0.0, 1.57), (1.4, 0, 0.1, 1.57), (0.2, 1.8, 0.05, 0.08)):
+        s, t = bale(rng, x, y, z, yaw)
+        S += s
+        T += t
+    return [("Straw", STRAW, S[:2]), ("Straw", STRAW_DARK, S[2:]), ("Twine", TWINE, T)]
+
+
+def scarecrow(rng):
+    """A scarecrow (about 10 tall): a post and crossbar, a patched green shirt with straw
+    poking out of the cuffs and hem, a jack-o'-lantern head and a pointed witch hat."""
+    post = [slab(rng, -0.3, -0.4, -0.3, 0.3, 7.0, 0.3, 0.05, 0.0)]
+    bar = [slab(rng, -3.4, 5.0, -0.25, 3.4, 5.5, 0.25, 0.05, 0.0)]
+    shirt = [slab(rng, -1.3, 2.6, -0.75, 1.3, 5.7, 0.75, 0.25, 0.0)]
+    sleeves = [slab(rng, -3.0, 4.75, -0.55, -1.1, 5.75, 0.55, 0.15, 0.0), slab(rng, 1.1, 4.75, -0.55, 3.0, 5.75, 0.55, 0.15, 0.0)]
+    patches = [slab(rng, -0.9, 3.2, -0.85, -0.2, 3.9, -0.7, 0.05, 0.0), slab(rng, 1.9, 4.85, -0.65, 2.5, 5.55, -0.5, 0.05, 0.0)]
+    rope = [slab(rng, -1.35, 3.0, -0.8, 1.35, 3.3, 0.8, 0.0, 0.0)]
+    straw = []
+    for s in (-1, 1):  # straw tufts out of each cuff: pyramids
+        for dy, dz in ((0.25, 0.0), (-0.2, 0.25), (-0.15, -0.25)):
+            c = np.array((s * 3.0, 5.25 + dy, dz))
+            straw.append(np.array([c + (0, dy2, dz2) for dy2 in (-0.22, 0.22) for dz2 in (-0.22, 0.22)] + [c + (s * 1.0, dy * 0.8, dz * 0.8)]))
+    for x in (-0.9, -0.3, 0.3, 0.9):  # and down from the hem
+        c = np.array((x, 2.7, -0.2))
+        straw.append(np.array([c + (dx, 0, dz) for dx in (-0.25, 0.25) for dz in (-0.25, 0.25)] + [c + (x * 0.15, -1.0, 0)]))
+    a, b, stem = pumpkin_parts(rng, (0, 5.6, 0), 1.35, 2.0)
+    fc = face((0, 5.6, 0), 1.35, 2.0, "happy")
+    hat_brim = [frustum(8, 1.9, 7.3, 1.9, 7.55)]
+    hat = [np.array(ring(4, 1.05, 7.5, a0=math.pi / 4) + [(0.7, 10.0, 0.5)])]
+    band_ = [frustum(4, 1.12, 7.5, 1.0, 7.85, a0=math.pi / 4)]
+    return [("Post", WOOD, post + bar), ("Shirt", (96, 140, 70), shirt + sleeves), ("Patches", (176, 92, 56), patches),
+            ("Rope", TWINE, rope), ("Straw", STRAW, straw), ("Pumpkin", PUMPKIN, a), ("Pumpkin", PUMPKIN_DARK, b),
+            ("Stem", STEM, stem), ("Face", GLOW, fc), ("Hat", (70, 46, 74), hat + hat_brim), ("HatBand", (232, 102, 36), band_)]
 
 
 # ---------------------------------------------------------------- pumpkins
@@ -226,16 +320,24 @@ ITEMS = [  # name, builder, seed, label
     ("PumpkinPile", pumpkin_pile, 2, "Pumpkins"),
     ("LeafPile", leaf_pile, 4, "Leaf pile"),
     ("LeafScatter", leaf_scatter, 5, "Leaves"),
+    ("LanternTree", lantern_tree, 2, "Lantern tree"),
+    ("Scarecrow", scarecrow, 1, "Scarecrow"),
+    ("HayBale", hay_bale, 1, "Hay bale"),
+    ("HayStack", hay_stack, 2, "Hay stack"),
 ]
 
-FLOOR = [(240, 136, 36), (226, 122, 28)]  # the Halloween world's orange grass
+FLOOR = [(112, 82, 142), (102, 74, 130)]  # the Halloween world's purple floor (QM's recolour, Oct 15)
 
 
 def main():
     built, sizes = build_set(OUT, ITEMS)
     rows = [lineup_row(built, sizes, [(n, l) for n, _, _, l in ITEMS[:3]], FLOOR, yaw=0),
-            lineup_row(built, sizes, [(n, l) for n, _, _, l in ITEMS[3:]], FLOOR, ppst=36, yaw=0)]
+            lineup_row(built, sizes, [(n, l) for n, _, _, l in ITEMS[3:7]], FLOOR, ppst=36, yaw=0)]
     stack(rows, os.path.join(OUT, "halloween_lineup.png"), "Halloween props (1x; figure is 5 studs)")
+    new = ["LanternTree", "Scarecrow", "HayBale", "HayStack"]
+    labels = dict((n, l) for n, _, _, l in ITEMS)
+    row = lineup_row(built, sizes, [(n, labels[n]) for n in new], FLOOR, ppst=34, yaw=0)
+    stack([row], os.path.join(OUT, "harvest_lineup.png"), "Halloween harvest props (1x; figure is 5 studs)")
 
 
 if __name__ == "__main__":
