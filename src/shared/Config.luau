@@ -2083,10 +2083,10 @@ end
 if Config.World == 4 then
 	local rgb = Color3.fromRGB
 	local meadow = table.clone(Config.Biomes[1])
-	meadow.GroundColors = { rgb(240, 136, 36), rgb(226, 122, 28) } -- bright orange grass
+	meadow.GroundColors = { rgb(121, 65, 137), rgb(113, 61, 130) } -- (QM, Oct 15: purple, set in Play; was orange 240,136,36)
 	meadow.Patches = table.clone(meadow.Patches or {})
-	meadow.Patches.Grass = { rgb(200, 98, 26), rgb(186, 88, 22) } -- darker orange, between the grass and the stone
-	meadow.Patches.Dirt = { rgb(70, 66, 80), rgb(60, 56, 70) } -- dark stone yard and paths
+	meadow.Patches.Grass = { rgb(100, 55, 105), rgb(92, 51, 97) } -- darker, between the ground and the paths
+	meadow.Patches.Dirt = { rgb(159, 136, 179), rgb(153, 130, 174) } -- the paths, light lilac
 	Config.Biomes = table.clone(Config.Biomes)
 	Config.Biomes[1] = meadow
 end

@@ -33,9 +33,9 @@ ANGLES = [-30 + i * 240 / 9 for i in range(10)]  # degrees from +x toward +z
 PEN_HALF = 44  # World 1's pens at their biggest, 22 tiles (tools/pens.py)
 PENS = [(C[0] + math.cos(math.radians(a)) * (R + PEN_HALF), C[1] + math.sin(math.radians(a)) * (R + PEN_HALF)) for a in ANGLES]
 COLOURS = {  # part, checker
-    BRIGHT: [(240, 136, 36), (226, 122, 28)],  # bright pumpkin orange ("Ground")
-    DARK: [(200, 98, 26), (186, 88, 22)],  # darker orange ("Grass")
-    STONE: [(70, 66, 80), (60, 56, 70)],  # dark stone path ("Dirt")
+    BRIGHT: [(121, 65, 137), (113, 61, 130)],  # purple ("Ground"; QM, Oct 15, set in Play: was orange)
+    DARK: [(100, 55, 105), (92, 51, 97)],  # darker purple ("Grass")
+    STONE: [(159, 136, 179), (153, 130, 174)],  # light lilac paths ("Dirt")
 }
 COLOURS[RAISED] = COLOURS[BRIGHT]
 

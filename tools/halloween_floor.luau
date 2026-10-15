@@ -12,10 +12,10 @@
 local W = workspace.World
 local rgb = Color3.fromRGB
 local KINDS = { -- [kind] = { name, top, part colour, checker colour }
-	[0] = { "Ground", 0, rgb(240, 136, 36), rgb(226, 122, 28) },
-	[1] = { "Grass", 0, rgb(200, 98, 26), rgb(186, 88, 22) }, -- the darker orange
-	[2] = { "Dirt", -1, rgb(70, 66, 80), rgb(60, 56, 70) }, -- the dark stone
-	[3] = { "Ground", 1, rgb(240, 136, 36), rgb(226, 122, 28) }, -- the bright orange a stud up
+	[0] = { "Ground", 0, rgb(121, 65, 137), rgb(113, 61, 130) },
+	[1] = { "Grass", 0, rgb(100, 55, 105), rgb(92, 51, 97) }, -- the darker purple
+	[2] = { "Dirt", -1, rgb(159, 136, 179), rgb(153, 130, 174) }, -- the lilac paths
+	[3] = { "Ground", 1, rgb(121, 65, 137), rgb(113, 61, 130) }, -- the ground a stud up
 }
 -- { kind, low x, low z, size x, size z } on 8-stud cells
 local FLOOR = {
