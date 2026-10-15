@@ -139,6 +139,17 @@ local HEADSHOTS = {
 	Loong = "rbxassetid://110728718265049", -- PetLoong.png
 	WarElephant = "rbxassetid://88035044263993", -- PetWarElephant.png
 	SoulHorse = "rbxassetid://102872657938822", -- PetSoulHorse.png
+	BlackCat = "rbxassetid://113004358144012", -- PetBlackCat.png (Halloween)
+	Bat = "rbxassetid://100128286970303", -- PetBat.png (Halloween)
+	PumpkinPup = "rbxassetid://116423656331586", -- PetPumpkinPup.png (Halloween)
+	PurpleTarantula = "rbxassetid://134177221629571", -- PetPurpleTarantula.png (Halloween)
+	Werewolf = "rbxassetid://128487650106554", -- PetWerewolf.png (Halloween)
+	Ghost = "rbxassetid://108549180902749", -- PetGhost.png (Halloween)
+	SkeletonDog = "rbxassetid://128602992140927", -- PetSkeletonDog.png (Halloween)
+	TombstoneCrawler = "rbxassetid://109858648843308", -- PetTombstoneCrawler.png (Halloween)
+	ZombieBear = "rbxassetid://126070362603608", -- PetZombieBear.png (Halloween)
+	WispWolf = "rbxassetid://112363865182650", -- PetWispWolf.png (Halloween)
+	GrimReaper = "rbxassetid://83787999904244", -- PetGrimReaper.png (Halloween)
 	Sludge = "rbxassetid://119834887149656", -- PetSludge.png
 	Leviathan = "rbxassetid://93677343741816", -- PetLeviathan.png
 }
