@@ -70,21 +70,21 @@ def gumball_golem():
                     ("LegFL", "root"), ("LegFR", "root"), ("Crank", "root")]
     rnd = random.Random(7)
 
-    def cube_ball(name, c, s, col, bone, shine=False, M=None, seg=10):
-        """A round gumball of diameter s centred on c (a smooth mesh)."""
-        C.hull(a, "Smooth" + name, C.G.ellipsoid(c, (s / 2,) * 3, seg=seg, rings=seg // 2), col, bone)
+    def cube_ball(name, c, s, col, bone, shine=False, M=None, seg=6):
+        """A round gumball of diameter s centred on c (a chunky low-poly mesh)."""
+        C.hull(a, "Gum" + name, C.G.ellipsoid(c, (s / 2,) * 3, seg=seg, rings=3), col, bone)
 
-    def band(name, c, r, dy, h, col, bone, seg=12):
+    def band(name, c, r, dy, h, col, bone, seg=8):
         """A stripe round a ball: the slice of a slightly bigger sphere from dy - h/2 to dy + h/2."""
-        P = C.G.ellipsoid(c, (r * 1.05,) * 3, seg=seg, rings=8, twist=0.0)
+        P = C.G.ellipsoid(c, (r * 1.05,) * 3, seg=seg, rings=6, twist=0.0)
         P[:, 1] = np.clip(P[:, 1], c[1] + dy - h / 2, c[1] + dy + h / 2)
-        C.hull(a, "Smooth" + name, P, col, bone)
+        C.hull(a, "Gum" + name, P, col, bone)
 
     def jaw(name, c, r, cols, bone, **_):
         """A striped jawbreaker: a round ball in cols[0] wrapped by bands in the other colours."""
         c = np.array(c, float)
         s = 2 * r
-        cube_ball(name, c, s, cols[0], bone, seg=12)
+        cube_ball(name, c, s, cols[0], bone, seg=8)
         nb = len(cols) - 1
         for k, col in enumerate(cols[1:]):
             dy = (k - (nb - 1) / 2) * min(0.42 * s / max(nb - 1, 1), 0.28 * s) if nb > 1 else 0.0
@@ -100,7 +100,7 @@ def gumball_golem():
     a.box("Plinth", (-bx - 0.3, by0 - 0.35, -bz - 0.45), (bx + 0.3, by0 + 0.35, bz + 0.45), RED_DK, "root")
     a.box("Lip", (-bx - 0.2, by1 - 0.4, -bz - 0.4), (bx + 0.2, by1 + 0.1, bz + 0.4), RED_DK, "root")
     # chrome collar the globe sits in (stepped rings)
-    C.hull(a, "SmoothCollar", C.G.prism((0, by1 + 0.1, 0), 3.1, 0.9, seg=16, top=0.95), CHROME, "root")
+    C.hull(a, "Collar", C.G.prism((0, by1 + 0.1, 0), 3.1, 0.9, seg=8, top=0.95), CHROME, "root")
     # chrome corner posts (rivets down the edges)
     for sx in (-1, 1):
         for sz in (-1, 1):
@@ -161,7 +161,7 @@ def gumball_golem():
     a.pivots["neck"] = (0, by1 + 0.5, 0)
     a.pivots["Balls"] = tuple(GC)
     g = 4.2  # globe radius
-    C.hull(a, "SmoothGlobe", C.G.ellipsoid(GC, (g, g, g), seg=20, rings=10), GLASS, "neck")
+    C.hull(a, "Globe", C.G.ellipsoid(GC, (g, g, g), seg=8, rings=4), GLASS, "neck")
     k_ball = [0]
 
     def gum(c, size=1.6):
@@ -194,11 +194,11 @@ def gumball_golem():
         C.stick(a, "Brow" + side, GC + d2 * g, d2, (2.4, 0.5, 0.6), C.LEMON_DK, "neck", sx * 8, 0.3)
     # chrome shoulder hubs on the sides
     for side, sx in (("L", -1), ("R", 1)):
-        C.hull(a, "SmoothShoulderHub" + side, C.G.prism(GC + (sx * (g - 0.6), 0, 0), 1.3, 1.0, seg=12,
+        C.hull(a, "ShoulderHub" + side, C.G.prism(GC + (sx * (g - 0.6), 0, 0), 1.3, 1.0, seg=8,
                M=C.G.R("z", -90 * sx)), CHROME, "neck")
     # chrome lid on top, the seat on it
     top = GC[1] + g
-    C.hull(a, "SmoothLid", C.G.dome((0, top - 0.75, 0), 3.0, 1.9, seg=16, rings=4, base=0.3), CHROME, "neck")
+    C.hull(a, "Lid", C.G.dome((0, top - 0.75, 0), 3.0, 1.9, seg=8, rings=2, base=0.3), CHROME, "neck")
     sy = top + 1.15
     a.box("Seat", (-1.25, sy, -0.9), (1.25, sy + 0.4, 1.5), RED, "neck")
     a.box("SeatBack", (-1.3, sy, 1.5), (1.3, sy + 1.0, 1.95), RED_DK, "neck")

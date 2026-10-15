@@ -72,9 +72,9 @@ return {
 		{ name = "Sugar20", bone = "root", class = "Part", size = Vector3.new(0.28, 0.2, 0.28), cframe = CFrame.new(-0.677303, 4.96741, 0.599419, 0.684557, 0.397261, 0.6112, 0.13209, -0.892176, 0.431943, 0.716892, -0.214956, -0.663219), color = Color3.fromRGB(255, 252, 246) },
 		{ name = "Sugar21", bone = "root", class = "Part", size = Vector3.new(0.28, 0.2, 0.28), cframe = CFrame.new(0.37766, 5.02358, 0.762149, -0.23718, -0.225207, -0.945001, 0.358241, -0.924477, 0.130403, -0.903, -0.307609, 0.299946), color = Color3.fromRGB(255, 252, 246) },
 		{ name = "Sugar22", bone = "root", class = "Part", size = Vector3.new(0.28, 0.2, 0.28), cframe = CFrame.new(-0.46681, 5.07005, -0.075265, -0.054715, -0.28095, 0.958161, -0.173989, 0.947601, 0.267918, -0.983226, -0.15205, -0.10073), color = Color3.fromRGB(255, 252, 246) },
-		{ name = "FF8C1E_neck", bone = "neck", class = "MeshPart", mesh = "GumdropFrog_FF8C1E_neck", size = Vector3.new(3.7217, 0.95, 1.5217), cframe = CFrame.new(0, 3.975, -3, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30), plain = true },
-		{ name = "DE6012_root", bone = "root", class = "MeshPart", mesh = "GumdropFrog_DE6012_root", size = Vector3.new(4.4724, 0.55, 4.6685), cframe = CFrame.new(0, 1.375, 0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18), plain = true },
-		{ name = "FF8C1E_root", bone = "root", class = "MeshPart", mesh = "GumdropFrog_FF8C1E_root", size = Vector3.new(4.4, 3.85, 4.6), cframe = CFrame.new(0, 3.175, 0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30), plain = true },
+		{ name = "FF8C1E_neck", bone = "neck", class = "MeshPart", mesh = "GumdropFrog_FF8C1E_neck", size = Vector3.new(3.5856, 0.95, 1.3856), cframe = CFrame.new(0, 3.975, -3, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
+		{ name = "DE6012_root", bone = "root", class = "MeshPart", mesh = "GumdropFrog_DE6012_root", size = Vector3.new(4.2129, 0.55, 4.3977), cframe = CFrame.new(0, 1.375, 0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(222, 96, 18) },
+		{ name = "FF8C1E_root", bone = "root", class = "MeshPart", mesh = "GumdropFrog_FF8C1E_root", size = Vector3.new(4.4, 3.85, 4.6), cframe = CFrame.new(0, 3.175, 0.2, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 140, 30) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
 	animations = {

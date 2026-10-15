@@ -31,10 +31,10 @@ return {
 		{ name = "LegFR", bone = "LegFR", class = "Part", size = Vector3.new(1.1, 1.25, 1.1), cframe = CFrame.new(1.35, 0.625, -1.45, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(200, 124, 50) },
 		{ name = "LegHL", bone = "LegHL", class = "Part", size = Vector3.new(1.1, 1.25, 1.1), cframe = CFrame.new(-1.35, 0.625, 1.45, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(200, 124, 50) },
 		{ name = "LegHR", bone = "LegHR", class = "Part", size = Vector3.new(1.1, 1.25, 1.1), cframe = CFrame.new(1.35, 0.625, 1.45, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(200, 124, 50) },
-		{ name = "EEAC54_neck", bone = "neck", class = "MeshPart", mesh = "Creampuff_EEAC54_neck", size = Vector3.new(5, 2.15, 4.8746), cframe = CFrame.new(0, 4.325, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(238, 172, 84), plain = true },
-		{ name = "EC2448_neck", bone = "neck", class = "MeshPart", mesh = "Creampuff_EC2448_neck", size = Vector3.new(1.0462, 1, 1.0462), cframe = CFrame.new(0, 5.85, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(236, 36, 72), plain = true },
-		{ name = "EEAC54_root", bone = "root", class = "MeshPart", mesh = "Creampuff_EEAC54_root", size = Vector3.new(4.6797, 1.8, 4.6797), cframe = CFrame.new(0, 1.8, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(238, 172, 84), plain = true },
-		{ name = "FFFCF6_root", bone = "root", class = "MeshPart", mesh = "Creampuff_FFFCF6_root", size = Vector3.new(5.7, 1.24, 5.4993), cframe = CFrame.new(0, 3.05, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 252, 246), plain = true },
+		{ name = "EEAC54_neck", bone = "neck", class = "MeshPart", mesh = "Creampuff_EEAC54_neck", size = Vector3.new(5, 2.15, 5), cframe = CFrame.new(0, 4.325, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(238, 172, 84) },
+		{ name = "EC2448_neck", bone = "neck", class = "MeshPart", mesh = "Creampuff_EC2448_neck", size = Vector3.new(0.9526, 1, 0.9526), cframe = CFrame.new(0, 5.85, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(236, 36, 72) },
+		{ name = "EEAC54_root", bone = "root", class = "MeshPart", mesh = "Creampuff_EEAC54_root", size = Vector3.new(4.8, 1.8, 4.8), cframe = CFrame.new(0, 1.8, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(238, 172, 84) },
+		{ name = "FFFCF6_root", bone = "root", class = "MeshPart", mesh = "Creampuff_FFFCF6_root", size = Vector3.new(5.4856, 1.24, 5.285), cframe = CFrame.new(0, 3.05, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 252, 246) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
 	animations = {

@@ -1,8 +1,9 @@
 """Creampuff: World 3 Candyland Rare (after the Candyland Hunting Grounds creampuffs).
 A grumpy cream puff: a golden choux bun cut in half with a fat puffy ring of whipped cream
 between, the top half a round lid that chomps open and shut like a mouth, a cherry on top,
-powdered sugar, googly eyes with chocolate brows and four stubby pastry feet. It hops. (QM, Oct 15: no longer spoiled; the bun, cream, lid and cherry are smooth
-meshes.)
+powdered sugar, googly eyes with chocolate brows and four stubby pastry feet. It hops.
+(QM, Oct 15: no longer spoiled; the bun, cream, lid and cherry are chunky low-poly meshes,
+few facets and studded, since smooth ones were "way too rounded".)
 
 Bones: root (bottom bun and cream), neck (the lid: opens with +X), EarL/EarR empty, Tail
 empty, Leg* (feet). Nothing turned.
@@ -31,14 +32,14 @@ def creampuff(name="Creampuff", rarity="Rare"):
     a.dims = dict(x=x, y0=y0, y1=y1, z0=z0, z1=z1)
     a.pivots["root"] = (0, 2.0, 0)
     # bottom bun: a squashed round bun, flat underneath and cut flat on top
-    P = C.G.ellipsoid((0, 1.95, 0), (x, 1.25, x), seg=14, rings=7)
+    P = C.G.ellipsoid((0, 1.95, 0), (x, 1.25, x), seg=8, rings=4)
     P[:, 1] = np.clip(P[:, 1], y0, y1 + 0.1)
-    C.hull(a, "SmoothBun", P, BUN, "root")
+    C.hull(a, "Bun", P, BUN, "root")
     # whipped cream piped round the cut: a ring of fat puffs bulging out past the bun
-    C.hull(a, "SmoothCream", C.G.ellipsoid((0, y1 + 0.45, 0), (x - 0.1, 0.55, x - 0.1), seg=14, rings=5), CREAM, "root")
+    C.hull(a, "Cream", C.G.ellipsoid((0, y1 + 0.45, 0), (x - 0.1, 0.55, x - 0.1), seg=8, rings=3), CREAM, "root")
     for k in range(10):
         t = C.TAU * (k + 0.5) / 10
-        C.hull(a, "SmoothCream", C.G.ellipsoid((2.05 * math.sin(t), y1 + 0.45, 2.05 * math.cos(t)), (0.8, 0.62, 0.8), seg=8, rings=4), CREAM, "root")
+        C.hull(a, "Cream", C.G.ellipsoid((2.05 * math.sin(t), y1 + 0.45, 2.05 * math.cos(t)), (0.8, 0.62, 0.8), seg=6, rings=3), CREAM, "root")
 
     # four stubby feet
     for leg in ("FL", "FR", "HL", "HR"):
@@ -52,7 +53,7 @@ def creampuff(name="Creampuff", rarity="Rare"):
     # ---- the lid (neck bone, hinged at the back of the cream): a round choux dome
     ly0 = y1 + 0.9
     r, h = 2.5, 1.9
-    C.hull(a, "SmoothLid", C.G.dome((0, ly0, 0), r, h, seg=14, rings=5, base=0.25), BUN, "neck")
+    C.hull(a, "Lid", C.G.dome((0, ly0, 0), r, h, seg=8, rings=2, base=0.25), BUN, "neck")
 
     def surf(phi, az):
         """A point on the lid (phi up from its rim, az round from the front) and its normal."""
@@ -69,7 +70,7 @@ def creampuff(name="Creampuff", rarity="Rare"):
     for i, (phi, az) in enumerate(((62, 140), (58, 230), (66, 320), (55, 50), (72, 190))):
         on_lid(f"Sugar{i + 1}", phi, az, (0.3, 0.3, 0.12), C.ICING)
     # a round cherry with a stem
-    C.hull(a, "SmoothCherry", C.G.ellipsoid((0, ly0 + h + 0.45, 0), (0.55, 0.5, 0.55), seg=10, rings=5), C.CHERRY, "neck")
+    C.hull(a, "Cherry", C.G.ellipsoid((0, ly0 + h + 0.45, 0), (0.55, 0.5, 0.55), seg=6, rings=3), C.CHERRY, "neck")
     C.beam(a, "Stem", (0, ly0 + h + 0.85, 0), (0.35, ly0 + h + 1.6, 0.25), 0.14, 0.14, C.LIME_DK, "neck")
     # googly eyes on the lid front, chocolate brows slanting down to the middle
     for side, sx in (("L", -1), ("R", 1)):

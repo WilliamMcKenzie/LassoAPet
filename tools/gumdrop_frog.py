@@ -1,9 +1,9 @@
 """Gumdrop Frog: World 3 Candyland Uncommon. A squat frog shaped like an orange gumdrop: a
-smooth dome body (widest at the bottom like a gumdrop) rolled in white sugar crystals, a
-darker orange base band, a wide frog head with two round smooth eye bumps on top (googly plates
+faceted dome body (widest at the bottom like a gumdrop) rolled in white sugar crystals, a
+darker orange base band, a wide frog head with two faceted eye bumps on top (googly plates
 facing forward), a wide chocolate grin with a cherry tongue tip, bubblegum cheeks, short
 front legs and big folded hind thighs with webbed feet. It hops (the quadruped leap gallop).
-(QM, Oct 15: the gumdrop, base band and eye bumps are smooth meshes.)
+(QM, Oct 15: the gumdrop, base band and eye bumps are chunky low-poly meshes, studded.)
 
     python3 tools/gumdrop_frog.py [--still]
 """
@@ -29,10 +29,10 @@ def gumdrop_frog(name="GumdropFrog", rarity="Uncommon", gum=GUM, gum_dk=GUM_DK, 
     x, y0, y1, z0, z1 = 2.1, 1.1, 3.4, -2.0, 2.4
     a.dims = dict(x=x, y0=y0, y1=y1, z0=z0, z1=z1)
     a.pivots["root"] = (0, (y0 + y1) / 2, (z0 + z1) / 2)
-    # the gumdrop: a smooth dome (widest at the bottom) on a darker base band, rolled in sugar
+    # the gumdrop: a faceted dome (widest at the bottom) on a darker base band, rolled in sugar
     cz, rx, rz, h = (z0 + z1) / 2, x + 0.1, (z1 - z0) / 2 + 0.1, y1 + 1.7 - (y0 + 0.9)
-    C.hull(a, "SmoothBase", C.G.prism((0, y0, cz), (rx + 0.08, rz + 0.08), 0.55, seg=16), gum_dk, "root")
-    C.hull(a, "SmoothBody", C.G.dome((0, y0 + 0.9, cz), (rx, rz), h, seg=16, rings=5, base=0.75), gum, "root")
+    C.hull(a, "Base", C.G.prism((0, y0, cz), (rx + 0.08, rz + 0.08), 0.55, seg=8), gum_dk, "root")
+    C.hull(a, "Body", C.G.dome((0, y0 + 0.9, cz), (rx, rz), h, seg=8, rings=3, base=0.75), gum, "root")
     a.box("Belly", (-1.5, y0 - 0.15, z0 + 0.3), (1.5, y0, z1 - 0.5), belly, "root")
 
     def surf(phi, az):
@@ -80,7 +80,7 @@ def gumdrop_frog(name="GumdropFrog", rarity="Uncommon", gum=GUM, gum_dk=GUM_DK, 
     C.sym(a, "Nostril*", (0.25, hy1 - 0.45, hz0 - 0.06), (0.45, hy1 - 0.3, hz0), gum_dk, "neck")
     for side, sx in (("L", -1), ("R", 1)):  # round eye bumps, googly eyes looking forward
         c = np.array((sx * 1.1, hy1 + 0.3, -3.0))
-        C.hull(a, "SmoothTurret", C.G.ellipsoid(c, (0.8, 0.95, 0.8), seg=10, rings=5, cut=0.0), gum, "neck")
+        C.hull(a, "Turret", C.G.ellipsoid(c, (0.8, 0.95, 0.8), seg=6, rings=3, cut=0.0), gum, "neck")
         d = np.array((sx * 0.25, 0.45, -1.0))
         d /= np.linalg.norm(d)
         C.surface_eye(a, side, c + d * np.array((0.8, 0.95, 0.8)), d, 0.95, 1.0, "neck")
