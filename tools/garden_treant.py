@@ -1,8 +1,12 @@
-"""Ancient Treant: World 3 Garden giga rare (draft, Oct 14; about 1 in 1,000). A towering old tree
+"""DON'T RERUN: QM edited designs/garden/AncientTreant.bbmodel by hand in Blockbench (Oct 15), which is now the
+source; this would overwrite it. Convert that file instead (animations() is still used for its walk).
+
+Ancient Treant: World 3 Garden giga rare (draft, Oct 14; about 1 in 1,000). A towering old tree
 that walks: a thick trunk of stacked bark blocks with darker ridges, a face in the bark (deep
 sockets with big googly eyes, a knotted nose, a wide mossy beard), shelf mushrooms and moss patches
 up its sides, branch arms ending in forked twig fingers (pyramid tips), two huge root legs with
-splayed pyramid roots, and a vast layered canopy dotted with pink blossoms. Ridden on the canopy.
+splayed pyramid roots, and a vast canopy of faceted leafy clumps dotted with pink blossoms
+(Oct 15, QM: the foliage as one mesh; shoulder tufts and blossoms meshes too). Ridden on the canopy.
 Same family as the Living Birch and Palm Guy, just ancient and enormous.
 
 Run: python3 tools/garden_treant.py [--gif]
@@ -17,8 +21,8 @@ import garden_lib as G
 from garden_lib import Garden, Rm, track, sin, TAU
 
 C = {"bark": (126, 84, 52), "barkdark": (84, 54, 36), "barklight": (160, 112, 70), "socket": (44, 28, 22),
-     "moss": (96, 170, 60), "mossdark": (56, 120, 44), "leaf": (60, 160, 60), "leafdark": (34, 112, 46),
-     "leaflight": (120, 200, 70), "blossom": (255, 140, 190), "blossomdark": (220, 80, 150),
+     "moss": (96, 170, 60), "mossdark": (56, 120, 44), "leaf": (60, 160, 60),
+     "blossom": (255, 140, 190),
      "shroom": (240, 132, 40), "shroomdark": (190, 90, 30)}
 
 
@@ -82,33 +86,30 @@ def build():
         for k, dd in enumerate(((-0.5, -1, -0.4), (0.0, -1, -0.8), (0.5, -1, -0.4), (s * 0.9, -0.6, 0.2))):
             g.spike(arm, "Twig" + side, hand + np.array(dd) * 0.8, dd, 1.2, 0.3, "barkdark", shaft=1.2)
         g.box(arm, "ElbowTwig" + side, el + (0, 1.2, 0), (0.6, 2.4, 0.6), "barkdark", Rm(("z", -s * 20)))
-        g.box(arm, "ElbowLeaf" + side, el + (s * -0.4, 2.6, 0), (2.0, 1.2, 1.8), "leaflight")
-        for k, (dx, dy, dz) in enumerate(((0.4, 1.6, -0.6), (1.6, 1.2, 0.8), (-0.2, 1.4, 1.4))):
-            g.box(arm, "ShoulderLeaf" + side, sh + (s * dx, dy, dz), (3.0, 1.6, 2.6), "leaf" if k % 2 else "leafdark")
-    # canopy: a broad layered crown, clumps round it, blossoms dotted on top and sides
+        g.hull(arm, "ElbowLeaf" + side, G.ellipsoid(el + (s * -0.4, 2.6, 0), (1.2, 0.9, 1.1), seg=7, rings=3), "leaf")
+        for k, (dx, dy, dz, r) in enumerate(((0.4, 1.2, -0.6, 1.8), (1.6, 0.9, 0.8, 1.6), (-0.2, 1.0, 1.4, 1.5))):
+            g.hull(arm, "ShoulderLeaf" + side, G.ellipsoid(sh + (s * dx, dy, dz), (r, r * 0.8, r), seg=7, rings=3), "leaf")
+    # canopy (QM Oct 15: "the whole tree foliage could be one mesh"): faceted leafy clumps, all one colour, so
+    # they merge into one MeshPart, pink blossoms half sunk into them (one more mesh)
     neck = g.group("neck", (0, top, 0), root)
     c = top + 1.0
-    for name, lo, hi, col in [
-            ("Crown", (-5.0, c - 1.0, -4.4), (5.0, c + 1.2, 4.4), "barkdark"),
-            ("LeavesLow", (-8.0, c + 0.8, -6.6), (8.0, c + 3.6, 6.6), "leafdark"),
-            ("Leaves", (-9.4, c + 3.2, -7.8), (9.4, c + 7.2, 7.8), "leaf"),
-            ("LeavesMid", (-7.6, c + 6.8, -6.2), (7.6, c + 9.6, 6.2), "leaf"),
-            ("LeavesTop", (-4.6, c + 9.2, -4.0), (4.6, c + 11.0, 4.0), "leaflight"),
-            ("ClumpFL", (-10.4, c + 4.4, -8.6), (-5.6, c + 8.4, -4.4), "leaflight"),
-            ("ClumpFR", (5.0, c + 2.2, -9.0), (9.8, c + 6.0, -4.6), "leafdark"),
-            ("ClumpBL", (-9.8, c + 2.4, 4.0), (-5.2, c + 6.2, 8.6), "leafdark"),
-            ("ClumpBR", (5.4, c + 5.0, 3.6), (10.2, c + 9.2, 8.4), "leaflight"),
-            ("ClumpL", (-11.0, c + 6.4, -1.6), (-7.0, c + 9.6, 2.4), "leafdark"),
-            ("ClumpR", (7.0, c + 7.0, -2.8), (10.8, c + 10.0, 1.2), "leaflight"),
-            ("ClumpTop", (-1.0, c + 10.6, -1.4), (3.0, c + 12.4, 2.6), "leaf"),
-            ("ClumpTopB", (-4.0, c + 10.4, 0.8), (-0.8, c + 11.8, 4.2), "leafdark"),
-            ("ClumpF", (-3.0, c + 4.0, -9.4), (3.4, c + 7.4, -7.0), "leaflight")]:
-        lo, hi = np.array(lo), np.array(hi)
-        g.box(neck, name, (lo + hi) / 2, hi - lo, col)
-    for k, (x, yy, z) in enumerate(((-6.0, 7.4, -7.0), (2.0, 7.6, -8.2), (7.0, 6.2, -4.8), (-9.6, 5.0, 2.0), (9.6, 8.2, 3.0),
-                                    (-3.0, 9.8, -4.4), (3.2, 9.8, 3.0), (0.6, 12.6, 0.6), (-8.4, 8.4, -4.2), (6.8, 3.6, 6.8),
-                                    (-6.0, 4.4, 7.0), (5.6, 9.8, -3.6), (-2.4, 11.3, 2.6), (0.0, 6.0, 8.0))):
-        g.box(neck, "Blossom", (x, c + yy, z), (2.0, 2.0, 2.0), "blossom" if k % 3 else "blossomdark", Rm(("y", 45)))
+    g.box(neck, "Crown", (0, c + 0.1, 0), (10.0, 2.2, 8.8), "barkdark")
+    clumps = [((0, c + 4.6, 0), (9.6, 4.4, 8.0)), ((0, c + 8.4, 0), (7.0, 3.6, 6.0)), ((0.6, c + 11.0, 0.4), (3.8, 2.4, 3.4)),
+              ((-8.2, c + 6.4, -6.2), (3.2, 2.8, 3.0)), ((7.4, c + 4.4, -6.6), (3.2, 2.6, 3.0)),
+              ((-7.4, c + 4.4, 6.2), (3.2, 2.6, 3.0)), ((7.8, c + 7.2, 6.0), (3.2, 2.8, 3.0)),
+              ((-9.2, c + 8.0, 0.4), (2.8, 2.4, 2.8)), ((9.0, c + 8.4, -0.8), (2.6, 2.2, 2.6)),
+              ((0.2, c + 5.6, -8.4), (4.0, 2.6, 2.4)), ((-0.4, c + 5.0, 8.2), (4.0, 2.6, 2.4))]
+    for k, (cc, r) in enumerate(clumps):
+        g.hull(neck, "Leaves", G.ellipsoid(cc, r, seg=9, rings=4, twist=0.5 if k % 2 else 0.25), "leaf")
+    for k, (i, d) in enumerate(((0, (-0.6, 0.6, -0.5)), (0, (0.7, 0.5, -0.4)), (0, (0.2, 0.4, 0.9)), (1, (-0.5, 0.7, -0.5)),
+                                (1, (0.6, 0.7, 0.3)), (2, (0.2, 1, -0.2)), (3, (-0.5, 0.8, -0.3)), (4, (0.5, 0.8, -0.4)),
+                                (5, (-0.4, 0.8, 0.5)), (6, (0.5, 0.8, 0.3)), (9, (0.3, 0.5, -1)), (10, (-0.3, 0.5, 1)),
+                                (7, (-1, 0.5, 0)), (8, (1, 0.5, 0)))):
+        cc, r = clumps[i]
+        d = np.array(d, float)
+        d /= np.linalg.norm(d * 1.0)
+        u = d / np.sqrt(np.sum((d / np.array(r)) ** 2))  # the clump's surface in direction d
+        g.hull(neck, "Blossom", G.ellipsoid(np.array(cc) + u * 0.92, (1.1, 1.1, 1.1), seg=6, rings=3), "blossom")
     return g
 
 
