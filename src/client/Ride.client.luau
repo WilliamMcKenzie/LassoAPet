@@ -4422,6 +4422,16 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	-- Bigger pets fill more of the view: the camera pulls back RideZoomPerTier
 	-- times further for each size tier above small (Config.PetTiers).
 	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
+	-- (and back as far as it takes to see over a pet taller than RideCamTall, as it grows: the
+	-- 4x Robo Shark and Loong filled the view, QM Oct 15)
+	if mount and not mount.giant and mount.animal.model.PrimaryPart then
+		local a = mount.animal
+		if not mount.camH0 then
+			local _, ext = a.model:GetBoundingBox()
+			mount.camH0 = ext.Y / (a.size * a.scale)
+		end
+		zoomTo = math.max(zoomTo, mount.camH0 * a.size * a.scale / Config.RideCamTall)
+	end
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and (phase == "outbound" or phase == "return") and sprinting(), if phase == "return" and Config.ReturnCamFixed then Config.SprintCam.HorseSprint elseif mount then mount.speed * (vfx.speedGain or 1) else nil) -- (the run home's a sprint too: QM)
 	local z = vfx.camZoom * sprintZoom

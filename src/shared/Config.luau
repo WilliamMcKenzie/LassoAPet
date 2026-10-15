@@ -636,6 +636,7 @@ local Config = {
 	-- The riding camera pulls back this much further per tier above small: 1x on a
 	-- small pet, 1.2x on a medium, 1.44x on a large (QM, Oct 2).
 	RideZoomPerTier = 1, -- (QM, Oct 9: riding always the same plain view; was 1.2)
+	RideCamTall = 16, -- studs: a pet taller than this pulls the ride out's camera back in proportion (QM, Oct 15)
 	RideCamSeat = 9, -- how high a Horse's rider sits (studs); on anything taller the ride out's camera rises by the difference (QM, Oct 11)
 	ObstacleTiers = {
 		Bush = 1, Rock = 2, Stone = 1, Sandstone = 1, -- small
