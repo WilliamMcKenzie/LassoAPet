@@ -41,6 +41,12 @@ local IDS = {
 	Bumblebee_Wing_WingFR = 76404368724892, -- (re-upload: QM's Blockbench edit, Oct 15)
 	Bumblebee_Yellow_Abdomen = 79819704203552,
 	Bumblebee_Yellow_root = 73623092957303,
+	VineMonster_Leaf_LeavesL = 132839468011196, -- (the Vine Monster: QM's Blockbench edit, Oct 15)
+	VineMonster_Leaf_LeavesR = 102753960814800,
+	VineMonster_Rose_Rose = 139718791105732,
+	VineMonster_Rosedark_Rose = 101570267675570,
+	VineMonster_Vinelight_VineL = 103130234470918,
+	VineMonster_Vinelight_VineR = 115011483764524,
 }
 local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
 if not folder then
