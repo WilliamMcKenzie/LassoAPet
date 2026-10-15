@@ -2088,6 +2088,7 @@ if Config.World == 4 then
 	meadow.Patches.Grass = { rgb(100, 55, 105), rgb(92, 51, 97) } -- darker, between the ground and the paths
 	meadow.Patches.Dirt = { rgb(159, 136, 179), rgb(153, 130, 174) } -- the paths, light lilac
 	Config.Biomes = table.clone(Config.Biomes)
+	meadow.WallColors = { rgb(63, 38, 77), rgb(74, 44, 87) } -- dark purple walls (QM, Oct 15)
 	Config.Biomes[1] = meadow
 	Config.Sky = "Default" -- Roblox's own sky with its clouds and stars (QM, Oct 15: World.server)
 end
