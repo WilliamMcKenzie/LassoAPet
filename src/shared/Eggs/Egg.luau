@@ -161,6 +161,11 @@ local KINDS = {
 	Leviathan = { data = require(script.Parent.LeviathanEggModel), center = 1.6 },
 	Sludge = { data = require(script.Parent.SludgeEggModel), center = 1.6 },
 }
+-- The Halloween world's giga rares: their bases' eggs in their colours (Shared/HalloweenSkins).
+local HalloweenSkins = require(script.Parent.Parent.HalloweenSkins)
+for kind, base in HalloweenSkins.Base do
+	KINDS[kind] = { data = HalloweenSkins.model(kind, KINDS[base].data), center = KINDS[base].center }
+end
 
 local Egg = {}
 Egg.__index = Egg
