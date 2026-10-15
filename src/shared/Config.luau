@@ -1974,7 +1974,7 @@ if Config.World == 3 then
 			CapColor = rgb(255, 255, 255),
 			-- (Oct 14, the Candyland animals thread: weights as the Pirate Cove's by rarity, guesses;
 			-- its giga rares and the Gigacorn added below)
-			Herd = { GummyBear = 0.3, YellowGummyBear = 0.1, GreenGummyBear = 0.05, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, SwollFairy = 0.08, DesireTroll = 0.03 },
+			Herd = { GummyBear = 0.3, YellowGummyBear = 0.05, GreenGummyBear = 0.05, GumdropFrog = 0.25, GingerbreadMan = 0.25, Creampuff = 0.15, SwollFairy = 0.08, DesireTroll = 0.03 },
 			Patches = {
 				Chocolate = { rgb(110, 62, 40), rgb(98, 54, 34) },
 				Cream = { rgb(255, 236, 200), rgb(248, 224, 184) },
