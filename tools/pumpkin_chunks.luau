@@ -8,6 +8,14 @@
 -- of its start edge at floor height, facing down the course (-z), so the next chunk goes at
 -- pivot * CFrame.new(0, 0, -LENGTH). Parts are named Ground (tan), Grass (green), Dirt
 -- (brown) for WorldColors; World 4's Pumpkin Patch needs those three in Config.
+-- Each chunk is dressed too (QM, Oct 15: the harvest props and the pumpkins, "thoughtful
+-- placements"): little scenes against the walls taking turns side to side every 64 studs (an
+-- orchard tree with hay and pumpkins, a scarecrow on bales, a pumpkin pile with jack-o-lanterns,
+-- a hay stack), a loose pumpkin or leaves opposite each, the middle kept clear to ride. Copies of
+-- ServerStorage.HalloweenProps (as stored), in each chunk's Props folder, facing in from their
+-- wall and turned 30 degrees back toward the riders. The big ones (tree, scarecrow, hay stack,
+-- pumpkin pile) carry an invisible "Base" footprint and a Tier attribute, like the course's
+-- Obstacles, for the runtime to make them smashable.
 local rgb = Color3.fromRGB
 local LENGTH = 256
 local LOOK = {
@@ -267,6 +275,124 @@ local CHUNKS = {
 	},
 }
 
+-- per chunk: { item, x, z, yaw degrees, tier (0 = decor) } (yaw: CFrame.Angles on a model facing -z)
+local PROPS = {
+	{ -- Chunk1
+		{ "LanternTree", -64.9, -32.0, -120, 3 },
+		{ "HayStack", -70.9, -47.0, -120, 2 },
+		{ "Pumpkin", -62.9, -41.0, -140, 0 },
+		{ "LeafScatter", -56.9, -28.0, -120, 0 },
+		{ "Pumpkin", -69.9, -20.0, -105, 0 },
+		{ "LeafScatter", 69.9, -24.0, 0, 0 },
+		{ "Scarecrow", 67.9, -96.0, 120, 2 },
+		{ "HayBale", 71.9, -104.0, 120, 0 },
+		{ "HayBale", 67.9, -104.0, 210, 0 },
+		{ "JackOLanternSmall", 62.9, -89.0, 130, 0 },
+		{ "LeafScatter", 59.9, -95.0, 120, 0 },
+		{ "Pumpkin", 70.9, -85.0, 120, 0 },
+		{ "Pumpkin", -69.9, -88.0, 0, 0 },
+		{ "PumpkinPile", -69.9, -160.0, -120, 2 },
+		{ "JackOLantern", -63.9, -150.0, -120, 0 },
+		{ "Pumpkin", -62.9, -169.0, -145, 0 },
+		{ "LeafPile", -60.9, -163.0, -120, 0 },
+		{ "JackOLanternSmall", -70.9, -173.0, -120, 0 },
+		{ "LeafPile", 69.9, -152.0, 0, 0 },
+		{ "HayStack", 70.9, -224.0, 120, 2 },
+		{ "HayBale", 64.9, -215.0, 150, 0 },
+		{ "HayBale", 71.9, -215.0, 120, 0 },
+		{ "Pumpkin", 64.9, -232.0, 120, 0 },
+		{ "JackOLanternSmall", 62.9, -222.0, 110, 0 },
+		{ "LeafScatter", 57.9, -234.0, 120, 0 },
+		{ "JackOLanternSmall", -69.9, -216.0, 0, 0 },
+	},
+	{ -- Chunk2
+		{ "Scarecrow", -67.9, -32.0, -120, 2 },
+		{ "HayBale", -71.9, -40.0, -120, 0 },
+		{ "HayBale", -67.9, -40.0, -210, 0 },
+		{ "JackOLanternSmall", -62.9, -25.0, -130, 0 },
+		{ "LeafScatter", -59.9, -31.0, -120, 0 },
+		{ "Pumpkin", -70.9, -21.0, -120, 0 },
+		{ "Pumpkin", 69.9, -40.0, 0, 0 },
+		{ "LanternTree", 64.9, -96.0, 120, 3 },
+		{ "HayStack", 70.9, -111.0, 120, 2 },
+		{ "Pumpkin", 62.9, -105.0, 140, 0 },
+		{ "LeafScatter", 56.9, -92.0, 120, 0 },
+		{ "Pumpkin", 69.9, -84.0, 105, 0 },
+		{ "LeafPile", -69.9, -104.0, 0, 0 },
+		{ "HayStack", -70.9, -160.0, -120, 2 },
+		{ "HayBale", -64.9, -151.0, -150, 0 },
+		{ "HayBale", -71.9, -151.0, -120, 0 },
+		{ "Pumpkin", -64.9, -168.0, -120, 0 },
+		{ "JackOLanternSmall", -62.9, -158.0, -110, 0 },
+		{ "LeafScatter", -57.9, -170.0, -120, 0 },
+		{ "JackOLanternSmall", 69.9, -168.0, 0, 0 },
+		{ "PumpkinPile", 69.9, -224.0, 120, 2 },
+		{ "JackOLantern", 63.9, -214.0, 120, 0 },
+		{ "Pumpkin", 62.9, -233.0, 145, 0 },
+		{ "LeafPile", 60.9, -227.0, 120, 0 },
+		{ "JackOLanternSmall", 70.9, -237.0, 120, 0 },
+		{ "LeafScatter", -69.9, -232.0, 0, 0 },
+	},
+	{ -- Chunk3
+		{ "PumpkinPile", -69.9, -32.0, -120, 2 },
+		{ "JackOLantern", -63.9, -22.0, -120, 0 },
+		{ "Pumpkin", -62.9, -41.0, -145, 0 },
+		{ "LeafPile", -60.9, -35.0, -120, 0 },
+		{ "JackOLanternSmall", -70.9, -45.0, -120, 0 },
+		{ "LeafPile", 69.9, -24.0, 0, 0 },
+		{ "HayStack", 70.9, -96.0, 120, 2 },
+		{ "HayBale", 64.9, -87.0, 150, 0 },
+		{ "HayBale", 71.9, -87.0, 120, 0 },
+		{ "Pumpkin", 64.9, -104.0, 120, 0 },
+		{ "JackOLanternSmall", 62.9, -94.0, 110, 0 },
+		{ "LeafScatter", 57.9, -106.0, 120, 0 },
+		{ "JackOLanternSmall", -69.9, -88.0, 0, 0 },
+		{ "LanternTree", -64.9, -160.0, -120, 3 },
+		{ "HayStack", -70.9, -175.0, -120, 2 },
+		{ "Pumpkin", -62.9, -169.0, -140, 0 },
+		{ "LeafScatter", -56.9, -156.0, -120, 0 },
+		{ "Pumpkin", -69.9, -148.0, -105, 0 },
+		{ "LeafScatter", 69.9, -152.0, 0, 0 },
+		{ "Scarecrow", 67.9, -224.0, 120, 2 },
+		{ "HayBale", 71.9, -232.0, 120, 0 },
+		{ "HayBale", 67.9, -232.0, 210, 0 },
+		{ "JackOLanternSmall", 62.9, -217.0, 130, 0 },
+		{ "LeafScatter", 59.9, -223.0, 120, 0 },
+		{ "Pumpkin", 70.9, -213.0, 120, 0 },
+		{ "Pumpkin", -69.9, -216.0, 0, 0 },
+	},
+	{ -- Chunk4
+		{ "HayStack", -70.9, -32.0, -120, 2 },
+		{ "HayBale", -64.9, -23.0, -150, 0 },
+		{ "HayBale", -71.9, -23.0, -120, 0 },
+		{ "Pumpkin", -64.9, -40.0, -120, 0 },
+		{ "JackOLanternSmall", -62.9, -30.0, -110, 0 },
+		{ "LeafScatter", -57.9, -42.0, -120, 0 },
+		{ "JackOLanternSmall", 69.9, -40.0, 0, 0 },
+		{ "PumpkinPile", 69.9, -96.0, 120, 2 },
+		{ "JackOLantern", 63.9, -86.0, 120, 0 },
+		{ "Pumpkin", 62.9, -105.0, 145, 0 },
+		{ "LeafPile", 60.9, -99.0, 120, 0 },
+		{ "JackOLanternSmall", 70.9, -109.0, 120, 0 },
+		{ "LeafScatter", -69.9, -104.0, 0, 0 },
+		{ "Scarecrow", -67.9, -160.0, -120, 2 },
+		{ "HayBale", -71.9, -168.0, -120, 0 },
+		{ "HayBale", -67.9, -168.0, -210, 0 },
+		{ "JackOLanternSmall", -62.9, -153.0, -130, 0 },
+		{ "LeafScatter", -59.9, -159.0, -120, 0 },
+		{ "Pumpkin", -70.9, -149.0, -120, 0 },
+		{ "Pumpkin", 69.9, -168.0, 0, 0 },
+		{ "LanternTree", 64.9, -224.0, 120, 3 },
+		{ "HayStack", 70.9, -239.0, 120, 2 },
+		{ "Pumpkin", 62.9, -233.0, 140, 0 },
+		{ "LeafScatter", 56.9, -220.0, 120, 0 },
+		{ "Pumpkin", 69.9, -212.0, 105, 0 },
+		{ "LeafPile", -69.9, -232.0, 0, 0 },
+	},
+}
+-- If the props turn out facing the wall instead of the riders, set this to 180.
+local YAW_OFFSET = 0
+
 local SS = game:GetService("ServerStorage")
 local folder = SS:FindFirstChild("PumpkinPatchChunks") or Instance.new("Folder")
 folder.Name = "PumpkinPatchChunks"
@@ -277,7 +403,7 @@ for _, p in workspace.World.Ground:GetChildren() do -- (the 4-stud checker, off 
 	checker = checker or p:FindFirstChildWhichIsA("Texture")
 end
 assert(checker, "no checker Texture on the floor to copy")
-local parts = 0
+local parts, placed, missing = 0, 0, {}
 for n, list in CHUNKS do
 	local model = Instance.new("Model")
 	model.Name = "Chunk" .. n
@@ -305,7 +431,40 @@ for n, list in CHUNKS do
 		p.Parent = model
 		parts += 1
 	end
+	local dressing = Instance.new("Folder")
+	dressing.Name = "Props"
+	dressing.Parent = model
+	for _, q in PROPS[n] do
+		local source = SS.HalloweenProps:FindFirstChild(q[1])
+		if not source then
+			table.insert(missing, q[1])
+			continue
+		end
+		local prop = source:Clone()
+		prop:PivotTo(CFrame.new(q[2], 0, q[3]) * CFrame.Angles(0, math.rad(q[4] + YAW_OFFSET), 0))
+		local cf, size = prop:GetBoundingBox()
+		prop:PivotTo(prop:GetPivot() + Vector3.new(0, -(cf.Y - size.Y / 2), 0)) -- (stood on the floor)
+		for _, p in prop:GetDescendants() do
+			if p:IsA("BasePart") then
+				p.Anchored = true
+			end
+		end
+		if q[5] > 0 then
+			cf, size = prop:GetBoundingBox()
+			local base = Instance.new("Part")
+			base.Name = "Base"
+			base.Anchored, base.CanCollide, base.CanQuery, base.CanTouch = true, false, false, false
+			base.Transparency = 1
+			base.Size = Vector3.new(size.X, 1, size.Z)
+			base.CFrame = CFrame.new(cf.X, 0.5, cf.Z)
+			base.Parent = prop
+			prop:SetAttribute("Tier", q[5])
+		end
+		prop.Parent = dressing
+		placed += 1
+	end
 	model:SetAttribute("Length", LENGTH)
 	model.Parent = folder
 end
-return string.format("%d chunks, %d parts, each %d long", #CHUNKS, parts, LENGTH)
+return string.format("%d chunks, %d parts, each %d long; %d props placed%s", #CHUNKS, parts, LENGTH, placed,
+	if #missing > 0 then ", missing from ServerStorage.HalloweenProps: " .. table.concat(missing, ", ") else "")
