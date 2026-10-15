@@ -29,7 +29,15 @@ function RiderTrail.make(hrp, name, colors, lifetime, head)
 	local t = Instance.new("Trail")
 	t.Name = name
 	t.Attachment0, t.Attachment1 = top, bottom
-	t.Color = ColorSequence.new(colors[1], colors[2] or colors[1])
+	if #colors > 2 then -- (bands, front to back: the trail bars' trails, Config.TrailBars)
+		local keys = {}
+		for i, c in colors do
+			table.insert(keys, ColorSequenceKeypoint.new((i - 1) / (#colors - 1), c))
+		end
+		t.Color = ColorSequence.new(keys)
+	else
+		t.Color = ColorSequence.new(colors[1], colors[2] or colors[1])
+	end
 	t.Transparency = NumberSequence.new(head or 0.1, 1)
 	t.Lifetime = lifetime
 	t.MinLength = 0.2
