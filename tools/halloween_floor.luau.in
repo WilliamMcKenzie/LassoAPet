@@ -1,0 +1,100 @@
+-- The Halloween world's base floor (QM, Oct 15: like the Meadow base, orange grass and dark
+-- stone paths). Made by tools/halloween_floor.py: edit that and re-make this, not this.
+-- Run in Studio (Edit, execute_luau) on the Halloween Place, after tools/halloween_base.luau.
+-- Re-running is fine.
+-- Bright orange grass, darker orange and dark stone as a gradient: the bright never touches
+-- the stone, there's always darker orange between. The stone is sunk a stud; the bright
+-- orange a stud up, but flat inside the pens and on the start line's row. Replaces the
+-- one Grass part tools/halloween_base.luau laid (kept in ServerStorage.HalloweenStripped)
+-- and moves the spawn and anything in BaseDecor with the floor under it.
+-- In game the floor takes Config's colours by part name: Ground (bright), the Patches
+-- Grass (darker) and Dirt (stone): World 4 needs its own block in Config for these.
+local W = workspace.World
+local rgb = Color3.fromRGB
+local KINDS = { -- [kind] = { name, top, part colour, checker colour }
+	[0] = { "Ground", 0, rgb(240, 136, 36), rgb(226, 122, 28) },
+	[1] = { "Grass", 0, rgb(200, 98, 26), rgb(186, 88, 22) }, -- the darker orange
+	[2] = { "Dirt", -1, rgb(70, 66, 80), rgb(60, 56, 70) }, -- the dark stone
+	[3] = { "Ground", 1, rgb(240, 136, 36), rgb(226, 122, 28) }, -- the bright orange a stud up
+}
+-- { kind, low x, low z, size x, size z } on 8-stud cells
+local FLOOR = {
+--FLOOR--
+}
+
+local function floorAt(pos)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { W.Ground }
+	local hit = workspace:Raycast(Vector3.new(pos.X, 50, pos.Z), Vector3.new(0, -100, 0), params)
+	return if hit then hit.Position.Y else 0
+end
+
+local standing = {}
+local function note(inst)
+	if inst:IsA("Model") or inst:IsA("BasePart") then
+		table.insert(standing, { inst, floorAt(inst:GetPivot().Position) })
+	end
+end
+local decor = W:FindFirstChild("BaseDecor")
+for _, inst in decor and decor:GetDescendants() or {} do
+	if inst.Parent == decor or (inst.Parent and inst.Parent:IsA("Folder") and inst.Parent.Parent == decor) then
+		note(inst)
+	end
+end
+local spawn = W:FindFirstChild("SpawnLocation", true) or workspace:FindFirstChild("SpawnLocation")
+if spawn then
+	note(spawn)
+end
+
+-- The old floor: tools/halloween_base.luau's one Grass part (to the bin), or this script's
+-- own parts from a run before.
+local SS = game:GetService("ServerStorage")
+local bin = SS:FindFirstChild("HalloweenStripped") or Instance.new("Folder")
+bin.Name = "HalloweenStripped"
+bin.Parent = SS
+local template
+for _, p in W.Ground:GetChildren() do
+	if p:IsA("BasePart") and p:GetAttribute("HalloweenBase") then
+		template = p:Clone()
+		p.Parent = bin
+	elseif p:IsA("BasePart") and p:GetAttribute("HalloweenFloor") then
+		template = template or p:Clone()
+		p:Destroy()
+	end
+end
+assert(template, "no Halloween base floor in World.Ground: run tools/halloween_base.luau first")
+template:SetAttribute("HalloweenBase", nil)
+template:SetAttribute("HalloweenFloor", true)
+local checker
+for _, t in template:GetChildren() do
+	if t:IsA("Texture") and not checker then
+		checker = t
+	else
+		t:Destroy()
+	end
+end
+for _, r in FLOOR do
+	local k = KINDS[r[1]]
+	local x, z, sx, sz = r[2], r[3], r[4], r[5]
+	local p = template:Clone()
+	p.Name = k[1]
+	p.Size = Vector3.new(sx, k[2] + 2, sz)
+	p.CFrame = CFrame.new(x + sx / 2, (k[2] - 2) / 2, z + sz / 2)
+	p.Color = k[3]
+	for _, t in p:GetChildren() do
+		t.Color3 = k[4]
+	end
+	p.Parent = W.Ground
+end
+
+local moved = 0
+for _, s in standing do
+	local inst, before = s[1], s[2]
+	local dy = floorAt(inst:GetPivot().Position) - before
+	if math.abs(dy) > 0.01 then
+		inst:PivotTo(inst:GetPivot() + Vector3.new(0, dy, 0))
+		moved += 1
+	end
+end
+return string.format("%d floor parts, %d things moved with the floor", #FLOOR, moved)
