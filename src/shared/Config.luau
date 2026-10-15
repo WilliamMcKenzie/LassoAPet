@@ -800,8 +800,8 @@ local Config = {
 	-- starts at StartLeft (QM: "to make it feel like its selling"): no count saved yet means that.
 	LoongOffer = { Kind = "Loong", ProductId = 3718721407, Price = 999, Stock = 500, StartLeft = 435, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.zero,
 		Ledger = "loongs", StockKey = "sold" },
-	-- The Robo Shark beside it the same way (QM, Oct 15: 1,000 of them; ProductId: QM's to make).
-	RoboSharkOffer = { Kind = "RoboShark", ProductId = 0, Price = 0, Stock = 1000, StartLeft = 870, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(0, 0, 30),
+	-- The Robo Shark beside it the same way (QM, Oct 15: 1,000 of them; "Roboshark Pet [Limited]").
+	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3718722226, Price = 399, Stock = 1000, StartLeft = 870, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(0, 0, 30),
 		Ledger = "roboSharks", StockKey = "sold_RoboShark" },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
