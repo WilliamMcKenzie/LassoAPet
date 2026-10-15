@@ -28,6 +28,11 @@ local WorldUnlock = require(script.Parent.WorldUnlock)
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
 local FULL = if REBIRTH then "rbxassetid://73306793972865" else "rbxassetid://100062651101544" -- assets/ui/RebirthBar.png, BarFill.png (964x103; QM's World2Bar.png, its label painted out)
 local EMPTY = if REBIRTH then "rbxassetid://88891851849945" else "rbxassetid://105502035787337" -- assets/ui/RebirthBarEmpty.png, BarEmpty.png
+-- QM's own art for a world's bar, its name on it (no label over it): [world] = { full, empty }
+local WORLD_ART = {
+	[2] = { "rbxassetid://108726643390976", "rbxassetid://108345016053649" }, -- World2Bar.png, World2BarEmpty.png
+	[3] = { "rbxassetid://114072165271854", "rbxassetid://134941502651415" }, -- World3Bar.png, World3BarEmpty.png (QM, Oct 15)
+}
 local BAR = Vector2.new(660, 660 * 103 / 964) -- (half the screen across: QM's mockup)
 local TOP = 14 -- px from the screen's top (QM, Oct 13: was at the bottom, over the egg inventory)
 local ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
@@ -147,7 +152,10 @@ local function showGold()
 	fill.Size = UDim2.fromScale(math.clamp(gold / p, 0, 1), 1)
 	text.Text = "$" .. Config.short(gold) .. "/" .. Config.short(p)
 	local g = goal()
-	label.Text = g and g.label or ""
+	local art = g and g.world and WORLD_ART[g.world]
+	label.Text = if g and not art then g.label else ""
+	green.Image = if art then art[1] else FULL
+	bar.Image = if art then art[2] else EMPTY
 	hand.Visible = full()
 end
 for _, name in { "Gold", "Rebirths", "OwnsWorld2", "OwnsWorld3", "TrailsOwned", "FinishTrail", "RainbowTrail" } do
