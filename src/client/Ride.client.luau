@@ -1793,6 +1793,9 @@ local function updateHerd(dt, slowed)
 	-- Fish wrestled on into the Desert outlived its stream's schedule and vanished)
 	local held = transfer and transfer.target and transfer.target.n
 	for b, stream in streams do
+		if stream.total <= 0 then
+			continue -- (an empty herd)
+		end
 		local every = stream.every
 		local newest = math.floor(herdClock / every)
 		stream.oldest = math.ceil((herdClock - stream.life) / every)

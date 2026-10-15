@@ -2168,10 +2168,10 @@ if Config.World == 4 then
 	-- Patch's chunks are laid one after another, picked at random ("like roadwork": Config.Endless
 	-- Chunks, Client/Endless; the chunks tools/pumpkin_chunks.luau builds in
 	-- ReplicatedStorage.PumpkinPatchChunks, dressed with the harvest and pumpkin props). Its
-	-- stampede the Tundra's for now. Its colours are the chunks' own (and the pens' tiles').
+	-- stampede empty till its own animals are in. Its colours are the chunks' own (and the pens' tiles').
 	meadow.Name, desert.Name = "Haunted Hills", "Soul Valley"
 	-- Their own animals (QM, Oct 15: all World 1's scrapped here), weights as the Meadow's and the
-	-- Desert's by rarity (guesses). The Pumpkin Patch keeps the Tundra's till its own are in.
+	-- Desert's by rarity (guesses). The Pumpkin Patch runs none till its own are in (below).
 	meadow.Herd = { BlackCat = 0.35, Bat = 0.25, PumpkinPup = 0.25, PurpleTarantula = 0.13, Werewolf = 0.08, SoulHorse = 0.05 }
 	desert.Herd = { Ghost = 0.3, SkeletonDog = 0.25, TombstoneCrawler = 0.25, ZombieBear = 0.2, WispWolf = 0.12, GrimReaper = 0.025 }
 	local patch = table.clone(Config.Biomes[3])
@@ -2184,6 +2184,7 @@ if Config.World == 4 then
 		Dirt = { rgb(160, 112, 74), rgb(148, 102, 66) },
 	}
 	patch.Haze, patch.Depths, patch.Sky = nil, nil, nil
+	patch.Herd = {} -- (empty till its own animals are in: QM, Oct 15, every World 1 animal scrapped here; was the Tundra's)
 	patch.Length = 256 -- (one chunk: past the cut it's all chunks)
 	Config.Biomes = { meadow, desert, patch }
 	Config.CourseLength = meadow.Length + desert.Length + patch.Length
