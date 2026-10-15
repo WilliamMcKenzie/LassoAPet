@@ -192,8 +192,9 @@ end)
 if not okLoong then
 	loongStore = nil
 end
+local LOONG_START = Config.LoongOffer.Stock - (Config.LoongOffer.StartLeft or Config.LoongOffer.Stock) -- (sold before the first sale)
 local function showLoongLeft(sold)
-	workspace:SetAttribute("LoongLeft", math.max(0, Config.LoongOffer.Stock - (tonumber(sold) or 0)))
+	workspace:SetAttribute("LoongLeft", math.max(0, Config.LoongOffer.Stock - (tonumber(sold) or LOONG_START)))
 end
 loongSold = function()
 	if not loongStore then
@@ -202,12 +203,12 @@ loongSold = function()
 	end
 	pcall(function()
 		showLoongLeft(loongStore:UpdateAsync("sold", function(n)
-			return (tonumber(n) or 0) + 1
+			return (tonumber(n) or LOONG_START) + 1
 		end))
 	end)
 end
 if Config.LoongOffer and Config.Podium.Hidden then
-	showLoongLeft(0)
+	showLoongLeft(nil)
 	task.spawn(function()
 		while true do
 			if loongStore then
