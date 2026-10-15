@@ -1,6 +1,6 @@
 -- Moon Jellyfish: World 3 Cnidaria's Common (Oct 14). A chubby lilac bell (a low-poly
 -- MeshPart dome, QM Oct 15), four glowing pink horseshoe pads round the rider, big googly eyes, a skirt
--- of rim panels with pink fringe tentacles that pulse, and four frilly pink oral arms.
+-- of eight rim slabs with pink fringe tentacles that pulse, and four tapered pink oral arms.
 -- It swims, and sprint flies it up like the Crystal Phoenix (Config.SprintSpecials).
 -- Model from designs/cnidaria/MoonJellyfish.bbmodel (tools/moon_jellyfish.py), converted into MoonJellyfishModel.luau by
 -- tools/bbmodel_to_luau.py --zyx --meshes assets/meshes/MoonJellyfish (the bell copied from

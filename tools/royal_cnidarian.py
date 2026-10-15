@@ -2,7 +2,7 @@
 Cnidarian Reef boss: "electric jellyfish ensnare all trespassers"). A gigantic crowned
 jellyfish: a tall low-poly domed bell (a mesh) in bands of royal violet / magenta, a big gold crown with
 glowing jewels on top (the rider sits inside the crown ring), an angry face on the front
-(googly eyes, scowling brows, a jagged toothy mouth), a frilled skirt of eight rim panels,
+(googly eyes, scowling brows, a jagged toothy mouth), a scalloped skirt ring of eight rim slabs,
 a curtain of twelve long glowing trailing tentacles and four thick frilly oral arms, and
 four little Gold Cnidarian minions orbiting it.
 
@@ -10,7 +10,7 @@ four little Gold Cnidarian minions orbiting it.
 
 writes designs/cnidaria/RoyalCnidarian.bbmodel and previews in
 /mnt/project-files/world3/cnidaria/renders/. ZYX, every bone rests at 0. Faces -Z.
-Bones: root (bell, face, crown; rider on top) -> Skirt1..8 (rim panels),
+Bones: root (bell, face, crown; rider on top) -> Skirt1..8 (rim slabs),
 root -> Tent1..12 -> Tent1b -> Tent1c (trailing tentacles),
 root -> Arm1..4 -> Arm1b -> Arm1c (oral arms),
 root -> Orbit (spins about Y) -> Minion1..4 (gold jellies, bobbing).
@@ -27,7 +27,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(__file__))
-from cnidaria_kit import FRONT9, TAU, Build, Lathe, finish, lay, rot, track  # noqa: E402
+from cnidaria_kit import FB8, FRONT9, TAU, Build, Lathe, face_frame, finish, lay, rot, track  # noqa: E402
 
 NAME = "RoyalCnidarian"
 COLORS = {
@@ -43,8 +43,7 @@ Y = 10.5  # the bell's rim height
 # stacked tiers). BANDS: (first ring, last ring, colour)
 RINGS = ((Y - 0.1, 6.8), (Y + 1.4, 7.05), (Y + 2.8, 6.75), (Y + 4.1, 6.1), (Y + 5.3, 5.0), (Y + 6.4, 3.5), (Y + 7.1, 2.4))
 BANDS = ((0, 3, "bell"), (3, 5, "bell2"), (5, 6, "bell3"))
-# a ten-sided ring with a wide flat face on the front (-Z) for the face
-ANGLES = (144, 216, 248, 280, 312, 344, 16, 48, 80, 112)
+BELL = Lathe((0, 0, 0), RINGS, FB8)  # eight faces like the Moon Jellyfish, a wide one in front for the face
 TOP = Y + 7.1  # the seat (top of the bell, inside the crown)
 
 
@@ -61,7 +60,7 @@ def build():
     root = b.group("root", (0, Y + 3, 0))
 
     # ---- the bell
-    bell = Lathe((0, 0, 0), RINGS, ANGLES)
+    bell = BELL
     for j0, j1, col in BANDS:
         b.hull(root, "Bell" + col[4:], bell.section(j0, j1), col)
 
@@ -109,18 +108,21 @@ def build():
             b.box(root, f"GlowJewel{k + 1}", base + d * 0.5 + np.array([0, h - 0.1, 0]), (0.7, 0.7, 0.7),
                   "glowp" if k % 4 else "glowc", rot(("y", 45), ("x", 35)))
 
-    # ---- the frilled skirt: eight rim panels, each its own bone
-    for k in range(8):
-        a = math.radians(22.5 + 45 * k)
-        d, t = outdir(a), np.array([math.cos(a), 0, -math.sin(a)])
-        pivot = d * 6.5 + np.array([0, Y + 0.3, 0])
-        sk = b.group(f"Skirt{k + 1}", pivot, root)
-        M = rot(("y", math.degrees(a)))
-        b.box(sk, f"Skirt{k + 1}", pivot + d * 0.45 + np.array([0, -0.75, 0]), (5.6, 1.8, 0.6), "rim",
-              M @ rot(("x", 22)))
-        for j, s in enumerate((-1.4, 1.4)):
-            c = pivot + d * 0.95 + t * s + np.array([0, -2.0, 0])
-            b.box(sk, f"Frill{k + 1}{'ab'[j]}", c, (2.3, 1.1, 0.45), "frill", M @ rot(("x", 22), ("z", 10 * s)))
+    # ---- the skirt: one scalloped ring hugging the rim, a slab on each of the bell's eight
+    # faces (each its own bone) with rounded-off lobes under it
+    for i in range(8):
+        c, w, ap = face_frame(bell, i, RINGS[0][1])
+        d = np.array([math.sin(c), 0, math.cos(c)])
+        side = np.array([math.cos(c), 0, -math.sin(c)])
+        pivot = d * (ap - 0.2) + np.array([0, Y - 0.1, 0])
+        sk = b.group(f"Skirt{i + 1}", pivot, root)
+        M = rot(("y", math.degrees(c))) @ rot(("x", -22))
+        down = M @ np.array([0, -1.0, 0])
+        b.box(sk, f"Skirt{i + 1}", pivot + down * 0.9 + d * 0.3, (w + 0.15, 1.8, 0.6), "rim", M)
+        for j, t in enumerate((-w / 4, w / 4) if w > 5 else (0,)):
+            lw = (w / 2 if w > 5 else w) * 0.7
+            b.box(sk, f"Frill{i + 1}{'ab'[j]}", pivot + down * 2.15 + d * 0.3 + side * t, (lw, 0.7, 0.55), "frill", M)
+            b.box(sk, f"Frill{i + 1}{'ab'[j]}2", pivot + down * 2.7 + d * 0.3 + side * t, (lw * 0.55, 0.45, 0.5), "frill", M)
 
     # ---- twelve long glowing trailing tentacles, three bones each
     lens = (3.4, 3.2, 2.4)
@@ -184,10 +186,10 @@ def animations():
     def swim(L, pulse, bob, lean, wave, armamp, spin, trail=0.0):
         tr = {"root": [track(L, lambda u: (lean + 2.5 * math.sin(TAU * u), 0, 1.5 * math.sin(TAU * u + 0.7)), 16),
                        track(L, lambda u: (0, bob * math.sin(TAU * u - 1.0), 0), 16, "position")]}
-        for k in range(8):
-            a = math.radians(22.5 + 45 * k)
-            tx, tz = math.cos(a), -math.sin(a)  # the panel's hinge (tangent) axis
-            tr[f"Skirt{k + 1}"] = [track(L, lambda u, tx=tx, tz=tz: (
+        for i in range(8):
+            c = face_frame(BELL, i, RINGS[0][1])[0]
+            tx, tz = math.cos(c), -math.sin(c)  # the slab's hinge (tangent) axis
+            tr[f"Skirt{i + 1}"] = [track(L, lambda u, tx=tx, tz=tz: (
                 -tx * pulse * (0.5 + math.sin(TAU * u)), 0, -tz * pulse * (0.5 + math.sin(TAU * u))), 8)]
         for k in range(12):
             a = math.radians(15 + 30 * k)

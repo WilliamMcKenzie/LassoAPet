@@ -209,6 +209,13 @@ class Lathe:
         return p, nrm / np.linalg.norm(nrm)
 
 
+def face_frame(lathe, i, r):
+    """Face i of a Lathe ring of radius r: (centre angle in radians, edge length, apothem)."""
+    a0, a1 = lathe.angles[i], lathe.angles[(i + 1) % len(lathe.angles)]
+    span = (a1 - a0) % TAU
+    return a0 + span / 2, 2 * r * math.sin(span / 2), r * math.cos(span / 2)
+
+
 def lay(n):
     """A rotation whose local +Y is the normal n and local +X runs level along the face (to lay a
     flat block on a sloped face)."""

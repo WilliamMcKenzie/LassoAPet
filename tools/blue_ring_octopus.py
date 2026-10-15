@@ -1,6 +1,6 @@
 """Blue-Ringed Octopus: World 3 Cnidaria (the reef), Rare. A sunny yellow octopus covered in
 glowing electric-blue rings (each ring a glowing blue block round a dark ochre centre), a
-domed mantle you sit on, bulging googly eyes on the front, a little beak smile, and eight
+domed mantle you sit on, big googly eyes on the front, a little beak smile, and eight
 curly arms spread round it in a skirt, each banded with more rings and curling up at the
 tip.
 
@@ -54,11 +54,10 @@ def build():
     for k, (i, y) in enumerate(((4, Y + 2.6), (2, Y), (6, Y))):
         p, n = body.face(i, y)
         ring(b, root, f"Ring{k + 1}", p + n * 0.05, n, 1.9)
-    # bulging eyes on the front, beak smile under them
+    # big googly eyes on the flat front face, beak smile under them
     for s in (-1, 1):
-        n = "LR"[s > 0]
-        b.box(root, "EyeBump" + n, (s * 1.5, Y + 1.0, -2.5), (2.0, 2.0, 1.6), "skin2")
-        b.eye(root, n, (s * 1.5, Y + 1.05, -3.34), (0, 0, -1), 1.6, look=(-s * 0.3, 0))
+        p, nrm = body.face(0, Y + 1.1)
+        b.eye(root, "LR"[s > 0], p + np.array([s * 1.05, 0, 0]) + nrm * 0.04, nrm, 1.55, look=(-s * 0.3, 0))
     p, nrm = body.face(0, Y - 0.6)
     b.box(root, "Beak", p + nrm * 0.1, (1.2, 0.5, 0.3), "beak")
     # eight curly arms in a skirt, ringed, tips curling up
