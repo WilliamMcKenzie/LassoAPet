@@ -239,6 +239,13 @@ local function publish(player)
 			profile.ridden[item.pet] = true
 		end
 	end
+	-- (and every kind you've ever lassoed: the quests keep the counts, "lasso:<kind>", QM Oct 15)
+	for key in profile.quests and profile.quests.counts or {} do
+		local kind = typeof(key) == "string" and key:match("^lasso:(.+)$")
+		if kind and isAnimal(kind) then
+			profile.ridden[kind] = true
+		end
+	end
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
 	player:SetAttribute("StoredPets", HttpService:JSONEncode(profile.stored or {})) -- (the Pets panel's unequipped ones: Client/PetsPanel)
 	local pen = penOf(player)
