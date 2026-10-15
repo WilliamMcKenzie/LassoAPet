@@ -1,6 +1,6 @@
 """Beach bushes for World 3 (QM, Oct 15): the leafy clumps by the walls in his screenshot.
 Broad pointed leaves fanning out from the ground, each folded along its midrib so one
-half is light and the other dark (Camo and Parsley green, the World 3 palm frond colours).
+half is Camo (the World 3 palm frond green) and the other a lighter Camo; the inner\nupright leaves are Parsley green for shade.
 
 Run: python3 tools/w3_bushes.py
 Writes design/w3_bushes/<Name>.obj, pieces/<Name>_<i>.obj + colours.txt, sizes.txt and
@@ -15,8 +15,8 @@ import numpy as np
 from w3props import HERE, build_set, lineup_row, stack
 
 OUT = os.path.join(HERE, "..", "design", "w3_bushes")
-LIGHT = (58, 125, 21)  # Camo (QM's palm fronds, Oct 14)
-DARK = (44, 101, 29)  # Parsley green
+LIGHT = (58, 125, 21)  # Camo (QM's palm fronds, Oct 14): the main colour
+LIME = (84, 150, 34)  # a lighter Camo for the sunny half of each leaf
 
 
 def leaf(base, yaw, length, width, rise, droop, fold=0.35, thick=0.25):
@@ -46,28 +46,29 @@ def leaf(base, yaw, length, width, rise, droop, fold=0.35, thick=0.25):
 
 
 def bush(rng, n, length, width):
-    """A mound of leaves in three rings: n low arching leaves outside, then a taller ring,
-    then a few nearly upright ones in the middle."""
-    light, dark = [], []
-    rings = ((n, 1.0, 0.95, 0.5, 0.0), (max(3, n // 2), 0.85, 1.6, 0.4, 0.4), (3, 0.7, 2.6, 0.3, 0.9))
+    """A mound of leaves in three rings: n arching leaves outside (lifted, not lying flat),
+    a taller ring, then a few nearly upright ones in the middle."""
+    camo, lime = [], []
+    rings = ((n, 1.0, 1.5, 0.45, 0.0), (max(3, n // 2), 0.85, 2.0, 0.35, 0.4), (3, 0.7, 2.8, 0.25, 0.9))
     for count, ls, rise, droop, a0 in rings:
         for i in range(count):
             yaw = a0 + 2 * math.pi * i / count + rng.uniform(-0.2, 0.2)
             L = length * ls * rng.uniform(0.92, 1.08)
-            a, b = leaf((0, 0, 0), yaw, L, width * ls ** 0.5, rise=rise / L * length * 0.45, droop=L * droop)
-            light += a
-            dark += b
-    return [("Leaves", LIGHT, light), ("Leaves", DARK, dark)]
+            a, b = leaf((0, 0, 0), yaw, L, width * ls ** 0.5, rise=rise / L * length * 0.45, droop=L * droop,
+                        thick=0.12 * length)
+            lime += a
+            camo += b
+    return [("Leaves", LIGHT, camo), ("Leaves", LIME, lime)]
 
 
 def beach_bush(rng):
-    """A big beach bush (about 9 across, 4 tall): sixteen broad leaves in three rings."""
-    return bush(rng, 8, 4.6, 1.8)
+    """A big beach bush (about 5.5 across, 3 tall, placed at 1x): sixteen broad leaves in three rings."""
+    return bush(rng, 8, 2.8, 1.15)
 
 
 def beach_bush_small(rng):
-    """A small beach bush (about 6 across, 3 tall): twelve leaves in three rings."""
-    return bush(rng, 6, 3.2, 1.35)
+    """A small beach bush (about 4 across, 2 tall, placed at 1x): twelve leaves in three rings."""
+    return bush(rng, 6, 2.0, 0.85)
 
 
 ITEMS = [
@@ -80,7 +81,7 @@ SAND = [(240, 218, 160), (228, 204, 146)]
 
 def main():
     built, sizes = build_set(OUT, ITEMS)
-    row = lineup_row(built, sizes, [(n, l) for n, _, _, l in ITEMS], SAND, ppst=48)
+    row = lineup_row(built, sizes, [(n, l) for n, _, _, l in ITEMS], SAND, ppst=80)
     stack([row], os.path.join(OUT, "bushes_lineup.png"), "Beach bushes (1x; figure is 5 studs)")
 
 
