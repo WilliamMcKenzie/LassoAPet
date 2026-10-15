@@ -2102,6 +2102,42 @@ if Config.World == 4 then
 	desert.Patches.Grass = { rgb(86, 122, 150), rgb(78, 114, 142) } -- (its dry grass: slate blue)
 	desert.Patches.Stone = { rgb(104, 154, 186), rgb(96, 146, 178) } -- (its sandstone, a stud up: darker flagstone)
 	Config.Biomes[2] = desert
+	-- Three biomes here (QM, Oct 15): Haunted Hills (the Meadow), Soul Valley (the Desert), then
+	-- the Pumpkin Patch, laid on the Tundra's stretch as a meadow (no snow, no haze), its
+	-- stampede the Tundra's for now, and endless: the course is cut at its end and the
+	-- Patch laid again and again past it (Config.Endless, Client/Endless). Its look:
+	-- tools/halloween_patch.luau (the orange Halloween props in place of its pines and rocks).
+	meadow.Name, desert.Name = "Haunted Hills", "Soul Valley"
+	local patch = table.clone(Config.Biomes[3])
+	patch.Name = "Pumpkin Patch"
+	patch.GroundColors = { rgb(70, 108, 58), rgb(64, 100, 52) } -- dark autumn grass
+	patch.WallColors = meadow.WallColors
+	patch.CapColor = rgb(240, 140, 40) -- pumpkin orange tops
+	patch.Patches = {
+		Grass = { rgb(58, 90, 48), rgb(52, 84, 44) }, -- (its cold grass: darker grass)
+		Ice = { rgb(104, 72, 52), rgb(96, 66, 48) }, -- (its ice ponds, a stud down: tilled soil)
+	}
+	patch.Haze, patch.Depths, patch.Sky = nil, nil, nil
+	Config.Biomes = { meadow, desert, patch }
+	Config.CourseLength = meadow.Length + desert.Length + patch.Length
+	Config.Endless = { Cut = -Config.CourseLength, Length = patch.Length } -- (5904 and 1920: whole 16s)
+	Config.BiomeNames[4] = { "Haunted Hills", "Soul Valley", "Pumpkin Patch" }
+	-- The quests: World 1's, to this world's three biomes, and only animals that run here.
+	Config.Quests = {
+		{
+			{ Text = "Reach Haunted Hills", Kind = "reach", Biome = 1, Egg = "Cactus", NoPenLevel = true },
+			{ Text = "Reach Soul Valley", Kind = "reach", Biome = 2, Egg = "Penguin" },
+			{ Text = "Reach Pumpkin Patch", Kind = "reach", Biome = 3, Egg = "Snowman" },
+		},
+		{
+			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "SpineLizard" },
+			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "SnackYak" },
+			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "Boar" },
+			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "IceGolem" },
+			{ Text = "Collect animals", Kind = "home", Need = 20, Egg = "SnackYak" }, -- (no finish line on an endless course)
+		},
+		Config.Quests[3],
+	}
 	Config.Sky = "Default" -- Roblox's own sky with its clouds and stars (QM, Oct 15: World.server)
 end
 -- World 2's Temple: the Loong runs wild there (QM, Oct 13), 1 in 4,000 of its stampede (QM, Oct 15:

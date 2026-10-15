@@ -8,6 +8,37 @@ local AssetService = game:GetService("AssetService")
 local rgb = Color3.fromRGB
 local GLOW = rgb(255, 214, 60)
 local ITEMS = { -- [item] = { { label, mesh id, colour } } (pieces/colours.txt)
+	LanternTree = { -- (the harvest set: claude/world3-props-mo84d8 5752398, the tree at 2x, the rest 1.5x)
+		{ "Trunk", 86140210129449, rgb(96, 64, 58) },
+		{ "Leaves", 85877000319494, rgb(204, 52, 40) },
+		{ "Leaves", 119743052113458, rgb(232, 102, 36) },
+		{ "Leaves", 91403745688019, rgb(160, 34, 62) },
+		{ "Apples", 109314436122378, rgb(250, 200, 40) },
+		{ "Lantern", 122071296895765, rgb(52, 46, 58) },
+		{ "Glass", 107512596462525, rgb(255, 214, 60) },
+	},
+	Scarecrow = { -- (the harvest set: claude/world3-props-mo84d8 5752398, the tree at 2x, the rest 1.5x)
+		{ "Post", 73603121475563, rgb(120, 82, 52) },
+		{ "Shirt", 110532154652697, rgb(96, 140, 70) },
+		{ "Patches", 91476707120571, rgb(176, 92, 56) },
+		{ "Rope", 71872067255955, rgb(120, 78, 44) },
+		{ "Straw", 109180860443839, rgb(232, 196, 96) },
+		{ "Pumpkin", 135362875361942, rgb(206, 70, 18) },
+		{ "Pumpkin", 109824287053216, rgb(172, 54, 14) },
+		{ "Stem", 119101044485480, rgb(104, 120, 46) },
+		{ "Face", 126850747348752, rgb(255, 214, 60) },
+		{ "Hat", 91857331101182, rgb(150, 96, 60) },
+		{ "HatBand", 70849480741602, rgb(232, 102, 36) },
+	},
+	HayBale = { -- (the harvest set: claude/world3-props-mo84d8 5752398, the tree at 2x, the rest 1.5x)
+		{ "Straw", 104228712031942, rgb(232, 196, 96) },
+		{ "Twine", 110885143600363, rgb(120, 78, 44) },
+	},
+	HayStack = { -- (the harvest set: claude/world3-props-mo84d8 5752398, the tree at 2x, the rest 1.5x)
+		{ "Straw", 108177645377259, rgb(232, 196, 96) },
+		{ "Straw", 83214332722286, rgb(206, 166, 70) },
+		{ "Twine", 72721533830337, rgb(120, 78, 44) },
+	},
 	JackOLantern = {
 		{ "Pumpkin", 108933514207456, rgb(206, 70, 18) },
 		{ "Pumpkin", 77537202979253, rgb(172, 54, 14) },
