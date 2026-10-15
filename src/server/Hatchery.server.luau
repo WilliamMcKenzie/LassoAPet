@@ -1422,7 +1422,7 @@ local function addBoughtLoongs(player)
 	publish(player)
 	save(player)
 	for _ = 1, n do
-		ReplicatedStorage:WaitForChild("ShopGrant"):FireClient(player, "LegendaryPet", "Loong")
+		ReplicatedStorage:WaitForChild("ShopGrant"):FireClient(player, "LoongPet", "Loong") -- (the new animal popup, not the Legend Egg's card roll: QM, Oct 15)
 	end
 end
 Players.PlayerAdded:Connect(function(player)

@@ -831,7 +831,9 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			Sounds.play("purchase") -- (the Legend Egg's pet comes as a second grant: one sound)
 		end
 		Shop.close()
-		if key == "LegendaryPet" and kind then
+		if key == "LoongPet" and kind then
+			require(script.Parent.NewAnimal).show(kind) -- (the bought Loong: the new animal popup, QM Oct 15)
+		elseif key == "LegendaryPet" and kind then
 			-- (its own rarity's card: the Loong and Robo Shark are Exclusive)
 			local animal = game:GetService("ReplicatedStorage").Shared.Animals:FindFirstChild(kind)
 			Hud.eggReveal(if animal then require(animal).Rarity else "Legendary", kind, true)
