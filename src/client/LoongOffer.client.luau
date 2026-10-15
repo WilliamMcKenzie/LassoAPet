@@ -97,7 +97,7 @@ model.Parent = folder
 
 -- Its price and the prompt.
 local tag = Instance.new("BillboardGui")
-tag.Size = UDim2.fromScale(40, 6) -- (2x: QM, Oct 15; wide enough for "Robo Shark 870/1000 left" on one line)
+tag.Size = UDim2.fromScale(80, 12) -- (QM, Oct 15: 2x, then 2x again; wide enough for "Robo Shark 870/1000 left" on one line)
 local boxAt, box = model:GetBoundingBox()
 tag.StudsOffsetWorldSpace = Vector3.new(0, math.max(boxAt.Y + box.Y / 2 - at.Y, offer.Rise) + 8, 0) -- (well over the Loong's head: QM, Oct 15, higher)
 table.insert(stands, { model = model, tag = tag })
@@ -120,7 +120,7 @@ end
 workspace:GetAttributeChangedSignal(LEFT):Connect(showLeft)
 showLeft()
 local stroke = Instance.new("UIStroke")
-stroke.Thickness = 5
+stroke.Thickness = 8
 stroke.Parent = label
 label.Parent = tag
 tag.Adornee = hub
