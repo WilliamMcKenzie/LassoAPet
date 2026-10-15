@@ -1,4 +1,7 @@
-"""Venus Flytrap: World 3 Garden Epic (draft, Oct 14). A walking flytrap: a fat bulb body wrapped
+"""DON'T RERUN for the Venus Flytrap: QM edited designs/garden/VenusFlytrap.bbmodel by hand in Blockbench (Oct 15), which
+is now the source; build() would overwrite it. Convert that file instead. build_trap() still serves the Flytrap Queen.
+
+Venus Flytrap: World 3 Garden Epic (draft, Oct 14). A walking flytrap: a fat bulb body wrapped
 in a rosette of big leaves, scuttling on four gnarled root legs, a thick stem curving up and forward
 to a huge trap head. The trap is two green lobes, wide open, blood-red inside, ringed with long
 cream spikes; googly eyes sit on top of the upper lobe under a dark brow. Ridden on the bulb.

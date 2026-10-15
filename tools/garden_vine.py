@@ -47,16 +47,17 @@ def build():
     g.box(root, "Chest", (0, y0 + 2.2, -0.6), (7.2, 4.4, 4.8), "vine")
     g.box(root, "ChestPlate", (0, y0 + 1.6, -3.1), (4.6, 2.8, 0.2), "vinelight")
     g.box(root, "Hips", (0, y0 - 0.6, 1.0), (5.0, 2.4, 4.0), "vinedark")
-    # back thorns down the spine
-    for k, (yy, zz) in enumerate(((y0 + 4.4, 0.2), (y0 + 3.6, 1.8), (y0 + 2.0, 1.8))):
-        d = (0, 1, 0.5) if k == 0 else (0, 0.4, 1)
-        g.pyr(root, "Thorn", (0, yy, zz), d, 1.4 - 0.2 * k, 0.45, 0.45, "thorn")
+    # back thorns, evenly down the spine (coordinator Oct 15: bigger, evenly spaced)
+    for k, (yy, zz, d) in enumerate(((y0 + 4.4, -0.6, (0, 1, 0.3)), (y0 + 4.4, 1.1, (0, 1, 0.6)),
+                                     (y0 + 3.3, 1.8, (0, 0.5, 1)), (y0 + 1.6, 1.8, (0, 0.3, 1)))):
+        g.pyr(root, "Thorn", (0, yy, zz), d, 2.0, 0.7, 0.7, "thorn")
     # leaf shoulder pads: three leaves fanned over each shoulder
     for side, s in (("L", -1), ("R", 1)):
         for k, (dz, ang) in enumerate(((-1.6, -35), (-0.4, 0), (0.8, 35))):
             a = np.radians(ang)
             d = np.array([s * np.cos(a), -0.35, np.sin(a)])
-            g.hull(root, "SmoothLeaf", G.leaf((s * 2.6, y0 + 4.5, dz), d, (0, 1, 0), 3.8, 2.4), "leaf")
+            for half in G.cupped_leaf((s * 2.6, y0 + 4.5, dz), d, (0, 1, 0), 3.8, 2.4):
+                g.hull(root, "SmoothLeaf", half, "leaf")
     # head: hunched forward between the shoulders, heavy brows, a muzzle full of thorn teeth
     neck = g.group("neck", (0, y0 + 3.4, -2.6), root)
     hy, hz = y0 + 3.8, -3.6
@@ -88,16 +89,16 @@ def build():
         g.box(arm, "Arm" + side, (ax, y0 + 2.4, az), (2.4, 3.2, 2.4), "vine")
         g.box(arm, "Forearm" + side, (ax, 4.0, az - 0.2), (2.8, 3.6, 2.8), "vinemid")
         g.box(arm, "Fist" + side, (ax, 1.1, az - 0.4), (3.0, 2.2, 3.0), "vinedark")
-        g.pyr(arm, "FistThorn" + side, (ax + s * 1.5, 1.5, az - 0.4), (s, 0.3, 0), 1.0, 0.35, 0.35, "thorn")
-        g.pyr(arm, "FistThorn" + side, (ax, 2.2, az - 1.3), (0, 1, -0.4), 0.9, 0.3, 0.3, "thorn")
+        g.pyr(arm, "FistThorn" + side, (ax + s * 1.5, 1.2, az - 0.4), (s, 0.3, 0), 2.0, 0.7, 0.7, "thorn")
+        g.pyr(arm, "FistThorn" + side, (ax, 1.1, az - 1.9), (0, 0.3, -1), 1.8, 0.65, 0.65, "thorn")
         path = helix(ax, az - 0.1, 2.3, y0 + 2.6, 1.75, 1.6, 0.15 if s > 0 else 0.65)
         radii = [0.38] * (len(path) - 3) + [0.32, 0.24, 0.0]
         G.tube(g, arm, "SmoothVine" + side, path, radii, "vinelight")
     # legs: short thick roots
     for side, s in (("L", -1), ("R", 1)):
         leg = g.group("Leg" + side, (s * 1.6, y0 - 1.6, 1.2), root)
-        g.box(leg, "Leg" + side, (s * 1.6, (y0 - 1.2 + 0.7) / 2, 1.2), (2.2, y0 - 1.9, 2.2), "bark")
-        g.box(leg, "Foot" + side, (s * 1.7, 0.35, 0.8), (2.8, 0.7, 3.0), "bark")
+        g.box(leg, "Leg" + side, (s * 1.45, (y0 - 1.0 + 0.7) / 2, 1.2), (2.8, y0 - 1.7, 2.8), "bark")
+        g.box(leg, "Foot" + side, (s * 1.5, 0.35, 0.8), (3.2, 0.7, 3.4), "bark")
     return g
 
 

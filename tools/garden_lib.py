@@ -435,6 +435,25 @@ def leaf(c, d, n, L, W, T=0.25, steps=7):
     return pts
 
 
+def cupped_leaf(c, d, n, L, W, T=0.45, cup=0.5, steps=7):
+    """A thick leaf folded up along its mid-rib (a V, so it reads cupped): two convex halves, each
+    a point set for Garden.hull; the edges rise `cup` along n."""
+    d = np.array(d, float) / np.linalg.norm(d)
+    n = np.array(n, float)
+    n = n - d * (n @ d)
+    n /= np.linalg.norm(n)
+    s = np.cross(d, n)
+    c = np.array(c, float)
+    halves = ([], [])
+    for t in np.linspace(0, 1, steps):
+        w = W / 2 * np.sin(np.pi * t) ** 0.8
+        p = c + d * L * t
+        lift = n * cup * np.sin(np.pi * t)
+        for h, sg in zip(halves, (1, -1)):
+            h += [p, p - n * T * 0.5 * np.sin(np.pi * t), p + sg * s * w + lift, p + sg * s * w + lift + n * T * 0.5 * np.sin(np.pi * t)]
+    return halves
+
+
 def legs(L, pairs, swing, n=16, axis=0):
     """{bone: track}: legs swing about X; pairs = [(bone, phase in turns)]."""
     out = {}
