@@ -2089,6 +2089,7 @@ if Config.World == 4 then
 	meadow.Patches.Dirt = { rgb(159, 136, 179), rgb(153, 130, 174) } -- the paths, light lilac
 	Config.Biomes = table.clone(Config.Biomes)
 	Config.Biomes[1] = meadow
+	Config.Sky = "Default" -- Roblox's own sky with its clouds and stars (QM, Oct 15: World.server)
 end
 -- World 2's Temple: the Loong runs wild there (QM, Oct 13), 1 in 4,000 of its stampede (QM, Oct 15:
 -- was 0.025, now it's sold at World 1's base), counted once the Temple's herd is all in.
