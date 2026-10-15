@@ -2064,9 +2064,9 @@ if Config.World == 3 then
 	Config.Quests = {
 		{
 			{ Text = "Reach Pirate Cove", Kind = "reach", Biome = 1, Egg = "Eyeworm", NoPenLevel = true },
-			{ Text = "Reach Garden", Kind = "reach", Biome = 2, Egg = "CrystalCentipede" },
-			{ Text = "Reach Candyland", Kind = "reach", Biome = 3, Egg = "BrownMushroom" },
-			{ Text = "Reach Cnidaria", Kind = "reach", Biome = 4, Egg = "OrangeButterfly" },
+			{ Text = "Reach Garden", Kind = "reach", Biome = 2, Egg = "VenusFlytrap" }, -- (QM, Oct 15)
+			{ Text = "Reach Candyland", Kind = "reach", Biome = 3, Egg = "GummyBear" }, -- (QM, Oct 15: the red one)
+			{ Text = "Reach Cnidaria", Kind = "reach", Biome = 4, Egg = "BlueRingOctopus" }, -- (QM, Oct 15)
 		},
 		{
 			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "Seraph" },
