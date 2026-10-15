@@ -425,6 +425,9 @@ def boxes(b):
     return out
 
 
+LINES = set(STARTS[1:-1])  # the biome lines (-4336, -7968, -11808)
+
+
 def wall_segments():
     """Each side's wall as straight pieces between PROFILE points: (centre x, z, length, yaw)."""
     out = []
@@ -438,9 +441,13 @@ def wall_segments():
             ox, oz = dz / length, -dx / length
             if ox * sg < 0:
                 ox, oz = -ox, -oz
-            cx = sg * (h0 + h1) / 2 + ox * 4
-            cz = (z0 + z1) / 2 + oz * 4
-            out.append((round(cx, 3), round(cz, 3), round(length + 8, 3), round(yaw, 6), sg))
+            # 4 studs past each end to close the joints, but never past a biome line: the next
+            # biome's piece starts there and the overlap z-fights (QM, Oct 15: stamina-loop eb3d39a)
+            e0 = 0 if z0 in LINES else 4
+            e1 = 0 if z1 in LINES else 4
+            cx = sg * (h0 + h1) / 2 + ox * 4 + dx / length * (e1 - e0) / 2
+            cz = (z0 + z1) / 2 + oz * 4 + dz / length * (e1 - e0) / 2
+            out.append((round(cx, 3), round(cz, 3), round(length + e0 + e1, 3), round(yaw, 6), sg))
     return out
 
 
