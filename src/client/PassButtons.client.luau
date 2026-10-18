@@ -17,26 +17,26 @@ local AFTER_RIDES = 3 -- (not till this many rides are done: QM, Oct 14)
 local SHOWN = true -- (QM, Oct 14: hidden a while for the shop's redo, then back; false hides them)
 local BUTTONS = {
 	{ "StarterPack", "rbxassetid://100466055719917", Vector2.new(245, 138) }, -- assets/ui/PassStarterPack.png
-	{ "Speed", "rbxassetid://128119306382781", Vector2.new(295, 141), "Speed" }, -- assets/ui/PassSpeed.png (and its Config.Passes key)
+	{ "Speed", "rbxassetid://100578505321305", Vector2.new(295, 141), "Speed" }, -- assets/ui/PassSpeed49.png (and its Config.Passes key)
 	{ "Cash", "rbxassetid://108884731983075", Vector2.new(295, 147), "DoubleGold" }, -- assets/ui/PassCash.png
-	{ "GiantPets", "rbxassetid://126647709261103", Vector2.new(302, 148), "GiantPets" }, -- assets/ui/PassGiantPets.png
+	{ "GiantPets", "rbxassetid://89610420254499", Vector2.new(302, 148), "GiantPets" }, -- assets/ui/PassGiantPets49.png
 }
 
-local camera = workspace.CurrentCamera
 local gui = Instance.new("ScreenGui")
 gui.Name = "PassButtons"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
 local root = Instance.new("Frame")
 root.BackgroundTransparency = 1
 local rootScale = Instance.new("UIScale")
 rootScale.Parent = root
 local function resize()
-	local screen = camera.ViewportSize
+	local screen = gui.AbsoluteSize
 	rootScale.Scale = screen.X / REFERENCE_WIDTH * Config.HudScale
 	root.Size = UDim2.fromOffset(screen.X / rootScale.Scale, screen.Y / rootScale.Scale)
 end
-camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
+gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
 resize()
 root.Parent = gui
 
@@ -131,7 +131,6 @@ for i, spec in BUTTONS do
 	slot.Parent = column
 	column.Size = UDim2.fromOffset(math.max(column.Size.X.Offset, slot.Size.X.Offset), column.Size.Y.Offset + slot.Size.Y.Offset + (if i > 1 then GAP else 0))
 end
-gui.Parent = player:WaitForChild("PlayerGui")
 
 RunService.RenderStepped:Connect(function()
 	local base = player.PlayerGui:FindFirstChild("BaseUi")
@@ -144,7 +143,7 @@ RunService.RenderStepped:Connect(function()
 	end
 	local baseScale = baseRoot and baseRoot:FindFirstChildOfClass("UIScale")
 	if baseScale and rootScale.Scale ~= baseScale.Scale then -- (BaseUi's scale, so they match the buttons on the right: QM)
-		local screen = camera.ViewportSize
+		local screen = gui.AbsoluteSize
 		rootScale.Scale = baseScale.Scale
 		root.Size = UDim2.fromOffset(screen.X / rootScale.Scale, screen.Y / rootScale.Scale)
 	end

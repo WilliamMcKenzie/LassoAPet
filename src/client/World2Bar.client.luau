@@ -174,11 +174,13 @@ end
 showGold()
 
 bar.Activated:Connect(function()
-	if not full() then
-		return
-	end
 	local g = goal()
 	if not g then
+		return
+	elseif not full() then
+		if g.world or g.trail then
+			require(script.Parent.Shop).buyGoldFor(g.price - (player:GetAttribute("Gold") or 0))
+		end
 		return
 	elseif g.gems then
 		pcall(ReplicatedStorage.BuyBossTime.InvokeServer, ReplicatedStorage.BuyBossTime)

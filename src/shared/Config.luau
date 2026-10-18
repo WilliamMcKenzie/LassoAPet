@@ -1189,9 +1189,9 @@ local Config = {
 	Passes = {
 		-- (QM, Oct 13: his four passes, renamed from the old ones on their ids, so their old
 		-- owners own these now. VIP, Fast Hatch and Auto Hatch are gone.)
-		{ Key = "Speed", Name = "1.5x Speed", Price = 4, Id = 2012972449 }, -- every ride x PassSpeed (Config.rebirthSpeed)
+		{ Key = "Speed", Name = "1.5x Speed", Price = 49, Id = 2012972449 }, -- every ride x PassSpeed (Config.rebirthSpeed)
 		{ Key = "DoubleGold", Name = "2x Cash", Price = 99, Id = 2014634454 }, -- x PassGoldMultiplier (Config.goldX)
-		{ Key = "GiantPets", Name = "Giant Pets", Price = 299, Id = 2014472441 },
+		{ Key = "GiantPets", Name = "Giant Pets", Price = 49, Id = 2014472441 },
 		{ Key = "StarterPack", Name = "Starter Pack", Price = 19, Id = 2013764414 }, -- Config.StarterPack, once (Hatchery)
 	},
 	PassSpeed = 1.5, -- Speed's
@@ -1206,6 +1206,11 @@ local Config = {
 		Trail = { Color3.fromRGB(255, 236, 140), Color3.fromRGB(255, 180, 20) }, -- head to tail
 	},
 	Shop = {
+		CashPacks = { -- insufficient-cash prompts; old Gold products remain valid for receipts
+			{ Key = "Cash100K", Gold = 500000, ProductId = 3719218362 },
+			{ Key = "Cash1M", Gold = 5000000, ProductId = 3719218832 },
+			{ Key = "Cash1B", Gold = 1000000000, ProductId = 3719218954 },
+		},
 		Gold = {
 			{ Key = "Gold1", Gold = 100000, Price = 50, ProductId = 3716553782, OldProductIds = { 3716409553 } }, -- $100K (QM's nerf, Oct 4: was $1M)
 			{ Key = "Gold2", Gold = 5000000, Price = 99, ProductId = 3716409568 },
@@ -1397,8 +1402,8 @@ Config.PenCount = if Config.World == 4 then 10 else 5
 -- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
 Config.EndPortal = nil
 -- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's
--- World 2 bar; QM, Oct 14: 100k, was 200k, 1m, then 10m; World 3 10m, QM Oct 15). World 1 is everyone's.
-Config.WorldPrices = { 0, 100000, 1000000 } -- (World 3 1m: QM, Oct 15; was 10m)
+-- World 2 bar). World 1 is everyone's.
+Config.WorldPrices = { 0, 500000, 5000000 }
 -- Rebirth (QM, Oct 13): World 2's Rebirth bar (World2Bar.client) for Prices[n] gold, your
 -- nth. It re-locks World 2 (save up for it again) and sends you to World 1; your pets stay.
 -- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,

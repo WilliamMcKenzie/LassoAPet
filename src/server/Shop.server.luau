@@ -60,7 +60,7 @@ buyShop.Name = "BuyShop"
 buyShop.Parent = ReplicatedStorage
 
 local offers, offerOf = {}, {} -- [Key] = offer; [product id] = offer
-for _, list in { Config.Shop.Gold, Config.Shop.Specials } do
+for _, list in { Config.Shop.Gold, Config.Shop.CashPacks, Config.Shop.Specials } do
 	for _, offer in list do
 		offers[offer.Key] = offer
 		if offer.ProductId ~= 0 then

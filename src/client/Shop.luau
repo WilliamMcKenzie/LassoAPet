@@ -426,11 +426,14 @@ function Shop.toggle()
 	end
 end
 
--- ROLL without the gold for it (Hud, QM): the smallest gold pack that covers
+-- A purchase without enough gold: the smallest cash pack that covers the shortfall
 -- `amount`, else the biggest there is.
 function Shop.buyGoldFor(amount)
+	if amount <= 0 then
+		return
+	end
 	local packs = {}
-	for _, offer in Config.Shop.Gold do
+	for _, offer in Config.Shop.CashPacks do
 		if offered(offer) then
 			table.insert(packs, offer)
 		end
