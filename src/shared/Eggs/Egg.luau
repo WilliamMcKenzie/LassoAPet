@@ -68,6 +68,28 @@ local KINDS = {
 	CrimsonScorpion = { data = require(script.Parent.CrimsonScorpionEggModel), center = 1.6 },
 	IvorySpider = { data = require(script.Parent.IvorySpiderEggModel), center = 1.6 },
 	BlackWidow = { data = require(script.Parent.BlackWidowEggModel), center = 1.6 },
+	-- The Halloween world's (tools/halloween_eggs.py)
+	BlackCat = { data = require(script.Parent.BlackCatEggModel), center = 1.6 },
+	Bat = { data = require(script.Parent.BatEggModel), center = 1.6 },
+	PumpkinPup = { data = require(script.Parent.PumpkinPupEggModel), center = 1.6 },
+	PurpleTarantula = { data = require(script.Parent.PurpleTarantulaEggModel), center = 1.6 },
+	Werewolf = { data = require(script.Parent.WerewolfEggModel), center = 1.6 },
+	Ghost = { data = require(script.Parent.GhostEggModel), center = 1.6 },
+	SkeletonDog = { data = require(script.Parent.SkeletonDogEggModel), center = 1.6 },
+	TombstoneCrawler = { data = require(script.Parent.TombstoneCrawlerEggModel), center = 1.6 },
+	ZombieBear = { data = require(script.Parent.ZombieBearEggModel), center = 1.6 },
+	WispWolf = { data = require(script.Parent.WispWolfEggModel), center = 1.6 },
+	GrimReaper = { data = require(script.Parent.GrimReaperEggModel), center = 1.6 },
+	-- World 3's Garden (tools/garden_eggs.py)
+	Ladybug = { data = require(script.Parent.LadybugEggModel), center = 1.6 },
+	Bumblebee = { data = require(script.Parent.BumblebeeEggModel), center = 1.6 },
+	ToadstoolFrog = { data = require(script.Parent.ToadstoolFrogEggModel), center = 1.6 },
+	VineMonster = { data = require(script.Parent.VineMonsterEggModel), center = 1.6 },
+	VenusFlytrap = { data = require(script.Parent.VenusFlytrapEggModel), center = 1.6 },
+	SunflowerLion = { data = require(script.Parent.SunflowerLionEggModel), center = 1.6 },
+	RafflesiaBeast = { data = require(script.Parent.RafflesiaBeastEggModel), center = 1.6 },
+	AncientTreant = { data = require(script.Parent.AncientTreantEggModel), center = 1.6 },
+	GiantRafflesia = { data = require(script.Parent.FlytrapQueenEggModel), center = 1.6 }, -- (still the Flytrap Queen's egg, Oct 15)
 	Asura = { data = require(script.Parent.AsuraEggModel), center = 1.6 },
 	Snake = { data = require(script.Parent.SnakeEggModel), center = 1.6 },
 	Penguin = { data = require(script.Parent.PenguinEggModel), center = 1.6 },
@@ -85,6 +107,26 @@ local KINDS = {
 	Bes = { data = require(script.Parent.BesEggModel), center = 1.6 },
 	BloatedMummy = { data = require(script.Parent.BloatedMummyEggModel), center = 1.6 },
 	Scarab = { data = require(script.Parent.ScarabEggModel), center = 1.6 },
+	GreenCrab = { data = require(script.Parent.GreenCrabEggModel), center = 1.6 }, -- World 3 Pirate Cove (tools/pirate_eggs.py)
+	LimeCrab = { data = require(script.Parent.LimeCrabEggModel), center = 1.6 },
+	Parrot = { data = require(script.Parent.ParrotEggModel), center = 1.6 },
+	BananaMonkey = { data = require(script.Parent.BananaMonkeyEggModel), center = 1.6 },
+	TreasureHermit = { data = require(script.Parent.TreasureHermitEggModel), center = 1.6 },
+	EyepatchShark = { data = require(script.Parent.EyepatchSharkEggModel), center = 1.6 },
+	TreasureTurtle = { data = require(script.Parent.TreasureTurtleEggModel), center = 1.6 },
+	GhostShip = { data = require(script.Parent.GhostShipEggModel), center = 1.6 },
+	JollyRogerWyvern = { data = require(script.Parent.JollyRogerWyvernEggModel), center = 1.6 },
+	GummyBear = { data = require(script.Parent.GummyBearEggModel), center = 1.6 }, -- World 3 Candyland (tools/candy_eggs.py)
+	YellowGummyBear = { data = require(script.Parent.YellowGummyBearEggModel), center = 1.6 },
+	GreenGummyBear = { data = require(script.Parent.GreenGummyBearEggModel), center = 1.6 },
+	GumdropFrog = { data = require(script.Parent.GumdropFrogEggModel), center = 1.6 },
+	GingerbreadMan = { data = require(script.Parent.GingerbreadManEggModel), center = 1.6 },
+	Creampuff = { data = require(script.Parent.CreampuffEggModel), center = 1.6 },
+	SwollFairy = { data = require(script.Parent.SwollFairyEggModel), center = 1.6 }, -- (scrapped Oct 15: kept only so saved eggs still hatch)
+	DesireTroll = { data = require(script.Parent.DesireTrollEggModel), center = 1.6 },
+	RockCandyDragon = { data = require(script.Parent.RockCandyDragonEggModel), center = 1.6 },
+	GumballGolem = { data = require(script.Parent.GumballGolemEggModel), center = 1.6 },
+	Gigacorn = { data = require(script.Parent.GigacornEggModel), center = 1.6 },
 	WarElephant = { data = require(script.Parent.WarElephantEggModel), center = 1.6 },
 	SoulHorse = { data = require(script.Parent.SoulHorseEggModel), center = 1.6 },
 	Squid = { data = require(script.Parent.SquidEggModel), center = 1.6 },
@@ -119,6 +161,11 @@ local KINDS = {
 	Leviathan = { data = require(script.Parent.LeviathanEggModel), center = 1.6 },
 	Sludge = { data = require(script.Parent.SludgeEggModel), center = 1.6 },
 }
+-- The Halloween world's giga rares: their bases' eggs in their colours (Shared/HalloweenSkins).
+local HalloweenSkins = require(script.Parent.Parent.HalloweenSkins)
+for kind, base in HalloweenSkins.Base do
+	KINDS[kind] = { data = HalloweenSkins.model(kind, KINDS[base].data), center = KINDS[base].center }
+end
 
 local Egg = {}
 Egg.__index = Egg

@@ -22,7 +22,8 @@ if clouds then
 end
 local sky = Instance.new("Sky")
 sky.CelestialBodiesShown = false
-sky.StarCount = 0
+-- (Config.Sky "Default": Roblox's own sky, its clouds and stars, QM Oct 15 for Halloween)
+sky.StarCount = if Config.Sky == "Default" then sky.StarCount else 0
 -- One flat colour all round, that shows on screen as #59D9FD (QM, Oct 6). The image
 -- itself is #5CB5F1: Lighting's ColorCorrection (Saturation 0.25, Contrast 0.05) and
 -- ExposureCompensation 0.5 brighten and saturate the sky too, so it was picked by
@@ -35,7 +36,7 @@ local ANIME = {
 	Bk = "rbxassetid://13107325341", Dn = "rbxassetid://13107329809", Ft = "rbxassetid://13107334845",
 	Lf = "rbxassetid://13107337703", Rt = "rbxassetid://13107340396", Up = "rbxassetid://13107344387",
 }
-for _, face in { "Bk", "Dn", "Ft", "Lf", "Rt", "Up" } do
+for _, face in if Config.Sky == "Default" then {} else { "Bk", "Dn", "Ft", "Lf", "Rt", "Up" } do
 	sky["Skybox" .. face] = if Config.Sky == "Flat" then FLAT else ANIME[face]
 end
 sky.Parent = Lighting

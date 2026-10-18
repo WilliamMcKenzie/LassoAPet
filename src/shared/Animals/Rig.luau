@@ -1,6 +1,8 @@
 -- Builds a rigged, studded Model from a declarative part list.
 -- Parts with `plain = true` (eyes, pupils) skip the stud texture.
 -- `class` picks the part class (default "Part", e.g. "WedgePart").
+-- `mesh` names a low-poly MeshPart in ReplicatedStorage.AnimalMeshes to copy (scripts
+-- can't set MeshId; tools/bbmodel_to_luau.py --meshes, QM Oct 14).
 -- `hidden = true` makes an invisible, untextured part (used for bones).
 -- `neon = true` makes a glowing, untextured part (the snake's slit pupils).
 -- `metal = true` swaps the studs for the classic Weld surface (the Icebringer's armour).
@@ -14,7 +16,9 @@
 -- The model faces -Z. Root is an anchored, invisible part at ground level and
 -- is the PrimaryPart: move the animal by setting Root.CFrame.
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Studs = require(script.Parent.Parent.Studs)
+local Config = require(script.Parent.Parent.Config)
 
 local Rig = {}
 
@@ -23,6 +27,19 @@ local FACES = { "Top", "Bottom", "Front", "Back", "Left", "Right" }
 -- opaque image meant for a MaterialVariant, so it's tinted with the part's colour and
 -- tiled twice as wide as the studs, as Resurface tiles it (2 studs to the studs' 1).
 local WELD = { image = "rbxassetid://10509843977", tile = 2 }
+
+-- A copy of the mesh's MeshPart, or a plain block (its box) if it isn't there.
+local function meshPart(name)
+	local folder = ReplicatedStorage:FindFirstChild("AnimalMeshes")
+	local template = folder and folder:FindFirstChild(name)
+	if not (template and template:IsA("MeshPart")) then
+		warn("Rig: no MeshPart " .. name .. " in ReplicatedStorage.AnimalMeshes")
+		return Instance.new("Part")
+	end
+	local part = template:Clone()
+	part:ClearAllChildren()
+	return part
+end
 
 function Rig.build(spec)
 	local model = Instance.new("Model")
@@ -48,7 +65,7 @@ function Rig.build(spec)
 		local parent = parts[def.parent]
 		assert(parent, spec.name .. ": " .. def.name .. " has unknown parent " .. tostring(def.parent))
 
-		local part = Instance.new(def.class or "Part")
+		local part = if def.mesh then meshPart(def.mesh) else Instance.new(def.class or "Part")
 		part.Name = def.name
 		part.Size = def.size
 		part.Color = def.color
@@ -103,6 +120,9 @@ function Rig.build(spec)
 			local part = built[i]
 			if not def.metal and Studs.apply(part, spec.studTexture.tile) then
 				continue -- studs as a material (Config.StudMaterial): no textures
+			end
+			if part:IsA("MeshPart") then
+				continue -- (a Texture can't follow a mesh's faces)
 			end
 			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
 				if part.ClassName == "Part" and Rig.covered(part, face, byBone[def.parent]) then
@@ -212,7 +232,10 @@ function Rig.fromData(data, name, studTexture, size)
 		if size ~= 1 then
 			model:ScaleTo(size)
 			if studTexture then
-				Studs.fit(model, studTexture.tile * size) -- (the material's studs don't scale with it)
+				-- (the material's studs don't scale with it; Config.FineStuds kinds keep their
+				-- unscaled size's studs, so a bigger recolour reads as glossy as its original)
+				local studScale = if Config.FineStuds[name] then size / (Config.AnimalScale[name] or 1) else size
+				Studs.fit(model, studTexture.tile * studScale)
 			end
 		end
 		template = { model = model, pivots = pivots }
@@ -258,6 +281,7 @@ function Rig.buildFromData(data, name, studTexture)
 			size = part.size,
 			color = part.color,
 			class = part.class,
+			mesh = part.mesh,
 			plain = part.plain,
 			neon = part.neon,
 			metal = part.metal,

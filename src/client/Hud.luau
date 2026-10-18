@@ -129,6 +129,64 @@ local IMAGES = {
 	eggFox = { id = "rbxassetid://92522948167443", size = Vector2.new(502, 806) }, -- FoxEggRender.png (World 2)
 	eggNineTailedFox = { id = "rbxassetid://110560724842212", size = Vector2.new(544, 806) }, -- NineTailedFoxEggRender.png (World 2)
 	eggKitsune = { id = "rbxassetid://124688776792586", size = Vector2.new(522, 849) }, -- KitsuneEggRender.png (World 2)
+	eggGreenCrab = { id = "rbxassetid://74196090261063", size = Vector2.new(602, 791) }, -- GreenCrabEggRender.png (World 3)
+	eggLimeCrab = { id = "rbxassetid://85578461423986", size = Vector2.new(602, 791) }, -- LimeCrabEggRender.png (World 3)
+	eggParrot = { id = "rbxassetid://96862284524676", size = Vector2.new(573, 774) }, -- ParrotEggRender.png (World 3)
+	eggBananaMonkey = { id = "rbxassetid://128398088115519", size = Vector2.new(502, 750) }, -- BananaMonkeyEggRender.png (World 3)
+	eggTreasureHermit = { id = "rbxassetid://87618949538639", size = Vector2.new(549, 723) }, -- TreasureHermitEggRender.png (World 3)
+	eggHalloweenSnake = { id = "rbxassetid://117365953821607", size = Vector2.new(553, 960) }, -- HalloweenSnakeEggRender.png (Halloween giga rare)
+	eggHalloweenUnicorn = { id = "rbxassetid://74912601109263", size = Vector2.new(502, 865) }, -- HalloweenUnicornEggRender.png (Halloween giga rare)
+	eggHalloweenKraken = { id = "rbxassetid://128790726871911", size = Vector2.new(696, 900) }, -- HalloweenKrakenEggRender.png (Halloween giga rare)
+	eggHalloweenBoneRex = { id = "rbxassetid://134717406361017", size = Vector2.new(566, 945) }, -- HalloweenBoneRexEggRender.png (Halloween giga rare)
+	eggHalloweenSeraph = { id = "rbxassetid://131579993641835", size = Vector2.new(700, 760) }, -- HalloweenSeraphEggRender.png (Halloween giga rare)
+	eggHalloweenKitsune = { id = "rbxassetid://88660119728664", size = Vector2.new(522, 849) }, -- HalloweenKitsuneEggRender.png (Halloween giga rare)
+	eggHalloweenLoong = { id = "rbxassetid://132053102713664", size = Vector2.new(560, 863) }, -- HalloweenLoongEggRender.png (Halloween giga rare)
+	eggHalloweenPhoenix = { id = "rbxassetid://103296530187654", size = Vector2.new(700, 982) }, -- HalloweenPhoenixEggRender.png (Halloween giga rare)
+	eggHalloweenCrystalElephant = { id = "rbxassetid://93115607475102", size = Vector2.new(650, 911) }, -- HalloweenCrystalElephantEggRender.png (Halloween giga rare)
+	eggBlackCat = { id = "rbxassetid://90649473102708", size = Vector2.new(502, 759) }, -- BlackCatEggRender.png (Halloween)
+	eggBat = { id = "rbxassetid://134273437630221", size = Vector2.new(569, 818) }, -- BatEggRender.png (Halloween)
+	eggPumpkinPup = { id = "rbxassetid://85542206203209", size = Vector2.new(502, 762) }, -- PumpkinPupEggRender.png (Halloween)
+	eggPurpleTarantula = { id = "rbxassetid://77502329949420", size = Vector2.new(678, 704) }, -- PurpleTarantulaEggRender.png (Halloween)
+	eggWerewolf = { id = "rbxassetid://76054901949807", size = Vector2.new(502, 798) }, -- WerewolfEggRender.png (Halloween)
+	eggGhost = { id = "rbxassetid://120779575988151", size = Vector2.new(647, 703) }, -- GhostEggRender.png (Halloween)
+	eggSkeletonDog = { id = "rbxassetid://138690310482207", size = Vector2.new(502, 719) }, -- SkeletonDogEggRender.png (Halloween)
+	eggTombstoneCrawler = { id = "rbxassetid://85290109366044", size = Vector2.new(502, 668) }, -- TombstoneCrawlerEggRender.png (Halloween)
+	eggZombieBear = { id = "rbxassetid://117268933780863", size = Vector2.new(502, 722) }, -- ZombieBearEggRender.png (Halloween)
+	eggWispWolf = { id = "rbxassetid://137089266842594", size = Vector2.new(502, 818) }, -- WispWolfEggRender.png (Halloween)
+	eggGrimReaper = { id = "rbxassetid://105770722348639", size = Vector2.new(593, 734) }, -- GrimReaperEggRender.png (Halloween)
+	eggEyepatchShark = { id = "rbxassetid://133989350638738", size = Vector2.new(502, 775) }, -- EyepatchSharkEggRender.png (World 3)
+	eggTreasureTurtle = { id = "rbxassetid://94903975169870", size = Vector2.new(502, 817) }, -- TreasureTurtleEggRender.png (World 3)
+	eggGhostShip = { id = "rbxassetid://83345853164128", size = Vector2.new(522, 868) }, -- GhostShipEggRender.png (World 3)
+	eggJollyRogerWyvern = { id = "rbxassetid://106595353110687", size = Vector2.new(602, 734) }, -- JollyRogerWyvernEggRender.png (World 3)
+	eggLadybug = { id = "rbxassetid://108874116333491", size = Vector2.new(502, 778) }, -- LadybugEggRender.png (World 3)
+	eggBumblebee = { id = "rbxassetid://126546375629358", size = Vector2.new(645, 727) }, -- BumblebeeEggRender.png (World 3)
+	eggToadstoolFrog = { id = "rbxassetid://115536781118070", size = Vector2.new(502, 676) }, -- ToadstoolFrogEggRender.png (World 3)
+	eggVineMonster = { id = "rbxassetid://116358195389802", size = Vector2.new(524, 710) }, -- VineMonsterEggRender.png (World 3)
+	eggVenusFlytrap = { id = "rbxassetid://99027902215314", size = Vector2.new(557, 668) }, -- VenusFlytrapEggRender.png (World 3)
+	eggSunflowerLion = { id = "rbxassetid://109315089615628", size = Vector2.new(667, 689) }, -- SunflowerLionEggRender.png (World 3)
+	eggRafflesiaBeast = { id = "rbxassetid://105998022695625", size = Vector2.new(658, 695) }, -- RafflesiaBeastEggRender.png (World 3)
+	eggAncientTreant = { id = "rbxassetid://100941370514849", size = Vector2.new(502, 694) }, -- AncientTreantEggRender.png (World 3)
+	eggGiantRafflesia = { id = "rbxassetid://81971373381902", size = Vector2.new(564, 764) }, -- FlytrapQueenEggRender.png (World 3; the Giant Rafflesia keeps the Flytrap Queen's egg for now)
+	eggGummyBear = { id = "rbxassetid://82472901970710", size = Vector2.new(502, 750) }, -- GummyBearEggRender.png (World 3)
+	eggYellowGummyBear = { id = "rbxassetid://71659275230398", size = Vector2.new(502, 750) }, -- YellowGummyBearEggRender.png (World 3)
+	eggGreenGummyBear = { id = "rbxassetid://133913042752808", size = Vector2.new(502, 750) }, -- GreenGummyBearEggRender.png (World 3)
+	eggGumdropFrog = { id = "rbxassetid://96785493203961", size = Vector2.new(502, 719) }, -- GumdropFrogEggRender.png (World 3)
+	eggGingerbreadMan = { id = "rbxassetid://109625880806599", size = Vector2.new(502, 668) }, -- GingerbreadManEggRender.png (World 3)
+	eggCreampuff = { id = "rbxassetid://139714019730087", size = Vector2.new(502, 780) }, -- CreampuffEggRender.png (World 3)
+	eggSwollFairy = { id = "rbxassetid://127716474790012", size = Vector2.new(600, 721) }, -- SwollFairyEggRender.png (World 3)
+	eggDesireTroll = { id = "rbxassetid://100253441445728", size = Vector2.new(502, 760) }, -- DesireTrollEggRender.png (World 3)
+	eggRockCandyDragon = { id = "rbxassetid://112086344358353", size = Vector2.new(502, 815) }, -- RockCandyDragonEggRender.png (World 3)
+	eggGumballGolem = { id = "rbxassetid://125539296607125", size = Vector2.new(502, 727) }, -- GumballGolemEggRender.png (World 3)
+	eggGigacorn = { id = "rbxassetid://72903095022775", size = Vector2.new(502, 848) }, -- GigacornEggRender.png (World 3)
+	eggMoonJellyfish = { id = "rbxassetid://130186009688014", size = Vector2.new(560, 686) }, -- MoonJellyfishEggRender.png (World 3)
+	eggAnomalocaris = { id = "rbxassetid://124388771955215", size = Vector2.new(606, 830) }, -- AnomalocarisEggRender.png (World 3)
+	eggBoxJellyfish = { id = "rbxassetid://119877368095785", size = Vector2.new(502, 676) }, -- BoxJellyfishEggRender.png (World 3)
+	eggBlueRingOctopus = { id = "rbxassetid://72113109901514", size = Vector2.new(502, 699) }, -- BlueRingOctopusEggRender.png (World 3)
+	eggManOWar = { id = "rbxassetid://84987070586649", size = Vector2.new(502, 837) }, -- ManOWarEggRender.png (World 3)
+	eggMermaid = { id = "rbxassetid://87614321273679", size = Vector2.new(522, 795) }, -- MermaidEggRender.png (World 3)
+	eggAbyssalDragon = { id = "rbxassetid://107912461575187", size = Vector2.new(585, 811) }, -- AbyssalDragonEggRender.png (World 3)
+	eggReefTitan = { id = "rbxassetid://85646971920304", size = Vector2.new(660, 795) }, -- ReefTitanEggRender.png (World 3)
+	eggRoyalCnidarian = { id = "rbxassetid://95339327375816", size = Vector2.new(502, 823) }, -- RoyalCnidarianEggRender.png (World 3)
 	eggTombJackal = { id = "rbxassetid://114106715330048", size = Vector2.new(530, 879) }, -- TombJackalEggRender.png (World 2)
 	eggLionArcher = { id = "rbxassetid://117473019333658", size = Vector2.new(505, 800) }, -- LionArcherEggRender.png (World 2)
 	eggNut = { id = "rbxassetid://120782360993998", size = Vector2.new(623, 874) }, -- NutEggRender.png (World 2)
@@ -740,7 +798,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			Shop.toggle()
 		end
 	end)
-	shopIcon.Visible = pets.Visible
+	shopIcon.Visible = pets.Visible and Config.ShopOn
 	if IMAGES.shopIcon.id == "" then
 		local shopText = label(shopIcon, UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), 34, 3) -- 3px outline (QM)
 		shopText.Text = "Shop"
@@ -793,7 +851,9 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			Sounds.play("purchase") -- (the Legend Egg's pet comes as a second grant: one sound)
 		end
 		Shop.close()
-		if key == "LegendaryPet" and kind then
+		if key == "LoongPet" and kind then
+			require(script.Parent.NewAnimal).show(kind) -- (the bought Loong: the new animal popup, QM Oct 15)
+		elseif key == "LegendaryPet" and kind then
 			-- (its own rarity's card: the Loong and Robo Shark are Exclusive)
 			local animal = game:GetService("ReplicatedStorage").Shared.Animals:FindFirstChild(kind)
 			Hud.eggReveal(if animal then require(animal).Rarity else "Legendary", kind, true)
@@ -1140,7 +1200,7 @@ function Hud.show(visible)
 	gold.Visible = not visible and tutorial == nil
 	pets.Visible = not visible and tutorial == nil
 	fuseIcon.Visible = not visible and ((tutorial == nil and Hud.fuseUnlocked()) or tutorial == "fuse")
-	shopIcon.Visible = pets.Visible
+	shopIcon.Visible = pets.Visible and Config.ShopOn
 	upgrade.Visible = upgradeShown and not visible and tutorial == nil
 	Inventory.setVisible(not visible and not lesson) -- your eggs, hidden while riding
 	gained.row.Visible = false
@@ -1386,11 +1446,13 @@ function Hud.eggReveal(rarity, kind, rolled)
 		cardEgg.Position = UDim2.new(0.5, 0, 0.5, -lift)
 	end
 	-- Runs step(t) every frame for a duration; false if the reveal was cancelled.
+	-- (Config.EggRevealSpeed: t runs that much faster, so every part of it does)
+	local speed = Config.EggRevealSpeed or 1
 	local function play(duration, step)
 		local t = 0
 		while t < duration do
 			step(t)
-			t += RunService.Heartbeat:Wait()
+			t += RunService.Heartbeat:Wait() * speed
 			if reveal ~= token then
 				return false
 			end
@@ -1542,7 +1604,7 @@ function Hud.eggReveal(rarity, kind, rolled)
 			cardExclusive.Visible = false
 		end
 	end)
-	return ENTER_TIME + roll + ANTICIPATION + hold + EXIT_TIME
+	return (ENTER_TIME + roll + ANTICIPATION + hold + EXIT_TIME) / speed
 end
 
 -- Cutscenes hide the whole ride HUD.
@@ -1720,7 +1782,7 @@ function Hud.setTutorial(stage)
 	gold.Visible = not riding and stage == nil
 	pets.Visible = not riding and stage == nil
 	fuseIcon.Visible = not riding and ((stage == nil and Hud.fuseUnlocked()) or stage == "fuse")
-	shopIcon.Visible = pets.Visible
+	shopIcon.Visible = pets.Visible and Config.ShopOn
 	upgrade.Visible = upgradeShown and not riding and stage == nil
 	rideCash.row.Visible = SHOW_RIDE_TOP and (stage == nil and not noCash)
 end

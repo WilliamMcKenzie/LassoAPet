@@ -25,10 +25,7 @@ biomeUnlocked.Name = "BiomeUnlocked"
 biomeUnlocked.Parent = game:GetService("ServerStorage")
 
 -- Each world's biome names, as players know them.
-local NAMES = {
-	[1] = { "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" },
-	[2] = { "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
-}
+local NAMES = Config.BiomeNames
 local QUIT = { "0-1m", "1-5m", "5-10m", "10-20m", "20-30m", "30m+" }
 local EXITS = { "startup", "tutorial", "base", "outbound", "return", "reward", "transfer" }
 
@@ -144,7 +141,7 @@ local function report(arg)
 		table.insert(quit, band .. " " .. pct(r.c("quit" .. i), ended))
 	end
 	line("  Quit at: %s", table.concat(quit, ", "))
-	for w = 1, 2 do
+	for w = 1, #NAMES do
 		line("  Place visits, World %d: %d, mean %s, median %s", w, r.c("placeVisit" .. w), minutes(r.mean("placeVisit" .. w)), minutes(r.p("placeVisit" .. w, 0.5)))
 	end
 	local devices = {}
@@ -165,6 +162,14 @@ local function report(arg)
 	line("STARTUP: joins %d; %s", joins, table.concat(startup, ", "))
 	line("  Events: mounted %d, lasso chance %d, throws %d, landed %d, boss/return %d, quests opened %d",
 		r.c("mounted"), r.c("lassoChance"), r.c("lassoThrow"), r.c("lassoLand"), r.c("returnStart"), r.c("questsOpened"))
+
+	-- The shop and Robux (QM, Oct 14): % of completed sessions that opened the shop, and that bought anything.
+	line("SHOP: opened in %s of sessions (%d opens); bought something in %s (%d purchases, R$%d from products)",
+		pct(r.c("shopOpened"), ended), r.c("shopOpens"), pct(r.c("bought"), ended), r.c("purchases"), r.c("robux"))
+	for _, seg in { "new", "ret" } do
+		local e = r.c("end", seg)
+		line("  %s: opened %s, bought %s", if seg == "new" then "New" else "Returning", pct(r.c("shopOpened", seg), e), pct(r.c("bought", seg), e))
+	end
 
 	-- First-session survival (completed first sessions only).
 	local entrants = r.c("fsEntrant")
@@ -191,10 +196,54 @@ local function report(arg)
 	end
 	line("EXIT PHASE (%d): %s", ended, table.concat(exits, ", "))
 
+	-- What they were doing as they left (Telemetry's quit snapshot), by when they left.
+	local SNAP = {
+		{ "rides since tutorial", { "rides0", "rides1", "rides2", "rides3-5", "rides6+" } },
+		{ "last ride", { "last:animal", "last:crash", "last:empty", "last:riding", "last:none" } },
+		{ "since it ended", { "idle:<15", "idle:<60", "idle:60+" } },
+		{ "that ride into their furthest biome", { "far:gate", "far:<50", "far:<80", "far:<95", "far:95+" } },
+		{ "vs their best before", { "vs:best", "vs:near", "vs:short", "vs:first" } },
+		{ "rides since a new barrier", { "stuck:0", "stuck:1-2", "stuck:3-5", "stuck:6+" } },
+		{ "egg in pen", { "egg:ready", "egg:hatching", "egg:none" } },
+		{ "quest to claim", { "claim:yes", "claim:no" } },
+		{ "World 2 gold (W1, not owned)", { "w2gold:yes", "w2gold:no" } },
+		{ "had it for", { "w2for:<1m", "w2for:1-5m", "w2for:5m+" } },
+		{ "at base since", { "w2seen:yes", "w2seen:no" } },
+	}
+	line("AS THEY LEFT (quit snapshot):")
+	for q, band in { "<1m", "1-5m", "5-10m", "10-20m", "20m+" } do
+		local n = r.c("q" .. q .. ":n")
+		if n > 0 then
+			local parts = {}
+			for _, group in SNAP do
+				local bits = {}
+				for _, what in group[2] do
+					local c = r.c("q" .. q .. ":" .. what)
+					if c > 0 then
+						table.insert(bits, what:gsub("^%w+:", "") .. " " .. pct(c, n))
+					end
+				end
+				if #bits > 0 then
+					table.insert(parts, group[1] .. ": " .. table.concat(bits, ", "))
+				end
+			end
+			local reach = {}
+			for w = 1, #NAMES do
+				for i = 1, #NAMES[w] do
+					local c = r.c("q" .. q .. ":w" .. w .. "reach" .. i)
+					if c > 0 then
+						table.insert(reach, "W" .. w .. " " .. NAMES[w][i] .. " " .. pct(c, n))
+					end
+				end
+			end
+			line("  Quit %s (%d): %s; barrier: %s", band, n, table.concat(parts, "; "), table.concat(reach, ", "))
+		end
+	end
+
 	-- Pacing and replay.
 	line("PACING: first ride %s; first reward %s; next ride after tutorial %s", r.spread("toFirstRide"), r.spread("toFirstReward"), r.spread("toNextRide"))
 	line("  Replay (rode again within 90s of the tutorial): %s (%d)", pct(r.c("replay"), r.c("replayEligible")), r.c("replayEligible"))
-	for w = 1, 2 do
+	for w = 1, #NAMES do
 		local times = {}
 		for i = 2, #NAMES[w] do
 			table.insert(times, NAMES[w][i] .. " " .. r.spread("w" .. w .. "biome" .. i))
@@ -208,7 +257,7 @@ local function report(arg)
 		table.insert(first, NAMES[1][i] .. " " .. pct(r.c("fv" .. i), entrants))
 	end
 	line("REACH, first sessions (%d): %s", entrants, table.concat(first, ", "))
-	for w = 1, 2 do
+	for w = 1, #NAMES do
 		local visits = r.c("placeVisit" .. w)
 		local reach = {}
 		for i = 2, #NAMES[w] do

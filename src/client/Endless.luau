@@ -13,6 +13,13 @@
 --   Endless.init({ obstacles, slices, streams, newStream })  -- Ride's lists, once
 --   Endless.update(camZ)                                      -- every frame
 --   Endless.streamAt(z) -> stream?                            -- the stream of the copy at z
+--
+-- Or from chunks (Config.Endless.Chunks, the name of a folder in ReplicatedStorage: the
+-- Halloween world's Pumpkin Patch, QM Oct 15 "randomly pick ones and lay them down like
+-- roadwork", tools/pumpkin_chunks.luau): copy k is one of its Models (each Length long, its
+-- pivot the middle of its start edge, facing -z), picked at random but the same for k on
+-- every client, laid from the cut on. More copies then, as a chunk is short: BEHIND behind
+-- the camera's and AHEAD ahead; one that falls out of reach goes, and the next one's made.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -247,7 +254,74 @@ local function move(copy, k)
 	end
 end
 
+-- Chunks (Config.Endless.Chunks): copy k's chunk, the same on every client.
+local CHUNKS = cfg.Chunks and ReplicatedStorage:WaitForChild(cfg.Chunks)
+local BEHIND, AHEAD = 2, 6
+local function chunkFor(k)
+	local list = CHUNKS:GetChildren()
+	table.sort(list, function(a, b)
+		return a.Name < b.Name
+	end)
+	return list[Random.new(k * 7919 + 17):NextInteger(1, #list)]
+end
+
+local function makeChunk(k)
+	local copy = { k = k, obstacleModels = {}, ready = false }
+	table.insert(copies, copy)
+	local model = chunkFor(k):Clone()
+	model:PivotTo(CFrame.new(0, 0, CUT - (k - 1) * LENGTH))
+	for _, inst in model:GetDescendants() do
+		if inst:IsA("Model") and inst:FindFirstChild("Base") then
+			table.insert(copy.obstacleModels, inst)
+		end
+	end
+	model.Parent = holder
+	copy.model = model
+	addEntries(copy)
+	copy.ready = true
+	setStream(k, true)
+end
+
+local function dropChunk(copy)
+	removeEntries(copy)
+	setStream(copy.k, false)
+	copy.model:Destroy()
+	table.remove(copies, table.find(copies, copy))
+end
+
+local function updateChunks(camZ)
+	if not holder then
+		holder = Instance.new("Folder")
+		holder.Name = "EndlessCourse"
+		holder.Parent = workspace
+	end
+	local here = if camZ < CUT then math.floor((CUT - camZ) / LENGTH) + 1 else 0
+	local lo, hi = math.max(here - BEHIND, 1), here + AHEAD
+	for i = #copies, 1, -1 do
+		local copy = copies[i]
+		if copy.k < lo or copy.k > hi then
+			dropChunk(copy)
+		end
+	end
+	local have = {}
+	for _, copy in copies do
+		have[copy.k] = true
+	end
+	for k = lo, hi do
+		if not have[k] then
+			makeChunk(k) -- (one a frame: the rest the frames after)
+			return
+		end
+	end
+end
+
 function Endless.update(camZ)
+	if CHUNKS then
+		if ride and camZ <= START_AT + AHEAD * LENGTH then
+			updateChunks(camZ)
+		end
+		return
+	end
 	if not ride or camZ > START_AT then
 		return
 	end

@@ -23,9 +23,9 @@ local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this w
 -- (QM's mockup, Oct 13, was 1456 wide: its sizes x 1320 / 1456 here)
 local CLOSE = "rbxassetid://84920756991403" -- dex/IndexClose.png (the Index's X, as the shop's)
 local ART = { -- assets/ui/worlds (QM's; World2.png is his World1.png with a 2)
-	World1 = "rbxassetid://117854477071908", -- World1.png: the banner (portal, tree, track; "World 1" on it)
-	World2 = "rbxassetid://123640921226077", -- World2.png: QM's marble temple banner (Oct 13)
-	World3 = "rbxassetid://122859842408693", -- World3.png: QM's "World 3" / COMING SOON banner (his World3 1.png)
+	World1 = "rbxassetid://97539379085415", -- World1.png: QM's World 1 banner (his World1 1.png, Oct 15)
+	World2 = "rbxassetid://118848669288128", -- World2.png: QM's World 2 banner (his World2 5.png, Oct 15)
+	World3 = "rbxassetid://79877009915322", -- World3.png: QM's World 3 banner (his World3 3.png, Oct 15; was the COMING SOON one)
 	Travel = "rbxassetid://72409176941710", -- Travel.png: the blue button ("Travel" on it)
 	TravelLoading = "rbxassetid://104387240097786", -- TravelLoading.png: the same in grey, while a trip's on its way
 	Buy = "rbxassetid://128346351326066", -- Buy.png: the green button, a cash stack left, "Buy" right
@@ -33,7 +33,7 @@ local ART = { -- assets/ui/worlds (QM's; World2.png is his World1.png with a 2)
 local WORLDS = {
 	{ name = "World 1", banner = "World1" },
 	{ name = "World 2", banner = "World2" },
-	{ name = "World 3", banner = "World3", soon = true },
+	{ name = "World 3", banner = "World3" }, -- (for sale: QM, Oct 15, 1m)
 }
 local CARD = Vector2.new(723, 212)
 local LIST_TOP, CARD_PAD, CARD_GAP = 50, 12, 22 -- the scrolling list's top below the panel's; the first card's below that, and between them
@@ -48,6 +48,7 @@ local AWAY = 45 -- and you've walked off once you're this far
 
 local player = Players.LocalPlayer
 local open = false
+local prompted = false -- (opened by World2Bar's prompt, not the gate: walking about doesn't close it)
 local travelling = false -- (a trip's on its way: every Travel button waits)
 local TRAVEL_WAIT = 15 -- seconds before Travel works again if the teleport never came
 local closeMenu
@@ -390,6 +391,7 @@ function closeMenu()
 		return
 	end
 	open = false
+	prompted = false
 	hideOthers(false)
 	haze(false)
 	ModalPop.close(setScale, function()
@@ -399,6 +401,18 @@ end
 closeButton.Activated:Connect(function()
 	closeMenu()
 end)
+
+-- World 1's World 2 prompt (QM, Oct 14: was a forced box over the World 2 bar; softened so
+-- players can close it and play on): World2Bar fires this to open the menu wherever you are.
+local promptEvent = Instance.new("BindableEvent")
+promptEvent.Name = "OpenWorldsMenu"
+promptEvent.Event:Connect(function()
+	if not open then
+		openMenu()
+		prompted = true
+	end
+end)
+promptEvent.Parent = script
 
 -- Walking up to the gate pops it up, once a visit: walk off (AWAY) and back for it again.
 local gate = workspace:WaitForChild("World"):WaitForChild("BaseDecor"):WaitForChild("PortalGate", 30)
@@ -417,7 +431,7 @@ RunService.Heartbeat:Connect(function()
 	local d = Vector2.new(root.Position.X - centre.X, root.Position.Z - centre.Z).Magnitude
 	if d > AWAY then
 		armed = true
-		if open then
+		if open and not prompted then
 			closeMenu()
 		end
 	elseif d < NEAR and armed and not humanoid.SeatPart then -- (not riding past)

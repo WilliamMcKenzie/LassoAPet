@@ -463,6 +463,7 @@ local function fuse()
 	end
 	if not player:GetAttribute("FuseLesson") and not player:GetAttribute("MergeFree") and (player:GetAttribute("Gold") or 0) < priceOf(a, b) then
 		showTip("Not enough cash")
+		require(script.Parent.Shop).buyGoldFor(priceOf(a, b) - (player:GetAttribute("Gold") or 0))
 		return
 	end
 	local base, donor, aIsBase = Fusion.combine(a.kind, a.fuse, b.kind, b.fuse)

@@ -33,8 +33,20 @@ function WorldColors.biomeNamedStart(name)
 	return nil
 end
 
--- The course's half width at z (Config: a funnel, widening from the start line).
+-- The course's half width at z (Config: a funnel, widening from the start line; or World 3's
+-- Config.CourseProfile, { z, half width } stops widening and narrowing, straight between).
 function WorldColors.halfWidth(z)
+	local profile = Config.CourseProfile
+	if profile then
+		z = math.min(z, 0)
+		for k = 2, #profile do
+			local a, b = profile[k - 1], profile[k]
+			if z >= b[1] then
+				return a[2] + (b[2] - a[2]) * (a[1] - z) / (a[1] - b[1])
+			end
+		end
+		return profile[#profile][2]
+	end
 	return math.min(Config.CourseHalfWidth + Config.CourseWidening * math.max(-z, 0), Config.CourseMaxHalfWidth)
 end
 
@@ -138,9 +150,13 @@ function WorldColors.paintGround(world, part)
 	end
 end
 
--- One wall part, or the cap along its top.
+-- One wall part, or the cap along its top. A wall part with its own name (World 3's base
+-- walls: BaseWallLow, BaseWall, BaseCap) takes that name's colours from the biome's Patches.
 function WorldColors.paintWall(world, part)
-	if part.Name == "Cap" then
+	local own = part.Name ~= "Wall" and part.Name ~= "Cap" and get(world, part, part.Name, "A")
+	if own then
+		paint(part, own, get(world, part, part.Name, "B") or own)
+	elseif part.Name == "Cap" then
 		local biome = Config.Biomes[WorldColors.biomeAt(part.Position.Z)]
 		part.Color = WorldColors.saturate(biome.CapColor) or get(world, part, "Ground", "B") -- (CapColor: World 2's cavern)
 	else

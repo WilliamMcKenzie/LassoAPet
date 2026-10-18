@@ -1,0 +1,216 @@
+-- The animals' low-poly meshes (QM, Oct 14; tools/bbmodel_to_luau.py --meshes): one MeshPart
+-- per mesh in ReplicatedStorage.AnimalMeshes, named as its .obj, which Rig.luau copies (scripts
+-- can't set MeshId, so the game can't make them itself). Needed in every Place an animal can
+-- show up in (pets travel between worlds). Rerunnable: run in the command bar after filling IDS.
+--
+-- To fill IDS: upload each assets/meshes/<Kind>/<Name>.obj (Asset Manager > Bulk Import, or
+-- Import 3D: units studs, no rig, keep the name) and put its mesh asset id next to its name.
+local AssetService = game:GetService("AssetService")
+local IDS = {
+	-- The Halloween world's animals (Oct 15): upload assets/meshes/<Kind>/*.obj, put the ids here
+	Bat_Fur_neck = 81329754956163,
+	Bat_Fur_root = 140436210691479,
+	Bat_Wing_WingL = 96644882542231,
+	Bat_Wing_WingL2 = 138337495224235,
+	Bat_Wing_WingR = 101191126037721,
+	Bat_Wing_WingR2 = 76684957771569,
+	Ghost_Ghost_root = 80161799825783,
+	GrimReaper_Robe_root = 89446773292393,
+	GrimReaper_Robedark_neck = 101546065169912,
+	PumpkinPup_Leaf_neck = 95327742533514,
+	PumpkinPup_Pumpkin_neck = 90888534622781,
+	PumpkinPup_Stem_Tail = 91935438240183,
+	PurpleTarantula_Fur_Abdomen = 104385000338994,
+	PurpleTarantula_Fur_root = 108851709864621,
+	PurpleTarantula_Furdark_neck = 89159181512413,
+	PurpleTarantula_Orange_Abdomen = 80124506033468,
+	TombstoneCrawler_Stone_root = 77935903456631,
+	ZombieBear_Furdark_neck = 77172338059801,
+	GiantPumpkin_Leaf_Top = 115723733876088, -- (the Haunted Hills boss)
+	GiantPumpkin_Leaf_VineL = 139816502934488,
+	GiantPumpkin_Leaf_VineR = 124163983884361,
+	GiantPumpkin_Pumpkin_root = 102410366584692,
+	GiantPumpkin_Pumpkindark_root = 118675545673173,
+	GiantPumpkin_Stem_VineL = 105922647020616,
+	GiantPumpkin_Stem_VineR = 140508923485490,
+	ToadstoolFrog_Cap_neck = 113676246756247, -- (re-upload: QM's Blockbench edit, Oct 15)
+	ToadstoolFrog_Gill_neck = 118811291987440, -- (re-upload: QM's Blockbench edit, Oct 15)
+	ToadstoolFrog_Spot_neck = 101087756608521, -- (re-upload: QM's Blockbench edit, Oct 15)
+	GreenCrab_Red_root = 129403060148775, -- (the Green Crab's carapace, QM Oct 14)
+	GreenCrab_Red_ClawL = 86915530155881, -- (its claws' tops)
+	GreenCrab_Red_ClawR = 88608798113715,
+	LimeCrab_Red_root = 129403060148775, -- (the Lime Crab: the Green Crab's shapes, so its ids; QM Oct 15)
+	LimeCrab_Red_ClawL = 86915530155881,
+	LimeCrab_Red_ClawR = 88608798113715,
+	TreasureHermit_Crab_neck = 90664321484638, -- (the Treasure Hermit's head and claw tops, like the Green Crab's: QM Oct 14)
+	TreasureHermit_Crab_ClawL = 100973532077609,
+	TreasureHermit_Crab_ClawR = 94863051921521,
+	TreasureTurtle_Shell_root = 130644895498216, -- (its diamond scutes, a tortoise's: QM Oct 15; was 134661861738303, the smooth shell)
+	TreasureTurtle_Shelldark_root = 88767256156902, -- (the dark dome under the scutes, QM Oct 15)
+	TreasureTurtle_Sanddark_root = 78623906471175, -- (the sand island dome on its shell, QM Oct 14)
+	GhostShip_Deck_root = 139059304610733, -- (the Ghost Ship, on the pirate ship prop: QM Oct 14)
+	GhostShip_Flag_Flag = 91677109949137,
+	GhostShip_Flag_root = 112054783839535,
+	GhostShip_Gold_root = 70583742678210,
+	GhostShip_Hull_root = 97435701886321,
+	GhostShip_Mast_root = 113933522114883,
+	GhostShip_Rail_root = 89259235330850,
+	GhostShip_Sail_SailF = 139005826343219,
+	GhostShip_Sail_SailM = 101983046030341,
+	GhostShip_Sail_root = 107969410845724,
+	GhostShip_White_Flag = 74100158036798,
+	Ladybug_Black_ShellL = 85921473817669, -- (re-upload: QM's Blockbench edit, Oct 15; the Ladybug shell and the Bumblebee body and wings, QM Oct 14)
+	Ladybug_Black_ShellR = 98752802337169, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Ladybug_Red_ShellL = 103177915144410, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Ladybug_Red_ShellR = 110848259912731, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Black_Abdomen = 88744261457751,
+	Bumblebee_Black_root = 114671736332286,
+	Bumblebee_Wing_WingBL = 126428174511432, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Wing_WingBR = 124395339512885, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Wing_WingFL = 126854557968209, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Wing_WingFR = 76404368724892, -- (re-upload: QM's Blockbench edit, Oct 15)
+	Bumblebee_Yellow_Abdomen = 79819704203552,
+	Bumblebee_Yellow_root = 73623092957303,
+	VineMonster_Leaf_LeavesL = 132839468011196, -- (the Vine Monster: QM's Blockbench edit, Oct 15)
+	VineMonster_Leaf_LeavesR = 102753960814800,
+	VineMonster_Rose_Rose = 139718791105732,
+	VineMonster_Rosedark_Rose = 101570267675570,
+	VineMonster_Vinelight_VineL = 103130234470918,
+	VineMonster_Vinelight_VineR = 115011483764524,
+	SunflowerLion_Leaf_LegFL = 123343424864938, -- (the Sunflower Lion: QM's Blockbench edit, Oct 15)
+	SunflowerLion_Leaf_LegFR = 115757717830949,
+	SunflowerLion_Leaf_LegHL = 125948253170331,
+	SunflowerLion_Leaf_LegHR = 110002276960658,
+	SunflowerLion_Leafdark_Tail = 116929942962469,
+	SunflowerLion_Petal_Mane = 138779729869815,
+	SunflowerLion_Petal_Tail = 98497427209358,
+	SunflowerLion_Petaldark_Mane = 119624135948732,
+	SunflowerLion_Petaldark_Tail = 127848487802117,
+	SunflowerLion_Seed_Mane = 117384319496301,
+	SunflowerLion_Seed_neck = 125216012628886, -- (the mane's spikes, leaning tips: QM, Oct 15)
+	SunflowerLion_Seed_Tail = 82159190123765,
+	SunflowerLion_Seeddark_Mane = 92069771151078,
+	SunflowerLion_Seeddark_Tail = 138276175726502,
+	RafflesiaBeast_Bud_Tail = 131088602336035, -- (the Rafflesia Beast: QM's edit, its flower a head on a long stem neck, Oct 15)
+	RafflesiaBeast_Petal_Petal1 = 124761133981609,
+	RafflesiaBeast_Petal_Petal2 = 135581062172655,
+	RafflesiaBeast_Petal_Petal3 = 76287362478673,
+	RafflesiaBeast_Petal_Petal4 = 131699424937100,
+	RafflesiaBeast_Petal_Petal5 = 92674619076556,
+	RafflesiaBeast_Petaldark_head = 81072022728749,
+	RafflesiaBeast_Rim_head = 107326197598032,
+	RafflesiaBeast_Vine_Tail = 114776377525703,
+	RafflesiaBeast_Vine_neck = 70519743109717,
+	RafflesiaBeast_Wart_Petal1 = 100329038386982,
+	RafflesiaBeast_Wart_Petal2 = 103724387426732,
+	RafflesiaBeast_Wart_Petal3 = 107309004723908,
+	RafflesiaBeast_Wart_Petal4 = 71880267995445,
+	RafflesiaBeast_Wart_Petal5 = 134325203482611,
+	RafflesiaBeast_Vine_root = 127163766775155, -- (QM's remodel, Oct 15)
+	RafflesiaBeast_Well_head = 134791278182948,
+	AncientTreant_Leaf_ArmL = 72520559240156, -- (the Ancient Treant: QM's edit, Oct 15)
+	AncientTreant_Leaf_ArmR = 138556975636001,
+	AncientTreant_Leaf_neck = 135473395019785,
+	AncientTreant_Bark_ArmL = 100405580096422, -- (its tapered trunk, moss mouth and leaning fingers as meshes: QM Oct 15)
+	AncientTreant_Bark_ArmR = 91526866992805,
+	AncientTreant_Bark_root = 115478703668645,
+	AncientTreant_Moss_root = 93576707636543,
+	GiantRafflesia_Mosslight_Stem = 138897571228769, -- (the Giant Rafflesia, the Garden's new boss, QM Oct 15)
+	GiantRafflesia_Petal_Petal1 = 134402827558101,
+	GiantRafflesia_Petal_Petal2 = 122501213903802,
+	GiantRafflesia_Petal_Petal3 = 137440297596070,
+	GiantRafflesia_Petal_Petal4 = 106403228068807,
+	GiantRafflesia_Petal_Petal5 = 133284589944906,
+	GiantRafflesia_Petaldark_Flower = 126991300195113,
+	GiantRafflesia_Rim_Flower = 91295063947723,
+	GiantRafflesia_Vine_Stem = 138332442612398,
+	GiantRafflesia_Vine_root = 71053029294374,
+	GiantRafflesia_Wart_Petal1 = 97902420267084,
+	GiantRafflesia_Wart_Petal2 = 93712028390221,
+	GiantRafflesia_Wart_Petal3 = 140704345987263,
+	GiantRafflesia_Wart_Petal4 = 124018537708046,
+	GiantRafflesia_Wart_Petal5 = 78180364957226,
+	GiantRafflesia_Well_Flower = 88148812378304,
+	MoonJellyfish_Bell_root = 83985722402590, -- (the Cnidaria jellies and octopus, QM Oct 15: their bells and bodies)
+	BoxJellyfish_Bell_root = 88637748892426,
+	BoxJellyfish_Edge_root = 124474803771588,
+	BlueRingOctopus_Skin_root = 118891816064210,
+	RoyalCnidarian_Bell2_root = 117848376770564,
+	RoyalCnidarian_Bell3_root = 122411445052584,
+	RoyalCnidarian_Bell_root = 72415740510301,
+	RoyalCnidarian_Mgold_Minion1 = 76598489943815,
+	RoyalCnidarian_Mgold_Minion2 = 139595445452230,
+	RoyalCnidarian_Mgold_Minion3 = 82581402492475,
+	RoyalCnidarian_Mgold_Minion4 = 135979358941049,
+	Creampuff_EC2448_neck = 125623328314011, -- (the Creampuff's bun, cream, lid and cherry: QM Oct 15)
+	Creampuff_EEAC54_neck = 88438822788781,
+	Creampuff_EEAC54_root = 99690936634585,
+	Creampuff_FFFCF6_root = 138535515308423,
+	GumdropFrog_DE6012_root = 110918820554407, -- (QM's Blockbench edit of the GumdropFrog, Oct 15)
+	GumdropFrog_FF8C1E_root = 121995333066851,
+	GumballGolem_46C4FF_ArmL = 76681057042439, -- (QM's Blockbench edit of the GumballGolem, Oct 15)
+	GumballGolem_46C4FF_ArmR = 98517650532758,
+	GumballGolem_46C4FF_LegFL = 73690373708231,
+	GumballGolem_46C4FF_LegFR = 101805999555134,
+	GumballGolem_78DE32_ArmL = 75616613667046,
+	GumballGolem_78DE32_ArmR = 123292012069453,
+	GumballGolem_A050F0_LegFL = 100779842936931,
+	GumballGolem_A050F0_LegFR = 81704321387126,
+	GumballGolem_B0E2FF_neck = 129301922859162,
+	GumballGolem_CED6E2_neck = 135643951831081,
+	GumballGolem_CED6E2_root = 132796242140169,
+	GumballGolem_EC2448_ArmL = 75119353383097,
+	GumballGolem_EC2448_ArmR = 111072783267674,
+	GumballGolem_EC2448_LegFL = 133548316786364,
+	GumballGolem_EC2448_LegFR = 124732274552624,
+	GumballGolem_FF8C1E_ArmL = 107076171518860,
+	GumballGolem_FF8C1E_ArmR = 108562448475305,
+	GumballGolem_FF96CE_ArmL = 138439096960228,
+	GumballGolem_FF96CE_ArmR = 106682577653830,
+	GumballGolem_FF96CE_LegFL = 128285401602220,
+	GumballGolem_FF96CE_LegFR = 85839186038505,
+	GumballGolem_FFDE28_ArmL = 87072701637456,
+	GumballGolem_FFDE28_ArmR = 96723821346874,
+	GumballGolem_FFDE28_LegFL = 97563555889513,
+	GumballGolem_FFDE28_LegFR = 83334185289562,
+	GumballGolem_FFDE28_neck = 138962406850935,
+	GumballGolem_FFFCF6_ArmL = 119001831550335,
+	GumballGolem_FFFCF6_ArmR = 126781199486840,
+	GumballGolem_FFFCF6_LegFL = 99951173723825,
+	GumballGolem_FFFCF6_LegFR = 83819041187987,
+	DesireTroll_FF5C96_LegFL = 86695566005419, -- (QM's Blockbench edit of the DesireTroll, Oct 15)
+	DesireTroll_FF5C96_LegFR = 92709956741297,
+}
+local folder = game.ReplicatedStorage:FindFirstChild("AnimalMeshes")
+if not folder then
+	folder = Instance.new("Folder")
+	folder.Name = "AnimalMeshes"
+	folder.Parent = game.ReplicatedStorage
+end
+for name, id in IDS do
+	if id == 0 then
+		continue
+	end
+	local ok, part = pcall(function()
+		return AssetService:CreateMeshPartAsync(Content.fromUri("rbxassetid://" .. id), {
+			CollisionFidelity = Enum.CollisionFidelity.Box,
+			RenderFidelity = Enum.RenderFidelity.Precise, -- (no level-of-detail blobbing: QM, Oct 15, the Treant's low-poly canopy came out lumpy)
+		})
+	end)
+	if not ok then
+		warn(name, part)
+		continue
+	end
+	local old = folder:FindFirstChild(name)
+	if old then
+		old:Destroy()
+	end
+	part.Name = name
+	part.Anchored = true
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	part.DoubleSided = false
+	part.Parent = folder
+end
+print(#folder:GetChildren(), "animal meshes")

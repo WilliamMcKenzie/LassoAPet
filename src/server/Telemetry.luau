@@ -150,6 +150,17 @@ function Telemetry.once(player, name)
 	end
 end
 
+-- A Robux purchase (Shop.server's products, Passes' game passes): /stats' "bought" rate.
+function Telemetry.purchase(player, robux)
+	if player and sessions[player] then
+		Telemetry.once(player, "bought")
+		count(player, "purchases")
+		if type(robux) == "number" and robux > 0 then
+			count(player, "robux", robux)
+		end
+	end
+end
+
 -- Online seconds this session, both worlds.
 local function elapsed(s)
 	return s.onlineBase + os.time() - s.arrived
@@ -168,6 +179,7 @@ local function phaseOf(s, player)
 end
 
 local close -- (below)
+local rideFacts -- (below)
 
 -- A session from its snapshot (Telemetry.leaving's), for closing a trip that never arrived.
 local function fromSnapshot(snap)
@@ -197,6 +209,7 @@ local function join(player, carried)
 		tutorialDone = carried ~= nil and carried.tutorialDone == true,
 		reached = carried and tonumber(carried.reached) or nil,
 		successes = carried and tonumber(carried.successes) or 0,
+		postRides = carried and tonumber(carried.postRides) or nil, lastRide = carried and carried.lastRide or nil,
 		runs = carried and tonumber(carried.runs) or 0,
 		phase = "base",
 		phaseAt = os.clock(),
@@ -278,6 +291,7 @@ function Telemetry.reward(player)
 	end
 	local tut = player:GetAttribute("Tutorial") and "tut" or "post"
 	s.successes += 1
+	s.rideAnimal = true
 	s.phase, s.phaseAt = "reward", os.clock()
 	local samples = {}
 	if s.firstSession and not s.firstReward then
@@ -323,7 +337,8 @@ local function snapshot(s)
 	return { id = s.id, online = elapsed(s), new = s.new, first = s.firstSession, tutorialDone = s.tutorialDone, reached = s.reached,
 		successes = s.successes, runs = s.runs, excluded = s.excluded, device = s.device, ready = s.ready,
 		gold = s.gold, goldAt = goldAt, wallet0 = s.wallet0, tutorialDoneAt = s.tutorialDoneAt, firstRide = s.firstRide,
-		firstReward = s.firstReward, nextRide = s.nextRide, clientReady = s.clientReady, once = once }
+		firstReward = s.firstReward, nextRide = s.nextRide, clientReady = s.clientReady, once = once,
+		postRides = s.postRides, lastRide = s.lastRide }
 end
 
 -- Gold.server, as it teleports them to the other world: what carries the session over
@@ -347,6 +362,7 @@ end
 local function rideStarted(player, s)
 	local tut = player:GetAttribute("Tutorial") and "tut" or "post"
 	s.runs += 1
+	s.rideFar, s.rideGates = 0, player:GetAttribute("GatesBroken") or 1 -- (the quit snapshot's: how far this ride got)
 	s.phase, s.phaseAt = "outbound", os.clock()
 	s.lassoChance = false
 	local counts, samples = { [tut .. "Run"] = 1 }, {}
@@ -376,9 +392,110 @@ end
 
 -- The session's over (not a trip to the other world). (s: a session from a trip that never
 -- arrived, closed by the world it left: Telemetry's transfer check.)
+-- How far a ride got (s.rideFar, s.rideGates: since it crossed the start line): how far into
+-- the furthest biome they've opened, the one whose barrier's next ("<50", "<80", "<95",
+-- "95+" %, or "gate" when it broke a barrier), and against their best ride before it
+-- this session ("first", "best": further, "near": at least 90% of it, "short").
+function rideFacts(player, s)
+	local gates = player:GetAttribute("GatesBroken") or 1
+	local into
+	if gates > (s.rideGates or gates) then
+		into = "gate"
+	else
+		local edge = 0
+		for i = 1, gates - 1 do
+			edge -= Config.Biomes[i].Length
+		end
+		local biome = Config.Biomes[gates]
+		local f = if biome then math.clamp((edge - s.rideFar) / biome.Length, 0, 1) else 0
+		into = if f < 0.5 then "<50" elseif f < 0.8 then "<80" elseif f < 0.95 then "<95" else "95+"
+	end
+	local vs = if not s.bestFar or s.bestFar >= 0 then "first"
+		elseif s.rideFar < s.bestFar then "best"
+		elseif s.rideFar <= s.bestFar * 0.9 then "near"
+		else "short"
+	return into, vs
+end
+
+-- What the player was doing as they left (QM, Oct 14: "so we stop guessing"), by when they
+-- left (Q: 1 under a minute, 2 at 1-5, 3 at 5-10, 4 at 10-20, 5 later), all as
+-- "q<Q>:<what>" counts: rides since the tutorial (0, 1, 2, 3-5, 6+), how the last one ended
+-- (animal, crash, empty, riding now, none), seconds since it ended (<15, <60, 60+), an egg
+-- in the pen (ready, hatching, none), a quest to claim (yes, no), the furthest barrier
+-- (w<world>reach<i>), and whether they had the gold for World 2 (World 1, not owned yet).
+local QUIT_AT = { 1, 5, 10, 20, math.huge }
+local function quitSnapshot(s, player, length, counts)
+	local q = 5
+	for i, m in QUIT_AT do
+		if length < m * 60 then
+			q = i
+			break
+		end
+	end
+	local function put(what)
+		counts["q" .. q .. ":" .. what] = 1
+	end
+	put("n")
+	local rides = s.postRides or 0
+	put("rides" .. (if rides >= 6 then "6+" elseif rides >= 3 then "3-5" else tostring(rides)))
+	put("last:" .. (if s.riding then "riding" else s.lastRide or "none"))
+	-- (that ride, or the one they're on: how far it got, QM, Oct 14: "WHY they decided to leave")
+	local far, vs = s.lastRideFar, s.lastRideVs
+	if s.riding and s.rideFar then
+		far, vs = rideFacts(player, s)
+	end
+	if far then
+		put("far:" .. far)
+		put("vs:" .. vs)
+		local since = s.ridesSinceGate or 0
+		if s.riding and s.rideFar and far ~= "gate" then
+			since += 1
+		elseif s.riding and far == "gate" then
+			since = 0
+		end
+		put("stuck:" .. (if since == 0 then "0" elseif since <= 2 then "1-2" elseif since <= 5 then "3-5" else "6+"))
+	end
+	if s.lastEnd and not s.riding then
+		local idle = os.clock() - s.lastEnd
+		put("idle:" .. (if idle < 15 then "<15" elseif idle < 60 then "<60" else "60+"))
+	end
+	put("w" .. WORLD .. "reach" .. tostring(player:GetAttribute("GatesBroken") or 1)) -- (the world they left from)
+	local egg = "none"
+	pcall(function()
+		local items = game:GetService("HttpService"):JSONDecode(s.penContents or "{}") -- (kept every few seconds: the pen's emptied as they go)
+		for _, item in items do
+			if item.egg then
+				egg = if (tonumber(item.hatchAt) or 0) <= os.time() then "ready" elseif egg ~= "ready" then "hatching" else egg
+			end
+		end
+	end)
+	put("egg:" .. egg)
+	local claim = "no"
+	pcall(function()
+		for _, quest in game:GetService("HttpService"):JSONDecode(player:GetAttribute("Quests") or "[]") do
+			if (tonumber(quest.have) or 0) >= (tonumber(quest.need) or 1) then
+				claim = "yes"
+			end
+		end
+	end)
+	put("claim:" .. claim)
+	if WORLD == 1 and not player:GetAttribute("OwnsWorld2") then
+		local can = (player:GetAttribute("Gold") or 0) >= (Config.WorldPrices[2] or math.huge)
+		put("w2gold:" .. (if can then "yes" else "no"))
+		if can and s.affordAt then -- (how long they'd had it, and whether they were at base since, where the bar's prompt is: QM, Oct 14)
+			local held = os.clock() - s.affordAt
+			put("w2for:" .. (if held < 60 then "<1m" elseif held < 300 then "1-5m" else "5m+"))
+			put("w2seen:" .. (if s.sawW2 then "yes" else "no"))
+		end
+	end
+end
+
 function close(s, player)
 	local length = elapsed(s)
 	local counts = { ["end"] = 1, ["exit:" .. phaseOf(s, player)] = 1 }
+	if player then
+		pcall(quitSnapshot, s, player, length, counts)
+	end
 	for i, band in BANDS do
 		if length < band * 60 then
 			counts["quit" .. i] = 1
@@ -485,7 +602,7 @@ end)
 -- The client's reports: "ready" (with its device), "lassoChance", "questsOpened". Each
 -- name counted at most once a ride or so (RATE seconds apart).
 local RATE = 5
-local CLIENT = { ready = true, lassoChance = true, questsOpened = true }
+local CLIENT = { ready = true, lassoChance = true, questsOpened = true, shopOpened = true }
 local DEVICES = { pc = true, phone = true, tablet = true, console = true }
 local remote = Instance.new("RemoteEvent")
 remote.Name = "Telemetry"
@@ -514,6 +631,9 @@ remote.OnServerEvent:Connect(function(player, name, device)
 		end
 		s.lassoChance = true
 		count(player, "lassoChance")
+	elseif name == "shopOpened" then -- (QM, Oct 14: /stats' shop open rate)
+		Telemetry.once(player, "shopOpened")
+		count(player, "shopOpens")
 	else
 		count(player, name)
 	end
@@ -531,6 +651,9 @@ task.spawn(function() -- (Riders makes these)
 			rideStarted(player, s)
 		end
 		s.lastZ = if kind == "" then nil else z
+		if kind ~= "" and z and s.rideFar then
+			s.rideFar = math.min(s.rideFar, z) -- (the course runs toward -z)
+		end
 	end)
 	ReplicatedStorage:WaitForChild("RideCue").OnServerEvent:Connect(function(player, what)
 		local s = sessions[player]
@@ -540,6 +663,7 @@ task.spawn(function() -- (Riders makes these)
 		local tut = player:GetAttribute("Tutorial") and "tut" or "post"
 		if what == "out" then
 			count(player, "mounted")
+			s.riding, s.rideAnimal, s.rideCrash = true, false, false -- (the quit snapshot's: below)
 		elseif what == "lasso" then
 			count(player, "lassoThrow")
 		elseif what == "landed" then
@@ -549,8 +673,23 @@ task.spawn(function() -- (Riders makes these)
 			count(player, "returnStart")
 		elseif what == "crash" then
 			count(player, tut .. "Crash")
+			s.rideCrash = true
 			s.phase, s.phaseAt = "base", os.clock()
 		elseif what == "end" then
+			s.lastRide = if s.rideAnimal then "animal" elseif s.rideCrash then "crash" else "empty"
+			s.riding, s.lastEnd = false, os.clock()
+			if s.rideFar then -- (how far it got: the quit snapshot's)
+				s.lastRideFar, s.lastRideVs = rideFacts(player, s)
+				s.ridesSinceGate = if (player:GetAttribute("GatesBroken") or 1) > s.rideGates then 0 else (s.ridesSinceGate or 0) + 1
+				s.bestFar = math.min(s.bestFar or 0, s.rideFar)
+				s.rideFar = nil
+			end
+			if s.affordAt then
+				s.sawW2 = true -- (back at base with World 2's gold: the bar's prompt)
+			end
+			if tut == "post" then
+				s.postRides = (s.postRides or 0) + 1
+			end
 			if s.phase ~= "reward" then
 				s.phase, s.phaseAt = "base", os.clock()
 			end
@@ -584,6 +723,19 @@ for _, player in Players:GetPlayers() do
 	task.spawn(join, player)
 end
 Players.PlayerRemoving:Connect(leave)
+task.spawn(function() -- (the quit snapshot's copy of each pen, and when they could first buy World 2)
+	while true do
+		task.wait(5)
+		for player, s in sessions do
+			local pens = workspace:FindFirstChild("Pens")
+			local pen = pens and pens:FindFirstChild("Pen" .. tostring(player:GetAttribute("Pen")))
+			s.penContents = pen and pen:GetAttribute("Contents") or s.penContents
+			if WORLD == 1 and not s.affordAt and not player:GetAttribute("OwnsWorld2") and (player:GetAttribute("Gold") or 0) >= (Config.WorldPrices[2] or math.huge) then
+				s.affordAt, s.sawW2 = os.clock(), not s.riding -- (first could buy World 2: at base, the prompt's up)
+			end
+		end
+	end
+end)
 game:BindToClose(function()
 	for player in sessions do
 		leave(player)

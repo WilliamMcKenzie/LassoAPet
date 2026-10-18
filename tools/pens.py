@@ -35,6 +35,7 @@ The markers are turned with the pen too (the scripts read them in its frame).
 """
 
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -64,6 +65,17 @@ def _pen(angle, r):
     return (ARC[0] + out_x * r, ARC[1] + out_z * r, -out_x, -out_z)
 
 
+# World 3's island base (QM, Oct 14: tools/world3_base.luau, 1.2x the base): WORLD=3 writes
+# src/world/Pens_W3.rbxmx, pens up to 104 studs (26 tiles), fully grown centred at (0, 262),
+# (-+132.4, 226.3) and (-+144.1, 89.8): the same angles round the yard's middle, 1.2x out.
+if os.environ.get("WORLD") == "3":
+    OUT = OUT.with_name("Pens_W3.rbxmx")
+    SIZES = [round(n * 26 / 22) for n in SIZES]
+    ARC = (0, 96 * 1.2)
+    _full = ((0, 262), (-132.4, 226.3), (132.4, 226.3), (-144.1, 89.8), (144.1, 89.8))
+    GATES = tuple(math.hypot(x - ARC[0], z - ARC[1]) - SIZES[-1] * TILE / 2 for x, z in _full)
+    LIFT = 1  # (QM, Oct 14: on the light sand, a stud up: tools/world3_sandstep.luau)
+LIFT = globals().get("LIFT", 0)
 PENS = [_pen(a, r) for a, r in zip(ANGLES, GATES)]
 # Local pen frame: centred on the pen, open side at z = -SIZE / 2 facing -z.
 
@@ -225,7 +237,7 @@ def pen_parts(gx, gz, fx, fz, n=SIZES[0], style=0):
 
     out = []
     for name, size, centre, R, color, visible, material, transparency in parts:
-        world = M @ centre + np.array([cx, 0, cz])
+        world = M @ centre + np.array([cx, LIFT, cz])
         out.append((name, size, world, M @ R, color, visible, material, transparency))  # (markers too: read in the pen's frame)
     return out
 

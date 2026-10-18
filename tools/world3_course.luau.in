@@ -1,0 +1,75 @@
+-- World 3's course (QM, Oct 14; draft): the walls for its four biomes, Pirate Cove, Garden,
+-- Candyland and Cnidaria. Made by tools/world3_course.py: edit that and re-make this, not
+-- this. Run in Studio (Edit, execute_luau) on the World 3 Place (workspace.World), FIRST,
+-- then tools/world3_piratecove.luau, world3_garden.luau, world3_candyland.luau and
+-- world3_cnidaria.luau. Re-running is fine. The base (z > 0) is left alone.
+-- 1. Clears World 2's copied course past the start line: its floor (and World.Funnel's),
+--    its side walls and caps, its obstacles and props (World 2's: World 3's come later).
+-- 2. Lays the side walls along the course's new shape: not one straight funnel but straight
+--    pieces between the points of world3_course.py PROFILE, widening and narrowing (never
+--    past 137, World 1's and World 2's widest). Walls 8 thick, 48 tall, caps 10 wide on top.
+-- No far wall: the course ends at the finish line, into the void, as Worlds 1 and 2 do.
+local W = workspace.World
+local END = --END--
+-- { centre x, centre z, length, yaw } per wall piece (its inner face on the course's edge)
+local WALLS = {
+--WALLS--
+}
+
+local function past(inst) -- in the course, past the start line
+	local cf, size = inst:GetPivot(), inst:IsA("BasePart") and inst.Size or Vector3.zero
+	return cf.Position.Z + math.max(size.X, size.Z) / 2 < 0 and cf.Position.Z < -10
+end
+local cleared = { floor = 0, walls = 0, things = 0 }
+for _, p in W.Ground:GetChildren() do
+	if p:IsA("BasePart") and p.Position.Z < 0 and p.Position.Z + p.Size.Z / 2 <= 0.5 then
+		p:Destroy()
+		cleared.floor += 1
+	end
+end
+if W:FindFirstChild("Funnel") then
+	W.Funnel:Destroy()
+end
+local wallTemplate, capTemplate
+for _, p in W.Walls:GetChildren() do
+	if p:IsA("BasePart") and p.Position.Z < -10 then
+		if p.Name == "Cap" then
+			capTemplate = capTemplate or p:Clone()
+		else
+			wallTemplate = wallTemplate or p:Clone()
+		end
+		p:Destroy()
+		cleared.walls += 1
+	end
+end
+assert(wallTemplate and capTemplate, "no course walls in World.Walls to copy the look of (already run? then World.Walls has World3Wall pieces: fine)")
+for _, folder in { W:FindFirstChild("Obstacles"), W:FindFirstChild("Decor") and W.Decor:FindFirstChild("Props") } do
+	for _, m in folder and folder:GetChildren() or {} do
+		if past(m) then
+			m:Destroy()
+			cleared.things += 1
+		end
+	end
+end
+
+for _, t in { wallTemplate, capTemplate } do
+	for k in t:GetAttributes() do
+		t:SetAttribute(k, nil)
+	end
+end
+for _, w in WALLS do
+	local x, z, length, yaw = w[1], w[2], w[3], w[4]
+	local turn = CFrame.Angles(0, yaw, 0)
+	local wall = wallTemplate:Clone()
+	wall.Size = Vector3.new(8, 48, length)
+	wall.CFrame = CFrame.new(x, 24, z) * turn
+	wall:SetAttribute("World3Wall", true)
+	wall.Parent = W.Walls
+	local cap = capTemplate:Clone()
+	cap.Size = Vector3.new(10, 2, length)
+	cap.CFrame = CFrame.new(x, 49, z) * turn
+	cap:SetAttribute("World3Wall", true)
+	cap.Parent = W.Walls
+end
+return string.format("cleared %d floor parts, %d walls, %d obstacles/props; laid %d wall pieces to z %d",
+	cleared.floor, cleared.walls, cleared.things, #WALLS, END)

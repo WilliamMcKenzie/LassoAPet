@@ -116,6 +116,7 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, id, p
 	local pass = byId[id]
 	if purchased and pass and player.Parent then
 		grant(player, pass, true)
+		require(script.Parent.Telemetry).purchase(player) -- (/stats: % who bought)
 	end
 end)
 

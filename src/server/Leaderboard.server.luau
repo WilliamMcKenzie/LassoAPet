@@ -117,7 +117,7 @@ local origin = CFrame.new(podium.Position + Vector3.new(0, GrassSnake.capTop.Y *
 	* CFrame.Angles(0, math.pi, 0) -- (a character looks along its -z)
 local model = Instance.new("Model")
 model.Name = "Podium"
-model.Parent = workspace
+model.Parent = if podium.Hidden then game:GetService("ServerStorage") else workspace -- (hidden: kept, out of sight; Config.LoongOffer stands there)
 
 -- Who's standing there: { id, avatar, tag }.
 local standing

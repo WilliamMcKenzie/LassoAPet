@@ -25,7 +25,7 @@ local MOST = 4 -- plates at once, nearest first (a crowded pen would be a wall o
 local HEIGHT = 3 -- studs: the name and speed lines' height (125 px in the reference)
 local WIDTH = HEIGHT * 300 / 125
 local TALL = HEIGHT * 1.45 -- studs: the plate's height with the gold line between them (QM, Oct 7)
-local GOLD = Color3.fromRGB(80, 255, 60) -- the gold line's bright green
+local GOLD = if Config.Gems then Config.GemYellow else Color3.fromRGB(80, 255, 60) -- the gold line's bright green (gems' yellow in the Halloween world: Config.Gems, QM Oct 15)
 local TIER_GROWTH = 1.2 -- the plate's size per size tier up from a small pet (QM, Oct 7)
 local ABOVE = 0.6 -- studs between the pet's top and the plate
 local FONT = Enum.Font.FredokaOne
@@ -111,6 +111,7 @@ local function short(n)
 end
 
 local function show(model, kind, fuse, stats, income)
+	income = if Config.earnsHere(kind, fuse) then income else 0 -- (a pet from the other side of the Halloween line earns nothing here: QM, Oct 15)
 	local p = plates[model] or build(model)
 	local s = Fusion.stats(kind, fuse, stats)
 	local key = Fusion.key(kind, fuse) .. "/" .. s.Speed .. "/" .. income .. "/" .. Config.goldX(player)
@@ -118,7 +119,9 @@ local function show(model, kind, fuse, stats, income)
 		p.key = key
 		p.name.Text = (Fusion.rarity(kind, fuse)) -- its rarity, not its name (QM, Oct 10; a hybrid's: the rarer of its two)
 		p.name.TextColor3 = colorOf(kind, fuse)
-		p.gold.Text = "$" .. short(income * Config.goldX(Players.LocalPlayer)) .. "/s" -- (x the x2 Gold pass and rebirths)
+		p.gold.Text = if Config.Gems
+			then short(income * Config.goldX(Players.LocalPlayer) * Config.Gems.Rate) .. " gems/s" -- (the Halloween world: they earn gems, Hatchery)
+			else "$" .. short(income * Config.goldX(Players.LocalPlayer)) .. "/s" -- (x the x2 Gold pass and rebirths)
 		p.speed.Text = math.floor(s.Speed * 20 + 0.5) .. "m/s"
 	end
 	local box, size = Outline.box(model)

@@ -65,7 +65,8 @@ rideCue.OnServerEvent:Connect(function(player, what, ...)
 	if what == "landed" then
 		return -- (just for that)
 	elseif what == "out" then
-		player:SetAttribute("PetOut", true)
+		local id = ...
+		player:SetAttribute("PetOut", if typeof(id) == "string" and #id < 64 then id else true) -- (which pen pet's out: Pen.client)
 		return
 	elseif what == "end" then
 		player:SetAttribute("PetOut", nil)

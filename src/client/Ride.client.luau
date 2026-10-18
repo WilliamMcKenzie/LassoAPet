@@ -110,6 +110,7 @@ vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM,
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
 vfx.sprintTrail = require(script.Parent.SprintTrail) -- a white trail behind your mount while it sprints (QM, Oct 9)
 vfx.returnVignette = require(script.Parent.ReturnVignette) -- the run home's pulsing red edges (QM, Oct 9)
+vfx.huntVignette = require(script.Parent.HuntVignette) -- the Robo Shark's hunt: hard red edges (QM, Oct 15)
 vfx.homeBiome = {} -- [kind] = the index of the first biome whose herd lists it (the Horse: the Meadow)
 for b, biome in Config.Biomes do
 	for kind in biome.Herd or {} do
@@ -231,7 +232,7 @@ end
 -- How long the Hold bar lasts: Config.RideSeconds, whatever you're riding (QM, Oct 10:
 -- no more stamina).
 local function holdTime(_entity)
-	return vfx.tutorialRide.bossSeconds or Config.RideSeconds -- (the tutorial's: a short one, once it's let go)
+	return vfx.tutorialRide.bossSeconds or Config.bossSeconds(Players.LocalPlayer) -- (the tutorial's: a short one, once it's let go; with Gems, the time bought: Halloween)
 end
 local streams = {}
 -- A stream from spawnZ to endZ of the herd's kinds; name labels its line in the Output.
@@ -313,6 +314,7 @@ vfx.HerdPacks = require(script.Parent.HerdPacks)
 vfx.endless = require(script.Parent.Endless) -- the endless Jurassic: copies past the cut (Config.Endless)
 vfx.endless.init({ obstacles = obstacles, slices = slices, streams = streams, newStream = newStream })
 vfx.Burrow = require(script.Parent.Burrow) -- the Sandworm's spray and mounds (yours and other riders')
+vfx.sink = require(script.Parent.WaterSink) -- sinking in water (QM, Oct 14)
 vfx.Studs = require(ReplicatedStorage.Shared.Studs) -- hybrids: the donor's size and colours
 -- The stretch of course with stampede loaded round the camera at camZ: VIEW either
 -- way. Racing home (+z) the wider field of view (Config.ReturnFovKick) sees to the
@@ -433,7 +435,7 @@ local function place(entity, yawOffset)
 	local lift = entity.lift or floor
 	lift += (floor - lift) * (1 - math.exp(-STEP_RATE * (now - (entity.liftAt or now))))
 	entity.lift, entity.liftAt = lift, now
-	entity.animal.model.PrimaryPart.CFrame = CFrame.new(entity.x, entity.rootY + lift + (entity.hop or 0), entity.z)
+	entity.animal.model.PrimaryPart.CFrame = CFrame.new(entity.x, entity.rootY + lift + (entity.hop or 0) - vfx.sink(entity, now), entity.z)
 		* CFrame.Angles(0, entity.yaw + yawOffset, 0)
 end
 
@@ -617,6 +619,7 @@ local function spawnStarter()
 	starter.merged = player:GetAttribute("RideMerged") or 1
 	starter.fuse = player:GetAttribute("RideFuse") -- a hybrid (Shared/Fusion): its donor's colours and size
 	starter.tier = player:GetAttribute("RideTier") -- (its saved size tier: Fusion.tier)
+	starter.auto = player:GetAttribute("RideAuto") -- (its kept automatic ability: Fusion.autoAbility)
 	local stats = player:GetAttribute("RideStats") -- (and the best of both pets' Speed, Stamina)
 	starter.stats = stats and { Speed = stats.X, Stamina = stats.Y }
 	vfx.Fusion.paint(starter.animal.model, starter.kind, starter.fuse)
@@ -840,6 +843,7 @@ startRide = function(model, at)
 		end
 		mount = fromHerd
 		mount.popping, mount.hop, mount.dodge, mount.merged, mount.fuse, mount.tier = nil, 0, 0, nil, nil, nil
+		mount.auto = nil
 		mount.swerve, mount.swerveTo, mount.swerveV, mount.swerveSide = 0, 0, 0, nil
 		mount.animal:setScale(1)
 		spot = Vector3.new(mount.x, 0, mount.z)
@@ -851,6 +855,7 @@ startRide = function(model, at)
 		end
 		mount = newEntity(spot.X, spot.Z, 0, fromPen.kind)
 		mount.merged, mount.fuse, mount.stats, mount.tier = fromPen.merged, fromPen.fuse, fromPen.stats, fromPen.tier
+		mount.auto = fromPen.auto -- (its kept automatic ability: Fusion.autoAbility)
 		vfx.Fusion.paint(mount.animal.model, mount.kind, mount.fuse)
 		vfx.Skins.apply(mount.animal, player:GetAttribute("Rebirths"), player:GetAttribute("PassGiantPets"))
 		mount.own = true -- your own pet: no egg for bringing it home (it stays yours once let go and lassoed back)
@@ -860,7 +865,7 @@ startRide = function(model, at)
 		setClickable(mount.animal.model, false)
 	end
 	if not fromHerd then
-		vfx.rideCue:FireServer("out") -- your pet's left your pen: others stop drawing it there (Riders.server, Pen.client)
+		vfx.rideCue:FireServer("out", fromPen and fromPen.id) -- your pet's left your pen: it isn't drawn there meanwhile (Riders.server, Pen.client)
 		vfx.syncing = true -- (so "end" follows, however soon the ride ends)
 	end
 	mount.animal:setSaddled(true)
@@ -1363,8 +1368,8 @@ ContextActionService:BindActionAtPriority("Sprint", function(_, state)
 end, false, Enum.ContextActionPriority.High.Value, Enum.KeyCode.LeftShift, Enum.KeyCode.RightShift, Enum.KeyCode.ButtonL2)
 
 local function sprinting()
-	if vfx.hunting or player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
-		return false -- the Robo Shark can't sprint while it hunts (QM)
+	if player:GetAttribute("NoSprint") then -- (NoSprint: the tutorial's first seconds, Client/Tutorial)
+		return false -- (the Robo Shark sprints on while it hunts now: QM, Oct 15, no slowing at all)
 	end
 	if (phase == "return" and Config.ReturnSprint) or (phase == "outbound" and Config.OutboundSprint) then -- (the ride out always a sprint too: QM, Oct 11)
 		return true -- racing home with the egg, always
@@ -1535,7 +1540,7 @@ local function putInPool(entity)
 	entity.animal:setScale(1)
 	if entity.fuse then -- a hybrid you let go: back to its own colours for the stampede
 		vfx.Fusion.paint(entity.animal.model, entity.kind, nil)
-		entity.fuse, entity.stats = nil, nil
+		entity.fuse, entity.stats, entity.auto = nil, nil, nil
 	end
 	entity.hop, entity.popping, entity.lift = 0, nil, nil
 	entity.ability, entity.frostLeft, entity.fall, entity.scaredOffBy = nil, nil, nil, nil
@@ -1788,6 +1793,9 @@ local function updateHerd(dt, slowed)
 	-- Fish wrestled on into the Desert outlived its stream's schedule and vanished)
 	local held = transfer and transfer.target and transfer.target.n
 	for b, stream in streams do
+		if stream.total <= 0 then
+			continue -- (an empty stampede: no animals in it yet, the Halloween world's)
+		end
 		local every = stream.every
 		local newest = math.floor(herdClock / every)
 		stream.oldest = math.ceil((herdClock - stream.life) / every)
@@ -2411,7 +2419,10 @@ end
 -- if that has none its body's (QM, Oct 6).
 function vfx.abilityOf(entity)
 	if not Config.AbilitiesOn then
-		return nil -- (abilities off for now: QM, Oct 10)
+		-- (abilities off for now: QM, Oct 10; but the AutoAbilities pets' go off on their own)
+		-- (a hybrid keeps one through all its fuses, the Loong's over the Robo Shark's: QM, Oct 15)
+		local kind = entity and vfx.Fusion.autoAbility(entity.auto, entity.kind, entity.fuse)
+		return kind and Config.Abilities[kind] or nil
 	end
 	return entity and (entity.fuse and Config.Abilities[entity.fuse] or Config.Abilities[entity.kind])
 end
@@ -2548,6 +2559,7 @@ function vfx.huntStep(cfg)
 			table.remove(strays, table.find(strays, prey))
 		end
 		Poof.at(Vector3.new(prey.x, 0, prey.z))
+		vfx.sounds.play("bite") -- (QM, Oct 15)
 		retire(prey)
 		vfx.huntTarget = nil
 		vfx.feed(cfg, 1)
@@ -2567,7 +2579,8 @@ function vfx.feed(cfg, n)
 	local feast = vfx.feastOf(mount)
 	local max = Config.TierGrowth ^ math.max(cfg.MaxTier - tierOf(mount.kind), 0)
 	if feast.size < max then
-		local size = math.min(feast.size * cfg.Grow ^ n, max)
+		-- (LinearGrow: the same step every animal, not compounding: the Robo Shark, QM Oct 15)
+		local size = math.min(if cfg.LinearGrow then feast.size + (cfg.Grow - 1) * n else feast.size * cfg.Grow ^ n, max)
 		local looming = vfx.sprintMount == mount and vfx.sprintKind == "Loom"
 		local special = Config.SprintSpecials[mount.kind]
 		local show = if looming and special then size * special.Grow else size -- (bigger still while it looms)
@@ -2738,9 +2751,7 @@ function vfx.breathAim()
 	if UserInputService.MouseEnabled and not UserInputService.TouchEnabled then
 		local m = UserInputService:GetMouseLocation()
 		ray = camera:ViewportPointToRay(m.X, m.Y)
-	elseif vfx.lastTap then
-		ray = camera:ScreenPointToRay(vfx.lastTap.X, vfx.lastTap.Y)
-	end
+	end -- (on a phone, straight ahead: no aiming, QM Oct 15)
 	if not ray or ray.Direction.Y > -1e-3 then
 		return ahead
 	end
@@ -2824,6 +2835,10 @@ function vfx.breathBlast(active)
 	end
 	if active.t < cfg.FireFrom or active.t > cfg.FireTo then
 		return
+	end
+	if active.t >= (active.flameAt or 0) then -- (a burst of flame sound every 0.3 s while it breathes: QM, Oct 15)
+		active.flameAt = active.t + 0.3
+		vfx.sounds.play("flame", 0.8)
 	end
 	local half = cfg.Width / 2
 	local function inPath(x, z, extra)
@@ -3187,6 +3202,8 @@ end
 local abilityMount -- the mount last frame: when it changes (lassoed a new one, thrown off), the old one's ability stops
 local function updateAbility(dt)
 	abilityClock += dt
+	local hunting = mount and mount.ability and mount.ability.active
+	vfx.huntVignette.update(dt, hunting ~= nil and hunting.cfg.Kind == "Hunt")
 	if abilityMount and abilityMount ~= mount then
 		endAbility(abilityMount)
 	end
@@ -3200,12 +3217,14 @@ local function updateAbility(dt)
 		Hud.setAbility(nil)
 		return
 	end
+	local auto = not Config.AbilitiesOn -- (only AutoAbilities pets get here then: on its own, no button)
 	local a = mount.ability
 	if not a then
-		a = { readyAt = 0 }
+		-- (an automatic one starts on its cooldown, not before the start line: QM, Oct 15)
+		a = { readyAt = if auto then abilityClock + cfg.Cooldown else 0 }
 		mount.ability = a
 	end
-	local pressed = abilityPressed()
+	local pressed = abilityPressed() or auto
 	local active = a.active
 	if active then
 		active.t += dt
@@ -3239,7 +3258,9 @@ local function updateAbility(dt)
 		startAbility(cfg)
 	end
 	active = a.active
-	if active then
+	if auto then
+		Hud.setAbility(nil)
+	elseif active then
 		Hud.setAbility(if active.cfg.Duration then 1 - active.t / active.cfg.Duration else hold / holdTime(mount), nil, true)
 	else
 		local left = math.max(a.readyAt - abilityClock, 0)
@@ -3899,7 +3920,7 @@ vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, spee
 		rider.entity.animal:setSaddled(true)
 		rider.entity.dodge = 0
 		rider.kind = kind
-		if Config.trailColors(player) then -- the Rainbow Trail, or the finish line's (Config.FinishTrails)
+		if Config.AnimalTrails and Config.trailColors(player) then -- the Rainbow Trail, or the finish line's (Config.FinishTrails)
 			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width, Config.trailColors(player))
 		end
 		rider.shown = nil
@@ -4087,7 +4108,7 @@ end)
 -- you're riding, moved over when you swap mounts and gone when the ride ends.
 vfx.trail = { parts = {} }
 function vfx.updateTrail()
-	local colors = Config.trailColors(Players.LocalPlayer)
+	local colors = Config.AnimalTrails and Config.trailColors(Players.LocalPlayer)
 	local want = if mount and colors and mount.animal.model.PrimaryPart then mount else nil
 	if vfx.trail.entity == want and vfx.trail.colors == colors then
 		return
@@ -4315,7 +4336,7 @@ RunService.PreSimulation:Connect(function(dt)
 			-- Crossed the finish line: the animal you rode is yours, in your pen
 			-- (Hatchery's FinishCourse), then back home to your pen.
 			task.spawn(function()
-				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, mount.kind)
+				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, if mount.own then nil else mount.kind) -- (your own pet: not a copy of it, a random one: QM, Oct 15)
 				task.wait(ok and kind and vfx.newAnimal.show(kind) or 0.5)
 				if phase == "finish" then
 					local pen = myPen()
@@ -4410,6 +4431,16 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	-- Bigger pets fill more of the view: the camera pulls back RideZoomPerTier
 	-- times further for each size tier above small (Config.PetTiers).
 	local zoomTo = if mount and mount.giant then Config.Shop.GiantHorse.Zoom elseif mount then Config.RideZoomPerTier ^ (vfx.mountTier() - 1) else 1
+	-- (and back as far as it takes to see over a pet taller than RideCamTall, as it grows: the
+	-- 4x Robo Shark and Loong filled the view, QM Oct 15)
+	if mount and not mount.giant and mount.animal.model.PrimaryPart then
+		local a = mount.animal
+		if not mount.camH0 then
+			local _, ext = a.model:GetBoundingBox()
+			mount.camH0 = ext.Y / (a.size * a.scale)
+		end
+		zoomTo = math.max(zoomTo, mount.camH0 * a.size * a.scale / Config.RideCamTall)
+	end
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and (phase == "outbound" or phase == "return") and sprinting(), if phase == "return" and Config.ReturnCamFixed then Config.SprintCam.HorseSprint elseif mount then mount.speed * (vfx.speedGain or 1) else nil) -- (the run home's a sprint too: QM)
 	local z = vfx.camZoom * sprintZoom
@@ -4750,11 +4781,13 @@ spawnStarter()
 -- The server hands out pens just after joining: move the waiting pet to yours.
 -- Picking another pet to ride (in the pen) swaps the waiting one; it's used from
 -- the next ride if you're out on one.
-for _, name in { "Pen", "RidePet", "RideMerged", "RideFuse", "RideStats", "RideTier" } do
+for _, name in { "Pen", "RidePet", "RideMerged", "RideFuse", "RideStats", "RideTier", "RideAuto" } do
 	player:GetAttributeChangedSignal(name):Connect(function()
-		if phase == "idle" and starter then
-			starter.animal.model:Destroy()
-			starter = nil
+		if phase == "idle" then -- (none drawn before, too: all your pets taken out, then one put back, QM Oct 15)
+			if starter then
+				starter.animal.model:Destroy()
+				starter = nil
+			end
 			spawnStarter()
 		end
 	end)

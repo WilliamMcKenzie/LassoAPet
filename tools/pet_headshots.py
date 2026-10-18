@@ -23,7 +23,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.dirname(__file__))
 import horse_rig as HR  # noqa: E402
 import snake_design as S  # noqa: E402
-from bbmodel_to_luau import NEON, PLAIN  # noqa: E402
+from bbmodel_to_luau import NEON, PLAIN, SMOOTH  # noqa: E402
 from partlib import render  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -31,6 +31,7 @@ OUT = os.path.join(ROOT, "assets", "ui")
 PREVIEW = "/mnt/project-files/animals/headshots"
 
 MODELS = {
+    "ArmoredHorse": "horses/ArmoredHorse",  # (World 2's starter: QM, Oct 15, it had none)
     "Horse": "horses/Horse9_Leap", "Pinto": "horses/Pinto", "Pig": "animals/Pig", "Bunny": "animals/Bunny", "Fish": "animals/Fish",
     "Rhino": "animals/Rhino", "Unicorn": "animals/Unicorn", "MarbleColossus": "world2/MarbleColossus", "MajesticUnicorn": "world2/MajesticUnicorn", "MarbleFish": "world2/MarbleFish", "Catfish": "temple/Catfish", "Lion": "world2/Lion", "Buffalo": "world2/Buffalo", "Crocodile": "world2/Crocodile", "CrystalCentipede": "crystal/CrystalCentipede", "CrystalPhoenix": "crystal/CrystalPhoenix", "PinkButterfly": "woodland/PinkButterfly", "RedMushroom": "crystal/RedMushroom", "BrownMushroom": "crystal/BrownMushroom", "PurpleMushroom": "crystal/PurpleMushroom", "BlueCrystal": "crystal/BlueCrystal", "PinkCrystal": "crystal/PinkCrystal", "CrystalSpider": "crystal/CrystalSpider", "CrystalElephant": "crystal/CrystalElephant", "OrangeButterfly": "woodland/OrangeButterfly", "LivingBirch": "woodland/LivingBirch", "GiantGolem": "woodland/GiantGolem", "Hawkmoth": "woodland/Hawkmoth", "Fox": "temple/Fox", "TombJackal": "tomb/TombJackal", "NineTailedFox": "temple/NineTailedFox", "EagleSentry": "tomb/EagleSentry",
     "Cactus": "desert/Cactus", "Kitten": "desert/Kitten", "Scorpion": "desert/Scorpion", "Sandworm": "desert/Sandworm", "Eyeworm": "crimson/Eyeworm", "Caterpillar": "woodland/Caterpillar", "Maw": "crimson/Maw", "CrimsonScorpion": "crimson/CrimsonScorpion", "IvorySpider": "crimson/IvorySpider", "Asura": "crimson/Asura", "Kitsune": "temple/Kitsune", "Nut": "tomb/Nut", "Geb": "tomb/Geb", "Bes": "tomb/Bes", "BloatedMummy": "tomb/BloatedMummy", "Scarab": "tomb/Scarab",
@@ -43,12 +44,19 @@ MODELS = {
     "KingCrab": "ocean/KingCrab", "BlueCrab": "ocean/BlueCrab", "RoboShark": "ocean/RoboShark", "Kraken": "ocean/Kraken", "FishSchool": "ocean/FishSchool",
     "Loong": "godlands/Loong", "WarElephant": "godlands/WarElephant", "SoulHorse": "godlands/SoulHorse",
     "Sludge": "sludge/Sludge",
+    "MoonJellyfish": "cnidaria/MoonJellyfish", "Anomalocaris": "cnidaria/Anomalocaris", "BoxJellyfish": "cnidaria/BoxJellyfish", "BlueRingOctopus": "cnidaria/BlueRingOctopus", "ManOWar": "cnidaria/ManOWar", "Mermaid": "cnidaria/Mermaid", "AbyssalDragon": "cnidaria/AbyssalDragon", "ReefTitan": "cnidaria/ReefTitan", "RoyalCnidarian": "cnidaria/RoyalCnidarian",
     "Beholder": "beholder/Beholder",
     "Seraph": "bosses/Seraph", "CrimsonSeraph": "bosses/CrimsonSeraph", "CrystalSeraph": "bosses/CrystalSeraph", "BlackWidow": "bosses/BlackWidow",
+    # World 3 Garden (tools/garden_*.py)
+    "Ladybug": "garden/Ladybug", "Bumblebee": "garden/Bumblebee", "ToadstoolFrog": "garden/ToadstoolFrog", "VineMonster": "garden/VineMonster", "VenusFlytrap": "garden/VenusFlytrap", "SunflowerLion": "garden/SunflowerLion", "RafflesiaBeast": "garden/RafflesiaBeast", "AncientTreant": "garden/AncientTreant", "GiantRafflesia": "bosses/GiantRafflesia",
+    # Halloween (tools/halloween_*.py)
+    "BlackCat": "halloween/BlackCat", "Bat": "halloween/Bat", "PumpkinPup": "halloween/PumpkinPup", "PurpleTarantula": "halloween/PurpleTarantula", "Werewolf": "halloween/Werewolf", "Ghost": "halloween/Ghost", "SkeletonDog": "halloween/SkeletonDog", "TombstoneCrawler": "halloween/TombstoneCrawler", "ZombieBear": "halloween/ZombieBear", "WispWolf": "halloween/WispWolf", "GrimReaper": "halloween/GrimReaper",
     "Leviathan": "leviathan/Leviathan",
+    "GreenCrab": "world3/pirate/GreenCrab", "LimeCrab": "world3/pirate/LimeCrab", "Parrot": "world3/pirate/Parrot", "BananaMonkey": "world3/pirate/BananaMonkey", "TreasureHermit": "world3/pirate/TreasureHermit", "EyepatchShark": "world3/pirate/EyepatchShark", "TreasureTurtle": "world3/pirate/TreasureTurtle", "GhostShip": "world3/pirate/GhostShip", "JollyRogerWyvern": "world3/pirate/JollyRogerWyvern",  # World 3 Pirate Cove
     "VolcanoTortoise": "volcano/VolcanoTortoise", "Firebird": "volcano/Firebird", "RockHog": "volcano/RockHog", "Rockworm": "volcano/Rockworm", "JadeStatue": "temple/JadeStatue", "GarnetStatue": "temple/GarnetStatue", "FireLobster": "volcano/FireLobster", "TRex": "jurassic/TRex", "BoneRex": "jurassic/BoneRex", "Ankylosaurus": "jurassic/Ankylosaurus", "PalmGuy": "jurassic/PalmGuy", "Spinosaurus": "jurassic/Spinosaurus", "Pterodactyl": "jurassic/Pterodactyl", "Raptor": "jurassic/Raptor", "LavaWhale": "volcano/LavaWhale", "Phoenix": "volcano/Phoenix",
+    "GummyBear": "candyland/GummyBear", "YellowGummyBear": "candyland/YellowGummyBear", "GreenGummyBear": "candyland/GreenGummyBear", "GumdropFrog": "candyland/GumdropFrog", "GingerbreadMan": "candyland/GingerbreadMan", "Creampuff": "candyland/Creampuff", "SwollFairy": "candyland/SwollFairy", "DesireTroll": "candyland/DesireTroll", "RockCandyDragon": "candyland/RockCandyDragon", "GumballGolem": "candyland/GumballGolem", "Gigacorn": "candyland/Gigacorn",  # World 3 Candyland
 }
-ZYX = {"EagleSentry", "PinkButterfly", "Seraph", "CrimsonSeraph", "CrystalSeraph", "CrystalCentipede", "CrystalPhoenix", "CrystalElephant", "CrystalSpider", "BoneRex", "KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish", "TRex", "Spinosaurus", "MajesticUnicorn", "Crocodile", "Maw", "IvorySpider", "BlackWidow", "Asura", "Lion", "OrangeButterfly", "Hawkmoth"}  # converted with --zyx (QM's hand-made multi-axis rotations)
+ZYX = {"EagleSentry", "PinkButterfly", "Seraph", "CrimsonSeraph", "CrystalSeraph", "CrystalCentipede", "CrystalPhoenix", "CrystalElephant", "CrystalSpider", "BoneRex", "KingCrab", "BlueCrab", "RoboShark", "IceGolem", "SnackYak", "Loong", "WarElephant", "VolcanoTortoise", "Firebird", "RockHog", "Rockworm", "Phoenix", "LavaWhale", "Lionfish", "TRex", "Spinosaurus", "MajesticUnicorn", "Crocodile", "Maw", "IvorySpider", "BlackWidow", "Asura", "Lion", "OrangeButterfly", "Hawkmoth", "GreenCrab", "LimeCrab", "Parrot", "BananaMonkey", "TreasureHermit", "EyepatchShark", "TreasureTurtle", "GhostShip", "JollyRogerWyvern", "Ladybug", "Bumblebee", "ToadstoolFrog", "VineMonster", "VenusFlytrap", "SunflowerLion", "RafflesiaBeast", "AncientTreant", "GiantRafflesia", "MoonJellyfish", "Anomalocaris", "BoxJellyfish", "BlueRingOctopus", "ManOWar", "AbyssalDragon", "ReefTitan", "RoyalCnidarian", "BlackCat", "Bat", "PumpkinPup", "PurpleTarantula", "Werewolf", "Ghost", "SkeletonDog", "TombstoneCrawler", "ZombieBear", "WispWolf", "GrimReaper"}  # converted with --zyx (QM's hand-made multi-axis rotations)
 FACING = {"Kraken": 180}
 # Animals whose run makes a poor picture (the Snake stretches out thin, the Starfish
 # folds its arms up) keep their idle stance in the action style.
@@ -81,7 +89,7 @@ def parts_of(kind, model, pose=None):
     parts = S.posed(model, anim, t)
     for p in parts:
         p.neon = p.name.startswith(NEON)
-        p.plain = p.plain or p.neon or p.name.startswith(PLAIN) or "In" in p.name
+        p.plain = p.plain or p.neon or p.name.startswith(PLAIN + SMOOTH) or "In" in p.name
     return parts
 
 

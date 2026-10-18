@@ -16,6 +16,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Telemetry = require(script.Parent.Telemetry) -- (/stats: purchases)
 
 local continueRide = Instance.new("RemoteEvent")
 continueRide.Name = "ContinueRide"
@@ -59,7 +60,7 @@ buyShop.Name = "BuyShop"
 buyShop.Parent = ReplicatedStorage
 
 local offers, offerOf = {}, {} -- [Key] = offer; [product id] = offer
-for _, list in { Config.Shop.Gold, Config.Shop.Specials } do
+for _, list in { Config.Shop.Gold, Config.Shop.CashPacks, Config.Shop.Specials } do
 	for _, offer in list do
 		offers[offer.Key] = offer
 		if offer.ProductId ~= 0 then
@@ -72,6 +73,13 @@ for _, list in { Config.Shop.Gold, Config.Shop.Specials } do
 end
 
 offerOf[Config.SpeedupEgg.ProductId] = { Key = "SpeedupEgg" }
+local petOfferOf = {} -- [Key] = the Config.PetOffers entry
+for _, pet in Config.PetOffers do
+	petOfferOf[pet.Kind] = pet
+	if pet.ProductId ~= 0 then
+		offerOf[pet.ProductId] = { Key = pet.Kind } -- (World 1's base stands: Client/LoongOffer)
+	end
+end
 
 -- Paid random items (the Legendary Pet, and egg rolls now gold can be bought) are
 -- never sold where the player's policy restricts them. Unknown counts as restricted.
@@ -111,7 +119,7 @@ local ledgers = {} -- [player] = the ledger as last read or written
 local MAX_RECEIPTS = 200
 
 local function blank()
-	return { receipts = {}, gold = 0, pets = 0, giant = 0, giantUsed = 0, giantEggs = 0, nukes = 0, nukesUsed = 0, hatches = 0 }
+	return { receipts = {}, gold = 0, pets = 0, giant = 0, giantUsed = 0, giantEggs = 0, nukes = 0, nukesUsed = 0, hatches = 0, loongs = 0 }
 end
 
 local function show(player, ledger)
@@ -120,6 +128,9 @@ local function show(player, ledger)
 	player:SetAttribute("BoughtGold", ledger.gold)
 	player:SetAttribute("BoughtPets", ledger.pets)
 	player:SetAttribute("BoughtGiantEggs", ledger.giantEggs)
+	for _, pet in Config.PetOffers do
+		player:SetAttribute("Bought" .. pet.Kind .. "s", ledger[pet.Ledger] or 0)
+	end
 	local rides, nukes = ledger.giant - ledger.giantUsed, ledger.nukes - ledger.nukesUsed
 	player:SetAttribute("GiantRides", if rides > 0 then rides else nil)
 	player:SetAttribute("Nukes", if nukes > 0 then nukes else nil)
@@ -176,6 +187,53 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 -- Records `offer` bought with receipt `purchaseId` (once). True once it's saved.
+local petSold
+-- The base stands' stock (Config.PetOffers: Stock each): sales counted in a DataStore key every
+-- server shares (UpdateAsync, so two can't both take the last), what's left on workspace's
+-- "<Kind>Left" for Client/LoongOffer, read again every STOCK_REFRESH seconds. No count saved
+-- yet means StartLeft are left (QM: "to make it feel like its selling").
+local STOCK_REFRESH = 10
+local okStock, stockStore = pcall(function()
+	return game:GetService("DataStoreService"):GetDataStore("LoongStock")
+end)
+if not okStock then
+	stockStore = nil
+end
+local function showLeft(pet, sold)
+	local start = pet.Stock - (pet.StartLeft or pet.Stock)
+	workspace:SetAttribute(pet.Kind .. "Left", math.max(0, pet.Stock - (tonumber(sold) or start)))
+end
+petSold = function(pet)
+	local start = pet.Stock - (pet.StartLeft or pet.Stock)
+	if not stockStore then
+		showLeft(pet, (pet.Stock - (workspace:GetAttribute(pet.Kind .. "Left") or pet.Stock)) + 1)
+		return
+	end
+	pcall(function()
+		showLeft(pet, stockStore:UpdateAsync(pet.StockKey, function(n)
+			return (tonumber(n) or start) + 1
+		end))
+	end)
+end
+if Config.Podium.Hidden and Config.PetOffersLimited then
+	for _, pet in Config.PetOffers do
+		showLeft(pet, nil)
+	end
+	task.spawn(function()
+		while true do
+			for _, pet in Config.PetOffers do
+				if stockStore then
+					local ok, sold = pcall(stockStore.GetAsync, stockStore, pet.StockKey)
+					if ok then
+						showLeft(pet, sold)
+					end
+				end
+			end
+			task.wait(STOCK_REFRESH)
+		end
+	end)
+end
+
 local function record(userId, purchaseId, offer)
 	local fresh = false
 	local ledger = update(userId, function(ledger)
@@ -198,9 +256,15 @@ local function record(userId, purchaseId, offer)
 			ledger.hatches = (ledger.hatches or 0) + 1
 		elseif offer.Key == "Nuke" then
 			ledger.nukes += 1
+		elseif petOfferOf[offer.Key] then
+			local field = petOfferOf[offer.Key].Ledger
+			ledger[field] = (ledger[field] or 0) + 1 -- a Loong (or Robo Shark) into your pen (Config.PetOffers)
 		end
 		return true
 	end)
+	if ledger and fresh and petOfferOf[offer.Key] and Config.PetOffersLimited then
+		task.spawn(petSold, petOfferOf[offer.Key])
+	end
 	if ledger and fresh and offer.Key == "SpawnLoong" then
 		workspace.World:SetAttribute("ForceEventNow", true) -- (bought: no countdown)
 		workspace.World:SetAttribute("ForceEvent", "Loong")
@@ -296,6 +360,9 @@ MarketplaceService.ProcessReceipt = function(receipt)
 	if offer then
 		local granted = record(receipt.PlayerId, receipt.PurchaseId, offer)
 		local buyer = Players:GetPlayerByUserId(receipt.PlayerId)
+		if granted == true then
+			Telemetry.purchase(buyer, receipt.CurrencySpent) -- (/stats: % who bought)
+		end
 		if granted and receipt.ProductId == Config.SpeedupEgg.ProductId then
 			local player = Players:GetPlayerByUserId(receipt.PlayerId)
 			if player then hatchPending[player] = nil end
@@ -304,6 +371,7 @@ MarketplaceService.ProcessReceipt = function(receipt)
 	end
 	local player = Players:GetPlayerByUserId(receipt.PlayerId)
 	if player and isContinue[receipt.ProductId] then
+		Telemetry.purchase(player, receipt.CurrencySpent)
 		continueRide:FireClient(player, true)
 		return Enum.ProductPurchaseDecision.PurchaseGranted
 	end

@@ -1,0 +1,1 @@
+local n=0 for _,p in workspace.World.Ground:GetChildren() do if p.Name=="Water" and p.Position.Z>0 then local t=p:FindFirstChild("Water") if t then t.Color3=Color3.fromRGB(150, 200, 255) n+=1 end end end return n.." base water textures tinted"

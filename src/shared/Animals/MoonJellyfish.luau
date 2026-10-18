@@ -1,0 +1,15 @@
+-- Moon Jellyfish: World 3 Cnidaria's Common (Oct 14). A chubby lilac bell (a low-poly
+-- MeshPart dome, QM Oct 15), four glowing pink horseshoe pads round the rider, big googly eyes, a skirt
+-- of eight rim slabs with pink fringe tentacles that pulse, and four tapered pink oral arms.
+-- It swims, and sprint flies it up like the Crystal Phoenix (Config.SprintSpecials).
+-- Model from designs/cnidaria/MoonJellyfish.bbmodel (tools/moon_jellyfish.py), converted into MoonJellyfishModel.luau by
+-- tools/bbmodel_to_luau.py --zyx --meshes assets/meshes/MoonJellyfish (the bell copied from
+-- ReplicatedStorage.AnimalMeshes, tools/animal_meshes.luau).
+
+local Horse = require(script.Parent.Horse)
+local MoonJellyfishModel = require(script.Parent.MoonJellyfishModel)
+
+return Horse.variant("MoonJellyfish", MoonJellyfishModel, "Common", {
+	seat = Vector3.new(0, 11.3, 0),
+	neck = { center = Vector3.new(0, 8.5, 0), radius = 4 },
+})

@@ -95,6 +95,22 @@ function Fusion.combine(a, aFuse, b, bFuse)
 	return a, bFuse or b, true
 end
 
+-- The automatic ability a hybrid keeps through every fuse (QM, Oct 15: the Loong's and the Robo
+-- Shark's, Config.AutoAbilities, "always preserved through the lineage"; both: the Loong's): from
+-- any of the kinds and saved abilities given (nil ones skipped). nil if none of them has one.
+function Fusion.autoAbility(...)
+	local found
+	for i = 1, select("#", ...) do
+		local kind = select(i, ...)
+		if kind == "Loong" then
+			return "Loong"
+		elseif kind and Config.AutoAbilities[kind] then
+			found = kind
+		end
+	end
+	return found
+end
+
 local ONE = { Speed = 1, Stamina = 1 }
 
 -- A pet's Speed and Stamina (Config.AnimalStats, 1x if not listed). A hybrid's are
@@ -105,10 +121,12 @@ function Fusion.stats(kind, fuse, saved)
 	if not fuse then
 		return Config.AnimalStats[kind] or ONE
 	end
-	if typeof(saved) == "table" and tonumber(saved.Speed) and tonumber(saved.Stamina) then
-		return saved
+	local stats = if typeof(saved) == "table" and tonumber(saved.Speed) and tonumber(saved.Stamina) then saved
+		else Fusion.best(Config.AnimalStats[kind] or ONE, Config.AnimalStats[fuse] or ONE)
+	if Config.slowedHere(kind, fuse) then -- (a World 1 hybrid in World 2: a Horse's speed, QM Oct 14)
+		return { Speed = Config.AnimalStats.Horse.Speed, Stamina = stats.Stamina }
 	end
-	return Fusion.best(Config.AnimalStats[kind] or ONE, Config.AnimalStats[fuse] or ONE)
+	return stats
 end
 
 -- The best of both worlds (QM): the faster one's Speed plus Config.FuseSpeedShare of the
@@ -156,7 +174,11 @@ local NAMES = {
 	IceGolem = { "Ice", "golem" }, SnackYak = { "Snack", "yak" }, Icebringer = { "Ice", "bringer" },
 	Starfish = { "Star", "fish" }, Lionfish = { "Lion", "fish" }, Clownfish = { "Clown", "fish" }, Whale = { "Wh", "ale", "Wha" }, Squid = { "Sq", "uid", "Squi" },
 	JadeStatue = { "Jade", "tue" }, GarnetStatue = { "Gar", "net" },
-	Kraken = { "Kra", "ken" }, GiantGolem = { "Gi", "golem" }, KingCrab = { "King", "crab" }, BlueCrab = { "Blue", "crab" }, VolcanoTortoise = { "Volca", "toise" }, Firebird = { "Fire", "bird" }, RockHog = { "Rock", "hog" }, Rockworm = { "Rock", "worm" }, FireLobster = { "Fire", "lobster" }, LavaWhale = { "Lava", "whale" }, TRex = { "T-", "Rex" }, BoneRex = { "Bone", "rex" }, Ankylosaurus = { "Ankylo", "saurus" }, PalmGuy = { "Palm", "guy" }, Spinosaurus = { "Spino", "saurus" }, Pterodactyl = { "Ptero", "dactyl" }, Raptor = { "Rap", "tor" }, Phoenix = { "Phoe", "nix" }, Kitsune = { "Kit", "sune" }, Nut = { "N", "ut", "Nu" }, Geb = { "G", "eb", "Ge" }, Bes = { "Be", "es", "Bes" }, BloatedMummy = { "Bloat", "mummy" }, Scarab = { "Sca", "rab" },
+	BlackCat = { "Black", "cat" }, Bat = { "B", "at", "Ba" }, PumpkinPup = { "Pump", "pup" }, PurpleTarantula = { "Taran", "tula" }, Werewolf = { "Were", "wolf" }, Ghost = { "Gho", "ost" }, SkeletonDog = { "Skele", "dog" }, TombstoneCrawler = { "Tomb", "crawler" }, ZombieBear = { "Zom", "bear" }, WispWolf = { "Wisp", "wolf" }, GrimReaper = { "Grim", "reaper" }, -- Halloween
+	BlackCat = { "Black", "cat" }, Bat = { "B", "at", "Ba" }, PumpkinPup = { "Pump", "pup" }, PurpleTarantula = { "Taran", "tula" }, Werewolf = { "Were", "wolf" }, Ghost = { "Gho", "ost" }, SkeletonDog = { "Skele", "dog" }, TombstoneCrawler = { "Tomb", "crawler" }, ZombieBear = { "Zom", "bear" }, WispWolf = { "Wisp", "wolf" }, GrimReaper = { "Grim", "reaper" }, -- Halloween
+	Ladybug = { "Lady", "bug" }, Bumblebee = { "Bum", "bee" }, ToadstoolFrog = { "Toad", "frog" }, VineMonster = { "Vine", "ster" }, VenusFlytrap = { "Ve", "trap" }, SunflowerLion = { "Sun", "lion" }, RafflesiaBeast = { "Raff", "beast" }, AncientTreant = { "Tre", "ant" }, GiantRafflesia = { "Giant", "sia" }, -- World 3 Garden
+	Kraken = { "Kra", "ken" }, GiantGolem = { "Gi", "golem" }, KingCrab = { "King", "crab" }, BlueCrab = { "Blue", "crab" }, VolcanoTortoise = { "Volca", "toise" }, Firebird = { "Fire", "bird" }, RockHog = { "Rock", "hog" }, Rockworm = { "Rock", "worm" }, FireLobster = { "Fire", "lobster" }, LavaWhale = { "Lava", "whale" }, TRex = { "T-", "Rex" }, BoneRex = { "Bone", "rex" }, Ankylosaurus = { "Ankylo", "saurus" }, PalmGuy = { "Palm", "guy" }, Spinosaurus = { "Spino", "saurus" }, Pterodactyl = { "Ptero", "dactyl" }, Raptor = { "Rap", "tor" }, Phoenix = { "Phoe", "nix" }, Kitsune = { "Kit", "sune" }, Nut = { "N", "ut", "Nu" }, Geb = { "G", "eb", "Ge" }, Bes = { "Be", "es", "Bes" }, BloatedMummy = { "Bloat", "mummy" }, Scarab = { "Sca", "rab" }, GreenCrab = { "Green", "crab" }, LimeCrab = { "Lime", "crab" }, Parrot = { "Par", "rot" }, BananaMonkey = { "Bana", "monkey" }, TreasureHermit = { "Trea", "hermit" }, EyepatchShark = { "Patch", "shark" }, TreasureTurtle = { "Trea", "turtle" }, GhostShip = { "Ghost", "ship" }, JollyRogerWyvern = { "Jolly", "wyvern" },
+	GummyBear = { "Gummy", "bear" }, YellowGummyBear = { "Yel", "bear" }, GreenGummyBear = { "Green", "bear" }, GumdropFrog = { "Gum", "frog" }, GingerbreadMan = { "Ginger", "bread" }, Creampuff = { "Cream", "puff" }, SwollFairy = { "Swoll", "fairy" }, DesireTroll = { "Sugar", "troll" }, RockCandyDragon = { "Rock", "dragon" }, GumballGolem = { "Gumball", "golem" }, Gigacorn = { "Giga", "corn" }, -- World 3 Candyland
 	RollingLog = { "Rol", "log" },
 	Tiger = { "Ti", "ger" }, LionArcher = { "Lion", "archer" },
 	RoboShark = { "Robo", "shark" }, FishSchool = { "Fish", "school" }, Loong = { "L", "oong", "Loo" },
@@ -166,7 +188,7 @@ local NAMES = {
 local VOWELS = { a = true, e = true, i = true, o = true, u = true }
 
 local function spaced(kind)
-	return (string.gsub(kind, "(%l)(%u)", "%1 %2"))
+	return Config.PetNames[kind] or (string.gsub(kind, "(%l)(%u)", "%1 %2"))
 end
 
 -- What a pet adds to FUSE's price: its rarity's (Config.FusePrice), so a Legendary

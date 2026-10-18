@@ -92,6 +92,11 @@ function WorldUnlock.buy(world, bought)
 	if busy then
 		return false
 	end
+	local shortfall = (Config.WorldPrices[world] or 0) - (player:GetAttribute("Gold") or 0)
+	if shortfall > 0 and not player:GetAttribute("OwnsWorld" .. world) then
+		require(script.Parent.Shop).buyGoldFor(shortfall)
+		return false
+	end
 	busy = true
 	local portal = if world == 2 and Config.World == 1 then gate() else nil
 	if portal then

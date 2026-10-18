@@ -1,0 +1,97 @@
+-- World 3's --NAME-- floor (QM, Oct 14; draft). Made by tools/world3_course.py: edit that
+-- and re-make this, not this. Run in Studio (Edit, execute_luau) on the World 3 Place
+-- (workspace.World), after tools/world3_course.luau. Re-running is fine (it replaces its own
+-- parts, tagged World3Biome).
+-- A quasicrystal floor (QM's map maker) in tiles of a ladder: each tile only touches the
+-- tiles a rung either side, so there's always a transition ring (QM's layered rule). Paints
+-- this biome's walls and caps. In game the floor takes Config's colours by part name.
+local W = workspace.World
+local NAME, NEAR, FAR = "--NAME--", --NEAR--, --FAR--
+local WATER_IMAGE = "rbxassetid://113940500836253" -- (QM's darker tile, Oct 14: stamina-loop f6fac9e2; Config.Water.Image in World 3)
+local rgb = Color3.fromRGB
+local KINDS = { -- [kind] = { name, top, part colour, checker colour (nil: plain) }
+--KINDS--
+}
+local WALL, WALL_CHECKER, CAP = --WALL--
+-- { kind, low x, near z, size x, size z } on 8-stud cells, in game space
+local FLOOR = {
+--FLOOR--
+}
+
+local template
+for _, p in W.Ground:GetChildren() do
+	if p:IsA("BasePart") and p.Position.Z > 0 and p.Name == "Ground" and p:FindFirstChild("Checker") then
+		template = p:Clone() -- (the base's sand: its checker texture)
+		break
+	end
+end
+assert(template, "no checkered Ground part on the base to copy the look of")
+for _, c in template:GetChildren() do
+	if not c:IsA("Texture") then
+		c:Destroy()
+	end
+end
+for k in template:GetAttributes() do
+	template:SetAttribute(k, nil)
+end
+for _, p in W.Ground:GetChildren() do
+	if p:GetAttribute("World3Biome") == NAME and p.Position.Z < NEAR and p.Position.Z > FAR then -- (only its own parts, in its own stretch: never the base's)
+		p:Destroy()
+	end
+end
+local function lay(k, x, z, sx, sz, colour, checker)
+	local p = template:Clone()
+	p.Name = k[1]
+	p.Size = Vector3.new(sx, k[2] + 2, sz)
+	p.CFrame = CFrame.new(x + sx / 2, (k[2] - 2) / 2, z - sz / 2)
+	p.Color = colour
+	local water = k[1] == "Water" or k[1] == "DeepWater"
+	for _, t in p:GetChildren() do
+		if checker and not water and k[1] ~= "Planks" then
+			t.Color3 = checker
+		else
+			t:Destroy() -- (water wears the flowing tile instead; boards are plain)
+		end
+	end
+	if water then
+		local t = Instance.new("Texture")
+		t.Name = "Water"
+		t.Face = Enum.NormalId.Top
+		t.Texture = WATER_IMAGE
+		t.StudsPerTileU, t.StudsPerTileV = 8, 8
+		t.Color3 = k[3]
+		t.Parent = p
+	end
+	p:SetAttribute("World3Biome", NAME)
+	p.Parent = W.Ground
+end
+for _, r in FLOOR do
+	local k = KINDS[r[1]]
+	local x, z, sx, sz = r[2], r[3], r[4], r[5]
+	if k[1] == "Planks" then -- (World 2's Crystal Cavern boards: 4 studs deep across the course, alternating)
+		for b = 0, sz / 4 - 1 do
+			local bz = z - b * 4
+			lay(k, x, bz, sx, 4, if ((NEAR - bz) / 4) % 2 == 0 then k[3] else k[4])
+		end
+	else
+		lay(k, x, z, sx, sz, k[3], k[4])
+	end
+end
+
+local walls = 0
+for _, p in W.Walls:GetChildren() do
+	if p:IsA("BasePart") and p:GetAttribute("World3Wall") and p.Position.Z <= NEAR and p.Position.Z > FAR then -- (only the course's own walls: never the base's, QM's ragged sand bands)
+		if p.Name == "Cap" then
+			p.Color = CAP
+		else
+			p.Color = WALL
+			for _, t in p:GetChildren() do
+				if t:IsA("Texture") then
+					t.Color3 = WALL_CHECKER
+				end
+			end
+		end
+		walls += 1
+	end
+end
+return string.format("%s: %d floor parts, %d walls painted", NAME, #FLOOR, walls)

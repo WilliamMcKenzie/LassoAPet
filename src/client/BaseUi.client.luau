@@ -18,6 +18,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Hud = require(script.Parent.Hud)
 local Shop = require(script.Parent.Shop)
 local AnimalDex = require(script.Parent.AnimalDex)
+local PetsPanel = require(script.Parent.PetsPanel)
 local RollMenu = require(script.Parent.RollMenu)
 local CameraHint = require(script.Parent.CameraHint)
 local TapHand = require(script.Parent.TapHand)
@@ -30,10 +31,12 @@ local cfg = Config.BaseUi
 
 local ART = { -- assets/ui/base_hud/*.png (QM, Oct 9)
 	shop = { id = "rbxassetid://119060039201858", size = Vector2.new(267, 113) }, -- Shop.png
+	pets = { id = "rbxassetid://132882732722928", size = Vector2.new(267, 113) }, -- Pets.png (QM, Oct 15)
 	index = { id = "rbxassetid://135845846149671", size = Vector2.new(267, 113) }, -- Index.png
 	merge = { id = "rbxassetid://126251339270486", size = Vector2.new(267, 113) }, -- Merge.png
 	invite = { id = "rbxassetid://72356826090260", size = Vector2.new(267, 113) }, -- Invite.png (QM, Oct 12)
 	cash = { id = "rbxassetid://76663783463176", size = Vector2.new(256, 256) }, -- Cash.png
+	crystal = { id = "rbxassetid://128722118314123", size = Vector2.new(256, 256) }, -- gems/Crystal.png (QM's, Oct 15: the Halloween world's gems)
 }
 -- assets/ui/quests/*.png (QM, Oct 11). "" till Studio uploads them: plain boxes meanwhile.
 local QUEST_ART = {
@@ -156,7 +159,11 @@ for i, spec in { { "shop", function()
 	if Shop.hasOffers() then
 		Shop.toggle()
 	end
+end }, { "pets", function()
+	AnimalDex.close(true)
+	PetsPanel.toggle()
 end }, { "index", function()
+	PetsPanel.close(true)
 	AnimalDex.toggle()
 end }, { "merge", function()
 	if Hud.onFuse then
@@ -165,17 +172,20 @@ end }, { "merge", function()
 end }, { "invite", promptInvite } } do
 	-- (each in a slot of its own size, centred in it, so it grows from its middle and the
 	-- others stay put: QM, Oct 13)
+	if spec[1] == "shop" and not Config.ShopOn then
+		continue -- (the shop hidden for now: QM, Oct 15)
+	end
 	local slot = Instance.new("Frame")
 	slot.Name = spec[1] .. "Slot"
 	slot.BackgroundTransparency = 1
-	slot.LayoutOrder = ({ merge = 1, index = 2, shop = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
+	slot.LayoutOrder = ({ merge = 1, index = 2, shop = 3, pets = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
 	slot.Parent = menu
 	local b = picture("ImageButton", slot, ART[spec[1]], MENU_WIDTH)
 	b.Name = spec[1]
 	slot.Size = b.Size
 	b.AnchorPoint = Vector2.new(0.5, 0.5)
 	b.Position = UDim2.fromScale(0.5, 0.5)
-	menu.Size = UDim2.fromOffset(MENU_WIDTH, menu.Size.Y.Offset + b.Size.Y.Offset + (if i > 1 then MENU_GAP else 0))
+	menu.Size = UDim2.fromOffset(MENU_WIDTH, menu.Size.Y.Offset + b.Size.Y.Offset + (if menu.Size.Y.Offset > 0 then MENU_GAP else 0))
 	if ART[spec[1]].id == "" then -- (no art yet: a plain button with its name)
 		b.BackgroundTransparency = 0
 		b.BackgroundColor3 = Color3.fromRGB(76, 200, 92)
@@ -250,6 +260,15 @@ local function showCounters()
 end
 player:GetAttributeChangedSignal("Gold"):Connect(showCounters)
 showCounters()
+-- The Halloween world's gems (Config.Gems, QM Oct 15), over the cash, in gems' yellow.
+if Config.Gems then
+	local gemText = counter(0, ART.crystal, Config.GemYellow)
+	local function showGems()
+		gemText.Text = (Hud.money(player:GetAttribute("Gems") or 0):gsub("%$", ""))
+	end
+	player:GetAttributeChangedSignal("Gems"):Connect(showGems)
+	showGems()
+end
 
 -- Top right: Quests. Laid out in the art's own pixels, scaled down to QUESTS_WIDTH.
 local claimQuest = ReplicatedStorage:WaitForChild("ClaimQuest")
@@ -657,7 +676,7 @@ drawQuests()
 
 -- A menu's up over the base: Quests (and PassPopups' cards, by the "Modal" attribute) step aside.
 local function modal()
-	return Shop.isOpen() or AnimalDex.isOpen() or RollMenu.isOpen() or player:GetAttribute("MergeView") == true
+	return Shop.isOpen() or AnimalDex.isOpen() or PetsPanel.isOpen() or RollMenu.isOpen() or player:GetAttribute("MergeView") == true
 end
 
 local wasRiding = false

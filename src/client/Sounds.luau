@@ -23,6 +23,8 @@ local IDS = {
 	sprint_tier = "rbxassetid://137322083927464", -- Up a sprint tier: Speed Burst SFX (dash cloth, QM's pick, Oct 9)
 	sprint_whoosh = "rbxassetid://79833203443837", -- Sprint starts: speed woosh (compressed cloth sfx dash, QM's pick, Oct 9; was 73983934702758)
 	ability_use = "rbxassetid://9085320874", -- a pet's ability goes off: Speed Up (Brawl Stars SFX, QM's pick, Oct 9)
+	flame = "rbxassetid://138257634793906", -- each Loong breath of fire: Flamethrower (Creator Store, QM's pick, Oct 15)
+	bite = "rbxassetid://136650469995272", -- the Robo Shark eats an animal: Bite Sound (hitsound) (Creator Store, QM's pick, Oct 15)
 	-- A rush of wind looping while you sprint on a mount, a subtle sense of speed (QM, Oct 9):
 	-- Spiraling Wind Data Tunnel Travelling 2 (ProSoundEffects, 0:31). Others tried: Plasma
 	-- Trails Constant Airy Whooshing Windy 9125742262, Desert Wind Whistley Light Gusts 1 9114057104.
@@ -50,8 +52,13 @@ local IDS = {
 	boss_CrystalSeraph = "rbxassetid://133260252239833", -- the same angelic sound for the Crystal Cavern's angel (QM)
 	boss_CrimsonSeraph = "rbxassetid://133260252239833", -- the same angelic sound for the Crimson Lands' angel (QM)
 	boss_Monarch = "", -- the Woodland Maze's butterfly: silent (QM, Oct 13: no cry needed)
+	boss_Gigacorn = "", -- World 3 Candyland's candy unicorn: silent until a cry is picked (Oct 14)
 	boss_JadeAsura = "rbxassetid://129162115855106", -- the Temple's boss: the Elder Boar's monstergrowl (QM, Oct 13)
 	boss_Sphinx = "rbxassetid://95169379454314", -- the Ancient Tomb's boss: the Cactus's angry alien cat growl (QM, Oct 13)
+	boss_GiantRafflesia = "rbxassetid://95169379454314", -- World 3 Garden's boss: borrows the Cactus growl until QM picks a cry
+	boss_GiantPumpkin = "rbxassetid://129162115855106", -- the Halloween world's bosses borrow cries until QM picks theirs (Oct 15): monstergrowl
+	boss_GiantSoulHorse = "rbxassetid://95169379454314", -- (the Cactus's angry alien cat growl)
+	boss_GiantGrimReaper = "rbxassetid://137419707857339", -- (the Lava Wyrm's T-Rex Roar 2)
 	reveal_pop = "rbxassetid://4612378086", -- the egg card lands on its rarity (after the flicks): rewardscreenreveal (QM's pick, Oct 9; was 117371326373841)
 	egg_hatch = "rbxassetid://96102213526905", -- an egg in your pen hatches: Rewards (QM's pick, Oct 9; was 112644148635720)
 	gold_tick = "rbxassetid://123673857032707", -- gold counting up
