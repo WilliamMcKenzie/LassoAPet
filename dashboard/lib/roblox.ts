@@ -1,4 +1,4 @@
-import type { Totals, Snapshot } from './metrics';
+import { mergeTotals, type Totals, type Snapshot } from './metrics';
 
 export const UNIVERSE = '10768914077';
 type Entry = { data: Totals | null; at: number };
@@ -27,14 +27,23 @@ export async function readEntry(key: string, store: string, entry: string): Prom
   cache.set(cacheKey,pending);
   try { return (await pending).data; } catch(e) { cache.delete(cacheKey); throw e; }
 }
+
+// The game spreads each total over SHARDS entries ("<entry>#0".."#9", one per server; see
+// src/server/StatsStore.luau) besides the plain entry it wrote before Oct 18: a total is all of
+// them merged (counts summed, "max:" fields the biggest). null when none of them exist.
+export const SHARDS = 10;
+export async function readTotals(key: string, store: string, entry: string): Promise<Totals | null> {
+  const parts = await Promise.all([readEntry(key,store,entry), ...Array.from({length:SHARDS},(_,n)=>readEntry(key,store,`${entry}#${n}`))]);
+  return parts.every(p=>p===null) ? null : mergeTotals(parts);
+}
 export async function snapshot(key: string, dates: string[]): Promise<Snapshot> {
   const result: Snapshot={days:[],funnels:[],worlds:null,online:null,fetchedAt:new Date().toISOString(),issues:[]};
   // Reject invalid credentials before fan-out; a missing date is a valid empty result.
   await readEntry(key,'SessionStatsShared',`v1d-${dates[dates.length-1]}`);
   const jobs = [
-    ...dates.map(date=>({label:date,run:async()=>{result.days.push({date,data:await readEntry(key,'SessionStatsShared',`v1d-${date}`)});}})),
-    ...[1,2].map(world=>({label:`World ${world} funnels`,run:async()=>{result.funnels.push({world,data:await readEntry(key,world===1?'SessionStats':'SessionStats_W2','v1-funnels')});}})),
-    {label:'World progression',run:async()=>{result.worlds=await readEntry(key,'SessionStatsShared','v1-worlds');}},
+    ...dates.map(date=>({label:date,run:async()=>{result.days.push({date,data:await readTotals(key,'SessionStatsShared',`v1d-${date}`)});}})),
+    ...[1,2,3].map(world=>({label:`World ${world} funnels`,run:async()=>{result.funnels.push({world,data:await readTotals(key,world===1?'SessionStats':`SessionStats_W${world}`,'v1-funnels')});}})),
+    {label:'World progression',run:async()=>{result.worlds=await readTotals(key,'SessionStatsShared','v1-worlds');}},
   ];
   let cursor=0;
   await Promise.all(Array.from({length:4},async()=>{while(cursor<jobs.length){const job=jobs[cursor++];try{await job.run();}catch(e){result.issues.push(`${job.label}: ${e instanceof UpstreamError ? e.message : 'Read failed.'}`);}}}));
