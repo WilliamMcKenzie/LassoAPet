@@ -267,7 +267,15 @@ end
 function Horse:getNeck()
 	local loop = self.neckLoop
 	local k = self.size * self.scale -- (at the size it really is)
-	return { cframe = self.neck.CFrame * CFrame.new((loop.center - self.pivots.neck) * k), radius = loop.radius * k }
+	-- An animal with no neck bone (the crabs, the jellyfish, the spiders, the Scarab, the
+	-- Ghost and its ship, the Tombstone Crawler: their loop points are set about the body)
+	-- is lassoed about its root instead. Ride.client asks every frame of a throw, so a nil
+	-- here was an error a frame (Oct 18: 189k a day) that also cut that frame's ride update short.
+	local bone, pivot = self.neck, self.pivots.neck
+	if not (bone and pivot) then
+		bone, pivot = self.root, self.pivots.root
+	end
+	return { cframe = bone.CFrame * CFrame.new((loop.center - pivot) * k), radius = loop.radius * k }
 end
 
 function Horse:setSaddled(_saddled) end

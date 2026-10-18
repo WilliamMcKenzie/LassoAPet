@@ -167,6 +167,26 @@ for kind, base in HalloweenSkins.Base do
 	KINDS[kind] = { data = HalloweenSkins.model(kind, KINDS[base].data), center = KINDS[base].center }
 end
 
+-- An animal with no egg of its own yet (Oct 18: World 3's nine Cnidaria animals, Moon
+-- Jellyfish to Royal Cnidarian; tools/*_egg.py make one) gets the Horse's as a stand-in, at
+-- its own tier's size, rather than nothing. Egg.new runs every frame for an egg someone else is carrying
+-- (Ride.client) and on every pen refresh (Pen.client), so KINDS[kind] being nil was an
+-- error a frame for everyone who could see it (713k a day) that also cut their ride update
+-- and the rest of that pen's refresh short. Warned once a kind: the report names what's missing.
+local STAND_IN = "Horse"
+local warned = {}
+local function defOf(kind)
+	local def = KINDS[kind]
+	if def then
+		return def
+	end
+	if not warned[kind] then
+		warned[kind] = true
+		warn("Egg: no egg model for " .. kind .. "; the " .. STAND_IN .. "'s stands in")
+	end
+	return KINDS[STAND_IN]
+end
+
 local Egg = {}
 Egg.__index = Egg
 
@@ -175,8 +195,8 @@ function Egg.sizeOf(kind)
 end
 
 function Egg.new(kind)
-	kind = kind or "Horse"
-	local def = KINDS[kind]
+	kind = if kind == nil then STAND_IN else tostring(kind)
+	local def = defOf(kind)
 	local model, _, bones = Rig.fromData(def.data, kind .. "Egg", STUD_TEXTURE)
 	model.PrimaryPart.PivotOffset = CFrame.new(0, def.center, 0)
 	local size = Egg.sizeOf(kind)
