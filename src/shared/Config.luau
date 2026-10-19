@@ -808,7 +808,7 @@ local Config = {
 	-- Stock (QM, Oct 15: "Loong 435/500 left"): Stock in all, shared by every server (Shop.server
 	-- counts each sale in a DataStore; workspace's "LoongLeft" is what's left), SOLD OUT at 0. It
 	-- starts at StartLeft (QM: "to make it feel like its selling"): no count saved yet means that.
-	LoongOffer = { Kind = "Loong", ProductId = 3718721407, Price = 999, Stock = 500, StartLeft = 435, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(7, 0, -11), -- (against the base's front wall, the Robo Shark beside it: QM, Oct 15)
+	LoongOffer = { Kind = "Loong", ProductId = 3718721407, Price = 399, Stock = 500, StartLeft = 435, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(7, 0, -11), -- (against the base's front wall, the Robo Shark beside it: QM, Oct 15)
 		Ledger = "loongs", StockKey = "sold" },
 	-- The Robo Shark beside it the same way (QM, Oct 15: 1,000 of them; "Roboshark Pet [Limited]").
 	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3718722226, Price = 399, Stock = 1000, StartLeft = 870, Scale = 6, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11), -- (Scale 6: 4x the 1.5 it had, QM Oct 15: "insanely small")
