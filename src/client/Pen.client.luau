@@ -651,8 +651,8 @@ RunService.RenderStepped:Connect(function(dt)
 					readyArrow(s, ready and pen == myPen() and not player:GetAttribute("Tutorial") and not player:GetAttribute("EggPromptUp")
 						and not player:GetAttribute("MergeView") and not player:GetAttribute("Cutscene"))
 					if s.speedupPrompt then
-						-- (its action: the time left, as over the egg, till it's ready: QM, Oct 10)
-						local action = if ready then "Hatch" else s.timer.Text
+						-- (its action: "Hatch now · R$10" till it's ready, the paid hatch; the time left shows over the egg)
+						local action = if ready then "Hatch" else "Hatch now · R$" .. Config.SpeedupEgg.Price -- (the paid hatch says so: QM, Oct 19)
 						if s.speedupPrompt.ActionText ~= action then
 							s.speedupPrompt.ActionText = action
 						end
