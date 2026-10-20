@@ -14,7 +14,8 @@ local Players = game:GetService("Players")
 
 -- Every image in the client's scripts (tools/preload_ids.py).
 local PANELS = {
-	"rbxassetid://127821178410489", "rbxassetid://119060039201858", "rbxassetid://132882732722928",
+	"rbxassetid://127821178410489", "rbxassetid://125418799809598", "rbxassetid://107362573611718",
+	"rbxassetid://106855326447623", "rbxassetid://119060039201858", "rbxassetid://132882732722928",
 	"rbxassetid://135845846149671", "rbxassetid://126251339270486", "rbxassetid://72356826090260",
 	"rbxassetid://76663783463176", "rbxassetid://128722118314123", "rbxassetid://120142364189594",
 	"rbxassetid://133997765094952", "rbxassetid://72901094417133", "rbxassetid://72181051059940",
@@ -93,17 +94,17 @@ local PANELS = {
 	"rbxassetid://119064104030965", "rbxassetid://71854224710325", "rbxassetid://9120972321",
 	"rbxassetid://86824541929406", "rbxassetid://137596967858841", "rbxassetid://120075276423928",
 	"rbxassetid://92909054184182", "rbxassetid://75096704585668", "rbxassetid://100279863676585",
-	"rbxassetid://85834206672187", "rbxassetid://100466055719917", "rbxassetid://100578505321305",
-	"rbxassetid://108884731983075", "rbxassetid://127729903919837", "rbxassetid://112260275929453",
+	"rbxassetid://85834206672187", "rbxassetid://100466055719917", "rbxassetid://108585154222977",
+	"rbxassetid://106151758290669", "rbxassetid://107961643042370", "rbxassetid://112260275929453",
 	"rbxassetid://111082975846791", "rbxassetid://78103765703011", "rbxassetid://95624233682694",
 	"rbxassetid://118605133730785", "rbxassetid://17520182385", "rbxassetid://7216979807",
 	"rbxassetid://73420824782915", "rbxassetid://140037705020050", "rbxassetid://90506809044433",
-	"rbxassetid://83654143211576", "rbxassetid://125036875690208", "rbxassetid://75780199465315",
-	"rbxassetid://93494892373199", "rbxassetid://106323361129280", "rbxassetid://74397756416359",
-	"rbxassetid://135798607638786", "rbxassetid://111293349532346", "rbxassetid://84405738259224",
-	"rbxassetid://71934286153027", "rbxassetid://119782710836202", "rbxassetid://99691859053615",
-	"rbxassetid://135667055262173", "rbxassetid://86278091719365", "rbxassetid://136450925240528",
-	"rbxassetid://133694083336509", "rbxassetid://111300482619596", "rbxassetid://82082521618286",
+	"rbxassetid://83654143211576", "rbxassetid://125036875690208", "rbxassetid://86572003302585",
+	"rbxassetid://77065186414976", "rbxassetid://127409850784423", "rbxassetid://135248482417682",
+	"rbxassetid://72137957416956", "rbxassetid://101951033426315", "rbxassetid://83223429511866",
+	"rbxassetid://113449238733442", "rbxassetid://129857278922864", "rbxassetid://94861344921194",
+	"rbxassetid://128433749405556", "rbxassetid://114300820141286", "rbxassetid://107487299920702",
+	"rbxassetid://80262179750586", "rbxassetid://111300482619596", "rbxassetid://82082521618286",
 	"rbxassetid://79299508640873", "rbxassetid://131361280239840", "rbxassetid://134865745295413",
 	"rbxassetid://128484192846174", "rbxassetid://118018475359108", "rbxassetid://139647408711436",
 	"rbxassetid://114889489768256", "rbxassetid://90551038508587", "rbxassetid://83311618092760",
@@ -169,12 +170,14 @@ local REST = {
 	"rbxassetid://116423656331586", "rbxassetid://134177221629571", "rbxassetid://128487650106554",
 	"rbxassetid://108549180902749", "rbxassetid://128602992140927", "rbxassetid://109858648843308",
 	"rbxassetid://126070362603608", "rbxassetid://112363865182650", "rbxassetid://83787999904244",
-	"rbxassetid://119834887149656", "rbxassetid://93677343741816", "rbxassetid://113778810800288",
-	"rbxassetid://134340111977085", "rbxassetid://97537967185164", "rbxassetid://93384010922515",
-	"rbxassetid://105968538824751", "rbxassetid://133303061216721", "rbxassetid://75356296124042",
-	"rbxassetid://86611519789045", "rbxassetid://98686807740770", "rbxassetid://87302593393430",
-	"rbxassetid://74500954492785", "rbxassetid://71726481257884", "rbxassetid://77807866797953",
-	"rbxassetid://128871935822673",
+	"rbxassetid://119834887149656", "rbxassetid://93677343741816", "rbxassetid://10509843977",
+	"rbxassetid://113778810800288", "rbxassetid://134340111977085", "rbxassetid://97537967185164",
+	"rbxassetid://93384010922515", "rbxassetid://105968538824751", "rbxassetid://133303061216721",
+	"rbxassetid://75356296124042", "rbxassetid://86611519789045", "rbxassetid://98686807740770",
+	"rbxassetid://87302593393430", "rbxassetid://74500954492785", "rbxassetid://71726481257884",
+	"rbxassetid://77807866797953", "rbxassetid://128871935822673", "rbxassetid://101417923883570",
+	"rbxassetid://92755387446581", "rbxassetid://134638563995635", "rbxassetid://78772680292420",
+	"rbxassetid://107890182670363", "rbxassetid://88920972936817",
 }
 
 local warm = Instance.new("ScreenGui")
@@ -200,4 +203,21 @@ task.spawn(function()
 		table.insert(labels, label)
 	end
 	pcall(ContentProvider.PreloadAsync, ContentProvider, labels)
+	-- Then anything the lists missed (art added since tools/preload_ids.py last ran): every
+	-- picture in the UI that's been built by now (QM, Oct 20: "preload ALL texture assets").
+	task.wait(2)
+	local seen, more = {}, {}
+	for _, id in PANELS do
+		seen[id] = true
+	end
+	for _, id in REST do
+		seen[id] = true
+	end
+	for _, d in Players.LocalPlayer.PlayerGui:GetDescendants() do
+		if (d:IsA("ImageLabel") or d:IsA("ImageButton")) and d.Image ~= "" and not seen[d.Image] then
+			seen[d.Image] = true
+			table.insert(more, d)
+		end
+	end
+	pcall(ContentProvider.PreloadAsync, ContentProvider, more)
 end)

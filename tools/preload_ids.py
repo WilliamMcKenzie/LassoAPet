@@ -25,7 +25,7 @@ client = sorted(glob.glob(os.path.join(src, "client", "*.luau")))
 sounds = set(ID.findall(open(os.path.join(src, "client", "Sounds.luau")).read()))
 later = {"PetFaces.luau", "AnimalDex.luau"}
 keep_files = [f for f in client if os.path.basename(f) not in later | {"Sounds.luau", "Preload.client.luau"}]
-rest_files = [f for f in client if os.path.basename(f) in later] + [os.path.join(src, "shared", "Config.luau")]
+rest_files = [f for f in client if os.path.basename(f) in later] + sorted(glob.glob(os.path.join(src, "shared", "**", "*.luau"), recursive=True)) # (all of Shared: Config, the animals, eggs, bosses; QM, Oct 20)
 keep = [i for i in ids(keep_files) if i not in sounds]
 rest = [i for i in ids(rest_files) if i not in sounds and i not in keep]
 
