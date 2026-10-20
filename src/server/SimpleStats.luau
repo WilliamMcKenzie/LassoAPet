@@ -10,6 +10,7 @@ local Stats = {}
 Stats.Rows = {
 	{ "shop", "Shop button (opened the shop)", "open" },
 	{ "StarterPackOpen", "Starter Pack HUD button", "open" },
+	{ "shopAuto", "Shop popped up by itself (after the 3rd ride / on return)", "open" },
 	{ "StarterPack", "Starter Pack: Buy" },
 	{ "Speed", "1.5x Speed button" },
 	{ "AutoHatch", "Auto Hatch button" },

@@ -127,6 +127,7 @@ scroll.Parent = panel
 local EGG_W = 1180
 local EGG_K = EGG_W / 1192
 local egg = image(scroll, "HalloweenEgg", ART.Halloween, 0, 0, EGG_W, math.round(470 * EGG_K))
+egg.AnchorPoint, egg.Position = Vector2.new(0.5, 0), UDim2.fromOffset(EGG_W / 2, 0) -- (its middle, so its spotlight pulse grows from there: below)
 local cards, eggButtons = {}, {}
 for i, count in { 1, 3, 10, 50 } do
 	local width = ({ 145, 146, 144, 163 })[i] -- (each button's art's own width)
@@ -260,7 +261,7 @@ local function layout()
 	starter.Visible = show
 	starterBuy.Selectable = show
 	local y = if show then starter.Size.Y.Offset + 28 else 0
-	egg.Position = UDim2.fromOffset(0, y)
+	egg.Position = UDim2.fromOffset(EGG_W / 2, y)
 	for _, card in cashCards do
 		card.Position = UDim2.fromOffset(card.Position.X.Offset, y + egg.Size.Y.Offset + 28)
 	end
@@ -282,6 +283,36 @@ RunService.Heartbeat:Connect(function()
 		if left <= 0 then
 			layout()
 		end
+	end
+end)
+-- The Halloween Egg in the spotlight (QM, Oct 20): when the shop pops up by itself (bottom of this
+-- file), it's scrolled into view and swells and shrinks with a sunburst turning behind it till the
+-- shop closes.
+local eggPulse = Instance.new("UIScale")
+eggPulse.Parent = egg
+local eggBurst = Instance.new("ImageLabel")
+eggBurst.Name = "EggSunburst"
+eggBurst.BackgroundTransparency = 1
+eggBurst.Image = "rbxassetid://85834206672187" -- assets/ui/Sunburst.png (QM's)
+eggBurst.ImageTransparency = 0.25
+eggBurst.AnchorPoint = Vector2.new(0.5, 0.5)
+eggBurst.Size = UDim2.fromOffset(EGG_W * 1.1, EGG_W * 1.1)
+eggBurst.ZIndex = 0
+eggBurst.Visible = false
+eggBurst.Parent = scroll
+local spotlight = false
+local function spotlightEgg(on)
+	spotlight = on
+	eggBurst.Visible = on
+	if not on then
+		eggPulse.Scale = 1
+	end
+end
+RunService.Heartbeat:Connect(function()
+	if spotlight and gui.Enabled then
+		eggPulse.Scale = 1 + 0.025 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 * 1.1))
+		eggBurst.Position = UDim2.fromOffset(EGG_W / 2, egg.Position.Y.Offset + egg.Size.Y.Offset / 2)
+		eggBurst.Rotation = os.clock() * 20 % 360
 	end
 end)
 root.Parent = gui
@@ -338,7 +369,7 @@ end
 local function setScale(scale)
 	pop.Scale = scale
 end
-function Shop.open()
+function Shop.open(auto) -- (auto: it popped up by itself, the Halloween Egg in the spotlight)
 	if open then
 		return
 	end
@@ -351,10 +382,22 @@ function Shop.open()
 	gui.Enabled = true
 	haze(true)
 	ModalPop.open(setScale)
+	spotlightEgg(auto == true)
+	if auto then
+		task.defer(function() -- (once the canvas has its size: the egg's top just under the panel's)
+			scroll.CanvasPosition = Vector2.new(0, math.max(0, egg.Position.Y.Offset - 12))
+		end)
+	end
 	for _, name in { "FunnelStep", "Telemetry" } do
 		local event = ReplicatedStorage:FindFirstChild(name)
 		if event then
-			event:FireServer(if name == "FunnelStep" then "shop" else "shopOpened")
+			if name == "FunnelStep" then
+				event:FireServer("shop")
+			elseif auto then
+				event:FireServer("monoView", "shopAuto") -- (/stats: popped up, not tapped)
+			else
+				event:FireServer("shopOpened")
+			end
 		end
 	end
 	Gamepad.openMenu("Shop", {
@@ -374,6 +417,7 @@ function Shop.close(instant)
 		return
 	end
 	open = false
+	spotlightEgg(false)
 	Gamepad.closeMenu("Shop")
 	hideOthers(false)
 	if Shop.onToggle then
@@ -414,6 +458,29 @@ function Shop.buyGoldFor(amount)
 		end
 	end
 end
+
+-- The shop pops up by itself once a session (QM, Oct 20), the Halloween Egg in the spotlight: after
+-- the 3rd finished ride, or soon after joining for a player past that already, once they're at their
+-- base with nothing else up (no tutorial, cutscene, away cash panel or other menu).
+local AUTO_AFTER_RIDES = 3
+task.spawn(function()
+	while (player:GetAttribute("RidesDone") or 0) < AUTO_AFTER_RIDES do
+		player:GetAttributeChangedSignal("RidesDone"):Wait()
+	end
+	task.wait(2)
+	while true do
+		local base = player.PlayerGui:FindFirstChild("BaseUi")
+		local baseRoot = base and base:FindFirstChild("Root")
+		local away = player.PlayerGui:FindFirstChild("AwayPanel")
+		if base and base.Enabled and not (baseRoot and baseRoot:GetAttribute("Modal")) and not open
+			and not player:GetAttribute("Tutorial") and not player:GetAttribute("Cutscene")
+			and not (away and away.Enabled) and not ((player:GetAttribute("AwayGold") or 0) > 0) then
+			Shop.open(true)
+			return
+		end
+		task.wait(0.5)
+	end
+end)
 
 function Shop.isOpen()
 	return open
