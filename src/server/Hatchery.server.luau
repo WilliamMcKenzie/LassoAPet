@@ -995,13 +995,16 @@ claimStarter = function(player)
 		return
 	end
 	profile.starterPack = true
-	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + Config.StarterPack.Gold)
-	Telemetry.gold(player, "purchased", Config.StarterPack.Gold)
-	givePet(player, profile, Config.StarterPack.Pet)
+	for _, kind in Config.StarterPack.Pets do -- (into the pen, or the egg inventory if it's full: givePet)
+		givePet(player, profile, kind)
+	end
+	if Config.StarterPack.World then -- (World 2 unlocked at once: Gold.server saves it)
+		player:SetAttribute("OwnsWorld" .. Config.StarterPack.World, true)
+	end
 	task.spawn(save, player)
 	local newAnimal = ReplicatedStorage:FindFirstChild("NewAnimal")
 	if newAnimal then
-		newAnimal:FireClient(player, Config.StarterPack.Pet) -- (its cutscene, as /give's)
+		newAnimal:FireClient(player, Config.StarterPack.Pets[1]) -- (the Robo Shark's cutscene, as /give's)
 	end
 end
 

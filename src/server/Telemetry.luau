@@ -153,20 +153,20 @@ end
 
 -- A Robux purchase (Shop.server's products, Passes' game passes): /stats' "bought" rate.
 function Telemetry.purchase(player, robux, sku)
-	local arm = player and player:GetAttribute("ABRideEgg") -- (the ride egg A/B's Robux: Hatchery, /stats ab)
-	if arm then
-		local spent = robux
-		if type(spent) ~= "number" then -- (a pass: its price)
-			for _, pass in Config.Passes do
-				if sku == "pass:" .. pass.Id then
-					spent = pass.Price
-				end
+	local spent = robux
+	if type(spent) ~= "number" then -- (a pass: its price)
+		for _, pass in Config.Passes do
+			if sku == "pass:" .. pass.Id then
+				spent = pass.Price
 			end
 		end
+	end
+	local arm = player and player:GetAttribute("ABRideEgg") -- (the ride egg A/B's Robux: Hatchery, /stats ab)
+	if arm then
 		StatsStore.addShared("ab-rideegg-" .. arm, { robux = tonumber(spent) or 0, buys = 1 })
 	end
 	if player and sessions[player] then
-		SimpleStats.purchase(not sessions[player].excluded and sessions[player].simple or nil, sku)
+		SimpleStats.purchase(not sessions[player].excluded and sessions[player].simple or nil, sku, spent)
 		Telemetry.once(player, "bought")
 		count(player, "purchases")
 		if type(robux) == "number" and robux > 0 then

@@ -3,26 +3,45 @@
 local Config = require(game.ReplicatedStorage.Shared.Config)
 local Store = require(script.Parent.StatsStore)
 local Stats = {}
+-- Each offer (QM, Oct 20): what players DO with it, not who it was shown to (everyone sees the
+-- buttons): sessions that tapped it (opened its checkout), closed that checkout, bought (sessions),
+-- and every sale and its Robux. "open" rows are taps that open something (the Shop button, the
+-- HUD's Starter Pack button: the client's monoView); the rest are offers, counted from checkout.
 Stats.Rows = {
-	{ "shop", "Shop" },
+	{ "shop", "Shop button (opened the shop)", "open" },
+	{ "StarterPackOpen", "Starter Pack HUD button", "open" },
+	{ "StarterPack", "Starter Pack: Buy" },
+	{ "Speed", "1.5x Speed button" },
+	{ "AutoHatch", "Auto Hatch button" },
+	{ "Invincible", "Invincible button" },
+	{ "DoubleGold", "2x Cash (old button)" },
+	{ "eggSpeedup", "Egg: Hatch now" },
 	{ "revive", "Crash: Revive" },
 	{ "crashInvincible", "Crash: Invincible" },
-	{ "eggSpeedup", "Egg speed-up" },
-	{ "cashShortfall", "Insufficient-cash offer" },
-	{ "StarterPack", "Starter Pack" },
-	{ "StarterPackOpen", "Starter Pack popup opened" },
-	{ "Speed", "1.5x Speed card" },
-	{ "DoubleGold", "2x Cash card" },
-	{ "Invincible", "Invincible card" },
-	{ "AutoHatch", "Auto Hatch card" },
 	{ "away4x", "Away panel: 4x" },
+	{ "cashShortfall", "Not-enough-cash popup (opens by itself)" },
 }
-for _, pet in Config.PetOffers do
-	table.insert(Stats.Rows, { "limited_" .. pet.Kind, "Limited: " .. pet.Kind })
+local function short(n)
+	for _, unit in { { 1e9, "B" }, { 1e6, "M" }, { 1e3, "K" } } do
+		if n >= unit[1] then
+			return (string.format("%.1f", n / unit[1]):gsub("%.0$", "")) .. unit[2]
+		end
+	end
+	return tostring(n)
 end
-local valid = {}
+for _, offer in Config.Shop.HalloweenPacks do
+	table.insert(Stats.Rows, { "shop_" .. offer.Key, "Shop: " .. offer.Count .. "x Halloween Egg" })
+end
+for _, offer in Config.Shop.CashPacks do
+	table.insert(Stats.Rows, { "shop_" .. offer.Key, "Shop: $" .. short(offer.Gold) .. " cash" })
+end
+for _, pet in Config.PetOffers do
+	table.insert(Stats.Rows, { "limited_" .. pet.Kind, "Pet stand: " .. pet.Kind })
+end
+local valid, opens = {}, {}
 for _, row in Stats.Rows do
 	valid[row[1]] = true
+	opens[row[1]] = row[3] == "open" or nil
 end
 function Stats.validSurface(surface)
 	return type(surface) == "string" and valid[surface] == true
@@ -70,7 +89,7 @@ function Stats.reach(s, world, biome)
 	end
 end
 function Stats.view(s, surface)
-	if not s or not valid[surface] or s.views[surface] then
+	if not s or not opens[surface] or s.views[surface] then -- (only taps that open something: being shown an offer isn't counted)
 		return
 	end
 	s.views[surface] = true
@@ -80,7 +99,6 @@ function Stats.prompt(s, sku, surface)
 	if not s or not valid[surface] then
 		return
 	end
-	Stats.view(s, surface) -- a checkout also proves the offer was seen
 	s.pending[sku] = surface
 	if not s.prompts[surface] then
 		s.prompts[surface] = true
@@ -100,13 +118,17 @@ function Stats.cancel(s, sku)
 		add(s, { ["cancel:" .. surface] = 1 })
 	end
 end
-function Stats.purchase(s, sku)
+function Stats.purchase(s, sku, robux)
 	local surface = s and s.pending[sku]
-	if not surface or s.buyers[surface] then
+	if not surface then
 		return
 	end
-	s.buyers[surface] = true
-	add(s, { ["buy:" .. surface] = 1 })
+	local fields = { ["sales:" .. surface] = 1, ["robux:" .. surface] = math.floor(tonumber(robux) or 0) }
+	if not s.buyers[surface] then
+		s.buyers[surface] = true
+		fields["buy:" .. surface] = 1
+	end
+	add(s, fields)
 end
 function Stats.finish(s, seconds, firstSession, ready)
 	if not s or s.closed then
@@ -167,23 +189,28 @@ function Stats.report(arg)
 	if shown == 0 then
 		table.insert(lines, "  N/A — no completed first sessions yet")
 	end
-	table.insert(lines, "Monetization (" .. sessions .. " player sessions; purchase % is of viewers):")
+	table.insert(lines, "Monetization (" .. sessions .. " player sessions; what players did, not what they were shown):")
 	for _, row in Stats.Rows do
 		local id, label = row[1], row[2]
-		local views, buyers, prompts = d["view:" .. id] or 0, d["buy:" .. id] or 0, d["prompt:" .. id] or 0
-		table.insert(
-			lines,
-			string.format(
-				"  %s: %d viewers (%s reach), %d opened checkout, %d closed it, %d buyers (%s purchased)",
-				label,
-				views,
-				pct(views, sessions),
-				prompts,
-				d["cancel:" .. id] or 0,
-				buyers,
-				pct(buyers, views)
+		if row[3] == "open" then
+			local n = d["view:" .. id] or 0
+			table.insert(lines, string.format("  %s: tapped in %d sessions (%s)", label, n, pct(n, sessions)))
+		else
+			local taps, buyers = d["prompt:" .. id] or 0, d["buy:" .. id] or 0
+			table.insert(
+				lines,
+				string.format(
+					"  %s: %d tapped (checkout opened), %d closed it, %d bought (%s of tappers), %d sales, R$%d",
+					label,
+					taps,
+					d["cancel:" .. id] or 0,
+					buyers,
+					pct(buyers, taps),
+					d["sales:" .. id] or 0,
+					d["robux:" .. id] or 0
+				)
 			)
-		)
+		end
 	end
 	return lines
 end

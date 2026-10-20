@@ -351,7 +351,7 @@ buyShop.OnServerEvent:Connect(function(player, key, source)
 	if offer.Count and offer.ProductId == 0 then return end -- not on sale until configured
 	if offer.ProductId ~= 0 then
 		MarketplaceService:PromptProductPurchase(player, offer.ProductId)
-		local surface = if petOfferOf[key] then "limited_" .. key elseif source == "shop" then "shop" elseif offer.Gold then "cashShortfall" else nil
+		local surface = if petOfferOf[key] then "limited_" .. key elseif source == "shop" then "shop_" .. offer.Key elseif offer.Gold then "cashShortfall" else nil -- (each shop item its own /stats row: SimpleStats)
 		Telemetry.monoPrompt(player, "product:" .. offer.ProductId, surface)
 	elseif RunService:IsStudio() then
 		record(player.UserId, game:GetService("HttpService"):GenerateGUID(false), offer)

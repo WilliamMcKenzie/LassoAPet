@@ -222,6 +222,22 @@ buyWorld.OnServerInvoke = function(player, world)
 	return true
 end
 buyWorld.Parent = ReplicatedStorage
+-- A world given some other way (the Starter Pack: Hatchery sets "OwnsWorld2"): saved at once.
+local function watchWorlds(player)
+	for world in Config.Places do
+		if world ~= 1 then
+			player:GetAttributeChangedSignal("OwnsWorld" .. world):Connect(function()
+				if player:GetAttribute("OwnsWorld" .. world) and loaded[player] then
+					save(player)
+				end
+			end)
+		end
+	end
+end
+Players.PlayerAdded:Connect(watchWorlds)
+for _, player in Players:GetPlayers() do
+	watchWorlds(player)
+end
 
 -- BuyTrail (Config.TrailBars, QM Oct 15): with every world yours, the next trail for its gold.
 local buyTrail = Instance.new("RemoteFunction")

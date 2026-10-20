@@ -1200,7 +1200,7 @@ local Config = {
 	},
 	PassSpeed = 1.5, -- Speed's
 	PassGiantScale = 2, -- Giant Pets': every pet of yours this x bigger (Skins.apply)
-	StarterPack = { Gold = 150000, Pet = "Snake" }, -- (QM's popup: 150k and the Snake)
+	StarterPack = { Pets = { "RoboShark", "SnackYak", "GiantRafflesia" }, World = 2 }, -- (QM, Oct 20, as its shop card shows: the Robo Shark (EX), the Giant Rafflesia (Legendary), the Snack Yak (Epic), and World 2 unlocked; was $150k and the Snake)
 	PassGoldMultiplier = 2, -- DoubleGold's
 	PassHatchSpeed = 2, -- FastHatch's: hatch times / this
 	Vip = {
