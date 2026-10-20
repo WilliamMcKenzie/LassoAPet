@@ -1813,18 +1813,33 @@ skipCommand.Triggered:Connect(function(source)
 end)
 skipCommand.Parent = game:GetService("TextChatService")
 
--- The "While you were away" popup's Claim button: the gold earned while away goes
--- into your total.
-remote("ClaimAway", function(player)
+-- The "While you were away" panel's Claim button: the gold earned while away goes
+-- into your total. Its rainbow button (Config.AwayBoost, bought: Shop.server's receipt) banks it
+-- Multiplier times over through BankAway, true if there was any to bank.
+local function bankAway(player, times)
 	local profile = profiles[player]
 	if not profile or (profile.awayGold or 0) <= 0 then
-		return
+		return false
 	end
 	local currency = if Config.Gems then "Gems" else "Gold" -- (the Halloween world's pets earn gems: Config.Gems)
-	player:SetAttribute(currency, (player:GetAttribute(currency) or 0) + profile.awayGold * (if Config.Gems then Config.Gems.Rate else 1))
+	local banked = profile.awayGold * (if Config.Gems then Config.Gems.Rate else 1) * (tonumber(times) or 1)
+	player:SetAttribute(currency, (player:GetAttribute(currency) or 0) + banked)
 	profile.awayGold = nil
 	player:SetAttribute("AwayGold", nil)
+	if (tonumber(times) or 1) > 1 then
+		task.spawn(save, player) -- (paid for: kept even if the server goes down)
+	end
+	return true
+end
+remote("ClaimAway", function(player)
+	bankAway(player, 1)
 end)
+do
+	local bank = Instance.new("BindableFunction")
+	bank.Name = "BankAway"
+	bank.OnInvoke = bankAway
+	bank.Parent = game:GetService("ServerStorage")
+end
 
 -- The fuse lesson (client FuseLesson): due once you unlock the Desert (PenLevel.server
 -- sets "FuseLesson"), saved till you've fused, then never again.

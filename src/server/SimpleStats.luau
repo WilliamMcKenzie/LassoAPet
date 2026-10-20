@@ -13,6 +13,7 @@ Stats.Rows = {
 	{ "Speed", "1.5x Speed card" },
 	{ "DoubleGold", "2x Cash card" },
 	{ "Invincible", "Invincible card" },
+	{ "away4x", "Away panel: 4x" },
 }
 for _, pet in Config.PetOffers do
 	table.insert(Stats.Rows, { "limited_" .. pet.Kind, "Limited: " .. pet.Kind })

@@ -323,7 +323,24 @@ Players.PlayerRemoving:Connect(function(player)
 	hatchPending[player] = nil
 end)
 
+-- The away panel's rainbow button (Config.AwayBoost, Client/Away): its product, or free in
+-- Studio till it has one. Hatchery's BankAway banks the away gold Multiplier times over.
+local awayGranted = {} -- [PurchaseId] = true (a receipt seen again is already banked)
+local function bankAway(player)
+	local bank = game:GetService("ServerStorage"):FindFirstChild("BankAway")
+	return bank ~= nil and bank:Invoke(player, Config.AwayBoost.Multiplier) == true
+end
 buyShop.OnServerEvent:Connect(function(player, key, source)
+	if key == "Away4x" then
+		local id = Config.AwayBoost.ProductId
+		if id ~= 0 then
+			MarketplaceService:PromptProductPurchase(player, id)
+			Telemetry.monoPrompt(player, "product:" .. id, "away4x")
+		elseif RunService:IsStudio() then
+			bankAway(player)
+		end
+		return
+	end
 	local offer = typeof(key) == "string" and offers[key]
 	if not offer or ((offer.Key == "Legendary" or offer.Count) and randomRestricted(player)) then
 		return
@@ -377,6 +394,20 @@ MarketplaceService.PromptProductPurchaseFinished:Connect(function(userId, produc
 end)
 
 MarketplaceService.ProcessReceipt = function(receipt)
+	if receipt.ProductId == Config.AwayBoost.ProductId and receipt.ProductId ~= 0 then
+		-- (the away panel's 4x: banked while they're here with away gold to bank; else tried again,
+		-- as Roblox does on their next visit, when it's there again)
+		if awayGranted[receipt.PurchaseId] then
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		local player = Players:GetPlayerByUserId(receipt.PlayerId)
+		if player and bankAway(player) then
+			awayGranted[receipt.PurchaseId] = true
+			Telemetry.purchase(player, receipt.CurrencySpent, "product:" .. receipt.ProductId)
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
 	-- Shop offers go into the ledger whether or not the buyer is still here.
 	local offer = offerOf[receipt.ProductId]
 	if offer then
