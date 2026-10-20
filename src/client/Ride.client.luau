@@ -106,6 +106,15 @@ vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's ou
 vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
 vfx.newAnimal = require(script.Parent.NewAnimal) -- the animal you got, shown (QM, Oct 13)
+-- What a ride home or over the finish line gave you, shown; seconds it takes: the animal
+-- (vfx.newAnimal), or in the ride egg A/B's egg arm (Config.RideEggAB, Hatchery) its egg's reveal.
+vfx.rideReward = function(kind)
+	local module = ReplicatedStorage.Shared.Animals:FindFirstChild(kind)
+	if player:GetAttribute("ABRideEgg") == "egg" and not player:GetAttribute("Tutorial") and module then
+		return Hud.eggReveal(require(module).Rarity, kind)
+	end
+	return vfx.newAnimal.show(kind)
+end
 vfx.returnRun = require(script.Parent.ReturnRun) -- the run home (QM)
 vfx.skyFlash = require(script.Parent.SkyFlash) -- white on a sprint tier-up (QM, Oct 9)
 vfx.sprintCam = require(script.Parent.SprintCam) -- wider and closer while sprinting (QM, Oct 9)
@@ -4338,7 +4347,7 @@ RunService.PreSimulation:Connect(function(dt)
 			-- (Hatchery's FinishCourse), then back home to your pen.
 			task.spawn(function()
 				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, if mount.own then nil else mount.kind) -- (your own pet: not a copy of it, a random one: QM, Oct 15)
-				task.wait(ok and kind and vfx.newAnimal.show(kind) or 0.5)
+				task.wait(ok and kind and vfx.rideReward(kind) or 0.5)
 				if phase == "finish" then
 					local pen = myPen()
 					local spawn = pen and pen:FindFirstChild("Spawn")
@@ -4351,7 +4360,7 @@ RunService.PreSimulation:Connect(function(dt)
 			if kind then
 				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
 			end
-			task.delay(kind and vfx.newAnimal.show(kind) or 0.5, function()
+			task.delay(kind and vfx.rideReward(kind) or 0.5, function()
 				if phase == "home" then
 					finishRide(mount.x, mount.z)
 				end

@@ -832,7 +832,8 @@ end
 
 -- Ride egg A/B (Config.RideEggAB, QM Oct 19). The arm is by UserId, so it's the same every
 -- session and server; it's on the player as "ABRideEgg". The "egg" arm's rides home and finish
--- lines give the animal's egg too, into the egg inventory to place, as rides did before Oct 13.
+-- lines give the animal's egg instead of the animal, into the egg inventory to place, as rides
+-- did before Oct 13 (not mid-tutorial: its first ride's animal is the tutorial's next step).
 local RideEggAB = {}
 function RideEggAB.arm(player)
 	local ab = Config.RideEggAB
@@ -841,11 +842,15 @@ function RideEggAB.arm(player)
 	end
 	return if (player.UserId + ab.Salt * 389) % 1000 < ab.Share * 1000 then "egg" else "control"
 end
-function RideEggAB.egg(player, profile, kind)
-	if player:GetAttribute("ABRideEgg") == "egg" and isAnimal(kind) then
-		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
-		publish(player)
+function RideEggAB.give(player, profile, kind)
+	if player:GetAttribute("ABRideEgg") ~= "egg" or player:GetAttribute("Tutorial") or not isAnimal(kind) then
+		return givePet(player, profile, kind)
 	end
+	Funnel.rewarded(player) -- (as givePet: the server's award)
+	Telemetry.reward(player)
+	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+	publish(player)
+	return false
 end
 -- Each arm's totals in the shared stats store ("ab-rideegg-<arm>", read by /stats ab): sessions
 -- and their seconds, new players by the day they started ("new:<day>"), and those who came back
@@ -956,8 +961,7 @@ remote("DeliverEgg", function(player, kind)
 	if profile.homeEggs then
 		profile.homeEggs += 1
 	end
-	givePet(player, profile, kind)
-	RideEggAB.egg(player, profile, kind)
+	RideEggAB.give(player, profile, kind)
 end)
 
 -- The Starter Pack (game pass, QM, Oct 13): Config.StarterPack's gold and pet, once, when
@@ -1024,8 +1028,7 @@ finishCourse.OnServerInvoke = function(player, rode)
 	-- (no trail for it any more: QM, Oct 15; ones already earned stay, Config.FinishTrails)
 	Quests.count(player, profile.quests, "finish") -- ("Cross the finish line 5 times", QM Oct 15)
 	if typeof(rode) == "string" and isAnimal(rode) then
-		givePet(player, profile, rode)
-		RideEggAB.egg(player, profile, rode)
+		RideEggAB.give(player, profile, rode)
 		return rode
 	end
 	local pool, total = {}, 0
@@ -1049,8 +1052,7 @@ finishCourse.OnServerInvoke = function(player, rode)
 	if not kind then
 		return nil
 	end
-	givePet(player, profile, kind)
-	RideEggAB.egg(player, profile, kind)
+	RideEggAB.give(player, profile, kind)
 	return kind
 end
 finishCourse.Parent = ReplicatedStorage

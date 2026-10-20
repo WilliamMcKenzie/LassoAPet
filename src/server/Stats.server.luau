@@ -26,7 +26,7 @@ end
 local function abReport()
 	local Store = require(script.Parent.StatsStore)
 	local today = os.date("!%Y-%m-%d")
-	local lines = { "RIDE EGG A/B (egg: the animal and its egg; control: the animal only)" }
+	local lines = { "RIDE EGG A/B (egg: rides give the animal's egg; control: the animal)" }
 	for _, arm in { "control", "egg" } do
 		local d = Store.readShared("ab-rideegg-" .. arm)
 		local sessions, new, back = d.sessions or 0, 0, 0
