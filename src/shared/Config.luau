@@ -1763,6 +1763,14 @@ Config.AnimalScale.RoyalCnidarian = 2 -- (QM, Oct 15)
 Config.AnimalScale.GiantRafflesia = 2 -- the Garden's boss (QM, Oct 15)
 Config.AnimalScale.Loong = 4 -- (QM, Oct 15: "very tiny"; its breath still grows it from there)
 Config.AnimalScale.RoboShark = 4 -- (QM, Oct 15; its hunting still grows it from there)
+-- Ride egg A/B (QM, Oct 19): players in the "egg" arm (Share of them, by UserId, so the same
+-- every session and server) get the ridden animal's egg as well as the animal, from every ride
+-- home and finish line (Server/Hatchery), as rides gave eggs before Oct 13, so there are eggs
+-- worth speeding up again. Their eggs placed before FastRides rides are done hatch in at most
+-- FastHatch seconds, so the first minutes stay quick. "control" is the game as it is. Share 0
+-- turns it off for everyone, 1 on; change Salt to reshuffle who's in which. Studio is always the
+-- Studio arm. /stats ab compares the two (Robux, session time, day 1 return).
+Config.RideEggAB = { Share = 0.5, Salt = 1, FastRides = 4, FastHatch = 15, Studio = "egg" }
 -- Limited stock and the display's overhead labels are active.
 Config.PetOffersLimited = true
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought

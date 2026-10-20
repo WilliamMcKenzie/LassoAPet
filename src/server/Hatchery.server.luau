@@ -455,6 +455,7 @@ local function load(player)
 					profile.rainbowTrail = data.rainbowTrail == true or nil
 					profile.questsSeen = data.questsSeen == true or nil -- (opened the Quests panel: no tap hand on it)
 					profile.starterPack = data.starterPack == true or nil -- (the Starter Pack's gold and Snake given)
+					profile.ab = typeof(data.ab) == "table" and data.ab or nil -- (the ride egg A/B: their cohort day, day 1 return counted)
 					-- (rides finished, for the pass buttons: they show from the 3rd, QM Oct 14. A save
 					-- from before this, past the tutorial, counts as plenty)
 					profile.ridesDone = tonumber(data.ridesDone) or (if data.tutorial then 3 else 0)
@@ -612,7 +613,7 @@ local function save(player, onlyIfChanged)
 	local data = { eggs = profile.eggs, items = profile.items, stored = profile.stored, caught = profile.caught and (function() local t = {} for k in profile.caught do table.insert(t, k) end return t end)() or nil, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, rideAuto = profile.rideAuto, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtHalloweenPets = profile.boughtHalloweenPets, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, boughtLoongs = profile.boughtLoongs, boughtRoboSharks = profile.boughtRoboSharks, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
 		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, ridesDone = profile.ridesDone, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
-		merged = profile.merged }
+		merged = profile.merged, ab = profile.ab }
 	data[worldKey("quests")], data[worldKey("v1")] = profile.quests, profile.v1 -- (this world's own)
 	for name, value in profile.keep or {} do -- (the other worlds', as they were)
 		data[name] = value
@@ -829,6 +830,60 @@ local function givePet(player, profile, kind)
 	return false
 end
 
+-- Ride egg A/B (Config.RideEggAB, QM Oct 19). The arm is by UserId, so it's the same every
+-- session and server; it's on the player as "ABRideEgg". The "egg" arm's rides home and finish
+-- lines give the animal's egg too, into the egg inventory to place, as rides did before Oct 13.
+local RideEggAB = {}
+function RideEggAB.arm(player)
+	local ab = Config.RideEggAB
+	if RunService:IsStudio() then
+		return ab.Studio
+	end
+	return if (player.UserId + ab.Salt * 389) % 1000 < ab.Share * 1000 then "egg" else "control"
+end
+function RideEggAB.egg(player, profile, kind)
+	if player:GetAttribute("ABRideEgg") == "egg" and isAnimal(kind) then
+		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
+		publish(player)
+	end
+end
+-- Each arm's totals in the shared stats store ("ab-rideegg-<arm>", read by /stats ab): sessions
+-- and their seconds, new players by the day they started ("new:<day>"), and those who came back
+-- the next day ("d1:<day>"). Robux is added by Telemetry.purchase.
+RideEggAB.joined = {}
+Players.PlayerAdded:Connect(function(player)
+	local arm = RideEggAB.arm(player)
+	player:SetAttribute("ABRideEgg", arm)
+	RideEggAB.joined[player] = os.clock()
+	for _ = 1, 60 do -- (till their save's loaded: a new player?)
+		if loaded[player] or not player.Parent then
+			break
+		end
+		task.wait(0.5)
+	end
+	local profile = profiles[player]
+	if not profile or not player.Parent then
+		return
+	end
+	local today = os.date("!%Y-%m-%d")
+	local fields = { sessions = 1 }
+	if not profile.ab and not profile.tutorial then -- (a new player: their cohort is today)
+		profile.ab = { day = today }
+		fields["new:" .. today] = 1
+	elseif profile.ab and not profile.ab.d1 and profile.ab.day == os.date("!%Y-%m-%d", os.time() - 86400) then
+		profile.ab.d1 = true
+		fields["d1:" .. profile.ab.day] = 1
+	end
+	require(script.Parent.StatsStore).addShared("ab-rideegg-" .. arm, fields)
+end)
+Players.PlayerRemoving:Connect(function(player)
+	local at, arm = RideEggAB.joined[player], player:GetAttribute("ABRideEgg")
+	RideEggAB.joined[player] = nil
+	if at and arm then
+		require(script.Parent.StatsStore).addShared("ab-rideegg-" .. arm, { seconds = math.floor(os.clock() - at) })
+	end
+end)
+
 -- The Pets panel (QM, Oct 15): a pet in your pen taken out (stored: it keeps everything but its
 -- spot, and earns nothing), or a stored one put back in at the first clear spot, room allowing.
 remote("UnequipPet", function(player, id)
@@ -902,6 +957,7 @@ remote("DeliverEgg", function(player, kind)
 		profile.homeEggs += 1
 	end
 	givePet(player, profile, kind)
+	RideEggAB.egg(player, profile, kind)
 end)
 
 -- The Starter Pack (game pass, QM, Oct 13): Config.StarterPack's gold and pet, once, when
@@ -969,6 +1025,7 @@ finishCourse.OnServerInvoke = function(player, rode)
 	Quests.count(player, profile.quests, "finish") -- ("Cross the finish line 5 times", QM Oct 15)
 	if typeof(rode) == "string" and isAnimal(rode) then
 		givePet(player, profile, rode)
+		RideEggAB.egg(player, profile, rode)
 		return rode
 	end
 	local pool, total = {}, 0
@@ -993,6 +1050,7 @@ finishCourse.OnServerInvoke = function(player, rode)
 		return nil
 	end
 	givePet(player, profile, kind)
+	RideEggAB.egg(player, profile, kind)
 	return kind
 end
 finishCourse.Parent = ReplicatedStorage
@@ -1148,7 +1206,11 @@ place = function(player, profile, kind, x, z)
 	if special then -- (hatches into its Pet, merged from Merged: a Giant Horse is 10 horses)
 		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = pet, merged = special.Merged, eggScale = special.EggScale, hatchAt = os.time() + math.ceil(special.HatchTime / hatchX(player)) }
 	else
-		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + (if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else math.ceil(hatchTime(kind) / hatchX(player))) }
+		local seconds = if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else math.ceil(hatchTime(kind) / hatchX(player))
+		if player:GetAttribute("ABRideEgg") == "egg" and (profile.ridesDone or 0) < Config.RideEggAB.FastRides then
+			seconds = math.min(seconds, Config.RideEggAB.FastHatch) -- (the ride egg A/B: the first rides' eggs hatch quickly, QM Oct 19)
+		end
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + seconds }
 	end
 	publish(player)
 end
