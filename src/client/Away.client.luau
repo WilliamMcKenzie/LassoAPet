@@ -15,7 +15,7 @@ local ModalPop = require(script.Parent.ModalPop)
 local REFERENCE_WIDTH = 1320 -- Hud's: sizes below are pixels on a screen this wide
 local ART = { -- assets/ui/away (QM's)
 	panel = "rbxassetid://125418799809598", -- Panel.png (1229x710, its "+$999 CASH" painted out for the live amount; shrunk to 1024x592 by the upload)
-	boost = "rbxassetid://109857217281496", -- Claim4x.png (358x142): the rainbow button, Robux 29
+	boost = "rbxassetid://107362573611718", -- Claim4x.png (337x142): the rainbow button, Robux 9
 	claim = "rbxassetid://106855326447623", -- Claim.png (333x113)
 }
 local K = 760 / 1229 -- QM's art's pixels to ours
@@ -121,7 +121,7 @@ local function button(name, image, center, size)
 	b.Parent = panel
 	return b
 end
-local boost = button("Claim4x", ART.boost, Vector2.new(455, 611), Vector2.new(340, 340 * 142 / 358))
+local boost = button("Claim4x", ART.boost, Vector2.new(445, 611), Vector2.new(320, 320 * 142 / 337))
 local claim = button("Claim", ART.claim, Vector2.new(815, 623), Vector2.new(331, 331 * 113 / 333))
 -- (the rainbow's own label: the bar's the bottom ~80% of its art, the Robux badge over its top right)
 local boostLabel = Instance.new("TextLabel")

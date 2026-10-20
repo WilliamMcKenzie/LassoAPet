@@ -1771,7 +1771,7 @@ Config.AnimalScale.RoboShark = 4 -- (QM, Oct 15; its hunting still grows it from
 -- turns it off for everyone, 1 on; change Salt to reshuffle who's in which. Studio is always the
 -- Studio arm. /stats ab compares the two (Robux, session time, day 1 return).
 -- The "While you were away" panel's rainbow button (QM, Oct 20; Client/Away, Shop.server): the away
--- gold banked Multiplier times over, for the developer product ProductId (R$29 on QM's art). With
+-- gold banked Multiplier times over, for the developer product ProductId (R$9 on QM's art). With
 -- ProductId 0 it's free in Studio and does nothing live.
 Config.AwayBoost = { ProductId = 0, Multiplier = 4 }
 Config.RideEggAB = { Share = 0.5, Salt = 1, FastRides = 4, FastHatch = 15, Studio = "egg" }
