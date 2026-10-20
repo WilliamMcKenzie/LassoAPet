@@ -1194,7 +1194,7 @@ local Config = {
 		{ Key = "Speed", Name = "1.5x Speed", Price = 49, Id = 2012972449 }, -- every ride x PassSpeed (Config.rebirthSpeed)
 		{ Key = "DoubleGold", Name = "2x Cash", Price = 99, Id = 2014634454 },
 		{ Key = "Invincible", Name = "Invincible", Price = 19, Id = 2036488765 }, -- x PassGoldMultiplier (Config.goldX) (QM, Oct 20: R$19 on its new button)
-		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 29, Id = 0 }, -- (QM, Oct 20) ready eggs hatch by themselves (Hatchery's PassAutoHatch); its pass's id goes in Id
+		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 29, Id = 2039620869 }, -- (QM, Oct 20) ready eggs hatch by themselves (Hatchery's PassAutoHatch)
 		{ Key = "GiantPets", Name = "Giant Pets", Price = 49, Id = 2014472441 },
 		{ Key = "StarterPack", Name = "Starter Pack", Price = 19, Id = 2013764414 }, -- Config.StarterPack, once (Hatchery)
 	},
