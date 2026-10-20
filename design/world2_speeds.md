@@ -1,6 +1,6 @@
 # World 2 animal speeds
 
-Read from World 2's Config in Studio on Oct 20, 2026, after QM's nerf (Crimson Lands and Crystal Cavern x0.6, Woodland Maze x0.7, Hawkmoth to 10% into the Temple, Temple x0.8). A ride is 45 s of full sprint (RideSeconds × MountSpeed 44 × SprintSpeed 2), so each 1.0 of Speed covers **3,960 studs**. "Reaches" is how far one full-sprint ride from the start line gets, with no rebirth or 1.5x Speed pass.
+Read from World 2's Config in Studio on Oct 20, 2026, after QM's flat nerf: Crimson Lands and Crystal Cavern animals reach 0.4 of a biome less far, Woodland Maze 0.3 (the Hawkmoth 10% into the Temple), Temple 0.2. A ride is 45 s of full sprint (RideSeconds × MountSpeed 44 × SprintSpeed 2), so each 1.0 of Speed covers **3,960 studs**. "Reaches" is how far one full-sprint ride from the start line gets, with no rebirth or 1.5x Speed pass.
 
 Biome starts: Meadow 0, Crimson Lands 2,168, Crystal Cavern 3,984, Woodland Maze 5,904, Temple 9,024, Tomb 14,064; finish line 21,744.
 
@@ -26,53 +26,53 @@ Spawn chance is its share of its home biome's stampede (0% = never spawns: a Rob
 | Animal | Rarity | Spawn chance | Speed | Reaches (studs) | Furthest biome | % through it |
 |---|---|---|---|---|---|---|
 | Crimson Seraph | Legendary | 0.17% | 0.367 | 1,452 | Meadow | 67% |
-| Eyeworm | Uncommon | 26% | 1.035 | 4,099 | Crystal Cavern | 6% |
-| Crimson Scorpion | Uncommon | 17% | 1.108 | 4,386 | Crystal Cavern | 21% |
-| Maw | Rare | 26% | 1.151 | 4,559 | Crystal Cavern | 30% |
-| Beholder | Rare | 26% | 1.181 | 4,676 | Crystal Cavern | 36% |
-| Ivory Spider | Epic | 4.3% | 1.239 | 4,906 | Crystal Cavern | 48% |
-| Black Widow | Legendary | 1% | 1.828 | 7,240 | Woodland Maze | 43% |
-| Asura | Legendary | 1% | 1.828 | 7,240 | Woodland Maze | 43% |
+| Eyeworm | Uncommon | 26% | 0.869 | 3,439 | Crimson Lands | 70% |
+| Crimson Scorpion | Uncommon | 17% | 0.983 | 3,892 | Crimson Lands | 95% |
+| Maw | Rare | 26% | 1.054 | 4,175 | Crystal Cavern | 10% |
+| Beholder | Rare | 26% | 1.103 | 4,369 | Crystal Cavern | 20% |
+| Ivory Spider | Epic | 4.3% | 1.200 | 4,752 | Crystal Cavern | 40% |
+| Black Widow | Legendary | 1% | 1.738 | 6,883 | Woodland Maze | 31% |
+| Asura | Legendary | 1% | 1.738 | 6,883 | Woodland Maze | 31% |
 
 ## Crystal Cavern
 
 | Animal | Rarity | Spawn chance | Speed | Reaches (studs) | Furthest biome | % through it |
 |---|---|---|---|---|---|---|
 | Crystal Seraph | Legendary | 0.12% | 0.367 | 1,452 | Meadow | 67% |
-| Crystal Centipede | Uncommon | 19% | 1.538 | 6,090 | Woodland Maze | 6% |
-| Red Mushroom | Uncommon | 16% | 1.633 | 6,465 | Woodland Maze | 18% |
-| Blue Crystal | Uncommon | 16% | 1.633 | 6,465 | Woodland Maze | 18% |
-| Pink Crystal | Rare | 14% | 1.727 | 6,840 | Woodland Maze | 30% |
-| Brown Mushroom | Rare | 14% | 1.727 | 6,840 | Woodland Maze | 30% |
-| Purple Mushroom | Epic | 7.5% | 1.803 | 7,139 | Woodland Maze | 40% |
-| Crystal Spider | Epic | 7.5% | 1.812 | 7,178 | Woodland Maze | 41% |
-| Crystal Phoenix | Epic | 5% | 2.355 | 9,327 | Temple | 6% |
-| Crystal Elephant | Legendary | 2.5% | 2.355 | 9,327 | Temple | 6% |
+| Crystal Centipede | Uncommon | 19% | 1.345 | 5,327 | Crystal Cavern | 70% |
+| Red Mushroom | Uncommon | 16% | 1.442 | 5,712 | Crystal Cavern | 90% |
+| Blue Crystal | Uncommon | 16% | 1.442 | 5,712 | Crystal Cavern | 90% |
+| Pink Crystal | Rare | 14% | 1.569 | 6,215 | Woodland Maze | 10% |
+| Brown Mushroom | Rare | 14% | 1.569 | 6,215 | Woodland Maze | 10% |
+| Purple Mushroom | Epic | 7.5% | 1.696 | 6,715 | Woodland Maze | 26% |
+| Crystal Spider | Epic | 7.5% | 1.712 | 6,779 | Woodland Maze | 28% |
+| Crystal Phoenix | Epic | 5% | 2.042 | 8,088 | Woodland Maze | 70% |
+| Crystal Elephant | Legendary | 2.5% | 2.042 | 8,088 | Woodland Maze | 70% |
 
 ## Woodland Maze
 
 | Animal | Rarity | Spawn chance | Speed | Reaches (studs) | Furthest biome | % through it |
 |---|---|---|---|---|---|---|
+| Pink Butterfly | Uncommon | 21% | 2.200 | 8,713 | Woodland Maze | 90% |
+| Caterpillar | Uncommon | 25% | 2.239 | 8,867 | Woodland Maze | 95% |
+| Orange Butterfly | Rare | 12% | 2.342 | 9,276 | Temple | 5% |
+| Rolling Log | Rare | 12% | 2.342 | 9,276 | Temple | 5% |
+| Living Birch | Rare | 12% | 2.342 | 9,276 | Temple | 5% |
 | Hawkmoth | Epic | 12% | 2.406 | 9,528 | Temple | 10% |
-| Pink Butterfly | Uncommon | 21% | 2.457 | 9,731 | Temple | 14% |
-| Caterpillar | Uncommon | 25% | 2.501 | 9,905 | Temple | 17% |
-| Orange Butterfly | Rare | 12% | 2.591 | 10,259 | Temple | 25% |
-| Rolling Log | Rare | 12% | 2.591 | 10,259 | Temple | 25% |
-| Living Birch | Rare | 12% | 2.591 | 10,259 | Temple | 25% |
-| Giant Golem | Legendary | 4.2% | 4.176 | 16,538 | Tomb | 32% |
+| Giant Golem | Legendary | 4.2% | 3.862 | 15,294 | Tomb | 16% |
 
 ## Temple
 
 | Animal | Rarity | Spawn chance | Speed | Reaches (studs) | Furthest biome | % through it |
 |---|---|---|---|---|---|---|
 | Loong | Legendary | 0.025% | 0.500 | 1,980 | Meadow | 91% |
-| Catfish | Uncommon | 29% | 3.706 | 14,677 | Tomb | 8% |
-| Fox | Uncommon | 29% | 3.706 | 14,677 | Tomb | 8% |
-| Tiger | Rare | 12% | 3.862 | 15,293 | Tomb | 16% |
-| Nine Tailed Fox | Rare | 12% | 3.939 | 15,600 | Tomb | 20% |
-| Jade Statue | Epic | 8.8% | 4.017 | 15,907 | Tomb | 24% |
-| Garnet Statue | Epic | 8.8% | 4.017 | 15,907 | Tomb | 24% |
-| Kitsune | Legendary | 2% | 5.093 | 20,167 | Tomb | 79% |
+| Catfish | Uncommon | 29% | 3.424 | 13,559 | Temple | 90% |
+| Fox | Uncommon | 29% | 3.424 | 13,559 | Temple | 90% |
+| Tiger | Rare | 12% | 3.552 | 14,064 | Tomb | 0% |
+| Nine Tailed Fox | Rare | 12% | 3.648 | 14,448 | Tomb | 5% |
+| Jade Statue | Epic | 8.8% | 3.745 | 14,831 | Tomb | 10% |
+| Garnet Statue | Epic | 8.8% | 3.745 | 14,831 | Tomb | 10% |
+| Kitsune | Legendary | 2% | 5.090 | 20,157 | Tomb | 79% |
 
 ## Tomb
 
