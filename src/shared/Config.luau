@@ -2502,4 +2502,31 @@ for kind, stats in EXEMPT_STATS do
 	Config.AnimalStats[kind] = table.clone(stats)
 end
 
+-- World 2's nerf (QM, Oct 20): each animal's final Speed, after everything above, so a full
+-- 45 s sprint gets that much less far into the furthest biome it reaches (design/world2_speeds.md).
+-- The Tomb, the Meadow, the Seraphs and the Loong are as they were. The Asura and Black Widow
+-- spawn 1% of the Crimson Lands' stampede each (their Herd weights, of a total ~1.175).
+if Config.World == 2 then
+	local speeds = {
+		-- Crimson Lands: each % into its furthest biome x0.6
+		Eyeworm = 1.0351, CrimsonScorpion = 1.1077, Maw = 1.1513, Beholder = 1.1808, IvorySpider = 1.2389, Asura = 1.8284, BlackWidow = 1.8284,
+		-- Crystal Cavern: x0.6
+		CrystalCentipede = 1.538, RedMushroom = 1.6326, BlueCrystal = 1.6326, PinkCrystal = 1.7272, BrownMushroom = 1.7272, PurpleMushroom = 1.8028, CrystalSpider = 1.8125, CrystalPhoenix = 2.3552, CrystalElephant = 2.3552,
+		-- Woodland Maze: x0.7, the Hawkmoth 10% into the Temple
+		PinkButterfly = 2.4572, Caterpillar = 2.5013, OrangeButterfly = 2.5907, RollingLog = 2.5907, LivingBirch = 2.5907, Hawkmoth = 2.4061, GiantGolem = 4.1763,
+		-- Temple: x0.8 (not the Loong)
+		Catfish = 3.7064, Fox = 3.7064, Tiger = 3.8619, NineTailedFox = 3.9393, JadeStatue = 4.0168, GarnetStatue = 4.0168, Kitsune = 5.0927,
+	}
+	for kind, speed in speeds do
+		if Config.AnimalStats[kind] then
+			Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind])
+			Config.AnimalStats[kind].Speed = speed
+		end
+	end
+	local crimson = Config.Biomes[2] and Config.Biomes[2].Herd
+	if crimson then
+		crimson.Asura, crimson.BlackWidow = 0.01176, 0.01176
+	end
+end
+
 return Config
