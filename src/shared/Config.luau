@@ -1125,9 +1125,10 @@ local Config = {
 	-- a note of it: what's charged is the product's price on the dashboard). Gold2,
 	-- Gold3 and Nuke All aren't on it but can still be bought.
 	-- Instantly hatch one egg in your pen. The product depends on the egg's time left
-	-- (QM, Oct 20): up to 5 min tier 1, up to an hour tier 2, longer tier 3
-	-- (Config.speedupTier). ProductId and Price are tier 1's.
+	-- (QM, Oct 20): under 30 s the R$9 one, up to 5 min tier 1, up to an hour tier 2,
+	-- longer tier 3 (Config.speedupTier). ProductId and Price are tier 1's.
 	SpeedupEgg = { ProductId = 3716598923, Price = 24, Range = 10, Tiers = {
+		{ Upto = 30, ProductId = 3720454780, Price = 9 },
 		{ Upto = 5 * 60, ProductId = 3716598923, Price = 24 },
 		{ Upto = 60 * 60, ProductId = 3720452246, Price = 42 },
 		{ Upto = math.huge, ProductId = 3720452332, Price = 69 },
