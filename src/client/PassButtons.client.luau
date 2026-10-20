@@ -17,7 +17,7 @@ local AFTER_RIDES = 3 -- (not till this many rides are done: QM, Oct 14)
 local SHOWN = true -- (QM, Oct 14: hidden a while for the shop's redo, then back; false hides them)
 local BUTTONS = {
 	{ "StarterPack", "rbxassetid://100466055719917", Vector2.new(245, 138) }, -- assets/ui/PassStarterPack.png
-	{ "Speed", "rbxassetid://100578505321305", Vector2.new(295, 141), "Speed" }, -- assets/ui/PassSpeed49.png (and its Config.Passes key)
+	{ "Speed", "rbxassetid://108585154222977", Vector2.new(295, 141), "Speed" }, -- assets/ui/PassSpeedRainbow.png (QM, Oct 20; and its Config.Passes key)
 	{ "AutoHatch", "rbxassetid://106151758290669", Vector2.new(295, 147), "AutoHatch" }, -- assets/ui/PassAutoHatch.png (R$29; in 2x Cash's place, QM Oct 20)
 	{ "Invincible", "rbxassetid://107961643042370", Vector2.new(302, 140), "Invincible" }, -- assets/ui/PassInvincible19.png (R$19, QM Oct 20)
 }
