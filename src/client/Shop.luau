@@ -23,9 +23,9 @@ local ART = {
 	Cash500K = "rbxassetid://101951033426315", -- assets/ui/shop3 (QM, Oct 20: with borders)
 	Cash5M = "rbxassetid://83223429511866",
 	Cash1B = "rbxassetid://113449238733442",
-	Price49 = "rbxassetid://86278091719365",
-	Price99 = "rbxassetid://136450925240528",
-	Price299 = "rbxassetid://133694083336509",
+	Price49 = "rbxassetid://114300820141286", -- assets/ui/shop3/Price49.png (144x108, QM Oct 20)
+	Price99 = "rbxassetid://107487299920702",
+	Price299 = "rbxassetid://80262179750586",
 	Close = "rbxassetid://84920756991403",
 }
 local restricted
@@ -180,10 +180,10 @@ for i, offer in Config.Shop.CashPacks do
 		card,
 		"Buy",
 		if i == 1 then ART.Price49 elseif i == 2 then ART.Price99 else ART.Price299,
-		math.round(175 * CASH_K),
-		math.round(55 * CASH_K),
-		math.round(145 * CASH_K),
-		math.round(73 * CASH_K),
+		math.round(191 * CASH_K), -- (where QM's reference has it on the 349x184 card, Oct 20)
+		math.round(59 * CASH_K),
+		math.round(144 * CASH_K),
+		math.round(108 * CASH_K),
 		true
 	)
 	pressable(button)
