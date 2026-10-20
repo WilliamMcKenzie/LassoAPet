@@ -19,7 +19,7 @@ local ART = { -- assets/ui/away (QM's)
 	claim = "rbxassetid://106855326447623", -- Claim.png (333x113)
 }
 local K = 912 / 1229 -- QM's art's pixels to ours (QM, Oct 20: 20% bigger, was 760)
-local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
+local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Heavy) -- (as bold as the art's own text: QM, Oct 20)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -102,7 +102,7 @@ cash.Position = UDim2.fromOffset(608 * K, 487 * K)
 cash.Size = UDim2.fromOffset(760 * K, 74 * K)
 cash.ZIndex = 2
 local cashStroke = Instance.new("UIStroke")
-cashStroke.Thickness = 3
+cashStroke.Thickness = 4
 cashStroke.Color = Color3.new(0, 0, 0)
 cashStroke.Parent = cash
 cash.Parent = panel
@@ -136,7 +136,7 @@ boostLabel.Position = UDim2.fromScale(0.46, 0.6)
 boostLabel.Size = UDim2.fromScale(0.72, 0.36)
 boostLabel.ZIndex = 4
 local boostStroke = Instance.new("UIStroke")
-boostStroke.Thickness = 2.5
+boostStroke.Thickness = 3.5
 boostStroke.Color = Color3.new(0, 0, 0)
 boostStroke.Parent = boostLabel
 boostLabel.Parent = boost
