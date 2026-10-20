@@ -288,8 +288,27 @@ end)
 -- The Halloween Egg in the spotlight (QM, Oct 20): when the shop pops up by itself (bottom of this
 -- file), it's scrolled into view and swells and shrinks with a sunburst turning behind it till the
 -- shop closes.
+-- (the banner's art pulses on its own copy, under the buy buttons, so they stay still: QM, Oct 20)
+local eggArt = Instance.new("ImageLabel")
+eggArt.Name = "PulseArt"
+eggArt.BackgroundTransparency = 1
+eggArt.Image = egg.Image
+eggArt.Size = UDim2.fromScale(1, 1)
+eggArt.ZIndex = 0
+eggArt.Visible = false
+eggArt.Parent = egg
 local eggPulse = Instance.new("UIScale")
-eggPulse.Parent = egg
+eggPulse.Parent = eggArt
+local pulsing = false -- (till the mouse or a controller's selection reaches the banner: QM, Oct 20)
+local function stopPulse()
+	pulsing = false
+	eggPulse.Scale = 1
+end
+egg.MouseEnter:Connect(stopPulse)
+for _, button in eggButtons do
+	button.MouseEnter:Connect(stopPulse)
+	button.SelectionGained:Connect(stopPulse)
+end
 local eggBurst = Instance.new("ImageLabel")
 eggBurst.Name = "EggSunburst"
 eggBurst.BackgroundTransparency = 1
@@ -304,13 +323,16 @@ local spotlight = false
 local function spotlightEgg(on)
 	spotlight = on
 	eggBurst.Visible = on
-	if not on then
-		eggPulse.Scale = 1
-	end
+	eggArt.Visible = on
+	egg.ImageTransparency = if on then 1 else 0 -- (its pulsing copy stands in for it meanwhile)
+	pulsing = on
+	eggPulse.Scale = 1
 end
 RunService.Heartbeat:Connect(function()
 	if spotlight and gui.Enabled then
-		eggPulse.Scale = 1 - 0.04 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 * 1.1)) -- (in from its full size and back, never past it: bigger got clipped by the panel's edges, QM Oct 20)
+		if pulsing then
+			eggPulse.Scale = 1 - 0.04 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 * 1.1)) -- (in from its full size and back, never past it: bigger got clipped by the panel's edges, QM Oct 20)
+		end
 		eggBurst.Position = UDim2.fromOffset(EGG_W / 2, egg.Position.Y.Offset + egg.Size.Y.Offset / 2)
 		eggBurst.Rotation = os.clock() * 20 % 360
 	end
