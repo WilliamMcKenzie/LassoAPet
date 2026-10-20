@@ -310,7 +310,7 @@ local function spotlightEgg(on)
 end
 RunService.Heartbeat:Connect(function()
 	if spotlight and gui.Enabled then
-		eggPulse.Scale = 1 + 0.025 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 * 1.1))
+		eggPulse.Scale = 1 - 0.04 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 * 1.1)) -- (in from its full size and back, never past it: bigger got clipped by the panel's edges, QM Oct 20)
 		eggBurst.Position = UDim2.fromOffset(EGG_W / 2, egg.Position.Y.Offset + egg.Size.Y.Offset / 2)
 		eggBurst.Rotation = os.clock() * 20 % 360
 	end
