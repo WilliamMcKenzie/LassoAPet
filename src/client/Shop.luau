@@ -1,4 +1,6 @@
--- The scrollable shop uses the supplied cards; prices and odds are baked into the art.
+-- The shop uses the supplied cards; prices and odds are baked into the art. QM's Oct 20 design:
+-- the Halloween Egg banner (NEW, LIMITED!) with its four buy buttons along its bottom, then the
+-- three cash packs in an even row across the panel; the 2x Cash and Invincible passes are gone.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -10,21 +12,17 @@ local Shop = {}
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local buyShop = ReplicatedStorage:WaitForChild("BuyShop")
-local buyPass = ReplicatedStorage:WaitForChild("BuyPass")
 local open = false
 local ART = {
 	Panel = "rbxassetid://125036875690208",
-	Halloween = "rbxassetid://75780199465315",
+	Halloween = "rbxassetid://74082141733336", -- assets/ui/shop2/HalloweenEgg.png (1192x470, QM Oct 20; shrunk to 1024x404 by the upload)
 	Egg1 = "rbxassetid://93494892373199",
 	Egg3 = "rbxassetid://106323361129280",
 	Egg10 = "rbxassetid://74397756416359",
 	Egg50 = "rbxassetid://135798607638786",
-	DoubleCash = "rbxassetid://111293349532346",
-	Invincible = "rbxassetid://84405738259224",
 	Cash500K = "rbxassetid://71934286153027",
 	Cash5M = "rbxassetid://119782710836202",
 	Cash1B = "rbxassetid://99691859053615",
-	Pass99 = "rbxassetid://135667055262173",
 	Price49 = "rbxassetid://86278091719365",
 	Price99 = "rbxassetid://136450925240528",
 	Price299 = "rbxassetid://133694083336509",
@@ -61,7 +59,7 @@ root.Parent = gui
 local fit = Instance.new("UIScale", root)
 local function resize()
 	local size = camera.ViewportSize
-	fit.Scale = math.min(size.X * 0.72 / 1230, size.Y * 0.90 / 969)
+	fit.Scale = math.min(size.X * 0.792 / 1230, size.Y * 0.97 / 969) -- (10% bigger, QM Oct 20: was 0.72 / 0.90)
 end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
 resize()
@@ -115,16 +113,22 @@ end)
 local scroll = Instance.new("ScrollingFrame")
 scroll.Name, scroll.BackgroundTransparency, scroll.BorderSizePixel = "Offers", 1, 0
 scroll.Position, scroll.Size = UDim2.fromOffset(50, 143), UDim2.fromOffset(1132, 779)
-scroll.CanvasSize = UDim2.fromOffset(0, 954)
+scroll.CanvasSize = UDim2.fromOffset(0, 0)
+scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y -- (all of it fits now: it only scrolls on a short screen)
 scroll.ScrollingDirection, scroll.ScrollBarThickness = Enum.ScrollingDirection.Y, 0
 scroll.ScrollBarImageColor3 = Color3.fromRGB(230, 230, 230)
 scroll.ElasticBehavior = Enum.ElasticBehavior.WhenScrollable
 scroll.Parent = panel
-local egg = image(scroll, "HalloweenEgg", ART.Halloween, 0, 0, 1128, 382)
+-- The banner across the panel, at its art's shape; its buy buttons where QM's design has them
+-- (x in the art's 1192 pixels: 285, 444, 599, 754; tops at 347, under each one's "x1" label).
+local EGG_W = 1132
+local EGG_K = EGG_W / 1192
+local egg = image(scroll, "HalloweenEgg", ART.Halloween, 0, 0, EGG_W, math.round(470 * EGG_K))
 local cards, eggButtons = {}, {}
 for i, count in { 1, 3, 10, 50 } do
 	local width = if count == 50 then 163 else 145
-	local button = image(egg, "Buy" .. count, ART["Egg" .. count], 248 + (i - 1) * 156, 264, width, 98, true)
+	local x = ({ 285, 444, 599, 754 })[i]
+	local button = image(egg, "Buy" .. count, ART["Egg" .. count], math.round(x * EGG_K), math.round(347 * EGG_K), math.round(width * EGG_K), math.round(98 * EGG_K), true)
 	pressable(button)
 	button.Activated:Connect(function()
 		local offer = Config.Shop.HalloweenPacks[i]
@@ -148,7 +152,7 @@ local function eggAvailability()
 	end
 	local message = egg:FindFirstChild("Availability")
 	if not message then
-		message = outlined(egg, "Availability", "", 20, 260, 1080, 25)
+		message = outlined(egg, "Availability", "", 20, egg.Size.Y.Offset - 34, EGG_W - 40, 25)
 	end
 	message.Text = if not allowed
 		then "Paid random items unavailable in your region"
@@ -156,48 +160,30 @@ local function eggAvailability()
 		else ""
 end
 task.spawn(eggAvailability)
-for i, key in { "DoubleGold", "Invincible" } do
-	local art = if i == 1 then ART.DoubleCash else ART.Invincible
-	local card = image(scroll, key, art, (i - 1) * 582, 414, 546, 318)
-	local button = image(card, "Buy", ART.Pass99, 175, 218, 196, 75, true)
-	pressable(button)
-	local function owned()
-		local has = player:GetAttribute("Pass" .. key) == true
-		button.ImageTransparency = if has then 0.65 else 0
-		button.Active, button.Selectable = not has, not has
-		local label = button:FindFirstChild("Owned")
-		if not label then
-			label = outlined(button, "Owned", "OWNED", 0, 0, 196, 75)
-		end
-		label.Visible = has
-	end
-	owned()
-	player:GetAttributeChangedSignal("Pass" .. key):Connect(owned)
-	button.Activated:Connect(function()
-		if open and not player:GetAttribute("Pass" .. key) then
-			buyPass:FireServer(key, "shop")
-		end
-	end)
-	table.insert(cards, button)
-end
+-- The cash packs: an even row of three under the banner, each card the same width with the same
+-- gaps, at its art's shape, its price button where it was on the card (scaled with it).
+local CASH_GAP = 24
+local CASH_W = (EGG_W - 2 * CASH_GAP) / 3
+local CASH_K = CASH_W / 349
+local CASH_Y = egg.Size.Y.Offset + 28
 for i, offer in Config.Shop.CashPacks do
 	local card = image(
 		scroll,
 		offer.Key,
 		if i == 1 then ART.Cash500K elseif i == 3 then ART.Cash1B else ART.Cash5M,
-		(i - 1) * 389,
-		764,
-		349,
-		184
+		math.round((i - 1) * (CASH_W + CASH_GAP)),
+		CASH_Y,
+		math.round(CASH_W),
+		math.round(184 * CASH_K)
 	)
 	local button = image(
 		card,
 		"Buy",
 		if i == 1 then ART.Price49 elseif i == 2 then ART.Price99 else ART.Price299,
-		175,
-		55,
-		145,
-		73,
+		math.round(175 * CASH_K),
+		math.round(55 * CASH_K),
+		math.round(145 * CASH_K),
+		math.round(73 * CASH_K),
 		true
 	)
 	pressable(button)
