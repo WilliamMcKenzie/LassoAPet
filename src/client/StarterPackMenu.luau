@@ -26,10 +26,12 @@ local ART = { -- assets/ui/starterpack (QM's)
 }
 local PANEL = Vector2.new(796, 796 * 803 / 1230) -- the art, title and all
 local TOP = 796 * 60 / 1230 -- the panel's top edge, under the title (positions below are from it)
-local CARD = Vector2.new(172, 177)
-local CARD_Y = TOP + 214 -- the cards' middle
-local BUY = Vector2.new(141, 72)
-local BUY_Y = TOP + 387
+-- (QM, Oct 20: cards, sunbursts and Buy all bigger, filling more of the panel; were 172x177 at
+-- TOP + 214 and 141x72 at TOP + 387)
+local CARD = Vector2.new(230, 237)
+local CARD_Y = TOP + 232 -- the cards' middle
+local BUY = Vector2.new(190, 97)
+local BUY_Y = TOP + 412
 local SPIN = 25 -- the sunbursts' degrees a second
 
 local player = Players.LocalPlayer
@@ -64,7 +66,7 @@ local rootScale = Instance.new("UIScale")
 rootScale.Parent = root
 local function resize()
 	local screen = camera.ViewportSize
-	rootScale.Scale = screen.X / REFERENCE_WIDTH * Config.HudScale
+	rootScale.Scale = screen.X / REFERENCE_WIDTH * Config.HudScale * 1.2 -- (the whole popup 20% bigger: QM, Oct 20)
 	root.Size = UDim2.fromOffset(screen.X / rootScale.Scale, screen.Y / rootScale.Scale)
 end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
@@ -104,7 +106,7 @@ closeButton.Parent = panel
 -- The two cards, the sunburst turning behind each.
 local bursts = {}
 for i, art in { ART.cash, ART.snake } do
-	local x = if i == 1 then 0.378 else 0.622
+	local x = if i == 1 then 0.338 else 0.662 -- (14 apart from the middle each)
 	local burst = Instance.new("ImageLabel")
 	burst.Name = "Sunburst"
 	burst.BackgroundTransparency = 1
