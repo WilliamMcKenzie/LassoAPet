@@ -294,7 +294,7 @@ eggArt.Name = "PulseArt"
 eggArt.BackgroundTransparency = 1
 eggArt.Image = egg.Image
 eggArt.Size = UDim2.fromScale(1, 1)
-eggArt.ZIndex = 0
+eggArt.ZIndex = 1 -- (over the sunburst, 0; under the buy buttons, 2)
 eggArt.Visible = false
 eggArt.Parent = egg
 local eggPulse = Instance.new("UIScale")
@@ -305,6 +305,11 @@ local function stopPulse()
 	eggPulse.Scale = 1
 end
 egg.MouseEnter:Connect(stopPulse)
+for _, label in egg:GetChildren() do -- (the buy buttons and the availability note above the art)
+	if label:IsA("GuiObject") and label ~= eggArt then
+		label.ZIndex = 2
+	end
+end
 for _, button in eggButtons do
 	button.MouseEnter:Connect(stopPulse)
 	button.SelectionGained:Connect(stopPulse)
