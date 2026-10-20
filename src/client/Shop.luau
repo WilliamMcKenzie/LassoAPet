@@ -293,6 +293,7 @@ local eggArt = Instance.new("ImageLabel")
 eggArt.Name = "PulseArt"
 eggArt.BackgroundTransparency = 1
 eggArt.Image = egg.Image
+eggArt.AnchorPoint, eggArt.Position = Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5) -- (so it pulses about its middle, not its top left corner)
 eggArt.Size = UDim2.fromScale(1, 1)
 eggArt.ZIndex = 1 -- (over the sunburst, 0; under the buy buttons, 2)
 eggArt.Visible = false
