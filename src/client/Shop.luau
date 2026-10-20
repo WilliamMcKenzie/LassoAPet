@@ -23,6 +23,9 @@ local ART = {
 	Cash500K = "rbxassetid://101951033426315", -- assets/ui/shop3 (QM, Oct 20: with borders)
 	Cash5M = "rbxassetid://83223429511866",
 	Cash1B = "rbxassetid://113449238733442",
+	StarterPack = "rbxassetid://129857278922864", -- assets/ui/shop3/StarterPack.png (1192x470, QM Oct 20; shrunk to 1024x404 by the upload)
+	StarterBuy = "rbxassetid://79966597417896", -- assets/ui/shop3/StarterBuy.png (230x134): Robux 39
+	World2 = "rbxassetid://128433749405556", -- assets/ui/shop3/World2.png (342x64): the Starter Pack's "WORLD 2", pulsing
 	Price49 = "rbxassetid://114300820141286", -- assets/ui/shop3/Price49.png (144x108, QM Oct 20)
 	Price99 = "rbxassetid://107487299920702",
 	Price299 = "rbxassetid://80262179750586",
@@ -166,6 +169,7 @@ local CASH_GAP = 24
 local CASH_W = (EGG_W - 2 * CASH_GAP) / 3
 local CASH_K = CASH_W / 349
 local CASH_Y = egg.Size.Y.Offset + 28
+local cashCards = {} -- (moved down under the Starter Pack while it's up: below)
 for i, offer in Config.Shop.CashPacks do
 	local card = image(
 		scroll,
@@ -186,6 +190,7 @@ for i, offer in Config.Shop.CashPacks do
 		math.round(108 * CASH_K),
 		true
 	)
+	table.insert(cashCards, card)
 	pressable(button)
 	button.Activated:Connect(function()
 		if open then
@@ -194,6 +199,77 @@ for i, offer in Config.Shop.CashPacks do
 	end)
 	table.insert(cards, button)
 end
+
+-- The Starter Pack (QM, Oct 20): its card on top, over the Halloween Egg, while it's on offer: ten
+-- minutes from when it's first seen each join (the HUD's Starter Pack button or here: the local
+-- "StarterPackShownAt", shared with PassButtons) and till it's yours. Its ribbon counts down;
+-- Buy is Roblox's prompt for the pass (Server/Passes; Hatchery gives it).
+local STARTER_FOR = 10 * 60
+local starter = image(scroll, "StarterPack", ART.StarterPack, 0, 0, EGG_W, math.round(470 * EGG_K))
+local starterBuy = image(starter, "Buy", ART.StarterBuy, math.round(943 * EGG_K), math.round(318 * EGG_K), math.round(230 * EGG_K), math.round(134 * EGG_K), true)
+pressable(starterBuy)
+starterBuy.Activated:Connect(function()
+	if open then
+		ReplicatedStorage:WaitForChild("BuyPass"):FireServer("StarterPack")
+	end
+end)
+table.insert(cards, 1, starterBuy)
+local ribbon = Instance.new("TextLabel") -- (on the art's red ribbon, along it)
+ribbon.Name = "Countdown"
+ribbon.BackgroundTransparency = 1
+ribbon.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.Heavy)
+ribbon.TextScaled = true
+ribbon.TextColor3 = Color3.new(1, 1, 1)
+ribbon.AnchorPoint = Vector2.new(0.5, 0.5)
+ribbon.Position = UDim2.fromOffset(math.round(1092 * EGG_K), math.round(52 * EGG_K))
+ribbon.Size = UDim2.fromOffset(math.round(190 * EGG_K), math.round(38 * EGG_K))
+ribbon.Rotation = 20
+ribbon.ZIndex = 3
+local ribbonStroke = Instance.new("UIStroke")
+ribbonStroke.Thickness = 2.5
+ribbonStroke.Color = Color3.fromRGB(90, 0, 0)
+ribbonStroke.Parent = ribbon
+ribbon.Parent = starter
+local world2 = Instance.new("ImageLabel") -- (QM's "WORLD 2" on its own, so it can pulse: Oct 20)
+world2.Name = "World2"
+world2.BackgroundTransparency = 1
+world2.Image = ART.World2
+world2.AnchorPoint = Vector2.new(0.5, 0.5)
+world2.Position = UDim2.fromOffset(math.round(207 * EGG_K), math.round(291 * EGG_K))
+local WORLD2 = Vector2.new(342 * EGG_K, 64 * EGG_K)
+world2.Size = UDim2.fromOffset(WORLD2.X, WORLD2.Y)
+world2.ZIndex = 2
+world2.Parent = starter
+local function starterLeft()
+	local shownAt = player:GetAttribute("StarterPackShownAt")
+	return math.max(0, math.ceil(STARTER_FOR - (if shownAt then os.clock() - shownAt else 0)))
+end
+local function layout()
+	local show = starterLeft() > 0 and not player:GetAttribute("PassStarterPack")
+	starter.Visible = show
+	starterBuy.Selectable = show
+	local y = if show then starter.Size.Y.Offset + 28 else 0
+	egg.Position = UDim2.fromOffset(0, y)
+	for _, card in cashCards do
+		card.Position = UDim2.fromOffset(card.Position.X.Offset, y + egg.Size.Y.Offset + 28)
+	end
+end
+layout()
+player:GetAttributeChangedSignal("PassStarterPack"):Connect(layout)
+RunService.Heartbeat:Connect(function()
+	if gui.Enabled and starter.Visible then
+		if not player:GetAttribute("StarterPackShownAt") then
+			player:SetAttribute("StarterPackShownAt", os.clock()) -- (first seen here: its ten minutes start)
+		end
+		local k = 1 + 0.08 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 * 1.1)) -- ("WORLD 2" swells up to 8% and back, about once a second)
+		world2.Size = UDim2.fromOffset(WORLD2.X * k, WORLD2.Y * k)
+		local left = starterLeft()
+		ribbon.Text = string.format("%dm %02ds", left // 60, left % 60)
+		if left <= 0 then
+			layout()
+		end
+	end
+end)
 root.Parent = gui
 gui.Parent = player:WaitForChild("PlayerGui")
 

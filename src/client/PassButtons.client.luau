@@ -66,7 +66,7 @@ column.Parent = root
 local bursts, offerSlots, seenOffers = {}, {}, {}
 local STARTER_PACK_FOR = 10 * 60 -- seconds
 local NUDGE = 8 -- the Starter Pack right of centre by this
-local joinedAt = os.clock()
+local starterShownAt
 local starterTimer, starterSlot
 for i, spec in BUTTONS do
 	local size = spec[3] * SCALE
@@ -112,10 +112,14 @@ for i, spec in BUTTONS do
 	end
 	if spec[1] == "StarterPack" then -- (QM's popup: Oct 13)
 		button.Activated:Connect(function()
-			require(script.Parent.StarterPackMenu).open()
+			-- (the shop, its Starter Pack card on top: QM, Oct 20; was its own popup, StarterPackMenu)
+			local telemetry = ReplicatedStorage:FindFirstChild("Telemetry")
+			if telemetry then
+				telemetry:FireServer("monoView", "StarterPackOpen")
+			end
+			require(script.Parent.Shop).open()
 		end)
-		-- Its countdown, small and yellow over it (QM, Oct 13): STARTER_PACK_FOR from each
-		-- join, then the Starter Pack's gone till the next.
+		-- Ten minutes from first seeing the card each join, then it's gone till the next.
 		local timer = Instance.new("TextLabel")
 		timer.Name = "Countdown"
 		timer.BackgroundTransparency = 1
@@ -147,7 +151,11 @@ RunService.RenderStepped:Connect(function()
 	local baseRoot = base and base:FindFirstChild("Root")
 	gui.Enabled = SHOWN and (player:GetAttribute("RidesDone") or 0) >= AFTER_RIDES and base ~= nil and base.Enabled and not (baseRoot and baseRoot:GetAttribute("Modal"))
 	if starterSlot then
-		local left = math.max(0, math.ceil(STARTER_PACK_FOR - (os.clock() - joinedAt)))
+		if gui.Enabled and not player:GetAttribute("PassStarterPack") and not player:GetAttribute("StarterPackShownAt") then
+			player:SetAttribute("StarterPackShownAt", os.clock()) -- (local: the shop's Starter Pack card counts down from it too)
+		end
+		starterShownAt = player:GetAttribute("StarterPackShownAt")
+		local left = math.max(0, math.ceil(STARTER_PACK_FOR - (if starterShownAt then os.clock() - starterShownAt else 0)))
 		starterTimer.Text = string.format("%d:%02d", left // 60, left % 60)
 		starterSlot.Visible = left > 0 and not player:GetAttribute("PassStarterPack") -- (gone once it's yours)
 	end
