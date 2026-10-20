@@ -73,7 +73,11 @@ for _, list in { Config.Shop.Gold, Config.Shop.CashPacks, Config.Shop.Specials, 
 	end
 end
 
-offerOf[Config.SpeedupEgg.ProductId] = { Key = "SpeedupEgg" }
+local isHatch = {} -- [product id] = true: the paid hatch's tiers (Config.SpeedupEgg.Tiers)
+for _, tier in Config.SpeedupEgg.Tiers do
+	offerOf[tier.ProductId] = { Key = "SpeedupEgg" }
+	isHatch[tier.ProductId] = true
+end
 local petOfferOf = {} -- [Key] = the Config.PetOffers entry
 for _, pet in Config.PetOffers do
 	petOfferOf[pet.Kind] = pet
@@ -306,14 +310,15 @@ speedupEgg.OnServerEvent:Connect(function(player, id)
 		return
 	end
 	hatchPending[player] = true
-	local ok, action = pcall(prepare.Invoke, prepare, player, id)
+	local ok, action, secondsLeft = pcall(prepare.Invoke, prepare, player, id)
 	if not ok or action ~= "purchase" then
 		hatchPending[player] = nil
 		return
 	end
-	local prompted = pcall(MarketplaceService.PromptProductPurchase, MarketplaceService, player, Config.SpeedupEgg.ProductId)
+	local productId = Config.speedupTier(secondsLeft or 0).ProductId
+	local prompted = pcall(MarketplaceService.PromptProductPurchase, MarketplaceService, player, productId)
 	if prompted then
-		Telemetry.monoPrompt(player, "product:" .. Config.SpeedupEgg.ProductId, "eggSpeedup")
+		Telemetry.monoPrompt(player, "product:" .. productId, "eggSpeedup")
 	else
 		hatchPending[player] = nil
 	end
@@ -385,7 +390,7 @@ spender("UseNuke", "nukes", "nukesUsed")
 
 MarketplaceService.PromptProductPurchaseFinished:Connect(function(userId, productId, purchased)
 	local player = Players:GetPlayerByUserId(userId)
-	if player and productId == Config.SpeedupEgg.ProductId and not purchased then
+	if player and isHatch[productId] and not purchased then
 		hatchPending[player] = nil
 	end
 	if player and isContinue[productId] and not purchased then
@@ -419,7 +424,7 @@ MarketplaceService.ProcessReceipt = function(receipt)
 		if granted == true then
 			Telemetry.purchase(buyer, receipt.CurrencySpent, "product:" .. receipt.ProductId) -- (/stats: % who bought)
 		end
-		if granted and receipt.ProductId == Config.SpeedupEgg.ProductId then
+		if granted and isHatch[receipt.ProductId] then
 			local player = Players:GetPlayerByUserId(receipt.PlayerId)
 			if player then hatchPending[player] = nil end
 		end

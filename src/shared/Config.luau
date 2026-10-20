@@ -1124,7 +1124,14 @@ local Config = {
 	-- Legend Egg, with their prices baked into the cards' art (Price here is just
 	-- a note of it: what's charged is the product's price on the dashboard). Gold2,
 	-- Gold3 and Nuke All aren't on it but can still be bought.
-	SpeedupEgg = { ProductId = 3716598923, Price = 10, Range = 10 }, -- instantly hatch one egg in your pen
+	-- Instantly hatch one egg in your pen. The product depends on the egg's time left
+	-- (QM, Oct 20): up to 5 min tier 1, up to an hour tier 2, longer tier 3
+	-- (Config.speedupTier). ProductId and Price are tier 1's.
+	SpeedupEgg = { ProductId = 3716598923, Price = 24, Range = 10, Tiers = {
+		{ Upto = 5 * 60, ProductId = 3716598923, Price = 24 },
+		{ Upto = 60 * 60, ProductId = 3720452246, Price = 42 },
+		{ Upto = math.huge, ProductId = 3720452332, Price = 69 },
+	} },
 	-- Game passes (QM, Oct 7; Server/Passes): bought once, kept for good. Each is a
 	-- pass on the Creator Hub (Monetization > Passes); put its id in Id. With Id 0
 	-- it isn't offered live, and in Studio buying it is free for the session.
@@ -1439,6 +1446,16 @@ function Config.rebirthSpeed(player)
 	return (Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1) * (if player:GetAttribute("PassSpeed") then Config.PassSpeed else 1)
 end
 -- 15, 1.2k, 3.4m, 10m... (gold, short: the Worlds menu's prices and the World 2 bar)
+-- The paid hatch's tier (Config.SpeedupEgg.Tiers) for an egg with secondsLeft to go.
+function Config.speedupTier(secondsLeft)
+	for _, tier in Config.SpeedupEgg.Tiers do
+		if secondsLeft <= tier.Upto then
+			return tier
+		end
+	end
+	return Config.SpeedupEgg.Tiers[#Config.SpeedupEgg.Tiers]
+end
+
 function Config.short(n)
 	for _, unit in { { 1e12, "t" }, { 1e9, "b" }, { 1e6, "m" }, { 1e3, "k" } } do
 		if n >= unit[1] then
