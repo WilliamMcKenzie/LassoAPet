@@ -16,10 +16,10 @@ local open = false
 local ART = {
 	Panel = "rbxassetid://125036875690208",
 	Halloween = "rbxassetid://86572003302585", -- assets/ui/shop4/HalloweenEgg.png (1192x470, QM Oct 20: odds 25/24/20/20/10/1; shrunk to 1024x404 by the upload)
-	Egg1 = "rbxassetid://93494892373199",
+	Egg1 = "rbxassetid://77065186414976", -- assets/ui/shop4/Egg1.png (R$19; the old upload said 49)
 	Egg3 = "rbxassetid://127409850784423", -- assets/ui/shop4/Egg3.png (146x98)
 	Egg10 = "rbxassetid://135248482417682", -- assets/ui/shop4/Egg10.png (144x98)
-	Egg50 = "rbxassetid://135798607638786",
+	Egg50 = "rbxassetid://72137957416956", -- assets/ui/shop4/Egg50.png (R$599; the old upload said 1299)
 	Cash500K = "rbxassetid://101951033426315", -- assets/ui/shop3 (QM, Oct 20: with borders)
 	Cash5M = "rbxassetid://83223429511866",
 	Cash1B = "rbxassetid://113449238733442",
@@ -384,8 +384,8 @@ function Shop.open(auto) -- (auto: it popped up by itself, the Halloween Egg in 
 	ModalPop.open(setScale)
 	spotlightEgg(auto == true)
 	if auto then
-		task.defer(function() -- (once the canvas has its size: the egg's top just under the panel's)
-			scroll.CanvasPosition = Vector2.new(0, math.max(0, egg.Position.Y.Offset - 12))
+		task.defer(function() -- (once the canvas has its size: the egg in the middle of the panel, QM Oct 20)
+			scroll.CanvasPosition = Vector2.new(0, math.max(0, egg.Position.Y.Offset + egg.Size.Y.Offset / 2 - scroll.Size.Y.Offset / 2))
 		end)
 	end
 	for _, name in { "FunnelStep", "Telemetry" } do
