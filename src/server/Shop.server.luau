@@ -169,6 +169,11 @@ local function update(userId, change)
 end
 
 Players.PlayerAdded:Connect(function(player)
+	task.delay(5, function() -- (/stats: how many can't be sold the Halloween Egg where they play)
+		if player.Parent and randomRestricted(player) then
+			Telemetry.monoFlag(player, "randomRestricted")
+		end
+	end)
 	for attempt = 1, 3 do
 		local ledger = update(player.UserId, function()
 			return false

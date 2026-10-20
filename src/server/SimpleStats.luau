@@ -89,6 +89,18 @@ function Stats.reach(s, world, biome)
 		s.world, s.biome = world, biome
 	end
 end
+-- Something true of this session, counted once (e.g. "randomRestricted": the Halloween Egg can't
+-- be sold to them where they play, Shop.server; QM, Oct 20).
+function Stats.flag(s, name)
+	if not s then
+		return
+	end
+	s.flags = s.flags or {}
+	if not s.flags[name] then
+		s.flags[name] = true
+		add(s, { ["flag:" .. name] = 1 })
+	end
+end
 function Stats.view(s, surface)
 	if not s or not opens[surface] or s.views[surface] then -- (only taps that open something: being shown an offer isn't counted)
 		return
@@ -191,6 +203,8 @@ function Stats.report(arg)
 		table.insert(lines, "  N/A — no completed first sessions yet")
 	end
 	table.insert(lines, "Monetization (" .. sessions .. " player sessions; what players did, not what they were shown):")
+	local blocked = d["flag:randomRestricted"] or 0
+	table.insert(lines, string.format("  Can't buy the Halloween Egg where they play (paid random items): %d sessions (%s)", blocked, pct(blocked, sessions)))
 	for _, row in Stats.Rows do
 		local id, label = row[1], row[2]
 		if row[3] == "open" then

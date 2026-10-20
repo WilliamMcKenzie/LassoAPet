@@ -180,6 +180,10 @@ function Telemetry.monoView(player, surface)
  local s = sessions[player]
  if s and not s.excluded then SimpleStats.view(s.simple, surface) end
 end
+function Telemetry.monoFlag(player, name) -- (once a session: SimpleStats.flag)
+ local s = sessions[player]
+ if s and not s.excluded then SimpleStats.flag(s.simple, name) end
+end
 function Telemetry.monoCancel(player, sku) -- (a checkout closed without buying: SimpleStats.cancel)
  local s = sessions[player]
  if s and not s.excluded then SimpleStats.cancel(s.simple, sku) end
