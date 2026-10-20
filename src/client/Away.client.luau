@@ -234,6 +234,16 @@ local function close()
 	end)
 end
 
+-- The rainbow button pulses while the panel's up (QM, Oct 20): its size swells up to 6% and back,
+-- about once a second (on top of its press scale).
+local boostSize = boost.Size
+RunService.RenderStepped:Connect(function()
+	if gui.Enabled then
+		local k = 1 + 0.06 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 * 1.1))
+		boost.Size = UDim2.fromOffset(boostSize.X.Offset * k, boostSize.Y.Offset * k)
+	end
+end)
+
 claim.Activated:Connect(function()
 	claimAway:FireServer()
 end)
