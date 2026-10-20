@@ -18,9 +18,18 @@ local SHOWN = true -- (QM, Oct 14: hidden a while for the shop's redo, then back
 local BUTTONS = {
 	{ "StarterPack", "rbxassetid://100466055719917", Vector2.new(245, 138) }, -- assets/ui/PassStarterPack.png
 	{ "Speed", "rbxassetid://100578505321305", Vector2.new(295, 141), "Speed" }, -- assets/ui/PassSpeed49.png (and its Config.Passes key)
-	{ "Cash", "rbxassetid://108884731983075", Vector2.new(295, 147), "DoubleGold" }, -- assets/ui/PassCash.png
-	{ "Invincible", "rbxassetid://127729903919837", Vector2.new(302, 142), "Invincible" }, -- assets/ui/PassInvincible.png
+	{ "AutoHatch", "rbxassetid://106151758290669", Vector2.new(295, 147), "AutoHatch" }, -- assets/ui/PassAutoHatch.png (R$29; in 2x Cash's place, QM Oct 20)
+	{ "Invincible", "rbxassetid://107961643042370", Vector2.new(302, 140), "Invincible" }, -- assets/ui/PassInvincible19.png (R$19, QM Oct 20)
 }
+-- (a pass with no Id yet isn't on sale live, so its button only shows in Studio: Server/Passes)
+for i = #BUTTONS, 1, -1 do
+	local key = BUTTONS[i][4]
+	for _, pass in Config.Passes do
+		if key and pass.Key == key and pass.Id == 0 and not RunService:IsStudio() then
+			table.remove(BUTTONS, i)
+		end
+	end
+end
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "PassButtons"

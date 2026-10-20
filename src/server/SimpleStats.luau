@@ -14,6 +14,7 @@ Stats.Rows = {
 	{ "Speed", "1.5x Speed card" },
 	{ "DoubleGold", "2x Cash card" },
 	{ "Invincible", "Invincible card" },
+	{ "AutoHatch", "Auto Hatch card" },
 	{ "away4x", "Away panel: 4x" },
 }
 for _, pet in Config.PetOffers do
