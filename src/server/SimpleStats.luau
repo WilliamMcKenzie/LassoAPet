@@ -87,6 +87,19 @@ function Stats.prompt(s, sku, surface)
 		add(s, { ["prompt:" .. surface] = 1 })
 	end
 end
+-- A checkout closed without buying (QM, Oct 20: why the Starter Pack doesn't sell): once a session
+-- per offer, as "cancel:<surface>".
+function Stats.cancel(s, sku)
+	local surface = s and s.pending[sku]
+	if not surface or s.buyers[surface] then
+		return
+	end
+	s.cancelled = s.cancelled or {}
+	if not s.cancelled[surface] then
+		s.cancelled[surface] = true
+		add(s, { ["cancel:" .. surface] = 1 })
+	end
+end
 function Stats.purchase(s, sku)
 	local surface = s and s.pending[sku]
 	if not surface or s.buyers[surface] then
@@ -161,11 +174,12 @@ function Stats.report(arg)
 		table.insert(
 			lines,
 			string.format(
-				"  %s: %d viewers (%s reach), %d opened checkout, %d buyers (%s purchased)",
+				"  %s: %d viewers (%s reach), %d opened checkout, %d closed it, %d buyers (%s purchased)",
 				label,
 				views,
 				pct(views, sessions),
 				prompts,
+				d["cancel:" .. id] or 0,
 				buyers,
 				pct(buyers, views)
 			)

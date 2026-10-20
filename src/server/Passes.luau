@@ -119,6 +119,8 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, id, p
 	if purchased and pass and player.Parent then
 		grant(player, pass, true)
 		require(script.Parent.Telemetry).purchase(player, nil, "pass:" .. id) -- (/stats: % who bought)
+	elseif not purchased and pass and player.Parent then
+		require(script.Parent.Telemetry).monoCancel(player, "pass:" .. id) -- (/stats: closed without buying)
 	end
 end)
 

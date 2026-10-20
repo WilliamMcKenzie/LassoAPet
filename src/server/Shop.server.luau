@@ -391,6 +391,9 @@ MarketplaceService.PromptProductPurchaseFinished:Connect(function(userId, produc
 	if player and isContinue[productId] and not purchased then
 		continueRide:FireClient(player, false)
 	end
+	if player and not purchased then
+		Telemetry.monoCancel(player, "product:" .. productId) -- (/stats: closed without buying)
+	end
 end)
 
 MarketplaceService.ProcessReceipt = function(receipt)
