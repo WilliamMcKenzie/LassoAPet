@@ -15,7 +15,8 @@
 --             pushing the stick right out). WAIT_FOR_BOSS seconds after that, BOSS IN
 --             shows with BOSS_SECONDS on it: still in the Meadow, so the Chicken.
 --   5. gate   home with an animal, it goes in your pen (Hatchery; its new animal cutscene
---             plays, Client/NewAnimal); the camera zooms to the Desert's gate (the next goal) and back. Done:
+--             plays, Client/NewAnimal; in the ride egg A/B's egg arm its egg, ready to hatch,
+--             Config.RideEggAB); the camera zooms to the Desert's gate (the next goal) and back. Done:
 --             TutorialDone, and the rest of the UI comes back.
 --
 -- A ride that comes home with nothing goes back to step 3. Runs whenever the "Tutorial"

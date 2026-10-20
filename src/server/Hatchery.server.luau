@@ -833,7 +833,8 @@ end
 -- Ride egg A/B (Config.RideEggAB, QM Oct 19). The arm is by UserId, so it's the same every
 -- session and server; it's on the player as "ABRideEgg". The "egg" arm's rides home and finish
 -- lines give the animal's egg instead of the animal, into the egg inventory to place, as rides
--- did before Oct 13 (not mid-tutorial: its first ride's animal is the tutorial's next step).
+-- did before Oct 13. The tutorial's first ride's egg goes straight into the pen, ready at once
+-- (Config.TutorialHatchTime), so its "a new one in your pen" step goes on (QM, Oct 19).
 local RideEggAB = {}
 function RideEggAB.arm(player)
 	local ab = Config.RideEggAB
@@ -843,11 +844,18 @@ function RideEggAB.arm(player)
 	return if (player.UserId + ab.Salt * 389) % 1000 < ab.Share * 1000 then "egg" else "control"
 end
 function RideEggAB.give(player, profile, kind)
-	if player:GetAttribute("ABRideEgg") ~= "egg" or player:GetAttribute("Tutorial") or not isAnimal(kind) then
+	if player:GetAttribute("ABRideEgg") ~= "egg" or not isAnimal(kind) then
 		return givePet(player, profile, kind)
 	end
 	Funnel.rewarded(player) -- (as givePet: the server's award)
 	Telemetry.reward(player)
+	local pen = penOf(player)
+	local area = pen and pen:FindFirstChild("Area")
+	if player:GetAttribute("Tutorial") and area and penCount(profile) < penCap(player) then
+		local spot = freeSpot(pen, profile, area)
+		place(player, profile, kind, spot.X, spot.Y)
+		return true
+	end
 	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
 	publish(player)
 	return false

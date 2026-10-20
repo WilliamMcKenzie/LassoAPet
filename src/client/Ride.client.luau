@@ -110,7 +110,7 @@ vfx.newAnimal = require(script.Parent.NewAnimal) -- the animal you got, shown (Q
 -- (vfx.newAnimal), or in the ride egg A/B's egg arm (Config.RideEggAB, Hatchery) its egg's reveal.
 vfx.rideReward = function(kind)
 	local module = ReplicatedStorage.Shared.Animals:FindFirstChild(kind)
-	if player:GetAttribute("ABRideEgg") == "egg" and not player:GetAttribute("Tutorial") and module then
+	if player:GetAttribute("ABRideEgg") == "egg" and module then
 		return Hud.eggReveal(require(module).Rarity, kind)
 	end
 	return vfx.newAnimal.show(kind)
