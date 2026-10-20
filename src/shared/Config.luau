@@ -1773,7 +1773,7 @@ Config.AnimalScale.RoboShark = 4 -- (QM, Oct 15; its hunting still grows it from
 -- The "While you were away" panel's rainbow button (QM, Oct 20; Client/Away, Shop.server): the away
 -- gold banked Multiplier times over, for the developer product ProductId (R$9 on QM's art). With
 -- ProductId 0 it's free in Studio and does nothing live.
-Config.AwayBoost = { ProductId = 0, Multiplier = 4 }
+Config.AwayBoost = { ProductId = 3720169501, Multiplier = 4 }
 Config.RideEggAB = { Share = 0.5, Salt = 1, FastRides = 4, FastHatch = 15, Studio = "egg" }
 -- Limited stock and the display's overhead labels are active.
 Config.PetOffersLimited = true

@@ -18,7 +18,7 @@ local ART = { -- assets/ui/away (QM's)
 	boost = "rbxassetid://107362573611718", -- Claim4x.png (337x142): the rainbow button, Robux 9
 	claim = "rbxassetid://106855326447623", -- Claim.png (333x113)
 }
-local K = 760 / 1229 -- QM's art's pixels to ours
+local K = 912 / 1229 -- QM's art's pixels to ours (QM, Oct 20: 20% bigger, was 760)
 local FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
 
 local player = Players.LocalPlayer
@@ -121,18 +121,19 @@ local function button(name, image, center, size)
 	b.Parent = panel
 	return b
 end
-local boost = button("Claim4x", ART.boost, Vector2.new(445, 611), Vector2.new(320, 320 * 142 / 337))
-local claim = button("Claim", ART.claim, Vector2.new(815, 623), Vector2.new(331, 331 * 113 / 333))
+-- (both 20% bigger, QM Oct 20: side by side, 40 apart, centred, their bottoms 15 above the panel's)
+local boost = button("Claim4x", ART.boost, Vector2.new(396, 695 - 384 * 142 / 337 / 2), Vector2.new(384, 384 * 142 / 337))
+local claim = button("Claim", ART.claim, Vector2.new(827, 695 - 397 * 113 / 333 / 2), Vector2.new(397, 397 * 113 / 333))
 -- (the rainbow's own label: the bar's the bottom ~80% of its art, the Robux badge over its top right)
 local boostLabel = Instance.new("TextLabel")
 boostLabel.BackgroundTransparency = 1
 boostLabel.FontFace = FONT
-boostLabel.Text = "Claim " .. Config.AwayBoost.Multiplier .. "x"
+boostLabel.Text = "" -- (what you'd get: show() sets it, QM Oct 20)
 boostLabel.TextScaled = true
 boostLabel.TextColor3 = Color3.new(1, 1, 1)
 boostLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-boostLabel.Position = UDim2.fromScale(0.43, 0.6)
-boostLabel.Size = UDim2.fromScale(0.5, 0.3)
+boostLabel.Position = UDim2.fromScale(0.46, 0.6)
+boostLabel.Size = UDim2.fromScale(0.72, 0.36)
 boostLabel.ZIndex = 4
 local boostStroke = Instance.new("UIStroke")
 boostStroke.Thickness = 2.5
@@ -167,13 +168,15 @@ local function haze(on)
 end
 
 -- Every other bit of UI goes while it's up (as the Starter Pack's).
-local hidden, holdHidden = {}, nil
+local hidden, holdHidden, oldCutscene = {}, nil, nil
 local function hideOthers(on)
 	if holdHidden then
 		holdHidden:Disconnect()
 		holdHidden = nil
 	end
 	if on then
+		oldCutscene = player:GetAttribute("Cutscene")
+		player:SetAttribute("Cutscene", true) -- (BaseUi and the guides keep themselves off: they turn themselves back on otherwise)
 		local function hideAll()
 			for _, g in player.PlayerGui:GetChildren() do
 				if g:IsA("ScreenGui") and g.Enabled and g ~= gui then
@@ -187,6 +190,7 @@ local function hideOthers(on)
 		hideAll()
 		holdHidden = RunService.RenderStepped:Connect(hideAll)
 	else
+		player:SetAttribute("Cutscene", oldCutscene)
 		for _, g in hidden do
 			g.Enabled = true
 		end
@@ -200,7 +204,9 @@ end
 
 local function show(total)
 	local gems = Config.Gems ~= nil -- (the Halloween world's pets earn gems)
-	cash.Text = "+" .. (if gems then "" else "$") .. amount(total * (if gems then Config.Gems.Rate else 1)) .. (if gems then " GEMS" else " CASH")
+	local each = total * (if gems then Config.Gems.Rate else 1)
+	cash.Text = "+" .. (if gems then "" else "$") .. amount(each) .. (if gems then " GEMS" else " CASH")
+	boostLabel.Text = "+" .. (if gems then "" else "$") .. amount(each * Config.AwayBoost.Multiplier) -- (the rainbow button: what 4x gives)
 	if open then
 		return
 	end
