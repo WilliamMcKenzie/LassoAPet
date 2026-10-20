@@ -210,7 +210,7 @@ local starterBuy = image(starter, "Buy", ART.StarterBuy, math.round(943 * EGG_K)
 pressable(starterBuy)
 starterBuy.ZIndex = 3
 local STARTER_BUY = Vector2.new(starterBuy.Size.X.Offset, starterBuy.Size.Y.Offset)
--- (behind Buy: QM's sunburst, turning, and Buy pulsing: QM, Oct 20)
+-- (QM's sunburst, turning behind "WORLD 2" (placed with it, below), and Buy pulsing: QM, Oct 20)
 local starterBurst = Instance.new("ImageLabel")
 starterBurst.Name = "Sunburst"
 starterBurst.BackgroundTransparency = 1
@@ -219,7 +219,7 @@ starterBurst.ImageTransparency = 0.2
 starterBurst.AnchorPoint = Vector2.new(0.5, 0.5)
 starterBurst.Position = starterBuy.Position
 starterBurst.Size = UDim2.fromOffset(STARTER_BUY.X * 1.7, STARTER_BUY.X * 1.7)
-starterBurst.ZIndex = 2
+starterBurst.ZIndex = 1
 starterBurst.Parent = starter
 starterBuy.Activated:Connect(function()
 	if open then
@@ -249,6 +249,8 @@ local WORLD2 = Vector2.new(342 * EGG_K, 64 * EGG_K)
 world2.Size = UDim2.fromOffset(WORLD2.X, WORLD2.Y)
 world2.ZIndex = 2
 world2.Parent = starter
+starterBurst.Position = world2.Position -- (the sunburst behind it, not Buy: QM, Oct 20)
+starterBurst.Size = UDim2.fromOffset(WORLD2.X * 1.3, WORLD2.X * 1.3)
 local function starterLeft()
 	local shownAt = player:GetAttribute("StarterPackShownAt")
 	return math.max(0, math.ceil(STARTER_FOR - (if shownAt then os.clock() - shownAt else 0)))
