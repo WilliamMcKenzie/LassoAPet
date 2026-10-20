@@ -121,9 +121,10 @@ local function button(name, image, center, size)
 	b.Parent = panel
 	return b
 end
--- (both 20% bigger, QM Oct 20: side by side, 40 apart, centred, their bottoms 15 above the panel's)
-local boost = button("Claim4x", ART.boost, Vector2.new(396, 695 - 384 * 142 / 337 / 2), Vector2.new(384, 384 * 142 / 337))
-local claim = button("Claim", ART.claim, Vector2.new(827, 695 - 397 * 113 / 333 / 2), Vector2.new(397, 397 * 113 / 333))
+-- (QM, Oct 20: the rainbow one 20% bigger than Claim, its bar 400 wide to Claim's 331, the Robux
+-- badge sticking out past that; side by side, 40 apart, centred, their bottoms 15 above the panel's)
+local boost = button("Claim4x", ART.boost, Vector2.new(429, 695 - 408 * 142 / 337 / 2), Vector2.new(408, 408 * 142 / 337))
+local claim = button("Claim", ART.claim, Vector2.new(838.5, 695 - 331 * 113 / 333 / 2), Vector2.new(331, 331 * 113 / 333))
 -- (the rainbow's own label: the bar's the bottom ~80% of its art, the Robux badge over its top right)
 local boostLabel = Instance.new("TextLabel")
 boostLabel.BackgroundTransparency = 1
