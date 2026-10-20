@@ -856,7 +856,7 @@ end
 -- and their seconds, new players by the day they started ("new:<day>"), and those who came back
 -- the next day ("d1:<day>"). Robux is added by Telemetry.purchase.
 RideEggAB.joined = {}
-Players.PlayerAdded:Connect(function(player)
+function RideEggAB.join(player)
 	local arm = RideEggAB.arm(player)
 	player:SetAttribute("ABRideEgg", arm)
 	RideEggAB.joined[player] = os.clock()
@@ -880,7 +880,11 @@ Players.PlayerAdded:Connect(function(player)
 		fields["d1:" .. profile.ab.day] = 1
 	end
 	require(script.Parent.StatsStore).addShared("ab-rideegg-" .. arm, fields)
-end)
+end
+Players.PlayerAdded:Connect(RideEggAB.join)
+for _, player in Players:GetPlayers() do -- (joined while this script was still starting: Studio's Play)
+	task.spawn(RideEggAB.join, player)
+end
 Players.PlayerRemoving:Connect(function(player)
 	local at, arm = RideEggAB.joined[player], player:GetAttribute("ABRideEgg")
 	RideEggAB.joined[player] = nil
