@@ -15,10 +15,10 @@ local buyShop = ReplicatedStorage:WaitForChild("BuyShop")
 local open = false
 local ART = {
 	Panel = "rbxassetid://125036875690208",
-	Halloween = "rbxassetid://95709238284593", -- assets/ui/shop3/HalloweenEgg.png (1192x470, QM Oct 20, with its border; shrunk to 1024x404 by the upload)
+	Halloween = "rbxassetid://86572003302585", -- assets/ui/shop4/HalloweenEgg.png (1192x470, QM Oct 20: odds 25/24/20/20/10/1; shrunk to 1024x404 by the upload)
 	Egg1 = "rbxassetid://93494892373199",
-	Egg3 = "rbxassetid://106323361129280",
-	Egg10 = "rbxassetid://74397756416359",
+	Egg3 = "rbxassetid://127409850784423", -- assets/ui/shop4/Egg3.png (146x98)
+	Egg10 = "rbxassetid://135248482417682", -- assets/ui/shop4/Egg10.png (144x98)
 	Egg50 = "rbxassetid://135798607638786",
 	Cash500K = "rbxassetid://101951033426315", -- assets/ui/shop3 (QM, Oct 20: with borders)
 	Cash5M = "rbxassetid://83223429511866",
@@ -129,7 +129,7 @@ local EGG_K = EGG_W / 1192
 local egg = image(scroll, "HalloweenEgg", ART.Halloween, 0, 0, EGG_W, math.round(470 * EGG_K))
 local cards, eggButtons = {}, {}
 for i, count in { 1, 3, 10, 50 } do
-	local width = if count == 50 then 163 else 145
+	local width = ({ 145, 146, 144, 163 })[i] -- (each button's art's own width)
 	local x = ({ 285, 444, 599, 754 })[i]
 	local button = image(egg, "Buy" .. count, ART["Egg" .. count], math.round(x * EGG_K), math.round(347 * EGG_K), math.round(width * EGG_K), math.round(98 * EGG_K), true)
 	pressable(button)

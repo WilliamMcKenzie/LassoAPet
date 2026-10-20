@@ -1216,7 +1216,7 @@ local Config = {
 			{ Key = "Halloween10", Count = 10, Price = 399, ProductId = 3720044148 },
 			{ Key = "Halloween50", Count = 50, Price = 1299, ProductId = 3720044257 },
 		},
-		HalloweenOdds = { Bat = 39, PurpleTarantula = 25, SoulHorse = 20, HalloweenCrystalElephant = 10, HalloweenSeraph = 5, HalloweenBoneRex = 1 },
+		HalloweenOdds = { Bat = 25, PurpleTarantula = 24, SoulHorse = 20, HalloweenCrystalElephant = 20, HalloweenSeraph = 10, HalloweenBoneRex = 1 }, -- (QM, Oct 20: as his new banner shows; was 39/25/20/10/5/1)
 		CashPacks = { -- insufficient-cash prompts; old Gold products remain valid for receipts
 			{ Key = "Cash100K", Gold = 500000, ProductId = 3719218362 },
 			{ Key = "Cash1M", Gold = 5000000, ProductId = 3719218832 },
