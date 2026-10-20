@@ -833,8 +833,9 @@ end
 -- Ride egg A/B (Config.RideEggAB, QM Oct 19). The arm is by UserId, so it's the same every
 -- session and server; it's on the player as "ABRideEgg". The "egg" arm's rides home and finish
 -- lines give the animal's egg instead of the animal, into the egg inventory to place, as rides
--- did before Oct 13. The tutorial's first ride's egg goes straight into the pen, ready at once
--- (Config.TutorialHatchTime), so its "a new one in your pen" step goes on (QM, Oct 19).
+-- did before Oct 13. The tutorial's first ride's egg goes straight into the pen, so its "a new
+-- one in your pen" step goes on, and stays an egg (no tutorial auto-hatch: byHand) till you
+-- hatch it, after Config.RideEggAB.FastHatch seconds (QM, Oct 19).
 local RideEggAB = {}
 function RideEggAB.arm(player)
 	local ab = Config.RideEggAB
@@ -853,7 +854,9 @@ function RideEggAB.give(player, profile, kind)
 	local area = pen and pen:FindFirstChild("Area")
 	if player:GetAttribute("Tutorial") and area and penCount(profile) < penCap(player) then
 		local spot = freeSpot(pen, profile, area)
-		place(player, profile, kind, spot.X, spot.Y)
+		profile.items[HttpService:GenerateGUID(false)] = { x = spot.X, z = spot.Y, egg = kind, hatchAt = os.time() + Config.RideEggAB.FastHatch, byHand = true }
+		profile.pastStarter = true
+		publish(player)
 		return true
 	end
 	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
@@ -1990,7 +1993,7 @@ while true do
 		local changed = false
 		for _, item in profile.items do
 			-- (in the tutorial, not the starter egg: you hatch that one yourself, QM Oct 11)
-			if item.egg and now >= item.hatchAt and ((player:GetAttribute("Tutorial") and profile.ride ~= nil) or player:GetAttribute("PassAutoHatch")) then
+			if item.egg and now >= item.hatchAt and ((player:GetAttribute("Tutorial") and profile.ride ~= nil and not item.byHand) or player:GetAttribute("PassAutoHatch")) then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
 				Telemetry.once(player, "eggHatched")
