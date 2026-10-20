@@ -115,7 +115,7 @@ closeButton.Activated:Connect(function()
 end)
 local scroll = Instance.new("ScrollingFrame")
 scroll.Name, scroll.BackgroundTransparency, scroll.BorderSizePixel = "Offers", 1, 0
-scroll.Position, scroll.Size = UDim2.fromOffset(50, 143), UDim2.fromOffset(1132, 779)
+scroll.Position, scroll.Size = UDim2.fromOffset(25, 143), UDim2.fromOffset(1180, 779) -- (half the side margin, QM Oct 20: was 50 in, 1132 wide)
 scroll.CanvasSize = UDim2.fromOffset(0, 0)
 scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y -- (all of it fits now: it only scrolls on a short screen)
 scroll.ScrollingDirection, scroll.ScrollBarThickness = Enum.ScrollingDirection.Y, 0
@@ -124,7 +124,7 @@ scroll.ElasticBehavior = Enum.ElasticBehavior.WhenScrollable
 scroll.Parent = panel
 -- The banner across the panel, at its art's shape; its buy buttons where QM's design has them
 -- (x in the art's 1192 pixels: 285, 444, 599, 754; tops at 347, under each one's "x1" label).
-local EGG_W = 1132
+local EGG_W = 1180
 local EGG_K = EGG_W / 1192
 local egg = image(scroll, "HalloweenEgg", ART.Halloween, 0, 0, EGG_W, math.round(470 * EGG_K))
 local cards, eggButtons = {}, {}
