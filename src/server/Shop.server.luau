@@ -47,6 +47,7 @@ continueRide.OnServerEvent:Connect(function(player, metres)
 	local id = continueTier(metres).ProductId
 	if id ~= 0 then
 		MarketplaceService:PromptProductPurchase(player, id)
+		Telemetry.monoPrompt(player, "product:" .. id, "revive")
 	elseif RunService:IsStudio() then
 		continueRide:FireClient(player, true)
 	end
@@ -60,7 +61,7 @@ buyShop.Name = "BuyShop"
 buyShop.Parent = ReplicatedStorage
 
 local offers, offerOf = {}, {} -- [Key] = offer; [product id] = offer
-for _, list in { Config.Shop.Gold, Config.Shop.CashPacks, Config.Shop.Specials } do
+for _, list in { Config.Shop.Gold, Config.Shop.CashPacks, Config.Shop.Specials, Config.Shop.HalloweenPacks } do
 	for _, offer in list do
 		offers[offer.Key] = offer
 		if offer.ProductId ~= 0 then
@@ -76,6 +77,7 @@ offerOf[Config.SpeedupEgg.ProductId] = { Key = "SpeedupEgg" }
 local petOfferOf = {} -- [Key] = the Config.PetOffers entry
 for _, pet in Config.PetOffers do
 	petOfferOf[pet.Kind] = pet
+	offers[pet.Kind] = { Key = pet.Kind, ProductId = pet.ProductId }
 	if pet.ProductId ~= 0 then
 		offerOf[pet.ProductId] = { Key = pet.Kind } -- (World 1's base stands: Client/LoongOffer)
 	end
@@ -127,6 +129,7 @@ local function show(player, ledger)
 	player:SetAttribute("BoughtHatches", ledger.hatches or 0)
 	player:SetAttribute("BoughtGold", ledger.gold)
 	player:SetAttribute("BoughtPets", ledger.pets)
+	player:SetAttribute("BoughtHalloweenPets", ledger.halloweenPets or 0)
 	player:SetAttribute("BoughtGiantEggs", ledger.giantEggs)
 	for _, pet in Config.PetOffers do
 		player:SetAttribute("Bought" .. pet.Kind .. "s", ledger[pet.Ledger] or 0)
@@ -196,22 +199,29 @@ local STOCK_REFRESH = 10
 local okStock, stockStore = pcall(function()
 	return game:GetService("DataStoreService"):GetDataStore("LoongStock")
 end)
-if not okStock then
+if not okStock or RunService:IsStudio() then
 	stockStore = nil
 end
 local function showLeft(pet, sold)
 	local start = pet.Stock - (pet.StartLeft or pet.Stock)
+	if typeof(sold) == "table" then sold = sold.sold end
 	workspace:SetAttribute(pet.Kind .. "Left", math.max(0, pet.Stock - (tonumber(sold) or start)))
 end
-petSold = function(pet)
+petSold = function(pet, purchaseId)
 	local start = pet.Stock - (pet.StartLeft or pet.Stock)
 	if not stockStore then
 		showLeft(pet, (pet.Stock - (workspace:GetAttribute(pet.Kind .. "Left") or pet.Stock)) + 1)
-		return
+		return true
 	end
-	pcall(function()
+	return pcall(function()
 		showLeft(pet, stockStore:UpdateAsync(pet.StockKey, function(n)
-			return (tonumber(n) or start) + 1
+			local stock = if typeof(n) == "table" then n else { sold = tonumber(n) or start, receipts = {} }
+			stock.receipts = stock.receipts or {}
+			if not stock.receipts[purchaseId] then
+				stock.sold += 1
+				stock.receipts[purchaseId] = true
+			end
+			return stock
 		end))
 	end)
 end
@@ -248,6 +258,8 @@ local function record(userId, purchaseId, offer)
 		end
 		if offer.Gold then
 			ledger.gold += offer.Gold
+		elseif offer.Count then
+			ledger.halloweenPets = (ledger.halloweenPets or 0) + offer.Count
 		elseif offer.Key == "Legendary" then
 			ledger.pets += 1
 		elseif offer.Key == "GiantHorse" then
@@ -262,8 +274,10 @@ local function record(userId, purchaseId, offer)
 		end
 		return true
 	end)
-	if ledger and fresh and petOfferOf[offer.Key] and Config.PetOffersLimited then
-		task.spawn(petSold, petOfferOf[offer.Key])
+	if ledger and petOfferOf[offer.Key] and Config.PetOffersLimited then
+		if not petSold(petOfferOf[offer.Key], purchaseId) then
+			return false -- retry the receipt until its stock update is saved too
+		end
 	end
 	if ledger and fresh and offer.Key == "SpawnLoong" then
 		workspace.World:SetAttribute("ForceEventNow", true) -- (bought: no countdown)
@@ -298,7 +312,9 @@ speedupEgg.OnServerEvent:Connect(function(player, id)
 		return
 	end
 	local prompted = pcall(MarketplaceService.PromptProductPurchase, MarketplaceService, player, Config.SpeedupEgg.ProductId)
-	if not prompted then
+	if prompted then
+		Telemetry.monoPrompt(player, "product:" .. Config.SpeedupEgg.ProductId, "eggSpeedup")
+	else
 		hatchPending[player] = nil
 	end
 end)
@@ -307,13 +323,19 @@ Players.PlayerRemoving:Connect(function(player)
 	hatchPending[player] = nil
 end)
 
-buyShop.OnServerEvent:Connect(function(player, key)
+buyShop.OnServerEvent:Connect(function(player, key, source)
 	local offer = typeof(key) == "string" and offers[key]
-	if not offer or (offer.Key == "Legendary" and randomRestricted(player)) then
+	if not offer or ((offer.Key == "Legendary" or offer.Count) and randomRestricted(player)) then
 		return
 	end
+	if Config.PetOffersLimited and petOfferOf[key] and (workspace:GetAttribute(key .. "Left") or 0) <= 0 then
+		return
+	end
+	if offer.Count and offer.ProductId == 0 then return end -- not on sale until configured
 	if offer.ProductId ~= 0 then
 		MarketplaceService:PromptProductPurchase(player, offer.ProductId)
+		local surface = if petOfferOf[key] then "limited_" .. key elseif source == "shop" then "shop" elseif offer.Gold then "cashShortfall" else nil
+		Telemetry.monoPrompt(player, "product:" .. offer.ProductId, surface)
 	elseif RunService:IsStudio() then
 		record(player.UserId, game:GetService("HttpService"):GenerateGUID(false), offer)
 	end
@@ -361,7 +383,7 @@ MarketplaceService.ProcessReceipt = function(receipt)
 		local granted = record(receipt.PlayerId, receipt.PurchaseId, offer)
 		local buyer = Players:GetPlayerByUserId(receipt.PlayerId)
 		if granted == true then
-			Telemetry.purchase(buyer, receipt.CurrencySpent) -- (/stats: % who bought)
+			Telemetry.purchase(buyer, receipt.CurrencySpent, "product:" .. receipt.ProductId) -- (/stats: % who bought)
 		end
 		if granted and receipt.ProductId == Config.SpeedupEgg.ProductId then
 			local player = Players:GetPlayerByUserId(receipt.PlayerId)
@@ -371,7 +393,7 @@ MarketplaceService.ProcessReceipt = function(receipt)
 	end
 	local player = Players:GetPlayerByUserId(receipt.PlayerId)
 	if player and isContinue[receipt.ProductId] then
-		Telemetry.purchase(player, receipt.CurrencySpent)
+		Telemetry.purchase(player, receipt.CurrencySpent, "product:" .. receipt.ProductId)
 		continueRide:FireClient(player, true)
 		return Enum.ProductPurchaseDecision.PurchaseGranted
 	end

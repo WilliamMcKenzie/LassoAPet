@@ -1,5 +1,5 @@
 -- QM's pass buttons down the right of the base HUD (Oct 13): Starter Pack (its popup,
--- StarterPackMenu), 1.5x Speed, 2x Cash, Giant Pets (Roblox's buy prompt: BuyPass, Config.Passes),
+-- StarterPackMenu), 1.5x Speed, 2x Cash, Invincible (Roblox's buy prompt: BuyPass, Config.Passes),
 -- each with QM's sunburst turning behind it. Shown whenever BaseUi is (not riding, in a cutscene or the tutorial) and no
 -- menu's up over the base.
 local Players = game:GetService("Players")
@@ -19,7 +19,7 @@ local BUTTONS = {
 	{ "StarterPack", "rbxassetid://100466055719917", Vector2.new(245, 138) }, -- assets/ui/PassStarterPack.png
 	{ "Speed", "rbxassetid://100578505321305", Vector2.new(295, 141), "Speed" }, -- assets/ui/PassSpeed49.png (and its Config.Passes key)
 	{ "Cash", "rbxassetid://108884731983075", Vector2.new(295, 147), "DoubleGold" }, -- assets/ui/PassCash.png
-	{ "GiantPets", "rbxassetid://89610420254499", Vector2.new(302, 148), "GiantPets" }, -- assets/ui/PassGiantPets49.png
+	{ "Invincible", "rbxassetid://127729903919837", Vector2.new(302, 142), "Invincible" }, -- assets/ui/PassInvincible.png
 }
 
 local gui = Instance.new("ScreenGui")
@@ -54,7 +54,7 @@ local fit = Instance.new("UIScale") -- (a short screen: shrunk to fit between th
 fit.Parent = column
 column.Parent = root
 
-local bursts = {}
+local bursts, offerSlots, seenOffers = {}, {}, {}
 local STARTER_PACK_FOR = 10 * 60 -- seconds
 local NUDGE = 8 -- the Starter Pack right of centre by this
 local joinedAt = os.clock()
@@ -63,6 +63,7 @@ for i, spec in BUTTONS do
 	local size = spec[3] * SCALE
 	local slot = Instance.new("Frame") -- (the sunburst and the button side by side, so it's behind)
 	slot.Name = spec[1]
+	offerSlots[spec[4] or spec[1]] = slot
 	slot.LayoutOrder = i
 	slot.BackgroundTransparency = 1
 	slot.Size = UDim2.fromOffset(size.X, size.Y)
@@ -148,6 +149,15 @@ RunService.RenderStepped:Connect(function()
 		root.Size = UDim2.fromOffset(screen.X / rootScale.Scale, screen.Y / rootScale.Scale)
 	end
 	if gui.Enabled then
+		local telemetry = ReplicatedStorage:FindFirstChild("Telemetry")
+		if telemetry then
+			for key, slot in offerSlots do
+				if slot.Visible and not seenOffers[key] and not player:GetAttribute("Pass" .. key) then
+					seenOffers[key] = true
+					telemetry:FireServer("monoView", key)
+				end
+			end
+		end
 		local tall = list.AbsoluteContentSize.Y / rootScale.Scale / fit.Scale
 		column.Size = UDim2.fromOffset(column.Size.X.Offset, tall) -- (the slots' height, without the Starter Pack once it's gone)
 		fit.Scale = math.min(1, root.Size.Y.Offset * 0.62 / math.max(tall, 1))

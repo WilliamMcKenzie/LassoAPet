@@ -810,9 +810,9 @@ local Config = {
 	-- starts at StartLeft (QM: "to make it feel like its selling"): no count saved yet means that.
 	LoongOffer = { Kind = "Loong", ProductId = 3718721407, Price = 399, Stock = 500, StartLeft = 435, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(7, 0, -11), -- (against the base's front wall, the Robo Shark beside it: QM, Oct 15)
 		Ledger = "loongs", StockKey = "sold" },
-	-- The Robo Shark beside it the same way (QM, Oct 15: 1,000 of them; "Roboshark Pet [Limited]").
-	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3718722226, Price = 399, Stock = 1000, StartLeft = 870, Scale = 6, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11), -- (Scale 6: 4x the 1.5 it had, QM Oct 15: "insanely small")
-		Ledger = "roboSharks", StockKey = "sold_RoboShark" },
+	-- Majestic Unicorn replaces the limited Robo Shark; keep its product, stock and claim counters.
+	MajesticUnicornOffer = { Kind = "MajesticUnicorn", ProductId = 3718722226, Price = 199, Stock = 1000, StartLeft = 870, Scale = 2, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11),
+		Ledger = "roboSharks", StockKey = "sold_RoboShark", ClaimField = "boughtRoboSharks" },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
 	-- (Shared/Merge). They look like Pet's egg, EggScale x as big (QM).
@@ -999,9 +999,11 @@ local Config = {
 	-- (QM, Oct 13, later: the pet sprints home by itself again, everywhere, and the boss never
 	-- catches you (CatchAfter math.huge; it was 5 s): the only risk is obstacles, Crashes of them
 	-- crash you. Idle is unused while it sprints by itself.)
-	-- (QM, Oct 14, an A/B test against the 1-5 min quits: obstacles on the way home don't
-	-- slow you or crash you any more, you plough through; was Walk = 0.4, Crashes = 5)
-	ReturnRun = { Idle = 0, Walk = math.huge, Ramp = 1.2, CatchAfter = math.huge, Crashes = math.huge },
+	-- At StaggerSpeed studs/s, obstacles and animals up to tier 2 cannot stagger you.
+	-- Collision size overrides keep the Phoenix below large animals without changing its ability tier.
+	-- The fifth stagger makes the boss charge and catch you. No catch timer between staggers.
+	ReturnRun = { Idle = 0, Walk = 0.4, Ramp = 1.2, CatchAfter = math.huge, Crashes = 5,
+		StaggerSpeed = 500, StaggerTiers = { Phoenix = 2, HalloweenPhoenix = 2 } },
 	ReturnSprint = true, -- the ride home always a sprint (SprintSpeed x ReturnSpeed)? On again (QM, Oct 11; Oct 10 had it off, Shift to sprint)
 	ReturnFovKick = 0, -- (QM, Oct 9: plain, was 20) degrees added to the field of view on the ride home, to feel faster (0 = off)
 	-- The feel of speed (QM, Oct 7; Client/SpeedFx): Speed is uncapped, but rides travel
@@ -1106,10 +1108,10 @@ local Config = {
 	-- Continue (QM, Oct 3): after a crash or a buck-off, pay Robux to keep riding
 	-- from where it happened (Shop.server, Ride.client). Price bands by distance are
 	-- possible (each band its own product; the furthest band passed, From metres from
-	-- the start line, is offered), but QM (Oct 4): always the same, one 100 R$ product.
+	-- the start line, is offered). The crash screen now offers one 29 R$ Revive product.
 	-- OldProductIds: the bands it was sold as before, still honoured.
 	ContinueTiers = {
-		{ From = 0, Price = 100, ProductId = 3716554535, OldProductIds = { 3716409203, 3716409211, 3716409249, 3716409258, 3716409346 } },
+		{ From = 0, Price = 29, ProductId = 3720048492, OldProductIds = { 3716554535, 3716409203, 3716409211, 3716409249, 3716409258, 3716409346 } },
 	},
 	ContinueGrace = 1.5, -- seconds nothing can crash you once you're back on
 	ContinueClear = 14, -- studs: obstacles this close to where you crashed are knocked away
@@ -1190,7 +1192,8 @@ local Config = {
 		-- (QM, Oct 13: his four passes, renamed from the old ones on their ids, so their old
 		-- owners own these now. VIP, Fast Hatch and Auto Hatch are gone.)
 		{ Key = "Speed", Name = "1.5x Speed", Price = 49, Id = 2012972449 }, -- every ride x PassSpeed (Config.rebirthSpeed)
-		{ Key = "DoubleGold", Name = "2x Cash", Price = 99, Id = 2014634454 }, -- x PassGoldMultiplier (Config.goldX)
+		{ Key = "DoubleGold", Name = "2x Cash", Price = 99, Id = 2014634454 },
+		{ Key = "Invincible", Name = "Invincible", Price = 99, Id = 2036488765 }, -- x PassGoldMultiplier (Config.goldX)
 		{ Key = "GiantPets", Name = "Giant Pets", Price = 49, Id = 2014472441 },
 		{ Key = "StarterPack", Name = "Starter Pack", Price = 19, Id = 2013764414 }, -- Config.StarterPack, once (Hatchery)
 	},
@@ -1206,6 +1209,13 @@ local Config = {
 		Trail = { Color3.fromRGB(255, 236, 140), Color3.fromRGB(255, 180, 20) }, -- head to tail
 	},
 	Shop = {
+		HalloweenPacks = {
+			{ Key = "Halloween1", Count = 1, Price = 49, ProductId = 3720043968 },
+			{ Key = "Halloween3", Count = 3, Price = 129, ProductId = 3720044050 },
+			{ Key = "Halloween10", Count = 10, Price = 399, ProductId = 3720044148 },
+			{ Key = "Halloween50", Count = 50, Price = 1299, ProductId = 3720044257 },
+		},
+		HalloweenOdds = { Bat = 39, PurpleTarantula = 25, SoulHorse = 20, HalloweenCrystalElephant = 10, HalloweenSeraph = 5, HalloweenBoneRex = 1 },
 		CashPacks = { -- insufficient-cash prompts; old Gold products remain valid for receipts
 			{ Key = "Cash100K", Gold = 500000, ProductId = 3719218362 },
 			{ Key = "Cash1M", Gold = 5000000, ProductId = 3719218832 },
@@ -1403,7 +1413,8 @@ Config.PenCount = if Config.World == 4 then 10 else 5
 Config.EndPortal = nil
 -- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's
 -- World 2 bar). World 1 is everyone's.
-Config.WorldPrices = { 0, 500000, 5000000 }
+-- World 2 targets the late Volcano / first Jurassic rides on the normal income curve.
+Config.WorldPrices = { 0, 1000000, 10000000 }
 -- Rebirth (QM, Oct 13): World 2's Rebirth bar (World2Bar.client) for Prices[n] gold, your
 -- nth. It re-locks World 2 (save up for it again) and sends you to World 1; your pets stay.
 -- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,
@@ -1752,12 +1763,12 @@ Config.AnimalScale.RoyalCnidarian = 2 -- (QM, Oct 15)
 Config.AnimalScale.GiantRafflesia = 2 -- the Garden's boss (QM, Oct 15)
 Config.AnimalScale.Loong = 4 -- (QM, Oct 15: "very tiny"; its breath still grows it from there)
 Config.AnimalScale.RoboShark = 4 -- (QM, Oct 15; its hunting still grows it from there)
--- (QM, Oct 15: not limited any more, and no text over them: the Stock counts below are off)
-Config.PetOffersLimited = false
+-- Limited stock and the display's overhead labels are active.
+Config.PetOffersLimited = true
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
-Config.PetOffers = if Config.World == 4 then {} else { Config.LoongOffer, Config.RoboSharkOffer } -- (none in the Halloween world's stripped base for now: QM, Oct 15)
+Config.PetOffers = if Config.World == 4 then {} else { Config.LoongOffer, Config.MajesticUnicornOffer } -- (none in the Halloween world's stripped base for now: QM, Oct 15)
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)
@@ -1774,7 +1785,7 @@ Config.PetNames = {
 }
 -- Every pet ridden in a world not its own runs at a Horse's speed there (QM, Oct 15; World 2's
 -- kept theirs in World 3 before), but these keep theirs everywhere (QM: the Robux pets).
-Config.CrossWorldExempt = { Loong = true, RoboShark = true, SnackYak = true }
+Config.CrossWorldExempt = { Loong = true, RoboShark = true, SnackYak = true, MajesticUnicorn = true }
 -- (and the same speed in every world, whatever a world does to the rest: QM, Oct 15; put back at the end)
 local EXEMPT_STATS = {}
 for kind in Config.CrossWorldExempt do
@@ -1805,7 +1816,7 @@ Config.Podium = table.clone(Config.Podium)
 Config.Podium.Hidden = true
 if Config.World ~= 1 then
 	-- (World 2's base has a pine and World 3's a palm where World 1's Robo Shark stands: further along the wall)
-	Config.RoboSharkOffer.Offset = Vector3.new(76, 0, -11)
+	Config.MajesticUnicornOffer.Offset = Vector3.new(76, 0, -11)
 end
 -- World 1: World 2's and 3's pets ridden here at a Horse's speed (QM, Oct 15).
 if Config.World == 1 then

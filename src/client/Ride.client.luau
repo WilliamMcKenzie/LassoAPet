@@ -99,6 +99,7 @@ local function tierOf(kind)
 end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
+vfx.crashScreen = require(script.Parent.CrashScreen)
 vfx.tutorialRide = require(script.Parent.TutorialRide) -- (the tutorial's first ride: Client/Tutorial steers it)
 vfx.speedLines = require(script.Parent.SpeedLines) -- speed lines on the screen while sprinting (QM, Oct 9 / 11)
 vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's out (QM, Oct 10)
@@ -517,6 +518,7 @@ local function character()
 end
 
 local function cleanup()
+	vfx.crashScreen.hide()
 	if mount then
 		mount.animal.model:Destroy()
 	end
@@ -1017,10 +1019,13 @@ local function fail(reason, tip)
 	-- with the egg. Not into a locked gate, and not in the tutorial.
 	local gate = WorldColors.gateZ(math.max(player:GetAttribute("PenLevel") or 1, warpLevel or 1))
 	vfx.revive = nil
-	if mount and (reason == "CRASH!" or reason == "BUCKED OFF") and (phase == "outbound" or phase == "return")
+	if mount and (reason == "CRASH!" or reason == "BUCKED OFF" or reason == "CAUGHT!") and (phase == "outbound" or phase == "return")
 		and not (phase == "outbound" and mount.z < gate + 2.4)
 		and (RunService:IsStudio() or vfx.continueTier(-mount.z / STUDS_PER_METRE).ProductId ~= 0) then
 		vfx.revive = { kind = mount.kind, x = mount.x, z = mount.z, yaw = mount.yaw, speed = mount.speed, phase = phase, dir = dir }
+	end
+	if phase == "return" then
+		vfx.bossChase.runPast(mount and mount.speed)
 	end
 	phase = "ended"
 	cutscene = nil
@@ -1059,21 +1064,7 @@ local function fail(reason, tip)
 	Hud.setAction(nil)
 	Hud.setHold(nil)
 	Hud.setDistance("")
-	Hud.flash(reason)
-	task.delay(0.8, function()
-		if phase == "ended" then
-			Hud.showHome(true)
-			Hud.showContinue(if vfx.revive then "ready" else nil)
-		end
-	end)
-	if Config.RideHud == false then
-		vfx.revive = nil -- (no riding UI for now, QM Oct 9: no Home or Continue to press, so home you go)
-		task.delay(2, function()
-			if phase == "ended" and vfx.goHome then
-				vfx.goHome()
-			end
-		end)
-	end
+	vfx.crashScreen.show(vfx.revive ~= nil)
 end
 
 local function goHome()
@@ -2438,11 +2429,21 @@ function vfx.feastOf(entity)
 	return entity.feast
 end
 
+-- First-time Meadow players stay safe until they have actually entered Desert.
+function vfx.crashProtected()
+	return player:GetAttribute("PassInvincible") == true or (Config.World == 1 and (player:GetAttribute("GatesBroken") or 1) < 2)
+end
+
 -- The mount broke something (smashed an obstacle, knocked an animal flying).
 function vfx.broke(hit)
-	if phase == "return" and mount and not activeAbility() and not hit then -- (an obstacle: back to a walk, ReturnRun; animals you plough through)
-		vfx.returnRun.hits += 1
-		mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
+	if phase == "return" and mount and not activeAbility() and not vfx.crashProtected() then
+		local fast = math.abs(mount.speed) >= Config.ReturnRun.StaggerSpeed
+		local tier = Config.ReturnRun.StaggerTiers[mount.kind] or vfx.mountTier()
+		local hitTier = hit and (Config.ReturnRun.StaggerTiers[hit.kind] or tierOf(hit.kind))
+		if (hitTier and hitTier > math.max(tier, fast and 2 or 0)) or (not hit and not fast) then
+			vfx.returnRun.hits += 1
+			mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
+		end
 	end
 	local feast = vfx.feastOf(mount)
 	if feast then
@@ -3521,9 +3522,9 @@ local function checkRide(dt)
 	if vfx.tutorialRide.invulnerable then
 		grace = math.max(grace, 0.1) -- (nothing crashes you on the tutorial's ride: QM)
 	end
-	if phase == "return" and vfx.returnRun.caught and vfx.bossChase.ranOver() and not vfx.tutorialRide.active then
+	if phase == "return" and vfx.returnRun.caught and vfx.bossChase.ranOver() and not vfx.tutorialRide.active and not vfx.crashProtected() then
 		return fail("CAUGHT!")
-	elseif phase == "return" and vfx.returnRun.hits >= Config.ReturnRun.Crashes then
+	elseif phase == "return" and vfx.returnRun.hits >= Config.ReturnRun.Crashes and not vfx.crashProtected() then
 		if vfx.tutorialRide.active or vfx.returnRun.giveUp() then
 			return fail("CRASH!")
 		end
@@ -3655,7 +3656,7 @@ local function checkRide(dt)
 			-- Racing home on the Icebringer, an animal frozen in ice smashes whatever its size (QM).
 			local shatter = phase == "return" and entity.frostFx ~= nil and (vfx.abilityOf(mount) or {}).Kind == "Frost"
 			-- (racing home, nothing crashes you: whatever you run into is knocked away, QM Oct 11)
-			if phase == "return" or (trample and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
+			if phase == "return" or player:GetAttribute("PassInvincible") or (trample and tierOf(entity.kind) < myTier) or kind == "Crabwalk" or shatter then
 				knock(entity, dx) -- (the Blue Crab's crab walk knocks everything)
 				vfx.broke(entity)
 				if kind == "Crabwalk" and special.RestorePer then
@@ -4227,7 +4228,7 @@ RunService.PreSimulation:Connect(function(dt)
 	dt *= timeScale
 	updateHerd(dt, (slow and not cutscene) or tr.active) -- (the tutorial's herd is yours alone: no snapping back to the shared one, QM)
 	updateFlung(dt)
-	if phase == "boss" or phase == "turning" or phase == "return" or phase == "home" then -- (the boss, then after you home, in the leap's slow motion too)
+	if phase == "boss" or phase == "turning" or phase == "return" or phase == "home" or (phase == "ended" and vfx.bossChase.runningPast()) then -- the boss keeps running after a crash
 		vfx.bossChase.update(dt, phase ~= "boss", mount and mount.x, mount and mount.z, mount and mount.speed)
 	end
 	vfx.hazards.update(dt, herd, mount, phase == "outbound" or phase == "turning" or phase == "return",
@@ -4370,7 +4371,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	vfx.speedLines.update(if riding and sprinting() then Config.SpeedLines.Speed else 0, dt)
 	vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
 	vfx.returnVignette.update(dt, mount ~= nil and (phase == "turning" or phase == "return"))
-	if not (phase == "boss" or phase == "turning" or phase == "return" or phase == "home") then
+	if not (phase == "boss" or phase == "turning" or phase == "return" or phase == "home" or (phase == "ended" and vfx.bossChase.runningPast())) then
 		vfx.bossChase.stop() -- (it moves with the ride, slow motion and all: below)
 	end
 	if phase == "idle" then
@@ -4461,6 +4462,7 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	local base = camera.FieldOfView - (vfx.sprintFov or 0)
 	base += (fov - base) * (1 - math.exp(-3 * dt))
 	camera.FieldOfView, vfx.sprintFov = base + sprintFov, sprintFov
+	vfx.bossChase.clearPassed()
 end)
 
 -- Continue on the fail screen: the server asks for the Robux (Shop.server) and
@@ -4471,7 +4473,7 @@ function vfx.askContinue()
 	local revive = vfx.revive
 	if phase == "ended" and revive and not revive.asked then
 		revive.asked = true
-		Hud.showContinue("waiting")
+		vfx.crashScreen.setWaiting(true)
 		ReplicatedStorage:WaitForChild("ContinueRide"):FireServer(-revive.z / STUDS_PER_METRE)
 	end
 end
@@ -4484,10 +4486,13 @@ ReplicatedStorage:WaitForChild("ContinueRide").OnClientEvent:Connect(function(pa
 	end
 	if not paid then
 		revive.asked = false
-		Hud.showContinue("ready")
+		vfx.crashScreen.setWaiting(false)
 		return
 	end
 	vfx.sounds.play("purchase")
+	vfx.crashScreen.hide()
+	vfx.bossChase.stop()
+	vfx.returnRun.reset()
 	vfx.revive = nil
 	for _, o in obstacles do
 		if not o.smashed and Vector2.new(o.x - revive.x, o.z - revive.z).Magnitude < Config.ContinueClear then
@@ -4509,8 +4514,11 @@ ReplicatedStorage:WaitForChild("ContinueRide").OnClientEvent:Connect(function(pa
 		carried.part.Parent = workspace
 	end
 	phase, hold, grace = revive.phase, holdTime(mount), Config.ContinueGrace
+	hrp.Anchored = true
+	hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
 	humanoid.PlatformStand = false
 	humanoid.Sit = true
+	if phase == "return" then vfx.bossChase.resume(mount.x, mount.z) end
 	Hud.resume(phase == "return")
 end)
 
@@ -4761,6 +4769,7 @@ ReplicatedStorage:WaitForChild("ShopGrant").OnClientEvent:Connect(function(key)
 end)
 
 Hud.init(onAction, goHome, rideFromHome, vfx.askContinue)
+vfx.crashScreen.init(vfx.askContinue, goHome)
 
 player.CharacterAdded:Connect(function()
 	clearRideTarget() -- the prompt starts afresh for the new character (E)

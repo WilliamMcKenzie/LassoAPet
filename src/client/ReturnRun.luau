@@ -1,6 +1,6 @@
--- The ride home (QM, Oct 13): your pet sprints home by itself; an obstacle you hit drops it
--- back to a walk to build up again (animals you plough through), and Config.ReturnRun.Crashes
--- of them crash you (Ride counts .hits). The boss closing in while you're under full speed
+-- The ride home: your pet sprints home by itself; obstacles and bigger animals drop it
+-- back to a walk to build up again. Config.ReturnRun.Crashes staggers make the boss
+-- charge and catch you (Ride counts .hits). The boss closing in while you're under full speed
 -- (BossChase.closing, catching you after CatchAfter seconds) is off for now (CatchAfter
 -- math.huge); pushing() is kept for it, for a run home you steer the speed of.
 --   ReturnRun.reset()                -- a new run home
@@ -19,7 +19,7 @@ local PUSH = 0.25 -- of a stick's reach that counts as pushing
 
 local RUN_OVER_WAIT = 3 -- seconds
 
-local ReturnRun = { slow = 0, caught = false, hits = 0 } -- (hits: obstacles hit this run home)
+local ReturnRun = { slow = 0, caught = false, hits = 0 } -- (hits: staggers this run home)
 
 function ReturnRun.reset()
 	ReturnRun.slow, ReturnRun.caught, ReturnRun.hits, ReturnRun.forcedAt = 0, false, 0, nil

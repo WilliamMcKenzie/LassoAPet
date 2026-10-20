@@ -845,13 +845,29 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		end
 		homeGui.Enabled = not open
 	end
+	local halloweenQueue, showingHalloween = {}, false
 	-- A Legendary Pet bought in the shop is in your pen: its card shows which.
 	game:GetService("ReplicatedStorage"):WaitForChild("ShopGrant").OnClientEvent:Connect(function(key, kind)
-		if key ~= "LegendaryPet" then
+		if key ~= "LegendaryPet" and key ~= "HalloweenPets" then
 			Sounds.play("purchase") -- (the Legend Egg's pet comes as a second grant: one sound)
 		end
 		Shop.close()
-		if key == "LoongPet" and kind then
+		if key == "HalloweenPets" and typeof(kind) == "table" and #kind > 0 then
+			table.insert(halloweenQueue, kind)
+			if not showingHalloween then
+				showingHalloween = true
+				task.spawn(function()
+					while #halloweenQueue > 0 do
+						while Hud.revealing() do RunService.Heartbeat:Wait() end
+						local batch = table.remove(halloweenQueue, 1)
+						local animal = game:GetService("ReplicatedStorage").Shared.Animals:FindFirstChild(batch[1])
+						Hud.eggReveal(if animal then require(animal).Rarity else "Legendary", batch[1], true, batch)
+						while Hud.revealing() do RunService.Heartbeat:Wait() end
+					end
+					showingHalloween = false
+				end)
+			end
+		elseif key == "LoongPet" and kind then
 			require(script.Parent.NewAnimal).show(kind) -- (the bought Loong: the new animal popup, QM Oct 15)
 		elseif key == "LegendaryPet" and kind then
 			-- (its own rarity's card: the Loong and Robo Shark are Exclusive)
@@ -1401,7 +1417,7 @@ function Hud.revealing()
 	return card ~= nil and card.Visible
 end
 
-function Hud.eggReveal(rarity, kind, rolled)
+function Hud.eggReveal(rarity, kind, rolled, batch)
 	local final = RARITY_CARDS[rarity]
 	if not final then
 		return nil
@@ -1468,6 +1484,10 @@ function Hud.eggReveal(rarity, kind, rolled)
 		local ids = { IMAGES[final].id, egg.id }
 		for _, key in UNKNOWN_CARDS do
 			table.insert(ids, IMAGES[key].id)
+		end
+		for _, resultKind in batch or {} do
+			local art = IMAGES["egg" .. resultKind]
+			if art then table.insert(ids, art.id) end
 		end
 		game:GetService("ContentProvider"):PreloadAsync(ids)
 		ready = true
@@ -1540,44 +1560,60 @@ function Hud.eggReveal(rarity, kind, rolled)
 			return
 		end
 
-		-- 4. Pop: the real card, stretched tall and big, springs back with a
-		-- wobble, behind a white flash and the sunburst; the screen shakes.
-		setCardFace(final)
-		if gamble then
-			gamble:Stop()
-		end
-		Sounds.play(if rolled then "roll_reveal" else "reveal_pop")
-		cardExclusive.Visible = standIn
-		cardFlash.Visible = true
-		cardBurst.Visible = Config.EggRevealBurst
-		cardEgg.Visible = true
-		poseEgg(0, 1, 1, 0)
-		local eggDelay = 0.12 -- the egg follows through just after the card
-		play(hold, function(t)
-			local d = spring(t, 2.4, 6)
-			cardScale.Scale = 1 + 0.35 * d
-			local shake = math.max(0, 1 - t / 0.35) * 8
-			local squash = spring(t, 3.5, 7)
-			pose(1 - 0.18 * squash, 1 + 0.22 * squash, math.random(-1, 1) * shake, -8 * spring(t, 1.8, 5))
-			card.Position += UDim2.fromOffset(math.random(-1, 1) * shake, 0)
-			cardFlash.BackgroundTransparency = 0.25 + 0.75 * math.min(t / 0.35, 1)
-			cardBurst.UIScale.Scale = math.min(t / 0.25, 1) * (1 + 0.1 * spring(t, 2, 5))
-			cardBurst.Rotation = t * 30
-			-- Egg: springs out of the card stretched, squashes, then breathes.
-			local e = t - eggDelay
-			if e < 0 then
-				poseEgg(0, 1, 1, 0)
-			else
-				local grow = 1 - spring(e, 2.2, 6)
-				local es = spring(e, 3.8, 6)
-				local breath = math.sin(e * 4) * 0.03 * math.min(e, 1)
-				poseEgg(grow, 1 - 0.25 * es - breath, 1 + 0.3 * es + breath, 0)
+		for index, resultKind in batch or { kind } do
+			if index > 1 then
+				local animal = game:GetService("ReplicatedStorage").Shared.Animals:FindFirstChild(resultKind)
+				final = RARITY_CARDS[if animal then require(animal).Rarity else "Legendary"] or "cardLegendary"
+				standIn = final == "cardExclusive" and IMAGES.cardExclusive.id == ""
+				if standIn then final = "cardLegendary" end
+				cardFaces.cardLegendary.ImageColor3 = if standIn then EXCLUSIVE_TINT else WHITE
+				egg = IMAGES["egg" .. resultKind] or IMAGES.eggPinto
+				eggW = eggH * baseH * egg.size.X / egg.size.Y / baseW
+				cardEgg.Image = egg.id
 			end
-		end)
-		if reveal ~= token then
-			return
+			-- 4. Pop: the real card, stretched tall and big, springs back with a
+			-- wobble, behind a white flash and the sunburst; the screen shakes.
+			setCardFace(final)
+			if gamble then
+				gamble:Stop()
+				gamble = nil
+			end
+			Sounds.play(if rolled then "roll_reveal" else "reveal_pop")
+			cardExclusive.Visible = standIn
+			cardFlash.Visible = true
+			cardBurst.Visible = Config.EggRevealBurst
+			cardEgg.Visible = true
+			poseEgg(0, 1, 1, 0)
+			local eggDelay = 0.12 -- the egg follows through just after the card
+			-- Multi-open pacing is real time: 0.6 s after the first, then 0.8 s.
+			local resultHold = if batch and index < #batch then (if index == 1 then 0.6 else 0.8) * speed else hold
+			play(resultHold, function(t)
+				local d = spring(t, 2.4, 6)
+				cardScale.Scale = 1 + 0.35 * d
+				local shake = math.max(0, 1 - t / 0.35) * 8
+				local squash = spring(t, 3.5, 7)
+				pose(1 - 0.18 * squash, 1 + 0.22 * squash, math.random(-1, 1) * shake, -8 * spring(t, 1.8, 5))
+				card.Position += UDim2.fromOffset(math.random(-1, 1) * shake, 0)
+				cardFlash.BackgroundTransparency = 0.25 + 0.75 * math.min(t / 0.35, 1)
+				cardBurst.UIScale.Scale = math.min(t / 0.25, 1) * (1 + 0.1 * spring(t, 2, 5))
+				cardBurst.Rotation = t * 30
+				-- Egg: springs out of the card stretched, squashes, then breathes.
+				local e = t - eggDelay
+				if e < 0 then
+					poseEgg(0, 1, 1, 0)
+				else
+					local grow = 1 - spring(e, 2.2, 6)
+					local es = spring(e, 3.8, 6)
+					local breath = math.sin(e * 4) * 0.03 * math.min(e, 1)
+					poseEgg(grow, 1 - 0.25 * es - breath, 1 + 0.3 * es + breath, 0)
+				end
+			end)
+			if reveal ~= token then
+				return
+			end
+			cardFlash.Visible = false
+
 		end
-		cardFlash.Visible = false
 
 		-- 5. Exit, the entrance in reverse: the card swells and squashes down, then
 		-- pops out, stretching tall as it shrinks away. The egg goes first, just
@@ -1604,7 +1640,8 @@ function Hud.eggReveal(rarity, kind, rolled)
 			cardExclusive.Visible = false
 		end
 	end)
-	return (ENTER_TIME + roll + ANTICIPATION + hold + EXIT_TIME) / speed
+	local extra = if batch and #batch > 1 then 0.6 + math.max(#batch - 2, 0) * 0.8 else 0
+	return (ENTER_TIME + roll + ANTICIPATION + hold + EXIT_TIME) / speed + extra
 end
 
 -- Cutscenes hide the whole ride HUD.

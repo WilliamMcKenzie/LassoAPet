@@ -56,6 +56,7 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local StatsStore = require(script.Parent.StatsStore)
+local SimpleStats = require(script.Parent.SimpleStats)
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
 local okTransfers, transfers = pcall(DataStoreService.GetDataStore, DataStoreService, "V1Transfers")
@@ -151,14 +152,25 @@ function Telemetry.once(player, name)
 end
 
 -- A Robux purchase (Shop.server's products, Passes' game passes): /stats' "bought" rate.
-function Telemetry.purchase(player, robux)
+function Telemetry.purchase(player, robux, sku)
 	if player and sessions[player] then
+		SimpleStats.purchase(not sessions[player].excluded and sessions[player].simple or nil, sku)
 		Telemetry.once(player, "bought")
 		count(player, "purchases")
 		if type(robux) == "number" and robux > 0 then
 			count(player, "robux", robux)
 		end
 	end
+end
+
+-- Monetization views and successful checkout prompts, once per logical session.
+function Telemetry.monoView(player, surface)
+ local s = sessions[player]
+ if s and not s.excluded then SimpleStats.view(s.simple, surface) end
+end
+function Telemetry.monoPrompt(player, sku, surface)
+ local s = sessions[player]
+ if s and not s.excluded then SimpleStats.prompt(s.simple, sku, surface) end
 end
 
 -- Online seconds this session, both worlds.
@@ -187,7 +199,7 @@ local function fromSnapshot(snap)
 		id = snap.id, onlineBase = tonumber(snap.online) or 0, arrived = os.time(), new = snap.new == true,
 		firstSession = snap.first == true, reached = tonumber(snap.reached), successes = tonumber(snap.successes) or 0,
 		excluded = snap.excluded == true, device = snap.device, ready = snap.ready == true,
-		phase = "transfer", phaseAt = os.clock(),
+		phase = "transfer", phaseAt = os.clock(), simple = snap.simple,
 	}
 end
 
@@ -235,6 +247,7 @@ local function join(player, carried)
 		end
 	end
 	s.excluded = (carried ~= nil and carried.excluded == true) or isOwner(player)
+	s.simple = if s.excluded then nil else SimpleStats.begin(carried and carried.simple)
 	sessions[player] = s
 	if not transfers then
 		if not carried then
@@ -251,6 +264,7 @@ local function join(player, carried)
 			-- (too late: the world they left closed it, so this is a new session)
 			s.id, s.onlineBase, s.arrived, s.carried = HttpService:GenerateGUID(false), 0, os.time(), false
 			s.successes, s.runs = 0, 0
+			s.simple = if s.excluded then nil else SimpleStats.begin(nil)
 			add(s, if s.ready then { join = 1, start = 1, profileReady = 1 } else { join = 1 }) -- (profileReady's still to come: it adds them)
 		elseif not carried then
 			if old and old.id then
@@ -272,6 +286,7 @@ function Telemetry.profileReady(player, isNew)
 		add(s, { start = 1, profileReady = 1 })
 	end
 	s.ready = true
+	SimpleStats.reach(s.simple, WORLD, player:GetAttribute("GatesBroken") or 1)
 	s.wallet0 = s.wallet0 or player:GetAttribute("Gold") or 0
 	if isNew and Config.World == 1 then
 		player:SetAttribute("V1New", true) -- (Gold.server saves it: World 2's progress of new players)
@@ -338,7 +353,7 @@ local function snapshot(s)
 		successes = s.successes, runs = s.runs, excluded = s.excluded, device = s.device, ready = s.ready,
 		gold = s.gold, goldAt = goldAt, wallet0 = s.wallet0, tutorialDoneAt = s.tutorialDoneAt, firstRide = s.firstRide,
 		firstReward = s.firstReward, nextRide = s.nextRide, clientReady = s.clientReady, once = once,
-		postRides = s.postRides, lastRide = s.lastRide }
+		postRides = s.postRides, lastRide = s.lastRide, simple = s.simple }
 end
 
 -- Gold.server, as it teleports them to the other world: what carries the session over
@@ -492,6 +507,10 @@ end
 
 function close(s, player)
 	local length = elapsed(s)
+	if not s.excluded then
+		if player then SimpleStats.reach(s.simple, WORLD, player:GetAttribute("GatesBroken") or 1) end
+		SimpleStats.finish(s.simple, length, s.firstSession, s.ready)
+	end
 	local counts = { ["end"] = 1, ["exit:" .. phaseOf(s, player)] = 1 }
 	if player then
 		pcall(quitSnapshot, s, player, length, counts)
@@ -568,6 +587,9 @@ task.spawn(function()
 	while true do
 		task.wait(2)
 		for player, s in sessions do
+			if s.ready and elapsed(s) >= 10 * 60 and not (s.onceDone and s.onceDone.communityPrompt) then
+				player:SetAttribute("CommunityPromptDue", true)
+			end
 			if s.firstSession and s.ready then
 				for _, t in GOLD_AT do
 					if not s.goldAt[t] and elapsed(s) >= t * 60 then
@@ -602,7 +624,7 @@ end)
 -- The client's reports: "ready" (with its device), "lassoChance", "questsOpened". Each
 -- name counted at most once a ride or so (RATE seconds apart).
 local RATE = 5
-local CLIENT = { ready = true, lassoChance = true, questsOpened = true, shopOpened = true }
+local CLIENT = { ready = true, lassoChance = true, questsOpened = true, shopOpened = true, monoView = true, communityPromptShown = true }
 local DEVICES = { pc = true, phone = true, tablet = true, console = true }
 local remote = Instance.new("RemoteEvent")
 remote.Name = "Telemetry"
@@ -611,12 +633,22 @@ remote.OnServerEvent:Connect(function(player, name, device)
 	if not s or type(name) ~= "string" or not CLIENT[name] then
 		return
 	end
+	if name == "monoView" and not SimpleStats.validSurface(device) then return end
 	s.last = s.last or {}
-	if s.last[name] and os.clock() - s.last[name] < RATE then
+	local rateKey = name .. (if name == "monoView" then device else "")
+	if s.last[rateKey] and os.clock() - s.last[rateKey] < RATE then
 		return
 	end
-	s.last[name] = os.clock()
-	if name == "ready" then
+	s.last[rateKey] = os.clock()
+	if name == "communityPromptShown" then
+		if elapsed(s) >= 10 * 60 then
+			s.onceDone = s.onceDone or {}
+			s.onceDone.communityPrompt = true -- carried between worlds with the other once-per-session flags
+			player:SetAttribute("CommunityPromptDue", false)
+		end
+	elseif name == "monoView" then
+		Telemetry.monoView(player, device)
+	elseif name == "ready" then
 		if s.clientReady then
 			return
 		end
@@ -632,6 +664,7 @@ remote.OnServerEvent:Connect(function(player, name, device)
 		s.lassoChance = true
 		count(player, "lassoChance")
 	elseif name == "shopOpened" then -- (QM, Oct 14: /stats' shop open rate)
+		Telemetry.monoView(player, "shop")
 		Telemetry.once(player, "shopOpened")
 		count(player, "shopOpens")
 	else
@@ -712,6 +745,7 @@ task.spawn(function()
 		unlocked.Event:Connect(function(player, biome, seconds)
 			local s = sessions[player]
 			if s and type(biome) == "number" and type(seconds) == "number" then
+				SimpleStats.reach(s.simple, WORLD, biome)
 				add(s, nil, { ["w" .. WORLD .. "biome" .. biome] = seconds })
 			end
 		end)
@@ -740,6 +774,7 @@ game:BindToClose(function()
 	for player in sessions do
 		leave(player)
 	end
+	StatsStore.flush() -- final session summaries must be queued before the last flush
 end)
 
 -- Stats.server: the session's online seconds so far and whether it's on its way to the

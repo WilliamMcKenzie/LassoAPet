@@ -11,6 +11,8 @@
 --   BossChase.over()                  -- true once the cutscene's done (turn for home)
 --   BossChase.update(dt, chasing, x, z, speed) -- every frame: chasing the rider at (x, z)
 --   BossChase.camera() -> CFrame?     -- the camera during the cutscene (nil: Ride's own)
+--   BossChase.runPast(speed)          -- charge past the body after a crash
+--   BossChase.clearPassed()           -- remove once fully outside the death camera
 --   BossChase.stop()                  -- gone (home, or the ride over)
 --   BossChase.roar() -> 0..1          -- how loud its cry on the run home is right now (ReturnVignette)
 
@@ -142,6 +144,15 @@ function BossChase.start(x, z)
 	ReplicatedStorage.RideCue:FireServer("boss", kind, x, z) -- (everyone else sees it chase you: Client/RemoteBosses, QM)
 end
 
+-- Revive resumes the chase without replaying the boss introduction.
+function BossChase.resume(x, z)
+	BossChase.start(x, z)
+	boss.t = Config.Boss.CutsceneTime + (Config.Boss.Linger or 0) + 0.01
+	boss.z, boss.scale = z - Config.Boss.Behind - boss.room, 1
+	boss.riderX, boss.riderZ = x, z
+	place()
+end
+
 -- Whether it's reached the rider (charging once it's caught them: ReturnRun), so they're run over.
 function BossChase.ranOver()
 	return boss ~= nil and boss.riderZ ~= nil and boss.z >= boss.riderZ - boss.room * 0.5 - 4
@@ -149,6 +160,45 @@ end
 
 function BossChase.over()
 	return boss ~= nil and boss.t >= Config.Boss.CutsceneTime
+end
+
+-- After a crash, keep charging through the body instead of following the rider.
+function BossChase.runPast(speed)
+	if boss then
+		boss.runPastSpeed = math.max(speed or 0, Config.Boss.ChaseMin or 0) + 260
+		boss.runPastFrom = boss.riderZ or boss.z
+	end
+end
+
+function BossChase.runningPast()
+	return boss ~= nil and boss.runPastSpeed ~= nil
+end
+
+-- Called after the death camera is positioned. Keep the whole bounding box on
+-- screen until the charge has carried the boss past the point of impact.
+function BossChase.clearPassed()
+	if not BossChase.runningPast() or boss.z <= boss.runPastFrom + boss.room then
+		return
+	end
+	local camera = workspace.CurrentCamera
+	local box, size = boss.animal.model:GetBoundingBox()
+	local minX, minY, minZ = math.huge, math.huge, math.huge
+	local maxX, maxY, maxZ = -math.huge, -math.huge, -math.huge
+	for x = -1, 1, 2 do
+		for y = -1, 1, 2 do
+			for z = -1, 1, 2 do
+				local point = camera:WorldToViewportPoint(box:PointToWorldSpace(size * Vector3.new(x, y, z) * 0.5))
+				minX, minY, minZ = math.min(minX, point.X), math.min(minY, point.Y), math.min(minZ, point.Z)
+				maxX, maxY, maxZ = math.max(maxX, point.X), math.max(maxY, point.Y), math.max(maxZ, point.Z)
+			end
+		end
+	end
+	if
+		maxZ <= 0
+		or (minZ > 0 and (maxX < 0 or minX > camera.ViewportSize.X or maxY < 0 or minY > camera.ViewportSize.Y))
+	then
+		BossChase.stop()
+	end
 end
 
 function BossChase.update(dt, chasing, x, z, speed)
@@ -161,7 +211,11 @@ function BossChase.update(dt, chasing, x, z, speed)
 	boss.scale = popScale(boss.t)
 	if was < cfg.ZoomAt and boss.t >= cfg.ZoomAt then
 		showBars(true)
-		Sounds.play("boss_" .. boss.kind, Config.Boss.CryVolume[boss.kind] or 0.6, (Config.Boss.CryPitch or {})[boss.kind]) -- (its own cry with the bars: Sounds' boss_<Kind>)
+		Sounds.play(
+			"boss_" .. boss.kind,
+			Config.Boss.CryVolume[boss.kind] or 0.6,
+			(Config.Boss.CryPitch or {})[boss.kind]
+		) -- (its own cry with the bars: Sounds' boss_<Kind>)
 	elseif was < cfg.CutsceneTime - cfg.BarTime and boss.t >= cfg.CutsceneTime - cfg.BarTime then
 		showBars(false)
 	end
@@ -179,7 +233,10 @@ function BossChase.update(dt, chasing, x, z, speed)
 		b.vein.Rotation = v * cfg.VeinSpin -- (turning slowly: QM)
 	end
 	local moving = 0
-	if chasing and x then
+	if boss.runPastSpeed then
+		boss.z += boss.runPastSpeed * dt
+		moving = boss.runPastSpeed
+	elseif chasing and x then
 		-- After you at your own speed (QM, Oct 10), so the gap holds all the way home,
 		-- never nearer than Behind studs, and pulling up short of the start line.
 		local was = boss.z
@@ -190,7 +247,11 @@ function BossChase.update(dt, chasing, x, z, speed)
 		-- (closing in from Behind to just clear of the camera, CameraClear, till it has you)
 		local clear = boss.room + (cfg.CameraClear or 30)
 		local gap = if caught then -boss.room - 30 else clear + (cfg.Behind + boss.room - clear) * (1 - closing)
-		boss.z = math.min(boss.z + (math.max(speed or 0, cfg.ChaseMin or 0) + (if caught then 260 else 60 * closing)) * dt, z - gap, -cfg.StopShort - boss.room) -- (never slower than ChaseMin: it doesn't stall as you turn)
+		boss.z = math.min(
+			boss.z + (math.max(speed or 0, cfg.ChaseMin or 0) + (if caught then 260 else 60 * closing)) * dt,
+			z - gap,
+			-cfg.StopShort - boss.room
+		) -- (never slower than ChaseMin: it doesn't stall as you turn)
 		boss.x += (x - boss.x) * (1 - math.exp(-2 * dt))
 		moving = math.max(boss.z - was, 0) / math.max(dt, 1e-3)
 	end
@@ -203,7 +264,8 @@ function BossChase.update(dt, chasing, x, z, speed)
 		roar.next = roar.next or boss.t + r.First
 		if boss.t >= roar.next then
 			roar.next = boss.t + r.Every[1] + math.random() * (r.Every[2] - r.Every[1])
-			roar.sound, roar.peak = Sounds.play("boss_" .. boss.kind, cfg.CryVolume[boss.kind] or 0.6, (cfg.CryPitch or {})[boss.kind]), 0
+			roar.sound, roar.peak =
+				Sounds.play("boss_" .. boss.kind, cfg.CryVolume[boss.kind] or 0.6, (cfg.CryPitch or {})[boss.kind]), 0
 		end
 	end
 	-- (how loud it is, of its loudest: fast up, slower down)
@@ -239,15 +301,23 @@ RunService:BindToRenderStep("BossRoarShake", Enum.RenderPriority.Camera.Value + 
 		return math.noise(t * 18, k) * 2
 	end
 	shaken = camera.CFrame
-	camera.CFrame = shaken * CFrame.new(wobble(1) * r.ShakeMove * s, wobble(2) * r.ShakeMove * s, 0)
-		* CFrame.Angles(math.rad(wobble(3) * r.Shake * s), math.rad(wobble(4) * r.Shake * s), math.rad(wobble(5) * r.Shake * s))
+	camera.CFrame = shaken
+		* CFrame.new(wobble(1) * r.ShakeMove * s, wobble(2) * r.ShakeMove * s, 0)
+		* CFrame.Angles(
+			math.rad(wobble(3) * r.Shake * s),
+			math.rad(wobble(4) * r.Shake * s),
+			math.rad(wobble(5) * r.Shake * s)
+		)
 end)
 
 -- Lingering: just after the close-up, the camera stays behind you looking down the
 -- course at the boss for Linger s while you turn and it starts after you (QM, Oct 11).
 function BossChase.lingering()
 	local cfg = Config.Boss
-	return boss ~= nil and boss.t > cfg.CutsceneTime - cfg.BarTime * 0.5 and boss.t < cfg.CutsceneTime + (cfg.Linger or 0)
+	return boss ~= nil
+		and not boss.runPastSpeed
+		and boss.t > cfg.CutsceneTime - cfg.BarTime * 0.5
+		and boss.t < cfg.CutsceneTime + (cfg.Linger or 0)
 end
 
 function BossChase.camera()
@@ -255,7 +325,12 @@ function BossChase.camera()
 		local at = Vector3.new(boss.riderX, 0, boss.riderZ)
 		return CFrame.lookAt(at + Vector3.new(0, 30, 30), Vector3.new(boss.x, 6, boss.z))
 	end
-	if not boss or boss.t < Config.Boss.ZoomAt or boss.t > Config.Boss.CutsceneTime - Config.Boss.BarTime * 0.5 then
+	if
+		not boss
+		or boss.runPastSpeed
+		or boss.t < Config.Boss.ZoomAt
+		or boss.t > Config.Boss.CutsceneTime - Config.Boss.BarTime * 0.5
+	then
 		return nil
 	end
 	-- (its face: up its front, FaceAt of the way up its box from the middle, and as far forward)

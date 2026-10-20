@@ -98,7 +98,7 @@ end)
 
 local buyPass = Instance.new("RemoteEvent")
 buyPass.Name = "BuyPass"
-buyPass.OnServerEvent:Connect(function(player, key)
+buyPass.OnServerEvent:Connect(function(player, key, source)
 	local pass = typeof(key) == "string" and byKey[key]
 	if not pass then
 		return
@@ -106,6 +106,8 @@ buyPass.OnServerEvent:Connect(function(player, key)
 	if pass.Id ~= 0 then
 		-- (owned too: Roblox's prompt then says you own it, so a tap never does nothing)
 		MarketplaceService:PromptGamePassPurchase(player, pass.Id)
+		local surface = if source == "shop" then "shop" elseif source == "crash" and key == "Invincible" then "crashInvincible" else key
+		require(script.Parent.Telemetry).monoPrompt(player, "pass:" .. pass.Id, surface)
 	elseif RunService:IsStudio() and not player:GetAttribute("Pass" .. pass.Key) then
 		grant(player, pass, true)
 	end
@@ -116,7 +118,7 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, id, p
 	local pass = byId[id]
 	if purchased and pass and player.Parent then
 		grant(player, pass, true)
-		require(script.Parent.Telemetry).purchase(player) -- (/stats: % who bought)
+		require(script.Parent.Telemetry).purchase(player, nil, "pass:" .. id) -- (/stats: % who bought)
 	end
 end)
 

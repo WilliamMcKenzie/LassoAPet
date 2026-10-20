@@ -297,6 +297,12 @@ local function showEgg(pen, id, item)
 				speedupEgg:FireServer(id)
 			end
 		end)
+		prompt.PromptShown:Connect(function()
+			if (s.hatchAt or 0) > workspace:GetServerTimeNow() and not player:GetAttribute("Tutorial") then
+				local telemetry = ReplicatedStorage:FindFirstChild("Telemetry")
+				if telemetry then telemetry:FireServer("monoView", "eggSpeedup") end
+			end
+		end)
 		s.speedupPrompt = prompt
 	end
 
@@ -642,16 +648,15 @@ RunService.RenderStepped:Connect(function(dt)
 				if not s.hatching then
 					local ready = (s.hatchAt or now) <= now
 					if s.speedupPrompt then
-						-- (an egg only beats a pet's RIDE once it's ready to hatch: till then, by a
-						-- pet, the pet's prompt shows, Ride's "RidePromptUp"; QM, Oct 13)
+						-- Eggs use F and take priority nearby; Ride hides itself while an egg prompt is up.
+						-- Testing RidePromptUp here makes the two prompts suppress each other.
 						s.speedupPrompt.Enabled = pen == myPen() and pen:GetAttribute("Owner") == player.UserId and (ready or not player:GetAttribute("Tutorial")) -- (the tutorial: hatch it, no speeding up)
-							and (ready or not player:GetAttribute("RidePromptUp"))
 					end
 					s.timer.Text = if ready then "Ready" else countdown((s.hatchAt or now) - now)
 					readyArrow(s, ready and pen == myPen() and not player:GetAttribute("Tutorial") and not player:GetAttribute("EggPromptUp")
 						and not player:GetAttribute("MergeView") and not player:GetAttribute("Cutscene"))
 					if s.speedupPrompt then
-						-- (its action: "Hatch now · R$10" till it's ready, the paid hatch; the time left shows over the egg)
+						-- (its action: the time left, as over the egg, till it's ready: QM, Oct 10)
 						local action = if ready then "Hatch" else "Hatch now · R$" .. Config.SpeedupEgg.Price -- (the paid hatch says so: QM, Oct 19)
 						if s.speedupPrompt.ActionText ~= action then
 							s.speedupPrompt.ActionText = action

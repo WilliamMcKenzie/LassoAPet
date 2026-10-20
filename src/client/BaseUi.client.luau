@@ -155,11 +155,7 @@ menu.Parent = root
 local mergeBadge -- QM's red "1" on Merge while the "Merge animals" quest is up and you've not merged yet (QM, Oct 11)
 local mergeHinted = false -- (and the quest's tap hands, as tapping it, once as it comes up: QM)
 local mergeHintDue = false -- (waiting for the egg reveal to finish and the quest to pop in: QM, Oct 13)
-for i, spec in { { "shop", function()
-	if Shop.hasOffers() then
-		Shop.toggle()
-	end
-end }, { "pets", function()
+for i, spec in { { "pets", function()
 	AnimalDex.close(true)
 	PetsPanel.toggle()
 end }, { "index", function()
@@ -169,16 +165,15 @@ end }, { "merge", function()
 	if Hud.onFuse then
 		Hud.onFuse()
 	end
-end }, { "invite", promptInvite } } do
+end }, { "shop", function()
+	Shop.toggle()
+end } } do
 	-- (each in a slot of its own size, centred in it, so it grows from its middle and the
 	-- others stay put: QM, Oct 13)
-	if spec[1] == "shop" and not Config.ShopOn then
-		continue -- (the shop hidden for now: QM, Oct 15)
-	end
 	local slot = Instance.new("Frame")
 	slot.Name = spec[1] .. "Slot"
 	slot.BackgroundTransparency = 1
-	slot.LayoutOrder = ({ merge = 1, index = 2, shop = 3, pets = 3, invite = 4 })[spec[1]] -- (top to bottom: Merge, Index, Shop, Invite: QM's mockup, Oct 12)
+	slot.LayoutOrder = ({ merge = 1, index = 2, pets = 3, shop = 4 })[spec[1]] -- top to bottom: Merge, Index, Pets, Shop
 	slot.Parent = menu
 	local b = picture("ImageButton", slot, ART[spec[1]], MENU_WIDTH)
 	b.Name = spec[1]
@@ -342,6 +337,7 @@ end)
 -- tutorial (questGuide, below), and only while the starter quest (World 1's "Reach Meadow")
 -- is still to claim, a tap hand on the folded panel to open it, then on its Claim.
 local questGuide = false
+local questGuideThisVisit = false -- a merge lesson must wait for the next ride home
 local openHand = TapHand.new(80)
 openHand.Name = "OpenQuestsHint"
 openHand:SetAttribute("Spotlight", true) -- (TapHand's: QM, Oct 13)
@@ -404,7 +400,11 @@ local function hint(quest)
 			task.spawn(CameraHint.show, look, -ahead * 70 + Vector3.new(0, 12, 0))
 		end
 	elseif quest.kind == "merge" and Config.World == 1 then -- (World 2: no hint, QM)
-		player:SetAttribute("MergeHint", true)
+		if questGuideThisVisit then
+			mergeHintDue = true
+		else
+			player:SetAttribute("MergeHint", true)
+		end
 	elseif quest.kind == "invite" then
 		promptInvite()
 	end
@@ -601,8 +601,11 @@ local function drawQuests()
 	if merging and not mergeHinted and not player:GetAttribute("Tutorial") and Config.World == 1 then -- (not till the tutorial's over; World 1 only: World 2's players know how, QM)
 		mergeHinted = true
 		mergeHintDue = true -- (shown once the egg reveal's over and the quest's popped in: below)
-	elseif not mergeUp and player:GetAttribute("MergeHint") then
-		player:SetAttribute("MergeHint", nil) -- (no Merge animals quest up: e.g. "/tutorial" set the quests back)
+	elseif not mergeUp then
+		mergeHintDue = false
+		if player:GetAttribute("MergeHint") then
+			player:SetAttribute("MergeHint", nil) -- the pending lesson no longer has a quest
+		end
 	end
 	local count = 0
 	for _ in claimable do
@@ -690,8 +693,10 @@ RunService.RenderStepped:Connect(function()
 		wasRiding = true
 	elseif wasRiding and not player:GetAttribute("Cutscene") then -- (back from a ride, its reward shown)
 		wasRiding = false
+		questGuideThisVisit = false
 		if not questGuide and not player:GetAttribute("Tutorial") then
 			questGuide = true
+			questGuideThisVisit = starterUp()
 			drawQuests() -- (the starter quest's Claim gets its spotlight)
 		end
 	end
@@ -711,7 +716,7 @@ RunService.RenderStepped:Connect(function()
 	end
 	-- The Merge animals quest's hint: only once the egg reveal's over and the quest has
 	-- popped in (QM, Oct 13: it showed while the egg was still rolling).
-	if mergeHintDue and up and not player:GetAttribute("Cutscene") then
+	if mergeHintDue and up and not questGuideThisVisit and not player:GetAttribute("Cutscene") then
 		local popping = false
 		for _, quest in questList do
 			if typeof(quest) == "table" and quest.kind == "merge" and pops[tonumber(quest.i)] ~= nil then

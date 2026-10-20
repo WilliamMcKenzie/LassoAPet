@@ -99,6 +99,7 @@ task.spawn(function()
 		flush()
 	end
 end)
+StatsStore.flush = flush
 game:BindToClose(flush)
 
 return StatsStore

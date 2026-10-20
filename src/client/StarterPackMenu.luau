@@ -200,6 +200,8 @@ local function setScale(scale)
 end
 
 function StarterPackMenu.open()
+	local telemetry = ReplicatedStorage:FindFirstChild("Telemetry")
+	if telemetry then telemetry:FireServer("monoView", "StarterPack") end
 	if open then
 		return
 	end
