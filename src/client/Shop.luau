@@ -208,6 +208,19 @@ local STARTER_FOR = 10 * 60
 local starter = image(scroll, "StarterPack", ART.StarterPack, 0, 0, EGG_W, math.round(470 * EGG_K))
 local starterBuy = image(starter, "Buy", ART.StarterBuy, math.round(943 * EGG_K), math.round(318 * EGG_K), math.round(230 * EGG_K), math.round(134 * EGG_K), true)
 pressable(starterBuy)
+starterBuy.ZIndex = 3
+local STARTER_BUY = Vector2.new(starterBuy.Size.X.Offset, starterBuy.Size.Y.Offset)
+-- (behind Buy: QM's sunburst, turning, and Buy pulsing: QM, Oct 20)
+local starterBurst = Instance.new("ImageLabel")
+starterBurst.Name = "Sunburst"
+starterBurst.BackgroundTransparency = 1
+starterBurst.Image = "rbxassetid://85834206672187" -- assets/ui/Sunburst.png (QM's)
+starterBurst.ImageTransparency = 0.2
+starterBurst.AnchorPoint = Vector2.new(0.5, 0.5)
+starterBurst.Position = starterBuy.Position
+starterBurst.Size = UDim2.fromOffset(STARTER_BUY.X * 1.7, STARTER_BUY.X * 1.7)
+starterBurst.ZIndex = 2
+starterBurst.Parent = starter
 starterBuy.Activated:Connect(function()
 	if open then
 		ReplicatedStorage:WaitForChild("BuyPass"):FireServer("StarterPack")
@@ -259,6 +272,9 @@ RunService.Heartbeat:Connect(function()
 		end
 		local k = 1 + 0.08 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 * 1.1)) -- ("WORLD 2" swells up to 8% and back, about once a second)
 		world2.Size = UDim2.fromOffset(WORLD2.X * k, WORLD2.Y * k)
+		local b = 1 + 0.06 * (0.5 - 0.5 * math.cos(os.clock() * math.pi * 2 * 1.1)) -- (Buy swells up to 6% and back)
+		starterBuy.Size = UDim2.fromOffset(STARTER_BUY.X * b, STARTER_BUY.Y * b)
+		starterBurst.Rotation = os.clock() * 25 % 360
 		local left = starterLeft()
 		ribbon.Text = string.format("%dm %02ds", left // 60, left % 60)
 		if left <= 0 then
