@@ -10,6 +10,7 @@ Stats.Rows = {
 	{ "eggSpeedup", "Egg speed-up" },
 	{ "cashShortfall", "Insufficient-cash offer" },
 	{ "StarterPack", "Starter Pack" },
+	{ "StarterPackOpen", "Starter Pack popup opened" },
 	{ "Speed", "1.5x Speed card" },
 	{ "DoubleGold", "2x Cash card" },
 	{ "Invincible", "Invincible card" },

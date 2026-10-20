@@ -201,7 +201,7 @@ end
 
 function StarterPackMenu.open()
 	local telemetry = ReplicatedStorage:FindFirstChild("Telemetry")
-	if telemetry then telemetry:FireServer("monoView", "StarterPack") end
+	if telemetry then telemetry:FireServer("monoView", "StarterPackOpen") end -- (opened the popup: /stats, apart from seeing its button)
 	if open then
 		return
 	end
