@@ -11,6 +11,7 @@
 
 local ContentProvider = game:GetService("ContentProvider")
 local Players = game:GetService("Players")
+local LowMemory = require(script.Parent.LowMemory)
 
 -- Every image in the client's scripts (tools/preload_ids.py).
 local PANELS = {
@@ -180,6 +181,11 @@ local REST = {
 	"rbxassetid://107890182670363", "rbxassetid://88920972936817",
 }
 
+-- On phones and tablets (LowMemory) nothing is pinned: the UI's art alone is ~500 MB of
+-- textures held for the whole session (measured in Studio, Oct 20), and the <2 GB
+-- devices crash on it. There the pictures are only downloaded and decoded, so the
+-- first show is quick but Roblox can drop them when memory runs low, and the
+-- headshots and the dictionary's sheets load when they're opened.
 local warm = Instance.new("ScreenGui")
 warm.Name = "PreloadWarm"
 warm.ResetOnSpawn = false
@@ -191,10 +197,15 @@ for _, id in PANELS do
 	keep.ImageTransparency = 0.99
 	keep.Parent = warm
 end
-warm.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+if not LowMemory.on then
+	warm.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+end
 
 task.spawn(function()
 	pcall(ContentProvider.PreloadAsync, ContentProvider, warm:GetChildren())
+	if LowMemory.on then
+		return
+	end
 	-- (as image labels, not bare ids: PreloadAsync fails plain image id strings)
 	local labels = {}
 	for _, id in REST do

@@ -684,7 +684,7 @@ prepareHatch.OnInvoke = function(player, id)
 	if not player.Parent or not item.egg or item.hatchAt <= os.time() then
 		return nil
 	end
-	return "purchase"
+	return "purchase", item.hatchAt - os.time() -- (its time left picks the product: Config.speedupTier)
 end
 prepareHatch.Parent = game:GetService("ServerStorage")
 

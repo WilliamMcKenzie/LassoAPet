@@ -8,7 +8,17 @@ local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Studs = require(ReplicatedStorage.Shared.Studs)
 local world = workspace:WaitForChild("World")
+
+-- The map's stud Textures become the stud material here, before anyone joins (Shared/
+-- Studs), so clients never load those ~17,500 Textures (QM, Oct 20: phones running out
+-- of memory). Client/StudMap still converts anything this misses.
+for _, part in world:GetDescendants() do
+	if part:IsA("BasePart") then
+		Studs.convert(part)
+	end
+end
 
 -- The sky (Config.Sky), with no sun, moon, stars or clouds of Roblox's own.
 for _, child in Lighting:GetChildren() do

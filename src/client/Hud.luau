@@ -13,6 +13,7 @@ local AnimalDex = require(script.Parent.AnimalDex)
 local RollMenu = require(script.Parent.RollMenu)
 local Shop = require(script.Parent.Shop)
 local Gamepad = require(script.Parent.Gamepad)
+local LowMemory = require(script.Parent.LowMemory)
 local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
 -- The new riding UI (QM, Oct 9): with Config.RideHud off, the ride's calls below go to it.
 local RideUi = if Config.RideHud == false then require(script.Parent.RideUi) else nil
@@ -1161,12 +1162,13 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only
 	-- readies an image for drawing the first time it's on screen, which stalls
 	-- that frame. So each image also stays drawn in the corner at 1 pixel and
-	-- nearly invisible, keeping it ready for the moment it's needed.
+	-- nearly invisible, keeping it ready for the moment it's needed. Not on phones and
+	-- tablets (LowMemory): pinned, these ~190 pictures hold ~300 MB there for good.
 	local warm = Instance.new("Frame")
 	warm.Name = "Preload"
 	warm.BackgroundTransparency = 1
 	warm.Size = UDim2.fromOffset(1, 1)
-	warm.Parent = homeGui
+	warm.Parent = if LowMemory.on then nil else homeGui
 	local labels = {}
 	for key, entry in IMAGES do
 		if entry.id ~= "" then -- not uploaded yet
