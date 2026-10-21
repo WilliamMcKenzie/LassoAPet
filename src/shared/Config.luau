@@ -1775,7 +1775,7 @@ Config.AnimalScale.RoboShark = 4 -- (QM, Oct 15; its hunting still grows it from
 -- gold banked Multiplier times over, for the developer product ProductId (R$9 on QM's art). With
 -- ProductId 0 it's free in Studio and does nothing live.
 Config.AwayBoost = { ProductId = 3720169501, Multiplier = 4 }
-Config.RideEggAB = { Share = 0.5, Salt = 1, FastRides = 4, FastHatch = 15, Studio = "egg" }
+Config.RideEggAB = { Share = 1, Salt = 1, FastRides = 4, FastHatch = 15, Studio = "egg" } -- (QM, Oct 21: the A/B over, eggs for everyone; was 0.5)
 -- Limited stock and the display's overhead labels are active.
 Config.PetOffersLimited = true
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
