@@ -808,10 +808,10 @@ local Config = {
 	-- Stock (QM, Oct 15: "Loong 435/500 left"): Stock in all, shared by every server (Shop.server
 	-- counts each sale in a DataStore; workspace's "LoongLeft" is what's left), SOLD OUT at 0. It
 	-- starts at StartLeft (QM: "to make it feel like its selling"): no count saved yet means that.
-	LoongOffer = { Kind = "Loong", ProductId = 3718721407, Price = 399, Stock = 500, StartLeft = 435, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(7, 0, -11), -- (against the base's front wall, the Robo Shark beside it: QM, Oct 15)
+	LoongOffer = { Kind = "Loong", ProductId = 3718721407, Price = 999, Stock = 500, StartLeft = 435, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(7, 0, -11), -- (against the base's front wall, the Robo Shark beside it: QM, Oct 15)
 		Ledger = "loongs", StockKey = "sold" },
 	-- Majestic Unicorn replaces the limited Robo Shark; keep its product, stock and claim counters.
-	MajesticUnicornOffer = { Kind = "MajesticUnicorn", ProductId = 3718722226, Price = 199, Stock = 1000, StartLeft = 870, Scale = 2, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11),
+	MajesticUnicornOffer = { Kind = "MajesticUnicorn", ProductId = 3718722226, Price = 999, Stock = 1000, StartLeft = 870, Scale = 2, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11),
 		Ledger = "roboSharks", StockKey = "sold_RoboShark", ClaimField = "boughtRoboSharks" },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
