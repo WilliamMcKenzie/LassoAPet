@@ -1427,6 +1427,10 @@ Config.EndPortal = nil
 -- World 2 bar). World 1 is everyone's.
 -- World 2 targets the late Volcano / first Jurassic rides on the normal income curve.
 Config.WorldPrices = { 0, 1000000, 10000000 }
+-- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
+-- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:
+-- free in Studio, not on sale live.
+Config.WorldProducts = { [3] = { ProductId = 3727273087, Price = 299 } }
 -- Rebirth (QM, Oct 13): World 2's Rebirth bar (World2Bar.client) for Prices[n] gold, your
 -- nth. It re-locks World 2 (save up for it again) and sends you to World 1; your pets stay.
 -- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,

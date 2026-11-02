@@ -92,6 +92,12 @@ function WorldUnlock.buy(world, bought)
 	if busy then
 		return false
 	end
+	if Config.WorldProducts[world] then -- (Robux: Roblox's prompt; Shop.server gives it once it's paid)
+		if not player:GetAttribute("OwnsWorld" .. world) then
+			ReplicatedStorage.BuyShop:FireServer("World" .. world, "worlds")
+		end
+		return true
+	end
 	local shortfall = (Config.WorldPrices[world] or 0) - (player:GetAttribute("Gold") or 0)
 	if shortfall > 0 and not player:GetAttribute("OwnsWorld" .. world) then
 		require(script.Parent.Shop).buyGoldFor(shortfall)

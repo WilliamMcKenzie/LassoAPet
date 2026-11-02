@@ -240,8 +240,9 @@ for i, world in WORLDS do
 			if busy then
 				return
 			end
-			price.Text = "$" .. Config.short(world.price)
-			price.TextColor3 = if (player:GetAttribute("Gold") or 0) >= world.price then CASH_GREEN else CASH_RED
+			local product = Config.WorldProducts[i]
+			price.Text = if product then "R$" .. product.Price else "$" .. Config.short(world.price)
+			price.TextColor3 = if product or (player:GetAttribute("Gold") or 0) >= world.price then CASH_GREEN else CASH_RED
 		end
 		player:GetAttributeChangedSignal("Gold"):Connect(showPrice)
 		showPrice()

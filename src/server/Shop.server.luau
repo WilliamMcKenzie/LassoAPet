@@ -352,6 +352,19 @@ buyShop.OnServerEvent:Connect(function(player, key, source)
 		end
 		return
 	end
+	local world = typeof(key) == "string" and tonumber(string.match(key, "^World(%d+)$"))
+	local product = world and Config.WorldProducts[world]
+	if product then
+		if player:GetAttribute("OwnsWorld" .. world) then
+			return
+		elseif product.ProductId ~= 0 then
+			MarketplaceService:PromptProductPurchase(player, product.ProductId)
+			Telemetry.monoPrompt(player, "product:" .. product.ProductId, "world" .. world)
+		elseif RunService:IsStudio() then
+			game:GetService("ServerStorage").GrantWorld:Invoke(player, world)
+		end
+		return
+	end
 	if key == "HatchAll" then
 		local hatch = game:GetService("ServerStorage"):FindFirstChild("HatchAllEggs")
 		if not hatch or (hatch:Invoke(player, true) or 0) < 1 then
@@ -430,6 +443,18 @@ MarketplaceService.ProcessReceipt = function(receipt)
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end
 		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	for world, product in Config.WorldProducts do
+		if receipt.ProductId == product.ProductId and product.ProductId ~= 0 then
+			-- (given while they're here with their save loaded; else tried again on their next visit)
+			local player = Players:GetPlayerByUserId(receipt.PlayerId)
+			local grant = game:GetService("ServerStorage"):FindFirstChild("GrantWorld")
+			if player and grant and grant:Invoke(player, world) then
+				Telemetry.purchase(player, receipt.CurrencySpent, "product:" .. receipt.ProductId)
+				return Enum.ProductPurchaseDecision.PurchaseGranted
+			end
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
 	end
 	if receipt.ProductId == Config.HatchAll.ProductId then
 		-- (hatched while they're here with their pen loaded; else tried again on their next visit)

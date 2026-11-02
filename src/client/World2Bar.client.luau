@@ -56,7 +56,7 @@ local function goal()
 		return p and { price = p, label = "" }
 	end
 	for world = 2, #Config.Places do
-		if not player:GetAttribute("OwnsWorld" .. world) and Config.WorldPrices[world] then
+		if not player:GetAttribute("OwnsWorld" .. world) and Config.WorldPrices[world] and not Config.WorldProducts[world] then -- (Robux worlds: the Worlds menu's)
 			return { price = Config.WorldPrices[world], label = "WORLD " .. world, world = world }
 		end
 	end

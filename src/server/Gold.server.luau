@@ -205,6 +205,9 @@ local buyWorld = Instance.new("RemoteFunction")
 buyWorld.Name = "BuyWorld"
 buyWorld.OnServerInvoke = function(player, world)
 	local price = Config.WorldPrices[tonumber(world) or 0]
+	if Config.WorldProducts[tonumber(world) or 0] then
+		return false -- (Robux only: GrantWorld)
+	end
 	if not price or not loaded[player] or player:GetAttribute("OwnsWorld" .. world) then
 		return false
 	end
@@ -222,6 +225,21 @@ buyWorld.OnServerInvoke = function(player, world)
 	return true
 end
 buyWorld.Parent = ReplicatedStorage
+-- A world bought for Robux (Config.WorldProducts; Shop.server's receipt): false till the save's loaded.
+local grantWorld = Instance.new("BindableFunction")
+grantWorld.Name = "GrantWorld"
+grantWorld.OnInvoke = function(player, world)
+	if not loaded[player] then
+		return false
+	end
+	if not player:GetAttribute("OwnsWorld" .. world) then
+		player:SetAttribute("OwnsWorld" .. world, true)
+		Funnel.boughtWorld(player, world)
+		save(player)
+	end
+	return true
+end
+grantWorld.Parent = game:GetService("ServerStorage")
 -- A world given some other way (the Starter Pack: Hatchery sets "OwnsWorld2"): saved at once.
 local function watchWorlds(player)
 	for world in Config.Places do
@@ -247,7 +265,7 @@ buyTrail.OnServerInvoke = function(player)
 		return false
 	end
 	for world in Config.Places do
-		if world ~= 1 and not player:GetAttribute("OwnsWorld" .. world) then
+		if world ~= 1 and not Config.WorldProducts[world] and not player:GetAttribute("OwnsWorld" .. world) then
 			return false
 		end
 	end
