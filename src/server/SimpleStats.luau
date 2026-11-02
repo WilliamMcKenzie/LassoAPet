@@ -17,6 +17,7 @@ Stats.Rows = {
 	{ "Invincible", "Invincible button" },
 	{ "DoubleGold", "2x Cash (old button)" },
 	{ "eggSpeedup", "Egg: Hatch now" },
+	{ "hatchAll", "Hatch All button (in your pen)" },
 	{ "revive", "Crash: Revive" },
 	{ "crashInvincible", "Crash: Invincible" },
 	{ "away4x", "Away panel: 4x" },

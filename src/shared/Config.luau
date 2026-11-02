@@ -1133,6 +1133,9 @@ local Config = {
 		{ Upto = 60 * 60, ProductId = 3720452246, Price = 49 },
 		{ Upto = math.huge, ProductId = 3720452332, Price = 79 },
 	} },
+	-- Hatch All (QM, Nov 2): the button over the world bar while you're in your pen with eggs
+	-- still hatching (Client/World2Bar); bought, every egg in your pen hatches (Hatchery's HatchAllEggs).
+	HatchAll = { ProductId = 3727269167, Price = 99 },
 	-- Game passes (QM, Oct 7; Server/Passes): bought once, kept for good. Each is a
 	-- pass on the Creator Hub (Monetization > Passes); put its id in Id. With Id 0
 	-- it isn't offered live, and in Studio buying it is free for the session.

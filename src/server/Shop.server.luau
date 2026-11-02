@@ -336,6 +336,7 @@ end)
 -- The away panel's rainbow button (Config.AwayBoost, Client/Away): its product, or free in
 -- Studio till it has one. Hatchery's BankAway banks the away gold Multiplier times over.
 local awayGranted = {} -- [PurchaseId] = true (a receipt seen again is already banked)
+local hatchAllGranted = {} -- (Hatch All's, the same)
 local function bankAway(player)
 	local bank = game:GetService("ServerStorage"):FindFirstChild("BankAway")
 	return bank ~= nil and bank:Invoke(player, Config.AwayBoost.Multiplier) == true
@@ -349,6 +350,15 @@ buyShop.OnServerEvent:Connect(function(player, key, source)
 		elseif RunService:IsStudio() then
 			bankAway(player)
 		end
+		return
+	end
+	if key == "HatchAll" then
+		local hatch = game:GetService("ServerStorage"):FindFirstChild("HatchAllEggs")
+		if not hatch or (hatch:Invoke(player, true) or 0) < 1 then
+			return -- (nothing left to hatch: no checkout)
+		end
+		MarketplaceService:PromptProductPurchase(player, Config.HatchAll.ProductId)
+		Telemetry.monoPrompt(player, "product:" .. Config.HatchAll.ProductId, "hatchAll")
 		return
 	end
 	local offer = typeof(key) == "string" and offers[key]
@@ -416,6 +426,20 @@ MarketplaceService.ProcessReceipt = function(receipt)
 		local player = Players:GetPlayerByUserId(receipt.PlayerId)
 		if player and bankAway(player) then
 			awayGranted[receipt.PurchaseId] = true
+			Telemetry.purchase(player, receipt.CurrencySpent, "product:" .. receipt.ProductId)
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	if receipt.ProductId == Config.HatchAll.ProductId then
+		-- (hatched while they're here with their pen loaded; else tried again on their next visit)
+		if hatchAllGranted[receipt.PurchaseId] then
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		local player = Players:GetPlayerByUserId(receipt.PlayerId)
+		local hatch = game:GetService("ServerStorage"):FindFirstChild("HatchAllEggs")
+		if player and hatch and hatch:Invoke(player) then
+			hatchAllGranted[receipt.PurchaseId] = true
 			Telemetry.purchase(player, receipt.CurrencySpent, "product:" .. receipt.ProductId)
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end

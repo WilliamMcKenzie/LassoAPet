@@ -12,6 +12,8 @@
 -- world you're in (World 2, then World 3: Config.WorldPrices), and once they're all yours to the
 -- next trail (Config.TrailBars: Grey ... Rainbow; Gold.server's BuyTrail). The label's on QM's
 -- art with its "WORLD 2" painted out (BarFill.png, BarEmpty.png).
+-- In your pen with eggs still hatching it's QM's Hatch All button instead (Nov 2; Config.HatchAll,
+-- Shop.server's "HatchAll"): every egg there hatched for R$99.
 -- In the Halloween world (Config.Gems, QM Oct 15) it's the "+5s TIME" bar instead: QM's art
 -- (gems/BossTimeBar.png on BossTimeBarDisabled.png) filling as your gems come up to the next
 -- 5 seconds' price, the gems over it in their yellow; tapped when full, it buys them
@@ -41,6 +43,7 @@ local WORLD_ART = {
 local TRAIL_ART = { "rbxassetid://96598497238200", "rbxassetid://130130177164969" } -- TrailBar.png, TrailBarEmpty.png (QM's, "TRAIL" on them; the colour's name goes before it)
 local BAR = Vector2.new(660, 660 * 103 / 964) -- (half the screen across: QM's mockup)
 local TOP = 14 -- px from the screen's top (QM, Oct 13: was at the bottom, over the egg inventory)
+local HATCH_ALL = "rbxassetid://95664942496836" -- assets/ui/HatchAll.png (QM's, same size as the bar)
 local ARROW = "rbxassetid://127821178410489" -- assets/ui/TutorialArrow.png
 local NEAR = 30 -- studs from the gate: the Worlds menu's (no trail closer in)
 -- What the bar's for now: { price, label, world or trail }, or nil when there's nothing left.
@@ -150,6 +153,17 @@ hand:SetAttribute("FocusGoal", "buyWorld2")
 hand.Position = UDim2.fromScale(0.84, 0.6)
 hand.Visible = false
 hand.Parent = bar
+local hatchAll = Instance.new("ImageButton")
+hatchAll.Name = "HatchAll"
+hatchAll.AutoButtonColor = false
+hatchAll.BackgroundTransparency = 1
+hatchAll.Image = HATCH_ALL
+hatchAll.AnchorPoint = bar.AnchorPoint
+hatchAll.Visible = false
+hatchAll.Parent = root
+hatchAll.Activated:Connect(function()
+	ReplicatedStorage.BuyShop:FireServer("HatchAll", "pen") -- (Roblox's prompt; hatched once it's paid)
+end)
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local CURRENCY = if GEMS then "Gems" else "Gold"
@@ -232,6 +246,21 @@ local function align()
 	bar.Size = UDim2.fromOffset(size.X, size.Y)
 	green.Size = bar.Size
 	bar.Position = UDim2.new(0.5, 0, 0, (quests.AbsolutePosition.Y - root.AbsolutePosition.Y) / rootScale.Scale - (tall - header) / 2) -- (centred on it)
+	hatchAll.Size, hatchAll.Position = bar.Size, bar.Position
+end
+
+-- Standing in your own pen (its Area, a few studs' grace).
+local function inPen()
+	local index = player:GetAttribute("Pen")
+	local pens = workspace:FindFirstChild("Pens")
+	local pen = index and pens and pens:FindFirstChild("Pen" .. index)
+	local area = pen and pen:FindFirstChild("Area")
+	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not area or not area:IsA("BasePart") or not hrp then
+		return false
+	end
+	local at = area.CFrame:PointToObjectSpace(hrp.Position)
+	return math.abs(at.X) <= area.Size.X / 2 + 4 and math.abs(at.Z) <= area.Size.Z / 2 + 4
 end
 
 RunService.RenderStepped:Connect(function()
@@ -239,7 +268,10 @@ RunService.RenderStepped:Connect(function()
 	local owned = player:GetAttribute("OwnsWorld2") == true
 	local busy = Hud.isRiding() or player:GetAttribute("Cutscene") or player:GetAttribute("Tutorial")
 	local menu = player.PlayerGui:FindFirstChild("WorldsMenu")
-	gui.Enabled = price() ~= nil and not busy and not (menu and menu.Enabled) -- (not under the Worlds menu; in every world: QM, Oct 15)
+	local hatching = not busy and (player:GetAttribute("PenHatchLast") or 0) > workspace:GetServerTimeNow() and inPen()
+	hatchAll.Visible = hatching
+	bar.Visible = not hatching
+	gui.Enabled = (price() ~= nil or hatching) and not busy and not (menu and menu.Enabled) -- (not under the Worlds menu; in every world: QM, Oct 15)
 	if REBIRTH or GEMS then
 		return
 	end

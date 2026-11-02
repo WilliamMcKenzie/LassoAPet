@@ -225,6 +225,13 @@ local function publish(player)
 	player:SetAttribute("QuestsSeen", profile.questsSeen or nil) -- (BaseUi: the tap hand on the folded Quests panel till it's opened once)
 	player:SetAttribute("RidesDone", profile.ridesDone or 0) -- (PassButtons: from the 3rd)
 	player:SetAttribute("RideMerged", profile.rideMerged or 1) -- how many pets it's merged from (Shared/Merge)
+	local lastHatch = nil -- (when the pen's last egg hatches: Client/World2Bar's Hatch All till then)
+	for _, item in profile.items do
+		if item.egg and item.hatchAt and item.hatchAt > os.time() then
+			lastHatch = math.max(lastHatch or 0, item.hatchAt)
+		end
+	end
+	player:SetAttribute("PenHatchLast", lastHatch)
 	player:SetAttribute("RideFuse", profile.rideFuse) -- the donor, if it's a hybrid (Shared/Fusion)
 	player:SetAttribute("RideTier", profile.rideFuse and profile.rideTier or nil) -- its saved size tier (Fusion.tier)
 	player:SetAttribute("RideAuto", profile.rideFuse and profile.rideAuto or nil) -- its kept automatic ability (Fusion.autoAbility)
@@ -687,6 +694,32 @@ prepareHatch.OnInvoke = function(player, id)
 	return "purchase", item.hatchAt - os.time() -- (its time left picks the product: Config.speedupTier)
 end
 prepareHatch.Parent = game:GetService("ServerStorage")
+
+-- Hatch All (Config.HatchAll; Shop.server): with check, how many eggs in the pen are still
+-- hatching (nil till the pen's loaded); without, hatches them all, as the paid hatch does.
+local hatchAll = Instance.new("BindableFunction")
+hatchAll.Name = "HatchAllEggs"
+hatchAll.OnInvoke = function(player, check)
+	local profile = profiles[player]
+	if not profile or not loaded[player] or player:GetAttribute("Tutorial") then
+		return nil
+	end
+	local n = 0
+	for _, item in profile.items do
+		if item.egg and item.hatchAt and item.hatchAt > os.time() then
+			n += 1
+			if not check then
+				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
+			end
+		end
+	end
+	if not check then
+		save(player)
+		publish(player)
+	end
+	return n
+end
+hatchAll.Parent = game:GetService("ServerStorage")
 
 -- Fast Hatch bought in game: the eggs already waiting in the pen have their time
 -- left cut too (the eggs placed from then on start out with half).
