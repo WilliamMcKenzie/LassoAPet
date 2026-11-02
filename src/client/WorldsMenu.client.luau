@@ -29,6 +29,7 @@ local ART = { -- assets/ui/worlds (QM's; World2.png is his World1.png with a 2)
 	Travel = "rbxassetid://72409176941710", -- Travel.png: the blue button ("Travel" on it)
 	TravelLoading = "rbxassetid://104387240097786", -- TravelLoading.png: the same in grey, while a trip's on its way
 	Buy = "rbxassetid://128346351326066", -- Buy.png: the green button, a cash stack left, "Buy" right
+	BuyRobux = "rbxassetid://80598769848703", -- assets/ui/BuyRobux.png: QM's pink one, the Robux icon left (Robux worlds: Config.WorldProducts)
 }
 local WORLDS = {
 	{ name = "World 1", banner = "World1" },
@@ -214,7 +215,7 @@ for i, world in WORLDS do
 	local buy, travel
 	if world.price > 0 then
 		-- Buy: the art's cash stack, the price in green, then its "Buy".
-		buy = button(ART.Buy)
+		buy = button(if Config.WorldProducts[i] then ART.BuyRobux else ART.Buy)
 		buy.Name = "Buy"
 		-- The price as the merge menu's Merge button has it (QM): left aligned just past
 		-- the cash, Montserrat ExtraBold with a round black stroke, green when you can
@@ -234,6 +235,7 @@ for i, world in WORLDS do
 		stroke.Thickness = 5 * K
 		stroke.LineJoinMode = Enum.LineJoinMode.Round
 		stroke.Parent = price
+		price.Visible = not Config.WorldProducts[i] -- (QM's Robux art says it all: no price over it)
 		price.Parent = buy
 		local busy = false
 		local function showPrice()
