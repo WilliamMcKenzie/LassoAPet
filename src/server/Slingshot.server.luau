@@ -198,3 +198,23 @@ unlock.OnServerInvoke = function(player, i)
 	player:SetAttribute("PenLevel", i)
 	return true
 end
+
+-- A biome bought with Robux (Config.Biomes[i].RobuxProduct; Shop.server's ProcessReceipt
+-- invokes this): your pen level up to it. True once given.
+local grant = Instance.new("BindableFunction")
+grant.Name = "GrantBiome"
+grant.OnInvoke = function(player, i)
+	if not (player and player.Parent and Config.Biomes[i]) then
+		return false
+	end
+	local level = player:GetAttribute("PenLevel") or 1
+	if i > level then
+		local zone = ReplicatedStorage:FindFirstChild("ZoneUnlocked")
+		if zone then
+			zone:FireClient(player, i)
+		end
+		player:SetAttribute("PenLevel", i)
+	end
+	return true
+end
+grant.Parent = game:GetService("ServerStorage")

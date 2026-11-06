@@ -1,13 +1,20 @@
 -- The Slingshot's menu (QM, Nov 6: in place of the top bar): hold E at your slingshot and
--- pick where it flings you. The Weapon Shop's popup (HudKit.popup, its orange Header), one
--- card per biome in its own colours: one you've unlocked has GO!; one you haven't has its
--- price under its name and UNLOCK (only the next one in order can be bought: the server's
--- UnlockBiome, Server/Slingshot, takes the cash and puts your pen level up to it).
+-- pick where it flings you. Fight to Steal an Egg's Weapon Shop 1:1 (its client/WeaponShop:
+-- the orange-headed popup, HudKit.popup, and its 729 x 991 cards in a row that scrolls
+-- sideways), one card per biome (Config.Biomes), its back in the biome's colours:
+--   its name, Unlocked / Locked under it, its picture (Config.Biomes[i].Picture, a render of
+--   it), how many animals run there (the Weapon Shop's DPS bar), and at the bottom
+--   GO!       unlocked: flings you there (onPick)
+--   $Price    the next one to unlock, for its UnlockCost (Server/Slingshot's UnlockBiome: in
+--             order only), beside its Robux price when it has a developer product
+--             (Config.Biomes[i].RobuxProduct = { ProductId, Price }: Server/Slingshot's
+--             GrantBiome, from Shop.server's ProcessReceipt)
 --
 --   SlingshotMenu.open(onPick)   -- onPick(biome index) when you pick an unlocked one
 --   SlingshotMenu.close()
 --   SlingshotMenu.isOpen()
 
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -20,86 +27,176 @@ local Ui = require(script.Parent.Ui)
 local SlingshotMenu = {}
 
 local player = Players.LocalPlayer
-local fig, label, button = HudKit.fig, HudKit.label, HudKit.button
-
--- QM's Figma px, as the Shop's
-local WIDTH = 2177
-local GAP = 22
-local CARD_W, CARD_H = 520, 980 -- (a card's own size; more than fit across scroll sideways, as the Weapon Shop's)
-local BUTTON_W, BUTTON_H = CARD_W - 70, 170
+local fig, art, label, button = HudKit.fig, HudKit.art, HudKit.label, HudKit.button
+local NAME_STROKE = Color3.fromRGB(70, 70, 70) -- (the Weapon Shop's)
+local ICON_OUTLINE = 3
+local FAIL_SHOW = 1.2 -- seconds a failed buy's message shows on the button
+local UNLOCKED_COLOR = Color3.fromHex("7CFF4D")
+local LOCKED_COLOR = Color3.fromHex("ff5a5a")
 
 local gui, cards, onPick
-local busy = false
+local made = {} -- [biome index] = its card's parts
 
-local function unlocked(i)
-	return i <= (player:GetAttribute("PenLevel") or 1)
+local function price(n)
+	return "$" .. Config.short(n or 0)
 end
 
-local function setLook(b, look)
-	if b:GetAttribute("Look") == look then
-		return
+local function level()
+	return player:GetAttribute("PenLevel") or 1
+end
+
+-- a card (the Weapon Shop's: 729 x 991 Figma px)
+local function makeCard(parent, i, biome)
+	local ground = biome.GroundColors or { Color3.fromRGB(120, 200, 90), Color3.fromRGB(100, 170, 70) }
+	local wall = biome.WallColors or ground
+	local card = Ui.make(parent, "Card" .. i, "Frame", {
+		BackgroundTransparency = 1,
+		Size = UDim2.fromOffset(fig(729), fig(991)),
+		LayoutOrder = i,
+	})
+	local back = HudKit.back(card, "Card", {})
+	-- (its rarity's gradient on the Weapon Shop's: here the biome's ground down to its wall)
+	local fill = back:FindFirstChild("Fill")
+	if fill then
+		fill.Color = ColorSequence.new(ground[2] or ground[1], wall[1])
+		fill.Rotation = 90
 	end
-	local old = b:FindFirstChild("Back")
-	if old then
-		old:Destroy()
+	local glow = Ui.make(back, "Glow", "Frame", {
+		BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(fig(5 + 16), fig(5 + 16)),
+		Size = UDim2.new(1, -2 * fig(5 + 16), 1, -2 * fig(5 + 16)),
+	})
+	if not glow:FindFirstChildOfClass("UIStroke") then
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.new(1, 1, 1)
+		stroke.Transparency = 0.5
+		stroke.Thickness = fig(16)
+		stroke.Parent = glow
 	end
-	HudKit.back(b, look, {})
-	b:SetAttribute("Look", look)
+	local picture = Ui.make(card, "Picture", "ImageLabel", {
+		BackgroundTransparency = 1,
+		Image = biome.Picture or "",
+		ScaleType = Enum.ScaleType.Crop,
+		Position = UDim2.fromOffset(fig(109), fig(237)),
+		Size = UDim2.fromOffset(fig(512), fig(512)),
+		ZIndex = 2,
+	})
+	if not picture:FindFirstChildOfClass("UICorner") then
+		local round = Instance.new("UICorner")
+		round.CornerRadius = UDim.new(0, fig(16))
+		round.Parent = picture
+	end
+	local name = label(card, "BiomeName", {
+		Text = biome.Name,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextScaled = true,
+		Position = UDim2.fromOffset(fig(24), fig(15)),
+		Size = UDim2.fromOffset(fig(674), fig(120)),
+		ZIndex = 3,
+	})
+	name.Outline.Color = NAME_STROKE
+	if not name:FindFirstChildOfClass("UITextSizeConstraint") then
+		local limit = Instance.new("UITextSizeConstraint")
+		limit.MaxTextSize = fig(120)
+		limit.Parent = name
+	end
+	local status = label(card, "Status", {
+		Text = "Locked",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = fig(70),
+		Position = UDim2.fromOffset(fig(24), fig(143)),
+		Size = UDim2.fromOffset(fig(674), fig(85)),
+		ZIndex = 3,
+	})
+	-- the dark bar (the Weapon Shop's DPS): how many kinds of animal run there
+	local kinds = 0
+	for _, weight in biome.Herd or {} do
+		if weight > 0 then
+			kinds += 1
+		end
+	end
+	local bar = HudKit.back(card, "Dark", {
+		Name = "Info",
+		Position = UDim2.fromOffset(fig(24), fig(631)),
+		Size = UDim2.fromOffset(fig(674), fig(128)),
+		ZIndex = 3,
+	})
+	label(bar, "Text", {
+		RichText = true,
+		Text = if kinds > 0 then string.format('<font color="#00FFF6">%d</font> Animals', kinds) else "No animals yet",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = fig(95),
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 4,
+	})
+	-- the buttons: GO! (whole width), or the cash price and the Robux price
+	local go = button(card, "ShopGo", 674, 160, { Position = UDim2.fromOffset(fig(24), fig(799)), ZIndex = 4 }, "GreenEdged")
+	label(go, "Text", {
+		Text = "GO!",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = fig(80),
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 5,
+	})
+	local robuxProduct = biome.RobuxProduct
+	local buyW = if robuxProduct then 413 else 674
+	local buy = button(card, "ShopBuy", buyW, 160, { Position = UDim2.fromOffset(fig(24), fig(799)), ZIndex = 4 }, "GreenEdged")
+	label(buy, "Text", {
+		Text = price(biome.UnlockCost),
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = fig(80),
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 5,
+	})
+	local robux
+	if robuxProduct then
+		robux = button(card, "ShopRobux", 213, 160, { Position = UDim2.fromOffset(fig(479), fig(799)), ZIndex = 4 }, "PinkEdged")
+		local icon = art(robux, "RobuxIcon", {
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.new(0, fig(12), 0.5, 0),
+			Size = UDim2.fromOffset(fig(85), fig(93)),
+			ZIndex = 5,
+		})
+		HudKit.outlineArt(icon, ICON_OUTLINE)
+		label(robux, "Text", {
+			Text = tostring(robuxProduct.Price or ""),
+			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.new(0, fig(110), 0.5, 0),
+			Size = UDim2.fromOffset(fig(100), fig(98)),
+			TextSize = fig(80),
+			ZIndex = 5,
+		})
+	end
+	for _, b in { go, buy, robux } do
+		UiFx.button(b)
+	end
+	return { card = card, status = status, go = go, buy = buy, robux = robux }
 end
 
 local function refresh()
-	if not cards then
-		return
-	end
-	local level = player:GetAttribute("PenLevel") or 1
-	local gold = player:GetAttribute("Gold") or 0
-	for i, c in cards do
-		local biome = Config.Biomes[i]
-		local cost = biome.UnlockCost or 0
-		if unlocked(i) then
-			c.price.Visible = false
-			c.text.Text = "GO!"
-			setLook(c.button, "Green")
-		else
-			c.price.Visible = true
-			c.price.Text = "$" .. Config.short(cost)
-			c.text.Text = "UNLOCK"
-			setLook(c.button, if i == level + 1 and gold >= cost then "Green" else "GreyPlain")
+	for i, c in made do
+		local open = i <= level()
+		c.status.Text = if open then "Unlocked" else "Locked"
+		c.status.TextColor3 = if open then UNLOCKED_COLOR else LOCKED_COLOR
+		c.go.Visible = open
+		c.buy.Visible = not open
+		if c.robux then
+			c.robux.Visible = not open
+		end
+		if not open and not c.buy:GetAttribute("Failing") then
+			c.buy.Text.Text = price(Config.Biomes[i].UnlockCost)
 		end
 	end
 end
 
-local function pick(i)
-	if busy then
-		return
-	end
-	local c = cards[i]
-	if unlocked(i) then
-		SlingshotMenu.close()
-		if onPick then
-			onPick(i)
-		end
-		return
-	end
-	local level = player:GetAttribute("PenLevel") or 1
-	local cost = Config.Biomes[i].UnlockCost or 0
-	if i ~= level + 1 or (player:GetAttribute("Gold") or 0) < cost then
-		UiFx.shake(c.button) -- (not the next one yet, or not enough cash)
-		return
-	end
-	busy = true
-	local remote = ReplicatedStorage:FindFirstChild("UnlockBiome")
-	local ok, bought = false, false
-	if remote then
-		ok, bought = pcall(remote.InvokeServer, remote, i)
-	end
-	busy = false
-	if ok and bought then
-		UiFx.play("Buy")
-	else
-		UiFx.shake(c.button)
-	end
-	refresh()
+local function fail(c, i, why)
+	UiFx.shake(c.buy)
+	c.buy:SetAttribute("Failing", true)
+	c.buy.Text.Text = why
+	task.delay(FAIL_SHOW, function()
+		c.buy:SetAttribute("Failing", nil)
+		c.buy.Text.Text = price(Config.Biomes[i].UnlockCost)
+	end)
 end
 
 local function build()
@@ -109,15 +206,15 @@ local function build()
 	local root = NativeHud.popupRoot()
 	local close
 	gui, close = HudKit.popup(root, "SlingshotMenu", "Slingshot", "Header")
-	UiFx.menu(gui, SlingshotMenu.close)
-	UiFx.button(close)
+	UiFx.menu(gui, SlingshotMenu.close) -- (one menu at a time: client/UiFx)
 	close.Activated:Connect(SlingshotMenu.close)
 
-	local list = Ui.make(gui, "List", "ScrollingFrame", {
+	-- (the Weapon Shop's row, scrolling sideways when the cards don't fit)
+	cards = Ui.make(gui, "Cards", "ScrollingFrame", {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(fig(45), fig(300)),
-		Size = UDim2.fromOffset(fig(WIDTH) + 4, fig(CARD_H + 50)),
+		Position = UDim2.fromOffset(fig(46) - 4, fig(330) - 4),
+		Size = UDim2.fromOffset(fig(2268 - 92) + 8, fig(991) + 8 + 10),
 		CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.X,
 		ScrollingDirection = Enum.ScrollingDirection.X,
@@ -125,87 +222,66 @@ local function build()
 		ScrollBarImageColor3 = Color3.fromRGB(150, 150, 150),
 		ZIndex = 2,
 	})
+	local pad = Instance.new("UIPadding")
+	pad.PaddingLeft, pad.PaddingTop = UDim.new(0, 4), UDim.new(0, 4)
+	pad.Parent = cards
 	local layout = Instance.new("UIListLayout")
 	layout.FillDirection = Enum.FillDirection.Horizontal
-	layout.Padding = UDim.new(0, fig(GAP))
+	layout.Padding = UDim.new(0, fig(44))
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Parent = list
-	local pad = Instance.new("UIPadding")
-	pad.PaddingLeft, pad.PaddingRight, pad.PaddingTop = UDim.new(0, fig(10)), UDim.new(0, fig(10)), UDim.new(0, fig(10))
-	pad.Parent = list
+	layout.Parent = cards
 
-	local w = CARD_W
-	cards = {}
+	local unlock = ReplicatedStorage:WaitForChild("UnlockBiome", 10)
 	for i, biome in Config.Biomes do
-		local ground = biome.GroundColors or { Color3.fromRGB(120, 200, 90), Color3.fromRGB(100, 170, 70) }
-		local wall = biome.WallColors or ground
-		local card = Ui.make(list, "Biome" .. i, "Frame", {
-			BackgroundTransparency = 1,
-			Size = UDim2.fromOffset(fig(w), fig(CARD_H)),
-			LayoutOrder = i,
-			ZIndex = 2,
-		})
-		-- its back in the biome's own colours: its ground over its wall, studded
-		HudKit.back(card, {
-			top = ground[2] or ground[1],
-			bottom = wall[1],
-			from = 0.3,
-			bevel = { 0.75, 0.75 },
-			border = { Color3.new(0, 0, 0), 5 },
-			tile = { 223.5, 0.8 },
-			outline = 6,
-			corner = 10,
-		}, { Name = "Back", Size = UDim2.fromScale(1, 1), ZIndex = 2 })
-		if biome.Picture then
-			-- its picture (a render of the biome, Config.Biomes[i].Picture) over the colours
-			local pic = Ui.make(card, "Picture", "ImageLabel", {
-				BackgroundTransparency = 1,
-				Image = biome.Picture,
-				ScaleType = Enum.ScaleType.Crop,
-				Position = UDim2.fromOffset(fig(8), fig(8)),
-				Size = UDim2.new(1, -fig(16), 1, -fig(16)),
-				ZIndex = 3,
-			})
-			local round = Instance.new("UICorner")
-			round.CornerRadius = UDim.new(0, fig(8))
-			round.Parent = pic
-		end
-		label(card, "BiomeName", {
-			Text = biome.Name,
-			TextXAlignment = Enum.TextXAlignment.Center,
-			TextSize = fig(100),
-			Position = UDim2.fromOffset(fig(20), fig(60)),
-			Size = UDim2.new(1, -fig(40), 0, fig(130)),
-			ZIndex = 4,
-		})
-		local price = label(card, "Price", {
-			Text = "",
-			TextColor3 = Color3.fromHex("ffe700"),
-			TextXAlignment = Enum.TextXAlignment.Center,
-			TextSize = fig(110),
-			Position = UDim2.fromOffset(fig(20), fig(230)),
-			Size = UDim2.new(1, -fig(40), 0, fig(130)),
-			ZIndex = 4,
-		})
-		local b = button(card, "Go", BUTTON_W, BUTTON_H, {
-			AnchorPoint = Vector2.new(0.5, 1),
-			Position = UDim2.new(0.5, 0, 1, -fig(60)),
-			ZIndex = 4,
-		}, "Green")
-		b:SetAttribute("Look", "Green")
-		UiFx.button(b)
-		local text = label(b, "Text", {
-			Text = "GO!",
-			TextXAlignment = Enum.TextXAlignment.Center,
-			TextSize = fig(90),
-			Size = UDim2.fromScale(1, 1),
-			ZIndex = 6,
-		})
-		b.Activated:Connect(function()
-			pick(i)
+		local c = makeCard(cards, i, biome)
+		made[i] = c
+		c.go.Activated:Connect(function()
+			if i <= level() then
+				SlingshotMenu.close()
+				if onPick then
+					onPick(i)
+				end
+			end
 		end)
-		cards[i] = { button = b, price = price, text = text }
+		c.buy.Activated:Connect(function()
+			if c.buy:GetAttribute("Failing") then
+				return
+			end
+			if i > level() + 1 then
+				return fail(c, i, "Unlock " .. Config.Biomes[i - 1].Name .. "!")
+			end
+			if (player:GetAttribute("Gold") or 0) < (biome.UnlockCost or 0) then
+				return fail(c, i, "Need cash!")
+			end
+			local ok, bought = false, false
+			if unlock then
+				ok, bought = pcall(unlock.InvokeServer, unlock, i)
+			end
+			if ok and bought then
+				UiFx.play("Buy")
+				refresh()
+			else
+				fail(c, i, "Can't buy")
+			end
+		end)
+		if c.robux then
+			c.robux.Activated:Connect(function()
+				MarketplaceService:PromptProductPurchase(player, biome.RobuxProduct.ProductId)
+			end)
+		end
 	end
+	-- the real Robux prices (regional pricing: the product's own), then the cards again
+	task.spawn(function()
+		for i, biome in Config.Biomes do
+			local product = biome.RobuxProduct
+			if product and product.ProductId and made[i].robux then
+				local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, product.ProductId, Enum.InfoType.Product)
+				if ok and info and info.PriceInRobux then
+					made[i].robux.Text.Text = tostring(info.PriceInRobux)
+				end
+			end
+		end
+	end)
 	player:GetAttributeChangedSignal("Gold"):Connect(refresh)
 	player:GetAttributeChangedSignal("PenLevel"):Connect(refresh)
 end
