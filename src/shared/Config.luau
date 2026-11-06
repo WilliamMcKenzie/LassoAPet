@@ -2369,11 +2369,6 @@ for kind, p in Config.SharedPets do
 	Config.AnimalStats[kind] = { Speed = p[3], Stamina = 3 }
 end
 
--- Particle auras (QM, Nov 6; Shared/Auras): which an animal wears, wherever it's drawn.
-Config.Auras = {
-	AlphaSnake = "SaiyanGreen", -- the Aura Pack's Saiyan flames, in its glowing green
-}
-
 -- Alphas (QM, Nov 6): an existing animal, bigger and recoloured (Animals/<Kind>.luau), about 10x
 -- rarer than it. Each runs in its base's World 1 biome at a tenth of its herd weight, a size tier
 -- up (capped at 4), Scale x as big as its base however its tier grows it, and otherwise takes its

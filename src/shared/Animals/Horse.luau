@@ -26,7 +26,6 @@
 -- back), so blending never shows hidden faces.
 
 local Config = require(script.Parent.Parent.Config)
-local Auras = require(script.Parent.Parent.Auras)
 local Rig = require(script.Parent.Rig)
 local HorseModel = require(script.Parent.HorseModel)
 
@@ -126,7 +125,6 @@ local function variant(name, data, rarity, points)
 
 	function class.new()
 		local model, byName, bones, pivots = Rig.fromData(data, name, STUD_TEXTURE, class.size)
-		Auras.attach(model, name) -- (its particle aura, if Config.Auras gives it one)
 
 		local clocks = {}
 		for anim in pairs(data.animations) do
