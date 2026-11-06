@@ -14,7 +14,8 @@ local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Sounds = require(script.Parent.Sounds)
 
 local player = Players.LocalPlayer
-local SHARDS_X, SHARDS_Y = 14, 7 -- the gate breaks into this many pieces
+local SHARDS_X = 14 -- the gate breaks into this many pieces across
+local SHARDS_Y = math.clamp(math.round(Config.GateHeight / 12), 7, 25) -- and this many up (a tall one: smaller pieces)
 local SHARD_TIME = 1.6 -- seconds the pieces fly before they're gone
 local PIXELS_PER_STUD = 20
 
@@ -47,7 +48,7 @@ local function build(i)
 	local gradient = Instance.new("UIGradient")
 	gradient.Rotation = 90 -- top (0) to bottom (1)
 	gradient.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0, 0.85), -- (still faintly there at the top: a Slingshot shot goes through it up there, QM)
 		NumberSequenceKeypoint.new(0.6, 0.75),
 		NumberSequenceKeypoint.new(1, 0.1),
 	})

@@ -374,7 +374,7 @@ local Config = {
 	-- that biome's training dummy (QM, Oct 8); past the last, the Rainbow Trail.
 	-- Off (QM, Oct 11): claiming a quest upgrades your pen now (Quests, below).
 	PenUpgrades = false,
-	GateHeight = 26,
+	GateHeight = 300, -- (QM, Nov 6: above the Slingshot's highest shot, Apex 260 over the ground, so you see it shatter as you fly through; was 26)
 	GateColor = Color3.fromRGB(255, 204, 40),
 	-- The course: CourseHalfWidth either side of x = 0 at the start line, then CourseProfile's widths, from the start line (z = 0) to the finish line, FinishFromEnd
 	-- before the last biome's end. WorldColors.halfWidth(z) is the width at z. Server/Map builds it.
