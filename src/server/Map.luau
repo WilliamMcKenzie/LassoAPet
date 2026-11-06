@@ -45,6 +45,7 @@ local ALL = { Enum.NormalId.Top, Enum.NormalId.Front, Enum.NormalId.Back, Enum.N
 local FLOOR_BOTTOM = -2
 local SEAM = 0.03 -- how far each floor part reaches past its edges
 local LIP = 0.25 -- how far a wall's cap overhangs it (as the lineup's showcase)
+local CAP_LIP, CAP_H = 1, 3 -- a painted wall's cap: its overhang and height (QM, Nov 6: a whole stud, chunkier)
 
 local function folder(name, parent)
 	local f = Instance.new("Folder")
@@ -175,11 +176,26 @@ local function floors(parent, wallParent)
 			local key, top = tile[1], tile[2]
 			local x0, z0, sx, sz = rect[2], rect[3], rect[4], rect[5]
 			if tile[4] then
-				-- a painted wall: its sides, and a stud-high cap of the cap's colour
+				-- a painted wall: its sides, and a CAP_H-high cap of the cap's colour that
+				-- overhangs by CAP_LIP wherever the ground beside it is lower (QM, Nov 6)
 				local model = Instance.new("Model")
 				model.Name = area.Name .. "Wall"
-				box("Wall", model, x0, FLOOR_BOTTOM, z0, x0 + sx, top - 1, z0 - sz, key, SIDES).Locked = true
-				box("Cap", model, x0, top - 1, z0, x0 + sx, top, z0 - sz, tile[4]).Locked = true
+				local function lower(ax, az, bx, bz)
+					local n = math.max(1, math.round(math.max(math.abs(bx - ax), math.abs(bz - az)) / 4))
+					for k = 0, n - 1 do
+						local t = (k + 0.5) / n
+						if MapFile.groundAt(MapData, ax + (bx - ax) * t, az + (bz - az) * t) >= top - 0.5 then
+							return 0
+						end
+					end
+					return CAP_LIP
+				end
+				local west = lower(x0 - 2, z0, x0 - 2, z0 - sz)
+				local east = lower(x0 + sx + 2, z0, x0 + sx + 2, z0 - sz)
+				local south = lower(x0, z0 + 2, x0 + sx, z0 + 2)
+				local north = lower(x0, z0 - sz - 2, x0 + sx, z0 - sz - 2)
+				box("Wall", model, x0, FLOOR_BOTTOM, z0, x0 + sx, top - CAP_H, z0 - sz, key, SIDES).Locked = true
+				box("Cap", model, x0 - west, top - CAP_H, z0 + south, x0 + sx + east, top, z0 - sz - north, tile[4]).Locked = true
 				model.Parent = wallParent
 				continue
 			end
