@@ -25,8 +25,8 @@ local fig, label, button = HudKit.fig, HudKit.label, HudKit.button
 -- QM's Figma px, as the Shop's
 local WIDTH = 2177
 local GAP = 22
-local CARD_H = 1000
-local BUTTON_W, BUTTON_H = 440, 170
+local CARD_W, CARD_H = 520, 980 -- (a card's own size; more than fit across scroll sideways, as the Weapon Shop's)
+local BUTTON_W, BUTTON_H = CARD_W - 70, 170
 
 local gui, cards, onPick
 local busy = false
@@ -113,21 +113,28 @@ local function build()
 	UiFx.button(close)
 	close.Activated:Connect(SlingshotMenu.close)
 
-	local list = Ui.make(gui, "List", "Frame", {
+	local list = Ui.make(gui, "List", "ScrollingFrame", {
 		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(fig(45), fig(310)),
-		Size = UDim2.fromOffset(fig(WIDTH), fig(CARD_H)),
+		BorderSizePixel = 0,
+		Position = UDim2.fromOffset(fig(45), fig(300)),
+		Size = UDim2.fromOffset(fig(WIDTH) + 4, fig(CARD_H + 50)),
+		CanvasSize = UDim2.new(),
+		AutomaticCanvasSize = Enum.AutomaticSize.X,
+		ScrollingDirection = Enum.ScrollingDirection.X,
+		ScrollBarThickness = 6,
+		ScrollBarImageColor3 = Color3.fromRGB(150, 150, 150),
 		ZIndex = 2,
 	})
 	local layout = Instance.new("UIListLayout")
 	layout.FillDirection = Enum.FillDirection.Horizontal
-	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	layout.Padding = UDim.new(0, fig(GAP))
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = list
+	local pad = Instance.new("UIPadding")
+	pad.PaddingLeft, pad.PaddingRight, pad.PaddingTop = UDim.new(0, fig(10)), UDim.new(0, fig(10)), UDim.new(0, fig(10))
+	pad.Parent = list
 
-	local n = #Config.Biomes
-	local w = (WIDTH - GAP * (n - 1)) / n
+	local w = CARD_W
 	cards = {}
 	for i, biome in Config.Biomes do
 		local ground = biome.GroundColors or { Color3.fromRGB(120, 200, 90), Color3.fromRGB(100, 170, 70) }
@@ -149,10 +156,24 @@ local function build()
 			outline = 6,
 			corner = 10,
 		}, { Name = "Back", Size = UDim2.fromScale(1, 1), ZIndex = 2 })
+		if biome.Picture then
+			-- its picture (a render of the biome, Config.Biomes[i].Picture) over the colours
+			local pic = Ui.make(card, "Picture", "ImageLabel", {
+				BackgroundTransparency = 1,
+				Image = biome.Picture,
+				ScaleType = Enum.ScaleType.Crop,
+				Position = UDim2.fromOffset(fig(8), fig(8)),
+				Size = UDim2.new(1, -fig(16), 1, -fig(16)),
+				ZIndex = 3,
+			})
+			local round = Instance.new("UICorner")
+			round.CornerRadius = UDim.new(0, fig(8))
+			round.Parent = pic
+		end
 		label(card, "BiomeName", {
 			Text = biome.Name,
 			TextXAlignment = Enum.TextXAlignment.Center,
-			TextScaled = true,
+			TextSize = fig(100),
 			Position = UDim2.fromOffset(fig(20), fig(60)),
 			Size = UDim2.new(1, -fig(40), 0, fig(130)),
 			ZIndex = 4,
