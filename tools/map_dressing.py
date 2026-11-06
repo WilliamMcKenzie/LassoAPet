@@ -173,5 +173,60 @@ def main(only):
     print("\n".join(report))
 
 
+OBSTACLES = {  # small props out in the ride lane (QM, Nov 6): "obstacle": 1, only the smallest
+    # animals swerve round them, bigger ones knock them away (Ride), riders smash them
+    "Desert": ["CactusBarrel", "CactusBarrel", "Cactus", "Boulders", "Skull", "Femur"],
+    "Lava": ["Boulders", "Boulders", "StoneRubble", "StoneBlockLow"],
+}
+
+
+def obstacles(only):
+    """Sparse little clusters of tier-1 obstacles across the ride lanes of OBSTACLES' biomes:
+    one to three small props every 120-200 studs, never more than a third of the lane across."""
+    d = json.load(open(WORLD))
+    cell = d["cell"]
+    ox, oz = d["origin"]
+    cols = d["size"][0]
+    T = {t["id"]: t for t in d["tiles"]}
+
+    def edge(z):
+        row = d["rows"][int((z - oz) // cell)]
+        mid = cols // 2
+        a = b = mid
+        while a > 0 and row[a - 1] in T and not T[row[a - 1]].get("wall"):
+            a -= 1
+        while b < cols - 1 and row[b + 1] in T and not T[row[b + 1]].get("wall"):
+            b += 1
+        return min(mid - a, b + 1 - mid) * cell
+
+    report = []
+    for area in d["areas"]:
+        name = area["name"]
+        if name not in (only or OBSTACLES) or not area.get("bounds"):
+            continue
+        near, far = area["bounds"][1], area["bounds"][3]
+        if any(o.get("obstacle") and far <= o["z"] < near for o in d["objects"]):
+            report.append(name + ": has obstacles already, left alone")
+            continue
+        rng = random.Random("obstacles " + name)
+        n = 0
+        z = near - rng.uniform(150, 250)
+        while z > far + 120:
+            e = edge(z) - 20
+            cx = rng.uniform(-e * 0.75, e * 0.75)
+            for _ in range(rng.choice((1, 1, 2, 2, 3))):
+                d["objects"].append({"type": "Prop", "item": rng.choice(OBSTACLES[name]),
+                                     "x": round(max(-e, min(e, cx + rng.uniform(-14, 14)))), "z": round(z + rng.uniform(-14, 14)),
+                                     "yaw": rng.randrange(360), "scale": round(rng.uniform(1.6, 3), 2), "style": name, "obstacle": 1})
+                n += 1
+            z -= rng.uniform(120, 200)
+        report.append("%s: %d obstacles" % (name, n))
+    open(WORLD, "w").write(dump(d))
+    print("\n".join(report))
+
+
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    if sys.argv[1:2] == ["--obstacles"]:
+        obstacles(sys.argv[2:])
+    else:
+        main(sys.argv[1:])
