@@ -513,7 +513,12 @@ local function arch(parent, style, x, z, rng)
 		local pos = Vector3.new(x + math.cos(am) * rm, ARCH_SPRING + 10 + math.sin(am) * rm * ARCH_SQUASH, z)
 		local tangent = Vector3.new(-math.sin(am), math.cos(am) * ARCH_SQUASH, 0).Unit
 		local up = Vector3.new(0, 0, 1):Cross(tangent)
-		local length = (a1 - a0) * rm * (1 + ARCH_SQUASH) / 2 + 1.2
+		-- (as long as the gap between its neighbours at the arch's outer edge, so no wedge of
+		-- sky shows between the stones at the top: QM, Nov 6; they overlap a little inside)
+		local function at(a, r)
+			return Vector3.new(math.cos(a) * r, math.sin(a) * r * ARCH_SQUASH, 0)
+		end
+		local length = (at(a1 + 0.012, rOut) - at(a0 - 0.012, rOut)).Magnitude + 0.6
 		local size = Vector3.new(
 			length,
 			rOut - rIn + (if keystone then 3 else rng:NextNumber(-0.4, 0.6)),
