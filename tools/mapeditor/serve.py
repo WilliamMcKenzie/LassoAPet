@@ -29,7 +29,7 @@ WORLD = os.path.join(ROOT, "maps", "world.map")
 # every version served, on disk so a restart of this server still knows what an open tab
 # opened (a tab saves against that version; without it the save would overwrite the file)
 # (what a save changes, synced into Studio before the rebuild: Lasso's src/ is too big to send whole)
-MAP_FILES = ("src/shared/MapData.luau", "src/shared/MapFile.luau", "src/server/Map.luau")
+MAP_FILES = ("src/shared/MapData.luau", "src/shared/MapFile.luau", "src/shared/HiddenFaces.luau", "src/server/Map.luau")
 SERVED_DIR = os.path.join(tempfile.gettempdir(), "mapeditor_served")
 os.makedirs(SERVED_DIR, exist_ok=True)
 

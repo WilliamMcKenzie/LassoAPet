@@ -1,3 +1,5 @@
+--!native
+--!optimize 2
 -- Drops the stud and checker Textures on faces nobody can see (QM, Oct 27: the game lagged
 -- in Studio; the map had ~22,000 Textures, each drawn on its own). A face is hidden when
 -- it's wholly inside other solid blocks: a floor plate's sides against its neighbours, a
@@ -13,26 +15,27 @@ local HiddenFaces = {}
 local CELL = 16 -- studs: the grid the blocks are bucketed in, so each test only looks nearby
 local STEP = 2 -- studs between the points tested on a face
 local OFF = 0.02 -- how far off the face each point is
+local MOST = 24 -- points along a side at most
 
 -- a solid, see-nothing-through box: only these can hide another's face
 local function solid(part)
 	return part.ClassName == "Part" and part.Shape == Enum.PartType.Block and part.Transparency <= 0.01
 end
 
+local function keyOf(x, z)
+	return x * 100000 + z
+end
+
 local function cellsOf(cf, size, fn)
-	-- the world box round the part, in CELLs
+	-- the world box round the part, in CELLs across x and z (QM, Nov 6: 3D cells made the
+	-- 320-stud walls fill thousands of buckets; height is checked by inside() anyway)
 	local half = size / 2
-	local ext = Vector3.new(
-		math.abs(cf.XVector.X) * half.X + math.abs(cf.YVector.X) * half.Y + math.abs(cf.ZVector.X) * half.Z,
-		math.abs(cf.XVector.Y) * half.X + math.abs(cf.YVector.Y) * half.Y + math.abs(cf.ZVector.Y) * half.Z,
-		math.abs(cf.XVector.Z) * half.X + math.abs(cf.YVector.Z) * half.Y + math.abs(cf.ZVector.Z) * half.Z
-	)
-	local lo, hi = cf.Position - ext, cf.Position + ext
-	for x = math.floor(lo.X / CELL), math.floor(hi.X / CELL) do
-		for y = math.floor(lo.Y / CELL), math.floor(hi.Y / CELL) do
-			for z = math.floor(lo.Z / CELL), math.floor(hi.Z / CELL) do
-				fn(x .. "," .. y .. "," .. z)
-			end
+	local ex = math.abs(cf.XVector.X) * half.X + math.abs(cf.YVector.X) * half.Y + math.abs(cf.ZVector.X) * half.Z
+	local ez = math.abs(cf.XVector.Z) * half.X + math.abs(cf.YVector.Z) * half.Y + math.abs(cf.ZVector.Z) * half.Z
+	local p = cf.Position
+	for x = math.floor((p.X - ex) / CELL), math.floor((p.X + ex) / CELL) do
+		for z = math.floor((p.Z - ez) / CELL), math.floor((p.Z + ez) / CELL) do
+			fn(keyOf(x, z))
 		end
 	end
 end
@@ -45,7 +48,8 @@ end
 
 local function steps(half)
 	-- points across -half..half, about STEP apart, just in from the edges
-	local n = math.max(1, math.ceil(2 * half / STEP))
+	-- (at most MOST points a side: a 320-stud wall's face was tens of thousands, QM Nov 6)
+	local n = math.clamp(math.ceil(2 * half / STEP), 1, MOST)
 	local list = {}
 	for i = 0, n do
 		table.insert(list, (i / n * 2 - 1) * math.max(half - 0.05, 0))
@@ -102,11 +106,7 @@ function HiddenFaces.cull(root)
 							elseif n.Y ~= 0 then Vector3.new(u, 0, v)
 							else Vector3.new(u, v, 0)
 						local at = part.CFrame:PointToWorldSpace(out + along)
-						local key = math.floor(at.X / CELL)
-							.. ","
-							.. math.floor(at.Y / CELL)
-							.. ","
-							.. math.floor(at.Z / CELL)
+						local key = keyOf(math.floor(at.X / CELL), math.floor(at.Z / CELL))
 						local covered = false
 						for _, other in grid[key] or {} do
 							if other ~= part and inside(at, other) then
