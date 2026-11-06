@@ -40,6 +40,16 @@ SKINS = {
     "AlphaIceGolem": ("Animals/IceGolemModel", {  # yellow instead of blue
         "82, 150, 226": (226, 168, 40), "96, 222, 255": (255, 214, 60), "160, 218, 250": (250, 220, 120),
     }, []),
+    "AlphaRockHog": ("Animals/RockHogModel", {  # its whole body molten, not just the horns
+        "88, 98, 128": (255, 104, 24), "54, 58, 82": (214, 52, 18), "36, 38, 52": (28, 22, 26),
+    }, [(("Back", "Ear", "Head", "Leg", "Shoulders", "Tail", "Beard", "Brow", "Cheek", "Jaw"), None)]),
+    "AlphaLavaWhale": ("Animals/LavaWhaleModel", {  # dark obsidian body instead of orange
+        "182, 100, 62": (40, 32, 50), "136, 74, 50": (26, 20, 32), "246, 196, 140": (76, 62, 92),
+    }, []),
+    "AlphaPhoenix": ("Animals/PhoenixModel", {  # blue fire instead of regular fire
+        "240, 72, 32": (40, 110, 240), "255, 232, 84": (176, 240, 255), "255, 188, 36": (90, 200, 255),
+        "255, 132, 24": (50, 150, 255), "206, 34, 40": (30, 58, 196), "255, 236, 120": (200, 245, 255),
+    }, []),
 }
 
 LINE = re.compile(r'^(\s*\{ name = "([^"]+)".*color = Color3\.fromRGB\()([0-9, ]+)(\).*)$')
