@@ -28,6 +28,9 @@ local KINDS = {
 	Pig = { data = require(script.Parent.PigEggModel), center = 1.6 },
 	Fish = { data = require(script.Parent.FishEggModel), center = 1.6 },
 	Rhino = { data = require(script.Parent.RhinoEggModel), center = 1.6 },
+	Zebra = { data = require(script.Parent.ZebraEggModel), center = 1.6 }, -- (World 1 Meadow, QM Nov 6: tools/meadow_eggs.py)
+	Gecko = { data = require(script.Parent.GeckoEggModel), center = 1.6 },
+	Elephant = { data = require(script.Parent.ElephantEggModel), center = 1.6 },
 	Bunny = { data = require(script.Parent.BunnyEggModel), center = 1.6 },
 	Unicorn = { data = require(script.Parent.UnicornEggModel), center = 1.6 },
 	MarbleColossus = { data = require(script.Parent.MarbleColossusEggModel), center = 1.6 },
@@ -165,6 +168,10 @@ local KINDS = {
 local HalloweenSkins = require(script.Parent.Parent.HalloweenSkins)
 for kind, base in HalloweenSkins.Base do
 	KINDS[kind] = { data = HalloweenSkins.model(kind, KINDS[base].data), center = KINDS[base].center }
+end
+-- The alphas hatch from their base's egg (Config.Alphas).
+for kind, alpha in Config.Alphas do
+	KINDS[kind] = KINDS[alpha.Base]
 end
 
 local Egg = {}
