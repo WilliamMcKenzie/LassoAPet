@@ -283,53 +283,22 @@ local Config = {
 			UpgradeImageDisabled = "rbxassetid://133303061216721", -- assets/ui/UpgradePenTundraDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 		},
 		{
-			Name = "Ocean",
-			AnimalSize = 2.6,
-			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.25)
-			NestScale = 2.5,
-			Length = 3120, -- a whole number of 240-stud depth bands (QM, Oct 11: the pacing ladder; was 7680)
-			GroundColors = { Color3.fromRGB(160, 230, 247), Color3.fromRGB(153, 222, 240) }, -- Fight to Steal an Egg's Ocean floor and its checker (QM, Nov 6)
-			WallColors = { Color3.fromRGB(73, 103, 145), Color3.fromRGB(79, 112, 156) }, -- and its Ocean wall
-			CapColor = Color3.fromRGB(157, 226, 244), -- (its OceanCap)
-			GateColor = Color3.fromRGB(30, 80, 220), -- its breakable barrier's colour (Gate.client)
-			-- The Fish is a placeholder until the rest of the ocean animals are designed.
-			HerdSpawnEvery = 0.45, -- (twice the stampede of the rest: it looked barren, QM Oct 11)
-			Herd = { Fish = 0.1, Starfish = 0.3, Clownfish = 0.25, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0, Kraken = 0.05, Lionfish = 0.15 }, -- (the Lionfish Rare, a touch faster than the Starfish, QM Oct 11, weight a guess; the Clownfish Uncommon, a little rarer than the Starfish, QM Oct 11; Blue Crab guessed like the Kraken; the Robo Shark never spawns: a future Robux pet, QM Oct 4)
-			UnlockCost = 10000000, -- QM, Oct 8: matches the new button art (Oct 7 had $5M: halved with the Tundra's ("same with ocean/godlands"); balance pass Oct 6 had it $10M, before that $1M
-			UpgradeImage = "rbxassetid://86611519789045", -- assets/ui/UpgradePenOceanEnabled.png (QM, Oct 8: price drawn in)
-			UpgradeImageDisabled = "rbxassetid://98686807740770", -- assets/ui/UpgradePenOceanDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
-		},
-		{
-			-- The volcano (QM, Oct 11): after the ocean.
+			-- The volcano (QM, Oct 11; Nov 6: on the Lava ground, 4th, the last biome with a herd
+			-- for now: the Ocean and Jurassic herds are out until the rest are made. Their
+			-- animals stay in Shared/Animals: they're pets in saves.)
 			Name = "Volcano",
 			AnimalSize = 2.6, -- (as the ocean's)
 			Swerve = 1,
 			NestScale = 2.5,
-			Length = 5040, -- (QM, Oct 11: the pacing ladder; was 7680)
+			Length = 3120, -- the Lava ground's run in maps/world.map (QM, Nov 6; was 5040)
 			GroundColors = { Color3.fromRGB(156, 98, 66), Color3.fromRGB(168, 108, 74) }, -- Fight to Steal an Egg's Lava floor and its checker (QM, Nov 6)
 			WallColors = { Color3.fromRGB(170, 92, 58), Color3.fromRGB(186, 104, 66) }, -- and its Lava wall
 			CapColor = Color3.fromRGB(96, 60, 46), -- (its LavaCap)
 			GateColor = Color3.fromRGB(255, 110, 20), -- its breakable barrier's colour (Gate.client)
 			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean and Jurassic: QM Oct 11)
 			Herd = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (QM, Oct 11: the Firebird Uncommon, the Rock Hog and Fire Lobster Rare, the Rockworm Epic, the Phoenix Legendary and very rare, the Lava Whale Epic and as rare as the Phoenix; the weights a guess)
-			UnlockCost = 300000000, -- a guess (the old Godlands price)
+			UnlockCost = 10000000, -- (4th now: the Ocean's price; was 300M, a guess)
 			-- No Upgrade Pen art yet: the plain button with the price.
-		},
-		{
-			-- The Jurassic (QM, Oct 11): the final biome, after the volcano.
-			Name = "Jurassic",
-			AnimalSize = 2.6, -- (as the volcano's)
-			Swerve = 1,
-			NestScale = 2.5,
-			Length = 7680, -- as long as the volcano was (a guess; its animals aren't on the ladder yet)
-			HerdSpawnEvery = 0.15, -- (3x its stampede again: QM Oct 12; was 0.45, twice the rest, as the Ocean)
-			GroundColors = { Color3.fromRGB(30, 196, 186), Color3.fromRGB(28, 189, 181) }, -- Fight to Steal an Egg's Forest floor and its checker (QM, Nov 6)
-			WallColors = { Color3.fromRGB(130, 107, 115), Color3.fromRGB(125, 100, 108) }, -- and its Forest wall
-			CapColor = Color3.fromRGB(30, 196, 186), -- (its ForestCap)
-			GateColor = Color3.fromRGB(90, 200, 50), -- its breakable barrier's colour (Gate.client)
-			Herd = { Fish = 0, Spinosaurus = 0.2, TRex = 0.12, Raptor = 0.15, Pterodactyl = 0.08, Ankylosaurus = 0.25, PalmGuy = 0.25, BoneRex = 0.03 }, -- (the Bone Rex the final Legendary, as rare as the Phoenix, QM Oct 11; Palm Guy an Uncommon too, QM Oct 11, weight a guess; no more Fish: QM, Oct 11; the Ankylosaurus the Jurassic's Uncommon, QM Oct 11, weight a guess; the Pterodactyl an Epic, QM Oct 11; the Spinosaurus Rare, QM Oct 11; QM, Oct 11: fish for now, until the dinosaurs are designed; the T-Rex, an Epic, is the first; the Raptor a Rare that runs in packs of three (HerdPacks), so 0.15 is about a third of the stampede. Weights a guess)
-			UnlockCost = 3000000000, -- a guess (10x the volcano)
-			-- No Upgrade Pen art or boss yet (Config.Boss falls back to the Chicken).
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
@@ -353,7 +322,7 @@ local Config = {
 	-- (QM, Nov 6) the corridor's half width along it, as maps/world.map's floor: { z, half width },
 	-- straight between (WorldColors.halfWidth), wider the later the biome. Change it with the map.
 	CourseProfile = { { 0, 80 }, { -160, 80 }, { -164, 120 }, { -604, 120 }, { -608, 96 }, { -808, 96 }, { -812, 112 }, { -1092, 112 }, { -1096, 96 }, { -1296, 96 }, { -1300, 80 }, { -1500, 80 }, { -1504, 96 }, { -1784, 96 }, { -1788, 112 }, { -1988, 112 }, { -1992, 80 }, { -2272, 80 }, { -2276, 130 }, { -2716, 130 }, { -2720, 114 }, { -3280, 114 }, { -3284, 98 }, { -3484, 98 }, { -3488, 122 }, { -3768, 122 }, { -3772, 90 }, { -3972, 90 }, { -3976, 122 }, { -4256, 122 }, { -4260, 148 }, { -4700, 148 }, { -4704, 100 }, { -5264, 100 }, { -5268, 116 }, { -5628, 116 }, { -5632, 140 }, { -5912, 140 }, { -5916, 110 }, { -6196, 110 }, { -6200, 142 }, { -6480, 142 }, { -6484, 110 }, { -6684, 110 }, { -6688, 126 }, { -7128, 126 }, { -7132, 110 }, { -7332, 110 }, { -7336, 134 }, { -7616, 134 }, { -7620, 158 }, { -7900, 158 }, { -7904, 126 }, { -8184, 126 }, { -8188, 150 }, { -8468, 150 }, { -8472, 134 }, { -8672, 134 }, { -8676, 158 }, { -9236, 158 }, { -9240, 176 }, { -9600, 176 }, { -9604, 160 }, { -10044, 160 }, { -10048, 176 }, { -10408, 176 }, { -10412, 144 }, { -10972, 144 }, { -10976, 160 }, { -11536, 160 }, { -11540, 136 }, { -11740, 136 }, { -11744, 162 }, { -12024, 162 }, { -12028, 194 }, { -12468, 194 }, { -12472, 178 }, { -12672, 178 }, { -12676, 146 }, { -13116, 146 }, { -13120, 170 }, { -13400, 170 }, { -13404, 194 }, { -13684, 194 }, { -13688, 162 }, { -14128, 162 }, { -14132, 188 }, { -14572, 188 }, { -14576, 204 }, { -14856, 204 }, { -14860, 172 }, { -15300, 172 }, { -15304, 188 }, { -15504, 188 }, { -15508, 148 }, { -15948, 148 }, { -15952, 196 }, { -16152, 196 }, { -16156, 180 }, { -16516, 180 }, { -16520, 148 }, { -17080, 148 }, { -17084, 164 }, { -17444, 164 }, { -17448, 188 }, { -17648, 188 }, { -17652, 172 }, { -17932, 172 }, { -17936, 206 }, { -18136, 206 }, { -18140, 222 }, { -18700, 222 }, { -18704, 150 }, { -19144, 150 }, { -19148, 182 }, { -19428, 182 }, { -19432, 158 }, { -19872, 158 }, { -19876, 174 }, { -20436, 174 }, { -20440, 158 }, { -21000, 158 }, { -21004, 174 }, { -21284, 174 }, { -21288, 214 }, { -21696, 214 } },
-	CourseLength = 2168 + 1816 + 1920 + 3120 + 5040 + 7680, -- all the biomes' lengths added up
+	CourseLength = 2168 + 1816 + 1920 + 3120, -- all the biomes' lengths added up (the ground past the Lava is scenery for now)
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
@@ -1255,18 +1224,18 @@ local Config = {
 			{ Text = "Reach Meadow", Kind = "reach", Biome = 1, Egg = "Cactus", NoPenLevel = true }, -- (QM, Oct 11: done from the start, so there's something to claim right away, and no pen upgrade; Quests.load moves saves from before it on one)
 			{ Text = "Reach Desert", Kind = "reach", Biome = 2, Egg = "Penguin" }, -- (QM, Oct 11: quick eggs early, to speed you up; was the Unicorn)
 			{ Text = "Reach Tundra", Kind = "reach", Biome = 3, Egg = "Snowman" }, -- (QM, Oct 11: was the Snake, then the Starfish, then the Boar)
-			{ Text = "Reach Ocean", Kind = "reach", Biome = 4, Egg = "Lionfish" }, -- (QM, Oct 11: was the Icebringer)
-			{ Text = "Reach Volcano", Kind = "reach", Biome = 5, Egg = "FireLobster" }, -- (QM, Oct 11: was the Kraken)
-			{ Text = "Reach Jurassic", Kind = "reach", Biome = 6, Egg = "PalmGuy" }, -- (QM, Oct 11: was the Phoenix)
+			{ Text = "Reach Volcano", Kind = "reach", Biome = 4, Egg = "FireLobster" }, -- (QM, Nov 6: the Volcano is 4th now; was Reach Ocean for a Lionfish) -- (QM, Oct 11: was the Icebringer)
+			{ Text = "Reach Volcano", Kind = "reach", Biome = 5, Egg = "FireLobster", Off = true }, -- (Off, QM Nov 6: no 5th biome for now; kept in place, quests save by position) -- (QM, Oct 11: was the Kraken)
+			{ Text = "Reach Jurassic", Kind = "reach", Biome = 6, Egg = "PalmGuy", Off = true }, -- (Off, QM Nov 6: no Jurassic for now) -- (QM, Oct 11: was the Phoenix)
 		},
 		{
 			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "SpineLizard" }, -- (QM, Oct 11: 3, was 10)
 			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "SnackYak" }, -- (QM, Oct 14: 1 merge, was 3; QM, Oct 11: the Snack Yak, was the Snowman) -- (before Collect: QM, Oct 12)
 			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "BoneRex" }, -- (for D1: its egg's long, QM; QM, Oct 14: 5, was 10, then 5 before that)
 			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "TRex" }, -- (QM, Oct 11: these three after Merge)
-			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 3, Egg = "LavaWhale" }, -- (QM, Oct 11: 3, was 5) -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
+			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 3, Egg = "LavaWhale", Off = true }, -- (Off, QM Nov 6: no Ocean herd for now) -- (QM, Oct 11: 3, was 5) -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
 			{ Text = "Lasso Lava Whales", Kind = "lasso", Animal = "LavaWhale", Need = 2, Egg = "SnackYak" }, -- (QM, Oct 15: was the Robo Shark; QM, Oct 11: was Collect 30)
-			{ Text = "Lasso a Bone Rex", Kind = "lasso", Animal = "BoneRex", Need = 1, Egg = "Seraph" }, -- (QM, Oct 14: World 2's Seraph egg, was the Loong; QM, Oct 11: was Collect 50)
+			{ Text = "Lasso a Bone Rex", Kind = "lasso", Animal = "BoneRex", Need = 1, Egg = "Seraph", Off = true }, -- (Off, QM Nov 6: no Jurassic herd for now) -- (QM, Oct 14: World 2's Seraph egg, was the Loong; QM, Oct 11: was Collect 50)
 			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "SnackYak" }, -- (QM, Oct 15: the end of every line; the Snack Yak, not the Loong)
 		},
 		{ -- (QM, Oct 12: a third line, just this; tapping it opens Roblox's invite, done when an invited friend joins: Hatchery)
@@ -1995,7 +1964,7 @@ end
 -- Each world's biome names, as players know them (Stats, Funnel; World 2's and 3's Config.Biomes
 -- Names are different: World 2's keep World 1's).
 Config.BiomeNames = {
-	{ "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" },
+	{ "Meadow", "Desert", "Tundra", "Volcano" },
 	{ "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
 	{ "Pirate Cove", "Garden", "Candyland", "Cnidaria" },
 }
