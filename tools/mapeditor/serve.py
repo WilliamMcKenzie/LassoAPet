@@ -162,6 +162,7 @@ class StudioLink:
             except (ValueError, TimeoutError):
                 pass
             time.sleep(0.1)
+        raise TimeoutError("Studio %s isn't listed by StudioMCP (is it open?)" % self.sid)
 
     def execute(self, code):
         """(ok, output) as run(lu.py) gives them."""
@@ -172,6 +173,7 @@ class StudioLink:
                         self._start()
                     return True, self._call("execute_luau", {"code": code, "datamodel_type": "Edit", "studio_id": self.sid})
                 except (OSError, EOFError, TimeoutError, ValueError) as e:
+                    sys.stderr.write("studio link: %s\n" % e)
                     if self.p:
                         self.p.kill()
                     self.p = None
