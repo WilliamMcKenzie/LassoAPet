@@ -1809,6 +1809,8 @@ Config.AwayBoost = { ProductId = 3720169501, Multiplier = 4 }
 Config.RideEggAB = { Share = 1, Salt = 1, FastRides = 4, FastHatch = 15, Studio = "egg" }
 -- Limited stock and the display's overhead labels are active.
 Config.PetOffersLimited = true
+-- The LIMITEDS stand at World 1's base (Client/LoongOffer): false hides it for now (QM, Nov 6).
+Config.LimitedsStand = false
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
