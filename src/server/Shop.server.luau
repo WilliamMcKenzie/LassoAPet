@@ -337,6 +337,7 @@ end)
 -- Studio till it has one. Hatchery's BankAway banks the away gold Multiplier times over.
 local awayGranted = {} -- [PurchaseId] = true (a receipt seen again is already banked)
 local hatchAllGranted = {} -- (Hatch All's, the same)
+local slotGranted = {} -- (+1 Equip's, the same)
 local function bankAway(player)
 	local bank = game:GetService("ServerStorage"):FindFirstChild("BankAway")
 	return bank ~= nil and bank:Invoke(player, Config.AwayBoost.Multiplier) == true
@@ -455,6 +456,20 @@ MarketplaceService.ProcessReceipt = function(receipt)
 			end
 			return Enum.ProductPurchaseDecision.NotProcessedYet
 		end
+	end
+	if receipt.ProductId == Config.Backpack.SlotProduct and receipt.ProductId ~= 0 then
+		-- (+1 Equip: one more active pet slot, given while they're here with their save loaded)
+		if slotGranted[receipt.PurchaseId] then
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		local player = Players:GetPlayerByUserId(receipt.PlayerId)
+		local add = game:GetService("ServerStorage"):FindFirstChild("AddPetSlot")
+		if player and add and add:Invoke(player) then
+			slotGranted[receipt.PurchaseId] = true
+			Telemetry.purchase(player, receipt.CurrencySpent, "product:" .. receipt.ProductId)
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	if receipt.ProductId == Config.HatchAll.ProductId then
 		-- (hatched while they're here with their pen loaded; else tried again on their next visit)

@@ -177,7 +177,7 @@ function NativeHud.build(handlers)
 	local row = Ui.make(root, "Cash", "Frame", {
 		BackgroundTransparency = 1,
 		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 0, 1, -fig(81)),
+		Position = UDim2.new(0, 0, 1, -fig(256)), -- (up in Fight to Steal an Egg's Power spot: QM, Nov 6)
 		Size = UDim2.fromOffset(fig(411), fig(160)),
 	})
 	local band = Ui.make(row, "Band", "Frame", {

@@ -29,10 +29,12 @@ local POP_UP = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Ou
 local POP_DOWN = TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local POP = 1.15
 local DONE_FILL = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local PULSE = 1.25
-local PULSE_OUT = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-local PULSE_HOLD = 0.35 -- seconds big with "Done!" before the next goal shows
-local PULSE_BACK = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+local SIZE = 0.85 -- the whole panel's scale (QM, Nov 6: 15% smaller)
+-- claimed (QM, Nov 6: a pop and swap, not held): a quick squash in (anticipation), out past
+-- full size, the next goal swapped in at the peak, then a springy settle back (overshoot)
+local SQUASH, SQUASH_IN = 0.9, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local PULSE, PULSE_OUT = 1.2, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local PULSE_BACK = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local CLAIM_THROB = 0.05 -- the Claim button breathes this much
 
 function GoalPanel.init(root, handlers)
@@ -149,6 +151,7 @@ function GoalPanel.init(root, handlers)
 	})
 
 	local grow = Ui.make(panel, "Pop", "UIScale")
+	grow.Scale = SIZE
 	local api = { panel = panel, claimButton = claim }
 	local current -- the quest up
 	local lastFraction
@@ -157,10 +160,10 @@ function GoalPanel.init(root, handlers)
 	local claimed -- the i of the quest last claimed from here
 
 	local function pop()
-		local up = TweenService:Create(grow, POP_UP, { Scale = POP })
+		local up = TweenService:Create(grow, POP_UP, { Scale = POP * SIZE })
 		up.Completed:Connect(function(how)
 			if how == Enum.PlaybackState.Completed then
-				TweenService:Create(grow, POP_DOWN, { Scale = 1 }):Play()
+				TweenService:Create(grow, POP_DOWN, { Scale = SIZE }):Play()
 			end
 		end)
 		up:Play()
@@ -184,8 +187,8 @@ function GoalPanel.init(root, handlers)
 		tap.Visible = not done
 	end
 
-	-- the goal's claimed: the bar fills, the panel pulses out with "Done!", swaps to the
-	-- next goal while it's big, then settles back
+	-- the goal's claimed: the bar fills with "Done!", the panel squashes in, pops out, swaps to
+	-- the next goal at the peak and springs back
 	local function complete()
 		busy = true
 		UiFx.play("Claim")
@@ -193,19 +196,21 @@ function GoalPanel.init(root, handlers)
 		track.Visible = true
 		TweenService:Create(clip, DONE_FILL, { Size = UDim2.fromScale(1, 1) }):Play()
 		progress.Text = "Done!"
-		local out = TweenService:Create(grow, PULSE_OUT, { Scale = PULSE })
+		local squash = TweenService:Create(grow, SQUASH_IN, { Scale = SQUASH * SIZE })
+		squash:Play()
+		squash.Completed:Wait()
+		local out = TweenService:Create(grow, PULSE_OUT, { Scale = PULSE * SIZE })
 		out:Play()
 		out.Completed:Wait()
-		task.wait(PULSE_HOLD)
 		busy = false
 		local q = pending
 		pending = nil
 		current = nil
-		api.set(q)
-		TweenService:Create(grow, PULSE_BACK, { Scale = 1 }):Play()
+		api.set(q, true)
+		TweenService:Create(grow, PULSE_BACK, { Scale = SIZE }):Play()
 	end
 
-	function api.set(q)
+	function api.set(q, settling)
 		if busy then
 			pending = q
 			return
@@ -227,7 +232,7 @@ function GoalPanel.init(root, handlers)
 		local swapped = was and was.i ~= q.i
 		local becameDone = was and was.have < was.need and q.have >= q.need
 		show(q, was == nil or swapped)
-		if becameDone or swapped then
+		if (becameDone or swapped) and not settling then
 			pop()
 			UiFx.play("Claim")
 		end
