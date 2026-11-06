@@ -72,7 +72,7 @@ local function spotOf(pen)
 		return nil
 	end
 	d = d.Unit
-	local ground = area.Position.Y + area.Size.Y / 2
+	local ground = area.Position.Y - area.Size.Y / 2 -- (the Area marker sits on the ground)
 	local at = Vector3.new(spawn.Position.X, ground, spawn.Position.Z) + d * CFG.Ahead
 	return CFrame.lookAt(at, at + d) -- (its -Z, the way it flings, away from the pen)
 end
