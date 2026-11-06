@@ -761,6 +761,9 @@ local function lassoFurniture(map)
 		end
 	end
 	line.Parent = map
+	if Config.Endless then
+		return -- (no finish line: the course goes on past the Ocean, Shared/Endless)
+	end
 	local finish = line:Clone()
 	finish.Name = "FinishLine"
 	finish:PivotTo(CFrame.new(0, 0, -Config.CourseLength + Config.FinishFromEnd + 2) * line:GetPivot())

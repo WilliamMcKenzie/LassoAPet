@@ -121,6 +121,13 @@ end
 
 -- ---- Lasso's course geometry (Config.Biomes, the course's width) ----------------------
 
+-- (required when first needed: Shared/Endless requires Config, as this does)
+local Endless
+local function endlessFrom()
+	Endless = Endless or require(script.Parent.Endless)
+	return if Endless.On then Endless.START else -math.huge
+end
+
 -- Index into Config.Biomes of the biome at z. The course runs toward -z from
 -- z = 0; the home base (z > 0) counts as the first biome, past the end as the last.
 function WorldColors.biomeAt(z)
@@ -132,6 +139,15 @@ function WorldColors.biomeAt(z)
 		end
 	end
 	return #Config.Biomes
+end
+
+-- The biome's Config at z: Config.Biomes[biomeAt(z)], or past the Ocean the endless stretch's
+-- (Config.Endless.Biomes: its Name, Herd, Boss...).
+function WorldColors.biomeConfigAt(z)
+	if z < endlessFrom() then
+		return Endless.templateAt(z)
+	end
+	return Config.Biomes[WorldColors.biomeAt(z)]
 end
 
 -- Where the biome called name starts (its edge nearest home), or nil if there's none.
@@ -149,6 +165,9 @@ end
 -- The course's half width at z (Config: a funnel, widening from the start line; or World 3's
 -- Config.CourseProfile, { z, half width } stops widening and narrowing, straight between).
 function WorldColors.halfWidth(z)
+	if z < endlessFrom() then
+		return Endless.halfWidth(z) -- (the endless course past the Ocean: Shared/Endless)
+	end
 	local profile = Config.CourseProfile
 	if profile then
 		z = math.min(z, 0)

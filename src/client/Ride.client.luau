@@ -93,12 +93,63 @@ for _, o in obstacles do
 	slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
 	slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
 end
+-- Obstacles that come and go (the endless course's, built near the camera by Client/Endless):
+-- put in the list and the slices as they're added to World.Obstacles, taken out as they go.
+slices.byModel = {}
+function slices.remove(list, o, zMin, zMax)
+	for slice = math.floor(zMin / slices.SIZE), math.floor(zMax / slices.SIZE) do
+		local here = list[slice]
+		local k = here and table.find(here, o)
+		if k then
+			table.remove(here, k)
+		end
+	end
+end
+world.Obstacles.ChildAdded:Connect(function(model)
+	local base = model:FindFirstChild("Base")
+	if not model:IsA("Model") or not base or slices.byModel[model] then
+		return
+	end
+	local parts = {}
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") then
+			table.insert(parts, { part = part, cframe = part.CFrame, transparency = part.Transparency })
+		end
+	end
+	local o = {
+		x = base.Position.X,
+		z = base.Position.Z,
+		hx = base.Size.X / 2,
+		hz = base.Size.Z / 2,
+		tier = model:GetAttribute("Tier") or Config.ObstacleTiers[model.Name] or 1,
+		center = model:GetPivot().Position,
+		parts = parts,
+	}
+	slices.byModel[model] = o
+	table.insert(obstacles, o)
+	slices.add(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
+	slices.add(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
+end)
+world.Obstacles.ChildRemoved:Connect(function(model)
+	local o = slices.byModel[model]
+	if not o then
+		return
+	end
+	slices.byModel[model] = nil
+	local k = table.find(obstacles, o)
+	if k then
+		table.remove(obstacles, k)
+	end
+	slices.remove(slices.swerve, o, o.z - o.hz - slices.SWERVE_AFTER, o.z + o.hz + slices.SWERVE_BEFORE)
+	slices.remove(slices.block, o, o.z - o.hz - slices.BLOCK_PAD, o.z + o.hz + slices.BLOCK_PAD)
+end)
 
 local function tierOf(kind)
 	return Config.PetTiers[kind] or 1
 end
 
 local vfx = {} -- ability VFX bits and state (one table: this chunk is at Luau's 200-local limit)
+vfx.Endless = require(ReplicatedStorage.Shared.Endless) -- the endless course past the Ocean (Config.Endless)
 vfx.crashScreen = require(script.Parent.CrashScreen)
 vfx.tutorialRide = require(script.Parent.TutorialRide) -- (the tutorial's first ride: Client/Tutorial steers it)
 vfx.speedLines = require(script.Parent.SpeedLines) -- speed lines on the screen while sprinting (QM, Oct 9 / 11)
@@ -211,7 +262,7 @@ end
 -- stream, and riding never changes it: an animal you lasso just leaves it.
 local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:GetBoundingBox().Position.Z else -2
 local SPAWN_Z = START_LINE_Z + 4
-local FINISH_Z = -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
+local FINISH_Z = if vfx.Endless.On then -math.huge else -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there; none past the Ocean now the course is endless: Config.Endless)
 local FINISH_DROP = 40 -- studs the leap off the end drops below the floor by the time it lands
 local VIEW = 320 -- stampede animals further than this from the camera aren't drawn
 local DUST_VIEW = 160 -- landings further than this from the camera kick up no dust
@@ -303,7 +354,7 @@ do
 		assert(biome.Herd, "Config.Biomes[" .. b .. "] (" .. tostring(biome.Name) .. ") has no Herd")
 		streams[b] = newStream(
 			if b == 1 then SPAWN_Z else startZ - 2,
-			if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
+			if b == #Config.Biomes and not vfx.Endless.On then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line (or goes on: vfx.endlessStreams)
 			biome.Herd,
 			biome.Name
 		)
@@ -312,8 +363,51 @@ do
 	end
 end
 
+-- The endless course's stretches each run their biome's herd (Config.Endless): stretch s's
+-- stream is streams[#Config.Biomes + 1 + (s - 1) % 1000], keyed like a biome's (BIOME_KEYS), made
+-- when the camera comes within ENDLESS_REACH of it and dropped once it's that far again, so only a
+-- few are ever running. (1000 apart share a slot: never both near the camera.)
+vfx.ENDLESS_REACH = 3000
+function vfx.endlessStream(seg)
+	local b = #Config.Biomes + 1 + (seg.index - 1) % 1000
+	local s = streams[b]
+	if not s or s.segment ~= seg.index then
+		local biome = seg.template
+		s = newStream(seg.from - 2, seg.to + 2, biome.Herd)
+		s.segment = seg.index
+		s.oldest = -math.huge -- (till the herd's next update sets it: its plans are kept meanwhile)
+		s.keep = biome.HerdKeep
+		s.every = biome.HerdSpawnEvery or Config.HerdSpawnEvery
+		streams[b] = s
+	end
+	return s
+end
+function vfx.endlessStreams(camZ)
+	if not vfx.Endless.On then
+		return
+	end
+	for b, s in streams do
+		if s.segment then
+			local seg = vfx.Endless.segment(s.segment)
+			if seg.to > camZ + vfx.ENDLESS_REACH or seg.from < camZ - vfx.ENDLESS_REACH then
+				streams[b] = nil
+			end
+		end
+	end
+	local z = math.min(camZ + vfx.ENDLESS_REACH, vfx.Endless.START - 1)
+	while z >= camZ - vfx.ENDLESS_REACH do
+		local seg = vfx.Endless.segmentAt(z)
+		vfx.endlessStream(seg)
+		z = seg.to - 1
+	end
+end
+
 -- Where an animal in biome b (at z) stops: its stream's end.
 local function streamAt(z)
+	local seg = vfx.Endless.On and vfx.Endless.segmentAt(z)
+	if seg then
+		return vfx.endlessStream(seg)
+	end
 	return streams[WorldColors.biomeAt(z)]
 end
 
@@ -404,6 +498,14 @@ local sprintKey = false -- Shift or L2 held
 -- averages its share of the stream divided by the gap it runs between spawns,
 -- plus a margin for runs of it.
 local classes, poolSizes = {}, {}
+for _, biome in if vfx.Endless.On then Config.Endless.Biomes else {} do
+	for kind, weight in biome.Herd do
+		if weight > 0 then
+			pools[kind] = pools[kind] or {}
+			poolSizes[kind] = poolSizes[kind] or 2 -- (built on the spot past that: takeFromPool)
+		end
+	end
+end
 for _, stream in streams do
 	local window = math.min(2 * VIEW, stream.spawnZ - stream.endZ)
 	for _, kind in stream.kinds do
@@ -1722,7 +1824,7 @@ end
 -- can't be knocked away or crashed into. Built during the countdown, since a big
 -- animal is slow to build.
 vfx.EVENT_LANE = 0
-vfx.EVENT_END = WorldColors.biomeNamedStart(Config.Events.DespawnBiome) or FINISH_Z -- (it runs off at the Jungle's edge: QM, Oct 11)
+vfx.EVENT_END = WorldColors.biomeNamedStart(Config.Events.DespawnBiome) or -Config.CourseLength + Config.FinishFromEnd -- (it runs off at the Jungle's edge: QM, Oct 11)
 function vfx.updateEvent(dt, seen, inView)
 	local id = world:GetAttribute("EventId") or 0
 	local key, kind = -id, world:GetAttribute("EventKind") or ""
@@ -1829,6 +1931,7 @@ local function updateHerd(dt, slowed)
 		vfx.frostLeft[key] = if left > dt then left - dt else nil
 	end
 	local fromZ, toZ = vfx.viewWindow(camZ)
+	vfx.endlessStreams(camZ) -- (the endless course's stretches near the camera: their streams)
 	-- (the animal you're lassoing is kept however old it gets or far it runs: QM, Oct 8, a
 	-- Fish wrestled on into the Desert outlived its stream's schedule and vanished)
 	local held = transfer and transfer.target and transfer.target.n

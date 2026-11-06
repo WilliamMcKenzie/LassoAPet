@@ -7,6 +7,10 @@ local CELL = 4
 
 local Ground = {}
 
+-- (past the Ocean the course is generated, not parts in the Floor: Shared/Endless works it out)
+local Endless = require(script.Parent.Endless)
+local ENDLESS_FROM = if Endless.On then Endless.START else -math.huge
+
 local heights -- [cell key] = top y, only for cells off y = 0
 local waters -- [cell key] = "Water", for the liquid tiles
 
@@ -39,6 +43,9 @@ local function load()
 end
 
 function Ground.heightAt(x, z)
+	if z < ENDLESS_FROM then
+		return Endless.heightAt(x, z)
+	end
 	if not heights then
 		load()
 	end
@@ -48,6 +55,9 @@ end
 -- The water under a point (QM, Oct 14: things sink a bit in it, Client/WaterSink): "Water" on
 -- a liquid tile (the map's water and magma), or nil.
 function Ground.waterAt(x, z)
+	if z < ENDLESS_FROM then
+		return if Endless.liquidAt(x, z) then "Water" else nil
+	end
 	if not waters then
 		load()
 	end

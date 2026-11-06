@@ -1541,6 +1541,118 @@ local Config = {
 	HerdGapSpeed = 2,
 }
 
+-- The endless course past the Ocean Trench (QM, Nov 6: "after the final ocean biome, should be
+-- infinite procedural: this is where we will use world 2's biomes and all its pets"). Past the
+-- Ocean's end the course never stops: Shared/Endless lays it out as stretches of World 2's first
+-- three biomes, each one picked at random (never the one before again) for a random length, and
+-- generates their terrain as you go (Client/Endless builds what's near the camera). Each stretch
+-- runs its biome's World 2 herd. They're biome tiers 9, 10 and 11 for speed and income (the
+-- balance passes at the end of this file). Same Seed, same course on every client and server.
+local rgb = Color3.fromRGB
+Config.Endless = {
+	Seed = 20261106,
+	MinLength = 1600, -- studs each stretch runs, at random between these (whole 16s)
+	MaxLength = 2800,
+	Blend = 96, -- studs over which one stretch's tiles dither into the next's
+	Biomes = {
+		{
+			-- World 2's Meadow: golden grass, marble ruins, ponds (QM, Oct 13)
+			Name = "MarbleMeadow",
+			DisplayName = "Marble Meadow",
+			Tier = 9,
+			Swerve = 1,
+			HerdSpawnEvery = 0.45, -- (as the Ocean's)
+			GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) },
+			WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) }, -- marble
+			-- its own animals (World 2's weights). The Majestic Unicorn's a Robux pet in World 1: on its
+			-- page, never wild (as the Robo Shark). World 1's Bunny, Rhino and Buffalo stay in the Meadow.
+			Herd = { MarbleFish = 0.3, Lion = 0.2, Crocodile = 0.2, MarbleColossus = 0.08, MajesticUnicorn = 0 },
+			Boss = "Seraph", -- (World 2's Meadow boss)
+			Fog = { Color = rgb(232, 214, 160), Start = 0, End = 500 },
+		},
+		{
+			-- World 2's Crimson Lands (QM, Oct 13)
+			Name = "CrimsonLands",
+			DisplayName = "Crimson Lands",
+			Tier = 10,
+			Swerve = 1,
+			HerdSpawnEvery = 0.45,
+			GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) },
+			WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) },
+			Herd = { Eyeworm = 0.3, Maw = 0.3, IvorySpider = 0.05, Asura = 0.05, CrimsonScorpion = 0.2, Beholder = 0.3,
+				BlackWidow = 0.0024 }, -- (the Black Widow 1 in 500 of its stampede: QM, Oct 13)
+			Boss = "CrimsonSeraph",
+			Fog = { Color = rgb(150, 60, 70), Start = 0, End = 450 },
+		},
+		{
+			-- World 2's Crystal Cavern (QM, Oct 13): blue-grey by the walls to ice to crystal down the middle
+			Name = "CrystalCavern",
+			DisplayName = "Crystal Cavern",
+			Tier = 11,
+			Swerve = 1,
+			HerdSpawnEvery = 0.45,
+			GroundColors = { rgb(90, 109, 143), rgb(82, 99, 131) },
+			WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) },
+			Herd = { CrystalCentipede = 0.3, RedMushroom = 0.25, BrownMushroom = 0.22, PurpleMushroom = 0.12, BlueCrystal = 0.25,
+				PinkCrystal = 0.22, CrystalSpider = 0.12, CrystalPhoenix = 0.08, CrystalElephant = 0.04 },
+			Boss = "CrystalSeraph",
+			Fog = { Color = rgb(70, 92, 140), Start = 0, End = 420 },
+		},
+	},
+	-- The endless tiles' and props' colours (ColorKeys, live in workspace.WorldColors like the
+	-- map's): World 2's where it had them.
+	Colors = {
+		MarbleGrass = rgb(206, 168, 58), MarbleGrassChecker = rgb(190, 152, 46),
+		MarbleDarkGrass = rgb(182, 144, 44), MarbleDarkGrassChecker = rgb(166, 130, 36),
+		MarbleDirt = rgb(142, 101, 60), MarbleDirtChecker = rgb(128, 89, 52),
+		MarbleStone = rgb(236, 232, 224), MarbleStoneChecker = rgb(218, 214, 206),
+		MarbleWall = rgb(236, 232, 224), MarbleWallChecker = rgb(218, 214, 206),
+		MarbleCap = rgb(206, 168, 58),
+		MarbleWater = rgb(76, 156, 222), MarbleWaterChecker = rgb(90, 170, 232),
+		MarbleBush = rgb(166, 130, 36),
+		CrimsonGround = rgb(121, 20, 37), CrimsonGroundChecker = rgb(110, 17, 33),
+		CrimsonPatch = rgb(144, 44, 43), CrimsonPatchChecker = rgb(132, 38, 38),
+		CrimsonStone = rgb(119, 86, 86), CrimsonStoneChecker = rgb(108, 77, 77),
+		CrimsonDark = rgb(98, 15, 30), CrimsonDarkChecker = rgb(89, 13, 27),
+		CrimsonWall = rgb(91, 50, 54), CrimsonWallChecker = rgb(82, 44, 48),
+		CrimsonCap = rgb(72, 39, 42),
+		CrimsonRune = rgb(255, 59, 92),
+		CrimsonShroom = rgb(196, 38, 56), CrimsonShroomStem = rgb(226, 206, 196),
+		CavernGround = rgb(90, 109, 143), CavernGroundChecker = rgb(82, 99, 131),
+		CavernIce = rgb(98, 129, 167), CavernIceChecker = rgb(89, 118, 153),
+		CavernCrystal = rgb(116, 186, 213), CavernCrystalChecker = rgb(105, 171, 197),
+		CavernRock = rgb(66, 84, 118), CavernRockChecker = rgb(60, 77, 108),
+		CavernWall = rgb(56, 72, 103), CavernWallChecker = rgb(48, 62, 90),
+		CavernCap = rgb(44, 57, 82),
+		CavernPlank = rgb(139, 94, 60), CavernPlankChecker = rgb(126, 84, 53),
+		CavernWater = rgb(60, 128, 200), CavernWaterChecker = rgb(72, 140, 210),
+		CavernGlow = rgb(92, 225, 255), CavernPink = rgb(255, 130, 200),
+		CavernShroom = rgb(150, 80, 200), CavernShroomStem = rgb(220, 214, 236),
+	},
+}
+for key, color in Config.Endless.Colors do
+	Config.WorldColors[key] = color
+end
+-- each endless biome's boss (World 2's, by its biome: Client/BossChase)
+for _, biome in Config.Endless.Biomes do
+	Config.Boss.ByBiome[biome.Name] = biome.Boss
+end
+-- [kind] = true: the endless herds' animals (World 2's), which keep their own speed in World 1
+Config.EndlessAnimals = {}
+for _, biome in Config.Endless.Biomes do
+	for kind in biome.Herd do
+		Config.EndlessAnimals[kind] = true
+	end
+end
+-- Every biome a player can meet, for the Index: Config.Biomes, then the endless ones.
+function Config.allBiomes()
+	local list = table.clone(Config.Biomes)
+	for _, biome in Config.Endless.Biomes do
+		table.insert(list, biome)
+	end
+	return list
+end
+
 -- Flowing water (QM, Oct 13; Client/WaterFlow): a Texture named "Water" on a tile's top
 -- with this Image flows Flow studs a second (U across the course, V along it).
 Config.Water = {
@@ -2090,7 +2202,7 @@ function Config.ownHere(kind, world)
 	elseif world == 3 then
 		return Config.World3Animals[kind] == true
 	end
-	return not Config.World3Animals[kind] and (not Config.World2Animals[kind] or SHARED[kind] == true)
+	return not Config.World3Animals[kind] and (not Config.World2Animals[kind] or SHARED[kind] == true or Config.EndlessAnimals[kind] == true) -- (the endless herds' in World 1)
 end
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
 function Config.slowedHere(kind, fuse)
@@ -2419,6 +2531,70 @@ if Config.World == 1 then
 					Config.AnimalStats[kind].Speed = math.floor(stats.Speed * k * 100 + 0.5) / 100
 				end
 			end
+		end
+	end
+end
+
+-- The endless biomes (Config.Endless) as biome tiers 9, 10 and 11, on the same curves as World 1's
+-- (QM, Nov 6): speed the Meadow's average x (1 + SpeedLog x ln(tier)), income 2x the tier before
+-- (the Ocean's, then each other). Each animal keeps its place in its biome. Kinds a World 1 herd
+-- runs and the Robux pets keep their numbers.
+if Config.World == 1 then
+	local inWorld1 = {}
+	for _, biome in Config.Biomes do
+		for kind in biome.Herd do
+			inWorld1[kind] = true
+		end
+	end
+	local function own(kind)
+		return not inWorld1[kind] and not Config.CrossWorldExempt[kind]
+	end
+	local function average(herd, value, skip)
+		local weights, total = 0, 0
+		for kind, weight in herd do
+			local v = value(kind)
+			if weight > 0 and v and not skip[kind] then
+				weights += weight
+				total += weight * v
+			end
+		end
+		return if weights > 0 then total / weights else nil
+	end
+	local function speed(kind)
+		return Config.AnimalStats[kind] and Config.AnimalStats[kind].Speed
+	end
+	local function income(kind)
+		return Config.PetIncome[kind]
+	end
+	local base = average(Config.Biomes[1].Herd, speed, { SnackYak = true, RoboShark = true, Fish = true, Horse = true })
+	local previous = average(Config.Biomes[#Config.Biomes].Herd, income, { SnackYak = true, RoboShark = true, Fish = true })
+	for _, biome in Config.Endless.Biomes do
+		local herd = {}
+		for kind, weight in biome.Herd do
+			if own(kind) then
+				herd[kind] = weight
+			end
+		end
+		local was = average(herd, speed, {})
+		if was and base then
+			local k = base * (1 + (Config.SpeedLog or 0.5) * math.log(biome.Tier)) / was
+			for kind in herd do
+				Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind])
+				Config.AnimalStats[kind].Speed = math.floor(Config.AnimalStats[kind].Speed * k * 100 + 0.5) / 100
+			end
+		end
+		was = average(herd, income, {})
+		if was and previous then
+			local k = previous * 2 / was
+			for kind in herd do
+				if Config.PetIncome[kind] then
+					local n = Config.PetIncome[kind] * k
+					local step = if n >= 1000 then 50 elseif n >= 100 then 5 else 1
+					Config.PetIncome[kind] = math.max(1, math.floor(n / step + 0.5) * step)
+					baseIncome[kind] = Config.PetIncome[kind] -- (Config.incomeIn: what a World 1 pen earns)
+				end
+			end
+			previous = average(herd, income, {})
 		end
 	end
 end

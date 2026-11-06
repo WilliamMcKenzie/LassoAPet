@@ -11,6 +11,7 @@
 --   BiomeFog.step(z, dt?)   -- eases Lighting's fog toward the fog at z (no dt: at once)
 
 local Lighting = game:GetService("Lighting")
+local Endless = require(script.Parent.Endless)
 
 local BiomeFog = {}
 
@@ -68,11 +69,17 @@ function BiomeFog.at(z)
 end
 
 function BiomeFog.step(z, dt)
-	local entry = BiomeFog.at(z)
-	if not entry then
-		return
+	local color, s, e
+	local endless = Endless.fogAt(z) -- (past the Ocean: the endless stretch's biome's, Config.Endless)
+	if endless then
+		color, s, e = endless.Color, endless.Start, endless.End
+	else
+		local entry = BiomeFog.at(z)
+		if not entry then
+			return
+		end
+		color, s, e = entry:GetAttribute("Color"), entry:GetAttribute("Start"), entry:GetAttribute("End")
 	end
-	local color, s, e = entry:GetAttribute("Color"), entry:GetAttribute("Start"), entry:GetAttribute("End")
 	if typeof(color) ~= "Color3" or type(s) ~= "number" or type(e) ~= "number" then
 		return
 	end

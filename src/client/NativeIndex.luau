@@ -79,7 +79,7 @@ end
 
 -- This world's biomes, each with its animals (the herd's, cheapest first), as the old Index
 local BIOMES = {}
-for i, biome in Config.Biomes do
+for i, biome in Config.allBiomes() do -- (and the endless course's, past the Ocean: Config.Endless)
 	local kinds = {}
 	for kind, weight in biome.Herd or {} do
 		if weight > 0 and PetFaces.HEADSHOTS[kind] ~= nil then
@@ -96,7 +96,7 @@ for i, biome in Config.Biomes do
 	local names = Config.BiomeNames and Config.BiomeNames[Config.World]
 	local colours = biome.GroundColors
 	table.insert(BIOMES, {
-		name = names and names[i] or biome.Name,
+		name = names and names[i] or biome.DisplayName or biome.Name,
 		kinds = kinds,
 		tint = colours and colours[#colours] or Color3.fromRGB(80, 80, 80),
 	})
