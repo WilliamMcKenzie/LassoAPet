@@ -84,6 +84,17 @@ end
 function MapFile.decode(text)
 	local file = HttpService:JSONDecode(text)
 	assert(file.format == "StealAndFightPets.map", "not a .map file")
+	if file.rowRuns then
+		-- (tools/map_bake.py: each different row as runs of one cell)
+		file.rowSet = {}
+		for i, runs in file.rowRuns do
+			local parts = table.create(#runs // 2)
+			for k = 1, #runs, 2 do
+				table.insert(parts, string.rep(runs[k], runs[k + 1]))
+			end
+			file.rowSet[i] = table.concat(parts)
+		end
+	end
 	if file.rowIndex then
 		-- (tools/map_bake.py sends each different row once: rowSet, and which one each row is)
 		local rowsOut = table.create(#file.rowIndex)

@@ -17,6 +17,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -44,6 +45,7 @@ class Served:
 
 
 SERVED = Served()
+SENT = {}  # each map file as last synced into Studio
 BUILT = [None]  # the map text Studio last built (Map.update builds only what changed since)
 PARTS = ("colours", "areas", "tiles", "objects", "fixed", "rows")
 
@@ -141,7 +143,11 @@ def to_studio(areas=None):
     """Syncs src/ into Studio and rebuilds workspace.Map there (only `areas`' floors and the
     objects, if given); a message saying how it went."""
     load = os.path.join(tempfile.gettempdir(), "mapeditor_load.luau")
-    ok, out = run(os.path.join(STUDIO, "mkload.py"), load, *MAP_FILES)
+    t0 = time.time()
+    # (only the files that changed since the last good save: usually just MapData)
+    texts = {f: open(os.path.join(ROOT, f)).read() for f in MAP_FILES}
+    files = [f for f in MAP_FILES if SENT.get(f) != texts[f]] or [MAP_FILES[0]]
+    ok, out = run(os.path.join(STUDIO, "mkload.py"), load, *files)
     if ok:
         # (the sync and the rebuild in one call to Studio: QM, Nov 6, a save in about a second)
         sync = open(load).read()
@@ -152,11 +158,15 @@ def to_studio(areas=None):
         ok, out = run(os.path.join(STUDIO, "lu.py"), load, "Edit")
     if "Play mode" in out:  # (Studio's answer while a play test runs: no Edit datamodel to load into)
         return "Saved. Studio is in Play: stop it, then press Save to game again."
+    SENT.clear()
+    if ok and "loaded" in out and (out.splitlines() or [""])[-1].startswith("baked"):
+        SENT.update(texts)
+    took = " (%.1f s)" % (time.time() - t0)
     if not ok or "loaded" not in out:
         return "Saved, but Studio didn't take it (is it open?). Sync and press Map > Rebuild there."
     last = out.splitlines()[-1] if out else ""
     if ok and last.startswith("baked"):
-        return "Saved and rebuilt in Studio. Save the place there to keep it."
+        return "Saved and rebuilt in Studio" + took + ". Save the place there to keep it."
     if "playing" in last:
         return "Saved. Studio is in Play: stop it and press Map > Rebuild."
     return "Saved, but the rebuild in Studio failed: " + last[:200]
