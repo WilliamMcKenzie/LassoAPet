@@ -122,6 +122,8 @@ HudKit.LOOKS = {
 	-- the Goal panel's bar (QM's Figma, Oct 31; client/GoalPanel): lime over a dark slate track
 	GoalTrack = { top = rgb("3d505c"), bottom = rgb("1f2c35"), from = 0.001, outline = 8, corner = 10 },
 	GoalFill = { top = rgb("caff00"), bottom = rgb("0aff00"), bevel = { 0.75, 0.75 }, tile = { 230, 0.8, "Weld" }, corner = 10 },
+	-- the top progress bar: the same lime, its weld faded a little (QM, Nov 6) so it reads like the buttons'
+	TopFill = { top = rgb("caff00"), bottom = rgb("0aff00"), bevel = { 0.75, 0.75 }, tile = { 230, 0.88, "Weld" }, corner = 10 },
 	IndexCard = { fill = rgb("2f3a2a"), border = { Color3.new(0, 0, 0), 5, 0.4 }, tile = { 223.5, 0.85 }, outline = 6, corner = 10 },
 	Panel = { fill = rgb("323232"), border = { Color3.new(0, 0, 0), 6, 0.5 }, tile = { 223.5, 0.9 }, outline = 8, corner = 20 },
 	Card = { fill = Color3.new(1, 1, 1), border = { Color3.new(0, 0, 0), 5 }, tile = { 223.5, 0.8 }, corner = 10 },
