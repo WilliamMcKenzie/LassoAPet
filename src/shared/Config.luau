@@ -356,7 +356,9 @@ local Config = {
 			CapColor = Color3.fromRGB(157, 226, 244),
 			GateColor = Color3.fromRGB(70, 200, 255),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { Squid = 0.38, Seahorse = 0.22, KingCrab = 0.17, FishSchool = 0.12, Whale = 0.08, AbyssWhale = 0.03 },
+			Herd = { Squid = 0.38, Seahorse = 0.22, KingCrab = 0.17, FishSchool = 0.12, Whale = 0.08, AbyssWhale = 0.03,
+				-- (QM, Nov 6: and Lasso's own old Ocean animals back, at their old weights; the Robo Shark a Robux pet, never wild)
+				Starfish = 0.3, Clownfish = 0.25, Lionfish = 0.15, BlueCrab = 0.05, Kraken = 0.05, RoboShark = 0 },
 			UnlockCost = 100000000000,
 		},
 	},
@@ -1751,6 +1753,11 @@ Config.SharedPets = {
 	KingCrab = { 27500, 1200, 8.6 }, -- Epic
 	FishSchool = { 27500, 1200, 9.6 }, -- Epic
 	Whale = { 20000, 300, 9 }, -- Rare
+	Starfish = { 12000, 60, 8.2 }, -- Uncommon (Lasso's old Ocean ones, QM Nov 6)
+	Clownfish = { 12000, 60, 8.4 }, -- Uncommon
+	Lionfish = { 20000, 300, 8.8 }, -- Rare
+	BlueCrab = { 42500, 7200, 9.2 }, -- Legendary
+	Kraken = { 42500, 7200, 9.6 }, -- Legendary
 }
 for kind, p in Config.SharedPets do
 	Config.PetIncome[kind] = p[1]
