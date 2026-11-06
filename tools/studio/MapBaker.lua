@@ -2,7 +2,8 @@
 -- so it's there to see and save without pressing Play.
 --
 -- Install: copy this file into Studio's plugins folder (Plugins tab > Plugins Folder;
--- on a Mac ~/Documents/Roblox/Plugins) and restart Studio. A "Map" toolbar appears:
+-- on a Mac ~/Documents/Roblox/Plugins) as LassoMapBaker.lua, so it sits beside Fight to
+-- Steal an Egg's MapBaker.lua, and restart Studio. A "Lasso Map Baker" toolbar appears:
 --   Rebuild     bakes Shared/MapData (maps/world.map, as synced from the repo)
 --   Import .map bakes a .map straight from disk (a download from the map editor), to
 --               look at before it goes in the repo (tools/map_bake.py)
@@ -20,7 +21,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 local StudioService = game:GetService("StudioService")
 
-local toolbar = plugin:CreateToolbar("Map")
+local toolbar = plugin:CreateToolbar("Lasso Map Baker") -- (not "Map": Fight to Steal an Egg's Map Baker has that)
 local rebuild = toolbar:CreateButton("MapBakerRebuild", "Bake Shared/MapData into workspace.World", "", "Rebuild")
 local import = toolbar:CreateButton("MapBakerImport", "Bake a .map file from disk into workspace.World", "", "Import .map")
 local petLineup = toolbar:CreateButton("MapBakerPetLineup", "Stand every biome's animals mid-run in their biome, sized by workspace.PetScale", "", "Pet Lineup")

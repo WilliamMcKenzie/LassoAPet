@@ -29,12 +29,13 @@ SPLIT_LEN = 320  # the island's length
 ISLAND_HALF = 48  # the island's half width at its widest
 RAMP = 64  # studs each taper step runs
 
-PROPS = {  # big ones (scale 5-10), small ones (2-4), accents near the end
+PROPS = {  # big ones (scale 5-10), small ones (2-4), accents near the end: each biome's own
+    # Fight to Steal an Egg props, as its maps/world.map has them (QM, Nov 6: keep them apart)
     "Ice": (["SnowPine", "SnowPine", "Boulders"], ["Boulders", "SnowPine"], ["Monolith"]),
-    "Dungeon": (["RuinPillar", "StoneBlock", "Candelabra"], ["StoneRubble", "Skull", "Ribcage", "Torch", "StoneBlockLow"], ["RuinPillarBroken", "Monolith"]),
-    "Forest": (["DeadTree", "PineTall", "Boulders"], ["ForestCandle", "Boulders", "PineShort"], ["Monolith"]),
-    "Castle": (["RuinPillar", "StoneBlock", "CandlePodium"], ["Candles", "Shackles", "StoneRubble"], ["RuinPillarBroken"]),
-    "Ocean": (["PalmTree", "Coral", "Coral"], ["Kelp", "Sponges", "Starfish", "PalmTreeSmall"], ["Monolith"]),
+    "Dungeon": (["Boulders", "Candelabra", "Monolith"], ["Candles", "Candles", "Femur", "Ribcage", "Boulders"], ["Monolith"]),
+    "Forest": (["PalmTree", "PalmTree", "Boulders"], ["PalmTreeSmall", "Boulders"], ["Monolith", "RuinPillar", "RuinPillarBroken"]),
+    "Castle": (["Candelabra", "Boulders", "Monolith"], ["Candles", "Candles", "Femur", "Ribcage", "Torch"], ["Monolith"]),
+    "Ocean": (["Coral", "Coral", "Boulders"], ["Kelp", "Kelp", "Starfish", "Sponges"], ["Monolith"]),
 }
 
 
