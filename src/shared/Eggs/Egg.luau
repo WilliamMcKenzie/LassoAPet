@@ -28,6 +28,12 @@ local KINDS = {
 	Pig = { data = require(script.Parent.PigEggModel), center = 1.6 },
 	Fish = { data = require(script.Parent.FishEggModel), center = 1.6 },
 	Rhino = { data = require(script.Parent.RhinoEggModel), center = 1.6 },
+	Zebra = { data = require(script.Parent.ZebraEggModel), center = 1.6 }, -- (World 1 Meadow, QM Nov 6: tools/meadow_eggs.py)
+	Gecko = { data = require(script.Parent.GeckoEggModel), center = 1.6 },
+	Elephant = { data = require(script.Parent.ElephantEggModel), center = 1.6 },
+	AlphaRhino = { data = require(script.Parent.RhinoEggModel), center = 1.6 }, -- (the alphas hatch from their base's egg)
+	AlphaFish = { data = require(script.Parent.FishEggModel), center = 1.6 },
+	GoldenPig = { data = require(script.Parent.PigEggModel), center = 1.6 },
 	Bunny = { data = require(script.Parent.BunnyEggModel), center = 1.6 },
 	Unicorn = { data = require(script.Parent.UnicornEggModel), center = 1.6 },
 	MarbleColossus = { data = require(script.Parent.MarbleColossusEggModel), center = 1.6 },

@@ -26,7 +26,9 @@ local Config = {
 			-- use the same odds (NestOdds). A 0 never spawns but keeps the animal on
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
-			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05 },
+			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05,
+				Zebra = 0.25, Gecko = 0.13, Buffalo = 0.1, Elephant = 0.06, -- (QM, Nov 6; weights a guess, as the Pinto, the Fish and between the Fish and Rhino)
+				GoldenPig = 0.025, AlphaFish = 0.013, AlphaRhino = 0.008 }, -- the alphas: 10x rarer than their base (QM, Nov 6)
 			-- Dirt patches in the walls' colours, a stud below the grass
 			-- (tools/meadow_ground.py); see the Desert's Patches.
 			Patches = {
@@ -393,7 +395,7 @@ local Config = {
 		-- QM's own table (Oct 11, "new json"): every animal's egg, by biome. Uncommons and Rares
 		-- hatch within a run, each biome's Epics a little longer, the Legendaries are the long
 		-- D1 eggs you come back for.
-		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 3600, MarbleFish = 15, Lion = 60, Buffalo = 60, Crocodile = 60, MarbleColossus = 120, MajesticUnicorn = 300, -- Meadow (the Marble Fish, Lion, Marble Colossus and Majestic Unicorn: World 2's, as the Pinto, a Rare, the Rhino and Unicorn)
+		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 3600, MarbleFish = 15, Lion = 60, Buffalo = 60, Crocodile = 60, MarbleColossus = 120, MajesticUnicorn = 300, Zebra = 15, Gecko = 45, Elephant = 120, GoldenPig = 120, AlphaFish = 300, AlphaRhino = 600, -- Meadow (the Marble Fish, Lion, Marble Colossus and Majestic Unicorn: World 2's, as the Pinto, a Rare, the Rhino and Unicorn)
 		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 7200, -- Desert
 		Eyeworm = 15, CrimsonScorpion = 15, Maw = 60, IvorySpider = 75, Asura = 600, -- World 2 Crimson Lands
 		Caterpillar = 15, -- World 2 Woodland Maze (as the Starfish)
@@ -590,7 +592,7 @@ local Config = {
 	-- Oct 6); their tier (model "Tier" attribute, else ObstacleTiers by name) only
 	-- decides which ones some abilities break.
 	PetTiers = {
-		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleFish = 1, Lion = 1, Buffalo = 2, Crocodile = 1, MarbleColossus = 2, MajesticUnicorn = 2, -- Meadow
+		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleFish = 1, Lion = 1, Buffalo = 2, Crocodile = 1, MarbleColossus = 2, MajesticUnicorn = 2, Zebra = 1, Gecko = 1, Elephant = 3, GoldenPig = 2, AlphaFish = 2, AlphaRhino = 3, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Eyeworm = 1, CrimsonScorpion = 1, Maw = 1, IvorySpider = 2, Asura = 3, -- World 2 Crimson Lands (the Asura large, QM)
 		Caterpillar = 1, -- World 2 Woodland Maze
@@ -698,7 +700,7 @@ local Config = {
 	-- every second while you're in the game. (QM, Oct 8 evening: progression 2x faster, so
 	-- x3 QM's pets JSON: rides don't get quicker, so the gold has to more than double.)
 	PetIncome = {
-		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleFish = 15, Lion = 24, Buffalo = 30, Crocodile = 24, MarbleColossus = 90, MajesticUnicorn = 450, -- Meadow
+		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleFish = 15, Lion = 24, Buffalo = 30, Crocodile = 24, MarbleColossus = 90, MajesticUnicorn = 450, Zebra = 15, Gecko = 24, Elephant = 90, GoldenPig = 60, AlphaFish = 120, AlphaRhino = 300, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
 		Eyeworm = 18, CrimsonScorpion = 24, Maw = 60, IvorySpider = 180, Asura = 750, -- World 2 Crimson Lands
 		Caterpillar = 300, -- World 2 Woodland Maze (as the Starfish)
@@ -1289,6 +1291,12 @@ local Config = {
 		Buffalo = { Speed = 1.3, Stamina = 1.6 }, -- World 2's Meadow Rare, Rhino-sized (QM, Oct 13; a guess)
 		Crocodile = { Speed = 1.25, Stamina = 1.2 }, -- World 2's Meadow Rare (QM, Oct 13; the Lion's numbers, a guess)
 		MajesticUnicorn = { Speed = 1.8, Stamina = 2 }, -- World 2's Meadow Legendary (as the Unicorn until QM sets it)
+		Zebra = { Speed = 1.15, Stamina = 0.9 }, -- World 1 Meadow's new ones (QM, Nov 6; guesses, by the Pinto, Lion and Rhino)
+		Gecko = { Speed = 1.25, Stamina = 1.2 },
+		Elephant = { Speed = 1.35, Stamina = 2.2 },
+		GoldenPig = { Speed = 0.9, Stamina = 1.2 }, -- the alphas: a bit faster and longer-lasting than their base (guesses)
+		AlphaFish = { Speed = 0.7, Stamina = 4 },
+		AlphaRhino = { Speed = 1.5, Stamina = 2.4 },
 		Unicorn = { Speed = 1.8, Stamina = 2 }, -- (QM, Oct 12: kept at 1.8, into the Tundra from the start line, ~4,440 of 3,984)
 		-- Desert
 		Caterpillar = { Speed = 3.37, Stamina = 2 }, -- World 2's Woodland Maze Uncommon (as the Starfish until QM sets it)
@@ -1898,7 +1906,7 @@ for kind in Config.CrossWorldExempt do
 	EXEMPT_STATS[kind] = Config.AnimalStats[kind] and table.clone(Config.AnimalStats[kind])
 end
 -- (World 1's animals World 2's Meadow has too: World 1's own as well)
-local SHARED = { Bunny = true, Rhino = true, Fish = true }
+local SHARED = { Bunny = true, Rhino = true, Fish = true, Buffalo = true } -- (the Buffalo World 1 Meadow's too: QM, Nov 6)
 -- Whether `kind` is one of `world`'s own animals.
 function Config.ownHere(kind, world)
 	world = world or Config.World
