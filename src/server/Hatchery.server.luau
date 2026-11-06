@@ -611,6 +611,11 @@ local function load(player)
 			Quests.publish(player, profiles[player].quests)
 		end
 	end)
+	player:GetAttributeChangedSignal("PenLevel"):Connect(function() -- (the "Upgrade slingshot" goals: Server/Slingshot's UnlockBiome)
+		if profiles[player] then
+			Quests.publish(player, profiles[player].quests)
+		end
+	end)
 	if not profile.tutorial then
 		profile.homeEggs = profile.homeEggs or 0
 	end

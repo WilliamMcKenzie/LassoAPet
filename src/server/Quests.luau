@@ -47,13 +47,29 @@ function Quests.load(saved)
 		end
 		state.lines[line] = { at = math.clamp(at, 1, #quests + 1), skip = skip }
 	end
-	state.v = 3
+	-- (World 1's goals became one line, QM Nov 6: saves from before it start that line over)
+	if v < 4 and Config.World == 1 then
+		state.lines = { { at = 1 } }
+	end
+	state.v = 4
 	return state
 end
 
 local function progress(player, state, quest)
 	if quest.Kind == "reach" then
 		return if (player:GetAttribute("GatesBroken") or 1) >= quest.Biome then 1 else 0, 1
+	end
+	if quest.Kind == "slingshot" then -- (the Slingshot's menu has unlocked Biome: your pen level's up to it)
+		return if (player:GetAttribute("PenLevel") or 1) >= quest.Biome then 1 else 0, 1
+	end
+	if quest.Kind == "lasso" and quest.Biome and not quest.Animal then -- (lassos on any of that biome's herd)
+		local n = 0
+		for animal, weight in (Config.Biomes[quest.Biome] or {}).Herd or {} do
+			if weight > 0 then
+				n += state.counts["lasso:" .. animal] or 0
+			end
+		end
+		return math.min(n, quest.Need), quest.Need
 	end
 	local count = if quest.Animal then quest.Kind .. ":" .. quest.Animal else quest.Kind
 	return math.min(state.counts[count] or 0, quest.Need), quest.Need

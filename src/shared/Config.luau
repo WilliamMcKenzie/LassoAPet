@@ -2122,6 +2122,23 @@ Config.BiomeNames = {
 	{ "Pirate Cove", "Garden", "Candyland", "Cnidaria" },
 }
 
+-- World 1's goals (QM, Nov 6): one line, biome by biome to the end: reach it, capture 3 of its
+-- animals, upgrade the slingshot (unlock the next biome in its menu: Server/Slingshot). Claiming
+-- one no longer upgrades your pen (the slingshot's unlocks do). The first four reaches keep their eggs.
+if Config.World == 1 then
+	local REACH_EGGS = { "Cactus", "Penguin", "Snowman", "FireLobster" }
+	local goals = {}
+	for i in Config.Biomes do
+		local name = Config.BiomeNames[1][i] or Config.Biomes[i].Name
+		table.insert(goals, { Text = "Reach " .. name, Kind = "reach", Biome = i, Egg = REACH_EGGS[i], NoPenLevel = true })
+		table.insert(goals, { Text = "Capture 3 " .. name .. " animals", Kind = "lasso", Biome = i, Need = 3, NoPenLevel = true })
+		if Config.Biomes[i + 1] then
+			table.insert(goals, { Text = "Upgrade slingshot", Kind = "slingshot", Biome = i + 1, NoPenLevel = true })
+		end
+	end
+	Config.Quests = { goals }
+end
+
 -- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
 -- with you (QM, Oct 14), they're as big in the other worlds too. (Not the Loong: World 1's own as well.)
 do
