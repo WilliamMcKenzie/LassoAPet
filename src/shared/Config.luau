@@ -1505,8 +1505,8 @@ Config.Slingshot = {
 	Ahead = 22, -- studs out from your pen's Spawn to the slingshot's middle
 	Flight = 4.5, -- seconds in the air
 	Apex = 260, -- studs over the straight line at the flight's middle
-	Meshes = {}, -- (filled by tools/slingshot_upload.py)
-	Band = nil,
+	Meshes = { { 98330547373685, 170, 167, 180 }, { 97372945090229, 145, 152, 154 }, { 72003741917426, 186, 134, 80 }, { 107356883198884, 158, 108, 62 }, { 101149753111869, 86, 88, 98 }, { 117633513992999, 232, 204, 150 } }, -- (filled by tools/slingshot_upload.py)
+	Band = 104618131148243, -- (filled by tools/slingshot_upload.py)
 	BandColor = Color3.fromRGB(226, 58, 52),
 }
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's

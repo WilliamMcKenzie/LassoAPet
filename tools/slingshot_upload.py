@@ -61,7 +61,7 @@ return tostring(ok) .. " " .. tostring(res) .. " " .. tostring(id)
 def upload(name):
     data = json.dumps(read_obj(os.path.join(PIECES, name + ".obj")))
     out = run_luau(UPLOAD % (json.dumps(data), name), "Edit").strip()
-    m = re.search(r"true Success (\d+)", out)
+    m = re.search(r"true (?:Enum\.CreateAssetResult\.)?Success (\d+)", out)
     if not m:
         raise SystemExit("%s didn't upload: %s" % (name, out[:400]))
     print(name, m.group(1))
