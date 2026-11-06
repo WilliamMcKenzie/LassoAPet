@@ -14,9 +14,11 @@ Run: python3 tools/mapeditor/serve.py [port]     (default 3000; http://localhost
 import hashlib
 import json
 import os
+import select
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -115,6 +117,71 @@ def keep_tops(mine, theirs):
     return dump(m)
 
 
+class StudioLink:
+    """One StudioMCP kept open for every save (QM, Nov 6: starting it took ~2 s a save), as
+    tools/studio/lu.py talks to it. Only with STUDIO (the place's studio id) set; lu.py otherwise."""
+    MCP = "/Applications/RobloxStudio.app/Contents/MacOS/StudioMCP"
+
+    def __init__(self, sid):
+        self.sid, self.p, self.n, self.lock = sid, None, 10, threading.Lock()
+
+    def _send(self, m):
+        self.p.stdin.write(json.dumps(m) + "\n")
+        self.p.stdin.flush()
+
+    def _call(self, name, args, timeout=300):
+        self.n += 1
+        i = self.n
+        self._send({"jsonrpc": "2.0", "id": i, "method": "tools/call", "params": {"name": name, "arguments": args}})
+        end = time.time() + timeout
+        while True:
+            if not select.select([self.p.stdout], [], [], max(0, end - time.time()))[0]:
+                raise TimeoutError("Studio didn't answer")
+            line = self.p.stdout.readline()
+            if not line:
+                raise EOFError("StudioMCP closed")
+            m = json.loads(line)
+            if m.get("id") == i:
+                break
+        outs = [c.get("text", str(c)) for c in m.get("result", {}).get("content", [])]
+        return "\n".join(outs) + (str(m["error"]) if "error" in m else "")
+
+    def _start(self):
+        self.p = subprocess.Popen([self.MCP, "--stdio"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                  stderr=subprocess.DEVNULL, text=True)
+        self._send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+            "protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "mapeditor", "version": "1"}}})
+        while json.loads(self.p.stdout.readline()).get("id") != 1:
+            pass
+        self._send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        end = time.time() + 8
+        while time.time() < end:
+            try:
+                if any(x.get("id") == self.sid for x in json.loads(self._call("list_roblox_studios", {}, 5)).get("studios", [])):
+                    return
+            except (ValueError, TimeoutError):
+                pass
+            time.sleep(0.1)
+
+    def execute(self, code):
+        """(ok, output) as run(lu.py) gives them."""
+        with self.lock:
+            for attempt in (0, 1):
+                try:
+                    if not self.p or self.p.poll() is not None:
+                        self._start()
+                    return True, self._call("execute_luau", {"code": code, "datamodel_type": "Edit", "studio_id": self.sid})
+                except (OSError, EOFError, TimeoutError, ValueError) as e:
+                    if self.p:
+                        self.p.kill()
+                    self.p = None
+                    if attempt:
+                        return False, str(e)
+
+
+LINK = StudioLink(os.environ["STUDIO"]) if os.environ.get("STUDIO") else None
+
+
 def run(*args):
     r = subprocess.run(["python3", *args], cwd=ROOT, capture_output=True, text=True, timeout=300)
     return r.returncode == 0, (r.stdout + r.stderr).strip()
@@ -141,7 +208,7 @@ def changed_areas(old, new):
     return sorted({(nt.get(i) or ot.get(i))["area"] for i in ids if i in nt or i in ot})
 
 
-def to_studio(areas=None):
+def to_studio(areas=None, since=None):
     """Syncs src/ into Studio and rebuilds workspace.Map there (only `areas`' floors and the
     objects, if given); a message saying how it went."""
     load = os.path.join(tempfile.gettempdir(), "mapeditor_load.luau")
@@ -157,13 +224,13 @@ def to_studio(areas=None):
         head = "local AREAS = " + ("nil" if areas is None else "{" + ", ".join(json.dumps(a) for a in areas) + "}") + "\n"
         open(load, "w").write(head + "local loaded = (function()\n" + sync + "\nend)()\n"
                               + "return loaded .. \"\\n\" .. (function()\n" + rebuild + "\nend)()\n")
-        ok, out = run(os.path.join(STUDIO, "lu.py"), load, "Edit")
+        ok, out = LINK.execute(open(load).read()) if LINK else run(os.path.join(STUDIO, "lu.py"), load, "Edit")
     if "Play mode" in out:  # (Studio's answer while a play test runs: no Edit datamodel to load into)
         return "Saved. Studio is in Play: stop it, then press Save to game again."
     SENT.clear()
     if ok and "loaded" in out and (out.splitlines() or [""])[-1].startswith("baked"):
         SENT.update(texts)
-    took = " (%.1f s)" % (time.time() - t0)
+    took = " (%.1f s, %.1f in Studio)" % (time.time() - (since or t0), time.time() - t0)
     if not ok or "loaded" not in out:
         return "Saved, but Studio didn't take it (is it open?). Sync and press Map > Rebuild there."
     last = out.splitlines()[-1] if out else ""
@@ -200,6 +267,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path != "/save":
             return self.send(404, "not found")
+        since = time.time()
         text = self.rfile.read(int(self.headers.get("Content-Length", 0))).decode()
         try:
             json.loads(text)
@@ -225,7 +293,7 @@ class Handler(BaseHTTPRequestHandler):
         if not ok:
             return self.send(500, "Saved maps/world.map, but baking it failed: " + out[-300:])
         # (merged: the tab reloads the file, so it carries the other changes from now on)
-        said = to_studio(areas)
+        said = to_studio(areas, since)
         BUILT[0] = text if said.startswith("Saved and rebuilt") else None
         self.send(200, said, headers={"X-Map-Version": version(text), "X-Map-Merged": "1" if merged else "0"})
 
