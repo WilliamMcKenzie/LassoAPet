@@ -20,7 +20,6 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
 
-local LOAD = Vector3.new(0, 1.6, 17) -- (SlingshotPose's resting pull: where you step on)
 local FEET = -1.45 -- your pet's feet under the pull
 local SEAT = 2.2 -- your root over your pet's back
 local CAM_LAUNCH = Vector3.new(16, 14, 44) -- the camera, in the slingshot's space, while it draws
@@ -141,31 +140,19 @@ local function launch(model)
 	busy = false
 end
 
--- The prompt on your own slingshot's band, where it rests.
+-- The Launch prompt (a native ProximityPrompt the server puts on the slingshot, Server/Slingshot):
+-- yours works; anyone else's is switched off on your screen.
 local function setup(model)
 	local owner = model:GetAttribute("Owner") or tonumber(model.Name) -- (the server names it by its owner's UserId too)
-	if owner ~= player.UserId or model:FindFirstChild("LaunchSpot", true) then
-		return
-	end
 	local frame = model:WaitForChild("Frame1", 30)
-	if not frame then
+	local prompt = frame and frame:WaitForChild("Launch", 30)
+	if not prompt then
 		return
 	end
-	local spot = Instance.new("Attachment")
-	spot.Name = "LaunchSpot"
-	spot.CFrame = CFrame.new(LOAD + Vector3.new(0, 2, 0)) -- (Frame1 sits at the slingshot's pivot)
-	spot.Parent = frame
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.Name = "Launch"
-	prompt.ActionText = "Launch"
-	prompt.ObjectText = "Slingshot"
-	prompt.KeyboardKeyCode = Enum.KeyCode.E
-	prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
-	prompt.HoldDuration = 0.6
-	prompt.Style = Enum.ProximityPromptStyle.Custom -- (Roblox's look without its panel: PromptUi)
-	prompt.MaxActivationDistance = 14
-	prompt.RequiresLineOfSight = false
-	prompt.Parent = spot
+	if owner ~= player.UserId then
+		prompt.Enabled = false
+		return
+	end
 	prompt.Triggered:Connect(function()
 		if not (SlingshotRide.bestPet and SlingshotRide.bestPet()) then
 			-- (no pet at home to fly with: say so on the prompt for a moment)
