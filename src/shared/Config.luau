@@ -2386,6 +2386,43 @@ for kind, p in Config.SharedPets do
 	Config.AnimalStats[kind] = { Speed = p[3], Stamina = 3 }
 end
 
+-- Speed by biome (QM, Nov 6: "logarithmic speed growth"): the Slingshot's unlocks decide which
+-- biome you play in, not how fast your pets run, so a later biome's animals are only a little
+-- faster. Each World 1 biome's herd (weighted as it spawns) averages the Meadow's x
+-- (1 + SpeedLog x ln(its place)): 1x, 1.35x, 1.55x, 1.69x... about 2x by the 8th. Each animal
+-- keeps its place in its biome (the same share of that biome's average as before). Gold still
+-- doubles each biome (the income curve above). The Robux pets, the Fish and the Horse keep theirs.
+Config.SpeedLog = 0.5
+if Config.World == 1 then
+	local skip = { SnackYak = true, RoboShark = true, Fish = true, Horse = true }
+	local function average(biome)
+		local weights, total = 0, 0
+		for kind, weight in biome.Herd do
+			local stats = Config.AnimalStats[kind]
+			if weight > 0 and stats and not skip[kind] then
+				weights += weight
+				total += weight * stats.Speed
+			end
+		end
+		return if weights > 0 then total / weights else nil
+	end
+	local base = average(Config.Biomes[1])
+	for i = 2, #Config.Biomes do
+		local biome = Config.Biomes[i]
+		local was = average(biome)
+		if was and base then
+			local k = base * (1 + Config.SpeedLog * math.log(i)) / was
+			for kind in biome.Herd do
+				local stats = Config.AnimalStats[kind]
+				if stats and not skip[kind] then
+					Config.AnimalStats[kind] = table.clone(stats)
+					Config.AnimalStats[kind].Speed = math.floor(stats.Speed * k * 100 + 0.5) / 100
+				end
+			end
+		end
+	end
+end
+
 -- Alphas (QM, Nov 6): an existing animal, bigger and recoloured (Animals/<Kind>.luau), about 10x
 -- rarer than it. Each runs in its base's World 1 biome at a tenth of its herd weight, a size tier
 -- up (capped at 4), Scale x as big as its base however its tier grows it, and otherwise takes its
