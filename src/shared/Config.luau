@@ -2241,5 +2241,18 @@ for kind, stats in EXEMPT_STATS do
 	Config.AnimalStats[kind] = table.clone(stats)
 end
 
+-- The place's workspace.PetScale wins over AnimalScale, which only seeds it (QM, Nov 6, as in
+-- Fight to Steal an Egg: size the animals in Studio with the pet lineup, Shared/PetScale and
+-- Shared/PetLineup; tick PetScale.CopyValues to print a line to paste over AnimalScale).
+do
+	local petScale = workspace:FindFirstChild("PetScale")
+	if petScale then
+		for kind, value in petScale:GetAttributes() do
+			if type(value) == "number" and value > 0 then
+				Config.AnimalScale[kind] = value
+			end
+		end
+	end
+end
 
 return Config

@@ -5,6 +5,13 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+-- (the pet lineup is for sizing animals in Studio's Edit mode, Shared/PetLineup: not in the
+-- game, where it would stand in the stampede; workspace.PetScale stays, the animals' sizes)
+local lineup = workspace:FindFirstChild("PetLineup")
+if lineup then
+	lineup:Destroy()
+end
+
 local Map = require(script.Parent.Map)
 local StudStyle = require(ReplicatedStorage.Shared.StudStyle)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
