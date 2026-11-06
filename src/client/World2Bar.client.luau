@@ -164,6 +164,41 @@ hatchAll.Parent = root
 hatchAll.Activated:Connect(function()
 	ReplicatedStorage.BuyShop:FireServer("HatchAll", "pen") -- (Roblox's prompt; hatched once it's paid)
 end)
+-- The native UI's look (Config.NativeUi, QM Nov 6): the bar is the Goal panel's (a dark slate
+-- track, the lime fill over it, studs and bevel) with what it's for written on it, and Hatch All
+-- a yellow button with its Robux price, in place of the art.
+local HudKit = if Config.NativeUi.On then require(script.Parent.HudKit) else nil
+if HudKit then
+	bar.Image, green.Image = "", ""
+	HudKit.back(bar, "GoalTrack", { Name = "NativeTrack", ZIndex = 1 })
+	green.Size = UDim2.fromOffset(BAR.X, BAR.Y)
+	HudKit.back(green, "GoalFill", { Name = "NativeFill", ZIndex = 2 })
+	fill.ZIndex = 2
+	for _, l in { text, label } do
+		l.FontFace = HudKit.FONT
+		l.ZIndex = 4
+	end
+	text.Position, text.Size = UDim2.fromScale(0.04, 0.5), UDim2.fromScale(0.48, 0.55)
+	label.Position, label.Size = UDim2.fromScale(0.96, 0.5), UDim2.fromScale(0.45, 0.55)
+	hatchAll.Image = ""
+	HudKit.back(hatchAll, "Yellow", { Name = "NativeBack", ZIndex = 1 })
+	local hatchText = HudKit.label(hatchAll, "Text", {
+		Text = "Hatch All  R$" .. Config.HatchAll.Price,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextScaled = true,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.9, 0.6),
+		ZIndex = 3,
+	})
+	task.spawn(function()
+		local MarketplaceService = game:GetService("MarketplaceService")
+		local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, Config.HatchAll.ProductId, Enum.InfoType.Product)
+		if ok and info and info.PriceInRobux then
+			hatchText.Text = "Hatch All  R$" .. info.PriceInRobux
+		end
+	end)
+end
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local CURRENCY = if GEMS then "Gems" else "Gold"
@@ -180,6 +215,10 @@ local function showGold()
 	label.Text = if g and g.trail then g.label else ""
 	green.Image = if art then art[1] else FULL
 	bar.Image = if art then art[2] else EMPTY
+	if HudKit then -- (no art: what it's for written on)
+		green.Image, bar.Image = "", ""
+		label.Text = if g then (if g.trail then g.label .. " TRAIL" else g.label) else ""
+	end
 	hand.Visible = full()
 end
 for _, name in { "Gold", "Gems", "BossTime", "Rebirths", "OwnsWorld2", "OwnsWorld3", "TrailsOwned", "FinishTrail", "RainbowTrail" } do
