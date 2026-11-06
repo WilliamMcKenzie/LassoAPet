@@ -159,6 +159,14 @@ local function setup(model)
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = spot
 	prompt.Triggered:Connect(function()
+		if not (SlingshotRide.bestPet and SlingshotRide.bestPet()) then
+			-- (no pet at home to fly with: say so on the prompt for a moment)
+			prompt.ObjectText = "Bring a pet home first!"
+			task.delay(2, function()
+				prompt.ObjectText = "Slingshot"
+			end)
+			return
+		end
 		launch(model)
 	end)
 	-- (it follows the slingshot when the pen grows)
@@ -167,7 +175,7 @@ local function setup(model)
 	end)
 	task.spawn(function()
 		while model.Parent do
-			prompt.Enabled = not busy and not Hud.isRiding() and SlingshotRide.bestPet ~= nil and SlingshotRide.bestPet() ~= nil
+			prompt.Enabled = not busy and not Hud.isRiding()
 			task.wait(0.25)
 		end
 	end)
