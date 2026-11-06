@@ -1,5 +1,5 @@
--- The Slingshot (Config.Slingshot, QM Nov 6): once bought (Gold.server's BuySlingshot,
--- "OwnsSlingshot"), it stands in front of its owner's pen: Ahead studs out from the pen's
+-- The Slingshot (Config.Slingshot, QM Nov 6): everyone's (the top bar that sold it is gone,
+-- QM Nov 6), it stands in front of its owner's pen: Ahead studs out from the pen's
 -- Spawn, facing away from the pen, so its band rests pulled back toward the pen's opening.
 -- Built here from the uploaded meshes (design/slingshot): the frame's pieces, and three
 -- band pieces (BandL, BandMid, BandR) that Client/Slingshot stretches. It follows the pen
@@ -128,9 +128,6 @@ end
 
 local function place(player)
 	remove(player)
-	if not player:GetAttribute("OwnsSlingshot") then
-		return
-	end
 	local index = player:GetAttribute("Pen")
 	local pens = workspace:FindFirstChild("Pens")
 	local pen = index and pens and pens:FindFirstChild("Pen" .. index)
@@ -156,9 +153,6 @@ local function place(player)
 end
 
 local function watch(player)
-	player:GetAttributeChangedSignal("OwnsSlingshot"):Connect(function()
-		place(player)
-	end)
 	player:GetAttributeChangedSignal("Pen"):Connect(function()
 		place(player)
 	end)
@@ -172,3 +166,29 @@ for _, player in Players:GetPlayers() do
 	task.spawn(watch, player)
 end
 Players.PlayerRemoving:Connect(remove)
+
+-- Unlocking a biome from the Slingshot's menu (Client/SlingshotMenu, in place of the top
+-- bar): the next one in order, for its UnlockCost cash, takes your pen level up to it (its
+-- gate opens: PenLevel.server saves it). Returns true if it went through.
+local unlock = Instance.new("RemoteFunction")
+unlock.Name = "UnlockBiome"
+unlock.Parent = ReplicatedStorage
+unlock.OnServerInvoke = function(player, i)
+	local level = player:GetAttribute("PenLevel") or 1
+	local biome = typeof(i) == "number" and Config.Biomes[i]
+	if not biome or i ~= level + 1 then
+		return false
+	end
+	local cost = biome.UnlockCost or 0
+	local gold = player:GetAttribute("Gold") or 0
+	if gold < cost then
+		return false
+	end
+	player:SetAttribute("Gold", gold - cost)
+	local zone = ReplicatedStorage:FindFirstChild("ZoneUnlocked")
+	if zone then
+		zone:FireClient(player, i) -- (its gate breaks open on camera: Gate.client)
+	end
+	player:SetAttribute("PenLevel", i)
+	return true
+end
