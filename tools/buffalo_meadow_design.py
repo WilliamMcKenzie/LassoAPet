@@ -1,8 +1,8 @@
 """Buffalo, redone for World 1's Meadow (QM, Nov 6: "redo buffalo"), built the way QM's
 Kitten and Sandworm are (designs/desert/): a few big stepped sections instead of many small
 blocks. A tall dark shaggy hump with a fringe under it, a lower, narrower brown back half,
-a low heavy head with a pale snout, a beard and a tuft, cream horns running out sideways
-and turning up at grey tips, small ears under them, thick dark front legs and a tasselled
+a low heavy head with a pale snout and a tuft, cream horns running out sideways to
+pyramid points turned up (as the Elephant's tusks), small ears under them, thick dark front legs and a tasselled
 tail. Same colours as tools/buffalo_design.py (World 2's, which this replaces in game),
 so its egg and palette still fit.
 
@@ -19,7 +19,9 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 import animal_designs as A  # noqa: E402
 from animal_designs import Animal, quad_animations  # noqa: E402
-from buffalo_design import COAT, FUR, SNOUT, HORN, HORN_TIP, HOOF, NOSTRIL  # noqa: E402
+from buffalo_design import COAT, FUR, SNOUT, HORN, HOOF, NOSTRIL  # noqa: E402
+from partlib import Part  # noqa: E402
+import numpy as np  # noqa: E402
 
 
 def buffalo():
@@ -49,17 +51,22 @@ def buffalo():
     for side, sx in (("L", -1), ("R", 1)):
         xa, xb = sorted((sx * 0.3, sx * 0.7))
         a.box("Nostril" + side, (xa, 3.5, -6.25), (xb, 3.8, -6.2), NOSTRIL, "neck")
-    a.box("Beard", (-0.7, 1.8, -5.6), (0.7, 2.6, -4.0), FUR, "neck")
     a.box("Tuft", (-1.0, 5.4, -5.0), (1.0, 5.9, -3.6), FUR, "neck")
     a.eyes(1.4, 3.9, 4.7, -5.1, -4.3)
     a.pivots["neck"] = (0, 5.0, -3.0)
     # horns: out the sides, then up to grey tips; small ears just under them
     for side, sx in (("L", -1), ("R", 1)):
-        xa, xb = sorted((sx * 1.4, sx * 2.4))
-        a.box("Horn" + side, (xa, 4.6, -4.7), (xb, 5.1, -4.1), HORN, "neck")
-        ua, ub = sorted((sx * 1.95, sx * 2.4))
-        a.box("HornUp" + side, (ua, 5.1, -4.7), (ub, 5.8, -4.1), HORN, "neck")
-        a.box("HornTip" + side, (ua, 5.8, -4.65), (ub, 6.2, -4.15), HORN_TIP, "neck")
+        xa, xb = sorted((sx * 1.4, sx * 2.5))
+        a.box("Horn" + side, (xa, 4.6, -4.65), (xb, 5.1, -4.15), HORN, "neck")
+        # a pyramid point up off the horn's outer end (as the Elephant's tusk tips)
+        ta, tb = sorted((sx * 1.95, sx * 2.5))
+        base = [(ta, 5.1, -4.7), (tb, 5.1, -4.7), (tb, 5.1, -4.1), (ta, 5.1, -4.1)]
+        tip = Part("HornTip" + side, (1, 1, 1), np.eye(4), HORN, "Poly")
+        c = [np.array(v, float) for v in base]
+        apex = np.array(((ta + tb) / 2, 6.4, -4.4))
+        tip.polys = [np.array(c)] + [np.array([c[k], c[(k + 1) % 4], apex]) for k in range(4)]
+        tip.bone = "neck"
+        a.parts.append(tip)
         bone = "Ear" + side
         ea, eb = sorted((sx * 1.4, sx * 2.0))
         a.box(bone, (ea, 3.9, -3.9), (eb, 4.4, -3.4), FUR, bone)
