@@ -45,7 +45,7 @@
         ],
         "EnvironmentDiffuseScale": 0,
         "EnvironmentSpecularScale": 1,
-        "ExposureCompensation": 0.5,
+        "ExposureCompensation": 0,
         "ClockTime": 12,
         "FogStart": 500,
         "FogEnd": 500,
