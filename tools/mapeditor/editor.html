@@ -1091,6 +1091,9 @@ function inspect() {
       box.appendChild(field("Yaw", o.yaw || 0, set("yaw")));
       box.appendChild(scaleRow(o));
       box.appendChild(field("Height", o.y === undefined ? "" : o.y, set("y")));
+      // (QM, Nov 6: an obstacle stands in the ride: animals of its size tier or smaller swerve
+      // round it, bigger ones and riders knock it away)
+      box.appendChild(field("Obstacle", o.obstacle ? "tier " + o.obstacle : "no", (v) => set("obstacle")(v === "no" ? null : +v.slice(5)), ["no", "tier 1", "tier 2", "tier 3"]));
       const n = document.createElement("div"); n.className = "note";
       n.textContent = o.y === undefined ? `Stands on the ground under it (${groundAt(o.x, o.z)}). Set a height to pin it.` : "Pinned at that height: clear it to stand on the ground.";
       box.appendChild(n);

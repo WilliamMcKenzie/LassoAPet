@@ -188,7 +188,8 @@ function MapFile.decode(text)
 	for _, o in file.objects do
 		if o.type == "Prop" then
 			local y = o.y or MapFile.groundAt(data, o.x, o.z)
-			table.insert(data.Props, { o.item, o.x, o.z, y, o.yaw or 0, o.scale or 1, o.style or "Base" })
+			-- (obstacle: a size tier; it stands in the ride, World.Obstacles: QM, Nov 6)
+			table.insert(data.Props, { o.item, o.x, o.z, y, o.yaw or 0, o.scale or 1, o.style or "Base", o.obstacle })
 		elseif o.type == "Ruin" then
 			table.insert(data.Ruins, { o.style, o.x, o.z, o.length, o.yaw or 0, o.height, o.seed or 1 })
 		elseif o.type == "Pillar" then

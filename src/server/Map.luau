@@ -730,7 +730,9 @@ end
 -- WalkLimit read its z) and its copy at the finish (Config.FinishFromEnd before the last
 -- biome's end); World.Obstacles and World.Nests, which the ride and Server/Nests look in.
 local function lassoFurniture(map)
-	folder("Obstacles", map)
+	if not map:FindFirstChild("Obstacles") then
+		folder("Obstacles", map)
+	end
 	if not map:FindFirstChild("Nests") then
 		folder("Nests", map)
 	end
@@ -1003,7 +1005,7 @@ end
 
 -- The props (pines, ruins, cacti, monoliths...) from ServerStorage.WorldAssets: grey stone
 -- pieces wear their biome's colours (propKey), runes glow.
-local function props(parent)
+local function props(parent, obstacles)
 	local assets = ServerStorage:FindFirstChild("WorldAssets")
 	local rng = Random.new(77)
 	for _, p in MapData.Props do
@@ -1043,7 +1045,14 @@ local function props(parent)
 					end
 				end
 			end
-			copy.Parent = parent
+			if p[8] and obstacles then
+				-- an obstacle (QM, Nov 6): in the ride's way, smashed by riders and by bigger
+				-- animals, swerved round by ones its size or smaller (Client/Ride)
+				copy:SetAttribute("Tier", p[8])
+				copy.Parent = obstacles
+			else
+				copy.Parent = parent
+			end
 		else
 			standIn(parent, item, at, scale, style, rng)
 		end
@@ -1182,7 +1191,7 @@ local function rest(map)
 	local base = folder("Base", map)
 	baseFurniture(base)
 	biomeFurniture(folder("Biomes", map))
-	props(folder("Props", map))
+	props(folder("Props", map), folder("Obstacles", map))
 	local ruins = folder("Ruins", map)
 	for _, r in MapData.Ruins do
 		ruin(ruins, r)
