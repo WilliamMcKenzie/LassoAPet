@@ -47,7 +47,7 @@
         "EnvironmentSpecularScale": 1,
         "ExposureCompensation": 0,
         "ClockTime": 12,
-        "FogStart": 500,
+        "FogStart": 150,
         "FogEnd": 500,
         "GeographicLatitude": 0,
         "LightingStyle": "Soft",
