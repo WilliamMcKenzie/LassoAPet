@@ -73,6 +73,13 @@ function Quests.publish(player, state)
 	local list = {}
 	for line, quests in Config.Quests do
 		local slot = state.lines[line]
+		-- (a quest that's Off, Config.NativeUi's Merge: passed over, as if claimed)
+		while quests[slot.at] and quests[slot.at].Off do
+			slot.at += 1
+			if slot.skip == slot.at then
+				slot.at += 1
+			end
+		end
 		local quest = quests[slot.at]
 		if quest then
 			local have, need = progress(player, state, quest)

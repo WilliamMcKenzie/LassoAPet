@@ -230,7 +230,17 @@ local function setPop(s)
 	resize()
 end
 
+-- (the native UI's Pets popup in its place: Config.NativeUi, QM Nov 6)
+local Native = if Config.NativeUi.On then require(script.Parent.NativePets) else nil
+
 function PetsPanel.toggle(instant)
+	if Native then
+		Native.toggle()
+		if PetsPanel.onToggle then
+			PetsPanel.onToggle(Native.isOpen())
+		end
+		return
+	end
 	open = not open
 	if open then
 		gui.Enabled = true
@@ -250,10 +260,17 @@ function PetsPanel.toggle(instant)
 end
 
 function PetsPanel.isOpen()
+	if Native then
+		return Native.isOpen()
+	end
 	return open == true
 end
 
 function PetsPanel.close(instant)
+	if Native then
+		Native.close()
+		return
+	end
 	if open then
 		PetsPanel.toggle(instant)
 	end

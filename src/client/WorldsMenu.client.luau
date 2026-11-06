@@ -85,6 +85,9 @@ local function rounded(object, radius)
 end
 
 local gui = Instance.new("ScreenGui")
+if Config.NativeUi.On then
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
+end
 gui.Name = "WorldsMenu"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
@@ -150,7 +153,46 @@ closeButton.ZIndex = 4
 pressable(closeButton)
 closeButton.Parent = panel
 
--- A button of QM's art, at the card's top right.
+-- The native UI's look (Config.NativeUi, QM Nov 6): Fight to Steal an Egg's popup, the dark
+-- studded panel under an orange header with "Worlds" and the red X, and its buttons (blue
+-- Travel, green Buy, pink for Robux) in place of the art.
+local HudKit = if Config.NativeUi.On then require(script.Parent.HudKit) else nil
+local NATIVE_LOOK = { [ART.Travel] = { "Blue", "Travel" }, [ART.Buy] = { "Green", "" }, [ART.BuyRobux] = { "Pink", "" } }
+if HudKit then
+	panel.BackgroundTransparency = 1
+	panelEdge.Enabled = false
+	HudKit.back(panel, "Panel", { Name = "NativePanel", ZIndex = 1 })
+	HudKit.back(panel, "Header", {
+		Name = "NativeHeader",
+		Position = UDim2.fromOffset(0, -44),
+		Size = UDim2.new(1, 0, 0, 88),
+		ZIndex = 2,
+	})
+	title.Visible = false
+	for _, t in { { "NativeTitleShadow", 4, HudKit.BLACK, 3 }, { "NativeTitle", 0, Color3.new(1, 1, 1), 4 } } do
+		HudKit.label(panel, t[1], {
+			Text = "Worlds",
+			TextSize = 56,
+			TextColor3 = t[3],
+			Position = UDim2.fromOffset(24, -40 + t[2]),
+			Size = UDim2.fromOffset(400, 80),
+			ZIndex = t[4],
+		})
+	end
+	closeButton.Image = ""
+	closeButton.Position = UDim2.new(1, -46, 0, 0)
+	closeButton.Size = UDim2.fromOffset(66, 66)
+	HudKit.back(closeButton, "Red", { ZIndex = 4 })
+	HudKit.label(closeButton, "X", {
+		Text = "X",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = 50,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 5,
+	})
+end
+
+-- A button of QM's art, at the card's top right (native: its look and text instead).
 local function button(art)
 	local b = Instance.new("ImageButton")
 	b.AutoButtonColor = false
@@ -161,6 +203,18 @@ local function button(art)
 	b.Size = UDim2.fromOffset(BUTTON.X, BUTTON.Y)
 	b.ZIndex = 3
 	pressable(b)
+	local look = HudKit and NATIVE_LOOK[art]
+	if look then
+		b.Image = ""
+		HudKit.back(b, look[1], { ZIndex = 3 })
+		HudKit.label(b, "Text", {
+			Text = look[2],
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextSize = 40,
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 4,
+		})
+	end
 	return b
 end
 
@@ -236,6 +290,14 @@ for i, world in WORLDS do
 		stroke.LineJoinMode = Enum.LineJoinMode.Round
 		stroke.Parent = price
 		price.Visible = not Config.WorldProducts[i] -- (QM's Robux art says it all: no price over it)
+		if HudKit then -- (native: "Buy $1m" / "Buy R$299" written on the button)
+			price.Visible = true
+			price.TextXAlignment = Enum.TextXAlignment.Center
+			price.AnchorPoint = Vector2.new(0.5, 0.5)
+			price.Position = UDim2.fromScale(0.5, 0.5)
+			price.Size = UDim2.fromScale(0.9, 0.8)
+			price.TextScaled = true
+		end
 		price.Parent = buy
 		local busy = false
 		local function showPrice()
@@ -244,6 +306,9 @@ for i, world in WORLDS do
 			end
 			local product = Config.WorldProducts[i]
 			price.Text = if product then "R$" .. product.Price else "$" .. Config.short(world.price)
+			if HudKit then
+				price.Text = "Buy " .. price.Text
+			end
 			price.TextColor3 = if product or (player:GetAttribute("Gold") or 0) >= world.price then CASH_GREEN else CASH_RED
 		end
 		player:GetAttributeChangedSignal("Gold"):Connect(showPrice)
@@ -270,12 +335,18 @@ for i, world in WORLDS do
 			-- Loading (QM, Oct 13: a trip takes seconds): the button goes grey and does
 			-- nothing more till the teleport takes you, or TRAVEL_WAIT if it doesn't.
 			travelling = true
-			travel.Image = ART.TravelLoading
+			travel.Image = if HudKit then "" else ART.TravelLoading
+			if HudKit then
+				travel.Text.Text = "Loading..."
+			end
 			ReplicatedStorage.Travel:FireServer(i) -- (teleports: not in Studio)
 			player:SetAttribute("GuideTravel", nil)
 			task.delay(TRAVEL_WAIT, function()
 				travelling = false
-				travel.Image = ART.Travel
+				travel.Image = if HudKit then "" else ART.Travel
+				if HudKit then
+					travel.Text.Text = "Travel"
+				end
 			end)
 		end -- (it stays open: only its X or walking off closes it, QM Oct 13)
 	end)

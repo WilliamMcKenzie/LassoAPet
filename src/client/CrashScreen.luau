@@ -8,6 +8,9 @@ local Gamepad = require(script.Parent.Gamepad)
 local player = Players.LocalPlayer
 local CrashScreen = {}
 local gui = Instance.new("ScreenGui")
+if Config.NativeUi.On then
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
+end
 gui.Name, gui.ResetOnSpawn, gui.IgnoreGuiInset = "CrashScreen", false, true
 gui.DisplayOrder, gui.Enabled = 40, false
 gui.Parent = if Config.ShowHud then player:WaitForChild("PlayerGui") else nil
@@ -46,6 +49,38 @@ local invincible = art(controls, "Invincible", "rbxassetid://102985018399551", 2
 invincible.Position = UDim2.fromOffset(349, 38)
 local continue = art(controls, "Continue", "rbxassetid://122061064731565", 258, 72, 0, 0, true)
 continue.Position = UDim2.fromOffset(235, 120)
+-- The native UI's look (Config.NativeUi, QM Nov 6): Fight to Steal an Egg's death screen, the
+-- title in red with a thick black outline, and its buttons (green Revive, pink Invincible, red
+-- Continue) in place of the art.
+if Config.NativeUi.On then
+	local HudKit = require(script.Parent.HudKit)
+	title.Image = ""
+	title.Size = UDim2.fromOffset(560, 110)
+	local text = HudKit.label(title, "Text", {
+		Text = "You Crashed!",
+		TextScaled = true,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		Size = UDim2.fromScale(1, 1),
+	})
+	text.Outline.Thickness = 6
+	local shade = Instance.new("UIGradient")
+	shade.Rotation = 90
+	shade.Color = ColorSequence.new(Color3.fromHex("ff5a5a"), Color3.fromHex("d00000"))
+	shade.Parent = text
+	for _, b in { { revive, "GreenEdged", "Revive R$29" }, { invincible, "PinkEdged", "Invincible R$19" }, { continue, "Red", "Continue" } } do
+		b[1].Image = ""
+		HudKit.back(b[1], b[2], { Name = "NativeBack" })
+		HudKit.label(b[1], "Text", {
+			Text = b[3],
+			TextScaled = true,
+			TextXAlignment = Enum.TextXAlignment.Center,
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromScale(0.86, 0.56),
+			ZIndex = 2,
+		})
+	end
+end
 local onRevive, onContinue
 local waiting, canRevive = false, false
 local tweens, hidden = {}, {}

@@ -194,7 +194,17 @@ local function setPop(s)
 	resize()
 end
 
+-- (the native UI's Index in its place: Config.NativeUi, QM Nov 6)
+local Native = if Config.NativeUi.On then require(script.Parent.NativeIndex) else nil
+
 function AnimalDex.toggle(instant)
+	if Native then
+		Native.toggle()
+		if AnimalDex.onToggle then
+			AnimalDex.onToggle(Native.isOpen())
+		end
+		return
+	end
 	open = not open
 	if open then
 		gui.Enabled = true
@@ -214,10 +224,17 @@ function AnimalDex.toggle(instant)
 end
 
 function AnimalDex.isOpen()
+	if Native then
+		return Native.isOpen()
+	end
 	return open == true
 end
 
 function AnimalDex.close(instant)
+	if Native then
+		Native.close()
+		return
+	end
 	if open then
 		AnimalDex.toggle(instant)
 	end

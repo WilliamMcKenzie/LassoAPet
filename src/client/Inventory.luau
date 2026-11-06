@@ -153,11 +153,19 @@ local function redraw()
 		bg.SliceScale = SLOT / PANEL_SIZE -- (the art's proportions at slot size)
 		bg.ZIndex = 0 -- (under the egg's outline)
 		bg.Parent = slot
+		-- (the native UI, Config.NativeUi, QM Nov 6: Fight to Steal an Egg's hotbar slot, 40%
+		-- black with round corners and a thick white ring on the one in hand, no art)
+		local native = Config.NativeUi.On
+		if native then
+			bg:Destroy()
+			slot.BackgroundColor3 = Color3.new(0, 0, 0)
+			slot.BackgroundTransparency = 0.6
+		end
 		if tool.Parent == player.Character then
 			local ring = Instance.new("UIStroke")
 			ring.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 			ring.Color = Color3.new(1, 1, 1)
-			ring.Thickness = 2.5 -- (QM, Oct 8: a bit thinner than 4)
+			ring.Thickness = if native then 4 else 2.5 -- (QM, Oct 8: a bit thinner than 4)
 			ring.Parent = slot
 		end
 		local picture = Instance.new("ImageLabel")
