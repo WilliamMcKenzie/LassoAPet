@@ -86,8 +86,8 @@ end
 Slingshot.place = place -- (model, base CFrame, t): returns the pull's CFrame
 Slingshot.pullLocal = pullLocal
 
-function Slingshot.launch(model, onStep, onRelease)
-	local base = model:GetPivot()
+function Slingshot.launch(model, onStep, onRelease, base)
+	base = base or model:GetPivot()
 	local released = false
 	local t0 = os.clock()
 	while true do

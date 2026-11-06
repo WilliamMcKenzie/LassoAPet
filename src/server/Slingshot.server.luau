@@ -1,10 +1,11 @@
--- The Slingshot (Config.Slingshot, QM Nov 6): once bought (Gold.server's BuySlingshot,
--- "OwnsSlingshot"), it stands in front of its owner's pen: Ahead studs out from the pen's
+-- The Slingshot (Config.Slingshot, QM Nov 6): everyone's (the top bar that sold it is gone,
+-- QM Nov 6), it stands in front of its owner's pen: Ahead studs out from the pen's
 -- Spawn, facing away from the pen, so its band rests pulled back toward the pen's opening.
 -- Built here from the uploaded meshes (design/slingshot): the frame's pieces, and three
 -- band pieces (BandL, BandMid, BandR) that Client/Slingshot stretches. It follows the pen
 -- as it grows (its Spawn moves). Hold E at it: Client/SlingshotLaunch.
--- workspace.Slingshots.<UserId>, with an "Owner" attribute.
+-- workspace.Slingshots.<UserId>, with an "Owner" attribute. The band's colour goes up with
+-- your pen level (Config.Slingshot.BandColors: each Upgrade Pen recolours it).
 
 local AssetService = game:GetService("AssetService")
 local Players = game:GetService("Players")
@@ -56,6 +57,21 @@ local function build()
 			part.Parent = model
 		end
 	end
+	-- the Launch prompt, Roblox's own, on the slingshot (Client/SlingshotLaunch: the owner's works)
+	local frame = model:FindFirstChild("Frame1")
+	if frame then
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.Name = "Launch"
+		prompt.ActionText = "Launch"
+		prompt.ObjectText = "Slingshot"
+		prompt.KeyboardKeyCode = Enum.KeyCode.E
+		prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
+		prompt.HoldDuration = 0.6
+		prompt.MaxActivationDistance = 26 -- (from the base's middle: reaches the band where it rests)
+		prompt.RequiresLineOfSight = false
+		prompt.UIOffset = Vector2.new(0, -40)
+		prompt.Parent = frame
+	end
 	model.WorldPivot = CFrame.new()
 	template = model
 	return model
@@ -79,6 +95,26 @@ end
 
 local placed = {} -- [player] = { model, connections }
 
+local function bandColor(player)
+	local colors = CFG.BandColors
+	if not colors or #colors == 0 then
+		return CFG.BandColor
+	end
+	return colors[math.clamp(player:GetAttribute("PenLevel") or 1, 1, #colors)]
+end
+
+local function paint(player)
+	local p = placed[player]
+	if p then
+		for _, name in { "BandL", "BandMid", "BandR" } do
+			local band = p.model:FindFirstChild(name)
+			if band then
+				band.Color = bandColor(player)
+			end
+		end
+	end
+end
+
 local function remove(player)
 	local p = placed[player]
 	if p then
@@ -92,9 +128,6 @@ end
 
 local function place(player)
 	remove(player)
-	if not player:GetAttribute("OwnsSlingshot") then
-		return
-	end
 	local index = player:GetAttribute("Pen")
 	local pens = workspace:FindFirstChild("Pens")
 	local pen = index and pens and pens:FindFirstChild("Pen" .. index)
@@ -116,14 +149,15 @@ local function place(player)
 	move()
 	model.Parent = folder
 	placed[player] = { model = model, connections = { spawn:GetPropertyChangedSignal("CFrame"):Connect(move) } }
+	paint(player)
 end
 
 local function watch(player)
-	player:GetAttributeChangedSignal("OwnsSlingshot"):Connect(function()
-		place(player)
-	end)
 	player:GetAttributeChangedSignal("Pen"):Connect(function()
 		place(player)
+	end)
+	player:GetAttributeChangedSignal("PenLevel"):Connect(function()
+		paint(player)
 	end)
 	place(player)
 end
@@ -132,3 +166,29 @@ for _, player in Players:GetPlayers() do
 	task.spawn(watch, player)
 end
 Players.PlayerRemoving:Connect(remove)
+
+-- Unlocking a biome from the Slingshot's menu (Client/SlingshotMenu, in place of the top
+-- bar): the next one in order, for its UnlockCost cash, takes your pen level up to it (its
+-- gate opens: PenLevel.server saves it). Returns true if it went through.
+local unlock = Instance.new("RemoteFunction")
+unlock.Name = "UnlockBiome"
+unlock.Parent = ReplicatedStorage
+unlock.OnServerInvoke = function(player, i)
+	local level = player:GetAttribute("PenLevel") or 1
+	local biome = typeof(i) == "number" and Config.Biomes[i]
+	if not biome or i ~= level + 1 then
+		return false
+	end
+	local cost = biome.UnlockCost or 0
+	local gold = player:GetAttribute("Gold") or 0
+	if gold < cost then
+		return false
+	end
+	player:SetAttribute("Gold", gold - cost)
+	local zone = ReplicatedStorage:FindFirstChild("ZoneUnlocked")
+	if zone then
+		zone:FireClient(player, i) -- (its gate breaks open on camera: Gate.client)
+	end
+	player:SetAttribute("PenLevel", i)
+	return true
+end

@@ -147,7 +147,7 @@ boostLabel.Parent = boost
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- The world behind hazy (as the Starter Pack's).
-local HAZE = { blur = 14, brightness = 0.06, contrast = -0.15, saturation = -0.35 }
+local HAZE = { blur = 0, brightness = 0, contrast = 0, saturation = 0 } -- (QM, Nov 6: no glass blur behind popups; was 14, 0.06, -0.15, -0.35)
 local blur = Instance.new("BlurEffect")
 blur.Name = "AwayHaze"
 blur.Size = 0

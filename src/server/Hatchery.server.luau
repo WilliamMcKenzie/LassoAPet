@@ -199,9 +199,51 @@ local function penCap(player)
 	return cfg.Base + cfg.PerUpgrade * ((player:GetAttribute("PenLevel") or 1) - 1)
 end
 
+-- Active pets (Config.Backpack, QM Nov 6): the pets out in the pen, the one you ride with them,
+-- at most PenSlots plus the slots they bought (extraSlots: Shop.server's +1 Equip).
+local function petCount(profile)
+	local n = if profile.ride then 1 else 0
+	for _, item in profile.items do
+		if item.pet then
+			n += 1
+		end
+	end
+	return n
+end
+local function petSlots(profile)
+	return Config.Backpack.PenSlots + (profile.extraSlots or 0)
+end
+-- (more out than there's room for, from a hatch or an old save: the lowest earners stored)
+local function storeOverflow(profile)
+	local over = petCount(profile) - petSlots(profile)
+	if over <= 0 then
+		return
+	end
+	local out = {}
+	for id, item in profile.items do
+		if item.pet then
+			table.insert(out, { id = id, earns = Fusion.earning(item.pet, item.merged, item.income) or 0 })
+		end
+	end
+	table.sort(out, function(a, b)
+		return a.earns < b.earns
+	end)
+	profile.stored = profile.stored or {}
+	for i = 1, math.min(over, #out) do
+		local item = profile.items[out[i].id]
+		profile.items[out[i].id] = nil
+		item.x, item.z = nil, nil
+		profile.stored[out[i].id] = item
+	end
+end
+
 local freeSpot -- (below)
 local function publish(player)
 	local profile = profiles[player]
+	if profile then
+		storeOverflow(profile)
+		player:SetAttribute("ExtraSlots", profile.extraSlots) -- (the Pets panel's "1/5 Active")
+	end
 	if not profile then
 		return
 	end
@@ -519,6 +561,7 @@ local function load(player)
 					if profile.tutorial then
 						profile.awayGold = awayGold(player, profile, data)
 					end
+					profile.extraSlots = tonumber(data.extraSlots) -- (pet slots bought: Config.Backpack)
 					profile.usedHatches = tonumber(data.usedHatches) or 0
 					profile.hatchTarget = typeof(data.hatchTarget) == "string" and data.hatchTarget or nil
 					profile.boughtHalloweenPets = tonumber(data.boughtHalloweenPets)
@@ -564,6 +607,11 @@ local function load(player)
 		end
 	end)
 	player:GetAttributeChangedSignal("GatesBroken"):Connect(function() -- ("Enter Desert" and the like)
+		if profiles[player] then
+			Quests.publish(player, profiles[player].quests)
+		end
+	end)
+	player:GetAttributeChangedSignal("PenLevel"):Connect(function() -- (the "Upgrade slingshot" goals: Server/Slingshot's UnlockBiome)
 		if profiles[player] then
 			Quests.publish(player, profiles[player].quests)
 		end
@@ -631,7 +679,7 @@ local function save(player, onlyIfChanged)
 	local data = { eggs = profile.eggs, items = profile.items, stored = profile.stored, caught = profile.caught and (function() local t = {} for k in profile.caught do table.insert(t, k) end return t end)() or nil, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, rideAuto = profile.rideAuto, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtHalloweenPets = profile.boughtHalloweenPets, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, boughtLoongs = profile.boughtLoongs, boughtRoboSharks = profile.boughtRoboSharks, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
 		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, ridesDone = profile.ridesDone, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
-		merged = profile.merged, ab = profile.ab, indexClaimed = profile.indexClaimed and (function() local t = {} for k in profile.indexClaimed do table.insert(t, k) end return t end)() or nil }
+		merged = profile.merged, ab = profile.ab, extraSlots = profile.extraSlots, indexClaimed = profile.indexClaimed and (function() local t = {} for k in profile.indexClaimed do table.insert(t, k) end return t end)() or nil }
 	data[worldKey("quests")], data[worldKey("v1")] = profile.quests, profile.v1 -- (this world's own)
 	for name, value in profile.keep or {} do -- (the other worlds', as they were)
 		data[name] = value
@@ -731,6 +779,22 @@ hatchAll.OnInvoke = function(player, check)
 	return n
 end
 hatchAll.Parent = game:GetService("ServerStorage")
+
+-- +1 Equip (Config.Backpack.SlotProduct; Shop.server): one more active pet slot, for good. True
+-- once given (their save loaded).
+local addSlot = Instance.new("BindableFunction")
+addSlot.Name = "AddPetSlot"
+addSlot.OnInvoke = function(player)
+	local profile = profiles[player]
+	if not profile or not loaded[player] or player:GetAttribute("Tutorial") then
+		return false -- (tried again on their next visit: Roblox's ProcessReceipt)
+	end
+	profile.extraSlots = (profile.extraSlots or 0) + 1
+	publish(player)
+	save(player)
+	return true
+end
+addSlot.Parent = game:GetService("ServerStorage")
 
 -- Fast Hatch bought in game: the eggs already waiting in the pen have their time
 -- left cut too (the eggs placed from then on start out with half).
@@ -862,9 +926,16 @@ local function givePet(player, profile, kind)
 	Telemetry.reward(player)
 	local pen = penOf(player)
 	local area = pen and pen:FindFirstChild("Area")
-	if area and penCount(profile) < penCap(player) then
+	if area and penCount(profile) < penCap(player) and petCount(profile) < petSlots(profile) then
 		local best = freeSpot(pen, profile, area)
 		profile.items[HttpService:GenerateGUID(false)] = { x = best.X, z = best.Y, pet = kind }
+		profile.pastStarter = true
+		publish(player)
+		return true
+	end
+	if area and isAnimal(kind) and not player:GetAttribute("Tutorial") then -- (no room out: stored, Config.Backpack)
+		profile.stored = profile.stored or {}
+		profile.stored[HttpService:GenerateGUID(false)] = { pet = kind }
 		profile.pastStarter = true
 		publish(player)
 		return true
@@ -992,7 +1063,7 @@ remote("EquipPet", function(player, id)
 	local item = profile and profile.stored and typeof(id) == "string" and profile.stored[id]
 	local pen = penOf(player)
 	local area = pen and pen:FindFirstChild("Area")
-	if not item or not area or penCount(profile) >= penCap(player) then
+	if not item or not area or penCount(profile) >= penCap(player) or petCount(profile) >= petSlots(profile) then
 		return
 	end
 	profile.stored[id] = nil
@@ -1019,12 +1090,10 @@ remote("EquipBest", function(player)
 		return
 	end
 	profile.stored = profile.stored or {}
-	local all, room = {}, penCap(player) - (if profile.ride then 1 else 0)
+	local all, room = {}, petSlots(profile) - (if profile.ride then 1 else 0) -- (Config.Backpack; eggs don't take a slot)
 	for id, item in profile.items do
 		if item.pet then
 			table.insert(all, { id = id, item = item, home = true })
-		else
-			room -= 1 -- (an egg keeps its place)
 		end
 	end
 	for id, item in profile.stored do
@@ -1057,6 +1126,15 @@ remote("EquipBest", function(player)
 	end
 	publish(player)
 	save(player)
+end)
+
+-- (no product yet, SlotProduct 0: free in Studio, to try it)
+remote("BuyPetSlot", function(player)
+	local profile = profiles[player]
+	if profile and Config.Backpack.SlotProduct == 0 and RunService:IsStudio() then
+		profile.extraSlots = (profile.extraSlots or 0) + 1
+		publish(player)
+	end
 end)
 
 -- The Index's rewards (the native UI's, as Fight to Steal an Egg's: QM, Nov 6): once per

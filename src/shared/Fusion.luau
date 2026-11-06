@@ -167,6 +167,7 @@ end
 -- goes ("Kra" + "ale" = "Krale"). Names can repeat: they're only for show.
 local NAMES = {
 	Horse = { "Hor", "se" }, Pinto = { "Pin", "to" }, Pig = { "P", "ig", "Pi" }, Bunny = { "Bun", "ny" }, Fish = { "F", "ish", "Fi" },
+	Zebra = { "Ze", "bra" }, Gecko = { "Ge", "cko" }, Elephant = { "Ele", "phant" },
 	Rhino = { "Rhi", "no" }, Unicorn = { "Uni", "corn" }, MarbleColossus = { "Mar", "lossus" }, MarbleFish = { "Mar", "fish" }, Catfish = { "Cat", "fish" }, Lion = { "L", "ion", "Li" }, Buffalo = { "Buf", "falo" }, Crocodile = { "Croc", "dile" }, MajesticUnicorn = { "Majes", "corn" }, CrystalCentipede = { "Crys", "pede" }, CrystalPhoenix = { "Crys", "nix" }, PinkButterfly = { "Pink", "fly" }, RedMushroom = { "Red", "shroom" }, BrownMushroom = { "Brown", "shroom" }, PurpleMushroom = { "Purp", "shroom" }, BlueCrystal = { "Blue", "crystal" }, PinkCrystal = { "Pink", "crystal" }, CrystalSpider = { "Crys", "pider" }, Cactus = { "Cac", "tus" }, Kitten = { "Kit", "ten" }, Scorpion = { "Scor", "pion" }, CrystalElephant = { "Crys", "phant" }, OrangeButterfly = { "Or", "fly" }, LivingBirch = { "Birch", "birch" }, Hawkmoth = { "Hawk", "moth" }, Fox = { "F", "ox", "Fo" }, TombJackal = { "Jack", "kal" }, NineTailedFox = { "Nine", "tails" },
 	Sandworm = { "Sand", "worm" }, Eyeworm = { "Eye", "worm" }, Caterpillar = { "Cater", "pillar" }, Maw = { "M", "aw", "Ma" }, CrimsonScorpion = { "Crim", "pion" }, IvorySpider = { "Ivo", "spider" }, BlackWidow = { "Black", "dow", "Wid" }, Asura = { "As", "ura", "Asu" }, Seraph = { "Ser", "aph" }, CrimsonSeraph = { "Crim", "raph" }, CrystalSeraph = { "Crys", "raph" }, SpineLizard = { "Spine", "lizard" }, Snake = { "Sn", "ake", "Sna" },
 	EagleSentry = { "Ea", "sentry" },
@@ -184,6 +185,13 @@ local NAMES = {
 	RoboShark = { "Robo", "shark" }, FishSchool = { "Fish", "school" }, Loong = { "L", "oong", "Loo" },
 	WarElephant = { "War", "elephant" }, SoulHorse = { "Soul", "horse" }, Sludge = { "Slu", "udge" },
 	Leviathan = { "Levi", "athan" },
+	-- Fight to Steal an Egg's Dungeon, Forest, Castle and Ocean pets (QM, Nov 6)
+	DungeonRat = { "Dun", "rat" }, Slime = { "Sl", "ime", "Sli" }, CaveSpider = { "Cave", "spider" }, BoneSteed = { "Bone", "steed" },
+	Mimic = { "Mi", "mic" }, BoneWyrm = { "Bone", "wyrm" }, Shroom = { "Sh", "room", "Shroo" }, SpiritFox = { "Spirit", "fox" },
+	SpiritDeer = { "Spirit", "deer" }, MysticOwl = { "Mystic", "owl" }, CrystalTortoise = { "Crys", "toise" }, SpiritLoong = { "Spirit", "loong" },
+	WarBoar = { "War", "boar" }, RoyalSteed = { "Roy", "steed" }, ChessKnight = { "Chess", "knight" }, RoyalPeacock = { "Pea", "cock" },
+	LivingArmor = { "Living", "armor" }, CrimsonDrake = { "Crim", "drake" }, RoyalEagle = { "Roy", "eagle" }, Seahorse = { "Sea", "horse" },
+	AbyssWhale = { "Abyss", "whale" },
 }
 local VOWELS = { a = true, e = true, i = true, o = true, u = true }
 

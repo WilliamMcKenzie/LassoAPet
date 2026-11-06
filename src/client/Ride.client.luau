@@ -940,12 +940,13 @@ end
 
 -- The Slingshot (Client/SlingshotLaunch, QM Nov 6): you land at (x, z) on your fastest pet.
 require(script.Parent.SlingshotRide).bestPet = vfx.fastestPet
-require(script.Parent.SlingshotRide).ride = function(x, z)
+require(script.Parent.SlingshotRide).ride = function(x, z, level)
 	local best = vfx.fastestPet()
 	if phase ~= "idle" or not best then
 		return false
 	end
 	startRide(best, Vector3.new(x, 0, z))
+	warpLevel = level or Config.Slingshot.To -- (its gate lets you through: you were flung past it)
 	return phase == "outbound"
 end
 
@@ -4300,7 +4301,7 @@ RunService.PreSimulation:Connect(function(dt)
 		-- ride (WalkLimit holds you there), so only 8+ studs past it, where no
 		-- animal at the line reaches.
 		local hrp, humanoid = character()
-		if hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z - 8 then
+		if hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z - 8 and not require(script.Parent.SlingshotRide).flying then -- (not flying over them off the Slingshot)
 			for _, entity in allAnimals() do
 				if not entity.popping and math.abs(entity.x - hrp.Position.X) < 2.6 and math.abs(entity.z - hrp.Position.Z) < 4 then
 					clearRideTarget()
