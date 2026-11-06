@@ -3,11 +3,14 @@
 -- pulled back on the band, flung over the course and land at the start of biome To (the
 -- Desert), riding that pet from there (SlingshotRide.ride: Ride.client's startRide).
 -- The bands move on your screen only (Shared/SlingshotPose); the flight is a curve from
--- where the band lets you go, Apex studs up at its middle, Flight seconds long.
+-- where the band lets you go, Apex studs up at its middle, Flight seconds long. In the air
+-- you steer left and right as on the way out of your pen (Config.SteerSpeed, SteerResponse:
+-- A/D, the arrows, a stick or a phone's joystick), and land where you've steered to.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
@@ -26,6 +29,18 @@ local CAM_LAUNCH = Vector3.new(16, 14, 44) -- the camera, in the slingshot's spa
 local CAM_BACK, CAM_UP = 34, 12 -- then behind and over you in the air
 
 local busy = false
+
+-- Left/right in the air: -1..1 (the keys, and the move vector: a stick or a phone's joystick).
+local function steerInput()
+	local keys = 0
+	if UserInputService:IsKeyDown(Enum.KeyCode.A) or UserInputService:IsKeyDown(Enum.KeyCode.Left) then
+		keys -= 1
+	end
+	if UserInputService:IsKeyDown(Enum.KeyCode.D) or UserInputService:IsKeyDown(Enum.KeyCode.Right) then
+		keys += 1
+	end
+	return math.clamp(keys + controls:GetMoveVector().X, -1, 1)
+end
 
 -- The slingshot's own frame: its Frame1 part, built at the model's origin, so its CFrame is
 -- where the server stood it (a client may not have the Model's WorldPivot).
@@ -69,6 +84,7 @@ local function restore(hrp, humanoid)
 	if humanoid then
 		humanoid.Sit = false
 	end
+	SlingshotRide.flying = false
 	controls:Enable()
 	camera.CameraType = Enum.CameraType.Custom
 end
@@ -83,6 +99,7 @@ local function launch(model)
 		return
 	end
 	busy = true
+	SlingshotRide.flying = true -- (Ride.client: you're not on foot, nothing throws you off)
 	local base = baseOf(model)
 	local pet, rel, size = petCopy(best)
 	-- your pet stands against the band (its back end on it), you on its back
@@ -105,16 +122,26 @@ local function launch(model)
 		local p0 = from.Position
 		local p2 = Vector3.new(landing.X, p0.Y - pull.Position.Y + landing.Y, landing.Z)
 		local p1 = (p0 + p2) / 2 + Vector3.new(0, 2 * CFG.Apex, 0) -- (a quadratic curve's middle is half way to this)
-		local t0 = os.clock()
+		-- steering: x off the curve, easing toward SteerSpeed x your input (as Ride's way out
+		-- of your pen), kept inside the course where you land
+		local side, latVel = 0, 0
+		local room = math.max(WorldColors.halfWidth(landing.Z) - 8, 0)
+		controls:Enable() -- (anchored: the move vector only steers, as Ride's rideStick)
+		local t0, last = os.clock(), os.clock()
 		while true do
-			local u = math.min((os.clock() - t0) / CFG.Flight, 1)
+			local now = os.clock()
+			local dt = math.min(now - last, 0.1)
+			last = now
+			local u = math.min((now - t0) / CFG.Flight, 1)
+			latVel += (steerInput() * Config.SteerSpeed - latVel) * (1 - math.exp(-Config.SteerResponse * dt))
+			side = math.clamp(side + latVel * dt, -room - landing.X, room - landing.X)
 			local a, b = p0:Lerp(p1, u), p1:Lerp(p2, u)
-			local at = a:Lerp(b, u)
-			local ahead = (b - a)
+			local at = a:Lerp(b, u) + Vector3.new(side, 0, 0)
+			local ahead = (b - a) * (2 / CFG.Flight) + Vector3.new(latVel, 0, 0) -- (its velocity: facing the way it really goes)
 			local body = CFrame.lookAt(at, at + (if ahead.Magnitude > 0.01 then ahead else -Vector3.zAxis))
 			pet:PivotTo(body * rel)
 			hrp.CFrame = body * CFrame.new(0, size.Y / 2 + SEAT, 0)
-			local flat = Vector3.new(ahead.X, 0, ahead.Z)
+			local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
 			local back = if flat.Magnitude > 0.01 then flat.Unit else -Vector3.zAxis
 			camera.CFrame = CFrame.lookAt(at - back * CAM_BACK + Vector3.new(0, CAM_UP, 0), at)
 			if u >= 1 then
@@ -122,9 +149,12 @@ local function launch(model)
 			end
 			RunService.RenderStepped:Wait()
 		end
+		controls:Disable()
 		pet:Destroy()
-		hrp.CFrame = CFrame.new(landing + Vector3.new(0, 3, 0))
-		local riding = SlingshotRide.ride and SlingshotRide.ride(landing.X, landing.Z)
+		local x = landing.X + side
+		hrp.CFrame = CFrame.new(x, landing.Y + 3, landing.Z)
+		local riding = SlingshotRide.ride and SlingshotRide.ride(x, landing.Z)
+		SlingshotRide.flying = false
 		if not riding then
 			restore(hrp, humanoid)
 		end
