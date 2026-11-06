@@ -162,12 +162,31 @@ if HudKit then
 	panel.BackgroundTransparency = 1
 	panelEdge.Enabled = false
 	HudKit.back(panel, "Panel", { Name = "NativePanel", ZIndex = 1 })
-	HudKit.back(panel, "Header", {
+	local header = HudKit.back(panel, "Header", {
 		Name = "NativeHeader",
 		Position = UDim2.fromOffset(0, -44),
 		Size = UDim2.new(1, 0, 0, 88),
 		ZIndex = 2,
 	})
+	-- the header's shine (HudKit.popup's): slanted white stripes, clipped by a CanvasGroup
+	local shine = Instance.new("CanvasGroup")
+	shine.Name = "Shine"
+	shine.BackgroundTransparency = 1
+	shine.Size = UDim2.fromScale(1, 1)
+	shine.GroupTransparency = 0.7
+	shine.ZIndex = 2
+	for i, st in { { 0.62, 0.07 }, { 0.72, 0.025 } } do
+		local stripe = Instance.new("Frame")
+		stripe.Name = "Stripe" .. i
+		stripe.BackgroundColor3 = Color3.new(1, 1, 1)
+		stripe.BorderSizePixel = 0
+		stripe.AnchorPoint = Vector2.new(0.5, 0.5)
+		stripe.Position = UDim2.fromScale(st[1], 0.5)
+		stripe.Size = UDim2.new(st[2], 0, 2, 0)
+		stripe.Rotation = 22
+		stripe.Parent = shine
+	end
+	shine.Parent = header
 	title.Visible = false
 	for _, t in { { "NativeTitleShadow", 4, HudKit.BLACK, 3 }, { "NativeTitle", 0, Color3.new(1, 1, 1), 4 } } do
 		HudKit.label(panel, t[1], {
