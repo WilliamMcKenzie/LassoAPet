@@ -18,8 +18,13 @@ local Config = {
 			AnimalSize = 1, -- its obstacles (tools/funnel.luau) and the Godlands' terrain grow ^0.8 of this. Animals no longer do (QM, Oct 8: back to their old sizes)
 			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
 			Length = 2168, -- (QM, Oct 11: the pacing ladder, below AnimalStats; was 760)
-			GroundColors = { Color3.fromRGB(23, 191, 29), Color3.fromRGB(24, 203, 31) }, -- Fight to Steal an Egg's Grass / GrassChecker (QM, Nov 6; was 113, 173, 31 / 122, 190, 25)
-			WallColors = { Color3.fromRGB(197, 126, 70), Color3.fromRGB(211, 142, 75) }, -- (QM, Oct 10; was 225, 150, 104 / 248, 170, 114)
+			GroundColors = { Color3.fromRGB(23, 191, 29), Color3.fromRGB(24, 203, 31) }, -- Fight to Steal an Egg's Meadow floor and its checker (QM, Nov 6)
+			WallColors = { Color3.fromRGB(133, 90, 50), Color3.fromRGB(143, 98, 56) }, -- and its Meadow wall
+			CapColor = Color3.fromRGB(148, 181, 26), -- the cap along its walls' tops (Fight to Steal an Egg's MeadowCap)
+			-- The base's dirt: the pens' floor (PenLevel) and the base walls (Server/Map).
+			Patches = {
+				Dirt = { Color3.fromRGB(200, 149, 71), Color3.fromRGB(189, 141, 67) },
+			},
 			-- Which animals run in this biome's stampede and how often (names are modules
 			-- in Shared/Animals). QM's spawn table (Oct 3): chances out of 1. They're
 			-- weights, so a biome that doesn't add up to exactly 1 still works. Nest eggs
@@ -27,12 +32,6 @@ local Config = {
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
 			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05 },
-			-- Dirt patches in the walls' colours, a stud below the grass
-			-- (tools/meadow_ground.py); see the Desert's Patches.
-			Patches = {
-				Dirt = { Color3.fromRGB(206, 146, 84), Color3.fromRGB(222, 164, 100) }, -- (QM, Oct 10; was the walls' 225, 150, 104 / 248, 170, 114)
-				Grass = { Color3.fromRGB(92, 146, 30), Color3.fromRGB(100, 160, 26) }, -- the base's darker green band, between its grass and dirt (tools/world1_base.luau; QM, Oct 13)
-			},
 		},
 		{
 			Name = "Desert",
@@ -40,22 +39,15 @@ local Config = {
 			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.75)
 			NestScale = 2, -- its nests are this many times bigger, so they show from afar at its speed (Nests.server; QM, Oct 6)
 			Length = 1816, -- (QM, Oct 11: 1.5x as long; the pacing ladder made it 1208, was 2280)
-			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
-			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
+			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(246, 208, 124) }, -- Fight to Steal an Egg's Desert floor and its checker (QM, Nov 6)
+			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) }, -- and its Desert wall
+			CapColor = Color3.fromRGB(222, 164, 100), -- (its DesertCap)
+			GateColor = Color3.fromRGB(255, 204, 40), -- its breakable barrier's colour (Gate.client)
 			Herd = { Cactus = 0.3, Kitten = 0.1, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
-			-- Patches of other ground in the floor (parts named after them in
-			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
-			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
-			Patches = {
-				Grass = { Color3.fromRGB(184, 172, 70), Color3.fromRGB(200, 188, 86) },
-				Stone = { Color3.fromRGB(206, 146, 84), Color3.fromRGB(222, 164, 100) },
-			},
 			-- Locked behind a gate until your pen is this biome's level (its place
 			-- in this list). Upgrading your pen to it costs UnlockCost gold; your pen's
 			-- floor tiles take this biome's ground colours and its posts PostColor.
 			UnlockCost = 500, -- balance pass (Oct 6): was $1k; most new players quit before reaching it
-			PostColor = Color3.fromRGB(206, 118, 72),
-			GateColor = Color3.fromRGB(255, 204, 40), -- the gate's glow at this biome's line: desert yellow
 			-- Upgrade Pen while this is the next biome to unlock (its price is drawn in).
 			UpgradeImage = "rbxassetid://134340111977085", -- assets/ui/UpgradePenDesertEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://97537967185164", -- assets/ui/UpgradePenDesertDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
@@ -66,17 +58,12 @@ local Config = {
 			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.5)
 			NestScale = 2.25,
 			Length = 1920, -- (QM, Oct 11: the pacing ladder; was 5472)
-			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
-			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
+			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) }, -- Fight to Steal an Egg's Ice floor and its checker (QM, Nov 6)
+			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) }, -- and its Ice wall
+			CapColor = Color3.fromRGB(244, 247, 251), -- (its IceCap)
+			GateColor = Color3.fromRGB(70, 220, 255), -- its breakable barrier's colour (Gate.client)
 			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.02 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
-			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
-			Patches = {
-				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
-				Ice = { Color3.fromRGB(160, 188, 244), Color3.fromRGB(178, 202, 250) },
-			},
 			UnlockCost = 300000, -- QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
-			PostColor = Color3.fromRGB(126, 164, 214),
-			GateColor = Color3.fromRGB(70, 220, 255), -- cyan (QM)
 			UpgradeImage = "rbxassetid://105968538824751", -- assets/ui/UpgradePenTundraEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://133303061216721", -- assets/ui/UpgradePenTundraDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 		},
@@ -86,134 +73,47 @@ local Config = {
 			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.25)
 			NestScale = 2.5,
 			Length = 3120, -- a whole number of 240-stud depth bands (QM, Oct 11: the pacing ladder; was 7680)
-			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
-			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
+			GroundColors = { Color3.fromRGB(160, 230, 247), Color3.fromRGB(153, 222, 240) }, -- Fight to Steal an Egg's Ocean floor and its checker (QM, Nov 6)
+			WallColors = { Color3.fromRGB(73, 103, 145), Color3.fromRGB(79, 112, 156) }, -- and its Ocean wall
+			CapColor = Color3.fromRGB(157, 226, 244), -- (its OceanCap)
+			GateColor = Color3.fromRGB(30, 80, 220), -- its breakable barrier's colour (Gate.client)
 			-- The Fish is a placeholder until the rest of the ocean animals are designed.
 			HerdSpawnEvery = 0.45, -- (twice the stampede of the rest: it looked barren, QM Oct 11)
 			Herd = { Fish = 0.1, Starfish = 0.3, Clownfish = 0.25, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0, Kraken = 0.05, Lionfish = 0.15 }, -- (the Lionfish Rare, a touch faster than the Starfish, QM Oct 11, weight a guess; the Clownfish Uncommon, a little rarer than the Starfish, QM Oct 11; Blue Crab guessed like the Kraken; the Robo Shark never spawns: a future Robux pet, QM Oct 4)
-			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
-			Patches = {
-				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
-				Trench = { Color3.fromRGB(70, 150, 214), Color3.fromRGB(86, 166, 228) },
-				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon (WorldColors keeps the textures off its glow)
-			},
-			-- It gets darker the further you ride (QM, Oct 2; bluer and a little brighter, Oct 6): coral reef, sand flats,
-			-- dark rock with the first lava, volcanic abyss. At is the fraction of the
-			-- way along; the floor, walls and haze blend between these stops (the floor
-			-- and walls step every 240 studs, tools/ocean_ground.py BAND). Where a stop
-			-- has a colour, it wins over the GroundA/WallA... attributes above.
-			Depths = {
-				{
-					At = 0,
-					Ground = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
-					Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
-					Trench = { Color3.fromRGB(60, 156, 232), Color3.fromRGB(76, 172, 244) },
-					Wall = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) },
-					Haze = Color3.fromRGB(56, 160, 245),
-					Tint = Color3.fromRGB(214, 236, 255),
-				},
-				{
-					At = 0.33,
-					Ground = { Color3.fromRGB(222, 196, 150), Color3.fromRGB(234, 210, 166) },
-					Grass = { Color3.fromRGB(76, 150, 112), Color3.fromRGB(90, 164, 124) },
-					Trench = { Color3.fromRGB(52, 132, 212), Color3.fromRGB(66, 146, 226) },
-					Wall = { Color3.fromRGB(196, 150, 140), Color3.fromRGB(212, 166, 154) },
-					Haze = Color3.fromRGB(42, 124, 220),
-					Tint = Color3.fromRGB(205, 224, 250),
-				},
-				{
-					At = 0.55,
-					Ground = { Color3.fromRGB(132, 150, 176), Color3.fromRGB(146, 164, 190) },
-					Grass = { Color3.fromRGB(70, 96, 124), Color3.fromRGB(82, 108, 136) },
-					Trench = { Color3.fromRGB(44, 92, 170), Color3.fromRGB(54, 104, 184) },
-					Wall = { Color3.fromRGB(100, 118, 156), Color3.fromRGB(116, 134, 172) },
-					Haze = Color3.fromRGB(36, 96, 190),
-					Tint = Color3.fromRGB(196, 214, 245),
-				},
-				{
-					At = 0.75,
-					Ground = { Color3.fromRGB(82, 104, 140), Color3.fromRGB(96, 118, 154) },
-					Grass = { Color3.fromRGB(56, 76, 108), Color3.fromRGB(66, 88, 120) },
-					Trench = { Color3.fromRGB(34, 62, 130), Color3.fromRGB(44, 74, 142) },
-					Wall = { Color3.fromRGB(64, 86, 128), Color3.fromRGB(78, 100, 142) },
-					Haze = Color3.fromRGB(28, 70, 160),
-					Tint = Color3.fromRGB(188, 200, 240),
-				},
-				{
-					At = 1,
-					Ground = { Color3.fromRGB(46, 58, 92), Color3.fromRGB(58, 70, 104) },
-					Grass = { Color3.fromRGB(34, 44, 70), Color3.fromRGB(44, 54, 80) },
-					Trench = { Color3.fromRGB(28, 40, 90), Color3.fromRGB(38, 50, 100) },
-					Wall = { Color3.fromRGB(36, 46, 80), Color3.fromRGB(48, 58, 92) },
-					Haze = Color3.fromRGB(20, 36, 100),
-					Tint = Color3.fromRGB(176, 180, 230),
-				},
-			},
 			UnlockCost = 10000000, -- QM, Oct 8: matches the new button art (Oct 7 had $5M: halved with the Tundra's ("same with ocean/godlands"); balance pass Oct 6 had it $10M, before that $1M
-			PostColor = Color3.fromRGB(236, 140, 124),
-			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
 			UpgradeImage = "rbxassetid://86611519789045", -- assets/ui/UpgradePenOceanEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://98686807740770", -- assets/ui/UpgradePenOceanDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
-			-- Under the sea (Ocean.client): while you're in this biome the distance
-			-- fades into Haze.Color and bubbles drift up round the camera.
-			Haze = {
-				Color = Color3.fromRGB(60, 150, 235),
-				Density = 0.45, -- Atmosphere.Density
-				Tint = Color3.fromRGB(200, 228, 255), -- ColorCorrection.TintColor
-				FadeTime = 1.5, -- seconds to sink into it or come out of it
-				Bubbles = 24, -- per second
-			},
 		},
 		{
-			-- The volcano (QM, Oct 11): after the ocean, bright and warm, brown more than
-			-- black (design/lava_biome). Floor, walls and nests: tools/volcano.py; its rocks:
-			-- tools/biome_rocks.py; the big crack at its end: VolcanoCrack below.
+			-- The volcano (QM, Oct 11): after the ocean.
 			Name = "Volcano",
 			AnimalSize = 2.6, -- (as the ocean's)
 			Swerve = 1,
 			NestScale = 2.5,
 			Length = 5040, -- (QM, Oct 11: the pacing ladder; was 7680)
-			GroundColors = { Color3.fromRGB(156, 98, 66), Color3.fromRGB(168, 108, 74) }, -- baked-earth brown
-			WallColors = { Color3.fromRGB(170, 92, 58), Color3.fromRGB(186, 104, 66) },
+			GroundColors = { Color3.fromRGB(156, 98, 66), Color3.fromRGB(168, 108, 74) }, -- Fight to Steal an Egg's Lava floor and its checker (QM, Nov 6)
+			WallColors = { Color3.fromRGB(170, 92, 58), Color3.fromRGB(186, 104, 66) }, -- and its Lava wall
+			CapColor = Color3.fromRGB(96, 60, 46), -- (its LavaCap)
+			GateColor = Color3.fromRGB(255, 110, 20), -- its breakable barrier's colour (Gate.client)
 			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean and Jurassic: QM Oct 11)
 			Herd = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (QM, Oct 11: the Firebird Uncommon, the Rock Hog and Fire Lobster Rare, the Rockworm Epic, the Phoenix Legendary and very rare, the Lava Whale Epic and as rare as the Phoenix; the weights a guess)
-			-- tools/volcano.py: lighter ash flush, darker crust plates a stud up, lava pools
-			-- a stud down out by the walls.
-			Patches = {
-				Ash = { Color3.fromRGB(184, 124, 84), Color3.fromRGB(196, 134, 92) },
-				Crust = { Color3.fromRGB(124, 78, 58), Color3.fromRGB(136, 86, 64) },
-				Lava = { Color3.fromRGB(255, 116, 24), Color3.fromRGB(255, 146, 40) }, -- Neon
-			},
 			UnlockCost = 300000000, -- a guess (the old Godlands price)
-			PostColor = Color3.fromRGB(170, 92, 58),
-			GateColor = Color3.fromRGB(255, 110, 20), -- lava orange
-			Sky = "rbxassetid://87302593393430", -- assets/ui/SkyVolcano.png: a flat lava orange (QM, Oct 11; Client/BiomeSky)
-			-- How much that sky colours everything (the red-orange cast) and a tint over it
-			-- (QM, Oct 11; Client/BiomeSky): Diffuse 0 to 1, Specular 0 to 1, Tint white for none.
-			SkyLight = { Diffuse = 0, Specular = 1, Tint = Color3.new(1, 1, 1) }, -- (QM, Oct 11: no orange cast)
 			-- No Upgrade Pen art yet: the plain button with the price.
 		},
 		{
-			-- The Jurassic (QM, Oct 11): the final biome, after the volcano (design/jurassic_biome):
-			-- darker jungle grass, a rough dirt trail down the middle, brown rocks, jungle plants
-			-- and a giant ribcage halfway. Floor, walls, nests and ribcage: tools/jurassic.py;
-			-- rocks and plants: tools/biome_rocks.py.
+			-- The Jurassic (QM, Oct 11): the final biome, after the volcano.
 			Name = "Jurassic",
 			AnimalSize = 2.6, -- (as the volcano's)
 			Swerve = 1,
 			NestScale = 2.5,
 			Length = 7680, -- as long as the volcano was (a guess; its animals aren't on the ladder yet)
 			HerdSpawnEvery = 0.15, -- (3x its stampede again: QM Oct 12; was 0.45, twice the rest, as the Ocean)
-			GroundColors = { Color3.fromRGB(78, 140, 40), Color3.fromRGB(86, 152, 44) }, -- dark jungle grass
-			WallColors = { Color3.fromRGB(150, 102, 62), Color3.fromRGB(164, 114, 70) },
+			GroundColors = { Color3.fromRGB(30, 196, 186), Color3.fromRGB(28, 189, 181) }, -- Fight to Steal an Egg's Forest floor and its checker (QM, Nov 6)
+			WallColors = { Color3.fromRGB(130, 107, 115), Color3.fromRGB(125, 100, 108) }, -- and its Forest wall
+			CapColor = Color3.fromRGB(30, 196, 186), -- (its ForestCap)
+			GateColor = Color3.fromRGB(90, 200, 50), -- its breakable barrier's colour (Gate.client)
 			Herd = { Fish = 0, Spinosaurus = 0.2, TRex = 0.12, Raptor = 0.15, Pterodactyl = 0.08, Ankylosaurus = 0.25, PalmGuy = 0.25, BoneRex = 0.03 }, -- (the Bone Rex the final Legendary, as rare as the Phoenix, QM Oct 11; Palm Guy an Uncommon too, QM Oct 11, weight a guess; no more Fish: QM, Oct 11; the Ankylosaurus the Jurassic's Uncommon, QM Oct 11, weight a guess; the Pterodactyl an Epic, QM Oct 11; the Spinosaurus Rare, QM Oct 11; QM, Oct 11: fish for now, until the dinosaurs are designed; the T-Rex, an Epic, is the first; the Raptor a Rare that runs in packs of three (HerdPacks), so 0.15 is about a third of the stampede. Weights a guess)
-			-- tools/jurassic.py: the dirt trail, flush.
-			Patches = {
-				Trail = { Color3.fromRGB(150, 104, 64), Color3.fromRGB(162, 114, 70) },
-			},
 			UnlockCost = 3000000000, -- a guess (10x the volcano)
-			PostColor = Color3.fromRGB(150, 102, 62),
-			GateColor = Color3.fromRGB(90, 200, 50), -- jungle green
 			-- No Upgrade Pen art or boss yet (Config.Boss falls back to the Chicken).
 		},
 	},
@@ -230,35 +130,13 @@ local Config = {
 	PenUpgrades = false,
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
-	-- The course is a funnel (QM, Oct 8): CourseHalfWidth at the start line, each wall
-	-- angled out CourseWidening studs per stud of course (one straight line), up to
-	-- CourseMaxHalfWidth (reached at the Godlands line, which keeps that width). Full
-	-- widths: Meadow 112-120, Desert 120-142, Snow 142-197, Ocean 197-274, Godlands 274.
-	-- WorldColors.halfWidth(z) is the width at z. The place's walls, ground, obstacles
-	-- and nests are moved to it by tools/funnel.luau (re-run it after a World push).
-	-- The big lava crack at the volcano's end (QM, Oct 10-11: a geyser to launch you on
-	-- to the next biome, later; for now it's only there). VolcanoCrack.client draws it
-	-- with ViewportStencil (Shared/ViewportStencil) from the Model named Model in
-	-- ReplicatedStorage: CrackMask and CrackInside, imported from design/volcano/VolcanoCrack.gltf
-	-- (tools/volcano_crack.py). FromFinish: studs before the volcano's end (where the finish line was) its middle is.
-	VolcanoCrack = {
-		Model = "VolcanoCrack",
-		FromFinish = 110,
-		Yaw = 0,
-		Brightness = 1.4, -- SurfaceGui.Brightness: a little over 1 so it glows
-		MaxDistance = 900,
-	},
-	CourseHalfWidth = 56,
-	CourseWidening = 0.005,
-	CourseMaxHalfWidth = 137,
-	CourseLength = 2168 + 1816 + 1920 + 3120 + 5040 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, then the Jurassic, its end is the end; off its edge, the void)
-	-- The Jurassic went on forever (QM, Oct 11: the temporary endgame): the course was
-	-- cut at Cut (World.server: no far wall, no finish line) and the Length studs
-	-- before it laid again and again past it (Client/Endless). Cut and Length are
-	-- whole 16s, so the floor's checker keeps its step. nil: the course ends as before.
-	-- (QM, Oct 13: off; World 1 ends at a giant portal to World 2 instead, EndPortal below.
-	-- Was { Cut = -21504, Length = 1536 }.)
-	Endless = nil,
+	-- The course (QM, Nov 6: a straight corridor for now; dynamic walls later): CourseHalfWidth
+	-- either side of x = 0 all the way, from the start line (z = 0) to the finish line, FinishFromEnd
+	-- before the last biome's end. WorldColors.halfWidth(z) is the width at z. Server/Map builds it.
+	CourseHalfWidth = 80,
+	CourseWidening = 0,
+	CourseMaxHalfWidth = 80,
+	CourseLength = 2168 + 1816 + 1920 + 3120 + 5040 + 7680, -- all the biomes' lengths added up
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
@@ -328,7 +206,6 @@ local Config = {
 	-- which cut tens of thousands of textures. Off (or those variants missing from
 	-- MaterialService): the stud Textures as before. Shared/Studs.
 	StudMaterial = true,
-	Sky = "Flat", -- (QM, Oct 9: back to Oct 5 evening's flat sky) "Anime" (the Creator Store's Anime sky, QM Oct 6) or "Flat" (one flat #59D9FD): World.server
 	WalkSpeed = 48, -- on foot, studs a second (Roblox's default is 16; QM, Oct 9: 3x, was 2x)
 	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
 	-- On the ride home with an egg the stampede gets out of your way (QM, Oct 6, to
@@ -1398,15 +1275,6 @@ Config.Places = { 126872244121414, 139418530058790, 117724433633972 } -- [world]
 Config.World = table.find(Config.Places, game.PlaceId) or 1
 -- Pens in the base (Server/Pens): one per player.
 Config.PenCount = 5
--- World 1's Meadow as open country (QM, Nov 6): the distance fades into a pale blue haze
--- (Client/Ocean's Lighting fog), so the cliffs and mesas past the course (tools/
--- world1_meadow_cliffs.luau) melt into it instead of ending at blank sky. In studs from the camera.
-if Config.World == 1 then
-	Config.Biomes[1].Haze = { Color = Color3.fromRGB(200, 226, 244), Tint = Color3.new(1, 1, 1), FogStart = 220, FogEnd = 1100, FadeTime = 1.5, Bubbles = 0, NoDepths = true }
-end
--- (World 1 ended at a giant portal to World 2 for a while: QM, Oct 13 took it out. Both
--- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
-Config.EndPortal = nil
 -- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's
 -- World 2 bar). World 1 is everyone's.
 -- World 2 targets the late Volcano / first Jurassic rides on the normal income curve.
@@ -2097,9 +1965,5 @@ for kind, stats in EXEMPT_STATS do
 	Config.AnimalStats[kind] = table.clone(stats)
 end
 
-
--- Where each biome starts and the course ends: the parts in workspace.World.Borders, which
--- QM drags in Studio (Shared/Borders; QM, Nov 6). They override the Lengths above.
-require(script.Parent.Borders).apply(Config)
 
 return Config
