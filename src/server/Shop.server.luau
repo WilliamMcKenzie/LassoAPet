@@ -471,6 +471,19 @@ MarketplaceService.ProcessReceipt = function(receipt)
 		end
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
+	for i, biome in Config.Biomes do
+		local product = biome.RobuxProduct
+		if product and product.ProductId and receipt.ProductId == product.ProductId then
+			-- a biome from the Slingshot's menu (Server/Slingshot's GrantBiome; else tried again next visit)
+			local player = Players:GetPlayerByUserId(receipt.PlayerId)
+			local grant = game:GetService("ServerStorage"):FindFirstChild("GrantBiome")
+			if player and grant and grant:Invoke(player, i) then
+				Telemetry.purchase(player, receipt.CurrencySpent, "product:" .. receipt.ProductId)
+				return Enum.ProductPurchaseDecision.PurchaseGranted
+			end
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+	end
 	if receipt.ProductId == Config.HatchAll.ProductId then
 		-- (hatched while they're here with their pen loaded; else tried again on their next visit)
 		if hatchAllGranted[receipt.PurchaseId] then
