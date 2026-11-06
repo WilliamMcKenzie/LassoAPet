@@ -11,6 +11,11 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Studs = require(ReplicatedStorage.Shared.Studs)
 local world = workspace:WaitForChild("World")
 
+-- The biome borders QM drags in Studio (Shared/Borders) can't be seen in Play.
+if world:FindFirstChild("Borders") then
+	require(ReplicatedStorage.Shared.Borders).hide(world.Borders)
+end
+
 -- The map's stud Textures become the stud material here, before anyone joins (Shared/
 -- Studs), so clients never load those ~17,500 Textures (QM, Oct 20: phones running out
 -- of memory). Client/StudMap still converts anything this misses.
