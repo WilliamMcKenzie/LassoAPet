@@ -345,12 +345,14 @@ local Config = {
 	PenUpgrades = false,
 	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
-	-- The course (QM, Nov 6: a straight corridor for now; dynamic walls later): CourseHalfWidth
-	-- either side of x = 0 all the way, from the start line (z = 0) to the finish line, FinishFromEnd
+	-- The course: CourseHalfWidth either side of x = 0 at the start line, then CourseProfile's widths, from the start line (z = 0) to the finish line, FinishFromEnd
 	-- before the last biome's end. WorldColors.halfWidth(z) is the width at z. Server/Map builds it.
 	CourseHalfWidth = 80,
 	CourseWidening = 0,
-	CourseMaxHalfWidth = 80,
+	CourseMaxHalfWidth = 214,
+	-- (QM, Nov 6) the corridor's half width along it, as maps/world.map's floor: { z, half width },
+	-- straight between (WorldColors.halfWidth), wider the later the biome. Change it with the map.
+	CourseProfile = { { 0, 80 }, { -160, 80 }, { -288, 120 }, { -648, 120 }, { -744, 104 }, { -1024, 104 }, { -1184, 80 }, { -1464, 80 }, { -1560, 96 }, { -1840, 96 }, { -1968, 80 }, { -2168, 80 }, { -2264, 130 }, { -2704, 130 }, { -2832, 114 }, { -3032, 114 }, { -3160, 90 }, { -3360, 90 }, { -3456, 122 }, { -3736, 122 }, { -3896, 98 }, { -4096, 98 }, { -4256, 116 }, { -4616, 116 }, { -4744, 132 }, { -5024, 132 }, { -5120, 116 }, { -5400, 116 }, { -5496, 100 }, { -5696, 100 }, { -5824, 116 }, { -6024, 116 }, { -6120, 142 }, { -6560, 142 }, { -6656, 126 }, { -6936, 126 }, { -7064, 142 }, { -7504, 142 }, { -7600, 158 }, { -8160, 158 }, { -8288, 126 }, { -8728, 126 }, { -8888, 150 }, { -9328, 150 }, { -9488, 168 }, { -10048, 168 }, { -10176, 120 }, { -10456, 120 }, { -10552, 176 }, { -10992, 176 }, { -11088, 136 }, { -11528, 136 }, { -11656, 162 }, { -11936, 162 }, { -12096, 178 }, { -12456, 178 }, { -12584, 194 }, { -12864, 194 }, { -13024, 154 }, { -13464, 154 }, { -13560, 138 }, { -14000, 138 }, { -14160, 156 }, { -14520, 156 }, { -14616, 196 }, { -14816, 196 }, { -14944, 164 }, { -15144, 164 }, { -15304, 148 }, { -15744, 148 }, { -15840, 204 }, { -16400, 204 }, { -16496, 188 }, { -16936, 188 }, { -17032, 148 }, { -17312, 148 }, { -17440, 164 }, { -18000, 164 }, { -18096, 214 }, { -18296, 214 }, { -18392, 190 }, { -18832, 190 }, { -18928, 166 }, { -19128, 166 }, { -19256, 150 }, { -19536, 150 }, { -19632, 190 }, { -19992, 190 }, { -20088, 158 }, { -20448, 158 }, { -20576, 190 }, { -20776, 190 }, { -20936, 206 }, { -21496, 206 }, { -21624, 158 }, { -21696, 158 } },
 	CourseLength = 2168 + 1816 + 1920 + 3120 + 5040 + 7680, -- all the biomes' lengths added up
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
