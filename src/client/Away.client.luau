@@ -216,12 +216,11 @@ local function setScale(scale)
 end
 
 local function show(total)
-	local gems = Config.Gems ~= nil -- (the Halloween world's pets earn gems)
-	local each = total * (if gems then Config.Gems.Rate else 1)
-	cash.Text = "+" .. (if gems then "" else "$") .. amount(each) .. (if gems then " GEMS" else " CASH")
-	boostLabel.Text = "+" .. (if gems then "" else "$") .. amount(each * Config.AwayBoost.Multiplier) -- (the rainbow button: what 4x gives)
+	local each = total
+	cash.Text = "+$" .. amount(each) .. " CASH"
+	boostLabel.Text = "+$" .. amount(each * Config.AwayBoost.Multiplier) -- (the rainbow button: what 4x gives)
 	if native then
-		native.setAmount((if gems then "" else "$") .. amount(each))
+		native.setAmount("$" .. amount(each))
 	end
 	if open then
 		return

@@ -1,0 +1,8 @@
+# piece: label, RGB
+Slingshot_1: Stone, 170, 167, 180
+Slingshot_2: Stone, 145, 152, 154
+Slingshot_3: Bark, 186, 134, 80
+Slingshot_4: Bark, 158, 108, 62
+Slingshot_5: Iron, 86, 88, 98
+Slingshot_6: Rope, 232, 204, 150
+SlingshotBand_1: Band, 226, 58, 52

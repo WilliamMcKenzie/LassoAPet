@@ -1,32 +1,44 @@
-# Map editor (World 1)
+# Map editor
 
-Fight to Steal an Egg's map editor, for Lasso a Pet's World 1 course (QM, Nov 6). It edits
-`maps/world1.map`: the course south of the start line, a 4-stud cell at a time. The base
-(north of the start line), World.Barriers and the far scenery (World.Cliffs.Far) aren't in it.
+`MapEditor.html` edits the game's map, `maps/world.map` (QM, Oct 24; Fight to Steal an Egg's editor, ported to Lasso A Pet Nov 6). Open it in a browser
+(it's one self-contained file), paint the floor and the walls a 4-stud checker square at a time, place
+and move every mesh (props, pillars, arches, ruins, nests, bosses), tweak any colour, then **Download .map** and send it
+over. Only the barriers are fixed (tools/map_gen.py lays them out). **Grow map** adds 64 studs of
+empty room along a side (tools/map_grow.py does the same from the command line; serve.py's merge
+copes with a map that grew in the tab or in the file).
 
-On this Mac:
+On this Mac: `python3 tools/mapeditor/serve.py` serves it at http://localhost:3000, opening the
+game's current `maps/world.map`. Its **Save to game** button writes `maps/world.map`, bakes
+`src/shared/MapData.luau` and syncs and rebuilds the map in the open Studio place (Edit mode),
+so nothing needs sending.
 
-    python3 tools/mapeditor/serve.py
+Getting a .map into the game by hand:
 
-then open http://localhost:3001. **Save to game** writes `maps/world1.map` and builds it into
-World 1's open Studio place (Edit mode; stop Play first). Publish the place in Studio to keep it.
+1. `python3 tools/map_bake.py ~/Downloads/world.map` copies it to `maps/world.map` and bakes
+   it into `src/shared/MapData.luau` (a `.map.json` from the Artifact page works the same).
+2. Sync `src/` into Studio, then **Map > Rebuild** (the Map Baker plugin, `tools/studio/MapBaker.lua`)
+   builds `workspace.World` (and `workspace.Pens`) in Edit mode. Save the place. The game plays on that baked map.
+   **Map > Import .map** bakes a file straight from disk, to look at before it goes in the repo.
 
-- **Floor** and **Walls** tabs: tiles to paint with. Paint (B), rectangle (U), bucket (G: fills
-  the patch of one tile you click, floors and walls alike), pick (I or Alt+click).
-- A wall tile has its own height: **+ New tile** on the Walls tab adds one 4 studs higher (set
-  any height on the right), so walls of mixed heights sit side by side. Sides and Cap pick the
-  names whose colours they take.
-- **Colours**: each biome's colours, as the game paints them (Shared/WorldColors). A tile's name
-  (Ground, Dirt, Wall, Cliff...) takes that name's colours in whichever biome it's in. Changed
-  colours go on World as attributes; Reset goes back to Config's.
-- **Objects**: the obstacles, decor and nests. Select (V) to drag, Q/E turn, [ ] scale,
-  Ctrl+D duplicate, Delete. Place (P) adds one of the kind picked in the tray.
-- **Biome borders**: the dashed lines. Drag one with Select to stretch or shrink the biomes
-  either side (World.Borders, Shared/Borders); the red one is the finish line.
+Rebuilding the editor (after Config colour changes, new meshes, or a new world.map):
 
-If the place was changed by hand in Studio, `python3 tools/mapeditor/export.py` reads it back
-into `maps/world1.map` (and the palette); `export.py palette` just refreshes Config's colours.
+    python3 tools/mapeditor/build.py     # -> MapEditor.html
 
-Files: `editor.html` (the page), `build.py` (bakes it into MapEditor.html), `serve.py`,
-`export.py` + `studio/export.luau` (place to .map), `studio/build.luau` (.map to place),
-`mapfile.py` (the format), `studio.py` (talks to Studio).
+## The .map format
+
+JSON, one row of cells and one object per line so diffs read well:
+
+- `cell` (4 studs), `origin` (the north-west corner, x and z), `size` (columns, rows)
+- `rows`: north to south, one character a cell: a tile's `id`, or `.` for nothing (a hole)
+- `tiles`: `{ id, area, key (a Config.WorldColors key; key .. "Checker" is its checker), top, liquid? }`;
+  a wall tile adds `wall: true` and `cap` (its top stud's colour; `key` is its sides')
+- `colours`: `{ key: [r, g, b] }`, the colours changed from Config.WorldColors (they win)
+- `areas`: the base's pens, training grounds and spawn; each biome's bounds and boss-circle radius
+- `objects`: `Prop` (item, x, z, yaw, scale, style, y only when pinned), `Pillar` (style, kind,
+  size, height, yaw, scale, y), `Arch` (style, yaw, scale, y), `Ruin`, `Nest`, `Boss`
+- `fixed`: barriers, wall height, gateway half-width (older files also had walls, pillars and
+  arches here: `tools/map_migrate.py` paints the walls in and moves the rest into `objects`, and
+  the editor does the same on open)
+- `saved`: when the editor wrote it (the game warns if the baked map isn't MapData's)
+
+`src/shared/MapFile.luau` is the parser.

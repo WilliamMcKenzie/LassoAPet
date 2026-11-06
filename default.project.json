@@ -25,12 +25,6 @@
     "Workspace": {
       "$properties": {
         "StreamingEnabled": false
-      },
-      "World": {
-        "$path": "src/world/World.rbxmx"
-      },
-      "Pens": {
-        "$path": "src/world/Pens.rbxmx"
       }
     },
     "Lighting": {
@@ -51,19 +45,46 @@
         ],
         "EnvironmentDiffuseScale": 0,
         "EnvironmentSpecularScale": 1,
-        "ExposureCompensation": 0.5,
+        "ExposureCompensation": 0,
         "ClockTime": 12,
-        "FogStart": 100000,
-        "FogEnd": 100000,
+        "FogStart": 150,
+        "FogEnd": 500,
         "GeographicLatitude": 0,
         "LightingStyle": "Soft",
-        "PrioritizeLightingQuality": false
+        "PrioritizeLightingQuality": false,
+        "FogColor": [
+          0.2784313725490196,
+          0.49019607843137253,
+          0.6509803921568628
+        ]
       },
       "ColorCorrection": {
         "$className": "ColorCorrectionEffect",
         "$properties": {
           "Contrast": 0.05,
           "Saturation": 0.25
+        }
+      },
+      "Sky": {
+        "$className": "Sky",
+        "$properties": {
+          "CelestialBodiesShown": false,
+          "StarCount": 0,
+          "SkyboxBk": "rbxassetid://81588505365795",
+          "SkyboxDn": "rbxassetid://81588505365795",
+          "SkyboxFt": "rbxassetid://81588505365795",
+          "SkyboxLf": "rbxassetid://81588505365795",
+          "SkyboxRt": "rbxassetid://81588505365795",
+          "SkyboxUp": "rbxassetid://81588505365795"
+        }
+      }
+    },
+    "MaterialService": {
+      "Matte": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "SmoothPlastic",
+          "RoughnessMap": "rbxassetid://134094806969492"
         }
       }
     },
