@@ -68,6 +68,9 @@ end
 local haze, hazeTint
 local hazing = {}
 function NativeHud.haze(who, on)
+	do
+		return -- (QM, Nov 6: no glass blur behind popups any more)
+	end
 	local camera = workspace.CurrentCamera
 	if not haze then
 		haze = Instance.new("BlurEffect")
