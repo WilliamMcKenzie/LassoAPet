@@ -11,6 +11,7 @@
 --   Pet Lineup  stands every biome's animals mid-run in their biome (workspace.PetLineup),
 --               sized by workspace.PetScale, which resizes them as you change it
 --               (Shared/PetLineup, Shared/PetScale)
+--   (and in Edit mode the fog follows the camera: each biome's own, workspace.Fog)
 
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -242,5 +243,30 @@ end)
 task.defer(function()
 	if workspace:FindFirstChild("PetLineup") then
 		lineupHook(false)
+	end
+end)
+
+-- ---- each biome's fog, in Edit mode ----------------------------------------------------------
+-- (QM, Nov 6) While workspace.Fog is there, the fog follows the Studio camera: fly into a
+-- biome and you see its fog (Shared/BiomeFog), so changing its Color, Start or End shows at once.
+local fogCode = nil
+RunService.Heartbeat:Connect(function(dt)
+	if RunService:IsRunning() or not workspace:FindFirstChild("Fog") then
+		return
+	end
+	if not fogCode then
+		local module = ReplicatedStorage:FindFirstChild("Shared") and ReplicatedStorage.Shared:FindFirstChild("BiomeFog")
+		if not module then
+			return
+		end
+		local copy = module:Clone() -- (a fresh copy: a module required from a plugin stays cached)
+		local ok, code = pcall(require, copy)
+		fogCode = if ok then code else false
+		if not ok then
+			warn("[Map Baker] BiomeFog: " .. tostring(code))
+		end
+	end
+	if fogCode then
+		fogCode.step(workspace.CurrentCamera.CFrame.Position.Z, dt)
 	end
 end)

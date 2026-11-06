@@ -30,6 +30,7 @@ local WorldColors = require(Shared.WorldColors)
 local Studs = require(Shared.Studs)
 local StudStyle = require(Shared.StudStyle)
 local HiddenFaces = require(Shared.HiddenFaces)
+local BiomeFog = require(Shared.BiomeFog)
 
 local Map = {}
 Map.data = MapData
@@ -1223,6 +1224,7 @@ function Map.build(data)
 	Studs.meshAll(map, 1)
 	-- (the textures on faces nobody sees, thousands of them: QM Oct 27, the game lagged)
 	HiddenFaces.cull(map)
+	BiomeFog.ensure(MapData.Areas) -- (workspace.Fog: each biome's fog, QM Nov 6)
 	map:SetAttribute("Baked", not RunService:IsRunning())
 	map:SetAttribute("Saved", MapData.Saved)
 	map.Parent = workspace
@@ -1276,6 +1278,7 @@ function Map.update(areas)
 	end
 	-- (unseen faces of what's new; the rest of the map was culled when it was built)
 	HiddenFaces.cull(map, made)
+	BiomeFog.ensure(MapData.Areas)
 	map:SetAttribute("Saved", MapData.Saved)
 	return map
 end
