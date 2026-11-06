@@ -10,7 +10,9 @@
 
 local ContentProvider = game:GetService("ContentProvider")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LowMemory = require(script.Parent.LowMemory)
+local Config = require(ReplicatedStorage.Shared.Config)
 
 -- Every image in the client's scripts (tools/preload_ids.py).
 local PANELS = {
@@ -104,7 +106,18 @@ local PANELS = {
 local warm = Instance.new("ScreenGui")
 warm.Name = "PreloadWarm"
 warm.ResetOnSpawn = false
-for _, id in PANELS do
+-- (QM, Nov 6: with the native UI on, the old PNG art never shows, so only the native UI's
+-- own pictures, client/HudImages, are kept loaded)
+local list = PANELS
+if Config.NativeUi.On then
+	list = {}
+	for _, id in require(script.Parent.HudImages) do
+		if typeof(id) == "string" and id ~= "" then
+			table.insert(list, id)
+		end
+	end
+end
+for _, id in list do
 	local keep = Instance.new("ImageLabel")
 	keep.BackgroundTransparency = 1
 	keep.Size = UDim2.fromOffset(1, 1)

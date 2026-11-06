@@ -8,6 +8,9 @@ local Gamepad = require(script.Parent.Gamepad)
 local player = Players.LocalPlayer
 local CrashScreen = {}
 local gui = Instance.new("ScreenGui")
+if Config.NativeUi.On then
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
+end
 gui.Name, gui.ResetOnSpawn, gui.IgnoreGuiInset = "CrashScreen", false, true
 gui.DisplayOrder, gui.Enabled = 40, false
 gui.Parent = if Config.ShowHud then player:WaitForChild("PlayerGui") else nil
@@ -46,6 +49,89 @@ local invincible = art(controls, "Invincible", "rbxassetid://102985018399551", 2
 invincible.Position = UDim2.fromOffset(349, 38)
 local continue = art(controls, "Continue", "rbxassetid://122061064731565", 258, 72, 0, 0, true)
 continue.Position = UDim2.fromOffset(235, 120)
+-- The native UI's look (Config.NativeUi, QM Nov 6): Fight to Steal an Egg's death screen, the
+-- title in red with a thick black outline, and its buttons (green Revive, pink Invincible, red
+-- Continue) in place of the art.
+if Config.NativeUi.On then
+	local HudKit = require(script.Parent.HudKit)
+	title.Image = ""
+	title.Size = UDim2.fromOffset(560, 110)
+	local text = HudKit.label(title, "Text", {
+		Text = "You Crashed!",
+		TextScaled = true,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		Size = UDim2.fromScale(1, 1),
+	})
+	text.Outline.Thickness = math.max(2, math.round(110 * 0.06)) -- (the reference's: 0.06 of its height)
+	local shade = Instance.new("UIGradient")
+	shade.Rotation = 90
+	shade.Color = ColorSequence.new(Color3.fromHex("ff5a5a"), Color3.fromHex("d00000"))
+	shade.Parent = text
+	-- Revive and Invincible: the name, the Robux icon and the live price in a row (the
+	-- reference's Revive); Continue just its name
+	local invinciblePass
+	for _, pass in Config.Passes do
+		if pass.Key == "Invincible" then
+			invinciblePass = pass
+		end
+	end
+	local tier = Config.ContinueTiers and Config.ContinueTiers[1]
+	for _, b in {
+		{ revive, "GreenEdged", "Revive", tier and tier.ProductId, tier and tier.Price, Enum.InfoType.Product },
+		{ invincible, "PinkEdged", "Invincible", invinciblePass and invinciblePass.Id, invinciblePass and invinciblePass.Price, Enum.InfoType.GamePass },
+		{ continue, "Red", "Continue" },
+	} do
+		b[1].Image = ""
+		HudKit.back(b[1], b[2], { Name = "NativeBack" })
+		local row = Instance.new("Frame")
+		row.Name = "Row"
+		row.BackgroundTransparency = 1
+		row.AnchorPoint = Vector2.new(0.5, 0.5)
+		row.Position = UDim2.fromScale(0.5, 0.5)
+		row.Size = UDim2.fromOffset(0, 40)
+		row.AutomaticSize = Enum.AutomaticSize.X
+		row.ZIndex = 2
+		local layout = Instance.new("UIListLayout")
+		layout.FillDirection = Enum.FillDirection.Horizontal
+		layout.VerticalAlignment = Enum.VerticalAlignment.Center
+		layout.Padding = UDim.new(0, 7)
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
+		layout.Parent = row
+		row.Parent = b[1]
+		HudKit.label(row, "Text", {
+			Text = b[3],
+			TextSize = 30,
+			Size = UDim2.fromOffset(0, 40),
+			AutomaticSize = Enum.AutomaticSize.X,
+			LayoutOrder = 1,
+			ZIndex = 3,
+		})
+		if b[4] then
+			local holder = Instance.new("Frame")
+			holder.Name = "Robux"
+			holder.BackgroundTransparency = 1
+			holder.Size = UDim2.fromOffset(27, 29)
+			holder.LayoutOrder = 2
+			holder.ZIndex = 3
+			holder.Parent = row
+			HudKit.outlineArt(HudKit.art(holder, "RobuxIcon", { Size = UDim2.fromScale(1, 1), ZIndex = 4 }), 3)
+			local price = HudKit.label(row, "Price", {
+				Text = tostring(b[5] or ""),
+				TextSize = 30,
+				Size = UDim2.fromOffset(0, 40),
+				AutomaticSize = Enum.AutomaticSize.X,
+				LayoutOrder = 3,
+				ZIndex = 3,
+			})
+			task.spawn(function() -- (what's charged: the product's or pass's own price)
+				local ok, info = pcall(game:GetService("MarketplaceService").GetProductInfo, game:GetService("MarketplaceService"), b[4], b[6])
+				if ok and info and info.PriceInRobux then
+					price.Text = tostring(info.PriceInRobux)
+				end
+			end)
+		end
+	end
+end
 local onRevive, onContinue
 local waiting, canRevive = false, false
 local tweens, hidden = {}, {}

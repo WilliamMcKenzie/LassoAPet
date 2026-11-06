@@ -250,8 +250,43 @@ local function counter(order, art, color)
 	return label
 end
 local cashText = counter(1, ART.cash, CASH_GREEN)
+-- The native HUD (Config.NativeUi, QM Nov 6: World 1 first): Fight to Steal an Egg's Goal
+-- panel, Shop, Index, Pets and cash in place of the art here (hidden), no Merge (QM). Its
+-- Goal panel's claim and hint are the quests' (below: set once they're made).
+local nativeQuest = {}
+local native = if Config.NativeUi.On then require(script.Parent.NativeHud).build({
+	claim = function(i)
+		nativeQuest.claim(i)
+	end,
+	hint = function(quest)
+		nativeQuest.hint(quest)
+	end,
+}) else nil
+if native then
+	menu.Visible = false
+	counters.Visible = false
+	native.buttons.Shop.Activated:Connect(function()
+		Shop.toggle()
+	end)
+	native.buttons.Index.Activated:Connect(function()
+		PetsPanel.close(true)
+		AnimalDex.toggle()
+	end)
+	native.buttons.Pets.Activated:Connect(function()
+		AnimalDex.close(true)
+		PetsPanel.toggle()
+	end)
+	require(script.Parent.NativeIndex).badge(native.buttons.Index)
+	native.buttons.Eggs.Activated:Connect(function()
+		AnimalDex.close(true)
+		require(script.Parent.NativeEggs).toggle()
+	end)
+end
 local function showCounters()
 	cashText.Text = Hud.money(player:GetAttribute("Gold") or 0) -- (no "+$N" pop: QM, Oct 12, tried and dropped)
+	if native then
+		native.cash.Text = (Hud.money(player:GetAttribute("Gold") or 0):gsub("%$", ""))
+	end
 end
 player:GetAttributeChangedSignal("Gold"):Connect(showCounters)
 showCounters()
@@ -410,6 +445,37 @@ RunService.RenderStepped:Connect(function()
 end)
 
 local claimBusy = false -- a claim's egg reveal is up: no other claim till it's over (QM, Oct 11)
+-- Claims quest i (its CLAIM, or the native Goal panel's Claim!): its egg's reveal.
+local function claimAt(i)
+	if claimBusy or Hud.revealing() then
+		return
+	end
+	claimBusy = true
+	-- (its egg stays out of the inventory till its reveal's over: QM, Oct 11)
+	local line = Config.Quests[i // 100]
+	local egg = line and line[i % 100] and line[i % 100].Egg
+	local eggs = if typeof(egg) == "table" then egg else { egg } -- (some give several: World 2's last, QM Oct 13)
+	for _, kind in eggs do
+		Inventory.holdBack(kind, 1)
+	end
+	local ok, kind = pcall(claimQuest.InvokeServer, claimQuest, i)
+	task.spawn(function()
+		for _, each in if ok and kind then eggs else {} do
+			local animal = ReplicatedStorage.Shared.Animals:FindFirstChild(each)
+			if animal then
+				Hud.eggReveal(require(animal).Rarity, each, true) -- (the egg it gave you)
+				task.wait(0.2)
+				while Hud.revealing() do
+					task.wait(0.1)
+				end
+			end
+		end
+		for _, each in eggs do
+			Inventory.holdBack(each, -1)
+		end
+		claimBusy = false
+	end)
+end
 local function questRow(i, quest, y)
 	local done = quest.have >= quest.need
 	local row = Instance.new("Frame")
@@ -494,34 +560,7 @@ local function questRow(i, quest, y)
 			label.Size = UDim2.fromScale(1, 1)
 		end
 		claim.Activated:Connect(function()
-			if claimBusy or Hud.revealing() then
-				return
-			end
-			claimBusy = true
-			-- (its egg stays out of the inventory till its reveal's over: QM, Oct 11)
-			local line = Config.Quests[i // 100]
-			local egg = line and line[i % 100] and line[i % 100].Egg
-			local eggs = if typeof(egg) == "table" then egg else { egg } -- (some give several: World 2's last, QM Oct 13)
-			for _, kind in eggs do
-				Inventory.holdBack(kind, 1)
-			end
-			local ok, kind = pcall(claimQuest.InvokeServer, claimQuest, i)
-			task.spawn(function()
-				for _, each in if ok and kind then eggs else {} do
-					local animal = ReplicatedStorage.Shared.Animals:FindFirstChild(each)
-					if animal then
-						Hud.eggReveal(require(animal).Rarity, each, true) -- (the egg it gave you)
-						task.wait(0.2)
-						while Hud.revealing() do
-							task.wait(0.1)
-						end
-					end
-				end
-				for _, each in eggs do
-					Inventory.holdBack(each, -1)
-				end
-				claimBusy = false
-			end)
+			claimAt(i)
 		end)
 		-- (in a holder that pulses about its middle: QM, Oct 11; the button's own UIScale is its press)
 		local holder = Instance.new("Frame")
@@ -543,7 +582,23 @@ local function questRow(i, quest, y)
 	return row.Size.Y.Offset
 end
 
+nativeQuest.claim, nativeQuest.hint = claimAt, hint
 local questList = {} -- what's up: { { i, text, have, need } } (Hatchery's "Quests")
+-- The native Goal panel's goal: a quest ready to claim, else the first line's (the lowest i).
+local function goalOf(list)
+	local best
+	for _, quest in list do
+		if typeof(quest) == "table" and tonumber(quest.i) and tonumber(quest.have) and tonumber(quest.need) then
+			local ready = quest.have >= quest.need
+			local bestReady = best and best.have >= best.need
+			if not best or (ready and not bestReady) or (ready == bestReady and quest.i < best.i) then
+				best = quest
+			end
+		end
+	end
+	return best
+end
+local goalHand -- (the starter quest's tap hand on the Goal panel's Claim!, below)
 local function starterUp()
 	if Config.World ~= 1 then
 		return false
@@ -620,6 +675,9 @@ local function drawQuests()
 			child:Destroy()
 		end
 	end
+	if native then
+		native.goal.set(goalOf(questList))
+	end
 	local one = not folded and #questList == 1 and QUEST_ART.one ~= ""
 	panelClosed.Visible = folded
 	panelOne.Visible = one
@@ -671,6 +729,7 @@ drawQuests()
 -- A menu's up over the base: Quests (and PassPopups' cards, by the "Modal" attribute) step aside.
 local function modal()
 	return Shop.isOpen() or AnimalDex.isOpen() or PetsPanel.isOpen() or RollMenu.isOpen() or player:GetAttribute("MergeView") == true
+		or (native ~= nil and require(script.Parent.NativeEggs).isOpen())
 end
 
 local wasRiding = false
@@ -679,7 +738,24 @@ RunService.RenderStepped:Connect(function()
 	gui.Enabled = not riding and not player:GetAttribute("Cutscene") and not player:GetAttribute("Tutorial") -- (none in the intro or the tutorial: QM, minimal UI till it's done)
 	local covered = modal()
 	root:SetAttribute("Modal", covered)
-	quests.Visible = not riding and not covered and #questList > 0
+	quests.Visible = not native and not riding and not covered and #questList > 0
+	if native then
+		-- (shown with BaseUi; a menu over the base hides it: popups hide the rest of the HUD)
+		native.gui.Enabled = gui.Enabled and not covered
+		menu.Visible, counters.Visible = false, false
+		if not goalHand then
+			goalHand = TapHand.new(90)
+			goalHand.Name = "ClaimHint"
+			goalHand.Position = UDim2.fromScale(0.62, 0.6)
+			goalHand.Parent = native.goal.claimButton
+		end
+		-- (the starter quest's Claim!, World 1's "Reach Meadow": in the spotlight, as before)
+		local starter = questGuide and starterUp()
+		goalHand:SetAttribute("Spotlight", starter)
+		goalHand:SetAttribute("Focus", if starter then Focus.P.StarterQuest else Focus.P.Hand)
+		goalHand:SetAttribute("FocusGoal", if starter then "starterQuest" else nil)
+		goalHand.Visible = native.goal.claimButton.Parent.Visible and native.goal.panel.Visible
+	end
 	if riding then
 		wasRiding = true
 	elseif wasRiding and not player:GetAttribute("Cutscene") then -- (back from a ride, its reward shown)
@@ -691,7 +767,7 @@ RunService.RenderStepped:Connect(function()
 			drawQuests() -- (the starter quest's Claim gets its spotlight)
 		end
 	end
-	openHand.Visible = folded and questGuide and starterUp()
+	openHand.Visible = not native and folded and questGuide and starterUp()
 	-- (down the left, centred top to bottom: QM, Oct 13, swapped with the pass buttons,
 	-- which have the right, under the Quests panel)
 	local centred = (root.Size.Y.Offset - menu.AbsoluteSize.Y / scale.Scale) / 2

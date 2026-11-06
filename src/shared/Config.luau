@@ -1488,6 +1488,65 @@ Config.WaterSink = { Water = 0.3, DeepWater = 0.5, Rate = 6 }
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
 Config.Places = { 126872244121414, 139418530058790, 117724433633972 } -- [world] = its PlaceId (World 3: QM, Oct 14, a copy of World 2 for now; not for sale yet, so no way in)
 Config.World = table.find(Config.Places, game.PlaceId) or 1
+-- The native UI (QM, Nov 6): Fight to Steal an Egg's studded UI, built in code (client/HudKit,
+-- UiFx, NativeHud, GoalPanel) in place of the PNG art. World 1 only while it's tried out.
+-- Scale: the 1080-tall design scaled to the screen by (height / 1080) ^ Curve, clamped
+-- (softer than 1:1 so phones get bigger buttons); PopupMargin: px a popup keeps off the edges.
+Config.NativeUi = {
+	On = Config.World == 1,
+	Scale = { Curve = 0.6, Min = 0.45, Max = 1.25, PopupMargin = 12 },
+	GoalColor = Color3.fromRGB(255, 157, 0), -- the little "Goal" over the title
+	-- each rarity's colours (Fight to Steal an Egg's): a card's top and bottom (the bottom from
+	-- `at` of the way down), its name's text colour; Common's text fades text to text2; a
+	-- `move` one has a band of text2 sweeping across it (client/RarityLook)
+	Rarities = {
+		Common = { text = Color3.new(1, 1, 1), text2 = Color3.fromRGB(135, 135, 135), stroke = Color3.fromRGB(70, 70, 70) },
+		Uncommon = { bottom = Color3.fromHex("40ff00"), top = Color3.fromHex("c8ff00"), at = 0.736, text = Color3.fromHex("00ff00") },
+		Rare = { bottom = Color3.fromHex("0070ff"), top = Color3.fromHex("00e6ff"), at = 1, text = Color3.fromHex("00b7ff") },
+		Epic = { bottom = Color3.fromHex("9000ff"), top = Color3.fromHex("ff00f0"), at = 1, text = Color3.fromHex("d300ff") },
+		Legendary = { bottom = Color3.fromHex("ff0020"), top = Color3.fromHex("ff8c00"), at = 1, text = Color3.fromHex("ff0004") },
+		Exclusive = { bottom = Color3.fromHex("ff0040"), top = Color3.fromHex("ff00c0"), at = 1, text = Color3.fromHex("ff0050"), text2 = Color3.fromHex("ff00d0"), move = true }, -- (the reference's Mythic)
+	},
+	-- the Shop's ~Game Passes~ cards (client/NativeShop; QM, Nov 6: the reference's), in order,
+	-- by Config.Passes key: its card's look, its picture (HudImages, or Pet: a pet's headshot),
+	-- the badge on the picture and what it does (rich text)
+	PassCards = {
+		{ Key = "DoubleGold", Look = "GoldCard", Icon = "CashStack", Badge = "x2", Text = 'Earn <font color="#7CFF4D">2x Cash!</font>' },
+		{ Key = "Speed", Look = "DamageCard", Pet = "Horse", Badge = "1.5x", Text = 'Ride <font color="#7CFF4D">1.5x</font> faster!' },
+		{ Key = "AutoHatch", Look = "GrowthCard", Icon = "PassGrowth", Text = 'Eggs hatch <font color="#7CFF4D">by themselves!</font>' },
+		{ Key = "Invincible", Look = "LifeCard", Icon = "PassLife", Text = 'Never <font color="#7CFF4D">crash!</font>' },
+		{ Key = "GiantPets", Look = "PowerCard", Pet = "MajesticUnicorn", Badge = "x2", Text = 'Your pets are <font color="#7CFF4D">giant!</font>' },
+	},
+	-- UI sounds (client/UiFx): id, volume, speed, start (seconds in)
+	Sounds = {
+		Click = { id = "rbxassetid://6895079853", volume = 0.5 },
+		Hover = { id = "rbxassetid://6895079853", volume = 0.12, speed = 1.6 },
+		Open = { id = "rbxassetid://2375539277", volume = 0.45 },
+		Close = { id = "rbxassetid://2198217232", volume = 0.3, speed = 1.3 },
+		Buy = { id = "rbxassetid://7112275565", volume = 0.45 },
+		Claim = { id = "rbxassetid://1169755927", volume = 0.5 },
+		Equip = { id = "rbxassetid://133331985238497", volume = 0.5 },
+		Error = { id = "rbxassetid://6895079853", volume = 0.6, speed = 0.55 },
+	},
+}
+-- The Index's reward for an animal you've had (the native UI's, as Fight to Steal an Egg's: QM,
+-- Nov 6; Server/Hatchery's IndexClaim): Seconds of what it earns a second, at least Min.
+Config.IndexReward = { Seconds = 300, Min = 100 }
+function Config.indexReward(kind)
+	local r = Config.IndexReward
+	return math.max(r.Min, math.floor((Config.PetIncome[kind] or 0) * r.Seconds))
+end
+-- (QM, Nov 6: no Merge in the native UI, so its quest is passed over, Off: Server/Quests.
+-- Quests are saved by their place in the line, so it stays in the list.)
+if Config.NativeUi.On then
+	for _, line in Config.Quests do
+		for _, quest in line do
+			if quest.Kind == "merge" then
+				quest.Off = true
+			end
+		end
+	end
+end
 -- Pens in the base (Server/Pens): one per player.
 Config.PenCount = 5
 -- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's

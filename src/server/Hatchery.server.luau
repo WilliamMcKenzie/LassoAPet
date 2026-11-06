@@ -259,6 +259,11 @@ local function publish(player)
 	end
 	table.sort(caught)
 	player:SetAttribute("Caught", HttpService:JSONEncode(caught))
+	local claimed = {}
+	for kind in profile.indexClaimed or {} do
+		table.insert(claimed, kind)
+	end
+	player:SetAttribute("IndexClaimed", HttpService:JSONEncode(claimed)) -- (the Index's rewards claimed: IndexClaim)
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
 	player:SetAttribute("StoredPets", HttpService:JSONEncode(profile.stored or {})) -- (the Pets panel's unequipped ones: Client/PetsPanel)
 	local pen = penOf(player)
@@ -487,6 +492,12 @@ local function load(player)
 						end
 					end
 					profile.caught = {} -- (the Index's: pets you've had, publish)
+					profile.indexClaimed = {} -- (the Index's rewards claimed: IndexClaim)
+					for _, kind in typeof(data.indexClaimed) == "table" and data.indexClaimed or {} do
+						if isAnimal(kind) then
+							profile.indexClaimed[kind] = true
+						end
+					end
 					for _, kind in typeof(data.caught) == "table" and data.caught or {} do
 						if isAnimal(kind) then
 							profile.caught[kind] = true
@@ -620,7 +631,7 @@ local function save(player, onlyIfChanged)
 	local data = { eggs = profile.eggs, items = profile.items, stored = profile.stored, caught = profile.caught and (function() local t = {} for k in profile.caught do table.insert(t, k) end return t end)() or nil, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, rideAuto = profile.rideAuto, tutorial = profile.tutorial, ridden = riddenList(profile),
 		awayGold = profile.awayGold, boughtHalloweenPets = profile.boughtHalloweenPets, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, boughtLoongs = profile.boughtLoongs, boughtRoboSharks = profile.boughtRoboSharks, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
 		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, ridesDone = profile.ridesDone, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
-		merged = profile.merged, ab = profile.ab }
+		merged = profile.merged, ab = profile.ab, indexClaimed = profile.indexClaimed and (function() local t = {} for k in profile.indexClaimed do table.insert(t, k) end return t end)() or nil }
 	data[worldKey("quests")], data[worldKey("v1")] = profile.quests, profile.v1 -- (this world's own)
 	for name, value in profile.keep or {} do -- (the other worlds', as they were)
 		data[name] = value
@@ -997,6 +1008,78 @@ remote("EquipPet", function(player, id)
 	save(player)
 end)
 
+-- Equip Best (the native UI's Pets panel, as Fight to Steal an Egg's: QM, Nov 6): the pen's
+-- pets and the stored ones, the best earners in the pen, as many as fit beside its eggs and
+-- the one you ride; the rest to storage.
+remote("EquipBest", function(player)
+	local profile = profiles[player]
+	local pen = penOf(player)
+	local area = pen and pen:FindFirstChild("Area")
+	if not profile or not area or player:GetAttribute("Tutorial") then
+		return
+	end
+	profile.stored = profile.stored or {}
+	local all, room = {}, penCap(player) - (if profile.ride then 1 else 0)
+	for id, item in profile.items do
+		if item.pet then
+			table.insert(all, { id = id, item = item, home = true })
+		else
+			room -= 1 -- (an egg keeps its place)
+		end
+	end
+	for id, item in profile.stored do
+		table.insert(all, { id = id, item = item })
+	end
+	for _, p in all do
+		p.earns = Fusion.earning(p.item.pet, p.item.merged, p.item.income) or 0
+	end
+	table.sort(all, function(a, b)
+		if a.earns ~= b.earns then
+			return a.earns > b.earns
+		end
+		return a.home == true and b.home ~= true
+	end)
+	for i, p in all do
+		local keep = i <= room
+		if p.home and not keep then
+			profile.items[p.id] = nil
+			p.item.x, p.item.z = nil, nil
+			profile.stored[p.id] = p.item
+		end
+	end
+	for i, p in all do
+		if not p.home and i <= room then
+			profile.stored[p.id] = nil
+			local spot = freeSpot(pen, profile, area)
+			p.item.x, p.item.z = spot.X, spot.Y
+			profile.items[p.id] = p.item
+		end
+	end
+	publish(player)
+	save(player)
+end)
+
+-- The Index's rewards (the native UI's, as Fight to Steal an Egg's: QM, Nov 6): once per
+-- animal you've had (Caught), its cash (Config.indexReward), claimed here. True if claimed.
+local indexClaim = Instance.new("RemoteFunction")
+indexClaim.Name = "IndexClaim"
+indexClaim.OnServerInvoke = function(player, kind)
+	local profile = profiles[player]
+	if not profile or not loaded[player] or typeof(kind) ~= "string" or not (profile.caught and profile.caught[kind]) then
+		return false
+	end
+	profile.indexClaimed = profile.indexClaimed or {}
+	if profile.indexClaimed[kind] then
+		return false
+	end
+	profile.indexClaimed[kind] = true
+	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + Config.indexReward(kind))
+	publish(player)
+	save(player)
+	return true
+end
+indexClaim.Parent = ReplicatedStorage
+
 -- The ride got its animal home: the animal itself, into your pen (givePet), the
 -- tutorial's first ride's too (QM, Oct 13: its new animal cutscene; the tutorial goes on
 -- once there's a new pet in the pen).
@@ -1051,10 +1134,10 @@ remote("HatchEgg", function(player, id)
 		return
 	end
 	local at = pen.Area.CFrame:PointToWorldSpace(Vector3.new(item.x, 0, item.z)) -- (x, z in the pen's frame: its pens are turned)
-	if (root.Position - at).Magnitude > Config.SpeedupEgg.Range + 4 then
-		return
+	if (root.Position - at).Magnitude > Config.SpeedupEgg.Range + 4 and not Config.NativeUi.On then
+		return -- (the native UI's Growing Eggs hatches from anywhere, as Fight to Steal an Egg's: QM, Nov 6)
 	end
-	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
+	item.pet, item.egg, item.hatchAt, item.hatchFor = item.egg, nil, nil, nil
 	if not profile.pastStarter then
 		Funnel.starterReady(player) -- (Analytics V1)
 	end
@@ -1257,13 +1340,13 @@ place = function(player, profile, kind, x, z)
 	local pet = eggPet(kind)
 	local special = Config.SpecialEggs[kind]
 	if special then -- (hatches into its Pet, merged from Merged: a Giant Horse is 10 horses)
-		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = pet, merged = special.Merged, eggScale = special.EggScale, hatchAt = os.time() + math.ceil(special.HatchTime / hatchX(player)) }
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = pet, merged = special.Merged, eggScale = special.EggScale, hatchAt = os.time() + math.ceil(special.HatchTime / hatchX(player)), hatchFor = math.ceil(special.HatchTime / hatchX(player)) }
 	else
 		local seconds = if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else math.ceil(hatchTime(kind) / hatchX(player))
 		if player:GetAttribute("ABRideEgg") == "egg" and (profile.ridesDone or 0) < Config.RideEggAB.FastRides then
 			seconds = math.min(seconds, Config.RideEggAB.FastHatch) -- (the ride egg A/B: the first rides' eggs hatch quickly, QM Oct 19)
 		end
-		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + seconds }
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + seconds, hatchFor = seconds } -- (hatchFor: the Growing Eggs bar's whole, Client/NativeEggs)
 	end
 	publish(player)
 end

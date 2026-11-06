@@ -604,6 +604,9 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	revealGui.ResetOnSpawn = false
 	revealGui.IgnoreGuiInset = true
 	revealGui.DisplayOrder = 5
+	if Config.NativeUi.On then
+		revealGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native cards' layers sit over their parents)
+	end
 	revealGui.Parent = playerGui
 	local revealRoot = root(revealGui)
 	-- Egg reveal card: a frame the size of the card's body, with the card image
@@ -629,6 +632,51 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		face.ZIndex = 3
 		face.ImageTransparency = 1
 		cardFaces[key] = face
+		if Config.NativeUi.On then
+			-- (the native UI, Config.NativeUi, QM Nov 6: Fight to Steal an Egg's card, its
+			-- rarity's colours under the studs, the rarity or the odds written on it, no art)
+			local HudKit = require(script.Parent.HudKit)
+			local rarity = string.match(key, "^card(%u%l+)$")
+			face.Image = ""
+			face.Size, face.Position = UDim2.fromScale(1, 1), UDim2.new()
+			face.Visible = false
+			local back = HudKit.back(face, if rarity then "Card" else "EggCard", { Name = "NativeBack", ZIndex = 3 })
+			HudKit.back(face, "Dark", { Name = "NativeEdge", BackgroundTransparency = 1, ZIndex = 3 })
+			local outline = Instance.new("UIStroke")
+			outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			outline.Thickness = 5
+			outline.Parent = face
+			local text = HudKit.label(face, "NativeText", {
+				Text = "",
+				TextScaled = true,
+				TextXAlignment = Enum.TextXAlignment.Center,
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(0.5, 0.82),
+				Size = UDim2.fromScale(0.86, 0.16),
+				ZIndex = 5,
+			})
+			if rarity then
+				local look = Config.NativeUi.Rarities[rarity] or Config.NativeUi.Rarities.Common
+				local fill = back:FindFirstChild("Fill")
+				if fill and look.top then
+					fill.Color = ColorSequence.new(look.top, look.bottom)
+				end
+				require(script.Parent.RarityLook).paint(text, rarity, text:FindFirstChild("Outline"))
+				text.Text = rarity .. "!"
+			else
+				local odds = { "1/10", "1/100", "1/1,000", "1/10K", "1/100K" }
+				text.Text = odds[(tonumber(string.match(key, "%d+$")) or 0) + 1] or "???"
+				HudKit.label(face, "NativeMark", {
+					Text = "?",
+					TextScaled = true,
+					TextXAlignment = Enum.TextXAlignment.Center,
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					Position = UDim2.fromScale(0.5, CARD_EGG_HEIGHT),
+					Size = UDim2.fromScale(0.6, 0.4),
+					ZIndex = 5,
+				})
+			end
+		end
 	end
 	cardEgg = image(card, "eggPinto", UDim2.new(), UDim2.fromScale(0.5, 0.5))
 	cardEgg.ZIndex = 4
@@ -1153,7 +1201,8 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	warm.Size = UDim2.fromOffset(1, 1)
 	warm.Parent = if LowMemory.on then nil else homeGui
 	local labels = {}
-	for key, entry in IMAGES do
+	-- (QM, Nov 6: not with the native UI on: the PNG art never shows there)
+	for key, entry in (if Config.NativeUi.On then {} else IMAGES) do
 		if entry.id ~= "" then -- not uploaded yet
 			local l = Instance.new("ImageLabel")
 			l.Name = key
@@ -1374,8 +1423,12 @@ end
 local function setCardFace(key)
 	if cardShown then
 		cardFaces[cardShown].ImageTransparency = 1
+		if Config.NativeUi.On then
+			cardFaces[cardShown].Visible = false
+		end
 	end
 	cardFaces[key].ImageTransparency = 0
+	cardFaces[key].Visible = true
 	cardShown = key
 end
 
