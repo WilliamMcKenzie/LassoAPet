@@ -175,7 +175,7 @@ if HudKit then
 	bar.Image, green.Image = "", ""
 	HudKit.back(bar, "GoalTrack", { Name = "NativeTrack", ZIndex = 1 })
 	green.Size = UDim2.fromOffset(BAR.X, BAR.Y)
-	HudKit.back(green, "GoalFill", { Name = "NativeFill", ZIndex = 2 })
+	HudKit.back(green, "TopFill", { Name = "NativeFill", ZIndex = 2 })
 	fill.ZIndex = 2
 	for _, l in { text, label } do
 		l.FontFace = HudKit.FONT
