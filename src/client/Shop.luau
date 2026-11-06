@@ -52,6 +52,9 @@ function Shop.hasOffers()
 end
 
 local gui = Instance.new("ScreenGui")
+if Config.NativeUi.On then
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
+end
 gui.Name, gui.ResetOnSpawn, gui.IgnoreGuiInset = "Shop", false, true
 gui.DisplayOrder, gui.Enabled = 20, false
 local root = Instance.new("Frame")

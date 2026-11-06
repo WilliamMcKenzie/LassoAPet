@@ -4,6 +4,8 @@
 -- the picture, the green Robux price button):
 --   the Starter Pack   while it's on offer (Client/Shop's ten minutes): its three pets, World 2,
 --                      the time left, Buy (the pass: BuyPass)
+--   ~Game Passes~      two to a row (Config.NativeUi.PassCards): its picture and badge on a
+--                      sunburst, its name, what it does, its price ("Owned" once it's yours)
 --   ~Halloween Egg~    its odds (each pet's headshot and chance) and x1, x3, x10, x50
 --   ~Cash Packs~       three cards: a pile of cash, how much, the price
 -- Prices are read live from Roblox (the products' own), so they're always what's charged.
@@ -34,6 +36,7 @@ local fig, art, label, button = HudKit.fig, HudKit.art, HudKit.label, HudKit.but
 -- QM's Figma px (the reference's)
 local WIDTH = 2177 -- the list's width: three cards and two gaps
 local GAP = 22
+local WIDE = (WIDTH - GAP) / 2 -- a Game Pass card, two to a row
 local CARD_H = 635
 local THIRD = (WIDTH - 2 * GAP) / 3
 local EDGE = 47 -- the buttons' inset from the card's sides
@@ -320,9 +323,114 @@ function NativeShop.build(screen, handlers)
 	end)
 	table.insert(shop.cards, starterBuy)
 
+	-- ---- the Game Passes (the reference's: no gift button, Lasso can't gift) ----
+	local passes = {}
+	for _, pass in Config.Passes do
+		passes[pass.Key] = pass
+	end
+	local passCards = {} -- { { key, priceText, buy } }
+	local shown = {}
+	for _, spec in Config.NativeUi.PassCards do
+		local pass = passes[spec.Key]
+		if pass and (pass.Id ~= 0 or RunService:IsStudio()) then -- (no Id yet: Studio only, Server/Passes)
+			table.insert(shown, { spec = spec, pass = pass })
+		end
+	end
+	if #shown > 0 then
+		heading(list, "PassHeading", "~Game Passes~", { "ffd000", "ffe700", "ffae00" }, 2)
+	end
+	local passRow
+	for i, p in shown do
+		local spec, pass = p.spec, p.pass
+		if i % 2 == 1 then
+			passRow = row(list, "PassRow" .. (i + 1) // 2, 2 + (i + 1) // 2)
+		end
+		local c = card(passRow, "Pass" .. spec.Key, spec.Look, WIDE, CARD_H, i)
+		local x, y = 255 - WIDE / 2, 215 -- (the picture's middle: x from the card's)
+		sunburst(c, x, y, 560)
+		art(c, "Picture", {
+			Image = (if spec.Pet then PetFaces.HEADSHOTS[spec.Pet] else HudImages[spec.Icon]) or "",
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.new(0.5, fig(x), 0, fig(y)),
+			Size = UDim2.fromOffset(fig(330), fig(330)),
+			ZIndex = 3,
+		})
+		if spec.Badge then
+			local badge = label(c, "Badge", {
+				Text = spec.Badge,
+				TextXAlignment = Enum.TextXAlignment.Center,
+				TextSize = fig(120),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.new(0.5, fig(x + 120), 0, fig(y + 120)),
+				Size = UDim2.fromOffset(fig(260), fig(140)),
+				Rotation = -10,
+				ZIndex = 4,
+			})
+			gradient(badge, { "ffe700", "ffd000", "ff9d00" })
+		end
+		label(c, "PassName", {
+			Text = pass.Name,
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextSize = fig(100),
+			Position = UDim2.fromOffset(fig(480), fig(40)),
+			Size = UDim2.new(1, -fig(520), 0, fig(120)),
+			ZIndex = 4,
+		})
+		label(c, "Description", {
+			RichText = true,
+			Text = spec.Text,
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextWrapped = true,
+			TextSize = fig(68),
+			Position = UDim2.fromOffset(fig(480), fig(170)),
+			Size = UDim2.new(1, -fig(520), 0, fig(220)),
+			ZIndex = 4,
+		})
+		local b, text = buyButton(c, "Buy", WIDE - 2 * EDGE, {
+			Position = UDim2.fromOffset(fig(EDGE), fig(BUTTONS_Y)),
+			ZIndex = 5,
+		})
+		if pass.Id ~= 0 then
+			price(pass.Id, true, pass.Price, function(r)
+				if not player:GetAttribute("Pass" .. pass.Key) then
+					text.Text = tostring(r)
+				end
+			end)
+		else
+			text.Text = tostring(pass.Price)
+		end
+		b.Activated:Connect(function()
+			if not player:GetAttribute("Pass" .. pass.Key) then
+				handlers.buyPass(pass.Key)
+			end
+		end)
+		table.insert(passCards, { key = pass.Key, text = text, buy = b })
+		table.insert(shop.cards, b)
+	end
+	-- "Owned" in place of the price once it's yours
+	local function owned()
+		for _, p in passCards do
+			local have = player:GetAttribute("Pass" .. p.key) == true
+			p.buy.Price.Robux.Visible = not have
+			if have then
+				p.text.Text = "Owned"
+			elseif p.text.Text == "Owned" then
+				p.text.Text = ""
+				local pass = passes[p.key]
+				price(pass.Id, true, pass.Price, function(r)
+					p.text.Text = tostring(r)
+				end)
+			end
+		end
+	end
+	for _, p in passCards do
+		player:GetAttributeChangedSignal("Pass" .. p.key):Connect(owned)
+	end
+	owned()
+
 	-- ---- the Halloween Egg ----
-	heading(list, "EggHeading", "~Halloween Egg~", { "ff9d00", "ffd000", "ff5e00" }, 2)
-	local egg = card(list, "HalloweenEgg", "DamageCard", WIDTH, CARD_H, 3)
+	heading(list, "EggHeading", "~Halloween Egg~", { "ff9d00", "ffd000", "ff5e00" }, 10)
+	local egg = card(list, "HalloweenEgg", "DamageCard", WIDTH, CARD_H, 11)
 	local odds = {}
 	for kind, chance in Config.Shop.HalloweenOdds or {} do
 		table.insert(odds, { kind = kind, chance = chance })
@@ -391,8 +499,8 @@ function NativeShop.build(screen, handlers)
 	end)
 
 	-- ---- the cash packs ----
-	heading(list, "CashHeading", "~Cash Packs~", { "61ff00", "b9ff00", "57ff00" }, 4)
-	local cashRow = row(list, "CashRow", 5)
+	heading(list, "CashHeading", "~Cash Packs~", { "61ff00", "b9ff00", "57ff00" }, 12)
+	local cashRow = row(list, "CashRow", 13)
 	for i, offer in Config.Shop.CashPacks do
 		local c = card(cashRow, offer.Key, "CashCard", THIRD, CARD_H, i)
 		sunburst(c, 0, PILE_Y, BURST)

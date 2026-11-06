@@ -59,6 +59,9 @@ local function pressable(button)
 end
 
 local gui = Instance.new("ScreenGui")
+if Config.NativeUi.On then
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
+end
 gui.Name = "AwayPanel"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true

@@ -72,6 +72,9 @@ local MONTSERRAT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.Fo
 local camera = workspace.CurrentCamera
 
 local gui = Instance.new("ScreenGui")
+if Config.NativeUi.On then
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
+end
 gui.Name = "World2Bar"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true

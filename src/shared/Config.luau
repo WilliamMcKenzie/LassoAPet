@@ -1437,6 +1437,16 @@ Config.NativeUi = {
 		Legendary = { bottom = Color3.fromHex("ff0020"), top = Color3.fromHex("ff8c00"), at = 1, text = Color3.fromHex("ff0004") },
 		Exclusive = { bottom = Color3.fromHex("ff0040"), top = Color3.fromHex("ff00c0"), at = 1, text = Color3.fromHex("ff0050"), text2 = Color3.fromHex("ff00d0"), move = true }, -- (the reference's Mythic)
 	},
+	-- the Shop's ~Game Passes~ cards (client/NativeShop; QM, Nov 6: the reference's), in order,
+	-- by Config.Passes key: its card's look, its picture (HudImages, or Pet: a pet's headshot),
+	-- the badge on the picture and what it does (rich text)
+	PassCards = {
+		{ Key = "DoubleGold", Look = "GoldCard", Icon = "CashStack", Badge = "x2", Text = 'Earn <font color="#7CFF4D">2x Cash!</font>' },
+		{ Key = "Speed", Look = "DamageCard", Pet = "Horse", Badge = "1.5x", Text = 'Ride <font color="#7CFF4D">1.5x</font> faster!' },
+		{ Key = "AutoHatch", Look = "GrowthCard", Icon = "PassGrowth", Text = 'Eggs hatch <font color="#7CFF4D">by themselves!</font>' },
+		{ Key = "Invincible", Look = "LifeCard", Icon = "PassLife", Text = 'Never <font color="#7CFF4D">crash!</font>' },
+		{ Key = "GiantPets", Look = "PowerCard", Pet = "MajesticUnicorn", Badge = "x2", Text = 'Your pets are <font color="#7CFF4D">giant!</font>' },
+	},
 	-- UI sounds (client/UiFx): id, volume, speed, start (seconds in)
 	Sounds = {
 		Click = { id = "rbxassetid://6895079853", volume = 0.5 },

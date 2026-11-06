@@ -8,6 +8,9 @@ local Gamepad = require(script.Parent.Gamepad)
 local player = Players.LocalPlayer
 local CrashScreen = {}
 local gui = Instance.new("ScreenGui")
+if Config.NativeUi.On then
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
+end
 gui.Name, gui.ResetOnSpawn, gui.IgnoreGuiInset = "CrashScreen", false, true
 gui.DisplayOrder, gui.Enabled = 40, false
 gui.Parent = if Config.ShowHud then player:WaitForChild("PlayerGui") else nil

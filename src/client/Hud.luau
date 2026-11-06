@@ -604,6 +604,9 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	revealGui.ResetOnSpawn = false
 	revealGui.IgnoreGuiInset = true
 	revealGui.DisplayOrder = 5
+	if Config.NativeUi.On then
+		revealGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native cards' layers sit over their parents)
+	end
 	revealGui.Parent = playerGui
 	local revealRoot = root(revealGui)
 	-- Egg reveal card: a frame the size of the card's body, with the card image

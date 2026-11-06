@@ -85,6 +85,9 @@ local function rounded(object, radius)
 end
 
 local gui = Instance.new("ScreenGui")
+if Config.NativeUi.On then
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
+end
 gui.Name = "WorldsMenu"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
