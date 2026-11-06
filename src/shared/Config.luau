@@ -1420,6 +1420,12 @@ Config.HalloweenPlace = 139057235302936
 Config.World = table.find(Config.Places, game.PlaceId) or (if game.PlaceId == Config.HalloweenPlace then 4 else 1)
 -- Pens in the base (Server/Pens): one per player.
 Config.PenCount = if Config.World == 4 then 10 else 5
+-- World 1's Meadow as open country (QM, Nov 6): the distance fades into a pale blue haze
+-- (Client/Ocean's Lighting fog), so the cliffs and mesas past the course (tools/
+-- world1_meadow_cliffs.luau) melt into it instead of ending at blank sky. In studs from the camera.
+if Config.World == 1 then
+	Config.Biomes[1].Haze = { Color = Color3.fromRGB(200, 226, 244), Tint = Color3.new(1, 1, 1), FogStart = 220, FogEnd = 1100, FadeTime = 1.5, Bubbles = 0, NoDepths = true }
+end
 -- (World 1 ended at a giant portal to World 2 for a while: QM, Oct 13 took it out. Both
 -- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
 Config.EndPortal = nil
