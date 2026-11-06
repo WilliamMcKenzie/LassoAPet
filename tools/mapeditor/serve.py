@@ -96,7 +96,9 @@ def merge(base, mine, theirs):
     out = dict(t)
     for k in m:
         if k == "rows":
-            out["rows"] = ["".join(cm if cm != cb else ct for cm, cb, ct in zip(rm, rb, rt))
+            # (cell by cell only where both sides changed a row: QM, Nov 6, saves in a second)
+            out["rows"] = [rt if rm == rb else rm if rt == rb else
+                           "".join(cm if cm != cb else ct for cm, cb, ct in zip(rm, rb, rt))
                            for rm, rb, rt in zip(m["rows"], b["rows"], t["rows"])]
         elif k == "saved" or m[k] != b.get(k):
             out[k] = m[k]

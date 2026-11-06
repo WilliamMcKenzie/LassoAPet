@@ -13,7 +13,7 @@ import os
 import shutil
 import sys
 
-import numpy as np
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..")
@@ -22,13 +22,24 @@ WORLD = os.path.join(ROOT, "maps", "world.map")
 
 def mesh_centres():
     """Each world mesh piece's bounding-box centre (studs, from its origin), so the
-    builder can place them however Roblox centres an imported mesh."""
-    out = {}
+    builder can place them however Roblox centres an imported mesh. (Kept in a cache
+    beside the meshes' sizes and times: a map save shouldn't read 99 meshes, QM Nov 6.)"""
     d = os.path.join(ROOT, "assets", "meshes")
-    for f in sorted(os.listdir(d)):
-        if f.endswith(".obj"):
-            v = np.array([list(map(float, l.split()[1:4])) for l in open(os.path.join(d, f)) if l.startswith("v ")])
-            out[f[:-4]] = (v.min(0) + v.max(0)) / 2
+    names = sorted(f for f in os.listdir(d) if f.endswith(".obj"))
+    stamp = [[f, os.path.getsize(os.path.join(d, f)), os.path.getmtime(os.path.join(d, f))] for f in names]
+    cache = os.path.join(tempfile.gettempdir(), "map_bake_mesh_centres.json")
+    try:
+        c = json.load(open(cache))
+        if c["stamp"] == stamp:
+            return c["centres"]
+    except (OSError, ValueError, KeyError):
+        pass
+    import numpy as np
+    out = {}
+    for f in names:
+        v = np.array([list(map(float, l.split()[1:4])) for l in open(os.path.join(d, f)) if l.startswith("v ")])
+        out[f[:-4]] = [float(x) for x in (v.min(0) + v.max(0)) / 2]
+    json.dump({"stamp": stamp, "centres": out}, open(cache, "w"))
     return out
 
 
