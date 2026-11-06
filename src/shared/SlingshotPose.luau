@@ -1,10 +1,10 @@
--- The giant slingshot's launch (design/slingshot, tools/slingshot_meshes.py): no pouch,
+-- The giant slingshot's launch (shared: Server/Slingshot rests it, Client/SlingshotLaunch plays it) (design/slingshot, tools/slingshot_meshes.py): no pouch,
 -- the player and their pet stand against the band, which rests pulled back to the
 -- ground, draws back a touch more, snaps forward past the fork, wobbles and winds back
 -- down. Same timings as the preview GIF.
 --
---   Slingshot.pose(model)                        -- the resting pose (once, after placing it)
---   Slingshot.launch(model, onStep, onRelease)   -- plays the shot; returns when wound back
+--   SlingshotPose.place(model, base, t)               -- the bands at time t of the shot (0: resting)
+--   SlingshotPose.launch(model, onStep, onRelease)   -- plays the shot; returns when wound back
 --     onStep(pullCFrame)                         -- each frame until the release: hold the
 --                                                   rider here (it faces -Z, the band behind)
 --     onRelease(pullCFrame, direction)           -- as the band passes the fork: fling the
@@ -30,6 +30,8 @@ local DURATION = 0.6 + 0.2 + FIRE + 0.9 + 1.4
 local RELEASE = 0.6 + 0.2 + FIRE * 0.8
 
 local Slingshot = {}
+Slingshot.RELEASE = RELEASE
+Slingshot.DURATION = DURATION
 
 local function smooth(u)
 	u = math.clamp(u, 0, 1)
@@ -81,9 +83,8 @@ local function place(model, base, t)
 	return cf
 end
 
-function Slingshot.pose(model)
-	return place(model, model:GetPivot(), 0)
-end
+Slingshot.place = place -- (model, base CFrame, t): returns the pull's CFrame
+Slingshot.pullLocal = pullLocal
 
 function Slingshot.launch(model, onStep, onRelease)
 	local base = model:GetPivot()

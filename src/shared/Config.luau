@@ -1493,6 +1493,22 @@ Config.EndPortal = nil
 -- World 2 bar). World 1 is everyone's.
 -- World 2 targets the late Volcano / first Jurassic rides on the normal income curve.
 Config.WorldPrices = { 0, 1000000, 10000000 }
+-- The Slingshot (QM, Nov 6): the top bar's first goal (World2Bar.client), bought once for
+-- Price gold (Gold.server's BuySlingshot, saved as "OwnsSlingshot"). Yours stands in front of
+-- your pen (Server/Slingshot), its back to the pen's opening; hold E at it and it flings you,
+-- on your best pet, to the start of biome To (Client/SlingshotLaunch). The meshes are
+-- design/slingshot's (tools/slingshot_meshes.py), uploaded: Meshes[i] = { asset id, R, G, B }
+-- for pieces/Slingshot_i (the frame), Band the SlingshotBand mesh (stretched, three of them).
+Config.Slingshot = {
+	Price = 1000000, -- (World 2's, the goal it replaces)
+	To = 2, -- the Desert
+	Ahead = 22, -- studs out from your pen's Spawn to the slingshot's middle
+	Flight = 4.5, -- seconds in the air
+	Apex = 260, -- studs over the straight line at the flight's middle
+	Meshes = {}, -- (filled by tools/slingshot_upload.py)
+	Band = nil,
+	BandColor = Color3.fromRGB(226, 58, 52),
+}
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:
 -- free in Studio, not on sale live.

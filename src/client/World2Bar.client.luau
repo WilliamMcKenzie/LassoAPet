@@ -12,6 +12,8 @@
 -- world you're in (World 2, then World 3: Config.WorldPrices), and once they're all yours to the
 -- next trail (Config.TrailBars: Grey ... Rainbow; Gold.server's BuyTrail). The label's on QM's
 -- art with its "WORLD 2" painted out (BarFill.png, BarEmpty.png).
+-- First of all it's the Slingshot (QM, Nov 6: Config.Slingshot; Gold.server's BuySlingshot), then
+-- the worlds and trails as above.
 -- In your pen with eggs still hatching it's QM's Hatch All button instead (Nov 2; Config.HatchAll,
 -- Shop.server's "HatchAll"): every egg there hatched for R$99.
 -- In the Halloween world (Config.Gems, QM Oct 15) it's the "+5s TIME" bar instead: QM's art
@@ -54,6 +56,9 @@ local function goal()
 	if REBIRTH then
 		local p = Config.Rebirth.Prices[(player:GetAttribute("Rebirths") or 0) + 1]
 		return p and { price = p, label = "" }
+	end
+	if not player:GetAttribute("OwnsSlingshot") then -- (first: the Slingshot, Config.Slingshot, QM Nov 6)
+		return { price = Config.Slingshot.Price, label = "SLINGSHOT", slingshot = true }
 	end
 	for world = 2, #Config.Places do
 		if not player:GetAttribute("OwnsWorld" .. world) and Config.WorldPrices[world] and not Config.WorldProducts[world] then -- (Robux worlds: the Worlds menu's)
@@ -215,7 +220,7 @@ local function showGold()
 	text.Text = (if GEMS then "" else "$") .. Config.short(gold) .. "/" .. Config.short(p)
 	local g = goal()
 	local art = g and (if g.world then WORLD_ART[g.world] elseif g.trail then TRAIL_ART else nil)
-	label.Text = if g and g.trail then g.label else ""
+	label.Text = if g and (g.trail or g.slingshot) then g.label else ""
 	green.Image = if art then art[1] else FULL
 	bar.Image = if art then art[2] else EMPTY
 	if HudKit then -- (no art: what it's for written on)
@@ -224,7 +229,7 @@ local function showGold()
 	end
 	hand.Visible = full()
 end
-for _, name in { "Gold", "Gems", "BossTime", "Rebirths", "OwnsWorld2", "OwnsWorld3", "TrailsOwned", "FinishTrail", "RainbowTrail" } do
+for _, name in { "Gold", "Gems", "BossTime", "Rebirths", "OwnsSlingshot", "OwnsWorld2", "OwnsWorld3", "TrailsOwned", "FinishTrail", "RainbowTrail" } do
 	player:GetAttributeChangedSignal(name):Connect(showGold)
 end
 showGold()
@@ -234,12 +239,14 @@ bar.Activated:Connect(function()
 	if not g then
 		return
 	elseif not full() then
-		if g.world or g.trail then
+		if g.world or g.trail or g.slingshot then
 			require(script.Parent.Shop).buyGoldFor(g.price - (player:GetAttribute("Gold") or 0))
 		end
 		return
 	elseif g.gems then
 		pcall(ReplicatedStorage.BuyBossTime.InvokeServer, ReplicatedStorage.BuyBossTime)
+	elseif g.slingshot then
+		pcall(ReplicatedStorage.BuySlingshot.InvokeServer, ReplicatedStorage.BuySlingshot)
 	elseif g.world then
 		WorldUnlock.buy(g.world)
 	elseif g.trail then

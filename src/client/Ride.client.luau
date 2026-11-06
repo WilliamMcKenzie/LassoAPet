@@ -902,12 +902,9 @@ startRide = function(model, at)
 	Lasso.start(player.Character, nil, player:GetAttribute("PenLevel") or 1) -- (your pen level's lasso: LassoTiers)
 end
 
--- Walking over the start line on foot (WalkLimit.client): you're on your fastest pet
--- there and then (QM, Oct 12), else (none yet) a random Meadow animal (QM, Oct 6).
-require(script.Parent.StartLine).ride = function(x, z)
-	if phase ~= "idle" then
-		return false
-	end
+-- Your fastest pet at home (the one the start line and the Slingshot ride). (A field: this
+-- chunk is at the local limit.)
+function vfx.fastestPet()
 	local best, fastest = nil, -1
 	for _, model in homePets() do
 		local info = if starter and model == starter.animal.model then starter else PenPets.pets[model]
@@ -916,6 +913,27 @@ require(script.Parent.StartLine).ride = function(x, z)
 			best, fastest = model, speed
 		end
 	end
+	return best
+end
+
+-- The Slingshot (Client/SlingshotLaunch, QM Nov 6): you land at (x, z) on your fastest pet.
+require(script.Parent.SlingshotRide).bestPet = vfx.fastestPet
+require(script.Parent.SlingshotRide).ride = function(x, z)
+	local best = vfx.fastestPet()
+	if phase ~= "idle" or not best then
+		return false
+	end
+	startRide(best, Vector3.new(x, 0, z))
+	return phase == "outbound"
+end
+
+-- Walking over the start line on foot (WalkLimit.client): you're on your fastest pet
+-- there and then (QM, Oct 12), else (none yet) a random Meadow animal (QM, Oct 6).
+require(script.Parent.StartLine).ride = function(x, z)
+	if phase ~= "idle" then
+		return false
+	end
+	local best = vfx.fastestPet()
 	if best then
 		startRide(best, Vector3.new(x, 0, z))
 		return phase == "outbound"

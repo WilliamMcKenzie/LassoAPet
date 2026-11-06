@@ -83,6 +83,7 @@ local function load(player)
 				player:SetAttribute("FinishTrail", if typeof(value) == "table" then tonumber(value.trail) else nil) -- (the finish line's trails: Config.FinishTrails, shared by every world)
 				player:SetAttribute("Rebirths", if typeof(value) == "table" then tonumber(value.rebirths) else nil) -- (Config.Rebirth, shared by every world)
 				player:SetAttribute("TrailsOwned", if typeof(value) == "table" then tonumber(value.trails) else nil) -- (Config.TrailBars, shared by every world)
+				player:SetAttribute("OwnsSlingshot", if typeof(value) == "table" and value.slingshot == true then true else nil) -- (Config.Slingshot)
 				if GEMS and typeof(value) == "table" then
 					player:SetAttribute("Gems", (player:GetAttribute("Gems") or 0) + (tonumber(value.gems4) or 0))
 					player:SetAttribute("BossTime", tonumber(value.bossTime4) or 0)
@@ -123,8 +124,9 @@ local function save(player, onlyIfChanged)
 	local trail = player:GetAttribute("FinishTrail")
 	local rebirths = player:GetAttribute("Rebirths")
 	local trails = player:GetAttribute("TrailsOwned")
+	local slingshot = player:GetAttribute("OwnsSlingshot") == true
 	local gems, bossTime = player:GetAttribute("Gems"), player:GetAttribute("BossTime")
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths) .. "/" .. tostring(trails) .. "/" .. tostring(gems) .. "/" .. tostring(bossTime)
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths) .. "/" .. tostring(trails) .. "/" .. tostring(slingshot) .. "/" .. tostring(gems) .. "/" .. tostring(bossTime)
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
@@ -135,6 +137,7 @@ local function save(player, onlyIfChanged)
 		record.trail = trail
 		record.rebirths = rebirths
 		record.trails = trails
+		record.slingshot = slingshot or nil
 		if GEMS then
 			record.gems4, record.bossTime4 = gems, bossTime
 		end
@@ -281,6 +284,21 @@ buyTrail.OnServerInvoke = function(player)
 	return true
 end
 buyTrail.Parent = ReplicatedStorage
+
+-- BuySlingshot (Config.Slingshot, QM Nov 6): the top bar's first goal, once, for its gold.
+local buySlingshot = Instance.new("RemoteFunction")
+buySlingshot.Name = "BuySlingshot"
+buySlingshot.OnServerInvoke = function(player)
+	local gold = player:GetAttribute("Gold") or 0
+	if not loaded[player] or player:GetAttribute("OwnsSlingshot") or gold < Config.Slingshot.Price then
+		return false
+	end
+	player:SetAttribute("Gold", gold - Config.Slingshot.Price)
+	player:SetAttribute("OwnsSlingshot", true)
+	save(player)
+	return true
+end
+buySlingshot.Parent = ReplicatedStorage
 
 -- BuyBossTime (Config.Gems, the Halloween world; QM Oct 15): the "+5s TIME" bar, the next
 -- BossStep seconds on the boss timer for its gems.
