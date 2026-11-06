@@ -35,8 +35,9 @@ def reframe(d, origin, size):
 
 
 if __name__ == "__main__":
-    sys.path.insert(0, __import__("os").path.dirname(__file__))
-    from map_gen import dump_map
+    here = __import__("os").path.dirname(__import__("os").path.abspath(__file__))
+    sys.path.insert(0, __import__("os").path.join(here, "mapeditor"))
+    from serve import dump as dump_map
     path, w, e, n, s = sys.argv[1], *map(int, sys.argv[2:6])
     d = grow(json.loads(open(path).read()), w, e, n, s)
     open(path, "w").write(dump_map(d))
