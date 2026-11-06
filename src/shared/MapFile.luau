@@ -1,3 +1,5 @@
+--!native
+--!optimize 2
 -- The .map file (QM, Oct 24): the map editor's format (tools/mapeditor), decoded into the
 -- layout Server/Map builds. Shared/MapData is maps/world.map baked in (tools/map_bake.py);
 -- the Map Baker plugin (tools/studio/MapBaker.lua) decodes a file straight from disk.
@@ -82,6 +84,14 @@ end
 function MapFile.decode(text)
 	local file = HttpService:JSONDecode(text)
 	assert(file.format == "StealAndFightPets.map", "not a .map file")
+	if file.rowIndex then
+		-- (tools/map_bake.py sends each different row once: rowSet, and which one each row is)
+		local rowsOut = table.create(#file.rowIndex)
+		for r, i in file.rowIndex do
+			rowsOut[r] = file.rowSet[i]
+		end
+		file.rows = rowsOut
+	end
 	local cell, cols, rows = file.cell, file.size[1], file.size[2]
 	local x0, z0 = file.origin[1], file.origin[2]
 	local fixed = file.fixed
@@ -131,36 +141,36 @@ function MapFile.decode(text)
 		data.Grid.Tiles[t.id] = t
 	end
 
-	-- the floor: each area's cells merged into parts
-	local kinds = {}
-	for _, area in data.Areas do
-		local k = {}
-		for r = 1, rows do
-			k[r] = table.create(cols, 0)
-		end
-		kinds[area] = k
+	-- the floor: same-tile cells merged into parts, each in its tile's area. One grid of
+	-- tile numbers (rows that repeat share one table: most of the map repeats), merged once.
+	local byByte, ofNumber = {}, {}
+	for n, t in file.tiles do
+		byByte[string.byte(t.id)] = n
+		ofNumber[n] = tileOf[t.id]
 	end
+	local kind, made = table.create(rows), {}
 	for r = 1, rows do
 		local row = file.rows[r]
-		for c = 1, cols do
-			local ch = string.sub(row, c, c)
-			local t = tileOf[ch]
-			if t then
-				kinds[t[1]][r][c] = t[2]
+		local k = made[row]
+		if not k then
+			k = table.create(cols, 0)
+			for c = 1, cols do
+				k[c] = byByte[string.byte(row, c)] or 0
 			end
+			made[row] = k
 		end
+		kind[r] = k
 	end
-	for _, area in data.Areas do
-		for _, p in rects(kinds[area], cols, rows) do
-			-- { tile, x0, z0 (south edge), size x, size z }, as Server/Map wants
-			table.insert(area.Floor, {
-				p[1],
-				x0 + (p[2] - 1) * cell,
-				z0 + (p[5] - 1) * cell,
-				(p[4] - p[2]) * cell,
-				(p[5] - p[3]) * cell,
-			})
-		end
+	for _, p in rects(kind, cols, rows) do
+		local t = ofNumber[p[1]]
+		-- { tile, x0, z0 (south edge), size x, size z }, as Server/Map wants
+		table.insert(t[1].Floor, {
+			t[2],
+			x0 + (p[2] - 1) * cell,
+			z0 + (p[5] - 1) * cell,
+			(p[4] - p[2]) * cell,
+			(p[5] - p[3]) * cell,
+		})
 	end
 
 	-- the objects

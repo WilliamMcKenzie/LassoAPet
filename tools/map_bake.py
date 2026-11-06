@@ -45,6 +45,13 @@ def bake(path=WORLD):
     if os.path.abspath(path) != os.path.abspath(WORLD):
         os.makedirs(os.path.dirname(WORLD), exist_ok=True)
         shutil.copy(path, WORLD)
+    # (each different row once, and which one each row is: most rows repeat, and a save
+    # goes to Studio faster the smaller this is. Shared/MapFile puts the rows back.)
+    seen = {}
+    data["rowIndex"] = [seen.setdefault(r, len(seen) + 1) for r in data["rows"]]
+    data["rowSet"] = list(seen)
+    del data["rows"]
+    text = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
     level = 1
     while "]" + "=" * level + "]" in text:
         level += 1
