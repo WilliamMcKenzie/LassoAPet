@@ -163,6 +163,27 @@ local KINDS = {
 	Beholder = { data = require(script.Parent.BeholderEggModel), center = 1.6 },
 	Leviathan = { data = require(script.Parent.LeviathanEggModel), center = 1.6 },
 	Sludge = { data = require(script.Parent.SludgeEggModel), center = 1.6 },
+	DungeonRat = { data = require(script.Parent.DungeonRatEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
+	Slime = { data = require(script.Parent.SlimeEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
+	CaveSpider = { data = require(script.Parent.CaveSpiderEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
+	BoneSteed = { data = require(script.Parent.BoneSteedEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
+	Mimic = { data = require(script.Parent.MimicEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
+	BoneWyrm = { data = require(script.Parent.BoneWyrmEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
+	Shroom = { data = require(script.Parent.ShroomEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
+	SpiritFox = { data = require(script.Parent.SpiritFoxEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
+	SpiritDeer = { data = require(script.Parent.SpiritDeerEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
+	MysticOwl = { data = require(script.Parent.MysticOwlEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
+	CrystalTortoise = { data = require(script.Parent.CrystalTortoiseEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
+	SpiritLoong = { data = require(script.Parent.SpiritLoongEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
+	WarBoar = { data = require(script.Parent.WarBoarEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
+	RoyalSteed = { data = require(script.Parent.RoyalSteedEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
+	ChessKnight = { data = require(script.Parent.ChessKnightEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
+	RoyalPeacock = { data = require(script.Parent.RoyalPeacockEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
+	LivingArmor = { data = require(script.Parent.LivingArmorEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
+	CrimsonDrake = { data = require(script.Parent.CrimsonDrakeEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
+	RoyalEagle = { data = require(script.Parent.RoyalEagleEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
+	Seahorse = { data = require(script.Parent.SeahorseEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Ocean, QM Nov 6: tools/later_eggs.py there)
+	AbyssWhale = { data = require(script.Parent.AbyssWhaleEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Ocean, QM Nov 6: tools/later_eggs.py there)
 }
 -- The Halloween world's giga rares: their bases' eggs in their colours (Shared/HalloweenSkins).
 local HalloweenSkins = require(script.Parent.Parent.HalloweenSkins)

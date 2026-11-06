@@ -185,6 +185,13 @@ local NAMES = {
 	RoboShark = { "Robo", "shark" }, FishSchool = { "Fish", "school" }, Loong = { "L", "oong", "Loo" },
 	WarElephant = { "War", "elephant" }, SoulHorse = { "Soul", "horse" }, Sludge = { "Slu", "udge" },
 	Leviathan = { "Levi", "athan" },
+	-- Fight to Steal an Egg's Dungeon, Forest, Castle and Ocean pets (QM, Nov 6)
+	DungeonRat = { "Dun", "rat" }, Slime = { "Sl", "ime", "Sli" }, CaveSpider = { "Cave", "spider" }, BoneSteed = { "Bone", "steed" },
+	Mimic = { "Mi", "mic" }, BoneWyrm = { "Bone", "wyrm" }, Shroom = { "Sh", "room", "Shroo" }, SpiritFox = { "Spirit", "fox" },
+	SpiritDeer = { "Spirit", "deer" }, MysticOwl = { "Mystic", "owl" }, CrystalTortoise = { "Crys", "toise" }, SpiritLoong = { "Spirit", "loong" },
+	WarBoar = { "War", "boar" }, RoyalSteed = { "Roy", "steed" }, ChessKnight = { "Chess", "knight" }, RoyalPeacock = { "Pea", "cock" },
+	LivingArmor = { "Living", "armor" }, CrimsonDrake = { "Crim", "drake" }, RoyalEagle = { "Roy", "eagle" }, Seahorse = { "Sea", "horse" },
+	AbyssWhale = { "Abyss", "whale" },
 }
 local VOWELS = { a = true, e = true, i = true, o = true, u = true }
 

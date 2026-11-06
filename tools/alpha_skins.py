@@ -32,6 +32,10 @@ SKINS = {
     "AlphaSnake": ("Animals/SnakeModel", {  # green accents instead of blue, glowing
         "48, 196, 214": (90, 240, 90),
     }, [(("Spike", "crest", "brow", "Swept", "Horn"), (90, 240, 90))]),
+    "AlphaSandworm": ("Animals/SandwormModel", {  # faded, paler sand (QM, Nov 6)
+        "228, 178, 104": (214, 192, 150), "248, 224, 172": (238, 228, 206), "156, 98, 56": (170, 142, 108),
+        "54, 40, 50": (96, 82, 74),
+    }, []),
     "AlphaBoar": ("Bosses/ElderBoarModel", {}, [(("PupilL", "PupilR"), (255, 255, 255))]),  # the boss boar, glowing white eyes
     "AlphaIcebringer": ("Animals/IcebringerModel", {  # ice armour and tusks, glowing blue eyes
         "157, 157, 157": (190, 236, 252), "103, 103, 103": (130, 200, 236), "243, 243, 243": (214, 246, 255),
