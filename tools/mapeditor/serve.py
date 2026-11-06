@@ -120,10 +120,14 @@ def to_studio():
     load = os.path.join(tempfile.gettempdir(), "mapeditor_load.luau")
     ok, out = run(os.path.join(STUDIO, "mkload.py"), load, *MAP_FILES)
     if ok:
+        # (the sync and the rebuild in one call to Studio: QM, Nov 6, a save in about a second)
+        sync = open(load).read()
+        rebuild = open(os.path.join(STUDIO, "rebuild.luau")).read()
+        open(load, "w").write("local loaded = (function()\n" + sync + "\nend)()\n"
+                              + "return loaded .. \"\\n\" .. (function()\n" + rebuild + "\nend)()\n")
         ok, out = run(os.path.join(STUDIO, "lu.py"), load, "Edit")
     if not ok or "loaded" not in out:
         return "Saved, but Studio didn't take it (is it open?). Sync and press Map > Rebuild there."
-    ok, out = run(os.path.join(STUDIO, "lu.py"), os.path.join(STUDIO, "rebuild.luau"), "Edit")
     last = out.splitlines()[-1] if out else ""
     if ok and last.startswith("baked"):
         return "Saved and rebuilt in Studio. Save the place there to keep it."
