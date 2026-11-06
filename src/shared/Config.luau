@@ -1459,6 +1459,13 @@ Config.NativeUi = {
 		Error = { id = "rbxassetid://6895079853", volume = 0.6, speed = 0.55 },
 	},
 }
+-- The Index's reward for an animal you've had (the native UI's, as Fight to Steal an Egg's: QM,
+-- Nov 6; Server/Hatchery's IndexClaim): Seconds of what it earns a second, at least Min.
+Config.IndexReward = { Seconds = 300, Min = 100 }
+function Config.indexReward(kind)
+	local r = Config.IndexReward
+	return math.max(r.Min, math.floor((Config.PetIncome[kind] or 0) * r.Seconds))
+end
 -- (QM, Nov 6: no Merge in the native UI, so its quest is passed over, Off: Server/Quests.
 -- Quests are saved by their place in the line, so it stays in the list.)
 if Config.NativeUi.On then

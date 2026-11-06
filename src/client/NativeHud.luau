@@ -2,14 +2,14 @@
 -- for the UI make it natively", World 1 first: Config.NativeUi). Its client/Hud's layout:
 --   the Goal panel, top left (client/GoalPanel: your quests, one at a time);
 --   the green Shop and blue Index buttons, left middle;
---   the orange Pets button (a square, the paw), right middle;
+--   the orange Pets button (a square, the paw), right middle, and the red Eggs one under it;
 --   your cash, bottom left: the cash icon on a black band fading out, the number in green
 --   italics.
 -- BaseUi builds it in place of its own art and wires it up (clicks, cash, quests); shown
 -- whenever BaseUi is. Laid out in design px (1080 tall) and scaled to the screen by the
 -- Root's UIScale (Config.NativeUi.Scale). QM's Figma is 2190 tall: its numbers go through fig.
 --
---   local hud = NativeHud.build() -> { gui, root, buttons = { Shop, Index, Pets }, cash, goal }
+--   local hud = NativeHud.build() -> { gui, root, buttons = { Shop, Index, Pets, Eggs }, cash, goal }
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -158,6 +158,19 @@ function NativeHud.build(handlers)
 		ZIndex = 2,
 	})
 	buttons.Pets = pets
+
+	-- Eggs, under Pets (QM, Nov 6): the red square, the egg (96) in it (client/NativeEggs)
+	local eggs = button(root, "EggsButton", 128, 128, {
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -fig(30), 0.5, fig(163)),
+	}, "Red")
+	art(eggs, "EggsIcon", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromOffset(fig(96), fig(96)),
+		ZIndex = 2,
+	})
+	buttons.Eggs = eggs
 
 	-- cash, bottom left: a 160 icon on a black band fading out to the right, the number in
 	-- green italics

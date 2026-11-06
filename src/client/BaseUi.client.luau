@@ -276,6 +276,11 @@ if native then
 		AnimalDex.close(true)
 		PetsPanel.toggle()
 	end)
+	require(script.Parent.NativeIndex).badge(native.buttons.Index)
+	native.buttons.Eggs.Activated:Connect(function()
+		AnimalDex.close(true)
+		require(script.Parent.NativeEggs).toggle()
+	end)
 end
 local function showCounters()
 	cashText.Text = Hud.money(player:GetAttribute("Gold") or 0) -- (no "+$N" pop: QM, Oct 12, tried and dropped)
@@ -733,6 +738,7 @@ drawQuests()
 -- A menu's up over the base: Quests (and PassPopups' cards, by the "Modal" attribute) step aside.
 local function modal()
 	return Shop.isOpen() or AnimalDex.isOpen() or PetsPanel.isOpen() or RollMenu.isOpen() or player:GetAttribute("MergeView") == true
+		or (native ~= nil and require(script.Parent.NativeEggs).isOpen())
 end
 
 local wasRiding = false

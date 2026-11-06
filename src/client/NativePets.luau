@@ -2,8 +2,10 @@
 -- Pets (its client/PetsPanel, 1:1 in look), sliding in on the right (client/SidePanel). A gold
 -- header with "5 Active", and a row per pet you have: its headshot (PetFaces), its name, its
 -- cash a second, and Riding (yellow: the one at your pen's gap, that a ride sets off on),
--- Unequip (red: the pen's other pets, out to storage) or Equip (green: a stored one, back in).
--- Equip and Unequip are Hatchery's EquipPet / UnequipPet. Client/PetsPanel hands its toggle,
+-- Unequip (red: the pen's other pets, out to storage), Equip (green: a stored one, back in)
+-- or Full (grey: no room in the pen). The header counts what's in the pen against its room
+-- ("4/10 Active"); the green Equip Best under it fills the pen with your best earners.
+-- Equip, Unequip and Equip Best are Hatchery's EquipPet / UnequipPet / EquipBest. Client/PetsPanel hands its toggle,
 -- close and isOpen to this while the native UI's on.
 --
 --   NativePets.toggle() / NativePets.close() / NativePets.isOpen()
@@ -33,6 +35,8 @@ local OUTLINES = { -- text outlines (QM's Figma)
 	Unequip = hex("7a0000"),
 	Equip = hex("006b10"),
 	Riding = hex("8a5a00"),
+	Full = hex("3a3a3a"),
+	Best = hex("0a5a00"),
 }
 local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Exclusive" }
 
@@ -135,6 +139,7 @@ local function rowTemplate()
 		{ "PetUnequip", "RedPlain", "Unequip" },
 		{ "PetEquip", "GreenPlain", "Equip" },
 		{ "PetRiding", "YellowPlain", "Riding" },
+		{ "PetFull", "GreyPlain", "Full" },
 	} do
 		local btn = button(row, b[1], 272, 112, { Position = UDim2.fromOffset(fig(567), fig(47)), ZIndex = 3 }, b[2])
 		local text = label(btn, "Text", {
@@ -166,7 +171,10 @@ local function refresh()
 			active += 1
 		end
 	end
-	panel.title.Text = active .. " Active"
+	local pen = myPen()
+	local count, cap = pen and pen:GetAttribute("PetCount"), pen and pen:GetAttribute("PetCap")
+	local full = count ~= nil and cap ~= nil and count >= cap
+	panel.title.Text = if cap then (count or active) .. "/" .. cap .. " Active" else active .. " Active"
 	for i, pet in list do
 		local row = Ui.copy(template, "Row" .. i, panel.rows)
 		row.LayoutOrder = i
@@ -176,7 +184,8 @@ local function refresh()
 		row.PetCash.Text = "($" .. Config.short(pet.income) .. "/s)"
 		row.PetRiding.Visible = pet.riding == true
 		row.PetUnequip.Visible = pet.equipped and not pet.riding
-		row.PetEquip.Visible = not pet.equipped
+		row.PetEquip.Visible = not pet.equipped and not full
+		row.PetFull.Visible = not pet.equipped and full
 		for _, b in { row.PetUnequip, row.PetEquip } do
 			HudKit.hover(b) -- (a copy doesn't keep the template's)
 			b.Activated:Connect(function()
@@ -203,6 +212,25 @@ local function ensure()
 	end
 	panel = SidePanel.new(NativeHud.popupRoot(), "PetsPanel", "GoldHeader", "0 Active", OUTLINES.Title)
 	template = Ui.template(panel.rows, "RowTemplate", rowTemplate)
+	-- Equip Best: under the panel, lined up with its right edge (the panel's 1168 x 734)
+	local best = button(panel.gui, "PetsEquipBest", 560, 150, { Position = UDim2.fromOffset(fig(608), fig(764)), ZIndex = 4 }, "GreenWeld")
+	label(best, "Text", {
+		Text = "Equip Best",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextSize = fig(80),
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 5,
+	}).Outline.Color = OUTLINES.Best
+	best.Activated:Connect(function()
+		if not busy then
+			busy = true
+			UiFx.play("Equip")
+			ReplicatedStorage:WaitForChild("EquipBest"):FireServer()
+			task.delay(0.4, function()
+				busy = false
+			end)
+		end
+	end)
 	-- kept up to date while it's open
 	local watched
 	local function watchPen()

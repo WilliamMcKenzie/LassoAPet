@@ -7,7 +7,10 @@
 --           Hatchery) is a dark silhouette under "???".
 --   bottom  Unlocked: had / every animal, by the Index book
 --   right   the picked animal's card (its rarity's colours: name, rarity, cash a second;
---           "???" for one not had), and under it where it runs and its speed.
+--           "???" for one not had), and under it its reward (Config.indexReward's cash) with
+--           Claim! (Locked till you've had it; Hatchery's IndexClaim). Once that's claimed
+--           the box shows where it runs and its speed instead, as the reference's stats.
+-- A red "!" sits on the Index button while there's a reward to claim (NativeIndex.badge).
 -- Client/AnimalDex hands its toggle, close and isOpen to this while the native UI's on.
 --
 -- The collage (as the reference's): a biome's grid is COLS cells across and 2 down (more
@@ -15,6 +18,7 @@
 -- tiles, as many big ones as fit; its rarest get the biggest tiles.
 --
 --   NativeIndex.toggle() / NativeIndex.close() / NativeIndex.isOpen()
+--   NativeIndex.badge(indexButton)   -- once, from BaseUi
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -32,7 +36,7 @@ local UiFx = require(script.Parent.UiFx)
 local NativeIndex = {}
 
 local player = Players.LocalPlayer
-local fig, label = HudKit.fig, HudKit.label
+local fig, label, art, button = HudKit.fig, HudKit.label, HudKit.art, HudKit.button
 
 -- (QM's Figma px, through fig: the popup is the reference's 2268 x 1370)
 local W, H = 2268, 1370
@@ -52,7 +56,7 @@ local SILHOUETTE = 0.35 -- an animal not had: black, this transparent
 local PICK = 8 -- the picked tile's white ring
 local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Exclusive" }
 
-local gui, sections, card, details, unlocked
+local gui, sections, card, details, unlocked, badge
 local tiles = {} -- [kind] = tile
 local bars = {} -- [biome number] = { section, kinds }
 local picked
@@ -104,8 +108,8 @@ for i, biome in BIOMES do
 	end
 end
 
-local function had()
-	local ok, list = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Caught") or "[]")
+local function had(attr)
+	local ok, list = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute(attr or "Caught") or "[]")
 	local set = {}
 	for _, kind in if ok and typeof(list) == "table" then list else {} do
 		set[kind] = true
@@ -286,6 +290,14 @@ local function showCard(kind)
 	details.Where.Value.Text = biome and biome.name or "???"
 	local stats = Config.AnimalStats and Config.AnimalStats[kind]
 	details.Speed.Value.Text = if found and stats and stats.Speed then string.format("%.2g Speed", stats.Speed) else "??? Speed"
+	-- its reward and Claim! (Locked till you've had it), or once claimed where it runs and its speed
+	local done = found and had("IndexClaimed")[kind] == true
+	local claim = details.Claim
+	claim.Visible = not done
+	details.Where.Visible, details.Speed.Visible = done, done
+	claim.CashReward.Amount.Text = "$" .. Config.short(Config.indexReward(kind)):upper()
+	claim.ClaimButton.Visible = found
+	claim.LockedButton.Visible = not found
 end
 
 local function pick(kind)
@@ -515,6 +527,64 @@ local function build()
 		Size = UDim2.fromOffset(fig(RIGHT_W), fig(H - 40 - (BOX_TOP + CARD_H + 40))),
 		ZIndex = 2,
 	})
+	local claim = Ui.make(details, "Claim", "Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 3 })
+	label(claim, "Heading", {
+		Text = "Rewards:",
+		TextSize = fig(48),
+		Position = UDim2.fromOffset(fig(30), fig(14)),
+		Size = UDim2.fromOffset(fig(300), fig(56)),
+		ZIndex = 4,
+	})
+	local slot = HudKit.back(claim, "Dark", {
+		Name = "CashReward",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, fig(68)),
+		Size = UDim2.fromOffset(fig(160), fig(160)),
+		ZIndex = 4,
+	})
+	art(slot, "Icon", {
+		Image = HudImages.CashGainIcon or "",
+		Position = UDim2.fromScale(0.1, 0.02),
+		Size = UDim2.fromScale(0.8, 0.8),
+		ZIndex = 5,
+	})
+	label(slot, "Amount", {
+		Text = "$1K",
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextScaled = true,
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, -fig(6)),
+		Size = UDim2.new(0.95, 0, 0, fig(52)),
+		ZIndex = 6,
+	})
+	for _, b in { { "ClaimButton", "Claim!", "GreenPlain" }, { "LockedButton", "Locked", "GreyPlain" } } do
+		local btn = button(claim, b[1], RIGHT_W - 120, 110, {
+			AnchorPoint = Vector2.new(0.5, 1),
+			Position = UDim2.new(0.5, 0, 1, -fig(20)),
+			ZIndex = 4,
+		}, b[3])
+		label(btn, "Text", {
+			Text = b[2],
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextSize = fig(75),
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 5,
+		})
+	end
+	local claimButton = claim.ClaimButton
+	claimButton.Activated:Connect(function()
+		local remote = ReplicatedStorage:FindFirstChild("IndexClaim")
+		if remote and picked and not claimButton:GetAttribute("Busy") then
+			claimButton:SetAttribute("Busy", true)
+			local ok, done = pcall(remote.InvokeServer, remote, picked)
+			if ok and done then
+				UiFx.play("Claim")
+			else
+				UiFx.shake(claimButton)
+			end
+			claimButton:SetAttribute("Busy", nil)
+		end
+	end)
 	for i, s in { { "Where", "Meadow" }, { "Speed", "??? Speed" } } do
 		local row = Ui.make(details, s[1], "Frame", {
 			BackgroundTransparency = 1,
@@ -563,6 +633,7 @@ local function refresh()
 		end
 	end
 	unlocked.Count.Text = "Unlocked: " .. have .. "/" .. total
+	NativeIndex.updateBadge()
 	if not picked then
 		local first = BIOMES[1] and BIOMES[1].kinds[1]
 		if first then
@@ -573,6 +644,55 @@ local function refresh()
 	end
 end
 
+-- the red "!" on the Index button while something you've had has its reward to claim
+function NativeIndex.updateBadge()
+	if not badge then
+		return
+	end
+	local claimed = had("IndexClaimed")
+	local claimable = false
+	for kind in had() do
+		if biomeOf[kind] and not claimed[kind] then
+			claimable = true
+			break
+		end
+	end
+	badge.Visible = claimable
+end
+
+function NativeIndex.badge(indexButton)
+	badge = Instance.new("Frame")
+	badge.Name = "IndexBadge"
+	badge.BackgroundColor3 = Color3.fromHex("ff0000")
+	badge.Position = UDim2.new(1, -fig(36), 0, -fig(26))
+	badge.Size = UDim2.fromOffset(fig(64), fig(64))
+	badge.ZIndex = 10
+	badge.Visible = false
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0.5, 0)
+	corner.Parent = badge
+	local border = Instance.new("UIStroke")
+	border.Name = "Border"
+	border.Color = Color3.fromHex("770000")
+	border.Thickness = fig(5)
+	border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	border.Parent = badge
+	local mark = label(badge, "Mark", {
+		Text = "!",
+		TextSize = fig(55),
+		TextXAlignment = Enum.TextXAlignment.Center,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 11,
+	})
+	mark.Outline.Color = Color3.fromHex("770000")
+	mark.Outline.Thickness = fig(3)
+	badge.Parent = indexButton
+	for _, attr in { "Caught", "IndexClaimed" } do
+		player:GetAttributeChangedSignal(attr):Connect(NativeIndex.updateBadge)
+	end
+	NativeIndex.updateBadge()
+end
+
 function NativeIndex.isOpen()
 	return gui ~= nil and UiFx.isOpen(gui)
 end
@@ -580,11 +700,13 @@ end
 function NativeIndex.toggle()
 	if not gui then
 		build()
-		player:GetAttributeChangedSignal("Caught"):Connect(function()
-			if gui.Visible then
-				refresh()
-			end
-		end)
+		for _, attr in { "Caught", "IndexClaimed" } do
+			player:GetAttributeChangedSignal(attr):Connect(function()
+				if gui.Visible then
+					refresh()
+				end
+			end)
+		end
 	end
 	if not UiFx.isOpen(gui) then
 		refresh()
