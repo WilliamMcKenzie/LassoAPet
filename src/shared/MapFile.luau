@@ -68,9 +68,9 @@ function MapFile.groundAt(data, x, z)
 	local g = data.Grid
 	local c = math.floor((x - g.X0) / g.Cell) + 1
 	local r = math.floor((z - g.Z0) / g.Cell) + 1
-	local row = g.Rows[r]
-	local ch = if row and c >= 1 and c <= g.Cols then string.sub(row, c, c) else "."
-	local tile = g.Tiles[ch]
+	local row = g.Kind[r]
+	local n = if row and c >= 1 and c <= g.Cols then row[c] else 0
+	local tile = if n and n > 0 then g.TileList[n] else nil
 	-- (an empty cell: a hole now that walls are painted; under a wall in older files)
 	return if tile then tile.top elseif #data.Walls > 0 then data.WallHeight else 0
 end
@@ -84,25 +84,6 @@ end
 function MapFile.decode(text)
 	local file = HttpService:JSONDecode(text)
 	assert(file.format == "StealAndFightPets.map", "not a .map file")
-	if file.rowRuns then
-		-- (tools/map_bake.py: each different row as runs of one cell)
-		file.rowSet = {}
-		for i, runs in file.rowRuns do
-			local parts = table.create(#runs // 2)
-			for k = 1, #runs, 2 do
-				table.insert(parts, string.rep(runs[k], runs[k + 1]))
-			end
-			file.rowSet[i] = table.concat(parts)
-		end
-	end
-	if file.rowIndex then
-		-- (tools/map_bake.py sends each different row once: rowSet, and which one each row is)
-		local rowsOut = table.create(#file.rowIndex)
-		for r, i in file.rowIndex do
-			rowsOut[r] = file.rowSet[i]
-		end
-		file.rows = rowsOut
-	end
 	local cell, cols, rows = file.cell, file.size[1], file.size[2]
 	local x0, z0 = file.origin[1], file.origin[2]
 	local fixed = file.fixed
@@ -124,7 +105,7 @@ function MapFile.decode(text)
 		Props = {},
 		Ruins = {},
 		Vendors = {}, -- { name, x, z, yaw, scale, y, title }: the cactus vendor's stall (Server/Map)
-		Grid = { X0 = x0, Z0 = z0, Cell = cell, Cols = cols, Rows = file.rows, Tiles = {} },
+		Grid = { X0 = x0, Z0 = z0, Cell = cell, Cols = cols, Tiles = {} },
 	}
 
 	-- the areas, and each one's tiles in the file's order
@@ -154,24 +135,45 @@ function MapFile.decode(text)
 
 	-- the floor: same-tile cells merged into parts, each in its tile's area. One grid of
 	-- tile numbers (rows that repeat share one table: most of the map repeats), merged once.
-	local byByte, ofNumber = {}, {}
+	-- (a tile's id is one character, any character: QM, Nov 6, no limit on tiles; so a row is
+	-- read by characters, not bytes)
+	local byChar, ofNumber = {}, {}
 	for n, t in file.tiles do
-		byByte[string.byte(t.id)] = n
+		byChar[t.id] = n
 		ofNumber[n] = tileOf[t.id]
+	end
+	local function fromRuns(runs) -- (tools/map_bake.py: [cell, how many, cell, how many, ...])
+		local k, c = table.create(cols, 0), 1
+		for i = 1, #runs, 2 do
+			local n = byChar[runs[i]] or 0
+			for _ = 1, runs[i + 1] do
+				k[c] = n
+				c += 1
+			end
+		end
+		return k
+	end
+	local function fromRow(row) -- (a .map straight from the editor)
+		local k, c = table.create(cols, 0), 1
+		for _, code in utf8.codes(row) do
+			k[c] = byChar[utf8.char(code)] or 0
+			c += 1
+		end
+		return k
 	end
 	local kind, made = table.create(rows), {}
 	for r = 1, rows do
-		local row = file.rows[r]
-		local k = made[row]
-		if not k then
-			k = table.create(cols, 0)
-			for c = 1, cols do
-				k[c] = byByte[string.byte(row, c)] or 0
-			end
-			made[row] = k
+		if file.rowIndex then
+			local i = file.rowIndex[r]
+			made[i] = made[i] or fromRuns(file.rowRuns[i])
+			kind[r] = made[i]
+		else
+			local row = file.rows[r]
+			made[row] = made[row] or fromRow(row)
+			kind[r] = made[row]
 		end
-		kind[r] = k
 	end
+	data.Grid.Kind, data.Grid.TileList = kind, file.tiles
 	for _, p in rects(kind, cols, rows) do
 		local t = ofNumber[p[1]]
 		-- { tile, x0, z0 (south edge), size x, size z }, as Server/Map wants
