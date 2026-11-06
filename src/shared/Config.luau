@@ -2402,8 +2402,4 @@ Config.AnimalScale.AlphaBoar /= 1.5
 Config.AnimalScale.AlphaIcebringer = (Config.AnimalScale.Icebringer or 1) * 1.4 -- (sized as the Icebringer is, not by its tier)
 Config.AnimalScale.Gecko = 1.2 -- (QM, Nov 6: bigger; its size is set by its tier, not its model)
 
--- Where each biome starts and the course ends: the parts in workspace.World.Borders, which
--- QM drags in Studio (Shared/Borders; QM, Nov 6). They override the Lengths above.
-require(script.Parent.Borders).apply(Config)
-
 return Config
