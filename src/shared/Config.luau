@@ -2560,4 +2560,8 @@ if Config.World == 2 then
 	end
 end
 
+-- Where each biome starts and the course ends: the parts in workspace.World.Borders, which
+-- QM drags in Studio (Shared/Borders; QM, Nov 6). They override the Lengths above.
+require(script.Parent.Borders).apply(Config)
+
 return Config
