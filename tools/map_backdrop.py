@@ -17,7 +17,7 @@ WORLD = os.path.join(HERE, "..", "maps", "world.map")
 sys.path.insert(0, os.path.join(HERE, "mapeditor"))
 from serve import dump  # noqa: E402
 
-TILE_IDS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&()*+-/:;<=>?@^_`{|}~"
+TILE_IDS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&()*+-/:;<=>?@^_`{|}~',["
 HEIGHTS = [(320, 0.45), (220, 0.35), (120, 0.2)]  # (top, weight): mostly tall, as QM's
 GAP = (250, 520)  # studs along z between one block and the next on a side
 WIDE = (60, 230)  # across (x)
