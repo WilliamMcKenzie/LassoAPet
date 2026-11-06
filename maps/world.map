@@ -1,4 +1,4 @@
-{"format":"StealAndFightPets.map","version":1,"cell":4,"origin":[-724,-21696],"size":[362,5620],"saved":"2026-11-06T19:18:09Z",
+{"format":"StealAndFightPets.map","version":1,"cell":4,"origin":[-724,-21696],"size":[362,5620],"saved":"2026-11-06T19:21:09Z",
 "colours": {
   "BoulderDark": [162,169,163],
   "CactusFlower": [255,148,251],
@@ -197,7 +197,23 @@
   {"type":"Prop","item":"PineTall","x":193,"z":-1279,"yaw":274,"scale":6.24,"style":"Meadow"},
   {"type":"Prop","item":"PineTall","x":224,"z":-1251,"yaw":193,"scale":4.52,"style":"Meadow"},
   {"type":"Prop","item":"PineShort","x":198,"z":-1243,"yaw":145,"scale":4.68,"style":"Meadow"},
-  {"type":"Prop","item":"PineShort","x":145,"z":-1223,"yaw":323,"scale":3.02,"style":"Meadow"}
+  {"type":"Prop","item":"PineShort","x":145,"z":-1223,"yaw":323,"scale":3.02,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-224,"z":-1327,"yaw":285,"scale":7.08,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-183,"z":-1327,"yaw":254,"scale":4.22,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-114,"z":-1330,"yaw":235,"scale":5.75,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-108,"z":-1296,"yaw":318,"scale":2.26,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-157,"z":-1293,"yaw":148,"scale":1,"style":"Meadow"},
+  {"type":"Prop","item":"PineShort","x":-131,"z":-1269,"yaw":123,"scale":3.27,"style":"Meadow"},
+  {"type":"Prop","item":"PineShort","x":-146,"z":-1303,"yaw":21,"scale":5.43,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":125,"z":-1061,"yaw":323,"scale":3.16,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":153,"z":-1148,"yaw":0,"scale":5.5,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":161,"z":-1125,"yaw":78,"scale":3.02,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":-140,"z":-842,"yaw":84,"scale":6.53,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":-151,"z":-811,"yaw":65,"scale":3.55,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":-124,"z":-802,"yaw":-93,"scale":3.72,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":219,"z":-366,"yaw":247,"scale":6.68,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":187,"z":-358,"yaw":97,"scale":5.43,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":197,"z":-325,"yaw":189,"scale":2.95,"style":"Meadow"}
 ],
 "fixed": {
   "wallHeight": 30,
