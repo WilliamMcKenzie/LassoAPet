@@ -1,4 +1,4 @@
-{"format":"StealAndFightPets.map","version":1,"cell":4,"origin":[-724,-21696],"size":[362,5620],"saved":"2026-11-06T19:21:09Z",
+{"format":"StealAndFightPets.map","version":1,"cell":4,"origin":[-724,-21696],"size":[362,5620],"saved":"2026-11-06T19:22:46Z",
 "colours": {
   "BoulderDark": [162,169,163],
   "CactusFlower": [255,148,251],
@@ -213,7 +213,22 @@
   {"type":"Prop","item":"Boulders","x":-124,"z":-802,"yaw":-93,"scale":3.72,"style":"Meadow"},
   {"type":"Prop","item":"Boulders","x":219,"z":-366,"yaw":247,"scale":6.68,"style":"Meadow"},
   {"type":"Prop","item":"Boulders","x":187,"z":-358,"yaw":97,"scale":5.43,"style":"Meadow"},
-  {"type":"Prop","item":"Boulders","x":197,"z":-325,"yaw":189,"scale":2.95,"style":"Meadow"}
+  {"type":"Prop","item":"Boulders","x":197,"z":-325,"yaw":189,"scale":2.95,"style":"Meadow"},
+  {"type":"Prop","item":"PineShort","x":219,"z":-234,"yaw":351,"scale":9.02,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":273,"z":-290,"yaw":282,"scale":10,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":283,"z":-231,"yaw":165,"scale":9.55,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":281,"z":-366,"yaw":180,"scale":6.76,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":259,"z":-179,"yaw":23,"scale":3.39,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-233,"z":-256,"yaw":38,"scale":10,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-188,"z":-216,"yaw":79,"scale":5.19,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-224,"z":-193,"yaw":110,"scale":3.55,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-162,"z":-424,"yaw":344,"scale":5.75,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-147,"z":-396,"yaw":31,"scale":3.55,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":133,"z":-717,"yaw":161,"scale":5.43,"style":"Meadow"},
+  {"type":"Prop","item":"PineShort","x":128,"z":-686,"yaw":103,"scale":2.63,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-192,"z":-1034,"yaw":152,"scale":10,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-172,"z":-983,"yaw":334,"scale":8.41,"style":"Meadow"},
+  {"type":"Prop","item":"PineTall","x":-225,"z":-976,"yaw":133,"scale":3.16,"style":"Meadow"}
 ],
 "fixed": {
   "wallHeight": 30,
