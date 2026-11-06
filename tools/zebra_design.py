@@ -1,6 +1,6 @@
 """Zebra: World 1 Meadow's Uncommon (QM, Nov 6), the Horse variant like the Pinto
-(tools/animal_designs.py pinto()): QM's Horse layout in white, three black stripes down
-each side, one behind each eye, a black muzzle, mane, back stripe and hooves, and a white tail with a black tuft.
+(tools/animal_designs.py pinto()): QM's Horse layout in white, black stripes as flush
+slices through the body, neck and head (as the Kitten's, designs/desert/Kitten.bbmodel), a black muzzle, mane, back stripe and hooves, and a white tail with a black tuft.
 
 Same bones and rules as every quadruped; walk is QM's horse walk, the gallop the shared leap.
 
@@ -24,14 +24,16 @@ HOOF = (58, 58, 66)
 def zebra():
     a = Animal("Zebra", "Uncommon")
     horse_body(a, WHITE, BLACK, HOOF)
-    body = ((-1.6, 3.5, -2.7), (1.6, 6.5, 3.3))
-    # three stripes down each side, one behind each eye
-    for i, (z0, z1, b0) in enumerate(((-1.8, -1.1, 3.9), (0.0, 0.7, 3.5), (1.8, 2.5, 3.9))):
-        a.patch(f"StripeL{i + 1}", "L", z0, z1, b0, 6.5, BLACK, box=body)
-        a.patch(f"StripeR{i + 1}", "R", z0, z1, b0, 6.5, BLACK, box=body)
-    head = ((-1.1, 8.3, -3.9), (1.1, 10.5, -1.1))
-    a.patch("HeadStripeL", "L", -2.1, -1.6, 8.3, 10.5, BLACK, "neck", box=head)
-    a.patch("HeadStripeR", "R", -2.1, -1.6, 8.3, 10.5, BLACK, "neck", box=head)
+    # stripes as flush slices through the body, neck and head (as the Kitten's), not plates
+    for name in ("Body", "Neck", "Head"):
+        a.remove(name)
+    for i, (z0, z1, c) in enumerate(((-2.7, -1.7, WHITE), (-1.7, -1.2, BLACK), (-1.2, 0.0, WHITE), (0.0, 0.5, BLACK),
+                                     (0.5, 1.7, WHITE), (1.7, 2.2, BLACK), (2.2, 3.3, WHITE))):
+        a.box(f"Body{i + 1}", (-1.6, 3.5, z0), (1.6, 6.5, z1), c, "root")
+    for i, (y0, y1, c) in enumerate(((5.1, 6.0, WHITE), (6.0, 6.4, BLACK), (6.4, 7.2, WHITE), (7.2, 7.6, BLACK), (7.6, 8.3, WHITE))):
+        a.box(f"Neck{i + 1}", (-0.9, y0, -2.699), (0.9, y1, -1.099), c, "neck")
+    for i, (z0, z1, c) in enumerate(((-3.9, -2.2, WHITE), (-2.2, -1.8, BLACK), (-1.8, -1.1, WHITE))):
+        a.box(f"Head{i + 1}", (-1.1, 8.3, z0), (1.1, 10.5, z1), c, "neck")
     for p in a.parts:
         if p.name in ("Snout", "Bridge"):
             p.color = BLACK
