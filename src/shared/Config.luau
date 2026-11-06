@@ -1539,6 +1539,16 @@ Config.Slingshot = {
 	Meshes = { { 98330547373685, 170, 167, 180 }, { 97372945090229, 145, 152, 154 }, { 72003741917426, 186, 134, 80 }, { 107356883198884, 158, 108, 62 }, { 101149753111869, 86, 88, 98 }, { 117633513992999, 232, 204, 150 } }, -- (filled by tools/slingshot_upload.py)
 	Band = 104618131148243, -- (filled by tools/slingshot_upload.py)
 	BandColor = Color3.fromRGB(226, 58, 52),
+	-- The band's colour by your pen level (each Upgrade Pen recolours it; past the list, the last).
+	BandColors = {
+		Color3.fromRGB(226, 58, 52), -- red
+		Color3.fromRGB(245, 140, 40), -- orange
+		Color3.fromRGB(250, 214, 50), -- yellow
+		Color3.fromRGB(90, 200, 80), -- green
+		Color3.fromRGB(60, 150, 240), -- blue
+		Color3.fromRGB(150, 80, 230), -- purple
+		Color3.fromRGB(240, 90, 190), -- pink
+	},
 }
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:

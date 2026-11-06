@@ -4,7 +4,8 @@
 -- Built here from the uploaded meshes (design/slingshot): the frame's pieces, and three
 -- band pieces (BandL, BandMid, BandR) that Client/Slingshot stretches. It follows the pen
 -- as it grows (its Spawn moves). Hold E at it: Client/SlingshotLaunch.
--- workspace.Slingshots.<UserId>, with an "Owner" attribute.
+-- workspace.Slingshots.<UserId>, with an "Owner" attribute. The band's colour goes up with
+-- your pen level (Config.Slingshot.BandColors: each Upgrade Pen recolours it).
 
 local AssetService = game:GetService("AssetService")
 local Players = game:GetService("Players")
@@ -94,6 +95,26 @@ end
 
 local placed = {} -- [player] = { model, connections }
 
+local function bandColor(player)
+	local colors = CFG.BandColors
+	if not colors or #colors == 0 then
+		return CFG.BandColor
+	end
+	return colors[math.clamp(player:GetAttribute("PenLevel") or 1, 1, #colors)]
+end
+
+local function paint(player)
+	local p = placed[player]
+	if p then
+		for _, name in { "BandL", "BandMid", "BandR" } do
+			local band = p.model:FindFirstChild(name)
+			if band then
+				band.Color = bandColor(player)
+			end
+		end
+	end
+end
+
 local function remove(player)
 	local p = placed[player]
 	if p then
@@ -131,6 +152,7 @@ local function place(player)
 	move()
 	model.Parent = folder
 	placed[player] = { model = model, connections = { spawn:GetPropertyChangedSignal("CFrame"):Connect(move) } }
+	paint(player)
 end
 
 local function watch(player)
@@ -139,6 +161,9 @@ local function watch(player)
 	end)
 	player:GetAttributeChangedSignal("Pen"):Connect(function()
 		place(player)
+	end)
+	player:GetAttributeChangedSignal("PenLevel"):Connect(function()
+		paint(player)
 	end)
 	place(player)
 end
