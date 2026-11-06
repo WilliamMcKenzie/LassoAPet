@@ -71,6 +71,7 @@ def gecko():
 
     a.meta = {"seat": (0, 3.5, 0.2), "neck_loop": {"center": (0, 2.2, -4.4), "radius": 1.9}}
     a.animations = quad_animations
+    a.scale(1.6)  # about Horse-sized (QM, Nov 6: bigger)
     return a
 
 
