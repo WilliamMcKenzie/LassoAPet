@@ -1,4 +1,4 @@
-{"format":"StealAndFightPets.map","version":1,"cell":4,"origin":[-724,-21696],"size":[362,5620],"saved":"2026-11-06T18:41:11Z",
+{"format":"StealAndFightPets.map","version":1,"cell":4,"origin":[-724,-21696],"size":[362,5620],"saved":"2026-11-06T18:54:27Z",
 "colours": {
   "BoulderDark": [162,169,163],
   "CactusFlower": [255,148,251],
@@ -47,6 +47,7 @@
   "GrassChecker": [24,203,31],
   "IceBoulderDark": [122,160,210],
   "LavaBoulderDark": [104,80,70],
+  "MeadowBoulderDark": [162,169,163],
   "MeadowCap": [23,191,29],
   "MeadowCapChecker": [24,203,31],
   "MeadowGrass": [23,191,29],
@@ -175,7 +176,10 @@
 ],
 "objects": [
   {"type":"Prop","item":"Boulders","x":130,"z":-46,"yaw":236,"scale":5.62,"style":"Meadow"},
-  {"type":"Prop","item":"PineTall","x":-100,"z":-20,"yaw":153,"scale":4.12,"style":"Meadow"}
+  {"type":"Prop","item":"Boulders","x":-131,"z":-26,"yaw":304,"scale":3.76,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":-113,"z":-37,"yaw":224,"scale":2.37,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":-138,"z":-56,"yaw":115,"scale":2.34,"style":"Meadow"},
+  {"type":"Prop","item":"Boulders","x":153,"z":-32,"yaw":82,"scale":2.85,"style":"Meadow"}
 ],
 "fixed": {
   "wallHeight": 30,
