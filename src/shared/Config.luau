@@ -1165,6 +1165,15 @@ local Config = {
 	-- PerUpgrade more for each pen upgrade (PenLevel). Full, you can't put an egg down;
 	-- "5/10" shows under your name over the pen (Pens.server).
 	PenLevels = 13, -- pen levels, one per quest claimed after Reach Meadow, each with its own fence (tools/pens.py STYLES: QM, Oct 11)
+	-- Active pets (QM, Nov 6: as Fight to Steal an Egg's Backpack): at most PenSlots pets out in
+	-- your pen (the one you ride counts), the rest stored (the Pets panel). Its "+1 Equip" buys
+	-- one more slot for Robux, for good, as many times as they like (Shop.server, saved extraSlots).
+	-- SlotProduct 0: not on sale yet (a 30 R$ developer product's id goes here).
+	Backpack = {
+		PenSlots = 5,
+		SlotRobux = 30,
+		SlotProduct = 0,
+	},
 	PenCapacity = nil, -- (QM, Oct 14: no cap on pets, and no "5/10" on the sign; quests still grow the pen. Was { Base = 10, PerUpgrade = 8 }: 10, and 8 more a level)
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
 	-- Client/SkyFlash. Start: its see-through at the flash (0: solid white). Distance: studs
