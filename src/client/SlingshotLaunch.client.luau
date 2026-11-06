@@ -20,13 +20,19 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
 
-local LOAD = Vector3.new(0, 1.6, 17) -- (SlingshotPose's resting pull: where you step on)
 local FEET = -1.45 -- your pet's feet under the pull
 local SEAT = 2.2 -- your root over your pet's back
 local CAM_LAUNCH = Vector3.new(16, 14, 44) -- the camera, in the slingshot's space, while it draws
 local CAM_BACK, CAM_UP = 34, 12 -- then behind and over you in the air
 
 local busy = false
+
+-- The slingshot's own frame: its Frame1 part, built at the model's origin, so its CFrame is
+-- where the server stood it (a client may not have the Model's WorldPivot).
+local function baseOf(model)
+	local frame = model:FindFirstChild("Frame1")
+	return if frame then frame.CFrame else model:GetPivot()
+end
 
 local function character()
 	local char = player.Character
@@ -77,7 +83,7 @@ local function launch(model)
 		return
 	end
 	busy = true
-	local base = model:GetPivot()
+	local base = baseOf(model)
 	local pet, rel, size = petCopy(best)
 	-- your pet stands against the band (its back end on it), you on its back
 	local function hold(pull)
@@ -127,47 +133,40 @@ local function launch(model)
 
 	SlingshotPose.launch(model, hold, function(pull)
 		fly(pull)
-	end)
+	end, base)
 	while not flown do
 		task.wait()
 	end
 	busy = false
 end
 
--- The prompt on your own slingshot's band, where it rests.
+-- The Launch prompt (a native ProximityPrompt the server puts on the slingshot, Server/Slingshot):
+-- yours works; anyone else's is switched off on your screen.
 local function setup(model)
-	if model:GetAttribute("Owner") ~= player.UserId or model:FindFirstChild("LaunchSpot", true) then
-		return
-	end
+	local owner = model:GetAttribute("Owner") or tonumber(model.Name) -- (the server names it by its owner's UserId too)
 	local frame = model:WaitForChild("Frame1", 30)
-	if not frame then
+	local prompt = frame and frame:WaitForChild("Launch", 30)
+	if not prompt then
 		return
 	end
-	local spot = Instance.new("Attachment")
-	spot.Name = "LaunchSpot"
-	spot.WorldCFrame = model:GetPivot() * CFrame.new(LOAD + Vector3.new(0, 2, 0))
-	spot.Parent = frame
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.Name = "Launch"
-	prompt.ActionText = "Launch"
-	prompt.ObjectText = "Slingshot"
-	prompt.KeyboardKeyCode = Enum.KeyCode.E
-	prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
-	prompt.HoldDuration = 0.6
-	prompt.Style = Enum.ProximityPromptStyle.Custom -- (Roblox's look without its panel: PromptUi)
-	prompt.MaxActivationDistance = 14
-	prompt.RequiresLineOfSight = false
-	prompt.Parent = spot
+	if owner ~= player.UserId then
+		prompt.Enabled = false
+		return
+	end
 	prompt.Triggered:Connect(function()
+		if not (SlingshotRide.bestPet and SlingshotRide.bestPet()) then
+			-- (no pet at home to fly with: say so on the prompt for a moment)
+			prompt.ObjectText = "Bring a pet home first!"
+			task.delay(2, function()
+				prompt.ObjectText = "Slingshot"
+			end)
+			return
+		end
 		launch(model)
-	end)
-	-- (it follows the slingshot when the pen grows)
-	model:GetPropertyChangedSignal("WorldPivot"):Connect(function()
-		spot.WorldCFrame = model:GetPivot() * CFrame.new(LOAD + Vector3.new(0, 2, 0))
 	end)
 	task.spawn(function()
 		while model.Parent do
-			prompt.Enabled = not busy and not Hud.isRiding() and SlingshotRide.bestPet ~= nil and SlingshotRide.bestPet() ~= nil
+			prompt.Enabled = not busy and not Hud.isRiding()
 			task.wait(0.25)
 		end
 	end)

@@ -56,6 +56,21 @@ local function build()
 			part.Parent = model
 		end
 	end
+	-- the Launch prompt, Roblox's own, on the slingshot (Client/SlingshotLaunch: the owner's works)
+	local frame = model:FindFirstChild("Frame1")
+	if frame then
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.Name = "Launch"
+		prompt.ActionText = "Launch"
+		prompt.ObjectText = "Slingshot"
+		prompt.KeyboardKeyCode = Enum.KeyCode.E
+		prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
+		prompt.HoldDuration = 0.6
+		prompt.MaxActivationDistance = 26 -- (from the base's middle: reaches the band where it rests)
+		prompt.RequiresLineOfSight = false
+		prompt.UIOffset = Vector2.new(0, -40)
+		prompt.Parent = frame
+	end
 	model.WorldPivot = CFrame.new()
 	template = model
 	return model
