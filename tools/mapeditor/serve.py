@@ -126,6 +126,8 @@ def to_studio():
         open(load, "w").write("local loaded = (function()\n" + sync + "\nend)()\n"
                               + "return loaded .. \"\\n\" .. (function()\n" + rebuild + "\nend)()\n")
         ok, out = run(os.path.join(STUDIO, "lu.py"), load, "Edit")
+    if "Play mode" in out:  # (Studio's answer while a play test runs: no Edit datamodel to load into)
+        return "Saved. Studio is in Play: stop it, then press Save to game again."
     if not ok or "loaded" not in out:
         return "Saved, but Studio didn't take it (is it open?). Sync and press Map > Rebuild there."
     last = out.splitlines()[-1] if out else ""
