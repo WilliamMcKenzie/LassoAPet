@@ -1215,12 +1215,6 @@ local Config = {
 	FinishFromEnd = 50,
 	-- Egg reveal back home (gacha): the card rolls through the three unknown eggs,
 	-- slow at first and faster and faster, then pops onto the egg's rarity card.
-	EggRevealFlicks = 24, -- unknown cards shown before the real one
-	EggRevealFirstGap = 0.3, -- seconds between the first, slow flicks
-	EggRevealLastGap = 0.03, -- seconds between the last, fastest flicks
-	EggRevealHold = 2.2, -- seconds the real card stays up before the ride ends
-	EggRevealBurst = true, -- spinning sunburst behind the real card
-	EggRevealSpeed = 1.5, -- (QM, Oct 14) the whole egg RNG card plays this many times faster: drop-in, roll, pop, hold, exit
 	LandingGrace = 0.8,
 	TurnGrace = 2,
 	-- Continue (QM, Oct 3): after a crash or a buck-off, pay Robux to keep riding

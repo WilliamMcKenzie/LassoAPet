@@ -9,6 +9,7 @@ local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local Inventory = require(script.Parent.Inventory)
 local Sounds = require(script.Parent.Sounds)
+local RewardPopups = require(script.Parent.RewardPopups)
 local AnimalDex = require(script.Parent.AnimalDex)
 local RollMenu = require(script.Parent.RollMenu)
 local Shop = require(script.Parent.Shop)
@@ -65,26 +66,9 @@ local IMAGES = {
 	-- The ready half while it's still filling up: always the one without [SPACE],
 	-- even on a computer, where [SPACE] shows only once it's fully ready (QM).
 	abilityFilling = { id = "rbxassetid://95632395593874", size = Vector2.new(618, 524) }, -- Ability.png
-	-- Egg reveal cards (assets/ui).
-	-- cardLeft / cardTop are where the card's rounded body starts in the image (the
-	-- rarity cards' banners stick out past it), size the image's: all in units of
-	-- the body being 975 x 1175 (CARD_BODY). QM's new art (Oct 11) is drawn with the
-	-- body at the image's top, about 499 px wide, so each is its pixels x 975 / 499.
-	unknownEgg = { id = "rbxassetid://89190624413208", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg.png, 1/10
-	unknownEgg1 = { id = "rbxassetid://128255311278989", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg1.png, 1/100
-	unknownEgg2 = { id = "rbxassetid://79213006654938", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg2.png, 1/1000
-	unknownEgg3 = { id = "rbxassetid://84991607264564", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg3.png, 1/10k
-	unknownEgg4 = { id = "rbxassetid://77508300986598", size = Vector2.new(977, 1196), cardLeft = 0, cardTop = 0 }, -- UnknownEgg4.png, 1/100k
-	cardUncommon = { id = "rbxassetid://87221432893647", size = Vector2.new(1204, 1198), cardLeft = 114, cardTop = 0 }, -- UncommonEggRNG.png
-	cardRare = { id = "rbxassetid://82895123115484", size = Vector2.new(1110, 1192), cardLeft = 69, cardTop = 0 }, -- RareEggRNG.png
-	cardEpic = { id = "rbxassetid://74773300097555", size = Vector2.new(1215, 1200), cardLeft = 139, cardTop = 0 }, -- EpicEggRNG.png
-	cardLegendary = { id = "rbxassetid://87136104713556", size = Vector2.new(1145, 1200), cardLeft = 76, cardTop = 0 }, -- LegendaryEggRNG.png
-	-- Gacha-only animals (Config.Gacha.Pool.Exclusive). Until QM's card is uploaded
-	-- the Legendary card stands in, tinted, with EXCLUSIVE! written over it.
-	cardExclusive = { id = "", size = Vector2.new(1171, 1227), cardLeft = 90 }, -- ExclusiveEggRNG.png
 	-- The Egg Machine's ROLL button (QM's art to come; a green text button until then).
 	roll = { id = "", size = Vector2.new(960, 308) }, -- Roll.png
-	-- Egg renders for the card, cropped to the egg (assets/ui/<Kind>EggRender.png).
+	-- Egg renders for the reward popups, cropped to the egg (assets/ui/<Kind>EggRender.png).
 	eggHorse = { id = "rbxassetid://96698232796495", size = Vector2.new(502, 799) }, -- HorseEggRender.png
 	eggArmoredHorse = { id = "rbxassetid://96698232796495", size = Vector2.new(502, 799) }, -- the Horse's (QM, Oct 13)
 	eggPinto = { id = "rbxassetid://79525419811481", size = Vector2.new(496, 788) }, -- PintoEggRender.png
@@ -277,18 +261,6 @@ local EGG_BUTTONS = { Rare = "takeEggRare", Epic = "takeEggEpic", Legendary = "t
 local BANNERS = { ["BUCKED OFF"] = "buckedOff", ["CRASH!"] = "crash" }
 local BANNER_SCALE = 0.55 -- banner images show at this share of their pixel size
 
--- Egg reveal card, sized and placed as in QM's reference screenshot: the card's
--- body is 22% of the screen's width, centred a little below the middle, and the
--- egg sits in the card's centre at 37% of its height.
-local CARD_BODY = Vector2.new(975, 1175) -- the rounded body, in image pixels
-local CARD_TOP = 12 -- body's top edge in every card image
-local CARD_WIDTH = 296
-local CARD_SCALE = CARD_WIDTH / CARD_BODY.X
-local CARD_EGG_HEIGHT = 0.37
-local UNKNOWN_CARDS = { "unknownEgg", "unknownEgg1", "unknownEgg2", "unknownEgg3", "unknownEgg4" }
-local RARITY_CARDS = { Uncommon = "cardUncommon", Rare = "cardRare", Epic = "cardEpic", Legendary = "cardLegendary", Exclusive = "cardExclusive" }
-local EXCLUSIVE_TINT = Color3.fromRGB(215, 150, 255) -- the stand-in Exclusive card's tint
-
 -- Banner colors: bad news red, good news yellow, anything else white.
 local TONES = {
 	["CRASH!"] = RED,
@@ -296,9 +268,6 @@ local TONES = {
 	["TOO FAR!"] = RED,
 }
 
-local card, cardEgg, cardScale, cardFlash, cardBurst, cardExclusive -- egg reveal card, the egg on it, its UIScale, the white flash and sunburst behind it, the stand-in EXCLUSIVE! text
-local cardFaces, cardShown = {}, nil -- one stacked image per card, and the one showing
-local reveal = 0 -- bumped to stop a running reveal
 local sprint, sprintInput -- the Sprint button, and the touch or click holding it down
 local ability, abilityPressed, abilityFill, abilityReady, abilityTime -- the Ability button, a press not yet used, the ready part (and its picture) and the countdown
 local mergeButton, mergeWanted -- MERGE, in RIDE's spot when RIDE isn't up (Hud.showMerge), and whether there's anything to merge
@@ -598,112 +567,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 			TweenService:Create(abilityScale, TweenInfo.new(0.08), { Scale = 1 }):Play()
 		end
 	end)
-	-- The egg reveal has its own screen, so the Egg Machine can show it at home too.
-	local revealGui = Instance.new("ScreenGui")
-	revealGui.Name = "EggReveal"
-	revealGui.ResetOnSpawn = false
-	revealGui.IgnoreGuiInset = true
-	revealGui.DisplayOrder = 5
-	if Config.NativeUi.On then
-		revealGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native cards' layers sit over their parents)
-	end
-	revealGui.Parent = playerGui
-	local revealRoot = root(revealGui)
-	-- Egg reveal card: a frame the size of the card's body, with the card image
-	-- placed so its body fills the frame and the egg render on top.
-	card = Instance.new("Frame")
-	card.Name = "EggCard"
-	card.BackgroundTransparency = 1
-	card.AnchorPoint = Vector2.new(0.5, 0.5)
-	card.Size = UDim2.fromOffset(CARD_BODY.X * CARD_SCALE, CARD_BODY.Y * CARD_SCALE)
-	card.Position = UDim2.fromScale(0.5, 0.53)
-	card.ZIndex = 3
-	card.Visible = false
-	cardScale = Instance.new("UIScale")
-	cardScale.Parent = card
-	-- Every card is its own image, stacked and already loaded; a flick only swaps
-	-- which one is opaque, in the same frame, so there's no blank frame or size jump.
-	for _, key in { "unknownEgg", "unknownEgg1", "unknownEgg2", "unknownEgg3", "unknownEgg4", "cardUncommon", "cardRare", "cardEpic", "cardLegendary", "cardExclusive" } do
-		local entry = IMAGES[key]
-		-- Sized as a share of the card's body, so squashing the card squashes its images.
-		local face = image(card, key, UDim2.fromScale(entry.size.X / CARD_BODY.X, entry.size.Y / CARD_BODY.Y), UDim2.fromScale(-entry.cardLeft / CARD_BODY.X, -(entry.cardTop or CARD_TOP) / CARD_BODY.Y))
-		face.Name = key
-		face.AnchorPoint = Vector2.zero
-		face.ZIndex = 3
-		face.ImageTransparency = 1
-		cardFaces[key] = face
-		if Config.NativeUi.On then
-			-- (the native UI, Config.NativeUi, QM Nov 6: Fight to Steal an Egg's card, its
-			-- rarity's colours under the studs, the rarity or the odds written on it, no art)
-			local HudKit = require(script.Parent.HudKit)
-			local rarity = string.match(key, "^card(%u%l+)$")
-			face.Image = ""
-			face.Size, face.Position = UDim2.fromScale(1, 1), UDim2.new()
-			face.Visible = false
-			local back = HudKit.back(face, if rarity then "Card" else "EggCard", { Name = "NativeBack", ZIndex = 3 })
-			HudKit.back(face, "Dark", { Name = "NativeEdge", BackgroundTransparency = 1, ZIndex = 3 })
-			local outline = Instance.new("UIStroke")
-			outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			outline.Thickness = 5
-			outline.Parent = face
-			local text = HudKit.label(face, "NativeText", {
-				Text = "",
-				TextScaled = true,
-				TextXAlignment = Enum.TextXAlignment.Center,
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				Position = UDim2.fromScale(0.5, 0.82),
-				Size = UDim2.fromScale(0.86, 0.16),
-				ZIndex = 5,
-			})
-			if rarity then
-				local look = Config.NativeUi.Rarities[rarity] or Config.NativeUi.Rarities.Common
-				local fill = back:FindFirstChild("Fill")
-				if fill and look.top then
-					fill.Color = ColorSequence.new(look.top, look.bottom)
-				end
-				require(script.Parent.RarityLook).paint(text, rarity, text:FindFirstChild("Outline"))
-				text.Text = rarity .. "!"
-			else
-				local odds = { "1/10", "1/100", "1/1,000", "1/10K", "1/100K" }
-				text.Text = odds[(tonumber(string.match(key, "%d+$")) or 0) + 1] or "???"
-				HudKit.label(face, "NativeMark", {
-					Text = "?",
-					TextScaled = true,
-					TextXAlignment = Enum.TextXAlignment.Center,
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					Position = UDim2.fromScale(0.5, CARD_EGG_HEIGHT),
-					Size = UDim2.fromScale(0.6, 0.4),
-					ZIndex = 5,
-				})
-			end
-		end
-	end
-	cardEgg = image(card, "eggPinto", UDim2.new(), UDim2.fromScale(0.5, 0.5))
-	cardEgg.ZIndex = 4
-	Instance.new("UIScale").Parent = cardEgg
-	cardExclusive = label(card, UDim2.fromScale(1, 0.14), UDim2.fromScale(0.5, 0.07), 48, 5)
-	cardExclusive.Text = "EXCLUSIVE!"
-	cardExclusive.ZIndex = 5
-	cardExclusive.TextScaled = true
-	cardExclusive.Visible = false
-	card.Parent = revealRoot
-	-- Behind the card: a white flash over the screen and the sunburst, for the pop.
-	cardFlash = Instance.new("Frame")
-	cardFlash.Name = "EggFlash"
-	cardFlash.BackgroundColor3 = WHITE
-	cardFlash.BorderSizePixel = 0
-	cardFlash.AnchorPoint = Vector2.new(0.5, 0.5)
-	cardFlash.Position = UDim2.fromScale(0.5, 0.5)
-	cardFlash.Size = UDim2.fromScale(1.2, 1.2)
-	cardFlash.ZIndex = 2
-	cardFlash.Visible = false
-	cardFlash.Parent = revealRoot
-	cardBurst = image(revealRoot, "sunburst", UDim2.fromOffset(CARD_WIDTH * 2.6, CARD_WIDTH * 2.6), card.Position)
-	cardBurst.Name = "EggBurst"
-	cardBurst.ZIndex = 2
-	cardBurst.Visible = false
-	Instance.new("UIScale").Parent = cardBurst
-
 	gained = cashRow(rideRoot, 84, 58, Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.57), 4) -- 4px outline (QM)
 	-- A tooltip that takes the gained cash's place on a fail screen (Hud.setTip):
 	-- just the outlined white text, no box (QM, Oct 1).
@@ -786,6 +649,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	gold:GetPropertyChangedSignal("Visible"):Connect(follow)
 	follow()
 	task.spawn(function() -- (not holding up the HUD's build for it)
+	RewardPopups.watchCash(money) -- (gold you're given pops up in the lower middle, QM Nov 6)
 	game:GetService("ReplicatedStorage"):WaitForChild("PetIncome").OnClientEvent:Connect(function(earned)
 		if type(earned) ~= "number" or earned <= 0 or not gold.Visible or not sideRoot:FindFirstAncestorOfClass("ScreenGui").Enabled then
 			return -- (nothing while the counter's hidden: riding...)
@@ -1033,7 +897,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	end)
 
 	-- Egg Machine (Config.Gacha): walking up to it shows ROLL where RIDE goes; it
-	-- (or E) pays the price for a random egg, revealed on the egg card. The prompt
+	-- (or E) pays the price for a random egg, shown in its reward popup. The prompt
 	-- draws nothing, like RIDE's. Green when you have the gold, grey when you don't.
 	local rollGacha = game:GetService("ReplicatedStorage"):WaitForChild("RollGacha")
 	local rollSize = fit("roll", BUTTON_WIDTH)
@@ -1082,13 +946,13 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		end
 		rolling = true
 		local ok, kind, exclusive = pcall(rollGacha.InvokeServer, rollGacha)
-		-- The same egg card as coming home with that egg: its own rarity's (QM).
+		-- The egg's reward popup, as coming home with it (QM, Nov 6: no RNG card).
 		local rarity = ok and kind and require(game:GetService("ReplicatedStorage").Shared.Animals[kind]).Rarity
-		RollMenu.setHidden(rarity ~= nil) -- the menu steps aside for the egg card
+		RollMenu.setHidden(rarity ~= nil)
 		local seconds = rarity and Hud.eggReveal(rarity, kind, true)
 		task.wait(seconds or 0.3)
 		if rarity then
-			RollMenu.close() -- one egg per roll: the menu doesn't come back after the card (QM)
+			RollMenu.close() -- one egg per roll: the menu doesn't come back (QM)
 		end
 		RollMenu.setHidden(false)
 		rolling = false
@@ -1189,7 +1053,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		end
 	end)
 
-	-- Load every image now, so the first BUCKED OFF or egg RNG card isn't still
+	-- Load every image now, so the first BUCKED OFF banner isn't still
 	-- downloading while it animates. Downloading alone isn't enough: Roblox only
 	-- readies an image for drawing the first time it's on screen, which stalls
 	-- that frame. So each image also stays drawn in the corner at 1 pixel and
@@ -1231,11 +1095,6 @@ function Hud.show(visible)
 	if RideUi then
 		RideUi.show(visible)
 	end
-	reveal += 1
-	card.Visible = false
-	cardFlash.Visible = false
-	cardBurst.Visible = false
-	cardExclusive.Visible = false
 	if visible then
 		rollShown = false
 		roll.Visible = false
@@ -1420,266 +1279,29 @@ function Hud.flash(text, seconds)
 	end
 end
 
-local function setCardFace(key)
-	if cardShown then
-		cardFaces[cardShown].ImageTransparency = 1
-		if Config.NativeUi.On then
-			cardFaces[cardShown].Visible = false
-		end
-	end
-	cardFaces[key].ImageTransparency = 0
-	cardFaces[key].Visible = true
-	cardShown = key
-end
-
--- Damped spring from 1 toward 0: starts at 1, overshoots past 0 and settles.
--- Drives every bounce below (squash and stretch, overshoot, wobble).
-local function spring(t, frequency, decay)
-	return math.exp(-decay * t) * math.cos(t * frequency * math.pi * 2)
-end
-
-local CARD_REST = UDim2.fromScale(0.5, 0.53)
-local ENTER_TIME = 0.5 -- drop in, land, bounce
-local ANTICIPATION = 0.14 -- squash down before the pop
-local EXIT_SWELL = 0.12 -- swell and squash before popping out
-local EXIT_TIME = 0.42
-
--- Back home with an egg: a gacha-style card drops in, rolls through the unknown
--- eggs (slow, then faster and faster), squashes down and pops onto the egg's
--- rarity card, and the egg springs out onto it. Returns how long it takes until
--- the card is gone (nil if there's no card for that rarity, e.g. Common).
--- rolled: a roll's (or the shop's Legend Egg's) card, which lands with roll_reveal
--- rather than reveal_pop (Sounds).
--- Whether an egg reveal's card is up (BaseUi's quest egg waits for it to go).
+-- An egg you got (a ride home's, a roll's, a quest's, the shop's): straight into its reward
+-- popup, no RNG card (QM, Nov 6: client/RewardPopups). batch: several at once, side by side.
+-- Returns 0 (callers once waited out the card).
 function Hud.revealing()
-	return card ~= nil and card.Visible
+	return false
 end
 
 function Hud.eggReveal(rarity, kind, rolled, batch)
-	local final = RARITY_CARDS[rarity]
-	if not final then
-		return nil
+	Sounds.play(if rolled then "roll_reveal" else "reveal_pop")
+	local counts, order = {}, {}
+	for _, each in batch or { kind } do
+		if not counts[each] then
+			table.insert(order, each)
+		end
+		counts[each] = (counts[each] or 0) + 1
 	end
-	-- No Exclusive card yet: the Legendary one, tinted, with EXCLUSIVE! on it.
-	local standIn = final == "cardExclusive" and IMAGES.cardExclusive.id == ""
-	if standIn then
-		final = "cardLegendary"
+	for _, each in order do
+		-- (the Eggs panel's picture of it, client/NativeEggs; else the old render)
+		local egg = IMAGES["egg" .. tostring(each)]
+		local icon = Config.EggIcons[each] or (egg and egg.id ~= "" and egg.id) or IMAGES.eggPinto.id
+		RewardPopups.show(icon, "x" .. counts[each])
 	end
-	cardFaces.cardLegendary.ImageColor3 = if standIn then EXCLUSIVE_TINT else WHITE
-	cardExclusive.Visible = false
-	reveal += 1
-	local token = reveal
-	local flicks = Config.EggRevealFlicks
-	local first, last = Config.EggRevealFirstGap, Config.EggRevealLastGap
-	local gaps, roll = {}, 0
-	for i = 1, flicks do
-		-- Each gap a constant factor shorter than the one before: slow, then a blur.
-		gaps[i] = first * (last / first) ^ ((i - 1) / math.max(flicks - 1, 1))
-		roll += gaps[i]
-	end
-	local hold = Config.EggRevealHold
-
-	local baseW, baseH = CARD_BODY.X * CARD_SCALE, CARD_BODY.Y * CARD_SCALE
-	local egg = IMAGES["egg" .. tostring(kind)]
-	if not egg or egg.id == "" then
-		egg = IMAGES.eggPinto -- until that egg's render is uploaded
-	end
-	local eggH = CARD_EGG_HEIGHT
-	local eggW = eggH * baseH * egg.size.X / egg.size.Y / baseW
-
-	-- Pose the card: stretch sx, sy (1 = rest), keeping its bottom edge planted
-	-- when it squashes, plus a lift in pixels and a tilt.
-	local function pose(sx, sy, lift, rotation)
-		card.Size = UDim2.fromOffset(baseW * sx, baseH * sy)
-		card.Position = CARD_REST + UDim2.fromOffset(0, baseH * (1 - sy) / 2 - lift)
-		card.Rotation = rotation
-	end
-	local function poseEgg(scale, sx, sy, lift)
-		cardEgg.UIScale.Scale = scale
-		cardEgg.Size = UDim2.fromScale(eggW * sx, eggH * sy)
-		cardEgg.Position = UDim2.new(0.5, 0, 0.5, -lift)
-	end
-	-- Runs step(t) every frame for a duration; false if the reveal was cancelled.
-	-- (Config.EggRevealSpeed: t runs that much faster, so every part of it does)
-	local speed = Config.EggRevealSpeed or 1
-	local function play(duration, step)
-		local t = 0
-		while t < duration do
-			step(t)
-			t += RunService.Heartbeat:Wait() * speed
-			if reveal ~= token then
-				return false
-			end
-		end
-		step(duration)
-		return true
-	end
-
-	-- The HUD preloads every image at game start; ask again for this reveal's in
-	-- case the ride was quicker than the download (a no-op once they're cached).
-	local ready = false
-	task.spawn(function()
-		local ids = { IMAGES[final].id, egg.id }
-		for _, key in UNKNOWN_CARDS do
-			table.insert(ids, IMAGES[key].id)
-		end
-		for _, resultKind in batch or {} do
-			local art = IMAGES["egg" .. resultKind]
-			if art then table.insert(ids, art.id) end
-		end
-		game:GetService("ContentProvider"):PreloadAsync(ids)
-		ready = true
-	end)
-	setCardFace(UNKNOWN_CARDS[1])
-	-- The egg stays visible at scale 0 so its image loads during the roll.
-	cardEgg.Image = egg.id
-	cardEgg.Visible = true
-	poseEgg(0, 1, 1, 0)
-	cardFlash.Visible = false
-	cardBurst.Visible = false
-	cardScale.Scale = 1
-	pose(1, 1, 600, 0)
-	card.Visible = true
-
-	task.spawn(function()
-		-- 1. Drop in from above, stretched by the fall, squash on landing, bounce.
-		local fall = 0.2
-		if not play(ENTER_TIME, function(t)
-			if t < fall then
-				local u = t / fall
-				pose(0.88, 1.18, 600 * (1 - u * u), 0)
-			else
-				local d = spring(t - fall, 3.2, 7)
-				pose(1 + 0.22 * d, 1 - 0.22 * d, 0, 0)
-			end
-		end) then
-			return
-		end
-
-		-- 2. Roll: the faces flick faster and faster while the card shakes and
-		-- swells with the tension. The flicks themselves are clean swaps.
-		local nextFlick, flick = gaps[1], 1
-		local gamble = Sounds.play("reveal_roll") -- (QM: under the roulette, cut as the card lands)
-		if not play(roll, function(t)
-			while flick < flicks and t >= nextFlick do
-				setCardFace(UNKNOWN_CARDS[flick % #UNKNOWN_CARDS + 1])
-				Sounds.play("reveal_tick", 0.35)
-				flick += 1
-				nextFlick += gaps[flick]
-			end
-			local u = t / roll
-			local tension = u * u
-			cardScale.Scale = 1 + 0.08 * tension
-			pose(1, 1, 0, math.sin(t * 55) * 4 * tension)
-		end) then
-			return
-		end
-
-		-- Never pop onto a card or egg that hasn't downloaded (it would flash blank):
-		-- keep rolling fast until both have, for at most a second. (Not IsLoaded:
-		-- the rarity card is hidden until the pop, and a hidden image never reports
-		-- loaded, so that always sat out the full second.)
-		local waited = 0
-		while waited < 1 and not ready do
-			setCardFace(UNKNOWN_CARDS[flick % #UNKNOWN_CARDS + 1])
-			flick += 1
-			waited += RunService.Heartbeat:Wait() + RunService.Heartbeat:Wait()
-			if reveal ~= token then
-				return
-			end
-		end
-
-		-- 3. Anticipation: squash down hard for a beat.
-		if not play(ANTICIPATION, function(t)
-			local u = math.sin(t / ANTICIPATION * math.pi / 2)
-			cardScale.Scale = 1.08 - 0.08 * u
-			pose(1 + 0.2 * u, 1 - 0.25 * u, 0, 0)
-		end) then
-			return
-		end
-
-		for index, resultKind in batch or { kind } do
-			if index > 1 then
-				local animal = game:GetService("ReplicatedStorage").Shared.Animals:FindFirstChild(resultKind)
-				final = RARITY_CARDS[if animal then require(animal).Rarity else "Legendary"] or "cardLegendary"
-				standIn = final == "cardExclusive" and IMAGES.cardExclusive.id == ""
-				if standIn then final = "cardLegendary" end
-				cardFaces.cardLegendary.ImageColor3 = if standIn then EXCLUSIVE_TINT else WHITE
-				egg = IMAGES["egg" .. resultKind] or IMAGES.eggPinto
-				eggW = eggH * baseH * egg.size.X / egg.size.Y / baseW
-				cardEgg.Image = egg.id
-			end
-			-- 4. Pop: the real card, stretched tall and big, springs back with a
-			-- wobble, behind a white flash and the sunburst; the screen shakes.
-			setCardFace(final)
-			if gamble then
-				gamble:Stop()
-				gamble = nil
-			end
-			Sounds.play(if rolled then "roll_reveal" else "reveal_pop")
-			cardExclusive.Visible = standIn
-			cardFlash.Visible = true
-			cardBurst.Visible = Config.EggRevealBurst
-			cardEgg.Visible = true
-			poseEgg(0, 1, 1, 0)
-			local eggDelay = 0.12 -- the egg follows through just after the card
-			-- Multi-open pacing is real time: 0.6 s after the first, then 0.8 s.
-			local resultHold = if batch and index < #batch then (if index == 1 then 0.6 else 0.8) * speed else hold
-			play(resultHold, function(t)
-				local d = spring(t, 2.4, 6)
-				cardScale.Scale = 1 + 0.35 * d
-				local shake = math.max(0, 1 - t / 0.35) * 8
-				local squash = spring(t, 3.5, 7)
-				pose(1 - 0.18 * squash, 1 + 0.22 * squash, math.random(-1, 1) * shake, -8 * spring(t, 1.8, 5))
-				card.Position += UDim2.fromOffset(math.random(-1, 1) * shake, 0)
-				cardFlash.BackgroundTransparency = 0.25 + 0.75 * math.min(t / 0.35, 1)
-				cardBurst.UIScale.Scale = math.min(t / 0.25, 1) * (1 + 0.1 * spring(t, 2, 5))
-				cardBurst.Rotation = t * 30
-				-- Egg: springs out of the card stretched, squashes, then breathes.
-				local e = t - eggDelay
-				if e < 0 then
-					poseEgg(0, 1, 1, 0)
-				else
-					local grow = 1 - spring(e, 2.2, 6)
-					local es = spring(e, 3.8, 6)
-					local breath = math.sin(e * 4) * 0.03 * math.min(e, 1)
-					poseEgg(grow, 1 - 0.25 * es - breath, 1 + 0.3 * es + breath, 0)
-				end
-			end)
-			if reveal ~= token then
-				return
-			end
-			cardFlash.Visible = false
-
-		end
-
-		-- 5. Exit, the entrance in reverse: the card swells and squashes down, then
-		-- pops out, stretching tall as it shrinks away. The egg goes first, just
-		-- ahead of the card, and the sunburst fades with them.
-		play(EXIT_TIME, function(t)
-			cardBurst.UIScale.Scale = 1 - math.min(t / (EXIT_TIME * 0.7), 1)
-			cardBurst.Rotation += 1
-			if t < EXIT_SWELL then
-				local a = math.sin(t / EXIT_SWELL * math.pi / 2)
-				cardScale.Scale = 1 + 0.08 * a
-				pose(1 + 0.15 * a, 1 - 0.18 * a, 0, 0)
-				poseEgg(1, 1 + 0.2 * a, 1 - 0.2 * a, 0)
-				return
-			end
-			local v = (t - EXIT_SWELL) / (EXIT_TIME - EXIT_SWELL)
-			cardScale.Scale = (1.08 + 0.2 * v) * (1 - v * v)
-			pose(1 - 0.15 * v, 1 + 0.22 * v, 40 * v, 0)
-			local e = math.min(v / 0.6, 1) -- the egg is gone by 60% of the way
-			poseEgg(1 - e * e, 1 - 0.2 * e, 1 + 0.3 * e, 0)
-		end)
-		if reveal == token then
-			card.Visible = false
-			cardBurst.Visible = false
-			cardExclusive.Visible = false
-		end
-	end)
-	local extra = if batch and #batch > 1 then 0.6 + math.max(#batch - 2, 0) * 0.8 else 0
-	return (ENTER_TIME + roll + ANTICIPATION + hold + EXIT_TIME) / speed + extra
+	return 0
 end
 
 -- Cutscenes hide the whole ride HUD.

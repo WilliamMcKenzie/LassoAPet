@@ -155,6 +155,7 @@ local function join(player)
 		addBought(player)
 	end)
 	addBought(player)
+	player:SetAttribute("GoldLoaded", true) -- (the saved gold's in: reward popups count from here, Client/RewardPopups)
 end
 Players.PlayerAdded:Connect(join)
 for _, player in Players:GetPlayers() do
