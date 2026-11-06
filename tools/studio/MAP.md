@@ -1,5 +1,9 @@
 # Editing World 1's map (QM, Nov 6)
 
+**The map editor** (tools/mapeditor/README.md): `python3 tools/mapeditor/serve.py`, then
+http://localhost:3001. It paints the course's floor and wall tiles (any wall height), its
+colours, objects and biome borders, and Save builds them into the open Studio place.
+
 The map is the parts in `Workspace.World` of the live place (126872244121414), saved in the
 place like Fight to Steal an Egg's `workspace.Map`. Edit it in Studio (Edit mode) and
 publish; the place is the source of truth. `src/world/World.rbxmx` is an old snapshot, so

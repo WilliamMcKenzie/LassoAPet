@@ -32,6 +32,7 @@ local Config = {
 			Patches = {
 				Dirt = { Color3.fromRGB(206, 146, 84), Color3.fromRGB(222, 164, 100) }, -- (QM, Oct 10; was the walls' 225, 150, 104 / 248, 170, 114)
 				Grass = { Color3.fromRGB(92, 146, 30), Color3.fromRGB(100, 160, 26) }, -- the base's darker green band, between its grass and dirt (tools/world1_base.luau; QM, Oct 13)
+				Cliff = { Color3.fromRGB(226, 186, 128), Color3.fromRGB(214, 172, 114) }, -- the stepped cliffs past the course (tools/world1_meadow_cliffs.luau, the map editor's walls; QM, Nov 6)
 			},
 		},
 		{

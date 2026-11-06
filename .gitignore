@@ -5,3 +5,4 @@
 .DS_Store
 sourcemap.json
 __pycache__/
+tools/mapeditor/MapEditor.html

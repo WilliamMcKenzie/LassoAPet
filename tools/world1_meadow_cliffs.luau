@@ -108,8 +108,29 @@ local function pick(list)
 	return list[rng:NextInteger(1, #list)]
 end
 
+-- The props are models in World.Decor (the map editor's objects), tagged MeadowCliffs so a
+-- rerun clears them; parent is ignored.
+local decor = world:FindFirstChild("Decor") or Instance.new("Folder")
+decor.Name = "Decor"
+decor.Parent = world
+for _, m in decor:GetChildren() do
+	if m:GetAttribute("MeadowCliffs") then
+		m:Destroy()
+	end
+end
+local function prop(name, x, y, z)
+	local m = Instance.new("Model")
+	m.Name = name
+	m:SetAttribute("MeadowCliffs", true)
+	m.Parent = decor
+	return m, function()
+		m.WorldPivot = CFrame.new(x, y, z)
+	end
+end
+
 -- a chunky pine: a trunk and three shrinking blocks of needles
-local function pine(parent, x, y, z, s)
+local function pine(_, x, y, z, s)
+	local parent, done = prop("Pine", x, y, z)
 	block(parent, "Trunk", x - 0.8 * s, y, z - 0.8 * s, x + 0.8 * s, y + 4 * s, z + 0.8 * s, TRUNK, false)
 	local green = pick(PINE)
 	local h = y + 3 * s
@@ -117,18 +138,23 @@ local function pine(parent, x, y, z, s)
 		block(parent, "Needles", x - w * s, h, z - w * s, x + w * s, h + 3 * s, z + w * s, if k == 2 then GRASS_DARK else green, true)
 		h += 2.6 * s
 	end
+	done()
 end
 
-local function boulder(parent, x, y, z, s)
+local function boulder(_, x, y, z, s)
+	local parent, done = prop("Boulder", x, y, z)
 	local p = block(parent, "Boulder", x - s, y - 0.5, z - s * 0.8, x + s, y + s * 1.2, z + s * 0.8, pick(TAN), true)
 	p.CFrame = p.CFrame * CFrame.Angles(0, rng:NextNumber(0, math.pi), rng:NextNumber(-0.15, 0.15))
+	done()
 end
 
-local function flowers(parent, x0, x1, y, z0, z1)
+local function flowers(_, x0, x1, y, z0, z1)
+	local parent, done = prop("Flowers", (x0 + x1) / 2, y, (z0 + z1) / 2)
 	for _ = 1, rng:NextInteger(3, 7) do
 		local x, z = rng:NextNumber(x0, x1), rng:NextNumber(z1, z0)
 		block(parent, "Flower", x - 0.5, y, z - 0.5, x + 0.5, y + 0.6, z + 0.5, pick(FLOWER), false)
 	end
+	done()
 end
 
 -- Each side: segments along the course, each a stack of steps going out and up. The
@@ -159,7 +185,7 @@ for _, side in { -1, 1 } do
 			local depth = rng:NextInteger(3, 7) * 4
 			local a, b = out(depth)
 			block(seg, "Cliff", a, -4, z0, b, plateau - 1, z1, pick(TAN), true)
-			block(seg, "Grass", a, plateau - 1, z0, b, plateau, z1, GRASS, true)
+			block(seg, "Ground", a, plateau - 1, z0, b, plateau, z1, GRASS, true)
 			local lo, hi = math.min(a, b) + 2, math.max(a, b) - 2
 			if rng:NextNumber() < 0.55 then
 				pine(seg, rng:NextNumber(lo, hi), plateau, rng:NextNumber(z1 + 4, z0 - 4), rng:NextNumber(0.9, 1.5))
@@ -177,7 +203,7 @@ for _, side in { -1, 1 } do
 			local depth = rng:NextInteger(4, 9) * 4
 			local a, b = out(depth)
 			block(seg, "Cliff", a, -4, z0, b, middle - 1, z1, pick(TAN), true)
-			block(seg, "Grass", a, middle - 1, z0, b, middle, z1, GRASS_DARK, true)
+			block(seg, "Ground", a, middle - 1, z0, b, middle, z1, GRASS_DARK, true)
 			if rng:NextNumber() < 0.45 then
 				local lo, hi = math.min(a, b) + 3, math.max(a, b) - 3
 				pine(seg, rng:NextNumber(lo, hi), middle, rng:NextNumber(z1 + 4, z0 - 4), rng:NextNumber(1.2, 2))
