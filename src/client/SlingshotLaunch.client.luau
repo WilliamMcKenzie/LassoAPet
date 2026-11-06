@@ -28,6 +28,13 @@ local CAM_BACK, CAM_UP = 34, 12 -- then behind and over you in the air
 
 local busy = false
 
+-- The slingshot's own frame: its Frame1 part, built at the model's origin, so its CFrame is
+-- where the server stood it (a client may not have the Model's WorldPivot).
+local function baseOf(model)
+	local frame = model:FindFirstChild("Frame1")
+	return if frame then frame.CFrame else model:GetPivot()
+end
+
 local function character()
 	local char = player.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -77,7 +84,7 @@ local function launch(model)
 		return
 	end
 	busy = true
-	local base = model:GetPivot()
+	local base = baseOf(model)
 	local pet, rel, size = petCopy(best)
 	-- your pet stands against the band (its back end on it), you on its back
 	local function hold(pull)
@@ -127,7 +134,7 @@ local function launch(model)
 
 	SlingshotPose.launch(model, hold, function(pull)
 		fly(pull)
-	end)
+	end, base)
 	while not flown do
 		task.wait()
 	end
@@ -136,7 +143,8 @@ end
 
 -- The prompt on your own slingshot's band, where it rests.
 local function setup(model)
-	if model:GetAttribute("Owner") ~= player.UserId or model:FindFirstChild("LaunchSpot", true) then
+	local owner = model:GetAttribute("Owner") or tonumber(model.Name) -- (the server names it by its owner's UserId too)
+	if owner ~= player.UserId or model:FindFirstChild("LaunchSpot", true) then
 		return
 	end
 	local frame = model:WaitForChild("Frame1", 30)
@@ -145,7 +153,7 @@ local function setup(model)
 	end
 	local spot = Instance.new("Attachment")
 	spot.Name = "LaunchSpot"
-	spot.WorldCFrame = model:GetPivot() * CFrame.new(LOAD + Vector3.new(0, 2, 0))
+	spot.CFrame = CFrame.new(LOAD + Vector3.new(0, 2, 0)) -- (Frame1 sits at the slingshot's pivot)
 	spot.Parent = frame
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "Launch"
@@ -168,10 +176,6 @@ local function setup(model)
 			return
 		end
 		launch(model)
-	end)
-	-- (it follows the slingshot when the pen grows)
-	model:GetPropertyChangedSignal("WorldPivot"):Connect(function()
-		spot.WorldCFrame = model:GetPivot() * CFrame.new(LOAD + Vector3.new(0, 2, 0))
 	end)
 	task.spawn(function()
 		while model.Parent do
