@@ -268,6 +268,7 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 	end
 	if fogCode then
-		fogCode.step(workspace.CurrentCamera.CFrame.Position.Z, dt)
+		local cf = workspace.CurrentCamera.CFrame
+		fogCode.step(cf.Position.Z, dt, cf.LookVector)
 	end
 end)
