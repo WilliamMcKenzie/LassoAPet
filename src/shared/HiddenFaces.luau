@@ -7,7 +7,7 @@
 -- Rig.covered, but sampled every couple of studs, so a long face with a low neighbour
 -- partway along keeps its studs.
 --
---   HiddenFaces.cull(root) -> how many Textures it dropped
+--   HiddenFaces.cull(root, only?) -> how many Textures it dropped (only: just those instances')
 --     (marks root HiddenFacesCulled, so Server/Map can skip a baked map that's done)
 
 local HiddenFaces = {}
@@ -57,9 +57,19 @@ local function steps(half)
 	return list
 end
 
-function HiddenFaces.cull(root)
+function HiddenFaces.cull(root, only)
 	local grid = {}
 	local textured = {}
+	-- (only: just these instances' textures are looked at, against everything in root)
+	local mine = nil
+	if only then
+		mine = {}
+		for _, x in only do
+			for _, d in x:GetDescendants() do
+				mine[d] = true
+			end
+		end
+	end
 	for _, part in root:GetDescendants() do
 		if part:IsA("BasePart") then
 			if solid(part) then
@@ -72,7 +82,7 @@ function HiddenFaces.cull(root)
 					table.insert(list, part)
 				end)
 			end
-		elseif part:IsA("Texture") then
+		elseif part:IsA("Texture") and (not mine or mine[part]) then
 			local p = part.Parent
 			if p and p.ClassName == "Part" and p.Shape == Enum.PartType.Block then
 				textured[p] = textured[p] or {}

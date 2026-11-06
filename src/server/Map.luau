@@ -162,9 +162,15 @@ end
 -- ---- the floors ----------------------------------------------------------------------
 
 -- (wall tiles go in wallParent, kept out of the Floor: Server/BossAttacks finds the ground there)
-local function floors(parent, wallParent)
+local function floors(parent, wallParent, only, made)
 	for _, area in MapData.Areas do
+		if only and not only[area.Name] then
+			continue
+		end
 		local f = folder(area.Name, parent)
+		if made then
+			table.insert(made, f)
+		end
 		local lowest = math.huge
 		for _, tile in area.Tiles do
 			if not tile[4] then
@@ -196,7 +202,11 @@ local function floors(parent, wallParent)
 				local north = lower(x0, z0 - sz - 2, x0 + sx, z0 - sz - 2)
 				box("Wall", model, x0, FLOOR_BOTTOM, z0, x0 + sx, top - CAP_H, z0 - sz, key, SIDES).Locked = true
 				box("Cap", model, x0 - west, top - CAP_H, z0 + south, x0 + sx + east, top, z0 - sz - north, tile[4]).Locked = true
+				model:SetAttribute("Area", area.Name)
 				model.Parent = wallParent
+				if made then
+					table.insert(made, model)
+				end
 				continue
 			end
 			-- (only raised tiles show their sides; the lowest one's are always buried)
@@ -1142,24 +1152,10 @@ function Map.ensure()
 	return Map.build()
 end
 
-function Map.build(data)
-	if data then
-		data.MeshCentres = data.MeshCentres or MapData.MeshCentres
-		MapFile.applyColours(data, COLORS)
-		MapData = data
-		Map.data = data
-	end
-	local old = workspace:FindFirstChild("World")
-	if old then
-		old:Destroy()
-	end
-	clearSite()
-	loadStone()
-	local map = Instance.new("Folder")
-	map.Name = "World"
-	local wallFolder = folder("Walls", map)
-	floors(folder("Floor", map), wallFolder)
-	walls(wallFolder)
+-- everything but the floors and walls (objects, furniture, the start and finish lines):
+-- cheap, so a save from the map editor builds it again whatever changed
+local REST = { "Pillars", "Base", "Biomes", "Props", "Ruins", "Obstacles", "StartLine", "FinishLine" }
+local function rest(map)
 	local rng = Random.new(24)
 	local pillars = folder("Pillars", map)
 	-- (each built at the origin, then turned, scaled and moved to its spot: they're
@@ -1192,6 +1188,27 @@ function Map.build(data)
 		ruin(ruins, r)
 	end
 	lassoFurniture(map)
+end
+
+function Map.build(data)
+	if data then
+		data.MeshCentres = data.MeshCentres or MapData.MeshCentres
+		MapFile.applyColours(data, COLORS)
+		MapData = data
+		Map.data = data
+	end
+	local old = workspace:FindFirstChild("World")
+	if old then
+		old:Destroy()
+	end
+	clearSite()
+	loadStone()
+	local map = Instance.new("Folder")
+	map.Name = "World"
+	local wallFolder = folder("Walls", map)
+	floors(folder("Floor", map), wallFolder)
+	walls(wallFolder)
+	rest(map)
 	-- (studs on the meshes too, like the blocks round them: QM Oct 31, the bushes and rocks
 	-- were flat. 1-stud studs like the map's blocks; workspace.StudStyle scales them all.)
 	Studs.meshAll(map, 1)
@@ -1200,6 +1217,57 @@ function Map.build(data)
 	map:SetAttribute("Baked", not RunService:IsRunning())
 	map:SetAttribute("Saved", MapData.Saved)
 	map.Parent = workspace
+	return map
+end
+
+-- A save from the map editor (QM, Nov 6: one object added shouldn't rebuild the whole map):
+-- builds again only the floors and walls of `areas` (names), and the cheap rest. Anything
+-- else (no map yet, colours changed: tools/mapeditor/serve.py decides) -> Map.build().
+function Map.update(areas)
+	local map = workspace:FindFirstChild("World")
+	local floorFolder = map and map:FindFirstChild("Floor")
+	local wallFolder = map and map:FindFirstChild("Walls")
+	if not (floorFolder and wallFolder) then
+		return Map.build()
+	end
+	loadStone()
+	local only, made = {}, {}
+	for _, name in areas do
+		only[name] = true
+		local f = floorFolder:FindFirstChild(name)
+		if f then
+			f:Destroy()
+		end
+	end
+	for _, m in wallFolder:GetChildren() do
+		if only[m:GetAttribute("Area")] then
+			m:Destroy()
+		end
+	end
+	if next(only) then
+		floors(floorFolder, wallFolder, only, made)
+	end
+	for _, name in REST do
+		for _, x in map:GetChildren() do
+			if x.Name == name then
+				x:Destroy()
+			end
+		end
+	end
+	local before = {}
+	for _, x in map:GetChildren() do
+		before[x] = true
+	end
+	rest(map)
+	for _, x in map:GetChildren() do
+		if not before[x] then
+			table.insert(made, x)
+			Studs.meshAll(x, 1)
+		end
+	end
+	-- (unseen faces of what's new; the rest of the map was culled when it was built)
+	HiddenFaces.cull(map, made)
+	map:SetAttribute("Saved", MapData.Saved)
 	return map
 end
 

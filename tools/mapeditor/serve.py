@@ -44,6 +44,7 @@ class Served:
 
 
 SERVED = Served()
+BUILT = [None]  # the map text Studio last built (Map.update builds only what changed since)
 PARTS = ("colours", "areas", "tiles", "objects", "fixed", "rows")
 
 
@@ -115,15 +116,38 @@ def run(*args):
     return r.returncode == 0, (r.stdout + r.stderr).strip()
 
 
-def to_studio():
-    """Syncs src/ into Studio and rebuilds workspace.Map there; a message saying how it went."""
+def changed_areas(old, new):
+    """The areas whose floors or walls a save changed, or None when it needs the whole map
+    built again (QM, Nov 6: one object added shouldn't rebuild everything). [] is objects only."""
+    try:
+        o, n = json.loads(old), json.loads(new)
+    except ValueError:
+        return None
+    for k in ("cell", "origin", "size", "areas", "colours", "fixed"):
+        if o.get(k) != n.get(k):
+            return None
+    ot = {t["id"]: t for t in o["tiles"]}
+    nt = {t["id"]: t for t in n["tiles"]}
+    ids = {i for i in set(ot) | set(nt) if ot.get(i) != nt.get(i)}
+    if [t["id"] for t in o["tiles"]] != [t["id"] for t in n["tiles"]]:
+        ids |= set(nt)  # (reordered: every area's tile numbers may have moved)
+    for ro, rn in zip(o["rows"], n["rows"]):
+        if ro != rn:
+            ids |= {a for a, b in zip(ro, rn) if a != b} | {b for a, b in zip(ro, rn) if a != b}
+    return sorted({(nt.get(i) or ot.get(i))["area"] for i in ids if i in nt or i in ot})
+
+
+def to_studio(areas=None):
+    """Syncs src/ into Studio and rebuilds workspace.Map there (only `areas`' floors and the
+    objects, if given); a message saying how it went."""
     load = os.path.join(tempfile.gettempdir(), "mapeditor_load.luau")
     ok, out = run(os.path.join(STUDIO, "mkload.py"), load, *MAP_FILES)
     if ok:
         # (the sync and the rebuild in one call to Studio: QM, Nov 6, a save in about a second)
         sync = open(load).read()
         rebuild = open(os.path.join(STUDIO, "rebuild.luau")).read()
-        open(load, "w").write("local loaded = (function()\n" + sync + "\nend)()\n"
+        head = "local AREAS = " + ("nil" if areas is None else "{" + ", ".join(json.dumps(a) for a in areas) + "}") + "\n"
+        open(load, "w").write(head + "local loaded = (function()\n" + sync + "\nend)()\n"
                               + "return loaded .. \"\\n\" .. (function()\n" + rebuild + "\nend)()\n")
         ok, out = run(os.path.join(STUDIO, "lu.py"), load, "Edit")
     if not ok or "loaded" not in out:
@@ -176,6 +200,9 @@ class Handler(BaseHTTPRequestHandler):
             # (a tab opened before saves were versioned: keep the file's tile heights, which
             # Claude may have changed since that tab opened)
             text = keep_tops(text, current)
+        # (against what Studio last built, not the file: a save that didn't reach Studio
+        # still gets built; the first save after starting this server builds everything)
+        areas = changed_areas(BUILT[0], text) if BUILT[0] else None
         tmp = WORLD + ".tmp"
         open(tmp, "w").write(text)
         os.replace(tmp, WORLD)
@@ -184,7 +211,9 @@ class Handler(BaseHTTPRequestHandler):
         if not ok:
             return self.send(500, "Saved maps/world.map, but baking it failed: " + out[-300:])
         # (merged: the tab reloads the file, so it carries the other changes from now on)
-        self.send(200, to_studio(), headers={"X-Map-Version": version(text), "X-Map-Merged": "1" if merged else "0"})
+        said = to_studio(areas)
+        BUILT[0] = text if said.startswith("Saved and rebuilt") else None
+        self.send(200, said, headers={"X-Map-Version": version(text), "X-Map-Merged": "1" if merged else "0"})
 
     def log_message(self, fmt, *args):
         sys.stderr.write("%s\n" % (fmt % args))

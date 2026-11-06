@@ -12,7 +12,9 @@ game:GetService("ReplicatedStorage").Shared:Clone().Parent = tmp
 game:GetService("ServerScriptService").Server.Map:Clone().Parent = tmp
 tmp.Parent = ServerStorage
 local ok, res = pcall(function()
-	local map = require(tmp.Map).build()
+	-- (AREAS: set by tools/mapeditor/serve.py when a save only changed some areas' floors, or
+	-- only objects ({}): just those are built again. Unset: the whole map.)
+	local map = if AREAS then require(tmp.Map).update(AREAS) else require(tmp.Map).build()
 	-- (the studs' knobs, as the Map Baker plugin does after a bake: Shared/StudStyle)
 	local StudStyle = require(tmp.Shared.StudStyle)
 	StudStyle.ensure()
