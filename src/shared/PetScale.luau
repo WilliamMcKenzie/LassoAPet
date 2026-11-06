@@ -18,6 +18,7 @@ local PetScale = {}
 
 PetScale.NAME = "PetScale"
 PetScale.COPY = "CopyValues" -- (the tick box that prints them)
+PetScale.SPARE = "9 Not in a biome yet" -- (animals no biome has now: their values, kept)
 
 local Config = require(script.Parent.Config)
 
@@ -90,6 +91,20 @@ function PetScale.ensure()
 				-- (a value kept on workspace.PetScale itself, from before the groups, moves in)
 				local old = s:GetAttribute(kind)
 				group:SetAttribute(kind, if type(old) == "number" then old else (Config.AnimalScale[kind] or 1))
+			end
+			s:SetAttribute(kind, nil)
+		end
+	end
+	-- (values left on workspace.PetScale itself, for animals in no biome's herd now: kept, out
+	-- of the way, in a group of their own)
+	local spare = nil
+	for kind, value in s:GetAttributes() do
+		if kind ~= PetScale.COPY and type(value) == "number" then
+			spare = spare or s:FindFirstChild(PetScale.SPARE) or Instance.new("Configuration")
+			spare.Name = PetScale.SPARE
+			spare.Parent = s
+			if spare:GetAttribute(kind) == nil then
+				spare:SetAttribute(kind, value)
 			end
 			s:SetAttribute(kind, nil)
 		end
