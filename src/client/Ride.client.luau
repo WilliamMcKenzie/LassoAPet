@@ -155,6 +155,26 @@ local function smash(o, dir, side, remote)
 	Poof.at(Vector3.new(o.x, 0, o.z))
 end
 
+-- A stampede animal bigger than an obstacle knocks it out of the way (QM, Nov 6: small
+-- obstacles only trouble small animals). Everyone runs the same stampede, so it's local, and
+-- back a few seconds later like another rider's smash.
+function vfx.trample(x, z, tier)
+	for _, o in slices.at(slices.block, z) do
+		if not o.smashed and o.tier < tier and math.abs(o.x - x) < o.hx + 3 and math.abs(o.z - z) < o.hz + 3 then
+			smash(o, -1, if o.x >= x then 1 else -1, true)
+			o.remoteSmash = true
+			task.delay(vfx.REMOTE_SMASH_BACK or 4, function()
+				if o.remoteSmash then
+					o.smashed, o.remoteSmash = nil, nil
+					for _, q in o.parts do
+						q.part.CFrame, q.part.Transparency = q.cframe, q.transparency
+					end
+				end
+			end)
+		end
+	end
+end
+
 local function unsmashAll()
 	for _, o in obstacles do
 		if o.smashed then
@@ -488,12 +508,16 @@ local function smoothstep(a, b, v)
 	return t * t * (3 - 2 * t)
 end
 
--- A stampede animal's x at z: its lane, swerving round any obstacle in the way.
-local function laneX(x0, z)
+-- A stampede animal's x at z: its lane, swerving round any obstacle in the way (of its own
+-- size tier or bigger, given `tier`: smaller ones it knocks aside, vfx.trample; QM Nov 6).
+local function laneX(x0, z, tier)
 	x0 *= vfx.widen(z) -- (lanes are in start-line units)
 	local EDGE = vfx.edge(z)
 	local x = x0
 	for _, o in slices.at(slices.swerve, z) do
+		if tier and o.tier < tier then
+			continue
+		end
 		local reach = o.hx + 6
 		local d = x0 - o.x
 		if math.abs(d) < reach then
@@ -1824,8 +1848,11 @@ local function updateHerd(dt, slowed)
 			if (z <= stream.endZ or z < fromZ or z > toZ) and not lassoed then
 				continue
 			end
-			local x = laneX(p.x, z)
+			local x = laneX(p.x, z, tierOf(p.kind))
 			local shown = lassoed or inView(x, z)
+			if shown then
+				vfx.trample(x, z, tierOf(p.kind))
+			end
 			if not entity then
 				entity = takeFromPool(key, x, z, p.kind)
 				if not entity then
