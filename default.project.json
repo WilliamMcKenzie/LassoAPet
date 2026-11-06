@@ -25,9 +25,6 @@
     "Workspace": {
       "$properties": {
         "StreamingEnabled": false
-      },
-      "Pens": {
-        "$path": "src/world/Pens.rbxmx"
       }
     },
     "Lighting": {

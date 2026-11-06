@@ -1,12 +1,20 @@
--- Builds the map (Server/Map: the base, then one straight walled corridor through the
--- biomes), turns on the live colour attributes (Shared/WorldColors) and marks the world
--- ready. The sky and fog are Lighting's, in default.project.json.
+-- The map (Server/Map: Fight to Steal an Egg's, from the map editor's maps/world.map): the one
+-- baked into the place in Studio, or built now if there's none. Then the live colours
+-- (workspace.WorldColors, Shared/WorldColors) and the studs' knobs (workspace.StudStyle),
+-- and the world's marked ready. The sky and fog are Lighting's, in default.project.json.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Map = require(script.Parent.Map)
+local StudStyle = require(ReplicatedStorage.Shared.StudStyle)
 local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 
-local world = Map.build()
-WorldColors.watch(world)
+local baked = workspace:FindFirstChild("World")
+baked = baked and baked:GetAttribute("Baked")
+local world = Map.ensure()
+StudStyle.ensure()
+if not baked then
+	StudStyle.applyAll() -- (a map built just now: its studs to workspace.StudStyle's knobs)
+end
+WorldColors.create() -- (after the map: it paints it)
 world:SetAttribute("Ready", true)

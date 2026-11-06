@@ -1,0 +1,2305 @@
+{
+ "sprites": {
+  "Boulders_Base": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "BoulderDark"
+   ]
+  ],
+  "Boulders_Meadow": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "MeadowBoulderDark"
+   ]
+  ],
+  "Boulders_Desert": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "DesertBoulderDark"
+   ]
+  ],
+  "Boulders_Ice": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "IceBoulderDark"
+   ]
+  ],
+  "Boulders_Lava": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "LavaBoulderDark"
+   ]
+  ],
+  "Boulders_Dungeon": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "DungeonBoulderDark"
+   ]
+  ],
+  "Boulders_Castle": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "CastleBoulderDark"
+   ]
+  ],
+  "Boulders_Forest": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "ForestBoulderDark"
+   ]
+  ],
+  "Boulders_Ocean": [
+   -4.36,
+   -4.23,
+   6.39,
+   4.88,
+   [
+    "OceanBoulderDark"
+   ]
+  ],
+  "Cactus": [
+   -4.95,
+   -2.47,
+   5.55,
+   2.47,
+   [
+    "CactusFlower",
+    "CactusGreen"
+   ]
+  ],
+  "CactusBarrel": [
+   -2.34,
+   -2.29,
+   4.27,
+   2.46,
+   [
+    "CactusFlower",
+    "CactusGreen"
+   ]
+  ],
+  "Candelabra": [
+   -2.97,
+   -1.76,
+   2.97,
+   1.79,
+   [
+    "CandleFlame",
+    "CandleWax",
+    "Gold"
+   ]
+  ],
+  "CandlePodium": [
+   -1.91,
+   -1.92,
+   1.93,
+   1.91,
+   [
+    "ForestCandleWax",
+    "ForestFlame",
+    "ForestPodium",
+    "ForestPodiumDark"
+   ]
+  ],
+  "Candles": [
+   -2.17,
+   -2.15,
+   2.21,
+   2.19,
+   [
+    "CandleFlame",
+    "CandleWax"
+   ]
+  ],
+  "Coral": [
+   -4.77,
+   -4.93,
+   3.94,
+   5.54,
+   [
+    "Coral"
+   ]
+  ],
+  "DeadTree": [
+   -5.38,
+   -3.98,
+   3.82,
+   4.39,
+   [
+    "DeadWood"
+   ]
+  ],
+  "Femur": [
+   -5.69,
+   -2.58,
+   5.82,
+   2.64,
+   [
+    "Bone"
+   ]
+  ],
+  "ForestCandle": [
+   -1.73,
+   -1.67,
+   1.72,
+   1.76,
+   [
+    "ForestCandleWax",
+    "ForestFlame",
+    "ForestPodiumDark"
+   ]
+  ],
+  "HumanSkull": [
+   -1.44,
+   -1.66,
+   1.46,
+   1.85,
+   [
+    "Bone",
+    "BoneDark"
+   ]
+  ],
+  "Kelp": [
+   -3.09,
+   -2.78,
+   2.11,
+   2.98,
+   [
+    "Kelp",
+    "KelpDark"
+   ]
+  ],
+  "Monolith_Base": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "Monolith",
+    "Rune"
+   ]
+  ],
+  "Monolith_Meadow": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "MeadowMonolith",
+    "MeadowRune"
+   ]
+  ],
+  "Monolith_Desert": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "DesertMonolith",
+    "DesertRune"
+   ]
+  ],
+  "Monolith_Ice": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "IceMonolith",
+    "IceRune"
+   ]
+  ],
+  "Monolith_Lava": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "LavaMonolith",
+    "LavaRune"
+   ]
+  ],
+  "Monolith_Dungeon": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "DungeonMonolith",
+    "DungeonRune"
+   ]
+  ],
+  "Monolith_Castle": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "CastleMonolith",
+    "CastleRune"
+   ]
+  ],
+  "Monolith_Forest": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "ForestMonolith",
+    "ForestRune"
+   ]
+  ],
+  "Monolith_Ocean": [
+   -4.76,
+   -3.42,
+   5.22,
+   3.8,
+   [
+    "OceanMonolith",
+    "OceanRune"
+   ]
+  ],
+  "PalmTree": [
+   -3.97,
+   -8.0,
+   11.94,
+   7.98,
+   [
+    "ForestFrond",
+    "ForestFrondDark",
+    "ForestFruit",
+    "ForestTrunk",
+    "ForestTrunkDark"
+   ]
+  ],
+  "PalmTreeSmall": [
+   -3.34,
+   -5.65,
+   7.47,
+   5.46,
+   [
+    "ForestFrond",
+    "ForestFrondDark",
+    "ForestFruit",
+    "ForestTrunk",
+    "ForestTrunkDark"
+   ]
+  ],
+  "PineShort": [
+   -4.79,
+   -3.98,
+   4.66,
+   4.43,
+   [
+    "PineNeedlesA",
+    "PineNeedlesB",
+    "PineNeedlesC",
+    "PineTrunk"
+   ]
+  ],
+  "PineTall": [
+   -5.06,
+   -4.78,
+   4.34,
+   4.85,
+   [
+    "PineNeedlesA",
+    "PineNeedlesB",
+    "PineNeedlesC",
+    "PineNeedlesD",
+    "PineTrunk"
+   ]
+  ],
+  "Ribcage": [
+   -8.76,
+   -5.38,
+   8.83,
+   5.38,
+   [
+    "Bone",
+    "BoneDark"
+   ]
+  ],
+  "RuinPillar_Base": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "Stone"
+   ]
+  ],
+  "RuinPillar_Meadow": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "MeadowPillar"
+   ]
+  ],
+  "RuinPillar_Desert": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "DesertPillar"
+   ]
+  ],
+  "RuinPillar_Ice": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "IcePillar"
+   ]
+  ],
+  "RuinPillar_Lava": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "LavaPillar"
+   ]
+  ],
+  "RuinPillar_Dungeon": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "DungeonPillar"
+   ]
+  ],
+  "RuinPillar_Castle": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "CastlePillar"
+   ]
+  ],
+  "RuinPillar_Forest": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "ForestPillar"
+   ]
+  ],
+  "RuinPillar_Ocean": [
+   -4.01,
+   -4.08,
+   4.01,
+   4.09,
+   [
+    "OceanPillar"
+   ]
+  ],
+  "RuinPillarBroken_Base": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "Stone"
+   ]
+  ],
+  "RuinPillarBroken_Meadow": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "MeadowPillar"
+   ]
+  ],
+  "RuinPillarBroken_Desert": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "DesertPillar"
+   ]
+  ],
+  "RuinPillarBroken_Ice": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "IcePillar"
+   ]
+  ],
+  "RuinPillarBroken_Lava": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "LavaPillar"
+   ]
+  ],
+  "RuinPillarBroken_Dungeon": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "DungeonPillar"
+   ]
+  ],
+  "RuinPillarBroken_Castle": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "CastlePillar"
+   ]
+  ],
+  "RuinPillarBroken_Forest": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "ForestPillar"
+   ]
+  ],
+  "RuinPillarBroken_Ocean": [
+   -5.31,
+   -3.97,
+   8.31,
+   5.36,
+   [
+    "OceanPillar"
+   ]
+  ],
+  "Shackles": [
+   -2.52,
+   -1.15,
+   2.51,
+   0.51,
+   [
+    "Iron",
+    "IronDark"
+   ]
+  ],
+  "Skull": [
+   -5.29,
+   -5.02,
+   5.3,
+   4.39,
+   [
+    "Bone",
+    "BoneDark"
+   ]
+  ],
+  "SnowPine": [
+   -5.33,
+   -5.31,
+   5.84,
+   5.71,
+   [
+    "PineTrunk",
+    "Snow",
+    "SnowPineNeedles"
+   ]
+  ],
+  "Sponges": [
+   -3.64,
+   -2.77,
+   3.11,
+   2.8,
+   [
+    "Sponge",
+    "SpongeRock"
+   ]
+  ],
+  "Starfish": [
+   -2.34,
+   -2.45,
+   2.59,
+   2.51,
+   [
+    "Starfish"
+   ]
+  ],
+  "Torch": [
+   -1.51,
+   -1.89,
+   2.05,
+   1.88,
+   [
+    "DungeonFlame",
+    "Iron",
+    "IronDark"
+   ]
+  ],
+  "WallTorch": [
+   -1.21,
+   -2.79,
+   1.19,
+   0.51,
+   [
+    "DungeonFlame",
+    "Iron",
+    "IronDark"
+   ]
+  ],
+  "Pillar_Base_joint_14": [
+   -9.0,
+   -9.16,
+   9.17,
+   9.16,
+   [
+    "Stone",
+    "StoneDark"
+   ]
+  ],
+  "Pillar_Meadow_joint_14": [
+   -9.15,
+   -9.15,
+   9.15,
+   9.14,
+   [
+    "MeadowPillar",
+    "MeadowPillarDark"
+   ]
+  ],
+  "Pillar_Desert_joint_14": [
+   -9.15,
+   -9.15,
+   9.15,
+   9.14,
+   [
+    "DesertPillar",
+    "DesertPillarDark"
+   ]
+  ],
+  "Pillar_Ice_joint_14": [
+   -9.32,
+   -9.32,
+   9.32,
+   9.31,
+   [
+    "IcePillar",
+    "IcePillarDark"
+   ]
+  ],
+  "Pillar_Lava_joint_14": [
+   -9.0,
+   -9.16,
+   9.17,
+   9.16,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Dungeon_joint_14": [
+   -9.11,
+   -9.11,
+   9.11,
+   9.1,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Pillar_Castle_joint_14": [
+   -9.15,
+   -9.15,
+   9.15,
+   9.14,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Pillar_Forest_joint_14": [
+   -9.15,
+   -9.15,
+   9.15,
+   9.14,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Pillar_Ocean_joint_14": [
+   -9.12,
+   -9.12,
+   9.12,
+   9.11,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
+   ]
+  ],
+  "Pillar_Base_rubble_20": [
+   -21.06,
+   -8.94,
+   21.08,
+   8.52,
+   [
+    "Stone",
+    "StoneDark"
+   ]
+  ],
+  "Pillar_Meadow_rubble_20": [
+   -22.03,
+   -8.68,
+   16.2,
+   10.27,
+   [
+    "MeadowPillar",
+    "MeadowPillarDark"
+   ]
+  ],
+  "Pillar_Desert_rubble_20": [
+   -22.03,
+   -8.68,
+   16.2,
+   10.27,
+   [
+    "DesertPillar",
+    "DesertPillarDark"
+   ]
+  ],
+  "Pillar_Ice_rubble_20": [
+   -23.39,
+   -10.59,
+   15.91,
+   9.04,
+   [
+    "IcePillar",
+    "IcePillarDark"
+   ]
+  ],
+  "Pillar_Lava_rubble_20": [
+   -21.06,
+   -8.94,
+   21.08,
+   8.52,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Dungeon_rubble_20": [
+   -23.91,
+   -9.73,
+   25.09,
+   9.8,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Pillar_Castle_rubble_20": [
+   -22.03,
+   -8.68,
+   16.2,
+   10.27,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Pillar_Forest_rubble_20": [
+   -22.03,
+   -8.68,
+   16.2,
+   10.27,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Pillar_Ocean_rubble_20": [
+   -20.78,
+   -11.47,
+   20.16,
+   10.12,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
+   ]
+  ],
+  "Pillar_Base_corner_22": [
+   -13.0,
+   -13.3,
+   13.31,
+   13.3,
+   [
+    "Stone",
+    "StoneDark"
+   ]
+  ],
+  "Pillar_Meadow_corner_22": [
+   -13.0,
+   -13.09,
+   13.09,
+   13.09,
+   [
+    "MeadowPillar",
+    "MeadowPillarDark"
+   ]
+  ],
+  "Pillar_Desert_corner_22": [
+   -13.0,
+   -13.09,
+   13.09,
+   13.09,
+   [
+    "DesertPillar",
+    "DesertPillarDark"
+   ]
+  ],
+  "Pillar_Ice_corner_22": [
+   -13.0,
+   -13.08,
+   13.08,
+   13.08,
+   [
+    "IcePillar",
+    "IcePillarDark"
+   ]
+  ],
+  "Pillar_Lava_corner_22": [
+   -13.0,
+   -13.3,
+   13.31,
+   13.3,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Dungeon_corner_22": [
+   -13.23,
+   -13.23,
+   13.23,
+   13.22,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Pillar_Castle_corner_22": [
+   -13.0,
+   -13.09,
+   13.09,
+   13.09,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Pillar_Forest_corner_22": [
+   -13.0,
+   -13.09,
+   13.09,
+   13.09,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Pillar_Ocean_corner_22": [
+   -13.05,
+   -13.35,
+   13.36,
+   13.35,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
+   ]
+  ],
+  "Pillar_Base_gate_24": [
+   -14.0,
+   -14.3,
+   14.31,
+   14.3,
+   [
+    "Stone",
+    "StoneDark"
+   ]
+  ],
+  "Pillar_Meadow_gate_24": [
+   -14.46,
+   -14.47,
+   14.47,
+   14.44,
+   [
+    "MeadowPillar",
+    "MeadowPillarDark"
+   ]
+  ],
+  "Pillar_Desert_gate_24": [
+   -14.46,
+   -14.47,
+   14.47,
+   14.44,
+   [
+    "DesertPillar",
+    "DesertPillarDark"
+   ]
+  ],
+  "Pillar_Ice_gate_24": [
+   -14.0,
+   -14.1,
+   14.1,
+   14.1,
+   [
+    "IcePillar",
+    "IcePillarDark"
+   ]
+  ],
+  "Pillar_Lava_gate_24": [
+   -14.0,
+   -14.3,
+   14.31,
+   14.3,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Dungeon_gate_24": [
+   -14.15,
+   -14.16,
+   14.15,
+   14.14,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Pillar_Castle_gate_24": [
+   -14.46,
+   -14.47,
+   14.47,
+   14.44,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Pillar_Forest_gate_24": [
+   -14.46,
+   -14.47,
+   14.47,
+   14.44,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Pillar_Ocean_gate_24": [
+   -14.0,
+   -14.28,
+   14.29,
+   14.28,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
+   ]
+  ],
+  "Pillar_Base_transition_26": [
+   -15.55,
+   -15.56,
+   15.56,
+   15.53,
+   [
+    "Stone",
+    "StoneDark"
+   ]
+  ],
+  "Pillar_Meadow_transition_26": [
+   -15.1,
+   -15.44,
+   15.45,
+   15.44,
+   [
+    "MeadowPillar",
+    "MeadowPillarDark"
+   ]
+  ],
+  "Pillar_Desert_transition_26": [
+   -15.1,
+   -15.44,
+   15.45,
+   15.44,
+   [
+    "DesertPillar",
+    "DesertPillarDark"
+   ]
+  ],
+  "Pillar_Ice_transition_26": [
+   -15.15,
+   -15.16,
+   15.15,
+   15.14,
+   [
+    "IcePillar",
+    "IcePillarDark"
+   ]
+  ],
+  "Pillar_Lava_transition_26": [
+   -15.55,
+   -15.56,
+   15.56,
+   15.53,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Pillar_Dungeon_transition_26": [
+   -15.0,
+   -15.32,
+   15.33,
+   15.32,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Pillar_Castle_transition_26": [
+   -15.1,
+   -15.44,
+   15.45,
+   15.44,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Pillar_Forest_transition_26": [
+   -15.1,
+   -15.44,
+   15.45,
+   15.44,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Pillar_Ocean_transition_26": [
+   -15.11,
+   -15.11,
+   15.11,
+   15.09,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
+   ]
+  ],
+  "Arch_Base": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "Stone",
+    "StoneDark"
+   ]
+  ],
+  "Arch_Meadow": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "MeadowPillar",
+    "MeadowPillarDark"
+   ]
+  ],
+  "Arch_Desert": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "DesertPillar",
+    "DesertPillarDark"
+   ]
+  ],
+  "Arch_Ice": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "IcePillar",
+    "IcePillarDark"
+   ]
+  ],
+  "Arch_Lava": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "LavaPillar",
+    "LavaPillarDark"
+   ]
+  ],
+  "Arch_Dungeon": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "DungeonPillar",
+    "DungeonPillarDark"
+   ]
+  ],
+  "Arch_Castle": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "CastlePillar",
+    "CastlePillarDark"
+   ]
+  ],
+  "Arch_Forest": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "ForestPillar",
+    "ForestPillarDark"
+   ]
+  ],
+  "Arch_Ocean": [
+   -33.99,
+   -8.5,
+   33.8,
+   8.5,
+   [
+    "OceanPillar",
+    "OceanPillarDark"
+   ]
+  ],
+  "Nest_Meadow": [
+   -6.04,
+   -6.62,
+   6.32,
+   6.19,
+   [
+    "Egg",
+    "NestStick",
+    "NestStickDark"
+   ]
+  ],
+  "Boss_Meadow": [
+   -9.72,
+   -21.24,
+   9.72,
+   13.17,
+   [
+    "_rgb_230_230_224",
+    "_rgb_232_44_52",
+    "_rgb_250_250_246",
+    "_rgb_255_120_120",
+    "_rgb_255_168_36",
+    "_rgb_255_196_40",
+    "_rgb_30_30_45"
+   ]
+  ],
+  "Nest_Desert": [
+   -6.04,
+   -6.62,
+   6.32,
+   6.19,
+   [
+    "Egg",
+    "NestStick",
+    "NestStickDark"
+   ]
+  ],
+  "Boss_Desert": [
+   -14.18,
+   -8.42,
+   14.18,
+   9.38,
+   [
+    "_rgb_104_190_56",
+    "_rgb_250_238_206",
+    "_rgb_255_150_190",
+    "_rgb_255_210_50",
+    "_rgb_255_90_150",
+    "_rgb_54_34_24",
+    "_rgb_64_136_40"
+   ]
+  ],
+  "Nest_Ice": [
+   -6.04,
+   -6.62,
+   6.32,
+   6.19,
+   [
+    "Egg",
+    "NestStick",
+    "NestStickDark"
+   ]
+  ],
+  "Boss_Ice": [
+   -13.72,
+   -26.49,
+   13.72,
+   14.41,
+   [
+    "_rgb_0_0_0",
+    "_rgb_104_40_52",
+    "_rgb_132_116_104",
+    "_rgb_214_132_138",
+    "_rgb_214_208_198",
+    "_rgb_244_236_214",
+    "_rgb_255_0_0",
+    "_rgb_58_54_54",
+    "_rgb_82_72_66"
+   ]
+  ],
+  "Nest_Lava": [
+   -6.04,
+   -6.62,
+   6.32,
+   6.19,
+   [
+    "Egg",
+    "NestStick",
+    "NestStickDark"
+   ]
+  ],
+  "Boss_Lava": [
+   -8.56,
+   -22.78,
+   8.56,
+   39.88,
+   [
+    "_rgb_120_26_40",
+    "_rgb_138_22_34",
+    "_rgb_176_30_42",
+    "_rgb_214_44_40",
+    "_rgb_236_208_160",
+    "_rgb_246_226_186",
+    "_rgb_250_248_238",
+    "_rgb_30_30_45"
+   ]
+  ]
+ },
+ "colours": {
+  "Grass": [
+   148,
+   181,
+   26
+  ],
+  "GrassChecker": [
+   163,
+   194,
+   15
+  ],
+  "Dirt": [
+   200,
+   149,
+   71
+  ],
+  "DirtChecker": [
+   189,
+   141,
+   67
+  ],
+  "WallDirt": [
+   133,
+   90,
+   50
+  ],
+  "WallDirtChecker": [
+   143,
+   98,
+   56
+  ],
+  "PineTrunk": [
+   120,
+   84,
+   58
+  ],
+  "PineNeedlesA": [
+   46,
+   125,
+   80
+  ],
+  "PineNeedlesB": [
+   58,
+   140,
+   88
+  ],
+  "PineNeedlesC": [
+   40,
+   112,
+   72
+  ],
+  "PineNeedlesD": [
+   66,
+   150,
+   96
+  ],
+  "Stone": [
+   214,
+   216,
+   206
+  ],
+  "RegionBarrier": [
+   0,
+   28,
+   78
+  ],
+  "StoneDark": [
+   176,
+   178,
+   168
+  ],
+  "Wood": [
+   150,
+   98,
+   56
+  ],
+  "WoodDark": [
+   110,
+   72,
+   42
+  ],
+  "Straw": [
+   226,
+   196,
+   110
+  ],
+  "NestStick": [
+   143,
+   74,
+   44
+  ],
+  "NestStickDark": [
+   110,
+   56,
+   34
+  ],
+  "StrawDark": [
+   196,
+   164,
+   84
+  ],
+  "Egg": [
+   250,
+   246,
+   232
+  ],
+  "EggSpot": [
+   150,
+   200,
+   90
+  ],
+  "Sign": [
+   58,
+   46,
+   38
+  ],
+  "MeadowWater": [
+   76,
+   156,
+   222
+  ],
+  "MeadowWaterChecker": [
+   90,
+   170,
+   232
+  ],
+  "MeadowGrass": [
+   148,
+   181,
+   26
+  ],
+  "MeadowGrassChecker": [
+   163,
+   194,
+   15
+  ],
+  "MeadowDirt": [
+   200,
+   149,
+   71
+  ],
+  "MeadowDirtChecker": [
+   189,
+   141,
+   67
+  ],
+  "MeadowWall": [
+   133,
+   90,
+   50
+  ],
+  "MeadowWallChecker": [
+   143,
+   98,
+   56
+  ],
+  "MeadowCap": [
+   148,
+   181,
+   26
+  ],
+  "MeadowCapChecker": [
+   163,
+   194,
+   15
+  ],
+  "MeadowPillar": [
+   168,
+   184,
+   108
+  ],
+  "MeadowPillarDark": [
+   134,
+   152,
+   82
+  ],
+  "DesertDryGrass": [
+   178,
+   170,
+   76
+  ],
+  "DesertDryGrassChecker": [
+   190,
+   180,
+   86
+  ],
+  "DesertSand": [
+   232,
+   188,
+   102
+  ],
+  "DesertSandChecker": [
+   246,
+   208,
+   124
+  ],
+  "DesertSandstone": [
+   206,
+   146,
+   84
+  ],
+  "DesertSandstoneChecker": [
+   222,
+   164,
+   100
+  ],
+  "DesertWall": [
+   206,
+   118,
+   72
+  ],
+  "DesertWallChecker": [
+   226,
+   138,
+   88
+  ],
+  "DesertCap": [
+   222,
+   164,
+   100
+  ],
+  "DesertCapChecker": [
+   232,
+   176,
+   112
+  ],
+  "DesertPillar": [
+   226,
+   178,
+   112
+  ],
+  "DesertPillarDark": [
+   202,
+   148,
+   90
+  ],
+  "IceColdGrass": [
+   80,
+   160,
+   166
+  ],
+  "IceColdGrassChecker": [
+   96,
+   176,
+   180
+  ],
+  "IceSnow": [
+   228,
+   234,
+   242
+  ],
+  "IceSnowChecker": [
+   244,
+   247,
+   251
+  ],
+  "IceGlacier": [
+   160,
+   188,
+   244
+  ],
+  "IceGlacierChecker": [
+   178,
+   202,
+   250
+  ],
+  "IceWall": [
+   126,
+   164,
+   214
+  ],
+  "IceWallChecker": [
+   146,
+   182,
+   228
+  ],
+  "IceCap": [
+   244,
+   247,
+   251
+  ],
+  "IceCapChecker": [
+   232,
+   238,
+   246
+  ],
+  "IcePillar": [
+   204,
+   222,
+   246
+  ],
+  "IcePillarDark": [
+   164,
+   192,
+   232
+  ],
+  "LavaMagma": [
+   255,
+   116,
+   24
+  ],
+  "LavaMagmaChecker": [
+   255,
+   146,
+   40
+  ],
+  "LavaRock": [
+   156,
+   98,
+   66
+  ],
+  "LavaRockChecker": [
+   168,
+   108,
+   74
+  ],
+  "LavaBasalt": [
+   84,
+   66,
+   62
+  ],
+  "LavaBasaltChecker": [
+   94,
+   74,
+   68
+  ],
+  "LavaWall": [
+   170,
+   92,
+   58
+  ],
+  "LavaWallChecker": [
+   186,
+   104,
+   66
+  ],
+  "LavaCap": [
+   96,
+   60,
+   46
+  ],
+  "LavaCapChecker": [
+   106,
+   68,
+   52
+  ],
+  "LavaPillar": [
+   104,
+   80,
+   70
+  ],
+  "LavaPillarDark": [
+   76,
+   60,
+   56
+  ],
+  "DungeonStone": [
+   74,
+   96,
+   86
+  ],
+  "DungeonStoneChecker": [
+   82,
+   106,
+   94
+  ],
+  "DungeonSlate": [
+   66,
+   82,
+   102
+  ],
+  "DungeonSlateChecker": [
+   74,
+   91,
+   112
+  ],
+  "DungeonWall": [
+   38,
+   40,
+   44
+  ],
+  "DungeonWallChecker": [
+   45,
+   47,
+   52
+  ],
+  "DungeonCap": [
+   54,
+   58,
+   60
+  ],
+  "DungeonCapChecker": [
+   61,
+   65,
+   67
+  ],
+  "DungeonPillar": [
+   84,
+   92,
+   92
+  ],
+  "DungeonPillarDark": [
+   58,
+   64,
+   66
+  ],
+  "CastleCarpet": [
+   156,
+   22,
+   42
+  ],
+  "CastleCarpetChecker": [
+   170,
+   30,
+   52
+  ],
+  "CastleFloor": [
+   78,
+   70,
+   86
+  ],
+  "CastleFloorChecker": [
+   87,
+   78,
+   95
+  ],
+  "CastleWall": [
+   112,
+   34,
+   42
+  ],
+  "CastleWallChecker": [
+   124,
+   40,
+   48
+  ],
+  "CastleCap": [
+   70,
+   62,
+   78
+  ],
+  "CastleCapChecker": [
+   78,
+   70,
+   86
+  ],
+  "CastlePillar": [
+   132,
+   116,
+   132
+  ],
+  "CastlePillarDark": [
+   100,
+   86,
+   102
+  ],
+  "ForestGrass": [
+   56,
+   196,
+   168
+  ],
+  "ForestGrassChecker": [
+   66,
+   208,
+   178
+  ],
+  "ForestStone": [
+   96,
+   124,
+   214
+  ],
+  "ForestStoneChecker": [
+   106,
+   134,
+   224
+  ],
+  "ForestWall": [
+   112,
+   140,
+   222
+  ],
+  "ForestWallChecker": [
+   124,
+   152,
+   230
+  ],
+  "ForestCap": [
+   56,
+   196,
+   168
+  ],
+  "ForestCapChecker": [
+   66,
+   208,
+   178
+  ],
+  "ForestPillar": [
+   150,
+   176,
+   240
+  ],
+  "ForestPillarDark": [
+   112,
+   140,
+   222
+  ],
+  "OceanSand": [
+   140,
+   200,
+   236
+  ],
+  "OceanSandChecker": [
+   152,
+   210,
+   242
+  ],
+  "OceanStone": [
+   60,
+   92,
+   188
+  ],
+  "OceanStoneChecker": [
+   68,
+   102,
+   198
+  ],
+  "OceanWall": [
+   48,
+   76,
+   170
+  ],
+  "OceanWallChecker": [
+   56,
+   86,
+   182
+  ],
+  "OceanCap": [
+   60,
+   92,
+   188
+  ],
+  "OceanCapChecker": [
+   68,
+   102,
+   198
+  ],
+  "OceanPillar": [
+   76,
+   110,
+   204
+  ],
+  "OceanPillarDark": [
+   52,
+   82,
+   176
+  ],
+  "CactusGreen": [
+   92,
+   168,
+   70
+  ],
+  "CactusFlower": [
+   255,
+   120,
+   170
+  ],
+  "SnowPineNeedles": [
+   52,
+   112,
+   96
+  ],
+  "Snow": [
+   244,
+   248,
+   252
+  ],
+  "DeadWood": [
+   70,
+   56,
+   50
+  ],
+  "Bone": [
+   232,
+   222,
+   196
+  ],
+  "BoneDark": [
+   150,
+   136,
+   112
+  ],
+  "Boulder": [
+   150,
+   152,
+   146
+  ],
+  "BoulderDark": [
+   118,
+   120,
+   116
+  ],
+  "Monolith": [
+   96,
+   98,
+   106
+  ],
+  "MonolithDark": [
+   68,
+   70,
+   78
+  ],
+  "Rune": [
+   110,
+   200,
+   255
+  ],
+  "MeadowBoulder": [
+   140,
+   146,
+   124
+  ],
+  "MeadowBoulderDark": [
+   106,
+   116,
+   92
+  ],
+  "MeadowMonolith": [
+   118,
+   128,
+   104
+  ],
+  "MeadowMonolithDark": [
+   86,
+   98,
+   74
+  ],
+  "MeadowRune": [
+   120,
+   255,
+   140
+  ],
+  "DesertBoulder": [
+   198,
+   140,
+   92
+  ],
+  "DesertBoulderDark": [
+   164,
+   108,
+   70
+  ],
+  "DesertMonolith": [
+   212,
+   166,
+   106
+  ],
+  "DesertMonolithDark": [
+   176,
+   130,
+   80
+  ],
+  "DesertRune": [
+   255,
+   214,
+   90
+  ],
+  "IceBoulder": [
+   152,
+   178,
+   206
+  ],
+  "IceBoulderDark": [
+   112,
+   142,
+   178
+  ],
+  "IceMonolith": [
+   122,
+   160,
+   210
+  ],
+  "IceMonolithDark": [
+   86,
+   124,
+   178
+  ],
+  "IceRune": [
+   130,
+   236,
+   255
+  ],
+  "LavaBoulder": [
+   64,
+   54,
+   52
+  ],
+  "LavaBoulderDark": [
+   44,
+   38,
+   38
+  ],
+  "LavaMonolith": [
+   104,
+   80,
+   70
+  ],
+  "LavaMonolithDark": [
+   76,
+   60,
+   56
+  ],
+  "LavaRune": [
+   255,
+   120,
+   40
+  ],
+  "DungeonBoulder": [
+   70,
+   78,
+   78
+  ],
+  "DungeonBoulderDark": [
+   50,
+   56,
+   58
+  ],
+  "DungeonMonolith": [
+   56,
+   62,
+   66
+  ],
+  "DungeonMonolithDark": [
+   40,
+   44,
+   48
+  ],
+  "DungeonRune": [
+   90,
+   255,
+   140
+  ],
+  "CastleBoulder": [
+   96,
+   86,
+   102
+  ],
+  "CastleBoulderDark": [
+   72,
+   64,
+   78
+  ],
+  "CastleMonolith": [
+   88,
+   78,
+   96
+  ],
+  "CastleMonolithDark": [
+   64,
+   56,
+   72
+  ],
+  "CastleRune": [
+   255,
+   70,
+   90
+  ],
+  "ForestBoulder": [
+   120,
+   146,
+   224
+  ],
+  "ForestBoulderDark": [
+   90,
+   114,
+   196
+  ],
+  "ForestMonolith": [
+   128,
+   156,
+   232
+  ],
+  "ForestMonolithDark": [
+   96,
+   122,
+   204
+  ],
+  "ForestRune": [
+   110,
+   220,
+   255
+  ],
+  "OceanBoulder": [
+   64,
+   96,
+   190
+  ],
+  "OceanBoulderDark": [
+   46,
+   72,
+   160
+  ],
+  "OceanMonolith": [
+   70,
+   104,
+   198
+  ],
+  "OceanMonolithDark": [
+   50,
+   78,
+   168
+  ],
+  "OceanRune": [
+   120,
+   255,
+   230
+  ],
+  "Iron": [
+   84,
+   88,
+   96
+  ],
+  "IronDark": [
+   52,
+   54,
+   60
+  ],
+  "DungeonFlame": [
+   90,
+   255,
+   130
+  ],
+  "Gold": [
+   214,
+   168,
+   72
+  ],
+  "CandleWax": [
+   242,
+   232,
+   206
+  ],
+  "CandleFlame": [
+   255,
+   196,
+   92
+  ],
+  "ForestTrunk": [
+   92,
+   64,
+   82
+  ],
+  "ForestTrunkDark": [
+   74,
+   50,
+   68
+  ],
+  "ForestFrond": [
+   36,
+   150,
+   132
+  ],
+  "ForestFrondDark": [
+   28,
+   124,
+   112
+  ],
+  "ForestFruit": [
+   150,
+   96,
+   200
+  ],
+  "ForestPodium": [
+   150,
+   176,
+   240
+  ],
+  "ForestPodiumDark": [
+   104,
+   130,
+   214
+  ],
+  "ForestCandleWax": [
+   226,
+   220,
+   246
+  ],
+  "ForestFlame": [
+   96,
+   196,
+   255
+  ],
+  "Kelp": [
+   60,
+   168,
+   128
+  ],
+  "KelpDark": [
+   44,
+   136,
+   108
+  ],
+  "Starfish": [
+   255,
+   112,
+   64
+  ],
+  "Sponge": [
+   92,
+   92,
+   230
+  ],
+  "SpongeRock": [
+   52,
+   60,
+   108
+  ],
+  "Coral": [
+   226,
+   72,
+   170
+  ],
+  "Color": [
+   255,
+   255,
+   255
+  ],
+  "_rgb_255_168_36": [
+   255,
+   168,
+   36
+  ],
+  "_rgb_230_230_224": [
+   230,
+   230,
+   224
+  ],
+  "_rgb_250_250_246": [
+   250,
+   250,
+   246
+  ],
+  "_rgb_255_196_40": [
+   255,
+   196,
+   40
+  ],
+  "_rgb_232_44_52": [
+   232,
+   44,
+   52
+  ],
+  "_rgb_255_120_120": [
+   255,
+   120,
+   120
+  ],
+  "_rgb_30_30_45": [
+   30,
+   30,
+   45
+  ],
+  "_rgb_104_190_56": [
+   104,
+   190,
+   56
+  ],
+  "_rgb_64_136_40": [
+   64,
+   136,
+   40
+  ],
+  "_rgb_255_90_150": [
+   255,
+   90,
+   150
+  ],
+  "_rgb_255_150_190": [
+   255,
+   150,
+   190
+  ],
+  "_rgb_255_210_50": [
+   255,
+   210,
+   50
+  ],
+  "_rgb_250_238_206": [
+   250,
+   238,
+   206
+  ],
+  "_rgb_54_34_24": [
+   54,
+   34,
+   24
+  ],
+  "_rgb_132_116_104": [
+   132,
+   116,
+   104
+  ],
+  "_rgb_58_54_54": [
+   58,
+   54,
+   54
+  ],
+  "_rgb_214_208_198": [
+   214,
+   208,
+   198
+  ],
+  "_rgb_244_236_214": [
+   244,
+   236,
+   214
+  ],
+  "_rgb_214_132_138": [
+   214,
+   132,
+   138
+  ],
+  "_rgb_104_40_52": [
+   104,
+   40,
+   52
+  ],
+  "_rgb_82_72_66": [
+   82,
+   72,
+   66
+  ],
+  "_rgb_0_0_0": [
+   0,
+   0,
+   0
+  ],
+  "_rgb_255_0_0": [
+   255,
+   0,
+   0
+  ],
+  "_rgb_246_226_186": [
+   246,
+   226,
+   186
+  ],
+  "_rgb_138_22_34": [
+   138,
+   22,
+   34
+  ],
+  "_rgb_214_44_40": [
+   214,
+   44,
+   40
+  ],
+  "_rgb_236_208_160": [
+   236,
+   208,
+   160
+  ],
+  "_rgb_120_26_40": [
+   120,
+   26,
+   40
+  ],
+  "_rgb_250_248_238": [
+   250,
+   248,
+   238
+  ],
+  "_rgb_176_30_42": [
+   176,
+   30,
+   42
+  ]
+ }
+}
