@@ -128,6 +128,9 @@ end
 
 local function place(player)
 	remove(player)
+	if player:GetAttribute("Tutorial") then
+		return -- (none till the tutorial's over: QM, Nov 6; Hatchery's "Tutorial")
+	end
 	local index = player:GetAttribute("Pen")
 	local pens = workspace:FindFirstChild("Pens")
 	local pen = index and pens and pens:FindFirstChild("Pen" .. index)
@@ -153,6 +156,9 @@ local function place(player)
 end
 
 local function watch(player)
+	player:GetAttributeChangedSignal("Tutorial"):Connect(function()
+		place(player)
+	end)
 	player:GetAttributeChangedSignal("Pen"):Connect(function()
 		place(player)
 	end)
