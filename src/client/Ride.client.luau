@@ -946,6 +946,7 @@ require(script.Parent.SlingshotRide).ride = function(x, z)
 		return false
 	end
 	startRide(best, Vector3.new(x, 0, z))
+	warpLevel = Config.Slingshot.To -- (its gate lets you through: you were flung past it)
 	return phase == "outbound"
 end
 
