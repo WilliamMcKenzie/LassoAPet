@@ -2216,9 +2216,12 @@ end
 do
 	local petScale = workspace:FindFirstChild("PetScale")
 	if petScale then
-		for kind, value in petScale:GetAttributes() do
-			if type(value) == "number" and value > 0 then
-				Config.AnimalScale[kind] = value
+		-- (each biome's group, and values kept on it from before the groups)
+		for _, holder in { petScale, table.unpack(petScale:GetChildren()) } do
+			for kind, value in holder:GetAttributes() do
+				if type(value) == "number" and value > 0 then
+					Config.AnimalScale[kind] = value
+				end
 			end
 		end
 	end

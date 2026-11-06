@@ -197,16 +197,26 @@ function PetLineup.watch()
 			resize(kind) -- (values changed while nothing was watching)
 		end
 	end
-	return s.AttributeChanged:Connect(function(name)
+	-- (the CopyValues tick on workspace.PetScale, each animal's value in its biome's group)
+	local conns = {}
+	table.insert(conns, s.AttributeChanged:Connect(function(name)
 		if name == PetScale.COPY then
 			if s:GetAttribute(name) == true then
 				print("[PetScale] paste this over Config.AnimalScale (src/shared/Config.luau):\n" .. PetScale.text())
 				s:SetAttribute(name, false)
 			end
-		elseif name ~= PetScale.COPY then
-			resize(name)
 		end
-	end)
+	end))
+	for _, group in s:GetChildren() do
+		table.insert(conns, group.AttributeChanged:Connect(resize))
+	end
+	return {
+		Disconnect = function()
+			for _, c in conns do
+				c:Disconnect()
+			end
+		end,
+	}
 end
 
 return PetLineup
