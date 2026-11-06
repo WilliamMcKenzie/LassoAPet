@@ -1,4 +1,4 @@
-{"format":"StealAndFightPets.map","version":1,"cell":4,"origin":[-724,-21696],"size":[362,5620],"saved":"2026-11-06T19:59:09Z",
+{"format":"StealAndFightPets.map","version":1,"cell":4,"origin":[-724,-21696],"size":[362,5620],"saved":"2026-11-06T20:23:30Z",
 "colours": {
   "BoulderDark": [162,169,163],
   "CactusFlower": [255,148,251],
@@ -485,7 +485,7 @@
   {"type":"Prop","item":"Sponges","x":-57,"z":-20962,"yaw":273,"scale":3.32,"style":"Ocean"},
   {"type":"Prop","item":"Starfish","x":-55,"z":-21052,"yaw":261,"scale":2.81,"style":"Ocean"},
   {"type":"Prop","item":"Kelp","x":196,"z":-18046,"yaw":329,"scale":4.36,"style":"Ocean"},
-  {"type":"Prop","item":"Kelp","x":164,"z":-17962,"yaw":18,"scale":5.0,"style":"Ocean"},
+  {"type":"Prop","item":"Kelp","x":164,"z":-17962,"yaw":18,"scale":5,"style":"Ocean"},
   {"type":"Prop","item":"Kelp","x":190,"z":-18031,"yaw":277,"scale":4.73,"style":"Ocean"},
   {"type":"Prop","item":"Kelp","x":185,"z":-18005,"yaw":23,"scale":6.28,"style":"Ocean"},
   {"type":"Prop","item":"Kelp","x":162,"z":-18029,"yaw":84,"scale":5.43,"style":"Ocean"},
@@ -541,7 +541,7 @@
   {"type":"Prop","item":"Kelp","x":139,"z":-19374,"yaw":204,"scale":6.18,"style":"Ocean"},
   {"type":"Prop","item":"Kelp","x":158,"z":-19327,"yaw":209,"scale":6.18,"style":"Ocean"},
   {"type":"Prop","item":"Kelp","x":-131,"z":-19537,"yaw":330,"scale":5.63,"style":"Ocean"},
-  {"type":"Prop","item":"Kelp","x":-132,"z":-19529,"yaw":359,"scale":3.0,"style":"Ocean"},
+  {"type":"Prop","item":"Kelp","x":-132,"z":-19529,"yaw":359,"scale":3,"style":"Ocean"},
   {"type":"Prop","item":"Kelp","x":-148,"z":-19497,"yaw":102,"scale":6.32,"style":"Ocean"},
   {"type":"Prop","item":"Kelp","x":-141,"z":-19453,"yaw":51,"scale":6.66,"style":"Ocean"},
   {"type":"Prop","item":"Kelp","x":-113,"z":-19452,"yaw":107,"scale":6.53,"style":"Ocean"},
@@ -624,7 +624,11 @@
   {"type":"Prop","item":"Kelp","x":-203,"z":-21511,"yaw":16,"scale":6.42,"style":"Ocean"},
   {"type":"Prop","item":"Kelp","x":-197,"z":-21571,"yaw":254,"scale":5.45,"style":"Ocean"},
   {"type":"Prop","item":"Boulders","x":-188,"z":-21556,"yaw":55,"scale":7,"style":"Ocean"},
-  {"type":"Prop","item":"Boulders","x":188,"z":-21556,"yaw":92,"scale":7,"style":"Ocean"}
+  {"type":"Prop","item":"Boulders","x":188,"z":-21556,"yaw":92,"scale":7,"style":"Ocean"},
+  {"type":"Prop","item":"Torch","x":22,"z":-9304,"yaw":23,"scale":1,"style":"Dungeon"},
+  {"type":"Prop","item":"Torch","x":-22,"z":-9304,"yaw":123,"scale":1,"style":"Dungeon"},
+  {"type":"Prop","item":"Torch","x":25,"z":-9720,"yaw":180,"scale":1,"style":"Dungeon"},
+  {"type":"Prop","item":"Torch","x":-25,"z":-9720,"yaw":174,"scale":1,"style":"Dungeon"}
 ],
 "fixed": {
   "wallHeight": 30,
