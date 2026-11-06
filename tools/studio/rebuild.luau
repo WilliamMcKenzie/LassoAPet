@@ -5,6 +5,7 @@ if game:GetService("RunService"):IsRunning() then
 	return "playing: stop Play first"
 end
 local ServerStorage = game:GetService("ServerStorage")
+local started = os.clock()
 -- (fresh copies of Server.Map and Shared side by side: required modules stay cached)
 local tmp = Instance.new("Folder")
 tmp.Name = "MapBakerTemp"
@@ -28,4 +29,4 @@ local ok, res = pcall(function()
 	return parts
 end)
 tmp:Destroy()
-return if ok then "baked " .. res .. " parts" else "error: " .. tostring(res)
+return if ok then string.format("baked %d parts in %.2f s", res, os.clock() - started) else "error: " .. tostring(res)

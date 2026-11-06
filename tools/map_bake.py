@@ -8,6 +8,7 @@ Run: python3 tools/map_bake.py [file.map]     (default maps/world.map)
 """
 
 import json
+import re
 import os
 import shutil
 import sys
@@ -49,7 +50,8 @@ def bake(path=WORLD):
     # goes to Studio faster the smaller this is. Shared/MapFile puts the rows back.)
     seen = {}
     data["rowIndex"] = [seen.setdefault(r, len(seen) + 1) for r in data["rows"]]
-    data["rowSet"] = list(seen)
+    # (and each of those as runs, [cell, how many, cell, how many, ...]: 290 KB -> 60 KB)
+    data["rowRuns"] = [[x for m in re.finditer(r"(.)\1*", r, re.S) for x in (m.group(1), len(m.group(0)))] for r in seen]
     del data["rows"]
     text = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
     level = 1
