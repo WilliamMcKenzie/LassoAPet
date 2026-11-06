@@ -342,7 +342,8 @@ local Config = {
 			CapColor = Color3.fromRGB(130, 28, 55),
 			GateColor = Color3.fromRGB(255, 0, 25),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02 },
+			Herd = { WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02,
+				TRex = 0.12, Pterodactyl = 0.08 }, -- (QM, Nov 6: the old Jurassic's T-Rex and Pterodactyl, at their old weights)
 			UnlockCost = 10000000000,
 		},
 		{
@@ -1758,6 +1759,8 @@ Config.SharedPets = {
 	Lionfish = { 20000, 300, 8.8 }, -- Rare
 	BlueCrab = { 42500, 7200, 9.2 }, -- Legendary
 	Kraken = { 42500, 7200, 9.6 }, -- Legendary
+	TRex = { 27500, 1200, 9 }, -- Epic (the old Jurassic's, now the Castle's: QM Nov 6)
+	Pterodactyl = { 27500, 1200, 9.2 }, -- Epic
 }
 for kind, p in Config.SharedPets do
 	Config.PetIncome[kind] = p[1]
