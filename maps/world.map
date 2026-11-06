@@ -1,4 +1,4 @@
-{"format":"StealAndFightPets.map","version":1,"cell":4,"origin":[-724,-21696],"size":[362,5620],"saved":"2026-11-06T18:54:27Z",
+{"format":"StealAndFightPets.map","version":1,"cell":4,"origin":[-724,-21696],"size":[362,5620],"saved":"2026-11-06T19:04:46Z",
 "colours": {
   "BoulderDark": [162,169,163],
   "CactusFlower": [255,148,251],
@@ -52,8 +52,10 @@
   "MeadowCapChecker": [24,203,31],
   "MeadowGrass": [23,191,29],
   "MeadowGrassChecker": [24,203,31],
+  "MeadowMonolith": [162,169,163],
   "MeadowPillar": [177,185,178],
   "MeadowPillarDark": [162,169,163],
+  "MeadowRune": [0,255,38],
   "Monolith": [162,169,163],
   "OceanBoulderDark": [79,112,156],
   "OceanCap": [157,226,244],
@@ -179,7 +181,17 @@
   {"type":"Prop","item":"Boulders","x":-131,"z":-26,"yaw":304,"scale":3.76,"style":"Meadow"},
   {"type":"Prop","item":"Boulders","x":-113,"z":-37,"yaw":224,"scale":2.37,"style":"Meadow"},
   {"type":"Prop","item":"Boulders","x":-138,"z":-56,"yaw":115,"scale":2.34,"style":"Meadow"},
-  {"type":"Prop","item":"Boulders","x":153,"z":-32,"yaw":82,"scale":2.85,"style":"Meadow"}
+  {"type":"Prop","item":"Boulders","x":153,"z":-32,"yaw":82,"scale":2.85,"style":"Meadow"},
+  {"type":"Prop","item":"Monolith","x":169,"z":-46,"yaw":160,"scale":4.9,"style":"Meadow"},
+  {"type":"Arch","style":"Meadow","x":7,"z":-148,"scale":5.62},
+  {"type":"Prop","item":"Boulders","x":476,"z":-268,"yaw":227,"scale":10,"style":"Base"},
+  {"type":"Prop","item":"Boulders","x":-482,"z":-166,"yaw":281,"scale":7.67,"style":"Base"},
+  {"type":"Prop","item":"Boulders","x":-525,"z":182,"yaw":302,"scale":10,"style":"Base"},
+  {"type":"Prop","item":"Boulders","x":444,"z":252,"yaw":123,"scale":10,"style":"Base"},
+  {"type":"Prop","item":"RuinPillar","x":477,"z":113,"yaw":60,"scale":10,"style":"Base"},
+  {"type":"Prop","item":"RuinPillarBroken","x":-43,"z":575,"yaw":144,"scale":10,"style":"Base"},
+  {"type":"Pillar","style":"Meadow","kind":"gate","x":225,"z":-148,"size":24,"height":36,"scale":5},
+  {"type":"Pillar","style":"Meadow","kind":"joint","x":-151,"z":-147,"size":14,"height":36,"scale":7}
 ],
 "fixed": {
   "wallHeight": 30,
