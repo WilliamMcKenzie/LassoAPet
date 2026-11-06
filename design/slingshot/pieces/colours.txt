@@ -5,6 +5,4 @@ Slingshot_3: Bark, 186, 134, 80
 Slingshot_4: Bark, 158, 108, 62
 Slingshot_5: Iron, 86, 88, 98
 Slingshot_6: Rope, 232, 204, 150
-SlingshotPouch_1: Leather, 132, 80, 44
-SlingshotPouch_2: Stitching, 112, 66, 36
 SlingshotBand_1: Band, 226, 58, 52

@@ -1,20 +1,20 @@
 """Giant slingshot (QM, Nov 6), in the pirate props' style (tools/pirate_meshes.py:
 faceted convex pieces, flat shaded, studded; each piece its own MeshPart in its own
-colour). It flings the player and their pet: they stand in the pouch, which rests
-pulled back and low by the ground (easy to step into), draws back a touch more, then
-snaps forward past the fork and lets them go.
+colour). It flings the player and their pet: no pouch (QM), they stand against the band
+itself, which rests pulled back to the ground (easy to step onto), draws back a touch
+more, then snaps forward past the fork and lets them go.
 
-Four items, so the pouch can move and the bands can stretch:
+Two items, so the band can stretch:
 
   Slingshot        the frame: stone base, forked wooden trunk, iron bands, rope wraps at
                    the tips (origin: middle of its base, y = 0; it flings toward -z)
-  SlingshotPouch   the leather pouch, origin at its middle; it faces -z (its back wall at
-                   +z, the floor under the rider at y = -2), so CFrame.lookAt(pouch, the
-                   tips' middle, its height scaled by TILT) poses it
-  SlingshotBand    one rubber band, 1 stud long along z (centred): stretch it from a tip
-                   to the pouch's side with Size.Z = the distance (two of them)
+  SlingshotBand    a piece of rubber band, 1 stud long along z (centred): the band is three
+                   of them, tip -> rider's left, across the rider's back, rider's right -> tip,
+                   each stretched with Size.Z = its length
 
-Poses (frame space): TIPS, POUCH_SIDE (pouch space), LOAD (resting), DRAW, NEUTRAL.
+The rider's frame ("the pull") faces -z with the band across its back at BAND_SIDE; it is
+CFrame.lookAt(pull, the tips' middle with its height scaled by TILT).
+Poses (frame space): TIPS, LOAD (resting), DRAW, NEUTRAL, OVER.
 
 Run: python3 tools/slingshot_meshes.py
 Writes design/slingshot/<Name>.obj, design/slingshot/pieces/<Name>_<i>.obj (colours in
@@ -43,13 +43,12 @@ BARK = [(186, 134, 80), (158, 108, 62)]     # the palm trunk's
 IRON = (86, 88, 98)                         # the barrel hoops'
 ROPE = (232, 204, 150)
 BAND = (226, 58, 52)
-LEATHER = [(132, 80, 44), (112, 66, 36)]
 
 TIPS = [(-7.6, 14.6, 0.0), (7.6, 14.6, 0.0)]   # where the bands tie on
-POUCH_SIDE = [(-4.7, 0.4, -1.2), (4.7, 0.4, -1.2)]  # the bands' ends, in pouch space
-NEUTRAL = (0.0, 13.0, 3.6)   # the pouch's middle when the bands are slack
-LOAD = (0.0, 4.4, 17.0)      # resting, pulled back by the ground (step in here)
-DRAW = (0.0, 3.6, 20.0)      # drawn back before the shot
+BAND_SIDE = [(-2.0, 0.9, 0.3), (2.0, 0.9, 0.3)]  # where the band wraps the rider, in the pull's space
+NEUTRAL = (0.0, 13.0, 3.6)   # the pull when the band is slack
+LOAD = (0.0, 1.6, 17.0)      # resting, pulled back to the ground (step on here)
+DRAW = (0.0, 1.6, 20.0)      # drawn back before the shot
 OVER = (0.0, 22.0, -7.0)     # the furthest it snaps forward
 
 
@@ -97,30 +96,11 @@ def frame(rng):
             ("Bark", BARK[1], bark[1]), ("Iron", IRON, iron), ("Rope", ROPE, rope)]
 
 
-def pouch(rng):
-    """A curved leather cradle facing -z: a back wall and a floor, both bending forward
-    at the sides, with stitched (darker) side flaps where the bands pull."""
-    main, flaps = [], []
-    xs = np.linspace(-4.4, 4.4, 7)
-    zc = lambda x: 1.0 - 0.09 * x * x  # noqa: E731  (the back wall's curve)
-    for a, b in zip(xs[:-1], xs[1:]):
-        za, zb = zc(a), zc(b)
-        # back wall
-        main.append(np.array([(x, y, z + dz) for x, z in ((a, za), (b, zb)) for y in (-2.0, 2.6) for dz in (0, 0.55)]))
-        # floor, reaching forward from the wall
-        main.append(np.array([(x, y, z) for x, zw in ((a, za), (b, zb)) for y in (-2.0, -1.45)
-                              for z in (zw + 0.5, zw - 4.6 + 0.04 * x * x)]))
-    for s in (-1, 1):
-        x = s * 4.55
-        flaps.append(np.array([(x + s * dx, y, z) for dx in (0, 0.5) for y in (-1.6, 2.2) for z in (zc(4.4) - 0.6, zc(4.4) + 0.7)]))
-    return [("Leather", LEATHER[0], main), ("Stitching", LEATHER[1], flaps)]
-
-
 def band(rng):
     return [("Band", BAND, [slab(rng, -0.6, -0.4, -0.5, 0.6, 0.4, 0.5, 0.12, 0.0)])]
 
 
-ITEMS = [("Slingshot", frame, 1), ("SlingshotPouch", pouch, 2), ("SlingshotBand", band, 3)]
+ITEMS = [("Slingshot", frame, 1), ("SlingshotBand", band, 3)]
 
 
 # ---------------------------------------------------------------- the launch
@@ -133,8 +113,8 @@ def smooth(u):
 FIRE = 0.24  # s from DRAW to OVER
 
 
-def pouch_at(t):
-    """The pouch's middle at time t (s): resting at LOAD, drawn back (0.6 s), a beat,
+def pull_at(t):
+    """The pull (the band's middle) at time t (s): resting at LOAD, drawn back (0.6 s), a beat,
     snapped forward (ease-in) to OVER, a damped wobble about NEUTRAL, then wound back
     down to LOAD (1.4 s)."""
     L, D, N, O = (np.array(v) for v in (LOAD, DRAW, NEUTRAL, OVER))
@@ -155,8 +135,8 @@ def pouch_at(t):
 
 
 DURATION = 0.6 + 0.2 + FIRE + 0.9 + 1.4
-RELEASE = 0.6 + 0.2 + FIRE * 0.8  # s: the rider lets go as the pouch passes the tips
-TILT = 0.35         # how much of the bands' pitch the pouch takes
+RELEASE = 0.6 + 0.2 + FIRE * 0.8  # s: the rider lets go as the band passes the tips
+TILT = 0.35         # how much of the band's pitch the rider takes
 FLING_SPEED = 60.0  # studs/s (preview; the game sets its own)
 GRAVITY = 60.0      # studs/s^2 (preview)
 
@@ -170,8 +150,8 @@ def look_at(pos, target):
     return np.stack([r, u, -f], 1)  # columns: right, up, back (Roblox's)
 
 
-def pouch_cf(t):
-    p = pouch_at(t)
+def pull_cf(t):
+    p = pull_at(t)
     mid = (np.array(TIPS[0]) + TIPS[1]) / 2
     mid[1] = p[1] + (mid[1] - p[1]) * TILT  # keep the rider fairly upright
     return look_at(p, mid), p
@@ -182,7 +162,7 @@ def moved(pieces, R, t):
 
 
 def rider():
-    """A pet stand-in (a blocky pony) with the scale figure on it, in pouch space."""
+    """A pet stand-in (a blocky pony) with the scale figure on it, in the pull's space."""
     k = TA.Kit()
     pet, dark = (236, 170, 96), (196, 128, 64)
     y = -1.45
@@ -233,12 +213,12 @@ def main():
     rider_parts = rider()
 
     def scene(t, carried=True, flying=None):
-        """carried: the rider in the pouch; flying: the rider's 4x4 pose in the air."""
-        R, p = pouch_cf(t)
-        ps = parts_of(built["Slingshot"]) + parts_of(moved(built["SlingshotPouch"], R, p))
-        for tip, side in zip(TIPS, POUCH_SIDE):
-            end = R @ np.array(side) + p
-            ps += parts_of([("Band", BAND, [hull_tris(beam(tip, end, 1.2, 0.8))])])
+        """carried: the rider on the band; flying: the rider's 4x4 pose in the air."""
+        R, p = pull_cf(t)
+        ps = parts_of(built["Slingshot"])
+        ends = [R @ np.array(side) + p for side in BAND_SIDE]
+        for a, b in ((TIPS[0], ends[0]), (ends[0], ends[1]), (ends[1], TIPS[1])):
+            ps += parts_of([("Band", BAND, [hull_tris(beam(a, b, 1.2, 0.8))])])
         m = M(R, p) if carried else flying
         if m is not None:
             ps += [Part(q.name, q.size, m @ q.cf, q.color) for q in rider_parts]
@@ -256,8 +236,8 @@ def main():
 
     # the launch: 30 fps, side on; the rider flies off toward -z
     fps = 30
-    R0, p0 = pouch_cf(RELEASE)
-    _, p1 = pouch_cf(RELEASE + 1 / 240)
+    R0, p0 = pull_cf(RELEASE)
+    _, p1 = pull_cf(RELEASE + 1 / 240)
     vel = (p1 - p0) / np.linalg.norm(p1 - p0) * FLING_SPEED
     frames = []
     for i in range(int(fps * (DURATION + 0.5))):
