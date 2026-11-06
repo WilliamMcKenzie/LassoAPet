@@ -18,7 +18,7 @@ local Config = {
 			AnimalSize = 1, -- its obstacles (tools/funnel.luau) and the Godlands' terrain grow ^0.8 of this. Animals no longer do (QM, Oct 8: back to their old sizes)
 			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
 			Length = 2168, -- (QM, Oct 11: the pacing ladder, below AnimalStats; was 760)
-			GroundColors = { Color3.fromRGB(113, 173, 31), Color3.fromRGB(122, 190, 25) }, -- (QM, Oct 10; was 77, 196, 63 / 105, 255, 74)
+			GroundColors = { Color3.fromRGB(23, 191, 29), Color3.fromRGB(24, 203, 31) }, -- Fight to Steal an Egg's Grass / GrassChecker (QM, Nov 6; was 113, 173, 31 / 122, 190, 25)
 			WallColors = { Color3.fromRGB(197, 126, 70), Color3.fromRGB(211, 142, 75) }, -- (QM, Oct 10; was 225, 150, 104 / 248, 170, 114)
 			-- Which animals run in this biome's stampede and how often (names are modules
 			-- in Shared/Animals). QM's spawn table (Oct 3): chances out of 1. They're
