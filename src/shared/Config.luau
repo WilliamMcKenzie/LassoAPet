@@ -1426,6 +1426,17 @@ Config.NativeUi = {
 	On = Config.World == 1,
 	Scale = { Curve = 0.6, Min = 0.45, Max = 1.25, PopupMargin = 12 },
 	GoalColor = Color3.fromRGB(255, 157, 0), -- the little "Goal" over the title
+	-- each rarity's colours (Fight to Steal an Egg's): a card's top and bottom (the bottom from
+	-- `at` of the way down), its name's text colour; Common's text fades text to text2; a
+	-- `move` one has a band of text2 sweeping across it (client/RarityLook)
+	Rarities = {
+		Common = { text = Color3.new(1, 1, 1), text2 = Color3.fromRGB(135, 135, 135), stroke = Color3.fromRGB(70, 70, 70) },
+		Uncommon = { bottom = Color3.fromHex("40ff00"), top = Color3.fromHex("c8ff00"), at = 0.736, text = Color3.fromHex("00ff00") },
+		Rare = { bottom = Color3.fromHex("0070ff"), top = Color3.fromHex("00e6ff"), at = 1, text = Color3.fromHex("00b7ff") },
+		Epic = { bottom = Color3.fromHex("9000ff"), top = Color3.fromHex("ff00f0"), at = 1, text = Color3.fromHex("d300ff") },
+		Legendary = { bottom = Color3.fromHex("ff0020"), top = Color3.fromHex("ff8c00"), at = 1, text = Color3.fromHex("ff0004") },
+		Exclusive = { bottom = Color3.fromHex("ff0040"), top = Color3.fromHex("ff00c0"), at = 1, text = Color3.fromHex("ff0050"), text2 = Color3.fromHex("ff00d0"), move = true }, -- (the reference's Mythic)
+	},
 	-- UI sounds (client/UiFx): id, volume, speed, start (seconds in)
 	Sounds = {
 		Click = { id = "rbxassetid://6895079853", volume = 0.5 },

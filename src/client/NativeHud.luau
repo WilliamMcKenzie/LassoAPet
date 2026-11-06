@@ -12,6 +12,7 @@
 --   local hud = NativeHud.build() -> { gui, root, buttons = { Shop, Index, Pets }, cash, goal }
 
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 
 local HudKit = require(script.Parent.HudKit)
 local HudImages = require(script.Parent.HudImages)
@@ -30,6 +31,57 @@ function NativeHud.scaleFor(h)
 	local cfg = Config.NativeUi.Scale
 	local k = (h / DESIGN_HEIGHT) ^ (cfg.Curve or 1)
 	return math.clamp(k, cfg.Min or 0, cfg.Max or math.huge)
+end
+
+-- a ScreenGui with a Root scaled as the HUD's, for the popups (over the HUD, which hides
+-- while one's up: BaseUi's Modal). Made once.
+local popupRoot
+function NativeHud.popupRoot()
+	if popupRoot then
+		return popupRoot
+	end
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "NativePopups"
+	gui.IgnoreGuiInset = true
+	gui.ResetOnSpawn = false
+	gui.DisplayOrder = 5
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+	local root = Ui.make(gui, "Root", "Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) })
+	local fit = Ui.make(root, "Fit", "UIScale")
+	local function resize()
+		local h = gui.AbsoluteSize.Y
+		if h < 1 then
+			h = workspace.CurrentCamera.ViewportSize.Y
+		end
+		fit.Scale = NativeHud.scaleFor(h)
+		root.Size = UDim2.fromScale(1 / fit.Scale, 1 / fit.Scale)
+	end
+	resize()
+	gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
+	popupRoot = root
+	return root
+end
+
+-- the world behind a popup hazy, like frosted glass (QM: popups use glass blur), while any
+-- of `who` holds it
+local haze, hazeTint
+local hazing = {}
+function NativeHud.haze(who, on)
+	local camera = workspace.CurrentCamera
+	if not haze then
+		haze = Instance.new("BlurEffect")
+		haze.Name = "NativeHaze"
+		haze.Size = 0
+		hazeTint = Instance.new("ColorCorrectionEffect")
+		hazeTint.Name = "NativeHaze"
+	end
+	haze.Parent, hazeTint.Parent = camera, camera
+	hazing[who] = on or nil
+	local k = if next(hazing) then 1 else 0
+	local info = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	TweenService:Create(haze, info, { Size = 14 * k }):Play()
+	TweenService:Create(hazeTint, info, { Brightness = 0.06 * k, Contrast = -0.15 * k, Saturation = -0.35 * k }):Play()
 end
 
 function NativeHud.build(handlers)
