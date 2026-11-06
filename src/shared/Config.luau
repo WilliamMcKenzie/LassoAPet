@@ -1418,6 +1418,37 @@ Config.Places = { 126872244121414, 139418530058790, 117724433633972 } -- [world]
 -- World 4, outside Config.Places so the Worlds menu and the top bar don't list it yet.
 Config.HalloweenPlace = 139057235302936
 Config.World = table.find(Config.Places, game.PlaceId) or (if game.PlaceId == Config.HalloweenPlace then 4 else 1)
+-- The native UI (QM, Nov 6): Fight to Steal an Egg's studded UI, built in code (client/HudKit,
+-- UiFx, NativeHud, GoalPanel) in place of the PNG art. World 1 only while it's tried out.
+-- Scale: the 1080-tall design scaled to the screen by (height / 1080) ^ Curve, clamped
+-- (softer than 1:1 so phones get bigger buttons); PopupMargin: px a popup keeps off the edges.
+Config.NativeUi = {
+	On = Config.World == 1,
+	Scale = { Curve = 0.6, Min = 0.45, Max = 1.25, PopupMargin = 12 },
+	GoalColor = Color3.fromRGB(255, 157, 0), -- the little "Goal" over the title
+	-- UI sounds (client/UiFx): id, volume, speed, start (seconds in)
+	Sounds = {
+		Click = { id = "rbxassetid://6895079853", volume = 0.5 },
+		Hover = { id = "rbxassetid://6895079853", volume = 0.12, speed = 1.6 },
+		Open = { id = "rbxassetid://2375539277", volume = 0.45 },
+		Close = { id = "rbxassetid://2198217232", volume = 0.3, speed = 1.3 },
+		Buy = { id = "rbxassetid://7112275565", volume = 0.45 },
+		Claim = { id = "rbxassetid://1169755927", volume = 0.5 },
+		Equip = { id = "rbxassetid://133331985238497", volume = 0.5 },
+		Error = { id = "rbxassetid://6895079853", volume = 0.6, speed = 0.55 },
+	},
+}
+-- (QM, Nov 6: no Merge in the native UI, so its quest is passed over, Off: Server/Quests.
+-- Quests are saved by their place in the line, so it stays in the list.)
+if Config.NativeUi.On then
+	for _, line in Config.Quests do
+		for _, quest in line do
+			if quest.Kind == "merge" then
+				quest.Off = true
+			end
+		end
+	end
+end
 -- Pens in the base (Server/Pens): one per player.
 Config.PenCount = if Config.World == 4 then 10 else 5
 -- (World 1 ended at a giant portal to World 2 for a while: QM, Oct 13 took it out. Both
