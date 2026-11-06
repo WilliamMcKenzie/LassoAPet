@@ -1052,23 +1052,6 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 		roll.Visible = shown and not gui.Enabled and not lesson
 		Inventory.setVisible(not shown and not ride.Visible and not mergeButton.Visible and not gui.Enabled and not lesson)
 	end
-	task.spawn(function()
-		if not Config.Gacha.Enabled or not Config.Gacha.Machine then
-			return
-		end
-		local machine = workspace:WaitForChild("EggMachine")
-		local prompt = machine:WaitForChild("Body"):WaitForChild("RollPrompt", 30)
-		if not prompt then
-			return
-		end
-		prompt.PromptShown:Connect(function()
-			setRollShown(true)
-		end)
-		prompt.PromptHidden:Connect(function()
-			setRollShown(false)
-		end)
-		prompt.Triggered:Connect(doRoll)
-	end)
 
 	-- A line of text top centre (Hud.setNotice), where the event countdown was.
 	local noticeGui = Instance.new("ScreenGui")

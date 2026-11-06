@@ -736,10 +736,8 @@ local Config = {
 	-- weighted too. Exclusive animals are only ever in this machine (keep them
 	-- out of every biome's Herd), and get their own card in the reveal.
 	Gacha = {
-		-- The egg roll menu (QM, Oct 4): Roll over Pets opens it (RollMenu, Hud). The old
-		-- Egg Machine in the base stays off (Machine).
+		-- The egg roll menu (QM, Oct 4): Roll over Pets opens it (RollMenu, Hud).
 		Enabled = true,
-		Machine = false,
 		-- Each roll costs PriceGrowth x the last, rounded to two figures ($1M, $1.1M, $1.2M,
 		-- $1.3M, $1.5M...), counted per player and saved (balance pass, Oct 6: a flat $1M
 		-- roll paid for itself in ~2 minutes once you had the Ocean). Hatchery sets it on
@@ -770,15 +768,6 @@ local Config = {
 		ImageDisabled = "rbxassetid://71726481257884", -- assets/ui/DisabledRainbowTrail.png: while you can't afford it
 		Lifetime = 0.8, -- seconds each band trails behind (the Leap's is 1.4; very long trails don't render)
 		Width = 2, -- x the Unicorn's rainbow's height (QM, Oct 6: tried 3, settled on 2)
-	},
-	-- Carl's stall (Carl.client, QM Oct 4): a desert stall with a cactus guy in it, in
-	-- the gap between the left corner pen and the start line. Talk to him and he asks
-	-- if you want to spin; Yes opens the roll menu. Faces into the base (+z).
-	Carl = {
-		On = false, -- (QM, Oct 12: Carl's gone; a stone portal gate, World.BaseDecor.PortalGate, now stands left of the start line at (-63.5, 24.6), its opening swirling (Client/PortalFx), doing nothing yet)
-		Position = Vector3.new(-104, 0, 20), -- the arc base's front left corner, beside the corridor (QM, Oct 9)
-		Yaw = 15, -- degrees it turns in toward the course, off square with the wall (QM)
-		Reach = 12, -- studs from the counter where Talk shows
 	},
 	-- The podium (Leaderboard.server, QM Oct 4): the avatar of the player who rode
 	-- furthest from base, all time (OrderedDataStore "BestDistance", metres), standing on
@@ -1071,7 +1060,6 @@ local Config = {
 	SprintTiers = { 180, 360, 440 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
-	Intro = false, -- (off for now: QM, Oct 11) a new player's opening cutscene: the villain steals your egg (Client/Intro, QM Oct 11; "/tutorial" replays it)
 	LassoRange = 51, -- studs, for a Horse-sized animal (QM, Oct 11: bigger ones further, below; Oct 12: 1.5x, was 34)
 	LassoRangeFrom = 4.6, -- a Horse's half width (studs): an animal this wide or narrower gets LassoRange
 	LassoRangeGain = 1.5, -- studs more range for each stud wider than that (1.5x with LassoRange, QM Oct 12; was 1)
@@ -1414,12 +1402,9 @@ Config.WaterSink = { Water = 0.3, DeepWater = 0.5, Rate = 6 }
 -- Worlds (QM, Oct 13): each is its own Place in the experience, running this same code.
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
 Config.Places = { 126872244121414, 139418530058790, 117724433633972 } -- [world] = its PlaceId (World 3: QM, Oct 14, a copy of World 2 for now; not for sale yet, so no way in)
--- The Halloween event world (QM, Oct 15: a copy of World 1 for now, 10 players, its own saves):
--- World 4, outside Config.Places so the Worlds menu and the top bar don't list it yet.
-Config.HalloweenPlace = 139057235302936
-Config.World = table.find(Config.Places, game.PlaceId) or (if game.PlaceId == Config.HalloweenPlace then 4 else 1)
+Config.World = table.find(Config.Places, game.PlaceId) or 1
 -- Pens in the base (Server/Pens): one per player.
-Config.PenCount = if Config.World == 4 then 10 else 5
+Config.PenCount = 5
 -- World 1's Meadow as open country (QM, Nov 6): the distance fades into a pale blue haze
 -- (Client/Ocean's Lighting fog), so the cliffs and mesas past the course (tools/
 -- world1_meadow_cliffs.luau) melt into it instead of ending at blank sky. In studs from the camera.
@@ -1437,15 +1422,10 @@ Config.WorldPrices = { 0, 1000000, 10000000 }
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:
 -- free in Studio, not on sale live.
 Config.WorldProducts = { [3] = { ProductId = 3727273087, Price = 299 } }
--- Rebirth (QM, Oct 13): World 2's Rebirth bar (World2Bar.client) for Prices[n] gold, your
--- nth. It re-locks World 2 (save up for it again) and sends you to World 1; your pets stay.
--- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,
--- and every pet of yours wears Shared/Skins' Skins[n]: Gold, Diamond, Galaxy.
--- Off for the time being (QM, Oct 15: "scrap the rebirth system for the time being"): no Rebirth
--- bar or panel, and the server refuses one. Rebirths already saved keep their buffs and skins.
-Config.RebirthOn = false
+-- Rebirth (QM, Oct 13; the rebirth itself is gone, QM Oct 15 / Nov 6): rebirths already saved
+-- keep their buffs, Gold[n] x gold and Speed[n] x riding speed, and every pet of theirs wears
+-- Shared/Skins' Skins[n]: Gold, Diamond, Galaxy.
 Config.Rebirth = {
-	Prices = { 10000000, 100000000, 1000000000 }, -- (QM, Oct 14: each 10x cheaper; was 100m, 1b, 10b)
 	Gold = { 2, 4, 8 }, -- (each rebirth doubles again: QM's rebirth panel's "2x Gold")
 	Speed = { 1.5, 1.5, 1.5 }, -- (QM's 1.5x: not stacked, so the courses stay ridable)
 	Scale = 1.5, -- (QM, Oct 13: rebirthed pets are this much bigger everywhere: Shared/Skins)
@@ -1814,7 +1794,7 @@ Config.LimitedsStand = false
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
-Config.PetOffers = if Config.World == 4 then {} else { Config.LoongOffer, Config.MajesticUnicornOffer } -- (none in the Halloween world's stripped base for now: QM, Oct 15)
+Config.PetOffers = { Config.LoongOffer, Config.MajesticUnicornOffer }
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)
@@ -1881,320 +1861,11 @@ Config.BiomeNames = {
 	{ "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" },
 	{ "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
 	{ "Pirate Cove", "Garden", "Candyland", "Cnidaria" },
-	{ "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" }, -- (Halloween: World 1's for now)
 }
 
--- World 2's look: its first biome and base as QM's reference (marble walls, yellow
--- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
--- hue-turned as placeholders (tools/world2_terrain.luau's turns).
-if Config.World == 2 then
-	-- World 2's quests (QM, Oct 13): reach each biome, its egg World 1's reward's
-	-- equivalent here; and the other line, merge 3, lasso 10 Lions, lasso 3 Kitsunes (that
-	-- last one's three eggs). No invite line here.
-	Config.Quests = {
-		{
-			{ Text = "Reach Meadow", Kind = "reach", Biome = 1, Egg = "Eyeworm", NoPenLevel = true }, -- (World 1's Cactus: the next biome's Uncommon)
-			{ Text = "Reach Crimson Lands", Kind = "reach", Biome = 2, Egg = "CrystalCentipede" }, -- (the Penguin)
-			{ Text = "Reach Crystal Cavern", Kind = "reach", Biome = 3, Egg = "BrownMushroom" }, -- (the Snowman)
-			{ Text = "Reach Woodland Maze", Kind = "reach", Biome = 4, Egg = "OrangeButterfly" }, -- (the Lionfish)
-			{ Text = "Reach Temple", Kind = "reach", Biome = 5, Egg = "Tiger" }, -- (the Fire Lobster)
-			{ Text = "Reach Tomb", Kind = "reach", Biome = 6, Egg = "BloatedMummy" }, -- (the Palm Guy: the Uncommon)
-		},
-		{
-			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "Seraph" }, -- (QM, Oct 14: 1, was 3)
-			{ Text = "Lasso Lions", Kind = "lasso", Animal = "Lion", Need = 10, Egg = "Asura" },
-			{ Text = "Lasso Kitsunes", Kind = "lasso", Animal = "Kitsune", Need = 3, Egg = { "Geb", "Nut", "Bes" } },
-			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "SnackYak" }, -- (QM, Oct 15: the end of every line; the Snack Yak, not the Loong)
-		},
-	}
-	Config.DefaultPet = "ArmoredHorse" -- World 2's starter, in your pen from the start (QM, Oct 13)
-	Config.RideSeconds = 45 -- World 2's boss timer (QM, Oct 14: was 33, as World 1's)
-	local rgb = Color3.fromRGB
-	local TURN = { 0.55, 0.6, 0.35, 0.2, 0.45, 0.75 } -- [biome] hue turn
-	local function turn(value, by)
-		if typeof(value) == "Color3" then
-			local h, sat, v = value:ToHSV()
-			return if sat < 0.12 then value else Color3.fromHSV((h + by) % 1, sat, v)
-		elseif type(value) == "table" then
-			local out = {}
-			for k, v in value do
-				out[k] = turn(v, by)
-			end
-			return out
-		end
-		return value
-	end
-	for i, biome in Config.Biomes do
-		for _, key in { "GroundColors", "WallColors", "Patches", "Depths", "PostColor", "GateColor" } do
-			if biome[key] then
-				biome[key] = turn(biome[key], TURN[i] or 0)
-			end
-		end
-	end
-	Config.Boss.ByBiome = table.clone(Config.Boss.ByBiome)
-	Config.Boss.ByBiome.Meadow = "Seraph" -- World 2's Meadow boss: the biblically accurate angel (QM, Oct 13)
-	Config.Boss.ByBiome.Desert = "CrimsonSeraph" -- the Crimson Lands' (biome 2): the Seraph in crimson (QM, Oct 13)
-	Config.Boss.ByBiome.Snow = "CrystalSeraph" -- the Crystal Cavern's (biome 3): the Seraph in crystal (QM, Oct 13; was the Crystal Tyrant)
-	Config.Boss.ByBiome.Ocean = "Monarch" -- the Woodland Maze's (biome 4): a giant monarch butterfly (QM, Oct 13)
-	Config.Boss.ByBiome.Volcano = "JadeAsura" -- the Temple's (biome 5): the Asura in jade with tusks (QM, Oct 13)
-	Config.Boss.ByBiome.Jurassic = "Sphinx" -- the Ancient Tomb's (biome 6): a winged pharaoh sphinx (QM, Oct 13)
-	local meadow = Config.Biomes[1]
-	meadow.Herd = table.clone(meadow.Herd)
-	meadow.Herd.MarbleFish = 0.3 -- World 2's Meadow Uncommon (QM, Oct 13), about as often as the Pinto
-	meadow.Herd.Lion = 0.2 -- World 2's Meadow Rare (QM, Oct 13), as often as the Fish
-	meadow.Herd.Buffalo = 0.1 -- World 2's Meadow Rare (QM, Oct 13; a guess)
-	meadow.Herd.Crocodile = 0.2 -- World 2's Meadow Rare (QM, Oct 13; a guess)
-	meadow.Herd.MarbleColossus = 0.08 -- World 2's Meadow Epic (QM, Oct 13), as often as the Rhino
-	meadow.Herd.MajesticUnicorn = 0.05 -- World 2's Meadow Legendary (QM, Oct 13), as often as the Unicorn
-	meadow.GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) }
-	meadow.WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) } -- marble
-	meadow.Patches = {
-		Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (QM, Oct 13: 20% lighter, then its checker 20% less contrast; was 118, 84, 50 / 104, 72, 42)
-		Grass = { rgb(182, 144, 44), rgb(166, 130, 36) }, -- the darker grass, beside the dirt
-	}
-	-- The second biome: the Crimson Lands (QM, Oct 13; tools/world2_crimson.luau's floor).
-	local crimson = Config.Biomes[2]
-	crimson.GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) } -- #791425
-	crimson.Patches = {
-		Crimson = { rgb(144, 44, 43), rgb(132, 38, 38) }, -- #902C2B, round every stone tile
-		Stone = { rgb(119, 86, 86), rgb(108, 77, 77) }, -- #775656 single tiles
-	}
-	crimson.Herd = table.clone(crimson.Herd)
-	crimson.Herd.Eyeworm = 0.3 -- the Crimson Lands' animals (QM, Oct 13): Uncommon, as often as the Cactus
-	crimson.Herd.Maw = 0.3 -- Rare, as the Scorpion
-	crimson.Herd.IvorySpider = 0.05 -- Epic, as the Sandworm
-	crimson.Herd.Asura = 0.05 -- Legendary, as the Snake
-	crimson.Herd.CrimsonScorpion = 0.2 -- Uncommon, as the Kitten
-	crimson.Herd.Beholder = 0.3 -- the Godlands' Rare joins the Crimson Lands (QM, Oct 13), in the Spine Lizard's slot
-	-- The third: the Crystal Cavern (QM, Oct 13; tools/world2_cavern.luau): blue-grey by the
-	-- walls to ice to crystal down the middle; its plank boards keep their own colours.
-	local cavern = Config.Biomes[3]
-	cavern.GroundColors = { rgb(90, 109, 143), rgb(82, 99, 131) } -- #5A6D8F
-	cavern.Patches = {
-		Ice = { rgb(98, 129, 167), rgb(89, 118, 153) }, -- #6281A7
-		Crystal = { rgb(116, 186, 213), rgb(105, 171, 197) }, -- #74BAD5
-	}
-	cavern.WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) } -- #384867
-	cavern.CapColor = rgb(44, 57, 82)
-	cavern.Herd = table.clone(cavern.Herd)
-	cavern.Herd.CrystalCentipede = 0.3 -- the Cavern's first animal (QM, Oct 13), an Uncommon as often as the Penguin
-	cavern.Herd.RedMushroom = 0.25 -- the Living Mushrooms (QM, Oct 13), as often as the Boar, Snowman and Ice Golem
-	cavern.Herd.BrownMushroom = 0.22
-	cavern.Herd.PurpleMushroom = 0.12
-	cavern.Herd.BlueCrystal = 0.25 -- the Living Crystals (QM, Oct 13), as often as the Boar and Snowman
-	cavern.Herd.PinkCrystal = 0.22
-	cavern.Herd.CrystalSpider = 0.12 -- the Crystal Spider (QM, Oct 13), an Epic as often as the Ice Golem
-	cavern.Herd.CrystalPhoenix = 0.08 -- the Crystal Phoenix (QM, Oct 13), an Epic too
-	cavern.Herd.CrystalElephant = 0.04 -- the Crystal Elephant (QM, Oct 13), the Legendary, as rare as the Icebringer
-	-- The fourth: the Woodland Maze (QM, Oct 13; tools/world2_woodland.luau): brown, darker
-	-- by the walls.
-	local woodland = Config.Biomes[4]
-	woodland.GroundColors = { rgb(121, 72, 46), rgb(110, 65, 41) } -- #79482E
-	woodland.Patches = {
-		Soil = { rgb(142, 81, 57), rgb(130, 74, 52) }, -- #8E5139
-		Path = { rgb(151, 89, 57), rgb(139, 81, 52) }, -- #975939, the middle
-		-- (the Ocean's patches under it: very dark soil, QM Oct 13; were its grass and trench,
-		-- green to blue to purple along the way)
-		Grass = { rgb(38, 25, 18), rgb(33, 21, 15) },
-		Trench = { rgb(38, 25, 18), rgb(33, 21, 15) },
-		Lava = { rgb(38, 25, 18), rgb(33, 21, 15) },
-	}
-	woodland.Depths = nil -- (no sea floor's colours along it: QM, Oct 13)
-	woodland.Herd = table.clone(woodland.Herd)
-	woodland.Herd.Caterpillar = 0.3 -- the Woodland Maze's Uncommon (QM, Oct 13), as often as the Starfish
-	woodland.Herd.PinkButterfly = 0.25 -- the Pink Butterfly (QM, Oct 13): Uncommon, as often as the Clownfish
-	woodland.Herd.OrangeButterfly = 0.15 -- the Orange Butterfly (QM, Oct 13), a Rare as often as the Lionfish
-	woodland.Herd.LivingBirch = 0.15 -- the Woodland's Rare (QM, Oct 13), as often as the Lionfish
-	woodland.Herd.Hawkmoth = 0.15 -- the Hawkmoth (QM, Oct 13), an Epic as often as the King Crab
-	woodland.Herd.RollingLog = 0.15 -- the Woodland Maze's Rare (QM, Oct 13), as often as the Lionfish
-	woodland.Herd.GiantGolem = 0.05 -- the Giant Golem (QM, Oct 13), the Legendary, as rare as the Kraken
-	-- The fifth: the Temple (QM, Oct 13; tools/world2_temple.luau): a rock path, grass and
-	-- marble a stud up, ponds a stud and two down (their flowing water: tools/world2_water.luau).
-	local temple = Config.Biomes[5]
-	temple.Herd = table.clone(temple.Herd)
-	temple.Herd.Catfish = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
-	temple.Herd.Tiger = 0.17 -- the Temple's Rare (QM, Oct 13), as often as the Fire Lobster
-	temple.Herd.JadeStatue = 0.13 -- the Jade and Garnet Statues (QM, Oct 13), Epics as often as the Rockworm
-	temple.Herd.GarnetStatue = 0.13
-	temple.Herd.Fox = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
-	temple.Herd.NineTailedFox = 0.17 -- the Fox's rare variant (QM, Oct 13), as often as the Fire Lobster
-	temple.Herd.Kitsune = 0.03 -- the Kitsune (QM, Oct 13), the Temple's Legendary, as rare as the Phoenix
-	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
-	temple.Patches = {
-		Rock = { rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
-		Grass = { rgb(145, 178, 41), rgb(133, 164, 35) }, -- #91B229
-		Marble = { rgb(200, 200, 200), rgb(186, 186, 186) }, -- #C8C8C8
-		SideDirt = { rgb(200, 200, 200), rgb(190, 188, 184) },
-		Water = { rgb(37, 81, 40), rgb(34, 99, 55) }, -- (QM's water tile's greens, so the pond sides match it)
-		DeepWater = { rgb(26, 57, 28), rgb(24, 69, 38) },
-	}
-	temple.WallColors = { rgb(200, 200, 200), rgb(186, 186, 186) }
-	temple.CapColor = rgb(176, 176, 176)
-	-- The last: the Ancient Tomb (QM, Oct 13; tools/world2_tomb.luau): sand, a gold causeway a
-	-- stud up and gold daises two up in darker frames. (World 2's zones end: no endless.)
-	local tomb = Config.Biomes[6]
-	tomb.Herd = table.clone(tomb.Herd)
-	tomb.Herd.Geb = 0.03 -- Geb (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
-	tomb.Herd.Nut = 0.03 -- Nut (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
-	tomb.Herd.Bes = 0.03 -- Bes (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
-	tomb.Herd.TombJackal = 0.15 -- the Tomb's Rare (QM, Oct 13), as often as the Raptor
-	tomb.Herd.LionArcher = 0.15 -- the Lion Archer (QM, Oct 13), the Tomb's Rare, as often as the Raptor
-	tomb.Herd.EagleSentry = 0.08 -- the Eagle Sentry (QM, Oct 13), a Tomb Epic as often as the Pterodactyl
-	tomb.Herd.BloatedMummy = 0.25 -- the Tomb's Uncommon (QM, Oct 13), as often as the Ankylosaurus
-	tomb.Herd.Scarab = 0.25 -- the Tomb's Uncommon (QM, Oct 13), as often as the Ankylosaurus
-	tomb.GroundColors = { rgb(220, 201, 152), rgb(210, 191, 142) } -- (its base is Sand)
-	tomb.Patches = {
-		Sand = { rgb(220, 201, 152), rgb(210, 191, 142) }, -- #DCC998
-		Dune = { rgb(208, 184, 134), rgb(198, 174, 124) }, -- #D0B886
-		Paving = { rgb(208, 184, 134), rgb(198, 174, 124) },
-		Gold = { rgb(226, 194, 0), rgb(196, 167, 3) }, -- #E2C200 / #C4A703
-		Frame = { rgb(196, 167, 3), rgb(180, 152, 2) },
-	}
-	tomb.WallColors = { rgb(211, 183, 66), rgb(196, 168, 54) } -- #D3B742
-	tomb.CapColor = rgb(186, 158, 46)
-	-- Walls and gate glows (QM, Oct 13: the Level design thread's batch; tools/world2_walls.luau).
-	crimson.WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) }
-	crimson.CapColor = rgb(72, 39, 42)
-	crimson.GateColor = rgb(255, 59, 92)
-	cavern.GateColor = rgb(92, 225, 255)
-	woodland.WallColors = { rgb(70, 42, 24), rgb(60, 36, 20) } -- dark brown (QM, Oct 13)
-	-- Not the Ocean's sea any more (its blue haze, hue-turned pink here, and bubbles): a very
-	-- subtle autumn orange haze far off (QM, Oct 13; Ocean.client).
-	woodland.Haze = { Color = rgb(250, 176, 110), Tint = rgb(255, 248, 238), FogStart = 250, FogEnd = 1400, FadeTime = 1.5, Bubbles = 0, NoDepths = true }
-	woodland.CapColor = rgb(242, 109, 57) -- vibrant autumn leaves on top (QM, Oct 13)
-	woodland.GateColor = rgb(242, 109, 57)
-	temple.GateColor = rgb(130, 226, 80)
-	tomb.GateColor = rgb(255, 200, 30)
-	-- Only World 2's own animals run in its herds (QM, Oct 13: no World 1 animals in the
-	-- marble Meadow): each biome keeps the kinds the lines above added. A biome with none
-	-- yet runs Fish as a placeholder.
-	local own = {}
-	for i, biome in Config.Biomes do
-		own[i] = {}
-	end
-	local function ownHerd(i, kinds)
-		for _, kind in kinds do
-			own[i][kind] = true
-		end
-	end
-	ownHerd(1, { "MarbleFish", "Lion", "Buffalo", "Crocodile", "MarbleColossus", "MajesticUnicorn", "Bunny", "Rhino" }) -- (the Bunny and Rhino too, at World 1's weights: QM, Oct 13)
-	ownHerd(2, { "Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura" })
-	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
-	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
-	ownHerd(5, { "Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune" }) -- the Temple
-	ownHerd(6, { "TombJackal", "LionArcher", "Nut", "Geb", "EagleSentry", "Bes", "BloatedMummy", "Scarab" }) -- the Tomb
-	for i, biome in Config.Biomes do
-		local herd = {}
-		for kind, weight in biome.Herd or {} do
-			if own[i][kind] then
-				herd[kind] = weight
-			end
-		end
-		biome.Herd = if next(herd) then herd else { Fish = 1 }
-	end
-	-- The last three biomes' animals bigger, and more of them (QM, Oct 13): x their size
-	-- (AnimalScale, on top of any of their own: wild and as pets) and x how often they spawn.
-	Config.AnimalScale = table.clone(Config.AnimalScale)
-	for i, more in { [4] = { size = 2, spawn = 1.6 }, [5] = { size = 2.5, spawn = 2 }, [6] = { size = 3, spawn = 2.5 } } do
-		for kind in own[i] do
-			-- (not the Loong running wild in the Temple: it's 4x everywhere already, QM Oct 15)
-			if Config.CrossWorldExempt[kind] then
-				continue
-			end
-			Config.AnimalScale[kind] = (Config.AnimalScale[kind] or 1) * more.size
-		end
-		local biome = Config.Biomes[i]
-		biome.HerdSpawnEvery = (biome.HerdSpawnEvery or Config.HerdSpawnEvery) / more.spawn
-	end
-	Config.Biomes[6].HerdSpawnEvery = Config.Biomes[4].HerdSpawnEvery -- (the Tomb as often as the Woodland: QM, Oct 13, 2.5x was far too many)
-	-- World 2's speeds (QM, Oct 13: each animal's % into a biome on a full sprint ride,
-	-- 2,904 studs per 1 Speed). The rest keep theirs (the Seraphs 0.5, the Majestic Unicorn and
-	-- the Asura as they were).
-	for kind, speed in {
-		MarbleFish = 0.809, -- 10% into the Crimson Lands
-		Lion = 0.872, -- 20% into the Crimson Lands
-		Crocodile = 0.878, -- 21% into the Crimson Lands
-		Buffalo = 0.934, -- 30% into the Crimson Lands
-		MarbleColossus = 1.028, -- 45% into the Crimson Lands
-		CrimsonScorpion = 1.603, -- 35% into the Crystal Cavern (QM, Oct 13)
-		IvorySpider = 1.901, -- 80% into the Crystal Cavern (QM, Oct 13)
-		Maw = 1.702, -- 50% into the Crystal Cavern (QM, Oct 13)
-		Beholder = 1.769, -- 60% into the Crystal Cavern (QM, Oct 13)
-		RedMushroom = 2.355, -- 30% into the Woodland (QM, Oct 13)
-		BlueCrystal = 2.355, -- 30% into the Woodland (QM, Oct 13)
-		BrownMushroom = 2.57, -- 50% into the Woodland (QM, Oct 13)
-		PinkCrystal = 2.57, -- 50% into the Woodland (QM, Oct 13)
-		PurpleMushroom = 2.742, -- 66% into the Woodland (QM, Oct 13)
-		CrystalSpider = 2.764, -- 68% into the Woodland (QM, Oct 13)
-		CrystalPhoenix = 3.281, -- 10% into the Temple (QM, Oct 13)
-		CrystalElephant = 3.281, -- 10% into the Temple (QM, Oct 13)
-		Eyeworm = 1.438, -- 10% into the Crystal Cavern (QM, Oct 13)
-		CrystalCentipede = 2.14, -- 10% into the Woodland (QM, Oct 13)
-		Caterpillar = 3.541, -- 25% into the Temple (QM, Oct 13: +10 points, was 15%)
-		PinkButterfly = 3.455, -- 20% into the Temple (QM, Oct 13: +10 points, was 10%)
-		OrangeButterfly = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
-		LivingBirch = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
-		RollingLog = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
-		Hawkmoth = 4.322, -- 70% into the Temple (QM, Oct 13: +10 points, was 60%)
-		GiantGolem = 6.06, -- 46% into the Tomb (QM, Oct 13: +10 points, was 36%)
-	} do
-		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
-		Config.AnimalStats[kind].Speed = speed
-	end
-	-- The Temple and Tomb on World 2's own curve (QM, Oct 13: "balance them to whatever
-	-- seems reasonable"; they had World 1's Volcano and Jurassic numbers). Speed as above:
-	-- the Temple's reach into the Tomb, its Legendary to the finish line; the Tomb's (the
-	-- last biome) further into itself, its Legendaries to the finish line. Income about 2x a
-	-- biome by rarity; Legendaries hatch in 30 and 40 minutes, not World 1's 12 hours.
-	for kind, s in Config.World2Pets do
-		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
-		Config.AnimalStats[kind].Speed = s[1]
-		Config.PetIncome[kind], Config.PetHatchTime[kind] = s[2], s[3]
-	end
-	-- Every animal in World 2's Meadow 30% faster still (QM, Oct 13: "they're too slow"), the
-	-- Bunny and Rhino too (here only: this is World 2's Config); not the trophy Seraph.
-	for kind in own[1] do
-		if Config.AnimalStats[kind] then
-			Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind])
-			Config.AnimalStats[kind].Speed *= 1.3
-		end
-	end
-	-- The trophy angels (QM, Oct 13: his weights; were 1 in 300 of their biome's stampede).
-	for i, weight in { 0.001, 0.002, 0.002 } do
-		Config.Biomes[i].Herd[({ "Seraph", "CrimsonSeraph", "CrystalSeraph" })[i]] = weight
-	end
-	-- And all three in the Ancient Tomb (QM, Oct 13): each 1 in 1,000 of its stampede.
-	local tombTotal = 0
-	for _, weight in Config.Biomes[6].Herd do
-		tombTotal += weight
-	end
-	for _, angel in { "Seraph", "CrimsonSeraph", "CrystalSeraph" } do
-		Config.Biomes[6].Herd[angel] = tombTotal / 997 -- (3 of them: each ends up 1 in 1,000 of the total)
-	end
-	-- The trophy Black Widow (QM, Oct 13): 1 in 500 of the Crimson Lands' stampede.
-	local crimsonTotal = 0
-	for _, weight in Config.Biomes[2].Herd do
-		crimsonTotal += weight
-	end
-	Config.Biomes[2].Herd.BlackWidow = crimsonTotal / 499
-	-- World 1's animals ridden here: a Horse's speed (QM, Oct 14; Config.slowedHere).
-	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
-	for kind, stats in Config.AnimalStats do
-		if not Config.ownHere(kind, 2) then -- (and World 3's: QM, Oct 15)
-			Config.AnimalStats[kind] = table.clone(stats)
-			Config.AnimalStats[kind].Speed = horse
-		end
-	end
-	-- The 45 s timer (QM, Oct 14): every animal here 33/45 as fast, so each still reaches as far
-	-- as it did in 33 s (the % into a biome in the comments above still hold).
-	for kind, stats in Config.AnimalStats do
-		Config.AnimalStats[kind] = table.clone(stats)
-		Config.AnimalStats[kind].Speed = stats.Speed * 33 / Config.RideSeconds
-	end
-end
 -- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
 -- with you (QM, Oct 14), they're as big in the other worlds too. (Not the Loong: World 1's own as well.)
-if Config.World ~= 2 then
+do
 	Config.AnimalScale = table.clone(Config.AnimalScale)
 	for size, kinds in {
 		[2] = { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }, -- the Woodland Maze
@@ -2212,26 +1883,10 @@ end
 -- Floors, walls and their colours: the World 3 terrain thread's (tools/world3_course.luau, then
 -- world3_<biome>.luau; not funnel.luau). Animals and bosses come from the biome animal threads;
 -- until then each herd runs Fish (World 2's way) and each boss is World 2's in that slot.
--- The Halloween world's base (QM, Oct 15: orange grass, dark stone paths, like the Meadow's;
--- tools/halloween_floor.luau): its first biome's colours, which paint the base floor by part name.
--- Gems (QM, Oct 15): the Halloween world's own currency, nothing anywhere else. There your
--- pets earn gems instead of cash (their PetIncome x Rate a second), and the ride's boss timer
--- starts at BossStart seconds, BossStep more for each "+5s TIME" bought with gems (the top
--- bar: World2Bar.client; Gold.server's BuyBossTime), the nth (from 0) for Price x Growth^n.
--- nil in the other worlds.
-Config.Gems = nil
--- The ride's boss timer, in seconds (Ride's Hold bar): RideSeconds, or with Gems its start
--- and the time bought.
-function Config.bossSeconds(player)
-	if not Config.Gems then
-		return Config.RideSeconds
-	end
-	return Config.Gems.BossStart + Config.Gems.BossStep * (player and player:GetAttribute("BossTime") or 0)
+-- The ride's boss timer, in seconds (Ride's Hold bar).
+function Config.bossSeconds(_player)
+	return Config.RideSeconds
 end
-function Config.bossTimePrice(bought)
-	return math.floor(Config.Gems.Price * Config.Gems.Growth ^ (bought or 0) + 0.5)
-end
-Config.GemYellow = Color3.fromHex("FFFC2E") -- (gems' yellow, where cash is green: QM, Oct 15)
 -- The Halloween animals (QM, Oct 15): pets are shared by every world, Halloween ones too, but
 -- a Halloween pet earns only gems, and only in the Halloween world, and the rest only cash,
 -- only outside it: anywhere else they're "useless". [kind] = true: Config.HalloweenPets'.
@@ -2242,100 +1897,9 @@ end
 -- Whether a pet of `kind` (a hybrid: `fuse` its other half, Halloween if either is) earns here.
 function Config.earnsHere(kind, fuse)
 	local halloween = Config.HalloweenAnimals[kind] == true or (fuse ~= nil and Config.HalloweenAnimals[fuse] == true)
-	return halloween == (Config.World == 4)
+	return not halloween -- (the Halloween world is gone, QM Nov 6: its pets earn nothing)
 end
 
-if Config.World == 4 then
-	local rgb = Color3.fromRGB
-	Config.Gems = { BossStart = 5, BossStep = 5, Price = 100, Growth = 1.6, Rate = 1 }
-	local meadow = table.clone(Config.Biomes[1])
-	meadow.GroundColors = { rgb(121, 65, 137), rgb(113, 61, 130) } -- (QM, Oct 15: purple, set in Play; was orange 240,136,36)
-	meadow.Patches = table.clone(meadow.Patches or {})
-	meadow.Patches.Grass = { rgb(100, 55, 105), rgb(92, 51, 97) } -- darker, between the ground and the paths
-	meadow.Patches.Dirt = { rgb(159, 136, 179), rgb(153, 130, 174) } -- the paths, light lilac
-	Config.Biomes = table.clone(Config.Biomes)
-	meadow.WallColors = { rgb(63, 38, 77), rgb(74, 44, 87) } -- dark purple walls (QM, Oct 15)
-	meadow.CapColor = rgb(240, 128, 200) -- pink wall tops (QM, Oct 15)
-	Config.Biomes[1] = meadow
-	-- The Desert as a teal night graveyard (QM, Oct 15, his picture: was the base's purples):
-	-- pale blue flagstones, slate-blue patches (bluer than his picture: the Lighting's warm Ambient pinks them), dark teal walls with teal tops. Its cacti
-	-- and rocks are the Halloween props in teal (tools/halloween_desert.luau).
-	local desert = table.clone(Config.Biomes[2])
-	desert.GroundColors = { rgb(126, 180, 210), rgb(116, 170, 202) }
-	desert.WallColors = { rgb(42, 88, 104), rgb(50, 100, 116) }
-	desert.CapColor = rgb(86, 172, 182)
-	desert.Patches = table.clone(desert.Patches or {})
-	desert.Patches.Grass = { rgb(86, 122, 150), rgb(78, 114, 142) } -- (its dry grass: slate blue)
-	desert.Patches.Stone = { rgb(104, 154, 186), rgb(96, 146, 178) } -- (its sandstone, a stud up: darker flagstone)
-	Config.Biomes[2] = desert
-	-- Three biomes here (QM, Oct 15): Haunted Hills (the Meadow), Soul Valley (the Desert), then
-	-- the Pumpkin Patch, endless: the course is cut where Soul Valley ends and past it the
-	-- Patch's chunks are laid one after another, picked at random ("like roadwork": Config.Endless
-	-- Chunks, Client/Endless; the chunks tools/pumpkin_chunks.luau builds in
-	-- ReplicatedStorage.PumpkinPatchChunks, dressed with the harvest and pumpkin props). Its
-	-- stampede empty for now. Its colours are the chunks' own (and the pens' tiles').
-	meadow.Name, desert.Name = "Haunted Hills", "Soul Valley"
-	-- Their own animals (QM, Oct 15: all World 1's scrapped here), weights as the Meadow's and the
-	-- Desert's by rarity (guesses). The Pumpkin Patch has none till its own are in (below).
-	meadow.Herd = { BlackCat = 0.35, Bat = 0.25, PumpkinPup = 0.25, PurpleTarantula = 0.13, Werewolf = 0.08, SoulHorse = 0.05 }
-	desert.Herd = { Ghost = 0.3, SkeletonDog = 0.25, TombstoneCrawler = 0.25, ZombieBear = 0.2, WispWolf = 0.12, GrimReaper = 0.025 }
-	local patch = table.clone(Config.Biomes[3])
-	patch.Name = "Pumpkin Patch"
-	patch.GroundColors = { rgb(214, 184, 134), rgb(204, 174, 124) } -- tan
-	patch.WallColors = meadow.WallColors
-	patch.CapColor = rgb(240, 140, 40) -- pumpkin orange tops
-	patch.Patches = {
-		Grass = { rgb(136, 156, 104), rgb(126, 146, 96) },
-		Dirt = { rgb(160, 112, 74), rgb(148, 102, 66) },
-	}
-	patch.Haze, patch.Depths, patch.Sky = nil, nil, nil
-	patch.Herd = {} -- (empty till its own animals are in: QM, Oct 15, every World 1 animal scrapped here; was the Tundra's)
-	patch.Length = 256 -- (one chunk: past the cut it's all chunks)
-	Config.Biomes = { meadow, desert, patch }
-	Config.CourseLength = meadow.Length + desert.Length + patch.Length
-	Config.Endless = { Cut = -(meadow.Length + desert.Length), Length = 256, Chunks = "PumpkinPatchChunks" } -- (3984: a whole 16)
-	Config.BiomeNames[4] = { "Haunted Hills", "Soul Valley", "Pumpkin Patch" }
-	-- Its bosses (QM, Oct 15: "make bosses for each zone, last one grim reaper"; was the Chicken
-	-- everywhere): a giant jack-o'-lantern, a giant Soul Horse reskinned, and a giant Grim Reaper.
-	Config.Boss.ByBiome = {
-		["Haunted Hills"] = "GiantPumpkin", -- (QM: a giant pumpkin)
-		["Soul Valley"] = "GiantSoulHorse", -- (QM: "a giant soul horse make it reskinned to be cooler")
-		["Pumpkin Patch"] = "GiantGrimReaper",
-	}
-	Config.Boss.Room.GiantPumpkin, Config.Boss.Room.GiantSoulHorse, Config.Boss.Room.GiantGrimReaper = 60, 50, 70 -- (guesses)
-	Config.Boss.Faces.GiantPumpkin = { At = Vector3.new(0, 0.05, 0.45), From = Vector3.new(0, 6, 60) } -- (its carved face; a guess)
-	Config.Boss.Faces.GiantSoulHorse = { At = Vector3.new(0, 0.3, 0.38), From = Vector3.new(24, 6, 55) } -- (its head, a little from the side for its eye; a guess)
-	Config.Boss.Faces.GiantGrimReaper = { At = Vector3.new(0, 0.25, 0.3), From = Vector3.new(0, 6, 70) } -- (its skull under the hood; a guess)
-	-- The quests: World 1's, to this world's three biomes, and only animals that run here.
-	Config.Quests = {
-		{
-			{ Text = "Reach Haunted Hills", Kind = "reach", Biome = 1, Egg = "Bat", NoPenLevel = true }, -- (Halloween eggs, Oct 15: were World 1's Cactus,
-			{ Text = "Reach Soul Valley", Kind = "reach", Biome = 2, Egg = "SkeletonDog" }, -- Penguin,
-			{ Text = "Reach Pumpkin Patch", Kind = "reach", Biome = 3, Egg = "ZombieBear" }, -- Snowman)
-		},
-		{
-			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "Werewolf" }, -- (was the Spine Lizard's)
-			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "SnackYak" },
-			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "TombstoneCrawler" }, -- (was the Boar's)
-			{ Text = "Lasso Ghosts", Kind = "lasso", Animal = "Ghost", Need = 4, Egg = "WispWolf" }, -- (was 4 Snowmen for the Ice Golem's)
-			{ Text = "Collect animals", Kind = "home", Need = 20, Egg = "SnackYak" }, -- (no finish line on an endless course)
-		},
-		Config.Quests[3],
-	}
-	Config.Sky = "Default" -- Roblox's own sky with its clouds and stars (QM, Oct 15: World.server)
-end
--- World 2's Temple: the Loong runs wild there (QM, Oct 13), 1 in 4,000 of its stampede (QM, Oct 15:
--- was 0.025, now it's sold at World 1's base), counted once the Temple's herd is all in.
-if Config.World == 2 then
-	local temple = Config.Biomes[5].Herd
-	local others = 0
-	for kind, weight in temple do
-		if kind ~= "Loong" then
-			others += weight
-		end
-	end
-	temple.Loong = others / 3999
-end
 if Config.World == 3 then
 	local rgb = Color3.fromRGB
 	local SAND = { rgb(246, 226, 173), rgb(237, 216, 160) } -- (QM, Oct 15: his GroundA/B)
@@ -2540,33 +2104,6 @@ for kind, stats in EXEMPT_STATS do
 	Config.AnimalStats[kind] = table.clone(stats)
 end
 
--- World 2's nerf (QM, Oct 20): each animal's final Speed, after everything above. A full 45 s
--- sprint now gets a flat part of a biome less far than it did (QM: 30% into a biome, less 40%, is
--- 90% into the one before), so some land a biome earlier (design/world2_speeds.md). The Tomb, the
--- Meadow, the Seraphs and the Loong are as they were. The Asura and Black Widow spawn 1% of the
--- Crimson Lands' stampede each (their Herd weights, of a total ~1.175).
-if Config.World == 2 then
-	local speeds = {
-		-- Crimson Lands: 0.4 of a biome less far
-		Eyeworm = 0.8685, CrimsonScorpion = 0.9829, Maw = 1.0542, Beholder = 1.1033, IvorySpider = 1.2001, Asura = 1.7382, BlackWidow = 1.7382,
-		-- Crystal Cavern: 0.4 of a biome less
-		CrystalCentipede = 1.3452, RedMushroom = 1.4423, BlueCrystal = 1.4423, PinkCrystal = 1.5695, BrownMushroom = 1.5695, PurpleMushroom = 1.6956, CrystalSpider = 1.7118, CrystalPhoenix = 2.0424, CrystalElephant = 2.0424,
-		-- Woodland Maze: 0.3 of a biome less, the Hawkmoth 10% into the Temple
-		PinkButterfly = 2.2002, Caterpillar = 2.2392, OrangeButterfly = 2.3425, RollingLog = 2.3425, LivingBirch = 2.3425, Hawkmoth = 2.4061, GiantGolem = 3.8622,
-		-- Temple: 0.2 of a biome less (not the Loong)
-		Catfish = 3.424, Fox = 3.424, Tiger = 3.5516, NineTailedFox = 3.6484, JadeStatue = 3.7452, GarnetStatue = 3.7452, Kitsune = 5.0901,
-	}
-	for kind, speed in speeds do
-		if Config.AnimalStats[kind] then
-			Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind])
-			Config.AnimalStats[kind].Speed = speed
-		end
-	end
-	local crimson = Config.Biomes[2] and Config.Biomes[2].Herd
-	if crimson then
-		crimson.Asura, crimson.BlackWidow = 0.01176, 0.01176
-	end
-end
 
 -- Where each biome starts and the course ends: the parts in workspace.World.Borders, which
 -- QM drags in Studio (Shared/Borders; QM, Nov 6). They override the Lengths above.
