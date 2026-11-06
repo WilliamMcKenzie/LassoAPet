@@ -55,7 +55,6 @@ local Config = {
 			-- floor tiles take this biome's ground colours and its posts PostColor.
 			UnlockCost = 500, -- balance pass (Oct 6): was $1k; most new players quit before reaching it
 			PostColor = Color3.fromRGB(206, 118, 72),
-			GateImage = "rbxassetid://113778810800288", -- assets/ui/GateDesert.png ("Zone Locked")
 			GateColor = Color3.fromRGB(255, 204, 40), -- the gate's glow at this biome's line: desert yellow
 			-- Upgrade Pen while this is the next biome to unlock (its price is drawn in).
 			UpgradeImage = "rbxassetid://134340111977085", -- assets/ui/UpgradePenDesertEnabled.png (QM, Oct 8: price drawn in)
@@ -77,7 +76,6 @@ local Config = {
 			},
 			UnlockCost = 300000, -- QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
 			PostColor = Color3.fromRGB(126, 164, 214),
-			GateImage = "rbxassetid://93384010922515", -- assets/ui/GateTundra.png
 			GateColor = Color3.fromRGB(70, 220, 255), -- cyan (QM)
 			UpgradeImage = "rbxassetid://105968538824751", -- assets/ui/UpgradePenTundraEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://133303061216721", -- assets/ui/UpgradePenTundraDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
@@ -153,7 +151,6 @@ local Config = {
 			},
 			UnlockCost = 10000000, -- QM, Oct 8: matches the new button art (Oct 7 had $5M: halved with the Tundra's ("same with ocean/godlands"); balance pass Oct 6 had it $10M, before that $1M
 			PostColor = Color3.fromRGB(236, 140, 124),
-			GateImage = "rbxassetid://75356296124042", -- assets/ui/GateOcean.png
 			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
 			UpgradeImage = "rbxassetid://86611519789045", -- assets/ui/UpgradePenOceanEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://98686807740770", -- assets/ui/UpgradePenOceanDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
@@ -222,9 +219,6 @@ local Config = {
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
-	-- Zone gates on? Off (QM, Oct 8: new-loops): ride anywhere, no gates, no tutorial
-	-- flight to the next gate. PenLevel still loads and saves as before.
-	Gates = false,
 	-- Breakable barriers instead (QM, Oct 9): the same sheets at each biome line (their
 	-- colour alone, no card), shattering the first time you ride through, gone for good
 	-- for you after (Gate.client; saved by Gold.server). They never stop you.
@@ -501,7 +495,6 @@ local Config = {
 	--     and Mouth (studs up its tentacles start from, default 3) are optional.
 	-- Charge swings the camera round to a cinematic front-side angle.
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
-	NativePrompts = false, -- Roblox's own interact prompts instead of ours (Client/PromptUi), to compare (QM, Oct 10)
 	ShopOn = false, -- (QM, Oct 15: the Robux shop hidden for now, its buttons too: Client/Shop, Hud, BaseUi)
 	AbilitiesOn = false, -- (QM, Oct 10: off till the riding UX is settled; Abilities below stay as they are)
 	-- These use theirs anyway, on their own, whenever it's off cooldown (QM, Oct 15), with no button.
