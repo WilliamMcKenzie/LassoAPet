@@ -940,13 +940,13 @@ end
 
 -- The Slingshot (Client/SlingshotLaunch, QM Nov 6): you land at (x, z) on your fastest pet.
 require(script.Parent.SlingshotRide).bestPet = vfx.fastestPet
-require(script.Parent.SlingshotRide).ride = function(x, z)
+require(script.Parent.SlingshotRide).ride = function(x, z, level)
 	local best = vfx.fastestPet()
 	if phase ~= "idle" or not best then
 		return false
 	end
 	startRide(best, Vector3.new(x, 0, z))
-	warpLevel = Config.Slingshot.To -- (its gate lets you through: you were flung past it)
+	warpLevel = level or Config.Slingshot.To -- (its gate lets you through: you were flung past it)
 	return phase == "outbound"
 end
 

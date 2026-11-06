@@ -1623,10 +1623,11 @@ Config.PenCount = 5
 -- World 2 bar). World 1 is everyone's.
 -- World 2 targets the late Volcano / first Jurassic rides on the normal income curve.
 Config.WorldPrices = { 0, 1000000, 10000000 }
--- The Slingshot (QM, Nov 6): the top bar's first goal (World2Bar.client), bought once for
--- Price gold (Gold.server's BuySlingshot, saved as "OwnsSlingshot"). Yours stands in front of
--- your pen (Server/Slingshot), its back to the pen's opening; hold E at it and it flings you,
--- on your best pet, to the start of biome To (Client/SlingshotLaunch). The meshes are
+-- The Slingshot (QM, Nov 6): everyone's (the top bar is gone; Price and Gold.server's
+-- BuySlingshot are left unused). Yours stands in front of your pen (Server/Slingshot), its
+-- back to the pen's opening; hold E at it and pick a biome (Client/SlingshotMenu: unlocked
+-- ones, or the next for its UnlockCost) and it flings you there on your best pet
+-- (Client/SlingshotLaunch; To: the default). The meshes are
 -- design/slingshot's (tools/slingshot_meshes.py), uploaded: Meshes[i] = { asset id, R, G, B }
 -- for pieces/Slingshot_i (the frame), Band the SlingshotBand mesh (stretched, three of them).
 Config.Slingshot = {
