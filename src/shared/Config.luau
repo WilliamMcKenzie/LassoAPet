@@ -1762,6 +1762,19 @@ Config.Slingshot = {
 		Color3.fromRGB(240, 90, 190), -- pink
 	},
 }
+-- The Top Earners board (QM, Nov 6): left of the start line, facing into the base, the global
+-- top pen incomes (gold a second, everyone's latest recorded, OrderedDataStore "TopEarners")
+-- in a square stone frame (the old portal gate's style, a skull on top: tools/earners_board_meshes.py),
+-- your own pen's income and the countdown to the next refresh under the list.
+-- Server/TopEarners builds it and records; Client/TopEarners draws the list.
+Config.TopEarners = {
+	Position = Vector3.new(-112, 0, 18), -- the base's middle (on the ground), just inside the base left of the course's mouth
+	Yaw = 210, -- degrees: faces into the base (+z), turned 30 degrees toward the course
+	Screen = { Width = 26, Height = 32, Bottom = 4.2 }, -- the frame's opening (tools/earners_board_meshes.py SCREEN_*)
+	Refresh = 60, -- seconds between recording everyone here and re-reading the top
+	Top = 50, -- rows on the board
+	Meshes = {}, -- (filled by tools/earners_board_upload.py)
+}
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:
 -- free in Studio, not on sale live.

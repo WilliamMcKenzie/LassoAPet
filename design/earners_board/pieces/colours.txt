@@ -1,0 +1,5 @@
+# piece: label, R, G, B, centre x, y, z (its bounding box's, where its MeshPart goes)
+EarnersBoard_1: Stone, 177, 185, 178, 0.006, 20.790, -0.713
+EarnersBoard_2: StoneDark, 148, 156, 150, -0.759, 20.846, -0.708
+EarnersBoard_3: Bone, 232, 226, 206, 0.008, 46.766, -0.195
+EarnersBoard_4: Socket, 38, 38, 44, 0.000, 46.300, -4.175

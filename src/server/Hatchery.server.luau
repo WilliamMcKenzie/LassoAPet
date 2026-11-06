@@ -2143,7 +2143,11 @@ task.spawn(function()
 	while true do
 		task.wait(1)
 		for player, profile in profiles do
-			local earned = if player:GetAttribute("Tutorial") then 0 else (income(profile) + (otherIncome[player] or 0)) * goldX(player) -- (nothing till the tutorial's done)
+			local rate = (income(profile) + (otherIncome[player] or 0)) * goldX(player)
+			if player:GetAttribute("PenIncome") ~= rate then
+				player:SetAttribute("PenIncome", rate) -- (the Top Earners board's: Server/TopEarners)
+			end
+			local earned = if player:GetAttribute("Tutorial") then 0 else rate -- (nothing till the tutorial's done)
 			if earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
 				Telemetry.gold(player, "earned", earned)
