@@ -2343,23 +2343,6 @@ for kind, stats in EXEMPT_STATS do
 	Config.AnimalStats[kind] = table.clone(stats)
 end
 
--- The place's workspace.PetScale wins over AnimalScale, which only seeds it (QM, Nov 6, as in
--- Fight to Steal an Egg: size the animals in Studio with the pet lineup, Shared/PetScale and
--- Shared/PetLineup; tick PetScale.CopyValues to print a line to paste over AnimalScale).
-do
-	local petScale = workspace:FindFirstChild("PetScale")
-	if petScale then
-		-- (each biome's group, and values kept on it from before the groups)
-		for _, holder in { petScale, table.unpack(petScale:GetChildren()) } do
-			for kind, value in holder:GetAttributes() do
-				if type(value) == "number" and value > 0 then
-					Config.AnimalScale[kind] = value
-				end
-			end
-		end
-	end
-end
-
 -- (Config.SharedPets, above: the income curve's numbers back, after the other worlds' tables)
 for kind, p in Config.SharedPets do
 	Config.PetIncome[kind], Config.PetHatchTime[kind] = p[1], p[2]
@@ -2411,5 +2394,29 @@ end
 Config.AnimalScale.AlphaBoar /= 1.5
 Config.AnimalScale.AlphaIcebringer = (Config.AnimalScale.Icebringer or 1) * 1.4 -- (sized as the Icebringer is, not by its tier)
 Config.AnimalScale.Gecko = 1.2 -- (QM, Nov 6: bigger; its size is set by its tier, not its model)
+
+-- The place's workspace.PetScale wins over AnimalScale, which only seeds it (QM, Nov 6, as in
+-- Fight to Steal an Egg: size the animals in Studio with the pet lineup, Shared/PetScale and
+-- Shared/PetLineup; tick PetScale.CopyValues to print a line to paste over AnimalScale).
+-- Last in the file, so nothing above (the alphas' sizes, the Gecko's) writes over them, and on a
+-- client it waits for the place to load first: required early, workspace.PetScale wasn't there
+-- yet and the game drew every animal at Config's sizes (QM, Nov 6: "make the scales I set apply").
+do
+	local RunService = game:GetService("RunService")
+	if RunService:IsClient() and RunService:IsRunning() and not game:IsLoaded() then
+		game.Loaded:Wait()
+	end
+	local petScale = workspace:FindFirstChild("PetScale")
+	if petScale then
+		-- (each biome's group, and values kept on it from before the groups)
+		for _, holder in { petScale, table.unpack(petScale:GetChildren()) } do
+			for kind, value in holder:GetAttributes() do
+				if type(value) == "number" and value > 0 then
+					Config.AnimalScale[kind] = value
+				end
+			end
+		end
+	end
+end
 
 return Config
