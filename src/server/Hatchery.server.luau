@@ -1940,9 +1940,8 @@ local function bankAway(player, times)
 	if not profile or (profile.awayGold or 0) <= 0 then
 		return false
 	end
-	local currency = if Config.Gems then "Gems" else "Gold" -- (the Halloween world's pets earn gems: Config.Gems)
-	local banked = profile.awayGold * (if Config.Gems then Config.Gems.Rate else 1) * (tonumber(times) or 1)
-	player:SetAttribute(currency, (player:GetAttribute(currency) or 0) + banked)
+	local banked = profile.awayGold * (tonumber(times) or 1)
+	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + banked)
 	profile.awayGold = nil
 	player:SetAttribute("AwayGold", nil)
 	if (tonumber(times) or 1) > 1 then
@@ -2031,42 +2030,6 @@ resetCommand.Triggered:Connect(function(source)
 end)
 resetCommand.Parent = game:GetService("TextChatService")
 
--- Rebirth (Gold.server, QM Oct 13: "lose all pets"): every pet and egg gone, in every world,
--- saved before it returns (the trip to World 1 loads that world's pen next); a fresh
--- Config.DefaultPet to ride. Quests, pen level, the tutorial and the shop counts stay.
-local rebirthPets = Instance.new("BindableFunction")
-rebirthPets.Name = "RebirthPets"
-rebirthPets.OnInvoke = function(player)
-	local old = profiles[player]
-	if not old then
-		return false
-	end
-	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = old.ridden or {}, tutorial = true, boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets,
-		boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, usedHatches = old.usedHatches, quests = old.quests, v1 = old.v1, questsSeen = old.questsSeen,
-		starterPack = old.starterPack, rainbowTrail = old.rainbowTrail, homeEggs = old.homeEggs, merged = old.merged, keep = old.keep, ridesDone = old.ridesDone }
-	local writes = {}
-	for _, other in otherStores do -- (the other worlds' pens, empty)
-		table.insert(writes, task.spawn(function()
-			pcall(other.UpdateAsync, other, "u" .. player.UserId, function(data)
-				data = if typeof(data) == "table" then data else {}
-				data.eggs, data.items, data.ride, data.rideMerged, data.rideFuse, data.rideIncome, data.rideStats, data.rideWorth, data.rideTier = {}, {}, nil, nil, nil, nil, nil, nil, nil
-				data.tutorial = true
-				return data
-			end)
-		end))
-	end
-	otherIncome[player] = 0
-	player:SetAttribute("CarriedEgg", nil)
-	publish(player)
-	save(player)
-	for _, thread in writes do -- (wait for the other worlds' writes too)
-		while coroutine.status(thread) ~= "dead" do
-			task.wait(0.1)
-		end
-	end
-	return true
-end
-rebirthPets.Parent = game:GetService("ServerStorage")
 
 -- Testing: "/gold <amount>" adds that much gold, 5000, 2.5m, 10b (k, m, b, t); "/gold" alone
 -- 10m; a minus takes it away (QM, Oct 13).
@@ -2103,12 +2066,7 @@ task.spawn(function()
 		task.wait(1)
 		for player, profile in profiles do
 			local earned = if player:GetAttribute("Tutorial") then 0 else (income(profile) + (otherIncome[player] or 0)) * goldX(player) -- (nothing till the tutorial's done)
-			if earned > 0 and player.Parent and Config.Gems then
-				-- (the Halloween world: your pets earn gems, not cash: Config.Gems, QM Oct 15)
-				local gems = earned * Config.Gems.Rate
-				player:SetAttribute("Gems", (player:GetAttribute("Gems") or 0) + gems)
-				paid:FireClient(player, gems) -- (the HUD shows it by the gem counter)
-			elseif earned > 0 and player.Parent then
+			if earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
 				Telemetry.gold(player, "earned", earned)
 				paid:FireClient(player, earned) -- (the HUD shows it by the gold counter)

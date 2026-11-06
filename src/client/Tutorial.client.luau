@@ -470,12 +470,6 @@ local function run()
 	end
 	running = true
 	bannerShown = {} -- (a new run, "/tutorial" too, shows its banners again)
-	-- After the intro (or straight away without one).
-	if Config.Intro ~= false then
-		while player:GetAttribute("Tutorial") and not player:GetAttribute("IntroDone") do
-			task.wait(0.2)
-		end
-	end
 	local function on()
 		return player:GetAttribute("Tutorial") == true
 	end

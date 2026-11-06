@@ -155,6 +155,26 @@ local function smash(o, dir, side, remote)
 	Poof.at(Vector3.new(o.x, 0, o.z))
 end
 
+-- A stampede animal bigger than an obstacle knocks it out of the way (QM, Nov 6: small
+-- obstacles only trouble small animals). Everyone runs the same stampede, so it's local, and
+-- back a few seconds later like another rider's smash.
+function vfx.trample(x, z, tier)
+	for _, o in slices.at(slices.block, z) do
+		if not o.smashed and o.tier < tier and math.abs(o.x - x) < o.hx + 3 and math.abs(o.z - z) < o.hz + 3 then
+			smash(o, -1, if o.x >= x then 1 else -1, true)
+			o.remoteSmash = true
+			task.delay(vfx.REMOTE_SMASH_BACK or 4, function()
+				if o.remoteSmash then
+					o.smashed, o.remoteSmash = nil, nil
+					for _, q in o.parts do
+						q.part.CFrame, q.part.Transparency = q.cframe, q.transparency
+					end
+				end
+			end)
+		end
+	end
+end
+
 local function unsmashAll()
 	for _, o in obstacles do
 		if o.smashed then
@@ -191,7 +211,7 @@ end
 -- stream, and riding never changes it: an animal you lasso just leaves it.
 local START_LINE_Z = if world:FindFirstChild("StartLine") then world.StartLine:GetBoundingBox().Position.Z else -2
 local SPAWN_Z = START_LINE_Z + 4
-local FINISH_Z = if Config.Endless then -math.huge else -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
+local FINISH_Z = -Config.CourseLength + Config.FinishFromEnd -- the finish line (World.server puts it there)
 local FINISH_DROP = 40 -- studs the leap off the end drops below the floor by the time it lands
 local VIEW = 320 -- stampede animals further than this from the camera aren't drawn
 local DUST_VIEW = 160 -- landings further than this from the camera kick up no dust
@@ -283,7 +303,7 @@ do
 		assert(biome.Herd, "Config.Biomes[" .. b .. "] (" .. tostring(biome.Name) .. ") has no Herd")
 		streams[b] = newStream(
 			if b == 1 then SPAWN_Z else startZ - 2,
-			if b == #Config.Biomes then (if Config.Endless then Config.Endless.Cut else FINISH_Z) + 2 else endZ + 2, -- the course stops at the finish line
+			if b == #Config.Biomes then FINISH_Z + 2 else endZ + 2, -- the course stops at the finish line
 			biome.Herd,
 			biome.Name
 		)
@@ -294,7 +314,7 @@ end
 
 -- Where an animal in biome b (at z) stops: its stream's end.
 local function streamAt(z)
-	return vfx.endless.streamAt(z) or streams[WorldColors.biomeAt(z)]
+	return streams[WorldColors.biomeAt(z)]
 end
 
 local rng = Random.new()
@@ -321,8 +341,6 @@ vfx.Merge = require(ReplicatedStorage.Shared.Merge)
 vfx.Fusion = require(ReplicatedStorage.Shared.Fusion)
 vfx.Skins = require(ReplicatedStorage.Shared.Skins)
 vfx.HerdPacks = require(script.Parent.HerdPacks)
-vfx.endless = require(script.Parent.Endless) -- the endless Jurassic: copies past the cut (Config.Endless)
-vfx.endless.init({ obstacles = obstacles, slices = slices, streams = streams, newStream = newStream })
 vfx.Burrow = require(script.Parent.Burrow) -- the Sandworm's spray and mounds (yours and other riders')
 vfx.sink = require(script.Parent.WaterSink) -- sinking in water (QM, Oct 14)
 vfx.Studs = require(ReplicatedStorage.Shared.Studs) -- hybrids: the donor's size and colours
@@ -490,12 +508,16 @@ local function smoothstep(a, b, v)
 	return t * t * (3 - 2 * t)
 end
 
--- A stampede animal's x at z: its lane, swerving round any obstacle in the way.
-local function laneX(x0, z)
+-- A stampede animal's x at z: its lane, swerving round any obstacle in the way (of its own
+-- size tier or bigger, given `tier`: smaller ones it knocks aside, vfx.trample; QM Nov 6).
+local function laneX(x0, z, tier)
 	x0 *= vfx.widen(z) -- (lanes are in start-line units)
 	local EDGE = vfx.edge(z)
 	local x = x0
 	for _, o in slices.at(slices.swerve, z) do
+		if tier and o.tier < tier then
+			continue
+		end
 		local reach = o.hx + 6
 		local d = x0 - o.x
 		if math.abs(d) < reach then
@@ -1806,7 +1828,6 @@ local function updateHerd(dt, slowed)
 		vfx.frostLeft[key] = if left > dt then left - dt else nil
 	end
 	local fromZ, toZ = vfx.viewWindow(camZ)
-	vfx.endless.update(camZ)
 	-- (the animal you're lassoing is kept however old it gets or far it runs: QM, Oct 8, a
 	-- Fish wrestled on into the Desert outlived its stream's schedule and vanished)
 	local held = transfer and transfer.target and transfer.target.n
@@ -1845,8 +1866,11 @@ local function updateHerd(dt, slowed)
 			if (z <= stream.endZ or z < fromZ or z > toZ) and not lassoed then
 				continue
 			end
-			local x = laneX(p.x, z)
+			local x = laneX(p.x, z, tierOf(p.kind))
 			local shown = lassoed or inView(x, z)
+			if shown then
+				vfx.trample(x, z, tierOf(p.kind))
+			end
 			if not entity then
 				entity = takeFromPool(key, x, z, p.kind)
 				if not entity then

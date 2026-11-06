@@ -290,15 +290,6 @@ local function showCounters()
 end
 player:GetAttributeChangedSignal("Gold"):Connect(showCounters)
 showCounters()
--- The Halloween world's gems (Config.Gems, QM Oct 15), over the cash, in gems' yellow.
-if Config.Gems then
-	local gemText = counter(0, ART.crystal, Config.GemYellow)
-	local function showGems()
-		gemText.Text = (Hud.money(player:GetAttribute("Gems") or 0):gsub("%$", ""))
-	end
-	player:GetAttributeChangedSignal("Gems"):Connect(showGems)
-	showGems()
-end
 
 -- Top right: Quests. Laid out in the art's own pixels, scaled down to QUESTS_WIDTH.
 local claimQuest = ReplicatedStorage:WaitForChild("ClaimQuest")
