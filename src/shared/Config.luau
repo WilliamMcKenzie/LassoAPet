@@ -1721,6 +1721,7 @@ Config.Endless = {
 			-- World 2's Crimson Lands (QM, Oct 13)
 			Name = "CrimsonLands",
 			DisplayName = "Crimson Lands",
+			Picture = "rbxassetid://122032706733413", -- design/biomes/CrimsonLands.png: its render, no pets (an edit-time capture of its stretch, in its fog)
 			Tier = 10,
 			Swerve = 1,
 			HerdSpawnEvery = 0.45,
