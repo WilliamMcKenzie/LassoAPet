@@ -172,7 +172,28 @@ for _, player in Players:GetPlayers() do
 	task.spawn(join, player)
 end
 
+-- "PlayTime" (the Top Playtime board's: Server/Leaderboards): all-time seconds played, this
+-- world's `played`; from this visit only when the save didn't load (Studio without API access).
+local joinedAt = {} -- [player] = os.time() at join
+Players.PlayerAdded:Connect(function(player)
+	joinedAt[player] = os.time()
+end)
+for _, player in Players:GetPlayers() do
+	joinedAt[player] = joinedAt[player] or os.time()
+end
+task.spawn(function()
+	while true do
+		for _, player in Players:GetPlayers() do
+			if ready[player] then
+				player:SetAttribute("PlayTime", math.floor(if playedFrom[player] then playedNow(player) else os.time() - (joinedAt[player] or os.time())))
+			end
+		end
+		task.wait(10)
+	end
+end)
+
 Players.PlayerRemoving:Connect(function(player)
+	joinedAt[player] = nil
 	save(player)
 	loaded[player], ready[player], bought[player], savedAs[player], oldStamina[player], others[player] = nil, nil, nil, nil, nil, nil
 	playedBase[player], playedFrom[player], playedFull[player] = nil, nil, nil

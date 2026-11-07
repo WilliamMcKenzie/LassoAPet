@@ -2201,7 +2201,7 @@ task.spawn(function()
 		for player, profile in profiles do
 			local rate = (income(profile) + (otherIncome[player] or 0)) * goldX(player)
 			if player:GetAttribute("PenIncome") ~= rate then
-				player:SetAttribute("PenIncome", rate) -- (the Top Earners board's: Server/TopEarners)
+				player:SetAttribute("PenIncome", rate) -- (the Top Money board's: Server/Leaderboards)
 			end
 			local earned = if player:GetAttribute("Tutorial") then 0 else rate -- (nothing till the tutorial's done)
 			if earned > 0 and player.Parent then

@@ -1985,18 +1985,6 @@ Config.Slingshot = {
 		Color3.fromRGB(240, 90, 190), -- pink
 	},
 }
--- The Top Earners board (QM, Nov 6): left of the start line, facing into the base, the global
--- top pen incomes (gold a second, everyone's latest recorded, OrderedDataStore "TopEarners")
--- in a grass-and-dirt frame in the map's look with a gold crown on top (QM, Nov 7),
--- your own pen's income and the countdown to the next refresh under the list.
--- Server/TopEarners builds it and records; Client/TopEarners draws the list.
-Config.TopEarners = {
-	Position = Vector3.new(-112, 0, 18), -- the base's middle (on the ground), just inside the base left of the course's mouth
-	Yaw = 210, -- degrees: faces into the base (+z), turned 30 degrees toward the course
-	Screen = { Width = 26, Height = 32, Bottom = 4.2 }, -- the frame's opening (Server/TopEarners builds the frame round it)
-	Refresh = 60, -- seconds between recording everyone here and re-reading the top
-	Top = 50, -- rows on the board
-}
 -- The free gift (QM, Nov 7: Fight to Steal an Egg's, 1:1, but +3 luck and +5k cash, not Power):
 -- a red studded present with a yellow bow, "FREE!" over it, a glowing ring and sparkles, in
 -- the base right of the start line (Shared/GiftModel; Server/FreeGift builds it). Walking into
@@ -2020,6 +2008,37 @@ Config.FreeGift = {
 	BoxColor = Color3.fromRGB(226, 26, 36),
 	RibbonColor = Color3.fromRGB(255, 205, 30),
 	Bob = 0.35, -- studs it floats up and down (client/FreeReward)
+}
+-- The leaderboards (QM, Nov 7: a copy of his reference's three boards, Top Speed swapped for
+-- Top Luck): left of the start line, facing into the base, side by side. Each one is the
+-- global top Top players by its stat, everyone's latest recorded every Refresh seconds in its
+-- own OrderedDataStore. Money = pen gold a second ("PenIncome", Hatchery's), Luck =
+-- Config.luck (stored x100), Playtime = all-time seconds played ("PlayTime", Gold.server's).
+-- Server/Leaderboards builds them (Parts) and records; Client/Leaderboards draws the titles
+-- and the lists.
+Config.Leaderboards = {
+	Position = Vector3.new(-112, 0, 18), -- the middle board's foot (on the ground), where the Top Earners board was
+	Yaw = 210, -- degrees: faces into the base (+z), turned 30 degrees toward the course
+	Spacing = 20, -- studs between the boards' middles
+	Refresh = 60, -- seconds between recording everyone here and re-reading the tops
+	Top = 50, -- rows on each board
+	Boards = {
+		{
+			Key = "Money", Title = "Top Money", Store = "TopMoney",
+			Main = Color3.fromRGB(96, 214, 46), Dark = Color3.fromRGB(30, 112, 24), Pale = Color3.fromRGB(196, 238, 176),
+			Text = Color3.fromRGB(226, 255, 92), Value = Color3.fromRGB(150, 255, 90),
+		},
+		{
+			Key = "Luck", Title = "Top Luck", Store = "TopLuck",
+			Main = Color3.fromRGB(44, 140, 255), Dark = Color3.fromRGB(20, 62, 180), Pale = Color3.fromRGB(176, 210, 255),
+			Text = Color3.fromRGB(150, 226, 255), Value = Color3.fromRGB(150, 226, 255),
+		},
+		{
+			Key = "Playtime", Title = "Top Playtime", Store = "TopPlaytime",
+			Main = Color3.fromRGB(242, 72, 96), Dark = Color3.fromRGB(150, 24, 48), Pale = Color3.fromRGB(255, 184, 196),
+			Text = Color3.fromRGB(255, 140, 160), Value = Color3.fromRGB(255, 255, 255),
+		},
+	},
 }
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:
