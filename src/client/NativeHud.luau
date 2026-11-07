@@ -4,7 +4,7 @@
 --   the green Shop and blue Index buttons, left middle;
 --   the orange Pets button (a square, the paw), right middle, and the red Eggs one under it;
 --   your cash, bottom left: the cash icon on a black band fading out, the number in green
---   italics.
+--   italics; your luck above it. Gains pop "+N" beside them (client/GainPopups).
 -- BaseUi builds it in place of its own art and wires it up (clicks, cash, quests); shown
 -- whenever BaseUi is. Laid out in design px (1080 tall) and scaled to the screen by the
 -- Root's UIScale (Config.NativeUi.Scale). QM's Figma is 2190 tall: its numbers go through fig.
@@ -209,6 +209,14 @@ function NativeHud.build(handlers)
 		Size = UDim2.fromOffset(fig(230), fig(72)),
 		ZIndex = 3,
 	})
+	-- (each gain pops "+N" right of the number and bounces the icon: client/GainPopups, QM Nov 7)
+	local GainPopups = require(script.Parent.GainPopups)
+	GainPopups.init(row, "Cash", cash, Color3.fromRGB(0, 255, 0), 44, {
+		attribute = "Gold",
+		text = function(amount) -- (Hud's money, no "$": as the counter; required here, Hud needs us)
+			return (require(script.Parent.Hud).money(amount):gsub("%$", ""))
+		end,
+	})
 
 	-- luck, just above cash (QM, Nov 7: where Fight to Steal an Egg's Power is: its row, 256 up,
 	-- band 66, the number at 177, white): the clover, "x1". Tap it for the rebirth popup.
@@ -245,6 +253,13 @@ function NativeHud.build(handlers)
 		Text = "",
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 4,
+	})
+	GainPopups.init(luckRow, "Luck", luck, Color3.new(1, 1, 1), 66, {
+		attribute = "LuckBonus",
+		min = 0.01, -- (luck comes in quarters)
+		text = function(amount)
+			return (string.format("%.2f", amount):gsub("%.?0+$", ""))
+		end,
 	})
 	local function showLuck()
 		luck.Text = Config.luckText(Config.luck(player))
