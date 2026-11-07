@@ -8,7 +8,8 @@
 -- away. Rewards that land while others are still up sit beside them in a row (QM: "multiple
 -- stuff can turn into a row"). Eggs show here straight away, no RNG card (QM, Nov 6).
 --
---   RewardPopups.show(image, text)   -- image: an asset id; text: "$450K", "x1"
+--   RewardPopups.show(image, text, outline)   -- image: an asset id; text: "$450K", "x1";
+--                                             -- outline: black round the picture (the cash)
 --   RewardPopups.watchCash(money)    -- pops the gold you're given (not the pets' per-second
 --                                    -- pay, which ticks by the counter); money: Hud's "$1.2k"
 
@@ -79,7 +80,7 @@ local function place(r)
 end
 
 local order = 0
-function RewardPopups.show(image, text)
+function RewardPopups.show(image, text, outline)
 	local side, glow = fig(TILE), fig(GLOW)
 	order += 1
 	-- (a CanvasGroup, so the tile, its outline and the glow fade as one)
@@ -142,6 +143,9 @@ function RewardPopups.show(image, text)
 	pic.Size = UDim2.fromScale(0.78, 0.78)
 	pic.ZIndex = 4
 	pic.Parent = tile
+	if outline then
+		HudKit.outlineArt(pic, HudKit.TEXT_OUTLINE)
+	end
 	local amount = HudKit.label(tile, "Amount", {
 		Text = text or "",
 		TextScaled = true,
@@ -185,7 +189,7 @@ function RewardPopups.watchCash(money)
 		local sum = gained - paid
 		gained, paid = 0, 0
 		if sum >= 1 then
-			RewardPopups.show(HudImages.CashStack, money(sum))
+			RewardPopups.show(HudImages.CashStack, money(sum), true)
 		end
 	end
 	local function wait()

@@ -542,12 +542,15 @@ local function build()
 		Size = UDim2.fromOffset(fig(160), fig(160)),
 		ZIndex = 4,
 	})
-	art(slot, "Icon", {
-		Image = HudImages.CashGainIcon or "",
+	-- (QM, Nov 7: the Shop's high-res cash stack, outlined black, not the 34 px gain icon)
+	local cashIcon = art(slot, "Icon", {
+		Image = HudImages.CashStack or "",
 		Position = UDim2.fromScale(0.1, 0.02),
 		Size = UDim2.fromScale(0.8, 0.8),
 		ZIndex = 5,
 	})
+	cashIcon.Image = HudImages.CashStack or ""
+	HudKit.outlineArt(cashIcon, HudKit.TEXT_OUTLINE)
 	label(slot, "Amount", {
 		Text = "$1K",
 		TextXAlignment = Enum.TextXAlignment.Center,
