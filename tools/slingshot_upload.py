@@ -10,11 +10,21 @@ Only uploads; it doesn't change the place.
 import json
 import os
 import re
+import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "mapeditor"))
-from studio import run_luau  # noqa: E402
+LU = os.path.join(HERE, "studio", "lu.py")  # (runs Luau in the open Studio, as tools/earners_board_upload.py)
+
+
+def run_luau(code, mode="Edit"):
+    with tempfile.NamedTemporaryFile("w", suffix=".luau", delete=False) as f:
+        f.write(code)
+    try:
+        return subprocess.run([sys.executable, LU, f.name, mode], capture_output=True, text=True).stdout
+    finally:
+        os.remove(f.name)
 
 PIECES = os.path.join(HERE, "..", "design", "slingshot", "pieces")
 CONFIG = os.path.join(HERE, "..", "src", "shared", "Config.luau")
@@ -84,7 +94,7 @@ def main():
     src = open(CONFIG).read()
     src, n1 = re.subn(r"\tMeshes = \{[^\n]*\}, -- \(filled by tools/slingshot_upload\.py\)",
                       "\tMeshes = { " + ", ".join(meshes) + " }, -- (filled by tools/slingshot_upload.py)", src)
-    src, n2 = re.subn(r"\tBand = [^\n]*,\n", "\tBand = %s, -- (filled by tools/slingshot_upload.py)\n" % band, src, count=1)
+    src, n2 = re.subn(r"\tBand = \d+,[^\n]*\n", "\tBand = %s, -- (filled by tools/slingshot_upload.py)\n" % band, src, count=1)
     if n1 != 1 or n2 != 1:
         raise SystemExit("couldn't find Config.Slingshot's Meshes / Band lines")
     open(CONFIG, "w").write(src)

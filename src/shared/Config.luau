@@ -1849,9 +1849,11 @@ end
 Config.Slingshot = {
 	Price = 1000000, -- (World 2's, the goal it replaces)
 	To = 2, -- the Desert
-	Ahead = 22, -- studs out from your pen's Spawn to the slingshot's middle
+	Ahead = 12, -- studs out from your pen's Spawn to the slingshot's middle (QM, Nov 7: closer; was 22)
 	Flight = 4.5, -- seconds in the air
 	Apex = 260, -- studs over the straight line at the flight's middle
+	Lift = 80, -- studs more up early on (sin^0.6 of the flight: steep off the band, none by the landing), so the shot clears the walls (QM, Nov 7)
+	Steer = 2, -- x Ride's SteerSpeed and SteerResponse in the air (QM, Nov 7: twice as nimble)
 	Meshes = { { 108584371800496, 222, 124, 62 }, { 83135902680851, 240, 228, 196 }, { 126807462534931, 150, 76, 38 } }, -- (filled by tools/slingshot_upload.py)
 	Band = 102942616406200, -- (filled by tools/slingshot_upload.py)
 	BandColor = Color3.fromRGB(226, 58, 52),

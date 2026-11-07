@@ -48,8 +48,8 @@ TIPS = [(-7.6, 14.6, 0.0), (7.6, 14.6, 0.0)]   # where the bands tie on
 BAND_SIDE = [(-2.0, 0.9, 0.3), (2.0, 0.9, 0.3)]  # where the band wraps the rider, in the pull's space
 SLACK = (0.0, 10.4, 0.0)     # resting: the band hangs slack between the tips (QM, Nov 7)
 NEUTRAL = SLACK              # what it wobbles about after the shot
-LOAD = (0.0, 1.6, 17.0)      # pulled back to the ground, the rider on it
-DRAW = (0.0, 1.6, 20.0)      # drawn back before the shot
+LOAD = (0.0, 1.6, 11.0)      # pulled back to the ground, the rider on it
+DRAW = (0.0, 1.6, 13.5)      # drawn back before the shot
 OVER = (0.0, 22.0, -7.0)     # the furthest it snaps forward
 
 
