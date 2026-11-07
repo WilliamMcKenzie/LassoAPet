@@ -13,6 +13,8 @@
 --   SlingshotMenu.open(onPick)   -- onPick(biome index) when you pick an unlocked one
 --   SlingshotMenu.open(nil, i)   -- (the Goal panel's Buy!, QM Nov 7) scrolled so biome i's card
 --                                -- is in the middle, the clicking cursor on its buy button
+--   SlingshotMenu.open(onPick, nil, true) -- (holding E on a pet, QM Nov 7: not at the slingshot,
+--                                -- so walking away doesn't close it)
 --   SlingshotMenu.atSlingshot()  -- open from the slingshot itself (Client/SlingshotLaunch
 --                                -- closes it when you walk away; not one from the Goal panel)
 --   SlingshotMenu.close()
@@ -340,10 +342,10 @@ local function build()
 	player:GetAttributeChangedSignal("Reborn"):Connect(refresh) -- (prices x2: Config.Luck)
 end
 
-function SlingshotMenu.open(callback, focus)
+function SlingshotMenu.open(callback, focus, away)
 	build()
 	onPick = callback
-	fromSlingshot = callback ~= nil
+	fromSlingshot = callback ~= nil and not away
 	if cursor then
 		cursor.Visible = false
 	end

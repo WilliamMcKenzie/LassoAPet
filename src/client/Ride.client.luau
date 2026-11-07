@@ -1012,6 +1012,19 @@ end
 
 local function rideFromHome()
 	if phase == "idle" and rideModel and rideShown then
+		-- After the tutorial, your own pets open the Slingshot menu instead: pick where to go
+		-- (QM, Nov 7). Meadow rides it from here as before. (Not a stampede animal: not yours.)
+		local sling = require(script.Parent.SlingshotRide)
+		local model = rideModel
+		local own = (starter and model == starter.animal.model) or PenPets.pets[model]
+		if sling.menu and own and player:GetAttribute("Tutorial") ~= true then
+			sling.menu(model, function()
+				if phase == "idle" and model.Parent then
+					startRide(model)
+				end
+			end)
+			return
+		end
 		startRide(rideModel)
 	end
 end
@@ -1108,7 +1121,8 @@ end
 -- The Slingshot (Client/SlingshotLaunch, QM Nov 6): you land at (x, z) on your fastest pet.
 require(script.Parent.SlingshotRide).bestPet = vfx.fastestPet
 require(script.Parent.SlingshotRide).ride = function(x, z, level)
-	local best = vfx.fastestPet()
+	local chosen = require(script.Parent.SlingshotRide).pet -- (the pet you held E on, if it's still home)
+	local best = if chosen and chosen.Parent then chosen else vfx.fastestPet()
 	if phase ~= "idle" or not best then
 		return false
 	end
