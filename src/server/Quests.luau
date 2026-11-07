@@ -171,6 +171,25 @@ function Quests.claim(player, state, i)
 	return quest, first
 end
 
+-- "/skipgoal N" (QM, Nov 7; Hatchery's): each line's next n goals passed over, no rewards, never
+-- past the Rebirth goal. Returns the goal now up in the first line (its Text), or nil.
+function Quests.skip(player, state, n)
+	for line, quests in Config.Quests do
+		local slot = state.lines[line]
+		for _ = 1, n do
+			local quest = quests[slot.at]
+			if not quest or quest.Kind == "rebirth" then
+				break
+			end
+			slot.at += 1
+		end
+		slot.skip = nil
+	end
+	Quests.publish(player, state)
+	local first = Config.Quests[1] and Config.Quests[1][state.lines[1].at]
+	return first and first.Text
+end
+
 -- The Rebirth goal (Config.Quests' "rebirth"), if it's up and done: every line back to its
 -- Loop goal (else its first). True if it was (Hatchery's Rebirth then does the rest).
 function Quests.rebirth(player, state)

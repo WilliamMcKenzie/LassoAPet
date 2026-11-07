@@ -2165,6 +2165,23 @@ goldCommand.Triggered:Connect(function(source, text)
 end)
 goldCommand.Parent = game:GetService("TextChatService")
 
+-- Testing: "/skipgoal [N]" (QM, Nov 7) passes over your next N goals (1 if no N), no rewards.
+local skipGoalCommand = Instance.new("TextChatCommand")
+skipGoalCommand.Name = "SkipGoal"
+skipGoalCommand.PrimaryAlias = "/skipgoal"
+skipGoalCommand.Triggered:Connect(function(source, text)
+	local player = Players:GetPlayerByUserId(source.UserId)
+	local profile = player and profiles[player]
+	if not profile or not allowed(player) then
+		return
+	end
+	local n = math.clamp(math.floor(tonumber(text:match("^/skipgoal%s+(%d+)")) or 1), 1, 100)
+	local now = Quests.skip(player, profile.quests, n)
+	save(player)
+	devChat:FireClient(player, "/skipgoal: skipped " .. n .. ", now " .. tostring(now or "done"))
+end)
+skipGoalCommand.Parent = game:GetService("TextChatService")
+
 Telemetry.incomeOf = function(player) -- (gold a second: the gold checkpoints)
 	local profile = profiles[player]
 	return if profile then (income(profile) + (otherIncome[player] or 0)) * goldX(player) else 0
