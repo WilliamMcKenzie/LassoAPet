@@ -368,7 +368,7 @@ local Config = {
 			GateColor = Color3.fromRGB(255, 170, 40),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				Ankylosaurus = 1/4, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/8, TRex = 1/10, Pterodactyl = 1/20, BoneRex = 1/40,
+				Ankylosaurus = 1/4, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/8, TRex = 1/10, Pterodactyl = 1/20, BoneRex = 1/40, CastleWyvern = 1/10000, -- (the Castle Wyvern stays: QM Nov 7)
 			},
 			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
 		},
