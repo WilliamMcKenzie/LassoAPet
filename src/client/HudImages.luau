@@ -24,7 +24,7 @@ return {
 	PassGrowth = "rbxassetid://114174541072022", -- assets/ui/shop/PassGrowth.png
 	GiftIcon = "rbxassetid://128507687375224", -- assets/ui/shop/GiftIcon.png
 	Sunburst = "rbxassetid://77681254888649", -- assets/ui/shop/Sunburst.png
-	TrailGuy = "", -- assets/ui/shop/TrailGuy.png, QM's trail guy (the Trails Shop's cards, recoloured per trail): tools/studio/imgup.py
+	TrailGuy = "rbxassetid://85489175966101", -- assets/ui/shop/TrailGuy.png, QM's trail guy (the Trails Shop's cards, recoloured per trail): tools/studio/imgup.py
 	StudTile = "rbxassetid://100359261064701", -- assets/ui/StudTile.png (QM's Figma stud texture)
 	WeldTile = "rbxassetid://94674059514917", -- assets/ui/WeldTile.png (QM's Figma weld texture)
 	BossAliveIcon = "rbxassetid://136700539456694", -- assets/ui/hud/BossAliveIcon.png
