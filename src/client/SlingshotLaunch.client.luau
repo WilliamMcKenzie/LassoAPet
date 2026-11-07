@@ -124,10 +124,10 @@ local function launch(model, to)
 		local from = hold(pull)
 		local p0 = from.Position
 		local p2 = Vector3.new(landing.X, p0.Y - pull.Position.Y + landing.Y, landing.Z)
-		-- (a nearer biome: a lower, quicker shot; a farther one: longer, up to twice Flight)
+		-- (a nearer biome: a lower shot; every shot takes exactly Flight seconds in the air)
 		local far = Vector3.new(p2.X - p0.X, 0, p2.Z - p0.Z).Magnitude
 		local apex = math.clamp(far / 8, 40, CFG.Apex)
-		local flight = CFG.Flight * math.clamp(far / 2000, 0.5, 2)
+		local flight = CFG.Flight
 		local p1 = (p0 + p2) / 2 + Vector3.new(0, 2 * apex, 0) -- (a quadratic curve's middle is half way to this)
 		-- steering: x off the curve, easing toward SteerSpeed x your input (as Ride's way out
 		-- of your pen), kept inside the course where you land
