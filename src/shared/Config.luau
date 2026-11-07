@@ -2780,7 +2780,7 @@ for kind, alpha in Config.Alphas do
 	local stats = Config.AnimalStats[base] or { Speed = 1, Stamina = 1 }
 	Config.AnimalStats[kind] = { Speed = stats.Speed * 1.1, Stamina = stats.Stamina * 1.5 }
 	Config.Abilities[kind] = Config.Abilities[base]
-	Config.EggIcons[kind] = Config.EggIcons[base]
+	Config.EggIcons[kind] = Config.EggIcons[kind] or Config.EggIcons[base] -- (its own recoloured egg once uploaded: tools/egg_icons_upload.py)
 	if Config.World == 1 then
 		for _, biome in Config.Biomes do
 			if biome.Herd and (biome.Herd[base] or 0) > 0 then

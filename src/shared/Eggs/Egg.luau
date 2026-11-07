@@ -226,9 +226,10 @@ local HalloweenSkins = require(script.Parent.Parent.HalloweenSkins)
 for kind, base in HalloweenSkins.Base do
 	KINDS[kind] = { data = HalloweenSkins.model(kind, KINDS[base].data), center = KINDS[base].center }
 end
--- The alphas hatch from their base's egg (Config.Alphas).
+-- The alphas' eggs: their base's egg recoloured (tools/egg_icons.py, QM Nov 7), else the base's (Config.Alphas).
 for kind, alpha in Config.Alphas do
-	KINDS[kind] = KINDS[alpha.Base]
+	local own = script.Parent:FindFirstChild(kind .. "EggModel")
+	KINDS[kind] = own and { data = require(own), center = KINDS[alpha.Base].center } or KINDS[alpha.Base]
 end
 
 local Egg = {}
