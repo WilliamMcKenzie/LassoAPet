@@ -1143,7 +1143,8 @@ local indexClaim = Instance.new("RemoteFunction")
 indexClaim.Name = "IndexClaim"
 indexClaim.OnServerInvoke = function(player, kind)
 	local profile = profiles[player]
-	if not profile or not loaded[player] or typeof(kind) ~= "string" or not (profile.caught and profile.caught[kind]) then
+	-- (in Studio too, where the save never loads: no API access)
+	if not profile or not (loaded[player] or RunService:IsStudio()) or typeof(kind) ~= "string" or not (profile.caught and profile.caught[kind]) then
 		return false
 	end
 	profile.indexClaimed = profile.indexClaimed or {}
