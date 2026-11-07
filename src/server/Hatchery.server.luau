@@ -1405,6 +1405,7 @@ rebirth.OnServerInvoke = function(player)
 	player:SetAttribute("PenLevel", 1)
 	player:SetAttribute("GatesBroken", 1)
 	player:SetAttribute("Reborn", (player:GetAttribute("Reborn") or 0) + 1)
+	Funnel.rebirthed(player, player:GetAttribute("Reborn")) -- (analytics: "Rebirthed")
 	Quests.publish(player, profile.quests)
 	task.spawn(save, player)
 	return true

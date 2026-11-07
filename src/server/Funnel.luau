@@ -53,6 +53,9 @@
 --                         CustomField03 cash or robux)
 --   "Reached <biome>"     rode through its barrier (value: minutes played so far)
 --   "Session Minutes"     each visit's length (value: minutes)
+--   "Rebirthed"           a rebirth (value: minutes played so far; CustomField03 which rebirth)
+--   "Robux Spent"         any product or pass bought (value: Robux; CustomField03 the sku),
+--                         so Robux per player can be split by version too
 --   Economy (Analytics > Economy), currency "Cash": sources Ride, Pen Income (a minute's
 --   worth at a time), Away Earnings, Index Reward, Cash Pack; sinks Unlock <biome>, Egg
 --   Roll, Fuse, Rainbow Trail.
@@ -289,6 +292,15 @@ function Funnel.unlocked(player, i, how)
 	if ok and seconds then
 		Funnel.event(player, "Unlocked " .. (BIOME_NAMES[i] or Config.Biomes[i].Name), minutes(seconds), how)
 	end
+end
+
+-- Hatchery's Rebirth: rebirth number `n` done.
+function Funnel.rebirthed(player, n)
+	local played = game:GetService("ServerStorage"):FindFirstChild("PlayedTime") -- (Gold.server's)
+	local ok, seconds = pcall(function()
+		return played and played:Invoke(player)
+	end)
+	Funnel.event(player, "Rebirthed", if ok and seconds then minutes(seconds) else 0, tostring(n))
 end
 
 -- Quests.publish: the quests up now, { { i, have, need } }, i = line * 100 + place.
