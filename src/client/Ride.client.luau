@@ -3625,7 +3625,10 @@ local function updateMount(dt)
 	-- extra horse-width (1.6 studs half) on top, so twice as wide steers 1.2x.
 	local halfWidth = vfx.halfBody(mount)
 	local wide = 1 + Config.SteerWidthScale * math.max(halfWidth / 1.6 - 1, 0)
-	local targetLat = steer * Config.SteerSpeed * wide * -dir
+	-- Steering keeps up with speed (Config.SteerPerSpeed): at least SteerSpeed, else this share of
+	-- how fast you're going, so a fast pet can still dodge what's ahead (QM, Nov 7).
+	local steerSpeed = math.max(Config.SteerSpeed, math.abs(mount.speed) * (Config.SteerPerSpeed or 0))
+	local targetLat = steer * steerSpeed * wide * -dir
 	-- Leaving the base from an outer pen: lean in so the animal reaches the
 	-- corridor by the start line.
 	if phase == "outbound" and mount.z > 0 and mount.z < leadFromZ and math.abs(mount.x) > EDGE - 4 then
@@ -3646,7 +3649,7 @@ local function updateMount(dt)
 	mount.z += dir * mount.speed * dt
 	local sideways = if (ability and ability.cfg.Kind == "Crabwalk") or (vfx.sprintSpecial() or {}).Kind == "Crabwalk" then math.pi / 2 else 0 -- a crab scuttles sideways
 	place(mount, math.atan2(mount.latVel * dir, math.max(mount.speed, 1)) + sideways)
-	animate(mount, dt, mount.speed, mount.latVel * -dir / (Config.SteerSpeed * wide))
+	animate(mount, dt, mount.speed, math.clamp(mount.latVel * -dir / (steerSpeed * wide), -1, 1))
 end
 
 local function reachHome()

@@ -227,6 +227,13 @@ local Config = {
 	-- The course is biomes end to end from the start line, each Length studs long,
 	-- with its own tile colours. The home base uses the first biome's. Any Nest
 	-- model in World.Nests is an egg spawn of the biome it stands in (NestOdds).
+	-- The progression pass (QM, Nov 7): the Slingshot's unlocks (each biome's UnlockCost) set the pace,
+	-- a sigmoid's back half: quick at first, slowing round the Dungeon, hard by the Ocean. Target
+	-- arrivals (a free player): Desert ~1 min, Tundra ~5, Volcano ~15, Dungeon ~35, Forest ~75,
+	-- Castle ~140, Ocean ~240 (4 h; the endless course runs on from its end). Each price is the
+	-- minutes in the biome before x 60 x ~3x its herd's average gold a second (5 pen slots, ~60%
+	-- filled with its pets as they hatch) + ~1000x that average (about half its Index rewards).
+	-- Herd averages after the income curve: 36, 114, 229, 457, 914, 1828, 3657 (x2 a biome).
 	Biomes = {
 		{
 			Name = "Meadow",
@@ -282,7 +289,7 @@ local Config = {
 			CapColor = Color3.fromRGB(244, 247, 251), -- (its IceCap)
 			GateColor = Color3.fromRGB(70, 220, 255), -- its breakable barrier's colour (Gate.client)
 			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.02 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
-			UnlockCost = 300000, -- QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
+			UnlockCost = 200000, -- (the progression pass, QM Nov 7: above Biomes; was 300k) QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
 			UpgradeImage = "rbxassetid://105968538824751", -- assets/ui/UpgradePenTundraEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://133303061216721", -- assets/ui/UpgradePenTundraDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 		},
@@ -301,7 +308,7 @@ local Config = {
 			GateColor = Color3.fromRGB(255, 110, 20), -- its breakable barrier's colour (Gate.client)
 			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean and Jurassic: QM Oct 11)
 			Herd = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (QM, Oct 11: the Firebird Uncommon, the Rock Hog and Fire Lobster Rare, the Rockworm Epic, the Phoenix Legendary and very rare, the Lava Whale Epic and as rare as the Phoenix; the weights a guess)
-			UnlockCost = 10000000, -- (4th now: the Ocean's price; was 300M, a guess)
+			UnlockCost = 650000, -- (the progression pass, QM Nov 7: above Biomes; was 10M)
 			-- No Upgrade Pen art yet: the plain button with the price.
 		},
 		{
@@ -320,7 +327,7 @@ local Config = {
 			GateColor = Color3.fromRGB(90, 255, 130),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
 			Herd = { DungeonRat = 0.34, Bat = 0.2, Slime = 0.18, CaveSpider = 0.16, BoneSteed = 0.12, Mimic = 0.07, BoneWyrm = 0.03 },
-			UnlockCost = 100000000,
+			UnlockCost = 2000000, -- (the progression pass, QM Nov 7; was 100M)
 		},
 		{
 			Name = "Forest", -- the Magic Forest
@@ -335,7 +342,7 @@ local Config = {
 			GateColor = Color3.fromRGB(255, 143, 240),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
 			Herd = { Shroom = 0.35, SpiritFox = 0.22, SpiritDeer = 0.15, AncientTreant = 0.13, MysticOwl = 0.08, CrystalTortoise = 0.05, SpiritLoong = 0.02 },
-			UnlockCost = 1000000000,
+			UnlockCost = 7500000, -- (the progression pass, QM Nov 7; was 1B)
 		},
 		{
 			Name = "Castle", -- the Red Castle
@@ -351,7 +358,7 @@ local Config = {
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
 			Herd = { WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02,
 				TRex = 0.12, Pterodactyl = 0.08 }, -- (QM, Nov 6: the old Jurassic's T-Rex and Pterodactyl, at their old weights)
-			UnlockCost = 10000000000,
+			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
 		},
 		{
 			Name = "Ocean", -- the Ocean Trench
@@ -368,7 +375,7 @@ local Config = {
 			Herd = { Squid = 0.38, Seahorse = 0.22, KingCrab = 0.17, FishSchool = 0.12, Whale = 0.08, AbyssWhale = 0.03,
 				-- (QM, Nov 6: and Lasso's own old Ocean animals back, at their old weights; the Robo Shark a Robux pet, never wild)
 				Starfish = 0.3, Clownfish = 0.25, Lionfish = 0.15, BlueCrab = 0.05, Kraken = 0.05, RoboShark = 0 },
-			UnlockCost = 100000000000,
+			UnlockCost = 75000000, -- (the progression pass, QM Nov 7; was 100B)
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
@@ -402,6 +409,12 @@ local Config = {
 	RunSpeedLeeway = 0.1, -- Speed (2 m/s as the plates show it, x20): once you've reached the Desert, nothing you lasso in a run goes slower than the pet you left your pen on less this (Ride: QM, Oct 12: a Penguin's Rhino runs 1.62 and reaches the Tundra; before the Desert, no floor, so a new player's Horse's Fish keeps its own 0.6)
 	ReturnSpeed = 88, -- 2x MountSpeed: the ride home twice as fast as the ride out (QM, Oct 11; was 1.6x, 70.4; at first 40)
 	SteerSpeed = 28,
+	-- ...or this share of your forward speed, whichever is more (QM, Nov 7: "running back the obstacles
+	-- are impossible to dodge since you go so fast"). A fixed 28 studs/s sideways was a 4 degree swerve at
+	-- the Volcano's ~340 studs/s home; this holds it at ~19 degrees at any speed. Sidestepping an obstacle
+	-- (~15 studs) then takes 0.25 s to react + 1/SteerResponse s to turn + 15 / 0.35 = 43 studs, i.e.
+	-- 0.375 x speed + 43 studs: 193 at 400 studs/s, 380 at 900, inside the ~420+ studs you can see.
+	SteerPerSpeed = 0.35,
 	-- Wider mounts steer quicker, gently (QM, Oct 8): x (1 + SteerWidthScale x (width
 	-- over a horse's - 1)), so twice a horse's width steers 1.2x, three times 1.4x.
 	SteerWidthScale = 0.2,
