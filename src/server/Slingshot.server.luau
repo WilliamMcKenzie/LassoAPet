@@ -67,12 +67,14 @@ local function build()
 		prompt.KeyboardKeyCode = Enum.KeyCode.E
 		prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
 		prompt.HoldDuration = 0.6
-		prompt.MaxActivationDistance = 16 -- (from the base's middle: the band hangs right over it now)
+		prompt.MaxActivationDistance = 22 -- (from the base's middle: the band hangs right over it now)
 		prompt.RequiresLineOfSight = false
 		prompt.UIOffset = Vector2.new(0, -40)
 		prompt.Parent = frame
 	end
 	model.WorldPivot = CFrame.new()
+	model:ScaleTo(CFG.Scale or 1) -- (bigger: QM; SlingshotPose reads the Scale attribute for the band)
+	model:SetAttribute("Scale", CFG.Scale or 1)
 	template = model
 	return model
 end
@@ -90,7 +92,14 @@ local function spotOf(pen)
 	d = d.Unit
 	local ground = area.Position.Y - area.Size.Y / 2 -- (the Area marker sits on the ground)
 	local at = Vector3.new(spawn.Position.X, ground, spawn.Position.Z) + d * CFG.Ahead
-	return CFrame.lookAt(at, at + d) -- (its -Z, the way it flings, away from the pen)
+	-- turned a bit toward the start line's middle (QM, Nov 7: CFG.Turn of the way)
+	local world = workspace:FindFirstChild("World")
+	local line = world and world:FindFirstChild("StartLine")
+	local centre = if line then line:GetBoundingBox().Position else Vector3.zero
+	local toward = Vector3.new(centre.X - at.X, 0, centre.Z - at.Z)
+	local face = if toward.Magnitude > 1 then d:Lerp(toward.Unit, CFG.Turn or 0) else d
+	face = if face.Magnitude > 0.01 then face.Unit else d
+	return CFrame.lookAt(at, at + face) -- (its -Z, the way it flings, away from the pen)
 end
 
 local placed = {} -- [player] = { model, connections }
