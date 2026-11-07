@@ -618,7 +618,7 @@ task.spawn(function()
 							local wallet = player:GetAttribute("Gold") or 0
 							local g = s.gold
 							local spent = math.max(0, (s.wallet0 or 0) + g.earned + g.purchased - wallet)
-							local paid = g.purchased > 0 or player:GetAttribute("PassDoubleGold") == true
+							local paid = g.purchased > 0 or player:GetAttribute("PassDoubleGold") == true or player:GetAttribute("PassCash8x") == true
 							local key = (if paid then "gp" else "g") .. t
 							local ok, income = pcall(Telemetry.incomeOf, player)
 							add(s, { [key] = 1 }, {

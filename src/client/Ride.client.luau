@@ -4936,10 +4936,14 @@ function vfx.nukeNow()
 end
 
 function vfx.updateNuke()
-	if not vfx.nuke or not mount then
+	if not mount then
 		return
 	end
-	local range = Config.Shop.NukeRange
+	-- (Break All Obstacles, the game pass: as a Nuke, every ride, within its own range)
+	local range = if vfx.nuke then Config.Shop.NukeRange elseif player:GetAttribute("PassBreakObstacles") then Config.PassBreakRange else nil
+	if not range then
+		return
+	end
 	for _, o in obstacles do
 		if not o.smashed and math.abs(o.z - mount.z) < range then
 			smash(o, travelDir(), if o.x >= mount.x then 1 else -1)
