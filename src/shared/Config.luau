@@ -2559,8 +2559,8 @@ Config.RideEggAB = { Share = 1, Salt = 1, FastRides = 4, FastHatch = 15, Studio 
 Config.PetOffersLimited = true
 -- The LIMITEDS stand at World 1's base (Client/LoongOffer): back on with three limiteds (QM, Nov 7; hidden Nov 6).
 Config.LimitedsStand = true
--- How far the stand's row turns in toward the base (degrees, about its first stand), as the Top Earners board (QM, Nov 7).
-Config.LimitedsTurn = 25
+-- How far the stand's row turns in toward the base (degrees, about its first stand): 0, the stand's row parallel to the wall (QM Nov 7).
+Config.LimitedsTurn = 0
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
