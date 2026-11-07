@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Studs = require(ReplicatedStorage.Shared.Studs)
 local SlingshotPose = require(ReplicatedStorage.Shared.SlingshotPose)
+local Funnel = require(script.Parent.Funnel)
 
 local CFG = Config.Slingshot
 
@@ -191,11 +192,13 @@ unlock.OnServerInvoke = function(player, i)
 		return false
 	end
 	player:SetAttribute("Gold", gold - cost)
+	Funnel.cash(player, true, cost, Enum.AnalyticsEconomyTransactionType.Shop.Name, "Unlock " .. biome.Name)
 	local zone = ReplicatedStorage:FindFirstChild("ZoneUnlocked")
 	if zone then
 		zone:FireClient(player, i) -- (its gate breaks open on camera: Gate.client)
 	end
 	player:SetAttribute("PenLevel", i)
+	Funnel.unlocked(player, i, "cash")
 	return true
 end
 
@@ -214,6 +217,7 @@ grant.OnInvoke = function(player, i)
 			zone:FireClient(player, i)
 		end
 		player:SetAttribute("PenLevel", i)
+		Funnel.unlocked(player, i, "robux")
 	end
 	return true
 end
