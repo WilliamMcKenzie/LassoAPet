@@ -254,8 +254,8 @@ local Config = {
 			-- use the same odds (NestOdds). A 0 never spawns but keeps the animal on
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				Pinto = 1/4, Bunny = 1/4, Zebra = 1/8, Pig = 1/8, Snail = 1/10, Fish = 1/20, Gecko = 1/25, Buffalo = 1/40, Giraffe = 1/125, Elephant = 1/250, Rhino = 1/250, HillbackTortoise = 1/1000, Unicorn = 1/10000, Horse = 0,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				Pig = 1/5, Pinto = 1/5, Snail = 1/5, Zebra = 1/8, Bunny = 1/10, Fish = 1/20, Gecko = 1/20, Buffalo = 1/25, Rhino = 1/250, Elephant = 1/400, Giraffe = 1/500, HillbackTortoise = 1/1000, Unicorn = 1/10000, Horse = 0,
 			},
 		},
 		{
@@ -269,8 +269,8 @@ local Config = {
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) }, -- and its Desert wall
 			CapColor = Color3.fromRGB(222, 164, 100), -- (its DesertCap)
 			GateColor = Color3.fromRGB(255, 204, 40), -- its breakable barrier's colour (Gate.client)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				Cactus = 1/4, Coyote = 1/4, Kitten = 1/4, Scorpion = 1/8, Oryx = 1/20, Sandworm = 1/40, SpineLizard = 1/40, Ostrich = 1/128, Snake = 1/1280, MirageElephant = 1/12800,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				Kitten = 1/2, Cactus = 1/5, Coyote = 1/5, Scorpion = 1/20, Oryx = 1/25, Ostrich = 1/800, Sandworm = 1/800, SpineLizard = 1/800, Snake = 1/1600, MirageElephant = 1/3200,
 			},
 			-- Locked behind a gate until your pen is this biome's level (its place
 			-- in this list). Upgrading your pen to it costs UnlockCost gold; your pen's
@@ -291,8 +291,8 @@ local Config = {
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) }, -- and its Ice wall
 			CapColor = Color3.fromRGB(244, 247, 251), -- (its IceCap)
 			GateColor = Color3.fromRGB(70, 220, 255), -- its breakable barrier's colour (Gate.client)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				Penguin = 1/4, Seal = 1/4, Boar = 1/4, Snowman = 1/10, Reindeer = 1/16, Walrus = 1/25, IceGolem = 1/80, Narwhal = 1/125, Icebringer = 1/1600, GlacierMammoth = 1/16000, SnackYak = 0,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				Boar = 1/4, Penguin = 1/4, Seal = 1/4, Reindeer = 1/10, Walrus = 1/16, Snowman = 1/20, IceGolem = 1/160, Narwhal = 1/200, Icebringer = 1/3200, GlacierMammoth = 1/4000, SnackYak = 0,
 			},
 			UnlockCost = 200000, -- (the progression pass, QM Nov 7: above Biomes; was 300k) QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
 			UpgradeImage = "rbxassetid://105968538824751", -- assets/ui/UpgradePenTundraEnabled.png (QM, Oct 8: price drawn in)
@@ -312,8 +312,8 @@ local Config = {
 			CapColor = Color3.fromRGB(96, 60, 46), -- (its LavaCap)
 			GateColor = Color3.fromRGB(255, 110, 20), -- its breakable barrier's colour (Gate.client)
 			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean and Jurassic: QM Oct 11)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				Firebird = 1/2, FireAnt = 1/5, RockHog = 1/10, FireLobster = 1/16, MagmaCrab = 1/16, VolcanoTortoise = 1/25, Rockworm = 1/50, LavaWhale = 1/250, Phoenix = 1/2000, AshBehemoth = 1/20000,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				FireAnt = 1/2, Firebird = 1/4, MagmaCrab = 1/16, RockHog = 1/16, VolcanoTortoise = 1/16, FireLobster = 1/20, LavaWhale = 1/320, Rockworm = 1/512, AshBehemoth = 1/2560, Phoenix = 1/2560,
 			},
 			UnlockCost = 650000, -- (the progression pass, QM Nov 7: above Biomes; was 10M)
 			-- No Upgrade Pen art yet: the plain button with the price.
@@ -333,8 +333,8 @@ local Config = {
 			CapColor = Color3.fromRGB(104, 126, 146),
 			GateColor = Color3.fromRGB(90, 255, 130),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				DungeonRat = 1/4, Bat = 1/4, Rat = 1/8, CryptSnail = 1/10, Slime = 1/10, CaveCricket = 1/16, WebSpider = 1/25, CaveSpider = 1/25, BoneSteed = 1/32, Mimic = 1/1000, BoneWyrm = 1/5000, AbyssPillbug = 1/20000,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				CaveCricket = 1/4, Bat = 1/8, CryptSnail = 1/8, DungeonRat = 1/8, Rat = 1/8, Slime = 1/8, CaveSpider = 1/25, WebSpider = 1/25, BoneSteed = 1/32, Mimic = 1/80, AbyssPillbug = 1/1000, BoneWyrm = 1/4000,
 			},
 			UnlockCost = 2000000, -- (the progression pass, QM Nov 7; was 100M)
 		},
@@ -350,8 +350,8 @@ local Config = {
 			CapColor = Color3.fromRGB(30, 196, 186),
 			GateColor = Color3.fromRGB(255, 143, 240),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				Shroom = 1/4, SpiritFox = 1/4, StagBeetle = 1/4, Deer = 1/8, SpiritDeer = 1/16, MysticOwl = 1/25, BrownBear = 1/80, CrystalTortoise = 1/128, AncientTreant = 1/500, SpiritLoong = 1/6400, AncientMoose = 1/32000,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				StagBeetle = 1/2, Shroom = 1/5, SpiritFox = 1/5, SpiritDeer = 1/20, Deer = 1/25, BrownBear = 1/320, CrystalTortoise = 1/320, MysticOwl = 1/400, AncientMoose = 1/1600, AncientTreant = 1/2000, SpiritLoong = 1/8000,
 			},
 			UnlockCost = 7500000, -- (the progression pass, QM Nov 7; was 1B)
 		},
@@ -367,8 +367,8 @@ local Config = {
 			CapColor = Color3.fromRGB(70, 140, 40),
 			GateColor = Color3.fromRGB(255, 170, 40),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				Ankylosaurus = 1/4, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/8, TRex = 1/10, Pterodactyl = 1/20, BoneRex = 1/40,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				Ankylosaurus = 1/2, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/25, TRex = 1/125, Pterodactyl = 1/625, BoneRex = 1/2500,
 			},
 			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
 		},
@@ -384,8 +384,8 @@ local Config = {
 			CapColor = Color3.fromRGB(157, 226, 244),
 			GateColor = Color3.fromRGB(70, 200, 255),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				Squid = 1/5, Shrimp = 1/8, Clownfish = 1/8, Pelican = 1/10, Seahorse = 1/10, Starfish = 1/10, FishSchool = 1/20, Hammerhead = 1/20, KingCrab = 1/20, Lionfish = 1/20, Whale = 1/40, MantaRay = 1/50, Anglerfish = 1/256, AbyssWhale = 1/1000, BlueCrab = 1/12800, Kraken = 1/64000, RoboShark = 0,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				Clownfish = 1/5, Pelican = 1/5, Squid = 1/5, Shrimp = 1/8, Starfish = 1/8, FishSchool = 1/40, Hammerhead = 1/40, Seahorse = 1/40, Whale = 1/40, KingCrab = 1/50, Lionfish = 1/50, Anglerfish = 1/200, MantaRay = 1/250, BlueCrab = 1/2000, AbyssWhale = 1/2500, Kraken = 1/10000, RoboShark = 0,
 			},
 			UnlockCost = 75000000, -- (the progression pass, QM Nov 7; was 100B)
 		},
@@ -538,7 +538,7 @@ local Config = {
 	-- Epics are what carry you into the next one (the pacing ladder, below AnimalStats),
 	-- so they take ~5 runs to hatch; Uncommons and Rares hatch within a run, so every run
 	-- pays out. Legendaries hatch slower (PetHatchTime: QM's D1 retention eggs).
-	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480 },
+	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480, Divine = 600 },
 	PetHatchTime = {
 		Snail = 15, Giraffe = 120, HillbackTortoise = 3600, Coyote = 15, Oryx = 60, Ostrich = 90, MirageElephant = 7200, Seal = 15, Reindeer = 60, Walrus = 60, Narwhal = 300, GlacierMammoth = 7200, FireAnt = 15, MagmaCrab = 60, AshBehemoth = 7200, Rat = 60, CaveCricket = 60, CryptSnail = 60, WebSpider = 300, AbyssPillbug = 7200, StagBeetle = 60, Deer = 300, BrownBear = 1200, AncientMoose = 7200, Swan = 60, ArmoredRam = 60, RoyalStag = 300, Griffin = 1200, FortressTortoise = 7200, Shrimp = 60, Pelican = 60, Hammerhead = 300, MantaRay = 1200, Anglerfish = 1200, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
 		-- (QM's spawn/hatch JSON, Oct 11, applied as given: the Herd weights in Biomes too)
@@ -834,7 +834,7 @@ local Config = {
 	-- that costs gold instead of waiting on the Epic's egg. Hybrids made before keep theirs.
 	FuseSpeedShare = 0.15,
 	-- (Shared/Fusion.worth: what went into a hybrid, by rarity; kept on saves, no longer priced.)
-	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000 },
+	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000, Divine = 10000000 },
 	PetSmallSize = 10.4,
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
@@ -1665,7 +1665,7 @@ local Config = {
 
 	-- Coins for landing on an animal: LassoCoins for that animal, else by its rarity (set
 	-- in its Animals module).
-	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25 },
+	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25, Divine = 50 },
 	LassoCoins = { Beholder = 50, Sludge = 50, WarElephant = 50, Leviathan = 100 }, -- QM's pets JSON, Oct 4
 
 	-- Stampede: each biome has its own steady stream of animals (its Herd above),
@@ -1709,9 +1709,8 @@ Config.Endless = {
 			WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) }, -- marble
 			-- its own animals (World 2's weights). The Majestic Unicorn's a Robux pet in World 1: on its
 			-- page, never wild (as the Robo Shark). World 1's Bunny, Rhino and Buffalo stay in the Meadow.
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				MarbleFish = 1/2, Lion = 1/4, Crocodile = 1/5, MarbleColossus = 1/20, MajesticUnicorn = 0,
-				Seraph = 1/300, -- (QM, Nov 7: in the Index; World 2's trophy angel, 1 in 300 of its stampede as there)
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				MarbleFish = 1/2, Lion = 1/4, Crocodile = 1/5, MarbleColossus = 1/25, Seraph = 1/100, MajesticUnicorn = 0,
 			},
 			Boss = "Seraph", -- (World 2's Meadow boss)
 			Fog = { Color = rgb(232, 214, 160), Start = 0, End = 500 },
@@ -1725,9 +1724,8 @@ Config.Endless = {
 			HerdSpawnEvery = 0.45,
 			GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) },
 			WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) },
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				Eyeworm = 1/4, Maw = 1/4, Beholder = 1/4, CrimsonScorpion = 1/8, IvorySpider = 1/20, Asura = 1/20,
-				BlackWidow = 1/500, -- (the Black Widow 1 in 500 of its stampede: QM, Oct 13)
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				CrimsonScorpion = 1/2, Eyeworm = 1/4, Beholder = 1/5, Maw = 1/25, IvorySpider = 1/125, Asura = 1/625, BlackWidow = 1/2500,
 			},
 			Boss = "CrimsonSeraph",
 			Fog = { Color = rgb(150, 60, 70), Start = 0, End = 450 },
@@ -1742,9 +1740,8 @@ Config.Endless = {
 			HerdSpawnEvery = 0.45,
 			GroundColors = { rgb(90, 109, 143), rgb(82, 99, 131) },
 			WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) },
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				CrystalCentipede = 1/4, BlueCrystal = 1/8, RedMushroom = 1/8, BrownMushroom = 1/8, PinkCrystal = 1/8, PurpleMushroom = 1/10, CrystalSpider = 1/10, CrystalPhoenix = 1/25, CrystalElephant = 1/100,
-				CrystalSeraph = 1/300, -- (QM, Nov 7: in the Index; World 2's trophy angel, 1 in 300 as there)
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
+				RedMushroom = 1/2, BlueCrystal = 1/5, CrystalCentipede = 1/5, PinkCrystal = 1/20, BrownMushroom = 1/25, CrystalPhoenix = 1/320, CrystalSpider = 1/320, PurpleMushroom = 1/320, CrystalElephant = 1/2000, CrystalSeraph = 1/8000,
 			},
 			Boss = "CrystalSeraph",
 			Fog = { Color = rgb(70, 92, 140), Start = 0, End = 420 },
@@ -2863,14 +2860,14 @@ Config.Alphas = {
 	AlphaRhino = { Base = "Rhino", Scale = 1.4 },
 	EmperorScorpion = { Base = "Scorpion", Scale = 2 }, -- Desert
 	AlphaSpineLizard = { Base = "SpineLizard", Scale = 1.4 },
-	AlphaSnake = { Base = "Snake", Scale = 1.4 },
+	AlphaSnake = { Base = "Snake", Scale = 1.4, Odds = 5 },
 	AlphaSandworm = { Base = "Sandworm", Scale = 3, Odds = 20 }, -- (QM, Nov 6: faded sand, 3x, 1 in 20)
 	AlphaBoar = { Base = "Boar", Scale = 2 }, -- Tundra (the Elder Boar's model)
 	AlphaIceGolem = { Base = "IceGolem", Scale = 1.5 },
-	AlphaIcebringer = { Base = "Icebringer", Scale = 1.4 },
+	AlphaIcebringer = { Base = "Icebringer", Scale = 1.4, Odds = 5 },
 	AlphaRockHog = { Base = "RockHog", Scale = 1.4 }, -- Volcano
 	AlphaLavaWhale = { Base = "LavaWhale", Scale = 1.3 },
-	AlphaPhoenix = { Base = "Phoenix", Scale = 2 },
+	AlphaPhoenix = { Base = "Phoenix", Scale = 2, Odds = 5 }, -- (the three Divine alphas 1 in 5 of their Legendary base: QM Nov 7, Divine about 1 in 10,000)
 }
 for kind, alpha in Config.Alphas do
 	local base = alpha.Base

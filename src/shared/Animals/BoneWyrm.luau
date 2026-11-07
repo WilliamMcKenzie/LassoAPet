@@ -11,7 +11,7 @@ local SandwormModel = require(script.Parent.SandwormModel)
 local BoneWyrmModel = table.clone(require(script.Parent.BoneWyrmModel))
 BoneWyrmModel.animations = SandwormModel.animations
 
-return Horse.variant("BoneWyrm", BoneWyrmModel, "Legendary", {
+return Horse.variant("BoneWyrm", BoneWyrmModel, "Divine", {
 	seat = Vector3.new(0, 4.45, 1.6),
 	neck = { center = Vector3.new(0, 3.2, -2.6), radius = 3 },
 	size = Rockworm.size * 1.1,

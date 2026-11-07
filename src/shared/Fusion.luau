@@ -29,7 +29,7 @@ local Palettes = require(script.Parent.Palettes)
 
 local Fusion = {}
 
-local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary" }
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine" }
 
 local function rgbKey(r, g, b)
 	return r * 65536 + g * 256 + b

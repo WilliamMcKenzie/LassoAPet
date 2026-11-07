@@ -255,7 +255,7 @@ local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
 -- Action text from the ride -> which image the action button shows.
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
 -- The TAKE EGG image by the egg's rarity; anything else uses takeEgg (Uncommon).
-local EGG_BUTTONS = { Rare = "takeEggRare", Epic = "takeEggEpic", Legendary = "takeEggLegendary" }
+local EGG_BUTTONS = { Rare = "takeEggRare", Epic = "takeEggEpic", Legendary = "takeEggLegendary", Divine = "takeEggLegendary" }
 
 -- Banners drawn as images instead of text.
 local BANNERS = { ["BUCKED OFF"] = "buckedOff", ["CRASH!"] = "crash" }

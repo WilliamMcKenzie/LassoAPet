@@ -4,7 +4,7 @@
 local Horse = require(script.Parent.Horse)
 local AlphaSnakeModel = require(script.Parent.AlphaSnakeModel)
 
-return Horse.variant("AlphaSnake", AlphaSnakeModel, "Legendary", {
+return Horse.variant("AlphaSnake", AlphaSnakeModel, "Divine", {
 	seat = Vector3.new(0, 3.5, 1.6),
 	neck = { center = Vector3.new(0, 2.2, -5), radius = 2.3 },
 })
