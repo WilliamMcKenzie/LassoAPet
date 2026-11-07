@@ -1685,6 +1685,9 @@ Config.WaterSink = { Water = 0.3, DeepWater = 0.5, Rate = 6 }
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
 Config.Places = { 126872244121414, 139418530058790, 117724433633972 } -- [world] = its PlaceId (World 3: QM, Oct 14, a copy of World 2 for now; not for sale yet, so no way in)
 Config.World = table.find(Config.Places, game.PlaceId) or 1
+-- The game version every analytics event is tagged with (Server/Funnel: CustomField01), to
+-- compare it with the last one in Creator Hub. Change it when a new version goes out.
+Config.GameVersion = "Revamp"
 -- The native UI (QM, Nov 6): Fight to Steal an Egg's studded UI, built in code (client/HudKit,
 -- UiFx, NativeHud, GoalPanel) in place of the PNG art. World 1 only while it's tried out.
 -- Scale: the 1080-tall design scaled to the screen by (height / 1080) ^ Curve, clamped

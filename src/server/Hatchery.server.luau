@@ -1153,6 +1153,7 @@ indexClaim.OnServerInvoke = function(player, kind)
 	end
 	profile.indexClaimed[kind] = true
 	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + Config.indexReward(kind))
+	Funnel.cash(player, false, Config.indexReward(kind), Enum.AnalyticsEconomyTransactionType.Gameplay.Name, "Index Reward")
 	publish(player)
 	save(player)
 	return true
@@ -1286,6 +1287,7 @@ buyTrail.OnServerInvoke = function(player)
 		return false
 	end
 	player:SetAttribute("Gold", gold - price)
+	Funnel.cash(player, true, price, Enum.AnalyticsEconomyTransactionType.Shop.Name, "Rainbow Trail")
 	profile.rainbowTrail = true
 	publish(player)
 	task.spawn(save, player)
@@ -1343,6 +1345,7 @@ rollGacha.OnServerInvoke = function(player)
 	end
 	rolled[player] = os.clock()
 	player:SetAttribute("Gold", gold - price)
+	Funnel.cash(player, true, price, Enum.AnalyticsEconomyTransactionType.Shop.Name, "Egg Roll")
 	profile.rolls = (profile.rolls or 0) + 1
 	Funnel.event(player, "Rolled Egg")
 	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
@@ -1627,6 +1630,7 @@ remote("FusePets", function(player, idA, idB)
 		return
 	end
 	player:SetAttribute("Gold", gold - price)
+	Funnel.cash(player, true, price, Enum.AnalyticsEconomyTransactionType.Gameplay.Name, "Fuse")
 	if lesson then
 		player:SetAttribute("FuseLesson", nil) -- (done: client FuseLesson sees the hybrid land)
 	end
@@ -2021,6 +2025,7 @@ local function bankAway(player, times)
 	end
 	local banked = profile.awayGold * (tonumber(times) or 1)
 	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + banked)
+	Funnel.cash(player, false, banked, Enum.AnalyticsEconomyTransactionType.TimedReward.Name, "Away Earnings")
 	profile.awayGold = nil
 	player:SetAttribute("AwayGold", nil)
 	if (tonumber(times) or 1) > 1 then
@@ -2152,6 +2157,7 @@ task.spawn(function()
 			if earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
 				Telemetry.gold(player, "earned", earned)
+				Funnel.penIncome(player, earned)
 				paid:FireClient(player, earned) -- (the HUD shows it by the gold counter)
 			end
 		end

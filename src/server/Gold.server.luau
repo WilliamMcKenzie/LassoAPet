@@ -144,6 +144,7 @@ local function addBought(player)
 	end
 	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + total - (bought[player] or 0))
 	Telemetry.gold(player, "purchased", total - (bought[player] or 0))
+	Funnel.cash(player, false, total - (bought[player] or 0), Enum.AnalyticsEconomyTransactionType.IAP.Name, "Cash Pack")
 	bought[player] = total
 	save(player)
 end
@@ -299,6 +300,14 @@ game:BindToClose(function()
 	end
 end)
 
+-- Seconds played so far (Funnel.unlocked's), nil if not known (an older save).
+local playedTime = Instance.new("BindableFunction")
+playedTime.Name = "PlayedTime"
+playedTime.OnInvoke = function(player)
+	return if playedFull[player] then playedNow(player) else nil
+end
+playedTime.Parent = game:GetService("ServerStorage")
+
 -- Riding through a biome's barrier breaks it for good (Gate.client): only ever up.
 local breakGate = Instance.new("RemoteEvent")
 breakGate.Name = "BreakGate"
@@ -315,7 +324,7 @@ breakGate.OnServerEvent:Connect(function(player, i)
 				end
 			end
 		end
-		Funnel.reached(player, broken, i) -- (analytics: Zones Reached)
+		Funnel.reached(player, broken, i, if playedFull[player] then playedNow(player) else nil) -- (analytics: Zones Reached)
 	end
 end)
 
@@ -385,6 +394,7 @@ bankCoins.OnServerEvent:Connect(function(player, amount)
 	if cash > 0 then
 		player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + cash)
 		Telemetry.gold(player, "earned", cash)
+		Funnel.cash(player, false, cash, Enum.AnalyticsEconomyTransactionType.Gameplay.Name, "Ride")
 	end
 end)
 
