@@ -967,6 +967,10 @@ local Config = {
 	-- Majestic Unicorn replaces the limited Robo Shark; keep its product, stock and claim counters.
 	MajesticUnicornOffer = { Kind = "MajesticUnicorn", ProductId = 3718722226, Price = 999, Stock = 1000, StartLeft = 870, Scale = 2, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11),
 		Ledger = "roboSharks", StockKey = "sold_RoboShark", ClaimField = "boughtRoboSharks" },
+	-- The Robo Shark back as the third limited (QM, Nov 7). Its own ledger, stock and claim fields:
+	-- the Majestic Unicorn kept the old Robo Shark ones (above). ProductId 0 until QM's product exists.
+	RoboSharkOffer = { Kind = "RoboShark", ProductId = 0, Price = 999, Stock = 1000, StartLeft = 870, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165,
+		Ledger = "limitedRoboSharks", StockKey = "sold_LimitedRoboShark", ClaimField = "boughtLimitedRoboSharks" },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
 	-- (Shared/Merge). They look like Pet's egg, EggScale x as big (QM).
@@ -2408,12 +2412,12 @@ Config.AwayBoost = { ProductId = 3720169501, Multiplier = 4 }
 Config.RideEggAB = { Share = 1, Salt = 1, FastRides = 4, FastHatch = 15, Studio = "egg" }
 -- Limited stock and the display's overhead labels are active.
 Config.PetOffersLimited = true
--- The LIMITEDS stand at World 1's base (Client/LoongOffer): false hides it for now (QM, Nov 6).
-Config.LimitedsStand = false
+-- The LIMITEDS stand at World 1's base (Client/LoongOffer): back on with three limiteds (QM, Nov 7; hidden Nov 6).
+Config.LimitedsStand = true
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
-Config.PetOffers = { Config.LoongOffer, Config.MajesticUnicornOffer }
+Config.PetOffers = { Config.LoongOffer, Config.MajesticUnicornOffer, Config.RoboSharkOffer } -- the 3 limiteds (QM, Nov 7)
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)
