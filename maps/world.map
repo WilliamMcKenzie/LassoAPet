@@ -112,6 +112,8 @@
   {"id":"'","area":"Forest","key":"ForestStone","top":0.5},
   {"id":"n","area":"Forest","key":"ForestWall","cap":"ForestCap","top":30,"wall":true},
   {"id":"p","area":"Castle","key":"CastleGrass","top":0},
+  {"id":"~","area":"Castle","key":"CastleGrass","top":0},
+  {"id":"]","area":"Castle","key":"CastleGrass","top":0},
   {"id":"q","area":"Castle","key":"CastleWall","cap":"CastleCap","top":30,"wall":true},
   {"id":"r","area":"Dungeon","key":"DungeonStone","top":0},
   {"id":"}","area":"Dungeon","key":"DungeonSlate","top":0.5},
