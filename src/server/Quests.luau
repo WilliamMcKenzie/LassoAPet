@@ -81,7 +81,8 @@ local function progress(player, state, quest)
 	if quest.Kind == "rebirth" then -- (QM, Nov 7: done once you've reached the last biome; claimed by Quests.rebirth)
 		return if (player:GetAttribute("GatesBroken") or 1) >= quest.Biome then 1 else 0, 1
 	end
-	if quest.Kind == "slingshot" then -- (the Slingshot's menu has unlocked Biome: your pen level's up to it)
+	if quest.Kind == "slingshot" then -- (the Slingshot's menu has unlocked Biome: your pen level's up to it.
+		-- The Goal panel shows it as your cash towards its price instead: Client/GoalPanel)
 		return if (player:GetAttribute("PenLevel") or 1) >= quest.Biome then 1 else 0, 1
 	end
 	if quest.Kind == "lasso" and quest.Biome and not quest.Animal then -- (lassos on any of that biome's herd)
@@ -111,8 +112,14 @@ function Quests.publish(player, state)
 	local list = {}
 	for line, quests in Config.Quests do
 		local slot = state.lines[line]
-		-- (a quest that's Off, Config.NativeUi's Merge: passed over, as if claimed)
-		while quests[slot.at] and quests[slot.at].Off do
+		-- (a quest that's Off, Config.NativeUi's Merge: passed over, as if claimed; and an
+		-- "Upgrade slingshot" once it's bought: QM Nov 7, its Buy! opens the Slingshot's menu
+		-- and buying there is the claim, so it moves on by itself)
+		while quests[slot.at] and (quests[slot.at].Off or (quests[slot.at].Kind == "slingshot" and (player:GetAttribute("PenLevel") or 1) >= quests[slot.at].Biome)) do
+			if not quests[slot.at].Off then
+				state.given = state.given or {}
+				state.given[line .. "." .. slot.at] = true
+			end
 			slot.at += 1
 			if slot.skip == slot.at then
 				slot.at += 1
