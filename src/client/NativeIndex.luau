@@ -542,7 +542,8 @@ local function build()
 		Size = UDim2.fromOffset(fig(160), fig(160)),
 		ZIndex = 4,
 	})
-	-- (QM, Nov 7: the Shop's high-res cash stack, outlined black, not the 34 px gain icon)
+	-- (QM, Nov 7: Fight to Steal an Egg's high-res cash stack, its Shop and Offline Cash one,
+	-- black outline drawn in; not the 34 px gain icon)
 	local cashIcon = art(slot, "Icon", {
 		Image = HudImages.CashStack or "",
 		Position = UDim2.fromScale(0.1, 0.02),
@@ -550,7 +551,6 @@ local function build()
 		ZIndex = 5,
 	})
 	cashIcon.Image = HudImages.CashStack or ""
-	HudKit.outlineArt(cashIcon, HudKit.TEXT_OUTLINE)
 	label(slot, "Amount", {
 		Text = "$1K",
 		TextXAlignment = Enum.TextXAlignment.Center,
