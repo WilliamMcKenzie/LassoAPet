@@ -1531,6 +1531,20 @@ Config.WorldPrices = { 0, 1000000, 10000000 }
 -- (Client/SlingshotLaunch; To: the default). The meshes are
 -- design/slingshot's (tools/slingshot_meshes.py), uploaded: Meshes[i] = { asset id, R, G, B }
 -- for pieces/Slingshot_i (the frame), Band the SlingshotBand mesh (stretched, three of them).
+-- Each biome's unlock for Robux on the Slingshot's menu (Client/SlingshotMenu, Shop.server's
+-- ProcessReceipt -> Server/Slingshot's GrantBiome): its developer product, by biome name.
+Config.BiomeProducts = {
+	Desert = { ProductId = 3729076824, Price = 39 },
+	Snow = { ProductId = 3729076935, Price = 49 },
+	Volcano = { ProductId = 3729077016, Price = 59 },
+	Dungeon = { ProductId = 3729077112, Price = 69 },
+	Forest = { ProductId = 3729077199, Price = 79 },
+	Castle = { ProductId = 3729077318, Price = 89 },
+	Ocean = { ProductId = 3729077407, Price = 99 },
+}
+for _, biome in Config.Biomes do
+	biome.RobuxProduct = biome.RobuxProduct or Config.BiomeProducts[biome.Name]
+end
 Config.Slingshot = {
 	Price = 1000000, -- (World 2's, the goal it replaces)
 	To = 2, -- the Desert
