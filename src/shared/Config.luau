@@ -1472,7 +1472,9 @@ local Config = {
 		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 29, Id = 2039620869 }, -- (QM, Oct 20) ready eggs hatch by themselves (Hatchery's PassAutoHatch)
 		{ Key = "GiantPets", Name = "Giant Pets", Price = 49, Id = 2014472441 },
 		{ Key = "StarterPack", Name = "Starter Pack", Price = 19, Id = 2013764414 }, -- Config.StarterPack, once (Hatchery)
+		{ Key = "Luck10x", Name = "10x Luck", Price = 599, Id = 0 }, -- (QM, Nov 7) your luck x PassLuck for good (Config.luck)
 	},
+	PassLuck = 10, -- Luck10x's
 	PassSpeed = 1.5, -- Speed's
 	PassGiantScale = 2, -- Giant Pets': every pet of yours this x bigger (Skins.apply)
 	StarterPack = { Pets = { "RoboShark", "SnackYak", "GiantRafflesia" }, World = 2 }, -- (QM, Oct 20, as its shop card shows: the Robo Shark (EX), the Giant Rafflesia (Legendary), the Snack Yak (Epic), and World 2 unlocked; was $150k and the Snake)
@@ -1496,6 +1498,25 @@ local Config = {
 			{ Key = "Cash100K", Gold = 500000, ProductId = 3719218362 },
 			{ Key = "Cash1M", Gold = 5000000, ProductId = 3719218832 },
 			{ Key = "Cash1B", Gold = 1000000000, ProductId = 3719218954 },
+		},
+		-- Luck Packs (QM, Nov 7: like Fight to Steal an Egg's Power Packs, six blue cards, three
+		-- and three; Client/NativeShop): Luck is added to your LuckBonus for good (Gold.server's
+		-- AddLuck, through Shop.server's ProcessReceipt). Icons: the clover pile, as the Power
+		-- packs' swords were placed. No product yet (0): free in Studio, not sold live.
+		LuckPacks = {
+			{ Key = "Luck1", Luck = 1, Price = 49, ProductId = 0, Icons = { { 0, 229, 280 } } },
+			{ Key = "Luck2", Luck = 3, Price = 99, ProductId = 0, Icons = { { -70, 220, 260 }, { 70, 220, 260 } } },
+			{ Key = "Luck3", Luck = 8, Price = 199, ProductId = 0, Icons = { { -120, 205, 230 }, { 120, 205, 230 }, { 0, 235, 290 } } },
+			{ Key = "Luck4", Luck = 20, Price = 459, ProductId = 0, Icons = {
+				{ -200, 235, 210 }, { 200, 235, 210 }, { -75, 200, 260 }, { 75, 200, 260 },
+			} },
+			{ Key = "Luck5", Luck = 50, Price = 799, ProductId = 0, Icons = {
+				{ -215, 250, 210 }, { 215, 250, 210 }, { -110, 165, 230 }, { 110, 165, 230 }, { 0, 240, 300 },
+			} },
+			{ Key = "Luck6", Luck = 125, Price = 1499, ProductId = 0, Icons = {
+				{ -235, 140, 190 }, { 235, 140, 190 }, { -225, 265, 210 }, { 225, 265, 210 },
+				{ -110, 175, 240 }, { 110, 175, 240 }, { 0, 240, 310 },
+			} },
 		},
 		Gold = {
 			{ Key = "Gold1", Gold = 100000, Price = 50, ProductId = 3716553782, OldProductIds = { 3716409553 } }, -- $100K (QM's nerf, Oct 4: was $1M)
@@ -1896,6 +1917,7 @@ Config.NativeUi = {
 	-- by Config.Passes key: its card's look, its picture (HudImages, or Pet: a pet's headshot),
 	-- the badge on the picture and what it does (rich text)
 	PassCards = {
+		{ Key = "Luck10x", Look = "CashCard", Icon = "LuckIcon", Badge = "x10", Text = '<font color="#7CFF4D">10x Luck</font> forever!' },
 		{ Key = "DoubleGold", Look = "GoldCard", Icon = "CashStack", Badge = "x2", Text = 'Earn <font color="#7CFF4D">2x Cash!</font>' },
 		{ Key = "Speed", Look = "DamageCard", Pet = "Horse", Badge = "1.5x", Text = 'Ride <font color="#7CFF4D">1.5x</font> faster!' },
 		{ Key = "AutoHatch", Look = "GrowthCard", Icon = "PassGrowth", Text = 'Eggs hatch <font color="#7CFF4D">by themselves!</font>' },
@@ -2117,6 +2139,9 @@ function Config.luckEventLeft(now)
 end
 function Config.luck(player)
 	local mult = if Config.luckEventLeft() then Config.LuckEvent.Multiplier else 1
+	if player:GetAttribute("PassLuck10x") then -- (the 10x Luck pass)
+		mult *= Config.PassLuck
+	end
 	return (1 + (player:GetAttribute("LuckBonus") or 0)) * mult
 end
 -- Luck to show: "x1", "x1.25", "x2.75", "x12.5".

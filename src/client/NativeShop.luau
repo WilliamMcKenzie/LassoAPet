@@ -8,6 +8,7 @@
 --                      sunburst, its name, what it does, its price ("Owned" once it's yours)
 --   ~Halloween Egg~    its odds (each pet's headshot and chance) and x1, x3, x10, x50
 --   ~Cash Packs~       three cards: a pile of cash, how much, the price
+--   ~Luck Packs~       six blue cards, three and three (FTSAE's Power Packs): clovers, +luck, the price
 -- Prices are read live from Roblox (the products' own), so they're always what's charged.
 -- Client/Shop keeps opening and closing it (its haze, hiding the rest of the UI, telemetry,
 -- the auto pop-up) and shows this in place of its art.
@@ -536,6 +537,57 @@ function NativeShop.build(screen, handlers)
 			price(offer.ProductId, false, offer.Price or 0, function(r)
 				text.Text = tostring(r)
 			end)
+		end
+		b.Activated:Connect(function()
+			handlers.buy(offer.Key)
+		end)
+		table.insert(shop.cards, b)
+	end
+
+	-- ---- the luck packs (Fight to Steal an Egg's Power Packs: six blue cards, three and three) ----
+	heading(list, "LuckHeading", "~Luck Packs~", { "00c8ff", "00e5ff", "0096ff" }, 14)
+	local luckRow
+	for i, offer in Config.Shop.LuckPacks do
+		if i % 3 == 1 then
+			luckRow = row(list, "LuckRow" .. (i + 2) // 3, 14 + (i + 2) // 3)
+		end
+		local c = card(luckRow, offer.Key, "PowerCard", THIRD, CARD_H, i)
+		sunburst(c, 0, PILE_Y, BURST)
+		local icons = Ui.make(c, "Icons", "Frame", {
+			BackgroundTransparency = 1,
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.fromScale(0.5, 0),
+			Size = UDim2.fromOffset(0, 0),
+			ZIndex = 3,
+		})
+		for k, p in offer.Icons do
+			art(icons, "Icon" .. k, {
+				Image = HudImages.LuckIcon or "",
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromOffset(fig(p[1]), fig(p[2])),
+				Size = UDim2.fromOffset(fig(p[3]), fig(p[3])),
+				ZIndex = 3 + k,
+			})
+		end
+		label(c, "Amount", {
+			RichText = true,
+			Text = string.format('<font color="#7CFF4D">+%s</font> Luck', tostring(offer.Luck)),
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextSize = fig(75),
+			Position = UDim2.fromOffset(0, fig(285)),
+			Size = UDim2.new(1, 0, 0, fig(91)),
+			ZIndex = 20,
+		})
+		local b, text = buyButton(c, "Buy", THIRD - 2 * EDGE, {
+			Position = UDim2.fromOffset(fig(EDGE), fig(BUTTONS_Y)),
+			ZIndex = 5,
+		})
+		if offer.ProductId ~= 0 then
+			price(offer.ProductId, false, offer.Price, function(r)
+				text.Text = tostring(r)
+			end)
+		else
+			text.Text = tostring(offer.Price)
 		end
 		b.Activated:Connect(function()
 			handlers.buy(offer.Key)
