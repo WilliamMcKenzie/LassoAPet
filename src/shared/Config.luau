@@ -2098,12 +2098,12 @@ Config.TrailBars = {
 	{ Name = "Godly", Rarity = "Godly", Speed = 3, Price = 1000000000, Robux = 399, ProductId = 0, AllAnimals = true, Colors = { rgb(255, 255, 255), rgb(255, 245, 190), rgb(255, 215, 80), rgb(255, 170, 30), rgb(255, 255, 255) } },
 }
 -- The Trails Shop's stand (QM, Nov 7: Fight to Steal an Egg's Weapon Shop stall, without Carl,
--- green and white like his reference's Trails Shop): right of the start line, mirroring the Top
+-- green and white like his reference's Trails Shop): right of the start line, past the free gift and the Top
 -- Earners board, its counter facing into the base. Server/TrailShop builds it; its Open prompt
 -- (or walking onto its ring) opens the popup (Client/TrailShop).
 Config.TrailShop = {
 	Order = { 1, 2, 3, 4, 5, 6, 9, 8, 7, 10 }, -- the cards, left to right (TrailBars indices)
-	Position = Vector3.new(116, 0, 34), -- on the ground
+	Position = Vector3.new(140, 0, 40), -- on the ground: right of the free gift (Config.FreeGift, 105, 30), clear of its ring
 	Yaw = 140, -- degrees: its counter faces the spawn
 	Scale = 1.6, -- (Fight to Steal an Egg's Weapon Shop's)
 	Title = "Trails Shop",
