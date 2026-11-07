@@ -2030,7 +2030,7 @@ Config.FreeGift = {
 -- Server/Leaderboards builds them (Parts) and records; Client/Leaderboards draws the titles
 -- and the lists.
 Config.Leaderboards = {
-	Position = Vector3.new(-112, 0, 18), -- the middle board's foot (on the ground), where the Top Earners board was
+	Position = Vector3.new(-112, 0, 2.1), -- the middle board's foot (on the ground): its plinth's back flush against the base wall at z 0 (QM Nov 7)
 	Yaw = 180, -- degrees: faces into the base (+z), flat to the wall behind (QM Nov 7: side by side as in his reference)
 	Spacing = 20, -- studs between the boards' middles
 	Refresh = 60, -- seconds between recording everyone here and re-reading the tops
