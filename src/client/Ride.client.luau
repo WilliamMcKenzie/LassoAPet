@@ -2619,9 +2619,8 @@ end
 function vfx.broke(hit)
 	if phase == "return" and mount and not activeAbility() and not vfx.crashProtected() then
 		local fast = math.abs(mount.speed) >= Config.ReturnRun.StaggerSpeed
-		local tier = Config.ReturnRun.StaggerTiers[mount.kind] or vfx.mountTier()
-		local hitTier = hit and (Config.ReturnRun.StaggerTiers[hit.kind] or tierOf(hit.kind))
-		if (hitTier and hitTier > math.max(tier, fast and 2 or 0)) or (not hit and not fast) then
+		-- (animals never stagger or crash you, only obstacles: QM, Nov 7; it was by StaggerTiers)
+		if not hit and not fast then
 			vfx.returnRun.hits += 1
 			mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
 		end
@@ -4466,7 +4465,7 @@ RunService.PreSimulation:Connect(function(dt)
 		-- ride (WalkLimit holds you there), so only 8+ studs past it, where no
 		-- animal at the line reaches.
 		local hrp, humanoid = character()
-		if hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z - 8 and not require(script.Parent.SlingshotRide).flying then -- (not flying over them off the Slingshot)
+		if Config.AnimalsBuckOnFoot and hrp and humanoid.Health > 0 and hrp.Position.Z < START_LINE_Z - 8 and not require(script.Parent.SlingshotRide).flying then -- (off, nil: animals never crash you, QM Nov 7; not flying over them off the Slingshot)
 			for _, entity in allAnimals() do
 				if not entity.popping and math.abs(entity.x - hrp.Position.X) < 2.6 and math.abs(entity.z - hrp.Position.Z) < 4 then
 					clearRideTarget()
