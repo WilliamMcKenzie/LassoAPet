@@ -9,7 +9,7 @@
 local Horse = require(script.Parent.Horse)
 local BoneRexModel = require(script.Parent.BoneRexModel)
 
-return Horse.variant("BoneRex", BoneRexModel, "Divine", {
+return Horse.variant("BoneRex", BoneRexModel, "Legendary", {
 	seat = Vector3.new(0, 10.62, 0.6), -- on the spine, between the low blades over the back
 	neck = { center = Vector3.new(0, 9.9, -5.2), radius = 2.2 },
 })

@@ -368,7 +368,7 @@ local Config = {
 			GateColor = Color3.fromRGB(255, 170, 40),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Ankylosaurus = 1/2, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/25, TRex = 1/125, Pterodactyl = 1/625, BoneRex = 1/2500,
+				Ankylosaurus = 1/2, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/25, TRex = 1/200, Pterodactyl = 1/250, BoneRex = 1/1250, CastleWyvern = 1/5000,
 			},
 			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
 		},
@@ -943,6 +943,7 @@ local Config = {
 		Rare = Color3.fromHex("40D6FF"),
 		Epic = Color3.fromHex("FF7CC6"),
 		Legendary = Color3.fromHex("5CE6B7"),
+		Divine = Color3.fromHex("00DCFF"), -- (Fight to Steal an Egg's Divine text colour: QM, Nov 7)
 	},
 	Podium = {
 		Position = Vector3.new(63.5, 0, 24.6), -- the column, on the ground, mirroring the portal gate across the start line (QM, Oct 12; was 104, 20, the front right corner); the snake reaches ~-8..+16 in x, -14..+31 in z
@@ -1838,6 +1839,7 @@ Config.NativeUi = {
 		Rare = { bottom = Color3.fromHex("0070ff"), top = Color3.fromHex("00e6ff"), at = 1, text = Color3.fromHex("00b7ff") },
 		Epic = { bottom = Color3.fromHex("9000ff"), top = Color3.fromHex("ff00f0"), at = 1, text = Color3.fromHex("d300ff") },
 		Legendary = { bottom = Color3.fromHex("ff0020"), top = Color3.fromHex("ff8c00"), at = 1, text = Color3.fromHex("ff0004") },
+		Divine = { bottom = Color3.fromHex("6a00ff"), top = Color3.fromHex("00d0ff"), at = 1, text = Color3.fromHex("00dcff"), text2 = Color3.fromHex("0040ff"), move = true }, -- (the reference's Divine: QM, Nov 7, the rarest in each biome)
 		Exclusive = { bottom = Color3.fromHex("ff0040"), top = Color3.fromHex("ff00c0"), at = 1, text = Color3.fromHex("ff0050"), text2 = Color3.fromHex("ff00d0"), move = true }, -- (the reference's Mythic)
 	},
 	-- the Shop's ~Game Passes~ cards (client/NativeShop; QM, Nov 6: the reference's), in order,
