@@ -1755,6 +1755,18 @@ Config.BiomeProducts = {
 	Castle = { ProductId = 3729077318, Price = 89 },
 	Ocean = { ProductId = 3729077407, Price = 99 },
 }
+-- Each biome's difficulty on the Slingshot's menu, by its place on the course (QM, Nov 7;
+-- past the list, the last).
+Config.BiomeDifficulty = {
+	{ "Easy", "😊" },
+	{ "Medium", "🙂" },
+	{ "Hard", "😐" },
+	{ "Tough", "😬" },
+	{ "Insane", "😱" },
+	{ "Extreme", "😡" },
+	{ "Nightmare", "💀" },
+	{ "Monster", "😈" },
+}
 for _, biome in Config.Biomes do
 	biome.RobuxProduct = biome.RobuxProduct or Config.BiomeProducts[biome.Name]
 end
