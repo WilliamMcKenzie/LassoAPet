@@ -125,4 +125,50 @@ function Studs.convert(part)
 	return true
 end
 
+-- (the stud look on meshes, not on glowing, see-through or already-studded ones)
+local function studdable(part)
+	if not part:IsA("MeshPart") or part.Transparency > 0.5 then
+		return false
+	end
+	local m = part.Material
+	if m == Enum.Material.Neon or m == Enum.Material.Glass or m == Enum.Material.ForceField then
+		return false
+	end
+	for _, child in part:GetChildren() do
+		if child:IsA("Texture") and child.Texture == Studs.IMAGE then
+			return false
+		end
+	end
+	return true
+end
+
+function Studs.mesh(part, tile, transparency)
+	if not studdable(part) then
+		return false
+	end
+	-- (workspace.StudStyle: Shared/StudStyle sets every stud Texture's transparency and scale)
+	local StudStyle = require(script.Parent.StudStyle)
+	for _, face in Enum.NormalId:GetEnumItems() do
+		local t = Instance.new("Texture")
+		t.Name = "Studs"
+		t.Face = face
+		t.Texture = Studs.IMAGE
+		t.StudsPerTileU, t.StudsPerTileV = tile, tile
+		t.ZIndex = 2
+		t.Transparency = transparency or StudStyle.transparency()
+		t.Parent = part
+	end
+	return true
+end
+
+function Studs.meshAll(root, tile)
+	local n = 0
+	for _, part in root:GetDescendants() do
+		if Studs.mesh(part, tile) then
+			n += 1
+		end
+	end
+	return n
+end
+
 return Studs
