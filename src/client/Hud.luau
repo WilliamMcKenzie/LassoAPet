@@ -650,6 +650,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	follow()
 	task.spawn(function() -- (not holding up the HUD's build for it)
 	RewardPopups.watchCash(money) -- (gold you're given pops up in the lower middle, QM Nov 6)
+	RewardPopups.watchLuck() -- (and luck from goals, QM Nov 7)
 	game:GetService("ReplicatedStorage"):WaitForChild("PetIncome").OnClientEvent:Connect(function(earned)
 		if type(earned) ~= "number" or earned <= 0 or not gold.Visible or not sideRoot:FindFirstAncestorOfClass("ScreenGui").Enabled then
 			return -- (nothing while the counter's hidden: riding...)
