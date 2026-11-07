@@ -1,8 +1,8 @@
 -- The Trails Shop's stand (Config.TrailShop, QM Nov 7): Fight to Steal an Egg's Weapon Shop
--- stall (its Server/Map vendor() and shopSign(), 1:1) without Carl: posts, beams, a counter and
+-- stall (its Server/Map vendor() and shopSign(), 1:1) with Carl the cactus guy: posts, beams, a counter and
 -- a green and white striped roof (Shared/TrailStallModel), "Trails Shop" floating over it and a
 -- glowing ring on the ground in front. Built at the origin, its counter facing -z, then scaled,
--- turned and placed. Its Open prompt and its ring open the popup (Client/TrailShop); buying and
+-- turned and placed. Carl's Talk prompt and its ring open the popup (Client/TrailShop); buying and
 -- equipping are Gold.server's BuyTrail and EquipTrail.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,6 +11,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local HiddenFaces = require(ReplicatedStorage.Shared.HiddenFaces)
 local Studs = require(ReplicatedStorage.Shared.Studs)
 local TrailStallModel = require(ReplicatedStorage.Shared.TrailStallModel)
+local Cactus = require(ReplicatedStorage.Shared.Animals.Cactus)
 
 local s = Config.TrailShop
 local TITLE_FONT = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.ExtraBold)
@@ -97,10 +98,28 @@ local function stall()
 			counter = part
 		end
 	end
+	-- where Carl's feet go (Client/TrailShop stands its own Carl here, who idles and watches you),
+	-- and a still Carl so he shows in Studio's Edit mode
+	local spot = Instance.new("Part")
+	spot.Name = "CarlSpot"
+	spot.Anchored, spot.CanCollide, spot.CanQuery, spot.CanTouch = true, false, false, false
+	spot.Transparency = 1
+	spot.Size = Vector3.new(1, 1, 1)
+	spot.CFrame = CFrame.new(TrailStallModel.carl)
+	spot.Parent = model
+	local carl = Cactus.new().model
+	carl.Name = "Carl"
+	for _, part in carl:GetDescendants() do
+		if part:IsA("BasePart") then
+			part.CanCollide, part.CanQuery, part.CanTouch = false, false, false
+		end
+	end
+	carl:PivotTo(spot.CFrame)
+	carl.Parent = model
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "OpenPrompt"
-	prompt.ActionText = "Open"
-	prompt.ObjectText = s.Title
+	prompt.ActionText = "Talk"
+	prompt.ObjectText = "Carl"
 	prompt.RequiresLineOfSight = false
 	prompt.MaxActivationDistance = s.Reach * s.Scale
 	prompt.Parent = counter
@@ -122,4 +141,5 @@ model:PivotTo(CFrame.new(s.Position) * CFrame.Angles(0, math.rad(s.Yaw), 0))
 local gui = model.Title:FindFirstChildOfClass("BillboardGui")
 gui.Size = UDim2.fromScale(s.TitleHeight * 6 * s.Scale, s.TitleHeight * s.Scale)
 HiddenFaces.cull(model)
+model:SetAttribute("Scale", s.Scale)
 model.Parent = workspace

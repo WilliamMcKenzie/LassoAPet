@@ -2197,14 +2197,14 @@ Config.TrailBars = {
 	{ Name = "Ice", Rarity = "Divine", Speed = 1.75, Price = 40000000, Robux = 189, ProductId = 3729494551, Colors = { rgb(240, 255, 255), rgb(170, 240, 255), rgb(90, 210, 255), rgb(40, 150, 240) } },
 	{ Name = "Godly", Rarity = "Godly", Speed = 3, Price = 1000000000, Robux = 399, ProductId = 3729494716, AllAnimals = true, Colors = { rgb(255, 255, 255), rgb(255, 245, 190), rgb(255, 215, 80), rgb(255, 170, 30), rgb(255, 255, 255) } },
 }
--- The Trails Shop's stand (QM, Nov 7: Fight to Steal an Egg's Weapon Shop stall, without Carl,
--- green and white like his reference's Trails Shop): right of the start line, past the free
--- gift, its counter facing into the base. Server/TrailShop builds it; its Open prompt
+-- The Trails Shop's stand (QM, Nov 7: Fight to Steal an Egg's Weapon Shop stall, Carl and all,
+-- green and white like his reference's Trails Shop): left of the start line, by the
+-- leaderboards, its counter facing into the base. Server/TrailShop builds it; Carl's Talk prompt
 -- (or walking onto its ring) opens the popup (Client/TrailShop).
 Config.TrailShop = {
 	Order = { 1, 2, 3, 4, 5, 6, 9, 8, 7, 10 }, -- the cards, left to right (TrailBars indices)
-	Position = Vector3.new(140, 0, 40), -- on the ground: right of the free gift (Config.FreeGift, 105, 30), clear of its ring
-	Yaw = 140, -- degrees: its counter faces the spawn
+	Position = Vector3.new(-62, 0, 24), -- on the ground: left of the course's mouth, right of the Top Playtime board (QM, Nov 7: where Fight to Steal an Egg's Weapon Shop stands by its gateway)
+	Yaw = 200, -- degrees: its counter faces into the base, turned a touch inward (Fight to Steal an Egg's)
 	Scale = 1.6, -- (Fight to Steal an Egg's Weapon Shop's)
 	Title = "Trails Shop",
 	TitleTop = Color3.fromRGB(190, 255, 120),
@@ -2215,6 +2215,8 @@ Config.TrailShop = {
 	RingRadius = 12, -- studs (x Scale)
 	RingAhead = 5, -- its centre this far in front of the stall's middle (x Scale)
 	Reach = 12, -- studs from the counter where Open shows (x Scale)
+	LookRange = 30, -- Carl turns to watch a player this close (Fight to Steal an Egg's Config.Vendor)
+	Hop = 0.45, -- seconds of his hello hop
 }
 -- (the finish line's old trails, FinishTrail n, count as these: Yellow the Golden one)
 local OLD = { Golden = 1, Blue = 2, Red = 3, Rainbow = 4, Galactic = 5 }
