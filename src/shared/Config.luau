@@ -1797,6 +1797,7 @@ Config.Slingshot = {
 	BandColor = Color3.fromRGB(226, 58, 52),
 	-- The band's colour by your pen level (each Upgrade Pen recolours it; past the list, the last).
 	BandColors = {
+		Color3.fromRGB(196, 170, 128), -- tan (QM, Nov 7: the cartoon slingshot's)
 		Color3.fromRGB(226, 58, 52), -- red
 		Color3.fromRGB(245, 140, 40), -- orange
 		Color3.fromRGB(250, 214, 50), -- yellow
