@@ -1710,6 +1710,7 @@ Config.Endless = {
 			-- page, never wild (as the Robo Shark). World 1's Bunny, Rhino and Buffalo stay in the Meadow.
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
 				MarbleFish = 1/2, Lion = 1/4, Crocodile = 1/5, MarbleColossus = 1/20, MajesticUnicorn = 0,
+				Seraph = 1/300, -- (QM, Nov 7: in the Index; World 2's trophy angel, 1 in 300 of its stampede as there)
 			},
 			Boss = "Seraph", -- (World 2's Meadow boss)
 			Fog = { Color = rgb(232, 214, 160), Start = 0, End = 500 },
@@ -1742,6 +1743,7 @@ Config.Endless = {
 			WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) },
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
 				CrystalCentipede = 1/4, BlueCrystal = 1/8, RedMushroom = 1/8, BrownMushroom = 1/8, PinkCrystal = 1/8, PurpleMushroom = 1/10, CrystalSpider = 1/10, CrystalPhoenix = 1/25, CrystalElephant = 1/100,
+				CrystalSeraph = 1/300, -- (QM, Nov 7: in the Index; World 2's trophy angel, 1 in 300 as there)
 			},
 			Boss = "CrystalSeraph",
 			Fog = { Color = rgb(70, 92, 140), Start = 0, End = 420 },

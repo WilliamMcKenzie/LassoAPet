@@ -87,13 +87,16 @@ for i, biome in Config.allBiomes() do -- (and the endless course's, past the Oce
 	local kinds = {}
 	local total = 0
 	for kind, weight in biome.Herd or {} do
-		if weight > 0 and ReplicatedStorage.Shared.Animals:FindFirstChild(kind) then
+		-- (a 0 never runs wild but stays on its biome's page: the starter, the Robux pets)
+		if weight >= 0 and ReplicatedStorage.Shared.Animals:FindFirstChild(kind) then
 			table.insert(kinds, kind)
 		end
 		total += math.max(weight, 0)
 	end
 	for _, kind in kinds do -- 1 in this many of the biome's spawns
-		oddsOf[kind] = oddsOf[kind] or total / biome.Herd[kind]
+		if biome.Herd[kind] > 0 then
+			oddsOf[kind] = oddsOf[kind] or total / biome.Herd[kind]
+		end
 	end
 	table.sort(kinds, function(a, b)
 		local ia, ib = Config.PetIncome[a] or 0, Config.PetIncome[b] or 0
@@ -130,8 +133,8 @@ end
 -- "1 in 37", "1 in 2.5", "1 in 12,500"
 local function oddsText(kind)
 	local n = oddsOf[kind]
-	if not n then
-		return "???"
+	if not n then -- (never wild)
+		return if kind == Config.DefaultPet then "Starter" else "Exclusive"
 	end
 	local text
 	if n < 10 then
