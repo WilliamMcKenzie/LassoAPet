@@ -1045,18 +1045,20 @@ startRide = function(model, at)
 	Lasso.start(player.Character, nil, player:GetAttribute("PenLevel") or 1) -- (your pen level's lasso: LassoTiers)
 end
 
--- Your fastest pet at home (the one the start line and the Slingshot ride). (A field: this
--- chunk is at the local limit.)
+-- Your fastest pet at home (the one the start line and the Slingshot ride), and where its
+-- rider sits, relative to its pivot (getSeatCFrame x SEAT_OFFSET, as on a ride: the
+-- Slingshot's flight seats you there). (A field: this chunk is at the local limit.)
 function vfx.fastestPet()
-	local best, fastest = nil, -1
+	local best, fastest, seat = nil, -1, nil
 	for _, model in homePets() do
 		local info = if starter and model == starter.animal.model then starter else PenPets.pets[model]
 		local speed = info and statsOf(info.kind, info).Speed or -1
 		if speed > fastest then
 			best, fastest = model, speed
+			seat = info and info.animal and model:GetPivot():ToObjectSpace(info.animal:getSeatCFrame() * SEAT_OFFSET)
 		end
 	end
-	return best
+	return best, seat
 end
 
 -- The Slingshot (Client/SlingshotLaunch, QM Nov 6): you land at (x, z) on your fastest pet.
