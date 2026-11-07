@@ -107,6 +107,11 @@ local Config = {
 		-- the Jurassic (the Castle's slot, QM Nov 7): all jungle grass, rock pillars
 		CastleGrass = Color3.fromRGB(86, 166, 52),
 		CastleGrassChecker = Color3.fromRGB(80, 156, 48),
+		-- (still used: the Dungeon's sunken "À" tile wears CastleFloor; CastleCarpet for old maps)
+		CastleFloor = Color3.fromRGB(78, 70, 86),
+		CastleFloorChecker = Color3.fromRGB(87, 78, 95),
+		CastleCarpet = Color3.fromRGB(86, 166, 52),
+		CastleCarpetChecker = Color3.fromRGB(80, 156, 48),
 		CastleWall = Color3.fromRGB(118, 92, 66),
 		CastleWallChecker = Color3.fromRGB(108, 84, 60),
 		CastleCap = Color3.fromRGB(70, 140, 40),
