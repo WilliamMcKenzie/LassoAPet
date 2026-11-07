@@ -2002,8 +2002,28 @@ Config.Luck = {
 	RewardPerRebirth = 2, -- goal luck x this each rebirth (0.25, 0.5, 1, 2...)
 	CostPerRebirth = 2, -- slingshot unlock prices x this each rebirth
 }
+-- The 100x Luck Event (QM, Nov 7): every Every seconds (on the server clock, so every server
+-- at once) everyone's luck is x Multiplier for Duration seconds. The sign over the course's
+-- mouth (Server/LuckEvent builds it, Client/LuckEvent draws it) counts down to it; the luck
+-- counter turns animated rainbow with the time left beside it (Client/NativeHud).
+Config.LuckEvent = {
+	Every = 20 * 60, -- seconds from one event's start to the next
+	Duration = 60, -- seconds it lasts
+	Multiplier = 100,
+	Title = "100x Luck Event",
+	-- the sign: across the course's mouth (z), its board's middle Height over the ground
+	Sign = { Z = -8, Height = 48, Width = 52, BoardHeight = 15, Color = Config.WorldColors.Wood, Trim = Config.WorldColors.WoodDark }, -- (the pens' fence wood, QM)
+}
+-- Seconds left of the luck event now, or nil when none is on; and seconds to the next start.
+function Config.luckEventLeft(now)
+	now = now or workspace:GetServerTimeNow()
+	local into = now % Config.LuckEvent.Every
+	local left = if into < Config.LuckEvent.Duration then Config.LuckEvent.Duration - into else nil
+	return left, Config.LuckEvent.Every - into
+end
 function Config.luck(player)
-	return 1 + (player:GetAttribute("LuckBonus") or 0)
+	local mult = if Config.luckEventLeft() then Config.LuckEvent.Multiplier else 1
+	return (1 + (player:GetAttribute("LuckBonus") or 0)) * mult
 end
 -- Luck to show: "x1", "x1.25", "x2.75", "x12.5".
 function Config.luckText(luck)

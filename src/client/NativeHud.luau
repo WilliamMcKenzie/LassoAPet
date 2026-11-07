@@ -246,11 +246,31 @@ function NativeHud.build(handlers)
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 4,
 	})
+	-- the 100x Luck Event (Config.LuckEvent, QM Nov 7): while it's on the number's the boosted
+	-- luck in a smoothly flowing rainbow (Shared/LuckEventSign's, as the sign's title), the time
+	-- left beside it
+	local LuckEventSign = require(game:GetService("ReplicatedStorage").Shared.LuckEventSign)
+	local luckTimer = label(luckRow, "EventTimer", {
+		Text = "",
+		FontFace = HudKit.ITALIC,
+		Visible = false,
+		Position = UDim2.new(1, fig(14), 0, fig(66)),
+		Size = UDim2.fromOffset(fig(170), fig(72)),
+		ZIndex = 3,
+	})
+	luck.RichText = true
 	local function showLuck()
-		luck.Text = Config.luckText(Config.luck(player))
+		local now = workspace:GetServerTimeNow()
+		local left = Config.luckEventLeft(now)
+		local text = Config.luckText(Config.luck(player))
+		luck.Text = if left then LuckEventSign.rainbow(text, -(now * 0.35) % 1) else text
+		luckTimer.Visible = left ~= nil
+		if left then
+			luckTimer.Text = LuckEventSign.clock(left)
+		end
 	end
-	player:GetAttributeChangedSignal("LuckBonus"):Connect(showLuck)
 	showLuck()
+	game:GetService("RunService").Heartbeat:Connect(showLuck)
 	luckButton.Activated:Connect(function()
 		require(script.Parent.RebirthPopup).open()
 	end)

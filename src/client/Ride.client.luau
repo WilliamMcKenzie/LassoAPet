@@ -426,9 +426,9 @@ local phase = "idle" -- idle | outbound | turning | return | home | finish | end
 local starter, mount
 local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
 local plans = {} -- [n] = { x, speed }, the stampede's schedule
--- Your luck changed (a goal, or the save loaded: "LuckBonus"): every stream's odds again at
+-- Your luck changed (a goal, the save loaded: "LuckBonus", or the luck event): every stream's odds again at
 -- the new luck, and the plans not yet running drawn again from them.
-player:GetAttributeChangedSignal("LuckBonus"):Connect(function()
+local function reweigh()
 	local luck = Config.luck(player)
 	for _, s in streams do
 		s.total = 0
@@ -440,6 +440,19 @@ player:GetAttributeChangedSignal("LuckBonus"):Connect(function()
 	for key in plans do
 		if not herd[key] then
 			plans[key] = nil
+		end
+	end
+end
+player:GetAttributeChangedSignal("LuckBonus"):Connect(reweigh)
+-- and the 100x Luck Event starting or ending (Config.LuckEvent: Config.luck's in it)
+task.spawn(function()
+	local on = Config.luckEventLeft() ~= nil
+	while true do
+		task.wait(0.25)
+		local now = Config.luckEventLeft() ~= nil
+		if now ~= on then
+			on = now
+			reweigh()
 		end
 	end
 end)
