@@ -1563,8 +1563,8 @@ local Config = {
 
 -- The endless course past the Ocean Trench (QM, Nov 6: "after the final ocean biome, should be
 -- infinite procedural: this is where we will use world 2's biomes and all its pets"). Past the
--- Ocean's end the course never stops: Shared/Endless lays it out as stretches of World 2's first
--- three biomes, each one picked at random (never the one before again) for a random length, and
+-- Ocean's end the course never stops: Shared/Endless lays it out as stretches of World 2's Marble
+-- Meadow and Crystal Cavern and the Jurassic (QM, Nov 7: in the Crimson Lands' place), each one picked at random (never the one before again) for a random length, and
 -- generates their terrain as you go (Client/Endless builds what's near the camera). Each stretch
 -- runs its biome's World 2 herd. They're biome tiers 9, 10 and 11 for speed and income (the
 -- balance passes at the end of this file). Same Seed, same course on every client and server.
@@ -1591,18 +1591,19 @@ Config.Endless = {
 			Fog = { Color = rgb(232, 214, 160), Start = 0, End = 500 },
 		},
 		{
-			-- World 2's Crimson Lands (QM, Oct 13)
-			Name = "CrimsonLands",
-			DisplayName = "Crimson Lands",
+			-- The Jurassic (QM, Nov 7: in the Crimson Lands' place, on its terrain recoloured: a jungle
+			-- of rock ridges, mud basins and cycads), with its old animals at their old weights and
+			-- its old stampede (3x the rest) and boss
+			Name = "Jurassic",
+			DisplayName = "Jurassic",
 			Tier = 10,
 			Swerve = 1,
-			HerdSpawnEvery = 0.45,
-			GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) },
-			WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) },
-			Herd = { Eyeworm = 0.3, Maw = 0.3, IvorySpider = 0.05, Asura = 0.05, CrimsonScorpion = 0.2, Beholder = 0.3,
-				BlackWidow = 0.0024 }, -- (the Black Widow 1 in 500 of its stampede: QM, Oct 13)
-			Boss = "CrimsonSeraph",
-			Fog = { Color = rgb(150, 60, 70), Start = 0, End = 450 },
+			HerdSpawnEvery = 0.15,
+			GroundColors = { rgb(86, 166, 52), rgb(80, 156, 48) },
+			WallColors = { rgb(118, 92, 66), rgb(108, 84, 60) },
+			Herd = { Spinosaurus = 0.2, TRex = 0.12, Raptor = 0.15, Pterodactyl = 0.08, Ankylosaurus = 0.25, PalmGuy = 0.25, BoneRex = 0.03 },
+			Boss = "TyrantRex",
+			Fog = { Color = rgb(150, 190, 120), Start = 0, End = 450 },
 		},
 		{
 			-- World 2's Crystal Cavern (QM, Oct 13): blue-grey by the walls to ice to crystal down the middle
@@ -1630,14 +1631,14 @@ Config.Endless = {
 		MarbleCap = rgb(206, 168, 58),
 		MarbleWater = rgb(76, 156, 222), MarbleWaterChecker = rgb(90, 170, 232),
 		MarbleBush = rgb(166, 130, 36),
-		CrimsonGround = rgb(121, 20, 37), CrimsonGroundChecker = rgb(110, 17, 33),
-		CrimsonPatch = rgb(144, 44, 43), CrimsonPatchChecker = rgb(132, 38, 38),
-		CrimsonStone = rgb(119, 86, 86), CrimsonStoneChecker = rgb(108, 77, 77),
-		CrimsonDark = rgb(98, 15, 30), CrimsonDarkChecker = rgb(89, 13, 27),
-		CrimsonWall = rgb(91, 50, 54), CrimsonWallChecker = rgb(82, 44, 48),
-		CrimsonCap = rgb(72, 39, 42),
-		CrimsonRune = rgb(255, 59, 92),
-		CrimsonShroom = rgb(196, 38, 56), CrimsonShroomStem = rgb(226, 206, 196),
+		JurassicGround = rgb(86, 166, 52), JurassicGroundChecker = rgb(80, 156, 48),
+		JurassicPatch = rgb(112, 184, 64), JurassicPatchChecker = rgb(104, 174, 58),
+		JurassicStone = rgb(134, 120, 96), JurassicStoneChecker = rgb(124, 110, 88),
+		JurassicDark = rgb(96, 74, 48), JurassicDarkChecker = rgb(88, 68, 44),
+		JurassicWall = rgb(118, 92, 66), JurassicWallChecker = rgb(108, 84, 60),
+		JurassicCap = rgb(70, 140, 40),
+		JurassicAmber = rgb(255, 170, 40),
+		JurassicFrond = rgb(46, 128, 44), JurassicTrunk = rgb(120, 84, 54),
 		CavernGround = rgb(90, 109, 143), CavernGroundChecker = rgb(82, 99, 131),
 		CavernIce = rgb(98, 129, 167), CavernIceChecker = rgb(89, 118, 153),
 		CavernCrystal = rgb(116, 186, 213), CavernCrystalChecker = rgb(105, 171, 197),
