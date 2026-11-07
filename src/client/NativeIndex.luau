@@ -289,6 +289,7 @@ local function showCard(kind)
 	card.PetCash.Text = if found then "$" .. Config.short(Config.PetIncome[kind] or 0) .. "/s" else "???"
 	local biome = BIOMES[biomeOf[kind]]
 	details.Where.Value.Text = biome and biome.name or "???"
+	details.Where.Icon.Image = biome and biome.picture or ""
 	local stats = Config.AnimalStats and Config.AnimalStats[kind]
 	details.Speed.Value.Text = if found and stats and stats.Speed then string.format("%.2g Speed", stats.Speed) else "??? Speed"
 	-- its reward and Claim! (Locked till you've had it), or once claimed where it runs and its speed
@@ -603,18 +604,35 @@ local function build()
 			claimButton:SetAttribute("Busy", nil)
 		end
 	end)
-	for i, s in { { "Where", "Meadow" }, { "Speed", "??? Speed" } } do
+	-- once claimed: Fight to Steal an Egg's stat rows (its IndexPanel), a 96 px icon and a big
+	-- outlined label each; Where wears the biome's render as its icon (FTSAE has no such row)
+	for i, s in { { "Where", "", "Meadow" }, { "Speed", HudImages.SpeedIcon or "", "??? Speed" } } do
 		local row = Ui.make(details, s[1], "Frame", {
 			BackgroundTransparency = 1,
-			Position = UDim2.fromOffset(fig(40), fig(40 + (i - 1) * 110)),
+			Position = UDim2.fromOffset(fig(40), fig(22 + (i - 1) * 100)),
 			Size = UDim2.new(1, -fig(80), 0, fig(96)),
 			ZIndex = 4,
 		})
+		local icon = art(row, "Icon", {
+			Image = s[2],
+			Size = UDim2.fromOffset(fig(96), fig(96)),
+			ZIndex = 5,
+		})
+		if s[1] == "Where" then
+			icon.ScaleType = Enum.ScaleType.Crop
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, fig(16))
+			corner.Parent = icon
+			local edge = Instance.new("UIStroke")
+			edge.Color = HudKit.BLACK
+			edge.Thickness = HudKit.TEXT_OUTLINE
+			edge.Parent = icon
+		end
 		label(row, "Value", {
-			Text = s[2],
+			Text = s[3],
 			TextSize = fig(70),
-			TextScaled = true,
-			Size = UDim2.fromScale(1, 1),
+			Position = UDim2.fromOffset(fig(120), 0),
+			Size = UDim2.new(1, -fig(120), 1, 0),
 			ZIndex = 5,
 		})
 	end
