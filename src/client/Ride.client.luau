@@ -331,9 +331,13 @@ local function newStream(spawnZ, endZ, herd, name)
 	end
 	s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / slowest
 	local names = {}
-	local luck = Config.luck(player) -- (your luck flattens your own stampede's odds: Config.Luck)
+	local luck = Config.luck(player) -- (your luck multiplies your own stampede's rarer odds: Config.luckWeight)
+	s.top = 0 -- (the herd's commonest weight: luck lifts no animal past it)
+	for _, weight in herd do
+		s.top = math.max(s.top, weight)
+	end
 	for kind, weight in herd do
-		local w = Config.luckWeight(weight, luck)
+		local w = Config.luckWeight(weight, luck, s.top)
 		table.insert(s.kinds, { name = kind, weight = w, base = weight })
 		table.insert(names, kind .. " " .. string.format("%.3g", w))
 		s.total += w
@@ -433,7 +437,7 @@ local function reweigh()
 	for _, s in streams do
 		s.total = 0
 		for _, k in s.kinds do
-			k.weight = Config.luckWeight(k.base, luck)
+			k.weight = Config.luckWeight(k.base, luck, s.top)
 			s.total += k.weight
 		end
 	end

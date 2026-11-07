@@ -254,13 +254,12 @@ local Config = {
 	-- The course is biomes end to end from the start line, each Length studs long,
 	-- with its own tile colours. The home base uses the first biome's. Any Nest
 	-- model in World.Nests is an egg spawn of the biome it stands in (NestOdds).
-	-- The progression pass (QM, Nov 7): the Slingshot's unlocks (each biome's UnlockCost) set the pace,
-	-- a sigmoid's back half: quick at first, slowing round the Dungeon, hard by the Ocean. Target
-	-- arrivals (a free player): Desert ~1 min, Tundra ~5, Volcano ~15, Dungeon ~35, Forest ~75,
-	-- Castle ~140, Ocean ~240 (4 h; the endless course runs on from its end). Each price is the
-	-- minutes in the biome before x 60 x ~3x its herd's average gold a second (5 pen slots, ~60%
-	-- filled with its pets as they hatch) + ~1000x that average (about half its Index rewards).
-	-- Herd averages after the income curve: 36, 114, 229, 457, 914, 1828, 3657 (x2 a biome).
+	-- The balance pass (QM, Nov 7: "desert at like 2m, tundra at 4m, lava at 8m, 2xing each time"):
+	-- the Slingshot's unlocks (each biome's UnlockCost, x Config.Luck.CostPerRebirth a rebirth) set
+	-- the pace of a player following the goals, rebirthing each time the Rebirth goal comes up.
+	-- Simulated: Desert ~2.4 min, Tundra ~3.6, Volcano ~8, Dungeon ~18,
+	-- Forest ~40, Jurassic ~55, Ocean ~2.3 h; rebirths at ~4, 8, 18, 55 min, 2 h, 5 h, 9 h.
+	-- Gold by rarity (below) makes luck the engine: each rebirth's x4 goal luck brings rarer pets.
 	Biomes = {
 		{
 			Name = "Meadow",
@@ -281,8 +280,8 @@ local Config = {
 			-- use the same odds (NestOdds). A 0 never spawns but keeps the animal on
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Pig = 1/5, Pinto = 1/5, Snail = 1/5, Zebra = 1/8, Bunny = 1/10, Fish = 1/20, Gecko = 1/20, Buffalo = 1/25, Rhino = 1/250, Elephant = 1/400, Giraffe = 1/500, HillbackTortoise = 1/1000, Unicorn = 1/10000, Horse = 0,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7): ~3 Rares a run through the biome before the first rebirth (free gift's x4 luck), ~3 Epics after the second, ~3 Legendaries after the third
+				Pig = 1/4, Snail = 1/4, Pinto = 1/5 + 631/15000, Bunny = 1/8, Zebra = 1/8, Fish = 1/600, Gecko = 1/600, Buffalo = 1/800, Elephant = 1/2500, Rhino = 1/2500, Giraffe = 1/3000, HillbackTortoise = 1/4000, Unicorn = 1/10000, Horse = 0,
 			},
 		},
 		{
@@ -296,8 +295,8 @@ local Config = {
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) }, -- and its Desert wall
 			CapColor = Color3.fromRGB(222, 164, 100), -- (its DesertCap)
 			GateColor = Color3.fromRGB(255, 204, 40), -- its breakable barrier's colour (Gate.client)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Kitten = 1/2, Cactus = 1/5, Coyote = 1/5, Scorpion = 1/20, Oryx = 1/25, Ostrich = 1/800, Sandworm = 1/800, SpineLizard = 1/800, Snake = 1/1600, MirageElephant = 1/3200,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7): ~3 Rares a run through the biome before the first rebirth (free gift's x4 luck), ~3 Epics after the second, ~3 Legendaries after the third
+				Kitten = 1/2 + 9697/120000, Cactus = 1/5, Coyote = 1/5, Oryx = 1/150, Scorpion = 1/150, Ostrich = 1/1000, Sandworm = 1/1000, SpineLizard = 1/1000, Snake = 1/2000, MirageElephant = 1/2500,
 			},
 			-- Locked behind a gate until your pen is this biome's level (its place
 			-- in this list). Upgrading your pen to it costs UnlockCost gold; your pen's
@@ -318,10 +317,10 @@ local Config = {
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) }, -- and its Ice wall
 			CapColor = Color3.fromRGB(244, 247, 251), -- (its IceCap)
 			GateColor = Color3.fromRGB(70, 220, 255), -- its breakable barrier's colour (Gate.client)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Boar = 1/4, Penguin = 1/4, Seal = 1/4, Reindeer = 1/10, Walrus = 1/16, Snowman = 1/20, IceGolem = 1/160, Narwhal = 1/200, Icebringer = 1/3200, GlacierMammoth = 1/4000, SnackYak = 0,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7): ~3 Rares a run through the biome before the first rebirth (free gift's x4 luck), ~3 Epics after the second, ~3 Legendaries after the third
+				Seal = 1/4 + 57089/240000, Boar = 1/4, Penguin = 1/4, Reindeer = 1/400, Walrus = 1/400, Snowman = 1/500, IceGolem = 1/800, Narwhal = 1/800, Icebringer = 1/3000, GlacierMammoth = 1/4000, SnackYak = 0,
 			},
-			UnlockCost = 200000, -- (the progression pass, QM Nov 7: above Biomes; was 300k) QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
+			UnlockCost = 60000, -- (the balance pass, QM Nov 7: Tundra ~4 min in; was 200k, 300k) QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
 			UpgradeImage = "rbxassetid://105968538824751", -- assets/ui/UpgradePenTundraEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://133303061216721", -- assets/ui/UpgradePenTundraDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 		},
@@ -339,10 +338,10 @@ local Config = {
 			CapColor = Color3.fromRGB(96, 60, 46), -- (its LavaCap)
 			GateColor = Color3.fromRGB(255, 110, 20), -- its breakable barrier's colour (Gate.client)
 			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean and Jurassic: QM Oct 11)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				FireAnt = 1/2, Firebird = 1/4, MagmaCrab = 1/16, RockHog = 1/16, VolcanoTortoise = 1/16, FireLobster = 1/20, LavaWhale = 1/320, Rockworm = 1/512, AshBehemoth = 1/2560, Phoenix = 1/2560,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7): ~3 Rares a run through the biome before the first rebirth (free gift's x4 luck), ~3 Epics after the second, ~3 Legendaries after the third
+				FireAnt = 1/2 + 611/2500, Firebird = 1/4, FireLobster = 1/1000, MagmaCrab = 1/1000, RockHog = 1/1000, VolcanoTortoise = 1/1000, LavaWhale = 1/3000, Rockworm = 1/3000, Phoenix = 1/6000, AshBehemoth = 1/10000,
 			},
-			UnlockCost = 650000, -- (the progression pass, QM Nov 7: above Biomes; was 10M)
+			UnlockCost = 800000, -- (the balance pass, QM Nov 7: Volcano ~8 min in; was 650k)
 			-- No Upgrade Pen art yet: the plain button with the price.
 		},
 		{
@@ -360,10 +359,10 @@ local Config = {
 			CapColor = Color3.fromRGB(104, 126, 146),
 			GateColor = Color3.fromRGB(90, 255, 130),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				CaveCricket = 1/4 + 9/40000, Bat = 1/8, CryptSnail = 1/8, DungeonRat = 1/8, Rat = 1/8, Slime = 1/8, CaveSpider = 1/25, WebSpider = 1/25, BoneSteed = 1/32, Mimic = 1/80, AbyssPillbug = 1/1000, BoneWyrm = 1/40000,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7): ~3 Rares a run through the biome before the first rebirth (free gift's x4 luck), ~3 Epics after the second, ~3 Legendaries after the third
+				CaveCricket = 1/4 + 4659/40000, Bat = 1/8, CryptSnail = 1/8, DungeonRat = 1/8, Rat = 1/8, Slime = 1/8, BoneSteed = 1/500, CaveSpider = 1/500, Mimic = 1/500, WebSpider = 1/500, AbyssPillbug = 1/2000, BoneWyrm = 1/40000,
 			},
-			UnlockCost = 2000000, -- (the progression pass, QM Nov 7; was 100M)
+			UnlockCost = 12500000, -- (the balance pass, QM Nov 7; was 2M)
 		},
 		{
 			Name = "Forest", -- the Magic Forest
@@ -377,10 +376,10 @@ local Config = {
 			CapColor = Color3.fromRGB(30, 196, 186),
 			GateColor = Color3.fromRGB(255, 143, 240),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				StagBeetle = 1/2 + 7/64000, Shroom = 1/5, SpiritFox = 1/5, SpiritDeer = 1/20, Deer = 1/25, BrownBear = 1/320, CrystalTortoise = 1/320, MysticOwl = 1/400, AncientMoose = 1/1600, AncientTreant = 1/2000, SpiritLoong = 1/64000,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7): ~3 Rares a run through the biome before the first rebirth (free gift's x4 luck), ~3 Epics after the second, ~3 Legendaries after the third
+				StagBeetle = 1/2 + 17437/192000, Shroom = 1/5, SpiritFox = 1/5, Deer = 1/300, SpiritDeer = 1/300, BrownBear = 1/1500, CrystalTortoise = 1/1500, MysticOwl = 1/1500, AncientMoose = 1/4000, AncientTreant = 1/4000, SpiritLoong = 1/64000,
 			},
-			UnlockCost = 7500000, -- (the progression pass, QM Nov 7; was 1B)
+			UnlockCost = 25000000, -- (the balance pass, QM Nov 7; was 7.5M)
 		},
 		{
 			Name = "Castle", -- the Jurassic (QM, Nov 7: in the Red Castle's place, on its map recoloured as a jungle; its old animals and boss)
@@ -395,10 +394,10 @@ local Config = {
 			CapColor = Color3.fromRGB(70, 140, 40),
 			GateColor = Color3.fromRGB(255, 170, 40),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Ankylosaurus = 1/2 + 19/100000, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/25, TRex = 1/200, Pterodactyl = 1/250, BoneRex = 1/1250, CastleWyvern = 1/100000,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7): ~3 Rares a run through the biome before the first rebirth (free gift's x4 luck), ~3 Epics after the second, ~3 Legendaries after the third
+				Ankylosaurus = 1/2 + 24499/100000, PalmGuy = 1/4, Spinosaurus = 1/400, Raptor = 1/800, Pterodactyl = 1/2000, TRex = 1/2000, BoneRex = 1/4000, CastleWyvern = 1/100000,
 			},
-			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
+			UnlockCost = 400000000, -- (the balance pass, QM Nov 7; was 25M)
 		},
 		{
 			Name = "Ocean", -- the Ocean Trench
@@ -412,10 +411,10 @@ local Config = {
 			CapColor = Color3.fromRGB(157, 226, 244),
 			GateColor = Color3.fromRGB(70, 200, 255),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Clownfish = 1/5 + 24/250000, Pelican = 1/5, Squid = 1/5, Shrimp = 1/8, Starfish = 1/8, FishSchool = 1/40, Hammerhead = 1/40, Seahorse = 1/40, Whale = 1/40, KingCrab = 1/50, Lionfish = 1/50, Anglerfish = 1/200, MantaRay = 1/250, BlueCrab = 1/2000, AbyssWhale = 1/2500, Kraken = 1/250000, RoboShark = 0,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7): ~3 Rares a run through the biome before the first rebirth (free gift's x4 luck), ~3 Epics after the second, ~3 Legendaries after the third
+				Pelican = 1/4, Squid = 1/4, Clownfish = 1/5 + 67619/1500000, Shrimp = 1/8, Starfish = 1/8, FishSchool = 1/1500, Hammerhead = 1/1500, Seahorse = 1/1500, Whale = 1/1500, Anglerfish = 1/2000, KingCrab = 1/2000, Lionfish = 1/2000, MantaRay = 1/2000, AbyssWhale = 1/8000, BlueCrab = 1/8000, Kraken = 1/250000, RoboShark = 0,
 			},
-			UnlockCost = 75000000, -- (the progression pass, QM Nov 7; was 100B)
+			UnlockCost = 3200000000, -- (the balance pass, QM Nov 7; was 75M)
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
@@ -2099,18 +2098,18 @@ function Config.rebirthSpeed(player)
 end
 -- Luck (QM, Nov 7): 1 + what the goals have given you ("LuckBonus", saved as `luck`:
 -- Gold.server), added, never multiplied, and kept through rebirths. Each Reach goal from the
--- Desert on gives Reach luck, each Capture 3 cash (CashOfNext of the next unlock's price); both
--- double each rebirth (RewardPerRebirth). A goal's egg only comes the first time (Server/Quests).
+-- Desert on gives Reach luck (x RewardPerRebirth each rebirth), each Capture 3 cash (CashOfNext
+-- of the next unlock's price, x CostPerRebirth as the price is). A goal's egg only comes the first time (Server/Quests).
 -- A rebirth (the goal once you've reached Config.rebirthBiome: Server/Quests' "rebirth", Hatchery's Rebirth) wipes
 -- your cash and unlocks, doubles every slingshot unlock's price and the goals' rewards, and
 -- loops the goals back to Reach Desert. Your pets and luck stay. Luck flattens your own
--- stampede's odds (each weight ^ (1 / luck): 1 is the table as it is, more and more luck heads
--- for all even), so every player's stampede is their own. Rebirths are `reborn`, the "Reborn"
+-- stampede's odds (each weight x luck, up to the herd's commonest: Config.luckWeight), so every
+-- player's stampede is their own. Rebirths are `reborn`, the "Reborn"
 -- attribute; not the old Rebirths above (their gold, speed and skins).
 Config.Luck = {
 	Reach = 0.25, -- luck for each Reach goal from the Desert on, before any rebirth
 	CashOfNext = 0.1, -- a Capture 3 goal's cash: this much of the next unlock's price (which doubles too)
-	RewardPerRebirth = 2, -- goal luck x this each rebirth (0.25, 0.5, 1, 2...)
+	RewardPerRebirth = 4, -- goal luck x this each rebirth (0.25, 1, 4, 16...: QM, Nov 7, was 2)
 	CostPerRebirth = 2, -- slingshot unlock prices x this each rebirth
 }
 -- The biome you reach to rebirth (QM, Nov 7): the Desert the first time, then the Tundra, the
@@ -2159,12 +2158,13 @@ function Config.goalCash(player, goal, extra)
 	end
 	return math.floor(Config.unlockCost(player, goal.Biome + 1, extra) * goal.CashOfNext)
 end
--- A herd weight at `luck`.
-function Config.luckWeight(weight, luck)
+-- A herd weight at `luck` (QM, Nov 7: x4 luck is 4x the chance, 1 in 10,000 -> 1 in 2,500): the
+-- weight x luck, but never past the herd's commonest (`top`), so the commons stay about.
+function Config.luckWeight(weight, luck, top)
 	if weight <= 0 then
 		return 0
 	end
-	return weight ^ (1 / math.max(luck or 1, 1))
+	return math.min(weight * math.max(luck or 1, 1), math.max(weight, top or weight))
 end
 -- What unlocking biome i in the Slingshot's menu costs `player` (or after one more rebirth: extra).
 function Config.unlockCost(player, i, extra)
@@ -3057,19 +3057,19 @@ end
 -- the same ability, egg and egg picture (Eggs/Egg.luau). The numbers past the size are guesses.
 -- Odds: 1 in this many of its base (a tenth if left out).
 Config.Alphas = {
-	GoldenPig = { Base = "Pig", Scale = 2 }, -- Meadow
-	AlphaFish = { Base = "Fish", Scale = 1.4 },
-	AlphaRhino = { Base = "Rhino", Scale = 1.4 },
-	EmperorScorpion = { Base = "Scorpion", Scale = 2 }, -- Desert
-	AlphaSpineLizard = { Base = "SpineLizard", Scale = 1.4 },
-	AlphaSnake = { Base = "Snake", Scale = 1.4, Odds = 5 },
-	AlphaSandworm = { Base = "Sandworm", Scale = 3, Odds = 20 }, -- (QM, Nov 6: faded sand, 3x, 1 in 20)
-	AlphaBoar = { Base = "Boar", Scale = 2 }, -- Tundra (the Elder Boar's model)
-	AlphaIceGolem = { Base = "IceGolem", Scale = 1.5 },
+	GoldenPig = { Base = "Pig", Scale = 2, Odds = 200 }, -- Meadow
+	AlphaFish = { Base = "Fish", Scale = 1.4, Odds = 4 },
+	AlphaRhino = { Base = "Rhino", Scale = 1.4, Odds = 2 },
+	EmperorScorpion = { Base = "Scorpion", Scale = 2, Odds = 5 }, -- Desert
+	AlphaSpineLizard = { Base = "SpineLizard", Scale = 1.4, Odds = 4 },
+	AlphaSnake = { Base = "Snake", Scale = 1.4, Odds = 4 },
+	AlphaSandworm = { Base = "Sandworm", Scale = 3, Odds = 4 }, -- (QM, Nov 6: faded sand, 3x; Odds: the balance pass)
+	AlphaBoar = { Base = "Boar", Scale = 2, Odds = 150 }, -- Tundra (the Elder Boar's model)
+	AlphaIceGolem = { Base = "IceGolem", Scale = 1.5, Odds = 4 },
 	AlphaIcebringer = { Base = "Icebringer", Scale = 1.4, Odds = 5 },
-	AlphaRockHog = { Base = "RockHog", Scale = 1.4 }, -- Volcano
-	AlphaLavaWhale = { Base = "LavaWhale", Scale = 1.3 },
-	AlphaPhoenix = { Base = "Phoenix", Scale = 2, Odds = 5 }, -- (the three Divine alphas 1 in 5 of their Legendary base: QM Nov 7, Divine about 1 in 10,000)
+	AlphaRockHog = { Base = "RockHog", Scale = 1.4, Odds = 2 }, -- Volcano
+	AlphaLavaWhale = { Base = "LavaWhale", Scale = 1.3, Odds = 4 },
+	AlphaPhoenix = { Base = "Phoenix", Scale = 2, Odds = 2 }, -- (the Divine alphas about 1 in 10,000 to 16,000 overall; every alpha's Odds: the balance pass, QM Nov 7)
 }
 for kind, alpha in Config.Alphas do
 	local base = alpha.Base
