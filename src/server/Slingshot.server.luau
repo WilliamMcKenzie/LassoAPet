@@ -67,7 +67,7 @@ local function build()
 		prompt.KeyboardKeyCode = Enum.KeyCode.E
 		prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
 		prompt.HoldDuration = 0.6
-		prompt.MaxActivationDistance = 26 -- (from the base's middle: reaches the band where it rests)
+		prompt.MaxActivationDistance = 16 -- (from the base's middle: the band hangs right over it now)
 		prompt.RequiresLineOfSight = false
 		prompt.UIOffset = Vector2.new(0, -40)
 		prompt.Parent = frame
