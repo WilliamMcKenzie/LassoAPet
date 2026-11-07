@@ -4,8 +4,8 @@
 --   left    a box scrolling through a section per biome of this world: the biome's card (its
 --           grass colour, its name) and its animals as tiles in a collage, then a bar of how
 --           many of them you've had. One you've never had (the "Caught" attribute,
---           Hatchery) is a dark silhouette. Each tile's label is its spawn odds in its biome,
---           "1 in N" (its Herd weight over the herd's total, at luck 1: QM, Nov 7). Every
+--           Hatchery) is a dark silhouette. Each tile's label is its name once had, else "???",
+--           in its rarity's colours (RarityLook); tiles run rarest first by spawn odds. Every
 --           animal that runs in a biome is in (the alphas and the new ones too); one with no
 --           uploaded headshot shows its model in 3D (PetStill).
 --   bottom  Unlocked: had / every animal, by the Index book
@@ -57,7 +57,7 @@ local CASH_GREEN = Color3.fromRGB(0, 255, 0)
 local LOCKED_SHADE = 0.45 -- the dark over a tile not had (its transparency)
 local SILHOUETTE = 0.35 -- an animal not had: black, this transparent
 local PICK = 8 -- the picked tile's white ring
-local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Exclusive" }
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Exclusive" }
 
 local gui, sections, card, details, unlocked, badge
 local tiles = {} -- [kind] = tile
@@ -88,7 +88,7 @@ for i, biome in Config.allBiomes() do -- (and the endless course's, past the Oce
 	local total = 0
 	for kind, weight in biome.Herd or {} do
 		-- (a 0 never runs wild but stays on its biome's page: the starter, the Robux pets)
-		if weight >= 0 and ReplicatedStorage.Shared.Animals:FindFirstChild(kind) then
+		if weight >= 0 and kind ~= Config.DefaultPet and ReplicatedStorage.Shared.Animals:FindFirstChild(kind) then -- (not the starter: QM, Nov 7)
 			table.insert(kinds, kind)
 		end
 		total += math.max(weight, 0)
@@ -128,21 +128,6 @@ local function had(attr)
 		set[kind] = true
 	end
 	return set
-end
-
--- "1 in 37", "1 in 2.5", "1 in 12,500"
-local function oddsText(kind)
-	local n = oddsOf[kind]
-	if not n then -- (never wild)
-		return if kind == Config.DefaultPet then "Starter" else "Exclusive"
-	end
-	local text
-	if n < 10 then
-		text = (string.format("%.1f", n):gsub("%.0$", ""))
-	else
-		text = tostring(math.round(n)):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
-	end
-	return "1 in " .. text
 end
 
 -- an animal's picture in a holder (its "Picture" ImageLabel): its headshot, or its model in
@@ -521,7 +506,8 @@ local function makeSection(i)
 		paintBack(tile:FindFirstChild("Back"), about(kind).rarity)
 		tile.Parent = grid
 		setPicture(tile.Picture, kind)
-		tile.PetName.Text = oddsText(kind)
+		RarityLook.paint(tile.PetName, about(kind).rarity, tile.PetName:FindFirstChild("Outline")) -- (its rarity's colours; its name or "???": refresh)
+		tile.PetName.Text = "???"
 		if p[3] == 2 and p[4] == 2 then
 			tile.PetName.Size = UDim2.new(0.92, 0, 0, fig(60))
 		end
@@ -756,6 +742,7 @@ local function refresh()
 			if tile then
 				tile.Shade.Visible = not f
 				shadePicture(tile.Picture, f)
+				tile.PetName.Text = if f then about(kind).name else "???"
 			end
 		end
 		total += #biome.kinds
