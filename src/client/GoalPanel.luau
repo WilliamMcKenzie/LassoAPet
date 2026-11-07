@@ -195,7 +195,7 @@ function GoalPanel.init(root, handlers)
 		progress.Text = if q.money
 			then "$" .. Config.short(q.have) .. "/$" .. Config.short(q.need)
 			else string.format("%d/%d", q.have, q.need)
-		claimText.Text = if q.money then "Buy!" else "Claim!"
+		claimText.Text = if q.money then "Buy!" elseif q.kind == "rebirth" then "Rebirth!" else "Claim!" -- (QM, Nov 7)
 		if fraction ~= lastFraction or fresh then
 			if fresh then
 				clip.Size = UDim2.fromScale(0, 1)
