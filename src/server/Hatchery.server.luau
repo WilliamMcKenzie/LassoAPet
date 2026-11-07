@@ -446,7 +446,7 @@ local function mergeOld(player, data)
 		end
 		merged[worldKey("quests", world)] = old.quests
 		merged[worldKey("v1", world)] = old.v1
-		for _, field in { "boughtPets", "boughtHalloweenPets", "boughtGiantEggs", "boughtLoongs", "boughtRoboSharks", "usedHatches", "homeEggs" } do
+		for _, field in { "boughtPets", "boughtHalloweenPets", "boughtGiantEggs", "boughtLoongs", "boughtRoboSharks", "boughtLimitedRoboSharks", "usedHatches", "homeEggs" } do
 			if tonumber(old[field]) then
 				merged[field] = math.max(tonumber(merged[field]) or 0, old[field])
 			end
@@ -568,7 +568,8 @@ local function load(player)
 					profile.boughtPets = tonumber(data.boughtPets) -- Legendary Pets from the shop already in (addBoughtPets)
 					profile.boughtGiantEggs = tonumber(data.boughtGiantEggs) -- Giant Horse eggs from the shop already in (addBoughtGiantEggs)
 					profile.boughtLoongs = tonumber(data.boughtLoongs) -- Loongs bought at the base already in (addBoughtOffer)
-					profile.boughtRoboSharks = tonumber(data.boughtRoboSharks) -- and Robo Sharks
+					profile.boughtRoboSharks = tonumber(data.boughtRoboSharks) -- and Majestic Unicorns (their old Robo Shark field)
+					profile.boughtLimitedRoboSharks = tonumber(data.boughtLimitedRoboSharks) -- and Robo Sharks
 				end
 				loaded[player] = true
 				player:GetAttributeChangedSignal("PenLevel"):Connect(function() -- (an upgrade makes room: Config.PenCapacity)
@@ -677,7 +678,7 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	local data = { eggs = profile.eggs, items = profile.items, stored = profile.stored, caught = profile.caught and (function() local t = {} for k in profile.caught do table.insert(t, k) end return t end)() or nil, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, rideAuto = profile.rideAuto, tutorial = profile.tutorial, ridden = riddenList(profile),
-		awayGold = profile.awayGold, boughtHalloweenPets = profile.boughtHalloweenPets, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, boughtLoongs = profile.boughtLoongs, boughtRoboSharks = profile.boughtRoboSharks, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
+		awayGold = profile.awayGold, boughtHalloweenPets = profile.boughtHalloweenPets, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, boughtLoongs = profile.boughtLoongs, boughtRoboSharks = profile.boughtRoboSharks, boughtLimitedRoboSharks = profile.boughtLimitedRoboSharks, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
 		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, ridesDone = profile.ridesDone, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
 		merged = profile.merged, ab = profile.ab, extraSlots = profile.extraSlots, indexClaimed = profile.indexClaimed and (function() local t = {} for k in profile.indexClaimed do table.insert(t, k) end return t end)() or nil }
 	data[worldKey("quests")], data[worldKey("v1")] = profile.quests, profile.v1 -- (this world's own)
@@ -2004,13 +2005,13 @@ tutorialCommand.Triggered:Connect(function(source)
 		return
 	end
 	local old = profiles[player]
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, boughtLimitedRoboSharks = old.boughtLimitedRoboSharks, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
 	Quests.publish(player, profiles[player].quests)
 	if store and loaded[player] then
 		-- Keep the shop counts saved too: without them, rejoining hands every Giant Horse
 		-- egg and Legendary Pet ever bought over again (addBoughtGiantEggs / addBoughtPets).
 		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false, usedHatches = old.usedHatches,
-			boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, merged = old.merged })
+			boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, boughtLimitedRoboSharks = old.boughtLimitedRoboSharks, merged = old.merged })
 	end
 	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
 	player:SetAttribute("PenLevel", 1)
@@ -2125,7 +2126,7 @@ resetCommand.Triggered:Connect(function(source)
 	end
 	Telemetry.exclude(player) -- (a test from here on: not in the play data)
 	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {}, tutorial = true, boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets,
-		boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
+		boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, boughtLimitedRoboSharks = old.boughtLimitedRoboSharks, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
 	for _, other in otherStores do -- (the other worlds' pens, empty)
 		task.spawn(pcall, other.SetAsync, other, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = true })
 	end
