@@ -7,7 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local COPIES = {
-	PineTall = { "Trunk", "Tier1", "Tier2", "Tier3", "Tier4" }, -- (the Hillback Tortoise's tree)
+	PineTall = { "Tier1", "Tier2", "Tier3", "Tier4" }, -- (the Hillback Tortoise's tree; its trunk is a plain block)
 }
 
 local assets = ServerStorage:FindFirstChild("WorldAssets")

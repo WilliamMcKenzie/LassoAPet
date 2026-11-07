@@ -348,6 +348,7 @@ return Horse.variant("{kind}", {kind}Model, "{rarity}", {{
 # TREE_SCALE x the map's size, in model units before the model's own scaling).
 PINE = (("Trunk", (120, 84, 58)), ("Tier1", (46, 125, 80)), ("Tier2", (58, 140, 88)), ("Tier3", (40, 112, 72)), ("Tier4", (66, 150, 96)))
 TREE_AT, TREE_SCALE = (0.0, 19.0, 1.0), 0.85
+HILL_TOP = 19.0  # the top of the hill on its shell, in the same units
 
 
 def hillback_module(k, seat, nc, nr):
@@ -360,6 +361,13 @@ def hillback_module(k, seat, nc, nr):
         size = (hi - lo) * TREE_SCALE * k
         lines.append(f'\t{{ name = "Pine{piece}", bone = "root", class = "MeshPart", mesh = "PineTall_{piece}", '
                      f'size = {v3(size)}, cframe = CFrame.new({centre[0]:.2f}, {centre[1]:.2f}, {centre[2]:.2f}), color = Color3.fromRGB{rgb} }},')
+    # The trunk a plain block from inside the hill up into the lowest tier (QM, Nov 7: the mesh trunk
+    # left the tree floating over the hill in game), in place of the mesh's.
+    hill_top = HILL_TOP * k
+    top = float(lines[0].split("CFrame.new(")[1].split(",")[1]) + float(lines[0].split("Vector3.new(")[1].split(",")[1]) / 2
+    w = round(1.6 * TREE_SCALE * k, 2)
+    lines[0] = (f'\t{{ name = "PineTrunk", bone = "root", class = "Part", size = Vector3.new({w}, {top - hill_top + 0.4:.2f}, {w}), '
+                f'cframe = CFrame.new(0, {(top + hill_top - 0.4) / 2:.2f}, {TREE_AT[2] * k:.2f}), color = Color3.fromRGB{PINE[0][1]} }},')
     body = "\n".join(lines)
     with open(os.path.join(ANIMALS, "HillbackTortoise.luau"), "w") as f:
         f.write(f"""-- Hillback Tortoise: World 1 Meadow's Legendary titan (QM, Nov 7: one of the luck-padding animals
