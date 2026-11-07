@@ -217,7 +217,7 @@ local function setup(model)
 			prompt.Enabled = not busy and not Hud.isRiding()
 			-- (walked away from it, or riding: its menu goes)
 			local hrp = character()
-			if SlingshotMenu.isOpen() and (busy or Hud.isRiding() or not hrp or (hrp.Position - frame.Position).Magnitude > prompt.MaxActivationDistance + 14) then
+			if SlingshotMenu.atSlingshot() and (busy or Hud.isRiding() or not hrp or (hrp.Position - frame.Position).Magnitude > prompt.MaxActivationDistance + 14) then
 				SlingshotMenu.close()
 			end
 			task.wait(0.25)

@@ -5,12 +5,17 @@
 -- done a green "Claim!" button takes the bar's place; claiming pulses the panel out with
 -- "Done!", swaps to the next goal while it's big and settles back. Tapping the title shows
 -- how to do it (BaseUi's quest hints). Laid out in design px (1080 tall: NativeHud's Root).
+-- "Upgrade slingshot" (QM, Nov 7) is money: its bar is your cash towards the next biome's
+-- unlock ("$40k/$100k"), and once you have it a "Buy!" takes the bar's place, which opens
+-- the Slingshot's menu on that biome (Client/SlingshotMenu, its cursor on the buy button).
+-- Buying it there moves the goal on (Server/Quests' publish), with the same "Done!" pulse.
 --
 --   local goal = GoalPanel.init(root, { claim = function(i) end, hint = function(quest) end })
 --   goal.set(quest or nil)   -- the quest to show ({ i, text, have, need, ... }); nil hides it
 --   goal.claimButton         -- (BaseUi puts the starter quest's tap hand on it)
 --   goal.panel
 
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local HudKit = require(script.Parent.HudKit)
@@ -19,6 +24,19 @@ local Ui = require(script.Parent.Ui)
 local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Config"))
 
 local GoalPanel = {}
+local player = Players.LocalPlayer
+
+-- a slingshot goal as cash towards its biome's price (the rest as the server sent it)
+local function money(q)
+	if not (q and q.kind == "slingshot" and q.biome) then
+		return q
+	end
+	local m = table.clone(q)
+	m.need = math.max(Config.unlockCost(player, q.biome), 1)
+	m.have = math.min(player:GetAttribute("Gold") or 0, m.need)
+	m.money = true
+	return m
+end
 
 local TOP = 150 -- design px from the screen's top (under Roblox's buttons)
 local W, H = 420, 160
@@ -142,7 +160,7 @@ function GoalPanel.init(root, handlers)
 	HudKit.back(claim, "Green", { ZIndex = 7 })
 	Ui.make(claim, "Hover", "UIScale")
 	HudKit.hover(claim)
-	label(claim, "Text", {
+	local claimText = label(claim, "Text", {
 		Text = "Claim!",
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextSize = 44,
@@ -174,7 +192,10 @@ function GoalPanel.init(root, handlers)
 		local fraction = if q.need > 0 then math.clamp(q.have / q.need, 0, 1) else 1
 		local done = q.have >= q.need
 		title.Text = q.text
-		progress.Text = string.format("%d/%d", q.have, q.need)
+		progress.Text = if q.money
+			then "$" .. Config.short(q.have) .. "/$" .. Config.short(q.need)
+			else string.format("%d/%d", q.have, q.need)
+		claimText.Text = if q.money then "Buy!" else "Claim!"
 		if fraction ~= lastFraction or fresh then
 			if fresh then
 				clip.Size = UDim2.fromScale(0, 1)
@@ -211,6 +232,7 @@ function GoalPanel.init(root, handlers)
 	end
 
 	function api.set(q, settling)
+		q = money(q)
 		if busy then
 			pending = q
 			return
@@ -241,9 +263,23 @@ function GoalPanel.init(root, handlers)
 	claim.Activated:Connect(function()
 		if current and not busy then
 			claimed = current.i
-			handlers.claim(current.i)
+			if current.money then
+				-- (Buy!: the Slingshot's menu on its biome; buying there moves the goal on.
+				-- Required here, not above: SlingshotMenu needs NativeHud, which needs this)
+				require(script.Parent.SlingshotMenu).open(nil, current.biome)
+			else
+				handlers.claim(current.i)
+			end
 		end
 	end)
+	-- (a slingshot goal's bar follows your cash, and its price after a rebirth)
+	for _, name in { "Gold", "Reborn" } do
+		player:GetAttributeChangedSignal(name):Connect(function()
+			if current and current.money and not busy then
+				api.set(current)
+			end
+		end)
+	end
 	tap.Activated:Connect(function()
 		if current and not busy then
 			handlers.hint(current)
