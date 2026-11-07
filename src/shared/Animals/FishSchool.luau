@@ -8,7 +8,7 @@
 local Horse = require(script.Parent.Horse)
 local FishSchoolModel = require(script.Parent.FishSchoolModel)
 
-return Horse.variant("FishSchool", FishSchoolModel, "Rare", -- (QM, Nov 7: rarity matches its odds, 1 in 20) {
+return Horse.variant("FishSchool", FishSchoolModel, "Rare", { -- (QM, Nov 7: rarity matches its odds, 1 in 20)
 	seat = Vector3.new(0, 4.65, 0.4),
 	neck = { center = Vector3.new(0, 2.5, -4.6), radius = 1.1 },
 })

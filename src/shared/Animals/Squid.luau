@@ -5,7 +5,7 @@
 local Horse = require(script.Parent.Horse)
 local SquidModel = require(script.Parent.SquidModel)
 
-return Horse.variant("Squid", SquidModel, "Uncommon", -- (QM, Nov 7: rarity matches its odds, 1 in 5) {
+return Horse.variant("Squid", SquidModel, "Uncommon", { -- (QM, Nov 7: rarity matches its odds, 1 in 5)
 	seat = Vector3.new(0, 29.1, 3.9),
 	neck = { center = Vector3.new(0, 5.8, 0), radius = 2.4 },
 	seatBone = "root", -- on top of the mantle, which is on the root bone: the neck bone it rode on swung it off into thin air (QM, Oct 11)
