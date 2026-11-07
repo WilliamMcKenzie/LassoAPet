@@ -433,6 +433,8 @@ local function hint(quest)
 		end
 	elseif quest.kind == "invite" then
 		promptInvite()
+	elseif quest.kind == "rebirth" then -- (not done yet: the popup, its button "Reach Ocean Trench")
+		require(script.Parent.RebirthPopup).open()
 	end
 end
 
@@ -448,6 +450,11 @@ local claimBusy = false -- a claim's egg reveal is up: no other claim till it's 
 -- Claims quest i (its CLAIM, or the native Goal panel's Claim!): its egg's reveal.
 local function claimAt(i)
 	if claimBusy or Hud.revealing() then
+		return
+	end
+	local goal = Config.Quests[i // 100] and Config.Quests[i // 100][i % 100]
+	if goal and goal.Kind == "rebirth" then -- (QM, Nov 7: claimed in the Rebirth popup, Config.Luck)
+		require(script.Parent.RebirthPopup).open()
 		return
 	end
 	claimBusy = true

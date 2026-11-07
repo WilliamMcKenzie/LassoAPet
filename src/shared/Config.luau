@@ -1846,6 +1846,32 @@ end
 function Config.rebirthSpeed(player)
 	return (Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1) * (if player:GetAttribute("PassSpeed") then Config.PassSpeed else 1)
 end
+-- Luck (QM, Nov 7): each rebirth (the last goal, past the Ocean: Server/Quests' "rebirth",
+-- Hatchery's Rebirth) doubles your luck from 1 and doubles every slingshot unlock's price, and
+-- wipes your cash and unlocks. Your pets stay. Luck flattens your own stampede's odds (each
+-- weight ^ (1 / luck): 1 is the table as it is, more and more luck heads for all even), so
+-- every player's stampede is their own now. Saved as `reborn` (Gold.server), the "Reborn"
+-- attribute; not the old Rebirths above (their gold, speed and skins).
+Config.Luck = {
+	PerRebirth = 2, -- luck x this each rebirth
+	CostPerRebirth = 2, -- slingshot unlock prices x this each rebirth
+}
+function Config.luck(player)
+	return Config.Luck.PerRebirth ^ (player:GetAttribute("Reborn") or 0)
+end
+-- A herd weight at `luck`.
+function Config.luckWeight(weight, luck)
+	if weight <= 0 then
+		return 0
+	end
+	return weight ^ (1 / math.max(luck or 1, 1))
+end
+-- What unlocking biome i in the Slingshot's menu costs `player` (or after one more rebirth: extra).
+function Config.unlockCost(player, i, extra)
+	local base = Config.Biomes[i] and Config.Biomes[i].UnlockCost or 0
+	local n = (player:GetAttribute("Reborn") or 0) + (extra or 0)
+	return math.floor(base * Config.Luck.CostPerRebirth ^ n)
+end
 -- 15, 1.2k, 3.4m, 10m... (gold, short: the Worlds menu's prices and the World 2 bar)
 -- The paid hatch's tier (Config.SpeedupEgg.Tiers) for an egg with secondsLeft to go.
 function Config.speedupTier(secondsLeft)
@@ -2307,6 +2333,11 @@ if Config.World == 1 then
 	for i in Config.Biomes do
 		local name = Config.BiomeNames[1][i] or Config.Biomes[i].Name
 		table.insert(goals, { Text = "Reach " .. name, Kind = "reach", Biome = i, Egg = REACH_EGGS[i], NoPenLevel = true })
+		if not Config.Biomes[i + 1] then
+			-- (QM, Nov 7: after the last reach, Rebirth: claimed in its popup, Client/RebirthPopup)
+			table.insert(goals, { Text = "Rebirth", Kind = "rebirth", Biome = i, NoPenLevel = true })
+			break
+		end
 		table.insert(goals, { Text = "Capture 3 " .. name .. " animals", Kind = "lasso", Biome = i, Need = 3, NoPenLevel = true })
 		if Config.Biomes[i + 1] then
 			table.insert(goals, { Text = "Upgrade slingshot", Kind = "slingshot", Biome = i + 1, NoPenLevel = true })

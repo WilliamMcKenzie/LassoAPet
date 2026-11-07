@@ -186,7 +186,7 @@ unlock.OnServerInvoke = function(player, i)
 	if not biome or i ~= level + 1 then
 		return false
 	end
-	local cost = biome.UnlockCost or 0
+	local cost = Config.unlockCost(player, i) -- (x2 a rebirth: Config.Luck)
 	local gold = player:GetAttribute("Gold") or 0
 	if gold < cost then
 		return false

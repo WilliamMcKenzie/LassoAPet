@@ -9,6 +9,7 @@ return {
 	PetsIcon = "rbxassetid://135122637332207",
 	PowerIcon = "rbxassetid://123860946510182",
 	CashIcon = "rbxassetid://102450910988008",
+	LuckIcon = "", -- assets/ui/hud/LuckIcon.png, QM's clover (the luck counter: NativeHud): tools/studio/imgup.py
 	PowerGainIcon = "rbxassetid://124462507147384", -- assets/ui/hud/PowerGainIcon.png (the gain popups': client/GainPopups)
 	CashGainIcon = "rbxassetid://96406134533444", -- assets/ui/hud/CashGainIcon.png
 	RobuxIcon = "rbxassetid://86362799525767",

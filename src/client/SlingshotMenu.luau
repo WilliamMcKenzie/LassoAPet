@@ -140,7 +140,7 @@ local function makeCard(parent, i, biome)
 	local buyW = if robuxProduct then 413 else 674
 	local buy = button(card, "ShopBuy", buyW, 160, { Position = UDim2.fromOffset(fig(24), fig(799)), ZIndex = 4 }, "GreenEdged")
 	label(buy, "Text", {
-		Text = price(biome.UnlockCost),
+		Text = price(Config.unlockCost(player, i)),
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextSize = fig(80),
 		Size = UDim2.fromScale(1, 1),
@@ -182,7 +182,7 @@ local function refresh()
 			c.robux.Visible = not open
 		end
 		if not open and not c.buy:GetAttribute("Failing") then
-			c.buy.Text.Text = price(Config.Biomes[i].UnlockCost)
+			c.buy.Text.Text = price(Config.unlockCost(player, i))
 		end
 	end
 end
@@ -193,7 +193,7 @@ local function fail(c, i, why)
 	c.buy.Text.Text = why
 	task.delay(FAIL_SHOW, function()
 		c.buy:SetAttribute("Failing", nil)
-		c.buy.Text.Text = price(Config.Biomes[i].UnlockCost)
+		c.buy.Text.Text = price(Config.unlockCost(player, i))
 	end)
 end
 
@@ -248,7 +248,7 @@ local function build()
 			if i > level() + 1 then
 				return fail(c, i, "Unlock " .. Config.Biomes[i - 1].Name .. "!")
 			end
-			if (player:GetAttribute("Gold") or 0) < (biome.UnlockCost or 0) then
+			if (player:GetAttribute("Gold") or 0) < Config.unlockCost(player, i) then
 				return fail(c, i, "Need cash!")
 			end
 			local ok, bought = false, false
@@ -282,6 +282,7 @@ local function build()
 	end)
 	player:GetAttributeChangedSignal("Gold"):Connect(refresh)
 	player:GetAttributeChangedSignal("PenLevel"):Connect(refresh)
+	player:GetAttributeChangedSignal("Reborn"):Connect(refresh) -- (prices x2: Config.Luck)
 end
 
 function SlingshotMenu.open(callback)

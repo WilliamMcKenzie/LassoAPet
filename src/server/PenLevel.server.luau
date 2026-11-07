@@ -47,7 +47,9 @@ local function load(player)
 		if success then
 			if player.Parent then
 				local best = tonumber(value) or 1
-				for _, old in oldStores do
+				-- (the old worlds' only before World 1's was ever saved: it holds their best since,
+				-- and a rebirth's level 1 mustn't come back up from them: Config.Luck)
+				for _, old in if value == nil then oldStores else {} do
 					local got, was = pcall(old.GetAsync, old, "u" .. player.UserId)
 					if got and tonumber(was) then
 						best = math.max(best, tonumber(was))
@@ -181,6 +183,9 @@ local function watch(player)
 			end
 		end)
 	end
+	player:GetAttributeChangedSignal("Reborn"):Connect(function() -- (a rebirth: back to 1, saved at once)
+		save(player)
+	end)
 	load(player)
 end
 
