@@ -382,7 +382,7 @@ buyShop.OnServerEvent:Connect(function(player, key, source)
 	if Config.PetOffersLimited and petOfferOf[key] and (workspace:GetAttribute(key .. "Left") or 0) <= 0 then
 		return
 	end
-	if offer.Count and offer.ProductId == 0 then return end -- not on sale until configured
+	if offer.Retired or (offer.Count and offer.ProductId == 0) then return end -- off sale (old receipts still granted) / not on sale until configured
 	if offer.ProductId ~= 0 then
 		MarketplaceService:PromptProductPurchase(player, offer.ProductId)
 		local surface = if petOfferOf[key] then "limited_" .. key elseif source == "shop" then "shop_" .. offer.Key elseif offer.Gold then "cashShortfall" else nil -- (each shop item its own /stats row: SimpleStats)

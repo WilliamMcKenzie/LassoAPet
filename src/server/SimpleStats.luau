@@ -32,9 +32,6 @@ local function short(n)
 	end
 	return tostring(n)
 end
-for _, offer in Config.Shop.HalloweenPacks do
-	table.insert(Stats.Rows, { "shop_" .. offer.Key, "Shop: " .. offer.Count .. "x Halloween Egg" })
-end
 for _, offer in Config.Shop.CashPacks do
 	table.insert(Stats.Rows, { "shop_" .. offer.Key, "Shop: $" .. short(offer.Gold) .. " cash" })
 end

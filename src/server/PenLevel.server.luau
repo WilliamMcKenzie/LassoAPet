@@ -12,7 +12,7 @@ local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Studs = require(ReplicatedStorage.Shared.Studs)
-require(script.Parent.Passes) -- (PassVIP: the gold fence, below)
+local Passes = require(script.Parent.Passes) -- (PassVIP: the gold fence; PassAllSlingshots, below)
 
 -- One pen level across every world (QM, Oct 14: the pen carries over, and its size): World
 -- 1's store in all of them. The old per-world levels ("PenLevel_W2"...) count too: the
@@ -172,7 +172,21 @@ local function penOf(player)
 	return if pen and pen:GetAttribute("Owner") == player.UserId then pen else nil
 end
 
+-- Unlock All Slingshots (game pass, QM Nov 7): every biome on the Slingshot's menu unlocked,
+-- as if each were bought (Server/Slingshot's GrantBiome: the pen level up to the last one).
+local function allSlingshots(player)
+	if player.Parent and player:GetAttribute("PassAllSlingshots") then
+		local top = math.min(#Config.Biomes, Config.PenLevels or #Config.Biomes)
+		if (player:GetAttribute("PenLevel") or 1) < top then
+			player:SetAttribute("PenLevel", top)
+		end
+	end
+end
+
 local function watch(player)
+	player:GetAttributeChangedSignal("PassAllSlingshots"):Connect(function()
+		allSlingshots(player)
+	end)
 	for _, name in { "PassVIP" } do
 		player:GetAttributeChangedSignal(name):Connect(function()
 			local pen = penOf(player)
@@ -182,6 +196,8 @@ local function watch(player)
 		end)
 	end
 	load(player)
+	Passes.owns(player, "AllSlingshots") -- (waits for the join check)
+	allSlingshots(player)
 end
 
 Players.PlayerAdded:Connect(watch)
