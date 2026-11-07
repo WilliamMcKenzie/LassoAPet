@@ -4656,13 +4656,17 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 			local _, ext = a.model:GetBoundingBox()
 			mount.camH0 = ext.Y / (a.size * a.scale)
 		end
-		zoomTo = math.max(zoomTo, mount.camH0 * a.size * a.scale / Config.RideCamTall)
+		-- (square-rooted, QM Nov 7: the camera already rises to the rider's seat, so pulling back
+		-- the whole height over again left a tall pet like the Mirage Elephant a speck far below)
+		zoomTo = math.max(zoomTo, (mount.camH0 * a.size * a.scale / Config.RideCamTall) ^ Config.RideCamTallPower)
 	end
 	vfx.camZoom = (vfx.camZoom or 1) + (zoomTo - (vfx.camZoom or 1)) * (1 - math.exp(-3 * dt))
 	local sprintFov, sprintZoom = vfx.sprintCam.update(dt, mount ~= nil and (phase == "outbound" or phase == "return") and sprinting(), if phase == "return" and Config.ReturnCamFixed then Config.SprintCam.HorseSprint elseif mount then mount.speed * (vfx.speedGain or 1) else nil) -- (the run home's a sprint too: QM)
 	local z = vfx.camZoom * sprintZoom
 	local desired = vfx.bossChase.camera() -- (on the boss's face in its cutscene)
-		or CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24)).Position)
+		-- (it looks further ahead as it pulls back, so a big pet's camera keeps a Horse's angle and
+		-- the track ahead stays in view, rather than tipping down onto the ground: QM, Nov 7)
+		or CFrame.lookAt((basis * CFrame.new(0, 38 * z, 18 * z)).Position, (basis * CFrame.new(0, 0, -24 * vfx.camZoom)).Position)
 	-- (snappier while the Robo Shark hunts: it darts about too fast for the usual ease)
 	camera.CFrame = camera.CFrame:Lerp(desired, 1 - math.exp(-(if vfx.huntTarget then 30 else 8) * dt))
 	-- The run home: over the shoulder (QM, Oct 10), pinned to the rider rather than eased
