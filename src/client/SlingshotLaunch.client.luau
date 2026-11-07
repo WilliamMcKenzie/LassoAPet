@@ -19,6 +19,7 @@ local SlingshotPose = require(ReplicatedStorage.Shared.SlingshotPose)
 local SlingshotRide = require(script.Parent.SlingshotRide)
 local SlingshotMenu = require(script.Parent.SlingshotMenu)
 local Hud = require(script.Parent.Hud)
+local Sounds = require(script.Parent.Sounds)
 
 local CFG = Config.Slingshot
 local player = Players.LocalPlayer
@@ -124,16 +125,21 @@ local function launch(model, to)
 		local from = hold(pull)
 		local p0 = from.Position
 		local p2 = Vector3.new(landing.X, p0.Y - pull.Position.Y + landing.Y, landing.Z)
-		-- (a nearer biome: a lower, quicker shot; a farther one: longer, up to twice Flight)
+		-- (a nearer biome: a lower shot; every shot takes exactly Flight seconds in the air)
 		local far = Vector3.new(p2.X - p0.X, 0, p2.Z - p0.Z).Magnitude
 		local apex = math.clamp(far / 8, 40, CFG.Apex)
-		local flight = CFG.Flight * math.clamp(far / 2000, 0.5, 2)
+		local flight = CFG.Flight
 		local p1 = (p0 + p2) / 2 + Vector3.new(0, 2 * apex, 0) -- (a quadratic curve's middle is half way to this)
 		-- steering: x off the curve, easing toward SteerSpeed x your input (as Ride's way out
 		-- of your pen), kept inside the course where you land
 		local side, latVel = 0, 0
 		local room = math.max(WorldColors.halfWidth(landing.Z) - 8, 0)
 		controls:Enable() -- (anchored: the move vector only steers, as Ride's rideStick)
+		-- off the band: a whoosh, then the wind while you fly (speed lines and the white
+		-- trail: Ride.client's, while SlingshotRide.flying)
+		Sounds.play("sprint_tier", 1)
+		Sounds.play("sprint_whoosh", 1)
+		Sounds.setSprintWind(true, 2)
 		local t0, last = os.clock(), os.clock()
 		while true do
 			local now = os.clock()
@@ -151,7 +157,9 @@ local function launch(model, to)
 			local uc = math.clamp(u, 0.02, 0.98)
 			local climb = lift * 0.6 * math.sin(math.pi * uc) ^ -0.4 * math.cos(math.pi * uc) * math.pi / flight
 			local ahead = (b - a) * (2 / flight) + Vector3.new(latVel, climb, 0) -- (its velocity: facing the way it really goes)
-			local body = CFrame.lookAt(at, at + (if ahead.Magnitude > 0.01 then ahead else -Vector3.zAxis))
+			-- spinning: CFG.Spins whole barrel rolls, eased in and out, so you land upright
+			local roll = 2 * math.pi * (CFG.Spins or 0) * (1 - math.cos(math.pi * u)) / 2
+			local body = CFrame.lookAt(at, at + (if ahead.Magnitude > 0.01 then ahead else -Vector3.zAxis)) * CFrame.Angles(0, 0, roll)
 			pet:PivotTo(body * rel)
 			hrp.CFrame = body * CFrame.new(0, size.Y / 2 + SEAT, 0)
 			local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
@@ -164,6 +172,8 @@ local function launch(model, to)
 		end
 		controls:Disable()
 		pet:Destroy()
+		Sounds.setSprintWind(false)
+		Sounds.play("smash", 0.6)
 		local x = landing.X + side
 		hrp.CFrame = CFrame.new(x, landing.Y + 3, landing.Z)
 		local riding = SlingshotRide.ride and SlingshotRide.ride(x, landing.Z, to)
