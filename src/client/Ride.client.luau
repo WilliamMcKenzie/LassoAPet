@@ -1313,7 +1313,14 @@ function vfx.updateHomeGuide()
 		end
 		local at = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
 		local spot = best and best.PrimaryPart.Position * Vector3.new(1, 0, 1)
-		if spot and (spot - at).Magnitude > guide.HOME_CLOSE and not (rideShown and rideModel == best) then
+		-- With the Desert or past unlocked, to your Slingshot instead (QM, Nov 7: Server/Slingshot)
+		local slings = (player:GetAttribute("PenLevel") or 1) >= 2 and workspace:FindFirstChild("Slingshots")
+		local sling = slings and slings:FindFirstChild(tostring(player.UserId))
+		local frame = sling and sling:FindFirstChild("Frame1")
+		if frame then
+			spot, best = frame.Position * Vector3.new(1, 0, 1), nil
+		end
+		if spot and (spot - at).Magnitude > guide.HOME_CLOSE and not (best and rideShown and rideModel == best) then
 			target = spot
 		end
 	end
