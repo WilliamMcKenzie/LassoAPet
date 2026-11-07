@@ -4,7 +4,10 @@
 --   left    a box scrolling through a section per biome of this world: the biome's card (its
 --           grass colour, its name) and its animals as tiles in a collage, then a bar of how
 --           many of them you've had. One you've never had (the "Caught" attribute,
---           Hatchery) is a dark silhouette under "???".
+--           Hatchery) is a dark silhouette. Each tile's label is its spawn odds in its biome,
+--           "1 in N" (its Herd weight over the herd's total, at luck 1: QM, Nov 7). Every
+--           animal that runs in a biome is in (the alphas and the new ones too); one with no
+--           uploaded headshot shows its model in 3D (PetStill).
 --   bottom  Unlocked: had / every animal, by the Index book
 --   right   the picked animal's card (its rarity's colours: name, rarity, cash a second;
 --           "???" for one not had), and under it its reward (Config.indexReward's cash) with
@@ -29,6 +32,7 @@ local HudImages = require(script.Parent.HudImages)
 local HudKit = require(script.Parent.HudKit)
 local NativeHud = require(script.Parent.NativeHud)
 local PetFaces = require(script.Parent.PetFaces)
+local PetStill = require(script.Parent.PetStill)
 local RarityLook = require(script.Parent.RarityLook)
 local Ui = require(script.Parent.Ui)
 local UiFx = require(script.Parent.UiFx)
@@ -79,12 +83,18 @@ end
 
 -- This world's biomes, each with its animals (the herd's, cheapest first), as the old Index
 local BIOMES = {}
+local oddsOf = {} -- [kind] = N, its spawn odds "1 in N" in its (first) biome
 for i, biome in Config.allBiomes() do -- (and the endless course's, past the Ocean: Config.Endless)
 	local kinds = {}
+	local total = 0
 	for kind, weight in biome.Herd or {} do
-		if weight > 0 and PetFaces.HEADSHOTS[kind] ~= nil then
+		if weight > 0 and ReplicatedStorage.Shared.Animals:FindFirstChild(kind) then
 			table.insert(kinds, kind)
 		end
+		total += math.max(weight, 0)
+	end
+	for _, kind in kinds do -- 1 in this many of the biome's spawns
+		oddsOf[kind] = oddsOf[kind] or total / biome.Herd[kind]
 	end
 	table.sort(kinds, function(a, b)
 		local ia, ib = Config.PetIncome[a] or 0, Config.PetIncome[b] or 0
@@ -116,6 +126,58 @@ local function had(attr)
 		set[kind] = true
 	end
 	return set
+end
+
+-- "1 in 37", "1 in 2.5", "1 in 12,500"
+local function oddsText(kind)
+	local n = oddsOf[kind]
+	if not n then
+		return "???"
+	end
+	local text
+	if n < 10 then
+		text = (string.format("%.1f", n):gsub("%.0$", ""))
+	else
+		text = tostring(math.round(n)):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+	end
+	return "1 in " .. text
+end
+
+-- an animal's picture in a holder (its "Picture" ImageLabel): its headshot, or its model in
+-- 3D (PetStill) as "View" when it has none uploaded
+local function setPicture(picture, kind)
+	local old = picture.Parent and picture.Parent:FindFirstChild("View")
+	if old and old:GetAttribute("Kind") ~= kind then
+		old:Destroy()
+		old = nil
+	end
+	local headshot = PetFaces.HEADSHOTS[kind]
+	picture.Image = headshot or ""
+	if (headshot == nil or headshot == "") and not old and picture.Parent then
+		local view = PetStill.view(kind)
+		if view then
+			view.Name = "View"
+			view:SetAttribute("Kind", kind)
+			view.AnchorPoint = picture.AnchorPoint
+			view.Position = picture.Position
+			view.Size = picture.Size
+			view.ZIndex = picture.ZIndex
+			view.Parent = picture.Parent
+		end
+	end
+end
+
+-- had: full colour; not: a dark silhouette (the headshot's or the 3D view's)
+local function shadePicture(picture, found)
+	local colour = if found then Color3.new(1, 1, 1) else HudKit.BLACK
+	local transparency = if found then 0 else SILHOUETTE
+	picture.ImageColor3, picture.ImageTransparency = colour, transparency
+	local view = picture.Parent and picture.Parent:FindFirstChild("View")
+	if view then
+		view.ImageColor3, view.ImageTransparency = colour, transparency
+		view.Ambient = if found then Color3.fromRGB(200, 200, 200) else HudKit.BLACK
+		view.LightColor = if found then Color3.new(1, 1, 1) else HudKit.BLACK
+	end
 end
 
 -- ---- the collage ------------------------------------------------------------------------
@@ -281,9 +343,8 @@ local function showCard(kind)
 	local found = had()[kind] == true
 	paintBack(card, a.rarity)
 	local picture = card.PictureBox.Picture
-	picture.Image = PetFaces.HEADSHOTS[kind] or ""
-	picture.ImageColor3 = if found then Color3.new(1, 1, 1) else HudKit.BLACK
-	picture.ImageTransparency = if found then 0 else SILHOUETTE
+	setPicture(picture, kind)
+	shadePicture(picture, found)
 	card.PetName.Text = if found then a.name else "???"
 	RarityLook.paint(card.Rarity, a.rarity, card.Rarity:FindFirstChild("Outline"))
 	card.PetCash.Text = if found then "$" .. Config.short(Config.PetIncome[kind] or 0) .. "/s" else "???"
@@ -420,11 +481,12 @@ local function makeSection(i)
 		tile.Position = UDim2.fromOffset(math.round(p[1] * (cell + fig(GAP))), math.round(p[2] * (cell + fig(GAP))))
 		tile.Size = UDim2.fromOffset(math.round(p[3] * cell + (p[3] - 1) * fig(GAP)), math.round(p[4] * cell + (p[4] - 1) * fig(GAP)))
 		paintBack(tile:FindFirstChild("Back"), about(kind).rarity)
-		tile.Picture.Image = PetFaces.HEADSHOTS[kind] or ""
+		tile.Parent = grid
+		setPicture(tile.Picture, kind)
+		tile.PetName.Text = oddsText(kind)
 		if p[3] == 2 and p[4] == 2 then
 			tile.PetName.Size = UDim2.new(0.92, 0, 0, fig(60))
 		end
-		tile.Parent = grid
 		HudKit.hover(tile)
 		tile.Activated:Connect(function()
 			pick(kind)
@@ -655,9 +717,7 @@ local function refresh()
 			end
 			if tile then
 				tile.Shade.Visible = not f
-				tile.Picture.ImageColor3 = if f then Color3.new(1, 1, 1) else HudKit.BLACK
-				tile.Picture.ImageTransparency = if f then 0 else SILHOUETTE
-				tile.PetName.Text = if f then about(kind).name else "???"
+				shadePicture(tile.Picture, f)
 			end
 		end
 		total += #biome.kinds
