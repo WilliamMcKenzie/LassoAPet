@@ -78,8 +78,8 @@ local function progress(player, state, quest)
 	if quest.Kind == "reach" then
 		return if (player:GetAttribute("GatesBroken") or 1) >= quest.Biome then 1 else 0, 1
 	end
-	if quest.Kind == "rebirth" then -- (QM, Nov 7: done once you've reached the last biome; claimed by Quests.rebirth)
-		return if (player:GetAttribute("GatesBroken") or 1) >= quest.Biome then 1 else 0, 1
+	if quest.Kind == "rebirth" then -- (QM, Nov 7: done once you've reached Config.rebirthBiome; claimed by Quests.rebirth)
+		return if (player:GetAttribute("GatesBroken") or 1) >= Config.rebirthBiome(player) then 1 else 0, 1
 	end
 	if quest.Kind == "slingshot" then -- (the Slingshot's menu has unlocked Biome: your pen level's up to it.
 		-- The Goal panel shows it as your cash towards its price instead: Client/GoalPanel)
@@ -123,6 +123,18 @@ function Quests.publish(player, state)
 			slot.at += 1
 			if slot.skip == slot.at then
 				slot.at += 1
+			end
+		end
+		-- (QM, Nov 7: past Reach <Config.rebirthBiome>, straight to the Rebirth goal, the line's
+		-- last: the Desert's the first time, one biome further each rebirth)
+		local target = Config.rebirthBiome(player)
+		local now = quests[slot.at]
+		if now and now.Kind ~= "rebirth" and now.Biome and (now.Biome > target or (now.Kind == "lasso" and now.Biome >= target)) then
+			for k = #quests, slot.at, -1 do
+				if quests[k].Kind == "rebirth" then
+					slot.at, slot.skip = k, nil
+					break
+				end
 			end
 		end
 		local quest = quests[slot.at]
