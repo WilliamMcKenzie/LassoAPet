@@ -99,6 +99,7 @@ for i, biome in Config.allBiomes() do -- (and the endless course's, past the Oce
 		name = names and names[i] or biome.DisplayName or biome.Name,
 		kinds = kinds,
 		tint = colours and colours[#colours] or Color3.fromRGB(80, 80, 80),
+		picture = biome.Picture, -- (its render: design/biomes, QM Nov 7)
 	})
 end
 local biomeOf = {}
@@ -327,6 +328,20 @@ local function makeSection(i)
 	if fill then
 		fill.Color = ColorSequence.new(biome.tint:Lerp(Color3.new(1, 1, 1), 0.25), biome.tint:Lerp(HudKit.BLACK, 0.35))
 		fill.Rotation = 90
+	end
+	if biome.picture then -- the biome's render over its colours, cropped to the card (QM, Nov 7: "sidebar fix")
+		local render = Instance.new("ImageLabel")
+		render.Name = "Render"
+		render.BackgroundTransparency = 1
+		render.Image = biome.picture
+		render.ScaleType = Enum.ScaleType.Crop
+		render.Size = UDim2.fromScale(1, 1)
+		render.ZIndex = 2
+		local corner = picture:FindFirstChildOfClass("UICorner")
+		if corner then
+			corner:Clone().Parent = render
+		end
+		render.Parent = picture
 	end
 	label(picture, "BiomeName", {
 		Text = biome.name,
