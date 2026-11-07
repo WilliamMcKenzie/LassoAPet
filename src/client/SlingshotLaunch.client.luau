@@ -27,7 +27,7 @@ local camera = workspace.CurrentCamera
 local controls = require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
 
 local FEET = -1.45 -- your pet's feet under the pull
-local SEAT = 2.2 -- your root over your pet's back
+local SEAT = 2.2 -- your root over your pet's box (a pet without Ride's seat)
 local CAM_LAUNCH = Vector3.new(16, 14, 44) -- the camera, in the slingshot's space, while it draws
 local CAM_BACK, CAM_UP = 34, 12 -- then behind and over you in the air
 
@@ -100,7 +100,11 @@ local function launch(model, to, chosen)
 	if chosen and not chosen.Parent then
 		chosen = nil
 	end
-	local best = chosen or (SlingshotRide.bestPet and SlingshotRide.bestPet())
+	-- (the pet you held E on, else your fastest; with Ride's seat on it)
+	local best, seat
+	if SlingshotRide.bestPet then
+		best, seat = SlingshotRide.bestPet(chosen)
+	end
 	if not hrp or not best then
 		return
 	end
@@ -108,11 +112,13 @@ local function launch(model, to, chosen)
 	SlingshotRide.flying = true -- (Ride.client: you're not on foot, nothing throws you off)
 	local base = baseOf(model)
 	local pet, rel, size = petCopy(best)
+	-- you sit where you would riding it (Ride's seat, relative to its pivot), else on its box
+	local sitAt = if seat then rel * seat else CFrame.new(0, size.Y / 2 + SEAT, 0)
 	-- your pet stands against the band (its back end on it), you on its back
 	local function hold(pull)
 		local body = pull * CFrame.new(0, FEET + size.Y / 2, -size.Z / 2)
 		pet:PivotTo(body * rel)
-		hrp.CFrame = body * CFrame.new(0, size.Y / 2 + SEAT, 0)
+		hrp.CFrame = body * sitAt
 		return body
 	end
 	controls:Disable()
@@ -164,7 +170,7 @@ local function launch(model, to, chosen)
 			local roll = 2 * math.pi * (CFG.Spins or 0) * (1 - math.cos(math.pi * u)) / 2
 			local body = CFrame.lookAt(at, at + (if ahead.Magnitude > 0.01 then ahead else -Vector3.zAxis)) * CFrame.Angles(0, 0, roll)
 			pet:PivotTo(body * rel)
-			hrp.CFrame = body * CFrame.new(0, size.Y / 2 + SEAT, 0)
+			hrp.CFrame = body * sitAt
 			local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
 			local back = if flat.Magnitude > 0.01 then flat.Unit else -Vector3.zAxis
 			camera.CFrame = CFrame.lookAt(at - back * CAM_BACK + Vector3.new(0, CAM_UP, 0), at)
