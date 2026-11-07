@@ -61,7 +61,7 @@ local PICK = 8 -- the picked tile's white ring
 local SPIN = 45 -- degrees a second a moving rarity's back turns (Fight to Steal an Egg's WeaponShop)
 local SHEEN = 0.45 -- transparency at the middle of its sheen's band
 local moving = setmetatable({}, { __mode = "k" }) -- [back's Fill] = its sheen's UIGradient
-local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Exclusive" }
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Celestial", "Void", "Omega", "Exclusive" }
 
 local gui, sections, card, details, unlocked, badge
 local tiles = {} -- [kind] = tile
