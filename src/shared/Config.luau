@@ -2098,7 +2098,7 @@ function Config.rebirthSpeed(player)
 end
 -- Luck (QM, Nov 7): 1 + what the goals have given you ("LuckBonus", saved as `luck`:
 -- Gold.server), added, never multiplied, and kept through rebirths. Each Reach goal from the
--- Desert on gives Reach luck (x RewardPerRebirth each rebirth), each Capture 3 cash (CashOfNext
+-- Desert on gives Reach luck (x RewardPerRebirth each rebirth), each Capture 2 cash (CashOfNext
 -- of the next unlock's price, x CostPerRebirth as the price is). A goal's egg only comes the first time (Server/Quests).
 -- A rebirth (the goal once you've reached Config.rebirthBiome: Server/Quests' "rebirth", Hatchery's Rebirth) wipes
 -- your cash and unlocks, doubles every slingshot unlock's price and the goals' rewards, and
@@ -2108,7 +2108,7 @@ end
 -- attribute; not the old Rebirths above (their gold, speed and skins).
 Config.Luck = {
 	Reach = 0.25, -- luck for each Reach goal from the Desert on, before any rebirth
-	CashOfNext = 0.1, -- a Capture 3 goal's cash: this much of the next unlock's price (which doubles too)
+	CashOfNext = 0.1, -- a Capture 2 goal's cash: this much of the next unlock's price (which doubles too)
 	RewardPerRebirth = 4, -- goal luck x this each rebirth (0.25, 1, 4, 16...: QM, Nov 7, was 2)
 	CostPerRebirth = 2, -- slingshot unlock prices x this each rebirth
 }
@@ -2694,7 +2694,7 @@ if Config.World == 1 then
 			table.insert(goals, { Text = "Rebirth", Kind = "rebirth", Biome = i, NoPenLevel = true })
 			break
 		end
-		table.insert(goals, { Text = "Capture 3 " .. name .. " animals", Kind = "lasso", Biome = i, Need = 3, NoPenLevel = true, CashOfNext = Config.Luck.CashOfNext })
+		table.insert(goals, { Text = "Capture 2 " .. name .. " animals", Kind = "lasso", Biome = i, Need = 2, NoPenLevel = true, CashOfNext = Config.Luck.CashOfNext }) -- (QM, Nov 7: 2, was 3)
 		if Config.Biomes[i + 1] then
 			table.insert(goals, { Text = "Upgrade slingshot", Kind = "slingshot", Biome = i + 1, NoPenLevel = true })
 		end
