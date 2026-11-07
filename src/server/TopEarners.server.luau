@@ -35,7 +35,7 @@ for i, piece in CFG.Meshes do
 		part.Name = "Frame" .. i
 		part.Anchored = true
 		part.Color = Color3.fromRGB(piece[2], piece[3], piece[4])
-		part.CFrame = origin * CFrame.new(piece[5], piece[6], piece[7]) -- (a MeshPart sits on its mesh's bounding box centre)
+		part.CFrame = origin -- (an uploaded EditableMesh keeps its own origin: the board's, as the Slingshot's pieces)
 		Studs.apply(part, 0.5)
 		part.Locked = true
 		part.Parent = model
