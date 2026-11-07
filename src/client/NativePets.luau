@@ -38,7 +38,7 @@ local OUTLINES = { -- text outlines (QM's Figma)
 	Full = hex("3a3a3a"),
 	Best = hex("0a5a00"),
 }
-local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Exclusive" }
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Celestial", "Void", "Omega", "Exclusive" }
 
 local panel, template
 

@@ -333,7 +333,7 @@ local Config = {
 			GateColor = Color3.fromRGB(90, 255, 130),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				CaveCricket = 1/4, Bat = 1/8, CryptSnail = 1/8, DungeonRat = 1/8, Rat = 1/8, Slime = 1/8, CaveSpider = 1/25, WebSpider = 1/25, BoneSteed = 1/32, Mimic = 1/80, AbyssPillbug = 1/1000, BoneWyrm = 1/4000,
+				CaveCricket = 1/4 + 9/40000, Bat = 1/8, CryptSnail = 1/8, DungeonRat = 1/8, Rat = 1/8, Slime = 1/8, CaveSpider = 1/25, WebSpider = 1/25, BoneSteed = 1/32, Mimic = 1/80, AbyssPillbug = 1/1000, BoneWyrm = 1/40000,
 			},
 			UnlockCost = 2000000, -- (the progression pass, QM Nov 7; was 100M)
 		},
@@ -350,7 +350,7 @@ local Config = {
 			GateColor = Color3.fromRGB(255, 143, 240),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				StagBeetle = 1/2, Shroom = 1/5, SpiritFox = 1/5, SpiritDeer = 1/20, Deer = 1/25, BrownBear = 1/320, CrystalTortoise = 1/320, MysticOwl = 1/400, AncientMoose = 1/1600, AncientTreant = 1/2000, SpiritLoong = 1/8000,
+				StagBeetle = 1/2 + 7/64000, Shroom = 1/5, SpiritFox = 1/5, SpiritDeer = 1/20, Deer = 1/25, BrownBear = 1/320, CrystalTortoise = 1/320, MysticOwl = 1/400, AncientMoose = 1/1600, AncientTreant = 1/2000, SpiritLoong = 1/64000,
 			},
 			UnlockCost = 7500000, -- (the progression pass, QM Nov 7; was 1B)
 		},
@@ -368,7 +368,7 @@ local Config = {
 			GateColor = Color3.fromRGB(255, 170, 40),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Ankylosaurus = 1/2, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/25, TRex = 1/200, Pterodactyl = 1/250, BoneRex = 1/1250, CastleWyvern = 1/5000,
+				Ankylosaurus = 1/2 + 19/100000, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/25, TRex = 1/200, Pterodactyl = 1/250, BoneRex = 1/1250, CastleWyvern = 1/100000,
 			},
 			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
 		},
@@ -385,7 +385,7 @@ local Config = {
 			GateColor = Color3.fromRGB(70, 200, 255),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Clownfish = 1/5, Pelican = 1/5, Squid = 1/5, Shrimp = 1/8, Starfish = 1/8, FishSchool = 1/40, Hammerhead = 1/40, Seahorse = 1/40, Whale = 1/40, KingCrab = 1/50, Lionfish = 1/50, Anglerfish = 1/200, MantaRay = 1/250, BlueCrab = 1/2000, AbyssWhale = 1/2500, Kraken = 1/10000, RoboShark = 0,
+				Clownfish = 1/5 + 24/250000, Pelican = 1/5, Squid = 1/5, Shrimp = 1/8, Starfish = 1/8, FishSchool = 1/40, Hammerhead = 1/40, Seahorse = 1/40, Whale = 1/40, KingCrab = 1/50, Lionfish = 1/50, Anglerfish = 1/200, MantaRay = 1/250, BlueCrab = 1/2000, AbyssWhale = 1/2500, Kraken = 1/250000, RoboShark = 0,
 			},
 			UnlockCost = 75000000, -- (the progression pass, QM Nov 7; was 100B)
 		},
@@ -538,7 +538,7 @@ local Config = {
 	-- Epics are what carry you into the next one (the pacing ladder, below AnimalStats),
 	-- so they take ~5 runs to hatch; Uncommons and Rares hatch within a run, so every run
 	-- pays out. Legendaries hatch slower (PetHatchTime: QM's D1 retention eggs).
-	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480, Divine = 600 },
+	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480, Divine = 600, Celestial = 900, Void = 1200, Omega = 1800 },
 	PetHatchTime = {
 		Snail = 15, Giraffe = 120, HillbackTortoise = 3600, Coyote = 15, Oryx = 60, Ostrich = 90, MirageElephant = 7200, Seal = 15, Reindeer = 60, Walrus = 60, Narwhal = 300, GlacierMammoth = 7200, FireAnt = 15, MagmaCrab = 60, AshBehemoth = 7200, Rat = 60, CaveCricket = 60, CryptSnail = 60, WebSpider = 300, AbyssPillbug = 7200, StagBeetle = 60, Deer = 300, BrownBear = 1200, AncientMoose = 7200, Swan = 60, ArmoredRam = 60, RoyalStag = 300, Griffin = 1200, FortressTortoise = 7200, Shrimp = 60, Pelican = 60, Hammerhead = 300, MantaRay = 1200, Anglerfish = 1200, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
 		-- (QM's spawn/hatch JSON, Oct 11, applied as given: the Herd weights in Biomes too)
@@ -835,7 +835,7 @@ local Config = {
 	-- that costs gold instead of waiting on the Epic's egg. Hybrids made before keep theirs.
 	FuseSpeedShare = 0.15,
 	-- (Shared/Fusion.worth: what went into a hybrid, by rarity; kept on saves, no longer priced.)
-	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000, Divine = 10000000 },
+	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000, Divine = 10000000, Celestial = 100000000, Void = 1000000000, Omega = 10000000000 },
 	PetSmallSize = 10.4,
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
@@ -945,6 +945,9 @@ local Config = {
 		Epic = Color3.fromHex("FF7CC6"),
 		Legendary = Color3.fromHex("5CE6B7"),
 		Divine = Color3.fromHex("00DCFF"), -- (Fight to Steal an Egg's Divine text colour: QM, Nov 7)
+		Celestial = Color3.fromHex("FFD000"), -- (and its tiers past Divine: QM, Nov 7)
+		Void = Color3.fromHex("5A00FF"),
+		Omega = Color3.fromHex("7DFF00"),
 	},
 	Podium = {
 		Position = Vector3.new(63.5, 0, 24.6), -- the column, on the ground, mirroring the portal gate across the start line (QM, Oct 12; was 104, 20, the front right corner); the snake reaches ~-8..+16 in x, -14..+31 in z
@@ -1671,7 +1674,7 @@ local Config = {
 
 	-- Coins for landing on an animal: LassoCoins for that animal, else by its rarity (set
 	-- in its Animals module).
-	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25, Divine = 50 },
+	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25, Divine = 50, Celestial = 100, Void = 250, Omega = 500 },
 	LassoCoins = { Beholder = 50, Sludge = 50, WarElephant = 50, Leviathan = 100 }, -- QM's pets JSON, Oct 4
 
 	-- Stampede: each biome has its own steady stream of animals (its Herd above),
@@ -1716,7 +1719,7 @@ Config.Endless = {
 			-- its own animals (World 2's weights). The Majestic Unicorn's a Robux pet in World 1: on its
 			-- page, never wild (as the Robo Shark). World 1's Bunny, Rhino and Buffalo stay in the Meadow.
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				MarbleFish = 1/2, Lion = 1/4, Crocodile = 1/5, MarbleColossus = 1/25, Seraph = 1/100, MajesticUnicorn = 0,
+				MarbleFish = 1/2 + 9999/1000000, Lion = 1/4, Crocodile = 1/5, MarbleColossus = 1/25, Seraph = 1/1000000, MajesticUnicorn = 0,
 			},
 			Boss = "Seraph", -- (World 2's Meadow boss)
 			Fog = { Color = rgb(232, 214, 160), Start = 0, End = 500 },
@@ -1732,7 +1735,7 @@ Config.Endless = {
 			GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) },
 			WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) },
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				CrimsonScorpion = 1/2, Eyeworm = 1/4, Beholder = 1/5, Maw = 1/25, IvorySpider = 1/125, Asura = 1/625, BlackWidow = 1/2500,
+				CrimsonScorpion = 1/2 + 199/500000, Eyeworm = 1/4, Beholder = 1/5, Maw = 1/25, IvorySpider = 1/125, Asura = 1/625, BlackWidow = 1/500000,
 			},
 			Boss = "CrimsonSeraph",
 			Fog = { Color = rgb(150, 60, 70), Start = 0, End = 450 },
@@ -1748,7 +1751,7 @@ Config.Endless = {
 			GroundColors = { rgb(90, 109, 143), rgb(82, 99, 131) },
 			WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) },
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				RedMushroom = 1/2, BlueCrystal = 1/5, CrystalCentipede = 1/5, PinkCrystal = 1/20, BrownMushroom = 1/25, CrystalPhoenix = 1/320, CrystalSpider = 1/320, PurpleMushroom = 1/320, CrystalElephant = 1/2000, CrystalSeraph = 1/8000,
+				RedMushroom = 1/2 + 124/1000000, BlueCrystal = 1/5, CrystalCentipede = 1/5, PinkCrystal = 1/20, BrownMushroom = 1/25, CrystalPhoenix = 1/320, CrystalSpider = 1/320, PurpleMushroom = 1/320, CrystalElephant = 1/2000, CrystalSeraph = 1/1000000,
 			},
 			Boss = "CrystalSeraph",
 			Fog = { Color = rgb(70, 92, 140), Start = 0, End = 420 },
@@ -1840,6 +1843,12 @@ Config.NativeUi = {
 	-- `at` of the way down), its name's text colour; Common's text fades text to text2; a
 	-- `move` one has a band of text2 sweeping across it (client/RarityLook)
 	Rarities = {
+		-- (past Divine, Fight to Steal an Egg's top pet tiers, its colours: QM Nov 7, the ceiling
+		-- rises biome by biome: Celestial from the Dungeon, Void in the Ocean, Omega in the endless;
+		-- the commonest pet in those herds takes the odds the top one gave up, so each adds to 1)
+		Celestial = { bottom = Color3.fromHex("ff6a00"), top = Color3.fromHex("ffe600"), at = 1, text = Color3.fromHex("ffd000"), text2 = Color3.fromHex("ff5a00"), move = true },
+		Void = { bottom = Color3.fromHex("3a00b0"), top = Color3.fromHex("a000ff"), at = 1, text = Color3.fromHex("5a00ff"), text2 = Color3.fromHex("22009a"), move = true },
+		Omega = { bottom = Color3.fromHex("00ff40"), top = Color3.fromHex("ffee00"), at = 1, text = Color3.fromHex("7dff00"), text2 = Color3.fromHex("00ffb0"), move = true },
 		Common = { text = Color3.new(1, 1, 1), text2 = Color3.fromRGB(135, 135, 135), stroke = Color3.fromRGB(70, 70, 70) },
 		Uncommon = { bottom = Color3.fromHex("40ff00"), top = Color3.fromHex("c8ff00"), at = 0.736, text = Color3.fromHex("00ff00") },
 		Rare = { bottom = Color3.fromHex("0070ff"), top = Color3.fromHex("00e6ff"), at = 1, text = Color3.fromHex("00b7ff") },

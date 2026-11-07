@@ -6,7 +6,7 @@
 local Horse = require(script.Parent.Horse)
 local SpiritLoongModel = require(script.Parent.SpiritLoongModel)
 
-return Horse.variant("SpiritLoong", SpiritLoongModel, "Divine", {
+return Horse.variant("SpiritLoong", SpiritLoongModel, "Celestial", {
 	seat = Vector3.new(0, 7, -1.2),
 	neck = { center = Vector3.new(0, 4.8, -7.2), radius = 2.6 },
 	seatBone = "saddle",
