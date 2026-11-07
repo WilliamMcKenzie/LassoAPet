@@ -92,12 +92,15 @@ local function restore(hrp, humanoid)
 	camera.CameraType = Enum.CameraType.Custom
 end
 
-local function launch(model, to)
+local function launch(model, to, chosen)
 	if busy or Hud.isRiding() then
 		return
 	end
 	local hrp, humanoid = character()
-	local best = SlingshotRide.bestPet and SlingshotRide.bestPet()
+	if chosen and not chosen.Parent then
+		chosen = nil
+	end
+	local best = chosen or (SlingshotRide.bestPet and SlingshotRide.bestPet())
 	if not hrp or not best then
 		return
 	end
@@ -176,7 +179,9 @@ local function launch(model, to)
 		Sounds.play("smash", 0.6)
 		local x = landing.X + side
 		hrp.CFrame = CFrame.new(x, landing.Y + 3, landing.Z)
+		SlingshotRide.pet = chosen -- (Ride.client rides this one, not the fastest)
 		local riding = SlingshotRide.ride and SlingshotRide.ride(x, landing.Z, to)
+		SlingshotRide.pet = nil
 		SlingshotRide.flying = false
 		if not riding then
 			restore(hrp, humanoid)
@@ -236,6 +241,32 @@ local function setup(model)
 end
 
 local folder = workspace:WaitForChild("Slingshots")
+
+-- Holding E on one of your pets after the tutorial (Ride.client, QM Nov 7): the same menu,
+-- from wherever you are. Meadow rides that pet out of your pen as before; any other biome
+-- flings you and that pet off your slingshot to it.
+SlingshotRide.menu = function(pet, rideHere)
+	if busy or Hud.isRiding() then
+		return
+	end
+	local mine
+	for _, model in folder:GetChildren() do
+		if (model:GetAttribute("Owner") or tonumber(model.Name)) == player.UserId and model:FindFirstChild("Frame1") then
+			mine = model
+		end
+	end
+	if not mine then
+		rideHere()
+		return
+	end
+	SlingshotMenu.open(function(to)
+		if to <= 1 then
+			rideHere()
+		else
+			launch(mine, to, pet)
+		end
+	end, nil, true)
+end
 folder.ChildAdded:Connect(setup)
 for _, model in folder:GetChildren() do
 	task.spawn(setup, model)
