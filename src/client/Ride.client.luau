@@ -2645,6 +2645,32 @@ function vfx.mountTier()
 	return tier
 end
 
+-- Riding out into a wall (QM, Nov 7: you ran straight through them; Client/RideWalls): the step
+-- to (nx, nz) is a crash (vfx.wallCrash, checkRide), unless your mount's huge enough to walk
+-- over walls (Config.WallWalkOverTier) or flying higher than it. While nothing can crash you
+-- (grace, Invincible, before the Desert) it stops you at the wall instead, sliding along it.
+vfx.rideWalls = require(script.Parent.RideWalls)
+function vfx.wallStep(nx, nz)
+	if phase ~= "outbound" or exitPath or nz >= 0 or vfx.rideWalls.walksOver(vfx.mountTier()) then
+		return nx, nz
+	end
+	local bodyX, bodyZ = vfx.halfBody(mount)
+	local hx, hz = math.max(1.3, bodyX * 0.7), math.max(2.4, bodyZ * 0.7) -- (as forgiving as obstacles: checkRide)
+	local top = vfx.rideWalls.hit(nx, nz, hx, hz)
+	if not top or (mount.hop or 0) > top then
+		return nx, nz
+	end
+	if grace <= 0 and not vfx.crashProtected() then
+		vfx.wallCrash = true
+		return mount.x, mount.z -- (stopped where it hit, so a Continue picks up just short of it)
+	elseif not vfx.rideWalls.hit(nx, mount.z, hx, hz) then
+		return nx, mount.z
+	elseif not vfx.rideWalls.hit(mount.x, nz, hx, hz) then
+		return mount.x, nz
+	end
+	return mount.x, mount.z
+end
+
 -- The mount's special sprint (Config.SprintSpecials) while Sprint is held on the
 -- way out, else nil.
 function vfx.sprintSpecial()
@@ -3664,8 +3690,9 @@ local function updateMount(dt)
 	-- so a ride from an outer pen is eased into the corridor.
 	local edge = vfx.edge(mount.z) + (Config.HomeHalfWidth - 4 - vfx.edge(mount.z)) * math.clamp(mount.z / 40, 0, 1)
 	edge = math.max(edge - math.max(halfWidth - 2, 0), 4) -- (its whole body stays off the walls)
-	mount.x = math.clamp(mount.x + mount.latVel * dt, -edge, edge)
-	mount.z += dir * mount.speed * dt
+	local nx, nz = vfx.wallStep(mount.x + mount.latVel * dt, mount.z + dir * mount.speed * dt) -- (into a wall: vfx.wallStep)
+	mount.x = math.clamp(nx, -edge, edge)
+	mount.z = nz
 	local sideways = if (ability and ability.cfg.Kind == "Crabwalk") or (vfx.sprintSpecial() or {}).Kind == "Crabwalk" then math.pi / 2 else 0 -- a crab scuttles sideways
 	place(mount, math.atan2(mount.latVel * dir, math.max(mount.speed, 1)) + sideways)
 	animate(mount, dt, mount.speed, math.clamp(mount.latVel * -dir / (steerSpeed * wide), -1, 1))
@@ -3752,6 +3779,12 @@ local function checkRide(dt)
 	end
 	if mount.z < FINISH_Z - 8 then
 		return fail("TOO FAR!") -- only if something skipped the finish line
+	end
+	if vfx.wallCrash then
+		vfx.wallCrash, mount.speed = nil, 0 -- (into a wall: vfx.wallStep; a Continue starts from a standstill)
+		if phase == "outbound" then
+			return fail("CRASH!")
+		end
 	end
 	if ability and ability.cfg.Kind == "Charge" then
 		-- A battering ram: everything in the way goes flying, whatever its size.
