@@ -28,7 +28,7 @@ local ROW_WIDTH = 150 -- a row this wide carries on in a new one behind (the cou
 -- each biome's group: its name, the z of the middle of its run, its herd (commonest first)
 local function groups()
 	local out = {}
-	for i, biome in Config.Biomes do
+	for i, biome in Config.allBiomes() do
 		local herd = {}
 		for kind, weight in biome.Herd or {} do
 			if Animals:FindFirstChild(kind) then
@@ -46,7 +46,12 @@ local function groups()
 			table.insert(kinds, h[1])
 		end
 		if #kinds > 0 then
-			table.insert(out, { name = biome.Name, z = WorldColors.biomeStart(i) - biome.Length / 2, kinds = kinds })
+			-- (named as players see it: the Castle's slot is the Jurassic, QM Nov 7. The endless
+			-- biomes, which have no fixed place, stand one after another just past the Ocean's end)
+			local z = if i <= #Config.Biomes
+				then WorldColors.biomeStart(i) - biome.Length / 2
+				else -Config.CourseLength - 120 - (i - #Config.Biomes - 1) * 160
+			table.insert(out, { name = biome.DisplayName or biome.Name, z = z, kinds = kinds })
 		end
 	end
 	return out
