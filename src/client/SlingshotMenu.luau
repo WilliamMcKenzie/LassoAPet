@@ -13,8 +13,9 @@
 --   SlingshotMenu.open(onPick)   -- onPick(biome index) when you pick an unlocked one
 --   SlingshotMenu.open(nil, i)   -- (the Goal panel's Buy!, QM Nov 7) scrolled so biome i's card
 --                                -- is in the middle, the clicking cursor on its buy button
---   SlingshotMenu.open(onPick, nil, true) -- (holding E on a pet, QM Nov 7: not at the slingshot,
---                                -- so walking away doesn't close it)
+--   SlingshotMenu.open(onPick, i, true) -- (holding E on a pet, QM Nov 7: not at the slingshot,
+--                                -- so walking away doesn't close it; scrolled to i, the farthest
+--                                -- unlocked, the hand on its GO!)
 --   SlingshotMenu.atSlingshot()  -- open from the slingshot itself (Client/SlingshotLaunch
 --                                -- closes it when you walk away; not one from the Goal panel)
 --   SlingshotMenu.close()
@@ -44,7 +45,7 @@ local RunService = game:GetService("RunService")
 local CURSOR_CLICK = 0.12 -- how much the cursor shrinks as it "clicks" (Hud's upgrade hand's look)
 
 local gui, cards, onPick, fromSlingshot
-local cursor, cursorScale, cursorOn -- the clicking cursor (the Goal panel's Buy!), on the card i = cursorOn
+local cursor, cursorScale, cursorOn, cursorGo -- the clicking cursor (the Goal panel's Buy!), on the card i = cursorOn (on its GO! when cursorGo)
 local made = {} -- [biome index] = its card's parts
 
 local function price(n)
@@ -195,14 +196,15 @@ local function refresh()
 			c.buy.Text.Text = price(Config.unlockCost(player, i))
 		end
 	end
-	if cursor and cursorOn and cursorOn <= level() then -- (bought: the cursor goes)
+	if cursor and cursorOn and not cursorGo and cursorOn <= level() then -- (bought: the cursor goes)
 		cursorOn = nil
 		cursor.Visible = false
 	end
 end
 
 -- the clicking hand (assets/ui/TapHand.png, as on Hud's Upgrade) on card i's buy button
-local function pointAt(i)
+-- (or its GO! button, when go)
+local function pointAt(i, go)
 	local c = made[i]
 	if not c then
 		return
@@ -228,8 +230,8 @@ local function pointAt(i)
 			end
 		end)
 	end
-	cursor.Parent = c.buy
-	cursorOn = i
+	cursor.Parent = if go then c.go else c.buy
+	cursorOn, cursorGo = i, go == true
 	cursor.Visible = true
 end
 
@@ -353,9 +355,7 @@ function SlingshotMenu.open(callback, focus, away)
 	if focus and made[focus] then
 		centre(focus)
 		task.defer(centre, focus) -- (again once a first build's row has its canvas size)
-		if focus > level() then
-			pointAt(focus)
-		end
+		pointAt(focus, focus <= level()) -- (an unlocked one: its GO!, holding E on a pet, QM Nov 7)
 	end
 	refresh()
 	NativeHud.haze("SlingshotMenu", true)

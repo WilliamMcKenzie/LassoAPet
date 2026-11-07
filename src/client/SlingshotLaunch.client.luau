@@ -265,7 +265,7 @@ SlingshotRide.menu = function(pet, rideHere)
 		else
 			launch(mine, to, pet)
 		end
-	end, nil, true)
+	end, math.min(player:GetAttribute("PenLevel") or 1, #Config.Biomes), true) -- (scrolled to the farthest unlocked, the hand on its GO!: QM)
 end
 folder.ChildAdded:Connect(setup)
 for _, model in folder:GetChildren() do
