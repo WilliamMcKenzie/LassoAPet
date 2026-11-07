@@ -1938,6 +1938,7 @@ Config.Slingshot = {
 	Scale = 1.6, -- the model's size x its meshes' (QM, Nov 7: 1.6x bigger)
 	Turn = 0.35, -- how much it turns from straight out of your pen toward the start line's middle (QM, Nov 7)
 	Steer = 2, -- x Ride's SteerSpeed and SteerResponse in the air (QM, Nov 7: twice as nimble)
+	Meshes = { { 108584371800496, 222, 124, 62 }, { 83135902680851, 240, 228, 196 }, { 126807462534931, 150, 76, 38 } }, -- (filled by tools/slingshot_upload.py)
 	Band = 102942616406200, -- (filled by tools/slingshot_upload.py)
 	BandColor = Color3.fromRGB(226, 58, 52),
 	-- The band's colour by your pen level (each Upgrade Pen recolours it; past the list, the last).
