@@ -990,7 +990,7 @@ startRide = function(model, at)
 	if fromHerd then
 		-- Jumped onto a stampede animal: it leaves the stampede and runs on with
 		-- you from where it is. Your own pet stays home.
-		vfx.rideCue:FireServer("take", fromHerd.n)
+		vfx.rideCue:FireServer("take", fromHerd.n, fromHerd.kind)
 		vfx.markEventRun(fromHerd)
 		if fromHerd.n then -- (nil: a Meadow animal for walking over the start line, below)
 			herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
@@ -2761,7 +2761,7 @@ function vfx.huntStep(cfg)
 		-- Caught: eaten on the spot.
 		if prey.n then
 			herd[prey.n], taken[prey.n] = nil, true
-			vfx.rideCue:FireServer("take", prey.n) -- gone for everyone else too
+			vfx.rideCue:FireServer("take", prey.n, "gone") -- gone for everyone else too (not their mount)
 		else
 			table.remove(strays, table.find(strays, prey))
 		end
@@ -2821,7 +2821,7 @@ function vfx.devour(active, cfg)
 		local entity = found[i].entity
 		if entity.n and herd[entity.n] == entity then
 			herd[entity.n], taken[entity.n] = nil, true
-			vfx.rideCue:FireServer("take", entity.n) -- gone for everyone else too
+			vfx.rideCue:FireServer("take", entity.n, "gone") -- gone for everyone else too (not their mount)
 		else
 			local k = table.find(strays, entity)
 			if k then
@@ -3933,7 +3933,7 @@ local function updateRider(dt)
 			local target = transfer.target
 			vfx.markEventRun(target)
 			if target.n then
-				vfx.rideCue:FireServer("take", target.n)
+				vfx.rideCue:FireServer("take", target.n, target.kind)
 				herd[target.n], taken[target.n], target.n = nil, true, nil
 			else
 				table.remove(strays, table.find(strays, target))
@@ -4247,8 +4247,10 @@ vfx.rideCue.OnClientEvent:Connect(function(player, what, a, b, c, d)
 			if entity then
 				knock(entity, tonumber(b) or 0, true)
 			end
-		elseif entity and rider then
-			-- Now their mount: the stampede's copy carries on as it.
+		elseif entity and rider and (b == nil or b == entity.kind) then
+			-- Now their mount: the stampede's copy carries on as it. (b: the kind they took, or
+			-- "gone" when it was eaten. Luck makes each player's stampede draw its own kinds, so
+			-- a slot that differs here just leaves the herd; their next RideSync shows the right one.)
 			herd[key], entity.n = nil, nil
 			if rider.entity then
 				retire(rider.entity)

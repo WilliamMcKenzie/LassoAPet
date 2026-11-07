@@ -2417,6 +2417,15 @@ Config.LimitedsStand = true
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
 Config.PetOffers = { Config.LoongOffer, Config.MajesticUnicornOffer, Config.RoboSharkOffer } -- the 3 limiteds (QM, Nov 7)
+-- (live, a limited whose developer product isn't made yet, ProductId 0, stays off the stand: its
+-- Buy would do nothing there. In Studio it shows, free, for testing.)
+if not game:GetService("RunService"):IsStudio() then
+	for i = #Config.PetOffers, 1, -1 do
+		if Config.PetOffers[i].ProductId == 0 then
+			table.remove(Config.PetOffers, i)
+		end
+	end
+end
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)

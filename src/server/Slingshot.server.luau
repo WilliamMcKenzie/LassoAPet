@@ -177,6 +177,9 @@ local function watch(player)
 	end)
 	place(player)
 end
+-- (built once up front: CreateMeshPartAsync yields, and two players placed while it did
+-- would each build their own, or one player twice, leaving a spare slingshot behind)
+build()
 Players.PlayerAdded:Connect(watch)
 for _, player in Players:GetPlayers() do
 	task.spawn(watch, player)
