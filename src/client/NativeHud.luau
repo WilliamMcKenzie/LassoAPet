@@ -246,11 +246,49 @@ function NativeHud.build(handlers)
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 4,
 	})
+	-- the 100x Luck Event (Config.LuckEvent, QM Nov 7): while it's on the number's the boosted
+	-- luck in rolling rainbow, the time left beside it
+	local luckRainbow = Instance.new("UIGradient")
+	luckRainbow.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 70, 70)),
+		ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 160, 50)),
+		ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 235, 70)),
+		ColorSequenceKeypoint.new(0.6, Color3.fromRGB(80, 220, 90)),
+		ColorSequenceKeypoint.new(0.8, Color3.fromRGB(70, 150, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 70, 70)),
+	})
+	luckRainbow.Enabled = false
+	luckRainbow.Parent = luck
+	local luckTimer = label(luckRow, "EventTimer", {
+		Text = "",
+		FontFace = HudKit.ITALIC,
+		Visible = false,
+		Position = UDim2.new(1, fig(14), 0, fig(66)),
+		Size = UDim2.fromOffset(fig(170), fig(72)),
+		ZIndex = 3,
+	})
+	local luckShown
 	local function showLuck()
-		luck.Text = Config.luckText(Config.luck(player))
+		local text = Config.luckText(Config.luck(player))
+		if text ~= luckShown then
+			luckShown = text
+			luck.Text = text
+		end
 	end
 	player:GetAttributeChangedSignal("LuckBonus"):Connect(showLuck)
 	showLuck()
+	game:GetService("RunService").Heartbeat:Connect(function()
+		local now = workspace:GetServerTimeNow()
+		local left = Config.luckEventLeft(now)
+		showLuck()
+		luckRainbow.Enabled = left ~= nil
+		luckTimer.Visible = left ~= nil
+		if left then
+			local s = math.ceil(left)
+			luckTimer.Text = string.format("%d:%02d", s // 60, s % 60)
+			luckRainbow.Offset = Vector2.new((now * 0.6) % 2 - 1, 0) -- (rolls along)
+		end
+	end)
 	luckButton.Activated:Connect(function()
 		require(script.Parent.RebirthPopup).open()
 	end)
