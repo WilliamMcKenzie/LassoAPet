@@ -1937,7 +1937,6 @@ Config.Slingshot = {
 	Scale = 1.6, -- the model's size x its meshes' (QM, Nov 7: 1.6x bigger)
 	Turn = 0.35, -- how much it turns from straight out of your pen toward the start line's middle (QM, Nov 7)
 	Steer = 2, -- x Ride's SteerSpeed and SteerResponse in the air (QM, Nov 7: twice as nimble)
-	Meshes = { { 108584371800496, 222, 124, 62 }, { 83135902680851, 240, 228, 196 }, { 126807462534931, 150, 76, 38 } }, -- (filled by tools/slingshot_upload.py)
 	Band = 102942616406200, -- (filled by tools/slingshot_upload.py)
 	BandColor = Color3.fromRGB(226, 58, 52),
 	-- The band's colour by your pen level (each Upgrade Pen recolours it; past the list, the last).
@@ -1954,16 +1953,15 @@ Config.Slingshot = {
 }
 -- The Top Earners board (QM, Nov 6): left of the start line, facing into the base, the global
 -- top pen incomes (gold a second, everyone's latest recorded, OrderedDataStore "TopEarners")
--- in a square stone frame (the old portal gate's style, a skull on top: tools/earners_board_meshes.py),
+-- in a grass-and-dirt frame in the map's look with a gold crown on top (QM, Nov 7),
 -- your own pen's income and the countdown to the next refresh under the list.
 -- Server/TopEarners builds it and records; Client/TopEarners draws the list.
 Config.TopEarners = {
 	Position = Vector3.new(-112, 0, 18), -- the base's middle (on the ground), just inside the base left of the course's mouth
 	Yaw = 210, -- degrees: faces into the base (+z), turned 30 degrees toward the course
-	Screen = { Width = 26, Height = 32, Bottom = 4.2 }, -- the frame's opening (tools/earners_board_meshes.py SCREEN_*)
+	Screen = { Width = 26, Height = 32, Bottom = 4.2 }, -- the frame's opening (Server/TopEarners builds the frame round it)
 	Refresh = 60, -- seconds between recording everyone here and re-reading the top
 	Top = 50, -- rows on the board
-	Meshes = { { 106770230038436, 177, 185, 178, 0.006, 20.790, -0.713 }, { 82718487796629, 148, 156, 150, -0.759, 20.846, -0.708 }, { 134382604805829, 232, 226, 206, 0.008, 46.766, -0.195 }, { 137436135736323, 38, 38, 44, 0.000, 46.300, -4.175 } }, -- (filled by tools/earners_board_upload.py)
 }
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:

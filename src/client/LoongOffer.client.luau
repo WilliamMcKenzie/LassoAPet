@@ -1,4 +1,5 @@
--- Limited pet display: gold platforms, a framed sign, and the game's Fredoka nameplates.
+-- Limited pet display: grass-and-dirt pedestals with gold trim, a wooden sign capped with grass
+-- (blocks in the map's look, Shared/VoxelBlock: QM, Nov 7), and the game's Fredoka nameplates.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -7,10 +8,15 @@ if Config.LimitedsStand == false or not (Config.Podium and Config.Podium.Hidden 
 	return
 end
 local Rig = require(ReplicatedStorage.Shared.Animals.Rig)
+local VoxelBlock = require(ReplicatedStorage.Shared.VoxelBlock)
 local player = Players.LocalPlayer
 local FONT = Font.new("rbxasset://fonts/families/FredokaOne.json")
 local GOLD = Color3.fromRGB(255, 209, 35)
-local METAL = Color3.fromRGB(106, 112, 140)
+local C = Config.WorldColors
+local DIRT, DIRT_C = C.WallDirt, C.WallDirtChecker
+local GRASS, GRASS_C = C.Grass, C.GrassChecker
+local WOOD, WOOD_C = C.Wood, nil -- (nil: a checker just lighter than the wood)
+local TRIM = Color3.fromRGB(255, 196, 40)
 local STUD_TEXTURE = { image = "rbxassetid://7447638591", tile = 0.5 }
 local display = Instance.new("Model")
 display.Name = "LimitedsDisplay"
@@ -27,6 +33,13 @@ local function part(name, size, at, color, material, transparency)
 	p.Transparency = transparency or 0
 	p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
 	p.Parent = display
+	return p
+end
+
+-- a block in the map's look; you walk through it, as the old stand
+local function block(name, size, at, color, checker)
+	local p = VoxelBlock.new(name, display, CFrame.new(at), size, color, checker)
+	p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
 	return p
 end
 
@@ -49,20 +62,10 @@ for i, offer in Config.PetOffers do
 	-- Adjacent stands under one sign, as in the reference.
 	local at = first + Vector3.new((i - 1) * 28, 0, 0)
 	local width = offer.Ring or 22
-	part(offer.Kind .. "Base", Vector3.new(width + 3, 0.8, width + 3), at + Vector3.new(0, 0.4, 0), METAL)
-	part(
-		offer.Kind .. "Step",
-		Vector3.new(width + 1.5, 0.35, width + 1.5),
-		at + Vector3.new(0, 0.97, 0),
-		Color3.fromRGB(65, 70, 98)
-	)
-	part(
-		offer.Kind .. "Platform",
-		Vector3.new(width, 0.25, width),
-		at + Vector3.new(0, 1.27, 0),
-		METAL,
-		Enum.Material.SmoothPlastic
-	)
+	-- dirt, a gold step, grass on top: the pet stands at 1.5
+	block(offer.Kind .. "Base", Vector3.new(width + 3, 0.8, width + 3), at + Vector3.new(0, 0.4, 0), DIRT, DIRT_C)
+	block(offer.Kind .. "Step", Vector3.new(width + 1.5, 0.35, width + 1.5), at + Vector3.new(0, 0.975, 0), TRIM)
+	block(offer.Kind .. "Platform", Vector3.new(width, 0.35, width), at + Vector3.new(0, 1.325, 0), GRASS, GRASS_C)
 	-- Four flat side panels, fading from gold at the floor to transparent at the top.
 	for side = 0, 3 do
 		local panel = part(offer.Kind .. "GradientSide", Vector3.new(width, 4, 0.05), at, GOLD, nil, 1)
@@ -154,36 +157,28 @@ for _, stand in stands do
 end
 local signWidth = (last.X - first.X) + 28
 for _, x in { -signWidth / 2 + 3, signWidth / 2 - 3 } do
-	part(
-		"SignPost",
-		Vector3.new(1.4, height, 1.6),
-		center + Vector3.new(x, height / 2, -12),
-		METAL,
-		Enum.Material.Metal
-	)
-	part("PostFoot", Vector3.new(2.5, 8, 2.5), center + Vector3.new(x, 4, -12), Color3.fromRGB(145, 150, 170))
+	-- a wooden post on a grass-capped dirt foot
+	block("SignPost", Vector3.new(2.2, height, 2.2), center + Vector3.new(x, height / 2, -12), WOOD, WOOD_C)
+	block("PostFoot", Vector3.new(4, 5, 4), center + Vector3.new(x, 2.5, -12), DIRT, DIRT_C)
+	block("PostFootCap", Vector3.new(4.8, 1.2, 4.8), center + Vector3.new(x, 5.6, -12), GRASS, GRASS_C)
 end
 local signAt = center + Vector3.new(0, height, -12)
-part("SignFrame", Vector3.new(signWidth + 2, 12, 1.6), signAt, METAL, Enum.Material.Metal)
+block("SignFrame", Vector3.new(signWidth + 2, 12, 1.6), signAt, WOOD, WOOD_C)
+block("SignTrimTop", Vector3.new(signWidth + 2, 1, 2), signAt + Vector3.new(0, 5.5, 0), TRIM)
+block("SignTrimBottom", Vector3.new(signWidth + 2, 1, 2), signAt + Vector3.new(0, -5.5, 0), TRIM)
+block("SignCap", Vector3.new(signWidth + 3.6, 2, 3.2), signAt + Vector3.new(0, 7, 0), GRASS, GRASS_C)
 local face =
-	part("SignFace", Vector3.new(signWidth - 1, 9.5, 0.2), signAt + Vector3.new(0, 0, 0.92), Color3.fromRGB(8, 12, 43))
+	part("SignFace", Vector3.new(signWidth - 1, 9.5, 0.2), signAt + Vector3.new(0, 0, 0.92), C.Sign)
 face.CFrame *= CFrame.Angles(0, math.pi, 0)
-part(
-	"SignTopLight",
-	Vector3.new(signWidth + 2, 0.25, 0.3),
-	signAt + Vector3.new(0, 6.15, 0.8),
-	Color3.new(1, 1, 1),
-	Enum.Material.Neon
-)
 local signGui = Instance.new("SurfaceGui")
 signGui.Name, signGui.Face = "LimitedsSign", Enum.NormalId.Front
 signGui.SizingMode, signGui.CanvasSize = Enum.SurfaceGuiSizingMode.FixedSize, Vector2.new(500, 110)
 signGui.LightInfluence, signGui.Parent = 0, face
-local signText = text(signGui, "Title", "LIMITEDS", Color3.fromRGB(255, 112, 0), 0.05, 0.9)
+local signText = text(signGui, "Title", "LIMITEDS", Color3.fromRGB(255, 214, 40), 0.05, 0.9)
 signText.Position, signText.Size = UDim2.fromScale(0.04, 0.05), UDim2.fromScale(0.92, 0.9)
 signText.Font = Enum.Font.Arcade
 signText.TextScaled, signText.TextSize = false, 100
-signText.UIStroke.Color, signText.UIStroke.Thickness = Color3.fromRGB(255, 38, 0), 2
+signText.UIStroke.Color, signText.UIStroke.Thickness = Color3.fromRGB(150, 50, 0), 3
 
 display.Parent = workspace
 RunService.Heartbeat:Connect(function(dt)
