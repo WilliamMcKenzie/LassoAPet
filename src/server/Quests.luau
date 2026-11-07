@@ -152,7 +152,7 @@ function Quests.claim(player, state, i)
 end
 
 -- The Rebirth goal (Config.Quests' "rebirth"), if it's up and done: every line back to its
--- first goal. True if it was (Hatchery's Rebirth then does the rest).
+-- Loop goal (else its first). True if it was (Hatchery's Rebirth then does the rest).
 function Quests.rebirth(player, state)
 	for line, quests in Config.Quests do
 		local slot = state.lines[line]
@@ -162,8 +162,17 @@ function Quests.rebirth(player, state)
 			if have < need then
 				return false
 			end
-			for l in Config.Quests do
-				state.lines[l] = { at = 1 }
+			-- (QM, Nov 7: a jump back to the line's label, its goal marked Loop, "Reach Desert":
+			-- the first goals aren't done again; a line without one starts over)
+			for l, goals in Config.Quests do
+				local at = 1
+				for k, goal in goals do
+					if goal.Loop then
+						at = k
+						break
+					end
+				end
+				state.lines[l] = { at = at }
 			end
 			return true
 		end

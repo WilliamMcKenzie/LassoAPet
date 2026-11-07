@@ -2391,7 +2391,8 @@ if Config.World == 1 then
 	local goals = {}
 	for i in Config.Biomes do
 		local name = Config.BiomeNames[1][i] or Config.Biomes[i].Name
-		table.insert(goals, { Text = "Reach " .. name, Kind = "reach", Biome = i, Egg = REACH_EGGS[i], NoPenLevel = true })
+		-- (Loop, QM Nov 7: a rebirth jumps back to Reach Desert, not the Meadow's goals: Quests.rebirth)
+		table.insert(goals, { Text = "Reach " .. name, Kind = "reach", Biome = i, Egg = REACH_EGGS[i], NoPenLevel = true, Loop = i == 2 or nil })
 		if not Config.Biomes[i + 1] then
 			-- (QM, Nov 7: after the last reach, Rebirth: claimed in its popup, Client/RebirthPopup)
 			table.insert(goals, { Text = "Rebirth", Kind = "rebirth", Biome = i, NoPenLevel = true })
