@@ -235,16 +235,12 @@ local function shape(kind)
 	return out
 end
 
--- kinds' tiles in a COLS-wide grid, the big ones first, then the rarest, each in the first
+-- kinds' tiles in a COLS-wide grid, the rarest first, each in the first
 -- spot it fits (reading order): { [kind] = { x, y, w, h } } (cells, from 0) and its rows, or
 -- nil if they don't fit in `rows`
 local function pack(kinds, sizes, rows)
 	local order = table.clone(kinds)
-	table.sort(order, function(a, b)
-		local aa, ab = sizes[a][1] * sizes[a][2], sizes[b][1] * sizes[b][2]
-		if aa ~= ab then
-			return aa > ab
-		end
+	table.sort(order, function(a, b) -- (rarest first whatever their size: QM, Nov 7)
 		local oa, ob = oddsOf[a] or 0, oddsOf[b] or 0
 		if oa ~= ob then
 			return oa > ob

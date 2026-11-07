@@ -6,7 +6,7 @@
 local Horse = require(script.Parent.Horse)
 local KingCrabModel = require(script.Parent.KingCrabModel)
 
-return Horse.variant("KingCrab", KingCrabModel, "Epic", {
+return Horse.variant("KingCrab", KingCrabModel, "Rare", -- (QM, Nov 7: rarity matches its odds, 1 in 20) {
 	seat = Vector3.new(0, 2.65, 0.2),
 	neck = { center = Vector3.new(0, 2.0, -1.5), radius = 1.5 },
 })
