@@ -185,7 +185,7 @@ function RewardPopups.watchCash(money)
 		local sum = gained - paid
 		gained, paid = 0, 0
 		if sum >= 1 then
-			RewardPopups.show(HudImages.CashStack, money(sum))
+			RewardPopups.show(HudImages.CashStack, money(sum)) -- (FTSAE's cash stack, outline drawn in)
 		end
 	end
 	local function wait()
