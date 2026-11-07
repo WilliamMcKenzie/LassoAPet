@@ -104,16 +104,16 @@ local Config = {
 		DungeonCapChecker = Color3.fromRGB(61, 65, 67),
 		DungeonPillar = Color3.fromRGB(84, 92, 92),
 		DungeonPillarDark = Color3.fromRGB(58, 64, 66),
-		CastleCarpet = Color3.fromRGB(156, 22, 42),
-		CastleCarpetChecker = Color3.fromRGB(170, 30, 52),
+		CastleCarpet = Color3.fromRGB(86, 166, 52),
+		CastleCarpetChecker = Color3.fromRGB(80, 156, 48),
 		CastleFloor = Color3.fromRGB(78, 70, 86),
 		CastleFloorChecker = Color3.fromRGB(87, 78, 95),
-		CastleWall = Color3.fromRGB(112, 34, 42),
-		CastleWallChecker = Color3.fromRGB(124, 40, 48),
-		CastleCap = Color3.fromRGB(70, 62, 78),
-		CastleCapChecker = Color3.fromRGB(78, 70, 86),
-		CastlePillar = Color3.fromRGB(132, 116, 132),
-		CastlePillarDark = Color3.fromRGB(100, 86, 102),
+		CastleWall = Color3.fromRGB(118, 92, 66),
+		CastleWallChecker = Color3.fromRGB(108, 84, 60),
+		CastleCap = Color3.fromRGB(70, 140, 40),
+		CastleCapChecker = Color3.fromRGB(64, 130, 36),
+		CastlePillar = Color3.fromRGB(120, 84, 54),
+		CastlePillarDark = Color3.fromRGB(96, 66, 42),
 		-- the right fork's first biome (QM, Oct 24): the Magic Forest, turquoise grass and blue stone
 		ForestGrass = Color3.fromRGB(56, 196, 168),
 		ForestGrassChecker = Color3.fromRGB(66, 208, 178),
@@ -176,11 +176,11 @@ local Config = {
 		DungeonMonolith = Color3.fromRGB(56, 62, 66),
 		DungeonMonolithDark = Color3.fromRGB(40, 44, 48),
 		DungeonRune = Color3.fromRGB(90, 255, 140),
-		CastleBoulder = Color3.fromRGB(96, 86, 102),
-		CastleBoulderDark = Color3.fromRGB(72, 64, 78),
-		CastleMonolith = Color3.fromRGB(88, 78, 96),
-		CastleMonolithDark = Color3.fromRGB(64, 56, 72),
-		CastleRune = Color3.fromRGB(255, 70, 90),
+		CastleBoulder = Color3.fromRGB(134, 120, 96),
+		CastleBoulderDark = Color3.fromRGB(110, 98, 78),
+		CastleMonolith = Color3.fromRGB(96, 110, 72),
+		CastleMonolithDark = Color3.fromRGB(74, 86, 56),
+		CastleRune = Color3.fromRGB(255, 170, 40),
 		ForestBoulder = Color3.fromRGB(120, 146, 224),
 		ForestBoulderDark = Color3.fromRGB(90, 114, 196),
 		ForestMonolith = Color3.fromRGB(128, 156, 232),
@@ -356,19 +356,19 @@ local Config = {
 			UnlockCost = 7500000, -- (the progression pass, QM Nov 7; was 1B)
 		},
 		{
-			Name = "Castle", -- the Red Castle
-			Picture = "rbxassetid://115627895691510", -- design/biomes/Castle.png: its render, no pets (the Slingshot menu's card)
+			Name = "Castle", -- the Jurassic (QM, Nov 7: in the Red Castle's place, on its map recoloured as a jungle; its old animals and boss)
+			Picture = "rbxassetid://126635296858399", -- design/biomes/Jurassic.png: a jungle render, no pets (the Slingshot menu's card)
 			AnimalSize = 2.6, -- (as the volcano's)
 			Swerve = 1,
 			NestScale = 2.5,
 			Length = 3840, -- its ground's run in maps/world.map
-			GroundColors = { Color3.fromRGB(130, 28, 55), Color3.fromRGB(127, 26, 53) },
-			WallColors = { Color3.fromRGB(64, 37, 60), Color3.fromRGB(59, 33, 55) },
-			CapColor = Color3.fromRGB(130, 28, 55),
-			GateColor = Color3.fromRGB(255, 0, 25),
+			GroundColors = { Color3.fromRGB(86, 166, 52), Color3.fromRGB(80, 156, 48) },
+			WallColors = { Color3.fromRGB(118, 92, 66), Color3.fromRGB(108, 84, 60) },
+			CapColor = Color3.fromRGB(70, 140, 40),
+			GateColor = Color3.fromRGB(255, 170, 40),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				WarBoar = 1/4, Swan = 1/4, ArmoredRam = 1/8, RoyalSteed = 1/8, ChessKnight = 1/16, RoyalPeacock = 1/16, RoyalStag = 1/20, TRex = 1/40, LivingArmor = 1/50, Pterodactyl = 1/64, CrimsonDrake = 1/100, Griffin = 1/250, RoyalEagle = 1/4000, CastleWyvern = 1/10000, FortressTortoise = 1/40000,
+				Ankylosaurus = 1/4, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/8, TRex = 1/10, Pterodactyl = 1/20, BoneRex = 1/40,
 			},
 			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
 		},
@@ -448,7 +448,7 @@ local Config = {
 	-- VeinSpin degrees a second.
 	-- ByBiome: which boss (Shared/Bosses) each biome (Config.Biomes Name) gets; Kind for any other.
 	Boss = {
-		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss", Volcano = "LavaWyrm", Jurassic = "TyrantRex" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
+		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss", Volcano = "LavaWyrm", Jurassic = "TyrantRex", Castle = "TyrantRex" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
 		ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		-- (you turn for home at once, but the camera lingers behind you, on the boss, for
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
@@ -1685,8 +1685,8 @@ local Config = {
 
 -- The endless course past the Ocean Trench (QM, Nov 6: "after the final ocean biome, should be
 -- infinite procedural: this is where we will use world 2's biomes and all its pets"). Past the
--- Ocean's end the course never stops: Shared/Endless lays it out as stretches of World 2's Marble
--- Meadow and Crystal Cavern and the Jurassic (QM, Nov 7: in the Crimson Lands' place), each one picked at random (never the one before again) for a random length, and
+-- Ocean's end the course never stops: Shared/Endless lays it out as stretches of World 2's first
+-- three biomes, each one picked at random (never the one before again) for a random length, and
 -- generates their terrain as you go (Client/Endless builds what's near the camera). Each stretch
 -- runs its biome's World 2 herd. They're biome tiers 9, 10 and 11 for speed and income (the
 -- balance passes at the end of this file). Same Seed, same course on every client and server.
@@ -1717,22 +1717,20 @@ Config.Endless = {
 			Fog = { Color = rgb(232, 214, 160), Start = 0, End = 500 },
 		},
 		{
-			-- The Jurassic (QM, Nov 7: in the Crimson Lands' place, on its terrain recoloured: a jungle
-			-- of rock ridges, mud basins and cycads), with its old animals at their old weights and
-			-- its old stampede (3x the rest) and boss
-			Name = "Jurassic",
-			DisplayName = "Jurassic",
-			Picture = "rbxassetid://126635296858399", -- design/biomes/Jurassic.png: its render, no pets (an edit-time capture of its stretch, in its fog)
+			-- World 2's Crimson Lands (QM, Oct 13)
+			Name = "CrimsonLands",
+			DisplayName = "Crimson Lands",
 			Tier = 10,
 			Swerve = 1,
-			HerdSpawnEvery = 0.15,
-			GroundColors = { rgb(86, 166, 52), rgb(80, 156, 48) },
-			WallColors = { rgb(118, 92, 66), rgb(108, 84, 60) },
+			HerdSpawnEvery = 0.45,
+			GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) },
+			WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) },
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas: 1 in 10x their base); QM Nov 7: rare ones want a rebirth
-				Ankylosaurus = 1/4, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/8, TRex = 1/10, Pterodactyl = 1/20, BoneRex = 1/40,
+				Eyeworm = 1/4, Maw = 1/4, Beholder = 1/4, CrimsonScorpion = 1/8, IvorySpider = 1/20, Asura = 1/20,
+				BlackWidow = 1/500, -- (the Black Widow 1 in 500 of its stampede: QM, Oct 13)
 			},
-			Boss = "TyrantRex",
-			Fog = { Color = rgb(150, 190, 120), Start = 0, End = 450 },
+			Boss = "CrimsonSeraph",
+			Fog = { Color = rgb(150, 60, 70), Start = 0, End = 450 },
 		},
 		{
 			-- World 2's Crystal Cavern (QM, Oct 13): blue-grey by the walls to ice to crystal down the middle
@@ -1763,14 +1761,14 @@ Config.Endless = {
 		MarbleCap = rgb(206, 168, 58),
 		MarbleWater = rgb(76, 156, 222), MarbleWaterChecker = rgb(90, 170, 232),
 		MarbleBush = rgb(166, 130, 36),
-		JurassicGround = rgb(86, 166, 52), JurassicGroundChecker = rgb(80, 156, 48),
-		JurassicPatch = rgb(112, 184, 64), JurassicPatchChecker = rgb(104, 174, 58),
-		JurassicStone = rgb(134, 120, 96), JurassicStoneChecker = rgb(124, 110, 88),
-		JurassicDark = rgb(96, 74, 48), JurassicDarkChecker = rgb(88, 68, 44),
-		JurassicWall = rgb(118, 92, 66), JurassicWallChecker = rgb(108, 84, 60),
-		JurassicCap = rgb(70, 140, 40),
-		JurassicAmber = rgb(255, 170, 40),
-		JurassicFrond = rgb(46, 128, 44), JurassicTrunk = rgb(120, 84, 54),
+		CrimsonGround = rgb(121, 20, 37), CrimsonGroundChecker = rgb(110, 17, 33),
+		CrimsonPatch = rgb(144, 44, 43), CrimsonPatchChecker = rgb(132, 38, 38),
+		CrimsonStone = rgb(119, 86, 86), CrimsonStoneChecker = rgb(108, 77, 77),
+		CrimsonDark = rgb(98, 15, 30), CrimsonDarkChecker = rgb(89, 13, 27),
+		CrimsonWall = rgb(91, 50, 54), CrimsonWallChecker = rgb(82, 44, 48),
+		CrimsonCap = rgb(72, 39, 42),
+		CrimsonRune = rgb(255, 59, 92),
+		CrimsonShroom = rgb(196, 38, 56), CrimsonShroomStem = rgb(226, 206, 196),
 		CavernGround = rgb(90, 109, 143), CavernGroundChecker = rgb(82, 99, 131),
 		CavernIce = rgb(98, 129, 167), CavernIceChecker = rgb(89, 118, 153),
 		CavernCrystal = rgb(116, 186, 213), CavernCrystalChecker = rgb(105, 171, 197),
@@ -2477,7 +2475,7 @@ end
 -- Each world's biome names, as players know them (Stats, Funnel; World 2's and 3's Config.Biomes
 -- Names are different: World 2's keep World 1's).
 Config.BiomeNames = {
-	{ "Meadow", "Desert", "Tundra", "Volcano", "Abandoned Dungeon", "Magic Forest", "Red Castle", "Ocean Trench" },
+	{ "Meadow", "Desert", "Tundra", "Volcano", "Abandoned Dungeon", "Magic Forest", "Jurassic", "Ocean Trench" },
 	{ "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
 	{ "Pirate Cove", "Garden", "Candyland", "Cnidaria" },
 }

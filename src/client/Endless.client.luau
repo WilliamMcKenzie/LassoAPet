@@ -175,7 +175,7 @@ local function neon(p)
 	return p
 end
 
--- a mushroom: a stem and a stepped cap, spots on top (the Jurassic's: trunk and fronds, a cycad)
+-- a mushroom: a stem and a stepped cap (World 2's living mushrooms' look), spots on top
 local function mushroom(m, s, at, capKey, stemKey, glow, r)
 	local h = 14 * s
 	cyl(m, stemKey, h, 3 * s, at * CFrame.new(0, h / 2, 0))
@@ -211,11 +211,11 @@ local function crystals(m, s, at, key, r, count)
 	end
 end
 
--- a tall stone with glowing bars down both faces (the Jurassic's: amber)
+-- a tall stone with glowing rune bars down both faces
 local function runestone(m, s, at, height, r)
 	local h = height * s
 	local tilt = at * CFrame.Angles(r:NextNumber(-0.08, 0.08), 0, r:NextNumber(-0.08, 0.08))
-	newPart(m, "JurassicStone", Vector3.new(4.5 * s, h, 3 * s), tilt * CFrame.new(0, h / 2 - 0.5, 0))
+	newPart(m, "CrimsonStone", Vector3.new(4.5 * s, h, 3 * s), tilt * CFrame.new(0, h / 2 - 0.5, 0))
 	for _, face in { -1, 1 } do
 		for k = 1, math.max(2, math.floor(h / (3 * s))) do
 			local y = 1.5 * s + (k - 1) * 3 * s
@@ -223,7 +223,7 @@ local function runestone(m, s, at, height, r)
 				break
 			end
 			local w = r:NextNumber(1, 3) * s
-			neon(newPart(m, "JurassicAmber", Vector3.new(w, 0.6 * s, 0.3), tilt * CFrame.new(r:NextNumber(-0.8, 0.8) * s, y, face * 1.55 * s)))
+			neon(newPart(m, "CrimsonRune", Vector3.new(w, 0.6 * s, 0.3), tilt * CFrame.new(r:NextNumber(-0.8, 0.8) * s, y, face * 1.55 * s)))
 		end
 	end
 end
@@ -261,15 +261,15 @@ local BUILD = {
 		return 3 * s
 	end,
 	GiantShroom = function(m, s, at, r)
-		mushroom(m, 1.15 * s, at, "JurassicFrond", "JurassicTrunk", nil, r)
+		mushroom(m, 1.15 * s, at, "CrimsonShroom", "CrimsonShroomStem", nil, r)
 		return 2.5 * s
 	end,
 	Shroom = function(m, s, at, r)
-		mushroom(m, 0.6 * s, at, "JurassicFrond", "JurassicTrunk", nil, r)
+		mushroom(m, 0.6 * s, at, "CrimsonShroom", "CrimsonShroomStem", nil, r)
 		return 1.6 * s
 	end,
 	SmallShroom = function(m, s, at, r)
-		mushroom(m, 0.3 * s, at, "JurassicFrond", "JurassicTrunk", nil, r)
+		mushroom(m, 0.3 * s, at, "CrimsonShroom", "CrimsonShroomStem", nil, r)
 		return 1.2 * s
 	end,
 	Runestone = function(m, s, at, r)
@@ -289,8 +289,8 @@ local BUILD = {
 			p.Material, p.MaterialVariant = Enum.Material.SmoothPlastic, "Matte"
 			p.Size = Vector3.new(0.8 * s, h, 2 * s)
 			p.CFrame = at * CFrame.Angles(0, a, 0) * CFrame.new(0, h / 2, 1 * s) * CFrame.Angles(0.25, 0, 0)
-			p:SetAttribute("ColorKey", "JurassicPatch")
-			p.Color = color("JurassicPatch")
+			p:SetAttribute("ColorKey", "CrimsonPatch")
+			p.Color = color("CrimsonPatch")
 			p.Parent = m
 		end
 		return 2 * s
@@ -365,19 +365,19 @@ local LANDMARK = {
 		newPart(m, "MarbleStone", Vector3.new(2 * reach + 18, 2, 15), CFrame.new(0, 83, l.z))
 		newPart(m, "MarbleCap", Vector3.new(2 * reach + 18, 1.5, 15.6), CFrame.new(0, 84.6, l.z))
 	end,
-	-- the Jurassic: two giant standing stones on the ledges, amber glowing in them, and a lintel between
-	Jurassic = function(m, l)
+	-- two giant runestones on the ledges and a lintel stone hanging between them
+	CrimsonLands = function(m, l)
 		local r = Random.new(l.seed)
 		local reach = l.w + 10
 		for _, side in { -1, 1 } do
 			local at = CFrame.new(side * reach, 0, l.z) * CFrame.Angles(0, 0, side * 0.05)
-			newPart(m, "JurassicStone", Vector3.new(14, 90, 9), at * CFrame.new(0, 44, 0))
+			newPart(m, "CrimsonStone", Vector3.new(14, 90, 9), at * CFrame.new(0, 44, 0))
 			for k = 1, 9 do
-				neon(newPart(m, "JurassicAmber", Vector3.new(r:NextNumber(3, 8), 1.6, 0.4), at * CFrame.new(r:NextNumber(-2.5, 2.5), 10 + k * 8, -4.6)))
+				neon(newPart(m, "CrimsonRune", Vector3.new(r:NextNumber(3, 8), 1.6, 0.4), at * CFrame.new(r:NextNumber(-2.5, 2.5), 10 + k * 8, -4.6)))
 			end
 		end
-		newPart(m, "JurassicStone", Vector3.new(2 * reach + 20, 8, 10), CFrame.new(0, 96, l.z))
-		neon(newPart(m, "JurassicAmber", Vector3.new(2 * reach, 1, 0.4), CFrame.new(0, 94, l.z - 5.1)))
+		newPart(m, "CrimsonStone", Vector3.new(2 * reach + 20, 8, 10), CFrame.new(0, 96, l.z))
+		neon(newPart(m, "CrimsonRune", Vector3.new(2 * reach, 1, 0.4), CFrame.new(0, 94, l.z - 5.1)))
 	end,
 	-- a rock bridge across the cavern, stalactites hanging off it and crystals on top
 	CrystalCavern = function(m, l)
