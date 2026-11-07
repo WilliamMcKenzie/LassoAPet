@@ -966,11 +966,11 @@ local Config = {
 	LoongOffer = { Kind = "Loong", ProductId = 3718721407, Price = 999, Stock = 500, StartLeft = 435, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(7, 0, -11), -- (against the base's front wall, the Robo Shark beside it: QM, Oct 15)
 		Ledger = "loongs", StockKey = "sold" },
 	-- Majestic Unicorn replaces the limited Robo Shark; keep its product, stock and claim counters.
-	MajesticUnicornOffer = { Kind = "MajesticUnicorn", ProductId = 3718722226, Price = 999, Stock = 1000, StartLeft = 870, Scale = 2, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11),
+	MajesticUnicornOffer = { Kind = "MajesticUnicorn", ProductId = 3718722226, Price = 599, Stock = 1000, StartLeft = 870, Scale = 2, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11),
 		Ledger = "roboSharks", StockKey = "sold_RoboShark", ClaimField = "boughtRoboSharks" },
 	-- The Robo Shark back as the third limited (QM, Nov 7). Its own ledger, stock and claim fields:
-	-- the Majestic Unicorn kept the old Robo Shark ones (above). Product "Robo Shark Pet [Limited]", R$999.
-	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3729449142, Price = 999, Stock = 1000, StartLeft = 870, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165,
+	-- the Majestic Unicorn kept the old Robo Shark ones (above). Product "Robo Shark Pet [Limited]", R$499 (Unicorn R$599, Loong R$999: QM, Nov 7).
+	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3729449142, Price = 499, Stock = 1000, StartLeft = 870, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165,
 		Ledger = "limitedRoboSharks", StockKey = "sold_LimitedRoboShark", ClaimField = "boughtLimitedRoboSharks" },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
