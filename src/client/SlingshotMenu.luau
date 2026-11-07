@@ -3,7 +3,7 @@
 -- the orange-headed popup, HudKit.popup, and its 729 x 991 cards in a row that scrolls
 -- sideways), one card per biome (Config.Biomes), its back in the biome's colours:
 --   its name, Unlocked / Locked under it, over its picture (Config.Biomes[i].Picture, a render
---   of it, filling the card), how many animals run there (the Weapon Shop's DPS bar), and at the bottom
+--   of it, filling the card), how hard it is (Config.BiomeDifficulty: the Weapon Shop's DPS bar), and at the bottom
 --   GO!       unlocked: flings you there (onPick)
 --   $Price    the next one to unlock, for its UnlockCost (Server/Slingshot's UnlockBiome: in
 --             order only), beside its Robux price when it has a developer product
@@ -110,13 +110,9 @@ local function makeCard(parent, i, biome)
 		Size = UDim2.fromOffset(fig(674), fig(85)),
 		ZIndex = 3,
 	})
-	-- the dark bar (the Weapon Shop's DPS): how many kinds of animal run there
-	local kinds = 0
-	for _, weight in biome.Herd or {} do
-		if weight > 0 then
-			kinds += 1
-		end
-	end
+	-- the dark bar (the Weapon Shop's DPS): how hard it is (Config.BiomeDifficulty, QM)
+	local ladder = Config.BiomeDifficulty or {}
+	local difficulty = ladder[math.min(i, #ladder)]
 	local bar = HudKit.back(card, "Dark", {
 		Name = "Info",
 		Position = UDim2.fromOffset(fig(24), fig(631)),
@@ -125,7 +121,7 @@ local function makeCard(parent, i, biome)
 	})
 	label(bar, "Text", {
 		RichText = true,
-		Text = if kinds > 0 then string.format('<font color="#00FFF6">%d</font> Animals', kinds) else "No animals yet",
+		Text = if difficulty then difficulty[1] .. " " .. difficulty[2] else "",
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextSize = fig(95),
 		Size = UDim2.fromScale(1, 1),
