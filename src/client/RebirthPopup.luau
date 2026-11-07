@@ -1,10 +1,11 @@
 -- The Rebirth popup (QM, Nov 7; Config.Luck): the last goal's Claim! and the luck counter open
 -- it (NativeHud). The orange-headed popup (HudKit.popup, as the Slingshot's menu), what a
 -- rebirth does in three dark bars, each now -> after:
---   Cash             $1.2m -> $0
---   Slingshot        every biome you've unlocked (its picture, Config.Biomes[i].Picture) -> just
---                    the Meadow's (QM, Nov 7), then prices x1 -> x2
---   Luck per goal    +0.25 -> +0.5 (goal rewards x2; your luck itself stays)
+-- (QM, Nov 7: icons, not words)
+--   [cash]   $1.2m -> $0
+--   every biome you've unlocked (its picture, Config.Biomes[i].Picture) -> just the Meadow's,
+--   then [cash] x1 -> x2 (unlock prices)
+--   [clover] +0.25 -> +0.5 (luck per goal: goal rewards x2; your luck itself stays)
 -- and under them Rebirth! (Hatchery's Rebirth), or, till the Rebirth goal is done, a grey
 -- "Reach <Config.rebirthBiome>" (Desert, then Tundra...) that does nothing. X (or not confirming) leaves the goal to claim later.
 --
@@ -32,7 +33,8 @@ local ROWS_Y = 360
 local CONFIRM_W, CONFIRM_H, CONFIRM_Y = 900, 200, 1060
 
 local PIC_MAX_H, PIC_ASPECT, PIC_GAP = 130, 1.4, 16 -- the Slingshot row's biome pictures
-local ARROW_W, PRICES_W = 90, 520
+local ARROW_W, PRICES_W = 170, 520 -- (the arrow's and the prices' room, icon and all)
+local ICON = 140 -- the rows' icons (HudImages: the HUD's cash and clover)
 
 local gui, rows, confirm, confirmText, waiting
 
@@ -57,22 +59,37 @@ local function refresh()
 	end
 	local reborn = player:GetAttribute("Reborn") or 0
 	local per = Config.Luck.CostPerRebirth
-	rows.Cash.Text.Text = "Cash   $" .. Config.short(player:GetAttribute("Gold") or 0) .. "  →  " .. colored("$0", BAD)
-	-- the Slingshot row: your unlocked biomes' pictures -> the Meadow's, prices x1 -> x2
-	local strip = rows.Slingshot.Strip
-	for _, child in strip:GetChildren() do
-		if not child:IsA("UIListLayout") then
-			child:Destroy()
+	-- each row an icon strip (QM, Nov 7: icons, not words), rebuilt each time
+	local strip, order
+	local function start(row)
+		strip, order = rows[row].Strip, 0
+		for _, child in strip:GetChildren() do
+			if not child:IsA("UIListLayout") then
+				child:Destroy()
+			end
 		end
 	end
-	local have = math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
-	local room = ROW_W - 60 - ARROW_W - PRICES_W - (have + 3) * PIC_GAP
-	local h = math.min(PIC_MAX_H, room / (have + 1) / PIC_ASPECT)
-	local order = 0
-	local function picture(i)
+	local function icon(name)
+		order += 1
+		HudKit.art(strip, name, { Size = UDim2.fromOffset(fig(ICON), fig(ICON)), LayoutOrder = order, ZIndex = 4 })
+	end
+	local function text(str)
+		order += 1
+		label(strip, "Text" .. order, {
+			RichText = true,
+			Text = str,
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextSize = fig(80),
+			AutomaticSize = Enum.AutomaticSize.X,
+			Size = UDim2.fromOffset(0, fig(ROW_H)),
+			LayoutOrder = order,
+			ZIndex = 4,
+		})
+	end
+	local function picture(i, h)
 		order += 1
 		local pic = Instance.new("ImageLabel")
-		pic.Name = "Biome" .. i
+		pic.Name = "Biome" .. order
 		pic.BackgroundColor3 = Color3.new(0, 0, 0)
 		pic.Image = Config.Biomes[i].Picture or ""
 		pic.ScaleType = Enum.ScaleType.Crop
@@ -88,33 +105,34 @@ local function refresh()
 		edge.Parent = pic
 		pic.Parent = strip
 	end
-	local function text(name, str, w)
-		order += 1
-		label(strip, name, {
-			RichText = true,
-			Text = str,
-			TextXAlignment = Enum.TextXAlignment.Center,
-			TextSize = fig(70),
-			Size = UDim2.fromOffset(fig(w), fig(ROW_H)),
-			LayoutOrder = order,
-			ZIndex = 4,
-		})
-	end
+	local ARROW = "  →  "
+
+	-- cash: [cash] $9.8b -> $0
+	start("Cash")
+	icon("CashIcon")
+	text("$" .. Config.short(player:GetAttribute("Gold") or 0) .. ARROW .. colored("$0", BAD))
+
+	-- slingshot: your unlocked biomes' pictures -> the Meadow's, [cash] x1 -> x2 (its prices)
+	start("Slingshot")
+	local have = math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
+	local room = ROW_W - 60 - ARROW_W - PRICES_W - (have + 4) * PIC_GAP
+	local h = math.min(PIC_MAX_H, room / (have + 1) / PIC_ASPECT)
 	for i = 1, have do
-		picture(i)
+		picture(i, h)
 	end
-	text("Arrow", "→", ARROW_W)
-	picture(1)
-	text(
-		"Prices",
-		"Prices x" .. Config.short(per ^ reborn) .. " → " .. colored("x" .. Config.short(per ^ (reborn + 1)), BAD),
-		PRICES_W
-	)
+	text(ARROW)
+	picture(1, h)
+	icon("CashIcon")
+	text("x" .. Config.short(per ^ reborn) .. ARROW .. colored("x" .. Config.short(per ^ (reborn + 1)), BAD))
+
+	-- luck per goal: [clover] +0.25 -> +0.5
 	local now, after = Config.Luck.Reach * Config.Luck.RewardPerRebirth ^ reborn, Config.Luck.Reach * Config.Luck.RewardPerRebirth ^ (reborn + 1)
 	local function plus(n)
 		return "+" .. (string.format("%.2f", n):gsub("%.?0+$", ""))
 	end
-	rows.Luck.Text.Text = "Luck per goal " .. plus(now) .. "  →  " .. colored(plus(after), GOOD)
+	start("Luck")
+	icon("LuckIcon")
+	text(plus(now) .. ARROW .. colored(plus(after), GOOD))
 	local can = ready()
 	confirm.Active = can
 	confirm.AutoButtonColor = false
@@ -145,31 +163,20 @@ local function build()
 			Size = UDim2.fromOffset(fig(ROW_W), fig(ROW_H)),
 			ZIndex = 3,
 		})
-		if name == "Slingshot" then
-			-- (filled in by refresh: pictures in a centred row)
-			local strip = Instance.new("Frame")
-			strip.Name = "Strip"
-			strip.BackgroundTransparency = 1
-			strip.Size = UDim2.fromScale(1, 1)
-			strip.ZIndex = 4
-			local list = Instance.new("UIListLayout")
-			list.FillDirection = Enum.FillDirection.Horizontal
-			list.HorizontalAlignment = Enum.HorizontalAlignment.Center
-			list.VerticalAlignment = Enum.VerticalAlignment.Center
-			list.SortOrder = Enum.SortOrder.LayoutOrder
-			list.Padding = UDim.new(0, fig(PIC_GAP))
-			list.Parent = strip
-			strip.Parent = bar
-		else
-			label(bar, "Text", {
-				RichText = true,
-				Text = "",
-				TextXAlignment = Enum.TextXAlignment.Center,
-				TextSize = fig(80),
-				Size = UDim2.fromScale(1, 1),
-				ZIndex = 4,
-			})
-		end
+		-- (filled in by refresh: icons, text and pictures in a centred row)
+		local strip = Instance.new("Frame")
+		strip.Name = "Strip"
+		strip.BackgroundTransparency = 1
+		strip.Size = UDim2.fromScale(1, 1)
+		strip.ZIndex = 4
+		local list = Instance.new("UIListLayout")
+		list.FillDirection = Enum.FillDirection.Horizontal
+		list.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		list.VerticalAlignment = Enum.VerticalAlignment.Center
+		list.SortOrder = Enum.SortOrder.LayoutOrder
+		list.Padding = UDim.new(0, fig(PIC_GAP))
+		list.Parent = strip
+		strip.Parent = bar
 		rows[name] = bar
 	end
 
