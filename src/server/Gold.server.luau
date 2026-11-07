@@ -76,6 +76,7 @@ local function load(player)
 				player:SetAttribute("TrailsOwned", if typeof(value) == "table" then tonumber(value.trails) else nil) -- (Config.TrailBars, shared by every world)
 				player:SetAttribute("Reborn", if typeof(value) == "table" then tonumber(value.reborn) else nil) -- (Config.Luck: rebirths, Hatchery's Rebirth)
 				player:SetAttribute("LuckBonus", if typeof(value) == "table" then tonumber(value.luck) else nil) -- (Config.Luck: the goals' luck, Hatchery's ClaimQuest)
+				player:SetAttribute("FreeGift", if typeof(value) == "table" and value.gift == true then true else nil) -- (Config.FreeGift: claimed, Server/FreeGift)
 				player:SetAttribute("OwnsSlingshot", if typeof(value) == "table" and value.slingshot == true then true else nil) -- (Config.Slingshot)
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
 				if typeof(value) == "table" and value.v1new then -- (Analytics V1: a new World 1 player since V1)
@@ -116,7 +117,8 @@ local function save(player, onlyIfChanged)
 	local slingshot = player:GetAttribute("OwnsSlingshot") == true
 	local reborn = player:GetAttribute("Reborn")
 	local luck = player:GetAttribute("LuckBonus")
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths) .. "/" .. tostring(trails) .. "/" .. tostring(slingshot) .. "/" .. tostring(reborn) .. "/" .. tostring(luck)
+	local gift = player:GetAttribute("FreeGift") == true
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths) .. "/" .. tostring(trails) .. "/" .. tostring(slingshot) .. "/" .. tostring(reborn) .. "/" .. tostring(luck) .. "/" .. tostring(gift)
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
@@ -130,6 +132,7 @@ local function save(player, onlyIfChanged)
 		record.slingshot = slingshot or nil
 		record.reborn = reborn
 		record.luck = luck
+		record.gift = gift or nil
 		record.v1new = player:GetAttribute("V1New") or record.v1new
 		record.lastWorld = Config.World -- (where you were last: a join from the home page goes back there)
 		record[PLAYED] = math.floor(playedNow(player))
@@ -210,7 +213,7 @@ for _, player in Players:GetPlayers() do
 end
 -- A rebirth (Hatchery's Rebirth: cash 0, "Reborn" + 1): saved at once.
 local function watchReborn(player)
-	for _, name in { "Reborn", "LuckBonus" } do -- (and luck from a goal)
+	for _, name in { "Reborn", "LuckBonus", "FreeGift" } do -- (and luck from a goal, and the free gift claimed)
 		player:GetAttributeChangedSignal(name):Connect(function()
 			if loaded[player] then
 				save(player)
@@ -266,7 +269,7 @@ hardReset.Name = "HardReset"
 hardReset.Event:Connect(function(player)
 	player:SetAttribute("Gold", 0)
 	player:SetAttribute("GatesBroken", 1)
-	for _, name in { "Rebirths", "FinishTrail", "TrailsOwned", "Reborn", "LuckBonus" } do
+	for _, name in { "Rebirths", "FinishTrail", "TrailsOwned", "Reborn", "LuckBonus", "FreeGift" } do
 		player:SetAttribute(name, nil)
 	end
 	for world in Config.Places do

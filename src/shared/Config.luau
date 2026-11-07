@@ -1965,6 +1965,30 @@ Config.TopEarners = {
 	Top = 50, -- rows on the board
 	Meshes = { { 106770230038436, 177, 185, 178, 0.006, 20.790, -0.713 }, { 82718487796629, 148, 156, 150, -0.759, 20.846, -0.708 }, { 134382604805829, 232, 226, 206, 0.008, 46.766, -0.195 }, { 137436135736323, 38, 38, 44, 0.000, 46.300, -4.175 } }, -- (filled by tools/earners_board_upload.py)
 }
+-- The free gift (QM, Nov 7: Fight to Steal an Egg's, 1:1, but +3 luck and +5k cash, not Power):
+-- a red studded present with a yellow bow, "FREE!" over it, a glowing ring and sparkles, in
+-- the base right of the start line (Shared/GiftModel; Server/FreeGift builds it). Walking into
+-- its ring opens the Free Reward! popup (Client/FreeReward): the three steps (like the game,
+-- favorite it, join the group) and Claim, which gives Luck (added to LuckBonus) and Cash,
+-- once per player (saved: `gift`, Gold.server). Only the group can be checked: not in it,
+-- Claim pops a red "Steps not complete!". GroupId nil: the group that owns the game.
+Config.FreeGift = {
+	X = 105, Z = 30, Yaw = 150, -- (mirrors the Top Earners board: right of the course's mouth, facing into the base)
+	Scale = 1,
+	Luck = 3, -- added to your luck (x1 -> x4)
+	Cash = 5000,
+	GroupId = nil,
+	Reach = 30, -- studs from the gift the server takes a Claim from
+	OpenRadius = 7, -- walking this close (the ring) opens the popup
+	LabelTop = Color3.fromHex("eaff3c"), -- FREE!: lit lime at the top...
+	LabelBottom = Color3.fromHex("38d41a"), -- ...to green at the bottom
+	LabelHeight = 3.2, -- studs tall
+	RingColor = Color3.fromRGB(255, 226, 60),
+	RingRadius = 6,
+	BoxColor = Color3.fromRGB(226, 26, 36),
+	RibbonColor = Color3.fromRGB(255, 205, 30),
+	Bob = 0.35, -- studs it floats up and down (client/FreeReward)
+}
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:
 -- free in Studio, not on sale live.
