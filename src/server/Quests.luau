@@ -55,6 +55,22 @@ function Quests.load(saved)
 		state.lines = { { at = 1 } }
 	end
 	state.v = 4
+	-- (QM, Nov 7: a goal's egg only the first time; `given` = { ["line.k"] = true }, the goals
+	-- already claimed once. Saved before it: everything before where each line is up)
+	state.given = {}
+	if typeof(saved) == "table" and typeof(saved.given) == "table" then
+		for key, on in saved.given do
+			if type(key) == "string" and on == true then
+				state.given[key] = true
+			end
+		end
+	else
+		for line, slot in state.lines do
+			for k = 1, slot.at - 1 do
+				state.given[line .. "." .. k] = true
+			end
+		end
+	end
 	return state
 end
 
@@ -129,7 +145,8 @@ function Quests.penCount(player, state, n)
 	Quests.publish(player, state)
 end
 
--- Claims quest i (as published) if it's up and finished: returns it (Config.Quests'), or nil.
+-- Claims quest i (as published) if it's up and finished: returns it (Config.Quests') and
+-- whether it's the first time it's been claimed, or nil.
 function Quests.claim(player, state, i)
 	local line, at = i // 100, i % 100
 	local slot = state.lines[line]
@@ -147,8 +164,11 @@ function Quests.claim(player, state, i)
 		nextAt += 1
 	end
 	state.lines[line] = { at = nextAt }
+	state.given = state.given or {}
+	local first = not state.given[line .. "." .. at] -- (its egg only the first time: QM, Nov 7)
+	state.given[line .. "." .. at] = true
 	Quests.publish(player, state)
-	return quest
+	return quest, first
 end
 
 -- The Rebirth goal (Config.Quests' "rebirth"), if it's up and done: every line back to its

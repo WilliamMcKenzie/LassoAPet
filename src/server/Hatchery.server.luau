@@ -1361,16 +1361,27 @@ local claimQuest = Instance.new("RemoteFunction")
 claimQuest.Name = "ClaimQuest"
 claimQuest.OnServerInvoke = function(player, i)
 	local profile = profiles[player]
-	local quest = profile and typeof(i) == "number" and Quests.claim(player, profile.quests, i)
+	local quest, first
+	if profile and typeof(i) == "number" then
+		quest, first = Quests.claim(player, profile.quests, i)
+	end
 	if not quest then
 		return nil
+	end
+	-- (QM, Nov 7: luck and cash every time, doubling each rebirth; the egg the first time only)
+	local luck, cash = Config.goalLuck(player, quest), Config.goalCash(player, quest)
+	if luck > 0 then
+		player:SetAttribute("LuckBonus", (player:GetAttribute("LuckBonus") or 0) + luck)
+	end
+	if cash > 0 then
+		player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + cash)
 	end
 	local level = math.clamp(player:GetAttribute("PenLevel") or 1, 1, Config.PenLevels)
 	if level < Config.PenLevels and not quest.NoPenLevel then -- (not "Reach Meadow": QM)
 		player:SetAttribute("PenLevel", level + 1)
 	end
 	Funnel.claimed(player, i) -- (Analytics V1)
-	local eggs = if typeof(quest.Egg) == "table" then quest.Egg else { quest.Egg } -- (several: World 2's Kitsune quest)
+	local eggs = if not first then {} elseif typeof(quest.Egg) == "table" then quest.Egg else { quest.Egg } -- (several: World 2's Kitsune quest)
 	for _, kind in eggs do
 		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
 	end
@@ -1380,8 +1391,8 @@ end
 claimQuest.Parent = ReplicatedStorage
 -- Rebirth (QM, Nov 7; Config.Luck): the Rebirth goal's popup confirmed (Client/RebirthPopup).
 -- With the goal up and done: cash to 0, the slingshot's unlocks and the barriers gone (pen
--- level and GatesBroken back to 1), the goals from the start, one more rebirth (luck x2, unlocks
--- x2 the price). Pets and eggs stay. Gold.server and PenLevel.server save on "Reborn".
+-- level and GatesBroken back to 1), the goals back to Reach Desert, one more rebirth (goal rewards
+-- and unlocks x2). Pets, eggs and luck stay. Gold.server and PenLevel.server save on "Reborn".
 local rebirth = Instance.new("RemoteFunction")
 rebirth.Name = "Rebirth"
 rebirth.OnServerInvoke = function(player)

@@ -426,9 +426,9 @@ local phase = "idle" -- idle | outbound | turning | return | home | finish | end
 local starter, mount
 local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
 local plans = {} -- [n] = { x, speed }, the stampede's schedule
--- Your luck changed (a rebirth, or the save loaded: "Reborn"): every stream's odds again at
+-- Your luck changed (a goal, or the save loaded: "LuckBonus"): every stream's odds again at
 -- the new luck, and the plans not yet running drawn again from them.
-player:GetAttributeChangedSignal("Reborn"):Connect(function()
+player:GetAttributeChangedSignal("LuckBonus"):Connect(function()
 	local luck = Config.luck(player)
 	for _, s in streams do
 		s.total = 0

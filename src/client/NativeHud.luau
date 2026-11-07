@@ -247,9 +247,9 @@ function NativeHud.build(handlers)
 		ZIndex = 4,
 	})
 	local function showLuck()
-		luck.Text = "x" .. Config.short(Config.luck(player))
+		luck.Text = Config.luckText(Config.luck(player))
 	end
-	player:GetAttributeChangedSignal("Reborn"):Connect(showLuck)
+	player:GetAttributeChangedSignal("LuckBonus"):Connect(showLuck)
 	showLuck()
 	luckButton.Activated:Connect(function()
 		require(script.Parent.RebirthPopup).open()

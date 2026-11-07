@@ -3,7 +3,7 @@
 -- rebirth does in three dark bars, each now -> after:
 --   Cash             $1.2m -> $0
 --   Slingshot        unlocks wiped, prices x1 -> x2
---   Luck             x1 -> x2
+--   Luck per goal    +0.25 -> +0.5 (goal rewards x2; your luck itself stays)
 -- and under them Rebirth! (Hatchery's Rebirth), or, till the Rebirth goal is done, a grey
 -- "Reach Ocean Trench" that does nothing. X (or not confirming) leaves the goal to claim later.
 --
@@ -54,14 +54,17 @@ local function refresh()
 		return
 	end
 	local reborn = player:GetAttribute("Reborn") or 0
-	local luck = Config.luck(player)
 	local per = Config.Luck.CostPerRebirth
 	rows.Cash.Text.Text = "Cash   $" .. Config.short(player:GetAttribute("Gold") or 0) .. "  →  " .. colored("$0", BAD)
 	rows.Slingshot.Text.Text = "Slingshot unlocks wiped, prices x"
 		.. Config.short(per ^ reborn)
 		.. "  →  "
 		.. colored("x" .. Config.short(per ^ (reborn + 1)), BAD)
-	rows.Luck.Text.Text = "Luck   x" .. Config.short(luck) .. "  →  " .. colored("x" .. Config.short(luck * Config.Luck.PerRebirth), GOOD)
+	local now, after = Config.Luck.Reach * Config.Luck.RewardPerRebirth ^ reborn, Config.Luck.Reach * Config.Luck.RewardPerRebirth ^ (reborn + 1)
+	local function plus(n)
+		return "+" .. (string.format("%.2f", n):gsub("%.?0+$", ""))
+	end
+	rows.Luck.Text.Text = "Luck per goal " .. plus(now) .. "  →  " .. colored(plus(after), GOOD)
 	local can = ready()
 	confirm.Active = can
 	confirm.AutoButtonColor = false
@@ -142,7 +145,7 @@ local function build()
 			UiFx.shake(confirm)
 		end
 	end)
-	for _, name in { "Gold", "Reborn", "Quests" } do
+	for _, name in { "Gold", "Reborn", "Quests", "LuckBonus" } do
 		player:GetAttributeChangedSignal(name):Connect(refresh)
 	end
 end

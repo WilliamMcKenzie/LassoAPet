@@ -1906,18 +1906,39 @@ end
 function Config.rebirthSpeed(player)
 	return (Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1) * (if player:GetAttribute("PassSpeed") then Config.PassSpeed else 1)
 end
--- Luck (QM, Nov 7): each rebirth (the last goal, past the Ocean: Server/Quests' "rebirth",
--- Hatchery's Rebirth) doubles your luck from 1 and doubles every slingshot unlock's price, and
--- wipes your cash and unlocks. Your pets stay. Luck flattens your own stampede's odds (each
--- weight ^ (1 / luck): 1 is the table as it is, more and more luck heads for all even), so
--- every player's stampede is their own now. Saved as `reborn` (Gold.server), the "Reborn"
+-- Luck (QM, Nov 7): 1 + what the goals have given you ("LuckBonus", saved as `luck`:
+-- Gold.server), added, never multiplied, and kept through rebirths. Each Reach goal from the
+-- Desert on gives Reach luck, each Capture 3 cash (CashOfNext of the next unlock's price); both
+-- double each rebirth (RewardPerRebirth). A goal's egg only comes the first time (Server/Quests).
+-- A rebirth (the last goal, past the Ocean: Server/Quests' "rebirth", Hatchery's Rebirth) wipes
+-- your cash and unlocks, doubles every slingshot unlock's price and the goals' rewards, and
+-- loops the goals back to Reach Desert. Your pets and luck stay. Luck flattens your own
+-- stampede's odds (each weight ^ (1 / luck): 1 is the table as it is, more and more luck heads
+-- for all even), so every player's stampede is their own. Rebirths are `reborn`, the "Reborn"
 -- attribute; not the old Rebirths above (their gold, speed and skins).
 Config.Luck = {
-	PerRebirth = 2, -- luck x this each rebirth
+	Reach = 0.25, -- luck for each Reach goal from the Desert on, before any rebirth
+	CashOfNext = 0.1, -- a Capture 3 goal's cash: this much of the next unlock's price (which doubles too)
+	RewardPerRebirth = 2, -- goal luck x this each rebirth (0.25, 0.5, 1, 2...)
 	CostPerRebirth = 2, -- slingshot unlock prices x this each rebirth
 }
 function Config.luck(player)
-	return Config.Luck.PerRebirth ^ (player:GetAttribute("Reborn") or 0)
+	return 1 + (player:GetAttribute("LuckBonus") or 0)
+end
+-- Luck to show: "x1", "x1.25", "x2.75", "x12.5".
+function Config.luckText(luck)
+	return "x" .. (string.format("%.2f", luck):gsub("%.?0+$", ""))
+end
+-- What goal gives `player` in luck and cash when claimed (extra: after that many more rebirths).
+function Config.goalLuck(player, goal, extra)
+	local n = (player:GetAttribute("Reborn") or 0) + (extra or 0)
+	return (goal.Luck or 0) * Config.Luck.RewardPerRebirth ^ n
+end
+function Config.goalCash(player, goal, extra)
+	if not goal.CashOfNext or not Config.Biomes[(goal.Biome or 0) + 1] then
+		return 0
+	end
+	return math.floor(Config.unlockCost(player, goal.Biome + 1, extra) * goal.CashOfNext)
 end
 -- A herd weight at `luck`.
 function Config.luckWeight(weight, luck)
@@ -2388,18 +2409,18 @@ Config.BiomeNames = {
 -- animals, upgrade the slingshot (unlock the next biome in its menu: Server/Slingshot). Claiming
 -- one no longer upgrades your pen (the slingshot's unlocks do). The first four reaches keep their eggs.
 if Config.World == 1 then
-	local REACH_EGGS = { "Cactus", "Penguin", "Snowman", "FireLobster" }
+	local REACH_EGGS = { "Cactus", "Penguin", "Snowman", "FireLobster", "DungeonRat", "Shroom", "WarBoar", "Squid" } -- (QM, Nov 7: every reach; the last four each biome's commonest)
 	local goals = {}
 	for i in Config.Biomes do
 		local name = Config.BiomeNames[1][i] or Config.Biomes[i].Name
 		-- (Loop, QM Nov 7: a rebirth jumps back to Reach Desert, not the Meadow's goals: Quests.rebirth)
-		table.insert(goals, { Text = "Reach " .. name, Kind = "reach", Biome = i, Egg = REACH_EGGS[i], NoPenLevel = true, Loop = i == 2 or nil })
+		table.insert(goals, { Text = "Reach " .. name, Kind = "reach", Biome = i, Egg = REACH_EGGS[i], NoPenLevel = true, Loop = i == 2 or nil, Luck = if i >= 2 then Config.Luck.Reach else nil })
 		if not Config.Biomes[i + 1] then
 			-- (QM, Nov 7: after the last reach, Rebirth: claimed in its popup, Client/RebirthPopup)
 			table.insert(goals, { Text = "Rebirth", Kind = "rebirth", Biome = i, NoPenLevel = true })
 			break
 		end
-		table.insert(goals, { Text = "Capture 3 " .. name .. " animals", Kind = "lasso", Biome = i, Need = 3, NoPenLevel = true })
+		table.insert(goals, { Text = "Capture 3 " .. name .. " animals", Kind = "lasso", Biome = i, Need = 3, NoPenLevel = true, CashOfNext = Config.Luck.CashOfNext })
 		if Config.Biomes[i + 1] then
 			table.insert(goals, { Text = "Upgrade slingshot", Kind = "slingshot", Biome = i + 1, NoPenLevel = true })
 		end
