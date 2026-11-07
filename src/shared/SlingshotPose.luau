@@ -40,7 +40,9 @@ local function smooth(u)
 	return u * u * (3 - 2 * u)
 end
 
-local function pullAt(t)
+local function pullAt(t, k)
+	k = k or 1
+	local SLACK, NEUTRAL, OVER = SLACK * k, NEUTRAL * k, OVER * k
 	if t < GRAB then
 		return SLACK:Lerp(LOAD, smooth(t / GRAB))
 	end
@@ -64,28 +66,33 @@ local function pullAt(t)
 	return NEUTRAL
 end
 
+-- The band's geometry grows with the model (its "Scale" attribute: Server/Slingshot scales
+-- it, QM Nov 7); where the rider waits and draws back (LOAD, DRAW) doesn't.
 -- the pull's CFrame in the slingshot's space: facing the tips, only partly pitched
-local function pullLocal(t)
-	local p = pullAt(t)
-	local mid = (TIPS[1] + TIPS[2]) / 2
+local function pullLocal(t, k)
+	k = k or 1
+	local p = pullAt(t, k)
+	local mid = (TIPS[1] + TIPS[2]) / 2 * k
 	-- (never straight up: hanging slack, it faces -z too)
 	return CFrame.lookAt(p, Vector3.new(mid.X, p.Y + (mid.Y - p.Y) * TILT, p.Z - math.max(p.Z - mid.Z, 1)))
 end
 
-local function stretch(band, a, b)
+local function stretch(band, a, b, k)
 	if band then
-		band.Size = Vector3.new(BAND_SIZE.X, BAND_SIZE.Y, math.max((b - a).Magnitude, 0.05))
+		k = k or 1
+		band.Size = Vector3.new(BAND_SIZE.X * k, BAND_SIZE.Y * k, math.max((b - a).Magnitude, 0.05))
 		band.CFrame = CFrame.lookAt((a + b) / 2, b)
 	end
 end
 
 local function place(model, base, t)
-	local cf = base * pullLocal(t)
-	local tipL, tipR = base * TIPS[1], base * TIPS[2]
+	local k = model:GetAttribute("Scale") or 1
+	local cf = base * pullLocal(t, k)
+	local tipL, tipR = base * (TIPS[1] * k), base * (TIPS[2] * k)
 	local sideL, sideR = cf * BAND_SIDE[1], cf * BAND_SIDE[2]
-	stretch(model:FindFirstChild("BandL"), tipL, sideL)
-	stretch(model:FindFirstChild("BandMid"), sideL, sideR)
-	stretch(model:FindFirstChild("BandR"), sideR, tipR)
+	stretch(model:FindFirstChild("BandL"), tipL, sideL, k)
+	stretch(model:FindFirstChild("BandMid"), sideL, sideR, k)
+	stretch(model:FindFirstChild("BandR"), sideR, tipR, k)
 	return cf
 end
 
@@ -94,18 +101,19 @@ Slingshot.pullLocal = pullLocal
 
 function Slingshot.launch(model, onStep, onRelease, base)
 	base = base or model:GetPivot()
+	local k = model:GetAttribute("Scale") or 1
 	local released = false
 	local t0 = os.clock()
 	while true do
 		local t = math.min(os.clock() - t0, DURATION)
 		local cf = place(model, base, t)
 		if not released and t < RELEASE and onStep then
-			onStep(if t < GRAB then base * pullLocal(GRAB) else cf) -- (the rider waits behind it while the band comes back)
+			onStep(if t < GRAB then base * pullLocal(GRAB, k) else cf) -- (the rider waits behind it while the band comes back)
 		end
 		if not released and t >= RELEASE then
 			released = true
-			local a = (base * pullLocal(RELEASE)).Position
-			local b = (base * pullLocal(RELEASE + 1 / 240)).Position
+			local a = (base * pullLocal(RELEASE, k)).Position
+			local b = (base * pullLocal(RELEASE + 1 / 240, k)).Position
 			if onRelease then
 				task.spawn(onRelease, cf, (b - a).Unit)
 			end
