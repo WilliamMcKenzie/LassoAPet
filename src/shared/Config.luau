@@ -1184,6 +1184,23 @@ local Config = {
 		AlphaRockHog = "rbxassetid://92398266051379", -- assets/ui/AlphaRockHogEggRender.png (tools/egg_icons.py)
 		AlphaLavaWhale = "rbxassetid://120944565125344", -- assets/ui/AlphaLavaWhaleEggRender.png (tools/egg_icons.py)
 		AlphaPhoenix = "rbxassetid://95367990323693", -- assets/ui/AlphaPhoenixEggRender.png (tools/egg_icons.py)
+		LivingArmor = "rbxassetid://130433092050736", -- assets/ui/LivingArmorEggRender.png (tools/egg_icons.py)
+		MagmaCrab = "rbxassetid://75686941782840", -- assets/ui/MagmaCrabEggRender.png (tools/egg_icons.py)
+		MantaRay = "rbxassetid://71028108710460", -- assets/ui/MantaRayEggRender.png (tools/egg_icons.py)
+		Mimic = "rbxassetid://114320676254012", -- assets/ui/MimicEggRender.png (tools/egg_icons.py)
+		MirageElephant = "rbxassetid://88869884712209", -- assets/ui/MirageElephantEggRender.png (tools/egg_icons.py)
+		MysticOwl = "rbxassetid://86452966162665", -- assets/ui/MysticOwlEggRender.png (tools/egg_icons.py)
+		Narwhal = "rbxassetid://131272014094665", -- assets/ui/NarwhalEggRender.png (tools/egg_icons.py)
+		Oryx = "rbxassetid://121949969432470", -- assets/ui/OryxEggRender.png (tools/egg_icons.py)
+		Ostrich = "rbxassetid://134435534460117", -- assets/ui/OstrichEggRender.png (tools/egg_icons.py)
+		Pelican = "rbxassetid://136887077081828", -- assets/ui/PelicanEggRender.png (tools/egg_icons.py)
+		Rat = "rbxassetid://87948575504414", -- assets/ui/RatEggRender.png (tools/egg_icons.py)
+		Reindeer = "rbxassetid://126902405794787", -- assets/ui/ReindeerEggRender.png (tools/egg_icons.py)
+		RoyalEagle = "rbxassetid://85119925028903", -- assets/ui/RoyalEagleEggRender.png (tools/egg_icons.py)
+		RoyalPeacock = "rbxassetid://103092836354093", -- assets/ui/RoyalPeacockEggRender.png (tools/egg_icons.py)
+		RoyalStag = "rbxassetid://76634863701833", -- assets/ui/RoyalStagEggRender.png (tools/egg_icons.py)
+		RoyalSteed = "rbxassetid://110593092388551", -- assets/ui/RoyalSteedEggRender.png (tools/egg_icons.py)
+		Seahorse = "rbxassetid://124241926918593", -- assets/ui/SeahorseEggRender.png (tools/egg_icons.py)
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
