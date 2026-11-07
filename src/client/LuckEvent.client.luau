@@ -9,7 +9,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Sign = require(ReplicatedStorage.Shared.LuckEventSign)
 
 local title = Config.LuckEvent.Title
-local lastShift, lastTimer
+local lastTimer
 
 RunService.Heartbeat:Connect(function()
 	local model = workspace:FindFirstChild("LuckEventSign")
@@ -18,20 +18,18 @@ RunService.Heartbeat:Connect(function()
 		return
 	end
 	local now = workspace:GetServerTimeNow()
-	local shift = math.floor(now * 4) -- (the colours roll along four letters a second)
+	local phase = -(now * 0.35) % 1 -- (the colours flow along the title, every frame)
 	local left, nextIn = Config.luckEventLeft(now)
 	local timer = if left then "Ends in: " .. Sign.clock(left) else "Starts in: " .. Sign.clock(nextIn)
 	local fresh = board:GetAttribute("Drawn") == nil -- (a rebuilt sign: draw it all again)
 	board:SetAttribute("Drawn", true)
 	for _, gui in board:GetChildren() do
 		if gui:IsA("SurfaceGui") then
-			if shift ~= lastShift or fresh then
-				gui.Title.Text = Sign.rainbow(title, -shift)
-			end
+			gui.Title.Text = Sign.rainbow(title, phase)
 			if timer ~= lastTimer or fresh then
 				gui.Timer.Text = timer
 			end
 		end
 	end
-	lastShift, lastTimer = shift, timer
+	lastTimer = timer
 end)
