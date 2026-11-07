@@ -201,7 +201,7 @@ local function refresh()
 	end
 end
 
--- the clicking cursor (assets/ui/TutorialCursor.png, as on Hud's Upgrade) on card i's buy button
+-- the clicking hand (assets/ui/TapHand.png, as on Hud's Upgrade) on card i's buy button
 local function pointAt(i)
 	local c = made[i]
 	if not c then
@@ -211,11 +211,11 @@ local function pointAt(i)
 		cursor = Instance.new("ImageLabel")
 		cursor.Name = "Cursor"
 		cursor.BackgroundTransparency = 1
-		cursor.Image = "rbxassetid://93240211999923" -- assets/ui/TutorialCursor.png
-		cursor.AnchorPoint = Vector2.new(29 / 256, 6 / 256) -- its tip, so it clicks about it
+		cursor.Image = "rbxassetid://134865745295413" -- assets/ui/TapHand.png (QM's; the old TutorialCursor art is a grey placeholder while Config.UiArt is off)
+		cursor.AnchorPoint = Vector2.new(0.365, 0.03) -- its tip, so it clicks about it
 		cursor.Position = UDim2.fromScale(0.55, 0.3) -- (low enough to read, high enough not to be cut off by the row)
 		cursor.SizeConstraint = Enum.SizeConstraint.RelativeYY
-		cursor.Size = UDim2.fromScale(0.9, 0.9)
+		cursor.Size = UDim2.fromScale(0.9 * 488 / 610, 0.9) -- (TapHand.png is 488 x 610)
 		cursor.ZIndex = 9
 		cursorScale = Instance.new("UIScale")
 		cursorScale.Parent = cursor

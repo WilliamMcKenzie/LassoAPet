@@ -871,11 +871,11 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	local hand = Instance.new("ImageLabel")
 	hand.Name = "Hand"
 	hand.BackgroundTransparency = 1
-	hand.Image = "rbxassetid://93240211999923" -- assets/ui/TutorialCursor.png
-	hand.AnchorPoint = Vector2.new(29 / 256, 6 / 256) -- its tip, so it throbs about it
+	hand.Image = "rbxassetid://134865745295413" -- assets/ui/TapHand.png (QM's; the old TutorialCursor art is a grey placeholder while Config.UiArt is off)
+	hand.AnchorPoint = Vector2.new(0.365, 0.03) -- its tip, so it throbs about it
 	hand.Position = UDim2.fromScale(0.5, 0.6)
 	hand.SizeConstraint = Enum.SizeConstraint.RelativeYY
-	hand.Size = UDim2.fromScale(0.9, 0.9)
+	hand.Size = UDim2.fromScale(0.9 * 488 / 610, 0.9) -- (TapHand.png is 488 x 610)
 	hand.Visible = false
 	hand.ZIndex = 2 -- over the fill
 	local handScale = Instance.new("UIScale")
