@@ -1797,8 +1797,8 @@ Config.Slingshot = {
 	Ahead = 22, -- studs out from your pen's Spawn to the slingshot's middle
 	Flight = 4.5, -- seconds in the air
 	Apex = 260, -- studs over the straight line at the flight's middle
-	Meshes = { { 98330547373685, 170, 167, 180 }, { 97372945090229, 145, 152, 154 }, { 72003741917426, 186, 134, 80 }, { 107356883198884, 158, 108, 62 }, { 101149753111869, 86, 88, 98 }, { 117633513992999, 232, 204, 150 } }, -- (filled by tools/slingshot_upload.py)
-	Band = 104618131148243, -- (filled by tools/slingshot_upload.py)
+	Meshes = { { 108584371800496, 222, 124, 62 }, { 83135902680851, 240, 228, 196 }, { 126807462534931, 150, 76, 38 } }, -- (filled by tools/slingshot_upload.py)
+	Band = 102942616406200, -- (filled by tools/slingshot_upload.py)
 	BandColor = Color3.fromRGB(226, 58, 52),
 	-- The band's colour by your pen level (each Upgrade Pen recolours it; past the list, the last).
 	BandColors = {
