@@ -16,25 +16,18 @@ local Studs = require(Shared.Studs)
 local LuckEventSign = {}
 
 local W, H = 1040, 300 -- the board's canvas (20 pixels a stud: Sign 52 x 15)
-LuckEventSign.RAINBOW = {
-	Color3.fromRGB(255, 70, 70),
-	Color3.fromRGB(255, 160, 50),
-	Color3.fromRGB(255, 235, 70),
-	Color3.fromRGB(80, 220, 90),
-	Color3.fromRGB(70, 150, 255),
-	Color3.fromRGB(170, 90, 240),
-}
 
--- the title in rich text, letter k coloured RAINBOW[k + shift], spaces skipped
-function LuckEventSign.rainbow(text, shift)
+-- the title in rich text, a smooth rainbow along it: letter k's hue (k * HUE_STEP + phase),
+-- phase any number (Client/LuckEvent turns it with the time, so the colours flow along)
+local HUE_STEP = 0.06
+function LuckEventSign.rainbow(text, phase)
 	local out, k = {}, 0
-	local colors = LuckEventSign.RAINBOW
 	for _, code in utf8.codes(text) do
 		local ch = utf8.char(code)
 		if ch == " " then
 			table.insert(out, ch)
 		else
-			local c = colors[(k + shift) % #colors + 1]
+			local c = Color3.fromHSV((k * HUE_STEP + phase) % 1, 0.72, 1)
 			table.insert(out, string.format('<font color="rgb(%d,%d,%d)">%s</font>', math.round(c.R * 255), math.round(c.G * 255), math.round(c.B * 255), ch))
 			k += 1
 		end

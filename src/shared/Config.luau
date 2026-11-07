@@ -2097,7 +2097,7 @@ Config.LuckEvent = {
 	Multiplier = 100,
 	Title = "100x Luck Event",
 	-- the sign: across the course's mouth (z), its board's middle Height over the ground
-	Sign = { Z = -8, Height = 24, Width = 52, BoardHeight = 15, Color = Color3.fromRGB(170, 92, 78), Trim = Color3.fromRGB(110, 52, 48) },
+	Sign = { Z = -8, Height = 48, Width = 52, BoardHeight = 15, Color = Config.WorldColors.Wood, Trim = Config.WorldColors.WoodDark }, -- (the pens' fence wood, QM)
 }
 -- Seconds left of the luck event now, or nil when none is on; and seconds to the next start.
 function Config.luckEventLeft(now)
