@@ -1180,7 +1180,7 @@ local Config = {
 	Backpack = {
 		PenSlots = 5,
 		SlotRobux = 30,
-		SlotProduct = 0,
+		SlotProduct = 3729073844,
 	},
 	PenCapacity = nil, -- (QM, Oct 14: no cap on pets, and no "5/10" on the sign; quests still grow the pen. Was { Base = 10, PerUpgrade = 8 }: 10, and 8 more a level)
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
