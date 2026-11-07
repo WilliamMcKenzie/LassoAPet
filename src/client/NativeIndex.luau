@@ -4,7 +4,10 @@
 --   left    a box scrolling through a section per biome of this world: the biome's card (its
 --           grass colour, its name) and its animals as tiles in a collage, then a bar of how
 --           many of them you've had. One you've never had (the "Caught" attribute,
---           Hatchery) is a dark silhouette under "???".
+--           Hatchery) is a dark silhouette. Each tile's label is its name once had, else "???",
+--           in its rarity's colours (RarityLook); tiles run rarest first by spawn odds. Every
+--           animal that runs in a biome is in (the alphas and the new ones too); one with no
+--           uploaded headshot shows its model in 3D (PetStill).
 --   bottom  Unlocked: had / every animal, by the Index book
 --   right   the picked animal's card (its rarity's colours: name, rarity, cash a second;
 --           "???" for one not had), and under it its reward (Config.indexReward's cash) with
@@ -13,15 +16,15 @@
 -- A red "!" sits on the Index button while there's a reward to claim (NativeIndex.badge).
 -- Client/AnimalDex hands its toggle, close and isOpen to this while the native UI's on.
 --
--- The collage (as the reference's): a biome's grid is COLS cells across and 2 down (more
--- rows when it has more), tiled by exactly its number of animals with 2x2, 1x2, 2x1 and 1x1
--- tiles, as many big ones as fit; its rarest get the biggest tiles.
+-- The collage: a biome's grid is COLS cells across, each animal's tile sized as the animal is
+-- (2x2 a huge one, 2x1 a long one, 1x2 a tall one, else 1x1: see shape).
 --
 --   NativeIndex.toggle() / NativeIndex.close() / NativeIndex.isOpen()
 --   NativeIndex.badge(indexButton)   -- once, from BaseUi
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -29,6 +32,7 @@ local HudImages = require(script.Parent.HudImages)
 local HudKit = require(script.Parent.HudKit)
 local NativeHud = require(script.Parent.NativeHud)
 local PetFaces = require(script.Parent.PetFaces)
+local PetStill = require(script.Parent.PetStill)
 local RarityLook = require(script.Parent.RarityLook)
 local Ui = require(script.Parent.Ui)
 local UiFx = require(script.Parent.UiFx)
@@ -54,7 +58,10 @@ local CASH_GREEN = Color3.fromRGB(0, 255, 0)
 local LOCKED_SHADE = 0.45 -- the dark over a tile not had (its transparency)
 local SILHOUETTE = 0.35 -- an animal not had: black, this transparent
 local PICK = 8 -- the picked tile's white ring
-local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Exclusive" }
+local SPIN = 45 -- degrees a second a moving rarity's back turns (Fight to Steal an Egg's WeaponShop)
+local SHEEN = 0.45 -- transparency at the middle of its sheen's band
+local moving = setmetatable({}, { __mode = "k" }) -- [back's Fill] = its sheen's UIGradient
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Exclusive" }
 
 local gui, sections, card, details, unlocked, badge
 local tiles = {} -- [kind] = tile
@@ -79,11 +86,20 @@ end
 
 -- This world's biomes, each with its animals (the herd's, cheapest first), as the old Index
 local BIOMES = {}
-for i, biome in Config.Biomes do
+local oddsOf = {} -- [kind] = N, its spawn odds "1 in N" in its (first) biome
+for i, biome in Config.allBiomes() do -- (and the endless course's, past the Ocean: Config.Endless)
 	local kinds = {}
+	local total = 0
 	for kind, weight in biome.Herd or {} do
-		if weight > 0 and PetFaces.HEADSHOTS[kind] ~= nil then
+		-- (a 0 never runs wild but stays on its biome's page: the starter, the Robux pets)
+		if weight >= 0 and kind ~= Config.DefaultPet and ReplicatedStorage.Shared.Animals:FindFirstChild(kind) then -- (not the starter: QM, Nov 7)
 			table.insert(kinds, kind)
+		end
+		total += math.max(weight, 0)
+	end
+	for _, kind in kinds do -- 1 in this many of the biome's spawns
+		if biome.Herd[kind] > 0 then
+			oddsOf[kind] = oddsOf[kind] or total / biome.Herd[kind]
 		end
 	end
 	table.sort(kinds, function(a, b)
@@ -96,9 +112,10 @@ for i, biome in Config.Biomes do
 	local names = Config.BiomeNames and Config.BiomeNames[Config.World]
 	local colours = biome.GroundColors
 	table.insert(BIOMES, {
-		name = names and names[i] or biome.Name,
+		name = names and names[i] or biome.DisplayName or biome.Name,
 		kinds = kinds,
 		tint = colours and colours[#colours] or Color3.fromRGB(80, 80, 80),
+		picture = biome.Picture, -- (its render: design/biomes, QM Nov 7)
 	})
 end
 local biomeOf = {}
@@ -117,87 +134,209 @@ local function had(attr)
 	return set
 end
 
+-- an animal's picture in a holder (its "Picture" ImageLabel): its headshot, or its model in
+-- 3D (PetStill) as "View" when it has none uploaded
+local function setPicture(picture, kind)
+	local old = picture.Parent and picture.Parent:FindFirstChild("View")
+	if old and old:GetAttribute("Kind") ~= kind then
+		old:Destroy()
+		old = nil
+	end
+	local headshot = PetFaces.HEADSHOTS[kind]
+	picture.Image = headshot or ""
+	if (headshot == nil or headshot == "") and not old and picture.Parent then
+		local view = PetStill.view(kind)
+		if view then
+			view.Name = "View"
+			view:SetAttribute("Kind", kind)
+			view.AnchorPoint = picture.AnchorPoint
+			view.Position = picture.Position
+			view.Size = picture.Size
+			view.ZIndex = picture.ZIndex
+			view.Parent = picture.Parent
+		end
+	end
+end
+
+-- had: full colour; not: a dark silhouette (the headshot's or the 3D view's)
+local function shadePicture(picture, found)
+	local colour = if found then Color3.new(1, 1, 1) else HudKit.BLACK
+	local transparency = if found then 0 else SILHOUETTE
+	picture.ImageColor3, picture.ImageTransparency = colour, transparency
+	local view = picture.Parent and picture.Parent:FindFirstChild("View")
+	if view then
+		view.ImageColor3, view.ImageTransparency = colour, transparency
+		view.Ambient = if found then Color3.fromRGB(200, 200, 200) else HudKit.BLACK
+		view.LightColor = if found then Color3.new(1, 1, 1) else HudKit.BLACK
+	end
+end
+
 -- ---- the collage ------------------------------------------------------------------------
 
-local SHAPES = { { 2, 2 }, { 1, 2 }, { 2, 1 }, { 1, 1 } } -- (tried biggest first)
-
--- n tiles exactly filling a COLS-wide grid: { { x, y, w, h } } (cells, from 0) and its rows
-local function collage(n)
-	local rows = math.max(2, math.ceil(n / COLS))
-	while true do
-		local cells = COLS * rows
-		local taken, placed = {}, {}
-		local best, bestScore
-		local function score()
-			local s = 0
-			for _, p in placed do
-				if p[3] == 2 and p[4] == 2 then
-					s += 3
-				elseif p[3] ~= p[4] then
-					s -= 1
-				end
-			end
-			return s
-		end
-		local function solve(free)
-			local first
-			for i = 0, cells - 1 do
-				if not taken[i] then
-					first = i
-					break
-				end
-			end
-			if not first then
-				if #placed == n then
-					local s = score()
-					if not bestScore or s > bestScore then
-						bestScore, best = s, table.clone(placed)
-					end
-				end
-				return
-			end
-			local left = n - #placed
-			if left <= 0 or free < left or free > 4 * left then
-				return
-			end
-			local x, y = first % COLS, first // COLS
-			for _, shape in SHAPES do
-				local w, h = shape[1], shape[2]
-				if x + w <= COLS and y + h <= rows then
-					local fits = true
-					for dy = 0, h - 1 do
-						for dx = 0, w - 1 do
-							if taken[(y + dy) * COLS + x + dx] then
-								fits = false
-							end
-						end
-					end
-					if fits then
-						for dy = 0, h - 1 do
-							for dx = 0, w - 1 do
-								taken[(y + dy) * COLS + x + dx] = true
-							end
-						end
-						table.insert(placed, { x, y, w, h })
-						solve(free - w * h)
-						table.remove(placed)
-						for dy = 0, h - 1 do
-							for dx = 0, w - 1 do
-								taken[(y + dy) * COLS + x + dx] = nil
-							end
-						end
-					end
-				end
-			end
-		end
-		if n > 0 and n <= cells then
-			solve(cells)
-		end
-		if best or n == 0 then
-			return best or {}, rows
-		end
-		rows += 1
+-- Every tile is 1x1 (QM, Nov 7), unless the biome's tiles leave its grid's rows short: then
+-- the pets whose shape calls for it grow, to fill them (shape: QM, Nov 7, "the size of the card
+-- should be ~= the size of the pet"): a huge one (BIG x the Horse's size or more: the titans) 2x2, a long one (LONG x as long
+-- as it's tall: the Snake) 2x1, a tall one (TALL x as tall as it's long: the Giraffe) 1x2, the
+-- rest 1x1. Its size is how big it's drawn in game: its model's box (as Horse's silhouette)
+-- x its class's size, over Config.PetSmallSize (the Horse's).
+local BIG, LONG, TALL = 3.5, 2.5, 1.8
+local shapeOf = {}
+local fitOf = {} -- [kind] = how much its shape calls for it (its size for a huge one, else its length or height over the other)
+local function shape(kind)
+	if shapeOf[kind] then
+		return shapeOf[kind]
 	end
+	local module = ReplicatedStorage.Shared.Animals:FindFirstChild(kind)
+	local ok, class = pcall(require, module)
+	local data = ok and typeof(class) == "table" and class.data
+	local out = { 1, 1 }
+	if typeof(data) == "table" and typeof(data.parts) == "table" and type(class.size) == "number" then
+		local lo, hi = Vector3.one * math.huge, -Vector3.one * math.huge
+		for _, part in data.parts do
+			if not part.hidden and typeof(part.cframe) == "CFrame" and typeof(part.size) == "Vector3" then
+				local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = part.cframe:GetComponents()
+				local h = part.size / 2
+				local e = Vector3.new(
+					math.abs(r00) * h.X + math.abs(r01) * h.Y + math.abs(r02) * h.Z,
+					math.abs(r10) * h.X + math.abs(r11) * h.Y + math.abs(r12) * h.Z,
+					math.abs(r20) * h.X + math.abs(r21) * h.Y + math.abs(r22) * h.Z
+				)
+				local c = Vector3.new(x, y, z)
+				lo, hi = lo:Min(c - e), hi:Max(c + e)
+			end
+		end
+		local d = hi - lo
+		if d.X > 0 and d.Y > 0 and d.Z > 0 then
+			local sides = { d.X, d.Y, d.Z }
+			table.sort(sides)
+			local size = class.size * math.sqrt(sides[2] * sides[3]) / (Config.PetSmallSize or 10.4)
+			local long, tall = math.max(d.X, d.Z), d.Y
+			if size >= BIG then
+				out, fitOf[kind] = { 2, 2 }, 100 + size
+			elseif long >= LONG * tall then
+				out, fitOf[kind] = { 2, 1 }, long / tall
+			elseif tall >= TALL * long then
+				out, fitOf[kind] = { 1, 2 }, tall / long
+			end
+		end
+	end
+	shapeOf[kind] = out
+	return out
+end
+
+-- kinds' tiles in a COLS-wide grid, the rarest first, each in the first
+-- spot it fits (reading order): { [kind] = { x, y, w, h } } (cells, from 0) and its rows, or
+-- nil if they don't fit in `rows`
+local function pack(kinds, sizes, rows)
+	local order = table.clone(kinds)
+	table.sort(order, function(a, b) -- (rarest first whatever their size: QM, Nov 7)
+		local oa, ob = oddsOf[a] or 0, oddsOf[b] or 0
+		if oa ~= ob then
+			return oa > ob
+		end
+		return a < b
+	end)
+	local taken, layout = {}, {}
+	for _, kind in order do
+		local w, h = sizes[kind][1], sizes[kind][2]
+		local placed = false
+		for cell = 0, COLS * rows - 1 do
+			local x, y = cell % COLS, cell // COLS
+			local fits = x + w <= COLS and y + h <= rows
+			for dy = 0, h - 1 do
+				for dx = 0, w - 1 do
+					if fits and taken[(y + dy) * COLS + x + dx] then
+						fits = false
+					end
+				end
+			end
+			if fits then
+				for dy = 0, h - 1 do
+					for dx = 0, w - 1 do
+						taken[(y + dy) * COLS + x + dx] = true
+					end
+				end
+				layout[kind] = { x, y, w, h }
+				placed = true
+				break
+			end
+		end
+		if not placed then
+			return nil
+		end
+	end
+	return layout
+end
+
+-- All 1x1 in as few rows as hold them (2 at least: the biome's card beside them); then, while
+-- the rows have spare cells, the pets whose shape calls for it most grow to it, one at a time,
+-- each kept only if everything still fits
+local function collage(kinds)
+	local rows = math.max(2, math.ceil(#kinds / COLS))
+	local sizes = {}
+	local candidates = {}
+	for _, kind in kinds do
+		sizes[kind] = { 1, 1 }
+		local want = shape(kind)
+		if want[1] * want[2] > 1 then
+			table.insert(candidates, kind)
+		end
+	end
+	table.sort(candidates, function(a, b)
+		return (fitOf[a] or 0) > (fitOf[b] or 0)
+	end)
+	local layout = pack(kinds, sizes, rows)
+	local spare = COLS * rows - #kinds
+	for _, kind in candidates do
+		local want = shape(kind)
+		local extra = want[1] * want[2] - 1
+		if extra <= spare then
+			sizes[kind] = want
+			local tried = pack(kinds, sizes, rows)
+			if tried then
+				layout, spare = tried, spare - extra
+			else
+				sizes[kind] = { 1, 1 }
+			end
+		end
+	end
+	-- no holes (QM, Nov 7): while cells are still spare, the rest grow too, one cell more at a
+	-- time (2x1, else 1x2; then 2x2), the shaped ones first, then the rarest
+	local rest = table.clone(kinds)
+	table.sort(rest, function(a, b)
+		local fa, fb = fitOf[a] or 0, fitOf[b] or 0
+		if fa ~= fb then
+			return fa > fb
+		end
+		local oa, ob = oddsOf[a] or 0, oddsOf[b] or 0
+		if oa ~= ob then
+			return oa > ob
+		end
+		return a < b
+	end)
+	for _, grow in { { { 2, 1 }, { 1, 2 } }, { { 2, 2 } } } do
+		for _, kind in rest do
+			if spare <= 0 then
+				break
+			end
+			local was = sizes[kind]
+			if was[1] * was[2] == 1 then
+				for _, want in grow do
+					local extra = want[1] * want[2] - 1
+					if extra <= spare then
+						sizes[kind] = want
+						local tried = pack(kinds, sizes, rows)
+						if tried then
+							layout, spare = tried, spare - extra
+							break
+						end
+						sizes[kind] = was
+					end
+				end
+			end
+		end
+	end
+	return layout, rows
 end
 
 -- ---- building ---------------------------------------------------------------------------
@@ -210,6 +349,38 @@ local function paintBack(back, rarity)
 	end
 	local look = Config.NativeUi.Rarities[rarity] or Config.NativeUi.Rarities.Common
 	fill.Rotation = 90
+	-- a moving rarity's (Divine, Exclusive) back turns with a white sheen sweeping across it, as
+	-- Fight to Steal an Egg's WeaponShop cards
+	local old = back:FindFirstChild("Sheen")
+	if old then
+		old:Destroy()
+	end
+	moving[fill] = nil
+	if look.top and look.move then
+		local sheen = Instance.new("Frame")
+		sheen.Name = "Sheen"
+		sheen.BackgroundColor3 = Color3.new(1, 1, 1)
+		sheen.BorderSizePixel = 0
+		sheen.Size = UDim2.fromScale(1, 1)
+		sheen.ZIndex = back.ZIndex
+		local corner = back:FindFirstChildOfClass("UICorner")
+		if corner then
+			corner:Clone().Parent = sheen
+		end
+		local band = Instance.new("UIGradient")
+		band.Rotation = 60
+		band.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.4, 1),
+			NumberSequenceKeypoint.new(0.5, SHEEN),
+			NumberSequenceKeypoint.new(0.6, 1),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		band.Offset = Vector2.new(-1.5, 0)
+		band.Parent = sheen
+		sheen.Parent = back
+		moving[fill] = band
+	end
 	if look.top then
 		fill.Color = if look.at < 1
 			then ColorSequence.new({
@@ -280,14 +451,14 @@ local function showCard(kind)
 	local found = had()[kind] == true
 	paintBack(card, a.rarity)
 	local picture = card.PictureBox.Picture
-	picture.Image = PetFaces.HEADSHOTS[kind] or ""
-	picture.ImageColor3 = if found then Color3.new(1, 1, 1) else HudKit.BLACK
-	picture.ImageTransparency = if found then 0 else SILHOUETTE
+	setPicture(picture, kind)
+	shadePicture(picture, found)
 	card.PetName.Text = if found then a.name else "???"
 	RarityLook.paint(card.Rarity, a.rarity, card.Rarity:FindFirstChild("Outline"))
 	card.PetCash.Text = if found then "$" .. Config.short(Config.PetIncome[kind] or 0) .. "/s" else "???"
 	local biome = BIOMES[biomeOf[kind]]
 	details.Where.Value.Text = biome and biome.name or "???"
+	details.Where.Icon.Image = biome and biome.picture or ""
 	local stats = Config.AnimalStats and Config.AnimalStats[kind]
 	details.Speed.Value.Text = if found and stats and stats.Speed then string.format("%.2g Speed", stats.Speed) else "??? Speed"
 	-- its reward and Claim! (Locked till you've had it), or once claimed where it runs and its speed
@@ -327,6 +498,20 @@ local function makeSection(i)
 	if fill then
 		fill.Color = ColorSequence.new(biome.tint:Lerp(Color3.new(1, 1, 1), 0.25), biome.tint:Lerp(HudKit.BLACK, 0.35))
 		fill.Rotation = 90
+	end
+	if biome.picture then -- the biome's render over its colours, cropped to the card (QM, Nov 7: "sidebar fix")
+		local render = Instance.new("ImageLabel")
+		render.Name = "Render"
+		render.BackgroundTransparency = 1
+		render.Image = biome.picture
+		render.ScaleType = Enum.ScaleType.Crop
+		render.Size = UDim2.fromScale(1, 1)
+		render.ZIndex = 2
+		local corner = picture:FindFirstChildOfClass("UICorner")
+		if corner then
+			corner:Clone().Parent = render
+		end
+		render.Parent = picture
 	end
 	label(picture, "BiomeName", {
 		Text = biome.name,
@@ -377,38 +562,27 @@ local function makeSection(i)
 	egg.Image = (Config.EggIcons or {})[biome.kinds[#biome.kinds]] or ""
 	egg.Parent = track
 
-	-- the collage: the biggest tiles to the rarest (kinds are cheapest first)
+	-- the collage: each tile the pet's size
 	local kinds = biome.kinds
-	local layout, rows = collage(#kinds)
-	local byArea = {}
-	for k = 1, #layout do
-		byArea[k] = k
-	end
-	table.sort(byArea, function(a, b)
-		local la, lb = layout[a], layout[b]
-		local area = la[3] * la[4] - lb[3] * lb[4]
-		if area ~= 0 then
-			return area > 0
-		end
-		return a < b
-	end)
+	local layout, rows = collage(kinds)
 	local gridW = fig(LEFT_W) - 2 * fig(8) - 6 - fig(PAD + PICTURE_W + 2 * PAD) -- (6: the scroll bar)
 	local cell = (gridW - (COLS - 1) * fig(GAP)) / COLS
 	local gridH = rows * cell + (rows - 1) * fig(GAP)
 	section.Size = UDim2.new(1, 0, 0, math.round(gridH + fig(2 * PAD + BAR_H + PAD)))
-	for rank, at in byArea do
-		local kind = kinds[#kinds - rank + 1]
-		local p = layout[at]
+	for _, kind in kinds do
+		local p = layout[kind]
 		local tile = makeTile()
 		tile.Name = kind
 		tile.Position = UDim2.fromOffset(math.round(p[1] * (cell + fig(GAP))), math.round(p[2] * (cell + fig(GAP))))
 		tile.Size = UDim2.fromOffset(math.round(p[3] * cell + (p[3] - 1) * fig(GAP)), math.round(p[4] * cell + (p[4] - 1) * fig(GAP)))
 		paintBack(tile:FindFirstChild("Back"), about(kind).rarity)
-		tile.Picture.Image = PetFaces.HEADSHOTS[kind] or ""
+		tile.Parent = grid
+		setPicture(tile.Picture, kind)
+		RarityLook.paint(tile.PetName, about(kind).rarity, tile.PetName:FindFirstChild("Outline")) -- (its rarity's colours; its name or "???": refresh)
+		tile.PetName.Text = "???"
 		if p[3] == 2 and p[4] == 2 then
 			tile.PetName.Size = UDim2.new(0.92, 0, 0, fig(60))
 		end
-		tile.Parent = grid
 		HudKit.hover(tile)
 		tile.Activated:Connect(function()
 			pick(kind)
@@ -424,6 +598,19 @@ local function build()
 	local close
 	gui, close = HudKit.popup(root, "IndexPanel", "Index", "PinkHeader")
 	UiFx.menu(gui)
+	-- the moving rarities' backs, while it's open: each turns (from its light top) and its sheen
+	-- sweeps in step with the band on its rarity's name (RarityLook), as Fight to Steal an Egg's
+	RunService.RenderStepped:Connect(function()
+		if not gui.Visible or next(moving) == nil then
+			return
+		end
+		local turn = (90 + os.clock() * SPIN) % 360
+		local sweep = RarityLook.sweep()
+		for fill, band in moving do
+			fill.Rotation = turn
+			band.Offset = Vector2.new(sweep * 1.5, 0) -- (further: its band is slanted)
+		end
+	end)
 	close.Activated:Connect(function()
 		UiFx.popOut(gui)
 	end)
@@ -542,12 +729,15 @@ local function build()
 		Size = UDim2.fromOffset(fig(160), fig(160)),
 		ZIndex = 4,
 	})
-	art(slot, "Icon", {
-		Image = HudImages.CashGainIcon or "",
+	-- (QM, Nov 7: Fight to Steal an Egg's high-res cash stack, its Shop and Offline Cash one,
+	-- black outline drawn in; not the 34 px gain icon)
+	local cashIcon = art(slot, "Icon", {
+		Image = HudImages.CashStack or "",
 		Position = UDim2.fromScale(0.1, 0.02),
 		Size = UDim2.fromScale(0.8, 0.8),
 		ZIndex = 5,
 	})
+	cashIcon.Image = HudImages.CashStack or ""
 	label(slot, "Amount", {
 		Text = "$1K",
 		TextXAlignment = Enum.TextXAlignment.Center,
@@ -585,18 +775,35 @@ local function build()
 			claimButton:SetAttribute("Busy", nil)
 		end
 	end)
-	for i, s in { { "Where", "Meadow" }, { "Speed", "??? Speed" } } do
+	-- once claimed: Fight to Steal an Egg's stat rows (its IndexPanel), a 96 px icon and a big
+	-- outlined label each; Where wears the biome's render as its icon (FTSAE has no such row)
+	for i, s in { { "Where", "", "Meadow" }, { "Speed", HudImages.SpeedIcon or "", "??? Speed" } } do
 		local row = Ui.make(details, s[1], "Frame", {
 			BackgroundTransparency = 1,
-			Position = UDim2.fromOffset(fig(40), fig(40 + (i - 1) * 110)),
+			Position = UDim2.fromOffset(fig(40), fig(22 + (i - 1) * 100)),
 			Size = UDim2.new(1, -fig(80), 0, fig(96)),
 			ZIndex = 4,
 		})
+		local icon = art(row, "Icon", {
+			Image = s[2],
+			Size = UDim2.fromOffset(fig(96), fig(96)),
+			ZIndex = 5,
+		})
+		if s[1] == "Where" then
+			icon.ScaleType = Enum.ScaleType.Crop
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, fig(16))
+			corner.Parent = icon
+			local edge = Instance.new("UIStroke")
+			edge.Color = HudKit.BLACK
+			edge.Thickness = HudKit.TEXT_OUTLINE
+			edge.Parent = icon
+		end
 		label(row, "Value", {
-			Text = s[2],
+			Text = s[3],
 			TextSize = fig(70),
-			TextScaled = true,
-			Size = UDim2.fromScale(1, 1),
+			Position = UDim2.fromOffset(fig(120), 0),
+			Size = UDim2.new(1, -fig(120), 1, 0),
 			ZIndex = 5,
 		})
 	end
@@ -619,8 +826,7 @@ local function refresh()
 			end
 			if tile then
 				tile.Shade.Visible = not f
-				tile.Picture.ImageColor3 = if f then Color3.new(1, 1, 1) else HudKit.BLACK
-				tile.Picture.ImageTransparency = if f then 0 else SILHOUETTE
+				shadePicture(tile.Picture, f)
 				tile.PetName.Text = if f then about(kind).name else "???"
 			end
 		end

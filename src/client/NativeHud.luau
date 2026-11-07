@@ -68,6 +68,9 @@ end
 local haze, hazeTint
 local hazing = {}
 function NativeHud.haze(who, on)
+	do
+		return -- (QM, Nov 6: no glass blur behind popups any more)
+	end
 	local camera = workspace.CurrentCamera
 	if not haze then
 		haze = Instance.new("BlurEffect")
@@ -207,8 +210,53 @@ function NativeHud.build(handlers)
 		ZIndex = 3,
 	})
 
+	-- luck, just above cash (QM, Nov 7: where Fight to Steal an Egg's Power is: its row, 256 up,
+	-- band 66, the number at 177, white): the clover, "x1". Tap it for the rebirth popup.
+	local luckRow = Ui.make(root, "Luck", "Frame", {
+		BackgroundTransparency = 1,
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 0, 1, -fig(256)),
+		Size = UDim2.fromOffset(fig(411), fig(160)),
+	})
+	local luckBand = Ui.make(luckRow, "Band", "Frame", {
+		BackgroundColor3 = HudKit.BLACK,
+		BorderSizePixel = 0,
+		Position = UDim2.fromOffset(0, fig(66)),
+		Size = UDim2.new(1, 0, 0, fig(72)),
+	})
+	local luckFade = Instance.new("UIGradient")
+	luckFade.Transparency = fade.Transparency
+	luckFade.Parent = luckBand
+	art(luckRow, "LuckIcon", {
+		Position = UDim2.fromOffset(fig(11), 0),
+		Size = UDim2.fromOffset(fig(160), fig(160)),
+		ZIndex = 2,
+	})
+	local luck = label(luckRow, "Value", {
+		Text = "x1",
+		FontFace = HudKit.ITALIC,
+		TextColor3 = Color3.new(1, 1, 1),
+		Position = UDim2.fromOffset(fig(177), fig(66)),
+		Size = UDim2.fromOffset(fig(230), fig(72)),
+		ZIndex = 3,
+	})
+	local luckButton = Ui.make(luckRow, "Tap", "TextButton", {
+		BackgroundTransparency = 1,
+		Text = "",
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 4,
+	})
+	local function showLuck()
+		luck.Text = Config.luckText(Config.luck(player))
+	end
+	player:GetAttributeChangedSignal("LuckBonus"):Connect(showLuck)
+	showLuck()
+	luckButton.Activated:Connect(function()
+		require(script.Parent.RebirthPopup).open()
+	end)
+
 	local goal = GoalPanel.init(root, handlers)
-	return { gui = gui, root = root, buttons = buttons, cash = cash, goal = goal }
+	return { gui = gui, root = root, buttons = buttons, cash = cash, luck = luck, goal = goal }
 end
 
 return NativeHud

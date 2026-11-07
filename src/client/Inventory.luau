@@ -321,6 +321,14 @@ end
 
 -- The square showing the tool called `name`, while the bar is up (the tutorial
 -- points at it).
+-- the bar's top edge on screen (px), nil while it's hidden (client/RewardPopups sits just above it)
+function Inventory.top()
+	if bar and bar.Visible and bar.AbsoluteSize.Y > 0 then
+		return bar.AbsolutePosition.Y
+	end
+	return nil
+end
+
 function Inventory.holdBack(kind, n)
 	heldBack[kind] = math.max((heldBack[kind] or 0) + n, 0)
 	if heldBack[kind] == 0 then

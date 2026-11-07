@@ -1,4 +1,4 @@
--- Five pens (src/world/Pens.rbxmx, Workspace.Pens), one per player: a player
+-- Five pens (workspace.Pens, built by Server/Map from the map editor's map), one per player: a player
 -- gets the lowest free pen on joining and it's freed when they leave. The pen
 -- is theirs only while they're online. Its number goes on the player as the
 -- "Pen" attribute (the ride reads it), its owner's UserId on the pen as "Owner".

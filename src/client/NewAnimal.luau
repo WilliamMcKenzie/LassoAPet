@@ -20,7 +20,7 @@ local POP, BLACK, SQUASH, REVEAL, SETTLE, HOLD, RISE, OUT = 0.16, 0.85, 0.12, 0.
 local SUNBURST = "rbxassetid://85834206672187" -- assets/ui/Sunburst.png (QM's)
 local BURST_SIZE, BURST_SPIN = 2.3, 80 -- x the animal's size; degrees a second (it turns a good way round)
 local SIZE = 0.6 -- x the screen's height
-local HAZE = { blur = 14, brightness = 0.06, contrast = -0.15, saturation = -0.35 } -- (WorldsMenu's)
+local HAZE = { blur = 0, brightness = 0, contrast = 0, saturation = 0 } -- (QM, Nov 6: no glass blur behind popups; was 14, 0.06, -0.15, -0.35) -- (WorldsMenu's)
 
 local NewAnimal = {}
 local busy = false

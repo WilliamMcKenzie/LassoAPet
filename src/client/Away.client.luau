@@ -147,7 +147,7 @@ boostLabel.Parent = boost
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- The world behind hazy (as the Starter Pack's).
-local HAZE = { blur = 14, brightness = 0.06, contrast = -0.15, saturation = -0.35 }
+local HAZE = { blur = 0, brightness = 0, contrast = 0, saturation = 0 } -- (QM, Nov 6: no glass blur behind popups; was 14, 0.06, -0.15, -0.35)
 local blur = Instance.new("BlurEffect")
 blur.Name = "AwayHaze"
 blur.Size = 0
@@ -216,12 +216,11 @@ local function setScale(scale)
 end
 
 local function show(total)
-	local gems = Config.Gems ~= nil -- (the Halloween world's pets earn gems)
-	local each = total * (if gems then Config.Gems.Rate else 1)
-	cash.Text = "+" .. (if gems then "" else "$") .. amount(each) .. (if gems then " GEMS" else " CASH")
-	boostLabel.Text = "+" .. (if gems then "" else "$") .. amount(each * Config.AwayBoost.Multiplier) -- (the rainbow button: what 4x gives)
+	local each = total
+	cash.Text = "+$" .. amount(each) .. " CASH"
+	boostLabel.Text = "+$" .. amount(each * Config.AwayBoost.Multiplier) -- (the rainbow button: what 4x gives)
 	if native then
-		native.setAmount((if gems then "" else "$") .. amount(each))
+		native.setAmount("$" .. amount(each))
 	end
 	if open then
 		return

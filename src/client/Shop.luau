@@ -358,9 +358,9 @@ local hazeTween = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirectio
 local function haze(on)
 	local k = if on then 1 else 0
 	blur.Enabled, tint.Enabled = true, true
-	TweenService:Create(blur, hazeTween, { Size = 14 * k }):Play()
+	TweenService:Create(blur, hazeTween, { Size = 0 }):Play() -- (QM, Nov 6: no glass blur behind popups; was 14)
 	local tween =
-		TweenService:Create(tint, hazeTween, { Brightness = 0.06 * k, Contrast = -0.15 * k, Saturation = -0.35 * k })
+		TweenService:Create(tint, hazeTween, { Brightness = 0, Contrast = 0, Saturation = 0 })
 	tween.Completed:Connect(function()
 		if not open then
 			blur.Enabled, tint.Enabled = false, false

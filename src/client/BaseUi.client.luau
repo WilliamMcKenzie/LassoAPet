@@ -290,15 +290,6 @@ local function showCounters()
 end
 player:GetAttributeChangedSignal("Gold"):Connect(showCounters)
 showCounters()
--- The Halloween world's gems (Config.Gems, QM Oct 15), over the cash, in gems' yellow.
-if Config.Gems then
-	local gemText = counter(0, ART.crystal, Config.GemYellow)
-	local function showGems()
-		gemText.Text = (Hud.money(player:GetAttribute("Gems") or 0):gsub("%$", ""))
-	end
-	player:GetAttributeChangedSignal("Gems"):Connect(showGems)
-	showGems()
-end
 
 -- Top right: Quests. Laid out in the art's own pixels, scaled down to QUESTS_WIDTH.
 local claimQuest = ReplicatedStorage:WaitForChild("ClaimQuest")
@@ -442,6 +433,8 @@ local function hint(quest)
 		end
 	elseif quest.kind == "invite" then
 		promptInvite()
+	elseif quest.kind == "rebirth" then -- (not done yet: the popup, its button "Reach Ocean Trench")
+		require(script.Parent.RebirthPopup).open()
 	end
 end
 
@@ -457,6 +450,11 @@ local claimBusy = false -- a claim's egg reveal is up: no other claim till it's 
 -- Claims quest i (its CLAIM, or the native Goal panel's Claim!): its egg's reveal.
 local function claimAt(i)
 	if claimBusy or Hud.revealing() then
+		return
+	end
+	local goal = Config.Quests[i // 100] and Config.Quests[i // 100][i % 100]
+	if goal and goal.Kind == "rebirth" then -- (QM, Nov 7: claimed in the Rebirth popup, Config.Luck)
+		require(script.Parent.RebirthPopup).open()
 		return
 	end
 	claimBusy = true

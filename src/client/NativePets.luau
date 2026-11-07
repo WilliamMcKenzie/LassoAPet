@@ -1,6 +1,6 @@
 -- The Pets popup in the native UI (Config.NativeUi, QM Nov 6): Fight to Steal an Egg's Active
 -- Pets (its client/PetsPanel, 1:1 in look), sliding in on the right (client/SidePanel). A gold
--- header with "5 Active", and a row per pet you have: its headshot (PetFaces), its name, its
+-- header with "1/5 Active" and the pink "+1 Equip [30R]" (Config.Backpack), and a row per pet you have: its headshot (PetFaces), its name, its
 -- cash a second, and Riding (yellow: the one at your pen's gap, that a ride sets off on),
 -- Unequip (red: the pen's other pets, out to storage), Equip (green: a stored one, back in)
 -- or Full (grey: no room in the pen). The header counts what's in the pen against its room
@@ -38,7 +38,7 @@ local OUTLINES = { -- text outlines (QM's Figma)
 	Full = hex("3a3a3a"),
 	Best = hex("0a5a00"),
 }
-local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Exclusive" }
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Exclusive" }
 
 local panel, template
 
@@ -171,10 +171,9 @@ local function refresh()
 			active += 1
 		end
 	end
-	local pen = myPen()
-	local count, cap = pen and pen:GetAttribute("PetCount"), pen and pen:GetAttribute("PetCap")
-	local full = count ~= nil and cap ~= nil and count >= cap
-	panel.title.Text = if cap then (count or active) .. "/" .. cap .. " Active" else active .. " Active"
+	local slots = Config.Backpack.PenSlots + (player:GetAttribute("ExtraSlots") or 0)
+	local full = active >= slots
+	panel.title.Text = active .. "/" .. slots .. " Active"
 	for i, pet in list do
 		local row = Ui.copy(template, "Row" .. i, panel.rows)
 		row.LayoutOrder = i
@@ -212,6 +211,28 @@ local function ensure()
 	end
 	panel = SidePanel.new(NativeHud.popupRoot(), "PetsPanel", "GoldHeader", "0 Active", OUTLINES.Title)
 	template = Ui.template(panel.rows, "RowTemplate", rowTemplate)
+	-- +1 Equip (Fight to Steal an Egg's, 1:1): one more active slot for Robux (Config.Backpack)
+	local buy = button(panel.gui, "PetsBuySlot", 384, 90, { Position = UDim2.fromOffset(fig(768), fig(19)), ZIndex = 4 }, "Pink")
+	label(buy, "Text", {
+		Text = "+1 Equip [" .. Config.Backpack.SlotRobux .. "R]",
+		TextSize = fig(35),
+		Position = UDim2.fromOffset(fig(12), 0),
+		Size = UDim2.new(0, fig(290), 1, 0),
+		ZIndex = 5,
+	})
+	local robux = HudKit.art(buy, "RobuxIcon", {
+		Position = UDim2.fromOffset(fig(312), fig(9)),
+		Size = UDim2.fromOffset(fig(61), fig(67)),
+		ZIndex = 5,
+	})
+	HudKit.outlineArt(robux, 3)
+	buy.Activated:Connect(function()
+		if Config.Backpack.SlotProduct ~= 0 then
+			game:GetService("MarketplaceService"):PromptProductPurchase(player, Config.Backpack.SlotProduct)
+		else
+			ReplicatedStorage:WaitForChild("BuyPetSlot"):FireServer() -- (free in Studio till it has a product)
+		end
+	end)
 	-- Equip Best: under the panel, lined up with its right edge (the panel's 1168 x 734)
 	local best = button(panel.gui, "PetsEquipBest", 560, 150, { Position = UDim2.fromOffset(fig(608), fig(764)), ZIndex = 4 }, "GreenWeld")
 	label(best, "Text", {
@@ -249,7 +270,7 @@ local function ensure()
 	end
 	player:GetAttributeChangedSignal("Pen"):Connect(watchPen)
 	watchPen()
-	for _, name in { "RidePet", "StoredPets" } do
+	for _, name in { "RidePet", "StoredPets", "ExtraSlots" } do
 		player:GetAttributeChangedSignal(name):Connect(function()
 			if panel:isOpen() then
 				refresh()

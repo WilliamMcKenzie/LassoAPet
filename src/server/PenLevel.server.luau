@@ -1,24 +1,17 @@
 -- Pen levels: everyone starts at 1, and each quest you claim takes it up one, to
 -- Config.PenLevels (QM, Oct 11: Hatchery's ClaimQuest; it used to cost the next biome's
--- UnlockCost gold, UpgradePen). The pen grows with each level: each pen's Sizes folder
--- (tools/pens.py) holds one SizeK model per level, its markers laid out for that size.
--- The owner's level picks the one on show, and the pen's live markers (Spawn, Sign,
--- Area, Tiles, Slots) move onto its copies, so pets, eggs and rides follow without
--- knowing. Its look follows the furthest biome its owner has unlocked (QM, Oct 12;
--- Gold.server's "GatesBroken"): that biome's fence, built round it (PenFence), and its
--- ground colours on the floor.
+-- UnlockCost gold, UpgradePen). Pens no longer grow with it (QM, Nov 6: Fight to Steal an
+-- Egg's pens, one size, built by Server/Map from the map editor's map). VIP (the game pass)
+-- gilds its owner's fence and hangs banners on its corners.
 -- The level lives in the player's "PenLevel" attribute and is saved like Gold.
 
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local ServerStorage = game:GetService("ServerStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local WorldColors = require(ReplicatedStorage.Shared.WorldColors)
 local Studs = require(ReplicatedStorage.Shared.Studs)
-local PenFence = require(script.Parent.PenFence)
 require(script.Parent.Passes) -- (PassVIP: the gold fence, below)
 
 -- One pen level across every world (QM, Oct 14: the pen carries over, and its size): World
@@ -54,7 +47,9 @@ local function load(player)
 		if success then
 			if player.Parent then
 				local best = tonumber(value) or 1
-				for _, old in oldStores do
+				-- (the old worlds' only before World 1's was ever saved: it holds their best since,
+				-- and a rebirth's level 1 mustn't come back up from them: Config.Luck)
+				for _, old in if value == nil then oldStores else {} do
 					local got, was = pcall(old.GetAsync, old, "u" .. player.UserId)
 					if got and tonumber(was) then
 						best = math.max(best, tonumber(was))
@@ -94,110 +89,8 @@ end
 
 -- Pen looks ------------------------------------------------------------------
 
-local world = workspace:WaitForChild("World")
 local pens = workspace:WaitForChild("Pens")
-local postColors = {} -- [post] = its level 1 colour
-local fenceLooks = {} -- [rail or brace] = { Color, Material } as built, for when VIP goes
-
--- Pen sizes ------------------------------------------------------------------
-
-local spare = Instance.new("Folder") -- the sizes not on show
-spare.Name = "PenSizes"
-spare.Parent = ServerStorage
-local sizes = {} -- [pen] = { [k] = SizeK model }
-
-local function sizesOf(pen)
-	if not sizes[pen] then
-		sizes[pen] = {}
-		local folder = pen:FindFirstChild("Sizes")
-		for _, model in (if folder then folder:GetChildren() else {}) do
-			local k = tonumber(model.Name:match("^Size(%d+)$"))
-			if k then
-				sizes[pen][k] = model
-			end
-		end
-	end
-	return sizes[pen]
-end
-
-local function copyBox(from, to)
-	if from and to then
-		to.Size = from.Size
-		to.CFrame = from.CFrame
-	end
-end
-
--- Shows the size for level n (the biggest there is, past the last) and moves
--- the live markers onto it. Returns the fence model on show.
-local function sizePen(pen, n)
-	local list = sizesOf(pen)
-	local k = math.min(n, #list)
-	for i, model in list do
-		model.Parent = if i == k then pen.Sizes else spare
-	end
-	local shown = list[k]
-	if not shown then
-		return nil
-	end
-	for _, name in { "Spawn", "Sign", "Area", "Tiles" } do
-		copyBox(shown:FindFirstChild(name), pen:FindFirstChild(name))
-	end
-	local slots, liveSlots = shown:FindFirstChild("Slots"), pen:FindFirstChild("Slots")
-	if slots and liveSlots then
-		for _, slot in slots:GetChildren() do
-			copyBox(slot, liveSlots:FindFirstChild(slot.Name))
-		end
-	end
-	return shown
-end
-
--- A copy of the ground over the pen's tiles, with the ground's checker: a block as
--- deep as the ground's (FLOOR_DEPTH), not a sheet (QM, Oct 9: turned with the pen,
--- a sheet showed the grass round its edges). Top at 0.3: the underlying ground
--- textures bleed through the old 0.1 gap at shallow angles. Solid, so you stand on it
--- rather than 0.3 into it on the ground under it (QM, Oct 11: feet in the pen's floor).
-local FLOOR_TOP, FLOOR_DEPTH = 0.3, 2.3 -- (FLOOR_TOP: above the bottom of the pen's tiles, so a pen set higher, World 3's on its sand, keeps its floor on top: QM, Oct 14)
-local function floorY(tiles)
-	return tiles.Position.Y - tiles.Size.Y / 2 + FLOOR_TOP - FLOOR_DEPTH / 2
-end
-local function floorOf(pen)
-	local floor = pen:FindFirstChild("Floor")
-	local tiles = pen:FindFirstChild("Tiles")
-	if floor or not tiles then
-		if floor and tiles then -- the pen may have grown
-			floor.Size = Vector3.new(tiles.Size.X, FLOOR_DEPTH, tiles.Size.Z)
-			floor.CFrame = CFrame.new(tiles.Position.X, floorY(tiles), tiles.Position.Z) * tiles.CFrame.Rotation
-		end
-		return floor
-	end
-	floor = Instance.new("Part")
-	floor.Name = "Floor"
-	floor.Anchored = true
-	floor.CanCollide = true
-	floor.CanTouch = false
-	floor.CastShadow = false
-	floor.TopSurface = Enum.SurfaceType.Smooth
-	for _, side in { "FrontSurface", "BackSurface", "LeftSurface", "RightSurface" } do
-		floor[side] = Enum.SurfaceType.Studs -- (studded sides, like the ground's: QM)
-	end
-	floor.Size = Vector3.new(tiles.Size.X, FLOOR_DEPTH, tiles.Size.Z)
-	floor.CFrame = CFrame.new(tiles.Position.X, floorY(tiles), tiles.Position.Z) * tiles.CFrame.Rotation -- (turned with the pen: the arc base's pens face the yard)
-	local ground -- (a ground tile with the checker: the first child may be water or a plain tile, World 3's were, QM Oct 15)
-	for _, part in world.Ground:GetChildren() do
-		if part:FindFirstChild("Checker") then
-			ground = part
-			break
-		end
-	end
-	ground = ground or world.Ground:GetChildren()[1]
-	for _, texture in ground:GetChildren() do
-		if texture:IsA("Texture") and texture.Name ~= "Water" then
-			texture:Clone().Parent = floor
-		end
-	end
-	floor.Parent = pen
-	return floor
-end
+local fenceLooks = {} -- [post, rail] = { Color, Material } as built, for when VIP goes
 
 -- VIP (game pass): a red banner on a gold pole on each corner post of the fence,
 -- facing out. Rebuilt with each repaint (the pen grows), gone without VIP.
@@ -257,51 +150,12 @@ end
 
 local function paintPen(pen)
 	local owner = Players:GetPlayerByUserId(pen:GetAttribute("Owner") or 0)
-	local n = if owner then level(owner) else 1
-	-- (its look, fence and floor, the furthest biome its owner's unlocked: QM, Oct 12; its size the level's)
-	local b = math.clamp(if owner then owner:GetAttribute("GatesBroken") or 1 else 1, 1, #Config.Biomes)
-	local fence = sizePen(pen, n) or pen
-	local tiles = fence:FindFirstChild("Tiles")
-	if tiles and fence:GetAttribute("FenceBiome") ~= b then
-		local old = fence:FindFirstChild("Fence")
-		if old then
-			old:Destroy()
-		end
-		PenFence.build(tiles, b).Parent = fence
-		fence:SetAttribute("FenceBiome", b)
-	end
-	local floor = floorOf(pen)
-	if floor then
-		-- (level 1 too, QM Oct 9: the Meadow's dirt checker, turned with the pen like the rest)
-		local show = not fence:GetAttribute("CustomFloor")
-		floor.Transparency = if show then 0 else 1
-		for _, texture in floor:GetChildren() do
-			if texture:IsA("Texture") then
-				texture.Transparency = if show then 0 else 1
-			end
-		end
-		if show then
-			local prefix = WorldColors.prefix(b)
-			local name = if b == 1 then "Dirt" else "Ground"
-			local colors = if b == 1 then Config.Biomes[1].Patches.Dirt else Config.Biomes[b].GroundColors
-			floor.Color = WorldColors.saturate(world:GetAttribute(prefix .. name .. "A") or colors[1])
-			for _, texture in floor:GetChildren() do
-				if texture.Name == "Checker" then
-					texture.Color3 = WorldColors.saturate(world:GetAttribute(prefix .. name .. "B") or colors[2])
-				end
-			end
-		end
-	end
 	local vip = owner ~= nil and owner:GetAttribute("PassVIP") == true
+	local fence = pen:FindFirstChild("Fence") or pen
 	for _, part in fence:GetDescendants() do
-		if part.Name == "Post" then
-			postColors[part] = postColors[part] or part.Color
-			part.Color = if vip then Config.Vip.Fence.Post else postColors[part] -- (each biome's fence has its own colours: PenFence)
-		elseif part:IsA("BasePart") and (part.Name == "Rail" or part.Name == "Brace") then
+		if part:IsA("BasePart") and (part.Name == "Post" or part.Name == "Rail") then
 			fenceLooks[part] = fenceLooks[part] or { part.Color, part.Material }
 			part.Color = if vip then Config.Vip.Fence[part.Name] else fenceLooks[part][1]
-			-- (the Godlands' Neon lava rails go plain gold; the rest keep their studs)
-			part.Material = if vip and fenceLooks[part][2] == Enum.Material.Neon then Enum.Material.SmoothPlastic else fenceLooks[part][2]
 		end
 	end
 	vipBanners(pen, fence, vip)
@@ -321,7 +175,7 @@ local function penOf(player)
 end
 
 local function watch(player)
-	for _, name in { "PenLevel", "PassVIP", "GatesBroken" } do
+	for _, name in { "PassVIP" } do
 		player:GetAttributeChangedSignal(name):Connect(function()
 			local pen = penOf(player)
 			if pen then
@@ -329,6 +183,9 @@ local function watch(player)
 			end
 		end)
 	end
+	player:GetAttributeChangedSignal("Reborn"):Connect(function() -- (a rebirth: back to 1, saved at once)
+		save(player)
+	end)
 	load(player)
 end
 

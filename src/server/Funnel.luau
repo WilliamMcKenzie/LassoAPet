@@ -42,6 +42,20 @@
 -- (not a trip to the other world).
 --
 -- Custom events (Analytics > Custom Events), every time: Funnel.event(player, name).
+--
+-- Comparing game versions (QM, Nov 7: "see immediately if it's performing worse/better than
+-- the old version"): every funnel step, custom event and economy event carries
+-- CustomField01 = Config.GameVersion (the old version's say "build <n>"), so any chart in
+-- Creator Hub > Analytics can be broken down by it. Retention, session length and Robux
+-- (Engagement, Retention, Monetization) are Roblox's own: compare them by date. Added for it:
+--   [V2] World 1 Biomes   the revamp's biomes (V1's had the old ones)
+--   "Unlocked <biome>"    a biome bought on the Slingshot (value: minutes played so far;
+--                         CustomField03 cash or robux)
+--   "Reached <biome>"     rode through its barrier (value: minutes played so far)
+--   "Session Minutes"     each visit's length (value: minutes)
+--   Economy (Analytics > Economy), currency "Cash": sources Ride, Pen Income (a minute's
+--   worth at a time), Away Earnings, Index Reward, Cash Pack; sinks Unlock <biome>, Egg
+--   Roll, Fuse, Rainbow Trail.
 local AnalyticsService = game:GetService("AnalyticsService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -56,9 +70,10 @@ local Funnel = {}
 
 local WORLD = Config.World
 local BUILD = game.PlaceVersion
+local VERSION = Config.GameVersion
 local TUTORIAL = "[V1] Tutorial"
 local LOOP = "[V1] First Session Loop"
-local BIOMES = "[V1] World " .. WORLD .. " Biomes"
+local BIOMES = "[V2] World " .. WORLD .. " Biomes" -- (V2: the revamp's biomes)
 local CLAIMS = "[V1] Quest Claims"
 local PROGRESS = "[V1] Quest Progress"
 local WORLDS = "[V1] Worlds"
@@ -80,6 +95,15 @@ end
 Funnel.BIOMES = BIOMES
 
 local state = {} -- [player] = this session's: see Funnel.start
+
+-- Every event's custom fields: the game version, new or returning, and `key`.
+local function fields(s, key)
+	return {
+		[Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = VERSION,
+		[Enum.AnalyticsCustomFieldKeys.CustomField02.Name] = if s and s.new then "new" else "returning",
+		[Enum.AnalyticsCustomFieldKeys.CustomField03.Name] = key,
+	}
+end
 
 local function isOwner(player)
 	if game.CreatorType == Enum.CreatorType.User then
@@ -106,12 +130,7 @@ local function log(player, name, id, memo, step, key, persist)
 	if persist then
 		s.profile.v1.done[memo] = step
 	end
-	local fields = {
-		[Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = "build " .. tostring(s.profile.v1.build),
-		[Enum.AnalyticsCustomFieldKeys.CustomField02.Name] = if s.new then "new" else "returning",
-		[Enum.AnalyticsCustomFieldKeys.CustomField03.Name] = key,
-	}
-	pcall(AnalyticsService.LogFunnelStepEvent, AnalyticsService, player, name, id, step, Funnel.STEPS[name][step], fields)
+	pcall(AnalyticsService.LogFunnelStepEvent, AnalyticsService, player, name, id, step, Funnel.STEPS[name][step], fields(s, key))
 	local counts = {}
 	for i = was + 1, step do
 		counts[name .. "|" .. i] = 1
@@ -128,7 +147,7 @@ function Funnel.start(player, profile, isNew)
 	v1.build = tonumber(v1.build) or BUILD
 	v1.done = typeof(v1.done) == "table" and v1.done or {}
 	if isNew then
-		v1.biomes = true -- (first arrival in this world after V1: in its Biomes funnel for good)
+		v1.biomes2 = true -- (first arrival in this world after V2: in its Biomes funnel for good)
 	end
 	profile.v1 = v1
 	local s = {
@@ -145,8 +164,8 @@ function Funnel.start(player, profile, isNew)
 		log(player, TUTORIAL, s.session, "tut", 1, "w" .. WORLD)
 		log(player, LOOP, s.session, "loop", 1, "w" .. WORLD)
 	end
-	if v1.biomes then
-		log(player, BIOMES, player.UserId .. ":w" .. WORLD, "b", 1, "w" .. WORLD, true)
+	if v1.biomes2 then
+		log(player, BIOMES, player.UserId .. ":w" .. WORLD, "b2", 1, "w" .. WORLD, true)
 	end
 	s.arrivedAt = os.clock()
 	if ARRIVED[WORLD] then -- (not the Halloween world's)
@@ -186,8 +205,8 @@ local function rideStarted(player)
 	if not s then
 		return
 	end
-	if s.profile.v1.biomes then
-		log(player, BIOMES, player.UserId .. ":w" .. WORLD, "b", 2, "w" .. WORLD, true)
+	if s.profile.v1.biomes2 then
+		log(player, BIOMES, player.UserId .. ":w" .. WORLD, "b2", 2, "w" .. WORLD, true)
 	end
 	if RODE[WORLD] then
 		log(player, WORLDS, tostring(player.UserId), "worldsRode", RODE[WORLD], "w" .. WORLD, true)
@@ -236,16 +255,39 @@ function Funnel.tutorialDone(player)
 	end
 end
 
+local function minutes(seconds)
+	return math.floor(seconds / 6 + 0.5) / 10
+end
+
 -- Gold.server: the player rode through biome `to`'s barrier, the last they'd broken `from`
--- (1: none yet).
-function Funnel.reached(player, from, to)
+-- (1: none yet); `played`: their seconds played so far, if known.
+function Funnel.reached(player, from, to, played)
 	local s = state[player]
-	if not s or not s.profile.v1.biomes then
+	if not s then
+		return
+	end
+	if played then
+		for b = from + 1, math.min(to, #BIOME_NAMES) do
+			Funnel.event(player, "Reached " .. BIOME_NAMES[b], minutes(played), "w" .. WORLD)
+		end
+	end
+	if not s.profile.v1.biomes2 then
 		return
 	end
 	local last = math.min(to, #BIOME_NAMES)
 	if last >= 2 then
-		log(player, BIOMES, player.UserId .. ":w" .. WORLD, "b", last + 1, "w" .. WORLD, true)
+		log(player, BIOMES, player.UserId .. ":w" .. WORLD, "b2", last + 1, "w" .. WORLD, true)
+	end
+end
+
+-- Server/Slingshot: biome i unlocked on the Slingshot's menu, `how` "cash" or "robux".
+function Funnel.unlocked(player, i, how)
+	local played = game:GetService("ServerStorage"):FindFirstChild("PlayedTime") -- (Gold.server's)
+	local ok, seconds = pcall(function()
+		return played and played:Invoke(player)
+	end)
+	if ok and seconds then
+		Funnel.event(player, "Unlocked " .. (BIOME_NAMES[i] or Config.Biomes[i].Name), minutes(seconds), how)
 	end
 end
 
@@ -287,9 +329,49 @@ function Funnel.claimed(player, i)
 	end
 end
 
-function Funnel.event(player, name)
-	pcall(AnalyticsService.LogCustomEvent, AnalyticsService, player, name)
+-- `value` (default 1) and `key` (CustomField03) are optional.
+function Funnel.event(player, name, value, key)
+	local s = state[player]
+	if s and s.excluded then
+		return
+	end
+	pcall(AnalyticsService.LogCustomEvent, AnalyticsService, player, name, value or 1, fields(s, key))
 end
+
+-- Cash in (`sink` false) or out, after the player's Gold has changed: an economy event, `sku`
+-- what it was for, `kind` an Enum.AnalyticsEconomyTransactionType's name.
+function Funnel.cash(player, sink, amount, kind, sku)
+	local s = state[player]
+	if not s or s.excluded or type(amount) ~= "number" or not (amount > 0) then
+		return
+	end
+	local flow = if sink then Enum.AnalyticsEconomyFlowType.Sink else Enum.AnalyticsEconomyFlowType.Source
+	pcall(AnalyticsService.LogEconomyEvent, AnalyticsService, player, flow, "Cash", amount,
+		player:GetAttribute("Gold") or 0, kind, sku, fields(s, sku))
+end
+
+-- Hatchery: pen income, every second; logged a minute's worth at a time (and on leaving).
+function Funnel.penIncome(player, amount)
+	local s = state[player]
+	if s then
+		s.pen = (s.pen or 0) + amount
+	end
+end
+local function flushPen(player, s)
+	local amount = s.pen
+	s.pen = nil
+	if amount then
+		Funnel.cash(player, false, amount, Enum.AnalyticsEconomyTransactionType.Gameplay.Name, "Pen Income")
+	end
+end
+task.spawn(function()
+	while true do
+		task.wait(60)
+		for player, s in state do
+			flushPen(player, s)
+		end
+	end
+end)
 
 -- The client's reports: only the intro's end now ("tutorial", "intro"). Anything else
 -- (the old tutorial and shop steps) is ignored.
@@ -318,15 +400,18 @@ task.spawn(function() -- (Riders makes these: don't hold up whoever requires thi
 end)
 Telemetry.onLeave(function(player, transferring)
 	local s = state[player]
-	state[player] = nil
 	if not s or s.excluded then
+		state[player] = nil
 		return
 	end
+	flushPen(player, s)
 	-- How long they were in this world this visit, and whether they left the game or travelled on.
 	local minutes = (os.clock() - (s.arrivedAt or os.clock())) / 60
 	local spent = if minutes < 1 then "Under 1m" elseif minutes < 5 then "1-5m" elseif minutes < 15 then "5-15m" else "15m+"
 	Funnel.event(player, (if transferring then "Travelled From World " else "Left Game In World ") .. WORLD)
 	Funnel.event(player, "Left World " .. WORLD .. " After " .. spent)
+	Funnel.event(player, "Session Minutes", math.floor(minutes * 10 + 0.5) / 10, "w" .. WORLD)
+	state[player] = nil
 	StatsStore.add("v1-leaves", { ["w" .. WORLD .. "|" .. (if transferring then "travel" else "quit") .. "|" .. spent] = 1 })
 	local ends = {}
 	if s.logged.claims then

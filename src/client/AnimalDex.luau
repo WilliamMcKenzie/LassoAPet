@@ -37,7 +37,7 @@ local AnimalDex = {}
 -- This world's biomes, each with its animals: the herd's (and its 1-in-1,000 trophies), cheapest
 -- first.
 local BIOMES = {}
-for i, biome in Config.Biomes do
+for i, biome in Config.allBiomes() do -- (and the endless course's, past the Ocean: Config.Endless)
 	local kinds = {}
 	for kind, weight in biome.Herd or {} do
 		if weight > 0 and PetFaces.HEADSHOTS[kind] ~= nil then
@@ -52,7 +52,7 @@ for i, biome in Config.Biomes do
 		return a < b
 	end)
 	local names = Config.BiomeNames and Config.BiomeNames[Config.World]
-	table.insert(BIOMES, { name = names and names[i] or biome.Name, kinds = kinds })
+	table.insert(BIOMES, { name = names and names[i] or biome.DisplayName or biome.Name, kinds = kinds })
 end
 
 local function ridden()

@@ -5,7 +5,7 @@
 local Horse = require(script.Parent.Horse)
 local UnicornModel = require(script.Parent.UnicornModel)
 
-return Horse.variant("Unicorn", UnicornModel, "Legendary", {
+return Horse.variant("Unicorn", UnicornModel, "Divine", {
 	seat = Vector3.new(0, 7.3, 1),
 	neck = { center = Vector3.new(0, 7.4, -1.9), radius = 1.35 },
 })
