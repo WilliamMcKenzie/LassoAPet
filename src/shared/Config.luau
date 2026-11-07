@@ -230,7 +230,7 @@ local Config = {
 	Biomes = {
 		{
 			Name = "Meadow",
-			Picture = "rbxassetid://95414880837488", -- design/biomes/Meadow.png: its render, no pets (the Slingshot menu's card)
+			Picture = "rbxassetid://134128815979171", -- design/biomes/Meadow.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 1, -- its obstacles (tools/funnel.luau) and the Godlands' terrain grow ^0.8 of this. Animals no longer do (QM, Oct 8: back to their old sizes)
 			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
 			Length = 2168, -- (QM, Oct 11: the pacing ladder, below AnimalStats; was 760)
@@ -252,7 +252,7 @@ local Config = {
 		},
 		{
 			Name = "Desert",
-			Picture = "rbxassetid://75479960566935", -- design/biomes/Desert.png: its render, no pets (the Slingshot menu's card)
+			Picture = "rbxassetid://92572924134940", -- design/biomes/Desert.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 1.35,
 			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.75)
 			NestScale = 2, -- its nests are this many times bigger, so they show from afar at its speed (Nests.server; QM, Oct 6)
@@ -272,7 +272,7 @@ local Config = {
 		},
 		{
 			Name = "Snow",
-			Picture = "rbxassetid://118124148075485", -- design/biomes/Snow.png: its render, no pets (the Slingshot menu's card)
+			Picture = "rbxassetid://87312209015598", -- design/biomes/Snow.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 1.8,
 			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.5)
 			NestScale = 2.25,
@@ -290,7 +290,7 @@ local Config = {
 			-- The volcano (QM, Oct 11; Nov 6: on the Lava ground, 4th. The old Ocean and Jurassic
 			-- herds are out; their animals stay in Shared/Animals: they're pets in saves.)
 			Name = "Volcano",
-			Picture = "rbxassetid://100287752344956", -- design/biomes/Volcano.png: its render, no pets (the Slingshot menu's card)
+			Picture = "rbxassetid://87109343842146", -- design/biomes/Volcano.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 2.6, -- (as the ocean's)
 			Swerve = 1,
 			NestScale = 2.5,
@@ -309,7 +309,7 @@ local Config = {
 			-- grounds in maps/world.map's order, each with its pets and egg odds from there
 			-- (its Eggs.Kinds). Colours are the map's; unlock costs are guesses (10x each).
 			Name = "Dungeon", -- the Abandoned Dungeon
-			Picture = "rbxassetid://91413010596267", -- design/biomes/Dungeon.png: its render, no pets (the Slingshot menu's card)
+			Picture = "rbxassetid://82252140059908", -- design/biomes/Dungeon.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 2.6, -- (as the volcano's)
 			Swerve = 1,
 			NestScale = 2.5,
@@ -324,7 +324,7 @@ local Config = {
 		},
 		{
 			Name = "Forest", -- the Magic Forest
-			Picture = "rbxassetid://90815211457859", -- design/biomes/Forest.png: its render, no pets (the Slingshot menu's card)
+			Picture = "rbxassetid://102414455931760", -- design/biomes/Forest.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 2.6, -- (as the volcano's)
 			Swerve = 1,
 			NestScale = 2.5,
@@ -339,7 +339,7 @@ local Config = {
 		},
 		{
 			Name = "Castle", -- the Red Castle
-			Picture = "rbxassetid://140083088970066", -- design/biomes/Castle.png: its render, no pets (the Slingshot menu's card)
+			Picture = "rbxassetid://115627895691510", -- design/biomes/Castle.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 2.6, -- (as the volcano's)
 			Swerve = 1,
 			NestScale = 2.5,
@@ -355,7 +355,7 @@ local Config = {
 		},
 		{
 			Name = "Ocean", -- the Ocean Trench
-			Picture = "rbxassetid://112630263377201", -- design/biomes/Ocean.png: its render, no pets (the Slingshot menu's card)
+			Picture = "rbxassetid://78505716706890", -- design/biomes/Ocean.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 2.6, -- (as the volcano's)
 			Swerve = 1,
 			NestScale = 2.5,
