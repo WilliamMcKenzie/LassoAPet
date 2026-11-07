@@ -6,6 +6,6 @@ local Horse = require(script.Parent.Horse)
 local CryptSnailModel = require(script.Parent.CryptSnailModel)
 
 return Horse.variant("CryptSnail", CryptSnailModel, "Uncommon", {
-	seat = Vector3.new(0, 8.84, -0.63),
+	seat = Vector3.new(0, 8.84, -0.62),
 	neck = { center = Vector3.new(0, 5.6, -4.42), radius = 3.92 },
 })

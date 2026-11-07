@@ -246,11 +246,68 @@ def v3(v):
     return "Vector3.new({:g}, {:g}, {:g})".format(*(round(float(x), 2) + 0.0 for x in v))
 
 
+NUDGE = 0.025  # model units: 0.25 Blockbench pixels (QM, Nov 7: "extend one out by 0.25 pixels")
+
+
+def faces(p):
+    """A block's six faces as (normal, plane offset, centre, two in-plane half-axes)."""
+    R, c, h = p.cf[:3, :3], p.cf[:3, 3], p.size / 2
+    out = []
+    for ax in range(3):
+        for sg in (-1, 1):
+            n = R[:, ax] * sg
+            u, v = [R[:, a] * h[a] for a in range(3) if a != ax]
+            fc = c + n * h[ax]
+            out.append((ax, sg, n, n @ fc, fc, u, v))
+    return out
+
+
+def overlap(f, g):
+    """Do two coplanar faces share area? (Separating axes in the plane.)"""
+    _, _, n, _, c1, u1, v1 = f
+    _, _, _, _, c2, u2, v2 = g
+    for axis in (u1, v1, u2, v2):
+        L = np.linalg.norm(axis)
+        a = axis / L
+        r1 = abs(u1 @ a) + abs(v1 @ a)
+        r2 = abs(u2 @ a) + abs(v2 @ a)
+        if abs((c2 - c1) @ a) >= r1 + r2 - 1e-3:
+            return False
+    return True
+
+
+def unfight(parts):
+    """No z-fighting: where two blocks have flush faces facing the same way and overlapping,
+    extend the smaller one out past the other by NUDGE. Returns how many faces moved."""
+    blocks = [p for p in parts if p.shape == "Block"]
+    moved = 0
+    for _ in range(4):
+        fixes = {}
+        for i, p in enumerate(blocks):
+            for q in blocks[i + 1:]:
+                for f in faces(p):
+                    for g in faces(q):
+                        if f[2] @ g[2] > 0.999 and abs(f[3] - g[3]) < NUDGE - 1e-6 and overlap(f, g):
+                            (small, face), big = ((p, f), g) if np.prod(p.size) <= np.prod(q.size) else ((q, g), f)
+                            step = big[3] + NUDGE - face[3]  # out to NUDGE past the other's face
+                            key = (id(small), face[0], face[1])
+                            if step > fixes.get(key, (0, 0, 0))[2]:
+                                fixes[key] = (small, face, step)
+        if not fixes:
+            break
+        for small, (ax, sg, n, *_), step in fixes.values():
+            small.size[ax] += step
+            small.cf[:3, 3] += n * step / 2
+            moved += 1
+    return moved
+
+
 def export(kind):
     biome, fn, motion, rarity, tier, *_ = PICKS[kind]
     a = build(kind)
     k = HORSE_SIL / silhouette(a.parts)
     C.grow(a, k)
+    a.nudged = unfight(a.parts)
     for p in a.parts:
         if not hasattr(p, "bone"):
             p.bone = "root"
@@ -281,7 +338,7 @@ return Horse.variant("{kind}", {kind}Model, "{rarity}", {{
 """)
     if kind == "HillbackTortoise":
         hillback_module(k, seat, nc, nr)
-    print(f"{kind:18} {len(a.parts):3} parts, x{k:.2f}, seat {v3(seat)}")
+    print(f"{kind:18} {len(a.parts):3} parts, x{k:.2f}, seat {v3(seat)}, {a.nudged} faces nudged")
     return a, k, seat, nc, nr
 
 

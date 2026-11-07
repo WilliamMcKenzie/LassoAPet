@@ -4,7 +4,7 @@
 
 return {
 	bones = {
-		{ name = "root", parent = nil, pivot = Vector3.new(0, 12.1899, 0) },
+		{ name = "root", parent = nil, pivot = Vector3.new(0, 12.1963, 0) },
 		{ name = "LegFL", parent = "root", pivot = Vector3.new(-1.2184, 10.7217, -1.5839) },
 		{ name = "LegFR", parent = "root", pivot = Vector3.new(1.2184, 10.7217, -1.5839) },
 		{ name = "LegHL", parent = "root", pivot = Vector3.new(-1.2184, 10.7217, 1.5839) },
@@ -22,12 +22,12 @@ return {
 		{ name = "LegHR", bone = "LegHR", class = "Part", size = Vector3.new(0.6823, 10.2344, 0.6823), cframe = CFrame.new(1.21837, 5.60454, 1.5839, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(190, 170, 160) },
 		{ name = "FootHR", bone = "LegHR", class = "Part", size = Vector3.new(0.9747, 0.4874, 0.9747), cframe = CFrame.new(1.21838, 0.243675, 1.58389, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(150, 132, 124) },
 		{ name = "Head", bone = "neck", class = "Part", size = Vector3.new(2.1931, 2.6804, 1.2208), cframe = CFrame.new(0, 12.5493, -2.80105, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(190, 170, 160) },
-		{ name = "EyeL", bone = "neck", class = "Part", size = Vector3.new(0.0122, 0.3899, 0.3411), cframe = CFrame.new(-1.10263, 12.8661, -3.09468, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilL", bone = "neck", class = "Part", size = Vector3.new(0.0195, 0.2339, 0.1706), cframe = CFrame.new(-1.10628, 12.8271, -3.17387, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
-		{ name = "EyeR", bone = "neck", class = "Part", size = Vector3.new(0.0122, 0.3899, 0.3411), cframe = CFrame.new(1.10263, 12.8661, -3.09468, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilR", bone = "neck", class = "Part", size = Vector3.new(0.0195, 0.2339, 0.1706), cframe = CFrame.new(1.10628, 12.8271, -3.17387, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
-		{ name = "EarL", bone = "neck", class = "Part", size = Vector3.new(0.1706, 2.4368, 0.9747), cframe = CFrame.new(-1.18182, 12.4275, -1.94941, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(150, 132, 124) },
-		{ name = "EarR", bone = "neck", class = "Part", size = Vector3.new(0.1706, 2.4368, 0.9747), cframe = CFrame.new(1.18182, 12.4275, -1.94941, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(150, 132, 124) },
+		{ name = "EyeL", bone = "neck", class = "Part", size = Vector3.new(0.025, 0.3899, 0.3411), cframe = CFrame.new(-1.10904, 12.8661, -3.09468, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
+		{ name = "PupilL", bone = "neck", class = "Part", size = Vector3.new(0.075, 0.2339, 0.2017), cframe = CFrame.new(-1.10904, 12.8271, -3.18942, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
+		{ name = "EyeR", bone = "neck", class = "Part", size = Vector3.new(0.025, 0.3899, 0.3411), cframe = CFrame.new(1.10904, 12.8661, -3.09468, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
+		{ name = "PupilR", bone = "neck", class = "Part", size = Vector3.new(0.075, 0.2339, 0.2017), cframe = CFrame.new(1.10904, 12.8271, -3.18942, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
+		{ name = "EarL", bone = "neck", class = "Part", size = Vector3.new(0.1706, 2.4618, 0.9747), cframe = CFrame.new(-1.18182, 12.4399, -1.94941, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(150, 132, 124) },
+		{ name = "EarR", bone = "neck", class = "Part", size = Vector3.new(0.1706, 2.4618, 0.9747), cframe = CFrame.new(1.18182, 12.4399, -1.94941, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(150, 132, 124) },
 		{ name = "Trunk", bone = "neck", class = "Part", size = Vector3.new(0.6823, 3.4115, 0.4898), cframe = CFrame.new(0, 9.9907, -3.65392, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(190, 170, 160) },
 		{ name = "Trunk2", bone = "neck", class = "Part", size = Vector3.new(0.4874, 1.9494, 0.4874), cframe = CFrame.new(0, 7.31027, -3.65514, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(190, 170, 160) },
 		{ name = "TuskL", bone = "neck", class = "CornerWedgePart", size = Vector3.new(0.1218, 0.9747, 0.3655), cframe = CFrame.new(-0.54827, 10.9045, -3.89881, -1, 0, 0, 0, 0, -1, 0, -1, 0), color = Color3.fromRGB(250, 244, 224), plain = true },
@@ -40,8 +40,8 @@ return {
 		{ name = "TuskR_4", bone = "neck", class = "CornerWedgePart", size = Vector3.new(0.1218, 0.9747, 0.3655), cframe = CFrame.new(0.54827, 11.27, -3.89881, 1, 0, 0, 0, 0, 1, 0, -1, 0), color = Color3.fromRGB(250, 244, 224), plain = true },
 		{ name = "Tail", bone = "Tail", class = "Part", size = Vector3.new(0.1949, 1.9494, 0.1949), cframe = CFrame.new(0, 12.1838, 2.29055, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(150, 132, 124) },
 		{ name = "Body", bone = "root", class = "Part", size = Vector3.new(3.4115, 2.9241, 4.3862), cframe = CFrame.new(0, 12.1838, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(190, 170, 160) },
-		{ name = "Blanket", bone = "root", class = "Part", size = Vector3.new(3.4358, 1.4742, 1.9494), cframe = CFrame.new(0, 12.9209, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(180, 60, 60) },
-		{ name = "Trim", bone = "root", class = "Part", size = Vector3.new(3.4602, 0.1462, 1.9494), cframe = CFrame.new(0, 12.1107, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(240, 190, 60) },
+		{ name = "Blanket", bone = "root", class = "Part", size = Vector3.new(3.4615, 1.4871, 1.9494), cframe = CFrame.new(0, 12.9273, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(180, 60, 60) },
+		{ name = "Trim", bone = "root", class = "Part", size = Vector3.new(3.4615, 0.1462, 1.9494), cframe = CFrame.new(0, 12.1107, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(240, 190, 60) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
 	animations = {

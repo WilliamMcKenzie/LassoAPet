@@ -10,9 +10,9 @@ return {
 	parts = {
 		{ name = "Head", bone = "neck", class = "Part", size = Vector3.new(3.6556, 2.0889, 2.0889), cframe = CFrame.new(0, 2.08892, -3.65561, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(60, 40, 30) },
 		{ name = "EyeL", bone = "neck", class = "Part", size = Vector3.new(0.1306, 0.6528, 0.6528), cframe = CFrame.new(-1.89308, 2.28476, -4.11257, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilL", bone = "neck", class = "Part", size = Vector3.new(0.2089, 0.3917, 0.3264), cframe = CFrame.new(-1.93226, 2.21948, -4.21049, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
+		{ name = "PupilL", bone = "neck", class = "Part", size = Vector3.new(0.2339, 0.3917, 0.3264), cframe = CFrame.new(-1.91976, 2.21948, -4.21049, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
 		{ name = "EyeR", bone = "neck", class = "Part", size = Vector3.new(0.1306, 0.6528, 0.6528), cframe = CFrame.new(1.89308, 2.28476, -4.11257, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilR", bone = "neck", class = "Part", size = Vector3.new(0.2089, 0.3917, 0.3264), cframe = CFrame.new(1.93226, 2.21948, -4.21049, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
+		{ name = "PupilR", bone = "neck", class = "Part", size = Vector3.new(0.2339, 0.3917, 0.3264), cframe = CFrame.new(1.91976, 2.21948, -4.21049, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
 		{ name = "JawL", bone = "neck", class = "Part", size = Vector3.new(0.7833, 0.7834, 3.1334), cframe = CFrame.new(-1.43613, 2.4806, -6.26677, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(120, 70, 40) },
 		{ name = "JawR", bone = "neck", class = "Part", size = Vector3.new(0.7833, 0.7834, 3.1334), cframe = CFrame.new(1.43613, 2.4806, -6.26677, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(120, 70, 40) },
 		{ name = "JawTipL", bone = "neck", class = "CornerWedgePart", size = Vector3.new(0.3917, 1.3056, 0.3917), cframe = CFrame.new(0.65279, 2.28476, -7.63762, 0, 1, 0, 1, 0, 0, 0, 0, -1), color = Color3.fromRGB(120, 70, 40), plain = true },

@@ -6,6 +6,6 @@ local Horse = require(script.Parent.Horse)
 local ArmoredRamModel = require(script.Parent.ArmoredRamModel)
 
 return Horse.variant("ArmoredRam", ArmoredRamModel, "Uncommon", {
-	seat = Vector3.new(0, 7.18, 0),
+	seat = Vector3.new(0, 7.18, -0.03),
 	neck = { center = Vector3.new(0, 6.73, -4.93), radius = 1.9 },
 })

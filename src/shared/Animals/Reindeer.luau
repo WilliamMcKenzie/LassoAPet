@@ -7,5 +7,5 @@ local ReindeerModel = require(script.Parent.ReindeerModel)
 
 return Horse.variant("Reindeer", ReindeerModel, "Rare", {
 	seat = Vector3.new(0, 6.75, 0),
-	neck = { center = Vector3.new(0, 8.44, -2.5), radius = 1.25 },
+	neck = { center = Vector3.new(0, 8.44, -2.48), radius = 1.27 },
 })

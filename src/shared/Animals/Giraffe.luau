@@ -6,6 +6,6 @@ local Horse = require(script.Parent.Horse)
 local GiraffeModel = require(script.Parent.GiraffeModel)
 
 return Horse.variant("Giraffe", GiraffeModel, "Epic", {
-	seat = Vector3.new(0, 8.1, 0),
-	neck = { center = Vector3.new(0, 14.13, -2.34), radius = 1.25 },
+	seat = Vector3.new(0, 8.1, -0.01),
+	neck = { center = Vector3.new(0, 14.13, -2.33), radius = 1.26 },
 })

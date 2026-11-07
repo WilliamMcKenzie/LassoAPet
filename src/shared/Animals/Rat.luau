@@ -7,5 +7,5 @@ local RatModel = require(script.Parent.RatModel)
 
 return Horse.variant("Rat", RatModel, "Uncommon", {
 	seat = Vector3.new(0, 4.4, 0),
-	neck = { center = Vector3.new(0, 3.16, -4.53), radius = 1.75 },
+	neck = { center = Vector3.new(0, 3.17, -4.53), radius = 1.76 },
 })

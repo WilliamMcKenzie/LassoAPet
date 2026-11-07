@@ -7,5 +7,5 @@ local OryxModel = require(script.Parent.OryxModel)
 
 return Horse.variant("Oryx", OryxModel, "Rare", {
 	seat = Vector3.new(0, 6.6, 0),
-	neck = { center = Vector3.new(0, 8.36, -2.47), radius = 1.25 },
+	neck = { center = Vector3.new(0, 8.36, -2.46), radius = 1.26 },
 })

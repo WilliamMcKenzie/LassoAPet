@@ -6,6 +6,6 @@ local Horse = require(script.Parent.Horse)
 local AncientMooseModel = require(script.Parent.AncientMooseModel)
 
 return Horse.variant("AncientMoose", AncientMooseModel, "Legendary", {
-	seat = Vector3.new(0, 8.54, 0),
+	seat = Vector3.new(0, 8.56, 0.01),
 	neck = { center = Vector3.new(0, 9.03, -2.89), radius = 1.36 },
 })

@@ -10,9 +10,9 @@ return {
 	parts = {
 		{ name = "Head", bone = "neck", class = "Part", size = Vector3.new(2.416, 1.9328, 1.6912), cframe = CFrame.new(0, 2.41595, -3.01994, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(190, 170, 140) },
 		{ name = "EyeL", bone = "neck", class = "Part", size = Vector3.new(0.1208, 0.604, 0.604), cframe = CFrame.new(-1.26838, 2.59715, -3.44273, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilL", bone = "neck", class = "Part", size = Vector3.new(0.1933, 0.3624, 0.302), cframe = CFrame.new(-1.30462, 2.53675, -3.53334, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
+		{ name = "PupilL", bone = "neck", class = "Part", size = Vector3.new(0.2183, 0.3624, 0.302), cframe = CFrame.new(-1.29212, 2.53675, -3.53334, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
 		{ name = "EyeR", bone = "neck", class = "Part", size = Vector3.new(0.1208, 0.604, 0.604), cframe = CFrame.new(1.26838, 2.59715, -3.44273, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 255, 255), plain = true },
-		{ name = "PupilR", bone = "neck", class = "Part", size = Vector3.new(0.1933, 0.3624, 0.302), cframe = CFrame.new(1.30462, 2.53675, -3.53334, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
+		{ name = "PupilR", bone = "neck", class = "Part", size = Vector3.new(0.2183, 0.3624, 0.302), cframe = CFrame.new(1.29212, 2.53675, -3.53334, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(30, 30, 45), plain = true },
 		{ name = "AntennaL", bone = "neck", class = "Part", size = Vector3.new(0.3624, 0.3624, 6.2815), cframe = CFrame.new(-0.54359, 3.56353, -6.52309, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(150, 130, 100) },
 		{ name = "AntennaR", bone = "neck", class = "Part", size = Vector3.new(0.3624, 0.3624, 6.2815), cframe = CFrame.new(0.54359, 3.56353, -6.52309, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(150, 130, 100) },
 		{ name = "Body", bone = "root", class = "Part", size = Vector3.new(2.8991, 2.6575, 5.5567), cframe = CFrame.new(0, 2.53675, 0.60399, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(190, 170, 140) },

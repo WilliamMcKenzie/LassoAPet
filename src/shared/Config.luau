@@ -2794,6 +2794,14 @@ end
 Config.AnimalScale.AlphaBoar /= 1.5
 Config.AnimalScale.AlphaIcebringer = (Config.AnimalScale.Icebringer or 1) * 1.4 -- (sized as the Icebringer is, not by its tier)
 Config.AnimalScale.Gecko = 1.2 -- (QM, Nov 6: bigger; its size is set by its tier, not its model)
+-- The picked titans 2x their tier's size, the biggest in their biomes (QM, Nov 7: "the Ash Behemoth is the Volcano Tortoise's size")
+Config.AnimalScale.HillbackTortoise = 2
+Config.AnimalScale.MirageElephant = 2
+Config.AnimalScale.GlacierMammoth = 2
+Config.AnimalScale.AshBehemoth = 2
+Config.AnimalScale.AbyssPillbug = 2
+Config.AnimalScale.AncientMoose = 2
+Config.AnimalScale.FortressTortoise = 2
 
 -- The place's workspace.PetScale wins over AnimalScale, which only seeds it (QM, Nov 6, as in
 -- Fight to Steal an Egg: size the animals in Studio with the pet lineup, Shared/PetScale and

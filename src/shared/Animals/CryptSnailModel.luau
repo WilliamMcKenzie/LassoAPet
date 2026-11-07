@@ -4,7 +4,7 @@
 
 return {
 	bones = {
-		{ name = "root", parent = nil, pivot = Vector3.new(0, 4.4199, -0.6314) },
+		{ name = "root", parent = nil, pivot = Vector3.new(0, 4.4199, -0.6189) },
 		{ name = "neck", parent = "root", pivot = Vector3.new(0, 1.8942, -3.1571) },
 	},
 	parts = {
@@ -15,7 +15,7 @@ return {
 		{ name = "GlowBallR", bone = "neck", class = "Part", size = Vector3.new(1.105, 1.105, 1.105), cframe = CFrame.new(0.8682, 8.7609, -4.75141, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(140, 240, 200), plain = true, neon = true },
 		{ name = "Foot", bone = "root", class = "Part", size = Vector3.new(3.7885, 1.8942, 10.1027), cframe = CFrame.new(0, 0.947125, -0.63142, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(180, 190, 200) },
 		{ name = "Shell", bone = "root", class = "Part", size = Vector3.new(5.6827, 6.3142, 6.9456), cframe = CFrame.new(0, 5.05133, 0.947125, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(120, 120, 130) },
-		{ name = "Brick", bone = "root", class = "Part", size = Vector3.new(5.9985, 1.5785, 6.9456), cframe = CFrame.new(0, 5.20918, 0.947125, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(70, 70, 80) },
+		{ name = "Brick", bone = "root", class = "Part", size = Vector3.new(5.9985, 1.5785, 6.9956), cframe = CFrame.new(0, 5.20918, 0.947125, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(70, 70, 80) },
 		{ name = "Moss", bone = "root", class = "Part", size = Vector3.new(4.4199, 0.6314, 4.4199), cframe = CFrame.new(0, 8.52412, 0.947125, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(90, 140, 80) },
 	},
 	-- keys: { time, x, y, z }; rotation in radians, position in studs, scale as a factor
