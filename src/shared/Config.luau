@@ -1502,18 +1502,18 @@ local Config = {
 		-- Luck Packs (QM, Nov 7: like Fight to Steal an Egg's Power Packs, six blue cards, three
 		-- and three; Client/NativeShop): Luck is added to your LuckBonus for good (Gold.server's
 		-- AddLuck, through Shop.server's ProcessReceipt). Icons: the clover pile, as the Power
-		-- packs' swords were placed. No product yet (0): free in Studio, not sold live.
+		-- packs' swords were placed. Products made Nov 7 (clover icon).
 		LuckPacks = {
-			{ Key = "Luck1", Luck = 1, Price = 49, ProductId = 0, Icons = { { 0, 229, 280 } } },
-			{ Key = "Luck2", Luck = 3, Price = 99, ProductId = 0, Icons = { { -70, 220, 260 }, { 70, 220, 260 } } },
-			{ Key = "Luck3", Luck = 8, Price = 199, ProductId = 0, Icons = { { -120, 205, 230 }, { 120, 205, 230 }, { 0, 235, 290 } } },
-			{ Key = "Luck4", Luck = 20, Price = 459, ProductId = 0, Icons = {
+			{ Key = "Luck1", Luck = 1, Price = 49, ProductId = 3729520060, Icons = { { 0, 229, 280 } } },
+			{ Key = "Luck2", Luck = 3, Price = 99, ProductId = 3729520343, Icons = { { -70, 220, 260 }, { 70, 220, 260 } } },
+			{ Key = "Luck3", Luck = 8, Price = 199, ProductId = 3729520517, Icons = { { -120, 205, 230 }, { 120, 205, 230 }, { 0, 235, 290 } } },
+			{ Key = "Luck4", Luck = 20, Price = 459, ProductId = 3729520656, Icons = {
 				{ -200, 235, 210 }, { 200, 235, 210 }, { -75, 200, 260 }, { 75, 200, 260 },
 			} },
-			{ Key = "Luck5", Luck = 50, Price = 799, ProductId = 0, Icons = {
+			{ Key = "Luck5", Luck = 50, Price = 799, ProductId = 3729520754, Icons = {
 				{ -215, 250, 210 }, { 215, 250, 210 }, { -110, 165, 230 }, { 110, 165, 230 }, { 0, 240, 300 },
 			} },
-			{ Key = "Luck6", Luck = 125, Price = 1499, ProductId = 0, Icons = {
+			{ Key = "Luck6", Luck = 125, Price = 1499, ProductId = 3729520917, Icons = {
 				{ -235, 140, 190 }, { 235, 140, 190 }, { -225, 265, 210 }, { 225, 265, 210 },
 				{ -110, 175, 240 }, { 110, 175, 240 }, { 0, 240, 310 },
 			} },
