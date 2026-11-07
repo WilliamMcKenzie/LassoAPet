@@ -4632,8 +4632,13 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	vfx.speedFx.update(dt, if riding and sprinting() then mount.speed * (vfx.speedGain or 1) else 0) -- speed lines while sprinting, by the uncurved speed
 	-- QM's speed lines (Config.SpeedLines): full on any sprint whatever the pet's speed,
 	-- none otherwise (QM, Oct 11).
-	vfx.speedLines.update(if riding and sprinting() then Config.SpeedLines.Speed else 0, dt)
-	vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
+	-- (and flying off the Slingshot: QM, Nov 7, Client/SlingshotLaunch)
+	vfx.speedLines.update(if (riding and sprinting()) or require(script.Parent.SlingshotRide).flying then Config.SpeedLines.Speed else 0, dt)
+	if require(script.Parent.SlingshotRide).flying then
+		vfx.sprintTrail.update(player.Character, true, Config.SprintTrail.HorseSprint * 4)
+	else
+		vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
+	end
 	vfx.returnVignette.update(dt, mount ~= nil and (phase == "turning" or phase == "return"))
 	if not (phase == "boss" or phase == "turning" or phase == "return" or phase == "home" or (phase == "ended" and vfx.bossChase.runningPast())) then
 		vfx.bossChase.stop() -- (it moves with the ride, slow motion and all: below)
@@ -4861,6 +4866,9 @@ function vfx.updateSound()
 	end
 	vfx.wasSprinting, vfx.sprintTier = now, tier
 	-- (the wind loop while you sprint on a mount, the run home's too: Sounds.sprint_wind)
+	if require(script.Parent.SlingshotRide).flying then
+		return -- (the Slingshot's flight has its own wind: Client/SlingshotLaunch)
+	end
 	vfx.sounds.setSprintWind(mount ~= nil and not transfer and (phase == "outbound" or phase == "return") and sprinting(),
 		vfx.sprintCam.tierLoudness(tier)) -- (louder a step each sprint tier, up to 2x: QM)
 end
