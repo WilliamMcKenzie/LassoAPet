@@ -1990,7 +1990,7 @@ end
 -- Gold.server), added, never multiplied, and kept through rebirths. Each Reach goal from the
 -- Desert on gives Reach luck, each Capture 3 cash (CashOfNext of the next unlock's price); both
 -- double each rebirth (RewardPerRebirth). A goal's egg only comes the first time (Server/Quests).
--- A rebirth (the last goal, past the Ocean: Server/Quests' "rebirth", Hatchery's Rebirth) wipes
+-- A rebirth (the goal once you've reached Config.rebirthBiome: Server/Quests' "rebirth", Hatchery's Rebirth) wipes
 -- your cash and unlocks, doubles every slingshot unlock's price and the goals' rewards, and
 -- loops the goals back to Reach Desert. Your pets and luck stay. Luck flattens your own
 -- stampede's odds (each weight ^ (1 / luck): 1 is the table as it is, more and more luck heads
@@ -2002,6 +2002,11 @@ Config.Luck = {
 	RewardPerRebirth = 2, -- goal luck x this each rebirth (0.25, 0.5, 1, 2...)
 	CostPerRebirth = 2, -- slingshot unlock prices x this each rebirth
 }
+-- The biome you reach to rebirth (QM, Nov 7): the Desert the first time, then the Tundra, the
+-- Volcano... one further each rebirth, up to the last (the Ocean).
+function Config.rebirthBiome(player)
+	return math.min(2 + (player:GetAttribute("Reborn") or 0), #Config.Biomes)
+end
 function Config.luck(player)
 	return 1 + (player:GetAttribute("LuckBonus") or 0)
 end
