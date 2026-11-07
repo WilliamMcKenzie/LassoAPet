@@ -254,7 +254,9 @@ local Config = {
 			-- use the same odds (NestOdds). A 0 never spawns but keeps the animal on
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
-			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05,
+			Herd = {
+				Snail = 0.2, Giraffe = 0.06, HillbackTortoise = 0.02, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
+				Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05,
 				Zebra = 0.25, Gecko = 0.13, Buffalo = 0.1, Elephant = 0.06 }, -- (QM, Nov 6; weights a guess, as the Pinto, the Fish and between the Fish and Rhino; the alphas: Config.Alphas)
 		},
 		{
@@ -268,7 +270,9 @@ local Config = {
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) }, -- and its Desert wall
 			CapColor = Color3.fromRGB(222, 164, 100), -- (its DesertCap)
 			GateColor = Color3.fromRGB(255, 204, 40), -- its breakable barrier's colour (Gate.client)
-			Herd = { Cactus = 0.3, Kitten = 0.1, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
+			Herd = {
+				Coyote = 0.2, Oryx = 0.2, Ostrich = 0.12, MirageElephant = 0.015, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
+				Cactus = 0.3, Kitten = 0.1, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
 			-- Locked behind a gate until your pen is this biome's level (its place
 			-- in this list). Upgrading your pen to it costs UnlockCost gold; your pen's
 			-- floor tiles take this biome's ground colours and its posts PostColor.
@@ -288,7 +292,9 @@ local Config = {
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) }, -- and its Ice wall
 			CapColor = Color3.fromRGB(244, 247, 251), -- (its IceCap)
 			GateColor = Color3.fromRGB(70, 220, 255), -- its breakable barrier's colour (Gate.client)
-			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.02 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
+			Herd = {
+				Seal = 0.25, Reindeer = 0.18, Walrus = 0.15, Narwhal = 0.08, GlacierMammoth = 0.015, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
+				Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.02 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
 			UnlockCost = 200000, -- (the progression pass, QM Nov 7: above Biomes; was 300k) QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
 			UpgradeImage = "rbxassetid://105968538824751", -- assets/ui/UpgradePenTundraEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://133303061216721", -- assets/ui/UpgradePenTundraDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
@@ -307,7 +313,9 @@ local Config = {
 			CapColor = Color3.fromRGB(96, 60, 46), -- (its LavaCap)
 			GateColor = Color3.fromRGB(255, 110, 20), -- its breakable barrier's colour (Gate.client)
 			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean and Jurassic: QM Oct 11)
-			Herd = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (QM, Oct 11: the Firebird Uncommon, the Rock Hog and Fire Lobster Rare, the Rockworm Epic, the Phoenix Legendary and very rare, the Lava Whale Epic and as rare as the Phoenix; the weights a guess)
+			Herd = {
+				FireAnt = 0.3, MagmaCrab = 0.15, AshBehemoth = 0.02, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
+				Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (QM, Oct 11: the Firebird Uncommon, the Rock Hog and Fire Lobster Rare, the Rockworm Epic, the Phoenix Legendary and very rare, the Lava Whale Epic and as rare as the Phoenix; the weights a guess)
 			UnlockCost = 650000, -- (the progression pass, QM Nov 7: above Biomes; was 10M)
 			-- No Upgrade Pen art yet: the plain button with the price.
 		},
@@ -326,7 +334,9 @@ local Config = {
 			CapColor = Color3.fromRGB(104, 126, 146),
 			GateColor = Color3.fromRGB(90, 255, 130),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { DungeonRat = 0.34, Bat = 0.2, Slime = 0.18, CaveSpider = 0.16, BoneSteed = 0.12, Mimic = 0.07, BoneWyrm = 0.03 },
+			Herd = {
+				Rat = 0.3, CaveCricket = 0.2, CryptSnail = 0.2, WebSpider = 0.14, AbyssPillbug = 0.02, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
+				DungeonRat = 0.34, Bat = 0.2, Slime = 0.18, CaveSpider = 0.16, BoneSteed = 0.12, Mimic = 0.07, BoneWyrm = 0.03 },
 			UnlockCost = 2000000, -- (the progression pass, QM Nov 7; was 100M)
 		},
 		{
@@ -341,7 +351,9 @@ local Config = {
 			CapColor = Color3.fromRGB(30, 196, 186),
 			GateColor = Color3.fromRGB(255, 143, 240),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { Shroom = 0.35, SpiritFox = 0.22, SpiritDeer = 0.15, AncientTreant = 0.13, MysticOwl = 0.08, CrystalTortoise = 0.05, SpiritLoong = 0.02 },
+			Herd = {
+				StagBeetle = 0.25, Deer = 0.15, BrownBear = 0.07, AncientMoose = 0.02, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
+				Shroom = 0.35, SpiritFox = 0.22, SpiritDeer = 0.15, AncientTreant = 0.13, MysticOwl = 0.08, CrystalTortoise = 0.05, SpiritLoong = 0.02 },
 			UnlockCost = 7500000, -- (the progression pass, QM Nov 7; was 1B)
 		},
 		{
@@ -356,7 +368,9 @@ local Config = {
 			CapColor = Color3.fromRGB(130, 28, 55),
 			GateColor = Color3.fromRGB(255, 0, 25),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02, CastleWyvern = 0.01,
+			Herd = {
+				Swan = 0.25, ArmoredRam = 0.22, RoyalStag = 0.14, Griffin = 0.05, FortressTortoise = 0.01, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
+				WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02, CastleWyvern = 0.01,
 				TRex = 0.12, Pterodactyl = 0.08 }, -- (QM, Nov 6: the old Jurassic's T-Rex and Pterodactyl, at their old weights)
 			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
 		},
@@ -372,7 +386,9 @@ local Config = {
 			CapColor = Color3.fromRGB(157, 226, 244),
 			GateColor = Color3.fromRGB(70, 200, 255),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { Squid = 0.38, Seahorse = 0.22, KingCrab = 0.17, FishSchool = 0.12, Whale = 0.08, AbyssWhale = 0.03,
+			Herd = {
+				Shrimp = 0.28, Pelican = 0.2, Hammerhead = 0.12, MantaRay = 0.07, Anglerfish = 0.07, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
+				Squid = 0.38, Seahorse = 0.22, KingCrab = 0.17, FishSchool = 0.12, Whale = 0.08, AbyssWhale = 0.03,
 				-- (QM, Nov 6: and Lasso's own old Ocean animals back, at their old weights; the Robo Shark a Robux pet, never wild)
 				Starfish = 0.3, Clownfish = 0.25, Lionfish = 0.15, BlueCrab = 0.05, Kraken = 0.05, RoboShark = 0 },
 			UnlockCost = 75000000, -- (the progression pass, QM Nov 7; was 100B)
@@ -528,6 +544,7 @@ local Config = {
 	-- pays out. Legendaries hatch slower (PetHatchTime: QM's D1 retention eggs).
 	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480 },
 	PetHatchTime = {
+		Snail = 15, Giraffe = 120, HillbackTortoise = 3600, Coyote = 15, Oryx = 60, Ostrich = 90, MirageElephant = 7200, Seal = 15, Reindeer = 60, Walrus = 60, Narwhal = 300, GlacierMammoth = 7200, FireAnt = 15, MagmaCrab = 60, AshBehemoth = 7200, Rat = 60, CaveCricket = 60, CryptSnail = 60, WebSpider = 300, AbyssPillbug = 7200, StagBeetle = 60, Deer = 300, BrownBear = 1200, AncientMoose = 7200, Swan = 60, ArmoredRam = 60, RoyalStag = 300, Griffin = 1200, FortressTortoise = 7200, Shrimp = 60, Pelican = 60, Hammerhead = 300, MantaRay = 1200, Anglerfish = 1200, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
 		-- (QM's spawn/hatch JSON, Oct 11, applied as given: the Herd weights in Biomes too)
 		-- QM's own table (Oct 11, "new json"): every animal's egg, by biome. Uncommons and Rares
 		-- hatch within a run, each biome's Epics a little longer, the Legendaries are the long
@@ -731,6 +748,7 @@ local Config = {
 	-- Oct 6); their tier (model "Tier" attribute, else ObstacleTiers by name) only
 	-- decides which ones some abilities break.
 	PetTiers = {
+		Snail = 2, Giraffe = 3, HillbackTortoise = 4, Coyote = 2, Oryx = 2, Ostrich = 3, MirageElephant = 4, Seal = 2, Reindeer = 2, Walrus = 3, Narwhal = 3, GlacierMammoth = 4, FireAnt = 2, MagmaCrab = 2, AshBehemoth = 4, Rat = 2, CaveCricket = 2, CryptSnail = 2, WebSpider = 2, AbyssPillbug = 4, StagBeetle = 2, Deer = 2, BrownBear = 3, AncientMoose = 4, Swan = 2, ArmoredRam = 2, RoyalStag = 2, Griffin = 3, FortressTortoise = 4, Shrimp = 2, Pelican = 2, Hammerhead = 3, MantaRay = 3, Anglerfish = 2, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
 		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleFish = 1, Lion = 1, Buffalo = 2, Crocodile = 1, MarbleColossus = 2, MajesticUnicorn = 2, Zebra = 1, Gecko = 1, Elephant = 3, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Eyeworm = 1, CrimsonScorpion = 1, Maw = 1, IvorySpider = 2, Asura = 3, -- World 2 Crimson Lands (the Asura large, QM)
@@ -841,6 +859,7 @@ local Config = {
 	-- every second while you're in the game. (QM, Oct 8 evening: progression 2x faster, so
 	-- x3 QM's pets JSON: rides don't get quicker, so the gold has to more than double.)
 	PetIncome = {
+		Snail = 9, Giraffe = 90, HillbackTortoise = 450, Coyote = 24, Oryx = 60, Ostrich = 240, MirageElephant = 750, Seal = 75, Reindeer = 300, Walrus = 300, Narwhal = 1260, GlacierMammoth = 3333, FireAnt = 12000, MagmaCrab = 20000, AshBehemoth = 45000, Rat = 12000, CaveCricket = 12000, CryptSnail = 12000, WebSpider = 20000, AbyssPillbug = 42500, StagBeetle = 12000, Deer = 20000, BrownBear = 27500, AncientMoose = 42500, Swan = 12000, ArmoredRam = 12000, RoyalStag = 20000, Griffin = 27500, FortressTortoise = 60000, Shrimp = 12000, Pelican = 12000, Hammerhead = 20000, MantaRay = 27500, Anglerfish = 27500, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
 		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleFish = 15, Lion = 24, Buffalo = 30, Crocodile = 24, MarbleColossus = 90, MajesticUnicorn = 450, Zebra = 15, Gecko = 24, Elephant = 90, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
 		Eyeworm = 18, CrimsonScorpion = 24, Maw = 60, IvorySpider = 180, Asura = 750, -- World 2 Crimson Lands
@@ -1410,6 +1429,41 @@ local Config = {
 	-- how long the Hold bar lasts while you ride it: 2x lasts twice as long. BiomeSpeed:
 	-- ridden in that biome (by Name), as fast as the animal named.
 	AnimalStats = {
+		-- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
+		Snail = { Speed = 0.8, Stamina = 0.8 },
+		Giraffe = { Speed = 1.35, Stamina = 2.2 },
+		HillbackTortoise = { Speed = 1.6, Stamina = 3 },
+		Coyote = { Speed = 1.5, Stamina = 1.2 },
+		Oryx = { Speed = 1.77, Stamina = 1.5 },
+		Ostrich = { Speed = 1.97, Stamina = 2 },
+		MirageElephant = { Speed = 2.8, Stamina = 3 },
+		Seal = { Speed = 2.355, Stamina = 1.5 },
+		Reindeer = { Speed = 2.678, Stamina = 1.3 },
+		Walrus = { Speed = 2.5, Stamina = 2 },
+		Narwhal = { Speed = 2.86, Stamina = 3 },
+		GlacierMammoth = { Speed = 3.8, Stamina = 4 },
+		FireAnt = { Speed = 5.11, Stamina = 2.5 },
+		MagmaCrab = { Speed = 6.56, Stamina = 2.8 },
+		AshBehemoth = { Speed = 7.2, Stamina = 3 },
+		Rat = { Speed = 7.6, Stamina = 3 },
+		CaveCricket = { Speed = 7.4, Stamina = 3 },
+		CryptSnail = { Speed = 7, Stamina = 3 },
+		WebSpider = { Speed = 8.2, Stamina = 3 },
+		AbyssPillbug = { Speed = 8.6, Stamina = 3 },
+		StagBeetle = { Speed = 7.6, Stamina = 3 },
+		Deer = { Speed = 8.4, Stamina = 3 },
+		BrownBear = { Speed = 7.6, Stamina = 3 },
+		AncientMoose = { Speed = 8.6, Stamina = 3 },
+		Swan = { Speed = 8.4, Stamina = 3 },
+		ArmoredRam = { Speed = 9, Stamina = 3 },
+		RoyalStag = { Speed = 8.8, Stamina = 3 },
+		Griffin = { Speed = 9.2, Stamina = 3 },
+		FortressTortoise = { Speed = 8.6, Stamina = 3 },
+		Shrimp = { Speed = 8.2, Stamina = 3 },
+		Pelican = { Speed = 8.4, Stamina = 3 },
+		Hammerhead = { Speed = 8.8, Stamina = 3 },
+		MantaRay = { Speed = 9, Stamina = 3 },
+		Anglerfish = { Speed = 8.6, Stamina = 3 },
 		-- Meadow (QM, Oct 11: the Meadow's and the Desert's back to their speeds from before the ladder:
 		-- the Meadow is the tutorial and the Desert should come almost at once)
 		Horse = { Speed = 1, Stamina = 1 },

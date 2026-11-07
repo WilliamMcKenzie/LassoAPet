@@ -192,6 +192,15 @@ local NAMES = {
 	WarBoar = { "War", "boar" }, RoyalSteed = { "Roy", "steed" }, ChessKnight = { "Chess", "knight" }, RoyalPeacock = { "Pea", "cock" },
 	LivingArmor = { "Living", "armor" }, CrimsonDrake = { "Crim", "drake" }, CastleWyvern = { "Castle", "wyvern" }, RoyalEagle = { "Roy", "eagle" }, Seahorse = { "Sea", "horse" },
 	AbyssWhale = { "Abyss", "whale" },
+	-- QM's picked luck-padding animals (Nov 7)
+	Snail = { "Sn", "ail", "Sna" }, Giraffe = { "Gi", "raffe" }, HillbackTortoise = { "Hill", "toise" },
+	Coyote = { "Coy", "ote" }, Oryx = { "Or", "yx" }, Ostrich = { "Ost", "rich" }, MirageElephant = { "Mirage", "phant" },
+	Seal = { "S", "eal", "Se" }, Reindeer = { "Rein", "deer" }, Walrus = { "Wal", "rus" }, Narwhal = { "Nar", "whal" }, GlacierMammoth = { "Gla", "mmoth" },
+	FireAnt = { "Fire", "ant" }, MagmaCrab = { "Mag", "crab" }, AshBehemoth = { "Ash", "moth" },
+	Rat = { "R", "at", "Ra" }, CaveCricket = { "Cave", "cricket" }, CryptSnail = { "Crypt", "snail" }, WebSpider = { "Web", "spider" }, AbyssPillbug = { "Abyss", "bug" },
+	StagBeetle = { "Stag", "beetle" }, Deer = { "D", "eer", "De" }, BrownBear = { "Brown", "bear" }, AncientMoose = { "An", "moose" },
+	Swan = { "Sw", "an", "Swa" }, ArmoredRam = { "Ar", "ram" }, RoyalStag = { "Roy", "stag" }, Griffin = { "Grif", "fin" }, FortressTortoise = { "Fort", "toise" },
+	Shrimp = { "Shr", "imp", "Shri" }, Pelican = { "Peli", "can" }, Hammerhead = { "Hammer", "head" }, MantaRay = { "Man", "ray" }, Anglerfish = { "Angler", "fish" },
 }
 local VOWELS = { a = true, e = true, i = true, o = true, u = true }
 
