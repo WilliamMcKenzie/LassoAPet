@@ -140,11 +140,17 @@ local function launch(model, to)
 			local dt = math.min(now - last, 0.1)
 			last = now
 			local u = math.min((now - t0) / flight, 1)
-			latVel += (steerInput() * Config.SteerSpeed - latVel) * (1 - math.exp(-Config.SteerResponse * dt))
+			local nimble = CFG.Steer or 1
+			latVel += (steerInput() * Config.SteerSpeed * nimble - latVel) * (1 - math.exp(-Config.SteerResponse * nimble * dt))
 			side = math.clamp(side + latVel * dt, -room - landing.X, room - landing.X)
 			local a, b = p0:Lerp(p1, u), p1:Lerp(p2, u)
-			local at = a:Lerp(b, u) + Vector3.new(side, 0, 0)
-			local ahead = (b - a) * (2 / flight) + Vector3.new(latVel, 0, 0) -- (its velocity: facing the way it really goes)
+			-- the lift (CFG.Lift): steeply up off the band, back to nothing by the landing
+			local lift = CFG.Lift or 0
+			local s = math.sin(math.pi * u)
+			local at = a:Lerp(b, u) + Vector3.new(side, lift * s ^ 0.6, 0)
+			local uc = math.clamp(u, 0.02, 0.98)
+			local climb = lift * 0.6 * math.sin(math.pi * uc) ^ -0.4 * math.cos(math.pi * uc) * math.pi / flight
+			local ahead = (b - a) * (2 / flight) + Vector3.new(latVel, climb, 0) -- (its velocity: facing the way it really goes)
 			local body = CFrame.lookAt(at, at + (if ahead.Magnitude > 0.01 then ahead else -Vector3.zAxis))
 			pet:PivotTo(body * rel)
 			hrp.CFrame = body * CFrame.new(0, size.Y / 2 + SEAT, 0)
