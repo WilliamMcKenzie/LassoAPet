@@ -448,15 +448,15 @@ local Config = {
 	-- VeinSpin degrees a second.
 	-- ByBiome: which boss (Shared/Bosses) each biome (Config.Biomes Name) gets; Kind for any other.
 	Boss = {
-		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss", Volcano = "LavaWyrm", Jurassic = "TyrantRex", Castle = "TyrantRex" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
+		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss", Volcano = "LavaWyrm", Jurassic = "TyrantRex", Castle = "TyrantRex", Dungeon = "BoneWarden", Forest = "ElderTreant" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
 		ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		-- (you turn for home at once, but the camera lingers behind you, on the boss, for
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, GiantRafflesia = 120, RoyalCnidarian = 50, Gigacorn = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
-		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
-		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, GiantRafflesia = 120, RoyalCnidarian = 50, Gigacorn = 60, BoneWarden = 40, ElderTreant = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3, BoneWarden = 0.6, ElderTreant = 0.6 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
+		CryPitch = { CrystalTyrant = 0.7, BoneWarden = 0.9, ElderTreant = 0.6 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
 			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 5, 41) }, -- (it's 1.7x the size: QM)
 			CactusBoss = { From = Vector3.new(0, 5, 34) }, -- (1.7x the size)
@@ -473,6 +473,8 @@ local Config = {
 			RoyalCnidarian = { At = Vector3.new(0, 0.1, 0.33), From = Vector3.new(0, 6, 60) }, -- (World 3 Cnidaria's crowned jellyfish: its eyes and teeth under the crown; a guess)
 			Gigacorn = { At = Vector3.new(0, 0.2, 0.4), From = Vector3.new(0, 8, 65) }, -- (World 3 Candyland's candy unicorn: its face under the horn, high at the front; a guess)
 			CrystalTyrant = { At = Vector3.new(0, 0.02, 0.48), From = Vector3.new(0, 4, 34) }, -- (its eyes and teeth, halfway up: the crown makes it tall)
+			BoneWarden = { At = Vector3.new(0, 0.38, 0.3), From = Vector3.new(0, 6, 55) }, -- (its skull, high up: FightToStealAnEgg's Dungeon boss, QM Nov 7; a guess)
+			ElderTreant = { At = Vector3.new(0, 0.3, 0.35), From = Vector3.new(0, 8, 60) }, -- (its face in the bark: FightToStealAnEgg's Forest boss, QM Nov 7; a guess)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 		-- On the run home it cries again every so often (QM, Oct 11): its opening cry, the
