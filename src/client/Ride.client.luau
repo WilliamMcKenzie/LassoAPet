@@ -331,10 +331,12 @@ local function newStream(spawnZ, endZ, herd, name)
 	end
 	s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / slowest
 	local names = {}
+	local luck = Config.luck(player) -- (your luck flattens your own stampede's odds: Config.Luck)
 	for kind, weight in herd do
-		table.insert(s.kinds, { name = kind, weight = weight })
-		table.insert(names, kind .. " " .. weight)
-		s.total += weight
+		local w = Config.luckWeight(weight, luck)
+		table.insert(s.kinds, { name = kind, weight = w, base = weight })
+		table.insert(names, kind .. " " .. string.format("%.3g", w))
+		s.total += w
 	end
 	table.sort(s.kinds, function(a, c)
 		return a.name < c.name
@@ -424,6 +426,23 @@ local phase = "idle" -- idle | outbound | turning | return | home | finish | end
 local starter, mount
 local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
 local plans = {} -- [n] = { x, speed }, the stampede's schedule
+-- Your luck changed (a rebirth, or the save loaded: "Reborn"): every stream's odds again at
+-- the new luck, and the plans not yet running drawn again from them.
+player:GetAttributeChangedSignal("Reborn"):Connect(function()
+	local luck = Config.luck(player)
+	for _, s in streams do
+		s.total = 0
+		for _, k in s.kinds do
+			k.weight = Config.luckWeight(k.base, luck)
+			s.total += k.weight
+		end
+	end
+	for key in plans do
+		if not herd[key] then
+			plans[key] = nil
+		end
+	end
+end)
 local taken = {} -- [n] = true once lassoed out of the stampede
 local strays = {} -- former mounts, running on to the far wall with the stampede
 local pools = {} -- [kind] = spare animals of that kind for the stampede

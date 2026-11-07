@@ -1378,6 +1378,26 @@ claimQuest.OnServerInvoke = function(player, i)
 	return eggs[1]
 end
 claimQuest.Parent = ReplicatedStorage
+-- Rebirth (QM, Nov 7; Config.Luck): the Rebirth goal's popup confirmed (Client/RebirthPopup).
+-- With the goal up and done: cash to 0, the slingshot's unlocks and the barriers gone (pen
+-- level and GatesBroken back to 1), the goals from the start, one more rebirth (luck x2, unlocks
+-- x2 the price). Pets and eggs stay. Gold.server and PenLevel.server save on "Reborn".
+local rebirth = Instance.new("RemoteFunction")
+rebirth.Name = "Rebirth"
+rebirth.OnServerInvoke = function(player)
+	local profile = profiles[player]
+	if not profile or not Quests.rebirth(player, profile.quests) then
+		return false
+	end
+	player:SetAttribute("Gold", 0)
+	player:SetAttribute("PenLevel", 1)
+	player:SetAttribute("GatesBroken", 1)
+	player:SetAttribute("Reborn", (player:GetAttribute("Reborn") or 0) + 1)
+	Quests.publish(player, profile.quests)
+	task.spawn(save, player)
+	return true
+end
+rebirth.Parent = ReplicatedStorage
 -- Gold.server's: a lasso landed on a wild animal ("Lasso animals", and "Lasso Snowmen" by its kind).
 local questProgress = Instance.new("BindableEvent")
 questProgress.Name = "QuestProgress"

@@ -45,7 +45,10 @@ function Quests.load(saved)
 		if v < 3 and line == 2 and at == 3 then
 			at, skip = 2, 3
 		end
-		state.lines[line] = { at = math.clamp(at, 1, #quests + 1), skip = skip }
+		-- (the Rebirth goal, last, is never passed: QM Nov 7; a save past the end before it came
+		-- in waits at it)
+		local last = if quests[#quests] and quests[#quests].Kind == "rebirth" then #quests else #quests + 1
+		state.lines[line] = { at = math.clamp(at, 1, last), skip = skip }
 	end
 	-- (World 1's goals became one line, QM Nov 6: saves from before it start that line over)
 	if v < 4 and Config.World == 1 then
@@ -57,6 +60,9 @@ end
 
 local function progress(player, state, quest)
 	if quest.Kind == "reach" then
+		return if (player:GetAttribute("GatesBroken") or 1) >= quest.Biome then 1 else 0, 1
+	end
+	if quest.Kind == "rebirth" then -- (QM, Nov 7: done once you've reached the last biome; claimed by Quests.rebirth)
 		return if (player:GetAttribute("GatesBroken") or 1) >= quest.Biome then 1 else 0, 1
 	end
 	if quest.Kind == "slingshot" then -- (the Slingshot's menu has unlocked Biome: your pen level's up to it)
@@ -132,7 +138,7 @@ function Quests.claim(player, state, i)
 		return nil
 	end
 	local have, need = progress(player, state, quest)
-	if have < need then
+	if have < need or quest.Kind == "rebirth" then -- (Rebirth: only its popup's confirm, Quests.rebirth)
 		return nil
 	end
 	local slot = state.lines[line]
@@ -143,6 +149,26 @@ function Quests.claim(player, state, i)
 	state.lines[line] = { at = nextAt }
 	Quests.publish(player, state)
 	return quest
+end
+
+-- The Rebirth goal (Config.Quests' "rebirth"), if it's up and done: every line back to its
+-- first goal. True if it was (Hatchery's Rebirth then does the rest).
+function Quests.rebirth(player, state)
+	for line, quests in Config.Quests do
+		local slot = state.lines[line]
+		local quest = slot and quests[slot.at]
+		if quest and quest.Kind == "rebirth" then
+			local have, need = progress(player, state, quest)
+			if have < need then
+				return false
+			end
+			for l in Config.Quests do
+				state.lines[l] = { at = 1 }
+			end
+			return true
+		end
+	end
+	return false
 end
 
 return Quests
