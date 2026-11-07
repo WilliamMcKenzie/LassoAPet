@@ -1176,7 +1176,7 @@ local Config = {
 	-- Active pets (QM, Nov 6: as Fight to Steal an Egg's Backpack): at most PenSlots pets out in
 	-- your pen (the one you ride counts), the rest stored (the Pets panel). Its "+1 Equip" buys
 	-- one more slot for Robux, for good, as many times as they like (Shop.server, saved extraSlots).
-	-- SlotProduct 0: not on sale yet (a 30 R$ developer product's id goes here).
+	-- SlotProduct: the "+1 Equip" developer product, 30 R$ (0 would make it free in Studio, off sale live).
 	Backpack = {
 		PenSlots = 5,
 		SlotRobux = 30,
