@@ -2905,6 +2905,42 @@ Config.AnimalScale.AbyssPillbug = 2
 Config.AnimalScale.AncientMoose = 2
 Config.AnimalScale.FortressTortoise = 2
 
+-- Gold by rarity (QM, Nov 7: "cash income scales pretty hard with rarity, not so much with
+-- biomes": a Meadow Divine earns more than an Ocean Uncommon). Each animal that runs wild earns its
+-- biome's base x (its 1 in N) ^ IncomeRarityPower, so 10x rarer earns about 6.3x more. The base is
+-- set so each biome's herd-weighted average stays what the curves above made it (about 2x a biome),
+-- so pacing holds. Alphas count at their own odds. An animal in two herds takes its first one's.
+Config.IncomeRarityPower = 0.8
+if Config.World == 1 then
+	local done = {}
+	for _, biome in Config.allBiomes() do
+		local total = 0
+		for _, weight in biome.Herd or {} do
+			total += math.max(weight, 0)
+		end
+		local old, new = 0, 0
+		local mine = {}
+		for kind, weight in biome.Herd or {} do
+			if weight > 0 and Config.PetIncome[kind] and not done[kind] then
+				local score = (total / weight) ^ Config.IncomeRarityPower
+				mine[kind] = score
+				old += weight * Config.PetIncome[kind]
+				new += weight * score
+			end
+		end
+		if new > 0 then
+			local k = old / new
+			for kind, score in mine do
+				local n = score * k
+				local step = if n >= 1000 then 50 elseif n >= 100 then 5 else 1
+				Config.PetIncome[kind] = math.max(1, math.floor(n / step + 0.5) * step)
+				baseIncome[kind] = Config.PetIncome[kind] -- (Config.incomeIn: what a World 1 pen earns)
+				done[kind] = true
+			end
+		end
+	end
+end
+
 -- The place's workspace.PetScale wins over AnimalScale, which only seeds it (QM, Nov 6, as in
 -- Fight to Steal an Egg: size the animals in Studio with the pet lineup, Shared/PetScale and
 -- Shared/PetLineup; tick PetScale.CopyValues to print a line to paste over AnimalScale).
