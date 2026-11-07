@@ -42,7 +42,7 @@ STONE = [(170, 167, 180), (145, 152, 154)]  # the meadow rock shades (design/por
 BARK = [(186, 134, 80), (158, 108, 62)]     # the palm trunk's
 IRON = (86, 88, 98)                         # the barrel hoops'
 ROPE = (232, 204, 150)
-BAND = (226, 58, 52)
+BAND = (196, 170, 128)  # a tan band (in game: Config.Slingshot.BandColors by pen level)
 
 TIPS = [(-7.6, 14.6, 0.0), (7.6, 14.6, 0.0)]   # where the bands tie on
 BAND_SIDE = [(-2.0, 0.9, 0.3), (2.0, 0.9, 0.3)]  # where the band wraps the rider, in the pull's space
@@ -89,19 +89,43 @@ def block(p, q, w, h=None, c=0.18):
     return chamfer(corners, c)
 
 
+WOOD = (222, 124, 62)       # (QM, Nov 7: a plain orange wooden Y)
+KNOT = (150, 76, 38)
+WRAP = (240, 228, 196)
+
+
+def curve(a, c, b, n):
+    """n+1 points along the quadratic curve a -> b bent toward c."""
+    a, c, b = (np.array(v, float) for v in (a, c, b))
+    return [(1 - u) ** 2 * a + 2 * (1 - u) * u * c + u * u * b for u in np.linspace(0, 1, n + 1)]
+
+
 def frame(rng):
-    """QM, Nov 7: simpler and blockier, in Fight to Steal an Egg's chunky studded style: a
-    stone footing, a square wooden trunk, two straight arms and two upright prongs, dark
-    caps on the prongs where the band ties on. Three pieces (stone, wood, dark wood)."""
-    stone, wood, dark = [], [], []
-    stone.append(slab(rng, -3.4, 0.0, -2.6, 3.4, 1.4, 2.6, 0.3, 0.0))
-    wood.append(block((0, 1.2, 0), (0, 7.6, 0), 2.6))
-    for s in (-1, 1):
-        wood.append(block((s * 0.6, 6.4, 0), (s * 6.9, 10.2, 0), 2.2))
-        wood.append(block((s * 7.0, 9.2, 0), (s * 7.6, 14.2, 0), 2.0))
-        dark.append(slab(rng, s * 7.6 - 1.3, 13.9, -1.3, s * 7.6 + 1.3, 15.5, 1.3, 0.2, 0.0))
-    dark.append(slab(rng, -1.6, 6.0, -1.6, 1.6, 7.4, 1.6, 0.2, 0.0))  # the collar under the fork
-    return [("Stone", STONE[0], stone), ("Wood", BARK[0], wood), ("DarkWood", BARK[1], dark)]
+    """QM, Nov 7 (a simple cartoon slingshot): one forked branch stuck in the ground, its
+    trunk splitting into two arms that curve out and up to the tips, cream cloth wrapped
+    round each tip where the band ties on, a few dark knots. Three pieces (wood, wraps,
+    knots); round, faceted segments, studded in game."""
+    wood, wrap, knot = [], [], []
+    wood.append(prism(rng, (0, -0.6, 0), (0, 5.4, 0), 1.45, 1.3, 12, 0.0))
+    wood.append(blob(rng, (0, 5.4, 0), 1.55, 18, squash=(1.25, 1.0, 1.0), jitter=0.0))
+    for sgn in (-1, 1):
+        pts = curve((sgn * 0.5, 5.0, 0), (sgn * 6.4, 6.6, 0), (sgn * 7.6, 15.4, 0), 6)
+        for k in range(len(pts) - 1):
+            r0 = 1.2 - 0.25 * k / 6
+            r1 = 1.2 - 0.25 * (k + 1) / 6
+            wood.append(prism(rng, pts[k], pts[k + 1] + (pts[k + 1] - pts[k]) * 0.12, r0, r1, 12, 0.0))
+        wood.append(blob(rng, pts[-1], 0.98, 14, squash=(1, 0.5, 1), jitter=0.0))  # (the rounded end)
+        # the cloth wrap round the tip (the band ties on here: TIPS)
+        d = pts[-1] - pts[-2]
+        d /= np.linalg.norm(d)
+        c = np.array(TIPS[0 if sgn < 0 else 1])
+        wrap.append(prism(rng, c - d * 0.75, c + d * 0.75, 1.2, 1.18, 12, 0.0))
+        # knots
+        mid = pts[3]
+        knot.append(blob(rng, mid + np.array((0, 0, -1.0)), 0.3, 8, squash=(1, 1, 0.5), jitter=0.0))
+    knot.append(blob(rng, (0.35, 2.4, -1.35), 0.32, 8, squash=(1, 1, 0.5), jitter=0.0))
+    knot.append(blob(rng, (-0.4, 3.6, 1.25), 0.26, 8, squash=(1, 1, 0.5), jitter=0.0))
+    return [("Wood", WOOD, wood), ("Wrap", WRAP, wrap), ("Knot", KNOT, knot)]
 
 
 def band(rng):
