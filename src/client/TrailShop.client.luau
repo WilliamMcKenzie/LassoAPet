@@ -403,7 +403,7 @@ if spot then
 	end
 	carl = Cactus.new()
 	carl:setSaddled(false)
-	carl:setScale(stand:GetAttribute("Scale") or 1)
+	carl:setScale(Config.TrailShop.CarlScale or stand:GetAttribute("Scale") or 1)
 	for _, part in carl.model:GetDescendants() do
 		if part:IsA("BasePart") then
 			part.CanCollide, part.CanQuery, part.CanTouch = false, false, false

@@ -114,6 +114,7 @@ local function stall()
 			part.CanCollide, part.CanQuery, part.CanTouch = false, false, false
 		end
 	end
+	carl:ScaleTo((s.CarlScale or s.Scale) / s.Scale) -- (the stall's ScaleTo below brings him to CarlScale)
 	carl:PivotTo(spot.CFrame)
 	carl.Parent = model
 	local prompt = Instance.new("ProximityPrompt")

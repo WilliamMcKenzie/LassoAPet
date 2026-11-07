@@ -2106,6 +2106,7 @@ Config.TrailShop = {
 	Position = Vector3.new(-62, 0, 24), -- on the ground: left of the course's mouth, right of the Top Playtime board (QM, Nov 7: where Fight to Steal an Egg's Weapon Shop stands by its gateway)
 	Yaw = 200, -- degrees: its counter faces into the base, turned a touch inward (Fight to Steal an Egg's)
 	Scale = 1.6, -- (Fight to Steal an Egg's Weapon Shop's)
+	CarlScale = 0.8, -- Carl the cactus guy's own size (not x Scale): normal NPC size behind the counter (QM, Nov 7: was too big)
 	Title = "Trails Shop",
 	TitleTop = Color3.fromRGB(190, 255, 120),
 	TitleBottom = Color3.fromRGB(46, 176, 64),
