@@ -358,8 +358,8 @@ end
 local function awayGold(player, profile, data)
 	local seen = tonumber(data.seen)
 	local away = if seen then math.clamp(os.time() - seen, 0, Config.AwayCap) else 0
-	local x = (if Passes.owns(player, "DoubleGold") then Config.PassGoldMultiplier else 1) -- (waits for the pass check)
-		* (Config.Rebirth.Gold[player:GetAttribute("Rebirths") or 0] or 1)
+	Passes.owns(player, "DoubleGold") -- (waits for the pass check)
+	local x = Config.goldX(player) -- (2x / 8x Cash and rebirths)
 	return (tonumber(data.awayGold) or 0) + math.floor(income(profile) * x * Config.AwayRate * away)
 end
 

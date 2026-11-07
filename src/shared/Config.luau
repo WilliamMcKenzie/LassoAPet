@@ -1328,7 +1328,13 @@ local Config = {
 		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 29, Id = 2039620869 }, -- (QM, Oct 20) ready eggs hatch by themselves (Hatchery's PassAutoHatch)
 		{ Key = "GiantPets", Name = "Giant Pets", Price = 49, Id = 2014472441 },
 		{ Key = "StarterPack", Name = "Starter Pack", Price = 19, Id = 2013764414 }, -- Config.StarterPack, once (Hatchery)
+		-- (QM, Nov 7: new ones. Id 0 till each is made on the Creator Hub: Studio only till then.)
+		{ Key = "Cash8x", Name = "8x Cash", Price = 499, Id = 0 }, -- x PassCash8x on all cash (Config.goldX; with 2x Cash, x16)
+		{ Key = "AllSlingshots", Name = "Unlock All Slingshots", Price = 299, Id = 0 }, -- every biome unlocked on the Slingshot (PenLevel.server)
+		{ Key = "BreakObstacles", Name = "Break All Obstacles", Price = 149, Id = 0 }, -- every obstacle within PassBreakRange smashes as you ride (Ride.client's vfx.updateNuke)
 	},
+	PassCash8x = 8, -- 8x Cash's
+	PassBreakRange = 45, -- Break All Obstacles': studs ahead/behind you an obstacle smashes
 	PassSpeed = 1.5, -- Speed's
 	PassGiantScale = 2, -- Giant Pets': every pet of yours this x bigger (Skins.apply)
 	StarterPack = { Pets = { "RoboShark", "SnackYak", "GiantRafflesia" }, World = 2 }, -- (QM, Oct 20, as its shop card shows: the Robo Shark (EX), the Giant Rafflesia (Legendary), the Snack Yak (Epic), and World 2 unlocked; was $150k and the Snake)
@@ -1341,11 +1347,12 @@ local Config = {
 		Trail = { Color3.fromRGB(255, 236, 140), Color3.fromRGB(255, 180, 20) }, -- head to tail
 	},
 	Shop = {
+		-- (Retired, QM Nov 7: off the shop, Halloween's over; kept so old receipts are still granted: Shop.server)
 		HalloweenPacks = {
-			{ Key = "Halloween1", Count = 1, Price = 49, ProductId = 3720043968 },
-			{ Key = "Halloween3", Count = 3, Price = 129, ProductId = 3720044050 },
-			{ Key = "Halloween10", Count = 10, Price = 399, ProductId = 3720044148 },
-			{ Key = "Halloween50", Count = 50, Price = 1299, ProductId = 3720044257 },
+			{ Key = "Halloween1", Count = 1, Price = 49, ProductId = 3720043968, Retired = true },
+			{ Key = "Halloween3", Count = 3, Price = 129, ProductId = 3720044050, Retired = true },
+			{ Key = "Halloween10", Count = 10, Price = 399, ProductId = 3720044148, Retired = true },
+			{ Key = "Halloween50", Count = 50, Price = 1299, ProductId = 3720044257, Retired = true },
 		},
 		HalloweenOdds = { Bat = 25, PurpleTarantula = 24, SoulHorse = 20, HalloweenCrystalElephant = 20, HalloweenSeraph = 10, HalloweenBoneRex = 1 }, -- (QM, Oct 20: as his new banner shows; was 39/25/20/10/5/1)
 		CashPacks = { -- insufficient-cash prompts; old Gold products remain valid for receipts
@@ -1695,6 +1702,9 @@ Config.NativeUi = {
 	-- by Config.Passes key: its card's look, its picture (HudImages, or Pet: a pet's headshot),
 	-- the badge on the picture and what it does (rich text)
 	PassCards = {
+		{ Key = "Cash8x", Look = "GoldCard", Icon = "CashBills", Badge = "x8", Text = 'Earn <font color="#7CFF4D">8x Cash!</font>' },
+		{ Key = "AllSlingshots", Look = "PowerCard", Icon = "BiomeOcean", Text = 'Fly to <font color="#7CFF4D">every biome!</font>' },
+		{ Key = "BreakObstacles", Look = "LifeCard", Icon = "ShopSword", Text = 'Smash <font color="#7CFF4D">every obstacle!</font>' },
 		{ Key = "DoubleGold", Look = "GoldCard", Icon = "CashStack", Badge = "x2", Text = 'Earn <font color="#7CFF4D">2x Cash!</font>' },
 		{ Key = "Speed", Look = "DamageCard", Pet = "Horse", Badge = "1.5x", Text = 'Ride <font color="#7CFF4D">1.5x</font> faster!' },
 		{ Key = "AutoHatch", Look = "GrowthCard", Icon = "PassGrowth", Text = 'Eggs hatch <font color="#7CFF4D">by themselves!</font>' },
@@ -1818,6 +1828,7 @@ Config.Rebirth = {
 -- All your gold earnings' multiplier: the x2 Gold pass and your rebirths.
 function Config.goldX(player)
 	return (if player:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)
+		* (if player:GetAttribute("PassCash8x") then Config.PassCash8x else 1)
 		* (Config.Rebirth.Gold[player:GetAttribute("Rebirths") or 0] or 1)
 end
 -- x every ride's speed: rebirths and the 1.5x Speed pass.
