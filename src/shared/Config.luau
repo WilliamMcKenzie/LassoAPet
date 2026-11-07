@@ -2180,22 +2180,22 @@ local RAINBOW = {
 -- ("TrailOn", saved) streams off you on foot, riding and flying the slingshot
 -- (Server/PlayerTrail), and its Speed multiplies every ride (Config.rebirthSpeed). Equipped
 -- none yet: your best. Price is cash (Gold.server's BuyTrail), Robux the Robux button's price
--- till Roblox's loads, ProductId its developer product (0: none yet, the button does nothing).
+-- till Roblox's loads, ProductId its developer product (made Nov 7, each with its recoloured trail guy icon).
 -- Godly also needs every animal in the Index (Shared/Trails.hasAllAnimals).
 local rgb = Color3.fromRGB
 -- (on your character only, Server/PlayerTrail: QM, Oct 15, not on what you ride any more)
 Config.AnimalTrails = false
 Config.TrailBars = {
-	{ Name = "White", Rarity = "Common", Speed = 1.1, Price = 1000, Robux = 5, ProductId = 0, Colors = { rgb(255, 255, 255), rgb(235, 235, 240), rgb(205, 205, 212), rgb(170, 170, 180) } },
-	{ Name = "Green", Rarity = "Uncommon", Speed = 1.2, Price = 15000, Robux = 15, ProductId = 0, Colors = { rgb(180, 255, 160), rgb(100, 230, 90), rgb(40, 190, 60), rgb(20, 130, 40) } },
-	{ Name = "Blue", Rarity = "Rare", Speed = 1.3, Price = 100000, Robux = 29, ProductId = 0, Colors = Config.FinishTrails[2].Colors },
-	{ Name = "Purple", Rarity = "Epic", Speed = 1.4, Price = 500000, Robux = 49, ProductId = 0, Colors = { rgb(235, 190, 255), rgb(200, 120, 255), rgb(150, 60, 230), rgb(100, 30, 170) } },
-	{ Name = "Golden", Rarity = "Legendary", Speed = 1.5, Price = 2500000, Robux = 79, ProductId = 0, Colors = Config.FinishTrails[1].Colors },
-	{ Name = "Red", Rarity = "Legendary", Speed = 1.6, Price = 10000000, Robux = 129, ProductId = 0, Colors = Config.FinishTrails[3].Colors },
-	{ Name = "Galactic", Rarity = "Cosmic", Speed = 2.5, Price = 500000000, Robux = 295, ProductId = 0, Colors = Config.FinishTrails[5].Colors },
-	{ Name = "Rainbow", Rarity = "Mythic", Speed = 2, Price = 150000000, Robux = 249, ProductId = 0 }, -- (the Rainbow Trail's bands)
-	{ Name = "Ice", Rarity = "Divine", Speed = 1.75, Price = 40000000, Robux = 189, ProductId = 0, Colors = { rgb(240, 255, 255), rgb(170, 240, 255), rgb(90, 210, 255), rgb(40, 150, 240) } },
-	{ Name = "Godly", Rarity = "Godly", Speed = 3, Price = 1000000000, Robux = 399, ProductId = 0, AllAnimals = true, Colors = { rgb(255, 255, 255), rgb(255, 245, 190), rgb(255, 215, 80), rgb(255, 170, 30), rgb(255, 255, 255) } },
+	{ Name = "White", Rarity = "Common", Speed = 1.1, Price = 1000, Robux = 5, ProductId = 3729493127, Colors = { rgb(255, 255, 255), rgb(235, 235, 240), rgb(205, 205, 212), rgb(170, 170, 180) } },
+	{ Name = "Green", Rarity = "Uncommon", Speed = 1.2, Price = 15000, Robux = 15, ProductId = 3729493405, Colors = { rgb(180, 255, 160), rgb(100, 230, 90), rgb(40, 190, 60), rgb(20, 130, 40) } },
+	{ Name = "Blue", Rarity = "Rare", Speed = 1.3, Price = 100000, Robux = 29, ProductId = 3729493775, Colors = Config.FinishTrails[2].Colors },
+	{ Name = "Purple", Rarity = "Epic", Speed = 1.4, Price = 500000, Robux = 49, ProductId = 3729494004, Colors = { rgb(235, 190, 255), rgb(200, 120, 255), rgb(150, 60, 230), rgb(100, 30, 170) } },
+	{ Name = "Golden", Rarity = "Legendary", Speed = 1.5, Price = 2500000, Robux = 79, ProductId = 3729494067, Colors = Config.FinishTrails[1].Colors },
+	{ Name = "Red", Rarity = "Legendary", Speed = 1.6, Price = 10000000, Robux = 129, ProductId = 3729494493, Colors = Config.FinishTrails[3].Colors },
+	{ Name = "Galactic", Rarity = "Cosmic", Speed = 2.5, Price = 500000000, Robux = 295, ProductId = 3729494659, Colors = Config.FinishTrails[5].Colors },
+	{ Name = "Rainbow", Rarity = "Mythic", Speed = 2, Price = 150000000, Robux = 249, ProductId = 3729494608 }, -- (the Rainbow Trail's bands)
+	{ Name = "Ice", Rarity = "Divine", Speed = 1.75, Price = 40000000, Robux = 189, ProductId = 3729494551, Colors = { rgb(240, 255, 255), rgb(170, 240, 255), rgb(90, 210, 255), rgb(40, 150, 240) } },
+	{ Name = "Godly", Rarity = "Godly", Speed = 3, Price = 1000000000, Robux = 399, ProductId = 3729494716, AllAnimals = true, Colors = { rgb(255, 255, 255), rgb(255, 245, 190), rgb(255, 215, 80), rgb(255, 170, 30), rgb(255, 255, 255) } },
 }
 -- The Trails Shop's stand (QM, Nov 7: Fight to Steal an Egg's Weapon Shop stall, without Carl,
 -- green and white like his reference's Trails Shop): right of the start line, past the free
