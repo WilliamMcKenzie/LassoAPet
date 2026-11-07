@@ -970,7 +970,8 @@ local Config = {
 		Ledger = "roboSharks", StockKey = "sold_RoboShark", ClaimField = "boughtRoboSharks" },
 	-- The Robo Shark back as the third limited (QM, Nov 7). Its own ledger, stock and claim fields:
 	-- the Majestic Unicorn kept the old Robo Shark ones (above). Product "Robo Shark Pet [Limited]", R$499 (Unicorn R$599, Loong R$999: QM, Nov 7).
-	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3729449142, Price = 499, Stock = 1000, StartLeft = 870, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165,
+	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3729449142, Price = 499, Stock = 1000, StartLeft = 870, Scale = 5, -- (QM, Nov 7: 1.5 was "way too small" beside the others)
+		 Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165,
 		Ledger = "limitedRoboSharks", StockKey = "sold_LimitedRoboShark", ClaimField = "boughtLimitedRoboSharks" },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
@@ -2413,6 +2414,8 @@ Config.RideEggAB = { Share = 1, Salt = 1, FastRides = 4, FastHatch = 15, Studio 
 Config.PetOffersLimited = true
 -- The LIMITEDS stand at World 1's base (Client/LoongOffer): back on with three limiteds (QM, Nov 7; hidden Nov 6).
 Config.LimitedsStand = true
+-- How far the stand's row turns in toward the base (degrees, about its first stand), as the Top Earners board (QM, Nov 7).
+Config.LimitedsTurn = 25
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
