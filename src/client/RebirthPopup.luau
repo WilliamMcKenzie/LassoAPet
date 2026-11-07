@@ -4,7 +4,6 @@
 -- (QM, Nov 7: icons, not words)
 --   [cash]   $1.2m -> $0
 --   every biome you've unlocked (its picture, Config.Biomes[i].Picture) -> just the Meadow's,
---   then [cash] x1 -> x2 (unlock prices)
 --   [clover] +0.25 -> +0.5 (luck per goal: goal rewards x2; your luck itself stays)
 -- and under them Rebirth! (Hatchery's Rebirth), or, till the Rebirth goal is done, a grey
 -- "Reach <Config.rebirthBiome>" (Desert, then Tundra...) that does nothing. X (or not confirming) leaves the goal to claim later.
@@ -33,7 +32,7 @@ local ROWS_Y = 360
 local CONFIRM_W, CONFIRM_H, CONFIRM_Y = 900, 200, 1060
 
 local PIC_MAX_H, PIC_ASPECT, PIC_GAP = 130, 1.4, 16 -- the Slingshot row's biome pictures
-local ARROW_W, PRICES_W = 170, 520 -- (the arrow's and the prices' room, icon and all)
+local ARROW_W = 170 -- (the arrow's room)
 local ICON = 140 -- the rows' icons (HudImages: the HUD's cash and clover)
 
 local gui, rows, confirm, confirmText, waiting
@@ -58,7 +57,6 @@ local function refresh()
 		return
 	end
 	local reborn = player:GetAttribute("Reborn") or 0
-	local per = Config.Luck.CostPerRebirth
 	-- each row an icon strip (QM, Nov 7: icons, not words), rebuilt each time
 	local strip, order
 	local function start(row)
@@ -112,18 +110,16 @@ local function refresh()
 	icon("CashIcon")
 	text("$" .. Config.short(player:GetAttribute("Gold") or 0) .. ARROW .. colored("$0", BAD))
 
-	-- slingshot: your unlocked biomes' pictures -> the Meadow's, [cash] x1 -> x2 (its prices)
+	-- slingshot: your unlocked biomes' pictures -> the Meadow's (QM, Nov 7: no prices x1 -> x2)
 	start("Slingshot")
 	local have = math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
-	local room = ROW_W - 60 - ARROW_W - PRICES_W - (have + 4) * PIC_GAP
+	local room = ROW_W - 60 - ARROW_W - (have + 2) * PIC_GAP
 	local h = math.min(PIC_MAX_H, room / (have + 1) / PIC_ASPECT)
 	for i = 1, have do
 		picture(i, h)
 	end
 	text(ARROW)
 	picture(1, h)
-	icon("CashIcon")
-	text("x" .. Config.short(per ^ reborn) .. ARROW .. colored("x" .. Config.short(per ^ (reborn + 1)), BAD))
 
 	-- luck per goal: [clover] +0.25 -> +0.5
 	local now, after = Config.Luck.Reach * Config.Luck.RewardPerRebirth ^ reborn, Config.Luck.Reach * Config.Luck.RewardPerRebirth ^ (reborn + 1)
