@@ -1,6 +1,6 @@
 -- The Trails Shop (QM, Nov 7): Fight to Steal an Egg's Weapon Shop 1:1 (its client/WeaponShop),
 -- with trails for weapons and a blue header (his reference's Trails Shop). Opened at its stand
--- (Server/TrailShop: its Open prompt, or walking onto its ring). Under the header a dark panel
+-- (Server/TrailShop: Talk to Carl the cactus guy, or walk onto its ring). Under the header a dark panel
 -- with a row of cards, one per trail (Config.TrailBars, in Config.TrailShop.Order), scrolling
 -- sideways when they don't fit. Each card: the trail's name, its rarity (in its rarity's
 -- colours), QM's trail guy recoloured to the trail, its speed (x every ride:
@@ -382,15 +382,41 @@ function TrailShop.close()
 	end
 end
 
--- ---- the stand: its Open prompt, and stepping onto its ring ------------------------------
+-- ---- the stand: Carl's Talk prompt, and stepping onto its ring ---------------------------
 
 local stand = workspace:WaitForChild("TrailShop", 60)
 if not stand then
 	return
 end
+
+-- Carl (Fight to Steal an Egg's client/Vendor, 1:1): the still one the server stood in the
+-- stall swapped for one that idles, turns to watch you when you're near and hops hello when
+-- you Talk
+local Cactus = require(ReplicatedStorage.Shared.Animals:WaitForChild("Cactus"))
+local spot = stand:WaitForChild("CarlSpot", 10)
+local carl, rootY
+local yaw, hop = 0, 0
+if spot then
+	local still = stand:FindFirstChild("Carl")
+	if still then
+		still:Destroy()
+	end
+	carl = Cactus.new()
+	carl:setSaddled(false)
+	carl:setScale(stand:GetAttribute("Scale") or 1)
+	for _, part in carl.model:GetDescendants() do
+		if part:IsA("BasePart") then
+			part.CanCollide, part.CanQuery, part.CanTouch = false, false, false
+		end
+	end
+	rootY = carl.model.PrimaryPart.Position.Y
+	carl.model.Parent = stand
+end
+
 local prompt = stand:FindFirstChild("OpenPrompt", true)
 if prompt then
 	prompt.Triggered:Connect(function()
+		hop = CFG.Hop
 		if TrailShop.isOpen() then
 			TrailShop.close()
 		else
@@ -401,9 +427,30 @@ end
 -- (on the ring opens it once; step off and on again to open it again)
 local disc = stand:WaitForChild("Ring", 10) and stand.Ring:FindFirstChild("Disc")
 local inside = false
-RunService.Heartbeat:Connect(function()
+RunService.Heartbeat:Connect(function(dt)
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	-- Carl
+	if carl and spot then
+		local origin = spot.CFrame
+		local away = if hrp then (hrp.Position - origin.Position) * Vector3.new(1, 0, 1) else nil
+		if not (away and away.Magnitude > 200) then
+			-- (turns to you while you're close, at most about 60 degrees off his counter)
+			local target = 0
+			if away and away.Magnitude > 0.1 and away.Magnitude < CFG.LookRange then
+				local inFrame = origin:VectorToObjectSpace(away)
+				target = math.clamp(math.atan2(-inFrame.X, -inFrame.Z), -1, 1)
+			end
+			yaw += (target - yaw) * math.min(1, dt * 8)
+			hop = math.max(0, hop - dt)
+			local lift = math.sin(hop / CFG.Hop * math.pi) * 0.6 -- (low: the roof is just over his head)
+			carl:update(dt, 0, 0)
+			carl.model.PrimaryPart.CFrame = origin
+				* CFrame.new(0, rootY + lift * (carl.scale or 1), 0)
+				* CFrame.Angles(0, yaw, 0)
+		end
+	end
+	-- the ring
 	if not (disc and hrp and humanoid) or humanoid.Sit or humanoid.PlatformStand then
 		inside = false -- (riding or flying past doesn't open it)
 		return

@@ -1,5 +1,5 @@
 -- The Trails Shop's stall (QM, Nov 7): Fight to Steal an Egg's Weapon Shop stall (its
--- src/shared/VendorStallModel.luau, itself Lasso's old Carl stall) without Carl, his cactus or
+-- src/shared/VendorStallModel.luau, itself Lasso's old Carl stall) with Carl the cactus guy (QM, Nov 7) but without
 -- his stock, its roof striped green and white like QM's reference. Studs, ground at Y = 0, the
 -- counter facing -Z (Server/TrailShop turns, scales and places it: Config.TrailShop).
 
@@ -34,5 +34,10 @@ return {
 		{ name = "Beam", size = Vector3.new(2.4, 2.2, 2), cframe = CFrame.new(9, 11.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(80, 220, 70) },
 		{ name = "Beam", size = Vector3.new(2.4, 2.2, 2.1), cframe = CFrame.new(9, 11.5, -2.05, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(250, 246, 236) },
 		{ name = "Beam", size = Vector3.new(2.4, 2.2, 2), cframe = CFrame.new(9, 11.5, -4.1, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(80, 220, 70) },
+		{ name = "CactusArm", size = Vector3.new(2.52, 1.44, 1.44), cframe = CFrame.new(8.34, 4.22, 1.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(118, 204, 64) },
+		{ name = "CactusArm", size = Vector3.new(1.44, 2.76, 1.44), cframe = CFrame.new(8.88, 6.32, 1.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(118, 204, 64) },
+		{ name = "Flower", size = Vector3.new(1.44, 0.84, 1.44), cframe = CFrame.new(6, 8.12, 1.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(255, 110, 170) },
+		{ name = "Cactus", size = Vector3.new(2.16, 8, 2.16), cframe = CFrame.new(6, 3.7, 1.7, 1, 0, 0, 0, 1, 0, 0, 0, 1), color = Color3.fromRGB(118, 204, 64) },
 	},
+	carl = Vector3.new(0, 0, 2.1), -- his feet (Carl the cactus guy behind the counter: Server/TrailShop, Client/TrailShop)
 }
