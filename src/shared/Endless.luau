@@ -1,5 +1,5 @@
 -- The endless course past the Ocean Trench (QM, Nov 6; Config.Endless): stretches of World 2's
--- Marble Meadow, Crimson Lands and Crystal Cavern, one after another for ever, each picked at
+-- Marble Meadow and Crystal Cavern and the Jurassic, one after another for ever, each picked at
 -- random (never the one before again) for a random length. Everything here is worked out from
 -- Config.Endless.Seed alone, by hashing, so every client and the server lay out the same course
 -- without sending anything; Client/Endless builds the parts near the camera from it.
@@ -10,7 +10,7 @@
 --   2. Its walls are two tiers each side, as the map's: a ledge and a cliff behind it, their
 --      heights stepped noise (each side its own), the cliff's width ragged, so the skyline's jagged.
 --   3. The floor is domain-warped fractal noise read through each biome's own rules: the Marble
---      Meadow's ponds, knolls and ruined marble plazas; the Crimson Lands' ridged-noise veins of
+--      Meadow's ponds, knolls and ruined marble plazas; the Jurassic's ridged-noise veins of
 --      raised rock, sunken basins and single stones ringed in crimson; the Crystal Cavern's
 --      ground to ice to crystal toward its middle line, rock shelves and pools.
 --   4. A causeway snakes down each stretch (two sine waves, back to the middle at both ends, so
@@ -18,7 +18,7 @@
 --      plank bridges over the Cavern's pools.
 --   5. Props scatter on a jittered grid (an even spread with no rows), thicker in groves (low-
 --      frequency noise) and by the walls; the ones in the corridor are obstacles the ride smashes.
---   6. Each stretch has a set piece at its middle: a marble arch, a rune gate, a rock bridge.
+--   6. Each stretch has a set piece at its middle: a marble arch, an amber-lit stone gate, a rock bridge.
 --   7. Where two stretches meet, the line between them is ragged (teeth up to Config.Endless.Blend).
 --
 --   Endless.On, Endless.START (the Ocean's far end), Endless.CELL, Endless.CHUNK
@@ -115,7 +115,7 @@ end
 -- How each biome's terrain differs (by Config.Endless.Biomes Name)
 local STYLE = {
 	MarbleMeadow = { widthBias = 18, ledge = { 30, 40, 60 }, cliff = { 90, 120, 160 }, causeway = 10 },
-	CrimsonLands = { widthBias = 0, ledge = { 30, 40, 60 }, cliff = { 80, 120, 220 }, causeway = 8 },
+	Jurassic = { widthBias = 0, ledge = { 30, 40, 60 }, cliff = { 80, 120, 220 }, causeway = 8 },
 	CrystalCavern = { widthBias = -22, ledge = { 40, 60, 90 }, cliff = { 120, 220, 320 }, causeway = 12 },
 }
 Endless.STYLE = STYLE
@@ -273,13 +273,13 @@ local T = {
 	MarbleDirt = tile("MarbleDirt", -0.5),
 	MarbleStone = tile("MarbleStone", 0.5),
 	MarbleWater = tile("MarbleWater", -1, true),
-	CrimsonGround = tile("CrimsonGround", 0),
-	CrimsonPatch = tile("CrimsonPatch", 0),
-	CrimsonShoulder = tile("CrimsonPatch", 0.5),
-	CrimsonCrest = tile("CrimsonStone", 1),
-	CrimsonStone = tile("CrimsonStone", 0),
-	CrimsonRoad = tile("CrimsonStone", 0.5),
-	CrimsonBasin = tile("CrimsonDark", -0.5),
+	JurassicGround = tile("JurassicGround", 0),
+	JurassicPatch = tile("JurassicPatch", 0),
+	JurassicShoulder = tile("JurassicPatch", 0.5),
+	JurassicCrest = tile("JurassicStone", 1),
+	JurassicStone = tile("JurassicStone", 0),
+	JurassicRoad = tile("JurassicStone", 0.5),
+	JurassicBasin = tile("JurassicDark", -0.5),
 	CavernGround = tile("CavernGround", 0),
 	CavernIce = tile("CavernIce", 0),
 	CavernCrystal = tile("CavernCrystal", 0),
@@ -290,8 +290,8 @@ local T = {
 }
 
 -- (thresholds on the fractal noise, which bunches round 0.5: measured over 400 chunks, ponds are
--- about 15% of a Marble Meadow or Crystal Cavern floor, knolls and shelves 15%, the Crimson
--- Lands' basins 15% and its veins 25%)
+-- about 15% of a Marble Meadow or Crystal Cavern floor, knolls and shelves 15%, the
+-- Jurassic's mud basins 15% and its rock veins 25%)
 local LOW, HIGH, HIGHER = 0.37, 0.63, 0.68
 
 -- Where stretch n meets stretch n + 1, the line between them is ragged: this far past its
@@ -331,23 +331,23 @@ local function floorTile(i, j, w)
 	local wx = x + 80 * (value2(x / 90, z / 90, salt + 1) - 0.5)
 	local wz = z + 80 * (value2(x / 90 + 17.3, z / 90 + 4.1, salt + 2) - 0.5)
 	local h = fbm(wx / 110, wz / 110, salt + 3, 3)
-	if name == "CrimsonLands" then
+	if name == "Jurassic" then
 		if onRoad then
-			return T.CrimsonRoad
+			return T.JurassicRoad
 		end
 		local r = 1 - math.abs(2 * fbm(wx / 150, wz / 150, salt + 4, 2) - 1) -- ridged: 1 along the veins
 		if r > 0.95 then
-			return T.CrimsonCrest
+			return T.JurassicCrest
 		elseif r > 0.9 then
-			return T.CrimsonShoulder
+			return T.JurassicShoulder
 		elseif h < LOW + 0.02 then
-			return T.CrimsonBasin
+			return T.JurassicBasin
 		elseif stoneAt(i, j, salt) then
-			return T.CrimsonStone
+			return T.JurassicStone
 		elseif stoneAt(i + 1, j, salt) or stoneAt(i - 1, j, salt) or stoneAt(i, j + 1, salt) or stoneAt(i, j - 1, salt) then
-			return T.CrimsonPatch -- (crimson round every stone, as World 2's)
+			return T.JurassicPatch -- (grass round every stone)
 		end
-		return T.CrimsonGround
+		return T.JurassicGround
 	elseif name == "CrystalCavern" then
 		if h < LOW then
 			return if onRoad then T.CavernPlank else T.CavernWater
@@ -464,7 +464,7 @@ function Endless.rows(j0, j1, onRow)
 		end
 		-- walls: east and west, ledge then cliff
 		local name = seg.template.Name
-		local prefix = if name == "CrimsonLands" then "Crimson" elseif name == "CrystalCavern" then "Cavern" else "Marble"
+		local prefix = if name == "Jurassic" then "Jurassic" elseif name == "CrystalCavern" then "Cavern" else "Marble"
 		for _, side in { 1, -1 } do
 			local ledgeW, ledgeTop, cliffW, cliffTop = wallsOf(j, side, seg)
 			for part, span in { { w, w + ledgeW, ledgeTop }, { w + ledgeW, w + ledgeW + cliffW, cliffTop } } do
@@ -500,7 +500,7 @@ local PROPS = {
 		inside = { { "Column", 3, 3, 0.9, 1.3 }, { "BrokenColumn", 4, 3, 0.8, 1.2 }, { "Drum", 3, 2, 0.8, 1.2 }, { "MarbleBlock", 2, 2, 0.8, 1.3 }, { "Bush", 5, 1, 0.8, 1.4 } },
 		ledge = { { "Column", 3, 3, 1.1, 1.6 }, { "Bush", 4, 1, 1, 1.6 } },
 	},
-	CrimsonLands = {
+	Jurassic = {
 		inside = { { "GiantShroom", 2, 3, 1, 1.3 }, { "Shroom", 4, 2, 0.8, 1.2 }, { "SmallShroom", 4, 1, 0.8, 1.2 }, { "Runestone", 3, 3, 0.9, 1.3 }, { "ShortRunestone", 3, 2, 0.8, 1.2 }, { "Tuft", 5, 1, 0.8, 1.4 } },
 		ledge = { { "GiantShroom", 3, 3, 1.2, 1.7 }, { "Runestone", 2, 3, 1.2, 1.6 } },
 	},
