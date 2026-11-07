@@ -31,7 +31,7 @@ end
 function PetScale.groups()
 	local out = {}
 	local seen = {}
-	for i, biome in Config.Biomes do
+	for i, biome in Config.allBiomes() do -- (the endless biomes too: 9, 10, 11)
 		local herd = {}
 		for kind in biome.Herd or {} do
 			if not seen[kind] then
@@ -40,7 +40,9 @@ function PetScale.groups()
 			end
 		end
 		table.sort(herd)
-		table.insert(out, { name = i .. " " .. (biome.Name or ("Biome " .. i)), kinds = herd })
+		-- (named as players see it, the Castle's slot "7 Jurassic": QM Nov 7; was "7 Castle", renamed in place)
+		local name = i .. " " .. (biome.DisplayName or biome.Name or ("Biome " .. i))
+		table.insert(out, { name = name, was = i .. " " .. (biome.Name or ""), kinds = herd })
 	end
 	return out
 end
@@ -81,6 +83,12 @@ function PetScale.ensure()
 	end
 	for _, g in PetScale.groups() do
 		local group = s:FindFirstChild(g.name)
+		if not group and g.was ~= g.name then
+			group = s:FindFirstChild(g.was) -- (its values kept under its new name)
+			if group then
+				group.Name = g.name
+			end
+		end
 		if not group then
 			group = Instance.new("Configuration")
 			group.Name = g.name
