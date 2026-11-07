@@ -206,17 +206,32 @@ local function build(board)
 		local nameColour = if rank == 1 then GOLD elseif rank == 3 then ORANGE else WHITE
 		local r = label(f, "#" .. rank, nameColour, 4, ROW - 36, 52, 32, Enum.TextXAlignment.Left)
 		stroke(r, INK, 3)
-		local vw = rw - ROW - 52
-		local vt = label(f, TEXT[key](v), board.Value, ROW + 8, 6, vw, 32, Enum.TextXAlignment.Right)
+		-- top right: the icon, then the value (a row, right-aligned, sized to the text: nothing overlaps)
+		local top = Instance.new("Frame")
+		top.BackgroundTransparency = 1
+		top.Position = UDim2.fromOffset(ROW + 8, 4)
+		top.Size = UDim2.fromOffset(rw - ROW - 18, 36)
+		top.Parent = f
+		local across = Instance.new("UIListLayout")
+		across.FillDirection = Enum.FillDirection.Horizontal
+		across.HorizontalAlignment = Enum.HorizontalAlignment.Right
+		across.VerticalAlignment = Enum.VerticalAlignment.Center
+		across.SortOrder = Enum.SortOrder.LayoutOrder
+		across.Padding = UDim.new(0, 8)
+		across.Parent = top
+		local ic = icon(key, top, 0, 0, 32, false)
+		ic.LayoutOrder = 1
+		local vt = label(top, TEXT[key](v), board.Value, 0, 0, 0, 36, Enum.TextXAlignment.Right)
+		vt.LayoutOrder = 2
+		vt.TextScaled = false
+		vt.TextSize = 32
+		vt.TextTruncate = Enum.TextTruncate.None
+		vt.AutomaticSize = Enum.AutomaticSize.X
 		stroke(vt, INK, 3)
-		local n = label(f, "@" .. name, nameColour, ROW + 4, 42, rw - ROW - 12, 32, Enum.TextXAlignment.Right)
+		local n = label(f, "@" .. name, nameColour, ROW + 4, 42, rw - ROW - 12, 34, Enum.TextXAlignment.Right)
+		n.TextScaled = false
+		n.TextSize = 28
 		stroke(n, INK, 3)
-		local ic = icon(key, f, 0, 4, 36, false)
-		local function place() -- (the icon just left of the value's text, once it's measured)
-			ic.Position = UDim2.fromOffset(rw - 44 - vt.TextBounds.X - 40, 4)
-		end
-		vt:GetPropertyChangedSignal("TextBounds"):Connect(place)
-		place()
 		f.Parent = list
 	end
 
