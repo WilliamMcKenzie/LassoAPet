@@ -968,7 +968,8 @@ local Config = {
 		Ledger = "roboSharks", StockKey = "sold_RoboShark", ClaimField = "boughtRoboSharks" },
 	-- The Robo Shark back as the third limited (QM, Nov 7). Its own ledger, stock and claim fields:
 	-- the Majestic Unicorn kept the old Robo Shark ones (above). Product "Robo Shark Pet [Limited]", R$999.
-	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3729449142, Price = 999, Stock = 1000, StartLeft = 870, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165,
+	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3729449142, Price = 999, Stock = 1000, StartLeft = 870, Scale = 5, -- (QM, Nov 7: 1.5 was "way too small" beside the others)
+		 Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165,
 		Ledger = "limitedRoboSharks", StockKey = "sold_LimitedRoboShark", ClaimField = "boughtLimitedRoboSharks" },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
@@ -1954,16 +1955,15 @@ Config.Slingshot = {
 }
 -- The Top Earners board (QM, Nov 6): left of the start line, facing into the base, the global
 -- top pen incomes (gold a second, everyone's latest recorded, OrderedDataStore "TopEarners")
--- in a square stone frame (the old portal gate's style, a skull on top: tools/earners_board_meshes.py),
+-- in a grass-and-dirt frame in the map's look with a gold crown on top (QM, Nov 7),
 -- your own pen's income and the countdown to the next refresh under the list.
 -- Server/TopEarners builds it and records; Client/TopEarners draws the list.
 Config.TopEarners = {
 	Position = Vector3.new(-112, 0, 18), -- the base's middle (on the ground), just inside the base left of the course's mouth
 	Yaw = 210, -- degrees: faces into the base (+z), turned 30 degrees toward the course
-	Screen = { Width = 26, Height = 32, Bottom = 4.2 }, -- the frame's opening (tools/earners_board_meshes.py SCREEN_*)
+	Screen = { Width = 26, Height = 32, Bottom = 4.2 }, -- the frame's opening (Server/TopEarners builds the frame round it)
 	Refresh = 60, -- seconds between recording everyone here and re-reading the top
 	Top = 50, -- rows on the board
-	Meshes = { { 106770230038436, 177, 185, 178, 0.006, 20.790, -0.713 }, { 82718487796629, 148, 156, 150, -0.759, 20.846, -0.708 }, { 134382604805829, 232, 226, 206, 0.008, 46.766, -0.195 }, { 137436135736323, 38, 38, 44, 0.000, 46.300, -4.175 } }, -- (filled by tools/earners_board_upload.py)
 }
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:
@@ -2413,6 +2413,8 @@ Config.RideEggAB = { Share = 1, Salt = 1, FastRides = 4, FastHatch = 15, Studio 
 Config.PetOffersLimited = true
 -- The LIMITEDS stand at World 1's base (Client/LoongOffer): back on with three limiteds (QM, Nov 7; hidden Nov 6).
 Config.LimitedsStand = true
+-- How far the stand's row turns in toward the base (degrees, about its first stand), as the Top Earners board (QM, Nov 7).
+Config.LimitedsTurn = 25
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".

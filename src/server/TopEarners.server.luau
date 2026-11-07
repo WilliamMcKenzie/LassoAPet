@@ -1,8 +1,8 @@
 -- The Top Earners board (Config.TopEarners, QM Nov 6): left of the start line, the players
--- whose pens earn the most gold a second, worldwide, in a square stone frame.
+-- whose pens earn the most gold a second, worldwide, in a grass-and-dirt frame with a gold crown.
 --
--- Builds workspace.TopEarners: the frame's meshes (tools/earners_board_meshes.py, uploaded by
--- tools/earners_board_upload.py) and "Screen", the Part in its opening that
+-- Builds workspace.TopEarners: the frame (plain blocks in the map's look, Shared/VoxelBlock) and
+-- "Screen", the Part in its opening that
 -- Client/TopEarners draws the list on.
 -- Every Refresh seconds it records everyone here (their "PenIncome" attribute, Hatchery's:
 -- gold a second, x2 Gold and rebirths in) in the OrderedDataStore "TopEarners" ("u" .. UserId
@@ -11,7 +11,6 @@
 -- it in ReplicatedStorage.TopEarners (a StringValue: JSON { { id, name, display, gold } },
 -- best first; its "Next" attribute is the server time of the next refresh).
 
-local AssetService = game:GetService("AssetService")
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -19,7 +18,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserService = game:GetService("UserService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
-local Studs = require(ReplicatedStorage.Shared.Studs)
+local VoxelBlock = require(ReplicatedStorage.Shared.VoxelBlock)
 
 local CFG = Config.TopEarners
 local MAX = 2 ^ 53 -- (an OrderedDataStore holds whole numbers)
@@ -29,22 +28,53 @@ local MAX = 2 ^ 53 -- (an OrderedDataStore holds whole numbers)
 local origin = CFrame.new(CFG.Position) * CFrame.Angles(0, math.rad(CFG.Yaw), 0)
 local model = Instance.new("Model")
 model.Name = "TopEarners"
-for i, piece in CFG.Meshes do
-	local ok, part = pcall(AssetService.CreateMeshPartAsync, AssetService, Content.fromUri("rbxassetid://" .. piece[1]))
-	if ok then
-		part.Name = "Frame" .. i
-		part.Anchored = true
-		part.Color = Color3.fromRGB(piece[2], piece[3], piece[4])
-		part.CFrame = origin -- (an uploaded EditableMesh keeps its own origin: the board's, as the Slingshot's pieces)
-		Studs.apply(part, 0.5)
-		part.Locked = true
-		part.Parent = model
-	else
-		warn("TopEarners: mesh " .. piece[1] .. " didn't load: " .. tostring(part))
+-- The frame (QM, Nov 7: the stone gate "looks bad", remade in the map's look): a grass-topped
+-- dirt plinth, two dirt pillars, a gold trim round the screen, a lintel capped with grass like
+-- the map's walls, and a blocky gold crown on top. Board space: the board faces -z, the
+-- opening centred on x = 0 from s.Bottom up s.Height.
+do
+	local s = CFG.Screen
+	local C = Config.WorldColors
+	local DIRT, DIRT_C = C.WallDirt, C.WallDirtChecker
+	local GRASS, GRASS_C = C.Grass, C.GrassChecker
+	local GOLD = Color3.fromRGB(255, 196, 40)
+	local function b(name, x0, y0, z0, x1, y1, z1, color, checker)
+		return VoxelBlock.at(model, origin, name, x0, y0, z0, x1, y1, z1, color, checker)
 	end
-end
-if #CFG.Meshes == 0 then
-	warn("TopEarners: no frame meshes yet (Config.TopEarners.Meshes: tools/earners_board_upload.py)")
+	local hw = s.Width / 2
+	local bottom, top = s.Bottom, s.Bottom + s.Height
+	local px = hw + 6 -- each pillar's outer face
+	local sill = bottom - 1.4
+	-- the plinth: dirt, a grass cap with a lip
+	b("Plinth", -px - 1.5, -0.5, -5, px + 1.5, sill - 1, 4, DIRT, DIRT_C)
+	b("PlinthCap", -px - 2, sill - 1, -5.5, px + 2, sill, 4.5, GRASS, GRASS_C)
+	for side = -1, 1, 2 do
+		-- a dirt pillar, a grass band low on it, and the gold trim down the opening's edge
+		b("Pillar", side * (hw + 0.4), sill, -3, side * px, top + 1.2, 3, DIRT, DIRT_C)
+		b("PillarBand", side * (hw + 0.4), sill + 3, -3.4, side * (px + 0.4), sill + 4.2, 3.4, GRASS, GRASS_C)
+		b("TrimSide", side * (hw + 0.2), sill, -3.6, side * (hw + 1.4), top + 1.2, -2.4, GOLD)
+	end
+	b("TrimBottom", -hw - 1.4, sill, -3.6, hw + 1.4, bottom, -2.4, GOLD)
+	b("TrimTop", -hw - 1.4, top, -3.6, hw + 1.4, top + 1.2, -2.4, GOLD)
+	-- the lintel: dirt with a grass cap overhanging it, as the map's walls
+	local y = top + 1.2
+	b("Lintel", -px - 1, y, -3.5, px + 1, y + 4, 3.5, DIRT, DIRT_C)
+	b("LintelCap", -px - 1.8, y + 4, -4.3, px + 1.8, y + 6, 4.3, GRASS, GRASS_C)
+	y += 6
+	-- the crown: a band, five prongs (the middle and outer ones taller), gems on its front
+	b("CrownBand", -6, y, -2.5, 6, y + 2.8, 2.5, GOLD)
+	for i = -2, 2 do
+		local tall = if i == 0 then 3.6 elseif math.abs(i) == 2 then 2.8 else 1.8
+		local x = i * 2.6
+		b("CrownProng", x - 0.8, y + 2.8, -1.6, x + 0.8, y + 2.8 + tall, 1.6, GOLD)
+		if i % 2 == 0 then
+			b("CrownTip", x - 0.6, y + 2.8 + tall, -0.6, x + 0.6, y + 3.8 + tall, 0.6, Color3.fromRGB(255, 236, 140), false)
+		end
+	end
+	for _, side in { -1, 1 } do
+		b("Gem", side * 4.4 - 0.7, y + 0.7, -2.9, side * 4.4 + 0.7, y + 2.1, -2.3, Color3.fromRGB(60, 160, 255), false)
+	end
+	b("Gem", -1.1, y + 0.5, -2.9, 1.1, y + 2.3, -2.3, Color3.fromRGB(235, 45, 60), false)
 end
 local s = CFG.Screen
 local screen = Instance.new("Part")
