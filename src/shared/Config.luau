@@ -1952,18 +1952,36 @@ Config.Slingshot = {
 		Color3.fromRGB(240, 90, 190), -- pink
 	},
 }
--- The Top Earners board (QM, Nov 6): left of the start line, facing into the base, the global
--- top pen incomes (gold a second, everyone's latest recorded, OrderedDataStore "TopEarners")
--- in a square stone frame (the old portal gate's style, a skull on top: tools/earners_board_meshes.py),
--- your own pen's income and the countdown to the next refresh under the list.
--- Server/TopEarners builds it and records; Client/TopEarners draws the list.
-Config.TopEarners = {
-	Position = Vector3.new(-112, 0, 18), -- the base's middle (on the ground), just inside the base left of the course's mouth
+-- The leaderboards (QM, Nov 7: a copy of his reference's three boards, Top Speed swapped for
+-- Top Luck): left of the start line, facing into the base, side by side. Each one is the
+-- global top Top players by its stat, everyone's latest recorded every Refresh seconds in its
+-- own OrderedDataStore. Money = pen gold a second ("PenIncome", Hatchery's), Luck =
+-- Config.luck (stored x100), Playtime = all-time seconds played ("PlayTime", Gold.server's).
+-- Server/Leaderboards builds them (Parts) and records; Client/Leaderboards draws the titles
+-- and the lists.
+Config.Leaderboards = {
+	Position = Vector3.new(-112, 0, 18), -- the middle board's foot (on the ground), where the Top Earners board was
 	Yaw = 210, -- degrees: faces into the base (+z), turned 30 degrees toward the course
-	Screen = { Width = 26, Height = 32, Bottom = 4.2 }, -- the frame's opening (tools/earners_board_meshes.py SCREEN_*)
-	Refresh = 60, -- seconds between recording everyone here and re-reading the top
-	Top = 50, -- rows on the board
-	Meshes = { { 106770230038436, 177, 185, 178, 0.006, 20.790, -0.713 }, { 82718487796629, 148, 156, 150, -0.759, 20.846, -0.708 }, { 134382604805829, 232, 226, 206, 0.008, 46.766, -0.195 }, { 137436135736323, 38, 38, 44, 0.000, 46.300, -4.175 } }, -- (filled by tools/earners_board_upload.py)
+	Spacing = 20, -- studs between the boards' middles
+	Refresh = 60, -- seconds between recording everyone here and re-reading the tops
+	Top = 50, -- rows on each board
+	Boards = {
+		{
+			Key = "Money", Title = "Top Money", Store = "TopMoney",
+			Main = Color3.fromRGB(96, 214, 46), Dark = Color3.fromRGB(30, 112, 24), Pale = Color3.fromRGB(196, 238, 176),
+			Text = Color3.fromRGB(226, 255, 92), Value = Color3.fromRGB(150, 255, 90),
+		},
+		{
+			Key = "Luck", Title = "Top Luck", Store = "TopLuck",
+			Main = Color3.fromRGB(44, 140, 255), Dark = Color3.fromRGB(20, 62, 180), Pale = Color3.fromRGB(176, 210, 255),
+			Text = Color3.fromRGB(150, 226, 255), Value = Color3.fromRGB(150, 226, 255),
+		},
+		{
+			Key = "Playtime", Title = "Top Playtime", Store = "TopPlaytime",
+			Main = Color3.fromRGB(242, 72, 96), Dark = Color3.fromRGB(150, 24, 48), Pale = Color3.fromRGB(255, 184, 196),
+			Text = Color3.fromRGB(255, 140, 160), Value = Color3.fromRGB(255, 255, 255),
+		},
+	},
 }
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:
