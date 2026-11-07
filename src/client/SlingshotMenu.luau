@@ -11,6 +11,12 @@
 --             GrantBiome, from Shop.server's ProcessReceipt)
 --
 --   SlingshotMenu.open(onPick)   -- onPick(biome index) when you pick an unlocked one
+--   SlingshotMenu.open(nil, i)   -- (the Goal panel's Buy!, QM Nov 7) scrolled so biome i's card
+--                                -- is in the middle, the clicking cursor on its buy button
+--   SlingshotMenu.open(onPick, nil, true) -- (holding E on a pet, QM Nov 7: not at the slingshot,
+--                                -- so walking away doesn't close it)
+--   SlingshotMenu.atSlingshot()  -- open from the slingshot itself (Client/SlingshotLaunch
+--                                -- closes it when you walk away; not one from the Goal panel)
 --   SlingshotMenu.close()
 --   SlingshotMenu.isOpen()
 
@@ -34,7 +40,11 @@ local FAIL_SHOW = 1.2 -- seconds a failed buy's message shows on the button
 local UNLOCKED_COLOR = Color3.fromHex("7CFF4D")
 local LOCKED_COLOR = Color3.fromHex("ff5a5a")
 
-local gui, cards, onPick
+local RunService = game:GetService("RunService")
+local CURSOR_CLICK = 0.12 -- how much the cursor shrinks as it "clicks" (Hud's upgrade hand's look)
+
+local gui, cards, onPick, fromSlingshot
+local cursor, cursorScale, cursorOn -- the clicking cursor (the Goal panel's Buy!), on the card i = cursorOn
 local made = {} -- [biome index] = its card's parts
 
 local function price(n)
@@ -185,6 +195,53 @@ local function refresh()
 			c.buy.Text.Text = price(Config.unlockCost(player, i))
 		end
 	end
+	if cursor and cursorOn and cursorOn <= level() then -- (bought: the cursor goes)
+		cursorOn = nil
+		cursor.Visible = false
+	end
+end
+
+-- the clicking cursor (assets/ui/TutorialCursor.png, as on Hud's Upgrade) on card i's buy button
+local function pointAt(i)
+	local c = made[i]
+	if not c then
+		return
+	end
+	if not cursor then
+		cursor = Instance.new("ImageLabel")
+		cursor.Name = "Cursor"
+		cursor.BackgroundTransparency = 1
+		cursor.Image = "rbxassetid://93240211999923" -- assets/ui/TutorialCursor.png
+		cursor.AnchorPoint = Vector2.new(29 / 256, 6 / 256) -- its tip, so it clicks about it
+		cursor.Position = UDim2.fromScale(0.55, 0.3) -- (low enough to read, high enough not to be cut off by the row)
+		cursor.SizeConstraint = Enum.SizeConstraint.RelativeYY
+		cursor.Size = UDim2.fromScale(0.9, 0.9)
+		cursor.ZIndex = 9
+		cursorScale = Instance.new("UIScale")
+		cursorScale.Parent = cursor
+		RunService.RenderStepped:Connect(function()
+			if cursor.Visible then
+				-- (a click a second: quick press in, slower let go)
+				local t = os.clock() % 1
+				local press = if t < 0.15 then t / 0.15 elseif t < 0.5 then 1 - (t - 0.15) / 0.35 else 0
+				cursorScale.Scale = 1 - CURSOR_CLICK * press
+			end
+		end)
+	end
+	cursor.Parent = c.buy
+	cursorOn = i
+	cursor.Visible = true
+end
+
+-- scrolls the row so card i is in the middle (as far as the row goes)
+local function centre(i)
+	local cardW, gap = fig(729), fig(44)
+	local window = cards.Size.X.Offset
+	local count = #Config.Biomes
+	local canvas = 4 + count * cardW + (count - 1) * gap
+	local mid = 4 + (i - 1) * (cardW + gap) + cardW / 2
+	local x = math.clamp(mid - window / 2, 0, math.max(canvas - window, 0))
+	cards.CanvasPosition = Vector2.new(x, 0)
 end
 
 local function fail(c, i, why)
@@ -285,9 +342,21 @@ local function build()
 	player:GetAttributeChangedSignal("Reborn"):Connect(refresh) -- (prices x2: Config.Luck)
 end
 
-function SlingshotMenu.open(callback)
+function SlingshotMenu.open(callback, focus, away)
 	build()
 	onPick = callback
+	fromSlingshot = callback ~= nil and not away
+	if cursor then
+		cursor.Visible = false
+	end
+	cursorOn = nil
+	if focus and made[focus] then
+		centre(focus)
+		task.defer(centre, focus) -- (again once a first build's row has its canvas size)
+		if focus > level() then
+			pointAt(focus)
+		end
+	end
 	refresh()
 	NativeHud.haze("SlingshotMenu", true)
 	UiFx.popIn(gui)
@@ -302,6 +371,10 @@ end
 
 function SlingshotMenu.isOpen()
 	return gui ~= nil and UiFx.isOpen(gui)
+end
+
+function SlingshotMenu.atSlingshot()
+	return SlingshotMenu.isOpen() and fromSlingshot == true
 end
 
 return SlingshotMenu
