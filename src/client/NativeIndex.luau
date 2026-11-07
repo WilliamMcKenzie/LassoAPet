@@ -24,6 +24,7 @@
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
@@ -57,6 +58,9 @@ local CASH_GREEN = Color3.fromRGB(0, 255, 0)
 local LOCKED_SHADE = 0.45 -- the dark over a tile not had (its transparency)
 local SILHOUETTE = 0.35 -- an animal not had: black, this transparent
 local PICK = 8 -- the picked tile's white ring
+local SPIN = 45 -- degrees a second a moving rarity's back turns (Fight to Steal an Egg's WeaponShop)
+local SHEEN = 0.45 -- transparency at the middle of its sheen's band
+local moving = setmetatable({}, { __mode = "k" }) -- [back's Fill] = its sheen's UIGradient
 local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Exclusive" }
 
 local gui, sections, card, details, unlocked, badge
@@ -309,6 +313,38 @@ local function paintBack(back, rarity)
 	end
 	local look = Config.NativeUi.Rarities[rarity] or Config.NativeUi.Rarities.Common
 	fill.Rotation = 90
+	-- a moving rarity's (Divine, Exclusive) back turns with a white sheen sweeping across it, as
+	-- Fight to Steal an Egg's WeaponShop cards
+	local old = back:FindFirstChild("Sheen")
+	if old then
+		old:Destroy()
+	end
+	moving[fill] = nil
+	if look.top and look.move then
+		local sheen = Instance.new("Frame")
+		sheen.Name = "Sheen"
+		sheen.BackgroundColor3 = Color3.new(1, 1, 1)
+		sheen.BorderSizePixel = 0
+		sheen.Size = UDim2.fromScale(1, 1)
+		sheen.ZIndex = back.ZIndex
+		local corner = back:FindFirstChildOfClass("UICorner")
+		if corner then
+			corner:Clone().Parent = sheen
+		end
+		local band = Instance.new("UIGradient")
+		band.Rotation = 60
+		band.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.4, 1),
+			NumberSequenceKeypoint.new(0.5, SHEEN),
+			NumberSequenceKeypoint.new(0.6, 1),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		band.Offset = Vector2.new(-1.5, 0)
+		band.Parent = sheen
+		sheen.Parent = back
+		moving[fill] = band
+	end
 	if look.top then
 		fill.Color = if look.at < 1
 			then ColorSequence.new({
@@ -526,6 +562,19 @@ local function build()
 	local close
 	gui, close = HudKit.popup(root, "IndexPanel", "Index", "PinkHeader")
 	UiFx.menu(gui)
+	-- the moving rarities' backs, while it's open: each turns (from its light top) and its sheen
+	-- sweeps in step with the band on its rarity's name (RarityLook), as Fight to Steal an Egg's
+	RunService.RenderStepped:Connect(function()
+		if not gui.Visible or next(moving) == nil then
+			return
+		end
+		local turn = (90 + os.clock() * SPIN) % 360
+		local sweep = RarityLook.sweep()
+		for fill, band in moving do
+			fill.Rotation = turn
+			band.Offset = Vector2.new(sweep * 1.5, 0) -- (further: its band is slanted)
+		end
+	end)
 	close.Activated:Connect(function()
 		UiFx.popOut(gui)
 	end)
