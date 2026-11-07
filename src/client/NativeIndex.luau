@@ -181,13 +181,15 @@ end
 
 -- ---- the collage ------------------------------------------------------------------------
 
--- Each tile's size is the pet's (QM, Nov 7: "the size of the card should be ~= the size of the
--- pet"): a huge one (BIG x the Horse's size or more: the titans) 2x2, a long one (LONG x as long
+-- Every tile is 1x1 (QM, Nov 7), unless the biome's tiles leave its grid's rows short: then
+-- the pets whose shape calls for it grow, to fill them (shape: QM, Nov 7, "the size of the card
+-- should be ~= the size of the pet"): a huge one (BIG x the Horse's size or more: the titans) 2x2, a long one (LONG x as long
 -- as it's tall: the Snake) 2x1, a tall one (TALL x as tall as it's long: the Giraffe) 1x2, the
 -- rest 1x1. Its size is how big it's drawn in game: its model's box (as Horse's silhouette)
 -- x its class's size, over Config.PetSmallSize (the Horse's).
 local BIG, LONG, TALL = 3.5, 2.5, 1.8
 local shapeOf = {}
+local fitOf = {} -- [kind] = how much its shape calls for it (its size for a huge one, else its length or height over the other)
 local function shape(kind)
 	if shapeOf[kind] then
 		return shapeOf[kind]
@@ -218,11 +220,11 @@ local function shape(kind)
 			local size = class.size * math.sqrt(sides[2] * sides[3]) / (Config.PetSmallSize or 10.4)
 			local long, tall = math.max(d.X, d.Z), d.Y
 			if size >= BIG then
-				out = { 2, 2 }
+				out, fitOf[kind] = { 2, 2 }, 100 + size
 			elseif long >= LONG * tall then
-				out = { 2, 1 }
+				out, fitOf[kind] = { 2, 1 }, long / tall
 			elseif tall >= TALL * long then
-				out = { 1, 2 }
+				out, fitOf[kind] = { 1, 2 }, tall / long
 			end
 		end
 	end
@@ -231,13 +233,12 @@ local function shape(kind)
 end
 
 -- kinds' tiles in a COLS-wide grid, the big ones first, then the rarest, each in the first
--- spot it fits (reading order), so the small ones fill the gaps: { [kind] = { x, y, w, h } }
--- (cells, from 0) and its rows
-local function collage(kinds)
+-- spot it fits (reading order): { [kind] = { x, y, w, h } } (cells, from 0) and its rows, or
+-- nil if they don't fit in `rows`
+local function pack(kinds, sizes, rows)
 	local order = table.clone(kinds)
 	table.sort(order, function(a, b)
-		local sa, sb = shape(a), shape(b)
-		local aa, ab = sa[1] * sa[2], sb[1] * sb[2]
+		local aa, ab = sizes[a][1] * sizes[a][2], sizes[b][1] * sizes[b][2]
 		if aa ~= ab then
 			return aa > ab
 		end
@@ -247,13 +248,13 @@ local function collage(kinds)
 		end
 		return a < b
 	end)
-	local taken, layout, rows = {}, {}, 1
+	local taken, layout = {}, {}
 	for _, kind in order do
-		local w, h = shape(kind)[1], shape(kind)[2]
-		local cell = 0
-		while true do
+		local w, h = sizes[kind][1], sizes[kind][2]
+		local placed = false
+		for cell = 0, COLS * rows - 1 do
 			local x, y = cell % COLS, cell // COLS
-			local fits = x + w <= COLS
+			local fits = x + w <= COLS and y + h <= rows
 			for dy = 0, h - 1 do
 				for dx = 0, w - 1 do
 					if fits and taken[(y + dy) * COLS + x + dx] then
@@ -268,13 +269,50 @@ local function collage(kinds)
 					end
 				end
 				layout[kind] = { x, y, w, h }
-				rows = math.max(rows, y + h)
+				placed = true
 				break
 			end
-			cell += 1
+		end
+		if not placed then
+			return nil
 		end
 	end
-	return layout, math.max(rows, 2) -- (at least 2 rows: the biome's card beside it)
+	return layout
+end
+
+-- All 1x1 in as few rows as hold them (2 at least: the biome's card beside them); then, while
+-- the rows have spare cells, the pets whose shape calls for it most grow to it, one at a time,
+-- each kept only if everything still fits
+local function collage(kinds)
+	local rows = math.max(2, math.ceil(#kinds / COLS))
+	local sizes = {}
+	local candidates = {}
+	for _, kind in kinds do
+		sizes[kind] = { 1, 1 }
+		local want = shape(kind)
+		if want[1] * want[2] > 1 then
+			table.insert(candidates, kind)
+		end
+	end
+	table.sort(candidates, function(a, b)
+		return (fitOf[a] or 0) > (fitOf[b] or 0)
+	end)
+	local layout = pack(kinds, sizes, rows)
+	local spare = COLS * rows - #kinds
+	for _, kind in candidates do
+		local want = shape(kind)
+		local extra = want[1] * want[2] - 1
+		if extra <= spare then
+			sizes[kind] = want
+			local tried = pack(kinds, sizes, rows)
+			if tried then
+				layout, spare = tried, spare - extra
+			else
+				sizes[kind] = { 1, 1 }
+			end
+		end
+	end
+	return layout, rows
 end
 
 -- ---- building ---------------------------------------------------------------------------
