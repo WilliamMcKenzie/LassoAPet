@@ -558,6 +558,7 @@ local Config = {
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
 		Seraph = 3600, CrimsonSeraph = 3600, CrystalSeraph = 3600, -- World 2's trophy angels, 1 in 300 of their stampedes (QM, Oct 13; the hatch a guess)
+		CastleWyvern = 3600, -- (as the Black Widow: a guess)
 		BlackWidow = 3600, -- World 2's trophy spider, 1 in 500 of the Crimson Lands' stampede (QM, Oct 13; the hatch a guess, as the Seraphs')
 	},
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
@@ -712,6 +713,7 @@ local Config = {
 		MoonJellyfish = { Kind = "Fly", Height = 56 }, Anomalocaris = { Kind = "Fly", Height = 56 }, BoxJellyfish = { Kind = "Fly", Height = 56 }, BlueRingOctopus = { Kind = "Fly", Height = 56 }, ManOWar = { Kind = "Fly", Height = 56 }, -- World 3 Cnidaria: all swimmers, fliers like the Crystal Phoenix (Oct 14)
 		Mermaid = { Kind = "Fly", Height = 56 }, AbyssalDragon = { Kind = "Fly", Height = 56 }, ReefTitan = { Kind = "Fly", Height = 56 }, RoyalCnidarian = { Kind = "Fly", Height = 56 },
 		SwollFairy = { Kind = "Fly", Height = 56 }, -- World 3 Candyland: the buff fairy, a flier (Oct 14)
+		CastleWyvern = { Kind = "Fly", Height = 56 }, -- (the Rock Candy Dragon's frame: QM Nov 7)
 		RockCandyDragon = { Kind = "Fly", Height = 56 }, -- World 3 Candyland's giga rare dragon, a flier (Oct 14)
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
@@ -762,6 +764,7 @@ local Config = {
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
+		CastleWyvern = 4, -- the Crimson Lands' Legendary dragon (XL, as the Rock Candy Dragon: QM Nov 7)
 		GreenCrab = 1, LimeCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
 		GhostShip = 4, JollyRogerWyvern = 4, -- World 3 Pirate Cove's giga rares (XL) (guesses, Oct 14)
 		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
@@ -843,6 +846,7 @@ local Config = {
 		Eyeworm = 18, CrimsonScorpion = 24, Maw = 60, IvorySpider = 180, Asura = 750, -- World 2 Crimson Lands
 		Caterpillar = 300, -- World 2 Woodland Maze (as the Starfish)
 		Seraph = 4500, CrimsonSeraph = 7500, CrystalSeraph = 33330, -- World 2's trophy angels (QM, Oct 13: slow but earn a lot): 10x their biome's Legendary (the Majestic Unicorn, Asura, Crystal Elephant)
+		CastleWyvern = 7500, -- the Crimson Lands' Legendary dragon, about 1 in 200 (as the Crimson Seraph: a guess)
 		BlackWidow = 12500, -- World 2's trophy spider: rarer than the Crimson Seraph (1 in 500, not 1 in 300), so 500/300 its gold (a guess)
 		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, CrystalCentipede = 75, RedMushroom = 150, BrownMushroom = 300, PurpleMushroom = 1260, BlueCrystal = 150, PinkCrystal = 300, CrystalSpider = 1260, CrystalPhoenix = 1260, CrystalElephant = 3333, -- Tundra
 		Starfish = 300, Clownfish = 700, PinkButterfly = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, Lionfish = 1500, GiantGolem = 24600, -- Ocean
@@ -1449,6 +1453,7 @@ local Config = {
 		CrystalElephant = { Speed = 3.8, Stamina = 4 }, -- World 2's Cavern Legendary Crystal Elephant (as the Icebringer until QM sets it)
 		Seraph = { Speed = 0.5, Stamina = 3 }, -- World 2's trophy angels (QM, Oct 13: "move quite slowly (like say 0.5 speed)")
 		CrimsonSeraph = { Speed = 0.5, Stamina = 3 },
+		CastleWyvern = { Speed = 2.8, Stamina = 3 }, -- the Asura's numbers (a guess)
 		BlackWidow = { Speed = 2.8, Stamina = 3 }, -- World 2's trophy spider: the Asura's numbers (a guess)
 		CrystalSeraph = { Speed = 0.5, Stamina = 3 },
 		CrystalPhoenix = { Speed = 2.57, Stamina = 3 }, -- World 2's Cavern Crystal Phoenix: Epic (as the Ice Golem until QM sets it)
@@ -1595,7 +1600,7 @@ Config.Endless = {
 			GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) },
 			WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) },
 			Herd = { Eyeworm = 0.3, Maw = 0.3, IvorySpider = 0.05, Asura = 0.05, CrimsonScorpion = 0.2, Beholder = 0.3,
-				BlackWidow = 0.0024 }, -- (the Black Widow 1 in 500 of its stampede: QM, Oct 13)
+				BlackWidow = 0.0024, CastleWyvern = 0.006 }, -- (the Black Widow 1 in 500 of its stampede: QM, Oct 13; the Castle Wyvern about 1 in 200, QM Nov 7)
 			Boss = "CrimsonSeraph",
 			Fog = { Color = rgb(150, 60, 70), Start = 0, End = 450 },
 		},
@@ -2124,7 +2129,7 @@ end
 -- the scrapped Swoll Fairy, Abyssal Dragon and Gigacorn trophy as their biome's, for saved ones.
 Config.IncomeCopy = {
 	AbyssalDragon = 7400, AncientTreant = 1500, Anomalocaris = 225, Asura = 240, BananaMonkey = 13, Beholder = 750,
-	Bes = 4800, BlackWidow = 1500, BloatedMummy = 1050, BlueCrystal = 91, BlueRingOctopus = 385, BoxJellyfish = 385,
+	Bes = 4800, BlackWidow = 1500, CastleWyvern = 900, BloatedMummy = 1050, BlueCrystal = 91, BlueRingOctopus = 385, BoxJellyfish = 385,
 	BrownMushroom = 180, Buffalo = 20, Bumblebee = 18, Caterpillar = 45, Catfish = 555, Creampuff = 180,
 	CrimsonScorpion = 24, CrimsonSeraph = 1500, Crocodile = 13, CrystalCentipede = 45, CrystalElephant = 2000, CrystalPhoenix = 760,
 	CrystalSeraph = 4000, CrystalSpider = 760, DesireTroll = 2000, EagleSentry = 2900, EyepatchShark = 74, Eyeworm = 18,
@@ -2198,6 +2203,7 @@ Config.AnimalScale.GummyBear = 1.5 -- (the same: QM, Oct 15)
 Config.AnimalScale.GumdropFrog = 1.6 -- (QM, Oct 15)
 Config.AnimalScale.GingerbreadMan = 2 -- (QM, Oct 15)
 Config.AnimalScale.RockCandyDragon = 2 -- (QM, Oct 15)
+Config.AnimalScale.CastleWyvern = 2 -- (as the Rock Candy Dragon, its base)
 Config.AnimalScale.ReefTitan = 3 -- (QM, Oct 15)
 Config.AnimalScale.AncientTreant = 2 -- (QM, Oct 15)
 Config.AnimalScale.RoyalCnidarian = 2 -- (QM, Oct 15)

@@ -190,7 +190,7 @@ local NAMES = {
 	Mimic = { "Mi", "mic" }, BoneWyrm = { "Bone", "wyrm" }, Shroom = { "Sh", "room", "Shroo" }, SpiritFox = { "Spirit", "fox" },
 	SpiritDeer = { "Spirit", "deer" }, MysticOwl = { "Mystic", "owl" }, CrystalTortoise = { "Crys", "toise" }, SpiritLoong = { "Spirit", "loong" },
 	WarBoar = { "War", "boar" }, RoyalSteed = { "Roy", "steed" }, ChessKnight = { "Chess", "knight" }, RoyalPeacock = { "Pea", "cock" },
-	LivingArmor = { "Living", "armor" }, CrimsonDrake = { "Crim", "drake" }, RoyalEagle = { "Roy", "eagle" }, Seahorse = { "Sea", "horse" },
+	LivingArmor = { "Living", "armor" }, CrimsonDrake = { "Crim", "drake" }, CastleWyvern = { "Castle", "wyvern" }, RoyalEagle = { "Roy", "eagle" }, Seahorse = { "Sea", "horse" },
 	AbyssWhale = { "Abyss", "whale" },
 }
 local VOWELS = { a = true, e = true, i = true, o = true, u = true }

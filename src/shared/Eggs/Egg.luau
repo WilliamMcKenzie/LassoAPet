@@ -180,6 +180,7 @@ local KINDS = {
 	ChessKnight = { data = require(script.Parent.ChessKnightEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
 	RoyalPeacock = { data = require(script.Parent.RoyalPeacockEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
 	LivingArmor = { data = require(script.Parent.LivingArmorEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
+	CastleWyvern = { data = require(script.Parent.CrimsonDrakeEggModel), center = 1.6 }, -- (the Crimson Drake's red egg: QM Nov 7)
 	CrimsonDrake = { data = require(script.Parent.CrimsonDrakeEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
 	RoyalEagle = { data = require(script.Parent.RoyalEagleEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
 	Seahorse = { data = require(script.Parent.SeahorseEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Ocean, QM Nov 6: tools/later_eggs.py there)
