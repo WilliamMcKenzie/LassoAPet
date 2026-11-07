@@ -70,12 +70,12 @@
         "$properties": {
           "CelestialBodiesShown": false,
           "StarCount": 0,
-          "SkyboxBk": "rbxassetid://81588505365795",
-          "SkyboxDn": "rbxassetid://81588505365795",
-          "SkyboxFt": "rbxassetid://81588505365795",
-          "SkyboxLf": "rbxassetid://81588505365795",
-          "SkyboxRt": "rbxassetid://81588505365795",
-          "SkyboxUp": "rbxassetid://81588505365795"
+          "SkyboxBk": "rbxassetid://13107325341",
+          "SkyboxDn": "rbxassetid://13107329809",
+          "SkyboxFt": "rbxassetid://13107334845",
+          "SkyboxLf": "rbxassetid://13107337703",
+          "SkyboxRt": "rbxassetid://13107340396",
+          "SkyboxUp": "rbxassetid://13107344387"
         }
       }
     },
