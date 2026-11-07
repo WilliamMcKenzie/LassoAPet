@@ -16,8 +16,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local GiftModel = require(Shared.GiftModel)
-local MapData = require(Shared.MapData)
-local MapFile = require(Shared.MapFile)
+local Stands = require(Shared.Stands)
 
 local busy = {} -- [player] = true while a Claim is being checked
 
@@ -52,7 +51,8 @@ local function near(player)
 	if not root then
 		return false
 	end
-	local away = (root.Position - Vector3.new(s.X, root.Position.Y, s.Z)).Magnitude
+	local at = Stands.at("FreeGift").Position
+	local away = (root.Position - Vector3.new(at.X, root.Position.Y, at.Z)).Magnitude
 	return away <= s.Reach
 end
 
@@ -97,8 +97,7 @@ local function build()
 	if s.Scale and s.Scale ~= 1 then
 		model:ScaleTo(s.Scale)
 	end
-	local y = MapFile.groundAt(MapData, s.X, s.Z)
-	model:PivotTo(CFrame.new(s.X, y, s.Z) * CFrame.Angles(0, math.rad(s.Yaw or 0), 0))
+	model:PivotTo(Stands.at("FreeGift")) -- (where the map editor put it, on the ground there)
 	model.Parent = workspace
 end
 

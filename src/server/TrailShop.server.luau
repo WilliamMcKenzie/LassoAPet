@@ -138,7 +138,7 @@ if s.Scale ~= 1 then
 	model:ScaleTo(s.Scale)
 	Studs.fit(model, 0.5 * s.Scale)
 end
-model:PivotTo(CFrame.new(s.Position) * CFrame.Angles(0, math.rad(s.Yaw), 0))
+model:PivotTo(require(ReplicatedStorage.Shared.Stands).at("TrailShop")) -- (where the map editor put it)
 local gui = model.Title:FindFirstChildOfClass("BillboardGui")
 gui.Size = UDim2.fromScale(s.TitleHeight * 6 * s.Scale, s.TitleHeight * s.Scale)
 HiddenFaces.cull(model)

@@ -17,6 +17,7 @@ local UserService = game:GetService("UserService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local Studs = require(ReplicatedStorage.Shared.Studs)
 
+local Stands = require(ReplicatedStorage.Shared.Stands)
 local CFG = Config.Leaderboards
 local MAX = 2 ^ 53 -- (an OrderedDataStore holds whole numbers)
 
@@ -94,10 +95,9 @@ end
 local folder = Instance.new("Folder")
 folder.Name = "Leaderboards"
 
-local base = CFrame.new(CFG.Position) * CFrame.Angles(0, math.rad(CFG.Yaw), 0)
-for i, board in CFG.Boards do
-	-- (left to right as you face them: their -z is your +z, so +x is your left)
-	local origin = base * CFrame.new((2 - i) * CFG.Spacing, 0, 0)
+for _, board in CFG.Boards do
+	-- each board where the map editor put it (its Stand, by Store; Config's spot without one)
+	local origin = Stands.at(board.Store)
 	local model = Instance.new("Model")
 	model.Name = board.Key
 	local main, dark, pale = board.Main, board.Dark, board.Pale

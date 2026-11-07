@@ -57,11 +57,10 @@ local function text(parent, name, value, color, y, height)
 	return label
 end
 
--- the row turns about the first stand (the one nearest the course), the others swinging forward
-local row = CFrame.new(Config.Podium.Position + (Config.PetOffers[1].Offset or Vector3.zero))
-	* CFrame.Angles(0, -math.rad(Config.LimitedsTurn or 0), 0)
-for i, offer in Config.PetOffers do
-	local cf = row * CFrame.new((i - 1) * 28, 0, 0) -- this stand, turned with the row
+-- each stand where the map editor put it (its Stand, by Kind; Config's row without one)
+local Stands = require(ReplicatedStorage.Shared.Stands)
+for _, offer in Config.PetOffers do
+	local cf = Stands.at(offer.Kind)
 	local at = cf.Position
 	local width = offer.Ring or 22
 	-- dirt, a gold step, grass on top: the pet stands at 1.5
