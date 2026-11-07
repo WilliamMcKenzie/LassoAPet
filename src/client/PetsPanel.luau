@@ -103,7 +103,7 @@ local function decode(text)
 end
 
 -- Each kind's rarity's place (Common 1 .. Legendary 5, Exclusive 6), from its animal module.
-local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Exclusive" }
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Celestial", "Void", "Omega", "Exclusive" }
 local rank = {}
 local function rarityRank(kind)
 	if rank[kind] == nil then

@@ -8,7 +8,7 @@
 local Horse = require(script.Parent.Horse)
 local BlackWidowModel = require(script.Parent.BlackWidowModel)
 
-return Horse.variant("BlackWidow", BlackWidowModel, "Divine", {
+return Horse.variant("BlackWidow", BlackWidowModel, "Void", {
 	seat = Vector3.new(0, 3.5, 3),
 	seatBone = "abdomen",
 	neck = { center = Vector3.new(0, 0.7, -2.1), radius = 1.6 },
