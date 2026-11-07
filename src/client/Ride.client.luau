@@ -727,16 +727,62 @@ local leadFromZ = 0
 -- it's in the corridor and riding as usual.
 local exitPath = nil
 
--- Out of your pen's gap (to its Spawn, just outside it), then straight to the
--- corridor's mouth, then a few studs on into it, square to the start line.
+-- Out of your pen's gap (to its Spawn, just outside it), round the slingshots standing
+-- in front of the pens, then straight to the corridor's mouth and a few studs on into it,
+-- square to the start line. All read off the live map (QM, Nov 7: the base grew, the
+-- pens moved back and the slingshots went in front of them), nothing hardcoded: the
+-- start line's z and width (World.StartLine), the pen's Spawn, the slingshots' boxes.
 local function penExitPath()
 	local pen = myPen()
 	local spawn = pen and pen:FindFirstChild("Spawn")
 	if not spawn then
 		return nil
 	end
-	local x = math.clamp(spawn.Position.X * 0.25, -(EDGE - 8), EDGE - 8) -- (a little toward its side of the corridor)
-	return { Vector2.new(spawn.Position.X, spawn.Position.Z), Vector2.new(x, 24), Vector2.new(x, 4) }
+	local line = world:FindFirstChild("StartLine")
+	local lineAt, lineSize = CFrame.new(0, 0, START_LINE_Z), Vector3.new(2 * (EDGE + 4), 0, 0)
+	if line then
+		lineAt, lineSize = line:GetBoundingBox()
+	end
+	local lineX, reach = lineAt.Position.X, lineSize.X / 2 - 12 -- (EDGE - 8, as before)
+	local from = Vector2.new(spawn.Position.X, spawn.Position.Z)
+	local x = math.clamp(lineX + (from.X - lineX) * 0.25, lineX - reach, lineX + reach) -- (a little toward its side of the corridor)
+	local mouth = Vector2.new(x, START_LINE_Z + 26) -- (straight on from here: 20 studs square to the line)
+	local path = { from }
+	-- Round each slingshot in the way (Server/Slingshot: Config.Slingshot.Ahead out from a
+	-- pen's Spawn, Scale times its meshes): past the side nearer the start line's middle,
+	-- clear of its box by the pet's half width and a bit.
+	local slings = workspace:FindFirstChild("Slingshots")
+	local clear = (if mount then vfx.halfBody(mount) else 2) + 3
+	local detours = {}
+	for _, sling in if slings then slings:GetChildren() else {} do
+		if not sling:IsA("Model") then
+			continue
+		end
+		local at, size = sling:GetBoundingBox()
+		local c = Vector2.new(at.Position.X, at.Position.Z)
+		local r = math.max(size.X, size.Z) / 2 + clear
+		local leg = mouth - from
+		local t = math.clamp((c - from):Dot(leg) / math.max(leg:Dot(leg), 1e-3), 0, 1)
+		local near = from + leg * t
+		if (c - near).Magnitude < r then
+			local side = Vector2.new(-leg.Unit.Y, leg.Unit.X) -- (square to the leg)
+			if (lineX - c.X) * side.X < 0 or (lineX == c.X and (near - c):Dot(side) < 0) then
+				side = -side
+			end
+			local along = leg.Unit * r * 0.5 -- (a short lane past it, so neither leg cuts its corner)
+			table.insert(detours, { t = t, at = c + side * r - along })
+			table.insert(detours, { t = t + 1e-6, at = c + side * r + along })
+		end
+	end
+	table.sort(detours, function(a, b)
+		return a.t < b.t
+	end)
+	for _, d in detours do
+		table.insert(path, d.at)
+	end
+	table.insert(path, mouth)
+	table.insert(path, Vector2.new(x, START_LINE_Z + 6))
+	return path
 end
 
 -- Which way your pen's open side faces, as a yaw (0 = toward the start line).
