@@ -1,7 +1,7 @@
 -- The giant slingshot's launch (shared: Server/Slingshot rests it, Client/SlingshotLaunch plays it) (design/slingshot, tools/slingshot_meshes.py): no pouch,
--- the player and their pet stand against the band, which rests pulled back to the
--- ground, draws back a touch more, snaps forward past the fork, wobbles and winds back
--- down. Same timings as the preview GIF.
+-- the band hangs slack between the prongs (QM, Nov 7), stretches back to the player and
+-- their pet waiting behind it, draws back a touch more, snaps forward past the fork,
+-- wobbles and hangs slack again. Same timings as the preview GIF.
 --
 --   SlingshotPose.place(model, base, t)               -- the bands at time t of the shot (0: resting)
 --   SlingshotPose.launch(model, onStep, onRelease)   -- plays the shot; returns when wound back
@@ -18,7 +18,9 @@ local RunService = game:GetService("RunService")
 
 local TIPS = { Vector3.new(-7.6, 14.6, 0), Vector3.new(7.6, 14.6, 0) }
 local BAND_SIDE = { Vector3.new(-2, 0.9, 0.3), Vector3.new(2, 0.9, 0.3) }
-local NEUTRAL = Vector3.new(0, 13, 3.6)
+local SLACK = Vector3.new(0, 10.4, 0) -- resting: hanging between the tips
+local NEUTRAL = SLACK -- what it wobbles about after the shot
+local GRAB = 0.5 -- s: stretched back from slack to the rider
 local LOAD = Vector3.new(0, 1.6, 17)
 local DRAW = Vector3.new(0, 1.6, 20)
 local OVER = Vector3.new(0, 22, -7)
@@ -26,8 +28,8 @@ local FIRE = 0.24
 local TILT = 0.35
 local BAND_SIZE = Vector2.new(1.2, 0.8)
 
-local DURATION = 0.6 + 0.2 + FIRE + 0.9 + 1.4
-local RELEASE = 0.6 + 0.2 + FIRE * 0.8
+local DURATION = GRAB + 0.6 + 0.2 + FIRE + 0.9 + 0.4
+local RELEASE = GRAB + 0.6 + 0.2 + FIRE * 0.8
 
 local Slingshot = {}
 Slingshot.RELEASE = RELEASE
@@ -39,6 +41,10 @@ local function smooth(u)
 end
 
 local function pullAt(t)
+	if t < GRAB then
+		return SLACK:Lerp(LOAD, smooth(t / GRAB))
+	end
+	t -= GRAB
 	if t < 0.6 then
 		return LOAD:Lerp(DRAW, smooth(t / 0.6))
 	end
@@ -55,15 +61,15 @@ local function pullAt(t)
 	if t < 0.9 then
 		return NEUTRAL + (OVER - NEUTRAL) * math.cos(2 * math.pi * 1.8 * t) * math.exp(-4.5 * t)
 	end
-	t -= 0.9
-	return NEUTRAL:Lerp(LOAD, smooth(t / 1.4))
+	return NEUTRAL
 end
 
 -- the pull's CFrame in the slingshot's space: facing the tips, only partly pitched
 local function pullLocal(t)
 	local p = pullAt(t)
 	local mid = (TIPS[1] + TIPS[2]) / 2
-	return CFrame.lookAt(p, Vector3.new(mid.X, p.Y + (mid.Y - p.Y) * TILT, mid.Z))
+	-- (never straight up: hanging slack, it faces -z too)
+	return CFrame.lookAt(p, Vector3.new(mid.X, p.Y + (mid.Y - p.Y) * TILT, p.Z - math.max(p.Z - mid.Z, 1)))
 end
 
 local function stretch(band, a, b)
@@ -94,7 +100,7 @@ function Slingshot.launch(model, onStep, onRelease, base)
 		local t = math.min(os.clock() - t0, DURATION)
 		local cf = place(model, base, t)
 		if not released and t < RELEASE and onStep then
-			onStep(cf)
+			onStep(if t < GRAB then base * pullLocal(GRAB) else cf) -- (the rider waits behind it while the band comes back)
 		end
 		if not released and t >= RELEASE then
 			released = true

@@ -46,8 +46,9 @@ BAND = (226, 58, 52)
 
 TIPS = [(-7.6, 14.6, 0.0), (7.6, 14.6, 0.0)]   # where the bands tie on
 BAND_SIDE = [(-2.0, 0.9, 0.3), (2.0, 0.9, 0.3)]  # where the band wraps the rider, in the pull's space
-NEUTRAL = (0.0, 13.0, 3.6)   # the pull when the band is slack
-LOAD = (0.0, 1.6, 17.0)      # resting, pulled back to the ground (step on here)
+SLACK = (0.0, 10.4, 0.0)     # resting: the band hangs slack between the tips (QM, Nov 7)
+NEUTRAL = SLACK              # what it wobbles about after the shot
+LOAD = (0.0, 1.6, 17.0)      # pulled back to the ground, the rider on it
 DRAW = (0.0, 1.6, 20.0)      # drawn back before the shot
 OVER = (0.0, 22.0, -7.0)     # the furthest it snaps forward
 
@@ -64,36 +65,43 @@ def beam(p, q, w, h=None):
     return np.array([a + side * s * w / 2 + up * t * h / 2 for a in (p, q) for s in (-1, 1) for t in (-1, 1)])
 
 
-def frame(rng):
-    stone = [[], []]
-    bark = [[], []]
-    iron, rope = [], []
-    # a two-step stone base
-    stone[0] += [slab(rng, -6.4, -0.4, -4.6, -0.1, 1.5, 4.6, 0.35, 0.1), slab(rng, 0.1, -0.4, -4.4, 6.4, 1.5, 4.6, 0.35, 0.1)]
-    stone[1] += [slab(rng, -4.2, 1.3, -3.2, 4.2, 2.8, 3.2, 0.35, 0.08)]
-    # trunk, the fork's arms (two shades, segment by segment) and knobbly joints
-    segs = [((0, 2.4, 0), (0, 7.4, 0), 1.9, 1.7)]
-    for s in (-1, 1):
-        segs += [((s * 0.6, 6.6, 0), (s * 5.6, 10.0, 0), 1.6, 1.4),
-                 ((s * 5.6, 9.6, 0), (s * 7.6, 15.6, 0), 1.35, 1.1)]
-    for i, (a, b, r0, r1) in enumerate(segs):
-        bark[i % 2].append(prism(rng, a, b, r0, r1, 9, 0.04))
-    bark[1].append(blob(rng, (0, 7.6, 0), 2.1, 14, jitter=0.06))
-    for s in (-1, 1):
-        bark[0].append(blob(rng, (s * 5.6, 9.9, 0), 1.55, 12, jitter=0.06))
-        bark[1].append(blob(rng, (s * 7.6, 15.6, 0), 1.15, 12, squash=(1, 0.8, 1), jitter=0.05))
-    # iron bands round the trunk's foot and under the fork
-    for y0, y1 in ((2.6, 3.4), (6.0, 6.7)):
-        iron.append(prism(rng, (0, y0, 0), (0, y1, 0), 2.0, 1.95, 12, 0.0))
-    # rope wraps at the tips, where the bands tie on
-    for s in (-1, 1):
-        d = np.array((2.0, 6.0, 0)) * (s, 1, 1)
-        d /= np.linalg.norm(d)
+def chamfer(corners, c):
+    """A box's 8 corners (index bits: x, y, z as in slab), each cut back c toward its 3 neighbours."""
+    pts = []
+    for i, p in enumerate(corners):
         for k in range(3):
-            c = np.array((s * 7.6, 14.6, 0)) + d * (k - 1) * 0.55
-            rope.append(prism(rng, c - d * 0.24, c + d * 0.24, 1.35, 1.35, 10, 0.03))
-    return [("Stone", STONE[0], stone[0]), ("Stone", STONE[1], stone[1]), ("Bark", BARK[0], bark[0]),
-            ("Bark", BARK[1], bark[1]), ("Iron", IRON, iron), ("Rope", ROPE, rope)]
+            q = corners[i ^ (1 << (2 - k))]
+            pts.append(p + (q - p) / np.linalg.norm(q - p) * c)
+    return np.array(pts)
+
+
+def block(p, q, w, h=None, c=0.18):
+    """A chamfered box beam from p to q, w across and h deep (Lego-block chunky)."""
+    h = h or w
+    p, q = np.array(p, float), np.array(q, float)
+    d = q - p
+    d /= np.linalg.norm(d)
+    side = np.array((1.0, 0, 0)) if abs(d[0]) < 0.95 else np.array((0, 0, 1.0))
+    side = side - d * side.dot(d)
+    side /= np.linalg.norm(side)
+    up = np.cross(d, side)
+    corners = np.array([a + side * sx * w / 2 + up * sz * h / 2 for a in (p, q) for sx in (-1, 1) for sz in (-1, 1)])
+    return chamfer(corners, c)
+
+
+def frame(rng):
+    """QM, Nov 7: simpler and blockier, in Fight to Steal an Egg's chunky studded style: a
+    stone footing, a square wooden trunk, two straight arms and two upright prongs, dark
+    caps on the prongs where the band ties on. Three pieces (stone, wood, dark wood)."""
+    stone, wood, dark = [], [], []
+    stone.append(slab(rng, -3.4, 0.0, -2.6, 3.4, 1.4, 2.6, 0.3, 0.0))
+    wood.append(block((0, 1.2, 0), (0, 7.6, 0), 2.6))
+    for s in (-1, 1):
+        wood.append(block((s * 0.6, 6.4, 0), (s * 6.9, 10.2, 0), 2.2))
+        wood.append(block((s * 7.0, 9.2, 0), (s * 7.6, 14.2, 0), 2.0))
+        dark.append(slab(rng, s * 7.6 - 1.3, 13.9, -1.3, s * 7.6 + 1.3, 15.5, 1.3, 0.2, 0.0))
+    dark.append(slab(rng, -1.6, 6.0, -1.6, 1.6, 7.4, 1.6, 0.2, 0.0))  # the collar under the fork
+    return [("Stone", STONE[0], stone), ("Wood", BARK[0], wood), ("DarkWood", BARK[1], dark)]
 
 
 def band(rng):
@@ -113,11 +121,17 @@ def smooth(u):
 FIRE = 0.24  # s from DRAW to OVER
 
 
+GRAB = 0.5  # s: the slack band stretched back to the rider
+
+
 def pull_at(t):
-    """The pull (the band's middle) at time t (s): resting at LOAD, drawn back (0.6 s), a beat,
-    snapped forward (ease-in) to OVER, a damped wobble about NEUTRAL, then wound back
-    down to LOAD (1.4 s)."""
-    L, D, N, O = (np.array(v) for v in (LOAD, DRAW, NEUTRAL, OVER))
+    """The pull (the band's middle) at time t (s): hanging slack, stretched back to the rider
+    at LOAD (GRAB), drawn back (0.6 s), a beat, snapped forward (ease-in) to OVER, a damped
+    wobble about NEUTRAL (slack), then settling slack (0.4 s)."""
+    L, D, N, O, S = (np.array(v) for v in (LOAD, DRAW, NEUTRAL, OVER, SLACK))
+    if t < GRAB:
+        return S + (L - S) * smooth(t / GRAB)
+    t -= GRAB
     if t < 0.6:
         return L + (D - L) * smooth(t / 0.6)
     t -= 0.6
@@ -130,12 +144,11 @@ def pull_at(t):
     t -= FIRE
     if t < 0.9:
         return N + (O - N) * math.cos(2 * math.pi * 1.8 * t) * math.exp(-4.5 * t)
-    t -= 0.9
-    return N + (L - N) * smooth(t / 1.4)
+    return N
 
 
-DURATION = 0.6 + 0.2 + FIRE + 0.9 + 1.4
-RELEASE = 0.6 + 0.2 + FIRE * 0.8  # s: the rider lets go as the band passes the tips
+DURATION = GRAB + 0.6 + 0.2 + FIRE + 0.9 + 0.4
+RELEASE = GRAB + 0.6 + 0.2 + FIRE * 0.8  # s: the rider lets go as the band passes the tips
 TILT = 0.35         # how much of the band's pitch the rider takes
 FLING_SPEED = 60.0  # studs/s (preview; the game sets its own)
 GRAVITY = 60.0      # studs/s^2 (preview)
@@ -154,6 +167,7 @@ def pull_cf(t):
     p = pull_at(t)
     mid = (np.array(TIPS[0]) + TIPS[1]) / 2
     mid[1] = p[1] + (mid[1] - p[1]) * TILT  # keep the rider fairly upright
+    mid[2] = p[2] - max(p[2] - mid[2], 1.0)  # (never straight up: hanging slack, it faces -z too)
     return look_at(p, mid), p
 
 
@@ -219,7 +233,8 @@ def main():
         ends = [R @ np.array(side) + p for side in BAND_SIDE]
         for a, b in ((TIPS[0], ends[0]), (ends[0], ends[1]), (ends[1], TIPS[1])):
             ps += parts_of([("Band", BAND, [hull_tris(beam(a, b, 1.2, 0.8))])])
-        m = M(R, p) if carried else flying
+        Rr, pr = pull_cf(max(t, GRAB))  # (the rider waits at LOAD while the band comes back to them)
+        m = M(Rr, pr) if carried else flying
         if m is not None:
             ps += [Part(q.name, q.size, m @ q.cf, q.color) for q in rider_parts]
         return ps
