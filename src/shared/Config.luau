@@ -1701,6 +1701,7 @@ Config.Endless = {
 			-- World 2's Meadow: golden grass, marble ruins, ponds (QM, Oct 13)
 			Name = "MarbleMeadow",
 			DisplayName = "Marble Meadow",
+			Picture = "rbxassetid://79053862780013", -- design/biomes/MarbleMeadow.png: its render, no pets (an edit-time capture of its stretch, in its fog)
 			Tier = 9,
 			Swerve = 1,
 			HerdSpawnEvery = 0.45, -- (as the Ocean's)
@@ -1721,6 +1722,7 @@ Config.Endless = {
 			-- its old stampede (3x the rest) and boss
 			Name = "Jurassic",
 			DisplayName = "Jurassic",
+			Picture = "rbxassetid://126635296858399", -- design/biomes/Jurassic.png: its render, no pets (an edit-time capture of its stretch, in its fog)
 			Tier = 10,
 			Swerve = 1,
 			HerdSpawnEvery = 0.15,
@@ -1736,6 +1738,7 @@ Config.Endless = {
 			-- World 2's Crystal Cavern (QM, Oct 13): blue-grey by the walls to ice to crystal down the middle
 			Name = "CrystalCavern",
 			DisplayName = "Crystal Cavern",
+			Picture = "rbxassetid://114660671037502", -- design/biomes/CrystalCavern.png: its render, no pets (an edit-time capture of its stretch, in its fog)
 			Tier = 11,
 			Swerve = 1,
 			HerdSpawnEvery = 0.45,
