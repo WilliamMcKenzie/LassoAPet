@@ -1930,13 +1930,15 @@ end
 Config.Slingshot = {
 	Price = 1000000, -- (World 2's, the goal it replaces)
 	To = 2, -- the Desert
-	Ahead = 12, -- studs out from your pen's Spawn to the slingshot's middle (QM, Nov 7: closer; was 22)
+	Ahead = 6, -- studs out from your pen's Spawn to the slingshot's middle (QM, Nov 7: closer; was 22, then 12)
+	Side = 16, -- studs to the left of the pen's entrance, as you look at the pen (QM, Nov 7: "to the left of the entrance")
 	Flight = 3, -- seconds in the air, every shot whatever the distance
 	Apex = 260, -- studs over the straight line at the flight's middle
 	Lift = 80, -- studs more up early on (sin^0.6 of the flight: steep off the band, none by the landing), so the shot clears the walls (QM, Nov 7)
 	Scale = 1.6, -- the model's size x its meshes' (QM, Nov 7: 1.6x bigger)
 	Turn = 0.35, -- how much it turns from straight out of your pen toward the start line's middle (QM, Nov 7)
 	Steer = 2, -- x Ride's SteerSpeed and SteerResponse in the air (QM, Nov 7: twice as nimble)
+	Spins = 2, -- whole barrel rolls you and your pet make in the air (QM, Nov 7: not frozen; whole turns, so you land upright)
 	Meshes = { { 108584371800496, 222, 124, 62 }, { 83135902680851, 240, 228, 196 }, { 126807462534931, 150, 76, 38 } }, -- (filled by tools/slingshot_upload.py)
 	Band = 102942616406200, -- (filled by tools/slingshot_upload.py)
 	BandColor = Color3.fromRGB(226, 58, 52),

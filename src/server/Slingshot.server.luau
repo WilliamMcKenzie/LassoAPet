@@ -92,7 +92,9 @@ local function spotOf(pen)
 	end
 	d = d.Unit
 	local ground = area.Position.Y - area.Size.Y / 2 -- (the Area marker sits on the ground)
-	local at = Vector3.new(spawn.Position.X, ground, spawn.Position.Z) + d * CFG.Ahead
+	-- left of the entrance as you look at the pen (you face -d: your left is (-d.Z, 0, d.X))
+	local left = Vector3.new(-d.Z, 0, d.X)
+	local at = Vector3.new(spawn.Position.X, ground, spawn.Position.Z) + d * CFG.Ahead + left * (CFG.Side or 0)
 	-- turned a bit toward the start line's middle (QM, Nov 7: CFG.Turn of the way)
 	local world = workspace:FindFirstChild("World")
 	local line = world and world:FindFirstChild("StartLine")

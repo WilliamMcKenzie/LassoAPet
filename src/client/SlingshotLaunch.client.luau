@@ -19,6 +19,7 @@ local SlingshotPose = require(ReplicatedStorage.Shared.SlingshotPose)
 local SlingshotRide = require(script.Parent.SlingshotRide)
 local SlingshotMenu = require(script.Parent.SlingshotMenu)
 local Hud = require(script.Parent.Hud)
+local Sounds = require(script.Parent.Sounds)
 
 local CFG = Config.Slingshot
 local player = Players.LocalPlayer
@@ -134,6 +135,11 @@ local function launch(model, to)
 		local side, latVel = 0, 0
 		local room = math.max(WorldColors.halfWidth(landing.Z) - 8, 0)
 		controls:Enable() -- (anchored: the move vector only steers, as Ride's rideStick)
+		-- off the band: a whoosh, then the wind while you fly (speed lines and the white
+		-- trail: Ride.client's, while SlingshotRide.flying)
+		Sounds.play("sprint_tier", 1)
+		Sounds.play("sprint_whoosh", 1)
+		Sounds.setSprintWind(true, 2)
 		local t0, last = os.clock(), os.clock()
 		while true do
 			local now = os.clock()
@@ -151,7 +157,9 @@ local function launch(model, to)
 			local uc = math.clamp(u, 0.02, 0.98)
 			local climb = lift * 0.6 * math.sin(math.pi * uc) ^ -0.4 * math.cos(math.pi * uc) * math.pi / flight
 			local ahead = (b - a) * (2 / flight) + Vector3.new(latVel, climb, 0) -- (its velocity: facing the way it really goes)
-			local body = CFrame.lookAt(at, at + (if ahead.Magnitude > 0.01 then ahead else -Vector3.zAxis))
+			-- spinning: CFG.Spins whole barrel rolls, eased in and out, so you land upright
+			local roll = 2 * math.pi * (CFG.Spins or 0) * (1 - math.cos(math.pi * u)) / 2
+			local body = CFrame.lookAt(at, at + (if ahead.Magnitude > 0.01 then ahead else -Vector3.zAxis)) * CFrame.Angles(0, 0, roll)
 			pet:PivotTo(body * rel)
 			hrp.CFrame = body * CFrame.new(0, size.Y / 2 + SEAT, 0)
 			local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
@@ -164,6 +172,8 @@ local function launch(model, to)
 		end
 		controls:Disable()
 		pet:Destroy()
+		Sounds.setSprintWind(false)
+		Sounds.play("smash", 0.6)
 		local x = landing.X + side
 		hrp.CFrame = CFrame.new(x, landing.Y + 3, landing.Z)
 		local riding = SlingshotRide.ride and SlingshotRide.ride(x, landing.Z, to)
