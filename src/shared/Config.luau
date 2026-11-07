@@ -822,6 +822,7 @@ local Config = {
 	-- (the horse is the tier 1 anchor), unless their file gives an explicit size.
 	-- Obstacles are rescaled about their spot on the floor by ObstacleScale (worked out the same
 	-- way from tools/terrain_assets.py, against smalls of ~5.4 studs).
+	WallWalkOverTier = 4, -- riding out, a mount of this size tier or more (titans: Ash Behemoth, Glacier Mammoth...) walks right over walls; anything smaller crashes into them (QM, Nov 7; Client/RideWalls)
 	TierGrowth = 1.6, -- QM, Oct 1: 2x was too much
 	-- MERGE is off for now that there's FUSE (QM, Oct 6 19:16): no MERGE button, and
 	-- the server refuses MergePets. Pets already merged keep their size and gold.
