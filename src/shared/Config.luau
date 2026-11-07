@@ -2022,7 +2022,7 @@ Config.FreeGift = {
 -- and the lists.
 Config.Leaderboards = {
 	Position = Vector3.new(-112, 0, 18), -- the middle board's foot (on the ground), where the Top Earners board was
-	Yaw = 210, -- degrees: faces into the base (+z), turned 30 degrees toward the course
+	Yaw = 180, -- degrees: faces into the base (+z), flat to the wall behind (QM Nov 7: side by side as in his reference)
 	Spacing = 20, -- studs between the boards' middles
 	Refresh = 60, -- seconds between recording everyone here and re-reading the tops
 	Top = 50, -- rows on each board
