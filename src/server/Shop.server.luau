@@ -338,6 +338,18 @@ end)
 local awayGranted = {} -- [PurchaseId] = true (a receipt seen again is already banked)
 local hatchAllGranted = {} -- (Hatch All's, the same)
 local slotGranted = {} -- (+1 Equip's, the same)
+local luckGranted = {} -- (the Luck Packs', the same)
+local luckOf, luckByKey = {}, {} -- [product id] / [Key] = a Luck Pack (Config.Shop.LuckPacks)
+for _, pack in Config.Shop.LuckPacks do
+	luckByKey[pack.Key] = pack
+	if pack.ProductId ~= 0 then
+		luckOf[pack.ProductId] = pack
+	end
+end
+local function addLuck(player, pack)
+	local add = game:GetService("ServerStorage"):FindFirstChild("AddLuck")
+	return add ~= nil and add:Invoke(player, pack.Luck) == true
+end
 local function bankAway(player)
 	local bank = game:GetService("ServerStorage"):FindFirstChild("BankAway")
 	return bank ~= nil and bank:Invoke(player, Config.AwayBoost.Multiplier) == true
@@ -363,6 +375,16 @@ buyShop.OnServerEvent:Connect(function(player, key, source)
 			Telemetry.monoPrompt(player, "product:" .. product.ProductId, "world" .. world)
 		elseif RunService:IsStudio() then
 			game:GetService("ServerStorage").GrantWorld:Invoke(player, world)
+		end
+		return
+	end
+	local luckPack = typeof(key) == "string" and luckByKey[key]
+	if luckPack then
+		if luckPack.ProductId ~= 0 then
+			MarketplaceService:PromptProductPurchase(player, luckPack.ProductId)
+			Telemetry.monoPrompt(player, "product:" .. luckPack.ProductId, "shop_" .. luckPack.Key)
+		elseif RunService:IsStudio() then
+			addLuck(player, luckPack)
 		end
 		return
 	end
@@ -495,6 +517,20 @@ MarketplaceService.ProcessReceipt = function(receipt)
 			end
 			return Enum.ProductPurchaseDecision.NotProcessedYet
 		end
+	end
+	local luckPack = luckOf[receipt.ProductId]
+	if luckPack then
+		-- (a Luck Pack: added while they're here with their save loaded; else tried again next visit)
+		if luckGranted[receipt.PurchaseId] then
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		local player = Players:GetPlayerByUserId(receipt.PlayerId)
+		if player and addLuck(player, luckPack) then
+			luckGranted[receipt.PurchaseId] = true
+			Telemetry.purchase(player, receipt.CurrencySpent, "product:" .. receipt.ProductId)
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	if receipt.ProductId == Config.HatchAll.ProductId then
 		-- (hatched while they're here with their pen loaded; else tried again on their next visit)

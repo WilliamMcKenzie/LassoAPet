@@ -235,6 +235,19 @@ Players.PlayerAdded:Connect(watchWorlds)
 for _, player in Players:GetPlayers() do
 	watchWorlds(player)
 end
+-- A Luck Pack (Config.Shop.LuckPacks; Shop.server's ProcessReceipt): `amount` added to your
+-- LuckBonus for good. True once given (their save loaded; else Roblox tries again next visit).
+local addLuck = Instance.new("BindableFunction")
+addLuck.Name = "AddLuck"
+addLuck.OnInvoke = function(player, amount)
+	if not loaded[player] or not player.Parent then
+		return false
+	end
+	player:SetAttribute("LuckBonus", (player:GetAttribute("LuckBonus") or 0) + amount) -- (saved at once: below)
+	return true
+end
+addLuck.Parent = game:GetService("ServerStorage")
+
 -- A rebirth (Hatchery's Rebirth: cash 0, "Reborn" + 1): saved at once.
 local function watchReborn(player)
 	for _, name in { "Reborn", "LuckBonus", "FreeGift" } do -- (and luck from a goal, and the free gift claimed)
