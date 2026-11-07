@@ -1,5 +1,5 @@
 -- Castle Wyvern (QM, Nov 7): Fight to Steal an Egg's Red Castle dragon boss, as a Legendary pet
--- in the Crimson Lands (the endless course's). Its model is FTSAE's CastleWyvernModel.luau
+-- in the Red Castle, about 1 in 120. Its model is FTSAE's CastleWyvernModel.luau
 -- verbatim (tools/boss_recolors.py there, from our Rock Candy Dragon), so it sits as that does.
 
 local Horse = require(script.Parent.Horse)

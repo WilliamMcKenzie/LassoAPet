@@ -356,7 +356,7 @@ local Config = {
 			CapColor = Color3.fromRGB(130, 28, 55),
 			GateColor = Color3.fromRGB(255, 0, 25),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02,
+			Herd = { WarBoar = 0.35, RoyalSteed = 0.22, ChessKnight = 0.15, RoyalPeacock = 0.13, LivingArmor = 0.08, CrimsonDrake = 0.05, RoyalEagle = 0.02, CastleWyvern = 0.01,
 				TRex = 0.12, Pterodactyl = 0.08 }, -- (QM, Nov 6: the old Jurassic's T-Rex and Pterodactyl, at their old weights)
 			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
 		},
@@ -558,7 +558,7 @@ local Config = {
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
 		Seraph = 3600, CrimsonSeraph = 3600, CrystalSeraph = 3600, -- World 2's trophy angels, 1 in 300 of their stampedes (QM, Oct 13; the hatch a guess)
-		CastleWyvern = 3600, -- (as the Black Widow: a guess)
+		CastleWyvern = 7200, -- (as the World 1 Legendaries: a guess)
 		BlackWidow = 3600, -- World 2's trophy spider, 1 in 500 of the Crimson Lands' stampede (QM, Oct 13; the hatch a guess, as the Seraphs')
 	},
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
@@ -764,7 +764,7 @@ local Config = {
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
-		CastleWyvern = 4, -- the Crimson Lands' Legendary dragon (XL, as the Rock Candy Dragon: QM Nov 7)
+		CastleWyvern = 4, -- the Red Castle's Legendary dragon (XL, as the Rock Candy Dragon: QM Nov 7)
 		GreenCrab = 1, LimeCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
 		GhostShip = 4, JollyRogerWyvern = 4, -- World 3 Pirate Cove's giga rares (XL) (guesses, Oct 14)
 		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
@@ -846,7 +846,7 @@ local Config = {
 		Eyeworm = 18, CrimsonScorpion = 24, Maw = 60, IvorySpider = 180, Asura = 750, -- World 2 Crimson Lands
 		Caterpillar = 300, -- World 2 Woodland Maze (as the Starfish)
 		Seraph = 4500, CrimsonSeraph = 7500, CrystalSeraph = 33330, -- World 2's trophy angels (QM, Oct 13: slow but earn a lot): 10x their biome's Legendary (the Majestic Unicorn, Asura, Crystal Elephant)
-		CastleWyvern = 7500, -- the Crimson Lands' Legendary dragon, about 1 in 200 (as the Crimson Seraph: a guess)
+		CastleWyvern = 60000, -- the Red Castle's top Legendary dragon, about 1 in 120 (over the Royal Eagle's 42500: a guess; the income curve scales it)
 		BlackWidow = 12500, -- World 2's trophy spider: rarer than the Crimson Seraph (1 in 500, not 1 in 300), so 500/300 its gold (a guess)
 		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, CrystalCentipede = 75, RedMushroom = 150, BrownMushroom = 300, PurpleMushroom = 1260, BlueCrystal = 150, PinkCrystal = 300, CrystalSpider = 1260, CrystalPhoenix = 1260, CrystalElephant = 3333, -- Tundra
 		Starfish = 300, Clownfish = 700, PinkButterfly = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, Lionfish = 1500, GiantGolem = 24600, -- Ocean
@@ -1453,7 +1453,7 @@ local Config = {
 		CrystalElephant = { Speed = 3.8, Stamina = 4 }, -- World 2's Cavern Legendary Crystal Elephant (as the Icebringer until QM sets it)
 		Seraph = { Speed = 0.5, Stamina = 3 }, -- World 2's trophy angels (QM, Oct 13: "move quite slowly (like say 0.5 speed)")
 		CrimsonSeraph = { Speed = 0.5, Stamina = 3 },
-		CastleWyvern = { Speed = 2.8, Stamina = 3 }, -- the Asura's numbers (a guess)
+		CastleWyvern = { Speed = 10.4, Stamina = 3 }, -- a touch over the Royal Eagle (the Castle's speeds are rescaled below)
 		BlackWidow = { Speed = 2.8, Stamina = 3 }, -- World 2's trophy spider: the Asura's numbers (a guess)
 		CrystalSeraph = { Speed = 0.5, Stamina = 3 },
 		CrystalPhoenix = { Speed = 2.57, Stamina = 3 }, -- World 2's Cavern Crystal Phoenix: Epic (as the Ice Golem until QM sets it)
@@ -1600,7 +1600,7 @@ Config.Endless = {
 			GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) },
 			WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) },
 			Herd = { Eyeworm = 0.3, Maw = 0.3, IvorySpider = 0.05, Asura = 0.05, CrimsonScorpion = 0.2, Beholder = 0.3,
-				BlackWidow = 0.0024, CastleWyvern = 0.006 }, -- (the Black Widow 1 in 500 of its stampede: QM, Oct 13; the Castle Wyvern about 1 in 200, QM Nov 7)
+				BlackWidow = 0.0024 }, -- (the Black Widow 1 in 500 of its stampede: QM, Oct 13)
 			Boss = "CrimsonSeraph",
 			Fog = { Color = rgb(150, 60, 70), Start = 0, End = 450 },
 		},
@@ -2129,7 +2129,7 @@ end
 -- the scrapped Swoll Fairy, Abyssal Dragon and Gigacorn trophy as their biome's, for saved ones.
 Config.IncomeCopy = {
 	AbyssalDragon = 7400, AncientTreant = 1500, Anomalocaris = 225, Asura = 240, BananaMonkey = 13, Beholder = 750,
-	Bes = 4800, BlackWidow = 1500, CastleWyvern = 900, BloatedMummy = 1050, BlueCrystal = 91, BlueRingOctopus = 385, BoxJellyfish = 385,
+	Bes = 4800, BlackWidow = 1500, BloatedMummy = 1050, BlueCrystal = 91, BlueRingOctopus = 385, BoxJellyfish = 385,
 	BrownMushroom = 180, Buffalo = 20, Bumblebee = 18, Caterpillar = 45, Catfish = 555, Creampuff = 180,
 	CrimsonScorpion = 24, CrimsonSeraph = 1500, Crocodile = 13, CrystalCentipede = 45, CrystalElephant = 2000, CrystalPhoenix = 760,
 	CrystalSeraph = 4000, CrystalSpider = 760, DesireTroll = 2000, EagleSentry = 2900, EyepatchShark = 74, Eyeworm = 18,
