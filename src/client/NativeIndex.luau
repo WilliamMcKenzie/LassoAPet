@@ -16,9 +16,8 @@
 -- A red "!" sits on the Index button while there's a reward to claim (NativeIndex.badge).
 -- Client/AnimalDex hands its toggle, close and isOpen to this while the native UI's on.
 --
--- The collage (as the reference's): a biome's grid is COLS cells across and 2 down (more
--- rows when it has more), tiled by exactly its number of animals with 2x2, 1x2, 2x1 and 1x1
--- tiles, as many big ones as fit; its rarest get the biggest tiles.
+-- The collage: a biome's grid is COLS cells across, each animal's tile sized as the animal is
+-- (2x2 a huge one, 2x1 a long one, 1x2 a tall one, else 1x1: see shape).
 --
 --   NativeIndex.toggle() / NativeIndex.close() / NativeIndex.isOpen()
 --   NativeIndex.badge(indexButton)   -- once, from BaseUi
@@ -182,85 +181,100 @@ end
 
 -- ---- the collage ------------------------------------------------------------------------
 
-local SHAPES = { { 2, 2 }, { 1, 2 }, { 2, 1 }, { 1, 1 } } -- (tried biggest first)
-
--- n tiles exactly filling a COLS-wide grid: { { x, y, w, h } } (cells, from 0) and its rows
-local function collage(n)
-	local rows = math.max(2, math.ceil(n / COLS))
-	while true do
-		local cells = COLS * rows
-		local taken, placed = {}, {}
-		local best, bestScore
-		local function score()
-			local s = 0
-			for _, p in placed do
-				if p[3] == 2 and p[4] == 2 then
-					s += 3
-				elseif p[3] ~= p[4] then
-					s -= 1
-				end
-			end
-			return s
-		end
-		local function solve(free)
-			local first
-			for i = 0, cells - 1 do
-				if not taken[i] then
-					first = i
-					break
-				end
-			end
-			if not first then
-				if #placed == n then
-					local s = score()
-					if not bestScore or s > bestScore then
-						bestScore, best = s, table.clone(placed)
-					end
-				end
-				return
-			end
-			local left = n - #placed
-			if left <= 0 or free < left or free > 4 * left then
-				return
-			end
-			local x, y = first % COLS, first // COLS
-			for _, shape in SHAPES do
-				local w, h = shape[1], shape[2]
-				if x + w <= COLS and y + h <= rows then
-					local fits = true
-					for dy = 0, h - 1 do
-						for dx = 0, w - 1 do
-							if taken[(y + dy) * COLS + x + dx] then
-								fits = false
-							end
-						end
-					end
-					if fits then
-						for dy = 0, h - 1 do
-							for dx = 0, w - 1 do
-								taken[(y + dy) * COLS + x + dx] = true
-							end
-						end
-						table.insert(placed, { x, y, w, h })
-						solve(free - w * h)
-						table.remove(placed)
-						for dy = 0, h - 1 do
-							for dx = 0, w - 1 do
-								taken[(y + dy) * COLS + x + dx] = nil
-							end
-						end
-					end
-				end
-			end
-		end
-		if n > 0 and n <= cells then
-			solve(cells)
-		end
-		if best or n == 0 then
-			return best or {}, rows
-		end
-		rows += 1
+-- Each tile's size is the pet's (QM, Nov 7: "the size of the card should be ~= the size of the
+-- pet"): a huge one (BIG x the Horse's size or more: the titans) 2x2, a long one (LONG x as long
+-- as it's tall: the Snake) 2x1, a tall one (TALL x as tall as it's long: the Giraffe) 1x2, the
+-- rest 1x1. Its size is how big it's drawn in game: its model's box (as Horse's silhouette)
+-- x its class's size, over Config.PetSmallSize (the Horse's).
+local BIG, LONG, TALL = 3.5, 2.5, 1.8
+local shapeOf = {}
+local function shape(kind)
+	if shapeOf[kind] then
+		return shapeOf[kind]
 	end
+	local module = ReplicatedStorage.Shared.Animals:FindFirstChild(kind)
+	local ok, class = pcall(require, module)
+	local data = ok and typeof(class) == "table" and class.data
+	local out = { 1, 1 }
+	if typeof(data) == "table" and typeof(data.parts) == "table" and type(class.size) == "number" then
+		local lo, hi = Vector3.one * math.huge, -Vector3.one * math.huge
+		for _, part in data.parts do
+			if not part.hidden and typeof(part.cframe) == "CFrame" and typeof(part.size) == "Vector3" then
+				local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = part.cframe:GetComponents()
+				local h = part.size / 2
+				local e = Vector3.new(
+					math.abs(r00) * h.X + math.abs(r01) * h.Y + math.abs(r02) * h.Z,
+					math.abs(r10) * h.X + math.abs(r11) * h.Y + math.abs(r12) * h.Z,
+					math.abs(r20) * h.X + math.abs(r21) * h.Y + math.abs(r22) * h.Z
+				)
+				local c = Vector3.new(x, y, z)
+				lo, hi = lo:Min(c - e), hi:Max(c + e)
+			end
+		end
+		local d = hi - lo
+		if d.X > 0 and d.Y > 0 and d.Z > 0 then
+			local sides = { d.X, d.Y, d.Z }
+			table.sort(sides)
+			local size = class.size * math.sqrt(sides[2] * sides[3]) / (Config.PetSmallSize or 10.4)
+			local long, tall = math.max(d.X, d.Z), d.Y
+			if size >= BIG then
+				out = { 2, 2 }
+			elseif long >= LONG * tall then
+				out = { 2, 1 }
+			elseif tall >= TALL * long then
+				out = { 1, 2 }
+			end
+		end
+	end
+	shapeOf[kind] = out
+	return out
+end
+
+-- kinds' tiles in a COLS-wide grid, the big ones first, then the rarest, each in the first
+-- spot it fits (reading order), so the small ones fill the gaps: { [kind] = { x, y, w, h } }
+-- (cells, from 0) and its rows
+local function collage(kinds)
+	local order = table.clone(kinds)
+	table.sort(order, function(a, b)
+		local sa, sb = shape(a), shape(b)
+		local aa, ab = sa[1] * sa[2], sb[1] * sb[2]
+		if aa ~= ab then
+			return aa > ab
+		end
+		local oa, ob = oddsOf[a] or 0, oddsOf[b] or 0
+		if oa ~= ob then
+			return oa > ob
+		end
+		return a < b
+	end)
+	local taken, layout, rows = {}, {}, 1
+	for _, kind in order do
+		local w, h = shape(kind)[1], shape(kind)[2]
+		local cell = 0
+		while true do
+			local x, y = cell % COLS, cell // COLS
+			local fits = x + w <= COLS
+			for dy = 0, h - 1 do
+				for dx = 0, w - 1 do
+					if fits and taken[(y + dy) * COLS + x + dx] then
+						fits = false
+					end
+				end
+			end
+			if fits then
+				for dy = 0, h - 1 do
+					for dx = 0, w - 1 do
+						taken[(y + dy) * COLS + x + dx] = true
+					end
+				end
+				layout[kind] = { x, y, w, h }
+				rows = math.max(rows, y + h)
+				break
+			end
+			cell += 1
+		end
+	end
+	return layout, math.max(rows, 2) -- (at least 2 rows: the biome's card beside it)
 end
 
 -- ---- building ---------------------------------------------------------------------------
@@ -454,28 +468,15 @@ local function makeSection(i)
 	egg.Image = (Config.EggIcons or {})[biome.kinds[#biome.kinds]] or ""
 	egg.Parent = track
 
-	-- the collage: the biggest tiles to the rarest (kinds are cheapest first)
+	-- the collage: each tile the pet's size
 	local kinds = biome.kinds
-	local layout, rows = collage(#kinds)
-	local byArea = {}
-	for k = 1, #layout do
-		byArea[k] = k
-	end
-	table.sort(byArea, function(a, b)
-		local la, lb = layout[a], layout[b]
-		local area = la[3] * la[4] - lb[3] * lb[4]
-		if area ~= 0 then
-			return area > 0
-		end
-		return a < b
-	end)
+	local layout, rows = collage(kinds)
 	local gridW = fig(LEFT_W) - 2 * fig(8) - 6 - fig(PAD + PICTURE_W + 2 * PAD) -- (6: the scroll bar)
 	local cell = (gridW - (COLS - 1) * fig(GAP)) / COLS
 	local gridH = rows * cell + (rows - 1) * fig(GAP)
 	section.Size = UDim2.new(1, 0, 0, math.round(gridH + fig(2 * PAD + BAR_H + PAD)))
-	for rank, at in byArea do
-		local kind = kinds[#kinds - rank + 1]
-		local p = layout[at]
+	for _, kind in kinds do
+		local p = layout[kind]
 		local tile = makeTile()
 		tile.Name = kind
 		tile.Position = UDim2.fromOffset(math.round(p[1] * (cell + fig(GAP))), math.round(p[2] * (cell + fig(GAP))))

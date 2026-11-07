@@ -9,11 +9,11 @@ local Horse = require(script.Parent.Horse)
 local HillbackTortoiseModel = require(script.Parent.HillbackTortoiseModel)
 
 local PINE = {
-	{ name = "PineTrunk", bone = "root", class = "MeshPart", mesh = "PineTall_Trunk", size = Vector3.new(0.52, 3.32, 0.52), cframe = CFrame.new(0.00, 9.64, 0.42), color = Color3.fromRGB(120, 84, 58) },
-	{ name = "PineTier1", bone = "root", class = "MeshPart", mesh = "PineTall_Tier1", size = Vector3.new(3, 2.22, 3.08), cframe = CFrame.new(-0.13, 10.31, 0.43), color = Color3.fromRGB(46, 125, 80) },
-	{ name = "PineTier2", bone = "root", class = "MeshPart", mesh = "PineTall_Tier2", size = Vector3.new(2.71, 2.2, 2.68), cframe = CFrame.new(-0.14, 11.19, 0.47), color = Color3.fromRGB(58, 140, 88) },
-	{ name = "PineTier3", bone = "root", class = "MeshPart", mesh = "PineTall_Tier3", size = Vector3.new(2.1, 2.22, 2.16), cframe = CFrame.new(0.04, 12.05, 0.43), color = Color3.fromRGB(40, 112, 72) },
-	{ name = "PineTier4", bone = "root", class = "MeshPart", mesh = "PineTall_Tier4", size = Vector3.new(1.75, 2.06, 1.64), cframe = CFrame.new(-0.01, 12.85, 0.45), color = Color3.fromRGB(66, 150, 96) },
+	{ name = "PineTrunk", bone = "root", class = "MeshPart", mesh = "PineTall_Trunk", size = Vector3.new(0.52, 3.32, 0.52), cframe = CFrame.new(0.00, 8.71, 0.42), color = Color3.fromRGB(120, 84, 58) },
+	{ name = "PineTier1", bone = "root", class = "MeshPart", mesh = "PineTall_Tier1", size = Vector3.new(3, 2.22, 3.08), cframe = CFrame.new(-0.13, 9.38, 0.43), color = Color3.fromRGB(46, 125, 80) },
+	{ name = "PineTier2", bone = "root", class = "MeshPart", mesh = "PineTall_Tier2", size = Vector3.new(2.71, 2.2, 2.68), cframe = CFrame.new(-0.14, 10.26, 0.47), color = Color3.fromRGB(58, 140, 88) },
+	{ name = "PineTier3", bone = "root", class = "MeshPart", mesh = "PineTall_Tier3", size = Vector3.new(2.1, 2.22, 2.16), cframe = CFrame.new(0.04, 11.12, 0.43), color = Color3.fromRGB(40, 112, 72) },
+	{ name = "PineTier4", bone = "root", class = "MeshPart", mesh = "PineTall_Tier4", size = Vector3.new(1.75, 2.06, 1.64), cframe = CFrame.new(-0.01, 11.92, 0.45), color = Color3.fromRGB(66, 150, 96) },
 }
 
 local data = table.clone(HillbackTortoiseModel)

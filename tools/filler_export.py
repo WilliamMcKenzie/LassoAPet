@@ -347,7 +347,7 @@ return Horse.variant("{kind}", {kind}Model, "{rarity}", {{
 # PineTall_<piece> by Server/AnimalMeshCopies, standing on the hill (its base at TREE_AT,
 # TREE_SCALE x the map's size, in model units before the model's own scaling).
 PINE = (("Trunk", (120, 84, 58)), ("Tier1", (46, 125, 80)), ("Tier2", (58, 140, 88)), ("Tier3", (40, 112, 72)), ("Tier4", (66, 150, 96)))
-TREE_AT, TREE_SCALE = (0.0, 19.0, 1.0), 0.85
+TREE_AT, TREE_SCALE = (0.0, 16.8, 1.0), 0.85  # (QM, Nov 7: was 19, the trunk floated over the hill; its top is ~17)
 
 
 def hillback_module(k, seat, nc, nr):
