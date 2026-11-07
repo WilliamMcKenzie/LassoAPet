@@ -357,6 +357,7 @@ local Config = {
 		},
 		{
 			Name = "Castle", -- the Jurassic (QM, Nov 7: in the Red Castle's place, on its map recoloured as a jungle; its old animals and boss)
+			DisplayName = "Jurassic", -- what players see (QM, Nov 7: "should be called jurassic everywhere"; Name stays the code's key)
 			Picture = "rbxassetid://126635296858399", -- design/biomes/Jurassic.png: a jungle render, no pets (the Slingshot menu's card)
 			AnimalSize = 2.6, -- (as the volcano's)
 			Swerve = 1,

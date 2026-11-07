@@ -89,7 +89,7 @@ local function makeCard(parent, i, biome)
 		round.Parent = picture
 	end
 	local name = label(card, "BiomeName", {
-		Text = biome.Name,
+		Text = biome.DisplayName or biome.Name,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextScaled = true,
 		Position = UDim2.fromOffset(fig(24), fig(15)),
@@ -246,7 +246,7 @@ local function build()
 				return
 			end
 			if i > level() + 1 then
-				return fail(c, i, "Unlock " .. Config.Biomes[i - 1].Name .. "!")
+				return fail(c, i, "Unlock " .. (Config.Biomes[i - 1].DisplayName or Config.Biomes[i - 1].Name) .. "!")
 			end
 			if (player:GetAttribute("Gold") or 0) < Config.unlockCost(player, i) then
 				return fail(c, i, "Need cash!")
