@@ -1,7 +1,9 @@
 -- Reward popups (QM, Nov 6: "when receiving stuff (cash, eggs, anything like that) should popup
 -- same as how cash does here with the pulsing and weld bg (exact same as egg button)"): a
--- square tile on the Eggs button's back (HudKit's Red look: its weld texture, bevel and black
--- outline) pops up in the lower middle of the screen, the reward's picture on it and its
+-- square tile on the Eggs button's back, but blue (QM, Nov 7: like his reference's cyan tile;
+-- the Index button's blue with the Eggs button's weld texture, bevel and black outline) pops
+-- up just above the egg inventory (QM, Nov 7: "a bit closer to the inventory"), the reward's
+-- picture on it and its
 -- amount written over the bottom, a white glow round it pulsing. After HOLD seconds it fades
 -- away. Rewards that land while others are still up sit beside them in a row (QM: "multiple
 -- stuff can turn into a row"). Eggs show here straight away, no RNG card (QM, Nov 6).
@@ -17,6 +19,7 @@ local TweenService = game:GetService("TweenService")
 local HudKit = require(script.Parent.HudKit)
 local HudImages = require(script.Parent.HudImages)
 local NativeHud = require(script.Parent.NativeHud)
+local Inventory = require(script.Parent.Inventory)
 
 local RewardPopups = {}
 
@@ -24,8 +27,16 @@ local fig = HudKit.fig
 local TILE = 260 -- the tile's side (Figma px; the Eggs button's is 128)
 local GLOW = 36 -- the glow's reach past the tile all round (Figma px)
 local GAP = 24 -- between tiles in a row (Figma px)
-local BOTTOM = 340 -- the row's bottom edge above the screen's (Figma px)
+local BOTTOM = 200 -- the row's bottom edge above the screen's while the inventory's hidden (Figma px)
+local ABOVE = 10 -- the row's bottom edge above the inventory's top (Figma px; the glow fills most of it)
 local HOLD = 2 -- seconds a tile stays before it fades
+local LOOK = { -- the Blue button's colours on the Red one's weld (client/HudKit.LOOKS)
+	top = HudKit.LOOKS.Blue.top,
+	bottom = HudKit.LOOKS.Blue.bottom,
+	bevel = HudKit.LOOKS.Red.bevel,
+	base = HudKit.LOOKS.Red.base,
+	tile = HudKit.LOOKS.Red.tile,
+}
 local POP = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 local FADE = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 local PULSE = TweenInfo.new(0.45, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
@@ -52,6 +63,19 @@ local function getRow()
 	layout.Parent = row
 	row.Parent = NativeHud.popupRoot()
 	return row
+end
+
+-- the row just above the inventory (or BOTTOM up, while it's hidden): its top in screen px
+-- into the popup root's design px (its Fit UIScale)
+local function place(r)
+	local root = r.Parent
+	local fit = root and root:FindFirstChild("Fit")
+	local top = Inventory.top()
+	if top and fit and fit.Scale > 0 then
+		r.Position = UDim2.new(0.5, 0, 0, (top - root.AbsolutePosition.Y) / fit.Scale - fig(ABOVE))
+	else
+		r.Position = UDim2.new(0.5, 0, 1, -fig(BOTTOM))
+	end
 end
 
 local order = 0
@@ -107,7 +131,7 @@ function RewardPopups.show(image, text)
 	tile.Size = UDim2.fromOffset(side, side)
 	tile.ZIndex = 3
 	tile.Parent = holder
-	HudKit.back(tile, "Red", { ZIndex = 3 })
+	HudKit.back(tile, LOOK, { ZIndex = 3 })
 	local pic = Instance.new("ImageLabel")
 	pic.Name = "Icon"
 	pic.BackgroundTransparency = 1
@@ -131,7 +155,9 @@ function RewardPopups.show(image, text)
 	cap.MaxTextSize = fig(70)
 	cap.Parent = amount
 
-	group.Parent = getRow()
+	local r = getRow()
+	place(r)
+	group.Parent = r
 	TweenService:Create(pop, POP, { Scale = 1 }):Play()
 	local breathe = TweenService:Create(pulse, PULSE, { Scale = 1.06 })
 	breathe:Play()
