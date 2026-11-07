@@ -9,6 +9,7 @@
 -- stuff can turn into a row"). Eggs show here straight away, no RNG card (QM, Nov 6).
 --
 --   RewardPopups.show(image, text)   -- image: an asset id; text: "$450K", "x1"
+--   RewardPopups.watchLuck()         -- pops the luck goals give you ("+0.25", the clover)
 --   RewardPopups.watchCash(money)    -- pops the gold you're given (not the pets' per-second
 --                                    -- pay, which ticks by the counter); money: Hud's "$1.2k"
 
@@ -217,6 +218,32 @@ function RewardPopups.watchCash(money)
 		end
 	end)
 	player:GetAttributeChangedSignal("Gold"):Connect(changed)
+	player:GetAttributeChangedSignal("GoldLoaded"):Connect(changed)
+	changed()
+end
+
+-- Luck gains (a goal's: Hatchery's ClaimQuest) as tiles too, the clover and "+0.25" (QM, Nov 7:
+-- "when i claim goals which give luck i dont see the popup like how cash has it"). Counts
+-- from GoldLoaded, like the gold, so the saved luck arriving on join doesn't pop.
+function RewardPopups.watchLuck()
+	local player = Players.LocalPlayer
+	local last = nil
+	local function changed()
+		local value = player:GetAttribute("LuckBonus") or 0
+		if not player:GetAttribute("GoldLoaded") then
+			return
+		end
+		if last == nil then
+			last = value
+			return
+		end
+		local gain = value - last
+		last = value
+		if gain > 0 then
+			RewardPopups.show(HudImages.LuckIcon, "+" .. (string.format("%.2f", gain):gsub("%.?0+$", "")))
+		end
+	end
+	player:GetAttributeChangedSignal("LuckBonus"):Connect(changed)
 	player:GetAttributeChangedSignal("GoldLoaded"):Connect(changed)
 	changed()
 end
