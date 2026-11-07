@@ -300,6 +300,42 @@ local function collage(kinds)
 			end
 		end
 	end
+	-- no holes (QM, Nov 7): while cells are still spare, the rest grow too, one cell more at a
+	-- time (2x1, else 1x2; then 2x2), the shaped ones first, then the rarest
+	local rest = table.clone(kinds)
+	table.sort(rest, function(a, b)
+		local fa, fb = fitOf[a] or 0, fitOf[b] or 0
+		if fa ~= fb then
+			return fa > fb
+		end
+		local oa, ob = oddsOf[a] or 0, oddsOf[b] or 0
+		if oa ~= ob then
+			return oa > ob
+		end
+		return a < b
+	end)
+	for _, grow in { { { 2, 1 }, { 1, 2 } }, { { 2, 2 } } } do
+		for _, kind in rest do
+			if spare <= 0 then
+				break
+			end
+			local was = sizes[kind]
+			if was[1] * was[2] == 1 then
+				for _, want in grow do
+					local extra = want[1] * want[2] - 1
+					if extra <= spare then
+						sizes[kind] = want
+						local tried = pack(kinds, sizes, rows)
+						if tried then
+							layout, spare = tried, spare - extra
+							break
+						end
+						sizes[kind] = was
+					end
+				end
+			end
+		end
+	end
 	return layout, rows
 end
 
