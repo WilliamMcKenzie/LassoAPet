@@ -18,7 +18,7 @@ local PetScale = {}
 
 PetScale.NAME = "PetScale"
 PetScale.COPY = "CopyValues" -- (the tick box that prints them)
-PetScale.SPARE = "9 Not in a biome yet" -- (animals no biome has now: their values, kept)
+PetScale.SPARE = "99 Not in a biome yet" -- (was "9 ...": 9 is Marble Meadow now; renamed in place by ensure) -- (animals no biome has now: their values, kept)
 
 local Config = require(script.Parent.Config)
 
@@ -80,6 +80,10 @@ function PetScale.ensure()
 		s = Instance.new("Configuration")
 		s.Name = PetScale.NAME
 		s.Parent = workspace
+	end
+	local oldSpare = s:FindFirstChild("9 Not in a biome yet")
+	if oldSpare and not s:FindFirstChild(PetScale.SPARE) then
+		oldSpare.Name = PetScale.SPARE
 	end
 	for _, g in PetScale.groups() do
 		local group = s:FindFirstChild(g.name)
