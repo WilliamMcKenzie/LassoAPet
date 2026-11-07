@@ -2,8 +2,8 @@
 -- pick where it flings you. Fight to Steal an Egg's Weapon Shop 1:1 (its client/WeaponShop:
 -- the orange-headed popup, HudKit.popup, and its 729 x 991 cards in a row that scrolls
 -- sideways), one card per biome (Config.Biomes), its back in the biome's colours:
---   its name, Unlocked / Locked under it, its picture (Config.Biomes[i].Picture, a render of
---   it), how many animals run there (the Weapon Shop's DPS bar), and at the bottom
+--   its name, Unlocked / Locked under it, over its picture (Config.Biomes[i].Picture, a render
+--   of it, filling the card), how many animals run there (the Weapon Shop's DPS bar), and at the bottom
 --   GO!       unlocked: flings you there (onPick)
 --   $Price    the next one to unlock, for its UnlockCost (Server/Slingshot's UnlockBiome: in
 --             order only), beside its Robux price when it has a developer product
@@ -77,13 +77,15 @@ local function makeCard(parent, i, biome)
 		BackgroundTransparency = 1,
 		Image = biome.Picture or "",
 		ScaleType = Enum.ScaleType.Crop,
-		Position = UDim2.fromOffset(fig(109), fig(237)),
-		Size = UDim2.fromOffset(fig(512), fig(512)),
+		-- (the card's whole background, inside its black edge: QM, Nov 7; the name, bar and
+		-- buttons over it)
+		Position = UDim2.fromOffset(fig(5), fig(5)),
+		Size = UDim2.new(1, -2 * fig(5), 1, -2 * fig(5)),
 		ZIndex = 2,
 	})
 	if not picture:FindFirstChildOfClass("UICorner") then
 		local round = Instance.new("UICorner")
-		round.CornerRadius = UDim.new(0, fig(16))
+		round.CornerRadius = UDim.new(0, fig(8))
 		round.Parent = picture
 	end
 	local name = label(card, "BiomeName", {
