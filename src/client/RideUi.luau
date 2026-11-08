@@ -11,6 +11,8 @@
 --   RideUi.show(visible)
 --   RideUi.setHold(fraction, _, total)  -- of total (Config.RideSeconds) seconds left (nil: no bar)
 --   (setDistance, setSprint, setAbility, setAction, sprintHeld, abilityPressed: nothing)
+--   RideUi.autoLasso                    -- the Auto Lasso toggle's on (bottom left: QM's Figma
+--     AutoLasso/Toggle, Nov 8); Ride lassos anything faster than your mount while it is
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -134,6 +136,132 @@ seconds.Position = UDim2.new(0.5, 0, 0, BAR_MIDDLE)
 seconds.ZIndex = 2
 local titleScale, secondsScale = Instance.new("UIScale"), Instance.new("UIScale")
 titleScale.Parent, secondsScale.Parent = title, seconds
+
+-- The Auto Lasso toggle, bottom left (QM's Figma, page AutoLasso, frame Toggle, Nov 8). Drawn
+-- on a 2324 px wide shot of the screen, so its numbers go through k to RefWidth px. Off: the
+-- red knob on the left of the dark track; on: it slides right and turns green.
+RideUi.autoLasso = false
+do
+	local k = Config.BaseUi.RefWidth / 2324
+	local function px(n)
+		return math.round(n * k)
+	end
+	local function gradient(parent, top, bottom, alphaTop, alphaBottom)
+		local g = Instance.new("UIGradient")
+		g.Rotation = 90
+		g.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, top),
+			ColorSequenceKeypoint.new(0.159, top),
+			ColorSequenceKeypoint.new(1, bottom),
+		})
+		g.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, alphaTop),
+			NumberSequenceKeypoint.new(0.159, alphaTop),
+			NumberSequenceKeypoint.new(1, alphaBottom),
+		})
+		g.Parent = parent
+		return g
+	end
+	-- (Figma's inner shadows: a light band top and left, a shade band bottom and right)
+	local function bevel(parent, light, shade)
+		local w = px(8)
+		for _, e in {
+			{ Color3.new(1, 1, 1), light, UDim2.new(), UDim2.new(1, 0, 0, w) },
+			{ Color3.new(1, 1, 1), light, UDim2.fromOffset(0, w), UDim2.new(0, w, 1, -w) },
+			{ Color3.new(0, 0, 0), shade, UDim2.new(0, w, 1, -w), UDim2.new(1, -w, 0, w) },
+			{ Color3.new(0, 0, 0), shade, UDim2.new(1, -w, 0, w), UDim2.new(0, w, 1, -2 * w) },
+		} do
+			local strip = Instance.new("Frame")
+			strip.BorderSizePixel = 0
+			strip.BackgroundColor3 = e[1]
+			strip.BackgroundTransparency = e[2]
+			strip.Position, strip.Size = e[3], e[4]
+			strip.Parent = parent
+		end
+	end
+	local function box(parent, outlineColor)
+		local f = Instance.new("Frame")
+		f.BorderSizePixel = 0
+		f.BackgroundColor3 = Color3.new(1, 1, 1)
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, px(5))
+		corner.Parent = f
+		local outline = Instance.new("UIStroke")
+		outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		outline.Color = outlineColor
+		outline.Thickness = px(8)
+		outline.Parent = f
+		f.Parent = parent
+		return f, outline
+	end
+
+	local toggle = Instance.new("TextButton")
+	toggle.Name = "AutoLasso"
+	toggle.Text = ""
+	toggle.AutoButtonColor = false
+	toggle.BackgroundTransparency = 1
+	toggle.AnchorPoint = Vector2.new(0, 1)
+	toggle.Position = UDim2.new(0, px(51), 1, -px(46))
+	toggle.Size = UDim2.fromOffset(px(442), px(94))
+	toggle.Parent = root
+
+	-- the track: black at 50% fading to 40%, black outline
+	local track = box(toggle, Color3.new(0, 0, 0))
+	track.Name = "Track"
+	track.Size = UDim2.fromOffset(px(238), px(94))
+	track.BackgroundColor3 = Color3.new(0, 0, 0)
+	gradient(track, Color3.new(1, 1, 1), Color3.new(1, 1, 1), 0.5, 0.6)
+	bevel(track, 0.9, 0.75)
+
+	-- the knob: 72 px, 11 in from the track's edges
+	local INSET, KNOB = 11, 72
+	local knob, knobOutline = box(track, Color3.fromHex("651513"))
+	knob.Name = "Knob"
+	knob.Size = UDim2.fromOffset(px(KNOB), px(KNOB))
+	local fill = gradient(knob, Color3.fromHex("ff0000"), Color3.fromHex("d90000"), 0, 0)
+	bevel(knob, 0.75, 0.75)
+
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.BackgroundTransparency = 1
+	label.FontFace = FONT
+	label.TextSize = px(30)
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Text = "Auto Lasso"
+	label.AnchorPoint = Vector2.new(0, 0.5)
+	label.Position = UDim2.new(0, px(266), 0.5, 0)
+	label.Size = UDim2.fromOffset(px(176), px(37))
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = STROKE
+	stroke.Color = Color3.new(0, 0, 0)
+	stroke.LineJoinMode = Enum.LineJoinMode.Round
+	stroke.Parent = label
+	label.Parent = toggle
+
+	local SLIDE = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local function paint(animate)
+		local on = RideUi.autoLasso
+		local to = UDim2.fromOffset(px(if on then 238 - INSET - KNOB else INSET), px(INSET))
+		if animate then
+			game:GetService("TweenService"):Create(knob, SLIDE, { Position = to }):Play()
+		else
+			knob.Position = to
+		end
+		local top, bottom = Color3.fromHex(if on then "0aff00" else "ff0000"), Color3.fromHex(if on then "00c800" else "d90000")
+		fill.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, top),
+			ColorSequenceKeypoint.new(0.159, top),
+			ColorSequenceKeypoint.new(1, bottom),
+		})
+		knobOutline.Color = Color3.fromHex(if on then "136515" else "651513")
+	end
+	paint(false)
+	toggle.Activated:Connect(function()
+		RideUi.autoLasso = not RideUi.autoLasso
+		paint(true)
+	end)
+end
 
 -- Back out (overshoots a little, then settles), 0..1 over 0..1.
 local function backOut(x)
