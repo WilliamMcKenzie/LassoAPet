@@ -74,8 +74,10 @@ local function load(player)
 				player:SetAttribute("FinishTrail", if typeof(value) == "table" then tonumber(value.trail) else nil) -- (the finish line's trails: Config.FinishTrails, shared by every world)
 				player:SetAttribute("Rebirths", if typeof(value) == "table" then tonumber(value.rebirths) else nil) -- (Config.Rebirth, shared by every world)
 				player:SetAttribute("TrailsOwned", if typeof(value) == "table" then tonumber(value.trails) else nil) -- (Config.TrailBars, shared by every world)
+				player:SetAttribute("TrailOn", if typeof(value) == "table" then tonumber(value.trailOn) else nil) -- (the trail you equipped: Config.trailIndex)
 				player:SetAttribute("Reborn", if typeof(value) == "table" then tonumber(value.reborn) else nil) -- (Config.Luck: rebirths, Hatchery's Rebirth)
 				player:SetAttribute("LuckBonus", if typeof(value) == "table" then tonumber(value.luck) else nil) -- (Config.Luck: the goals' luck, Hatchery's ClaimQuest)
+				player:SetAttribute("FreeGift", if typeof(value) == "table" and value.gift == true then true else nil) -- (Config.FreeGift: claimed, Server/FreeGift)
 				player:SetAttribute("OwnsSlingshot", if typeof(value) == "table" and value.slingshot == true then true else nil) -- (Config.Slingshot)
 				player:SetAttribute("GatesBroken", math.max(player:GetAttribute("GatesBroken") or 1, gates or 1))
 				if typeof(value) == "table" and value.v1new then -- (Analytics V1: a new World 1 player since V1)
@@ -113,10 +115,12 @@ local function save(player, onlyIfChanged)
 	local trail = player:GetAttribute("FinishTrail")
 	local rebirths = player:GetAttribute("Rebirths")
 	local trails = player:GetAttribute("TrailsOwned")
+	local trailOn = player:GetAttribute("TrailOn")
 	local slingshot = player:GetAttribute("OwnsSlingshot") == true
 	local reborn = player:GetAttribute("Reborn")
 	local luck = player:GetAttribute("LuckBonus")
-	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths) .. "/" .. tostring(trails) .. "/" .. tostring(slingshot) .. "/" .. tostring(reborn) .. "/" .. tostring(luck)
+	local gift = player:GetAttribute("FreeGift") == true
+	local as = gold .. "/" .. (bought[player] or 0) .. "/" .. gates .. "/" .. table.concat(worlds, ",") .. "/" .. tostring(trail) .. "/" .. tostring(rebirths) .. "/" .. tostring(trails) .. "/" .. tostring(slingshot) .. "/" .. tostring(reborn) .. "/" .. tostring(luck) .. "/" .. tostring(gift) .. "/" .. tostring(trailOn)
 	if onlyIfChanged and savedAs[player] == as then
 		return
 	end
@@ -127,9 +131,11 @@ local function save(player, onlyIfChanged)
 		record.trail = trail
 		record.rebirths = rebirths
 		record.trails = trails
+		record.trailOn = trailOn
 		record.slingshot = slingshot or nil
 		record.reborn = reborn
 		record.luck = luck
+		record.gift = gift or nil
 		record.v1new = player:GetAttribute("V1New") or record.v1new
 		record.lastWorld = Config.World -- (where you were last: a join from the home page goes back there)
 		record[PLAYED] = math.floor(playedNow(player))
@@ -169,7 +175,28 @@ for _, player in Players:GetPlayers() do
 	task.spawn(join, player)
 end
 
+-- "PlayTime" (the Top Playtime board's: Server/Leaderboards): all-time seconds played, this
+-- world's `played`; from this visit only when the save didn't load (Studio without API access).
+local joinedAt = {} -- [player] = os.time() at join
+Players.PlayerAdded:Connect(function(player)
+	joinedAt[player] = os.time()
+end)
+for _, player in Players:GetPlayers() do
+	joinedAt[player] = joinedAt[player] or os.time()
+end
+task.spawn(function()
+	while true do
+		for _, player in Players:GetPlayers() do
+			if ready[player] then
+				player:SetAttribute("PlayTime", math.floor(if playedFrom[player] then playedNow(player) else os.time() - (joinedAt[player] or os.time())))
+			end
+		end
+		task.wait(10)
+	end
+end)
+
 Players.PlayerRemoving:Connect(function(player)
+	joinedAt[player] = nil
 	save(player)
 	loaded[player], ready[player], bought[player], savedAs[player], oldStamina[player], others[player] = nil, nil, nil, nil, nil, nil
 	playedBase[player], playedFrom[player], playedFull[player] = nil, nil, nil
@@ -208,9 +235,22 @@ Players.PlayerAdded:Connect(watchWorlds)
 for _, player in Players:GetPlayers() do
 	watchWorlds(player)
 end
+-- A Luck Pack (Config.Shop.LuckPacks; Shop.server's ProcessReceipt): `amount` added to your
+-- LuckBonus for good. True once given (their save loaded; else Roblox tries again next visit).
+local addLuck = Instance.new("BindableFunction")
+addLuck.Name = "AddLuck"
+addLuck.OnInvoke = function(player, amount)
+	if not loaded[player] or not player.Parent then
+		return false
+	end
+	player:SetAttribute("LuckBonus", (player:GetAttribute("LuckBonus") or 0) + amount) -- (saved at once: below)
+	return true
+end
+addLuck.Parent = game:GetService("ServerStorage")
+
 -- A rebirth (Hatchery's Rebirth: cash 0, "Reborn" + 1): saved at once.
 local function watchReborn(player)
-	for _, name in { "Reborn", "LuckBonus" } do -- (and luck from a goal)
+	for _, name in { "Reborn", "LuckBonus", "FreeGift" } do -- (and luck from a goal, and the free gift claimed)
 		player:GetAttributeChangedSignal(name):Connect(function()
 			if loaded[player] then
 				save(player)
@@ -223,25 +263,62 @@ for _, player in Players:GetPlayers() do
 	watchReborn(player)
 end
 
--- BuyTrail (Config.TrailBars, QM Oct 15): with every world yours, the next trail for its gold.
+-- The Trails Shop (Config.TrailBars, QM Nov 7: Client/TrailShop): BuyTrail(i) buys trail i for
+-- its cash price and equips it; EquipTrail(i) wears one you own; GrantTrail (ServerStorage,
+-- Shop.server's receipt) gives one bought with Robux. The Godly one needs every animal first.
+local Trails = require(ReplicatedStorage.Shared.Trails)
+
+local function giveTrail(player, i)
+	player:SetAttribute("TrailsOwned", bit32.bor(tonumber(player:GetAttribute("TrailsOwned")) or 0, bit32.lshift(1, i - 1)))
+	player:SetAttribute("TrailOn", i) -- (buying one wears it, as the Weapon Shop's)
+	save(player)
+end
+
 local buyTrail = Instance.new("RemoteFunction")
 buyTrail.Name = "BuyTrail"
-buyTrail.OnServerInvoke = function(player)
-	if not loaded[player] then
-		return false
+buyTrail.OnServerInvoke = function(player, i)
+	i = tonumber(i)
+	local bar = i and Config.TrailBars[i]
+	if not loaded[player] or not bar then
+		return false, "can't buy"
 	end
-	local i = Config.nextTrail(player)
-	local price = i and Config.TrailBars[i].Price
+	if Config.ownsTrail(player, i) then
+		return false, "owned"
+	end
+	if bar.AllAnimals and not Trails.hasAllAnimals(player) then
+		return false, "need every animal"
+	end
 	local gold = player:GetAttribute("Gold") or 0
-	if not price or gold < price then
-		return false
+	if gold < bar.Price then
+		return false, "not enough cash"
 	end
-	player:SetAttribute("Gold", gold - price)
-	player:SetAttribute("TrailsOwned", bit32.bor(tonumber(player:GetAttribute("TrailsOwned")) or 0, bit32.lshift(1, i - 1)))
-	save(player)
+	player:SetAttribute("Gold", gold - bar.Price)
+	giveTrail(player, i)
 	return true
 end
 buyTrail.Parent = ReplicatedStorage
+
+local equipTrail = Instance.new("RemoteEvent")
+equipTrail.Name = "EquipTrail"
+equipTrail.OnServerEvent:Connect(function(player, i)
+	i = tonumber(i)
+	if i and Config.ownsTrail(player, i) then
+		player:SetAttribute("TrailOn", i)
+	end
+end)
+equipTrail.Parent = ReplicatedStorage
+
+-- (false till their save's loaded: Shop.server's receipt tries again next visit)
+local grantTrail = Instance.new("BindableFunction")
+grantTrail.Name = "GrantTrail"
+grantTrail.OnInvoke = function(player, i)
+	if not loaded[player] or not Config.TrailBars[i] then
+		return false
+	end
+	giveTrail(player, i)
+	return true
+end
+grantTrail.Parent = game:GetService("ServerStorage")
 
 -- BuySlingshot (Config.Slingshot, QM Nov 6): the top bar's first goal, once, for its gold.
 local buySlingshot = Instance.new("RemoteFunction")
@@ -266,7 +343,7 @@ hardReset.Name = "HardReset"
 hardReset.Event:Connect(function(player)
 	player:SetAttribute("Gold", 0)
 	player:SetAttribute("GatesBroken", 1)
-	for _, name in { "Rebirths", "FinishTrail", "TrailsOwned", "Reborn", "LuckBonus" } do
+	for _, name in { "Rebirths", "FinishTrail", "TrailsOwned", "TrailOn", "Reborn", "LuckBonus", "FreeGift" } do
 		player:SetAttribute(name, nil)
 	end
 	for world in Config.Places do

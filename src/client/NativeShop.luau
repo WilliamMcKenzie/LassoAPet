@@ -6,8 +6,8 @@
 --                      the time left, Buy (the pass: BuyPass)
 --   ~Game Passes~      two to a row (Config.NativeUi.PassCards): its picture and badge on a
 --                      sunburst, its name, what it does, its price ("Owned" once it's yours)
---   ~Halloween Egg~    its odds (each pet's headshot and chance) and x1, x3, x10, x50
 --   ~Cash Packs~       three cards: a pile of cash, how much, the price
+--   ~Luck Packs~       six blue cards, three and three (FTSAE's Power Packs): clovers, +luck, the price
 -- Prices are read live from Roblox (the products' own), so they're always what's charged.
 -- Client/Shop keeps opening and closing it (its haze, hiding the rest of the UI, telemetry,
 -- the auto pop-up) and shows this in place of its art.
@@ -428,75 +428,7 @@ function NativeShop.build(screen, handlers)
 	end
 	owned()
 
-	-- ---- the Halloween Egg ----
-	heading(list, "EggHeading", "~Halloween Egg~", { "ff9d00", "ffd000", "ff5e00" }, 10)
-	local egg = card(list, "HalloweenEgg", "DamageCard", WIDTH, CARD_H, 11)
-	local odds = {}
-	for kind, chance in Config.Shop.HalloweenOdds or {} do
-		table.insert(odds, { kind = kind, chance = chance })
-	end
-	table.sort(odds, function(a, b)
-		return a.chance > b.chance
-	end)
-	local slotW = (WIDTH - 2 * EDGE) / math.max(#odds, 1)
-	for i, o in odds do
-		local x = EDGE + (i - 0.5) * slotW - WIDTH / 2
-		if i == #odds then
-			sunburst(egg, x, 200, 420)
-		end
-		art(egg, "Pet" .. i, {
-			Image = PetFaces.HEADSHOTS[o.kind] or "",
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, fig(x), 0, fig(200)),
-			Size = UDim2.fromOffset(fig(300), fig(300)),
-			ZIndex = 3,
-		})
-		label(egg, "Chance" .. i, {
-			Text = o.chance .. "%",
-			TextXAlignment = Enum.TextXAlignment.Center,
-			TextSize = fig(70),
-			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.new(0.5, fig(x), 0, fig(345)),
-			Size = UDim2.fromOffset(fig(300), fig(80)),
-			ZIndex = 4,
-		})
-	end
-	local packs = Config.Shop.HalloweenPacks or {}
-	local packW = (WIDTH - 2 * EDGE - (#packs - 1) * GAP) / math.max(#packs, 1)
-	local eggButtons = {}
-	for i, offer in packs do
-		local b, text = buyButton(egg, "Buy" .. offer.Count, packW, {
-			Position = UDim2.fromOffset(fig(EDGE + (i - 1) * (packW + GAP)), fig(BUTTONS_Y)),
-			ZIndex = 5,
-		}, "x" .. offer.Count)
-		if offer.ProductId ~= 0 then
-			price(offer.ProductId, false, offer.Price, function(r)
-				text.Text = tostring(r)
-			end)
-		end
-		b.Activated:Connect(function()
-			if offer.ProductId ~= 0 and not handlers.restricted() then
-				handlers.buy(offer.Key)
-			end
-		end)
-		table.insert(eggButtons, b)
-		table.insert(shop.cards, b)
-	end
-	local note = label(egg, "Availability", {
-		Text = "",
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextScaled = true,
-		Position = UDim2.fromOffset(fig(40), fig(CARD_H - 60)),
-		Size = UDim2.new(1, -fig(80), 0, fig(46)),
-		ZIndex = 6,
-	})
-	task.spawn(function()
-		local restricted = handlers.restricted()
-		for i, b in eggButtons do
-			b.Visible = not restricted and packs[i].ProductId ~= 0
-		end
-		note.Text = if restricted then "Paid random items unavailable in your region" else ""
-	end)
+	-- (the Halloween Egg is gone from the shop: QM, Nov 8)
 
 	-- ---- the cash packs ----
 	heading(list, "CashHeading", "~Cash Packs~", { "61ff00", "b9ff00", "57ff00" }, 12)
@@ -543,10 +475,61 @@ function NativeShop.build(screen, handlers)
 		table.insert(shop.cards, b)
 	end
 
+	-- ---- the luck packs (Fight to Steal an Egg's Power Packs: six blue cards, three and three) ----
+	heading(list, "LuckHeading", "~Luck Packs~", { "00c8ff", "00e5ff", "0096ff" }, 14)
+	local luckRow
+	for i, offer in Config.Shop.LuckPacks do
+		if i % 3 == 1 then
+			luckRow = row(list, "LuckRow" .. (i + 2) // 3, 14 + (i + 2) // 3)
+		end
+		local c = card(luckRow, offer.Key, "PowerCard", THIRD, CARD_H, i)
+		sunburst(c, 0, PILE_Y, BURST)
+		local icons = Ui.make(c, "Icons", "Frame", {
+			BackgroundTransparency = 1,
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.fromScale(0.5, 0),
+			Size = UDim2.fromOffset(0, 0),
+			ZIndex = 3,
+		})
+		for k, p in offer.Icons do
+			art(icons, "Icon" .. k, {
+				Image = HudImages.LuckIcon or "",
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromOffset(fig(p[1]), fig(p[2])),
+				Size = UDim2.fromOffset(fig(p[3]), fig(p[3])),
+				ZIndex = 3 + k,
+			})
+		end
+		label(c, "Amount", {
+			RichText = true,
+			Text = string.format('<font color="#7CFF4D">+%s</font> Luck', tostring(offer.Luck)),
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextSize = fig(75),
+			Position = UDim2.fromOffset(0, fig(285)),
+			Size = UDim2.new(1, 0, 0, fig(91)),
+			ZIndex = 20,
+		})
+		local b, text = buyButton(c, "Buy", THIRD - 2 * EDGE, {
+			Position = UDim2.fromOffset(fig(EDGE), fig(BUTTONS_Y)),
+			ZIndex = 5,
+		})
+		if offer.ProductId ~= 0 then
+			price(offer.ProductId, false, offer.Price, function(r)
+				text.Text = tostring(r)
+			end)
+		else
+			text.Text = tostring(offer.Price)
+		end
+		b.Activated:Connect(function()
+			handlers.buy(offer.Key)
+		end)
+		table.insert(shop.cards, b)
+	end
+
 	-- the Starter Pack's card only while it's on offer; its time counts down
 	function shop.refresh()
 		local left = handlers.starterLeft()
-		starter.Visible = left > 0 and not player:GetAttribute("PassStarterPack")
+		starter.Visible = false -- (Starter Pack off the shop: QM, Nov 8; was left > 0 and not PassStarterPack)
 		starterBuy.Selectable = starter.Visible
 		timer.Text = string.format("Ends in %dm %02ds", left // 60, left % 60)
 	end

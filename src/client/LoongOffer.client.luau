@@ -1,4 +1,6 @@
--- Limited pet display: gold platforms, a framed sign, and the game's Fredoka nameplates.
+-- Limited pet display: each pet on its own grass-and-dirt pedestal with gold trim (blocks in the
+-- map's look, Shared/VoxelBlock), its Fredoka nameplate right above it. No sign (QM, Nov 7); the
+-- row is turned Config.LimitedsTurn degrees in toward the base, as the Top Earners board.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -7,10 +9,14 @@ if Config.LimitedsStand == false or not (Config.Podium and Config.Podium.Hidden 
 	return
 end
 local Rig = require(ReplicatedStorage.Shared.Animals.Rig)
+local VoxelBlock = require(ReplicatedStorage.Shared.VoxelBlock)
 local player = Players.LocalPlayer
 local FONT = Font.new("rbxasset://fonts/families/FredokaOne.json")
 local GOLD = Color3.fromRGB(255, 209, 35)
-local METAL = Color3.fromRGB(106, 112, 140)
+local C = Config.WorldColors
+local DIRT, DIRT_C = C.WallDirt, C.WallDirtChecker
+local GRASS, GRASS_C = C.Grass, C.GrassChecker
+local TRIM = Color3.fromRGB(255, 196, 40)
 local STUD_TEXTURE = { image = "rbxassetid://7447638591", tile = 0.5 }
 local display = Instance.new("Model")
 display.Name = "LimitedsDisplay"
@@ -22,11 +28,18 @@ local function part(name, size, at, color, material, transparency)
 	p.Anchored = true
 	p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
 	p.CastShadow = false
-	p.Size, p.CFrame = size, CFrame.new(at)
+	p.Size, p.CFrame = size, if typeof(at) == "CFrame" then at else CFrame.new(at)
 	p.Color, p.Material = color, material or Enum.Material.SmoothPlastic
 	p.Transparency = transparency or 0
 	p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
 	p.Parent = display
+	return p
+end
+
+-- a block in the map's look; you walk through it, as the old stand
+local function block(name, size, at, color, checker)
+	local p = VoxelBlock.new(name, display, if typeof(at) == "CFrame" then at else CFrame.new(at), size, color, checker)
+	p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
 	return p
 end
 
@@ -44,29 +57,21 @@ local function text(parent, name, value, color, y, height)
 	return label
 end
 
-local first = Config.Podium.Position + (Config.PetOffers[1].Offset or Vector3.zero)
-for i, offer in Config.PetOffers do
-	-- Adjacent stands under one sign, as in the reference.
-	local at = first + Vector3.new((i - 1) * 28, 0, 0)
+-- each stand where the map editor put it (its Stand, by Kind; Config's row without one)
+local Stands = require(ReplicatedStorage.Shared.Stands)
+for _, offer in Config.PetOffers do
+	local cf = Stands.at(offer.Kind)
+	local at = cf.Position
 	local width = offer.Ring or 22
-	part(offer.Kind .. "Base", Vector3.new(width + 3, 0.8, width + 3), at + Vector3.new(0, 0.4, 0), METAL)
-	part(
-		offer.Kind .. "Step",
-		Vector3.new(width + 1.5, 0.35, width + 1.5),
-		at + Vector3.new(0, 0.97, 0),
-		Color3.fromRGB(65, 70, 98)
-	)
-	part(
-		offer.Kind .. "Platform",
-		Vector3.new(width, 0.25, width),
-		at + Vector3.new(0, 1.27, 0),
-		METAL,
-		Enum.Material.SmoothPlastic
-	)
+	-- dirt, a gold step, grass on top: the pet stands at 1.5
+	block(offer.Kind .. "Base", Vector3.new(width + 3, 0.8, width + 3), cf * CFrame.new(0, 0.4, 0), DIRT, DIRT_C)
+	block(offer.Kind .. "Step", Vector3.new(width + 1.5, 0.35, width + 1.5), cf * CFrame.new(0, 0.975, 0), TRIM)
+	block(offer.Kind .. "Platform", Vector3.new(width, 0.35, width), cf * CFrame.new(0, 1.325, 0), GRASS, GRASS_C)
 	-- Four flat side panels, fading from gold at the floor to transparent at the top.
 	for side = 0, 3 do
 		local panel = part(offer.Kind .. "GradientSide", Vector3.new(width, 4, 0.05), at, GOLD, nil, 1)
-		panel.CFrame = CFrame.new(at + Vector3.new(0, 3.4, 0))
+		panel.CFrame = cf
+			* CFrame.new(0, 3.4, 0)
 			* CFrame.Angles(0, side * math.pi / 2, 0)
 			* CFrame.new(0, 0, width / 2)
 		for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
@@ -92,7 +97,7 @@ for i, offer in Config.PetOffers do
 			p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
 		end
 	end
-	model:PivotTo(CFrame.new(at) * CFrame.Angles(0, math.rad(offer.Yaw), 0))
+	model:PivotTo(cf * CFrame.Angles(0, math.rad(offer.Yaw), 0))
 	local boxAt, box = model:GetBoundingBox()
 	model:PivotTo(model:GetPivot() + Vector3.new(0, at.Y + 1.5 - (boxAt.Y - box.Y / 2), 0))
 	model.Parent = display
@@ -100,7 +105,9 @@ for i, offer in Config.PetOffers do
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "OfferLabels"
 	tag.Size = UDim2.fromScale(26, 10)
-	tag.StudsOffsetWorldSpace = Vector3.new(0, box.Y + 8.5, width)
+	-- right above its own pet: the label (10 studs) sits 2 studs over the pet's top
+	local petTop = 1.5 + box.Y
+	tag.StudsOffsetWorldSpace = Vector3.new(boxAt.X - at.X, petTop + 7, boxAt.Z - at.Z)
 	tag.Adornee, tag.LightInfluence, tag.MaxDistance = hub, 0, 180
 	tag.Parent = hub
 	local stock = text(tag, "Stock", "LOADING STOCK", Color3.fromRGB(255, 65, 55), 0, 0.19)
@@ -143,47 +150,6 @@ for i, offer in Config.PetOffers do
 	end)
 	table.insert(stands, { model = model, data = data, bones = bones, scale = offer.Scale, at = at, t = 0 })
 end
-
--- The sign sits behind the pets; its bright top trim and inset navy face match the reference.
-local last = first + Vector3.new((#Config.PetOffers - 1) * 28, 0, 0)
-local center = (first + last) / 2
-local height = 0
-for _, stand in stands do
-	local cf, size = stand.model:GetBoundingBox()
-	height = math.max(height, cf.Y + size.Y / 2 - first.Y + 15)
-end
-local signWidth = (last.X - first.X) + 28
-for _, x in { -signWidth / 2 + 3, signWidth / 2 - 3 } do
-	part(
-		"SignPost",
-		Vector3.new(1.4, height, 1.6),
-		center + Vector3.new(x, height / 2, -12),
-		METAL,
-		Enum.Material.Metal
-	)
-	part("PostFoot", Vector3.new(2.5, 8, 2.5), center + Vector3.new(x, 4, -12), Color3.fromRGB(145, 150, 170))
-end
-local signAt = center + Vector3.new(0, height, -12)
-part("SignFrame", Vector3.new(signWidth + 2, 12, 1.6), signAt, METAL, Enum.Material.Metal)
-local face =
-	part("SignFace", Vector3.new(signWidth - 1, 9.5, 0.2), signAt + Vector3.new(0, 0, 0.92), Color3.fromRGB(8, 12, 43))
-face.CFrame *= CFrame.Angles(0, math.pi, 0)
-part(
-	"SignTopLight",
-	Vector3.new(signWidth + 2, 0.25, 0.3),
-	signAt + Vector3.new(0, 6.15, 0.8),
-	Color3.new(1, 1, 1),
-	Enum.Material.Neon
-)
-local signGui = Instance.new("SurfaceGui")
-signGui.Name, signGui.Face = "LimitedsSign", Enum.NormalId.Front
-signGui.SizingMode, signGui.CanvasSize = Enum.SurfaceGuiSizingMode.FixedSize, Vector2.new(500, 110)
-signGui.LightInfluence, signGui.Parent = 0, face
-local signText = text(signGui, "Title", "LIMITEDS", Color3.fromRGB(255, 112, 0), 0.05, 0.9)
-signText.Position, signText.Size = UDim2.fromScale(0.04, 0.05), UDim2.fromScale(0.92, 0.9)
-signText.Font = Enum.Font.Arcade
-signText.TextScaled, signText.TextSize = false, 100
-signText.UIStroke.Color, signText.UIStroke.Thickness = Color3.fromRGB(255, 38, 0), 2
 
 display.Parent = workspace
 RunService.Heartbeat:Connect(function(dt)

@@ -1405,6 +1405,7 @@ rebirth.OnServerInvoke = function(player)
 	player:SetAttribute("PenLevel", 1)
 	player:SetAttribute("GatesBroken", 1)
 	player:SetAttribute("Reborn", (player:GetAttribute("Reborn") or 0) + 1)
+	Funnel.rebirthed(player, player:GetAttribute("Reborn")) -- (analytics: "Rebirthed")
 	Quests.publish(player, profile.quests)
 	task.spawn(save, player)
 	return true
@@ -2200,7 +2201,7 @@ task.spawn(function()
 		for player, profile in profiles do
 			local rate = (income(profile) + (otherIncome[player] or 0)) * goldX(player)
 			if player:GetAttribute("PenIncome") ~= rate then
-				player:SetAttribute("PenIncome", rate) -- (the Top Earners board's: Server/TopEarners)
+				player:SetAttribute("PenIncome", rate) -- (the Top Money board's: Server/Leaderboards)
 			end
 			local earned = if player:GetAttribute("Tutorial") then 0 else rate -- (nothing till the tutorial's done)
 			if earned > 0 and player.Parent then
@@ -2223,7 +2224,8 @@ while true do
 		local changed = false
 		for _, item in profile.items do
 			-- (in the tutorial, not the starter egg: you hatch that one yourself, QM Oct 11)
-			if item.egg and now >= item.hatchAt and ((player:GetAttribute("Tutorial") and profile.ride ~= nil and not item.byHand) or player:GetAttribute("PassAutoHatch")) then
+			-- (Insta Hatch, the AutoHatch pass: QM Nov 8, every egg as soon as it's placed, time or not)
+			if item.egg and ((now >= item.hatchAt and player:GetAttribute("Tutorial") and profile.ride ~= nil and not item.byHand) or (player:GetAttribute("PassAutoHatch") and not player:GetAttribute("Tutorial"))) then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
 				Telemetry.once(player, "eggHatched")

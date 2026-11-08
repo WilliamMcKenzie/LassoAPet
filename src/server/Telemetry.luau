@@ -165,6 +165,9 @@ function Telemetry.purchase(player, robux, sku)
 	if arm then
 		StatsStore.addShared("ab-rideegg-" .. arm, { robux = tonumber(spent) or 0, buys = 1 })
 	end
+	if player and tonumber(spent) then -- (analytics "Robux Spent", by version: Funnel's; required here, as Funnel requires this)
+		require(script.Parent.Funnel).event(player, "Robux Spent", tonumber(spent), sku)
+	end
 	if player and sessions[player] then
 		SimpleStats.purchase(not sessions[player].excluded and sessions[player].simple or nil, sku, spent)
 		Telemetry.once(player, "bought")

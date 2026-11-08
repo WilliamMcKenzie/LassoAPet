@@ -107,6 +107,34 @@ local Config = {
 		-- the Jurassic (the Castle's slot, QM Nov 7): all jungle grass, rock pillars
 		CastleGrass = Color3.fromRGB(86, 166, 52),
 		CastleGrassChecker = Color3.fromRGB(80, 156, 48),
+		-- (still used: the Dungeon's sunken "À" tile wears CastleFloor; CastleCarpet for old maps)
+		CastleFloor = Color3.fromRGB(78, 70, 86),
+		CastleFloorChecker = Color3.fromRGB(87, 78, 95),
+		CastleCarpet = Color3.fromRGB(86, 166, 52),
+		CastleCarpetChecker = Color3.fromRGB(80, 156, 48),
+		-- (tools/map_endless_style.py: the endless-style floors past the Lava, QM Nov 7)
+		DungeonTile = Color3.fromRGB(122, 142, 160),
+		DungeonTileChecker = Color3.fromRGB(116, 136, 154),
+		ForestMoss = Color3.fromRGB(22, 168, 158),
+		ForestMossChecker = Color3.fromRGB(20, 160, 151),
+		ForestWater = Color3.fromRGB(70, 150, 230),
+		ForestWaterChecker = Color3.fromRGB(80, 160, 236),
+		CastleMoss = Color3.fromRGB(66, 140, 42),
+		CastleMossChecker = Color3.fromRGB(61, 131, 39),
+		CastleMud = Color3.fromRGB(110, 82, 52),
+		CastleMudChecker = Color3.fromRGB(102, 76, 48),
+		CastleSwamp = Color3.fromRGB(64, 140, 120),
+		CastleSwampChecker = Color3.fromRGB(70, 150, 128),
+		CastleRock = Color3.fromRGB(128, 114, 92),
+		CastleRockChecker = Color3.fromRGB(120, 107, 86),
+		CastleTrail = Color3.fromRGB(150, 118, 76),
+		CastleTrailChecker = Color3.fromRGB(142, 111, 71),
+		OceanSandDark = Color3.fromRGB(130, 200, 226),
+		OceanSandDarkChecker = Color3.fromRGB(124, 193, 219),
+		OceanShell = Color3.fromRGB(196, 240, 250),
+		OceanShellChecker = Color3.fromRGB(188, 234, 246),
+		OceanTrench = Color3.fromRGB(110, 170, 210),
+		OceanTrenchChecker = Color3.fromRGB(104, 163, 203),
 		CastleWall = Color3.fromRGB(118, 92, 66),
 		CastleWallChecker = Color3.fromRGB(108, 84, 60),
 		CastleCap = Color3.fromRGB(70, 140, 40),
@@ -226,13 +254,12 @@ local Config = {
 	-- The course is biomes end to end from the start line, each Length studs long,
 	-- with its own tile colours. The home base uses the first biome's. Any Nest
 	-- model in World.Nests is an egg spawn of the biome it stands in (NestOdds).
-	-- The progression pass (QM, Nov 7): the Slingshot's unlocks (each biome's UnlockCost) set the pace,
-	-- a sigmoid's back half: quick at first, slowing round the Dungeon, hard by the Ocean. Target
-	-- arrivals (a free player): Desert ~1 min, Tundra ~5, Volcano ~15, Dungeon ~35, Forest ~75,
-	-- Castle ~140, Ocean ~240 (4 h; the endless course runs on from its end). Each price is the
-	-- minutes in the biome before x 60 x ~3x its herd's average gold a second (5 pen slots, ~60%
-	-- filled with its pets as they hatch) + ~1000x that average (about half its Index rewards).
-	-- Herd averages after the income curve: 36, 114, 229, 457, 914, 1828, 3657 (x2 a biome).
+	-- The balance pass (QM, Nov 7: "desert at like 2m, tundra at 4m, lava at 8m, 2xing each time"):
+	-- the Slingshot's unlocks (each biome's UnlockCost, x Config.Luck.CostPerRebirth a rebirth) set
+	-- the pace of a player following the goals, rebirthing each time the Rebirth goal comes up.
+	-- Simulated (a goal-following player, ~70 s rides): Desert ~2.4 min, Tundra ~3.6, Volcano ~10,
+	-- Dungeon ~17, Forest ~33, Jurassic ~61, Ocean ~2 h; rebirths at ~4, 10, 21, 61 min, 2 h, 4.6 h, 7.7 h.
+	-- Gold by rarity (below) makes luck the engine: each rebirth's x4 luck brings the next rarity.
 	Biomes = {
 		{
 			Name = "Meadow",
@@ -253,8 +280,8 @@ local Config = {
 			-- use the same odds (NestOdds). A 0 never spawns but keeps the animal on
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Pig = 1/5, Pinto = 1/5, Snail = 1/5, Zebra = 1/8, Bunny = 1/10, Fish = 1/20, Gecko = 1/20, Buffalo = 1/25, Rhino = 1/250, Elephant = 1/400, Giraffe = 1/500, HillbackTortoise = 1/1000, Unicorn = 1/10000, Horse = 0,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7-8): about one rarity a rebirth, ~3 a run through the biome: Rares before the first rebirth (the free gift's x4 luck), Epics after it, Legendaries after the second
+				Pig = 1/4, Snail = 1/4, Pinto = 1/5 + 1267/30000, Bunny = 1/8, Zebra = 1/8, Fish = 1/600, Gecko = 1/600, Buffalo = 1/800, Elephant = 1/3000, Giraffe = 1/3000, Rhino = 1/3000, HillbackTortoise = 1/4000, Unicorn = 1/10000, Horse = 0,
 			},
 		},
 		{
@@ -268,8 +295,8 @@ local Config = {
 			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) }, -- and its Desert wall
 			CapColor = Color3.fromRGB(222, 164, 100), -- (its DesertCap)
 			GateColor = Color3.fromRGB(255, 204, 40), -- its breakable barrier's colour (Gate.client)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Kitten = 1/2, Cactus = 1/5, Coyote = 1/5, Scorpion = 1/20, Oryx = 1/25, Ostrich = 1/800, Sandworm = 1/800, SpineLizard = 1/800, Snake = 1/1600, MirageElephant = 1/3200,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7-8): about one rarity a rebirth, ~3 a run through the biome: Rares before the first rebirth (the free gift's x4 luck), Epics after it, Legendaries after the second
+				Kitten = 1/2 + 817/10000, Cactus = 1/5, Coyote = 1/5, Oryx = 1/150, Scorpion = 1/150, Ostrich = 1/1250, Sandworm = 1/1250, SpineLizard = 1/1250, Snake = 1/2500, MirageElephant = 1/3000,
 			},
 			-- Locked behind a gate until your pen is this biome's level (its place
 			-- in this list). Upgrading your pen to it costs UnlockCost gold; your pen's
@@ -290,10 +317,10 @@ local Config = {
 			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) }, -- and its Ice wall
 			CapColor = Color3.fromRGB(244, 247, 251), -- (its IceCap)
 			GateColor = Color3.fromRGB(70, 220, 255), -- its breakable barrier's colour (Gate.client)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Boar = 1/4, Penguin = 1/4, Seal = 1/4, Reindeer = 1/10, Walrus = 1/16, Snowman = 1/20, IceGolem = 1/160, Narwhal = 1/200, Icebringer = 1/3200, GlacierMammoth = 1/4000, SnackYak = 0,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7-8): about one rarity a rebirth, ~3 a run through the biome: Rares before the first rebirth (the free gift's x4 luck), Epics after it, Legendaries after the second
+				Seal = 1/4 + 5717/24000, Boar = 1/4, Penguin = 1/4, Reindeer = 1/400, Walrus = 1/400, Snowman = 1/500, IceGolem = 1/800, Narwhal = 1/1000, GlacierMammoth = 1/4000, Icebringer = 1/4000, SnackYak = 0,
 			},
-			UnlockCost = 200000, -- (the progression pass, QM Nov 7: above Biomes; was 300k) QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
+			UnlockCost = 150000, -- (the balance pass, QM Nov 7-8: Tundra ~4 min in; was 200k, 300k) QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
 			UpgradeImage = "rbxassetid://105968538824751", -- assets/ui/UpgradePenTundraEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://133303061216721", -- assets/ui/UpgradePenTundraDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 		},
@@ -311,10 +338,10 @@ local Config = {
 			CapColor = Color3.fromRGB(96, 60, 46), -- (its LavaCap)
 			GateColor = Color3.fromRGB(255, 110, 20), -- its breakable barrier's colour (Gate.client)
 			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean and Jurassic: QM Oct 11)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				FireAnt = 1/2, Firebird = 1/4, MagmaCrab = 1/16, RockHog = 1/16, VolcanoTortoise = 1/16, FireLobster = 1/20, LavaWhale = 1/320, Rockworm = 1/512, AshBehemoth = 1/2560, Phoenix = 1/2560,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7-8): about one rarity a rebirth, ~3 a run through the biome: Rares before the first rebirth (the free gift's x4 luck), Epics after it, Legendaries after the second
+				FireAnt = 1/2 + 73351/300000, Firebird = 1/4, FireLobster = 1/1000, MagmaCrab = 1/1000, RockHog = 1/1000, VolcanoTortoise = 1/1000, LavaWhale = 1/3000, Rockworm = 1/4000, Phoenix = 1/6000, AshBehemoth = 1/12500,
 			},
-			UnlockCost = 650000, -- (the progression pass, QM Nov 7: above Biomes; was 10M)
+			UnlockCost = 3000000, -- (the balance pass, QM Nov 7-8: Volcano ~8-10 min in; was 650k)
 			-- No Upgrade Pen art yet: the plain button with the price.
 		},
 		{
@@ -332,10 +359,10 @@ local Config = {
 			CapColor = Color3.fromRGB(104, 126, 146),
 			GateColor = Color3.fromRGB(90, 255, 130),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				CaveCricket = 1/4, Bat = 1/8, CryptSnail = 1/8, DungeonRat = 1/8, Rat = 1/8, Slime = 1/8, CaveSpider = 1/25, WebSpider = 1/25, BoneSteed = 1/32, Mimic = 1/80, AbyssPillbug = 1/1000, BoneWyrm = 1/4000,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7-8): about one rarity a rebirth, ~3 a run through the biome: Rares before the first rebirth (the free gift's x4 luck), Epics after it, Legendaries after the second
+				CaveCricket = 1/4 + 14029/120000, Bat = 1/8, CryptSnail = 1/8, DungeonRat = 1/8, Rat = 1/8, Slime = 1/8, BoneSteed = 1/500, CaveSpider = 1/500, WebSpider = 1/500, Mimic = 1/600, AbyssPillbug = 1/2500, BoneWyrm = 1/40000,
 			},
-			UnlockCost = 2000000, -- (the progression pass, QM Nov 7; was 100M)
+			UnlockCost = 15000000, -- (the balance pass, QM Nov 7-8; was 2M)
 		},
 		{
 			Name = "Forest", -- the Magic Forest
@@ -349,10 +376,10 @@ local Config = {
 			CapColor = Color3.fromRGB(30, 196, 186),
 			GateColor = Color3.fromRGB(255, 143, 240),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				StagBeetle = 1/2, Shroom = 1/5, SpiritFox = 1/5, SpiritDeer = 1/20, Deer = 1/25, BrownBear = 1/320, CrystalTortoise = 1/320, MysticOwl = 1/400, AncientMoose = 1/1600, AncientTreant = 1/2000, SpiritLoong = 1/8000,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7-8): about one rarity a rebirth, ~3 a run through the biome: Rares before the first rebirth (the free gift's x4 luck), Epics after it, Legendaries after the second
+				StagBeetle = 1/2 + 87713/960000, Shroom = 1/5, SpiritFox = 1/5, Deer = 1/300, SpiritDeer = 1/300, BrownBear = 1/2000, CrystalTortoise = 1/2000, MysticOwl = 1/2000, AncientMoose = 1/4000, AncientTreant = 1/5000, SpiritLoong = 1/64000,
 			},
-			UnlockCost = 7500000, -- (the progression pass, QM Nov 7; was 1B)
+			UnlockCost = 30000000, -- (the balance pass, QM Nov 7-8; was 7.5M)
 		},
 		{
 			Name = "Castle", -- the Jurassic (QM, Nov 7: in the Red Castle's place, on its map recoloured as a jungle; its old animals and boss)
@@ -367,10 +394,10 @@ local Config = {
 			CapColor = Color3.fromRGB(70, 140, 40),
 			GateColor = Color3.fromRGB(255, 170, 40),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Ankylosaurus = 1/2, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/25, TRex = 1/200, Pterodactyl = 1/250, BoneRex = 1/1250, CastleWyvern = 1/5000,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7-8): about one rarity a rebirth, ~3 a run through the biome: Rares before the first rebirth (the free gift's x4 luck), Epics after it, Legendaries after the second
+				Ankylosaurus = 1/2 + 24519/100000, PalmGuy = 1/4, Spinosaurus = 1/400, Raptor = 1/800, Pterodactyl = 1/2500, TRex = 1/2500, BoneRex = 1/4000, CastleWyvern = 1/100000,
 			},
-			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
+			UnlockCost = 400000000, -- (the balance pass, QM Nov 7; was 25M)
 		},
 		{
 			Name = "Ocean", -- the Ocean Trench
@@ -384,10 +411,10 @@ local Config = {
 			CapColor = Color3.fromRGB(157, 226, 244),
 			GateColor = Color3.fromRGB(70, 200, 255),
 			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Clownfish = 1/5, Pelican = 1/5, Squid = 1/5, Shrimp = 1/8, Starfish = 1/8, FishSchool = 1/40, Hammerhead = 1/40, Seahorse = 1/40, Whale = 1/40, KingCrab = 1/50, Lionfish = 1/50, Anglerfish = 1/200, MantaRay = 1/250, BlueCrab = 1/2000, AbyssWhale = 1/2500, Kraken = 1/10000, RoboShark = 0,
+			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). The balance pass (QM, Nov 7-8): about one rarity a rebirth, ~3 a run through the biome: Rares before the first rebirth (the free gift's x4 luck), Epics after it, Legendaries after the second
+				Pelican = 1/4, Squid = 1/4, Clownfish = 1/5 + 135913/3000000, Shrimp = 1/8, Starfish = 1/8, FishSchool = 1/1500, Hammerhead = 1/1500, Seahorse = 1/1500, Whale = 1/1500, KingCrab = 1/2000, Lionfish = 1/2000, Anglerfish = 1/2500, MantaRay = 1/2500, BlueCrab = 1/8000, AbyssWhale = 1/10000, Kraken = 1/250000, RoboShark = 0,
 			},
-			UnlockCost = 75000000, -- (the progression pass, QM Nov 7; was 100B)
+			UnlockCost = 3200000000, -- (the balance pass, QM Nov 7; was 75M)
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
@@ -410,7 +437,7 @@ local Config = {
 	CourseMaxHalfWidth = 222,
 	-- (QM, Nov 6) the corridor's half width along it, as maps/world.map's floor: { z, half width },
 	-- straight between (WorldColors.halfWidth), wider the later the biome. Change it with the map.
-	CourseProfile = { { 0, 80 }, { -160, 80 }, { -164, 120 }, { -604, 120 }, { -608, 96 }, { -808, 96 }, { -812, 112 }, { -1092, 112 }, { -1096, 96 }, { -1296, 96 }, { -1300, 80 }, { -1500, 80 }, { -1504, 96 }, { -1784, 96 }, { -1788, 112 }, { -1988, 112 }, { -1992, 80 }, { -2272, 80 }, { -2276, 130 }, { -2716, 130 }, { -2720, 114 }, { -3280, 114 }, { -3284, 98 }, { -3484, 98 }, { -3488, 122 }, { -3768, 122 }, { -3772, 90 }, { -3972, 90 }, { -3976, 122 }, { -4256, 122 }, { -4260, 148 }, { -4700, 148 }, { -4704, 100 }, { -5264, 100 }, { -5268, 116 }, { -5628, 116 }, { -5632, 140 }, { -5912, 140 }, { -5916, 110 }, { -6196, 110 }, { -6200, 142 }, { -6480, 142 }, { -6484, 110 }, { -6684, 110 }, { -6688, 126 }, { -7128, 126 }, { -7132, 110 }, { -7332, 110 }, { -7336, 134 }, { -7616, 134 }, { -7620, 158 }, { -7900, 158 }, { -7904, 126 }, { -8184, 126 }, { -8188, 150 }, { -8468, 150 }, { -8472, 134 }, { -8672, 134 }, { -8676, 158 }, { -9236, 158 }, { -9240, 176 }, { -9600, 176 }, { -9604, 160 }, { -10044, 160 }, { -10048, 176 }, { -10408, 176 }, { -10412, 144 }, { -10972, 144 }, { -10976, 160 }, { -11536, 160 }, { -11540, 136 }, { -11740, 136 }, { -11744, 162 }, { -12024, 162 }, { -12028, 194 }, { -12468, 194 }, { -12472, 178 }, { -12672, 178 }, { -12676, 146 }, { -13116, 146 }, { -13120, 170 }, { -13400, 170 }, { -13404, 194 }, { -13684, 194 }, { -13688, 162 }, { -14128, 162 }, { -14132, 188 }, { -14572, 188 }, { -14576, 204 }, { -14856, 204 }, { -14860, 172 }, { -15300, 172 }, { -15304, 188 }, { -15504, 188 }, { -15508, 148 }, { -15948, 148 }, { -15952, 196 }, { -16152, 196 }, { -16156, 180 }, { -16516, 180 }, { -16520, 148 }, { -17080, 148 }, { -17084, 164 }, { -17444, 164 }, { -17448, 188 }, { -17648, 188 }, { -17652, 172 }, { -17932, 172 }, { -17936, 206 }, { -18136, 206 }, { -18140, 222 }, { -18700, 222 }, { -18704, 150 }, { -19144, 150 }, { -19148, 182 }, { -19428, 182 }, { -19432, 158 }, { -19872, 158 }, { -19876, 174 }, { -20436, 174 }, { -20440, 158 }, { -21000, 158 }, { -21004, 174 }, { -21284, 174 }, { -21288, 214 }, { -21696, 214 } },
+	CourseProfile = { { 0, 80 }, { -160, 80 }, { -164, 120 }, { -604, 120 }, { -608, 96 }, { -808, 96 }, { -812, 112 }, { -1092, 112 }, { -1096, 96 }, { -1296, 96 }, { -1300, 80 }, { -1500, 80 }, { -1504, 96 }, { -1784, 96 }, { -1788, 112 }, { -1988, 112 }, { -1992, 80 }, { -2272, 80 }, { -2276, 130 }, { -2716, 130 }, { -2720, 114 }, { -3280, 114 }, { -3284, 98 }, { -3484, 98 }, { -3488, 122 }, { -3768, 122 }, { -3772, 90 }, { -3972, 90 }, { -3976, 122 }, { -4256, 122 }, { -4260, 148 }, { -4700, 148 }, { -4704, 100 }, { -5264, 100 }, { -5268, 116 }, { -5628, 116 }, { -5632, 140 }, { -5912, 140 }, { -5916, 110 }, { -6196, 110 }, { -6200, 142 }, { -6480, 142 }, { -6484, 110 }, { -6684, 110 }, { -6688, 126 }, { -7128, 126 }, { -7132, 110 }, { -7332, 110 }, { -7336, 134 }, { -7616, 134 }, { -7620, 158 }, { -7900, 158 }, { -7904, 126 }, { -8184, 126 }, { -8188, 150 }, { -8468, 150 }, { -8472, 134 }, { -8672, 134 }, { -8676, 158 }, { -9024, 160 }, { -9136, 160 }, { -9136, 168 }, { -9392, 168 }, { -9392, 160 }, { -9464, 160 }, { -9464, 152 }, { -9672, 152 }, { -9672, 144 }, { -9720, 144 }, { -9720, 136 }, { -9920, 136 }, { -9920, 144 }, { -10000, 144 }, { -10000, 152 }, { -10056, 152 }, { -10056, 160 }, { -10144, 160 }, { -10144, 152 }, { -10216, 152 }, { -10216, 144 }, { -10760, 144 }, { -10760, 152 }, { -10816, 152 }, { -10816, 160 }, { -10912, 160 }, { -10912, 168 }, { -11080, 168 }, { -11080, 160 }, { -11120, 160 }, { -11120, 152 }, { -11152, 152 }, { -11152, 144 }, { -11208, 144 }, { -11208, 136 }, { -11280, 136 }, { -11280, 128 }, { -11456, 128 }, { -11456, 136 }, { -11560, 136 }, { -11560, 144 }, { -11608, 144 }, { -11608, 152 }, { -11800, 152 }, { -11800, 160 }, { -11848, 160 }, { -11848, 168 }, { -11880, 168 }, { -11880, 176 }, { -11928, 176 }, { -11928, 184 }, { -12040, 184 }, { -12040, 176 }, { -12112, 176 }, { -12112, 168 }, { -12432, 168 }, { -12432, 176 }, { -12736, 176 }, { -12736, 168 }, { -13304, 168 }, { -13304, 176 }, { -13440, 176 }, { -13440, 168 }, { -13736, 168 }, { -13736, 160 }, { -14224, 160 }, { -14224, 152 }, { -14304, 152 }, { -14304, 144 }, { -14424, 144 }, { -14424, 136 }, { -14512, 136 }, { -14512, 128 }, { -15424, 128 }, { -15424, 136 }, { -15496, 136 }, { -15496, 144 }, { -15760, 144 }, { -15760, 136 }, { -15880, 136 }, { -15880, 144 }, { -15928, 144 }, { -15928, 152 }, { -15976, 152 }, { -15976, 160 }, { -16080, 160 }, { -16080, 168 }, { -16248, 168 }, { -16248, 160 }, { -16336, 160 }, { -16336, 168 }, { -16704, 168 }, { -16704, 176 }, { -17016, 176 }, { -17016, 168 }, { -17296, 168 }, { -17296, 176 }, { -17504, 176 }, { -17504, 168 }, { -17584, 168 }, { -17584, 160 }, { -17736, 160 }, { -17736, 152 }, { -17784, 152 }, { -17784, 144 }, { -17824, 144 }, { -17824, 136 }, { -18096, 136 }, { -18096, 144 }, { -18224, 144 }, { -18224, 136 }, { -18336, 136 }, { -18336, 128 }, { -19784, 128 }, { -19784, 136 }, { -19832, 136 }, { -19832, 144 }, { -19888, 144 }, { -19888, 152 }, { -19984, 152 }, { -19984, 160 }, { -20248, 160 }, { -20248, 168 }, { -20544, 168 }, { -20544, 176 }, { -20600, 176 }, { -20600, 184 }, { -20856, 184 }, { -20856, 192 }, { -20976, 192 }, { -20976, 184 }, { -21032, 184 }, { -21032, 176 }, { -21088, 176 }, { -21088, 168 }, { -21168, 168 }, { -21168, 176 }, { -21272, 176 }, { -21272, 184 }, { -21440, 184 }, { -21440, 176 }, { -21504, 176 }, { -21504, 168 }, { -21560, 168 }, { -21560, 160 }, { -21616, 160 }, { -21616, 152 }, { -21656, 152 }, { -21656, 144 }, { -21696, 144 } },
 	CourseLength = 2168 + 1816 + 1920 + 3120 + 2520 + 2520 + 3840 + 3792, -- all the biomes' lengths added up (QM, Nov 6: the Dungeon, Forest, Castle and Ocean too; was to the end of the Lava)
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
@@ -448,15 +475,15 @@ local Config = {
 	-- VeinSpin degrees a second.
 	-- ByBiome: which boss (Shared/Bosses) each biome (Config.Biomes Name) gets; Kind for any other.
 	Boss = {
-		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss", Volcano = "LavaWyrm", Jurassic = "TyrantRex", Castle = "TyrantRex" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
+		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss", Volcano = "LavaWyrm", Jurassic = "TyrantRex", Castle = "TyrantRex", Dungeon = "BoneWarden", Forest = "ElderTreant" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
 		ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		-- (you turn for home at once, but the camera lingers behind you, on the boss, for
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
 		Linger = 1, ChaseMin = 70,
 		FaceAt = Vector3.new(0, 0.32, 0.25), FaceFrom = Vector3.new(0, 3, 20), Behind = 90, CameraClear = 32, StopShort = 30, -- (Behind 90, was 40: QM, Oct 13, not on your heels; CameraClear: the nearest it comes, past the camera, till it catches you)
-		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, GiantRafflesia = 120, RoyalCnidarian = 50, Gigacorn = 60 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
-		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
-		CryPitch = { CrystalTyrant = 0.7 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
+		Room = { CactusBoss = 40, ElderBoar = 40, SharkBoss = 80, LavaWyrm = 60, TyrantRex = 100, Seraph = 60, CrystalTyrant = 40, CrystalSeraph = 60, CrimsonSeraph = 60, Monarch = 60, JadeAsura = 50, Sphinx = 50, GiantRafflesia = 120, RoyalCnidarian = 50, Gigacorn = 60, BoneWarden = 40, ElderTreant = 50 }, -- (studs more Ahead and Behind for the bigger ones, so they don't clip you: QM)
+		CryVolume = { Chicken = 0.9, ElderBoar = 0.6, SharkBoss = 2.5, CactusBoss = 0.3, LavaWyrm = 0.8, TyrantRex = 1, CrystalTyrant = 0.3, JadeAsura = 0.6, Sphinx = 0.3, BoneWarden = 0.6, ElderTreant = 0.6 }, -- (each boss's cry: QM, Oct 10; the Jade Asura has the Elder Boar's, the Sphinx the Cactus's, Oct 13)
+		CryPitch = { CrystalTyrant = 0.7, BoneWarden = 0.9, ElderTreant = 0.6 }, -- (a cry's playback speed, so its pitch: the Crystal Tyrant's is the Cactus growl pitched down, QM, Oct 13)
 		Faces = { -- (bosses whose faces sit elsewhere: At / From in place of FaceAt / FaceFrom)
 			ElderBoar = { At = Vector3.new(0, 0, 0.45), From = Vector3.new(0, 5, 41) }, -- (it's 1.7x the size: QM)
 			CactusBoss = { From = Vector3.new(0, 5, 34) }, -- (1.7x the size)
@@ -473,6 +500,8 @@ local Config = {
 			RoyalCnidarian = { At = Vector3.new(0, 0.1, 0.33), From = Vector3.new(0, 6, 60) }, -- (World 3 Cnidaria's crowned jellyfish: its eyes and teeth under the crown; a guess)
 			Gigacorn = { At = Vector3.new(0, 0.2, 0.4), From = Vector3.new(0, 8, 65) }, -- (World 3 Candyland's candy unicorn: its face under the horn, high at the front; a guess)
 			CrystalTyrant = { At = Vector3.new(0, 0.02, 0.48), From = Vector3.new(0, 4, 34) }, -- (its eyes and teeth, halfway up: the crown makes it tall)
+			BoneWarden = { At = Vector3.new(0, 0.38, 0.3), From = Vector3.new(0, 6, 55) }, -- (its skull, high up: FightToStealAnEgg's Dungeon boss, QM Nov 7; a guess)
+			ElderTreant = { At = Vector3.new(0, 0.3, 0.35), From = Vector3.new(0, 8, 60) }, -- (its face in the bark: FightToStealAnEgg's Forest boss, QM Nov 7; a guess)
 		},
 		VeinSize = 0.16, VeinAt = Vector2.new(0.67, 0.317), VeinPopTime = 0.35, VeinPulse = 0.3, VeinPeriod = 0.4, VeinSpin = 25,
 		-- On the run home it cries again every so often (QM, Oct 11): its opening cry, the
@@ -487,6 +516,7 @@ local Config = {
 	-- which cut tens of thousands of textures. Off (or those variants missing from
 	-- MaterialService): the stud Textures as before. Shared/Studs.
 	StudMaterial = true,
+	BaseplateTransparency = 0.8, -- the ground's checker is Roblox's own Baseplate texture (grid + checker, black), this see-through, as the Baseplate's (QM, Nov 8)
 	WalkSpeed = 48, -- on foot, studs a second (Roblox's default is 16; QM, Oct 9: 3x, was 2x)
 	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
 	-- On the ride home with an egg the stampede gets out of your way (QM, Oct 6, to
@@ -538,7 +568,7 @@ local Config = {
 	-- Epics are what carry you into the next one (the pacing ladder, below AnimalStats),
 	-- so they take ~5 runs to hatch; Uncommons and Rares hatch within a run, so every run
 	-- pays out. Legendaries hatch slower (PetHatchTime: QM's D1 retention eggs).
-	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480, Divine = 600 },
+	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480, Divine = 600, Celestial = 900, Void = 1200, Omega = 1800 },
 	PetHatchTime = {
 		Snail = 15, Giraffe = 120, HillbackTortoise = 3600, Coyote = 15, Oryx = 60, Ostrich = 90, MirageElephant = 7200, Seal = 15, Reindeer = 60, Walrus = 60, Narwhal = 300, GlacierMammoth = 7200, FireAnt = 15, MagmaCrab = 60, AshBehemoth = 7200, Rat = 60, CaveCricket = 60, CryptSnail = 60, WebSpider = 300, AbyssPillbug = 7200, StagBeetle = 60, Deer = 300, BrownBear = 1200, AncientMoose = 7200, Swan = 60, ArmoredRam = 60, RoyalStag = 300, Griffin = 1200, FortressTortoise = 7200, Shrimp = 60, Pelican = 60, Hammerhead = 300, MantaRay = 1200, Anglerfish = 1200, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
 		-- (QM's spawn/hatch JSON, Oct 11, applied as given: the Herd weights in Biomes too)
@@ -819,6 +849,7 @@ local Config = {
 	-- (the horse is the tier 1 anchor), unless their file gives an explicit size.
 	-- Obstacles are rescaled about their spot on the floor by ObstacleScale (worked out the same
 	-- way from tools/terrain_assets.py, against smalls of ~5.4 studs).
+	WallsCrash = false, -- walls are solid: you stop and slide along them, both ways, never a crash (QM, Nov 8: first-ride payouts fell with wall crashes)
 	WallWalkOverTier = 4, -- riding out, a mount of this size tier or more (titans: Ash Behemoth, Glacier Mammoth...) walks right over walls; anything smaller crashes into them (QM, Nov 7; Client/RideWalls)
 	TierGrowth = 1.6, -- QM, Oct 1: 2x was too much
 	-- MERGE is off for now that there's FUSE (QM, Oct 6 19:16): no MERGE button, and
@@ -835,7 +866,7 @@ local Config = {
 	-- that costs gold instead of waiting on the Epic's egg. Hybrids made before keep theirs.
 	FuseSpeedShare = 0.15,
 	-- (Shared/Fusion.worth: what went into a hybrid, by rarity; kept on saves, no longer priced.)
-	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000, Divine = 10000000 },
+	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000, Divine = 10000000, Celestial = 100000000, Void = 1000000000, Omega = 10000000000 },
 	PetSmallSize = 10.4,
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
@@ -945,6 +976,9 @@ local Config = {
 		Epic = Color3.fromHex("FF7CC6"),
 		Legendary = Color3.fromHex("5CE6B7"),
 		Divine = Color3.fromHex("00DCFF"), -- (Fight to Steal an Egg's Divine text colour: QM, Nov 7)
+		Celestial = Color3.fromHex("FFD000"), -- (and its tiers past Divine: QM, Nov 7)
+		Void = Color3.fromHex("5A00FF"),
+		Omega = Color3.fromHex("7DFF00"),
 	},
 	Podium = {
 		Position = Vector3.new(63.5, 0, 24.6), -- the column, on the ground, mirroring the portal gate across the start line (QM, Oct 12; was 104, 20, the front right corner); the snake reaches ~-8..+16 in x, -14..+31 in z
@@ -964,11 +998,12 @@ local Config = {
 	LoongOffer = { Kind = "Loong", ProductId = 3718721407, Price = 999, Stock = 500, StartLeft = 435, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(7, 0, -11), -- (against the base's front wall, the Robo Shark beside it: QM, Oct 15)
 		Ledger = "loongs", StockKey = "sold" },
 	-- Majestic Unicorn replaces the limited Robo Shark; keep its product, stock and claim counters.
-	MajesticUnicornOffer = { Kind = "MajesticUnicorn", ProductId = 3718722226, Price = 999, Stock = 1000, StartLeft = 870, Scale = 2, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11),
+	MajesticUnicornOffer = { Kind = "MajesticUnicorn", ProductId = 3718722226, Price = 599, Stock = 1000, StartLeft = 870, Scale = 2, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11),
 		Ledger = "roboSharks", StockKey = "sold_RoboShark", ClaimField = "boughtRoboSharks" },
 	-- The Robo Shark back as the third limited (QM, Nov 7). Its own ledger, stock and claim fields:
-	-- the Majestic Unicorn kept the old Robo Shark ones (above). Product "Robo Shark Pet [Limited]", R$999.
-	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3729449142, Price = 999, Stock = 1000, StartLeft = 870, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165,
+	-- the Majestic Unicorn kept the old Robo Shark ones (above). Product "Robo Shark Pet [Limited]", R$499 (Unicorn R$599, Loong R$999: QM, Nov 7).
+	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3729449142, Price = 499, Stock = 1000, StartLeft = 870, Scale = 5, -- (QM, Nov 7: 1.5 was "way too small" beside the others)
+		 Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165,
 		Ledger = "limitedRoboSharks", StockKey = "sold_LimitedRoboShark", ClaimField = "boughtLimitedRoboSharks" },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
@@ -1432,13 +1467,16 @@ local Config = {
 	Passes = {
 		-- (QM, Oct 13: his four passes, renamed from the old ones on their ids, so their old
 		-- owners own these now. VIP, Fast Hatch and Auto Hatch are gone.)
+		-- (QM, Nov 8: 1.5x Speed and Giant Pets off the shop, PassCards; owners keep them)
 		{ Key = "Speed", Name = "1.5x Speed", Price = 49, Id = 2012972449 }, -- every ride x PassSpeed (Config.rebirthSpeed)
-		{ Key = "DoubleGold", Name = "2x Cash", Price = 99, Id = 2014634454 },
+		{ Key = "DoubleGold", Name = "2x Cash", Price = 49, Id = 2014634454 },
 		{ Key = "Invincible", Name = "Invincible", Price = 19, Id = 2036488765 }, -- x PassGoldMultiplier (Config.goldX) (QM, Oct 20: R$19 on its new button)
-		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 29, Id = 2039620869 }, -- (QM, Oct 20) ready eggs hatch by themselves (Hatchery's PassAutoHatch)
+		{ Key = "AutoHatch", Name = "Insta Hatch", Price = 299, Id = 2039620869 }, -- (QM, Nov 8: was Auto Hatch R$29) every egg hatches as soon as it is placed (Hatchery's PassAutoHatch)
 		{ Key = "GiantPets", Name = "Giant Pets", Price = 49, Id = 2014472441 },
 		{ Key = "StarterPack", Name = "Starter Pack", Price = 19, Id = 2013764414 }, -- Config.StarterPack, once (Hatchery)
+		{ Key = "Luck10x", Name = "10x Luck", Price = 199, Id = 2075103975 }, -- (QM, Nov 7) your luck x PassLuck for good (Config.luck)
 	},
+	PassLuck = 10, -- Luck10x's
 	PassSpeed = 1.5, -- Speed's
 	PassGiantScale = 2, -- Giant Pets': every pet of yours this x bigger (Skins.apply)
 	StarterPack = { Pets = { "RoboShark", "SnackYak", "GiantRafflesia" }, World = 2 }, -- (QM, Oct 20, as its shop card shows: the Robo Shark (EX), the Giant Rafflesia (Legendary), the Snack Yak (Epic), and World 2 unlocked; was $150k and the Snake)
@@ -1462,6 +1500,25 @@ local Config = {
 			{ Key = "Cash100K", Gold = 500000, ProductId = 3719218362 },
 			{ Key = "Cash1M", Gold = 5000000, ProductId = 3719218832 },
 			{ Key = "Cash1B", Gold = 1000000000, ProductId = 3719218954 },
+		},
+		-- Luck Packs (QM, Nov 7: like Fight to Steal an Egg's Power Packs, six blue cards, three
+		-- and three; Client/NativeShop): Luck is added to your LuckBonus for good (Gold.server's
+		-- AddLuck, through Shop.server's ProcessReceipt). Icons: the clover pile, as the Power
+		-- packs' swords were placed. Products made Nov 7 (clover icon).
+		LuckPacks = {
+			{ Key = "Luck1", Luck = 1, Price = 49, ProductId = 3729520060, Icons = { { 0, 229, 280 } } },
+			{ Key = "Luck2", Luck = 3, Price = 99, ProductId = 3729520343, Icons = { { -70, 220, 260 }, { 70, 220, 260 } } },
+			{ Key = "Luck3", Luck = 8, Price = 199, ProductId = 3729520517, Icons = { { -120, 205, 230 }, { 120, 205, 230 }, { 0, 235, 290 } } },
+			{ Key = "Luck4", Luck = 20, Price = 459, ProductId = 3729520656, Icons = {
+				{ -200, 235, 210 }, { 200, 235, 210 }, { -75, 200, 260 }, { 75, 200, 260 },
+			} },
+			{ Key = "Luck5", Luck = 50, Price = 799, ProductId = 3729520754, Icons = {
+				{ -215, 250, 210 }, { 215, 250, 210 }, { -110, 165, 230 }, { 110, 165, 230 }, { 0, 240, 300 },
+			} },
+			{ Key = "Luck6", Luck = 125, Price = 1499, ProductId = 3729520917, Icons = {
+				{ -235, 140, 190 }, { 235, 140, 190 }, { -225, 265, 210 }, { 225, 265, 210 },
+				{ -110, 175, 240 }, { 110, 175, 240 }, { 0, 240, 310 },
+			} },
 		},
 		Gold = {
 			{ Key = "Gold1", Gold = 100000, Price = 50, ProductId = 3716553782, OldProductIds = { 3716409553 } }, -- $100K (QM's nerf, Oct 4: was $1M)
@@ -1671,7 +1728,7 @@ local Config = {
 
 	-- Coins for landing on an animal: LassoCoins for that animal, else by its rarity (set
 	-- in its Animals module).
-	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25, Divine = 50 },
+	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25, Divine = 50, Celestial = 100, Void = 250, Omega = 500 },
 	LassoCoins = { Beholder = 50, Sludge = 50, WarElephant = 50, Leviathan = 100 }, -- QM's pets JSON, Oct 4
 
 	-- Stampede: each biome has its own steady stream of animals (its Herd above),
@@ -1716,7 +1773,7 @@ Config.Endless = {
 			-- its own animals (World 2's weights). The Majestic Unicorn's a Robux pet in World 1: on its
 			-- page, never wild (as the Robo Shark). World 1's Bunny, Rhino and Buffalo stay in the Meadow.
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				MarbleFish = 1/2, Lion = 1/4, Crocodile = 1/5, MarbleColossus = 1/25, Seraph = 1/100, MajesticUnicorn = 0,
+				MarbleFish = 1/2 + 9999/1000000, Lion = 1/4, Crocodile = 1/5, MarbleColossus = 1/25, Seraph = 1/1000000, MajesticUnicorn = 0,
 			},
 			Boss = "Seraph", -- (World 2's Meadow boss)
 			Fog = { Color = rgb(232, 214, 160), Start = 0, End = 500 },
@@ -1732,7 +1789,7 @@ Config.Endless = {
 			GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) },
 			WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) },
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				CrimsonScorpion = 1/2, Eyeworm = 1/4, Beholder = 1/5, Maw = 1/25, IvorySpider = 1/125, Asura = 1/625, BlackWidow = 1/2500,
+				CrimsonScorpion = 1/2 + 199/500000, Eyeworm = 1/4, Beholder = 1/5, Maw = 1/25, IvorySpider = 1/125, Asura = 1/625, BlackWidow = 1/500000,
 			},
 			Boss = "CrimsonSeraph",
 			Fog = { Color = rgb(150, 60, 70), Start = 0, End = 450 },
@@ -1748,7 +1805,7 @@ Config.Endless = {
 			GroundColors = { rgb(90, 109, 143), rgb(82, 99, 131) },
 			WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) },
 			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				RedMushroom = 1/2, BlueCrystal = 1/5, CrystalCentipede = 1/5, PinkCrystal = 1/20, BrownMushroom = 1/25, CrystalPhoenix = 1/320, CrystalSpider = 1/320, PurpleMushroom = 1/320, CrystalElephant = 1/2000, CrystalSeraph = 1/8000,
+				RedMushroom = 1/2 + 124/1000000, BlueCrystal = 1/5, CrystalCentipede = 1/5, PinkCrystal = 1/20, BrownMushroom = 1/25, CrystalPhoenix = 1/320, CrystalSpider = 1/320, PurpleMushroom = 1/320, CrystalElephant = 1/2000, CrystalSeraph = 1/1000000,
 			},
 			Boss = "CrystalSeraph",
 			Fog = { Color = rgb(70, 92, 140), Start = 0, End = 420 },
@@ -1840,6 +1897,12 @@ Config.NativeUi = {
 	-- `at` of the way down), its name's text colour; Common's text fades text to text2; a
 	-- `move` one has a band of text2 sweeping across it (client/RarityLook)
 	Rarities = {
+		-- (past Divine, Fight to Steal an Egg's top pet tiers, its colours: QM Nov 7, the ceiling
+		-- rises biome by biome: Celestial from the Dungeon, Void in the Ocean, Omega in the endless;
+		-- the commonest pet in those herds takes the odds the top one gave up, so each adds to 1)
+		Celestial = { bottom = Color3.fromHex("ff6a00"), top = Color3.fromHex("ffe600"), at = 1, text = Color3.fromHex("ffd000"), text2 = Color3.fromHex("ff5a00"), move = true },
+		Void = { bottom = Color3.fromHex("3a00b0"), top = Color3.fromHex("a000ff"), at = 1, text = Color3.fromHex("5a00ff"), text2 = Color3.fromHex("22009a"), move = true },
+		Omega = { bottom = Color3.fromHex("00ff40"), top = Color3.fromHex("ffee00"), at = 1, text = Color3.fromHex("7dff00"), text2 = Color3.fromHex("00ffb0"), move = true },
 		Common = { text = Color3.new(1, 1, 1), text2 = Color3.fromRGB(135, 135, 135), stroke = Color3.fromRGB(70, 70, 70) },
 		Uncommon = { bottom = Color3.fromHex("40ff00"), top = Color3.fromHex("c8ff00"), at = 0.736, text = Color3.fromHex("00ff00") },
 		Rare = { bottom = Color3.fromHex("0070ff"), top = Color3.fromHex("00e6ff"), at = 1, text = Color3.fromHex("00b7ff") },
@@ -1847,16 +1910,19 @@ Config.NativeUi = {
 		Legendary = { bottom = Color3.fromHex("ff0020"), top = Color3.fromHex("ff8c00"), at = 1, text = Color3.fromHex("ff0004") },
 		Divine = { bottom = Color3.fromHex("6a00ff"), top = Color3.fromHex("00d0ff"), at = 1, text = Color3.fromHex("00dcff"), text2 = Color3.fromHex("0040ff"), move = true }, -- (the reference's Divine: QM, Nov 7, the rarest in each biome)
 		Exclusive = { bottom = Color3.fromHex("ff0040"), top = Color3.fromHex("ff00c0"), at = 1, text = Color3.fromHex("ff0050"), text2 = Color3.fromHex("ff00d0"), move = true }, -- (the reference's Mythic)
+		-- (the trails' top rarities, QM Nov 7: his reference's Trails Shop)
+		Mythic = { bottom = Color3.fromHex("ff4fd8"), top = Color3.fromHex("ffd84f"), at = 1, text = Color3.fromHex("ffe500"), text2 = Color3.fromHex("00ffb3"), move = true },
+		Cosmic = { bottom = Color3.fromHex("5a00ff"), top = Color3.fromHex("d000ff"), at = 1, text = Color3.fromHex("c800ff"), text2 = Color3.fromHex("ff4fe0"), move = true },
+		Godly = { bottom = Color3.fromHex("ff9d00"), top = Color3.fromHex("fff36b"), at = 1, text = Color3.fromHex("ffd000"), text2 = Color3.fromHex("ffffff"), move = true },
 	},
 	-- the Shop's ~Game Passes~ cards (client/NativeShop; QM, Nov 6: the reference's), in order,
 	-- by Config.Passes key: its card's look, its picture (HudImages, or Pet: a pet's headshot),
 	-- the badge on the picture and what it does (rich text)
 	PassCards = {
+		{ Key = "Luck10x", Look = "CashCard", Icon = "LuckIcon", Badge = "x10", Text = '<font color="#7CFF4D">10x Luck</font> forever!' },
 		{ Key = "DoubleGold", Look = "GoldCard", Icon = "CashStack", Badge = "x2", Text = 'Earn <font color="#7CFF4D">2x Cash!</font>' },
-		{ Key = "Speed", Look = "DamageCard", Pet = "Horse", Badge = "1.5x", Text = 'Ride <font color="#7CFF4D">1.5x</font> faster!' },
-		{ Key = "AutoHatch", Look = "GrowthCard", Icon = "PassGrowth", Text = 'Eggs hatch <font color="#7CFF4D">by themselves!</font>' },
+		{ Key = "AutoHatch", Look = "GrowthCard", Icon = "PassGrowth", Text = 'Eggs hatch <font color="#7CFF4D">instantly!</font>' },
 		{ Key = "Invincible", Look = "LifeCard", Icon = "PassLife", Text = 'Never <font color="#7CFF4D">crash!</font>' },
-		{ Key = "GiantPets", Look = "PowerCard", Pet = "MajesticUnicorn", Badge = "x2", Text = 'Your pets are <font color="#7CFF4D">giant!</font>' },
 	},
 	-- UI sounds (client/UiFx): id, volume, speed, start (seconds in)
 	Sounds = {
@@ -1930,13 +1996,15 @@ end
 Config.Slingshot = {
 	Price = 1000000, -- (World 2's, the goal it replaces)
 	To = 2, -- the Desert
-	Ahead = 12, -- studs out from your pen's Spawn to the slingshot's middle (QM, Nov 7: closer; was 22)
-	Flight = 4.5, -- seconds in the air
+	Ahead = 6, -- studs out from your pen's Spawn to the slingshot's middle (QM, Nov 7: closer; was 22, then 12)
+	Side = 16, -- studs to the left of the pen's entrance, as you look at the pen (QM, Nov 7: "to the left of the entrance")
+	Flight = 3, -- seconds in the air, every shot whatever the distance
 	Apex = 260, -- studs over the straight line at the flight's middle
 	Lift = 80, -- studs more up early on (sin^0.6 of the flight: steep off the band, none by the landing), so the shot clears the walls (QM, Nov 7)
 	Scale = 1.6, -- the model's size x its meshes' (QM, Nov 7: 1.6x bigger)
 	Turn = 0.35, -- how much it turns from straight out of your pen toward the start line's middle (QM, Nov 7)
 	Steer = 2, -- x Ride's SteerSpeed and SteerResponse in the air (QM, Nov 7: twice as nimble)
+	Spins = 2, -- whole barrel rolls you and your pet make in the air (QM, Nov 7: not frozen; whole turns, so you land upright)
 	Meshes = { { 108584371800496, 222, 124, 62 }, { 83135902680851, 240, 228, 196 }, { 126807462534931, 150, 76, 38 } }, -- (filled by tools/slingshot_upload.py)
 	Band = 102942616406200, -- (filled by tools/slingshot_upload.py)
 	BandColor = Color3.fromRGB(226, 58, 52),
@@ -1952,18 +2020,60 @@ Config.Slingshot = {
 		Color3.fromRGB(240, 90, 190), -- pink
 	},
 }
--- The Top Earners board (QM, Nov 6): left of the start line, facing into the base, the global
--- top pen incomes (gold a second, everyone's latest recorded, OrderedDataStore "TopEarners")
--- in a square stone frame (the old portal gate's style, a skull on top: tools/earners_board_meshes.py),
--- your own pen's income and the countdown to the next refresh under the list.
--- Server/TopEarners builds it and records; Client/TopEarners draws the list.
-Config.TopEarners = {
-	Position = Vector3.new(-112, 0, 18), -- the base's middle (on the ground), just inside the base left of the course's mouth
-	Yaw = 210, -- degrees: faces into the base (+z), turned 30 degrees toward the course
-	Screen = { Width = 26, Height = 32, Bottom = 4.2 }, -- the frame's opening (tools/earners_board_meshes.py SCREEN_*)
-	Refresh = 60, -- seconds between recording everyone here and re-reading the top
-	Top = 50, -- rows on the board
-	Meshes = { { 106770230038436, 177, 185, 178, 0.006, 20.790, -0.713 }, { 82718487796629, 148, 156, 150, -0.759, 20.846, -0.708 }, { 134382604805829, 232, 226, 206, 0.008, 46.766, -0.195 }, { 137436135736323, 38, 38, 44, 0.000, 46.300, -4.175 } }, -- (filled by tools/earners_board_upload.py)
+-- The free gift (QM, Nov 7: Fight to Steal an Egg's, 1:1, but +3 luck and +5k cash, not Power):
+-- a red studded present with a yellow bow, "FREE!" over it, a glowing ring and sparkles, in
+-- the base right of the start line (Shared/GiftModel; Server/FreeGift builds it). Walking into
+-- its ring opens the Free Reward! popup (Client/FreeReward): the three steps (like the game,
+-- favorite it, join the group) and Claim, which gives Luck (added to LuckBonus) and Cash,
+-- once per player (saved: `gift`, Gold.server). Only the group can be checked: not in it,
+-- Claim pops a red "Steps not complete!". GroupId nil: the group that owns the game.
+Config.FreeGift = {
+	X = 105, Z = 30, Yaw = 150, -- (mirrors the Top Earners board: right of the course's mouth, facing into the base)
+	Scale = 1,
+	Luck = 3, -- added to your luck (x1 -> x4)
+	Cash = 5000,
+	GroupId = nil,
+	Reach = 30, -- studs from the gift the server takes a Claim from
+	OpenRadius = 7, -- walking this close (the ring) opens the popup
+	LabelTop = Color3.fromHex("eaff3c"), -- FREE!: lit lime at the top...
+	LabelBottom = Color3.fromHex("38d41a"), -- ...to green at the bottom
+	LabelHeight = 3.2, -- studs tall
+	RingColor = Color3.fromRGB(255, 226, 60),
+	RingRadius = 6,
+	BoxColor = Color3.fromRGB(226, 26, 36),
+	RibbonColor = Color3.fromRGB(255, 205, 30),
+	Bob = 0.35, -- studs it floats up and down (client/FreeReward)
+}
+-- The leaderboards (QM, Nov 7: a copy of his reference's three boards, Top Speed swapped for
+-- Top Luck): left of the start line, facing into the base, side by side. Each one is the
+-- global top Top players by its stat, everyone's latest recorded every Refresh seconds in its
+-- own OrderedDataStore. Money = pen gold a second ("PenIncome", Hatchery's), Luck =
+-- Config.luck (stored x100), Playtime = all-time seconds played ("PlayTime", Gold.server's).
+-- Server/Leaderboards builds them (Parts) and records; Client/Leaderboards draws the titles
+-- and the lists.
+Config.Leaderboards = {
+	Position = Vector3.new(-112, 0, 2.1), -- the middle board's foot (on the ground): its plinth's back flush against the base wall at z 0 (QM Nov 7)
+	Yaw = 180, -- degrees: faces into the base (+z), flat to the wall behind (QM Nov 7: side by side as in his reference)
+	Spacing = 20, -- studs between the boards' middles
+	Refresh = 60, -- seconds between recording everyone here and re-reading the tops
+	Top = 50, -- rows on each board
+	Boards = {
+		{
+			Key = "Money", Title = "Top Money", Store = "TopMoney",
+			Main = Color3.fromRGB(96, 214, 46), Dark = Color3.fromRGB(30, 112, 24), Pale = Color3.fromRGB(196, 238, 176),
+			Text = Color3.fromRGB(226, 255, 92), Value = Color3.fromRGB(150, 255, 90),
+		},
+		{
+			Key = "Luck", Title = "Top Luck", Store = "TopLuck",
+			Main = Color3.fromRGB(44, 140, 255), Dark = Color3.fromRGB(20, 62, 180), Pale = Color3.fromRGB(176, 210, 255),
+			Text = Color3.fromRGB(150, 226, 255), Value = Color3.fromRGB(150, 226, 255),
+		},
+		{
+			Key = "Playtime", Title = "Top Playtime", Store = "TopPlaytime",
+			Main = Color3.fromRGB(242, 72, 96), Dark = Color3.fromRGB(150, 24, 48), Pale = Color3.fromRGB(255, 184, 196),
+			Text = Color3.fromRGB(255, 140, 160), Value = Color3.fromRGB(255, 255, 255),
+		},
+	},
 }
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:
@@ -1982,31 +2092,64 @@ function Config.goldX(player)
 	return (if player:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)
 		* (Config.Rebirth.Gold[player:GetAttribute("Rebirths") or 0] or 1)
 end
--- x every ride's speed: rebirths and the 1.5x Speed pass.
+-- x every ride's speed: rebirths, the 1.5x Speed pass and your trail (Config.trailSpeed).
 function Config.rebirthSpeed(player)
 	return (Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1) * (if player:GetAttribute("PassSpeed") then Config.PassSpeed else 1)
+		* Config.trailSpeed(player)
 end
 -- Luck (QM, Nov 7): 1 + what the goals have given you ("LuckBonus", saved as `luck`:
 -- Gold.server), added, never multiplied, and kept through rebirths. Each Reach goal from the
--- Desert on gives Reach luck, each Capture 3 cash (CashOfNext of the next unlock's price); both
--- double each rebirth (RewardPerRebirth). A goal's egg only comes the first time (Server/Quests).
--- A rebirth (the last goal, past the Ocean: Server/Quests' "rebirth", Hatchery's Rebirth) wipes
+-- Desert on gives Reach luck, each Capture 2 cash (CashOfNext of the next unlock's price, x
+-- CostPerRebirth as the price is). Each rebirth multiplies your luck by RebirthLuck (QM, Nov 8). A goal's egg only comes the first time (Server/Quests).
+-- A rebirth (the goal once you've reached Config.rebirthBiome: Server/Quests' "rebirth", Hatchery's Rebirth) wipes
 -- your cash and unlocks, doubles every slingshot unlock's price and the goals' rewards, and
 -- loops the goals back to Reach Desert. Your pets and luck stay. Luck flattens your own
--- stampede's odds (each weight ^ (1 / luck): 1 is the table as it is, more and more luck heads
--- for all even), so every player's stampede is their own. Rebirths are `reborn`, the "Reborn"
+-- stampede's odds (each weight x luck, up to the herd's commonest: Config.luckWeight), so every
+-- player's stampede is their own. Rebirths are `reborn`, the "Reborn"
 -- attribute; not the old Rebirths above (their gold, speed and skins).
 Config.Luck = {
 	Reach = 0.25, -- luck for each Reach goal from the Desert on, before any rebirth
-	CashOfNext = 0.1, -- a Capture 3 goal's cash: this much of the next unlock's price (which doubles too)
-	RewardPerRebirth = 2, -- goal luck x this each rebirth (0.25, 0.5, 1, 2...)
+	CashOfNext = 0.1, -- a Capture 2 goal's cash: this much of the next unlock's price (which doubles too)
+	RewardPerRebirth = 1, -- goal luck x this each rebirth (QM, Nov 8: +0.25 a goal always; the rebirth multiplies your luck instead)
+	RebirthLuck = 4, -- your luck x this for each rebirth (QM, Nov 8: x1.25 -> x5 on the first)
 	CostPerRebirth = 2, -- slingshot unlock prices x this each rebirth
 }
+-- The biome you reach to rebirth (QM, Nov 7): the Desert the first time, then the Tundra, the
+-- Volcano... one further each rebirth, up to the last (the Ocean).
+function Config.rebirthBiome(player)
+	return math.min(2 + (player:GetAttribute("Reborn") or 0), #Config.Biomes)
+end
+-- The 100x Luck Event (QM, Nov 7): every Every seconds (on the server clock, so every server
+-- at once) everyone's luck is x Multiplier for Duration seconds. The sign over the course's
+-- mouth (Server/LuckEvent builds it, Client/LuckEvent draws it) counts down to it; the luck
+-- counter turns animated rainbow with the time left beside it (Client/NativeHud).
+Config.LuckEvent = {
+	Every = 20 * 60, -- seconds from one event's start to the next
+	Duration = 60, -- seconds it lasts
+	Multiplier = 100,
+	Title = "100x Luck Event",
+	-- the sign: across the course's mouth (z), its board's middle Height over the ground
+	Sign = { Z = -8, Height = 48, Width = 52, BoardHeight = 15, Color = Config.WorldColors.Wood, Trim = Config.WorldColors.WoodDark }, -- (the pens' fence wood, QM)
+}
+-- Seconds left of the luck event now, or nil when none is on; and seconds to the next start.
+function Config.luckEventLeft(now)
+	now = now or workspace:GetServerTimeNow()
+	local into = now % Config.LuckEvent.Every
+	local left = if into < Config.LuckEvent.Duration then Config.LuckEvent.Duration - into else nil
+	return left, Config.LuckEvent.Every - into
+end
 function Config.luck(player)
-	return 1 + (player:GetAttribute("LuckBonus") or 0)
+	local mult = if Config.luckEventLeft() then Config.LuckEvent.Multiplier else 1
+	if player:GetAttribute("PassLuck10x") then -- (the 10x Luck pass)
+		mult *= Config.PassLuck
+	end
+	return (1 + (player:GetAttribute("LuckBonus") or 0)) * Config.Luck.RebirthLuck ^ (player:GetAttribute("Reborn") or 0) * mult
 end
 -- Luck to show: "x1", "x1.25", "x2.75", "x12.5".
 function Config.luckText(luck)
+	if luck >= 1000 then
+		return "x" .. Config.short(luck) -- (x45k: rebirths multiply it)
+	end
 	return "x" .. (string.format("%.2f", luck):gsub("%.?0+$", ""))
 end
 -- What goal gives `player` in luck and cash when claimed (extra: after that many more rebirths).
@@ -2020,12 +2163,13 @@ function Config.goalCash(player, goal, extra)
 	end
 	return math.floor(Config.unlockCost(player, goal.Biome + 1, extra) * goal.CashOfNext)
 end
--- A herd weight at `luck`.
-function Config.luckWeight(weight, luck)
+-- A herd weight at `luck` (QM, Nov 7: x4 luck is 4x the chance, 1 in 10,000 -> 1 in 2,500): the
+-- weight x luck, but never past the herd's commonest (`top`), so the commons stay about.
+function Config.luckWeight(weight, luck, top)
 	if weight <= 0 then
 		return 0
 	end
-	return weight ^ (1 / math.max(luck or 1, 1))
+	return math.min(weight * math.max(luck or 1, 1), math.max(weight, top or weight))
 end
 -- What unlocking biome i in the Slingshot's menu costs `player` (or after one more rebirth: extra).
 function Config.unlockCost(player, i, extra)
@@ -2068,25 +2212,54 @@ local RAINBOW = {
 	Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 160, 50), Color3.fromRGB(255, 235, 70),
 	Color3.fromRGB(80, 220, 90), Color3.fromRGB(70, 150, 255), Color3.fromRGB(170, 90, 240),
 }
--- The trail bars (QM, Oct 15): once every world is yours, the top bar (World2Bar.client) fills
--- to each of these in turn, for gold; a tap on a full one buys it (Gold.server's BuyTrail).
--- Bought ones are saved as bits of "TrailsOwned", shared by every world. Your trail is the
--- best one you own (the last in this list). Prices QM's (Oct 15; Purple to Rainbow 5x later that day).
+-- The trails (QM, Oct 15 the trail bars; Nov 7 the Trails Shop, Client/TrailShop, Fight to Steal
+-- an Egg's Weapon Shop 1:1): ten trails, Common up to Godly. Bought ones are saved as bits of
+-- "TrailsOwned" (bit i = Config.TrailBars[i], shared by every world), so the first eight keep
+-- their old places and the shop shows them in Config.TrailShop.Order. The one you equip
+-- ("TrailOn", saved) streams off you on foot, riding and flying the slingshot
+-- (Server/PlayerTrail), and its Speed multiplies every ride (Config.rebirthSpeed). Equipped
+-- none yet: your best. Price is cash (Gold.server's BuyTrail), Robux the Robux button's price
+-- till Roblox's loads, ProductId its developer product (made Nov 7, each with its recoloured trail guy icon).
+-- Godly also needs every animal in the Index (Shared/Trails.hasAllAnimals).
 local rgb = Color3.fromRGB
 -- (on your character only, Server/PlayerTrail: QM, Oct 15, not on what you ride any more)
 Config.AnimalTrails = false
 Config.TrailBars = {
-	{ Name = "Grey", Price = 100000, Colors = { rgb(240, 240, 245), rgb(200, 200, 208), rgb(150, 150, 160), rgb(100, 100, 112) } },
-	{ Name = "Green", Price = 500000, Colors = { rgb(180, 255, 160), rgb(100, 230, 90), rgb(40, 190, 60), rgb(20, 130, 40) } },
-	{ Name = "Blue", Price = 1000000, Colors = Config.FinishTrails[2].Colors },
-	{ Name = "Purple", Price = 25000000, Colors = { rgb(235, 190, 255), rgb(200, 120, 255), rgb(150, 60, 230), rgb(100, 30, 170) } },
-	{ Name = "Golden", Price = 50000000, Colors = Config.FinishTrails[1].Colors },
-	{ Name = "Red", Price = 75000000, Colors = Config.FinishTrails[3].Colors },
-	{ Name = "Galaxy", Price = 100000000, Colors = Config.FinishTrails[5].Colors },
-	{ Name = "Rainbow", Price = 200000000 }, -- (the Rainbow Trail's bands)
+	{ Name = "White", Rarity = "Common", Speed = 1.1, Price = 1000, Robux = 5, ProductId = 3729493127, Colors = { rgb(255, 255, 255), rgb(235, 235, 240), rgb(205, 205, 212), rgb(170, 170, 180) } },
+	{ Name = "Green", Rarity = "Uncommon", Speed = 1.2, Price = 15000, Robux = 15, ProductId = 3729493405, Colors = { rgb(180, 255, 160), rgb(100, 230, 90), rgb(40, 190, 60), rgb(20, 130, 40) } },
+	{ Name = "Blue", Rarity = "Rare", Speed = 1.3, Price = 100000, Robux = 29, ProductId = 3729493775, Colors = Config.FinishTrails[2].Colors },
+	{ Name = "Purple", Rarity = "Epic", Speed = 1.4, Price = 500000, Robux = 49, ProductId = 3729494004, Colors = { rgb(235, 190, 255), rgb(200, 120, 255), rgb(150, 60, 230), rgb(100, 30, 170) } },
+	{ Name = "Golden", Rarity = "Legendary", Speed = 1.5, Price = 2500000, Robux = 79, ProductId = 3729494067, Colors = Config.FinishTrails[1].Colors },
+	{ Name = "Red", Rarity = "Legendary", Speed = 1.6, Price = 10000000, Robux = 129, ProductId = 3729494493, Colors = Config.FinishTrails[3].Colors },
+	{ Name = "Galactic", Rarity = "Cosmic", Speed = 2.5, Price = 500000000, Robux = 295, ProductId = 3729494659, Colors = Config.FinishTrails[5].Colors },
+	{ Name = "Rainbow", Rarity = "Mythic", Speed = 2, Price = 150000000, Robux = 249, ProductId = 3729494608 }, -- (the Rainbow Trail's bands)
+	{ Name = "Ice", Rarity = "Divine", Speed = 1.75, Price = 40000000, Robux = 189, ProductId = 3729494551, Colors = { rgb(240, 255, 255), rgb(170, 240, 255), rgb(90, 210, 255), rgb(40, 150, 240) } },
+	{ Name = "Godly", Rarity = "Godly", Speed = 3, Price = 1000000000, Robux = 399, ProductId = 3729494716, AllAnimals = true, Colors = { rgb(255, 255, 255), rgb(255, 245, 190), rgb(255, 215, 80), rgb(255, 170, 30), rgb(255, 255, 255) } },
+}
+-- The Trails Shop's stand (QM, Nov 7: Fight to Steal an Egg's Weapon Shop stall, Carl and all,
+-- green and white like his reference's Trails Shop): left of the start line, by the
+-- leaderboards, its counter facing into the base. Server/TrailShop builds it; Carl's Talk prompt
+-- (or walking onto its ring) opens the popup (Client/TrailShop).
+Config.TrailShop = {
+	Order = { 1, 2, 3, 4, 5, 6, 9, 8, 7, 10 }, -- the cards, left to right (TrailBars indices)
+	Position = Vector3.new(-62, 0, 24), -- on the ground: left of the course's mouth, right of the Top Playtime board (QM, Nov 7: where Fight to Steal an Egg's Weapon Shop stands by its gateway)
+	Yaw = 200, -- degrees: its counter faces into the base, turned a touch inward (Fight to Steal an Egg's)
+	Scale = 1.6, -- (Fight to Steal an Egg's Weapon Shop's)
+	CarlScale = 0.8, -- Carl the cactus guy's own size (not x Scale): normal NPC size behind the counter (QM, Nov 7: was too big)
+	Title = "Trails Shop",
+	TitleTop = Color3.fromRGB(190, 255, 120),
+	TitleBottom = Color3.fromRGB(46, 176, 64),
+	TitleStroke = Color3.fromRGB(16, 62, 28),
+	TitleHeight = 4, -- studs tall (x Scale)
+	RingColor = Color3.fromRGB(110, 235, 90),
+	RingRadius = 12, -- studs (x Scale)
+	RingAhead = 5, -- its centre this far in front of the stall's middle (x Scale)
+	Reach = 12, -- studs from the counter where Open shows (x Scale)
+	LookRange = 30, -- Carl turns to watch a player this close (Fight to Steal an Egg's Config.Vendor)
+	Hop = 0.45, -- seconds of his hello hop
 }
 -- (the finish line's old trails, FinishTrail n, count as these: Yellow the Golden one)
-local OLD = { Golden = 1, Blue = 2, Red = 3, Rainbow = 4, Galaxy = 5 }
+local OLD = { Golden = 1, Blue = 2, Red = 3, Rainbow = 4, Galactic = 5 }
 function Config.ownsTrail(player, i)
 	local bar = Config.TrailBars[i]
 	if not bar then
@@ -2100,22 +2273,37 @@ function Config.ownsTrail(player, i)
 	end
 	return bar.Name == "Rainbow" and player:GetAttribute("RainbowTrail") == true -- (the bought Rainbow Trail)
 end
--- The next trail bar to fill (not yet yours), or nil when you have them all.
+-- The next trail in the shop's order not yet yours, or nil when you have them all.
 function Config.nextTrail(player)
-	for i in Config.TrailBars do
+	for _, i in Config.TrailShop.Order do
 		if not Config.ownsTrail(player, i) then
 			return i
 		end
 	end
 	return nil
 end
-function Config.trailColors(player)
-	for i = #Config.TrailBars, 1, -1 do
-		if Config.ownsTrail(player, i) then
-			return Config.TrailBars[i].Colors or RAINBOW
+-- The trail you wear: the one you equipped ("TrailOn") if it's yours, else your best, else nil.
+function Config.trailIndex(player)
+	local on = tonumber(player:GetAttribute("TrailOn"))
+	if on and Config.ownsTrail(player, on) then
+		return on
+	end
+	local order = Config.TrailShop.Order
+	for k = #order, 1, -1 do
+		if Config.ownsTrail(player, order[k]) then
+			return order[k]
 		end
 	end
 	return nil
+end
+function Config.trailColors(player)
+	local i = Config.trailIndex(player)
+	return if i then Config.TrailBars[i].Colors or RAINBOW else nil
+end
+-- x every ride's speed from the trail you wear (1 with none)
+function Config.trailSpeed(player)
+	local i = Config.trailIndex(player)
+	return if i then Config.TrailBars[i].Speed or 1 else 1
 end
 -- The per-world saves' DataStore names: World 1's as they've always been, the others' with
 -- this on the end ("Pen_W2"). Gold's store is shared.
@@ -2413,6 +2601,8 @@ Config.RideEggAB = { Share = 1, Salt = 1, FastRides = 4, FastHatch = 15, Studio 
 Config.PetOffersLimited = true
 -- The LIMITEDS stand at World 1's base (Client/LoongOffer): back on with three limiteds (QM, Nov 7; hidden Nov 6).
 Config.LimitedsStand = true
+-- How far the stand's row turns in toward the base (degrees, about its first stand): 0, the stand's row parallel to the wall (QM Nov 7).
+Config.LimitedsTurn = 0
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
@@ -2509,7 +2699,7 @@ if Config.World == 1 then
 			table.insert(goals, { Text = "Rebirth", Kind = "rebirth", Biome = i, NoPenLevel = true })
 			break
 		end
-		table.insert(goals, { Text = "Capture 3 " .. name .. " animals", Kind = "lasso", Biome = i, Need = 3, NoPenLevel = true, CashOfNext = Config.Luck.CashOfNext })
+		table.insert(goals, { Text = "Capture 2 " .. name .. " animals", Kind = "lasso", Biome = i, Need = 2, NoPenLevel = true, CashOfNext = Config.Luck.CashOfNext }) -- (QM, Nov 7: 2, was 3)
 		if Config.Biomes[i + 1] then
 			table.insert(goals, { Text = "Upgrade slingshot", Kind = "slingshot", Biome = i + 1, NoPenLevel = true })
 		end
@@ -2872,19 +3062,19 @@ end
 -- the same ability, egg and egg picture (Eggs/Egg.luau). The numbers past the size are guesses.
 -- Odds: 1 in this many of its base (a tenth if left out).
 Config.Alphas = {
-	GoldenPig = { Base = "Pig", Scale = 2 }, -- Meadow
-	AlphaFish = { Base = "Fish", Scale = 1.4 },
-	AlphaRhino = { Base = "Rhino", Scale = 1.4 },
-	EmperorScorpion = { Base = "Scorpion", Scale = 2 }, -- Desert
-	AlphaSpineLizard = { Base = "SpineLizard", Scale = 1.4 },
-	AlphaSnake = { Base = "Snake", Scale = 1.4, Odds = 5 },
-	AlphaSandworm = { Base = "Sandworm", Scale = 3, Odds = 20 }, -- (QM, Nov 6: faded sand, 3x, 1 in 20)
-	AlphaBoar = { Base = "Boar", Scale = 2 }, -- Tundra (the Elder Boar's model)
-	AlphaIceGolem = { Base = "IceGolem", Scale = 1.5 },
-	AlphaIcebringer = { Base = "Icebringer", Scale = 1.4, Odds = 5 },
-	AlphaRockHog = { Base = "RockHog", Scale = 1.4 }, -- Volcano
-	AlphaLavaWhale = { Base = "LavaWhale", Scale = 1.3 },
-	AlphaPhoenix = { Base = "Phoenix", Scale = 2, Odds = 5 }, -- (the three Divine alphas 1 in 5 of their Legendary base: QM Nov 7, Divine about 1 in 10,000)
+	GoldenPig = { Base = "Pig", Scale = 2, Odds = 200 }, -- Meadow
+	AlphaFish = { Base = "Fish", Scale = 1.4, Odds = 4 },
+	AlphaRhino = { Base = "Rhino", Scale = 1.4, Odds = 2 },
+	EmperorScorpion = { Base = "Scorpion", Scale = 2, Odds = 5 }, -- Desert
+	AlphaSpineLizard = { Base = "SpineLizard", Scale = 1.4, Odds = 4 },
+	AlphaSnake = { Base = "Snake", Scale = 1.4, Odds = 4 },
+	AlphaSandworm = { Base = "Sandworm", Scale = 3, Odds = 4 }, -- (QM, Nov 6: faded sand, 3x; Odds: the balance pass)
+	AlphaBoar = { Base = "Boar", Scale = 2, Odds = 150 }, -- Tundra (the Elder Boar's model)
+	AlphaIceGolem = { Base = "IceGolem", Scale = 1.5, Odds = 4 },
+	AlphaIcebringer = { Base = "Icebringer", Scale = 1.4, Odds = 4 },
+	AlphaRockHog = { Base = "RockHog", Scale = 1.4, Odds = 2 }, -- Volcano
+	AlphaLavaWhale = { Base = "LavaWhale", Scale = 1.3, Odds = 4 },
+	AlphaPhoenix = { Base = "Phoenix", Scale = 2, Odds = 2 }, -- (the Divine alphas about 1 in 10,000 to 16,000 overall; every alpha's Odds: the balance pass, QM Nov 7)
 }
 for kind, alpha in Config.Alphas do
 	local base = alpha.Base

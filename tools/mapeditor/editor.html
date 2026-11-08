@@ -255,6 +255,7 @@ function dumpMap() {
 function load(text, name, quiet) {
   const { m, g } = parseMap(text);
   M = m; cells = g; fileName = name || "world.map";
+  addMissingStands(M); // (the base's stands: always on the map)
   C = Object.assign({}, DEFAULTS, M.colours);
   $("file").textContent = fileName;
   undoStack.length = redoStack.length = 0;
@@ -406,6 +407,74 @@ function tint(s) {
   }
   s.img.getContext("2d").putImageData(out, 0, 0);
   s.url = null;
+}
+// the base's stands (QM, Nov 7): the three leaderboards, the Trails Shop, the three limiteds and
+// the free gift, each a "Stand" object by its kind (Shared/Stands). Always on the map: one that's
+// missing is put back at its Config spot on open (these: Config.Leaderboards, .TrailShop,
+// .FreeGift, the limiteds' row), and they can't be deleted. Front: -z at yaw 0 (the arrow).
+const STAND_DEFAULTS = [
+  { kind: "TopMoney", label: "Top Money board", x: -132, z: 2.1, yaw: 180 },
+  { kind: "TopLuck", label: "Top Luck board", x: -112, z: 2.1, yaw: 180 },
+  { kind: "TopPlaytime", label: "Top Playtime board", x: -92, z: 2.1, yaw: 180 },
+  { kind: "TrailShop", label: "Trails Shop", x: -62, z: 24, yaw: 200 },
+  { kind: "FreeGift", label: "Free gift", x: 105, z: 30, yaw: 150 },
+  { kind: "Loong", label: "Loong (limited)", x: 70.5, z: 13.6, yaw: 0 },
+  { kind: "MajesticUnicorn", label: "Majestic Unicorn (limited)", x: 98.5, z: 13.6, yaw: 0 },
+  { kind: "RoboShark", label: "Robo Shark (limited)", x: 126.5, z: 13.6, yaw: 0 },
+];
+const STAND_COLOURS = { TopMoney: "#60d62e", TopLuck: "#2c8cff", TopPlaytime: "#f24860" };
+const standLabel = (o) => (STAND_DEFAULTS.find((d) => d.kind === o.kind) || { label: o.kind }).label;
+function addMissingStands(m) {
+  for (const d of STAND_DEFAULTS)
+    if (!m.objects.some((o) => o.type === "Stand" && o.kind === d.kind))
+      m.objects.push({ type: "Stand", kind: d.kind, x: d.x, z: d.z, yaw: d.yaw });
+}
+function standRadius(o) {
+  if (STAND_COLOURS[o.kind]) return 7.5;
+  if (o.kind === "TrailShop") return 18;
+  if (o.kind === "FreeGift") return 6;
+  return 12.5;
+}
+function drawStand(g, o, alpha = 1) {
+  g.save(); g.globalAlpha = alpha;
+  g.translate(o.x, o.z); g.rotate(-(o.yaw || 0) * Math.PI / 180);
+  g.lineWidth = 0.3; g.strokeStyle = "rgba(0,0,0,0.5)";
+  let arrow = null;
+  if (STAND_COLOURS[o.kind]) {
+    // a leaderboard's plinth (14.5 x 4), its glowing strip along the front
+    g.fillStyle = STAND_COLOURS[o.kind]; g.fillRect(-7.25, -2, 14.5, 4); g.strokeRect(-7.25, -2, 14.5, 4);
+    g.fillStyle = "#fff"; g.fillRect(-5.5, -2.2, 11, 0.6);
+    arrow = 2;
+  } else if (o.kind === "TrailShop") {
+    // its ring in front (Config.TrailShop RingRadius x Scale, RingAhead x Scale), the stall behind
+    g.fillStyle = "rgba(110,235,90,0.3)"; g.strokeStyle = "rgb(110,235,90)"; g.lineWidth = 0.6;
+    g.beginPath(); g.arc(0, -8, 19.2, 0, Math.PI * 2); g.fill(); g.stroke();
+    g.lineWidth = 0.3; g.strokeStyle = "rgba(0,0,0,0.5)";
+    for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? "#faf6ec" : "#2eb040"; g.fillRect(-13 + i * 26 / 6, -6, 26 / 6, 14); }
+    g.strokeRect(-13, -6, 26, 14);
+    g.fillStyle = "#96643e"; g.fillRect(-11, -7, 22, 2.4);
+    arrow = 7;
+  } else if (o.kind === "FreeGift") {
+    g.fillStyle = "rgba(255,226,60,0.35)"; g.strokeStyle = "rgb(255,226,60)"; g.lineWidth = 0.5;
+    g.beginPath(); g.arc(0, 0, 6, 0, Math.PI * 2); g.fill(); g.stroke();
+    g.fillStyle = "#e21a24"; g.fillRect(-2, -2, 4, 4);
+    g.fillStyle = "#ffcd1e"; g.fillRect(-0.4, -2, 0.8, 4); g.fillRect(-2, -0.4, 4, 0.8);
+  } else {
+    // a limited's pedestal: dirt, a gold step, grass on top (Client/LoongOffer: Ring 22)
+    g.fillStyle = "#8a5a3a"; g.fillRect(-12.5, -12.5, 25, 25);
+    g.fillStyle = "#ffc428"; g.fillRect(-11.75, -11.75, 23.5, 23.5);
+    g.fillStyle = "#5cc23a"; g.fillRect(-11, -11, 22, 22); g.strokeRect(-12.5, -12.5, 25, 25);
+  }
+  if (arrow) { g.fillStyle = "#ffcc4d"; g.beginPath(); g.moveTo(0, -arrow - 3); g.lineTo(-2, -arrow); g.lineTo(2, -arrow); g.closePath(); g.fill(); }
+  g.restore();
+  // its name, upright
+  g.save(); g.globalAlpha = alpha;
+  g.fillStyle = "#fff"; g.strokeStyle = "rgba(0,0,0,0.8)"; g.lineWidth = 0.8;
+  const board = !!STAND_COLOURS[o.kind];
+  g.font = `bold ${board ? 2.2 : 3.2}px Montserrat, sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
+  const t = standLabel(o).replace(" (limited)", "").replace(" board", "");
+  g.strokeText(t, o.x, o.z); g.fillText(t, o.x, o.z);
+  g.restore();
 }
 // the cactus vendor's stall (QM, Oct 27: LassoAPet's Carl stall) from above, drawn here from
 // Shared/VendorStallModel's parts (x, z, width, depth, colour, egg?) lowest first, its crates
@@ -625,13 +694,14 @@ function draw() {
   }
   if (view.furniture) drawFurniture(ctx);
   // objects: ruins, nests, props, bosses
-  const order = { Ruin: 0, Nest: 1, Prop: 2, Vendor: 2, Pillar: 3, Boss: 4, Arch: 5, Barrier: 6, FightBarrier: 7 };
+  const order = { Ruin: 0, Nest: 1, Prop: 2, Vendor: 2, Stand: 2, Pillar: 3, Boss: 4, Arch: 5, Barrier: 6, FightBarrier: 7 };
   const shown = (o) => o.type === "Pillar" ? view.fixed : o.type === "Arch" ? view.arches : o.type === "Prop" || o.type === "Ruin" ? view.props : true;
   const objs = M.objects.filter(shown).sort((a, b) => order[a.type] - order[b.type]);
   for (const o of objs) {
     if (o.x < v.x0 - 80 || o.x > v.x1 + 80 || o.z < v.z0 - 80 || o.z > v.z1 + 80) continue;
     if (o.type === "Ruin") drawRuin(ctx, o);
     else if (isBar(o)) drawBarrier(ctx, o);
+    else if (o.type === "Stand") drawStand(ctx, o);
     else drawSprite(ctx, spriteFor(o), o.x, o.z, o.yaw, o.scale, o.type === "Arch" ? 0.85 : 1);
   }
   if (view.barriers) {
@@ -754,6 +824,7 @@ const snap = (v, free) => (free ? Math.round(v * 10) / 10 : Math.round(v));
 function hitRadius(o) {
   if (o.type === "Ruin") return o.length / 2;
   if (isBar(o)) return o.width / 2;
+  if (o.type === "Stand") return standRadius(o);
   const s = spriteFor(o);
   if (!s) return 4;
   const [x0, z0, x1, z1] = s.b;
@@ -800,11 +871,12 @@ function place(x, z) {
   });
   inspect();
 }
-function deleteSelected() { if (!selected) return; const s = selected; editObjects(() => (M.objects = M.objects.filter((o) => o !== s))); selected = null; inspect(); }
+function deleteSelected() { if (!selected) return; const s = selected; if (s.type === "Stand") return toast("The game needs every stand: drag it where you want it instead."); editObjects(() => (M.objects = M.objects.filter((o) => o !== s))); selected = null; inspect(); }
 function duplicateSelected() {
   if (!selected) return;
   const copy = JSON.parse(JSON.stringify(selected)); copy.x += 8; copy.z += 8;
   if (copy.type === "Boss") return toast("One boss a biome: drag it instead.");
+  if (copy.type === "Stand") return toast("One of each stand: drag it instead.");
   editObjects(() => M.objects.push(copy)); selected = copy; inspect();
 }
 function nudgeSelected(f) {
@@ -1081,7 +1153,7 @@ function inspect() {
   const h = document.createElement("h2"); h.className = "title"; box.appendChild(h);
   if (selected) {
     const o = selected;
-    h.textContent = o.type === "Prop" ? o.item.replace(/([a-z])([A-Z])/g, "$1 $2") : o.type === "Ruin" ? "Brick wall" : o.type === "Pillar" ? pillarLabel(o) : o.type === "Arch" ? "Arch" : o.type === "Barrier" ? `${o.region} ${o.training ? "training " : ""}barrier` : o.type === "FightBarrier" ? "Fight barrier" : `${o.area} ${o.type.toLowerCase()}`;
+    h.textContent = o.type === "Prop" ? o.item.replace(/([a-z])([A-Z])/g, "$1 $2") : o.type === "Ruin" ? "Brick wall" : o.type === "Pillar" ? pillarLabel(o) : o.type === "Arch" ? "Arch" : o.type === "Barrier" ? `${o.region} ${o.training ? "training " : ""}barrier` : o.type === "FightBarrier" ? "Fight barrier" : o.type === "Stand" ? standLabel(o) : `${o.area} ${o.type.toLowerCase()}`;
     const set = (k) => (v) => nudgeSelected((x) => { if (v === null) delete x[k]; else x[k] = v; });
     box.appendChild(field("X", o.x, set("x")));
     box.appendChild(field("Z", o.z, set("z")));
@@ -1119,6 +1191,11 @@ function inspect() {
       box.appendChild(field("Width", o.width, set("width")));
       const n = document.createElement("div"); n.className = "note";
       n.textContent = "Red wall across a gate, solid only for players locked into the boss fight in the area either side. [ ] make it narrower or wider.";
+      box.appendChild(n);
+    } else if (o.type === "Stand") {
+      box.appendChild(field("Yaw", o.yaw || 0, set("yaw")));
+      const n = document.createElement("div"); n.className = "note";
+      n.textContent = "Stands on the ground here in the game. The yellow arrow is the way it faces. Moves in Studio on the next Play.";
       box.appendChild(n);
     } else if (o.type === "Vendor") {
       box.appendChild(field("Name", o.name || "Carl", set("name")));

@@ -96,7 +96,7 @@ end
 
 -- Your own pets can be ridden, and clicked to pick which. Animal parts aren't
 -- queryable (so they never block the lasso or the mouse), so these ones are made so.
-local mine = PenPets.pets -- [model] = { id, kind, merged, fuse, income, stats, worth }
+local mine = PenPets.pets -- [model] = { animal, id, kind, merged, fuse, income, stats, worth }
 local function makeRideable(pen, id, pet, kind, merged, fuse, income, stats, worth, tier, auto)
 	if pen ~= myPen() then
 		-- Someone else's: no RIDE, but its nameplate and ring show as yours do (QM, Oct 7).
@@ -112,7 +112,7 @@ local function makeRideable(pen, id, pet, kind, merged, fuse, income, stats, wor
 			part.CanQuery = true
 		end
 	end
-	mine[pet.animal.model] = { id = id, kind = kind, merged = merged or 1, fuse = fuse, income = income, stats = stats, worth = worth, tier = tier, auto = auto }
+	mine[pet.animal.model] = { animal = pet.animal, id = id, kind = kind, merged = merged or 1, fuse = fuse, income = income, stats = stats, worth = worth, tier = tier, auto = auto }
 	pet.animal.model.Destroying:Connect(function()
 		mine[pet.animal.model] = nil
 	end)

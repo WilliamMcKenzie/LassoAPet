@@ -2,6 +2,7 @@
 -- baked into the place in Studio, or built now if there's none. Then the live colours
 -- (workspace.WorldColors, Shared/WorldColors) and the studs' knobs (workspace.StudStyle),
 -- and the world's marked ready. The sky and fog are Lighting's, in default.project.json.
+-- Sky: the Creator Store "Anime sky" (asset 13107361022), QM Nov 7; was flat blue 81588505365795.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
