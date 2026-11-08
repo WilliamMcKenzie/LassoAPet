@@ -218,6 +218,35 @@ function Stats.report(arg)
 			end
 		end
 	end
+	-- Quit quartiles (QM, Nov 8; Funnel's "quit:m<minutes>"): the minute 25/50/75% of quits had
+	-- happened by, and the cash, luck and commonest biome of those who quit in that minute.
+	local quitTotal = 0
+	for m = 0, 180 do
+		quitTotal += d["quit:m" .. m] or 0
+	end
+	table.insert(lines, "Quit quartiles (" .. quitTotal .. " quits; time stayed, and cash/luck/biome then):")
+	if quitTotal > 0 then
+		for _, q in { 0.25, 0.5, 0.75 } do
+			local seen, at = 0, 180
+			for m = 0, 180 do
+				seen += d["quit:m" .. m] or 0
+				if seen >= q * quitTotal then
+					at = m
+					break
+				end
+			end
+			local n = math.max(d["quit:m" .. at] or 0, 1)
+			local top, topN = "?", 0
+			for f, c in d do
+				local b = string.match(f, "^quit:m" .. at .. ":b:(.+)$")
+				if b and c > topN then
+					top, topN = b, c
+				end
+			end
+			table.insert(lines, string.format("  q%d: %d-%d min, avg cash %s, avg luck x%.2f, mostly %s (%d of %d)",
+				q * 100, at, at + 1, Config.short(math.floor((d["quit:m" .. at .. ":cash"] or 0) / n)), (d["quit:m" .. at .. ":luck"] or 0) / n, top, topN, n))
+		end
+	end
 	table.insert(lines, "Monetization (" .. sessions .. " player sessions; what players did, not what they were shown):")
 	local blocked = d["flag:randomRestricted"] or 0
 	table.insert(lines, string.format("  Can't buy the Halloween Egg where they play (paid random items): %d sessions (%s)", blocked, pct(blocked, sessions)))

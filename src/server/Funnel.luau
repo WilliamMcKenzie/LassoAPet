@@ -60,6 +60,8 @@
 --   "Quit In <biome>"     leaving the game: the furthest biome reached (value: minutes this
 --                         visit; CustomField03 "riding" or "in base")
 --   "Quit At Goal: <goal>" leaving the game: the goal that was up (same value and field)
+--   "Quit After <0-1m..60m+>" leaving the game, by time stayed (value: cash held;
+--                         CustomField03 the biome); "Quit Luck After <..>" the same, value luck
 --   "Robux Spent"         any product or pass bought (value: Robux; CustomField03 the sku),
 --                         so Robux per player can be split by version too
 --   Economy (Analytics > Economy), currency "Cash": sources Ride, Pen Income (a minute's
@@ -300,6 +302,9 @@ function Funnel.unlocked(player, i, how)
 	end
 end
 
+local QUIT_BUCKETS = { { 1, "0-1m" }, { 2, "1-2m" }, { 3, "2-3m" }, { 5, "3-5m" }, { 7, "5-7m" }, { 10, "7-10m" },
+	{ 15, "10-15m" }, { 20, "15-20m" }, { 30, "20-30m" }, { 45, "30-45m" }, { 60, "45-60m" } } -- (Quit After: under each, else 60m+)
+
 -- Hatchery's Rebirth: rebirth number `n` done.
 function Funnel.rebirthed(player, n)
 	local played = game:GetService("ServerStorage"):FindFirstChild("PlayedTime") -- (Gold.server's)
@@ -456,6 +461,28 @@ Telemetry.onLeave(function(player, transferring)
 		local ok, quests = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Quests") or "[]")
 		local goal = ok and type(quests) == "table" and type(quests[1]) == "table" and quests[1].text
 		Funnel.event(player, "Quit At Goal: " .. (if type(goal) == "string" then string.sub(goal, 1, 40) else "none"), mins, doing)
+		-- Quit-time quartiles (QM, Nov 8: q25/q50/q75 of time stayed, with the biome, cash and
+		-- luck they had then). Roblox's: "Quit After <bucket>" (value: cash) and "Quit Luck After
+		-- <bucket>" (value: luck), CustomField03 the biome. Ours, exact and instant (/stats'
+		-- "Quit quartiles"): per minute stayed, its count and cash, luck and biome counts.
+		local biome = BIOME_NAMES[gates] or "Endless"
+		local cash = tonumber(player:GetAttribute("Gold")) or 0
+		local okLuck, luck = pcall(Config.luck, player)
+		luck = if okLuck and type(luck) == "number" then luck else 1
+		local bucket
+		for _, b in QUIT_BUCKETS do
+			if minutes < b[1] then
+				bucket = b[2]
+				break
+			end
+		end
+		bucket = bucket or "60m+"
+		Funnel.event(player, "Quit After " .. bucket, cash, biome)
+		Funnel.event(player, "Quit Luck After " .. bucket, luck, biome)
+		local m = "quit:m" .. math.min(math.floor(minutes), 180)
+		local fields = { [m] = 1, [m .. ":cash"] = cash, [m .. ":luck"] = luck, [m .. ":b:" .. biome] = 1 }
+		StatsStore.addShared("simple-v2-build-w" .. WORLD .. "-" .. BUILD, fields)
+		StatsStore.addShared("simple-v2-day-" .. os.date("!%Y-%m-%d"), fields)
 	end
 	state[player] = nil
 	StatsStore.add("v1-leaves", { ["w" .. WORLD .. "|" .. (if transferring then "travel" else "quit") .. "|" .. spent] = 1 })
