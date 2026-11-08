@@ -265,8 +265,12 @@ local function layout()
 	starterBuy.Selectable = show
 	local y = if show then starter.Size.Y.Offset + 28 else 0
 	egg.Position = UDim2.fromOffset(EGG_W / 2, y)
+	egg.Visible = false -- (the Halloween Egg is gone from the shop: QM, Nov 8)
+	for _, button in eggButtons do
+		button.Selectable = false
+	end
 	for _, card in cashCards do
-		card.Position = UDim2.fromOffset(card.Position.X.Offset, y + egg.Size.Y.Offset + 28)
+		card.Position = UDim2.fromOffset(card.Position.X.Offset, y)
 	end
 end
 layout()
