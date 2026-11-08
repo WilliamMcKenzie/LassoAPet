@@ -2426,14 +2426,27 @@ function vfx.updateAvoid(dt)
 				end
 				if not state.skip[entity] then
 					-- Away from you (the side it first picked), unless the wall leaves it in your way.
+					-- Once it has picked a side and a pace it keeps both, and its line only ever
+					-- moves further out (QM, Nov 8: animals snapped left/right as you got close).
+					-- Before, every frame re-picked the pace from what was left to go (a few studs,
+					-- so the fastest spring) and could flip sides at a wall, so a late swerve
+					-- tracked your steering, or crossed your path, in a fraction of a second.
+					-- Animals can't crash you now (anything you hit riding home is knocked away),
+					-- so the swerve only has to look right.
 					local side = side0
 					local target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
-					if math.abs(target - px) < math.min(6, clear) then
-						side = -side
-						target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
+					if not entity.swerveSide then
+						if math.abs(target - px) < math.min(6, clear) then
+							side = -side
+							target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
+						end
+						entity.swerveW = math.min(w, 6)
 					end
-					entity.swerveSide, entity.swerveTo = side, target - base
-					entity.swerveW = w
+					local to = target - base
+					if entity.swerveSide then
+						to = if side > 0 then math.max(to, entity.swerveTo or 0) else math.min(to, entity.swerveTo or 0)
+					end
+					entity.swerveSide, entity.swerveTo = side, to
 				end
 			end
 		elseif dz < -10 and entity.swerveSide then
@@ -2448,7 +2461,11 @@ function vfx.updateAvoid(dt)
 			local off = s - to
 			local a = (v + w * off) * dt
 			local decay = math.exp(-w * dt)
-			off, v = (off + a) * decay, math.clamp((v - w * a) * decay, -maxSpeed, maxSpeed)
+			-- (sideways no faster than Turn x its running speed, so it never darts: QM, Nov 8)
+			local cap = math.min(maxSpeed, math.max(entity.speed or 0, 10) * (cfg and cfg.Turn or 0.6) * 1.5)
+			local was = off
+			off, v = (off + a) * decay, math.clamp((v - w * a) * decay, -cap, cap)
+			off = math.clamp(off, was - cap * dt, was + cap * dt)
 			if math.abs(off) < 0.01 and math.abs(v) < 0.05 then
 				off, v = 0, 0
 			end
