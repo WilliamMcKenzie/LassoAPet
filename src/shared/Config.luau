@@ -1466,10 +1466,11 @@ local Config = {
 	Passes = {
 		-- (QM, Oct 13: his four passes, renamed from the old ones on their ids, so their old
 		-- owners own these now. VIP, Fast Hatch and Auto Hatch are gone.)
+		-- (QM, Nov 8: 1.5x Speed and Giant Pets off the shop, PassCards; owners keep them)
 		{ Key = "Speed", Name = "1.5x Speed", Price = 49, Id = 2012972449 }, -- every ride x PassSpeed (Config.rebirthSpeed)
 		{ Key = "DoubleGold", Name = "2x Cash", Price = 49, Id = 2014634454 },
 		{ Key = "Invincible", Name = "Invincible", Price = 19, Id = 2036488765 }, -- x PassGoldMultiplier (Config.goldX) (QM, Oct 20: R$19 on its new button)
-		{ Key = "AutoHatch", Name = "Auto Hatch", Price = 29, Id = 2039620869 }, -- (QM, Oct 20) ready eggs hatch by themselves (Hatchery's PassAutoHatch)
+		{ Key = "AutoHatch", Name = "Insta Hatch", Price = 299, Id = 2039620869 }, -- (QM, Nov 8: was Auto Hatch R$29) every egg hatches as soon as it is placed (Hatchery's PassAutoHatch)
 		{ Key = "GiantPets", Name = "Giant Pets", Price = 49, Id = 2014472441 },
 		{ Key = "StarterPack", Name = "Starter Pack", Price = 19, Id = 2013764414 }, -- Config.StarterPack, once (Hatchery)
 		{ Key = "Luck10x", Name = "10x Luck", Price = 199, Id = 2075103975 }, -- (QM, Nov 7) your luck x PassLuck for good (Config.luck)
@@ -1919,10 +1920,8 @@ Config.NativeUi = {
 	PassCards = {
 		{ Key = "Luck10x", Look = "CashCard", Icon = "LuckIcon", Badge = "x10", Text = '<font color="#7CFF4D">10x Luck</font> forever!' },
 		{ Key = "DoubleGold", Look = "GoldCard", Icon = "CashStack", Badge = "x2", Text = 'Earn <font color="#7CFF4D">2x Cash!</font>' },
-		{ Key = "Speed", Look = "DamageCard", Pet = "Horse", Badge = "1.5x", Text = 'Ride <font color="#7CFF4D">1.5x</font> faster!' },
-		{ Key = "AutoHatch", Look = "GrowthCard", Icon = "PassGrowth", Text = 'Eggs hatch <font color="#7CFF4D">by themselves!</font>' },
+		{ Key = "AutoHatch", Look = "GrowthCard", Icon = "PassGrowth", Text = 'Eggs hatch <font color="#7CFF4D">instantly!</font>' },
 		{ Key = "Invincible", Look = "LifeCard", Icon = "PassLife", Text = 'Never <font color="#7CFF4D">crash!</font>' },
-		{ Key = "GiantPets", Look = "PowerCard", Pet = "MajesticUnicorn", Badge = "x2", Text = 'Your pets are <font color="#7CFF4D">giant!</font>' },
 	},
 	-- UI sounds (client/UiFx): id, volume, speed, start (seconds in)
 	Sounds = {
