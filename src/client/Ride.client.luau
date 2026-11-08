@@ -996,7 +996,7 @@ startRide = function(model, at)
 			herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
 		end
 		mount = fromHerd
-		mount.popping, mount.hop, mount.dodge, mount.merged, mount.fuse, mount.tier = nil, 0, 0, nil, nil, nil
+		mount.popping, mount.hop, mount.dodge, mount.dodgeTo, mount.merged, mount.fuse, mount.tier = nil, 0, 0, 0, nil, nil, nil
 		mount.auto = nil
 		mount.swerve, mount.swerveTo, mount.swerveV, mount.swerveSide = 0, 0, 0, nil
 		mount.animal:setScale(1)
@@ -1586,7 +1586,7 @@ local function takeFromPool(n, x, z, kind)
 		builtThisFrame += 1
 		entity = newEntity(x, z, 0, kind)
 	end
-	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
+	entity.n, entity.x, entity.z, entity.yaw, entity.dodge, entity.dodgeTo = n, x, z, 0, 0, 0
 	entity.swerve, entity.swerveTo, entity.swerveV, entity.swerveSide, entity.lat = 0, 0, 0, nil, 0 -- (vfx.updateAvoid; moveAnimal)
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
 	-- Put where it now is at once: one taken out of view isn't moved until it comes
@@ -1781,6 +1781,16 @@ end
 
 -- shown: false while it's out of view (see updateHerd), when it only keeps its
 -- place on the course and its model waits where it was.
+-- A sideways nudge (a rider brushing past on the way out, a scare, ink) sets where the
+-- animal is pushed to (dodgeTo, which fades back to its lane); the animal eases after it
+-- (~0.2 s), so it never jerks aside or swings its head the instant you touch it (QM,
+-- Nov 8: animals snapped left/right as you rode up to them).
+function vfx.easeDodge(entity, dt)
+	local to = (entity.dodgeTo or 0) * math.exp(-1.5 * dt)
+	entity.dodgeTo = to
+	entity.dodge += (to - entity.dodge) * (1 - math.exp(-5 * dt))
+end
+
 local function moveAnimal(entity, x, z, speed, dt, shown)
 	-- Faces along its sideways speed, smoothed (~0.1 s) so any frame-to-frame wobble in x
 	-- can't twitch its head (QM, Oct 6). Its position isn't smoothed: that's the hitbox.
@@ -1877,7 +1887,7 @@ function vfx.updateEvent(dt, seen, inView)
 	if not vfx.event then
 		local entity = newEntity(vfx.EVENT_LANE, SPAWN_Z, 0, kind)
 		entity.animal.model.Parent = nil
-		entity.n, entity.dodge, entity.event = key, 0, true
+		entity.n, entity.dodge, entity.dodgeTo, entity.event = key, 0, 0, true
 		vfx.event = { key = key, entity = entity }
 	end
 	local event = vfx.event
@@ -1926,7 +1936,7 @@ function vfx.updateEvent(dt, seen, inView)
 	if shown then
 		entity.animal:setScale(scale * vfx.ownSize(entity)) -- (grown while you rode it, it stays grown)
 	end
-	entity.dodge *= math.exp(-1.5 * dt)
+	vfx.easeDodge(entity, dt)
 	moveAnimal(entity, math.clamp(x + entity.dodge, -vfx.edge(z), vfx.edge(z)), z, speed, dt, shown)
 end
 
@@ -2027,7 +2037,7 @@ local function updateHerd(dt, slowed)
 				entity.animal:setScale(scale)
 			end
 			-- A nudge from a passing rider fades back out; it never changes the schedule.
-			entity.dodge *= math.exp(-1.5 * dt)
+			vfx.easeDodge(entity, dt)
 			if snapped then
 				entity.x = x + entity.dodge + (entity.swerve or 0) -- a snap doesn't swing them sideways
 			end
@@ -2426,14 +2436,27 @@ function vfx.updateAvoid(dt)
 				end
 				if not state.skip[entity] then
 					-- Away from you (the side it first picked), unless the wall leaves it in your way.
+					-- Once it has picked a side and a pace it keeps both, and its line only ever
+					-- moves further out (QM, Nov 8: animals snapped left/right as you got close).
+					-- Before, every frame re-picked the pace from what was left to go (a few studs,
+					-- so the fastest spring) and could flip sides at a wall, so a late swerve
+					-- tracked your steering, or crossed your path, in a fraction of a second.
+					-- Animals can't crash you now (anything you hit riding home is knocked away),
+					-- so the swerve only has to look right.
 					local side = side0
 					local target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
-					if math.abs(target - px) < math.min(6, clear) then
-						side = -side
-						target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
+					if not entity.swerveSide then
+						if math.abs(target - px) < math.min(6, clear) then
+							side = -side
+							target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
+						end
+						entity.swerveW = math.min(w, 6)
 					end
-					entity.swerveSide, entity.swerveTo = side, target - base
-					entity.swerveW = w
+					local to = target - base
+					if entity.swerveSide then
+						to = if side > 0 then math.max(to, entity.swerveTo or 0) else math.min(to, entity.swerveTo or 0)
+					end
+					entity.swerveSide, entity.swerveTo = side, to
 				end
 			end
 		elseif dz < -10 and entity.swerveSide then
@@ -2448,7 +2471,11 @@ function vfx.updateAvoid(dt)
 			local off = s - to
 			local a = (v + w * off) * dt
 			local decay = math.exp(-w * dt)
-			off, v = (off + a) * decay, math.clamp((v - w * a) * decay, -maxSpeed, maxSpeed)
+			-- (sideways no faster than Turn x its running speed, so it never darts: QM, Nov 8)
+			local cap = math.min(maxSpeed, math.max(entity.speed or 0, 10) * (cfg and cfg.Turn or 0.6) * 1.5)
+			local was = off
+			off, v = (off + a) * decay, math.clamp((v - w * a) * decay, -cap, cap)
+			off = math.clamp(off, was - cap * dt, was + cap * dt)
 			if math.abs(off) < 0.01 and math.abs(v) < 0.05 then
 				off, v = 0, 0
 			end
@@ -2488,7 +2515,7 @@ function vfx.updateScared(dt)
 		if entity ~= mount and not entity.popping and dx * dx + dz * dz < aura.radius * aura.radius then
 			local away = if dx >= 0 then 1 else -1
 			if entity.n then
-				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -aura.radius, aura.radius)
+				entity.dodgeTo = math.clamp((entity.dodgeTo or 0) + away * 60 * dt, -aura.radius, aura.radius)
 			else
 				entity.lane = math.clamp((entity.lane or entity.x / vfx.widen(entity.z)) + away * 60 * dt / vfx.widen(entity.z), -EDGE, EDGE)
 			end
@@ -2715,7 +2742,7 @@ function vfx.scareOff(dt, special)
 		if entity ~= mount and not entity.popping and dx * dx + dz * dz < r * r then
 			local away = if dx >= 0 then 1 else -1
 			if entity.n then
-				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -r, r)
+				entity.dodgeTo = math.clamp((entity.dodgeTo or 0) + away * 60 * dt, -r, r)
 			else
 				entity.lane = math.clamp((entity.lane or entity.x / vfx.widen(entity.z)) + away * 60 * dt / vfx.widen(entity.z), -EDGE, EDGE)
 			end
@@ -2931,7 +2958,7 @@ function vfx.inkBlast(dt, cfg)
 		if entity ~= mount and dx * dx + dz * dz < cfg.Radius * cfg.Radius then
 			local away = if dx >= 0 then 1 else -1
 			if entity.n then
-				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -cfg.Radius, cfg.Radius)
+				entity.dodgeTo = math.clamp((entity.dodgeTo or 0) + away * 60 * dt, -cfg.Radius, cfg.Radius)
 			else
 				entity.lane = math.clamp(entity.lane + away * 60 * dt / vfx.widen(entity.z), -EDGE, EDGE)
 			end
@@ -3879,7 +3906,7 @@ local function checkRide(dt)
 					hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount)) -- 20% Hold per animal it hits (QM)
 				end
 			elseif phase == "outbound" and entity.n then
-				entity.dodge = math.clamp(entity.dodge + (if dx >= 0 then 1 else -1) * 12 * dt, -6, 6)
+				entity.dodgeTo = math.clamp((entity.dodgeTo or 0) + (if dx >= 0 then 1 else -1) * 12 * dt, -6, 6)
 			end
 		end
 	end
@@ -4135,7 +4162,7 @@ vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, spee
 		rider.entity = newEntity(p.X, p.Z, 0, base)
 		vfx.Fusion.paint(rider.entity.animal.model, base, fuse)
 		rider.entity.animal:setSaddled(true)
-		rider.entity.dodge = 0
+		rider.entity.dodge, rider.entity.dodgeTo = 0, 0
 		rider.kind = kind
 		if Config.AnimalTrails and Config.trailColors(player) then -- the Rainbow Trail, or the finish line's (Config.FinishTrails)
 			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width, Config.trailColors(player))
