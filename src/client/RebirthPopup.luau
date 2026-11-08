@@ -4,7 +4,7 @@
 -- (QM, Nov 7: icons, not words)
 --   [cash]   $1.2m -> $0
 --   every biome you've unlocked (its picture, Config.Biomes[i].Picture) -> just the Meadow's,
---   [clover] +0.25 -> +0.5 (luck per goal: goal rewards x2; your luck itself stays)
+--   [clover] x1.25 -> x5 (your luck x Config.Luck.RebirthLuck: QM, Nov 8)
 -- and under them Rebirth! (Hatchery's Rebirth), or, till the Rebirth goal is done, a grey
 -- "Reach <Config.rebirthBiome>" (Desert, then Tundra...) that does nothing. X (or not confirming) leaves the goal to claim later.
 --
@@ -56,7 +56,6 @@ local function refresh()
 	if not gui then
 		return
 	end
-	local reborn = player:GetAttribute("Reborn") or 0
 	-- each row an icon strip (QM, Nov 7: icons, not words), rebuilt each time
 	local strip, order
 	local function start(row)
@@ -121,14 +120,11 @@ local function refresh()
 	text(ARROW)
 	picture(1, h)
 
-	-- luck per goal: [clover] +0.25 -> +0.5
-	local now, after = Config.Luck.Reach * Config.Luck.RewardPerRebirth ^ reborn, Config.Luck.Reach * Config.Luck.RewardPerRebirth ^ (reborn + 1)
-	local function plus(n)
-		return "+" .. (string.format("%.2f", n):gsub("%.?0+$", ""))
-	end
+	-- your luck: [clover] x1.25 -> x5 (QM, Nov 8: a rebirth multiplies it)
+	local now = Config.luck(player)
 	start("Luck")
 	icon("LuckIcon")
-	text(plus(now) .. ARROW .. colored(plus(after), GOOD))
+	text(Config.luckText(now) .. ARROW .. colored(Config.luckText(now * Config.Luck.RebirthLuck), GOOD))
 	local can = ready()
 	confirm.Active = can
 	confirm.AutoButtonColor = false

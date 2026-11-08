@@ -449,6 +449,7 @@ local function reweigh()
 end
 player:GetAttributeChangedSignal("LuckBonus"):Connect(reweigh)
 player:GetAttributeChangedSignal("PassLuck10x"):Connect(reweigh) -- (the 10x Luck pass)
+player:GetAttributeChangedSignal("Reborn"):Connect(reweigh) -- (a rebirth: luck x Config.Luck.RebirthLuck)
 -- and the 100x Luck Event starting or ending (Config.LuckEvent: Config.luck's in it)
 task.spawn(function()
 	local on = Config.luckEventLeft() ~= nil
