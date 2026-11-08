@@ -516,6 +516,7 @@ local Config = {
 	-- which cut tens of thousands of textures. Off (or those variants missing from
 	-- MaterialService): the stud Textures as before. Shared/Studs.
 	StudMaterial = true,
+	BaseplateTransparency = 0.8, -- the ground's checker is Roblox's own Baseplate texture (grid + checker, black), this see-through, as the Baseplate's (QM, Nov 8)
 	WalkSpeed = 48, -- on foot, studs a second (Roblox's default is 16; QM, Oct 9: 3x, was 2x)
 	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
 	-- On the ride home with an egg the stampede gets out of your way (QM, Oct 6, to

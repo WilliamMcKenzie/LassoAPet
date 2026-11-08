@@ -39,7 +39,8 @@ local COLORS = Config.WorldColors
 -- (the map's own colours, from the editor, over Config's: WorldColors paints from these too)
 local MapFile = require(Shared.MapFile)
 MapFile.applyColours(MapData, COLORS)
-local CHECKER, STUDS = "rbxassetid://84747779882944", "rbxassetid://7447638591"
+-- (Roblox's own Baseplate texture, grid + checker, QM Nov 8: a black overlay, tinted nothing)
+local CHECKER, STUDS = "rbxassetid://6372755229", "rbxassetid://7447638591"
 local STONE_MESH = "rbxassetid://128149382332662" -- StoneBlock_Block (assets/meshes/ids.json)
 local SIDES = { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
 local ALL = { Enum.NormalId.Top, Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
@@ -66,7 +67,9 @@ local function texture(part, face, image, tile, key, z, aligned)
 	t.Texture = image
 	t.StudsPerTileU, t.StudsPerTileV = tile, tile
 	t.ZIndex = z or 1
-	if key then
+	if image == CHECKER then
+		t.Color3, t.Transparency = Color3.new(0, 0, 0), Config.BaseplateTransparency
+	elseif key then
 		t:SetAttribute("ColorKey", key)
 		t.Color3 = color(key)
 	end
@@ -229,7 +232,7 @@ local function floors(parent, wallParent, only, made)
 					-- magma glows: Neon, only a faint checker on top (as LassoAPet's lava)
 					p.Material = Enum.Material.Neon
 					p.Transparency = 0.15
-					t.Transparency = 0.55
+					t.Transparency = 0.9 -- (the baseplate overlay is black: fainter over the glow)
 					p:SetAttribute("Lava", true)
 				else
 					p.Material = Enum.Material.Glass

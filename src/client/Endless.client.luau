@@ -34,7 +34,8 @@ root.Parent = workspace
 local CELL, CHUNK, START = Endless.CELL, Endless.CHUNK, Endless.START
 local AHEAD, BEHIND = 760, 260 -- studs of course built in front of the camera and behind it (the fog ends by 500)
 local BUDGET = 0.004 -- seconds of building a frame
-local CHECKER, STUDS = "rbxassetid://84747779882944", "rbxassetid://7447638591"
+-- (Roblox's own Baseplate texture, grid + checker, QM Nov 8: a black overlay, tinted nothing)
+local CHECKER, STUDS = "rbxassetid://6372755229", "rbxassetid://7447638591"
 local FLOOR_BOTTOM, SEAM, CAP_H, CAP_LIP = -2, 0.03, 3, 1
 local TOP = { Enum.NormalId.Top }
 local ALL = { Enum.NormalId.Top, Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
@@ -63,7 +64,9 @@ local function texture(part, face, image, tile, key, ground)
 	t.Texture = image
 	t.StudsPerTileU, t.StudsPerTileV = tile, tile
 	t.ZIndex = if image == STUDS then 2 else 1
-	if key then
+	if image == CHECKER then
+		t.Color3, t.Transparency = Color3.new(0, 0, 0), Config.BaseplateTransparency
+	elseif key then
 		t:SetAttribute("ColorKey", key)
 		t.Color3 = color(key)
 	end
@@ -130,7 +133,7 @@ local function floorsAndWalls(parent, c)
 			p.Material = Enum.Material.Glass
 			p.MaterialVariant = ""
 			p.Transparency = 0.35
-			texture(p, Enum.NormalId.Top, CHECKER, 8, t.key .. "Checker", true).Transparency = 0.5
+			texture(p, Enum.NormalId.Top, CHECKER, 8, t.key .. "Checker", true)
 		else
 			local p = box(parent, x0, FLOOR_BOTTOM, z0, x1, t.top, z1, t.key, if t.top > 0 then ALL else TOP, true)
 			-- (a hair bigger all round, so neighbours overlap and no crack shows: as the map's)
