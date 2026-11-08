@@ -37,8 +37,8 @@ local BUDGET = 0.004 -- seconds of building a frame
 -- (Roblox's own Baseplate texture, grid + checker, QM Nov 8: a black overlay, tinted nothing)
 local CHECKER, STUDS = "rbxassetid://6372755229", "rbxassetid://7447638591"
 -- (walls' sides: the same look with 2x2-stud squares, a grid line between studs, QM Nov 8;
--- assets/terrain/Baseplate2x2.png, black, tiles every 4 studs)
-local WALL_CHECKER, WALL_TILE = "rbxassetid://119843983644581", 4
+-- assets/terrain/Baseplate2x2.png, black, tiles every 8 studs: walls' studs are 2 studs, StudStyle TileScale)
+local WALL_CHECKER, WALL_TILE = "rbxassetid://119843983644581", 8
 local FLOOR_BOTTOM, SEAM, CAP_H, CAP_LIP = -2, 0.03, 3, 1
 local TOP = { Enum.NormalId.Top }
 local ALL = { Enum.NormalId.Top, Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
