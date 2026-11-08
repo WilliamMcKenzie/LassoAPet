@@ -2761,7 +2761,8 @@ end
 -- Riding out (or home: QM, Nov 8) into a wall (QM, Nov 7: you ran straight through them; Client/RideWalls): the step
 -- to (nx, nz) is a crash (vfx.wallCrash, checkRide), unless your mount's huge enough to walk
 -- over walls (Config.WallWalkOverTier) or flying higher than it. While nothing can crash you
--- (grace, Invincible, before the Desert) it stops you at the wall instead, sliding along it.
+-- (grace, Invincible, before the Desert), or ever with Config.WallsCrash off (QM, Nov 8), it stops
+-- you at the wall instead, sliding along it.
 vfx.rideWalls = require(script.Parent.RideWalls)
 function vfx.wallStep(nx, nz)
 	if (phase ~= "outbound" and phase ~= "return") or exitPath or nz >= 0 or vfx.rideWalls.walksOver(vfx.mountTier()) then -- (both ways: QM, Nov 8)
@@ -2773,7 +2774,7 @@ function vfx.wallStep(nx, nz)
 	if not top or (mount.hop or 0) > top then
 		return nx, nz
 	end
-	if grace <= 0 and not vfx.crashProtected() then
+	if Config.WallsCrash and grace <= 0 and not vfx.crashProtected() then
 		vfx.wallCrash = true
 		return mount.x, mount.z -- (stopped where it hit, so a Continue picks up just short of it)
 	elseif not vfx.rideWalls.hit(nx, mount.z, hx, hz) then
