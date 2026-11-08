@@ -484,6 +484,18 @@ MarketplaceService.ProcessReceipt = function(receipt)
 			return Enum.ProductPurchaseDecision.NotProcessedYet
 		end
 	end
+	for i, bar in Config.TrailBars do
+		if bar.ProductId and bar.ProductId ~= 0 and receipt.ProductId == bar.ProductId then
+			-- a trail from the Trails Shop (Gold.server's GrantTrail; else tried again next visit)
+			local player = Players:GetPlayerByUserId(receipt.PlayerId)
+			local grant = game:GetService("ServerStorage"):FindFirstChild("GrantTrail")
+			if player and grant and grant:Invoke(player, i) then
+				Telemetry.purchase(player, receipt.CurrencySpent, "product:" .. receipt.ProductId)
+				return Enum.ProductPurchaseDecision.PurchaseGranted
+			end
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+	end
 	if receipt.ProductId == Config.HatchAll.ProductId then
 		-- (hatched while they're here with their pen loaded; else tried again on their next visit)
 		if hatchAllGranted[receipt.PurchaseId] then

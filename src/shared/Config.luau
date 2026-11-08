@@ -1847,6 +1847,10 @@ Config.NativeUi = {
 		Legendary = { bottom = Color3.fromHex("ff0020"), top = Color3.fromHex("ff8c00"), at = 1, text = Color3.fromHex("ff0004") },
 		Divine = { bottom = Color3.fromHex("6a00ff"), top = Color3.fromHex("00d0ff"), at = 1, text = Color3.fromHex("00dcff"), text2 = Color3.fromHex("0040ff"), move = true }, -- (the reference's Divine: QM, Nov 7, the rarest in each biome)
 		Exclusive = { bottom = Color3.fromHex("ff0040"), top = Color3.fromHex("ff00c0"), at = 1, text = Color3.fromHex("ff0050"), text2 = Color3.fromHex("ff00d0"), move = true }, -- (the reference's Mythic)
+		-- (the trails' top rarities, QM Nov 7: his reference's Trails Shop)
+		Mythic = { bottom = Color3.fromHex("ff4fd8"), top = Color3.fromHex("ffd84f"), at = 1, text = Color3.fromHex("ffe500"), text2 = Color3.fromHex("00ffb3"), move = true },
+		Cosmic = { bottom = Color3.fromHex("5a00ff"), top = Color3.fromHex("d000ff"), at = 1, text = Color3.fromHex("c800ff"), text2 = Color3.fromHex("ff4fe0"), move = true },
+		Godly = { bottom = Color3.fromHex("ff9d00"), top = Color3.fromHex("fff36b"), at = 1, text = Color3.fromHex("ffd000"), text2 = Color3.fromHex("ffffff"), move = true },
 	},
 	-- the Shop's ~Game Passes~ cards (client/NativeShop; QM, Nov 6: the reference's), in order,
 	-- by Config.Passes key: its card's look, its picture (HudImages, or Pet: a pet's headshot),
@@ -1982,7 +1986,8 @@ function Config.goldX(player)
 	return (if player:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)
 		* (Config.Rebirth.Gold[player:GetAttribute("Rebirths") or 0] or 1)
 end
--- x every ride's speed: rebirths and the 1.5x Speed pass.
+-- x every ride's speed: rebirths and the 1.5x Speed pass. (Not your trail: its speed is on foot
+-- only, QM Nov 8: Config.trailSpeed, Server/PlayerTrail.)
 function Config.rebirthSpeed(player)
 	return (Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1) * (if player:GetAttribute("PassSpeed") then Config.PassSpeed else 1)
 end
@@ -2068,25 +2073,55 @@ local RAINBOW = {
 	Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 160, 50), Color3.fromRGB(255, 235, 70),
 	Color3.fromRGB(80, 220, 90), Color3.fromRGB(70, 150, 255), Color3.fromRGB(170, 90, 240),
 }
--- The trail bars (QM, Oct 15): once every world is yours, the top bar (World2Bar.client) fills
--- to each of these in turn, for gold; a tap on a full one buys it (Gold.server's BuyTrail).
--- Bought ones are saved as bits of "TrailsOwned", shared by every world. Your trail is the
--- best one you own (the last in this list). Prices QM's (Oct 15; Purple to Rainbow 5x later that day).
+-- The trails (QM, Oct 15 the trail bars; Nov 7 the Trails Shop, Client/TrailShop, Fight to Steal
+-- an Egg's Weapon Shop 1:1): ten trails, Common up to Godly. Bought ones are saved as bits of
+-- "TrailsOwned" (bit i = Config.TrailBars[i], shared by every world), so the first eight keep
+-- their old places and the shop shows them in Config.TrailShop.Order. The one you equip
+-- ("TrailOn", saved) streams off you on foot, riding and flying the slingshot
+-- (Server/PlayerTrail), and its Speed multiplies your walking speed on foot, not your ride's
+-- (QM, Nov 8: Server/PlayerTrail sets WalkSpeed). Equipped
+-- none yet: your best. Price is cash (Gold.server's BuyTrail), Robux the Robux button's price
+-- till Roblox's loads, ProductId its developer product (made Nov 7, each with its recoloured trail guy icon).
+-- Godly also needs every animal in the Index (Shared/Trails.hasAllAnimals).
 local rgb = Color3.fromRGB
 -- (on your character only, Server/PlayerTrail: QM, Oct 15, not on what you ride any more)
 Config.AnimalTrails = false
 Config.TrailBars = {
-	{ Name = "Grey", Price = 100000, Colors = { rgb(240, 240, 245), rgb(200, 200, 208), rgb(150, 150, 160), rgb(100, 100, 112) } },
-	{ Name = "Green", Price = 500000, Colors = { rgb(180, 255, 160), rgb(100, 230, 90), rgb(40, 190, 60), rgb(20, 130, 40) } },
-	{ Name = "Blue", Price = 1000000, Colors = Config.FinishTrails[2].Colors },
-	{ Name = "Purple", Price = 25000000, Colors = { rgb(235, 190, 255), rgb(200, 120, 255), rgb(150, 60, 230), rgb(100, 30, 170) } },
-	{ Name = "Golden", Price = 50000000, Colors = Config.FinishTrails[1].Colors },
-	{ Name = "Red", Price = 75000000, Colors = Config.FinishTrails[3].Colors },
-	{ Name = "Galaxy", Price = 100000000, Colors = Config.FinishTrails[5].Colors },
-	{ Name = "Rainbow", Price = 200000000 }, -- (the Rainbow Trail's bands)
+	{ Name = "White", Rarity = "Common", Speed = 1.1, Price = 1000, Robux = 5, ProductId = 3729493127, Colors = { rgb(255, 255, 255), rgb(235, 235, 240), rgb(205, 205, 212), rgb(170, 170, 180) } },
+	{ Name = "Green", Rarity = "Uncommon", Speed = 1.2, Price = 15000, Robux = 15, ProductId = 3729493405, Colors = { rgb(180, 255, 160), rgb(100, 230, 90), rgb(40, 190, 60), rgb(20, 130, 40) } },
+	{ Name = "Blue", Rarity = "Rare", Speed = 1.3, Price = 100000, Robux = 29, ProductId = 3729493775, Colors = Config.FinishTrails[2].Colors },
+	{ Name = "Purple", Rarity = "Epic", Speed = 1.4, Price = 500000, Robux = 49, ProductId = 3729494004, Colors = { rgb(235, 190, 255), rgb(200, 120, 255), rgb(150, 60, 230), rgb(100, 30, 170) } },
+	{ Name = "Golden", Rarity = "Legendary", Speed = 1.5, Price = 2500000, Robux = 79, ProductId = 3729494067, Colors = Config.FinishTrails[1].Colors },
+	{ Name = "Red", Rarity = "Legendary", Speed = 1.6, Price = 10000000, Robux = 129, ProductId = 3729494493, Colors = Config.FinishTrails[3].Colors },
+	{ Name = "Galactic", Rarity = "Cosmic", Speed = 2.5, Price = 500000000, Robux = 295, ProductId = 3729494659, Colors = Config.FinishTrails[5].Colors },
+	{ Name = "Rainbow", Rarity = "Mythic", Speed = 2, Price = 150000000, Robux = 249, ProductId = 3729494608 }, -- (the Rainbow Trail's bands)
+	{ Name = "Ice", Rarity = "Divine", Speed = 1.75, Price = 40000000, Robux = 189, ProductId = 3729494551, Colors = { rgb(240, 255, 255), rgb(170, 240, 255), rgb(90, 210, 255), rgb(40, 150, 240) } },
+	{ Name = "Godly", Rarity = "Godly", Speed = 3, Price = 1000000000, Robux = 399, ProductId = 3729494716, AllAnimals = true, Colors = { rgb(255, 255, 255), rgb(255, 245, 190), rgb(255, 215, 80), rgb(255, 170, 30), rgb(255, 255, 255) } },
+}
+-- The Trails Shop's stand (QM, Nov 7: Fight to Steal an Egg's Weapon Shop stall, Carl and all,
+-- green and white like his reference's Trails Shop): left of the start line, by the
+-- leaderboards, its counter facing into the base. Server/TrailShop builds it; Carl's Talk prompt
+-- (or walking onto its ring) opens the popup (Client/TrailShop).
+Config.TrailShop = {
+	Order = { 1, 2, 3, 4, 5, 6, 9, 8, 7, 10 }, -- the cards, left to right (TrailBars indices)
+	Position = Vector3.new(-62, 0, 24), -- on the ground: left of the course's mouth, right of the Top Playtime board (QM, Nov 7: where Fight to Steal an Egg's Weapon Shop stands by its gateway)
+	Yaw = 200, -- degrees: its counter faces into the base, turned a touch inward (Fight to Steal an Egg's)
+	Scale = 1.6, -- (Fight to Steal an Egg's Weapon Shop's)
+	CarlScale = 0.8, -- Carl the cactus guy's own size (not x Scale): normal NPC size behind the counter (QM, Nov 7: was too big)
+	Title = "Trails Shop",
+	TitleTop = Color3.fromRGB(190, 255, 120),
+	TitleBottom = Color3.fromRGB(46, 176, 64),
+	TitleStroke = Color3.fromRGB(16, 62, 28),
+	TitleHeight = 4, -- studs tall (x Scale)
+	RingColor = Color3.fromRGB(110, 235, 90),
+	RingRadius = 12, -- studs (x Scale)
+	RingAhead = 5, -- its centre this far in front of the stall's middle (x Scale)
+	Reach = 12, -- studs from the counter where Open shows (x Scale)
+	LookRange = 30, -- Carl turns to watch a player this close (Fight to Steal an Egg's Config.Vendor)
+	Hop = 0.45, -- seconds of his hello hop
 }
 -- (the finish line's old trails, FinishTrail n, count as these: Yellow the Golden one)
-local OLD = { Golden = 1, Blue = 2, Red = 3, Rainbow = 4, Galaxy = 5 }
+local OLD = { Golden = 1, Blue = 2, Red = 3, Rainbow = 4, Galactic = 5 }
 function Config.ownsTrail(player, i)
 	local bar = Config.TrailBars[i]
 	if not bar then
@@ -2100,22 +2135,37 @@ function Config.ownsTrail(player, i)
 	end
 	return bar.Name == "Rainbow" and player:GetAttribute("RainbowTrail") == true -- (the bought Rainbow Trail)
 end
--- The next trail bar to fill (not yet yours), or nil when you have them all.
+-- The next trail in the shop's order not yet yours, or nil when you have them all.
 function Config.nextTrail(player)
-	for i in Config.TrailBars do
+	for _, i in Config.TrailShop.Order do
 		if not Config.ownsTrail(player, i) then
 			return i
 		end
 	end
 	return nil
 end
-function Config.trailColors(player)
-	for i = #Config.TrailBars, 1, -1 do
-		if Config.ownsTrail(player, i) then
-			return Config.TrailBars[i].Colors or RAINBOW
+-- The trail you wear: the one you equipped ("TrailOn") if it's yours, else your best, else nil.
+function Config.trailIndex(player)
+	local on = tonumber(player:GetAttribute("TrailOn"))
+	if on and Config.ownsTrail(player, on) then
+		return on
+	end
+	local order = Config.TrailShop.Order
+	for k = #order, 1, -1 do
+		if Config.ownsTrail(player, order[k]) then
+			return order[k]
 		end
 	end
 	return nil
+end
+function Config.trailColors(player)
+	local i = Config.trailIndex(player)
+	return if i then Config.TrailBars[i].Colors or RAINBOW else nil
+end
+-- x your walking speed on foot from the trail you wear (1 with none)
+function Config.trailSpeed(player)
+	local i = Config.trailIndex(player)
+	return if i then Config.TrailBars[i].Speed or 1 else 1
 end
 -- The per-world saves' DataStore names: World 1's as they've always been, the others' with
 -- this on the end ("Pen_W2"). Gold's store is shared.
