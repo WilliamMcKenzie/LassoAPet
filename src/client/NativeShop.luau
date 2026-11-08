@@ -546,7 +546,7 @@ function NativeShop.build(screen, handlers)
 	-- the Starter Pack's card only while it's on offer; its time counts down
 	function shop.refresh()
 		local left = handlers.starterLeft()
-		starter.Visible = left > 0 and not player:GetAttribute("PassStarterPack")
+		starter.Visible = false -- (Starter Pack off the shop: QM, Nov 8; was left > 0 and not PassStarterPack)
 		starterBuy.Selectable = starter.Visible
 		timer.Text = string.format("Ends in %dm %02ds", left // 60, left % 60)
 	end
