@@ -87,10 +87,19 @@ end
 -- the biome-coloured checker outside the base (as Server/Map had it before the baseplate)
 local COLOUR_CHECKER = "rbxassetid://84747779882944"
 local Config = require(script.Parent.Config)
+-- (the map editor's colours first, as Server/Map paints: Config's are only defaults, and in
+-- Edit mode there's no live workspace.WorldColors; in Play WorldColors repaints by ColorKey)
+local mapColours
 local function colour(key)
-	local live = workspace:FindFirstChild("WorldColors")
-	local c = live and live:GetAttribute(key)
-	return if typeof(c) == "Color3" then c else Config.WorldColors[key]
+	if not mapColours then
+		local ok, data = pcall(require, script.Parent.MapData)
+		mapColours = if ok and type(data) == "table" and data.Colours then data.Colours else {}
+	end
+	local c = mapColours[key]
+	if type(c) == "table" then
+		return Color3.fromRGB(c[1], c[2], c[3])
+	end
+	return Config.WorldColors[key]
 end
 
 -- a grid Texture (or a baked face's) -> the coloured checker: same 8-stud tiling and offsets
@@ -134,7 +143,9 @@ function BakedStuds.plain(part, ground)
 			stud.Parent = part
 			StudStyle.apply(stud, ground)
 		end
-		if look or t.Texture == CHECKER or t.Texture == WALL_CHECKER then
+		if t.Texture == COLOUR_CHECKER then
+			recolour(t, part) -- (an earlier pass's: painted again from the map's colours)
+		elseif look or t.Texture == CHECKER or t.Texture == WALL_CHECKER then
 			if not recolour(t, part) then
 				t:Destroy()
 			end
