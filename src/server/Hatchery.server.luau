@@ -2224,7 +2224,8 @@ while true do
 		local changed = false
 		for _, item in profile.items do
 			-- (in the tutorial, not the starter egg: you hatch that one yourself, QM Oct 11)
-			if item.egg and now >= item.hatchAt and ((player:GetAttribute("Tutorial") and profile.ride ~= nil and not item.byHand) or player:GetAttribute("PassAutoHatch")) then
+			-- (Insta Hatch, the AutoHatch pass: QM Nov 8, every egg as soon as it's placed, time or not)
+			if item.egg and ((now >= item.hatchAt and player:GetAttribute("Tutorial") and profile.ride ~= nil and not item.byHand) or (player:GetAttribute("PassAutoHatch") and not player:GetAttribute("Tutorial"))) then
 				item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 				changed = true
 				Telemetry.once(player, "eggHatched")
