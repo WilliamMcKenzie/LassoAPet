@@ -2644,13 +2644,13 @@ function vfx.mountTier()
 	return tier
 end
 
--- Riding out into a wall (QM, Nov 7: you ran straight through them; Client/RideWalls): the step
+-- Riding out (or home: QM, Nov 8) into a wall (QM, Nov 7: you ran straight through them; Client/RideWalls): the step
 -- to (nx, nz) is a crash (vfx.wallCrash, checkRide), unless your mount's huge enough to walk
 -- over walls (Config.WallWalkOverTier) or flying higher than it. While nothing can crash you
 -- (grace, Invincible, before the Desert) it stops you at the wall instead, sliding along it.
 vfx.rideWalls = require(script.Parent.RideWalls)
 function vfx.wallStep(nx, nz)
-	if phase ~= "outbound" or exitPath or nz >= 0 or vfx.rideWalls.walksOver(vfx.mountTier()) then
+	if (phase ~= "outbound" and phase ~= "return") or exitPath or nz >= 0 or vfx.rideWalls.walksOver(vfx.mountTier()) then -- (both ways: QM, Nov 8)
 		return nx, nz
 	end
 	local bodyX, bodyZ = vfx.halfBody(mount)
@@ -3781,7 +3781,7 @@ local function checkRide(dt)
 	end
 	if vfx.wallCrash then
 		vfx.wallCrash, mount.speed = nil, 0 -- (into a wall: vfx.wallStep; a Continue starts from a standstill)
-		if phase == "outbound" then
+		if phase == "outbound" or phase == "return" then
 			return fail("CRASH!")
 		end
 	end
