@@ -2617,14 +2617,8 @@ end
 
 -- The mount broke something (smashed an obstacle, knocked an animal flying).
 function vfx.broke(hit)
-	if phase == "return" and mount and not activeAbility() and not vfx.crashProtected() then
-		local fast = math.abs(mount.speed) >= Config.ReturnRun.StaggerSpeed
-		-- (animals never stagger or crash you, only obstacles: QM, Nov 7; it was by StaggerTiers)
-		if not hit and not fast then
-			vfx.returnRun.hits += 1
-			mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
-		end
-	end
+	-- (Nothing you knock away staggers or crashes you, obstacle or animal: only walls crash you,
+	-- vfx.wallStep. QM, Nov 8; it used to slow you, and ReturnRun.Crashes of them crashed you.)
 	local feast = vfx.feastOf(mount)
 	if feast then
 		feast.count += 1
