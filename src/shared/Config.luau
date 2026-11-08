@@ -2626,18 +2626,18 @@ Config.IndexBuy = {
 	Prices = { Legendary = 299, Divine = 599, Celestial = 999, Void = 1999, Omega = 3999 },
 	Products = {
 		-- Legendary
-		HillbackTortoise = 0, Snake = 0, MirageElephant = 0, GlacierMammoth = 0, Icebringer = 0, Phoenix = 0,
-		AshBehemoth = 0, AbyssPillbug = 0, AncientMoose = 0, AncientTreant = 0, BoneRex = 0, BlueCrab = 0,
-		AbyssWhale = 0, Asura = 0, CrystalElephant = 0, AlphaRhino = 0, AlphaSpineLizard = 0, AlphaSandworm = 0,
-		AlphaIceGolem = 0, AlphaLavaWhale = 0,
+		HillbackTortoise = 3729793489, Snake = 3729794058, MirageElephant = 3729794172, GlacierMammoth = 3729794190, Icebringer = 3729794206, Phoenix = 3729794227,
+		AshBehemoth = 3729794240, AbyssPillbug = 3729794258, AncientMoose = 3729794272, AncientTreant = 3729794294, BoneRex = 3729794313, BlueCrab = 3729794330,
+		AbyssWhale = 3729794340, Asura = 3729794349, CrystalElephant = 3729794363, AlphaRhino = 3729794373, AlphaSpineLizard = 3729794384, AlphaSandworm = 3729794400,
+		AlphaIceGolem = 3729794409, AlphaLavaWhale = 3729794422,
 		-- Divine
-		Unicorn = 0, AlphaSnake = 0, AlphaIcebringer = 0, AlphaPhoenix = 0,
+		Unicorn = 3729794439, AlphaSnake = 3729794451, AlphaIcebringer = 3729794464, AlphaPhoenix = 3729794476,
 		-- Celestial
-		BoneWyrm = 0, SpiritLoong = 0, CastleWyvern = 0,
+		BoneWyrm = 3729794488, SpiritLoong = 3729794504, CastleWyvern = 3729794520,
 		-- Void
-		Kraken = 0, BlackWidow = 0,
+		Kraken = 3729794538, BlackWidow = 3729794553,
 		-- Omega
-		Seraph = 0, CrystalSeraph = 0,
+		Seraph = 3729794567, CrystalSeraph = 3729794586,
 	},
 }
 if Config.World ~= 1 then
