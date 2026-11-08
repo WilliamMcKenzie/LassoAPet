@@ -164,5 +164,9 @@ local HEADSHOTS = {
 }
 
 PetFaces.HEADSHOTS = HEADSHOTS
+-- The same headshots at 128 px, for the Index's tiles (QM, Nov 8: memory, ~85 KB each, not ~1.3 MB;
+-- tools/headshots_small_upload.py). A kind missing here uses its 512 px one.
+PetFaces.SMALL = {
+}
 
 return PetFaces

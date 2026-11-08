@@ -137,14 +137,14 @@ end
 
 -- an animal's picture in a holder (its "Picture" ImageLabel): its headshot, or its model in
 -- 3D (PetStill) as "View" when it has none uploaded
-local function setPicture(picture, kind)
+local function setPicture(picture, kind, small)
 	local old = picture.Parent and picture.Parent:FindFirstChild("View")
 	if old and old:GetAttribute("Kind") ~= kind then
 		old:Destroy()
 		old = nil
 	end
 	local headshot = PetFaces.HEADSHOTS[kind]
-	picture.Image = headshot or ""
+	picture.Image = (if small then PetFaces.SMALL[kind] else nil) or headshot or "" -- (a tile's: the 128 px one)
 	if (headshot == nil or headshot == "") and not old and picture.Parent then
 		local view = PetStill.view(kind)
 		if view then
@@ -844,7 +844,7 @@ function loadNear()
 			for _, kind in BIOMES[i].kinds do
 				local tile = tiles[kind]
 				if tile then
-					setPicture(tile.Picture, kind)
+					setPicture(tile.Picture, kind, true)
 					shadePicture(tile.Picture, seen[kind] == true)
 				end
 			end
