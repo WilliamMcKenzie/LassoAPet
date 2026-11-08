@@ -19,9 +19,9 @@ local STUD = "rbxassetid://7447638591"
 
 -- uploaded pictures (assets/terrain/StudGrid*.png); "" bakes nothing of that look
 BakedStuds.IDS = {
-	Floor = "",
-	FloorSide = "",
-	Wall = "",
+	Floor = "rbxassetid://97799538921027", -- StudGridFloor.png
+	FloorSide = "rbxassetid://115934859193770", -- StudGridFloorSide.png
+	Wall = "rbxassetid://114582520270896", -- StudGridWall.png
 }
 
 function BakedStuds.merge(part, ground)
