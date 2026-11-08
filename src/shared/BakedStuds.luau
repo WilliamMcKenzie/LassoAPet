@@ -7,11 +7,12 @@
 --   anything else   the 2x2 grid + 2-stud studs          (Wall: walls, caps)
 -- Anything else (a grid with no studs, a non-ground Baseplate top) keeps its Textures.
 -- workspace.StudStyle no longer changes baked faces: re-run the tool for other values.
--- Only the home base wears the grid (QM, Nov 8): outside it mergeAll takes the grid off and
--- leaves plain studs (a baked face goes back to a stud Texture), and Client/Endless has none.
+-- Only the home base wears the grid (QM, Nov 8): outside it mergeAll gives faces back the
+-- biome-coloured checker and studs they had before (a baked face splits into the two), and
+-- Client/Endless builds those.
 --
 --   BakedStuds.merge(part, ground) -> how many faces it baked
---   BakedStuds.plain(part, ground) -> takes the grid off its faces, leaving the studs
+--   BakedStuds.plain(part, ground) -> the grid off its faces: the coloured checker + studs instead
 --   BakedStuds.mergeAll(world)     -> merge in the home base, plain everywhere else
 
 local BakedStuds = {}
@@ -83,36 +84,104 @@ local function baked(id)
 	return OLD[id]
 end
 
-function BakedStuds.plain(part, ground)
-	local studs = {}
-	for _, t in part:GetChildren() do
-		if t:IsA("Texture") and t.Texture == STUD then
-			studs[t.Face] = true
-		end
+-- the biome-coloured checker outside the base (as Server/Map had it before the baseplate)
+local COLOUR_CHECKER = "rbxassetid://84747779882944"
+local Config = require(script.Parent.Config)
+local function colour(key)
+	local live = workspace:FindFirstChild("WorldColors")
+	local c = live and live:GetAttribute(key)
+	return if typeof(c) == "Color3" then c else Config.WorldColors[key]
+end
+
+-- a grid Texture (or a baked face's) -> the coloured checker: same 8-stud tiling and offsets
+-- (Server/Map lined both up the same way), tinted by the part's ColorKey .. "Checker";
+-- false when the part's colour has no checker
+local function recolour(t, part)
+	local key = part:GetAttribute("ColorKey")
+	local c = typeof(key) == "string" and colour(key .. "Checker")
+	if not c then
+		return false
 	end
+	t.Texture = COLOUR_CHECKER
+	t.Name = "Checker"
+	t.StudsPerTileU, t.StudsPerTileV = 8, 8
+	t.ZIndex = 1
+	t.Color3 = c
+	t:SetAttribute("ColorKey", key .. "Checker")
+	t.Transparency = if part:GetAttribute("Lava") then 0.55 elseif part:GetAttribute("Liquid") then 0.5 else 0
+	return true
+end
+
+-- Outside the base: no baseplate grid, the biome-coloured checker and the studs over it
+-- (QM, Nov 8), as the map was before. A baked face splits back into the two.
+function BakedStuds.plain(part, ground)
 	local n = 0
 	for _, t in part:GetChildren() do
 		if not t:IsA("Texture") then
 			continue
 		end
 		local look = baked(t.Texture)
-		if t.Texture == CHECKER or t.Texture == WALL_CHECKER or (look and studs[t.Face]) then
-			t:Destroy() -- (a grid: its face keeps its own studs, if any)
-			n += 1
-		elseif look then
-			-- a baked face: back to the stud Texture it was, as Server/Map makes it, then
-			-- StudStyle scales it (walls' 2-stud studs) and lines it up with the world grid
-			t.Texture = STUD
-			t.Name = "Studs"
-			t.StudsPerTileU, t.StudsPerTileV = 1, 1
-			t.OffsetStudsU, t.OffsetStudsV = t.OffsetStudsU % 1, t.OffsetStudsV % 1
-			t.Color3 = Color3.new(1, 1, 1)
-			t.ZIndex = 2
-			t:SetAttribute("ColorKey", nil)
-			t:SetAttribute("StudScale", nil)
-			StudStyle.apply(t, ground)
+		if look then
+			-- the studs it held: a stud Texture again, as Server/Map makes it; StudStyle
+			-- scales it (walls' 2-stud studs) and lines it up with the world grid
+			local stud = Instance.new("Texture")
+			stud.Name = "Studs"
+			stud.Face = t.Face
+			stud.Texture = STUD
+			stud.StudsPerTileU, stud.StudsPerTileV = 1, 1
+			stud.OffsetStudsU, stud.OffsetStudsV = t.OffsetStudsU % 1, t.OffsetStudsV % 1
+			stud.ZIndex = 2
+			stud.Parent = part
+			StudStyle.apply(stud, ground)
+		end
+		if look or t.Texture == CHECKER or t.Texture == WALL_CHECKER then
+			if not recolour(t, part) then
+				t:Destroy()
+			end
 			n += 1
 		end
+	end
+	-- (a face whose grid an earlier pass took off, leaving only its studs, or a liquid's
+	-- bare top: its coloured checker back, lined up as Server/Map lines it)
+	if part.ClassName ~= "Part" then
+		return n
+	end
+	local want, have = {}, {}
+	for _, t in part:GetChildren() do
+		if t:IsA("Texture") then
+			if t.Texture == STUD then
+				want[t.Face] = true
+			elseif t.Texture == COLOUR_CHECKER then
+				have[t.Face] = true
+			end
+		end
+	end
+	if part:GetAttribute("Liquid") and part.Name:sub(-7) == "Surface" then
+		want[Enum.NormalId.Top] = true
+	end
+	local aligned = part.CFrame.Rotation:FuzzyEq(CFrame.identity)
+	local corner, far = part.Position - part.Size / 2, part.Position + part.Size / 2
+	for face in want do
+		if have[face] then
+			continue
+		end
+		local t = Instance.new("Texture")
+		t.Face = face
+		if not recolour(t, part) then
+			t:Destroy()
+			continue
+		end
+		if aligned then
+			if face == Enum.NormalId.Top or face == Enum.NormalId.Bottom then
+				t.OffsetStudsU, t.OffsetStudsV = (4 - far.X) % 8, (4 - far.Z) % 8
+			elseif face == Enum.NormalId.Front or face == Enum.NormalId.Back then
+				t.OffsetStudsU, t.OffsetStudsV = corner.X % 8, corner.Y % 8
+			else
+				t.OffsetStudsU, t.OffsetStudsV = corner.Z % 8, corner.Y % 8
+			end
+		end
+		t.Parent = part
+		n += 1
 	end
 	return n
 end
