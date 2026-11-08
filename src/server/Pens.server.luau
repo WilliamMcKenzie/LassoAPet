@@ -152,7 +152,7 @@ local function onJoin(player)
 	player.CharacterAdded:Connect(function(character)
 		local humanoid = character:WaitForChild("Humanoid", 5)
 		if humanoid then
-			humanoid.WalkSpeed = Config.WalkSpeed
+			humanoid.WalkSpeed = Config.WalkSpeed * Config.trailSpeed(player) -- (your trail's speed, on foot: Server/PlayerTrail)
 		end
 		toPen(player, character)
 	end)
