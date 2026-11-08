@@ -76,7 +76,7 @@ local Funnel = {}
 
 local WORLD = Config.World
 local BUILD = game.PlaceVersion
-local VERSION = Config.GameVersion
+local VERSION = Config.GameVersion .. " v" .. BUILD -- (each publish its own, "Revamp v671": QM, Nov 8, to tell one build from the next)
 local TUTORIAL = "[V1] Tutorial"
 local LOOP = "[V1] First Session Loop"
 local BIOMES = "[V2] World " .. WORLD .. " Biomes" -- (V2: the revamp's biomes)
