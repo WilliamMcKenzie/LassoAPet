@@ -32,6 +32,8 @@ BakedStuds.IDS = {
 local OLD = {
 	["rbxassetid://97799538921027"] = "Floor",
 	["rbxassetid://115934859193770"] = "FloorSide",
+	["rbxassetid://114916306273885"] = "Floor", -- (the 20% softer one, before QM's 5%)
+	["rbxassetid://137345544596451"] = "FloorSide",
 }
 
 function BakedStuds.merge(part, ground)

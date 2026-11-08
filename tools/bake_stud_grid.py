@@ -9,8 +9,8 @@ Transparency 0) by Shared/BakedStuds.
   StudGridWall.png       walls and caps: the 2x2 grid, 2-stud studs (StudStyle TileScale 2)
 
 All 512 px for an 8-stud tile. Re-run (and re-upload) if those transparencies change.
-Only the home base wears these (QM, Nov 8); its ground's checker squares are SQUARES (0.8) as
-dark as the grid's own, its grid lines as they were.
+Only the home base wears these (QM, Nov 8); on its ground the whole grid overlay (squares and
+lines) is scaled so a dark square darkens the ground by GROUND_DARK (5%).
 """
 
 import os
@@ -21,13 +21,14 @@ T = os.path.join(HERE, "..", "assets", "terrain")
 SIZE, TILE = 512, 8
 CHECKER_T = 0.8  # Config.BaseplateTransparency
 GROUND_T, WALL_T = 0.5, 0.4  # Config.StudStyle GroundTransparency, Transparency
-SQUARES = 0.8  # the home base ground's dark checker squares, x their contrast (QM, Nov 8: ~20% less)
+GROUND_DARK = 0.05  # how much a dark square darkens the home base ground (QM, Nov 8: 5%, was ~9%)
 
 
 def alpha(path, resample, square=None):
     a = Image.open(path).convert("RGBA").getchannel("A")
-    if square is not None:  # (the dark squares' own alpha: lines keep theirs)
-        a = a.point(lambda v: round(v * SQUARES) if v == square else v)
+    if square is not None:  # (the whole overlay, so the dark squares darken by GROUND_DARK)
+        k = GROUND_DARK / (square / 255 * (1 - CHECKER_T))
+        a = a.point(lambda v: round(v * k))
     return a.resize((SIZE, SIZE), resample)
 
 
