@@ -11,7 +11,6 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Endless = require(Shared.Endless)
 local StudStyle = require(Shared.StudStyle)
-local BakedStuds = require(Shared.BakedStuds)
 if not Endless.On then
 	return
 end
@@ -113,13 +112,10 @@ end
 local function box(parent, x0, y0, z0, x1, y1, z1, key, faces, ground)
 	local p = newPart(parent, key, Vector3.new(x1 - x0, y1 - y0, z1 - z0), CFrame.new((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2))
 	p.CanCollide = true
+	-- (studs only: the baseplate grid is the home base's alone, QM Nov 8)
 	for _, face in faces do
-		if Config.WorldColors[key .. "Checker"] then
-			texture(p, face, CHECKER, 8, key .. "Checker", ground)
-		end
 		texture(p, face, STUDS, 1, nil, ground)
 	end
-	BakedStuds.merge(p, ground) -- (one Texture a face: the studs baked into the grid, Nov 8)
 	return p
 end
 
@@ -141,7 +137,6 @@ local function floorsAndWalls(parent, c)
 			p.Material = Enum.Material.Glass
 			p.MaterialVariant = ""
 			p.Transparency = 0.35
-			texture(p, Enum.NormalId.Top, CHECKER, 8, t.key .. "Checker", true)
 		else
 			local p = box(parent, x0, FLOOR_BOTTOM, z0, x1, t.top, z1, t.key, if t.top > 0 then ALL else TOP, true)
 			-- (a hair bigger all round, so neighbours overlap and no crack shows: as the map's)

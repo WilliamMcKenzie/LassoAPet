@@ -9,6 +9,8 @@ Transparency 0) by Shared/BakedStuds.
   StudGridWall.png       walls and caps: the 2x2 grid, 2-stud studs (StudStyle TileScale 2)
 
 All 512 px for an 8-stud tile. Re-run (and re-upload) if those transparencies change.
+Only the home base wears these (QM, Nov 8); its ground's checker squares are SQUARES (0.8) as
+dark as the grid's own, its grid lines as they were.
 """
 
 import os
@@ -19,11 +21,14 @@ T = os.path.join(HERE, "..", "assets", "terrain")
 SIZE, TILE = 512, 8
 CHECKER_T = 0.8  # Config.BaseplateTransparency
 GROUND_T, WALL_T = 0.5, 0.4  # Config.StudStyle GroundTransparency, Transparency
+SQUARES = 0.8  # the home base ground's dark checker squares, x their contrast (QM, Nov 8: ~20% less)
 
 
-def alpha(path, resample):
-    im = Image.open(path).convert("RGBA")
-    return im.getchannel("A").resize((SIZE, SIZE), resample)
+def alpha(path, resample, square=None):
+    a = Image.open(path).convert("RGBA").getchannel("A")
+    if square is not None:  # (the dark squares' own alpha: lines keep theirs)
+        a = a.point(lambda v: round(v * SQUARES) if v == square else v)
+    return a.resize((SIZE, SIZE), resample)
 
 
 def bake(grid, stud_studs, stud_t, out):
@@ -50,7 +55,7 @@ def bake(grid, stud_studs, stud_t, out):
     print(out, img.getextrema())
 
 
-bake(alpha(os.path.join(T, "Baseplate.png"), Image.LANCZOS), 1, GROUND_T, "StudGridFloor.png")
-grid2 = alpha(os.path.join(T, "Baseplate2x2.png"), Image.NEAREST)
-bake(grid2, 1, GROUND_T, "StudGridFloorSide.png")
-bake(grid2, 2, WALL_T, "StudGridWall.png")
+# (147 and 217: the dark squares' alpha in Baseplate.png and Baseplate2x2.png)
+bake(alpha(os.path.join(T, "Baseplate.png"), Image.LANCZOS, 147), 1, GROUND_T, "StudGridFloor.png")
+bake(alpha(os.path.join(T, "Baseplate2x2.png"), Image.NEAREST, 217), 1, GROUND_T, "StudGridFloorSide.png")
+bake(alpha(os.path.join(T, "Baseplate2x2.png"), Image.NEAREST), 2, WALL_T, "StudGridWall.png")
