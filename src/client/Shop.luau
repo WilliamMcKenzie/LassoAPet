@@ -260,7 +260,7 @@ local function starterLeft()
 	return math.max(0, math.ceil(STARTER_FOR - (if shownAt then os.clock() - shownAt else 0)))
 end
 local function layout()
-	local show = starterLeft() > 0 and not player:GetAttribute("PassStarterPack")
+	local show = false -- (Starter Pack off the shop: QM, Nov 8; was starterLeft() > 0 and not PassStarterPack)
 	starter.Visible = show
 	starterBuy.Selectable = show
 	local y = if show then starter.Size.Y.Offset + 28 else 0
