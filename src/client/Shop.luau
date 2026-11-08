@@ -520,28 +520,7 @@ function Shop.buyGoldFor(amount)
 	end
 end
 
--- The shop pops up by itself once a session (QM, Oct 20), the Halloween Egg in the spotlight: after
--- the 3rd finished ride, or soon after joining for a player past that already, once they're at their
--- base with nothing else up (no tutorial, cutscene, away cash panel or other menu).
-local AUTO_AFTER_RIDES = 3
-task.spawn(function()
-	while (player:GetAttribute("RidesDone") or 0) < AUTO_AFTER_RIDES do
-		player:GetAttributeChangedSignal("RidesDone"):Wait()
-	end
-	task.wait(2)
-	while true do
-		local base = player.PlayerGui:FindFirstChild("BaseUi")
-		local baseRoot = base and base:FindFirstChild("Root")
-		local away = player.PlayerGui:FindFirstChild("AwayPanel")
-		if base and base.Enabled and not (baseRoot and baseRoot:GetAttribute("Modal")) and not open
-			and not player:GetAttribute("Tutorial") and not player:GetAttribute("Cutscene")
-			and not (away and away.Enabled) and not ((player:GetAttribute("AwayGold") or 0) > 0) then
-			Shop.open(true)
-			return
-		end
-		task.wait(0.5)
-	end
-end)
+-- The shop never pops up by itself (QM, Nov 8): only the Shop button or a buy prompt you tapped opens it.
 
 function Shop.isOpen()
 	return open
