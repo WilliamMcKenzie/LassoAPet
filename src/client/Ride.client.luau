@@ -154,6 +154,7 @@ vfx.crashScreen = require(script.Parent.CrashScreen)
 vfx.tutorialRide = require(script.Parent.TutorialRide) -- (the tutorial's first ride: Client/Tutorial steers it)
 vfx.speedLines = require(script.Parent.SpeedLines) -- speed lines on the screen while sprinting (QM, Oct 9 / 11)
 vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's out (QM, Oct 10)
+vfx.LowMemory = require(script.Parent.LowMemory) -- (phones: fewer spare animals kept, vfx.poolCap)
 vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
 vfx.newAnimal = require(script.Parent.NewAnimal) -- the animal you got, shown (QM, Oct 13)
@@ -540,7 +541,7 @@ for _, biome in if vfx.Endless.On then Config.Endless.Biomes else {} do
 	for kind, weight in biome.Herd do
 		if weight > 0 then
 			pools[kind] = pools[kind] or {}
-			poolSizes[kind] = poolSizes[kind] or 2 -- (built on the spot past that: takeFromPool)
+			poolSizes[kind] = poolSizes[kind] or 0 -- (none built ahead: the endless course is far off, built on the spot: takeFromPool)
 		end
 	end
 end
@@ -1792,6 +1793,18 @@ function vfx.shatterIce(entity)
 	end
 end
 
+-- How many spare animals of a kind are kept (Nov 8, v671 crashes: every kind of every biome's
+-- herd, 100+ kinds, was built 3 times over at join and kept for good, rares too). Kinds that
+-- are about in view keep their pool size; rare ones (and phones: LowMemory) keep one at most.
+vfx.POOL_PREBUILD = 0.25 -- a kind is built ahead at join if about this many are in view on average
+function vfx.poolCap(kind)
+	local size = poolSizes[kind] or 0
+	if size < vfx.POOL_PREBUILD then
+		return if vfx.LowMemory.on then 0 else 1
+	end
+	return math.ceil(size) + 1
+end
+
 local function putInPool(entity)
 	vfx.setFrosted(entity, false, true)
 	local active = entity.ability and entity.ability.active
@@ -1806,7 +1819,12 @@ local function putInPool(entity)
 	end
 	entity.hop, entity.popping, entity.lift = 0, nil, nil
 	entity.ability, entity.frostLeft, entity.fall, entity.scaredOffBy = nil, nil, nil, nil
-	table.insert(pools[entity.kind], entity)
+	local pool = pools[entity.kind]
+	if #pool >= vfx.poolCap(entity.kind) then
+		entity.animal.model:Destroy() -- (the pool's full: let it go, not kept for the session)
+		return
+	end
+	table.insert(pool, entity)
 end
 
 -- Done with an animal: back in its kind's pool if the stampede has one (building
@@ -2074,6 +2092,8 @@ local function updateHerd(dt, slowed)
 		local first = stream.oldest
 		if held and held % BIOME_KEYS == b - 1 then
 			first = math.min(first, held // BIOME_KEYS)
+		elseif stream.spawnZ + 500 < fromZ or stream.endZ > toZ then
+			continue -- (nowhere near the camera: none of it could show, so no per-animal work: Nov 8 lag)
 		end
 		for n = first, newest + vfx.HerdPacks.most - 1 do -- (a pack's followers pop in with it)
 			local key = n * BIOME_KEYS + b - 1
@@ -5160,7 +5180,7 @@ task.spawn(function()
 	end
 	table.sort(names)
 	for _, name in names do
-		for _ = #pools[name] + 1, math.max(2, math.ceil(poolSizes[name]) + 1) do
+		for _ = #pools[name] + 1, if poolSizes[name] < vfx.POOL_PREBUILD then 0 else vfx.poolCap(name) do
 			putInPool(newEntity(0, 0, 0, name))
 			built += 1
 			if built % 4 == 0 then
