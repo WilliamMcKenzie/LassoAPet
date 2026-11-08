@@ -57,6 +57,9 @@
 --   "Ride Ended <outcome>" each ride's end (not the tutorial's): Brought One Home, Home Empty
 --                         (back on your own pet), Finish Line, Crash, Caught, Bucked Off,
 --                         Too Far; CustomField03 "lassoed" or "no lasso" (landed one this ride)
+--   "Quit In <biome>"     leaving the game: the furthest biome reached (value: minutes this
+--                         visit; CustomField03 "riding" or "in base")
+--   "Quit At Goal: <goal>" leaving the game: the goal that was up (same value and field)
 --   "Robux Spent"         any product or pass bought (value: Robux; CustomField03 the sku),
 --                         so Robux per player can be split by version too
 --   Economy (Analytics > Economy), currency "Cash": sources Ride, Pen Income (a minute's
@@ -442,6 +445,18 @@ Telemetry.onLeave(function(player, transferring)
 	Funnel.event(player, (if transferring then "Travelled From World " else "Left Game In World ") .. WORLD)
 	Funnel.event(player, "Left World " .. WORLD .. " After " .. spent)
 	Funnel.event(player, "Session Minutes", math.floor(minutes * 10 + 0.5) / 10, "w" .. WORLD)
+	if not transferring then
+		-- Where they quit (QM, Nov 8: "most common quitting points"): the furthest biome reached,
+		-- the goal that was up, and what they were doing (CustomField03: riding or in base).
+		-- Value: minutes this visit.
+		local doing = if s.lastZ ~= nil then "riding" else "in base"
+		local mins = math.floor(minutes * 10 + 0.5) / 10
+		local gates = math.max(1, math.floor(player:GetAttribute("GatesBroken") or 1))
+		Funnel.event(player, "Quit In " .. (BIOME_NAMES[gates] or "Endless"), mins, doing)
+		local ok, quests = pcall(HttpService.JSONDecode, HttpService, player:GetAttribute("Quests") or "[]")
+		local goal = ok and type(quests) == "table" and type(quests[1]) == "table" and quests[1].text
+		Funnel.event(player, "Quit At Goal: " .. (if type(goal) == "string" then string.sub(goal, 1, 40) else "none"), mins, doing)
+	end
 	state[player] = nil
 	StatsStore.add("v1-leaves", { ["w" .. WORLD .. "|" .. (if transferring then "travel" else "quit") .. "|" .. spent] = 1 })
 	local ends = {}
