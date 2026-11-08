@@ -54,6 +54,9 @@
 --   "Reached <biome>"     rode through its barrier (value: minutes played so far)
 --   "Session Minutes"     each visit's length (value: minutes)
 --   "Rebirthed"           a rebirth (value: minutes played so far; CustomField03 which rebirth)
+--   "Ride Ended <outcome>" each ride's end (not the tutorial's): Brought One Home, Home Empty
+--                         (back on your own pet), Finish Line, Crash, Caught, Bucked Off,
+--                         Too Far; CustomField03 "lassoed" or "no lasso" (landed one this ride)
 --   "Robux Spent"         any product or pass bought (value: Robux; CustomField03 the sku),
 --                         so Robux per player can be split by version too
 --   Economy (Analytics > Economy), currency "Cash": sources Ride, Pen Income (a minute's
@@ -385,13 +388,17 @@ task.spawn(function()
 	end
 end)
 
--- The client's reports: only the intro's end now ("tutorial", "intro"). Anything else
+-- The client's reports: the intro's end ("tutorial", "intro") and how a ride ended ("ride",
+-- outcome, landed a lasso). Anything else
 -- (the old tutorial and shop steps) is ignored.
 local funnelStep = Instance.new("RemoteEvent")
 funnelStep.Name = "FunnelStep"
-funnelStep.OnServerEvent:Connect(function(player, kind, name)
+local RIDE_OUTCOMES = { ["Brought One Home"] = true, ["Home Empty"] = true, ["Finish Line"] = true, Crash = true, Caught = true, ["Bucked Off"] = true, ["Too Far"] = true }
+funnelStep.OnServerEvent:Connect(function(player, kind, name, landed)
 	if kind == "tutorial" and name == "intro" then
 		Funnel.intro(player)
+	elseif kind == "ride" and RIDE_OUTCOMES[name] and not player:GetAttribute("Tutorial") then
+		Funnel.event(player, "Ride Ended " .. name, 1, if landed == true then "lassoed" else "no lasso")
 	end
 end)
 funnelStep.Parent = ReplicatedStorage

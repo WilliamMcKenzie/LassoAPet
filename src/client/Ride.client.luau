@@ -1258,10 +1258,22 @@ function vfx.continueTier(metres)
 	return tier
 end
 
+-- How each ride ends, for analytics (Funnel's "Ride Ended <outcome>"; QM, Nov 8: do new
+-- players who never get an animal lasso nothing, or crash on the way home?).
+vfx.rideLog = { landed = 0 }
+function vfx.rideEnded(outcome)
+	local remote = ReplicatedStorage:FindFirstChild("FunnelStep")
+	if remote then
+		remote:FireServer("ride", outcome, vfx.rideLog.landed > 0)
+	end
+	vfx.rideLog.landed = 0
+end
+
 local function fail(reason, tip)
 	if phase == "ended" then
 		return
 	end
+	vfx.rideEnded(if reason == "CRASH!" then "Crash" elseif reason == "CAUGHT!" then "Caught" elseif reason == "BUCKED OFF" then "Bucked Off" else "Too Far")
 	vfx.sounds.play("crash")
 	Hud.setTip(tip) -- in place of the "+$N" the fail screen shows
 	local hrp, humanoid = character()
@@ -4041,6 +4053,7 @@ local function updateRider(dt)
 				table.remove(strays, table.find(strays, target))
 			end
 			mount, transfer = target, nil
+			vfx.rideLog.landed += 1
 			exitPath, vfx.exitTrack, vfx.exitLat, vfx.exitRoute = nil, nil, nil, nil -- (lassoed off your pet still on its way out of your pen: it'd pull you back onto the path, QM)
 			vfx.rideCue:FireServer("landed") -- (Riders.server: not lassoing any more)
 			picked = nil
@@ -4657,6 +4670,7 @@ RunService.PreSimulation:Connect(function(dt)
 			-- Crossed the finish line: the animal you rode is yours, in your pen
 			-- (Hatchery's FinishCourse), then back home to your pen.
 			task.spawn(function()
+				vfx.rideEnded("Finish Line")
 				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, if mount.own then nil else mount.kind) -- (your own pet: not a copy of it, a random one: QM, Oct 15)
 				task.wait(ok and kind and vfx.rideReward(kind) or 0.5)
 				if phase == "finish" then
@@ -4668,6 +4682,7 @@ RunService.PreSimulation:Connect(function(dt)
 			end)
 		else
 			local kind = carried and carried.kind
+			vfx.rideEnded(if kind then "Brought One Home" else "Home Empty")
 			if kind then
 				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
 			end
