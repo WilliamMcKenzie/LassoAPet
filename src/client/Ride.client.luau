@@ -2725,14 +2725,8 @@ end
 
 -- The mount broke something (smashed an obstacle, knocked an animal flying).
 function vfx.broke(hit)
-	if phase == "return" and mount and not activeAbility() and not vfx.crashProtected() then
-		local fast = math.abs(mount.speed) >= Config.ReturnRun.StaggerSpeed
-		-- (animals never stagger or crash you, only obstacles: QM, Nov 7; it was by StaggerTiers)
-		if not hit and not fast then
-			vfx.returnRun.hits += 1
-			mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
-		end
-	end
+	-- (Nothing you knock away staggers or crashes you, obstacle or animal: only walls crash you,
+	-- vfx.wallStep. QM, Nov 8; it used to slow you, and ReturnRun.Crashes of them crashed you.)
 	local feast = vfx.feastOf(mount)
 	if feast then
 		feast.count += 1
@@ -2752,13 +2746,13 @@ function vfx.mountTier()
 	return tier
 end
 
--- Riding out into a wall (QM, Nov 7: you ran straight through them; Client/RideWalls): the step
+-- Riding out (or home: QM, Nov 8) into a wall (QM, Nov 7: you ran straight through them; Client/RideWalls): the step
 -- to (nx, nz) is a crash (vfx.wallCrash, checkRide), unless your mount's huge enough to walk
 -- over walls (Config.WallWalkOverTier) or flying higher than it. While nothing can crash you
 -- (grace, Invincible, before the Desert) it stops you at the wall instead, sliding along it.
 vfx.rideWalls = require(script.Parent.RideWalls)
 function vfx.wallStep(nx, nz)
-	if phase ~= "outbound" or exitPath or nz >= 0 or vfx.rideWalls.walksOver(vfx.mountTier()) then
+	if (phase ~= "outbound" and phase ~= "return") or exitPath or nz >= 0 or vfx.rideWalls.walksOver(vfx.mountTier()) then -- (both ways: QM, Nov 8)
 		return nx, nz
 	end
 	local bodyX, bodyZ = vfx.halfBody(mount)
@@ -3889,7 +3883,7 @@ local function checkRide(dt)
 	end
 	if vfx.wallCrash then
 		vfx.wallCrash, mount.speed = nil, 0 -- (into a wall: vfx.wallStep; a Continue starts from a standstill)
-		if phase == "outbound" then
+		if phase == "outbound" or phase == "return" then
 			return fail("CRASH!")
 		end
 	end
