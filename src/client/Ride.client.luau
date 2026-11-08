@@ -1556,6 +1556,25 @@ local function onAction()
 end
 vfx.lassoPrompt.onTap = onAction
 
+-- Auto Lasso (QM, Nov 8: RideUi's toggle): while it's on, the fastest animal in reach that's
+-- faster than the one you're on is lassoed by itself, as if you'd pressed E on it.
+vfx.rideUi = require(script.Parent.RideUi)
+function vfx.autoLasso()
+	if not vfx.rideUi.autoLasso or phase ~= "outbound" or transfer or not mount or player:GetAttribute("NoLasso") then
+		return
+	end
+	local best, fastest = nil, statsOf(mount.kind, mount).Speed
+	for _, entity in candidates() do
+		local speed = statsOf(entity.kind, entity).Speed
+		if speed > fastest then
+			best, fastest = entity, speed
+		end
+	end
+	if best then
+		startTransfer(best)
+	end
+end
+
 -- The phone joystick while riding: the player controls stay on (the rider is
 -- anchored, so it only steers, see readSteer) with jumping off, so no jump button.
 local rideStick = { on = false }
@@ -4715,6 +4734,7 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 	end
 	actionTarget = findTarget()
+	vfx.autoLasso()
 	Outline.set(if actionTarget then actionTarget.animal.model else nil)
 	updateHud()
 end)
