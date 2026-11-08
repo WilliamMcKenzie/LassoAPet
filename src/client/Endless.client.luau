@@ -36,6 +36,9 @@ local AHEAD, BEHIND = 760, 260 -- studs of course built in front of the camera a
 local BUDGET = 0.004 -- seconds of building a frame
 -- (Roblox's own Baseplate texture, grid + checker, QM Nov 8: a black overlay, tinted nothing)
 local CHECKER, STUDS = "rbxassetid://6372755229", "rbxassetid://7447638591"
+-- (walls' sides: the same look with 2x2-stud squares, a grid line between studs, QM Nov 8;
+-- assets/terrain/Baseplate2x2.png, black, tiles every 4 studs)
+local WALL_CHECKER, WALL_TILE = "rbxassetid://119843983644581", 4
 local FLOOR_BOTTOM, SEAM, CAP_H, CAP_LIP = -2, 0.03, 3, 1
 local TOP = { Enum.NormalId.Top }
 local ALL = { Enum.NormalId.Top, Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
@@ -59,12 +62,15 @@ end
 -- (as Server/Map's: lined up with the world grid, so every part's checker is one board)
 local function texture(part, face, image, tile, key, ground)
 	local t = Instance.new("Texture")
+	if image == CHECKER and face ~= Enum.NormalId.Top then
+		image, tile = WALL_CHECKER, WALL_TILE
+	end
 	t.Name = if image == STUDS then "Studs" else "Checker"
 	t.Face = face
 	t.Texture = image
 	t.StudsPerTileU, t.StudsPerTileV = tile, tile
 	t.ZIndex = if image == STUDS then 2 else 1
-	if image == CHECKER then
+	if image == CHECKER or image == WALL_CHECKER then
 		t.Color3, t.Transparency = Color3.new(0, 0, 0), Config.BaseplateTransparency
 	elseif key then
 		t:SetAttribute("ColorKey", key)
