@@ -399,6 +399,18 @@ funnelStep.OnServerEvent:Connect(function(player, kind, name, landed)
 		Funnel.intro(player)
 	elseif kind == "ride" and RIDE_OUTCOMES[name] and not player:GetAttribute("Tutorial") then
 		Funnel.event(player, "Ride Ended " .. name, 1, if landed == true then "lassoed" else "no lasso")
+		-- (and in our own instant totals, /stats' "Rides": per build and per day, QM Nov 8)
+		local st = state[player]
+		if st and not st.excluded then
+			local fields = { ["ride:" .. name] = 1, ["ride:" .. name .. (if landed == true then ":lassoed" else ":nolasso")] = 1 }
+			if st.firstSession and st.tutorialDone and not st.firstRideEnded then
+				st.firstRideEnded = true -- (their first ride after the tutorial)
+				fields["firstRide:" .. name] = 1
+				fields["firstRide:" .. name .. (if landed == true then ":lassoed" else ":nolasso")] = 1
+			end
+			StatsStore.addShared("simple-v2-build-w" .. WORLD .. "-" .. BUILD, fields)
+			StatsStore.addShared("simple-v2-day-" .. os.date("!%Y-%m-%d"), fields)
+		end
 	end
 end)
 funnelStep.Parent = ReplicatedStorage

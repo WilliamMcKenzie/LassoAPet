@@ -204,6 +204,20 @@ function Stats.report(arg)
 	if shown == 0 then
 		table.insert(lines, "  N/A — no completed first sessions yet")
 	end
+	for _, which in { { "firstRide:", "New players' first ride after the tutorial" }, { "ride:", "All rides" } } do
+		local outcomes, total = {}, 0
+		for _, o in { "Brought One Home", "Finish Line", "Home Empty", "Crash", "Caught", "Bucked Off", "Too Far" } do
+			local n = d[which[1] .. o] or 0
+			total += n
+			table.insert(outcomes, { o, n, d[which[1] .. o .. ":lassoed"] or 0 })
+		end
+		table.insert(lines, which[2] .. " (" .. total .. " ended; lassoed = landed a lasso that ride):")
+		for _, o in outcomes do
+			if o[2] > 0 then
+				table.insert(lines, string.format("  %s: %s (%d, %d lassoed)", o[1], pct(o[2], total), o[2], o[3]))
+			end
+		end
+	end
 	table.insert(lines, "Monetization (" .. sessions .. " player sessions; what players did, not what they were shown):")
 	local blocked = d["flag:randomRestricted"] or 0
 	table.insert(lines, string.format("  Can't buy the Halloween Egg where they play (paid random items): %d sessions (%s)", blocked, pct(blocked, sessions)))
