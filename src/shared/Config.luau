@@ -2092,10 +2092,10 @@ function Config.goldX(player)
 	return (if player:GetAttribute("PassDoubleGold") then Config.PassGoldMultiplier else 1)
 		* (Config.Rebirth.Gold[player:GetAttribute("Rebirths") or 0] or 1)
 end
--- x every ride's speed: rebirths, the 1.5x Speed pass and your trail (Config.trailSpeed).
+-- x every ride's speed: rebirths and the 1.5x Speed pass. (Not your trail: its speed is on foot
+-- only, QM Nov 8: Config.trailSpeed, Server/PlayerTrail.)
 function Config.rebirthSpeed(player)
 	return (Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1) * (if player:GetAttribute("PassSpeed") then Config.PassSpeed else 1)
-		* Config.trailSpeed(player)
 end
 -- Luck (QM, Nov 7): 1 + what the goals have given you ("LuckBonus", saved as `luck`:
 -- Gold.server), added, never multiplied, and kept through rebirths. Each Reach goal from the
@@ -2217,7 +2217,8 @@ local RAINBOW = {
 -- "TrailsOwned" (bit i = Config.TrailBars[i], shared by every world), so the first eight keep
 -- their old places and the shop shows them in Config.TrailShop.Order. The one you equip
 -- ("TrailOn", saved) streams off you on foot, riding and flying the slingshot
--- (Server/PlayerTrail), and its Speed multiplies every ride (Config.rebirthSpeed). Equipped
+-- (Server/PlayerTrail), and its Speed multiplies your walking speed on foot, not your ride's
+-- (QM, Nov 8: Server/PlayerTrail sets WalkSpeed). Equipped
 -- none yet: your best. Price is cash (Gold.server's BuyTrail), Robux the Robux button's price
 -- till Roblox's loads, ProductId its developer product (made Nov 7, each with its recoloured trail guy icon).
 -- Godly also needs every animal in the Index (Shared/Trails.hasAllAnimals).
@@ -2300,7 +2301,7 @@ function Config.trailColors(player)
 	local i = Config.trailIndex(player)
 	return if i then Config.TrailBars[i].Colors or RAINBOW else nil
 end
--- x every ride's speed from the trail you wear (1 with none)
+-- x your walking speed on foot from the trail you wear (1 with none)
 function Config.trailSpeed(player)
 	local i = Config.trailIndex(player)
 	return if i then Config.TrailBars[i].Speed or 1 else 1

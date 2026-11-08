@@ -2,6 +2,8 @@
 -- (Config.trailColors: the Trails Shop's, the finish line's old ones, the bought Rainbow Trail)
 -- streams off your character too, on foot and riding, built like VIP's gold one
 -- (Shared/RiderTrail), so everyone sees it. Your ride's own is Client/Ride's.
+-- Its speed (Config.trailSpeed) is your walking speed on foot only (QM, Nov 8): WalkSpeed is
+-- Config.WalkSpeed x it. Riding doesn't use WalkSpeed (you sit on your mount), so rides aren't sped up.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -15,6 +17,10 @@ local function trail(player, character)
 	local hrp = character and character:WaitForChild("HumanoidRootPart", 10)
 	if not hrp then
 		return
+	end
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.WalkSpeed = Config.WalkSpeed * Config.trailSpeed(player)
 	end
 	local colors = Config.trailColors(player)
 	if not colors then
