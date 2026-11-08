@@ -1142,8 +1142,41 @@ end)
 -- animal you've had (Caught), its cash (Config.indexReward), claimed here. True if claimed.
 local indexClaim = Instance.new("RemoteFunction")
 indexClaim.Name = "IndexClaim"
+local indexKinds -- [kind] = true: every animal in the Index (its biomes' herds, as Client/NativeIndex)
 indexClaim.OnServerInvoke = function(player, kind)
 	local profile = profiles[player]
+	if kind == "*" then
+		-- every reward there is to claim at once (the Index's "Claim! (N)" bar: QM, Nov 8)
+		if not profile or not (loaded[player] or RunService:IsStudio()) or not profile.caught then
+			return false
+		end
+		if not indexKinds then
+			indexKinds = {}
+			for _, biome in Config.allBiomes() do
+				for k, weight in biome.Herd or {} do
+					if weight >= 0 and k ~= Config.DefaultPet then
+						indexKinds[k] = true
+					end
+				end
+			end
+		end
+		profile.indexClaimed = profile.indexClaimed or {}
+		local cash = 0
+		for k in profile.caught do
+			if indexKinds[k] and not profile.indexClaimed[k] then
+				profile.indexClaimed[k] = true
+				cash += Config.indexReward(k)
+			end
+		end
+		if cash <= 0 then
+			return false
+		end
+		player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + cash)
+		Funnel.cash(player, false, cash, Enum.AnalyticsEconomyTransactionType.Gameplay.Name, "Index Reward")
+		publish(player)
+		save(player)
+		return true
+	end
 	-- (in Studio too, where the save never loads: no API access)
 	if not profile or not (loaded[player] or RunService:IsStudio()) or typeof(kind) ~= "string" or not (profile.caught and profile.caught[kind]) then
 		return false
@@ -1160,6 +1193,26 @@ indexClaim.OnServerInvoke = function(player, kind)
 	return true
 end
 indexClaim.Parent = ReplicatedStorage
+
+-- The Index's Buy (Config.IndexBuy; Shop.server): the animal, hatched, into your pen (or your
+-- stored pets, givePet), saved at once, with its new animal cutscene. True once given (their
+-- save loaded); else Roblox tries the receipt again on their next visit.
+local grantIndexPet = Instance.new("BindableFunction")
+grantIndexPet.Name = "GrantIndexPet"
+grantIndexPet.OnInvoke = function(player, kind)
+	local profile = profiles[player]
+	if not profile or not (loaded[player] or RunService:IsStudio()) or not Config.IndexBuy.Products[kind] then
+		return false
+	end
+	givePet(player, profile, kind)
+	save(player)
+	local newAnimal = ReplicatedStorage:FindFirstChild("NewAnimal")
+	if newAnimal then
+		newAnimal:FireClient(player, kind)
+	end
+	return true
+end
+grantIndexPet.Parent = game:GetService("ServerStorage")
 
 -- The ride got its animal home: the animal itself, into your pen (givePet), the
 -- tutorial's first ride's too (QM, Oct 13: its new animal cutscene; the tutorial goes on
