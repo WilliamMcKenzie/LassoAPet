@@ -1,11 +1,12 @@
 -- The Rebirth popup (QM, Nov 7; Config.Luck): the last goal's Claim! and the luck counter open
 -- it (NativeHud). The orange-headed popup (HudKit.popup, as the Slingshot's menu), what a
 -- rebirth does in three dark bars, each now -> after:
---   Cash             $1.2m -> $0
---   Slingshot        unlocks wiped, prices x1 -> x2
---   Luck per goal    +0.25 -> +0.5 (goal rewards x2; your luck itself stays)
+-- (QM, Nov 7: icons, not words)
+--   [cash]   $1.2m -> $0
+--   every biome you've unlocked (its picture, Config.Biomes[i].Picture) -> just the Meadow's,
+--   [clover] x1.25 -> x5 (your luck x Config.Luck.RebirthLuck: QM, Nov 8)
 -- and under them Rebirth! (Hatchery's Rebirth), or, till the Rebirth goal is done, a grey
--- "Reach Ocean Trench" that does nothing. X (or not confirming) leaves the goal to claim later.
+-- "Reach <Config.rebirthBiome>" (Desert, then Tundra...) that does nothing. X (or not confirming) leaves the goal to claim later.
 --
 --   RebirthPopup.open()
 --   RebirthPopup.close()
@@ -30,9 +31,11 @@ local ROW_W, ROW_H, ROW_GAP = 1800, 170, 40
 local ROWS_Y = 360
 local CONFIRM_W, CONFIRM_H, CONFIRM_Y = 900, 200, 1060
 
+local PIC_MAX_H, PIC_ASPECT, PIC_GAP = 130, 1.4, 16 -- the Slingshot row's biome pictures
+local ARROW_W = 170 -- (the arrow's room)
+local ICON = 140 -- the rows' icons (HudImages: the HUD's cash and clover)
+
 local gui, rows, confirm, confirmText, waiting
-local lastBiome = #Config.Biomes
-local lastName = Config.BiomeNames[1][lastBiome] or Config.Biomes[lastBiome].Name
 
 -- The Rebirth goal is up and done (the "Quests" attribute: Server/Quests).
 local function ready()
@@ -53,18 +56,75 @@ local function refresh()
 	if not gui then
 		return
 	end
-	local reborn = player:GetAttribute("Reborn") or 0
-	local per = Config.Luck.CostPerRebirth
-	rows.Cash.Text.Text = "Cash   $" .. Config.short(player:GetAttribute("Gold") or 0) .. "  →  " .. colored("$0", BAD)
-	rows.Slingshot.Text.Text = "Slingshot unlocks wiped, prices x"
-		.. Config.short(per ^ reborn)
-		.. "  →  "
-		.. colored("x" .. Config.short(per ^ (reborn + 1)), BAD)
-	local now, after = Config.Luck.Reach * Config.Luck.RewardPerRebirth ^ reborn, Config.Luck.Reach * Config.Luck.RewardPerRebirth ^ (reborn + 1)
-	local function plus(n)
-		return "+" .. (string.format("%.2f", n):gsub("%.?0+$", ""))
+	-- each row an icon strip (QM, Nov 7: icons, not words), rebuilt each time
+	local strip, order
+	local function start(row)
+		strip, order = rows[row].Strip, 0
+		for _, child in strip:GetChildren() do
+			if not child:IsA("UIListLayout") then
+				child:Destroy()
+			end
+		end
 	end
-	rows.Luck.Text.Text = "Luck per goal " .. plus(now) .. "  →  " .. colored(plus(after), GOOD)
+	local function icon(name)
+		order += 1
+		HudKit.art(strip, name, { Size = UDim2.fromOffset(fig(ICON), fig(ICON)), LayoutOrder = order, ZIndex = 4 })
+	end
+	local function text(str)
+		order += 1
+		label(strip, "Text" .. order, {
+			RichText = true,
+			Text = str,
+			TextXAlignment = Enum.TextXAlignment.Center,
+			TextSize = fig(80),
+			AutomaticSize = Enum.AutomaticSize.X,
+			Size = UDim2.fromOffset(0, fig(ROW_H)),
+			LayoutOrder = order,
+			ZIndex = 4,
+		})
+	end
+	local function picture(i, h)
+		order += 1
+		local pic = Instance.new("ImageLabel")
+		pic.Name = "Biome" .. order
+		pic.BackgroundColor3 = Color3.new(0, 0, 0)
+		pic.Image = Config.Biomes[i].Picture or ""
+		pic.ScaleType = Enum.ScaleType.Crop
+		pic.Size = UDim2.fromOffset(fig(h * PIC_ASPECT), fig(h))
+		pic.LayoutOrder = order
+		pic.ZIndex = 4
+		local round = Instance.new("UICorner")
+		round.CornerRadius = UDim.new(0, fig(10))
+		round.Parent = pic
+		local edge = Instance.new("UIStroke")
+		edge.Thickness = fig(4)
+		edge.Color = Color3.new(0, 0, 0)
+		edge.Parent = pic
+		pic.Parent = strip
+	end
+	local ARROW = "  →  "
+
+	-- cash: [cash] $9.8b -> $0
+	start("Cash")
+	icon("CashIcon")
+	text("$" .. Config.short(player:GetAttribute("Gold") or 0) .. ARROW .. colored("$0", BAD))
+
+	-- slingshot: your unlocked biomes' pictures -> the Meadow's (QM, Nov 7: no prices x1 -> x2)
+	start("Slingshot")
+	local have = math.clamp(player:GetAttribute("PenLevel") or 1, 1, #Config.Biomes)
+	local room = ROW_W - 60 - ARROW_W - (have + 2) * PIC_GAP
+	local h = math.min(PIC_MAX_H, room / (have + 1) / PIC_ASPECT)
+	for i = 1, have do
+		picture(i, h)
+	end
+	text(ARROW)
+	picture(1, h)
+
+	-- your luck: [clover] x1.25 -> x5 (QM, Nov 8: a rebirth multiplies it)
+	local now = Config.luck(player)
+	start("Luck")
+	icon("LuckIcon")
+	text(Config.luckText(now) .. ARROW .. colored(Config.luckText(now * Config.Luck.RebirthLuck), GOOD))
 	local can = ready()
 	confirm.Active = can
 	confirm.AutoButtonColor = false
@@ -73,7 +133,8 @@ local function refresh()
 		back.Visible = can
 	end
 	confirm:FindFirstChild("Grey").Visible = not can
-	confirmText.Text = if can then "Rebirth!" else "Reach " .. lastName
+	local target = Config.rebirthBiome(player)
+	confirmText.Text = if can then "Rebirth!" else "Reach " .. (Config.BiomeNames[1][target] or Config.Biomes[target].Name)
 end
 
 local function build()
@@ -94,14 +155,20 @@ local function build()
 			Size = UDim2.fromOffset(fig(ROW_W), fig(ROW_H)),
 			ZIndex = 3,
 		})
-		label(bar, "Text", {
-			RichText = true,
-			Text = "",
-			TextXAlignment = Enum.TextXAlignment.Center,
-			TextSize = fig(80),
-			Size = UDim2.fromScale(1, 1),
-			ZIndex = 4,
-		})
+		-- (filled in by refresh: icons, text and pictures in a centred row)
+		local strip = Instance.new("Frame")
+		strip.Name = "Strip"
+		strip.BackgroundTransparency = 1
+		strip.Size = UDim2.fromScale(1, 1)
+		strip.ZIndex = 4
+		local list = Instance.new("UIListLayout")
+		list.FillDirection = Enum.FillDirection.Horizontal
+		list.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		list.VerticalAlignment = Enum.VerticalAlignment.Center
+		list.SortOrder = Enum.SortOrder.LayoutOrder
+		list.Padding = UDim.new(0, fig(PIC_GAP))
+		list.Parent = strip
+		strip.Parent = bar
 		rows[name] = bar
 	end
 
@@ -145,7 +212,7 @@ local function build()
 			UiFx.shake(confirm)
 		end
 	end)
-	for _, name in { "Gold", "Reborn", "Quests", "LuckBonus" } do
+	for _, name in { "Gold", "Reborn", "Quests", "LuckBonus", "PenLevel" } do
 		player:GetAttributeChangedSignal(name):Connect(refresh)
 	end
 end

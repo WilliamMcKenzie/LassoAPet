@@ -34,6 +34,7 @@ root.Parent = workspace
 local CELL, CHUNK, START = Endless.CELL, Endless.CHUNK, Endless.START
 local AHEAD, BEHIND = 760, 260 -- studs of course built in front of the camera and behind it (the fog ends by 500)
 local BUDGET = 0.004 -- seconds of building a frame
+-- (the biome-coloured checker, no baseplate grid: that's the home base's alone, QM Nov 8)
 local CHECKER, STUDS = "rbxassetid://84747779882944", "rbxassetid://7447638591"
 local FLOOR_BOTTOM, SEAM, CAP_H, CAP_LIP = -2, 0.03, 3, 1
 local TOP = { Enum.NormalId.Top }

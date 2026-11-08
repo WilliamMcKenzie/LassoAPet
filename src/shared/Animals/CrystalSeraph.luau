@@ -7,7 +7,7 @@
 local Horse = require(script.Parent.Horse)
 local CrystalSeraphModel = require(script.Parent.Parent.Bosses.CrystalSeraphModel)
 
-return Horse.variant("CrystalSeraph", CrystalSeraphModel, "Divine", {
+return Horse.variant("CrystalSeraph", CrystalSeraphModel, "Omega", {
 	seat = Vector3.new(0, 34.4, 0), -- (on its halo)
 	neck = { center = Vector3.new(0, 18.15, 0), radius = 4.6 }, -- (round its core)
 })

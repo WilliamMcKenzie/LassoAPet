@@ -7,7 +7,8 @@ local ServerStorage = game:GetService("ServerStorage")
 local configCopy = game.ReplicatedStorage.Shared.Config:Clone()
 local Config = require(configCopy)
 local COLORS = Config.WorldColors
-local CHECKER, STUDS = "rbxassetid://84747779882944", "rbxassetid://7447638591"
+-- (Roblox's own Baseplate texture, grid + checker, QM Nov 8: a black overlay, tinted nothing)
+local CHECKER, STUDS = "rbxassetid://6372755229", "rbxassetid://7447638591"
 
 local ITEMS = {
 	PineTall = { {
@@ -342,7 +343,7 @@ local function texture(part, face, image, tile, key, z)
 	local t = Instance.new("Texture")
 	t.Name = if image == STUDS then "Studs" else "Checker"
 	t.Face = face t.Texture = image t.StudsPerTileU = tile t.StudsPerTileV = tile t.ZIndex = z or 1
-	if key then t:SetAttribute("ColorKey", key) t.Color3 = COLORS[key] end
+	if image == CHECKER then t.Color3, t.Transparency = Color3.new(0, 0, 0), Config.BaseplateTransparency elseif key then t:SetAttribute("ColorKey", key) t.Color3 = COLORS[key] end
 	if image == STUDS then t.Transparency = Config.StudTransparency end
 	-- (line the texture up with the world grid, whatever the part's corner)
 	do

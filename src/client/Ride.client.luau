@@ -154,6 +154,7 @@ vfx.crashScreen = require(script.Parent.CrashScreen)
 vfx.tutorialRide = require(script.Parent.TutorialRide) -- (the tutorial's first ride: Client/Tutorial steers it)
 vfx.speedLines = require(script.Parent.SpeedLines) -- speed lines on the screen while sprinting (QM, Oct 9 / 11)
 vfx.bossChase = require(script.Parent.BossChase) -- the boss when the timer's out (QM, Oct 10)
+vfx.LowMemory = require(script.Parent.LowMemory) -- (phones: fewer spare animals kept, vfx.poolCap)
 vfx.lassoPrompt = require(script.Parent.LassoPrompt) -- the prompt on what you'd lasso (QM, Oct 10)
 vfx.shoulderCam = require(script.Parent.ShoulderCam) -- the run home's camera (QM, Oct 10)
 vfx.newAnimal = require(script.Parent.NewAnimal) -- the animal you got, shown (QM, Oct 13)
@@ -331,9 +332,13 @@ local function newStream(spawnZ, endZ, herd, name)
 	end
 	s.life = START_AFTER + START_EASE + (s.spawnZ - s.endZ) / slowest
 	local names = {}
-	local luck = Config.luck(player) -- (your luck flattens your own stampede's odds: Config.Luck)
+	local luck = Config.luck(player) -- (your luck multiplies your own stampede's rarer odds: Config.luckWeight)
+	s.top = 0 -- (the herd's commonest weight: luck lifts no animal past it)
+	for _, weight in herd do
+		s.top = math.max(s.top, weight)
+	end
 	for kind, weight in herd do
-		local w = Config.luckWeight(weight, luck)
+		local w = Config.luckWeight(weight, luck, s.top)
 		table.insert(s.kinds, { name = kind, weight = w, base = weight })
 		table.insert(names, kind .. " " .. string.format("%.3g", w))
 		s.total += w
@@ -426,20 +431,35 @@ local phase = "idle" -- idle | outbound | turning | return | home | finish | end
 local starter, mount
 local herd = {} -- [n] = entity, for the stampede's animals near enough to draw
 local plans = {} -- [n] = { x, speed }, the stampede's schedule
--- Your luck changed (a goal, or the save loaded: "LuckBonus"): every stream's odds again at
+-- Your luck changed (a goal, the save loaded: "LuckBonus", or the luck event): every stream's odds again at
 -- the new luck, and the plans not yet running drawn again from them.
-player:GetAttributeChangedSignal("LuckBonus"):Connect(function()
+local function reweigh()
 	local luck = Config.luck(player)
 	for _, s in streams do
 		s.total = 0
 		for _, k in s.kinds do
-			k.weight = Config.luckWeight(k.base, luck)
+			k.weight = Config.luckWeight(k.base, luck, s.top)
 			s.total += k.weight
 		end
 	end
 	for key in plans do
 		if not herd[key] then
 			plans[key] = nil
+		end
+	end
+end
+player:GetAttributeChangedSignal("LuckBonus"):Connect(reweigh)
+player:GetAttributeChangedSignal("PassLuck10x"):Connect(reweigh) -- (the 10x Luck pass)
+player:GetAttributeChangedSignal("Reborn"):Connect(reweigh) -- (a rebirth: luck x Config.Luck.RebirthLuck)
+-- and the 100x Luck Event starting or ending (Config.LuckEvent: Config.luck's in it)
+task.spawn(function()
+	local on = Config.luckEventLeft() ~= nil
+	while true do
+		task.wait(0.25)
+		local now = Config.luckEventLeft() ~= nil
+		if now ~= on then
+			on = now
+			reweigh()
 		end
 	end
 end)
@@ -521,7 +541,7 @@ for _, biome in if vfx.Endless.On then Config.Endless.Biomes else {} do
 	for kind, weight in biome.Herd do
 		if weight > 0 then
 			pools[kind] = pools[kind] or {}
-			poolSizes[kind] = poolSizes[kind] or 2 -- (built on the spot past that: takeFromPool)
+			poolSizes[kind] = poolSizes[kind] or 0 -- (none built ahead: the endless course is far off, built on the spot: takeFromPool)
 		end
 	end
 end
@@ -727,16 +747,62 @@ local leadFromZ = 0
 -- it's in the corridor and riding as usual.
 local exitPath = nil
 
--- Out of your pen's gap (to its Spawn, just outside it), then straight to the
--- corridor's mouth, then a few studs on into it, square to the start line.
+-- Out of your pen's gap (to its Spawn, just outside it), round the slingshots standing
+-- in front of the pens, then straight to the corridor's mouth and a few studs on into it,
+-- square to the start line. All read off the live map (QM, Nov 7: the base grew, the
+-- pens moved back and the slingshots went in front of them), nothing hardcoded: the
+-- start line's z and width (World.StartLine), the pen's Spawn, the slingshots' boxes.
 local function penExitPath()
 	local pen = myPen()
 	local spawn = pen and pen:FindFirstChild("Spawn")
 	if not spawn then
 		return nil
 	end
-	local x = math.clamp(spawn.Position.X * 0.25, -(EDGE - 8), EDGE - 8) -- (a little toward its side of the corridor)
-	return { Vector2.new(spawn.Position.X, spawn.Position.Z), Vector2.new(x, 24), Vector2.new(x, 4) }
+	local line = world:FindFirstChild("StartLine")
+	local lineAt, lineSize = CFrame.new(0, 0, START_LINE_Z), Vector3.new(2 * (EDGE + 4), 0, 0)
+	if line then
+		lineAt, lineSize = line:GetBoundingBox()
+	end
+	local lineX, reach = lineAt.Position.X, lineSize.X / 2 - 12 -- (EDGE - 8, as before)
+	local from = Vector2.new(spawn.Position.X, spawn.Position.Z)
+	local x = math.clamp(lineX + (from.X - lineX) * 0.25, lineX - reach, lineX + reach) -- (a little toward its side of the corridor)
+	local mouth = Vector2.new(x, START_LINE_Z + 26) -- (straight on from here: 20 studs square to the line)
+	local path = { from }
+	-- Round each slingshot in the way (Server/Slingshot: Config.Slingshot.Ahead out from a
+	-- pen's Spawn, Scale times its meshes): past the side nearer the start line's middle,
+	-- clear of its box by the pet's half width and a bit.
+	local slings = workspace:FindFirstChild("Slingshots")
+	local clear = (if mount then vfx.halfBody(mount) else 2) + 3
+	local detours = {}
+	for _, sling in if slings then slings:GetChildren() else {} do
+		if not sling:IsA("Model") then
+			continue
+		end
+		local at, size = sling:GetBoundingBox()
+		local c = Vector2.new(at.Position.X, at.Position.Z)
+		local r = math.max(size.X, size.Z) / 2 + clear
+		local leg = mouth - from
+		local t = math.clamp((c - from):Dot(leg) / math.max(leg:Dot(leg), 1e-3), 0, 1)
+		local near = from + leg * t
+		if (c - near).Magnitude < r then
+			local side = Vector2.new(-leg.Unit.Y, leg.Unit.X) -- (square to the leg)
+			if (lineX - c.X) * side.X < 0 or (lineX == c.X and (near - c):Dot(side) < 0) then
+				side = -side
+			end
+			local along = leg.Unit * r * 0.5 -- (a short lane past it, so neither leg cuts its corner)
+			table.insert(detours, { t = t, at = c + side * r - along })
+			table.insert(detours, { t = t + 1e-6, at = c + side * r + along })
+		end
+	end
+	table.sort(detours, function(a, b)
+		return a.t < b.t
+	end)
+	for _, d in detours do
+		table.insert(path, d.at)
+	end
+	table.insert(path, mouth)
+	table.insert(path, Vector2.new(x, START_LINE_Z + 6))
+	return path
 end
 
 -- Which way your pen's open side faces, as a yaw (0 = toward the start line).
@@ -966,6 +1032,19 @@ end
 
 local function rideFromHome()
 	if phase == "idle" and rideModel and rideShown then
+		-- After the tutorial, your own pets open the Slingshot menu instead: pick where to go
+		-- (QM, Nov 7). Meadow rides it from here as before. (Not a stampede animal: not yours.)
+		local sling = require(script.Parent.SlingshotRide)
+		local model = rideModel
+		local own = (starter and model == starter.animal.model) or PenPets.pets[model]
+		if sling.menu and own and player:GetAttribute("Tutorial") ~= true then
+			sling.menu(model, function()
+				if phase == "idle" and model.Parent then
+					startRide(model)
+				end
+			end)
+			return
+		end
 		startRide(rideModel)
 	end
 end
@@ -996,7 +1075,7 @@ startRide = function(model, at)
 			herd[fromHerd.n], taken[fromHerd.n], fromHerd.n = nil, true, nil
 		end
 		mount = fromHerd
-		mount.popping, mount.hop, mount.dodge, mount.merged, mount.fuse, mount.tier = nil, 0, 0, nil, nil, nil
+		mount.popping, mount.hop, mount.dodge, mount.dodgeTo, mount.merged, mount.fuse, mount.tier = nil, 0, 0, 0, nil, nil, nil
 		mount.auto = nil
 		mount.swerve, mount.swerveTo, mount.swerveV, mount.swerveSide = 0, 0, 0, nil
 		mount.animal:setScale(1)
@@ -1045,24 +1124,27 @@ startRide = function(model, at)
 	Lasso.start(player.Character, nil, player:GetAttribute("PenLevel") or 1) -- (your pen level's lasso: LassoTiers)
 end
 
--- Your fastest pet at home (the one the start line and the Slingshot ride). (A field: this
--- chunk is at the local limit.)
-function vfx.fastestPet()
-	local best, fastest = nil, -1
-	for _, model in homePets() do
+-- Your fastest pet at home (the one the start line and the Slingshot ride), and where its
+-- rider sits, relative to its pivot (getSeatCFrame x SEAT_OFFSET, as on a ride: the
+-- Slingshot's flight seats you there). (A field: this chunk is at the local limit.)
+function vfx.fastestPet(only) -- (only: just that pet, for its seat)
+	local best, fastest, seat = nil, (if only then -math.huge else -1), nil
+	for _, model in (if only then { only } else homePets()) do
 		local info = if starter and model == starter.animal.model then starter else PenPets.pets[model]
 		local speed = info and statsOf(info.kind, info).Speed or -1
 		if speed > fastest then
 			best, fastest = model, speed
+			seat = info and info.animal and model:GetPivot():ToObjectSpace(info.animal:getSeatCFrame() * SEAT_OFFSET)
 		end
 	end
-	return best
+	return best, seat
 end
 
 -- The Slingshot (Client/SlingshotLaunch, QM Nov 6): you land at (x, z) on your fastest pet.
 require(script.Parent.SlingshotRide).bestPet = vfx.fastestPet
 require(script.Parent.SlingshotRide).ride = function(x, z, level)
-	local best = vfx.fastestPet()
+	local chosen = require(script.Parent.SlingshotRide).pet -- (the pet you held E on, if it's still home)
+	local best = if chosen and chosen.Parent then chosen else vfx.fastestPet()
 	if phase ~= "idle" or not best then
 		return false
 	end
@@ -1177,10 +1259,22 @@ function vfx.continueTier(metres)
 	return tier
 end
 
+-- How each ride ends, for analytics (Funnel's "Ride Ended <outcome>"; QM, Nov 8: do new
+-- players who never get an animal lasso nothing, or crash on the way home?).
+vfx.rideLog = { landed = 0 }
+function vfx.rideEnded(outcome)
+	local remote = ReplicatedStorage:FindFirstChild("FunnelStep")
+	if remote then
+		remote:FireServer("ride", outcome, vfx.rideLog.landed > 0)
+	end
+	vfx.rideLog.landed = 0
+end
+
 local function fail(reason, tip)
 	if phase == "ended" then
 		return
 	end
+	vfx.rideEnded(if reason == "CRASH!" then "Crash" elseif reason == "CAUGHT!" then "Caught" elseif reason == "BUCKED OFF" then "Bucked Off" else "Too Far")
 	vfx.sounds.play("crash")
 	Hud.setTip(tip) -- in place of the "+$N" the fail screen shows
 	local hrp, humanoid = character()
@@ -1462,6 +1556,25 @@ local function onAction()
 end
 vfx.lassoPrompt.onTap = onAction
 
+-- Auto Lasso (QM, Nov 8: RideUi's toggle): while it's on, the fastest animal in reach that's
+-- faster than the one you're on is lassoed by itself, as if you'd pressed E on it.
+vfx.rideUi = require(script.Parent.RideUi)
+function vfx.autoLasso()
+	if not vfx.rideUi.autoLasso or phase ~= "outbound" or transfer or not mount or player:GetAttribute("NoLasso") then
+		return
+	end
+	local best, fastest = nil, statsOf(mount.kind, mount).Speed
+	for _, entity in candidates() do
+		local speed = statsOf(entity.kind, entity).Speed
+		if speed > fastest then
+			best, fastest = entity, speed
+		end
+	end
+	if best then
+		startTransfer(best)
+	end
+end
+
 -- The phone joystick while riding: the player controls stay on (the rider is
 -- anchored, so it only steers, see readSteer) with jumping off, so no jump button.
 local rideStick = { on = false }
@@ -1586,7 +1699,7 @@ local function takeFromPool(n, x, z, kind)
 		builtThisFrame += 1
 		entity = newEntity(x, z, 0, kind)
 	end
-	entity.n, entity.x, entity.z, entity.yaw, entity.dodge = n, x, z, 0, 0
+	entity.n, entity.x, entity.z, entity.yaw, entity.dodge, entity.dodgeTo = n, x, z, 0, 0, 0
 	entity.swerve, entity.swerveTo, entity.swerveV, entity.swerveSide, entity.lat = 0, 0, 0, nil, 0 -- (vfx.updateAvoid; moveAnimal)
 	entity.animal.speed, entity.animal.turn = 0, 0 -- a reused animal starts standing, not mid-gallop
 	-- Put where it now is at once: one taken out of view isn't moved until it comes
@@ -1699,6 +1812,18 @@ function vfx.shatterIce(entity)
 	end
 end
 
+-- How many spare animals of a kind are kept (Nov 8, v671 crashes: every kind of every biome's
+-- herd, 100+ kinds, was built 3 times over at join and kept for good, rares too). Kinds that
+-- are about in view keep their pool size; rare ones (and phones: LowMemory) keep one at most.
+vfx.POOL_PREBUILD = 0.25 -- a kind is built ahead at join if about this many are in view on average
+function vfx.poolCap(kind)
+	local size = poolSizes[kind] or 0
+	if size < vfx.POOL_PREBUILD then
+		return if vfx.LowMemory.on then 0 else 1
+	end
+	return math.ceil(size) + 1
+end
+
 local function putInPool(entity)
 	vfx.setFrosted(entity, false, true)
 	local active = entity.ability and entity.ability.active
@@ -1713,7 +1838,12 @@ local function putInPool(entity)
 	end
 	entity.hop, entity.popping, entity.lift = 0, nil, nil
 	entity.ability, entity.frostLeft, entity.fall, entity.scaredOffBy = nil, nil, nil, nil
-	table.insert(pools[entity.kind], entity)
+	local pool = pools[entity.kind]
+	if #pool >= vfx.poolCap(entity.kind) then
+		entity.animal.model:Destroy() -- (the pool's full: let it go, not kept for the session)
+		return
+	end
+	table.insert(pool, entity)
 end
 
 -- Done with an animal: back in its kind's pool if the stampede has one (building
@@ -1781,6 +1911,16 @@ end
 
 -- shown: false while it's out of view (see updateHerd), when it only keeps its
 -- place on the course and its model waits where it was.
+-- A sideways nudge (a rider brushing past on the way out, a scare, ink) sets where the
+-- animal is pushed to (dodgeTo, which fades back to its lane); the animal eases after it
+-- (~0.2 s), so it never jerks aside or swings its head the instant you touch it (QM,
+-- Nov 8: animals snapped left/right as you rode up to them).
+function vfx.easeDodge(entity, dt)
+	local to = (entity.dodgeTo or 0) * math.exp(-1.5 * dt)
+	entity.dodgeTo = to
+	entity.dodge += (to - entity.dodge) * (1 - math.exp(-5 * dt))
+end
+
 local function moveAnimal(entity, x, z, speed, dt, shown)
 	-- Faces along its sideways speed, smoothed (~0.1 s) so any frame-to-frame wobble in x
 	-- can't twitch its head (QM, Oct 6). Its position isn't smoothed: that's the hitbox.
@@ -1877,7 +2017,7 @@ function vfx.updateEvent(dt, seen, inView)
 	if not vfx.event then
 		local entity = newEntity(vfx.EVENT_LANE, SPAWN_Z, 0, kind)
 		entity.animal.model.Parent = nil
-		entity.n, entity.dodge, entity.event = key, 0, true
+		entity.n, entity.dodge, entity.dodgeTo, entity.event = key, 0, 0, true
 		vfx.event = { key = key, entity = entity }
 	end
 	local event = vfx.event
@@ -1926,7 +2066,7 @@ function vfx.updateEvent(dt, seen, inView)
 	if shown then
 		entity.animal:setScale(scale * vfx.ownSize(entity)) -- (grown while you rode it, it stays grown)
 	end
-	entity.dodge *= math.exp(-1.5 * dt)
+	vfx.easeDodge(entity, dt)
 	moveAnimal(entity, math.clamp(x + entity.dodge, -vfx.edge(z), vfx.edge(z)), z, speed, dt, shown)
 end
 
@@ -1971,6 +2111,8 @@ local function updateHerd(dt, slowed)
 		local first = stream.oldest
 		if held and held % BIOME_KEYS == b - 1 then
 			first = math.min(first, held // BIOME_KEYS)
+		elseif stream.spawnZ + 500 < fromZ or stream.endZ > toZ then
+			continue -- (nowhere near the camera: none of it could show, so no per-animal work: Nov 8 lag)
 		end
 		for n = first, newest + vfx.HerdPacks.most - 1 do -- (a pack's followers pop in with it)
 			local key = n * BIOME_KEYS + b - 1
@@ -2027,7 +2169,7 @@ local function updateHerd(dt, slowed)
 				entity.animal:setScale(scale)
 			end
 			-- A nudge from a passing rider fades back out; it never changes the schedule.
-			entity.dodge *= math.exp(-1.5 * dt)
+			vfx.easeDodge(entity, dt)
 			if snapped then
 				entity.x = x + entity.dodge + (entity.swerve or 0) -- a snap doesn't swing them sideways
 			end
@@ -2426,14 +2568,27 @@ function vfx.updateAvoid(dt)
 				end
 				if not state.skip[entity] then
 					-- Away from you (the side it first picked), unless the wall leaves it in your way.
+					-- Once it has picked a side and a pace it keeps both, and its line only ever
+					-- moves further out (QM, Nov 8: animals snapped left/right as you got close).
+					-- Before, every frame re-picked the pace from what was left to go (a few studs,
+					-- so the fastest spring) and could flip sides at a wall, so a late swerve
+					-- tracked your steering, or crossed your path, in a fraction of a second.
+					-- Animals can't crash you now (anything you hit riding home is knocked away),
+					-- so the swerve only has to look right.
 					local side = side0
 					local target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
-					if math.abs(target - px) < math.min(6, clear) then
-						side = -side
-						target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
+					if not entity.swerveSide then
+						if math.abs(target - px) < math.min(6, clear) then
+							side = -side
+							target = math.clamp(px + side * clear, -vfx.edge(entity.z), vfx.edge(entity.z))
+						end
+						entity.swerveW = math.min(w, 6)
 					end
-					entity.swerveSide, entity.swerveTo = side, target - base
-					entity.swerveW = w
+					local to = target - base
+					if entity.swerveSide then
+						to = if side > 0 then math.max(to, entity.swerveTo or 0) else math.min(to, entity.swerveTo or 0)
+					end
+					entity.swerveSide, entity.swerveTo = side, to
 				end
 			end
 		elseif dz < -10 and entity.swerveSide then
@@ -2448,7 +2603,11 @@ function vfx.updateAvoid(dt)
 			local off = s - to
 			local a = (v + w * off) * dt
 			local decay = math.exp(-w * dt)
-			off, v = (off + a) * decay, math.clamp((v - w * a) * decay, -maxSpeed, maxSpeed)
+			-- (sideways no faster than Turn x its running speed, so it never darts: QM, Nov 8)
+			local cap = math.min(maxSpeed, math.max(entity.speed or 0, 10) * (cfg and cfg.Turn or 0.6) * 1.5)
+			local was = off
+			off, v = (off + a) * decay, math.clamp((v - w * a) * decay, -cap, cap)
+			off = math.clamp(off, was - cap * dt, was + cap * dt)
 			if math.abs(off) < 0.01 and math.abs(v) < 0.05 then
 				off, v = 0, 0
 			end
@@ -2488,7 +2647,7 @@ function vfx.updateScared(dt)
 		if entity ~= mount and not entity.popping and dx * dx + dz * dz < aura.radius * aura.radius then
 			local away = if dx >= 0 then 1 else -1
 			if entity.n then
-				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -aura.radius, aura.radius)
+				entity.dodgeTo = math.clamp((entity.dodgeTo or 0) + away * 60 * dt, -aura.radius, aura.radius)
 			else
 				entity.lane = math.clamp((entity.lane or entity.x / vfx.widen(entity.z)) + away * 60 * dt / vfx.widen(entity.z), -EDGE, EDGE)
 			end
@@ -2617,14 +2776,8 @@ end
 
 -- The mount broke something (smashed an obstacle, knocked an animal flying).
 function vfx.broke(hit)
-	if phase == "return" and mount and not activeAbility() and not vfx.crashProtected() then
-		local fast = math.abs(mount.speed) >= Config.ReturnRun.StaggerSpeed
-		-- (animals never stagger or crash you, only obstacles: QM, Nov 7; it was by StaggerTiers)
-		if not hit and not fast then
-			vfx.returnRun.hits += 1
-			mount.speed = math.min(mount.speed, Config.MountSpeed * rideSpeed(mount) * Config.ReturnRun.Walk)
-		end
-	end
+	-- (Nothing you knock away staggers or crashes you, obstacle or animal: only walls crash you,
+	-- vfx.wallStep. QM, Nov 8; it used to slow you, and ReturnRun.Crashes of them crashed you.)
 	local feast = vfx.feastOf(mount)
 	if feast then
 		feast.count += 1
@@ -2644,13 +2797,14 @@ function vfx.mountTier()
 	return tier
 end
 
--- Riding out into a wall (QM, Nov 7: you ran straight through them; Client/RideWalls): the step
+-- Riding out (or home: QM, Nov 8) into a wall (QM, Nov 7: you ran straight through them; Client/RideWalls): the step
 -- to (nx, nz) is a crash (vfx.wallCrash, checkRide), unless your mount's huge enough to walk
 -- over walls (Config.WallWalkOverTier) or flying higher than it. While nothing can crash you
--- (grace, Invincible, before the Desert) it stops you at the wall instead, sliding along it.
+-- (grace, Invincible, before the Desert), or ever with Config.WallsCrash off (QM, Nov 8), it stops
+-- you at the wall instead, sliding along it.
 vfx.rideWalls = require(script.Parent.RideWalls)
 function vfx.wallStep(nx, nz)
-	if phase ~= "outbound" or exitPath or nz >= 0 or vfx.rideWalls.walksOver(vfx.mountTier()) then
+	if (phase ~= "outbound" and phase ~= "return") or exitPath or nz >= 0 or vfx.rideWalls.walksOver(vfx.mountTier()) then -- (both ways: QM, Nov 8)
 		return nx, nz
 	end
 	local bodyX, bodyZ = vfx.halfBody(mount)
@@ -2659,7 +2813,7 @@ function vfx.wallStep(nx, nz)
 	if not top or (mount.hop or 0) > top then
 		return nx, nz
 	end
-	if grace <= 0 and not vfx.crashProtected() then
+	if Config.WallsCrash and grace <= 0 and not vfx.crashProtected() then
 		vfx.wallCrash = true
 		return mount.x, mount.z -- (stopped where it hit, so a Continue picks up just short of it)
 	elseif not vfx.rideWalls.hit(nx, mount.z, hx, hz) then
@@ -2715,7 +2869,7 @@ function vfx.scareOff(dt, special)
 		if entity ~= mount and not entity.popping and dx * dx + dz * dz < r * r then
 			local away = if dx >= 0 then 1 else -1
 			if entity.n then
-				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -r, r)
+				entity.dodgeTo = math.clamp((entity.dodgeTo or 0) + away * 60 * dt, -r, r)
 			else
 				entity.lane = math.clamp((entity.lane or entity.x / vfx.widen(entity.z)) + away * 60 * dt / vfx.widen(entity.z), -EDGE, EDGE)
 			end
@@ -2931,7 +3085,7 @@ function vfx.inkBlast(dt, cfg)
 		if entity ~= mount and dx * dx + dz * dz < cfg.Radius * cfg.Radius then
 			local away = if dx >= 0 then 1 else -1
 			if entity.n then
-				entity.dodge = math.clamp(entity.dodge + away * 60 * dt, -cfg.Radius, cfg.Radius)
+				entity.dodgeTo = math.clamp((entity.dodgeTo or 0) + away * 60 * dt, -cfg.Radius, cfg.Radius)
 			else
 				entity.lane = math.clamp(entity.lane + away * 60 * dt / vfx.widen(entity.z), -EDGE, EDGE)
 			end
@@ -3781,7 +3935,7 @@ local function checkRide(dt)
 	end
 	if vfx.wallCrash then
 		vfx.wallCrash, mount.speed = nil, 0 -- (into a wall: vfx.wallStep; a Continue starts from a standstill)
-		if phase == "outbound" then
+		if phase == "outbound" or phase == "return" then
 			return fail("CRASH!")
 		end
 	end
@@ -3879,7 +4033,7 @@ local function checkRide(dt)
 					hold = math.min(hold + holdTime(mount) * special.RestorePer, holdTime(mount)) -- 20% Hold per animal it hits (QM)
 				end
 			elseif phase == "outbound" and entity.n then
-				entity.dodge = math.clamp(entity.dodge + (if dx >= 0 then 1 else -1) * 12 * dt, -6, 6)
+				entity.dodgeTo = math.clamp((entity.dodgeTo or 0) + (if dx >= 0 then 1 else -1) * 12 * dt, -6, 6)
 			end
 		end
 	end
@@ -3939,6 +4093,7 @@ local function updateRider(dt)
 				table.remove(strays, table.find(strays, target))
 			end
 			mount, transfer = target, nil
+			vfx.rideLog.landed += 1
 			exitPath, vfx.exitTrack, vfx.exitLat, vfx.exitRoute = nil, nil, nil, nil -- (lassoed off your pet still on its way out of your pen: it'd pull you back onto the path, QM)
 			vfx.rideCue:FireServer("landed") -- (Riders.server: not lassoing any more)
 			picked = nil
@@ -4135,7 +4290,7 @@ vfx.rideSync.OnClientEvent:Connect(function(player, kind, mountCF, riderCF, spee
 		rider.entity = newEntity(p.X, p.Z, 0, base)
 		vfx.Fusion.paint(rider.entity.animal.model, base, fuse)
 		rider.entity.animal:setSaddled(true)
-		rider.entity.dodge = 0
+		rider.entity.dodge, rider.entity.dodgeTo = 0, 0
 		rider.kind = kind
 		if Config.AnimalTrails and Config.trailColors(player) then -- the Rainbow Trail, or the finish line's (Config.FinishTrails)
 			rider.trail = vfx.rainbowFx(rider.entity, Config.RainbowTrail.Lifetime, Config.RainbowTrail.Width, Config.trailColors(player))
@@ -4555,6 +4710,7 @@ RunService.PreSimulation:Connect(function(dt)
 			-- Crossed the finish line: the animal you rode is yours, in your pen
 			-- (Hatchery's FinishCourse), then back home to your pen.
 			task.spawn(function()
+				vfx.rideEnded("Finish Line")
 				local ok, kind = pcall(finishCourse.InvokeServer, finishCourse, if mount.own then nil else mount.kind) -- (your own pet: not a copy of it, a random one: QM, Oct 15)
 				task.wait(ok and kind and vfx.rideReward(kind) or 0.5)
 				if phase == "finish" then
@@ -4566,6 +4722,7 @@ RunService.PreSimulation:Connect(function(dt)
 			end)
 		else
 			local kind = carried and carried.kind
+			vfx.rideEnded(if kind then "Brought One Home" else "Home Empty")
 			if kind then
 				deliverEgg:FireServer(kind) -- into your egg inventory, to place in your pen
 			end
@@ -4577,6 +4734,7 @@ RunService.PreSimulation:Connect(function(dt)
 		end
 	end
 	actionTarget = findTarget()
+	vfx.autoLasso()
 	Outline.set(if actionTarget then actionTarget.animal.model else nil)
 	updateHud()
 end)
@@ -4586,8 +4744,13 @@ RunService:BindToRenderStep("RideCamera", Enum.RenderPriority.Camera.Value + 1, 
 	vfx.speedFx.update(dt, if riding and sprinting() then mount.speed * (vfx.speedGain or 1) else 0) -- speed lines while sprinting, by the uncurved speed
 	-- QM's speed lines (Config.SpeedLines): full on any sprint whatever the pet's speed,
 	-- none otherwise (QM, Oct 11).
-	vfx.speedLines.update(if riding and sprinting() then Config.SpeedLines.Speed else 0, dt)
-	vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
+	-- (and flying off the Slingshot: QM, Nov 7, Client/SlingshotLaunch)
+	vfx.speedLines.update(if (riding and sprinting()) or require(script.Parent.SlingshotRide).flying then Config.SpeedLines.Speed else 0, dt)
+	if require(script.Parent.SlingshotRide).flying then
+		vfx.sprintTrail.update(player.Character, true, Config.SprintTrail.HorseSprint * 4)
+	else
+		vfx.sprintTrail.update(if riding then player.Character else nil, riding and sprinting(), riding and mount.speed * (vfx.speedGain or 1) or 0) -- (off the rider: QM)
+	end
 	vfx.returnVignette.update(dt, mount ~= nil and (phase == "turning" or phase == "return"))
 	if not (phase == "boss" or phase == "turning" or phase == "return" or phase == "home" or (phase == "ended" and vfx.bossChase.runningPast())) then
 		vfx.bossChase.stop() -- (it moves with the ride, slow motion and all: below)
@@ -4815,6 +4978,9 @@ function vfx.updateSound()
 	end
 	vfx.wasSprinting, vfx.sprintTier = now, tier
 	-- (the wind loop while you sprint on a mount, the run home's too: Sounds.sprint_wind)
+	if require(script.Parent.SlingshotRide).flying then
+		return -- (the Slingshot's flight has its own wind: Client/SlingshotLaunch)
+	end
 	vfx.sounds.setSprintWind(mount ~= nil and not transfer and (phase == "outbound" or phase == "return") and sprinting(),
 		vfx.sprintCam.tierLoudness(tier)) -- (louder a step each sprint tier, up to 2x: QM)
 end
@@ -5034,7 +5200,7 @@ task.spawn(function()
 	end
 	table.sort(names)
 	for _, name in names do
-		for _ = #pools[name] + 1, math.max(2, math.ceil(poolSizes[name]) + 1) do
+		for _ = #pools[name] + 1, if poolSizes[name] < vfx.POOL_PREBUILD then 0 else vfx.poolCap(name) do
 			putInPool(newEntity(0, 0, 0, name))
 			built += 1
 			if built % 4 == 0 then

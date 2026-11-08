@@ -8,7 +8,7 @@
 local Horse = require(script.Parent.Horse)
 local LoongModel = require(script.Parent.LoongModel)
 
-return Horse.variant("Loong", LoongModel, "Legendary", {
+return Horse.variant("Loong", LoongModel, "Divine", {
 	seat = Vector3.new(0, 7, -1.2),
 	seatBone = "saddle", -- on the chest, which the slither swings about
 	neck = { center = Vector3.new(0, 4.8, -7.2), radius = 2.6 },

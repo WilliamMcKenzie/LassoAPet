@@ -30,6 +30,7 @@ local WorldColors = require(Shared.WorldColors)
 local Studs = require(Shared.Studs)
 local StudStyle = require(Shared.StudStyle)
 local HiddenFaces = require(Shared.HiddenFaces)
+local BakedStuds = require(Shared.BakedStuds)
 local BiomeFog = require(Shared.BiomeFog)
 
 local Map = {}
@@ -39,7 +40,11 @@ local COLORS = Config.WorldColors
 -- (the map's own colours, from the editor, over Config's: WorldColors paints from these too)
 local MapFile = require(Shared.MapFile)
 MapFile.applyColours(MapData, COLORS)
-local CHECKER, STUDS = "rbxassetid://84747779882944", "rbxassetid://7447638591"
+-- (Roblox's own Baseplate texture, grid + checker, QM Nov 8: a black overlay, tinted nothing)
+local CHECKER, STUDS = "rbxassetid://6372755229", "rbxassetid://7447638591"
+-- (walls' sides: the same look with 2x2-stud squares, a grid line between studs, QM Nov 8;
+-- assets/terrain/Baseplate2x2.png, black, tiles every 8 studs: walls' studs are 2 studs, StudStyle TileScale)
+local WALL_CHECKER, WALL_TILE = "rbxassetid://119843983644581", 8
 local STONE_MESH = "rbxassetid://128149382332662" -- StoneBlock_Block (assets/meshes/ids.json)
 local SIDES = { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
 local ALL = { Enum.NormalId.Top, Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
@@ -61,12 +66,17 @@ end
 
 local function texture(part, face, image, tile, key, z, aligned)
 	local t = Instance.new("Texture")
+	if image == CHECKER and (face ~= Enum.NormalId.Top or part.Name == "Cap" or part.Name == "Wall") then -- (walls' sides and tops)
+		image, tile = WALL_CHECKER, WALL_TILE
+	end
 	t.Name = if image == STUDS then "Studs" else "Checker"
 	t.Face = face
 	t.Texture = image
 	t.StudsPerTileU, t.StudsPerTileV = tile, tile
 	t.ZIndex = z or 1
-	if key then
+	if image == CHECKER or image == WALL_CHECKER then
+		t.Color3, t.Transparency = Color3.new(0, 0, 0), Config.BaseplateTransparency
+	elseif key then
 		t:SetAttribute("ColorKey", key)
 		t.Color3 = color(key)
 	end
@@ -229,7 +239,7 @@ local function floors(parent, wallParent, only, made)
 					-- magma glows: Neon, only a faint checker on top (as LassoAPet's lava)
 					p.Material = Enum.Material.Neon
 					p.Transparency = 0.15
-					t.Transparency = 0.55
+					t.Transparency = 0.9 -- (the baseplate overlay is black: fainter over the glow)
 					p:SetAttribute("Lava", true)
 				else
 					p.Material = Enum.Material.Glass
@@ -1165,6 +1175,7 @@ function Map.ensure()
 		end
 		-- (a map baked before meshes had studs, QM Oct 31: give them theirs now)
 		Studs.meshAll(map, 1)
+		BakedStuds.mergeAll(map) -- (one Texture a face: the studs baked into the grid, Nov 8)
 		return map
 	end
 	return Map.build()
@@ -1232,6 +1243,7 @@ function Map.build(data)
 	Studs.meshAll(map, 1)
 	-- (the textures on faces nobody sees, thousands of them: QM Oct 27, the game lagged)
 	HiddenFaces.cull(map)
+	BakedStuds.mergeAll(map) -- (one Texture a face: the studs baked into the grid, Nov 8)
 	BiomeFog.ensure(MapData.Areas) -- (workspace.Fog: each biome's fog, QM Nov 6)
 	map:SetAttribute("Baked", not RunService:IsRunning())
 	map:SetAttribute("Saved", MapData.Saved)
@@ -1286,6 +1298,7 @@ function Map.update(areas)
 	end
 	-- (unseen faces of what's new; the rest of the map was culled when it was built)
 	HiddenFaces.cull(map, made)
+	BakedStuds.mergeAll(map)
 	BiomeFog.ensure(MapData.Areas)
 	map:SetAttribute("Saved", MapData.Saved)
 	return map

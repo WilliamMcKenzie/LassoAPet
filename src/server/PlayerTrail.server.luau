@@ -1,7 +1,9 @@
--- Your trail (QM, Oct 15: "a trail on the player as well as the animal"): the best one you own
--- (Config.trailColors: the trail bars, the finish line's old ones, the bought Rainbow Trail)
+-- Your trail (QM, Oct 15: "a trail on the player as well as the animal"): the one you wear
+-- (Config.trailColors: the Trails Shop's, the finish line's old ones, the bought Rainbow Trail)
 -- streams off your character too, on foot and riding, built like VIP's gold one
 -- (Shared/RiderTrail), so everyone sees it. Your ride's own is Client/Ride's.
+-- Its speed (Config.trailSpeed) is your walking speed on foot only (QM, Nov 8): WalkSpeed is
+-- Config.WalkSpeed x it. Riding doesn't use WalkSpeed (you sit on your mount), so rides aren't sped up.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -16,6 +18,10 @@ local function trail(player, character)
 	if not hrp then
 		return
 	end
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.WalkSpeed = Config.WalkSpeed * Config.trailSpeed(player)
+	end
 	local colors = Config.trailColors(player)
 	if not colors then
 		RiderTrail.remove(hrp, NAME)
@@ -28,7 +34,7 @@ local function watch(player)
 	player.CharacterAdded:Connect(function(character)
 		trail(player, character)
 	end)
-	for _, name in { "TrailsOwned", "FinishTrail", "RainbowTrail" } do
+	for _, name in { "TrailsOwned", "TrailOn", "FinishTrail", "RainbowTrail" } do
 		player:GetAttributeChangedSignal(name):Connect(function()
 			trail(player, player.Character)
 		end)

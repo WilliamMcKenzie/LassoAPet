@@ -18,6 +18,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local HudKit = require(script.Parent.HudKit)
 local NativeHud = require(script.Parent.NativeHud)
 local PetFaces = require(script.Parent.PetFaces)
+local PetStill = require(script.Parent.PetStill)
 local SidePanel = require(script.Parent.SidePanel)
 local Ui = require(script.Parent.Ui)
 local UiFx = require(script.Parent.UiFx)
@@ -38,7 +39,7 @@ local OUTLINES = { -- text outlines (QM's Figma)
 	Full = hex("3a3a3a"),
 	Best = hex("0a5a00"),
 }
-local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Exclusive" }
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Celestial", "Void", "Omega", "Exclusive" }
 
 local panel, template
 
@@ -67,7 +68,8 @@ local function myPen()
 	return pens and pens:FindFirstChild("Pen" .. tostring(player:GetAttribute("Pen")))
 end
 
--- every pet you have: { id, kind, equipped, riding, income }, rarest first, then by income
+-- every pet you have: { id, kind, equipped, riding, income }: the one you ride, then the active
+-- ones (QM, Nov 8), each group rarest first, then by income
 local function pets()
 	local out = {}
 	local pen = myPen()
@@ -91,6 +93,9 @@ local function pets()
 	table.sort(out, function(a, b)
 		if a.riding ~= b.riding then
 			return a.riding == true
+		end
+		if a.equipped ~= b.equipped then
+			return a.equipped
 		end
 		local ra, rb = about(a.kind).rank, about(b.kind).rank
 		if ra ~= rb then
@@ -177,8 +182,22 @@ local function refresh()
 	for i, pet in list do
 		local row = Ui.copy(template, "Row" .. i, panel.rows)
 		row.LayoutOrder = i
-		row.Picture.Image = PetFaces.HEADSHOTS[pet.kind] or ""
+		local headshot = PetFaces.HEADSHOTS[pet.kind]
+		row.Picture.Image = headshot or ""
 		row.Picture.ImageTransparency = if pet.equipped then 0 else 0.2
+		if headshot == nil or headshot == "" then
+			-- no uploaded headshot (the luck-padding animals and others): its model in 3D, as the Index does
+			local view = PetStill.view(pet.kind)
+			if view then
+				view.Name = "View"
+				view.AnchorPoint = row.Picture.AnchorPoint
+				view.Position = row.Picture.Position
+				view.Size = row.Picture.Size
+				view.ZIndex = row.Picture.ZIndex
+				view.ImageTransparency = row.Picture.ImageTransparency
+				view.Parent = row.Picture.Parent
+			end
+		end
 		row.PetName.Text = about(pet.kind).name
 		row.PetCash.Text = "($" .. Config.short(pet.income) .. "/s)"
 		row.PetRiding.Visible = pet.riding == true

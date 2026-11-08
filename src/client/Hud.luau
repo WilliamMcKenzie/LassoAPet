@@ -255,7 +255,7 @@ local REFERENCE_WIDTH = 1320 -- screen width the sizes above are drawn for
 -- Action text from the ride -> which image the action button shows.
 local ACTIONS = { ["GRAB EGG"] = "takeEgg", LASSO = "lasso" }
 -- The TAKE EGG image by the egg's rarity; anything else uses takeEgg (Uncommon).
-local EGG_BUTTONS = { Rare = "takeEggRare", Epic = "takeEggEpic", Legendary = "takeEggLegendary", Divine = "takeEggLegendary" }
+local EGG_BUTTONS = { Rare = "takeEggRare", Epic = "takeEggEpic", Legendary = "takeEggLegendary", Divine = "takeEggLegendary", Celestial = "takeEggLegendary", Void = "takeEggLegendary", Omega = "takeEggLegendary" }
 
 -- Banners drawn as images instead of text.
 local BANNERS = { ["BUCKED OFF"] = "buckedOff", ["CRASH!"] = "crash" }
@@ -650,6 +650,7 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	follow()
 	task.spawn(function() -- (not holding up the HUD's build for it)
 	RewardPopups.watchCash(money) -- (gold you're given pops up in the lower middle, QM Nov 6)
+	RewardPopups.watchLuck() -- (and luck from goals, QM Nov 7)
 	game:GetService("ReplicatedStorage"):WaitForChild("PetIncome").OnClientEvent:Connect(function(earned)
 		if type(earned) ~= "number" or earned <= 0 or not gold.Visible or not sideRoot:FindFirstAncestorOfClass("ScreenGui").Enabled then
 			return -- (nothing while the counter's hidden: riding...)
@@ -870,11 +871,11 @@ function Hud.init(onAction, onHome, onRide, onContinue)
 	local hand = Instance.new("ImageLabel")
 	hand.Name = "Hand"
 	hand.BackgroundTransparency = 1
-	hand.Image = "rbxassetid://93240211999923" -- assets/ui/TutorialCursor.png
-	hand.AnchorPoint = Vector2.new(29 / 256, 6 / 256) -- its tip, so it throbs about it
+	hand.Image = "rbxassetid://134865745295413" -- assets/ui/TapHand.png (QM's; the old TutorialCursor art is a grey placeholder while Config.UiArt is off)
+	hand.AnchorPoint = Vector2.new(0.365, 0.03) -- its tip, so it throbs about it
 	hand.Position = UDim2.fromScale(0.5, 0.6)
 	hand.SizeConstraint = Enum.SizeConstraint.RelativeYY
-	hand.Size = UDim2.fromScale(0.9, 0.9)
+	hand.Size = UDim2.fromScale(0.9 * 488 / 610, 0.9) -- (TapHand.png is 488 x 610)
 	hand.Visible = false
 	hand.ZIndex = 2 -- over the fill
 	local handScale = Instance.new("UIScale")

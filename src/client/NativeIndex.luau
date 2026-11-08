@@ -61,9 +61,10 @@ local PICK = 8 -- the picked tile's white ring
 local SPIN = 45 -- degrees a second a moving rarity's back turns (Fight to Steal an Egg's WeaponShop)
 local SHEEN = 0.45 -- transparency at the middle of its sheen's band
 local moving = setmetatable({}, { __mode = "k" }) -- [back's Fill] = its sheen's UIGradient
-local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Exclusive" }
+local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", "Celestial", "Void", "Omega", "Exclusive" }
 
 local gui, sections, card, details, unlocked, badge
+local loadNear, unloadAll -- (the pictures of the sections near view: below)
 local tiles = {} -- [kind] = tile
 local bars = {} -- [biome number] = { section, kinds }
 local picked
@@ -136,14 +137,14 @@ end
 
 -- an animal's picture in a holder (its "Picture" ImageLabel): its headshot, or its model in
 -- 3D (PetStill) as "View" when it has none uploaded
-local function setPicture(picture, kind)
+local function setPicture(picture, kind, small)
 	local old = picture.Parent and picture.Parent:FindFirstChild("View")
 	if old and old:GetAttribute("Kind") ~= kind then
 		old:Destroy()
 		old = nil
 	end
 	local headshot = PetFaces.HEADSHOTS[kind]
-	picture.Image = headshot or ""
+	picture.Image = (if small then PetFaces.SMALL[kind] else nil) or headshot or "" -- (a tile's: the 128 px one)
 	if (headshot == nil or headshot == "") and not old and picture.Parent then
 		local view = PetStill.view(kind)
 		if view then
@@ -577,7 +578,7 @@ local function makeSection(i)
 		tile.Size = UDim2.fromOffset(math.round(p[3] * cell + (p[3] - 1) * fig(GAP)), math.round(p[4] * cell + (p[4] - 1) * fig(GAP)))
 		paintBack(tile:FindFirstChild("Back"), about(kind).rarity)
 		tile.Parent = grid
-		setPicture(tile.Picture, kind)
+		-- (its picture is set when its section scrolls near: loadNear)
 		RarityLook.paint(tile.PetName, about(kind).rarity, tile.PetName:FindFirstChild("Outline")) -- (its rarity's colours; its name or "???": refresh)
 		tile.PetName.Text = "???"
 		if p[3] == 2 and p[4] == 2 then
@@ -616,6 +617,11 @@ local function build()
 	end)
 	gui:GetPropertyChangedSignal("Visible"):Connect(function()
 		NativeHud.haze("Index", gui.Visible)
+		if gui.Visible then
+			task.defer(loadNear)
+		else
+			unloadAll() -- (shut: its pictures and 3D models go, loaded again when it opens)
+		end
 	end)
 
 	-- the sections' box
@@ -641,6 +647,9 @@ local function build()
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Padding = UDim.new(0, fig(10))
 	layout.Parent = sections
+	sections:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+		loadNear()
+	end)
 
 	-- Unlocked: X/Y, the book over its left end
 	unlocked = HudKit.back(gui, "IndexBox", {
@@ -811,6 +820,51 @@ local function build()
 	for i in BIOMES do
 		makeSection(i)
 	end
+end
+
+-- Pictures only for the sections in or near view, and none while the Index is shut (Nov 8,
+-- memory: every tile's 512 px headshot, ~150 of them, plus a 3D model for each animal with no
+-- headshot, were all made the first time it opened and kept for good, ~200 MB).
+local loaded = {} -- [biome number] = true while its tiles have their pictures
+function loadNear()
+	if not sections or not gui or not gui.Visible then
+		return
+	end
+	local top = sections.AbsolutePosition.Y
+	local h = sections.AbsoluteSize.Y
+	local seen
+	for i, section in bars do
+		if loaded[i] then
+			continue
+		end
+		local y = section.AbsolutePosition.Y
+		if y + section.AbsoluteSize.Y >= top - h and y <= top + 2 * h then
+			loaded[i] = true
+			seen = seen or had()
+			for _, kind in BIOMES[i].kinds do
+				local tile = tiles[kind]
+				if tile then
+					setPicture(tile.Picture, kind, true)
+					shadePicture(tile.Picture, seen[kind] == true)
+				end
+			end
+		end
+	end
+end
+function unloadAll()
+	for i in loaded do
+		for _, kind in BIOMES[i].kinds do
+			local tile = tiles[kind]
+			if tile then
+				tile.Picture.Image = ""
+				local view = tile:FindFirstChild("View")
+				if view then
+					view:Destroy()
+				end
+			end
+		end
+	end
+	table.clear(loaded)
 end
 
 local function refresh()

@@ -71,7 +71,7 @@ local function yourPets()
 	if starter and starter.animal.model.Parent and starter.kind == player:GetAttribute("RidePet") then
 		table.insert(list, { model = starter.animal.model, id = "ride", kind = starter.kind, fuse = starter.fuse, merged = starter.merged, worth = player:GetAttribute("RideWorth"), income = player:GetAttribute("RideIncome"), stats = starter.stats })
 	end
-	local ranks = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5, Divine = 6 }
+	local ranks = { Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5, Divine = 6, Celestial = 7, Void = 8, Omega = 9 }
 	table.sort(list, function(a, b) -- rarest first, then by kind, so a kind's pets sit together
 		local ra, rb = ranks[Fusion.rarity(a.kind, a.fuse)] or 0, ranks[Fusion.rarity(b.kind, b.fuse)] or 0
 		if ra ~= rb then
