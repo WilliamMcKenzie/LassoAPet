@@ -137,15 +137,38 @@ seconds.ZIndex = 2
 local titleScale, secondsScale = Instance.new("UIScale"), Instance.new("UIScale")
 titleScale.Parent, secondsScale.Parent = title, seconds
 
--- The Auto Lasso toggle, bottom left (QM's Figma, page AutoLasso, frame Toggle, Nov 8). Drawn
--- on a 2324 px wide shot of the screen, so its numbers go through k to RefWidth px. Off: the
--- red knob on the left of the dark track; on: it slides right and turns green.
+-- The Auto Lasso toggle, bottom left (QM's Figma, page AutoLasso, frame Toggle, Nov 8). Off:
+-- the red knob on the left of the dark track; on: it slides right and turns green. Where the
+-- base HUD's cash row is (NativeHud, hidden while riding), at its scale (QM, Nov 8): the
+-- switch as tall as the cash icon, the label the cash number's size. Laid out in NativeHud's
+-- design px; the switch's Figma px go through k so its 94 is SWITCH_H.
 RideUi.autoLasso = false
 do
-	local k = Config.BaseUi.RefWidth / 2324
+	local HudKit = require(script.Parent.HudKit)
+	local NativeHud = require(script.Parent.NativeHud)
+	local fig = HudKit.fig
+	local SWITCH_H = fig(120) -- (the cash icon's art, inside its 160 box)
+	local k = SWITCH_H / 94
 	local function px(n)
-		return math.round(n * k)
+		return math.max(math.round(n * k), 1)
 	end
+	-- its own root at NativeHud's scale (the bar's root is RefWidth px)
+	local hudRoot = Instance.new("Frame")
+	hudRoot.Name = "HudRoot"
+	hudRoot.BackgroundTransparency = 1
+	hudRoot.Parent = gui
+	local fit = Instance.new("UIScale")
+	fit.Parent = hudRoot
+	local function refit()
+		local h = gui.AbsoluteSize.Y
+		if h < 1 then
+			h = workspace.CurrentCamera.ViewportSize.Y
+		end
+		fit.Scale = NativeHud.scaleFor(h)
+		hudRoot.Size = UDim2.fromScale(1 / fit.Scale, 1 / fit.Scale)
+	end
+	refit()
+	gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(refit)
 	local function gradient(parent, top, bottom, alphaTop, alphaBottom)
 		local g = Instance.new("UIGradient")
 		g.Rotation = 90
@@ -200,10 +223,11 @@ do
 	toggle.Text = ""
 	toggle.AutoButtonColor = false
 	toggle.BackgroundTransparency = 1
-	toggle.AnchorPoint = Vector2.new(0, 1)
-	toggle.Position = UDim2.new(0, px(51), 1, -px(46))
-	toggle.Size = UDim2.fromOffset(px(442), px(94))
-	toggle.Parent = root
+	-- (the cash row's: bottom 81 up, 160 tall, the icon 11 in; the switch centred on it)
+	toggle.AnchorPoint = Vector2.new(0, 0.5)
+	toggle.Position = UDim2.new(0, fig(11), 1, -fig(81) - fig(80))
+	toggle.Size = UDim2.fromOffset(px(238) + fig(24) + fig(300), px(94))
+	toggle.Parent = hudRoot
 
 	-- the track: black at 50% fading to 40%, black outline
 	local track = box(toggle, Color3.new(0, 0, 0))
@@ -225,13 +249,13 @@ do
 	label.Name = "Label"
 	label.BackgroundTransparency = 1
 	label.FontFace = FONT
-	label.TextSize = px(30)
+	label.TextSize = fig(60) -- (the cash number's: HudKit.label)
 	label.TextColor3 = Color3.new(1, 1, 1)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.Text = "Auto Lasso"
 	label.AnchorPoint = Vector2.new(0, 0.5)
-	label.Position = UDim2.new(0, px(266), 0.5, 0)
-	label.Size = UDim2.fromOffset(px(176), px(37))
+	label.Position = UDim2.new(0, px(238) + fig(24), 0.5, 0)
+	label.Size = UDim2.fromOffset(fig(300), fig(72))
 	local stroke = Instance.new("UIStroke")
 	stroke.Thickness = STROKE
 	stroke.Color = Color3.new(0, 0, 0)
