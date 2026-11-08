@@ -11,6 +11,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Endless = require(Shared.Endless)
 local StudStyle = require(Shared.StudStyle)
+local BakedStuds = require(Shared.BakedStuds)
 if not Endless.On then
 	return
 end
@@ -118,6 +119,7 @@ local function box(parent, x0, y0, z0, x1, y1, z1, key, faces, ground)
 		end
 		texture(p, face, STUDS, 1, nil, ground)
 	end
+	BakedStuds.merge(p, ground) -- (one Texture a face: the studs baked into the grid, Nov 8)
 	return p
 end
 
