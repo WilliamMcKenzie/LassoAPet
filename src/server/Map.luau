@@ -65,7 +65,7 @@ end
 
 local function texture(part, face, image, tile, key, z, aligned)
 	local t = Instance.new("Texture")
-	if image == CHECKER and face ~= Enum.NormalId.Top then
+	if image == CHECKER and (face ~= Enum.NormalId.Top or part.Name == "Cap" or part.Name == "Wall") then -- (walls' sides and tops)
 		image, tile = WALL_CHECKER, WALL_TILE
 	end
 	t.Name = if image == STUDS then "Studs" else "Checker"

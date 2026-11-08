@@ -62,7 +62,7 @@ end
 -- (as Server/Map's: lined up with the world grid, so every part's checker is one board)
 local function texture(part, face, image, tile, key, ground)
 	local t = Instance.new("Texture")
-	if image == CHECKER and face ~= Enum.NormalId.Top then
+	if image == CHECKER and (face ~= Enum.NormalId.Top or not ground) then -- (walls' sides and tops)
 		image, tile = WALL_CHECKER, WALL_TILE
 	end
 	t.Name = if image == STUDS then "Studs" else "Checker"
