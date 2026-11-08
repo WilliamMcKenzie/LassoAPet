@@ -24,8 +24,8 @@ local StudStyle = require(script.Parent.StudStyle)
 
 -- uploaded pictures (assets/terrain/StudGrid*.png); "" bakes nothing of that look
 BakedStuds.IDS = {
-	Floor = "rbxassetid://114916306273885", -- StudGridFloor.png (base checker 20% softer, Nov 8)
-	FloorSide = "rbxassetid://137345544596451", -- StudGridFloorSide.png (the same)
+	Floor = "rbxassetid://73568363658561", -- StudGridFloor.png (base overlay 5%, QM Nov 8)
+	FloorSide = "rbxassetid://136683686980957", -- StudGridFloorSide.png (the same)
 	Wall = "rbxassetid://114582520270896", -- StudGridWall.png
 }
 -- (earlier uploads of the same looks: still on a place baked before, swapped for IDS')
