@@ -2617,6 +2617,32 @@ if not game:GetService("RunService"):IsStudio() then
 		end
 	end
 end
+-- The Index's Buy (QM, Nov 8; Client/NativeIndex, Shop.server, Hatchery's GrantIndexPet): an
+-- animal you've never had, Legendary or rarer, can be bought for Robux, straight into your pen.
+-- Lower rarities stay Locked, and so do the limiteds (Config.PetOffers: their own stand). Prices
+-- by rarity (the limiteds R$499-999); Products, each animal's developer product (0: free in
+-- Studio, not for sale live).
+Config.IndexBuy = {
+	Prices = { Legendary = 299, Divine = 599, Celestial = 999, Void = 1999, Omega = 3999 },
+	Products = {
+		-- Legendary
+		HillbackTortoise = 0, Snake = 0, MirageElephant = 0, GlacierMammoth = 0, Icebringer = 0, Phoenix = 0,
+		AshBehemoth = 0, AbyssPillbug = 0, AncientMoose = 0, AncientTreant = 0, BoneRex = 0, BlueCrab = 0,
+		AbyssWhale = 0, Asura = 0, CrystalElephant = 0, AlphaRhino = 0, AlphaSpineLizard = 0, AlphaSandworm = 0,
+		AlphaIceGolem = 0, AlphaLavaWhale = 0,
+		-- Divine
+		Unicorn = 0, AlphaSnake = 0, AlphaIcebringer = 0, AlphaPhoenix = 0,
+		-- Celestial
+		BoneWyrm = 0, SpiritLoong = 0, CastleWyvern = 0,
+		-- Void
+		Kraken = 0, BlackWidow = 0,
+		-- Omega
+		Seraph = 0, CrystalSeraph = 0,
+	},
+}
+if Config.World ~= 1 then
+	Config.IndexBuy.Products = {}
+end
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)

@@ -354,7 +354,31 @@ local function bankAway(player)
 	local bank = game:GetService("ServerStorage"):FindFirstChild("BankAway")
 	return bank ~= nil and bank:Invoke(player, Config.AwayBoost.Multiplier) == true
 end
+local indexGranted = {} -- (the Index's Buy's, the same)
+local indexOf = {} -- [product id] = the animal (Config.IndexBuy)
+for kind, id in Config.IndexBuy.Products do
+	if id ~= 0 then
+		indexOf[id] = kind
+	end
+end
+local function grantIndexPet(player, kind)
+	local grant = game:GetService("ServerStorage"):FindFirstChild("GrantIndexPet")
+	return grant ~= nil and grant:Invoke(player, kind) == true
+end
 buyShop.OnServerEvent:Connect(function(player, key, source)
+	if key == "IndexBuy" then
+		-- the Index's Buy (Config.IndexBuy): an animal you've never had, Legendary or rarer
+		local id = typeof(source) == "string" and Config.IndexBuy.Products[source]
+		if not id then
+			return
+		elseif id ~= 0 then
+			MarketplaceService:PromptProductPurchase(player, id)
+			Telemetry.monoPrompt(player, "product:" .. id, "index_" .. source)
+		elseif RunService:IsStudio() then
+			grantIndexPet(player, source)
+		end
+		return
+	end
 	if key == "Away4x" then
 		local id = Config.AwayBoost.ProductId
 		if id ~= 0 then
@@ -517,6 +541,20 @@ MarketplaceService.ProcessReceipt = function(receipt)
 			end
 			return Enum.ProductPurchaseDecision.NotProcessedYet
 		end
+	end
+	local indexKind = indexOf[receipt.ProductId]
+	if indexKind then
+		-- (the Index's Buy: into their pen while they're here with it loaded; else tried again next visit)
+		if indexGranted[receipt.PurchaseId] then
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		local player = Players:GetPlayerByUserId(receipt.PlayerId)
+		if player and grantIndexPet(player, indexKind) then
+			indexGranted[receipt.PurchaseId] = true
+			Telemetry.purchase(player, receipt.CurrencySpent, "product:" .. receipt.ProductId)
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	local luckPack = luckOf[receipt.ProductId]
 	if luckPack then

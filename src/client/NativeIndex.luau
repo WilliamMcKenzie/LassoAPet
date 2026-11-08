@@ -4,14 +4,16 @@
 --   left    a box scrolling through a section per biome of this world: the biome's card (its
 --           grass colour, its name) and its animals as tiles in a collage, then a bar of how
 --           many of them you've had. One you've never had (the "Caught" attribute,
---           Hatchery) is a dark silhouette. Each tile's label is its name once had, else "???",
---           in its rarity's colours (RarityLook); tiles run rarest first by spawn odds. Every
+--           Hatchery) is a dark silhouette; one had has a drop shadow. Each tile's label is its
+--           name once had, else "???", white on black; tiles run rarest first by spawn odds. Every
 --           animal that runs in a biome is in (the alphas and the new ones too); one with no
 --           uploaded headshot shows its model in 3D (PetStill).
---   bottom  Unlocked: had / every animal, by the Index book
+--   bottom  Unlocked: had / every animal, by the Index book; while there are rewards to claim,
+--           full and blue, "Claim! (N)", claiming them all (IndexClaim "*")
 --   right   the picked animal's card (its rarity's colours: name, rarity, cash a second;
 --           "???" for one not had), and under it its reward (Config.indexReward's cash) with
---           Claim! (Locked till you've had it; Hatchery's IndexClaim). Once that's claimed
+--           Claim! (Locked till you've had it, or Buy for Robux if it's Legendary or rarer:
+--           Config.IndexBuy; Hatchery's IndexClaim). Once that's claimed
 --           the box shows where it runs and its speed instead, as the reference's stats.
 -- A red "!" sits on the Index button while there's a reward to claim (NativeIndex.badge).
 -- Client/AnimalDex hands its toggle, close and isOpen to this while the native UI's on.
@@ -26,6 +28,7 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local HudImages = require(script.Parent.HudImages)
@@ -58,6 +61,8 @@ local CASH_GREEN = Color3.fromRGB(0, 255, 0)
 local LOCKED_SHADE = 0.45 -- the dark over a tile not had (its transparency)
 local SILHOUETTE = 0.35 -- an animal not had: black, this transparent
 local PICK = 8 -- the picked tile's white ring
+local LEAN, LEAN_GROW = 5, 1.05 -- a hovered tile's pet: degrees turned, and how much bigger
+local SHADOW, SHADOW_SHIFT = 0.5, 8 -- a had animal's drop shadow: its transparency, and how far down and right
 local SPIN = 45 -- degrees a second a moving rarity's back turns (Fight to Steal an Egg's WeaponShop)
 local SHEEN = 0.45 -- transparency at the middle of its sheen's band
 local moving = setmetatable({}, { __mode = "k" }) -- [back's Fill] = its sheen's UIGradient
@@ -65,6 +70,8 @@ local RARITIES = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Divine", 
 
 local gui, sections, card, details, unlocked, badge
 local loadNear, unloadAll -- (the pictures of the sections near view: below)
+local claimable -- (how many rewards there are to claim: below)
+local ALL = "*" -- IndexClaim's "every one there is to claim" (Hatchery)
 local tiles = {} -- [kind] = tile
 local bars = {} -- [biome number] = { section, kinds }
 local picked
@@ -143,6 +150,7 @@ local function setPicture(picture, kind, small)
 		old:Destroy()
 		old = nil
 	end
+	picture:SetAttribute("Kind", kind)
 	local headshot = PetFaces.HEADSHOTS[kind]
 	picture.Image = (if small then PetFaces.SMALL[kind] else nil) or headshot or "" -- (a tile's: the 128 px one)
 	if (headshot == nil or headshot == "") and not old and picture.Parent then
@@ -152,7 +160,7 @@ local function setPicture(picture, kind, small)
 			view:SetAttribute("Kind", kind)
 			view.AnchorPoint = picture.AnchorPoint
 			view.Position = picture.Position
-			view.Size = picture.Size
+			view.Size = picture:GetAttribute("BaseSize") or picture.Size
 			view.ZIndex = picture.ZIndex
 			view.Parent = picture.Parent
 		end
@@ -169,6 +177,45 @@ local function shadePicture(picture, found)
 		view.ImageColor3, view.ImageTransparency = colour, transparency
 		view.Ambient = if found then Color3.fromRGB(200, 200, 200) else HudKit.BLACK
 		view.LightColor = if found then Color3.new(1, 1, 1) else HudKit.BLACK
+	end
+	-- (had: a copy of it behind, black, half see-through and shifted down and right, its drop
+	-- shadow: QM, Nov 8)
+	local holder = picture.Parent
+	local shadow = holder and holder:FindFirstChild("Shadow")
+	local kind = picture:GetAttribute("Kind")
+	local from = if view then "View" else "Image"
+	if shadow and (not found or shadow:GetAttribute("Kind") ~= kind or shadow:GetAttribute("From") ~= from) then
+		shadow:Destroy()
+		shadow = nil
+	end
+	if not found or not holder or (not view and picture.Image == "") then
+		return
+	end
+	if not shadow then
+		if view then
+			shadow = PetStill.view(kind)
+			if not shadow then
+				return
+			end
+			shadow.Ambient, shadow.LightColor = HudKit.BLACK, HudKit.BLACK
+		else
+			shadow = Instance.new("ImageLabel")
+			shadow.BackgroundTransparency = 1
+			shadow.ScaleType = picture.ScaleType
+		end
+		shadow.Name = "Shadow"
+		shadow:SetAttribute("Kind", kind)
+		shadow:SetAttribute("From", from)
+		shadow.AnchorPoint = picture.AnchorPoint
+		shadow.Position = picture.Position + UDim2.fromOffset(fig(SHADOW_SHIFT), fig(SHADOW_SHIFT))
+		shadow.Size = picture:GetAttribute("BaseSize") or picture.Size
+		shadow.ZIndex = picture.ZIndex - 1
+		shadow.ImageColor3 = HudKit.BLACK
+		shadow.ImageTransparency = SHADOW
+		shadow.Parent = holder
+	end
+	if not view then
+		shadow.Image = picture.Image
 	end
 end
 
@@ -400,7 +447,7 @@ local function makeTile()
 	tile.BackgroundTransparency = 1
 	tile.Image = ""
 	tile.AutoButtonColor = false
-	HudKit.back(tile, "Card", {})
+	HudKit.back(tile, "IndexTile", {})
 	local round = Instance.new("UICorner")
 	round.CornerRadius = UDim.new(0, fig(10))
 	round.Parent = tile
@@ -423,8 +470,8 @@ local function makeTile()
 	picture.BackgroundTransparency = 1
 	picture.ScaleType = Enum.ScaleType.Fit
 	picture.AnchorPoint = Vector2.new(0.5, 0.5)
-	picture.Position = UDim2.fromScale(0.5, 0.55)
-	picture.Size = UDim2.fromScale(0.86, 0.8)
+	picture.Position = UDim2.fromScale(0.5, 0.53)
+	picture.Size = UDim2.fromScale(1, 0.98) -- (the whole tile, under its name: QM, Nov 8, as Fight to Steal an Egg's)
 	picture.ZIndex = 3
 	picture.Parent = tile
 	local name = label(tile, "PetName", {
@@ -445,6 +492,13 @@ local function makeTile()
 	ring.Enabled = false
 	ring.Parent = tile
 	return tile
+end
+
+-- one never had of Legendary or above can be bought for Robux (Config.IndexBuy, QM Nov 8):
+-- its developer product, or free in Studio till it has one
+local function buyable(kind)
+	local id = Config.IndexBuy.Products[kind]
+	return id ~= nil and (id ~= 0 or RunService:IsStudio())
 end
 
 local function showCard(kind)
@@ -469,7 +523,9 @@ local function showCard(kind)
 	details.Where.Visible, details.Speed.Visible = done, done
 	claim.CashReward.Amount.Text = "$" .. Config.short(Config.indexReward(kind)):upper()
 	claim.ClaimButton.Visible = found
-	claim.LockedButton.Visible = not found
+	local buy = not found and buyable(kind)
+	claim.BuyButton.Visible = buy
+	claim.LockedButton.Visible = not found and not buy
 end
 
 local function pick(kind)
@@ -514,15 +570,6 @@ local function makeSection(i)
 		end
 		render.Parent = picture
 	end
-	label(picture, "BiomeName", {
-		Text = biome.name,
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextScaled = true,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.new(0.9, 0, 0, fig(80)),
-		ZIndex = 3,
-	})
 	local grid = Instance.new("Frame")
 	grid.Name = "Grid"
 	grid.BackgroundTransparency = 1
@@ -543,7 +590,7 @@ local function makeSection(i)
 	found.Size = UDim2.fromScale(0, 1)
 	found.ZIndex = 2
 	found.Parent = track
-	HudKit.back(found, "EggGrow", { Name = "Green", ZIndex = 2 })
+	HudKit.back(found, "IndexGrow", { Name = "Green", ZIndex = 2 })
 	label(track, "Count", {
 		Text = "0/0",
 		TextXAlignment = Enum.TextXAlignment.Center,
@@ -579,12 +626,34 @@ local function makeSection(i)
 		paintBack(tile:FindFirstChild("Back"), about(kind).rarity)
 		tile.Parent = grid
 		-- (its picture is set when its section scrolls near: loadNear)
-		RarityLook.paint(tile.PetName, about(kind).rarity, tile.PetName:FindFirstChild("Outline")) -- (its rarity's colours; its name or "???": refresh)
+		-- (its name or "???", white on black: QM, Nov 8; refresh)
 		tile.PetName.Text = "???"
 		if p[3] == 2 and p[4] == 2 then
 			tile.PetName.Size = UDim2.new(0.92, 0, 0, fig(60))
 		end
 		HudKit.hover(tile)
+		-- hovered: its pet turned a little and a little bigger (QM, Nov 8)
+		local function lean(on)
+			local info = TweenInfo.new(0.15, Enum.EasingStyle.Quad)
+			for _, name in { "Picture", "View", "Shadow" } do
+				local g = tile:FindFirstChild(name)
+				if g then
+					local base = g:GetAttribute("BaseSize") or g.Size
+					g:SetAttribute("BaseSize", base)
+					local k = if on then LEAN_GROW else 1
+					TweenService:Create(g, info, {
+						Rotation = if on then LEAN else 0,
+						Size = UDim2.new(base.X.Scale * k, base.X.Offset * k, base.Y.Scale * k, base.Y.Offset * k),
+					}):Play()
+				end
+			end
+		end
+		tile.MouseEnter:Connect(function()
+			lean(true)
+		end)
+		tile.MouseLeave:Connect(function()
+			lean(false)
+		end)
 		tile.Activated:Connect(function()
 			pick(kind)
 		end)
@@ -658,6 +727,29 @@ local function build()
 		Size = UDim2.fromOffset(fig(LEFT_W - 110), fig(H - 40 - (BOX_TOP + BOX_H + 40))),
 		ZIndex = 2,
 	})
+	-- (any rewards to claim: the bar full and blue, "Claim! (N)", claiming them all at a press, as
+	-- Fight to Steal an Egg's: QM, Nov 8)
+	HudKit.back(unlocked, "Blue", { Name = "ClaimAll", Visible = false, ZIndex = 2 })
+	local claimAll = Ui.make(unlocked, "Press", "TextButton", {
+		BackgroundTransparency = 1,
+		Text = "",
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 4,
+	})
+	claimAll.Activated:Connect(function()
+		local remote = ReplicatedStorage:FindFirstChild("IndexClaim")
+		if not remote or not unlocked.ClaimAll.Visible or claimAll:GetAttribute("Busy") then
+			return
+		end
+		claimAll:SetAttribute("Busy", true)
+		local ok, done = pcall(remote.InvokeServer, remote, ALL)
+		if ok and done then
+			UiFx.play("Claim")
+		else
+			UiFx.shake(unlocked)
+		end
+		claimAll:SetAttribute("Busy", nil)
+	end)
 	label(unlocked, "Count", {
 		Text = "Unlocked: 0/0",
 		TextXAlignment = Enum.TextXAlignment.Center,
@@ -678,7 +770,7 @@ local function build()
 	HudKit.outlineArt(book, 3)
 
 	-- the picked animal's card
-	card = HudKit.back(gui, "Card", {
+	card = HudKit.back(gui, "IndexTile", {
 		Name = "PetCard",
 		Position = UDim2.fromOffset(fig(RIGHT_X), fig(BOX_TOP)),
 		Size = UDim2.fromOffset(fig(RIGHT_W), fig(CARD_H)),
@@ -756,7 +848,7 @@ local function build()
 		Size = UDim2.new(0.95, 0, 0, fig(52)),
 		ZIndex = 6,
 	})
-	for _, b in { { "ClaimButton", "Claim!", "GreenPlain" }, { "LockedButton", "Locked", "GreyPlain" } } do
+	for _, b in { { "ClaimButton", "Claim!", "GreenPlain" }, { "LockedButton", "Locked", "GreyPlain" }, { "BuyButton", "Buy", "YellowPlain" } } do
 		local btn = button(claim, b[1], RIGHT_W - 120, 110, {
 			AnchorPoint = Vector2.new(0.5, 1),
 			Position = UDim2.new(0.5, 0, 1, -fig(20)),
@@ -770,6 +862,13 @@ local function build()
 			ZIndex = 5,
 		})
 	end
+	local buyButton = claim.BuyButton
+	buyButton.Visible = false
+	buyButton.Activated:Connect(function()
+		if picked and buyable(picked) and not had()[picked] then
+			ReplicatedStorage:WaitForChild("BuyShop"):FireServer("IndexBuy", picked) -- (Roblox's prompt; into your pen once it's paid)
+		end
+	end)
 	local claimButton = claim.ClaimButton
 	claimButton.Activated:Connect(function()
 		local remote = ReplicatedStorage:FindFirstChild("IndexClaim")
@@ -857,14 +956,28 @@ function unloadAll()
 			local tile = tiles[kind]
 			if tile then
 				tile.Picture.Image = ""
-				local view = tile:FindFirstChild("View")
-				if view then
-					view:Destroy()
+				for _, name in { "View", "Shadow" } do
+					local old = tile:FindFirstChild(name)
+					if old then
+						old:Destroy()
+					end
 				end
 			end
 		end
 	end
 	table.clear(loaded)
+end
+
+-- how many animals you've had have their reward still to claim
+function claimable()
+	local claimed = had("IndexClaimed")
+	local n = 0
+	for kind in had() do
+		if biomeOf[kind] and not claimed[kind] then
+			n += 1
+		end
+	end
+	return n
 end
 
 local function refresh()
@@ -892,7 +1005,9 @@ local function refresh()
 			section.Bar.Found.Size = UDim2.fromScale(if #biome.kinds > 0 then n / #biome.kinds else 0, 1)
 		end
 	end
-	unlocked.Count.Text = "Unlocked: " .. have .. "/" .. total
+	local n = claimable()
+	unlocked.ClaimAll.Visible = n > 0
+	unlocked.Count.Text = if n > 0 then "Claim! (" .. n .. ")" else "Unlocked: " .. have .. "/" .. total
 	NativeIndex.updateBadge()
 	if not picked then
 		local first = BIOMES[1] and BIOMES[1].kinds[1]
@@ -909,15 +1024,7 @@ function NativeIndex.updateBadge()
 	if not badge then
 		return
 	end
-	local claimed = had("IndexClaimed")
-	local claimable = false
-	for kind in had() do
-		if biomeOf[kind] and not claimed[kind] then
-			claimable = true
-			break
-		end
-	end
-	badge.Visible = claimable
+	badge.Visible = claimable() > 0
 end
 
 function NativeIndex.badge(indexButton)
