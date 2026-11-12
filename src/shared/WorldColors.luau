@@ -1,132 +1,12 @@
--- Live world colours: every part (or checker Texture) with a ColorKey attribute wears
--- Config.WorldColors[ColorKey]. The server makes workspace.WorldColors, a Configuration
--- with one Color3 attribute per key, fresh from Config each run; the client repaints
--- everything with that key whenever one changes, so you can tune colours in the
--- Properties panel during Play (in the Client view). Tick PrintColors to print the
--- current set as a Config.WorldColors block for the Output (paste it into Config, or to
--- Claude). (The studs' fade is workspace.StudStyle now: Shared/StudStyle.)
--- On start everything is painted from Config, so a saved place can't keep stale colours.
---
---   WorldColors.create()  -- server, once
---   WorldColors.watch()   -- client, once
+-- Live colour tuning for the ground and walls. In Studio, press Play, select
+-- Workspace > World and edit its GroundA / GroundB / WallA / WallB attributes
+-- (the first biome and the home base) or DesertGroundA and so on for the other
+-- biomes (DesertGrassA, DesertStoneA... for their Patches): the map recolours
+-- instantly. Copy the values you like into Config.
 
 local Config = require(script.Parent.Config)
 
 local WorldColors = {}
-
-local NAME = "WorldColors"
-
-function WorldColors.create()
-	local old = workspace:FindFirstChild(NAME)
-	if old then
-		old:Destroy()
-	end
-	local folder = Instance.new("Configuration")
-	folder.Name = NAME
-	for key, color in Config.WorldColors do
-		folder:SetAttribute(key, color)
-	end
-	folder:SetAttribute("PrintColors", false)
-	folder.Parent = workspace
-	WorldColors.paintAll(folder)
-	return folder
-end
-
--- a part's colour: its key's, lightened or darkened by its Shade attribute if it has one
--- (Server/Map gives each stone block its own)
-function WorldColors.shaded(color, thing)
-	local shade = thing:GetAttribute("Shade")
-	if typeof(shade) ~= "number" then
-		return color
-	end
-	return Color3.new(math.min(1, color.R * shade), math.min(1, color.G * shade), math.min(1, color.B * shade))
-end
-
-local function paint(key, color)
-	for _, thing in workspace:GetDescendants() do
-		if thing:GetAttribute("ColorKey") == key then
-			if thing:IsA("BasePart") then
-				thing.Color = WorldColors.shaded(color, thing)
-			elseif thing:IsA("Texture") then
-				thing.Color3 = color
-			elseif thing:IsA("Beam") then
-				thing.Color = ColorSequence.new(color)
-			end
-		end
-	end
-end
-
--- everything, from the folder's current values (the server does this on start, so the
--- world always wears Config's colours however the place was saved)
-function WorldColors.paintAll(folder)
-	for _, thing in workspace:GetDescendants() do
-		local key = thing:GetAttribute("ColorKey")
-		local color = key and folder:GetAttribute(key)
-		if typeof(color) == "Color3" then
-			if thing:IsA("BasePart") then
-				thing.Color = WorldColors.shaded(color, thing)
-			elseif thing:IsA("Texture") then
-				thing.Color3 = color
-			elseif thing:IsA("Beam") then
-				thing.Color = ColorSequence.new(color)
-			end
-		end
-	end
-end
-
-local function printAll(folder)
-	local keys = {}
-	for key, value in folder:GetAttributes() do
-		if typeof(value) == "Color3" then
-			table.insert(keys, key)
-		end
-	end
-	table.sort(keys)
-	local lines = { "WorldColors = {" }
-	for _, key in keys do
-		local c = folder:GetAttribute(key)
-		table.insert(
-			lines,
-			string.format(
-				"\t%s = Color3.fromRGB(%d, %d, %d),",
-				key,
-				math.round(c.R * 255),
-				math.round(c.G * 255),
-				math.round(c.B * 255)
-			)
-		)
-	end
-	table.insert(lines, "},")
-	print(table.concat(lines, "\n"))
-end
-
-function WorldColors.watch()
-	local folder = workspace:WaitForChild(NAME, 30)
-	if not folder then
-		return
-	end
-	WorldColors.paintAll(folder)
-	folder.AttributeChanged:Connect(function(key)
-		local value = folder:GetAttribute(key)
-		if key == "PrintColors" then
-			if value then
-				printAll(folder)
-				folder:SetAttribute("PrintColors", false)
-			end
-		elseif typeof(value) == "Color3" then
-			paint(key, value)
-		end
-	end)
-end
-
--- ---- Lasso's course geometry (Config.Biomes, the course's width) ----------------------
-
--- (required when first needed: Shared/Endless requires Config, as this does)
-local Endless
-local function endlessFrom()
-	Endless = Endless or require(script.Parent.Endless)
-	return if Endless.On then Endless.START else -math.huge
-end
 
 -- Index into Config.Biomes of the biome at z. The course runs toward -z from
 -- z = 0; the home base (z > 0) counts as the first biome, past the end as the last.
@@ -139,15 +19,6 @@ function WorldColors.biomeAt(z)
 		end
 	end
 	return #Config.Biomes
-end
-
--- The biome's Config at z: Config.Biomes[biomeAt(z)], or past the Ocean the endless stretch's
--- (Config.Endless.Biomes: its Name, Herd, Boss...).
-function WorldColors.biomeConfigAt(z)
-	if z < endlessFrom() then
-		return Endless.templateAt(z)
-	end
-	return Config.Biomes[WorldColors.biomeAt(z)]
 end
 
 -- Where the biome called name starts (its edge nearest home), or nil if there's none.
@@ -165,9 +36,6 @@ end
 -- The course's half width at z (Config: a funnel, widening from the start line; or World 3's
 -- Config.CourseProfile, { z, half width } stops widening and narrowing, straight between).
 function WorldColors.halfWidth(z)
-	if z < endlessFrom() then
-		return Endless.halfWidth(z) -- (the endless course past the Ocean: Shared/Endless)
-	end
 	local profile = Config.CourseProfile
 	if profile then
 		z = math.min(z, 0)
@@ -231,6 +99,30 @@ function WorldColors.depthAt(i, z)
 	return stops[#stops], stops[#stops], 0
 end
 
+local function depthColor(i, z, name, which)
+	local a, b, f = WorldColors.depthAt(i, z)
+	if a and a[name] and b[name] then
+		return a[name][which]:Lerp(b[name][which], f)
+	end
+	return nil
+end
+
+local GLOW_CHECKER = 0.55 -- on glowing (Neon) ground the checker is this see-through
+local function paint(part, base, checker)
+	part.Color = base
+	-- Lava glows: the stud texture's white and an opaque checker over it washed
+	-- the glow out (QM), so on Neon only a faint checker shows.
+	local glow = part.Material == Enum.Material.Neon
+	for _, texture in part:GetChildren() do
+		if texture.Name == "Checker" then
+			texture.Color3 = checker
+			texture.Transparency = if glow then GLOW_CHECKER else 0
+		elseif glow and texture:IsA("Texture") then
+			texture.Transparency = 1
+		end
+	end
+end
+
 -- The terrain's colours as painted: Config.TerrainSaturation x their saturation
 -- (QM, Oct 6; 1 leaves them as they are). The attributes and Config keep the
 -- unboosted colours, so setting it back to 1 undoes it.
@@ -241,6 +133,75 @@ function WorldColors.saturate(color)
 	end
 	local h, s, v = color:ToHSV()
 	return Color3.fromHSV(h, math.min(s * k, 1), v)
+end
+
+local function get(world, part, name, which)
+	local z = part.Position.Z
+	local i = WorldColors.biomeAt(z)
+	return WorldColors.saturate(depthColor(i, z, name, if which == "A" then 1 else 2) or world:GetAttribute(prefix(i) .. name .. which))
+end
+
+-- One floor part: "Ground" is the biome's base floor; other names are its Patches (Grass, Stone).
+-- A part whose name has no colours (World 2's Crystal Cavern planks) keeps its own.
+function WorldColors.paintGround(world, part)
+	local a = get(world, part, part.Name, "A")
+	if a then
+		paint(part, a, get(world, part, part.Name, "B") or a)
+	end
+end
+
+-- One wall part, or the cap along its top. A wall part with its own name (World 3's base
+-- walls: BaseWallLow, BaseWall, BaseCap) takes that name's colours from the biome's Patches.
+function WorldColors.paintWall(world, part)
+	local own = part.Name ~= "Wall" and part.Name ~= "Cap" and get(world, part, part.Name, "A")
+	if own then
+		paint(part, own, get(world, part, part.Name, "B") or own)
+	elseif part.Name == "Cap" then
+		local biome = Config.Biomes[WorldColors.biomeAt(part.Position.Z)]
+		part.Color = WorldColors.saturate(biome.CapColor) or get(world, part, "Ground", "B") -- (CapColor: World 2's cavern)
+	else
+		paint(part, get(world, part, "Wall", "A"), get(world, part, "Wall", "B"))
+	end
+end
+
+function WorldColors.apply(world)
+	for _, part in world.Ground:GetChildren() do
+		WorldColors.paintGround(world, part)
+	end
+	for _, part in world.Walls:GetChildren() do
+		WorldColors.paintWall(world, part)
+	end
+	local funnel = world:FindFirstChild("Funnel") -- (the floor under the widened ground: tools/funnel.luau)
+	if funnel then
+		for _, part in funnel:GetChildren() do
+			WorldColors.paintGround(world, part)
+		end
+	end
+end
+
+-- Seeds the attributes (server) and repaints whenever one changes.
+function WorldColors.watch(world)
+	for i, biome in Config.Biomes do
+		local defaults = {
+			GroundA = biome.GroundColors[1],
+			GroundB = biome.GroundColors[2],
+			WallA = biome.WallColors[1],
+			WallB = biome.WallColors[2],
+		}
+		for name, colors in biome.Patches or {} do
+			defaults[name .. "A"], defaults[name .. "B"] = colors[1], colors[2]
+		end
+		for key, default in defaults do
+			key = prefix(i) .. key
+			if world:GetAttribute(key) == nil then
+				world:SetAttribute(key, default)
+			end
+			world:GetAttributeChangedSignal(key):Connect(function()
+				WorldColors.apply(world)
+			end)
+		end
+	end
+	WorldColors.apply(world)
 end
 
 return WorldColors

@@ -1,41 +1,30 @@
--- Floor height under a point, and the water there, from the map's floor (workspace.World.Floor:
--- Server/Map builds it from the map editor's map, one part per run of 4-stud cells). Most of it
--- is at y = 0; tiles can stand higher or sit lower, so the height is looked up per 4-stud cell.
--- (Read off the parts, not Shared/MapData: decoding the whole map is too much for a client.)
+-- Floor height under a point. Most of the floor's top is at y = 0; patches
+-- in World.Ground can stand higher (the desert's sandstone) or sit lower (the
+-- meadow's dirt). They're laid out on an 8-stud grid (tools/desert_ground.py,
+-- tools/meadow_ground.py), so the height is looked up per 8-stud cell.
 
-local CELL = 4
+local Config = require(script.Parent.Config)
+
+local CELL = 8
+local endless = Config.Endless -- past its cut, the floor's the stretch before it, again and again (Client/Endless)
 
 local Ground = {}
 
--- (past the Ocean the course is generated, not parts in the Floor: Shared/Endless works it out)
-local Endless = require(script.Parent.Endless)
-local ENDLESS_FROM = if Endless.On then Endless.START else -math.huge
-
 local heights -- [cell key] = top y, only for cells off y = 0
-local waters -- [cell key] = "Water", for the liquid tiles
 
 local function key(i, j)
-	return (i + 8192) * 16384 + (j + 8192)
+	return (i + 4096) * 8192 + (j + 4096)
 end
 
 local function load()
-	heights, waters = {}, {}
-	local floor = workspace:WaitForChild("World"):WaitForChild("Floor")
-	for _, part in floor:GetDescendants() do
-		if part:IsA("BasePart") and part.CanCollide then
-			local top = part.Position.Y + part.Size.Y / 2
-			local liquid = part:GetAttribute("Liquid") == true
-			if math.abs(top) > 0.01 or liquid then
-				local lo = part.Position - part.Size / 2
-				for x = lo.X + CELL / 2, lo.X + part.Size.X, CELL do
-					for z = lo.Z + CELL / 2, lo.Z + part.Size.Z, CELL do
-						local k = key(math.floor(x / CELL), math.floor(z / CELL))
-						if liquid then
-							waters[k] = "Water"
-						else
-							heights[k] = top
-						end
-					end
+	heights = {}
+	for _, part in workspace:WaitForChild("World"):WaitForChild("Ground"):GetChildren() do
+		local top = part.Position.Y + part.Size.Y / 2
+		if part:IsA("BasePart") and math.abs(top) > 0.01 then
+			local lo = part.Position - part.Size / 2
+			for x = lo.X + CELL / 2, lo.X + part.Size.X, CELL do
+				for z = lo.Z + CELL / 2, lo.Z + part.Size.Z, CELL do
+					heights[key(math.floor(x / CELL), math.floor(z / CELL))] = top
 				end
 			end
 		end
@@ -43,23 +32,41 @@ local function load()
 end
 
 function Ground.heightAt(x, z)
-	if z < ENDLESS_FROM then
-		return Endless.heightAt(x, z)
-	end
 	if not heights then
 		load()
+	end
+	if endless and z < endless.Cut then
+		z = endless.Cut + (z - endless.Cut) % endless.Length
 	end
 	return heights[key(math.floor(x / CELL), math.floor(z / CELL))] or 0
 end
 
--- The water under a point (QM, Oct 14: things sink a bit in it, Client/WaterSink): "Water" on
--- a liquid tile (the map's water and magma), or nil.
+-- The water under a point (QM, Oct 14: things sink a bit in it, Client/WaterSink): "DeepWater",
+-- "Water" (a Water part or any with the flowing water tile, a Texture named Water), or nil.
+local waters -- [cell key] = its kind
+local watching, dirty, builtAt = false, false, 0
 function Ground.waterAt(x, z)
-	if z < ENDLESS_FROM then
-		return if Endless.liquidAt(x, z) then "Water" else nil
-	end
-	if not waters then
-		load()
+	if not waters or (dirty and os.clock() - builtAt > 1) then
+		waters, dirty, builtAt = {}, false, os.clock()
+		local ground = workspace:WaitForChild("World"):WaitForChild("Ground")
+		if not watching then -- (a client asks before all the floor has arrived: look again, at most once a second, as parts come and go)
+			watching = true
+			ground.ChildAdded:Connect(function() dirty = true end)
+			ground.ChildRemoved:Connect(function() dirty = true end)
+		end
+		for _, part in ground:GetChildren() do
+			local kind = if part.Name == "DeepWater" then "DeepWater"
+				elseif part.Name == "Water" or part:FindFirstChild("Water") then "Water"
+				else nil
+			if kind and part:IsA("BasePart") then
+				local lo = part.Position - part.Size / 2
+				for px = lo.X + CELL / 2, lo.X + part.Size.X, CELL do
+					for pz = lo.Z + CELL / 2, lo.Z + part.Size.Z, CELL do
+						waters[key(math.floor(px / CELL), math.floor(pz / CELL))] = kind
+					end
+				end
+			end
+		end
 	end
 	return waters[key(math.floor(x / CELL), math.floor(z / CELL))]
 end

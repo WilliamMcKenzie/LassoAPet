@@ -199,51 +199,9 @@ local function penCap(player)
 	return cfg.Base + cfg.PerUpgrade * ((player:GetAttribute("PenLevel") or 1) - 1)
 end
 
--- Active pets (Config.Backpack, QM Nov 6): the pets out in the pen, the one you ride with them,
--- at most PenSlots plus the slots they bought (extraSlots: Shop.server's +1 Equip).
-local function petCount(profile)
-	local n = if profile.ride then 1 else 0
-	for _, item in profile.items do
-		if item.pet then
-			n += 1
-		end
-	end
-	return n
-end
-local function petSlots(profile)
-	return Config.Backpack.PenSlots + (profile.extraSlots or 0)
-end
--- (more out than there's room for, from a hatch or an old save: the lowest earners stored)
-local function storeOverflow(profile)
-	local over = petCount(profile) - petSlots(profile)
-	if over <= 0 then
-		return
-	end
-	local out = {}
-	for id, item in profile.items do
-		if item.pet then
-			table.insert(out, { id = id, earns = Fusion.earning(item.pet, item.merged, item.income) or 0 })
-		end
-	end
-	table.sort(out, function(a, b)
-		return a.earns < b.earns
-	end)
-	profile.stored = profile.stored or {}
-	for i = 1, math.min(over, #out) do
-		local item = profile.items[out[i].id]
-		profile.items[out[i].id] = nil
-		item.x, item.z = nil, nil
-		profile.stored[out[i].id] = item
-	end
-end
-
 local freeSpot -- (below)
 local function publish(player)
 	local profile = profiles[player]
-	if profile then
-		storeOverflow(profile)
-		player:SetAttribute("ExtraSlots", profile.extraSlots) -- (the Pets panel's "1/5 Active")
-	end
 	if not profile then
 		return
 	end
@@ -301,11 +259,6 @@ local function publish(player)
 	end
 	table.sort(caught)
 	player:SetAttribute("Caught", HttpService:JSONEncode(caught))
-	local claimed = {}
-	for kind in profile.indexClaimed or {} do
-		table.insert(claimed, kind)
-	end
-	player:SetAttribute("IndexClaimed", HttpService:JSONEncode(claimed)) -- (the Index's rewards claimed: IndexClaim)
 	player:SetAttribute("Ridden", HttpService:JSONEncode(riddenList(profile))) -- for the animal dictionary (AnimalDex)
 	player:SetAttribute("StoredPets", HttpService:JSONEncode(profile.stored or {})) -- (the Pets panel's unequipped ones: Client/PetsPanel)
 	local pen = penOf(player)
@@ -446,7 +399,7 @@ local function mergeOld(player, data)
 		end
 		merged[worldKey("quests", world)] = old.quests
 		merged[worldKey("v1", world)] = old.v1
-		for _, field in { "boughtPets", "boughtHalloweenPets", "boughtGiantEggs", "boughtLoongs", "boughtRoboSharks", "boughtLimitedRoboSharks", "usedHatches", "homeEggs" } do
+		for _, field in { "boughtPets", "boughtHalloweenPets", "boughtGiantEggs", "boughtLoongs", "boughtRoboSharks", "usedHatches", "homeEggs" } do
 			if tonumber(old[field]) then
 				merged[field] = math.max(tonumber(merged[field]) or 0, old[field])
 			end
@@ -534,12 +487,6 @@ local function load(player)
 						end
 					end
 					profile.caught = {} -- (the Index's: pets you've had, publish)
-					profile.indexClaimed = {} -- (the Index's rewards claimed: IndexClaim)
-					for _, kind in typeof(data.indexClaimed) == "table" and data.indexClaimed or {} do
-						if isAnimal(kind) then
-							profile.indexClaimed[kind] = true
-						end
-					end
 					for _, kind in typeof(data.caught) == "table" and data.caught or {} do
 						if isAnimal(kind) then
 							profile.caught[kind] = true
@@ -561,15 +508,13 @@ local function load(player)
 					if profile.tutorial then
 						profile.awayGold = awayGold(player, profile, data)
 					end
-					profile.extraSlots = tonumber(data.extraSlots) -- (pet slots bought: Config.Backpack)
 					profile.usedHatches = tonumber(data.usedHatches) or 0
 					profile.hatchTarget = typeof(data.hatchTarget) == "string" and data.hatchTarget or nil
 					profile.boughtHalloweenPets = tonumber(data.boughtHalloweenPets)
 					profile.boughtPets = tonumber(data.boughtPets) -- Legendary Pets from the shop already in (addBoughtPets)
 					profile.boughtGiantEggs = tonumber(data.boughtGiantEggs) -- Giant Horse eggs from the shop already in (addBoughtGiantEggs)
 					profile.boughtLoongs = tonumber(data.boughtLoongs) -- Loongs bought at the base already in (addBoughtOffer)
-					profile.boughtRoboSharks = tonumber(data.boughtRoboSharks) -- and Majestic Unicorns (their old Robo Shark field)
-					profile.boughtLimitedRoboSharks = tonumber(data.boughtLimitedRoboSharks) -- and Robo Sharks
+					profile.boughtRoboSharks = tonumber(data.boughtRoboSharks) -- and Robo Sharks
 				end
 				loaded[player] = true
 				player:GetAttributeChangedSignal("PenLevel"):Connect(function() -- (an upgrade makes room: Config.PenCapacity)
@@ -608,11 +553,6 @@ local function load(player)
 		end
 	end)
 	player:GetAttributeChangedSignal("GatesBroken"):Connect(function() -- ("Enter Desert" and the like)
-		if profiles[player] then
-			Quests.publish(player, profiles[player].quests)
-		end
-	end)
-	player:GetAttributeChangedSignal("PenLevel"):Connect(function() -- (the "Upgrade slingshot" goals: Server/Slingshot's UnlockBiome)
 		if profiles[player] then
 			Quests.publish(player, profiles[player].quests)
 		end
@@ -678,9 +618,9 @@ local function save(player, onlyIfChanged)
 		return
 	end
 	local data = { eggs = profile.eggs, items = profile.items, stored = profile.stored, caught = profile.caught and (function() local t = {} for k in profile.caught do table.insert(t, k) end return t end)() or nil, ride = profile.ride, rideMerged = profile.rideMerged, rideFuse = profile.rideFuse, rideIncome = profile.rideIncome, rideStats = profile.rideStats, rideWorth = profile.rideWorth, rideTier = profile.rideTier, rideAuto = profile.rideAuto, tutorial = profile.tutorial, ridden = riddenList(profile),
-		awayGold = profile.awayGold, boughtHalloweenPets = profile.boughtHalloweenPets, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, boughtLoongs = profile.boughtLoongs, boughtRoboSharks = profile.boughtRoboSharks, boughtLimitedRoboSharks = profile.boughtLimitedRoboSharks, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
+		awayGold = profile.awayGold, boughtHalloweenPets = profile.boughtHalloweenPets, boughtPets = profile.boughtPets, boughtGiantEggs = profile.boughtGiantEggs, boughtLoongs = profile.boughtLoongs, boughtRoboSharks = profile.boughtRoboSharks, usedHatches = profile.usedHatches, hatchTarget = profile.hatchTarget, rolls = profile.rolls,
 		rainbowTrail = profile.rainbowTrail, questsSeen = profile.questsSeen, starterPack = profile.starterPack, ridesDone = profile.ridesDone, homeEggs = profile.homeEggs, fuseLesson = player:GetAttribute("FuseLesson") == true or nil,
-		merged = profile.merged, ab = profile.ab, extraSlots = profile.extraSlots, indexClaimed = profile.indexClaimed and (function() local t = {} for k in profile.indexClaimed do table.insert(t, k) end return t end)() or nil }
+		merged = profile.merged, ab = profile.ab }
 	data[worldKey("quests")], data[worldKey("v1")] = profile.quests, profile.v1 -- (this world's own)
 	for name, value in profile.keep or {} do -- (the other worlds', as they were)
 		data[name] = value
@@ -780,22 +720,6 @@ hatchAll.OnInvoke = function(player, check)
 	return n
 end
 hatchAll.Parent = game:GetService("ServerStorage")
-
--- +1 Equip (Config.Backpack.SlotProduct; Shop.server): one more active pet slot, for good. True
--- once given (their save loaded).
-local addSlot = Instance.new("BindableFunction")
-addSlot.Name = "AddPetSlot"
-addSlot.OnInvoke = function(player)
-	local profile = profiles[player]
-	if not profile or not loaded[player] or player:GetAttribute("Tutorial") then
-		return false -- (tried again on their next visit: Roblox's ProcessReceipt)
-	end
-	profile.extraSlots = (profile.extraSlots or 0) + 1
-	publish(player)
-	save(player)
-	return true
-end
-addSlot.Parent = game:GetService("ServerStorage")
 
 -- Fast Hatch bought in game: the eggs already waiting in the pen have their time
 -- left cut too (the eggs placed from then on start out with half).
@@ -927,16 +851,9 @@ local function givePet(player, profile, kind)
 	Telemetry.reward(player)
 	local pen = penOf(player)
 	local area = pen and pen:FindFirstChild("Area")
-	if area and penCount(profile) < penCap(player) and petCount(profile) < petSlots(profile) then
+	if area and penCount(profile) < penCap(player) then
 		local best = freeSpot(pen, profile, area)
 		profile.items[HttpService:GenerateGUID(false)] = { x = best.X, z = best.Y, pet = kind }
-		profile.pastStarter = true
-		publish(player)
-		return true
-	end
-	if area and isAnimal(kind) and not player:GetAttribute("Tutorial") then -- (no room out: stored, Config.Backpack)
-		profile.stored = profile.stored or {}
-		profile.stored[HttpService:GenerateGUID(false)] = { pet = kind }
 		profile.pastStarter = true
 		publish(player)
 		return true
@@ -1064,7 +981,7 @@ remote("EquipPet", function(player, id)
 	local item = profile and profile.stored and typeof(id) == "string" and profile.stored[id]
 	local pen = penOf(player)
 	local area = pen and pen:FindFirstChild("Area")
-	if not item or not area or penCount(profile) >= penCap(player) or petCount(profile) >= petSlots(profile) then
+	if not item or not area or penCount(profile) >= penCap(player) then
 		return
 	end
 	profile.stored[id] = nil
@@ -1079,87 +996,6 @@ remote("EquipPet", function(player, id)
 	publish(player)
 	save(player)
 end)
-
--- Equip Best (the native UI's Pets panel, as Fight to Steal an Egg's: QM, Nov 6): the pen's
--- pets and the stored ones, the best earners in the pen, as many as fit beside its eggs and
--- the one you ride; the rest to storage.
-remote("EquipBest", function(player)
-	local profile = profiles[player]
-	local pen = penOf(player)
-	local area = pen and pen:FindFirstChild("Area")
-	if not profile or not area or player:GetAttribute("Tutorial") then
-		return
-	end
-	profile.stored = profile.stored or {}
-	local all, room = {}, petSlots(profile) - (if profile.ride then 1 else 0) -- (Config.Backpack; eggs don't take a slot)
-	for id, item in profile.items do
-		if item.pet then
-			table.insert(all, { id = id, item = item, home = true })
-		end
-	end
-	for id, item in profile.stored do
-		table.insert(all, { id = id, item = item })
-	end
-	for _, p in all do
-		p.earns = Fusion.earning(p.item.pet, p.item.merged, p.item.income) or 0
-	end
-	table.sort(all, function(a, b)
-		if a.earns ~= b.earns then
-			return a.earns > b.earns
-		end
-		return a.home == true and b.home ~= true
-	end)
-	for i, p in all do
-		local keep = i <= room
-		if p.home and not keep then
-			profile.items[p.id] = nil
-			p.item.x, p.item.z = nil, nil
-			profile.stored[p.id] = p.item
-		end
-	end
-	for i, p in all do
-		if not p.home and i <= room then
-			profile.stored[p.id] = nil
-			local spot = freeSpot(pen, profile, area)
-			p.item.x, p.item.z = spot.X, spot.Y
-			profile.items[p.id] = p.item
-		end
-	end
-	publish(player)
-	save(player)
-end)
-
--- (no product yet, SlotProduct 0: free in Studio, to try it)
-remote("BuyPetSlot", function(player)
-	local profile = profiles[player]
-	if profile and Config.Backpack.SlotProduct == 0 and RunService:IsStudio() then
-		profile.extraSlots = (profile.extraSlots or 0) + 1
-		publish(player)
-	end
-end)
-
--- The Index's rewards (the native UI's, as Fight to Steal an Egg's: QM, Nov 6): once per
--- animal you've had (Caught), its cash (Config.indexReward), claimed here. True if claimed.
-local indexClaim = Instance.new("RemoteFunction")
-indexClaim.Name = "IndexClaim"
-indexClaim.OnServerInvoke = function(player, kind)
-	local profile = profiles[player]
-	-- (in Studio too, where the save never loads: no API access)
-	if not profile or not (loaded[player] or RunService:IsStudio()) or typeof(kind) ~= "string" or not (profile.caught and profile.caught[kind]) then
-		return false
-	end
-	profile.indexClaimed = profile.indexClaimed or {}
-	if profile.indexClaimed[kind] then
-		return false
-	end
-	profile.indexClaimed[kind] = true
-	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + Config.indexReward(kind))
-	Funnel.cash(player, false, Config.indexReward(kind), Enum.AnalyticsEconomyTransactionType.Gameplay.Name, "Index Reward")
-	publish(player)
-	save(player)
-	return true
-end
-indexClaim.Parent = ReplicatedStorage
 
 -- The ride got its animal home: the animal itself, into your pen (givePet), the
 -- tutorial's first ride's too (QM, Oct 13: its new animal cutscene; the tutorial goes on
@@ -1215,10 +1051,10 @@ remote("HatchEgg", function(player, id)
 		return
 	end
 	local at = pen.Area.CFrame:PointToWorldSpace(Vector3.new(item.x, 0, item.z)) -- (x, z in the pen's frame: its pens are turned)
-	if (root.Position - at).Magnitude > Config.SpeedupEgg.Range + 4 and not Config.NativeUi.On then
-		return -- (the native UI's Growing Eggs hatches from anywhere, as Fight to Steal an Egg's: QM, Nov 6)
+	if (root.Position - at).Magnitude > Config.SpeedupEgg.Range + 4 then
+		return
 	end
-	item.pet, item.egg, item.hatchAt, item.hatchFor = item.egg, nil, nil, nil
+	item.pet, item.egg, item.hatchAt = item.egg, nil, nil
 	if not profile.pastStarter then
 		Funnel.starterReady(player) -- (Analytics V1)
 	end
@@ -1288,7 +1124,6 @@ buyTrail.OnServerInvoke = function(player)
 		return false
 	end
 	player:SetAttribute("Gold", gold - price)
-	Funnel.cash(player, true, price, Enum.AnalyticsEconomyTransactionType.Shop.Name, "Rainbow Trail")
 	profile.rainbowTrail = true
 	publish(player)
 	task.spawn(save, player)
@@ -1346,7 +1181,6 @@ rollGacha.OnServerInvoke = function(player)
 	end
 	rolled[player] = os.clock()
 	player:SetAttribute("Gold", gold - price)
-	Funnel.cash(player, true, price, Enum.AnalyticsEconomyTransactionType.Shop.Name, "Egg Roll")
 	profile.rolls = (profile.rolls or 0) + 1
 	Funnel.event(player, "Rolled Egg")
 	profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
@@ -1362,27 +1196,16 @@ local claimQuest = Instance.new("RemoteFunction")
 claimQuest.Name = "ClaimQuest"
 claimQuest.OnServerInvoke = function(player, i)
 	local profile = profiles[player]
-	local quest, first
-	if profile and typeof(i) == "number" then
-		quest, first = Quests.claim(player, profile.quests, i)
-	end
+	local quest = profile and typeof(i) == "number" and Quests.claim(player, profile.quests, i)
 	if not quest then
 		return nil
-	end
-	-- (QM, Nov 7: luck and cash every time, doubling each rebirth; the egg the first time only)
-	local luck, cash = Config.goalLuck(player, quest), Config.goalCash(player, quest)
-	if luck > 0 then
-		player:SetAttribute("LuckBonus", (player:GetAttribute("LuckBonus") or 0) + luck)
-	end
-	if cash > 0 then
-		player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + cash)
 	end
 	local level = math.clamp(player:GetAttribute("PenLevel") or 1, 1, Config.PenLevels)
 	if level < Config.PenLevels and not quest.NoPenLevel then -- (not "Reach Meadow": QM)
 		player:SetAttribute("PenLevel", level + 1)
 	end
 	Funnel.claimed(player, i) -- (Analytics V1)
-	local eggs = if not first then {} elseif typeof(quest.Egg) == "table" then quest.Egg else { quest.Egg } -- (several: World 2's Kitsune quest)
+	local eggs = if typeof(quest.Egg) == "table" then quest.Egg else { quest.Egg } -- (several: World 2's Kitsune quest)
 	for _, kind in eggs do
 		profile.eggs[kind] = (profile.eggs[kind] or 0) + 1
 	end
@@ -1390,26 +1213,6 @@ claimQuest.OnServerInvoke = function(player, i)
 	return eggs[1]
 end
 claimQuest.Parent = ReplicatedStorage
--- Rebirth (QM, Nov 7; Config.Luck): the Rebirth goal's popup confirmed (Client/RebirthPopup).
--- With the goal up and done: cash to 0, the slingshot's unlocks and the barriers gone (pen
--- level and GatesBroken back to 1), the goals back to Reach Desert, one more rebirth (goal rewards
--- and unlocks x2). Pets, eggs and luck stay. Gold.server and PenLevel.server save on "Reborn".
-local rebirth = Instance.new("RemoteFunction")
-rebirth.Name = "Rebirth"
-rebirth.OnServerInvoke = function(player)
-	local profile = profiles[player]
-	if not profile or not Quests.rebirth(player, profile.quests) then
-		return false
-	end
-	player:SetAttribute("Gold", 0)
-	player:SetAttribute("PenLevel", 1)
-	player:SetAttribute("GatesBroken", 1)
-	player:SetAttribute("Reborn", (player:GetAttribute("Reborn") or 0) + 1)
-	Quests.publish(player, profile.quests)
-	task.spawn(save, player)
-	return true
-end
-rebirth.Parent = ReplicatedStorage
 -- Gold.server's: a lasso landed on a wild animal ("Lasso animals", and "Lasso Snowmen" by its kind).
 local questProgress = Instance.new("BindableEvent")
 questProgress.Name = "QuestProgress"
@@ -1454,13 +1257,13 @@ place = function(player, profile, kind, x, z)
 	local pet = eggPet(kind)
 	local special = Config.SpecialEggs[kind]
 	if special then -- (hatches into its Pet, merged from Merged: a Giant Horse is 10 horses)
-		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = pet, merged = special.Merged, eggScale = special.EggScale, hatchAt = os.time() + math.ceil(special.HatchTime / hatchX(player)), hatchFor = math.ceil(special.HatchTime / hatchX(player)) }
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = pet, merged = special.Merged, eggScale = special.EggScale, hatchAt = os.time() + math.ceil(special.HatchTime / hatchX(player)) }
 	else
 		local seconds = if player:GetAttribute("Tutorial") then Config.TutorialHatchTime else math.ceil(hatchTime(kind) / hatchX(player))
 		if player:GetAttribute("ABRideEgg") == "egg" and (profile.ridesDone or 0) < Config.RideEggAB.FastRides then
 			seconds = math.min(seconds, Config.RideEggAB.FastHatch) -- (the ride egg A/B: the first rides' eggs hatch quickly, QM Oct 19)
 		end
-		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + seconds, hatchFor = seconds } -- (hatchFor: the Growing Eggs bar's whole, Client/NativeEggs)
+		profile.items[HttpService:GenerateGUID(false)] = { x = x, z = z, egg = kind, hatchAt = os.time() + seconds }
 	end
 	publish(player)
 end
@@ -1662,7 +1465,6 @@ remote("FusePets", function(player, idA, idB)
 		return
 	end
 	player:SetAttribute("Gold", gold - price)
-	Funnel.cash(player, true, price, Enum.AnalyticsEconomyTransactionType.Gameplay.Name, "Fuse")
 	if lesson then
 		player:SetAttribute("FuseLesson", nil) -- (done: client FuseLesson sees the hybrid land)
 	end
@@ -2005,13 +1807,13 @@ tutorialCommand.Triggered:Connect(function(source)
 		return
 	end
 	local old = profiles[player]
-	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, boughtLimitedRoboSharks = old.boughtLimitedRoboSharks, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
+	profiles[player] = { eggs = { [Config.DefaultPet] = 1 }, items = {}, ride = nil, ridden = {}, boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
 	Quests.publish(player, profiles[player].quests)
 	if store and loaded[player] then
 		-- Keep the shop counts saved too: without them, rejoining hands every Giant Horse
 		-- egg and Legendary Pet ever bought over again (addBoughtGiantEggs / addBoughtPets).
 		task.spawn(pcall, store.SetAsync, store, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = false, usedHatches = old.usedHatches,
-			boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, boughtLimitedRoboSharks = old.boughtLimitedRoboSharks, merged = old.merged })
+			boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets, boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, merged = old.merged })
 	end
 	player:SetAttribute("Gold", 0) -- Gold and PenLevel save these when you leave
 	player:SetAttribute("PenLevel", 1)
@@ -2055,9 +1857,9 @@ local function bankAway(player, times)
 	if not profile or (profile.awayGold or 0) <= 0 then
 		return false
 	end
-	local banked = profile.awayGold * (tonumber(times) or 1)
-	player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + banked)
-	Funnel.cash(player, false, banked, Enum.AnalyticsEconomyTransactionType.TimedReward.Name, "Away Earnings")
+	local currency = if Config.Gems then "Gems" else "Gold" -- (the Halloween world's pets earn gems: Config.Gems)
+	local banked = profile.awayGold * (if Config.Gems then Config.Gems.Rate else 1) * (tonumber(times) or 1)
+	player:SetAttribute(currency, (player:GetAttribute(currency) or 0) + banked)
 	profile.awayGold = nil
 	player:SetAttribute("AwayGold", nil)
 	if (tonumber(times) or 1) > 1 then
@@ -2126,7 +1928,7 @@ resetCommand.Triggered:Connect(function(source)
 	end
 	Telemetry.exclude(player) -- (a test from here on: not in the play data)
 	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = {}, tutorial = true, boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets,
-		boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, boughtLimitedRoboSharks = old.boughtLimitedRoboSharks, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
+		boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, usedHatches = old.usedHatches, quests = Quests.load(nil), merged = old.merged, keep = {} }
 	for _, other in otherStores do -- (the other worlds' pens, empty)
 		task.spawn(pcall, other.SetAsync, other, "u" .. player.UserId, { eggs = {}, items = {}, tutorial = true })
 	end
@@ -2146,6 +1948,42 @@ resetCommand.Triggered:Connect(function(source)
 end)
 resetCommand.Parent = game:GetService("TextChatService")
 
+-- Rebirth (Gold.server, QM Oct 13: "lose all pets"): every pet and egg gone, in every world,
+-- saved before it returns (the trip to World 1 loads that world's pen next); a fresh
+-- Config.DefaultPet to ride. Quests, pen level, the tutorial and the shop counts stay.
+local rebirthPets = Instance.new("BindableFunction")
+rebirthPets.Name = "RebirthPets"
+rebirthPets.OnInvoke = function(player)
+	local old = profiles[player]
+	if not old then
+		return false
+	end
+	profiles[player] = { eggs = {}, items = {}, ride = Config.DefaultPet, ridden = old.ridden or {}, tutorial = true, boughtHalloweenPets = old.boughtHalloweenPets, boughtPets = old.boughtPets,
+		boughtGiantEggs = old.boughtGiantEggs, boughtLoongs = old.boughtLoongs, boughtRoboSharks = old.boughtRoboSharks, usedHatches = old.usedHatches, quests = old.quests, v1 = old.v1, questsSeen = old.questsSeen,
+		starterPack = old.starterPack, rainbowTrail = old.rainbowTrail, homeEggs = old.homeEggs, merged = old.merged, keep = old.keep, ridesDone = old.ridesDone }
+	local writes = {}
+	for _, other in otherStores do -- (the other worlds' pens, empty)
+		table.insert(writes, task.spawn(function()
+			pcall(other.UpdateAsync, other, "u" .. player.UserId, function(data)
+				data = if typeof(data) == "table" then data else {}
+				data.eggs, data.items, data.ride, data.rideMerged, data.rideFuse, data.rideIncome, data.rideStats, data.rideWorth, data.rideTier = {}, {}, nil, nil, nil, nil, nil, nil, nil
+				data.tutorial = true
+				return data
+			end)
+		end))
+	end
+	otherIncome[player] = 0
+	player:SetAttribute("CarriedEgg", nil)
+	publish(player)
+	save(player)
+	for _, thread in writes do -- (wait for the other worlds' writes too)
+		while coroutine.status(thread) ~= "dead" do
+			task.wait(0.1)
+		end
+	end
+	return true
+end
+rebirthPets.Parent = game:GetService("ServerStorage")
 
 -- Testing: "/gold <amount>" adds that much gold, 5000, 2.5m, 10b (k, m, b, t); "/gold" alone
 -- 10m; a minus takes it away (QM, Oct 13).
@@ -2166,23 +2004,6 @@ goldCommand.Triggered:Connect(function(source, text)
 end)
 goldCommand.Parent = game:GetService("TextChatService")
 
--- Testing: "/skipgoal [N]" (QM, Nov 7) passes over your next N goals (1 if no N), no rewards.
-local skipGoalCommand = Instance.new("TextChatCommand")
-skipGoalCommand.Name = "SkipGoal"
-skipGoalCommand.PrimaryAlias = "/skipgoal"
-skipGoalCommand.Triggered:Connect(function(source, text)
-	local player = Players:GetPlayerByUserId(source.UserId)
-	local profile = player and profiles[player]
-	if not profile or not allowed(player) then
-		return
-	end
-	local n = math.clamp(math.floor(tonumber(text:match("^/skipgoal%s+(%d+)")) or 1), 1, 100)
-	local now = Quests.skip(player, profile.quests, n)
-	save(player)
-	devChat:FireClient(player, "/skipgoal: skipped " .. n .. ", now " .. tostring(now or "done"))
-end)
-skipGoalCommand.Parent = game:GetService("TextChatService")
-
 Telemetry.incomeOf = function(player) -- (gold a second: the gold checkpoints)
 	local profile = profiles[player]
 	return if profile then (income(profile) + (otherIncome[player] or 0)) * goldX(player) else 0
@@ -2198,15 +2019,15 @@ task.spawn(function()
 	while true do
 		task.wait(1)
 		for player, profile in profiles do
-			local rate = (income(profile) + (otherIncome[player] or 0)) * goldX(player)
-			if player:GetAttribute("PenIncome") ~= rate then
-				player:SetAttribute("PenIncome", rate) -- (the Top Earners board's: Server/TopEarners)
-			end
-			local earned = if player:GetAttribute("Tutorial") then 0 else rate -- (nothing till the tutorial's done)
-			if earned > 0 and player.Parent then
+			local earned = if player:GetAttribute("Tutorial") then 0 else (income(profile) + (otherIncome[player] or 0)) * goldX(player) -- (nothing till the tutorial's done)
+			if earned > 0 and player.Parent and Config.Gems then
+				-- (the Halloween world: your pets earn gems, not cash: Config.Gems, QM Oct 15)
+				local gems = earned * Config.Gems.Rate
+				player:SetAttribute("Gems", (player:GetAttribute("Gems") or 0) + gems)
+				paid:FireClient(player, gems) -- (the HUD shows it by the gem counter)
+			elseif earned > 0 and player.Parent then
 				player:SetAttribute("Gold", (player:GetAttribute("Gold") or 0) + earned)
 				Telemetry.gold(player, "earned", earned)
-				Funnel.penIncome(player, earned)
 				paid:FireClient(player, earned) -- (the HUD shows it by the gold counter)
 			end
 		end

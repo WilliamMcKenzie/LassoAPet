@@ -52,9 +52,6 @@ function Shop.hasOffers()
 end
 
 local gui = Instance.new("ScreenGui")
-if Config.NativeUi.On then
-	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
-end
 gui.Name, gui.ResetOnSpawn, gui.IgnoreGuiInset = "Shop", false, true
 gui.DisplayOrder, gui.Enabled = 20, false
 local root = Instance.new("Frame")
@@ -358,9 +355,9 @@ local hazeTween = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirectio
 local function haze(on)
 	local k = if on then 1 else 0
 	blur.Enabled, tint.Enabled = true, true
-	TweenService:Create(blur, hazeTween, { Size = 0 }):Play() -- (QM, Nov 6: no glass blur behind popups; was 14)
+	TweenService:Create(blur, hazeTween, { Size = 14 * k }):Play()
 	local tween =
-		TweenService:Create(tint, hazeTween, { Brightness = 0, Contrast = 0, Saturation = 0 })
+		TweenService:Create(tint, hazeTween, { Brightness = 0.06 * k, Contrast = -0.15 * k, Saturation = -0.35 * k })
 	tween.Completed:Connect(function()
 		if not open then
 			blur.Enabled, tint.Enabled = false, false
@@ -397,34 +394,8 @@ local function hideOthers(on)
 		table.clear(hidden)
 	end
 end
--- The native UI's Shop (Config.NativeUi, QM Nov 6) in place of the art: this file still opens
--- and closes it (the haze, hiding the rest of the UI, telemetry, popping up by itself).
-local native = if Config.NativeUi.On then require(script.Parent.NativeShop).build(gui, {
-	close = function()
-		Shop.close()
-	end,
-	buy = function(key)
-		if open then
-			buyShop:FireServer(key, "shop")
-		end
-	end,
-	buyPass = function(key)
-		if open then
-			ReplicatedStorage:WaitForChild("BuyPass"):FireServer(key)
-		end
-	end,
-	starterLeft = starterLeft,
-	restricted = Shop.randomRestricted,
-}) else nil
-if native then
-	root.Visible = false
-	cards = native.cards
-end
 local function setScale(scale)
 	pop.Scale = scale
-	if native then
-		native.setScale(scale)
-	end
 end
 function Shop.open(auto) -- (auto: it popped up by itself, the Halloween Egg in the spotlight)
 	if open then
@@ -436,10 +407,6 @@ function Shop.open(auto) -- (auto: it popped up by itself, the Halloween Egg in 
 	end
 	hideOthers(true)
 	scroll.CanvasPosition = Vector2.zero
-	if native then
-		native.list.CanvasPosition = Vector2.zero
-		native.refresh()
-	end
 	gui.Enabled = true
 	haze(true)
 	ModalPop.open(setScale)
@@ -463,7 +430,7 @@ function Shop.open(auto) -- (auto: it popped up by itself, the Halloween Egg in 
 	end
 	Gamepad.openMenu("Shop", {
 		close = Shop.close,
-		group = if native then native.list else scroll,
+		group = scroll,
 		select = function()
 			for _, card in cards do
 				if card.Selectable then

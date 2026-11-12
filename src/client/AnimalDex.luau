@@ -37,7 +37,7 @@ local AnimalDex = {}
 -- This world's biomes, each with its animals: the herd's (and its 1-in-1,000 trophies), cheapest
 -- first.
 local BIOMES = {}
-for i, biome in Config.allBiomes() do -- (and the endless course's, past the Ocean: Config.Endless)
+for i, biome in Config.Biomes do
 	local kinds = {}
 	for kind, weight in biome.Herd or {} do
 		if weight > 0 and PetFaces.HEADSHOTS[kind] ~= nil then
@@ -52,7 +52,7 @@ for i, biome in Config.allBiomes() do -- (and the endless course's, past the Oce
 		return a < b
 	end)
 	local names = Config.BiomeNames and Config.BiomeNames[Config.World]
-	table.insert(BIOMES, { name = names and names[i] or biome.DisplayName or biome.Name, kinds = kinds })
+	table.insert(BIOMES, { name = names and names[i] or biome.Name, kinds = kinds })
 end
 
 local function ridden()
@@ -194,17 +194,7 @@ local function setPop(s)
 	resize()
 end
 
--- (the native UI's Index in its place: Config.NativeUi, QM Nov 6)
-local Native = if Config.NativeUi.On then require(script.Parent.NativeIndex) else nil
-
 function AnimalDex.toggle(instant)
-	if Native then
-		Native.toggle()
-		if AnimalDex.onToggle then
-			AnimalDex.onToggle(Native.isOpen())
-		end
-		return
-	end
 	open = not open
 	if open then
 		gui.Enabled = true
@@ -224,17 +214,10 @@ function AnimalDex.toggle(instant)
 end
 
 function AnimalDex.isOpen()
-	if Native then
-		return Native.isOpen()
-	end
 	return open == true
 end
 
 function AnimalDex.close(instant)
-	if Native then
-		Native.close()
-		return
-	end
 	if open then
 		AnimalDex.toggle(instant)
 	end

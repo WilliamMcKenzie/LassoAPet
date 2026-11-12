@@ -36,7 +36,7 @@ Burrow.MOUNDS = {
 local rng = Random.new()
 
 local function groundColors(z)
-	return WorldColors.biomeConfigAt(z).GroundColors -- (past the Ocean, the endless stretch's)
+	return Config.Biomes[WorldColors.biomeAt(z)].GroundColors
 end
 
 function Burrow.mound(x, z, floor)

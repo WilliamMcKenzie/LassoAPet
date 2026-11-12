@@ -5,220 +5,6 @@ local Config = {
 	HudScale = 1, -- multiplies the whole HUD's size; 1 matches QM's mockups
 	TakeEggSunburst = true, -- turning sunburst behind the TAKE EGG button (trial)
 
-	-- The map (QM, Nov 6: Fight to Steal an Egg's, ported): maps/world.map, edited in
-	-- tools/mapeditor, baked into Shared/MapData (tools/map_bake.py), built by Server/Map.
-	StudTransparency = 0.5, -- the map's stud Textures (tools/mapeditor/build.py reads it)
-	StudStyle = { GroundTransparency = 0.5, GroundTileScale = 1, Transparency = 0.4, TileScale = 2 },
-	-- every world colour, by the ColorKey attribute on the parts (and checker Textures)
-	-- that wear it. Live-tunable in Play through workspace.WorldColors (Shared/WorldColors).
-	WorldColors = {
-		Grass = Color3.fromRGB(148, 181, 26),
-		GrassChecker = Color3.fromRGB(163, 194, 15),
-		Dirt = Color3.fromRGB(200, 149, 71),
-		DirtChecker = Color3.fromRGB(189, 141, 67),
-		WallDirt = Color3.fromRGB(133, 90, 50),
-		WallDirtChecker = Color3.fromRGB(143, 98, 56),
-		PineTrunk = Color3.fromRGB(120, 84, 58),
-		PineNeedlesA = Color3.fromRGB(46, 125, 80),
-		PineNeedlesB = Color3.fromRGB(58, 140, 88),
-		PineNeedlesC = Color3.fromRGB(40, 112, 72),
-		PineNeedlesD = Color3.fromRGB(66, 150, 96),
-		Stone = Color3.fromRGB(214, 216, 206),
-		RegionBarrier = Color3.fromRGB(0, 28, 78), -- #001C4E: a locked region's blocker and its shadow (Shared/RegionBlocker)
-		StoneDark = Color3.fromRGB(176, 178, 168),
-
-		-- the map (tools/map_gen.py lays it out, Server/Map.luau builds it). Each floor
-		-- tile's Checker is its checker's colour.
-		-- the base: Grass and Dirt (above, the dirt a stud lower) are its floor, WallDirt its wall
-		Wood = Color3.fromRGB(150, 98, 56),
-		WoodDark = Color3.fromRGB(110, 72, 42),
-		Straw = Color3.fromRGB(226, 196, 110),
-		NestStick = Color3.fromRGB(143, 74, 44), -- (the nests' woven sticks: LassoAPet's, QM Oct 25)
-		NestStickDark = Color3.fromRGB(110, 56, 34),
-		StrawDark = Color3.fromRGB(196, 164, 84),
-		Egg = Color3.fromRGB(250, 246, 232),
-		EggSpot = Color3.fromRGB(150, 200, 90),
-		Sign = Color3.fromRGB(58, 46, 38),
-		-- Meadow (QM, Oct 24: all grass, a dirt circle for the boss, a few ponds)
-		MeadowWater = Color3.fromRGB(76, 156, 222),
-		MeadowWaterChecker = Color3.fromRGB(90, 170, 232),
-		MeadowGrass = Color3.fromRGB(148, 181, 26),
-		MeadowGrassChecker = Color3.fromRGB(163, 194, 15),
-		MeadowDirt = Color3.fromRGB(200, 149, 71),
-		MeadowDirtChecker = Color3.fromRGB(189, 141, 67),
-		MeadowWall = Color3.fromRGB(133, 90, 50),
-		MeadowWallChecker = Color3.fromRGB(143, 98, 56),
-		MeadowCap = Color3.fromRGB(148, 181, 26),
-		MeadowCapChecker = Color3.fromRGB(163, 194, 15),
-		MeadowPillar = Color3.fromRGB(168, 184, 108), -- (its pillars, ruins and stone props: QM, Oct 24, in the biome's colours)
-		MeadowPillarDark = Color3.fromRGB(134, 152, 82),
-		-- Desert (as LassoAPet's: dry grass a stud down, sand, sandstone a stud up)
-		DesertDryGrass = Color3.fromRGB(178, 170, 76),
-		DesertDryGrassChecker = Color3.fromRGB(190, 180, 86),
-		DesertSand = Color3.fromRGB(232, 188, 102),
-		DesertSandChecker = Color3.fromRGB(246, 208, 124),
-		DesertSandstone = Color3.fromRGB(206, 146, 84),
-		DesertSandstoneChecker = Color3.fromRGB(222, 164, 100),
-		DesertWall = Color3.fromRGB(206, 118, 72),
-		DesertWallChecker = Color3.fromRGB(226, 138, 88),
-		DesertCap = Color3.fromRGB(222, 164, 100),
-		DesertCapChecker = Color3.fromRGB(232, 176, 112),
-		DesertPillar = Color3.fromRGB(226, 178, 112),
-		DesertPillarDark = Color3.fromRGB(202, 148, 90),
-		-- Ice (cold grass a stud down, snow, glacier ice a stud up)
-		IceColdGrass = Color3.fromRGB(80, 160, 166),
-		IceColdGrassChecker = Color3.fromRGB(96, 176, 180),
-		IceSnow = Color3.fromRGB(228, 234, 242),
-		IceSnowChecker = Color3.fromRGB(244, 247, 251),
-		IceGlacier = Color3.fromRGB(160, 188, 244),
-		IceGlacierChecker = Color3.fromRGB(178, 202, 250),
-		IceWall = Color3.fromRGB(126, 164, 214),
-		IceWallChecker = Color3.fromRGB(146, 182, 228),
-		IceCap = Color3.fromRGB(244, 247, 251),
-		IceCapChecker = Color3.fromRGB(232, 238, 246),
-		IcePillar = Color3.fromRGB(204, 222, 246),
-		IcePillarDark = Color3.fromRGB(164, 192, 232),
-		-- Lava (glowing magma pools a stud down, light volcanic rock, dark basalt a stud up)
-		LavaMagma = Color3.fromRGB(255, 116, 24),
-		LavaMagmaChecker = Color3.fromRGB(255, 146, 40),
-		LavaRock = Color3.fromRGB(156, 98, 66),
-		LavaRockChecker = Color3.fromRGB(168, 108, 74),
-		LavaBasalt = Color3.fromRGB(84, 66, 62),
-		LavaBasaltChecker = Color3.fromRGB(94, 74, 68),
-		LavaWall = Color3.fromRGB(170, 92, 58),
-		LavaWallChecker = Color3.fromRGB(186, 104, 66),
-		LavaCap = Color3.fromRGB(96, 60, 46),
-		LavaCapChecker = Color3.fromRGB(106, 68, 52),
-		LavaPillar = Color3.fromRGB(104, 80, 70),
-		LavaPillarDark = Color3.fromRGB(76, 60, 56),
-		-- past the Lava, the left fork (QM, Oct 24): the Abandoned Dungeon (green and blue tinged
-		-- stone, near-black walls, green glows), then the Red Castle (crimson carpet on dark
-		-- purplish grey stone)
-		DungeonStone = Color3.fromRGB(74, 96, 86),
-		DungeonStoneChecker = Color3.fromRGB(82, 106, 94),
-		DungeonSlate = Color3.fromRGB(66, 82, 102),
-		DungeonSlateChecker = Color3.fromRGB(74, 91, 112),
-		DungeonWall = Color3.fromRGB(38, 40, 44),
-		DungeonWallChecker = Color3.fromRGB(45, 47, 52),
-		DungeonCap = Color3.fromRGB(54, 58, 60),
-		DungeonCapChecker = Color3.fromRGB(61, 65, 67),
-		DungeonPillar = Color3.fromRGB(84, 92, 92),
-		DungeonPillarDark = Color3.fromRGB(58, 64, 66),
-		-- the Jurassic (the Castle's slot, QM Nov 7): all jungle grass, rock pillars
-		CastleGrass = Color3.fromRGB(86, 166, 52),
-		CastleGrassChecker = Color3.fromRGB(80, 156, 48),
-		CastleWall = Color3.fromRGB(118, 92, 66),
-		CastleWallChecker = Color3.fromRGB(108, 84, 60),
-		CastleCap = Color3.fromRGB(70, 140, 40),
-		CastleCapChecker = Color3.fromRGB(64, 130, 36),
-		CastlePillar = Color3.fromRGB(128, 114, 92),
-		CastlePillarDark = Color3.fromRGB(104, 93, 75),
-		-- the right fork's first biome (QM, Oct 24): the Magic Forest, turquoise grass and blue stone
-		ForestGrass = Color3.fromRGB(56, 196, 168),
-		ForestGrassChecker = Color3.fromRGB(66, 208, 178),
-		ForestStone = Color3.fromRGB(96, 124, 214),
-		ForestStoneChecker = Color3.fromRGB(106, 134, 224),
-		ForestWall = Color3.fromRGB(112, 140, 222),
-		ForestWallChecker = Color3.fromRGB(124, 152, 230),
-		ForestCap = Color3.fromRGB(56, 196, 168),
-		ForestCapChecker = Color3.fromRGB(66, 208, 178),
-		ForestPillar = Color3.fromRGB(150, 176, 240),
-		ForestPillarDark = Color3.fromRGB(112, 140, 222),
-		-- after the Forest (QM, Oct 24): the Ocean Trench, pale blue sand, darker blue stone
-		OceanSand = Color3.fromRGB(140, 200, 236),
-		OceanSandChecker = Color3.fromRGB(152, 210, 242),
-		OceanStone = Color3.fromRGB(60, 92, 188),
-		OceanStoneChecker = Color3.fromRGB(68, 102, 198),
-		OceanWall = Color3.fromRGB(48, 76, 170),
-		OceanWallChecker = Color3.fromRGB(56, 86, 182),
-		OceanCap = Color3.fromRGB(60, 92, 188),
-		OceanCapChecker = Color3.fromRGB(68, 102, 198),
-		OceanPillar = Color3.fromRGB(76, 110, 204),
-		OceanPillarDark = Color3.fromRGB(52, 82, 176),
-		-- props (tools/ruin_assets.py): ruins take their biome's Pillar colours
-		CactusGreen = Color3.fromRGB(92, 168, 70),
-		CactusFlower = Color3.fromRGB(255, 120, 170),
-		SnowPineNeedles = Color3.fromRGB(52, 112, 96),
-		Snow = Color3.fromRGB(244, 248, 252),
-		DeadWood = Color3.fromRGB(70, 56, 50),
-		Bone = Color3.fromRGB(232, 222, 196), -- (femur, ribcage, skull: QM, Oct 24, for the Lava zone)
-		BoneDark = Color3.fromRGB(150, 136, 112), -- (eye sockets, horns, the ribcage's spine)
-		-- boulders and monoliths, each biome's own (QM, Oct 24); runes are Neon and glow.
-		-- Base's go unprefixed (Boulder, Monolith, Rune), the biomes' as MeadowBoulder etc.
-		Boulder = Color3.fromRGB(150, 152, 146),
-		BoulderDark = Color3.fromRGB(118, 120, 116),
-		Monolith = Color3.fromRGB(96, 98, 106),
-		MonolithDark = Color3.fromRGB(68, 70, 78),
-		Rune = Color3.fromRGB(110, 200, 255),
-		MeadowBoulder = Color3.fromRGB(140, 146, 124),
-		MeadowBoulderDark = Color3.fromRGB(106, 116, 92),
-		MeadowMonolith = Color3.fromRGB(118, 128, 104),
-		MeadowMonolithDark = Color3.fromRGB(86, 98, 74),
-		MeadowRune = Color3.fromRGB(120, 255, 140),
-		DesertBoulder = Color3.fromRGB(198, 140, 92),
-		DesertBoulderDark = Color3.fromRGB(164, 108, 70),
-		DesertMonolith = Color3.fromRGB(212, 166, 106),
-		DesertMonolithDark = Color3.fromRGB(176, 130, 80),
-		DesertRune = Color3.fromRGB(255, 214, 90),
-		IceBoulder = Color3.fromRGB(152, 178, 206),
-		IceBoulderDark = Color3.fromRGB(112, 142, 178),
-		IceMonolith = Color3.fromRGB(122, 160, 210),
-		IceMonolithDark = Color3.fromRGB(86, 124, 178),
-		IceRune = Color3.fromRGB(130, 236, 255),
-		LavaBoulder = Color3.fromRGB(64, 54, 52),
-		LavaBoulderDark = Color3.fromRGB(44, 38, 38),
-		LavaMonolith = Color3.fromRGB(104, 80, 70),
-		LavaMonolithDark = Color3.fromRGB(76, 60, 56),
-		LavaRune = Color3.fromRGB(255, 120, 40),
-		DungeonBoulder = Color3.fromRGB(70, 78, 78),
-		DungeonBoulderDark = Color3.fromRGB(50, 56, 58),
-		DungeonMonolith = Color3.fromRGB(56, 62, 66),
-		DungeonMonolithDark = Color3.fromRGB(40, 44, 48),
-		DungeonRune = Color3.fromRGB(90, 255, 140),
-		CastleBoulder = Color3.fromRGB(134, 120, 96),
-		CastleBoulderDark = Color3.fromRGB(110, 98, 78),
-		CastleMonolith = Color3.fromRGB(96, 110, 72),
-		CastleMonolithDark = Color3.fromRGB(74, 86, 56),
-		CastleRune = Color3.fromRGB(255, 170, 40),
-		ForestBoulder = Color3.fromRGB(120, 146, 224),
-		ForestBoulderDark = Color3.fromRGB(90, 114, 196),
-		ForestMonolith = Color3.fromRGB(128, 156, 232),
-		ForestMonolithDark = Color3.fromRGB(96, 122, 204),
-		ForestRune = Color3.fromRGB(110, 220, 255),
-		OceanBoulder = Color3.fromRGB(64, 96, 190),
-		OceanBoulderDark = Color3.fromRGB(46, 72, 160),
-		OceanMonolith = Color3.fromRGB(70, 104, 198),
-		OceanMonolithDark = Color3.fromRGB(50, 78, 168),
-		OceanRune = Color3.fromRGB(120, 255, 230),
-		-- the new biomes' decor (tools/ruin_assets.py); flames are Neon and light up
-		Iron = Color3.fromRGB(84, 88, 96),
-		IronDark = Color3.fromRGB(52, 54, 60),
-		DungeonFlame = Color3.fromRGB(90, 255, 130),
-		Gold = Color3.fromRGB(214, 168, 72),
-		CandleWax = Color3.fromRGB(242, 232, 206),
-		CandleFlame = Color3.fromRGB(255, 196, 92),
-		ForestTrunk = Color3.fromRGB(92, 64, 82), -- (palms: LassoAPet's mesh, dark purple-brown trunks)
-		ForestTrunkDark = Color3.fromRGB(74, 50, 68),
-		ForestFrond = Color3.fromRGB(36, 150, 132), -- (the grass's turquoise, darker)
-		ForestFrondDark = Color3.fromRGB(28, 124, 112),
-		ForestFruit = Color3.fromRGB(150, 96, 200),
-		ForestPodium = Color3.fromRGB(150, 176, 240),
-		ForestPodiumDark = Color3.fromRGB(104, 130, 214),
-		ForestCandleWax = Color3.fromRGB(226, 220, 246),
-		ForestFlame = Color3.fromRGB(96, 196, 255),
-		Kelp = Color3.fromRGB(60, 168, 128), -- (the Ocean's decor, after QM's reference)
-		KelpDark = Color3.fromRGB(44, 136, 108),
-		Starfish = Color3.fromRGB(255, 112, 64),
-		Sponge = Color3.fromRGB(92, 92, 230),
-		SpongeRock = Color3.fromRGB(52, 60, 108),
-		Coral = Color3.fromRGB(226, 72, 170),
-	},
-	Map = {
-		HideLineup = false, -- move tools/lineup.luau's workspace.World (and a Baseplate) out of the way when the map is built (Edit: into ServerStorage.MovedByMapBaker)
-		LiquidSlow = 0.8, -- walking through a biome's liquid (water, magma): this much of your speed (QM, Oct 24)
-		LiquidSink = 1, -- and you sink this far into it, below its surface
-	},
-
 	-- World (studs). The map is the saved model src/world/World.rbxmx; these sizes
 	-- must match it (the ride reads them). Ground and wall colours are calibrated so
 	-- they render like the Steal an Egg reference under the Lighting set in
@@ -226,172 +12,219 @@ local Config = {
 	-- The course is biomes end to end from the start line, each Length studs long,
 	-- with its own tile colours. The home base uses the first biome's. Any Nest
 	-- model in World.Nests is an egg spawn of the biome it stands in (NestOdds).
-	-- The progression pass (QM, Nov 7): the Slingshot's unlocks (each biome's UnlockCost) set the pace,
-	-- a sigmoid's back half: quick at first, slowing round the Dungeon, hard by the Ocean. Target
-	-- arrivals (a free player): Desert ~1 min, Tundra ~5, Volcano ~15, Dungeon ~35, Forest ~75,
-	-- Castle ~140, Ocean ~240 (4 h; the endless course runs on from its end). Each price is the
-	-- minutes in the biome before x 60 x ~3x its herd's average gold a second (5 pen slots, ~60%
-	-- filled with its pets as they hatch) + ~1000x that average (about half its Index rewards).
-	-- Herd averages after the income curve: 36, 114, 229, 457, 914, 1828, 3657 (x2 a biome).
 	Biomes = {
 		{
 			Name = "Meadow",
-			Picture = "rbxassetid://134128815979171", -- design/biomes/Meadow.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 1, -- its obstacles (tools/funnel.luau) and the Godlands' terrain grow ^0.8 of this. Animals no longer do (QM, Oct 8: back to their old sizes)
 			Swerve = 1, -- how much the stampede swerves out of your way on the ride home: ReturnAvoid's Clear and Chance x this (QM, Oct 6: full in the Meadow, less each zone, none in the Godlands)
 			Length = 2168, -- (QM, Oct 11: the pacing ladder, below AnimalStats; was 760)
-			GroundColors = { Color3.fromRGB(23, 191, 29), Color3.fromRGB(24, 203, 31) }, -- Fight to Steal an Egg's Meadow floor and its checker (QM, Nov 6)
-			WallColors = { Color3.fromRGB(133, 90, 50), Color3.fromRGB(143, 98, 56) }, -- and its Meadow wall
-			CapColor = Color3.fromRGB(148, 181, 26), -- the cap along its walls' tops (Fight to Steal an Egg's MeadowCap)
-			-- The base's dirt: the pens' floor (PenLevel) and the base walls (Server/Map).
-			Patches = {
-				Dirt = { Color3.fromRGB(200, 149, 71), Color3.fromRGB(189, 141, 67) },
-			},
+			GroundColors = { Color3.fromRGB(113, 173, 31), Color3.fromRGB(122, 190, 25) }, -- (QM, Oct 10; was 77, 196, 63 / 105, 255, 74)
+			WallColors = { Color3.fromRGB(197, 126, 70), Color3.fromRGB(211, 142, 75) }, -- (QM, Oct 10; was 225, 150, 104 / 248, 170, 114)
 			-- Which animals run in this biome's stampede and how often (names are modules
 			-- in Shared/Animals). QM's spawn table (Oct 3): chances out of 1. They're
 			-- weights, so a biome that doesn't add up to exactly 1 still works. Nest eggs
 			-- use the same odds (NestOdds). A 0 never spawns but keeps the animal on
 			-- the biome's page in the animal dictionary. No Common animal runs wild (QM,
 			-- Oct 6: no Common eggs): the Horse is only ever the pet you start with.
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Pig = 1/5, Pinto = 1/5, Snail = 1/5, Zebra = 1/8, Bunny = 1/10, Fish = 1/20, Gecko = 1/20, Buffalo = 1/25, Rhino = 1/250, Elephant = 1/400, Giraffe = 1/500, HillbackTortoise = 1/1000, Unicorn = 1/10000, Horse = 0,
+			Herd = { Horse = 0, Pinto = 0.35, Pig = 0.25, Bunny = 0.25, Fish = 0.13, Rhino = 0.08, Unicorn = 0.05 },
+			-- Dirt patches in the walls' colours, a stud below the grass
+			-- (tools/meadow_ground.py); see the Desert's Patches.
+			Patches = {
+				Dirt = { Color3.fromRGB(206, 146, 84), Color3.fromRGB(222, 164, 100) }, -- (QM, Oct 10; was the walls' 225, 150, 104 / 248, 170, 114)
+				Grass = { Color3.fromRGB(92, 146, 30), Color3.fromRGB(100, 160, 26) }, -- the base's darker green band, between its grass and dirt (tools/world1_base.luau; QM, Oct 13)
 			},
 		},
 		{
 			Name = "Desert",
-			Picture = "rbxassetid://92572924134940", -- design/biomes/Desert.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 1.35,
 			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.75)
 			NestScale = 2, -- its nests are this many times bigger, so they show from afar at its speed (Nests.server; QM, Oct 6)
 			Length = 1816, -- (QM, Oct 11: 1.5x as long; the pacing ladder made it 1208, was 2280)
-			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(246, 208, 124) }, -- Fight to Steal an Egg's Desert floor and its checker (QM, Nov 6)
-			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) }, -- and its Desert wall
-			CapColor = Color3.fromRGB(222, 164, 100), -- (its DesertCap)
-			GateColor = Color3.fromRGB(255, 204, 40), -- its breakable barrier's colour (Gate.client)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Kitten = 1/2, Cactus = 1/5, Coyote = 1/5, Scorpion = 1/20, Oryx = 1/25, Ostrich = 1/800, Sandworm = 1/800, SpineLizard = 1/800, Snake = 1/1600, MirageElephant = 1/3200,
+			GroundColors = { Color3.fromRGB(232, 188, 102), Color3.fromRGB(250, 214, 130) },
+			WallColors = { Color3.fromRGB(206, 118, 72), Color3.fromRGB(226, 138, 88) },
+			Herd = { Cactus = 0.3, Kitten = 0.1, Scorpion = 0.3, Sandworm = 0.2, SpineLizard = 0.2, Snake = 0.025 },
+			-- Patches of other ground in the floor (parts named after them in
+			-- World.Ground, laid out by tools/desert_ground.py): dry grass flush with
+			-- the sand, sandstone a stud higher. Checker colours, like GroundColors.
+			Patches = {
+				Grass = { Color3.fromRGB(184, 172, 70), Color3.fromRGB(200, 188, 86) },
+				Stone = { Color3.fromRGB(206, 146, 84), Color3.fromRGB(222, 164, 100) },
 			},
 			-- Locked behind a gate until your pen is this biome's level (its place
 			-- in this list). Upgrading your pen to it costs UnlockCost gold; your pen's
 			-- floor tiles take this biome's ground colours and its posts PostColor.
 			UnlockCost = 500, -- balance pass (Oct 6): was $1k; most new players quit before reaching it
+			PostColor = Color3.fromRGB(206, 118, 72),
+			GateImage = "rbxassetid://113778810800288", -- assets/ui/GateDesert.png ("Zone Locked")
+			GateColor = Color3.fromRGB(255, 204, 40), -- the gate's glow at this biome's line: desert yellow
 			-- Upgrade Pen while this is the next biome to unlock (its price is drawn in).
 			UpgradeImage = "rbxassetid://134340111977085", -- assets/ui/UpgradePenDesertEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://97537967185164", -- assets/ui/UpgradePenDesertDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 		},
 		{
 			Name = "Snow",
-			Picture = "rbxassetid://87312209015598", -- design/biomes/Snow.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 1.8,
 			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.5)
 			NestScale = 2.25,
 			Length = 1920, -- (QM, Oct 11: the pacing ladder; was 5472)
-			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) }, -- Fight to Steal an Egg's Ice floor and its checker (QM, Nov 6)
-			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) }, -- and its Ice wall
-			CapColor = Color3.fromRGB(244, 247, 251), -- (its IceCap)
-			GateColor = Color3.fromRGB(70, 220, 255), -- its breakable barrier's colour (Gate.client)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Boar = 1/4, Penguin = 1/4, Seal = 1/4, Reindeer = 1/10, Walrus = 1/16, Snowman = 1/20, IceGolem = 1/160, Narwhal = 1/200, Icebringer = 1/3200, GlacierMammoth = 1/4000, SnackYak = 0,
+			GroundColors = { Color3.fromRGB(228, 234, 242), Color3.fromRGB(244, 247, 251) },
+			WallColors = { Color3.fromRGB(126, 164, 214), Color3.fromRGB(146, 182, 228) },
+			Herd = { Penguin = 0.3, Boar = 0.25, Snowman = 0.22, IceGolem = 0.12, SnackYak = 0, Icebringer = 0.02 }, -- the Snack Yak never spawns: a Robux exclusive (QM, Oct 4)
+			-- tools/snow_ground.py: cold grass a stud above the snow, ice ponds a stud below.
+			Patches = {
+				Grass = { Color3.fromRGB(80, 160, 166), Color3.fromRGB(96, 176, 180) },
+				Ice = { Color3.fromRGB(160, 188, 244), Color3.fromRGB(178, 202, 250) },
 			},
-			UnlockCost = 200000, -- (the progression pass, QM Nov 7: above Biomes; was 300k) QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
+			UnlockCost = 300000, -- QM, Oct 8: matches the new button art (Oct 7 had $150k: the Tundra took too long to reach, "shorten it a BIT" (balance pass Oct 6 had it $300k, before that $100k)
+			PostColor = Color3.fromRGB(126, 164, 214),
+			GateImage = "rbxassetid://93384010922515", -- assets/ui/GateTundra.png
+			GateColor = Color3.fromRGB(70, 220, 255), -- cyan (QM)
 			UpgradeImage = "rbxassetid://105968538824751", -- assets/ui/UpgradePenTundraEnabled.png (QM, Oct 8: price drawn in)
 			UpgradeImageDisabled = "rbxassetid://133303061216721", -- assets/ui/UpgradePenTundraDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
 		},
 		{
-			-- The volcano (QM, Oct 11; Nov 6: on the Lava ground, 4th. The old Ocean and Jurassic
-			-- herds are out; their animals stay in Shared/Animals: they're pets in saves.)
+			Name = "Ocean",
+			AnimalSize = 2.6,
+			Swerve = 1, -- (as the Meadow's: QM, Oct 10; was 0.25)
+			NestScale = 2.5,
+			Length = 3120, -- a whole number of 240-stud depth bands (QM, Oct 11: the pacing ladder; was 7680)
+			GroundColors = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
+			WallColors = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) }, -- salmon coral (QM)
+			-- The Fish is a placeholder until the rest of the ocean animals are designed.
+			HerdSpawnEvery = 0.45, -- (twice the stampede of the rest: it looked barren, QM Oct 11)
+			Herd = { Fish = 0.1, Starfish = 0.3, Clownfish = 0.25, Whale = 0.05, Squid = 0.2, KingCrab = 0.15, FishSchool = 0.15, BlueCrab = 0.05, RoboShark = 0, Kraken = 0.05, Lionfish = 0.15 }, -- (the Lionfish Rare, a touch faster than the Starfish, QM Oct 11, weight a guess; the Clownfish Uncommon, a little rarer than the Starfish, QM Oct 11; Blue Crab guessed like the Kraken; the Robo Shark never spawns: a future Robux pet, QM Oct 4)
+			-- tools/ocean_ground.py: seagrass a stud above the sand, trenches a stud below.
+			Patches = {
+				Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
+				Trench = { Color3.fromRGB(70, 150, 214), Color3.fromRGB(86, 166, 228) },
+				Lava = { Color3.fromRGB(255, 72, 0), Color3.fromRGB(255, 120, 10) }, -- Neon (WorldColors keeps the textures off its glow)
+			},
+			-- It gets darker the further you ride (QM, Oct 2; bluer and a little brighter, Oct 6): coral reef, sand flats,
+			-- dark rock with the first lava, volcanic abyss. At is the fraction of the
+			-- way along; the floor, walls and haze blend between these stops (the floor
+			-- and walls step every 240 studs, tools/ocean_ground.py BAND). Where a stop
+			-- has a colour, it wins over the GroundA/WallA... attributes above.
+			Depths = {
+				{
+					At = 0,
+					Ground = { Color3.fromRGB(236, 214, 164), Color3.fromRGB(246, 228, 184) },
+					Grass = { Color3.fromRGB(64, 178, 122), Color3.fromRGB(80, 196, 138) },
+					Trench = { Color3.fromRGB(60, 156, 232), Color3.fromRGB(76, 172, 244) },
+					Wall = { Color3.fromRGB(236, 140, 124), Color3.fromRGB(250, 160, 142) },
+					Haze = Color3.fromRGB(56, 160, 245),
+					Tint = Color3.fromRGB(214, 236, 255),
+				},
+				{
+					At = 0.33,
+					Ground = { Color3.fromRGB(222, 196, 150), Color3.fromRGB(234, 210, 166) },
+					Grass = { Color3.fromRGB(76, 150, 112), Color3.fromRGB(90, 164, 124) },
+					Trench = { Color3.fromRGB(52, 132, 212), Color3.fromRGB(66, 146, 226) },
+					Wall = { Color3.fromRGB(196, 150, 140), Color3.fromRGB(212, 166, 154) },
+					Haze = Color3.fromRGB(42, 124, 220),
+					Tint = Color3.fromRGB(205, 224, 250),
+				},
+				{
+					At = 0.55,
+					Ground = { Color3.fromRGB(132, 150, 176), Color3.fromRGB(146, 164, 190) },
+					Grass = { Color3.fromRGB(70, 96, 124), Color3.fromRGB(82, 108, 136) },
+					Trench = { Color3.fromRGB(44, 92, 170), Color3.fromRGB(54, 104, 184) },
+					Wall = { Color3.fromRGB(100, 118, 156), Color3.fromRGB(116, 134, 172) },
+					Haze = Color3.fromRGB(36, 96, 190),
+					Tint = Color3.fromRGB(196, 214, 245),
+				},
+				{
+					At = 0.75,
+					Ground = { Color3.fromRGB(82, 104, 140), Color3.fromRGB(96, 118, 154) },
+					Grass = { Color3.fromRGB(56, 76, 108), Color3.fromRGB(66, 88, 120) },
+					Trench = { Color3.fromRGB(34, 62, 130), Color3.fromRGB(44, 74, 142) },
+					Wall = { Color3.fromRGB(64, 86, 128), Color3.fromRGB(78, 100, 142) },
+					Haze = Color3.fromRGB(28, 70, 160),
+					Tint = Color3.fromRGB(188, 200, 240),
+				},
+				{
+					At = 1,
+					Ground = { Color3.fromRGB(46, 58, 92), Color3.fromRGB(58, 70, 104) },
+					Grass = { Color3.fromRGB(34, 44, 70), Color3.fromRGB(44, 54, 80) },
+					Trench = { Color3.fromRGB(28, 40, 90), Color3.fromRGB(38, 50, 100) },
+					Wall = { Color3.fromRGB(36, 46, 80), Color3.fromRGB(48, 58, 92) },
+					Haze = Color3.fromRGB(20, 36, 100),
+					Tint = Color3.fromRGB(176, 180, 230),
+				},
+			},
+			UnlockCost = 10000000, -- QM, Oct 8: matches the new button art (Oct 7 had $5M: halved with the Tundra's ("same with ocean/godlands"); balance pass Oct 6 had it $10M, before that $1M
+			PostColor = Color3.fromRGB(236, 140, 124),
+			GateImage = "rbxassetid://75356296124042", -- assets/ui/GateOcean.png
+			GateColor = Color3.fromRGB(30, 80, 220), -- deep blue (QM)
+			UpgradeImage = "rbxassetid://86611519789045", -- assets/ui/UpgradePenOceanEnabled.png (QM, Oct 8: price drawn in)
+			UpgradeImageDisabled = "rbxassetid://98686807740770", -- assets/ui/UpgradePenOceanDisabled.png: grey, while you can't afford it (QM, Oct 8: price drawn in)
+			-- Under the sea (Ocean.client): while you're in this biome the distance
+			-- fades into Haze.Color and bubbles drift up round the camera.
+			Haze = {
+				Color = Color3.fromRGB(60, 150, 235),
+				Density = 0.45, -- Atmosphere.Density
+				Tint = Color3.fromRGB(200, 228, 255), -- ColorCorrection.TintColor
+				FadeTime = 1.5, -- seconds to sink into it or come out of it
+				Bubbles = 24, -- per second
+			},
+		},
+		{
+			-- The volcano (QM, Oct 11): after the ocean, bright and warm, brown more than
+			-- black (design/lava_biome). Floor, walls and nests: tools/volcano.py; its rocks:
+			-- tools/biome_rocks.py; the big crack at its end: VolcanoCrack below.
 			Name = "Volcano",
-			Picture = "rbxassetid://87109343842146", -- design/biomes/Volcano.png: its render, no pets (the Slingshot menu's card)
 			AnimalSize = 2.6, -- (as the ocean's)
 			Swerve = 1,
 			NestScale = 2.5,
-			Length = 3120, -- the Lava ground's run in maps/world.map (QM, Nov 6; was 5040)
-			GroundColors = { Color3.fromRGB(156, 98, 66), Color3.fromRGB(168, 108, 74) }, -- Fight to Steal an Egg's Lava floor and its checker (QM, Nov 6)
-			WallColors = { Color3.fromRGB(170, 92, 58), Color3.fromRGB(186, 104, 66) }, -- and its Lava wall
-			CapColor = Color3.fromRGB(96, 60, 46), -- (its LavaCap)
-			GateColor = Color3.fromRGB(255, 110, 20), -- its breakable barrier's colour (Gate.client)
+			Length = 5040, -- (QM, Oct 11: the pacing ladder; was 7680)
+			GroundColors = { Color3.fromRGB(156, 98, 66), Color3.fromRGB(168, 108, 74) }, -- baked-earth brown
+			WallColors = { Color3.fromRGB(170, 92, 58), Color3.fromRGB(186, 104, 66) },
 			HerdSpawnEvery = 0.45, -- (twice the stampede, as the Ocean and Jurassic: QM Oct 11)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				FireAnt = 1/2, Firebird = 1/4, MagmaCrab = 1/16, RockHog = 1/16, VolcanoTortoise = 1/16, FireLobster = 1/20, LavaWhale = 1/320, Rockworm = 1/512, AshBehemoth = 1/2560, Phoenix = 1/2560,
+			Herd = { Firebird = 0.42, RockHog = 0.18, FireLobster = 0.17, Rockworm = 0.13, VolcanoTortoise = 0.1, Phoenix = 0.03, LavaWhale = 0.03 }, -- (QM, Oct 11: the Firebird Uncommon, the Rock Hog and Fire Lobster Rare, the Rockworm Epic, the Phoenix Legendary and very rare, the Lava Whale Epic and as rare as the Phoenix; the weights a guess)
+			-- tools/volcano.py: lighter ash flush, darker crust plates a stud up, lava pools
+			-- a stud down out by the walls.
+			Patches = {
+				Ash = { Color3.fromRGB(184, 124, 84), Color3.fromRGB(196, 134, 92) },
+				Crust = { Color3.fromRGB(124, 78, 58), Color3.fromRGB(136, 86, 64) },
+				Lava = { Color3.fromRGB(255, 116, 24), Color3.fromRGB(255, 146, 40) }, -- Neon
 			},
-			UnlockCost = 650000, -- (the progression pass, QM Nov 7: above Biomes; was 10M)
+			UnlockCost = 300000000, -- a guess (the old Godlands price)
+			PostColor = Color3.fromRGB(170, 92, 58),
+			GateColor = Color3.fromRGB(255, 110, 20), -- lava orange
+			Sky = "rbxassetid://87302593393430", -- assets/ui/SkyVolcano.png: a flat lava orange (QM, Oct 11; Client/BiomeSky)
+			-- How much that sky colours everything (the red-orange cast) and a tint over it
+			-- (QM, Oct 11; Client/BiomeSky): Diffuse 0 to 1, Specular 0 to 1, Tint white for none.
+			SkyLight = { Diffuse = 0, Specular = 1, Tint = Color3.new(1, 1, 1) }, -- (QM, Oct 11: no orange cast)
 			-- No Upgrade Pen art yet: the plain button with the price.
 		},
 		{
-			-- Fight to Steal an Egg's biomes past the Lava (QM, Nov 6: "add them all"), on the map's
-			-- grounds in maps/world.map's order, each with its pets and egg odds from there
-			-- (its Eggs.Kinds). Colours are the map's; unlock costs are guesses (10x each).
-			Name = "Dungeon", -- the Abandoned Dungeon
-			Picture = "rbxassetid://82252140059908", -- design/biomes/Dungeon.png: its render, no pets (the Slingshot menu's card)
+			-- The Jurassic (QM, Oct 11): the final biome, after the volcano (design/jurassic_biome):
+			-- darker jungle grass, a rough dirt trail down the middle, brown rocks, jungle plants
+			-- and a giant ribcage halfway. Floor, walls, nests and ribcage: tools/jurassic.py;
+			-- rocks and plants: tools/biome_rocks.py.
+			Name = "Jurassic",
 			AnimalSize = 2.6, -- (as the volcano's)
 			Swerve = 1,
 			NestScale = 2.5,
-			Length = 2520, -- its ground's run in maps/world.map
-			GroundColors = { Color3.fromRGB(104, 126, 146), Color3.fromRGB(99, 121, 140) },
-			WallColors = { Color3.fromRGB(64, 71, 84), Color3.fromRGB(74, 81, 94) },
-			CapColor = Color3.fromRGB(104, 126, 146),
-			GateColor = Color3.fromRGB(90, 255, 130),
-			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				CaveCricket = 1/4, Bat = 1/8, CryptSnail = 1/8, DungeonRat = 1/8, Rat = 1/8, Slime = 1/8, CaveSpider = 1/25, WebSpider = 1/25, BoneSteed = 1/32, Mimic = 1/80, AbyssPillbug = 1/1000, BoneWyrm = 1/4000,
+			Length = 7680, -- as long as the volcano was (a guess; its animals aren't on the ladder yet)
+			HerdSpawnEvery = 0.15, -- (3x its stampede again: QM Oct 12; was 0.45, twice the rest, as the Ocean)
+			GroundColors = { Color3.fromRGB(78, 140, 40), Color3.fromRGB(86, 152, 44) }, -- dark jungle grass
+			WallColors = { Color3.fromRGB(150, 102, 62), Color3.fromRGB(164, 114, 70) },
+			Herd = { Fish = 0, Spinosaurus = 0.2, TRex = 0.12, Raptor = 0.15, Pterodactyl = 0.08, Ankylosaurus = 0.25, PalmGuy = 0.25, BoneRex = 0.03 }, -- (the Bone Rex the final Legendary, as rare as the Phoenix, QM Oct 11; Palm Guy an Uncommon too, QM Oct 11, weight a guess; no more Fish: QM, Oct 11; the Ankylosaurus the Jurassic's Uncommon, QM Oct 11, weight a guess; the Pterodactyl an Epic, QM Oct 11; the Spinosaurus Rare, QM Oct 11; QM, Oct 11: fish for now, until the dinosaurs are designed; the T-Rex, an Epic, is the first; the Raptor a Rare that runs in packs of three (HerdPacks), so 0.15 is about a third of the stampede. Weights a guess)
+			-- tools/jurassic.py: the dirt trail, flush.
+			Patches = {
+				Trail = { Color3.fromRGB(150, 104, 64), Color3.fromRGB(162, 114, 70) },
 			},
-			UnlockCost = 2000000, -- (the progression pass, QM Nov 7; was 100M)
-		},
-		{
-			Name = "Forest", -- the Magic Forest
-			Picture = "rbxassetid://102414455931760", -- design/biomes/Forest.png: its render, no pets (the Slingshot menu's card)
-			AnimalSize = 2.6, -- (as the volcano's)
-			Swerve = 1,
-			NestScale = 2.5,
-			Length = 2520, -- its ground's run in maps/world.map
-			GroundColors = { Color3.fromRGB(30, 196, 186), Color3.fromRGB(28, 189, 181) },
-			WallColors = { Color3.fromRGB(130, 107, 115), Color3.fromRGB(125, 100, 108) },
-			CapColor = Color3.fromRGB(30, 196, 186),
-			GateColor = Color3.fromRGB(255, 143, 240),
-			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				StagBeetle = 1/2, Shroom = 1/5, SpiritFox = 1/5, SpiritDeer = 1/20, Deer = 1/25, BrownBear = 1/320, CrystalTortoise = 1/320, MysticOwl = 1/400, AncientMoose = 1/1600, AncientTreant = 1/2000, SpiritLoong = 1/8000,
-			},
-			UnlockCost = 7500000, -- (the progression pass, QM Nov 7; was 1B)
-		},
-		{
-			Name = "Castle", -- the Jurassic (QM, Nov 7: in the Red Castle's place, on its map recoloured as a jungle; its old animals and boss)
-			DisplayName = "Jurassic", -- what players see (QM, Nov 7: "should be called jurassic everywhere"; Name stays the code's key)
-			Picture = "rbxassetid://126635296858399", -- design/biomes/Jurassic.png: a jungle render, no pets (the Slingshot menu's card)
-			AnimalSize = 2.6, -- (as the volcano's)
-			Swerve = 1,
-			NestScale = 2.5,
-			Length = 3840, -- its ground's run in maps/world.map
-			GroundColors = { Color3.fromRGB(86, 166, 52), Color3.fromRGB(80, 156, 48) },
-			WallColors = { Color3.fromRGB(118, 92, 66), Color3.fromRGB(108, 84, 60) },
-			CapColor = Color3.fromRGB(70, 140, 40),
-			GateColor = Color3.fromRGB(255, 170, 40),
-			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Ankylosaurus = 1/2, PalmGuy = 1/4, Spinosaurus = 1/5, Raptor = 1/25, TRex = 1/200, Pterodactyl = 1/250, BoneRex = 1/1250, CastleWyvern = 1/5000,
-			},
-			UnlockCost = 25000000, -- (the progression pass, QM Nov 7; was 10B)
-		},
-		{
-			Name = "Ocean", -- the Ocean Trench
-			Picture = "rbxassetid://78505716706890", -- design/biomes/Ocean.png: its render, no pets (the Slingshot menu's card)
-			AnimalSize = 2.6, -- (as the volcano's)
-			Swerve = 1,
-			NestScale = 2.5,
-			Length = 3792, -- its ground's run in maps/world.map
-			GroundColors = { Color3.fromRGB(160, 230, 247), Color3.fromRGB(153, 222, 240) },
-			WallColors = { Color3.fromRGB(73, 103, 145), Color3.fromRGB(79, 112, 156) },
-			CapColor = Color3.fromRGB(157, 226, 244),
-			GateColor = Color3.fromRGB(70, 200, 255),
-			HerdSpawnEvery = 0.45, -- (as the volcano's)
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				Clownfish = 1/5, Pelican = 1/5, Squid = 1/5, Shrimp = 1/8, Starfish = 1/8, FishSchool = 1/40, Hammerhead = 1/40, Seahorse = 1/40, Whale = 1/40, KingCrab = 1/50, Lionfish = 1/50, Anglerfish = 1/200, MantaRay = 1/250, BlueCrab = 1/2000, AbyssWhale = 1/2500, Kraken = 1/10000, RoboShark = 0,
-			},
-			UnlockCost = 75000000, -- (the progression pass, QM Nov 7; was 100B)
+			UnlockCost = 3000000000, -- a guess (10x the volcano)
+			PostColor = Color3.fromRGB(150, 102, 62),
+			GateColor = Color3.fromRGB(90, 200, 50), -- jungle green
+			-- No Upgrade Pen art or boss yet (Config.Boss falls back to the Chicken).
 		},
 	},
 	-- The gate across the corridor at a locked biome's line: its colour (the biome's GateColor, else this one) at the floor
 	-- fading to clear this many studs up. Only you see it, until you unlock it.
+	-- Zone gates on? Off (QM, Oct 8: new-loops): ride anywhere, no gates, no tutorial
+	-- flight to the next gate. PenLevel still loads and saves as before.
+	Gates = false,
 	-- Breakable barriers instead (QM, Oct 9): the same sheets at each biome line (their
 	-- colour alone, no card), shattering the first time you ride through, gone for good
 	-- for you after (Gate.client; saved by Gold.server). They never stop you.
@@ -401,17 +234,37 @@ local Config = {
 	-- that biome's training dummy (QM, Oct 8); past the last, the Rainbow Trail.
 	-- Off (QM, Oct 11): claiming a quest upgrades your pen now (Quests, below).
 	PenUpgrades = false,
-	GateHeight = 300, -- (QM, Nov 6: above the Slingshot's highest shot, Apex 260 over the ground, so you see it shatter as you fly through; was 26)
+	GateHeight = 26,
 	GateColor = Color3.fromRGB(255, 204, 40),
-	-- The course: CourseHalfWidth either side of x = 0 at the start line, then CourseProfile's widths, from the start line (z = 0) to the finish line, FinishFromEnd
-	-- before the last biome's end. WorldColors.halfWidth(z) is the width at z. Server/Map builds it.
-	CourseHalfWidth = 80,
-	CourseWidening = 0,
-	CourseMaxHalfWidth = 222,
-	-- (QM, Nov 6) the corridor's half width along it, as maps/world.map's floor: { z, half width },
-	-- straight between (WorldColors.halfWidth), wider the later the biome. Change it with the map.
-	CourseProfile = { { 0, 80 }, { -160, 80 }, { -164, 120 }, { -604, 120 }, { -608, 96 }, { -808, 96 }, { -812, 112 }, { -1092, 112 }, { -1096, 96 }, { -1296, 96 }, { -1300, 80 }, { -1500, 80 }, { -1504, 96 }, { -1784, 96 }, { -1788, 112 }, { -1988, 112 }, { -1992, 80 }, { -2272, 80 }, { -2276, 130 }, { -2716, 130 }, { -2720, 114 }, { -3280, 114 }, { -3284, 98 }, { -3484, 98 }, { -3488, 122 }, { -3768, 122 }, { -3772, 90 }, { -3972, 90 }, { -3976, 122 }, { -4256, 122 }, { -4260, 148 }, { -4700, 148 }, { -4704, 100 }, { -5264, 100 }, { -5268, 116 }, { -5628, 116 }, { -5632, 140 }, { -5912, 140 }, { -5916, 110 }, { -6196, 110 }, { -6200, 142 }, { -6480, 142 }, { -6484, 110 }, { -6684, 110 }, { -6688, 126 }, { -7128, 126 }, { -7132, 110 }, { -7332, 110 }, { -7336, 134 }, { -7616, 134 }, { -7620, 158 }, { -7900, 158 }, { -7904, 126 }, { -8184, 126 }, { -8188, 150 }, { -8468, 150 }, { -8472, 134 }, { -8672, 134 }, { -8676, 158 }, { -9236, 158 }, { -9240, 176 }, { -9600, 176 }, { -9604, 160 }, { -10044, 160 }, { -10048, 176 }, { -10408, 176 }, { -10412, 144 }, { -10972, 144 }, { -10976, 160 }, { -11536, 160 }, { -11540, 136 }, { -11740, 136 }, { -11744, 162 }, { -12024, 162 }, { -12028, 194 }, { -12468, 194 }, { -12472, 178 }, { -12672, 178 }, { -12676, 146 }, { -13116, 146 }, { -13120, 170 }, { -13400, 170 }, { -13404, 194 }, { -13684, 194 }, { -13688, 162 }, { -14128, 162 }, { -14132, 188 }, { -14572, 188 }, { -14576, 204 }, { -14856, 204 }, { -14860, 172 }, { -15300, 172 }, { -15304, 188 }, { -15504, 188 }, { -15508, 148 }, { -15948, 148 }, { -15952, 196 }, { -16152, 196 }, { -16156, 180 }, { -16516, 180 }, { -16520, 148 }, { -17080, 148 }, { -17084, 164 }, { -17444, 164 }, { -17448, 188 }, { -17648, 188 }, { -17652, 172 }, { -17932, 172 }, { -17936, 206 }, { -18136, 206 }, { -18140, 222 }, { -18700, 222 }, { -18704, 150 }, { -19144, 150 }, { -19148, 182 }, { -19428, 182 }, { -19432, 158 }, { -19872, 158 }, { -19876, 174 }, { -20436, 174 }, { -20440, 158 }, { -21000, 158 }, { -21004, 174 }, { -21284, 174 }, { -21288, 214 }, { -21696, 214 } },
-	CourseLength = 2168 + 1816 + 1920 + 3120 + 2520 + 2520 + 3840 + 3792, -- all the biomes' lengths added up (QM, Nov 6: the Dungeon, Forest, Castle and Ocean too; was to the end of the Lava)
+	-- The course is a funnel (QM, Oct 8): CourseHalfWidth at the start line, each wall
+	-- angled out CourseWidening studs per stud of course (one straight line), up to
+	-- CourseMaxHalfWidth (reached at the Godlands line, which keeps that width). Full
+	-- widths: Meadow 112-120, Desert 120-142, Snow 142-197, Ocean 197-274, Godlands 274.
+	-- WorldColors.halfWidth(z) is the width at z. The place's walls, ground, obstacles
+	-- and nests are moved to it by tools/funnel.luau (re-run it after a World push).
+	-- The big lava crack at the volcano's end (QM, Oct 10-11: a geyser to launch you on
+	-- to the next biome, later; for now it's only there). VolcanoCrack.client draws it
+	-- with ViewportStencil (Shared/ViewportStencil) from the Model named Model in
+	-- ReplicatedStorage: CrackMask and CrackInside, imported from design/volcano/VolcanoCrack.gltf
+	-- (tools/volcano_crack.py). FromFinish: studs before the volcano's end (where the finish line was) its middle is.
+	VolcanoCrack = {
+		Model = "VolcanoCrack",
+		FromFinish = 110,
+		Yaw = 0,
+		Brightness = 1.4, -- SurfaceGui.Brightness: a little over 1 so it glows
+		MaxDistance = 900,
+	},
+	CourseHalfWidth = 56,
+	CourseWidening = 0.005,
+	CourseMaxHalfWidth = 137,
+	CourseLength = 2168 + 1816 + 1920 + 3120 + 5040 + 7680, -- all the biomes' lengths added up (QM, Oct 10: no more Godlands; Oct 11: the Volcano after the Ocean, then the Jurassic, its end is the end; off its edge, the void)
+	-- The Jurassic went on forever (QM, Oct 11: the temporary endgame): the course was
+	-- cut at Cut (World.server: no far wall, no finish line) and the Length studs
+	-- before it laid again and again past it (Client/Endless). Cut and Length are
+	-- whole 16s, so the floor's checker keeps its step. nil: the course ends as before.
+	-- (QM, Oct 13: off; World 1 ends at a giant portal to World 2 instead, EndPortal below.
+	-- Was { Cut = -21504, Length = 1536 }.)
+	Endless = nil,
 	HomeHalfWidth = 176, -- tools/pens.py HALF_W: the arc base (QM, Oct 9; design/base_arc/SPEC.md)
 	HomeDepth = 264, -- tools/pens.py DEPTH: the base runs this far back from the start line to its back wall
 	StarterSpot = Vector3.new(0, 0, 20), -- where you start without a pen (players past the fifth)
@@ -421,12 +274,6 @@ local Config = {
 	RunSpeedLeeway = 0.1, -- Speed (2 m/s as the plates show it, x20): once you've reached the Desert, nothing you lasso in a run goes slower than the pet you left your pen on less this (Ride: QM, Oct 12: a Penguin's Rhino runs 1.62 and reaches the Tundra; before the Desert, no floor, so a new player's Horse's Fish keeps its own 0.6)
 	ReturnSpeed = 88, -- 2x MountSpeed: the ride home twice as fast as the ride out (QM, Oct 11; was 1.6x, 70.4; at first 40)
 	SteerSpeed = 28,
-	-- ...or this share of your forward speed, whichever is more (QM, Nov 7: "running back the obstacles
-	-- are impossible to dodge since you go so fast"). A fixed 28 studs/s sideways was a 4 degree swerve at
-	-- the Volcano's ~340 studs/s home; this holds it at ~19 degrees at any speed. Sidestepping an obstacle
-	-- (~15 studs) then takes 0.25 s to react + 1/SteerResponse s to turn + 15 / 0.35 = 43 studs, i.e.
-	-- 0.375 x speed + 43 studs: 193 at 400 studs/s, 380 at 900, inside the ~420+ studs you can see.
-	SteerPerSpeed = 0.35,
 	-- Wider mounts steer quicker, gently (QM, Oct 8): x (1 + SteerWidthScale x (width
 	-- over a horse's - 1)), so twice a horse's width steers 1.2x, three times 1.4x.
 	SteerWidthScale = 0.2,
@@ -448,7 +295,7 @@ local Config = {
 	-- VeinSpin degrees a second.
 	-- ByBiome: which boss (Shared/Bosses) each biome (Config.Biomes Name) gets; Kind for any other.
 	Boss = {
-		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss", Volcano = "LavaWyrm", Jurassic = "TyrantRex", Castle = "TyrantRex" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
+		On = true, Kind = "Chicken", ByBiome = { Meadow = "Chicken", Desert = "CactusBoss", Snow = "ElderBoar", Ocean = "SharkBoss", Volcano = "LavaWyrm", Jurassic = "TyrantRex" }, Ahead = 140, -- (QM, Oct 10: twice as far, was 70)
 		ZoomAt = 0.6, CutsceneTime = 2.8, BarTime = 0.35,
 		-- (you turn for home at once, but the camera lingers behind you, on the boss, for
 		-- Linger s as it starts after you, at ChaseMin studs/s at least: QM, Oct 11)
@@ -487,6 +334,7 @@ local Config = {
 	-- which cut tens of thousands of textures. Off (or those variants missing from
 	-- MaterialService): the stud Textures as before. Shared/Studs.
 	StudMaterial = true,
+	Sky = "Flat", -- (QM, Oct 9: back to Oct 5 evening's flat sky) "Anime" (the Creator Store's Anime sky, QM Oct 6) or "Flat" (one flat #59D9FD): World.server
 	WalkSpeed = 48, -- on foot, studs a second (Roblox's default is 16; QM, Oct 9: 3x, was 2x)
 	HomeSafeZone = 40, -- studs before the start line where a rider bringing an egg home can't be crashed: an animal popping in as they cross felt like bad faith (QM, Oct 6)
 	-- On the ride home with an egg the stampede gets out of your way (QM, Oct 6, to
@@ -538,14 +386,13 @@ local Config = {
 	-- Epics are what carry you into the next one (the pacing ladder, below AnimalStats),
 	-- so they take ~5 runs to hatch; Uncommons and Rares hatch within a run, so every run
 	-- pays out. Legendaries hatch slower (PetHatchTime: QM's D1 retention eggs).
-	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480, Divine = 600 },
+	HatchTime = { Uncommon = 15, Rare = 60, Epic = 300, Legendary = 480 },
 	PetHatchTime = {
-		Snail = 15, Giraffe = 120, HillbackTortoise = 3600, Coyote = 15, Oryx = 60, Ostrich = 90, MirageElephant = 7200, Seal = 15, Reindeer = 60, Walrus = 60, Narwhal = 300, GlacierMammoth = 7200, FireAnt = 15, MagmaCrab = 60, AshBehemoth = 7200, Rat = 60, CaveCricket = 60, CryptSnail = 60, WebSpider = 300, AbyssPillbug = 7200, StagBeetle = 60, Deer = 300, BrownBear = 1200, AncientMoose = 7200, Swan = 60, ArmoredRam = 60, RoyalStag = 300, Griffin = 1200, FortressTortoise = 7200, Shrimp = 60, Pelican = 60, Hammerhead = 300, MantaRay = 1200, Anglerfish = 1200, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
 		-- (QM's spawn/hatch JSON, Oct 11, applied as given: the Herd weights in Biomes too)
 		-- QM's own table (Oct 11, "new json"): every animal's egg, by biome. Uncommons and Rares
 		-- hatch within a run, each biome's Epics a little longer, the Legendaries are the long
 		-- D1 eggs you come back for.
-		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 3600, MarbleFish = 15, Lion = 60, Buffalo = 60, Crocodile = 60, MarbleColossus = 120, MajesticUnicorn = 300, Zebra = 15, Gecko = 45, Elephant = 120, -- Meadow (the Marble Fish, Lion, Marble Colossus and Majestic Unicorn: World 2's, as the Pinto, a Rare, the Rhino and Unicorn)
+		Horse = 15, ArmoredHorse = 15, Pinto = 15, Pig = 15, Bunny = 15, Fish = 45, Rhino = 120, Unicorn = 3600, MarbleFish = 15, Lion = 60, Buffalo = 60, Crocodile = 60, MarbleColossus = 120, MajesticUnicorn = 300, -- Meadow (the Marble Fish, Lion, Marble Colossus and Majestic Unicorn: World 2's, as the Pinto, a Rare, the Rhino and Unicorn)
 		Cactus = 15, Kitten = 15, Scorpion = 60, Sandworm = 75, SpineLizard = 90, Snake = 7200, -- Desert
 		Eyeworm = 15, CrimsonScorpion = 15, Maw = 60, IvorySpider = 75, Asura = 600, -- World 2 Crimson Lands
 		Caterpillar = 15, -- World 2 Woodland Maze (as the Starfish)
@@ -561,7 +408,6 @@ local Config = {
 		LionArcher = 60, -- World 2 Ancient Tomb's Rare (as the Raptor until QM sets it)
 		JadeStatue = 300, GarnetStatue = 300, -- World 2 Temple's Epics (as the Rockworm until QM sets them)
 		Firebird = 15, RockHog = 60, FireLobster = 60, VolcanoTortoise = 60, Rockworm = 1200, LavaWhale = 1200, Phoenix = 43200, Kitsune = 43200, -- Volcano
-		DungeonRat = 60, Slime = 60, CaveSpider = 300, BoneSteed = 300, Mimic = 1200, BoneWyrm = 7200, Shroom = 60, SpiritFox = 60, SpiritDeer = 300, MysticOwl = 1200, CrystalTortoise = 1200, SpiritLoong = 7200, WarBoar = 60, RoyalSteed = 60, ChessKnight = 300, RoyalPeacock = 300, LivingArmor = 1200, CrimsonDrake = 1200, RoyalEagle = 7200, Seahorse = 300, AbyssWhale = 7200, -- the Dungeon, Forest, Castle and Ocean's (QM, Nov 6; guesses by Lasso rarity)
 		Catfish = 15, -- World 2 Temple (as the Firebird)
 		BloatedMummy = 15, -- World 2 Ancient Tomb's Uncommon (as the Ankylosaurus)
 		Fox = 15, NineTailedFox = 60, -- World 2 Temple (the Fox an Uncommon as the Firebird, the Nine-tailed Fox a Rare as the Fire Lobster, until QM sets them)
@@ -571,7 +417,6 @@ local Config = {
 		Beholder = 2700, Sludge = 2400, WarElephant = 3600, Leviathan = 7200, SoulHorse = 9600, -- Godlands
 		RoboShark = 57600, Loong = 86400, -- exclusives
 		Seraph = 3600, CrimsonSeraph = 3600, CrystalSeraph = 3600, -- World 2's trophy angels, 1 in 300 of their stampedes (QM, Oct 13; the hatch a guess)
-		CastleWyvern = 7200, -- (as the World 1 Legendaries: a guess)
 		BlackWidow = 3600, -- World 2's trophy spider, 1 in 500 of the Crimson Lands' stampede (QM, Oct 13; the hatch a guess, as the Seraphs')
 	},
 	-- The first-time tutorial (Tutorial.luau): a new player places their first egg
@@ -656,6 +501,7 @@ local Config = {
 	--     and Mouth (studs up its tentacles start from, default 3) are optional.
 	-- Charge swings the camera round to a cinematic front-side angle.
 	-- (QM, Oct 2: the cooldowns, durations and radii QM didn't give are guesses.)
+	NativePrompts = false, -- Roblox's own interact prompts instead of ours (Client/PromptUi), to compare (QM, Oct 10)
 	ShopOn = false, -- (QM, Oct 15: the Robux shop hidden for now, its buttons too: Client/Shop, Hud, BaseUi)
 	AbilitiesOn = false, -- (QM, Oct 10: off till the riding UX is settled; Abilities below stay as they are)
 	-- These use theirs anyway, on their own, whenever it's off cooldown (QM, Oct 15), with no button.
@@ -726,7 +572,6 @@ local Config = {
 		MoonJellyfish = { Kind = "Fly", Height = 56 }, Anomalocaris = { Kind = "Fly", Height = 56 }, BoxJellyfish = { Kind = "Fly", Height = 56 }, BlueRingOctopus = { Kind = "Fly", Height = 56 }, ManOWar = { Kind = "Fly", Height = 56 }, -- World 3 Cnidaria: all swimmers, fliers like the Crystal Phoenix (Oct 14)
 		Mermaid = { Kind = "Fly", Height = 56 }, AbyssalDragon = { Kind = "Fly", Height = 56 }, ReefTitan = { Kind = "Fly", Height = 56 }, RoyalCnidarian = { Kind = "Fly", Height = 56 },
 		SwollFairy = { Kind = "Fly", Height = 56 }, -- World 3 Candyland: the buff fairy, a flier (Oct 14)
-		CastleWyvern = { Kind = "Fly", Height = 56 }, -- (the Rock Candy Dragon's frame: QM Nov 7)
 		RockCandyDragon = { Kind = "Fly", Height = 56 }, -- World 3 Candyland's giga rare dragon, a flier (Oct 14)
 		BoneRex = { Kind = "Smash", Radius = 60, ScareRadius = 60, OnReturn = true }, -- QM, Oct 11: scares animals off and smashes every obstacle in a massive radius (60 studs: a guess; the Unicorn's is 14 / 30)
 		-- The Beholder (QM, Oct 4; it has no ability): floats up over everything like the
@@ -744,8 +589,7 @@ local Config = {
 	-- Oct 6); their tier (model "Tier" attribute, else ObstacleTiers by name) only
 	-- decides which ones some abilities break.
 	PetTiers = {
-		Snail = 2, Giraffe = 3, HillbackTortoise = 4, Coyote = 2, Oryx = 2, Ostrich = 3, MirageElephant = 4, Seal = 2, Reindeer = 2, Walrus = 3, Narwhal = 3, GlacierMammoth = 4, FireAnt = 2, MagmaCrab = 2, AshBehemoth = 4, Rat = 2, CaveCricket = 2, CryptSnail = 2, WebSpider = 2, AbyssPillbug = 4, StagBeetle = 2, Deer = 2, BrownBear = 3, AncientMoose = 4, Swan = 2, ArmoredRam = 2, RoyalStag = 2, Griffin = 3, FortressTortoise = 4, Shrimp = 2, Pelican = 2, Hammerhead = 3, MantaRay = 3, Anglerfish = 2, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
-		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleFish = 1, Lion = 1, Buffalo = 2, Crocodile = 1, MarbleColossus = 2, MajesticUnicorn = 2, Zebra = 1, Gecko = 1, Elephant = 3, -- Meadow
+		Horse = 1, ArmoredHorse = 1, Pig = 1, Bunny = 1, Pinto = 1, Fish = 1, Rhino = 2, Unicorn = 2, MarbleFish = 1, Lion = 1, Buffalo = 2, Crocodile = 1, MarbleColossus = 2, MajesticUnicorn = 2, -- Meadow
 		Cactus = 1, Kitten = 1, Scorpion = 1, Sandworm = 2, SpineLizard = 2, Snake = 3, -- Desert
 		Eyeworm = 1, CrimsonScorpion = 1, Maw = 1, IvorySpider = 2, Asura = 3, -- World 2 Crimson Lands (the Asura large, QM)
 		Caterpillar = 1, -- World 2 Woodland Maze
@@ -760,7 +604,6 @@ local Config = {
 		LionArcher = 2, -- World 2 Ancient Tomb
 		JadeStatue = 2, GarnetStatue = 2, -- World 2 Temple
 		Firebird = 2, RockHog = 2, FireLobster = 2, Rockworm = 2, VolcanoTortoise = 2, Phoenix = 3, LavaWhale = 4, Kitsune = 3, -- Volcano (guesses; the Lava Whale XL like the Whale)
-		DungeonRat = 2, Slime = 2, CaveSpider = 2, BoneSteed = 2, Mimic = 2, BoneWyrm = 2, Shroom = 2, SpiritFox = 2, SpiritDeer = 2, MysticOwl = 2, CrystalTortoise = 2, SpiritLoong = 3, WarBoar = 2, RoyalSteed = 2, ChessKnight = 2, RoyalPeacock = 2, LivingArmor = 3, CrimsonDrake = 3, RoyalEagle = 3, Seahorse = 2, AbyssWhale = 4, -- the Dungeon, Forest, Castle and Ocean's (Fight to Steal an Egg's tiers)
 		Catfish = 1, -- World 2 Temple (Fish-sized)
 		BloatedMummy = 2, -- World 2 Ancient Tomb (a fat ball, about 10 studs tall)
 		Fox = 1, NineTailedFox = 2, -- World 2 Temple (the Fox under the Horse's size; the Nine-tailed Fox's fan of tails)
@@ -778,7 +621,6 @@ local Config = {
 		Loong = 1, Beholder = 2, Sludge = 2, Leviathan = 2, -- Godlands (starts small, grows to XL as its breath burns animals: Abilities.Loong)
 		Seraph = 3, CrimsonSeraph = 3, CrystalSeraph = 3, -- World 2's trophy angels (large, like the Asura)
 		BlackWidow = 3, -- World 2's trophy spider (giant, QM)
-		CastleWyvern = 4, -- the Red Castle's Legendary dragon (XL, as the Rock Candy Dragon: QM Nov 7)
 		GreenCrab = 1, LimeCrab = 1, Parrot = 1, BananaMonkey = 1, TreasureHermit = 2, EyepatchShark = 2, TreasureTurtle = 3, -- World 3 Pirate Cove (guesses, Oct 14)
 		GhostShip = 4, JollyRogerWyvern = 4, -- World 3 Pirate Cove's giga rares (XL) (guesses, Oct 14)
 		Ladybug = 1, Bumblebee = 1, ToadstoolFrog = 2, VineMonster = 2, VenusFlytrap = 2, SunflowerLion = 3, -- World 3 Garden (guesses, Oct 14)
@@ -800,7 +642,6 @@ local Config = {
 	-- small pet, 1.2x on a medium, 1.44x on a large (QM, Oct 2).
 	RideZoomPerTier = 1, -- (QM, Oct 9: riding always the same plain view; was 1.2)
 	RideCamTall = 16, -- studs: a pet taller than this pulls the ride out's camera back in proportion (QM, Oct 15)
-	RideCamTallPower = 0.5, -- ...by the square root of how much taller (a 4x taller pet: 2x back; was 1, in proportion: QM, Nov 7)
 	RideCamSeat = 9, -- how high a Horse's rider sits (studs); on anything taller the ride out's camera rises by the difference (QM, Oct 11)
 	ObstacleTiers = {
 		Bush = 1, Rock = 2, Stone = 1, Sandstone = 1, -- small
@@ -819,7 +660,6 @@ local Config = {
 	-- (the horse is the tier 1 anchor), unless their file gives an explicit size.
 	-- Obstacles are rescaled about their spot on the floor by ObstacleScale (worked out the same
 	-- way from tools/terrain_assets.py, against smalls of ~5.4 studs).
-	WallWalkOverTier = 4, -- riding out, a mount of this size tier or more (titans: Ash Behemoth, Glacier Mammoth...) walks right over walls; anything smaller crashes into them (QM, Nov 7; Client/RideWalls)
 	TierGrowth = 1.6, -- QM, Oct 1: 2x was too much
 	-- MERGE is off for now that there's FUSE (QM, Oct 6 19:16): no MERGE button, and
 	-- the server refuses MergePets. Pets already merged keep their size and gold.
@@ -835,7 +675,7 @@ local Config = {
 	-- that costs gold instead of waiting on the Epic's egg. Hybrids made before keep theirs.
 	FuseSpeedShare = 0.15,
 	-- (Shared/Fusion.worth: what went into a hybrid, by rarity; kept on saves, no longer priced.)
-	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000, Divine = 10000000 },
+	FusePrice = { Common = 100, Uncommon = 1000, Rare = 10000, Epic = 100000, Legendary = 1000000 },
 	PetSmallSize = 10.4,
 	-- Each animal's look, x its size from above (QM, Oct 11: set from the Studio lineup,
 	-- tools/lineup.luau). Only how big it looks: its tier, and so what it plows through
@@ -857,13 +697,11 @@ local Config = {
 	-- every second while you're in the game. (QM, Oct 8 evening: progression 2x faster, so
 	-- x3 QM's pets JSON: rides don't get quicker, so the gold has to more than double.)
 	PetIncome = {
-		Snail = 9, Giraffe = 90, HillbackTortoise = 450, Coyote = 24, Oryx = 60, Ostrich = 240, MirageElephant = 750, Seal = 75, Reindeer = 300, Walrus = 300, Narwhal = 1260, GlacierMammoth = 3333, FireAnt = 12000, MagmaCrab = 20000, AshBehemoth = 45000, Rat = 12000, CaveCricket = 12000, CryptSnail = 12000, WebSpider = 20000, AbyssPillbug = 42500, StagBeetle = 12000, Deer = 20000, BrownBear = 27500, AncientMoose = 42500, Swan = 12000, ArmoredRam = 12000, RoyalStag = 20000, Griffin = 27500, FortressTortoise = 60000, Shrimp = 12000, Pelican = 12000, Hammerhead = 20000, MantaRay = 27500, Anglerfish = 27500, -- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
-		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleFish = 15, Lion = 24, Buffalo = 30, Crocodile = 24, MarbleColossus = 90, MajesticUnicorn = 450, Zebra = 15, Gecko = 24, Elephant = 90, -- Meadow
+		Horse = 3, ArmoredHorse = 3, Pig = 9, Bunny = 12, Pinto = 15, Fish = 24, Rhino = 90, Unicorn = 450, MarbleFish = 15, Lion = 24, Buffalo = 30, Crocodile = 24, MarbleColossus = 90, MajesticUnicorn = 450, -- Meadow
 		Cactus = 18, Kitten = 24, Scorpion = 60, Sandworm = 180, SpineLizard = 240, Snake = 750, -- Desert
 		Eyeworm = 18, CrimsonScorpion = 24, Maw = 60, IvorySpider = 180, Asura = 750, -- World 2 Crimson Lands
 		Caterpillar = 300, -- World 2 Woodland Maze (as the Starfish)
 		Seraph = 4500, CrimsonSeraph = 7500, CrystalSeraph = 33330, -- World 2's trophy angels (QM, Oct 13: slow but earn a lot): 10x their biome's Legendary (the Majestic Unicorn, Asura, Crystal Elephant)
-		CastleWyvern = 60000, -- the Red Castle's top Legendary dragon, about 1 in 120 (over the Royal Eagle's 42500: a guess; the income curve scales it)
 		BlackWidow = 12500, -- World 2's trophy spider: rarer than the Crimson Seraph (1 in 500, not 1 in 300), so 500/300 its gold (a guess)
 		Penguin = 75, Boar = 150, Snowman = 300, IceGolem = 1260, SnackYak = 9000, Icebringer = 3333, CrystalCentipede = 75, RedMushroom = 150, BrownMushroom = 300, PurpleMushroom = 1260, BlueCrystal = 150, PinkCrystal = 300, CrystalSpider = 1260, CrystalPhoenix = 1260, CrystalElephant = 3333, -- Tundra
 		Starfish = 300, Clownfish = 700, PinkButterfly = 700, Squid = 2100, KingCrab = 2850, FishSchool = 2550, BlueCrab = 18000, RoboShark = 57000, Whale = 4500, Kraken = 24600, Lionfish = 1500, GiantGolem = 24600, -- Ocean
@@ -877,7 +715,6 @@ local Config = {
 		LionArcher = 40000, -- World 2 Ancient Tomb (as the Raptor)
 		JadeStatue = 25000, GarnetStatue = 25000, -- World 2 Temple (as the Rockworm)
 		Firebird = 12000, RockHog = 20000, FireLobster = 20000, Rockworm = 25000, VolcanoTortoise = 30000, Phoenix = 45000, LavaWhale = 40000, Kitsune = 45000, -- Volcano (guesses: past the Ocean's)
-		DungeonRat = 12000, Slime = 12000, CaveSpider = 20000, BoneSteed = 20000, Mimic = 27500, BoneWyrm = 42500, Shroom = 12000, SpiritFox = 12000, SpiritDeer = 20000, MysticOwl = 27500, CrystalTortoise = 27500, SpiritLoong = 42500, WarBoar = 12000, RoyalSteed = 12000, ChessKnight = 20000, RoyalPeacock = 20000, LivingArmor = 27500, CrimsonDrake = 27500, RoyalEagle = 42500, Seahorse = 20000, AbyssWhale = 42500, -- the Dungeon, Forest, Castle and Ocean's (QM, Nov 6: by Lasso rarity as the Volcano's; the income curve below scales each biome 2x the last)
 		Catfish = 12000, -- World 2 Temple (as the Firebird)
 		BloatedMummy = 25000, -- World 2 Ancient Tomb (as the Ankylosaurus)
 		Fox = 12000, NineTailedFox = 20000, -- World 2 Temple (the Firebird's and Fire Lobster's, until QM sets them)
@@ -899,8 +736,10 @@ local Config = {
 	-- weighted too. Exclusive animals are only ever in this machine (keep them
 	-- out of every biome's Herd), and get their own card in the reveal.
 	Gacha = {
-		-- The egg roll menu (QM, Oct 4): Roll over Pets opens it (RollMenu, Hud).
+		-- The egg roll menu (QM, Oct 4): Roll over Pets opens it (RollMenu, Hud). The old
+		-- Egg Machine in the base stays off (Machine).
 		Enabled = true,
+		Machine = false,
 		-- Each roll costs PriceGrowth x the last, rounded to two figures ($1M, $1.1M, $1.2M,
 		-- $1.3M, $1.5M...), counted per player and saved (balance pass, Oct 6: a flat $1M
 		-- roll paid for itself in ~2 minutes once you had the Ocean). Hatchery sets it on
@@ -932,6 +771,15 @@ local Config = {
 		Lifetime = 0.8, -- seconds each band trails behind (the Leap's is 1.4; very long trails don't render)
 		Width = 2, -- x the Unicorn's rainbow's height (QM, Oct 6: tried 3, settled on 2)
 	},
+	-- Carl's stall (Carl.client, QM Oct 4): a desert stall with a cactus guy in it, in
+	-- the gap between the left corner pen and the start line. Talk to him and he asks
+	-- if you want to spin; Yes opens the roll menu. Faces into the base (+z).
+	Carl = {
+		On = false, -- (QM, Oct 12: Carl's gone; a stone portal gate, World.BaseDecor.PortalGate, now stands left of the start line at (-63.5, 24.6), its opening swirling (Client/PortalFx), doing nothing yet)
+		Position = Vector3.new(-104, 0, 20), -- the arc base's front left corner, beside the corridor (QM, Oct 9)
+		Yaw = 15, -- degrees it turns in toward the course, off square with the wall (QM)
+		Reach = 12, -- studs from the counter where Talk shows
+	},
 	-- The podium (Leaderboard.server, QM Oct 4): the avatar of the player who rode
 	-- furthest from base, all time (OrderedDataStore "BestDistance", metres), standing on
 	-- QM's cream marble column in the middle of a coiled grass snake (Props/GrassSnake,
@@ -944,7 +792,6 @@ local Config = {
 		Rare = Color3.fromHex("40D6FF"),
 		Epic = Color3.fromHex("FF7CC6"),
 		Legendary = Color3.fromHex("5CE6B7"),
-		Divine = Color3.fromHex("00DCFF"), -- (Fight to Steal an Egg's Divine text colour: QM, Nov 7)
 	},
 	Podium = {
 		Position = Vector3.new(63.5, 0, 24.6), -- the column, on the ground, mirroring the portal gate across the start line (QM, Oct 12; was 104, 20, the front right corner); the snake reaches ~-8..+16 in x, -14..+31 in z
@@ -966,10 +813,6 @@ local Config = {
 	-- Majestic Unicorn replaces the limited Robo Shark; keep its product, stock and claim counters.
 	MajesticUnicornOffer = { Kind = "MajesticUnicorn", ProductId = 3718722226, Price = 999, Stock = 1000, StartLeft = 870, Scale = 2, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165, Offset = Vector3.new(35, 0, -11),
 		Ledger = "roboSharks", StockKey = "sold_RoboShark", ClaimField = "boughtRoboSharks" },
-	-- The Robo Shark back as the third limited (QM, Nov 7). Its own ledger, stock and claim fields:
-	-- the Majestic Unicorn kept the old Robo Shark ones (above). Product "Robo Shark Pet [Limited]", R$999.
-	RoboSharkOffer = { Kind = "RoboShark", ProductId = 3729449142, Price = 999, Stock = 1000, StartLeft = 870, Scale = 1.5, Ring = 22, Glow = Color3.fromRGB(70, 240, 255), Rise = 14, Yaw = 165,
-		Ledger = "limitedRoboSharks", StockKey = "sold_LimitedRoboShark", ClaimField = "boughtLimitedRoboSharks" },
 	-- Eggs that aren't just an animal's (QM, Oct 4): the inventory holds them by this
 	-- key; placed, they hatch after HatchTime seconds into Pet merged from Merged
 	-- (Shared/Merge). They look like Pet's egg, EggScale x as big (QM).
@@ -1133,77 +976,6 @@ local Config = {
 		SoulHorse = "rbxassetid://136725772402125", -- assets/ui/SoulHorseEggRender.png
 		Sludge = "rbxassetid://140005979942732", -- assets/ui/SludgeEggRender.png
 		Leviathan = "rbxassetid://95236739672996", -- assets/ui/LeviathanEggRender.png
-		AbyssPillbug = "rbxassetid://127295825880267", -- assets/ui/AbyssPillbugEggRender.png (tools/egg_icons.py)
-		AbyssWhale = "rbxassetid://131664518890753", -- assets/ui/AbyssWhaleEggRender.png (tools/egg_icons.py)
-		AncientMoose = "rbxassetid://80238304520137", -- assets/ui/AncientMooseEggRender.png (tools/egg_icons.py)
-		Anglerfish = "rbxassetid://107751395203360", -- assets/ui/AnglerfishEggRender.png (tools/egg_icons.py)
-		ArmoredRam = "rbxassetid://78276614330137", -- assets/ui/ArmoredRamEggRender.png (tools/egg_icons.py)
-		AshBehemoth = "rbxassetid://94253117909128", -- assets/ui/AshBehemothEggRender.png (tools/egg_icons.py)
-		BoneSteed = "rbxassetid://119143949372983", -- assets/ui/BoneSteedEggRender.png (tools/egg_icons.py)
-		BoneWyrm = "rbxassetid://118411728502301", -- assets/ui/BoneWyrmEggRender.png (tools/egg_icons.py)
-		BrownBear = "rbxassetid://111066846418344", -- assets/ui/BrownBearEggRender.png (tools/egg_icons.py)
-		CaveCricket = "rbxassetid://95327269301356", -- assets/ui/CaveCricketEggRender.png (tools/egg_icons.py)
-		CaveSpider = "rbxassetid://92022998703482", -- assets/ui/CaveSpiderEggRender.png (tools/egg_icons.py)
-		ChessKnight = "rbxassetid://113489438133610", -- assets/ui/ChessKnightEggRender.png (tools/egg_icons.py)
-		Coyote = "rbxassetid://109502770732166", -- assets/ui/CoyoteEggRender.png (tools/egg_icons.py)
-		CrimsonDrake = "rbxassetid://76016756539638", -- assets/ui/CrimsonDrakeEggRender.png (tools/egg_icons.py)
-		CryptSnail = "rbxassetid://88865705068882", -- assets/ui/CryptSnailEggRender.png (tools/egg_icons.py)
-		CrystalTortoise = "rbxassetid://123511683767822", -- assets/ui/CrystalTortoiseEggRender.png (tools/egg_icons.py)
-		Deer = "rbxassetid://130071499720139", -- assets/ui/DeerEggRender.png (tools/egg_icons.py)
-		DungeonRat = "rbxassetid://91046544619872", -- assets/ui/DungeonRatEggRender.png (tools/egg_icons.py)
-		Elephant = "rbxassetid://81370026469449", -- assets/ui/ElephantEggRender.png (tools/egg_icons.py)
-		FireAnt = "rbxassetid://108056661122783", -- assets/ui/FireAntEggRender.png (tools/egg_icons.py)
-		FortressTortoise = "rbxassetid://86080404777631", -- assets/ui/FortressTortoiseEggRender.png (tools/egg_icons.py)
-		Gecko = "rbxassetid://132734141232404", -- assets/ui/GeckoEggRender.png (tools/egg_icons.py)
-		Giraffe = "rbxassetid://133964032768276", -- assets/ui/GiraffeEggRender.png (tools/egg_icons.py)
-		GlacierMammoth = "rbxassetid://76240918065345", -- assets/ui/GlacierMammothEggRender.png (tools/egg_icons.py)
-		Griffin = "rbxassetid://108438349075082", -- assets/ui/GriffinEggRender.png (tools/egg_icons.py)
-		Hammerhead = "rbxassetid://85184898873856", -- assets/ui/HammerheadEggRender.png (tools/egg_icons.py)
-		HillbackTortoise = "rbxassetid://83175885360554", -- assets/ui/HillbackTortoiseEggRender.png (tools/egg_icons.py)
-		Seal = "rbxassetid://83740976790961", -- assets/ui/SealEggRender.png (tools/egg_icons.py)
-		Shrimp = "rbxassetid://86712642152420", -- assets/ui/ShrimpEggRender.png (tools/egg_icons.py)
-		Shroom = "rbxassetid://124847730422305", -- assets/ui/ShroomEggRender.png (tools/egg_icons.py)
-		Slime = "rbxassetid://78433495955882", -- assets/ui/SlimeEggRender.png (tools/egg_icons.py)
-		Snail = "rbxassetid://104904820558567", -- assets/ui/SnailEggRender.png (tools/egg_icons.py)
-		SpiritDeer = "rbxassetid://93968070484699", -- assets/ui/SpiritDeerEggRender.png (tools/egg_icons.py)
-		SpiritFox = "rbxassetid://93284077012067", -- assets/ui/SpiritFoxEggRender.png (tools/egg_icons.py)
-		SpiritLoong = "rbxassetid://124600566789603", -- assets/ui/SpiritLoongEggRender.png (tools/egg_icons.py)
-		StagBeetle = "rbxassetid://135917271400100", -- assets/ui/StagBeetleEggRender.png (tools/egg_icons.py)
-		Swan = "rbxassetid://132002694073265", -- assets/ui/SwanEggRender.png (tools/egg_icons.py)
-		Walrus = "rbxassetid://98145199876579", -- assets/ui/WalrusEggRender.png (tools/egg_icons.py)
-		WarBoar = "rbxassetid://73570217858265", -- assets/ui/WarBoarEggRender.png (tools/egg_icons.py)
-		WebSpider = "rbxassetid://89650001787905", -- assets/ui/WebSpiderEggRender.png (tools/egg_icons.py)
-		Zebra = "rbxassetid://96191049707731", -- assets/ui/ZebraEggRender.png (tools/egg_icons.py)
-		GoldenPig = "rbxassetid://91441916652455", -- assets/ui/GoldenPigEggRender.png (tools/egg_icons.py)
-		AlphaFish = "rbxassetid://87264048272892", -- assets/ui/AlphaFishEggRender.png (tools/egg_icons.py)
-		AlphaRhino = "rbxassetid://118204178283263", -- assets/ui/AlphaRhinoEggRender.png (tools/egg_icons.py)
-		EmperorScorpion = "rbxassetid://70463935083548", -- assets/ui/EmperorScorpionEggRender.png (tools/egg_icons.py)
-		AlphaSpineLizard = "rbxassetid://138281596465366", -- assets/ui/AlphaSpineLizardEggRender.png (tools/egg_icons.py)
-		AlphaSnake = "rbxassetid://85915648687356", -- assets/ui/AlphaSnakeEggRender.png (tools/egg_icons.py)
-		AlphaSandworm = "rbxassetid://96833539773900", -- assets/ui/AlphaSandwormEggRender.png (tools/egg_icons.py)
-		AlphaBoar = "rbxassetid://123678200239721", -- assets/ui/AlphaBoarEggRender.png (tools/egg_icons.py)
-		AlphaIceGolem = "rbxassetid://98458949029891", -- assets/ui/AlphaIceGolemEggRender.png (tools/egg_icons.py)
-		AlphaIcebringer = "rbxassetid://108140143227532", -- assets/ui/AlphaIcebringerEggRender.png (tools/egg_icons.py)
-		AlphaRockHog = "rbxassetid://92398266051379", -- assets/ui/AlphaRockHogEggRender.png (tools/egg_icons.py)
-		AlphaLavaWhale = "rbxassetid://120944565125344", -- assets/ui/AlphaLavaWhaleEggRender.png (tools/egg_icons.py)
-		AlphaPhoenix = "rbxassetid://95367990323693", -- assets/ui/AlphaPhoenixEggRender.png (tools/egg_icons.py)
-		LivingArmor = "rbxassetid://130433092050736", -- assets/ui/LivingArmorEggRender.png (tools/egg_icons.py)
-		MagmaCrab = "rbxassetid://75686941782840", -- assets/ui/MagmaCrabEggRender.png (tools/egg_icons.py)
-		MantaRay = "rbxassetid://71028108710460", -- assets/ui/MantaRayEggRender.png (tools/egg_icons.py)
-		Mimic = "rbxassetid://114320676254012", -- assets/ui/MimicEggRender.png (tools/egg_icons.py)
-		MirageElephant = "rbxassetid://88869884712209", -- assets/ui/MirageElephantEggRender.png (tools/egg_icons.py)
-		MysticOwl = "rbxassetid://86452966162665", -- assets/ui/MysticOwlEggRender.png (tools/egg_icons.py)
-		Narwhal = "rbxassetid://131272014094665", -- assets/ui/NarwhalEggRender.png (tools/egg_icons.py)
-		Oryx = "rbxassetid://121949969432470", -- assets/ui/OryxEggRender.png (tools/egg_icons.py)
-		Ostrich = "rbxassetid://134435534460117", -- assets/ui/OstrichEggRender.png (tools/egg_icons.py)
-		Pelican = "rbxassetid://136887077081828", -- assets/ui/PelicanEggRender.png (tools/egg_icons.py)
-		Rat = "rbxassetid://87948575504414", -- assets/ui/RatEggRender.png (tools/egg_icons.py)
-		Reindeer = "rbxassetid://126902405794787", -- assets/ui/ReindeerEggRender.png (tools/egg_icons.py)
-		RoyalEagle = "rbxassetid://85119925028903", -- assets/ui/RoyalEagleEggRender.png (tools/egg_icons.py)
-		RoyalPeacock = "rbxassetid://103092836354093", -- assets/ui/RoyalPeacockEggRender.png (tools/egg_icons.py)
-		RoyalStag = "rbxassetid://76634863701833", -- assets/ui/RoyalStagEggRender.png (tools/egg_icons.py)
-		RoyalSteed = "rbxassetid://110593092388551", -- assets/ui/RoyalSteedEggRender.png (tools/egg_icons.py)
-		Seahorse = "rbxassetid://124241926918593", -- assets/ui/SeahorseEggRender.png (tools/egg_icons.py)
 	},
 	-- Sprint (hold Shift, L2 or the button, on the way out only): faster, but the
 	-- Hold bar drains faster too.
@@ -1283,15 +1055,6 @@ local Config = {
 	-- PerUpgrade more for each pen upgrade (PenLevel). Full, you can't put an egg down;
 	-- "5/10" shows under your name over the pen (Pens.server).
 	PenLevels = 13, -- pen levels, one per quest claimed after Reach Meadow, each with its own fence (tools/pens.py STYLES: QM, Oct 11)
-	-- Active pets (QM, Nov 6: as Fight to Steal an Egg's Backpack): at most PenSlots pets out in
-	-- your pen (the one you ride counts), the rest stored (the Pets panel). Its "+1 Equip" buys
-	-- one more slot for Robux, for good, as many times as they like (Shop.server, saved extraSlots).
-	-- SlotProduct: the "+1 Equip" developer product, 30 R$ (0 would make it free in Studio, off sale live).
-	Backpack = {
-		PenSlots = 5,
-		SlotRobux = 30,
-		SlotProduct = 3729073844,
-	},
 	PenCapacity = nil, -- (QM, Oct 14: no cap on pets, and no "5/10" on the sign; quests still grow the pen. Was { Base = 10, PerUpgrade = 8 }: 10, and 8 more a level)
 	-- The sky flashes white on each sprint tier-up, fading back over Time seconds (QM, Oct 9):
 	-- Client/SkyFlash. Start: its see-through at the flash (0: solid white). Distance: studs
@@ -1308,6 +1071,7 @@ local Config = {
 	SprintTiers = { 180, 360, 440 },
 	-- (QM, Oct 9: On false, no speed lines or wider view: riding's plain)
 	SpeedFeel = { On = false, Min = 0.5, Ref = 400, Curve = 0.5, Lines = 44, Opacity = 0.85, LineSpeed = 2.8, FovKick = 26, MaxFov = 115 },
+	Intro = false, -- (off for now: QM, Oct 11) a new player's opening cutscene: the villain steals your egg (Client/Intro, QM Oct 11; "/tutorial" replays it)
 	LassoRange = 51, -- studs, for a Horse-sized animal (QM, Oct 11: bigger ones further, below; Oct 12: 1.5x, was 34)
 	LassoRangeFrom = 4.6, -- a Horse's half width (studs): an animal this wide or narrower gets LassoRange
 	LassoRangeGain = 1.5, -- studs more range for each stud wider than that (1.5x with LassoRange, QM Oct 12; was 1)
@@ -1333,6 +1097,12 @@ local Config = {
 	FinishFromEnd = 50,
 	-- Egg reveal back home (gacha): the card rolls through the three unknown eggs,
 	-- slow at first and faster and faster, then pops onto the egg's rarity card.
+	EggRevealFlicks = 24, -- unknown cards shown before the real one
+	EggRevealFirstGap = 0.3, -- seconds between the first, slow flicks
+	EggRevealLastGap = 0.03, -- seconds between the last, fastest flicks
+	EggRevealHold = 2.2, -- seconds the real card stays up before the ride ends
+	EggRevealBurst = true, -- spinning sunburst behind the real card
+	EggRevealSpeed = 1.5, -- (QM, Oct 14) the whole egg RNG card plays this many times faster: drop-in, roll, pop, hold, exit
 	LandingGrace = 0.8,
 	TurnGrace = 2,
 	-- Continue (QM, Oct 3): after a crash or a buck-off, pay Robux to keep riding
@@ -1410,18 +1180,18 @@ local Config = {
 			{ Text = "Reach Meadow", Kind = "reach", Biome = 1, Egg = "Cactus", NoPenLevel = true }, -- (QM, Oct 11: done from the start, so there's something to claim right away, and no pen upgrade; Quests.load moves saves from before it on one)
 			{ Text = "Reach Desert", Kind = "reach", Biome = 2, Egg = "Penguin" }, -- (QM, Oct 11: quick eggs early, to speed you up; was the Unicorn)
 			{ Text = "Reach Tundra", Kind = "reach", Biome = 3, Egg = "Snowman" }, -- (QM, Oct 11: was the Snake, then the Starfish, then the Boar)
-			{ Text = "Reach Volcano", Kind = "reach", Biome = 4, Egg = "FireLobster" }, -- (QM, Nov 6: the Volcano is 4th now; was Reach Ocean for a Lionfish) -- (QM, Oct 11: was the Icebringer)
-			{ Text = "Reach Volcano", Kind = "reach", Biome = 5, Egg = "FireLobster", Off = true }, -- (Off, QM Nov 6: no 5th biome for now; kept in place, quests save by position) -- (QM, Oct 11: was the Kraken)
-			{ Text = "Reach Jurassic", Kind = "reach", Biome = 6, Egg = "PalmGuy", Off = true }, -- (Off, QM Nov 6: no Jurassic for now) -- (QM, Oct 11: was the Phoenix)
+			{ Text = "Reach Ocean", Kind = "reach", Biome = 4, Egg = "Lionfish" }, -- (QM, Oct 11: was the Icebringer)
+			{ Text = "Reach Volcano", Kind = "reach", Biome = 5, Egg = "FireLobster" }, -- (QM, Oct 11: was the Kraken)
+			{ Text = "Reach Jurassic", Kind = "reach", Biome = 6, Egg = "PalmGuy" }, -- (QM, Oct 11: was the Phoenix)
 		},
 		{
 			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "SpineLizard" }, -- (QM, Oct 11: 3, was 10)
 			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "SnackYak" }, -- (QM, Oct 14: 1 merge, was 3; QM, Oct 11: the Snack Yak, was the Snowman) -- (before Collect: QM, Oct 12)
 			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "BoneRex" }, -- (for D1: its egg's long, QM; QM, Oct 14: 5, was 10, then 5 before that)
 			{ Text = "Lasso Snowmen", Kind = "lasso", Animal = "Snowman", Need = 4, Egg = "TRex" }, -- (QM, Oct 11: these three after Merge)
-			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 3, Egg = "LavaWhale", Off = true }, -- (Off, QM Nov 6: no Ocean herd for now) -- (QM, Oct 11: 3, was 5) -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
+			{ Text = "Lasso Crabs", Kind = "lasso", Animal = "KingCrab", Need = 3, Egg = "LavaWhale" }, -- (QM, Oct 11: 3, was 5) -- (QM's "crab": the King Crab, the Ocean's common one; the Blue Crab is a 0.05 Legendary)
 			{ Text = "Lasso Lava Whales", Kind = "lasso", Animal = "LavaWhale", Need = 2, Egg = "SnackYak" }, -- (QM, Oct 15: was the Robo Shark; QM, Oct 11: was Collect 30)
-			{ Text = "Lasso a Bone Rex", Kind = "lasso", Animal = "BoneRex", Need = 1, Egg = "Seraph", Off = true }, -- (Off, QM Nov 6: no Jurassic herd for now) -- (QM, Oct 14: World 2's Seraph egg, was the Loong; QM, Oct 11: was Collect 50)
+			{ Text = "Lasso a Bone Rex", Kind = "lasso", Animal = "BoneRex", Need = 1, Egg = "Seraph" }, -- (QM, Oct 14: World 2's Seraph egg, was the Loong; QM, Oct 11: was Collect 50)
 			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "SnackYak" }, -- (QM, Oct 15: the end of every line; the Snack Yak, not the Loong)
 		},
 		{ -- (QM, Oct 12: a third line, just this; tapping it opens Roblox's invite, done when an invited friend joins: Hatchery)
@@ -1503,41 +1273,6 @@ local Config = {
 	-- how long the Hold bar lasts while you ride it: 2x lasts twice as long. BiomeSpeed:
 	-- ridden in that biome (by Name), as fast as the animal named.
 	AnimalStats = {
-		-- (QM, Nov 7: picked luck-padding animals, tools/filler_export.py)
-		Snail = { Speed = 0.8, Stamina = 0.8 },
-		Giraffe = { Speed = 1.35, Stamina = 2.2 },
-		HillbackTortoise = { Speed = 1.6, Stamina = 3 },
-		Coyote = { Speed = 1.5, Stamina = 1.2 },
-		Oryx = { Speed = 1.77, Stamina = 1.5 },
-		Ostrich = { Speed = 1.97, Stamina = 2 },
-		MirageElephant = { Speed = 2.8, Stamina = 3 },
-		Seal = { Speed = 2.355, Stamina = 1.5 },
-		Reindeer = { Speed = 2.678, Stamina = 1.3 },
-		Walrus = { Speed = 2.5, Stamina = 2 },
-		Narwhal = { Speed = 2.86, Stamina = 3 },
-		GlacierMammoth = { Speed = 3.8, Stamina = 4 },
-		FireAnt = { Speed = 5.11, Stamina = 2.5 },
-		MagmaCrab = { Speed = 6.56, Stamina = 2.8 },
-		AshBehemoth = { Speed = 7.2, Stamina = 3 },
-		Rat = { Speed = 7.6, Stamina = 3 },
-		CaveCricket = { Speed = 7.4, Stamina = 3 },
-		CryptSnail = { Speed = 7, Stamina = 3 },
-		WebSpider = { Speed = 8.2, Stamina = 3 },
-		AbyssPillbug = { Speed = 8.6, Stamina = 3 },
-		StagBeetle = { Speed = 7.6, Stamina = 3 },
-		Deer = { Speed = 8.4, Stamina = 3 },
-		BrownBear = { Speed = 7.6, Stamina = 3 },
-		AncientMoose = { Speed = 8.6, Stamina = 3 },
-		Swan = { Speed = 8.4, Stamina = 3 },
-		ArmoredRam = { Speed = 9, Stamina = 3 },
-		RoyalStag = { Speed = 8.8, Stamina = 3 },
-		Griffin = { Speed = 9.2, Stamina = 3 },
-		FortressTortoise = { Speed = 8.6, Stamina = 3 },
-		Shrimp = { Speed = 8.2, Stamina = 3 },
-		Pelican = { Speed = 8.4, Stamina = 3 },
-		Hammerhead = { Speed = 8.8, Stamina = 3 },
-		MantaRay = { Speed = 9, Stamina = 3 },
-		Anglerfish = { Speed = 8.6, Stamina = 3 },
 		-- Meadow (QM, Oct 11: the Meadow's and the Desert's back to their speeds from before the ladder:
 		-- the Meadow is the tutorial and the Desert should come almost at once)
 		Horse = { Speed = 1, Stamina = 1 },
@@ -1553,9 +1288,6 @@ local Config = {
 		Buffalo = { Speed = 1.3, Stamina = 1.6 }, -- World 2's Meadow Rare, Rhino-sized (QM, Oct 13; a guess)
 		Crocodile = { Speed = 1.25, Stamina = 1.2 }, -- World 2's Meadow Rare (QM, Oct 13; the Lion's numbers, a guess)
 		MajesticUnicorn = { Speed = 1.8, Stamina = 2 }, -- World 2's Meadow Legendary (as the Unicorn until QM sets it)
-		Zebra = { Speed = 1.15, Stamina = 0.9 }, -- World 1 Meadow's new ones (QM, Nov 6; guesses, by the Pinto, Lion and Rhino)
-		Gecko = { Speed = 1.25, Stamina = 1.2 },
-		Elephant = { Speed = 1.35, Stamina = 2.2 },
 		Unicorn = { Speed = 1.8, Stamina = 2 }, -- (QM, Oct 12: kept at 1.8, into the Tundra from the start line, ~4,440 of 3,984)
 		-- Desert
 		Caterpillar = { Speed = 3.37, Stamina = 2 }, -- World 2's Woodland Maze Uncommon (as the Starfish until QM sets it)
@@ -1581,7 +1313,6 @@ local Config = {
 		CrystalElephant = { Speed = 3.8, Stamina = 4 }, -- World 2's Cavern Legendary Crystal Elephant (as the Icebringer until QM sets it)
 		Seraph = { Speed = 0.5, Stamina = 3 }, -- World 2's trophy angels (QM, Oct 13: "move quite slowly (like say 0.5 speed)")
 		CrimsonSeraph = { Speed = 0.5, Stamina = 3 },
-		CastleWyvern = { Speed = 10.4, Stamina = 3 }, -- a touch over the Royal Eagle (the Castle's speeds are rescaled below)
 		BlackWidow = { Speed = 2.8, Stamina = 3 }, -- World 2's trophy spider: the Asura's numbers (a guess)
 		CrystalSeraph = { Speed = 0.5, Stamina = 3 },
 		CrystalPhoenix = { Speed = 2.57, Stamina = 3 }, -- World 2's Cavern Crystal Phoenix: Epic (as the Ice Golem until QM sets it)
@@ -1616,28 +1347,6 @@ local Config = {
 		Kraken = { Speed = 6.064, Stamina = 3 }, -- (QM, Oct 13: 46% into the Jurassic, +10 points; was 5.8); (QM, Oct 11: 1.25x the Firebird, it lands in the Jurassic)
 		-- Volcano
 		Firebird = { Speed = 5.11, Stamina = 2.5 }, -- (QM, Oct 13: 10% into the Jurassic; was 4.59)
-		-- the Dungeon, Forest, Castle and Ocean's (QM, Nov 6): Fight to Steal an Egg's Speed (Lasso's own scale there); Stamina a guess
-		DungeonRat = { Speed = 7.6, Stamina = 3 },
-		Slime = { Speed = 7.2, Stamina = 3 },
-		CaveSpider = { Speed = 8.2, Stamina = 3 },
-		BoneSteed = { Speed = 8, Stamina = 3 },
-		Mimic = { Speed = 7.4, Stamina = 3 },
-		BoneWyrm = { Speed = 8.6, Stamina = 3 },
-		Shroom = { Speed = 7.2, Stamina = 3 },
-		SpiritFox = { Speed = 8.2, Stamina = 3 },
-		SpiritDeer = { Speed = 8.4, Stamina = 3 },
-		MysticOwl = { Speed = 7.6, Stamina = 3 },
-		CrystalTortoise = { Speed = 7.2, Stamina = 3 },
-		SpiritLoong = { Speed = 8.6, Stamina = 3 },
-		WarBoar = { Speed = 8.4, Stamina = 3 },
-		RoyalSteed = { Speed = 9.2, Stamina = 3 },
-		ChessKnight = { Speed = 8.6, Stamina = 3 },
-		RoyalPeacock = { Speed = 8.8, Stamina = 3 },
-		LivingArmor = { Speed = 8.6, Stamina = 3 },
-		CrimsonDrake = { Speed = 9.4, Stamina = 3 },
-		RoyalEagle = { Speed = 10, Stamina = 3 },
-		Seahorse = { Speed = 8.8, Stamina = 3 },
-		AbyssWhale = { Speed = 9.4, Stamina = 3 },
 		Catfish = { Speed = 5.11, Stamina = 2.5 }, -- World 2's Temple Uncommon (as the Firebird until QM sets it)
 		BloatedMummy = { Speed = 5, Stamina = 3 }, -- World 2's Ancient Tomb Uncommon (as the Ankylosaurus until QM sets it)
 		RockHog = { Speed = 6.56, Stamina = 2.8 }, -- (QM, Oct 13: 65% into the Jurassic; was 5.3)
@@ -1671,7 +1380,7 @@ local Config = {
 
 	-- Coins for landing on an animal: LassoCoins for that animal, else by its rarity (set
 	-- in its Animals module).
-	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25, Divine = 50 },
+	RarityCoins = { Common = 1, Uncommon = 3, Rare = 5, Epic = 10, Legendary = 25 },
 	LassoCoins = { Beholder = 50, Sludge = 50, WarElephant = 50, Leviathan = 100 }, -- QM's pets JSON, Oct 4
 
 	-- Stampede: each biome has its own steady stream of animals (its Herd above),
@@ -1689,125 +1398,6 @@ local Config = {
 	HerdGapSpeed = 2,
 }
 
--- The endless course past the Ocean Trench (QM, Nov 6: "after the final ocean biome, should be
--- infinite procedural: this is where we will use world 2's biomes and all its pets"). Past the
--- Ocean's end the course never stops: Shared/Endless lays it out as stretches of World 2's first
--- three biomes, each one picked at random (never the one before again) for a random length, and
--- generates their terrain as you go (Client/Endless builds what's near the camera). Each stretch
--- runs its biome's World 2 herd. They're biome tiers 9, 10 and 11 for speed and income (the
--- balance passes at the end of this file). Same Seed, same course on every client and server.
-local rgb = Color3.fromRGB
-Config.Endless = {
-	Seed = 20261106,
-	MinLength = 1600, -- studs each stretch runs, at random between these (whole 16s)
-	MaxLength = 2800,
-	Blend = 96, -- studs over which one stretch's tiles dither into the next's
-	Biomes = {
-		{
-			-- World 2's Meadow: golden grass, marble ruins, ponds (QM, Oct 13)
-			Name = "MarbleMeadow",
-			DisplayName = "Marble Meadow",
-			Picture = "rbxassetid://79053862780013", -- design/biomes/MarbleMeadow.png: its render, no pets (an edit-time capture of its stretch, in its fog)
-			Tier = 9,
-			Swerve = 1,
-			HerdSpawnEvery = 0.45, -- (as the Ocean's)
-			GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) },
-			WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) }, -- marble
-			-- its own animals (World 2's weights). The Majestic Unicorn's a Robux pet in World 1: on its
-			-- page, never wild (as the Robo Shark). World 1's Bunny, Rhino and Buffalo stay in the Meadow.
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				MarbleFish = 1/2, Lion = 1/4, Crocodile = 1/5, MarbleColossus = 1/25, Seraph = 1/100, MajesticUnicorn = 0,
-			},
-			Boss = "Seraph", -- (World 2's Meadow boss)
-			Fog = { Color = rgb(232, 214, 160), Start = 0, End = 500 },
-		},
-		{
-			-- World 2's Crimson Lands (QM, Oct 13)
-			Name = "CrimsonLands",
-			DisplayName = "Crimson Lands",
-			Picture = "rbxassetid://122032706733413", -- design/biomes/CrimsonLands.png: its render, no pets (an edit-time capture of its stretch, in its fog)
-			Tier = 10,
-			Swerve = 1,
-			HerdSpawnEvery = 0.45,
-			GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) },
-			WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) },
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				CrimsonScorpion = 1/2, Eyeworm = 1/4, Beholder = 1/5, Maw = 1/25, IvorySpider = 1/125, Asura = 1/625, BlackWidow = 1/2500,
-			},
-			Boss = "CrimsonSeraph",
-			Fog = { Color = rgb(150, 60, 70), Start = 0, End = 450 },
-		},
-		{
-			-- World 2's Crystal Cavern (QM, Oct 13): blue-grey by the walls to ice to crystal down the middle
-			Name = "CrystalCavern",
-			DisplayName = "Crystal Cavern",
-			Picture = "rbxassetid://114660671037502", -- design/biomes/CrystalCavern.png: its render, no pets (an edit-time capture of its stretch, in its fog)
-			Tier = 11,
-			Swerve = 1,
-			HerdSpawnEvery = 0.45,
-			GroundColors = { rgb(90, 109, 143), rgb(82, 99, 131) },
-			WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) },
-			Herd = { -- 1 in N each, adding up to exactly 1 with the alphas (Config.Alphas). QM Nov 7: by rarity, about Uncommon the rest, Rare 1 in 8, Epic 1 in 100, Legendary 1 in 1,000, Divine 1 in 10,000 overall
-				RedMushroom = 1/2, BlueCrystal = 1/5, CrystalCentipede = 1/5, PinkCrystal = 1/20, BrownMushroom = 1/25, CrystalPhoenix = 1/320, CrystalSpider = 1/320, PurpleMushroom = 1/320, CrystalElephant = 1/2000, CrystalSeraph = 1/8000,
-			},
-			Boss = "CrystalSeraph",
-			Fog = { Color = rgb(70, 92, 140), Start = 0, End = 420 },
-		},
-	},
-	-- The endless tiles' and props' colours (ColorKeys, live in workspace.WorldColors like the
-	-- map's): World 2's where it had them.
-	Colors = {
-		MarbleGrass = rgb(206, 168, 58), MarbleGrassChecker = rgb(190, 152, 46),
-		MarbleDarkGrass = rgb(182, 144, 44), MarbleDarkGrassChecker = rgb(166, 130, 36),
-		MarbleDirt = rgb(142, 101, 60), MarbleDirtChecker = rgb(128, 89, 52),
-		MarbleStone = rgb(236, 232, 224), MarbleStoneChecker = rgb(218, 214, 206),
-		MarbleWall = rgb(236, 232, 224), MarbleWallChecker = rgb(218, 214, 206),
-		MarbleCap = rgb(206, 168, 58),
-		MarbleWater = rgb(76, 156, 222), MarbleWaterChecker = rgb(90, 170, 232),
-		MarbleBush = rgb(166, 130, 36),
-		CrimsonGround = rgb(121, 20, 37), CrimsonGroundChecker = rgb(110, 17, 33),
-		CrimsonPatch = rgb(144, 44, 43), CrimsonPatchChecker = rgb(132, 38, 38),
-		CrimsonStone = rgb(119, 86, 86), CrimsonStoneChecker = rgb(108, 77, 77),
-		CrimsonDark = rgb(98, 15, 30), CrimsonDarkChecker = rgb(89, 13, 27),
-		CrimsonWall = rgb(91, 50, 54), CrimsonWallChecker = rgb(82, 44, 48),
-		CrimsonCap = rgb(72, 39, 42),
-		CrimsonRune = rgb(255, 59, 92),
-		CrimsonShroom = rgb(196, 38, 56), CrimsonShroomStem = rgb(226, 206, 196),
-		CavernGround = rgb(90, 109, 143), CavernGroundChecker = rgb(82, 99, 131),
-		CavernIce = rgb(98, 129, 167), CavernIceChecker = rgb(89, 118, 153),
-		CavernCrystal = rgb(116, 186, 213), CavernCrystalChecker = rgb(105, 171, 197),
-		CavernRock = rgb(66, 84, 118), CavernRockChecker = rgb(60, 77, 108),
-		CavernWall = rgb(56, 72, 103), CavernWallChecker = rgb(48, 62, 90),
-		CavernCap = rgb(44, 57, 82),
-		CavernPlank = rgb(139, 94, 60), CavernPlankChecker = rgb(126, 84, 53),
-		CavernWater = rgb(60, 128, 200), CavernWaterChecker = rgb(72, 140, 210),
-		CavernGlow = rgb(92, 225, 255), CavernPink = rgb(255, 130, 200),
-		CavernShroom = rgb(150, 80, 200), CavernShroomStem = rgb(220, 214, 236),
-	},
-}
-for key, color in Config.Endless.Colors do
-	Config.WorldColors[key] = color
-end
--- each endless biome's boss (World 2's, by its biome: Client/BossChase)
-for _, biome in Config.Endless.Biomes do
-	Config.Boss.ByBiome[biome.Name] = biome.Boss
-end
--- [kind] = true: the endless herds' animals (World 2's), which keep their own speed in World 1
-Config.EndlessAnimals = {}
-for _, biome in Config.Endless.Biomes do
-	for kind in biome.Herd do
-		Config.EndlessAnimals[kind] = true
-	end
-end
--- Every biome a player can meet, for the Index: Config.Biomes, then the endless ones.
-function Config.allBiomes()
-	local list = table.clone(Config.Biomes)
-	for _, biome in Config.Endless.Biomes do
-		table.insert(list, biome)
-	end
-	return list
-end
-
 -- Flowing water (QM, Oct 13; Client/WaterFlow): a Texture named "Water" on a tile's top
 -- with this Image flows Flow studs a second (U across the course, V along it).
 Config.Water = {
@@ -1824,155 +1414,32 @@ Config.WaterSink = { Water = 0.3, DeepWater = 0.5, Rate = 6 }
 -- Worlds (QM, Oct 13): each is its own Place in the experience, running this same code.
 -- Gold is shared; each world has its own pen, pets, pen levels and quests.
 Config.Places = { 126872244121414, 139418530058790, 117724433633972 } -- [world] = its PlaceId (World 3: QM, Oct 14, a copy of World 2 for now; not for sale yet, so no way in)
-Config.World = table.find(Config.Places, game.PlaceId) or 1
--- The game version every analytics event is tagged with (Server/Funnel: CustomField01), to
--- compare it with the last one in Creator Hub. Change it when a new version goes out.
-Config.GameVersion = "Revamp"
--- The native UI (QM, Nov 6): Fight to Steal an Egg's studded UI, built in code (client/HudKit,
--- UiFx, NativeHud, GoalPanel) in place of the PNG art. World 1 only while it's tried out.
--- Scale: the 1080-tall design scaled to the screen by (height / 1080) ^ Curve, clamped
--- (softer than 1:1 so phones get bigger buttons); PopupMargin: px a popup keeps off the edges.
-Config.NativeUi = {
-	On = Config.World == 1,
-	Scale = { Curve = 0.6, Min = 0.45, Max = 1.25, PopupMargin = 12 },
-	GoalColor = Color3.fromRGB(255, 157, 0), -- the little "Goal" over the title
-	-- each rarity's colours (Fight to Steal an Egg's): a card's top and bottom (the bottom from
-	-- `at` of the way down), its name's text colour; Common's text fades text to text2; a
-	-- `move` one has a band of text2 sweeping across it (client/RarityLook)
-	Rarities = {
-		Common = { text = Color3.new(1, 1, 1), text2 = Color3.fromRGB(135, 135, 135), stroke = Color3.fromRGB(70, 70, 70) },
-		Uncommon = { bottom = Color3.fromHex("40ff00"), top = Color3.fromHex("c8ff00"), at = 0.736, text = Color3.fromHex("00ff00") },
-		Rare = { bottom = Color3.fromHex("0070ff"), top = Color3.fromHex("00e6ff"), at = 1, text = Color3.fromHex("00b7ff") },
-		Epic = { bottom = Color3.fromHex("9000ff"), top = Color3.fromHex("ff00f0"), at = 1, text = Color3.fromHex("d300ff") },
-		Legendary = { bottom = Color3.fromHex("ff0020"), top = Color3.fromHex("ff8c00"), at = 1, text = Color3.fromHex("ff0004") },
-		Divine = { bottom = Color3.fromHex("6a00ff"), top = Color3.fromHex("00d0ff"), at = 1, text = Color3.fromHex("00dcff"), text2 = Color3.fromHex("0040ff"), move = true }, -- (the reference's Divine: QM, Nov 7, the rarest in each biome)
-		Exclusive = { bottom = Color3.fromHex("ff0040"), top = Color3.fromHex("ff00c0"), at = 1, text = Color3.fromHex("ff0050"), text2 = Color3.fromHex("ff00d0"), move = true }, -- (the reference's Mythic)
-	},
-	-- the Shop's ~Game Passes~ cards (client/NativeShop; QM, Nov 6: the reference's), in order,
-	-- by Config.Passes key: its card's look, its picture (HudImages, or Pet: a pet's headshot),
-	-- the badge on the picture and what it does (rich text)
-	PassCards = {
-		{ Key = "DoubleGold", Look = "GoldCard", Icon = "CashStack", Badge = "x2", Text = 'Earn <font color="#7CFF4D">2x Cash!</font>' },
-		{ Key = "Speed", Look = "DamageCard", Pet = "Horse", Badge = "1.5x", Text = 'Ride <font color="#7CFF4D">1.5x</font> faster!' },
-		{ Key = "AutoHatch", Look = "GrowthCard", Icon = "PassGrowth", Text = 'Eggs hatch <font color="#7CFF4D">by themselves!</font>' },
-		{ Key = "Invincible", Look = "LifeCard", Icon = "PassLife", Text = 'Never <font color="#7CFF4D">crash!</font>' },
-		{ Key = "GiantPets", Look = "PowerCard", Pet = "MajesticUnicorn", Badge = "x2", Text = 'Your pets are <font color="#7CFF4D">giant!</font>' },
-	},
-	-- UI sounds (client/UiFx): id, volume, speed, start (seconds in)
-	Sounds = {
-		Click = { id = "rbxassetid://6895079853", volume = 0.5 },
-		Hover = { id = "rbxassetid://6895079853", volume = 0.12, speed = 1.6 },
-		Open = { id = "rbxassetid://2375539277", volume = 0.45 },
-		Close = { id = "rbxassetid://2198217232", volume = 0.3, speed = 1.3 },
-		Buy = { id = "rbxassetid://7112275565", volume = 0.45 },
-		Claim = { id = "rbxassetid://1169755927", volume = 0.5 },
-		Equip = { id = "rbxassetid://133331985238497", volume = 0.5 },
-		Error = { id = "rbxassetid://6895079853", volume = 0.6, speed = 0.55 },
-	},
-}
--- The Index's reward for an animal you've had (the native UI's, as Fight to Steal an Egg's: QM,
--- Nov 6; Server/Hatchery's IndexClaim): Seconds of what it earns a second, at least Min.
-Config.IndexReward = { Seconds = 300, Min = 100 }
-function Config.indexReward(kind)
-	local r = Config.IndexReward
-	return math.max(r.Min, math.floor((Config.PetIncome[kind] or 0) * r.Seconds))
-end
--- (QM, Nov 6: no Merge in the native UI, so its quest is passed over, Off: Server/Quests.
--- Quests are saved by their place in the line, so it stays in the list.)
-if Config.NativeUi.On then
-	for _, line in Config.Quests do
-		for _, quest in line do
-			if quest.Kind == "merge" then
-				quest.Off = true
-			end
-		end
-	end
-end
+-- The Halloween event world (QM, Oct 15: a copy of World 1 for now, 10 players, its own saves):
+-- World 4, outside Config.Places so the Worlds menu and the top bar don't list it yet.
+Config.HalloweenPlace = 139057235302936
+Config.World = table.find(Config.Places, game.PlaceId) or (if game.PlaceId == Config.HalloweenPlace then 4 else 1)
 -- Pens in the base (Server/Pens): one per player.
-Config.PenCount = 5
+Config.PenCount = if Config.World == 4 then 10 else 5
+-- (World 1 ended at a giant portal to World 2 for a while: QM, Oct 13 took it out. Both
+-- worlds end at the finish line, into the void. EndPortal = { Scale, At } brings it back.)
+Config.EndPortal = nil
 -- What each world costs in gold to unlock, once (the Worlds menu's Buy and World 1's
 -- World 2 bar). World 1 is everyone's.
 -- World 2 targets the late Volcano / first Jurassic rides on the normal income curve.
 Config.WorldPrices = { 0, 1000000, 10000000 }
--- The Slingshot (QM, Nov 6): everyone's (the top bar is gone; Price and Gold.server's
--- BuySlingshot are left unused). Yours stands in front of your pen (Server/Slingshot), its
--- back to the pen's opening; hold E at it and pick a biome (Client/SlingshotMenu: unlocked
--- ones, or the next for its UnlockCost) and it flings you there on your best pet
--- (Client/SlingshotLaunch; To: the default). The meshes are
--- design/slingshot's (tools/slingshot_meshes.py), uploaded: Meshes[i] = { asset id, R, G, B }
--- for pieces/Slingshot_i (the frame), Band the SlingshotBand mesh (stretched, three of them).
--- Each biome's unlock for Robux on the Slingshot's menu (Client/SlingshotMenu, Shop.server's
--- ProcessReceipt -> Server/Slingshot's GrantBiome): its developer product, by biome name.
-Config.BiomeProducts = {
-	Desert = { ProductId = 3729076824, Price = 39 },
-	Snow = { ProductId = 3729076935, Price = 49 },
-	Volcano = { ProductId = 3729077016, Price = 59 },
-	Dungeon = { ProductId = 3729077112, Price = 69 },
-	Forest = { ProductId = 3729077199, Price = 79 },
-	Castle = { ProductId = 3729077318, Price = 89 },
-	Ocean = { ProductId = 3729077407, Price = 99 },
-}
--- Each biome's difficulty on the Slingshot's menu, by its place on the course (QM, Nov 7;
--- past the list, the last).
-Config.BiomeDifficulty = {
-	{ "Easy", "😊" },
-	{ "Medium", "🙂" },
-	{ "Hard", "😐" },
-	{ "Tough", "😬" },
-	{ "Insane", "😱" },
-	{ "Extreme", "😡" },
-	{ "Nightmare", "💀" },
-	{ "Monster", "😈" },
-}
-for _, biome in Config.Biomes do
-	biome.RobuxProduct = biome.RobuxProduct or Config.BiomeProducts[biome.Name]
-end
-Config.Slingshot = {
-	Price = 1000000, -- (World 2's, the goal it replaces)
-	To = 2, -- the Desert
-	Ahead = 12, -- studs out from your pen's Spawn to the slingshot's middle (QM, Nov 7: closer; was 22)
-	Flight = 4.5, -- seconds in the air
-	Apex = 260, -- studs over the straight line at the flight's middle
-	Lift = 80, -- studs more up early on (sin^0.6 of the flight: steep off the band, none by the landing), so the shot clears the walls (QM, Nov 7)
-	Scale = 1.6, -- the model's size x its meshes' (QM, Nov 7: 1.6x bigger)
-	Turn = 0.35, -- how much it turns from straight out of your pen toward the start line's middle (QM, Nov 7)
-	Steer = 2, -- x Ride's SteerSpeed and SteerResponse in the air (QM, Nov 7: twice as nimble)
-	Meshes = { { 108584371800496, 222, 124, 62 }, { 83135902680851, 240, 228, 196 }, { 126807462534931, 150, 76, 38 } }, -- (filled by tools/slingshot_upload.py)
-	Band = 102942616406200, -- (filled by tools/slingshot_upload.py)
-	BandColor = Color3.fromRGB(226, 58, 52),
-	-- The band's colour by your pen level (each Upgrade Pen recolours it; past the list, the last).
-	BandColors = {
-		Color3.fromRGB(196, 170, 128), -- tan (QM, Nov 7: the cartoon slingshot's)
-		Color3.fromRGB(226, 58, 52), -- red
-		Color3.fromRGB(245, 140, 40), -- orange
-		Color3.fromRGB(250, 214, 50), -- yellow
-		Color3.fromRGB(90, 200, 80), -- green
-		Color3.fromRGB(60, 150, 240), -- blue
-		Color3.fromRGB(150, 80, 230), -- purple
-		Color3.fromRGB(240, 90, 190), -- pink
-	},
-}
--- The Top Earners board (QM, Nov 6): left of the start line, facing into the base, the global
--- top pen incomes (gold a second, everyone's latest recorded, OrderedDataStore "TopEarners")
--- in a square stone frame (the old portal gate's style, a skull on top: tools/earners_board_meshes.py),
--- your own pen's income and the countdown to the next refresh under the list.
--- Server/TopEarners builds it and records; Client/TopEarners draws the list.
-Config.TopEarners = {
-	Position = Vector3.new(-112, 0, 18), -- the base's middle (on the ground), just inside the base left of the course's mouth
-	Yaw = 210, -- degrees: faces into the base (+z), turned 30 degrees toward the course
-	Screen = { Width = 26, Height = 32, Bottom = 4.2 }, -- the frame's opening (tools/earners_board_meshes.py SCREEN_*)
-	Refresh = 60, -- seconds between recording everyone here and re-reading the top
-	Top = 50, -- rows on the board
-	Meshes = { { 106770230038436, 177, 185, 178, 0.006, 20.790, -0.713 }, { 82718487796629, 148, 156, 150, -0.759, 20.846, -0.708 }, { 134382604805829, 232, 226, 206, 0.008, 46.766, -0.195 }, { 137436135736323, 38, 38, 44, 0.000, 46.300, -4.175 } }, -- (filled by tools/earners_board_upload.py)
-}
 -- Worlds sold for Robux instead (QM, Nov 2: World 3 for R$299; Shop.server's "World<n>", Gold.server's
 -- GrantWorld). The world bar skips them, going on to the trails (Client/World2Bar). ProductId 0:
 -- free in Studio, not on sale live.
 Config.WorldProducts = { [3] = { ProductId = 3727273087, Price = 299 } }
--- Rebirth (QM, Oct 13; the rebirth itself is gone, QM Oct 15 / Nov 6): rebirths already saved
--- keep their buffs, Gold[n] x gold and Speed[n] x riding speed, and every pet of theirs wears
--- Shared/Skins' Skins[n]: Gold, Diamond, Galaxy.
+-- Rebirth (QM, Oct 13): World 2's Rebirth bar (World2Bar.client) for Prices[n] gold, your
+-- nth. It re-locks World 2 (save up for it again) and sends you to World 1; your pets stay.
+-- Rebirths (saved with your gold, every world) give Gold[n] x gold, Speed[n] x riding speed,
+-- and every pet of yours wears Shared/Skins' Skins[n]: Gold, Diamond, Galaxy.
+-- Off for the time being (QM, Oct 15: "scrap the rebirth system for the time being"): no Rebirth
+-- bar or panel, and the server refuses one. Rebirths already saved keep their buffs and skins.
+Config.RebirthOn = false
 Config.Rebirth = {
+	Prices = { 10000000, 100000000, 1000000000 }, -- (QM, Oct 14: each 10x cheaper; was 100m, 1b, 10b)
 	Gold = { 2, 4, 8 }, -- (each rebirth doubles again: QM's rebirth panel's "2x Gold")
 	Speed = { 1.5, 1.5, 1.5 }, -- (QM's 1.5x: not stacked, so the courses stay ridable)
 	Scale = 1.5, -- (QM, Oct 13: rebirthed pets are this much bigger everywhere: Shared/Skins)
@@ -1985,53 +1452,6 @@ end
 -- x every ride's speed: rebirths and the 1.5x Speed pass.
 function Config.rebirthSpeed(player)
 	return (Config.Rebirth.Speed[player:GetAttribute("Rebirths") or 0] or 1) * (if player:GetAttribute("PassSpeed") then Config.PassSpeed else 1)
-end
--- Luck (QM, Nov 7): 1 + what the goals have given you ("LuckBonus", saved as `luck`:
--- Gold.server), added, never multiplied, and kept through rebirths. Each Reach goal from the
--- Desert on gives Reach luck, each Capture 3 cash (CashOfNext of the next unlock's price); both
--- double each rebirth (RewardPerRebirth). A goal's egg only comes the first time (Server/Quests).
--- A rebirth (the last goal, past the Ocean: Server/Quests' "rebirth", Hatchery's Rebirth) wipes
--- your cash and unlocks, doubles every slingshot unlock's price and the goals' rewards, and
--- loops the goals back to Reach Desert. Your pets and luck stay. Luck flattens your own
--- stampede's odds (each weight ^ (1 / luck): 1 is the table as it is, more and more luck heads
--- for all even), so every player's stampede is their own. Rebirths are `reborn`, the "Reborn"
--- attribute; not the old Rebirths above (their gold, speed and skins).
-Config.Luck = {
-	Reach = 0.25, -- luck for each Reach goal from the Desert on, before any rebirth
-	CashOfNext = 0.1, -- a Capture 3 goal's cash: this much of the next unlock's price (which doubles too)
-	RewardPerRebirth = 2, -- goal luck x this each rebirth (0.25, 0.5, 1, 2...)
-	CostPerRebirth = 2, -- slingshot unlock prices x this each rebirth
-}
-function Config.luck(player)
-	return 1 + (player:GetAttribute("LuckBonus") or 0)
-end
--- Luck to show: "x1", "x1.25", "x2.75", "x12.5".
-function Config.luckText(luck)
-	return "x" .. (string.format("%.2f", luck):gsub("%.?0+$", ""))
-end
--- What goal gives `player` in luck and cash when claimed (extra: after that many more rebirths).
-function Config.goalLuck(player, goal, extra)
-	local n = (player:GetAttribute("Reborn") or 0) + (extra or 0)
-	return (goal.Luck or 0) * Config.Luck.RewardPerRebirth ^ n
-end
-function Config.goalCash(player, goal, extra)
-	if not goal.CashOfNext or not Config.Biomes[(goal.Biome or 0) + 1] then
-		return 0
-	end
-	return math.floor(Config.unlockCost(player, goal.Biome + 1, extra) * goal.CashOfNext)
-end
--- A herd weight at `luck`.
-function Config.luckWeight(weight, luck)
-	if weight <= 0 then
-		return 0
-	end
-	return weight ^ (1 / math.max(luck or 1, 1))
-end
--- What unlocking biome i in the Slingshot's menu costs `player` (or after one more rebirth: extra).
-function Config.unlockCost(player, i, extra)
-	local base = Config.Biomes[i] and Config.Biomes[i].UnlockCost or 0
-	local n = (player:GetAttribute("Reborn") or 0) + (extra or 0)
-	return math.floor(base * Config.Luck.CostPerRebirth ^ n)
 end
 -- 15, 1.2k, 3.4m, 10m... (gold, short: the Worlds menu's prices and the World 2 bar)
 -- The paid hatch's tier (Config.SpeedupEgg.Tiers) for an egg with secondsLeft to go.
@@ -2124,30 +1544,6 @@ function Config.storeName(name, world)
 	return if world == 1 then name else name .. "_W" .. world
 end
 
--- The pets the Dungeon, Forest and Ocean share with other worlds (QM, Nov 6): on their new
--- biome's footing (by Lasso rarity, as the new ones there) for the income curve below. The
--- Halloween and World 3 tables further down would set them back, so Config.SharedPets (at
--- the end) puts the curve's numbers back after them. { rarity's base income, hatch seconds,
--- Fight to Steal an Egg's Speed }
-Config.SharedPets = {
-	Bat = { 12000, 60, 7.8 }, -- Uncommon
-	AncientTreant = { 42500, 7200, 7.4 }, -- Legendary
-	Squid = { 27500, 1200, 8.4 }, -- Epic
-	KingCrab = { 27500, 1200, 8.6 }, -- Epic
-	FishSchool = { 27500, 1200, 9.6 }, -- Epic
-	Whale = { 20000, 300, 9 }, -- Rare
-	Starfish = { 12000, 60, 8.2 }, -- Uncommon (Lasso's old Ocean ones, QM Nov 6)
-	Clownfish = { 12000, 60, 8.4 }, -- Uncommon
-	Lionfish = { 20000, 300, 8.8 }, -- Rare
-	BlueCrab = { 42500, 7200, 9.2 }, -- Legendary
-	Kraken = { 42500, 7200, 9.6 }, -- Legendary
-	TRex = { 27500, 1200, 9 }, -- Epic (the old Jurassic's, now the Castle's: QM Nov 6)
-	Pterodactyl = { 27500, 1200, 9.2 }, -- Epic
-}
-for kind, p in Config.SharedPets do
-	Config.PetIncome[kind] = p[1]
-end
-
 -- The income curve past the Desert (QM, Oct 14: "flatten it to the Desert's level"): each
 -- biome's animals earn about 2x the one before on average (herd-weighted), not the old ~3-7x,
 -- so going further helps but World 2 doesn't need it. Each biome's animals keep their order;
@@ -2180,9 +1576,6 @@ do
 			previous = average(biome)
 		end
 	end
-end
-for kind, p in Config.SharedPets do
-	p[1] = Config.PetIncome[kind] -- (as the curve left it)
 end
 
 -- World 2's Temple and Tomb animals on its own curve (below): { speed, gold a second, hatch
@@ -2390,7 +1783,6 @@ Config.AnimalScale.GummyBear = 1.5 -- (the same: QM, Oct 15)
 Config.AnimalScale.GumdropFrog = 1.6 -- (QM, Oct 15)
 Config.AnimalScale.GingerbreadMan = 2 -- (QM, Oct 15)
 Config.AnimalScale.RockCandyDragon = 2 -- (QM, Oct 15)
-Config.AnimalScale.CastleWyvern = 2 -- (as the Rock Candy Dragon, its base)
 Config.AnimalScale.ReefTitan = 3 -- (QM, Oct 15)
 Config.AnimalScale.AncientTreant = 2 -- (QM, Oct 15)
 Config.AnimalScale.RoyalCnidarian = 2 -- (QM, Oct 15)
@@ -2411,21 +1803,10 @@ Config.AwayBoost = { ProductId = 3720169501, Multiplier = 4 }
 Config.RideEggAB = { Share = 1, Salt = 1, FastRides = 4, FastHatch = 15, Studio = "egg" }
 -- Limited stock and the display's overhead labels are active.
 Config.PetOffersLimited = true
--- The LIMITEDS stand at World 1's base (Client/LoongOffer): back on with three limiteds (QM, Nov 7; hidden Nov 6).
-Config.LimitedsStand = true
 -- The pets for Robux at World 1's base, each on its own stand (Client/LoongOffer): what's bought
 -- is "Bought<Kind>s" (Shop.server's ledger) and "bought<Kind>s" in your profile (Hatchery);
 -- what's left is workspace's "<Kind>Left".
-Config.PetOffers = { Config.LoongOffer, Config.MajesticUnicornOffer, Config.RoboSharkOffer } -- the 3 limiteds (QM, Nov 7)
--- (live, a limited whose developer product isn't made yet, ProductId 0, stays off the stand: its
--- Buy would do nothing there. In Studio it shows, free, for testing.)
-if not game:GetService("RunService"):IsStudio() then
-	for i = #Config.PetOffers, 1, -1 do
-		if Config.PetOffers[i].ProductId == 0 then
-			table.remove(Config.PetOffers, i)
-		end
-	end
-end
+Config.PetOffers = if Config.World == 4 then {} else { Config.LoongOffer, Config.MajesticUnicornOffer } -- (none in the Halloween world's stripped base for now: QM, Oct 15)
 -- Kinds whose studs stay their unscaled size's (Animals/Rig): the big gummy bears, as fine and
 -- glossy as the red one (QM, Oct 15: "make yellow/green gummybear glowy like the red one").
 Config.FineStuds = { GummyBear = true, YellowGummyBear = true, GreenGummyBear = true, GumdropFrog = true } -- (the Gumdrop Frog too: QM, Oct 15)
@@ -2449,7 +1830,7 @@ for kind in Config.CrossWorldExempt do
 	EXEMPT_STATS[kind] = Config.AnimalStats[kind] and table.clone(Config.AnimalStats[kind])
 end
 -- (World 1's animals World 2's Meadow has too: World 1's own as well)
-local SHARED = { Bunny = true, Rhino = true, Fish = true, Buffalo = true } -- (the Buffalo World 1 Meadow's too: QM, Nov 6)
+local SHARED = { Bunny = true, Rhino = true, Fish = true }
 -- Whether `kind` is one of `world`'s own animals.
 function Config.ownHere(kind, world)
 	world = world or Config.World
@@ -2462,7 +1843,7 @@ function Config.ownHere(kind, world)
 	elseif world == 3 then
 		return Config.World3Animals[kind] == true
 	end
-	return not Config.World3Animals[kind] and (not Config.World2Animals[kind] or SHARED[kind] == true or Config.EndlessAnimals[kind] == true) -- (the endless herds' in World 1)
+	return not Config.World3Animals[kind] and (not Config.World2Animals[kind] or SHARED[kind] == true)
 end
 -- Whether `kind` (a hybrid: either of its two) is held to a Horse's speed here.
 function Config.slowedHere(kind, fuse)
@@ -2489,37 +1870,323 @@ end
 -- Each world's biome names, as players know them (Stats, Funnel; World 2's and 3's Config.Biomes
 -- Names are different: World 2's keep World 1's).
 Config.BiomeNames = {
-	{ "Meadow", "Desert", "Tundra", "Volcano", "Abandoned Dungeon", "Magic Forest", "Jurassic", "Ocean Trench" },
+	{ "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" },
 	{ "Meadow", "Crimson Lands", "Crystal Cavern", "Woodland Maze", "Temple", "Tomb" },
 	{ "Pirate Cove", "Garden", "Candyland", "Cnidaria" },
+	{ "Meadow", "Desert", "Tundra", "Ocean", "Volcano", "Jurassic" }, -- (Halloween: World 1's for now)
 }
 
--- World 1's goals (QM, Nov 6): one line, biome by biome to the end: reach it, capture 3 of its
--- animals, upgrade the slingshot (unlock the next biome in its menu: Server/Slingshot). Claiming
--- one no longer upgrades your pen (the slingshot's unlocks do). The first four reaches keep their eggs.
-if Config.World == 1 then
-	local REACH_EGGS = { "Cactus", "Penguin", "Snowman", "FireLobster", "DungeonRat", "Shroom", "WarBoar", "Squid" } -- (QM, Nov 7: every reach; the last four each biome's commonest)
-	local goals = {}
-	for i in Config.Biomes do
-		local name = Config.BiomeNames[1][i] or Config.Biomes[i].Name
-		-- (Loop, QM Nov 7: a rebirth jumps back to Reach Desert, not the Meadow's goals: Quests.rebirth)
-		table.insert(goals, { Text = "Reach " .. name, Kind = "reach", Biome = i, Egg = REACH_EGGS[i], NoPenLevel = true, Loop = i == 2 or nil, Luck = if i >= 2 then Config.Luck.Reach else nil })
-		if not Config.Biomes[i + 1] then
-			-- (QM, Nov 7: after the last reach, Rebirth: claimed in its popup, Client/RebirthPopup)
-			table.insert(goals, { Text = "Rebirth", Kind = "rebirth", Biome = i, NoPenLevel = true })
-			break
+-- World 2's look: its first biome and base as QM's reference (marble walls, yellow
+-- grass, the darker grass beside the dirt, brown dirt); the rest World 1's colours
+-- hue-turned as placeholders (tools/world2_terrain.luau's turns).
+if Config.World == 2 then
+	-- World 2's quests (QM, Oct 13): reach each biome, its egg World 1's reward's
+	-- equivalent here; and the other line, merge 3, lasso 10 Lions, lasso 3 Kitsunes (that
+	-- last one's three eggs). No invite line here.
+	Config.Quests = {
+		{
+			{ Text = "Reach Meadow", Kind = "reach", Biome = 1, Egg = "Eyeworm", NoPenLevel = true }, -- (World 1's Cactus: the next biome's Uncommon)
+			{ Text = "Reach Crimson Lands", Kind = "reach", Biome = 2, Egg = "CrystalCentipede" }, -- (the Penguin)
+			{ Text = "Reach Crystal Cavern", Kind = "reach", Biome = 3, Egg = "BrownMushroom" }, -- (the Snowman)
+			{ Text = "Reach Woodland Maze", Kind = "reach", Biome = 4, Egg = "OrangeButterfly" }, -- (the Lionfish)
+			{ Text = "Reach Temple", Kind = "reach", Biome = 5, Egg = "Tiger" }, -- (the Fire Lobster)
+			{ Text = "Reach Tomb", Kind = "reach", Biome = 6, Egg = "BloatedMummy" }, -- (the Palm Guy: the Uncommon)
+		},
+		{
+			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "Seraph" }, -- (QM, Oct 14: 1, was 3)
+			{ Text = "Lasso Lions", Kind = "lasso", Animal = "Lion", Need = 10, Egg = "Asura" },
+			{ Text = "Lasso Kitsunes", Kind = "lasso", Animal = "Kitsune", Need = 3, Egg = { "Geb", "Nut", "Bes" } },
+			{ Text = "Cross the finish line 5 times", Kind = "finish", Need = 5, Egg = "SnackYak" }, -- (QM, Oct 15: the end of every line; the Snack Yak, not the Loong)
+		},
+	}
+	Config.DefaultPet = "ArmoredHorse" -- World 2's starter, in your pen from the start (QM, Oct 13)
+	Config.RideSeconds = 45 -- World 2's boss timer (QM, Oct 14: was 33, as World 1's)
+	local rgb = Color3.fromRGB
+	local TURN = { 0.55, 0.6, 0.35, 0.2, 0.45, 0.75 } -- [biome] hue turn
+	local function turn(value, by)
+		if typeof(value) == "Color3" then
+			local h, sat, v = value:ToHSV()
+			return if sat < 0.12 then value else Color3.fromHSV((h + by) % 1, sat, v)
+		elseif type(value) == "table" then
+			local out = {}
+			for k, v in value do
+				out[k] = turn(v, by)
+			end
+			return out
 		end
-		table.insert(goals, { Text = "Capture 3 " .. name .. " animals", Kind = "lasso", Biome = i, Need = 3, NoPenLevel = true, CashOfNext = Config.Luck.CashOfNext })
-		if Config.Biomes[i + 1] then
-			table.insert(goals, { Text = "Upgrade slingshot", Kind = "slingshot", Biome = i + 1, NoPenLevel = true })
+		return value
+	end
+	for i, biome in Config.Biomes do
+		for _, key in { "GroundColors", "WallColors", "Patches", "Depths", "PostColor", "GateColor" } do
+			if biome[key] then
+				biome[key] = turn(biome[key], TURN[i] or 0)
+			end
 		end
 	end
-	Config.Quests = { goals }
+	Config.Boss.ByBiome = table.clone(Config.Boss.ByBiome)
+	Config.Boss.ByBiome.Meadow = "Seraph" -- World 2's Meadow boss: the biblically accurate angel (QM, Oct 13)
+	Config.Boss.ByBiome.Desert = "CrimsonSeraph" -- the Crimson Lands' (biome 2): the Seraph in crimson (QM, Oct 13)
+	Config.Boss.ByBiome.Snow = "CrystalSeraph" -- the Crystal Cavern's (biome 3): the Seraph in crystal (QM, Oct 13; was the Crystal Tyrant)
+	Config.Boss.ByBiome.Ocean = "Monarch" -- the Woodland Maze's (biome 4): a giant monarch butterfly (QM, Oct 13)
+	Config.Boss.ByBiome.Volcano = "JadeAsura" -- the Temple's (biome 5): the Asura in jade with tusks (QM, Oct 13)
+	Config.Boss.ByBiome.Jurassic = "Sphinx" -- the Ancient Tomb's (biome 6): a winged pharaoh sphinx (QM, Oct 13)
+	local meadow = Config.Biomes[1]
+	meadow.Herd = table.clone(meadow.Herd)
+	meadow.Herd.MarbleFish = 0.3 -- World 2's Meadow Uncommon (QM, Oct 13), about as often as the Pinto
+	meadow.Herd.Lion = 0.2 -- World 2's Meadow Rare (QM, Oct 13), as often as the Fish
+	meadow.Herd.Buffalo = 0.1 -- World 2's Meadow Rare (QM, Oct 13; a guess)
+	meadow.Herd.Crocodile = 0.2 -- World 2's Meadow Rare (QM, Oct 13; a guess)
+	meadow.Herd.MarbleColossus = 0.08 -- World 2's Meadow Epic (QM, Oct 13), as often as the Rhino
+	meadow.Herd.MajesticUnicorn = 0.05 -- World 2's Meadow Legendary (QM, Oct 13), as often as the Unicorn
+	meadow.GroundColors = { rgb(206, 168, 58), rgb(190, 152, 46) }
+	meadow.WallColors = { rgb(236, 232, 224), rgb(218, 214, 206) } -- marble
+	meadow.Patches = {
+		Dirt = { rgb(142, 101, 60), rgb(128, 89, 52) }, -- (QM, Oct 13: 20% lighter, then its checker 20% less contrast; was 118, 84, 50 / 104, 72, 42)
+		Grass = { rgb(182, 144, 44), rgb(166, 130, 36) }, -- the darker grass, beside the dirt
+	}
+	-- The second biome: the Crimson Lands (QM, Oct 13; tools/world2_crimson.luau's floor).
+	local crimson = Config.Biomes[2]
+	crimson.GroundColors = { rgb(121, 20, 37), rgb(110, 17, 33) } -- #791425
+	crimson.Patches = {
+		Crimson = { rgb(144, 44, 43), rgb(132, 38, 38) }, -- #902C2B, round every stone tile
+		Stone = { rgb(119, 86, 86), rgb(108, 77, 77) }, -- #775656 single tiles
+	}
+	crimson.Herd = table.clone(crimson.Herd)
+	crimson.Herd.Eyeworm = 0.3 -- the Crimson Lands' animals (QM, Oct 13): Uncommon, as often as the Cactus
+	crimson.Herd.Maw = 0.3 -- Rare, as the Scorpion
+	crimson.Herd.IvorySpider = 0.05 -- Epic, as the Sandworm
+	crimson.Herd.Asura = 0.05 -- Legendary, as the Snake
+	crimson.Herd.CrimsonScorpion = 0.2 -- Uncommon, as the Kitten
+	crimson.Herd.Beholder = 0.3 -- the Godlands' Rare joins the Crimson Lands (QM, Oct 13), in the Spine Lizard's slot
+	-- The third: the Crystal Cavern (QM, Oct 13; tools/world2_cavern.luau): blue-grey by the
+	-- walls to ice to crystal down the middle; its plank boards keep their own colours.
+	local cavern = Config.Biomes[3]
+	cavern.GroundColors = { rgb(90, 109, 143), rgb(82, 99, 131) } -- #5A6D8F
+	cavern.Patches = {
+		Ice = { rgb(98, 129, 167), rgb(89, 118, 153) }, -- #6281A7
+		Crystal = { rgb(116, 186, 213), rgb(105, 171, 197) }, -- #74BAD5
+	}
+	cavern.WallColors = { rgb(56, 72, 103), rgb(48, 62, 90) } -- #384867
+	cavern.CapColor = rgb(44, 57, 82)
+	cavern.Herd = table.clone(cavern.Herd)
+	cavern.Herd.CrystalCentipede = 0.3 -- the Cavern's first animal (QM, Oct 13), an Uncommon as often as the Penguin
+	cavern.Herd.RedMushroom = 0.25 -- the Living Mushrooms (QM, Oct 13), as often as the Boar, Snowman and Ice Golem
+	cavern.Herd.BrownMushroom = 0.22
+	cavern.Herd.PurpleMushroom = 0.12
+	cavern.Herd.BlueCrystal = 0.25 -- the Living Crystals (QM, Oct 13), as often as the Boar and Snowman
+	cavern.Herd.PinkCrystal = 0.22
+	cavern.Herd.CrystalSpider = 0.12 -- the Crystal Spider (QM, Oct 13), an Epic as often as the Ice Golem
+	cavern.Herd.CrystalPhoenix = 0.08 -- the Crystal Phoenix (QM, Oct 13), an Epic too
+	cavern.Herd.CrystalElephant = 0.04 -- the Crystal Elephant (QM, Oct 13), the Legendary, as rare as the Icebringer
+	-- The fourth: the Woodland Maze (QM, Oct 13; tools/world2_woodland.luau): brown, darker
+	-- by the walls.
+	local woodland = Config.Biomes[4]
+	woodland.GroundColors = { rgb(121, 72, 46), rgb(110, 65, 41) } -- #79482E
+	woodland.Patches = {
+		Soil = { rgb(142, 81, 57), rgb(130, 74, 52) }, -- #8E5139
+		Path = { rgb(151, 89, 57), rgb(139, 81, 52) }, -- #975939, the middle
+		-- (the Ocean's patches under it: very dark soil, QM Oct 13; were its grass and trench,
+		-- green to blue to purple along the way)
+		Grass = { rgb(38, 25, 18), rgb(33, 21, 15) },
+		Trench = { rgb(38, 25, 18), rgb(33, 21, 15) },
+		Lava = { rgb(38, 25, 18), rgb(33, 21, 15) },
+	}
+	woodland.Depths = nil -- (no sea floor's colours along it: QM, Oct 13)
+	woodland.Herd = table.clone(woodland.Herd)
+	woodland.Herd.Caterpillar = 0.3 -- the Woodland Maze's Uncommon (QM, Oct 13), as often as the Starfish
+	woodland.Herd.PinkButterfly = 0.25 -- the Pink Butterfly (QM, Oct 13): Uncommon, as often as the Clownfish
+	woodland.Herd.OrangeButterfly = 0.15 -- the Orange Butterfly (QM, Oct 13), a Rare as often as the Lionfish
+	woodland.Herd.LivingBirch = 0.15 -- the Woodland's Rare (QM, Oct 13), as often as the Lionfish
+	woodland.Herd.Hawkmoth = 0.15 -- the Hawkmoth (QM, Oct 13), an Epic as often as the King Crab
+	woodland.Herd.RollingLog = 0.15 -- the Woodland Maze's Rare (QM, Oct 13), as often as the Lionfish
+	woodland.Herd.GiantGolem = 0.05 -- the Giant Golem (QM, Oct 13), the Legendary, as rare as the Kraken
+	-- The fifth: the Temple (QM, Oct 13; tools/world2_temple.luau): a rock path, grass and
+	-- marble a stud up, ponds a stud and two down (their flowing water: tools/world2_water.luau).
+	local temple = Config.Biomes[5]
+	temple.Herd = table.clone(temple.Herd)
+	temple.Herd.Catfish = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
+	temple.Herd.Tiger = 0.17 -- the Temple's Rare (QM, Oct 13), as often as the Fire Lobster
+	temple.Herd.JadeStatue = 0.13 -- the Jade and Garnet Statues (QM, Oct 13), Epics as often as the Rockworm
+	temple.Herd.GarnetStatue = 0.13
+	temple.Herd.Fox = 0.42 -- the Temple's Uncommon (QM, Oct 13), as often as the Firebird
+	temple.Herd.NineTailedFox = 0.17 -- the Fox's rare variant (QM, Oct 13), as often as the Fire Lobster
+	temple.Herd.Kitsune = 0.03 -- the Kitsune (QM, Oct 13), the Temple's Legendary, as rare as the Phoenix
+	temple.GroundColors = { rgb(158, 141, 116), rgb(146, 130, 106) } -- (no Ground parts: Rock is its base)
+	temple.Patches = {
+		Rock = { rgb(158, 141, 116), rgb(146, 130, 106) }, -- #9E8D74
+		Grass = { rgb(145, 178, 41), rgb(133, 164, 35) }, -- #91B229
+		Marble = { rgb(200, 200, 200), rgb(186, 186, 186) }, -- #C8C8C8
+		SideDirt = { rgb(200, 200, 200), rgb(190, 188, 184) },
+		Water = { rgb(37, 81, 40), rgb(34, 99, 55) }, -- (QM's water tile's greens, so the pond sides match it)
+		DeepWater = { rgb(26, 57, 28), rgb(24, 69, 38) },
+	}
+	temple.WallColors = { rgb(200, 200, 200), rgb(186, 186, 186) }
+	temple.CapColor = rgb(176, 176, 176)
+	-- The last: the Ancient Tomb (QM, Oct 13; tools/world2_tomb.luau): sand, a gold causeway a
+	-- stud up and gold daises two up in darker frames. (World 2's zones end: no endless.)
+	local tomb = Config.Biomes[6]
+	tomb.Herd = table.clone(tomb.Herd)
+	tomb.Herd.Geb = 0.03 -- Geb (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
+	tomb.Herd.Nut = 0.03 -- Nut (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
+	tomb.Herd.Bes = 0.03 -- Bes (QM, Oct 13), one of the Tomb's three Legendaries, as rare as the Bone Rex
+	tomb.Herd.TombJackal = 0.15 -- the Tomb's Rare (QM, Oct 13), as often as the Raptor
+	tomb.Herd.LionArcher = 0.15 -- the Lion Archer (QM, Oct 13), the Tomb's Rare, as often as the Raptor
+	tomb.Herd.EagleSentry = 0.08 -- the Eagle Sentry (QM, Oct 13), a Tomb Epic as often as the Pterodactyl
+	tomb.Herd.BloatedMummy = 0.25 -- the Tomb's Uncommon (QM, Oct 13), as often as the Ankylosaurus
+	tomb.Herd.Scarab = 0.25 -- the Tomb's Uncommon (QM, Oct 13), as often as the Ankylosaurus
+	tomb.GroundColors = { rgb(220, 201, 152), rgb(210, 191, 142) } -- (its base is Sand)
+	tomb.Patches = {
+		Sand = { rgb(220, 201, 152), rgb(210, 191, 142) }, -- #DCC998
+		Dune = { rgb(208, 184, 134), rgb(198, 174, 124) }, -- #D0B886
+		Paving = { rgb(208, 184, 134), rgb(198, 174, 124) },
+		Gold = { rgb(226, 194, 0), rgb(196, 167, 3) }, -- #E2C200 / #C4A703
+		Frame = { rgb(196, 167, 3), rgb(180, 152, 2) },
+	}
+	tomb.WallColors = { rgb(211, 183, 66), rgb(196, 168, 54) } -- #D3B742
+	tomb.CapColor = rgb(186, 158, 46)
+	-- Walls and gate glows (QM, Oct 13: the Level design thread's batch; tools/world2_walls.luau).
+	crimson.WallColors = { rgb(91, 50, 54), rgb(82, 44, 48) }
+	crimson.CapColor = rgb(72, 39, 42)
+	crimson.GateColor = rgb(255, 59, 92)
+	cavern.GateColor = rgb(92, 225, 255)
+	woodland.WallColors = { rgb(70, 42, 24), rgb(60, 36, 20) } -- dark brown (QM, Oct 13)
+	-- Not the Ocean's sea any more (its blue haze, hue-turned pink here, and bubbles): a very
+	-- subtle autumn orange haze far off (QM, Oct 13; Ocean.client).
+	woodland.Haze = { Color = rgb(250, 176, 110), Tint = rgb(255, 248, 238), FogStart = 250, FogEnd = 1400, FadeTime = 1.5, Bubbles = 0, NoDepths = true }
+	woodland.CapColor = rgb(242, 109, 57) -- vibrant autumn leaves on top (QM, Oct 13)
+	woodland.GateColor = rgb(242, 109, 57)
+	temple.GateColor = rgb(130, 226, 80)
+	tomb.GateColor = rgb(255, 200, 30)
+	-- Only World 2's own animals run in its herds (QM, Oct 13: no World 1 animals in the
+	-- marble Meadow): each biome keeps the kinds the lines above added. A biome with none
+	-- yet runs Fish as a placeholder.
+	local own = {}
+	for i, biome in Config.Biomes do
+		own[i] = {}
+	end
+	local function ownHerd(i, kinds)
+		for _, kind in kinds do
+			own[i][kind] = true
+		end
+	end
+	ownHerd(1, { "MarbleFish", "Lion", "Buffalo", "Crocodile", "MarbleColossus", "MajesticUnicorn", "Bunny", "Rhino" }) -- (the Bunny and Rhino too, at World 1's weights: QM, Oct 13)
+	ownHerd(2, { "Eyeworm", "CrimsonScorpion", "Maw", "Beholder", "IvorySpider", "Asura" })
+	ownHerd(3, { "CrystalCentipede", "RedMushroom", "BrownMushroom", "PurpleMushroom", "BlueCrystal", "PinkCrystal", "CrystalSpider", "CrystalPhoenix", "CrystalElephant" })
+	ownHerd(4, { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }) -- the Woodland Maze
+	ownHerd(5, { "Loong", "Catfish", "Fox", "Tiger", "NineTailedFox", "JadeStatue", "GarnetStatue", "Kitsune" }) -- the Temple
+	ownHerd(6, { "TombJackal", "LionArcher", "Nut", "Geb", "EagleSentry", "Bes", "BloatedMummy", "Scarab" }) -- the Tomb
+	for i, biome in Config.Biomes do
+		local herd = {}
+		for kind, weight in biome.Herd or {} do
+			if own[i][kind] then
+				herd[kind] = weight
+			end
+		end
+		biome.Herd = if next(herd) then herd else { Fish = 1 }
+	end
+	-- The last three biomes' animals bigger, and more of them (QM, Oct 13): x their size
+	-- (AnimalScale, on top of any of their own: wild and as pets) and x how often they spawn.
+	Config.AnimalScale = table.clone(Config.AnimalScale)
+	for i, more in { [4] = { size = 2, spawn = 1.6 }, [5] = { size = 2.5, spawn = 2 }, [6] = { size = 3, spawn = 2.5 } } do
+		for kind in own[i] do
+			-- (not the Loong running wild in the Temple: it's 4x everywhere already, QM Oct 15)
+			if Config.CrossWorldExempt[kind] then
+				continue
+			end
+			Config.AnimalScale[kind] = (Config.AnimalScale[kind] or 1) * more.size
+		end
+		local biome = Config.Biomes[i]
+		biome.HerdSpawnEvery = (biome.HerdSpawnEvery or Config.HerdSpawnEvery) / more.spawn
+	end
+	Config.Biomes[6].HerdSpawnEvery = Config.Biomes[4].HerdSpawnEvery -- (the Tomb as often as the Woodland: QM, Oct 13, 2.5x was far too many)
+	-- World 2's speeds (QM, Oct 13: each animal's % into a biome on a full sprint ride,
+	-- 2,904 studs per 1 Speed). The rest keep theirs (the Seraphs 0.5, the Majestic Unicorn and
+	-- the Asura as they were).
+	for kind, speed in {
+		MarbleFish = 0.809, -- 10% into the Crimson Lands
+		Lion = 0.872, -- 20% into the Crimson Lands
+		Crocodile = 0.878, -- 21% into the Crimson Lands
+		Buffalo = 0.934, -- 30% into the Crimson Lands
+		MarbleColossus = 1.028, -- 45% into the Crimson Lands
+		CrimsonScorpion = 1.603, -- 35% into the Crystal Cavern (QM, Oct 13)
+		IvorySpider = 1.901, -- 80% into the Crystal Cavern (QM, Oct 13)
+		Maw = 1.702, -- 50% into the Crystal Cavern (QM, Oct 13)
+		Beholder = 1.769, -- 60% into the Crystal Cavern (QM, Oct 13)
+		RedMushroom = 2.355, -- 30% into the Woodland (QM, Oct 13)
+		BlueCrystal = 2.355, -- 30% into the Woodland (QM, Oct 13)
+		BrownMushroom = 2.57, -- 50% into the Woodland (QM, Oct 13)
+		PinkCrystal = 2.57, -- 50% into the Woodland (QM, Oct 13)
+		PurpleMushroom = 2.742, -- 66% into the Woodland (QM, Oct 13)
+		CrystalSpider = 2.764, -- 68% into the Woodland (QM, Oct 13)
+		CrystalPhoenix = 3.281, -- 10% into the Temple (QM, Oct 13)
+		CrystalElephant = 3.281, -- 10% into the Temple (QM, Oct 13)
+		Eyeworm = 1.438, -- 10% into the Crystal Cavern (QM, Oct 13)
+		CrystalCentipede = 2.14, -- 10% into the Woodland (QM, Oct 13)
+		Caterpillar = 3.541, -- 25% into the Temple (QM, Oct 13: +10 points, was 15%)
+		PinkButterfly = 3.455, -- 20% into the Temple (QM, Oct 13: +10 points, was 10%)
+		OrangeButterfly = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
+		LivingBirch = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
+		RollingLog = 3.715, -- 35% into the Temple (QM, Oct 13: +10 points, was 25%)
+		Hawkmoth = 4.322, -- 70% into the Temple (QM, Oct 13: +10 points, was 60%)
+		GiantGolem = 6.06, -- 46% into the Tomb (QM, Oct 13: +10 points, was 36%)
+	} do
+		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
+		Config.AnimalStats[kind].Speed = speed
+	end
+	-- The Temple and Tomb on World 2's own curve (QM, Oct 13: "balance them to whatever
+	-- seems reasonable"; they had World 1's Volcano and Jurassic numbers). Speed as above:
+	-- the Temple's reach into the Tomb, its Legendary to the finish line; the Tomb's (the
+	-- last biome) further into itself, its Legendaries to the finish line. Income about 2x a
+	-- biome by rarity; Legendaries hatch in 30 and 40 minutes, not World 1's 12 hours.
+	for kind, s in Config.World2Pets do
+		Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind] or { Stamina = 1 })
+		Config.AnimalStats[kind].Speed = s[1]
+		Config.PetIncome[kind], Config.PetHatchTime[kind] = s[2], s[3]
+	end
+	-- Every animal in World 2's Meadow 30% faster still (QM, Oct 13: "they're too slow"), the
+	-- Bunny and Rhino too (here only: this is World 2's Config); not the trophy Seraph.
+	for kind in own[1] do
+		if Config.AnimalStats[kind] then
+			Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind])
+			Config.AnimalStats[kind].Speed *= 1.3
+		end
+	end
+	-- The trophy angels (QM, Oct 13: his weights; were 1 in 300 of their biome's stampede).
+	for i, weight in { 0.001, 0.002, 0.002 } do
+		Config.Biomes[i].Herd[({ "Seraph", "CrimsonSeraph", "CrystalSeraph" })[i]] = weight
+	end
+	-- And all three in the Ancient Tomb (QM, Oct 13): each 1 in 1,000 of its stampede.
+	local tombTotal = 0
+	for _, weight in Config.Biomes[6].Herd do
+		tombTotal += weight
+	end
+	for _, angel in { "Seraph", "CrimsonSeraph", "CrystalSeraph" } do
+		Config.Biomes[6].Herd[angel] = tombTotal / 997 -- (3 of them: each ends up 1 in 1,000 of the total)
+	end
+	-- The trophy Black Widow (QM, Oct 13): 1 in 500 of the Crimson Lands' stampede.
+	local crimsonTotal = 0
+	for _, weight in Config.Biomes[2].Herd do
+		crimsonTotal += weight
+	end
+	Config.Biomes[2].Herd.BlackWidow = crimsonTotal / 499
+	-- World 1's animals ridden here: a Horse's speed (QM, Oct 14; Config.slowedHere).
+	local horse = (Config.AnimalStats.Horse or { Speed = 1 }).Speed
+	for kind, stats in Config.AnimalStats do
+		if not Config.ownHere(kind, 2) then -- (and World 3's: QM, Oct 15)
+			Config.AnimalStats[kind] = table.clone(stats)
+			Config.AnimalStats[kind].Speed = horse
+		end
+	end
+	-- The 45 s timer (QM, Oct 14): every animal here 33/45 as fast, so each still reaches as far
+	-- as it did in 33 s (the % into a biome in the comments above still hold).
+	for kind, stats in Config.AnimalStats do
+		Config.AnimalStats[kind] = table.clone(stats)
+		Config.AnimalStats[kind].Speed = stats.Speed * 33 / Config.RideSeconds
+	end
 end
-
 -- World 2's last three biomes' animals are bigger there (above: 2x, 2.5x, 3x). Now pets go
 -- with you (QM, Oct 14), they're as big in the other worlds too. (Not the Loong: World 1's own as well.)
-do
+if Config.World ~= 2 then
 	Config.AnimalScale = table.clone(Config.AnimalScale)
 	for size, kinds in {
 		[2] = { "Caterpillar", "PinkButterfly", "OrangeButterfly", "LivingBirch", "Hawkmoth", "RollingLog", "GiantGolem" }, -- the Woodland Maze
@@ -2537,10 +2204,26 @@ end
 -- Floors, walls and their colours: the World 3 terrain thread's (tools/world3_course.luau, then
 -- world3_<biome>.luau; not funnel.luau). Animals and bosses come from the biome animal threads;
 -- until then each herd runs Fish (World 2's way) and each boss is World 2's in that slot.
--- The ride's boss timer, in seconds (Ride's Hold bar).
-function Config.bossSeconds(_player)
-	return Config.RideSeconds
+-- The Halloween world's base (QM, Oct 15: orange grass, dark stone paths, like the Meadow's;
+-- tools/halloween_floor.luau): its first biome's colours, which paint the base floor by part name.
+-- Gems (QM, Oct 15): the Halloween world's own currency, nothing anywhere else. There your
+-- pets earn gems instead of cash (their PetIncome x Rate a second), and the ride's boss timer
+-- starts at BossStart seconds, BossStep more for each "+5s TIME" bought with gems (the top
+-- bar: World2Bar.client; Gold.server's BuyBossTime), the nth (from 0) for Price x Growth^n.
+-- nil in the other worlds.
+Config.Gems = nil
+-- The ride's boss timer, in seconds (Ride's Hold bar): RideSeconds, or with Gems its start
+-- and the time bought.
+function Config.bossSeconds(player)
+	if not Config.Gems then
+		return Config.RideSeconds
+	end
+	return Config.Gems.BossStart + Config.Gems.BossStep * (player and player:GetAttribute("BossTime") or 0)
 end
+function Config.bossTimePrice(bought)
+	return math.floor(Config.Gems.Price * Config.Gems.Growth ^ (bought or 0) + 0.5)
+end
+Config.GemYellow = Color3.fromHex("FFFC2E") -- (gems' yellow, where cash is green: QM, Oct 15)
 -- The Halloween animals (QM, Oct 15): pets are shared by every world, Halloween ones too, but
 -- a Halloween pet earns only gems, and only in the Halloween world, and the rest only cash,
 -- only outside it: anywhere else they're "useless". [kind] = true: Config.HalloweenPets'.
@@ -2551,9 +2234,100 @@ end
 -- Whether a pet of `kind` (a hybrid: `fuse` its other half, Halloween if either is) earns here.
 function Config.earnsHere(kind, fuse)
 	local halloween = Config.HalloweenAnimals[kind] == true or (fuse ~= nil and Config.HalloweenAnimals[fuse] == true)
-	return not halloween -- (the Halloween world is gone, QM Nov 6: its pets earn nothing)
+	return halloween == (Config.World == 4)
 end
 
+if Config.World == 4 then
+	local rgb = Color3.fromRGB
+	Config.Gems = { BossStart = 5, BossStep = 5, Price = 100, Growth = 1.6, Rate = 1 }
+	local meadow = table.clone(Config.Biomes[1])
+	meadow.GroundColors = { rgb(121, 65, 137), rgb(113, 61, 130) } -- (QM, Oct 15: purple, set in Play; was orange 240,136,36)
+	meadow.Patches = table.clone(meadow.Patches or {})
+	meadow.Patches.Grass = { rgb(100, 55, 105), rgb(92, 51, 97) } -- darker, between the ground and the paths
+	meadow.Patches.Dirt = { rgb(159, 136, 179), rgb(153, 130, 174) } -- the paths, light lilac
+	Config.Biomes = table.clone(Config.Biomes)
+	meadow.WallColors = { rgb(63, 38, 77), rgb(74, 44, 87) } -- dark purple walls (QM, Oct 15)
+	meadow.CapColor = rgb(240, 128, 200) -- pink wall tops (QM, Oct 15)
+	Config.Biomes[1] = meadow
+	-- The Desert as a teal night graveyard (QM, Oct 15, his picture: was the base's purples):
+	-- pale blue flagstones, slate-blue patches (bluer than his picture: the Lighting's warm Ambient pinks them), dark teal walls with teal tops. Its cacti
+	-- and rocks are the Halloween props in teal (tools/halloween_desert.luau).
+	local desert = table.clone(Config.Biomes[2])
+	desert.GroundColors = { rgb(126, 180, 210), rgb(116, 170, 202) }
+	desert.WallColors = { rgb(42, 88, 104), rgb(50, 100, 116) }
+	desert.CapColor = rgb(86, 172, 182)
+	desert.Patches = table.clone(desert.Patches or {})
+	desert.Patches.Grass = { rgb(86, 122, 150), rgb(78, 114, 142) } -- (its dry grass: slate blue)
+	desert.Patches.Stone = { rgb(104, 154, 186), rgb(96, 146, 178) } -- (its sandstone, a stud up: darker flagstone)
+	Config.Biomes[2] = desert
+	-- Three biomes here (QM, Oct 15): Haunted Hills (the Meadow), Soul Valley (the Desert), then
+	-- the Pumpkin Patch, endless: the course is cut where Soul Valley ends and past it the
+	-- Patch's chunks are laid one after another, picked at random ("like roadwork": Config.Endless
+	-- Chunks, Client/Endless; the chunks tools/pumpkin_chunks.luau builds in
+	-- ReplicatedStorage.PumpkinPatchChunks, dressed with the harvest and pumpkin props). Its
+	-- stampede empty for now. Its colours are the chunks' own (and the pens' tiles').
+	meadow.Name, desert.Name = "Haunted Hills", "Soul Valley"
+	-- Their own animals (QM, Oct 15: all World 1's scrapped here), weights as the Meadow's and the
+	-- Desert's by rarity (guesses). The Pumpkin Patch has none till its own are in (below).
+	meadow.Herd = { BlackCat = 0.35, Bat = 0.25, PumpkinPup = 0.25, PurpleTarantula = 0.13, Werewolf = 0.08, SoulHorse = 0.05 }
+	desert.Herd = { Ghost = 0.3, SkeletonDog = 0.25, TombstoneCrawler = 0.25, ZombieBear = 0.2, WispWolf = 0.12, GrimReaper = 0.025 }
+	local patch = table.clone(Config.Biomes[3])
+	patch.Name = "Pumpkin Patch"
+	patch.GroundColors = { rgb(214, 184, 134), rgb(204, 174, 124) } -- tan
+	patch.WallColors = meadow.WallColors
+	patch.CapColor = rgb(240, 140, 40) -- pumpkin orange tops
+	patch.Patches = {
+		Grass = { rgb(136, 156, 104), rgb(126, 146, 96) },
+		Dirt = { rgb(160, 112, 74), rgb(148, 102, 66) },
+	}
+	patch.Haze, patch.Depths, patch.Sky = nil, nil, nil
+	patch.Herd = {} -- (empty till its own animals are in: QM, Oct 15, every World 1 animal scrapped here; was the Tundra's)
+	patch.Length = 256 -- (one chunk: past the cut it's all chunks)
+	Config.Biomes = { meadow, desert, patch }
+	Config.CourseLength = meadow.Length + desert.Length + patch.Length
+	Config.Endless = { Cut = -(meadow.Length + desert.Length), Length = 256, Chunks = "PumpkinPatchChunks" } -- (3984: a whole 16)
+	Config.BiomeNames[4] = { "Haunted Hills", "Soul Valley", "Pumpkin Patch" }
+	-- Its bosses (QM, Oct 15: "make bosses for each zone, last one grim reaper"; was the Chicken
+	-- everywhere): a giant jack-o'-lantern, a giant Soul Horse reskinned, and a giant Grim Reaper.
+	Config.Boss.ByBiome = {
+		["Haunted Hills"] = "GiantPumpkin", -- (QM: a giant pumpkin)
+		["Soul Valley"] = "GiantSoulHorse", -- (QM: "a giant soul horse make it reskinned to be cooler")
+		["Pumpkin Patch"] = "GiantGrimReaper",
+	}
+	Config.Boss.Room.GiantPumpkin, Config.Boss.Room.GiantSoulHorse, Config.Boss.Room.GiantGrimReaper = 60, 50, 70 -- (guesses)
+	Config.Boss.Faces.GiantPumpkin = { At = Vector3.new(0, 0.05, 0.45), From = Vector3.new(0, 6, 60) } -- (its carved face; a guess)
+	Config.Boss.Faces.GiantSoulHorse = { At = Vector3.new(0, 0.3, 0.38), From = Vector3.new(24, 6, 55) } -- (its head, a little from the side for its eye; a guess)
+	Config.Boss.Faces.GiantGrimReaper = { At = Vector3.new(0, 0.25, 0.3), From = Vector3.new(0, 6, 70) } -- (its skull under the hood; a guess)
+	-- The quests: World 1's, to this world's three biomes, and only animals that run here.
+	Config.Quests = {
+		{
+			{ Text = "Reach Haunted Hills", Kind = "reach", Biome = 1, Egg = "Bat", NoPenLevel = true }, -- (Halloween eggs, Oct 15: were World 1's Cactus,
+			{ Text = "Reach Soul Valley", Kind = "reach", Biome = 2, Egg = "SkeletonDog" }, -- Penguin,
+			{ Text = "Reach Pumpkin Patch", Kind = "reach", Biome = 3, Egg = "ZombieBear" }, -- Snowman)
+		},
+		{
+			{ Text = "Lasso animals", Kind = "lasso", Need = 3, Egg = "Werewolf" }, -- (was the Spine Lizard's)
+			{ Text = "Merge an animal", Kind = "merge", Need = 1, Egg = "SnackYak" },
+			{ Text = "Collect animals", Kind = "home", Need = 5, Egg = "TombstoneCrawler" }, -- (was the Boar's)
+			{ Text = "Lasso Ghosts", Kind = "lasso", Animal = "Ghost", Need = 4, Egg = "WispWolf" }, -- (was 4 Snowmen for the Ice Golem's)
+			{ Text = "Collect animals", Kind = "home", Need = 20, Egg = "SnackYak" }, -- (no finish line on an endless course)
+		},
+		Config.Quests[3],
+	}
+	Config.Sky = "Default" -- Roblox's own sky with its clouds and stars (QM, Oct 15: World.server)
+end
+-- World 2's Temple: the Loong runs wild there (QM, Oct 13), 1 in 4,000 of its stampede (QM, Oct 15:
+-- was 0.025, now it's sold at World 1's base), counted once the Temple's herd is all in.
+if Config.World == 2 then
+	local temple = Config.Biomes[5].Herd
+	local others = 0
+	for kind, weight in temple do
+		if kind ~= "Loong" then
+			others += weight
+		end
+	end
+	temple.Loong = others / 3999
+end
 if Config.World == 3 then
 	local rgb = Color3.fromRGB
 	local SAND = { rgb(246, 226, 173), rgb(237, 216, 160) } -- (QM, Oct 15: his GroundA/B)
@@ -2758,224 +2532,31 @@ for kind, stats in EXEMPT_STATS do
 	Config.AnimalStats[kind] = table.clone(stats)
 end
 
--- (Config.SharedPets, above: the income curve's numbers back, after the other worlds' tables)
-for kind, p in Config.SharedPets do
-	Config.PetIncome[kind], Config.PetHatchTime[kind] = p[1], p[2]
-	Config.AnimalStats[kind] = { Speed = p[3], Stamina = 3 }
-end
-
--- Speed by biome (QM, Nov 6: "logarithmic speed growth"): the Slingshot's unlocks decide which
--- biome you play in, not how fast your pets run, so a later biome's animals are only a little
--- faster. Each World 1 biome's herd (weighted as it spawns) averages the Meadow's x
--- (1 + SpeedLog x ln(its place)): 1x, 1.35x, 1.55x, 1.69x... about 2x by the 8th. Each animal
--- keeps its place in its biome (the same share of that biome's average as before). Gold still
--- doubles each biome (the income curve above). The Robux pets, the Fish and the Horse keep theirs.
-Config.SpeedLog = 0.5
-if Config.World == 1 then
-	local skip = { SnackYak = true, RoboShark = true, Fish = true, Horse = true }
-	local function average(biome)
-		local weights, total = 0, 0
-		for kind, weight in biome.Herd do
-			local stats = Config.AnimalStats[kind]
-			if weight > 0 and stats and not skip[kind] then
-				weights += weight
-				total += weight * stats.Speed
-			end
-		end
-		return if weights > 0 then total / weights else nil
-	end
-	local base = average(Config.Biomes[1])
-	for i = 2, #Config.Biomes do
-		local biome = Config.Biomes[i]
-		local was = average(biome)
-		if was and base then
-			local k = base * (1 + Config.SpeedLog * math.log(i)) / was
-			for kind in biome.Herd do
-				local stats = Config.AnimalStats[kind]
-				if stats and not skip[kind] then
-					Config.AnimalStats[kind] = table.clone(stats)
-					Config.AnimalStats[kind].Speed = math.floor(stats.Speed * k * 100 + 0.5) / 100
-				end
-			end
+-- World 2's nerf (QM, Oct 20): each animal's final Speed, after everything above. A full 45 s
+-- sprint now gets a flat part of a biome less far than it did (QM: 30% into a biome, less 40%, is
+-- 90% into the one before), so some land a biome earlier (design/world2_speeds.md). The Tomb, the
+-- Meadow, the Seraphs and the Loong are as they were. The Asura and Black Widow spawn 1% of the
+-- Crimson Lands' stampede each (their Herd weights, of a total ~1.175).
+if Config.World == 2 then
+	local speeds = {
+		-- Crimson Lands: 0.4 of a biome less far
+		Eyeworm = 0.8685, CrimsonScorpion = 0.9829, Maw = 1.0542, Beholder = 1.1033, IvorySpider = 1.2001, Asura = 1.7382, BlackWidow = 1.7382,
+		-- Crystal Cavern: 0.4 of a biome less
+		CrystalCentipede = 1.3452, RedMushroom = 1.4423, BlueCrystal = 1.4423, PinkCrystal = 1.5695, BrownMushroom = 1.5695, PurpleMushroom = 1.6956, CrystalSpider = 1.7118, CrystalPhoenix = 2.0424, CrystalElephant = 2.0424,
+		-- Woodland Maze: 0.3 of a biome less, the Hawkmoth 10% into the Temple
+		PinkButterfly = 2.2002, Caterpillar = 2.2392, OrangeButterfly = 2.3425, RollingLog = 2.3425, LivingBirch = 2.3425, Hawkmoth = 2.4061, GiantGolem = 3.8622,
+		-- Temple: 0.2 of a biome less (not the Loong)
+		Catfish = 3.424, Fox = 3.424, Tiger = 3.5516, NineTailedFox = 3.6484, JadeStatue = 3.7452, GarnetStatue = 3.7452, Kitsune = 5.0901,
+	}
+	for kind, speed in speeds do
+		if Config.AnimalStats[kind] then
+			Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind])
+			Config.AnimalStats[kind].Speed = speed
 		end
 	end
-end
-
--- The endless biomes (Config.Endless) as biome tiers 9, 10 and 11, on the same curves as World 1's
--- (QM, Nov 6): speed the Meadow's average x (1 + SpeedLog x ln(tier)), income 2x the tier before
--- (the Ocean's, then each other). Each animal keeps its place in its biome. Kinds a World 1 herd
--- runs and the Robux pets keep their numbers.
-if Config.World == 1 then
-	local inWorld1 = {}
-	for _, biome in Config.Biomes do
-		for kind in biome.Herd do
-			inWorld1[kind] = true
-		end
-	end
-	local function own(kind)
-		return not inWorld1[kind] and not Config.CrossWorldExempt[kind]
-	end
-	local function average(herd, value, skip)
-		local weights, total = 0, 0
-		for kind, weight in herd do
-			local v = value(kind)
-			if weight > 0 and v and not skip[kind] then
-				weights += weight
-				total += weight * v
-			end
-		end
-		return if weights > 0 then total / weights else nil
-	end
-	local function speed(kind)
-		return Config.AnimalStats[kind] and Config.AnimalStats[kind].Speed
-	end
-	local function income(kind)
-		return Config.PetIncome[kind]
-	end
-	local base = average(Config.Biomes[1].Herd, speed, { SnackYak = true, RoboShark = true, Fish = true, Horse = true })
-	local previous = average(Config.Biomes[#Config.Biomes].Herd, income, { SnackYak = true, RoboShark = true, Fish = true })
-	for _, biome in Config.Endless.Biomes do
-		local herd = {}
-		for kind, weight in biome.Herd do
-			if own(kind) then
-				herd[kind] = weight
-			end
-		end
-		local was = average(herd, speed, {})
-		if was and base then
-			local k = base * (1 + (Config.SpeedLog or 0.5) * math.log(biome.Tier)) / was
-			for kind in herd do
-				Config.AnimalStats[kind] = table.clone(Config.AnimalStats[kind])
-				Config.AnimalStats[kind].Speed = math.floor(Config.AnimalStats[kind].Speed * k * 100 + 0.5) / 100
-			end
-		end
-		was = average(herd, income, {})
-		if was and previous then
-			local k = previous * 2 / was
-			for kind in herd do
-				if Config.PetIncome[kind] then
-					local n = Config.PetIncome[kind] * k
-					local step = if n >= 1000 then 50 elseif n >= 100 then 5 else 1
-					Config.PetIncome[kind] = math.max(1, math.floor(n / step + 0.5) * step)
-					baseIncome[kind] = Config.PetIncome[kind] -- (Config.incomeIn: what a World 1 pen earns)
-				end
-			end
-			previous = average(herd, income, {})
-		end
-	end
-end
-
--- Alphas (QM, Nov 6): an existing animal, bigger and recoloured (Animals/<Kind>.luau), about 10x
--- rarer than it. Each runs in its base's World 1 biome at a tenth of its herd weight, a size tier
--- up (capped at 4), Scale x as big as its base however its tier grows it, and otherwise takes its
--- base's numbers: twice the hatch time, three times the gold, a little faster and longer-lasting,
--- the same ability, egg and egg picture (Eggs/Egg.luau). The numbers past the size are guesses.
--- Odds: 1 in this many of its base (a tenth if left out).
-Config.Alphas = {
-	GoldenPig = { Base = "Pig", Scale = 2 }, -- Meadow
-	AlphaFish = { Base = "Fish", Scale = 1.4 },
-	AlphaRhino = { Base = "Rhino", Scale = 1.4 },
-	EmperorScorpion = { Base = "Scorpion", Scale = 2 }, -- Desert
-	AlphaSpineLizard = { Base = "SpineLizard", Scale = 1.4 },
-	AlphaSnake = { Base = "Snake", Scale = 1.4, Odds = 5 },
-	AlphaSandworm = { Base = "Sandworm", Scale = 3, Odds = 20 }, -- (QM, Nov 6: faded sand, 3x, 1 in 20)
-	AlphaBoar = { Base = "Boar", Scale = 2 }, -- Tundra (the Elder Boar's model)
-	AlphaIceGolem = { Base = "IceGolem", Scale = 1.5 },
-	AlphaIcebringer = { Base = "Icebringer", Scale = 1.4, Odds = 5 },
-	AlphaRockHog = { Base = "RockHog", Scale = 1.4 }, -- Volcano
-	AlphaLavaWhale = { Base = "LavaWhale", Scale = 1.3 },
-	AlphaPhoenix = { Base = "Phoenix", Scale = 2, Odds = 5 }, -- (the three Divine alphas 1 in 5 of their Legendary base: QM Nov 7, Divine about 1 in 10,000)
-}
-for kind, alpha in Config.Alphas do
-	local base = alpha.Base
-	local tier = Config.PetTiers[base] or 1
-	Config.PetTiers[kind] = math.min(tier + 1, 4)
-	Config.AnimalScale[kind] = (Config.AnimalScale[base] or 1) * alpha.Scale * Config.TierGrowth ^ (tier - Config.PetTiers[kind])
-	Config.PetHatchTime[kind] = (Config.PetHatchTime[base] or 60) * 2
-	Config.PetIncome[kind] = (Config.PetIncome[base] or 0) * 3
-	local stats = Config.AnimalStats[base] or { Speed = 1, Stamina = 1 }
-	Config.AnimalStats[kind] = { Speed = stats.Speed * 1.1, Stamina = stats.Stamina * 1.5 }
-	Config.Abilities[kind] = Config.Abilities[base]
-	Config.EggIcons[kind] = Config.EggIcons[kind] or Config.EggIcons[base] -- (its own recoloured egg once uploaded: tools/egg_icons_upload.py)
-	if Config.World == 1 then
-		for _, biome in Config.Biomes do
-			if biome.Herd and (biome.Herd[base] or 0) > 0 then
-				biome.Herd = table.clone(biome.Herd)
-				biome.Herd[kind] = biome.Herd[base] / (alpha.Odds or 10)
-			end
-		end
-	end
-end
--- (the Elder Boar's own size is a boss's: the Alpha Boar is 2x the Boar, its model 1.5x the Boar's)
-Config.AnimalScale.AlphaBoar /= 1.5
-Config.AnimalScale.AlphaIcebringer = (Config.AnimalScale.Icebringer or 1) * 1.4 -- (sized as the Icebringer is, not by its tier)
-Config.AnimalScale.Gecko = 1.2 -- (QM, Nov 6: bigger; its size is set by its tier, not its model)
--- The picked titans 2x their tier's size, the biggest in their biomes (QM, Nov 7: "the Ash Behemoth is the Volcano Tortoise's size")
-Config.AnimalScale.HillbackTortoise = 2
-Config.AnimalScale.MirageElephant = 2
-Config.AnimalScale.GlacierMammoth = 2
-Config.AnimalScale.AshBehemoth = 2
-Config.AnimalScale.AbyssPillbug = 2
-Config.AnimalScale.AncientMoose = 2
-Config.AnimalScale.FortressTortoise = 2
-
--- Gold by rarity (QM, Nov 7: "cash income scales pretty hard with rarity, not so much with
--- biomes": a Meadow Divine earns more than an Ocean Uncommon). Each animal that runs wild earns its
--- biome's base x (its 1 in N) ^ IncomeRarityPower, so 10x rarer earns about 6.3x more. The base is
--- set so each biome's herd-weighted average stays what the curves above made it (about 2x a biome),
--- so pacing holds. Alphas count at their own odds. An animal in two herds takes its first one's.
-Config.IncomeRarityPower = 0.8
-if Config.World == 1 then
-	local done = {}
-	for _, biome in Config.allBiomes() do
-		local total = 0
-		for _, weight in biome.Herd or {} do
-			total += math.max(weight, 0)
-		end
-		local old, new = 0, 0
-		local mine = {}
-		for kind, weight in biome.Herd or {} do
-			if weight > 0 and Config.PetIncome[kind] and not done[kind] then
-				local score = (total / weight) ^ Config.IncomeRarityPower
-				mine[kind] = score
-				old += weight * Config.PetIncome[kind]
-				new += weight * score
-			end
-		end
-		if new > 0 then
-			local k = old / new
-			for kind, score in mine do
-				local n = score * k
-				local step = if n >= 1000 then 50 elseif n >= 100 then 5 else 1
-				Config.PetIncome[kind] = math.max(1, math.floor(n / step + 0.5) * step)
-				baseIncome[kind] = Config.PetIncome[kind] -- (Config.incomeIn: what a World 1 pen earns)
-				done[kind] = true
-			end
-		end
-	end
-end
-
--- The place's workspace.PetScale wins over AnimalScale, which only seeds it (QM, Nov 6, as in
--- Fight to Steal an Egg: size the animals in Studio with the pet lineup, Shared/PetScale and
--- Shared/PetLineup; tick PetScale.CopyValues to print a line to paste over AnimalScale).
--- Last in the file, so nothing above (the alphas' sizes, the Gecko's) writes over them, and on a
--- client it waits for the place to load first: required early, workspace.PetScale wasn't there
--- yet and the game drew every animal at Config's sizes (QM, Nov 6: "make the scales I set apply").
-do
-	local RunService = game:GetService("RunService")
-	if RunService:IsClient() and RunService:IsRunning() and not game:IsLoaded() then
-		game.Loaded:Wait()
-	end
-	local petScale = workspace:FindFirstChild("PetScale")
-	if petScale then
-		-- (each biome's group, and values kept on it from before the groups)
-		for _, holder in { petScale, table.unpack(petScale:GetChildren()) } do
-			for kind, value in holder:GetAttributes() do
-				if type(value) == "number" and value > 0 then
-					Config.AnimalScale[kind] = value
-				end
-			end
-		end
+	local crimson = Config.Biomes[2] and Config.Biomes[2].Herd
+	if crimson then
+		crimson.Asura, crimson.BlackWidow = 0.01176, 0.01176
 	end
 end
 

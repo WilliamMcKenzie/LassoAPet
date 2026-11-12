@@ -1,5 +1,0 @@
-# piece: label, RGB
-Slingshot_1: Wood, 222, 124, 62
-Slingshot_2: Wrap, 240, 228, 196
-Slingshot_3: Knot, 150, 76, 38
-SlingshotBand_1: Band, 196, 170, 128

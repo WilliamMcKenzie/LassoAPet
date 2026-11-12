@@ -132,7 +132,7 @@ end)
 
 function BossChase.start(x, z)
 	BossChase.stop()
-	local biome = WorldColors.biomeConfigAt(z) -- (past the Ocean, the endless stretch's: World 2's bosses)
+	local biome = Config.Biomes[WorldColors.biomeAt(z)]
 	local kind = Config.Boss.ByBiome[biome.Name] or Config.Boss.Kind -- (each biome its own boss: QM, Oct 10)
 	local animal = spare[kind] or build(kind)
 	spare[kind] = nil

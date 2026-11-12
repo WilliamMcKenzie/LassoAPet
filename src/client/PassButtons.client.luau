@@ -8,10 +8,6 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
 local player = Players.LocalPlayer
 
-if Config.NativeUi.On then
-	return -- (none with the native UI for now: QM, Nov 6)
-end
-
 local REFERENCE_WIDTH = 1320 -- (till BaseUi's scale is there to match: below)
 local MARGIN, GAP = 18, -2 -- (the price badges fill most of the gap: 30% less space between buttons, as on the left, QM)
 local SCALE = 234 / 270 -- QM's art's pixels to ours: each button as wide as Merge and the rest on the left (BaseUi's 234: QM, Oct 13, 10% smaller; the art's ~25 px more is the price badge sticking out)
