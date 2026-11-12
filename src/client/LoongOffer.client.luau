@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Shared.Config)
-if Config.LimitedsStand == false or not (Config.Podium and Config.Podium.Hidden and Config.PetOffers and #Config.PetOffers > 0) then
+if not (Config.Podium and Config.Podium.Hidden and Config.PetOffers and #Config.PetOffers > 0) then
 	return
 end
 local Rig = require(ReplicatedStorage.Shared.Animals.Rig)

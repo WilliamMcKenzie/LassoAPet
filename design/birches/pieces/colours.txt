@@ -1,0 +1,21 @@
+# piece: label, RGB
+BirchTall_1: Trunk, 238, 234, 226
+BirchTall_2: Marks, 52, 46, 44
+BirchTall_3: Leaves, 254, 234, 92
+BirchTall_4: Leaves, 250, 214, 70
+BirchTall_5: Leaves, 255, 240, 120
+BirchTwin_1: Trunk, 238, 234, 226
+BirchTwin_2: Marks, 52, 46, 44
+BirchTwin_3: Leaves, 242, 109, 57
+BirchTwin_4: Leaves, 246, 132, 72
+BirchTwin_5: Leaves, 224, 92, 46
+BirchSmall_1: Trunk, 238, 234, 226
+BirchSmall_2: Marks, 52, 46, 44
+BirchSmall_3: Leaves, 242, 109, 57
+BirchSmall_4: Leaves, 254, 234, 92
+BirchSmall_5: Leaves, 248, 168, 64
+BirchLean_1: Trunk, 238, 234, 226
+BirchLean_2: Marks, 52, 46, 44
+BirchLean_3: Leaves, 214, 72, 43
+BirchLean_4: Leaves, 242, 109, 57
+BirchLean_5: Leaves, 196, 58, 36

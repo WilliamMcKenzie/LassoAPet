@@ -1,0 +1,98 @@
+-- World 2's props (QM, Oct 13). Made by tools/world2_props.py: edit that and
+-- re-make this, not this. Run in Studio (Edit, execute_luau) on the place with World2,
+-- after the floor scripts and world2_clear. Re-running is fine (it replaces its own).
+-- The Rock mesh thread's sets, hugging the walls, the course's middle clear: pines in the
+-- Meadow, mushrooms and runestones in the Crimson Lands, crystals and fungi in the
+-- Crystal Cavern, birches and the sword in the stone in the Woodland Maze, trees and
+-- lanterns down the Temple's sides with tombstones and lily pads (in place of
+-- world2_temple's discs), statues, sphinxes and gold in the Ancient Tomb. Big and middle pieces
+-- go in World2.Obstacles (smashed when ridden into: an invisible Base footprint and a
+-- Tier, like World 1's); small ones in World2.Decor.Props, walk-through.
+-- Each piece is cloned from ServerStorage.World2Assets.<Name>: a Model of its coloured
+-- MeshParts at the mesh's own size, pivot at its base's middle. (The pines: one of each
+-- of the base's, Pine, PineTall and PineSmall, at 1x.)
+local W = workspace.World2
+local OFFSET = 1000
+local assets = game:GetService("ServerStorage"):WaitForChild("World2Assets", 5)
+assert(assets, "ServerStorage.World2Assets (the imported meshes) not found")
+-- { biome, name, x, y (the tile's top), z, yaw, tier (0 = walk-through decor), base size x, base size z, scale }
+local PROPS = {
+--PROPS--
+}
+
+for _, m in W.Obstacles:GetChildren() do
+	if m:GetAttribute("World2Prop") then
+		m:Destroy()
+	end
+end
+local decor = W.Decor:FindFirstChild("Props")
+if decor then
+	decor:Destroy()
+end
+decor = Instance.new("Folder")
+decor.Name = "Props"
+decor.Parent = W.Decor
+
+-- Others' obstacles already standing (the base set's meadow rocks: tools/world2_base_decor.luau):
+-- a piece that would stand on one is left out.
+local standing = {}
+for _, m in W.Obstacles:GetChildren() do
+	if m:IsA("Model") and not m:GetAttribute("World2Prop") then
+		table.insert(standing, m:GetPivot().Position)
+	end
+end
+local function clear(r)
+	local at = Vector3.new(r[3] + OFFSET, 0, r[5])
+	for _, p in standing do
+		if (Vector3.new(p.X, 0, p.Z) - at).Magnitude < math.max(r[8], r[9]) / 2 + 8 then
+			return false
+		end
+	end
+	return true
+end
+
+local missing, placed, skipped = {}, 0, 0
+for _, r in PROPS do
+	if r[7] > 0 and not clear(r) then
+		skipped += 1
+		continue
+	end
+	local template = assets:FindFirstChild(r[2])
+	if not template then
+		missing[r[2]] = true
+		continue
+	end
+	local m = template:Clone()
+	m:SetAttribute("World2Prop", r[1])
+	m:ScaleTo(r[10])
+	m:PivotTo(CFrame.new(r[3] + OFFSET, r[4], r[5]) * CFrame.Angles(0, math.rad(r[6]), 0))
+	for _, p in m:GetDescendants() do
+		if p:IsA("BasePart") then
+			p.Anchored = true
+			p.CanCollide = r[7] > 0
+		end
+	end
+	if r[7] > 0 then
+		local base = Instance.new("Part")
+		base.Name = "Base"
+		base.Anchored, base.CanCollide, base.CanQuery, base.CanTouch = true, false, false, false
+		base.Transparency = 1
+		base.Size = Vector3.new(r[8], 1, r[9])
+		base.CFrame = CFrame.new(r[3] + OFFSET, r[4] + 0.5, r[5]) * CFrame.Angles(0, math.rad(r[6]), 0)
+		base.Parent = m
+		m:SetAttribute("Tier", r[7])
+		m.Parent = W.Obstacles
+	else
+		m.Parent = decor
+	end
+	placed += 1
+end
+local lilies = W.Decor:FindFirstChild("Lilies") -- (world2_temple's stand-in discs: the lily pads above take over)
+if lilies and decor:FindFirstChild("LilyPad") then
+	lilies:Destroy()
+end
+local names = {}
+for n in missing do
+	table.insert(names, n)
+end
+return string.format("%d props placed, %d left out by others' obstacles%s", placed, skipped, if #names > 0 then " | missing in World2Assets: " .. table.concat(names, ", ") else "")

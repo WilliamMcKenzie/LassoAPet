@@ -56,6 +56,9 @@ local IDS = {
 	boss_JadeAsura = "rbxassetid://129162115855106", -- the Temple's boss: the Elder Boar's monstergrowl (QM, Oct 13)
 	boss_Sphinx = "rbxassetid://95169379454314", -- the Ancient Tomb's boss: the Cactus's angry alien cat growl (QM, Oct 13)
 	boss_GiantRafflesia = "rbxassetid://95169379454314", -- World 3 Garden's boss: borrows the Cactus growl until QM picks a cry
+	boss_GiantPumpkin = "rbxassetid://129162115855106", -- the Halloween world's bosses borrow cries until QM picks theirs (Oct 15): monstergrowl
+	boss_GiantSoulHorse = "rbxassetid://95169379454314", -- (the Cactus's angry alien cat growl)
+	boss_GiantGrimReaper = "rbxassetid://137419707857339", -- (the Lava Wyrm's T-Rex Roar 2)
 	reveal_pop = "rbxassetid://4612378086", -- the egg card lands on its rarity (after the flicks): rewardscreenreveal (QM's pick, Oct 9; was 117371326373841)
 	egg_hatch = "rbxassetid://96102213526905", -- an egg in your pen hatches: Rewards (QM's pick, Oct 9; was 112644148635720)
 	gold_tick = "rbxassetid://123673857032707", -- gold counting up
@@ -74,6 +77,7 @@ local MUSIC = {
 	-- The run home (QM, Oct 9: more panicked; Oct 10: the Meadow's wherever you turned
 	-- round), APM's "Crime Scene - Action, Race & Chase":
 	home1 = "rbxassetid://1847683499", -- Running Faster A (Moritz Bintig, 2:19)
+	intro = "rbxassetid://1837301451", -- Epic Battle Simulator (APM): the intro's fight (Client/Intro, QM Oct 11)
 }
 local VOLUME = 0.5
 local GALLOP_VOLUME = 0.35

@@ -59,9 +59,6 @@ local function pressable(button)
 end
 
 local gui = Instance.new("ScreenGui")
-if Config.NativeUi.On then
-	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
-end
 gui.Name = "AwayPanel"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
@@ -147,7 +144,7 @@ boostLabel.Parent = boost
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- The world behind hazy (as the Starter Pack's).
-local HAZE = { blur = 0, brightness = 0, contrast = 0, saturation = 0 } -- (QM, Nov 6: no glass blur behind popups; was 14, 0.06, -0.15, -0.35)
+local HAZE = { blur = 14, brightness = 0.06, contrast = -0.15, saturation = -0.35 }
 local blur = Instance.new("BlurEffect")
 blur.Name = "AwayHaze"
 blur.Size = 0
@@ -202,26 +199,15 @@ local function hideOthers(on)
 	end
 end
 
--- The native UI's look (Config.NativeUi, QM Nov 6): Fight to Steal an Egg's Offline Cash popup
--- in place of the art; opened, closed and wired here as before.
-local native = if Config.NativeUi.On then require(script.Parent.NativeAway).build(gui) else nil
-if native then
-	panel.Visible = false
-end
 local function setScale(scale)
 	panelScale.Scale = scale
-	if native then
-		native.setScale(scale)
-	end
 end
 
 local function show(total)
-	local each = total
-	cash.Text = "+$" .. amount(each) .. " CASH"
-	boostLabel.Text = "+$" .. amount(each * Config.AwayBoost.Multiplier) -- (the rainbow button: what 4x gives)
-	if native then
-		native.setAmount("$" .. amount(each))
-	end
+	local gems = Config.Gems ~= nil -- (the Halloween world's pets earn gems)
+	local each = total * (if gems then Config.Gems.Rate else 1)
+	cash.Text = "+" .. (if gems then "" else "$") .. amount(each) .. (if gems then " GEMS" else " CASH")
+	boostLabel.Text = "+" .. (if gems then "" else "$") .. amount(each * Config.AwayBoost.Multiplier) -- (the rainbow button: what 4x gives)
 	if open then
 		return
 	end
@@ -258,16 +244,12 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
-for _, b in if native then { claim, native.claim } else { claim } do
-	b.Activated:Connect(function()
-		claimAway:FireServer()
-	end)
-end
-for _, b in if native then { boost, native.boost } else { boost } do
-	b.Activated:Connect(function()
-		ReplicatedStorage:WaitForChild("BuyShop"):FireServer("Away4x", "away") -- (Roblox's prompt; banked 4x once it's paid)
-	end)
-end
+claim.Activated:Connect(function()
+	claimAway:FireServer()
+end)
+boost.Activated:Connect(function()
+	ReplicatedStorage:WaitForChild("BuyShop"):FireServer("Away4x", "away") -- (Roblox's prompt; banked 4x once it's paid)
+end)
 
 -- Up when there's away gold and nothing else is going on; down once it's banked.
 local checking = false

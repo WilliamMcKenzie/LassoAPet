@@ -27,7 +27,7 @@ local WorldColors = require(script.Parent.WorldColors)
 -- Per biome: { { name, weight, rare } }, sorted by name (Herd is a dictionary, and
 -- both sides must walk it in the same order). rare: Rare or better, the eggs that
 -- get likelier deeper into the biome (Config.NestDepthOdds).
-local RARE = { Rare = true, Epic = true, Legendary = true, Divine = true }
+local RARE = { Rare = true, Epic = true, Legendary = true }
 local eggOdds = {}
 for b, biome in Config.Biomes do
 	local odds = {}

@@ -1,0 +1,67 @@
+-- World 2's home base floor (QM, Oct 13). Made by tools/world2_base.py: edit that and
+-- re-make this, not this. Run in Studio (Edit, execute_luau) on the place with World2,
+-- after tools/world2_terrain.luau and tools/world2_meadow.luau. Re-running is fine.
+-- Yellow grass, darker yellow grass and brown dirt as a gradient: the bright grass never
+-- touches the dirt, there's always darker grass between. Replaces World2's copied base
+-- floor (World 1's, its ArcBase parts) and drops any copied plant now standing on dirt.
+local W = workspace.World2
+local OFFSET = 1000
+local rgb = Color3.fromRGB
+local KINDS = { -- [kind] = { name, top, part colour, checker colour }
+	[0] = { "Ground", 0, rgb(206, 168, 58), rgb(190, 152, 46) },
+	[1] = { "Grass", 0, rgb(182, 144, 44), rgb(166, 130, 36) },
+	[2] = { "Dirt", -1, rgb(142, 101, 60), rgb(128, 89, 52) }, -- (QM: 20% lighter)
+	[3] = { "Ground", 1, rgb(206, 168, 58), rgb(190, 152, 46) }, -- the light grass a stud up (QM): all but under the pens and the start line's row
+}
+-- { kind, low x, low z, size x, size z } on 8-stud cells (x before the offset)
+local FLOOR = {
+--FLOOR--
+}
+
+local template
+for _, p in W.Ground:GetChildren() do
+	if p:IsA("BasePart") and p:GetAttribute("ArcBase") then
+		template = template or p:Clone()
+		p:Destroy()
+	end
+end
+assert(template, "no ArcBase floor in World2.Ground to copy the look of")
+for _, t in template:GetChildren() do
+	if not t:IsA("Texture") then
+		t:Destroy()
+	end
+end
+for _, r in FLOOR do
+	local k = KINDS[r[1]]
+	local x, z, sx, sz = r[2] + OFFSET, r[3], r[4], r[5]
+	local p = template:Clone()
+	p.Name = k[1]
+	p.Size = Vector3.new(sx, k[2] + 2, sz)
+	p.CFrame = CFrame.new(x + sx / 2, (k[2] - 2) / 2, z + sz / 2)
+	p.Color = k[3]
+	for _, t in p:GetChildren() do
+		t.Color3 = k[4]
+	end
+	p.Parent = W.Ground
+end
+
+local function dirtAt(x, z)
+	for _, r in FLOOR do
+		if r[1] == 2 and x >= r[2] + OFFSET and x < r[2] + OFFSET + r[4] and z >= r[3] and z < r[3] + r[5] then
+			return true
+		end
+	end
+	return false
+end
+local dropped = 0
+local plants = W.BaseDecor:FindFirstChild("Plants")
+if plants then
+	for _, m in plants:GetChildren() do
+		local at = m:GetPivot().Position
+		if dirtAt(at.X, at.Z) then
+			m:Destroy()
+			dropped += 1
+		end
+	end
+end
+return string.format("%d floor parts, %d plants on dirt dropped", #FLOOR, dropped)

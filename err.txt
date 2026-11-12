@@ -1,0 +1,2 @@
+[31mERROR[0m Failed to find tool 'stylua' in any project manifest file.
+Add the tool to a project using 'rokit add' before running it.

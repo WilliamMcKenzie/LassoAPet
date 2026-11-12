@@ -1,0 +1,21 @@
+# piece: label, RGB (Runes: Neon in game would suit them)
+MushroomGiant_1: Stem, 228, 172, 180
+MushroomGiant_2: Cap, 217, 15, 44
+MushroomGiant_3: Underside, 150, 10, 32
+MushroomMedium_1: Stem, 228, 172, 180
+MushroomMedium_2: Cap, 217, 15, 44
+MushroomMedium_3: Underside, 150, 10, 32
+MushroomSmall_1: Stem, 228, 172, 180
+MushroomSmall_2: Cap, 217, 15, 44
+MushroomSmall_3: Underside, 150, 10, 32
+CrimsonTuft_1: Strands, 217, 15, 44
+CrimsonTuft_2: Strands, 176, 12, 36
+RunestoneTall_1: Stone, 156, 124, 120
+RunestoneTall_2: Cap, 140, 110, 106
+RunestoneTall_3: Runes, 255, 186, 60
+RunestoneShort_1: Stone, 156, 124, 120
+RunestoneShort_2: Cap, 140, 110, 106
+RunestoneShort_3: Runes, 255, 186, 60
+RuneBlock_1: Stone, 156, 124, 120
+RuneBlock_2: Chunk, 170, 138, 132
+RuneBlock_3: Runes, 255, 186, 60

@@ -45,53 +45,15 @@ function Quests.load(saved)
 		if v < 3 and line == 2 and at == 3 then
 			at, skip = 2, 3
 		end
-		-- (the Rebirth goal, last, is never passed: QM Nov 7; a save past the end before it came
-		-- in waits at it)
-		local last = if quests[#quests] and quests[#quests].Kind == "rebirth" then #quests else #quests + 1
-		state.lines[line] = { at = math.clamp(at, 1, last), skip = skip }
+		state.lines[line] = { at = math.clamp(at, 1, #quests + 1), skip = skip }
 	end
-	-- (World 1's goals became one line, QM Nov 6: saves from before it start that line over)
-	if v < 4 and Config.World == 1 then
-		state.lines = { { at = 1 } }
-	end
-	state.v = 4
-	-- (QM, Nov 7: a goal's egg only the first time; `given` = { ["line.k"] = true }, the goals
-	-- already claimed once. Saved before it: everything before where each line is up)
-	state.given = {}
-	if typeof(saved) == "table" and typeof(saved.given) == "table" then
-		for key, on in saved.given do
-			if type(key) == "string" and on == true then
-				state.given[key] = true
-			end
-		end
-	else
-		for line, slot in state.lines do
-			for k = 1, slot.at - 1 do
-				state.given[line .. "." .. k] = true
-			end
-		end
-	end
+	state.v = 3
 	return state
 end
 
 local function progress(player, state, quest)
 	if quest.Kind == "reach" then
 		return if (player:GetAttribute("GatesBroken") or 1) >= quest.Biome then 1 else 0, 1
-	end
-	if quest.Kind == "rebirth" then -- (QM, Nov 7: done once you've reached the last biome; claimed by Quests.rebirth)
-		return if (player:GetAttribute("GatesBroken") or 1) >= quest.Biome then 1 else 0, 1
-	end
-	if quest.Kind == "slingshot" then -- (the Slingshot's menu has unlocked Biome: your pen level's up to it)
-		return if (player:GetAttribute("PenLevel") or 1) >= quest.Biome then 1 else 0, 1
-	end
-	if quest.Kind == "lasso" and quest.Biome and not quest.Animal then -- (lassos on any of that biome's herd)
-		local n = 0
-		for animal, weight in (Config.Biomes[quest.Biome] or {}).Herd or {} do
-			if weight > 0 then
-				n += state.counts["lasso:" .. animal] or 0
-			end
-		end
-		return math.min(n, quest.Need), quest.Need
 	end
 	local count = if quest.Animal then quest.Kind .. ":" .. quest.Animal else quest.Kind
 	return math.min(state.counts[count] or 0, quest.Need), quest.Need
@@ -111,13 +73,6 @@ function Quests.publish(player, state)
 	local list = {}
 	for line, quests in Config.Quests do
 		local slot = state.lines[line]
-		-- (a quest that's Off, Config.NativeUi's Merge: passed over, as if claimed)
-		while quests[slot.at] and quests[slot.at].Off do
-			slot.at += 1
-			if slot.skip == slot.at then
-				slot.at += 1
-			end
-		end
 		local quest = quests[slot.at]
 		if quest then
 			local have, need = progress(player, state, quest)
@@ -145,8 +100,7 @@ function Quests.penCount(player, state, n)
 	Quests.publish(player, state)
 end
 
--- Claims quest i (as published) if it's up and finished: returns it (Config.Quests') and
--- whether it's the first time it's been claimed, or nil.
+-- Claims quest i (as published) if it's up and finished: returns it (Config.Quests'), or nil.
 function Quests.claim(player, state, i)
 	local line, at = i // 100, i % 100
 	local slot = state.lines[line]
@@ -155,7 +109,7 @@ function Quests.claim(player, state, i)
 		return nil
 	end
 	local have, need = progress(player, state, quest)
-	if have < need or quest.Kind == "rebirth" then -- (Rebirth: only its popup's confirm, Quests.rebirth)
+	if have < need then
 		return nil
 	end
 	local slot = state.lines[line]
@@ -164,59 +118,8 @@ function Quests.claim(player, state, i)
 		nextAt += 1
 	end
 	state.lines[line] = { at = nextAt }
-	state.given = state.given or {}
-	local first = not state.given[line .. "." .. at] -- (its egg only the first time: QM, Nov 7)
-	state.given[line .. "." .. at] = true
 	Quests.publish(player, state)
-	return quest, first
-end
-
--- "/skipgoal N" (QM, Nov 7; Hatchery's): each line's next n goals passed over, no rewards, never
--- past the Rebirth goal. Returns the goal now up in the first line (its Text), or nil.
-function Quests.skip(player, state, n)
-	for line, quests in Config.Quests do
-		local slot = state.lines[line]
-		for _ = 1, n do
-			local quest = quests[slot.at]
-			if not quest or quest.Kind == "rebirth" then
-				break
-			end
-			slot.at += 1
-		end
-		slot.skip = nil
-	end
-	Quests.publish(player, state)
-	local first = Config.Quests[1] and Config.Quests[1][state.lines[1].at]
-	return first and first.Text
-end
-
--- The Rebirth goal (Config.Quests' "rebirth"), if it's up and done: every line back to its
--- Loop goal (else its first). True if it was (Hatchery's Rebirth then does the rest).
-function Quests.rebirth(player, state)
-	for line, quests in Config.Quests do
-		local slot = state.lines[line]
-		local quest = slot and quests[slot.at]
-		if quest and quest.Kind == "rebirth" then
-			local have, need = progress(player, state, quest)
-			if have < need then
-				return false
-			end
-			-- (QM, Nov 7: a jump back to the line's label, its goal marked Loop, "Reach Desert":
-			-- the first goals aren't done again; a line without one starts over)
-			for l, goals in Config.Quests do
-				local at = 1
-				for k, goal in goals do
-					if goal.Loop then
-						at = k
-						break
-					end
-				end
-				state.lines[l] = { at = at }
-			end
-			return true
-		end
-	end
-	return false
+	return quest
 end
 
 return Quests

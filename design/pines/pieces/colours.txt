@@ -1,0 +1,16 @@
+# piece: label, RGB
+Pine_1: Trunk, 144, 125, 114
+Pine_2: Needles, 231, 182, 88
+Pine_3: Needles, 214, 166, 74
+Pine_4: Needles, 242, 196, 104
+Pine_5: Needles, 222, 172, 80
+PineTall_1: Trunk, 144, 125, 114
+PineTall_2: Needles, 231, 182, 88
+PineTall_3: Needles, 214, 166, 74
+PineTall_4: Needles, 242, 196, 104
+PineTall_5: Needles, 222, 172, 80
+PineTall_6: Needles, 231, 182, 88
+PineSmall_1: Trunk, 144, 125, 114
+PineSmall_2: Needles, 231, 182, 88
+PineSmall_3: Needles, 214, 166, 74
+PineSmall_4: Needles, 242, 196, 104

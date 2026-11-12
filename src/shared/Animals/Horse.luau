@@ -97,31 +97,6 @@ end
 
 local Horse = {} -- the methods every variant shares
 
--- How far a seat sits above the back under it, in model units (QM, Nov 7: "seat looks off on a
--- lot of pets"): the highest part under the seat that isn't above it (spikes and crests that rise
--- past the seat don't count). Most seats sit 0 to 1 unit over the back, but that gap grew with the
--- animal (size x scale), so riders floated studs above the big ones. getSeatCFrame keeps the gap
--- this size in studs, at any size, and scales only the back's height.
-local function seatLift(data, seat)
-	local back = -math.huge
-	for _, p in data.parts or {} do
-		local cf, s = p.cframe, p.size
-		if typeof(cf) == "CFrame" and typeof(s) == "Vector3" then
-			local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = cf:GetComponents()
-			local hx = (math.abs(r00) * s.X + math.abs(r01) * s.Y + math.abs(r02) * s.Z) / 2
-			local hy = (math.abs(r10) * s.X + math.abs(r11) * s.Y + math.abs(r12) * s.Z) / 2
-			local hz = (math.abs(r20) * s.X + math.abs(r21) * s.Y + math.abs(r22) * s.Z) / 2
-			if math.abs(seat.X - x) <= hx and math.abs(seat.Z - z) <= hz then
-				local top = y + hy
-				if top <= seat.Y + 0.05 and top > back then
-					back = top
-				end
-			end
-		end
-	end
-	return if back > -math.huge then math.clamp(seat.Y - back, 0, 1.5) else 0
-end
-
 -- A kind of animal: its own model data and rarity, Horse's methods.
 -- points (optional): { seat = Vector3, neck = { center = Vector3, radius = number },
 -- seatOnNeck = true (the seat rides on the neck bone, e.g. a squid's mantle, which
@@ -139,7 +114,6 @@ local function variant(name, data, rarity, points)
 		data = data,
 		landAt = landAt(data),
 		seat = points.seat or SEAT,
-		seatLift = seatLift(data, points.seat or SEAT),
 		seatOnNeck = points.seatOnNeck,
 		seatBone = points.seatBone,
 		gallopOnSprint = points.gallopOnSprint, -- gallops only while self.sprinting (Ride sets it)
@@ -278,19 +252,16 @@ function Horse:update(dt, speed, turn)
 end
 
 function Horse:getSeatCFrame()
-	local k = self.size * self.scale
-	-- (the gap over the back stays its model size in studs: seatLift, above)
-	local down = CFrame.new(0, -(self.seatLift or 0) * (k - 1), 0)
 	if self.seatPart then
-		local at = self.seatPart.CFrame * CFrame.new((self.seat - self.pivots[self.seatBone]) * k)
-		return CFrame.new(at.Position) * self.model.PrimaryPart.CFrame.Rotation * down
+		local at = self.seatPart.CFrame * CFrame.new((self.seat - self.pivots[self.seatBone]) * self.size * self.scale)
+		return CFrame.new(at.Position) * self.model.PrimaryPart.CFrame.Rotation
 	end
 	-- (scaled with the animal too: the seat rises as it grows, e.g. the Robo Shark's hunt)
 	if self.seatOnNeck then
-		local at = self.neck.CFrame * CFrame.new((self.seat - self.pivots.neck) * k)
-		return CFrame.new(at.Position) * self.root.CFrame.Rotation * down
+		local at = self.neck.CFrame * CFrame.new((self.seat - self.pivots.neck) * self.size * self.scale)
+		return CFrame.new(at.Position) * self.root.CFrame.Rotation
 	end
-	return self.root.CFrame * CFrame.new((self.seat - self.pivots.root) * k) * down
+	return self.root.CFrame * CFrame.new((self.seat - self.pivots.root) * self.size * self.scale)
 end
 
 function Horse:getNeck()

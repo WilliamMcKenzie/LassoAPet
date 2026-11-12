@@ -1,8 +1,7 @@
-# Regenerates Client/Preload's image list: every image id in the client's scripts (the HUD,
-# menus, popups, buttons) that can actually show, kept loaded for good. Left out (QM, Nov 6:
-# no dead preloads): Sounds' ids (Sounds preloads those), UiArt's own tables, any id UiArt blanks
-# to a placeholder (in its NAMES but not its KEEP), and the headshots, the dictionary's sheets
-# and Config's egg art, which load when their screen opens.
+# Regenerates Client/Preload's image lists (QM, Oct 13: "preload all the UI png assets").
+# KEEP: every image id in the client's scripts (the HUD, menus, popups, buttons), kept
+# loaded for good; REST: the headshots, the dictionary's sheets and Config's (egg art and
+# the like), preloaded in the background. Sounds' ids are left out (Sounds preloads those).
 #   python3 tools/preload_ids.py
 import glob, os, re
 
@@ -24,17 +23,11 @@ def ids(files):
 
 client = sorted(glob.glob(os.path.join(src, "client", "*.luau")))
 sounds = set(ID.findall(open(os.path.join(src, "client", "Sounds.luau")).read()))
-skip = {"PetFaces.luau", "AnimalDex.luau", "Sounds.luau", "Preload.client.luau", "UiArt.client.luau"}
-uiart = open(os.path.join(src, "client", "UiArt.client.luau")).read()
-names = uiart[uiart.index("local NAMES = {"):]
-names = set(re.findall(r'\["(\d+)"\]', names[: names.index("\n}")]))
-keeps = uiart[uiart.index("local KEEP = {"):]
-keeps = set(re.findall(r'\["(\d+)"\]', keeps[: keeps.index("\n}")]))
-blanked = {"rbxassetid://" + i for i in names - keeps}
-config_off = os.path.join(src, "shared", "Config.luau")
-uiart_on = re.search(r"\n\tUiArt = true", open(config_off).read()) is not None
-keep_files = [f for f in client if os.path.basename(f) not in skip]
-keep = [i for i in ids(keep_files) if i not in sounds and (uiart_on or i not in blanked)]
+later = {"PetFaces.luau", "AnimalDex.luau"}
+keep_files = [f for f in client if os.path.basename(f) not in later | {"Sounds.luau", "Preload.client.luau"}]
+rest_files = [f for f in client if os.path.basename(f) in later] + sorted(glob.glob(os.path.join(src, "shared", "**", "*.luau"), recursive=True)) # (all of Shared: Config, the animals, eggs, bosses; QM, Oct 20)
+keep = [i for i in ids(keep_files) if i not in sounds]
+rest = [i for i in ids(rest_files) if i not in sounds and i not in keep]
 
 def block(name, items):
     rows = []
@@ -44,5 +37,6 @@ def block(name, items):
 
 s = open(path).read()
 s = re.sub(r"local PANELS = \{.*?\n\}", lambda _: block("PANELS", keep), s, flags=re.S)
+s = re.sub(r"local REST = \{.*?\n\}", lambda _: block("REST", rest), s, flags=re.S)
 open(path, "w").write(s)
-print(len(keep), "kept")
+print(len(keep), "kept,", len(rest), "in the background")

@@ -40,9 +40,6 @@ local RideUi = {}
 
 local player = Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
-if Config.NativeUi.On then
-	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- (the native UI's layers sit over their parents, as in Fight to Steal an Egg)
-end
 gui.Name = "RideUi"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
@@ -113,18 +110,6 @@ local fill = picture(clip, ART.progress, Vector2.zero, UDim2.new())
 fill.Size = bar.Size -- (the bar's, whatever the cut)
 local barScale = Instance.new("UIScale")
 barScale.Parent = bar
--- The native UI's look (Config.NativeUi, QM Nov 6): Fight to Steal an Egg's boss bar (its red
--- over the maroon, weld studs and bevel, black outline) in place of the art, 634 x 60.
-if Config.NativeUi.On then
-	local HudKit = require(script.Parent.HudKit)
-	bar.Image, fill.Image = "", ""
-	bar.Size = UDim2.fromOffset(634, 60)
-	fill.Size = bar.Size
-	BAR_WIDTH = 634
-	HudKit.back(bar, "BossEmpty", { Name = "NativeBack", ZIndex = 1 })
-	clip.ZIndex = 2
-	HudKit.back(fill, "BossRed", { Name = "NativeFill", ZIndex = 2 })
-end
 -- (on its own over the bar's middle, so it doesn't pulse with it)
 local seconds = text(root, TIME_TEXT)
 seconds.FontFace = TIME_FONT

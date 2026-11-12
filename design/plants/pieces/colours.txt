@@ -1,0 +1,17 @@
+# piece: label, RGB (flower petals: Pink by default, also White or Yellow, see PETALS)
+Tree_1: Trunk, 124, 86, 56
+Tree_2: Canopy, 98, 196, 72
+Tree_3: Canopy, 120, 214, 86
+Tree_4: Canopy, 86, 178, 64
+Tree_5: Canopy, 134, 224, 98
+TreeSmall_1: Trunk, 124, 86, 56
+TreeSmall_2: Canopy, 120, 214, 86
+TreeSmall_3: Canopy, 98, 196, 72
+GrassTuft_1: Blades, 84, 192, 60
+GrassTuft_2: Blades, 112, 218, 78
+Flower_1: Stem, 70, 150, 52
+Flower_2: Petals, 255, 148, 190
+Flower_3: Centre, 255, 196, 40
+StoneTile_1: Tile, 159, 161, 172
+StoneTile2_1: Tile, 159, 161, 172
+StoneTile3_1: Tile, 159, 161, 172

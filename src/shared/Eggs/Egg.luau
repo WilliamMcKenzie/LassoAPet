@@ -28,44 +28,6 @@ local KINDS = {
 	Pig = { data = require(script.Parent.PigEggModel), center = 1.6 },
 	Fish = { data = require(script.Parent.FishEggModel), center = 1.6 },
 	Rhino = { data = require(script.Parent.RhinoEggModel), center = 1.6 },
-	Zebra = { data = require(script.Parent.ZebraEggModel), center = 1.6 }, -- (World 1 Meadow, QM Nov 6: tools/meadow_eggs.py)
-	-- QM's picked luck-padding animals (Nov 7: tools/filler_eggs.py)
-	Snail = { data = require(script.Parent.SnailEggModel), center = 1.6 },
-	Giraffe = { data = require(script.Parent.GiraffeEggModel), center = 1.6 },
-	HillbackTortoise = { data = require(script.Parent.HillbackTortoiseEggModel), center = 1.6 },
-	Coyote = { data = require(script.Parent.CoyoteEggModel), center = 1.6 },
-	Oryx = { data = require(script.Parent.OryxEggModel), center = 1.6 },
-	Ostrich = { data = require(script.Parent.OstrichEggModel), center = 1.6 },
-	MirageElephant = { data = require(script.Parent.MirageElephantEggModel), center = 1.6 },
-	Seal = { data = require(script.Parent.SealEggModel), center = 1.6 },
-	Reindeer = { data = require(script.Parent.ReindeerEggModel), center = 1.6 },
-	Walrus = { data = require(script.Parent.WalrusEggModel), center = 1.6 },
-	Narwhal = { data = require(script.Parent.NarwhalEggModel), center = 1.6 },
-	GlacierMammoth = { data = require(script.Parent.GlacierMammothEggModel), center = 1.6 },
-	FireAnt = { data = require(script.Parent.FireAntEggModel), center = 1.6 },
-	MagmaCrab = { data = require(script.Parent.MagmaCrabEggModel), center = 1.6 },
-	AshBehemoth = { data = require(script.Parent.AshBehemothEggModel), center = 1.6 },
-	Rat = { data = require(script.Parent.RatEggModel), center = 1.6 },
-	CaveCricket = { data = require(script.Parent.CaveCricketEggModel), center = 1.6 },
-	CryptSnail = { data = require(script.Parent.CryptSnailEggModel), center = 1.6 },
-	WebSpider = { data = require(script.Parent.WebSpiderEggModel), center = 1.6 },
-	AbyssPillbug = { data = require(script.Parent.AbyssPillbugEggModel), center = 1.6 },
-	StagBeetle = { data = require(script.Parent.StagBeetleEggModel), center = 1.6 },
-	Deer = { data = require(script.Parent.DeerEggModel), center = 1.6 },
-	BrownBear = { data = require(script.Parent.BrownBearEggModel), center = 1.6 },
-	AncientMoose = { data = require(script.Parent.AncientMooseEggModel), center = 1.6 },
-	Swan = { data = require(script.Parent.SwanEggModel), center = 1.6 },
-	ArmoredRam = { data = require(script.Parent.ArmoredRamEggModel), center = 1.6 },
-	RoyalStag = { data = require(script.Parent.RoyalStagEggModel), center = 1.6 },
-	Griffin = { data = require(script.Parent.GriffinEggModel), center = 1.6 },
-	FortressTortoise = { data = require(script.Parent.FortressTortoiseEggModel), center = 1.6 },
-	Shrimp = { data = require(script.Parent.ShrimpEggModel), center = 1.6 },
-	Pelican = { data = require(script.Parent.PelicanEggModel), center = 1.6 },
-	Hammerhead = { data = require(script.Parent.HammerheadEggModel), center = 1.6 },
-	MantaRay = { data = require(script.Parent.MantaRayEggModel), center = 1.6 },
-	Anglerfish = { data = require(script.Parent.AnglerfishEggModel), center = 1.6 },
-	Gecko = { data = require(script.Parent.GeckoEggModel), center = 1.6 },
-	Elephant = { data = require(script.Parent.ElephantEggModel), center = 1.6 },
 	Bunny = { data = require(script.Parent.BunnyEggModel), center = 1.6 },
 	Unicorn = { data = require(script.Parent.UnicornEggModel), center = 1.6 },
 	MarbleColossus = { data = require(script.Parent.MarbleColossusEggModel), center = 1.6 },
@@ -198,38 +160,11 @@ local KINDS = {
 	Beholder = { data = require(script.Parent.BeholderEggModel), center = 1.6 },
 	Leviathan = { data = require(script.Parent.LeviathanEggModel), center = 1.6 },
 	Sludge = { data = require(script.Parent.SludgeEggModel), center = 1.6 },
-	DungeonRat = { data = require(script.Parent.DungeonRatEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
-	Slime = { data = require(script.Parent.SlimeEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
-	CaveSpider = { data = require(script.Parent.CaveSpiderEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
-	BoneSteed = { data = require(script.Parent.BoneSteedEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
-	Mimic = { data = require(script.Parent.MimicEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
-	BoneWyrm = { data = require(script.Parent.BoneWyrmEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Dungeon, QM Nov 6: tools/later_eggs.py there)
-	Shroom = { data = require(script.Parent.ShroomEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
-	SpiritFox = { data = require(script.Parent.SpiritFoxEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
-	SpiritDeer = { data = require(script.Parent.SpiritDeerEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
-	MysticOwl = { data = require(script.Parent.MysticOwlEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
-	CrystalTortoise = { data = require(script.Parent.CrystalTortoiseEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
-	SpiritLoong = { data = require(script.Parent.SpiritLoongEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Forest, QM Nov 6: tools/later_eggs.py there)
-	WarBoar = { data = require(script.Parent.WarBoarEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
-	RoyalSteed = { data = require(script.Parent.RoyalSteedEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
-	ChessKnight = { data = require(script.Parent.ChessKnightEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
-	RoyalPeacock = { data = require(script.Parent.RoyalPeacockEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
-	LivingArmor = { data = require(script.Parent.LivingArmorEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
-	CastleWyvern = { data = require(script.Parent.CrimsonDrakeEggModel), center = 1.6 }, -- (the Crimson Drake's red egg: QM Nov 7)
-	CrimsonDrake = { data = require(script.Parent.CrimsonDrakeEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
-	RoyalEagle = { data = require(script.Parent.RoyalEagleEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Castle, QM Nov 6: tools/later_eggs.py there)
-	Seahorse = { data = require(script.Parent.SeahorseEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Ocean, QM Nov 6: tools/later_eggs.py there)
-	AbyssWhale = { data = require(script.Parent.AbyssWhaleEggModel), center = 1.6 }, -- (Fight to Steal an Egg's Ocean, QM Nov 6: tools/later_eggs.py there)
 }
 -- The Halloween world's giga rares: their bases' eggs in their colours (Shared/HalloweenSkins).
 local HalloweenSkins = require(script.Parent.Parent.HalloweenSkins)
 for kind, base in HalloweenSkins.Base do
 	KINDS[kind] = { data = HalloweenSkins.model(kind, KINDS[base].data), center = KINDS[base].center }
-end
--- The alphas' eggs: their base's egg recoloured (tools/egg_icons.py, QM Nov 7), else the base's (Config.Alphas).
-for kind, alpha in Config.Alphas do
-	local own = script.Parent:FindFirstChild(kind .. "EggModel")
-	KINDS[kind] = own and { data = require(own), center = KINDS[alpha.Base].center } or KINDS[alpha.Base]
 end
 
 local Egg = {}
